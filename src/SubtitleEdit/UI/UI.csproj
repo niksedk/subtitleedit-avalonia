@@ -177,5 +177,121 @@
       <Content Include="Assets\Themes\Dark\WebVttStyle.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\Background.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\Background.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\FastForward.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\FastForward.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\FastForwardDown.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\FastForwardDown.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\FastForwardOver.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\FastForwardOver.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\Fullscreen.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\Fullscreen.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\FullscreenDown.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\FullscreenDown.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\FullscreenOver.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\FullscreenOver.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\Mute.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\Mute.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\MuteDown.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\MuteDown.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\MuteOver.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\MuteOver.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\NoFullscreen.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\NoFullscreen.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\NoFullscreenDown.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\NoFullscreenDown.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\NoFullscreenOver.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\NoFullscreenOver.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\Pause.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\Pause.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\PauseDown.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\PauseDown.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\PauseOver.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\PauseOver.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\Play.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\Play.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\PlayDown.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\PlayDown.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\PlayOver.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\PlayOver.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\ProgressBar.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\ProgressBar.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\ProgressBarBackground.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\ProgressBarBackground.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\Reverse.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\Reverse.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\ReverseDown.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\ReverseDown.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\ReverseOver.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\ReverseOver.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\Stop.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\Stop.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\StopDown.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\StopDown.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\StopOver.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\StopOver.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\VolumeBar.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\VolumeBar.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VideoPlayer\VolumeBarBackground.png" />
+      <Content Include="Assets\Themes\Dark\VideoPlayer\VolumeBarBackground.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 </Project>
