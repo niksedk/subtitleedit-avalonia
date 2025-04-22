@@ -1,0 +1,181 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <AssemblyName>Nikse.SubtitleEdit</AssemblyName>
+        <RootNamespace>Nikse.SubtitleEdit</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Avalonia" Version="11.2.8" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.2.8" />
+        <PackageReference Include="Avalonia.Markup.Declarative" Version="11.1.3" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.8" />
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.8" />
+        <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+        <PackageReference Include="Avalonia.Diagnostics" Version="11.2.8">
+            <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+            <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Assets\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Assets\Themes\Dark\New.png" />
+      <Content Include="Assets\Themes\Dark\New.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\Open.png" />
+      <Content Include="Assets\Themes\Dark\Open.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\OpenVideo.png" />
+      <Content Include="Assets\Themes\Dark\OpenVideo.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\Question.png" />
+      <Content Include="Assets\Themes\Dark\Question.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\RemoveTextForHi.png" />
+      <Content Include="Assets\Themes\Dark\RemoveTextForHi.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\Replace.png" />
+      <Content Include="Assets\Themes\Dark\Replace.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\Save.png" />
+      <Content Include="Assets\Themes\Dark\Save.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\SaveAs.png" />
+      <Content Include="Assets\Themes\Dark\SaveAs.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\AssaAttachments.png" />
+      <Content Include="Assets\Themes\Dark\AssaAttachments.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\AssaDraw.png" />
+      <Content Include="Assets\Themes\Dark\AssaDraw.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\AssaProperties.png" />
+      <Content Include="Assets\Themes\Dark\AssaProperties.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\AssaStyle.png" />
+      <Content Include="Assets\Themes\Dark\AssaStyle.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\BeautifyTimeCodes.png" />
+      <Content Include="Assets\Themes\Dark\BeautifyTimeCodes.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\BurnIn.png" />
+      <Content Include="Assets\Themes\Dark\BurnIn.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\EbuProperties.png" />
+      <Content Include="Assets\Themes\Dark\EbuProperties.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\Error.png" />
+      <Content Include="Assets\Themes\Dark\Error.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\Find.png" />
+      <Content Include="Assets\Themes\Dark\Find.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\FixCommonErrors.png" />
+      <Content Include="Assets\Themes\Dark\FixCommonErrors.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\Help.png" />
+      <Content Include="Assets\Themes\Dark\Help.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\Information.png" />
+      <Content Include="Assets\Themes\Dark\Information.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\IttProperties.png" />
+      <Content Include="Assets\Themes\Dark\IttProperties.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\Layout.png" />
+      <Content Include="Assets\Themes\Dark\Layout.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\Netflix.png" />
+      <Content Include="Assets\Themes\Dark\Netflix.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\Settings.png" />
+      <Content Include="Assets\Themes\Dark\Settings.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\SourceView.png" />
+      <Content Include="Assets\Themes\Dark\SourceView.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\SpellCheck.png" />
+      <Content Include="Assets\Themes\Dark\SpellCheck.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\VisualSync.png" />
+      <Content Include="Assets\Themes\Dark\VisualSync.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\Warning.png" />
+      <Content Include="Assets\Themes\Dark\Warning.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\WaveformCenter.png" />
+      <Content Include="Assets\Themes\Dark\WaveformCenter.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\WaveformPause.png" />
+      <Content Include="Assets\Themes\Dark\WaveformPause.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\WaveformPlay.png" />
+      <Content Include="Assets\Themes\Dark\WaveformPlay.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\WaveformPlaybackSpeed.png" />
+      <Content Include="Assets\Themes\Dark\WaveformPlaybackSpeed.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\WaveformPlayPause.png" />
+      <Content Include="Assets\Themes\Dark\WaveformPlayPause.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\WaveformZoomIn.png" />
+      <Content Include="Assets\Themes\Dark\WaveformZoomIn.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\WaveformZoomOut.png" />
+      <Content Include="Assets\Themes\Dark\WaveformZoomOut.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\WebVttProperties.png" />
+      <Content Include="Assets\Themes\Dark\WebVttProperties.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Themes\Dark\WebVttStyle.png" />
+      <Content Include="Assets\Themes\Dark\WebVttStyle.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+</Project>
