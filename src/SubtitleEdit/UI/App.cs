@@ -5,6 +5,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform;
 using Avalonia.Themes.Fluent;
 using Nikse.SubtitleEdit;
+using Nikse.SubtitleEdit.Features.Main;
 
 var lifetime = new ClassicDesktopStyleApplicationLifetime { Args = args, ShutdownMode = ShutdownMode.OnLastWindowClose };
 
