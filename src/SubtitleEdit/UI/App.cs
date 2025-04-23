@@ -38,10 +38,12 @@ var appBuilder = AppBuilder.Configure<Application>()
 // Main window setup
 lifetime.MainWindow = new Window
 {
-    Title = "Avalonia markup samples",
-    Content = new MainView(),
+    Title = "Subtitle Edit",
+    //Content = new MainView(this),
     // NativeMenu = menu
 };
+
+lifetime.MainWindow.Content = new MainView();
 
 // lifetime.MainWindow = new Window()
 //     .Title("Avalonia markup samples")

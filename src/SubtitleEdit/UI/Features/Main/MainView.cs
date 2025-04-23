@@ -1,4 +1,6 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Layout;
 using Avalonia.Markup.Declarative;
 using Avalonia.Media;
@@ -11,7 +13,9 @@ public class MainView : ViewBase
     {
         var vm = new MainViewModel();
         DataContext = vm;
-        
+
+        vm.Window = (Application.Current.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+
         var root = new DockPanel();
 
         // Menu bar

@@ -120,6 +120,7 @@ public static class ViewToolbar
                         Width = 32,
                         Height = 32,
                     },
+                    [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandShowLayoutCommand)),
                 },
                 new Border
                 {

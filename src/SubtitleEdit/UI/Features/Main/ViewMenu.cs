@@ -34,7 +34,7 @@ public static class ViewMenu
                         new MenuItem
                         {
                             Header = "E_xit",
-                            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandExitCommand))
+                            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandExitCommand)),
                         }
                     }
                 },
