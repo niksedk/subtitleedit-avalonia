@@ -22,6 +22,8 @@
             <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
         </PackageReference>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+        <PackageReference Include="libse" Version="4.1.0-alpha1" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
     </ItemGroup>
 
     <ItemGroup>
@@ -291,6 +293,54 @@
       </Content>
       <None Remove="Assets\Themes\Dark\VideoPlayer\VolumeBarBackground.png" />
       <Content Include="Assets\Themes\Dark\VideoPlayer\VolumeBarBackground.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Layout\layout_01.png" />
+      <Content Include="Assets\Layout\Layout01.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Layout\layout_02.png" />
+      <Content Include="Assets\Layout\Layout02.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Layout\layout_03.png" />
+      <Content Include="Assets\Layout\Layout03.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Layout\layout_04.png" />
+      <Content Include="Assets\Layout\Layout04.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Layout\layout_05.png" />
+      <Content Include="Assets\Layout\Layout05.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Layout\layout_06.png" />
+      <Content Include="Assets\Layout\Layout06.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Layout\layout_07.png" />
+      <Content Include="Assets\Layout\Layout07.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Layout\layout_08.png" />
+      <Content Include="Assets\Layout\Layout08.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Layout\layout_09.png" />
+      <Content Include="Assets\Layout\Layout09.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Layout\layout_10.png" />
+      <Content Include="Assets\Layout\Layout10.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Layout\layout_11.png" />
+      <Content Include="Assets\Layout\Layout11.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\Layout\layout_12.png" />
+      <Content Include="Assets\Layout\Layout12.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
     </ItemGroup>

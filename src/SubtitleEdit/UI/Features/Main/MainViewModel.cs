@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -23,7 +24,9 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task CommandShowLayout()
     {
-        var newWindow = new LayoutWindow();
+        var viewModel = new LayoutModel();
+        var newWindow = new LayoutWindow(viewModel);
+        //newWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
         await newWindow.ShowDialog(Window); 
     }
     

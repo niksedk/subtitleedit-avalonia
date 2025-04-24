@@ -2,8 +2,8 @@ using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Platform;
 using Avalonia.Themes.Fluent;
+using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit;
 using Nikse.SubtitleEdit.Features.Main;
 
@@ -34,6 +34,15 @@ var appBuilder = AppBuilder.Configure<Application>()
 //             .Menu(menu)
 //     ]
 // );
+
+
+// Register all the services needed for the application to run
+var collection = new ServiceCollection();
+collection.AddCommonServices();
+Locator.Services = collection.BuildServiceProvider();
+
+var services = collection.BuildServiceProvider();
+var vm = services.GetRequiredService<MainViewModel>();
 
 // Main window setup
 lifetime.MainWindow = new Window
