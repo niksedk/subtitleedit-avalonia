@@ -6,6 +6,8 @@ using Avalonia.Layout;
 using Avalonia.Markup.Declarative;
 using Avalonia.Media;
 using Microsoft.Extensions.DependencyInjection;
+using Nikse.SubtitleEdit.Features.Main.Layout;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -21,7 +23,7 @@ public class MainView : ViewBase
     protected override object Build()
     {
         _vm = Locator.Services.GetRequiredService<MainViewModel>();
-        
+        _vm.MainView = this;
         DataContext = _vm;
 
         _vm.Window = (Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow!;
@@ -38,7 +40,9 @@ public class MainView : ViewBase
         root.Children.Add(ViewFooter.Make(_vm).Dock(Dock.Bottom));
 
         // Main content (fills all remaining space)
-        root.Children.Add(ViewContent.Make(_vm));
+        _vm.ContentGrid = ViewContent.Make(_vm);
+        InitLayout.MakeLayout(this, _vm, Se.Settings.General.LayoutNumber);
+        root.Children.Add(_vm.ContentGrid);
 
         return root;
     }
