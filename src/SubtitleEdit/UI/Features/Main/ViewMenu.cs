@@ -90,7 +90,7 @@ public static class ViewMenu
                         new Separator(),
                         new MenuItem { Header = "Generate video with burned-in subtitles..." },
                         new MenuItem { Header = "Generate transparent video with subtitles..." },
-                                       }
+                    }
                 },
                 new MenuItem
                 {
@@ -123,7 +123,11 @@ public static class ViewMenu
                     Header = "_Help",
                     Items =
                     {
-                        new MenuItem { Header = "_About" },
+                        new MenuItem
+                        {
+                            Header = "_About",
+                            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandShowAboutCommand)),
+                        },
                         new Separator(),
                         new MenuItem { Header = "_Help" },
                     }
