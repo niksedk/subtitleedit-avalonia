@@ -43,7 +43,30 @@ public static class ViewContent
 // Left part of nested grid
         var nestedLeft = new Border
         {
-            Background = Brushes.CornflowerBlue
+            Background = Brushes.CornflowerBlue,
+            Child = new Grid
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Children =
+                {
+                    new StackPanel
+                    {
+                        Orientation = Orientation.Vertical,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Children =
+                        {
+                            new TextBlock
+                            {
+                                Text = "List and edit", 
+                                FontSize = 50,
+                                FontWeight = FontWeight.Bold,
+                            },
+                        }
+                    }
+                }
+            }
         };
         Grid.SetColumn(nestedLeft, 0);
         nestedGrid.Children.Add(nestedLeft);
@@ -62,7 +85,30 @@ public static class ViewContent
 // Right part of nested grid
         var nestedRight = new Border
         {
-            Background = Brushes.PaleVioletRed
+            Background = Brushes.PaleVioletRed,
+            Child = new Grid
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Children =
+                {
+                    new StackPanel
+                    {
+                        Orientation = Orientation.Vertical,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Children =
+                        {
+                            new TextBlock
+                            {
+                                Text = "Video player", 
+                                FontSize = 50,
+                                FontWeight = FontWeight.Bold,
+                            },
+                        }
+                    }
+                }
+            }
         };
         Grid.SetColumn(nestedRight, 2);
         nestedGrid.Children.Add(nestedRight);
@@ -84,12 +130,35 @@ public static class ViewContent
 // Bottom content
         var bottomContent = new Border
         {
-            Background = Brushes.MediumPurple
+            Background = Brushes.MediumPurple,
+            Child = new Grid
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Children =
+                {
+                    new StackPanel
+                    {
+                        Orientation = Orientation.Vertical,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Children =
+                        {
+                            new TextBlock
+                            {
+                                Text = "Waveform", 
+                                FontSize = 50,
+                                FontWeight = FontWeight.Bold,
+                            },
+                        }
+                    }
+                }
+            }
         };
         Grid.SetRow(bottomContent, 2);
         contentGrid.Children.Add(bottomContent);
 
-        
+
         return new Grid
         {
             Background = Brushes.White,
