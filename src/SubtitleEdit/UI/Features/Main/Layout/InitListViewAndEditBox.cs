@@ -19,20 +19,10 @@ public static partial class InitLayout
             // Create layout
             var mainGrid = new Grid
             {
-                RowDefinitions = new RowDefinitions("Auto,*,Auto")
+                RowDefinitions = new RowDefinitions("*,Auto")
             };
 
-            // Header
-            var headerText = new TextBlock
-            {
-                Text = "Subtitle Editor",
-                FontSize = 24,
-                FontWeight = FontWeight.Bold,
-                Margin = new Thickness(10)
-            };
-            Grid.SetRow(headerText, 0);
-            mainGrid.Children.Add(headerText);
-
+           
             // DataGrid for subtitles
             vm.SubtitleGrid = new DataGrid
             {
@@ -88,7 +78,7 @@ public static partial class InitLayout
             vm.SubtitleGrid.ItemsSource = vm.Subtitles;
             vm.SubtitleGrid.SelectionChanged += vm.SubtitleGrid_SelectionChanged;
 
-            Grid.SetRow(vm.SubtitleGrid, 1);
+            Grid.SetRow(vm.SubtitleGrid, 0);
             mainGrid.Children.Add(vm.SubtitleGrid);
 
             // Text edit area
@@ -113,22 +103,10 @@ public static partial class InitLayout
             };
             vm.EditTextBox.Bind(TextBox.TextProperty, new Binding("EditText") { Mode = BindingMode.TwoWay });
             vm.EditTextBox.Bind(InputElement.IsEnabledProperty, new Binding("IsSubtitleSelected"));
+            editPanel.Children.Add(vm.EditTextBox);
             //TODO: vm.EditTextBox.KeyDown += EditTextBox_KeyDown;
 
-            editPanel.Children.Add(vm.EditTextBox);
-
-            // Add save button
-            var saveButton = new Button
-            {
-                Content = "Save Changes",
-                HorizontalAlignment = HorizontalAlignment.Right,
-                Margin = new Thickness(0, 5, 0, 0)
-            };
-            saveButton.Bind(Button.CommandProperty, new Binding("SaveChangesCommand"));
-            saveButton.Bind(InputElement.IsEnabledProperty, new Binding("IsSubtitleSelected"));
-            editPanel.Children.Add(saveButton);
-
-            Grid.SetRow(editPanel, 2);
+            Grid.SetRow(editPanel, 1);
             mainGrid.Children.Add(editPanel);
 
             return mainGrid;
