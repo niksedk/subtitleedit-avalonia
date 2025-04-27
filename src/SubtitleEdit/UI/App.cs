@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -35,6 +36,8 @@ collection.AddSingleton<IFileHelper, FileHelper>();
 Locator.Services = collection.BuildServiceProvider();
 var services = collection.BuildServiceProvider();
 
+Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
 // Main window setup
 lifetime.MainWindow = new Window
 {
@@ -43,7 +46,6 @@ lifetime.MainWindow = new Window
 };
 
 lifetime.MainWindow.Content = new MainView();
-
 
 #if DEBUG
 lifetime.MainWindow.AttachDevTools();

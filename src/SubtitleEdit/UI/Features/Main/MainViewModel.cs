@@ -9,6 +9,7 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Help;
 using Nikse.SubtitleEdit.Features.Main.Layout;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 
@@ -73,23 +74,10 @@ public partial class MainViewModel : ObservableObject
         SubtitleFormats = new ObservableCollection<SubtitleFormat>(SubtitleFormat.AllSubtitleFormats);
         SelectedSubtitleFormat = SubtitleFormats[0];
 
-        Encodings = new ObservableCollection<TextEncoding>(GetEncodings());
+        Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         SelectedEncoding = Encodings[0];
 
         _fileHelper = fileHelper;
-    }
-
-    private IEnumerable<TextEncoding> GetEncodings()
-    {
-        System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-        return new List<TextEncoding>
-        {
-            new TextEncoding(System.Text.Encoding.UTF8, "utf-8"),
-            new TextEncoding(System.Text.Encoding.UTF32, "utf-32"),
-            new TextEncoding(System.Text.Encoding.Unicode, "utf-16"),
-            new TextEncoding(System.Text.Encoding.ASCII, "ascii"),
-            new TextEncoding(System.Text.Encoding.GetEncoding(1252), "windows-1252"),
-        };
     }
 
     [RelayCommand]
