@@ -196,6 +196,12 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    [RelayCommand]
+    private void CommandVideoClose()
+    {
+        VideoCloseFile();
+    }
+
     private async Task SubtitleOpen(string fileName, string? videoFileName = null)
     {
         if (string.IsNullOrEmpty(fileName))
@@ -426,6 +432,17 @@ public partial class MainViewModel : ObservableObject
         //{
         //    _timer.Start();
         //}
+    }
+
+    private void VideoCloseFile()
+    {
+        if (VideoPlayer == null)
+        {
+            return;
+        }
+
+        _videoFileName = string.Empty;
+        MediaPlayer.Media = null;
     }
 
     private int GetFastSubtitleHash()

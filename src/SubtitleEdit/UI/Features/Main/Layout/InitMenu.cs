@@ -113,6 +113,11 @@ public static class InitMenu
                             [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandVideoOpenCommand)),
                         },
                         new MenuItem { Header = "Open video file from _URL..." },
+                        new MenuItem
+                        {
+                            Header = "_Close video file",
+                            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandVideoCloseCommand)),
+                        },
                         new Separator(),
                         new MenuItem { Header = "_Audio to text (Whisper)..." },
                         new MenuItem { Header = "_Text to speech and add to video..." },
