@@ -15,39 +15,34 @@ public class InitVideoPlayer
         // Create main layout grid
         var mainGrid = new Grid
         {
-            RowDefinitions = new RowDefinitions("Auto,*,Auto"),  // Simplified to 3 rows
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-            Width = double.NaN,  // This tells Avalonia to size to parent
-            Height = double.NaN,  // This tells Avalonia to size to parent
+            RowDefinitions = new RowDefinitions("*,Auto"),  // Simplified to 3 rows
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Margin = new Thickness(0),
         };
-
-        // Header
-        var headerText = new TextBlock
-        {
-            Text = "File name:",
-            FontSize = 14,
-            FontWeight = FontWeight.Bold,
-            Margin = new Thickness(10)
-        };
-        Grid.SetRow(headerText, 0);
-        mainGrid.Children.Add(headerText);
 
         // Video player area
-        vm.MediaPlayer?.Dispose();
-        vm.LibVLC = new LibVLC();
-        vm.MediaPlayer = new MediaPlayer(vm.LibVLC);
-        vm.VideoPlayer = new VideoView
+        if (vm.LibVLC == null || vm.VideoPlayer == null)
         {
-            Margin = new Thickness(10),
-            MediaPlayer = vm.MediaPlayer,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-            Width = double.NaN,  // This tells Avalonia to size to parent
-            Height = double.NaN,  // This tells Avalonia to size to parent
+            vm.MediaPlayer?.Dispose();
+            vm.LibVLC?.Dispose();
+            vm.LibVLC = new LibVLC();
+            vm.MediaPlayer = new MediaPlayer(vm.LibVLC);
+            vm.VideoPlayer = new VideoView
+            {
+                Margin = new Thickness(0),
+                MediaPlayer = vm.MediaPlayer,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Stretch,
+            };
+        }
+        else
+        {
+            var grid = vm.VideoPlayer.Parent as Grid;
+            grid?.Children.Remove(vm.VideoPlayer);
+        }
 
-        };
-        Grid.SetRow(vm.VideoPlayer, 1);
+        Grid.SetRow(vm.VideoPlayer, 0);
         mainGrid.Children.Add(vm.VideoPlayer);
 
         // Footer
@@ -55,7 +50,7 @@ public class InitVideoPlayer
         {
             ColumnDefinitions = new ColumnDefinitions("*"),
             RowDefinitions = new RowDefinitions("Auto,Auto"),
-            Margin = new Thickness(10)
+            Margin = new Thickness(10, 0),
         };
 
         // Navigation bar (e.g., time slider)
@@ -64,19 +59,18 @@ public class InitVideoPlayer
             Minimum = 0,
             Maximum = 100,
             Value = 0,
-            Height = 20
+            Margin = new Thickness(0),            
         };
         Grid.SetRow(navigationBar, 0);  // First row of footer grid
         footerGrid.Children.Add(navigationBar);
 
-        // Control buttons (Play, Stop, Volume, Fullscreen)
         var controlsPanel = new StackPanel
         {
             Orientation = Orientation.Horizontal,
-            Spacing = 10,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-            Margin = new Thickness(0, 5, 0, 0)
+            Spacing = 0,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 0),
         };
         controlsPanel.Children.Add(CreateButtonWithIcon("Assets/Themes/Dark/VideoPlayer/Play.png"));
         controlsPanel.Children.Add(CreateButtonWithIcon("Assets/Themes/Dark/VideoPlayer/Stop.png"));
@@ -86,7 +80,7 @@ public class InitVideoPlayer
         footerGrid.Children.Add(controlsPanel);
 
         // Add footer to main grid
-        Grid.SetRow(footerGrid, 2);  // Third row of main grid
+        Grid.SetRow(footerGrid, 1);  // Third row of main grid
         mainGrid.Children.Add(footerGrid);
 
         return mainGrid;
@@ -101,10 +95,11 @@ public class InitVideoPlayer
             {
                 Source = new Bitmap(iconPath),
                 Width = 32,
-                Height = 32
+                Height = 32,
             },
             Background = Brushes.Transparent,
-            BorderBrush = Brushes.Transparent
+            BorderBrush = Brushes.Transparent,
+            Margin = new Thickness(0),
         };
     }
 }
