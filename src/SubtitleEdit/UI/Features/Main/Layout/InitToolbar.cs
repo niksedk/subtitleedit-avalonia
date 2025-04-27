@@ -1,12 +1,14 @@
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
 
-namespace Nikse.SubtitleEdit.Features.Main;
+namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
-public static class ViewToolbar
+public static class InitToolbar
 {
     public static Border Make(MainViewModel vm)
     {
@@ -89,12 +91,7 @@ public static class ViewToolbar
                         Height = 32,
                     },
                 },
-                new Border
-                {
-                    Width = 1,
-                    Background = Brushes.Gray,
-                    Margin = new Avalonia.Thickness(5, 5, 5, 5),
-                },
+                MakeSeparator(),
                 new Button
                 {
                     Content = new Image
@@ -123,12 +120,7 @@ public static class ViewToolbar
                     },
                     [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandShowLayoutCommand)),
                 },
-                new Border
-                {
-                    Width = 1,
-                    Background = Brushes.Gray,
-                    Margin = new Avalonia.Thickness(5, 5, 5, 5),
-                },
+                MakeSeparator(),
                 new Button
                 {
                     Content = new Image
@@ -138,7 +130,60 @@ public static class ViewToolbar
                         Height = 32,
                     },
                 },
+                MakeSeparator(),
+
+                // subtitle formats
+                new TextBlock
+                {
+                    Text = "Subtitle Format",
+                    Foreground = Brushes.White,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Avalonia.Thickness(5, 0, 0, 0),
+                },
+                new ComboBox
+                {
+                    Width = 200,
+                    Height = 30,
+                    [!ComboBox.ItemsSourceProperty] = new Binding(nameof(vm.SubtitleFormats)),
+                    [!ComboBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedSubtitleFormat)),
+                    DataContext = vm,
+                    ItemTemplate = new FuncDataTemplate<object>((item, _) =>
+                    new TextBlock
+                    {
+                        [!TextBlock.TextProperty] = new Binding(nameof(SubtitleFormat.Name)),
+                        Width = 150,
+                    }, true)                    
+                },
+
+                MakeSeparator(),
+
+                // encoding
+                new TextBlock
+                {
+                    Text = "Encoding",
+                    Foreground = Brushes.White,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Avalonia.Thickness(5, 0, 0, 0),
+                },
+                new ComboBox
+                {
+                    Width = 200,
+                    Height = 30,
+                    [!ComboBox.ItemsSourceProperty] = new Binding(nameof(vm.Encodings)),
+                    [!ComboBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedEncoding)),
+                    DataContext = vm,
+                },
             }
+        };
+    }
+
+    private static Border MakeSeparator()
+    {
+        return new Border
+        {
+            Width = 1,
+            Background = Brushes.Gray,
+            Margin = new Avalonia.Thickness(5, 5, 5, 5),
         };
     }
 }

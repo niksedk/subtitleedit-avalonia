@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Help;
 using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -18,6 +21,12 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private SubtitleLineViewModel? selectedSubtitle;
 
     [ObservableProperty] private string editText;
+
+    [ObservableProperty] private ObservableCollection<SubtitleFormat> subtitleFormats;
+    public SubtitleFormat? SelectedSubtitleFormat { get; set; }
+
+    [ObservableProperty] private ObservableCollection<TextEncoding> encodings;
+    public TextEncoding? SelectedEncoding { get; set; }
 
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
@@ -61,7 +70,26 @@ public partial class MainViewModel : ObservableObject
             }
         };
 
+        SubtitleFormats = new ObservableCollection<SubtitleFormat>(SubtitleFormat.AllSubtitleFormats);
+        SelectedSubtitleFormat = SubtitleFormats[0];
+
+        Encodings = new ObservableCollection<TextEncoding>(GetEncodings());
+        SelectedEncoding = Encodings[0];
+
         _fileHelper = fileHelper;
+    }
+
+    private IEnumerable<TextEncoding> GetEncodings()
+    {
+        System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+        return new List<TextEncoding>
+        {
+            new TextEncoding(System.Text.Encoding.UTF8, "utf-8"),
+            new TextEncoding(System.Text.Encoding.UTF32, "utf-32"),
+            new TextEncoding(System.Text.Encoding.Unicode, "utf-16"),
+            new TextEncoding(System.Text.Encoding.ASCII, "ascii"),
+            new TextEncoding(System.Text.Encoding.GetEncoding(1252), "windows-1252"),
+        };
     }
 
     [RelayCommand]
