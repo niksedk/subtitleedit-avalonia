@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Layout;
+using Avalonia.Media;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -71,81 +72,135 @@ public static class InitListViewAndEditBox
         Grid.SetRow(vm.SubtitleGrid, 0);
         mainGrid.Children.Add(vm.SubtitleGrid);
 
-        // Edit area - small bottom grid
-       var editGrid = new Grid
+        // Edit area - restructured with time controls on left, multiline text on right
+        var editGrid = new Grid
         {
             Margin = new Thickness(10),
-            ColumnDefinitions = new ColumnDefinitions("Auto, *, Auto, *, Auto, *"),
-            RowDefinitions = new RowDefinitions("Auto"),
-            //Height = 200,
-
+            ColumnDefinitions = new ColumnDefinitions("Auto, *"), // Two columns: left for time controls, right for text
+            RowDefinitions = new RowDefinitions("Auto")
         };
 
-        // Start Time label
+        // Left panel for time controls
+        var timeControlsPanel = new StackPanel
+        {
+            Spacing = 8,
+            Width = 200,
+            Margin = new Thickness(0, 0, 10, 0)
+        };
+
+        // Start Time controls
+        var startTimePanel = new StackPanel
+        {
+            Spacing = 4,
+            Orientation = Orientation.Vertical
+        };
+
         var startTimeLabel = new TextBlock
         {
             Text = "Start Time:",
-            VerticalAlignment = VerticalAlignment.Center
+            FontWeight = FontWeight.Bold
         };
-        Grid.SetColumn(startTimeLabel, 0);
-        editGrid.Children.Add(startTimeLabel);
+        startTimePanel.Children.Add(startTimeLabel);
 
-        // Start Time edit
         var startTimeBox = new TextBox
         {
             Watermark = "hh:mm:ss.fff",
+            Height = 32,
             [!TextBox.TextProperty] = new Binding("SelectedSubtitle.StartTime")
             {
                 Mode = BindingMode.TwoWay,
                 StringFormat = "c" // "c" = constant ("00:00:00.000")
             }
         };
-        Grid.SetColumn(startTimeBox, 1);
-        editGrid.Children.Add(startTimeBox);
+        startTimePanel.Children.Add(startTimeBox);
+        timeControlsPanel.Children.Add(startTimePanel);
 
-        // Duration label
+        //// End Time controls
+        //var endTimePanel = new StackPanel
+        //{
+        //    Spacing = 4,
+        //    Orientation = Orientation.Vertical
+        //};
+
+        //var endTimeLabel = new TextBlock
+        //{
+        //    Text = "End Time:",
+        //    FontWeight = FontWeight.Bold
+        //};
+        //endTimePanel.Children.Add(endTimeLabel);
+
+        //var endTimeBox = new TextBox
+        //{
+        //    Watermark = "hh:mm:ss.fff",
+        //    Height = 32,
+        //    [!TextBox.TextProperty] = new Binding("SelectedSubtitle.EndTime")
+        //    {
+        //        Mode = BindingMode.TwoWay,
+        //        StringFormat = "c" // "c" = constant ("00:00:00.000")
+        //    }
+        //};
+        //endTimePanel.Children.Add(endTimeBox);
+        //timeControlsPanel.Children.Add(endTimePanel);
+
+        // Duration display
+        var durationPanel = new StackPanel
+        {
+            Spacing = 4,
+            Orientation = Orientation.Vertical
+        };
+
         var durationLabel = new TextBlock
         {
             Text = "Duration:",
-            VerticalAlignment = VerticalAlignment.Center
+            FontWeight = FontWeight.Bold
         };
-        Grid.SetColumn(durationLabel, 2);
-        editGrid.Children.Add(durationLabel);
+        durationPanel.Children.Add(durationLabel);
 
-        // Duration edit (readonly for now)
         var durationBox = new TextBox
         {
             IsReadOnly = true,
+            Height = 32,
+            Background = new SolidColorBrush(Colors.LightGray),
             [!TextBox.TextProperty] = new Binding("SelectedSubtitle.Duration")
             {
                 Mode = BindingMode.OneWay,
                 StringFormat = "c"
             }
         };
-        Grid.SetColumn(durationBox, 3);
-        editGrid.Children.Add(durationBox);
+        durationPanel.Children.Add(durationBox);
+        timeControlsPanel.Children.Add(durationPanel);
 
-        // Text label
+        Grid.SetColumn(timeControlsPanel, 0);
+        editGrid.Children.Add(timeControlsPanel);
+
+        // Right panel for text editing
+        var textEditPanel = new StackPanel
+        {
+            Spacing = 4,
+            Orientation = Orientation.Vertical
+        };
+
         var textLabel = new TextBlock
         {
-            Text = "Text:",
-            VerticalAlignment = VerticalAlignment.Center
+            Text = "Subtitle Text:",
+            FontWeight = FontWeight.Bold
         };
-        Grid.SetColumn(textLabel, 4);
-        editGrid.Children.Add(textLabel);
+        textEditPanel.Children.Add(textLabel);
 
-        // Text edit
         var textBox = new TextBox
         {
             AcceptsReturn = true,
-            MinWidth = 200,
+            TextWrapping = TextWrapping.Wrap,
+            MinHeight = 100,
             [!TextBox.TextProperty] = new Binding("SelectedSubtitle.Text")
             {
                 Mode = BindingMode.TwoWay
             }
         };
-        Grid.SetColumn(textBox, 5);
-        editGrid.Children.Add(textBox);
+        textEditPanel.Children.Add(textBox);
+
+        Grid.SetColumn(textEditPanel, 1);
+        editGrid.Children.Add(textEditPanel);
 
         Grid.SetRow(editGrid, 1);
         mainGrid.Children.Add(editGrid);
