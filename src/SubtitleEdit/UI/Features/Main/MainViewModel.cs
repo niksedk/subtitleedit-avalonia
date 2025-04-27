@@ -313,9 +313,9 @@ public partial class MainViewModel : ObservableObject
 
     public void SubtitleGrid_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        if (SubtitleGrid.SelectedItem is SubtitleLineViewModel selectedLine)
+        if (SubtitleGrid.SelectedItem is SubtitleLineViewModel selected)
         {
-            SelectedSubtitle = selectedLine;
+            SelectedSubtitle = selected;
         }
         else
         {

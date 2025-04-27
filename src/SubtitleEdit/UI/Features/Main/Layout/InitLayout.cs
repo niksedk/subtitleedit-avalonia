@@ -61,24 +61,7 @@ public static partial class InitLayout
         var nestedLeft = new Border
         {
             Background = Brushes.CornflowerBlue,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
-                        }
-                    }
-                }
-            }
+            Child = InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
         };
         Grid.SetColumn(nestedLeft, 0);
         nestedGrid.Children.Add(nestedLeft);
@@ -202,24 +185,7 @@ public static partial class InitLayout
         var nestedLeft = new Border
         {
             Background = Brushes.CornflowerBlue,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
-                        }
-                    }
-                }
-            }
+            Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
         };
         Grid.SetColumn(nestedLeft, 0);
         nestedGrid.Children.Add(nestedLeft);
@@ -239,24 +205,7 @@ public static partial class InitLayout
         var nestedRight = new Border
         {
             Background = Brushes.PaleVioletRed,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
-                        }
-                    }
-                }
-            }
+            Child = InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
         };
         Grid.SetColumn(nestedRight, 2);
         nestedGrid.Children.Add(nestedRight);
@@ -279,24 +228,7 @@ public static partial class InitLayout
         var bottomContent = new Border
         {
             Background = Brushes.MediumPurple,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitWaveform.MakeWaveform(mainPage, vm),
-                        }
-                    }
-                }
-            }
+            Child = InitWaveform.MakeWaveform(mainPage, vm),
         };
         Grid.SetRow(bottomContent, 2);
         contentGrid.Children.Add(bottomContent);
@@ -343,24 +275,7 @@ public static partial class InitLayout
         var nestedTop = new Border
         {
             Background = Brushes.OrangeRed,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
-                        }
-                    }
-                }
-            }
+            Child = InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
         };
         Grid.SetRow(nestedTop, 0);
         nestedGrid.Children.Add(nestedTop);
@@ -380,24 +295,7 @@ public static partial class InitLayout
         var nestedBottom = new Border
         {
             Background = Brushes.PaleVioletRed,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitWaveform.MakeWaveform(mainPage, vm),
-                        }
-                    }
-                }
-            }
+            Child = InitWaveform.MakeWaveform(mainPage, vm),
         };
         Grid.SetRow(nestedBottom, 2);
         nestedGrid.Children.Add(nestedBottom);
@@ -420,24 +318,7 @@ public static partial class InitLayout
         var rightContent = new Border
         {
             Background = Brushes.MediumPurple,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
-                        }
-                    }
-                }
-            }
+            Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
         };
         Grid.SetColumn(rightContent, 2);
         contentGrid.Children.Add(rightContent);
@@ -465,24 +346,7 @@ public static partial class InitLayout
         var leftContent = new Border
         {
             Background = Brushes.CornflowerBlue,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
-                        }
-                    }
-                }
-            }
+            Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
         };
         Grid.SetColumn(leftContent, 0);
         contentGrid.Children.Add(leftContent);
@@ -521,24 +385,7 @@ public static partial class InitLayout
         var rightNestedTop = new Border
         {
             Background = Brushes.LightSeaGreen,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
-                        }
-                    }
-                }
-            }
+            Child = InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
         };
         Grid.SetRow(rightNestedTop, 0);
         rightNestedGrid.Children.Add(rightNestedTop);
@@ -558,24 +405,7 @@ public static partial class InitLayout
         var rightNestedBottom = new Border
         {
             Background = Brushes.Gold,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitWaveform.MakeWaveform(mainPage, vm),
-                        }
-                    }
-                }
-            }
+            Child = InitWaveform.MakeWaveform(mainPage, vm),
         };
         Grid.SetRow(rightNestedBottom, 2);
         rightNestedGrid.Children.Add(rightNestedBottom);
@@ -608,24 +438,7 @@ public static partial class InitLayout
         var topContent = new Border
         {
             Background = Brushes.CornflowerBlue,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
-                        }
-                    }
-                }
-            }
+            Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
         };
         Grid.SetRow(topContent, 0);
         contentGrid.Children.Add(topContent);
@@ -645,24 +458,7 @@ public static partial class InitLayout
         var middleContent = new Border
         {
             Background = Brushes.LightSeaGreen,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
-                        }
-                    }
-                }
-            }
+            Child = InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
         };
         Grid.SetRow(middleContent, 2);
         contentGrid.Children.Add(middleContent);
@@ -682,24 +478,7 @@ public static partial class InitLayout
         var bottomContent = new Border
         {
             Background = Brushes.PaleVioletRed,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                           InitWaveform.MakeWaveform(mainPage, vm),
-                        }
-                    }
-                }
-            }
+            Child = InitWaveform.MakeWaveform(mainPage, vm),
         };
         Grid.SetRow(bottomContent, 4);
         contentGrid.Children.Add(bottomContent);
@@ -727,24 +506,7 @@ public static partial class InitLayout
         var topContent = new Border
         {
             Background = Brushes.CornflowerBlue,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
-                        }
-                    }
-                }
-            }
+            Child = InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
         };
         Grid.SetRow(topContent, 0);
         contentGrid.Children.Add(topContent);
@@ -814,24 +576,7 @@ public static partial class InitLayout
         var leftContent = new Border
         {
             Background = Brushes.CornflowerBlue,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
-                        }
-                    }
-                }
-            }
+            Child = InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
         };
         Grid.SetColumn(leftContent, 0);
         contentGrid.Children.Add(leftContent);
@@ -851,24 +596,7 @@ public static partial class InitLayout
         var rightContent = new Border
         {
             Background = Brushes.PaleVioletRed,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
-                        }
-                    }
-                }
-            }
+            Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
         };
         Grid.SetColumn(rightContent, 2);
         contentGrid.Children.Add(rightContent);
@@ -896,24 +624,7 @@ public static partial class InitLayout
         var topContent = new Border
         {
             Background = Brushes.CornflowerBlue,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
-                        }
-                    }
-                }
-            }
+            Child = InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
         };
         Grid.SetRow(topContent, 0);
         contentGrid.Children.Add(topContent);
@@ -933,24 +644,7 @@ public static partial class InitLayout
         var bottomContent = new Border
         {
             Background = Brushes.PaleVioletRed,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
-                        }
-                    }
-                }
-            }
+            Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
         };
         Grid.SetRow(bottomContent, 2);
         contentGrid.Children.Add(bottomContent);
@@ -978,24 +672,7 @@ public static partial class InitLayout
         var topContent = new Border
         {
             Background = Brushes.CornflowerBlue,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm) ,
-                        }
-                    }
-                }
-            }
+            Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
         };
         Grid.SetRow(topContent, 0);
         contentGrid.Children.Add(topContent);
@@ -1015,24 +692,7 @@ public static partial class InitLayout
         var bottomContent = new Border
         {
             Background = Brushes.PaleVioletRed,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
-                        }
-                    }
-                }
-            }
+            Child = InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
         };
         Grid.SetRow(bottomContent, 2);
         contentGrid.Children.Add(bottomContent);
@@ -1079,24 +739,7 @@ public static partial class InitLayout
         var nestedLeft = new Border
         {
             Background = Brushes.CornflowerBlue,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
-                        }
-                    }
-                }
-            }
+            Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
         };
         Grid.SetColumn(nestedLeft, 0);
         nestedGrid.Children.Add(nestedLeft);
@@ -1116,24 +759,7 @@ public static partial class InitLayout
         var nestedRight = new Border
         {
             Background = Brushes.PaleVioletRed,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitWaveform.MakeWaveform(mainPage, vm),
-                        }
-                    }
-                }
-            }
+            Child = InitWaveform.MakeWaveform(mainPage, vm),
         };
         Grid.SetColumn(nestedRight, 2);
         nestedGrid.Children.Add(nestedRight);
@@ -1156,24 +782,7 @@ public static partial class InitLayout
         var bottomContent = new Border
         {
             Background = Brushes.MediumPurple,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
-                        }
-                    }
-                }
-            }
+            Child = InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
         };
         Grid.SetRow(bottomContent, 2);
         contentGrid.Children.Add(bottomContent);
@@ -1203,24 +812,7 @@ public static partial class InitLayout
         var topContent = new Border
         {
             Background = Brushes.CornflowerBlue,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
-                        }
-                    }
-                }
-            }
+            Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
         };
         Grid.SetRow(topContent, 0);
         contentGrid.Children.Add(topContent);
@@ -1240,24 +832,7 @@ public static partial class InitLayout
         var middleContent = new Border
         {
             Background = Brushes.LightSeaGreen,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitWaveform.MakeWaveform(mainPage, vm),
-                        }
-                    }
-                }
-            }
+            Child = InitWaveform.MakeWaveform(mainPage, vm),
         };
         Grid.SetRow(middleContent, 2);
         contentGrid.Children.Add(middleContent);
@@ -1277,24 +852,7 @@ public static partial class InitLayout
         var bottomContent = new Border
         {
             Background = Brushes.PaleVioletRed,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
-                        }
-                    }
-                }
-            }
+            Child = InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
         };
         Grid.SetRow(bottomContent, 4);
         contentGrid.Children.Add(bottomContent);
