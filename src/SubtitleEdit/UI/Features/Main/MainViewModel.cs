@@ -49,50 +49,23 @@ public partial class MainViewModel : ObservableObject
 
     private string? _videoFileName;
 
-    private bool _forceClosing = false;
+    private int _changeSubtitleHash = -1;
 
     private readonly IFileHelper _fileHelper;
 
     public MainViewModel(IFileHelper fileHelper)
     {
+        _fileHelper = fileHelper;
+
         _subtitle = new Subtitle();
 
-        Subtitles = new ObservableCollection<SubtitleLineViewModel>
-        {
-            //new SubtitleLineViewModel
-            //{
-            //    Number = 1, StartTime = "00:00:10,500", EndTime = "00:00:13,000", Duration = "00:00:02,500",
-            //    Text = "Hello, world!", IsVisible = true
-            //},
-            new SubtitleLineViewModel
-            {
-                Number = 2, StartTime = TimeSpan.FromSeconds(0), EndTime = TimeSpan.FromSeconds(1), Duration = TimeSpan.FromSeconds(1),
-                Text = "This is a subtitle editor.",
-            },
-            new SubtitleLineViewModel
-            {
-                Number = 3, StartTime = TimeSpan.FromSeconds(10), EndTime = TimeSpan.FromSeconds(1), Duration = TimeSpan.FromSeconds(1),
-                Text = "Navigate with arrow keys.",
-            },
-            new SubtitleLineViewModel
-            {
-                Number = 4, StartTime = TimeSpan.FromSeconds(20), EndTime = TimeSpan.FromSeconds(1), Duration = TimeSpan.FromSeconds(1),
-                Text = "Edit text in the box below.",
-            },
-            new SubtitleLineViewModel
-            {
-                Number = 5, StartTime = TimeSpan.FromSeconds(30), EndTime = TimeSpan.FromSeconds(1), Duration = TimeSpan.FromSeconds(1),
-                Text = "Press Ctrl+Enter to save changes.",
-            }
-        };
+        Subtitles = new ObservableCollection<SubtitleLineViewModel>();
 
         SubtitleFormats = [.. SubtitleFormat.AllSubtitleFormats];
         SelectedSubtitleFormat = SubtitleFormats[0];
 
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         SelectedEncoding = Encodings[0];
-
-        _fileHelper = fileHelper;
 
         statusText = string.Empty;
     }
@@ -169,6 +142,8 @@ public partial class MainViewModel : ObservableObject
         }
 
         Subtitles.Clear();
+        _subtitle = new Subtitle();
+        _changeSubtitleHash = GetFastSubtitleHash();
     }
 
     [RelayCommand]
@@ -269,6 +244,7 @@ public partial class MainViewModel : ObservableObject
         SetSubtitles(_subtitle);
         ShowStatus($"Subtitle loaded: {fileName}");
         AddToRecentFiles();
+        _changeSubtitleHash = GetFastSubtitleHash();
 
         if (!string.IsNullOrEmpty(videoFileName) && File.Exists(videoFileName))
         {
@@ -296,9 +272,11 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    private bool IsEmpty => Subtitles.Count == 0 || string.IsNullOrEmpty(Subtitles[0].Text);
+
     private bool HasChanges()
     {
-        return false;
+        return !IsEmpty && _changeSubtitleHash != GetFastSubtitleHash();
     }
 
     private async Task SaveSubtitle()
@@ -317,6 +295,7 @@ public partial class MainViewModel : ObservableObject
 
         var text = GetUpdateSubtitle().ToText(SelectedSubtitleFormat);
         await File.WriteAllTextAsync(_subtitleFileName, text);
+        _changeSubtitleHash = GetFastSubtitleHash();
     }
 
     private Subtitle GetUpdateSubtitle()
@@ -435,5 +414,55 @@ public partial class MainViewModel : ObservableObject
         //{
         //    _timer.Start();
         //}
+    }
+
+    private int GetFastSubtitleHash()
+    {
+        var pre = _subtitleFileName + SelectedEncoding.DisplayName;
+        unchecked // Overflow is fine, just wrap
+        {
+            var hash = 17;
+            hash = hash * 23 + pre.GetHashCode();
+
+            if (_subtitle.Header != null)
+            {
+                hash = hash * 23 + _subtitle.Header.Trim().GetHashCode();
+            }
+
+            if (_subtitle.Footer != null)
+            {
+                hash = hash * 23 + _subtitle.Footer.Trim().GetHashCode();
+            }
+
+            var max = Subtitles.Count;
+            for (var i = 0; i < max; i++)
+            {
+                var p = Subtitles[i];
+                hash = hash * 23 + p.Number.GetHashCode();
+                hash = hash * 23 + p.StartTime.TotalMilliseconds.GetHashCode();
+                hash = hash * 23 + p.EndTime.TotalMilliseconds.GetHashCode();
+
+                foreach (var line in p.Text.SplitToLines())
+                {
+                    hash = hash * 23 + line.GetHashCode();
+                }
+
+                //if (p.P.Style != null)
+                //{
+                //    hash = hash * 23 + p.P.Style.GetHashCode();
+                //}
+                //if (p.P.Extra != null)
+                //{
+                //    hash = hash * 23 + p.P.Extra.GetHashCode();
+                //}
+                //if (p.P.Actor != null)
+                //{
+                //    hash = hash * 23 + p.P.Actor.GetHashCode();
+                //}
+                //hash = hash * 23 + p.P.Layer.GetHashCode();
+            }
+
+            return hash;
+        }
     }
 }
