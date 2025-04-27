@@ -526,29 +526,7 @@ public static partial class InitLayout
         var bottomContent = new Border
         {
             Background = Brushes.PaleVioletRed,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            new TextBlock
-                            {
-                                Text = "Bottom Section",
-                                FontSize = 50,
-                                FontWeight = FontWeight.Bold,
-                            },
-                        }
-                    }
-                }
-            }
+            Child = InitWaveform.MakeWaveform(mainPage, vm),
         };
         Grid.SetRow(bottomContent, 2);
         contentGrid.Children.Add(bottomContent);

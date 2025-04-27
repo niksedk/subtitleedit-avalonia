@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Media;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -8,6 +9,14 @@ public static class InitMenu
 {
     public static Menu Make(MainViewModel vm)
     {
+        vm.MenuReopen = new MenuItem
+        {
+            Header = "_Reopen",
+            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileReopenCommand)),
+        };
+
+        UpdateRecentFiles(vm);
+
         return new Menu
         {
             Height = 30,
@@ -31,7 +40,7 @@ public static class InitMenu
                             Header = "_Open...",
                             [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileOpenCommand)),
                         },
-                        new MenuItem { Header = "_Reopen" },
+                        vm.MenuReopen,
                         new MenuItem { Header = "Restore auto-backup..." },
                         new Separator(),
                         new MenuItem
@@ -150,5 +159,28 @@ public static class InitMenu
                 },
             }
         };
+    }
+
+    public static void UpdateRecentFiles(MainViewModel vm)
+    {
+        vm.MenuReopen.Items.Clear();
+        if (Se.Settings.File.RecentFiles.Count > 0)
+        {
+            foreach (var file in Se.Settings.File.RecentFiles)
+            {
+                var item = new MenuItem
+                {
+                    Header = file,
+                    [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileReopenCommand)),
+                };
+                item.CommandParameter = file;
+                vm.MenuReopen.Items.Add(item);
+            }
+            vm.MenuReopen.IsVisible = true;
+        }
+        else
+        {
+            vm.MenuReopen.IsVisible = false;
+        }
     }
 }

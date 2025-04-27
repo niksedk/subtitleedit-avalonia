@@ -9,6 +9,7 @@ using Avalonia.Themes.Fluent;
 using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using SubtitleAlchemist.Logic.Media;
 
@@ -37,6 +38,7 @@ Locator.Services = collection.BuildServiceProvider();
 var services = collection.BuildServiceProvider();
 
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+Se.LoadSettings();
 
 // Main window setup
 lifetime.MainWindow = new Window
@@ -44,6 +46,7 @@ lifetime.MainWindow = new Window
     Title = "Subtitle Edit",
     Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://Nikse.SubtitleEdit/Assets/se.ico"))),
 };
+
 
 lifetime.MainWindow.Content = new MainView();
 

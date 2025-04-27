@@ -22,6 +22,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> subtitles;
 
     [ObservableProperty] private SubtitleLineViewModel? selectedSubtitle;
+    [ObservableProperty] private int? selectedSubtitleIndex;
 
     [ObservableProperty] private string editText;
 
@@ -29,7 +30,7 @@ public partial class MainViewModel : ObservableObject
     public SubtitleFormat SelectedSubtitleFormat { get; set; }
 
     [ObservableProperty] private ObservableCollection<TextEncoding> encodings;
-    public TextEncoding? SelectedEncoding { get; set; }
+    public TextEncoding SelectedEncoding { get; set; }
 
     [ObservableProperty] private string statusText;
 
@@ -41,9 +42,14 @@ public partial class MainViewModel : ObservableObject
     public MainView MainView { get; set; }
     public Grid VideoPlayer { get; internal set; }
     public Grid Waveform { get; internal set; }
+    public MenuItem MenuReopen { get; internal set; }
 
     private string? _subtitleFileName;
     private Subtitle _subtitle;
+
+    private string? _videoFileName;
+
+    private bool _forceClosing = false;
 
     private readonly IFileHelper _fileHelper;
 
@@ -176,6 +182,12 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task CommandFileReopen(string fileName)
+    {
+        await SubtitleOpen(fileName);
+    }
+
+    [RelayCommand]
     private async Task CommandFileSave()
     {
         await SaveSubtitle();
@@ -235,9 +247,11 @@ public partial class MainViewModel : ObservableObject
             }
         }
 
+        _subtitleFileName = fileName;
         _subtitle = subtitle;
         SetSubtitles(_subtitle);
         ShowStatus($"Subtitle loaded: {fileName}");
+        AddToRecentFiles();
     }
 
     private void SetSubtitles(Subtitle subtitle)
@@ -265,7 +279,7 @@ public partial class MainViewModel : ObservableObject
     {
         if (Subtitles == null || !Subtitles.Any())
         {
-            //ShowStatus("Nothing to save");
+            ShowStatus("Nothing to save");
             return;
         }
 
@@ -300,14 +314,27 @@ public partial class MainViewModel : ObservableObject
 
     private async Task SaveSubtitleAs()
     {
-        // Show save dialog
         var fileName = await _fileHelper.PickSaveSubtitleFile(Window, SelectedSubtitleFormat, "Save Subtitle File");
         if (!string.IsNullOrEmpty(fileName))
         {
             _subtitleFileName = fileName;
             _subtitle.FileName = fileName;
             await SaveSubtitle();
+            AddToRecentFiles();
         }
+    }
+
+    private void AddToRecentFiles()
+    {
+        if (string.IsNullOrEmpty(_subtitleFileName))
+        {
+            return;
+        }
+
+        Se.Settings.File.AddToRecentFiles(_subtitleFileName, _videoFileName ?? string.Empty, SelectedSubtitleIndex ?? 0, SelectedEncoding.DisplayName);
+        Se.SaveSettings();
+
+        InitMenu.UpdateRecentFiles(this);
     }
 
     public void SubtitleGrid_SelectionChanged(object? sender, SelectionChangedEventArgs e)
@@ -325,5 +352,22 @@ public partial class MainViewModel : ObservableObject
     private void ShowStatus(string statusText)
     {
         StatusText = statusText;
+    }
+
+    internal void SaveSettings()
+    {
+        Se.SaveSettings();
+    }
+
+    internal void OnLoaded()
+    {
+        if (Se.Settings.File.ShowRecentFiles)
+        {
+            var first = Se.Settings.File.RecentFiles.FirstOrDefault();
+            if (first != null && File.Exists(first.SubtitleFileName))
+            {
+                using var _ = SubtitleOpen(first.SubtitleFileName);
+            }
+        }
     }
 }

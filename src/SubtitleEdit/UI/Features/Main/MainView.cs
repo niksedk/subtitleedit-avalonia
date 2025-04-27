@@ -17,7 +17,8 @@ public static class Locator
 public class MainView : ViewBase
 {
     private MainViewModel _vm;
-    
+
+   
     protected override object Build()
     {
         _vm = Locator.Services.GetRequiredService<MainViewModel>();
@@ -30,6 +31,16 @@ public class MainView : ViewBase
         // this.Icon = icon;
 
         _vm.Window = (Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow!;
+
+        _vm.Window.OnClosing(e =>
+        {
+            _vm.SaveSettings();
+        });
+
+        _vm.Window.OnLoaded(e =>
+        {
+            _vm.OnLoaded();
+        });
 
         var root = new DockPanel();
 
