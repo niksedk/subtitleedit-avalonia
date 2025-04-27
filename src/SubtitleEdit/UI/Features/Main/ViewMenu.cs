@@ -22,7 +22,11 @@ public static class ViewMenu
                     {
                         new MenuItem { Header = "_New" },
                         new Separator(),
-                        new MenuItem { Header = "_Open..." },
+                        new MenuItem
+                        {
+                            Header = "_Open...",
+                            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileOpenCommand)),
+                        },
                         new MenuItem { Header = "_Reopen" },
                         new MenuItem { Header = "Restore auto-backup..." },
                         new Separator(),

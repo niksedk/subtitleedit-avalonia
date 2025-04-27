@@ -8,6 +8,8 @@ using Avalonia.Themes.Fluent;
 using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Logic.Media;
+using SubtitleAlchemist.Logic.Media;
 
 var lifetime = new ClassicDesktopStyleApplicationLifetime
 {
@@ -29,9 +31,9 @@ var appBuilder = AppBuilder.Configure<Application>()
 
 var collection = new ServiceCollection();
 collection.AddCommonServices();
+collection.AddSingleton<IFileHelper, FileHelper>();
 Locator.Services = collection.BuildServiceProvider();
 var services = collection.BuildServiceProvider();
-var vm = services.GetRequiredService<MainViewModel>();
 
 // Main window setup
 lifetime.MainWindow = new Window

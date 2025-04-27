@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Help;
 using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -27,7 +28,9 @@ public partial class MainViewModel : ObservableObject
     public Grid VideoPlayer { get; internal set; }
     public Grid Waveform { get; internal set; }
 
-    public MainViewModel()
+    private readonly IFileHelper _fileHelper;
+
+    public MainViewModel(IFileHelper fileHelper)
     {
         Subtitles = new ObservableCollection<SubtitleLineViewModel>
         {
@@ -57,6 +60,8 @@ public partial class MainViewModel : ObservableObject
                 Text = "Press Ctrl+Enter to save changes.", IsVisible = true
             }
         };
+
+        _fileHelper = fileHelper;
     }
 
     [RelayCommand]
@@ -71,7 +76,7 @@ public partial class MainViewModel : ObservableObject
         var layoutModel = new LayoutModel();
         layoutModel.SelectedLayout = Se.Settings.General.LayoutNumber;
         var newWindow = new LayoutWindow(layoutModel);
-        //newWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+        newWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
         await newWindow.ShowDialog(Window);
 
         if (layoutModel.SelectedLayout != null && layoutModel.SelectedLayout != Se.Settings.General.LayoutNumber)
@@ -85,6 +90,28 @@ public partial class MainViewModel : ObservableObject
     {
         var newWindow = new AboutWindow();
         await newWindow.ShowDialog(Window);
+    }
+
+    [RelayCommand]
+    private async Task CommandFileOpen()
+    {
+        var fileName = await _fileHelper.PickAndShowSubtitleFile(Window, "Open Subtitle File");
+        if (!string.IsNullOrEmpty(fileName))
+        {
+            // Load the subtitle file and update the Subtitles collection
+            // This is just a placeholder for actual loading logic
+            Subtitles.Clear();
+            Subtitles.Add(new SubtitleLineViewModel
+            {
+                Number = 1,
+                StartTime = "00:00:00,000",
+                EndTime = "00:00:05,000",
+                Duration = "00:00:05,000",
+                Text = "Loaded subtitle text from file.",
+                IsVisible = true
+            });
+        }
+
     }
 
     public void SubtitleGrid_SelectionChanged(object? sender, SelectionChangedEventArgs e)

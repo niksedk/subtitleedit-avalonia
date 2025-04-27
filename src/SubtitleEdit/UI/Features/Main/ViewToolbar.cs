@@ -17,7 +17,7 @@ public static class ViewToolbar
             Child = CreateToolbar(vm),
         };
     }
-    
+
     private static StackPanel CreateToolbar(MainViewModel vm)
     {
         return new StackPanel
@@ -45,6 +45,7 @@ public static class ViewToolbar
                         Width = 32,
                         Height = 32,
                     },
+                    [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileOpenCommand)),
                 },
                 new Button
                 {
