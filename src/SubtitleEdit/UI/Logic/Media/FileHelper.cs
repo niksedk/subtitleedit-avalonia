@@ -10,7 +10,7 @@ namespace SubtitleAlchemist.Logic.Media
 {
     public class FileHelper : IFileHelper
     {
-        public async Task<string> PickOpenSubtitleFile(Avalonia.Visual sender, string title)
+        public async Task<string> PickOpenSubtitleFile(Visual sender, string title)
         {
             // Get top level from the current control. Alternatively, you can use Window reference instead.
             var topLevel = TopLevel.GetTopLevel(sender)!;
@@ -20,7 +20,7 @@ namespace SubtitleAlchemist.Logic.Media
             {
                 Title = title,
                 AllowMultiple = false,
-                FileTypeFilter = MakeSubtitleFilter(),
+                FileTypeFilter = MakeOpenSubtitleFilter(),
             });
 
             if (files.Count >= 1)
@@ -31,28 +31,28 @@ namespace SubtitleAlchemist.Logic.Media
             return string.Empty;
         }
 
-        private IReadOnlyList<FilePickerFileType> MakeSubtitleFilter()
+        private static IReadOnlyList<FilePickerFileType> MakeOpenSubtitleFilter()
         {
-            var fileTypes = new List<FilePickerFileType>();
-
-            fileTypes.Add(new FilePickerFileType("Subtitle files")
+            var fileTypes = new List<FilePickerFileType>
             {
-                Patterns = MakeSubtitlePatterns(),
-            });
-
-            fileTypes.Add(new FilePickerFileType("Video files")
-            {
-                Patterns = new List<string> { "*.mkv", "*.mp4", ".ts" }
-            });
-            fileTypes.Add(new FilePickerFileType("All files")
-            {
-                Patterns = new List<string> { "*" },
-            });
+                new FilePickerFileType("Subtitle files")
+                {
+                    Patterns = MakeOpenSubtitlePatterns(),
+                },
+                new FilePickerFileType("Video files")
+                {
+                    Patterns = new List<string> { "*.mkv", "*.mp4", ".ts" }
+                },
+                new FilePickerFileType("All files")
+                {
+                    Patterns = new List<string> { "*" },
+                }
+            };
 
             return fileTypes;
         }
 
-        private static List<string> MakeSubtitlePatterns()
+        private static List<string> MakeOpenSubtitlePatterns()
         {
             var existingTypes = new HashSet<string>();
             var patterns = new List<string>();
@@ -86,19 +86,14 @@ namespace SubtitleAlchemist.Logic.Media
         public async Task<string> PickSaveSubtitleFile(Visual sender, SubtitleFormat currentFormat, string title)
         {
             var topLevel = TopLevel.GetTopLevel(sender)!;
-
-            var fileType = new FilePickerFileType(currentFormat.Name)
-            {
-                Patterns = new List<string> { "*" + currentFormat.Extension }
-            };
-
-            var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+            var options = new FilePickerSaveOptions
             {
                 Title = title,
                 SuggestedFileName = "subtitle" + currentFormat.Extension,
-                FileTypeChoices = new List<FilePickerFileType> { fileType },
+                FileTypeChoices = MakeSaveFilePickerFileTypes(currentFormat),
                 DefaultExtension = currentFormat.Extension.TrimStart('.')
-            });
+            };
+            var file = await topLevel.StorageProvider.SaveFilePickerAsync(options);
 
             if (file != null)
             {
@@ -106,6 +101,33 @@ namespace SubtitleAlchemist.Logic.Media
             }
 
             return string.Empty;
+        }
+
+        private static List<FilePickerFileType> MakeSaveFilePickerFileTypes(SubtitleFormat currentFormat)
+        {
+            var fileType = new FilePickerFileType(currentFormat.Name)
+            {
+                Patterns = new List<string> { "*" + currentFormat.Extension }
+            };
+            var fileTypes = new List<FilePickerFileType> { fileType };
+
+            //foreach (var format in SubtitleFormat.AllSubtitleFormats)
+            //{
+            //    if (format.IsTextBased && format.Name != currentFormat.Name)
+            //    {
+            //        var patterns = new List<string>
+            //        {
+            //            "*" + format.Extension
+            //        };
+
+            //        fileTypes.Add(new FilePickerFileType(format.Name)
+            //        {
+            //            Patterns = patterns
+            //        });
+            //    }
+            //}            
+
+            return fileTypes;
         }
     }
 }

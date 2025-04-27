@@ -235,7 +235,6 @@ public partial class MainViewModel : ObservableObject
             }
         }
 
-
         _subtitle = subtitle;
         SetSubtitles(_subtitle);
         ShowStatus($"Subtitle loaded: {fileName}");
@@ -302,7 +301,7 @@ public partial class MainViewModel : ObservableObject
     private async Task SaveSubtitleAs()
     {
         // Show save dialog
-        var fileName = await _fileHelper.PickOpenSubtitleFile(Window, "Save Subtitle File");
+        var fileName = await _fileHelper.PickSaveSubtitleFile(Window, SelectedSubtitleFormat, "Save Subtitle File");
         if (!string.IsNullOrEmpty(fileName))
         {
             _subtitleFileName = fileName;
