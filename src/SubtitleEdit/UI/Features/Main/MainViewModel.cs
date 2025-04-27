@@ -24,6 +24,8 @@ public partial class MainViewModel : ObservableObject
     public Window Window { get; set; }
     public Grid ContentGrid { get; set; }
     public MainView MainView { get; set; }
+    public Grid VideoPlayer { get; internal set; }
+    public Grid Waveform { get; internal set; }
 
     public MainViewModel()
     {
