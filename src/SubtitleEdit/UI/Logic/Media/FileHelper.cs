@@ -33,6 +33,26 @@ namespace SubtitleAlchemist.Logic.Media
         private IReadOnlyList<FilePickerFileType> MakeSubtitleFilter()
         {
             var fileTypes = new List<FilePickerFileType>();
+
+            fileTypes.Add(new FilePickerFileType("Subtitle files")
+            {
+                Patterns = MakeSubtitlePatterns(),
+            });
+
+            fileTypes.Add(new FilePickerFileType("Video files")
+            {
+                Patterns = new List<string> { "*.mkv", "*.mp4", ".ts" }
+            });
+            fileTypes.Add(new FilePickerFileType("All files")
+            {
+                Patterns = new List<string> { "*" },
+            });
+
+            return fileTypes;
+        }
+
+        private static List<string> MakeSubtitlePatterns()
+        {
             var existingTypes = new HashSet<string>();
             var patterns = new List<string>();
             foreach (var format in SubtitleFormat.AllSubtitleFormats)
@@ -50,21 +70,7 @@ namespace SubtitleAlchemist.Logic.Media
                 }
             }
             AddExt(existingTypes, patterns, ".mks");
-
-            fileTypes.Add(new FilePickerFileType("Subtitle files")
-            {
-                Patterns = patterns,
-            });
-            fileTypes.Add(new FilePickerFileType("Video files")
-            {
-                Patterns = new List<string> { "*.mkv", "*.mp4", ".ts" }
-            });
-            fileTypes.Add(new FilePickerFileType("All files")
-            {
-                Patterns = new List<string> { "*" },
-            });
-
-            return fileTypes;
+            return patterns;
         }
 
         private static void AddExt(HashSet<string> existingTypes, List<string> patterns, string ext)
