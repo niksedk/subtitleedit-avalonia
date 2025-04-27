@@ -38,6 +38,7 @@ public static class InitToolbar
                         Width = 32,
                         Height = 32,
                     },
+                    [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileNewCommand)),
                 },
                 new Button
                 {
@@ -57,6 +58,7 @@ public static class InitToolbar
                         Width = 32,
                         Height = 32,
                     },
+                    [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileSaveCommand)),
                 },
                 new Button
                 {
@@ -66,6 +68,7 @@ public static class InitToolbar
                         Width = 32,
                         Height = 32,
                     },
+                    [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileSaveAsCommand)),
                 },
                 new Border
                 {

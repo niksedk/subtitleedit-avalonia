@@ -42,12 +42,6 @@ public static partial class InitLayout
                 Binding = new Binding("Number"),
                 Width = new DataGridLength(50)
             });
-            vm.SubtitleGrid.Columns.Add(new DataGridCheckBoxColumn
-            {
-                Header = "Visible",
-                Binding = new Binding("IsVisible"),
-                Width = new DataGridLength(70)
-            });
             vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
             {
                 Header = "Start Time",

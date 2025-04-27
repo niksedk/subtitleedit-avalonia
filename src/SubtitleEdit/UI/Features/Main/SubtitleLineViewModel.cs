@@ -1,4 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Nikse.SubtitleEdit.Core.Common;
+using System;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -8,17 +10,16 @@ public partial class SubtitleLineViewModel : ObservableObject
     private int number;
 
     [ObservableProperty]
-    private string startTime;
+    private TimeSpan startTime;
 
     [ObservableProperty]
-    private string endTime;
+    private TimeSpan endTime;
 
     [ObservableProperty]
-    private string duration;
+    private TimeSpan duration;
 
     [ObservableProperty]
     private string text;
 
-    [ObservableProperty]
-    private bool isVisible;
+    public Paragraph? Paragraph { get; set; }
 }

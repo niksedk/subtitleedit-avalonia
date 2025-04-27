@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
@@ -9,7 +10,7 @@ namespace SubtitleAlchemist.Logic.Media
 {
     public class FileHelper : IFileHelper
     {
-        public async Task<string> PickAndShowSubtitleFile(Avalonia.Visual sender, string title)
+        public async Task<string> PickOpenSubtitleFile(Avalonia.Visual sender, string title)
         {
             // Get top level from the current control. Alternatively, you can use Window reference instead.
             var topLevel = TopLevel.GetTopLevel(sender)!;
@@ -80,6 +81,31 @@ namespace SubtitleAlchemist.Logic.Media
                 existingTypes.Add(ext);
                 patterns.Add("*" + ext);
             }
+        }
+
+        public async Task<string> PickSaveSubtitleFile(Visual sender, SubtitleFormat currentFormat, string title)
+        {
+            var topLevel = TopLevel.GetTopLevel(sender)!;
+
+            var fileType = new FilePickerFileType(currentFormat.Name)
+            {
+                Patterns = new List<string> { "*" + currentFormat.Extension }
+            };
+
+            var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+            {
+                Title = title,
+                SuggestedFileName = "subtitle" + currentFormat.Extension,
+                FileTypeChoices = new List<FilePickerFileType> { fileType },
+                DefaultExtension = currentFormat.Extension.TrimStart('.')
+            });
+
+            if (file != null)
+            {
+                return file.Path.LocalPath;
+            }
+
+            return string.Empty;
         }
     }
 }

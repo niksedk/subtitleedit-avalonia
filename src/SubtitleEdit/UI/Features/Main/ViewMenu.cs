@@ -20,7 +20,11 @@ public static class ViewMenu
                     Header = "_File",
                     Items =
                     {
-                        new MenuItem { Header = "_New" },
+                        new MenuItem
+                        {
+                            Header = "_New",
+                            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileNewCommand)),
+                        },
                         new Separator(),
                         new MenuItem
                         {
@@ -30,8 +34,16 @@ public static class ViewMenu
                         new MenuItem { Header = "_Reopen" },
                         new MenuItem { Header = "Restore auto-backup..." },
                         new Separator(),
-                        new MenuItem { Header = "_Save" },
-                        new MenuItem { Header = "Save _as..." },
+                        new MenuItem
+                        {
+                            Header = "_Save",
+                            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileSaveCommand)),
+                        },
+                        new MenuItem
+                        {
+                            Header = "Save _as...",
+                            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileSaveAsCommand)),
+                        },
                         new Separator(),
                         new MenuItem { Header = "Export" },
                         new Separator(),
