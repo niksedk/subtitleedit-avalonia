@@ -12,6 +12,7 @@
 
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="11.2.8" />
+        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.2.8" />
         <PackageReference Include="Avalonia.Desktop" Version="11.2.8" />
         <PackageReference Include="Avalonia.Markup.Declarative" Version="11.1.3" />
         <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.8" />
@@ -24,10 +25,6 @@
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
         <PackageReference Include="libse" Version="4.1.0-alpha1" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Assets\" />
     </ItemGroup>
 
     <ItemGroup>
@@ -343,5 +340,15 @@
       <Content Include="Assets\Layout\Layout12.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Assets\SE.png" />
+      <AvaloniaResource Include="Assets\SE.png" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Assets\se.ico" />
+      <AvaloniaResource Include="Assets\se.ico" />
     </ItemGroup>
 </Project>
