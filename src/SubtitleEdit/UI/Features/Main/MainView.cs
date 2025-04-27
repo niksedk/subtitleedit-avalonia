@@ -34,7 +34,7 @@ public class MainView : ViewBase
         var root = new DockPanel();
 
         // Menu bar
-        root.Children.Add(ViewMenu.Make(_vm).Dock(Dock.Top));
+        root.Children.Add(InitMenu.Make(_vm).Dock(Dock.Top));
 
         // Toolbar
         root.Children.Add(InitToolbar.Make(_vm).Dock(Dock.Top));

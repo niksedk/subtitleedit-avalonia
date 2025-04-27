@@ -2,9 +2,9 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Media;
 
-namespace Nikse.SubtitleEdit.Features.Main;
+namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
-public static class ViewMenu
+public static class InitMenu
 {
     public static Menu Make(MainViewModel vm)
     {
