@@ -182,9 +182,16 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task CommandFileReopen(string fileName)
+    private async Task CommandFileReopen(RecentFile recentFile)
     {
-        await SubtitleOpen(fileName);
+        await SubtitleOpen(recentFile.SubtitleFileName);
+    }
+
+    [RelayCommand]
+    private void CommandFileClearRecentFiles(RecentFile recentFile)
+    {
+        Se.Settings.File.RecentFiles.Clear();
+        InitMenu.UpdateRecentFiles(this);
     }
 
     [RelayCommand]

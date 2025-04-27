@@ -170,12 +170,22 @@ public static class InitMenu
             {
                 var item = new MenuItem
                 {
-                    Header = file,
+                    Header = file.SubtitleFileName,
                     [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileReopenCommand)),
                 };
                 item.CommandParameter = file;
                 vm.MenuReopen.Items.Add(item);
             }
+
+            vm.MenuReopen.Items.Add(new Separator());
+
+            var clearItem = new MenuItem
+            {
+                Header = "Clear recent files",
+                [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileClearRecentFilesCommand)),
+            };
+            vm.MenuReopen.Items.Add(clearItem);
+
             vm.MenuReopen.IsVisible = true;
         }
         else
