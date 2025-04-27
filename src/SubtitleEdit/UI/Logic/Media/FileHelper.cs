@@ -129,5 +129,43 @@ namespace SubtitleAlchemist.Logic.Media
 
             return fileTypes;
         }
+
+        public async Task<string> PickOpenVideoFile(Visual sender, string title)
+        {
+            // Get top level from the current control. Alternatively, you can use Window reference instead.
+            var topLevel = TopLevel.GetTopLevel(sender)!;
+
+            // Start async operation to open the dialog.
+            var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                Title = title,
+                AllowMultiple = false,
+                FileTypeFilter = MakeOpenVideoFilter(),
+            });
+
+            if (files.Count >= 1)
+            {
+                return files[0].Path.LocalPath;
+            }
+
+            return string.Empty;
+        }
+
+        private static IReadOnlyList<FilePickerFileType> MakeOpenVideoFilter()
+        {
+            var fileTypes = new List<FilePickerFileType>
+            {
+                new FilePickerFileType("Video files")
+                {
+                    Patterns = new List<string> { "*.mkv", "*.mp4", ".ts", ".mov", "*.mpeg" }
+                },
+                new FilePickerFileType("All files")
+                {
+                    Patterns = new List<string> { "*" },
+                }
+            };
+
+            return fileTypes;
+        }
     }
 }

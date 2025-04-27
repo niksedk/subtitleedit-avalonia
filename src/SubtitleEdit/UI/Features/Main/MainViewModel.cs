@@ -174,7 +174,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task CommandFileOpen()
     {
-        var fileName = await _fileHelper.PickOpenSubtitleFile(Window, "Open Subtitle File");
+        var fileName = await _fileHelper.PickOpenSubtitleFile(Window, "Open subtitle file");
         if (!string.IsNullOrEmpty(fileName))
         {
             await SubtitleOpen(fileName);
@@ -184,7 +184,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task CommandFileReopen(RecentFile recentFile)
     {
-        await SubtitleOpen(recentFile.SubtitleFileName);
+        await SubtitleOpen(recentFile.SubtitleFileName, recentFile.VideoFileName);
     }
 
     [RelayCommand]
@@ -206,7 +206,17 @@ public partial class MainViewModel : ObservableObject
         await SaveSubtitleAs();
     }
 
-    private async Task SubtitleOpen(string fileName)
+    [RelayCommand]
+    private async Task CommandVideoOpen()
+    {
+        var fileName = await _fileHelper.PickOpenVideoFile(Window, "Open video file");
+        if (!string.IsNullOrEmpty(fileName))
+        {
+            VideoOpenFile(fileName);
+        }
+    }
+
+    private async Task SubtitleOpen(string fileName, string? videoFileName = null)
     {
         if (string.IsNullOrEmpty(fileName))
         {
@@ -259,6 +269,15 @@ public partial class MainViewModel : ObservableObject
         SetSubtitles(_subtitle);
         ShowStatus($"Subtitle loaded: {fileName}");
         AddToRecentFiles();
+
+        if (!string.IsNullOrEmpty(videoFileName) && File.Exists(videoFileName))
+        {
+            VideoOpenFile(videoFileName);
+        }
+        else if (FindVideoFileName.TryFindVideoFileName(fileName, out videoFileName))
+        {
+            VideoOpenFile(videoFileName);
+        }
     }
 
     private void SetSubtitles(Subtitle subtitle)
@@ -373,8 +392,48 @@ public partial class MainViewModel : ObservableObject
             var first = Se.Settings.File.RecentFiles.FirstOrDefault();
             if (first != null && File.Exists(first.SubtitleFileName))
             {
-                using var _ = SubtitleOpen(first.SubtitleFileName);
+                using var _ = SubtitleOpen(first.SubtitleFileName, first.VideoFileName);
             }
         }
+    }
+
+    private void VideoOpenFile(string videoFileName)
+    {
+        if (VideoPlayer == null)
+        {
+            return;
+        }
+
+        //_timer.Stop();
+        //_audioVisualizer.WavePeaks = null;
+        //VideoPlayer.Source = MediaSource.FromFile(videoFileName);
+
+        var peakWaveFileName = WavePeakGenerator.GetPeakWaveFileName(videoFileName);
+        if (!File.Exists(peakWaveFileName))
+        {
+            if (FfmpegHelper.IsFfmpegInstalled())
+            {
+                var tempWaveFileName = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.wav");
+                var process = WaveFileExtractor.GetCommandLineProcess(videoFileName, -1, tempWaveFileName, Configuration.Settings.General.VlcWaveTranscodeSettings, out _);
+                ShowStatus("Extracting wave info...");
+                Task.Run(async () =>
+                {
+                    //await ExtractWaveformAndSpectrogram(process, tempWaveFileName, peakWaveFileName);
+                });
+            }
+        }
+        else
+        {
+            ShowStatus("Loading wave info from cache...");
+            var wavePeaks = WavePeakData.FromDisk(peakWaveFileName);
+            //_audioVisualizer.WavePeaks = wavePeaks;
+        }
+
+        _videoFileName = videoFileName;
+
+        //if (!_stopping)
+        //{
+        //    _timer.Start();
+        //}
     }
 }
