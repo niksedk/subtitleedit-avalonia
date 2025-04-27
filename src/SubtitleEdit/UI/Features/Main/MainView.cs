@@ -34,7 +34,7 @@ public class MainView : ViewBase
 
         _vm.Window.OnClosing(e =>
         {
-            _vm.SaveSettings();
+            _vm.OnClosing();
         });
 
         _vm.Window.OnLoaded(e =>

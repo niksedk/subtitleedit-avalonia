@@ -1,6 +1,8 @@
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LibVLCSharp.Avalonia;
+using LibVLCSharp.Shared;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Common;
@@ -40,7 +42,10 @@ public partial class MainViewModel : ObservableObject
     public Window Window { get; set; }
     public Grid ContentGrid { get; set; }
     public MainView MainView { get; set; }
-    public Grid VideoPlayer { get; internal set; }
+
+    public VideoView VideoPlayer { get; internal set; }
+    public MediaPlayer MediaPlayer { get; set; }
+
     public Grid Waveform { get; internal set; }
     public MenuItem MenuReopen { get; internal set; }
 
@@ -274,6 +279,8 @@ public partial class MainViewModel : ObservableObject
 
     private bool IsEmpty => Subtitles.Count == 0 || string.IsNullOrEmpty(Subtitles[0].Text);
 
+    public LibVLC LibVLC { get; internal set; }
+
     private bool HasChanges()
     {
         return !IsEmpty && _changeSubtitleHash != GetFastSubtitleHash();
@@ -359,8 +366,11 @@ public partial class MainViewModel : ObservableObject
         StatusText = statusText;
     }
 
-    internal void SaveSettings()
+    internal void OnClosing()
     {
+        MediaPlayer?.Dispose();
+        //libVLC?.Dispose();
+
         Se.SaveSettings();
     }
 
@@ -386,6 +396,8 @@ public partial class MainViewModel : ObservableObject
         //_timer.Stop();
         //_audioVisualizer.WavePeaks = null;
         //VideoPlayer.Source = MediaSource.FromFile(videoFileName);
+        var media = new Media(LibVLC, new Uri(videoFileName));
+        MediaPlayer.Play(media);
 
         var peakWaveFileName = WavePeakGenerator.GetPeakWaveFileName(videoFileName);
         if (!File.Exists(peakWaveFileName))

@@ -81,24 +81,7 @@ public static partial class InitLayout
         var nestedRight = new Border
         {
             Background = Brushes.PaleVioletRed,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
-                        }
-                    }
-                }
-            }
+            Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),                    
         };
         Grid.SetColumn(nestedRight, 2);
         nestedGrid.Children.Add(nestedRight);

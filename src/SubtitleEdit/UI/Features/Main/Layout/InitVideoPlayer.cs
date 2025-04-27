@@ -3,6 +3,8 @@ using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using LibVLCSharp.Avalonia;
+using LibVLCSharp.Shared;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -13,7 +15,11 @@ public class InitVideoPlayer
         // Create main layout grid
         var mainGrid = new Grid
         {
-            RowDefinitions = new RowDefinitions("Auto,*,Auto")
+            RowDefinitions = new RowDefinitions("Auto,*,Auto"),  // Simplified to 3 rows
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            Width = double.NaN,  // This tells Avalonia to size to parent
+            Height = double.NaN,  // This tells Avalonia to size to parent
         };
 
         // Header
@@ -28,10 +34,18 @@ public class InitVideoPlayer
         mainGrid.Children.Add(headerText);
 
         // Video player area
-        vm.VideoPlayer = new Grid
+        vm.MediaPlayer?.Dispose();
+        vm.LibVLC = new LibVLC();
+        vm.MediaPlayer = new MediaPlayer(vm.LibVLC);
+        vm.VideoPlayer = new VideoView
         {
             Margin = new Thickness(10),
-            Background = Brushes.Black // Placeholder background
+            MediaPlayer = vm.MediaPlayer,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            Width = double.NaN,  // This tells Avalonia to size to parent
+            Height = double.NaN,  // This tells Avalonia to size to parent
+
         };
         Grid.SetRow(vm.VideoPlayer, 1);
         mainGrid.Children.Add(vm.VideoPlayer);
@@ -39,11 +53,12 @@ public class InitVideoPlayer
         // Footer
         var footerGrid = new Grid
         {
+            ColumnDefinitions = new ColumnDefinitions("*"),
             RowDefinitions = new RowDefinitions("Auto,Auto"),
             Margin = new Thickness(10)
         };
 
-        // Toolbar 1: Navigation bar (e.g., time slider)
+        // Navigation bar (e.g., time slider)
         var navigationBar = new Slider
         {
             Minimum = 0,
@@ -51,27 +66,27 @@ public class InitVideoPlayer
             Value = 0,
             Height = 20
         };
-        Grid.SetRow(navigationBar, 0);
+        Grid.SetRow(navigationBar, 0);  // First row of footer grid
         footerGrid.Children.Add(navigationBar);
 
-        // Toolbar 2: Control buttons (Play, Stop, Volume, Fullscreen)
+        // Control buttons (Play, Stop, Volume, Fullscreen)
         var controlsPanel = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Spacing = 10,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+            Margin = new Thickness(0, 5, 0, 0)
         };
-
         controlsPanel.Children.Add(CreateButtonWithIcon("Assets/Themes/Dark/VideoPlayer/Play.png"));
         controlsPanel.Children.Add(CreateButtonWithIcon("Assets/Themes/Dark/VideoPlayer/Stop.png"));
         controlsPanel.Children.Add(CreateButtonWithIcon("Assets/Themes/Dark/VideoPlayer/VolumeBarBackground.png"));
         controlsPanel.Children.Add(CreateButtonWithIcon("Assets/Themes/Dark/VideoPlayer/Fullscreen.png"));
-
-        Grid.SetRow(controlsPanel, 1);
+        Grid.SetRow(controlsPanel, 1);  // Second row of footer grid
         footerGrid.Children.Add(controlsPanel);
 
-        Grid.SetRow(footerGrid, 2);
+        // Add footer to main grid
+        Grid.SetRow(footerGrid, 2);  // Third row of main grid
         mainGrid.Children.Add(footerGrid);
 
         return mainGrid;
