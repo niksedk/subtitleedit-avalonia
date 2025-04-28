@@ -16,6 +16,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Input;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -349,7 +350,8 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        Se.Settings.File.AddToRecentFiles(_subtitleFileName, _videoFileName ?? string.Empty, SelectedSubtitleIndex ?? 0, SelectedEncoding.DisplayName);
+        Se.Settings.File.AddToRecentFiles(_subtitleFileName, _videoFileName ?? string.Empty, SelectedSubtitleIndex ?? 0,
+            SelectedEncoding.DisplayName);
         Se.SaveSettings();
 
         InitMenu.UpdateRecentFiles(this);
@@ -411,7 +413,8 @@ public partial class MainViewModel : ObservableObject
             if (FfmpegHelper.IsFfmpegInstalled())
             {
                 var tempWaveFileName = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.wav");
-                var process = WaveFileExtractor.GetCommandLineProcess(videoFileName, -1, tempWaveFileName, Configuration.Settings.General.VlcWaveTranscodeSettings, out _);
+                var process = WaveFileExtractor.GetCommandLineProcess(videoFileName, -1, tempWaveFileName,
+                    Configuration.Settings.General.VlcWaveTranscodeSettings, out _);
                 ShowStatus("Extracting wave info...");
                 Task.Run(async () =>
                 {
@@ -493,5 +496,60 @@ public partial class MainViewModel : ObservableObject
 
             return hash;
         }
+    }
+
+    public void DeleteSelectedItems()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems?.Cast<SubtitleLineViewModel>().ToList();
+        if (selectedItems != null && selectedItems.Any())
+        {
+            foreach (var item in selectedItems)
+            {
+                Subtitles.Remove(item);
+            }
+        }
+    }
+
+    public void InsertAfterSelectedItem()
+    {
+        var selectedItem = SubtitleGrid.SelectedItem as SubtitleLineViewModel;
+        if (selectedItem != null)
+        {
+            var index = Subtitles.IndexOf(selectedItem);
+            var newItem = new SubtitleLineViewModel(); // Initialize with appropriate values
+
+            if (index >= 0)
+            {
+                Subtitles.Insert(index + 1, newItem);
+                SubtitleGrid.SelectedItem = newItem;
+            }
+        }
+    }
+
+    public void ToggleItalic()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems?.Cast<SubtitleLineViewModel>().ToList();
+        if (selectedItems != null && selectedItems.Any())
+        {
+            foreach (var item in selectedItems)
+            {
+                item.Text = item.Text.Contains("<i>")
+                    ? item.Text.Replace("<i>", "").Replace("</i>", "")
+                    : $"<i>{item.Text}</i>";
+            }
+        }
+    }
+
+    public void SubtitleContextOpening(object? sender, EventArgs e)
+    {
+
+    }
+
+    public void KeyDown(KeyEventArgs keyEventArgs)
+    {
+    }
+
+    public void KeyUp(KeyEventArgs keyEventArgs)
+    {
     }
 }

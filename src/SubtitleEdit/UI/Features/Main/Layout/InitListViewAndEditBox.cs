@@ -9,6 +9,8 @@ namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
 public static class InitListViewAndEditBox
 {
+    private static bool _isLeftMouseDown;
+    
     public static Grid MakeLayoutListViewAndEditBox(MainView mainPage, MainViewModel vm)
     {
         mainPage.DataContext = vm;
@@ -23,7 +25,7 @@ public static class InitListViewAndEditBox
         {
             AutoGenerateColumns = false,
             CanUserResizeColumns = true,
-            IsReadOnly = false,
+            IsReadOnly = true,
             SelectionMode = DataGridSelectionMode.Extended,
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
             HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
@@ -37,32 +39,32 @@ public static class InitListViewAndEditBox
         {
             Header = "#",
             Binding = new Binding("Number"),
-            Width = new DataGridLength(50)
+            Width = new DataGridLength(50),
         });
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
             Header = "Start Time",
             Binding = new Binding("StartTime"),
-            Width = new DataGridLength(120)
+            Width = new DataGridLength(120),
         });
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
             Header = "End Time",
             Binding = new Binding("EndTime"),
-            Width = new DataGridLength(120)
+            Width = new DataGridLength(120),
         });
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
             Header = "Duration",
             Binding = new Binding("Duration"),
             Width = new DataGridLength(120),
-            IsReadOnly = true
+            IsReadOnly = true,
         });
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
             Header = "Text",
             Binding = new Binding("Text"),
-            Width = new DataGridLength(1, DataGridLengthUnitType.Star) // Stretch text column
+            Width = new DataGridLength(1, DataGridLengthUnitType.Star), // Stretch text column
         });
 
         // Bind data
@@ -71,6 +73,31 @@ public static class InitListViewAndEditBox
 
         Grid.SetRow(vm.SubtitleGrid, 0);
         mainGrid.Children.Add(vm.SubtitleGrid);
+        
+
+        // Create a Flyout for the DataGrid
+        var flyout = new MenuFlyout();
+        
+        flyout.Opening += vm.SubtitleContextOpening;
+        
+        // Add menu items with commands
+        var deleteMenuItem = new MenuItem { Header = "Delete" };
+        deleteMenuItem.Click += (s, e) => vm.DeleteSelectedItems();
+        
+        var insertAfterMenuItem = new MenuItem { Header = "Insert after" };
+        insertAfterMenuItem.Click += (s, e) => vm.InsertAfterSelectedItem();
+        
+        var italicMenuItem = new MenuItem { Header = "Italic" };
+        italicMenuItem.Click += (s, e) => vm.ToggleItalic();
+        
+        // Add items to flyout menu
+        flyout.Items.Add(deleteMenuItem);
+        flyout.Items.Add(insertAfterMenuItem);
+        flyout.Items.Add(italicMenuItem);
+        
+        // Set the ContextFlyout property
+        vm.SubtitleGrid.ContextFlyout = flyout;
+
 
         // Edit area - restructured with time controls on left, multiline text on right
         var editGrid = new Grid
@@ -97,7 +124,7 @@ public static class InitListViewAndEditBox
 
         var startTimeLabel = new TextBlock
         {
-            Text = "Start Time:",
+            Text = "Show:",
             FontWeight = FontWeight.Bold
         };
         startTimePanel.Children.Add(startTimeLabel);
@@ -182,7 +209,7 @@ public static class InitListViewAndEditBox
 
         var textLabel = new TextBlock
         {
-            Text = "Subtitle Text:",
+            Text = "Text:",
             FontWeight = FontWeight.Bold
         };
         textEditPanel.Children.Add(textLabel);

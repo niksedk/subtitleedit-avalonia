@@ -9,6 +9,7 @@ using Avalonia.Themes.Fluent;
 using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using SubtitleAlchemist.Logic.Media;
@@ -34,6 +35,7 @@ var appBuilder = AppBuilder.Configure<Application>()
 var collection = new ServiceCollection();
 collection.AddCommonServices();
 collection.AddSingleton<IFileHelper, FileHelper>();
+collection.AddTransient<IShortcutManager, ShortcutManager>();
 Locator.Services = collection.BuildServiceProvider();
 var services = collection.BuildServiceProvider();
 
