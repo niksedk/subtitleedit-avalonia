@@ -20,7 +20,8 @@ public class InitVideoPlayer
             VerticalAlignment = VerticalAlignment.Stretch,
             Margin = new Thickness(0),
         };
-
+#if WINDOWS
+        
         // Video player area
         if (vm.LibVLC == null || vm.VideoPlayer == null)
         {
@@ -44,7 +45,7 @@ public class InitVideoPlayer
 
         Grid.SetRow(vm.VideoPlayer, 0);
         mainGrid.Children.Add(vm.VideoPlayer);
-
+#endif
         // Footer
         var footerGrid = new Grid
         {
