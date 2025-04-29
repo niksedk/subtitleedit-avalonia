@@ -10,7 +10,6 @@ using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
-
 public static class Locator
 {
     public static IServiceProvider Services { get; set; } = default!;
@@ -18,7 +17,6 @@ public static class Locator
 public class MainView : ViewBase
 {
     private MainViewModel _vm;
-
    
     protected override object Build()
     {
@@ -26,11 +24,6 @@ public class MainView : ViewBase
         _vm.MainView = this;
         DataContext = _vm;
         
-        // var icon = AssetLoader.Open(new Uri("avares://Nikse.SubtitleEdit/Assets/se.ico"));
-        // var iconAsset = new WindowIcon(AssetLoader.Open(new Uri("avares://Nikse.SubtitleEdit/Assets/SE.png")));
-        // this.Icon = iconAsset;
-        // this.Icon = icon;
-
         _vm.Window = (Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow!;
 
         _vm.Window.OnClosing(e =>
@@ -65,7 +58,6 @@ public class MainView : ViewBase
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
-        
         _vm.KeyDown(e);
     }
 

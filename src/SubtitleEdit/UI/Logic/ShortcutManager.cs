@@ -8,15 +8,8 @@ namespace Nikse.SubtitleEdit.Logic;
 
 public class ShortcutManager : IShortcutManager
 {
-    private readonly HashSet<Key> _activeKeys;
-    private readonly List<ShortCut> _shortcuts;
-
-    public ShortcutManager()
-    {
-        _activeKeys = new HashSet<Key>();
-        _shortcuts = new List<ShortCut>();
-    }
-
+    private readonly HashSet<Key> _activeKeys = [];
+    private readonly List<ShortCut> _shortcuts = [];
     public bool IsControlDown => _activeKeys.Contains(Key.LeftCtrl) || _activeKeys.Contains(Key.RightCtrl);
     public bool IsAltDown => _activeKeys.Contains(Key.LeftAlt) || _activeKeys.Contains(Key.RightAlt);
     public bool IsShiftDown => _activeKeys.Contains(Key.LeftShift) || _activeKeys.Contains(Key.RightShift);

@@ -58,10 +58,12 @@ public partial class MainViewModel : ObservableObject
     private int _changeSubtitleHash = -1;
 
     private readonly IFileHelper _fileHelper;
+    private readonly IShortcutManager _shortcutManager;
 
-    public MainViewModel(IFileHelper fileHelper)
+    public MainViewModel(IFileHelper fileHelper, IShortcutManager shortcutManager)
     {
         _fileHelper = fileHelper;
+        _shortcutManager = shortcutManager;
 
         _subtitle = new Subtitle();
 
@@ -547,9 +549,50 @@ public partial class MainViewModel : ObservableObject
 
     public void KeyDown(KeyEventArgs keyEventArgs)
     {
+        _shortcutManager.OnKeyPressed(this, keyEventArgs);
     }
 
     public void KeyUp(KeyEventArgs keyEventArgs)
     {
+        _shortcutManager.OnKeyReleased(this, keyEventArgs);  
+    }
+
+    private bool _subtitleGridIsRightClick = false;
+    private bool _subtitleGridIsLeftClick = false;
+    private bool _subtitleGridIsControlPressed = false;
+    public void SubtitleGrid_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        _subtitleGridIsControlPressed = false;
+        _subtitleGridIsLeftClick = false;
+        _subtitleGridIsRightClick = false;
+        
+        if (sender is Control { ContextFlyout: not null } control)
+        {
+            var props = e.GetCurrentPoint(control).Properties;
+            _subtitleGridIsLeftClick = props.IsLeftButtonPressed;
+            _subtitleGridIsRightClick= props.IsRightButtonPressed;
+            _subtitleGridIsControlPressed = e.KeyModifiers.HasFlag(KeyModifiers.Control);
+        }
+    }
+
+    public void SubtitleGrid_PointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        if (sender is Control { ContextFlyout: not null } control)
+        {
+            if (_subtitleGridIsRightClick)
+            {
+                control.ContextFlyout.ShowAt(control);
+                e.Handled = true;
+            }
+
+            if (OperatingSystem.IsMacOS())
+            {
+                if (_subtitleGridIsLeftClick && _subtitleGridIsControlPressed)    
+                {                                                                 
+                    control.ContextFlyout.ShowAt(control);                        
+                    e.Handled = true;                                             
+                }                                                                 
+            }
+        }
     }
 }
