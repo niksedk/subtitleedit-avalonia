@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
@@ -51,18 +52,19 @@ public class SettingsSection
 public class SettingsItem
 {
     private readonly string _label;
-    private readonly Control _control;
+    private readonly Func<Control> _controlFactory;
     public bool IsVisible { get; private set; } = true;
 
-    public SettingsItem(string label, Control control)
+    public SettingsItem(string label, Func<Control> controlFactory)
     {
         _label = label;
-        _control = control;
+        _controlFactory = controlFactory;
     }
 
     public void Filter(string filter)
     {
-        IsVisible = string.IsNullOrWhiteSpace(filter) || _label.ToLower().Contains(filter.ToLower());
+        IsVisible = string.IsNullOrWhiteSpace(filter) ||
+                    _label.Contains(filter, StringComparison.OrdinalIgnoreCase);
     }
 
     public Control Build()
@@ -73,9 +75,14 @@ public class SettingsItem
             Spacing = 10,
             Children =
             {
-                new TextBlock { Text = _label, Width = 150, VerticalAlignment = VerticalAlignment.Center },
-                _control
+                new TextBlock
+                {
+                    Text = _label,
+                    Width = 150,
+                    VerticalAlignment = VerticalAlignment.Center
+                },
+                _controlFactory()
             }
         };
     }
-}
+    }

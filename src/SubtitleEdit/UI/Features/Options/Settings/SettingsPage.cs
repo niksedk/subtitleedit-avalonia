@@ -1,12 +1,8 @@
-
+using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Layout;
-using Avalonia.Media;
-using Avalonia.Input;
-using System.Collections.Generic;
-using System.Linq;
-
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
 
@@ -27,29 +23,36 @@ public class SettingsPage : UserControl
         };
         DockPanel.SetDock(_searchBox, Dock.Top);
 
-        
-        Content = new DockPanel
+        _contentPanel = new StackPanel
         {
-            LastChildFill = true,
+            Orientation = Orientation.Vertical,
+            Spacing = 15,
+            Margin = new Thickness(10)
+        };
+
+        var scrollViewer = new ScrollViewer
+        {
+            Content = _contentPanel,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto
+        };
+
+        var dockPanel = new DockPanel
+        {
             Children =
             {
                 _searchBox,
-
-                (_contentPanel = new StackPanel
-                {
-                    Orientation = Orientation.Vertical,
-                    Margin = new Thickness(10),
-                    Spacing = 15
-                })
+                scrollViewer
             }
         };
 
-        // Initial fill
+        Content = dockPanel;
+
         UpdateVisibleSections("");
 
         _searchBox.TextChanged += (s, e) => UpdateVisibleSections(_searchBox.Text ?? string.Empty);
+            
     }
-    
+
     private void UpdateVisibleSections(string filter)
     {
         _contentPanel.Children.Clear();
@@ -70,30 +73,36 @@ public class SettingsPage : UserControl
         {
             new SettingsSection("General", new[]
             {
-                new SettingsItem("Language", new ComboBox
+                new SettingsItem("Language", () => new ComboBox
                 {
-                    Items =  { "English", "Danish", "Spanish" },
+                    Items = { "English", "Danish", "Spanish" },
                     SelectedIndex = 0,
                     Width = 150
                 }),
-                new SettingsItem("Enable Logging", new CheckBox { IsChecked = true })
+                new SettingsItem("Enable Logging", () => new CheckBox { IsChecked = true })
             }),
 
             new SettingsSection("Appearance", new[]
             {
-                new SettingsItem("Theme", new ComboBox
+                new SettingsItem("Theme", () => new ComboBox
                 {
-                    Items =  { "Light", "Dark" },
+                    Items = { "Light", "Dark" },
                     SelectedIndex = 0,
                     Width = 150
                 }),
-                new SettingsItem("Font Size", new Slider { Minimum = 10, Maximum = 30, Value = 14, Width = 150 })
+                new SettingsItem("Font Size", () => new Slider
+                {
+                    Minimum = 10,
+                    Maximum = 30,
+                    Value = 14,
+                    Width = 150
+                })
             }),
 
             new SettingsSection("Advanced", new[]
             {
-                new SettingsItem("Developer Mode", new CheckBox { IsChecked = false }),
-                new SettingsItem("Verbose Output", new CheckBox { IsChecked = false })
+                new SettingsItem("Developer Mode", () => new CheckBox { IsChecked = false }),
+                new SettingsItem("Verbose Output", () => new CheckBox { IsChecked = false })
             })
         };
     }
