@@ -141,8 +141,12 @@ public static class InitMenu
                     Header = "_Options",
                     Items =
                     {
-                        new MenuItem { Header = "_Settings..." },
-                    }
+                        new MenuItem
+                        {
+                            Header = "_Sattings...",
+                            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandShowSettingsCommand)),
+                        },
+                    },
                 },
                 new MenuItem
                 {

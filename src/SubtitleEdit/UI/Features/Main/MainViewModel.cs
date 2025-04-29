@@ -17,6 +17,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Input;
+using Nikse.SubtitleEdit.Features.Options.Settings;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -205,6 +206,35 @@ public partial class MainViewModel : ObservableObject
         VideoCloseFile();
     }
 
+    
+    [RelayCommand]                   
+    private void CommandShowSettings() 
+    {                                
+        var settingsWindow = new SettingsWindow                        
+        {                                                              
+          //  WindowStartupLocation = WindowStartupLocation.CenterOwner, 
+          //  Icon = null, // optional: add icon if needed    
+          //  Owner = this // 'this' is your current Window              
+        };                                                             
+                                                                 
+        settingsWindow.Show(); // non-modal                            
+    }                                
+    
+    
+    
+  
+  
+  
+  
+  
+  
+
+  
+
+    // Or use ShowDialog(this) if you want it modal:
+    // await settingsWindow.ShowDialog(this);
+    
+    
     private async Task SubtitleOpen(string fileName, string? videoFileName = null)
     {
         if (string.IsNullOrEmpty(fileName))

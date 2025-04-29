@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Platform;
+using Avalonia.Styling;
 using Avalonia.Themes.Fluent;
 using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit;
@@ -41,6 +42,15 @@ var services = collection.BuildServiceProvider();
 
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 Se.LoadSettings();
+
+if (Application.Current!.ActualThemeVariant == ThemeVariant.Light)
+{
+    Application.Current!.RequestedThemeVariant = ThemeVariant.Dark;
+}
+else
+{
+    Application.Current!.RequestedThemeVariant = ThemeVariant.Light;
+}
 
 // Main window setup
 lifetime.MainWindow = new Window
