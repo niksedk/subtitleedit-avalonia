@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Data;
 using Avalonia.Layout;
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
@@ -11,9 +12,11 @@ public class SettingsPage : UserControl
     private TextBox _searchBox;
     private StackPanel _contentPanel;
     private List<SettingsSection> _sections;
-
+    private SettingsPageViewModel _vm;
+    
     public SettingsPage()
     {
+        _vm = new SettingsPageViewModel();
         _sections = CreateSections();
 
         _searchBox = new TextBox
@@ -75,8 +78,9 @@ public class SettingsPage : UserControl
             {
                 new SettingsItem("Language", () => new ComboBox
                 {
-                    Items = { "English", "Danish", "Spanish" },
-                    SelectedIndex = 0,
+                    DataContext = _vm,
+                    [!ComboBox.ItemsSourceProperty] = new Binding(nameof(_vm.Languages)),
+                    [!ComboBox.SelectedItemProperty] = new Binding(nameof(_vm.SelectedLanguage)) { Mode = BindingMode.TwoWay },
                     Width = 150
                 }),
                 new SettingsItem("Enable Logging", () => new CheckBox { IsChecked = true })
@@ -86,8 +90,9 @@ public class SettingsPage : UserControl
             {
                 new SettingsItem("Theme", () => new ComboBox
                 {
-                    Items = { "Light", "Dark" },
-                    SelectedIndex = 0,
+                    DataContext = _vm,
+                    [!ComboBox.ItemsSourceProperty] = new Binding(nameof(_vm.Themes)),
+                    [!ComboBox.SelectedItemProperty] = new Binding(nameof(_vm.SelectedTheme)) { Mode = BindingMode.TwoWay },
                     Width = 150
                 }),
                 new SettingsItem("Font Size", () => new Slider
