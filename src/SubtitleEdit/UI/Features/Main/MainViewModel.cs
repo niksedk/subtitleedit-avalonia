@@ -31,7 +31,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string editText;
 
     [ObservableProperty] private ObservableCollection<SubtitleFormat> subtitleFormats;
-    public SubtitleFormat SelectedSubtitleFormat { get; set; }
+    [ObservableProperty] private SubtitleFormat selectedSubtitleFormat;
 
     [ObservableProperty] private ObservableCollection<TextEncoding> encodings;
     public TextEncoding SelectedEncoding { get; set; }
