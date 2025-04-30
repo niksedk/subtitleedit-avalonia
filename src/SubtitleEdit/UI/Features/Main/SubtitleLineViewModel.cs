@@ -21,5 +21,13 @@ public partial class SubtitleLineViewModel : ObservableObject
     [ObservableProperty]
     private string text;
 
+    public SubtitleLineViewModel()
+    {
+    }
+    
+    public SubtitleLineViewModel(Paragraph newParagraph)
+    {
+    }
+
     public Paragraph? Paragraph { get; set; }
 }

@@ -17,7 +17,9 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Input;
+using Nikse.SubtitleEdit.Features.Options.Language;
 using Nikse.SubtitleEdit.Features.Options.Settings;
+using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -206,7 +208,6 @@ public partial class MainViewModel : ObservableObject
         VideoCloseFile();
     }
 
-    
     [RelayCommand]                   
     private void CommandShowSettings() 
     {                                
@@ -220,16 +221,32 @@ public partial class MainViewModel : ObservableObject
         settingsWindow.Show(); // non-modal                            
     }                                
     
-    
-    
-  
-  
-  
-  
-  
-  
 
+    [RelayCommand]                   
+    private void CommandShowSettingsShortcuts() 
+    {                                
+        var settingsWindow = new ShortcutsWindow                        
+        {                                                              
+            //  WindowStartupLocation = WindowStartupLocation.CenterOwner, 
+            //  Icon = null, // optional: add icon if needed    
+            //  Owner = this // 'this' is your current Window              
+        };                                                             
+                                                                 
+        settingsWindow.Show(); // non-modal                            
+    }                                
   
+    [RelayCommand]                   
+    private void CommandShowSettingsLanguage() 
+    {                                
+        var settingsWindow = new LanguageWindow                   
+        {                                                              
+            //  WindowStartupLocation = WindowStartupLocation.CenterOwner, 
+            //  Icon = null, // optional: add icon if needed    
+            //  Owner = this // 'this' is your current Window              
+        };                                                             
+                                                                 
+        settingsWindow.Show(); // non-modal                            
+    }                                
 
     // Or use ShowDialog(this) if you want it modal:
     // await settingsWindow.ShowDialog(this);

@@ -146,6 +146,16 @@ public static class InitMenu
                             Header = "_Sattings...",
                             [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandShowSettingsCommand)),
                         },
+                        new MenuItem
+                        {
+                            Header = "Short_cuts...",
+                            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandShowSettingsShortcutsCommand)),
+                        },
+                        new MenuItem
+                        {
+                            Header = "Choose _language...",
+                            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandShowSettingsLanguageCommand)),
+                        },
                     },
                 },
                 new MenuItem

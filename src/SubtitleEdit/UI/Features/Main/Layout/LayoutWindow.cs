@@ -107,6 +107,7 @@ public class LayoutWindow : Window
         base.OnKeyDown(e);
         if (e.Key == Key.Escape)
         {
+            e.Handled = true;
             Close();
         }
 

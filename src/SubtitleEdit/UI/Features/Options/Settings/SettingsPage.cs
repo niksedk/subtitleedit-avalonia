@@ -12,11 +12,11 @@ public class SettingsPage : UserControl
     private TextBox _searchBox;
     private StackPanel _contentPanel;
     private List<SettingsSection> _sections;
-    private SettingsPageViewModel _vm;
+    private SettingsWindowViewModel _vm;
     
     public SettingsPage()
     {
-        _vm = new SettingsPageViewModel();
+        _vm = new SettingsWindowViewModel();
         _sections = CreateSections();
 
         _searchBox = new TextBox
@@ -24,6 +24,7 @@ public class SettingsPage : UserControl
             Watermark = "Search settings...",
             Margin = new Thickness(10)
         };
+        
         DockPanel.SetDock(_searchBox, Dock.Top);
 
         _contentPanel = new StackPanel
