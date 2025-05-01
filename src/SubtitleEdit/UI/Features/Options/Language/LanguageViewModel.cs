@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace Nikse.SubtitleEdit.Features.Options.Language;
 
-public partial class LanguageWindowViewModel : ObservableObject
+public partial class LanguageViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<string> languages;
     [ObservableProperty] private string selectedLanguage;
@@ -13,7 +13,7 @@ public partial class LanguageWindowViewModel : ObservableObject
     
     public bool OkPressed { get; private set; }
 
-    public LanguageWindowViewModel()
+    public LanguageViewModel()
     {
         Languages = new ObservableCollection<string> { "English", "Danish", "Spanish" };
         SelectedLanguage = Languages[0];

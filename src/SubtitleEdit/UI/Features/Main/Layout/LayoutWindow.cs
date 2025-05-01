@@ -1,26 +1,25 @@
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
 public class LayoutWindow : Window
 {
-    private LayoutModel _vm;
+    private LayoutViewModel _vm;
     private List<Border> _borders = new List<Border>();
     private int _focusedLayout = -1;
 
-    public LayoutWindow(LayoutModel viewModel)
+    public LayoutWindow(LayoutViewModel viewViewModel)
     {
-        _vm = viewModel;
+        _vm = viewViewModel;
 
         Title = "Choose layout";
         Width = 925;

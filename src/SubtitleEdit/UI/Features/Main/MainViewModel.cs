@@ -63,11 +63,13 @@ public partial class MainViewModel : ObservableObject
 
     private readonly IFileHelper _fileHelper;
     private readonly IShortcutManager _shortcutManager;
+    private readonly IWindowService _windowService;
 
-    public MainViewModel(IFileHelper fileHelper, IShortcutManager shortcutManager)
+    public MainViewModel(IFileHelper fileHelper, IShortcutManager shortcutManager, IWindowService windowService)
     {
         _fileHelper = fileHelper;
         _shortcutManager = shortcutManager;
+        _windowService = windowService;
 
         _subtitle = new Subtitle();
 
@@ -111,15 +113,15 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task CommandShowLayout()
     {
-        var layoutModel = new LayoutModel();
-        layoutModel.SelectedLayout = Se.Settings.General.LayoutNumber;
-        var newWindow = new LayoutWindow(layoutModel);
-        newWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-        await newWindow.ShowDialog(Window);
-
-        if (layoutModel.SelectedLayout != null && layoutModel.SelectedLayout != Se.Settings.General.LayoutNumber)
+        // Open a dialog with a specific ViewModel and get the result
+        var vm = await _windowService.ShowDialogAsync<LayoutWindow, LayoutViewModel>(Window, viewModel =>
         {
-            Se.Settings.General.LayoutNumber = InitLayout.MakeLayout(MainView, this, layoutModel.SelectedLayout.Value);
+            viewModel.SelectedLayout = Se.Settings.General.LayoutNumber;
+        });
+                
+        if (vm.OkPressed && vm.SelectedLayout != null && vm.SelectedLayout != Se.Settings.General.LayoutNumber)
+        {
+            Se.Settings.General.LayoutNumber = InitLayout.MakeLayout(MainView, this, vm.SelectedLayout.Value);
         }
     }
 
@@ -210,61 +212,58 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]                   
-    private void CommandShowAutoTranslate() 
-    {                                
-        var window = new AutoTranslateWindow();                        
-        {                                                              
-          //  WindowStartupLocation = WindowStartupLocation.CenterOwner, 
-          //  Icon = null, // optional: add icon if needed    
-          //  Owner = this // 'this' is your current Window              
-        };                                                             
-                                                                 
-        window.Show(); // non-modal                            
+    private async Task CommandShowAutoTranslate() 
+    {     
+        // Open a dialog with a specific ViewModel and get the result
+        var viewModel = await _windowService.ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(Window, viewModel => {
+            // viewModel.DialogTitle = "Please confirm";
+            // viewModel.Message = "Are you sure you want to proceed?";
+        });
+                
+        // You can access dialog results through the ViewModel
+        // if (viewModel.UserConfirmed)
+        // {
+        //     // Process confirmed action
+        //     Console.WriteLine("User confirmed the action");
+        // }
+        
+        
+        // var window = new AutoTranslateWindow();                        
+        // {                                                              
+        //   //  WindowStartupLocation = WindowStartupLocation.CenterOwner, 
+        //   //  Icon = null, // optional: add icon if needed    
+        //   //  Owner = this // 'this' is your current Window              
+        // };                                                             
+        //                                                          
+        // await window.ShowDialog(Window); // non-modal                            
     }                                
     
     [RelayCommand]                   
-    private void CommandShowSettings() 
+    private async Task CommandShowSettings() 
     {                                
-        var settingsWindow = new SettingsWindow                        
-        {                                                              
-            //  WindowStartupLocation = WindowStartupLocation.CenterOwner, 
-            //  Icon = null, // optional: add icon if needed    
-            //  Owner = this // 'this' is your current Window              
-        };                                                             
-                                                                 
-        settingsWindow.Show(); // non-modal                            
+        var viewModel = await _windowService.ShowDialogAsync<SettingsWindow, SettingsViewModel>(Window);
+        if (viewModel.OkPressed)
+        {
+            // todo
+        }
     }                                
 
     [RelayCommand]                   
-    private void CommandShowSettingsShortcuts() 
+    private async Task CommandShowSettingsShortcuts() 
     {                                
-        var settingsWindow = new ShortcutsWindow                        
-        {                                                              
-            //  WindowStartupLocation = WindowStartupLocation.CenterOwner, 
-            //  Icon = null, // optional: add icon if needed    
-            //  Owner = this // 'this' is your current Window              
-        };                                                             
-                                                                 
-        settingsWindow.Show(); // non-modal                            
+        await _windowService.ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(Window);
     }                                
   
     [RelayCommand]                   
-    private void CommandShowSettingsLanguage() 
-    {                                
-        var settingsWindow = new LanguageWindow                   
-        {                                                              
-            //  WindowStartupLocation = WindowStartupLocation.CenterOwner, 
-            //  Icon = null, // optional: add icon if needed    
-            //  Owner = this // 'this' is your current Window              
-        };                                                             
-                                                                 
-        settingsWindow.Show(); // non-modal                            
+    private async Task CommandShowSettingsLanguage() 
+    {                    
+        var viewModel = await _windowService.ShowDialogAsync<LanguageWindow, LanguageViewModel>(Window);
+        if (viewModel.OkPressed)
+        {
+            // todo
+        }
     }                                
 
-    // Or use ShowDialog(this) if you want it modal:
-    // await settingsWindow.ShowDialog(this);
-    
-    
     private async Task SubtitleOpen(string fileName, string? videoFileName = null)
     {
         if (string.IsNullOrEmpty(fileName))

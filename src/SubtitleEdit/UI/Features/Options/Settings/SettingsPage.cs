@@ -12,11 +12,11 @@ public class SettingsPage : UserControl
     private TextBox _searchBox;
     private StackPanel _contentPanel;
     private List<SettingsSection> _sections;
-    private SettingsWindowViewModel _vm;
+    private SettingsViewModel _vm;
     
-    public SettingsPage()
+    public SettingsPage(SettingsViewModel vm)
     {
-        _vm = new SettingsWindowViewModel();
+        _vm = vm;
         _sections = CreateSections();
 
         _searchBox = new TextBox

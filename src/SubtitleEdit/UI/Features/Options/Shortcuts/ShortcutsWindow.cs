@@ -9,9 +9,9 @@ namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 public class ShortcutsWindow : Window
 {
     private TextBox _searchBox;
-    private ShortcutsWindowViewModel _vm;
+    private ShortcutsViewModel _vm;
     
-    public ShortcutsWindow()
+    public ShortcutsWindow(ShortcutsViewModel vm)
     {
         Title = "Shortcuts";
         Width = 500;

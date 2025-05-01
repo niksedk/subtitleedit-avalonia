@@ -10,18 +10,18 @@ namespace Nikse.SubtitleEdit.Features.Options.Language;
 public class LanguageWindow : Window
 {
     private StackPanel _contentPanel;
-    private LanguageWindowViewModel _vm;
+    private LanguageViewModel _vm;
     
-    public LanguageWindow()
+    public LanguageWindow(LanguageViewModel vm)
     {
         Title = "Choose language";
         Width = 300;
         Height = 160;
         CanResize = false;
 
-        _vm = new LanguageWindowViewModel();
-        _vm.Window = this;
-        DataContext = _vm;
+        _vm = vm;
+        vm.Window = this;
+        DataContext = vm;
 
         var languagePanel = new StackPanel
         {
@@ -37,8 +37,8 @@ public class LanguageWindow : Window
                 },
                 new ComboBox
                 {
-                    ItemsSource = _vm.Languages,
-                    SelectedValue = _vm.SelectedLanguage,
+                    ItemsSource = vm.Languages,
+                    SelectedValue = vm.SelectedLanguage,
                     VerticalAlignment = VerticalAlignment.Center,
                 }
             }
@@ -51,8 +51,8 @@ public class LanguageWindow : Window
             Margin = new Thickness(10),
             Children =
             {
-                UiUtil.MakeButton("OK",  _vm.CommandOkCommand),
-                UiUtil.MakeButton("Cancel",  _vm.CommandCancelCommand),
+                UiUtil.MakeButton("OK",  vm.CommandOkCommand),
+                UiUtil.MakeButton("Cancel",  vm.CommandCancelCommand),
             }
         };
         

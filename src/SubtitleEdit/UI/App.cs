@@ -9,7 +9,13 @@ using Avalonia.Styling;
 using Avalonia.Themes.Fluent;
 using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit;
+using Nikse.SubtitleEdit.Features.Help;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Main.Layout;
+using Nikse.SubtitleEdit.Features.Options.Language;
+using Nikse.SubtitleEdit.Features.Options.Settings;
+using Nikse.SubtitleEdit.Features.Options.Shortcuts;
+using Nikse.SubtitleEdit.Features.Translate;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
@@ -41,6 +47,23 @@ var collection = new ServiceCollection();
 collection.AddCommonServices();
 collection.AddSingleton<IFileHelper, FileHelper>();
 collection.AddTransient<IShortcutManager, ShortcutManager>();
+collection.AddTransient<IWindowService, WindowService>();
+
+// Windows and view models
+collection.AddTransient<MainView>();
+collection.AddTransient<MainViewModel>();
+collection.AddTransient<LayoutWindow>();
+collection.AddTransient<LayoutViewModel>();
+collection.AddTransient<AboutWindow>();
+collection.AddTransient<LanguageWindow>();
+collection.AddTransient<LanguageViewModel>();
+collection.AddTransient<SettingsWindow>();
+collection.AddTransient<SettingsViewModel>();
+collection.AddTransient<ShortcutsWindow>();
+collection.AddTransient<ShortcutsViewModel>();
+collection.AddTransient<AutoTranslateWindow>();
+collection.AddTransient<AutoTranslateViewModel>();
+
 Locator.Services = collection.BuildServiceProvider();
 var services = collection.BuildServiceProvider();
 

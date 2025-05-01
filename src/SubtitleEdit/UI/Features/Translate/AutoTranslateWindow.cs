@@ -4,10 +4,8 @@ namespace Nikse.SubtitleEdit.Features.Translate;
 
 public class AutoTranslateWindow : Window
 {
-    
-    public AutoTranslateWindow()
+    public AutoTranslateWindow(AutoTranslateViewModel vm)
     {
-        var vm = new AutoTranslateViewModel();
         DataContext = vm;
         vm.Window = this;
         
