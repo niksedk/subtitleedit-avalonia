@@ -1,5 +1,4 @@
 using Avalonia.Controls;
-using Avalonia.Data;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -12,7 +11,7 @@ public static class InitMenu
         vm.MenuReopen = new MenuItem
         {
             Header = "_Reopen",
-            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileReopenCommand)),
+            Command =vm.CommandFileReopenCommand,
         };
 
         UpdateRecentFiles(vm);
@@ -32,13 +31,13 @@ public static class InitMenu
                         new MenuItem
                         {
                             Header = "_New",
-                            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileNewCommand)),
+                            Command =vm.CommandFileNewCommand,
                         },
                         new Separator(),
                         new MenuItem
                         {
                             Header = "_Open...",
-                            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileOpenCommand)),
+                            Command =vm.CommandFileOpenCommand,
                         },
                         vm.MenuReopen,
                         new MenuItem { Header = "Restore auto-backup..." },
@@ -46,12 +45,12 @@ public static class InitMenu
                         new MenuItem
                         {
                             Header = "_Save",
-                            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileSaveCommand)),
+                            Command =vm.CommandFileSaveCommand,
                         },
                         new MenuItem
                         {
                             Header = "Save _as...",
-                            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileSaveAsCommand)),
+                            Command =vm.CommandFileSaveAsCommand,
                         },
                         new Separator(),
                         new MenuItem { Header = "Export" },
@@ -59,7 +58,7 @@ public static class InitMenu
                         new MenuItem
                         {
                             Header = "E_xit",
-                            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandExitCommand)),
+                            Command =vm.CommandExitCommand,
                         }
                     }
                 },
@@ -110,13 +109,13 @@ public static class InitMenu
                         new MenuItem
                         {
                             Header = "_Open video file...",
-                            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandVideoOpenCommand)),
+                            Command =vm.CommandVideoOpenCommand,
                         },
                         new MenuItem { Header = "Open video file from _URL..." },
                         new MenuItem
                         {
                             Header = "_Close video file",
-                            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandVideoCloseCommand)),
+                            Command =vm.CommandVideoCloseCommand,
                         },
                         new Separator(),
                         new MenuItem { Header = "_Audio to text (Whisper)..." },
@@ -144,17 +143,17 @@ public static class InitMenu
                         new MenuItem
                         {
                             Header = "_Sattings...",
-                            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandShowSettingsCommand)),
+                            Command =vm.CommandShowSettingsCommand,
                         },
                         new MenuItem
                         {
                             Header = "Short_cuts...",
-                            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandShowSettingsShortcutsCommand)),
+                            Command = vm.CommandShowSettingsShortcutsCommand,
                         },
                         new MenuItem
                         {
                             Header = "Choose _language...",
-                            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandShowSettingsLanguageCommand)),
+                            Command = vm.CommandShowSettingsLanguageCommand,
                         },
                     },
                 },
@@ -163,7 +162,11 @@ public static class InitMenu
                     Header = "_Translate",
                     Items =
                     {
-                        new MenuItem { Header = "_Auto-translate..." },
+                        new MenuItem
+                        {
+                            Header = "_Auto-translate...",
+                            Command = vm.CommandShowAutoTranslateCommand,
+                        },
                     }
                 },
                 new MenuItem
@@ -174,7 +177,7 @@ public static class InitMenu
                         new MenuItem
                         {
                             Header = "_About",
-                            [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandShowAboutCommand)),
+                            Command =vm.CommandShowAboutCommand,
                         },
                         new Separator(),
                         new MenuItem { Header = "_Help" },
@@ -194,7 +197,7 @@ public static class InitMenu
                 var item = new MenuItem
                 {
                     Header = file.SubtitleFileName,
-                    [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileReopenCommand)),
+                    Command =vm.CommandFileReopenCommand,
                 };
                 item.CommandParameter = file;
                 vm.MenuReopen.Items.Add(item);
@@ -205,7 +208,7 @@ public static class InitMenu
             var clearItem = new MenuItem
             {
                 Header = "Clear recent files",
-                [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileClearRecentFilesCommand)),
+                Command =vm.CommandFileClearRecentFilesCommand,
             };
             vm.MenuReopen.Items.Add(clearItem);
 

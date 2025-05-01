@@ -20,6 +20,7 @@ using Avalonia.Input;
 using Nikse.SubtitleEdit.Features.Options.Language;
 using Nikse.SubtitleEdit.Features.Options.Settings;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
+using Nikse.SubtitleEdit.Features.Translate;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -209,18 +210,30 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]                   
-    private void CommandShowSettings() 
+    private void CommandShowAutoTranslate() 
     {                                
-        var settingsWindow = new SettingsWindow                        
+        var window = new AutoTranslateWindow();                        
         {                                                              
           //  WindowStartupLocation = WindowStartupLocation.CenterOwner, 
           //  Icon = null, // optional: add icon if needed    
           //  Owner = this // 'this' is your current Window              
         };                                                             
                                                                  
-        settingsWindow.Show(); // non-modal                            
+        window.Show(); // non-modal                            
     }                                
     
+    [RelayCommand]                   
+    private void CommandShowSettings() 
+    {                                
+        var settingsWindow = new SettingsWindow                        
+        {                                                              
+            //  WindowStartupLocation = WindowStartupLocation.CenterOwner, 
+            //  Icon = null, // optional: add icon if needed    
+            //  Owner = this // 'this' is your current Window              
+        };                                                             
+                                                                 
+        settingsWindow.Show(); // non-modal                            
+    }                                
 
     [RelayCommand]                   
     private void CommandShowSettingsShortcuts() 

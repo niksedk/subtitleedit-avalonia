@@ -1,6 +1,19 @@
+using Avalonia.Controls;
+
 namespace Nikse.SubtitleEdit.Features.Translate;
 
-public class AutoTranslateWindow
+public class AutoTranslateWindow : Window
 {
     
+    public AutoTranslateWindow()
+    {
+        var vm = new AutoTranslateViewModel();
+        DataContext = vm;
+        vm.Window = this;
+        
+        var treeDataGrid = new TreeDataGrid();
+        treeDataGrid.DataContext = vm;
+        Content = treeDataGrid;
+        treeDataGrid.Source = vm.TranslateRowSource;
+    }
 }
