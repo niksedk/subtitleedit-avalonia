@@ -214,28 +214,15 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]                   
     private async Task CommandShowAutoTranslate() 
     {     
-        // Open a dialog with a specific ViewModel and get the result
-        var viewModel = await _windowService.ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(Window, viewModel => {
-            // viewModel.DialogTitle = "Please confirm";
-            // viewModel.Message = "Are you sure you want to proceed?";
+        var viewModel = await _windowService.ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(Window, viewModel =>
+        {
+            viewModel.Initialize(GetUpdateSubtitle());
         });
                 
-        // You can access dialog results through the ViewModel
-        // if (viewModel.UserConfirmed)
-        // {
-        //     // Process confirmed action
-        //     Console.WriteLine("User confirmed the action");
-        // }
-        
-        
-        // var window = new AutoTranslateWindow();                        
-        // {                                                              
-        //   //  WindowStartupLocation = WindowStartupLocation.CenterOwner, 
-        //   //  Icon = null, // optional: add icon if needed    
-        //   //  Owner = this // 'this' is your current Window              
-        // };                                                             
-        //                                                          
-        // await window.ShowDialog(Window); // non-modal                            
+        if (viewModel.OkPressed)
+        {
+            Console.WriteLine("User confirmed the action");
+        }
     }                                
     
     [RelayCommand]                   
