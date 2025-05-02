@@ -1,4 +1,3 @@
-using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -12,43 +11,71 @@ public class AutoTranslateWindow : Window
 {
     public AutoTranslateWindow(AutoTranslateViewModel vm)
     {
+        Title = "Auto-translate";
+        Width = 900;
+        Height = 700;
+        MinWidth = 740;
+        MinHeight = 400;
+
         DataContext = vm;
         vm.Window = this;
-        
-       var sourceLangCombo = new ComboBox
+
+        var topBarPoweredBy = new StackPanel
         {
-            //Items = vm.SourceLanguages,
-            //SelectedItem = vm.SourceLanguage,
-           // [!ComboBox.SelectedItemProperty] = new Binding("SourceLanguage"),
-            Width = 150
+            Orientation = Orientation.Horizontal,
+            Margin = new Thickness(10),
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Spacing = 10,
+            Children =
+            {
+                UiUtil.MakeTextBlock("Powered by"),
+                UiUtil.MakeLink("Google Translate V1", vm.GoToAutranslatorUriCommand),
+            }
         };
 
-        var targetLangCombo = new ComboBox
-        {
-           // Items = vm.AvailableLanguages,
-            //SelectedItem = vm.TargetLanguage,
-           // [!ComboBox.SelectedItemProperty] = new Binding("TargetLanguage"),
-            Width = 150
-        };
+        var engineCombo = UiUtil.MakeComboBox(vm.AutoTranslators, vm.SelectedAutoTranslator);
+        var sourceLangCombo = UiUtil.MakeComboBox(vm.SourceLanguages, vm.SelectedSourceLanguage);
+        var targetLangCombo = UiUtil.MakeComboBox(vm.TargetLanguages, vm.SelectedTargetLanguage);
+        var buttonTranslate = UiUtil.MakeButton("Translate", vm.TranslateCommand);
 
         var topBar = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Margin = new Thickness(10),
+            HorizontalAlignment = HorizontalAlignment.Right,
             Spacing = 10,
             Children =
             {
-                new TextBlock { Text = "From:" },
+                UiUtil.MakeTextBlock("Engine:"),
+                engineCombo,
+                UiUtil.MakeSeparatorForHorizontal(),
+                UiUtil.MakeTextBlock("From:"),
                 sourceLangCombo,
-                new TextBlock { Text = "To:" },
-                targetLangCombo
+                UiUtil.MakeTextBlock("To:"),
+                targetLangCombo,
+                buttonTranslate,
+            }
+        };
+
+        var contextMenu = new MenuFlyout
+        {
+            Items =
+            {
+                new MenuItem
+                {
+                    Header = "Translate row",
+                    Command = vm.TranslateRowCommand,
+                },
             }
         };
 
         var treeDataGrid = new TreeDataGrid
         {
-            [!TreeDataGrid.SourceProperty] = new Binding("TranslateRowSource"),
-            Height = Double.NaN // auto size inside scroll viewer
+            Height = double.NaN, // auto size inside scroll viewer
+            Margin = new Thickness(0, 15, 0, 0),
+            Source = vm.TranslateRowSource,
+            CanUserSortColumns = false,
+            ContextFlyout = contextMenu,
         };
 
         var scrollViewer = new ScrollViewer
@@ -58,33 +85,28 @@ public class AutoTranslateWindow : Window
         };
 
         var okButton = UiUtil.MakeButton("OK", vm.CancelCommand);
-
         var cancelButton = UiUtil.MakeButton("Cancel", vm.CancelCommand);
+        StackPanel bottomBar = UiUtil.MakeButtonBar(okButton, cancelButton);
 
-        var bottomBar = new StackPanel
+        var grid = new Grid
         {
-            Orientation = Orientation.Horizontal,
-            HorizontalAlignment = HorizontalAlignment.Right,
-            Margin = new Thickness(10),
-            Spacing = 10,
-            Children = { okButton, cancelButton }
+            RowDefinitions = new RowDefinitions("Auto,Auto,*,Auto"),
+            Margin = new Thickness(UiUtil.WindowMarginWidth),
         };
 
-        Content = new DockPanel
-        {
-            Children =
-            {
-                new DockPanel
-                {
-                    LastChildFill = true,
-                    Children =
-                    {
-                        topBar, // with { [DockPanel.DockProperty] = Dock.Top },
-                        scrollViewer, // with { [DockPanel.DockProperty] = Dock.Top },
-                        bottomBar, // with { [DockPanel.DockProperty] = Dock.Bottom }
-                    }
-                }
-            }
-        };
+        var row = 0;
+        grid.Children.Add(topBarPoweredBy);
+        Grid.SetRow(topBarPoweredBy, row++);
+
+        grid.Children.Add(topBar);
+        Grid.SetRow(topBar, row++);
+
+        grid.Children.Add(scrollViewer);
+        Grid.SetRow(scrollViewer, row++);
+
+        grid.Children.Add(bottomBar);
+        Grid.SetRow(bottomBar, row++);
+
+        Content = grid;
     }
 }

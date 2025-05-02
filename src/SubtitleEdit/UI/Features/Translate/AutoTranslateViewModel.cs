@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -15,18 +16,18 @@ namespace Nikse.SubtitleEdit.Features.Translate;
 public partial class AutoTranslateViewModel : ObservableObject
 {
     private ObservableCollection<TranslateRow> _rows;
-    private FlatTreeDataGridSource<TranslateRow> TranslateRowSource { get;   }
+    public ITreeDataGridSource TranslateRowSource { get;   }
     public AutoTranslateWindow Window { get; set; }
     public bool OkPressed { get; set; }
     
     [ObservableProperty] private ObservableCollection<IAutoTranslator> _autoTranslators;
-    [ObservableProperty] private IAutoTranslator _selectedAutoTranslator; 
-    
-    [ObservableProperty]
-    private ObservableCollection<TranslationPair> _sourceLanguages = new();
+    [ObservableProperty] private IAutoTranslator _selectedAutoTranslator;
 
-    [ObservableProperty]
-    private ObservableCollection<TranslationPair> _targetLanguages  = new();
+    [ObservableProperty] private ObservableCollection<TranslationPair> _sourceLanguages = new();
+    [ObservableProperty] private TranslationPair? _selectedSourceLanguage;
+
+    [ObservableProperty] private ObservableCollection<TranslationPair> _targetLanguages  = new();
+    [ObservableProperty] private TranslationPair? _selectedTargetLanguage;
 
     private CancellationTokenSource _cancellationTokenSource = new();
     
@@ -58,18 +59,16 @@ public partial class AutoTranslateViewModel : ObservableObject
         {
             Columns =
             {
-                new TextColumn<TranslateRow, int>
-                    ("#", x => x.Number),
-                new TextColumn<TranslateRow, string>
-                    ("Show", x => x.Show),
-                new TextColumn<TranslateRow, string>
-                    ("Text", x => x.Text),
-                new TextColumn<TranslateRow, string>
-                    ("Translated text", x => x.TranslatedText),
-            },
+                new TextColumn<TranslateRow, int>("#", x => x.Number),
+                new TextColumn<TranslateRow, string>("Show", x => x.Show),
+                new TextColumn<TranslateRow, string>("Duration", x => x.Duration),
+                new TextColumn<TranslateRow, string>("Text", x => x.Text),
+                new TextColumn<TranslateRow, string>("Translated text", x => x.TranslatedText),
+            },            
         };
 
-        TranslateRowSource.RowSelection!.SingleSelect = false; // Multi select
+        var dataGridSource = TranslateRowSource as FlatTreeDataGridSource<TranslateRow>;
+        dataGridSource!.RowSelection!.SingleSelect = true; 
      }
 
     public void Initialize(Subtitle subtitle)
@@ -82,8 +81,57 @@ public partial class AutoTranslateViewModel : ObservableObject
              Text = p.Text,
         });
         _rows.AddRange(rows);
+
+        UpdateSourceLanguages(SelectedAutoTranslator);
+        UpdateTargetLanguages(SelectedAutoTranslator);
     }
-    
+
+    private void UpdateSourceLanguages(IAutoTranslator autoTranslator)
+    {
+        SourceLanguages.Clear();
+        if (autoTranslator == null)
+        {
+            return;
+        }
+
+        foreach (var language in autoTranslator.GetSupportedSourceLanguages())
+        {
+            SourceLanguages.Add(language);
+        }
+
+        if (SourceLanguages.Count > 0)
+        {
+            SelectedSourceLanguage = SourceLanguages[0];
+        }
+        else
+        {
+            SelectedSourceLanguage = null;
+        }
+    }
+
+    private void UpdateTargetLanguages(IAutoTranslator autoTranslator)
+    {
+        TargetLanguages.Clear();
+        if (autoTranslator == null)
+        {
+            return;
+        }
+
+        foreach (var language in autoTranslator.GetSupportedSourceLanguages())
+        {
+            TargetLanguages.Add(language);
+        }
+
+        if (TargetLanguages.Count > 0)
+        {
+            SelectedTargetLanguage = TargetLanguages[0];
+        }
+        else
+        {
+            SelectedTargetLanguage = null;
+        }
+    }
+
     [RelayCommand]                   
     private void Ok() 
     {
@@ -95,6 +143,30 @@ public partial class AutoTranslateViewModel : ObservableObject
     private void Cancel() 
     {
         Window?.Close();
+    }
+
+    [RelayCommand]
+    private async Task GoToAutranslatorUri()
+    {
+        var autoTranslator = SelectedAutoTranslator;
+        if (autoTranslator == null)
+        {
+            return;
+        }
+
+        await Window.Launcher.LaunchUriAsync(new System.Uri(autoTranslator.Url));
+    }
+
+    [RelayCommand]
+    private void Translate()
+    {
+     
+    }
+
+    [RelayCommand]
+    private void TranslateRow()
+    {
+
     }
 }
 
