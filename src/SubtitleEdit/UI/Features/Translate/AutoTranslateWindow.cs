@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Layout;
+using Avalonia.Markup.Declarative;
 using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Translate;
@@ -28,13 +29,22 @@ public class AutoTranslateWindow : Window
             Children =
             {
                 UiUtil.MakeTextBlock("Powered by"),
-                UiUtil.MakeLink("Google Translate V1", vm.GoToAutranslatorUriCommand),
+                UiUtil.MakeLink("Google Translate V1", vm.GoToAutranslatorUriCommand, vm, nameof(vm.AutoTranslatorLinkText)),
             }
         };
 
         var engineCombo = UiUtil.MakeComboBox(vm.AutoTranslators, vm.SelectedAutoTranslator);
-        var sourceLangCombo = UiUtil.MakeComboBox(vm.SourceLanguages, vm.SelectedSourceLanguage);
-        var targetLangCombo = UiUtil.MakeComboBox(vm.TargetLanguages, vm.SelectedTargetLanguage);
+
+        engineCombo.OnPropertyChanged(e =>
+        {
+            if (e.Property == SelectingItemsControl.SelectedItemProperty)
+            {
+                vm.AutoTranslatorChanged(e.Sender);
+            }
+        });
+
+        var sourceLangCombo = UiUtil.MakeComboBox(vm.SourceLanguages!, vm.SelectedSourceLanguage);
+        var targetLangCombo = UiUtil.MakeComboBox(vm.TargetLanguages!, vm.SelectedTargetLanguage);
         var buttonTranslate = UiUtil.MakeButton("Translate", vm.TranslateCommand);
 
         var topBar = new StackPanel
@@ -83,13 +93,25 @@ public class AutoTranslateWindow : Window
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto
         };
 
-        var okButton = UiUtil.MakeButton("OK", vm.CancelCommand);
+
+        StackPanel settingsBar = UiUtil.MakeControlBarLeft(
+            UiUtil.MakeTextBlock("API key"),
+            UiUtil.MakeTextBox(150, vm, nameof(vm.ApiKeyText)),
+            UiUtil.MakeSeparatorForHorizontal(),
+            UiUtil.MakeTextBlock("API url"),
+            UiUtil.MakeTextBox(150, vm, nameof(vm.ApiUrlText)),
+            UiUtil.MakeSeparatorForHorizontal(),
+            UiUtil.MakeTextBlock("Model"),
+            UiUtil.MakeTextBox(150, vm, nameof(vm.ModelText))
+        );
+
+        var okButton = UiUtil.MakeButton("OK", vm.OkCommand);
         var cancelButton = UiUtil.MakeButton("Cancel", vm.CancelCommand);
         StackPanel bottomBar = UiUtil.MakeButtonBar(okButton, cancelButton);
 
         var grid = new Grid
         {
-            RowDefinitions = new RowDefinitions("Auto,Auto,*,Auto"),
+            RowDefinitions = new RowDefinitions("Auto,Auto,*,Auto,Auto"),
             Margin = new Thickness(UiUtil.WindowMarginWidth),
         };
 
@@ -103,9 +125,22 @@ public class AutoTranslateWindow : Window
         grid.Children.Add(scrollViewer);
         Grid.SetRow(scrollViewer, row++);
 
+        grid.Children.Add(settingsBar);
+        Grid.SetRow(settingsBar, row++);
+
         grid.Children.Add(bottomBar);
         Grid.SetRow(bottomBar, row++);
 
         Content = grid;
+    }
+
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        base.OnClosing(e);
+
+        if (DataContext is AutoTranslateViewModel vm)
+        {
+            vm.SaveSettings();
+        }
     }
 }
