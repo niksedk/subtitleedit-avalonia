@@ -1,10 +1,13 @@
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.AutoTranslate;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.Translate;
 using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Translate;
@@ -12,12 +15,44 @@ namespace Nikse.SubtitleEdit.Features.Translate;
 public partial class AutoTranslateViewModel : ObservableObject
 {
     private ObservableCollection<TranslateRow> _rows;
-    public FlatTreeDataGridSource<TranslateRow> TranslateRowSource { get;   }
+    private FlatTreeDataGridSource<TranslateRow> TranslateRowSource { get;   }
     public AutoTranslateWindow Window { get; set; }
     public bool OkPressed { get; set; }
+    
+    [ObservableProperty] private ObservableCollection<IAutoTranslator> _autoTranslators;
+    [ObservableProperty] private IAutoTranslator _selectedAutoTranslator; 
+    
+    [ObservableProperty]
+    private ObservableCollection<TranslationPair> _sourceLanguages = new();
 
+    [ObservableProperty]
+    private ObservableCollection<TranslationPair> _targetLanguages  = new();
+
+    private CancellationTokenSource _cancellationTokenSource = new();
+    
     public AutoTranslateViewModel()
     {
+        AutoTranslators = new ObservableCollection<IAutoTranslator>
+        {
+            new GoogleTranslateV1(),
+            new GoogleTranslateV2(),
+            new MicrosoftTranslator(),
+            new DeepLTranslate(),
+            new LibreTranslate(),
+            new MyMemoryApi(),
+            new ChatGptTranslate(),
+            new LmStudioTranslate(),
+            new OllamaTranslate(),
+            new AnthropicTranslate(),
+            new GroqTranslate(),
+            new OpenRouterTranslate(),
+            new GeminiTranslate(),
+            new PapagoTranslate(),
+            new NoLanguageLeftBehindServe(),
+            new NoLanguageLeftBehindApi(),
+        };
+        SelectedAutoTranslator = AutoTranslators[0];
+        
         _rows = new ObservableCollection<TranslateRow>();
         TranslateRowSource = new FlatTreeDataGridSource<TranslateRow>(_rows)
         {
@@ -47,6 +82,19 @@ public partial class AutoTranslateViewModel : ObservableObject
              Text = p.Text,
         });
         _rows.AddRange(rows);
+    }
+    
+    [RelayCommand]                   
+    private void Ok() 
+    {
+        OkPressed = true;
+        Window?.Close();
+    }
+    
+    [RelayCommand]                   
+    private void Cancel() 
+    {
+        Window?.Close();
     }
 }
 
