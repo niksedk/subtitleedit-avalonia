@@ -29,11 +29,12 @@ public class AutoTranslateWindow : Window
             Children =
             {
                 UiUtil.MakeTextBlock("Powered by"),
-                UiUtil.MakeLink("Google Translate V1", vm.GoToAutranslatorUriCommand, vm, nameof(vm.AutoTranslatorLinkText)),
+                UiUtil.MakeLink("Google Translate V1", vm.GoToAutranslatorUriCommand, vm, nameof(vm.AutoTranslatorLinkText))
+                    .WithMarginRight(UiUtil.WindowMarginWidth),
             }
         };
 
-        var engineCombo = UiUtil.MakeComboBox(vm.AutoTranslators, vm.SelectedAutoTranslator);
+        var engineCombo = UiUtil.MakeComboBox(vm.AutoTranslators, vm, nameof(vm.SelectedAutoTranslator));
 
         engineCombo.OnPropertyChanged(e =>
         {
@@ -43,8 +44,8 @@ public class AutoTranslateWindow : Window
             }
         });
 
-        var sourceLangCombo = UiUtil.MakeComboBox(vm.SourceLanguages!, vm.SelectedSourceLanguage);
-        var targetLangCombo = UiUtil.MakeComboBox(vm.TargetLanguages!, vm.SelectedTargetLanguage);
+        var sourceLangCombo = UiUtil.MakeComboBox(vm.SourceLanguages!, vm, nameof(vm.SelectedSourceLanguage));
+        var targetLangCombo = UiUtil.MakeComboBox(vm.TargetLanguages!, vm, nameof(vm.SelectedTargetLanguage));
         var buttonTranslate = UiUtil.MakeButton("Translate", vm.TranslateCommand);
 
         var topBar = new StackPanel
@@ -95,14 +96,14 @@ public class AutoTranslateWindow : Window
 
 
         StackPanel settingsBar = UiUtil.MakeControlBarLeft(
-            UiUtil.MakeTextBlock("API key"),
-            UiUtil.MakeTextBox(150, vm, nameof(vm.ApiKeyText)),
+            UiUtil.MakeTextBlock("API key", vm, null, nameof(vm.ApiKeyIsVisible)),
+            UiUtil.MakeTextBox(150, vm, nameof(vm.ApiKeyText), nameof(vm.ApiKeyIsVisible)),
             UiUtil.MakeSeparatorForHorizontal(),
-            UiUtil.MakeTextBlock("API url"),
-            UiUtil.MakeTextBox(150, vm, nameof(vm.ApiUrlText)),
+            UiUtil.MakeTextBlock("API url", vm, null, nameof(vm.ApiUrlIsVisible)),
+            UiUtil.MakeTextBox(150, vm, nameof(vm.ApiUrlText), nameof(vm.ApiUrlIsVisible)),
             UiUtil.MakeSeparatorForHorizontal(),
-            UiUtil.MakeTextBlock("Model"),
-            UiUtil.MakeTextBox(150, vm, nameof(vm.ModelText))
+            UiUtil.MakeTextBlock("Model", vm, null, nameof(vm.ModelIsVisible)),
+            UiUtil.MakeTextBox(150, vm, nameof(vm.ModelText), nameof(vm.ModelIsVisible))
         );
 
         var okButton = UiUtil.MakeButton("OK", vm.OkCommand);

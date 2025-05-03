@@ -5,6 +5,7 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Common;
 
@@ -92,7 +93,7 @@ public class MessageBox : Window
 
         void AddButton(string text, MessageBoxResult result)
         {
-            var btn = new Button { Content = text, Width = 80, Margin = new Thickness(5) };
+            var btn = UiUtil.MakeButton(text);
             btn.Click += (_, _) => { _result = result; Close(_result); };
             buttonPanel.Children.Add(btn);
         }
@@ -150,8 +151,12 @@ public class MessageBox : Window
         };
     }
 
-    public static async Task<MessageBoxResult> Show(Window owner, string title, string message,
-        MessageBoxButtons buttons = MessageBoxButtons.OK, MessageBoxIcon icon = MessageBoxIcon.None)
+    public static async Task<MessageBoxResult> Show(
+        Window owner, 
+        string title, 
+        string message,
+        MessageBoxButtons buttons = MessageBoxButtons.OK, 
+        MessageBoxIcon icon = MessageBoxIcon.None)
     {
         var msgBox = new MessageBox(title, message, buttons, icon);
         return await msgBox.ShowDialog<MessageBoxResult>(owner);

@@ -46,6 +46,9 @@ public partial class AutoTranslateViewModel : ObservableObject
     private CancellationTokenSource _cancellationTokenSource = new();
     private bool _translationInProgress = false;
     private bool _abort = false;
+    private List<string> _apiUrls = new();
+    private List<string> _apiModels = new();
+    private bool _onlyCurrentLine;
 
     public AutoTranslateViewModel()
     {
@@ -94,13 +97,23 @@ public partial class AutoTranslateViewModel : ObservableObject
         {
             Number = p.Number,
             Show = p.StartTime.ToDisplayString(),
-            Duration = p.Duration.ToDisplayString(),
+            Duration = p.Duration.ToShortDisplayString(),
             Text = p.Text,
         });
         _rows.AddRange(rows);
 
         UpdateSourceLanguages(SelectedAutoTranslator);
         UpdateTargetLanguages(SelectedAutoTranslator);
+
+        if (!string.IsNullOrEmpty(Se.Settings.Tools.AutoTranslateLastName))
+        {
+            var autoTranslator = AutoTranslators.FirstOrDefault(x => x.Name == Se.Settings.Tools.AutoTranslateLastName);
+            if (autoTranslator != null)
+            {
+                SelectedAutoTranslator = autoTranslator;
+                SetAutoTranslatorEngine(autoTranslator);
+            }
+        }
     }
 
     private void UpdateSourceLanguages(IAutoTranslator autoTranslator)
@@ -338,22 +351,19 @@ public partial class AutoTranslateViewModel : ObservableObject
 
         ApiKeyIsVisible = false;
         ApiKeyText = string.Empty;
-        //LabelApiKey.IsVisible = false;
         ApiUrlIsVisible = false;
         ApiUrlText = string.Empty;
-        //LabelApiUrl.IsVisible = false;
         //ButtonApiUrl.IsVisible = false;
         //LabelFormality.IsVisible = false;
         //PickerFormality.IsVisible = false;
-        //LabelModel.IsVisible = false;
         ModelIsVisible = false;
         //ButtonModel.IsVisible = false;
         ModelText = string.Empty;
         //LabelApiUrl.Text = "API url";
         //LabelApiKey.Text = "API key";
 
-        //_apiUrls.Clear();
-        //_apiModels.Clear();
+        _apiUrls.Clear();
+        _apiModels.Clear();
 
         var engineType = translator.GetType();
 
@@ -468,9 +478,8 @@ public partial class AutoTranslateViewModel : ObservableObject
                 Configuration.Settings.Tools.ChatGptUrl.StartsWith("http://localhost:1234/v1/chat/completions", StringComparison.OrdinalIgnoreCase) ? "https://api.openai.com/v1/chat/completions" : "http://localhost:1234/v1/chat/completions"
             });
 
-            //LabelModel.IsVisible = true;
             ModelIsVisible = true;
-            //_apiModels = ChatGptTranslate.Models.ToList();
+            _apiModels = ChatGptTranslate.Models.ToList();
 
             if (string.IsNullOrWhiteSpace(Configuration.Settings.Tools.ChatGptModel))
             {
@@ -511,7 +520,7 @@ public partial class AutoTranslateViewModel : ObservableObject
                 Configuration.Settings.Tools.OllamaApiUrl.TrimEnd('/'),
             });
 
-            //_apiModels = Configuration.Settings.Tools.OllamaModels.Split(',').ToList();
+            _apiModels = Configuration.Settings.Tools.OllamaModels.Split(',').ToList();
             ModelIsVisible = true;
             //ButtonModel.IsVisible = true;
             ModelText = Configuration.Settings.Tools.OllamaModel;
@@ -531,9 +540,8 @@ public partial class AutoTranslateViewModel : ObservableObject
             ApiKeyText = Configuration.Settings.Tools.AnthropicApiKey;
             ApiKeyIsVisible = true;
 
-            //_apiModels = AnthropicTranslate.Models.ToList();
+            _apiModels = AnthropicTranslate.Models.ToList();
             ModelIsVisible = true;
-            //LabelModel.IsVisible = true;
             //ButtonModel.IsVisible = true;
             ModelText = Configuration.Settings.Tools.AnthropicApiModel;
 
@@ -550,11 +558,10 @@ public partial class AutoTranslateViewModel : ObservableObject
             ApiKeyText = Configuration.Settings.Tools.GroqApiKey;
             ApiKeyIsVisible = true;
 
-            //_apiModels = GroqTranslate.Models.ToList();
+            _apiModels = GroqTranslate.Models.ToList();
             ModelIsVisible = true;
-            //LabelModel.IsVisible = true;
             //ButtonModel.IsVisible = true;
-           // ModelText = string.IsNullOrEmpty(Configuration.Settings.Tools.GroqModel) ? _apiModels[0] : Configuration.Settings.Tools.GroqModel;
+            ModelText = string.IsNullOrEmpty(Configuration.Settings.Tools.GroqModel) ? _apiModels[0] : Configuration.Settings.Tools.GroqModel;
 
             return;
         }
@@ -570,10 +577,10 @@ public partial class AutoTranslateViewModel : ObservableObject
             ApiKeyText = Configuration.Settings.Tools.OpenRouterApiKey;
             ApiKeyIsVisible = true;
 
-            //_apiModels = OpenRouterTranslate.Models.ToList();
+            _apiModels = OpenRouterTranslate.Models.ToList();
             ModelIsVisible = true;
             //ButtonModel.IsVisible = true;
-           // ModelText = string.IsNullOrEmpty(Configuration.Settings.Tools.OpenRouterModel) ? _apiModels[0] : Configuration.Settings.Tools.OpenRouterModel;
+            ModelText = string.IsNullOrEmpty(Configuration.Settings.Tools.OpenRouterModel) ? _apiModels[0] : Configuration.Settings.Tools.OpenRouterModel;
 
             return;
         }
@@ -590,19 +597,9 @@ public partial class AutoTranslateViewModel : ObservableObject
 
     private void FillUrls(List<string> urls)
     {
-        //EntryApiUrl.Text = urls.Count > 0 ? urls[0] : string.Empty;
-        //_apiUrls = urls;
-        //EntryApiUrl.IsVisible = true;
-        //LabelApiUrl.IsVisible = true;
+        ApiUrlText = urls.Count > 0 ? urls[0] : string.Empty;
+        _apiUrls = urls;
+        ApiUrlIsVisible = true;
         //ButtonApiUrl.IsVisible = urls.Count > 0;
     }
-}
-
-public class TranslateRow
-{
-    public int Number { get; set; }
-    public string Show { get; set; }
-    public string Duration { get; set; }
-    public string Text { get; set; }
-    public string TranslatedText { get; set; }
 }
