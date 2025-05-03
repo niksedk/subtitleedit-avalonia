@@ -7,7 +7,6 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -91,6 +90,7 @@ public class LayoutWindow : Window
             border.PointerPressed += (_, __) =>
             {
                 _vm.SelectedLayout = layoutNumber;
+                _vm.OkPressed = true;
                 Close();
             };
 
@@ -136,6 +136,7 @@ public class LayoutWindow : Window
             await Task.Delay(500);
 
             _vm.SelectedLayout = layoutNumber;
+            _vm.OkPressed = true;
             Close();
         }
     }
