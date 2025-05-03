@@ -22,7 +22,7 @@ public class TranslateSettingsWindow : Window
         if (!vm.PromptIsVisible)
         {
             Width = MinWidth = 400;
-            Height = MinHeight = 220;            
+            Height = MinHeight = 220;
             CanResize = false;
         }
 
@@ -75,7 +75,7 @@ public class TranslateSettingsWindow : Window
             Width = double.NaN,
             Height = double.NaN,
             FontSize = 14,
-            Text = "Translate the following text to {0}:\n\n{1}",
+            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
         }.BindVisible(vm, nameof(vm.PromptIsVisible))
          .BindText(vm, nameof(vm.PromptText));
 

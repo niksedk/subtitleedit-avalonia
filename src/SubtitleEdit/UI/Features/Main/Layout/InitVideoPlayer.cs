@@ -5,6 +5,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using LibVLCSharp.Avalonia;
 using LibVLCSharp.Shared;
+using System;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -20,32 +21,35 @@ public class InitVideoPlayer
             VerticalAlignment = VerticalAlignment.Stretch,
             Margin = new Thickness(0),
         };
-#if WINDOWS
-        
-        // Video player area
-        if (vm.LibVLC == null || vm.VideoPlayer == null)
+
+
+        if (OperatingSystem.IsWindows() && false)
         {
-            vm.MediaPlayer?.Dispose();
-            vm.LibVLC?.Dispose();
-            vm.LibVLC = new LibVLC();
-            vm.MediaPlayer = new MediaPlayer(vm.LibVLC);
-            vm.VideoPlayer = new VideoView
+            // Video player area
+            if (vm.LibVLC == null || vm.VideoPlayer == null)
             {
-                Margin = new Thickness(0),
-                MediaPlayer = vm.MediaPlayer,
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Stretch,
-            };
-        }
-        else
-        {
-            var grid = vm.VideoPlayer.Parent as Grid;
-            grid?.Children.Remove(vm.VideoPlayer);
+                vm.MediaPlayer?.Dispose();
+                vm.LibVLC?.Dispose();
+                vm.LibVLC = new LibVLC();
+                vm.MediaPlayer = new MediaPlayer(vm.LibVLC);
+                vm.VideoPlayer = new VideoView
+                {
+                    Margin = new Thickness(0),
+                    MediaPlayer = vm.MediaPlayer,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    VerticalAlignment = VerticalAlignment.Stretch,
+                };
+            }
+            else
+            {
+                var grid = vm.VideoPlayer.Parent as Grid;
+                grid?.Children.Remove(vm.VideoPlayer);
+            }
+
+            Grid.SetRow(vm.VideoPlayer, 0);
+            mainGrid.Children.Add(vm.VideoPlayer);
         }
 
-        Grid.SetRow(vm.VideoPlayer, 0);
-        mainGrid.Children.Add(vm.VideoPlayer);
-#endif
         // Footer
         var footerGrid = new Grid
         {
@@ -60,7 +64,7 @@ public class InitVideoPlayer
             Minimum = 0,
             Maximum = 100,
             Value = 0,
-            Margin = new Thickness(0),            
+            Margin = new Thickness(0),
         };
         Grid.SetRow(navigationBar, 0);  // First row of footer grid
         footerGrid.Children.Add(navigationBar);
