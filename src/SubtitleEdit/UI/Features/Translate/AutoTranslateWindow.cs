@@ -82,7 +82,7 @@ public class AutoTranslateWindow : Window
         var treeDataGrid = new TreeDataGrid
         {
             Height = double.NaN, // auto size inside scroll viewer
-            Margin = new Thickness(0, 15, 0, 0),
+            Margin = new Thickness(2),
             Source = vm.TranslateRowSource,
             CanUserSortColumns = false,
             ContextFlyout = contextMenu,
@@ -93,7 +93,7 @@ public class AutoTranslateWindow : Window
             Content = treeDataGrid,
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto
         };
-
+        var scrollViewerBorder = UiUtil.MakeBorderForControl(scrollViewer);
 
         StackPanel settingsBar = UiUtil.MakeControlBarLeft(
             UiUtil.MakeTextBlock("API key", vm, null, nameof(vm.ApiKeyIsVisible)),
@@ -106,9 +106,10 @@ public class AutoTranslateWindow : Window
             UiUtil.MakeTextBox(150, vm, nameof(vm.ModelText), nameof(vm.ModelIsVisible))
         );
 
+        var settingsLink = UiUtil.MakeLink("Settings", vm.OpenSettingsCommand).WithMarginRight(10);
         var okButton = UiUtil.MakeButton("OK", vm.OkCommand);
         var cancelButton = UiUtil.MakeButton("Cancel", vm.CancelCommand);
-        StackPanel bottomBar = UiUtil.MakeButtonBar(okButton, cancelButton);
+        StackPanel bottomBar = UiUtil.MakeButtonBar(settingsLink, okButton, cancelButton);
 
         var grid = new Grid
         {
@@ -123,8 +124,8 @@ public class AutoTranslateWindow : Window
         grid.Children.Add(topBar);
         Grid.SetRow(topBar, row++);
 
-        grid.Children.Add(scrollViewer);
-        Grid.SetRow(scrollViewer, row++);
+        grid.Children.Add(scrollViewerBorder);
+        Grid.SetRow(scrollViewerBorder, row++);
 
         grid.Children.Add(settingsBar);
         Grid.SetRow(settingsBar, row++);

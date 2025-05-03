@@ -4,6 +4,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Media.Immutable;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 
@@ -12,19 +13,32 @@ namespace Nikse.SubtitleEdit.Logic;
 public static class UiUtil
 {
     public const int WindowMarginWidth = 10;
+    public const int CornerRadius = 4;
 
     public static Button MakeButton(string text)
     {
         return MakeButton(text, null);
     }
 
-    public static IBrush GetTextColor()     
+    public static IBrush GetTextColor()
     {
         //var faTheme = Application.Current?.Styles.OfType<FluentAvaloniaTheme>().FirstOrDefault();
         //faTheme.TryGetResource("TextFillColorPrimary", Application.Current.RequestedThemeVariant, out resource);
         // var found1 = this.TryGetResource("TheKey", this.ActualThemeVariant, out var result1);
         return new TextBlock().Foreground ?? new SolidColorBrush(Colors.Black);
     }
+
+    public static IBrush GetTextColor(double opacity)
+    {
+        var brush = new TextBlock().Foreground ?? new SolidColorBrush(Colors.Black, opacity);
+        if (brush is ImmutableSolidColorBrush cb)
+        {
+            return new SolidColorBrush(cb.Color, opacity);
+        }
+
+        return brush;
+    }
+
 
     public static Button MakeButton(string text, IRelayCommand? command)
     {
@@ -43,9 +57,9 @@ public static class UiUtil
     }
 
     public static Control MakeComboBox<T>(
-        ObservableCollection<T> sourceLanguages, 
-        object viewModal, 
-        string? propertySelectedPath, 
+        ObservableCollection<T> sourceLanguages,
+        object viewModal,
+        string? propertySelectedPath,
         string? propertyIsVisiblePath)
     {
         var comboBox = new ComboBox
@@ -274,6 +288,18 @@ public static class UiUtil
             Background = GetTextColor(), // Brushes.Gray,
             Margin = new Thickness(5, 5, 5, 5),
             VerticalAlignment = VerticalAlignment.Center,
+        };
+    }
+
+    public static Border MakeBorderForControl(Control control)
+    {
+        return new Border
+        {
+            Child = control,
+            BorderThickness = new Thickness(1),
+            BorderBrush = GetTextColor(0.3d),
+            Padding = new Thickness(5),
+            CornerRadius = new CornerRadius(CornerRadius),
         };
     }
 }

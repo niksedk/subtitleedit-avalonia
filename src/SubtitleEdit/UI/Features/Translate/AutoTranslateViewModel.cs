@@ -54,9 +54,12 @@ public partial class AutoTranslateViewModel : ObservableObject
     private List<string> _apiModels = new();
     private bool _onlyCurrentLine;
     private Subtitle _subtitle = new Subtitle();
+    private readonly IWindowService _windowService;
 
-    public AutoTranslateViewModel()
+    public AutoTranslateViewModel(IWindowService windowService)
     {
+        _windowService = windowService;
+
         AutoTranslators = new ObservableCollection<IAutoTranslator>
         {
             new GoogleTranslateV1(),
@@ -94,6 +97,7 @@ public partial class AutoTranslateViewModel : ObservableObject
 
         var dataGridSource = TranslateRowSource as FlatTreeDataGridSource<TranslateRow>;
         dataGridSource!.RowSelection!.SingleSelect = true;
+        _windowService = windowService;
     }
 
     public void Initialize(Subtitle subtitle)
@@ -215,6 +219,12 @@ public partial class AutoTranslateViewModel : ObservableObject
     private void Cancel()
     {
         Window?.Close();
+    }
+
+    [RelayCommand]
+    private async Task OpenSettings()
+    {
+        var vm = await _windowService.ShowDialogAsync<TranslateSettingsWindow, TranslateSettingsViewModel>(Window);
     }
 
     [RelayCommand]

@@ -45,24 +45,7 @@ var appBuilder = AppBuilder.Configure<Application>()
 
 var collection = new ServiceCollection();
 collection.AddCommonServices();
-collection.AddSingleton<IFileHelper, FileHelper>();
-collection.AddTransient<IShortcutManager, ShortcutManager>();
-collection.AddTransient<IWindowService, WindowService>();
 
-// Windows and view models
-collection.AddTransient<MainView>();
-collection.AddTransient<MainViewModel>();
-collection.AddTransient<LayoutWindow>();
-collection.AddTransient<LayoutViewModel>();
-collection.AddTransient<AboutWindow>();
-collection.AddTransient<LanguageWindow>();
-collection.AddTransient<LanguageViewModel>();
-collection.AddTransient<SettingsWindow>();
-collection.AddTransient<SettingsViewModel>();
-collection.AddTransient<ShortcutsWindow>();
-collection.AddTransient<ShortcutsViewModel>();
-collection.AddTransient<AutoTranslateWindow>();
-collection.AddTransient<AutoTranslateViewModel>();
 
 Locator.Services = collection.BuildServiceProvider();
 var services = collection.BuildServiceProvider();
