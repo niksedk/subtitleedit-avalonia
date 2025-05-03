@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
+using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Help;
 
@@ -9,6 +10,7 @@ public class AboutWindow : Window
 {
     public AboutWindow()
     {
+        Icon = UiUtil.GetSeIcon();
         Title = "About Subtitle Edit";
         Width = 400;
         Height = 250;

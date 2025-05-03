@@ -5,6 +5,7 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Common;
@@ -38,14 +39,34 @@ public enum MessageBoxIcon
 public class MessageBox : Window
 {
     private MessageBoxResult _result = MessageBoxResult.None;
+    private string _message;
+    private bool _hasCancel;
 
     private MessageBox(string title, string message, MessageBoxButtons buttons, MessageBoxIcon icon)
     {
+        Icon = UiUtil.GetSeIcon();
         Width = 400;
-        Height = 200;
+        Height = 180;
         Title = title;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         CanResize = false;
+
+        _message = message;
+
+        var grid = new Grid
+        {
+            Margin = new Thickness(10),
+            RowDefinitions =
+            {
+                new RowDefinition { Height = GridLength.Star },
+                new RowDefinition { Height = GridLength.Auto },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = GridLength.Auto },
+                new ColumnDefinition { Width = GridLength.Star },
+            }
+        };
 
         // Icon (optional)
         var iconImage = new Image
@@ -66,6 +87,10 @@ public class MessageBox : Window
             {
                 // If icon not found, silently ignore
             }
+
+            grid.Children.Add(iconImage);
+            Grid.SetRow(iconImage, 0);
+            Grid.SetColumn(iconImage, 0);
         }
 
         var textBlock = new TextBlock
@@ -73,16 +98,39 @@ public class MessageBox : Window
             Text = message,
             Margin = new Thickness(10),
             VerticalAlignment = VerticalAlignment.Center,
-            TextWrapping = TextWrapping.Wrap
+            TextWrapping = TextWrapping.Wrap,
+            Height = double.NaN,
+            Width = double.NaN,
         };
 
-        var contentPanel = new StackPanel
+
+        var x = TextMeasurer.MeasureString(message, textBlock.FontFamily.Name, (float)textBlock.FontSize);
+        if (x.Width > Width - 100)
         {
-            Orientation = Orientation.Horizontal,
-            Margin = new Thickness(10),
-            Spacing = 10,
-            Children = { iconImage, textBlock }
-        };
+            Width += 200;
+            Height += 50;
+        }
+
+        if (message.Length > 1000)
+        {
+            var scrollView = new ScrollViewer
+            {
+                Width = double.NaN,
+                Height = double.NaN,
+                Margin = new Thickness(10),
+                Content = textBlock
+            };
+
+            grid.Children.Add(scrollView);
+            Grid.SetRow(scrollView, 0);
+            Grid.SetColumn(scrollView, 1);
+        }
+        else
+        {
+            grid.Children.Add(textBlock);
+            Grid.SetRow(textBlock, 0);
+            Grid.SetColumn(textBlock, 1);
+        }
 
         var buttonPanel = new StackPanel
         {
@@ -107,6 +155,7 @@ public class MessageBox : Window
             case MessageBoxButtons.OKCancel:
                 AddButton("OK", MessageBoxResult.OK);
                 AddButton("Cancel", MessageBoxResult.Cancel);
+                _hasCancel = true;
                 break;
             case MessageBoxButtons.YesNo:
                 AddButton("Yes", MessageBoxResult.Yes);
@@ -116,49 +165,56 @@ public class MessageBox : Window
                 AddButton("Yes", MessageBoxResult.Yes);
                 AddButton("No", MessageBoxResult.No);
                 AddButton("Cancel", MessageBoxResult.Cancel);
+                _hasCancel = true;
                 break;
         }
 
-        Content = new DockPanel
+        grid.Children.Add(buttonPanel);
+        Grid.SetRow(buttonPanel, 2);
+        Grid.SetColumn(buttonPanel, 0);
+        Grid.SetColumnSpan(buttonPanel, 2);
+
+        Content = grid;
+
+        var contextMenu = new MenuFlyout
         {
-            LastChildFill = true,
-            Children =
+            Items =
             {
-                new Border
+                new MenuItem
                 {
-                    Child = contentPanel,
-                    Margin = new Thickness(10),
-                    [DockPanel.DockProperty] = Dock.Top
-                },
-                new Border
-                {
-                    Child = buttonPanel,
-                    Margin = new Thickness(10),
-                    [DockPanel.DockProperty] = Dock.Bottom
+                    Header = "Copy text to clipboard",
+                    Command = new RelayCommand(() =>
+                    {
+                        Clipboard!.SetTextAsync(_message);
+                    })
                 }
             }
         };
+        grid.ContextFlyout = contextMenu;
 
-        // Handle Escape key
-        KeyDown += (_, e) =>
-        {
-            if (e.Key == Key.Escape)
-            {
-                _result = MessageBoxResult.Cancel;
-                Close(_result);
-                e.Handled = true;
-            }
-        };
+        Activated += delegate { buttonPanel.Children[0].Focus(); }; // hack to make OnKeyDown work
     }
 
     public static async Task<MessageBoxResult> Show(
-        Window owner, 
-        string title, 
+        Window owner,
+        string title,
         string message,
-        MessageBoxButtons buttons = MessageBoxButtons.OK, 
+        MessageBoxButtons buttons = MessageBoxButtons.OK,
         MessageBoxIcon icon = MessageBoxIcon.None)
     {
         var msgBox = new MessageBox(title, message, buttons, icon);
         return await msgBox.ShowDialog<MessageBoxResult>(owner);
+    }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+
+        if (e.Key == Key.Escape && _hasCancel)
+        {
+            _result = MessageBoxResult.Cancel;
+            Close(_result);
+            e.Handled = true;
+        }
     }
 }

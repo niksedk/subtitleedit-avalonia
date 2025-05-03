@@ -66,7 +66,7 @@ else
 lifetime.MainWindow = new Window
 {
     Title = "Subtitle Edit",
-    Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://Nikse.SubtitleEdit/Assets/se.ico"))),
+    Icon = UiUtil.GetSeIcon(),
 };
 
 

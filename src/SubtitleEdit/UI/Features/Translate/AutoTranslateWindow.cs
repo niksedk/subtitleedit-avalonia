@@ -11,6 +11,7 @@ public class AutoTranslateWindow : Window
 {
     public AutoTranslateWindow(AutoTranslateViewModel vm)
     {
+        Icon = UiUtil.GetSeIcon();
         Title = "Auto-translate";
         Width = 950;
         MinWidth = 750;
@@ -96,13 +97,13 @@ public class AutoTranslateWindow : Window
         var scrollViewerBorder = UiUtil.MakeBorderForControl(scrollViewer);
 
         StackPanel settingsBar = UiUtil.MakeControlBarLeft(
-            UiUtil.MakeTextBlock("API key", vm, null, nameof(vm.ApiKeyIsVisible)),
+            UiUtil.MakeTextBlock("API key", vm, null, nameof(vm.ApiKeyIsVisible)).WithMarginRight(5),
             UiUtil.MakeTextBox(150, vm, nameof(vm.ApiKeyText), nameof(vm.ApiKeyIsVisible)),
             UiUtil.MakeSeparatorForHorizontal(),
-            UiUtil.MakeTextBlock("API url", vm, null, nameof(vm.ApiUrlIsVisible)),
+            UiUtil.MakeTextBlock("API url", vm, null, nameof(vm.ApiUrlIsVisible)).WithMarginRight(5),
             UiUtil.MakeTextBox(150, vm, nameof(vm.ApiUrlText), nameof(vm.ApiUrlIsVisible)),
             UiUtil.MakeSeparatorForHorizontal(),
-            UiUtil.MakeTextBlock("Model", vm, null, nameof(vm.ModelIsVisible)),
+            UiUtil.MakeTextBlock("Model", vm, null, nameof(vm.ModelIsVisible)).WithMarginRight(5),
             UiUtil.MakeTextBox(150, vm, nameof(vm.ModelText), nameof(vm.ModelIsVisible))
         );
 

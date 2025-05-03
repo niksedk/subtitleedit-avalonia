@@ -115,9 +115,9 @@ public partial class AutoTranslateViewModel : ObservableObject
         UpdateSourceLanguages(SelectedAutoTranslator);
         UpdateTargetLanguages(SelectedAutoTranslator);
 
-        if (!string.IsNullOrEmpty(Se.Settings.Tools.AutoTranslate.AutoTranslateLastName))
+        if (!string.IsNullOrEmpty(Se.Settings.AutoTranslate.AutoTranslateLastName))
         {
-            var autoTranslator = AutoTranslators.FirstOrDefault(x => x.Name == Se.Settings.Tools.AutoTranslate.AutoTranslateLastName);
+            var autoTranslator = AutoTranslators.FirstOrDefault(x => x.Name == Se.Settings.AutoTranslate.AutoTranslateLastName);
             if (autoTranslator != null)
             {
                 SetAutoTranslatorEngine(autoTranslator);
@@ -154,9 +154,9 @@ public partial class AutoTranslateViewModel : ObservableObject
             }
         }
 
-        if (!string.IsNullOrEmpty(Se.Settings.Tools.AutoTranslate.AutoTranslateLastSource))
+        if (!string.IsNullOrEmpty(Se.Settings.AutoTranslate.AutoTranslateLastSource))
         {
-            var lang = SourceLanguages.FirstOrDefault(p => p.Code == Se.Settings.Tools.AutoTranslate.AutoTranslateLastSource);
+            var lang = SourceLanguages.FirstOrDefault(p => p.Code == Se.Settings.AutoTranslate.AutoTranslateLastSource);
             if (lang != null)
             {
                 SelectedSourceLanguage = lang;
@@ -193,9 +193,9 @@ public partial class AutoTranslateViewModel : ObservableObject
             }
         }
 
-        if (!string.IsNullOrEmpty(Se.Settings.Tools.AutoTranslate.AutoTranslateLastTarget))
+        if (!string.IsNullOrEmpty(Se.Settings.AutoTranslate.AutoTranslateLastTarget))
         {
-            var lang = TargetLanguages.FirstOrDefault(p => p.Code == Se.Settings.Tools.AutoTranslate.AutoTranslateLastTarget);
+            var lang = TargetLanguages.FirstOrDefault(p => p.Code == Se.Settings.AutoTranslate.AutoTranslateLastTarget);
             if (lang != null)
             {
                 SelectedTargetLanguage = lang;
@@ -224,7 +224,10 @@ public partial class AutoTranslateViewModel : ObservableObject
     [RelayCommand]
     private async Task OpenSettings()
     {
-        var vm = await _windowService.ShowDialogAsync<TranslateSettingsWindow, TranslateSettingsViewModel>(Window);
+        await _windowService.ShowDialogAsync<TranslateSettingsWindow, TranslateSettingsViewModel>(Window, vm =>
+        {
+            vm.LoadValues(SelectedAutoTranslator);
+        });
     }
 
     [RelayCommand]
@@ -379,9 +382,9 @@ public partial class AutoTranslateViewModel : ObservableObject
         }
 
         Configuration.Settings.Tools.AutoTranslateLastName = SelectedAutoTranslator.Name;
-        Se.Settings.Tools.AutoTranslate.AutoTranslateLastName = SelectedAutoTranslator.Name;
-        Se.Settings.Tools.AutoTranslate.AutoTranslateLastSource = SelectedSourceLanguage?.Code ?? string.Empty;
-        Se.Settings.Tools.AutoTranslate.AutoTranslateLastTarget = SelectedTargetLanguage?.Code ?? string.Empty;
+        Se.Settings.AutoTranslate.AutoTranslateLastName = SelectedAutoTranslator.Name;
+        Se.Settings.AutoTranslate.AutoTranslateLastSource = SelectedSourceLanguage?.Code ?? string.Empty;
+        Se.Settings.AutoTranslate.AutoTranslateLastTarget = SelectedTargetLanguage?.Code ?? string.Empty;
 
         Se.SaveSettings();
     }

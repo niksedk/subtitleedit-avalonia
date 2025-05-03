@@ -16,6 +16,7 @@ public class Se
     public List<SeShortCut> Shortcuts { get; set; }
     public SeFile File { get; set; } = new();
     public SeTools Tools { get; set; } = new();
+    public SeAutoTranslate AutoTranslate { get; set; } = new();
     public SeSync Synchronization { get; set; } = new();
     public SeSpellCheck SpellCheck { get; set; } = new();
     public SeAppearance Appearance { get; set; } = new();
@@ -111,6 +112,11 @@ public class Se
         if (Settings.Tools == null)
         {
             Settings.Tools = new();
+        }
+
+        if (Settings.AutoTranslate == null)
+        {
+            Settings.AutoTranslate = new();
         }
 
         if (Settings.File == null)
@@ -237,6 +243,6 @@ public class Se
         Configuration.Settings.Tools.WhisperPostProcessingFixShortDuration = tts.WhisperPostProcessingFixShortDuration;
         Configuration.Settings.Tools.VoskPostProcessing = tts.PostProcessing;
 
-        Configuration.Settings.Tools.AutoTranslateLastName = Settings.Tools.AutoTranslate.AutoTranslateLastName;
+        Configuration.Settings.Tools.AutoTranslateLastName = Settings.AutoTranslate.AutoTranslateLastName;
     }
 }

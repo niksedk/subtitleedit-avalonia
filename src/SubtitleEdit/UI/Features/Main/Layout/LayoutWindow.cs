@@ -7,6 +7,7 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -18,8 +19,8 @@ public class LayoutWindow : Window
 
     public LayoutWindow(LayoutViewModel viewViewModel)
     {
+        Icon = UiUtil.GetSeIcon();
         _vm = viewViewModel;
-
         Title = "Choose layout";
         Width = 925;
         Height = 500;

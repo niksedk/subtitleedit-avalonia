@@ -1,14 +1,16 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Immutable;
+using Avalonia.Platform;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Features.Translate;
 using System;
 using System.Collections.ObjectModel;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Nikse.SubtitleEdit.Logic;
 
@@ -303,5 +305,34 @@ public static class UiUtil
             Padding = new Thickness(5),
             CornerRadius = new CornerRadius(CornerRadius),
         };
+    }
+
+    public static T BindVisible<T>(this T control, object vm, string visibilityPropertyPath) where T : Visual
+    {
+        control.DataContext = vm;
+        control.Bind(Visual.IsVisibleProperty, new Binding
+        {
+            Path = visibilityPropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
+    public static T BindText<T>(this T control, object vm, string textPropertyPath) where T : TextBox
+    {
+        control.DataContext = vm;
+        control.Bind(TextBox.TextProperty, new Binding
+        {
+            Path = textPropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
+    public static WindowIcon? GetSeIcon()
+    {
+        return new WindowIcon(AssetLoader.Open(new Uri("avares://Nikse.SubtitleEdit/Assets/se.ico")));
     }
 }

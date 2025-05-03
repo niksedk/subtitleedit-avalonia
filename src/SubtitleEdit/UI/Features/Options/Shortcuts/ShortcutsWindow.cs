@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
@@ -13,6 +14,7 @@ public class ShortcutsWindow : Window
     
     public ShortcutsWindow(ShortcutsViewModel vm)
     {
+        Icon = UiUtil.GetSeIcon();
         Title = "Shortcuts";
         Width = 500;
         Height = 600;

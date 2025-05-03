@@ -10,19 +10,26 @@ public class TranslateSettingsWindow : Window
 {
     public TranslateSettingsWindow(TranslateSettingsViewModel vm)
     {
-
+        Icon = UiUtil.GetSeIcon();
         Title = "Settings";
-        Width = 700;
+        Width = 750;
         MinWidth = 600;
         Height = 400;
         MinHeight = 350;
         DataContext = vm;
         vm.Window = this;
 
+        if (!vm.PromptIsVisible)
+        {
+            Width = MinWidth = 400;
+            Height = MinHeight = 220;            
+            CanResize = false;
+        }
+
         var labelMerge = UiUtil.MakeTextBlock("Line merge");
         var comboMerge = UiUtil.MakeComboBox(vm.MergeOptions, vm, nameof(vm.SelectedMergeOptions));
 
-        var labelDelay = UiUtil.MakeTextBlock("Delay between server calls");
+        var labelDelay = UiUtil.MakeTextBlock("Delay in seconds between requests");
         var delayNumericUpDown = new NumericUpDown
         {
             Minimum = 0,
@@ -58,7 +65,7 @@ public class TranslateSettingsWindow : Window
             Source = vm,
         });
 
-        var labelPrompt = UiUtil.MakeTextBlock("Prompt text");
+        var labelPrompt = UiUtil.MakeTextBlock("Prompt text", vm, null, nameof(vm.PromptIsVisible));
         var promptTextBox = new TextBox
         {
             AcceptsReturn = true,
@@ -69,7 +76,8 @@ public class TranslateSettingsWindow : Window
             Height = double.NaN,
             FontSize = 14,
             Text = "Translate the following text to {0}:\n\n{1}",
-        };
+        }.BindVisible(vm, nameof(vm.PromptIsVisible))
+         .BindText(vm, nameof(vm.PromptText));
 
         var buttonOk = UiUtil.MakeButton("OK", vm.OkCommand);
         var buttonCancel = UiUtil.MakeButton("Cancel", vm.CancelCommand);
