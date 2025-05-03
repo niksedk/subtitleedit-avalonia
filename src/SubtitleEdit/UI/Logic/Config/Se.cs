@@ -237,6 +237,6 @@ public class Se
         Configuration.Settings.Tools.WhisperPostProcessingFixShortDuration = tts.WhisperPostProcessingFixShortDuration;
         Configuration.Settings.Tools.VoskPostProcessing = tts.PostProcessing;
 
-        Configuration.Settings.Tools.AutoTranslateLastName = Settings.Tools.AutoTranslateLastName;
+        Configuration.Settings.Tools.AutoTranslateLastName = Settings.Tools.AutoTranslate.AutoTranslateLastName;
     }
 }

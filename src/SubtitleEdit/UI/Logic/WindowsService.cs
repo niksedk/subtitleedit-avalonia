@@ -120,8 +120,9 @@ namespace Nikse.SubtitleEdit.Logic
 
             var window = (TWindow)w;
 
+            window.WindowStartupLocation = WindowStartupLocation.CenterOwner; //TODO: does this work on mac?
             configureWindow?.Invoke(window);
-
+            
             await window.ShowDialog(owner);
 
             return viewModel;

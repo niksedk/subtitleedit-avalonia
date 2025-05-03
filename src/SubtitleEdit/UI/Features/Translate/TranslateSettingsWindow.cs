@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 
@@ -10,27 +11,121 @@ public class TranslateSettingsWindow : Window
     public TranslateSettingsWindow(TranslateSettingsViewModel vm)
     {
 
-        Title = "Translate Settings";
-        Width = 500;
-        MinWidth = 400;
-        Height = 300;
-        MinHeight = 200;
+        Title = "Settings";
+        Width = 700;
+        MinWidth = 600;
+        Height = 400;
+        MinHeight = 350;
         DataContext = vm;
         vm.Window = this;
-        var topBarPoweredBy = new StackPanel
+
+        var labelMerge = UiUtil.MakeTextBlock("Line merge");
+        var comboMerge = UiUtil.MakeComboBox(vm.MergeOptions, vm, nameof(vm.SelectedMergeOptions));
+
+        var labelDelay = UiUtil.MakeTextBlock("Delay between server calls");
+        var delayNumericUpDown = new NumericUpDown
         {
-            Orientation = Orientation.Horizontal,
-            Margin = new Thickness(10),
-            HorizontalAlignment = HorizontalAlignment.Right,
-            Spacing = 10,
-            Children =
-            {
-                UiUtil.MakeTextBlock("Powered by"),
-              
-            }
+            Minimum = 0,
+            Maximum = 60,
+            Value = vm.ServerDelaySeconds,
+            Width = 150,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Left,
         };
-        Content = topBarPoweredBy;
+        delayNumericUpDown.Bind(NumericUpDown.ValueProperty, new Binding
+        {
+            Path = nameof(vm.ServerDelaySeconds),
+            Mode = BindingMode.TwoWay,
+            Source = vm,
+        });
 
+        var labelMaxBytes = UiUtil.MakeTextBlock("Max bytes per request");
+        var maxBytesNumericUpDown = new NumericUpDown //TODO: UiUtil.MakeNumericUpDown
+        {
+            Minimum = 0,
+            Maximum = 100_000,
+            Value = 1000,
+            Width = 150,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Increment = 100,
+            FormatString = "#,###,##0",
+        };
+        maxBytesNumericUpDown.Bind(NumericUpDown.ValueProperty, new Binding
+        {
+            Path = nameof(vm.MaxBytesRequest),
+            Mode = BindingMode.TwoWay,
+            Source = vm,
+        });
 
+        var labelPrompt = UiUtil.MakeTextBlock("Prompt text");
+        var promptTextBox = new TextBox
+        {
+            AcceptsReturn = true,
+            AcceptsTab = true,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            Width = double.NaN,
+            Height = double.NaN,
+            FontSize = 14,
+            Text = "Translate the following text to {0}:\n\n{1}",
+        };
+
+        var buttonOk = UiUtil.MakeButton("OK", vm.OkCommand);
+        var buttonCancel = UiUtil.MakeButton("Cancel", vm.CancelCommand);
+        var buttonBar = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
+
+        var grid = new Grid
+        {
+            RowDefinitions = new RowDefinitions("Auto,Auto,Auto,Auto,*,Auto"),
+            ColumnDefinitions = new ColumnDefinitions("Auto,*"),
+            Margin = new Thickness(UiUtil.WindowMarginWidth),
+            ColumnSpacing = 10,
+            RowSpacing = 10,
+        };
+
+        var row = 0;
+        grid.Children.Add(labelMerge);
+        Grid.SetRow(labelMerge, row);
+        Grid.SetColumn(labelMerge, 0);
+        grid.Children.Add(comboMerge);
+        Grid.SetRow(comboMerge, row);
+        Grid.SetColumn(comboMerge, 1);
+        row++;
+
+        grid.Children.Add(labelDelay);
+        Grid.SetRow(labelDelay, row);
+        Grid.SetColumn(labelDelay, 0);
+        grid.Children.Add(delayNumericUpDown);
+        Grid.SetRow(delayNumericUpDown, row);
+        Grid.SetColumn(delayNumericUpDown, 1);
+        row++;
+
+        grid.Children.Add(labelMaxBytes);
+        Grid.SetRow(labelMaxBytes, row);
+        Grid.SetColumn(labelMaxBytes, 0);
+        grid.Children.Add(maxBytesNumericUpDown);
+        Grid.SetRow(maxBytesNumericUpDown, row);
+        Grid.SetColumn(maxBytesNumericUpDown, 1);
+        row++;
+
+        grid.Children.Add(labelPrompt);
+        Grid.SetRow(labelPrompt, row);
+        Grid.SetColumn(labelPrompt, 0);
+        Grid.SetColumnSpan(labelPrompt, 2);
+        row++;
+
+        grid.Children.Add(promptTextBox);
+        Grid.SetRow(promptTextBox, row);
+        Grid.SetColumn(promptTextBox, 0);
+        Grid.SetColumnSpan(promptTextBox, 2);
+        row++;
+
+        grid.Children.Add(buttonBar);
+        Grid.SetRow(buttonBar, row);
+        Grid.SetColumn(buttonBar, 0);
+        Grid.SetColumnSpan(buttonBar, 2);
+
+        Content = grid;
     }
 }

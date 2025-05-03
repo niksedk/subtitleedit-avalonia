@@ -6,6 +6,8 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Immutable;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Features.Translate;
+using System;
 using System.Collections.ObjectModel;
 
 namespace Nikse.SubtitleEdit.Logic;
