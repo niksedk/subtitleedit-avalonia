@@ -12,7 +12,7 @@ public class SettingsSection
 {
     private readonly string _title;
     private readonly List<SettingsItem> _items;
-    private StackPanel? _panel;
+    public StackPanel? Panel { get; set; }
 
     public bool IsVisible => _items.Any(i => i.IsVisible);
 
@@ -25,14 +25,16 @@ public class SettingsSection
     public void Filter(string filter)
     {
         foreach (var item in _items)
+        {
             item.Filter(filter);
+        }
     }
 
     public Control Build()
     {
-        _panel = new StackPanel { Spacing = 6 };
+        Panel = new StackPanel { Spacing = 6 };
 
-        _panel.Children.Add(new TextBlock
+        Panel.Children.Add(new TextBlock
         {
             Text = _title,
             FontSize = 16,
@@ -42,10 +44,10 @@ public class SettingsSection
 
         foreach (var item in _items.Where(i => i.IsVisible))
         {
-            _panel.Children.Add(item.Build());
+            Panel.Children.Add(item.Build());
         }
 
-        return _panel;
+        return Panel;
     }
 }
 

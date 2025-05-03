@@ -9,10 +9,11 @@ public class SettingsWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Settings";
-        Width = 500;
+        Width = 700;
         Height = 600;
         CanResize = true;
-        
+
+        vm.Window = this;
         Content = new SettingsPage(vm);
     }
 }

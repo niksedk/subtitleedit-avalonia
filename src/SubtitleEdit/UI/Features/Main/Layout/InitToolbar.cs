@@ -110,8 +110,9 @@ public static class InitToolbar
                     {
                         Source = new Bitmap("Assets/Themes/Dark/Settings.png"),
                         Width = 32,
-                        Height = 32,
+                        Height = 32,                       
                     },
+                    Command = vm.CommandShowSettingsCommand,
                 },
                 new Button
                 {

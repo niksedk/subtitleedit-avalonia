@@ -74,7 +74,6 @@ public class TranslateSettingsWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
             Width = double.NaN,
             Height = double.NaN,
-            FontSize = 14,
             TextWrapping = Avalonia.Media.TextWrapping.Wrap,
         }.BindVisible(vm, nameof(vm.PromptIsVisible))
          .BindText(vm, nameof(vm.PromptText));

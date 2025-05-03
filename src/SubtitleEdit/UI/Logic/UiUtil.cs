@@ -194,7 +194,7 @@ public static class UiUtil
             Cursor = new Cursor(StandardCursorType.Hand),
             Margin = new Thickness(0),
             Padding = new Thickness(0),
-            HorizontalAlignment = HorizontalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Center
         };
 
