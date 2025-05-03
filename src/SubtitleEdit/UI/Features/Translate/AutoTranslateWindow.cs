@@ -12,9 +12,9 @@ public class AutoTranslateWindow : Window
     public AutoTranslateWindow(AutoTranslateViewModel vm)
     {
         Title = "Auto-translate";
-        Width = 900;
+        Width = 950;
+        MinWidth = 750;
         Height = 700;
-        MinWidth = 740;
         MinHeight = 400;
 
         DataContext = vm;

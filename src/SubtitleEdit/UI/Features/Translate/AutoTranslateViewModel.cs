@@ -15,6 +15,8 @@ using Nikse.SubtitleEdit.Core.Translate;
 using Nikse.SubtitleEdit.Features.Common;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using System.Globalization;
+using System.Text;
 
 namespace Nikse.SubtitleEdit.Features.Translate;
 
@@ -40,8 +42,10 @@ public partial class AutoTranslateViewModel : ObservableObject
     [ObservableProperty] private string _apiKeyText;
     [ObservableProperty] private bool _apiUrlIsVisible;
     [ObservableProperty] private string _apiUrlText;
+    [ObservableProperty] private bool _buttonApiUrlIsVisible;
     [ObservableProperty] private bool _modelIsVisible;
     [ObservableProperty] private string _modelText;
+    [ObservableProperty] private bool _buttonModelIsVisible;
 
     private CancellationTokenSource _cancellationTokenSource = new();
     private bool _translationInProgress = false;
@@ -49,6 +53,7 @@ public partial class AutoTranslateViewModel : ObservableObject
     private List<string> _apiUrls = new();
     private List<string> _apiModels = new();
     private bool _onlyCurrentLine;
+    private Subtitle _subtitle = new Subtitle();
 
     public AutoTranslateViewModel()
     {
@@ -93,6 +98,7 @@ public partial class AutoTranslateViewModel : ObservableObject
 
     public void Initialize(Subtitle subtitle)
     {
+        _subtitle = subtitle;
         var rows = subtitle.Paragraphs.Select(p => new TranslateRow
         {
             Number = p.Number,
@@ -110,13 +116,17 @@ public partial class AutoTranslateViewModel : ObservableObject
             var autoTranslator = AutoTranslators.FirstOrDefault(x => x.Name == Se.Settings.Tools.AutoTranslateLastName);
             if (autoTranslator != null)
             {
-                SelectedAutoTranslator = autoTranslator;
                 SetAutoTranslatorEngine(autoTranslator);
             }
         }
     }
 
     private void UpdateSourceLanguages(IAutoTranslator autoTranslator)
+    {
+        UpdateSourceLanguages(autoTranslator, SourceLanguages);
+    }
+
+    private void UpdateSourceLanguages(IAutoTranslator autoTranslator, ObservableCollection<TranslationPair> sourceLanguages)
     {
         SourceLanguages.Clear();
         if (autoTranslator == null)
@@ -129,13 +139,29 @@ public partial class AutoTranslateViewModel : ObservableObject
             SourceLanguages.Add(language);
         }
 
-        if (SourceLanguages.Count > 0)
+        SelectedSourceLanguage = null;
+        var sourceLanguageIsoCode = EvaluateDefaultSourceLanguageCode(_subtitle.OriginalEncoding, _subtitle, sourceLanguages);
+        if (!string.IsNullOrEmpty(sourceLanguageIsoCode))
+        {
+            var lang = SourceLanguages.FirstOrDefault(p => p.Code == sourceLanguageIsoCode);
+            if (lang != null)
+            {
+                SelectedSourceLanguage = lang;
+            }
+        }
+
+        if (!string.IsNullOrEmpty(Se.Settings.Tools.AutoTranslateLastSource))
+        {
+            var lang = SourceLanguages.FirstOrDefault(p => p.Code == Se.Settings.Tools.AutoTranslateLastSource);
+            if (lang != null)
+            {
+                SelectedSourceLanguage = lang;
+            }
+        }
+
+        if (SelectedSourceLanguage == null && SourceLanguages.Count > 0)
         {
             SelectedSourceLanguage = SourceLanguages[0];
-        }
-        else
-        {
-            SelectedSourceLanguage = null;
         }
     }
 
@@ -147,18 +173,34 @@ public partial class AutoTranslateViewModel : ObservableObject
             return;
         }
 
-        foreach (var language in autoTranslator.GetSupportedSourceLanguages())
+        foreach (var language in autoTranslator.GetSupportedTargetLanguages())
         {
             TargetLanguages.Add(language);
         }
 
-        if (TargetLanguages.Count > 0)
+        SelectedTargetLanguage = null;
+        var targetLanguageIsoCode = EvaluateDefaultTargetLanguageCode(SelectedTargetLanguage?.Code ?? string.Empty);
+        if (!string.IsNullOrEmpty(targetLanguageIsoCode))
+        {
+            var lang = TargetLanguages.FirstOrDefault(p => p.Code == targetLanguageIsoCode);
+            if (lang != null)
+            {
+                SelectedTargetLanguage = lang;
+            }
+        }
+
+        if (!string.IsNullOrEmpty(Se.Settings.Tools.AutoTranslateLastTarget))
+        {
+            var lang = TargetLanguages.FirstOrDefault(p => p.Code == Se.Settings.Tools.AutoTranslateLastTarget);
+            if (lang != null)
+            {
+                SelectedTargetLanguage = lang;
+            }
+        }
+
+        if (SelectedTargetLanguage == null && TargetLanguages.Count > 0)
         {
             SelectedTargetLanguage = TargetLanguages[0];
-        }
-        else
-        {
-            SelectedTargetLanguage = null;
         }
     }
 
@@ -328,6 +370,8 @@ public partial class AutoTranslateViewModel : ObservableObject
 
         Configuration.Settings.Tools.AutoTranslateLastName = SelectedAutoTranslator.Name;
         Se.Settings.Tools.AutoTranslateLastName = SelectedAutoTranslator.Name;
+        Se.Settings.Tools.AutoTranslateLastSource = SelectedSourceLanguage?.Code ?? string.Empty;
+        Se.Settings.Tools.AutoTranslateLastTarget = SelectedTargetLanguage?.Code ?? string.Empty;
 
         Se.SaveSettings();
     }
@@ -347,17 +391,18 @@ public partial class AutoTranslateViewModel : ObservableObject
 
     private void SetAutoTranslatorEngine(IAutoTranslator translator)
     {
+        SelectedAutoTranslator = translator;
         AutoTranslatorLinkText = translator.Name;
 
         ApiKeyIsVisible = false;
         ApiKeyText = string.Empty;
         ApiUrlIsVisible = false;
         ApiUrlText = string.Empty;
-        //ButtonApiUrl.IsVisible = false;
+        ButtonApiUrlIsVisible = false;
         //LabelFormality.IsVisible = false;
         //PickerFormality.IsVisible = false;
         ModelIsVisible = false;
-        //ButtonModel.IsVisible = false;
+        ButtonModelIsVisible = false;
         ModelText = string.Empty;
         //LabelApiUrl.Text = "API url";
         //LabelApiKey.Text = "API key";
@@ -522,7 +567,7 @@ public partial class AutoTranslateViewModel : ObservableObject
 
             _apiModels = Configuration.Settings.Tools.OllamaModels.Split(',').ToList();
             ModelIsVisible = true;
-            //ButtonModel.IsVisible = true;
+            ButtonModelIsVisible = true;
             ModelText = Configuration.Settings.Tools.OllamaModel;
 
             //comboBoxFormality.ContextMenuStrip = contextMenuStripOlamaModels;
@@ -542,7 +587,7 @@ public partial class AutoTranslateViewModel : ObservableObject
 
             _apiModels = AnthropicTranslate.Models.ToList();
             ModelIsVisible = true;
-            //ButtonModel.IsVisible = true;
+            ButtonModelIsVisible = true;
             ModelText = Configuration.Settings.Tools.AnthropicApiModel;
 
             return;
@@ -560,7 +605,7 @@ public partial class AutoTranslateViewModel : ObservableObject
 
             _apiModels = GroqTranslate.Models.ToList();
             ModelIsVisible = true;
-            //ButtonModel.IsVisible = true;
+            ButtonModelIsVisible = true;
             ModelText = string.IsNullOrEmpty(Configuration.Settings.Tools.GroqModel) ? _apiModels[0] : Configuration.Settings.Tools.GroqModel;
 
             return;
@@ -579,7 +624,7 @@ public partial class AutoTranslateViewModel : ObservableObject
 
             _apiModels = OpenRouterTranslate.Models.ToList();
             ModelIsVisible = true;
-            //ButtonModel.IsVisible = true;
+            ButtonModelIsVisible = true;
             ModelText = string.IsNullOrEmpty(Configuration.Settings.Tools.OpenRouterModel) ? _apiModels[0] : Configuration.Settings.Tools.OpenRouterModel;
 
             return;
@@ -600,6 +645,101 @@ public partial class AutoTranslateViewModel : ObservableObject
         ApiUrlText = urls.Count > 0 ? urls[0] : string.Empty;
         _apiUrls = urls;
         ApiUrlIsVisible = true;
-        //ButtonApiUrl.IsVisible = urls.Count > 0;
+        ButtonApiUrlIsVisible = urls.Count > 0;
+    }
+
+    public static string EvaluateDefaultSourceLanguageCode(Encoding encoding, Subtitle subtitle, ObservableCollection<TranslationPair> sourceLanguages)
+    {
+        var defaultSourceLanguageCode = LanguageAutoDetect.AutoDetectGoogleLanguage(encoding); // Guess language via encoding
+        if (string.IsNullOrEmpty(defaultSourceLanguageCode))
+        {
+            defaultSourceLanguageCode = LanguageAutoDetect.AutoDetectGoogleLanguage(subtitle); // Guess language based on subtitle contents
+        }
+
+        if (!string.IsNullOrEmpty(Configuration.Settings.Tools.GoogleTranslateLastSourceLanguage) &&
+            Configuration.Settings.Tools.GoogleTranslateLastTargetLanguage.StartsWith(defaultSourceLanguageCode) &&
+            sourceLanguages.Any(p => p.Code == Configuration.Settings.Tools.GoogleTranslateLastSourceLanguage))
+        {
+            return Configuration.Settings.Tools.GoogleTranslateLastSourceLanguage;
+        }
+
+        return defaultSourceLanguageCode;
+    }
+
+    public static string EvaluateDefaultTargetLanguageCode(string defaultSourceLanguage)
+    {
+        var installedLanguages = new List<string>(); // Get installed languages
+
+        var currentCulture = CultureInfo.CurrentCulture;
+        var currentLanguage = currentCulture.Name.Split('-').LastOrDefault();
+        if (!string.IsNullOrEmpty(currentLanguage))
+        {
+            var cultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
+            var cultureByName = cultures.FirstOrDefault(p => p.Name.EndsWith(currentLanguage));
+            if (cultureByName != null)
+            {
+                installedLanguages.Add(cultureByName.TwoLetterISOLanguageName);
+            }
+        }
+
+        var uiCultureTargetLanguage = Configuration.Settings.Tools.GoogleTranslateLastTargetLanguage;
+        if (uiCultureTargetLanguage == defaultSourceLanguage)
+        {
+            foreach (var s in Utilities.GetDictionaryLanguages())
+            {
+                var temp = s.Replace("[", string.Empty).Replace("]", string.Empty);
+                if (temp.Length > 4)
+                {
+                    temp = temp.Substring(temp.Length - 5, 2).ToLowerInvariant();
+                    if (temp != defaultSourceLanguage && installedLanguages.Any(p => p.Contains(temp)))
+                    {
+                        uiCultureTargetLanguage = temp;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (uiCultureTargetLanguage == defaultSourceLanguage)
+        {
+            foreach (var language in installedLanguages)
+            {
+                if (language != defaultSourceLanguage)
+                {
+                    uiCultureTargetLanguage = language;
+                    break;
+                }
+            }
+        }
+
+        if (uiCultureTargetLanguage == defaultSourceLanguage)
+        {
+            var name = CultureInfo.CurrentCulture.Name;
+            if (name.Length > 2)
+            {
+                name = name.Remove(0, name.Length - 2);
+            }
+            var iso = IsoCountryCodes.ThreeToTwoLetterLookup.FirstOrDefault(p => p.Value == name);
+            if (!iso.Equals(default(KeyValuePair<string, string>)))
+            {
+                var iso639 = Iso639Dash2LanguageCode.GetTwoLetterCodeFromThreeLetterCode(iso.Key);
+                if (!string.IsNullOrEmpty(iso639))
+                {
+                    uiCultureTargetLanguage = iso639;
+                }
+            }
+        }
+
+        // Set target language to something different than source language
+        if (uiCultureTargetLanguage == defaultSourceLanguage && defaultSourceLanguage == "en")
+        {
+            uiCultureTargetLanguage = "es";
+        }
+        else if (uiCultureTargetLanguage == defaultSourceLanguage)
+        {
+            uiCultureTargetLanguage = "en";
+        }
+
+        return uiCultureTargetLanguage;
     }
 }

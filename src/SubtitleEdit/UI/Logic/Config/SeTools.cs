@@ -9,4 +9,6 @@ public class SeTools
     public SeChangeCasing ChangeCasing { get; set; } = new();
     public SeRemoveTextForHi RemoveTextForHi { get; set; } = new();
     public string AutoTranslateLastName { get; set; } = string.Empty;
+    public string AutoTranslateLastSource { get; set; } = string.Empty;
+    public string AutoTranslateLastTarget { get; set; } = string.Empty;
 }
