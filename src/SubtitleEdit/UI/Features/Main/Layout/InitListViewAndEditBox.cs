@@ -147,11 +147,11 @@ public static class InitListViewAndEditBox
 
         var timeCodeUpDown = new TimeCodeUpDown
         {
-            Height = 32,
+            DataContext = vm,
             [!TimeCodeUpDown.ValueProperty] = new Binding("SelectedSubtitle.StartTime")
             {
                 Mode = BindingMode.TwoWay,
-                StringFormat = "c" // "c" = constant ("00:00:00.000")
+                //StringFormat = "c" // "c" = constant ("00:00:00.000")
             }
         };
         startTimePanel.Children.Add(timeCodeUpDown);
@@ -207,7 +207,7 @@ public static class InitListViewAndEditBox
             Background = new SolidColorBrush(Colors.LightGray),
             [!TextBox.TextProperty] = new Binding("SelectedSubtitle.Duration")
             {
-                Mode = BindingMode.OneWay,
+                Mode = BindingMode.TwoWay,
                 StringFormat = "c"
             }
         };

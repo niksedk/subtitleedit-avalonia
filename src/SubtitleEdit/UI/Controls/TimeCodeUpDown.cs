@@ -4,7 +4,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Media;
+using Avalonia.Layout;
 using System;
 
 namespace Nikse.SubtitleEdit.Controls
@@ -40,26 +40,39 @@ namespace Nikse.SubtitleEdit.Controls
         {
             return new FuncControlTemplate<TimeCodeUpDown>((control, scope) =>
             {
+                var textBox = new TextBox
+                {
+                    Name = "PART_TextBox",
+                    IsReadOnly = false,
+                    Padding = new Thickness(9,2,2,2),
+                    Margin = new Thickness(0),
+                    VerticalContentAlignment = VerticalAlignment.Center,
+                    HorizontalContentAlignment = HorizontalAlignment.Left,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    Width = double.NaN,
+                };
+
+                var grid = new Grid
+                {
+                    ColumnDefinitions = new ColumnDefinitions("*,Auto"),
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    VerticalAlignment = VerticalAlignment.Stretch,
+                    Width = double.NaN,
+                };
+                grid.Children.Add(textBox);
+
                 var spinner = new ButtonSpinner
                 {
                     Name = "PART_Spinner",
                     ButtonSpinnerLocation = Location.Right,
-                    ShowButtonSpinner = true
+                    ShowButtonSpinner = true,
+                    Content = grid,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    VerticalAlignment = VerticalAlignment.Stretch,
+                    Width = double.NaN,
+                    Margin = new Thickness(0),
+                    Padding = new Thickness(0),
                 };
-
-                var textBox = new TextBox
-                {
-                    Name = "PART_TextBox",
-                    IsReadOnly = true,
-                    BorderBrush = null,
-                    Background = null,
-                    Padding = new Thickness(4),
-                    VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                    HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-                    FontFamily = FontFamily.Parse("Consolas")
-                };
-
-                spinner.Content = textBox;
 
                 scope.Register("PART_Spinner", spinner);
                 scope.Register("PART_TextBox", textBox);
@@ -67,6 +80,7 @@ namespace Nikse.SubtitleEdit.Controls
                 return spinner;
             });
         }
+
 
         protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
         {
