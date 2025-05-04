@@ -10,7 +10,6 @@ public static class ViewContent
     {
         return new Grid
         {
-            Background = Brushes.White,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
             Children = { new StackPanel() }

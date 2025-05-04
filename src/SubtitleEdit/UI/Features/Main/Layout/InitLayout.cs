@@ -56,7 +56,6 @@ public static partial class InitLayout
         // Left part of nested grid
         var nestedLeft = new Border
         {
-            Background = Brushes.CornflowerBlue,
             Child = InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
         };
         Grid.SetColumn(nestedLeft, 0);
@@ -132,7 +131,6 @@ public static partial class InitLayout
     {
         var contentGrid = new Grid
         {
-            Background = Brushes.White,
             RowDefinitions =
             {
                 new RowDefinition(GridLength.Star),
@@ -142,10 +140,7 @@ public static partial class InitLayout
         };
 
         // Top content (will hold the nested grid)
-        var topContent = new Border
-        {
-            Background = Brushes.OrangeRed
-        };
+        var topContent = new Border();
         Grid.SetRow(topContent, 0);
         contentGrid.Children.Add(topContent);
 
@@ -183,7 +178,6 @@ public static partial class InitLayout
         // Right part of nested grid
         var nestedRight = new Border
         {
-            Background = Brushes.PaleVioletRed,
             Child = InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
         };
         Grid.SetColumn(nestedRight, 2);
@@ -222,7 +216,6 @@ public static partial class InitLayout
     {
         var contentGrid = new Grid
         {
-            Background = Brushes.White,
             ColumnDefinitions =
             {
                 new ColumnDefinition(GridLength.Star),
@@ -232,10 +225,7 @@ public static partial class InitLayout
         };
 
         // Left content (will hold the nested grid)
-        var leftContent = new Border
-        {
-            Background = Brushes.CornflowerBlue
-        };
+        var leftContent = new Border();
         Grid.SetColumn(leftContent, 0);
         contentGrid.Children.Add(leftContent);
 
@@ -253,7 +243,6 @@ public static partial class InitLayout
         // Top part of nested grid
         var nestedTop = new Border
         {
-            Background = Brushes.OrangeRed,
             Child = InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
         };
         Grid.SetRow(nestedTop, 0);
@@ -312,7 +301,6 @@ public static partial class InitLayout
     {
         var contentGrid = new Grid
         {
-            Background = Brushes.White,
             ColumnDefinitions =
             {
                 new ColumnDefinition(GridLength.Star),
@@ -342,10 +330,7 @@ public static partial class InitLayout
         contentGrid.Children.Add(mainSplitter);
 
         // Right content (will hold the nested grid for right section)
-        var rightContent = new Border
-        {
-            Background = Brushes.MediumPurple
-        };
+        var rightContent = new Border();
         Grid.SetColumn(rightContent, 2);
         contentGrid.Children.Add(rightContent);
 
@@ -363,7 +348,6 @@ public static partial class InitLayout
         // Top part of right nested grid
         var rightNestedTop = new Border
         {
-            Background = Brushes.LightSeaGreen,
             Child = InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
         };
         Grid.SetRow(rightNestedTop, 0);
@@ -402,7 +386,6 @@ public static partial class InitLayout
     {
         var contentGrid = new Grid
         {
-            Background = Brushes.White,
             RowDefinitions =
             {
                 new RowDefinition(GridLength.Star),
@@ -436,7 +419,6 @@ public static partial class InitLayout
         // Middle section
         var middleContent = new Border
         {
-            Background = Brushes.LightSeaGreen,
             Child = InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
         };
         Grid.SetRow(middleContent, 2);
@@ -472,7 +454,6 @@ public static partial class InitLayout
     {
         var contentGrid = new Grid
         {
-            Background = Brushes.White,
             RowDefinitions =
             {
                 new RowDefinition(GridLength.Star),
@@ -484,7 +465,6 @@ public static partial class InitLayout
         // Top section
         var topContent = new Border
         {
-            Background = Brushes.CornflowerBlue,
             Child = InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
         };
         Grid.SetRow(topContent, 0);
@@ -520,7 +500,6 @@ public static partial class InitLayout
     {
         var contentGrid = new Grid
         {
-            Background = Brushes.White,
             ColumnDefinitions =
             {
                 new ColumnDefinition(GridLength.Star),
@@ -532,7 +511,6 @@ public static partial class InitLayout
         // Left section
         var leftContent = new Border
         {
-            Background = Brushes.CornflowerBlue,
             Child = InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
         };
         Grid.SetColumn(leftContent, 0);
@@ -568,7 +546,6 @@ public static partial class InitLayout
     {
         var contentGrid = new Grid
         {
-            Background = Brushes.White,
             RowDefinitions =
             {
                 new RowDefinition(GridLength.Star),
@@ -580,7 +557,6 @@ public static partial class InitLayout
         // Top section
         var topContent = new Border
         {
-            Background = Brushes.CornflowerBlue,
             Child = InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
         };
         Grid.SetRow(topContent, 0);
@@ -616,7 +592,6 @@ public static partial class InitLayout
     {
         var contentGrid = new Grid
         {
-            Background = Brushes.White,
             RowDefinitions =
             {
                 new RowDefinition(GridLength.Star),
@@ -648,7 +623,6 @@ public static partial class InitLayout
         // Bottom section
         var bottomContent = new Border
         {
-            Background = Brushes.PaleVioletRed,
             Child = InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
         };
         Grid.SetRow(bottomContent, 2);
@@ -664,7 +638,6 @@ public static partial class InitLayout
     {
         var contentGrid = new Grid
         {
-            Background = Brushes.White,
             RowDefinitions =
             {
                 new RowDefinition(GridLength.Star),
@@ -738,7 +711,6 @@ public static partial class InitLayout
         // Bottom content
         var bottomContent = new Border
         {
-            Background = Brushes.MediumPurple,
             Child = InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
         };
         Grid.SetRow(bottomContent, 2);
@@ -754,7 +726,6 @@ public static partial class InitLayout
     {
         var contentGrid = new Grid
         {
-            Background = Brushes.White,
             RowDefinitions =
             {
                 new RowDefinition(GridLength.Star),
@@ -808,7 +779,6 @@ public static partial class InitLayout
         // Bottom section
         var bottomContent = new Border
         {
-            Background = Brushes.PaleVioletRed,
             Child = InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm)
         };
         Grid.SetRow(bottomContent, 4);
