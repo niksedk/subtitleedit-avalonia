@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 using System;
 
@@ -12,6 +13,7 @@ namespace Nikse.SubtitleEdit.Controls
     {
         private TextBox? _textBox;
         private ButtonSpinner? _spinner;
+        private string _textBuffer = "00:00:00:000";
 
         public static readonly StyledProperty<TimeSpan> ValueProperty =
             AvaloniaProperty.Register<TimeCodeUpDown, TimeSpan>(
@@ -31,6 +33,7 @@ namespace Nikse.SubtitleEdit.Controls
         public TimeCodeUpDown()
         {
             Template = CreateTemplate();
+            _textBuffer = FormatTime(Value);
         }
 
         private static FuncControlTemplate<TimeCodeUpDown> CreateTemplate()
@@ -78,9 +81,63 @@ namespace Nikse.SubtitleEdit.Controls
             if (_textBox != null)
             {
                 _textBox.Text = FormatTime(Value);
+
+                _textBox.AddHandler(TextInputEvent, OnTextInput, RoutingStrategies.Tunnel);
                 _textBox.KeyDown += OnTextBoxKeyDown;
+
                 _textBox.IsReadOnly = true;
             }
+        }
+
+        private void OnTextInput(object? sender, TextInputEventArgs e)
+        {
+            if (_textBox == null || string.IsNullOrEmpty(e.Text)) return;
+
+            var c = e.Text[0];
+            if (!char.IsDigit(c))
+            {
+                e.Handled = true;
+                return;
+            }
+
+            var caret = _textBox.CaretIndex;
+            int pos = GetEditableIndex(caret);
+            if (pos < 0 || pos >= _textBuffer.Length)
+            {
+                e.Handled = true;
+                return;
+            }
+
+            char[] chars = _textBuffer.ToCharArray();
+            chars[pos] = c;
+            _textBuffer = new string(chars);
+            _textBox.Text = _textBuffer;
+            _textBox.CaretIndex = GetNextEditableIndex(pos + 1);
+
+            Value = ParseTime(_textBuffer);
+            e.Handled = true;
+        }
+
+        private int GetEditableIndex(int caret)
+        {
+            // Skip colons
+            if (caret == 2 || caret == 5 || caret == 8)
+                return caret + 1;
+            return caret;
+        }
+
+        private int GetNextEditableIndex(int caret)
+        {
+            if (caret == 2 || caret == 5 || caret == 8)
+                return caret + 1;
+            return caret;
+        }
+
+        private TimeSpan ParseTime(string text)
+        {
+            if (TimeSpan.TryParseExact(text, @"hh\:mm\:ss\:fff", null, out var result))
+                return result;
+            return TimeSpan.Zero;
         }
 
         private void OnSpin(object? sender, SpinEventArgs e)
@@ -134,9 +191,10 @@ namespace Nikse.SubtitleEdit.Controls
 
         private void UpdateText()
         {
+            _textBuffer = FormatTime(Value);
             if (_textBox != null)
             {
-                _textBox.Text = FormatTime(Value);
+                _textBox.Text = _textBuffer;
             }
         }
 
