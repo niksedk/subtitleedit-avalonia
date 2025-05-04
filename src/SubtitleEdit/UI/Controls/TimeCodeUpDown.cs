@@ -34,6 +34,15 @@ namespace Nikse.SubtitleEdit.Controls
         {
             Template = CreateTemplate();
             _textBuffer = FormatTime(Value);
+
+            this.GetObservable(ValueProperty).Subscribe(newValue =>
+            {
+                if (_textBox != null)
+                {
+                    _textBuffer = FormatTime(newValue);
+                    _textBox.Text = _textBuffer;
+                }
+            });
         }
 
         private static FuncControlTemplate<TimeCodeUpDown> CreateTemplate()
@@ -90,7 +99,9 @@ namespace Nikse.SubtitleEdit.Controls
             _spinner = e.NameScope.Find<ButtonSpinner>("PART_Spinner");
 
             if (_spinner != null)
+            {
                 _spinner.Spin += OnSpin;
+            }
 
             if (_textBox != null)
             {
@@ -115,7 +126,7 @@ namespace Nikse.SubtitleEdit.Controls
             }
 
             var caret = _textBox.CaretIndex;
-            int pos = GetEditableIndex(caret);
+            var pos = GetEditableIndex(caret);
             if (pos < 0 || pos >= _textBuffer.Length)
             {
                 e.Handled = true;
@@ -136,21 +147,30 @@ namespace Nikse.SubtitleEdit.Controls
         {
             // Skip colons
             if (caret == 2 || caret == 5 || caret == 8)
+            {
                 return caret + 1;
+            }
+
             return caret;
         }
 
         private int GetNextEditableIndex(int caret)
         {
             if (caret == 2 || caret == 5 || caret == 8)
+            {
                 return caret + 1;
+            }
+
             return caret;
         }
 
         private TimeSpan ParseTime(string text)
         {
             if (TimeSpan.TryParseExact(text, @"hh\:mm\:ss\:fff", null, out var result))
+            {
                 return result;
+            }
+
             return TimeSpan.Zero;
         }
 
@@ -212,10 +232,20 @@ namespace Nikse.SubtitleEdit.Controls
             }
         }
 
-        private string FormatTime(TimeSpan time) =>
-            $"{time.Hours:00}:{time.Minutes:00}:{time.Seconds:00}:{time.Milliseconds:000}";
+        private string FormatTime(TimeSpan time)
+        {
+            var hours = time.TotalHours;
+            if (hours > 99)
+            {
+                hours = 99;
+            }
 
-        private TimeSpan Clamp(TimeSpan time) =>
-            time.TotalMilliseconds < 0 ? TimeSpan.Zero : time;
+            return $"{hours:00}:{time.Minutes:00}:{time.Seconds:00}:{time.Milliseconds:000}";
+        }
+
+        private TimeSpan Clamp(TimeSpan time)
+        {
+            return time.TotalMilliseconds < 0 ? TimeSpan.Zero : time;
+        }
     }
 }
