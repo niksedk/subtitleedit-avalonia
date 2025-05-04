@@ -141,7 +141,7 @@ public static class InitMenu
                     {
                         new MenuItem
                         {
-                            Header = "_Sattings...",
+                            Header = "_Settings...",
                             Command =vm.CommandShowSettingsCommand,
                         },
                         new MenuItem

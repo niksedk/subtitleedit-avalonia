@@ -6,6 +6,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Nikse.SubtitleEdit.Controls;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -45,13 +46,13 @@ public static class InitListViewAndEditBox
         });
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
-            Header = "Start Time",
+            Header = "Show",
             Binding = new Binding("StartTime"),
             Width = new DataGridLength(120),
         });
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
-            Header = "End Time",
+            Header = "Hide",
             Binding = new Binding("EndTime"),
             Width = new DataGridLength(120),
         });
@@ -132,17 +133,30 @@ public static class InitListViewAndEditBox
         };
         startTimePanel.Children.Add(startTimeLabel);
 
-        var startTimeBox = new TextBox
+        //var startTimeBox = new TextBox
+        //{
+        //    Watermark = "hh:mm:ss.fff",
+        //    Height = 32,
+        //    [!TextBox.TextProperty] = new Binding("SelectedSubtitle.StartTime")
+        //    {
+        //        Mode = BindingMode.TwoWay,
+        //        StringFormat = "c" // "c" = constant ("00:00:00.000")
+        //    }
+        //};
+        //startTimePanel.Children.Add(startTimeBox);
+
+        var timeCodeUpDown = new TimeCodeUpDown
         {
-            Watermark = "hh:mm:ss.fff",
             Height = 32,
-            [!TextBox.TextProperty] = new Binding("SelectedSubtitle.StartTime")
+            [!TimeCodeUpDown.ValueProperty] = new Binding("SelectedSubtitle.StartTime")
             {
                 Mode = BindingMode.TwoWay,
                 StringFormat = "c" // "c" = constant ("00:00:00.000")
             }
         };
-        startTimePanel.Children.Add(startTimeBox);
+        startTimePanel.Children.Add(timeCodeUpDown);
+
+
         timeControlsPanel.Children.Add(startTimePanel);
 
         //// End Time controls
