@@ -37,6 +37,15 @@ public static class InitListViewAndEditBox
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch
         };
 
+        vm.SubtitleGrid2 = new TreeDataGrid
+        {
+            Height = double.NaN, // auto size inside scroll viewer
+            Margin = new Thickness(2),
+            Source = vm.TranslateRowSource,
+            CanUserSortColumns = false,
+            ContextFlyout = contextMenu,
+        };
+
         // Columns
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {

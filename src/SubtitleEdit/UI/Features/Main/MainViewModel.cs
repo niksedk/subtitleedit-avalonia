@@ -44,6 +44,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string statusText;
 
     public DataGrid SubtitleGrid { get; set; }
+    public TreeDataGrid SubtitleGrid2 { get; set; }
     public TextBox EditTextBox { get; set; }
     public MainView View { get; set; }
     public Window Window { get; set; }
