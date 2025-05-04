@@ -5,6 +5,7 @@ using Avalonia.Controls.Templates;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Media;
 using System;
 
 namespace Nikse.SubtitleEdit.Controls
@@ -59,6 +60,7 @@ namespace Nikse.SubtitleEdit.Controls
                     HorizontalContentAlignment = HorizontalAlignment.Left,
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                     Width = double.NaN,
+                    BorderBrush = Brushes.Transparent,
                 };
 
                 var grid = new Grid
