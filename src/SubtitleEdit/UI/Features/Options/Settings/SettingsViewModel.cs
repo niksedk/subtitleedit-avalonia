@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
 
@@ -26,7 +27,7 @@ public partial class SettingsViewModel : ObservableObject
         SelectedLanguage = Languages[0];
         
         Themes = new ObservableCollection<string> { "Light", "Dark" };
-        SelectedTheme = Themes[0];
+        SelectedTheme = Se.Settings.Appearance.Theme;
     }
 
     public static void ScrollElementIntoView(ScrollViewer scrollViewer, Control target)
@@ -55,6 +56,9 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private void CommandOk()
     {
+        Se.Settings.Appearance.Theme = SelectedTheme;
+        Se.SaveSettings();
+
         OkPressed = true;
         Window?.Close();
     }

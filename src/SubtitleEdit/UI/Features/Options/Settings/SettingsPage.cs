@@ -130,13 +130,8 @@ public class SettingsPage : UserControl
 
             new SettingsSection("Appearance", new[]
             {
-                new SettingsItem("Theme", () => new ComboBox
-                {
-                    DataContext = _vm,
-                    [!ComboBox.ItemsSourceProperty] = new Binding(nameof(_vm.Themes)),
-                    [!ComboBox.SelectedItemProperty] = new Binding(nameof(_vm.SelectedTheme)) { Mode = BindingMode.TwoWay },
-                    Width = 150
-                }),
+                new SettingsItem("Theme", () => 
+                UiUtil.MakeComboBox(_vm.Themes, _vm, nameof(_vm.SelectedTheme))),
                 new SettingsItem("Font Size", () => new Slider
                 {
                     Minimum = 10,

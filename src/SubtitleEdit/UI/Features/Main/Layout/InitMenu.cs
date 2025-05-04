@@ -19,7 +19,6 @@ public static class InitMenu
         return new Menu
         {
             Height = 30,
-            Background = Brushes.Orange,
             DataContext = vm,
             Items =
             {

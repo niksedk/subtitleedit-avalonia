@@ -5,6 +5,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -14,7 +15,6 @@ public static class InitToolbar
     {
         return new Border
         {
-            Background = Brushes.Black,
             Height = 40,
             Child = CreateToolbar(vm),
         };
@@ -22,11 +22,12 @@ public static class InitToolbar
 
     private static StackPanel CreateToolbar(MainViewModel vm)
     {
+        var path = $"Assets/Themes/{Se.Settings.Appearance.Theme}/";
+
         return new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Spacing = 5,
-            Background = Brushes.Black,
             Margin = new Avalonia.Thickness(5),
             Children =
             {
@@ -34,7 +35,7 @@ public static class InitToolbar
                 {
                     Content = new Image
                     {
-                        Source = new Bitmap("Assets/Themes/Dark/New.png"),
+                        Source = new Bitmap(path + "New.png"),
                         Width = 32,
                         Height = 32,
                     },
@@ -44,7 +45,7 @@ public static class InitToolbar
                 {
                     Content = new Image
                     {
-                        Source = new Bitmap("Assets/Themes/Dark/Open.png"),
+                        Source = new Bitmap(path + "Open.png"),
                         Width = 32,
                         Height = 32,
                     },
@@ -54,7 +55,7 @@ public static class InitToolbar
                 {
                     Content = new Image
                     {
-                        Source = new Bitmap("Assets/Themes/Dark/Save.png"),
+                        Source = new Bitmap(path + "Save.png"),
                         Width = 32,
                         Height = 32,
                     },
@@ -64,7 +65,7 @@ public static class InitToolbar
                 {
                     Content = new Image
                     {
-                        Source = new Bitmap("Assets/Themes/Dark/SaveAs.png"),
+                        Source = new Bitmap(path + "SaveAs.png"),
                         Width = 32,
                         Height = 32,
                     },
@@ -80,7 +81,7 @@ public static class InitToolbar
                 {
                     Content = new Image
                     {
-                        Source = new Bitmap("Assets/Themes/Dark/Find.png"),
+                        Source = new Bitmap(path + "Find.png"),
                         Width = 32,
                         Height = 32,
                     },
@@ -89,7 +90,7 @@ public static class InitToolbar
                 {
                     Content = new Image
                     {
-                        Source = new Bitmap("Assets/Themes/Dark/Replace.png"),
+                        Source = new Bitmap(path + "Replace.png"),
                         Width = 32,
                         Height = 32,
                     },
@@ -99,7 +100,7 @@ public static class InitToolbar
                 {
                     Content = new Image
                     {
-                        Source = new Bitmap("Assets/Themes/Dark/SpellCheck.png"),
+                        Source = new Bitmap(path + "SpellCheck.png"),
                         Width = 32,
                         Height = 32,
                     },
@@ -108,7 +109,7 @@ public static class InitToolbar
                 {
                     Content = new Image
                     {
-                        Source = new Bitmap("Assets/Themes/Dark/Settings.png"),
+                        Source = new Bitmap(path + "Settings.png"),
                         Width = 32,
                         Height = 32,                       
                     },
@@ -118,7 +119,7 @@ public static class InitToolbar
                 {
                     Content = new Image
                     {
-                        Source = new Bitmap("Assets/Themes/Dark/Layout.png"),
+                        Source = new Bitmap(path + "Layout.png"),
                         Width = 32,
                         Height = 32,
                     },
@@ -129,7 +130,7 @@ public static class InitToolbar
                 {
                     Content = new Image
                     {
-                        Source = new Bitmap("Assets/Themes/Dark/Help.png"),
+                        Source = new Bitmap(path + "Help.png"),
                         Width = 32,
                         Height = 32,
                     },

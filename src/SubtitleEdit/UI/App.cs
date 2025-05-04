@@ -4,22 +4,13 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml.Styling;
-using Avalonia.Platform;
 using Avalonia.Styling;
 using Avalonia.Themes.Fluent;
 using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit;
-using Nikse.SubtitleEdit.Features.Help;
 using Nikse.SubtitleEdit.Features.Main;
-using Nikse.SubtitleEdit.Features.Main.Layout;
-using Nikse.SubtitleEdit.Features.Options.Language;
-using Nikse.SubtitleEdit.Features.Options.Settings;
-using Nikse.SubtitleEdit.Features.Options.Shortcuts;
-using Nikse.SubtitleEdit.Features.Translate;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using Nikse.SubtitleEdit.Logic.Media;
-using SubtitleAlchemist.Logic.Media;
 
 var lifetime = new ClassicDesktopStyleApplicationLifetime
 {
@@ -53,7 +44,7 @@ var services = collection.BuildServiceProvider();
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 Se.LoadSettings();
 
-if (Application.Current!.ActualThemeVariant == ThemeVariant.Light)
+if (Se.Settings.Appearance.Theme == "Dark")
 {
     Application.Current!.RequestedThemeVariant = ThemeVariant.Dark;
 }

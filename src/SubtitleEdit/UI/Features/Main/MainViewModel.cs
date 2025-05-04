@@ -21,6 +21,8 @@ using Nikse.SubtitleEdit.Features.Options.Language;
 using Nikse.SubtitleEdit.Features.Options.Settings;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Features.Translate;
+using Avalonia.Styling;
+using Avalonia;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -227,13 +229,31 @@ public partial class MainViewModel : ObservableObject
     
     [RelayCommand]                   
     private async Task CommandShowSettings() 
-    {                                
+    {           
+        var oldTheme = Se.Settings.Appearance.Theme;
+
         var viewModel = await _windowService.ShowDialogAsync<SettingsWindow, SettingsViewModel>(Window);
-        if (viewModel.OkPressed)
+        if (!viewModel.OkPressed)
         {
-            // todo
+            return;
         }
-    }                                
+
+        if (oldTheme != viewModel.SelectedTheme)
+        {
+            if (viewModel.SelectedTheme == "Dark")
+            {
+                Application.Current!.RequestedThemeVariant = ThemeVariant.Dark;
+            }
+            else if (viewModel.SelectedTheme == "Light")
+            {
+                Application.Current!.RequestedThemeVariant = ThemeVariant.Light;
+            }
+            else
+            {
+                Application.Current!.RequestedThemeVariant = ThemeVariant.Default;
+            }
+        }
+    }
 
     [RelayCommand]                   
     private async Task CommandShowSettingsShortcuts() 
