@@ -12,6 +12,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -23,6 +24,7 @@ using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Features.Translate;
 using Avalonia.Styling;
 using Avalonia;
+using Avalonia.Controls.Models.TreeDataGrid;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -85,6 +87,21 @@ public partial class MainViewModel : ObservableObject
         SelectedEncoding = Encodings[0];
 
         statusText = string.Empty;
+        
+        SubtitlesSource = new FlatTreeDataGridSource<SubtitleLineViewModel>(Subtitles)
+        {
+            Columns =
+            {
+                new TextColumn<SubtitleLineViewModel, int>("#", x => x.Number),
+                new TextColumn<SubtitleLineViewModel, TimeSpan>("Show", x => x.StartTime),
+                new TextColumn<SubtitleLineViewModel, TimeSpan>("End", x => x.EndTime),
+                new TextColumn<SubtitleLineViewModel, TimeSpan>("Duration", x => x.Duration),
+                new TextColumn<SubtitleLineViewModel, string>("Text", x => x.Text),
+            },
+        };
+
+        var dataGridSource = SubtitlesSource as FlatTreeDataGridSource<SubtitleLineViewModel>;
+        dataGridSource!.RowSelection!.SingleSelect = false;
     }
 
     [RelayCommand]
@@ -356,6 +373,7 @@ public partial class MainViewModel : ObservableObject
     private bool IsEmpty => Subtitles.Count == 0 || string.IsNullOrEmpty(Subtitles[0].Text);
 
     public LibVLC LibVLC { get; internal set; }
+    public ITreeDataGridSource? SubtitlesSource { get; set; }
 
     private bool HasChanges()
     {
@@ -660,5 +678,22 @@ public partial class MainViewModel : ObservableObject
                 }
             }
         }
+    }
+
+    public void SubtitleGrid2_SelectionChanged( IReadOnlyList<SubtitleLineViewModel?> selectedItems)
+    {
+        if (selectedItems == null)
+        {
+            SelectedSubtitle = null;
+            return;
+        }
+
+        if (selectedItems.Count > 1)
+        {
+            SelectedSubtitle = null;
+            return;
+        }
+        
+        SelectedSubtitle = selectedItems.FirstOrDefault();
     }
 }

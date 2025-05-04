@@ -1,6 +1,8 @@
+using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Selection;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -33,17 +35,39 @@ public static class InitListViewAndEditBox
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
             HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
             Margin = new Thickness(0),
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch
+        };
+        
+        var subtitleContextMenu = new MenuFlyout
+        {
+            Items =
+            {
+                new MenuItem
+                {
+                    Header = "Delete",
+                    //Command = vm.TranslateRowCommand,
+                },
+            }
         };
 
         vm.SubtitleGrid2 = new TreeDataGrid
         {
             Height = double.NaN, // auto size inside scroll viewer
             Margin = new Thickness(2),
-            Source = vm.TranslateRowSource,
+            Source = vm.SubtitlesSource,
             CanUserSortColumns = false,
-            ContextFlyout = contextMenu,
+            ContextFlyout = subtitleContextMenu,
+        };
+        vm.SubtitleGrid2.SelectionChanging += (object? sender, CancelEventArgs args) =>
+        {
+            if (vm.SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source)
+            {
+                if (source.Selection is ITreeDataGridRowSelectionModel<SubtitleLineViewModel> x)
+                {
+                    vm.SubtitleGrid2_SelectionChanged(x.SelectedItems);   
+                }
+            }
         };
 
         // Columns
@@ -80,12 +104,15 @@ public static class InitListViewAndEditBox
         });
 
         // Bind data
-        vm.SubtitleGrid.ItemsSource = vm.Subtitles;
-        vm.SubtitleGrid.SelectionChanged += vm.SubtitleGrid_SelectionChanged;
+       // vm.SubtitleGrid.ItemsSource = vm.Subtitles;
+      //  vm.SubtitleGrid.SelectionChanged += vm.SubtitleGrid_SelectionChanged;
 
-        Grid.SetRow(vm.SubtitleGrid, 0);
-        mainGrid.Children.Add(vm.SubtitleGrid);
-        
+      //  Grid.SetRow(vm.SubtitleGrid, 0);
+      //  mainGrid.Children.Add(vm.SubtitleGrid);
+
+        Grid.SetRow(vm.SubtitleGrid2, 0);
+        mainGrid.Children.Add(vm.SubtitleGrid2);
+
 
         // Create a Flyout for the DataGrid
         var flyout = new MenuFlyout();
