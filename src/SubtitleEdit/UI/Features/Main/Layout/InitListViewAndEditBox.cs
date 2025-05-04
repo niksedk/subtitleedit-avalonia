@@ -11,6 +11,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.UI.Logic.ValueConverters;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -208,18 +209,17 @@ public static class InitListViewAndEditBox
         };
         durationPanel.Children.Add(durationLabel);
 
-        var durationBox = new TextBox
+        var durationUpDown = new NumericUpDown
         {
-            IsReadOnly = true,
-            Height = 32,
-            Background = new SolidColorBrush(Colors.LightGray),
-            [!TextBox.TextProperty] = new Binding("SelectedSubtitle.Duration")
+            DataContext = vm,
+            [!NumericUpDown.ValueProperty] = new Binding("SelectedSubtitle.Duration")
             {
                 Mode = BindingMode.TwoWay,
-                StringFormat = "c"
+                Converter = TimeSpanToSecondsConverter.Instance,
             }
         };
-        durationPanel.Children.Add(durationBox);
+
+        durationPanel.Children.Add(durationUpDown);
         timeControlsPanel.Children.Add(durationPanel);
 
         Grid.SetColumn(timeControlsPanel, 0);
