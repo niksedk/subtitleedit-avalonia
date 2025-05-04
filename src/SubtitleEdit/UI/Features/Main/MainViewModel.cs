@@ -25,6 +25,7 @@ using Nikse.SubtitleEdit.Features.Translate;
 using Avalonia.Styling;
 using Avalonia;
 using Avalonia.Controls.Models.TreeDataGrid;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -93,9 +94,18 @@ public partial class MainViewModel : ObservableObject
             Columns =
             {
                 new TextColumn<SubtitleLineViewModel, int>("#", x => x.Number),
-                new TextColumn<SubtitleLineViewModel, TimeSpan>("Show", x => x.StartTime),
-                new TextColumn<SubtitleLineViewModel, TimeSpan>("End", x => x.EndTime),
-                new TextColumn<SubtitleLineViewModel, TimeSpan>("Duration", x => x.Duration),
+                new TextColumn<SubtitleLineViewModel, string>("Show", x =>
+                    TimeSpanFormatter.ToStringHms(x.StartTime),
+                    (x, val) => x.StartTime = TimeSpanFormatter.FromStringHms(val)
+                ),
+                new TextColumn<SubtitleLineViewModel, string>("Hide", x =>
+                    TimeSpanFormatter.ToStringHms(x.EndTime),
+                    (x, val) => x.StartTime = TimeSpanFormatter.FromStringHms(val)
+                ),
+                new TextColumn<SubtitleLineViewModel, string>("Duration", x =>
+                    TimeSpanFormatterShort.ToStringShort(x.EndTime),
+                    (x, val) => x.StartTime = TimeSpanFormatterShort.FromStringShort(val)
+                ),
                 new TextColumn<SubtitleLineViewModel, string>("Text", x => x.Text),
             },
         };
