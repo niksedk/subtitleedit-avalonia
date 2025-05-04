@@ -31,8 +31,8 @@ namespace Nikse.SubtitleEdit.Features.Main;
 public partial class MainViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> subtitles;
-
     [ObservableProperty] private SubtitleLineViewModel? selectedSubtitle;
+    private List<SubtitleLineViewModel>? _selectedSubtitles;
     [ObservableProperty] private int? selectedSubtitleIndex;
 
     [ObservableProperty] private string editText;
@@ -45,8 +45,8 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty] private string statusText;
 
-    public DataGrid SubtitleGrid { get; set; }
-    public TreeDataGrid SubtitleGrid2 { get; set; }
+//    public DataGrid SubtitleGrid { get; set; }
+    public TreeDataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
     public MainView View { get; set; }
     public Window Window { get; set; }
@@ -287,7 +287,31 @@ public partial class MainViewModel : ObservableObject
         {
             // todo
         }
-    }                                
+    }
+
+    [RelayCommand]
+    private async Task DeleteSelectedLines()
+    {
+        await DeleteSelectedItems();
+    }
+
+    [RelayCommand]
+    private void InsertLineBefore()
+    {
+    }
+
+    [RelayCommand]
+    private void InsertLineAfter()
+    {
+        InsertAfterSelectedItem();
+    }
+
+    [RelayCommand]
+    private void ToggleLinesItalic()
+    {
+        ToggleItalic();
+    }
+
 
     private async Task SubtitleOpen(string fileName, string? videoFileName = null)
     {
@@ -444,18 +468,6 @@ public partial class MainViewModel : ObservableObject
         InitMenu.UpdateRecentFiles(this);
     }
 
-    public void SubtitleGrid_SelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
-        if (SubtitleGrid.SelectedItem is SubtitleLineViewModel selected)
-        {
-            SelectedSubtitle = selected;
-        }
-        else
-        {
-            SelectedSubtitle = null;
-        }
-    }
-
     private void ShowStatus(string statusText)
     {
         StatusText = statusText;
@@ -585,9 +597,9 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    public void DeleteSelectedItems()
+    public async Task DeleteSelectedItems()
     {
-        var selectedItems = SubtitleGrid.SelectedItems?.Cast<SubtitleLineViewModel>().ToList();
+        var selectedItems = _selectedSubtitles?.ToList() ?? new List<SubtitleLineViewModel>();
         if (selectedItems != null && selectedItems.Any())
         {
             foreach (var item in selectedItems)
@@ -599,7 +611,7 @@ public partial class MainViewModel : ObservableObject
 
     public void InsertAfterSelectedItem()
     {
-        var selectedItem = SubtitleGrid.SelectedItem as SubtitleLineViewModel;
+        var selectedItem = SelectedSubtitle;
         if (selectedItem != null)
         {
             var index = Subtitles.IndexOf(selectedItem);
@@ -608,14 +620,15 @@ public partial class MainViewModel : ObservableObject
             if (index >= 0)
             {
                 Subtitles.Insert(index + 1, newItem);
-                SubtitleGrid.SelectedItem = newItem;
+                SelectedSubtitle = newItem;
+                //TODO: SubtitleGrid.SelectedItem = newItem;
             }
         }
     }
 
     public void ToggleItalic()
     {
-        var selectedItems = SubtitleGrid.SelectedItems?.Cast<SubtitleLineViewModel>().ToList();
+        var selectedItems = _selectedSubtitles?.ToList() ?? new List<SubtitleLineViewModel>();
         if (selectedItems != null && selectedItems.Any())
         {
             foreach (var item in selectedItems)
@@ -680,14 +693,16 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    public void SubtitleGrid2_SelectionChanged( IReadOnlyList<SubtitleLineViewModel?> selectedItems)
+    public void SubtitleGrid2_SelectionChanged(IReadOnlyList<SubtitleLineViewModel> selectedItems)
     {
         if (selectedItems == null)
         {
             SelectedSubtitle = null;
+            _selectedSubtitles = null;
             return;
         }
 
+        _selectedSubtitles = selectedItems.ToList();
         if (selectedItems.Count > 1)
         {
             SelectedSubtitle = null;

@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
@@ -9,6 +10,7 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Controls;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -24,20 +26,7 @@ public static class InitListViewAndEditBox
         {
             RowDefinitions = new RowDefinitions("*,Auto") // First row fills, second is auto-sized
         };
-
-        // DataGrid for subtitles
-        vm.SubtitleGrid = new DataGrid
-        {
-            AutoGenerateColumns = false,
-            CanUserResizeColumns = true,
-            IsReadOnly = true,
-            SelectionMode = DataGridSelectionMode.Extended,
-            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-            HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
-            Margin = new Thickness(0),
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Stretch
-        };
+     
         
         var subtitleContextMenu = new MenuFlyout
         {
@@ -46,12 +35,22 @@ public static class InitListViewAndEditBox
                 new MenuItem
                 {
                     Header = "Delete",
-                    //Command = vm.TranslateRowCommand,
+                    Command = vm.DeleteSelectedLinesCommand,
                 },
-            }
+                new MenuItem
+                {
+                    Header = "Insert after",
+                    Command = vm.InsertLineAfterCommand,
+                },
+                new MenuItem
+                {
+                    Header = "Toggle italic",
+                    Command = vm.ToggleLinesItalicCommand,
+                },
+            },
         };
 
-        vm.SubtitleGrid2 = new TreeDataGrid
+        vm.SubtitleGrid = new TreeDataGrid
         {
             Height = double.NaN, // auto size inside scroll viewer
             Margin = new Thickness(2),
@@ -59,59 +58,32 @@ public static class InitListViewAndEditBox
             CanUserSortColumns = false,
             ContextFlyout = subtitleContextMenu,
         };
-        vm.SubtitleGrid2.SelectionChanging += (object? sender, CancelEventArgs args) =>
+
+
+        if (vm.SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source)
         {
-            if (vm.SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source)
+            source.RowSelection!.SelectionChanged += (sender, e) =>
             {
-                if (source.Selection is ITreeDataGridRowSelectionModel<SubtitleLineViewModel> x)
-                {
-                    vm.SubtitleGrid2_SelectionChanged(x.SelectedItems);   
-                }
-            }
-        };
+                vm.SubtitleGrid2_SelectionChanged(source.RowSelection.SelectedItems);
 
-        // Columns
-        vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
-        {
-            Header = "#",
-            Binding = new Binding("Number"),
-            Width = new DataGridLength(50),
-        });
-        vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
-        {
-            Header = "Show",
-            Binding = new Binding("StartTime"),
-            Width = new DataGridLength(120),
-        });
-        vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
-        {
-            Header = "Hide",
-            Binding = new Binding("EndTime"),
-            Width = new DataGridLength(120),
-        });
-        vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
-        {
-            Header = "Duration",
-            Binding = new Binding("Duration"),
-            Width = new DataGridLength(120),
-            IsReadOnly = true,
-        });
-        vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
-        {
-            Header = "Text",
-            Binding = new Binding("Text"),
-            Width = new DataGridLength(1, DataGridLengthUnitType.Star), // Stretch text column
-        });
+                // If needed: vm.SelectedSubtitle = source.RowSelection.SelectedRows.FirstOrDefault()?.Model;
+            };
+        }
 
-        // Bind data
-       // vm.SubtitleGrid.ItemsSource = vm.Subtitles;
-      //  vm.SubtitleGrid.SelectionChanged += vm.SubtitleGrid_SelectionChanged;
 
-      //  Grid.SetRow(vm.SubtitleGrid, 0);
-      //  mainGrid.Children.Add(vm.SubtitleGrid);
+        //vm.SubtitleGrid.SelectionChanging += (object? sender, CancelEventArgs args) =>
+        //{
+        //    if (vm.SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source)
+        //    {
+        //        if (source.Selection is ITreeDataGridRowSelectionModel<SubtitleLineViewModel> x)
+        //        {
+        //            //vm.SubtitleGrid2_SelectionChanged(x.SelectedItems);   
+        //        }
+        //    }
+        //};
 
-        Grid.SetRow(vm.SubtitleGrid2, 0);
-        mainGrid.Children.Add(vm.SubtitleGrid2);
+        Grid.SetRow(vm.SubtitleGrid, 0);
+        mainGrid.Children.Add(vm.SubtitleGrid);
 
 
         // Create a Flyout for the DataGrid
@@ -135,9 +107,9 @@ public static class InitListViewAndEditBox
         flyout.Items.Add(italicMenuItem);
         
         // Set the ContextFlyout property
-        vm.SubtitleGrid.ContextFlyout = flyout;
-        vm.SubtitleGrid.AddHandler(InputElement.PointerPressedEvent, vm.SubtitleGrid_PointerPressed, RoutingStrategies.Tunnel);
-        vm.SubtitleGrid.AddHandler(InputElement.PointerReleasedEvent, vm.SubtitleGrid_PointerReleased, RoutingStrategies.Tunnel);
+        //vm.SubtitleGrid.ContextFlyout = flyout;
+        //vm.SubtitleGrid.AddHandler(InputElement.PointerPressedEvent, vm.SubtitleGrid_PointerPressed, RoutingStrategies.Tunnel);
+        //vm.SubtitleGrid.AddHandler(InputElement.PointerReleasedEvent, vm.SubtitleGrid_PointerReleased, RoutingStrategies.Tunnel);
 
         // Edit area - restructured with time controls on left, multiline text on right
         var editGrid = new Grid
