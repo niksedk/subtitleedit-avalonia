@@ -28,6 +28,7 @@ using Avalonia.Controls.Models.TreeDataGrid;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 using System.Threading;
 using Avalonia.Animation;
+using Avalonia.Controls.Selection;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -328,39 +329,79 @@ public partial class MainViewModel : ObservableObject
         SelectAllRows();
     }
     
+    [RelayCommand]
+    private void InverseSelection()
+    {
+        InverseRowSelection();
+    }
+    
     private void SelectAllRows()
     {
-        // For a single selection mode TreeDataGrid
-        if (SubtitleGrid.Selection is TreeDataGridSelection selection)
+        if (SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source)
         {
-            // Get the source collection
-            var items = myTreeDataGrid.ItemsSource;
-        
-            // Clear previous selection
-            selection.Clear();
-        
-            // Select all items
-            for (int i = 0; i < items.Count; i++)
+            if (source.Selection is ITreeDataGridRowSelectionModel<SubtitleLineViewModel> x)
             {
-                selection.Select(i);
+                x.Clear();
+                for (var i = 0; i < source.Items.Count(); i++)
+                {
+                    x.Select(i);
+                }
             }
         }
+        
+        
+        
     
-        // For a multiple selection mode TreeDataGrid
-        if (myTreeDataGrid.Selection is TreeDataGridMultiSelection multiSelection)
+        // // For a multiple selection mode TreeDataGrid
+        // if (myTreeDataGrid.Selection is TreeDataGridMultiSelection multiSelection)
+        // {
+        //     // Get the source collection
+        //     var items = myTreeDataGrid.ItemsSource;
+        //
+        //     // Clear previous selection
+        //     multiSelection.Clear();
+        //
+        //     // Select all items
+        //     for (int i = 0; i < items.Count; i++)
+        //     {
+        //         multiSelection.Select(i);
+        //     }
+        // }
+    }
+    
+    private void InverseRowSelection()
+    {
+        if (SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source)
         {
-            // Get the source collection
-            var items = myTreeDataGrid.ItemsSource;
-        
-            // Clear previous selection
-            multiSelection.Clear();
-        
-            // Select all items
-            for (int i = 0; i < items.Count; i++)
+            if (source.Selection is ITreeDataGridRowSelectionModel<SubtitleLineViewModel> x)
             {
-                multiSelection.Select(i);
+                var oldIndices = x.SelectedIndexes.ToArray();
+                x.Clear();
+                for (var i = 0; i < source.Items.Count(); i++)
+                {
+                    if (!oldIndices.Contains(i))
+                    {
+                        x.Select(i);
+                    }
+                }
             }
         }
+        
+        // // For a multiple selection mode TreeDataGrid
+        // if (myTreeDataGrid.Selection is TreeDataGridMultiSelection multiSelection)
+        // {
+        //     // Get the source collection
+        //     var items = myTreeDataGrid.ItemsSource;
+        //
+        //     // Clear previous selection
+        //     multiSelection.Clear();
+        //
+        //     // Select all items
+        //     for (int i = 0; i < items.Count; i++)
+        //     {
+        //         multiSelection.Select(i);
+        //     }
+        // }
     }
 
 
@@ -781,6 +822,13 @@ public partial class MainViewModel : ObservableObject
         }
 
         var item = selectedItems.FirstOrDefault();
+        if (item == null)
+        {
+            SelectedSubtitle = null;
+            StatusTextRight = string.Empty;
+            return;
+        }
+        
         SelectedSubtitle = item;
         StatusTextRight = $"{item.Number}/{Subtitles.Count}";
     }

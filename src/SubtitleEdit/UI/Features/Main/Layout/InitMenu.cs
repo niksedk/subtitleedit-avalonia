@@ -74,8 +74,16 @@ public static class InitMenu
                         new MenuItem { Header = "Find _next" },
                         new MenuItem { Header = "_Multiple replace" },
                         new Separator(),
-                        new MenuItem { Header = "Select _all" },
-                        new MenuItem { Header = "_Inverse selection" },
+                        new MenuItem
+                        {
+                            Header = "Select _all",
+                            Command =vm.SelectAllLinesCommand,
+                        },                        
+                        new MenuItem
+                        {
+                            Header = "_Inverse selection",
+                            Command =vm.InverseSelectionCommand,
+                        },                        
                     }
                 },
                 new MenuItem
