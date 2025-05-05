@@ -12,14 +12,19 @@ public class TimeSpanToSecondsConverter : IValueConverter
     {
         if (value is TimeSpan timeSpan)
         {
-            return timeSpan.TotalSeconds;
+            return timeSpan.TotalSeconds.ToString("0.000");
         }
 
-        return 0.0;
+        return "0.000";
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
+        if (value is string stringValue)
+        {
+            return TimeSpan.Parse(stringValue);
+        }
+        
         if (value is decimal decimalSeconds)
         {
             return TimeSpan.FromSeconds((double)decimalSeconds);

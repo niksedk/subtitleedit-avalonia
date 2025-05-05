@@ -108,8 +108,8 @@ public partial class MainViewModel : ObservableObject
                     (x, val) => x.StartTime = TimeSpanFormatter.FromStringHms(val)
                 ),
                 new TextColumn<SubtitleLineViewModel, string>("Duration", x =>
-                        TimeSpanFormatterShort.ToStringShort(x.EndTime),
-                    (x, val) => x.StartTime = TimeSpanFormatterShort.FromStringShort(val)
+                        TimeSpanFormatterShort.ToStringShort(x.Duration),
+                    (x, val) => x.Duration = TimeSpanFormatterShort.FromStringShort(val)
                 ),
                 new TextColumn<SubtitleLineViewModel, string>("Text", x => x.Text),
             },

@@ -53,32 +53,16 @@ public static class InitListViewAndEditBox
             ContextFlyout = subtitleContextMenu,
         };
 
-
         if (vm.SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source)
         {
             source.RowSelection!.SelectionChanged += (sender, e) =>
             {
                 vm.SubtitleGrid_SelectionChanged(source.RowSelection.SelectedItems);
-
-                // If needed: vm.SelectedSubtitle = source.RowSelection.SelectedRows.FirstOrDefault()?.Model;
             };
         }
 
-
-        //vm.SubtitleGrid.SelectionChanging += (object? sender, CancelEventArgs args) =>
-        //{
-        //    if (vm.SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source)
-        //    {
-        //        if (source.Selection is ITreeDataGridRowSelectionModel<SubtitleLineViewModel> x)
-        //        {
-        //            //vm.SubtitleGrid2_SelectionChanged(x.SelectedItems);   
-        //        }
-        //    }
-        //};
-
         Grid.SetRow(vm.SubtitleGrid, 0);
         mainGrid.Children.Add(vm.SubtitleGrid);
-
 
         // Create a Flyout for the DataGrid
         var flyout = new MenuFlyout();
@@ -117,7 +101,7 @@ public static class InitListViewAndEditBox
         var timeControlsPanel = new StackPanel
         {
             Spacing = 8,
-            Width = 200,
+            Width = 180,
             Margin = new Thickness(0, 0, 10, 0)
         };
 
@@ -153,7 +137,6 @@ public static class InitListViewAndEditBox
             [!TimeCodeUpDown.ValueProperty] = new Binding("SelectedSubtitle.StartTime")
             {
                 Mode = BindingMode.TwoWay,
-                //StringFormat = "c" // "c" = constant ("00:00:00.000")
             }
         };
         startTimePanel.Children.Add(timeCodeUpDown);
@@ -236,7 +219,8 @@ public static class InitListViewAndEditBox
         {
             AcceptsReturn = true,
             TextWrapping = TextWrapping.Wrap,
-            MinHeight = 100,
+            MinHeight = 92,
+            Height = 92,
             [!TextBox.TextProperty] = new Binding("SelectedSubtitle.Text")
             {
                 Mode = BindingMode.TwoWay
