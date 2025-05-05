@@ -135,7 +135,7 @@ namespace Nikse.SubtitleEdit.Controls
                 return;
             }
 
-            char[] chars = _textBuffer.ToCharArray();
+            var chars = _textBuffer.ToCharArray();
             chars[pos] = c;
             _textBuffer = new string(chars);
             _textBox.Text = _textBuffer;
@@ -240,6 +240,10 @@ namespace Nikse.SubtitleEdit.Controls
             if (hours > 99)
             {
                 hours = 99;
+            }
+            else
+            {
+                hours = time.Hours;
             }
 
             return $"{hours:00}:{time.Minutes:00}:{time.Seconds:00}:{time.Milliseconds:000}";
