@@ -26,6 +26,8 @@ using Avalonia.Styling;
 using Avalonia;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
+using System.Threading;
+using Avalonia.Animation;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -44,9 +46,9 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<TextEncoding> encodings;
     public TextEncoding SelectedEncoding { get; set; }
 
-    [ObservableProperty] private string statusText;
+    [ObservableProperty] private string _statusTextLeft;
+    [ObservableProperty] private string _statusTextRight;
 
-//    public DataGrid SubtitleGrid { get; set; }
     public TreeDataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
     public MainView View { get; set; }
@@ -64,12 +66,14 @@ public partial class MainViewModel : ObservableObject
     private Subtitle _subtitle;
 
     private string? _videoFileName;
-
+    private CancellationTokenSource? _statusFadeCts;
     private int _changeSubtitleHash = -1;
 
     private readonly IFileHelper _fileHelper;
     private readonly IShortcutManager _shortcutManager;
     private readonly IWindowService _windowService;
+
+
 
     public MainViewModel(IFileHelper fileHelper, IShortcutManager shortcutManager, IWindowService windowService)
     {
@@ -87,8 +91,9 @@ public partial class MainViewModel : ObservableObject
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         SelectedEncoding = Encodings[0];
 
-        statusText = string.Empty;
-        
+        StatusTextLeft = string.Empty;
+        StatusTextRight = string.Empty;
+
         SubtitlesSource = new FlatTreeDataGridSource<SubtitleLineViewModel>(Subtitles)
         {
             Columns =
@@ -408,6 +413,7 @@ public partial class MainViewModel : ObservableObject
 
     public LibVLC LibVLC { get; internal set; }
     public ITreeDataGridSource? SubtitlesSource { get; set; }
+    public TextBlock StatusTextLeftLabel { get; internal set; }
 
     private bool HasChanges()
     {
@@ -478,9 +484,51 @@ public partial class MainViewModel : ObservableObject
         InitMenu.UpdateRecentFiles(this);
     }
 
-    private void ShowStatus(string statusText)
+    public async Task ShowStatus(string message)
     {
-        StatusText = statusText;
+        // Cancel any previous animation
+        _statusFadeCts?.Cancel();
+        _statusFadeCts = new CancellationTokenSource();
+        var token = _statusFadeCts.Token;
+
+        StatusTextLeft = message;
+        StatusTextLeftLabel.Opacity = 1;
+        StatusTextLeftLabel.IsVisible = true;
+
+        try
+        {
+            await Task.Delay(3000, token); // Wait 3 seconds, cancellable
+
+            var animation = new Animation
+            {
+                Duration = TimeSpan.FromSeconds(1),
+                Children =
+                {
+                    new KeyFrame
+                    {
+                        Cue = new Cue(0),
+                        Setters = { new Setter(TextBlock.OpacityProperty, 1d) }
+                    },
+                    new KeyFrame
+                    {
+                        Cue = new Cue(1),
+                        Setters = { new Setter(TextBlock.OpacityProperty, 0d) }
+                    }
+                },
+                
+            };
+
+            await animation.RunAsync(StatusTextLeftLabel, token);
+
+            //await Task.Delay(100, token);
+
+            //StatusTextLeftLabel.IsVisible = false;
+            //StatusTextLeft = string.Empty;
+        }
+        catch (TaskCanceledException)
+        {
+            // Ignore - a new message came in and interrupted
+        }
     }
 
     internal void OnClosing()
@@ -703,12 +751,13 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    public void SubtitleGrid2_SelectionChanged(IReadOnlyList<SubtitleLineViewModel> selectedItems)
+    public void SubtitleGrid_SelectionChanged(IReadOnlyList<SubtitleLineViewModel> selectedItems)
     {
         if (selectedItems == null)
         {
             SelectedSubtitle = null;
             _selectedSubtitles = null;
+            StatusTextRight = string.Empty;
             return;
         }
 
@@ -716,9 +765,12 @@ public partial class MainViewModel : ObservableObject
         if (selectedItems.Count > 1)
         {
             SelectedSubtitle = null;
+            StatusTextRight = $"{selectedItems.Count} lines selected of {Subtitles.Count}";
             return;
         }
-        
-        SelectedSubtitle = selectedItems.FirstOrDefault();
+
+        var item = selectedItems.FirstOrDefault();
+        SelectedSubtitle = item;
+        StatusTextRight = $"{item.Number}/{Subtitles.Count}";
     }
 }

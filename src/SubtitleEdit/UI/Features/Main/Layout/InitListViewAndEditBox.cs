@@ -58,7 +58,7 @@ public static class InitListViewAndEditBox
         {
             source.RowSelection!.SelectionChanged += (sender, e) =>
             {
-                vm.SubtitleGrid2_SelectionChanged(source.RowSelection.SelectedItems);
+                vm.SubtitleGrid_SelectionChanged(source.RowSelection.SelectedItems);
 
                 // If needed: vm.SelectedSubtitle = source.RowSelection.SelectedRows.FirstOrDefault()?.Model;
             };

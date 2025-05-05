@@ -45,7 +45,7 @@ public class MainView : ViewBase
         root.Children.Add(InitToolbar.Make(_vm).Dock(Dock.Top));
 
         // Footer
-        root.Children.Add(ViewFooter.Make(_vm).Dock(Dock.Bottom));
+        root.Children.Add(InitFooter.Make(_vm).Dock(Dock.Bottom));
 
         // Main content (fills all remaining space)
         _vm.ContentGrid = ViewContent.Make(_vm);
