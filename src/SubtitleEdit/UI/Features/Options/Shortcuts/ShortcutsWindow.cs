@@ -1,8 +1,7 @@
+using System.Collections.ObjectModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
-using Avalonia.Layout;
-using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
@@ -20,18 +19,23 @@ public class ShortcutsWindow : Window
         Height = 600;
         CanResize = true;
         
+        _vm = vm;
+        vm.Window = this;
+        DataContext = vm;
+        
         _searchBox = new TextBox
         {
-            Watermark = "Search settings...",
+            Watermark = "Search shortcuts...",
             Margin = new Thickness(10),
         };
-        
-        var contentPanel = new StackPanel
+
+        var contentPanel = new TreeDataGrid()
         {
-            Orientation = Orientation.Vertical,
-            Spacing = 15,
-            Margin = new Thickness(10),
-            Children = { new Label { Content = "Shortcuts:" } }
+            Height = double.NaN, // auto size inside scroll viewer
+            Margin = new Thickness(2),
+            Source = vm.ShortcutsSource,
+            DataContext = _vm,
+            CanUserSortColumns = false,
         };
 
         var scrollViewer = new ScrollViewer
@@ -40,35 +44,43 @@ public class ShortcutsWindow : Window
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
         };
 
-        var buttonOk = new Button
-        {
-            Content = "OK",
-        };
+        var buttonOk = UiUtil.MakeButton("OK", vm.CommandOkCommand);
+        var buttonCancel = UiUtil.MakeButton("Cancel", vm.CommandCancelCommand);
+        var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
-        var buttonCancel = new Button
+        var grid = new Grid
         {
-            Content = "Cancel",
+            RowDefinitions = new RowDefinitions("Auto,*,Auto"),
+            ColumnDefinitions = new ColumnDefinitions("*")
         };
-            
-        var buttonPanel = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            Spacing = 15,
-            Margin = new Thickness(10),
-            Children = { buttonOk, buttonCancel }
-        };
+        grid.Children.Add(_searchBox);
+        Grid.SetRow(_searchBox, 0);
+        Grid.SetColumn(_searchBox, 0);
+        
+        grid.Children.Add(scrollViewer);
+        Grid.SetRow(scrollViewer, 1);
+        Grid.SetColumn(scrollViewer, 0);
 
-        var dockPanel = new DockPanel
-        {
-            Children =
-            {
-                _searchBox,
-                scrollViewer,
-                buttonPanel,
-            }
-        };
+        grid.Children.Add(buttonPanel);
+        Grid.SetRow(buttonPanel, 2);
+        Grid.SetColumn(buttonPanel, 0);
 
-        Content = dockPanel;
-
+        Content = grid;
     }
+}
+
+public class ShortcutItem
+{
+    public ShortcutCategory Category { get; set; }
+    public string Keys { get; set; }
+    public int Age { get; set; }
+    public ShortCut Shortcut { get; set; }
+    public ObservableCollection<ShortcutItem> Children { get; } = new();
+}
+
+public enum ShortcutCategory
+{
+    General,
+    ListViewAndTextBox,
+    Waveform,
 }
