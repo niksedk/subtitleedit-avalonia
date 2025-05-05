@@ -141,7 +141,6 @@ public static class InitToolbar
                 new TextBlock
                 {
                     Text = "Subtitle Format",
-                    Foreground = Brushes.White,
                     VerticalAlignment = VerticalAlignment.Center,
                     Margin = new Avalonia.Thickness(5, 0, 0, 0),
                 },
@@ -166,7 +165,6 @@ public static class InitToolbar
                 new TextBlock
                 {
                     Text = "Encoding",
-                    Foreground = Brushes.White,
                     VerticalAlignment = VerticalAlignment.Center,
                     Margin = new Avalonia.Thickness(5, 0, 0, 0),
                 },

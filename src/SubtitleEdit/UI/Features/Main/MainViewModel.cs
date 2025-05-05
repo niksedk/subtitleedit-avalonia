@@ -74,7 +74,6 @@ public partial class MainViewModel : ObservableObject
     private readonly IWindowService _windowService;
 
 
-
     public MainViewModel(IFileHelper fileHelper, IShortcutManager shortcutManager, IWindowService windowService)
     {
         _fileHelper = fileHelper;
@@ -100,15 +99,15 @@ public partial class MainViewModel : ObservableObject
             {
                 new TextColumn<SubtitleLineViewModel, int>("#", x => x.Number),
                 new TextColumn<SubtitleLineViewModel, string>("Show", x =>
-                    TimeSpanFormatter.ToStringHms(x.StartTime),
+                        TimeSpanFormatter.ToStringHms(x.StartTime),
                     (x, val) => x.StartTime = TimeSpanFormatter.FromStringHms(val)
                 ),
                 new TextColumn<SubtitleLineViewModel, string>("Hide", x =>
-                    TimeSpanFormatter.ToStringHms(x.EndTime),
+                        TimeSpanFormatter.ToStringHms(x.EndTime),
                     (x, val) => x.StartTime = TimeSpanFormatter.FromStringHms(val)
                 ),
                 new TextColumn<SubtitleLineViewModel, string>("Duration", x =>
-                    TimeSpanFormatterShort.ToStringShort(x.EndTime),
+                        TimeSpanFormatterShort.ToStringShort(x.EndTime),
                     (x, val) => x.StartTime = TimeSpanFormatterShort.FromStringShort(val)
                 ),
                 new TextColumn<SubtitleLineViewModel, string>("Text", x => x.Text),
@@ -149,11 +148,9 @@ public partial class MainViewModel : ObservableObject
     private async Task CommandShowLayout()
     {
         // Open a dialog with a specific ViewModel and get the result
-        var vm = await _windowService.ShowDialogAsync<LayoutWindow, LayoutViewModel>(Window, viewModel =>
-        {
-            viewModel.SelectedLayout = Se.Settings.General.LayoutNumber;
-        });
-                
+        var vm = await _windowService.ShowDialogAsync<LayoutWindow, LayoutViewModel>(Window,
+            viewModel => { viewModel.SelectedLayout = Se.Settings.General.LayoutNumber; });
+
         if (vm.OkPressed && vm.SelectedLayout != null && vm.SelectedLayout != Se.Settings.General.LayoutNumber)
         {
             Se.Settings.General.LayoutNumber = InitLayout.MakeLayout(MainView, this, vm.SelectedLayout.Value);
@@ -236,7 +233,7 @@ public partial class MainViewModel : ObservableObject
         var fileName = await _fileHelper.PickOpenVideoFile(Window, "Open video file");
         if (!string.IsNullOrEmpty(fileName))
         {
-            VideoOpenFile(fileName);
+            await VideoOpenFile(fileName);
         }
     }
 
@@ -246,23 +243,21 @@ public partial class MainViewModel : ObservableObject
         VideoCloseFile();
     }
 
-    [RelayCommand]                   
-    private async Task CommandShowAutoTranslate() 
-    {     
-        var viewModel = await _windowService.ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(Window, viewModel =>
-        {
-            viewModel.Initialize(GetUpdateSubtitle());
-        });
-                
+    [RelayCommand]
+    private async Task CommandShowAutoTranslate()
+    {
+        var viewModel = await _windowService.ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(Window,
+            viewModel => { viewModel.Initialize(GetUpdateSubtitle()); });
+
         if (viewModel.OkPressed)
         {
             Console.WriteLine("User confirmed the action");
         }
-    }                                
-    
-    [RelayCommand]                   
-    private async Task CommandShowSettings() 
-    {           
+    }
+
+    [RelayCommand]
+    private async Task CommandShowSettings()
+    {
         var oldTheme = Se.Settings.Appearance.Theme;
 
         var viewModel = await _windowService.ShowDialogAsync<SettingsWindow, SettingsViewModel>(Window);
@@ -288,15 +283,15 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    [RelayCommand]                   
-    private async Task CommandShowSettingsShortcuts() 
-    {                                
+    [RelayCommand]
+    private async Task CommandShowSettingsShortcuts()
+    {
         await _windowService.ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(Window);
-    }                                
-  
-    [RelayCommand]                   
-    private async Task CommandShowSettingsLanguage() 
-    {                    
+    }
+
+    [RelayCommand]
+    private async Task CommandShowSettingsLanguage()
+    {
         var viewModel = await _windowService.ShowDialogAsync<LanguageWindow, LanguageViewModel>(Window);
         if (viewModel.OkPressed)
         {
@@ -325,6 +320,47 @@ public partial class MainViewModel : ObservableObject
     private void ToggleLinesItalic()
     {
         ToggleItalic();
+    }
+    
+    [RelayCommand]
+    private void SelectAllLines()
+    {
+        SelectAllRows();
+    }
+    
+    private void SelectAllRows()
+    {
+        // For a single selection mode TreeDataGrid
+        if (SubtitleGrid.Selection is TreeDataGridSelection selection)
+        {
+            // Get the source collection
+            var items = myTreeDataGrid.ItemsSource;
+        
+            // Clear previous selection
+            selection.Clear();
+        
+            // Select all items
+            for (int i = 0; i < items.Count; i++)
+            {
+                selection.Select(i);
+            }
+        }
+    
+        // For a multiple selection mode TreeDataGrid
+        if (myTreeDataGrid.Selection is TreeDataGridMultiSelection multiSelection)
+        {
+            // Get the source collection
+            var items = myTreeDataGrid.ItemsSource;
+        
+            // Clear previous selection
+            multiSelection.Clear();
+        
+            // Select all items
+            for (int i = 0; i < items.Count; i++)
+            {
+                multiSelection.Select(i);
+            }
+        }
     }
 
 
@@ -379,17 +415,17 @@ public partial class MainViewModel : ObservableObject
         _subtitleFileName = fileName;
         _subtitle = subtitle;
         SetSubtitles(_subtitle);
-        ShowStatus($"Subtitle loaded: {fileName}");
+        await ShowStatus($"Subtitle loaded: {fileName}");
         AddToRecentFiles();
         _changeSubtitleHash = GetFastSubtitleHash();
 
         if (!string.IsNullOrEmpty(videoFileName) && File.Exists(videoFileName))
         {
-            VideoOpenFile(videoFileName);
+            await VideoOpenFile(videoFileName);
         }
         else if (FindVideoFileName.TryFindVideoFileName(fileName, out videoFileName))
         {
-            VideoOpenFile(videoFileName);
+            await VideoOpenFile(videoFileName);
         }
     }
 
@@ -424,7 +460,7 @@ public partial class MainViewModel : ObservableObject
     {
         if (Subtitles == null || !Subtitles.Any())
         {
-            ShowStatus("Nothing to save");
+            await ShowStatus("Nothing to save");
             return;
         }
 
@@ -484,7 +520,7 @@ public partial class MainViewModel : ObservableObject
         InitMenu.UpdateRecentFiles(this);
     }
 
-    public async Task ShowStatus(string message)
+    private async Task ShowStatus(string message, int delayMs = 3000)
     {
         // Cancel any previous animation
         _statusFadeCts?.Cancel();
@@ -497,33 +533,8 @@ public partial class MainViewModel : ObservableObject
 
         try
         {
-            await Task.Delay(3000, token); // Wait 3 seconds, cancellable
-
-            var animation = new Animation
-            {
-                Duration = TimeSpan.FromSeconds(1),
-                Children =
-                {
-                    new KeyFrame
-                    {
-                        Cue = new Cue(0),
-                        Setters = { new Setter(TextBlock.OpacityProperty, 1d) }
-                    },
-                    new KeyFrame
-                    {
-                        Cue = new Cue(1),
-                        Setters = { new Setter(TextBlock.OpacityProperty, 0d) }
-                    }
-                },
-                
-            };
-
-            await animation.RunAsync(StatusTextLeftLabel, token);
-
-            //await Task.Delay(100, token);
-
-            //StatusTextLeftLabel.IsVisible = false;
-            //StatusTextLeft = string.Empty;
+            await Task.Delay(delayMs, token); // Wait 3 seconds, cancellable
+            StatusTextLeft = string.Empty;
         }
         catch (TaskCanceledException)
         {
@@ -545,13 +556,13 @@ public partial class MainViewModel : ObservableObject
         {
             var first = Se.Settings.File.RecentFiles.FirstOrDefault();
             if (first != null && File.Exists(first.SubtitleFileName))
-            {
-                using var _ = SubtitleOpen(first.SubtitleFileName, first.VideoFileName);
+            { 
+                SubtitleOpen(first.SubtitleFileName, first.VideoFileName).ConfigureAwait(false);
             }
         }
     }
 
-    private void VideoOpenFile(string videoFileName)
+    private async Task VideoOpenFile(string videoFileName)
     {
         if (VideoPlayer == null)
         {
@@ -572,7 +583,7 @@ public partial class MainViewModel : ObservableObject
                 var tempWaveFileName = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.wav");
                 var process = WaveFileExtractor.GetCommandLineProcess(videoFileName, -1, tempWaveFileName,
                     Configuration.Settings.General.VlcWaveTranscodeSettings, out _);
-                ShowStatus("Extracting wave info...");
+                await ShowStatus("Extracting wave info...");
                 Task.Run(async () =>
                 {
                     //await ExtractWaveformAndSpectrogram(process, tempWaveFileName, peakWaveFileName);
@@ -581,7 +592,7 @@ public partial class MainViewModel : ObservableObject
         }
         else
         {
-            ShowStatus("Loading wave info from cache...");
+            await ShowStatus("Loading wave info from cache...");
             var wavePeaks = WavePeakData.FromDisk(peakWaveFileName);
             //_audioVisualizer.WavePeaks = wavePeaks;
         }
@@ -744,7 +755,7 @@ public partial class MainViewModel : ObservableObject
             {
                 if (_subtitleGridIsLeftClick && _subtitleGridIsControlPressed)
                 {
-                    menuFlyout.ShowAt(control, true); 
+                    menuFlyout.ShowAt(control, true);
                     e.Handled = true;
                 }
             }

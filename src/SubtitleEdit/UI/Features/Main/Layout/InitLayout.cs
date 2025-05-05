@@ -6,6 +6,8 @@ namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
 public static partial class InitLayout
 {
+    public const int WaveFormHeight = 220;
+    
     public static int MakeLayout(MainView mainPage, MainViewModel vm, int layoutNumber)
     {
         return layoutNumber switch
@@ -76,7 +78,7 @@ public static partial class InitLayout
         var nestedRight = new Border
         {
             Background = Brushes.PaleVioletRed,
-            Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),                    
+            Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
         };
         Grid.SetColumn(nestedRight, 2);
         nestedGrid.Children.Add(nestedRight);
@@ -99,24 +101,7 @@ public static partial class InitLayout
         var bottomContent = new Border
         {
             Background = Brushes.MediumPurple,
-            Child = new Grid
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            InitWaveform.MakeWaveform(mainPage, vm),
-                        }
-                    }
-                }
-            }
+            Child = InitWaveform.MakeWaveform(mainPage, vm),
         };
         Grid.SetRow(bottomContent, 2);
         contentGrid.Children.Add(bottomContent);
@@ -124,6 +109,9 @@ public static partial class InitLayout
         vm.ContentGrid.Children.Clear();
         vm.ContentGrid.Children.Add(contentGrid);
 
+        // set waveform height
+        contentGrid.RowDefinitions[2].Height = new GridLength(WaveFormHeight, GridUnitType.Pixel);
+        
         return 1;
     }
 
@@ -209,6 +197,9 @@ public static partial class InitLayout
         vm.ContentGrid.Children.Clear();
         vm.ContentGrid.Children.Add(contentGrid);
 
+        // set waveform height
+        contentGrid.RowDefinitions[2].Height = new GridLength(WaveFormHeight, GridUnitType.Pixel);
+        
         return 2;
     }
 
