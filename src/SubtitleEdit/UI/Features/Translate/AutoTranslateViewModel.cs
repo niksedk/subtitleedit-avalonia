@@ -661,9 +661,13 @@ public partial class AutoTranslateViewModel : ObservableObject
         ButtonApiUrlIsVisible = urls.Count > 0;
     }
 
-    public static string EvaluateDefaultSourceLanguageCode(Encoding encoding, Subtitle subtitle, ObservableCollection<TranslationPair> sourceLanguages)
+    public static string EvaluateDefaultSourceLanguageCode(Encoding? encoding, Subtitle subtitle, ObservableCollection<TranslationPair> sourceLanguages)
     {
-        var defaultSourceLanguageCode = LanguageAutoDetect.AutoDetectGoogleLanguage(encoding); // Guess language via encoding
+        var defaultSourceLanguageCode = string.Empty;
+        if (encoding != null)
+        {
+            defaultSourceLanguageCode = LanguageAutoDetect.AutoDetectGoogleLanguage(encoding); // Guess language via encoding
+        }
         if (string.IsNullOrEmpty(defaultSourceLanguageCode))
         {
             defaultSourceLanguageCode = LanguageAutoDetect.AutoDetectGoogleLanguage(subtitle); // Guess language based on subtitle contents
