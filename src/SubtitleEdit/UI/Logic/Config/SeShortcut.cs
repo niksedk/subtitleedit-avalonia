@@ -8,15 +8,24 @@ public class SeShortCut
     public string ActionName { get; set; }
 
     public List<string> Keys { get; set; }
+    public string? ControlName { get; set; }
 
     public SeShortCut()
     {
         Keys = new List<string>();
+        ActionName = string.Empty;
     }
 
     public SeShortCut(string action, List<string> keys)
     {
         ActionName = action;
         Keys = keys;
+    }
+    
+    public SeShortCut(string action, List<string> keys, string controlName)
+    {
+        ActionName = action;
+        Keys = keys;
+        ControlName = controlName;
     }
 }

@@ -123,6 +123,7 @@ public partial class MainViewModel : ObservableObject
 
     private void LoadShortcuts()
     {
+        Se.Settings.InitializeMainShortcuts(this);
         foreach (var shortCut in ShortcutsMain.GetUsedShortcuts(this))
         {
             _shortcutManager.RegisterShortcut(shortCut);

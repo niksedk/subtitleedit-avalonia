@@ -4,8 +4,10 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Forms.FixCommonErrors;
+using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic.Config.Language;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
@@ -53,15 +55,22 @@ public class Se
 
     public Se()
     {
-        Shortcuts = new List<SeShortCut>
+        Shortcuts = new List<SeShortCut>();
+    }
+
+    public void InitializeMainShortcuts(MainViewModel vm)
+    {
+        Shortcuts = new List<SeShortCut>()
         {
-            new("ShortcutAction.GeneralMergeSelectedLines", new List<string> { "Control", "M" }),
-            new("ShortcutAction.GeneralGoToPrevSubtitle", new List<string> { "Alt", "Up" }),
-            new("ShortcutAction.GeneralGoToNextSubtitle", new List<string> { "Alt", "Down" }),
-            new("ShortcutAction.GeneralDuplicateLine", new List<string> { "Control", "D" }),
-            new("ShortcutAction.ListSelectAll", new List<string> { "Control", "A" }),
-            new("ShortcutAction.ListSelectFirst", new List<string> { "Control", "Home" }),
-            new("ShortcutAction.ListSelectLast", new List<string> { "Control", "End" }),
+    //        new(nameof(vm.CommandExitCommand), new List<string> { "Control", "M" }),
+    //        new(nameof(vm.CommandExitCommand), new List<string> { "Alt", "Up" }),
+    //        new(nameof(vm.CommandExitCommand), new List<string> { "Alt", "Down" }),
+    //        new(nameof(vm.CommandExitCommand), new List<string> { "Control", "D" }, "grid"),
+            new(nameof(vm.SelectAllLinesCommand), new List<string> { "Control", "A" }, "grid"),
+            new(nameof(vm.InverseSelectionCommand), new List<string> { "Control", "Shift", "I" }, "grid"),
+            //        new(nameof(vm.CommandExitCommand), new List<string> { "Control", "Home" }, "grid"),
+            // new(nameof(vm.CommandExitCommand), new List<string> { "Control", "End" }, "grid"),
+            new(nameof(vm.ToggleLinesItalicCommand), new List<string> { "Control", "I" }, "grid"),
         };
     }
 
