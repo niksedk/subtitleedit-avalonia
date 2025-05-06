@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Logic;
 
@@ -8,18 +10,45 @@ public class ShortCut
 {
     public List<string> Keys { get; set; }
     public string? Control { get; set; }
-    public Action Action { get; set; }
+    public string Name { get; set; }
+    public IRelayCommand Action { get; set; }
     public int HashCode { get; set; }
 
-    public ShortCut(List<string> keys, string? control, Action action)
+    public ShortCut(string name, List<string> keys, string? control, IRelayCommand action)
     {
+        Name = name;
         Keys = keys;
         Control = control;
         Action = action;
-        HashCode = keys.Aggregate(0, (hash, keyCode) => hash ^ keyCode.GetHashCode());
+        HashCode = CalculateHash(keys, control);
+    }
+
+    public static int CalculateHash(List<string> keys, string? control)
+    {
+        var hashCode = keys.Aggregate(0, (hash, keyCode) => hash ^ keyCode.GetHashCode());
         if (control != null)
         {
-            HashCode ^= control.GetHashCode();
+            hashCode ^= control.GetHashCode();
         }
+        
+        return hashCode;
+    }
+
+    public ShortCut(ShortcutsMain.AvailableShortcut shortcut, SeShortCut keys)
+    {
+        Keys = keys.Keys;
+        Action = shortcut.RelayCommand;
+        Name = shortcut.Name;
+        Control = null; 
+        HashCode = CalculateHash(Keys, Control);
+    }
+
+    public ShortCut(ShortcutsMain.AvailableShortcut shortcut)
+    {
+        Keys = new List<string>();
+        Action = shortcut.RelayCommand;
+        Name = shortcut.Name;
+        Control = string.Empty;
+        HashCode = CalculateHash(Keys, Control);
     }
 }

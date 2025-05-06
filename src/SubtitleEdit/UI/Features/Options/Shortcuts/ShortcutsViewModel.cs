@@ -103,8 +103,6 @@ public partial class ShortcutsViewModel : ObservableObject
                 };
                 grid.Children.Add(sc);
             }
-
-
         }
     }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Input;
+using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Logic;
@@ -24,20 +25,15 @@ public class ShortcutManager : IShortcutManager
         _activeKeys.Remove(e.Key);
     }
 
-    public void RegisterShortcut(SeShortCut shortcut, Action action)
+    public void RegisterShortcut(ShortCut shortcut)
     {
-        _shortcuts.Add(new ShortCut(shortcut.Keys, null, action));
+        _shortcuts.Add(shortcut);
     }
 
-    public void RegisterShortcut(SeShortCut shortcut, Action action, string control)
+    public IRelayCommand? CheckShortcuts(string? control)
     {
-        _shortcuts.Add(new ShortCut(shortcut.Keys, control, action));
-    }
-
-    public Action? CheckShortcuts(string? control)
-    {
-        var input = new ShortCut(_activeKeys.Select(p => p.ToString()).ToList(), control, () => { });
-        var inputWithNormalizedModifiers = NormalizeModifiers(input);
+        var hashCode = ShortCut.CalculateHash( _activeKeys.Select(p => p.ToString()).ToList(), control);
+        //var inputWithNormalizedModifiers = NormalizeModifiers(input);
 
         if (_activeKeys.Count < 2)
         {
@@ -46,7 +42,7 @@ public class ShortcutManager : IShortcutManager
 
         foreach (var shortcut in _shortcuts)
         {
-            if (input.HashCode == shortcut.HashCode || inputWithNormalizedModifiers.HashCode == shortcut.HashCode)
+            if (hashCode == shortcut.HashCode) // || inputWithNormalizedModifiers.HashCode == shortcut.HashCode)
             {
                 return shortcut.Action;
             }
@@ -83,6 +79,6 @@ public class ShortcutManager : IShortcutManager
             }
         }
 
-        return new ShortCut(keys, input.Control, input.Action);
+        return new ShortCut(string.Empty, keys, input.Control, input.Action);
     }
 }

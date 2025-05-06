@@ -117,6 +117,16 @@ public partial class MainViewModel : ObservableObject
 
         var dataGridSource = SubtitlesSource as FlatTreeDataGridSource<SubtitleLineViewModel>;
         dataGridSource!.RowSelection!.SingleSelect = false;
+
+        LoadShortcuts();
+    }
+
+    private void LoadShortcuts()
+    {
+        foreach (var shortCut in ShortcutsMain.GetUsedShortcuts(this))
+        {
+            _shortcutManager.RegisterShortcut(shortCut);
+        }
     }
 
     [RelayCommand]
