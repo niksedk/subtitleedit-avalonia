@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -13,17 +14,21 @@ namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
 public partial class ShortcutsViewModel : ObservableObject
 {
+
     [ObservableProperty] private ObservableCollection<ShortcutItem> _shortcuts;
+    private List<ShortcutItem> _allShortcuts;
 
     public HierarchicalTreeDataGridSource<ShortcutItem> ShortcutsSource { get; set; }
 
     public bool OkPressed { get; set; }
     public ShortcutsWindow Window { get; set; }
+    public TreeDataGrid ShortcutsGrid { get; internal set; }
 
     public ShortcutsViewModel()
     {
-        Shortcuts = new ObservableCollection<ShortcutItem>( );
-        
+        Shortcuts = new ObservableCollection<ShortcutItem>();
+        _allShortcuts = new List<ShortcutItem>();
+
         ShortcutsSource = new HierarchicalTreeDataGridSource<ShortcutItem>(_shortcuts)
         {
             Columns =
@@ -43,7 +48,7 @@ public partial class ShortcutsViewModel : ObservableObject
         var categories = new List<ShortcutItem>();
         foreach (var shortcut in ShortcutsMain.GetAllShortcuts(vm))
         {
-            var categoryEnum = shortcut.Category; 
+            var categoryEnum = shortcut.Category;
             var category = categories.FirstOrDefault(x => x.Category == categoryEnum);
             if (category == null)
             {
@@ -58,13 +63,16 @@ public partial class ShortcutsViewModel : ObservableObject
                 Shortcuts.Add(category);
             }
 
-            category.Children.Add(new ShortcutItem
+            var item = new ShortcutItem
             {
                 Category = categoryEnum,
-                CategoryText = string.Empty, 
+                CategoryText = string.Empty,
                 Keys = string.Join('+', shortcut.Keys),
                 Name = shortcut.Name,
-            });
+            };
+
+            category.Children.Add(item);
+            _allShortcuts.Add(item);
         }
     }
 
@@ -86,5 +94,46 @@ public partial class ShortcutsViewModel : ObservableObject
     private void CommandCancel()
     {
         Window?.Close();
+    }
+
+    internal void UpdateVisibleShortcuts(string searchText)
+    {
+        if (ShortcutsSource is ITreeDataGridSource source)
+        {
+            foreach (var item in source.Rows)
+            {
+                // ShortcutsGrid.Expand(item);
+                // ShortcutsGrid.
+
+                // Recursively expand children if it's a hierarchical source
+                // ExpandChildrenRecursively(contentPanel, item);
+            }
+        }
+
+        var categories = new List<ShortcutItem>();
+        Shortcuts.Clear();
+        foreach (var shortcut in _allShortcuts)
+        {
+            if (shortcut.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+                shortcut.Keys.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+            {
+                var categoryEnum = shortcut.Category;
+                var category = categories.FirstOrDefault(x => x.Category == categoryEnum);
+                if (category == null)
+                {
+                    category = new ShortcutItem
+                    {
+                        Name = string.Empty,
+                        Keys = string.Empty,
+                        Category = categoryEnum,
+                        CategoryText = Localize(categoryEnum),
+                    };
+                    categories.Add(category);
+                    Shortcuts.Add(category);
+                }
+
+                category.Children.Add(shortcut);
+            }
+        }
     }
 }

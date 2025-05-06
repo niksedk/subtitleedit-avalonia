@@ -184,6 +184,15 @@ public static class UiUtil
         return textBlock;
     }
 
+    public static CheckBox MakeCheckBox()
+    {
+        return new CheckBox
+        {
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+    }
+
     public static TextBlock MakeLink(string text, IRelayCommand command)
     {
         var link = new TextBlock

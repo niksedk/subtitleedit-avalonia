@@ -1,8 +1,11 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Input;
 using Nikse.SubtitleEdit.Logic;
+using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
@@ -29,6 +32,7 @@ public class ShortcutsWindow : Window
             Margin = new Thickness(10),
         };
 
+       
         var contentPanel = new TreeDataGrid
         {
             Height = double.NaN, // auto size inside scroll viewer
@@ -37,6 +41,7 @@ public class ShortcutsWindow : Window
             DataContext = _vm,
             CanUserSortColumns = false,
         };
+        vm.ShortcutsGrid = contentPanel;
 
         var scrollViewer = new ScrollViewer
         {
@@ -50,8 +55,9 @@ public class ShortcutsWindow : Window
 
         var grid = new Grid
         {
-            RowDefinitions = new RowDefinitions("Auto,*,Auto"),
-            ColumnDefinitions = new ColumnDefinitions("*")
+            RowDefinitions = new RowDefinitions("Auto,*,Auto,Auto"),
+            ColumnDefinitions = new ColumnDefinitions("*"),
+            Margin = new Thickness(UiUtil.WindowMarginWidth),
         };
         grid.Children.Add(_searchBox);
         Grid.SetRow(_searchBox, 0);
@@ -61,11 +67,53 @@ public class ShortcutsWindow : Window
         Grid.SetRow(scrollViewer, 1);
         Grid.SetColumn(scrollViewer, 0);
 
+        var editPanel = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            Margin = new Thickness(10),
+        };
+
+        // Control checkbox and label
+        editPanel.Children.Add(UiUtil.MakeTextBlock("Control").WithMarginRight(3));
+        editPanel.Children.Add(UiUtil.MakeCheckBox());
+
+        // Alt checkbox and label
+        editPanel.Children.Add(UiUtil.MakeTextBlock("Alt").WithMarginRight(3));
+        editPanel.Children.Add(UiUtil.MakeCheckBox());
+
+        // Shift checkbox and label
+        editPanel.Children.Add(UiUtil.MakeTextBlock("Shift").WithMarginRight(3));
+        editPanel.Children.Add(new CheckBox
+        {
+            Name = "ShiftCheckBox",
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+        });
+
+        // Key combobox
+        editPanel.Children.Add(new ComboBox
+        {
+            Name = "KeyComboBox",
+            Width = 100,
+            Margin = new Thickness(10, 0, 10, 0),
+            ItemsSource = Enum.GetValues(typeof(Key)).Cast<Key>(), 
+        });
+
+        // Update button
+        editPanel.Children.Add(UiUtil.MakeButton("Update"));
+
+
+        var editGridBorder = UiUtil.MakeBorderForControl(editPanel);
+        grid.Children.Add(editGridBorder);
+        Grid.SetRow(editGridBorder, 2);
+        Grid.SetColumn(editGridBorder, 0);
+
         grid.Children.Add(buttonPanel);
-        Grid.SetRow(buttonPanel, 2);
+        Grid.SetRow(buttonPanel, 3);
         Grid.SetColumn(buttonPanel, 0);
 
         Content = grid;
+
+        _searchBox.TextChanged += (s, e) => vm.UpdateVisibleShortcuts(_searchBox.Text ?? string.Empty);
     }
 }
 
