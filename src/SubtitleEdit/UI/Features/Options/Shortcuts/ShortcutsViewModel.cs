@@ -1,8 +1,12 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
@@ -19,7 +23,6 @@ public partial class ShortcutsViewModel : ObservableObject
     public ShortcutsViewModel()
     {
         Shortcuts = new ObservableCollection<ShortcutItem>( );
-        LoadShortCuts();
         
         ShortcutsSource = new HierarchicalTreeDataGridSource<ShortcutItem>(_shortcuts)
         {
@@ -34,75 +37,33 @@ public partial class ShortcutsViewModel : ObservableObject
         };
     }
 
-    private void LoadShortCuts()
+    public void LoadShortCuts(MainViewModel vm)
     {
-        var general = new ShortcutItem
+        var categories = new List<ShortcutItem>();
+        foreach (var shortcut in ShortcutsMain.GetAllShortcuts(vm))
         {
-            Name = string.Empty,
-            Keys = string.Empty,
-            Age = 4,
-            Category = ShortcutCategory.General,
-            CategoryText = "General",
-        };
-        Shortcuts.Add(general);
-
-        var gridAndTextBox = new ShortcutItem
-        {
-            Name = string.Empty,
-            Keys = string.Empty,
-            Age = 4,
-            Category = ShortcutCategory.SubtitleGridAndTextBox,
-            CategoryText = "Subtitle grid and text box",
-        };
-        Shortcuts.Add(gridAndTextBox);
-
-        var grid = new ShortcutItem
-        {
-            Name = string.Empty,
-            Keys = string.Empty,
-            Age = 4,
-            Category = ShortcutCategory.SubtitleGrid,
-            CategoryText = "Subtitle grid",
-        };
-        Shortcuts.Add(grid);
-
-        foreach (var item in Se.Settings.Shortcuts)
-        {
-            if (item.ActionName != "some-cat")
+            var categoryName = shortcut.Control ?? "General";
+            var category = categories.FirstOrDefault(x => x.Name == categoryName);
+            if (category == null)
             {
-                var sc = new ShortcutItem
+                category = new ShortcutItem
                 {
+                    Name = string.Empty,
+                    Keys = string.Empty,
                     Category = ShortcutCategory.General,
                     CategoryText = "General",
-                    Keys = string.Join('+', item.Keys),
-                    Name = item.ActionName,
                 };
-                general.Children.Add(sc);
+                categories.Add(category);
+                Shortcuts.Add(category);
             }
-
-            if (item.ActionName != "some-cat")
+            
+            category.Children.Add(new ShortcutItem
             {
-                var sc = new ShortcutItem
-                {
-                    Category = ShortcutCategory.SubtitleGridAndTextBox,
-                    CategoryText = "Subtitle grid and text box",
-                    Keys = string.Join('+', item.Keys),
-                    Name = item.ActionName,
-                };
-                gridAndTextBox.Children.Add(sc);
-            }
-
-            if (item.ActionName != "some-cat")
-            {
-                var sc = new ShortcutItem
-                {
-                    Category = ShortcutCategory.SubtitleGrid,
-                    CategoryText = "Subtitle grid",
-                    Keys = string.Join('+', item.Keys),
-                    Name = item.ActionName,
-                };
-                grid.Children.Add(sc);
-            }
+                Category = ShortcutCategory.General,
+                CategoryText = category.Name,
+                Keys = string.Join('+', shortcut.Keys),
+                Name = shortcut.Name,
+            });
         }
     }
 

@@ -301,7 +301,10 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task CommandShowSettingsShortcuts()
     {
-        await _windowService.ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(Window);
+        await _windowService.ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(Window, vm =>
+        {
+            vm.LoadShortCuts(this);
+        });
     }
 
     [RelayCommand]
