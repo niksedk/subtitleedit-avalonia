@@ -1,8 +1,8 @@
-using System.Collections.ObjectModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Nikse.SubtitleEdit.Logic;
+using System.Collections.ObjectModel;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
@@ -15,8 +15,8 @@ public class ShortcutsWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Shortcuts";
-        Width = 500;
-        Height = 600;
+        Width = 650;
+        Height = 650;
         CanResize = true;
         
         _vm = vm;
@@ -84,5 +84,5 @@ public enum ShortcutCategory
     General,
     SubtitleGridAndTextBox,
     Waveform,
-    SubtitleGrid
+    SubtitleGrid,
 }
