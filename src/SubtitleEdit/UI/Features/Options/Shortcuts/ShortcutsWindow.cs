@@ -29,7 +29,7 @@ public class ShortcutsWindow : Window
             Margin = new Thickness(10),
         };
 
-        var contentPanel = new TreeDataGrid()
+        var contentPanel = new TreeDataGrid
         {
             Height = double.NaN, // auto size inside scroll viewer
             Margin = new Thickness(2),
@@ -72,6 +72,8 @@ public class ShortcutsWindow : Window
 public class ShortcutItem
 {
     public ShortcutCategory Category { get; set; }
+    public string CategoryText { get; set; }
+    public string Name { get; set; }
     public string Keys { get; set; }
     public int Age { get; set; }
     public ShortCut Shortcut { get; set; }
@@ -81,6 +83,7 @@ public class ShortcutItem
 public enum ShortcutCategory
 {
     General,
-    ListViewAndTextBox,
+    SubtitleGridAndTextBox,
     Waveform,
+    SubtitleGrid
 }
