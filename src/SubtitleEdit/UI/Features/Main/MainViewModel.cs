@@ -27,8 +27,11 @@ using Avalonia;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 using System.Threading;
-using Avalonia.Animation;
 using Avalonia.Controls.Selection;
+using Avalonia.Threading;
+using Avalonia.Controls.Primitives;
+using Avalonia.VisualTree;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -333,19 +336,68 @@ public partial class MainViewModel : ObservableObject
     {
         ToggleItalic();
     }
-    
+
     [RelayCommand]
     private void SelectAllLines()
     {
         SelectAllRows();
     }
-    
+
     [RelayCommand]
     private void InverseSelection()
     {
         InverseRowSelection();
     }
-    
+
+    [RelayCommand]
+    private void GoToNextLine()
+    {
+        if (SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source &&
+            source.Selection is ITreeDataGridRowSelectionModel<SubtitleLineViewModel> selection &&
+            SubtitleGrid is TreeDataGrid treeGrid)
+        {
+            var currentIndex = selection.SelectedIndexes.FirstOrDefault().Count > 0 ? selection.SelectedIndexes.FirstOrDefault()[0] : -1;
+            if (currentIndex < 0 || currentIndex + 1 >= source.Rows.Count)
+            {
+                return;
+            }
+
+            var newIndex = currentIndex + 1;
+
+            //Dispatcher.UIThread.Post(() =>
+            //{
+            selection.Clear();
+            selection.Select(new IndexPath(newIndex)); // Use IndexPath constructor to create a valid index
+            SubtitleGrid.RowsPresenter?.BringIntoView(newIndex);
+            // }, DispatcherPriority.Background);
+        }
+    }
+
+
+    [RelayCommand]
+    private void GoPrevoiusLine()
+    {
+        if (SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source &&
+            source.Selection is ITreeDataGridRowSelectionModel<SubtitleLineViewModel> selection &&
+            SubtitleGrid is TreeDataGrid treeGrid)
+        {
+            var currentIndex = selection.SelectedIndexes.FirstOrDefault().Count > 0 ? selection.SelectedIndexes.FirstOrDefault()[0] : -1;
+            if (currentIndex < 1)
+            {
+                return;
+            }
+
+            var newIndex = currentIndex - 1;
+
+            // Dispatcher.UIThread.Post(() =>
+            //  {
+            selection.Clear();
+            selection.Select(new IndexPath(newIndex)); // Use IndexPath constructor to create a valid index
+            SubtitleGrid.RowsPresenter?.BringIntoView(newIndex);
+            //}, DispatcherPriority.Render);
+        }
+    }
+
     private void SelectAllRows()
     {
         if (SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source)
@@ -359,60 +411,34 @@ public partial class MainViewModel : ObservableObject
                 }
             }
         }
-        
-        
-        
-    
-        // // For a multiple selection mode TreeDataGrid
-        // if (myTreeDataGrid.Selection is TreeDataGridMultiSelection multiSelection)
-        // {
-        //     // Get the source collection
-        //     var items = myTreeDataGrid.ItemsSource;
-        //
-        //     // Clear previous selection
-        //     multiSelection.Clear();
-        //
-        //     // Select all items
-        //     for (int i = 0; i < items.Count; i++)
-        //     {
-        //         multiSelection.Select(i);
-        //     }
-        // }
     }
-    
+
     private void InverseRowSelection()
     {
         if (SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source)
         {
-            if (source.Selection is ITreeDataGridRowSelectionModel<SubtitleLineViewModel> x)
+            if (source.Selection is ITreeDataGridRowSelectionModel<SubtitleLineViewModel> selection)
             {
-                var oldIndices = x.SelectedIndexes.ToArray();
-                x.Clear();
+                // Fix for CA1826: Use a for loop instead of LINQ methods
+                var oldIndices = new HashSet<int>();
+                foreach (var indexPath in selection.SelectedIndexes)
+                {
+                    if (indexPath.Count > 0)
+                    {
+                        oldIndices.Add(indexPath[0]);
+                    }
+                }
+
+                selection.Clear();
                 for (var i = 0; i < source.Items.Count(); i++)
                 {
                     if (!oldIndices.Contains(i))
                     {
-                        x.Select(i);
+                        selection.Select(new IndexPath(i)); // Use IndexPath constructor to create a valid index
                     }
                 }
             }
         }
-        
-        // // For a multiple selection mode TreeDataGrid
-        // if (myTreeDataGrid.Selection is TreeDataGridMultiSelection multiSelection)
-        // {
-        //     // Get the source collection
-        //     var items = myTreeDataGrid.ItemsSource;
-        //
-        //     // Clear previous selection
-        //     multiSelection.Clear();
-        //
-        //     // Select all items
-        //     for (int i = 0; i < items.Count; i++)
-        //     {
-        //         multiSelection.Select(i);
-        //     }
-        // }
     }
 
 
@@ -608,7 +634,7 @@ public partial class MainViewModel : ObservableObject
         {
             var first = Se.Settings.File.RecentFiles.FirstOrDefault();
             if (first != null && File.Exists(first.SubtitleFileName))
-            { 
+            {
                 SubtitleOpen(first.SubtitleFileName, first.VideoFileName).ConfigureAwait(false);
             }
         }
@@ -768,6 +794,22 @@ public partial class MainViewModel : ObservableObject
     public void KeyDown(KeyEventArgs keyEventArgs)
     {
         _shortcutManager.OnKeyPressed(this, keyEventArgs);
+
+        var relayCommand = _shortcutManager.CheckShortcuts("grid");
+        if (relayCommand != null)
+        {
+            keyEventArgs.Handled = true;
+            relayCommand.Execute(null);
+            return;
+        }
+
+        relayCommand = _shortcutManager.CheckShortcuts(null);
+        if (relayCommand != null)
+        {
+            keyEventArgs.Handled = true;
+            relayCommand.Execute(null);
+            return;
+        }
     }
 
     public void KeyUp(KeyEventArgs keyEventArgs)
@@ -839,7 +881,7 @@ public partial class MainViewModel : ObservableObject
             StatusTextRight = string.Empty;
             return;
         }
-        
+
         SelectedSubtitle = item;
         StatusTextRight = $"{item.Number}/{Subtitles.Count}";
     }

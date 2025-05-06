@@ -54,6 +54,13 @@ public static class ShortcutsMain
         
         AddShortcut(shortcuts, vm.CommandExitCommand, nameof(vm.CommandExitCommand));
         AddShortcut(shortcuts, vm.SelectAllLinesCommand, nameof(vm.SelectAllLinesCommand));
+        AddShortcut(shortcuts, vm.ToggleLinesItalicCommand, nameof(vm.ToggleLinesItalicCommand));
+        AddShortcut(shortcuts, vm.InverseSelectionCommand, nameof(vm.InverseSelectionCommand));
+        AddShortcut(shortcuts, vm.GoPrevoiusLineCommand, nameof(vm.GoPrevoiusLineCommand));
+        AddShortcut(shortcuts, vm.GoToNextLineCommand, nameof(vm.GoToNextLineCommand));
+        AddShortcut(shortcuts, vm.CommandShowAutoTranslateCommand, nameof(vm.CommandShowAutoTranslateCommand));
+        AddShortcut(shortcuts, vm.CommandShowSettingsCommand, nameof(vm.CommandShowSettingsCommand));
+        AddShortcut(shortcuts, vm.CommandShowLayoutCommand, nameof(vm.CommandShowLayoutCommand));
         
         return shortcuts;
     }

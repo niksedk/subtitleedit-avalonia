@@ -63,8 +63,8 @@ public class Se
         Shortcuts = new List<SeShortCut>()
         {
     //        new(nameof(vm.CommandExitCommand), new List<string> { "Control", "M" }),
-    //        new(nameof(vm.CommandExitCommand), new List<string> { "Alt", "Up" }),
-    //        new(nameof(vm.CommandExitCommand), new List<string> { "Alt", "Down" }),
+            new(nameof(vm.GoPrevoiusLineCommand), new List<string> { "Alt", "Up" }),
+            new(nameof(vm.GoToNextLineCommand), new List<string> { "Alt", "Down" }),
     //        new(nameof(vm.CommandExitCommand), new List<string> { "Control", "D" }, "grid"),
             new(nameof(vm.SelectAllLinesCommand), new List<string> { "Control", "A" }, "grid"),
             new(nameof(vm.InverseSelectionCommand), new List<string> { "Control", "Shift", "I" }, "grid"),

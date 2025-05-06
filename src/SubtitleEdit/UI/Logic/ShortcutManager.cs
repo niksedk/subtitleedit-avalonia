@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Logic;
 
@@ -23,6 +21,7 @@ public class ShortcutManager : IShortcutManager
     public void OnKeyReleased(object? sender, KeyEventArgs e)
     {
         _activeKeys.Remove(e.Key);
+     //   _activeKeys.Clear();
     }
 
     public void RegisterShortcut(ShortCut shortcut)
@@ -32,8 +31,9 @@ public class ShortcutManager : IShortcutManager
 
     public IRelayCommand? CheckShortcuts(string? control)
     {
-        var hashCode = ShortCut.CalculateHash( _activeKeys.Select(p => p.ToString()).ToList(), control);
-        //var inputWithNormalizedModifiers = NormalizeModifiers(input);
+        var keys = _activeKeys.Select(p => p.ToString()).ToList();
+        var hashCode = ShortCut.CalculateHash(keys, control);
+        var inputWithNormalizedModifiers = NormalizeModifiers(keys, control);
 
         if (_activeKeys.Count < 2)
         {
@@ -42,7 +42,7 @@ public class ShortcutManager : IShortcutManager
 
         foreach (var shortcut in _shortcuts)
         {
-            if (hashCode == shortcut.HashCode) // || inputWithNormalizedModifiers.HashCode == shortcut.HashCode)
+            if (hashCode == shortcut.HashCode || inputWithNormalizedModifiers == shortcut.HashCode)
             {
                 return shortcut.Action;
             }
@@ -56,10 +56,10 @@ public class ShortcutManager : IShortcutManager
         _shortcuts.Clear();
     }
 
-    private static ShortCut NormalizeModifiers(ShortCut input)
+    private static int NormalizeModifiers(List<string> inputKeys, string? control)
     {
         var keys = new List<string>();
-        foreach (var key in input.Keys)
+        foreach (var key in inputKeys)
         {
             if (key is "LeftCtrl" or "RightCtrl")
             {
@@ -79,6 +79,6 @@ public class ShortcutManager : IShortcutManager
             }
         }
 
-        return new ShortCut(string.Empty, keys, input.Control, input.Action);
+        return ShortCut.CalculateHash(keys, control);
     }
 }
