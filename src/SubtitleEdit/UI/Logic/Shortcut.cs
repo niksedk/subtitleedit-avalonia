@@ -26,11 +26,14 @@ public class ShortCut
         HashCode = CalculateHash(keys, Control);
     }
 
-    public static int CalculateHash(List<string> keys, string control)
+    public static int CalculateHash(List<string> keys, string? control)
     {
         var hashCode = keys.Aggregate(0, (hash, keyCode) => hash ^ keyCode.GetHashCode());
-        hashCode ^= control.GetHashCode();
-        
+        if (control != null)
+        {
+            hashCode ^= control.GetHashCode();
+        }
+
         return hashCode;
     }
 

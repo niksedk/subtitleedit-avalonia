@@ -74,6 +74,8 @@ public partial class ShortcutsViewModel : ObservableObject
             category.Children.Add(item);
             _allShortcuts.Add(item);
         }
+        
+        ShortcutsSource.ExpandAll();
     }
 
     private static string Localize(ShortcutCategory categoryEnum)
@@ -98,18 +100,6 @@ public partial class ShortcutsViewModel : ObservableObject
 
     internal void UpdateVisibleShortcuts(string searchText)
     {
-        if (ShortcutsSource is ITreeDataGridSource source)
-        {
-            foreach (var item in source.Rows)
-            {
-                // ShortcutsGrid.Expand(item);
-                // ShortcutsGrid.
-
-                // Recursively expand children if it's a hierarchical source
-                // ExpandChildrenRecursively(contentPanel, item);
-            }
-        }
-
         var categories = new List<ShortcutItem>();
         Shortcuts.Clear();
         foreach (var shortcut in _allShortcuts)
@@ -135,5 +125,7 @@ public partial class ShortcutsViewModel : ObservableObject
                 category.Children.Add(shortcut);
             }
         }
+        
+        ShortcutsSource.ExpandAll();
     }
 }

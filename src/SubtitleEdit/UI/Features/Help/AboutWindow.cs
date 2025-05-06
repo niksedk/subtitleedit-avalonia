@@ -83,6 +83,8 @@ public class AboutWindow : Window
                 }
             }
         };
+        
+        Activated += delegate { okButton.Focus(); }; // hack to make OnKeyDown work
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

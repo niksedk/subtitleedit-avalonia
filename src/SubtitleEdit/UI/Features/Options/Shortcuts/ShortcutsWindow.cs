@@ -13,7 +13,7 @@ public class ShortcutsWindow : Window
 {
     private TextBox _searchBox;
     private ShortcutsViewModel _vm;
-    
+
     public ShortcutsWindow(ShortcutsViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
@@ -21,18 +21,18 @@ public class ShortcutsWindow : Window
         Width = 650;
         Height = 650;
         CanResize = true;
-        
+
         _vm = vm;
         vm.Window = this;
         DataContext = vm;
-        
+
         _searchBox = new TextBox
         {
             Watermark = "Search shortcuts...",
             Margin = new Thickness(10),
         };
 
-       
+
         var contentPanel = new TreeDataGrid
         {
             Height = double.NaN, // auto size inside scroll viewer
@@ -62,7 +62,7 @@ public class ShortcutsWindow : Window
         grid.Children.Add(_searchBox);
         Grid.SetRow(_searchBox, 0);
         Grid.SetColumn(_searchBox, 0);
-        
+
         grid.Children.Add(scrollViewer);
         Grid.SetRow(scrollViewer, 1);
         Grid.SetColumn(scrollViewer, 0);
@@ -95,7 +95,7 @@ public class ShortcutsWindow : Window
             Name = "KeyComboBox",
             Width = 100,
             Margin = new Thickness(10, 0, 10, 0),
-            ItemsSource = Enum.GetValues(typeof(Key)).Cast<Key>(), 
+            ItemsSource = Enum.GetValues(typeof(Key)).Cast<Key>(),
         });
 
         // Update button
@@ -114,6 +114,18 @@ public class ShortcutsWindow : Window
         Content = grid;
 
         _searchBox.TextChanged += (s, e) => vm.UpdateVisibleShortcuts(_searchBox.Text ?? string.Empty);
+
+        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+    }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            Close();
+        }
     }
 }
 
@@ -123,6 +135,7 @@ public class ShortcutItem
     public string CategoryText { get; set; }
     public string Name { get; set; }
     public string Keys { get; set; }
+    public bool IsExpanded { get; set; }
     public ShortCut Shortcut { get; set; }
     public ObservableCollection<ShortcutItem> Children { get; } = new();
 }
