@@ -2,14 +2,16 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
+using Avalonia.Controls.Primitives;
 using Avalonia.Layout;
+using Avalonia.Media;
+using Avalonia.Styling;
 using Projektanker.Icons.Avalonia;
 
 namespace ApvPlayer.Controls
 {
     public class VideoPlayerControl : UserControl
     {
-        // Bindable properties
         public static readonly StyledProperty<Control?> PlayerContentProperty =
             AvaloniaProperty.Register<VideoPlayerControl, Control?>(nameof(PlayerContent));
 
@@ -22,7 +24,9 @@ namespace ApvPlayer.Controls
         public static readonly StyledProperty<double> DurationProperty =
             AvaloniaProperty.Register<VideoPlayerControl, double>(nameof(Duration));
 
-        // Properties
+        public static readonly StyledProperty<string> ProgressTextProperty =
+            AvaloniaProperty.Register<VideoPlayerControl, string>(nameof(ProgressText), default!);
+
         public Control? PlayerContent
         {
             get => GetValue(PlayerContentProperty);
@@ -47,6 +51,12 @@ namespace ApvPlayer.Controls
             set => SetValue(DurationProperty, value);
         }
 
+        public string ProgressText
+        {
+            get => GetValue(ProgressTextProperty);
+            set => SetValue(ProgressTextProperty, value);
+        }
+
         public VideoPlayerControl()
         {
             var mainGrid = new Grid
@@ -54,7 +64,7 @@ namespace ApvPlayer.Controls
                 RowDefinitions = new RowDefinitions("*,Auto,Auto")
             };
 
-            // Player area
+            // PlayerContent
             var contentPresenter = new ContentPresenter
             {
                 [!ContentPresenter.ContentProperty] = this[!PlayerContentProperty]
@@ -62,88 +72,123 @@ namespace ApvPlayer.Controls
             mainGrid.Children.Add(contentPresenter);
             Grid.SetRow(contentPresenter, 0);
 
-            // Progress slider
+            // Row 1: Progress + volume
+            var progressGrid = new Grid
+            {
+                ColumnDefinitions = new ColumnDefinitions("* ,Auto ,Auto"),
+                Margin = new Thickness(10, 4)
+            };
+            Grid.SetRow(progressGrid, 1);
+            mainGrid.Children.Add(progressGrid);
+
             var progressSlider = new Slider
             {
-                Margin = new Thickness(10, 5),
                 Minimum = 0
             };
+            progressSlider.TemplateApplied += (s, e) =>
+            {
+                if (e.NameScope.Find<Thumb>("thumb") is Thumb thumb)
+                {
+                    thumb.Width = 15;
+                    thumb.Height = 15;
+                }
+            };
+
             progressSlider.Bind(Slider.MaximumProperty, this.GetObservable(DurationProperty));
             progressSlider.Bind(Slider.ValueProperty, this.GetObservable(PositionProperty));
-            mainGrid.Children.Add(progressSlider);
-            Grid.SetRow(progressSlider, 1);
+            progressGrid.Children.Add(progressSlider);
+            Grid.SetColumn(progressSlider, 0);
 
-            // Control bar
-            var controlBar = new Grid
+            var volumeIcon = new Icon
             {
-                Margin = new Thickness(10),
-                ColumnDefinitions = new ColumnDefinitions("Auto,Auto,Auto,*,Auto,Auto,Auto"),
+                Value = "fa-solid fa-volume-up",
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(10, 0, 4, 0)
+            };
+            progressGrid.Children.Add(volumeIcon);
+            Grid.SetColumn(volumeIcon, 1);
+
+            var volumeSlider = new Slider
+            {
+                Minimum = 0,
+                Maximum = 100,
+                Width = 80,
                 VerticalAlignment = VerticalAlignment.Center
             };
-            Grid.SetRow(controlBar, 2);
-            mainGrid.Children.Add(controlBar);
+            volumeSlider.TemplateApplied += (s, e) =>
+            {
+                if (e.NameScope.Find<Thumb>("thumb") is Thumb thumb)
+                {
+                    thumb.Width = 15;
+                    thumb.Height = 15;
+                }
+            };
+            volumeSlider.Bind(Slider.ValueProperty, this.GetObservable(VolumeProperty));
+            progressGrid.Children.Add(volumeSlider);
+            Grid.SetColumn(volumeSlider, 2);
 
-            // Play/Pause
-            var playPauseButton = new Button();
-            Attached.SetIcon(playPauseButton, "fa-solid fa-play");
-            playPauseButton.Click += (_, _) => PlayPauseRequested?.Invoke();
-            controlBar.Children.Add(playPauseButton);
-            Grid.SetColumn(playPauseButton, 0);
+            // Row 2: Controls
+            var controlGrid = new Grid
+            {
+                Margin = new Thickness(10, 4),
+                ColumnDefinitions = new ColumnDefinitions("Auto,Auto,Auto,*,Auto,Auto"),
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            Grid.SetRow(controlGrid, 2);
+            mainGrid.Children.Add(controlGrid);
+
+            // Play
+            var playButton = new Button();
+            Attached.SetIcon(playButton, "fa-solid fa-play");
+            playButton.Click += (_, _) => PlayPauseRequested?.Invoke();
+            controlGrid.Children.Add(playButton);
+            Grid.SetColumn(playButton, 0);
 
             // Stop
             var stopButton = new Button();
             Attached.SetIcon(stopButton, "fa-solid fa-stop");
             stopButton.Click += (_, _) => StopRequested?.Invoke();
-            controlBar.Children.Add(stopButton);
+            controlGrid.Children.Add(stopButton);
             Grid.SetColumn(stopButton, 1);
 
-            // Volume icon
-            var volumeIcon = new Icon
+            // Fullscreen
+            var fullscreenButton = new Button();
+            Attached.SetIcon(fullscreenButton, "fa-solid fa-expand");
+            fullscreenButton.Click += (_, _) => FullscreenRequested?.Invoke();
+            controlGrid.Children.Add(fullscreenButton);
+            Grid.SetColumn(fullscreenButton, 2);
+
+            // ProgressText
+            var progressText = new TextBlock
             {
-                Value = "fa-solid fa-volume-up",
-                Margin = new Thickness(10, 0, 5, 0),
-                VerticalAlignment = VerticalAlignment.Center
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                FontSize = 16
             };
-            controlBar.Children.Add(volumeIcon);
-            Grid.SetColumn(volumeIcon, 2);
+            progressText.Bind(TextBlock.TextProperty, this.GetObservable(ProgressTextProperty));
+            controlGrid.Children.Add(progressText);
+            Grid.SetColumn(progressText, 3);
 
-            // Volume slider
-            var volumeSlider = new Slider
-            {
-                Minimum = 0,
-                Maximum = 100,
-                MinWidth = 100,
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            volumeSlider.Bind(Slider.ValueProperty, this.GetObservable(VolumeProperty));
-            controlBar.Children.Add(volumeSlider);
-            Grid.SetColumn(volumeSlider, 3);
-
-            // Spacer
-            var spacer = new ContentControl();
-            controlBar.Children.Add(spacer);
-            Grid.SetColumn(spacer, 4);
-
-            // Screenshot
-            var screenshotButton = new Button();
-            Attached.SetIcon(screenshotButton, "fa-solid fa-scissors");
-            screenshotButton.Click += (_, _) => ScreenshotRequested?.Invoke();
-            controlBar.Children.Add(screenshotButton);
-            Grid.SetColumn(screenshotButton, 5);
+            // Clip
+            var clipButton = new Button();
+            Attached.SetIcon(clipButton, "fa-solid fa-scissors");
+            clipButton.Click += (_, _) => ScreenshotRequested?.Invoke();
+            controlGrid.Children.Add(clipButton);
+            Grid.SetColumn(clipButton, 4);
 
             // Settings
             var settingsButton = new Button();
             Attached.SetIcon(settingsButton, "fa-solid fa-gear");
             settingsButton.Click += (_, _) => SettingsRequested?.Invoke();
-            controlBar.Children.Add(settingsButton);
-            Grid.SetColumn(settingsButton, 6);
+            controlGrid.Children.Add(settingsButton);
+            Grid.SetColumn(settingsButton, 5);
 
             Content = mainGrid;
         }
 
-        // Events to hook up externally
         public event Action? PlayPauseRequested;
         public event Action? StopRequested;
+        public event Action? FullscreenRequested;
         public event Action? ScreenshotRequested;
         public event Action? SettingsRequested;
     }

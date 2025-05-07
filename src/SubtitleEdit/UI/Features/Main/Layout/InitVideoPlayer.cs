@@ -19,7 +19,7 @@ public class InitVideoPlayer
         // Create main layout grid
         var mainGrid = new Grid
         {
-            RowDefinitions = new RowDefinitions("*,Auto"),  // Simplified to 3 rows
+            RowDefinitions = new RowDefinitions("*"),  // Simplified to 3 rows
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
             Margin = new Thickness(0),
@@ -50,6 +50,7 @@ public class InitVideoPlayer
 
                 Grid.SetRow(control, 0);
                 mainGrid.Children.Add(control);
+                return mainGrid;
             }
 
         }
