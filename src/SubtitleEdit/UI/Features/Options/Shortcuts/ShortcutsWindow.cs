@@ -32,7 +32,6 @@ public class ShortcutsWindow : Window
             Margin = new Thickness(10),
         };
 
-
         var contentPanel = new TreeDataGrid
         {
             Height = double.NaN, // auto size inside scroll viewer
@@ -42,6 +41,14 @@ public class ShortcutsWindow : Window
             CanUserSortColumns = false,
         };
         vm.ShortcutsGrid = contentPanel;
+        
+        if (vm.ShortcutsSource is HierarchicalTreeDataGridSource<ShortcutItem> source)
+        {
+            source.RowSelection!.SelectionChanged += (sender, e) =>
+            {
+                vm.ShortcutGrid_SelectionChanged(source.RowSelection.SelectedItems);
+            };
+        }
 
         var scrollViewer = new ScrollViewer
         {
@@ -90,14 +97,21 @@ public class ShortcutsWindow : Window
         });
 
         // Key combobox
-        editPanel.Children.Add(new ComboBox
+        var comboBoxKeys = new ComboBox
         {
             Name = "KeyComboBox",
             Width = 100,
             Margin = new Thickness(10, 0, 10, 0),
             ItemsSource = Enum.GetValues(typeof(Key)).Cast<Key>(),
-        });
+        };
+        editPanel.Children.Add(comboBoxKeys);
 
+        comboBoxKeys.Bind(
+            IsEnabledProperty,
+            new Avalonia.Data.Binding(nameof(vm.ControlsEnabled)) { Source = vm }
+        );
+
+        
         // Update button
         editPanel.Children.Add(UiUtil.MakeButton("Update"));
 

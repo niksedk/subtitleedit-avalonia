@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Avalonia.Input;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
@@ -16,6 +17,11 @@ public partial class ShortcutsViewModel : ObservableObject
 {
 
     [ObservableProperty] private ObservableCollection<ShortcutItem> _shortcuts;
+    [ObservableProperty] private ShortcutItem? _selectedShortcut;
+    [ObservableProperty] private bool _controlsEnabled;
+    [ObservableProperty] private bool _ctrlIsSelected;
+    [ObservableProperty] private bool _altIsSelected;
+    [ObservableProperty] private bool _shiftIsSelected;
     private List<ShortcutItem> _allShortcuts;
 
     public HierarchicalTreeDataGridSource<ShortcutItem> ShortcutsSource { get; set; }
@@ -127,5 +133,23 @@ public partial class ShortcutsViewModel : ObservableObject
         }
         
         ShortcutsSource.ExpandAll();
+    }
+
+    public void ShortcutGrid_SelectionChanged(IReadOnlyList<ShortcutItem?> rowSelectionSelectedItems)
+    {
+        var shortcut = rowSelectionSelectedItems.FirstOrDefault();
+        if (shortcut?.Children.Count > 0)
+        {
+            shortcut = null;
+        }
+
+        SelectedShortcut = shortcut;
+        ControlsEnabled = shortcut != null;
+        if (shortcut != null)
+        {
+            CtrlIsSelected = shortcut.Keys.Contains("Ctrl");
+            AltIsSelected = shortcut.Keys.Contains("Alt");
+            ShiftIsSelected = shortcut.Keys.Contains("Shift");
+        }
     }
 }

@@ -110,7 +110,7 @@ public class AutoTranslateWindow : Window
         var settingsLink = UiUtil.MakeLink("Settings", vm.OpenSettingsCommand).WithMarginRight(10);
         var okButton = UiUtil.MakeButton("OK", vm.OkCommand);
         var cancelButton = UiUtil.MakeButton("Cancel", vm.CancelCommand);
-        StackPanel bottomBar = UiUtil.MakeButtonBar(settingsLink, okButton, cancelButton);
+        var bottomBar = UiUtil.MakeButtonBar(settingsLink, okButton, cancelButton);
 
         var grid = new Grid
         {
