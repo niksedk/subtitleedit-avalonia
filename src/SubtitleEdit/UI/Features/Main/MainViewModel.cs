@@ -32,6 +32,7 @@ using Avalonia.Threading;
 using Avalonia.Controls.Primitives;
 using Avalonia.VisualTree;
 using System.Reflection.Metadata.Ecma335;
+using HanumanInstitute.LibMpv.Avalonia;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -531,6 +532,7 @@ public partial class MainViewModel : ObservableObject
     public LibVLC LibVLC { get; internal set; }
     public ITreeDataGridSource? SubtitlesSource { get; set; }
     public TextBlock StatusTextLeftLabel { get; internal set; }
+    public MpvView MpvView { get; internal set; }
 
     private bool HasChanges()
     {

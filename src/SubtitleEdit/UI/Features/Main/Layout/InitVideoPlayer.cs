@@ -3,6 +3,8 @@ using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using HanumanInstitute.LibMpv.Avalonia;
+using HanumanInstitute.MediaPlayer.Avalonia.Mpv;
 using LibVLCSharp.Avalonia;
 using LibVLCSharp.Shared;
 using System;
@@ -22,6 +24,24 @@ public class InitVideoPlayer
             Margin = new Thickness(0),
         };
 
+
+        if (true)
+        {
+            // Video player area
+            if (vm.MpvView == null)
+            {
+                var player = new HanumanInstitute.MediaPlayer.Avalonia.MediaPlayer();
+                var mpvPlayerHost = new MpvPlayerHost
+                {
+                    Source = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                    Volume = 80,
+                    Loop = true
+                };
+                Grid.SetRow(mpvPlayerHost, 0);
+                mainGrid.Children.Add(mpvPlayerHost);
+            }
+
+        }
 
         if (OperatingSystem.IsWindows() && false)
         {
