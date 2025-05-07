@@ -11,12 +11,18 @@ using Nikse.SubtitleEdit;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Projektanker.Icons.Avalonia.FontAwesome;
+using Projektanker.Icons.Avalonia;
 
 var lifetime = new ClassicDesktopStyleApplicationLifetime
 {
     Args = args, 
     ShutdownMode = ShutdownMode.OnLastWindowClose 
 };
+
+IconProvider.Current
+           .Register<FontAwesomeIconProvider>();
+           //.Register<MaterialDesignIconProvider>();
 
 var appBuilder = AppBuilder.Configure<Application>()
     .UsePlatformDetect()

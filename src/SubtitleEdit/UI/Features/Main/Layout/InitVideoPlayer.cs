@@ -1,4 +1,5 @@
-﻿using Avalonia;
+﻿using ApvPlayer.Controls;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -30,15 +31,25 @@ public class InitVideoPlayer
             // Video player area
             if (vm.MpvView == null)
             {
-                var player = new HanumanInstitute.MediaPlayer.Avalonia.MediaPlayer();
+                //var player = new HanumanInstitute.MediaPlayer.Avalonia.MediaPlayer();
                 var mpvPlayerHost = new MpvPlayerHost
                 {
                     Source = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
                     Volume = 80,
                     Loop = true
                 };
-                Grid.SetRow(mpvPlayerHost, 0);
-                mainGrid.Children.Add(mpvPlayerHost);
+
+                var control = new VideoPlayerControl
+                {
+                    PlayerContent = mpvPlayerHost,
+                    Volume = 80,
+                    Duration = 300 // e.g., 5 minutes
+                };
+
+
+
+                Grid.SetRow(control, 0);
+                mainGrid.Children.Add(control);
             }
 
         }
