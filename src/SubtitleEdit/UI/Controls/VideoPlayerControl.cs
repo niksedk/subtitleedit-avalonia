@@ -1,11 +1,10 @@
 ﻿using System;
+using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Layout;
-using Avalonia.Media;
-using Avalonia.Styling;
 using Projektanker.Icons.Avalonia;
 
 namespace ApvPlayer.Controls
@@ -26,6 +25,15 @@ namespace ApvPlayer.Controls
 
         public static readonly StyledProperty<string> ProgressTextProperty =
             AvaloniaProperty.Register<VideoPlayerControl, string>(nameof(ProgressText), default!);
+
+        public static readonly StyledProperty<ICommand> PlayCommandProperty =
+                AvaloniaProperty.Register<VideoPlayerControl, ICommand>(nameof(PlayCommand));
+
+        public static readonly StyledProperty<ICommand> StopCommandProperty =
+            AvaloniaProperty.Register<VideoPlayerControl, ICommand>(nameof(StopCommand));
+
+        public static readonly StyledProperty<ICommand> FullScreenCommandProperty =
+            AvaloniaProperty.Register<VideoPlayerControl, ICommand>(nameof(FullScreenCommand));
 
         public Control? PlayerContent
         {
@@ -55,6 +63,24 @@ namespace ApvPlayer.Controls
         {
             get => GetValue(ProgressTextProperty);
             set => SetValue(ProgressTextProperty, value);
+        }
+
+        public ICommand PlayCommand
+        {
+            get => GetValue(PlayCommandProperty);
+            set => SetValue(PlayCommandProperty, value);
+        }
+
+        public ICommand StopCommand
+        {
+            get => GetValue(StopCommandProperty);
+            set => SetValue(StopCommandProperty, value);
+        }
+
+        public ICommand FullScreenCommand
+        {
+            get => GetValue(FullScreenCommandProperty);
+            set => SetValue(FullScreenCommandProperty, value);
         }
 
         public VideoPlayerControl()
