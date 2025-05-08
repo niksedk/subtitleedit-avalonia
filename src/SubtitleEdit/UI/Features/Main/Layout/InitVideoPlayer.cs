@@ -55,7 +55,9 @@ public class InitVideoPlayer
                 };
                 control.PlayCommand = vm.PlayPauseCommand;
                 control.StopCommand = vm.StopCommand;
-                control.FullScreenCommand = vm.FullScreenCommand;
+                control.FullScreenCommand = vm.VideoFullScreenCommand;
+                control.ScreenshotCommand = vm.VideoScreenshotCommand;
+                control.SettingsCommand = vm.VideoSettingsCommand;
 
                 Grid.SetRow(control, 0);
                 mainGrid.Children.Add(control);
@@ -92,22 +94,5 @@ public class InitVideoPlayer
 
 
         return mainGrid;
-    }
-
-    // Helper method to create a button with an image
-    private static Button CreateButtonWithIcon(string iconPath)
-    {
-        return new Button
-        {
-            Content = new Image
-            {
-                Source = new Bitmap(iconPath),
-                Width = 32,
-                Height = 32,
-            },
-            Background = Brushes.Transparent,
-            BorderBrush = Brushes.Transparent,
-            Margin = new Thickness(0),
-        };
     }
 }

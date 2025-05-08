@@ -35,6 +35,12 @@ namespace ApvPlayer.Controls
         public static readonly StyledProperty<ICommand> FullScreenCommandProperty =
             AvaloniaProperty.Register<VideoPlayerControl, ICommand>(nameof(FullScreenCommand));
 
+        public static readonly StyledProperty<ICommand> ScreenshotCommandProperty =
+            AvaloniaProperty.Register<VideoPlayerControl, ICommand>(nameof(ScreenshotCommand));
+
+        public static readonly StyledProperty<ICommand> SettingsCommandProperty =
+            AvaloniaProperty.Register<VideoPlayerControl, ICommand>(nameof(SettingsCommand));
+        
         public Control? PlayerContent
         {
             get => GetValue(PlayerContentProperty);
@@ -81,6 +87,18 @@ namespace ApvPlayer.Controls
         {
             get => GetValue(FullScreenCommandProperty);
             set => SetValue(FullScreenCommandProperty, value);
+        }
+        
+        public ICommand ScreenshotCommand
+        {
+            get => GetValue(ScreenshotCommandProperty);
+            set => SetValue(ScreenshotCommandProperty, value);
+        }
+        
+        public ICommand SettingsCommand
+        {
+            get => GetValue(SettingsCommandProperty);
+            set => SetValue(SettingsCommandProperty, value);
         }
 
         public VideoPlayerControl()

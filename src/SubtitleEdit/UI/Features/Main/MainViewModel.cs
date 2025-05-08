@@ -414,7 +414,19 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void FullScreen()
+    private void VideoFullScreen()
+    {
+        
+    }
+    
+    [RelayCommand]
+    private void VideoScreenshot()
+    {
+        
+    }
+
+    [RelayCommand]
+    private void VideoSettings()
     {
         
     }
