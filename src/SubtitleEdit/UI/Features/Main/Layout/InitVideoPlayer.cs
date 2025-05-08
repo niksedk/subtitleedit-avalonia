@@ -20,7 +20,7 @@ public class InitVideoPlayer
         // Create main layout grid
         var mainGrid = new Grid
         {
-            RowDefinitions = new RowDefinitions("*"),  // Simplified to 3 rows
+            RowDefinitions = new RowDefinitions("*"), // Simplified to 3 rows
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
             Margin = new Thickness(0),
@@ -42,9 +42,9 @@ public class InitVideoPlayer
 
                 var mpvPlayerHost = new Border
                 {
-                 Background = Brushes.Black,
-                  HorizontalAlignment = HorizontalAlignment.Stretch,
-                  VerticalAlignment = VerticalAlignment.Stretch,
+                    Background = Brushes.Black,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    VerticalAlignment = VerticalAlignment.Stretch,
                 };
 
                 var control = new VideoPlayerControl
@@ -53,14 +53,14 @@ public class InitVideoPlayer
                     Volume = 80,
                     Duration = 300 // e.g., 5 minutes
                 };
-
-
+                control.PlayCommand = vm.PlayPauseCommand;
+                control.StopCommand = vm.StopCommand;
+                control.FullScreenCommand = vm.FullScreenCommand;
 
                 Grid.SetRow(control, 0);
                 mainGrid.Children.Add(control);
                 return mainGrid;
             }
-
         }
 
         if (OperatingSystem.IsWindows() && false)
@@ -90,7 +90,6 @@ public class InitVideoPlayer
             mainGrid.Children.Add(vm.VideoPlayer);
         }
 
-    
 
         return mainGrid;
     }

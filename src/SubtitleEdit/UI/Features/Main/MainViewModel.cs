@@ -377,9 +377,8 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-
     [RelayCommand]
-    private void GoPrevoiusLine()
+    private void GoToPreviousLine()
     {
         if (SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source &&
             source.Selection is ITreeDataGridRowSelectionModel<SubtitleLineViewModel> selection &&
@@ -400,6 +399,24 @@ public partial class MainViewModel : ObservableObject
             SubtitleGrid.RowsPresenter?.BringIntoView(newIndex);
             //}, DispatcherPriority.Render);
         }
+    }
+    
+    [RelayCommand]
+    private void PlayPause()
+    {
+        
+    }
+    
+    [RelayCommand]
+    private void Stop()
+    {
+        
+    }
+
+    [RelayCommand]
+    private void FullScreen()
+    {
+        
     }
 
     private void SelectAllRows()
