@@ -262,6 +262,12 @@ public static class UiUtil
         textBlock.Margin = new Thickness(marginLeft, m.Top, m.Right, m.Bottom);
         return textBlock;
     }
+    
+    public static TextBlock WithBackgroundColor(this TextBlock textBlock, IBrush brush)
+    {
+        textBlock.Background = brush;
+        return textBlock;
+    }
 
     public static StackPanel MakeButtonBar(params Control[] buttons)
     {

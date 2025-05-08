@@ -77,7 +77,6 @@ public static partial class InitLayout
         // Right part of nested grid
         var nestedRight = new Border
         {
-            Background = Brushes.PaleVioletRed,
             Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
         };
         Grid.SetColumn(nestedRight, 2);
@@ -146,7 +145,6 @@ public static partial class InitLayout
         // Left part of nested grid
         var nestedLeft = new Border
         {
-            Background = Brushes.CornflowerBlue,
             Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
         };
         Grid.SetColumn(nestedLeft, 0);
@@ -276,7 +274,6 @@ public static partial class InitLayout
         // Right content
         var rightContent = new Border
         {
-            Background = Brushes.MediumPurple,
             Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
         };
         Grid.SetColumn(rightContent, 2);
@@ -303,7 +300,6 @@ public static partial class InitLayout
         // Left content (single panel, no splitter)
         var leftContent = new Border
         {
-            Background = Brushes.CornflowerBlue,
             Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
         };
         Grid.SetColumn(leftContent, 0);
@@ -390,7 +386,6 @@ public static partial class InitLayout
         // Top section
         var topContent = new Border
         {
-            Background = Brushes.CornflowerBlue,
             Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
         };
         Grid.SetRow(topContent, 0);
@@ -521,7 +516,6 @@ public static partial class InitLayout
         // Right section
         var rightContent = new Border
         {
-            Background = Brushes.PaleVioletRed,
             Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
         };
         Grid.SetColumn(rightContent, 2);
@@ -567,7 +561,6 @@ public static partial class InitLayout
         // Bottom section
         var bottomContent = new Border
         {
-            Background = Brushes.PaleVioletRed,
             Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
         };
         Grid.SetRow(bottomContent, 2);
@@ -594,7 +587,6 @@ public static partial class InitLayout
         // Top section
         var topContent = new Border
         {
-            Background = Brushes.CornflowerBlue,
             Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
         };
         Grid.SetRow(topContent, 0);
@@ -659,7 +651,6 @@ public static partial class InitLayout
         // Left part of nested grid
         var nestedLeft = new Border
         {
-            Background = Brushes.CornflowerBlue,
             Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
         };
         Grid.SetColumn(nestedLeft, 0);
@@ -730,7 +721,6 @@ public static partial class InitLayout
         // Top section
         var topContent = new Border
         {
-            Background = Brushes.CornflowerBlue,
             Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
         };
         Grid.SetRow(topContent, 0);

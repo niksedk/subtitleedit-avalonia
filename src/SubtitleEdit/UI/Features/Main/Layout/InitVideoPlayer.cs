@@ -9,6 +9,7 @@ using HanumanInstitute.MediaPlayer.Avalonia.Mpv;
 using LibVLCSharp.Avalonia;
 using LibVLCSharp.Shared;
 using System;
+using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -32,11 +33,18 @@ public class InitVideoPlayer
             if (vm.MpvView == null)
             {
                 //var player = new HanumanInstitute.MediaPlayer.Avalonia.MediaPlayer();
-                var mpvPlayerHost = new MpvPlayerHost
+                // var mpvPlayerHost = new MpvPlayerHost
+                // {
+                //     Source = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                //     Volume = 80,
+                //     Loop = true
+                // };
+
+                var mpvPlayerHost = new Border
                 {
-                    Source = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-                    Volume = 80,
-                    Loop = true
+                 Background = Brushes.Black,
+                  HorizontalAlignment = HorizontalAlignment.Stretch,
+                  VerticalAlignment = VerticalAlignment.Stretch,
                 };
 
                 var control = new VideoPlayerControl
@@ -82,43 +90,7 @@ public class InitVideoPlayer
             mainGrid.Children.Add(vm.VideoPlayer);
         }
 
-        // Footer
-        var footerGrid = new Grid
-        {
-            ColumnDefinitions = new ColumnDefinitions("*"),
-            RowDefinitions = new RowDefinitions("Auto,Auto"),
-            Margin = new Thickness(10, 0),
-        };
-
-        // Navigation bar (e.g., time slider)
-        var navigationBar = new Slider
-        {
-            Minimum = 0,
-            Maximum = 100,
-            Value = 0,
-            Margin = new Thickness(0),
-        };
-        Grid.SetRow(navigationBar, 0);  // First row of footer grid
-        footerGrid.Children.Add(navigationBar);
-
-        var controlsPanel = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            Spacing = 0,
-            VerticalAlignment = VerticalAlignment.Center,
-            HorizontalAlignment = HorizontalAlignment.Center,
-            Margin = new Thickness(0, 0, 0, 0),
-        };
-        controlsPanel.Children.Add(CreateButtonWithIcon("Assets/Themes/Dark/VideoPlayer/Play.png"));
-        controlsPanel.Children.Add(CreateButtonWithIcon("Assets/Themes/Dark/VideoPlayer/Stop.png"));
-        controlsPanel.Children.Add(CreateButtonWithIcon("Assets/Themes/Dark/VideoPlayer/VolumeBarBackground.png"));
-        controlsPanel.Children.Add(CreateButtonWithIcon("Assets/Themes/Dark/VideoPlayer/Fullscreen.png"));
-        Grid.SetRow(controlsPanel, 1);  // Second row of footer grid
-        footerGrid.Children.Add(controlsPanel);
-
-        // Add footer to main grid
-        Grid.SetRow(footerGrid, 1);  // Third row of main grid
-        mainGrid.Children.Add(footerGrid);
+    
 
         return mainGrid;
     }
