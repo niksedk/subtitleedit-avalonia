@@ -7,6 +7,7 @@ using LibVLCSharp.Avalonia;
 using LibVLCSharp.Shared;
 using System;
 using Nikse.SubtitleEdit.Controls;
+using Nikse.SubtitleEdit.Logic.VideoPlayers;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -36,6 +37,10 @@ public class InitVideoPlayer
                 //     Volume = 80,
                 //     Loop = true
                 // };
+                
+                var player = new MpvVideoPlayer();
+                player.LoadVideo("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4");
+                
 
                 var mpvPlayerHost = new Border
                 {
@@ -54,7 +59,7 @@ public class InitVideoPlayer
 
                 var control = new VideoPlayerControl
                 {
-                    PlayerContent = mpvPlayerHost,
+                    PlayerContent = player,
                     Volume = 80,
                     Duration = 300 // e.g., 5 minutes
                 };

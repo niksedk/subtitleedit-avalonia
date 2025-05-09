@@ -255,12 +255,12 @@ namespace Nikse.SubtitleEdit.Logic.VideoPlayers
 
         public void SetAudioChannelFrontCenter()
         {
-            _mpvSetOptionString?.Invoke(_mpvHandle, GetUtf8Bytes("af"), GetUtf8Bytes("lavfi=[pan=mono|c0=FC]"));
+            SetOptionString("af","lavfi=[pan=mono|c0=FC]");
         }
 
         public void SetAudioChannelFrontReset()
         {
-            _mpvSetOptionString?.Invoke(_mpvHandle, GetUtf8Bytes("af"), GetUtf8Bytes(""));
+            SetOptionString("af","");
         }
 
         public void GetNextFrame()
@@ -558,12 +558,12 @@ namespace Nikse.SubtitleEdit.Logic.VideoPlayers
 
         public void HideCursor()
         {
-            _mpvSetOptionString?.Invoke(_mpvHandle, GetUtf8Bytes("cursor-autohide"), GetUtf8Bytes("always"));
+            SetOptionString("cursor-autohide","always");
         }
 
         public void ShowCursor()
         {
-            _mpvSetOptionString?.Invoke(_mpvHandle, GetUtf8Bytes("cursor-autohide"), GetUtf8Bytes("no"));
+            SetOptionString("cursor-autohide", "no");
         }
 
         public static bool IsInstalled
@@ -697,7 +697,7 @@ namespace Nikse.SubtitleEdit.Logic.VideoPlayers
                 if (Configuration.Settings.General.MpvLogging)
                 {
                     var logFileName = Path.Combine(Configuration.DataDirectory, "mpv-log-" + Guid.NewGuid() + ".txt");
-                    _mpvSetOptionString?.Invoke(_mpvHandle, GetUtf8Bytes("log-file"), GetUtf8Bytes(logFileName));
+                    SetOptionString("log-file",logFileName);
                 }
 
                 
@@ -732,28 +732,28 @@ namespace Nikse.SubtitleEdit.Logic.VideoPlayers
 
                 if (!string.IsNullOrEmpty(videoOutput))
                 {
-                    _mpvSetOptionString?.Invoke(_mpvHandle, GetUtf8Bytes("vo"), GetUtf8Bytes(videoOutput));
+                    SetOptionString("vo",videoOutput);
                 }
 
                 if (!string.IsNullOrEmpty(Configuration.Settings.General.MpvVideoVf))
                 {
-                    _mpvSetOptionString?.Invoke(_mpvHandle, GetUtf8Bytes("vf"), GetUtf8Bytes(Configuration.Settings.General.MpvVideoVf));
+                    SetOptionString("vf", Configuration.Settings.General.MpvVideoVf);
                 }
 
                 if (!string.IsNullOrEmpty(Configuration.Settings.General.MpvVideoAf))
                 {
-                    _mpvSetOptionString?.Invoke(_mpvHandle, GetUtf8Bytes("af"), GetUtf8Bytes(Configuration.Settings.General.MpvVideoAf));
+                    SetOptionString("af", Configuration.Settings.General.MpvVideoAf);
                 }
 
-                _mpvSetOptionString?.Invoke(_mpvHandle, GetUtf8Bytes("keep-open"), GetUtf8Bytes("always")); // don't auto close video
-                _mpvSetOptionString?.Invoke(_mpvHandle, GetUtf8Bytes("no-sub"), GetUtf8Bytes(string.Empty)); // don't load subtitles (does not seem to work anymore)
-                _mpvSetOptionString?.Invoke(_mpvHandle, GetUtf8Bytes("sid"), GetUtf8Bytes("no")); // don't load subtitles
-                _mpvSetOptionString?.Invoke(_mpvHandle, GetUtf8Bytes("hr-seek"), GetUtf8Bytes("yes")); // don't load subtitles
+                SetOptionString("keep-open","always"); // don't auto close video
+                SetOptionString("no-sub",string.Empty); // don't load subtitles (does not seem to work anymore)
+                SetOptionString("sid","no"); // don't load subtitles
+                SetOptionString("hr-seek","yes"); // don't load subtitles
 
                 if (videoFileName.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
                     videoFileName.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
                 {
-                    _mpvSetOptionString?.Invoke(_mpvHandle, GetUtf8Bytes("ytdl"), GetUtf8Bytes("yes"));
+                    SetOptionString("ytdl", "yes");
                 }
 
                 if (!string.IsNullOrEmpty(Configuration.Settings.General.MpvExtraOptions))
@@ -766,11 +766,11 @@ namespace Nikse.SubtitleEdit.Logic.VideoPlayers
                             var parts = option.TrimStart('-').Split('=');
                             if (parts.Length == 2)
                             {
-                                _mpvSetOptionString?.Invoke(_mpvHandle, GetUtf8Bytes(parts[0]), GetUtf8Bytes(parts[1]));
+                                SetOptionString(parts[0],parts[1]);
                             }
                             else
                             {
-                                _mpvSetOptionString?.Invoke(_mpvHandle, GetUtf8Bytes(option), GetUtf8Bytes(string.Empty));
+                                SetOptionString(option, string.Empty);
                             }
                         }
                     }
@@ -918,7 +918,7 @@ namespace Nikse.SubtitleEdit.Logic.VideoPlayers
                 _brightness = -100;
             }
 
-            _mpvSetOptionString?.Invoke(_mpvHandle, GetUtf8Bytes("brightness"), GetUtf8Bytes(_brightness.ToString(CultureInfo.InvariantCulture)));
+            SetOptionString("brightness",_brightness.ToString(CultureInfo.InvariantCulture));
             return _brightness;
         }
 
@@ -930,7 +930,7 @@ namespace Nikse.SubtitleEdit.Logic.VideoPlayers
                 _contrast = -100;
             }
 
-            _mpvSetOptionString?.Invoke(_mpvHandle, GetUtf8Bytes("contrast"), GetUtf8Bytes(_contrast.ToString(CultureInfo.InvariantCulture)));
+            SetOptionString("contrast",_contrast.ToString(CultureInfo.InvariantCulture));
             return _contrast;
         }
 
@@ -965,6 +965,27 @@ namespace Nikse.SubtitleEdit.Logic.VideoPlayers
             }
 
             return info;
+        }
+
+        private void SetOptionString(string option, string value)
+        {
+            _mpvSetOptionString?.Invoke(_mpvHandle, GetUtf8Bytes(option), GetUtf8Bytes(value)); 
+
+        }
+
+        public void InitializeOpenGl(string videoFileName)
+        {
+            // Set up MPV for OpenGL rendering
+            SetOptionString("vo","opengl"); 
+            SetOptionString("gpu-api","opengl"); 
+            
+            // Configure mpv to use our OpenGL context
+            SetOptionString("opengl-backend","auto"); 
+            
+            if (!string.IsNullOrEmpty(videoFileName))
+            {
+                DoMpvCommand("loadfile", videoFileName);
+            }
         }
     }
 }

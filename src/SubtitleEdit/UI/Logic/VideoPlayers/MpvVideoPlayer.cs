@@ -24,10 +24,12 @@ public class MpvVideoPlayer : OpenGlControlBase
     public void LoadVideo(string path)
     {
         _videoPath = path;
-        if (_isInitialized)
+        if (_mpv == null)
         {
-            _mpv.Initialize(this, path, null, null);
+            _mpv = new LibMpvDynamic();
         }
+        
+        _mpv.Initialize(this, path, null, null);
     }
 
     public void Play()
@@ -60,7 +62,11 @@ public class MpvVideoPlayer : OpenGlControlBase
         {
             // Create a new MPV instance
             _mpv = new LibMpvDynamic();
+            _mpv.Initialize(this, string.Empty, null, null);
 
+            _mpv.InitializeOpenGl(_videoPath);
+            _isInitialized = true;
+            
             // // Set up MPV for OpenGL rendering
             // _mpv.SetPropertyString("vo", "opengl");
             // _mpv.SetPropertyString("gpu-api", "opengl");
@@ -89,12 +95,12 @@ public class MpvVideoPlayer : OpenGlControlBase
     private void StartRenderLoop()
     {
         // Request redraw at video framerate
-        DispatcherTimer timer = new DispatcherTimer
+        var timer = new DispatcherTimer
         {
             Interval = TimeSpan.FromMilliseconds(16) // ~60fps
         };
 
-        timer.Tick += (s, e) => { this.InvalidateVisual(); };
+        timer.Tick += (s, e) => { RequestNextFrameRendering(); };
 
         timer.Start();
     }
@@ -110,7 +116,7 @@ public class MpvVideoPlayer : OpenGlControlBase
             gl.Clear(GlConsts.GL_COLOR_BUFFER_BIT);
 
             // Get the current size of the control
-            var size = this.Bounds.Size;
+            var size = Bounds.Size;
 
             // Set the viewport
             gl.Viewport(0, 0, (int)size.Width, (int)size.Height);
@@ -135,7 +141,7 @@ public class MpvVideoPlayer : OpenGlControlBase
     protected override void OnOpenGlInit(GlInterface gl)
     {
         // Store the OpenGL context
-        IntPtr _glContext = gl.GetProcAddress("name");
+        _glContext = gl.GetProcAddress("name");
 
         // Additional OpenGL initialization if needed
     }
