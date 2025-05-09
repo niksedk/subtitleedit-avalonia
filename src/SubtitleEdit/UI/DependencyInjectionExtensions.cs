@@ -8,7 +8,6 @@ using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Features.Translate;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic;
-using SubtitleAlchemist.Logic.Media;
 
 namespace Nikse.SubtitleEdit;
 

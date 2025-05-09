@@ -1,6 +1,6 @@
 ﻿using SkiaSharp;
 
-namespace Nikse.SubtitleEdit.Features.Common;
+namespace Nikse.SubtitleEdit.Logic;
 
 public static class TextMeasurer
 {

@@ -1,15 +1,12 @@
-﻿using ApvPlayer.Controls;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
-using Avalonia.Media.Imaging;
 using HanumanInstitute.LibMpv.Avalonia;
-using HanumanInstitute.MediaPlayer.Avalonia.Mpv;
 using LibVLCSharp.Avalonia;
 using LibVLCSharp.Shared;
 using System;
-using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Controls;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -43,6 +40,14 @@ public class InitVideoPlayer
                 var mpvPlayerHost = new Border
                 {
                     Background = Brushes.Black,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    VerticalAlignment = VerticalAlignment.Stretch,
+                    
+                };
+
+                var mpvView = new MpvView()
+                {
+                    Margin = new Thickness(0),
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                     VerticalAlignment = VerticalAlignment.Stretch,
                 };

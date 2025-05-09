@@ -7,7 +7,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Layout;
 using Projektanker.Icons.Avalonia;
 
-namespace ApvPlayer.Controls
+namespace Nikse.SubtitleEdit.Controls
 {
     public class VideoPlayerControl : UserControl
     {

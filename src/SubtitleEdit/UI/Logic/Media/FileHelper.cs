@@ -1,12 +1,11 @@
-﻿using Avalonia;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
-using Nikse.SubtitleEdit.Logic.Media;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
-namespace SubtitleAlchemist.Logic.Media
+namespace Nikse.SubtitleEdit.Logic.Media
 {
     public class FileHelper : IFileHelper
     {
