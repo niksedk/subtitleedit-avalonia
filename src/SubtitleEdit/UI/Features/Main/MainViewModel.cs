@@ -31,6 +31,7 @@ using Avalonia.Controls.Selection;
 using HanumanInstitute.LibMpv;
 using Avalonia.Threading;
 using Nikse.SubtitleEdit.Controls;
+using HanumanInstitute.LibMpv.Avalonia;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -85,8 +86,7 @@ public partial class MainViewModel : ObservableObject
     private bool IsEmpty => Subtitles.Count == 0 || string.IsNullOrEmpty(Subtitles[0].Text);
 
     public VideoPlayerControl? VideoPlayerControl { get; internal set; }
-
-
+    public MpvView MpvView { get; internal set; }
 
     public MainViewModel(IFileHelper fileHelper, IShortcutManager shortcutManager, IWindowService windowService)
     {
@@ -705,7 +705,7 @@ public partial class MainViewModel : ObservableObject
         _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
         _positionTimer.Tick += (s, e) =>
         {
-            if (MediaPlayerMpv != null && VideoPlayerControl != null && !VideoPlayerControl.IsUserDragging)
+            if (MediaPlayerMpv != null && VideoPlayerControl != null)
             {
                 VideoPlayerControl.Duration = MediaPlayerMpv.Duration.Get() ?? 0; // / _mpv.Duration;
                 var pos = MediaPlayerMpv.TimePos.Get() ?? 0;
@@ -967,6 +967,14 @@ public partial class MainViewModel : ObservableObject
         if (MediaPlayerMpv != null && VideoPlayerControl != null) 
         {
             MediaPlayerMpv.TimePos.Set(obj);
+        }
+    }
+
+    internal void VideoPlayerControlVolumeChanged(double obj)
+    {
+        if (MediaPlayerMpv != null && VideoPlayerControl != null)
+        {
+            MediaPlayerMpv.Volume.Set(obj);
         }
     }
 }

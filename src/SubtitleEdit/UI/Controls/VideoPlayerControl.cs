@@ -102,12 +102,11 @@ namespace Nikse.SubtitleEdit.Controls
             set => SetValue(SettingsCommandProperty, value);
         }
 
-        public bool IsUserDragging { get; set; } = false;
-        double _ignoreValue = -1;
+        double _positionIgnore = -1;
 
         private void NotifyPositionChanged(double newPosition)
         {
-            if (_ignoreValue == newPosition)
+            if (_positionIgnore == newPosition)
             {
                 return;
             }
@@ -121,7 +120,7 @@ namespace Nikse.SubtitleEdit.Controls
 
         internal void SetPosition(double v)
         {
-            _ignoreValue = v;
+            _positionIgnore = v;
             Position = v;
         }
 
@@ -203,6 +202,14 @@ namespace Nikse.SubtitleEdit.Controls
                 }
             };
             volumeSlider.Bind(Slider.ValueProperty, this.GetObservable(VolumeProperty));
+
+            volumeSlider.ValueChanged += (s, e) =>
+            {
+                Volume = e.NewValue;
+                VolumeChanged?.Invoke(e.NewValue);
+            };
+
+
             progressGrid.Children.Add(volumeSlider);
             Grid.SetColumn(volumeSlider, 2);
 
@@ -289,6 +296,12 @@ namespace Nikse.SubtitleEdit.Controls
             });
 
             Content = mainGrid;
+
+            positionSlider.Maximum = 1;
+            positionSlider.Value = 0;
+
+            volumeSlider.Maximum = 1;
+            volumeSlider.Value = 0.5;
         }
 
         public event Action? PlayPauseRequested;
@@ -297,5 +310,6 @@ namespace Nikse.SubtitleEdit.Controls
         public event Action? ScreenshotRequested;
         public event Action? SettingsRequested;
         public event Action<double>? PositionChanged;
+        public event Action<double>? VolumeChanged;
     }
 }

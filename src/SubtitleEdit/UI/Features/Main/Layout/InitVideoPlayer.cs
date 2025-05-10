@@ -35,6 +35,7 @@ public class InitVideoPlayer
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                     VerticalAlignment = VerticalAlignment.Stretch,
                 };
+                vm.MpvView = mpvView;
 
                 mpvView.Bind(MpvView.MpvContextProperty, new Binding(nameof(vm.MediaPlayerMpv)));
 
@@ -52,9 +53,36 @@ public class InitVideoPlayer
                 control.SettingsCommand = vm.VideoSettingsCommand;
                 vm.VideoPlayerControl = control;
                 control.PositionChanged += vm.VideoPlayerControlPositionChanged;
+                control.VolumeChanged += vm.VideoPlayerControlVolumeChanged;
 
                 Grid.SetRow(control, 0);
                 mainGrid.Children.Add(control);
+                return mainGrid;
+            }
+            else if (vm.VideoPlayerControl != null && vm.MpvView != null)
+            {
+                // Remove old mpvView if it exists
+                var parent = vm.VideoPlayerControl?.Parent;
+
+                if (parent is Panel panel)
+                {
+                    panel.Children.Remove(vm.VideoPlayerControl!);
+                }
+                else if (parent is Decorator decorator)
+                {
+                    if (decorator.Child == vm.VideoPlayerControl)
+                        decorator.Child = null;
+                }
+                else if (parent is ContentControl contentControl)
+                {
+                    if (contentControl.Content == vm.VideoPlayerControl)
+                        contentControl.Content = null;
+                }
+
+
+              
+                Grid.SetRow(vm.VideoPlayerControl!, 0);
+                mainGrid.Children.Add(vm.VideoPlayerControl!);
                 return mainGrid;
             }
         }
