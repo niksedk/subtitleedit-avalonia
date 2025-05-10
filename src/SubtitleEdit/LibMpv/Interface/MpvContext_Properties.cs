@@ -131,6 +131,11 @@ public partial class MpvContext
     public MpvPropertyWrite<double> TimePos => new(this, "time-pos");
 
     /// <summary>
+    /// Position in current file in seconds.
+    /// </summary>
+    public MpvPropertyRead<double> TimePosRead => new(this, "time-pos");
+
+    /// <summary>
     /// Remaining length of the file in seconds. Note that the file duration is not always exactly known, so this is an estimate.
     /// </summary>
     public MpvPropertyRead<double> TimeRemaining => new(this, "time-remaining");

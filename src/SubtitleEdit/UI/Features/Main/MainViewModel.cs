@@ -29,6 +29,8 @@ using Nikse.SubtitleEdit.Logic.ValueConverters;
 using System.Threading;
 using Avalonia.Controls.Selection;
 using HanumanInstitute.LibMpv;
+using Avalonia.Threading;
+using Nikse.SubtitleEdit.Controls;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -60,6 +62,7 @@ public partial class MainViewModel : ObservableObject
     public VideoView VideoViewVlc { get; internal set; }
     public MediaPlayer? MediaPlayerVlc { get; set; }
     public MpvContext? MediaPlayerMpv { get; internal set; }
+    private DispatcherTimer _positionTimer;
     public LibVLC LibVLC { get; internal set; }
     public ITreeDataGridSource? SubtitlesSource { get; set; }
     public TextBlock StatusTextLeftLabel { get; internal set; }
@@ -78,6 +81,11 @@ public partial class MainViewModel : ObservableObject
     private readonly IFileHelper _fileHelper;
     private readonly IShortcutManager _shortcutManager;
     private readonly IWindowService _windowService;
+
+    private bool IsEmpty => Subtitles.Count == 0 || string.IsNullOrEmpty(Subtitles[0].Text);
+
+    public VideoPlayerControl? VideoPlayerControl { get; internal set; }
+
 
 
     public MainViewModel(IFileHelper fileHelper, IShortcutManager shortcutManager, IWindowService windowService)
@@ -434,7 +442,8 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void Stop()
     {
-        MediaPlayerMpv?.Stop();
+        MediaPlayerMpv.Pause.Set(true);
+        MediaPlayerMpv.TimePos.Set(0);
     }
 
     [RelayCommand]
@@ -580,9 +589,6 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    private bool IsEmpty => Subtitles.Count == 0 || string.IsNullOrEmpty(Subtitles[0].Text);
-
-
     private bool HasChanges()
     {
         return !IsEmpty && _changeSubtitleHash != GetFastSubtitleHash();
@@ -694,12 +700,27 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    private void StartPositionTimer()
+    {
+        _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
+        _positionTimer.Tick += (s, e) =>
+        {
+            if (MediaPlayerMpv != null && VideoPlayerControl != null)
+            {
+                VideoPlayerControl.Position = MediaPlayerMpv.TimePos.Get() ?? 0; // / _mpv.Duration;
+                VideoPlayerControl.Duration = MediaPlayerMpv.Duration.Get() ?? 0; // / _mpv.Duration;
+            }
+        };
+        _positionTimer.Start();
+    }
+
     private async Task VideoOpenFile(string videoFileName)
     {
         if (MediaPlayerMpv != null)
         {
             MediaPlayerMpv.Stop();
             await MediaPlayerMpv.LoadFile(videoFileName).InvokeAsync();
+            StartPositionTimer();
         }
         else if (MediaPlayerVlc != null)
         {

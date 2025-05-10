@@ -34,15 +34,9 @@ public class InitVideoPlayer
                     Margin = new Thickness(0),
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                     VerticalAlignment = VerticalAlignment.Stretch,
-                  //  DataContext = vm.MediaPlayerMpv,
-                   // Width = 800,
-                   // Height = 600,
                 };
 
-                mpvView.Bind(
-                            MpvView.MpvContextProperty,
-                            new Binding(nameof(vm.MediaPlayerMpv)) // binds to the "Mpv" property on the DataContext
-                        );
+                mpvView.Bind(MpvView.MpvContextProperty, new Binding(nameof(vm.MediaPlayerMpv)));
 
                 var control = new VideoPlayerControl
                 {
@@ -56,6 +50,7 @@ public class InitVideoPlayer
                 control.FullScreenCommand = vm.VideoFullScreenCommand;
                 control.ScreenshotCommand = vm.VideoScreenshotCommand;
                 control.SettingsCommand = vm.VideoSettingsCommand;
+                vm.VideoPlayerControl = control;
 
                 Grid.SetRow(control, 0);
                 mainGrid.Children.Add(control);
