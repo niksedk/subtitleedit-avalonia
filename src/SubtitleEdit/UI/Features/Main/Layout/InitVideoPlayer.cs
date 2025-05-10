@@ -2,12 +2,11 @@
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
-using HanumanInstitute.LibMpv.Avalonia;
 using LibVLCSharp.Avalonia;
 using LibVLCSharp.Shared;
 using System;
 using Nikse.SubtitleEdit.Controls;
-using Nikse.SubtitleEdit.Logic.VideoPlayers;
+using Nikse.SubtitleEdit.Logic.VideoPlayers.MpvLogic;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -24,33 +23,11 @@ public class InitVideoPlayer
             Margin = new Thickness(0),
         };
 
-
         if (true)
         {
-            // Video player area
-            if (vm.MpvView == null)
+            if (vm.MediaPlayerMpv == null)
             {
-                //var player = new HanumanInstitute.MediaPlayer.Avalonia.MediaPlayer();
-                // var mpvPlayerHost = new MpvPlayerHost
-                // {
-                //     Source = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-                //     Volume = 80,
-                //     Loop = true
-                // };
-                
-                var player = new MpvVideoPlayer();
-                player.LoadVideo("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4");
-                
-
-                var mpvPlayerHost = new Border
-                {
-                    Background = Brushes.Black,
-                    HorizontalAlignment = HorizontalAlignment.Stretch,
-                    VerticalAlignment = VerticalAlignment.Stretch,
-                    
-                };
-
-                var mpvView = new MpvView()
+                vm.MediaPlayerMpv = new MpvVideoPlayer
                 {
                     Margin = new Thickness(0),
                     HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -59,9 +36,10 @@ public class InitVideoPlayer
 
                 var control = new VideoPlayerControl
                 {
-                    PlayerContent = player,
+                    PlayerContent = vm.MediaPlayerMpv,
                     Volume = 80,
-                    Duration = 300 // e.g., 5 minutes
+                    VerticalAlignment = VerticalAlignment.Stretch,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
                 };
                 control.PlayCommand = vm.PlayPauseCommand;
                 control.StopCommand = vm.StopCommand;
@@ -78,28 +56,28 @@ public class InitVideoPlayer
         if (OperatingSystem.IsWindows() && false)
         {
             // Video player area
-            if (vm.LibVLC == null || vm.VideoPlayer == null)
+            if (vm.LibVLC == null || vm.VideoViewVlc == null)
             {
-                vm.MediaPlayer?.Dispose();
+                vm.MediaPlayerVlc?.Dispose();
                 vm.LibVLC?.Dispose();
                 vm.LibVLC = new LibVLC();
-                vm.MediaPlayer = new MediaPlayer(vm.LibVLC);
-                vm.VideoPlayer = new VideoView
+                vm.MediaPlayerVlc = new MediaPlayer(vm.LibVLC);
+                vm.VideoViewVlc = new VideoView
                 {
                     Margin = new Thickness(0),
-                    MediaPlayer = vm.MediaPlayer,
+                    MediaPlayer = vm.MediaPlayerVlc,
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                     VerticalAlignment = VerticalAlignment.Stretch,
                 };
             }
             else
             {
-                var grid = vm.VideoPlayer.Parent as Grid;
-                grid?.Children.Remove(vm.VideoPlayer);
+                var grid = vm.VideoViewVlc.Parent as Grid;
+                grid?.Children.Remove(vm.VideoViewVlc);
             }
 
-            Grid.SetRow(vm.VideoPlayer, 0);
-            mainGrid.Children.Add(vm.VideoPlayer);
+            Grid.SetRow(vm.VideoViewVlc, 0);
+            mainGrid.Children.Add(vm.VideoViewVlc);
         }
 
 

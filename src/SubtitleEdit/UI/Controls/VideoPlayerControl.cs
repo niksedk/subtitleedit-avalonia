@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
+using Avalonia.Data;
 using Avalonia.Layout;
 using Projektanker.Icons.Avalonia;
 
@@ -40,7 +41,7 @@ namespace Nikse.SubtitleEdit.Controls
 
         public static readonly StyledProperty<ICommand> SettingsCommandProperty =
             AvaloniaProperty.Register<VideoPlayerControl, ICommand>(nameof(SettingsCommand));
-        
+
         public Control? PlayerContent
         {
             get => GetValue(PlayerContentProperty);
@@ -88,13 +89,13 @@ namespace Nikse.SubtitleEdit.Controls
             get => GetValue(FullScreenCommandProperty);
             set => SetValue(FullScreenCommandProperty, value);
         }
-        
+
         public ICommand ScreenshotCommand
         {
             get => GetValue(ScreenshotCommandProperty);
             set => SetValue(ScreenshotCommandProperty, value);
         }
-        
+
         public ICommand SettingsCommand
         {
             get => GetValue(SettingsCommandProperty);
@@ -185,6 +186,12 @@ namespace Nikse.SubtitleEdit.Controls
             var playButton = new Button();
             Attached.SetIcon(playButton, "fa-solid fa-play");
             playButton.Click += (_, _) => PlayPauseRequested?.Invoke();
+            playButton.Bind(Button.CommandProperty, new Binding
+            {
+                Path = nameof(PlayCommand),
+                Source = this
+            });
+
             controlGrid.Children.Add(playButton);
             Grid.SetColumn(playButton, 0);
 
@@ -194,6 +201,11 @@ namespace Nikse.SubtitleEdit.Controls
             stopButton.Click += (_, _) => StopRequested?.Invoke();
             controlGrid.Children.Add(stopButton);
             Grid.SetColumn(stopButton, 1);
+            stopButton.Bind(Button.CommandProperty, new Binding
+            {
+                Path = nameof(StopCommand),
+                Source = this
+            });
 
             // Fullscreen
             var fullscreenButton = new Button();
@@ -201,6 +213,11 @@ namespace Nikse.SubtitleEdit.Controls
             fullscreenButton.Click += (_, _) => FullscreenRequested?.Invoke();
             controlGrid.Children.Add(fullscreenButton);
             Grid.SetColumn(fullscreenButton, 2);
+            fullscreenButton.Bind(Button.CommandProperty, new Binding
+            {
+                Path = nameof(FullScreenCommand),
+                Source = this
+            });
 
             // ProgressText
             var progressText = new TextBlock
@@ -219,6 +236,11 @@ namespace Nikse.SubtitleEdit.Controls
             clipButton.Click += (_, _) => ScreenshotRequested?.Invoke();
             controlGrid.Children.Add(clipButton);
             Grid.SetColumn(clipButton, 4);
+            clipButton.Bind(Button.CommandProperty, new Binding
+            {
+                Path = nameof(ScreenshotCommand),
+                Source = this
+            });
 
             // Settings
             var settingsButton = new Button();
@@ -226,6 +248,11 @@ namespace Nikse.SubtitleEdit.Controls
             settingsButton.Click += (_, _) => SettingsRequested?.Invoke();
             controlGrid.Children.Add(settingsButton);
             Grid.SetColumn(settingsButton, 5);
+            settingsButton.Bind(Button.CommandProperty, new Binding
+            {
+                Path = nameof(SettingsCommand),
+                Source = this
+            });
 
             Content = mainGrid;
         }

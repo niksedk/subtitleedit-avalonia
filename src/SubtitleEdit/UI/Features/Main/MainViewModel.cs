@@ -28,11 +28,7 @@ using Avalonia.Controls.Models.TreeDataGrid;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 using System.Threading;
 using Avalonia.Controls.Selection;
-using Avalonia.Threading;
-using Avalonia.Controls.Primitives;
-using Avalonia.VisualTree;
-using System.Reflection.Metadata.Ecma335;
-using HanumanInstitute.LibMpv.Avalonia;
+using Nikse.SubtitleEdit.Logic.VideoPlayers.MpvLogic;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -61,8 +57,13 @@ public partial class MainViewModel : ObservableObject
     public Grid ContentGrid { get; set; }
     public MainView MainView { get; set; }
 
-    public VideoView VideoPlayer { get; internal set; }
-    public MediaPlayer MediaPlayer { get; set; }
+    public VideoView VideoViewVlc { get; internal set; }
+    public MediaPlayer? MediaPlayerVlc { get; set; }
+    public MpvVideoPlayer? MediaPlayerMpv { get; internal set; }
+    public LibVLC LibVLC { get; internal set; }
+    public ITreeDataGridSource? SubtitlesSource { get; set; }
+    public TextBlock StatusTextLeftLabel { get; internal set; }
+
 
     public Grid Waveform { get; internal set; }
     public MenuItem MenuReopen { get; internal set; }
@@ -400,35 +401,35 @@ public partial class MainViewModel : ObservableObject
             //}, DispatcherPriority.Render);
         }
     }
-    
+
     [RelayCommand]
     private void PlayPause()
     {
-        
+        MediaPlayerMpv?.Play();
     }
-    
+
     [RelayCommand]
     private void Stop()
     {
-        
+        MediaPlayerMpv?.Stop();
     }
 
     [RelayCommand]
     private void VideoFullScreen()
     {
-        
+
     }
-    
+
     [RelayCommand]
     private void VideoScreenshot()
     {
-        
+
     }
 
     [RelayCommand]
     private void VideoSettings()
     {
-        
+
     }
 
     private void SelectAllRows()
@@ -558,10 +559,6 @@ public partial class MainViewModel : ObservableObject
 
     private bool IsEmpty => Subtitles.Count == 0 || string.IsNullOrEmpty(Subtitles[0].Text);
 
-    public LibVLC LibVLC { get; internal set; }
-    public ITreeDataGridSource? SubtitlesSource { get; set; }
-    public TextBlock StatusTextLeftLabel { get; internal set; }
-    public MpvView MpvView { get; internal set; }
 
     private bool HasChanges()
     {
@@ -656,7 +653,7 @@ public partial class MainViewModel : ObservableObject
 
     internal void OnClosing()
     {
-        MediaPlayer?.Dispose();
+        MediaPlayerVlc?.Dispose();
         //libVLC?.Dispose();
 
         Se.SaveSettings();
@@ -676,16 +673,15 @@ public partial class MainViewModel : ObservableObject
 
     private async Task VideoOpenFile(string videoFileName)
     {
-        if (VideoPlayer == null)
+        if (MediaPlayerMpv != null)
         {
-            return;
+            MediaPlayerMpv.OpenMedia(videoFileName);
         }
-
-        //_timer.Stop();
-        //_audioVisualizer.WavePeaks = null;
-        //VideoPlayer.Source = MediaSource.FromFile(videoFileName);
-        var media = new Media(LibVLC, new Uri(videoFileName));
-        MediaPlayer.Play(media);
+        else if (MediaPlayerVlc != null)
+        {
+            var media = new Media(LibVLC, new Uri(videoFileName));
+            MediaPlayerVlc.Play(media);
+        }
 
         var peakWaveFileName = WavePeakGenerator.GetPeakWaveFileName(videoFileName);
         if (!File.Exists(peakWaveFileName))
@@ -719,13 +715,13 @@ public partial class MainViewModel : ObservableObject
 
     private void VideoCloseFile()
     {
-        if (VideoPlayer == null)
+        if (VideoViewVlc == null)
         {
             return;
         }
 
         _videoFileName = string.Empty;
-        MediaPlayer.Media = null;
+        MediaPlayerVlc.Media = null;
     }
 
     private int GetFastSubtitleHash()
