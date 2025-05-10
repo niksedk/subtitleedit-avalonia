@@ -28,7 +28,7 @@ using Avalonia.Controls.Models.TreeDataGrid;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 using System.Threading;
 using Avalonia.Controls.Selection;
-using Nikse.SubtitleEdit.Logic.VideoPlayers.MpvLogic;
+using HanumanInstitute.LibMpv;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -59,7 +59,7 @@ public partial class MainViewModel : ObservableObject
 
     public VideoView VideoViewVlc { get; internal set; }
     public MediaPlayer? MediaPlayerVlc { get; set; }
-    public MpvVideoPlayer? MediaPlayerMpv { get; internal set; }
+    public MpvContext? MediaPlayerMpv { get; internal set; }
     public LibVLC LibVLC { get; internal set; }
     public ITreeDataGridSource? SubtitlesSource { get; set; }
     public TextBlock StatusTextLeftLabel { get; internal set; }
@@ -405,8 +405,31 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void PlayPause()
     {
-        MediaPlayerMpv?.Play();
+        var value = !MediaPlayerMpv.Pause.Get()!;
+        MediaPlayerMpv.Pause.Set(value.Value);
     }
+
+
+
+    //public async void Play()
+    //{
+    //    MediaPlayerMpv.Pause.Set(value.Value);
+    //    await MediaPlayerMpv.LoadFile(MediaUrl).InvokeAsync();
+    //}
+
+    //public void Pause() => Pause(null);
+
+    //public void Pause(bool? value)
+    //{
+    //    value ??= !Mpv.Pause.Get()!;
+    //    Mpv.Pause.Set(value.Value);
+    //}
+
+    //public void Stop()
+    //{
+    //    Mpv.Stop().Invoke();
+    //    Mpv.Pause.Set(false);
+    //}
 
     [RelayCommand]
     private void Stop()
@@ -675,7 +698,8 @@ public partial class MainViewModel : ObservableObject
     {
         if (MediaPlayerMpv != null)
         {
-            MediaPlayerMpv.OpenMedia(videoFileName);
+            MediaPlayerMpv.Stop();
+            await MediaPlayerMpv.LoadFile(videoFileName).InvokeAsync();
         }
         else if (MediaPlayerVlc != null)
         {

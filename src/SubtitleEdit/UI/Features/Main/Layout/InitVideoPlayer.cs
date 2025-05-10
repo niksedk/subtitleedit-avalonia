@@ -1,12 +1,12 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
-using Avalonia.Media;
 using LibVLCSharp.Avalonia;
 using LibVLCSharp.Shared;
 using System;
 using Nikse.SubtitleEdit.Controls;
-using Nikse.SubtitleEdit.Logic.VideoPlayers.MpvLogic;
+using HanumanInstitute.LibMpv.Avalonia;
+using Avalonia.Data;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -27,16 +27,26 @@ public class InitVideoPlayer
         {
             if (vm.MediaPlayerMpv == null)
             {
-                vm.MediaPlayerMpv = new MpvVideoPlayer
+                vm.MediaPlayerMpv = new HanumanInstitute.LibMpv.MpvContext();
+
+                var mpvView = new MpvView
                 {
                     Margin = new Thickness(0),
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                     VerticalAlignment = VerticalAlignment.Stretch,
+                  //  DataContext = vm.MediaPlayerMpv,
+                   // Width = 800,
+                   // Height = 600,
                 };
+
+                mpvView.Bind(
+                            MpvView.MpvContextProperty,
+                            new Binding(nameof(vm.MediaPlayerMpv)) // binds to the "Mpv" property on the DataContext
+                        );
 
                 var control = new VideoPlayerControl
                 {
-                    PlayerContent = vm.MediaPlayerMpv,
+                    PlayerContent = mpvView,
                     Volume = 80,
                     VerticalAlignment = VerticalAlignment.Stretch,
                     HorizontalAlignment = HorizontalAlignment.Stretch,
