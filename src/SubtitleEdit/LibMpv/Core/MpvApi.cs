@@ -13,6 +13,12 @@ public partial class MpvApi
     /// </summary>
     public static string DllName { get; set; } = "libmpv";
 
+    /// <summary>
+    /// Gets or sets the max volume.
+    /// </summary>
+    public static int MaxVolume { get; set; } = 130;
+
+
     // Libraries
     public static Dictionary<string, int> LibraryVersionMap = new()
     {

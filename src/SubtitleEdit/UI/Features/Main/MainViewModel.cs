@@ -32,6 +32,7 @@ using HanumanInstitute.LibMpv;
 using Avalonia.Threading;
 using Nikse.SubtitleEdit.Controls;
 using HanumanInstitute.LibMpv.Avalonia;
+using System.Diagnostics.Metrics;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -413,8 +414,21 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void PlayPause()
     {
-        var value = !MediaPlayerMpv.Pause.Get()!;
-        MediaPlayerMpv.Pause.Set(value.Value);
+        var before = MediaPlayerMpv?.Pause.Get();
+        if (before == null)
+        {
+            return;
+        }
+
+        MediaPlayerMpv?.Pause.Set(!before.Value);
+
+        var after = !MediaPlayerMpv?.Pause.Get();
+        if (after == null)
+        {
+            return;
+        }
+
+        VideoPlayerControl?.SetPlayPauseIcon(after.Value);
     }
 
 
@@ -442,8 +456,9 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void Stop()
     {
-        MediaPlayerMpv.Pause.Set(true);
-        MediaPlayerMpv.TimePos.Set(0);
+        MediaPlayerMpv?.Pause.Set(true);
+        MediaPlayerMpv?.TimePos.Set(0);
+        VideoPlayerControl?.SetPlayPauseIcon(false);
     }
 
     [RelayCommand]

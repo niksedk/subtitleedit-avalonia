@@ -6,6 +6,8 @@ using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Layout;
+using Avalonia.Threading;
+using HanumanInstitute.LibMpv.Core;
 using Projektanker.Icons.Avalonia;
 
 namespace Nikse.SubtitleEdit.Controls
@@ -35,12 +37,6 @@ namespace Nikse.SubtitleEdit.Controls
 
         public static readonly StyledProperty<ICommand> FullScreenCommandProperty =
             AvaloniaProperty.Register<VideoPlayerControl, ICommand>(nameof(FullScreenCommand));
-
-        public static readonly StyledProperty<ICommand> ScreenshotCommandProperty =
-            AvaloniaProperty.Register<VideoPlayerControl, ICommand>(nameof(ScreenshotCommand));
-
-        public static readonly StyledProperty<ICommand> SettingsCommandProperty =
-            AvaloniaProperty.Register<VideoPlayerControl, ICommand>(nameof(SettingsCommand));
 
         public Control? PlayerContent
         {
@@ -90,19 +86,10 @@ namespace Nikse.SubtitleEdit.Controls
             set => SetValue(FullScreenCommandProperty, value);
         }
 
-        public ICommand ScreenshotCommand
-        {
-            get => GetValue(ScreenshotCommandProperty);
-            set => SetValue(ScreenshotCommandProperty, value);
-        }
-
-        public ICommand SettingsCommand
-        {
-            get => GetValue(SettingsCommandProperty);
-            set => SetValue(SettingsCommandProperty, value);
-        }
-
         double _positionIgnore = -1;
+
+        private readonly Button _playButton = new Button();
+        private readonly Icon _volumeIcon = new Icon();
 
         private void NotifyPositionChanged(double newPosition)
         {
@@ -118,17 +105,17 @@ namespace Nikse.SubtitleEdit.Controls
             PositionChanged?.Invoke(newPosition);
         }
 
-        internal void SetPosition(double v)
+        public void SetPosition(double seconds)
         {
-            _positionIgnore = v;
-            Position = v;
+            _positionIgnore = seconds;
+            Position = seconds;
         }
 
         public VideoPlayerControl()
         {
             var mainGrid = new Grid
             {
-                RowDefinitions = new RowDefinitions("*,Auto,Auto")
+                RowDefinitions = new RowDefinitions("*,Auto") // video + controls
             };
 
             // PlayerContent
@@ -139,18 +126,68 @@ namespace Nikse.SubtitleEdit.Controls
             mainGrid.Children.Add(contentPresenter);
             Grid.SetRow(contentPresenter, 0);
 
-            // Row 1: Progress + volume
+            // Row with buttons + position slider + volume slider
             var progressGrid = new Grid
             {
-                ColumnDefinitions = new ColumnDefinitions("* ,Auto ,Auto"),
+                ColumnDefinitions = new ColumnDefinitions("Auto,Auto,Auto,*,Auto,Auto"),
                 Margin = new Thickness(10, 4)
             };
             Grid.SetRow(progressGrid, 1);
             mainGrid.Children.Add(progressGrid);
 
+
+            // Play
+            _playButton = new Button()
+            {
+                Margin = new Thickness(0, 0, 3, 0),
+            };
+            Attached.SetIcon(_playButton, "fa-solid fa-play");
+            _playButton.Click += (_, _) => PlayPauseRequested?.Invoke();
+            _playButton.Bind(Button.CommandProperty, new Binding
+            {
+                Path = nameof(PlayCommand),
+                Source = this
+            });
+
+            progressGrid.Children.Add(_playButton);
+            Grid.SetColumn(_playButton, 0);
+
+            // Stop
+            var stopButton = new Button()
+            {
+                Margin = new Thickness(0, 0, 3, 0),
+            }
+            ;
+            Attached.SetIcon(stopButton, "fa-solid fa-stop");
+            stopButton.Click += (_, _) => StopRequested?.Invoke();
+            progressGrid.Children.Add(stopButton);
+            Grid.SetColumn(stopButton, 1);
+            stopButton.Bind(Button.CommandProperty, new Binding
+            {
+                Path = nameof(StopCommand),
+                Source = this
+            });
+
+            // Fullscreen
+            var fullscreenButton = new Button()
+            {
+                Margin = new Thickness(0, 0, 3, 0),
+            };
+            Attached.SetIcon(fullscreenButton, "fa-solid fa-expand");
+            fullscreenButton.Click += (_, _) => FullscreenRequested?.Invoke();
+            progressGrid.Children.Add(fullscreenButton);
+            Grid.SetColumn(fullscreenButton, 2);
+            fullscreenButton.Bind(Button.CommandProperty, new Binding
+            {
+                Path = nameof(FullScreenCommand),
+                Source = this
+            });
+
+
             var positionSlider = new Slider
             {
-                Minimum = 0
+                Minimum = 0,
+                Margin = new Thickness(2, 0, 0, 0),
             };
             positionSlider.TemplateApplied += (s, e) =>
             {
@@ -162,7 +199,7 @@ namespace Nikse.SubtitleEdit.Controls
             };
 
             positionSlider.Bind(Slider.MaximumProperty, this.GetObservable(DurationProperty));
-            positionSlider.Bind(Slider.ValueProperty, this.GetObservable(PositionProperty));    
+            positionSlider.Bind(Slider.ValueProperty, this.GetObservable(PositionProperty));
 
             // Also ensure the control can receive keyboard focus
             positionSlider.Focusable = true;
@@ -175,16 +212,16 @@ namespace Nikse.SubtitleEdit.Controls
 
 
             progressGrid.Children.Add(positionSlider);
-            Grid.SetColumn(positionSlider, 0);
+            Grid.SetColumn(positionSlider, 3);
 
-            var volumeIcon = new Icon
+            _volumeIcon = new Icon
             {
                 Value = "fa-solid fa-volume-up",
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(10, 0, 4, 0)
             };
-            progressGrid.Children.Add(volumeIcon);
-            Grid.SetColumn(volumeIcon, 1);
+            progressGrid.Children.Add(_volumeIcon);
+            Grid.SetColumn(_volumeIcon, 4);
 
             var volumeSlider = new Slider
             {
@@ -207,101 +244,32 @@ namespace Nikse.SubtitleEdit.Controls
             {
                 Volume = e.NewValue;
                 VolumeChanged?.Invoke(e.NewValue);
+                SetVolumeIcon(e.NewValue < 0.0001);
             };
 
 
             progressGrid.Children.Add(volumeSlider);
-            Grid.SetColumn(volumeSlider, 2);
+            Grid.SetColumn(volumeSlider, 5);
 
-            // Row 2: Controls
-            var controlGrid = new Grid
-            {
-                Margin = new Thickness(10, 4),
-                ColumnDefinitions = new ColumnDefinitions("Auto,Auto,Auto,*,Auto,Auto"),
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            Grid.SetRow(controlGrid, 2);
-            mainGrid.Children.Add(controlGrid);
 
-            // Play
-            var playButton = new Button();
-            Attached.SetIcon(playButton, "fa-solid fa-play");
-            playButton.Click += (_, _) => PlayPauseRequested?.Invoke();
-            playButton.Bind(Button.CommandProperty, new Binding
-            {
-                Path = nameof(PlayCommand),
-                Source = this
-            });
-
-            controlGrid.Children.Add(playButton);
-            Grid.SetColumn(playButton, 0);
-
-            // Stop
-            var stopButton = new Button();
-            Attached.SetIcon(stopButton, "fa-solid fa-stop");
-            stopButton.Click += (_, _) => StopRequested?.Invoke();
-            controlGrid.Children.Add(stopButton);
-            Grid.SetColumn(stopButton, 1);
-            stopButton.Bind(Button.CommandProperty, new Binding
-            {
-                Path = nameof(StopCommand),
-                Source = this
-            });
-
-            // Fullscreen
-            var fullscreenButton = new Button();
-            Attached.SetIcon(fullscreenButton, "fa-solid fa-expand");
-            fullscreenButton.Click += (_, _) => FullscreenRequested?.Invoke();
-            controlGrid.Children.Add(fullscreenButton);
-            Grid.SetColumn(fullscreenButton, 2);
-            fullscreenButton.Bind(Button.CommandProperty, new Binding
-            {
-                Path = nameof(FullScreenCommand),
-                Source = this
-            });
-
-            // ProgressText
-            var progressText = new TextBlock
-            {
-                VerticalAlignment = VerticalAlignment.Center,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                FontSize = 16
-            };
-            progressText.Bind(TextBlock.TextProperty, this.GetObservable(ProgressTextProperty));
-            controlGrid.Children.Add(progressText);
-            Grid.SetColumn(progressText, 3);
-
-            // Clip
-            var clipButton = new Button();
-            Attached.SetIcon(clipButton, "fa-solid fa-scissors");
-            clipButton.Click += (_, _) => ScreenshotRequested?.Invoke();
-            controlGrid.Children.Add(clipButton);
-            Grid.SetColumn(clipButton, 4);
-            clipButton.Bind(Button.CommandProperty, new Binding
-            {
-                Path = nameof(ScreenshotCommand),
-                Source = this
-            });
-
-            // Settings
-            var settingsButton = new Button();
-            Attached.SetIcon(settingsButton, "fa-solid fa-gear");
-            settingsButton.Click += (_, _) => SettingsRequested?.Invoke();
-            controlGrid.Children.Add(settingsButton);
-            Grid.SetColumn(settingsButton, 5);
-            settingsButton.Bind(Button.CommandProperty, new Binding
-            {
-                Path = nameof(SettingsCommand),
-                Source = this
-            });
+            //// ProgressText
+            //var progressText = new TextBlock
+            //{
+            //    VerticalAlignment = VerticalAlignment.Center,
+            //    HorizontalAlignment = HorizontalAlignment.Center,
+            //    FontSize = 16
+            //};
+            //progressText.Bind(TextBlock.TextProperty, this.GetObservable(ProgressTextProperty));
+            //controlGrid.Children.Add(progressText);
+            //Grid.SetColumn(progressText, 3);
 
             Content = mainGrid;
 
             positionSlider.Maximum = 1;
             positionSlider.Value = 0;
 
-            volumeSlider.Maximum = 1;
-            volumeSlider.Value = 0.5;
+            volumeSlider.Maximum = MpvApi.MaxVolume;
+            volumeSlider.Value = 50;
         }
 
         public event Action? PlayPauseRequested;
@@ -311,5 +279,25 @@ namespace Nikse.SubtitleEdit.Controls
         public event Action? SettingsRequested;
         public event Action<double>? PositionChanged;
         public event Action<double>? VolumeChanged;
+
+        public void SetPlayPauseIcon(bool isPlaying)
+        {
+            if (isPlaying)
+            {
+                Attached.SetIcon(_playButton, "fa-solid fa-pause");
+            }
+            else
+            {
+                Attached.SetIcon(_playButton, "fa-solid fa-play");
+            }
+        }
+
+        public void SetVolumeIcon(bool isMuted)
+        {
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                _volumeIcon.Value = isMuted ? "fa-solid fa-volume-xmark" : "fa-solid fa-volume-up";
+            });
+        }
     }
 }

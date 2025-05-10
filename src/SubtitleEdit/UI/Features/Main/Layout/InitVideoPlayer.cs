@@ -49,8 +49,6 @@ public class InitVideoPlayer
                 control.PlayCommand = vm.PlayPauseCommand;
                 control.StopCommand = vm.StopCommand;
                 control.FullScreenCommand = vm.VideoFullScreenCommand;
-                control.ScreenshotCommand = vm.VideoScreenshotCommand;
-                control.SettingsCommand = vm.VideoSettingsCommand;
                 vm.VideoPlayerControl = control;
                 control.PositionChanged += vm.VideoPlayerControlPositionChanged;
                 control.VolumeChanged += vm.VideoPlayerControlVolumeChanged;
