@@ -102,6 +102,29 @@ namespace Nikse.SubtitleEdit.Controls
             set => SetValue(SettingsCommandProperty, value);
         }
 
+        public bool IsUserDragging { get; set; } = false;
+        double _ignoreValue = -1;
+
+        private void NotifyPositionChanged(double newPosition)
+        {
+            if (_ignoreValue == newPosition)
+            {
+                return;
+            }
+
+            // First update our property
+            Position = newPosition;
+
+            // Then notify listeners like the ViewModel
+            PositionChanged?.Invoke(newPosition);
+        }
+
+        internal void SetPosition(double v)
+        {
+            _ignoreValue = v;
+            Position = v;
+        }
+
         public VideoPlayerControl()
         {
             var mainGrid = new Grid
@@ -126,11 +149,11 @@ namespace Nikse.SubtitleEdit.Controls
             Grid.SetRow(progressGrid, 1);
             mainGrid.Children.Add(progressGrid);
 
-            var progressSlider = new Slider
+            var positionSlider = new Slider
             {
                 Minimum = 0
             };
-            progressSlider.TemplateApplied += (s, e) =>
+            positionSlider.TemplateApplied += (s, e) =>
             {
                 if (e.NameScope.Find<Thumb>("thumb") is Thumb thumb)
                 {
@@ -139,10 +162,21 @@ namespace Nikse.SubtitleEdit.Controls
                 }
             };
 
-            progressSlider.Bind(Slider.MaximumProperty, this.GetObservable(DurationProperty));
-            progressSlider.Bind(Slider.ValueProperty, this.GetObservable(PositionProperty));
-            progressGrid.Children.Add(progressSlider);
-            Grid.SetColumn(progressSlider, 0);
+            positionSlider.Bind(Slider.MaximumProperty, this.GetObservable(DurationProperty));
+            positionSlider.Bind(Slider.ValueProperty, this.GetObservable(PositionProperty));    
+
+            // Also ensure the control can receive keyboard focus
+            positionSlider.Focusable = true;
+
+            // For any direct value changes
+            positionSlider.ValueChanged += (s, e) =>
+            {
+                NotifyPositionChanged(e.NewValue);
+            };
+
+
+            progressGrid.Children.Add(positionSlider);
+            Grid.SetColumn(positionSlider, 0);
 
             var volumeIcon = new Icon
             {
@@ -262,5 +296,6 @@ namespace Nikse.SubtitleEdit.Controls
         public event Action? FullscreenRequested;
         public event Action? ScreenshotRequested;
         public event Action? SettingsRequested;
+        public event Action<double>? PositionChanged;
     }
 }

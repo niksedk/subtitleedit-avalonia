@@ -51,6 +51,7 @@ public class InitVideoPlayer
                 control.ScreenshotCommand = vm.VideoScreenshotCommand;
                 control.SettingsCommand = vm.VideoSettingsCommand;
                 vm.VideoPlayerControl = control;
+                control.PositionChanged += vm.VideoPlayerControlPositionChanged;
 
                 Grid.SetRow(control, 0);
                 mainGrid.Children.Add(control);

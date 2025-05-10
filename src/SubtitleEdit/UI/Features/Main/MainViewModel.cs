@@ -705,10 +705,11 @@ public partial class MainViewModel : ObservableObject
         _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
         _positionTimer.Tick += (s, e) =>
         {
-            if (MediaPlayerMpv != null && VideoPlayerControl != null)
+            if (MediaPlayerMpv != null && VideoPlayerControl != null && !VideoPlayerControl.IsUserDragging)
             {
-                VideoPlayerControl.Position = MediaPlayerMpv.TimePos.Get() ?? 0; // / _mpv.Duration;
                 VideoPlayerControl.Duration = MediaPlayerMpv.Duration.Get() ?? 0; // / _mpv.Duration;
+                var pos = MediaPlayerMpv.TimePos.Get() ?? 0;
+                VideoPlayerControl.SetPosition(MediaPlayerMpv.TimePos.Get() ?? 0); // / _mpv.Duration;
             }
         };
         _positionTimer.Start();
@@ -959,5 +960,13 @@ public partial class MainViewModel : ObservableObject
 
         SelectedSubtitle = item;
         StatusTextRight = $"{item.Number}/{Subtitles.Count}";
+    }
+
+    internal void VideoPlayerControlPositionChanged(double obj)
+    {
+        if (MediaPlayerMpv != null && VideoPlayerControl != null) 
+        {
+            MediaPlayerMpv.TimePos.Set(obj);
+        }
     }
 }
