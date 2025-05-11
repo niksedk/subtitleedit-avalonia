@@ -25,15 +25,15 @@ public class FullScreenVideoWindow : Window
             }
         };
 
-        videoPlayer.FullscreenRequested += () =>
+        videoPlayer.FullscreenCollapseRequested += () =>
         {
             Close();
         };
 
         Closing += (_, _) =>
         {
+            videoPlayer.FullscreenCollapseRequested -= () => Close();
             onClose?.Invoke();
-            videoPlayer.FullscreenRequested -= () => Close();
         };
     }
 }

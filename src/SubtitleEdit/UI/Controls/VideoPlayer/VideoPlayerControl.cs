@@ -92,15 +92,9 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             get => _isFullScreen;
             set
             {
+                _fullScreenCollapseButton.IsVisible = value;
+                _fullScreenButton.IsVisible = !value;
                 _isFullScreen = value;
-                if (_isFullScreen)
-                {
-                    Attached.SetIcon(_fullScreenButton, "fa-solid fa-compress");
-                }
-                else
-                {
-                    Attached.SetIcon(_fullScreenButton, "fa-solid fa-expand");
-                }
             }
         }
 
@@ -108,6 +102,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         double _volumeIgnore = -1;
         private readonly Button _playButton = new Button();
         private readonly Button _fullScreenButton = new Button();
+        private readonly Button _fullScreenCollapseButton = new Button();
         private readonly Icon _volumeIcon = new Icon();
         private DispatcherTimer? _positionTimer;
         IVideoPlayerInstance _videoPlayerInstance;
@@ -154,12 +149,20 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             // Row with buttons + position slider + volume slider
             var progressGrid = new Grid
             {
-                ColumnDefinitions = new ColumnDefinitions("Auto,Auto,Auto,*,Auto,Auto"),
+                ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto,Auto"),
                 Margin = new Thickness(10, 4)
             };
             Grid.SetRow(progressGrid, 1);
             mainGrid.Children.Add(progressGrid);
 
+
+            // Buttons
+            var stackPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Center
+            };
 
             // Play
             _playButton = new Button()
@@ -178,8 +181,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                 Source = this
             });
 
-            progressGrid.Children.Add(_playButton);
-            Grid.SetColumn(_playButton, 0);
+            stackPanel.Children.Add(_playButton);
 
             // Stop
             var stopButton = new Button()
@@ -193,8 +195,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                 _videoPlayerInstance.Stop();
                 StopRequested?.Invoke();
             };
-            progressGrid.Children.Add(stopButton);
-            Grid.SetColumn(stopButton, 1);
+            stackPanel.Children.Add(stopButton);
             stopButton.Bind(Button.CommandProperty, new Binding
             {
                 Path = nameof(StopCommand),
@@ -208,14 +209,25 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             };
             Attached.SetIcon(_fullScreenButton, "fa-solid fa-expand");
             _fullScreenButton.Click += (_, _) => FullscreenRequested?.Invoke();
-            progressGrid.Children.Add(_fullScreenButton);
-            Grid.SetColumn(_fullScreenButton, 2);
+            stackPanel.Children.Add(_fullScreenButton);
             _fullScreenButton.Bind(Button.CommandProperty, new Binding
             {
                 Path = nameof(FullScreenCommand),
                 Source = this
             });
 
+
+            _fullScreenCollapseButton = new Button()
+            {
+                Margin = new Thickness(0, 0, 3, 0),
+                IsVisible = false,
+            };
+            Attached.SetIcon(_fullScreenCollapseButton, "fa-solid fa-compress");
+            _fullScreenCollapseButton.Click += (_, _) => FullscreenCollapseRequested?.Invoke();
+            stackPanel.Children.Add(_fullScreenCollapseButton);
+
+            progressGrid.Children.Add(stackPanel);
+            Grid.SetColumn(stackPanel, 0);
 
             var positionSlider = new Slider
             {
@@ -243,9 +255,8 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                 NotifyPositionChanged(e.NewValue);
             };
 
-
             progressGrid.Children.Add(positionSlider);
-            Grid.SetColumn(positionSlider, 3);
+            Grid.SetColumn(positionSlider, 1);
 
             _volumeIcon = new Icon
             {
@@ -254,7 +265,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                 Margin = new Thickness(10, 0, 4, 0)
             };
             progressGrid.Children.Add(_volumeIcon);
-            Grid.SetColumn(_volumeIcon, 4);
+            Grid.SetColumn(_volumeIcon, 2);
 
             var volumeSlider = new Slider
             {
@@ -288,7 +299,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
 
 
             progressGrid.Children.Add(volumeSlider);
-            Grid.SetColumn(volumeSlider, 5);
+            Grid.SetColumn(volumeSlider, 3);
 
 
             //// ProgressText
@@ -314,6 +325,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         public event Action? PlayPauseRequested;
         public event Action? StopRequested;
         public event Action? FullscreenRequested;
+        public event Action? FullscreenCollapseRequested;
         public event Action? ScreenshotRequested;
         public event Action? SettingsRequested;
         public event Action<double>? PositionChanged;
