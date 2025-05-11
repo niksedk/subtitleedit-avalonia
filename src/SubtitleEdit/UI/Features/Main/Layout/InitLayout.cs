@@ -429,6 +429,7 @@ public static partial class InitLayout
 
     private static int MakeLayout6(MainView mainPage, MainViewModel vm)
     {
+
         var contentGrid = new Grid
         {
             RowDefinitions =
@@ -438,6 +439,14 @@ public static partial class InitLayout
                 new RowDefinition(GridLength.Star)
             }
         };
+
+        // hide video player
+        if (vm.VideoPlayerControl != null)
+        {
+            vm.VideoPlayerControl.RemoveControlFromParent();
+            contentGrid.Children.Add(vm.VideoPlayerControl);
+            vm.VideoPlayerControl.IsVisible = false;
+        }
 
         // Top section
         var topContent = new Border
@@ -756,8 +765,17 @@ public static partial class InitLayout
 
     private static int MakeLayout12(MainView mainPage, MainViewModel vm)
     {
+
         vm.ContentGrid.Children.Clear();
         vm.ContentGrid.Children.Add(InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm));
+
+        // hide video player
+        if (vm.VideoPlayerControl != null)
+        {
+            vm.VideoPlayerControl.RemoveControlFromParent();
+            vm.ContentGrid.Children.Add(vm.VideoPlayerControl);
+            vm.VideoPlayerControl.IsVisible = false;
+        }
 
         return 12;
     }

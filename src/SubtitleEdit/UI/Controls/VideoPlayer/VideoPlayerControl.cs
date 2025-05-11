@@ -377,19 +377,19 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
 
         private void StartPositionTimer()
         {
-            _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
-            _positionTimer.Tick += (s, e) =>
-            {
-                var pos = _videoPlayerInstance.Position;
-                SetPosition(pos);
+            //_positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
+            //_positionTimer.Tick += (s, e) =>
+            //{
+            //    var pos = _videoPlayerInstance.Position;
+            //    SetPosition(pos);
 
-                //TODO: move to a slower timer or events
-                Duration = _videoPlayerInstance.Duration;
+            //    //TODO: move to a slower timer or events
+            //    Duration = _videoPlayerInstance.Duration;
 
-                var isPlaying = _videoPlayerInstance.IsPlaying;
-                SetPlayPauseIcon(isPlaying);
-            };
-            _positionTimer.Start();
+            //    var isPlaying = _videoPlayerInstance.IsPlaying;
+            //    SetPlayPauseIcon(isPlaying);
+            //};
+            //_positionTimer.Start();
         }
     }
 }

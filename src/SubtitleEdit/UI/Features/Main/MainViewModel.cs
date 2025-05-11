@@ -1,33 +1,32 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Models.TreeDataGrid;
+using Avalonia.Controls.Selection;
+using Avalonia.Input;
+using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Common;
 using Nikse.SubtitleEdit.Features.Help;
 using Nikse.SubtitleEdit.Features.Main.Layout;
+using Nikse.SubtitleEdit.Features.Options.Language;
+using Nikse.SubtitleEdit.Features.Options.Settings;
+using Nikse.SubtitleEdit.Features.Options.Shortcuts;
+using Nikse.SubtitleEdit.Features.Translate;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
-using Avalonia.Input;
-using Nikse.SubtitleEdit.Features.Options.Language;
-using Nikse.SubtitleEdit.Features.Options.Settings;
-using Nikse.SubtitleEdit.Features.Options.Shortcuts;
-using Nikse.SubtitleEdit.Features.Translate;
-using Avalonia.Styling;
-using Avalonia;
-using Avalonia.Controls.Models.TreeDataGrid;
-using Nikse.SubtitleEdit.Logic.ValueConverters;
 using System.Threading;
-using Avalonia.Controls.Selection;
-using HanumanInstitute.LibMpv.Avalonia;
-using Nikse.SubtitleEdit.Controls.VideoPlayer;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -714,12 +713,7 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        VideoPlayerControl.Open(videoFileName);
-        //else if (MediaPlayerVlc != null)
-        //{
-        //    var media = new Media(LibVLC, new Uri(videoFileName));
-        //    MediaPlayerVlc.Play(media);
-        //}
+        await VideoPlayerControl.Open(videoFileName);
 
         var peakWaveFileName = WavePeakGenerator.GetPeakWaveFileName(videoFileName);
         if (!File.Exists(peakWaveFileName))

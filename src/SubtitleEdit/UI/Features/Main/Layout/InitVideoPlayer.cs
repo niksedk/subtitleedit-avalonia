@@ -40,6 +40,7 @@ public class InitVideoPlayer
             vm.VideoPlayerControl.RemoveControlFromParent();
             Grid.SetRow(vm.VideoPlayerControl!, 0);
             mainGrid.Children.Add(vm.VideoPlayerControl!);
+            vm.VideoPlayerControl.IsVisible = true;
         }
 
         return mainGrid;
