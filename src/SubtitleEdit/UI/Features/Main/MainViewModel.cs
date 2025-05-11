@@ -442,10 +442,30 @@ public partial class MainViewModel : ObservableObject
     {
     }
 
+
+    private Control _fullscreenBeforeParent;
     [RelayCommand]
     private void VideoFullScreen()
     {
+        var control = VideoPlayerControl;
+        if (control == null || control.IsFullScreen)
+        {
+            return;
+        }
 
+        var parent = (Control)control.Parent!;
+        _fullscreenBeforeParent = parent;
+        control.RemoveControlFromParent();
+        control.IsFullScreen = true;
+        var fullscreenWindow = new FullScreenVideoWindow(control, () =>
+        {
+            if (_fullscreenBeforeParent != null)
+            {
+                control.RemoveControlFromParent().AddControlToParent(_fullscreenBeforeParent);
+            }
+            control.IsFullScreen = false;
+        });
+        fullscreenWindow.Show(Window);
     }
 
     [RelayCommand]

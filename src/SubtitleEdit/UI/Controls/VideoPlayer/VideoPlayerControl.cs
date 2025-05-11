@@ -86,10 +86,28 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             set => SetValue(FullScreenCommandProperty, value);
         }
 
+        private bool _isFullScreen = false;
+        public bool IsFullScreen
+        {
+            get => _isFullScreen;
+            set
+            {
+                _isFullScreen = value;
+                if (_isFullScreen)
+                {
+                    Attached.SetIcon(_fullScreenButton, "fa-solid fa-compress");
+                }
+                else
+                {
+                    Attached.SetIcon(_fullScreenButton, "fa-solid fa-expand");
+                }
+            }
+        }
+
         double _positionIgnore = -1;
         double _volumeIgnore = -1;
-
         private readonly Button _playButton = new Button();
+        private readonly Button _fullScreenButton = new Button();
         private readonly Icon _volumeIcon = new Icon();
         private DispatcherTimer? _positionTimer;
         IVideoPlayerInstance _videoPlayerInstance;
@@ -184,15 +202,15 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             });
 
             // Fullscreen
-            var fullscreenButton = new Button()
+            _fullScreenButton = new Button()
             {
                 Margin = new Thickness(0, 0, 3, 0),
             };
-            Attached.SetIcon(fullscreenButton, "fa-solid fa-expand");
-            fullscreenButton.Click += (_, _) => FullscreenRequested?.Invoke();
-            progressGrid.Children.Add(fullscreenButton);
-            Grid.SetColumn(fullscreenButton, 2);
-            fullscreenButton.Bind(Button.CommandProperty, new Binding
+            Attached.SetIcon(_fullScreenButton, "fa-solid fa-expand");
+            _fullScreenButton.Click += (_, _) => FullscreenRequested?.Invoke();
+            progressGrid.Children.Add(_fullScreenButton);
+            Grid.SetColumn(_fullScreenButton, 2);
+            _fullScreenButton.Bind(Button.CommandProperty, new Binding
             {
                 Path = nameof(FullScreenCommand),
                 Source = this

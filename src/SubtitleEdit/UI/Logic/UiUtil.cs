@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
@@ -10,7 +9,6 @@ using Avalonia.Platform;
 using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.ObjectModel;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Nikse.SubtitleEdit.Logic;
 
@@ -42,7 +40,6 @@ public static class UiUtil
 
         return brush;
     }
-
 
     public static Button MakeButton(string text, IRelayCommand? command)
     {
@@ -349,5 +346,47 @@ public static class UiUtil
     public static WindowIcon? GetSeIcon()
     {
         return new WindowIcon(AssetLoader.Open(new Uri("avares://Nikse.SubtitleEdit/Assets/se.ico")));
+    }
+
+    public static Control RemoveControlFromParent(this Control control)
+    {
+        if (control.Parent is Panel parent)
+        {
+            parent.Children.Remove(control);
+        }
+        else if (control.Parent is Decorator decorator)
+        {
+            if (decorator.Child == control)
+            {
+                decorator.Child = null;
+            }
+        }
+        else if (control.Parent is ContentControl contentControl)
+        {
+            if (contentControl.Content == control)
+            {
+                contentControl.Content = null;
+            }
+        }
+
+        return control;
+    }
+
+    public static Control AddControlToParent(this Control control, Control parent)
+    {
+        if (parent is Panel panel)
+        {
+            panel.Children.Add(control);
+        }
+        else if (parent is Decorator decorator)
+        {
+            decorator.Child = control;
+        }
+        else if (parent is ContentControl contentControl2)
+        {
+            contentControl2.Content = control;
+        }
+
+        return control;
     }
 }
