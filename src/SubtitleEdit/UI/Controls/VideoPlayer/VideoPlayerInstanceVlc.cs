@@ -22,19 +22,13 @@ public class VideoPlayerInstanceVlc : IVideoPlayerInstance
     {
         get
         {
-            var durationSeconds = MediaPlayerVlc?.Length / 1000.0 ?? 0;
-            if (durationSeconds <= 0.0001)
+            var ms = MediaPlayerVlc?.Time ?? +0;
+            if (ms < 0.0001)
             {
                 return 0;
             }
 
-            var pos = MediaPlayerVlc?.Position ?? +0;
-            if (pos < 0.0001)
-            {
-                return 0;
-            }
-
-            return durationSeconds * pos;
+            return ms / 1000.0;
         }
         set
         {
@@ -43,17 +37,8 @@ public class VideoPlayerInstanceVlc : IVideoPlayerInstance
                 return;
             }
 
-            var durationMs = MediaPlayerVlc?.Length ?? 0;
-            if (durationMs <= 0.0001)
-            {
-                return;
-            }
-
-            var positionMs = value * 1000;
-
-            var v = positionMs / durationMs;
-
-            MediaPlayerVlc!.Position = (float)(v);
+            var positionMs = value * 1000.0;
+            MediaPlayerVlc!.Time = (long)(positionMs);
         }
     }
 
