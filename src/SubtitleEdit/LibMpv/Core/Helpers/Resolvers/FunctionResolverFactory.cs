@@ -2,26 +2,24 @@
 
 public static class FunctionResolverFactory
 {
-    public static PlatformID GetPlatformId()
-    {
-        return Environment.OSVersion.Platform;
-    }
-
     public static IFunctionResolver Create()
     {
-        switch (GetPlatformId())
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            case PlatformID.MacOSX:
-                return new MacFunctionResolver();
-            case PlatformID.Unix:
-                {
-                    var isAndroid = RuntimeInformation.IsOSPlatform(OSPlatform.Create("ANDROID"));
-                    return isAndroid ? new AndroidFunctionResolver() : new LinuxFunctionResolver();
-                }
-            case PlatformID.Win32NT:
-                return new WindowsFunctionResolver();
-            default:
-                throw new PlatformNotSupportedException();
+            return new MacFunctionResolver();
         }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return new WindowsFunctionResolver();
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            var isAndroid = RuntimeInformation.IsOSPlatform(OSPlatform.Create("ANDROID"));
+            return isAndroid ? new AndroidFunctionResolver() : new LinuxFunctionResolver();
+        }
+
+        throw new PlatformNotSupportedException();
     }
 }
