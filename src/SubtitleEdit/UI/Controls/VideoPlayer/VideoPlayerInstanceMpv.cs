@@ -9,7 +9,26 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer;
 
 public class VideoPlayerInstanceMpv : IVideoPlayerInstance
 {
-    public string Name => "libmpv";
+    public string Name
+    {
+        get
+        {
+            var mpvText = MpvContext?.MpvVersion.Get();
+
+            if (string.IsNullOrEmpty(mpvText))
+            {
+                return "libmpv";
+            }
+
+            var arr = mpvText.Split('-');
+            if (arr.Length > 1 && arr[0].Length > 5)
+            {
+                return arr[0];
+            }
+
+            return mpvText;
+        }
+    }
 
     private string _fileName = string.Empty;
     public string FileName => _fileName;

@@ -10,6 +10,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using HanumanInstitute.LibMpv.Core;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 
@@ -74,6 +75,8 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             get => GetValue(ProgressTextProperty);
             set => SetValue(ProgressTextProperty, value);
         }
+
+        private readonly TextBlock _textBlockPlayerName;
 
         public ICommand PlayCommand
         {
@@ -246,8 +249,8 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             {
                 if (e.NameScope.Find<Thumb>("thumb") is Thumb thumb)
                 {
-                    thumb.Width = 15;
-                    thumb.Height = 15;
+                    thumb.Width = 14;
+                    thumb.Height = 14;
                 }
             };
 
@@ -286,8 +289,8 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             {
                 if (e.NameScope.Find<Thumb>("thumb") is Thumb thumb)
                 {
-                    thumb.Width = 15;
-                    thumb.Height = 15;
+                    thumb.Width = 14;
+                    thumb.Height = 14;
                 }
             };
             volumeSlider.Bind(RangeBase.ValueProperty, this.GetObservable(VolumeProperty));
@@ -310,16 +313,29 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             Grid.SetColumn(volumeSlider, 3);
 
 
-            //// ProgressText
-            //var progressText = new TextBlock
-            //{
-            //    VerticalAlignment = VerticalAlignment.Center,
-            //    HorizontalAlignment = HorizontalAlignment.Center,
-            //    FontSize = 16
-            //};
-            //progressText.Bind(TextBlock.TextProperty, this.GetObservable(ProgressTextProperty));
-            //controlGrid.Children.Add(progressText);
-            //Grid.SetColumn(progressText, 3);
+            // ProgressText
+            var progressText = new TextBlock
+            {
+                VerticalAlignment = VerticalAlignment.Bottom,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                FontSize = 12,
+                FontWeight = FontWeight.Bold,
+            };
+            progressText.Bind(TextBlock.TextProperty, this.GetObservable(ProgressTextProperty));
+            progressGrid.Children.Add(progressText);
+            Grid.SetColumn(progressText, 1);
+            ProgressText = string.Empty;
+
+            _textBlockPlayerName = new TextBlock
+            {
+                VerticalAlignment = VerticalAlignment.Top,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                FontSize = 8,
+                FontWeight = FontWeight.Bold,
+                Opacity = 0.4,
+            };
+            progressGrid.Children.Add(_textBlockPlayerName);
+            Grid.SetColumn(_textBlockPlayerName, 3);
 
             Content = mainGrid;
 
@@ -368,28 +384,33 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                 StartPositionTimer();
             }
             _videoPlayerInstance.Pause();
+            _textBlockPlayerName.Text = _videoPlayerInstance.Name;
         }
 
         internal void Close()
         {
+            _positionTimer?.Stop();
             _videoPlayerInstance.Close();
+            ProgressText = string.Empty;
         }
 
         private void StartPositionTimer()
         {
-            //_positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
-            //_positionTimer.Tick += (s, e) =>
-            //{
-            //    var pos = _videoPlayerInstance.Position;
-            //    SetPosition(pos);
+            _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
+            _positionTimer.Tick += (s, e) =>
+            {
+                var pos = _videoPlayerInstance.Position;
+                SetPosition(pos);
 
-            //    //TODO: move to a slower timer or events
-            //    Duration = _videoPlayerInstance.Duration;
+                //TODO: move to a slower timer or events
+                Duration = _videoPlayerInstance.Duration;
 
-            //    var isPlaying = _videoPlayerInstance.IsPlaying;
-            //    SetPlayPauseIcon(isPlaying);
-            //};
-            //_positionTimer.Start();
+                ProgressText = $"{TimeCode.FromSeconds(pos).ToShortDisplayString() } / {TimeCode.FromSeconds(Duration).ToShortDisplayString()}";
+
+                var isPlaying = _videoPlayerInstance.IsPlaying;
+                SetPlayPauseIcon(isPlaying);
+            };
+            _positionTimer.Start();
         }
     }
 }
