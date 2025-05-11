@@ -6,6 +6,7 @@ public class SeVideo
     public SeVideoTransparent Transparent { get; set; } 
     public SeVideoTextToSpeech TextToSpeech { get; set; }
     public string VideoPlayer { get; set; }
+    public double Volume { get; set; }
 
     public SeVideo()
     {
@@ -13,5 +14,6 @@ public class SeVideo
         Transparent = new();
         TextToSpeech = new();
         VideoPlayer = "mpv";
+        Volume = 60;
     }
 }

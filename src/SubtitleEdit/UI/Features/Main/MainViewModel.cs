@@ -1,8 +1,6 @@
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using LibVLCSharp.Avalonia;
-using LibVLCSharp.Shared;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Common;
@@ -28,10 +26,7 @@ using Avalonia.Controls.Models.TreeDataGrid;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 using System.Threading;
 using Avalonia.Controls.Selection;
-using HanumanInstitute.LibMpv;
-using Avalonia.Threading;
 using HanumanInstitute.LibMpv.Avalonia;
-using System.Diagnostics.Metrics;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 
 namespace Nikse.SubtitleEdit.Features.Main;
@@ -83,7 +78,6 @@ public partial class MainViewModel : ObservableObject
     private bool IsEmpty => Subtitles.Count == 0 || string.IsNullOrEmpty(Subtitles[0].Text);
 
     public VideoPlayerControl? VideoPlayerControl { get; internal set; }
-    public MpvView MpvView { get; internal set; }
 
     public MainViewModel(IFileHelper fileHelper, IShortcutManager shortcutManager, IWindowService windowService)
     {

@@ -34,11 +34,16 @@ public class InitVideoPlayer
                 };
                 control.FullScreenCommand = vm.VideoFullScreenCommand;
                 vm.VideoPlayerControl = control;
+                vm.VideoPlayerControl.Volume = Se.Settings.Video.Volume;
+                vm.VideoPlayerControl.VolumeChanged += (double v) =>
+                {
+                    Se.Settings.Video.Volume = v;
+                };  
 
                 Grid.SetRow(control, 0);
                 mainGrid.Children.Add(control);
             }
-            else if (vm.VideoPlayerControl != null && vm.MpvView != null)
+            else
             {
                 vm.VideoPlayerControl.RemoveControlFromParent();
                 Grid.SetRow(vm.VideoPlayerControl!, 0);
@@ -58,11 +63,16 @@ public class InitVideoPlayer
                 };
                 control.FullScreenCommand = vm.VideoFullScreenCommand;
                 vm.VideoPlayerControl = control;
+                vm.VideoPlayerControl.Volume = Se.Settings.Video.Volume;
+                vm.VideoPlayerControl.VolumeChanged += (double v) =>
+                {
+                    Se.Settings.Video.Volume = v;
+                };
 
                 Grid.SetRow(control, 0);
                 mainGrid.Children.Add(control);
             }
-            else if (vm.VideoPlayerControl != null && vm.MpvView != null)
+            else 
             {
                 vm.VideoPlayerControl.RemoveControlFromParent();
                 Grid.SetRow(vm.VideoPlayerControl!, 0);

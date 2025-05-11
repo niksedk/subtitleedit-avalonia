@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
@@ -9,6 +10,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using HanumanInstitute.LibMpv.Core;
+using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 
 namespace Nikse.SubtitleEdit.Controls.VideoPlayer
@@ -48,7 +50,11 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         public double Volume
         {
             get => GetValue(VolumeProperty);
-            set => SetValue(VolumeProperty, value);
+            set
+            {
+                SetValue(VolumeProperty, value);
+                _videoPlayerInstance.Volume = value;
+            }
         }
 
         public double Position
@@ -353,13 +359,15 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             });
         }
 
-        internal void Open(string videoFileName)
+        internal async Task Open(string videoFileName)
         {
-            _videoPlayerInstance.Open(videoFileName);
+            await _videoPlayerInstance.Open(videoFileName);
+            _videoPlayerInstance.Volume = Volume;
             if (_positionTimer == null)
             {
                 StartPositionTimer();
             }
+            _videoPlayerInstance.Pause();
         }
 
         internal void Close()
