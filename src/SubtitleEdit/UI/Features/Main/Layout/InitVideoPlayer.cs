@@ -1,10 +1,10 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
-using LibVLCSharp.Avalonia;
-using LibVLCSharp.Shared;
 using System;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
+using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -21,7 +21,31 @@ public class InitVideoPlayer
             Margin = new Thickness(0),
         };
 
-        if (true)
+        if (OperatingSystem.IsWindows() && Se.Settings.Video.VideoPlayer.Equals("vlc", StringComparison.OrdinalIgnoreCase))
+        {
+            if (vm.VideoPlayerControl == null)
+            {
+                var videoPlayerInstance = new VideoPlayerInstanceVlc();
+                var control = new VideoPlayerControl(videoPlayerInstance)
+                {
+                    PlayerContent = videoPlayerInstance.VideoViewVlc,
+                    VerticalAlignment = VerticalAlignment.Stretch,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                };
+                control.FullScreenCommand = vm.VideoFullScreenCommand;
+                vm.VideoPlayerControl = control;
+
+                Grid.SetRow(control, 0);
+                mainGrid.Children.Add(control);
+            }
+            else if (vm.VideoPlayerControl != null && vm.MpvView != null)
+            {
+                vm.VideoPlayerControl.RemoveControlFromParent();
+                Grid.SetRow(vm.VideoPlayerControl!, 0);
+                mainGrid.Children.Add(vm.VideoPlayerControl!);
+            }
+        }
+        else 
         {
             if (vm.VideoPlayerControl == null)
             {
@@ -37,65 +61,14 @@ public class InitVideoPlayer
 
                 Grid.SetRow(control, 0);
                 mainGrid.Children.Add(control);
-                return mainGrid;
             }
             else if (vm.VideoPlayerControl != null && vm.MpvView != null)
             {
-                // Remove old mpvView if it exists
-                var parent = vm.VideoPlayerControl?.Parent;
-
-                if (parent is Panel panel)
-                {
-                    panel.Children.Remove(vm.VideoPlayerControl!);
-                }
-                else if (parent is Decorator decorator)
-                {
-                    if (decorator.Child == vm.VideoPlayerControl)
-                    {
-                        decorator.Child = null;
-                    }
-                }
-                else if (parent is ContentControl contentControl)
-                {
-                    if (contentControl.Content == vm.VideoPlayerControl)
-                    {
-                        contentControl.Content = null;
-                    }
-                }
-              
+                vm.VideoPlayerControl.RemoveControlFromParent();
                 Grid.SetRow(vm.VideoPlayerControl!, 0);
                 mainGrid.Children.Add(vm.VideoPlayerControl!);
-                return mainGrid;
             }
         }
-
-        if (OperatingSystem.IsWindows() && false)
-        {
-            // Video player area
-            if (vm.LibVLC == null || vm.VideoViewVlc == null)
-            {
-                vm.MediaPlayerVlc?.Dispose();
-                vm.LibVLC?.Dispose();
-                vm.LibVLC = new LibVLC();
-                vm.MediaPlayerVlc = new MediaPlayer(vm.LibVLC);
-                vm.VideoViewVlc = new VideoView
-                {
-                    Margin = new Thickness(0),
-                    MediaPlayer = vm.MediaPlayerVlc,
-                    HorizontalAlignment = HorizontalAlignment.Stretch,
-                    VerticalAlignment = VerticalAlignment.Stretch,
-                };
-            }
-            else
-            {
-                var grid = vm.VideoViewVlc.Parent as Grid;
-                grid?.Children.Remove(vm.VideoViewVlc);
-            }
-
-            Grid.SetRow(vm.VideoViewVlc, 0);
-            mainGrid.Children.Add(vm.VideoViewVlc);
-        }
-
 
         return mainGrid;
     }

@@ -53,9 +53,6 @@ public class VideoPlayerInstanceMpv : IVideoPlayerInstance
             VerticalAlignment = VerticalAlignment.Stretch,
         };
 
-
-        //videoPlayerInstanceMpv.MpvView.DataContext = videoPlayerInstanceMpv;
-        //videoPlayerInstanceMpv.MpvView.Bind(MpvView.MpvContextProperty, new Binding(nameof(videoPlayerInstanceMpv.MpvContext)));
         MpvView.DataContext = this;
         MpvView.Bind(MpvView.MpvContextProperty, new Binding(nameof(MpvContext)));
     }

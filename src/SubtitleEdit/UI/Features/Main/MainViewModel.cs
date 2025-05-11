@@ -61,10 +61,7 @@ public partial class MainViewModel : ObservableObject
     public Grid ContentGrid { get; set; }
     public MainView MainView { get; set; }
 
-    public VideoView VideoViewVlc { get; internal set; }
-    public MediaPlayer? MediaPlayerVlc { get; set; }
     public IVideoPlayerInstance? _videoPlayerInstance { get; internal set; }
-    public LibVLC LibVLC { get; internal set; }
     public ITreeDataGridSource? SubtitlesSource { get; set; }
     public TextBlock StatusTextLeftLabel { get; internal set; }
 
@@ -698,7 +695,7 @@ public partial class MainViewModel : ObservableObject
 
     internal void OnClosing()
     {
-        MediaPlayerVlc?.Dispose();
+        //MediaPlayerVlc?.Dispose();
         //libVLC?.Dispose();
 
         Se.SaveSettings();
@@ -762,13 +759,7 @@ public partial class MainViewModel : ObservableObject
 
     private void VideoCloseFile()
     {
-        if (VideoViewVlc == null)
-        {
-            return;
-        }
-
-        _videoFileName = string.Empty;
-        MediaPlayerVlc.Media = null;
+        VideoPlayerControl?.Close();
     }
 
     private int GetFastSubtitleHash()

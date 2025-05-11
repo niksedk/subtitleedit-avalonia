@@ -6,6 +6,7 @@ using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Avalonia.Threading;
 using HanumanInstitute.LibMpv.Core;
 using Projektanker.Icons.Avalonia;
@@ -141,7 +142,8 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             // PlayerContent
             var contentPresenter = new ContentPresenter
             {
-                [!ContentPresenter.ContentProperty] = this[!PlayerContentProperty]
+                [!ContentPresenter.ContentProperty] = this[!PlayerContentProperty],
+                Background = new SolidColorBrush(Colors.Black),
             };
             mainGrid.Children.Add(contentPresenter);
             Grid.SetRow(contentPresenter, 0);
@@ -360,6 +362,11 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             }
         }
 
+        internal void Close()
+        {
+            _videoPlayerInstance.Close();
+        }
+
         private void StartPositionTimer()
         {
             _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
@@ -376,6 +383,5 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             };
             _positionTimer.Start();
         }
-
     }
 }
