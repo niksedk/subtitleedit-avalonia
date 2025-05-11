@@ -7,7 +7,6 @@ using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
-using Nikse.SubtitleEdit.Core.Cea708.Commands;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Common;
@@ -19,7 +18,6 @@ using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Features.Translate;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using Nikse.SubtitleEdit.Logic.Config.Language;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 using System;
@@ -119,7 +117,7 @@ public partial class MainViewModel : ObservableObject
                         TimeSpanFormatterShort.ToStringShort(x.Duration),
                     (x, val) => x.Duration = TimeSpanFormatterShort.FromStringShort(val)
                 ),
-                new TextColumn<SubtitleLineViewModel, string>("Text", x => x.Text),
+                new TextColumn<SubtitleLineViewModel, string>("Text", x => x.Text, null, new GridLength(1, GridUnitType.Star)),
             },
         };
 
@@ -449,7 +447,7 @@ public partial class MainViewModel : ObservableObject
         if (s == null)
         {
             return;
-        }   
+        }
 
         s.Text = Utilities.AutoBreakLine(s.Text);
     }
