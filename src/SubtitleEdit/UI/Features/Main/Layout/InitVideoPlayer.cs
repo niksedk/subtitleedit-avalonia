@@ -4,9 +4,7 @@ using Avalonia.Layout;
 using LibVLCSharp.Avalonia;
 using LibVLCSharp.Shared;
 using System;
-using Nikse.SubtitleEdit.Controls;
-using HanumanInstitute.LibMpv.Avalonia;
-using Avalonia.Data;
+using Nikse.SubtitleEdit.Controls.VideoPlayer;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -25,33 +23,17 @@ public class InitVideoPlayer
 
         if (true)
         {
-            if (vm.MediaPlayerMpv == null)
+            if (vm.VideoPlayerControl == null)
             {
-                vm.MediaPlayerMpv = new HanumanInstitute.LibMpv.MpvContext();
-
-                var mpvView = new MpvView
+                var videoPlayerInstanceMpv = new VideoPlayerInstanceMpv();
+                var control = new VideoPlayerControl(videoPlayerInstanceMpv)
                 {
-                    Margin = new Thickness(0),
-                    HorizontalAlignment = HorizontalAlignment.Stretch,
-                    VerticalAlignment = VerticalAlignment.Stretch,
-                };
-                vm.MpvView = mpvView;
-
-                mpvView.Bind(MpvView.MpvContextProperty, new Binding(nameof(vm.MediaPlayerMpv)));
-
-                var control = new VideoPlayerControl
-                {
-                    PlayerContent = mpvView,
-                    Volume = 80,
+                    PlayerContent = videoPlayerInstanceMpv.MpvView,
                     VerticalAlignment = VerticalAlignment.Stretch,
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                 };
-                control.PlayCommand = vm.PlayPauseCommand;
-                control.StopCommand = vm.StopCommand;
                 control.FullScreenCommand = vm.VideoFullScreenCommand;
                 vm.VideoPlayerControl = control;
-                control.PositionChanged += vm.VideoPlayerControlPositionChanged;
-                control.VolumeChanged += vm.VideoPlayerControlVolumeChanged;
 
                 Grid.SetRow(control, 0);
                 mainGrid.Children.Add(control);
@@ -69,15 +51,17 @@ public class InitVideoPlayer
                 else if (parent is Decorator decorator)
                 {
                     if (decorator.Child == vm.VideoPlayerControl)
+                    {
                         decorator.Child = null;
+                    }
                 }
                 else if (parent is ContentControl contentControl)
                 {
                     if (contentControl.Content == vm.VideoPlayerControl)
+                    {
                         contentControl.Content = null;
+                    }
                 }
-
-
               
                 Grid.SetRow(vm.VideoPlayerControl!, 0);
                 mainGrid.Children.Add(vm.VideoPlayerControl!);

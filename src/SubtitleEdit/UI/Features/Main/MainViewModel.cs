@@ -30,9 +30,9 @@ using System.Threading;
 using Avalonia.Controls.Selection;
 using HanumanInstitute.LibMpv;
 using Avalonia.Threading;
-using Nikse.SubtitleEdit.Controls;
 using HanumanInstitute.LibMpv.Avalonia;
 using System.Diagnostics.Metrics;
+using Nikse.SubtitleEdit.Controls.VideoPlayer;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -63,8 +63,7 @@ public partial class MainViewModel : ObservableObject
 
     public VideoView VideoViewVlc { get; internal set; }
     public MediaPlayer? MediaPlayerVlc { get; set; }
-    public MpvContext? MediaPlayerMpv { get; internal set; }
-    private DispatcherTimer _positionTimer;
+    public IVideoPlayerInstance? _videoPlayerInstance { get; internal set; }
     public LibVLC LibVLC { get; internal set; }
     public ITreeDataGridSource? SubtitlesSource { get; set; }
     public TextBlock StatusTextLeftLabel { get; internal set; }
@@ -414,21 +413,6 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void PlayPause()
     {
-        var before = MediaPlayerMpv?.Pause.Get();
-        if (before == null)
-        {
-            return;
-        }
-
-        MediaPlayerMpv?.Pause.Set(!before.Value);
-
-        var after = !MediaPlayerMpv?.Pause.Get();
-        if (after == null)
-        {
-            return;
-        }
-
-        VideoPlayerControl?.SetPlayPauseIcon(after.Value);
     }
 
 
@@ -456,9 +440,6 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void Stop()
     {
-        MediaPlayerMpv?.Pause.Set(true);
-        MediaPlayerMpv?.TimePos.Set(0);
-        VideoPlayerControl?.SetPlayPauseIcon(false);
     }
 
     [RelayCommand]
@@ -715,34 +696,19 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    private void StartPositionTimer()
-    {
-        _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
-        _positionTimer.Tick += (s, e) =>
-        {
-            if (MediaPlayerMpv != null && VideoPlayerControl != null)
-            {
-                VideoPlayerControl.Duration = MediaPlayerMpv.Duration.Get() ?? 0; // / _mpv.Duration;
-                var pos = MediaPlayerMpv.TimePos.Get() ?? 0;
-                VideoPlayerControl.SetPosition(MediaPlayerMpv.TimePos.Get() ?? 0); // / _mpv.Duration;
-            }
-        };
-        _positionTimer.Start();
-    }
-
     private async Task VideoOpenFile(string videoFileName)
     {
-        if (MediaPlayerMpv != null)
+        if (VideoPlayerControl == null)
         {
-            MediaPlayerMpv.Stop();
-            await MediaPlayerMpv.LoadFile(videoFileName).InvokeAsync();
-            StartPositionTimer();
+            return;
         }
-        else if (MediaPlayerVlc != null)
-        {
-            var media = new Media(LibVLC, new Uri(videoFileName));
-            MediaPlayerVlc.Play(media);
-        }
+
+        VideoPlayerControl.Open(videoFileName);
+        //else if (MediaPlayerVlc != null)
+        //{
+        //    var media = new Media(LibVLC, new Uri(videoFileName));
+        //    MediaPlayerVlc.Play(media);
+        //}
 
         var peakWaveFileName = WavePeakGenerator.GetPeakWaveFileName(videoFileName);
         if (!File.Exists(peakWaveFileName))
@@ -975,21 +941,5 @@ public partial class MainViewModel : ObservableObject
 
         SelectedSubtitle = item;
         StatusTextRight = $"{item.Number}/{Subtitles.Count}";
-    }
-
-    internal void VideoPlayerControlPositionChanged(double obj)
-    {
-        if (MediaPlayerMpv != null && VideoPlayerControl != null) 
-        {
-            MediaPlayerMpv.TimePos.Set(obj);
-        }
-    }
-
-    internal void VideoPlayerControlVolumeChanged(double obj)
-    {
-        if (MediaPlayerMpv != null && VideoPlayerControl != null)
-        {
-            MediaPlayerMpv.Volume.Set(obj);
-        }
     }
 }
