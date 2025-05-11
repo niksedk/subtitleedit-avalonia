@@ -21,65 +21,54 @@ public class InitVideoPlayer
             Margin = new Thickness(0),
         };
 
-        if (OperatingSystem.IsWindows() && Se.Settings.Video.VideoPlayer.Equals("vlc", StringComparison.OrdinalIgnoreCase))
+        if (vm.VideoPlayerControl == null)
         {
-            if (vm.VideoPlayerControl == null)
+            VideoPlayerControl control = MakeVideoPlayer();
+            control.FullScreenCommand = vm.VideoFullScreenCommand;
+            vm.VideoPlayerControl = control;
+            vm.VideoPlayerControl.Volume = Se.Settings.Video.Volume;
+            vm.VideoPlayerControl.VolumeChanged += (double v) =>
             {
-                var videoPlayerInstance = new VideoPlayerInstanceVlc();
-                var control = new VideoPlayerControl(videoPlayerInstance)
-                {
-                    PlayerContent = videoPlayerInstance.VideoViewVlc,
-                    VerticalAlignment = VerticalAlignment.Stretch,
-                    HorizontalAlignment = HorizontalAlignment.Stretch,
-                };
-                control.FullScreenCommand = vm.VideoFullScreenCommand;
-                vm.VideoPlayerControl = control;
-                vm.VideoPlayerControl.Volume = Se.Settings.Video.Volume;
-                vm.VideoPlayerControl.VolumeChanged += (double v) =>
-                {
-                    Se.Settings.Video.Volume = v;
-                };  
+                Se.Settings.Video.Volume = v;
+            };
 
-                Grid.SetRow(control, 0);
-                mainGrid.Children.Add(control);
-            }
-            else
-            {
-                vm.VideoPlayerControl.RemoveControlFromParent();
-                Grid.SetRow(vm.VideoPlayerControl!, 0);
-                mainGrid.Children.Add(vm.VideoPlayerControl!);
-            }
+            Grid.SetRow(control, 0);
+            mainGrid.Children.Add(control);
         }
-        else 
+        else
         {
-            if (vm.VideoPlayerControl == null)
-            {
-                var videoPlayerInstanceMpv = new VideoPlayerInstanceMpv();
-                var control = new VideoPlayerControl(videoPlayerInstanceMpv)
-                {
-                    PlayerContent = videoPlayerInstanceMpv.MpvView,
-                    VerticalAlignment = VerticalAlignment.Stretch,
-                    HorizontalAlignment = HorizontalAlignment.Stretch,
-                };
-                control.FullScreenCommand = vm.VideoFullScreenCommand;
-                vm.VideoPlayerControl = control;
-                vm.VideoPlayerControl.Volume = Se.Settings.Video.Volume;
-                vm.VideoPlayerControl.VolumeChanged += (double v) =>
-                {
-                    Se.Settings.Video.Volume = v;
-                };
-
-                Grid.SetRow(control, 0);
-                mainGrid.Children.Add(control);
-            }
-            else 
-            {
-                vm.VideoPlayerControl.RemoveControlFromParent();
-                Grid.SetRow(vm.VideoPlayerControl!, 0);
-                mainGrid.Children.Add(vm.VideoPlayerControl!);
-            }
+            vm.VideoPlayerControl.RemoveControlFromParent();
+            Grid.SetRow(vm.VideoPlayerControl!, 0);
+            mainGrid.Children.Add(vm.VideoPlayerControl!);
         }
 
         return mainGrid;
+    }
+
+    private static VideoPlayerControl MakeVideoPlayer()
+    {
+        VideoPlayerControl control;
+
+        if (OperatingSystem.IsWindows() && Se.Settings.Video.VideoPlayer.Equals("vlc", StringComparison.OrdinalIgnoreCase))
+        {
+            var videoPlayerInstance = new VideoPlayerInstanceVlc();
+            control = new VideoPlayerControl(videoPlayerInstance)
+            {
+                PlayerContent = videoPlayerInstance.VideoViewVlc,
+            };
+        }
+        else
+        {
+            var videoPlayerInstanceMpv = new VideoPlayerInstanceMpv();
+            control = new VideoPlayerControl(videoPlayerInstanceMpv)
+            {
+                PlayerContent = videoPlayerInstanceMpv.MpvView,
+            };
+        }
+
+        control.VerticalAlignment = VerticalAlignment.Stretch;
+        control.HorizontalAlignment = HorizontalAlignment.Stretch;
+
+        return control;
     }
 }

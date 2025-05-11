@@ -1,13 +1,14 @@
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
 public static partial class InitLayout
 {
     public const int WaveFormHeight = 220;
-    
+
     public static int MakeLayout(MainView mainPage, MainViewModel vm, int layoutNumber)
     {
         return layoutNumber switch
@@ -66,8 +67,7 @@ public static partial class InitLayout
         // Vertical GridSplitter
         var nestedSplitter = new GridSplitter
         {
-            Background = Brushes.Black,
-            Width = 5,
+            Width = UiUtil.SplitterWidthOrHeight,
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Stretch
         };
@@ -88,8 +88,7 @@ public static partial class InitLayout
         // Main GridSplitter (horizontal)
         var splitter = new GridSplitter
         {
-            Background = Brushes.DimGray,
-            Height = 5,
+            Height = UiUtil.SplitterWidthOrHeight,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center
         };
@@ -110,7 +109,7 @@ public static partial class InitLayout
 
         // set waveform height
         contentGrid.RowDefinitions[2].Height = new GridLength(WaveFormHeight, GridUnitType.Pixel);
-        
+
         return 1;
     }
 
@@ -153,8 +152,7 @@ public static partial class InitLayout
         // Vertical GridSplitter
         var nestedSplitter = new GridSplitter
         {
-            Background = Brushes.Black,
-            Width = 5,
+            Width = UiUtil.SplitterWidthOrHeight,
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Stretch
         };
@@ -175,8 +173,7 @@ public static partial class InitLayout
         // Main GridSplitter (horizontal)
         var splitter = new GridSplitter
         {
-            Background = Brushes.DimGray,
-            Height = 5,
+            Height = UiUtil.SplitterWidthOrHeight,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center
         };
@@ -197,7 +194,7 @@ public static partial class InitLayout
 
         // set waveform height
         contentGrid.RowDefinitions[2].Height = new GridLength(WaveFormHeight, GridUnitType.Pixel);
-        
+
         return 2;
     }
 
@@ -240,8 +237,7 @@ public static partial class InitLayout
         // Horizontal GridSplitter in left section
         var nestedSplitter = new GridSplitter
         {
-            Background = Brushes.Black,
-            Height = 5,
+            Height = UiUtil.SplitterWidthOrHeight,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center
         };
@@ -263,8 +259,7 @@ public static partial class InitLayout
         // Main GridSplitter (vertical)
         var splitter = new GridSplitter
         {
-            Background = Brushes.DimGray,
-            Width = 5,
+            Width = UiUtil.SplitterWidthOrHeight,
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Stretch
         };
@@ -308,8 +303,7 @@ public static partial class InitLayout
         // Main GridSplitter (vertical between left and right sections)
         var mainSplitter = new GridSplitter
         {
-            Background = Brushes.DimGray,
-            Width = 5,
+            Width = UiUtil.SplitterWidthOrHeight,
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Stretch
         };
@@ -343,8 +337,7 @@ public static partial class InitLayout
         // Horizontal GridSplitter in right section
         var rightNestedSplitter = new GridSplitter
         {
-            Background = Brushes.Black,
-            Height = 5,
+            Height = UiUtil.SplitterWidthOrHeight,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center
         };
@@ -394,8 +387,7 @@ public static partial class InitLayout
         // First horizontal splitter (between top and middle)
         var firstSplitter = new GridSplitter
         {
-            Background = Brushes.DimGray,
-            Height = 5,
+            Height = UiUtil.SplitterWidthOrHeight,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center
         };
@@ -413,8 +405,7 @@ public static partial class InitLayout
         // Second horizontal splitter (between middle and bottom)
         var secondSplitter = new GridSplitter
         {
-            Background = Brushes.DimGray,
-            Height = 5,
+            Height = UiUtil.SplitterWidthOrHeight,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center
         };
@@ -459,8 +450,7 @@ public static partial class InitLayout
         // Horizontal splitter
         var splitter = new GridSplitter
         {
-            Background = Brushes.DimGray,
-            Height = 5,
+            Height = UiUtil.SplitterWidthOrHeight,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center
         };
@@ -505,8 +495,7 @@ public static partial class InitLayout
         // Vertical splitter
         var splitter = new GridSplitter
         {
-            Background = Brushes.DimGray,
-            Width = 5,
+            Width = UiUtil.SplitterWidthOrHeight,
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Stretch
         };
@@ -550,8 +539,7 @@ public static partial class InitLayout
         // Horizontal splitter
         var splitter = new GridSplitter
         {
-            Background = Brushes.DimGray,
-            Height = 5,
+            Height = UiUtil.SplitterWidthOrHeight,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center
         };
@@ -595,8 +583,7 @@ public static partial class InitLayout
         // Horizontal splitter
         var splitter = new GridSplitter
         {
-            Background = Brushes.DimGray,
-            Height = 5,
+            Height = UiUtil.SplitterWidthOrHeight,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center
         };
@@ -659,8 +646,7 @@ public static partial class InitLayout
         // Vertical GridSplitter
         var nestedSplitter = new GridSplitter
         {
-            Background = Brushes.Black,
-            Width = 5,
+            Width = UiUtil.SplitterWidthOrHeight,
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Stretch
         };
@@ -682,8 +668,7 @@ public static partial class InitLayout
         // Main GridSplitter (horizontal)
         var splitter = new GridSplitter
         {
-            Background = Brushes.DimGray,
-            Height = 5,
+            Height = UiUtil.SplitterWidthOrHeight,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center
         };
@@ -729,8 +714,7 @@ public static partial class InitLayout
         // First horizontal splitter (between top and middle)
         var firstSplitter = new GridSplitter
         {
-            Background = Brushes.DimGray,
-            Height = 5,
+            Height = UiUtil.SplitterWidthOrHeight,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center
         };
@@ -749,8 +733,7 @@ public static partial class InitLayout
         // Second horizontal splitter (between middle and bottom)
         var secondSplitter = new GridSplitter
         {
-            Background = Brushes.DimGray,
-            Height = 5,
+            Height = UiUtil.SplitterWidthOrHeight,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center
         };

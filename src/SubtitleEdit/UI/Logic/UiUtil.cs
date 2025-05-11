@@ -16,6 +16,7 @@ public static class UiUtil
 {
     public const int WindowMarginWidth = 10;
     public const int CornerRadius = 4;
+    public const int SplitterWidthOrHeight = 4;
 
     public static Button MakeButton(string text)
     {
@@ -24,9 +25,6 @@ public static class UiUtil
 
     public static IBrush GetTextColor()
     {
-        //var faTheme = Application.Current?.Styles.OfType<FluentAvaloniaTheme>().FirstOrDefault();
-        //faTheme.TryGetResource("TextFillColorPrimary", Application.Current.RequestedThemeVariant, out resource);
-        // var found1 = this.TryGetResource("TheKey", this.ActualThemeVariant, out var result1);
         return new TextBlock().Foreground ?? new SolidColorBrush(Colors.Black);
     }
 
@@ -259,7 +257,7 @@ public static class UiUtil
         textBlock.Margin = new Thickness(marginLeft, m.Top, m.Right, m.Bottom);
         return textBlock;
     }
-    
+
     public static TextBlock WithBackgroundColor(this TextBlock textBlock, IBrush brush)
     {
         textBlock.Background = brush;
