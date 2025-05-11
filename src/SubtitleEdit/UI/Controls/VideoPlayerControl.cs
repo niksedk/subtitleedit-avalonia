@@ -89,7 +89,7 @@ namespace Nikse.SubtitleEdit.Controls
         double _positionIgnore = -1;
 
         private readonly Button _playButton = new Button();
-        private readonly Icon _volumeIcon = new Icon();
+        private readonly Button _volumeButton = new Button();
 
         private void NotifyPositionChanged(double newPosition)
         {
@@ -137,7 +137,7 @@ namespace Nikse.SubtitleEdit.Controls
 
 
             // Play
-            _playButton = new Button()
+            _playButton = new Button
             {
                 Margin = new Thickness(0, 0, 3, 0),
             };
@@ -153,11 +153,10 @@ namespace Nikse.SubtitleEdit.Controls
             Grid.SetColumn(_playButton, 0);
 
             // Stop
-            var stopButton = new Button()
+            var stopButton = new Button
             {
                 Margin = new Thickness(0, 0, 3, 0),
-            }
-            ;
+            };
             Attached.SetIcon(stopButton, "fa-solid fa-stop");
             stopButton.Click += (_, _) => StopRequested?.Invoke();
             progressGrid.Children.Add(stopButton);
@@ -198,8 +197,8 @@ namespace Nikse.SubtitleEdit.Controls
                 }
             };
 
-            positionSlider.Bind(Slider.MaximumProperty, this.GetObservable(DurationProperty));
-            positionSlider.Bind(Slider.ValueProperty, this.GetObservable(PositionProperty));
+            positionSlider.Bind(RangeBase.MaximumProperty, this.GetObservable(DurationProperty));
+            positionSlider.Bind(RangeBase.ValueProperty, this.GetObservable(PositionProperty));
 
             // Also ensure the control can receive keyboard focus
             positionSlider.Focusable = true;
@@ -214,14 +213,16 @@ namespace Nikse.SubtitleEdit.Controls
             progressGrid.Children.Add(positionSlider);
             Grid.SetColumn(positionSlider, 3);
 
-            _volumeIcon = new Icon
+            
+            _volumeButton = new Button
             {
-                Value = "fa-solid fa-volume-up",
+                Margin = new Thickness(10, 0, 4, 0),
                 VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(10, 0, 4, 0)
             };
-            progressGrid.Children.Add(_volumeIcon);
-            Grid.SetColumn(_volumeIcon, 4);
+            Attached.SetIcon(_volumeButton, "fa-solid fa-volume-up");
+            _volumeButton.Click += (_, _) => MuteRequested?.Invoke();
+            progressGrid.Children.Add(_volumeButton);
+            Grid.SetColumn(_volumeButton, 4);
 
             var volumeSlider = new Slider
             {
@@ -238,7 +239,7 @@ namespace Nikse.SubtitleEdit.Controls
                     thumb.Height = 15;
                 }
             };
-            volumeSlider.Bind(Slider.ValueProperty, this.GetObservable(VolumeProperty));
+            volumeSlider.Bind(RangeBase.ValueProperty, this.GetObservable(VolumeProperty));
 
             volumeSlider.ValueChanged += (s, e) =>
             {
@@ -274,6 +275,7 @@ namespace Nikse.SubtitleEdit.Controls
 
         public event Action? PlayPauseRequested;
         public event Action? StopRequested;
+        public event Action? MuteRequested;
         public event Action? FullscreenRequested;
         public event Action? ScreenshotRequested;
         public event Action? SettingsRequested;
@@ -296,7 +298,7 @@ namespace Nikse.SubtitleEdit.Controls
         {
             Dispatcher.UIThread.Invoke(() =>
             {
-                _volumeIcon.Value = isMuted ? "fa-solid fa-volume-xmark" : "fa-solid fa-volume-up";
+                Attached.SetIcon(_volumeButton, isMuted ? "fa-solid fa-volume-xmark" : "fa-solid fa-volume-up");
             });
         }
     }
