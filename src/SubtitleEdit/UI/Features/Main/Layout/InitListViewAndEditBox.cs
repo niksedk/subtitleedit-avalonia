@@ -114,7 +114,7 @@ public static class InitListViewAndEditBox
 
         var startTimeLabel = new TextBlock
         {
-            Text = "Show:",
+            Text = "Show",
             FontWeight = FontWeight.Bold
         };
         startTimePanel.Children.Add(startTimeLabel);
@@ -180,7 +180,7 @@ public static class InitListViewAndEditBox
 
         var durationLabel = new TextBlock
         {
-            Text = "Duration:",
+            Text = "Duration",
             FontWeight = FontWeight.Bold
         };
         durationPanel.Children.Add(durationLabel);
@@ -202,18 +202,39 @@ public static class InitListViewAndEditBox
         editGrid.Children.Add(timeControlsPanel);
 
         // Right panel for text editing
-        var textEditPanel = new StackPanel
+        var textEditGrid = new Grid
         {
-            Spacing = 4,
-            Orientation = Orientation.Vertical
+            ColumnDefinitions = new ColumnDefinitions("*,Auto"), 
+            RowDefinitions = new RowDefinitions("Auto,*,Auto")
         };
+
+        //var textEditPanel = new StackPanel
+        //{
+        //    Spacing = 4,
+        //    Orientation = Orientation.Vertical
+        //};
 
         var textLabel = new TextBlock
         {
-            Text = "Text:",
-            FontWeight = FontWeight.Bold
+            Text = "Text",
+            FontWeight = FontWeight.Bold,
         };
-        textEditPanel.Children.Add(textLabel);
+        textEditGrid.Children.Add(textLabel);
+
+        var textCharsSecLabel = new TextBlock
+        {
+            Text = "Chars/sec: -",
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            FontSize = 12,
+            Padding = new Thickness(0, 0, 3, 0),
+        };
+        textCharsSecLabel.Bind(TextBlock.TextProperty, 
+            new Binding(nameof(vm.EditTextCharactersPerSecond))
+            {
+                Mode = BindingMode.OneWay
+            });
+        textEditGrid.Children.Add(textCharsSecLabel);
 
         var textBox = new TextBox
         {
@@ -226,10 +247,70 @@ public static class InitListViewAndEditBox
                 Mode = BindingMode.TwoWay
             }
         };
-        textEditPanel.Children.Add(textBox);
+        textEditGrid.Children.Add(textBox);
+        Grid.SetRow(textBox, 1);
 
-        Grid.SetColumn(textEditPanel, 1);
-        editGrid.Children.Add(textEditPanel);
+
+        var textTotalLengthLabel = new TextBlock
+        {
+            Text = "Total length: -",
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Top,
+            FontSize = 12,
+            Padding = new Thickness(0, 0, 3, 0),
+        };
+        textTotalLengthLabel.Bind(TextBlock.TextProperty,
+            new Binding(nameof(vm.EditTextTotalLength))
+            {
+                Mode = BindingMode.OneWay
+            });
+        textEditGrid.Children.Add(textTotalLengthLabel);
+        Grid.SetRow(textTotalLengthLabel, 2);
+
+
+        var singleLineLengthLabel = new TextBlock
+        {
+            Text = "Line length: -",
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Top,
+            FontSize = 12,
+            Padding = new Thickness(3, 0, 0, 0),
+        };
+        singleLineLengthLabel.Bind(TextBlock.TextProperty,
+            new Binding(nameof(vm.EditTextLineLengths))
+            {
+                Mode = BindingMode.OneWay
+            });
+        textEditGrid.Children.Add(singleLineLengthLabel);
+        Grid.SetRow(singleLineLengthLabel, 2);
+
+        var buttonPanel = new StackPanel
+        {
+            Orientation = Orientation.Vertical,
+            Spacing = 3,
+            Margin = new Thickness(3)
+        };
+
+        // Auto Break button
+        var autoBreakButton = new Button();
+        Projektanker.Icons.Avalonia.Attached.SetIcon(autoBreakButton, "fa-solid fa-bolt"); // Example icon
+        ToolTip.SetTip(autoBreakButton, "Auto-break");
+        buttonPanel.Children.Add(autoBreakButton);
+        autoBreakButton.Command = vm.AutoBreakCommand;  
+
+        // Unbreak button
+        var unbreakButton = new Button();
+        Projektanker.Icons.Avalonia.Attached.SetIcon(unbreakButton, "fa-solid fa-link-slash"); // Example icon
+        ToolTip.SetTip(unbreakButton, "Unbreak");
+        buttonPanel.Children.Add(unbreakButton);
+        unbreakButton.Command = vm.UnbreakCommand;
+
+        textEditGrid.Children.Add(buttonPanel);
+        Grid.SetRow(buttonPanel, 1);
+        Grid.SetColumn(buttonPanel, 1);
+
+        Grid.SetColumn(textEditGrid, 1);
+        editGrid.Children.Add(textEditGrid);
 
         Grid.SetRow(editGrid, 1);
         mainGrid.Children.Add(editGrid);

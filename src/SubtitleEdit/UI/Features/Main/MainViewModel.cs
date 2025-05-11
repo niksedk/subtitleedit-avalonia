@@ -7,6 +7,7 @@ using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
+using Nikse.SubtitleEdit.Core.Cea708.Commands;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Common;
@@ -18,6 +19,7 @@ using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Features.Translate;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Config.Language;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 using System;
@@ -38,6 +40,9 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private int? selectedSubtitleIndex;
 
     [ObservableProperty] private string editText;
+    [ObservableProperty] private string editTextCharactersPerSecond;
+    [ObservableProperty] private string editTextTotalLength;
+    [ObservableProperty] private string editTextLineLengths;
 
     [ObservableProperty] private ObservableCollection<SubtitleFormat> subtitleFormats;
     [ObservableProperty] private SubtitleFormat selectedSubtitleFormat;
@@ -400,39 +405,6 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    [RelayCommand]
-    private void PlayPause()
-    {
-    }
-
-
-
-    //public async void Play()
-    //{
-    //    MediaPlayerMpv.Pause.Set(value.Value);
-    //    await MediaPlayerMpv.LoadFile(MediaUrl).InvokeAsync();
-    //}
-
-    //public void Pause() => Pause(null);
-
-    //public void Pause(bool? value)
-    //{
-    //    value ??= !Mpv.Pause.Get()!;
-    //    Mpv.Pause.Set(value.Value);
-    //}
-
-    //public void Stop()
-    //{
-    //    Mpv.Stop().Invoke();
-    //    Mpv.Pause.Set(false);
-    //}
-
-    [RelayCommand]
-    private void Stop()
-    {
-    }
-
-
     private Control _fullscreenBeforeParent;
     [RelayCommand]
     private void VideoFullScreen()
@@ -459,15 +431,27 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void VideoScreenshot()
+    private async Task Unbreak()
     {
+        var s = SelectedSubtitle;
+        if (s == null)
+        {
+            return;
+        }
 
+        s.Text = Utilities.UnbreakLine(s.Text);
     }
 
     [RelayCommand]
-    private void VideoSettings()
+    private async Task AutoBreak()
     {
+        var s = SelectedSubtitle;
+        if (s == null)
+        {
+            return;
+        }   
 
+        s.Text = Utilities.AutoBreakLine(s.Text);
     }
 
     private void SelectAllRows()
@@ -512,7 +496,6 @@ public partial class MainViewModel : ObservableObject
             }
         }
     }
-
 
     private async Task SubtitleOpen(string fileName, string? videoFileName = null)
     {
@@ -919,6 +902,9 @@ public partial class MainViewModel : ObservableObject
             SelectedSubtitle = null;
             _selectedSubtitles = null;
             StatusTextRight = string.Empty;
+            EditTextCharactersPerSecond = string.Empty;
+            EditTextTotalLength = string.Empty;
+            EditTextLineLengths = string.Empty;
             return;
         }
 
@@ -927,6 +913,9 @@ public partial class MainViewModel : ObservableObject
         {
             SelectedSubtitle = null;
             StatusTextRight = $"{selectedItems.Count} lines selected of {Subtitles.Count}";
+            EditTextCharactersPerSecond = string.Empty;
+            EditTextTotalLength = string.Empty;
+            EditTextLineLengths = string.Empty;
             return;
         }
 
@@ -940,5 +929,21 @@ public partial class MainViewModel : ObservableObject
 
         SelectedSubtitle = item;
         StatusTextRight = $"{item.Number}/{Subtitles.Count}";
+
+        string text = item.Text;
+        text = HtmlUtil.RemoveHtmlTags(text, true);
+        var totalLength = text.CountCharacters(false);
+        var cps = new Paragraph(text, item.StartTime.TotalMilliseconds, item.EndTime.TotalMilliseconds).GetCharactersPerSecond();
+
+        var lines = text.SplitToLines();
+        var lineLenghts = new List<string>(lines);
+        for (var i = 0; i < lines.Count; i++)
+        {
+            lineLenghts[i] = $"{lines[i].Length}";
+        }
+
+        EditTextCharactersPerSecond = $"Chars/sec: {cps:0.#}";
+        EditTextTotalLength = $"Total length: {totalLength}";
+        EditTextLineLengths = $"Line length: {string.Join('/', lineLenghts)}";
     }
 }
