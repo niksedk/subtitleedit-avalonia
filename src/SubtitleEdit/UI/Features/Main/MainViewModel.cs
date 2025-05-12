@@ -577,7 +577,7 @@ public partial class MainViewModel : ObservableObject
             await VideoOpenFile(videoFileName);
         }
         
-        AddToRecentFiles();
+        AddToRecentFiles(true);
         _changeSubtitleHash = GetFastSubtitleHash();
     }
 
@@ -670,11 +670,11 @@ public partial class MainViewModel : ObservableObject
             _subtitle.FileName = fileName;
             _lastOpenSaveFormat = SelectedSubtitleFormat;
             await SaveSubtitle();
-            AddToRecentFiles();
+            AddToRecentFiles(true);
         }
     }
 
-    private void AddToRecentFiles()
+    private void AddToRecentFiles(bool updateMenu)
     {
         if (string.IsNullOrEmpty(_subtitleFileName))
         {
@@ -685,7 +685,10 @@ public partial class MainViewModel : ObservableObject
             SelectedEncoding.DisplayName);
         Se.SaveSettings();
 
-        InitMenu.UpdateRecentFiles(this);
+        if (updateMenu)
+        {
+            InitMenu.UpdateRecentFiles(this);
+        }
     }
 
     private async Task ShowStatus(string message, int delayMs = 3000)
@@ -715,7 +718,7 @@ public partial class MainViewModel : ObservableObject
         //MediaPlayerVlc?.Dispose();
         //libVLC?.Dispose();
 
-        AddToRecentFiles();
+        AddToRecentFiles(false);
         Se.SaveSettings();
     }
 
