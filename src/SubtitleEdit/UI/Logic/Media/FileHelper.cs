@@ -82,13 +82,17 @@ namespace Nikse.SubtitleEdit.Logic.Media
             }
         }
 
-        public async Task<string> PickSaveSubtitleFile(Visual sender, SubtitleFormat currentFormat, string title)
+        public async Task<string> PickSaveSubtitleFile(
+            Visual sender, 
+            SubtitleFormat currentFormat,
+            string saveSubtitleFile, 
+            string title)
         {
             var topLevel = TopLevel.GetTopLevel(sender)!;
             var options = new FilePickerSaveOptions
             {
                 Title = title,
-                SuggestedFileName = "subtitle" + currentFormat.Extension,
+                SuggestedFileName = saveSubtitleFile,
                 FileTypeChoices = MakeSaveFilePickerFileTypes(currentFormat),
                 DefaultExtension = currentFormat.Extension.TrimStart('.')
             };

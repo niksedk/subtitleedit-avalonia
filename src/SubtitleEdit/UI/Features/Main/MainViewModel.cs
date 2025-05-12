@@ -68,6 +68,7 @@ public partial class MainViewModel : ObservableObject
 
     private string? _subtitleFileName;
     private Subtitle _subtitle;
+    private SubtitleFormat? _lastOpenSaveFormat;
 
     private string? _videoFileName;
     private CancellationTokenSource? _statusFadeCts;
@@ -545,11 +546,12 @@ public partial class MainViewModel : ObservableObject
 
         _subtitleFileName = fileName;
         _subtitle = subtitle;
+        _changeSubtitleHash = GetFastSubtitleHash();
+        _lastOpenSaveFormat = subtitle.OriginalFormat;
         SetSubtitles(_subtitle);
         await ShowStatus($"Subtitle loaded: {fileName}");
         AddToRecentFiles();
-        _changeSubtitleHash = GetFastSubtitleHash();
-
+  
         if (!string.IsNullOrEmpty(videoFileName) && File.Exists(videoFileName))
         {
             await VideoOpenFile(videoFileName);
@@ -595,9 +597,16 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
+        if (_lastOpenSaveFormat == null ||  _lastOpenSaveFormat.Name != SelectedSubtitleFormat.Name)
+        {
+            await SaveSubtitleAs();
+            return;
+        }
+
         var text = GetUpdateSubtitle().ToText(SelectedSubtitleFormat);
         await File.WriteAllTextAsync(_subtitleFileName, text);
         _changeSubtitleHash = GetFastSubtitleHash();
+        _lastOpenSaveFormat = SelectedSubtitleFormat;
     }
 
     private Subtitle GetUpdateSubtitle()
@@ -621,11 +630,26 @@ public partial class MainViewModel : ObservableObject
 
     private async Task SaveSubtitleAs()
     {
-        var fileName = await _fileHelper.PickSaveSubtitleFile(Window, SelectedSubtitleFormat, "Save Subtitle File");
+        var newFileName =  "New" + SelectedSubtitleFormat.Extension;
+        if (!string.IsNullOrEmpty(_subtitleFileName))
+        {
+            newFileName = Path.GetFileNameWithoutExtension(_subtitleFileName) + SelectedSubtitleFormat.Extension;            
+        }
+        else if (!string.IsNullOrEmpty(_videoFileName))
+        {
+            newFileName = Path.GetFileNameWithoutExtension(_videoFileName) + SelectedSubtitleFormat.Extension;            
+        }
+        
+        var fileName = await _fileHelper.PickSaveSubtitleFile(
+            Window, 
+            SelectedSubtitleFormat,
+            newFileName,
+            "Save subtitle file");
         if (!string.IsNullOrEmpty(fileName))
         {
             _subtitleFileName = fileName;
             _subtitle.FileName = fileName;
+            _lastOpenSaveFormat = SelectedSubtitleFormat;
             await SaveSubtitle();
             AddToRecentFiles();
         }
