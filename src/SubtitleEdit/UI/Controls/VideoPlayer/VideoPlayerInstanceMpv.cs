@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Data;
 using Avalonia.Layout;
+using HanumanInstitute.LibMpv;
 using HanumanInstitute.LibMpv.Avalonia;
 using HanumanInstitute.LibMpv.Core;
 using System.Threading.Tasks;
@@ -59,12 +60,12 @@ public class VideoPlayerInstanceMpv : IVideoPlayerInstance
         }
     }   
 
-    public HanumanInstitute.LibMpv.MpvContext? MpvContext { get; set; }
+    public MpvContext? MpvContext { get; set; }
     public MpvView MpvView { get; set; }
 
     public VideoPlayerInstanceMpv()
     {
-        MpvContext = new HanumanInstitute.LibMpv.MpvContext();
+        MpvContext = new MpvContext();
         MpvView = new MpvView
         {
             Margin = new Thickness(0),
@@ -78,6 +79,7 @@ public class VideoPlayerInstanceMpv : IVideoPlayerInstance
 
     public void Close()
     {
+        MpvContext?.Stop();
         _fileName = string.Empty;
     }
 
