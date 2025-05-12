@@ -11,7 +11,6 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using HanumanInstitute.LibMpv.Core;
 using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 
 namespace Nikse.SubtitleEdit.Controls.VideoPlayer

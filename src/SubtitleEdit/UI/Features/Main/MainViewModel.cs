@@ -27,6 +27,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -118,7 +119,8 @@ public partial class MainViewModel : ObservableObject
                         TimeSpanFormatterShort.ToStringShort(x.Duration),
                     (x, val) => x.Duration = TimeSpanFormatterShort.FromStringShort(val)
                 ),
-                new TextColumn<SubtitleLineViewModel, string>("Text", x => x.Text, null, new GridLength(1, GridUnitType.Star)),
+                new TextColumn<SubtitleLineViewModel, string>("Text", x => x.Text, null,
+                    new GridLength(1, GridUnitType.Star)),
             },
         };
 
@@ -126,6 +128,8 @@ public partial class MainViewModel : ObservableObject
         dataGridSource!.RowSelection!.SingleSelect = false;
 
         LoadShortcuts();
+
+        StartTitleTimer();
     }
 
     private void LoadShortcuts()
@@ -224,7 +228,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task CommandFileReopen(RecentFile recentFile)
     {
-        await SubtitleOpen(recentFile.SubtitleFileName, recentFile.VideoFileName);
+        await SubtitleOpen(recentFile.SubtitleFileName, recentFile.VideoFileName, recentFile.SelectedLine);
     }
 
     [RelayCommand]
@@ -305,10 +309,8 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task CommandShowSettingsShortcuts()
     {
-        await _windowService.ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(Window, vm =>
-        {
-            vm.LoadShortCuts(this);
-        });
+        await _windowService.ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(Window,
+            vm => { vm.LoadShortCuts(this); });
     }
 
     [RelayCommand]
@@ -363,7 +365,9 @@ public partial class MainViewModel : ObservableObject
             source.Selection is ITreeDataGridRowSelectionModel<SubtitleLineViewModel> selection &&
             SubtitleGrid is TreeDataGrid treeGrid)
         {
-            var currentIndex = selection.SelectedIndexes.FirstOrDefault().Count > 0 ? selection.SelectedIndexes.FirstOrDefault()[0] : -1;
+            var currentIndex = selection.SelectedIndexes.FirstOrDefault().Count > 0
+                ? selection.SelectedIndexes.FirstOrDefault()[0]
+                : -1;
             if (currentIndex < 0 || currentIndex + 1 >= source.Rows.Count)
             {
                 return;
@@ -387,7 +391,9 @@ public partial class MainViewModel : ObservableObject
             source.Selection is ITreeDataGridRowSelectionModel<SubtitleLineViewModel> selection &&
             SubtitleGrid is TreeDataGrid treeGrid)
         {
-            var currentIndex = selection.SelectedIndexes.FirstOrDefault().Count > 0 ? selection.SelectedIndexes.FirstOrDefault()[0] : -1;
+            var currentIndex = selection.SelectedIndexes.FirstOrDefault().Count > 0
+                ? selection.SelectedIndexes.FirstOrDefault()[0]
+                : -1;
             if (currentIndex < 1)
             {
                 return;
@@ -405,6 +411,7 @@ public partial class MainViewModel : ObservableObject
     }
 
     private Control _fullscreenBeforeParent;
+
     [RelayCommand]
     private void VideoFullScreen()
     {
@@ -424,6 +431,7 @@ public partial class MainViewModel : ObservableObject
             {
                 control.RemoveControlFromParent().AddControlToParent(_fullscreenBeforeParent);
             }
+
             control.IsFullScreen = false;
         });
         fullscreenWindow.Show(Window);
@@ -496,7 +504,7 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    private async Task SubtitleOpen(string fileName, string? videoFileName = null)
+    private async Task SubtitleOpen(string fileName, string? videoFileName = null, int? selectedSubtitleIndex = null)
     {
         if (string.IsNullOrEmpty(fileName))
         {
@@ -546,12 +554,20 @@ public partial class MainViewModel : ObservableObject
 
         _subtitleFileName = fileName;
         _subtitle = subtitle;
-        _changeSubtitleHash = GetFastSubtitleHash();
         _lastOpenSaveFormat = subtitle.OriginalFormat;
         SetSubtitles(_subtitle);
         await ShowStatus($"Subtitle loaded: {fileName}");
-        AddToRecentFiles();
-  
+
+        if (selectedSubtitleIndex != null)
+        {
+            var selection = SubtitleGrid.RowSelection;
+            if (selection != null)
+            {
+                selection.Clear();
+                selection.Select(selectedSubtitleIndex.Value);
+            }
+        }
+      
         if (!string.IsNullOrEmpty(videoFileName) && File.Exists(videoFileName))
         {
             await VideoOpenFile(videoFileName);
@@ -560,6 +576,9 @@ public partial class MainViewModel : ObservableObject
         {
             await VideoOpenFile(videoFileName);
         }
+        
+        AddToRecentFiles();
+        _changeSubtitleHash = GetFastSubtitleHash();
     }
 
     private void SetSubtitles(Subtitle subtitle)
@@ -597,7 +616,7 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        if (_lastOpenSaveFormat == null ||  _lastOpenSaveFormat.Name != SelectedSubtitleFormat.Name)
+        if (_lastOpenSaveFormat == null || _lastOpenSaveFormat.Name != SelectedSubtitleFormat.Name)
         {
             await SaveSubtitleAs();
             return;
@@ -630,18 +649,18 @@ public partial class MainViewModel : ObservableObject
 
     private async Task SaveSubtitleAs()
     {
-        var newFileName =  "New" + SelectedSubtitleFormat.Extension;
+        var newFileName = "New" + SelectedSubtitleFormat.Extension;
         if (!string.IsNullOrEmpty(_subtitleFileName))
         {
-            newFileName = Path.GetFileNameWithoutExtension(_subtitleFileName) + SelectedSubtitleFormat.Extension;            
+            newFileName = Path.GetFileNameWithoutExtension(_subtitleFileName) + SelectedSubtitleFormat.Extension;
         }
         else if (!string.IsNullOrEmpty(_videoFileName))
         {
-            newFileName = Path.GetFileNameWithoutExtension(_videoFileName) + SelectedSubtitleFormat.Extension;            
+            newFileName = Path.GetFileNameWithoutExtension(_videoFileName) + SelectedSubtitleFormat.Extension;
         }
-        
+
         var fileName = await _fileHelper.PickSaveSubtitleFile(
-            Window, 
+            Window,
             SelectedSubtitleFormat,
             newFileName,
             "Save subtitle file");
@@ -696,6 +715,7 @@ public partial class MainViewModel : ObservableObject
         //MediaPlayerVlc?.Dispose();
         //libVLC?.Dispose();
 
+        AddToRecentFiles();
         Se.SaveSettings();
     }
 
@@ -922,6 +942,7 @@ public partial class MainViewModel : ObservableObject
         if (selectedItems == null)
         {
             SelectedSubtitle = null;
+            SelectedSubtitleIndex = null;
             _selectedSubtitles = null;
             StatusTextRight = string.Empty;
             EditTextCharactersPerSecond = string.Empty;
@@ -934,6 +955,7 @@ public partial class MainViewModel : ObservableObject
         if (selectedItems.Count > 1)
         {
             SelectedSubtitle = null;
+            SelectedSubtitleIndex = null;
             StatusTextRight = $"{selectedItems.Count} lines selected of {Subtitles.Count}";
             EditTextCharactersPerSecond = string.Empty;
             EditTextTotalLength = string.Empty;
@@ -945,17 +967,20 @@ public partial class MainViewModel : ObservableObject
         if (item == null)
         {
             SelectedSubtitle = null;
+            SelectedSubtitleIndex = null;
             StatusTextRight = string.Empty;
             return;
         }
 
         SelectedSubtitle = item;
+        SelectedSubtitleIndex = Subtitles.IndexOf(item);
         StatusTextRight = $"{item.Number}/{Subtitles.Count}";
 
         string text = item.Text;
         text = HtmlUtil.RemoveHtmlTags(text, true);
         var totalLength = text.CountCharacters(false);
-        var cps = new Paragraph(text, item.StartTime.TotalMilliseconds, item.EndTime.TotalMilliseconds).GetCharactersPerSecond();
+        var cps = new Paragraph(text, item.StartTime.TotalMilliseconds, item.EndTime.TotalMilliseconds)
+            .GetCharactersPerSecond();
 
         var lines = text.SplitToLines();
         var lineLenghts = new List<string>(lines);
@@ -967,5 +992,33 @@ public partial class MainViewModel : ObservableObject
         EditTextCharactersPerSecond = $"Chars/sec: {cps:0.#}";
         EditTextTotalLength = $"Total length: {totalLength}";
         EditTextLineLengths = $"Line length: {string.Join('/', lineLenghts)}";
+    }
+
+
+    private DispatcherTimer _positionTimer = new DispatcherTimer();
+
+    private void StartTitleTimer()
+    {
+        _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
+        _positionTimer.Tick += (s, e) =>
+        {
+            var text = "Untitled";
+            string separator = " + ";
+            if (!string.IsNullOrEmpty(_subtitleFileName))
+            {
+                text = Configuration.Settings.General.TitleBarFullFileName
+                    ? _subtitleFileName
+                    : Path.GetFileName(_subtitleFileName);
+            }
+
+            text = text + " - " + "Subtitle Edit 5.0 Alpha";
+            if (_changeSubtitleHash != GetFastSubtitleHash())
+            {
+                text = "*" + text;
+            }
+   
+            Window.Title = text;
+        };
+        _positionTimer.Start();
     }
 }
