@@ -52,7 +52,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _statusTextLeft;
     [ObservableProperty] private string _statusTextRight;
 
-    public TreeDataGrid SubtitleGrid { get; set; }
+    public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
     public MainView View { get; set; }
     public Window Window { get; set; }
@@ -361,53 +361,53 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void GoToNextLine()
     {
-        if (SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source &&
-            source.Selection is ITreeDataGridRowSelectionModel<SubtitleLineViewModel> selection &&
-            SubtitleGrid is TreeDataGrid treeGrid)
-        {
-            var currentIndex = selection.SelectedIndexes.FirstOrDefault().Count > 0
-                ? selection.SelectedIndexes.FirstOrDefault()[0]
-                : -1;
-            if (currentIndex < 0 || currentIndex + 1 >= source.Rows.Count)
-            {
-                return;
-            }
+        //if (SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source &&
+        //    source.Selection is ITreeDataGridRowSelectionModel<SubtitleLineViewModel> selection &&
+        //    SubtitleGrid is TreeDataGrid treeGrid)
+        //{
+        //    var currentIndex = selection.SelectedIndexes.FirstOrDefault().Count > 0
+        //        ? selection.SelectedIndexes.FirstOrDefault()[0]
+        //        : -1;
+        //    if (currentIndex < 0 || currentIndex + 1 >= source.Rows.Count)
+        //    {
+        //        return;
+        //    }
 
-            var newIndex = currentIndex + 1;
+        //    var newIndex = currentIndex + 1;
 
-            //Dispatcher.UIThread.Post(() =>
-            //{
-            selection.Clear();
-            selection.Select(new IndexPath(newIndex)); // Use IndexPath constructor to create a valid index
-            SubtitleGrid.RowsPresenter?.BringIntoView(newIndex);
-            // }, DispatcherPriority.Background);
-        }
+        //    //Dispatcher.UIThread.Post(() =>
+        //    //{
+        //    selection.Clear();
+        //    selection.Select(new IndexPath(newIndex)); // Use IndexPath constructor to create a valid index
+        //    SubtitleGrid.RowsPresenter?.BringIntoView(newIndex);
+        //    // }, DispatcherPriority.Background);
+        //}
     }
 
     [RelayCommand]
     private void GoToPreviousLine()
     {
-        if (SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source &&
-            source.Selection is ITreeDataGridRowSelectionModel<SubtitleLineViewModel> selection &&
-            SubtitleGrid is TreeDataGrid treeGrid)
-        {
-            var currentIndex = selection.SelectedIndexes.FirstOrDefault().Count > 0
-                ? selection.SelectedIndexes.FirstOrDefault()[0]
-                : -1;
-            if (currentIndex < 1)
-            {
-                return;
-            }
+        //if (SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source &&
+        //    source.Selection is ITreeDataGridRowSelectionModel<SubtitleLineViewModel> selection &&
+        //    SubtitleGrid is TreeDataGrid treeGrid)
+        //{
+        //    var currentIndex = selection.SelectedIndexes.FirstOrDefault().Count > 0
+        //        ? selection.SelectedIndexes.FirstOrDefault()[0]
+        //        : -1;
+        //    if (currentIndex < 1)
+        //    {
+        //        return;
+        //    }
 
-            var newIndex = currentIndex - 1;
+        //    var newIndex = currentIndex - 1;
 
-            // Dispatcher.UIThread.Post(() =>
-            //  {
-            selection.Clear();
-            selection.Select(new IndexPath(newIndex)); // Use IndexPath constructor to create a valid index
-            SubtitleGrid.RowsPresenter?.BringIntoView(newIndex);
-            //}, DispatcherPriority.Render);
-        }
+        //    // Dispatcher.UIThread.Post(() =>
+        //    //  {
+        //    selection.Clear();
+        //    selection.Select(new IndexPath(newIndex)); // Use IndexPath constructor to create a valid index
+        //    SubtitleGrid.RowsPresenter?.BringIntoView(newIndex);
+        //    //}, DispatcherPriority.Render);
+        //}
     }
 
     private Control _fullscreenBeforeParent;
@@ -560,12 +560,12 @@ public partial class MainViewModel : ObservableObject
 
         if (selectedSubtitleIndex != null)
         {
-            var selection = SubtitleGrid.RowSelection;
-            if (selection != null)
-            {
-                selection.Clear();
-                selection.Select(selectedSubtitleIndex.Value);
-            }
+            //var selection = SubtitleGrid.RowSelection;
+            //if (selection != null)
+            //{
+            //    selection.Clear();
+            //    selection.Select(selectedSubtitleIndex.Value);
+            //}
         }
       
         if (!string.IsNullOrEmpty(videoFileName) && File.Exists(videoFileName))

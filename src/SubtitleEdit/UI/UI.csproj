@@ -10,6 +10,9 @@
         <RootNamespace>Nikse.SubtitleEdit</RootNamespace>
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     </PropertyGroup>
+    <ItemGroup>
+      <AvaloniaXaml Remove="Styles.axaml" />
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="11.3.0" />
@@ -103,6 +106,7 @@
       <None Remove="Assets\Themes\Light\WaveformZoomOut.png" />
       <None Remove="Assets\Themes\Light\WebVttProperties.png" />
       <None Remove="Assets\Themes\Light\WebVttStyle.png" />
+      <None Remove="Styles.xaml" />
       <Content Include="Assets\Themes\Dark\New.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
@@ -622,6 +626,9 @@
     <ItemGroup>
       <None Remove="Assets\se.ico" />
       <AvaloniaResource Include="Assets\se.ico" />
+      <AvaloniaResource Include="Styles.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </AvaloniaResource>
     </ItemGroup>
 
     <ItemGroup>

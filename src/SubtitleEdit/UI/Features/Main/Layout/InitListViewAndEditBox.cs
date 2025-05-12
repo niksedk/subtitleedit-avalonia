@@ -1,8 +1,14 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Shapes;
 using Avalonia.Data;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Styling;
 using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 
@@ -44,22 +50,76 @@ public static class InitListViewAndEditBox
             },
         };
 
-        vm.SubtitleGrid = new TreeDataGrid
+        vm.SubtitleGrid = new DataGrid
         {
             Height = double.NaN, // auto size inside scroll viewer
             Margin = new Thickness(2),
-            Source = vm.SubtitlesSource,
+            ItemsSource = vm.Subtitles, // Use ItemsSource instead of Items
             CanUserSortColumns = false,
-            ContextFlyout = subtitleContextMenu,
+         //   ContextFlyout = subtitleContextMenu, // Create new ContextMenu
+            IsReadOnly = true,
+            SelectionMode = DataGridSelectionMode.Extended,            
         };
 
-        if (vm.SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source)
+      
+
+        // Create a theme for DataGridCell + Apply the cell theme to the DataGrid (hide cell selection rectangle)
+        //var cellTheme = new ControlTheme(typeof(DataGridCell));
+        //cellTheme.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(0)));
+        //cellTheme.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.Transparent));
+        //cellTheme.Setters.Add(new Setter(InputElement.FocusableProperty, false));
+        //vm.SubtitleGrid.CellTheme = cellTheme;
+
+
+        //     var cellTheme = vm.SubtitleGrid.CellTheme; // new ControlTheme(typeof(DataGridCell));
+        //      cellTheme.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.Tomato));
+        //cellTheme.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(0)));
+        // cellTheme.Setters.Add(new Setter(InputElement.FocusableProperty, false));
+        //        vm.SubtitleGrid.CellTheme = cellTheme;
+
+
+
+
+        // Columns
+        vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
-            source.RowSelection!.SelectionChanged += (sender, e) =>
-            {
-                vm.SubtitleGrid_SelectionChanged(source.RowSelection.SelectedItems);
-            };
-        }
+            Header = "#",
+            Binding = new Binding("Number"),
+            Width = new DataGridLength(50)
+        });
+        vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
+        {
+            Header = "Start Time",
+            Binding = new Binding("StartTime"),
+            Width = new DataGridLength(120)
+        });
+        vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
+        {
+            Header = "End Time",
+            Binding = new Binding("EndTime"),
+            Width = new DataGridLength(120)
+        });
+        vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
+        {
+            Header = "Duration",
+            Binding = new Binding("Duration"),
+            Width = new DataGridLength(120),
+            IsReadOnly = true
+        });
+        vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
+        {
+            Header = "Text",
+            Binding = new Binding("Text"),
+            Width = new DataGridLength(1, DataGridLengthUnitType.Star) // Stretch text column
+        });
+
+        //if (vm.SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source)
+        //{
+        //    source.RowSelection!.SelectionChanged += (sender, e) =>
+        //    {
+        //        vm.SubtitleGrid_SelectionChanged(source.RowSelection.SelectedItems);
+        //    };
+        //}
 
         Grid.SetRow(vm.SubtitleGrid, 0);
         mainGrid.Children.Add(vm.SubtitleGrid);
@@ -83,11 +143,11 @@ public static class InitListViewAndEditBox
         flyout.Items.Add(deleteMenuItem);
         flyout.Items.Add(insertAfterMenuItem);
         flyout.Items.Add(italicMenuItem);
-        
+
         // Set the ContextFlyout property
-        //vm.SubtitleGrid.ContextFlyout = flyout;
-        //vm.SubtitleGrid.AddHandler(InputElement.PointerPressedEvent, vm.SubtitleGrid_PointerPressed, RoutingStrategies.Tunnel);
-        //vm.SubtitleGrid.AddHandler(InputElement.PointerReleasedEvent, vm.SubtitleGrid_PointerReleased, RoutingStrategies.Tunnel);
+        vm.SubtitleGrid.ContextFlyout = flyout;
+        vm.SubtitleGrid.AddHandler(InputElement.PointerPressedEvent, vm.SubtitleGrid_PointerPressed, RoutingStrategies.Tunnel);
+        vm.SubtitleGrid.AddHandler(InputElement.PointerReleasedEvent, vm.SubtitleGrid_PointerReleased, RoutingStrategies.Tunnel);
 
         // Edit area - restructured with time controls on left, multiline text on right
         var editGrid = new Grid
