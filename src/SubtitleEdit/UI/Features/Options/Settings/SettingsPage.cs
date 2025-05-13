@@ -1,19 +1,35 @@
+using System;
 using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
+using Avalonia.Platform;
 using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
+
+public class FormatViewModel
+{
+    public string Name { get; set; }
+    public bool IsFavorite { get; set; }
+}
+
+public class FileTypeAssociationViewModel
+{
+    public string Extension { get; set; } = string.Empty;
+    public bool IsAssociated { get; set; } = false;
+    public string IconPath { get; set; } = string.Empty; // Optional: use if you have images per extension
+}
 
 public class SettingsPage : UserControl
 {
     private TextBox _searchBox;
     private StackPanel _contentPanel;
     private SettingsViewModel _vm;
-    
+
     public SettingsPage(SettingsViewModel vm)
     {
         _vm = vm;
@@ -24,7 +40,7 @@ public class SettingsPage : UserControl
             Watermark = "Search settings...",
             Margin = new Thickness(10)
         };
-        
+
         //DockPanel.SetDock(_searchBox, Dock.Top);
 
         _contentPanel = new StackPanel
@@ -95,7 +111,7 @@ public class SettingsPage : UserControl
         UpdateVisibleSections(string.Empty);
 
         _searchBox.TextChanged += (s, e) => UpdateVisibleSections(_searchBox.Text ?? string.Empty);
-            
+
     }
 
     private void UpdateVisibleSections(string filter)
@@ -125,12 +141,70 @@ public class SettingsPage : UserControl
                     [!ComboBox.SelectedItemProperty] = new Binding(nameof(_vm.SelectedLanguage)) { Mode = BindingMode.TwoWay },
                     Width = 150
                 }),
-                new SettingsItem("Enable Logging", () => new CheckBox { IsChecked = true })
+                new SettingsItem("Enable Logging", () => new CheckBox { IsChecked = true }),
+
+                 // New General Settings
+                MakeNumericSetting("Single line max length", nameof(_vm.SingleLineMaxLength)),
+                MakeNumericSetting("Optimal chars/sec", nameof(_vm.OptimalCharsPerSec)),
+                MakeNumericSetting("Max chars/sec", nameof(_vm.MaxCharsPerSec)),
+                MakeNumericSetting("Max words/min", nameof(_vm.MaxWordsPerMin)),
+                MakeNumericSetting("Min duration (ms)", nameof(_vm.MinDurationMs)),
+                MakeNumericSetting("Max duration (ms)", nameof(_vm.MaxDurationMs)),
+                MakeNumericSetting("Min gap (ms)", nameof(_vm.MinGapMs)),
+                MakeNumericSetting("Max number of lines", nameof(_vm.MaxLines)),
+                MakeNumericSetting("Unbreak subtitles shorter than (ms)", nameof(_vm.UnbreakShorterThanMs)),
+            }),
+
+
+            new SettingsSection("Subtitle Formats", new[]
+            {
+                new SettingsItem("Default format", () => new ComboBox
+                {
+                    Width = 200,
+                    DataContext = _vm,
+                    [!ComboBox.ItemsSourceProperty] = new Binding(nameof(_vm.AvailableFormats)),
+                    [!ComboBox.SelectedItemProperty] = new Binding(nameof(_vm.DefaultFormat)) { Mode = BindingMode.TwoWay },
+                    ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
+                        new TextBlock { Text = f?.Name }, true)
+                }),
+
+                new SettingsItem("Default save as format", () => new ComboBox
+                {
+                    Width = 200,
+                    DataContext = _vm,
+                    [!ComboBox.ItemsSourceProperty] = new Binding(nameof(_vm.AvailableFormats)),
+                    [!ComboBox.SelectedItemProperty] = new Binding(nameof(_vm.DefaultSaveAsFormat)) { Mode = BindingMode.TwoWay },
+                    ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
+                        new TextBlock { Text = f?.Name }, true)
+                }),
+
+                new SettingsItem("Favorite formats", () => new ItemsControl
+                {
+                    DataContext = _vm,
+                    [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.AvailableFormats)),
+                    ItemTemplate = new FuncDataTemplate<FormatViewModel>((formatVm, _) =>
+                        new CheckBox
+                        {
+                            Content = formatVm.Name,
+                            [!CheckBox.IsCheckedProperty] = new Binding(nameof(FormatViewModel.IsFavorite)) { Source = formatVm, Mode = BindingMode.TwoWay }
+                        }, true)
+                })
+            }),
+
+
+
+            new SettingsSection("Toolbar", new[]
+            {
+                MakeCheckboxSetting("Show New icon", nameof(_vm.ShowToolbarNew)),
+                MakeCheckboxSetting("Show Open icon", nameof(_vm.ShowToolbarOpen)),
+                MakeCheckboxSetting("Show Save icon", nameof(_vm.ShowToolbarSave)),
+                MakeCheckboxSetting("Show Save As icon", nameof(_vm.ShowToolbarSaveAs)),
+                MakeCheckboxSetting("Show Find icon", nameof(_vm.ShowToolbarFind)),
             }),
 
             new SettingsSection("Appearance", new[]
             {
-                new SettingsItem("Theme", () => 
+                new SettingsItem("Theme", () =>
                 UiUtil.MakeComboBox(_vm.Themes, _vm, nameof(_vm.SelectedTheme))),
                 new SettingsItem("Font Size", () => new Slider
                 {
@@ -145,7 +219,60 @@ public class SettingsPage : UserControl
             {
                 new SettingsItem("Developer Mode", () => new CheckBox { IsChecked = false }),
                 new SettingsItem("Verbose Output", () => new CheckBox { IsChecked = false })
+            }),
+
+            new SettingsSection("File Type Associations", new[]
+            {
+                new SettingsItem("Associate file types", () => new ItemsControl
+                {
+                    DataContext = _vm,
+                    [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.FileTypeAssociations)),
+                    ItemTemplate = new FuncDataTemplate<FileTypeAssociationViewModel>((fileType, _) =>
+                        new StackPanel
+                        {
+                            Orientation = Orientation.Horizontal,
+                            Spacing = 10,
+                            Children =
+                            {
+                                new CheckBox
+                                {
+                                    [!CheckBox.IsCheckedProperty] = new Binding(nameof(FileTypeAssociationViewModel.IsAssociated))
+                                    { Source = fileType, Mode = BindingMode.TwoWay }
+                                },
+                                new Image
+                                {
+                                    Source = new Avalonia.Media.Imaging.Bitmap(AssetLoader.Open(new Uri(fileType.IconPath))),
+                                    Width = 32,
+                                    Height = 32,
+                                    Margin = new Thickness(2),                                    
+                                },
+                                new TextBlock
+                                {
+                                    Text = fileType.Extension,
+                                    VerticalAlignment = VerticalAlignment.Center
+                                }
+                            }
+                        }, true)
+                })
             })
         };
     }
+
+    private SettingsItem MakeNumericSetting(string label, string bindingProperty)
+    {
+        return new SettingsItem(label, () => new NumericUpDown
+        {
+            Width = 150,
+            [!NumericUpDown.ValueProperty] = new Binding(bindingProperty) { Source = _vm, Mode = BindingMode.TwoWay },
+        });
+    }
+
+    private SettingsItem MakeCheckboxSetting(string label, string bindingProperty)
+    {
+        return new SettingsItem(label, () => new CheckBox
+        {
+            [!CheckBox.IsCheckedProperty] = new Binding(bindingProperty) { Source = _vm, Mode = BindingMode.TwoWay }
+        });
+    }
+
 }

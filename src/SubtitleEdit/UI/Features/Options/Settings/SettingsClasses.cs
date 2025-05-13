@@ -87,4 +87,4 @@ public class SettingsItem
             }
         };
     }
-    }
+}
