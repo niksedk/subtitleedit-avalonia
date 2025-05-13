@@ -332,6 +332,7 @@ public static class InitListViewAndEditBox
             }
         };
         textEditGrid.Children.Add(textBox);
+        textBox.TextChanged += vm.SubtitleTextChanged;
         Grid.SetRow(textBox, 1);
 
 

@@ -33,20 +33,20 @@ namespace Nikse.SubtitleEdit.Features.Main;
 
 public partial class MainViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> subtitles;
-    [ObservableProperty] private SubtitleLineViewModel? selectedSubtitle;
+    [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _subtitles;
+    [ObservableProperty] private SubtitleLineViewModel? _selectedSubtitle;
     private List<SubtitleLineViewModel>? _selectedSubtitles;
-    [ObservableProperty] private int? selectedSubtitleIndex;
+    [ObservableProperty] private int? _selectedSubtitleIndex;
 
-    [ObservableProperty] private string editText;
-    [ObservableProperty] private string editTextCharactersPerSecond;
-    [ObservableProperty] private string editTextTotalLength;
-    [ObservableProperty] private string editTextLineLengths;
+    [ObservableProperty] private string _editText;
+    [ObservableProperty] private string _editTextCharactersPerSecond;
+    [ObservableProperty] private string _editTextTotalLength;
+    [ObservableProperty] private string _editTextLineLengths;
 
-    [ObservableProperty] private ObservableCollection<SubtitleFormat> subtitleFormats;
-    [ObservableProperty] private SubtitleFormat selectedSubtitleFormat;
+    [ObservableProperty] private ObservableCollection<SubtitleFormat> _subtitleFormats;
+    [ObservableProperty] private SubtitleFormat _selectedSubtitleFormat;
 
-    [ObservableProperty] private ObservableCollection<TextEncoding> encodings;
+    [ObservableProperty] private ObservableCollection<TextEncoding> _encodings;
     public TextEncoding SelectedEncoding { get; set; }
 
     [ObservableProperty] private string _statusTextLeft;
@@ -1006,7 +1006,11 @@ public partial class MainViewModel : ObservableObject
         SelectedSubtitleIndex = Subtitles.IndexOf(item);
         StatusTextRight = $"{item.Number}/{Subtitles.Count}";
 
-        string text = item.Text;
+        MakeSubtitleTextInfo(item.Text, item);
+    }
+
+    private void MakeSubtitleTextInfo(string text, SubtitleLineViewModel item)
+    {
         text = HtmlUtil.RemoveHtmlTags(text, true);
         var totalLength = text.CountCharacters(false);
         var cps = new Paragraph(text, item.StartTime.TotalMilliseconds, item.EndTime.TotalMilliseconds)
@@ -1019,7 +1023,7 @@ public partial class MainViewModel : ObservableObject
             lineLenghts[i] = $"{lines[i].Length}";
         }
 
-        EditTextCharactersPerSecond = $"Chars/sec: {cps:0.#}";
+        EditTextCharactersPerSecond = $"Chars/sec: {cps:0.0}";
         EditTextTotalLength = $"Total length: {totalLength}";
         EditTextLineLengths = $"Line length: {string.Join('/', lineLenghts)}";
     }
@@ -1051,5 +1055,15 @@ public partial class MainViewModel : ObservableObject
         _positionTimer.Start();
     }
 
-   
+
+    public void SubtitleTextChanged(object? sender, TextChangedEventArgs e)
+    {
+        var selectedSubtitle = SelectedSubtitle;
+        if (selectedSubtitle == null)
+        {
+            return;
+        }
+
+        MakeSubtitleTextInfo(selectedSubtitle.Text, selectedSubtitle);
+    }
 }
