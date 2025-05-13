@@ -58,17 +58,21 @@ public static class InitListViewAndEditBox
             CanUserSortColumns = false,
          //   ContextFlyout = subtitleContextMenu, // Create new ContextMenu
             IsReadOnly = true,
-            SelectionMode = DataGridSelectionMode.Extended,            
+            SelectionMode = DataGridSelectionMode.Extended, 
         };
 
       
-
+        
+       // cellTheme.Setters.Add(new Setter(DataGridCell.HorizontalAlignmentProperty, VerticalAlignment.Stretch));
+        //cellTheme.Setters.Add(new Setter(Control.MarginProperty, new Thickness(2)));
+        //vm.SubtitleGrid.CellTheme = cellTheme;
+        
         // Create a theme for DataGridCell + Apply the cell theme to the DataGrid (hide cell selection rectangle)
         //var cellTheme = new ControlTheme(typeof(DataGridCell));
         //cellTheme.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(0)));
-        //cellTheme.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.Transparent));
+  //      cellTheme.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.Transparent));
         //cellTheme.Setters.Add(new Setter(InputElement.FocusableProperty, false));
-        //vm.SubtitleGrid.CellTheme = cellTheme;
+//        vm.SubtitleGrid.CellTheme = cellTheme;
 
 
         //     var cellTheme = vm.SubtitleGrid.CellTheme; // new ControlTheme(typeof(DataGridCell));
@@ -113,6 +117,26 @@ public static class InitListViewAndEditBox
             Width = new DataGridLength(1, DataGridLengthUnitType.Star) // Stretch text column
         });
 
+        
+        vm.SubtitleGrid.DataContext = vm.Subtitles;
+        vm.SubtitleGrid.SelectionChanged += vm.SubtitleGrid_SelectionChanged;
+        
+        
+        // Set up two-way binding for SelectedItem
+        vm.SubtitleGrid[!DataGrid.SelectedItemProperty] = new Binding("SelectedSubtitle") 
+        {
+            Mode = BindingMode.TwoWay,
+            Source = vm
+        };
+
+// Set up two-way binding for SelectedIndex
+        vm.SubtitleGrid[!DataGrid.SelectedIndexProperty] = new Binding("SelectedSubtitleIndex")
+        {
+            Mode = BindingMode.TwoWay,
+            Source = vm
+        };
+        
+        
         //if (vm.SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source)
         //{
         //    source.RowSelection!.SelectionChanged += (sender, e) =>

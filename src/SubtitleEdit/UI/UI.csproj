@@ -626,9 +626,6 @@
     <ItemGroup>
       <None Remove="Assets\se.ico" />
       <AvaloniaResource Include="Assets\se.ico" />
-      <AvaloniaResource Include="Styles.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </AvaloniaResource>
     </ItemGroup>
 
     <ItemGroup>

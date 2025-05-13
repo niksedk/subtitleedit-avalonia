@@ -503,6 +503,36 @@ public partial class MainViewModel : ObservableObject
             }
         }
     }
+    
+    // Method to select a specific row by index and make it visible
+    public void SelectAndScrollToRow(int index)
+    {
+        if (index < 0 || index >= Subtitles.Count)
+        {
+            return;
+        }
+
+        // First, set the selected index (this selects the row)
+        SubtitleGrid.SelectedIndex = index;
+    
+        // Then, scroll to the selected item to make it visible
+        SubtitleGrid.ScrollIntoView(SubtitleGrid.SelectedItem, null);
+    }
+
+// Method to select a specific subtitle and make it visible
+    public void SelectAndScrollToSubtitle(SubtitleLineViewModel subtitle)
+    {
+        if (subtitle == null || !Subtitles.Contains(subtitle))
+        {
+            return;
+        }
+
+        // First, set the selected item (this selects the row)
+        SubtitleGrid.SelectedItem = subtitle;
+    
+        // Then, scroll to the selected item to make it visible
+        SubtitleGrid.ScrollIntoView(subtitle, null);
+    }
 
     private async Task SubtitleOpen(string fileName, string? videoFileName = null, int? selectedSubtitleIndex = null)
     {
@@ -560,12 +590,7 @@ public partial class MainViewModel : ObservableObject
 
         if (selectedSubtitleIndex != null)
         {
-            //var selection = SubtitleGrid.RowSelection;
-            //if (selection != null)
-            //{
-            //    selection.Clear();
-            //    selection.Select(selectedSubtitleIndex.Value);
-            //}
+            SelectAndScrollToRow(selectedSubtitleIndex.Value);
         }
       
         if (!string.IsNullOrEmpty(videoFileName) && File.Exists(videoFileName))
@@ -729,7 +754,7 @@ public partial class MainViewModel : ObservableObject
             var first = Se.Settings.File.RecentFiles.FirstOrDefault();
             if (first != null && File.Exists(first.SubtitleFileName))
             {
-                SubtitleOpen(first.SubtitleFileName, first.VideoFileName).ConfigureAwait(false);
+                SubtitleOpen(first.SubtitleFileName, first.VideoFileName, first.SelectedLine).ConfigureAwait(false);
             }
         }
     }
@@ -940,8 +965,10 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    public void SubtitleGrid_SelectionChanged(IReadOnlyList<SubtitleLineViewModel> selectedItems)
+    public void SubtitleGrid_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
+        var selectedItems = SubtitleGrid.SelectedItems;
+        
         if (selectedItems == null)
         {
             SelectedSubtitle = null;
@@ -954,7 +981,7 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        _selectedSubtitles = selectedItems.ToList();
+        _selectedSubtitles = selectedItems.Cast<SubtitleLineViewModel>().ToList();
         if (selectedItems.Count > 1)
         {
             SelectedSubtitle = null;
@@ -966,7 +993,7 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        var item = selectedItems.FirstOrDefault();
+        var item = _selectedSubtitles.FirstOrDefault();
         if (item == null)
         {
             SelectedSubtitle = null;
@@ -997,7 +1024,6 @@ public partial class MainViewModel : ObservableObject
         EditTextLineLengths = $"Line length: {string.Join('/', lineLenghts)}";
     }
 
-
     private DispatcherTimer _positionTimer = new DispatcherTimer();
 
     private void StartTitleTimer()
@@ -1024,4 +1050,6 @@ public partial class MainViewModel : ObservableObject
         };
         _positionTimer.Start();
     }
+
+   
 }
