@@ -17,7 +17,7 @@ namespace Nikse.SubtitleEdit.Features.Main.Layout;
 public static class InitListViewAndEditBox
 {
     private static bool _isLeftMouseDown;
-    
+
     public static Grid MakeLayoutListViewAndEditBox(MainView mainPage, MainViewModel vm)
     {
         mainPage.DataContext = vm;
@@ -26,8 +26,8 @@ public static class InitListViewAndEditBox
         {
             RowDefinitions = new RowDefinitions("*,Auto") // First row fills, second is auto-sized
         };
-     
-        
+
+
         var subtitleContextMenu = new MenuFlyout
         {
             Items =
@@ -56,21 +56,20 @@ public static class InitListViewAndEditBox
             Margin = new Thickness(2),
             ItemsSource = vm.Subtitles, // Use ItemsSource instead of Items
             CanUserSortColumns = false,
-         //   ContextFlyout = subtitleContextMenu, // Create new ContextMenu
+            //   ContextFlyout = subtitleContextMenu, // Create new ContextMenu
             IsReadOnly = true,
-            SelectionMode = DataGridSelectionMode.Extended, 
+            SelectionMode = DataGridSelectionMode.Extended,
         };
 
-      
-        
-       // cellTheme.Setters.Add(new Setter(DataGridCell.HorizontalAlignmentProperty, VerticalAlignment.Stretch));
+
+        // cellTheme.Setters.Add(new Setter(DataGridCell.HorizontalAlignmentProperty, VerticalAlignment.Stretch));
         //cellTheme.Setters.Add(new Setter(Control.MarginProperty, new Thickness(2)));
         //vm.SubtitleGrid.CellTheme = cellTheme;
-        
+
         // Create a theme for DataGridCell + Apply the cell theme to the DataGrid (hide cell selection rectangle)
         //var cellTheme = new ControlTheme(typeof(DataGridCell));
         //cellTheme.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(0)));
-  //      cellTheme.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.Transparent));
+        //      cellTheme.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.Transparent));
         //cellTheme.Setters.Add(new Setter(InputElement.FocusableProperty, false));
 //        vm.SubtitleGrid.CellTheme = cellTheme;
 
@@ -82,7 +81,8 @@ public static class InitListViewAndEditBox
         //        vm.SubtitleGrid.CellTheme = cellTheme;
 
 
-
+        var fullTimeConverter = new TimeSpanToDisplayFullConverter();
+        var shortTimeConverter = new TimeSpanToDisplayShortConverter();
 
         // Columns
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
@@ -94,19 +94,19 @@ public static class InitListViewAndEditBox
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
             Header = "Start Time",
-            Binding = new Binding("StartTime"),
-            Width = new DataGridLength(120)
+            Binding = new Binding("StartTime") { Converter = fullTimeConverter },
+            Width = new DataGridLength(120),
         });
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
             Header = "End Time",
-            Binding = new Binding("EndTime"),
+            Binding = new Binding("EndTime") { Converter = fullTimeConverter },
             Width = new DataGridLength(120)
         });
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
             Header = "Duration",
-            Binding = new Binding("Duration"),
+            Binding = new Binding("Duration") { Converter = shortTimeConverter },
             Width = new DataGridLength(120),
             IsReadOnly = true
         });
@@ -117,13 +117,13 @@ public static class InitListViewAndEditBox
             Width = new DataGridLength(1, DataGridLengthUnitType.Star) // Stretch text column
         });
 
-        
+
         vm.SubtitleGrid.DataContext = vm.Subtitles;
         vm.SubtitleGrid.SelectionChanged += vm.SubtitleGrid_SelectionChanged;
-        
-        
+
+
         // Set up two-way binding for SelectedItem
-        vm.SubtitleGrid[!DataGrid.SelectedItemProperty] = new Binding("SelectedSubtitle") 
+        vm.SubtitleGrid[!DataGrid.SelectedItemProperty] = new Binding("SelectedSubtitle")
         {
             Mode = BindingMode.TwoWay,
             Source = vm
@@ -135,8 +135,8 @@ public static class InitListViewAndEditBox
             Mode = BindingMode.TwoWay,
             Source = vm
         };
-        
-        
+
+
         //if (vm.SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source)
         //{
         //    source.RowSelection!.SelectionChanged += (sender, e) =>
@@ -150,19 +150,19 @@ public static class InitListViewAndEditBox
 
         // Create a Flyout for the DataGrid
         var flyout = new MenuFlyout();
-        
+
         flyout.Opening += vm.SubtitleContextOpening;
-        
+
         // Add menu items with commands
         var deleteMenuItem = new MenuItem { Header = "Delete" };
         deleteMenuItem.Click += (s, e) => vm.DeleteSelectedItems();
-        
+
         var insertAfterMenuItem = new MenuItem { Header = "Insert after" };
         insertAfterMenuItem.Click += (s, e) => vm.InsertAfterSelectedItem();
-        
+
         var italicMenuItem = new MenuItem { Header = "Italic" };
         italicMenuItem.Click += (s, e) => vm.ToggleItalic();
-        
+
         // Add items to flyout menu
         flyout.Items.Add(deleteMenuItem);
         flyout.Items.Add(insertAfterMenuItem);
@@ -170,8 +170,10 @@ public static class InitListViewAndEditBox
 
         // Set the ContextFlyout property
         vm.SubtitleGrid.ContextFlyout = flyout;
-        vm.SubtitleGrid.AddHandler(InputElement.PointerPressedEvent, vm.SubtitleGrid_PointerPressed, RoutingStrategies.Tunnel);
-        vm.SubtitleGrid.AddHandler(InputElement.PointerReleasedEvent, vm.SubtitleGrid_PointerReleased, RoutingStrategies.Tunnel);
+        vm.SubtitleGrid.AddHandler(InputElement.PointerPressedEvent, vm.SubtitleGrid_PointerPressed,
+            RoutingStrategies.Tunnel);
+        vm.SubtitleGrid.AddHandler(InputElement.PointerReleasedEvent, vm.SubtitleGrid_PointerReleased,
+            RoutingStrategies.Tunnel);
 
         // Edit area - restructured with time controls on left, multiline text on right
         var editGrid = new Grid
@@ -288,7 +290,7 @@ public static class InitListViewAndEditBox
         // Right panel for text editing
         var textEditGrid = new Grid
         {
-            ColumnDefinitions = new ColumnDefinitions("*,Auto"), 
+            ColumnDefinitions = new ColumnDefinitions("*,Auto"),
             RowDefinitions = new RowDefinitions("Auto,*,Auto")
         };
 
@@ -313,7 +315,7 @@ public static class InitListViewAndEditBox
             FontSize = 12,
             Padding = new Thickness(0, 0, 3, 0),
         };
-        textCharsSecLabel.Bind(TextBlock.TextProperty, 
+        textCharsSecLabel.Bind(TextBlock.TextProperty,
             new Binding(nameof(vm.EditTextCharactersPerSecond))
             {
                 Mode = BindingMode.OneWay
@@ -381,7 +383,7 @@ public static class InitListViewAndEditBox
         Projektanker.Icons.Avalonia.Attached.SetIcon(autoBreakButton, "fa-solid fa-bolt"); // Example icon
         ToolTip.SetTip(autoBreakButton, "Auto-break");
         buttonPanel.Children.Add(autoBreakButton);
-        autoBreakButton.Command = vm.AutoBreakCommand;  
+        autoBreakButton.Command = vm.AutoBreakCommand;
 
         // Unbreak button
         var unbreakButton = new Button();

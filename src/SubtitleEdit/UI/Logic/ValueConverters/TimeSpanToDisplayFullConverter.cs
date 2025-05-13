@@ -1,6 +1,7 @@
 ﻿using Avalonia.Data.Converters;
 using System;
 using System.Globalization;
+using Nikse.SubtitleEdit.Core.Common;
 
 namespace Nikse.SubtitleEdit.Logic.ValueConverters;
 
@@ -12,11 +13,8 @@ public  class TimeSpanToDisplayFullConverter : IValueConverter
     {
         if (value is TimeSpan ts)
         {
-            return string.Format("{0:D2}:{1:D2}:{2:D2},{3:D3}",
-                ts.Hours,
-                ts.Minutes,
-                ts.Seconds,
-                ts.Milliseconds);
+            var result = new TimeCode(ts).ToDisplayString();
+            return result;
         }
 
         return "00:00:00,000";
