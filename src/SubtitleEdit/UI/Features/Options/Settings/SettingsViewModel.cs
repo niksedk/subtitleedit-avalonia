@@ -1,9 +1,13 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Animation.Easings;
+using Avalonia.Animation;
 using Avalonia.Controls;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -71,7 +75,7 @@ public partial class SettingsViewModel : ObservableObject
     {
         Languages = new ObservableCollection<string> { "English", "Danish", "Spanish" };
         SelectedLanguage = Languages[0];
-        
+
         Themes = new ObservableCollection<string> { "Light", "Dark" };
         LoadSettings();
     }
@@ -89,15 +93,23 @@ public partial class SettingsViewModel : ObservableObject
         MinGapMs = general.MinimumMillisecondsBetweenLines;
         MaxLines = general.MaxNumberOfLines;
         UnbreakShorterThanMs = general.MergeLinesShorterThan;
-            
+
         SelectedTheme = appearance.Theme;
     }
 
-    public static async void ScrollElementIntoView(ScrollViewer scrollViewer, Control target)
+    public async void ScrollElementIntoView(ScrollViewer scrollViewer, Control target)
     {
         await Dispatcher.UIThread.InvokeAsync(async () =>
         {
-            // Wait for the layout pass to complete
+            await Task.Yield(); // Ensures target has been laid out
+
+            // Fade out
+            //await FadeToAsync(ScrollView, 0, TimeSpan.FromMilliseconds(100));
+            await RunFadeAnimation(ScrollView, from: 1, to: 0, TimeSpan.FromMilliseconds(100));
+
+
+            await Task.Yield(); // Ensures target has been laid out
+            scrollViewer.ScrollToHome();
             await Task.Yield(); // Ensures target has been laid out
 
             var targetPosition = target.TranslatePoint(new Point(0, 0), scrollViewer);
@@ -105,9 +117,56 @@ public partial class SettingsViewModel : ObservableObject
             {
                 scrollViewer.Offset = new Vector(scrollViewer.Offset.X, targetPosition.Value.Y);
             }
+
+            await Task.Yield(); // Ensures target has been laid out
+            //await FadeToAsync(ScrollView, 1, TimeSpan.FromMilliseconds(100));
+            await RunFadeAnimation(ScrollView, from: 0, to: 1, TimeSpan.FromMilliseconds(200));
+
         }, DispatcherPriority.Background);
     }
 
+    private static async Task FadeToAsync(Control control, double targetOpacity, TimeSpan duration)
+    {
+        double startOpacity = control.Opacity;
+        double delta = targetOpacity - startOpacity;
+        const int fps = 60;
+        int steps = (int)(duration.TotalSeconds * fps);
+        if (steps <= 0) steps = 1;
+
+        for (int i = 0; i <= steps; i++)
+        {
+            double progress = (double)i / steps;
+            control.Opacity = startOpacity + (delta * progress);
+            await Task.Delay((int)(1000.0 / fps));
+        }
+
+        control.Opacity = targetOpacity;
+    }
+
+    private static Task RunFadeAnimation(Control control, double from, double to, TimeSpan duration)
+    {
+        var animation = new Animation
+        {
+            Duration = duration,
+            Easing = new CubicEaseOut(),
+            FillMode = FillMode.Forward,
+            Children =
+            {
+                new KeyFrame
+                {
+                    Cue = new Cue(0),
+                    Setters = { new Setter(Control.OpacityProperty, from) }
+                },
+                new KeyFrame
+                {
+                    Cue = new Cue(1),
+                    Setters = { new Setter(Control.OpacityProperty, to) }
+                }
+            }
+        };
+
+        return animation.RunAsync(control);
+    }
 
     [RelayCommand]
     private void ScrollToSection(string title)
