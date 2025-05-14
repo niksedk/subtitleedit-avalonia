@@ -56,10 +56,7 @@ public partial class SettingsViewModel : ObservableObject
     public FormatViewModel DefaultFormat { get; set; }
     public FormatViewModel DefaultSaveAsFormat { get; set; }
 
-
-
     public IList<string> FavoriteFormatSelections { get; set; } = new ObservableCollection<string>();
-
 
     public bool OkPressed { get; set; }
     public SettingsWindow? Window { get; internal set; }
@@ -73,7 +70,31 @@ public partial class SettingsViewModel : ObservableObject
         SelectedLanguage = Languages[0];
         
         Themes = new ObservableCollection<string> { "Light", "Dark" };
-        SelectedTheme = Se.Settings.Appearance.Theme;
+        LoadSettings();
+    }
+
+    private void LoadSettings()
+    {
+        var general = Se.Settings.General;
+        var appearance = Se.Settings.Appearance;
+        SingleLineMaxLength = general.SubtitleLineMaximumLength;
+        OptimalCharsPerSec = general.SubtitleOptimalCharactersPerSeconds;
+        MaxCharsPerSec = general.SubtitleMaximumCharactersPerSeconds;
+        MaxWordsPerMin = general.SubtitleMaximumWordsPerMinute;
+            
+        
+    internal object MinDurationMs;
+    internal object MaxDurationMs;
+    internal object MinGapMs;
+    internal object MaxLines;
+    internal object UnbreakShorterThanMs;
+    internal object ShowToolbarNew;
+    internal object ShowToolbarOpen;
+    internal object ShowToolbarSave;
+    internal object ShowToolbarSaveAs;
+    
+        SelectedTheme = appearance.Theme;
+
     }
 
     public static void ScrollElementIntoView(ScrollViewer scrollViewer, Control target)

@@ -212,6 +212,40 @@ public static class UiUtil
 
         return link;
     }
+    
+    public static TextBlock MakeMenuItem(string text, IRelayCommand command, object commandParameter)
+    {
+        var link = new TextBlock
+        {
+            Text = text,
+            FontWeight = FontWeight.Bold,   
+            FontSize = 16,
+            Margin = new Thickness(0),
+            Padding = new Thickness(10, 5, 10 ,5),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        
+        link.PointerEntered += (_, __) =>
+        {
+            link.Background = new SolidColorBrush(Colors.LightGray);
+        };
+
+        link.PointerExited += (_, __) =>
+        {
+            link.Background = Brushes.Transparent;
+        };
+
+        link.PointerPressed += (_, __) =>
+        {
+            if (command.CanExecute(commandParameter))
+            {
+                command.Execute(commandParameter);
+            }
+        };
+
+        return link;
+    }
 
     public static TextBlock MakeLink(string text, IRelayCommand command, object viewModel, string propertyTextPath)
     {

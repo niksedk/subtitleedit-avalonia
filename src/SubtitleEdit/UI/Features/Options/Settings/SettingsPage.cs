@@ -74,19 +74,19 @@ public class SettingsPage : UserControl
         {
             Orientation = Orientation.Vertical,
             Spacing = 10,
-            Margin = new Thickness(10, 10, 20, 10),
+            Margin = new Thickness(10, 10, 40, 10),
             Children =
             {
-                UiUtil.MakeLink("General", vm.ScrollToSectionCommand),
-                UiUtil.MakeLink("Subtitle formats", vm.ScrollToSectionCommand),
-                UiUtil.MakeLink("Syntax coloring", vm.ScrollToSectionCommand),
-                UiUtil.MakeLink("Video player", vm.ScrollToSectionCommand),
-                UiUtil.MakeLink("Waveform/spectrogram", vm.ScrollToSectionCommand),
-                UiUtil.MakeLink("Tools", vm.ScrollToSectionCommand),
-                UiUtil.MakeLink("Toolbar", vm.ScrollToSectionCommand),
-                UiUtil.MakeLink("Appearance", vm.ScrollToSectionCommand),
-                UiUtil.MakeLink("Network", vm.ScrollToSectionCommand),
-                UiUtil.MakeLink("File type associations", vm.ScrollToSectionCommand),
+                UiUtil.MakeMenuItem("General", vm.ScrollToSectionCommand, "General"),
+                UiUtil.MakeMenuItem("Subtitle formats", vm.ScrollToSectionCommand, "Subtitle formats"),
+                UiUtil.MakeMenuItem("Syntax coloring", vm.ScrollToSectionCommand, "Syntax coloring"),
+                UiUtil.MakeMenuItem("Video player", vm.ScrollToSectionCommand, "Video player"),
+                UiUtil.MakeMenuItem("Waveform/spectrogram", vm.ScrollToSectionCommand, "Waveform/spectrogram"),
+                UiUtil.MakeMenuItem("Tools", vm.ScrollToSectionCommand, "Tools"),
+                UiUtil.MakeMenuItem("Toolbar", vm.ScrollToSectionCommand, "Toolbar"),
+                UiUtil.MakeMenuItem("Appearance", vm.ScrollToSectionCommand, "Appearance"),
+                UiUtil.MakeMenuItem("Network", vm.ScrollToSectionCommand, "Network"),
+                UiUtil.MakeMenuItem("File type associations", vm.ScrollToSectionCommand, "File type associations"),
             }
         };
 
@@ -97,7 +97,6 @@ public class SettingsPage : UserControl
         grid.Children.Add(scrollViewer);
         Grid.SetRow(scrollViewer, 1);
         Grid.SetColumn(scrollViewer, 1);
-
 
         var buttonOK = UiUtil.MakeButton("OK", vm.CommandOkCommand);
         var buttonCancel = UiUtil.MakeButton("Cancel", vm.CommandCancelCommand);
@@ -111,7 +110,6 @@ public class SettingsPage : UserControl
         UpdateVisibleSections(string.Empty);
 
         _searchBox.TextChanged += (s, e) => UpdateVisibleSections(_searchBox.Text ?? string.Empty);
-
     }
 
     private void UpdateVisibleSections(string filter)
@@ -134,16 +132,7 @@ public class SettingsPage : UserControl
         {
             new SettingsSection("General", new[]
             {
-                new SettingsItem("Language", () => new ComboBox
-                {
-                    DataContext = _vm,
-                    [!ComboBox.ItemsSourceProperty] = new Binding(nameof(_vm.Languages)),
-                    [!ComboBox.SelectedItemProperty] = new Binding(nameof(_vm.SelectedLanguage)) { Mode = BindingMode.TwoWay },
-                    Width = 150
-                }),
-                new SettingsItem("Enable Logging", () => new CheckBox { IsChecked = true }),
-
-                 // New General Settings
+                 // Rules
                 MakeNumericSetting("Single line max length", nameof(_vm.SingleLineMaxLength)),
                 MakeNumericSetting("Optimal chars/sec", nameof(_vm.OptimalCharsPerSec)),
                 MakeNumericSetting("Max chars/sec", nameof(_vm.MaxCharsPerSec)),
@@ -154,7 +143,6 @@ public class SettingsPage : UserControl
                 MakeNumericSetting("Max number of lines", nameof(_vm.MaxLines)),
                 MakeNumericSetting("Unbreak subtitles shorter than (ms)", nameof(_vm.UnbreakShorterThanMs)),
             }),
-
 
             new SettingsSection("Subtitle Formats", new[]
             {
@@ -190,8 +178,6 @@ public class SettingsPage : UserControl
                         }, true)
                 })
             }),
-
-
 
             new SettingsSection("Toolbar", new[]
             {
@@ -274,5 +260,4 @@ public class SettingsPage : UserControl
             [!CheckBox.IsCheckedProperty] = new Binding(bindingProperty) { Source = _vm, Mode = BindingMode.TwoWay }
         });
     }
-
 }

@@ -9,8 +9,8 @@ public class SettingsWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Settings";
-        Width = 700;
-        Height = 600;
+        Width = 800;
+        Height = 700;
         CanResize = true;
 
         vm.Window = this;
