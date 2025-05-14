@@ -13,21 +13,21 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<string> languages;
     [ObservableProperty] private string selectedLanguage;
 
-    [ObservableProperty] private ObservableCollection<string> themes;
-    [ObservableProperty] private string selectedTheme;
-    internal object SingleLineMaxLength;
-    internal object OptimalCharsPerSec;
-    internal object MaxCharsPerSec;
-    internal object MaxWordsPerMin;
-    internal object MinDurationMs;
-    internal object MaxDurationMs;
-    internal object MinGapMs;
-    internal object MaxLines;
-    internal object UnbreakShorterThanMs;
-    internal object ShowToolbarNew;
-    internal object ShowToolbarOpen;
-    internal object ShowToolbarSave;
-    internal object ShowToolbarSaveAs;
+    [ObservableProperty] private ObservableCollection<string> _themes;
+    [ObservableProperty] private string _selectedTheme;
+    [ObservableProperty] private double _singleLineMaxLength;
+    [ObservableProperty] private double _optimalCharsPerSec;
+    [ObservableProperty] private double _maxCharsPerSec;
+    [ObservableProperty] private double _maxWordsPerMin;
+    [ObservableProperty] private double _minDurationMs;
+    [ObservableProperty] private double _maxDurationMs;
+    [ObservableProperty] private double _minGapMs;
+    [ObservableProperty] private double _maxLines;
+    [ObservableProperty] private double _unbreakShorterThanMs;
+    [ObservableProperty] private double _showToolbarNew;
+    [ObservableProperty] private double _showToolbarOpen;
+    [ObservableProperty] private double _showToolbarSave;
+    [ObservableProperty] private double _showToolbarSaveAs;
 
     public ObservableCollection<FormatViewModel> AvailableFormats { get; set; } = new()
     {
@@ -81,20 +81,13 @@ public partial class SettingsViewModel : ObservableObject
         OptimalCharsPerSec = general.SubtitleOptimalCharactersPerSeconds;
         MaxCharsPerSec = general.SubtitleMaximumCharactersPerSeconds;
         MaxWordsPerMin = general.SubtitleMaximumWordsPerMinute;
+        MinDurationMs = general.SubtitleMaximumDisplayMilliseconds;
+        MaxDurationMs = general.SubtitleMaximumDisplayMilliseconds;
+        MinGapMs = general.MinimumMillisecondsBetweenLines;
+        MaxLines = general.MaxNumberOfLines;
+        UnbreakShorterThanMs = general.MergeLinesShorterThan;
             
-        
-    internal object MinDurationMs;
-    internal object MaxDurationMs;
-    internal object MinGapMs;
-    internal object MaxLines;
-    internal object UnbreakShorterThanMs;
-    internal object ShowToolbarNew;
-    internal object ShowToolbarOpen;
-    internal object ShowToolbarSave;
-    internal object ShowToolbarSaveAs;
-    
         SelectedTheme = appearance.Theme;
-
     }
 
     public static void ScrollElementIntoView(ScrollViewer scrollViewer, Control target)
