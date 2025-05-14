@@ -1,7 +1,10 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -90,27 +93,30 @@ public partial class SettingsViewModel : ObservableObject
         SelectedTheme = appearance.Theme;
     }
 
-    public static void ScrollElementIntoView(ScrollViewer scrollViewer, Control target)
+    public static async void ScrollElementIntoView(ScrollViewer scrollViewer, Control target)
     {
-        if (scrollViewer == null || target == null)
+        await Dispatcher.UIThread.InvokeAsync(async () =>
         {
-            return;
-        }
+            // Wait for the layout pass to complete
+            await Task.Yield(); // Ensures target has been laid out
 
-        // Translate target's position to ScrollViewer's coordinate space
-        var targetPosition = target.TranslatePoint(new Point(0, 0), scrollViewer);
-
-        if (targetPosition.HasValue)
-        {
-            // Scroll to that Y offset
-            scrollViewer.Offset = new Vector(scrollViewer.Offset.X, targetPosition.Value.Y);
-        }
+            var targetPosition = target.TranslatePoint(new Point(0, 0), scrollViewer);
+            if (targetPosition.HasValue)
+            {
+                scrollViewer.Offset = new Vector(scrollViewer.Offset.X, targetPosition.Value.Y);
+            }
+        }, DispatcherPriority.Background);
     }
 
+
     [RelayCommand]
-    private void ScrollToSection()
+    private void ScrollToSection(string title)
     {
-        ScrollElementIntoView(ScrollView, Sections[1].Panel!);
+        var section = Sections.FirstOrDefault(section => section.IsVisible && section.Title == title);
+        if (section != null)
+        {
+            ScrollElementIntoView(ScrollView, section.Panel!);
+        }
     }
 
     [RelayCommand]

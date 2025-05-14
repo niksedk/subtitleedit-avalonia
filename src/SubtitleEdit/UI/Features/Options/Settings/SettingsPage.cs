@@ -144,7 +144,7 @@ public class SettingsPage : UserControl
                 MakeNumericSetting("Unbreak subtitles shorter than (ms)", nameof(_vm.UnbreakShorterThanMs)),
             }),
 
-            new SettingsSection("Subtitle Formats", new[]
+            new SettingsSection("Subtitle formats", new[]
             {
                 new SettingsItem("Default format", () => new ComboBox
                 {
@@ -178,6 +178,30 @@ public class SettingsPage : UserControl
                         }, true)
                 })
             }),
+            
+            new SettingsSection("Syntax coloring", new[]
+            {
+                new SettingsItem("Developer Mode", () => new CheckBox { IsChecked = false }),
+                new SettingsItem("Verbose Output", () => new CheckBox { IsChecked = false })
+            }),
+            
+            new SettingsSection("Video player", new[]
+            {
+                new SettingsItem("Developer Mode", () => new CheckBox { IsChecked = false }),
+                new SettingsItem("Verbose Output", () => new CheckBox { IsChecked = false })
+            }),
+
+            new SettingsSection("Waveform/spectrogram", new[]
+            {
+                new SettingsItem("Developer Mode", () => new CheckBox { IsChecked = false }),
+                new SettingsItem("Verbose Output", () => new CheckBox { IsChecked = false })
+            }),
+
+            new SettingsSection("Tools", new[]
+            {
+                new SettingsItem("Developer Mode", () => new CheckBox { IsChecked = false }),
+                new SettingsItem("Verbose Output", () => new CheckBox { IsChecked = false })
+            }),
 
             new SettingsSection("Toolbar", new[]
             {
@@ -201,13 +225,13 @@ public class SettingsPage : UserControl
                 })
             }),
 
-            new SettingsSection("Advanced", new[]
+            new SettingsSection("Network", new[]
             {
                 new SettingsItem("Developer Mode", () => new CheckBox { IsChecked = false }),
                 new SettingsItem("Verbose Output", () => new CheckBox { IsChecked = false })
             }),
 
-            new SettingsSection("File Type Associations", new[]
+            new SettingsSection("File type associations", new[]
             {
                 new SettingsItem("Associate file types", () => new ItemsControl
                 {

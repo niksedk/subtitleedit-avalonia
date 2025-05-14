@@ -10,7 +10,7 @@ namespace Nikse.SubtitleEdit.Features.Options.Settings;
 
 public class SettingsSection
 {
-    private readonly string _title;
+    public string Title { get; init; }
     private readonly List<SettingsItem> _items;
     public StackPanel? Panel { get; set; }
 
@@ -18,7 +18,7 @@ public class SettingsSection
 
     public SettingsSection(string title, IEnumerable<SettingsItem> items)
     {
-        _title = title;
+        Title = title;
         _items = items.ToList();
     }
 
@@ -36,7 +36,7 @@ public class SettingsSection
 
         Panel.Children.Add(new TextBlock
         {
-            Text = _title,
+            Text = Title,
             FontSize = 16,
             FontWeight = FontWeight.Bold,
             Margin = new Thickness(0, 10, 0, 5)
