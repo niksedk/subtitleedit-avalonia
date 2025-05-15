@@ -50,12 +50,14 @@ public class InitVideoPlayer
     {
         VideoPlayerControl control;
 
-        if (OperatingSystem.IsWindows() && Se.Settings.Video.VideoPlayer.Equals("vlc", StringComparison.OrdinalIgnoreCase))
+        if (Se.Settings.Video.VideoPlayer.Equals("vlc", StringComparison.OrdinalIgnoreCase))
         {
             var videoPlayerInstance = new VideoPlayerInstanceVlc();
             control = new VideoPlayerControl(videoPlayerInstance)
             {
                 PlayerContent = videoPlayerInstance.VideoViewVlc,
+                StopIsVisible = Se.Settings.Video.ShowStopButton,
+                FullScreenIsVisible = Se.Settings.Video.ShowFullscreenButton,
             };
         }
         else
@@ -64,6 +66,8 @@ public class InitVideoPlayer
             control = new VideoPlayerControl(videoPlayerInstanceMpv)
             {
                 PlayerContent = videoPlayerInstanceMpv.MpvView,
+                StopIsVisible = Se.Settings.Video.ShowStopButton,
+                FullScreenIsVisible = Se.Settings.Video.ShowFullscreenButton,
             };
         }
 

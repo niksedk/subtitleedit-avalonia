@@ -18,8 +18,8 @@ namespace Nikse.SubtitleEdit.Features.Options.Settings;
 
 public partial class SettingsViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<string> languages;
-    [ObservableProperty] private string selectedLanguage;
+    [ObservableProperty] private ObservableCollection<string> _languages;
+    [ObservableProperty] private string _selectedLanguage;
 
     [ObservableProperty] private ObservableCollection<string> _themes;
     [ObservableProperty] private string _selectedTheme;
@@ -53,10 +53,12 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _colorOverlap;
     [ObservableProperty] private bool _colorGapTooShort;
 
-    [ObservableProperty] private bool _usePlayerMpv;
-    [ObservableProperty] private bool _usePlayerVlc;
-
-
+    [ObservableProperty] private ObservableCollection<VideoPlayerItem> _videoPlayers;
+    [ObservableProperty] private VideoPlayerItem _selectedVideoPlayer;
+    [ObservableProperty] private bool _showStopButton;       
+    [ObservableProperty] private bool _showFullscreenButton; 
+    [ObservableProperty] private bool _autoOpenVideoFile;    
+    
     public ObservableCollection<FormatViewModel> AvailableFormats { get; set; } = new()
     {
         new FormatViewModel { Name = "SRT", IsFavorite = true },
@@ -97,6 +99,10 @@ public partial class SettingsViewModel : ObservableObject
         SelectedLanguage = Languages[0];
 
         Themes = new ObservableCollection<string> { "Light", "Dark" };
+
+        VideoPlayers = new ObservableCollection<VideoPlayerItem>(VideoPlayerItem.ListVideoPlayerItem());
+        SelectedVideoPlayer = VideoPlayers[0];
+        
         LoadSettings();
     }
 
@@ -135,12 +141,24 @@ public partial class SettingsViewModel : ObservableObject
         ColorTextTooManyLines = general.ColorTextTooManyLines;
         ColorOverlap = general.ColorTimeCodeOverlap;
         ColorGapTooShort = general.ColorGapTooShort;
+        
+        var video = Se.Settings.Video;
+        var videoPlayer = VideoPlayers.FirstOrDefault(p => p.Name == video.VideoPlayer);
+        if (videoPlayer != null)
+        {
+            SelectedVideoPlayer = videoPlayer;
+        }
+        ShowStopButton = video.ShowStopButton;
+        ShowFullscreenButton = video.ShowFullscreenButton;
+        AutoOpenVideoFile = video.AutoOpen;
+
     } 
 
     private void SaveSettings()
     {
         var general = Se.Settings.General;
         var appearance = Se.Settings.Appearance;
+        var video = Se.Settings.Video;   
 
         general.SubtitleLineMaximumLength = SingleLineMaxLength;
         general.SubtitleOptimalCharactersPerSeconds = OptimalCharsPerSec;
@@ -171,10 +189,14 @@ public partial class SettingsViewModel : ObservableObject
         general.ColorTextTooManyLines = ColorTextTooManyLines;
         general.ColorTimeCodeOverlap = ColorOverlap;
         general.ColorGapTooShort = ColorGapTooShort;
+
+        video.VideoPlayer = SelectedVideoPlayer.Name;
+        video.ShowStopButton = ShowStopButton;
+        video.ShowFullscreenButton = ShowFullscreenButton;
+        video.AutoOpen = AutoOpenVideoFile;                                                                                                                       
         
         Se.SaveSettings();
     }
-
 
     public async void ScrollElementIntoView(ScrollViewer scrollViewer, Control target)
     {

@@ -677,10 +677,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Logic\VideoPlayers\MpvLogic\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\LibMpv.Avalonia\LibMpv.Avalonia.csproj" />
       <ProjectReference Include="..\LibMpv\LibMpv.csproj" />
     </ItemGroup>

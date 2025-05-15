@@ -36,7 +36,7 @@ public class SettingsItem
                 {
                     Text = _label,
                     MinWidth = 200,
-                    VerticalAlignment = VerticalAlignment.Top,
+                    VerticalAlignment = VerticalAlignment.Center,
                 },
                 _controlFactory()
             }

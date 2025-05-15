@@ -29,6 +29,7 @@ public class SettingsPage : UserControl
             MaxWidth = 500,
             MinWidth = 360,
             HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
         };
 
         _contentPanel = new StackPanel
@@ -187,22 +188,25 @@ public class SettingsPage : UserControl
                 { 
                     Children =
                     {
-                        new RadioButton
+                        new ComboBox
                         {
-                            Content = "mpv",
-                            [!RadioButton.IsCheckedProperty] = new Binding(nameof(_vm.UsePlayerMpv)) { Source = _vm, Mode = BindingMode.TwoWay }
-                        },
-                        new RadioButton
-                        {
-                            Content = "vlc",
-                            [!RadioButton.IsCheckedProperty] = new Binding(nameof(_vm.UsePlayerVlc)) { Source = _vm, Mode = BindingMode.TwoWay }
+                            Width = 200,
+                            Height = 30,
+                            [!ComboBox.ItemsSourceProperty] = new Binding(nameof(_vm.VideoPlayers)),
+                            [!ComboBox.SelectedItemProperty] = new Binding(nameof(_vm.SelectedVideoPlayer)),
+                            DataContext = _vm,
+                            ItemTemplate = new FuncDataTemplate<object>((item, _) =>
+                                new TextBlock
+                                {
+                                    [!TextBlock.TextProperty] = new Binding(nameof(VideoPlayerItem.Name)),
+                                    Width = 150,
+                                }, true)
                         }
                     }
                 }),
-                new SettingsItem("Show stop button", () => new CheckBox { IsChecked = false }),
-                new SettingsItem("Show fullscreen button", () => new CheckBox { IsChecked = false }),
-                new SettingsItem("", () => new Label {  }),
-                new SettingsItem("Auto-open video file when openning subtitle", () => new CheckBox { IsChecked = false }),
+                MakeCheckboxSetting("Show stop button", nameof(_vm.ShowStopButton)),
+                MakeCheckboxSetting("Show fullscreen button", nameof(_vm.ShowFullscreenButton)),
+                MakeCheckboxSetting("Auto-open video file when opening subtitle", nameof(_vm.AutoOpenVideoFile)),
             ]),
 
             new SettingsSection("Waveform/spectrogram",
@@ -306,6 +310,7 @@ public class SettingsPage : UserControl
     {
         return new SettingsItem(label, () => new CheckBox
         {
+            VerticalAlignment = VerticalAlignment.Center,
             [!CheckBox.IsCheckedProperty] = new Binding(bindingProperty) { Source = _vm, Mode = BindingMode.TwoWay }
         });
     }

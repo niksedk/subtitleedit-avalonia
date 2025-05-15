@@ -41,6 +41,13 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         public static readonly StyledProperty<ICommand> FullScreenCommandProperty =
             AvaloniaProperty.Register<VideoPlayerControl, ICommand>(nameof(FullScreenCommand));
 
+        public static readonly StyledProperty<bool> StopIsVisibleProperty =
+            AvaloniaProperty.Register<VideoPlayerControl, bool>(nameof(StopIsVisible));
+
+        public static readonly StyledProperty<bool> FullScreenIsVisibleProperty =
+            AvaloniaProperty.Register<VideoPlayerControl, bool>(nameof(FullScreenIsVisible));
+
+        
         public Control? PlayerContent
         {
             get => GetValue(PlayerContentProperty);
@@ -94,6 +101,18 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             get => GetValue(FullScreenCommandProperty);
             set => SetValue(FullScreenCommandProperty, value);
         }
+        
+        public bool StopIsVisible
+        {
+            get => GetValue(StopIsVisibleProperty);
+            set => SetValue(StopIsVisibleProperty, value);
+        }
+        
+        public bool FullScreenIsVisible
+        {
+            get => GetValue(FullScreenIsVisibleProperty);
+            set => SetValue(FullScreenIsVisibleProperty, value);
+        }
 
         private bool _isFullScreen = false;
         public bool IsFullScreen
@@ -109,10 +128,10 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
 
         double _positionIgnore = -1;
         double _volumeIgnore = -1;
-        private readonly Button _playButton = new Button();
-        private readonly Button _fullScreenButton = new Button();
-        private readonly Button _fullScreenCollapseButton = new Button();
-        private readonly Icon _volumeIcon = new Icon();
+        private readonly Button _playButton;
+        private readonly Button _fullScreenButton;
+        private readonly Button _fullScreenCollapseButton;
+        private readonly Icon _volumeIcon;
         private DispatcherTimer? _positionTimer;
         IVideoPlayerInstance _videoPlayerInstance;
 
@@ -175,7 +194,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             };
 
             // Play
-            _playButton = new Button()
+            _playButton = new Button
             {
                 Margin = new Thickness(0, 0, 3, 0),
             };
@@ -194,11 +213,15 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             stackPanel.Children.Add(_playButton);
 
             // Stop
-            var stopButton = new Button()
+            var stopButton = new Button
             {
                 Margin = new Thickness(0, 0, 3, 0),
-            }
-            ;
+            };
+            stopButton.Bind(Button.IsVisibleProperty,  new Binding
+            {
+                Path = nameof(StopIsVisible),
+                Source = this
+            });
             Attached.SetIcon(stopButton, "fa-solid fa-stop");
             stopButton.Click += (_, _) =>
             {
@@ -213,10 +236,15 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             });
 
             // Fullscreen
-            _fullScreenButton = new Button()
+            _fullScreenButton = new Button
             {
                 Margin = new Thickness(0, 0, 3, 0),
             };
+            _fullScreenButton.Bind(IsVisibleProperty,  new Binding
+            {
+                Path = nameof(FullScreenIsVisible),
+                Source = this
+            });
             Attached.SetIcon(_fullScreenButton, "fa-solid fa-expand");
             _fullScreenButton.Click += (_, _) => FullscreenRequested?.Invoke();
             stackPanel.Children.Add(_fullScreenButton);
@@ -400,12 +428,10 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             {
                 var pos = _videoPlayerInstance.Position;
                 SetPosition(pos);
+                ProgressText = $"{TimeCode.FromSeconds(pos).ToShortDisplayString() } / {TimeCode.FromSeconds(Duration).ToShortDisplayString()}";
 
                 //TODO: move to a slower timer or events
                 Duration = _videoPlayerInstance.Duration;
-
-                ProgressText = $"{TimeCode.FromSeconds(pos).ToShortDisplayString() } / {TimeCode.FromSeconds(Duration).ToShortDisplayString()}";
-
                 var isPlaying = _videoPlayerInstance.IsPlaying;
                 SetPlayPauseIcon(isPlaying);
             };
