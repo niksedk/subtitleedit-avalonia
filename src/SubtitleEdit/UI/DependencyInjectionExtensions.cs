@@ -8,6 +8,9 @@ using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Features.Translate;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Compression;
+using Nikse.SubtitleEdit.Logic.Dictionaries;
+using Nikse.SubtitleEdit.Logic.Download;
 
 namespace Nikse.SubtitleEdit;
 
@@ -19,6 +22,14 @@ public static class DependencyInjectionExtensions
         collection.AddSingleton<IFileHelper, FileHelper>();
         collection.AddTransient<IShortcutManager, ShortcutManager>();
         collection.AddTransient<IWindowService, WindowService>();
+        collection.AddTransient<IZipUnpacker, ZipUnpacker>();
+        collection.AddTransient<INamesList, SeNamesList>();
+        
+        // Download services
+        collection.AddTransient<IFfmpegDownloadService, FfmpegDownloadService>();
+        collection.AddTransient<IWhisperDownloadService, WhisperDownloadService>();
+        collection.AddTransient<ISpellCheckDictionaryDownloadService, SpellCheckDictionaryDownloadService>();
+        collection.AddTransient<ITesseractDownloadService, TesseractDownloadService>();
 
         // Windows and view models
         collection.AddTransient<MainView>();
