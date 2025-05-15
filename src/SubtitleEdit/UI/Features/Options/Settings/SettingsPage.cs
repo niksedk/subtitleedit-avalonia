@@ -11,19 +11,6 @@ using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
 
-public class FormatViewModel
-{
-    public string Name { get; set; }
-    public bool IsFavorite { get; set; }
-}
-
-public class FileTypeAssociationViewModel
-{
-    public string Extension { get; set; } = string.Empty;
-    public bool IsAssociated { get; set; } = false;
-    public string IconPath { get; set; } = string.Empty; // Optional: use if you have images per extension
-}
-
 public class SettingsPage : UserControl
 {
     private TextBox _searchBox;
@@ -38,10 +25,11 @@ public class SettingsPage : UserControl
         _searchBox = new TextBox
         {
             Watermark = "Search settings...",
-            Margin = new Thickness(10)
+            Margin = new Thickness(10),
+            MaxWidth = 500,
+            MinWidth = 360,
+            HorizontalAlignment = HorizontalAlignment.Left,
         };
-
-        //DockPanel.SetDock(_searchBox, Dock.Top);
 
         _contentPanel = new StackPanel
         {
@@ -130,8 +118,8 @@ public class SettingsPage : UserControl
     {
         return new List<SettingsSection>
         {
-            new SettingsSection("General", new[]
-            {
+            new SettingsSection("General",
+            [
                  // Rules
                 MakeNumericSetting("Single line max length", nameof(_vm.SingleLineMaxLength)),
                 MakeNumericSetting("Optimal chars/sec", nameof(_vm.OptimalCharsPerSec)),
@@ -142,10 +130,10 @@ public class SettingsPage : UserControl
                 MakeNumericSetting("Min gap (ms)", nameof(_vm.MinGapMs)),
                 MakeNumericSetting("Max number of lines", nameof(_vm.MaxLines)),
                 MakeNumericSetting("Unbreak subtitles shorter than (ms)", nameof(_vm.UnbreakShorterThanMs)),
-            }),
+            ]),
 
-            new SettingsSection("Subtitle formats", new[]
-            {
+            new SettingsSection("Subtitle formats",
+            [
                 new SettingsItem("Default format", () => new ComboBox
                 {
                     Width = 200,
@@ -177,43 +165,70 @@ public class SettingsPage : UserControl
                             [!CheckBox.IsCheckedProperty] = new Binding(nameof(FormatViewModel.IsFavorite)) { Source = formatVm, Mode = BindingMode.TwoWay }
                         }, true)
                 })
-            }),
+            ]),
             
-            new SettingsSection("Syntax coloring", new[]
-            {
-                new SettingsItem("Developer Mode", () => new CheckBox { IsChecked = false }),
-                new SettingsItem("Verbose Output", () => new CheckBox { IsChecked = false })
-            }),
-            
-            new SettingsSection("Video player", new[]
-            {
-                new SettingsItem("Developer Mode", () => new CheckBox { IsChecked = false }),
-                new SettingsItem("Verbose Output", () => new CheckBox { IsChecked = false })
-            }),
+            new SettingsSection("Syntax coloring",
+            [
+                new SettingsItem("Color duration if too short", () => new CheckBox { IsChecked = false }),
+                new SettingsItem("Color duration if too long", () => new CheckBox { IsChecked = false }),
+                new SettingsItem("", () => new Label {  }),
+                new SettingsItem("Color text if too long", () => new CheckBox { IsChecked = false }),
+                new SettingsItem("Color text if toowide (pixels)", () => new CheckBox { IsChecked = false }),
+                new SettingsItem("Color text if more than 2 lines", () => new CheckBox { IsChecked = false }),
+                new SettingsItem("", () => new Label {  }),
+                new SettingsItem("Color time code overlap", () => new CheckBox { IsChecked = false }),
+                new SettingsItem("", () => new Label {  }),
+                new SettingsItem("Color if gap is too short", () => new CheckBox { IsChecked = false }),
+            ]),
+                        
 
-            new SettingsSection("Waveform/spectrogram", new[]
-            {
-                new SettingsItem("Developer Mode", () => new CheckBox { IsChecked = false }),
-                new SettingsItem("Verbose Output", () => new CheckBox { IsChecked = false })
-            }),
+            new SettingsSection("Video player",
+            [
+                new SettingsItem("Video player", () => new StackPanel 
+                { 
+                    Children =
+                    {
+                        new RadioButton
+                        {
+                            Content = "mpv",
+                            [!RadioButton.IsCheckedProperty] = new Binding(nameof(_vm.UsePlayerMpv)) { Source = _vm, Mode = BindingMode.TwoWay }
+                        },
+                        new RadioButton
+                        {
+                            Content = "vlc",
+                            [!RadioButton.IsCheckedProperty] = new Binding(nameof(_vm.UsePlayerVlc)) { Source = _vm, Mode = BindingMode.TwoWay }
+                        }
+                    }
+                }),
+                new SettingsItem("Show stop button", () => new CheckBox { IsChecked = false }),
+                new SettingsItem("Show fullscreen button", () => new CheckBox { IsChecked = false }),
+                new SettingsItem("", () => new Label {  }),
+                new SettingsItem("Auto-open video file when openning subtitle", () => new CheckBox { IsChecked = false }),
+            ]),
 
-            new SettingsSection("Tools", new[]
-            {
+            new SettingsSection("Waveform/spectrogram",
+            [
                 new SettingsItem("Developer Mode", () => new CheckBox { IsChecked = false }),
-                new SettingsItem("Verbose Output", () => new CheckBox { IsChecked = false })
-            }),
+                new SettingsItem("Verbose Output", () => new CheckBox { IsChecked = false }),
+            ]),
 
-            new SettingsSection("Toolbar", new[]
-            {
+            new SettingsSection("Tools",
+            [
+                new SettingsItem("Developer Mode", () => new CheckBox { IsChecked = false }),
+                new SettingsItem("Verbose Output", () => new CheckBox { IsChecked = false }),
+            ]),
+
+            new SettingsSection("Toolbar",
+            [
                 MakeCheckboxSetting("Show New icon", nameof(_vm.ShowToolbarNew)),
                 MakeCheckboxSetting("Show Open icon", nameof(_vm.ShowToolbarOpen)),
                 MakeCheckboxSetting("Show Save icon", nameof(_vm.ShowToolbarSave)),
                 MakeCheckboxSetting("Show Save As icon", nameof(_vm.ShowToolbarSaveAs)),
                 MakeCheckboxSetting("Show Find icon", nameof(_vm.ShowToolbarFind)),
-            }),
+            ]),
 
-            new SettingsSection("Appearance", new[]
-            {
+            new SettingsSection("Appearance",
+            [
                 new SettingsItem("Theme", () =>
                 UiUtil.MakeComboBox(_vm.Themes, _vm, nameof(_vm.SelectedTheme))),
                 new SettingsItem("Font Size", () => new Slider
@@ -223,16 +238,16 @@ public class SettingsPage : UserControl
                     Value = 14,
                     Width = 150
                 })
-            }),
+            ]),
 
-            new SettingsSection("Network", new[]
-            {
+            new SettingsSection("Network",
+            [
                 new SettingsItem("Developer Mode", () => new CheckBox { IsChecked = false }),
-                new SettingsItem("Verbose Output", () => new CheckBox { IsChecked = false })
-            }),
+                new SettingsItem("Verbose Output", () => new CheckBox { IsChecked = false }),
+            ]),
 
-            new SettingsSection("File type associations", new[]
-            {
+            new SettingsSection("File type associations",
+            [
                 new SettingsItem("Associate file types", () => new ItemsControl
                 {
                     DataContext = _vm,
@@ -247,7 +262,7 @@ public class SettingsPage : UserControl
                                 new CheckBox
                                 {
                                     [!CheckBox.IsCheckedProperty] = new Binding(nameof(FileTypeAssociationViewModel.IsAssociated))
-                                    { Source = fileType, Mode = BindingMode.TwoWay }
+                                    { Source = fileType, Mode = BindingMode.TwoWay },
                                 },
                                 new Image
                                 {
@@ -259,12 +274,12 @@ public class SettingsPage : UserControl
                                 new TextBlock
                                 {
                                     Text = fileType.Extension,
-                                    VerticalAlignment = VerticalAlignment.Center
+                                    VerticalAlignment = VerticalAlignment.Center,
                                 }
                             }
                         }, true)
                 })
-            })
+            ])
         };
     }
 

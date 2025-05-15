@@ -36,6 +36,12 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private double _showToolbarSave;
     [ObservableProperty] private double _showToolbarSaveAs;
 
+    [ObservableProperty] private bool _showToolbarFind;
+
+    [ObservableProperty] private bool _usePlayerMpv;
+    [ObservableProperty] private bool _usePlayerVlc;
+
+
     public ObservableCollection<FormatViewModel> AvailableFormats { get; set; } = new()
     {
         new FormatViewModel { Name = "SRT", IsFavorite = true },
@@ -69,7 +75,6 @@ public partial class SettingsViewModel : ObservableObject
     public SettingsWindow? Window { get; internal set; }
     public ScrollViewer ScrollView { get; internal set; }
     public List<SettingsSection> Sections { get; internal set; }
-    public object ShowToolbarFind { get; internal set; }
 
     public SettingsViewModel()
     {
