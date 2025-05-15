@@ -220,11 +220,16 @@ public class SettingsPage : UserControl
 
             new SettingsSection("Toolbar",
             [
-                MakeCheckboxSetting("Show New icon", nameof(_vm.ShowToolbarNew)),
-                MakeCheckboxSetting("Show Open icon", nameof(_vm.ShowToolbarOpen)),
-                MakeCheckboxSetting("Show Save icon", nameof(_vm.ShowToolbarSave)),
-                MakeCheckboxSetting("Show Save As icon", nameof(_vm.ShowToolbarSaveAs)),
-                MakeCheckboxSetting("Show Find icon", nameof(_vm.ShowToolbarFind)),
+                MakeCheckboxSetting("Show new icon", nameof(_vm.ShowToolbarNew)),
+                MakeCheckboxSetting("Show open icon", nameof(_vm.ShowToolbarOpen)),
+                MakeCheckboxSetting("Show save icon", nameof(_vm.ShowToolbarSave)),
+                MakeCheckboxSetting("Show save as icon", nameof(_vm.ShowToolbarSaveAs)),
+                MakeCheckboxSetting("Show find icon", nameof(_vm.ShowToolbarFind)),
+                MakeCheckboxSetting("Show replace icon", nameof(_vm.ShowToolbarReplace)),
+                MakeCheckboxSetting("Show spell check icon", nameof(_vm.ShowToolbarSpellCheck)),
+                MakeCheckboxSetting("Show settings icon", nameof(_vm.ShowToolbarSettings)),
+                MakeCheckboxSetting("Show layout icon", nameof(_vm.ShowToolbarLayout)),
+                MakeCheckboxSetting("Show help icon", nameof(_vm.ShowToolbarHelp)),
             ]),
 
             new SettingsSection("Appearance",

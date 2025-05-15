@@ -22,21 +22,26 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty] private ObservableCollection<string> _themes;
     [ObservableProperty] private string _selectedTheme;
-    [ObservableProperty] private double _singleLineMaxLength;
+    [ObservableProperty] private int _singleLineMaxLength;
     [ObservableProperty] private double _optimalCharsPerSec;
     [ObservableProperty] private double _maxCharsPerSec;
     [ObservableProperty] private double _maxWordsPerMin;
-    [ObservableProperty] private double _minDurationMs;
-    [ObservableProperty] private double _maxDurationMs;
-    [ObservableProperty] private double _minGapMs;
-    [ObservableProperty] private double _maxLines;
-    [ObservableProperty] private double _unbreakShorterThanMs;
-    [ObservableProperty] private double _showToolbarNew;
-    [ObservableProperty] private double _showToolbarOpen;
-    [ObservableProperty] private double _showToolbarSave;
-    [ObservableProperty] private double _showToolbarSaveAs;
-
+    [ObservableProperty] private int _minDurationMs;
+    [ObservableProperty] private int _maxDurationMs;
+    [ObservableProperty] private int _minGapMs;
+    [ObservableProperty] private int _maxLines;
+    [ObservableProperty] private int _unbreakShorterThanMs;
+    
+    [ObservableProperty] private bool _showToolbarNew;
+    [ObservableProperty] private bool _showToolbarOpen;
+    [ObservableProperty] private bool _showToolbarSave;
+    [ObservableProperty] private bool _showToolbarSaveAs;
     [ObservableProperty] private bool _showToolbarFind;
+    [ObservableProperty] private bool _showToolbarReplace;
+    [ObservableProperty] private bool _showToolbarSpellCheck;
+    [ObservableProperty] private bool _showToolbarSettings;
+    [ObservableProperty] private bool _showToolbarLayout;
+    [ObservableProperty] private bool _showToolbarHelp;
 
     [ObservableProperty] private bool _usePlayerMpv;
     [ObservableProperty] private bool _usePlayerVlc;
@@ -100,7 +105,47 @@ public partial class SettingsViewModel : ObservableObject
         UnbreakShorterThanMs = general.MergeLinesShorterThan;
 
         SelectedTheme = appearance.Theme;
+        ShowToolbarNew = appearance.ToolbarShowFileNew;
+        ShowToolbarOpen = appearance.ToolbarShowFileOpen;
+        ShowToolbarSave =  appearance.ToolbarShowSave;
+        ShowToolbarSaveAs = appearance.ToolbarShowSaveAs;
+        ShowToolbarFind = appearance.ToolbarShowFind;
+        ShowToolbarReplace = appearance.ToolbarShowReplace;
+        ShowToolbarSpellCheck = appearance.ToolbarShowSpellCheck;
+        ShowToolbarSettings = appearance.ToolbarShowSettings;
+        ShowToolbarLayout = appearance.ToolbarShowLayout;
+        ShowToolbarHelp = appearance.ToolbarShowHelp;
+    } 
+
+    private void SaveSettings()
+    {
+        var general = Se.Settings.General;
+        var appearance = Se.Settings.Appearance;
+
+        general.SubtitleLineMaximumLength = SingleLineMaxLength;
+        general.SubtitleOptimalCharactersPerSeconds = OptimalCharsPerSec;
+        general.SubtitleMaximumCharactersPerSeconds = MaxCharsPerSec;
+        general.SubtitleMaximumWordsPerMinute = MaxWordsPerMin;
+        general.SubtitleMaximumDisplayMilliseconds = MaxDurationMs; // Assuming MinDurationMs and MaxDurationMs are the same source
+        general.MinimumMillisecondsBetweenLines = MinGapMs;
+        general.MaxNumberOfLines = MaxLines;
+        general.MergeLinesShorterThan = UnbreakShorterThanMs;
+
+        appearance.Theme = SelectedTheme;
+        appearance.ToolbarShowFileNew = ShowToolbarNew;
+        appearance.ToolbarShowFileOpen = ShowToolbarOpen;
+        appearance.ToolbarShowSave = ShowToolbarSave;
+        appearance.ToolbarShowSaveAs = ShowToolbarSaveAs;
+        appearance.ToolbarShowFind = ShowToolbarFind;
+        appearance.ToolbarShowReplace = ShowToolbarReplace;
+        appearance.ToolbarShowSpellCheck = ShowToolbarSpellCheck;
+        appearance.ToolbarShowSettings = ShowToolbarSettings;
+        appearance.ToolbarShowLayout = ShowToolbarLayout;
+        appearance.ToolbarShowHelp = ShowToolbarHelp;
+        
+        Se.SaveSettings();
     }
+
 
     public async void ScrollElementIntoView(ScrollViewer scrollViewer, Control target)
     {
@@ -186,8 +231,7 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private void CommandOk()
     {
-        Se.Settings.Appearance.Theme = SelectedTheme;
-        Se.SaveSettings();
+        SaveSettings();
 
         OkPressed = true;
         Window?.Close();
@@ -197,5 +241,9 @@ public partial class SettingsViewModel : ObservableObject
     private void CommandCancel()
     {
         Window?.Close();
+    }
+
+    public void OnClosing(WindowClosingEventArgs windowClosingEventArgs)
+    {
     }
 }

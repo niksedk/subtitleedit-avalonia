@@ -13,6 +13,8 @@ public class SeAppearance
     public bool ToolbarShowReplace { get; set; }
     public bool ToolbarShowFixCommonErrors { get; set; }
     public bool ToolbarShowSpellCheck { get; set; }
+    public bool ToolbarShowSettings { get; set; }
+    public bool ToolbarShowLayout { get; set; }
     public bool ToolbarShowHelp { get; set; }
 
 
@@ -24,11 +26,13 @@ public class SeAppearance
         ToolbarShowFileOpen = true;
         ToolbarShowVideoFileOpen = true;
         ToolbarShowSave = true;
-        ToolbarShowSaveAs = true;
+        ToolbarShowSaveAs = false;
         ToolbarShowFind = true;
         ToolbarShowReplace = true;
         ToolbarShowFixCommonErrors = true;
         ToolbarShowSpellCheck = true;
+        ToolbarShowSettings = true;
+        ToolbarShowLayout = true;
         ToolbarShowHelp = true;
     }
 }
