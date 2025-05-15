@@ -21,6 +21,8 @@ public class SettingsWindow : Window
 
         vm.Window = this;
         Content = new SettingsPage(vm);
+        
+        Activated += delegate { Focus(); }; // hack to make OnKeyDown work
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

@@ -35,5 +35,7 @@ public class FullScreenVideoWindow : Window
             videoPlayer.FullscreenCollapseRequested -= () => Close();
             onClose?.Invoke();
         };
+        
+        Activated += delegate { Focus(); }; // hack to make OnKeyDown work
     }
 }

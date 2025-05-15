@@ -72,6 +72,7 @@ namespace Nikse.SubtitleEdit.Logic
             
             configure?.Invoke(window);
             window.Show();
+            window.Focus();
             
             return window;
         }
@@ -87,6 +88,7 @@ namespace Nikse.SubtitleEdit.Logic
             window.DataContext = viewModel;
             configure?.Invoke(window, viewModel);
             window.Show();
+            window.Focus();
             
             return viewModel;
         }

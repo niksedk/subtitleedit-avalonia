@@ -70,6 +70,8 @@ public class LanguageWindow : Window
         };
 
         Content = _contentPanel;
+        
+        Activated += delegate { Focus(); }; // hack to make OnKeyDown work
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

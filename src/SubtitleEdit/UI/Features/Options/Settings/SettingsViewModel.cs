@@ -12,6 +12,7 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
@@ -32,6 +33,12 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private int _minGapMs;
     [ObservableProperty] private int _maxLines;
     [ObservableProperty] private int _unbreakShorterThanMs;
+    
+    [ObservableProperty] private ObservableCollection<string> _defaultSubtitleFormats;
+    [ObservableProperty] private string _selectedDefaultSubtitleFormat;
+    
+    [ObservableProperty] private ObservableCollection<string> _saveSubtitleFormats;
+    [ObservableProperty] private string _selectedSaveSubtitleFormat;
     
     [ObservableProperty] private bool _showToolbarNew;
     [ObservableProperty] private bool _showToolbarOpen;
@@ -102,7 +109,25 @@ public partial class SettingsViewModel : ObservableObject
 
         VideoPlayers = new ObservableCollection<VideoPlayerItem>(VideoPlayerItem.ListVideoPlayerItem());
         SelectedVideoPlayer = VideoPlayers[0];
-        
+
+        var subtitleFormats = SubtitleFormat.AllSubtitleFormats;
+        var defaultSubtitleFormats = new List<string>();
+        var saveSubtitleFormats = new List<string>() { "Auto" };
+        foreach (var format in subtitleFormats)
+        {
+            if (format.Name.StartsWith("Unknown", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+            
+            defaultSubtitleFormats.Add(format.FriendlyName);
+            saveSubtitleFormats.Add(format.FriendlyName);
+        }
+        DefaultSubtitleFormats = new ObservableCollection<string>(defaultSubtitleFormats);
+        SaveSubtitleFormats = new ObservableCollection<string>(saveSubtitleFormats);
+        SelectedDefaultSubtitleFormat = DefaultSubtitleFormats.First();
+        SelectedSaveSubtitleFormat = SaveSubtitleFormats.First();
+
         LoadSettings();
     }
 

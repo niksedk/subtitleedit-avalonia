@@ -139,8 +139,8 @@ public class SettingsPage : UserControl
                 {
                     Width = 200,
                     DataContext = _vm,
-                    [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.AvailableFormats)),
-                    [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.DefaultFormat)) { Mode = BindingMode.TwoWay },
+                    [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.DefaultSubtitleFormats)),
+                    [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedDefaultSubtitleFormat)) { Mode = BindingMode.TwoWay },
                     ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
                         new TextBlock { Text = f?.Name }, true)
                 }),
@@ -149,8 +149,8 @@ public class SettingsPage : UserControl
                 {
                     Width = 200,
                     DataContext = _vm,
-                    [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.AvailableFormats)),
-                    [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.DefaultSaveAsFormat)) { Mode = BindingMode.TwoWay },
+                    [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.SaveSubtitleFormats)),
+                    [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedSaveSubtitleFormat)) { Mode = BindingMode.TwoWay },
                     ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
                         new TextBlock { Text = f?.Name }, true)
                 }),
