@@ -24,7 +24,7 @@ public partial class AutoTranslateViewModel : ObservableObject
 {
     private ObservableCollection<TranslateRow> _rows;
     public ITreeDataGridSource TranslateRowSource { get; }
-    public AutoTranslateWindow Window { get; set; }
+    public AutoTranslateWindow? Window { get; set; }
     public bool OkPressed { get; set; }
 
     [ObservableProperty] private ObservableCollection<IAutoTranslator> _autoTranslators;
@@ -59,6 +59,10 @@ public partial class AutoTranslateViewModel : ObservableObject
     public AutoTranslateViewModel(IWindowService windowService)
     {
         _windowService = windowService;
+        
+        ApiKeyText = string.Empty;
+        ApiUrlText = string.Empty;
+        ModelText = string.Empty;
 
         AutoTranslators = new ObservableCollection<IAutoTranslator>
         {
@@ -224,7 +228,7 @@ public partial class AutoTranslateViewModel : ObservableObject
     [RelayCommand]
     private async Task OpenSettings()
     {
-        await _windowService.ShowDialogAsync<TranslateSettingsWindow, TranslateSettingsViewModel>(Window, vm =>
+        await _windowService.ShowDialogAsync<TranslateSettingsWindow, TranslateSettingsViewModel>(Window!, vm =>
         {
             vm.LoadValues(SelectedAutoTranslator);
         });
@@ -239,7 +243,7 @@ public partial class AutoTranslateViewModel : ObservableObject
             return;
         }
 
-        await Window.Launcher.LaunchUriAsync(new System.Uri(autoTranslator.Url));
+        await Window!.Launcher.LaunchUriAsync(new System.Uri(autoTranslator.Url));
     }
 
     [RelayCommand]

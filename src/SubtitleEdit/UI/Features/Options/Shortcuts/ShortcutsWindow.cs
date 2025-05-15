@@ -4,8 +4,10 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Nikse.SubtitleEdit.Logic;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
@@ -152,6 +154,14 @@ public class ShortcutItem
     public bool IsExpanded { get; set; }
     public ShortCut Shortcut { get; set; }
     public ObservableCollection<ShortcutItem> Children { get; } = new();
+
+    public ShortcutItem()
+    {
+        CategoryText = string.Empty;
+        Name = string.Empty;
+        Keys = string.Empty;
+        IsExpanded = false;
+    }
 }
 
 public enum ShortcutCategory

@@ -23,10 +23,12 @@ public partial class SubtitleLineViewModel : ObservableObject
 
     public SubtitleLineViewModel()
     {
+        Text = string.Empty;
     }
     
     public SubtitleLineViewModel(Paragraph newParagraph)
     {
+        Text = newParagraph.Text;
     }
 
     public Paragraph? Paragraph { get; set; }

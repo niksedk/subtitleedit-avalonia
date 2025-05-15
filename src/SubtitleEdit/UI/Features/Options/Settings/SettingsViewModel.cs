@@ -91,6 +91,10 @@ public partial class SettingsViewModel : ObservableObject
     public SettingsViewModel()
     {
         Themes = ["Light", "Dark"];
+        SelectedTheme = Themes[0];
+        
+        ScrollView = new ScrollViewer();    
+        Sections = new List<SettingsSection>();
 
         VideoPlayers = new ObservableCollection<VideoPlayerItem>(VideoPlayerItem.ListVideoPlayerItem());
         SelectedVideoPlayer = VideoPlayers[0];

@@ -27,7 +27,7 @@ public partial class ShortcutsViewModel : ObservableObject
     public HierarchicalTreeDataGridSource<ShortcutItem> ShortcutsSource { get; set; }
 
     public bool OkPressed { get; set; }
-    public ShortcutsWindow Window { get; set; }
+    public ShortcutsWindow? Window { get; set; }
     public TreeDataGrid ShortcutsGrid { get; internal set; }
 
     public ShortcutsViewModel()

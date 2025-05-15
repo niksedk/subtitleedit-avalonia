@@ -89,6 +89,16 @@ public partial class MainViewModel : ObservableObject
         _shortcutManager = shortcutManager;
         _windowService = windowService;
 
+        EditText = string.Empty;
+        EditTextCharactersPerSecond = string.Empty;
+        EditTextTotalLength = string.Empty;
+        EditTextLineLengths = string.Empty;
+        StatusTextLeftLabel = new TextBlock();
+        SubtitleGrid = new DataGrid();
+        EditTextBox = new TextBox();
+        ContentGrid = new Grid();
+
+
         _subtitle = new Subtitle();
 
         Subtitles = new ObservableCollection<SubtitleLineViewModel>();
@@ -324,9 +334,9 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task DeleteSelectedLines()
+    private void DeleteSelectedLines()
     {
-        await DeleteSelectedItems();
+        DeleteSelectedItems();
     }
 
     [RelayCommand]
@@ -410,7 +420,7 @@ public partial class MainViewModel : ObservableObject
         //}
     }
 
-    private Control _fullscreenBeforeParent;
+    private Control? _fullscreenBeforeParent;
 
     [RelayCommand]
     private void VideoFullScreen()
@@ -438,7 +448,7 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task Unbreak()
+    private void Unbreak()
     {
         var s = SelectedSubtitle;
         if (s == null)
@@ -450,7 +460,7 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task AutoBreak()
+    private void AutoBreak()
     {
         var s = SelectedSubtitle;
         if (s == null)
@@ -503,7 +513,7 @@ public partial class MainViewModel : ObservableObject
             }
         }
     }
-    
+
     // Method to select a specific row by index and make it visible
     public void SelectAndScrollToRow(int index)
     {
@@ -514,7 +524,7 @@ public partial class MainViewModel : ObservableObject
 
         // First, set the selected index (this selects the row)
         SubtitleGrid.SelectedIndex = index;
-    
+
         // Then, scroll to the selected item to make it visible
         SubtitleGrid.ScrollIntoView(SubtitleGrid.SelectedItem, null);
     }
@@ -529,7 +539,7 @@ public partial class MainViewModel : ObservableObject
 
         // First, set the selected item (this selects the row)
         SubtitleGrid.SelectedItem = subtitle;
-    
+
         // Then, scroll to the selected item to make it visible
         SubtitleGrid.ScrollIntoView(subtitle, null);
     }
@@ -856,7 +866,7 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    public async Task DeleteSelectedItems()
+    public void DeleteSelectedItems()
     {
         var selectedItems = _selectedSubtitles?.ToList() ?? new List<SubtitleLineViewModel>();
         if (selectedItems != null && selectedItems.Any())
@@ -971,7 +981,7 @@ public partial class MainViewModel : ObservableObject
     public void SubtitleGrid_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         var selectedItems = SubtitleGrid.SelectedItems;
-        
+
         if (selectedItems == null)
         {
             SelectedSubtitle = null;
@@ -1039,7 +1049,6 @@ public partial class MainViewModel : ObservableObject
         _positionTimer.Tick += (s, e) =>
         {
             var text = "Untitled";
-            string separator = " + ";
             if (!string.IsNullOrEmpty(_subtitleFileName))
             {
                 text = Configuration.Settings.General.TitleBarFullFileName
@@ -1052,7 +1061,7 @@ public partial class MainViewModel : ObservableObject
             {
                 text = "*" + text;
             }
-   
+
             Window.Title = text;
         };
         _positionTimer.Start();

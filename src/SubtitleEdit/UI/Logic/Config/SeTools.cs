@@ -13,4 +13,13 @@ public class SeTools
     public string AnthropicPrompt { get; internal set; }
     public string GroqPrompt { get; internal set; }
     public string OpenRouterPrompt { get; internal set; }
+
+    public SeTools()
+    {
+        OllamaPrompt = string.Empty;
+        LmStudioPrompt = string.Empty;
+        AnthropicPrompt = string.Empty;
+        GroqPrompt = string.Empty;
+        OpenRouterPrompt = string.Empty;
+    }
 }
