@@ -87,10 +87,10 @@ public class SettingsPage : UserControl
         Grid.SetRow(scrollViewer, 1);
         Grid.SetColumn(scrollViewer, 1);
 
-        var buttonOK = UiUtil.MakeButton("OK", vm.CommandOkCommand);
+        var buttonOk = UiUtil.MakeButton("OK", vm.CommandOkCommand);
         var buttonCancel = UiUtil.MakeButton("Cancel", vm.CommandCancelCommand);
 
-        var buttonBar = UiUtil.MakeButtonBar(buttonOK, buttonCancel);
+        var buttonBar = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
         grid.Children.Add(buttonBar);
         Grid.SetRow(buttonBar, 2);
         Grid.SetColumn(buttonBar, 0);
@@ -98,7 +98,7 @@ public class SettingsPage : UserControl
 
         UpdateVisibleSections(string.Empty);
 
-        _searchBox.TextChanged += (s, e) => UpdateVisibleSections(_searchBox.Text ?? string.Empty);
+        _searchBox.TextChanged += (_, e) => UpdateVisibleSections(_searchBox.Text ?? string.Empty);
     }
 
     private void UpdateVisibleSections(string filter)
@@ -139,8 +139,8 @@ public class SettingsPage : UserControl
                 {
                     Width = 200,
                     DataContext = _vm,
-                    [!ComboBox.ItemsSourceProperty] = new Binding(nameof(_vm.AvailableFormats)),
-                    [!ComboBox.SelectedItemProperty] = new Binding(nameof(_vm.DefaultFormat)) { Mode = BindingMode.TwoWay },
+                    [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.AvailableFormats)),
+                    [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.DefaultFormat)) { Mode = BindingMode.TwoWay },
                     ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
                         new TextBlock { Text = f?.Name }, true)
                 }),
@@ -149,8 +149,8 @@ public class SettingsPage : UserControl
                 {
                     Width = 200,
                     DataContext = _vm,
-                    [!ComboBox.ItemsSourceProperty] = new Binding(nameof(_vm.AvailableFormats)),
-                    [!ComboBox.SelectedItemProperty] = new Binding(nameof(_vm.DefaultSaveAsFormat)) { Mode = BindingMode.TwoWay },
+                    [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.AvailableFormats)),
+                    [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.DefaultSaveAsFormat)) { Mode = BindingMode.TwoWay },
                     ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
                         new TextBlock { Text = f?.Name }, true)
                 }),
@@ -163,7 +163,7 @@ public class SettingsPage : UserControl
                         new CheckBox
                         {
                             Content = formatVm.Name,
-                            [!CheckBox.IsCheckedProperty] = new Binding(nameof(FormatViewModel.IsFavorite)) { Source = formatVm, Mode = BindingMode.TwoWay }
+                            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(FormatViewModel.IsFavorite)) { Source = formatVm, Mode = BindingMode.TwoWay }
                         }, true)
                 })
             ]),
@@ -192,8 +192,8 @@ public class SettingsPage : UserControl
                         {
                             Width = 200,
                             Height = 30,
-                            [!ComboBox.ItemsSourceProperty] = new Binding(nameof(_vm.VideoPlayers)),
-                            [!ComboBox.SelectedItemProperty] = new Binding(nameof(_vm.SelectedVideoPlayer)),
+                            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.VideoPlayers)),
+                            [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedVideoPlayer)),
                             DataContext = _vm,
                             ItemTemplate = new FuncDataTemplate<object>((item, _) =>
                                 new TextBlock
@@ -270,7 +270,7 @@ public class SettingsPage : UserControl
                             {
                                 new CheckBox
                                 {
-                                    [!CheckBox.IsCheckedProperty] = new Binding(nameof(FileTypeAssociationViewModel.IsAssociated))
+                                    [!ToggleButton.IsCheckedProperty] = new Binding(nameof(FileTypeAssociationViewModel.IsAssociated))
                                     { Source = fileType, Mode = BindingMode.TwoWay },
                                 },
                                 new Image
@@ -294,7 +294,7 @@ public class SettingsPage : UserControl
 
     private static SettingsItem MakeSeparator()
     {
-        return new SettingsItem("", () => new Label {  });
+        return new SettingsItem(string.Empty, () => new Label());
     }
 
     private SettingsItem MakeNumericSetting(string label, string bindingProperty)
@@ -311,7 +311,7 @@ public class SettingsPage : UserControl
         return new SettingsItem(label, () => new CheckBox
         {
             VerticalAlignment = VerticalAlignment.Center,
-            [!CheckBox.IsCheckedProperty] = new Binding(bindingProperty) { Source = _vm, Mode = BindingMode.TwoWay }
+            [!ToggleButton.IsCheckedProperty] = new Binding(bindingProperty) { Source = _vm, Mode = BindingMode.TwoWay }
         });
     }
 }
