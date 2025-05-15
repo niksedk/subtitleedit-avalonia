@@ -13,17 +13,19 @@ public static class InitToolbar
 {
     public static Border Make(MainViewModel vm)
     {
+        var toolbar = CreateToolbar(vm);
+        
         return new Border
         {
             Height = 40,
-            Child = CreateToolbar(vm),
+            Child = toolbar,
         };
     }
 
     private static StackPanel CreateToolbar(MainViewModel vm)
     {
         var path = $"Assets/Themes/{Se.Settings.Appearance.Theme}/";
-
+        
         var stackPanel = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -32,6 +34,8 @@ public static class InitToolbar
         };
 
         var appearance = Se.Settings.Appearance;
+        var isLastSeparator = true;
+        
         if (appearance.ToolbarShowFileNew)
         {
             stackPanel.Children.Add(new Button
@@ -44,6 +48,7 @@ public static class InitToolbar
                 },
                 [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileNewCommand)),
             });
+            isLastSeparator = false;
         }
 
         if (appearance.ToolbarShowFileOpen)
@@ -58,6 +63,7 @@ public static class InitToolbar
                 },
                 [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileOpenCommand)),
             });
+            isLastSeparator = false;
         }
 
         if (appearance.ToolbarShowSave)
@@ -72,6 +78,7 @@ public static class InitToolbar
                 },
                 [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileSaveCommand)),
             });
+            isLastSeparator = false;
         }
 
         if (appearance.ToolbarShowSaveAs)
@@ -86,9 +93,14 @@ public static class InitToolbar
                 },
                 [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileSaveAsCommand)),
             });
+            isLastSeparator = false;
         }
 
-        stackPanel.Children.Add(MakeSeparator());
+        if (!isLastSeparator)
+        {
+            stackPanel.Children.Add(MakeSeparator());
+            isLastSeparator = true;
+        }
 
         if (appearance.ToolbarShowFind)
         {
@@ -101,6 +113,7 @@ public static class InitToolbar
                     Height = 32,
                 },
             });
+            isLastSeparator = false;
         }
 
         if (appearance.ToolbarShowSaveAs)
@@ -114,9 +127,14 @@ public static class InitToolbar
                     Height = 32,
                 },
             });
+            isLastSeparator = false;
         }
 
-        stackPanel.Children.Add(MakeSeparator());
+        if (!isLastSeparator)
+        {
+            stackPanel.Children.Add(MakeSeparator());
+            isLastSeparator = true;
+        }
 
         if (appearance.ToolbarShowSpellCheck)
         {
@@ -129,6 +147,7 @@ public static class InitToolbar
                     Height = 32,
                 },
             });
+            isLastSeparator = false;
         }
 
         if (appearance.ToolbarShowFind)
@@ -143,6 +162,7 @@ public static class InitToolbar
                 },
                 Command = vm.CommandShowSettingsCommand,
             });
+            isLastSeparator = false;
         }
 
         if (appearance.ToolbarShowReplace)
@@ -157,9 +177,14 @@ public static class InitToolbar
                 },
                 [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandShowLayoutCommand)),
             });
+            isLastSeparator = false;
         }
 
-        stackPanel.Children.Add(MakeSeparator());
+        if (!isLastSeparator)
+        {
+            stackPanel.Children.Add(MakeSeparator());
+            isLastSeparator = true;
+        }
 
         if (appearance.ToolbarShowReplace)
         {
@@ -172,9 +197,14 @@ public static class InitToolbar
                     Height = 32,
                 },
             });
+            isLastSeparator = false;
         }
 
-        stackPanel.Children.Add(MakeSeparator());
+        if (!isLastSeparator)
+        {
+            stackPanel.Children.Add(MakeSeparator());
+            isLastSeparator = true;
+        }
 
         // subtitle formats
         stackPanel.Children.Add(new TextBlock
@@ -197,24 +227,31 @@ public static class InitToolbar
                     Width = 150,
                 }, true)
         });
+        isLastSeparator = false;
 
-        stackPanel.Children.Add(MakeSeparator());
 
-        // encoding
-        stackPanel.Children.Add(new TextBlock
+        if (!isLastSeparator && appearance.ToolbarShowEncoding)
         {
-            Text = "Encoding",
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Avalonia.Thickness(5, 0, 0, 0),
-        });
-        stackPanel.Children.Add(new ComboBox
+            stackPanel.Children.Add(MakeSeparator());
+        }
+
+        if (appearance.ToolbarShowEncoding)
         {
-            Width = 200,
-            Height = 30,
-            [!ComboBox.ItemsSourceProperty] = new Binding(nameof(vm.Encodings)),
-            [!ComboBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedEncoding)),
-            DataContext = vm,
-        });
+            stackPanel.Children.Add(new TextBlock
+            {
+                Text = "Encoding",
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Avalonia.Thickness(5, 0, 0, 0),
+            });
+            stackPanel.Children.Add(new ComboBox
+            {
+                Width = 200,
+                Height = 30,
+                [!ComboBox.ItemsSourceProperty] = new Binding(nameof(vm.Encodings)),
+                [!ComboBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedEncoding)),
+                DataContext = vm,
+            });
+        }
 
         return stackPanel;
     }

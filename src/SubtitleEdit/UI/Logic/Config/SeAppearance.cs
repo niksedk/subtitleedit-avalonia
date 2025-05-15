@@ -16,6 +16,7 @@ public class SeAppearance
     public bool ToolbarShowSettings { get; set; }
     public bool ToolbarShowLayout { get; set; }
     public bool ToolbarShowHelp { get; set; }
+    public bool ToolbarShowEncoding { get; set; }
 
 
     public SeAppearance()
@@ -34,5 +35,6 @@ public class SeAppearance
         ToolbarShowSettings = true;
         ToolbarShowLayout = true;
         ToolbarShowHelp = true;
+        ToolbarShowEncoding = true;
     }
 }

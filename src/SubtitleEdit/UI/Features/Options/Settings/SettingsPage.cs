@@ -230,6 +230,7 @@ public class SettingsPage : UserControl
                 MakeCheckboxSetting("Show settings icon", nameof(_vm.ShowToolbarSettings)),
                 MakeCheckboxSetting("Show layout icon", nameof(_vm.ShowToolbarLayout)),
                 MakeCheckboxSetting("Show help icon", nameof(_vm.ShowToolbarHelp)),
+                MakeCheckboxSetting("Show encoding", nameof(_vm.ShowToolbarEncoding)),
             ]),
 
             new SettingsSection("Appearance",

@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Input;
 using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
@@ -20,9 +21,9 @@ public class SettingsWindow : Window
         Content = new SettingsPage(vm);
     }
 
-    protected override void OnClosing(WindowClosingEventArgs e)
+    protected override void OnKeyDown(KeyEventArgs e)
     {
-        _vm.OnClosing(e);
-        base.OnClosing(e);
+        base.OnKeyDown(e);
+        _vm.OnKeyDown(e);
     }
 }

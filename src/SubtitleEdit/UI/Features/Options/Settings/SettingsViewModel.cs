@@ -7,6 +7,7 @@ using Avalonia;
 using Avalonia.Animation.Easings;
 using Avalonia.Animation;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -42,6 +43,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _showToolbarSettings;
     [ObservableProperty] private bool _showToolbarLayout;
     [ObservableProperty] private bool _showToolbarHelp;
+    [ObservableProperty] private bool _showToolbarEncoding;
 
     [ObservableProperty] private bool _usePlayerMpv;
     [ObservableProperty] private bool _usePlayerVlc;
@@ -115,6 +117,7 @@ public partial class SettingsViewModel : ObservableObject
         ShowToolbarSettings = appearance.ToolbarShowSettings;
         ShowToolbarLayout = appearance.ToolbarShowLayout;
         ShowToolbarHelp = appearance.ToolbarShowHelp;
+        ShowToolbarEncoding = appearance.ToolbarShowEncoding;
     } 
 
     private void SaveSettings()
@@ -142,6 +145,7 @@ public partial class SettingsViewModel : ObservableObject
         appearance.ToolbarShowSettings = ShowToolbarSettings;
         appearance.ToolbarShowLayout = ShowToolbarLayout;
         appearance.ToolbarShowHelp = ShowToolbarHelp;
+        appearance.ToolbarShowEncoding = ShowToolbarEncoding;
         
         Se.SaveSettings();
     }
@@ -243,7 +247,12 @@ public partial class SettingsViewModel : ObservableObject
         Window?.Close();
     }
 
-    public void OnClosing(WindowClosingEventArgs windowClosingEventArgs)
+    public void OnKeyDown(KeyEventArgs e)
     {
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            Window?.Close();
+        }
     }
 }
