@@ -65,6 +65,8 @@ lifetime.MainWindow = new Window
 {
     Title = "Subtitle Edit",
     Icon = UiUtil.GetSeIcon(),
+    MinWidth = 800,
+    MinHeight = 500,
 };
 
 

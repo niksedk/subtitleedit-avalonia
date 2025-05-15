@@ -116,7 +116,7 @@ public static class InitToolbar
             isLastSeparator = false;
         }
 
-        if (appearance.ToolbarShowSaveAs)
+        if (appearance.ToolbarShowReplace)
         {
             stackPanel.Children.Add(new Button
             {
@@ -150,7 +150,7 @@ public static class InitToolbar
             isLastSeparator = false;
         }
 
-        if (appearance.ToolbarShowFind)
+        if (appearance.ToolbarShowSettings)
         {
             stackPanel.Children.Add(new Button
             {
@@ -165,7 +165,7 @@ public static class InitToolbar
             isLastSeparator = false;
         }
 
-        if (appearance.ToolbarShowReplace)
+        if (appearance.ToolbarShowLayout)
         {
             stackPanel.Children.Add(new Button
             {
@@ -186,7 +186,7 @@ public static class InitToolbar
             isLastSeparator = true;
         }
 
-        if (appearance.ToolbarShowReplace)
+        if (appearance.ToolbarShowHelp)
         {
             stackPanel.Children.Add(new Button
             {

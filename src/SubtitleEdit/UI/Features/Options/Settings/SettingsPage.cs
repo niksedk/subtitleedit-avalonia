@@ -169,18 +169,17 @@ public class SettingsPage : UserControl
             
             new SettingsSection("Syntax coloring",
             [
-                new SettingsItem("Color duration if too short", () => new CheckBox { IsChecked = false }),
-                new SettingsItem("Color duration if too long", () => new CheckBox { IsChecked = false }),
-                new SettingsItem("", () => new Label {  }),
-                new SettingsItem("Color text if too long", () => new CheckBox { IsChecked = false }),
-                new SettingsItem("Color text if toowide (pixels)", () => new CheckBox { IsChecked = false }),
-                new SettingsItem("Color text if more than 2 lines", () => new CheckBox { IsChecked = false }),
-                new SettingsItem("", () => new Label {  }),
-                new SettingsItem("Color time code overlap", () => new CheckBox { IsChecked = false }),
-                new SettingsItem("", () => new Label {  }),
-                new SettingsItem("Color if gap is too short", () => new CheckBox { IsChecked = false }),
+                MakeCheckboxSetting("Color duration if too short", nameof(_vm.ColorDurationTooShort)),
+                MakeCheckboxSetting("Color duration if too long", nameof(_vm.ColorDurationTooLong)),
+                MakeSeparator(),
+                MakeCheckboxSetting("Color text if too long", nameof(_vm.ColorTextTooLong)),
+                MakeCheckboxSetting("Color text if too wide (pixels)", nameof(_vm.ColorTextTooWide)),
+                MakeCheckboxSetting("Color text if more than 2 lines", nameof(_vm.ColorTextTooManyLines)),
+                MakeSeparator(),
+                MakeCheckboxSetting("Color time code overlap", nameof(_vm.ColorOverlap)),
+                MakeSeparator(),
+                MakeCheckboxSetting("Color if gap is too short", nameof(_vm.ColorGapTooShort)),
             ]),
-                        
 
             new SettingsSection("Video player",
             [
@@ -287,6 +286,11 @@ public class SettingsPage : UserControl
                 })
             ])
         };
+    }
+
+    private static SettingsItem MakeSeparator()
+    {
+        return new SettingsItem("", () => new Label {  });
     }
 
     private SettingsItem MakeNumericSetting(string label, string bindingProperty)

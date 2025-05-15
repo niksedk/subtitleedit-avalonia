@@ -45,6 +45,14 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _showToolbarHelp;
     [ObservableProperty] private bool _showToolbarEncoding;
 
+    [ObservableProperty] private bool _colorDurationTooShort;
+    [ObservableProperty] private bool _colorDurationTooLong;
+    [ObservableProperty] private bool _colorTextTooLong;
+    [ObservableProperty] private bool _colorTextTooWide;
+    [ObservableProperty] private bool _colorTextTooManyLines;
+    [ObservableProperty] private bool _colorOverlap;
+    [ObservableProperty] private bool _colorGapTooShort;
+
     [ObservableProperty] private bool _usePlayerMpv;
     [ObservableProperty] private bool _usePlayerVlc;
 
@@ -96,6 +104,7 @@ public partial class SettingsViewModel : ObservableObject
     {
         var general = Se.Settings.General;
         var appearance = Se.Settings.Appearance;
+        
         SingleLineMaxLength = general.SubtitleLineMaximumLength;
         OptimalCharsPerSec = general.SubtitleOptimalCharactersPerSeconds;
         MaxCharsPerSec = general.SubtitleMaximumCharactersPerSeconds;
@@ -118,6 +127,14 @@ public partial class SettingsViewModel : ObservableObject
         ShowToolbarLayout = appearance.ToolbarShowLayout;
         ShowToolbarHelp = appearance.ToolbarShowHelp;
         ShowToolbarEncoding = appearance.ToolbarShowEncoding;
+        
+        ColorDurationTooLong = general.ColorDurationTooLong;
+        ColorDurationTooShort = general.ColorDurationTooShort;
+        ColorTextTooLong = general.ColorTextTooLong;
+        ColorTextTooWide = general.ColorTextTooWide;
+        ColorTextTooManyLines = general.ColorTextTooManyLines;
+        ColorOverlap = general.ColorTimeCodeOverlap;
+        ColorGapTooShort = general.ColorGapTooShort;
     } 
 
     private void SaveSettings()
@@ -146,6 +163,14 @@ public partial class SettingsViewModel : ObservableObject
         appearance.ToolbarShowLayout = ShowToolbarLayout;
         appearance.ToolbarShowHelp = ShowToolbarHelp;
         appearance.ToolbarShowEncoding = ShowToolbarEncoding;
+        
+        general.ColorDurationTooLong = ColorDurationTooLong;
+        general.ColorDurationTooShort = ColorDurationTooShort;
+        general.ColorTextTooLong = ColorTextTooLong;
+        general.ColorTextTooWide = ColorTextTooWide;
+        general.ColorTextTooManyLines = ColorTextTooManyLines;
+        general.ColorTimeCodeOverlap = ColorOverlap;
+        general.ColorGapTooShort = ColorGapTooShort;
         
         Se.SaveSettings();
     }

@@ -15,6 +15,8 @@ public class SettingsWindow : Window
         Title = "Settings";
         Width = 800;
         Height = 700;
+        MinWidth = 650;
+        MinHeight = 500;
         CanResize = true;
 
         vm.Window = this;
