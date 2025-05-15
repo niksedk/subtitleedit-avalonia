@@ -17,6 +17,8 @@ public class SeAppearance
     public bool ToolbarShowLayout { get; set; }
     public bool ToolbarShowHelp { get; set; }
     public bool ToolbarShowEncoding { get; set; }
+    public double SubtitleTextBoxFontSize { get; set; }
+    public bool SubtitleTextBoxFontBold { get; set; }
 
 
     public SeAppearance()
@@ -36,5 +38,7 @@ public class SeAppearance
         ToolbarShowLayout = true;
         ToolbarShowHelp = true;
         ToolbarShowEncoding = true;
+        SubtitleTextBoxFontSize = 15d;
+        SubtitleTextBoxFontBold = true;
     }
 }

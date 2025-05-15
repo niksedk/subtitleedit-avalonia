@@ -121,7 +121,7 @@ public class SettingsPage : UserControl
         {
             new SettingsSection("General",
             [
-                 // Rules
+                // Rules
                 MakeNumericSetting("Single line max length", nameof(_vm.SingleLineMaxLength)),
                 MakeNumericSetting("Optimal chars/sec", nameof(_vm.OptimalCharsPerSec)),
                 MakeNumericSetting("Max chars/sec", nameof(_vm.MaxCharsPerSec)),
@@ -140,7 +140,8 @@ public class SettingsPage : UserControl
                     Width = 200,
                     DataContext = _vm,
                     [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.DefaultSubtitleFormats)),
-                    [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedDefaultSubtitleFormat)) { Mode = BindingMode.TwoWay },
+                    [!SelectingItemsControl.SelectedItemProperty] =
+                        new Binding(nameof(_vm.SelectedDefaultSubtitleFormat)) { Mode = BindingMode.TwoWay },
                     ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
                         new TextBlock { Text = f?.Name }, true)
                 }),
@@ -150,24 +151,13 @@ public class SettingsPage : UserControl
                     Width = 200,
                     DataContext = _vm,
                     [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.SaveSubtitleFormats)),
-                    [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedSaveSubtitleFormat)) { Mode = BindingMode.TwoWay },
+                    [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedSaveSubtitleFormat))
+                        { Mode = BindingMode.TwoWay },
                     ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
                         new TextBlock { Text = f?.Name }, true)
                 }),
-
-                new SettingsItem("Favorite formats", () => new ItemsControl
-                {
-                    DataContext = _vm,
-                    [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.AvailableFormats)),
-                    ItemTemplate = new FuncDataTemplate<FormatViewModel>((formatVm, _) =>
-                        new CheckBox
-                        {
-                            Content = formatVm.Name,
-                            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(FormatViewModel.IsFavorite)) { Source = formatVm, Mode = BindingMode.TwoWay }
-                        }, true)
-                })
             ]),
-            
+
             new SettingsSection("Syntax coloring",
             [
                 MakeCheckboxSetting("Color duration if too short", nameof(_vm.ColorDurationTooShort)),
@@ -184,8 +174,8 @@ public class SettingsPage : UserControl
 
             new SettingsSection("Video player",
             [
-                new SettingsItem("Video player", () => new StackPanel 
-                { 
+                new SettingsItem("Video player", () => new StackPanel
+                {
                     Children =
                     {
                         new ComboBox
@@ -193,7 +183,8 @@ public class SettingsPage : UserControl
                             Width = 200,
                             Height = 30,
                             [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.VideoPlayers)),
-                            [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedVideoPlayer)),
+                            [!SelectingItemsControl.SelectedItemProperty] =
+                                new Binding(nameof(_vm.SelectedVideoPlayer)),
                             DataContext = _vm,
                             ItemTemplate = new FuncDataTemplate<object>((item, _) =>
                                 new TextBlock
@@ -211,8 +202,8 @@ public class SettingsPage : UserControl
 
             new SettingsSection("Waveform/spectrogram",
             [
-                new SettingsItem("Developer Mode", () => new CheckBox { IsChecked = false }),
-                new SettingsItem("Verbose Output", () => new CheckBox { IsChecked = false }),
+                MakeCheckboxSetting("Show grid lines", nameof(_vm.WaveformShowGridLines)),
+                new SettingsItem("Download ffmpeg", () => new TextBlock { Text = "todo..." }),
             ]),
 
             new SettingsSection("Tools",
@@ -238,21 +229,16 @@ public class SettingsPage : UserControl
 
             new SettingsSection("Appearance",
             [
-                new SettingsItem("Theme", () =>
-                UiUtil.MakeComboBox(_vm.Themes, _vm, nameof(_vm.SelectedTheme))),
-                new SettingsItem("Font Size", () => new Slider
-                {
-                    Minimum = 10,
-                    Maximum = 30,
-                    Value = 14,
-                    Width = 150
-                })
+                new SettingsItem("Theme", () => UiUtil.MakeComboBox(_vm.Themes, _vm, nameof(_vm.SelectedTheme))),
+                MakeNumericSetting("Text box font size", nameof(_vm.TextBoxFontSize)),
+                MakeCheckboxSetting("Text box font bold", nameof(_vm.TextBoxFontBold)),
             ]),
 
             new SettingsSection("Network",
             [
-                new SettingsItem("Developer Mode", () => new CheckBox { IsChecked = false }),
-                new SettingsItem("Verbose Output", () => new CheckBox { IsChecked = false }),
+                new SettingsItem("Proxy address", () => new TextBox { Width = 250 }),
+                new SettingsItem("Username", () => new TextBox { Width = 250 }),
+                new SettingsItem("Password", () => new TextBox { Width = 250 }),
             ]),
 
             new SettingsSection("File type associations",
@@ -270,15 +256,17 @@ public class SettingsPage : UserControl
                             {
                                 new CheckBox
                                 {
-                                    [!ToggleButton.IsCheckedProperty] = new Binding(nameof(FileTypeAssociationViewModel.IsAssociated))
-                                    { Source = fileType, Mode = BindingMode.TwoWay },
+                                    [!ToggleButton.IsCheckedProperty] =
+                                        new Binding(nameof(FileTypeAssociationViewModel.IsAssociated))
+                                            { Source = fileType, Mode = BindingMode.TwoWay },
                                 },
                                 new Image
                                 {
-                                    Source = new Avalonia.Media.Imaging.Bitmap(AssetLoader.Open(new Uri(fileType.IconPath))),
+                                    Source = new Avalonia.Media.Imaging.Bitmap(
+                                        AssetLoader.Open(new Uri(fileType.IconPath))),
                                     Width = 32,
                                     Height = 32,
-                                    Margin = new Thickness(2),                                    
+                                    Margin = new Thickness(2),
                                 },
                                 new TextBlock
                                 {

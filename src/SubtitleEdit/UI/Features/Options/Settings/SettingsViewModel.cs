@@ -19,11 +19,6 @@ namespace Nikse.SubtitleEdit.Features.Options.Settings;
 
 public partial class SettingsViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<string> _languages;
-    [ObservableProperty] private string _selectedLanguage;
-
-    [ObservableProperty] private ObservableCollection<string> _themes;
-    [ObservableProperty] private string _selectedTheme;
     [ObservableProperty] private int _singleLineMaxLength;
     [ObservableProperty] private double _optimalCharsPerSec;
     [ObservableProperty] private double _maxCharsPerSec;
@@ -64,16 +59,14 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private VideoPlayerItem _selectedVideoPlayer;
     [ObservableProperty] private bool _showStopButton;       
     [ObservableProperty] private bool _showFullscreenButton; 
-    [ObservableProperty] private bool _autoOpenVideoFile;    
+    [ObservableProperty] private bool _autoOpenVideoFile;
     
-    public ObservableCollection<FormatViewModel> AvailableFormats { get; set; } = new()
-    {
-        new FormatViewModel { Name = "SRT", IsFavorite = true },
-        new FormatViewModel { Name = "ASS", IsFavorite = false },
-        new FormatViewModel { Name = "VTT", IsFavorite = false },
-        new FormatViewModel { Name = "SUB", IsFavorite = false },
-        new FormatViewModel { Name = "TXT", IsFavorite = false }
-    };
+    [ObservableProperty] private bool _waveformShowGridLines;
+    
+    [ObservableProperty] private ObservableCollection<string> _themes;
+    [ObservableProperty] private string _selectedTheme;
+    [ObservableProperty] private double _textBoxFontSize;
+    [ObservableProperty] private bool _textBoxFontBold;
 
     public ObservableCollection<FileTypeAssociationViewModel> FileTypeAssociations { get; set; } = new()
     {
@@ -90,11 +83,6 @@ public partial class SettingsViewModel : ObservableObject
         new() { Extension = ".vtt", IconPath = "avares://Nikse.SubtitleEdit/Assets/FileTypes/vtt.ico" },
     };
 
-    public FormatViewModel DefaultFormat { get; set; }
-    public FormatViewModel DefaultSaveAsFormat { get; set; }
-
-    public IList<string> FavoriteFormatSelections { get; set; } = new ObservableCollection<string>();
-
     public bool OkPressed { get; set; }
     public SettingsWindow? Window { get; internal set; }
     public ScrollViewer ScrollView { get; internal set; }
@@ -102,10 +90,7 @@ public partial class SettingsViewModel : ObservableObject
 
     public SettingsViewModel()
     {
-        Languages = new ObservableCollection<string> { "English", "Danish", "Spanish" };
-        SelectedLanguage = Languages[0];
-
-        Themes = new ObservableCollection<string> { "Light", "Dark" };
+        Themes = ["Light", "Dark"];
 
         VideoPlayers = new ObservableCollection<VideoPlayerItem>(VideoPlayerItem.ListVideoPlayerItem());
         SelectedVideoPlayer = VideoPlayers[0];
@@ -158,6 +143,8 @@ public partial class SettingsViewModel : ObservableObject
         ShowToolbarLayout = appearance.ToolbarShowLayout;
         ShowToolbarHelp = appearance.ToolbarShowHelp;
         ShowToolbarEncoding = appearance.ToolbarShowEncoding;
+        TextBoxFontSize = appearance.SubtitleTextBoxFontSize;
+        TextBoxFontBold = appearance.SubtitleTextBoxFontBold;
         
         ColorDurationTooLong = general.ColorDurationTooLong;
         ColorDurationTooShort = general.ColorDurationTooShort;
@@ -206,6 +193,8 @@ public partial class SettingsViewModel : ObservableObject
         appearance.ToolbarShowLayout = ShowToolbarLayout;
         appearance.ToolbarShowHelp = ShowToolbarHelp;
         appearance.ToolbarShowEncoding = ShowToolbarEncoding;
+        appearance.SubtitleTextBoxFontSize = TextBoxFontSize;
+        appearance.SubtitleTextBoxFontBold = TextBoxFontBold;
         
         general.ColorDurationTooLong = ColorDurationTooLong;
         general.ColorDurationTooShort = ColorDurationTooShort;

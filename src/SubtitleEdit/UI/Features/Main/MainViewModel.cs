@@ -592,16 +592,19 @@ public partial class MainViewModel : ObservableObject
         {
             SelectAndScrollToRow(selectedSubtitleIndex.Value);
         }
-      
-        if (!string.IsNullOrEmpty(videoFileName) && File.Exists(videoFileName))
+
+        if (Se.Settings.Video.AutoOpen)
         {
-            await VideoOpenFile(videoFileName);
+            if (!string.IsNullOrEmpty(videoFileName) && File.Exists(videoFileName))
+            {
+                await VideoOpenFile(videoFileName);
+            }
+            else if (FindVideoFileName.TryFindVideoFileName(fileName, out videoFileName))
+            {
+                await VideoOpenFile(videoFileName);
+            }
         }
-        else if (FindVideoFileName.TryFindVideoFileName(fileName, out videoFileName))
-        {
-            await VideoOpenFile(videoFileName);
-        }
-        
+
         AddToRecentFiles(true);
         _changeSubtitleHash = GetFastSubtitleHash();
     }

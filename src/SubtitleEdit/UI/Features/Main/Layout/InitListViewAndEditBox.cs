@@ -10,6 +10,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Controls;
+using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
@@ -331,7 +332,9 @@ public static class InitListViewAndEditBox
             [!TextBox.TextProperty] = new Binding("SelectedSubtitle.Text")
             {
                 Mode = BindingMode.TwoWay
-            }
+            },
+            FontSize = Se.Settings.Appearance.SubtitleTextBoxFontSize,
+            FontWeight = Se.Settings.Appearance.SubtitleTextBoxFontBold ?  FontWeight.Bold : FontWeight.Normal,
         };
         textEditGrid.Children.Add(textBox);
         textBox.TextChanged += vm.SubtitleTextChanged;
