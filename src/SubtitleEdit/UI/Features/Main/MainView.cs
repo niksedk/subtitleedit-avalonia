@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Declarative;
 using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit.Features.Main.Layout;
@@ -51,6 +52,8 @@ public class MainView : ViewBase
         _vm.ContentGrid = ViewContent.Make(_vm);
         InitLayout.MakeLayout(this, _vm, Se.Settings.General.LayoutNumber);
         root.Children.Add(_vm.ContentGrid);
+        
+        this.AddHandler(KeyUpEvent, _vm.OnKeyUpHandler, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
 
         return root;
     }
@@ -59,11 +62,5 @@ public class MainView : ViewBase
     {
         base.OnKeyDown(e);
         _vm.KeyDown(e);
-    }
-
-    protected override void OnKeyUp(KeyEventArgs e)
-    {
-        base.OnKeyUp(e);
-        _vm.KeyUp(e);
     }
 }

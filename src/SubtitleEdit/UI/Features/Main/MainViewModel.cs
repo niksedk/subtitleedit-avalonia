@@ -28,6 +28,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
 
 namespace Nikse.SubtitleEdit.Features.Main;
@@ -59,8 +60,7 @@ public partial class MainViewModel : ObservableObject
     public Window Window { get; set; }
     public Grid ContentGrid { get; set; }
     public MainView MainView { get; set; }
-
-    public IVideoPlayerInstance? _videoPlayerInstance { get; internal set; }
+    
     public ITreeDataGridSource? SubtitlesSource { get; set; }
     public TextBlock StatusTextLeftLabel { get; internal set; }
 
@@ -189,6 +189,7 @@ public partial class MainViewModel : ObservableObject
         {
             Se.Settings.General.LayoutNumber = InitLayout.MakeLayout(MainView, this, vm.SelectedLayout.Value);
         }
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -287,6 +288,8 @@ public partial class MainViewModel : ObservableObject
         {
             Console.WriteLine("User confirmed the action");
         }
+        
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -295,6 +298,7 @@ public partial class MainViewModel : ObservableObject
         var oldTheme = Se.Settings.Appearance.Theme;
 
         var viewModel = await _windowService.ShowDialogAsync<SettingsWindow, SettingsViewModel>(Window);
+        _shortcutManager.ClearKeys();
         if (!viewModel.OkPressed)
         {
             return;
@@ -322,6 +326,7 @@ public partial class MainViewModel : ObservableObject
     {
         await _windowService.ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(Window,
             vm => { vm.LoadShortCuts(this); });
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -332,6 +337,8 @@ public partial class MainViewModel : ObservableObject
         {
             // todo
         }
+        
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -371,6 +378,8 @@ public partial class MainViewModel : ObservableObject
         {
             SelectAndScrollToRow(viewModel.LineNumber - 1);
         }
+        
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -918,7 +927,7 @@ public partial class MainViewModel : ObservableObject
     {
         _shortcutManager.OnKeyPressed(this, keyEventArgs);
 
-        var relayCommand = _shortcutManager.CheckShortcuts("grid");
+        var relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.SubtitleGrid.ToStringInvariant());
         if (relayCommand != null)
         {
             keyEventArgs.Handled = true;
@@ -926,7 +935,7 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        relayCommand = _shortcutManager.CheckShortcuts(null);
+        relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.General.ToStringInvariant());
         if (relayCommand != null)
         {
             keyEventArgs.Handled = true;
@@ -934,10 +943,10 @@ public partial class MainViewModel : ObservableObject
             return;
         }
     }
-
-    public void KeyUp(KeyEventArgs keyEventArgs)
+    
+    public void OnKeyUpHandler(object? sender, KeyEventArgs e)
     {
-        _shortcutManager.OnKeyReleased(this, keyEventArgs);
+        _shortcutManager.OnKeyReleased(this, e);
     }
 
     private bool _subtitleGridIsRightClick = false;

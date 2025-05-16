@@ -9,8 +9,8 @@ public interface IShortcutManager
 {
     void OnKeyPressed(object? sender, KeyEventArgs e);
     void OnKeyReleased(object? sender, KeyEventArgs e);
+    void ClearKeys();
     void RegisterShortcut(ShortCut shortcut);
- //   void RegisterShortcut(SeShortCut shortcut, Action action, string control);
     IRelayCommand? CheckShortcuts(string? control);
 
     void ClearShortcuts();

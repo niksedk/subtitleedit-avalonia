@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using CommunityToolkit.Mvvm.Input;
+using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -15,6 +17,7 @@ public class ShortCut
     public string Name { get; set; }
     public IRelayCommand Action { get; set; }
     public int HashCode { get; set; }
+    public int NormalizedHashCode { get; set; }
 
     public ShortCut(string name, List<string> keys, ShortcutCategory category, IRelayCommand action)
     {
@@ -24,6 +27,7 @@ public class ShortCut
         Control = category.ToString();
         Action = action;
         HashCode = CalculateHash(keys, Control);
+        NormalizedHashCode = ShortcutManager.CalculateNormalizedHash(keys, Control);
     }
 
     public static int CalculateHash(List<string> keys, string? control)
@@ -43,8 +47,9 @@ public class ShortCut
         Action = shortcut.RelayCommand;
         Category = shortcut.Category;
         Name = shortcut.Name;
-        Control = ShortcutCategory.General.ToString(); 
+        Control = ShortcutCategory.General.ToStringInvariant(); 
         HashCode = CalculateHash(Keys, Control);
+        NormalizedHashCode = ShortcutManager.CalculateNormalizedHash(Keys, Control);
     }
 
     public ShortCut(ShortcutsMain.AvailableShortcut shortcut)
@@ -55,5 +60,6 @@ public class ShortCut
         Name = shortcut.Name;
         Control = string.Empty;
         HashCode = CalculateHash(Keys, Control);
+        NormalizedHashCode = ShortcutManager.CalculateNormalizedHash(Keys, Control);
     }
 }

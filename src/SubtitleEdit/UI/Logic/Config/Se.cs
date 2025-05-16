@@ -60,7 +60,7 @@ public class Se
     {
         Shortcuts =
         [
-            new(nameof(vm.ShowGoToLineCommand), new List<string> { "Ctrl", "G" }),
+            new(nameof(vm.ShowGoToLineCommand), new List<string> { "Control", "G" }),
             new(nameof(vm.GoToPreviousLineCommand), new List<string> { "Alt", "Up" }),
             new(nameof(vm.GoToNextLineCommand), new List<string> { "Alt", "Down" }),
             new(nameof(vm.SelectAllLinesCommand), new List<string> { "Control", "A" }, "grid"),

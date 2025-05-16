@@ -9,7 +9,7 @@ public class ShortcutManager : IShortcutManager
 {
     private readonly HashSet<Key> _activeKeys = [];
     private readonly List<ShortCut> _shortcuts = [];
-    public bool IsControlDown => _activeKeys.Contains(Key.LeftCtrl) || _activeKeys.Contains(Key.RightCtrl);
+    public bool IsControlDown => _activeKeys.Contains(Key.LeftCtrl) || _activeKeys.Contains(Key.RightCtrl) || _activeKeys.Contains(Key.LWin);
     public bool IsAltDown => _activeKeys.Contains(Key.LeftAlt) || _activeKeys.Contains(Key.RightAlt);
     public bool IsShiftDown => _activeKeys.Contains(Key.LeftShift) || _activeKeys.Contains(Key.RightShift);
 
@@ -21,7 +21,11 @@ public class ShortcutManager : IShortcutManager
     public void OnKeyReleased(object? sender, KeyEventArgs e)
     {
         _activeKeys.Remove(e.Key);
-     //   _activeKeys.Clear();
+    }
+
+    public void ClearKeys()
+    {
+        _activeKeys.Clear();
     }
 
     public void RegisterShortcut(ShortCut shortcut)
@@ -33,7 +37,7 @@ public class ShortcutManager : IShortcutManager
     {
         var keys = _activeKeys.Select(p => p.ToString()).ToList();
         var hashCode = ShortCut.CalculateHash(keys, control);
-        var inputWithNormalizedModifiers = NormalizeModifiers(keys, control);
+        var inputWithNormalizedModifiers = CalculateNormalizedHash(keys, control);
 
         if (_activeKeys.Count < 2)
         {
@@ -42,7 +46,9 @@ public class ShortcutManager : IShortcutManager
 
         foreach (var shortcut in _shortcuts)
         {
-            if (hashCode == shortcut.HashCode || inputWithNormalizedModifiers == shortcut.HashCode)
+            if (hashCode == shortcut.HashCode || 
+                inputWithNormalizedModifiers == shortcut.HashCode|| 
+                inputWithNormalizedModifiers == shortcut.NormalizedHashCode)
             {
                 return shortcut.Action;
             }
@@ -56,12 +62,12 @@ public class ShortcutManager : IShortcutManager
         _shortcuts.Clear();
     }
 
-    private static int NormalizeModifiers(List<string> inputKeys, string? control)
+    public static int CalculateNormalizedHash(List<string> inputKeys, string? control)
     {
         var keys = new List<string>();
         foreach (var key in inputKeys)
         {
-            if (key is "LeftCtrl" or "RightCtrl")
+            if (key is "LeftCtrl" or "RightCtrl" or "LWin")
             {
                 keys.Add("Control");
             }
