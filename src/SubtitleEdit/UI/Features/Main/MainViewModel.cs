@@ -488,14 +488,19 @@ public partial class MainViewModel : ObservableObject
     
     private void InverseRowSelection()
     {
-        if (SubtitleGrid.SelectedItems == null)
+        if (SubtitleGrid.SelectedItems == null || Subtitles.Count == 0)
         {
             return;
         }
 
+        // Store currently selected items
         var selectedItems = new HashSet<SubtitleLineViewModel>(SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>());
+    
+        // Clear current selection
         SubtitleGrid.SelectedItems.Clear();
-        foreach (var item in SubtitleGrid.SelectedItems)
+    
+        // Add all items that weren't previously selected
+        foreach (var item in Subtitles)
         {
             if (!selectedItems.Contains(item))
             {

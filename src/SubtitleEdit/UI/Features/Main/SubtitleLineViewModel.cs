@@ -7,19 +7,19 @@ namespace Nikse.SubtitleEdit.Features.Main;
 public partial class SubtitleLineViewModel : ObservableObject
 {
     [ObservableProperty]
-    private int number;
+    private int _number;
 
     [ObservableProperty]
-    private TimeSpan startTime;
+    private TimeSpan _startTime;
 
     [ObservableProperty]
-    private TimeSpan endTime;
+    private TimeSpan _endTime;
 
     [ObservableProperty]
-    private TimeSpan duration;
+    private TimeSpan _duration;
 
     [ObservableProperty]
-    private string text;
+    private string _text;
 
     public SubtitleLineViewModel()
     {
