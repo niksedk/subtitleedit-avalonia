@@ -53,7 +53,11 @@ public class DownloadFfmpegWindow : Window
             }
         };
 
-        Activated += delegate { buttonCancel.Focus(); }; // hack to make OnKeyDown work
+        Activated += delegate
+        {
+            buttonCancel.Focus();
+            vm.StartDownload();
+        }; // hack to make OnKeyDown work
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

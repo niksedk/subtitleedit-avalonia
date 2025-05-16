@@ -347,7 +347,7 @@ public static class InitListViewAndEditBox
             HorizontalAlignment = HorizontalAlignment.Right,
             VerticalAlignment = VerticalAlignment.Top,
             FontSize = 12,
-            Padding = new Thickness(0, 0, 3, 0),
+            Padding = new Thickness(0, 2, 3, 0),
         };
         textTotalLengthLabel.Bind(TextBlock.TextProperty,
             new Binding(nameof(vm.EditTextTotalLength))
@@ -364,7 +364,7 @@ public static class InitListViewAndEditBox
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Top,
             FontSize = 12,
-            Padding = new Thickness(3, 0, 0, 0),
+            Padding = new Thickness(3, 2, 0, 0),
         };
         singleLineLengthLabel.Bind(TextBlock.TextProperty,
             new Binding(nameof(vm.EditTextLineLengths))
