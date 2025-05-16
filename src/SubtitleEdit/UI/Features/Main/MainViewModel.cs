@@ -483,46 +483,27 @@ public partial class MainViewModel : ObservableObject
 
     private void SelectAllRows()
     {
-        if (SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source)
-        {
-            if (source.Selection is ITreeDataGridRowSelectionModel<SubtitleLineViewModel> x)
-            {
-                x.Clear();
-                for (var i = 0; i < source.Items.Count(); i++)
-                {
-                    x.Select(i);
-                }
-            }
-        }
+        SubtitleGrid.SelectAll();
     }
-
+    
     private void InverseRowSelection()
     {
-        if (SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source)
+        if (SubtitleGrid.SelectedItems == null)
         {
-            if (source.Selection is ITreeDataGridRowSelectionModel<SubtitleLineViewModel> selection)
-            {
-                // Fix for CA1826: Use a for loop instead of LINQ methods
-                var oldIndices = new HashSet<int>();
-                foreach (var indexPath in selection.SelectedIndexes)
-                {
-                    if (indexPath.Count > 0)
-                    {
-                        oldIndices.Add(indexPath[0]);
-                    }
-                }
+            return;
+        }
 
-                selection.Clear();
-                for (var i = 0; i < source.Items.Count(); i++)
-                {
-                    if (!oldIndices.Contains(i))
-                    {
-                        selection.Select(new IndexPath(i)); // Use IndexPath constructor to create a valid index
-                    }
-                }
+        var selectedItems = new HashSet<SubtitleLineViewModel>(SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>());
+        SubtitleGrid.SelectedItems.Clear();
+        foreach (var item in SubtitleGrid.SelectedItems)
+        {
+            if (!selectedItems.Contains(item))
+            {
+                SubtitleGrid.SelectedItems.Add(item);
             }
         }
     }
+
 
     // Method to select a specific row by index and make it visible
     public void SelectAndScrollToRow(int index)
@@ -1007,8 +988,6 @@ public partial class MainViewModel : ObservableObject
         _selectedSubtitles = selectedItems.Cast<SubtitleLineViewModel>().ToList();
         if (selectedItems.Count > 1)
         {
-            SelectedSubtitle = null;
-            SelectedSubtitleIndex = null;
             StatusTextRight = $"{selectedItems.Count} lines selected of {Subtitles.Count}";
             EditTextCharactersPerSecond = string.Empty;
             EditTextTotalLength = string.Empty;

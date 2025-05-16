@@ -53,7 +53,7 @@ public class MainView : ViewBase
         InitLayout.MakeLayout(this, _vm, Se.Settings.General.LayoutNumber);
         root.Children.Add(_vm.ContentGrid);
         
-        this.AddHandler(KeyUpEvent, _vm.OnKeyUpHandler, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
+        AddHandler(KeyUpEvent, _vm.OnKeyUpHandler, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
 
         return root;
     }
