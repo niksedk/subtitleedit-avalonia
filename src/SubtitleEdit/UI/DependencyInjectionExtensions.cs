@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit.Features.Common;
+using Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
 using Nikse.SubtitleEdit.Features.Help;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Main.Layout;
@@ -50,5 +51,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<TranslateSettingsViewModel>();
         collection.AddTransient<DownloadFfmpegWindow>();
         collection.AddTransient<DownloadFfmpegViewModel>();
+        collection.AddTransient<GoToLineNumberWindow>();
+        collection.AddTransient<GoToLineNumberViewModel>();
     }
 }

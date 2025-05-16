@@ -28,6 +28,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -357,6 +358,22 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task ShowGoToLine()
+    {
+        if (Subtitles.Count == 0)
+        {
+            return;
+        }
+
+        var viewModel = await _windowService.ShowDialogAsync<GoToLineNumberWindow, GoToLineNumberViewModel>(Window,
+            vm => { vm.MaxLineNumber = Subtitles.Count; });
+        if (viewModel is { OkPressed: true, LineNumber: >= 0 } && viewModel.LineNumber < Subtitles.Count)
+        {
+            SelectAndScrollToRow(viewModel.LineNumber - 1);
+        }
+    }
+
+    [RelayCommand]
     private void SelectAllLines()
     {
         SelectAllRows();
@@ -371,53 +388,37 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void GoToNextLine()
     {
-        //if (SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source &&
-        //    source.Selection is ITreeDataGridRowSelectionModel<SubtitleLineViewModel> selection &&
-        //    SubtitleGrid is TreeDataGrid treeGrid)
-        //{
-        //    var currentIndex = selection.SelectedIndexes.FirstOrDefault().Count > 0
-        //        ? selection.SelectedIndexes.FirstOrDefault()[0]
-        //        : -1;
-        //    if (currentIndex < 0 || currentIndex + 1 >= source.Rows.Count)
-        //    {
-        //        return;
-        //    }
+        var idx = SelectedSubtitleIndex ?? -1;
+        if (Subtitles.Count == 0 || idx < 0 || idx >= Subtitles.Count)
+        {
+            return;
+        }
 
-        //    var newIndex = currentIndex + 1;
+        idx++;
+        if (idx >= Subtitles.Count)
+        {
+            return;
+        }
 
-        //    //Dispatcher.UIThread.Post(() =>
-        //    //{
-        //    selection.Clear();
-        //    selection.Select(new IndexPath(newIndex)); // Use IndexPath constructor to create a valid index
-        //    SubtitleGrid.RowsPresenter?.BringIntoView(newIndex);
-        //    // }, DispatcherPriority.Background);
-        //}
+        SelectAndScrollToRow(idx);
     }
 
     [RelayCommand]
     private void GoToPreviousLine()
     {
-        //if (SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source &&
-        //    source.Selection is ITreeDataGridRowSelectionModel<SubtitleLineViewModel> selection &&
-        //    SubtitleGrid is TreeDataGrid treeGrid)
-        //{
-        //    var currentIndex = selection.SelectedIndexes.FirstOrDefault().Count > 0
-        //        ? selection.SelectedIndexes.FirstOrDefault()[0]
-        //        : -1;
-        //    if (currentIndex < 1)
-        //    {
-        //        return;
-        //    }
+        var idx = SelectedSubtitleIndex ?? -1;
+        if (Subtitles.Count == 0 || idx < 0 || idx >= Subtitles.Count)
+        {
+            return;
+        }
 
-        //    var newIndex = currentIndex - 1;
+        idx--;
+        if (idx < 0)
+        {
+            return;
+        }
 
-        //    // Dispatcher.UIThread.Post(() =>
-        //    //  {
-        //    selection.Clear();
-        //    selection.Select(new IndexPath(newIndex)); // Use IndexPath constructor to create a valid index
-        //    SubtitleGrid.RowsPresenter?.BringIntoView(newIndex);
-        //    //}, DispatcherPriority.Render);
-        //}
+        SelectAndScrollToRow(idx);
     }
 
     private Control? _fullscreenBeforeParent;

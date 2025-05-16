@@ -73,6 +73,11 @@ public static class InitMenu
                         new MenuItem { Header = "_Find..." },
                         new MenuItem { Header = "Find _next" },
                         new MenuItem { Header = "_Multiple replace" },
+                        new MenuItem
+                        {
+                            Header = "_Go to line number...",
+                            Command =vm.ShowGoToLineCommand,
+                        },   
                         new Separator(),
                         new MenuItem
                         {

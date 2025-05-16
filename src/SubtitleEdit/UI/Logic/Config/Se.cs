@@ -4,7 +4,6 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Forms.FixCommonErrors;
 using Nikse.SubtitleEdit.Features.Main;
@@ -35,7 +34,6 @@ public class Se
         {
             if (string.IsNullOrEmpty(_baseFolder))
             {
-                // _baseFolder = AppContext.BaseDirectory;
                 _baseFolder = AppContext.BaseDirectory;
             }
 
@@ -60,18 +58,15 @@ public class Se
 
     public void InitializeMainShortcuts(MainViewModel vm)
     {
-        Shortcuts = new List<SeShortCut>()
-        {
-    //        new(nameof(vm.CommandExitCommand), new List<string> { "Control", "M" }),
+        Shortcuts =
+        [
+            new(nameof(vm.ShowGoToLineCommand), new List<string> { "Ctrl", "G" }),
             new(nameof(vm.GoToPreviousLineCommand), new List<string> { "Alt", "Up" }),
             new(nameof(vm.GoToNextLineCommand), new List<string> { "Alt", "Down" }),
-    //        new(nameof(vm.CommandExitCommand), new List<string> { "Control", "D" }, "grid"),
             new(nameof(vm.SelectAllLinesCommand), new List<string> { "Control", "A" }, "grid"),
             new(nameof(vm.InverseSelectionCommand), new List<string> { "Control", "Shift", "I" }, "grid"),
-            //        new(nameof(vm.CommandExitCommand), new List<string> { "Control", "Home" }, "grid"),
-            // new(nameof(vm.CommandExitCommand), new List<string> { "Control", "End" }, "grid"),
-            new(nameof(vm.ToggleLinesItalicCommand), new List<string> { "Control", "I" }, "grid"),
-        };
+            new(nameof(vm.ToggleLinesItalicCommand), new List<string> { "Control", "I" }, "grid")
+        ];
     }
 
     public static void SaveSettings()
