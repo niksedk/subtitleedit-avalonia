@@ -279,7 +279,12 @@ public static class InitListViewAndEditBox
             {
                 Mode = BindingMode.TwoWay,
                 Converter = TimeSpanToSecondsConverter.Instance,
-            }
+            },
+            // Add a binding for the background property
+            [!NumericUpDown.BackgroundProperty] = new Binding("SelectedSubtitle.Duration")
+            {
+                Converter = DurationToBackgroundConverter.Instance,
+            },
         };
 
         durationPanel.Children.Add(durationUpDown);

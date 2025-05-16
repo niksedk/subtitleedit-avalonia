@@ -170,6 +170,25 @@ public class SettingsPage : UserControl
                 MakeCheckboxSetting("Color time code overlap", nameof(_vm.ColorOverlap)),
                 MakeSeparator(),
                 MakeCheckboxSetting("Color if gap is too short", nameof(_vm.ColorGapTooShort)),
+                MakeSeparator(),
+                new SettingsItem("Error background color", () => new ColorPicker
+                {
+                    Width = 200,
+                    IsAlphaEnabled = true,
+                    IsAlphaVisible = true,
+                    IsColorSpectrumSliderVisible = false,
+                    IsColorComponentsVisible = true,
+                    IsColorModelVisible = false,
+                    IsColorPaletteVisible = false,
+                    IsAccentColorsVisible = false,
+                    IsColorSpectrumVisible = true,
+                    IsComponentTextInputVisible = true,
+                    [!ColorPicker.ColorProperty] = new Binding(nameof(_vm.ErrorColor))
+                    {
+                        Source = _vm,
+                        Mode = BindingMode.TwoWay
+                    },
+                }),
             ]),
 
             new SettingsSection("Video player",
@@ -256,9 +275,10 @@ public class SettingsPage : UserControl
                             {
                                 new CheckBox
                                 {
-                                    [!ToggleButton.IsCheckedProperty] =
-                                        new Binding(nameof(FileTypeAssociationViewModel.IsAssociated))
-                                            { Source = fileType, Mode = BindingMode.TwoWay },
+                                    [!ToggleButton.IsCheckedProperty] =new Binding(nameof(FileTypeAssociationViewModel.IsAssociated))
+                                    {
+                                        Source = fileType, Mode = BindingMode.TwoWay
+                                    },
                                 },
                                 new Image
                                 {

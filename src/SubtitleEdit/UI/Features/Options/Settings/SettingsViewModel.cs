@@ -14,6 +14,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic.Config;
+using Avalonia.Media;
+using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
 
@@ -54,6 +56,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _colorTextTooManyLines;
     [ObservableProperty] private bool _colorOverlap;
     [ObservableProperty] private bool _colorGapTooShort;
+    [ObservableProperty] private Color _errorColor;
 
     [ObservableProperty] private ObservableCollection<VideoPlayerItem> _videoPlayers;
     [ObservableProperty] private VideoPlayerItem _selectedVideoPlayer;
@@ -117,6 +120,8 @@ public partial class SettingsViewModel : ObservableObject
         SelectedDefaultSubtitleFormat = DefaultSubtitleFormats.First();
         SelectedSaveSubtitleFormat = SaveSubtitleFormats.First();
 
+        ErrorColor = Color.FromArgb(50, 255, 0, 0);
+
         LoadSettings();
     }
 
@@ -157,7 +162,8 @@ public partial class SettingsViewModel : ObservableObject
         ColorTextTooManyLines = general.ColorTextTooManyLines;
         ColorOverlap = general.ColorTimeCodeOverlap;
         ColorGapTooShort = general.ColorGapTooShort;
-        
+        ErrorColor = general.ErrorColor.FromHexToColor();
+
         var video = Se.Settings.Video;
         var videoPlayer = VideoPlayers.FirstOrDefault(p => p.Name == video.VideoPlayer);
         if (videoPlayer != null)
@@ -207,6 +213,7 @@ public partial class SettingsViewModel : ObservableObject
         general.ColorTextTooManyLines = ColorTextTooManyLines;
         general.ColorTimeCodeOverlap = ColorOverlap;
         general.ColorGapTooShort = ColorGapTooShort;
+        general.ErrorColor = ErrorColor.FromColorToHex();
 
         video.VideoPlayer = SelectedVideoPlayer.Name;
         video.ShowStopButton = ShowStopButton;

@@ -1,4 +1,5 @@
-﻿using Nikse.SubtitleEdit.Core.Common;
+﻿using Avalonia.Media;
+using Nikse.SubtitleEdit.Core.Common;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 
@@ -35,6 +36,7 @@ public class SeGeneral
     public bool ColorTextTooManyLines { get; set; }
     public bool ColorTimeCodeOverlap { get; set; }
     public bool ColorGapTooShort { get; set; }
+    public string ErrorColor { get; set; }
 
     public SeGeneral()
     {
@@ -62,5 +64,13 @@ public class SeGeneral
         FavoriteSubtitleFormats = "SubRip";
         CpsLineLengthStrategy = "";//TODO: Add default value
 
+        ColorDurationTooShort = true;
+        ColorDurationTooLong = true;
+        ColorTextTooLong = true;
+        ColorTextTooWide = true;
+        ColorTextTooManyLines = true;
+        ColorTimeCodeOverlap = true;
+        ColorGapTooShort = true;
+        ErrorColor = Color.FromArgb(50, 255, 0, 0).FromColorToHex();
     }
 }

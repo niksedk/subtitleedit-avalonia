@@ -37,6 +37,10 @@ var appBuilder = AppBuilder.Configure<Application>()
         {
             Source = new Uri("avares://Avalonia.Controls.TreeDataGrid/Themes/Fluent.axaml", UriKind.Absolute)
         });
+        b.Instance?.Styles.Add(new StyleInclude(new Uri("avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml", UriKind.Absolute))
+        {
+            Source = new Uri("avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml", UriKind.Absolute)
+        });
     })
     .SetupWithLifetime(lifetime);
 
