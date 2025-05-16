@@ -511,7 +511,7 @@ public partial class MainViewModel : ObservableObject
 
 
     // Method to select a specific row by index and make it visible
-    public void SelectAndScrollToRow(int index)
+    private void SelectAndScrollToRow(int index)
     {
         if (index < 0 || index >= Subtitles.Count)
         {
