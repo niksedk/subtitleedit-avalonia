@@ -15,12 +15,15 @@ public class WhisperPostProcessingWindow : Window
         Icon = UiUtil.GetSeIcon();
         Title = "Whisper post-processing";
         Width = 350;
-        Height = 320;
+        Height = 350;
         CanResize = false;
 
         _vm = vm;
         vm.Window = this;
         DataContext = vm;
+
+        var labelAdjustTimings = UiUtil.MakeTextBlock("Adjust timings");
+        var checkAdjustTimings = UiUtil.MakeCheckBox(vm, nameof(vm.AdjustTimings));
 
         var labelMergeShortLines = UiUtil.MakeTextBlock("Merge short lines");
         var checkMergeShortLines = UiUtil.MakeCheckBox(vm, nameof(vm.MergeShortLines));
@@ -51,6 +54,7 @@ public class WhisperPostProcessingWindow : Window
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
             },
             ColumnDefinitions =
@@ -66,6 +70,15 @@ public class WhisperPostProcessingWindow : Window
         };
 
         var row = 0;
+
+        grid.Children.Add(labelAdjustTimings);
+        Grid.SetRow(labelAdjustTimings, row);
+        Grid.SetColumn(labelAdjustTimings, 0);
+
+        grid.Children.Add(checkAdjustTimings);
+        Grid.SetRow(checkAdjustTimings, row);
+        Grid.SetColumn(checkAdjustTimings, 1);
+        row++;
 
         grid.Children.Add(labelMergeShortLines);
         Grid.SetRow(labelMergeShortLines, row);

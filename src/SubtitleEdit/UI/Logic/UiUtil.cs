@@ -327,6 +327,13 @@ public static class UiUtil
         return control;
     }
 
+    public static Button WithMarginBottom(this Button control, int marginBottom)
+    {
+        var m = control.Margin;
+        control.Margin = new Thickness(m.Left, m.Top, m.Right, marginBottom);
+        return control;
+    }
+
     public static TextBlock WithBackgroundColor(this TextBlock control, IBrush brush)
     {
         control.Background = brush;

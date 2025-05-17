@@ -7,6 +7,7 @@ namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 
 public partial class WhisperPostProcessingViewModel : ObservableObject
 {
+    [ObservableProperty] private bool _adjustTimings;
     [ObservableProperty] private bool _mergeShortLines;
     [ObservableProperty] private bool _breakSplitLongLines;
     [ObservableProperty] private bool _fixShortDuration;

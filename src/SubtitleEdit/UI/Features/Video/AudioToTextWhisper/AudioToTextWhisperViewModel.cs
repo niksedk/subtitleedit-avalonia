@@ -319,6 +319,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     {
         var vm = await _windowService.ShowDialogAsync<WhisperPostProcessingWindow, WhisperPostProcessingViewModel>(Window!, viewModal =>
         {
+            viewModal.AdjustTimings = Se.Settings.Tools.AudioToText.WhisperAutoAdjustTimings;
             viewModal.FixShortDuration = Se.Settings.Tools.AudioToText.WhisperPostProcessingFixShortDuration;
             viewModal.FixCasing = Se.Settings.Tools.AudioToText.WhisperPostProcessingFixCasing;
             viewModal.AddPeriods = Se.Settings.Tools.AudioToText.WhisperPostProcessingAddPeriods;
@@ -328,6 +329,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
         if (vm.OkPressed)
         {
+            Se.Settings.Tools.AudioToText.WhisperAutoAdjustTimings = vm.AdjustTimings;
             Se.Settings.Tools.AudioToText.WhisperPostProcessingFixShortDuration = vm.FixShortDuration;
             Se.Settings.Tools.AudioToText.WhisperPostProcessingFixCasing = vm.FixCasing;
             Se.Settings.Tools.AudioToText.WhisperPostProcessingAddPeriods = vm.AddPeriods;
@@ -335,6 +337,17 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             Se.Settings.Tools.AudioToText.WhisperPostProcessingSplitLines = vm.BreakSplitLongLines;
         }
     }
+
+    
+    [RelayCommand]
+    private async Task DownloadModel()
+    {
+        //_windowService.ShowWindow<DownloadModelWindow>(view =>
+        //{
+        //    view.DataContext = new DownloadModelViewModel(SelectedEngine, SelectedModel?.Model);
+        //});
+    }
+
 
     [RelayCommand]
     private void Transcribe()

@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
-using Avalonia.Markup.Declarative;
 using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
@@ -61,12 +60,30 @@ public class AudioToTextWhisperWindow : Window
         var comboModel = UiUtil.MakeComboBox(vm.Models, vm, nameof(vm.SelectedModel))
             .WithMinwidth(200)
             .WithMarginBottom(20);
+        var buttonModelDownload = new Button
+        {
+            Content = "...",
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center,
+            Command = vm.DownloadModelCommand,
+            Margin = new Thickness(5, 0, 0, 0),
+        }.WithMarginBottom(20);  
+        var panelModelControls = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            Children =
+            {
+                comboModel,
+                buttonModelDownload
+            }
+        };
 
         var labelTranslateToEnglish = UiUtil.MakeTextBlock("Translate to English");
         var checkTranslateToEnglish = UiUtil.MakeCheckBox(vm, nameof(vm.DoTranslateToEnglish));
-
-        var labelAdjustTimings = UiUtil.MakeTextBlock("Adjust timings");
-        var checkAdjustTimings = UiUtil.MakeCheckBox(vm, nameof(vm.DoAdjustTimings));
 
         var labelPostProcessing = UiUtil.MakeTextBlock("Post processing");
         var checkPostProcessing = UiUtil.MakeCheckBox(vm, nameof(vm.DoPostProcessing));
@@ -102,6 +119,36 @@ public class AudioToTextWhisperWindow : Window
             Command = vm.ShowAdvancedSettingsCommand,
         };
 
+        var progressSlider = new Slider()
+        {
+            Minimum = 0,
+            Maximum = 100,
+            IsEnabled = false,
+            Margin = new Thickness(10, 0, 10, 0),
+            Width = double.NaN,
+            Height = double.NaN,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+        var progressText = new TextBlock()
+        {
+            Text = "0%",
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(10, 0, 10, 0),
+        };
+        var panelProgress = new StackPanel()
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            Children =
+            {
+                progressSlider,
+                progressText
+            }
+        };
+
         var buttonPanel = UiUtil.MakeButtonBar(
             UiUtil.MakeButton("Transcribe", vm.TranscribeCommand),
             UiUtil.MakeButton("Cancel", vm.CancelCommand)
@@ -111,17 +158,17 @@ public class AudioToTextWhisperWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Engine
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Language
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Model
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Translate to English
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Post processing
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Advanced settings
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, 
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, 
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // Console log
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, 
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // OK/Cancel
             },
             ColumnDefinitions =
             {
@@ -147,7 +194,7 @@ public class AudioToTextWhisperWindow : Window
         grid.Children.Add(textBoxConsoleLog);
         Grid.SetRow(textBoxConsoleLog, row);
         Grid.SetColumn(textBoxConsoleLog, 2);
-        Grid.SetRowSpan(textBoxConsoleLog, 9);
+        Grid.SetRowSpan(textBoxConsoleLog, 8);
         row++;
 
         grid.Children.Add(labelEngine);
@@ -172,9 +219,9 @@ public class AudioToTextWhisperWindow : Window
         Grid.SetRow(labelModel, row);
         Grid.SetColumn(labelModel, 0);
 
-        grid.Children.Add(comboModel);
-        Grid.SetRow(comboModel, row);
-        Grid.SetColumn(comboModel, 1);
+        grid.Children.Add(panelModelControls);
+        Grid.SetRow(panelModelControls, row);
+        Grid.SetColumn(panelModelControls, 1);
         row++;
 
         grid.Children.Add(labelTranslateToEnglish);
@@ -184,15 +231,6 @@ public class AudioToTextWhisperWindow : Window
         grid.Children.Add(checkTranslateToEnglish);
         Grid.SetRow(checkTranslateToEnglish, row);
         Grid.SetColumn(checkTranslateToEnglish, 1);
-        row++;
-
-        grid.Children.Add(labelAdjustTimings);
-        Grid.SetRow(labelAdjustTimings, row);
-        Grid.SetColumn(labelAdjustTimings, 0);
-
-        grid.Children.Add(checkAdjustTimings);
-        Grid.SetRow(checkAdjustTimings, row);
-        Grid.SetColumn(checkAdjustTimings, 1);
         row++;
 
         grid.Children.Add(labelPostProcessing);
@@ -212,6 +250,12 @@ public class AudioToTextWhisperWindow : Window
         Grid.SetRow(buttonAdvancedSettings, row);
         Grid.SetColumn(buttonAdvancedSettings, 1);
         row++;
+        row++;
+
+        grid.Children.Add(panelProgress);
+        Grid.SetRow(panelProgress, row);
+        Grid.SetColumn(panelProgress, 0);
+        Grid.SetColumnSpan(panelProgress, 2);
 
         row++;
         grid.Children.Add(buttonPanel);
