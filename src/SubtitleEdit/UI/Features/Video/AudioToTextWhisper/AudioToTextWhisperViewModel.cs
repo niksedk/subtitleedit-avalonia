@@ -342,10 +342,10 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     [RelayCommand]
     private async Task DownloadModel()
     {
-        //_windowService.ShowWindow<DownloadModelWindow>(view =>
-        //{
-        //    view.DataContext = new DownloadModelViewModel(SelectedEngine, SelectedModel?.Model);
-        //});
+        var vm = await _windowService.ShowDialogAsync<DownloadWhisperModelsWindow, DownloadWhisperModelsViewModel>(Window, view =>
+        {
+            
+        });
     }
 
 

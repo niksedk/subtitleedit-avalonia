@@ -85,5 +85,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<RestoreAutoBackupViewModel>();
         collection.AddTransient<WhisperAdvancedViewModel>();
         collection.AddTransient<WhisperPostProcessingViewModel>();
+        collection.AddTransient<DownloadWhisperModelsViewModel>();
+        collection.AddTransient<DownloadWhisperEngineViewModel>();
     }
 }
