@@ -1,7 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit.Features.Common;
 using Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
-using Nikse.SubtitleEdit.Features.Help;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Features.Options.Language;
@@ -53,67 +52,38 @@ public static class DependencyInjectionExtensions
         collection.AddHttpClient<ITesseractDownloadService, TesseractDownloadService>();
         collection.AddHttpClient<IPaddleOcrDownloadService, PaddleOcrDownloadService>();
 
-        // Windows and view models
+        // Window view models
         collection.AddTransient<MainView>();
         collection.AddTransient<MainViewModel>();
-        collection.AddTransient<LayoutWindow>();
         collection.AddTransient<LayoutViewModel>();
-        collection.AddTransient<AboutWindow>();
-        collection.AddTransient<LanguageWindow>();
         collection.AddTransient<LanguageViewModel>();
-        collection.AddTransient<SettingsWindow>();
         collection.AddTransient<SettingsViewModel>();
-        collection.AddTransient<ShortcutsWindow>();
         collection.AddTransient<ShortcutsViewModel>();
-        collection.AddTransient<AutoTranslateWindow>();
         collection.AddTransient<AutoTranslateViewModel>();
-        collection.AddTransient<TranslateSettingsWindow>();
         collection.AddTransient<TranslateSettingsViewModel>();
-        collection.AddTransient<DownloadFfmpegWindow>();
         collection.AddTransient<DownloadFfmpegViewModel>();
-        collection.AddTransient<GoToLineNumberWindow>();
         collection.AddTransient<GoToLineNumberViewModel>();
-        collection.AddTransient<AudioToTextWhisperWindow>();
         collection.AddTransient<AudioToTextWhisperViewModel>();
-        collection.AddTransient<BurnInWindow>();
         collection.AddTransient<BurnInViewModel>();
-        collection.AddTransient<OpenFromUrlWindow>();
         collection.AddTransient<OpenFromUrlViewModel>();
-        collection.AddTransient<TextToSpeechWindow>();
         collection.AddTransient<TextToSpeechViewModel>();
-        collection.AddTransient<TransparentSubtitlesWindow>();
         collection.AddTransient<TransparentSubtitlesViewModel>();
-        collection.AddTransient<SpellCheckWindow>();
         collection.AddTransient<SpellCheckViewModel>();
-        collection.AddTransient<GetDictionariesWindow>();
         collection.AddTransient<GetDictionariesViewModel>();
-        collection.AddTransient<AdjustAllTimesWindow>();
         collection.AddTransient<AdjustAllTimesViewModel>();
-        collection.AddTransient<ChangeFrameRateWindow>();
         collection.AddTransient<ChangeFrameRateViewModel>();
-        collection.AddTransient<ChangeSpeedWindow>();
         collection.AddTransient<ChangeSpeedViewModel>();
-        collection.AddTransient<AdjustDurationWindow>();
         collection.AddTransient<AdjustDurationViewModel>();
-        collection.AddTransient<BatchConvertWindow>();
         collection.AddTransient<BatchConvertViewModel>();
-        collection.AddTransient<ChangeCasingWindow>();
         collection.AddTransient<ChangeCasingViewModel>();
-        collection.AddTransient<FixCommonErrorsWindow>();
         collection.AddTransient<FixCommonErrorsViewModel>();
-        collection.AddTransient<RemoveTextForHearingImpairedWindow>();
         collection.AddTransient<RemoveTextForHearingImpairedViewModel>();
-        collection.AddTransient<FindWindow>();
         collection.AddTransient<FindViewModel>();
-        collection.AddTransient<ReplaceWindow>();
         collection.AddTransient<ReplaceViewModel>();
-        collection.AddTransient<MultipleReplaceWindow>();
         collection.AddTransient<MultipleReplaceViewModel>();
-        collection.AddTransient<ShowHistoryWindow>();
         collection.AddTransient<ShowHistoryViewModel>();
-        collection.AddTransient<RestoreAutoBackupWindow>();
         collection.AddTransient<RestoreAutoBackupViewModel>();
-        collection.AddTransient<WhisperAdvancedWindow>();
         collection.AddTransient<WhisperAdvancedViewModel>();
+        collection.AddTransient<WhisperPostProcessingViewModel>();
     }
 }

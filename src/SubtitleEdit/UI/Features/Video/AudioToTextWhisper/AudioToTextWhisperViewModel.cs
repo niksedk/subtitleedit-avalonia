@@ -19,6 +19,7 @@ using Avalonia.Controls;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 
@@ -99,12 +100,21 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
         Models = new ObservableCollection<WhisperModelDisplay>();
 
+        LoadSettings();
 
         _timerWhisper.Interval = 100;
         _timerWhisper.Elapsed += OnTimerWhisperOnElapsed;
 
         _timerWaveExtract.Interval = 100;
         _timerWaveExtract.Elapsed += OnTimerWaveExtractOnElapsed;
+    }
+
+    private void LoadSettings()
+    {
+        DoTranslateToEnglish = false;
+        DoAdjustTimings = Se.Settings.Tools.AudioToText.WhisperAutoAdjustTimings;
+        DoPostProcessing = Se.Settings.Tools.AudioToText.PostProcessing;
+        Parameters = Se.Settings.Tools.AudioToText.WhisperCustomCommandLineArguments;
     }
 
     private void OnTimerWhisperOnElapsed(object? sender, ElapsedEventArgs args)
@@ -288,16 +298,14 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         //}
     }
 
-
     [RelayCommand]
     private async Task ShowAdvancedSettings()
     {
-        OkPressed = true;
-        
         var vm = await _windowService.ShowDialogAsync<WhisperAdvancedWindow, WhisperAdvancedViewModel>(Window!, viewModal =>
         {
-            viewModal.Engines = Engines.ToList();
             viewModal.Parameters = Parameters;
+            viewModal.Engines = Engines.ToList();
+            viewModal.EngineClickedCommand.Execute(SelectedEngine);
         });
 
         if (vm.OkPressed)
@@ -309,11 +317,23 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowPostProcessingSettings()
     {
-        OkPressed = true;
-
-        var vm = await _windowService.ShowDialogAsync<WhisperPostProcessingWindow, WhisperPostProcessingViewModel>(Window!, _ =>
+        var vm = await _windowService.ShowDialogAsync<WhisperPostProcessingWindow, WhisperPostProcessingViewModel>(Window!, viewModal =>
         {
+            viewModal.FixShortDuration = Se.Settings.Tools.AudioToText.WhisperPostProcessingFixShortDuration;
+            viewModal.FixCasing = Se.Settings.Tools.AudioToText.WhisperPostProcessingFixCasing;
+            viewModal.AddPeriods = Se.Settings.Tools.AudioToText.WhisperPostProcessingAddPeriods;
+            viewModal.MergeShortLines = Se.Settings.Tools.AudioToText.WhisperPostProcessingMergeLines;
+            viewModal.BreakSplitLongLines = Se.Settings.Tools.AudioToText.WhisperPostProcessingSplitLines;
         });
+
+        if (vm.OkPressed)
+        {
+            Se.Settings.Tools.AudioToText.WhisperPostProcessingFixShortDuration = vm.FixShortDuration;
+            Se.Settings.Tools.AudioToText.WhisperPostProcessingFixCasing = vm.FixCasing;
+            Se.Settings.Tools.AudioToText.WhisperPostProcessingAddPeriods = vm.AddPeriods;
+            Se.Settings.Tools.AudioToText.WhisperPostProcessingMergeLines = vm.MergeShortLines;
+            Se.Settings.Tools.AudioToText.WhisperPostProcessingSplitLines = vm.BreakSplitLongLines;
+        }
     }
 
     [RelayCommand]
@@ -335,6 +355,35 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         {
             e.Handled = true;
             Window?.Close();
+        }
+    }
+
+    internal void OnEngineChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        var engine = SelectedEngine;
+
+        Languages.Clear();
+        foreach (var language in engine.Languages)
+        {
+            Languages.Add(language);
+        }
+
+        Models.Clear();
+        foreach (var model in engine.Models)
+        {
+            Models.Add(new WhisperModelDisplay
+            {
+                Model = model,
+                Engine = engine,
+            });
+        }
+
+        var isPurfview = engine.Name == WhisperEnginePurfviewFasterWhisperXxl.StaticName;
+        if (isPurfview &&
+            string.IsNullOrWhiteSpace(Parameters) &&
+            !Se.Settings.Tools.AudioToText.WhisperCustomCommandLineArgumentsPurfviewBlank)
+        {
+            Parameters = "--standard";
         }
     }
 }

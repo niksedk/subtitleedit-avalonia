@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Markup.Declarative;
 using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
@@ -51,6 +52,7 @@ public class AudioToTextWhisperWindow : Window
 
         var labelEngine = UiUtil.MakeTextBlock("Engine");
         var comboEngine = UiUtil.MakeComboBox(vm.Engines, vm, nameof(vm.SelectedEngine)).WithMinwidth(200);
+        comboEngine.SelectionChanged += vm.OnEngineChanged;
 
         var labelLanguage = UiUtil.MakeTextBlock("Language");
         var comboLanguage = UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage)).WithMinwidth(200);
@@ -68,11 +70,37 @@ public class AudioToTextWhisperWindow : Window
 
         var labelPostProcessing = UiUtil.MakeTextBlock("Post processing");
         var checkPostProcessing = UiUtil.MakeCheckBox(vm, nameof(vm.DoPostProcessing));
+        var buttonPostProcessing = new Button()
+        {
+            Content = "Settings",
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center,
+            Command = vm.ShowPostProcessingSettingsCommand,
+        };
+        var panelPostProcessingControls = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            Children =
+            {
+                checkPostProcessing,
+                buttonPostProcessing
+            }
+        };
 
         var labelAdvancedSettings = UiUtil.MakeTextBlock("Advanced settings");
-        var buttonAdvancedSettings = UiUtil.MakeButton("...", vm.ShowAdvancedSettingsCommand)
-            .WithLeftAlignment()
-            .WithMargin(0);
+        var buttonAdvancedSettings = new Button() 
+        {
+            Content = "Settings",
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center,
+            Command = vm.ShowAdvancedSettingsCommand,
+        };
 
         var buttonPanel = UiUtil.MakeButtonBar(
             UiUtil.MakeButton("Transcribe", vm.TranscribeCommand),
@@ -121,7 +149,6 @@ public class AudioToTextWhisperWindow : Window
         Grid.SetColumn(textBoxConsoleLog, 2);
         Grid.SetRowSpan(textBoxConsoleLog, 9);
         row++;
-
 
         grid.Children.Add(labelEngine);
         Grid.SetRow(labelEngine, row);
@@ -172,9 +199,9 @@ public class AudioToTextWhisperWindow : Window
         Grid.SetRow(labelPostProcessing, row);
         Grid.SetColumn(labelPostProcessing, 0);
 
-        grid.Children.Add(checkPostProcessing);
-        Grid.SetRow(checkPostProcessing, row);
-        Grid.SetColumn(checkPostProcessing, 1);
+        grid.Children.Add(panelPostProcessingControls);
+        Grid.SetRow(panelPostProcessingControls, row);
+        Grid.SetColumn(panelPostProcessingControls, 1);
         row++;
 
         grid.Children.Add(labelAdvancedSettings);

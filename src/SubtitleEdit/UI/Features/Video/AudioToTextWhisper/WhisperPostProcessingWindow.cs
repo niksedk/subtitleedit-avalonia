@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 
@@ -13,8 +14,8 @@ public class WhisperPostProcessingWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Whisper post-processing";
-        Width = 950;
-        Height = 660;
+        Width = 350;
+        Height = 320;
         CanResize = false;
 
         _vm = vm;
@@ -37,8 +38,8 @@ public class WhisperPostProcessingWindow : Window
         var checkAddPeriods = UiUtil.MakeCheckBox(vm, nameof(vm.AddPeriods));
 
         var buttonPanel = UiUtil.MakeButtonBar(
-            UiUtil.MakeButton("Transcribe", vm.OKCommand),
-            UiUtil.MakeButton("Cancel", vm.CancelCommand)
+            UiUtil.MakeButton(Se.Language.General.Ok, vm.OKCommand),
+            UiUtil.MakeButton(Se.Language.General.Cancel, vm.CancelCommand)
         );
 
         var grid = new Grid
