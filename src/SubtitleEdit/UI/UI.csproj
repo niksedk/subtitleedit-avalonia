@@ -121,6 +121,11 @@
       <None Remove="Assets\Themes\Light\WaveformZoomOut.png" />
       <None Remove="Assets\Themes\Light\WebVttProperties.png" />
       <None Remove="Assets\Themes\Light\WebVttStyle.png" />
+      <None Remove="Assets\Whisper\PurfviewFasterWhisper.txt" />
+      <None Remove="Assets\Whisper\PurfviewFasterWhisperXXL.txt" />
+      <None Remove="Assets\Whisper\WhisperConstMe.txt" />
+      <None Remove="Assets\Whisper\WhisperCPP.txt" />
+      <None Remove="Assets\Whisper\WhisperOpenAI.txt" />
       <None Remove="Styles.xaml" />
       <Content Include="Assets\Themes\Dark\New.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -629,6 +634,21 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
       <Content Include="Assets\Themes\Light\WebVttStyle.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="Assets\Whisper\PurfviewFasterWhisper.txt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="Assets\Whisper\PurfviewFasterWhisperXXL.txt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="Assets\Whisper\WhisperConstMe.txt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="Assets\Whisper\WhisperCPP.txt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="Assets\Whisper\WhisperOpenAI.txt">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
     </ItemGroup>

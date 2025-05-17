@@ -47,6 +47,7 @@ public static class InitToolbar
                     Height = 32,
                 },
                 [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileNewCommand)),
+                Background = Brushes.Transparent,
             });
             isLastSeparator = false;
         }
@@ -62,6 +63,7 @@ public static class InitToolbar
                     Height = 32,
                 },
                 [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileOpenCommand)),
+                Background = Brushes.Transparent,
             });
             isLastSeparator = false;
         }
@@ -77,6 +79,7 @@ public static class InitToolbar
                     Height = 32,
                 },
                 [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileSaveCommand)),
+                Background = Brushes.Transparent,
             });
             isLastSeparator = false;
         }
@@ -92,6 +95,7 @@ public static class InitToolbar
                     Height = 32,
                 },
                 [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileSaveAsCommand)),
+                Background = Brushes.Transparent,
             });
             isLastSeparator = false;
         }
@@ -112,6 +116,7 @@ public static class InitToolbar
                     Width = 32,
                     Height = 32,
                 },
+                Background = Brushes.Transparent,
             });
             isLastSeparator = false;
         }
@@ -126,6 +131,7 @@ public static class InitToolbar
                     Width = 32,
                     Height = 32,
                 },
+                Background = Brushes.Transparent,
             });
             isLastSeparator = false;
         }
@@ -146,6 +152,7 @@ public static class InitToolbar
                     Width = 32,
                     Height = 32,
                 },
+                Background = Brushes.Transparent,
             });
             isLastSeparator = false;
         }
@@ -161,6 +168,7 @@ public static class InitToolbar
                     Height = 32,
                 },
                 Command = vm.CommandShowSettingsCommand,
+                Background = Brushes.Transparent,
             });
             isLastSeparator = false;
         }
@@ -176,6 +184,7 @@ public static class InitToolbar
                     Height = 32,
                 },
                 [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandShowLayoutCommand)),
+                Background = Brushes.Transparent,
             });
             isLastSeparator = false;
         }
@@ -196,6 +205,7 @@ public static class InitToolbar
                     Width = 32,
                     Height = 32,
                 },
+                Background = Brushes.Transparent,
             });
             isLastSeparator = false;
         }
