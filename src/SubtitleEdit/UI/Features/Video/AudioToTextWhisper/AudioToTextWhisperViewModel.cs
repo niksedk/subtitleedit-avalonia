@@ -18,6 +18,7 @@ using Avalonia.Threading;
 using Avalonia.Controls;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 
@@ -289,12 +290,31 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
 
     [RelayCommand]
-    private void ShowAdvancedSettings()
+    private async Task ShowAdvancedSettings()
     {
         OkPressed = true;
-        Window?.Close();
+        
+        var vm = await _windowService.ShowDialogAsync<WhisperAdvancedWindow, WhisperAdvancedViewModel>(Window!, viewModal =>
+        {
+            viewModal.Engines = Engines.ToList();
+            viewModal.Parameters = Parameters;
+        });
+
+        if (vm.OkPressed)
+        {
+            Parameters = vm.Parameters;
+        }
     }
 
+    [RelayCommand]
+    private async Task ShowPostProcessingSettings()
+    {
+        OkPressed = true;
+
+        var vm = await _windowService.ShowDialogAsync<WhisperPostProcessingWindow, WhisperPostProcessingViewModel>(Window!, _ =>
+        {
+        });
+    }
 
     [RelayCommand]
     private void Transcribe()

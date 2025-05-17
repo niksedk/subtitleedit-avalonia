@@ -111,8 +111,8 @@ public class LanguageGeneral
         Version = "0.0.8.0 Alpha";
         TranslatedBy = " ";
         CultureName = "en-US";
-        Ok = "&OK";
-        Cancel = "C&ancel";
+        Ok = "_OK";
+        Cancel = "C_ancel";
         Yes = "Yes";
         No = "No";
         Close = "Close";

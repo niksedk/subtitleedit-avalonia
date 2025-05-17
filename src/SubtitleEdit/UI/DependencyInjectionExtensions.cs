@@ -95,7 +95,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<ChangeSpeedViewModel>();
         collection.AddTransient<AdjustDurationWindow>();
         collection.AddTransient<AdjustDurationViewModel>();
-        collection.AddTransient<BatchConvertWindow >();
+        collection.AddTransient<BatchConvertWindow>();
         collection.AddTransient<BatchConvertViewModel>();
         collection.AddTransient<ChangeCasingWindow>();
         collection.AddTransient<ChangeCasingViewModel>();
@@ -113,5 +113,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<ShowHistoryViewModel>();
         collection.AddTransient<RestoreAutoBackupWindow>();
         collection.AddTransient<RestoreAutoBackupViewModel>();
+        collection.AddTransient<WhisperAdvancedWindow>();
+        collection.AddTransient<WhisperAdvancedViewModel>();
     }
 }

@@ -339,6 +339,12 @@ public static class UiUtil
         return control;
     }
 
+    public static Button WithCommandParameter<T>(this Button control, T parameter)
+    {
+        control.CommandParameter = parameter;
+        return control;
+    }
+
     public static ComboBox WithLeftAlignment(this ComboBox control)
     {
         control.HorizontalAlignment = HorizontalAlignment.Left;

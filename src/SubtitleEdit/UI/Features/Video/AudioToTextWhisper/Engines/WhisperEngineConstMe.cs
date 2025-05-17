@@ -111,7 +111,7 @@ public class WhisperEngineConstMe : IWhisperEngine
 
     public async Task<string> GetHelpText()
     {
-        var assetName = $"{StaticName.Replace(" ", string.Empty)}.txt";
+        var assetName = $"{StaticName.Replace(" ", string.Empty).Replace("-", string.Empty)}.txt";
         var path = Path.Combine(Se.BaseFolder, "Assets", "Whisper", assetName);
 
         await using var stream = File.OpenRead(path);

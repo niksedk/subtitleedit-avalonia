@@ -10,13 +10,15 @@ namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 public class AudioToTextWhisperWindow : Window
 {
     private AudioToTextWhisperViewModel _vm;
-    
+
     public AudioToTextWhisperWindow(AudioToTextWhisperViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Audio to text - Whisper";
-        Width = 900;
+        Width = 950;
         Height = 660;
+        MinWidth = 800;
+        MinHeight = 500;
         CanResize = true;
 
         _vm = vm;
@@ -48,14 +50,14 @@ public class AudioToTextWhisperWindow : Window
 
 
         var labelEngine = UiUtil.MakeTextBlock("Engine");
-        var comboEngine = UiUtil.MakeComboBox(vm.Engines, vm, nameof(vm.SelectedEngine)).WithMinwidth(150);
+        var comboEngine = UiUtil.MakeComboBox(vm.Engines, vm, nameof(vm.SelectedEngine)).WithMinwidth(200);
 
         var labelLanguage = UiUtil.MakeTextBlock("Language");
-        var comboLanguage = UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage)).WithMinwidth(150);
+        var comboLanguage = UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage)).WithMinwidth(200);
 
         var labelModel = UiUtil.MakeTextBlock("Model").WithMarginBottom(20);
         var comboModel = UiUtil.MakeComboBox(vm.Models, vm, nameof(vm.SelectedModel))
-            .WithMinwidth(150)
+            .WithMinwidth(200)
             .WithMarginBottom(20);
 
         var labelTranslateToEnglish = UiUtil.MakeTextBlock("Translate to English");
