@@ -16,6 +16,8 @@ using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic.Config;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Features.Common;
+using System.IO;
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
 
@@ -65,7 +67,9 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _autoOpenVideoFile;
     
     [ObservableProperty] private bool _waveformShowGridLines;
-    
+    [ObservableProperty] private string _ffmpegPath;
+    [ObservableProperty] private string _ffmpegStatus;
+
     [ObservableProperty] private ObservableCollection<string> _themes;
     [ObservableProperty] private string _selectedTheme;
     [ObservableProperty] private double _textBoxFontSize;
@@ -91,8 +95,12 @@ public partial class SettingsViewModel : ObservableObject
     public ScrollViewer ScrollView { get; internal set; }
     public List<SettingsSection> Sections { get; internal set; }
 
-    public SettingsViewModel()
+    private readonly IWindowService _windowService;
+
+    public SettingsViewModel(IWindowService windowService)
     {
+        _windowService = windowService;
+
         Themes = ["Light", "Dark"];
         SelectedTheme = Themes[0];
         
@@ -122,6 +130,9 @@ public partial class SettingsViewModel : ObservableObject
 
         ErrorColor = Color.FromArgb(50, 255, 0, 0);
 
+        FfmpegStatus = "Not installed";
+        FfmpegPath = string.Empty;
+
         LoadSettings();
     }
 
@@ -129,7 +140,7 @@ public partial class SettingsViewModel : ObservableObject
     {
         var general = Se.Settings.General;
         var appearance = Se.Settings.Appearance;
-        
+
         SingleLineMaxLength = general.SubtitleLineMaximumLength;
         OptimalCharsPerSec = general.SubtitleOptimalCharactersPerSeconds;
         MaxCharsPerSec = general.SubtitleMaximumCharactersPerSeconds;
@@ -143,7 +154,7 @@ public partial class SettingsViewModel : ObservableObject
         SelectedTheme = appearance.Theme;
         ShowToolbarNew = appearance.ToolbarShowFileNew;
         ShowToolbarOpen = appearance.ToolbarShowFileOpen;
-        ShowToolbarSave =  appearance.ToolbarShowSave;
+        ShowToolbarSave = appearance.ToolbarShowSave;
         ShowToolbarSaveAs = appearance.ToolbarShowSaveAs;
         ShowToolbarFind = appearance.ToolbarShowFind;
         ShowToolbarReplace = appearance.ToolbarShowReplace;
@@ -154,7 +165,7 @@ public partial class SettingsViewModel : ObservableObject
         ShowToolbarEncoding = appearance.ToolbarShowEncoding;
         TextBoxFontSize = appearance.SubtitleTextBoxFontSize;
         TextBoxFontBold = appearance.SubtitleTextBoxFontBold;
-        
+
         ColorDurationTooLong = general.ColorDurationTooLong;
         ColorDurationTooShort = general.ColorDurationTooShort;
         ColorTextTooLong = general.ColorTextTooLong;
@@ -174,7 +185,21 @@ public partial class SettingsViewModel : ObservableObject
         ShowFullscreenButton = video.ShowFullscreenButton;
         AutoOpenVideoFile = video.AutoOpen;
 
-    } 
+        FfmpegPath = Se.Settings.General.FfmpegPath;
+        SetFfmpegStatus();
+    }
+
+    private void SetFfmpegStatus()
+    {
+        if (!string.IsNullOrEmpty(FfmpegPath) && File.Exists(FfmpegPath))
+        {
+            FfmpegStatus = "Installed";
+        }
+        else
+        {
+            FfmpegStatus = "Not installed";
+        }
+    }
 
     private void SaveSettings()
     {
@@ -218,8 +243,10 @@ public partial class SettingsViewModel : ObservableObject
         video.VideoPlayer = SelectedVideoPlayer.Name;
         video.ShowStopButton = ShowStopButton;
         video.ShowFullscreenButton = ShowFullscreenButton;
-        video.AutoOpen = AutoOpenVideoFile;                                                                                                                       
-        
+        video.AutoOpen = AutoOpenVideoFile;
+
+        general.FfmpegPath = FfmpegPath;
+
         Se.SaveSettings();
     }
 
@@ -302,6 +329,19 @@ public partial class SettingsViewModel : ObservableObject
         {
             ScrollElementIntoView(ScrollView, section.Panel!);
         }
+    }
+
+    [RelayCommand]
+    private async Task DownloadFfmpeg()
+    {
+        var vm = await _windowService.ShowDialogAsync<DownloadFfmpegWindow, DownloadFfmpegViewModel>(Window!);
+        if (string.IsNullOrEmpty(vm.FfmpegFileName))
+        {
+            return;
+        }
+
+        FfmpegPath = vm.FfmpegFileName;
+        SetFfmpegStatus();
     }
 
     [RelayCommand]

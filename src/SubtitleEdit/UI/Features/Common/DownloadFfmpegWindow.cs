@@ -4,17 +4,23 @@ using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Data;
 using Nikse.SubtitleEdit.Logic;
+using Avalonia.Controls.Primitives;
+using Avalonia.Styling;
 
 namespace Nikse.SubtitleEdit.Features.Common;
 
 public class DownloadFfmpegWindow : Window
 {
+    private readonly DownloadFfmpegViewModel _vm;
+
     public DownloadFfmpegWindow(DownloadFfmpegViewModel vm)
     {
+        _vm = vm;
+        vm.Window = this;
         Icon = UiUtil.GetSeIcon();
         Title = "Downloading ffmpeg";
         Width = 400;
-        Height = 250;
+        Height = 190;
         CanResize = false;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
 
@@ -31,6 +37,23 @@ public class DownloadFfmpegWindow : Window
         {
             Minimum = 0,
             Maximum = 100,
+            Styles =
+            {
+                new Style(x => x.OfType<Thumb>())
+                {
+                    Setters =
+                    {
+                        new Setter(Thumb.IsVisibleProperty, false)
+                    }
+                },
+                new Style(x => x.OfType<Track>())
+                {
+                    Setters =
+                    {
+                        new Setter(Track.HeightProperty, 6.0)
+                    }
+                },
+            }
         };
         progressSlider.Bind(Slider.ValueProperty, new Binding(nameof(vm.Progress)));
 
@@ -38,7 +61,7 @@ public class DownloadFfmpegWindow : Window
         statusText.Bind(TextBlock.TextProperty, new Binding(nameof(vm.StatusText)));
 
         var buttonCancel = UiUtil.MakeButton("Cancel", vm.CommandCancelCommand);
-        var buttonBar = UiUtil.MakeButtonBar( buttonCancel);
+        var buttonBar = UiUtil.MakeButtonBar(buttonCancel);
 
         Content = new StackPanel
         {
@@ -55,18 +78,14 @@ public class DownloadFfmpegWindow : Window
 
         Activated += delegate
         {
-            buttonCancel.Focus();
+            buttonCancel.Focus(); // hack to make OnKeyDown work
             vm.StartDownload();
-        }; // hack to make OnKeyDown work
+        }; 
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
-        if (e.Key == Key.Escape)
-        {
-            e.Handled = true;
-            Close();
-        }
+        _vm.OnKeyDown(e);
     }
 }

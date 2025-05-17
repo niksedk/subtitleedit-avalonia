@@ -222,7 +222,38 @@ public class SettingsPage : UserControl
             new SettingsSection("Waveform/spectrogram",
             [
                 MakeCheckboxSetting("Show grid lines", nameof(_vm.WaveformShowGridLines)),
-                new SettingsItem("Download ffmpeg", () => new TextBlock { Text = "todo..." }),
+                new SettingsItem("Download ffmpeg", () => new StackPanel
+                {
+                    Children =
+                    {
+                        new StackPanel
+                        {
+                            Orientation = Orientation.Horizontal,
+                            Spacing = 10,
+                            Children =
+                            {
+                                UiUtil.MakeButton("Download", _vm.DownloadFfmpegCommand),
+                                new TextBlock
+                                {
+                                    DataContext = _vm,
+                                    [!TextBlock.TextProperty] = new Binding(nameof(_vm.FfmpegStatus)),
+                                    Margin = new Thickness(0, 0, 0, 0),
+                                    VerticalAlignment = VerticalAlignment.Center,
+                                    HorizontalAlignment = HorizontalAlignment.Left,
+                                }
+                            }
+                        },
+                        new TextBlock
+                        {
+                            DataContext = _vm,
+                            [!TextBlock.TextProperty] = new Binding(nameof(_vm.FfmpegPath)),
+                            Margin = new Thickness(10, 0, 0, 0),
+                            VerticalAlignment = VerticalAlignment.Center,
+                            Opacity = 0.5,
+                            FontSize = 10,
+                        }
+                    }
+                }),
             ]),
 
             new SettingsSection("Tools",

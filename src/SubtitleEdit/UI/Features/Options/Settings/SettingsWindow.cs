@@ -13,7 +13,7 @@ public class SettingsWindow : Window
         _vm = vm;
         Icon = UiUtil.GetSeIcon();
         Title = "Settings";
-        Width = 800;
+        Width = 900;
         Height = 700;
         MinWidth = 650;
         MinHeight = 500;

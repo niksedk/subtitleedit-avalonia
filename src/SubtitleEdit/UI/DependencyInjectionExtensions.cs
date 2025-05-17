@@ -28,10 +28,11 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<INamesList, SeNamesList>();
         
         // Download services
-        collection.AddTransient<IFfmpegDownloadService, FfmpegDownloadService>();
-        collection.AddTransient<IWhisperDownloadService, WhisperDownloadService>();
-        collection.AddTransient<ISpellCheckDictionaryDownloadService, SpellCheckDictionaryDownloadService>();
-        collection.AddTransient<ITesseractDownloadService, TesseractDownloadService>();
+        collection.AddHttpClient<IFfmpegDownloadService, FfmpegDownloadService>();
+        collection.AddHttpClient<IWhisperDownloadService, WhisperDownloadService>();
+        collection.AddHttpClient<ISpellCheckDictionaryDownloadService, SpellCheckDictionaryDownloadService>();
+        collection.AddHttpClient<ITesseractDownloadService, TesseractDownloadService>();
+        collection.AddHttpClient<IPaddleOcrDownloadService, PaddleOcrDownloadService>();
 
         // Windows and view models
         collection.AddTransient<MainView>();

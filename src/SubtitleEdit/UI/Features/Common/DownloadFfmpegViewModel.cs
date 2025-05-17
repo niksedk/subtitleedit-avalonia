@@ -5,6 +5,8 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using Avalonia.Input;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic.Compression;
@@ -26,6 +28,7 @@ public partial class DownloadFfmpegViewModel : ObservableObject
     private IFfmpegDownloadService _ffmpegDownloadService;
     private Task? _downloadTask;
     private readonly Timer _timer;
+    private bool _done;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly MemoryStream _downloadStream;
 
@@ -49,44 +52,56 @@ public partial class DownloadFfmpegViewModel : ObservableObject
         _timer.Start();
     }
 
+    private readonly Lock _lockObj = new();
+
     private void OnTimerOnElapsed(object? sender, ElapsedEventArgs args)
     {
-        if (_downloadTask is { IsCompleted: true })
+        lock (_lockObj)
         {
-            _timer.Stop();
-
-            if (_downloadStream.Length == 0)
+            if (_done)
             {
-                StatusText = "Download failed";
-                Error = "No data received";
                 return;
             }
 
-            var ffmpegFileName = GetFfmpegFileName();
-
-            if (File.Exists(ffmpegFileName))
+            if (_downloadTask is { IsCompleted: true })
             {
-                File.Delete(ffmpegFileName);
-            }
+                _timer.Stop();
+                _done = true;
 
-            UnpackFfmpeg(ffmpegFileName);
+                if (_downloadStream.Length == 0)
+                {
+                    StatusText = "Download failed";
+                    Error = "No data received";
+                    return;
+                }
 
-            FfmpegFileName = ffmpegFileName;
-            Close();
-        }
-        else if (_downloadTask is { IsFaulted: true })
-        {
-            _timer.Stop();
-            var ex = _downloadTask.Exception?.InnerException ?? _downloadTask.Exception;
-            if (ex is OperationCanceledException)
-            {
-                StatusText = "Download canceled";
+                var ffmpegFileName = GetFfmpegFileName();
+
+                if (File.Exists(ffmpegFileName))
+                {
+                    File.Delete(ffmpegFileName);
+                }
+
+                UnpackFfmpeg(ffmpegFileName);
+
+                FfmpegFileName = ffmpegFileName;
                 Close();
             }
-            else
+            else if (_downloadTask is { IsFaulted: true })
             {
-                StatusText = "Download failed";
-                Error = ex?.Message ?? "Unknown error";
+                _timer.Stop();
+                _done = true;
+                var ex = _downloadTask.Exception?.InnerException ?? _downloadTask.Exception;
+                if (ex is OperationCanceledException)
+                {
+                    StatusText = "Download canceled";
+                    Close();
+                }
+                else
+                {
+                    StatusText = "Download failed";
+                    Error = ex?.Message ?? "Unknown error";
+                }
             }
         }
     }
@@ -103,7 +118,7 @@ public partial class DownloadFfmpegViewModel : ObservableObject
         _downloadStream.Dispose();
     }
 
-  
+
     public static string GetFfmpegFileName()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -116,14 +131,19 @@ public partial class DownloadFfmpegViewModel : ObservableObject
 
     private void Close()
     {
-        Window?.Close();
+        Dispatcher.UIThread.Post(() =>
+        {
+            Window?.Close();
+        });
     }
 
     [RelayCommand]
     private void CommandCancel()
     {
         _cancellationTokenSource?.Cancel();
-        Window?.Close();
+        _done = true;
+        _timer.Stop();
+        Close();
     }
 
     public void StartDownload()
@@ -132,7 +152,7 @@ public partial class DownloadFfmpegViewModel : ObservableObject
         {
             var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
             var pctString = percentage.ToString(CultureInfo.InvariantCulture);
-            Progress = number;
+            Progress = percentage;
             StatusText = $"Downloading... {pctString}%";
         });
 
@@ -143,8 +163,13 @@ public partial class DownloadFfmpegViewModel : ObservableObject
         }
 
         _downloadTask = _ffmpegDownloadService.DownloadFfmpeg(
-            _downloadStream, 
-            downloadProgress, 
+            _downloadStream,
+            downloadProgress,
             _cancellationTokenSource.Token);
+    }
+
+    internal void OnKeyDown(KeyEventArgs e)
+    {
+        CommandCancel();
     }
 }
