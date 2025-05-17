@@ -1,23 +1,20 @@
-using System.Collections.ObjectModel;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-namespace Nikse.SubtitleEdit.Features.Options.Language;
+namespace Nikse.SubtitleEdit.Features.Video.OpenFromUrl;
 
-public partial class LanguageViewModel : ObservableObject
+public partial class OpenFromUrlViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<string> languages;
-    [ObservableProperty] private string selectedLanguage;
+    [ObservableProperty] private string _url;
     
-    public LanguageWindow? Window { get; set; }
+    public OpenFromUrlWindow? Window { get; set; }
     
     public bool OkPressed { get; private set; }
 
-    public LanguageViewModel()
+    public OpenFromUrlViewModel()
     {
-        Languages = new ObservableCollection<string> { "English", "Danish", "Spanish" };
-        SelectedLanguage = Languages[0];
+        Url = string.Empty;
     }
     
     [RelayCommand]                   

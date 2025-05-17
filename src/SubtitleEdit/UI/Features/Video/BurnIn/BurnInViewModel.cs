@@ -3,18 +3,18 @@ using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-namespace Nikse.SubtitleEdit.Features.Options.Language;
+namespace Nikse.SubtitleEdit.Features.Video.BurnIn;
 
-public partial class LanguageViewModel : ObservableObject
+public partial class BurnInViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<string> languages;
     [ObservableProperty] private string selectedLanguage;
     
-    public LanguageWindow? Window { get; set; }
+    public BurnInWindow? Window { get; set; }
     
     public bool OkPressed { get; private set; }
 
-    public LanguageViewModel()
+    public BurnInViewModel()
     {
         Languages = new ObservableCollection<string> { "English", "Danish", "Spanish" };
         SelectedLanguage = Languages[0];

@@ -1,20 +1,21 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 
-namespace Nikse.SubtitleEdit.Features.Options.Language;
+namespace Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
 
-public class LanguageWindow : Window
+public class TransparentSubtitlesWindow : Window
 {
     private StackPanel _contentPanel;
-    private LanguageViewModel _vm;
+    private TransparentSubtitlesViewModel _vm;
     
-    public LanguageWindow(LanguageViewModel vm)
+    public TransparentSubtitlesWindow(TransparentSubtitlesViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = "Choose language";
+        Title = "Generate video with transparent subtitles";
         Width = 300;
         Height = 160;
         CanResize = false;

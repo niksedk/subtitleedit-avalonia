@@ -30,6 +30,11 @@ using System.Threading.Tasks;
 using Avalonia.Threading;
 using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
+using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
+using Nikse.SubtitleEdit.Features.Video.BurnIn;
+using Nikse.SubtitleEdit.Features.Video.OpenFromUrl;
+using Nikse.SubtitleEdit.Features.Video.TextToSpeech;
+using Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -277,6 +282,58 @@ public partial class MainViewModel : ObservableObject
     {
         VideoCloseFile();
     }
+
+
+    [RelayCommand]
+    private async Task ShowVideoAudioToTextWhisper()
+    {
+        await _windowService.ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(Window, vm =>
+        {
+
+        });
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowVideoBurnIn()
+    {
+        await _windowService.ShowDialogAsync<BurnInWindow, BurnInViewModel>(Window, vm =>
+        {
+
+        });
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowVideoOpenFromUrl()
+    {
+        await _windowService.ShowDialogAsync<OpenFromUrlWindow, OpenFromUrlViewModel>(Window, vm =>
+        {
+
+        });
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowVideoTextToSpeech()
+    {
+        await _windowService.ShowDialogAsync<TextToSpeechWindow, TextToSpeechViewModel>(Window, vm =>
+        {
+
+        });
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowVideoTransparentSubtitles()
+    {
+        await _windowService.ShowDialogAsync<TransparentSubtitlesWindow, TransparentSubtitlesViewModel>(Window, vm =>
+        {
+
+        });
+        _shortcutManager.ClearKeys();
+    }
+
 
     [RelayCommand]
     private async Task CommandShowAutoTranslate()

@@ -1,20 +1,21 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 
-namespace Nikse.SubtitleEdit.Features.Options.Language;
+namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech;
 
-public class LanguageWindow : Window
+public class TextToSpeechWindow : Window
 {
     private StackPanel _contentPanel;
-    private LanguageViewModel _vm;
+    private TextToSpeechViewModel _vm;
     
-    public LanguageWindow(LanguageViewModel vm)
+    public TextToSpeechWindow(TextToSpeechViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = "Choose language";
+        Title = "Text to speech";
         Width = 300;
         Height = 160;
         CanResize = false;

@@ -13,6 +13,11 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Compression;
 using Nikse.SubtitleEdit.Logic.Dictionaries;
 using Nikse.SubtitleEdit.Logic.Download;
+using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
+using Nikse.SubtitleEdit.Features.Video.BurnIn;
+using Nikse.SubtitleEdit.Features.Video.OpenFromUrl;
+using Nikse.SubtitleEdit.Features.Video.TextToSpeech;
+using Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
 
 namespace Nikse.SubtitleEdit;
 
@@ -54,5 +59,15 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<DownloadFfmpegViewModel>();
         collection.AddTransient<GoToLineNumberWindow>();
         collection.AddTransient<GoToLineNumberViewModel>();
+        collection.AddTransient<AudioToTextWhisperWindow>();
+        collection.AddTransient<AudioToTextWhisperViewModel>();
+        collection.AddTransient<BurnInWindow>();
+        collection.AddTransient<BurnInViewModel>();
+        collection.AddTransient<OpenFromUrlWindow>();
+        collection.AddTransient<OpenFromUrlViewModel>();
+        collection.AddTransient<TextToSpeechWindow>();
+        collection.AddTransient<TextToSpeechViewModel>();
+        collection.AddTransient<TransparentSubtitlesWindow>();
+        collection.AddTransient<TransparentSubtitlesViewModel>();
     }
 }

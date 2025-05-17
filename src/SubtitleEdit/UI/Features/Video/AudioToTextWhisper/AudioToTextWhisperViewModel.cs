@@ -3,18 +3,18 @@ using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-namespace Nikse.SubtitleEdit.Features.Options.Language;
+namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 
-public partial class LanguageViewModel : ObservableObject
+public partial class AudioToTextWhisperViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<string> languages;
     [ObservableProperty] private string selectedLanguage;
     
-    public LanguageWindow? Window { get; set; }
+    public AudioToTextWhisperWindow? Window { get; set; }
     
     public bool OkPressed { get; private set; }
 
-    public LanguageViewModel()
+    public AudioToTextWhisperViewModel()
     {
         Languages = new ObservableCollection<string> { "English", "Danish", "Spanish" };
         SelectedLanguage = Languages[0];

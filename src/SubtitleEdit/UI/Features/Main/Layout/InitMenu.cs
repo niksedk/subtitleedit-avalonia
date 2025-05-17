@@ -123,18 +123,38 @@ public static class InitMenu
                             Header = "_Open video file...",
                             Command =vm.CommandVideoOpenCommand,
                         },
-                        new MenuItem { Header = "Open video file from _URL..." },
+                        new MenuItem
+                        {
+                            Header = "Open video file from _URL...",
+                            Command =vm.ShowVideoOpenFromUrlCommand,
+                        },
                         new MenuItem
                         {
                             Header = "_Close video file",
                             Command =vm.CommandVideoCloseCommand,
                         },
                         new Separator(),
-                        new MenuItem { Header = "_Audio to text (Whisper)..." },
-                        new MenuItem { Header = "_Text to speech and add to video..." },
+                        new MenuItem
+                        {
+                            Header = "_Audio to text (Whisper)...",
+                            Command =vm.ShowVideoAudioToTextWhisperCommand,
+                        },
+                        new MenuItem
+                        {
+                             Header = "_Text to speech and add to video...",
+                            Command =vm.ShowVideoTextToSpeechCommand,
+                        },
                         new Separator(),
-                        new MenuItem { Header = "Generate video with burned-in subtitles..." },
-                        new MenuItem { Header = "Generate transparent video with subtitles..." },
+                        new MenuItem
+                        {
+                             Header = "Generate video with burned-in subtitles...",
+                            Command =vm.ShowVideoBurnInCommand,
+                        },
+                        new MenuItem
+                        {
+                             Header = "Generate transparent video with subtitles...",
+                            Command =vm.ShowVideoTransparentSubtitlesCommand,
+                        },
                     }
                 },
                 new MenuItem

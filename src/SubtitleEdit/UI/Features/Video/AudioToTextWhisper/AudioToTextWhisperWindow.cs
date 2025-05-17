@@ -1,20 +1,21 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 
-namespace Nikse.SubtitleEdit.Features.Options.Language;
+namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 
-public class LanguageWindow : Window
+public class AudioToTextWhisperWindow : Window
 {
     private StackPanel _contentPanel;
-    private LanguageViewModel _vm;
+    private AudioToTextWhisperViewModel _vm;
     
-    public LanguageWindow(LanguageViewModel vm)
+    public AudioToTextWhisperWindow(AudioToTextWhisperViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = "Choose language";
+        Title = "Audio to text - Whisper";
         Width = 300;
         Height = 160;
         CanResize = false;
