@@ -46,7 +46,7 @@ public static class InitToolbar
                     Width = 32,
                     Height = 32,
                 },
-                [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileNewCommand)),
+                Command = vm.CommandFileNewCommand,
                 Background = Brushes.Transparent,
             });
             isLastSeparator = false;
@@ -62,7 +62,7 @@ public static class InitToolbar
                     Width = 32,
                     Height = 32,
                 },
-                [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileOpenCommand)),
+                Command = vm.CommandFileOpenCommand,
                 Background = Brushes.Transparent,
             });
             isLastSeparator = false;
@@ -78,7 +78,7 @@ public static class InitToolbar
                     Width = 32,
                     Height = 32,
                 },
-                [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileSaveCommand)),
+                Command = vm.CommandFileSaveCommand,
                 Background = Brushes.Transparent,
             });
             isLastSeparator = false;
@@ -94,7 +94,7 @@ public static class InitToolbar
                     Width = 32,
                     Height = 32,
                 },
-                [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandFileSaveAsCommand)),
+                Command = vm.CommandFileSaveAsCommand,
                 Background = Brushes.Transparent,
             });
             isLastSeparator = false;
@@ -116,6 +116,7 @@ public static class InitToolbar
                     Width = 32,
                     Height = 32,
                 },
+                Command = vm.ShowFindCommand,
                 Background = Brushes.Transparent,
             });
             isLastSeparator = false;
@@ -131,10 +132,12 @@ public static class InitToolbar
                     Width = 32,
                     Height = 32,
                 },
+                Command = vm.ShowReplaceCommand,
                 Background = Brushes.Transparent,
             });
             isLastSeparator = false;
         }
+
 
         if (!isLastSeparator)
         {
@@ -152,6 +155,7 @@ public static class InitToolbar
                     Width = 32,
                     Height = 32,
                 },
+                Command = vm.ShowSpellCheckCommand,
                 Background = Brushes.Transparent,
             });
             isLastSeparator = false;
@@ -183,7 +187,7 @@ public static class InitToolbar
                     Width = 32,
                     Height = 32,
                 },
-                [!MenuItem.CommandProperty] = new Binding(nameof(vm.CommandShowLayoutCommand)),
+                Command = vm.CommandShowLayoutCommand,
                 Background = Brushes.Transparent,
             });
             isLastSeparator = false;
@@ -205,6 +209,7 @@ public static class InitToolbar
                     Width = 32,
                     Height = 32,
                 },
+                Command = vm.ShowHelpCommand,
                 Background = Brushes.Transparent,
             });
             isLastSeparator = false;

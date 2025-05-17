@@ -55,7 +55,7 @@ public static class UiUtil
         };
     }
 
-    public static Control MakeComboBox<T>(
+    public static ComboBox MakeComboBox<T>(
         ObservableCollection<T> sourceLanguages,
         object viewModal,
         string? propertySelectedPath,
@@ -92,7 +92,7 @@ public static class UiUtil
         return comboBox;
     }
 
-    public static Control MakeComboBox<T>(
+    public static ComboBox MakeComboBox<T>(
         ObservableCollection<T> sourceLanguages,
         object viewModal,
         string? propertySelectedPath)
@@ -188,6 +188,27 @@ public static class UiUtil
         };
     }
 
+    public static CheckBox MakeCheckBox(object viewModel, string? isCheckedPropertyPath)
+    {
+        var checkBox = new CheckBox
+        {
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            DataContext = viewModel,
+        };
+
+        if (isCheckedPropertyPath != null)
+        {
+            checkBox.Bind(CheckBox.IsCheckedProperty, new Binding
+            {
+                Path = isCheckedPropertyPath,
+                Mode = BindingMode.TwoWay,
+            });
+        }
+
+        return checkBox;
+    }
+
     public static TextBlock MakeLink(string text, IRelayCommand command)
     {
         var link = new TextBlock
@@ -278,24 +299,80 @@ public static class UiUtil
         return link;
     }
 
-    public static TextBlock WithMarginRight(this TextBlock textBlock, int marginRight)
+    public static TextBlock WithMarginRight(this TextBlock control, int marginRight)
     {
-        var m = textBlock.Margin;
-        textBlock.Margin = new Thickness(m.Left, m.Top, marginRight, m.Bottom);
-        return textBlock;
+        var m = control.Margin;
+        control.Margin = new Thickness(m.Left, m.Top, marginRight, m.Bottom);
+        return control;
     }
 
-    public static TextBlock WithMarginLeft(this TextBlock textBlock, int marginLeft)
+    public static TextBlock WithMarginLeft(this TextBlock control, int marginLeft)
     {
-        var m = textBlock.Margin;
-        textBlock.Margin = new Thickness(marginLeft, m.Top, m.Right, m.Bottom);
-        return textBlock;
+        var m = control.Margin;
+        control.Margin = new Thickness(marginLeft, m.Top, m.Right, m.Bottom);
+        return control;
     }
 
-    public static TextBlock WithBackgroundColor(this TextBlock textBlock, IBrush brush)
+    public static TextBlock WithMarginBottom(this TextBlock control, int marginBottom)
     {
-        textBlock.Background = brush;
-        return textBlock;
+        var m = control.Margin;
+        control.Margin = new Thickness(m.Left, m.Top, m.Right, marginBottom);
+        return control;
+    }
+
+    public static ComboBox WithMarginBottom(this ComboBox control, int marginBottom)
+    {
+        var m = control.Margin;
+        control.Margin = new Thickness(m.Left, m.Top, m.Right, marginBottom);
+        return control;
+    }
+
+    public static TextBlock WithBackgroundColor(this TextBlock control, IBrush brush)
+    {
+        control.Background = brush;
+        return control;
+    }
+
+    public static Button WithLeftAlignment(this Button control)
+    {
+        control.HorizontalAlignment = HorizontalAlignment.Left;
+        return control;
+    }
+
+    public static ComboBox WithLeftAlignment(this ComboBox control)
+    {
+        control.HorizontalAlignment = HorizontalAlignment.Left;
+        return control;
+    }
+
+    public static TextBlock WithMargin(this TextBlock control, int margin)
+    {
+        control.Margin = new Thickness(margin);
+        return control;
+    }
+
+    public static Button WithMargin(this Button control, int margin)
+    {
+        control.Margin = new Thickness(margin);
+        return control;
+    }
+
+    public static TextBlock WithMinwidth(this TextBlock control, int width)
+    {
+        control.MinWidth = width;
+        return control;
+    }
+
+    public static Button WithMinwidth(this Button control, int width)
+    {
+        control.MinWidth = width;
+        return control;
+    }
+
+    public static ComboBox WithMinwidth(this ComboBox control, int width)
+    {
+        control.MinWidth = width;
+        return control;
     }
 
     public static StackPanel MakeButtonBar(params Control[] buttons)
