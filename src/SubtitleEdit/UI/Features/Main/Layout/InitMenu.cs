@@ -1,5 +1,4 @@
 using Avalonia.Controls;
-using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
@@ -11,7 +10,7 @@ public static class InitMenu
         vm.MenuReopen = new MenuItem
         {
             Header = "_Reopen",
-            Command =vm.CommandFileReopenCommand,
+            Command = vm.CommandFileReopenCommand,
         };
 
         UpdateRecentFiles(vm);
@@ -30,26 +29,30 @@ public static class InitMenu
                         new MenuItem
                         {
                             Header = "_New",
-                            Command =vm.CommandFileNewCommand,
+                            Command = vm.CommandFileNewCommand,
                         },
                         new Separator(),
                         new MenuItem
                         {
                             Header = "_Open...",
-                            Command =vm.CommandFileOpenCommand,
+                            Command = vm.CommandFileOpenCommand,
                         },
                         vm.MenuReopen,
-                        new MenuItem { Header = "Restore auto-backup..." },
+                        new MenuItem
+                        {
+                            Header = "Restore auto-backup...",
+                            Command = vm.ShowRestoreAutoBackupCommand,
+                        },
                         new Separator(),
                         new MenuItem
                         {
                             Header = "_Save",
-                            Command =vm.CommandFileSaveCommand,
+                            Command = vm.CommandFileSaveCommand,
                         },
                         new MenuItem
                         {
                             Header = "Save _as...",
-                            Command =vm.CommandFileSaveAsCommand,
+                            Command = vm.CommandFileSaveAsCommand,
                         },
                         new Separator(),
                         new MenuItem { Header = "Export" },
@@ -57,7 +60,7 @@ public static class InitMenu
                         new MenuItem
                         {
                             Header = "E_xit",
-                            Command =vm.CommandExitCommand,
+                            Command = vm.CommandExitCommand,
                         }
                     }
                 },
@@ -66,29 +69,56 @@ public static class InitMenu
                     Header = "_Edit",
                     Items =
                     {
-                        new MenuItem { Header = "_Undo" },
-                        new MenuItem { Header = "_Redo" },
-                        new MenuItem { Header = "Show _history..." },
+                        new MenuItem
+                        {
+                            Header = "_Undo",
+                        },
+                        new MenuItem
+                        {
+                            Header = "_Redo",
+                        },
+                        new MenuItem
+                        {
+                            Header = "Show _history...",
+                            Command = vm.ShowHistoryCommand,
+                        },
                         new Separator(),
-                        new MenuItem { Header = "_Find..." },
-                        new MenuItem { Header = "Find _next" },
-                        new MenuItem { Header = "_Multiple replace" },
+                        new MenuItem
+                        {
+                            Header = "_Find...",
+                            Command = vm.ShowFindCommand,
+                        },
+                        new MenuItem
+                        {
+                            Header = "Find _next",
+                            Command = vm.FindNextCommand,
+                        },
+                        new MenuItem
+                        {
+                            Header = "_Replace",
+                            Command = vm.ShowReplaceCommand,
+                        },
+                        new MenuItem
+                        {
+                            Header = "_Multiple replace",
+                            Command = vm.ShowMultipleReplaceCommand,
+                        },
                         new MenuItem
                         {
                             Header = "_Go to line number...",
-                            Command =vm.ShowGoToLineCommand,
-                        },   
+                            Command = vm.ShowGoToLineCommand,
+                        },
                         new Separator(),
                         new MenuItem
                         {
                             Header = "Select _all",
-                            Command =vm.SelectAllLinesCommand,
-                        },                        
+                            Command = vm.SelectAllLinesCommand,
+                        },
                         new MenuItem
                         {
                             Header = "_Inverse selection",
-                            Command =vm.InverseSelectionCommand,
-                        },                        
+                            Command = vm.InverseSelectionCommand,
+                        },
                     }
                 },
                 new MenuItem
@@ -96,11 +126,31 @@ public static class InitMenu
                     Header = "Too_ls",
                     Items =
                     {
-                        new MenuItem { Header = "_Adjust durations..." },
-                        new MenuItem { Header = "_Fix common errors..." },
-                        new MenuItem { Header = "_Remove text for hearing impaired..." },
-                        new MenuItem { Header = "_Change casing..." },
-                        new MenuItem { Header = "_Batch convert..." },
+                        new MenuItem
+                        {
+                            Header = "_Adjust durations...",
+                            Command = vm.ShowToolsAdjustDurationsCommand,
+                        },
+                        new MenuItem
+                        {
+                            Header = "_Fix common errors...",
+                            Command = vm.ShowToolsFixCommonErrorsCommand,
+                        },
+                        new MenuItem
+                        {
+                            Header = "_Remove text for hearing impaired...",
+                            Command = vm.ShowToolsRemoveTextForHearingImpairedCommand,
+                        },
+                        new MenuItem
+                        {
+                            Header = "_Change casing...",
+                            Command = vm.ShowToolsChangeCasingCommand,
+                        },
+                        new MenuItem
+                        {
+                            Header = "_Batch convert...",
+                            Command = vm.ShowToolsBatchConvertCommand,
+                        },
                     }
                 },
                 new MenuItem
@@ -108,9 +158,17 @@ public static class InitMenu
                     Header = "_Spell Check",
                     Items =
                     {
-                        new MenuItem { Header = "_Spell check..." },
+                        new MenuItem
+                        {
+                            Header = "_Spell check...",
+                            Command = vm.ShowSpellCheckCommand,
+                        },
                         new Separator(),
-                        new MenuItem { Header = "_Get dictionaries..." },
+                        new MenuItem
+                        {
+                            Header = "_Get dictionaries...",
+                            Command = vm.ShowSpellCheckDictionariesCommand,
+                        },
                     }
                 },
                 new MenuItem
@@ -121,39 +179,39 @@ public static class InitMenu
                         new MenuItem
                         {
                             Header = "_Open video file...",
-                            Command =vm.CommandVideoOpenCommand,
+                            Command = vm.CommandVideoOpenCommand,
                         },
                         new MenuItem
                         {
                             Header = "Open video file from _URL...",
-                            Command =vm.ShowVideoOpenFromUrlCommand,
+                            Command = vm.ShowVideoOpenFromUrlCommand,
                         },
                         new MenuItem
                         {
                             Header = "_Close video file",
-                            Command =vm.CommandVideoCloseCommand,
+                            Command = vm.CommandVideoCloseCommand,
                         },
                         new Separator(),
                         new MenuItem
                         {
                             Header = "_Audio to text (Whisper)...",
-                            Command =vm.ShowVideoAudioToTextWhisperCommand,
+                            Command = vm.ShowVideoAudioToTextWhisperCommand,
                         },
                         new MenuItem
                         {
                              Header = "_Text to speech and add to video...",
-                            Command =vm.ShowVideoTextToSpeechCommand,
+                            Command = vm.ShowVideoTextToSpeechCommand,
                         },
                         new Separator(),
                         new MenuItem
                         {
                              Header = "Generate video with burned-in subtitles...",
-                            Command =vm.ShowVideoBurnInCommand,
+                            Command = vm.ShowVideoBurnInCommand,
                         },
                         new MenuItem
                         {
                              Header = "Generate transparent video with subtitles...",
-                            Command =vm.ShowVideoTransparentSubtitlesCommand,
+                            Command = vm.ShowVideoTransparentSubtitlesCommand,
                         },
                     }
                 },
@@ -162,9 +220,21 @@ public static class InitMenu
                     Header = "Syn_chronization",
                     Items =
                     {
-                        new MenuItem { Header = "_Adjust all times (show earlier/later)..." },
-                        new MenuItem { Header = "_Change frame rate..." },
-                        new MenuItem { Header = "_Change speed in percent" },
+                        new MenuItem
+                        {
+                             Header = "_Adjust all times (show earlier/later)...",
+                            Command = vm.ShowSyncAdjustAllTimesCommand,
+                        },
+                        new MenuItem
+                        {
+                             Header = "_Change frame rate...",
+                            Command = vm.ShowSyncChangeFrameRateCommand,
+                        },
+                        new MenuItem
+                        {
+                             Header = "_Change speed in percent",
+                            Command = vm.ShowSyncChangeSpeedCommand,
+                        },
                     }
                 },
                 new MenuItem
@@ -175,7 +245,7 @@ public static class InitMenu
                         new MenuItem
                         {
                             Header = "_Settings...",
-                            Command =vm.CommandShowSettingsCommand,
+                            Command = vm.CommandShowSettingsCommand,
                         },
                         new MenuItem
                         {
@@ -209,10 +279,14 @@ public static class InitMenu
                         new MenuItem
                         {
                             Header = "_About",
-                            Command =vm.CommandShowAboutCommand,
+                            Command = vm.ShowAboutCommand,
                         },
                         new Separator(),
-                        new MenuItem { Header = "_Help" },
+                        new MenuItem
+                        {
+                            Header = "_Help",
+                            Command = vm.ShowHelpCommand,
+                        },
                     }
                 },
             }
@@ -229,7 +303,7 @@ public static class InitMenu
                 var item = new MenuItem
                 {
                     Header = file.SubtitleFileName,
-                    Command =vm.CommandFileReopenCommand,
+                    Command = vm.CommandFileReopenCommand,
                 };
                 item.CommandParameter = file;
                 vm.MenuReopen.Items.Add(item);
@@ -240,7 +314,7 @@ public static class InitMenu
             var clearItem = new MenuItem
             {
                 Header = "Clear recent files",
-                Command =vm.CommandFileClearRecentFilesCommand,
+                Command = vm.CommandFileClearRecentFilesCommand,
             };
             vm.MenuReopen.Items.Add(clearItem);
 

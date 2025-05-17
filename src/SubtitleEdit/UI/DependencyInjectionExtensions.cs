@@ -18,6 +18,20 @@ using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Features.Video.OpenFromUrl;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech;
 using Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
+using Nikse.SubtitleEdit.Features.SpellCheck;
+using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
+using Nikse.SubtitleEdit.Features.Sync.AdjustAllTimes;
+using Nikse.SubtitleEdit.Features.Sync.ChangeFrameRate;
+using Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
+using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
+using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
+using Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
+using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
+using Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
+using Nikse.SubtitleEdit.Features.Edit.Find;
+using Nikse.SubtitleEdit.Features.Edit.Replace;
+using Nikse.SubtitleEdit.Features.Edit.ShowHistory;
+using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 
 namespace Nikse.SubtitleEdit;
 
@@ -31,7 +45,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<IWindowService, WindowService>();
         collection.AddTransient<IZipUnpacker, ZipUnpacker>();
         collection.AddTransient<INamesList, SeNamesList>();
-        
+
         // Download services
         collection.AddHttpClient<IFfmpegDownloadService, FfmpegDownloadService>();
         collection.AddHttpClient<IWhisperDownloadService, WhisperDownloadService>();
@@ -69,5 +83,35 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<TextToSpeechViewModel>();
         collection.AddTransient<TransparentSubtitlesWindow>();
         collection.AddTransient<TransparentSubtitlesViewModel>();
+        collection.AddTransient<SpellCheckWindow>();
+        collection.AddTransient<SpellCheckViewModel>();
+        collection.AddTransient<GetDictionariesWindow>();
+        collection.AddTransient<GetDictionariesViewModel>();
+        collection.AddTransient<AdjustAllTimesWindow>();
+        collection.AddTransient<AdjustAllTimesViewModel>();
+        collection.AddTransient<ChangeFrameRateWindow>();
+        collection.AddTransient<ChangeFrameRateViewModel>();
+        collection.AddTransient<ChangeSpeedWindow>();
+        collection.AddTransient<ChangeSpeedViewModel>();
+        collection.AddTransient<AdjustDurationWindow>();
+        collection.AddTransient<AdjustDurationViewModel>();
+        collection.AddTransient<BatchConvertWindow >();
+        collection.AddTransient<BatchConvertViewModel>();
+        collection.AddTransient<ChangeCasingWindow>();
+        collection.AddTransient<ChangeCasingViewModel>();
+        collection.AddTransient<FixCommonErrorsWindow>();
+        collection.AddTransient<FixCommonErrorsViewModel>();
+        collection.AddTransient<RemoveTextForHearingImpairedWindow>();
+        collection.AddTransient<RemoveTextForHearingImpairedViewModel>();
+        collection.AddTransient<FindWindow>();
+        collection.AddTransient<FindViewModel>();
+        collection.AddTransient<ReplaceWindow>();
+        collection.AddTransient<ReplaceViewModel>();
+        collection.AddTransient<MultipleReplaceWindow>();
+        collection.AddTransient<MultipleReplaceViewModel>();
+        collection.AddTransient<ShowHistoryWindow>();
+        collection.AddTransient<ShowHistoryViewModel>();
+        collection.AddTransient<RestoreAutoBackupWindow>();
+        collection.AddTransient<RestoreAutoBackupViewModel>();
     }
 }

@@ -1,21 +1,42 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
-using Avalonia.Controls.Selection;
 using Avalonia.Input;
 using Avalonia.Styling;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Common;
+using Nikse.SubtitleEdit.Features.Edit.Find;
+using Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
+using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
+using Nikse.SubtitleEdit.Features.Edit.Replace;
+using Nikse.SubtitleEdit.Features.Edit.ShowHistory;
 using Nikse.SubtitleEdit.Features.Help;
 using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Features.Options.Language;
 using Nikse.SubtitleEdit.Features.Options.Settings;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
+using Nikse.SubtitleEdit.Features.SpellCheck;
+using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
+using Nikse.SubtitleEdit.Features.Sync.AdjustAllTimes;
+using Nikse.SubtitleEdit.Features.Sync.ChangeFrameRate;
+using Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
+using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
+using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
+using Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
+using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
+using Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
 using Nikse.SubtitleEdit.Features.Translate;
+using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
+using Nikse.SubtitleEdit.Features.Video.BurnIn;
+using Nikse.SubtitleEdit.Features.Video.OpenFromUrl;
+using Nikse.SubtitleEdit.Features.Video.TextToSpeech;
+using Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
@@ -27,14 +48,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Avalonia.Threading;
-using HanumanInstitute.Validators;
-using Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
-using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
-using Nikse.SubtitleEdit.Features.Video.BurnIn;
-using Nikse.SubtitleEdit.Features.Video.OpenFromUrl;
-using Nikse.SubtitleEdit.Features.Video.TextToSpeech;
-using Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -198,7 +211,13 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task CommandShowAbout()
+    private async Task ShowHelp()
+    {
+        await Window!.Launcher.LaunchUriAsync(new Uri("https://www.nikse.dk/subtitleedit/help"));
+    }
+
+    [RelayCommand]
+    private async Task ShowAbout()
     {
         var newWindow = new AboutWindow();
         await newWindow.ShowDialog(Window);
@@ -267,6 +286,57 @@ public partial class MainViewModel : ObservableObject
         await SaveSubtitleAs();
     }
 
+
+    [RelayCommand]
+    private async Task ShowToolsAdjustDurations()
+    {
+        await _windowService.ShowDialogAsync<AdjustDurationWindow, AdjustDurationViewModel>(Window, vm =>
+        {
+
+        });
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowToolsBatchConvert()
+    {
+        await _windowService.ShowDialogAsync<BatchConvertWindow, BatchConvertViewModel>(Window, vm =>
+        {
+
+        });
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowToolsChangeCasing()
+    {
+        await _windowService.ShowDialogAsync<ChangeCasingWindow, ChangeCasingViewModel>(Window, vm =>
+        {
+
+        });
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowToolsFixCommonErrors()
+    {
+        await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window, vm =>
+        {
+
+        });
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowToolsRemoveTextForHearingImpaired()
+    {
+        await _windowService.ShowDialogAsync<RemoveTextForHearingImpairedWindow, RemoveTextForHearingImpairedViewModel>(Window, vm =>
+        {
+
+        });
+        _shortcutManager.ClearKeys();
+    }
+
     [RelayCommand]
     private async Task CommandVideoOpen()
     {
@@ -283,6 +353,26 @@ public partial class MainViewModel : ObservableObject
         VideoCloseFile();
     }
 
+    [RelayCommand]
+    private async Task ShowSpellCheck()
+    {
+        await _windowService.ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(Window, vm =>
+        {
+
+        });
+        _shortcutManager.ClearKeys();
+    }
+
+
+    [RelayCommand]
+    private async Task ShowSpellCheckDictionaries()
+    {
+        await _windowService.ShowDialogAsync<GetDictionariesWindow, GetDictionariesViewModel>(Window, vm =>
+        {
+
+        });
+        _shortcutManager.ClearKeys();
+    }
 
     [RelayCommand]
     private async Task ShowVideoAudioToTextWhisper()
@@ -334,6 +424,35 @@ public partial class MainViewModel : ObservableObject
         _shortcutManager.ClearKeys();
     }
 
+    [RelayCommand]
+    private async Task ShowSyncAdjustAllTimes()
+    {
+        await _windowService.ShowDialogAsync<AdjustAllTimesWindow, AdjustAllTimesViewModel>(Window, vm =>
+        {
+
+        });
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowSyncChangeFrameRate()
+    {
+        await _windowService.ShowDialogAsync<ChangeFrameRateWindow, ChangeFrameRateViewModel>(Window, vm =>
+        {
+
+        });
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowSyncChangeSpeed()
+    {
+        await _windowService.ShowDialogAsync<ChangeSpeedWindow, ChangeSpeedViewModel>(Window, vm =>
+        {
+
+        });
+        _shortcutManager.ClearKeys();
+    }
 
     [RelayCommand]
     private async Task CommandShowAutoTranslate()
@@ -420,6 +539,90 @@ public partial class MainViewModel : ObservableObject
     {
         ToggleItalic();
     }
+
+    [RelayCommand]
+    private async Task ShowRestoreAutoBackup()
+    {
+        if (Subtitles.Count == 0)
+        {
+            return;
+        }
+
+        var viewModel = await _windowService.ShowDialogAsync<RestoreAutoBackupWindow, RestoreAutoBackupViewModel>(Window, vm =>
+        {
+        });
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowHistory()
+    {
+        if (Subtitles.Count == 0)
+        {
+            return;
+        }
+
+        var viewModel = await _windowService.ShowDialogAsync<ShowHistoryWindow, ShowHistoryViewModel>(Window, vm =>
+        {
+        });
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowFind()
+    {
+        if (Subtitles.Count == 0)
+        {
+            return;
+        }
+
+        var viewModel = await _windowService.ShowDialogAsync<FindWindow, FindViewModel>(Window, vm => 
+        { 
+        });
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task FindNext()
+    {
+    }
+
+
+    [RelayCommand]
+    private async Task ShowReplace()
+    {
+        if (Subtitles.Count == 0)
+        {
+            return;
+        }
+
+        var viewModel = await _windowService.ShowDialogAsync<ReplaceWindow, ReplaceViewModel>(Window, vm =>
+        {
+        });
+
+        _shortcutManager.ClearKeys();
+    }
+
+
+
+    [RelayCommand]
+    private async Task ShowMultipleReplace()
+    {
+        if (Subtitles.Count == 0)
+        {
+            return;
+        }
+
+        var viewModel = await _windowService.ShowDialogAsync<MultipleReplaceWindow, MultipleReplaceViewModel>(Window, vm =>
+        {
+        });
+
+        _shortcutManager.ClearKeys();
+    }
+
 
     [RelayCommand]
     private async Task ShowGoToLine()
