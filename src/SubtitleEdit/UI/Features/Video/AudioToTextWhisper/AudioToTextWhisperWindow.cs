@@ -24,53 +24,59 @@ public class AudioToTextWhisperWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        var languagePanel = new StackPanel
+        var label = new Label
         {
-            Orientation = Orientation.Horizontal,
-            Spacing = 15,
-            Margin = new Thickness(10, 20, 10, 10),
-            Children =
-            {
-                new Label
-                {
-                    Content = "Language",
-                    VerticalAlignment = VerticalAlignment.Center,
-                },
-                new ComboBox
-                {
-                    ItemsSource = vm.Languages,
-                    SelectedValue = vm.SelectedLanguage,
-                    VerticalAlignment = VerticalAlignment.Center,
-                }
-            }
+            Content = "Language",
+            VerticalAlignment = VerticalAlignment.Center,
         };
 
-        var buttonPanel = new StackPanel
+        var combo = new ComboBox
         {
-            Orientation = Orientation.Horizontal,
-            Spacing = 15,
-            Margin = new Thickness(10),
-            Children =
-            {
-                UiUtil.MakeButton("OK",  vm.OkCommand),
-                UiUtil.MakeButton("Cancel",  vm.CancelCommand),
-            }
-        };
-        
-        _contentPanel = new StackPanel
-        {
-            Orientation = Orientation.Vertical,
-            Spacing = 15,
-            Margin = new Thickness(10),
-            Children =
-            {
-                languagePanel,
-                buttonPanel,                
-            }
+            ItemsSource = vm.Languages,
+            SelectedValue = vm.SelectedLanguage,
+            VerticalAlignment = VerticalAlignment.Center,
+            MinWidth = 180,
         };
 
-        Content = _contentPanel;
-        
+        var buttonPanel = UiUtil.MakeButtonBar(
+            UiUtil.MakeButton("OK", vm.OkCommand),
+            UiUtil.MakeButton("Cancel", vm.CancelCommand)
+        );
+
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Margin = UiUtil.MakeWindowMargin(),
+            ColumnSpacing = 10,
+            RowSpacing = 10,
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        grid.Children.Add(label);
+        Grid.SetRow(label, 0);
+        Grid.SetColumn(label, 0);
+
+        grid.Children.Add(combo);
+        Grid.SetRow(combo, 0);
+        Grid.SetColumn(combo, 1);
+
+        grid.Children.Add(buttonPanel);
+        Grid.SetRow(buttonPanel, 1);
+        Grid.SetColumn(buttonPanel, 0);
+        Grid.SetColumnSpan(buttonPanel, 2);
+
+        Content = grid;
+
         Activated += delegate { Focus(); }; // hack to make OnKeyDown work
     }
 

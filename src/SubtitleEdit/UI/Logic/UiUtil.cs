@@ -304,7 +304,7 @@ public static class UiUtil
         {
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Right,
-            Margin = new Thickness(10),
+            Margin = new Thickness(WindowMarginWidth, WindowMarginWidth * 2, WindowMarginWidth, WindowMarginWidth),
             Spacing = 0,
         };
 
