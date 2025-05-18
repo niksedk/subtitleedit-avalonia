@@ -15,6 +15,7 @@ public static class InitFooter
             RowDefinitions = new RowDefinitions("Auto"),
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Bottom,
+            Margin = new Thickness(5, 0, 5, 0),
         };
         
         vm.StatusTextLeftLabel = new TextBlock
