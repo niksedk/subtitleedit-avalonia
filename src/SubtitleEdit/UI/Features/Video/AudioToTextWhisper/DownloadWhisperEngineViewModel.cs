@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -10,6 +11,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper.Engines;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Compression;
 using Nikse.SubtitleEdit.Logic.Download;
 using SharpCompress.Archives.SevenZip;
@@ -203,13 +205,14 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
         _zipUnpacker.UnpackZipStream(_downloadStream, folder, skipFolderLevel, false, new List<string>(), null);
         _downloadStream.Dispose();
 
-#if MACCATALYST
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
             var cppPath = Path.Combine(folder, "whisper-cli");
             if (File.Exists(cppPath))
-            {       
+            {
                 MacHelper.MakeExecutable(folder);
             }
-#endif
+        }
     }
 
     private void Close()

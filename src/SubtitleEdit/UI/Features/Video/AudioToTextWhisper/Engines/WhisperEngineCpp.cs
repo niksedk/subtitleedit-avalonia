@@ -3,6 +3,7 @@ using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper.Engines;
@@ -130,12 +131,13 @@ public class WhisperEngineCpp : IWhisperEngine
         return fileName;
     }
 
-    public string GetExecutableFileName()
+    private static string GetExecutableFileName()
     {
-#if MACCATALYST
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return "whisper-cli.exe";
+        }
+
         return "whisper-cli";
-#endif        
-        
-        return "whisper-cli.exe";
     }
 }

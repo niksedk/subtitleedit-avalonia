@@ -26,14 +26,18 @@ public class FfmpegDownloadService : IFfmpegDownloadService
             return WindowsUrl;
         }
 
-#if MACCATALYST
-        if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            return MacUrlArm;
+            switch (RuntimeInformation.ProcessArchitecture)
+            {
+                case Architecture.Arm64:
+                    return MacUrlArm; // e.g., for M1, M2, M3, M4 chips
+                case Architecture.X64:
+                    return MacUrl;
+                default:
+                    throw new PlatformNotSupportedException("Unsupported macOS architecture.");
+            }
         }
-
-        return MacUrl;
-#endif
 
         throw new PlatformNotSupportedException();
     }

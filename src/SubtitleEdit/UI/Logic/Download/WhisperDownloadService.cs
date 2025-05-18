@@ -50,11 +50,20 @@ public class WhisperDownloadService : IWhisperDownloadService
         {
             return WindowsUrl;
         }
-
-#if MACCATALYST 
-        return MacUrl;
-#endif
         
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            switch (RuntimeInformation.ProcessArchitecture)
+            {
+                case Architecture.Arm64:
+                    return MacUrl; // e.g., for M1, M2, M3, M4 chips
+                case Architecture.X64:
+                    return MacUrl;
+                default:
+                    throw new PlatformNotSupportedException("Unsupported macOS architecture.");
+            }
+        }
+
         throw new PlatformNotSupportedException();
     }
 }
