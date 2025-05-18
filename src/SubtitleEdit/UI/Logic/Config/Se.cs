@@ -7,6 +7,7 @@ using System.Text.Json;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Forms.FixCommonErrors;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Logic.Config.Language;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
@@ -63,9 +64,10 @@ public class Se
             new(nameof(vm.ShowGoToLineCommand), new List<string> { "Control", "G" }),
             new(nameof(vm.GoToPreviousLineCommand), new List<string> { "Alt", "Up" }),
             new(nameof(vm.GoToNextLineCommand), new List<string> { "Alt", "Down" }),
-            new(nameof(vm.SelectAllLinesCommand), new List<string> { "Control", "A" }, "grid"),
-            new(nameof(vm.InverseSelectionCommand), new List<string> { "Control", "Shift", "I" }, "grid"),
-            new(nameof(vm.ToggleLinesItalicCommand), new List<string> { "Control", "I" }, "grid")
+            new(nameof(vm.SelectAllLinesCommand), new List<string> { "Control", "A" }, ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.InverseSelectionCommand), new List<string> { "Control", "Shift", "I" }, ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.ToggleLinesItalicCommand), new List<string> { "Control", "I" }, ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.DeleteSelectedItems), new List<string> { "Del" }, ShortcutCategory.SubtitleGrid),
         ];
     }
 

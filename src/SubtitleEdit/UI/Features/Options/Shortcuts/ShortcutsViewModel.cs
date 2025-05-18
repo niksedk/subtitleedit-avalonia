@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Avalonia.Input;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 

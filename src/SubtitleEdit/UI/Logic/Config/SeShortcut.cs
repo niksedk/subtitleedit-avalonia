@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Nikse.SubtitleEdit.Features.Options.Shortcuts;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
@@ -21,11 +22,18 @@ public class SeShortCut
         ActionName = action;
         Keys = keys;
     }
-    
+
     public SeShortCut(string action, List<string> keys, string controlName)
     {
         ActionName = action;
         Keys = keys;
         ControlName = controlName;
+    }
+
+    public SeShortCut(string action, List<string> keys, ShortcutCategory category)
+    {
+        ActionName = action;
+        Keys = keys;
+        ControlName = category.ToString();
     }
 }

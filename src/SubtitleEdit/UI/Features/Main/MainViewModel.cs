@@ -98,6 +98,8 @@ public partial class MainViewModel : ObservableObject
     private readonly IShortcutManager _shortcutManager;
     private readonly IWindowService _windowService;
 
+    private bool SubtitleGridSelectionChangedSkip = false;
+
     private bool IsEmpty => Subtitles.Count == 0 || string.IsNullOrEmpty(Subtitles[0].Text);
 
     public VideoPlayerControl? VideoPlayerControl { get; internal set; }
@@ -825,10 +827,8 @@ public partial class MainViewModel : ObservableObject
         // Store currently selected items
         var selectedItems = new HashSet<SubtitleLineViewModel>(SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>());
 
-        // Clear current selection
+        SubtitleGridSelectionChangedSkip = true;   
         SubtitleGrid.SelectedItems.Clear();
-
-        // Add all items that weren't previously selected
         foreach (var item in Subtitles)
         {
             if (!selectedItems.Contains(item))
@@ -836,8 +836,9 @@ public partial class MainViewModel : ObservableObject
                 SubtitleGrid.SelectedItems.Add(item);
             }
         }
+        SubtitleGridSelectionChangedSkip = false;
+        SubtitleGridSelectionChanged();
     }
-
 
     // Method to select a specific row by index and make it visible
     private void SelectAndScrollToRow(int index)
@@ -1315,6 +1316,16 @@ public partial class MainViewModel : ObservableObject
     }
 
     public void SubtitleGrid_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (SubtitleGridSelectionChangedSkip)
+        {
+            return;
+        }
+
+        SubtitleGridSelectionChanged();
+    }
+
+    private void SubtitleGridSelectionChanged()
     {
         var selectedItems = SubtitleGrid.SelectedItems;
 
