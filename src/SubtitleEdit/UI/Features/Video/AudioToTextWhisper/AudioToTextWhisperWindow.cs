@@ -31,7 +31,7 @@ public class AudioToTextWhisperWindow : Window
         {
             Text = "Console log",
             HorizontalAlignment = HorizontalAlignment.Left,
-            Margin = new Thickness(10, 15, 10, 10),
+            Margin = new Thickness(10, 12, 10, 10),
         };
         var textBoxConsoleLog = new TextBox()
         {
@@ -51,22 +51,25 @@ public class AudioToTextWhisperWindow : Window
         });
         vm.TextBoxConsoleLog = textBoxConsoleLog;
 
-        var labelEngine = UiUtil.MakeTextBlock("Engine");
+        var labelEngine = UiUtil.MakeTextBlock("Engine").WithMarginTop(10);
         var comboEngine = UiUtil.MakeComboBox(vm.Engines, vm, nameof(vm.SelectedEngine))
-            .WithMinwidth(200)
-            .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled)); ;
+            .WithMinwidth(220)
+            .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled))
+            .WithMarginTop(10);
 
         comboEngine.SelectionChanged += vm.OnEngineChanged;
 
-        var labelLanguage = UiUtil.MakeTextBlock("Language");
+        var labelLanguage = UiUtil.MakeTextBlock("Language").WithMarginTop(10);
         var comboLanguage = UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage))
-            .WithMinwidth(200)
-            .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled)); ;
+            .WithMinwidth(220)
+            .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled))
+            .WithMarginTop(10);
 
-        var labelModel = UiUtil.MakeTextBlock("Model").WithMarginBottom(20);
+        var labelModel = UiUtil.MakeTextBlock("Model").WithMarginBottom(20).WithMarginTop(10);
         var comboModel = UiUtil.MakeComboBox(vm.Models, vm, nameof(vm.SelectedModel))
-            .WithMinwidth(200)
+            .WithMinwidth(220)
             .WithMarginBottom(20)
+            .WithMarginTop(10)
             .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled)); 
 
         var buttonModelDownload = new Button
@@ -78,7 +81,7 @@ public class AudioToTextWhisperWindow : Window
             VerticalContentAlignment = VerticalAlignment.Center,
             Command = vm.DownloadModelCommand,
             Margin = new Thickness(5, 0, 0, 0),
-        }.WithMarginBottom(20).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled)); 
+        }.WithMarginBottom(20).WithMarginTop(10).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled)); 
 
         var panelModelControls = new StackPanel
         {
@@ -94,7 +97,8 @@ public class AudioToTextWhisperWindow : Window
 
         var labelTranslateToEnglish = UiUtil.MakeTextBlock("Translate to English");
         var checkTranslateToEnglish = UiUtil.MakeCheckBox(vm, nameof(vm.DoTranslateToEnglish)).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled)); 
-        var labelPostProcessing = UiUtil.MakeTextBlock("Post processing");
+
+        var labelPostProcessing = UiUtil.MakeTextBlock("Post processing").WithMarginTop(15);
         var checkPostProcessing = UiUtil.MakeCheckBox(vm, nameof(vm.DoPostProcessing)).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled)); 
         var buttonPostProcessing = new Button()
         {
@@ -110,6 +114,7 @@ public class AudioToTextWhisperWindow : Window
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 15, 0, 0),
             Children =
             {
                 checkPostProcessing,
@@ -117,7 +122,7 @@ public class AudioToTextWhisperWindow : Window
             }
         };
 
-        var labelAdvancedSettings = UiUtil.MakeTextBlock("Advanced settings");
+        var labelAdvancedSettings = UiUtil.MakeTextBlock("Advanced settings").WithMarginTop(15);
         var buttonAdvancedSettings = new Button() 
         {
             Content = "Settings",
@@ -126,7 +131,26 @@ public class AudioToTextWhisperWindow : Window
             HorizontalContentAlignment = HorizontalAlignment.Center,
             VerticalContentAlignment = VerticalAlignment.Center,
             Command = vm.ShowAdvancedSettingsCommand,
-        }.BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
+        }.BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled)).WithMarginTop(15);
+
+        var textBoxAdvancedSettings = new TextBox()
+        {
+            VerticalAlignment = VerticalAlignment.Top,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            IsReadOnly = true,
+            FontSize = 12,
+            Margin = new Thickness(0),
+            Opacity = 0.6,
+            BorderThickness = new Thickness(0),
+            MaxWidth = 320,
+        };
+        textBoxAdvancedSettings.Bind(TextBox.TextProperty, new Binding
+        {
+            Path = nameof(vm.Parameters),
+            Mode = BindingMode.OneWay,
+            Source = vm,
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+        });
 
         var progressSlider = new Slider()
         {
@@ -279,7 +303,7 @@ public class AudioToTextWhisperWindow : Window
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
-            RowSpacing = 10,
+            RowSpacing = 0,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
@@ -351,6 +375,11 @@ public class AudioToTextWhisperWindow : Window
         Grid.SetRow(buttonAdvancedSettings, row);
         Grid.SetColumn(buttonAdvancedSettings, 1);
         row++;
+
+        grid.Children.Add(textBoxAdvancedSettings);
+        Grid.SetRow(textBoxAdvancedSettings, row);
+        Grid.SetColumn(textBoxAdvancedSettings, 0);
+        Grid.SetColumnSpan(textBoxAdvancedSettings, 2);
         row++;
 
         grid.Children.Add(panelProgress);

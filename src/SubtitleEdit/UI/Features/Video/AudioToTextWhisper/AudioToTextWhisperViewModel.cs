@@ -140,20 +140,23 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         DoPostProcessing = Se.Settings.Tools.AudioToText.PostProcessing;
         Parameters = Se.Settings.Tools.AudioToText.WhisperCustomCommandLineArguments;
 
+        var selectedEngine = Engines.FirstOrDefault(p => p.Choice == Se.Settings.Tools.AudioToText.WhisperChoice);
+        if (selectedEngine != null)
+        {
+            SelectedEngine = selectedEngine;
+        }
         EngineChanged();
     }
 
     private void SaveSettings()
     {
-        DoAdjustTimings = Se.Settings.Tools.AudioToText.WhisperAutoAdjustTimings;
-        DoPostProcessing = Se.Settings.Tools.AudioToText.PostProcessing;
-        Parameters = Se.Settings.Tools.AudioToText.WhisperCustomCommandLineArguments;
-
         Se.Settings.Tools.AudioToText.WhisperAutoAdjustTimings = DoAdjustTimings;
         Se.Settings.Tools.AudioToText.WhisperCustomCommandLineArguments = Parameters;
         Se.Settings.Tools.AudioToText.WhisperCustomCommandLineArgumentsPurfviewBlank = Parameters == "--standard";
         Se.Settings.Tools.AudioToText.WhisperChoice = SelectedEngine.Choice;
         Se.Settings.Tools.AudioToText.WhisperModel = SelectedModel?.Model.Name ?? string.Empty;
+        Se.Settings.Tools.AudioToText.WhisperLanguageCode = SelectedLanguage?.Code ?? string.Empty;
+        Se.Settings.Tools.AudioToText.WhisperCustomCommandLineArguments = Parameters;
 
         Se.SaveSettings();
     }
@@ -1377,6 +1380,8 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         {
             Parameters = "--standard";
         }
+
+        SaveSettings();
     }
 
     internal void Initialize(string? videoFileName)

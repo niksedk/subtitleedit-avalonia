@@ -60,6 +60,15 @@ public class WhisperEnginePurfviewFasterWhisperXxl : IWhisperEngine
             Directory.CreateDirectory(folder);
         }
 
+        if (whisperModel != null)
+        {
+            folder = Path.Combine(folder, "faster-whisper-" + whisperModel.Name);
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+        }
+
         return folder;
     }
 

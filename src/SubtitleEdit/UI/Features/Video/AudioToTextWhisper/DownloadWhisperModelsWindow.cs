@@ -36,6 +36,7 @@ public class DownloadWhisperModelsWindow : Window
         var comboBoxModel = UiUtil.MakeComboBox(vm.Models, vm, nameof(vm.SelectedModel)).WithMinwidth(200);
 
         var buttonDownload = UiUtil.MakeButton(Se.Language.General.Download, vm.DownloadCommand).WithLeftAlignment();
+        buttonDownload.Bind(Button.IsEnabledProperty, new Binding(nameof(vm.DownloadIsEnabled)));
 
         var buttonOpenFolder = new Button
         {

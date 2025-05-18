@@ -390,6 +390,27 @@ public static class UiUtil
         return control;
     }
 
+    public static TextBlock WithMarginTop(this TextBlock control, int marginTop)
+    {
+        var m = control.Margin;
+        control.Margin = new Thickness(m.Left, marginTop, m.Right, m.Bottom);
+        return control;
+    }
+
+    public static ComboBox WithMarginTop(this ComboBox control, int marginTop)
+    {
+        var m = control.Margin;
+        control.Margin = new Thickness(m.Left, marginTop, m.Right, m.Bottom);
+        return control;
+    }
+
+    public static Button WithMarginTop(this Button control, int marginTop)
+    {
+        var m = control.Margin;
+        control.Margin = new Thickness(m.Left, marginTop, m.Right, m.Bottom);
+        return control;
+    }
+
     public static Button WithMargin(this Button control, int margin)
     {
         control.Margin = new Thickness(margin);

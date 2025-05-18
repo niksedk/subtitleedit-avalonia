@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
-using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
@@ -32,6 +31,7 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
     [ObservableProperty] private double _progressValue;
     [ObservableProperty] private string _progressText;
     [ObservableProperty] private string _error;
+    [ObservableProperty] bool _downloadIsEnabled;
 
     public DownloadWhisperModelsWindow? Window { get; set; }
     public bool OkPressed { get; internal set; }
@@ -60,6 +60,7 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
 
         ProgressText = "Starting...";
         Error = string.Empty;
+        DownloadIsEnabled = true;
 
         _timer = new Timer(500);
         _timer.Elapsed += OnTimerOnElapsed;
@@ -232,6 +233,7 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
             return;
         }
 
+        DownloadIsEnabled = false;
         _downloadUrls.Clear();
         _downloadUrls.AddRange(model.Model.Urls);
         _downloadIndex = 0;
