@@ -189,7 +189,7 @@ public partial class MainViewModel : ObservableObject
 
             if (result == MessageBoxResult.Yes)
             {
-                // Save logic here
+                await SaveSubtitle();
             }
         }
 
