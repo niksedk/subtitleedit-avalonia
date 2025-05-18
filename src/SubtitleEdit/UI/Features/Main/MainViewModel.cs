@@ -379,7 +379,7 @@ public partial class MainViewModel : ObservableObject
     {
         await _windowService.ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(Window, vm =>
         {
-
+            vm.Initialize(_videoFileName);
         });
         _shortcutManager.ClearKeys();
     }

@@ -33,6 +33,7 @@ public class DownloadWhisperEngineWindow : Window
             FontSize = 20,
             FontWeight = FontWeight.Bold,
         };
+        titleText.Bind(TextBlock.TextProperty, new Binding(nameof(vm.TitleText)));
 
         var progressSlider = new Slider
         {
@@ -56,10 +57,10 @@ public class DownloadWhisperEngineWindow : Window
                 },
             }
         };
-        progressSlider.Bind(Slider.ValueProperty, new Binding(nameof(vm.Progress)));
+        progressSlider.Bind(Slider.ValueProperty, new Binding(nameof(vm.ProgressValue)));
 
         var statusText = new TextBlock();
-        statusText.Bind(TextBlock.TextProperty, new Binding(nameof(vm.StatusText)));
+        statusText.Bind(TextBlock.TextProperty, new Binding(nameof(vm.ProgressText)));
 
         var buttonCancel = UiUtil.MakeButton(Se.Language.General.Cancel, vm.CommandCancelCommand);
         var buttonBar = UiUtil.MakeButtonBar(buttonCancel);

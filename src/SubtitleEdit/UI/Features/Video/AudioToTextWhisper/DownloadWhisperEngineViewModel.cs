@@ -1,28 +1,36 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper.Engines;
 using Nikse.SubtitleEdit.Logic.Compression;
-using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Download;
+using SharpCompress.Archives.SevenZip;
+using SharpCompress.Common;
+using SharpCompress.Readers;
 using Timer = System.Timers.Timer;
 
 namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 
 public partial class DownloadWhisperEngineViewModel : ObservableObject
 {
-    [ObservableProperty] private double _progress;
-    [ObservableProperty] private string _statusText;
+    [ObservableProperty] private string _titleText;
+    [ObservableProperty] private double _progressOpacity;
+    [ObservableProperty] private double _progressValue;
+    [ObservableProperty] private string _progressText;
     [ObservableProperty] private string _error;
 
     public DownloadWhisperEngineWindow? Window { get; set; }
+    public bool OkPressed { get; internal set; }
+    public IWhisperEngine? Engine { get; internal set; }
 
     private IWhisperDownloadService _whisperDownloadService;
     private Task? _downloadTask;
@@ -42,7 +50,8 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
 
         _downloadStream = new MemoryStream();
 
-        StatusText = "Starting...";
+        TitleText = "Downloading Whisper engine";
+        ProgressText = "Starting...";
         Error = string.Empty;
 
         _timer = new Timer(500);
@@ -56,74 +65,152 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
     {
         lock (_lockObj)
         {
-            if (_done)
-            {
-                return;
-            }
-
+            _timer.Stop();
             if (_downloadTask is { IsCompleted: true })
             {
-                _timer.Stop();
-                _done = true;
-
-                if (_downloadStream.Length == 0)
+                if (Engine.Name == WhisperEnginePurfviewFasterWhisperXxl.StaticName)
                 {
-                    StatusText = "Download failed";
-                    Error = "No data received";
-                    return;
-                }
+                    var dir = Engine.GetAndCreateWhisperFolder();
+                    var tempFileName = Path.Combine(dir, Engine.Name + ".7z");
 
-                var ffmpegFileName = GetFfmpegFileName();
+                    ProgressText = "Unpacking 7-zip archive...";
+                    Extract7Zip(tempFileName, dir);
 
-                if (File.Exists(ffmpegFileName))
-                {
-                    File.Delete(ffmpegFileName);
-                }
+                    try
+                    {
+                        File.Delete(tempFileName);
+                    }
+                    catch
+                    {
+                        // ignore
+                    }
 
-                UnpackFfmpeg(ffmpegFileName);
+                    if (_cancellationTokenSource.IsCancellationRequested)
+                    {
+                        Cancel();
+                        return;
+                    }
 
-                Close();
-            }
-            else if (_downloadTask is { IsFaulted: true })
-            {
-                _timer.Stop();
-                _done = true;
-                var ex = _downloadTask.Exception?.InnerException ?? _downloadTask.Exception;
-                if (ex is OperationCanceledException)
-                {
-                    StatusText = "Download canceled";
+                    OkPressed = true;
                     Close();
                 }
                 else
                 {
-                    StatusText = "Download failed";
+                    if (_downloadStream.Length == 0)
+                    {
+                        ProgressText = "Download failed";
+                        Error = "No data received";
+                        return;
+                    }
+
+                    var folder = Engine.GetAndCreateWhisperFolder();
+                    Unpack(folder, Engine.UnpackSkipFolder);
+                    OkPressed = true;
+                    Close();
+                }
+
+                return;
+            }
+
+            if (_downloadTask is { IsFaulted: true })
+            {
+                var ex = _downloadTask.Exception?.InnerException ?? _downloadTask.Exception;
+                if (ex is OperationCanceledException)
+                {
+                    ProgressText = "Download canceled";
+                    Close();
+                }
+                else
+                {
+                    ProgressText = "Download failed";
                     Error = ex?.Message ?? "Unknown error";
                 }
+
+                return;
+            }
+
+            _timer.Start();
+        }
+    }
+
+    private void Extract7Zip(string tempFileName, string dir)
+    {
+        using Stream stream = File.OpenRead(tempFileName);
+        using var archive = SevenZipArchive.Open(stream);
+        double totalSize = archive.TotalUncompressSize;
+        double unpackedSize = 0;
+
+        var reader = archive.ExtractAllEntries();
+        while (reader.MoveToNextEntry())
+        {
+            if (_cancellationTokenSource.IsCancellationRequested)
+            {
+                return;
+            }
+
+            var skipFolderLevel = "Faster-Whisper-XXL";
+            if (!string.IsNullOrEmpty(reader.Entry.Key))
+            {
+                var entryFullName = reader.Entry.Key;
+                if (!string.IsNullOrEmpty(skipFolderLevel) && entryFullName.StartsWith(skipFolderLevel))
+                {
+                    entryFullName = entryFullName[skipFolderLevel.Length..];
+                }
+
+                entryFullName = entryFullName.Replace('/', Path.DirectorySeparatorChar);
+                entryFullName = entryFullName.TrimStart(Path.DirectorySeparatorChar);
+
+                var fullFileName = Path.Combine(dir, entryFullName);
+
+                if (reader.Entry.IsDirectory)
+                {
+                    if (!Directory.Exists(fullFileName))
+                    {
+                        Directory.CreateDirectory(fullFileName);
+                    }
+
+                    continue;
+                }
+
+                var fullPath = Path.GetDirectoryName(fullFileName);
+                if (fullPath == null)
+                {
+                    continue;
+                }
+
+                var displayName = entryFullName;
+                if (displayName.Length > 30)
+                {
+                    displayName = "..." + displayName.Remove(0, displayName.Length - 26).Trim();
+                }
+
+                ProgressText = $"Unpacking: {displayName}";
+                ProgressValue = (float)(unpackedSize / totalSize);
+                reader.WriteEntryToDirectory(fullPath, new ExtractionOptions() 
+                { 
+                    ExtractFullPath = false, 
+                    Overwrite = true 
+                });
+                unpackedSize += reader.Entry.Size;
             }
         }
+
+        ProgressValue = 1.0f;
     }
 
-    private void UnpackFfmpeg(string newFileName)
+    private void Unpack(string folder, string skipFolderLevel)
     {
-        var folder = Path.GetDirectoryName(newFileName);
-        if (folder != null)
-        {
-            _downloadStream.Position = 0;
-            _zipUnpacker.UnpackZipStream(_downloadStream, folder);
-        }
-
+        _downloadStream.Position = 0;
+        _zipUnpacker.UnpackZipStream(_downloadStream, folder, skipFolderLevel, false, new List<string>(), null);
         _downloadStream.Dispose();
-    }
 
-
-    public static string GetFfmpegFileName()
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            return Path.Combine(Se.FfmpegFolder, "ffmpeg.exe");
-        }
-
-        return Path.Combine(Se.FfmpegFolder, "ffmpeg");
+#if MACCATALYST
+            var cppPath = Path.Combine(folder, "whisper-cli");
+            if (File.Exists(cppPath))
+            {       
+                MacHelper.MakeExecutable(folder);
+            }
+#endif
     }
 
     private void Close()
@@ -137,6 +224,11 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
     [RelayCommand]
     private void CommandCancel()
     {
+        Cancel();
+    }
+
+    private void Cancel()
+    {
         _cancellationTokenSource?.Cancel();
         _done = true;
         _timer.Stop();
@@ -145,24 +237,30 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
 
     public void StartDownload()
     {
+        TitleText = $"Downloading {Engine?.Name}";
+
         var downloadProgress = new Progress<float>(number =>
         {
             var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
             var pctString = percentage.ToString(CultureInfo.InvariantCulture);
-            Progress = percentage;
-            StatusText = $"Downloading... {pctString}%";
+            ProgressValue = number;
+            ProgressText = $"Downloading... {pctString}%";
         });
 
-        var folder = Se.FfmpegFolder;
-        if (!Directory.Exists(folder))
+        if (Engine is WhisperEngineCpp)
         {
-            Directory.CreateDirectory(folder);
+            _downloadTask = _whisperDownloadService.DownloadWhisperCpp(_downloadStream, downloadProgress, _cancellationTokenSource.Token);
         }
-
-        //_downloadTask = _whisperDownloadService.DownloadFile
-        //    _downloadStream,
-        //    downloadProgress,
-        //    _cancellationTokenSource.Token);
+        else if (Engine is WhisperEngineConstMe)
+        {
+            _downloadTask = _whisperDownloadService.DownloadWhisperConstMe(_downloadStream, downloadProgress, _cancellationTokenSource.Token);
+        }
+        else if (Engine is WhisperEnginePurfviewFasterWhisperXxl)
+        {
+            var dir = Engine.GetAndCreateWhisperFolder();
+            var tempFileName = Path.Combine(dir, Engine.Name + ".7z");
+            _downloadTask = _whisperDownloadService.DownloadWhisperPurfviewFasterWhisperXxl(tempFileName, downloadProgress, _cancellationTokenSource.Token);
+        }
     }
 
     internal void OnKeyDown(KeyEventArgs e)

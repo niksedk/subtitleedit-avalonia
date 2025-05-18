@@ -21,8 +21,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Globalization;
-using Nikse.SubtitleEdit.Core.TextToSpeech;
-using System.Threading;
 using Nikse.SubtitleEdit.Features.Common;
 
 namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
@@ -47,6 +45,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     [ObservableProperty] private string _consoleLog;
 
     [ObservableProperty] private bool _isTranscribeEnabled;
+    [ObservableProperty] private double _progressOpacity;
 
     [ObservableProperty] private float _progressValue;
     [ObservableProperty] private string _progressText;
@@ -439,9 +438,14 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
             var vm = await _windowService.ShowDialogAsync<DownloadWhisperEngineWindow, DownloadWhisperEngineViewModel>(Window!, viewModel =>
             {
-                //viewModel.Engine = engine;
+                viewModel.Engine = engine;
                 viewModel.StartDownload();
             });
+
+            if (!vm.OkPressed)
+            {
+                return;
+            }
         }
 
         if (!engine.IsModelInstalled(model.Model))
@@ -467,6 +471,49 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
             return;
         }
+
+        if (language.Code != "en" && IsModelEnglishOnly(model.Model))
+        {
+            var answer = await MessageBox.Show(
+                Window!,
+                "Warning",
+                "English model should only be used with English language.\nContinue anyway?",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question);
+
+            if (answer != MessageBoxResult.Yes)
+            {
+                return;
+            }
+        }
+
+        IsTranscribeEnabled = false;
+        ConsoleLog = string.Empty;
+
+        var mediaInfo = FfmpegMediaInfo.Parse(_videoFileName);
+        if (mediaInfo.Tracks.Count(p => p.TrackType == FfmpegTrackType.Audio) == 0)
+        {
+            var answer = await MessageBox.Show(
+                Window!,
+                "No audio track found",
+                $"No audio track was found in {_videoFileName}",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+
+            IsTranscribeEnabled = true;
+            return;
+        }
+
+        _videoInfo.TotalMilliseconds = mediaInfo.Duration.TotalMilliseconds;
+        _videoInfo.TotalSeconds = mediaInfo.Duration.TotalSeconds;
+        _videoInfo.Width = mediaInfo.Dimension.Width;
+        _videoInfo.Height = mediaInfo.Dimension.Height;
+
+        ProgressOpacity = 1;
+        ProgressText = "Generating wav file...";
+        _startTicks = DateTime.UtcNow.Ticks;
+
+        var startGenerateWaveFileOk = GenerateWavFile(_videoFileName, _audioTrackNumber);
     }
 
     [RelayCommand]
@@ -1009,5 +1056,10 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         {
             Parameters = "--standard";
         }
+    }
+
+    internal void Initialize(string? videoFileName)
+    {
+        _videoFileName = videoFileName;
     }
 }
