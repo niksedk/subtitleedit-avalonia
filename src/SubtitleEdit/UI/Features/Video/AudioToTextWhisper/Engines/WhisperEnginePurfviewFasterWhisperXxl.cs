@@ -3,6 +3,7 @@ using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper.Engines;
@@ -121,6 +122,11 @@ public class WhisperEnginePurfviewFasterWhisperXxl : IWhisperEngine
 
     public string GetExecutableFileName()
     {
-        return "faster-whisper-xxl.exe";
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return "faster-whisper-xxl.exe";
+        }
+
+        return "faster-whisper-xxl";
     }
 }

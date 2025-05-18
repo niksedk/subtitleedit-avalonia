@@ -7,6 +7,7 @@ using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic.Config;
 using Avalonia.Layout;
 using Avalonia;
+using Projektanker.Icons.Avalonia;
 
 namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 
@@ -35,6 +36,28 @@ public class DownloadWhisperModelsWindow : Window
         var comboBoxModel = UiUtil.MakeComboBox(vm.Models, vm, nameof(vm.SelectedModel)).WithMinwidth(200);
 
         var buttonDownload = UiUtil.MakeButton(Se.Language.General.Download, vm.DownloadCommand).WithLeftAlignment();
+
+        var buttonOpenFolder = new Button
+        {
+            Margin = new Thickness(4, 0),
+            Padding = new Thickness(12, 6),
+            Height = 33,
+            Command = vm.OpenModelFolderCommand,
+        };
+        Attached.SetIcon(buttonOpenFolder, "fa-solid fa-folder-open");
+
+        var panelModelButtons = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Margin = new Thickness(0, 0, 0, 0),
+            Children =
+            {
+                buttonDownload,
+                buttonOpenFolder
+            }
+        };  
+
 
         var progressSlider = new Slider
         {
@@ -102,9 +125,9 @@ public class DownloadWhisperModelsWindow : Window
         Grid.SetRow(comboBoxModel, row);
         Grid.SetColumn(comboBoxModel, 0);
 
-        grid.Children.Add(buttonDownload);
-        Grid.SetRow(buttonDownload, row);
-        Grid.SetColumn(buttonDownload, 1);
+        grid.Children.Add(panelModelButtons);
+        Grid.SetRow(panelModelButtons, row);
+        Grid.SetColumn(panelModelButtons, 1);
         row++;
 
         grid.Children.Add(panelStatus);

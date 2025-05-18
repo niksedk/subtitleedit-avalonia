@@ -17,6 +17,7 @@ public class WhisperDownloadService : IWhisperDownloadService
 
     private const string DownloadUrlPurfviewFasterWhisper = "https://github.com/Purfview/whisper-standalone-win/releases/download/faster-whisper/Whisper-Faster_r192.3_windows.zip";
     private const string DownloadUrlPurfviewFasterWhisperXxl = "https://github.com/Purfview/whisper-standalone-win/releases/download/Faster-Whisper-XXL/Faster-Whisper-XXL_r245.4_windows.7z";
+    private const string DownloadUrlPurfviewFasterWhisperXxlLinux = "https://github.com/Purfview/whisper-standalone-win/releases/download/Faster-Whisper-XXL/Faster-Whisper-XXL_r245.4_linux.7z";
 
     public WhisperDownloadService(HttpClient httpClient)
     {
@@ -41,6 +42,17 @@ public class WhisperDownloadService : IWhisperDownloadService
     public async Task DownloadWhisperPurfviewFasterWhisperXxl(string destinationFileName, IProgress<float>? progress, CancellationToken cancellationToken)
     {
         var url = DownloadUrlPurfviewFasterWhisperXxl;
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            url = DownloadUrlPurfviewFasterWhisperXxlLinux;
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            throw new PlatformNotSupportedException("MacOS not supported.");
+        }
+
         await DownloadHelper.DownloadFileAsync(_httpClient, url, destinationFileName, progress, cancellationToken);
     }
 
@@ -50,7 +62,7 @@ public class WhisperDownloadService : IWhisperDownloadService
         {
             return WindowsUrl;
         }
-        
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             switch (RuntimeInformation.ProcessArchitecture)

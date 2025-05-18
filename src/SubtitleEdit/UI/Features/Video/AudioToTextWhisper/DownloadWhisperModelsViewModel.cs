@@ -8,7 +8,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -45,9 +47,7 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
 
     private const string TemporaryFileExtension = ".$$$";
     private readonly Timer _timer;
-    private bool _done;
     private readonly CancellationTokenSource _cancellationTokenSource;
-    private readonly MemoryStream _downloadStream;
 
     public DownloadWhisperModelsViewModel(IWhisperDownloadService whisperDownloadService)
     {
@@ -57,8 +57,6 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
         _whisperDownloadService = whisperDownloadService;
 
         _cancellationTokenSource = new CancellationTokenSource();
-
-        _downloadStream = new MemoryStream();
 
         ProgressText = "Starting...";
         Error = string.Empty;
@@ -208,10 +206,22 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
     private void Cancel()
     {
         _cancellationTokenSource?.Cancel();
-        _done = true;
         _timer.Stop();
         OkPressed = false;
         Close();
+    }
+
+    [RelayCommand]
+    private async Task OpenModelFolder()
+    {
+        if (_whisperEngine == null)
+        {
+            return;
+        }
+
+        var folder = _whisperEngine.GetAndCreateWhisperModelFolder(_selectedModel?.Model);
+        var dirInfo = new DirectoryInfo(folder);
+        await Window!.Launcher.LaunchDirectoryInfoAsync(dirInfo);
     }
 
     [RelayCommand]

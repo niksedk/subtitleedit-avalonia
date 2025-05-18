@@ -36,7 +36,6 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
     private IWhisperDownloadService _whisperDownloadService;
     private Task? _downloadTask;
     private readonly Timer _timer;
-    private bool _done;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly MemoryStream _downloadStream;
 
@@ -67,7 +66,7 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
         lock (_lockObj)
         {
             _timer.Stop();
-            if (_downloadTask is { IsCompleted: true })
+            if (_downloadTask is { IsCompleted: true } && Engine != null)
             {
                 if (Engine.Name == WhisperEnginePurfviewFasterWhisperXxl.StaticName)
                 {
@@ -186,7 +185,6 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
                 }
 
                 ProgressText = $"Unpacking: {displayName}";
-                ProgressValue = (float)(unpackedSize / totalSize);
                 reader.WriteEntryToDirectory(fullPath, new ExtractionOptions() 
                 { 
                     ExtractFullPath = false, 
@@ -196,7 +194,7 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
             }
         }
 
-        ProgressValue = 1.0f;
+        ProgressValue = 100.0f;
     }
 
     private void Unpack(string folder, string skipFolderLevel)
@@ -232,7 +230,6 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
     private void Cancel()
     {
         _cancellationTokenSource?.Cancel();
-        _done = true;
         _timer.Stop();
         Close();
     }
@@ -245,7 +242,7 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
         {
             var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
             var pctString = percentage.ToString(CultureInfo.InvariantCulture);
-            ProgressValue = number;
+            ProgressValue = percentage;
             ProgressText = $"Downloading... {pctString}%";
         });
 

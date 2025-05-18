@@ -100,9 +100,14 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             Engines.Add(new WhisperEnginePurfviewFasterWhisperXxl());
-            Engines.Add(new WhisperEngineOpenAi());
             Engines.Add(new WhisperEngineConstMe());
         }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            Engines.Add(new WhisperEnginePurfviewFasterWhisperXxl());
+        }
+        Engines.Add(new WhisperEngineOpenAi());
+
         SelectedEngine = Engines[0];
 
         Languages = new ObservableCollection<WhisperLanguage>(SelectedEngine.Languages);
