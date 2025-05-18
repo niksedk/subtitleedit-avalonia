@@ -117,7 +117,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         ElapsedText = string.Empty;
         EstimatedText = string.Empty;
         TranscribedSubtitle = new Subtitle();
-        TextBoxConsoleLog = new TextBox();  
+        TextBoxConsoleLog = new TextBox();
 
         LoadSettings();
 
@@ -821,6 +821,12 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     [RelayCommand]
     private void Cancel()
     {
+        if (!IsTranscribeEnabled)
+        {
+            _abort = true;
+            return;
+        }
+
         Window?.Close();
     }
 
