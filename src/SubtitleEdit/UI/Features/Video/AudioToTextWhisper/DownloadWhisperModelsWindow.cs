@@ -42,6 +42,7 @@ public class DownloadWhisperModelsWindow : Window
             Margin = new Thickness(0, 0, 0, 0),
             Minimum = 0,
             Maximum = 100,
+            IsHitTestVisible = false,
             Styles =
             {
                 new Style(x => x.OfType<Thumb>())

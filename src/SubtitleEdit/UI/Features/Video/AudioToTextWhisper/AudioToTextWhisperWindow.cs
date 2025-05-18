@@ -1,8 +1,10 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
@@ -51,6 +53,14 @@ public class AudioToTextWhisperWindow : Window
 
         var labelEngine = UiUtil.MakeTextBlock("Engine");
         var comboEngine = UiUtil.MakeComboBox(vm.Engines, vm, nameof(vm.SelectedEngine)).WithMinwidth(200);
+        comboEngine.Bind(ComboBox.IsEnabledProperty, new Binding
+        {
+            Path = nameof(vm.IsTranscribeEnabled),
+            Mode = BindingMode.OneWay,
+            Source = vm,
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+        });
+
         comboEngine.SelectionChanged += vm.OnEngineChanged;
 
         var labelLanguage = UiUtil.MakeTextBlock("Language");
@@ -123,30 +133,98 @@ public class AudioToTextWhisperWindow : Window
         {
             Minimum = 0,
             Maximum = 100,
-            IsEnabled = false,
-            Margin = new Thickness(10, 0, 10, 0),
+            IsHitTestVisible = false,
+            Margin = new Thickness(10, 0, 0, 0),
             Width = double.NaN,
-            Height = double.NaN,
+            Height = 10,
             VerticalAlignment = VerticalAlignment.Center,
             HorizontalAlignment = HorizontalAlignment.Stretch,
+            Styles =
+            {
+                new Style(x => x.OfType<Thumb>())
+                {
+                    Setters =
+                    {
+                        new Setter(Thumb.IsVisibleProperty, false)
+                    },
+                },
+                new Style(x => x.OfType<Track>())
+                {
+                    Setters =
+                    {
+                        new Setter(Track.HeightProperty, 8.0)
+                    },
+                },
+            },
         };
+        progressSlider.Bind(Slider.ValueProperty, new Binding
+        {
+            Path = nameof(vm.ProgressValue),
+            Mode = BindingMode.OneWay,
+            Source = vm,
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+        });
+        progressSlider.Bind(Slider.OpacityProperty, new Binding
+        {
+            Path = nameof(vm.ProgressOpacity),
+            Mode = BindingMode.OneWay,
+            Source = vm,
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+        });
+
         var progressText = new TextBlock()
         {
-            Text = "0%",
-            HorizontalAlignment = HorizontalAlignment.Right,
+            HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(10, 0, 10, 0),
         };
+        progressText.Bind(TextBlock.TextProperty, new Binding
+        {
+            Path = nameof(vm.ProgressText),
+            Mode = BindingMode.OneWay,
+            Source = vm,
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+        });
+        progressText.Bind(TextBlock.OpacityProperty, new Binding
+        {
+            Path = nameof(vm.ProgressOpacity),
+            Mode = BindingMode.OneWay,
+            Source = vm,
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+        });
+
+        var estimatedTimeText = new TextBlock()
+        {
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(10, 0, 10, 0),
+        };
+        estimatedTimeText.Bind(TextBlock.TextProperty, new Binding
+        {
+            Path = nameof(vm.EstimatedText),
+            Mode = BindingMode.OneWay,
+            Source = vm,
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+        });
+        estimatedTimeText.Bind(TextBlock.OpacityProperty, new Binding
+        {
+            Path = nameof(vm.ProgressOpacity),
+            Mode = BindingMode.OneWay,
+            Source = vm,
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+        });
+
         var panelProgress = new StackPanel()
         {
-            Orientation = Orientation.Horizontal,
+            Orientation = Orientation.Vertical,
             HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Top,
             Children =
             {
                 progressSlider,
-                progressText
-            }
+                progressText,
+                estimatedTimeText,
+            },
         };
 
         var buttonPanel = UiUtil.MakeButtonBar(
@@ -255,7 +333,8 @@ public class AudioToTextWhisperWindow : Window
         grid.Children.Add(panelProgress);
         Grid.SetRow(panelProgress, row);
         Grid.SetColumn(panelProgress, 0);
-        Grid.SetColumnSpan(panelProgress, 2);
+        Grid.SetColumnSpan(panelProgress, 3);
+        Grid.SetRowSpan(panelProgress, 2);
 
         row++;
         grid.Children.Add(buttonPanel);

@@ -50,7 +50,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     [ObservableProperty] private bool _isTranscribeEnabled;
     [ObservableProperty] private double _progressOpacity;
 
-    [ObservableProperty] private float _progressValue;
+    [ObservableProperty] private double _progressValue;
     [ObservableProperty] private string _progressText;
     [ObservableProperty] private string _elapsedText;
     [ObservableProperty] private string _estimatedText;
@@ -479,19 +479,20 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
     private void SetProgressBarPct(double pct)
     {
-        var p = pct / 100.0;
-
-        if (p > 1)
+        if (pct > 100)
         {
-            p = 1;
+            pct = 100;
         }
 
-        if (p < 0)
+        if (pct < 0)
         {
-            p = 0;
+            pct = 0;
         }
 
-        ProgressValue = (float)p;
+        if (pct > ProgressValue)
+        {
+            ProgressValue = pct;
+        }
         // _taskbarList.SetProgressValue(_windowHandle, Math.Max(0, Math.Min((int)pct, 100)), 100);
     }
 

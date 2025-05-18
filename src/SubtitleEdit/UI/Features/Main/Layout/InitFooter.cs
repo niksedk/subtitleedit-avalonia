@@ -31,7 +31,6 @@ public static class InitFooter
 
         var right = new TextBlock
         {
-            Text = "00:00:00 / 00:05:00 | EN subtitles | Saved",
             HorizontalAlignment = HorizontalAlignment.Right,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(10, 4),

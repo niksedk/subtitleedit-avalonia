@@ -78,7 +78,7 @@ public partial class MainViewModel : ObservableObject
     public Window Window { get; set; }
     public Grid ContentGrid { get; set; }
     public MainView MainView { get; set; }
-    
+
     public ITreeDataGridSource? SubtitlesSource { get; set; }
     public TextBlock StatusTextLeftLabel { get; internal set; }
 
@@ -473,7 +473,7 @@ public partial class MainViewModel : ObservableObject
         {
             Console.WriteLine("User confirmed the action");
         }
-        
+
         _shortcutManager.ClearKeys();
     }
 
@@ -522,7 +522,7 @@ public partial class MainViewModel : ObservableObject
         {
             // todo
         }
-        
+
         _shortcutManager.ClearKeys();
     }
 
@@ -587,8 +587,8 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        var viewModel = await _windowService.ShowDialogAsync<FindWindow, FindViewModel>(Window, vm => 
-        { 
+        var viewModel = await _windowService.ShowDialogAsync<FindWindow, FindViewModel>(Window, vm =>
+        {
         });
 
         _shortcutManager.ClearKeys();
@@ -647,7 +647,7 @@ public partial class MainViewModel : ObservableObject
         {
             SelectAndScrollToRow(viewModel.LineNumber - 1);
         }
-        
+
         _shortcutManager.ClearKeys();
     }
 
@@ -754,7 +754,7 @@ public partial class MainViewModel : ObservableObject
     {
         SubtitleGrid.SelectAll();
     }
-    
+
     private void InverseRowSelection()
     {
         if (SubtitleGrid.SelectedItems == null || Subtitles.Count == 0)
@@ -764,10 +764,10 @@ public partial class MainViewModel : ObservableObject
 
         // Store currently selected items
         var selectedItems = new HashSet<SubtitleLineViewModel>(SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>());
-    
+
         // Clear current selection
         SubtitleGrid.SelectedItems.Clear();
-    
+
         // Add all items that weren't previously selected
         foreach (var item in Subtitles)
         {
@@ -794,7 +794,7 @@ public partial class MainViewModel : ObservableObject
         SubtitleGrid.ScrollIntoView(SubtitleGrid.SelectedItem, null);
     }
 
-// Method to select a specific subtitle and make it visible
+    // Method to select a specific subtitle and make it visible
     public void SelectAndScrollToSubtitle(SubtitleLineViewModel subtitle)
     {
         if (subtitle == null || !Subtitles.Contains(subtitle))
@@ -1209,7 +1209,7 @@ public partial class MainViewModel : ObservableObject
             return;
         }
     }
-    
+
     public void OnKeyUpHandler(object? sender, KeyEventArgs e)
     {
         _shortcutManager.OnKeyReleased(this, e);
