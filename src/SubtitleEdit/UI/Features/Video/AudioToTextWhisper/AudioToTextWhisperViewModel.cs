@@ -110,6 +110,15 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
         Models = new ObservableCollection<WhisperModelDisplay>();
 
+        IsTranscribeEnabled = true;
+        Parameters = string.Empty;
+        ConsoleLog = string.Empty;
+        ProgressText = string.Empty;
+        ElapsedText = string.Empty;
+        EstimatedText = string.Empty;
+        TranscribedSubtitle = new Subtitle();
+        TextBoxConsoleLog = new TextBox();  
+
         LoadSettings();
 
         _timerWhisper.Interval = 100;

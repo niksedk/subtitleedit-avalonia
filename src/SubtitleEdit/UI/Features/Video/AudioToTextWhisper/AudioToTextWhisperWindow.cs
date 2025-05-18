@@ -52,24 +52,23 @@ public class AudioToTextWhisperWindow : Window
         vm.TextBoxConsoleLog = textBoxConsoleLog;
 
         var labelEngine = UiUtil.MakeTextBlock("Engine");
-        var comboEngine = UiUtil.MakeComboBox(vm.Engines, vm, nameof(vm.SelectedEngine)).WithMinwidth(200);
-        comboEngine.Bind(ComboBox.IsEnabledProperty, new Binding
-        {
-            Path = nameof(vm.IsTranscribeEnabled),
-            Mode = BindingMode.OneWay,
-            Source = vm,
-            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
-        });
+        var comboEngine = UiUtil.MakeComboBox(vm.Engines, vm, nameof(vm.SelectedEngine))
+            .WithMinwidth(200)
+            .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled)); ;
 
         comboEngine.SelectionChanged += vm.OnEngineChanged;
 
         var labelLanguage = UiUtil.MakeTextBlock("Language");
-        var comboLanguage = UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage)).WithMinwidth(200);
+        var comboLanguage = UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage))
+            .WithMinwidth(200)
+            .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled)); ;
 
         var labelModel = UiUtil.MakeTextBlock("Model").WithMarginBottom(20);
         var comboModel = UiUtil.MakeComboBox(vm.Models, vm, nameof(vm.SelectedModel))
             .WithMinwidth(200)
-            .WithMarginBottom(20);
+            .WithMarginBottom(20)
+            .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled)); 
+
         var buttonModelDownload = new Button
         {
             Content = "...",
@@ -79,7 +78,8 @@ public class AudioToTextWhisperWindow : Window
             VerticalContentAlignment = VerticalAlignment.Center,
             Command = vm.DownloadModelCommand,
             Margin = new Thickness(5, 0, 0, 0),
-        }.WithMarginBottom(20);  
+        }.WithMarginBottom(20).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled)); 
+
         var panelModelControls = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -93,10 +93,9 @@ public class AudioToTextWhisperWindow : Window
         };
 
         var labelTranslateToEnglish = UiUtil.MakeTextBlock("Translate to English");
-        var checkTranslateToEnglish = UiUtil.MakeCheckBox(vm, nameof(vm.DoTranslateToEnglish));
-
+        var checkTranslateToEnglish = UiUtil.MakeCheckBox(vm, nameof(vm.DoTranslateToEnglish)).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled)); 
         var labelPostProcessing = UiUtil.MakeTextBlock("Post processing");
-        var checkPostProcessing = UiUtil.MakeCheckBox(vm, nameof(vm.DoPostProcessing));
+        var checkPostProcessing = UiUtil.MakeCheckBox(vm, nameof(vm.DoPostProcessing)).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled)); 
         var buttonPostProcessing = new Button()
         {
             Content = "Settings",
@@ -105,7 +104,7 @@ public class AudioToTextWhisperWindow : Window
             HorizontalContentAlignment = HorizontalAlignment.Center,
             VerticalContentAlignment = VerticalAlignment.Center,
             Command = vm.ShowPostProcessingSettingsCommand,
-        };
+        }.BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled)); 
         var panelPostProcessingControls = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -127,7 +126,7 @@ public class AudioToTextWhisperWindow : Window
             HorizontalContentAlignment = HorizontalAlignment.Center,
             VerticalContentAlignment = VerticalAlignment.Center,
             Command = vm.ShowAdvancedSettingsCommand,
-        };
+        }.BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
 
         var progressSlider = new Slider()
         {
@@ -214,6 +213,28 @@ public class AudioToTextWhisperWindow : Window
             UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
         });
 
+        var elapsedTimeText = new TextBlock()
+        {
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(10, 0, 10, 0),
+        };
+        elapsedTimeText.Bind(TextBlock.TextProperty, new Binding
+        {
+            Path = nameof(vm.ElapsedText),
+            Mode = BindingMode.OneWay,
+            Source = vm,
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+        });
+        elapsedTimeText.Bind(TextBlock.OpacityProperty, new Binding
+        {
+            Path = nameof(vm.ProgressOpacity),
+            Mode = BindingMode.OneWay,
+            Source = vm,
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+        });
+
+
         var panelProgress = new StackPanel()
         {
             Orientation = Orientation.Vertical,
@@ -223,12 +244,14 @@ public class AudioToTextWhisperWindow : Window
             {
                 progressSlider,
                 progressText,
+                elapsedTimeText,
                 estimatedTimeText,
             },
         };
 
+        var transcribeButton = UiUtil.MakeButton("Transcribe", vm.TranscribeCommand).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
         var buttonPanel = UiUtil.MakeButtonBar(
-            UiUtil.MakeButton("Transcribe", vm.TranscribeCommand),
+            transcribeButton,
             UiUtil.MakeButton("Cancel", vm.CancelCommand)
         );
 

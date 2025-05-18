@@ -55,6 +55,32 @@ public static class UiUtil
         };
     }
 
+    public static Button BindIsEnabled(this Button control, object viewModal, string propertyIsEnabledPath)
+    {
+        control.Bind(Button.IsEnabledProperty, new Binding
+        {
+            Path =propertyIsEnabledPath,
+            Mode = BindingMode.OneWay,
+            Source = viewModal,
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+        });
+
+        return control;
+    }
+
+    public static ComboBox BindIsEnabled(this ComboBox control, object viewModal, string propertyIsEnabledPath)
+    {
+        control.Bind(ComboBox.IsEnabledProperty, new Binding
+        {
+            Path = propertyIsEnabledPath,
+            Mode = BindingMode.OneWay,
+            Source = viewModal,
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+        });
+
+        return control;
+    }
+
     public static ComboBox MakeComboBox<T>(
         ObservableCollection<T> sourceLanguages,
         object viewModal,
