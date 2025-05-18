@@ -115,6 +115,23 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         DoAdjustTimings = Se.Settings.Tools.AudioToText.WhisperAutoAdjustTimings;
         DoPostProcessing = Se.Settings.Tools.AudioToText.PostProcessing;
         Parameters = Se.Settings.Tools.AudioToText.WhisperCustomCommandLineArguments;
+
+        EngineChanged();
+    }
+
+    private void SaveSettings()
+    {
+        DoAdjustTimings = Se.Settings.Tools.AudioToText.WhisperAutoAdjustTimings;
+        DoPostProcessing = Se.Settings.Tools.AudioToText.PostProcessing;
+        Parameters = Se.Settings.Tools.AudioToText.WhisperCustomCommandLineArguments;
+
+        Se.Settings.Tools.AudioToText.WhisperAutoAdjustTimings = DoAdjustTimings;
+        Se.Settings.Tools.AudioToText.WhisperCustomCommandLineArguments = Parameters;
+        Se.Settings.Tools.AudioToText.WhisperCustomCommandLineArgumentsPurfviewBlank = Parameters == "--standard";
+        Se.Settings.Tools.AudioToText.WhisperChoice = SelectedEngine.Choice;
+        Se.Settings.Tools.AudioToText.WhisperModel = SelectedModel?.Model.Name ?? string.Empty;
+
+        Se.SaveSettings();
     }
 
     private void OnTimerWhisperOnElapsed(object? sender, ElapsedEventArgs args)
@@ -298,6 +315,31 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         //}
     }
 
+    public void DeleteTempFiles()
+    {
+        foreach (var file in _filesToDelete)
+        {
+            try
+            {
+                if (File.Exists(file))
+                {
+                    File.Delete(file);
+                }
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+    }
+
+    private static bool IsModelEnglishOnly(WhisperModel model)
+    {
+        return model.Name.EndsWith(".en", StringComparison.InvariantCulture) ||
+               model.Name == "distil-large-v2" ||
+               model.Name == "distil-large-v3";
+    }
+
     [RelayCommand]
     private async Task ShowAdvancedSettings()
     {
@@ -342,17 +384,22 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     [RelayCommand]
     private async Task DownloadModel()
     {
-        var vm = await _windowService.ShowDialogAsync<DownloadWhisperModelsWindow, DownloadWhisperModelsViewModel>(Window, view =>
+        var vm = await _windowService.ShowDialogAsync<DownloadWhisperModelsWindow, DownloadWhisperModelsViewModel>(Window!, viewModel =>
         {
-            
+            viewModel.SetModels(Models, SelectedEngine, SelectedModel);
         });
-    }
 
+        if (vm.OkPressed)
+        {
+            RefreshDownloadStatus(vm.SelectedModel?.Model);
+        }
+    }
 
     [RelayCommand]
     private void Transcribe()
     {
         OkPressed = true;
+        SaveSettings();
         Window?.Close();
     }
 
@@ -371,14 +418,16 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         }
     }
 
-    internal void OnEngineChanged(object? sender, SelectionChangedEventArgs e)
+    private void RefreshDownloadStatus(WhisperModel? result)
     {
-        var engine = SelectedEngine;
-
-        Languages.Clear();
-        foreach (var language in engine.Languages)
+        if (SelectedEngine is not IWhisperEngine engine)
         {
-            Languages.Add(language);
+            return;
+        }
+
+        if (SelectedModel is not WhisperModelDisplay oldModel)
+        {
+            return;
         }
 
         Models.Clear();
@@ -389,6 +438,65 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                 Model = model,
                 Engine = engine,
             });
+        }
+
+        if (result != null)
+        {
+            SelectedModel = Models.FirstOrDefault(m => m.Model.Name == result.Name);
+        }
+        else
+        {
+            SelectedModel = Models.FirstOrDefault(m => m.Model.Name == oldModel.Model.Name);
+        }
+    }
+
+    internal void OnEngineChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        EngineChanged();
+    }
+
+    private void EngineChanged()
+    {
+        var engine = SelectedEngine;
+
+        Languages.Clear();
+        foreach (var language in engine.Languages)
+        {
+            Languages.Add(language);
+        }
+        if (!string.IsNullOrEmpty(Se.Settings.Tools.AudioToText.WhisperLanguageCode))
+        {
+            var language = Languages.FirstOrDefault(p => p.Code == Se.Settings.Tools.AudioToText.WhisperLanguageCode);
+            if (language != null)
+            {
+                SelectedLanguage = language;
+            }
+        }
+        else
+        {
+            SelectedLanguage = Languages.FirstOrDefault(p => p.Name == "English");
+        }
+
+        Models.Clear();
+        foreach (var model in engine.Models)
+        {
+            Models.Add(new WhisperModelDisplay
+            {
+                Model = model,
+                Engine = engine,
+            });
+        }
+        if (Models.Count > 0)
+        {
+            var model = Models.FirstOrDefault(p => p.Model.Name == Se.Settings.Tools.AudioToText.WhisperModel);
+            if (model != null)
+            {
+                SelectedModel = model;
+            }
+            else
+            {
+                SelectedModel = Models.FirstOrDefault();
+            }
         }
 
         var isPurfview = engine.Name == WhisperEnginePurfviewFasterWhisperXxl.StaticName;

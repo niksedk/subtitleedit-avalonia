@@ -18,6 +18,7 @@ public class LanguageGeneral
     public string Preview { get; set; }
     public string ShowPreview { get; set; }
     public string HidePreview { get; set; }
+    public string Download { get; set; }
     public string SubtitleFile { get; set; }
     public string SubtitleFiles { get; set; }
     public string AllFiles { get; set; }
@@ -123,6 +124,7 @@ public class LanguageGeneral
         Preview = "Preview";
         ShowPreview = "Show preview";
         HidePreview = "Hide preview";
+        Download = "Download";
         SubtitleFile = "Subtitle file";
         SubtitleFiles = "Subtitle files";
         AllFiles = "All files";

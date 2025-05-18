@@ -19,6 +19,8 @@ public class WhisperAdvancedWindow : Window
         Title = "Advanced Whisper settings";
         Width = 1050;
         Height = 660;
+        MinWidth = 800;
+        MinHeight = 400;
         CanResize = true;
 
         _vm = vm;

@@ -1,12 +1,12 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Media;
 using Avalonia.Data;
 using Nikse.SubtitleEdit.Logic;
 using Avalonia.Controls.Primitives;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic.Config;
+using Avalonia.Layout;
+using Avalonia;
 
 namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 
@@ -21,21 +21,25 @@ public class DownloadWhisperModelsWindow : Window
         Icon = UiUtil.GetSeIcon();
         Title = "Downloading Whisper model";
         Width = 400;
-        Height = 190;
+        Height = 220;
         CanResize = false;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
 
         DataContext = vm;
 
-        var titleText = new TextBlock
+        var labelSelectModel = new TextBlock
         {
-            Text = "Downloading Whisper model",
-            FontSize = 20,
-            FontWeight = FontWeight.Bold,
+            Text = "Select model",
         };
+
+        var comboBoxModel = UiUtil.MakeComboBox(vm.Models, vm, nameof(vm.SelectedModel)).WithMinwidth(200);
+
+        var buttonDownload = UiUtil.MakeButton(Se.Language.General.Download, vm.DownloadCommand).WithLeftAlignment();
 
         var progressSlider = new Slider
         {
+            Height = 8,
+            Margin = new Thickness(0, 0, 0, 0),
             Minimum = 0,
             Maximum = 100,
             Styles =
@@ -56,26 +60,64 @@ public class DownloadWhisperModelsWindow : Window
                 },
             }
         };
-        progressSlider.Bind(Slider.ValueProperty, new Binding(nameof(vm.Progress)));
-
-        var statusText = new TextBlock();
-        statusText.Bind(TextBlock.TextProperty, new Binding(nameof(vm.StatusText)));
-
-        var buttonCancel = UiUtil.MakeButton(Se.Language.General.Cancel, vm.CommandCancelCommand);
-        var buttonBar = UiUtil.MakeButtonBar(buttonCancel);
-
-        Content = new StackPanel
+        progressSlider.Bind(Slider.ValueProperty, new Binding(nameof(vm.ProgressValue)));
+        progressSlider.Bind(Slider.OpacityProperty, new Binding(nameof(vm.ProgressOpacity)));
+        var statusText = new TextBlock
         {
-            Spacing = 8,
-            Margin = new Thickness(20),
+            Margin = new Thickness(0, 0, 0, 0),
+            HorizontalAlignment = HorizontalAlignment.Center,
+        };
+        statusText.Bind(TextBlock.TextProperty, new Binding(nameof(vm.ProgressText)));
+        statusText.Bind(TextBlock.OpacityProperty, new Binding(nameof(vm.ProgressOpacity)));
+        var panelStatus = new StackPanel
+        {
+            Orientation = Orientation.Vertical,
+            Margin = new Thickness(0, 35, 0, 10),
             Children =
             {
-                titleText,
                 progressSlider,
-                statusText,
-                buttonBar,
+                statusText
             }
+        };  
+
+        var buttonCancel = UiUtil.MakeButton(Se.Language.General.Cancel, vm.CancelCommand);
+        var buttonBar = UiUtil.MakeButtonBar(buttonCancel);
+
+        var grid = new Grid
+        {
+            ColumnDefinitions = new ColumnDefinitions("Auto, *"),
+            RowDefinitions = new RowDefinitions("Auto, Auto, Auto, Auto"),
+            Margin = UiUtil.MakeWindowMargin(),
         };
+
+        var row = 0;
+        grid.Children.Add(labelSelectModel);
+        Grid.SetColumnSpan(labelSelectModel, 2);
+        Grid.SetRow(labelSelectModel, row);
+        Grid.SetColumn(labelSelectModel, 0);
+        row++;
+
+        grid.Children.Add(comboBoxModel);
+        Grid.SetRow(comboBoxModel, row);
+        Grid.SetColumn(comboBoxModel, 0);
+
+        grid.Children.Add(buttonDownload);
+        Grid.SetRow(buttonDownload, row);
+        Grid.SetColumn(buttonDownload, 1);
+        row++;
+
+        grid.Children.Add(panelStatus);
+        Grid.SetColumnSpan(panelStatus, 2);
+        Grid.SetRow(panelStatus, row);
+        Grid.SetColumn(panelStatus, 0);
+        row++;
+
+        grid.Children.Add(buttonBar);
+        Grid.SetColumnSpan(buttonBar, 2);
+        Grid.SetRow(buttonBar, row);
+        Grid.SetColumn(buttonBar, 0);
+
+        Content = grid;
 
         Activated += delegate
         {

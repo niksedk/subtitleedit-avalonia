@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
-using System.Runtime.InteropServices;
+using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -9,8 +12,9 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Logic.Compression;
-using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Core.AudioToText;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper.Engines;
 using Nikse.SubtitleEdit.Logic.Download;
 using Timer = System.Timers.Timer;
 
@@ -18,36 +22,69 @@ namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 
 public partial class DownloadWhisperModelsViewModel : ObservableObject
 {
-    [ObservableProperty] private double _progress;
-    [ObservableProperty] private string _statusText;
+
+    [ObservableProperty] private ObservableCollection<WhisperModelDisplay> _models;
+    [ObservableProperty] private WhisperModelDisplay? _selectedModel;
+
+    [ObservableProperty] private double _progressOpacity;
+    [ObservableProperty] private double _progressValue;
+    [ObservableProperty] private string _progressText;
     [ObservableProperty] private string _error;
 
     public DownloadWhisperModelsWindow? Window { get; set; }
+    public bool OkPressed { get; internal set; }
 
     private IWhisperDownloadService _whisperDownloadService;
+    private IWhisperEngine? _whisperEngine;
+
     private Task? _downloadTask;
+    private readonly List<string> _downloadUrls = new();
+    private int _downloadIndex;
+    private string _downloadFileName = string.Empty;
+    private WhisperModel? _downloadModel;
+
+    private const string TemporaryFileExtension = ".$$$";
     private readonly Timer _timer;
     private bool _done;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly MemoryStream _downloadStream;
 
-    private readonly IZipUnpacker _zipUnpacker;
-
-    public DownloadWhisperModelsViewModel(IWhisperDownloadService whisperDownloadService, IZipUnpacker zipUnpacker)
+    public DownloadWhisperModelsViewModel(IWhisperDownloadService whisperDownloadService)
     {
+        Models = new ObservableCollection<WhisperModelDisplay>();
+        SelectedModel = Models.FirstOrDefault();
+
         _whisperDownloadService = whisperDownloadService;
-        _zipUnpacker = zipUnpacker;
 
         _cancellationTokenSource = new CancellationTokenSource();
 
         _downloadStream = new MemoryStream();
 
-        StatusText = "Starting...";
+        ProgressText = "Starting...";
         Error = string.Empty;
 
         _timer = new Timer(500);
         _timer.Elapsed += OnTimerOnElapsed;
         _timer.Start();
+    }
+
+    public void SetModels(ObservableCollection<WhisperModelDisplay> models, IWhisperEngine whisperEngine, WhisperModelDisplay? whisperModel)
+    {
+        _whisperEngine = whisperEngine;
+
+        foreach (var model in models)
+        {
+            Models.Add(model);
+        }
+
+        if (whisperModel != null)
+        {
+            SelectedModel = whisperModel;
+        }
+        else if (models.Count > 0)
+        {
+            SelectedModel = models[0];
+        }
     }
 
     private readonly Lock _lockObj = new();
@@ -56,74 +93,107 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
     {
         lock (_lockObj)
         {
-            if (_done)
-            {
-                return;
-            }
+            _timer.Stop();
 
             if (_downloadTask is { IsCompleted: true })
             {
-                _timer.Stop();
-                _done = true;
+                CompleteDownload();
 
-                if (_downloadStream.Length == 0)
+                _downloadIndex++;
+                if (_downloadIndex < _downloadUrls.Count)
                 {
-                    StatusText = "Download failed";
-                    Error = "No data received";
+                    _downloadFileName = GetDownloadFileName(_downloadModel!, _downloadUrls[_downloadIndex]);
+                    _downloadTask = _whisperDownloadService.DownloadFile(_downloadUrls[_downloadIndex], _downloadFileName, MakeDownloadProgress(), _cancellationTokenSource.Token);
+                    ProgressValue = 0;
+                    _timer.Start();
+
                     return;
                 }
 
-                var ffmpegFileName = GetFfmpegFileName();
+                _downloadTask = null;
 
-                if (File.Exists(ffmpegFileName))
-                {
-                    File.Delete(ffmpegFileName);
-                }
-
-                UnpackFfmpeg(ffmpegFileName);
-
+                OkPressed = true;
                 Close();
+
+                return;
             }
-            else if (_downloadTask is { IsFaulted: true })
+
+            if (_downloadTask is { IsFaulted: true })
             {
-                _timer.Stop();
-                _done = true;
                 var ex = _downloadTask.Exception?.InnerException ?? _downloadTask.Exception;
                 if (ex is OperationCanceledException)
                 {
-                    StatusText = "Download canceled";
-                    Close();
+                    ProgressText = "Download canceled";
+                    Cancel();
                 }
                 else
                 {
-                    StatusText = "Download failed";
+                    ProgressText = "Download failed";
                     Error = ex?.Message ?? "Unknown error";
                 }
+
+                return;
+            }
+
+            _timer.Start();
+        }
+    }
+
+    private void CompleteDownload()
+    {
+        var downloadFileName = _downloadFileName;
+        if (string.IsNullOrEmpty(downloadFileName) || !File.Exists(downloadFileName))
+        {
+            return;
+        }
+
+        var fileInfo = new FileInfo(downloadFileName);
+        if (fileInfo.Length == 0)
+        {
+            try
+            {
+                File.Delete(downloadFileName);
+            }
+            catch
+            {
+                // ignore
+            }
+
+            return;
+        }
+
+        if (fileInfo.Length < 50)
+        {
+            var text = FileUtil.ReadAllTextShared(downloadFileName, Encoding.UTF8);
+            if (text.StartsWith("Entry not found", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    File.Delete(downloadFileName);
+                }
+                catch
+                {
+                    // ignore
+                }
+
+                return;
+            }
+
+            if (text.Contains("Invalid username or password."))
+            {
+                throw new Exception("Unable to download file - Invalid username or password! (Perhaps file has a new location)");
             }
         }
-    }
 
-    private void UnpackFfmpeg(string newFileName)
-    {
-        var folder = Path.GetDirectoryName(newFileName);
-        if (folder != null)
+        var newFileName = downloadFileName.Replace(TemporaryFileExtension, string.Empty);
+
+        if (File.Exists(newFileName))
         {
-            _downloadStream.Position = 0;
-            _zipUnpacker.UnpackZipStream(_downloadStream, folder);
+            File.Delete(newFileName);
         }
 
-        _downloadStream.Dispose();
-    }
-
-
-    public static string GetFfmpegFileName()
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            return Path.Combine(Se.FfmpegFolder, "ffmpeg.exe");
-        }
-
-        return Path.Combine(Se.FfmpegFolder, "ffmpeg");
+        File.Move(downloadFileName, newFileName);
+        _downloadFileName = string.Empty;
     }
 
     private void Close()
@@ -135,38 +205,55 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void CommandCancel()
+    private void Cancel()
     {
         _cancellationTokenSource?.Cancel();
         _done = true;
         _timer.Stop();
+        OkPressed = false;
         Close();
     }
 
-    public void StartDownload()
+    [RelayCommand]
+    private void Download()
     {
-        var downloadProgress = new Progress<float>(number =>
+        if (SelectedModel is not { } model)
+        {
+            return;
+        }
+
+        _downloadUrls.Clear();
+        _downloadUrls.AddRange(model.Model.Urls);
+        _downloadIndex = 0;
+        _downloadModel = model.Model;
+        _downloadFileName = GetDownloadFileName(model.Model, _downloadUrls[_downloadIndex]);
+        _downloadTask = _whisperDownloadService.DownloadFile(_downloadUrls[_downloadIndex], _downloadFileName, MakeDownloadProgress(), _cancellationTokenSource.Token);
+        _timer.Interval = 500;
+        _timer.Elapsed += OnTimerOnElapsed;
+        _timer.Start();
+
+        ProgressOpacity = 1;
+    }
+
+    private Progress<float> MakeDownloadProgress()
+    {
+        return new Progress<float>(number =>
         {
             var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
             var pctString = percentage.ToString(CultureInfo.InvariantCulture);
-            Progress = percentage;
-            StatusText = $"Downloading... {pctString}%";
+            ProgressValue = percentage;
+            ProgressText = $"Downloading... {pctString}%";
         });
+    }
 
-        var folder = Se.FfmpegFolder;
-        if (!Directory.Exists(folder))
-        {
-            Directory.CreateDirectory(folder);
-        }
-
-        //_downloadTask = _whisperDownloadService.DownloadFile
-        //    _downloadStream,
-        //    downloadProgress,
-        //    _cancellationTokenSource.Token);
+    private string GetDownloadFileName(WhisperModel whisperModel, string url)
+    {
+        var fileName = _whisperEngine!.GetWhisperModelDownloadFileName(whisperModel, url);
+        return fileName + TemporaryFileExtension;
     }
 
     internal void OnKeyDown(KeyEventArgs e)
     {
-        CommandCancel();
+        Cancel();
     }
 }

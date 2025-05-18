@@ -1,14 +1,10 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Presenters;
-using Avalonia.Controls.Primitives;
-using Avalonia.Controls.Shapes;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
-using Avalonia.Styling;
 using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
@@ -89,32 +85,32 @@ public static class InitListViewAndEditBox
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
             Header = "#",
-            Binding = new Binding("Number"),
+            Binding = new Binding(nameof(SubtitleLineViewModel.Number)),
             Width = new DataGridLength(50)
         });
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
-            Header = "Start Time",
-            Binding = new Binding("StartTime") { Converter = fullTimeConverter },
+            Header = "Show",
+            Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)) { Converter = fullTimeConverter },
             Width = new DataGridLength(120),
         });
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
-            Header = "End Time",
-            Binding = new Binding("EndTime") { Converter = fullTimeConverter },
+            Header = "Hide",
+            Binding = new Binding(nameof(SubtitleLineViewModel.EndTime)) { Converter = fullTimeConverter },
             Width = new DataGridLength(120)
         });
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
             Header = "Duration",
-            Binding = new Binding("Duration") { Converter = shortTimeConverter },
+            Binding = new Binding(nameof(SubtitleLineViewModel.Duration)) { Converter = shortTimeConverter },
             Width = new DataGridLength(120),
             IsReadOnly = true
         });
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
             Header = "Text",
-            Binding = new Binding("Text"),
+            Binding = new Binding(nameof(SubtitleLineViewModel.Text)),
             Width = new DataGridLength(1, DataGridLengthUnitType.Star) // Stretch text column
         });
 
@@ -124,14 +120,14 @@ public static class InitListViewAndEditBox
 
 
         // Set up two-way binding for SelectedItem
-        vm.SubtitleGrid[!DataGrid.SelectedItemProperty] = new Binding("SelectedSubtitle")
+        vm.SubtitleGrid[!DataGrid.SelectedItemProperty] = new Binding(nameof(vm.SelectedSubtitle))
         {
             Mode = BindingMode.TwoWay,
             Source = vm
         };
 
-// Set up two-way binding for SelectedIndex
-        vm.SubtitleGrid[!DataGrid.SelectedIndexProperty] = new Binding("SelectedSubtitleIndex")
+        // Set up two-way binding for SelectedIndex
+        vm.SubtitleGrid[!DataGrid.SelectedIndexProperty] = new Binding(nameof(vm.SelectedSubtitleIndex))
         {
             Mode = BindingMode.TwoWay,
             Source = vm
@@ -221,7 +217,8 @@ public static class InitListViewAndEditBox
         var timeCodeUpDown = new TimeCodeUpDown
         {
             DataContext = vm,
-            [!TimeCodeUpDown.ValueProperty] = new Binding("SelectedSubtitle.StartTime")
+            [!TimeCodeUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.StartTime)}")
+
             {
                 Mode = BindingMode.TwoWay,
             }
