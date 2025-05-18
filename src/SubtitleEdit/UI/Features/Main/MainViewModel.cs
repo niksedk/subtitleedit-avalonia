@@ -377,6 +377,21 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowVideoAudioToTextWhisper()
     {
+        if (string.IsNullOrEmpty(_videoFileName))
+        {
+            await CommandVideoOpen();
+            if (string.IsNullOrEmpty(_videoFileName))
+            {
+                return;
+            }
+        }
+
+        var ffmpegOk = await RequireFfmpegOk();
+        if (!ffmpegOk)
+        {
+            return;
+        }
+
         var vm = await _windowService.ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(Window, viewModel =>
         {
             viewModel.Initialize(_videoFileName);
@@ -748,6 +763,51 @@ public partial class MainViewModel : ObservableObject
         }
 
         s.Text = Utilities.AutoBreakLine(s.Text);
+    }
+
+    private async Task<bool> RequireFfmpegOk()
+    {
+        if (FfmpegHelper.IsFfmpegInstalled())
+        {
+            return true;
+        }
+
+        if (File.Exists(DownloadFfmpegViewModel.GetFfmpegFileName()))
+        {
+            Se.Settings.General.FfmpegPath = DownloadFfmpegViewModel.GetFfmpegFileName();
+            return true;
+        }
+
+        if (!Configuration.IsRunningOnWindows && File.Exists("/usr/local/bin/ffmpeg"))
+        {
+            Se.Settings.General.FfmpegPath = "/usr/local/bin/ffmpeg";
+            return true;
+        }
+
+        if (Configuration.IsRunningOnWindows || Configuration.IsRunningOnMac)
+        {
+            var answer = await MessageBox.Show(
+                Window!,
+                "Download ffmpeg?",
+                $"{Environment.NewLine}\"Audio to text\" requires ffmpeg.{Environment.NewLine}{Environment.NewLine}Download and use ffmpeg?",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question);
+
+            if (answer != MessageBoxResult.Yes)
+            {
+                return false;
+            }
+
+            var result = await _windowService.ShowDialogAsync<DownloadFfmpegWindow, DownloadFfmpegViewModel>(Window);
+            if (!string.IsNullOrEmpty(result.FfmpegFileName))
+            {
+                Se.Settings.General.FfmpegPath = result.FfmpegFileName;
+                ShowStatus($"ffmpeg downloaded and installed to {result.FfmpegFileName}");
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void SelectAllRows()
