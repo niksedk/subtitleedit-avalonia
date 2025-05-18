@@ -47,7 +47,7 @@ public class AudioToTextWhisperWindow : Window
             Source = vm,
             UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
         });
-
+        vm.TextBoxConsoleLog = textBoxConsoleLog;
 
         var labelEngine = UiUtil.MakeTextBlock("Engine");
         var comboEngine = UiUtil.MakeComboBox(vm.Engines, vm, nameof(vm.SelectedEngine)).WithMinwidth(200);

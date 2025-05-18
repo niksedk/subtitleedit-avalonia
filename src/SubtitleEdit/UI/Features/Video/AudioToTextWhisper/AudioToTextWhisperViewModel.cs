@@ -22,6 +22,9 @@ using System.Threading.Tasks;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Globalization;
 using Nikse.SubtitleEdit.Features.Common;
+using System.Threading;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 
 namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 
@@ -55,6 +58,8 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     public AudioToTextWhisperWindow? Window { get; set; }
 
     public bool OkPressed { get; private set; }
+    public Subtitle TranscribedSubtitle { get; private set; }
+    public TextBox TextBoxConsoleLog { get; internal set; }
 
     private bool _unknownArgument;
     private bool _cudaOutOfMemory;
@@ -82,6 +87,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     private readonly System.Timers.Timer _timerWaveExtract = new();
     private Stopwatch _sw = new();
     private StringBuilder _ffmpegLog = new();
+    private readonly Lock _lockObj = new();
 
     IWindowService _windowService;
 
@@ -140,183 +146,469 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
     private void OnTimerWhisperOnElapsed(object? sender, ElapsedEventArgs args)
     {
-        if (_abort)
+        lock (_lockObj)
         {
-            _timerWhisper.Stop();
+            if (_abort)
+            {
+                _timerWhisper.Stop();
 #pragma warning disable CA1416
-            _whisperProcess.Kill(true);
+                _whisperProcess.Kill(true);
 #pragma warning restore CA1416
 
-            Dispatcher.UIThread.Invoke(() =>
+                Dispatcher.UIThread.Invoke(async () =>
+                {
+                    ProgressOpacity = 0;
+                    var partialSub = new Subtitle();
+                    partialSub.Paragraphs.AddRange(_resultList.OrderBy(p => p.Start).Select(p => new Paragraph(p.Text, (double)p.Start * 1000.0, (double)p.End * 1000.0)).ToList());
+
+                    if (partialSub.Paragraphs.Count > 0)
+                    {
+                        var answer = await MessageBox.Show(
+                            Window!,
+                            $"Keep partial transcription?",
+                            $"Do you want to keep {partialSub.Paragraphs.Count} lines?",
+                            MessageBoxButtons.YesNoCancel,
+                            MessageBoxIcon.Question);
+
+                        if (answer != MessageBoxResult.Yes)
+                        {
+                            _resultList.Clear();
+                            partialSub.Paragraphs.Clear();
+                            Cancel();
+                            return;
+                        }
+                    }
+
+                    await MakeResult(partialSub);
+                });
+
+                return;
+            }
+
+            if (!_whisperProcess.HasExited)
             {
-                //ProgressBar.IsVisible = false;
-                //var partialSub = new Subtitle();
-                //partialSub.Paragraphs.AddRange(_resultList.OrderBy(p => p.Start).Select(p => new Paragraph(p.Text, (double)p.Start * 1000.0, (double)p.End * 1000.0)).ToList());
+                var durationMs = (DateTime.UtcNow.Ticks - _startTicks) / 10_000;
+                ProgressText = "Transcribing...";
 
-                //if (partialSub.Paragraphs.Count > 0)
-                //{
-                //    var answer = await Page.DisplayAlert(
-                //        $"Keep partial transcription?",
-                //        $"Do you want to keep {partialSub.Paragraphs.Count} lines?",
-                //        "Yes",
-                //        "No");
+                ElapsedText = $"Time elapsed: {new TimeCode(durationMs).ToShortDisplayString()}";
+                if (_endSeconds <= 0)
+                {
+                    if (_showProgressPct > 0)
+                    {
+                        SetProgressBarPct(_showProgressPct);
+                    }
 
-                //    if (!answer)
-                //    {
-                //        _resultList.Clear();
-                //        partialSub.Paragraphs.Clear();
-                //        await Shell.Current.GoToAsync("..");
-                //        return;
-                //    }
-                //}
+                    return;
+                }
 
-                //await MakeResult(partialSub);
+                ShowProgressBar();
+
+                _videoInfo.TotalSeconds = Math.Max(_endSeconds, _videoInfo.TotalSeconds);
+                var msPerFrame = durationMs / (_endSeconds * 1000.0);
+                var estimatedTotalMs = msPerFrame * _videoInfo.TotalMilliseconds;
+                var msEstimatedLeft = estimatedTotalMs - durationMs;
+                if (msEstimatedLeft > _lastEstimatedMs)
+                {
+                    msEstimatedLeft = _lastEstimatedMs;
+                }
+                else
+                {
+                    _lastEstimatedMs = msEstimatedLeft;
+                }
+
+                if (_showProgressPct > 0)
+                {
+                    SetProgressBarPct(_showProgressPct);
+                }
+                else
+                {
+                    SetProgressBarPct(_endSeconds * 100.0 / _videoInfo.TotalSeconds);
+                }
+
+                EstimatedText = ProgressHelper.ToProgressTime(msEstimatedLeft);
+
+                return;
+            }
+
+            _timerWhisper.Stop();
+
+            Dispatcher.UIThread.Invoke(async () =>
+            {
+                ProgressValue = 100;
+                var settings = Se.Settings.Tools.AudioToText;
+                LogToConsole($"Whisper ({settings.WhisperChoice}) done in {_sw.Elapsed}{Environment.NewLine}");
+
+                _whisperProcess.Dispose();
+
+                if (GetResultFromSrt(_waveFileName, _videoFileName!, out var resultTexts, _outputText, _filesToDelete))
+                {
+                    var subtitle = new Subtitle();
+                    subtitle.Paragraphs.AddRange(resultTexts
+                        .Select(p => new Paragraph(p.Text, (double)p.Start * 1000.0, (double)p.End * 1000.0)).ToList());
+
+                    var postProcessedSubtitle = PostProcess(subtitle);
+                    await MakeResult(postProcessedSubtitle);
+
+                    return;
+                }
+
+                _outputText.Add("Loading result from STDOUT" + Environment.NewLine);
+
+                var transcribedSubtitleFromStdOut = new Subtitle();
+                transcribedSubtitleFromStdOut.Paragraphs.AddRange(_resultList.OrderBy(p => p.Start)
+                    .Select(p => new Paragraph(p.Text, (double)p.Start * 1000.0, (double)p.End * 1000.0)).ToList());
+                await MakeResult(transcribedSubtitleFromStdOut);
             });
+        }
+    }
 
-            return;
+    private Subtitle PostProcess(Subtitle transcript)
+    {
+        if (SelectedLanguage is not WhisperLanguage language)
+        {
+            return transcript;
         }
 
-        if (!_whisperProcess.HasExited)
+        if (DoAdjustTimings || DoPostProcessing)
         {
-            //var durationMs = (DateTime.UtcNow.Ticks - _startTicks) / 10_000;
-            //Dispatcher.UIThread.Invoke(() =>
-            //{
-            //    LabelProgress.Text = "Transcribing...";
-            //});
-
-            //ElapsedText = $"Time elapsed: {new TimeCode(durationMs).ToShortDisplayString()}";
-            //if (_endSeconds <= 0)
-            //{
-            //    if (_showProgressPct > 0)
-            //    {
-            //        SetProgressBarPct(_showProgressPct);
-            //    }
-
-            //    return;
-            //}
-
-            //ShowProgressBar();
-
-            //_videoInfo.TotalSeconds = Math.Max(_endSeconds, _videoInfo.TotalSeconds);
-            //var msPerFrame = durationMs / (_endSeconds * 1000.0);
-            //var estimatedTotalMs = msPerFrame * _videoInfo.TotalMilliseconds;
-            //var msEstimatedLeft = estimatedTotalMs - durationMs;
-            //if (msEstimatedLeft > _lastEstimatedMs)
-            //{
-            //    msEstimatedLeft = _lastEstimatedMs;
-            //}
-            //else
-            //{
-            //    _lastEstimatedMs = msEstimatedLeft;
-            //}
-
-            //if (_showProgressPct > 0)
-            //{
-            //    SetProgressBarPct(_showProgressPct);
-            //}
-            //else
-            //{
-            //    SetProgressBarPct(_endSeconds * 100.0 / _videoInfo.TotalSeconds);
-            //}
-
-            //EstimatedText = ProgressHelper.ToProgressTime(msEstimatedLeft);
-
-            return;
+            ProgressText = "Post-processing...";
         }
 
-        _timerWhisper.Stop();
-
-        Dispatcher.UIThread.Invoke(() =>
+        var postProcessor = new AudioToTextPostProcessor(DoTranslateToEnglish ? "en" : language.Code)
         {
-            //await ProgressBar.ProgressTo(1, 500, Easing.Linear);
+            ParagraphMaxChars = Configuration.Settings.General.SubtitleLineMaximumLength * 2,
+        };
 
-            //LogToConsole($"Whisper ({_settings.WhisperChoice}) done in {_sw.Elapsed}{Environment.NewLine}");
+        WavePeakData? wavePeaks = null;
+        if (DoAdjustTimings)
+        {
+            wavePeaks = MakeWavePeaks();
+        }
 
-            //_whisperProcess.Dispose();
+        if (DoAdjustTimings && wavePeaks != null)
+        {
+            transcript = WhisperTimingFixer.ShortenLongDuration(transcript);
+            transcript = WhisperTimingFixer.ShortenViaWavePeaks(transcript, wavePeaks);
+        }
 
-            //if (GetResultFromSrt(_waveFileName, _videoFileName!, out var resultTexts, _outputText, _filesToDelete))
-            //{
-            //    var subtitle = new Subtitle();
-            //    subtitle.Paragraphs.AddRange(resultTexts
-            //        .Select(p => new Paragraph(p.Text, (double)p.Start * 1000.0, (double)p.End * 1000.0)).ToList());
+        var settings = Se.Settings.Tools.AudioToText;
+        transcript = postProcessor.Fix(
+            AudioToTextPostProcessor.Engine.Whisper,
+            transcript,
+            DoPostProcessing,
+            settings.WhisperPostProcessingAddPeriods,
+            settings.WhisperPostProcessingMergeLines,
+            settings.WhisperPostProcessingFixCasing,
+            settings.WhisperPostProcessingFixShortDuration,
+            settings.WhisperPostProcessingSplitLines);
 
-            //    var postProcessedSubtitle = PostProcess(subtitle);
-            //    await MakeResult(postProcessedSubtitle);
+        return transcript;
+    }
 
-            //    return;
-            //}
+    private WavePeakData? MakeWavePeaks()
+    {
+        if (string.IsNullOrEmpty(_videoFileName) || !File.Exists(_videoFileName))
+        {
+            return null;
+        }
 
-            //_outputText.Add("Loading result from STDOUT" + Environment.NewLine);
+        var targetFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".wav");
+        try
+        {
+            var process = GetFfmpegProcess(_videoFileName, _audioTrackNumber, targetFile);
+            if (process == null)
+            {
+                return null;
+            }
 
-            //var transcribedSubtitleFromStdOut = new Subtitle();
-            //transcribedSubtitleFromStdOut.Paragraphs.AddRange(_resultList.OrderBy(p => p.Start)
-            //    .Select(p => new Paragraph(p.Text, (double)p.Start * 1000.0, (double)p.End * 1000.0)).ToList());
-            //await MakeResult(transcribedSubtitleFromStdOut);
-        });
+#pragma warning disable CA1416
+            process.Start();
+#pragma warning restore CA1416
+
+            while (!process.HasExited)
+            {
+                Task.Delay(100);
+            }
+
+            // check for delay in matroska files
+            var delayInMilliseconds = 0;
+            var audioTrackNames = new List<string>();
+            var mkvAudioTrackNumbers = new Dictionary<int, int>();
+            if (_videoFileName.ToLowerInvariant().EndsWith(".mkv", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    using (var matroska = new MatroskaFile(_videoFileName))
+                    {
+                        if (matroska.IsValid)
+                        {
+                            foreach (var track in matroska.GetTracks())
+                            {
+                                if (track.IsAudio)
+                                {
+                                    if (track.CodecId != null && track.Language != null)
+                                    {
+                                        audioTrackNames.Add("#" + track.TrackNumber + ": " + track.CodecId.Replace("\0", string.Empty) + " - " + track.Language.Replace("\0", string.Empty));
+                                    }
+                                    else
+                                    {
+                                        audioTrackNames.Add("#" + track.TrackNumber);
+                                    }
+
+                                    mkvAudioTrackNumbers.Add(mkvAudioTrackNumbers.Count, track.TrackNumber);
+                                }
+                            }
+
+                            if (mkvAudioTrackNumbers.Count > 0)
+                            {
+                                delayInMilliseconds = (int)matroska.GetAudioTrackDelayMilliseconds(mkvAudioTrackNumbers[0]);
+                            }
+                        }
+                    }
+                }
+                catch (Exception exception)
+                {
+                    SeLogger.Error(exception, $"Error getting delay from mkv: {_videoFileName}");
+                }
+            }
+
+            if (File.Exists(targetFile))
+            {
+                using var waveFile = new WavePeakGenerator(targetFile);
+                if (!string.IsNullOrEmpty(_videoFileName) && File.Exists(_videoFileName))
+                {
+                    return waveFile.GeneratePeaks(delayInMilliseconds, WavePeakGenerator.GetPeakWaveFileName(_videoFileName));
+                }
+            }
+        }
+        catch
+        {
+            // ignore
+        }
+
+        return null;
+    }
+
+    public bool GetResultFromSrt(string waveFileName, string videoFileName, out List<ResultText> resultTexts, ConcurrentBag<string> outputText, List<string> filesToDelete)
+    {
+        if (SelectedEngine is not IWhisperEngine engine)
+        {
+            resultTexts = new List<ResultText>();
+            return false;
+        }
+
+        var srtFileName = waveFileName + ".srt";
+        if (!File.Exists(srtFileName) && waveFileName.EndsWith(".wav"))
+        {
+            srtFileName = waveFileName.Remove(waveFileName.Length - 4) + ".srt";
+        }
+
+        var whisperFolder = engine.GetAndCreateWhisperFolder();
+        if (!string.IsNullOrEmpty(whisperFolder) && !File.Exists(srtFileName) && !string.IsNullOrEmpty(videoFileName))
+        {
+            srtFileName = Path.Combine(whisperFolder, Path.GetFileNameWithoutExtension(videoFileName)) + ".srt";
+        }
+
+        if (!File.Exists(srtFileName))
+        {
+            srtFileName = Path.Combine(whisperFolder, Path.GetFileNameWithoutExtension(waveFileName)) + ".srt";
+        }
+
+        var vttFileName = Path.Combine(whisperFolder, Path.GetFileName(waveFileName) + ".vtt");
+        if (!File.Exists(vttFileName))
+        {
+            vttFileName = Path.Combine(whisperFolder, Path.GetFileNameWithoutExtension(waveFileName)) + ".vtt";
+        }
+
+        if (!File.Exists(srtFileName) && !File.Exists(vttFileName))
+        {
+            resultTexts = new List<ResultText>();
+            return false;
+        }
+
+        var sub = new Subtitle();
+        if (File.Exists(srtFileName))
+        {
+            var rawText = FileUtil.ReadAllLinesShared(srtFileName, Encoding.UTF8);
+            new SubRip().LoadSubtitle(sub, rawText, srtFileName);
+            outputText?.Add($"Loading result from {srtFileName}{Environment.NewLine}");
+        }
+        else
+        {
+            var rawText = FileUtil.ReadAllLinesShared(srtFileName, Encoding.UTF8);
+            new WebVTT().LoadSubtitle(sub, rawText, srtFileName);
+            outputText?.Add($"Loading result from {vttFileName}{Environment.NewLine}");
+        }
+
+        sub.RemoveEmptyLines();
+
+        var results = new List<ResultText>();
+        foreach (var p in sub.Paragraphs)
+        {
+            results.Add(new ResultText
+            {
+                Start = (decimal)p.StartTime.TotalSeconds,
+                End = (decimal)p.EndTime.TotalSeconds,
+                Text = p.Text
+            });
+        }
+
+        resultTexts = results;
+
+        if (File.Exists(srtFileName))
+        {
+            filesToDelete?.Add(srtFileName);
+        }
+
+        if (File.Exists(vttFileName))
+        {
+            filesToDelete?.Add(vttFileName);
+        }
+
+        return true;
+    }
+
+    private void ShowProgressBar()
+    {
+        if (ProgressOpacity == 0)
+        {
+            ProgressValue = 0;
+            ProgressOpacity = 1;
+        }
+    }
+
+    private void SetProgressBarPct(double pct)
+    {
+        var p = pct / 100.0;
+
+        if (p > 1)
+        {
+            p = 1;
+        }
+
+        if (p < 0)
+        {
+            p = 0;
+        }
+
+        ProgressValue = (float)p;
+        // _taskbarList.SetProgressValue(_windowHandle, Math.Max(0, Math.Min((int)pct, 100)), 100);
+    }
+
+    private async Task MakeResult(Subtitle? transcribedSubtitle)
+    {
+        var sbLog = new StringBuilder();
+        foreach (var s in _outputText)
+        {
+            sbLog.AppendLine(s);
+        }
+
+        Se.WriteWhisperLog(sbLog.ToString().Trim());
+
+        var anyLinesTranscribed = transcribedSubtitle != null && transcribedSubtitle.Paragraphs.Count > 0;
+
+        if (anyLinesTranscribed)
+        {
+            TranscribedSubtitle = transcribedSubtitle!;
+            OkPressed = true;
+            Window?.Close();
+        }
+        else if (_abort)
+        {
+            Window?.Close();
+        }
+        else
+        {
+            var settings = Se.Settings.Tools.AudioToText;
+            IsTranscribeEnabled = true;
+
+            if (_incompleteModel)
+            {
+                await MessageBox.Show(Window!, "Incomplete model", "The model is incomplete. Please download the full model.");
+            }
+            else if (_unknownArgument && !string.IsNullOrEmpty(settings.WhisperCustomCommandLineArguments))
+            {
+                await MessageBox.Show(Window!, $"Unknown argument: {settings.WhisperCustomCommandLineArguments}", "Unknown argument. Please check the advanced settings.");
+            }
+            else if (_cudaOutOfMemory)
+            {
+                await MessageBox.Show(Window!, $"CUDA failed", "Whisper ran out of CUDA memory - try a smaller model or run on CPU.");
+            }
+            else
+            {
+                await MessageBox.Show(Window!, "No result", "No result from whisper. Please check the log");
+            }
+        }
     }
 
     private void OnTimerWaveExtractOnElapsed(object? sender, ElapsedEventArgs e)
     {
-        if (_waveExtractProcess == null)
+        lock (_lockObj)
         {
-            return;
-        }
+            if (_waveExtractProcess == null)
+            {
+                return;
+            }
 
-        if (_abort)
-        {
-            _timerWaveExtract.Stop();
+            if (_abort)
+            {
+                _timerWaveExtract.Stop();
+
 #pragma warning disable CA1416
-            _waveExtractProcess.Kill(true);
+                _waveExtractProcess.Kill(true);
 #pragma warning restore CA1416
-            // ProgressBar.IsVisible = false;
 
-            //  TranscribeButton.IsEnabled = true;
-            //  return;
+                ProgressOpacity = 0;
+                IsTranscribeEnabled = true;
+                return;
+            }
+
+            if (!_waveExtractProcess.HasExited)
+            {
+                var durationMs = (DateTime.UtcNow.Ticks - _startTicks) / 10_000;
+                ElapsedText = $"Time elapsed: {new TimeCode(durationMs).ToShortDisplayString()}";
+
+                return;
+            }
+
+            _timerWaveExtract.Stop();
+
+            if (!File.Exists(_waveFileName))
+            {
+                SeLogger.WhisperInfo("Generated wave file not found: " + _waveFileName + Environment.NewLine +
+                                     "ffmpeg: " + _waveExtractProcess.StartInfo.FileName + Environment.NewLine +
+                                     "Parameters: " + _waveExtractProcess.StartInfo.Arguments + Environment.NewLine +
+                                     "OS: " + Environment.OSVersion + Environment.NewLine +
+                                     "64-bit: " + Environment.Is64BitOperatingSystem + Environment.NewLine +
+                                     "ffmpeg exit code: " + _waveExtractProcess.ExitCode + Environment.NewLine +
+                                     "ffmpeg log: " + _ffmpegLog);
+                IsTranscribeEnabled = true;
+                _waveExtractProcess = null;
+                return;
+            }
+
+            _waveExtractProcess = null;
+            if (string.IsNullOrEmpty(_videoFileName))
+            {
+                IsTranscribeEnabled = true;
+                Dispatcher.UIThread.Invoke(async () =>
+                {
+                    await MessageBox.Show(Window!, "No video file", "No video file found!");
+                });
+
+                return;
+            }
+
+            var startOk = TranscribeViaWhisper(_waveFileName, _videoFileName);
+            if (!startOk)
+            {
+                IsTranscribeEnabled = true;
+                Dispatcher.UIThread.Invoke(async () =>
+                {
+                    await MessageBox.Show(Window!, "Unknown error", "Unable to start Whisper!");
+                });
+            }
         }
-
-        if (!_waveExtractProcess.HasExited)
-        {
-            var durationMs = (DateTime.UtcNow.Ticks - _startTicks) / 10_000;
-            ElapsedText = $"Time elapsed: {new TimeCode(durationMs).ToShortDisplayString()}";
-
-            return;
-        }
-
-        _timerWaveExtract.Stop();
-
-        //if (!File.Exists(_waveFileName))
-        //{
-        //    SeLogger.WhisperInfo("Generated wave file not found: " + _waveFileName + Environment.NewLine +
-        //                         "ffmpeg: " + _waveExtractProcess.StartInfo.FileName + Environment.NewLine +
-        //                         "Parameters: " + _waveExtractProcess.StartInfo.Arguments + Environment.NewLine +
-        //                         "OS: " + Environment.OSVersion + Environment.NewLine +
-        //                         "64-bit: " + Environment.Is64BitOperatingSystem + Environment.NewLine +
-        //                         "ffmpeg exit code: " + _waveExtractProcess.ExitCode + Environment.NewLine +
-        //                         "ffmpeg log: " + _ffmpegLog);
-        //    TranscribeButton.IsEnabled = true;
-        //    return;
-        //}
-
-        //if (string.IsNullOrEmpty(_videoFileName))
-        //{
-        //    TranscribeButton.IsEnabled = true;
-        //    MainThread.BeginInvokeOnMainThread(() =>
-        //    {
-        //        Page?.DisplayAlert("No video file", "No video file found!", "OK");
-        //    });
-
-        //    return;
-        //}
-
-        //var startOk = TranscribeViaWhisper(_waveFileName, _videoFileName);
-        //if (!startOk)
-        //{
-        //    TranscribeButton.IsEnabled = true;
-        //    MainThread.BeginInvokeOnMainThread(() =>
-        //    {
-        //        Page?.DisplayAlert("Unknown error", "Unable to start Whisper!", "OK");
-        //    });
-        //}
     }
 
     public void DeleteTempFiles()
@@ -549,7 +841,8 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         SaveSettings();
 
         _showProgressPct = -1;
-
+        IsTranscribeEnabled = false;
+        ProgressOpacity = 1;
         ProgressText = "Transcribing...";
 
         //if (_batchMode)
@@ -902,11 +1195,12 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     private void LogToConsole(string s)
     {
         _outputText.Add(s);
-        ConsoleLog += s + "\n";
-        //MainThread.BeginInvokeOnMainThread(() =>
-        //{
-        //   // ConsoleTextScrollView.ScrollToAsync(0, ConsoleText.Height, true);
-        //});
+        ConsoleLog += s.Trim() + "\n";
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            TextBoxConsoleLog.CaretIndex = TextBoxConsoleLog.Text?.Length ?? 0;
+        }, DispatcherPriority.Background);
     }
 
     private static decimal GetSeconds(string timeCode)

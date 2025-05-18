@@ -377,10 +377,19 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowVideoAudioToTextWhisper()
     {
-        await _windowService.ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(Window, vm =>
+        var vm = await _windowService.ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(Window, viewModel =>
         {
-            vm.Initialize(_videoFileName);
+            viewModel.Initialize(_videoFileName);
         });
+
+        if (vm.OkPressed)
+        {
+            _subtitle = vm.TranscribedSubtitle;
+            SetSubtitles(_subtitle);
+            SelectAndScrollToRow(0);
+            ShowStatus($"Transcription completed with {vm.TranscribedSubtitle.Paragraphs.Count} lines");
+        }
+
         _shortcutManager.ClearKeys();
     }
 
@@ -852,7 +861,7 @@ public partial class MainViewModel : ObservableObject
         _subtitle = subtitle;
         _lastOpenSaveFormat = subtitle.OriginalFormat;
         SetSubtitles(_subtitle);
-        await ShowStatus($"Subtitle loaded: {fileName}");
+        ShowStatus($"Subtitle loaded: {fileName}");
 
         if (selectedSubtitleIndex != null)
         {
@@ -900,7 +909,7 @@ public partial class MainViewModel : ObservableObject
     {
         if (Subtitles == null || !Subtitles.Any())
         {
-            await ShowStatus("Nothing to save");
+            ShowStatus("Nothing to save");
             return;
         }
 
@@ -985,21 +994,32 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    private async Task ShowStatus(string message, int delayMs = 3000)
+    private void ShowStatus(string message, int delayMs = 3000)
+    {
+        Task.Run(() => ShowStatusAsync(message, delayMs));
+    }
+
+    private async Task ShowStatusAsync(string message, int delayMs = 3000)
     {
         // Cancel any previous animation
         _statusFadeCts?.Cancel();
         _statusFadeCts = new CancellationTokenSource();
         var token = _statusFadeCts.Token;
 
-        StatusTextLeft = message;
-        StatusTextLeftLabel.Opacity = 1;
-        StatusTextLeftLabel.IsVisible = true;
+        Dispatcher.UIThread.Post(() =>
+        {
+            StatusTextLeft = message;
+            StatusTextLeftLabel.Opacity = 1;
+            StatusTextLeftLabel.IsVisible = true;
+        }, DispatcherPriority.Background);
 
         try
         {
             await Task.Delay(delayMs, token); // Wait 3 seconds, cancellable
-            StatusTextLeft = string.Empty;
+            Dispatcher.UIThread.Post(() =>
+            {
+                StatusTextLeft = string.Empty;
+            }, DispatcherPriority.Background);
         }
         catch (TaskCanceledException)
         {
@@ -1045,7 +1065,7 @@ public partial class MainViewModel : ObservableObject
                 var tempWaveFileName = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.wav");
                 var process = WaveFileExtractor.GetCommandLineProcess(videoFileName, -1, tempWaveFileName,
                     Configuration.Settings.General.VlcWaveTranscodeSettings, out _);
-                await ShowStatus("Extracting wave info...");
+                ShowStatus("Extracting wave info...");
                 Task.Run(async () =>
                 {
                     //await ExtractWaveformAndSpectrogram(process, tempWaveFileName, peakWaveFileName);
@@ -1054,7 +1074,7 @@ public partial class MainViewModel : ObservableObject
         }
         else
         {
-            await ShowStatus("Loading wave info from cache...");
+            ShowStatus("Loading wave info from cache...");
             var wavePeaks = WavePeakData.FromDisk(peakWaveFileName);
             //_audioVisualizer.WavePeaks = wavePeaks;
         }
