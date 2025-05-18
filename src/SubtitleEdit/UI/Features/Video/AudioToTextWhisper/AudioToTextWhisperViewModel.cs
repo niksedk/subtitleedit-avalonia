@@ -724,6 +724,9 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             return;
         }
 
+
+        Se.Settings.Tools.AudioToText.WhisperChoice = engine.Choice;
+
         if (!engine.IsEngineInstalled())
         {
             var answer = await MessageBox.Show(
@@ -979,12 +982,13 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         SeLogger.WhisperInfo($"{w} {parameters}");
 
         var process = new Process { StartInfo = new ProcessStartInfo(w, parameters) { WindowStyle = ProcessWindowStyle.Hidden, CreateNoWindow = true } };
-#if WINDOWS        
-        if (!string.IsNullOrEmpty(Se.Settings.General.FfmpegPath) && process.StartInfo.EnvironmentVariables["Path"] != null)
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            process.StartInfo.EnvironmentVariables["Path"] = process.StartInfo.EnvironmentVariables["Path"]?.TrimEnd(';') + ";" + Path.GetDirectoryName(Se.Settings.General.FfmpegPath);
+            if (!string.IsNullOrEmpty(Se.Settings.General.FfmpegPath) && process.StartInfo.EnvironmentVariables["Path"] != null)
+            {
+                process.StartInfo.EnvironmentVariables["Path"] = process.StartInfo.EnvironmentVariables["Path"]?.TrimEnd(';') + ";" + Path.GetDirectoryName(Se.Settings.General.FfmpegPath);
+            }
         }
-#endif
 
         var whisperFolder = engine.GetAndCreateWhisperFolder();
         if (!string.IsNullOrEmpty(whisperFolder))
@@ -1000,12 +1004,14 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             }
         }
 
-#if WINDOWS        
-        if (!string.IsNullOrEmpty(whisperFolder) && process.StartInfo.EnvironmentVariables["Path"] != null)
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            process.StartInfo.EnvironmentVariables["Path"] = process.StartInfo.EnvironmentVariables["Path"]?.TrimEnd(';') + ";" + whisperFolder;
+            if (!string.IsNullOrEmpty(whisperFolder) && process.StartInfo.EnvironmentVariables["Path"] != null)
+            {
+                process.StartInfo.EnvironmentVariables["Path"] = process.StartInfo.EnvironmentVariables["Path"]?.TrimEnd(';') + ";" + whisperFolder;
+            }
         }
-#endif
+
 
         if (settings.WhisperChoice != WhisperChoice.Cpp &&
             settings.WhisperChoice != WhisperChoice.CppCuBlas &&

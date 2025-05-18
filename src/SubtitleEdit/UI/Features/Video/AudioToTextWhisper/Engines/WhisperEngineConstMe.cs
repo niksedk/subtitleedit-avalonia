@@ -11,7 +11,7 @@ public class WhisperEngineConstMe : IWhisperEngine
 {
     public static string StaticName => "Whisper Const-me";
     public string Name => StaticName;
-    public string Choice => WhisperChoice.Cpp;
+    public string Choice => WhisperChoice.ConstMe;
     public string Url => "https://github.com/Const-me/Whisper";
 
     public List<WhisperLanguage> Languages => WhisperLanguage.Languages.OrderBy(p => p.Name).ToList();
