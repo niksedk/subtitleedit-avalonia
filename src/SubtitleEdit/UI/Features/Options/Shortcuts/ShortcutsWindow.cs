@@ -172,7 +172,7 @@ public class ShortcutsWindow : Window
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
-        _vm.OnKyDown(e);
+        _vm.OnKeyDown(e);
     }
 }
 
