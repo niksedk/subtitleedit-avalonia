@@ -36,4 +36,11 @@ public class SeShortCut
         Keys = keys;
         ControlName = category.ToString();
     }
+
+    public SeShortCut(ShortCut shortCut)
+    {
+        ActionName = shortCut.Name;
+        Keys = shortCut.Keys;
+        ControlName = shortCut.Category.ToString();
+    }
 }

@@ -107,6 +107,19 @@ public partial class ShortcutsViewModel : ObservableObject
     [RelayCommand]
     private void CommandOk()
     {
+        var shortcuts = new List<SeShortCut>(); 
+        foreach (var node in Nodes.Where(p => p.SubNodes != null))
+        {
+            foreach (var child in node.SubNodes!)
+            {
+                if (child.ShortCut != null)
+                {
+                    shortcuts.Add(new SeShortCut(child.ShortCut));  
+                }
+            }
+        }
+
+        Se.Settings.Shortcuts = shortcuts;
         Se.SaveSettings();
 
         OkPressed = true;
