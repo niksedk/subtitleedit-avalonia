@@ -19,7 +19,6 @@ public partial class ShortcutsViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<string> _shortcuts;
     [ObservableProperty] private string? _selectedShortcut;
-
     [ObservableProperty] private bool _isControlsEnabled;
     [ObservableProperty] private bool _ctrlIsSelected;
     [ObservableProperty] private bool _altIsSelected;
@@ -132,7 +131,7 @@ public partial class ShortcutsViewModel : ObservableObject
         var keys = new List<string>();
         if (CtrlIsSelected)
         {
-            keys.Add("Ctrl");
+            keys.Add("Control");
         }
 
         if (AltIsSelected)
