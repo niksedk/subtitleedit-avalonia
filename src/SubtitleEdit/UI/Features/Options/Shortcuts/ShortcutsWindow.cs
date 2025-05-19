@@ -44,42 +44,25 @@ public class ShortcutsWindow : Window
         treeView[!TreeView.SelectedItemProperty] = new Binding(nameof(vm.SelectedNode));
         
         var factory = new FuncTreeDataTemplate<ShortcutTreeNode>(
-            // Match function - determines if this template applies to the item
             node => true,
-            // Build function - creates the visual for each node with proper binding
             (node, _) => 
             {
                 var textBlock = new TextBlock();
                 textBlock.DataContext = node;
-                // Set up the binding for Text property
                 textBlock.Bind(TextBlock.TextProperty, new Binding(nameof(ShortcutTreeNode.Title)) 
                 { 
-                    
-                    // You can specify additional binding properties if needed
                     Mode = BindingMode.TwoWay,
                     Source = node,
                 });
         
                 return textBlock;
             },
-            // ItemsSelector function - tells TreeView how to find child nodes
             node => node.SubNodes
         );
 
-// Set the ItemTemplate
-        treeView.ItemTemplate = factory;
-        
+        treeView.ItemTemplate = factory;       
         vm.ShortcutsTreeView = treeView;
-
         treeView.SelectionChanged += vm.ShortcutsTreeView_SelectionChanged;
-
-        // if (vm.ShortcutsSource is HierarchicalTreeDataGridSource<ShortcutItem> source)
-        // {
-        //     source.RowSelection!.SelectionChanged += (sender, e) =>
-        //     {
-        //         vm.ShortcutGrid_SelectionChanged(source.RowSelection.SelectedItems);
-        //     };
-        // }
 
         var scrollViewer = new ScrollViewer
         {
@@ -174,12 +157,4 @@ public class ShortcutsWindow : Window
         base.OnKeyDown(e);
         _vm.OnKeyDown(e);
     }
-}
-
-public enum ShortcutCategory
-{
-    General,
-    SubtitleGridAndTextBox,
-    Waveform,
-    SubtitleGrid,
 }

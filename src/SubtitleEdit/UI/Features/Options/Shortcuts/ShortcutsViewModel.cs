@@ -69,7 +69,6 @@ public partial class ShortcutsViewModel : ObservableObject
         UpdateVisibleShortcuts(string.Empty);
     }
 
-
     internal void UpdateVisibleShortcuts(string searchText)
     {
         Nodes.Clear();
@@ -79,7 +78,6 @@ public partial class ShortcutsViewModel : ObservableObject
         AddShortcuts(ShortcutCategory.Waveform, "Waveform", searchText);
         ExpandAll();
     }
-
 
     private void AddShortcuts(ShortcutCategory category, string categoryName, string searchText)
     {
@@ -228,7 +226,6 @@ public partial class ShortcutsViewModel : ObservableObject
 
         SelectedShortcut = null;
     }
-
 
     public void ExpandAll()
     {
