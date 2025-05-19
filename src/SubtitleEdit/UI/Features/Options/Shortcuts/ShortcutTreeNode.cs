@@ -6,8 +6,8 @@ namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
 public partial class ShortcutTreeNode : ObservableObject
 {
-    public ObservableCollection<ShortcutTreeNode>? SubNodes { get; }
     [ObservableProperty] private string _title;
+    public ObservableCollection<ShortcutTreeNode>? SubNodes { get; }
     public ShortCut? ShortCut { get; set; }
 
     public ShortcutTreeNode(string title, ShortCut shortcut)

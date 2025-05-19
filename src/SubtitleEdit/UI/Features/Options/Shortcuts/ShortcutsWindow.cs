@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Nikse.SubtitleEdit.Logic;
-using System.Collections.ObjectModel;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 
@@ -18,9 +17,9 @@ public class ShortcutsWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Shortcuts";
-        Width = 650;
+        Width = 700;
         Height = 650;
-        MinWidth = 550;
+        MinWidth = 650;
         MinHeight = 500;
         CanResize = true;
 
@@ -148,6 +147,11 @@ public class ShortcutsWindow : Window
         editPanel.Children.Add(buttonUpdate);
         buttonUpdate.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
 
+        // Reset button
+        var buttonReset = UiUtil.MakeButton("Reset", vm.ResetShortcutCommand);
+        editPanel.Children.Add(buttonReset);
+        buttonReset.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
+
 
         var editGridBorder = UiUtil.MakeBorderForControl(editPanel);
         grid.Children.Add(editGridBorder);
@@ -168,30 +172,7 @@ public class ShortcutsWindow : Window
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
-        if (e.Key == Key.Escape)
-        {
-            e.Handled = true;
-            Close();
-        }
-    }
-}
-
-public class ShortcutItem
-{
-    public ShortcutCategory Category { get; set; }
-    public string CategoryText { get; set; }
-    public string Name { get; set; }
-    public string Keys { get; set; }
-    public bool IsExpanded { get; set; }
-    public ShortCut Shortcut { get; set; }
-    public ObservableCollection<ShortcutItem> Children { get; } = new();
-
-    public ShortcutItem()
-    {
-        CategoryText = string.Empty;
-        Name = string.Empty;
-        Keys = string.Empty;
-        IsExpanded = false;
+        _vm.OnKyDown(e);
     }
 }
 

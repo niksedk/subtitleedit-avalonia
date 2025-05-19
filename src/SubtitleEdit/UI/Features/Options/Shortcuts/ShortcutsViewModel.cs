@@ -23,21 +23,21 @@ public partial class ShortcutsViewModel : ObservableObject
     [ObservableProperty] private bool _ctrlIsSelected;
     [ObservableProperty] private bool _altIsSelected;
     [ObservableProperty] private bool _shiftIsSelected;
-    private List<ShortCut> _allShortcuts;
     [ObservableProperty] private ShortcutTreeNode? _selectedNode;
 
     public ObservableCollection<ShortcutTreeNode> Nodes { get; }
-
     public bool OkPressed { get; set; }
     public ShortcutsWindow? Window { get; set; }
     public TreeView ShortcutsTreeView { get; internal set; }
 
+    private List<ShortCut> _allShortcuts;
+
     public ShortcutsViewModel()
     {
         Shortcuts = new ObservableCollection<string>(GetShortcutKeys());
-        _allShortcuts = new List<ShortCut>();
         Nodes = new ObservableCollection<ShortcutTreeNode>();
         ShortcutsTreeView = new TreeView();
+        _allShortcuts = new List<ShortCut>();
     }
 
     private static IEnumerable<string> GetShortcutKeys()
@@ -66,22 +66,25 @@ public partial class ShortcutsViewModel : ObservableObject
     public void LoadShortCuts(MainViewModel vm)
     {
         _allShortcuts = ShortcutsMain.GetAllShortcuts(vm);
-        LoadShortcuts();
+        UpdateVisibleShortcuts(string.Empty);
     }
 
-    private void LoadShortcuts()
+
+    internal void UpdateVisibleShortcuts(string searchText)
     {
         Nodes.Clear();
-        AddShortcuts(_allShortcuts.Where(p => p.Category == ShortcutCategory.General).ToList(), "General");
-        AddShortcuts(_allShortcuts.Where(p => p.Category == ShortcutCategory.SubtitleGridAndTextBox).ToList(),
-            "SubtitleGridAndTextBox");
-        AddShortcuts(_allShortcuts.Where(p => p.Category == ShortcutCategory.SubtitleGrid).ToList(), "SubtitleGrid");
-        AddShortcuts(_allShortcuts.Where(p => p.Category == ShortcutCategory.Waveform).ToList(), "Waveform");
+        AddShortcuts(ShortcutCategory.General, "General", searchText);
+        AddShortcuts(ShortcutCategory.SubtitleGridAndTextBox, "Subtitle list view & text box", searchText);
+        AddShortcuts(ShortcutCategory.SubtitleGrid, "Subtitle list view", searchText);
+        AddShortcuts(ShortcutCategory.Waveform, "Waveform", searchText);
         ExpandAll();
     }
 
-    private void AddShortcuts(List<ShortCut> shortcuts, string categoryName)
+
+    private void AddShortcuts(ShortcutCategory category, string categoryName, string searchText)
     {
+        List<ShortCut> shortcuts = _allShortcuts.Where(p => p.Category == category && Search(searchText, p)).ToList();
+
         var children = new ObservableCollection<ShortcutTreeNode>(
             shortcuts.Select(x => new ShortcutTreeNode(MakeDisplayName(x), x))
         );
@@ -123,7 +126,7 @@ public partial class ShortcutsViewModel : ObservableObject
     {
         var shortcut = SelectedShortcut;
         var node = SelectedNode;
-        if (string.IsNullOrEmpty(shortcut) || node?.ShortCut is null) 
+        if (string.IsNullOrEmpty(shortcut) || node?.ShortCut is null)
         {
             return;
         }
@@ -146,39 +149,37 @@ public partial class ShortcutsViewModel : ObservableObject
 
         keys.Add(shortcut);
         node.ShortCut.Keys = keys;
-        SelectedNode.Title = MakeDisplayName(node.ShortCut!);
+        node.Title = MakeDisplayName(node.ShortCut!);
     }
 
-    internal void UpdateVisibleShortcuts(string searchText)
+    [RelayCommand]
+    private void ResetShortcut()
     {
-        if (string.IsNullOrEmpty(searchText))
+        var shortcut = SelectedShortcut;
+        var node = SelectedNode;
+        if (string.IsNullOrEmpty(shortcut) || node?.ShortCut is null)
         {
-            LoadShortcuts();
             return;
         }
 
-        Nodes.Clear();
-        AddShortcuts(
-            _allShortcuts.Where(p =>
-                p.Category == ShortcutCategory.General &&
-                p.Name.Contains(searchText, System.StringComparison.InvariantCultureIgnoreCase)).ToList(), "General");
-        AddShortcuts(
-            _allShortcuts.Where(p =>
-                p.Category == ShortcutCategory.SubtitleGridAndTextBox && p.Name.Contains(searchText,
-                    System.StringComparison.InvariantCultureIgnoreCase)).ToList(), "SubtitleGridAndTextBox");
-        AddShortcuts(
-            _allShortcuts.Where(p =>
-                p.Category == ShortcutCategory.SubtitleGrid &&
-                p.Name.Contains(searchText, System.StringComparison.InvariantCultureIgnoreCase)).ToList(),
-            "SubtitleGrid");
-        AddShortcuts(
-            _allShortcuts.Where(p =>
-                p.Category == ShortcutCategory.Waveform &&
-                p.Name.Contains(searchText, System.StringComparison.InvariantCultureIgnoreCase)).ToList(), "Waveform");
-
-        ExpandAll();
+        node.ShortCut.Keys = new List<string>();
+        node.Title = MakeDisplayName(node.ShortCut!);
+        CtrlIsSelected = false;
+        AltIsSelected = false;
+        ShiftIsSelected = false;
+        SelectedShortcut = null;
     }
 
+    private static bool Search(string searchText, ShortCut p)
+    {
+        if (string.IsNullOrEmpty(searchText))
+        {
+            return true;
+        }
+
+        var title = MakeDisplayName(p);
+        return title.Contains(searchText, StringComparison.InvariantCultureIgnoreCase);
+    }
 
     internal void ShortcutsTreeView_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
@@ -229,10 +230,8 @@ public partial class ShortcutsViewModel : ObservableObject
     }
 
 
-    // Expand all nodes
     public void ExpandAll()
     {
-        // Wait for layout to complete to ensure all items are generated
         Dispatcher.UIThread.Post(() =>
         {
             var allTreeViewItems = FindAllTreeViewItems(ShortcutsTreeView);
@@ -243,10 +242,8 @@ public partial class ShortcutsViewModel : ObservableObject
         }, DispatcherPriority.Background);
     }
 
-    // Collapse all nodes
     public void CollapseAll()
     {
-        // Wait for layout to complete to ensure all items are generated
         Dispatcher.UIThread.Post(() =>
         {
             var allTreeViewItems = FindAllTreeViewItems(ShortcutsTreeView);
@@ -257,18 +254,14 @@ public partial class ShortcutsViewModel : ObservableObject
         }, DispatcherPriority.Background);
     }
 
-    // Helper method to find all TreeViewItems using LogicalChildren
     private IEnumerable<TreeViewItem> FindAllTreeViewItems(Control parent)
     {
         var result = new List<TreeViewItem>();
-
-        // If the parent is a TreeViewItem, add it to the result
         if (parent is TreeViewItem tvi)
         {
             result.Add(tvi);
         }
 
-        // Get logical children and recursively process them
         foreach (var child in parent.GetLogicalDescendants())
         {
             if (child is TreeViewItem treeViewItem)
@@ -278,5 +271,14 @@ public partial class ShortcutsViewModel : ObservableObject
         }
 
         return result;
+    }
+
+    internal void OnKeyDown(KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            Window?.Close();
+        }
     }
 }
