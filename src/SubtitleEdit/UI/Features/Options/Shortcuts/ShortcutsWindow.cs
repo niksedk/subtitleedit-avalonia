@@ -4,14 +4,10 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Nikse.SubtitleEdit.Logic;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
-using Avalonia.Markup.Xaml.Templates;
-using Avalonia.Media;
-using CommunityToolkit.Mvvm.Input;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
@@ -129,9 +125,11 @@ public class ShortcutsWindow : Window
         {
             Width = 200,
             Margin = new Thickness(10, 0, 10, 0),
-            ItemsSource = Enum.GetValues(typeof(Key)).Cast<Key>(),
+            //ItemsSource = Enum.GetValues(typeof(Key)).Cast<Key>(),
         };
-        comboBoxKeys.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
+        comboBoxKeys.Bind(ComboBox.ItemsSourceProperty, new Binding(nameof(vm.Shortcuts)) { Source = vm });
+        comboBoxKeys.Bind(ComboBox.SelectedItemProperty, new Binding(nameof(vm.SelectedShortcut)) { Source = vm });
+        comboBoxKeys.Bind(IsEnabledProperty, new Binding(nameof(vm.SelectedShortcut)) { Source = vm });
         editPanel.Children.Add(comboBoxKeys);
 
 

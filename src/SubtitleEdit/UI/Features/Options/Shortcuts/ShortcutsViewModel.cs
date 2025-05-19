@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.LogicalTree;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -6,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -15,8 +17,9 @@ namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 public partial class ShortcutsViewModel : ObservableObject
 {
 
-    [ObservableProperty] private ObservableCollection<ShortcutItem> _shortcuts;
-    [ObservableProperty] private ShortcutItem? _selectedShortcut;
+    [ObservableProperty] private ObservableCollection<string> _shortcuts;
+    [ObservableProperty] private string? _selectedShortcut;
+
     [ObservableProperty] private bool _isControlsEnabled;
     [ObservableProperty] private bool _ctrlIsSelected;
     [ObservableProperty] private bool _altIsSelected;
@@ -32,7 +35,7 @@ public partial class ShortcutsViewModel : ObservableObject
 
     public ShortcutsViewModel()
     {
-        Shortcuts = new ObservableCollection<ShortcutItem>();
+        Shortcuts = new ObservableCollection<string>(Enum.GetValues(typeof(Key)).Cast<Key>().Select(p=>p.ToString()).Distinct());
         _allShortcuts = new List<ShortCut>();
         Nodes = new ObservableCollection<ShortcutTreeNode>();
         ShortcutsTreeView = new TreeView();
@@ -109,7 +112,7 @@ public partial class ShortcutsViewModel : ObservableObject
         }
 
         IsControlsEnabled = true;
-        CtrlIsSelected = node.ShortCut!.Keys.Contains("Ctrl");
+        CtrlIsSelected = node.ShortCut!.Keys.Contains("Ctrl") || node.ShortCut!.Keys.Contains("Control");
         AltIsSelected = node.ShortCut!.Keys.Contains("Alt");
         ShiftIsSelected = node.ShortCut!.Keys.Contains("Shift");
     }
