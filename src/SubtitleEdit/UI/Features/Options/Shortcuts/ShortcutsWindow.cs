@@ -3,9 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Nikse.SubtitleEdit.Logic;
-using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 
@@ -46,17 +44,30 @@ public class ShortcutsWindow : Window
         treeView[!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.Nodes));
         treeView[!TreeView.SelectedItemProperty] = new Binding(nameof(vm.SelectedNode));
         
-          
-        // Create the tree data template with the correct constructor parameters
         var factory = new FuncTreeDataTemplate<ShortcutTreeNode>(
             // Match function - determines if this template applies to the item
             node => true,
-            // Build function - creates the visual for each node
-            (node, _) => new TextBlock { Text = node.Title }, // Assuming nodes have a Name property
+            // Build function - creates the visual for each node with proper binding
+            (node, _) => 
+            {
+                var textBlock = new TextBlock();
+                textBlock.DataContext = node;
+                // Set up the binding for Text property
+                textBlock.Bind(TextBlock.TextProperty, new Binding(nameof(ShortcutTreeNode.Title)) 
+                { 
+                    
+                    // You can specify additional binding properties if needed
+                    Mode = BindingMode.TwoWay,
+                    Source = node,
+                });
+        
+                return textBlock;
+            },
             // ItemsSelector function - tells TreeView how to find child nodes
             node => node.SubNodes
         );
 
+// Set the ItemTemplate
         treeView.ItemTemplate = factory;
         
         vm.ShortcutsTreeView = treeView;
@@ -129,13 +140,11 @@ public class ShortcutsWindow : Window
         };
         comboBoxKeys.Bind(ComboBox.ItemsSourceProperty, new Binding(nameof(vm.Shortcuts)) { Source = vm });
         comboBoxKeys.Bind(ComboBox.SelectedItemProperty, new Binding(nameof(vm.SelectedShortcut)) { Source = vm });
-        comboBoxKeys.Bind(IsEnabledProperty, new Binding(nameof(vm.SelectedShortcut)) { Source = vm });
+        comboBoxKeys.Bind(ComboBox.IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(comboBoxKeys);
 
-
-
         // Update button
-        var buttonUpdate = UiUtil.MakeButton("Update");
+        var buttonUpdate = UiUtil.MakeButton("Update", vm.UpdateShortcutCommand);
         editPanel.Children.Add(buttonUpdate);
         buttonUpdate.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
 

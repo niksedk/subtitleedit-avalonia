@@ -1,15 +1,15 @@
 using Nikse.SubtitleEdit.Logic;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
-public class ShortcutTreeNode
+public partial class ShortcutTreeNode : ObservableObject
 {
     public ObservableCollection<ShortcutTreeNode>? SubNodes { get; }
-    public string Title { get; }
-    public ShortCut? ShortCut { get; }
-  
+    [ObservableProperty] private string _title;
+    public ShortCut? ShortCut { get; set; }
+
     public ShortcutTreeNode(string title, ShortCut shortcut)
     {
         Title = title;
