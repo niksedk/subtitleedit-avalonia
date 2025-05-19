@@ -26,6 +26,8 @@ public class ShortcutsWindow : Window
         Title = "Shortcuts";
         Width = 650;
         Height = 650;
+        MinWidth = 550;
+        MinHeight = 500;
         CanResize = true;
 
         _vm = vm;
@@ -105,25 +107,27 @@ public class ShortcutsWindow : Window
 
         // Control checkbox and label
         editPanel.Children.Add(UiUtil.MakeTextBlock("Control").WithMarginRight(3));
-        editPanel.Children.Add(UiUtil.MakeCheckBox());
+        var controlCheckBox = UiUtil.MakeCheckBox(vm, nameof(vm.CtrlIsSelected));
+        controlCheckBox.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
+        editPanel.Children.Add(controlCheckBox);
 
         // Alt checkbox and label
         editPanel.Children.Add(UiUtil.MakeTextBlock("Alt").WithMarginRight(3));
-        editPanel.Children.Add(UiUtil.MakeCheckBox());
+        var checkBoxAlt = UiUtil.MakeCheckBox(vm, nameof(vm.AltIsSelected));
+        checkBoxAlt.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
+        editPanel.Children.Add(checkBoxAlt);
+        
 
         // Shift checkbox and label
         editPanel.Children.Add(UiUtil.MakeTextBlock("Shift").WithMarginRight(3));
-        editPanel.Children.Add(new CheckBox
-        {
-            Name = "ShiftCheckBox",
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
-        });
+        var checkBoxShift = UiUtil.MakeCheckBox(vm, nameof(vm.ShiftIsSelected));
+        checkBoxShift.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
+        editPanel.Children.Add(checkBoxShift);
 
         // Key combobox
         var comboBoxKeys = new ComboBox
         {
-            Name = "KeyComboBox",
-            Width = 100,
+            Width = 200,
             Margin = new Thickness(10, 0, 10, 0),
             ItemsSource = Enum.GetValues(typeof(Key)).Cast<Key>(),
         };

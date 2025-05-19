@@ -6,7 +6,6 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -42,10 +41,17 @@ public partial class ShortcutsViewModel : ObservableObject
     public void LoadShortCuts(MainViewModel vm)
     {
         _allShortcuts = ShortcutsMain.GetAllShortcuts(vm);
+        LoadShortcuts();
+    }
+
+    private void LoadShortcuts()
+    {
+        Nodes.Clear();
         AddShorcuts(_allShortcuts.Where(p => p.Category == ShortcutCategory.General).ToList(), "General");
         AddShorcuts(_allShortcuts.Where(p => p.Category == ShortcutCategory.SubtitleGridAndTextBox).ToList(), "SubtitleGridAndTextBox");
         AddShorcuts(_allShortcuts.Where(p => p.Category == ShortcutCategory.SubtitleGrid).ToList(), "SubtitleGrid");
         AddShorcuts(_allShortcuts.Where(p => p.Category == ShortcutCategory.Waveform).ToList(), "Waveform");
+        ExpandAll();
     }
 
     private void AddShorcuts(List<ShortCut> shortcuts, string categoryName)
@@ -54,13 +60,11 @@ public partial class ShortcutsViewModel : ObservableObject
             shortcuts.Select(x => new ShortcutTreeNode(x.Name + " [" + string.Join("+", x.Keys) + "]", x))
         );
 
-        var node = new ShortcutTreeNode(categoryName, children);
-        Nodes.Add(node);
-    }
-
-    private static string Localize(ShortcutCategory categoryEnum)
-    {
-        return categoryEnum.ToString();  //TODO: localize
+        if (children.Count > 0)
+        {
+            var node = new ShortcutTreeNode(categoryName, children);
+            Nodes.Add(node);
+        }
     }
 
     [RelayCommand]
@@ -80,31 +84,17 @@ public partial class ShortcutsViewModel : ObservableObject
 
     internal void UpdateVisibleShortcuts(string searchText)
     {
-        //var categories = new List<ShortcutItem>();
-        //Shortcuts.Clear();
-        //foreach (var shortcut in _allShortcuts)
-        //{
-        //    if (shortcut.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-        //        shortcut.Keys.Contains(searchText, StringComparison.OrdinalIgnoreCase))
-        //    {
-        //        var categoryEnum = shortcut.Category;
-        //        var category = categories.FirstOrDefault(x => x.Category == categoryEnum);
-        //        if (category == null)
-        //        {
-        //            category = new ShortcutItem
-        //            {
-        //                Name = string.Empty,
-        //                Keys = string.Empty,
-        //                Category = categoryEnum,
-        //                CategoryText = Localize(categoryEnum),
-        //            };
-        //            categories.Add(category);
-        //            Shortcuts.Add(category);
-        //        }
+        if (string.IsNullOrEmpty(searchText))
+        {
+            LoadShortcuts();
+            return;
+        }
 
-        //        category.Children.Add(shortcut);
-        //    }
-        //}
+        Nodes.Clear();
+        AddShorcuts(_allShortcuts.Where(p => p.Category == ShortcutCategory.General && p.Name.Contains(searchText, System.StringComparison.InvariantCultureIgnoreCase)).ToList(), "General");
+        AddShorcuts(_allShortcuts.Where(p => p.Category == ShortcutCategory.SubtitleGridAndTextBox && p.Name.Contains(searchText, System.StringComparison.InvariantCultureIgnoreCase)).ToList(), "SubtitleGridAndTextBox");
+        AddShorcuts(_allShortcuts.Where(p => p.Category == ShortcutCategory.SubtitleGrid && p.Name.Contains(searchText, System.StringComparison.InvariantCultureIgnoreCase)).ToList(), "SubtitleGrid");
+        AddShorcuts(_allShortcuts.Where(p => p.Category == ShortcutCategory.Waveform && p.Name.Contains(searchText, System.StringComparison.InvariantCultureIgnoreCase)).ToList(), "Waveform");
 
         ExpandAll();
     }
@@ -112,24 +102,13 @@ public partial class ShortcutsViewModel : ObservableObject
    
     internal void ShortcutsTreeView_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        if (e.AddedItems == null || e.AddedItems.Count == 0)
-        {
-            IsControlsEnabled = false;
-        }
-        
-        ShortcutTreeNode? node = e.AddedItems[0] as ShortcutTreeNode;
-        if (node == null)
+        if (e.AddedItems == null || e.AddedItems.Count == 0 || e.AddedItems[0] is not ShortcutTreeNode node || node.ShortCut == null)
         {
             IsControlsEnabled = false;
             return;
         }
 
-        IsControlsEnabled = node.ShortCut != null;
-        if (!IsControlsEnabled)
-        {
-            return;
-        }
-
+        IsControlsEnabled = true;
         CtrlIsSelected = node.ShortCut!.Keys.Contains("Ctrl");
         AltIsSelected = node.ShortCut!.Keys.Contains("Alt");
         ShiftIsSelected = node.ShortCut!.Keys.Contains("Shift");
