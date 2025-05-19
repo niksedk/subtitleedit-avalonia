@@ -9,6 +9,7 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Compression;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Download;
@@ -83,7 +84,12 @@ public partial class DownloadFfmpegViewModel : ObservableObject
                 }
 
                 UnpackFfmpeg(ffmpegFileName);
-
+                
+                if (File.Exists(ffmpegFileName) && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    MacHelper.MakeExecutable(ffmpegFileName);   
+                }
+                
                 FfmpegFileName = ffmpegFileName;
                 Close();
             }

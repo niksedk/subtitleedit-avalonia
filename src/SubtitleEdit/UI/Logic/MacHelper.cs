@@ -31,7 +31,28 @@ public class MacHelper
             Console.WriteLine(error);
             return false;
         }
+        
+        RemoveQuarantineAttribute(filePath);
 
         return true;
+    }
+
+    private static void RemoveQuarantineAttribute(string filePath)
+    {
+        var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "/usr/bin/xattr",
+                Arguments = $"-d com.apple.quarantine \"{filePath}\"",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            }
+        };
+
+        process.Start();
+        process.WaitForExit();
     }
 }
