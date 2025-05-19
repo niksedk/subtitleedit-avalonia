@@ -7,6 +7,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Avalonia.Controls.Templates;
+using Avalonia.Data;
+using Avalonia.Markup.Xaml.Templates;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.Input;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
@@ -34,27 +38,42 @@ public class ShortcutsWindow : Window
             Margin = new Thickness(10),
         };
 
-        var contentPanel = new TreeDataGrid
+        var treeView = new TreeView
         {
-            Height = double.NaN, // auto size inside scroll viewer
-            Margin = new Thickness(2),
-            Source = vm.ShortcutsSource,
-            DataContext = _vm,
-            CanUserSortColumns = false,
+            Margin = new Thickness(10),
+            SelectionMode = SelectionMode.Single,
+            DataContext = vm,
         };
-        vm.ShortcutsGrid = contentPanel;
+
+        treeView[!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.Nodes));
+        treeView[!TreeView.SelectedItemProperty] = new Binding(nameof(vm.SelectedNode));
         
-        if (vm.ShortcutsSource is HierarchicalTreeDataGridSource<ShortcutItem> source)
-        {
-            source.RowSelection!.SelectionChanged += (sender, e) =>
-            {
-                vm.ShortcutGrid_SelectionChanged(source.RowSelection.SelectedItems);
-            };
-        }
+          
+        // Create the tree data template with the correct constructor parameters
+        var factory = new FuncTreeDataTemplate<ShortcutTreeNode>(
+            // Match function - determines if this template applies to the item
+            node => true,
+            // Build function - creates the visual for each node
+            (node, _) => new TextBlock { Text = node.Title }, // Assuming nodes have a Name property
+            // ItemsSelector function - tells TreeView how to find child nodes
+            node => node.SubNodes
+        );
+
+        treeView.ItemTemplate = factory;
+        
+        vm.ShortcutsGrid = treeView;
+
+        // if (vm.ShortcutsSource is HierarchicalTreeDataGridSource<ShortcutItem> source)
+        // {
+        //     source.RowSelection!.SelectionChanged += (sender, e) =>
+        //     {
+        //         vm.ShortcutGrid_SelectionChanged(source.RowSelection.SelectedItems);
+        //     };
+        // }
 
         var scrollViewer = new ScrollViewer
         {
-            Content = contentPanel,
+            Content = treeView,
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
         };
 
@@ -113,7 +132,7 @@ public class ShortcutsWindow : Window
             new Avalonia.Data.Binding(nameof(vm.ControlsEnabled)) { Source = vm }
         );
 
-        
+
         // Update button
         editPanel.Children.Add(UiUtil.MakeButton("Update"));
 

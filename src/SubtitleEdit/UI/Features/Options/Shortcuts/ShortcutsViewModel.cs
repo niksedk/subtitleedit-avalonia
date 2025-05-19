@@ -22,36 +22,32 @@ public partial class ShortcutsViewModel : ObservableObject
     [ObservableProperty] private bool _altIsSelected;
     [ObservableProperty] private bool _shiftIsSelected;
     private List<ShortcutItem> _allShortcuts;
+    [ObservableProperty] private ShortcutTreeNode? _selectedNode;
 
-    public HierarchicalTreeDataGridSource<ShortcutItem> ShortcutsSource { get; set; }
+    public ObservableCollection<ShortcutTreeNode> Nodes { get; }
 
     public bool OkPressed { get; set; }
     public ShortcutsWindow? Window { get; set; }
-    public TreeDataGrid ShortcutsGrid { get; internal set; }
+    public TreeView ShortcutsGrid { get; internal set; }
 
     public ShortcutsViewModel()
     {
         Shortcuts = new ObservableCollection<ShortcutItem>();
         _allShortcuts = new List<ShortcutItem>();
-
-        ShortcutsSource = new HierarchicalTreeDataGridSource<ShortcutItem>(_shortcuts)
-        {
-            Columns =
-            {
-                new HierarchicalExpanderColumn<ShortcutItem>(
-                    new TextColumn<ShortcutItem, string>("Category",
-                    x => x.CategoryText),
-                    x => x.Children),
-                new TextColumn<ShortcutItem, string>("Function", x => x.Name),
-                new TextColumn<ShortcutItem, string>("Keys", x => x.Keys),
-            },
-        };
+        Nodes = new ObservableCollection<ShortcutTreeNode>();
     }
 
     public void LoadShortCuts(MainViewModel vm)
     {
-        var categories = new List<ShortcutItem>();
-        foreach (var shortcut in ShortcutsMain.GetAllShortcuts(vm))
+        var shortcuts = ShortcutsMain.GetAllShortcuts(vm);
+        var general = shortcuts.Where(p=>p.Category == ShortcutCategory.General).ToList();
+        AddShorcuts(general, "General");
+        
+        var subtitleGridAndTextBox = shortcuts.Where(p => p.Category == ShortcutCategory.SubtitleGridAndTextBox).ToList();
+        var waveform = shortcuts.Where(p => p.Category == ShortcutCategory.Waveform).ToList();
+        
+        
+        foreach (var category in ShortcutsMain.GetAllShortcuts(vm).GroupBy(x => x.Category))
         {
             var categoryEnum = shortcut.Category;
             var category = categories.FirstOrDefault(x => x.Category == categoryEnum);
@@ -80,7 +76,13 @@ public partial class ShortcutsViewModel : ObservableObject
             _allShortcuts.Add(item);
         }
         
-        ShortcutsSource.ExpandAll();
+       
+        //ShortcutsSource.ExpandAll();
+    }
+
+    private void AddShorcuts(List<ShortCut> shortcuts, string s)
+    {
+        var children = general.Where(p => p.Category == ShortcutCategory.SubtitleGridAndTextBox).ToList();
     }
 
     private static string Localize(ShortcutCategory categoryEnum)
@@ -131,7 +133,7 @@ public partial class ShortcutsViewModel : ObservableObject
             }
         }
         
-        ShortcutsSource.ExpandAll();
+        //ShortcutsSource.ExpandAll();
     }
 
     public void ShortcutGrid_SelectionChanged(IReadOnlyList<ShortcutItem?> rowSelectionSelectedItems)
