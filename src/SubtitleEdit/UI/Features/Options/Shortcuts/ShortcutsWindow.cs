@@ -61,7 +61,9 @@ public class ShortcutsWindow : Window
 
         treeView.ItemTemplate = factory;
         
-        vm.ShortcutsGrid = treeView;
+        vm.ShortcutsTreeView = treeView;
+
+        treeView.SelectionChanged += vm.ShortcutsTreeView_SelectionChanged;
 
         // if (vm.ShortcutsSource is HierarchicalTreeDataGridSource<ShortcutItem> source)
         // {
@@ -125,16 +127,15 @@ public class ShortcutsWindow : Window
             Margin = new Thickness(10, 0, 10, 0),
             ItemsSource = Enum.GetValues(typeof(Key)).Cast<Key>(),
         };
+        comboBoxKeys.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(comboBoxKeys);
 
-        comboBoxKeys.Bind(
-            IsEnabledProperty,
-            new Avalonia.Data.Binding(nameof(vm.ControlsEnabled)) { Source = vm }
-        );
 
 
         // Update button
-        editPanel.Children.Add(UiUtil.MakeButton("Update"));
+        var buttonUpdate = UiUtil.MakeButton("Update");
+        editPanel.Children.Add(buttonUpdate);
+        buttonUpdate.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
 
 
         var editGridBorder = UiUtil.MakeBorderForControl(editPanel);
