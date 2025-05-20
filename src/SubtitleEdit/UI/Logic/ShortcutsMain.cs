@@ -49,11 +49,35 @@ public static class ShortcutsMain
         list.Add(new AvailableShortcut(command, name, category));
     }
 
+    private static MainViewModel _mvm = null!;
+
+    public static Dictionary<string, string> CommandTranslationLookup = new Dictionary<string, string>
+    {
+        { nameof(_mvm.SelectAllLinesCommand) , Se.Language.Settings.Shortcuts.ListSelectAll },
+        { nameof(_mvm.InverseSelectionCommand) , Se.Language.Settings.Shortcuts.ListInverseSelection },
+        { nameof(_mvm.DeleteSelectedLinesCommand) , Se.Language.Settings.Shortcuts.ListDeleteSelection },
+
+        { nameof(_mvm.CommandFileOpenCommand) , Se.Language.Settings.Shortcuts.FileOpen },
+        { nameof(_mvm.CommandExitCommand) , Se.Language.Settings.Shortcuts.FileExit },
+        { nameof(_mvm.CommandFileNewCommand) , Se.Language.Settings.Shortcuts.FileNew },
+
+        { nameof(_mvm.ShowGoToLineCommand) , Se.Language.Settings.Shortcuts.GeneralGoToLineNumber },
+        { nameof(_mvm.ToggleLinesItalicCommand) , Se.Language.Settings.Shortcuts.GeneralToggleItalic },
+
+        { nameof(_mvm.CommandShowLayoutCommand) , Se.Language.Settings.Shortcuts.GeneralChooseLayout },
+        { nameof(_mvm.CommandShowAutoTranslateCommand) , Se.Language.Settings.Shortcuts.AutoTranslate },
+        { nameof(_mvm.CommandShowSettingsCommand) , Se.Language.Settings.Shortcuts.Settings },
+
+        { nameof(_mvm.GoToNextLineCommand) , Se.Language.Settings.Shortcuts.GeneralGoToNextSubtitle },
+        { nameof(_mvm.GoToPreviousLineCommand) , Se.Language.Settings.Shortcuts.GeneralGoToPrevSubtitle },
+    };
+
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
     {
         var shortcuts = new List<AvailableShortcut>();
 
         AddShortcut(shortcuts, vm.CommandExitCommand, nameof(vm.CommandExitCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.CommandFileNewCommand, nameof(vm.CommandFileNewCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowGoToLineCommand, nameof(vm.ShowGoToLineCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.GoToPreviousLineCommand, nameof(vm.GoToPreviousLineCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.GoToNextLineCommand, nameof(vm.GoToNextLineCommand), ShortcutCategory.General);

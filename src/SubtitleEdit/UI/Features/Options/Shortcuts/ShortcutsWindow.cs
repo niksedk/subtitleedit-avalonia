@@ -5,6 +5,7 @@ using Avalonia.Input;
 using Nikse.SubtitleEdit.Logic;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
+using Projektanker.Icons.Avalonia;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
@@ -31,7 +32,44 @@ public class ShortcutsWindow : Window
         {
             Watermark = "Search shortcuts...",
             Margin = new Thickness(10),
+            Width = double.NaN,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
         };
+
+        var buttonExpand = new Button
+        {
+            Margin = new Thickness(0, 10, 0, 10),
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+            Command = vm.ExpandCommand,
+        };
+        Attached.SetIcon(buttonExpand, "fa-solid fa-plus");
+
+        var buttonCollapse = new Button
+        {
+            Margin = new Thickness(5, 10, 0, 10),
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+            Command = vm.CollapseCommand,
+        };
+        Attached.SetIcon(buttonCollapse, "fa-solid fa-minus");
+
+        var topGrid = new Grid
+        {
+            RowDefinitions = new RowDefinitions("Auto"),
+            ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto"),
+            Margin = new Thickness(10),
+        };
+        topGrid.Children.Add(_searchBox);
+        Grid.SetRow(_searchBox, 0);
+        Grid.SetColumn(_searchBox, 0);
+
+        topGrid.Children.Add(buttonExpand);
+        Grid.SetRow(buttonExpand, 0);
+        Grid.SetColumn(buttonExpand, 1);
+
+        topGrid.Children.Add(buttonCollapse);
+        Grid.SetRow(buttonCollapse, 0);
+        Grid.SetColumn(buttonCollapse, 2);
+
 
         var treeView = new TreeView
         {
@@ -80,9 +118,9 @@ public class ShortcutsWindow : Window
             ColumnDefinitions = new ColumnDefinitions("*"),
             Margin = new Thickness(UiUtil.WindowMarginWidth),
         };
-        grid.Children.Add(_searchBox);
-        Grid.SetRow(_searchBox, 0);
-        Grid.SetColumn(_searchBox, 0);
+        grid.Children.Add(topGrid);
+        Grid.SetRow(topGrid, 0);
+        Grid.SetColumn(topGrid, 0);
 
         grid.Children.Add(scrollViewer);
         Grid.SetRow(scrollViewer, 1);

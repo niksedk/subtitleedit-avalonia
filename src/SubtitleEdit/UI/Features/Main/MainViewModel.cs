@@ -827,7 +827,7 @@ public partial class MainViewModel : ObservableObject
         // Store currently selected items
         var selectedItems = new HashSet<SubtitleLineViewModel>(SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>());
 
-        SubtitleGridSelectionChangedSkip = true;   
+        SubtitleGridSelectionChangedSkip = true;
         SubtitleGrid.SelectedItems.Clear();
         foreach (var item in Subtitles)
         {

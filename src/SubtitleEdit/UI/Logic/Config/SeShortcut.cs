@@ -1,6 +1,5 @@
 ﻿using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 

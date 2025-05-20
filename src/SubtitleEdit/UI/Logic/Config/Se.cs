@@ -59,6 +59,11 @@ public class Se
 
     public void InitializeMainShortcuts(MainViewModel vm)
     {
+        if (Shortcuts.Count > 0)
+        {
+            return;
+        }
+
         Shortcuts =
         [
             new(nameof(vm.ShowGoToLineCommand), new List<string> { "Control", "G" }),

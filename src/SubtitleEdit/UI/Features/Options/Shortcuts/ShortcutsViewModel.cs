@@ -31,6 +31,7 @@ public partial class ShortcutsViewModel : ObservableObject
     public TreeView ShortcutsTreeView { get; internal set; }
 
     private List<ShortCut> _allShortcuts;
+    public MainViewModel? _mainViewModel;
 
     public ShortcutsViewModel()
     {
@@ -65,6 +66,7 @@ public partial class ShortcutsViewModel : ObservableObject
 
     public void LoadShortCuts(MainViewModel vm)
     {
+        _mainViewModel = vm;
         _allShortcuts = ShortcutsMain.GetAllShortcuts(vm);
         UpdateVisibleShortcuts(string.Empty);
     }
@@ -72,10 +74,10 @@ public partial class ShortcutsViewModel : ObservableObject
     internal void UpdateVisibleShortcuts(string searchText)
     {
         Nodes.Clear();
-        AddShortcuts(ShortcutCategory.General, "General", searchText);
-        AddShortcuts(ShortcutCategory.SubtitleGridAndTextBox, "Subtitle list view & text box", searchText);
-        AddShortcuts(ShortcutCategory.SubtitleGrid, "Subtitle list view", searchText);
-        AddShortcuts(ShortcutCategory.Waveform, "Waveform", searchText);
+        AddShortcuts(ShortcutCategory.General, Se.Language.Settings.Shortcuts.CategoryGeneral, searchText);
+        AddShortcuts(ShortcutCategory.SubtitleGridAndTextBox, Se.Language.Settings.Shortcuts.CategorySubtitleGridAndTextBox, searchText);
+        AddShortcuts(ShortcutCategory.SubtitleGrid, Se.Language.Settings.Shortcuts.CategorySubtitleGrid, searchText);
+        AddShortcuts(ShortcutCategory.Waveform, Se.Language.Settings.Shortcuts.CategoryWaveform, searchText);
         ExpandAll();
     }
 
@@ -94,14 +96,16 @@ public partial class ShortcutsViewModel : ObservableObject
         }
     }
 
-    private static string MakeDisplayName(ShortCut x)
+    private string MakeDisplayName(ShortCut x)
     {
+        var name = ShortcutsMain.CommandTranslationLookup.TryGetValue(x.Name, out var displayName) ? displayName : x.Name;
+
         if (x.Keys.Count > 0)
         {
-            return x.Name + " [" + string.Join("+", x.Keys) + "]";
+            return name + " [" + string.Join("+", x.Keys) + "]";
         }
 
-        return x.Name;
+        return name;
     }
 
     [RelayCommand]
@@ -181,7 +185,19 @@ public partial class ShortcutsViewModel : ObservableObject
         SelectedShortcut = null;
     }
 
-    private static bool Search(string searchText, ShortCut p)
+    [RelayCommand]
+    private void Expand()
+    {
+        ExpandAll();
+    }
+
+    [RelayCommand]
+    private void Collapse()
+    {
+        CollapseAll();
+    }
+
+    private bool Search(string searchText, ShortCut p)
     {
         if (string.IsNullOrEmpty(searchText))
         {

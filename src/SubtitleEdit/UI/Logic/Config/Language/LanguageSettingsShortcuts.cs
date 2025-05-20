@@ -2,6 +2,11 @@
 
 public class LanguageSettingsShortcuts
 {
+    public string CategoryGeneral { get; set; }
+    public string CategorySubtitleGridAndTextBox{ get; set; }
+    public string CategorySubtitleGrid { get; set; }
+    public string CategoryWaveform { get; set; }
+
     public string GeneralMergeSelectedLines { get; set; }
     public string GeneralMergeWithPrevious { get; set; }
     public string GeneralMergeWithNext { get; set; }
@@ -39,6 +44,7 @@ public class LanguageSettingsShortcuts
     public string GeneralGoToPreviousSubtitleAndFocusWaveform { get; set; }
     public string GeneralGoToNextSubtitleAndFocusWaveform { get; set; }
     public string GeneralGoToLineNumber { get; set; }
+    public string GeneralToggleItalic { get; set; }
     public string GeneralToggleBookmarks { get; set; }
     public string GeneralFocusTextBox { get; set; }
     public string GeneralToggleBookmarksWithText { get; set; }
@@ -80,9 +86,20 @@ public class LanguageSettingsShortcuts
     public string ListSelectAll { get; set; }
     public string ListSelectFirst { get; set; }
     public string ListSelectLast { get; set; }
+    public string ListInverseSelection { get; set; }
+    public string ListDeleteSelection { get; set; }
+
+    public string AutoTranslate { get; set; }
+
+    public string Settings { get; set; }
 
     public LanguageSettingsShortcuts()
     {
+        CategoryGeneral = "General";
+        CategorySubtitleGridAndTextBox = "Subtitle list view & text box";
+        CategorySubtitleGrid = "Subtitle list view";
+        CategoryWaveform = "Waveform";
+
         GeneralMergeSelectedLines = "Merge selected lines";
         GeneralMergeWithPrevious = "Merge with previous";
         GeneralMergeWithNext = "Merge with next";
@@ -120,6 +137,7 @@ public class LanguageSettingsShortcuts
         GeneralGoToPreviousSubtitleAndFocusWaveform = "Go to previous subtitle and focus waveform";
         GeneralGoToNextSubtitleAndFocusWaveform = "Go to next subtitle and focus waveform";
         GeneralGoToLineNumber = "Go to line number";
+        GeneralToggleItalic = "Toggle italic";
         GeneralToggleBookmarks = "Toggle bookmarks";
         GeneralFocusTextBox = "Focus text box";
         GeneralToggleBookmarksWithText = "Toggle bookmarks with text";
@@ -159,5 +177,11 @@ public class LanguageSettingsShortcuts
         ListSelectAll = "Select all";
         ListSelectFirst = "Select first";
         ListSelectLast = "Select last";
+        ListInverseSelection = "Inverse selection";
+        ListDeleteSelection = "Delete selection";
+
+        AutoTranslate = "Auto-translate";
+
+        Settings = "Settings";
     }
 }
