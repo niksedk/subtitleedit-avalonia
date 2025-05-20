@@ -59,7 +59,7 @@ public static class UiUtil
     {
         control.Bind(Button.IsEnabledProperty, new Binding
         {
-            Path =propertyIsEnabledPath,
+            Path = propertyIsEnabledPath,
             Mode = BindingMode.OneWay,
             Source = viewModal,
             UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
@@ -350,6 +350,12 @@ public static class UiUtil
     {
         var m = control.Margin;
         control.Margin = new Thickness(m.Left, m.Top, m.Right, marginBottom);
+        return control;
+    }
+
+    public static ComboBox WithMargin(this ComboBox control, int left, int top, int right, int bottom)
+    {
+        control.Margin = new Thickness(left, top, right, bottom);
         return control;
     }
 

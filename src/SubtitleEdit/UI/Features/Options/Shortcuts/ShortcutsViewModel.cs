@@ -19,6 +19,8 @@ public partial class ShortcutsViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<string> _shortcuts;
     [ObservableProperty] private string? _selectedShortcut;
+    [ObservableProperty] private ObservableCollection<string> _filters;
+    [ObservableProperty] private string _selectedFilter;
     [ObservableProperty] private bool _isControlsEnabled;
     [ObservableProperty] private bool _ctrlIsSelected;
     [ObservableProperty] private bool _altIsSelected;
@@ -36,6 +38,13 @@ public partial class ShortcutsViewModel : ObservableObject
     public ShortcutsViewModel()
     {
         Shortcuts = new ObservableCollection<string>(GetShortcutKeys());
+        Filters = new ObservableCollection<string>
+        {
+            "All",
+            "Assigned",
+            "Unassigned",
+        };
+        SelectedFilter = _filters[0];
         Nodes = new ObservableCollection<ShortcutTreeNode>();
         ShortcutsTreeView = new TreeView();
         _allShortcuts = new List<ShortCut>();
@@ -96,7 +105,7 @@ public partial class ShortcutsViewModel : ObservableObject
         }
     }
 
-    private string MakeDisplayName(ShortCut x)
+    private static string MakeDisplayName(ShortCut x)
     {
         var name = ShortcutsMain.CommandTranslationLookup.TryGetValue(x.Name, out var displayName) ? displayName : x.Name;
 
@@ -111,14 +120,14 @@ public partial class ShortcutsViewModel : ObservableObject
     [RelayCommand]
     private void CommandOk()
     {
-        var shortcuts = new List<SeShortCut>(); 
+        var shortcuts = new List<SeShortCut>();
         foreach (var node in Nodes.Where(p => p.SubNodes != null))
         {
             foreach (var child in node.SubNodes!)
             {
                 if (child.ShortCut != null)
                 {
-                    shortcuts.Add(new SeShortCut(child.ShortCut));  
+                    shortcuts.Add(new SeShortCut(child.ShortCut));
                 }
             }
         }

@@ -47,7 +47,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         public static readonly StyledProperty<bool> FullScreenIsVisibleProperty =
             AvaloniaProperty.Register<VideoPlayerControl, bool>(nameof(FullScreenIsVisible));
 
-        
+
         public Control? PlayerContent
         {
             get => GetValue(PlayerContentProperty);
@@ -101,13 +101,13 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             get => GetValue(FullScreenCommandProperty);
             set => SetValue(FullScreenCommandProperty, value);
         }
-        
+
         public bool StopIsVisible
         {
             get => GetValue(StopIsVisibleProperty);
             set => SetValue(StopIsVisibleProperty, value);
         }
-        
+
         public bool FullScreenIsVisible
         {
             get => GetValue(FullScreenIsVisibleProperty);
@@ -217,7 +217,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             {
                 Margin = new Thickness(0, 0, 3, 0),
             };
-            stopButton.Bind(Button.IsVisibleProperty,  new Binding
+            stopButton.Bind(Button.IsVisibleProperty, new Binding
             {
                 Path = nameof(StopIsVisible),
                 Source = this
@@ -240,7 +240,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             {
                 Margin = new Thickness(0, 0, 3, 0),
             };
-            _fullScreenButton.Bind(IsVisibleProperty,  new Binding
+            _fullScreenButton.Bind(IsVisibleProperty, new Binding
             {
                 Path = nameof(FullScreenIsVisible),
                 Source = this
@@ -428,7 +428,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             {
                 var pos = _videoPlayerInstance.Position;
                 SetPosition(pos);
-                ProgressText = $"{TimeCode.FromSeconds(pos).ToShortDisplayString() } / {TimeCode.FromSeconds(Duration).ToShortDisplayString()}";
+                ProgressText = $"{TimeCode.FromSeconds(pos).ToShortDisplayString()} / {TimeCode.FromSeconds(Duration).ToShortDisplayString()}";
 
                 //TODO: move to a slower timer or events
                 Duration = _videoPlayerInstance.Duration;

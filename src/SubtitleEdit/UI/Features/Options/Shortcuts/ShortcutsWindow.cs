@@ -6,6 +6,7 @@ using Nikse.SubtitleEdit.Logic;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Projektanker.Icons.Avalonia;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
@@ -16,8 +17,9 @@ public class ShortcutsWindow : Window
 
     public ShortcutsWindow(ShortcutsViewModel vm)
     {
+        var language = Se.Language.Settings.Shortcuts;
         Icon = UiUtil.GetSeIcon();
-        Title = "Shortcuts";
+        Title = language.Title;
         Width = 700;
         Height = 650;
         MinWidth = 650;
@@ -28,13 +30,19 @@ public class ShortcutsWindow : Window
         vm.Window = this;
         DataContext = vm;
 
+
         _searchBox = new TextBox
         {
-            Watermark = "Search shortcuts...",
+            Watermark = language.SearchShortcuts,
             Margin = new Thickness(10),
             Width = double.NaN,
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
         };
+
+        var labelFilter = UiUtil.MakeTextBlock(language.Filter);
+        var comboBoxFilter = UiUtil.MakeComboBox(vm.Filters, vm, nameof(vm.SelectedFilter))
+            .WithMinwidth(120)
+            .WithMargin(5, 0, 10, 0);
 
         var buttonExpand = new Button
         {
@@ -55,20 +63,28 @@ public class ShortcutsWindow : Window
         var topGrid = new Grid
         {
             RowDefinitions = new RowDefinitions("Auto"),
-            ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto"),
+            ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto,Auto,Auto"),
             Margin = new Thickness(10),
         };
         topGrid.Children.Add(_searchBox);
         Grid.SetRow(_searchBox, 0);
         Grid.SetColumn(_searchBox, 0);
 
+        topGrid.Children.Add(labelFilter);
+        Grid.SetRow(labelFilter, 0);
+        Grid.SetColumn(labelFilter, 1);
+
+        topGrid.Children.Add(comboBoxFilter);
+        Grid.SetRow(comboBoxFilter, 0);
+        Grid.SetColumn(comboBoxFilter, 2);
+
         topGrid.Children.Add(buttonExpand);
         Grid.SetRow(buttonExpand, 0);
-        Grid.SetColumn(buttonExpand, 1);
+        Grid.SetColumn(buttonExpand, 3);
 
         topGrid.Children.Add(buttonCollapse);
         Grid.SetRow(buttonCollapse, 0);
-        Grid.SetColumn(buttonCollapse, 2);
+        Grid.SetColumn(buttonCollapse, 4);
 
 
         var treeView = new TreeView
@@ -80,25 +96,25 @@ public class ShortcutsWindow : Window
 
         treeView[!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.Nodes));
         treeView[!TreeView.SelectedItemProperty] = new Binding(nameof(vm.SelectedNode));
-        
+
         var factory = new FuncTreeDataTemplate<ShortcutTreeNode>(
             node => true,
-            (node, _) => 
+            (node, _) =>
             {
                 var textBlock = new TextBlock();
                 textBlock.DataContext = node;
-                textBlock.Bind(TextBlock.TextProperty, new Binding(nameof(ShortcutTreeNode.Title)) 
-                { 
+                textBlock.Bind(TextBlock.TextProperty, new Binding(nameof(ShortcutTreeNode.Title))
+                {
                     Mode = BindingMode.TwoWay,
                     Source = node,
                 });
-        
+
                 return textBlock;
             },
             node => node.SubNodes
         );
 
-        treeView.ItemTemplate = factory;       
+        treeView.ItemTemplate = factory;
         vm.ShortcutsTreeView = treeView;
         treeView.SelectionChanged += vm.ShortcutsTreeView_SelectionChanged;
 
@@ -143,7 +159,7 @@ public class ShortcutsWindow : Window
         var checkBoxAlt = UiUtil.MakeCheckBox(vm, nameof(vm.AltIsSelected));
         checkBoxAlt.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(checkBoxAlt);
-        
+
 
         // Shift checkbox and label
         editPanel.Children.Add(UiUtil.MakeTextBlock("Shift").WithMarginRight(3));

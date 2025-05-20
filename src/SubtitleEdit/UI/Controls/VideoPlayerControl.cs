@@ -213,7 +213,7 @@ namespace Nikse.SubtitleEdit.Controls
             progressGrid.Children.Add(positionSlider);
             Grid.SetColumn(positionSlider, 3);
 
-            
+
             _volumeButton = new Button
             {
                 Margin = new Thickness(10, 0, 4, 0),

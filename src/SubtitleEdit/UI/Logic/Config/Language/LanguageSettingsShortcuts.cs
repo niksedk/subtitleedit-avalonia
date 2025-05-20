@@ -2,8 +2,12 @@
 
 public class LanguageSettingsShortcuts
 {
+    public string Title { get; set; }
+    public string SearchShortcuts { get; set; }
+    public string Filter { get; set; }
+
     public string CategoryGeneral { get; set; }
-    public string CategorySubtitleGridAndTextBox{ get; set; }
+    public string CategorySubtitleGridAndTextBox { get; set; }
     public string CategorySubtitleGrid { get; set; }
     public string CategoryWaveform { get; set; }
 
@@ -95,6 +99,10 @@ public class LanguageSettingsShortcuts
 
     public LanguageSettingsShortcuts()
     {
+        Title = "Shortcuts";
+        SearchShortcuts = "Search shortcuts...";
+        Filter = "Filter";
+
         CategoryGeneral = "General";
         CategorySubtitleGridAndTextBox = "Subtitle list view & text box";
         CategorySubtitleGrid = "Subtitle list view";
