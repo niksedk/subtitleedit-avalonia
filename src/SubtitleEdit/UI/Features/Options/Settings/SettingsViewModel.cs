@@ -32,6 +32,8 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private int _minGapMs;
     [ObservableProperty] private int _maxLines;
     [ObservableProperty] private int _unbreakShorterThanMs;
+    [ObservableProperty] private int _newEmptyDefaultMs;
+    [ObservableProperty] private bool _promptDeleteLines;
     
     [ObservableProperty] private ObservableCollection<string> _defaultSubtitleFormats;
     [ObservableProperty] private string _selectedDefaultSubtitleFormat;
@@ -150,6 +152,8 @@ public partial class SettingsViewModel : ObservableObject
         MinGapMs = general.MinimumMillisecondsBetweenLines;
         MaxLines = general.MaxNumberOfLines;
         UnbreakShorterThanMs = general.MergeLinesShorterThan;
+        NewEmptyDefaultMs = general.NewEmptyDefaultMs;
+        PromptDeleteLines = general.PromptDeleteLines;
 
         SelectedTheme = appearance.Theme;
         ShowToolbarNew = appearance.ToolbarShowFileNew;
@@ -187,19 +191,7 @@ public partial class SettingsViewModel : ObservableObject
 
         FfmpegPath = Se.Settings.General.FfmpegPath;
         SetFfmpegStatus();
-    }
-
-    private void SetFfmpegStatus()
-    {
-        if (!string.IsNullOrEmpty(FfmpegPath) && File.Exists(FfmpegPath))
-        {
-            FfmpegStatus = "Installed";
-        }
-        else
-        {
-            FfmpegStatus = "Not installed";
-        }
-    }
+    }   
 
     private void SaveSettings()
     {
@@ -215,6 +207,8 @@ public partial class SettingsViewModel : ObservableObject
         general.MinimumMillisecondsBetweenLines = MinGapMs;
         general.MaxNumberOfLines = MaxLines;
         general.MergeLinesShorterThan = UnbreakShorterThanMs;
+        general.NewEmptyDefaultMs = NewEmptyDefaultMs;
+        general.PromptDeleteLines = PromptDeleteLines;
 
         appearance.Theme = SelectedTheme;
         appearance.ToolbarShowFileNew = ShowToolbarNew;
@@ -248,6 +242,18 @@ public partial class SettingsViewModel : ObservableObject
         general.FfmpegPath = FfmpegPath;
 
         Se.SaveSettings();
+    }
+
+    private void SetFfmpegStatus()
+    {
+        if (!string.IsNullOrEmpty(FfmpegPath) && File.Exists(FfmpegPath))
+        {
+            FfmpegStatus = "Installed";
+        }
+        else
+        {
+            FfmpegStatus = "Not installed";
+        }
     }
 
     public async void ScrollElementIntoView(ScrollViewer scrollViewer, Control target)

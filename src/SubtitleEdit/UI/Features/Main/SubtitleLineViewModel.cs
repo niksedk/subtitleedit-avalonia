@@ -21,15 +21,42 @@ public partial class SubtitleLineViewModel : ObservableObject
     [ObservableProperty]
     private string _text;
 
+    public Paragraph? Paragraph { get; set; }
+    public string Extra { get;  set; }
+    public string Language { get;  set; }
+    public string Region { get;  set; }
+    public string Style { get;  set; }
+    public string Actor { get; set; }
+    public int Layer { get; set; }
+
+
     public SubtitleLineViewModel()
     {
         Text = string.Empty;
+        Extra = string.Empty;
+        Language = string.Empty;
+        Region = string.Empty;
+        Style = string.Empty;
+        Actor = string.Empty;
+        Layer = 0;
     }
     
     public SubtitleLineViewModel(Paragraph newParagraph)
     {
         Text = newParagraph.Text;
+        Extra = newParagraph.Extra;
+        Language = newParagraph.Language;
+        Region = newParagraph.Region;
+        Style = newParagraph.Style;
+        Actor = newParagraph.Actor;
+        Layer = newParagraph.Layer;
+        StartTime = TimeSpan.FromMilliseconds(newParagraph.StartTime.TotalMilliseconds);
+        EndTime = TimeSpan.FromMilliseconds(newParagraph.EndTime.TotalMilliseconds);
+        UpdateDuration();
     }
 
-    public Paragraph? Paragraph { get; set; }
+    internal void UpdateDuration()
+    {
+        Duration = EndTime - StartTime;
+    }
 }

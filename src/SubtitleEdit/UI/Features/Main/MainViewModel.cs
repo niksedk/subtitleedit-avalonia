@@ -97,6 +97,7 @@ public partial class MainViewModel : ObservableObject
     private readonly IFileHelper _fileHelper;
     private readonly IShortcutManager _shortcutManager;
     private readonly IWindowService _windowService;
+    private readonly IInsertService _insertService;
 
     private bool SubtitleGridSelectionChangedSkip = false;
 
@@ -104,11 +105,12 @@ public partial class MainViewModel : ObservableObject
 
     public VideoPlayerControl? VideoPlayerControl { get; internal set; }
 
-    public MainViewModel(IFileHelper fileHelper, IShortcutManager shortcutManager, IWindowService windowService)
+    public MainViewModel(IFileHelper fileHelper, IShortcutManager shortcutManager, IWindowService windowService, IInsertService insertService)
     {
         _fileHelper = fileHelper;
         _shortcutManager = shortcutManager;
         _windowService = windowService;
+        _insertService = insertService;
 
         EditText = string.Empty;
         EditTextCharactersPerSecond = string.Empty;
@@ -209,6 +211,7 @@ public partial class MainViewModel : ObservableObject
         {
             Se.Settings.General.LayoutNumber = InitLayout.MakeLayout(MainView, this, vm.SelectedLayout.Value);
         }
+
         _shortcutManager.ClearKeys();
     }
 
@@ -216,6 +219,7 @@ public partial class MainViewModel : ObservableObject
     private async Task ShowHelp()
     {
         await Window!.Launcher.LaunchUriAsync(new Uri("https://www.nikse.dk/subtitleedit/help"));
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -223,6 +227,7 @@ public partial class MainViewModel : ObservableObject
     {
         var newWindow = new AboutWindow();
         await newWindow.ShowDialog(Window);
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -252,6 +257,7 @@ public partial class MainViewModel : ObservableObject
         _subtitleFileName = string.Empty;
         _subtitle = new Subtitle();
         _changeSubtitleHash = GetFastSubtitleHash();
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -262,12 +268,14 @@ public partial class MainViewModel : ObservableObject
         {
             await SubtitleOpen(fileName);
         }
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task CommandFileReopen(RecentFile recentFile)
     {
         await SubtitleOpen(recentFile.SubtitleFileName, recentFile.VideoFileName, recentFile.SelectedLine);
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -275,20 +283,22 @@ public partial class MainViewModel : ObservableObject
     {
         Se.Settings.File.RecentFiles.Clear();
         InitMenu.UpdateRecentFiles(this);
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task CommandFileSave()
     {
         await SaveSubtitle();
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task CommandFileSaveAs()
     {
         await SaveSubtitleAs();
+        _shortcutManager.ClearKeys();
     }
-
 
     [RelayCommand]
     private async Task ShowToolsAdjustDurations()
@@ -348,12 +358,14 @@ public partial class MainViewModel : ObservableObject
         {
             await VideoOpenFile(fileName);
         }
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private void CommandVideoClose()
     {
         VideoCloseFile();
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -545,14 +557,16 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void DeleteSelectedLines()
+    private async Task DeleteSelectedLines()
     {
-        DeleteSelectedItems();
+        await DeleteSelectedItems();
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private void InsertLineBefore()
     {
+        InsertBeforeSelectedItem();
     }
 
     [RelayCommand]
@@ -562,9 +576,41 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void MergeWithLineBefore()
+    {
+        //InsertAfterSelectedItem();
+    }
+
+    [RelayCommand]
+    private void MergeWithLineAfter()
+    {
+        //InsertAfterSelectedItem();
+    }
+
+    [RelayCommand]
+    private void MergeSelectedLines()
+    {
+        //InsertAfterSelectedItem();
+    }
+
+    [RelayCommand]
+    private void MergeSelectedLinesDialog()
+    {
+        //InsertAfterSelectedItem();
+    }
+
+    [RelayCommand]
     private void ToggleLinesItalic()
     {
         ToggleItalic();
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private void ToggleLinesBold()
+    {
+        ToggleBold();
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -615,6 +661,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task FindNext()
     {
+        _shortcutManager.ClearKeys();
     }
 
 
@@ -673,12 +720,14 @@ public partial class MainViewModel : ObservableObject
     private void SelectAllLines()
     {
         SelectAllRows();
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private void InverseSelection()
     {
         InverseRowSelection();
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -697,6 +746,7 @@ public partial class MainViewModel : ObservableObject
         }
 
         SelectAndScrollToRow(idx);
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -715,6 +765,7 @@ public partial class MainViewModel : ObservableObject
         }
 
         SelectAndScrollToRow(idx);
+        _shortcutManager.ClearKeys();
     }
 
     private Control? _fullscreenBeforeParent;
@@ -742,6 +793,7 @@ public partial class MainViewModel : ObservableObject
             control.IsFullScreen = false;
         });
         fullscreenWindow.Show(Window);
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -754,6 +806,7 @@ public partial class MainViewModel : ObservableObject
         }
 
         s.Text = Utilities.UnbreakLine(s.Text);
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -766,6 +819,7 @@ public partial class MainViewModel : ObservableObject
         }
 
         s.Text = Utilities.AutoBreakLine(s.Text);
+        _shortcutManager.ClearKeys();
     }
 
     private async Task<bool> RequireFfmpegOk()
@@ -1185,34 +1239,64 @@ public partial class MainViewModel : ObservableObject
                     hash = hash * 23 + line.GetHashCode();
                 }
 
-                //if (p.P.Style != null)
-                //{
-                //    hash = hash * 23 + p.P.Style.GetHashCode();
-                //}
-                //if (p.P.Extra != null)
-                //{
-                //    hash = hash * 23 + p.P.Extra.GetHashCode();
-                //}
-                //if (p.P.Actor != null)
-                //{
-                //    hash = hash * 23 + p.P.Actor.GetHashCode();
-                //}
-                //hash = hash * 23 + p.P.Layer.GetHashCode();
+                if (p.Style != null)
+                {
+                    hash = hash * 23 + p.Style.GetHashCode();
+                }
+                if (p.Extra != null)
+                {
+                    hash = hash * 23 + p.Extra.GetHashCode();
+                }
+                if (p.Actor != null)
+                {
+                    hash = hash * 23 + p.Actor.GetHashCode();
+                }
+                hash = hash * 23 + p.Layer.GetHashCode();
             }
 
             return hash;
         }
     }
 
-    public void DeleteSelectedItems()
+    public async Task DeleteSelectedItems()
     {
         var selectedItems = _selectedSubtitles?.ToList() ?? new List<SubtitleLineViewModel>();
-        if (selectedItems != null && selectedItems.Any())
+        if (selectedItems == null || !selectedItems.Any())
         {
-            foreach (var item in selectedItems)
+            return;
+        }
+
+        if (Se.Settings.General.PromptDeleteLines)
+        {
+            var answer = await MessageBox.Show(
+                Window!,
+                "Delete lines?",
+                $"Do you want to delete {selectedItems.Count} lines?",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question);
+
+            if (answer != MessageBoxResult.Yes)
             {
-                Subtitles.Remove(item);
+                return;
             }
+
+            _shortcutManager.ClearKeys();
+        }
+
+        foreach (var item in selectedItems)
+        {
+            Subtitles.Remove(item);
+        }
+    }
+
+    public void InsertBeforeSelectedItem()
+    {
+        var selectedItem = SelectedSubtitle;
+        if (selectedItem != null)
+        {
+            var index = Subtitles.IndexOf(selectedItem);
+            _insertService.InsertBefore(SelectedSubtitleFormat, _subtitle, Subtitles, index, string.Empty);
+            SelectAndScrollToRow(index);
         }
     }
 
@@ -1222,14 +1306,8 @@ public partial class MainViewModel : ObservableObject
         if (selectedItem != null)
         {
             var index = Subtitles.IndexOf(selectedItem);
-            var newItem = new SubtitleLineViewModel(); // Initialize with appropriate values
-
-            if (index >= 0)
-            {
-                Subtitles.Insert(index + 1, newItem);
-                SelectedSubtitle = newItem;
-                //TODO: SubtitleGrid.SelectedItem = newItem;
-            }
+            _insertService.InsertAfter(SelectedSubtitleFormat, _subtitle, Subtitles, index, string.Empty);
+            SelectAndScrollToRow(index + 1);
         }
     }
 
@@ -1243,6 +1321,20 @@ public partial class MainViewModel : ObservableObject
                 item.Text = item.Text.Contains("<i>")
                     ? item.Text.Replace("<i>", "").Replace("</i>", "")
                     : $"<i>{item.Text}</i>";
+            }
+        }
+    }
+
+    public void ToggleBold()
+    {
+        var selectedItems = _selectedSubtitles?.ToList() ?? new List<SubtitleLineViewModel>();
+        if (selectedItems != null && selectedItems.Any())
+        {
+            foreach (var item in selectedItems)
+            {
+                item.Text = item.Text.Contains("<b>")
+                    ? item.Text.Replace("<b>", "").Replace("</b>", "")
+                    : $"<b>{item.Text}</b>";
             }
         }
     }

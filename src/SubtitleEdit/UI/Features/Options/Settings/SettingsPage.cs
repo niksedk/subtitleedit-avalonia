@@ -130,7 +130,9 @@ public class SettingsPage : UserControl
                 MakeNumericSetting("Max duration (ms)", nameof(_vm.MaxDurationMs)),
                 MakeNumericSetting("Min gap (ms)", nameof(_vm.MinGapMs)),
                 MakeNumericSetting("Max number of lines", nameof(_vm.MaxLines)),
-                MakeNumericSetting("Unbreak subtitles shorter than (ms)", nameof(_vm.UnbreakShorterThanMs)),
+                MakeSeparator(),
+                MakeNumericSetting("Default new subtitle duration (ms)", nameof(_vm.NewEmptyDefaultMs)),
+                MakeCheckboxSetting("Prompt for delete lines", nameof(_vm.PromptDeleteLines)),
             ]),
 
             new SettingsSection("Subtitle formats",

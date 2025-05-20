@@ -24,59 +24,15 @@ public static class InitListViewAndEditBox
             RowDefinitions = new RowDefinitions("*,Auto") // First row fills, second is auto-sized
         };
 
-
-        var subtitleContextMenu = new MenuFlyout
-        {
-            Items =
-            {
-                new MenuItem
-                {
-                    Header = "Delete",
-                    Command = vm.DeleteSelectedLinesCommand,
-                },
-                new MenuItem
-                {
-                    Header = "Insert after",
-                    Command = vm.InsertLineAfterCommand,
-                },
-                new MenuItem
-                {
-                    Header = "Toggle italic",
-                    Command = vm.ToggleLinesItalicCommand,
-                },
-            },
-        };
-
         vm.SubtitleGrid = new DataGrid
         {
             Height = double.NaN, // auto size inside scroll viewer
             Margin = new Thickness(2),
             ItemsSource = vm.Subtitles, // Use ItemsSource instead of Items
             CanUserSortColumns = false,
-            //   ContextFlyout = subtitleContextMenu, // Create new ContextMenu
             IsReadOnly = true,
             SelectionMode = DataGridSelectionMode.Extended,
         };
-
-
-        // cellTheme.Setters.Add(new Setter(DataGridCell.HorizontalAlignmentProperty, VerticalAlignment.Stretch));
-        //cellTheme.Setters.Add(new Setter(Control.MarginProperty, new Thickness(2)));
-        //vm.SubtitleGrid.CellTheme = cellTheme;
-
-        // Create a theme for DataGridCell + Apply the cell theme to the DataGrid (hide cell selection rectangle)
-        //var cellTheme = new ControlTheme(typeof(DataGridCell));
-        //cellTheme.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(0)));
-        //      cellTheme.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.Transparent));
-        //cellTheme.Setters.Add(new Setter(InputElement.FocusableProperty, false));
-//        vm.SubtitleGrid.CellTheme = cellTheme;
-
-
-        //     var cellTheme = vm.SubtitleGrid.CellTheme; // new ControlTheme(typeof(DataGridCell));
-        //      cellTheme.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.Tomato));
-        //cellTheme.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(0)));
-        // cellTheme.Setters.Add(new Setter(InputElement.FocusableProperty, false));
-        //        vm.SubtitleGrid.CellTheme = cellTheme;
-
 
         var fullTimeConverter = new TimeSpanToDisplayFullConverter();
         var shortTimeConverter = new TimeSpanToDisplayShortConverter();
@@ -134,14 +90,6 @@ public static class InitListViewAndEditBox
         };
 
 
-        //if (vm.SubtitlesSource is FlatTreeDataGridSource<SubtitleLineViewModel> source)
-        //{
-        //    source.RowSelection!.SelectionChanged += (sender, e) =>
-        //    {
-        //        vm.SubtitleGrid_SelectionChanged(source.RowSelection.SelectedItems);
-        //    };
-        //}
-
         Grid.SetRow(vm.SubtitleGrid, 0);
         mainGrid.Children.Add(vm.SubtitleGrid);
 
@@ -152,18 +100,40 @@ public static class InitListViewAndEditBox
 
         // Add menu items with commands
         var deleteMenuItem = new MenuItem { Header = "Delete" };
-        deleteMenuItem.Click += (s, e) => vm.DeleteSelectedItems();
+        deleteMenuItem.Command = vm.DeleteSelectedLinesCommand;
+        flyout.Items.Add(deleteMenuItem);
+
+        var insertBeforeMenuItem = new MenuItem { Header = "Insert before" };
+        insertBeforeMenuItem.Command = vm.InsertLineBeforeCommand;
+        flyout.Items.Add(insertBeforeMenuItem);
 
         var insertAfterMenuItem = new MenuItem { Header = "Insert after" };
-        insertAfterMenuItem.Click += (s, e) => vm.InsertAfterSelectedItem();
+        insertAfterMenuItem.Command = vm.InsertLineAfterCommand;
+        flyout.Items.Add(insertAfterMenuItem);
+
+        var mergePreviousMenuItem = new MenuItem { Header = "Merge with line before" };
+        mergePreviousMenuItem.Command = vm.MergeWithLineBeforeCommand;
+        flyout.Items.Add(mergePreviousMenuItem);
+
+        var mergeNextMenuItem = new MenuItem { Header = "Merge with line after" };
+        mergeNextMenuItem.Command = vm.MergeWithLineAfterCommand;
+        flyout.Items.Add(mergeNextMenuItem);
+
+        var mergeSelecedMenuItem = new MenuItem { Header = "Merge selected lines" };
+        mergeSelecedMenuItem.Command = vm.MergeSelectedLinesCommand;
+        flyout.Items.Add(mergeSelecedMenuItem);
+
+        var mergeSelecedAsDialogMenuItem = new MenuItem { Header = "Merge selected lines as dialog" };
+        mergeSelecedAsDialogMenuItem.Command = vm.MergeSelectedLinesDialogCommand;
+        flyout.Items.Add(mergeSelecedAsDialogMenuItem);
 
         var italicMenuItem = new MenuItem { Header = "Italic" };
-        italicMenuItem.Click += (s, e) => vm.ToggleItalic();
-
-        // Add items to flyout menu
-        flyout.Items.Add(deleteMenuItem);
-        flyout.Items.Add(insertAfterMenuItem);
+        italicMenuItem.Command = vm.ToggleLinesItalicCommand;
         flyout.Items.Add(italicMenuItem);
+
+        var boldMenuItem = new MenuItem { Header = "Bold" };
+        boldMenuItem.Command = vm.ToggleLinesBoldCommand;
+        flyout.Items.Add(boldMenuItem);
 
         // Set the ContextFlyout property
         vm.SubtitleGrid.ContextFlyout = flyout;
@@ -336,7 +306,7 @@ public static class InitListViewAndEditBox
                 Mode = BindingMode.TwoWay
             },
             FontSize = Se.Settings.Appearance.SubtitleTextBoxFontSize,
-            FontWeight = Se.Settings.Appearance.SubtitleTextBoxFontBold ?  FontWeight.Bold : FontWeight.Normal,
+            FontWeight = Se.Settings.Appearance.SubtitleTextBoxFontBold ? FontWeight.Bold : FontWeight.Normal,
         };
         textEditGrid.Children.Add(textBox);
         textBox.TextChanged += vm.SubtitleTextChanged;

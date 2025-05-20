@@ -39,11 +39,6 @@ public class ShortcutManager : IShortcutManager
         var hashCode = ShortCut.CalculateHash(keys, control);
         var inputWithNormalizedModifiers = CalculateNormalizedHash(keys, control);
 
-        if (_activeKeys.Count < 2)
-        {
-            return null; //TODO: remove
-        }
-
         foreach (var shortcut in _shortcuts)
         {
             if (hashCode == shortcut.HashCode || 
