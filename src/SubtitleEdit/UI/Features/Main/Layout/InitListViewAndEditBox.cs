@@ -111,6 +111,8 @@ public static class InitListViewAndEditBox
         insertAfterMenuItem.Command = vm.InsertLineAfterCommand;
         flyout.Items.Add(insertAfterMenuItem);
 
+        flyout.Items.Add(new Separator());
+
         var mergePreviousMenuItem = new MenuItem { Header = "Merge with line before" };
         mergePreviousMenuItem.Command = vm.MergeWithLineBeforeCommand;
         flyout.Items.Add(mergePreviousMenuItem);
@@ -126,6 +128,8 @@ public static class InitListViewAndEditBox
         var mergeSelecedAsDialogMenuItem = new MenuItem { Header = "Merge selected lines as dialog" };
         mergeSelecedAsDialogMenuItem.Command = vm.MergeSelectedLinesDialogCommand;
         flyout.Items.Add(mergeSelecedAsDialogMenuItem);
+
+        flyout.Items.Add(new Separator());
 
         var italicMenuItem = new MenuItem { Header = "Italic" };
         italicMenuItem.Command = vm.ToggleLinesItalicCommand;

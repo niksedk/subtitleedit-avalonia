@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Input;
 using Avalonia.Styling;
 using Avalonia.Threading;
@@ -40,10 +39,10 @@ using Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
-using Nikse.SubtitleEdit.Logic.ValueConverters;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -74,12 +73,9 @@ public partial class MainViewModel : ObservableObject
 
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
-    public MainView View { get; set; }
     public Window Window { get; set; }
     public Grid ContentGrid { get; set; }
     public MainView MainView { get; set; }
-
-    public ITreeDataGridSource? SubtitlesSource { get; set; }
     public TextBlock StatusTextLeftLabel { get; internal set; }
 
 
@@ -98,19 +94,20 @@ public partial class MainViewModel : ObservableObject
     private readonly IShortcutManager _shortcutManager;
     private readonly IWindowService _windowService;
     private readonly IInsertService _insertService;
-
+    private readonly IMergeManager _mergeManager;
     private bool SubtitleGridSelectionChangedSkip = false;
 
     private bool IsEmpty => Subtitles.Count == 0 || string.IsNullOrEmpty(Subtitles[0].Text);
 
     public VideoPlayerControl? VideoPlayerControl { get; internal set; }
 
-    public MainViewModel(IFileHelper fileHelper, IShortcutManager shortcutManager, IWindowService windowService, IInsertService insertService)
+    public MainViewModel(IFileHelper fileHelper, IShortcutManager shortcutManager, IWindowService windowService, IInsertService insertService, IMergeManager mergeManager)
     {
         _fileHelper = fileHelper;
         _shortcutManager = shortcutManager;
         _windowService = windowService;
         _insertService = insertService;
+        _mergeManager = mergeManager;
 
         EditText = string.Empty;
         EditTextCharactersPerSecond = string.Empty;
@@ -120,48 +117,16 @@ public partial class MainViewModel : ObservableObject
         SubtitleGrid = new DataGrid();
         EditTextBox = new TextBox();
         ContentGrid = new Grid();
-
-
         _subtitle = new Subtitle();
-
         Subtitles = new ObservableCollection<SubtitleLineViewModel>();
-
         SubtitleFormats = [.. SubtitleFormat.AllSubtitleFormats];
         SelectedSubtitleFormat = SubtitleFormats[0];
-
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         SelectedEncoding = Encodings[0];
-
         StatusTextLeft = string.Empty;
         StatusTextRight = string.Empty;
 
-        SubtitlesSource = new FlatTreeDataGridSource<SubtitleLineViewModel>(Subtitles)
-        {
-            Columns =
-            {
-                new TextColumn<SubtitleLineViewModel, int>("#", x => x.Number),
-                new TextColumn<SubtitleLineViewModel, string>("Show", x =>
-                        TimeSpanFormatter.ToStringHms(x.StartTime),
-                    (x, val) => x.StartTime = TimeSpanFormatter.FromStringHms(val)
-                ),
-                new TextColumn<SubtitleLineViewModel, string>("Hide", x =>
-                        TimeSpanFormatter.ToStringHms(x.EndTime),
-                    (x, val) => x.StartTime = TimeSpanFormatter.FromStringHms(val)
-                ),
-                new TextColumn<SubtitleLineViewModel, string>("Duration", x =>
-                        TimeSpanFormatterShort.ToStringShort(x.Duration),
-                    (x, val) => x.Duration = TimeSpanFormatterShort.FromStringShort(val)
-                ),
-                new TextColumn<SubtitleLineViewModel, string>("Text", x => x.Text, null,
-                    new GridLength(1, GridUnitType.Star)),
-            },
-        };
-
-        var dataGridSource = SubtitlesSource as FlatTreeDataGridSource<SubtitleLineViewModel>;
-        dataGridSource!.RowSelection!.SingleSelect = false;
-
         LoadShortcuts();
-
         StartTitleTimer();
     }
 
@@ -578,25 +543,25 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void MergeWithLineBefore()
     {
-        //InsertAfterSelectedItem();
+        MergeLineBefore();
     }
 
     [RelayCommand]
     private void MergeWithLineAfter()
     {
-        //InsertAfterSelectedItem();
+        MergeLineAfter();
     }
 
     [RelayCommand]
     private void MergeSelectedLines()
     {
-        //InsertAfterSelectedItem();
+        MergeLinesSelected();
     }
 
     [RelayCommand]
     private void MergeSelectedLinesDialog()
     {
-        //InsertAfterSelectedItem();
+        MergeLinesSelectedAsDialog();
     }
 
     [RelayCommand]
@@ -1182,10 +1147,12 @@ public partial class MainViewModel : ObservableObject
                 var process = WaveFileExtractor.GetCommandLineProcess(videoFileName, -1, tempWaveFileName,
                     Configuration.Settings.General.VlcWaveTranscodeSettings, out _);
                 ShowStatus("Extracting wave info...");
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 Task.Run(async () =>
                 {
-                    //await ExtractWaveformAndSpectrogram(process, tempWaveFileName, peakWaveFileName);
+                    await ExtractWaveformAndSpectrogram(process, tempWaveFileName, peakWaveFileName);
                 });
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
         }
         else
@@ -1201,6 +1168,45 @@ public partial class MainViewModel : ObservableObject
         //{
         //    _timer.Start();
         //}
+    }
+
+    private async Task ExtractWaveformAndSpectrogram(Process process, string tempWaveFileName, string peakWaveFileName)
+    {
+#pragma warning disable CA1416 // Validate platform compatibility
+        process.Start();
+#pragma warning restore CA1416 // Validate platform compatibility
+
+        var token = new CancellationTokenSource().Token;
+        while (!process.HasExited)
+        {
+            await Task.Delay(100, token);
+        }
+
+        if (process.ExitCode != 0)
+        {
+            ShowStatus("Failed to extract wave info.");
+            return;
+        }
+
+        if (File.Exists(tempWaveFileName))
+        {
+            using var waveFile = new WavePeakGenerator(tempWaveFileName);
+            waveFile.GeneratePeaks(0, peakWaveFileName);
+
+            var wavePeaks = WavePeakData.FromDisk(peakWaveFileName);
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                //_audioVisualizer.WavePeaks = wavePeaks;
+
+                //if (!_stopping)
+                //{
+                //    _timer.Start();
+                //    _audioVisualizer.InvalidateSurface();
+                //    ShowStatus("Wave info loaded.");
+                //}
+            }, DispatcherPriority.Background);
+        }
     }
 
     private void VideoCloseFile()
@@ -1308,6 +1314,50 @@ public partial class MainViewModel : ObservableObject
             var index = Subtitles.IndexOf(selectedItem);
             _insertService.InsertAfter(SelectedSubtitleFormat, _subtitle, Subtitles, index, string.Empty);
             SelectAndScrollToRow(index + 1);
+        }
+    }
+
+    public void MergeLineBefore()
+    {
+        var selectedItem = SelectedSubtitle;
+        if (selectedItem != null)
+        {
+            var index = Subtitles.IndexOf(selectedItem);
+            //            _mergeManager.MergeSelectedLines();
+            SelectAndScrollToRow(index - 1);
+        }
+    }
+
+    public void MergeLineAfter()
+    {
+        var selectedItem = SelectedSubtitle;
+        if (selectedItem != null)
+        {
+            var index = Subtitles.IndexOf(selectedItem);
+            //            _mergeManager.MergeSelectedLines();
+            SelectAndScrollToRow(index - 1);
+        }
+    }
+
+    public void MergeLinesSelected()
+    {
+        var selectedItem = SelectedSubtitle;
+        if (selectedItem != null)
+        {
+            var index = Subtitles.IndexOf(selectedItem);
+            //            _mergeManager.MergeSelectedLines();
+            SelectAndScrollToRow(index - 1);
+        }
+    }
+
+    public void MergeLinesSelectedAsDialog()
+    {
+        var selectedItem = SelectedSubtitle;
+        if (selectedItem != null)
+        {
+            var index = Subtitles.IndexOf(selectedItem);
+            //            _mergeManager.MergeSelectedLines();
+            SelectAndScrollToRow(index - 1);
         }
     }
 

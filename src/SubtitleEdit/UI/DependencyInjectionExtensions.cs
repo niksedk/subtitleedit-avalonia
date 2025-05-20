@@ -45,6 +45,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<IZipUnpacker, ZipUnpacker>();
         collection.AddTransient<INamesList, SeNamesList>();
         collection.AddTransient<IInsertService, InsertService>();
+        collection.AddTransient<IMergeManager, MergeManager>();
 
         // Download services
         collection.AddHttpClient<IFfmpegDownloadService, FfmpegDownloadService>();
