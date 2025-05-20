@@ -21,6 +21,7 @@ public partial class ShortcutsViewModel : ObservableObject
     [ObservableProperty] private string? _selectedShortcut;
     [ObservableProperty] private ObservableCollection<string> _filters;
     [ObservableProperty] private string _selectedFilter;
+    [ObservableProperty] private string _searchText;
     [ObservableProperty] private bool _isControlsEnabled;
     [ObservableProperty] private bool _ctrlIsSelected;
     [ObservableProperty] private bool _altIsSelected;
@@ -40,9 +41,9 @@ public partial class ShortcutsViewModel : ObservableObject
         Shortcuts = new ObservableCollection<string>(GetShortcutKeys());
         Filters = new ObservableCollection<string>
         {
-            "All",
-            "Assigned",
-            "Unassigned",
+            Se.Language.General.All,
+            Se.Language.Settings.Shortcuts.Assigned,
+            Se.Language.Settings.Shortcuts.Unassigned,
         };
         SelectedFilter = _filters[0];
         Nodes = new ObservableCollection<ShortcutTreeNode>();
@@ -208,6 +209,14 @@ public partial class ShortcutsViewModel : ObservableObject
 
     private bool Search(string searchText, ShortCut p)
     {
+        var filterOk = SelectedFilter == Se.Language.General.All ||
+                       SelectedFilter == Se.Language.Settings.Shortcuts.Unassigned && p.Keys.Count == 0 ||
+                       SelectedFilter == Se.Language.Settings.Shortcuts.Assigned && p.Keys.Count > 0;
+        if (!filterOk)
+        {
+            return false;
+        }
+
         if (string.IsNullOrEmpty(searchText))
         {
             return true;
@@ -315,5 +324,10 @@ public partial class ShortcutsViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+    }
+
+    internal void ComboBoxFilter_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        UpdateVisibleShortcuts(SearchText);
     }
 }

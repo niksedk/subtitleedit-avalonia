@@ -7,6 +7,7 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Projektanker.Icons.Avalonia;
 using Nikse.SubtitleEdit.Logic.Config;
+using Avalonia.Markup.Declarative;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
@@ -38,11 +39,13 @@ public class ShortcutsWindow : Window
             Width = double.NaN,
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
         };
+        _searchBox.Bind(TextBox.TextProperty, new Binding(nameof(vm.SearchText)) { Source = vm });
 
         var labelFilter = UiUtil.MakeTextBlock(language.Filter);
         var comboBoxFilter = UiUtil.MakeComboBox(vm.Filters, vm, nameof(vm.SelectedFilter))
             .WithMinwidth(120)
             .WithMargin(5, 0, 10, 0);
+        comboBoxFilter.SelectionChanged += vm.ComboBoxFilter_SelectionChanged;
 
         var buttonExpand = new Button
         {

@@ -96,6 +96,8 @@ public class LanguageSettingsShortcuts
     public string AutoTranslate { get; set; }
 
     public string Settings { get; set; }
+    public string Assigned { get; internal set; }
+    public string Unassigned { get; internal set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -191,5 +193,8 @@ public class LanguageSettingsShortcuts
         AutoTranslate = "Auto-translate";
 
         Settings = "Settings";
+
+        Assigned = "Assigned";
+        Unassigned = "Unassigned";
     }
 }
