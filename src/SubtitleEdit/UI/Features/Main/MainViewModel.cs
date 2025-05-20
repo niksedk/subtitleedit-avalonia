@@ -244,11 +244,12 @@ public partial class MainViewModel : ObservableObject
 
             if (result == MessageBoxResult.Yes)
             {
-                // Save logic here
+                await SaveSubtitle();
             }
         }
 
         Subtitles.Clear();
+        _subtitleFileName = string.Empty;
         _subtitle = new Subtitle();
         _changeSubtitleHash = GetFastSubtitleHash();
     }
