@@ -1,18 +1,62 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Logic;
 
-public class AutoBackup : IAutoBackup
+public interface IAutoBackupService
 {
+    void StartAutoBackup(MainViewModel mainViewModel);
+    void StopAutobackup();
+    public List<string> GetAutoBackupFiles();
+}
+
+public class AutoBackupService : IAutoBackupService
+{
+    private MainViewModel? _mainViewModel;
+    private System.Timers.Timer? _timerAutoBackup;
     private static readonly Regex RegexFileNamePattern = new Regex(@"^\d\d\d\d-\d\d-\d\d_\d\d-\d\d-\d\d", RegexOptions.Compiled);
 
-    public bool SaveAutoBackup(Subtitle subtitle, SubtitleFormat saveFormat)
+    public AutoBackupService()
+    {
+        
+    }
+
+    public void StartAutoBackup(MainViewModel mainViewModel)
+    {
+        _mainViewModel = mainViewModel;
+        
+        if (!Se.Settings.General.AutoBackupOn)
+        {
+            return;
+        }
+        
+        var minutes = Se.Settings.General.AutoBackupIntervalMinutes;
+        if (minutes < 1)
+        {
+            minutes = 1;
+        }
+        _timerAutoBackup = new System.Timers.Timer(TimeSpan.FromMinutes(minutes));
+        _timerAutoBackup.Elapsed += (sender, args) =>
+        {
+            var saveFormat = _mainViewModel.SelectedSubtitleFormat;
+            var subtitle =  _mainViewModel.GetUpdateSubtitle(); 
+            SaveAutoBackup(subtitle, saveFormat);   
+        };
+        _timerAutoBackup.Start();
+    }
+
+    public void StopAutobackup()
+    {
+        _timerAutoBackup?.Stop();
+    }
+
+    private bool SaveAutoBackup(Subtitle subtitle, SubtitleFormat saveFormat)
     {
         if (subtitle.Paragraphs.Count == 0)
         {
@@ -70,10 +114,4 @@ public class AutoBackup : IAutoBackup
 
         return result;
     }
-}
-
-public interface IAutoBackup
-{
-    bool SaveAutoBackup(Subtitle subtitle, SubtitleFormat saveFormat);
-    List<string> GetAutoBackupFiles();
 }

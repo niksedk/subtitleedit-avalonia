@@ -133,6 +133,10 @@ public class SettingsPage : UserControl
                 MakeSeparator(),
                 MakeNumericSetting("Default new subtitle duration (ms)", nameof(_vm.NewEmptyDefaultMs)),
                 MakeCheckboxSetting("Prompt for delete lines", nameof(_vm.PromptDeleteLines)),
+                MakeSeparator(),
+                MakeCheckboxSetting("Auto-backup", nameof(_vm.AutoBackupOn)),
+                MakeNumericSetting("Auto-backup interval (minutes)", nameof(_vm.AutoBackupIntervalMinutes)),
+                MakeNumericSetting("Auto-backup retention (months)", nameof(_vm.AutoBackupDeleteAfterMonths)),
             ]),
 
             new SettingsSection("Subtitle formats",

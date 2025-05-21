@@ -30,7 +30,9 @@ public class SeGeneral
     public double SubtitleMaximumWordsPerMinute { get; set; }
     public int NewEmptyDefaultMs { get; set; }
     public bool PromptDeleteLines { get; set; }
-
+    public bool AutoBackupOn { get; set; }
+    public int AutoBackupIntervalMinutes { get; set; }
+    public int AutoBackupDeleteAfterMonths { get; set; }
 
     public bool ColorDurationTooShort { get; set; }
     public bool ColorDurationTooLong { get; set; }
@@ -65,6 +67,9 @@ public class SeGeneral
         SubtitleMaximumWordsPerMinute = 400;
         NewEmptyDefaultMs = 2000;
         PromptDeleteLines = true;
+        AutoBackupOn = true;
+        AutoBackupIntervalMinutes = 5;
+        AutoBackupDeleteAfterMonths = 3;
         DefaultSaveAsFormat = "SubRip";
         FavoriteSubtitleFormats = "SubRip";
         CpsLineLengthStrategy = "";//TODO: Add default value

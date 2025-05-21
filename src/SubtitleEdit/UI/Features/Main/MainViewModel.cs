@@ -47,6 +47,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
+using RestoreAutoBackupViewModel = Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup.RestoreAutoBackupViewModel;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -77,37 +79,42 @@ public partial class MainViewModel : ObservableObject
     public Grid ContentGrid { get; set; }
     public MainView MainView { get; set; }
     public TextBlock StatusTextLeftLabel { get; internal set; }
-
-
     public Grid Waveform { get; internal set; }
     public MenuItem MenuReopen { get; internal set; }
 
     private string? _subtitleFileName;
     private Subtitle _subtitle;
     private SubtitleFormat? _lastOpenSaveFormat;
-
     private string? _videoFileName;
     private CancellationTokenSource? _statusFadeCts;
     private int _changeSubtitleHash = -1;
+    private bool _subtitleGridSelectionChangedSkip;
 
     private readonly IFileHelper _fileHelper;
     private readonly IShortcutManager _shortcutManager;
     private readonly IWindowService _windowService;
     private readonly IInsertService _insertService;
     private readonly IMergeManager _mergeManager;
-    private bool SubtitleGridSelectionChangedSkip = false;
+    private readonly IAutoBackupService _autoBackupService;
 
     private bool IsEmpty => Subtitles.Count == 0 || string.IsNullOrEmpty(Subtitles[0].Text);
 
     public VideoPlayerControl? VideoPlayerControl { get; internal set; }
 
-    public MainViewModel(IFileHelper fileHelper, IShortcutManager shortcutManager, IWindowService windowService, IInsertService insertService, IMergeManager mergeManager)
+    public MainViewModel(
+        IFileHelper fileHelper,
+        IShortcutManager shortcutManager,
+        IWindowService windowService,
+        IInsertService insertService,
+        IMergeManager mergeManager,
+        IAutoBackupService autoBackupService)
     {
         _fileHelper = fileHelper;
         _shortcutManager = shortcutManager;
         _windowService = windowService;
         _insertService = insertService;
         _mergeManager = mergeManager;
+        _autoBackupService = autoBackupService;
 
         EditText = string.Empty;
         EditTextCharactersPerSecond = string.Empty;
@@ -128,6 +135,7 @@ public partial class MainViewModel : ObservableObject
 
         LoadShortcuts();
         StartTitleTimer();
+        _autoBackupService.StartAutoBackup(this);
     }
 
     private void LoadShortcuts()
@@ -233,6 +241,7 @@ public partial class MainViewModel : ObservableObject
         {
             await SubtitleOpen(fileName);
         }
+
         _shortcutManager.ClearKeys();
     }
 
@@ -268,50 +277,36 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowToolsAdjustDurations()
     {
-        await _windowService.ShowDialogAsync<AdjustDurationWindow, AdjustDurationViewModel>(Window, vm =>
-        {
-
-        });
+        await _windowService.ShowDialogAsync<AdjustDurationWindow, AdjustDurationViewModel>(Window, vm => { });
         _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task ShowToolsBatchConvert()
     {
-        await _windowService.ShowDialogAsync<BatchConvertWindow, BatchConvertViewModel>(Window, vm =>
-        {
-
-        });
+        await _windowService.ShowDialogAsync<BatchConvertWindow, BatchConvertViewModel>(Window, vm => { });
         _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task ShowToolsChangeCasing()
     {
-        await _windowService.ShowDialogAsync<ChangeCasingWindow, ChangeCasingViewModel>(Window, vm =>
-        {
-
-        });
+        await _windowService.ShowDialogAsync<ChangeCasingWindow, ChangeCasingViewModel>(Window, vm => { });
         _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task ShowToolsFixCommonErrors()
     {
-        await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window, vm =>
-        {
-
-        });
+        await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window, vm => { });
         _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task ShowToolsRemoveTextForHearingImpaired()
     {
-        await _windowService.ShowDialogAsync<RemoveTextForHearingImpairedWindow, RemoveTextForHearingImpairedViewModel>(Window, vm =>
-        {
-
-        });
+        await _windowService.ShowDialogAsync<RemoveTextForHearingImpairedWindow, RemoveTextForHearingImpairedViewModel>(
+            Window, vm => { });
         _shortcutManager.ClearKeys();
     }
 
@@ -323,6 +318,7 @@ public partial class MainViewModel : ObservableObject
         {
             await VideoOpenFile(fileName);
         }
+
         _shortcutManager.ClearKeys();
     }
 
@@ -336,10 +332,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowSpellCheck()
     {
-        await _windowService.ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(Window, vm =>
-        {
-
-        });
+        await _windowService.ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(Window, vm => { });
         _shortcutManager.ClearKeys();
     }
 
@@ -347,10 +340,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowSpellCheckDictionaries()
     {
-        await _windowService.ShowDialogAsync<GetDictionariesWindow, GetDictionariesViewModel>(Window, vm =>
-        {
-
-        });
+        await _windowService.ShowDialogAsync<GetDictionariesWindow, GetDictionariesViewModel>(Window, vm => { });
         _shortcutManager.ClearKeys();
     }
 
@@ -372,10 +362,8 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        var vm = await _windowService.ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(Window, viewModel =>
-        {
-            viewModel.Initialize(_videoFileName);
-        });
+        var vm = await _windowService.ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(Window,
+            viewModel => { viewModel.Initialize(_videoFileName); });
 
         if (vm.OkPressed)
         {
@@ -391,70 +379,50 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowVideoBurnIn()
     {
-        await _windowService.ShowDialogAsync<BurnInWindow, BurnInViewModel>(Window, vm =>
-        {
-
-        });
+        await _windowService.ShowDialogAsync<BurnInWindow, BurnInViewModel>(Window, vm => { });
         _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task ShowVideoOpenFromUrl()
     {
-        await _windowService.ShowDialogAsync<OpenFromUrlWindow, OpenFromUrlViewModel>(Window, vm =>
-        {
-
-        });
+        await _windowService.ShowDialogAsync<OpenFromUrlWindow, OpenFromUrlViewModel>(Window, vm => { });
         _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task ShowVideoTextToSpeech()
     {
-        await _windowService.ShowDialogAsync<TextToSpeechWindow, TextToSpeechViewModel>(Window, vm =>
-        {
-
-        });
+        await _windowService.ShowDialogAsync<TextToSpeechWindow, TextToSpeechViewModel>(Window, vm => { });
         _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task ShowVideoTransparentSubtitles()
     {
-        await _windowService.ShowDialogAsync<TransparentSubtitlesWindow, TransparentSubtitlesViewModel>(Window, vm =>
-        {
-
-        });
+        await _windowService.ShowDialogAsync<TransparentSubtitlesWindow, TransparentSubtitlesViewModel>(Window,
+            vm => { });
         _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task ShowSyncAdjustAllTimes()
     {
-        await _windowService.ShowDialogAsync<AdjustAllTimesWindow, AdjustAllTimesViewModel>(Window, vm =>
-        {
-
-        });
+        await _windowService.ShowDialogAsync<AdjustAllTimesWindow, AdjustAllTimesViewModel>(Window, vm => { });
         _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task ShowSyncChangeFrameRate()
     {
-        await _windowService.ShowDialogAsync<ChangeFrameRateWindow, ChangeFrameRateViewModel>(Window, vm =>
-        {
-
-        });
+        await _windowService.ShowDialogAsync<ChangeFrameRateWindow, ChangeFrameRateViewModel>(Window, vm => { });
         _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task ShowSyncChangeSpeed()
     {
-        await _windowService.ShowDialogAsync<ChangeSpeedWindow, ChangeSpeedViewModel>(Window, vm =>
-        {
-
-        });
+        await _windowService.ShowDialogAsync<ChangeSpeedWindow, ChangeSpeedViewModel>(Window, vm => { });
         _shortcutManager.ClearKeys();
     }
 
@@ -581,14 +549,13 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowRestoreAutoBackup()
     {
-        if (Subtitles.Count == 0)
-        {
-            return;
-        }
+        var viewModel = await _windowService
+            .ShowDialogAsync<RestoreAutoBackupWindow, RestoreAutoBackupViewModel>(Window);
 
-        var viewModel = await _windowService.ShowDialogAsync<RestoreAutoBackupWindow, RestoreAutoBackupViewModel>(Window, vm =>
+        if (viewModel.OkPressed && !string.IsNullOrEmpty(viewModel.RestoreFileName))
         {
-        });
+            await SubtitleOpen(viewModel.RestoreFileName);
+        }
 
         _shortcutManager.ClearKeys();
     }
@@ -601,9 +568,8 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        var viewModel = await _windowService.ShowDialogAsync<ShowHistoryWindow, ShowHistoryViewModel>(Window, vm =>
-        {
-        });
+        var viewModel =
+            await _windowService.ShowDialogAsync<ShowHistoryWindow, ShowHistoryViewModel>(Window, vm => { });
 
         _shortcutManager.ClearKeys();
     }
@@ -616,9 +582,7 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        var viewModel = await _windowService.ShowDialogAsync<FindWindow, FindViewModel>(Window, vm =>
-        {
-        });
+        var viewModel = await _windowService.ShowDialogAsync<FindWindow, FindViewModel>(Window, vm => { });
 
         _shortcutManager.ClearKeys();
     }
@@ -638,13 +602,10 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        var viewModel = await _windowService.ShowDialogAsync<ReplaceWindow, ReplaceViewModel>(Window, vm =>
-        {
-        });
+        var viewModel = await _windowService.ShowDialogAsync<ReplaceWindow, ReplaceViewModel>(Window, vm => { });
 
         _shortcutManager.ClearKeys();
     }
-
 
 
     [RelayCommand]
@@ -655,9 +616,8 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        var viewModel = await _windowService.ShowDialogAsync<MultipleReplaceWindow, MultipleReplaceViewModel>(Window, vm =>
-        {
-        });
+        var viewModel =
+            await _windowService.ShowDialogAsync<MultipleReplaceWindow, MultipleReplaceViewModel>(Window, vm => { });
 
         _shortcutManager.ClearKeys();
     }
@@ -711,7 +671,6 @@ public partial class MainViewModel : ObservableObject
         }
 
         SelectAndScrollToRow(idx);
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -730,7 +689,6 @@ public partial class MainViewModel : ObservableObject
         }
 
         SelectAndScrollToRow(idx);
-        _shortcutManager.ClearKeys();
     }
 
     private Control? _fullscreenBeforeParent;
@@ -845,9 +803,10 @@ public partial class MainViewModel : ObservableObject
         }
 
         // Store currently selected items
-        var selectedItems = new HashSet<SubtitleLineViewModel>(SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>());
+        var selectedItems =
+            new HashSet<SubtitleLineViewModel>(SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>());
 
-        SubtitleGridSelectionChangedSkip = true;
+        _subtitleGridSelectionChangedSkip = true;
         SubtitleGrid.SelectedItems.Clear();
         foreach (var item in Subtitles)
         {
@@ -856,7 +815,8 @@ public partial class MainViewModel : ObservableObject
                 SubtitleGrid.SelectedItems.Add(item);
             }
         }
-        SubtitleGridSelectionChangedSkip = false;
+
+        _subtitleGridSelectionChangedSkip = false;
         SubtitleGridSelectionChanged();
     }
 
@@ -1012,7 +972,7 @@ public partial class MainViewModel : ObservableObject
         _lastOpenSaveFormat = SelectedSubtitleFormat;
     }
 
-    private Subtitle GetUpdateSubtitle()
+    public Subtitle GetUpdateSubtitle()
     {
         _subtitle.Paragraphs.Clear();
         foreach (var line in Subtitles)
@@ -1097,10 +1057,7 @@ public partial class MainViewModel : ObservableObject
         try
         {
             await Task.Delay(delayMs, token); // Wait 3 seconds, cancellable
-            Dispatcher.UIThread.Post(() =>
-            {
-                StatusTextLeft = string.Empty;
-            }, DispatcherPriority.Background);
+            Dispatcher.UIThread.Post(() => { StatusTextLeft = string.Empty; }, DispatcherPriority.Background);
         }
         catch (TaskCanceledException)
         {
@@ -1249,14 +1206,17 @@ public partial class MainViewModel : ObservableObject
                 {
                     hash = hash * 23 + p.Style.GetHashCode();
                 }
+
                 if (p.Extra != null)
                 {
                     hash = hash * 23 + p.Extra.GetHashCode();
                 }
+
                 if (p.Actor != null)
                 {
                     hash = hash * 23 + p.Actor.GetHashCode();
                 }
+
                 hash = hash * 23 + p.Layer.GetHashCode();
             }
 
@@ -1361,10 +1321,10 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    public void ToggleItalic()
+    private void ToggleItalic()
     {
         var selectedItems = _selectedSubtitles?.ToList() ?? new List<SubtitleLineViewModel>();
-        if (selectedItems != null && selectedItems.Any())
+        if (selectedItems.Any())
         {
             foreach (var item in selectedItems)
             {
@@ -1375,10 +1335,10 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    public void ToggleBold()
+    private void ToggleBold()
     {
         var selectedItems = _selectedSubtitles?.ToList() ?? new List<SubtitleLineViewModel>();
-        if (selectedItems != null && selectedItems.Any())
+        if (selectedItems.Any())
         {
             foreach (var item in selectedItems)
             {
@@ -1460,7 +1420,7 @@ public partial class MainViewModel : ObservableObject
 
     public void SubtitleGrid_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        if (SubtitleGridSelectionChangedSkip)
+        if (_subtitleGridSelectionChangedSkip)
         {
             return;
         }

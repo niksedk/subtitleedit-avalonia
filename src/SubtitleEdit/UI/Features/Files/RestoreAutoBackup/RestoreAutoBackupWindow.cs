@@ -1,9 +1,11 @@
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Options.Language;
+namespace Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 
 public class RestoreAutoBackupWindow : Window
 {
@@ -13,44 +15,73 @@ public class RestoreAutoBackupWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Restore auto-backup...";
-        Width = 310;
-        Height = 140;
-        CanResize = false;
+        Width = 810;
+        Height = 640;
+        MinWidth = 800; 
+        MinHeight = 600;
+        CanResize = true;
 
         _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
-        var label = new Label
+        var dataGrid = new DataGrid
         {
-            Content = "Language",
-            VerticalAlignment = VerticalAlignment.Center,
+            Width = double.NaN,
+            Height = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            ItemsSource = _vm.Files,
+            SelectionMode = DataGridSelectionMode.Single,
+            IsReadOnly = true,
+            AutoGenerateColumns = false, 
+            Columns =
+            {
+                new DataGridTextColumn
+                {
+                    Header = "Date and Time",
+                    Binding = new Binding(nameof(DisplayFile.DateAndTime))
+                },
+                new DataGridTextColumn
+                {
+                    Header = "File Name",
+                    Binding = new Binding(nameof(DisplayFile.FileName))
+                },
+                new DataGridTextColumn
+                {
+                    Header = "Extension",
+                    Binding = new Binding(nameof(DisplayFile.Extension))
+                },
+                new DataGridTextColumn
+                {
+                    Header = "Size",
+                    Binding = new Binding(nameof(DisplayFile.Size))
+                }
+            }
         };
 
-        var combo = new ComboBox
-        {
-            ItemsSource = vm.Languages,
-            SelectedValue = vm.SelectedLanguage,
-            VerticalAlignment = VerticalAlignment.Center,
-            MinWidth = 180,
-        };
+        dataGrid.SelectionChanged += vm.DataGridSelectionChanged;
 
+        var linkOpenFolder = UiUtil.MakeLink("Open auto-backup folder", vm.OpenFolderCommand);
+
+        var buttonRestore = UiUtil.MakeButton("Restore auto-backup file", vm.RestoreFileCommand);
+        buttonRestore.BindIsEnabled(vm, nameof(vm.IsOkButtonEnabled));
         var buttonPanel = UiUtil.MakeButtonBar(
-            UiUtil.MakeButton("OK", vm.OkCommand),
-            UiUtil.MakeButton("Cancel", vm.CancelCommand)
+            buttonRestore,
+            UiUtil.MakeButton(Se.Language.General.Ok, vm.CancelCommand)
         );
         
         var grid = new Grid
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
@@ -59,13 +90,14 @@ public class RestoreAutoBackupWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Children.Add(label);
-        Grid.SetRow(label, 0);
-        Grid.SetColumn(label, 0);
-
-        grid.Children.Add(combo);
-        Grid.SetRow(combo, 0);
-        Grid.SetColumn(combo, 1);
+        grid.Children.Add(dataGrid);
+        Grid.SetRow(dataGrid, 0);
+        Grid.SetColumn(dataGrid, 0);
+        Grid.SetColumnSpan(dataGrid, 2);
+        
+        grid.Children.Add(linkOpenFolder);
+        Grid.SetRow(linkOpenFolder, 1);
+        Grid.SetColumn(linkOpenFolder, 0);
 
         grid.Children.Add(buttonPanel);
         Grid.SetRow(buttonPanel, 1);

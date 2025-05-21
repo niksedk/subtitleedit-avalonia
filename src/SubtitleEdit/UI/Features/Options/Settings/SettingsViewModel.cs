@@ -34,6 +34,9 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private int _unbreakShorterThanMs;
     [ObservableProperty] private int _newEmptyDefaultMs;
     [ObservableProperty] private bool _promptDeleteLines;
+    [ObservableProperty] private bool _autoBackupOn;
+    [ObservableProperty] private int _autoBackupIntervalMinutes;
+    [ObservableProperty] private int _autoBackupDeleteAfterMonths;
     
     [ObservableProperty] private ObservableCollection<string> _defaultSubtitleFormats;
     [ObservableProperty] private string _selectedDefaultSubtitleFormat;
@@ -154,7 +157,10 @@ public partial class SettingsViewModel : ObservableObject
         UnbreakShorterThanMs = general.MergeLinesShorterThan;
         NewEmptyDefaultMs = general.NewEmptyDefaultMs;
         PromptDeleteLines = general.PromptDeleteLines;
-
+        AutoBackupOn = general.AutoBackupOn;
+        AutoBackupIntervalMinutes = general.AutoBackupIntervalMinutes;
+        AutoBackupDeleteAfterMonths = general.AutoBackupDeleteAfterMonths;
+        
         SelectedTheme = appearance.Theme;
         ShowToolbarNew = appearance.ToolbarShowFileNew;
         ShowToolbarOpen = appearance.ToolbarShowFileOpen;
@@ -209,6 +215,9 @@ public partial class SettingsViewModel : ObservableObject
         general.MergeLinesShorterThan = UnbreakShorterThanMs;
         general.NewEmptyDefaultMs = NewEmptyDefaultMs;
         general.PromptDeleteLines = PromptDeleteLines;
+        general.AutoBackupOn = AutoBackupOn;
+        general.AutoBackupIntervalMinutes = AutoBackupIntervalMinutes;
+        general.AutoBackupDeleteAfterMonths = AutoBackupDeleteAfterMonths;
 
         appearance.Theme = SelectedTheme;
         appearance.ToolbarShowFileNew = ShowToolbarNew;

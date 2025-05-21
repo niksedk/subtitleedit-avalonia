@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
+using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 
@@ -8,8 +9,11 @@ namespace Nikse.SubtitleEdit.Features.Translate;
 
 public class TranslateSettingsWindow : Window
 {
+    private TranslateSettingsViewModel _vm;
+    
     public TranslateSettingsWindow(TranslateSettingsViewModel vm)
     {
+        _vm = vm;
         Icon = UiUtil.GetSeIcon();
         Title = "Settings";
         Width = 750;
@@ -134,5 +138,13 @@ public class TranslateSettingsWindow : Window
         Grid.SetColumnSpan(buttonBar, 2);
 
         Content = grid;
+        
+        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+    }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        _vm.OnKeyDown(e);
     }
 }

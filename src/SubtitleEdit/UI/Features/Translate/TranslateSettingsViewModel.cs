@@ -6,6 +6,7 @@ using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Threading.Tasks;
+using Avalonia.Input;
 using Tmds.DBus.Protocol;
 
 namespace Nikse.SubtitleEdit.Features.Translate;
@@ -37,19 +38,23 @@ public partial class TranslateSettingsViewModel : ObservableObject
     {
         if (!PromptText.Contains("{0}") || !PromptText.Contains("{1}"))
         {
-            await MessageBox.Show(Window!, "Error", "Prompt must contain {0} (source language) and {1} (target language)", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            await MessageBox.Show(Window!, "Error",
+                "Prompt must contain {0} (source language) and {1} (target language)", MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
             return;
         }
 
         if (PromptText.Replace("{0}", string.Empty).Replace("{1}", string.Empty).Contains('{'))
         {
-            await MessageBox.Show(Window!, "Error", "Character not allowed in prompt: '{' (besides '{0}' and '{1}')", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            await MessageBox.Show(Window!, "Error", "Character not allowed in prompt: '{' (besides '{0}' and '{1}')",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
 
         if (PromptText.Replace("{0}", string.Empty).Replace("{1}", string.Empty).Contains('}'))
         {
-            await MessageBox.Show(Window!, "Error", "Character not allowed in prompt: '}' (besides '{0}' and '{1}')", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            await MessageBox.Show(Window!, "Error", "Character not allowed in prompt: '}' (besides '{0}' and '{1}')",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
 
@@ -72,6 +77,7 @@ public partial class TranslateSettingsViewModel : ObservableObject
         {
             return;
         }
+
         Se.Settings.AutoTranslate.RequestDelaySeconds = ServerDelaySeconds ?? 0;
         Se.Settings.AutoTranslate.RequestMaxBytes = MaxBytesRequest ?? 0;
         var translate = AutoTranslator as SeAutoTranslate;
@@ -180,6 +186,15 @@ public partial class TranslateSettingsViewModel : ObservableObject
         else
         {
             PromptIsVisible = false;
+        }
+    }
+
+    public void OnKeyDown(KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            Window?.Close();
         }
     }
 }
