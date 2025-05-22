@@ -377,8 +377,6 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         public event Action? StopRequested;
         public event Action? FullscreenRequested;
         public event Action? FullscreenCollapseRequested;
-        public event Action? ScreenshotRequested;
-        public event Action? SettingsRequested;
         public event Action<double>? PositionChanged;
         public event Action<double>? VolumeChanged;
 

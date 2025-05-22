@@ -220,7 +220,7 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
             return;
         }
 
-        var folder = _whisperEngine.GetAndCreateWhisperModelFolder(_selectedModel?.Model);
+        var folder = _whisperEngine.GetAndCreateWhisperModelFolder(SelectedModel?.Model);
         var dirInfo = new DirectoryInfo(folder);
         await Window!.Launcher.LaunchDirectoryInfoAsync(dirInfo);
     }

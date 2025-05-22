@@ -8,6 +8,11 @@ public partial class VideoPlayerItem : ObservableObject
 {
     [ObservableProperty] private string _name;
 
+    public VideoPlayerItem()
+    {
+        Name = string.Empty;
+    }
+
     public override string ToString()
     {
         return Name;

@@ -1,6 +1,4 @@
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
@@ -9,7 +7,6 @@ namespace Nikse.SubtitleEdit.Features.Video.BurnIn;
 
 public class BurnInWindow : Window
 {
-    private StackPanel _contentPanel;
     private BurnInViewModel _vm;
     
     public BurnInWindow(BurnInViewModel vm)

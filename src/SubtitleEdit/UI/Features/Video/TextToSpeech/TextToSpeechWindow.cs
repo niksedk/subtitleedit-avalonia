@@ -1,6 +1,4 @@
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
@@ -9,7 +7,6 @@ namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech;
 
 public class TextToSpeechWindow : Window
 {
-    private StackPanel _contentPanel;
     private TextToSpeechViewModel _vm;
     
     public TextToSpeechWindow(TextToSpeechViewModel vm)

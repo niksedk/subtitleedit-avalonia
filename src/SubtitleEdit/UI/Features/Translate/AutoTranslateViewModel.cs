@@ -268,7 +268,7 @@ public partial class AutoTranslateViewModel : ObservableObject
         if (ApiKeyIsVisible && string.IsNullOrWhiteSpace(ApiKeyText))
         {
             await MessageBox.Show(
-                Window,
+                Window!,
                 "API key required",
                 string.Format("{0} requires an API key.", translator.Name),
                 MessageBoxButtons.OK,
@@ -279,7 +279,7 @@ public partial class AutoTranslateViewModel : ObservableObject
         if (ApiUrlIsVisible && string.IsNullOrWhiteSpace(ApiUrlText))
         {
             await MessageBox.Show(
-               Window,
+               Window!,
                "URL key required",
                string.Format("{0} requires an URL.", translator.Name),
                MessageBoxButtons.OK,

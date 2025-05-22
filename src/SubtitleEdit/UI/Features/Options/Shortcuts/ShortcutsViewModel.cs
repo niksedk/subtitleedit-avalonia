@@ -38,6 +38,7 @@ public partial class ShortcutsViewModel : ObservableObject
 
     public ShortcutsViewModel()
     {
+        SearchText = string.Empty;
         Shortcuts = new ObservableCollection<string>(GetShortcutKeys());
         Filters = new ObservableCollection<string>
         {

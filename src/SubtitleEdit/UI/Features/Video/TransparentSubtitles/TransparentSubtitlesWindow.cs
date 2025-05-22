@@ -1,6 +1,4 @@
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
@@ -9,7 +7,6 @@ namespace Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
 
 public class TransparentSubtitlesWindow : Window
 {
-    private StackPanel _contentPanel;
     private TransparentSubtitlesViewModel _vm;
     
     public TransparentSubtitlesWindow(TransparentSubtitlesViewModel vm)

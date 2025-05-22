@@ -209,10 +209,8 @@ namespace Nikse.SubtitleEdit.Controls
                 NotifyPositionChanged(e.NewValue);
             };
 
-
             progressGrid.Children.Add(positionSlider);
             Grid.SetColumn(positionSlider, 3);
-
 
             _volumeButton = new Button
             {
@@ -248,21 +246,8 @@ namespace Nikse.SubtitleEdit.Controls
                 SetVolumeIcon(e.NewValue < 0.0001);
             };
 
-
             progressGrid.Children.Add(volumeSlider);
             Grid.SetColumn(volumeSlider, 5);
-
-
-            //// ProgressText
-            //var progressText = new TextBlock
-            //{
-            //    VerticalAlignment = VerticalAlignment.Center,
-            //    HorizontalAlignment = HorizontalAlignment.Center,
-            //    FontSize = 16
-            //};
-            //progressText.Bind(TextBlock.TextProperty, this.GetObservable(ProgressTextProperty));
-            //controlGrid.Children.Add(progressText);
-            //Grid.SetColumn(progressText, 3);
 
             Content = mainGrid;
 
@@ -277,8 +262,6 @@ namespace Nikse.SubtitleEdit.Controls
         public event Action? StopRequested;
         public event Action? MuteRequested;
         public event Action? FullscreenRequested;
-        public event Action? ScreenshotRequested;
-        public event Action? SettingsRequested;
         public event Action<double>? PositionChanged;
         public event Action<double>? VolumeChanged;
 
