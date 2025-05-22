@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
@@ -55,7 +56,43 @@ public static class InitMenu
                             Command = vm.CommandFileSaveAsCommand,
                         },
                         new Separator(),
-                        new MenuItem { Header = "Export" },
+                        new MenuItem
+                        {
+                            Header = "Export",
+                            Items =
+                            {
+                                new MenuItem
+                                {
+                                    Header = "Blu-ray .sup",
+                                    Command = vm.ExportBluRaySupCommand,
+                                },
+                                new MenuItem
+                                {
+                                    Header = new CapMakerPlus().Name,
+                                    Command = vm.ExportCapMakerPlusCommand,
+                                },
+                                new MenuItem
+                                {
+                                    Header = Cavena890.NameOfFormat,
+                                    Command = vm.ExportCavena890Command,
+                                },
+                                new MenuItem
+                                {
+                                    Header = Pac.NameOfFormat,
+                                    Command = vm.ExportPacCommand,
+                                },
+                                new MenuItem
+                                {
+                                    Header = new PacUnicode().Name,
+                                    Command = vm.ExportPacUnicodeCommand,
+                                },
+                                new MenuItem
+                                {
+                                    Header = Ebu.NameOfFormat,
+                                    Command = vm.ExportEbuStlCommand,
+                                }
+                            }
+                        },
                         new Separator(),
                         new MenuItem
                         {

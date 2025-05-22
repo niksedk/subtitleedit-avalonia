@@ -273,6 +273,97 @@ public partial class MainViewModel : ObservableObject
         await SaveSubtitleAs();
         _shortcutManager.ClearKeys();
     }
+    
+    [RelayCommand]
+    private async Task ExportBluRaySup()
+    {
+        _shortcutManager.ClearKeys();
+    }
+    
+    [RelayCommand]
+    private async Task ExportCapMakerPlus()
+    {
+        var format = new CapMakerPlus();
+        using var ms = new MemoryStream();
+        format.Save(_subtitleFileName, ms, GetUpdateSubtitle(), false);
+
+        var fileHelper = new FileHelper();
+        var subtitleFileName = await fileHelper.SaveStreamAs(ms, $"Save {CurrentSubtitleFormat.Name} file as", _videoFileName, format);
+        if (!string.IsNullOrEmpty(subtitleFileName))
+        {
+            ShowStatus($"File exported in format {format.Name} to {subtitleFileName}");
+        }
+    }
+    
+    [RelayCommand]
+    private async Task ExportCavena890()
+    {
+        var result = await _popupService
+            .ShowPopupAsync<ExportCavena890PopupModel>(onPresenting: viewModel
+                => viewModel.SetValues(UpdatedSubtitle), CancellationToken.None);
+
+        if (result is not (string and "OK"))
+        {
+            return;
+        }
+
+        var cavena = new Cavena890();
+        using var ms = new MemoryStream();
+        cavena.Save(_subtitleFileName, ms, UpdatedSubtitle, false);
+
+        var fileHelper = new FileHelper();
+        var subtitleFileName = await fileHelper.SaveStreamAs(ms, $"Save {CurrentSubtitleFormat.Name} file as", _videoFileName, cavena);
+        if (!string.IsNullOrEmpty(subtitleFileName))
+        {
+            ShowStatus($"File exported in format {cavena.Name} to {subtitleFileName}");
+        }
+        _shortcutManager.ClearKeys();
+    }
+    
+    [RelayCommand]
+    private async Task ExportPac()
+    {
+        var result = await _popupService.ShowPopupAsync<ExportPacPopupModel>(CancellationToken.None);
+        if (result is not int codePage || codePage < 0)
+        {
+            return;
+        }
+
+        var pac = new Pac { CodePage = codePage };
+        using var ms = new MemoryStream();
+        pac.Save(_subtitleFileName, ms, GetUpdateSubtitle(), false);
+
+        var fileHelper = new FileHelper();
+        var subtitleFileName = await fileHelper.SaveStreamAs(ms, $"Save {CurrentSubtitleFormat.Name} file as", _videoFileName, pac);
+        if (!string.IsNullOrEmpty(subtitleFileName))
+        {
+            ShowStatus($"File exported in format {pac.Name} to {subtitleFileName}");
+        }
+        _shortcutManager.ClearKeys();
+    }
+    
+    [RelayCommand]
+    private async Task ExportPacUnicode()
+    {
+        var pacUnicode = new PacUnicode();
+        using var ms = new MemoryStream();
+        pacUnicode.Save(_subtitleFileName, ms, GetUpdateSubtitle());
+
+        var fileHelper = new FileHelper();
+        var subtitleFileName = await fileHelper.SaveStreamAs(ms, $"Save {CurrentSubtitleFormat.Name} file as", _videoFileName, pacUnicode);
+        if (!string.IsNullOrEmpty(subtitleFileName))
+        {
+            ShowStatus($"File exported in format {pacUnicode.Name} to {subtitleFileName}");
+        }
+        _shortcutManager.ClearKeys();
+    }
+    
+    [RelayCommand]
+    private async Task ExportEbuStl()
+    {
+        
+        _shortcutManager.ClearKeys();
+    }
 
     [RelayCommand]
     private async Task ShowToolsAdjustDurations()
