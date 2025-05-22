@@ -121,7 +121,6 @@ public class InsertService : IInsertService
             firstSelectedIndex = index.Value;
         }
 
-
         var newParagraph = new SubtitleLineViewModel { Text = text };
 
         SetStyleForNewParagraph(format, subtitle, subtitles, newParagraph, firstSelectedIndex);

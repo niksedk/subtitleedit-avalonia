@@ -1037,10 +1037,10 @@ public partial class MainViewModel : ObservableObject
 
     private void ShowStatus(string message, int delayMs = 3000)
     {
-        Task.Run(() => ShowStatusAsync(message, delayMs));
+        Task.Run(() => ShowStatusWithWaitAsync(message, delayMs));
     }
 
-    private async Task ShowStatusAsync(string message, int delayMs = 3000)
+    private async Task ShowStatusWithWaitAsync(string message, int delayMs = 3000)
     {
         // Cancel any previous animation
         _statusFadeCts?.Cancel();
@@ -1253,6 +1253,7 @@ public partial class MainViewModel : ObservableObject
         {
             Subtitles.Remove(item);
         }
+        Renumber();
     }
 
     public void InsertBeforeSelectedItem()
@@ -1262,6 +1263,7 @@ public partial class MainViewModel : ObservableObject
         {
             var index = Subtitles.IndexOf(selectedItem);
             _insertService.InsertBefore(SelectedSubtitleFormat, _subtitle, Subtitles, index, string.Empty);
+            Renumber();
             SelectAndScrollToRow(index);
         }
     }
@@ -1273,7 +1275,16 @@ public partial class MainViewModel : ObservableObject
         {
             var index = Subtitles.IndexOf(selectedItem);
             _insertService.InsertAfter(SelectedSubtitleFormat, _subtitle, Subtitles, index, string.Empty);
+            Renumber();
             SelectAndScrollToRow(index + 1);
+        }
+    }
+
+    private void Renumber()
+    {
+        for (var index = 0; index < Subtitles.Count; index++)
+        {
+            Subtitles[index].Number = index + 1;
         }
     }
 
@@ -1284,6 +1295,7 @@ public partial class MainViewModel : ObservableObject
         {
             var index = Subtitles.IndexOf(selectedItem);
             //            _mergeManager.MergeSelectedLines();
+            Renumber();
             SelectAndScrollToRow(index - 1);
         }
     }
@@ -1295,6 +1307,7 @@ public partial class MainViewModel : ObservableObject
         {
             var index = Subtitles.IndexOf(selectedItem);
             //            _mergeManager.MergeSelectedLines();
+            Renumber();
             SelectAndScrollToRow(index - 1);
         }
     }
@@ -1307,6 +1320,7 @@ public partial class MainViewModel : ObservableObject
             var index = Subtitles.IndexOf(selectedItem);
             //            _mergeManager.MergeSelectedLines();
             SelectAndScrollToRow(index - 1);
+            Renumber();
         }
     }
 
@@ -1318,6 +1332,7 @@ public partial class MainViewModel : ObservableObject
             var index = Subtitles.IndexOf(selectedItem);
             //            _mergeManager.MergeSelectedLines();
             SelectAndScrollToRow(index - 1);
+            Renumber();
         }
     }
 
@@ -1465,7 +1480,7 @@ public partial class MainViewModel : ObservableObject
 
         SelectedSubtitle = item;
         SelectedSubtitleIndex = Subtitles.IndexOf(item);
-        StatusTextRight = $"{item.Number}/{Subtitles.Count}";
+        StatusTextRight = $"{Subtitles.IndexOf(item) + 1}/{Subtitles.Count}";
 
         MakeSubtitleTextInfo(item.Text, item);
     }
