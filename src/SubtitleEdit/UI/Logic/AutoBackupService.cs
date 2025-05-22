@@ -44,6 +44,11 @@ public class AutoBackupService : IAutoBackupService
         _timerAutoBackup = new System.Timers.Timer(TimeSpan.FromMinutes(minutes));
         _timerAutoBackup.Elapsed += (sender, args) =>
         {
+            if (!_mainViewModel.HasChanges())
+            {
+                return;
+            }
+
             var saveFormat = _mainViewModel.SelectedSubtitleFormat;
             var subtitle =  _mainViewModel.GetUpdateSubtitle(); 
             SaveAutoBackup(subtitle, saveFormat);   

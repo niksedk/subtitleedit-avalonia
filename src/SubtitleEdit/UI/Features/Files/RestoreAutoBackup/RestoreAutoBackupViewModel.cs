@@ -63,7 +63,7 @@ public partial class RestoreAutoBackupViewModel : ObservableObject
     [RelayCommand]
     private async Task RestoreFile()
     {
-        if (SelectedFile is not { } file || Window == null)
+        if (SelectedFile is not { } file || Window == null || !File.Exists(file.FullPath))
         {
             return;
         }

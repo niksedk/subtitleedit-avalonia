@@ -941,7 +941,7 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    private bool HasChanges()
+    public bool HasChanges()
     {
         return !IsEmpty && _changeSubtitleHash != GetFastSubtitleHash();
     }
