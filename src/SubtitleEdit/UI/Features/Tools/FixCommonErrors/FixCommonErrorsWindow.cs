@@ -8,14 +8,16 @@ namespace Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 public class FixCommonErrorsWindow : Window
 {
     private FixCommonErrorsViewModel _vm;
-    
+
     public FixCommonErrorsWindow(FixCommonErrorsViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Fix common errors";
-        Width = 310;
-        Height = 140;
-        CanResize = false;
+        Width = 950;
+        Height = 750;
+        MinWidth = 800; 
+        MinHeight = 600;
+        CanResize = true;
 
         _vm = vm;
         vm.Window = this;
@@ -23,33 +25,82 @@ public class FixCommonErrorsWindow : Window
 
         var label = new Label
         {
-            Content = "Language",
+            Content = "Fix common errors, step 1",
             VerticalAlignment = VerticalAlignment.Center,
         };
 
-        var combo = new ComboBox
+        var textBoxSearch = UiUtil.MakeTextBox(200, vm, nameof(vm.SearchText)).WithMarginRight(25);
+        textBoxSearch.Watermark = "Search rules...";
+        var panelTopRight = new StackPanel
         {
-            ItemsSource = vm.Languages,
-            SelectedValue = vm.SelectedLanguage,
+            Orientation = Orientation.Horizontal,
             VerticalAlignment = VerticalAlignment.Center,
-            MinWidth = 180,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Children =
+            {
+                textBoxSearch,
+                UiUtil.MakeTextBlock("Language").WithMarginRight(5),
+                UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage)),
+            },
         };
 
-        var buttonPanel = UiUtil.MakeButtonBar(
-            UiUtil.MakeButton("OK", vm.OkCommand),
+        var dataGrid = new DataGrid
+        {
+            AutoGenerateColumns = false,
+            SelectionMode = DataGridSelectionMode.Single,
+            CanUserResizeColumns = true,
+            CanUserSortColumns = true,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Width = double.NaN,
+            Height = double.NaN,
+            ItemsSource = vm.FixRules,
+            Columns =
+            {
+                new DataGridCheckBoxColumn
+                {
+                    Header = "Enabled",
+                    Binding = new Avalonia.Data.Binding(nameof(FixRuleDisplayItem.IsSelected)),
+                },
+                new DataGridTextColumn
+                {
+                    Header = "Name",
+                    Binding = new Avalonia.Data.Binding(nameof(FixRuleDisplayItem.Name)),
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = "Example",
+                    Binding = new Avalonia.Data.Binding(nameof(FixRuleDisplayItem.Example)),
+                    IsReadOnly = true,
+                },
+            },
+        };
+
+        var buttonPanelLeft = UiUtil.MakeButtonBar(
+            UiUtil.MakeButton("Select all", vm.OkCommand),
+            UiUtil.MakeButton("Inverse selection", vm.CancelCommand),
+            UiUtil.MakeTextBlock("Profile").WithMarginLeft(25).WithMarginRight(10),
+            UiUtil.MakeComboBox(vm.Profiles, vm, nameof(vm.SelectedProfile)),
+            UiUtil.MakeButton("...").Compact()
+        );
+
+        var buttonPanelRight = UiUtil.MakeButtonBar(
+            UiUtil.MakeButton("Apply fixes", vm.OkCommand),
             UiUtil.MakeButton("Cancel", vm.CancelCommand)
         );
-        
+
         var grid = new Grid
         {
             RowDefinitions =
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
@@ -63,17 +114,27 @@ public class FixCommonErrorsWindow : Window
         Grid.SetRow(label, 0);
         Grid.SetColumn(label, 0);
 
-        grid.Children.Add(combo);
-        Grid.SetRow(combo, 0);
-        Grid.SetColumn(combo, 1);
+        grid.Children.Add(panelTopRight);
+        Grid.SetRow(panelTopRight, 0);
+        Grid.SetColumn(panelTopRight, 1);
 
-        grid.Children.Add(buttonPanel);
-        Grid.SetRow(buttonPanel, 1);
-        Grid.SetColumn(buttonPanel, 0);
-        Grid.SetColumnSpan(buttonPanel, 2);
+        grid.Children.Add(dataGrid);
+        Grid.SetRow(dataGrid, 1);
+        Grid.SetColumn(dataGrid, 0);
+        Grid.SetColumnSpan(dataGrid, 2);
+
+        grid.Children.Add(buttonPanelLeft);
+        Grid.SetRow(buttonPanelLeft, 2);
+        Grid.SetColumn(buttonPanelLeft, 0);
+
+
+        grid.Children.Add(buttonPanelRight);
+        Grid.SetRow(buttonPanelRight, 2);
+        Grid.SetColumn(buttonPanelRight, 1);
+
 
         Content = grid;
-        
+
         Activated += delegate { Focus(); }; // hack to make OnKeyDown work
     }
 

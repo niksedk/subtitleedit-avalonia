@@ -416,7 +416,10 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowToolsFixCommonErrors()
     {
-        await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window, vm => { });
+        await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window, vm => 
+        { 
+            vm.InitStep1("en");
+        });
         _shortcutManager.ClearKeys();
     }
 

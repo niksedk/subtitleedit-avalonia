@@ -332,6 +332,13 @@ public static class UiUtil
         return control;
     }
 
+    public static TextBox WithMarginRight(this TextBox control, int marginRight)
+    {
+        var m = control.Margin;
+        control.Margin = new Thickness(m.Left, m.Top, marginRight, m.Bottom);
+        return control;
+    }
+
     public static TextBlock WithMarginLeft(this TextBlock control, int marginLeft)
     {
         var m = control.Margin;
@@ -414,6 +421,14 @@ public static class UiUtil
     {
         var m = control.Margin;
         control.Margin = new Thickness(m.Left, marginTop, m.Right, m.Bottom);
+        return control;
+    }
+
+    public static Button Compact(this Button control)
+    {
+        var m = control.Padding;
+        control.Padding = new Thickness(8, m.Top, 8, m.Bottom);
+        control.MinWidth = 0;
         return control;
     }
 
