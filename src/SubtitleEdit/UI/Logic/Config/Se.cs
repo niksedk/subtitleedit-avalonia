@@ -66,6 +66,8 @@ public class Se
 
         Shortcuts =
         [
+            new(nameof(vm.UndoCommand), new List<string> { "Control", "Z" }),
+            new(nameof(vm.RedoCommand), new List<string> { "Control", "Y" }),
             new(nameof(vm.ShowGoToLineCommand), new List<string> { "Control", "G" }),
             new(nameof(vm.GoToPreviousLineCommand), new List<string> { "Alt", "Up" }),
             new(nameof(vm.GoToNextLineCommand), new List<string> { "Alt", "Down" }),

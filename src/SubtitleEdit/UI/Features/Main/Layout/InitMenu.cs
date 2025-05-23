@@ -109,10 +109,12 @@ public static class InitMenu
                         new MenuItem
                         {
                             Header = "_Undo",
+                            Command = vm.UndoCommand,
                         },
                         new MenuItem
                         {
                             Header = "_Redo",
+                            Command = vm.RedoCommand,
                         },
                         new MenuItem
                         {

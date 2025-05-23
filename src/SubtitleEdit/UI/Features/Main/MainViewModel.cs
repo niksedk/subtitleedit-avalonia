@@ -40,6 +40,7 @@ using Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
+using Nikse.SubtitleEdit.Logic.UndoRedo;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -95,6 +96,7 @@ public partial class MainViewModel : ObservableObject
     private readonly IInsertService _insertService;
     private readonly IMergeManager _mergeManager;
     private readonly IAutoBackupService _autoBackupService;
+    private readonly IUndoRedoManager _undoRedoManager;
 
     private bool IsEmpty => Subtitles.Count == 0 || string.IsNullOrEmpty(Subtitles[0].Text);
 
@@ -106,7 +108,8 @@ public partial class MainViewModel : ObservableObject
         IWindowService windowService,
         IInsertService insertService,
         IMergeManager mergeManager,
-        IAutoBackupService autoBackupService)
+        IAutoBackupService autoBackupService,
+        IUndoRedoManager undoRedoManager)
     {
         _fileHelper = fileHelper;
         _shortcutManager = shortcutManager;
@@ -114,6 +117,7 @@ public partial class MainViewModel : ObservableObject
         _insertService = insertService;
         _mergeManager = mergeManager;
         _autoBackupService = autoBackupService;
+        _undoRedoManager = undoRedoManager;
 
         EditText = string.Empty;
         EditTextCharactersPerSecond = string.Empty;
@@ -274,13 +278,13 @@ public partial class MainViewModel : ObservableObject
         await SaveSubtitleAs();
         _shortcutManager.ClearKeys();
     }
-    
+
     [RelayCommand]
     private async Task ExportBluRaySup()
     {
         _shortcutManager.ClearKeys();
     }
-    
+
     [RelayCommand]
     private async Task ExportCapMakerPlus()
     {
@@ -300,7 +304,7 @@ public partial class MainViewModel : ObservableObject
             ShowStatus($"File exported in format {format.Name} to {fileName}");
         }
     }
-    
+
     [RelayCommand]
     private async Task ExportCavena890()
     {
@@ -325,7 +329,7 @@ public partial class MainViewModel : ObservableObject
         //}
         //_shortcutManager.ClearKeys();
     }
-    
+
     [RelayCommand]
     private async Task ExportPac()
     {
@@ -347,7 +351,7 @@ public partial class MainViewModel : ObservableObject
         //}
         //_shortcutManager.ClearKeys();
     }
-    
+
     [RelayCommand]
     private async Task ExportPacUnicode()
     {
@@ -369,11 +373,23 @@ public partial class MainViewModel : ObservableObject
 
         _shortcutManager.ClearKeys();
     }
-    
+
     [RelayCommand]
     private async Task ExportEbuStl()
     {
         _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task Undo()
+    {
+        PerformUndo();
+    }
+
+    [RelayCommand]
+    private async Task Redo()
+    {
+        PerformRedo();
     }
 
     [RelayCommand]
@@ -890,6 +906,66 @@ public partial class MainViewModel : ObservableObject
         }
 
         return false;
+    }
+
+    private void PerformUndo()
+    {
+        if (!_undoRedoManager.CanUndo)
+        {
+            return;
+        }
+
+        var undoRedoObject = _undoRedoManager.Undo()!;
+        RestoreUndoRedoState(undoRedoObject);
+        ShowStatus("Undo performed");
+    }
+
+    private void PerformRedo()
+    {
+        if (!_undoRedoManager.CanRedo)
+        {
+            return;
+        }
+
+        var undoRedoObject = _undoRedoManager.Redo()!;
+        RestoreUndoRedoState(undoRedoObject);
+        ShowStatus("Redo performed");
+    }
+
+    private void MakeHistoryForUndo(string description)
+    {
+        if (Subtitles.Count == 0 || Subtitles.Count == 1 && string.IsNullOrWhiteSpace(SelectedSubtitle?.Text))
+        {
+            return;
+        }
+
+        var hash = GetFastSubtitleHash();
+        if (hash == _changeSubtitleHash && _undoRedoManager.CanUndo)
+        {
+            return; // no changes
+        }
+
+        var undoRedoObject = MakeUndoRedoObject(description);
+        _undoRedoManager.Do(undoRedoObject);
+        _changeSubtitleHash = GetFastSubtitleHash();
+    }
+
+    private UndoRedoItem MakeUndoRedoObject(string description)
+    {
+        return new UndoRedoItem(
+            description,
+            Subtitles.ToArray(),
+            _subtitleFileName,
+            new int[] { 0 },
+            1,
+            1);
+    }
+
+    private void RestoreUndoRedoState(UndoRedoItem undoRedoObject)
+    {
+        Subtitles = new ObservableCollection<SubtitleLineViewModel>(undoRedoObject.Subtitles);
+        _subtitleFileName = undoRedoObject.SubtitleFileName;
+        SelectAndScrollToRow(undoRedoObject.SelectedLines.First());
     }
 
     private void SelectAllRows()

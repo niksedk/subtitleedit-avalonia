@@ -49,6 +49,7 @@ public class LanguageSettingsShortcuts
     public string GeneralGoToNextSubtitleAndFocusWaveform { get; set; }
     public string GeneralGoToLineNumber { get; set; }
     public string GeneralToggleItalic { get; set; }
+    public string GeneralToggleBold { get; set; }
     public string GeneralToggleBookmarks { get; set; }
     public string GeneralFocusTextBox { get; set; }
     public string GeneralToggleBookmarksWithText { get; set; }
@@ -148,6 +149,7 @@ public class LanguageSettingsShortcuts
         GeneralGoToNextSubtitleAndFocusWaveform = "Go to next subtitle and focus waveform";
         GeneralGoToLineNumber = "Go to line number";
         GeneralToggleItalic = "Toggle italic";
+        GeneralToggleBold = "Toggle bold";
         GeneralToggleBookmarks = "Toggle bookmarks";
         GeneralFocusTextBox = "Focus text box";
         GeneralToggleBookmarksWithText = "Toggle bookmarks with text";

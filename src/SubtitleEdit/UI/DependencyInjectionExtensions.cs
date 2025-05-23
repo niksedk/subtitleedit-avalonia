@@ -32,6 +32,7 @@ using Nikse.SubtitleEdit.Features.Edit.Replace;
 using Nikse.SubtitleEdit.Features.Edit.ShowHistory;
 using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 using RestoreAutoBackupViewModel = Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup.RestoreAutoBackupViewModel;
+using Nikse.SubtitleEdit.Logic.UndoRedo;
 
 namespace Nikse.SubtitleEdit;
 
@@ -48,6 +49,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<IInsertService, InsertService>();
         collection.AddTransient<IMergeManager, MergeManager>();
         collection.AddTransient<IAutoBackupService, AutoBackupService>();
+        collection.AddTransient<IUndoRedoManager, UndoRedoManager>();
 
         // Download services
         collection.AddHttpClient<IFfmpegDownloadService, FfmpegDownloadService>();
