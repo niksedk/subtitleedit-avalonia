@@ -4,6 +4,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Markup.Declarative;
+using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Translate;
@@ -89,6 +90,8 @@ public class AutoTranslateWindow : Window
             CanUserSortColumns = false,
             ContextFlyout = contextMenu,
             DataContext = vm,
+            IsReadOnly = true,
+            AutoGenerateColumns = false,
             Columns =
             {
                 new DataGridTextColumn
@@ -148,8 +151,51 @@ public class AutoTranslateWindow : Window
 
         var settingsLink = UiUtil.MakeLink("Settings", vm.OpenSettingsCommand).WithMarginRight(10);
         var okButton = UiUtil.MakeButton("OK", vm.OkCommand);
+        okButton.Bind(Button.IsEnabledProperty, new Binding(nameof(vm.IsTranslateEnabled)));
         var cancelButton = UiUtil.MakeButton("Cancel", vm.CancelCommand);
+
+        var bottomGrid = new Grid
+        {
+            RowDefinitions = new RowDefinitions("*,Auto"),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        var progressSlider = new Slider
+        {
+            Minimum = 0,
+            Maximum = 100,
+            IsHitTestVisible = false,
+            Margin = new Thickness(10, 0, 0, 0),
+            Width = double.NaN,
+            Height = 10,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            Styles =
+            {
+                new Style(x => x.OfType<Thumb>())
+                {
+                    Setters =
+                    {
+                        new Setter(Thumb.IsVisibleProperty, false)
+                    },
+                },
+                new Style(x => x.OfType<Track>())
+                {
+                    Setters =
+                    {
+                        new Setter(Track.HeightProperty, 8.0)
+                    },
+                },
+            },
+        };
+        progressSlider.Bind(Slider.ValueProperty, new Binding(nameof(vm.ProgressValue)));
+        progressSlider.Bind(Slider.IsVisibleProperty, new Binding(nameof(vm.IsProgressEnabled)));
+        bottomGrid.Children.Add(progressSlider);
+        Grid.SetRow(progressSlider, 0);
         var bottomBar = UiUtil.MakeButtonBar(settingsLink, okButton, cancelButton);
+        bottomGrid.Children.Add(bottomBar);
+        Grid.SetRow(bottomBar, 1);
+
 
         var grid = new Grid
         {
@@ -170,8 +216,8 @@ public class AutoTranslateWindow : Window
         grid.Children.Add(settingsBar);
         Grid.SetRow(settingsBar, row++);
 
-        grid.Children.Add(bottomBar);
-        Grid.SetRow(bottomBar, row++);
+        grid.Children.Add(bottomGrid);
+        Grid.SetRow(bottomGrid, row++);
 
         Content = grid;
     }

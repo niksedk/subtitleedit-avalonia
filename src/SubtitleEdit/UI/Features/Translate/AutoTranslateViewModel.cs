@@ -9,6 +9,7 @@ using Nikse.SubtitleEdit.Core.Translate;
 using Nikse.SubtitleEdit.Features.Common;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -40,6 +41,9 @@ public partial class AutoTranslateViewModel : ObservableObject
     [ObservableProperty] private TranslateRow? _selectedTranslateRow;
 
     [ObservableProperty] private bool _isTranslateEnabled;
+
+    [ObservableProperty] double _progressValue;
+    [ObservableProperty] bool _isProgressEnabled;
 
     [ObservableProperty] private bool _apiKeyIsVisible;
     [ObservableProperty] private string _apiKeyText;
@@ -222,6 +226,8 @@ public partial class AutoTranslateViewModel : ObservableObject
     private void Cancel()
     {
         _cancellationTokenSource.Cancel();
+        _abort = true;
+        IsProgressEnabled = false;
 
         if (IsTranslateEnabled)
         {
@@ -287,6 +293,7 @@ public partial class AutoTranslateViewModel : ObservableObject
         }
 
         _abort = false;
+        IsProgressEnabled = true;
         var engineType = translator.GetType();
 
         if (ApiKeyIsVisible && string.IsNullOrWhiteSpace(ApiKeyText))
@@ -391,8 +398,8 @@ public partial class AutoTranslateViewModel : ObservableObject
                     {
                         Dispatcher.UIThread.Invoke(() =>
                         {
-                            //ProgressBar.Progress = (double)index1 / Lines.Count;
-                            SelectAndScrollToRow(index1);
+                            ProgressValue = (double)index1 * 100 / Rows.Count;
+                            SelectAndScrollToRow(index1-1);
                         });
                     }
 
@@ -425,13 +432,12 @@ public partial class AutoTranslateViewModel : ObservableObject
 
                 if (translateCount > 0)
                 {
-                    // TranslateRows[index].TranslatedText = trg.Paragraphs[0].Text;
                     index += translateCount;
                     var progressIndex = index;
                     Dispatcher.UIThread.Invoke(() =>
                     {
-                        //ProgressBar.Progress = (double)progressIndex / TranslateRows.Count;
-                        SelectAndScrollToRow(progressIndex);
+                        ProgressValue = (double)progressIndex * 100 / Rows.Count;
+                        SelectAndScrollToRow(progressIndex-1);
                     });
 
                     if (_onlyCurrentLine)
@@ -458,22 +464,35 @@ public partial class AutoTranslateViewModel : ObservableObject
         finally
         {
             IsTranslateEnabled = true;
+            IsProgressEnabled = false;
+
+            var lastTranslatedRow = Rows.LastOrDefault(p => !string.IsNullOrEmpty(p.Text));
+            if (lastTranslatedRow != null)
+            {
+                SelectAndScrollToRow(Rows.IndexOf(lastTranslatedRow));
+            }
         }
     }
 
     private void SelectAndScrollToRow(int index)
     {
-        if (index < 0 || index >= Rows.Count || RowGrid == null)
+        if (RowGrid == null)
         {
             return;
         }
 
-        Dispatcher.UIThread.Invoke(() =>
+        Dispatcher.UIThread.Invoke(async() =>
         {
-            index = Math.Max(0, index - 1);
+            index = Math.Max(0, index);
             RowGrid.SelectedItem = Rows[index];
 
             var scrollIndex = Math.Min(index + 5, Rows.Count - 1);
+            if (scrollIndex < 0)
+            {
+                return;
+            }
+
+            await Task.Delay(5);
             RowGrid.ScrollIntoView(Rows[scrollIndex], null);
         });
     }
