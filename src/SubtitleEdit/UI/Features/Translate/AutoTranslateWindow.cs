@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Markup.Declarative;
 using Nikse.SubtitleEdit.Logic;
@@ -80,18 +81,54 @@ public class AutoTranslateWindow : Window
             }
         };
 
-        var treeDataGrid = new TreeDataGrid
+        var dataGrid = new DataGrid
         {
             Height = double.NaN, // auto size inside scroll viewer
             Margin = new Thickness(2),
-            Source = vm.TranslateRowSource,
             CanUserSortColumns = false,
             ContextFlyout = contextMenu,
+            DataContext = vm,
+            Columns =
+            {
+                new DataGridTextColumn
+                {
+                    Header = "#",
+                    Binding = new Binding(nameof(TranslateRow.Number)),
+                    Width = new DataGridLength(50)
+                },
+                new DataGridTextColumn
+                {
+                    Header = "Show",
+                    Binding = new Binding(nameof(TranslateRow.Show)),
+                    Width = new DataGridLength(100)
+                },
+                new DataGridTextColumn
+                {
+                    Header = "Duration",
+                    Binding = new Binding(nameof(TranslateRow.Duration)),
+                    Width = new DataGridLength(80)
+                },
+                new DataGridTextColumn
+                {
+                    Header = "Text",
+                    Binding = new Binding(nameof(TranslateRow.Text)),
+                    Width = new DataGridLength(200, DataGridLengthUnitType.Star)
+                },
+                new DataGridTextColumn
+                {
+                    Header = "Translated text",
+                    Binding = new Binding(nameof(TranslateRow.TranslatedText)),
+                    Width = new DataGridLength(200, DataGridLengthUnitType.Star)
+                }
+            }
         };
+        dataGrid.Bind(DataGrid.ItemsSourceProperty, new Binding(nameof(vm.Rows)));
+        dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedTranslateRow)));
+
 
         var scrollViewer = new ScrollViewer
         {
-            Content = treeDataGrid,
+            Content = dataGrid,
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto
         };
         var scrollViewerBorder = UiUtil.MakeBorderForControl(scrollViewer);

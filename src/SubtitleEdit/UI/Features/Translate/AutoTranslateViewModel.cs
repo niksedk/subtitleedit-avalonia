@@ -24,7 +24,6 @@ namespace Nikse.SubtitleEdit.Features.Translate;
 public partial class AutoTranslateViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<TranslateRow> _rows;
-    public ITreeDataGridSource TranslateRowSource { get; }
     public AutoTranslateWindow? Window { get; set; }
     public bool OkPressed { get; set; }
 
@@ -92,21 +91,7 @@ public partial class AutoTranslateViewModel : ObservableObject
         SelectedAutoTranslator = AutoTranslators[0];
         AutoTranslatorLinkText = SelectedAutoTranslator.Name;
 
-        _rows = new ObservableCollection<TranslateRow>();
-        TranslateRowSource = new FlatTreeDataGridSource<TranslateRow>(_rows)
-        {
-            Columns =
-            {
-                new TextColumn<TranslateRow, int>("#", x => x.Number),
-                new TextColumn<TranslateRow, TimeSpan>("Show", x => x.Show),
-                new TextColumn<TranslateRow, string>("Duration", x => x.Duration),
-                new TextColumn<TranslateRow, string>("Text", x => x.Text),
-                new TextColumn<TranslateRow, string>("Translated text", x => x.TranslatedText),
-            },
-        };
-
-        var dataGridSource = TranslateRowSource as FlatTreeDataGridSource<TranslateRow>;
-        dataGridSource!.RowSelection!.SingleSelect = true;
+        Rows = new ObservableCollection<TranslateRow>();
         IsTranslateEnabled = true;
         _cancellationTokenSource = new CancellationTokenSource();
     }
@@ -344,7 +329,7 @@ public partial class AutoTranslateViewModel : ObservableObject
                                       translator.Name ==
                                       NoLanguageLeftBehindApi.StaticName || // NLLB seems to miss some text...
                                       translator.Name == NoLanguageLeftBehindServe.StaticName; //||
-                                      //_singleLineMode;
+                                                                                               //_singleLineMode;
 
             if (_onlyCurrentLine)
             {
@@ -413,7 +398,7 @@ public partial class AutoTranslateViewModel : ObservableObject
 
                 if (translateCount > 0)
                 {
-                   // TranslateRows[index].TranslatedText = trg.Paragraphs[0].Text;
+                    // TranslateRows[index].TranslatedText = trg.Paragraphs[0].Text;
                     index += translateCount;
                     var progressIndex = index;
                     Dispatcher.UIThread.Invoke(() =>
