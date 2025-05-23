@@ -4,10 +4,8 @@ using Nikse.SubtitleEdit.Core.AutoTranslate;
 using Nikse.SubtitleEdit.Features.Common;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Threading.Tasks;
 using Avalonia.Input;
-using Tmds.DBus.Protocol;
 
 namespace Nikse.SubtitleEdit.Features.Translate;
 

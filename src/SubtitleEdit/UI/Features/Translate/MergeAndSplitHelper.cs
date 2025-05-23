@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -16,7 +17,7 @@ public static partial class MergeAndSplitHelper
 {
     public static bool MergeSplitProblems { get; set; }
 
-    public static async Task<int> MergeAndTranslateIfPossible(Subtitle sourceSubtitle, Subtitle targetSubtitle, TranslationPair source, TranslationPair target, int index, IAutoTranslator autoTranslator, bool forceSingleLineMode, CancellationToken cancellationToken)
+    public static async Task<int> MergeAndTranslateIfPossible(ObservableCollection<TranslateRow> rows, TranslationPair source, TranslationPair target, int index, IAutoTranslator autoTranslator, bool forceSingleLineMode, CancellationToken cancellationToken)
     {
         if (forceSingleLineMode)
         {
@@ -27,7 +28,7 @@ public static partial class MergeAndSplitHelper
         var noSentenceEndingTarget = IsNonMergeLanguage(target);
 
         // Try to handle (remove and save info for later restore) italics, bold, alignment, and more where possible
-        var tempSubtitle = new Subtitle(sourceSubtitle);
+        var tempSubtitle = rows.Select(p => new TranslateRow() { Number = p.Number, Show = p.Show, Duration = p.Duration, Text = p.Text }).ToArray();
         var formattingList = HandleFormatting(tempSubtitle, index, target.Code);
 
         if (Configuration.Settings.Tools.AutoTranslateMaxBytes <= 0)
@@ -74,14 +75,14 @@ public static partial class MergeAndSplitHelper
 
         // Split by line ending chars where period count matches
         var splitResult = SplitMultipleLines(mergeResult, mergedTranslation, target.Code);
-        if (splitResult.Count == mergeCount && HasSameEmptyLines(splitResult, tempSubtitle, index) &&
+        if (splitResult.Count == mergeCount && HasSameEmptyLines(splitResult, tempSubtitle.Select(p => p.Text).ToList(), index) &&
             Utilities.CountTagInText(text, '.') == Utilities.CountTagInText(mergedTranslation, '.'))
         {
             var idx = 0;
             foreach (var line in splitResult)
             {
                 var reformattedText = formattingList[idx].ReAddFormatting(line);
-                targetSubtitle.Paragraphs[index].Text = reformattedText;
+                rows[index].TranslatedText = reformattedText;
                 index++;
                 linesTranslate++;
                 idx++;
@@ -95,12 +96,6 @@ public static partial class MergeAndSplitHelper
         var translatedLines = mergedTranslation.SplitToLines();
         if (translatedLines.Count == mergeResult.Text.SplitToLines().Count)
         {
-            var newSub = new Subtitle();
-            for (var i = 0; i < mergeResult.ParagraphCount; i++)
-            {
-                newSub.Paragraphs.Add(new Paragraph());
-            }
-
             var translatedLinesIdx = 0;
             var paragraphIdx = 0;
             foreach (var mergeItem in mergeResult.MergeResultItems)
@@ -118,7 +113,7 @@ public static partial class MergeAndSplitHelper
                 var translatedText = sb.ToString().Trim();
 
                 var arr = TextSplit.SplitMulti(translatedText, numberOfParagraphs, target.TwoLetterIsoLanguageName);
-                for (var i = 0; i < arr.Count && paragraphIdx < newSub.Paragraphs.Count; i++)
+                for (var i = 0; i < arr.Count; i++)
                 {
                     var res = arr[i];
                     if (res.Contains('\n') ||
@@ -128,18 +123,18 @@ public static partial class MergeAndSplitHelper
                         res = Utilities.AutoBreakLine(arr[i], Configuration.Settings.General.SubtitleLineMaximumLength * 2, Configuration.Settings.General.MergeLinesShorterThan, target.TwoLetterIsoLanguageName);
                     }
 
-                    newSub.Paragraphs[paragraphIdx].Text = res;
+                    rows[i].TranslatedText = res;
                     paragraphIdx++;
                 }
             }
 
-            if (paragraphIdx == mergeCount && HasSameEmptyLines(newSub, sourceSubtitle, index))
+            if (paragraphIdx == mergeCount && HasSameEmptyLines(rows.Select(p => p.TranslatedText).ToList(), rows.Select(p => p.Text).ToList(), index))
             {
                 var idx = 0;
-                foreach (var p in newSub.Paragraphs)
+                foreach (var row in rows)
                 {
-                    var reformattedText = formattingList[idx].ReAddFormatting(p.Text);
-                    targetSubtitle.Paragraphs[index].Text = reformattedText;
+                    var reformattedText = formattingList[idx].ReAddFormatting(row.TranslatedText);
+                    row.TranslatedText = reformattedText;
                     index++;
                     linesTranslate++;
                     idx++;
@@ -152,14 +147,14 @@ public static partial class MergeAndSplitHelper
         // Split by line ending chars - periods in numbers removed
         var noPeriodsInNumbersTranslation = FixPeriodInNumbers(mergedTranslation);
         splitResult = SplitMultipleLines(mergeResult, noPeriodsInNumbersTranslation, target.Code);
-        if (splitResult.Count == mergeCount && HasSameEmptyLines(splitResult, tempSubtitle, index) &&
+        if (splitResult.Count == mergeCount && HasSameEmptyLines(splitResult, tempSubtitle.Select(p=>p.Text).ToList(), index) &&
             Utilities.CountTagInText(text, '.') == Utilities.CountTagInText(noPeriodsInNumbersTranslation, '.'))
         {
             var idx = 0;
             foreach (var line in splitResult)
             {
                 var reformattedText = formattingList[idx].ReAddFormatting(line.Replace('¤', '.'));
-                targetSubtitle.Paragraphs[index].Text = reformattedText;
+                rows[index].TranslatedText = reformattedText;
                 index++;
                 linesTranslate++;
                 idx++;
@@ -171,13 +166,13 @@ public static partial class MergeAndSplitHelper
 
         // Split by line ending chars
         splitResult = SplitMultipleLines(mergeResult, mergedTranslation, target.Code);
-        if (splitResult.Count == mergeCount && HasSameEmptyLines(splitResult, tempSubtitle, index))
+        if (splitResult.Count == mergeCount && HasSameEmptyLines(splitResult, tempSubtitle.Select(p => p.Text).ToList(), index))
         {
             var idx = 0;
             foreach (var line in splitResult)
             {
                 var reformattedText = formattingList[idx].ReAddFormatting(line);
-                targetSubtitle.Paragraphs[index].Text = reformattedText;
+                rows[index].TranslatedText = reformattedText;
                 index++;
                 linesTranslate++;
                 idx++;
@@ -211,12 +206,12 @@ public static partial class MergeAndSplitHelper
         }
     }
 
-    private static bool HasSameEmptyLines(Subtitle newSub, Subtitle sourceSubtitle, int index)
+    private static bool HasSameEmptyLines(List<string> newTexts, List<string> sourceSubtitle, int index)
     {
-        for (var i = 0; i < newSub.Paragraphs.Count; i++)
+        for (var i = 0; i < newTexts.Count; i++)
         {
-            var inputBlank = string.IsNullOrWhiteSpace(sourceSubtitle.Paragraphs[i + index].Text);
-            var outputBlank = string.IsNullOrWhiteSpace(newSub.Paragraphs[i].Text);
+            var inputBlank = string.IsNullOrWhiteSpace(sourceSubtitle[i + index]);
+            var outputBlank = string.IsNullOrWhiteSpace(newTexts[i]);
             if (inputBlank || outputBlank && (inputBlank != outputBlank))
             {
                 return false;
@@ -241,13 +236,13 @@ public static partial class MergeAndSplitHelper
         return true;
     }
 
-    private static List<Formatting> HandleFormatting(Subtitle sourceSubtitle, int index, string sourceLanguage)
+    private static List<Formatting> HandleFormatting(TranslateRow[] rows, int index, string sourceLanguage)
     {
         var formattingList = new List<Formatting>();
 
-        for (var i = index; i < sourceSubtitle.Paragraphs.Count; i++)
+        for (var i = index; i < rows.Length; i++)
         {
-            var p = sourceSubtitle.Paragraphs[i];
+            var p = rows[i];
             var f = new Formatting();
             var text = f.SetTagsAndReturnTrimmed(TranslationHelper.PreTranslate(p.Text, sourceLanguage), sourceLanguage);
             p.Text = text;
@@ -257,26 +252,27 @@ public static partial class MergeAndSplitHelper
         return formattingList;
     }
 
-    public static Nikse.SubtitleEdit.Features.Translate.MergeAndSplitHelper.MergeResult MergeMultipleLines(Subtitle sourceSubtitle, int index, int maxTextSize, bool noSentenceEndingSource, bool noSentenceEndingTarget)
+    public static MergeResult MergeMultipleLines(TranslateRow[] sourceSubtitle, int index, int maxTextSize, bool noSentenceEndingSource, bool noSentenceEndingTarget)
     {
-        var result = new Nikse.SubtitleEdit.Features.Translate.MergeAndSplitHelper.MergeResult
+        var result = new MergeResult
         {
-            MergeResultItems = new List<Nikse.SubtitleEdit.Features.Translate.MergeAndSplitHelper.MergeResultItem>(),
+            MergeResultItems = new List<MergeResultItem>(),
             NoSentenceEndingSource = noSentenceEndingSource,
             NoSentenceEndingTarget = noSentenceEndingTarget,
         };
 
-        var item = new Nikse.SubtitleEdit.Features.Translate.MergeAndSplitHelper.MergeResultItem
+        var item = new MergeResultItem
         {
             StartIndex = index,
             EndIndex = index,
             Text = string.Empty,
-            Paragraphs = new List<Paragraph>(),
+            Paragraphs = new List<TranslateRow>(),
+
         };
 
-        result.Text = sourceSubtitle.Paragraphs[index].Text;
-        item.Paragraphs.Add(sourceSubtitle.Paragraphs[index]);
-        item.Text = sourceSubtitle.Paragraphs[index].Text;
+        result.Text = sourceSubtitle[index].Text;
+        item.Paragraphs.Add(sourceSubtitle[index]);
+        item.Text = sourceSubtitle[index].Text;
         if (string.IsNullOrWhiteSpace(result.Text))
         {
             item.IsEmpty = true;
@@ -287,11 +283,11 @@ public static partial class MergeAndSplitHelper
         }
 
         var textBuild = new StringBuilder(result.Text);
-        var prev = sourceSubtitle.Paragraphs[index];
+        var prev = sourceSubtitle[index];
 
-        for (var i = index + 1; i < sourceSubtitle.Paragraphs.Count; i++)
+        for (var i = index + 1; i < sourceSubtitle.Length; i++)
         {
-            var p = sourceSubtitle.Paragraphs[i];
+            var p = sourceSubtitle[i];
 
             if (item != null && Utilities.UrlEncodeLength(result.Text + Environment.NewLine + p.Text) > maxTextSize)
             {
@@ -319,7 +315,7 @@ public static partial class MergeAndSplitHelper
                     result.MergeResultItems.Add(item);
 
                     textBuild = new StringBuilder();
-                    item = new Nikse.SubtitleEdit.Features.Translate.MergeAndSplitHelper.MergeResultItem { StartIndex = i, Text = string.Empty, Paragraphs = new List<Paragraph>() };
+                    item = new MergeResultItem { StartIndex = i, Text = string.Empty, Paragraphs = new List<TranslateRow>() };
                 }
             }
             else if (string.IsNullOrWhiteSpace(p.Text))
@@ -335,7 +331,7 @@ public static partial class MergeAndSplitHelper
                     result.MergeResultItems.Add(item);
                 }
 
-                result.MergeResultItems.Add(new Nikse.SubtitleEdit.Features.Translate.MergeAndSplitHelper.MergeResultItem
+                result.MergeResultItems.Add(new MergeResultItem
                 {
                     StartIndex = index,
                     EndIndex = index,
@@ -343,7 +339,7 @@ public static partial class MergeAndSplitHelper
                     TextIndexStart = result.Text.Length,
                     TextIndexEnd = result.Text.Length,
                     Text = string.Empty,
-                    Paragraphs = new List<Paragraph>(),
+                    Paragraphs = new List<TranslateRow>(),
                 });
 
                 item = null;
@@ -381,9 +377,9 @@ public static partial class MergeAndSplitHelper
 
                 result.Text += Environment.NewLine + p.Text;
 
-                item = new Nikse.SubtitleEdit.Features.Translate.MergeAndSplitHelper.MergeResultItem { StartIndex = i, TextIndexStart = result.Text.Length, Text = p.Text, Paragraphs = new List<Paragraph>(), };
+                item = new MergeResultItem { StartIndex = i, TextIndexStart = result.Text.Length, Text = p.Text, Paragraphs = new List<TranslateRow>(), };
             }
-            else if (item != null && (item.Continuous || item.StartIndex == item.EndIndex) && p.StartTime.TotalMilliseconds - prev.EndTime.TotalMilliseconds < 1000)
+            else if (item != null && (item.Continuous || item.StartIndex == item.EndIndex) && p.Show.TotalMilliseconds - prev.Hide.TotalMilliseconds < 1000)
             {
                 textBuild.Append(" ");
                 textBuild.Append(p.Text);
@@ -432,7 +428,7 @@ public static partial class MergeAndSplitHelper
         return result;
     }
 
-    public static List<string> SplitMultipleLines(Nikse.SubtitleEdit.Features.Translate.MergeAndSplitHelper.MergeResult mergeResult, string translatedText, string language)
+    public static List<string> SplitMultipleLines(MergeResult mergeResult, string translatedText, string language)
     {
         var lines = new List<string>();
         var text = translatedText;
@@ -551,14 +547,14 @@ public static partial class MergeAndSplitHelper
                 }
 
                 // check max chars
-                var cps1 = new Paragraph(arr[0], item.Paragraphs[0].StartTime.TotalMilliseconds, item.Paragraphs[0].EndTime.TotalMilliseconds).GetCharactersPerSecond();
-                var cps2 = new Paragraph(arr[1], item.Paragraphs[1].StartTime.TotalMilliseconds, item.Paragraphs[1].EndTime.TotalMilliseconds).GetCharactersPerSecond();
+                var cps1 = new Paragraph(arr[0], item.Paragraphs[0].Show.TotalMilliseconds, item.Paragraphs[0].Hide.TotalMilliseconds).GetCharactersPerSecond();
+                var cps2 = new Paragraph(arr[1], item.Paragraphs[1].Show.TotalMilliseconds, item.Paragraphs[1].Hide.TotalMilliseconds).GetCharactersPerSecond();
 
-                var cpsChar1 = new Paragraph(pctCharArr[0], item.Paragraphs[0].StartTime.TotalMilliseconds, item.Paragraphs[0].EndTime.TotalMilliseconds).GetCharactersPerSecond();
-                var cpsChar2 = new Paragraph(pctCharArr[1], item.Paragraphs[1].StartTime.TotalMilliseconds, item.Paragraphs[1].EndTime.TotalMilliseconds).GetCharactersPerSecond();
+                var cpsChar1 = new Paragraph(pctCharArr[0], item.Paragraphs[0].Show.TotalMilliseconds, item.Paragraphs[0].Hide.TotalMilliseconds).GetCharactersPerSecond();
+                var cpsChar2 = new Paragraph(pctCharArr[1], item.Paragraphs[1].Show.TotalMilliseconds, item.Paragraphs[1].Hide.TotalMilliseconds).GetCharactersPerSecond();
 
-                var cpsDuration1 = new Paragraph(pctDurationArr[0], item.Paragraphs[0].StartTime.TotalMilliseconds, item.Paragraphs[0].EndTime.TotalMilliseconds).GetCharactersPerSecond();
-                var cpsDuration2 = new Paragraph(pctDurationArr[1], item.Paragraphs[1].StartTime.TotalMilliseconds, item.Paragraphs[1].EndTime.TotalMilliseconds).GetCharactersPerSecond();
+                var cpsDuration1 = new Paragraph(pctDurationArr[0], item.Paragraphs[0].Show.TotalMilliseconds, item.Paragraphs[0].Hide.TotalMilliseconds).GetCharactersPerSecond();
+                var cpsDuration2 = new Paragraph(pctDurationArr[1], item.Paragraphs[1].Show.TotalMilliseconds, item.Paragraphs[1].Hide.TotalMilliseconds).GetCharactersPerSecond();
 
                 if (pctCharArr[0].Length > 0 && pctCharArr[0].EndsWith(',') &&
                     cpsChar1 < Configuration.Settings.General.SubtitleMaximumCharactersPerSeconds &&

@@ -17,12 +17,13 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Globalization;
 using System.Text;
+using Avalonia.Threading;
 
 namespace Nikse.SubtitleEdit.Features.Translate;
 
 public partial class AutoTranslateViewModel : ObservableObject
 {
-    private ObservableCollection<TranslateRow> _rows;
+    [ObservableProperty] private ObservableCollection<TranslateRow> _rows;
     public ITreeDataGridSource TranslateRowSource { get; }
     public AutoTranslateWindow? Window { get; set; }
     public bool OkPressed { get; set; }
@@ -38,6 +39,10 @@ public partial class AutoTranslateViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<TranslationPair> _targetLanguages = new();
     [ObservableProperty] private TranslationPair? _selectedTargetLanguage;
 
+    [ObservableProperty] private TranslateRow? _selectedTranslateRow;
+
+    [ObservableProperty] private bool _isTranslateEnabled;
+
     [ObservableProperty] private bool _apiKeyIsVisible;
     [ObservableProperty] private string _apiKeyText;
     [ObservableProperty] private bool _apiUrlIsVisible;
@@ -47,19 +52,20 @@ public partial class AutoTranslateViewModel : ObservableObject
     [ObservableProperty] private string _modelText;
     [ObservableProperty] private bool _buttonModelIsVisible;
 
-    private CancellationTokenSource _cancellationTokenSource = new();
+    private CancellationTokenSource _cancellationTokenSource;
     private bool _translationInProgress = false;
     private bool _abort = false;
     private List<string> _apiUrls = new();
     private List<string> _apiModels = new();
     private bool _onlyCurrentLine;
     private Subtitle _subtitle = new Subtitle();
+    private int _translationProgressIndex;
     private readonly IWindowService _windowService;
 
     public AutoTranslateViewModel(IWindowService windowService)
     {
         _windowService = windowService;
-        
+
         ApiKeyText = string.Empty;
         ApiUrlText = string.Empty;
         ModelText = string.Empty;
@@ -92,7 +98,7 @@ public partial class AutoTranslateViewModel : ObservableObject
             Columns =
             {
                 new TextColumn<TranslateRow, int>("#", x => x.Number),
-                new TextColumn<TranslateRow, string>("Show", x => x.Show),
+                new TextColumn<TranslateRow, TimeSpan>("Show", x => x.Show),
                 new TextColumn<TranslateRow, string>("Duration", x => x.Duration),
                 new TextColumn<TranslateRow, string>("Text", x => x.Text),
                 new TextColumn<TranslateRow, string>("Translated text", x => x.TranslatedText),
@@ -101,7 +107,8 @@ public partial class AutoTranslateViewModel : ObservableObject
 
         var dataGridSource = TranslateRowSource as FlatTreeDataGridSource<TranslateRow>;
         dataGridSource!.RowSelection!.SingleSelect = true;
-        _windowService = windowService;
+        IsTranslateEnabled = true;
+        _cancellationTokenSource = new CancellationTokenSource();
     }
 
     public void Initialize(Subtitle subtitle)
@@ -110,7 +117,8 @@ public partial class AutoTranslateViewModel : ObservableObject
         var rows = subtitle.Paragraphs.Select(p => new TranslateRow
         {
             Number = p.Number,
-            Show = p.StartTime.ToDisplayString(),
+            Show = p.StartTime.TimeSpan,
+            Hide = p.EndTime.TimeSpan,
             Duration = p.Duration.ToShortDisplayString(),
             Text = p.Text,
         });
@@ -289,6 +297,156 @@ public partial class AutoTranslateViewModel : ObservableObject
 
         _translationInProgress = true;
         _cancellationTokenSource = new CancellationTokenSource();
+
+
+        SaveSettings();
+
+        IsTranslateEnabled = false;
+
+        translator.Initialize();
+
+        var sourceLanguage = translator.GetSupportedSourceLanguages()
+            .FirstOrDefault(p => p.Name.Equals(SelectedSourceLanguage!.ToString(), StringComparison.InvariantCultureIgnoreCase));
+
+        var targetLanguage = translator.GetSupportedTargetLanguages()
+            .FirstOrDefault(p => p.Name.Equals(SelectedTargetLanguage!.ToString(), StringComparison.InvariantCultureIgnoreCase));
+
+        if (sourceLanguage == null || targetLanguage == null)
+        {
+            return;
+        }
+
+        Configuration.Settings.Tools.GoogleTranslateLastSourceLanguage = sourceLanguage.TwoLetterIsoLanguageName;
+        Configuration.Settings.Tools.GoogleTranslateLastTargetLanguage = targetLanguage.TwoLetterIsoLanguageName;
+
+
+        // do translation in background
+#pragma warning disable CS4014
+        Task.Run(() =>
+        {
+            DoTranslate(sourceLanguage, targetLanguage, translator, _cancellationTokenSource.Token);
+        });
+#pragma warning restore CS4014
+    }
+
+    private async Task DoTranslate(TranslationPair sourceLanguage, TranslationPair targetLanguage, IAutoTranslator translator, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var start = 0;
+            if (SelectedTranslateRow is TranslateRow selectedItem)
+            {
+                start = Rows.IndexOf(selectedItem);
+            }
+
+            var forceSingleLineMode = Configuration.Settings.Tools.AutoTranslateStrategy ==
+                                      TranslateStrategy.TranslateEachLineSeparately.ToString() ||
+                                      translator.Name ==
+                                      NoLanguageLeftBehindApi.StaticName || // NLLB seems to miss some text...
+                                      translator.Name == NoLanguageLeftBehindServe.StaticName; //||
+                                      //_singleLineMode;
+
+            if (_onlyCurrentLine)
+            {
+                forceSingleLineMode = true;
+            }
+
+            var index = start;
+            var linesTranslated = 0;
+            var errorCount = 0;
+            while (index < Rows.Count)
+            {
+                if (_abort || cancellationToken.IsCancellationRequested)
+                {
+                    IsTranslateEnabled = true;
+                    break;
+                }
+
+                var linesMergedAndTranslated = 0;
+
+                if (!_onlyCurrentLine)
+                {
+                    linesMergedAndTranslated = await MergeAndSplitHelper.MergeAndTranslateIfPossible(Rows, sourceLanguage, targetLanguage, index, translator, forceSingleLineMode,
+                        cancellationToken);
+                }
+
+                if (linesMergedAndTranslated > 0)
+                {
+                    index += linesMergedAndTranslated;
+
+                    var index1 = index;
+                    if (!_onlyCurrentLine)
+                    {
+                        Dispatcher.UIThread.Invoke(() =>
+                        {
+                            //ProgressBar.Progress = (double)index1 / Lines.Count;
+                            //CollectionView.ScrollTo(index1, 1, ScrollToPosition.Center, false);
+                        });
+                    }
+
+                    linesTranslated += linesMergedAndTranslated;
+                    _translationProgressIndex = index;
+                    errorCount = 0;
+                    continue;
+                }
+
+                errorCount++;
+                if (errorCount > 3)
+                {
+                    forceSingleLineMode = true;
+                }
+
+                var translateCount = await MergeAndSplitHelper.MergeAndTranslateIfPossible(
+                    Rows,
+                    sourceLanguage,
+                    targetLanguage,
+                    0,
+                    translator,
+                    false,
+                    _cancellationTokenSource.Token);
+
+                if (_abort || cancellationToken.IsCancellationRequested)
+                {
+                    IsTranslateEnabled = true;
+                    return;
+                }
+
+                if (translateCount > 0)
+                {
+                   // TranslateRows[index].TranslatedText = trg.Paragraphs[0].Text;
+                    index += translateCount;
+                    var progressIndex = index;
+                    Dispatcher.UIThread.Invoke(() =>
+                    {
+                        //ProgressBar.Progress = (double)progressIndex / TranslateRows.Count;
+                        //CollectionView.ScrollTo(progressIndex, 1, ScrollToPosition.Center, false);
+                    });
+
+                    if (_onlyCurrentLine)
+                    {
+                        _translationProgressIndex = index - 1;
+                        IsTranslateEnabled = true;
+                        break;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+        }
+        catch (Exception ex)
+        {
+            _ = Dispatcher.UIThread.Invoke(async () =>
+            {
+                await MessageBox.Show(Window!, ex.Message, ex.StackTrace ?? "An error occurred", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            });
+        }
+        finally
+        {
+            IsTranslateEnabled = true;
+        }
     }
 
     [RelayCommand]

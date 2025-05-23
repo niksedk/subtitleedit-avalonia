@@ -19,6 +19,6 @@ public static partial class MergeAndSplitHelper
         public bool HasError { get; set; }
         public int TextIndexStart { get; set; }
         public int TextIndexEnd { get; set; }
-        public List<Paragraph> Paragraphs { get; set; } = new();
+        public List<TranslateRow> Paragraphs { get; set; } = new();
     }
 }
