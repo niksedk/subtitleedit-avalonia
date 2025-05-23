@@ -49,6 +49,7 @@ public class AutoTranslateWindow : Window
         var sourceLangCombo = UiUtil.MakeComboBox(vm.SourceLanguages!, vm, nameof(vm.SelectedSourceLanguage));
         var targetLangCombo = UiUtil.MakeComboBox(vm.TargetLanguages!, vm, nameof(vm.SelectedTargetLanguage));
         var buttonTranslate = UiUtil.MakeButton("Translate", vm.TranslateCommand);
+        buttonTranslate.Bind(Button.IsEnabledProperty, new Binding(nameof(vm.IsTranslateEnabled)));
 
         var topBar = new StackPanel
         {
@@ -124,6 +125,7 @@ public class AutoTranslateWindow : Window
         };
         dataGrid.Bind(DataGrid.ItemsSourceProperty, new Binding(nameof(vm.Rows)));
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedTranslateRow)));
+        vm.RowGrid = dataGrid; 
 
 
         var scrollViewer = new ScrollViewer

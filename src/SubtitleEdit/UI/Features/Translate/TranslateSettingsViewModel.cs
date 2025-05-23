@@ -37,29 +37,24 @@ public partial class TranslateSettingsViewModel : ObservableObject
         if (!PromptText.Contains("{0}") || !PromptText.Contains("{1}"))
         {
             await MessageBox.Show(Window!, "Error",
-                "Prompt must contain {0} (source language) and {1} (target language)", MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+                "Prompt must contain {0} (source language) and {1} (target language)", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
 
         if (PromptText.Replace("{0}", string.Empty).Replace("{1}", string.Empty).Contains('{'))
         {
-            await MessageBox.Show(Window!, "Error", "Character not allowed in prompt: '{' (besides '{0}' and '{1}')",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            await MessageBox.Show(Window!, "Error", "Character not allowed in prompt: '{' (besides '{0}' and '{1}')", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
 
         if (PromptText.Replace("{0}", string.Empty).Replace("{1}", string.Empty).Contains('}'))
         {
-            await MessageBox.Show(Window!, "Error", "Character not allowed in prompt: '}' (besides '{0}' and '{1}')",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            await MessageBox.Show(Window!, "Error", "Character not allowed in prompt: '}' (besides '{0}' and '{1}')", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
 
         OkPressed = true;
-
         SaveValues();
-
         Window?.Close();
     }
 
@@ -110,7 +105,6 @@ public partial class TranslateSettingsViewModel : ObservableObject
 
         Se.SaveSettings();
     }
-
 
     public void LoadValues(IAutoTranslator translator)
     {

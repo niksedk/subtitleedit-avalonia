@@ -19,11 +19,6 @@ public static partial class MergeAndSplitHelper
 
     public static async Task<int> MergeAndTranslateIfPossible(ObservableCollection<TranslateRow> rows, TranslationPair source, TranslationPair target, int index, IAutoTranslator autoTranslator, bool forceSingleLineMode, CancellationToken cancellationToken)
     {
-        if (forceSingleLineMode)
-        {
-            return 0;
-        }
-
         var noSentenceEndingSource = IsNonMergeLanguage(source);
         var noSentenceEndingTarget = IsNonMergeLanguage(target);
 
@@ -36,6 +31,11 @@ public static partial class MergeAndSplitHelper
             Configuration.Settings.Tools.AutoTranslateMaxBytes = new ToolsSettings().AutoTranslateMaxBytes;
         }
         var maxChars = Math.Min(autoTranslator.MaxCharacters, Configuration.Settings.Tools.AutoTranslateMaxBytes);
+
+        if (forceSingleLineMode)
+        {
+            maxChars = 0;
+        }
 
         if (MergeSplitProblems)
         {
@@ -81,6 +81,11 @@ public static partial class MergeAndSplitHelper
             var idx = 0;
             foreach (var line in splitResult)
             {
+                if (index >= rows.Count || idx >= formattingList.Count)
+                {
+                    break;
+                }
+
                 var reformattedText = formattingList[idx].ReAddFormatting(line);
                 rows[index].TranslatedText = reformattedText;
                 index++;
@@ -131,10 +136,15 @@ public static partial class MergeAndSplitHelper
             if (paragraphIdx == mergeCount && HasSameEmptyLines(rows.Select(p => p.TranslatedText).ToList(), rows.Select(p => p.Text).ToList(), index))
             {
                 var idx = 0;
-                foreach (var row in rows)
+                foreach (var line in splitResult)
                 {
-                    var reformattedText = formattingList[idx].ReAddFormatting(row.TranslatedText);
-                    row.TranslatedText = reformattedText;
+                    if (idx >= formattingList.Count && index < rows.Count)
+                    {
+                        break;
+                    }
+
+                    var reformattedText = formattingList[idx].ReAddFormatting(rows[index].TranslatedText);
+                    rows[index].TranslatedText = reformattedText;
                     index++;
                     linesTranslate++;
                     idx++;
@@ -147,12 +157,16 @@ public static partial class MergeAndSplitHelper
         // Split by line ending chars - periods in numbers removed
         var noPeriodsInNumbersTranslation = FixPeriodInNumbers(mergedTranslation);
         splitResult = SplitMultipleLines(mergeResult, noPeriodsInNumbersTranslation, target.Code);
-        if (splitResult.Count == mergeCount && HasSameEmptyLines(splitResult, tempSubtitle.Select(p=>p.Text).ToList(), index) &&
+        if (splitResult.Count == mergeCount && HasSameEmptyLines(splitResult, tempSubtitle.Select(p => p.Text).ToList(), index) &&
             Utilities.CountTagInText(text, '.') == Utilities.CountTagInText(noPeriodsInNumbersTranslation, '.'))
         {
             var idx = 0;
             foreach (var line in splitResult)
             {
+                if (index >= rows.Count || idx >= formattingList.Count)
+                {
+                    break;
+                }
                 var reformattedText = formattingList[idx].ReAddFormatting(line.Replace('¤', '.'));
                 rows[index].TranslatedText = reformattedText;
                 index++;
@@ -171,6 +185,11 @@ public static partial class MergeAndSplitHelper
             var idx = 0;
             foreach (var line in splitResult)
             {
+                if (index >= rows.Count || idx >= formattingList.Count)
+                {
+                    break;
+                }
+
                 var reformattedText = formattingList[idx].ReAddFormatting(line);
                 rows[index].TranslatedText = reformattedText;
                 index++;
@@ -208,25 +227,10 @@ public static partial class MergeAndSplitHelper
 
     private static bool HasSameEmptyLines(List<string> newTexts, List<string> sourceSubtitle, int index)
     {
-        for (var i = 0; i < newTexts.Count; i++)
+        for (var i = 0; i < newTexts.Count && i + index < sourceSubtitle.Count; i++)
         {
             var inputBlank = string.IsNullOrWhiteSpace(sourceSubtitle[i + index]);
             var outputBlank = string.IsNullOrWhiteSpace(newTexts[i]);
-            if (inputBlank || outputBlank && (inputBlank != outputBlank))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private static bool HasSameEmptyLines(List<string> splitResult, Subtitle tempSubtitle, int index)
-    {
-        for (var i = 0; i < splitResult.Count; i++)
-        {
-            var inputBlank = string.IsNullOrWhiteSpace(tempSubtitle.Paragraphs[i + index].Text);
-            var outputBlank = string.IsNullOrWhiteSpace(splitResult[i]);
             if (inputBlank || outputBlank && (inputBlank != outputBlank))
             {
                 return false;
