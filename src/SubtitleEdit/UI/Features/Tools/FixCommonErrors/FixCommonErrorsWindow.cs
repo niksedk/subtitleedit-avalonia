@@ -4,6 +4,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
@@ -210,6 +211,7 @@ public class FixCommonErrorsWindow : Window
             VerticalAlignment = VerticalAlignment.Stretch,
             Width = double.NaN,
             Height = double.NaN,
+            DataContext = _vm,
             ItemsSource = _vm.Fixes,
             Columns =
             {
@@ -297,19 +299,38 @@ public class FixCommonErrorsWindow : Window
             VerticalAlignment = VerticalAlignment.Stretch,
             Width = double.NaN,
             Height = double.NaN,
-            //ItemsSource = _vm.SubtitlesToFix,
+            DataContext = _vm,
+            ItemsSource = _vm.Paragraphs,
             Columns =
             {
                 new DataGridTextColumn
                 {
-                    Header = "Subtitle Text",
-              //      Binding = new Binding(nameof(Subtitle.Text)),
+                    Header = "#",
+                    Binding = new Binding(nameof(SubtitleLineViewModel.Number)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Line Number",
-              //      Binding = new Binding(nameof(Subtitle.Number)),
+                    Header = "Show",
+                    Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)),
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = "Hide",
+                    Binding = new Binding(nameof(SubtitleLineViewModel.EndTime)),
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = "Duration",
+                    Binding = new Binding(nameof(SubtitleLineViewModel.Duration)),
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = "Text",
+                    Binding = new Binding(nameof(SubtitleLineViewModel.Text)),
                     IsReadOnly = true,
                 },
             },

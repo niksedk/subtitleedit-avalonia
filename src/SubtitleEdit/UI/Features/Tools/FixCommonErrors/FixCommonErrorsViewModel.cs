@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Enums;
 using Nikse.SubtitleEdit.Core.Forms.FixCommonErrors;
+using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
@@ -20,7 +21,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
-public partial class FixCommonErrorsViewModel : ObservableObject
+
+public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
 {
     [ObservableProperty] private string _searchText;
     [ObservableProperty] private ObservableCollection<LanguageDisplayItem> _languages;
@@ -173,7 +175,6 @@ public partial class FixCommonErrorsViewModel : ObservableObject
         RefreshFixes();
     }
 
-
     [RelayCommand]
     private void DoApplyFixes()
     {
@@ -278,15 +279,18 @@ public partial class FixCommonErrorsViewModel : ObservableObject
             if (fix.IsSelected)
             {
                 var fixCommonError = fix.GetFixCommonErrorFunction();
-                //fixCommonError.Fix(subtitle, this);
+                fixCommonError.Fix(subtitle, this);
             }
         }
 
-        Paragraphs = new ObservableCollection<SubtitleLineViewModel>(_fixSubtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
+        Paragraphs.Clear();
+        Paragraphs.AddRange(_fixSubtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
     }
 
-    public void InitStep1(string languageCode)
+    public void InitStep1(string languageCode, Subtitle subtitle)
     {
+        _fixSubtitle = subtitle;
+
         _allFixRules = new List<FixRuleDisplayItem>
         {
             new (_language.RemovedEmptyLinesUnusedLineBreaks, "Has only one valid line!</br><i> -> Has only one valid line!", 1, true, nameof(FixEmptyLines)),
@@ -400,5 +404,90 @@ public partial class FixCommonErrorsViewModel : ObservableObject
                 FixRules.Add(rule);
             }
         }
+    }
+
+    public bool AllowFix(Paragraph p, string action)
+    {
+        if (_previewMode)
+        {
+            return true;
+        }
+
+        var allowFix = Fixes.Any(f => f.Paragraph.Id == p.Id && f.Action == action && f.IsSelected);
+        return allowFix;
+    }
+
+    public void AddFixToListView(Paragraph p, string action, string before, string after)
+    {
+        if (!_previewMode)
+        {
+            return;
+        }
+
+        var oldFix = _oldFixes.FirstOrDefault(f => f.Paragraph.Id == p.Id && f.Action == action);
+        var isSelected = oldFix is not { IsSelected: false };
+
+        Fixes.Add(new FixDisplayItem(p, p.Number, action, before, after, isSelected));
+    }
+
+    public void AddFixToListView(Paragraph p, string action, string before, string after, bool isChecked)
+    {
+        if (!_previewMode)
+        {
+            return;
+        }
+
+        var oldFix = _oldFixes.FirstOrDefault(f => f.Paragraph.Id == p.Id && f.Action == action);
+        var isSelected = isChecked;
+        if (oldFix is { IsSelected: false })
+        {
+            isSelected = false;
+        }
+
+        Fixes.Add(new FixDisplayItem(p, p.Number, action, before, after, isSelected));
+    }
+
+    public void LogStatus(string sender, string message)
+    {
+        //TODO: Implement logging functionality
+    }
+
+    public void LogStatus(string sender, string message, bool isImportant)
+    {
+        //TODO: Implement logging functionality
+    }
+
+    public void UpdateFixStatus(int fixes, string message)
+    {
+        if (_previewMode)
+        {
+            return;
+        }
+
+        if (fixes > 0)
+        {
+            _totalFixes += fixes;
+            //            LogStatus(message, string.Format(LanguageSettings.Current.FixCommonErrors.XFixesApplied, fixes));
+        }
+    }
+
+    public bool IsName(string candidate)
+    {
+        return _namesList.IsName(candidate);
+    }
+
+    public HashSet<string> GetAbbreviations()
+    {
+        return _namesList.GetAbbreviations();
+    }
+
+    public void AddToTotalErrors(int count)
+    {
+        _totalErrors += count;
+    }
+
+    public void AddToDeleteIndices(int index)
+    {
+        //TODO: Implement functionality to handle delete indices
     }
 }

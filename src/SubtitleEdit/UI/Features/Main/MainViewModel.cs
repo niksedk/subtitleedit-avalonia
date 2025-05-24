@@ -418,7 +418,7 @@ public partial class MainViewModel : ObservableObject
     {
         await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window, vm => 
         { 
-            vm.InitStep1("en");
+            vm.InitStep1("en", GetUpdateSubtitle());
         });
         _shortcutManager.ClearKeys();
     }
