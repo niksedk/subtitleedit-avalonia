@@ -4,6 +4,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -21,7 +22,10 @@ public class InitWaveform
         // waveform area
         if (vm.AudioVisualizer == null)
         {
-            vm.AudioVisualizer = new AudioVisualizer() { ShowGridLines = true };
+            vm.AudioVisualizer = new AudioVisualizer() 
+            { 
+                DrawGridLines = Se.Settings.Waveform.DrawGridLines 
+            };
         }
         else
         {

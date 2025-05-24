@@ -227,7 +227,8 @@ public class SettingsPage : UserControl
 
             new SettingsSection("Waveform/spectrogram",
             [
-                MakeCheckboxSetting("Show grid lines", nameof(_vm.WaveformShowGridLines)),
+                MakeCheckboxSetting("Draw grid lines", nameof(_vm.WaveformDrawGridLines)),
+                MakeCheckboxSetting("Center video position", nameof(_vm.WaveformCenterVideoPosition)),
                 new SettingsItem("Download ffmpeg", () => new StackPanel
                 {
                     Children =

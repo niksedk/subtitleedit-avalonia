@@ -23,6 +23,7 @@ public class Se
     public SeSpellCheck SpellCheck { get; set; } = new();
     public SeAppearance Appearance { get; set; } = new();
     public SeVideo Video { get; set; } = new();
+    public SeWaveform Waveform { get; set; } = new();
     public SeOcr Ocr { get; set; } = new();
     public static SeLanguage Language { get; set; } = new();
     public static Se Settings { get; set; } = new();
@@ -51,6 +52,7 @@ public class Se
     public static string TesseractModelFolder => Path.Combine(TesseractFolder, "tessdata");
     public static string FfmpegFolder => Path.Combine(BaseFolder, "ffmpeg");
     public static string WhisperFolder => Path.Combine(BaseFolder, "Whisper");
+    
 
     public Se()
     {
@@ -160,6 +162,11 @@ public class Se
         if (Settings.Video == null)
         {
             Settings.Video = new();
+        }
+
+        if (Settings.Waveform == null)
+        {
+            Settings.Waveform = new();
         }
 
         if (Settings.Ocr == null)

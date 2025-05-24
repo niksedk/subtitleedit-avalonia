@@ -83,7 +83,7 @@ public partial class MainViewModel : ObservableObject
     public MenuItem MenuReopen { get; set; }
     public AudioVisualizer AudioVisualizer { get; set; }
 
-
+    private bool _updateAudioVisualizer = false;
     private string? _subtitleFileName;
     private Subtitle _subtitle;
     private SubtitleFormat? _lastOpenSaveFormat;
@@ -138,7 +138,10 @@ public partial class MainViewModel : ObservableObject
         SelectedEncoding = Encodings[0];
         StatusTextLeft = string.Empty;
         StatusTextRight = string.Empty;
-        AudioVisualizer = new AudioVisualizer() { ShowGridLines = true };
+        AudioVisualizer = new AudioVisualizer() 
+        { 
+            DrawGridLines = Se.Settings.Waveform.DrawGridLines 
+        };
 
         LoadShortcuts();
         StartTitleTimer();
@@ -422,8 +425,8 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowToolsFixCommonErrors()
     {
-        await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window, vm => 
-        { 
+        await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window, vm =>
+        {
             vm.InitStep1("en", GetUpdateSubtitle());
         });
         _shortcutManager.ClearKeys();
@@ -1341,7 +1344,7 @@ public partial class MainViewModel : ObservableObject
 
             Dispatcher.UIThread.Post(() =>
             {
-                //_audioVisualizer.WavePeaks = wavePeaks;
+                AudioVisualizer.WavePeaks = wavePeaks;
 
                 //if (!_stopping)
                 //{
@@ -1349,6 +1352,7 @@ public partial class MainViewModel : ObservableObject
                 //    _audioVisualizer.InvalidateSurface();
                 //    ShowStatus("Wave info loaded.");
                 //}
+                _updateAudioVisualizer = true;
             }, DispatcherPriority.Background);
         }
     }
@@ -1670,6 +1674,7 @@ public partial class MainViewModel : ObservableObject
         StatusTextRight = $"{Subtitles.IndexOf(item) + 1}/{Subtitles.Count}";
 
         MakeSubtitleTextInfo(item.Text, item);
+        _updateAudioVisualizer = true;
     }
 
     private void MakeSubtitleTextInfo(string text, SubtitleLineViewModel item)
@@ -1695,7 +1700,7 @@ public partial class MainViewModel : ObservableObject
 
     private void StartTitleTimer()
     {
-        _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(75) };
+        _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
         _positionTimer.Tick += (s, e) =>
         {
             var text = "Untitled";
@@ -1719,30 +1724,14 @@ public partial class MainViewModel : ObservableObject
             var vp = VideoPlayerControl;
             if (av != null && vp != null)
             {
-                var subtitle = new Subtitle();
-                var selectedIndices = new List<int>();
+                var subtitle = new ObservableCollection<SubtitleLineViewModel>();
                 var orderedList = Subtitles.OrderBy(p => p.StartTime.TotalMilliseconds).ToList();
                 var firstSelectedIndex = -1;
                 for (var i = 0; i < orderedList.Count; i++)
                 {
                     var dp = orderedList[i];
-                    var p = new Paragraph(dp.Text, dp.StartTime.TotalMilliseconds, dp.EndTime.TotalMilliseconds);
-                    p.Text = dp.Text;
-                    p.StartTime.TotalMilliseconds = dp.StartTime.TotalMilliseconds;
-                    p.EndTime.TotalMilliseconds = dp.EndTime.TotalMilliseconds;
-                    subtitle.Paragraphs.Add(p);
-
-                    if (false) // check selected items in the grid
-                    {
-                        selectedIndices.Add(i);
-
-                        if (firstSelectedIndex < 0)
-                        {
-                            firstSelectedIndex = i;
-                        }
-                    }
+                    subtitle.Add(dp);
                 }
-
 
                 var mediaPlayerSeconds = vp.Position;
                 var startPos = mediaPlayerSeconds - 0.01;
@@ -1753,15 +1742,25 @@ public partial class MainViewModel : ObservableObject
 
                 av.CurrentVideoPositionSeconds = vp.Position;
 
-                 if (mediaPlayerSeconds > av.EndPositionSeconds || mediaPlayerSeconds < av.StartPositionSeconds)
-                    {
-                        av.SetPosition(startPos, subtitle, mediaPlayerSeconds, 0, selectedIndices.ToArray());
-                    }
-                    else
-                    {
-                        av.SetPosition(av.StartPositionSeconds, subtitle, mediaPlayerSeconds, firstSelectedIndex, selectedIndices.ToArray());
-                    }
+                if (Se.Settings.Waveform.CenterVideoPosition)
+                {
+                    // calculate the center position based on the waveform width
+                    av.SetPosition(Math.Max(0, startPos - 5), subtitle, mediaPlayerSeconds, firstSelectedIndex, _selectedSubtitles ?? new List<SubtitleLineViewModel>());
+                }
+                else if (mediaPlayerSeconds > av.EndPositionSeconds || mediaPlayerSeconds < av.StartPositionSeconds)
+                {
+                    av.SetPosition(startPos, subtitle, mediaPlayerSeconds, 0, _selectedSubtitles ?? new List<SubtitleLineViewModel>());
+                }
+                else
+                {
+                    av.SetPosition(av.StartPositionSeconds, subtitle, mediaPlayerSeconds, firstSelectedIndex, _selectedSubtitles ?? new List<SubtitleLineViewModel>());
+                }
 
+                if (_updateAudioVisualizer)
+                {
+                    av.InvalidateVisual();
+                    _updateAudioVisualizer = false;
+                }
             }
         };
         _positionTimer.Start();
@@ -1777,5 +1776,6 @@ public partial class MainViewModel : ObservableObject
         }
 
         MakeSubtitleTextInfo(selectedSubtitle.Text, selectedSubtitle);
+        _updateAudioVisualizer = true;
     }
 }

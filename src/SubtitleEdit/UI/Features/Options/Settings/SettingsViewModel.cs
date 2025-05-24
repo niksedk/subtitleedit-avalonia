@@ -70,8 +70,9 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _showStopButton;       
     [ObservableProperty] private bool _showFullscreenButton; 
     [ObservableProperty] private bool _autoOpenVideoFile;
-    
-    [ObservableProperty] private bool _waveformShowGridLines;
+
+    [ObservableProperty] private bool _waveformDrawGridLines;
+    [ObservableProperty] private bool _waveformCenterVideoPosition;
     [ObservableProperty] private string _ffmpegPath;
     [ObservableProperty] private string _ffmpegStatus;
 
@@ -176,6 +177,9 @@ public partial class SettingsViewModel : ObservableObject
         TextBoxFontSize = appearance.SubtitleTextBoxFontSize;
         TextBoxFontBold = appearance.SubtitleTextBoxFontBold;
 
+        WaveformDrawGridLines = Se.Settings.Waveform.DrawGridLines;
+        WaveformCenterVideoPosition = Se.Settings.Waveform.CenterVideoPosition;
+
         ColorDurationTooLong = general.ColorDurationTooLong;
         ColorDurationTooShort = general.ColorDurationTooShort;
         ColorTextTooLong = general.ColorTextTooLong;
@@ -233,7 +237,10 @@ public partial class SettingsViewModel : ObservableObject
         appearance.ToolbarShowEncoding = ShowToolbarEncoding;
         appearance.SubtitleTextBoxFontSize = TextBoxFontSize;
         appearance.SubtitleTextBoxFontBold = TextBoxFontBold;
-        
+
+        Se.Settings.Waveform.DrawGridLines = WaveformDrawGridLines;
+        Se.Settings.Waveform.CenterVideoPosition = WaveformCenterVideoPosition;
+
         general.ColorDurationTooLong = ColorDurationTooLong;
         general.ColorDurationTooShort = ColorDurationTooShort;
         general.ColorTextTooLong = ColorTextTooLong;

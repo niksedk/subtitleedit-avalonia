@@ -4,8 +4,11 @@ using Avalonia.Input;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Logic;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
@@ -31,11 +34,11 @@ public class AudioVisualizer : Control
     public static readonly StyledProperty<bool> MouseOverProperty =
         AvaloniaProperty.Register<AudioVisualizer, bool>(nameof(MouseOver));
 
-    public static readonly StyledProperty<bool> ShowGridLinesProperty =
-        AvaloniaProperty.Register<AudioVisualizer, bool>(nameof(ShowGridLines));
+    public static readonly StyledProperty<bool> DrawGridLinesProperty =
+        AvaloniaProperty.Register<AudioVisualizer, bool>(nameof(DrawGridLines));
 
-    public static readonly StyledProperty<List<Paragraph>> AllSelectedParagraphsProperty =
-        AvaloniaProperty.Register<AudioVisualizer, List<Paragraph>>(nameof(AllSelectedParagraphs));
+    public static readonly StyledProperty<List<SubtitleLineViewModel>> AllSelectedParagraphsProperty =
+        AvaloniaProperty.Register<AudioVisualizer, List<SubtitleLineViewModel>>(nameof(AllSelectedParagraphs));
 
     public WavePeakData? WavePeaks
     {
@@ -73,39 +76,41 @@ public class AudioVisualizer : Control
         set => SetValue(MouseOverProperty, value);
     }
 
-    public bool ShowGridLines
+    public bool DrawGridLines
     {
-        get => GetValue(ShowGridLinesProperty);
-        set => SetValue(ShowGridLinesProperty, value);
+        get => GetValue(DrawGridLinesProperty);
+        set => SetValue(DrawGridLinesProperty, value);
     }
 
-    public List<Paragraph> AllSelectedParagraphs
+    public List<SubtitleLineViewModel> AllSelectedParagraphs
     {
         get => GetValue(AllSelectedParagraphsProperty);
         set => SetValue(AllSelectedParagraphsProperty, value);
     }
 
+    public SubtitleLineViewModel? SelectedParagraph { get; set; }
+
     // Pens and brushes
-    private readonly Pen _paintWaveform = new Pen(Brushes.LightGreen, 1);
-    private readonly Pen _paintPenSelected = new Pen(Brushes.LightPink, 1);
+    private readonly Pen _paintWaveform = new Pen(new SolidColorBrush(Color.FromArgb(150, 144, 238, 144)), 1);
+    private readonly Pen _paintPenSelected = new Pen(new SolidColorBrush(Color.FromArgb(210, 254, 10, 10)), 1);
     private readonly Pen _paintGridLines = new Pen(Brushes.DarkGray, 0.2);
     private readonly Pen _paintCurrentPosition = new Pen(Brushes.Cyan, 1);
     private readonly IBrush _mouseOverBrush = new SolidColorBrush(Color.FromArgb(50, 255, 255, 0));
 
     // Paragraph painting
-    private readonly IBrush _paintBackground = new SolidColorBrush(Color.FromArgb(100, 0, 100, 200));
-    private readonly Pen _paintLeft = new Pen(Brushes.Green, 2);
-    private readonly Pen _paintRight = new Pen(Brushes.Red, 2);
+    private readonly IBrush _paintBackground = new SolidColorBrush(Color.FromArgb(90, 70, 70, 70));
+    private readonly Pen _paintLeft = new Pen(new SolidColorBrush(Color.FromArgb(60, 0, 255, 0)), 2);
+    private readonly Pen _paintRight = new Pen(new SolidColorBrush(Color.FromArgb(100, 255, 0, 0)), 2);
     private readonly IBrush _paintText = Brushes.White;
     private readonly Typeface _typeface = new Typeface("Arial");
     private readonly double _fontSize = 12;
 
-    private readonly List<Paragraph> _displayableParagraphs = new();
+    private readonly List<SubtitleLineViewModel> _displayableParagraphs = new();
     private long _lastMouseWheelScroll = -1;
     private readonly Lock _lock = new();
-    private Paragraph? _hoveredParagraph;
+    private SubtitleLineViewModel? _hoveredParagraph;
 
-    private Paragraph? _activeParagraph;
+    private SubtitleLineViewModel? _activeParagraph;
     private Point _startPointerPosition;
     private double _originalStartSeconds;
     private double _originalEndSeconds;
@@ -114,8 +119,10 @@ public class AudioVisualizer : Control
     public readonly double ResizeMargin = 5.0; // Margin for resizing paragraphs
 
 
-    public  AudioVisualizer()
+    public AudioVisualizer()
     {
+        AllSelectedParagraphs = new List<SubtitleLineViewModel>();
+
         AffectsRender<AudioVisualizer>(
             WavePeaksProperty,
             StartPositionSecondsProperty,
@@ -130,7 +137,6 @@ public class AudioVisualizer : Control
         PointerExited += OnPointerExited;
         PointerPressed += OnPointerPressed;
         PointerReleased += OnPointerReleased;
-        //PointerLeave += (_, __) => this.Cursor = new Cursor(StandardCursorType.Arrow);
     }
 
     private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
@@ -187,46 +193,67 @@ public class AudioVisualizer : Control
     {
         var point = e.GetPosition(this);
 
-        if (_interactionMode == InteractionMode.None)
+        if (_interactionMode == InteractionMode.None || _activeParagraph == null)
         {
-            UpdateCursor(point); 
-            return;
-        }
-
-        if (_activeParagraph == null)
-        {
+            UpdateCursor(point);
             return;
         }
 
         double deltaX = point.X - _startPointerPosition.X;
         double deltaSeconds = RelativeXPositionToSeconds((int)deltaX);
 
+        double newStart = _originalStartSeconds;
+        double newEnd = _originalEndSeconds;
+
+        var currentIndex = _displayableParagraphs.IndexOf(_activeParagraph);
+        var previous = currentIndex > 0 ? _displayableParagraphs[currentIndex - 1] : null;
+        var next = currentIndex < _displayableParagraphs.Count - 1 ? _displayableParagraphs[currentIndex + 1] : null;
+
         switch (_interactionMode)
         {
             case InteractionMode.Moving:
-                _activeParagraph.StartTime.TotalMilliseconds = (_originalStartSeconds + deltaSeconds) * 1000.0;
-                _activeParagraph.EndTime.TotalMilliseconds = (_originalEndSeconds + deltaSeconds) * 1000.0;
+                newStart = _originalStartSeconds + deltaSeconds;
+                newEnd = _originalEndSeconds + deltaSeconds;
+
+                // Clamp so it doesn't overlap previous or next
+                if (previous != null && newStart < previous.EndTime.TotalSeconds + 0.001)
+                {
+                    return;
+                }
+
+                if (next != null && newEnd > next.StartTime.TotalSeconds - 0.001)
+                {
+                    return;
+                }
+
+                _activeParagraph.StartTime = TimeSpan.FromSeconds(newStart);
+                _activeParagraph.EndTime = TimeSpan.FromSeconds(newEnd);
                 break;
+
             case InteractionMode.ResizingLeft:
-                var newStart = _originalStartSeconds + deltaSeconds;
-                if (newStart < _activeParagraph.EndTime.TotalSeconds - 0.1)
-                {
-                    _activeParagraph.StartTime.TotalMilliseconds = newStart * 1000.0;
-                }
+                newStart = _originalStartSeconds + deltaSeconds;
 
+                if (newStart < _activeParagraph.EndTime.TotalSeconds - 0.001 &&
+                    (previous == null || newStart > previous.EndTime.TotalSeconds + 0.001))
+                {
+                    _activeParagraph.StartTime = TimeSpan.FromSeconds(newStart);
+                }
                 break;
-            case InteractionMode.ResizingRight:
-                var newEnd = _originalEndSeconds + deltaSeconds;
-                if (newEnd > _activeParagraph.StartTime.TotalSeconds + 0.1)
-                {
-                    _activeParagraph.EndTime.TotalMilliseconds = newEnd * 1000.0;
-                }
 
+            case InteractionMode.ResizingRight:
+                newEnd = _originalEndSeconds + deltaSeconds;
+
+                if (newEnd > _activeParagraph.StartTime.TotalSeconds + 0.001 &&
+                    (next == null || newEnd < next.StartTime.TotalSeconds - 0.001))
+                {
+                    _activeParagraph.EndTime = TimeSpan.FromSeconds(newEnd);
+                }
                 break;
         }
 
         InvalidateVisual(); // Redraw waveform
     }
+
 
     private void UpdateCursor(Point point)
     {
@@ -251,7 +278,7 @@ public class AudioVisualizer : Control
         }
     }
 
-    private Paragraph? HitTestParagraph(Point point)
+    private SubtitleLineViewModel? HitTestParagraph(Point point)
     {
         if (_displayableParagraphs == null)
         {
@@ -278,7 +305,7 @@ public class AudioVisualizer : Control
 
         using (context.PushClip(new Rect(0, 0, Bounds.Width, Bounds.Height)))
         {
-            DrawGridLines(context);
+            DrawAllGridLines(context);
             DrawWaveForm(context);
             DrawParagraphs(context);
             DrawCurrentVideoPosition(context);
@@ -304,9 +331,9 @@ public class AudioVisualizer : Control
         }
     }
 
-    private void DrawGridLines(DrawingContext context)
+    private void DrawAllGridLines(DrawingContext context)
     {
-        if (!ShowGridLines)
+        if (!DrawGridLines)
         {
             return;
         }
@@ -433,7 +460,7 @@ public class AudioVisualizer : Control
         }
     }
 
-    private void DrawParagraph(Paragraph paragraph, DrawingContext context)
+    private void DrawParagraph(SubtitleLineViewModel paragraph, DrawingContext context)
     {
         var currentRegionLeft = SecondsToXPosition(paragraph.StartTime.TotalSeconds - StartPositionSeconds);
         var currentRegionRight = SecondsToXPosition(paragraph.EndTime.TotalSeconds - StartPositionSeconds);
@@ -538,7 +565,7 @@ public class AudioVisualizer : Control
         return (int)Math.Round(seconds * WavePeaks.SampleRate * ZoomFactor, MidpointRounding.AwayFromZero);
     }
 
-    public void SetPosition(double startPositionSeconds, Subtitle subtitle, double currentVideoPositionSeconds, int subtitleIndex, int[] selectedIndexes)
+    public void SetPosition(double startPositionSeconds, ObservableCollection<SubtitleLineViewModel> subtitle, double currentVideoPositionSeconds, int subtitleIndex, List<SubtitleLineViewModel> selectedIndexes)
     {
         if (TimeSpan.FromTicks(DateTime.UtcNow.Ticks - _lastMouseWheelScroll).TotalSeconds > 0.25)
         { // don't set start position when scrolling with mouse wheel as it will make a bad (jumping back) forward scrolling
@@ -548,14 +575,13 @@ public class AudioVisualizer : Control
         LoadParagraphs(subtitle, subtitleIndex, selectedIndexes);
     }
 
-    private void LoadParagraphs(Subtitle subtitle, int primarySelectedIndex, int[] selectedIndexes)
+    private void LoadParagraphs(ObservableCollection<SubtitleLineViewModel> subtitle, int primarySelectedIndex, List<SubtitleLineViewModel> selectedIndexes)
     {
         lock (_lock)
         {
-            //_subtitle.Paragraphs.Clear();
             _displayableParagraphs.Clear();
-            //SelectedParagraph = null;
-            //_allSelectedParagraphs.Clear();
+            SelectedParagraph = null;
+            AllSelectedParagraphs.Clear();
 
             if (WavePeaks == null)
             {
@@ -565,12 +591,12 @@ public class AudioVisualizer : Control
             const double additionalSeconds = 15.0; // Helps when scrolling
             var startThresholdMilliseconds = (StartPositionSeconds - additionalSeconds) * TimeCode.BaseUnit;
             var endThresholdMilliseconds = (EndPositionSeconds + additionalSeconds) * TimeCode.BaseUnit;
-            var displayableParagraphs = new List<Paragraph>();
-            for (var i = 0; i < subtitle.Paragraphs.Count; i++)
+            var displayableParagraphs = new List<SubtitleLineViewModel>();
+            for (var i = 0; i < subtitle.Count; i++)
             {
-                var p = subtitle.Paragraphs[i];
+                var p = subtitle[i];
 
-                if (p.StartTime.IsMaxTime)
+                if (p.StartTime.TotalMilliseconds >= TimeCode.MaxTimeTotalMilliseconds)
                 {
                     continue;
                 }
@@ -600,19 +626,19 @@ public class AudioVisualizer : Control
                 lastStartTime = p.StartTime.TotalMilliseconds;
             }
 
-            var primaryParagraph = subtitle.GetParagraphOrDefault(primarySelectedIndex);
-            if (primaryParagraph != null && !primaryParagraph.StartTime.IsMaxTime)
+            var primaryParagraph = subtitle.GetOrNull(primarySelectedIndex);
+            if (primaryParagraph != null && !primaryParagraph.StartTime.IsMaxTime())
             {
-                //SelectedParagraph = primaryParagraph;
-                //_allSelectedParagraphs.Add(primaryParagraph);
+                SelectedParagraph = primaryParagraph;
+                AllSelectedParagraphs.Add(primaryParagraph);
             }
 
             foreach (var index in selectedIndexes)
             {
-                var p = subtitle.GetParagraphOrDefault(index);
-                if (p != null && !p.StartTime.IsMaxTime)
+                var p = subtitle.FirstOrDefault(p => p == index);
+                if (p != null && !p.StartTime.IsMaxTime())
                 {
-                 //   _allSelectedParagraphs.Add(p);
+                    AllSelectedParagraphs.Add(p);
                 }
             }
         }

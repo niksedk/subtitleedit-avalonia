@@ -1,4 +1,5 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Features.Main;
 using System;
 using System.Collections.Generic;
 
@@ -10,7 +11,7 @@ public class IsSelectedHelper
     private int _lastPosition = int.MaxValue;
     private SelectionRange _nextSelection;
 
-    public IsSelectedHelper(List<Paragraph> paragraphs, int sampleRate)
+    public IsSelectedHelper(List<SubtitleLineViewModel> paragraphs, int sampleRate)
     {
         var count = paragraphs?.Count ?? 0;
         _ranges = new SelectionRange[count];
