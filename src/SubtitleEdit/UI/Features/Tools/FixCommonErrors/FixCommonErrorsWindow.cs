@@ -246,6 +246,8 @@ public class FixCommonErrorsWindow : Window
                 },
             },
         };
+        dataGridFixes.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(_vm.SelectedFix)));
+        dataGridFixes.SelectionChanged += DataGridFixes_SelectionChanged;
 
         var buttonBarFixes = UiUtil.MakeButtonBar(
             UiUtil.MakeButton("Select all", _vm.FixesSelectAllCommand),
@@ -335,6 +337,7 @@ public class FixCommonErrorsWindow : Window
                 },
             },
         };
+        dataGridSubtitles.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(_vm.SelectedParagraph)));
 
         var gridCurrentSubtbtitle = new Grid
         {
@@ -398,6 +401,11 @@ public class FixCommonErrorsWindow : Window
         Grid.SetColumn(borderSubtitles, 0);
 
         return grid;
+    }
+
+    private void DataGridFixes_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

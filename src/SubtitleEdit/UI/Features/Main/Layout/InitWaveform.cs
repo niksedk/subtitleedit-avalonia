@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -17,27 +18,17 @@ public class InitWaveform
         };
 
         // waveform area
-        vm.Waveform = new Grid
+        if (vm.AudioVisualizer == null)
         {
-            Margin = new Thickness(10),
-            Background = Brushes.Black,
-            Children =
-            {
-                new TextBox
-                {
-                    Text = "Waveform",
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    Background = Brushes.Transparent,
-                    BorderBrush = Brushes.Transparent,
-                    Foreground = Brushes.White,
-                    FontSize = 24,
-                    IsHitTestVisible = false
-                }
-            }
-        };
-        Grid.SetRow(vm.Waveform, 0);
-        mainGrid.Children.Add(vm.Waveform);
+            vm.AudioVisualizer = new AudioVisualizer() { ShowGridLines = true };
+        }
+        else
+        {
+            UiUtil.RemoveControlFromParent(vm.AudioVisualizer);
+        }
+
+        Grid.SetRow(vm.AudioVisualizer, 0);
+        mainGrid.Children.Add(vm.AudioVisualizer);
 
         // Footer
         var controlsPanel = new StackPanel

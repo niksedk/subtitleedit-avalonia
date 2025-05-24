@@ -29,6 +29,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
     [ObservableProperty] private LanguageDisplayItem? _selectedLanguage;
     [ObservableProperty] private ObservableCollection<FixRuleDisplayItem> _fixRules;
     [ObservableProperty] private ObservableCollection<FixDisplayItem> _fixes;
+    [ObservableProperty] private FixDisplayItem? _selectedFix;
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _paragraphs;
     [ObservableProperty] private SubtitleLineViewModel? _selectedParagraph;
     [ObservableProperty] private string _editText;

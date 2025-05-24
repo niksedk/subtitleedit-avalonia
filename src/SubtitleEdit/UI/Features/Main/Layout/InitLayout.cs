@@ -98,7 +98,6 @@ public static partial class InitLayout
         // Bottom content
         var bottomContent = new Border
         {
-            Background = Brushes.MediumPurple,
             Child = InitWaveform.MakeWaveform(mainPage, vm),
         };
         Grid.SetRow(bottomContent, 2);
@@ -183,7 +182,6 @@ public static partial class InitLayout
         // Bottom content
         var bottomContent = new Border
         {
-            Background = Brushes.MediumPurple,
             Child = InitWaveform.MakeWaveform(mainPage, vm),
         };
         Grid.SetRow(bottomContent, 2);
@@ -247,7 +245,6 @@ public static partial class InitLayout
         // Bottom part of nested grid
         var nestedBottom = new Border
         {
-            Background = Brushes.PaleVioletRed,
             Child = InitWaveform.MakeWaveform(mainPage, vm),
         };
         Grid.SetRow(nestedBottom, 2);
@@ -347,7 +344,6 @@ public static partial class InitLayout
         // Bottom part of right nested grid
         var rightNestedBottom = new Border
         {
-            Background = Brushes.Gold,
             Child = InitWaveform.MakeWaveform(mainPage, vm),
         };
         Grid.SetRow(rightNestedBottom, 2);
@@ -415,7 +411,6 @@ public static partial class InitLayout
         // Bottom section
         var bottomContent = new Border
         {
-            Background = Brushes.PaleVioletRed,
             Child = InitWaveform.MakeWaveform(mainPage, vm),
         };
         Grid.SetRow(bottomContent, 4);
@@ -469,7 +464,6 @@ public static partial class InitLayout
         // Bottom section
         var bottomContent = new Border
         {
-            Background = Brushes.PaleVioletRed,
             Child = InitWaveform.MakeWaveform(mainPage, vm),
         };
         Grid.SetRow(bottomContent, 2);
@@ -665,7 +659,6 @@ public static partial class InitLayout
         // Right part of nested grid
         var nestedRight = new Border
         {
-            Background = Brushes.PaleVioletRed,
             Child = InitWaveform.MakeWaveform(mainPage, vm),
         };
         Grid.SetColumn(nestedRight, 2);
@@ -733,7 +726,6 @@ public static partial class InitLayout
         // Middle section
         var middleContent = new Border
         {
-            Background = Brushes.LightSeaGreen,
             Child = InitWaveform.MakeWaveform(mainPage, vm),
         };
         Grid.SetRow(middleContent, 2);

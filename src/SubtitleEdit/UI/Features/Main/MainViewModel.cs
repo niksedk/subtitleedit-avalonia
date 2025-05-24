@@ -78,9 +78,11 @@ public partial class MainViewModel : ObservableObject
     public Window Window { get; set; }
     public Grid ContentGrid { get; set; }
     public MainView MainView { get; set; }
-    public TextBlock StatusTextLeftLabel { get; internal set; }
-    public Grid Waveform { get; internal set; }
-    public MenuItem MenuReopen { get; internal set; }
+    public TextBlock StatusTextLeftLabel { get; set; }
+    //public Grid Waveform { get; internal set; }
+    public MenuItem MenuReopen { get; set; }
+    public AudioVisualizer AudioVisualizer { get; set; }
+
 
     private string? _subtitleFileName;
     private Subtitle _subtitle;
@@ -128,7 +130,6 @@ public partial class MainViewModel : ObservableObject
         EditTextBox = new TextBox();
         ContentGrid = new Grid();
         MenuReopen = new MenuItem();
-        Waveform = new Grid();
         _subtitle = new Subtitle();
         Subtitles = new ObservableCollection<SubtitleLineViewModel>();
         SubtitleFormats = [.. SubtitleFormat.AllSubtitleFormats];
@@ -137,6 +138,7 @@ public partial class MainViewModel : ObservableObject
         SelectedEncoding = Encodings[0];
         StatusTextLeft = string.Empty;
         StatusTextRight = string.Empty;
+        AudioVisualizer = new AudioVisualizer() { ShowGridLines = true };
 
         LoadShortcuts();
         StartTitleTimer();
@@ -1297,7 +1299,7 @@ public partial class MainViewModel : ObservableObject
         {
             ShowStatus("Loading wave info from cache...");
             var wavePeaks = WavePeakData.FromDisk(peakWaveFileName);
-            //_audioVisualizer.WavePeaks = wavePeaks;
+            AudioVisualizer.WavePeaks = wavePeaks;
         }
 
         _videoFileName = videoFileName;
