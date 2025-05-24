@@ -104,7 +104,15 @@ public class AudioVisualizer : Control
     private long _lastMouseWheelScroll = -1;
     private readonly Lock _lock = new();
     private Paragraph? _hoveredParagraph;
-    private const int ResizeMargin = 5;
+
+    private Paragraph? _activeParagraph;
+    private Point _startPointerPosition;
+    private double _originalStartSeconds;
+    private double _originalEndSeconds;
+    private enum InteractionMode { None, Moving, ResizingLeft, ResizingRight }
+    private InteractionMode _interactionMode = InteractionMode.None;
+    public readonly double ResizeMargin = 5.0; // Margin for resizing paragraphs
+
 
     public  AudioVisualizer()
     {
@@ -120,9 +128,49 @@ public class AudioVisualizer : Control
         PointerMoved += OnPointerMoved;
         PointerEntered += OnPointerEntered;
         PointerExited += OnPointerExited;
-        //PointerPressed += OnPointerPressed;
-        //PointerReleased += OnPointerReleased;
+        PointerPressed += OnPointerPressed;
+        PointerReleased += OnPointerReleased;
         //PointerLeave += (_, __) => this.Cursor = new Cursor(StandardCursorType.Arrow);
+    }
+
+    private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        _interactionMode = InteractionMode.None;
+        _activeParagraph = null;
+        e.Pointer.Capture(null);
+    }
+
+    private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        var point = e.GetPosition(this);
+        var p = HitTestParagraph(point);
+        if (p == null)
+        {
+            return;
+        }
+
+        double left = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds);
+        double right = SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds);
+
+        _activeParagraph = p;
+        _startPointerPosition = point;
+        _originalStartSeconds = p.StartTime.TotalSeconds;
+        _originalEndSeconds = p.EndTime.TotalSeconds;
+
+        if (Math.Abs(point.X - left) <= ResizeMargin)
+        {
+            _interactionMode = InteractionMode.ResizingLeft;
+        }
+        else if (Math.Abs(point.X - right) <= ResizeMargin)
+        {
+            _interactionMode = InteractionMode.ResizingRight;
+        }
+        else if (point.X > left && point.X < right)
+        {
+            _interactionMode = InteractionMode.Moving;
+        }
+
+        e.Pointer.Capture(this);
     }
 
     private void OnPointerExited(object? sender, PointerEventArgs e)
@@ -138,24 +186,63 @@ public class AudioVisualizer : Control
     private void OnPointerMoved(object? sender, PointerEventArgs e)
     {
         var point = e.GetPosition(this);
-        _hoveredParagraph = HitTestParagraph(point);
 
-        if (_hoveredParagraph != null)
+        if (_interactionMode == InteractionMode.None)
         {
-            double left = SecondsToXPosition(_hoveredParagraph.StartTime.TotalSeconds - StartPositionSeconds);
-            double right = SecondsToXPosition(_hoveredParagraph.EndTime.TotalSeconds - StartPositionSeconds);
+            UpdateCursor(point); 
+            return;
+        }
+
+        if (_activeParagraph == null)
+        {
+            return;
+        }
+
+        double deltaX = point.X - _startPointerPosition.X;
+        double deltaSeconds = RelativeXPositionToSeconds((int)deltaX);
+
+        switch (_interactionMode)
+        {
+            case InteractionMode.Moving:
+                _activeParagraph.StartTime.TotalMilliseconds = (_originalStartSeconds + deltaSeconds) * 1000.0;
+                _activeParagraph.EndTime.TotalMilliseconds = (_originalEndSeconds + deltaSeconds) * 1000.0;
+                break;
+            case InteractionMode.ResizingLeft:
+                var newStart = _originalStartSeconds + deltaSeconds;
+                if (newStart < _activeParagraph.EndTime.TotalSeconds - 0.1)
+                {
+                    _activeParagraph.StartTime.TotalMilliseconds = newStart * 1000.0;
+                }
+
+                break;
+            case InteractionMode.ResizingRight:
+                var newEnd = _originalEndSeconds + deltaSeconds;
+                if (newEnd > _activeParagraph.StartTime.TotalSeconds + 0.1)
+                {
+                    _activeParagraph.EndTime.TotalMilliseconds = newEnd * 1000.0;
+                }
+
+                break;
+        }
+
+        InvalidateVisual(); // Redraw waveform
+    }
+
+    private void UpdateCursor(Point point)
+    {
+        var p = HitTestParagraph(point);
+        if (p != null)
+        {
+            double left = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds);
+            double right = SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds);
 
             if (Math.Abs(point.X - left) <= ResizeMargin || Math.Abs(point.X - right) <= ResizeMargin)
             {
-                Cursor = new Cursor(StandardCursorType.SizeWestEast); // resizing
-            }
-            else if (point.X > left && point.X < right)
-            {
-                Cursor = new Cursor(StandardCursorType.Hand); // moving
+                Cursor = new Cursor(StandardCursorType.SizeWestEast);
             }
             else
             {
-                Cursor = new Cursor(StandardCursorType.Arrow);
+                Cursor = new Cursor(StandardCursorType.Hand);
             }
         }
         else
@@ -167,7 +254,9 @@ public class AudioVisualizer : Control
     private Paragraph? HitTestParagraph(Point point)
     {
         if (_displayableParagraphs == null)
+        {
             return null;
+        }
 
         foreach (var p in _displayableParagraphs)
         {
@@ -182,7 +271,6 @@ public class AudioVisualizer : Control
 
         return null;
     }
-
 
     public override void Render(DrawingContext context)
     {
@@ -278,7 +366,10 @@ public class AudioVisualizer : Control
         var halfWaveformHeight = waveformHeight / 2;
         var div = WavePeaks.SampleRate * ZoomFactor;
 
-        if (div <= 0) return;
+        if (div <= 0)
+        {
+            return;
+        }
 
         for (var x = 0; x < Bounds.Width; x++)
         {
