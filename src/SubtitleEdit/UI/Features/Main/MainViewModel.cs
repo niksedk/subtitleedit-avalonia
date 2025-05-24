@@ -1691,7 +1691,7 @@ public partial class MainViewModel : ObservableObject
 
     private void StartTitleTimer()
     {
-        _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
+        _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(75) };
         _positionTimer.Tick += (s, e) =>
         {
             var text = "Untitled";
@@ -1709,6 +1709,56 @@ public partial class MainViewModel : ObservableObject
             }
 
             Window.Title = text;
+
+            // update audio visualizer position if available
+            var av = AudioVisualizer;
+            var vp = VideoPlayerControl;
+            if (av != null && vp != null)
+            {
+                var subtitle = new Subtitle();
+                var selectedIndices = new List<int>();
+                var orderedList = Subtitles.OrderBy(p => p.StartTime.TotalMilliseconds).ToList();
+                var firstSelectedIndex = -1;
+                for (var i = 0; i < orderedList.Count; i++)
+                {
+                    var dp = orderedList[i];
+                    var p = new Paragraph(dp.Text, dp.StartTime.TotalMilliseconds, dp.EndTime.TotalMilliseconds);
+                    p.Text = dp.Text;
+                    p.StartTime.TotalMilliseconds = dp.StartTime.TotalMilliseconds;
+                    p.EndTime.TotalMilliseconds = dp.EndTime.TotalMilliseconds;
+                    subtitle.Paragraphs.Add(p);
+
+                    if (false) // check selected items in the grid
+                    {
+                        selectedIndices.Add(i);
+
+                        if (firstSelectedIndex < 0)
+                        {
+                            firstSelectedIndex = i;
+                        }
+                    }
+                }
+
+
+                var mediaPlayerSeconds = vp.Position;
+                var startPos = mediaPlayerSeconds - 0.01;
+                if (startPos < 0)
+                {
+                    startPos = 0;
+                }
+
+                av.CurrentVideoPositionSeconds = vp.Position;
+
+                 if (mediaPlayerSeconds > av.EndPositionSeconds || mediaPlayerSeconds < av.StartPositionSeconds)
+                    {
+                        av.SetPosition(startPos, subtitle, mediaPlayerSeconds, 0, selectedIndices.ToArray());
+                    }
+                    else
+                    {
+                        av.SetPosition(av.StartPositionSeconds, subtitle, mediaPlayerSeconds, firstSelectedIndex, selectedIndices.ToArray());
+                    }
+
+            }
         };
         _positionTimer.Start();
     }
