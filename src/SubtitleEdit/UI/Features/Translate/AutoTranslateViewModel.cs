@@ -399,7 +399,7 @@ public partial class AutoTranslateViewModel : ObservableObject
                         Dispatcher.UIThread.Invoke(() =>
                         {
                             ProgressValue = (double)index1 * 100 / Rows.Count;
-                            SelectAndScrollToRow(index1-1);
+                            SelectAndScrollToRow(index1 - 1);
                         });
                     }
 
@@ -437,7 +437,7 @@ public partial class AutoTranslateViewModel : ObservableObject
                     Dispatcher.UIThread.Invoke(() =>
                     {
                         ProgressValue = (double)progressIndex * 100 / Rows.Count;
-                        SelectAndScrollToRow(progressIndex-1);
+                        SelectAndScrollToRow(progressIndex - 1);
                     });
 
                     if (_onlyCurrentLine)
@@ -481,7 +481,7 @@ public partial class AutoTranslateViewModel : ObservableObject
             return;
         }
 
-        Dispatcher.UIThread.Invoke(async() =>
+        Dispatcher.UIThread.Invoke(async () =>
         {
             index = Math.Max(0, index);
             RowGrid.SelectedItem = Rows[index];

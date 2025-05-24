@@ -70,7 +70,7 @@ public class AudioToTextWhisperWindow : Window
             .WithMinwidth(220)
             .WithMarginBottom(20)
             .WithMarginTop(10)
-            .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled)); 
+            .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
 
         var buttonModelDownload = new Button
         {
@@ -81,7 +81,7 @@ public class AudioToTextWhisperWindow : Window
             VerticalContentAlignment = VerticalAlignment.Center,
             Command = vm.DownloadModelCommand,
             Margin = new Thickness(5, 0, 0, 0),
-        }.WithMarginBottom(20).WithMarginTop(10).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled)); 
+        }.WithMarginBottom(20).WithMarginTop(10).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
 
         var panelModelControls = new StackPanel
         {
@@ -96,10 +96,10 @@ public class AudioToTextWhisperWindow : Window
         };
 
         var labelTranslateToEnglish = UiUtil.MakeTextBlock("Translate to English");
-        var checkTranslateToEnglish = UiUtil.MakeCheckBox(vm, nameof(vm.DoTranslateToEnglish)).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled)); 
+        var checkTranslateToEnglish = UiUtil.MakeCheckBox(vm, nameof(vm.DoTranslateToEnglish)).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
 
         var labelPostProcessing = UiUtil.MakeTextBlock("Post processing").WithMarginTop(15);
-        var checkPostProcessing = UiUtil.MakeCheckBox(vm, nameof(vm.DoPostProcessing)).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled)); 
+        var checkPostProcessing = UiUtil.MakeCheckBox(vm, nameof(vm.DoPostProcessing)).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
         var buttonPostProcessing = new Button()
         {
             Content = "Settings",
@@ -108,7 +108,7 @@ public class AudioToTextWhisperWindow : Window
             HorizontalContentAlignment = HorizontalAlignment.Center,
             VerticalContentAlignment = VerticalAlignment.Center,
             Command = vm.ShowPostProcessingSettingsCommand,
-        }.BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled)); 
+        }.BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
         var panelPostProcessingControls = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -123,7 +123,7 @@ public class AudioToTextWhisperWindow : Window
         };
 
         var labelAdvancedSettings = UiUtil.MakeTextBlock("Advanced settings").WithMarginTop(15);
-        var buttonAdvancedSettings = new Button() 
+        var buttonAdvancedSettings = new Button()
         {
             Content = "Settings",
             HorizontalAlignment = HorizontalAlignment.Left,
@@ -289,10 +289,10 @@ public class AudioToTextWhisperWindow : Window
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Translate to English
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Post processing
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Advanced settings
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, 
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, 
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // Console log
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, 
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // OK/Cancel
             },
             ColumnDefinitions =

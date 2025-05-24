@@ -128,7 +128,7 @@ public class AutoTranslateWindow : Window
         };
         dataGrid.Bind(DataGrid.ItemsSourceProperty, new Binding(nameof(vm.Rows)));
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedTranslateRow)));
-        vm.RowGrid = dataGrid; 
+        vm.RowGrid = dataGrid;
 
 
         var scrollViewer = new ScrollViewer
