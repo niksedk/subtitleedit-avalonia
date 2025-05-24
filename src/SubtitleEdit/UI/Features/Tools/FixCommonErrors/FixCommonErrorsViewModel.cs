@@ -7,7 +7,6 @@ using Nikse.SubtitleEdit.Core.Enums;
 using Nikse.SubtitleEdit.Core.Forms.FixCommonErrors;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Main;
-using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Config.Language;
@@ -58,11 +57,12 @@ public partial class FixCommonErrorsViewModel : ObservableObject
     private LanguageDisplayItem _oldSelectedLanguage = new(CultureInfo.InvariantCulture, "English");
     private string? _oldSelectedProfile;
 
-    // private readonly INamesList _namesList;
+     private readonly INamesList _namesList;
     private readonly IWindowService _windowService;
 
-    public FixCommonErrorsViewModel(IWindowService windowService)
+    public FixCommonErrorsViewModel(INamesList namesList, IWindowService windowService)
     {
+        _namesList = namesList;
         _windowService = windowService;
 
         SearchText = string.Empty;
@@ -72,10 +72,20 @@ public partial class FixCommonErrorsViewModel : ObservableObject
         Fixes = new ObservableCollection<FixDisplayItem>();
         Paragraphs = new ObservableCollection<SubtitleLineViewModel>();
         EditText = string.Empty;
-        Profiles = new ObservableCollection<string>();
         _language = Se.Language.FixCommonErrors;
         Step1IsVisible = true;
-        InitLanguage();
+        InitLanguage();        
+
+        Profiles = new ObservableCollection<string>(Se.Settings.Tools.FixCommonErrors.Profiles.Select(p => p.ProfileName));
+        if (Profiles.Count == 0)
+        {
+            Profiles.Add("Default");
+        }
+
+        var profileName = Se.Settings.Tools.FixCommonErrors.LastProfileName;
+        SelectedProfile = Profiles.Contains(profileName)
+            ? profileName
+            : Profiles.First();
     }
 
     private string InitLanguage()
@@ -361,6 +371,18 @@ public partial class FixCommonErrorsViewModel : ObservableObject
         {
             e.Handled = true;
             Window?.Close();
+        }
+    }
+
+    internal void TextBoxSearch_TextChanged(object? sender, TextChangedEventArgs e)
+    {
+        FixRules.Clear();
+        foreach (var rule in _allFixRules)
+        {
+            if (string.IsNullOrEmpty(SearchText) || rule.Name.ToLowerInvariant().Contains(SearchText.ToLowerInvariant()))
+            {
+                FixRules.Add(rule);
+            }
         }
     }
 }

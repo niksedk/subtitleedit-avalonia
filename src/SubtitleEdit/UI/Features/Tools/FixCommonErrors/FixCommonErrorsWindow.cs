@@ -4,9 +4,9 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
-using Nikse.SubtitleEdit.Core.CDG;
 using Nikse.SubtitleEdit.Logic;
-using Projektanker.Icons.Avalonia;
+using SkiaSharp;
+using System;
 
 namespace Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 
@@ -42,8 +42,9 @@ public class FixCommonErrorsWindow : Window
         };
         labelStep2.Bind(IsVisibleProperty, new Binding(nameof(vm.Step2IsVisible)));
 
-        var textBoxSearch = UiUtil.MakeTextBox(200, vm, nameof(vm.SearchText)).WithMarginRight(25);
+        var textBoxSearch = UiUtil.MakeTextBox(250, vm, nameof(vm.SearchText)).WithMarginRight(25);
         textBoxSearch.Watermark = "Search rules...";
+        textBoxSearch.TextChanged += vm.TextBoxSearch_TextChanged;
         var panelTopRight = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -90,6 +91,9 @@ public class FixCommonErrorsWindow : Window
             },
         };
         rulesGrid.Bind(IsVisibleProperty, new Binding(nameof(vm.Step1IsVisible)));
+
+        var step2Grid = MakeStep2Grid();
+        step2Grid.Bind(IsVisibleProperty, new Binding(nameof(_vm.Step2IsVisible)));
 
         var buttonPanelRules = UiUtil.MakeButtonBar(
             UiUtil.MakeButton("Select all", vm.RulesSelectAllCommand),
@@ -149,12 +153,18 @@ public class FixCommonErrorsWindow : Window
 
         grid.Children.Add(panelTopRight);
         Grid.SetRow(panelTopRight, 0);
-        Grid.SetColumn(panelTopRight, 1);
+        Grid.SetColumn(panelTopRight, 0);
+        Grid.SetColumnSpan(panelTopRight, 2);
 
         grid.Children.Add(rulesGrid);
         Grid.SetRow(rulesGrid, 1);
         Grid.SetColumn(rulesGrid, 0);
         Grid.SetColumnSpan(rulesGrid, 2);
+
+        grid.Children.Add(step2Grid);
+        Grid.SetRow(step2Grid, 1);
+        Grid.SetColumn(step2Grid, 0);
+        Grid.SetColumnSpan(step2Grid, 2);
 
         grid.Children.Add(buttonPanelRules);
         Grid.SetRow(buttonPanelRules, 2);
@@ -169,6 +179,191 @@ public class FixCommonErrorsWindow : Window
         Content = grid;
 
         Activated += delegate { Focus(); }; // hack to make OnKeyDown work
+    }
+
+    private Grid MakeStep2Grid()
+    {
+        // top
+        var gridFixes = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnSpacing = 10,
+            RowSpacing = 10,
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        var dataGridFixes = new DataGrid
+        {
+            AutoGenerateColumns = false,
+            SelectionMode = DataGridSelectionMode.Single,
+            CanUserResizeColumns = true,
+            CanUserSortColumns = true,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Width = double.NaN,
+            Height = double.NaN,
+           // ItemsSource = _vm.FixesToApply, // Bind to the fixes to apply
+            Columns =
+            {
+                new DataGridCheckBoxColumn
+                {
+                    Header = "Apply",
+                    Binding = new Binding(nameof(FixDisplayItem.IsSelected)),
+                },
+                new DataGridTextColumn
+                {
+                    Header = "Rule",
+           //         Binding = new Binding(nameof(FixDisplayItem.RuleName)),
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = "Example",
+             //       Binding = new Binding(nameof(FixDisplayItem.Example)),
+                    IsReadOnly = true,
+                },
+            },
+        };
+
+        var buttonBarFixes = UiUtil.MakeButtonBar(
+            UiUtil.MakeButton("Select all", _vm.FixesSelectAllCommand),
+            UiUtil.MakeButton("Inverse selection", _vm.FixesInverseSelectedCommand),
+            UiUtil.MakeButton("Refresh fixes", _vm.FixesInverseSelectedCommand),
+            UiUtil.MakeButton("Apply selected fixes", _vm.FixesInverseSelectedCommand)
+        );
+
+        gridFixes.Children.Add(dataGridFixes);
+        Grid.SetRow(dataGridFixes, 0);
+        Grid.SetColumn(dataGridFixes, 0);
+
+        gridFixes.Children.Add(buttonBarFixes);
+        Grid.SetRow(buttonBarFixes, 1);
+        Grid.SetColumn(buttonBarFixes, 0);
+
+        var borderFixes = new Border
+        {
+            BorderThickness = new Thickness(1),
+            BorderBrush = new SolidColorBrush(Colors.Gray),
+            Margin = new Thickness(0, 0, 0, 10),
+            Padding = new Thickness(5),
+            Child = gridFixes,
+        };
+
+        // bottom
+        var gridSubtitles = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnSpacing = 10,
+            RowSpacing = 10,
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        var dataGridSubtitles = new DataGrid
+        {
+            AutoGenerateColumns = false,
+            SelectionMode = DataGridSelectionMode.Single,
+            CanUserResizeColumns = true,
+            CanUserSortColumns = true,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Width = double.NaN,
+            Height = double.NaN,
+            //ItemsSource = _vm.SubtitlesToFix,
+            Columns =
+            {
+                new DataGridTextColumn
+                {
+                    Header = "Subtitle Text",
+              //      Binding = new Binding(nameof(Subtitle.Text)),
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = "Line Number",
+              //      Binding = new Binding(nameof(Subtitle.Number)),
+                    IsReadOnly = true,
+                },
+            },
+        };
+
+        var gridCurrentSubtbtitle = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnSpacing = 10,
+            RowSpacing = 10,
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+
+
+        gridSubtitles.Children.Add(dataGridSubtitles);
+        Grid.SetRow(dataGridSubtitles, 0);
+        Grid.SetColumn(dataGridSubtitles, 0);
+
+        gridSubtitles.Children.Add(gridCurrentSubtbtitle);
+        Grid.SetRow(gridCurrentSubtbtitle, 1);
+        Grid.SetColumn(gridCurrentSubtbtitle, 0);
+
+        var borderSubtitles = new Border
+        {
+            BorderThickness = new Thickness(1),
+            BorderBrush = new SolidColorBrush(Colors.Gray),
+            Margin = new Thickness(0, 0, 0, 10),
+            Padding = new Thickness(5),
+            Child = gridSubtitles,
+        };  
+
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnSpacing = 10,
+            RowSpacing = 10,
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            Children =
+            {
+                borderFixes,
+                borderSubtitles,
+            },
+        };
+
+        return grid;
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
