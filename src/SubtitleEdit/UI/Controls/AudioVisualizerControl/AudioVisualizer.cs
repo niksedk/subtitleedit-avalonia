@@ -212,8 +212,8 @@ public class AudioVisualizer : Control
         switch (_interactionMode)
         {
             case InteractionMode.Moving:
-                newStart = _originalStartSeconds + deltaSeconds;
-                newEnd = _originalEndSeconds + deltaSeconds;
+                newStart = _originalStartSeconds + deltaSeconds - StartPositionSeconds;
+                newEnd = _originalEndSeconds + deltaSeconds - StartPositionSeconds;
 
                 // Clamp so it doesn't overlap previous or next
                 if (previous != null && newStart < previous.EndTime.TotalSeconds + 0.001)
@@ -231,7 +231,7 @@ public class AudioVisualizer : Control
                 break;
 
             case InteractionMode.ResizingLeft:
-                newStart = _originalStartSeconds + deltaSeconds;
+                newStart = _originalStartSeconds + deltaSeconds - StartPositionSeconds;
 
                 if (newStart < _activeParagraph.EndTime.TotalSeconds - 0.001 &&
                     (previous == null || newStart > previous.EndTime.TotalSeconds + 0.001))
@@ -241,7 +241,7 @@ public class AudioVisualizer : Control
                 break;
 
             case InteractionMode.ResizingRight:
-                newEnd = _originalEndSeconds + deltaSeconds;
+                newEnd = _originalEndSeconds + deltaSeconds - StartPositionSeconds;
 
                 if (newEnd > _activeParagraph.StartTime.TotalSeconds + 0.001 &&
                     (next == null || newEnd < next.StartTime.TotalSeconds - 0.001))
