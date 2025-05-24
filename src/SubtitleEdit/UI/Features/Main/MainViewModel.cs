@@ -138,9 +138,9 @@ public partial class MainViewModel : ObservableObject
         SelectedEncoding = Encodings[0];
         StatusTextLeft = string.Empty;
         StatusTextRight = string.Empty;
-        AudioVisualizer = new AudioVisualizer() 
-        { 
-            DrawGridLines = Se.Settings.Waveform.DrawGridLines 
+        AudioVisualizer = new AudioVisualizer()
+        {
+            DrawGridLines = Se.Settings.Waveform.DrawGridLines
         };
 
         LoadShortcuts();
@@ -597,6 +597,9 @@ public partial class MainViewModel : ObservableObject
                 Application.Current!.RequestedThemeVariant = ThemeVariant.Default;
             }
         }
+
+        AudioVisualizer.DrawGridLines = Se.Settings.Waveform.DrawGridLines;
+        _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
