@@ -5,8 +5,6 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
-using SkiaSharp;
-using System;
 
 namespace Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 
@@ -189,7 +187,7 @@ public class FixCommonErrorsWindow : Window
             RowDefinitions =
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
@@ -199,6 +197,7 @@ public class FixCommonErrorsWindow : Window
             RowSpacing = 10,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
         };
 
         var dataGridFixes = new DataGrid
@@ -211,7 +210,7 @@ public class FixCommonErrorsWindow : Window
             VerticalAlignment = VerticalAlignment.Stretch,
             Width = double.NaN,
             Height = double.NaN,
-           // ItemsSource = _vm.FixesToApply, // Bind to the fixes to apply
+            ItemsSource = _vm.Fixes,
             Columns =
             {
                 new DataGridCheckBoxColumn
@@ -221,14 +220,26 @@ public class FixCommonErrorsWindow : Window
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Rule",
-           //         Binding = new Binding(nameof(FixDisplayItem.RuleName)),
+                    Header = "#",
+                    Binding = new Binding(nameof(FixDisplayItem.Number)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Example",
-             //       Binding = new Binding(nameof(FixDisplayItem.Example)),
+                    Header = "Action",
+                    Binding = new Binding(nameof(FixDisplayItem.Action)),
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = "Before",
+                    Binding = new Binding(nameof(FixDisplayItem.Before)),
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = "After",
+                    Binding = new Binding(nameof(FixDisplayItem.After)),
                     IsReadOnly = true,
                 },
             },
@@ -356,12 +367,14 @@ public class FixCommonErrorsWindow : Window
             RowSpacing = 10,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
-            Children =
-            {
-                borderFixes,
-                borderSubtitles,
-            },
         };
+        grid.Children.Add(borderFixes);
+        Grid.SetRow(borderFixes, 0);
+        Grid.SetColumn(borderFixes, 0);
+
+        grid.Children.Add(borderSubtitles);
+        Grid.SetRow(borderSubtitles, 1);
+        Grid.SetColumn(borderSubtitles, 0);
 
         return grid;
     }

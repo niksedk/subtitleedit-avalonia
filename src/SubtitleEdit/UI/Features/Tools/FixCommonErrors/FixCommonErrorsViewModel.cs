@@ -57,7 +57,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject
     private LanguageDisplayItem _oldSelectedLanguage = new(CultureInfo.InvariantCulture, "English");
     private string? _oldSelectedProfile;
 
-     private readonly INamesList _namesList;
+    private readonly INamesList _namesList;
     private readonly IWindowService _windowService;
 
     public FixCommonErrorsViewModel(INamesList namesList, IWindowService windowService)
@@ -74,7 +74,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject
         EditText = string.Empty;
         _language = Se.Language.FixCommonErrors;
         Step1IsVisible = true;
-        InitLanguage();        
+        InitLanguage();
 
         Profiles = new ObservableCollection<string>(Se.Settings.Tools.FixCommonErrors.Profiles.Select(p => p.ProfileName));
         if (Profiles.Count == 0)
@@ -168,10 +168,19 @@ public partial class FixCommonErrorsViewModel : ObservableObject
     }
 
     [RelayCommand]
+    public void DoRefreshFixes()
+    {
+        RefreshFixes();
+    }
+
+
+    [RelayCommand]
     private void DoApplyFixes()
     {
-        //OkPressed = true;
-        //Window?.Close();
+        _previewMode = false;
+        ApplyFixes();
+
+        RefreshFixes();
     }
 
     [RelayCommand]
@@ -186,6 +195,13 @@ public partial class FixCommonErrorsViewModel : ObservableObject
     {
         Step1IsVisible = false;
         Step2IsVisible = true;
+
+        SaveRulesSelection();
+        _oldSelectedLanguage = SelectedLanguage!;
+        _oldSelectedProfile = SelectedProfile!;
+
+        ApplyFixes();
+        _previewMode = true;
     }
 
     [RelayCommand]
@@ -231,21 +247,20 @@ public partial class FixCommonErrorsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public void RefreshFixes()
-    {
-        _oldFixes = new List<FixDisplayItem>(Fixes);
-        Fixes.Clear();
-        _previewMode = true;
-        ApplyFixes();
-    }
-
-    [RelayCommand]
     public void ApplySelectedFixes()
     {
         _previewMode = false;
         ApplyFixes();
 
         RefreshFixes();
+    }
+
+    private void RefreshFixes()
+    {
+        _oldFixes = new List<FixDisplayItem>(Fixes);
+        Fixes.Clear();
+        _previewMode = true;
+        ApplyFixes();
     }
 
     private void ApplyFixes()
@@ -343,6 +358,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject
         }
 
         FixRules = new ObservableCollection<FixRuleDisplayItem>(_allFixRules);
+        UpdateRulesSelection();
     }
 
     private static string GetDialogStyle(DialogType dialogStyle)
