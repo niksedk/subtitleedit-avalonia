@@ -3,11 +3,12 @@ using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Core.Dictionaries;
 using Nikse.SubtitleEdit.Core.Enums;
 using Nikse.SubtitleEdit.Core.Forms.FixCommonErrors;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Config.Language;
 using Nikse.SubtitleEdit.Logic.Dictionaries;
@@ -17,6 +18,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 public partial class FixCommonErrorsViewModel : ObservableObject
@@ -33,6 +35,8 @@ public partial class FixCommonErrorsViewModel : ObservableObject
     [ObservableProperty] private TimeSpan _editDuration;
     [ObservableProperty] private ObservableCollection<string> _profiles;
     [ObservableProperty] private string? _selectedProfile;
+    [ObservableProperty] private bool _step1IsVisible;
+    [ObservableProperty] private bool _step2IsVisible;
 
     public DataGrid? Step1Grid { get; set; }
     public DataGrid? Step2Grid { get; set; }
@@ -54,10 +58,13 @@ public partial class FixCommonErrorsViewModel : ObservableObject
     private LanguageDisplayItem _oldSelectedLanguage = new(CultureInfo.InvariantCulture, "English");
     private string? _oldSelectedProfile;
 
-    private readonly INamesList _namesList;
+    // private readonly INamesList _namesList;
+    private readonly IWindowService _windowService;
 
-    public FixCommonErrorsViewModel()
+    public FixCommonErrorsViewModel(IWindowService windowService)
     {
+        _windowService = windowService;
+
         SearchText = string.Empty;
         Languages = new ObservableCollection<LanguageDisplayItem>();
         Language = new string(' ', 0);
@@ -67,6 +74,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject
         EditText = string.Empty;
         Profiles = new ObservableCollection<string>();
         _language = Se.Language.FixCommonErrors;
+        Step1IsVisible = true;
         InitLanguage();
     }
 
@@ -144,10 +152,30 @@ public partial class FixCommonErrorsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Ok()
+    private async Task ShowProfile()
     {
-        OkPressed = true;
-        Window?.Close();
+        await _windowService.ShowDialogAsync<FixCommonErrorsProfileWindow, FixCommonErrorsProfileViewModel>(Window!, vm => { });
+    }
+
+    [RelayCommand]
+    private void DoApplyFixes()
+    {
+        //OkPressed = true;
+        //Window?.Close();
+    }
+
+    [RelayCommand]
+    private void BackToFixList()
+    {
+        Step2IsVisible = false;
+        Step1IsVisible = true;
+    }
+
+    [RelayCommand]
+    private void ToApplyFixes()
+    {
+        Step1IsVisible = false;
+        Step2IsVisible = true;
     }
 
     [RelayCommand]

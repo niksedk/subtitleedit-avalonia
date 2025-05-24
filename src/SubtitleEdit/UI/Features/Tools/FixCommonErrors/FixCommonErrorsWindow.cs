@@ -1,7 +1,12 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Media;
+using Nikse.SubtitleEdit.Core.CDG;
 using Nikse.SubtitleEdit.Logic;
+using Projektanker.Icons.Avalonia;
 
 namespace Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 
@@ -15,7 +20,7 @@ public class FixCommonErrorsWindow : Window
         Title = "Fix common errors";
         Width = 950;
         Height = 750;
-        MinWidth = 800; 
+        MinWidth = 800;
         MinHeight = 600;
         CanResize = true;
 
@@ -23,11 +28,19 @@ public class FixCommonErrorsWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        var label = new Label
+        var labelStep1 = new Label
         {
             Content = "Fix common errors, step 1",
             VerticalAlignment = VerticalAlignment.Center,
         };
+        labelStep1.Bind(IsVisibleProperty, new Binding(nameof(vm.Step1IsVisible)));
+
+        var labelStep2 = new Label
+        {
+            Content = "Fix common errors, step 2",
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        labelStep2.Bind(IsVisibleProperty, new Binding(nameof(vm.Step2IsVisible)));
 
         var textBoxSearch = UiUtil.MakeTextBox(200, vm, nameof(vm.SearchText)).WithMarginRight(25);
         textBoxSearch.Watermark = "Search rules...";
@@ -44,7 +57,7 @@ public class FixCommonErrorsWindow : Window
             },
         };
 
-        var dataGrid = new DataGrid
+        var rulesGrid = new DataGrid
         {
             AutoGenerateColumns = false,
             SelectionMode = DataGridSelectionMode.Single,
@@ -60,33 +73,50 @@ public class FixCommonErrorsWindow : Window
                 new DataGridCheckBoxColumn
                 {
                     Header = "Enabled",
-                    Binding = new Avalonia.Data.Binding(nameof(FixRuleDisplayItem.IsSelected)),
+                    Binding = new Binding(nameof(FixRuleDisplayItem.IsSelected)),
                 },
                 new DataGridTextColumn
                 {
                     Header = "Name",
-                    Binding = new Avalonia.Data.Binding(nameof(FixRuleDisplayItem.Name)),
+                    Binding = new Binding(nameof(FixRuleDisplayItem.Name)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Example",
-                    Binding = new Avalonia.Data.Binding(nameof(FixRuleDisplayItem.Example)),
+                    Binding = new Binding(nameof(FixRuleDisplayItem.Example)),
                     IsReadOnly = true,
                 },
             },
         };
+        rulesGrid.Bind(IsVisibleProperty, new Binding(nameof(vm.Step1IsVisible)));
 
-        var buttonPanelLeft = UiUtil.MakeButtonBar(
-            UiUtil.MakeButton("Select all", vm.OkCommand),
-            UiUtil.MakeButton("Inverse selection", vm.CancelCommand),
+        var buttonPanelRules = UiUtil.MakeButtonBar(
+            UiUtil.MakeButton("Select all", vm.RulesSelectAllCommand),
+            UiUtil.MakeButton("Inverse selection", vm.RulesInverseSelectedCommand),
             UiUtil.MakeTextBlock("Profile").WithMarginLeft(25).WithMarginRight(10),
             UiUtil.MakeComboBox(vm.Profiles, vm, nameof(vm.SelectedProfile)),
-            UiUtil.MakeButton("...").Compact()
+            UiUtil.MakeButton("...", vm.ShowProfileCommand).Compact()
         );
+        buttonPanelRules.Bind(IsVisibleProperty, new Binding(nameof(vm.Step1IsVisible)));
+
+
+        var buttonToApplyFixes = UiUtil.MakeButton("To apply fixes", vm.ToApplyFixesCommand)
+            .WithIconRight("fa-solid fa-arrow-right")
+            .BindVisible(vm, nameof(vm.Step1IsVisible));
+
+        var buttonBackToFixList = UiUtil.MakeButton("Back to fix list", vm.BackToFixListCommand)
+            .WithIconLeft("fa-solid fa-arrow-left")
+            .BindVisible(vm, nameof(vm.Step2IsVisible));
+
+        var buttonApplyFixes = UiUtil.MakeButton("Apply fixes", vm.DoApplyFixesCommand)
+            .BindVisible(vm, nameof(vm.Step2IsVisible));
+
 
         var buttonPanelRight = UiUtil.MakeButtonBar(
-            UiUtil.MakeButton("Apply fixes", vm.OkCommand),
+            buttonBackToFixList,
+            buttonToApplyFixes,
+            buttonApplyFixes,
             UiUtil.MakeButton("Cancel", vm.CancelCommand)
         );
 
@@ -110,22 +140,25 @@ public class FixCommonErrorsWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Children.Add(label);
-        Grid.SetRow(label, 0);
-        Grid.SetColumn(label, 0);
+        grid.Children.Add(labelStep1);
+        Grid.SetRow(labelStep1, 0);
+        Grid.SetColumn(labelStep1, 0);
+        grid.Children.Add(labelStep2);
+        Grid.SetRow(labelStep2, 0);
+        Grid.SetColumn(labelStep2, 0);
 
         grid.Children.Add(panelTopRight);
         Grid.SetRow(panelTopRight, 0);
         Grid.SetColumn(panelTopRight, 1);
 
-        grid.Children.Add(dataGrid);
-        Grid.SetRow(dataGrid, 1);
-        Grid.SetColumn(dataGrid, 0);
-        Grid.SetColumnSpan(dataGrid, 2);
+        grid.Children.Add(rulesGrid);
+        Grid.SetRow(rulesGrid, 1);
+        Grid.SetColumn(rulesGrid, 0);
+        Grid.SetColumnSpan(rulesGrid, 2);
 
-        grid.Children.Add(buttonPanelLeft);
-        Grid.SetRow(buttonPanelLeft, 2);
-        Grid.SetColumn(buttonPanelLeft, 0);
+        grid.Children.Add(buttonPanelRules);
+        Grid.SetRow(buttonPanelRules, 2);
+        Grid.SetColumn(buttonPanelRules, 0);
 
 
         grid.Children.Add(buttonPanelRight);

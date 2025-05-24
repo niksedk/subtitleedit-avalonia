@@ -83,6 +83,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<BatchConvertViewModel>();
         collection.AddTransient<ChangeCasingViewModel>();
         collection.AddTransient<FixCommonErrorsViewModel>();
+        collection.AddTransient<FixCommonErrorsProfileViewModel>();
         collection.AddTransient<RemoveTextForHearingImpairedViewModel>();
         collection.AddTransient<FindViewModel>();
         collection.AddTransient<ReplaceViewModel>();

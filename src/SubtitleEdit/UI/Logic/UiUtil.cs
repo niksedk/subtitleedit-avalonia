@@ -7,6 +7,7 @@ using Avalonia.Media;
 using Avalonia.Media.Immutable;
 using Avalonia.Platform;
 using CommunityToolkit.Mvvm.Input;
+using Projektanker.Icons.Avalonia;
 using System;
 using System.Collections.ObjectModel;
 
@@ -384,6 +385,39 @@ public static class UiUtil
         control.HorizontalAlignment = HorizontalAlignment.Left;
         return control;
     }
+
+    public static Button WithIconRight(this Button control, string icon)
+    {
+        var label = new TextBlock() { Text = control.Content?.ToString(), Padding = new Thickness(0,0,4,0) };
+        var image = new ContentControl();
+        Attached.SetIcon(image, icon);
+        var stackPanelApplyFixes = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Children = { label, image }
+        };
+
+        control.Content = stackPanelApplyFixes;
+
+        return control;
+    }
+
+    public static Button WithIconLeft(this Button control, string icon)
+    {
+        var label = new TextBlock() { Text = control.Content?.ToString(), Padding = new Thickness(4, 0, 0, 0) };
+        var image = new ContentControl();
+        Attached.SetIcon(image, icon);
+        var stackPanelApplyFixes = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Children = { image, label  }
+        };
+
+        control.Content = stackPanelApplyFixes;
+
+        return control;
+    }
+
 
     public static Button WithCommandParameter<T>(this Button control, T parameter)
     {
