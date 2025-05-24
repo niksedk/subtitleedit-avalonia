@@ -31,9 +31,6 @@ public class AudioVisualizer : Control
     public static readonly StyledProperty<double> CurrentVideoPositionSecondsProperty =
         AvaloniaProperty.Register<AudioVisualizer, double>(nameof(CurrentVideoPositionSeconds));
 
-    public static readonly StyledProperty<bool> MouseOverProperty =
-        AvaloniaProperty.Register<AudioVisualizer, bool>(nameof(MouseOver));
-
     public static readonly StyledProperty<bool> DrawGridLinesProperty =
         AvaloniaProperty.Register<AudioVisualizer, bool>(nameof(DrawGridLines));
 
@@ -70,12 +67,6 @@ public class AudioVisualizer : Control
         set => SetValue(CurrentVideoPositionSecondsProperty, value);
     }
 
-    public bool MouseOver
-    {
-        get => GetValue(MouseOverProperty);
-        set => SetValue(MouseOverProperty, value);
-    }
-
     public bool DrawGridLines
     {
         get => GetValue(DrawGridLinesProperty);
@@ -106,10 +97,10 @@ public class AudioVisualizer : Control
     private readonly double _fontSize = 12;
 
     private readonly List<SubtitleLineViewModel> _displayableParagraphs = new();
+    private bool _mouseOver;
     private long _lastMouseWheelScroll = -1;
     private readonly Lock _lock = new();
-    private SubtitleLineViewModel? _hoveredParagraph;
-
+    public SubtitleLineViewModel? NewSelectionParagraph { get; set; }
     private SubtitleLineViewModel? _activeParagraph;
     private Point _startPointerPosition;
     private double _originalStartSeconds;
@@ -129,7 +120,6 @@ public class AudioVisualizer : Control
             ZoomFactorProperty,
             VerticalZoomFactorProperty,
             CurrentVideoPositionSecondsProperty,
-            MouseOverProperty,
             AllSelectedParagraphsProperty);
 
         PointerMoved += OnPointerMoved;
@@ -137,6 +127,15 @@ public class AudioVisualizer : Control
         PointerExited += OnPointerExited;
         PointerPressed += OnPointerPressed;
         PointerReleased += OnPointerReleased;
+        PointerWheelChanged += OnPointerWheelChanged;
+    }
+
+    private void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
+    {
+        //TODO: Handle zooming in and out with mouse wheel
+
+        //TODO: Scroll the video position
+        _lastMouseWheelScroll = DateTime.UtcNow.Ticks;
     }
 
     private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
@@ -181,12 +180,14 @@ public class AudioVisualizer : Control
 
     private void OnPointerExited(object? sender, PointerEventArgs e)
     {
-        MouseOver = false;
+        _mouseOver = false;
+        InvalidateVisual();
     }
 
     private void OnPointerEntered(object? sender, PointerEventArgs e)
     {
-        MouseOver = true;
+        _mouseOver = true;
+        InvalidateVisual();
     }
 
     private void OnPointerMoved(object? sender, PointerEventArgs e)
@@ -309,8 +310,9 @@ public class AudioVisualizer : Control
             DrawWaveForm(context);
             DrawParagraphs(context);
             DrawCurrentVideoPosition(context);
+            DrawNewParagraph(context);
 
-            if (MouseOver)
+            if (_mouseOver)
             {
                 var redPen = new Pen(Brushes.Red, 1); // 1 = stroke thickness
                 context.DrawRectangle(null, redPen, new Rect(0, 0, Bounds.Width, Bounds.Height));
@@ -526,6 +528,24 @@ public class AudioVisualizer : Control
             context.DrawLine(_paintCurrentPosition,
                 new Point(currentPositionPos, 0),
                 new Point(currentPositionPos, Bounds.Height));
+        }
+    }
+
+    private void DrawNewParagraph(DrawingContext context)
+    {
+        if (NewSelectionParagraph == null)
+        {
+            return;
+        }
+
+        double currentRegionLeft = SecondsToXPosition(NewSelectionParagraph.StartTime.TotalSeconds - StartPositionSeconds);
+        double currentRegionRight = SecondsToXPosition(NewSelectionParagraph.EndTime.TotalSeconds - StartPositionSeconds);
+        double currentRegionWidth = currentRegionRight - currentRegionLeft;
+
+        if (currentRegionRight >= 0 && currentRegionLeft <= Bounds.Width)
+        {
+            var rect = new Rect(currentRegionLeft, 0, currentRegionWidth, Bounds.Height);
+            context.FillRectangle(_paintBackground, rect);
         }
     }
 
