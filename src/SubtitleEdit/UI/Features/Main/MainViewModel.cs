@@ -237,6 +237,10 @@ public partial class MainViewModel : ObservableObject
         _subtitleFileName = string.Empty;
         _subtitle = new Subtitle();
         _changeSubtitleHash = GetFastSubtitleHash();
+        if (AudioVisualizer?.WavePeaks != null)
+        {
+            AudioVisualizer.WavePeaks = null;
+        }
         _shortcutManager.ClearKeys();
     }
 

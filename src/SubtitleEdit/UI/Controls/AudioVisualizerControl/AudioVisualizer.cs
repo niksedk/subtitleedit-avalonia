@@ -1,10 +1,9 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4.Boxes;
-using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -104,8 +103,10 @@ public class AudioVisualizer : Control
     private readonly List<Paragraph> _displayableParagraphs = new();
     private long _lastMouseWheelScroll = -1;
     private readonly Lock _lock = new();
+    private Paragraph? _hoveredParagraph;
+    private const int ResizeMargin = 5;
 
-    static AudioVisualizer()
+    public  AudioVisualizer()
     {
         AffectsRender<AudioVisualizer>(
             WavePeaksProperty,
@@ -115,7 +116,73 @@ public class AudioVisualizer : Control
             CurrentVideoPositionSecondsProperty,
             MouseOverProperty,
             AllSelectedParagraphsProperty);
+
+        PointerMoved += OnPointerMoved;
+        PointerEntered += OnPointerEntered;
+        PointerExited += OnPointerExited;
+        //PointerPressed += OnPointerPressed;
+        //PointerReleased += OnPointerReleased;
+        //PointerLeave += (_, __) => this.Cursor = new Cursor(StandardCursorType.Arrow);
     }
+
+    private void OnPointerExited(object? sender, PointerEventArgs e)
+    {
+        MouseOver = false;
+    }
+
+    private void OnPointerEntered(object? sender, PointerEventArgs e)
+    {
+        MouseOver = true;
+    }
+
+    private void OnPointerMoved(object? sender, PointerEventArgs e)
+    {
+        var point = e.GetPosition(this);
+        _hoveredParagraph = HitTestParagraph(point);
+
+        if (_hoveredParagraph != null)
+        {
+            double left = SecondsToXPosition(_hoveredParagraph.StartTime.TotalSeconds - StartPositionSeconds);
+            double right = SecondsToXPosition(_hoveredParagraph.EndTime.TotalSeconds - StartPositionSeconds);
+
+            if (Math.Abs(point.X - left) <= ResizeMargin || Math.Abs(point.X - right) <= ResizeMargin)
+            {
+                Cursor = new Cursor(StandardCursorType.SizeWestEast); // resizing
+            }
+            else if (point.X > left && point.X < right)
+            {
+                Cursor = new Cursor(StandardCursorType.Hand); // moving
+            }
+            else
+            {
+                Cursor = new Cursor(StandardCursorType.Arrow);
+            }
+        }
+        else
+        {
+            Cursor = new Cursor(StandardCursorType.Arrow);
+        }
+    }
+
+    private Paragraph? HitTestParagraph(Point point)
+    {
+        if (_displayableParagraphs == null)
+            return null;
+
+        foreach (var p in _displayableParagraphs)
+        {
+            double left = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds);
+            double right = SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds);
+
+            if (point.X >= left - ResizeMargin && point.X <= right + ResizeMargin)
+            {
+                return p;
+            }
+        }
+
+        return null;
+    }
+
 
     public override void Render(DrawingContext context)
     {
@@ -130,7 +197,8 @@ public class AudioVisualizer : Control
 
             if (MouseOver)
             {
-                //context.DrawRectangle(_mouseOverBrush, new Rect(0, 0, Bounds.Width, Bounds.Height));
+                var redPen = new Pen(Brushes.Red, 1); // 1 = stroke thickness
+                context.DrawRectangle(null, redPen, new Rect(0, 0, Bounds.Width, Bounds.Height));
             }
         }
     }

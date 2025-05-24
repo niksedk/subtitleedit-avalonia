@@ -14,7 +14,8 @@ public class InitWaveform
         // Create main layout grid
         var mainGrid = new Grid
         {
-            RowDefinitions = new RowDefinitions("*,Auto")
+            RowDefinitions = new RowDefinitions("*,Auto"),
+            Margin = new Thickness(10),
         };
 
         // waveform area
