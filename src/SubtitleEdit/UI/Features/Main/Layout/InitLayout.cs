@@ -620,10 +620,7 @@ public static partial class InitLayout
         };
 
         // Top content (will hold the nested grid)
-        var topContent = new Border
-        {
-            Background = Brushes.OrangeRed
-        };
+        var topContent = new Border();
         Grid.SetRow(topContent, 0);
         contentGrid.Children.Add(topContent);
 

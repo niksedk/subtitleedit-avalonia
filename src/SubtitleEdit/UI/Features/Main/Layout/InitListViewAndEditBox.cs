@@ -173,7 +173,7 @@ public static class InitListViewAndEditBox
         // Left panel for time controls
         var timeControlsPanel = new StackPanel
         {
-            Spacing = 8,
+            Spacing = 0,
             Width = 180,
             Margin = new Thickness(0, 0, 10, 0)
         };
@@ -181,7 +181,7 @@ public static class InitListViewAndEditBox
         // Start Time controls
         var startTimePanel = new StackPanel
         {
-            Spacing = 4,
+            Spacing = 0,
             Orientation = Orientation.Vertical
         };
 
@@ -248,27 +248,29 @@ public static class InitListViewAndEditBox
         // Duration display
         var durationPanel = new StackPanel
         {
-            Spacing = 4,
+            Spacing = 0,
             Orientation = Orientation.Vertical
         };
 
         var durationLabel = new TextBlock
         {
             Text = "Duration",
-            FontWeight = FontWeight.Bold
+            FontWeight = FontWeight.Bold,
+            Padding = new Thickness(0, 4, 0,0)
+
         };
         durationPanel.Children.Add(durationLabel);
 
         var durationUpDown = new NumericUpDown
         {
             DataContext = vm,
-            [!NumericUpDown.ValueProperty] = new Binding("SelectedSubtitle.Duration")
+            [!NumericUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.Duration)}")
             {
                 Mode = BindingMode.TwoWay,
                 Converter = TimeSpanToSecondsConverter.Instance,
             },
             // Add a binding for the background property
-            [!NumericUpDown.BackgroundProperty] = new Binding("SelectedSubtitle.Duration")
+            [!NumericUpDown.BackgroundProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.Duration)}")
             {
                 Converter = DurationToBackgroundConverter.Instance,
             },
