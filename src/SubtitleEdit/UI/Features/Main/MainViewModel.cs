@@ -74,6 +74,8 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _statusTextLeft;
     [ObservableProperty] private string _statusTextRight;
 
+    [ObservableProperty] private bool _isWaveformToolbarVisible;
+
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
     public Window Window { get; set; }
@@ -141,6 +143,7 @@ public partial class MainViewModel : ObservableObject
         StatusTextRight = string.Empty;
 
         LoadShortcuts();
+        _isWaveformToolbarVisible = Se.Settings.Waveform.ShowToolbar;
         StartTitleTimer();
         _autoBackupService.StartAutoBackup(this);
     }
@@ -598,6 +601,7 @@ public partial class MainViewModel : ObservableObject
         if (AudioVisualizer != null)
         {
             AudioVisualizer.DrawGridLines = Se.Settings.Waveform.DrawGridLines;
+            IsWaveformToolbarVisible = Se.Settings.Waveform.ShowToolbar;
         }
 
         _updateAudioVisualizer = true;

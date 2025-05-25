@@ -73,6 +73,7 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty] private bool _waveformDrawGridLines;
     [ObservableProperty] private bool _waveformCenterVideoPosition;
+    [ObservableProperty] private bool _waveformShowToolbar;
     [ObservableProperty] private bool _waveformFocusTextboxAfterInsertNew;
     [ObservableProperty] private string _ffmpegPath;
     [ObservableProperty] private string _ffmpegStatus;
@@ -180,6 +181,7 @@ public partial class SettingsViewModel : ObservableObject
 
         WaveformDrawGridLines = Se.Settings.Waveform.DrawGridLines;
         WaveformCenterVideoPosition = Se.Settings.Waveform.CenterVideoPosition;
+        WaveformShowToolbar = Se.Settings.Waveform.ShowToolbar;
         WaveformFocusTextboxAfterInsertNew = Se.Settings.Waveform.FocusTextBoxAfterInsertNew;
 
         ColorDurationTooLong = general.ColorDurationTooLong;
@@ -243,6 +245,7 @@ public partial class SettingsViewModel : ObservableObject
         Se.Settings.Waveform.DrawGridLines = WaveformDrawGridLines;
         Se.Settings.Waveform.CenterVideoPosition = WaveformCenterVideoPosition;
         Se.Settings.Waveform.FocusTextBoxAfterInsertNew = WaveformFocusTextboxAfterInsertNew;
+        Se.Settings.Waveform.ShowToolbar = WaveformShowToolbar;
 
         general.ColorDurationTooLong = ColorDurationTooLong;
         general.ColorDurationTooShort = ColorDurationTooShort;

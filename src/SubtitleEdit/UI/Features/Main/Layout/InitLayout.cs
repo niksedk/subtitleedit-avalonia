@@ -7,7 +7,7 @@ namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
 public static partial class InitLayout
 {
-    public const int WaveFormHeight = 220;
+    public const int WaveFormHeight = 150;
 
     public static int MakeLayout(MainView mainPage, MainViewModel vm, int layoutNumber)
     {
