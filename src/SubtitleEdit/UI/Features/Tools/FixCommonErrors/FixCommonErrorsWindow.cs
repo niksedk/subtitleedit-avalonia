@@ -9,6 +9,7 @@ using Avalonia.Media;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
 
 namespace Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 
@@ -61,17 +62,6 @@ public class FixCommonErrorsWindow : Window
             },
         };
 
-        var noBorderCellTheme = new ControlTheme(typeof(DataGridCell))
-        {
-            Setters =
-            {
-                new Setter(DataGridCell.BorderThicknessProperty, new Thickness(0)),
-                new Setter(DataGridCell.BorderBrushProperty, Brushes.Transparent),
-                new Setter(DataGridCell.BackgroundProperty, Brushes.Transparent),
-                new Setter(DataGridCell.FocusAdornerProperty, null),
-            }
-        };
-
         var rulesGrid = new DataGrid
         {
             AutoGenerateColumns = false,
@@ -89,7 +79,7 @@ public class FixCommonErrorsWindow : Window
                new DataGridTemplateColumn
                {
                     Header = "Enabled",
-                    CellTheme = noBorderCellTheme,
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                     CellTemplate = new FuncDataTemplate<FixRuleDisplayItem>((item, _) =>
                     new Border
                     {
@@ -106,14 +96,14 @@ public class FixCommonErrorsWindow : Window
                 new DataGridTextColumn
                 {
                     Header = "Name",
-                    CellTheme = noBorderCellTheme,
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                     Binding = new Binding(nameof(FixRuleDisplayItem.Name)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Example",
-                    CellTheme = noBorderCellTheme,
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                     Binding = new Binding(nameof(FixRuleDisplayItem.Example)),
                     IsReadOnly = true,
                 },
@@ -128,7 +118,7 @@ public class FixCommonErrorsWindow : Window
             }
         };
 
-        var step2Grid = MakeStep2Grid(noBorderCellTheme);
+        var step2Grid = MakeStep2Grid();
         step2Grid.Bind(IsVisibleProperty, new Binding(nameof(_vm.Step2IsVisible)));
 
         var buttonPanelRules = UiUtil.MakeButtonBar(
@@ -216,7 +206,7 @@ public class FixCommonErrorsWindow : Window
         Activated += delegate { Focus(); }; // hack to make OnKeyDown work
     }
 
-    private Grid MakeStep2Grid(ControlTheme noBorderCellTheme)
+    private Grid MakeStep2Grid()
     {
         // top
         var gridFixes = new Grid
@@ -254,7 +244,7 @@ public class FixCommonErrorsWindow : Window
                new DataGridTemplateColumn
                {
                     Header = "Apply",
-                    CellTheme = noBorderCellTheme,
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                     CellTemplate = new FuncDataTemplate<FixDisplayItem>((item, _) =>
                     new Border
                     {
@@ -271,28 +261,28 @@ public class FixCommonErrorsWindow : Window
                 new DataGridTextColumn
                 {
                     Header = "#",
-                    CellTheme = noBorderCellTheme,
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                     Binding = new Binding(nameof(FixDisplayItem.Number)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Action",
-                    CellTheme = noBorderCellTheme,
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                     Binding = new Binding(nameof(FixDisplayItem.Action)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Before",
-                    CellTheme = noBorderCellTheme,
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                     Binding = new Binding(nameof(FixDisplayItem.Before)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = "After",
-                    CellTheme = noBorderCellTheme,
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                     Binding = new Binding(nameof(FixDisplayItem.After)),
                     IsReadOnly = true,
                 },
@@ -344,12 +334,14 @@ public class FixCommonErrorsWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
+        var fullTimeConverter = new TimeSpanToDisplayFullConverter();
+        var shortTimeConverter = new TimeSpanToDisplayShortConverter();
         var dataGridSubtitles = new DataGrid
         {
             AutoGenerateColumns = false,
             SelectionMode = DataGridSelectionMode.Single,
             CanUserResizeColumns = true,
-            CanUserSortColumns = true,
+            CanUserSortColumns = false,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
             Width = double.NaN,
@@ -363,30 +355,35 @@ public class FixCommonErrorsWindow : Window
                     Header = "#",
                     Binding = new Binding(nameof(SubtitleLineViewModel.Number)),
                     IsReadOnly = true,
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Show",
-                    Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)),
+                    Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)) { Converter = fullTimeConverter },
                     IsReadOnly = true,
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Hide",
-                    Binding = new Binding(nameof(SubtitleLineViewModel.EndTime)),
+                    Binding = new Binding(nameof(SubtitleLineViewModel.EndTime)) { Converter = fullTimeConverter },
                     IsReadOnly = true,
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Duration",
-                    Binding = new Binding(nameof(SubtitleLineViewModel.Duration)),
+                    Binding = new Binding(nameof(SubtitleLineViewModel.Duration)) { Converter = shortTimeConverter },
                     IsReadOnly = true,
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Text",
                     Binding = new Binding(nameof(SubtitleLineViewModel.Text)),
                     IsReadOnly = true,
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
             },
         };
@@ -404,13 +401,11 @@ public class FixCommonErrorsWindow : Window
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
-            ColumnSpacing = 10,
-            RowSpacing = 10,
+            ColumnSpacing = 0,
+            RowSpacing = 0,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
-
-
 
         gridSubtitles.Children.Add(dataGridSubtitles);
         Grid.SetRow(dataGridSubtitles, 0);
@@ -424,7 +419,7 @@ public class FixCommonErrorsWindow : Window
         {
             BorderThickness = new Thickness(1),
             BorderBrush = new SolidColorBrush(Colors.Gray),
-            Margin = new Thickness(0, 0, 0, 10),
+            Margin = new Thickness(0, 0, 0, 0),
             Padding = new Thickness(5),
             Child = gridSubtitles,
         };
@@ -440,8 +435,8 @@ public class FixCommonErrorsWindow : Window
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
-            ColumnSpacing = 10,
-            RowSpacing = 10,
+            ColumnSpacing = 0,
+            RowSpacing = 0,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };

@@ -6,6 +6,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Immutable;
 using Avalonia.Platform;
+using Avalonia.Styling;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Options.Settings;
 using Projektanker.Icons.Avalonia;
@@ -19,6 +20,18 @@ public static class UiUtil
     public const int WindowMarginWidth = 10;
     public const int CornerRadius = 4;
     public const int SplitterWidthOrHeight = 4;
+
+    public static readonly ControlTheme DataGridNoBorderCellTheme = new ControlTheme(typeof(DataGridCell))
+    {
+        Setters =
+        {
+        new Setter(DataGridCell.BorderThicknessProperty, new Thickness(0)),
+            new Setter(DataGridCell.BorderBrushProperty, Brushes.Transparent),
+            new Setter(DataGridCell.BackgroundProperty, Brushes.Transparent),
+            new Setter(DataGridCell.FocusAdornerProperty, null),
+            new Setter(DataGridCell.PaddingProperty, new Thickness(4)),
+        }
+    };
 
     public static Button MakeButton(string text)
     {

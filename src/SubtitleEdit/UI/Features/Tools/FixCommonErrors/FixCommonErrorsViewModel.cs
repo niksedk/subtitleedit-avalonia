@@ -202,8 +202,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
         _oldSelectedLanguage = SelectedLanguage!;
         _oldSelectedProfile = SelectedProfile!;
 
-        ApplyFixes();
-        _previewMode = true;
+        RefreshFixes();
     }
 
     [RelayCommand]
