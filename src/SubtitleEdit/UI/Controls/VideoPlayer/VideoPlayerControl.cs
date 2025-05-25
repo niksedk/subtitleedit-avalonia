@@ -153,6 +153,10 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
 
         public void SetPosition(double seconds)
         {
+            Position = seconds;
+        }
+        public void SetPositionDisplayOnly(double seconds)
+        {
             _positionIgnore = seconds;
             Position = seconds;
         }
@@ -425,7 +429,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             _positionTimer.Tick += (s, e) =>
             {
                 var pos = _videoPlayerInstance.Position;
-                SetPosition(pos);
+                SetPositionDisplayOnly(pos);
                 ProgressText = $"{TimeCode.FromSeconds(pos).ToShortDisplayString()} / {TimeCode.FromSeconds(Duration).ToShortDisplayString()}";
 
                 //TODO: move to a slower timer or events

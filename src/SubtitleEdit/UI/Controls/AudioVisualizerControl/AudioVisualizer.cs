@@ -12,11 +12,9 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
-using Avalonia.Interactivity;
 
 public class AudioVisualizer : Control
 {
-    // Properties
     public static readonly StyledProperty<WavePeakData> WavePeaksProperty =
         AvaloniaProperty.Register<AudioVisualizer, WavePeakData>(nameof(WavePeaks));
 
@@ -98,18 +96,21 @@ public class AudioVisualizer : Control
     private readonly double _fontSize = 12;
 
     private readonly List<SubtitleLineViewModel> _displayableParagraphs = new();
-    private bool _mouseOver;
+    private bool _isAltDown;
+    private bool _isShiftDown;
     private long _lastMouseWheelScroll = -1;
     private readonly Lock _lock = new();
     public SubtitleLineViewModel? NewSelectionParagraph { get; set; }
+    public double _newSelectionSeconds { get; set; }
     private SubtitleLineViewModel? _activeParagraph;
     private Point _startPointerPosition;
     private double _originalStartSeconds;
     private double _originalEndSeconds;
     private enum InteractionMode { None, Moving, ResizingLeft, ResizingRight, New }
     private InteractionMode _interactionMode = InteractionMode.None;
+
     public readonly double ResizeMargin = 5.0; // Margin for resizing paragraphs
-    
+
     public class PositionEventArgs : EventArgs
     {
         public double PositionInSeconds { get; set; }
@@ -134,6 +135,8 @@ public class AudioVisualizer : Control
     {
         AllSelectedParagraphs = new List<SubtitleLineViewModel>();
         Focusable = true;
+        IsHitTestVisible = true;
+        ClipToBounds = true;
 
         AffectsRender<AudioVisualizer>(
             WavePeaksProperty,
@@ -150,12 +153,21 @@ public class AudioVisualizer : Control
         PointerReleased += OnPointerReleased;
         PointerWheelChanged += OnPointerWheelChanged;
         KeyDown += OnKeyDown;
-        LostFocus += OnLostFocus;
+        KeyUp += OnKeyUp;
     }
 
-    private void OnLostFocus(object? sender, RoutedEventArgs e)
+    private void OnKeyUp(object? sender, KeyEventArgs e)
     {
-        InvalidateVisual();
+        if (e.Key == Key.LeftAlt || e.Key == Key.RightAlt)
+        {
+            _isAltDown = false;
+            e.Handled = true;
+        }
+        else if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
+        {
+            _isShiftDown = false;
+            e.Handled = true;
+        }
     }
 
     private void OnKeyDown(object? sender, KeyEventArgs e)
@@ -180,40 +192,102 @@ public class AudioVisualizer : Control
             InvalidateVisual();
             e.Handled = true;
         }
+        else if (e.Key == Key.LeftAlt || e.Key == Key.RightAlt)
+        {
+            _isAltDown = true;
+            e.Handled = true;
+        }
+        else if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
+        {
+            _isShiftDown = true;
+            e.Handled = true;
+        }
     }
 
     private void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
-        //TODO: Handle zooming in and out with mouse wheel if ctrl is down
-
-        //TODO: Scroll the video position
         _lastMouseWheelScroll = DateTime.UtcNow.Ticks;
+
+        var point = e.GetPosition(this);
+        var properties = e.GetCurrentPoint(this).Properties;
+
+        if (_isAltDown)
+        {
+            var newZoomFactor = ZoomFactor + e.Delta.Y / 1000.0;
+
+            if (newZoomFactor < 0.1)
+            {
+                newZoomFactor = 0.1;
+            }
+
+            if (newZoomFactor > 20.0)
+            {
+                newZoomFactor = 20.0;
+            }
+
+            ZoomFactor = newZoomFactor;
+
+            InvalidateVisual();
+            return;
+        }
+
+        if (_isShiftDown)
+        {
+            var newZoomFactor = VerticalZoomFactor + e.Delta.Y / 100.0;
+
+            if (newZoomFactor < 0.1)
+            {
+                newZoomFactor = 0.1;
+            }
+
+            if (newZoomFactor > 20.0)
+            {
+                newZoomFactor = 20.0;
+            }
+
+            VerticalZoomFactor = newZoomFactor;
+
+            InvalidateVisual();
+            return;
+        }
+
+        e.Handled = true;
+        if (OnVideoPositionChanged != null)
+        {
+            OnVideoPositionChanged.Invoke(this, new PositionEventArgs { PositionInSeconds = e.Delta.Y / 10 });
+        }
+        return;
     }
 
     private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
     {
         _interactionMode = InteractionMode.None;
         _activeParagraph = null;
-        e.Pointer.Capture(null);
         InvalidateVisual();
     }
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
+        e.Handled = true;
+
         var point = e.GetPosition(this);
         var p = HitTestParagraph(point);
         if (p == null)
         {
             _interactionMode = InteractionMode.New;
             NewSelectionParagraph = new SubtitleLineViewModel();
-            
-            var deltaX = point.X - _startPointerPosition.X;
+
+            var deltaX = point.X; // - _startPointerPosition.X;
             var deltaSeconds = RelativeXPositionToSeconds((int)deltaX);
-            
+            _newSelectionSeconds = deltaSeconds;
+
             NewSelectionParagraph.StartTime = TimeSpan.FromSeconds(deltaSeconds);
             NewSelectionParagraph.EndTime = TimeSpan.FromSeconds(deltaSeconds);
+            InvalidateVisual();
             return;
         }
+
+
 
         double left = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds);
         double right = SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds);
@@ -235,57 +309,47 @@ public class AudioVisualizer : Control
         {
             _interactionMode = InteractionMode.Moving;
         }
-
-        e.Pointer.Capture(this);
     }
 
     private void OnPointerExited(object? sender, PointerEventArgs e)
     {
         base.OnPointerExited(e);
-        _mouseOver = false;
-        InvalidateVisual();  
+        NewSelectionParagraph = null;
+        InvalidateVisual();
     }
 
     private void OnPointerEntered(object? sender, PointerEventArgs e)
     {
         base.OnPointerEntered(e);
-        
+
         if (!IsFocused)
         {
             Focus();
         }
-        
-        _mouseOver = true;
+
         InvalidateVisual();
     }
 
     private void OnPointerMoved(object? sender, PointerEventArgs e)
     {
         var point = e.GetPosition(this);
-        var deltaX = point.X - _startPointerPosition.X;
-        var deltaSeconds = RelativeXPositionToSeconds((int)deltaX);
-
+        var properties = e.GetCurrentPoint(this).Properties;
         var newP = NewSelectionParagraph;
-        if (_interactionMode == InteractionMode.New && newP != null)
+        if (_interactionMode == InteractionMode.New && newP != null && properties.IsLeftButtonPressed)
         {
-            if (deltaSeconds < newP.StartTime.TotalSeconds)
+            var seconds = RelativeXPositionToSeconds((int)point.X);
+            if (seconds > _newSelectionSeconds)
             {
-                newP.StartTime = TimeSpan.FromSeconds(deltaSeconds);
-            }
-            else if (deltaSeconds > newP.EndTime.TotalSeconds)
-            {
-                newP.EndTime = TimeSpan.FromSeconds(deltaSeconds);
+                newP.StartTime = TimeSpan.FromSeconds(_newSelectionSeconds);
+                newP.EndTime = TimeSpan.FromSeconds(seconds);
             }
             else
             {
-                newP.StartTime = TimeSpan.FromSeconds(deltaSeconds);
-                if (newP.StartTime > newP.EndTime)
-                {
-                    newP.StartTime = newP.EndTime;
-                    newP.EndTime = TimeSpan.FromSeconds(deltaSeconds);
-                }
+                newP.StartTime = TimeSpan.FromSeconds(seconds);
+                newP.EndTime = TimeSpan.FromSeconds(_newSelectionSeconds);
             }
-            InvalidateVisual(); 
+
+            InvalidateVisual();
             return;
         }
 
@@ -294,7 +358,10 @@ public class AudioVisualizer : Control
             UpdateCursor(point);
             return;
         }
-  
+
+        var deltaX = point.X - _startPointerPosition.X;
+        var deltaSeconds = RelativeXPositionToSeconds((int)deltaX);
+
         var newStart = _originalStartSeconds;
         var newEnd = _originalEndSeconds;
 
@@ -344,7 +411,7 @@ public class AudioVisualizer : Control
                 break;
         }
 
-        InvalidateVisual(); // Redraw waveform
+        InvalidateVisual();
     }
 
 
@@ -406,8 +473,7 @@ public class AudioVisualizer : Control
 
     public override void Render(DrawingContext context)
     {
-        base.Render(context);
-
+        context.DrawRectangle(Brushes.Transparent, null, new Rect(Bounds.Size));
         using (context.PushClip(new Rect(0, 0, Bounds.Width, Bounds.Height)))
         {
             DrawAllGridLines(context);
@@ -661,7 +727,7 @@ public class AudioVisualizer : Control
         }
 
         // Normalize the value to the control's height
-        var normalizedValue = value / WavePeaks.HighestPeak;
+        var normalizedValue = value / WavePeaks.HighestPeak / VerticalZoomFactor;
         var yOffset = normalizedValue * halfWaveformHeight;
 
         // Ensure Y stays within bounds

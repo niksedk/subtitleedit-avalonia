@@ -1710,7 +1710,7 @@ public partial class MainViewModel : ObservableObject
 
     private void StartTitleTimer()
     {
-        _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
+        _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(150) };
         _positionTimer.Tick += (s, e) =>
         {
             var text = "Untitled";
@@ -1801,5 +1801,26 @@ public partial class MainViewModel : ObservableObject
                 EditTextBox.Focus();
             }, DispatcherPriority.Background);
         }
+    }
+
+    internal void AudioVisualizerOnVideoPositionChanged(object sender, AudioVisualizer.PositionEventArgs e)
+    {
+        var vp = VideoPlayerControl;
+        if (vp == null)
+        {
+            return; 
+        }
+
+        var newPosition = vp.Position + e.PositionInSeconds;
+        newPosition = Math.Max(0, newPosition); 
+        newPosition = Math.Min(vp.Duration, newPosition);
+
+        VideoPlayerControl?.SetPosition(newPosition);
+        _updateAudioVisualizer = true; // Update the audio visualizer position
+    }
+
+    internal void AudioVisualizerOnStatus(object sender, ParagraphEventArgs e)
+    {
+        ShowStatus(e.Paragraph.Text, 3000); 
     }
 }

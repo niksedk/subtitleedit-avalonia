@@ -27,6 +27,8 @@ public class InitWaveform
                 DrawGridLines = Se.Settings.Waveform.DrawGridLines,
             };
             vm.AudioVisualizer.OnNewSelectionInsert += vm.AudioVisualizerOnNewSelectionInsert;
+            vm.AudioVisualizer.OnVideoPositionChanged += vm.AudioVisualizerOnVideoPositionChanged;
+            vm.AudioVisualizer.OnStatus += vm.AudioVisualizerOnStatus;
         }
         else
         {
