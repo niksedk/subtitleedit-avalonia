@@ -426,10 +426,18 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowToolsFixCommonErrors()
     {
-        await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window, vm =>
+        var viewModel = await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window, vm =>
         {
             vm.InitStep1("en", GetUpdateSubtitle());
         });
+
+        if (viewModel.OkPressed)
+        {
+            SetSubtitles(viewModel.FixedSubtitle);
+            SelectAndScrollToRow(0);
+            ShowStatus($"Fixed {viewModel.FixedSubtitle.Paragraphs.Count} lines");
+        }
+
         _shortcutManager.ClearKeys();
     }
 
@@ -1132,15 +1140,9 @@ public partial class MainViewModel : ObservableObject
         Subtitles.Clear();
         foreach (var p in subtitle.Paragraphs)
         {
-            Subtitles.Add(new SubtitleLineViewModel
-            {
-                Number = p.Number,
-                StartTime = p.StartTime.TimeSpan,
-                EndTime = p.EndTime.TimeSpan,
-                Duration = p.Duration.TimeSpan,
-                Text = p.Text
-            });
+            Subtitles.Add(new SubtitleLineViewModel(p));
         }
+        Renumber();
     }
 
     public bool HasChanges()

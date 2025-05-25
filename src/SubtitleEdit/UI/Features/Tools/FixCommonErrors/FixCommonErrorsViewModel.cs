@@ -48,10 +48,10 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
     public SubtitleFormat Format { get; set; } = new SubRip();
     public Encoding Encoding { get; set; } = Encoding.UTF8;
     public string Language { get; set; } = "en";
+    public Subtitle FixedSubtitle = new();
 
     private List<FixRuleDisplayItem> _allFixRules = new();
     private Subtitle _originalSubtitle = new();
-    private Subtitle _fixSubtitle = new();
     private readonly LanguageFixCommonErrors _language;
     private int _totalFixes;
     private int _totalErrors;
@@ -213,6 +213,15 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
     }
 
     [RelayCommand]
+    private void Ok()
+    {
+        _previewMode = false;
+        ApplyFixes();
+        OkPressed = true;
+        Window?.Close();
+    }
+
+    [RelayCommand]
     public void RulesSelectAll()
     {
         foreach (var rule in FixRules)
@@ -269,13 +278,12 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
     {
         _totalErrors = 0;
 
-        var subtitle = _previewMode ? new Subtitle(_fixSubtitle, false) : _fixSubtitle;
+        var subtitle = _previewMode ? new Subtitle(FixedSubtitle, false) : FixedSubtitle;
         foreach (var paragraph in subtitle.Paragraphs)
         {
             paragraph.Text = string.Join(Environment.NewLine, paragraph.Text.SplitToLines());
         }
 
-        Fixes.Clear();
         foreach (var fix in FixRules)
         {
             if (fix.IsSelected)
@@ -286,12 +294,12 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
         }
 
         Paragraphs.Clear();
-        Paragraphs.AddRange(_fixSubtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
+        Paragraphs.AddRange(FixedSubtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
     }
 
     public void InitStep1(string languageCode, Subtitle subtitle)
     {
-        _fixSubtitle = subtitle;
+        FixedSubtitle = subtitle;
 
         _allFixRules = new List<FixRuleDisplayItem>
         {

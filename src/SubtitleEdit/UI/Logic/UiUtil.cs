@@ -480,6 +480,12 @@ public static class UiUtil
         return control;
     }
 
+    public static Button WithBold(this Button control)
+    {
+        control.FontWeight = FontWeight.Bold;
+        return control;
+    }
+
     public static TextBlock WithMinwidth(this TextBlock control, int width)
     {
         control.MinWidth = width;

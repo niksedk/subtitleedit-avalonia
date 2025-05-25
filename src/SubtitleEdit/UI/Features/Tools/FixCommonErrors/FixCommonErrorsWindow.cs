@@ -6,6 +6,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Styling;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 
@@ -45,6 +46,7 @@ public class FixCommonErrorsWindow : Window
 
         var textBoxSearch = UiUtil.MakeTextBox(250, vm, nameof(vm.SearchText)).WithMarginRight(25);
         textBoxSearch.Watermark = "Search rules...";
+        textBoxSearch.Bind(IsVisibleProperty, new Binding(nameof(vm.Step1IsVisible)));
         textBoxSearch.TextChanged += vm.TextBoxSearch_TextChanged;
         var panelTopRight = new StackPanel
         {
@@ -57,6 +59,17 @@ public class FixCommonErrorsWindow : Window
                 UiUtil.MakeTextBlock("Language").WithMarginRight(5),
                 UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage)),
             },
+        };
+
+        var noBorderCellTheme = new ControlTheme(typeof(DataGridCell))
+        {
+            Setters =
+            {
+                new Setter(DataGridCell.BorderThicknessProperty, new Thickness(0)),
+                new Setter(DataGridCell.BorderBrushProperty, Brushes.Transparent),
+                new Setter(DataGridCell.BackgroundProperty, Brushes.Transparent),
+                new Setter(DataGridCell.FocusAdornerProperty, null),
+            }
         };
 
         var rulesGrid = new DataGrid
@@ -74,25 +87,33 @@ public class FixCommonErrorsWindow : Window
             Columns =
             {
                new DataGridTemplateColumn
-                {
+               {
                     Header = "Enabled",
+                    CellTheme = noBorderCellTheme,
                     CellTemplate = new FuncDataTemplate<FixRuleDisplayItem>((item, _) =>
-                    new CheckBox
+                    new Border
                     {
-                        [!ToggleButton.IsCheckedProperty] = new Binding(nameof(FixRuleDisplayItem.IsSelected)),
-                        HorizontalAlignment = HorizontalAlignment.Center
+                        Background = Brushes.Transparent, // Prevents highlighting
+                        Padding = new Thickness(4),
+                        Child = new CheckBox
+                        {
+                            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(FixRuleDisplayItem.IsSelected)),
+                            HorizontalAlignment = HorizontalAlignment.Center
+                        }
                     }),
                     Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
                 },
                 new DataGridTextColumn
                 {
                     Header = "Name",
+                    CellTheme = noBorderCellTheme,
                     Binding = new Binding(nameof(FixRuleDisplayItem.Name)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Example",
+                    CellTheme = noBorderCellTheme,
                     Binding = new Binding(nameof(FixRuleDisplayItem.Example)),
                     IsReadOnly = true,
                 },
@@ -107,7 +128,7 @@ public class FixCommonErrorsWindow : Window
             }
         };
 
-        var step2Grid = MakeStep2Grid();
+        var step2Grid = MakeStep2Grid(noBorderCellTheme);
         step2Grid.Bind(IsVisibleProperty, new Binding(nameof(_vm.Step2IsVisible)));
 
         var buttonPanelRules = UiUtil.MakeButtonBar(
@@ -128,9 +149,8 @@ public class FixCommonErrorsWindow : Window
             .WithIconLeft("fa-solid fa-arrow-left")
             .BindVisible(vm, nameof(vm.Step2IsVisible));
 
-        var buttonApplyFixes = UiUtil.MakeButton("Apply fixes", vm.DoApplyFixesCommand)
+        var buttonApplyFixes = UiUtil.MakeButton("Apply selected fixes & close", vm.OkCommand)
             .BindVisible(vm, nameof(vm.Step2IsVisible));
-
 
         var buttonPanelRight = UiUtil.MakeButtonBar(
             buttonBackToFixList,
@@ -196,7 +216,7 @@ public class FixCommonErrorsWindow : Window
         Activated += delegate { Focus(); }; // hack to make OnKeyDown work
     }
 
-    private Grid MakeStep2Grid()
+    private Grid MakeStep2Grid(ControlTheme noBorderCellTheme)
     {
         // top
         var gridFixes = new Grid
@@ -231,32 +251,48 @@ public class FixCommonErrorsWindow : Window
             ItemsSource = _vm.Fixes,
             Columns =
             {
-                new DataGridCheckBoxColumn
-                {
+               new DataGridTemplateColumn
+               {
                     Header = "Apply",
-                    Binding = new Binding(nameof(FixDisplayItem.IsSelected)),
+                    CellTheme = noBorderCellTheme,
+                    CellTemplate = new FuncDataTemplate<FixDisplayItem>((item, _) =>
+                    new Border
+                    {
+                        Background = Brushes.Transparent, // Prevents highlighting
+                        Padding = new Thickness(4),
+                        Child = new CheckBox
+                        {
+                            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(FixDisplayItem.IsSelected)),
+                            HorizontalAlignment = HorizontalAlignment.Center
+                        }
+                    }),
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
                 },
                 new DataGridTextColumn
                 {
                     Header = "#",
+                    CellTheme = noBorderCellTheme,
                     Binding = new Binding(nameof(FixDisplayItem.Number)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Action",
+                    CellTheme = noBorderCellTheme,
                     Binding = new Binding(nameof(FixDisplayItem.Action)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Before",
+                    CellTheme = noBorderCellTheme,
                     Binding = new Binding(nameof(FixDisplayItem.Before)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = "After",
+                    CellTheme = noBorderCellTheme,
                     Binding = new Binding(nameof(FixDisplayItem.After)),
                     IsReadOnly = true,
                 },
