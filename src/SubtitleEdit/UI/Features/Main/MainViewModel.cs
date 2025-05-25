@@ -1030,7 +1030,6 @@ public partial class MainViewModel : ObservableObject
         SubtitleGridSelectionChanged();
     }
 
-    // Method to select a specific row by index and make it visible
     private void SelectAndScrollToRow(int index)
     {
         if (index < 0 || index >= Subtitles.Count)
@@ -1045,7 +1044,6 @@ public partial class MainViewModel : ObservableObject
         SubtitleGrid.ScrollIntoView(SubtitleGrid.SelectedItem, null);
     }
 
-    // Method to select a specific subtitle and make it visible
     public void SelectAndScrollToSubtitle(SubtitleLineViewModel subtitle)
     {
         if (subtitle == null || !Subtitles.Contains(subtitle))

@@ -499,4 +499,13 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
     {
         //TODO: Implement functionality to handle delete indices
     }
+
+    internal void SelectAndScrollTo(FixDisplayItem fixDisplayItem)
+    {
+        var p = Paragraphs.FirstOrDefault(p => p.Paragraph?.Id == fixDisplayItem.Paragraph.Id);    
+        if (p != null)
+        {
+            return;
+        }
+    }
 }

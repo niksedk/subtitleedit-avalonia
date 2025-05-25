@@ -25,11 +25,23 @@ public static class UiUtil
     {
         Setters =
         {
-        new Setter(DataGridCell.BorderThicknessProperty, new Thickness(0)),
+            new Setter(DataGridCell.BorderThicknessProperty, new Thickness(0)),
             new Setter(DataGridCell.BorderBrushProperty, Brushes.Transparent),
             new Setter(DataGridCell.BackgroundProperty, Brushes.Transparent),
             new Setter(DataGridCell.FocusAdornerProperty, null),
             new Setter(DataGridCell.PaddingProperty, new Thickness(4)),
+        }
+    };
+
+    public static readonly ControlTheme DataGridNoBorderNoPaddingCellTheme = new ControlTheme(typeof(DataGridCell))
+    {
+        Setters =
+        {
+            new Setter(DataGridCell.BorderThicknessProperty, new Thickness(0)),
+            new Setter(DataGridCell.BorderBrushProperty, Brushes.Transparent),
+            new Setter(DataGridCell.BackgroundProperty, Brushes.Transparent),
+            new Setter(DataGridCell.FocusAdornerProperty, null),
+            new Setter(DataGridCell.PaddingProperty, new Thickness(0)),
         }
     };
 

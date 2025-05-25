@@ -79,7 +79,7 @@ public class FixCommonErrorsWindow : Window
                new DataGridTemplateColumn
                {
                     Header = "Enabled",
-                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     CellTemplate = new FuncDataTemplate<FixRuleDisplayItem>((item, _) =>
                     new Border
                     {
@@ -96,14 +96,14 @@ public class FixCommonErrorsWindow : Window
                 new DataGridTextColumn
                 {
                     Header = "Name",
-                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(FixRuleDisplayItem.Name)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Example",
-                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(FixRuleDisplayItem.Example)),
                     IsReadOnly = true,
                 },
@@ -244,7 +244,7 @@ public class FixCommonErrorsWindow : Window
                new DataGridTemplateColumn
                {
                     Header = "Apply",
-                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     CellTemplate = new FuncDataTemplate<FixDisplayItem>((item, _) =>
                     new Border
                     {
@@ -261,28 +261,28 @@ public class FixCommonErrorsWindow : Window
                 new DataGridTextColumn
                 {
                     Header = "#",
-                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(FixDisplayItem.Number)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Action",
-                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(FixDisplayItem.Action)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Before",
-                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(FixDisplayItem.Before)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = "After",
-                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(FixDisplayItem.After)),
                     IsReadOnly = true,
                 },
@@ -453,7 +453,10 @@ public class FixCommonErrorsWindow : Window
 
     private void DataGridFixes_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-
+        if (e.AddedItems.Count == 1 && e.AddedItems[0] is FixDisplayItem fixDisplayItem)
+        { 
+            _vm.SelectAndScrollTo(fixDisplayItem);
+        }
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
