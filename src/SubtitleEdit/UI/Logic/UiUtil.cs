@@ -445,6 +445,13 @@ public static class UiUtil
         return control;
     }
 
+    public static StackPanel WithMarginTop(this StackPanel control, int marginTop)
+    {
+        var m = control.Margin;
+        control.Margin = new Thickness(m.Left, marginTop, m.Right, m.Bottom);
+        return control;
+    }
+
     public static ComboBox WithMarginTop(this ComboBox control, int marginTop)
     {
         var m = control.Margin;

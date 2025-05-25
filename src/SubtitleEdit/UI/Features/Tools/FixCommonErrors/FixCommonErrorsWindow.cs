@@ -1,5 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
@@ -17,8 +19,8 @@ public class FixCommonErrorsWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Fix common errors";
-        Width = 950;
-        Height = 750;
+        Width = 1024;
+        Height = 720;
         MinWidth = 800;
         MinHeight = 600;
         CanResize = true;
@@ -68,12 +70,19 @@ public class FixCommonErrorsWindow : Window
             Width = double.NaN,
             Height = double.NaN,
             ItemsSource = vm.FixRules,
+            IsReadOnly = false,
             Columns =
             {
-                new DataGridCheckBoxColumn
+               new DataGridTemplateColumn
                 {
                     Header = "Enabled",
-                    Binding = new Binding(nameof(FixRuleDisplayItem.IsSelected)),
+                    CellTemplate = new FuncDataTemplate<FixRuleDisplayItem>((item, _) =>
+                    new CheckBox
+                    {
+                        [!ToggleButton.IsCheckedProperty] = new Binding(nameof(FixRuleDisplayItem.IsSelected)),
+                        HorizontalAlignment = HorizontalAlignment.Center
+                    }),
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
                 },
                 new DataGridTextColumn
                 {
@@ -90,6 +99,13 @@ public class FixCommonErrorsWindow : Window
             },
         };
         rulesGrid.Bind(IsVisibleProperty, new Binding(nameof(vm.Step1IsVisible)));
+        rulesGrid.CellPointerPressed += (sender, e) =>
+        {
+            if (e.Column is DataGridCheckBoxColumn column && e.Row.DataContext is FixRuleDisplayItem item)
+            {
+                item.IsSelected = !item.IsSelected;
+            }
+        };
 
         var step2Grid = MakeStep2Grid();
         step2Grid.Bind(IsVisibleProperty, new Binding(nameof(_vm.Step2IsVisible)));
@@ -194,8 +210,8 @@ public class FixCommonErrorsWindow : Window
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
-            ColumnSpacing = 10,
-            RowSpacing = 10,
+            ColumnSpacing = 0,
+            RowSpacing = 0,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
@@ -252,9 +268,10 @@ public class FixCommonErrorsWindow : Window
         var buttonBarFixes = UiUtil.MakeButtonBar(
             UiUtil.MakeButton("Select all", _vm.FixesSelectAllCommand),
             UiUtil.MakeButton("Inverse selection", _vm.FixesInverseSelectedCommand),
-            UiUtil.MakeButton("Refresh fixes", _vm.FixesInverseSelectedCommand),
-            UiUtil.MakeButton("Apply selected fixes", _vm.FixesInverseSelectedCommand)
+            UiUtil.MakeButton("Refresh fixes", _vm.DoRefreshFixesCommand),
+            UiUtil.MakeButton("Apply selected fixes", _vm.DoApplyFixesCommand)
         );
+        buttonBarFixes.WithMarginTop(2);
 
         gridFixes.Children.Add(dataGridFixes);
         Grid.SetRow(dataGridFixes, 0);
@@ -374,7 +391,7 @@ public class FixCommonErrorsWindow : Window
             Margin = new Thickness(0, 0, 0, 10),
             Padding = new Thickness(5),
             Child = gridSubtitles,
-        };  
+        };
 
         var grid = new Grid
         {
@@ -405,7 +422,7 @@ public class FixCommonErrorsWindow : Window
 
     private void DataGridFixes_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        
+
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

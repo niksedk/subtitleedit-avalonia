@@ -275,7 +275,8 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
             paragraph.Text = string.Join(Environment.NewLine, paragraph.Text.SplitToLines());
         }
 
-        foreach (var fix in _allFixRules)
+        Fixes.Clear();
+        foreach (var fix in FixRules)
         {
             if (fix.IsSelected)
             {
