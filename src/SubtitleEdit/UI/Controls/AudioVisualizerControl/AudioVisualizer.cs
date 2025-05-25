@@ -149,7 +149,7 @@ public class AudioVisualizer : Control
     public delegate void ParagraphEventHandler(object sender, ParagraphEventArgs e);
     public event PositionEventHandler? OnVideoPositionChanged;
     public event PositionEventHandler? OnHorizontalScroll;
-    public event PositionEventHandler? OnDoubleTapped;
+    public event ParagraphEventHandler? OnParagraphDoubleTapped;
     public event ParagraphEventHandler? OnPositionSelected;
     public event ParagraphEventHandler? OnTimeChanged;
     public event ParagraphEventHandler? OnStartTimeChanged;
@@ -182,6 +182,19 @@ public class AudioVisualizer : Control
         PointerPressed += OnPointerPressed;
         PointerReleased += OnPointerReleased;
         PointerWheelChanged += OnPointerWheelChanged;
+        DoubleTapped += (sender, e) =>
+        {
+            if (OnParagraphDoubleTapped != null)
+            {
+                var point = e.GetPosition(this);
+                var p = HitTestParagraph(point);
+                if (p != null)
+                {
+                    var position = RelativeXPositionToSeconds((int)e.GetPosition(this).X);
+                    OnParagraphDoubleTapped.Invoke(this, new ParagraphEventArgs(position, p));
+                }
+            }
+        };
         KeyDown += OnKeyDown;
         KeyUp += OnKeyUp;
     }

@@ -1845,4 +1845,17 @@ public partial class MainViewModel : ObservableObject
             }
         }
     }
+
+    internal void OnWaveformDoubleTapped(object sender, ParagraphEventArgs e)
+    {
+        if (!string.IsNullOrEmpty(_videoFileName) && VideoPlayerControl != null)
+        {
+            VideoPlayerControl.Position = e.Seconds;
+            var p = Subtitles.FirstOrDefault(p=>p.StartTime.TotalMilliseconds == e.Paragraph.StartTime.TotalMilliseconds);
+            if (p != null)
+            {
+                SelectAndScrollToSubtitle(p);
+            }
+        }
+    }
 }
