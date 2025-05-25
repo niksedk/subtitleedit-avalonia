@@ -77,6 +77,9 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _waveformFocusTextboxAfterInsertNew;
     [ObservableProperty] private string _ffmpegPath;
     [ObservableProperty] private string _ffmpegStatus;
+    [ObservableProperty] private Color _waveformSelectedColor;
+    [ObservableProperty] private Color _waveformColor;
+
 
     [ObservableProperty] private ObservableCollection<string> _themes;
     [ObservableProperty] private string _selectedTheme;
@@ -141,10 +144,15 @@ public partial class SettingsViewModel : ObservableObject
         FfmpegStatus = "Not installed";
         FfmpegPath = string.Empty;
 
-        LoadSettings();
+        LoadSettings(GetWaveformSelectedColor());
     }
 
-    private void LoadSettings()
+    private Color GetWaveformSelectedColor()
+    {
+        return WaveformSelectedColor;
+    }
+
+    private void LoadSettings(Color waveformSelectedColor)
     {
         var general = Se.Settings.General;
         var appearance = Se.Settings.Appearance;
@@ -183,6 +191,8 @@ public partial class SettingsViewModel : ObservableObject
         WaveformCenterVideoPosition = Se.Settings.Waveform.CenterVideoPosition;
         WaveformShowToolbar = Se.Settings.Waveform.ShowToolbar;
         WaveformFocusTextboxAfterInsertNew = Se.Settings.Waveform.FocusTextBoxAfterInsertNew;
+        WaveformColor = general.ErrorColor.FromHexToColor();
+        waveformSelectedColor = general.ErrorColor.FromHexToColor();
 
         ColorDurationTooLong = general.ColorDurationTooLong;
         ColorDurationTooShort = general.ColorDurationTooShort;
@@ -246,6 +256,8 @@ public partial class SettingsViewModel : ObservableObject
         Se.Settings.Waveform.CenterVideoPosition = WaveformCenterVideoPosition;
         Se.Settings.Waveform.FocusTextBoxAfterInsertNew = WaveformFocusTextboxAfterInsertNew;
         Se.Settings.Waveform.ShowToolbar = WaveformShowToolbar;
+        Se.Settings.Waveform.WaveformColor = WaveformColor.FromColorToHex();
+        Se.Settings.Waveform.WaveformSelectedColor = WaveformSelectedColor.FromColorToHex();
 
         general.ColorDurationTooLong = ColorDurationTooLong;
         general.ColorDurationTooShort = ColorDurationTooShort;

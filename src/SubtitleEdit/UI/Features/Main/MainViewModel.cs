@@ -6,6 +6,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HanumanInstitute.Validators;
+using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
@@ -49,7 +50,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -602,6 +602,8 @@ public partial class MainViewModel : ObservableObject
         {
             AudioVisualizer.DrawGridLines = Se.Settings.Waveform.DrawGridLines;
             IsWaveformToolbarVisible = Se.Settings.Waveform.ShowToolbar;
+            AudioVisualizer.WaveformColor = Se.Settings.Waveform.WaveformColor.FromHexToColor();
+            AudioVisualizer.WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor();
         }
 
         _updateAudioVisualizer = true;

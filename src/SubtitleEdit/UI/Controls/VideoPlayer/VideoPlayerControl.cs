@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
@@ -12,6 +9,9 @@ using Avalonia.Threading;
 using HanumanInstitute.LibMpv.Core;
 using Nikse.SubtitleEdit.Core.Common;
 using Projektanker.Icons.Avalonia;
+using System;
+using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace Nikse.SubtitleEdit.Controls.VideoPlayer
 {

@@ -26,6 +26,8 @@ public class InitWaveform
             vm.AudioVisualizer = new AudioVisualizer
             {
                 DrawGridLines = Se.Settings.Waveform.DrawGridLines,
+                WaveformColor = Se.Settings.Waveform.WaveformColor.FromHexToColor(),
+                WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor(),
             };
             vm.AudioVisualizer.OnNewSelectionInsert += vm.AudioVisualizerOnNewSelectionInsert;
             vm.AudioVisualizer.OnVideoPositionChanged += vm.AudioVisualizerOnVideoPositionChanged;

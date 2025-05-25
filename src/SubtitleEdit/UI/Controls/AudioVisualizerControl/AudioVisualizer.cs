@@ -37,6 +37,12 @@ public class AudioVisualizer : Control
     public static readonly StyledProperty<List<SubtitleLineViewModel>> AllSelectedParagraphsProperty =
         AvaloniaProperty.Register<AudioVisualizer, List<SubtitleLineViewModel>>(nameof(AllSelectedParagraphs));
 
+    public static readonly StyledProperty<Color> WaveformColorProperty =
+        AvaloniaProperty.Register<AudioVisualizer, Color>(nameof(WaveformColor));
+
+    public static readonly StyledProperty<Color> WaveformSelectedColorProperty =
+        AvaloniaProperty.Register<AudioVisualizer, Color>(nameof(WaveformSelectedColor));
+
     public WavePeakData? WavePeaks
     {
         get => GetValue(WavePeaksProperty);
@@ -79,11 +85,31 @@ public class AudioVisualizer : Control
         set => SetValue(AllSelectedParagraphsProperty, value);
     }
 
+    public Color WaveformColor
+    {
+        get => GetValue(WaveformColorProperty);
+        set
+        {
+            _paintWaveform = new Pen(new SolidColorBrush(value), 1);
+            SetValue(WaveformColorProperty, value);
+        }
+    }
+
+    public Color WaveformSelectedColor
+    {
+        get => GetValue(WaveformSelectedColorProperty);
+        set
+        {
+            _paintPenSelected = new Pen(new SolidColorBrush(value), 1);
+            SetValue(WaveformSelectedColorProperty, value);
+        }
+    }
+
     public SubtitleLineViewModel? SelectedParagraph { get; set; }
 
     // Pens and brushes
-    private readonly Pen _paintWaveform = new Pen(new SolidColorBrush(Color.FromArgb(150, 144, 238, 144)), 1);
-    private readonly Pen _paintPenSelected = new Pen(new SolidColorBrush(Color.FromArgb(210, 254, 10, 10)), 1);
+    private Pen _paintWaveform = new Pen(new SolidColorBrush(Color.FromArgb(150, 144, 238, 144)), 1);
+    private Pen _paintPenSelected = new Pen(new SolidColorBrush(Color.FromArgb(210, 254, 10, 10)), 1);
     private readonly Pen _paintGridLines = new Pen(Brushes.DarkGray, 0.2);
     private readonly Pen _paintCurrentPosition = new Pen(Brushes.Cyan, 1);
     private readonly IBrush _mouseOverBrush = new SolidColorBrush(Color.FromArgb(50, 255, 255, 0));

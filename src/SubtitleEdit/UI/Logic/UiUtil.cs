@@ -7,6 +7,7 @@ using Avalonia.Media;
 using Avalonia.Media.Immutable;
 using Avalonia.Platform;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Features.Options.Settings;
 using Projektanker.Icons.Avalonia;
 using System;
 using System.Collections.ObjectModel;
@@ -617,5 +618,27 @@ public static class UiUtil
     internal static Thickness MakeWindowMargin()
     {
         return new Thickness(WindowMarginWidth, WindowMarginWidth * 2, WindowMarginWidth, WindowMarginWidth);
+    }
+
+    internal static ColorPicker MakeColorPicker(SettingsViewModel vm, string colorPropertyPath)
+    {
+        return new ColorPicker
+        {
+            Width = 200,
+            IsAlphaEnabled = true,
+            IsAlphaVisible = true,
+            IsColorSpectrumSliderVisible = false,
+            IsColorComponentsVisible = true,
+            IsColorModelVisible = false,
+            IsColorPaletteVisible = false,
+            IsAccentColorsVisible = false,
+            IsColorSpectrumVisible = true,
+            IsComponentTextInputVisible = true,
+            [!ColorPicker.ColorProperty] = new Binding(colorPropertyPath)
+            {
+                Source = vm,
+                Mode = BindingMode.TwoWay
+            },
+        };
     }
 }
