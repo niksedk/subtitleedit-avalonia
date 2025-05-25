@@ -12,6 +12,7 @@ public interface IInsertService
 {
     void InsertBefore(SubtitleFormat format, Subtitle subtitle, ObservableCollection<SubtitleLineViewModel> subtitles, int? index, string text);
     void InsertAfter(SubtitleFormat format, Subtitle subtitle, ObservableCollection<SubtitleLineViewModel> subtitles, int? index, string text);
+    int InsertInCorrectPosition( ObservableCollection<SubtitleLineViewModel> subtitles, SubtitleLineViewModel paragraph);
 }
 
 public class InsertService : IInsertService
@@ -201,6 +202,22 @@ public class InsertService : IInsertService
         }
 
         subtitles.Insert(firstSelectedIndex + 1, newParagraph);
+    }
+
+    public int InsertInCorrectPosition(ObservableCollection<SubtitleLineViewModel> subtitles, SubtitleLineViewModel paragraph)
+    {
+        for (var i = 0; i < subtitles.Count; i++)
+        {
+            if (paragraph.StartTime < subtitles[i].StartTime)
+            {
+                subtitles.Insert(i, paragraph);
+                return i;
+            }
+        }
+
+        // If not inserted earlier, it belongs at the end
+        subtitles.Add(paragraph);
+        return subtitles.Count - 1;
     }
 
     private void SetStyleForNewParagraph(SubtitleFormat format, Subtitle subtitle, ObservableCollection<SubtitleLineViewModel> subtitles, SubtitleLineViewModel newParagraph, int nearestIndex)

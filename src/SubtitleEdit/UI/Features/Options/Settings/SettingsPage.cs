@@ -229,6 +229,7 @@ public class SettingsPage : UserControl
             [
                 MakeCheckboxSetting("Draw grid lines", nameof(_vm.WaveformDrawGridLines)),
                 MakeCheckboxSetting("Center video position", nameof(_vm.WaveformCenterVideoPosition)),
+                MakeCheckboxSetting("Focus text box after insert", nameof(_vm.WaveformFocusTextboxAfterInsertNew)),
                 new SettingsItem("Download ffmpeg", () => new StackPanel
                 {
                     Children =

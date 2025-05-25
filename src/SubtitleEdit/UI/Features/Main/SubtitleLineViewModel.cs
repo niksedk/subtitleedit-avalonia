@@ -40,7 +40,21 @@ public partial class SubtitleLineViewModel : ObservableObject
         Actor = string.Empty;
         Layer = 0;
     }
-    
+
+    public SubtitleLineViewModel(SubtitleLineViewModel p, bool generateNewId = false)
+    {
+        Text = p.Text;
+        StartTime = p.StartTime;
+        EndTime = p.EndTime;
+        Duration = p.Duration;
+        Language = p.Language;
+        Region = p.Region;
+        Style = p.Style;
+        Actor = p.Actor;
+        Layer = p.Layer;
+        Extra = p.Extra;
+    }
+
     public SubtitleLineViewModel(Paragraph newParagraph)
     {
         Text = newParagraph.Text;

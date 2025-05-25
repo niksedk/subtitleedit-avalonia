@@ -1,46 +1,47 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Features.Main;
 
 namespace Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 
 public class ParagraphEventArgs
 {
-    public Paragraph Paragraph { get; }
+    public SubtitleLineViewModel Paragraph { get; }
     public double Seconds { get; }
-    public Paragraph? BeforeParagraph { get; set; }
+    public SubtitleLineViewModel? BeforeParagraph { get; set; }
     public MouseDownParagraphType MouseDownParagraphType { get; set; }
     public bool MovePreviousOrNext { get; set; }
     public double AdjustMs { get; set; }
 
-    public ParagraphEventArgs(Paragraph p)
+    public ParagraphEventArgs(SubtitleLineViewModel p)
     {
-        Paragraph = new Paragraph(p, false);
+        Paragraph = new SubtitleLineViewModel(p);
     }
 
-    public ParagraphEventArgs(double seconds, Paragraph? p)
+    public ParagraphEventArgs(double seconds, SubtitleLineViewModel? p)
     {
         Seconds = seconds;
-        Paragraph = new Paragraph(p, false);
+        Paragraph = new SubtitleLineViewModel(p, false);
     }
 
-    public ParagraphEventArgs(double seconds, Paragraph p, Paragraph b)
+    public ParagraphEventArgs(double seconds, SubtitleLineViewModel p, SubtitleLineViewModel b)
     {
         Seconds = seconds;
         Paragraph = p;
         BeforeParagraph = b;
     }
 
-    public ParagraphEventArgs(double seconds, Paragraph p, Paragraph? b, MouseDownParagraphType mouseDownParagraphType)
+    public ParagraphEventArgs(double seconds, SubtitleLineViewModel p, SubtitleLineViewModel? b, MouseDownParagraphType mouseDownParagraphType)
     {
         Seconds = seconds;
-        Paragraph = new Paragraph(p, false);
+        Paragraph = new SubtitleLineViewModel(p, false);
         BeforeParagraph = b;
         MouseDownParagraphType = mouseDownParagraphType;
     }
 
-    public ParagraphEventArgs(double seconds, Paragraph p, Paragraph? b, MouseDownParagraphType mouseDownParagraphType, bool movePreviousOrNext)
+    public ParagraphEventArgs(double seconds, SubtitleLineViewModel p, SubtitleLineViewModel? b, MouseDownParagraphType mouseDownParagraphType, bool movePreviousOrNext)
     {
         Seconds = seconds;
-        Paragraph = new Paragraph(p, false);
+        Paragraph = new SubtitleLineViewModel(p, false);
         BeforeParagraph = b;
         MouseDownParagraphType = mouseDownParagraphType;
         MovePreviousOrNext = movePreviousOrNext;

@@ -22,10 +22,11 @@ public class InitWaveform
         // waveform area
         if (vm.AudioVisualizer == null)
         {
-            vm.AudioVisualizer = new AudioVisualizer() 
+            vm.AudioVisualizer = new AudioVisualizer
             { 
-                DrawGridLines = Se.Settings.Waveform.DrawGridLines 
+                DrawGridLines = Se.Settings.Waveform.DrawGridLines,
             };
+            vm.AudioVisualizer.OnNewSelectionInsert += vm.AudioVisualizerOnNewSelectionInsert;
         }
         else
         {

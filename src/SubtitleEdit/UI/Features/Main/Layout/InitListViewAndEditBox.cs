@@ -312,6 +312,7 @@ public static class InitListViewAndEditBox
             FontSize = Se.Settings.Appearance.SubtitleTextBoxFontSize,
             FontWeight = Se.Settings.Appearance.SubtitleTextBoxFontBold ? FontWeight.Bold : FontWeight.Normal,
         };
+        vm.EditTextBox = textBox;
         textEditGrid.Children.Add(textBox);
         textBox.TextChanged += vm.SubtitleTextChanged;
         Grid.SetRow(textBox, 1);

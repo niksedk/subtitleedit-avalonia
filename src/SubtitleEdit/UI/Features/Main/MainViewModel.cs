@@ -49,6 +49,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -81,7 +82,7 @@ public partial class MainViewModel : ObservableObject
     public TextBlock StatusTextLeftLabel { get; set; }
     //public Grid Waveform { get; internal set; }
     public MenuItem MenuReopen { get; set; }
-    public AudioVisualizer AudioVisualizer { get; set; }
+    public AudioVisualizer? AudioVisualizer { get; set; }
 
     private bool _updateAudioVisualizer = false;
     private string? _subtitleFileName;
@@ -138,10 +139,6 @@ public partial class MainViewModel : ObservableObject
         SelectedEncoding = Encodings[0];
         StatusTextLeft = string.Empty;
         StatusTextRight = string.Empty;
-        AudioVisualizer = new AudioVisualizer()
-        {
-            DrawGridLines = Se.Settings.Waveform.DrawGridLines
-        };
 
         LoadShortcuts();
         StartTitleTimer();
@@ -598,7 +595,11 @@ public partial class MainViewModel : ObservableObject
             }
         }
 
-        AudioVisualizer.DrawGridLines = Se.Settings.Waveform.DrawGridLines;
+        if (AudioVisualizer != null)
+        {
+            AudioVisualizer.DrawGridLines = Se.Settings.Waveform.DrawGridLines;
+        }
+
         _updateAudioVisualizer = true;
     }
 
@@ -1309,7 +1310,10 @@ public partial class MainViewModel : ObservableObject
         {
             ShowStatus("Loading wave info from cache...");
             var wavePeaks = WavePeakData.FromDisk(peakWaveFileName);
-            AudioVisualizer.WavePeaks = wavePeaks;
+            if (AudioVisualizer != null)
+            {
+                AudioVisualizer.WavePeaks = wavePeaks;
+            }
         }
 
         _videoFileName = videoFileName;
@@ -1347,7 +1351,10 @@ public partial class MainViewModel : ObservableObject
 
             Dispatcher.UIThread.Post(() =>
             {
-                AudioVisualizer.WavePeaks = wavePeaks;
+                if (AudioVisualizer != null)
+                {
+                    AudioVisualizer.WavePeaks = wavePeaks;
+                }
 
                 //if (!_stopping)
                 //{
@@ -1780,5 +1787,19 @@ public partial class MainViewModel : ObservableObject
 
         MakeSubtitleTextInfo(selectedSubtitle.Text, selectedSubtitle);
         _updateAudioVisualizer = true;
+    }
+
+    public void AudioVisualizerOnNewSelectionInsert(object sender, ParagraphEventArgs e)
+    {
+        var index = _insertService.InsertInCorrectPosition(Subtitles, e.Paragraph);
+        SelectAndScrollToRow(index);
+        
+        if (Se.Settings.Waveform.FocusTextBoxAfterInsertNew)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                EditTextBox.Focus();
+            }, DispatcherPriority.Background);
+        }
     }
 }
