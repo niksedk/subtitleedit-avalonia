@@ -1751,13 +1751,15 @@ public partial class MainViewModel : ObservableObject
                 }
 
                 av.CurrentVideoPositionSeconds = vp.Position;
+                var isPlaying = vp.IsPlaying;
 
                 if (Se.Settings.Waveform.CenterVideoPosition)
                 {
                     // calculate the center position based on the waveform width
-                    av.SetPosition(Math.Max(0, startPos - 5), subtitle, mediaPlayerSeconds, firstSelectedIndex, _selectedSubtitles ?? new List<SubtitleLineViewModel>());
+                    var waveformHalfSeconds = (av.EndPositionSeconds - av.StartPositionSeconds) / 2.0;
+                    av.SetPosition(Math.Max(0, mediaPlayerSeconds - waveformHalfSeconds), subtitle, mediaPlayerSeconds, firstSelectedIndex, _selectedSubtitles ?? new List<SubtitleLineViewModel>());
                 }
-                else if (mediaPlayerSeconds > av.EndPositionSeconds || mediaPlayerSeconds < av.StartPositionSeconds)
+                else if ((isPlaying || !av.IsScrolling) && (mediaPlayerSeconds > av.EndPositionSeconds || mediaPlayerSeconds < av.StartPositionSeconds))
                 {
                     av.SetPosition(startPos, subtitle, mediaPlayerSeconds, 0, _selectedSubtitles ?? new List<SubtitleLineViewModel>());
                 }
@@ -1793,7 +1795,7 @@ public partial class MainViewModel : ObservableObject
     {
         var index = _insertService.InsertInCorrectPosition(Subtitles, e.Paragraph);
         SelectAndScrollToRow(index);
-        
+
         if (Se.Settings.Waveform.FocusTextBoxAfterInsertNew)
         {
             Dispatcher.UIThread.Post(() =>
@@ -1808,11 +1810,11 @@ public partial class MainViewModel : ObservableObject
         var vp = VideoPlayerControl;
         if (vp == null)
         {
-            return; 
+            return;
         }
 
-        var newPosition = vp.Position + e.PositionInSeconds;
-        newPosition = Math.Max(0, newPosition); 
+        var newPosition = e.PositionInSeconds;
+        newPosition = Math.Max(0, newPosition);
         newPosition = Math.Min(vp.Duration, newPosition);
 
         VideoPlayerControl?.SetPosition(newPosition);
@@ -1821,6 +1823,20 @@ public partial class MainViewModel : ObservableObject
 
     internal void AudioVisualizerOnStatus(object sender, ParagraphEventArgs e)
     {
-        ShowStatus(e.Paragraph.Text, 3000); 
+        ShowStatus(e.Paragraph.Text, 3000);
+    }
+
+    internal void OnSubtitleGridDoubleTapped(object? sender, TappedEventArgs e)
+    {
+        if (sender is DataGrid grid && grid.SelectedItem != null)
+        {
+            if (grid.SelectedItem is SubtitleLineViewModel selectedItem)
+            {
+                if (!string.IsNullOrEmpty(_videoFileName) && VideoPlayerControl != null)
+                {
+                    VideoPlayerControl.Position = selectedItem.StartTime.TotalSeconds;
+                }
+            }
+        }
     }
 }

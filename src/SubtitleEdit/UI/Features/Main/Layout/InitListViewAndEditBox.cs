@@ -34,6 +34,8 @@ public static class InitListViewAndEditBox
             SelectionMode = DataGridSelectionMode.Extended,
         };
 
+        vm.SubtitleGrid.DoubleTapped += vm.OnSubtitleGridDoubleTapped;
+
         var fullTimeConverter = new TimeSpanToDisplayFullConverter();
         var shortTimeConverter = new TimeSpanToDisplayShortConverter();
 

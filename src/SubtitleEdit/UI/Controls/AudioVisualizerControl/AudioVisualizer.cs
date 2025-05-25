@@ -9,6 +9,7 @@ using Nikse.SubtitleEdit.Logic;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
@@ -106,10 +107,12 @@ public class AudioVisualizer : Control
     private Point _startPointerPosition;
     private double _originalStartSeconds;
     private double _originalEndSeconds;
+    private long _audioVisualizerLastScroll;
     private enum InteractionMode { None, Moving, ResizingLeft, ResizingRight, New }
     private InteractionMode _interactionMode = InteractionMode.None;
 
     public readonly double ResizeMargin = 5.0; // Margin for resizing paragraphs
+    public bool IsScrolling => _audioVisualizerLastScroll > 0;
 
     public class PositionEventArgs : EventArgs
     {
@@ -118,6 +121,7 @@ public class AudioVisualizer : Control
     public delegate void PositionEventHandler(object sender, PositionEventArgs e);
     public delegate void ParagraphEventHandler(object sender, ParagraphEventArgs e);
     public event PositionEventHandler? OnVideoPositionChanged;
+    public event PositionEventHandler? OnHorizontalScroll;
     public event PositionEventHandler? OnDoubleTapped;
     public event ParagraphEventHandler? OnPositionSelected;
     public event ParagraphEventHandler? OnTimeChanged;
@@ -252,24 +256,58 @@ public class AudioVisualizer : Control
         }
 
         e.Handled = true;
-        if (OnVideoPositionChanged != null)
+        var newStart = StartPositionSeconds + e.Delta.Y / 2;
+        if (newStart < 0)
         {
-            OnVideoPositionChanged.Invoke(this, new PositionEventArgs { PositionInSeconds = e.Delta.Y / 10 });
+            newStart = 0;
         }
-        return;
+
+        _audioVisualizerLastScroll = Stopwatch.GetTimestamp(); // Update the last scroll time
+        StartPositionSeconds = newStart;
+        if (OnHorizontalScroll != null)
+        {
+            OnHorizontalScroll.Invoke(this, new PositionEventArgs { PositionInSeconds = newStart });
+        }
+        InvalidateVisual();
     }
 
     private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
     {
-        _interactionMode = InteractionMode.None;
         _activeParagraph = null;
+        var nsp = NewSelectionParagraph;
+        if (nsp != null)
+        {
+            nsp.UpdateDuration();
+            if (nsp.Duration.TotalMilliseconds < 10)
+            {
+                NewSelectionParagraph = null;
+            }
+            else
+            {
+                _interactionMode = InteractionMode.None;
+                return;
+            }
+        }
+
+        if (_interactionMode == InteractionMode.None || _interactionMode == InteractionMode.New)
+        {
+            if (OnVideoPositionChanged != null)
+            {
+                var videoPosition = RelativeXPositionToSeconds((int)e.GetPosition(this).X);
+                _audioVisualizerLastScroll = 0;
+                OnVideoPositionChanged.Invoke(this, new PositionEventArgs { PositionInSeconds = videoPosition });
+            }
+            return;
+        }
+
+        _interactionMode = InteractionMode.None;
+
         InvalidateVisual();
     }
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
         e.Handled = true;
-
         var point = e.GetPosition(this);
         var p = HitTestParagraph(point);
         if (p == null)
@@ -576,7 +614,7 @@ public class AudioVisualizer : Control
             var pos0 = (int)pos;
             var pos1 = pos0 + 1;
 
-            if (pos1 >= WavePeaks.Peaks.Count)
+            if (pos1 >= WavePeaks.Peaks.Count || pos0 > WavePeaks.Peaks.Count)
             {
                 break;
             }
