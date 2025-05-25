@@ -10,6 +10,7 @@ public class SeWaveform
     public bool ShowToolbar { get; internal set; }
     public string WaveformColor { get; set; }
     public string WaveformSelectedColor { get; set; }
+    public bool InvertMouseWheel { get; set; }
 
     public SeWaveform()
     {

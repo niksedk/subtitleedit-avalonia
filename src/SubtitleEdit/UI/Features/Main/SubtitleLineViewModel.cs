@@ -21,6 +21,9 @@ public partial class SubtitleLineViewModel : ObservableObject
     [ObservableProperty]
     private string _text;
 
+    [ObservableProperty]
+    private string _originalText;
+
     public Paragraph? Paragraph { get; set; }
     public string Extra { get;  set; }
     public string Language { get;  set; }

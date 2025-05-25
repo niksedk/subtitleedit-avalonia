@@ -34,6 +34,9 @@ public class AudioVisualizer : Control
     public static readonly StyledProperty<bool> DrawGridLinesProperty =
         AvaloniaProperty.Register<AudioVisualizer, bool>(nameof(DrawGridLines));
 
+    public static readonly StyledProperty<bool> InvertMouseWheelProperty =
+        AvaloniaProperty.Register<AudioVisualizer, bool>(nameof(InvertMouseWheel));
+
     public static readonly StyledProperty<List<SubtitleLineViewModel>> AllSelectedParagraphsProperty =
         AvaloniaProperty.Register<AudioVisualizer, List<SubtitleLineViewModel>>(nameof(AllSelectedParagraphs));
 
@@ -71,6 +74,12 @@ public class AudioVisualizer : Control
     {
         get => GetValue(CurrentVideoPositionSecondsProperty);
         set => SetValue(CurrentVideoPositionSecondsProperty, value);
+    }
+
+    public bool InvertMouseWheel
+    {
+        get => GetValue(InvertMouseWheelProperty);
+        set => SetValue(InvertMouseWheelProperty, value);
     }
 
     public bool DrawGridLines
@@ -253,10 +262,11 @@ public class AudioVisualizer : Control
 
         var point = e.GetPosition(this);
         var properties = e.GetCurrentPoint(this).Properties;
+        var delta = InvertMouseWheel ? -e.Delta.Y : e.Delta.Y;
 
         if (_isAltDown)
         {
-            var newZoomFactor = ZoomFactor + e.Delta.Y / 1000.0;
+            var newZoomFactor = ZoomFactor + delta / 1000.0;
 
             if (newZoomFactor < 0.1)
             {
@@ -276,7 +286,7 @@ public class AudioVisualizer : Control
 
         if (_isShiftDown)
         {
-            var newZoomFactor = VerticalZoomFactor + e.Delta.Y / 100.0;
+            var newZoomFactor = VerticalZoomFactor + delta / 100.0;
 
             if (newZoomFactor < 0.1)
             {
@@ -295,7 +305,7 @@ public class AudioVisualizer : Control
         }
 
         e.Handled = true;
-        var newStart = StartPositionSeconds + e.Delta.Y / 2;
+        var newStart = StartPositionSeconds + delta / 2;
         if (newStart < 0)
         {
             newStart = 0;

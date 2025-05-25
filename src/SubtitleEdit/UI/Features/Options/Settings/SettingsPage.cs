@@ -231,6 +231,7 @@ public class SettingsPage : UserControl
                 MakeCheckboxSetting("Center video position", nameof(_vm.WaveformCenterVideoPosition)),
                 MakeCheckboxSetting("Show toolbar", nameof(_vm.WaveformShowToolbar)),
                 MakeCheckboxSetting("Focus text box after insert", nameof(_vm.WaveformFocusTextboxAfterInsertNew)),
+                MakeCheckboxSetting("Invert mouse-wheel", nameof(_vm.WaveformInvertMouseWheel)),
                 new SettingsItem("Waveform color", () => UiUtil.MakeColorPicker(_vm, nameof(_vm.WaveformColor))),
                 new SettingsItem("Waveform selected color", () => UiUtil.MakeColorPicker(_vm, nameof(_vm.WaveformSelectedColor))),
                 new SettingsItem("Download ffmpeg", () => new StackPanel

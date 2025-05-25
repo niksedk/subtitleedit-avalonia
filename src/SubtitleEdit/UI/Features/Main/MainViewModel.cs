@@ -59,6 +59,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private SubtitleLineViewModel? _selectedSubtitle;
     private List<SubtitleLineViewModel>? _selectedSubtitles;
     [ObservableProperty] private int? _selectedSubtitleIndex;
+    [ObservableProperty] private bool _showColumnOriginalText;
 
     [ObservableProperty] private string _editText;
     [ObservableProperty] private string _editTextCharactersPerSecond;
@@ -604,6 +605,7 @@ public partial class MainViewModel : ObservableObject
             IsWaveformToolbarVisible = Se.Settings.Waveform.ShowToolbar;
             AudioVisualizer.WaveformColor = Se.Settings.Waveform.WaveformColor.FromHexToColor();
             AudioVisualizer.WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor();
+            AudioVisualizer.InvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel;
         }
 
         _updateAudioVisualizer = true;

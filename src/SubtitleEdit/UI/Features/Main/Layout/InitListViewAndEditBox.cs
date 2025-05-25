@@ -65,13 +65,27 @@ public static class InitListViewAndEditBox
             Width = new DataGridLength(120),
             IsReadOnly = true
         });
+
+        var originalColumn = new DataGridTextColumn
+        {
+            Header = "Original text",
+            Binding = new Binding(nameof(SubtitleLineViewModel.OriginalText)),
+            Width = new DataGridLength(1, DataGridLengthUnitType.Star), // Stretch text column
+        };
+        originalColumn.Bind(DataGridTextColumn.IsVisibleProperty,
+            new Binding(nameof(vm.ShowColumnOriginalText))
+            {
+                Mode = BindingMode.OneWay,
+                Source = vm
+            });
+        vm.SubtitleGrid.Columns.Add(originalColumn);
+
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
             Header = "Text",
             Binding = new Binding(nameof(SubtitleLineViewModel.Text)),
             Width = new DataGridLength(1, DataGridLengthUnitType.Star) // Stretch text column
         });
-
 
         vm.SubtitleGrid.DataContext = vm.Subtitles;
         vm.SubtitleGrid.SelectionChanged += vm.SubtitleGrid_SelectionChanged;
