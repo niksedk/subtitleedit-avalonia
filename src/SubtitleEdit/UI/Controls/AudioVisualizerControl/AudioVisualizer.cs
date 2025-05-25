@@ -134,6 +134,7 @@ public class AudioVisualizer : Control
     private double _originalStartSeconds;
     private double _originalEndSeconds;
     private long _audioVisualizerLastScroll;
+    private long _lastPointerPressed = -1;
     private enum InteractionMode { None, Moving, ResizingLeft, ResizingRight, New }
     private InteractionMode _interactionMode = InteractionMode.None;
 
@@ -159,7 +160,6 @@ public class AudioVisualizer : Control
     public event ParagraphEventHandler? OnNonParagraphRightClicked;
     public event ParagraphEventHandler? OnSingleClick;
     public event ParagraphEventHandler? OnStatus;
-
 
     public AudioVisualizer()
     {
@@ -299,7 +299,6 @@ public class AudioVisualizer : Control
 
     private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
     {
-        _activeParagraph = null;
         var nsp = NewSelectionParagraph;
         if (nsp != null)
         {
@@ -311,6 +310,7 @@ public class AudioVisualizer : Control
             else
             {
                 _interactionMode = InteractionMode.None;
+                _activeParagraph = null;
                 return;
             }
         }
@@ -323,16 +323,38 @@ public class AudioVisualizer : Control
                 _audioVisualizerLastScroll = 0;
                 OnVideoPositionChanged.Invoke(this, new PositionEventArgs { PositionInSeconds = videoPosition });
             }
+            _activeParagraph = null;
             return;
         }
 
+        if (_interactionMode == InteractionMode.Moving)
+        { // click on paragraph, but with no move
+            var ts = TimeSpan.FromTicks(Stopwatch.GetTimestamp() - _lastPointerPressed);
+            if (ts.TotalMilliseconds < 100 ||
+                (
+                _activeParagraph != null &&
+                Math.Abs(_originalStartSeconds - _activeParagraph.StartTime.TotalSeconds) < 0.01))
+            {
+                if (OnVideoPositionChanged != null)
+                {
+                    var videoPosition = RelativeXPositionToSeconds((int)e.GetPosition(this).X);
+                    _audioVisualizerLastScroll = 0;
+                    OnVideoPositionChanged.Invoke(this, new PositionEventArgs { PositionInSeconds = videoPosition });
+                }
+                _activeParagraph = null;
+                return;
+            }
+        }
+
         _interactionMode = InteractionMode.None;
+        _activeParagraph = null;
 
         InvalidateVisual();
     }
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
+        _lastPointerPressed = Stopwatch.GetTimestamp();
         e.Handled = true;
         var point = e.GetPosition(this);
         var p = HitTestParagraph(point);
@@ -350,8 +372,6 @@ public class AudioVisualizer : Control
             InvalidateVisual();
             return;
         }
-
-
 
         double left = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds);
         double right = SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds);
