@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.Collections.ObjectModel;
 using Nikse.SubtitleEdit.Logic.Config;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 
@@ -16,6 +19,8 @@ public partial class FixCommonErrorsProfileViewModel : ObservableObject
     public FixCommonErrorsProfileWindow? Window { get; set; }
 
     public bool OkPressed { get; private set; }
+    public TextBox ProfileNameTextBox { get; internal set; }
+
     private List<FixRuleDisplayItem> _fixRules;
 
     public FixCommonErrorsProfileViewModel()
@@ -24,6 +29,7 @@ public partial class FixCommonErrorsProfileViewModel : ObservableObject
         Profiles = new ObservableCollection<ProfileDisplayItem>();
         SelectedProfile = null;
         IsProfileSelected = true;
+        ProfileNameTextBox = new TextBox();
     }
 
     public void Initialize(List<FixRuleDisplayItem> allFixRules)
@@ -59,12 +65,17 @@ public partial class FixCommonErrorsProfileViewModel : ObservableObject
     {
         var newProfile = new ProfileDisplayItem
         {
-            Name = "Untitled",
-            FixRules = new ObservableCollection<FixRuleDisplayItem>(_fixRules)
+            Name = string.Empty,
+            FixRules = new ObservableCollection<FixRuleDisplayItem>(_fixRules.Select(p => new FixRuleDisplayItem(p))),
         };
 
         Profiles.Add(newProfile);
         SelectedProfile = newProfile;
+
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            ProfileNameTextBox.Focus();
+        });
     }
 
     [RelayCommand]

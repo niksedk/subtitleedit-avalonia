@@ -6,6 +6,7 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
+using Projektanker.Icons.Avalonia;
 
 namespace Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 
@@ -32,18 +33,6 @@ public class FixCommonErrorsProfileWindow : Window
             Margin = UiUtil.MakeWindowMargin(),
         };
 
-        // Header
-        // var header = new TextBlock
-        // {
-        //     Text = "Profile Manager",
-        //     FontSize = 24,
-        //     Margin = new Thickness(10),
-        //     HorizontalAlignment = HorizontalAlignment.Center
-        // };
-        // grid.Children.Add(header);
-        // Grid.SetRow(header, 0);
-        // Grid.SetColumnSpan(header, 2);
-
         // Left column: Profile list
         var profileListPanel = new StackPanel
         {
@@ -63,29 +52,32 @@ public class FixCommonErrorsProfileWindow : Window
                     [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedProfile)) { Mode = BindingMode.TwoWay },
                     ItemTemplate = new FuncDataTemplate<ProfileDisplayItem>((profile, _) =>
                     {
-                        var row = new StackPanel
+                       var grid = new Grid
                         {
-                            Orientation = Orientation.Horizontal,
-                            Spacing = 5
+                            ColumnDefinitions = new ColumnDefinitions("*,Auto"),
+                            Margin = new Thickness(2)
                         };
 
-                        row.Children.Add(new TextBlock
+                        // Name text (left-aligned)
+                        var nameText = new TextBlock
                         {
-                            [!TextBlock.TextProperty] = new Binding(nameof(ProfileDisplayItem.Name)),
-                            VerticalAlignment = VerticalAlignment.Center
-                        });
+                            VerticalAlignment = VerticalAlignment.Center,
+                            [!TextBlock.TextProperty] = new Binding(nameof(ProfileDisplayItem.Name))
+                        };
+                        Grid.SetColumn(nameText, 0);
+                        grid.Children.Add(nameText);
 
-                        row.Children.Add(new Button
+                        // Delete button (right-aligned)
+                        var deleteButton = new Button
                         {
-                            Content = "🗑",
-                            Width = 24,
-                            Height = 24,
-                            Margin = new Thickness(5, 0),
                             Command = vm.DeleteCommand,
-                            CommandParameter = profile
-                        });
+                            CommandParameter = profile,
+                        };
+                        Attached.SetIcon(deleteButton, "fa-solid fa-trash");
+                        Grid.SetColumn(deleteButton, 1);
+                        grid.Children.Add(deleteButton);
 
-                        return row;
+                        return grid;
                     })
                 }
             }
@@ -118,13 +110,14 @@ public class FixCommonErrorsProfileWindow : Window
         nameBox.Bind(TextBox.TextProperty, new Binding($"{nameof(vm.SelectedProfile)}.{nameof(ProfileDisplayItem.Name)}"));
         editorGrid.Children.Add(nameBox);
         Grid.SetRow(nameBox, 1);
+        vm.ProfileNameTextBox = nameBox;
 
         // "Rules" label
         var rulesLabel = new TextBlock
         {
             Text = "Rules",
             FontSize = 16,
-            Padding = new Thickness(0,20,0,0),
+            Padding = new Thickness(0, 20, 0, 0),
         };
         editorGrid.Children.Add(rulesLabel);
         Grid.SetRow(rulesLabel, 2);
@@ -135,7 +128,7 @@ public class FixCommonErrorsProfileWindow : Window
             Content = new ItemsControl
             {
                 DataContext = vm,
-               // ItemsSource = vm.SelectedProfile?.FixRules,
+                // ItemsSource = vm.SelectedProfile?.FixRules,
                 [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.SelectedProfile) + "." + nameof(ProfileDisplayItem.FixRules)) { Mode = BindingMode.TwoWay },
                 ItemTemplate = new FuncDataTemplate<FixRuleDisplayItem>((rule, _) =>
                 {
@@ -148,7 +141,7 @@ public class FixCommonErrorsProfileWindow : Window
                     var checkbox = new CheckBox
                     {
                         [!CheckBox.IsCheckedProperty] = new Binding(nameof(FixRuleDisplayItem.IsSelected)),
-                        VerticalAlignment = VerticalAlignment.Center, 
+                        VerticalAlignment = VerticalAlignment.Center,
                     };
                     ruleRow.Children.Add(checkbox);
                     Grid.SetColumn(checkbox, 0);
