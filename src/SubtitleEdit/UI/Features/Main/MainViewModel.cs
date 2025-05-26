@@ -1182,12 +1182,15 @@ public partial class MainViewModel : ObservableObject
         _subtitle.Paragraphs.Clear();
         foreach (var line in Subtitles)
         {
-            var p = new Paragraph
+            var p = new Paragraph()
             {
                 Number = line.Number,
                 StartTime = new TimeCode(line.StartTime),
                 EndTime = new TimeCode(line.EndTime),
-                Text = line.Text
+                Text = line.Text,
+                Actor = line.Actor,
+                Style = line.Style,
+                Language = line.Language,
             };
 
             _subtitle.Paragraphs.Add(p);

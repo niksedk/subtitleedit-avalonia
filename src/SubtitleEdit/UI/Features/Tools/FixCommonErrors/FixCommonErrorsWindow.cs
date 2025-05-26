@@ -389,6 +389,7 @@ public class FixCommonErrorsWindow : Window
             },
         };
         dataGridSubtitles.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(_vm.SelectedParagraph)));
+        _vm.GridSubtitles = dataGridSubtitles;
 
         var gridCurrentSubtbtitle = new Grid
         {

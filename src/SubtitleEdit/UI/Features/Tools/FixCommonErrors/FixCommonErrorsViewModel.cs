@@ -2,7 +2,6 @@
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Core.CDG;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Enums;
 using Nikse.SubtitleEdit.Core.Forms.FixCommonErrors;
@@ -47,6 +46,8 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
     public SubtitleFormat Format { get; set; } = new SubRip();
     public Encoding Encoding { get; set; } = Encoding.UTF8;
     public string Language { get; set; } = "en";
+    public DataGrid GridSubtitles { get; internal set; }
+
     public Subtitle FixedSubtitle = new();
 
     private List<FixRuleDisplayItem> _allFixRules = new();
@@ -64,6 +65,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
         _namesList = namesList;
         _windowService = windowService;
 
+        GridSubtitles = new DataGrid();
         SearchText = string.Empty;
         Languages = new ObservableCollection<LanguageDisplayItem>();
         Language = new string(' ', 0);
@@ -125,12 +127,12 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
             Se.Settings.Tools.FixCommonErrors.Profiles.Add(setting);
         }
 
-        Se.Settings.Tools.FixCommonErrors.LastProfileName = SelectedProfile?.Name ?? Profiles.FirstOrDefault()?.Name ?? "Default";        
+        Se.Settings.Tools.FixCommonErrors.LastProfileName = SelectedProfile?.Name ?? Profiles.FirstOrDefault()?.Name ?? "Default";
     }
 
     private void LoadProfiles()
     {
-        Profiles.Clear();   
+        Profiles.Clear();
         var profiles = Se.Settings.Tools.FixCommonErrors.Profiles;
         foreach (var setting in profiles)
         {
@@ -518,10 +520,11 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
 
     internal void SelectAndScrollTo(FixDisplayItem fixDisplayItem)
     {
-        var p = Paragraphs.FirstOrDefault(p => p.Paragraph?.Id == fixDisplayItem.Paragraph.Id);
+        var p = Paragraphs.FirstOrDefault(p => p.Number == fixDisplayItem.Paragraph.Number);
         if (p != null)
         {
-            return;
+            SelectedParagraph = p;
+            GridSubtitles.ScrollIntoView(GridSubtitles.SelectedItem, null);
         }
     }
 }

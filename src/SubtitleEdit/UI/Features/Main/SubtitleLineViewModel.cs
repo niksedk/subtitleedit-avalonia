@@ -59,6 +59,7 @@ public partial class SubtitleLineViewModel : ObservableObject
         Style = p.Style;
         Actor = p.Actor;
         Layer = p.Layer;
+        Number = p.Number;
         Extra = p.Extra;
         Id = generateNewId ? Guid.NewGuid() : p.Id;
     }
@@ -73,10 +74,11 @@ public partial class SubtitleLineViewModel : ObservableObject
         Style = paragraph.Style;
         Actor = paragraph.Actor;
         Layer = paragraph.Layer;
+        Number = paragraph.Number;
         StartTime = TimeSpan.FromMilliseconds(paragraph.StartTime.TotalMilliseconds);
         EndTime = TimeSpan.FromMilliseconds(paragraph.EndTime.TotalMilliseconds);
         UpdateDuration();
-        Id = Guid.NewGuid();
+        Id = Guid.TryParse(paragraph.Id, out var guid) ? guid : Guid.NewGuid();
     }
     
     partial void OnStartTimeChanged(TimeSpan value)
