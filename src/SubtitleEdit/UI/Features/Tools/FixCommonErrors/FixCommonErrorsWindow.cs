@@ -41,9 +41,9 @@ public class FixCommonErrorsWindow : Window
 
         var labelStep2 = new Label
         {
-            Content = "Fix common errors, step 2",
             VerticalAlignment = VerticalAlignment.Center,
         };
+        labelStep2.Bind(Label.ContentProperty, new Binding(nameof(vm.Step2Title)));
         labelStep2.Bind(IsVisibleProperty, new Binding(nameof(vm.Step2IsVisible)));
 
         var textBoxSearch = UiUtil.MakeTextBox(250, vm, nameof(vm.SearchText)).WithMarginRight(25);
@@ -57,7 +57,7 @@ public class FixCommonErrorsWindow : Window
             HorizontalAlignment = HorizontalAlignment.Right,
             Children =
             {
-                textBoxSearch,
+//                textBoxSearch,
                 UiUtil.MakeTextBlock("Language").WithMarginRight(5),
                 UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage)),
             },

@@ -2,6 +2,7 @@
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.CDG;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Enums;
 using Nikse.SubtitleEdit.Core.Forms.FixCommonErrors;
@@ -38,6 +39,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
     [ObservableProperty] private ProfileDisplayItem? _selectedProfile;
     [ObservableProperty] private bool _step1IsVisible;
     [ObservableProperty] private bool _step2IsVisible;
+    [ObservableProperty] private string _step2Title;
 
     public FixCommonErrorsWindow? Window { get; set; }
 
@@ -72,7 +74,8 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
         Step1IsVisible = true;
         _oldSelectedLanguage = new LanguageDisplayItem(new CultureInfo("en"), "English");
 
-        Profiles = new ObservableCollection<ProfileDisplayItem>();      
+        Profiles = new ObservableCollection<ProfileDisplayItem>();
+        Step2Title = "Fix common errors, step 2";
     }
 
     public void Initialize(Subtitle subtitle)
@@ -302,6 +305,8 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
 
         Paragraphs.Clear();
         Paragraphs.AddRange(FixedSubtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
+
+        Step2Title = $"Fix common errors, step 2      Fixes found: {Fixes.Count}";
     }
 
     private void InitStep1(string languageCode, Subtitle subtitle)
