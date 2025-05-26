@@ -25,6 +25,15 @@ public partial class FixRuleDisplayItem : ObservableObject
         Example = string.Empty;
         FixCommonErrorFunctionName = string.Empty;
     }
+    
+    public FixRuleDisplayItem(FixRuleDisplayItem item)
+    {
+        Name = item.Name;
+        Example = item.Example;
+        IsSelected = item.IsSelected;
+        SortOrder = item.SortOrder;
+        FixCommonErrorFunctionName = item.FixCommonErrorFunctionName;
+    }
 
     public FixRuleDisplayItem(string name, string example, int sortOrder, bool isSelected, string fixCommonErrorFunctionName)
     {

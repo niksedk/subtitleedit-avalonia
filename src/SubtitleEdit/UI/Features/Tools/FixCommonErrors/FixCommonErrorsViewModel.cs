@@ -167,7 +167,11 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
     [RelayCommand]
     private async Task ShowProfile()
     {
-        await _windowService.ShowDialogAsync<FixCommonErrorsProfileWindow, FixCommonErrorsProfileViewModel>(Window!, vm => { });
+        await _windowService.ShowDialogAsync<FixCommonErrorsProfileWindow, FixCommonErrorsProfileViewModel>(Window!,
+            vm =>
+            {
+                vm.Initialize(_allFixRules);
+            });
     }
 
     [RelayCommand]

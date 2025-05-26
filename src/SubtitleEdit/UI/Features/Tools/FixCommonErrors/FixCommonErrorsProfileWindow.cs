@@ -12,15 +12,15 @@ namespace Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 
 public class FixCommonErrorsProfileWindow : Window
 {
-    private FixCommonErrorsProfileViewModel _vm;
+    private readonly FixCommonErrorsProfileViewModel _vm;
 
     public FixCommonErrorsProfileWindow(FixCommonErrorsProfileViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Fix common errors profile";
-        Width = 510;
-        Height = 440;
-        CanResize = false;
+        Width = 810;
+        Height = 640;
+        CanResize = true;
 
         _vm = vm;
         vm.Window = this;

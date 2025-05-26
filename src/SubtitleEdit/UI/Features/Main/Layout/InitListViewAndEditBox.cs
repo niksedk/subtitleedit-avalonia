@@ -6,6 +6,7 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Controls;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 
@@ -44,26 +45,30 @@ public static class InitListViewAndEditBox
         {
             Header = "#",
             Binding = new Binding(nameof(SubtitleLineViewModel.Number)),
-            Width = new DataGridLength(50)
+            Width = new DataGridLength(50),
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
         });
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
             Header = "Show",
             Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)) { Converter = fullTimeConverter },
             Width = new DataGridLength(120),
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
         });
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
             Header = "Hide",
             Binding = new Binding(nameof(SubtitleLineViewModel.EndTime)) { Converter = fullTimeConverter },
-            Width = new DataGridLength(120)
+            Width = new DataGridLength(120),
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
         });
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
             Header = "Duration",
             Binding = new Binding(nameof(SubtitleLineViewModel.Duration)) { Converter = shortTimeConverter },
             Width = new DataGridLength(120),
-            IsReadOnly = true
+            IsReadOnly = true,
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
         });
 
         var originalColumn = new DataGridTextColumn
@@ -71,6 +76,7 @@ public static class InitListViewAndEditBox
             Header = "Original text",
             Binding = new Binding(nameof(SubtitleLineViewModel.OriginalText)),
             Width = new DataGridLength(1, DataGridLengthUnitType.Star), // Stretch text column
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
         };
         originalColumn.Bind(DataGridTextColumn.IsVisibleProperty,
             new Binding(nameof(vm.ShowColumnOriginalText))
@@ -84,7 +90,8 @@ public static class InitListViewAndEditBox
         {
             Header = "Text",
             Binding = new Binding(nameof(SubtitleLineViewModel.Text)),
-            Width = new DataGridLength(1, DataGridLengthUnitType.Star) // Stretch text column
+            Width = new DataGridLength(1, DataGridLengthUnitType.Star), // Stretch text column
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
         });
 
         vm.SubtitleGrid.DataContext = vm.Subtitles;
@@ -104,8 +111,7 @@ public static class InitListViewAndEditBox
             Mode = BindingMode.TwoWay,
             Source = vm
         };
-
-
+        
         Grid.SetRow(vm.SubtitleGrid, 0);
         mainGrid.Children.Add(vm.SubtitleGrid);
 
