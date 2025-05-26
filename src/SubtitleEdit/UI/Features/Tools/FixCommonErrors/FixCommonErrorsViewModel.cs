@@ -40,8 +40,6 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
     [ObservableProperty] private bool _step1IsVisible;
     [ObservableProperty] private bool _step2IsVisible;
 
-    public DataGrid? Step1Grid { get; set; }
-    public DataGrid? Step2Grid { get; set; }
     public FixCommonErrorsWindow? Window { get; set; }
 
     public bool OkPressed { get; private set; }
@@ -51,7 +49,6 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
     public Subtitle FixedSubtitle = new();
 
     private List<FixRuleDisplayItem> _allFixRules = new();
-    private Subtitle _originalSubtitle = new();
     private readonly LanguageFixCommonErrors _language;
     private int _totalFixes;
     private int _totalErrors;
@@ -77,7 +74,6 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
         EditText = string.Empty;
         _language = Se.Language.FixCommonErrors;
         Step1IsVisible = true;
-        InitLanguage();
 
         Profiles = new ObservableCollection<string>(Se.Settings.Tools.FixCommonErrors.Profiles.Select(p => p.ProfileName));
         if (Profiles.Count == 0)
@@ -91,7 +87,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
             : Profiles.First();
     }
 
-    private string InitLanguage()
+    public void Initialize(Subtitle subtitle)
     {
         var languages = new List<LanguageDisplayItem>();
         foreach (var ci in Utilities.GetSubtitleLanguageCultures(true))
@@ -101,8 +97,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
 
         Languages = new ObservableCollection<LanguageDisplayItem>(languages.OrderBy(p => p.ToString()));
 
-        var languageCode =
-            LanguageAutoDetect.AutoDetectGoogleLanguage(_originalSubtitle); // Guess language based on subtitle contents
+        var languageCode = LanguageAutoDetect.AutoDetectGoogleLanguage(subtitle); // Guess language based on subtitle contents
         Language = languageCode;
 
         SelectedLanguage = Languages.FirstOrDefault(p => p.Code.TwoLetterISOLanguageName == languageCode);
@@ -111,7 +106,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
             SelectedLanguage = Languages.First(p => p.Code.TwoLetterISOLanguageName == "en");
         }
 
-        return languageCode;
+        InitStep1(languageCode, subtitle);
     }
 
     private void UpdateRulesSelection()
@@ -300,7 +295,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
         Paragraphs.AddRange(FixedSubtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
     }
 
-    public void InitStep1(string languageCode, Subtitle subtitle)
+    private void InitStep1(string languageCode, Subtitle subtitle)
     {
         FixedSubtitle = subtitle;
 

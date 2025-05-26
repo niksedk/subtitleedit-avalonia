@@ -3,7 +3,6 @@ using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
-using Nikse.SubtitleEdit.Core.Forms.FixCommonErrors;
 using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
@@ -12,23 +11,24 @@ public partial class FixCommonErrorsProfileViewModel : ObservableObject
 {
     public ObservableCollection<ProfileDisplayItem> Profiles { get; set; }
     [ObservableProperty] private ProfileDisplayItem? _selectedProfile;
+    [ObservableProperty] private bool _isProfileSelected;
 
     public FixCommonErrorsProfileWindow? Window { get; set; }
 
     public bool OkPressed { get; private set; }
-    public List<FixRuleDisplayItem> FixRules { get; set; }
+    private List<FixRuleDisplayItem> _fixRules;
 
     public FixCommonErrorsProfileViewModel()
     {
+        _fixRules = new List<FixRuleDisplayItem>();
         Profiles = new ObservableCollection<ProfileDisplayItem>();  
-        Profiles.Add(new ProfileDisplayItem() { Name = "Default", FixRules = new ObservableCollection<FixRuleDisplayItem>()});
-        Profiles.Add(new ProfileDisplayItem() { Name = "Default2" });
         SelectedProfile = null;
+        IsProfileSelected = true;
     }
     
     public void Initialize(List<FixRuleDisplayItem> allFixRules)
     {
-        FixRules = allFixRules;
+        _fixRules = allFixRules;
 
         foreach (var rule in Se.Settings.Tools.FixCommonErrors.Profiles)
         {
@@ -41,11 +41,8 @@ public partial class FixCommonErrorsProfileViewModel : ObservableObject
             foreach (var fixRule in allFixRules)
             {
                 var displayItem = allFixRules.Find(x => x.Name == fixRule.Name);
-                if (displayItem != null)
-                {
-                    displayItem.IsSelected = true;
-                }
-                profile.FixRules.Add(new FixRuleDisplayItem(fixRule));
+                var isSelected = displayItem != null;
+                profile.FixRules.Add(new FixRuleDisplayItem(fixRule) { IsSelected = isSelected });
             }
 
             Profiles.Add(profile);
@@ -55,11 +52,26 @@ public partial class FixCommonErrorsProfileViewModel : ObservableObject
     [RelayCommand]
     private void NewProfile()
     {
+        var newProfile = new ProfileDisplayItem
+        {
+            Name = "Untitled",
+            FixRules = new ObservableCollection<FixRuleDisplayItem>(_fixRules)
+        };
+
+        Profiles.Add(newProfile);
+        SelectedProfile = newProfile;
     }
     
     [RelayCommand]
-    private void Delete()
+    private void Delete(ProfileDisplayItem? profile)
     {
+        if (profile == null || !Profiles.Contains(profile))
+        {
+            return;
+        }
+
+        Profiles.Remove(profile);
+        SelectedProfile = Profiles.Count > 0 ? Profiles[0] : null;
     }
     
     [RelayCommand]

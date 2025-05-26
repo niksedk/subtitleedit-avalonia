@@ -431,7 +431,7 @@ public partial class MainViewModel : ObservableObject
     {
         var viewModel =
             await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window,
-                vm => { vm.InitStep1("en", GetUpdateSubtitle()); });
+                vm => { vm.Initialize(GetUpdateSubtitle()); });
 
         if (viewModel.OkPressed)
         {

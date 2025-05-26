@@ -18,7 +18,7 @@ public class FixCommonErrorsProfileWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Fix common errors profile";
-        Width = 810;
+        Width = 910;
         Height = 640;
         CanResize = true;
 
@@ -27,163 +27,180 @@ public class FixCommonErrorsProfileWindow : Window
         DataContext = vm;
 
         var grid = new Grid
-        {
-            ColumnDefinitions = new ColumnDefinitions("2*,3*"),
-            RowDefinitions = new RowDefinitions("Auto,*")
-        };
-
-        // Header
-        var header = new TextBlock
-        {
-            Text = "Profile Manager",
-            FontSize = 24,
-            Margin = new Thickness(10),
-            HorizontalAlignment = HorizontalAlignment.Center
-        };
-        Grid.SetRow(header, 0);
-        Grid.SetColumnSpan(header, 2);
-        grid.Children.Add(header);
-
-        // Left column: Profile list
-        var profileListPanel = new StackPanel
-        {
-            Margin = new Thickness(10),
-            Spacing = 10,
-            Children =
             {
-                new Button
+                ColumnDefinitions = new ColumnDefinitions("2*,3*"),
+                RowDefinitions = new RowDefinitions("Auto,*")
+            };
+
+            // Header
+            var header = new TextBlock
+            {
+                Text = "Profile Manager",
+                FontSize = 24,
+                Margin = new Thickness(10),
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+            grid.Children.Add(header);
+            Grid.SetRow(header, 0);
+            Grid.SetColumnSpan(header, 2);
+
+            // Left column: Profile list
+            var profileListPanel = new StackPanel
+            {
+                Margin = new Thickness(10),
+                Spacing = 10,
+                Children =
                 {
-                    Content = "New Profile",
-                    Command = vm.NewProfileCommand,
-                },
-                new ListBox
-                {
-                    [!ItemsControl.ItemsSourceProperty] = new Binding("Profiles"),
-                    [!SelectingItemsControl.SelectedItemProperty] = new Binding("SelectedProfile"),
-                    ItemTemplate = new FuncDataTemplate<ProfileDisplayItem>((profile, _) =>
-                        new StackPanel
+                    new Button
+                    {
+                        Content = "New Profile",
+                        Command = vm.NewProfileCommand
+                    },
+                    new ListBox
+                    {
+                        DataContext = vm,
+                        ItemsSource = vm.Profiles,
+                        SelectedItem = vm.SelectedProfile,
+                        ItemTemplate = new FuncDataTemplate<ProfileDisplayItem>((profile, _) =>
                         {
-                            Orientation = Orientation.Horizontal,
-                            Spacing = 5,
-                            Children =
+                            var row = new StackPanel
                             {
-                                new TextBlock
-                                {
-                                    [!TextBlock.TextProperty] = new Binding("Name"),
-                                    VerticalAlignment = VerticalAlignment.Center
-                                },
-                                new Button
-                                {
-                                    Content = "🗑",
-                                    Width = 24,
-                                    Height = 24,
-                                    Margin = new Thickness(5, 0),
-                                    Command = vm.DeleteCommand,
-                                    [!Button.CommandParameterProperty] = new Binding(".")
-                                }
-                            }
+                                Orientation = Orientation.Horizontal,
+                                Spacing = 5
+                            };
+
+                            row.Children.Add(new TextBlock
+                            {
+                                Text = profile.Name,
+                                VerticalAlignment = VerticalAlignment.Center
+                            });
+
+                            row.Children.Add(new Button
+                            {
+                                Content = "🗑",
+                                Width = 24,
+                                Height = 24,
+                                Margin = new Thickness(5, 0),
+                                Command = vm.DeleteCommand,
+                                CommandParameter = profile
+                            });
+
+                            return row;
                         })
+                    }
                 }
-            }
-        };
-        Grid.SetRow(profileListPanel, 1);
-        Grid.SetColumn(profileListPanel, 0);
-        grid.Children.Add(profileListPanel);
+            };
+            grid.Children.Add(profileListPanel);
+            Grid.SetRow(profileListPanel, 1);
+            Grid.SetColumn(profileListPanel, 0);
 
-        // Right column: Profile editor
-        var editorPanel = new StackPanel
-        {
-            Margin = new Thickness(10),
-            Spacing = 10
-        };
-
-        editorPanel.Children.Add(new TextBlock
-        {
-            Text = "Edit Profile",
-            FontSize = 20
-        });
-
-        editorPanel.Children.Add(new TextBox
-        {
-            Watermark = "Profile Name",
-            [!TextBox.TextProperty] = new Binding("SelectedProfile.Name")
-        });
-
-        editorPanel.Children.Add(new TextBlock
-        {
-            Text = "Rules",
-            FontSize = 16
-        });
-
-        editorPanel.Children.Add(new ItemsControl
-        {
-            [!ItemsControl.ItemsSourceProperty] = new Binding("SelectedProfile.FixRules"),
-            ItemTemplate = new FuncDataTemplate<FixRuleDisplayItem>((rule, _) =>
+            // Right column: Profile editor
+            var editorGrid = new Grid
             {
-                var grid = new Grid
-                {
-                    ColumnDefinitions = new ColumnDefinitions("Auto,*,*"),
-                    Margin = new Thickness(0, 2)
-                };
+                Margin = new Thickness(10),
+                RowDefinitions = new RowDefinitions("Auto,Auto,Auto,*,Auto"),
+            };
 
-                var checkbox = new CheckBox
-                {
-                    [!ToggleButton.IsCheckedProperty] = new Binding("IsSelected")
-                };
-                Grid.SetColumn(checkbox, 0);
-
-                var nameText = new TextBlock
-                {
-                    [!TextBlock.TextProperty] = new Binding("Name"),
-                    FontWeight = FontWeight.Bold
-                };
-                Grid.SetColumn(nameText, 1);
-
-                var exampleText = new TextBlock
-                {
-                    [!TextBlock.TextProperty] = new Binding("Example"),
-                    FontStyle = FontStyle.Italic
-                };
-                Grid.SetColumn(exampleText, 2);
-
-                grid.Children.Add(checkbox);
-                grid.Children.Add(nameText);
-                grid.Children.Add(exampleText);
-
-                return grid;
-            })
-        });
-
-        var buttonRow = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            HorizontalAlignment = HorizontalAlignment.Right,
-            Spacing = 10,
-            Children =
+            // "Edit Profile" heading
+            var heading = new TextBlock
             {
-                new Button
+                Text = "Edit Profile",
+                FontSize = 20
+            };
+            editorGrid.Children.Add(heading);
+            Grid.SetRow(heading, 0);
+
+            // Name textbox
+            var nameBox = new TextBox
+            {
+                Watermark = "Profile Name"
+            };
+            nameBox.Bind(TextBox.TextProperty, new Binding(nameof(vm.SelectedProfile.Name)));
+            editorGrid.Children.Add(nameBox);
+            Grid.SetRow(nameBox, 1);
+
+            // "Rules" label
+            var rulesLabel = new TextBlock
+            {
+                Text = "Rules",
+                FontSize = 16
+            };
+            editorGrid.Children.Add(rulesLabel);
+            Grid.SetRow(rulesLabel, 2);
+
+            // Scrollable rule list
+            var scrollViewer = new ScrollViewer
+            {
+                Content = new ItemsControl
                 {
-                    Content = "OK",
-                    Command = vm.OkCommand,
-                },
-                new Button
-                {
-                    Content = "Cancel",
-                    Command = vm.CancelCommand,
+                    DataContext = vm,
+                    ItemsSource = vm.SelectedProfile?.FixRules,
+                    ItemTemplate = new FuncDataTemplate<FixRuleDisplayItem>((rule, _) =>
+                    {
+                        var ruleRow = new Grid
+                        {
+                            ColumnDefinitions = new ColumnDefinitions("Auto,*,*"),
+                            Margin = new Thickness(0, 2)
+                        };
+
+                        var checkbox = new CheckBox { IsChecked = rule.IsSelected };
+                        ruleRow.Children.Add(checkbox);
+                        Grid.SetColumn(checkbox, 0);
+
+                        var nameText = new TextBlock
+                        {
+                            Text = rule.Name,
+                            FontWeight = FontWeight.Bold
+                        };
+                        ruleRow.Children.Add(nameText);
+                        Grid.SetColumn(nameText, 1);
+
+                        var exampleText = new TextBlock
+                        {
+                            Text = rule.Example,
+                            FontStyle = FontStyle.Italic
+                        };
+                        ruleRow.Children.Add(exampleText);
+                        Grid.SetColumn(exampleText, 2);
+
+                        return ruleRow;
+                    })
                 }
-            }
-        };
+            };
+            editorGrid.Children.Add(scrollViewer);
+            Grid.SetRow(scrollViewer, 3);
 
-        editorPanel.Children.Add(buttonRow);
+            // Save/Cancel buttons
+            var buttonRow = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                Spacing = 10,
+                Children =
+                {
+                    new Button
+                    {
+                        Content = "OK",
+                        Command = vm.OkCommand
+                    },
+                    new Button
+                    {
+                        Content = "Cancel",
+                        Command = vm.CancelCommand
+                    }
+                }
+            };
+            Grid.SetRow(buttonRow, 4);
+            editorGrid.Children.Add(buttonRow);
 
-        // Visibility binding (optional)
-        editorPanel.Bind(IsVisibleProperty, new Binding("IsProfileSelected"));
+            // Hide if no profile is selected
+            editorGrid.Bind(IsVisibleProperty, new Binding(nameof(vm.IsProfileSelected)));
 
-        Grid.SetRow(editorPanel, 1);
-        Grid.SetColumn(editorPanel, 1);
-        grid.Children.Add(editorPanel);
+            Grid.SetRow(editorGrid, 1);
+            Grid.SetColumn(editorGrid, 1);
+            grid.Children.Add(editorGrid);
 
-        Content = grid;
+            Content = grid;
 
         Activated += delegate { Focus(); }; // hack to make OnKeyDown work
     }
