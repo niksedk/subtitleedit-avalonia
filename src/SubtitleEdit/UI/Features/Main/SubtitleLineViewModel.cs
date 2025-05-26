@@ -31,22 +31,26 @@ public partial class SubtitleLineViewModel : ObservableObject
     public string Style { get;  set; }
     public string Actor { get; set; }
     public int Layer { get; set; }
+    public Guid Id { get; set; }
 
 
     public SubtitleLineViewModel()
     {
         Text = string.Empty;
+        OriginalText = string.Empty;
         Extra = string.Empty;
         Language = string.Empty;
         Region = string.Empty;
         Style = string.Empty;
         Actor = string.Empty;
         Layer = 0;
+        Id = Guid.NewGuid();
     }
 
     public SubtitleLineViewModel(SubtitleLineViewModel p, bool generateNewId = false)
     {
         Text = p.Text;
+        OriginalText = p.OriginalText;
         StartTime = p.StartTime;
         EndTime = p.EndTime;
         Duration = p.Duration;
@@ -56,24 +60,41 @@ public partial class SubtitleLineViewModel : ObservableObject
         Actor = p.Actor;
         Layer = p.Layer;
         Extra = p.Extra;
+        Id = generateNewId ? Guid.NewGuid() : p.Id;
     }
 
-    public SubtitleLineViewModel(Paragraph newParagraph)
+    public SubtitleLineViewModel(Paragraph paragraph)
     {
-        Text = newParagraph.Text;
-        Extra = newParagraph.Extra;
-        Language = newParagraph.Language;
-        Region = newParagraph.Region;
-        Style = newParagraph.Style;
-        Actor = newParagraph.Actor;
-        Layer = newParagraph.Layer;
-        StartTime = TimeSpan.FromMilliseconds(newParagraph.StartTime.TotalMilliseconds);
-        EndTime = TimeSpan.FromMilliseconds(newParagraph.EndTime.TotalMilliseconds);
+        Text = paragraph.Text;
+        OriginalText = string.Empty;
+        Extra = paragraph.Extra;
+        Language = paragraph.Language;
+        Region = paragraph.Region;
+        Style = paragraph.Style;
+        Actor = paragraph.Actor;
+        Layer = paragraph.Layer;
+        StartTime = TimeSpan.FromMilliseconds(paragraph.StartTime.TotalMilliseconds);
+        EndTime = TimeSpan.FromMilliseconds(paragraph.EndTime.TotalMilliseconds);
+        UpdateDuration();
+        Id = Guid.NewGuid();
+    }
+    
+    partial void OnStartTimeChanged(TimeSpan value)
+    {
+        UpdateDuration();
+    }
+
+    partial void OnEndTimeChanged(TimeSpan value)
+    {
         UpdateDuration();
     }
 
     internal void UpdateDuration()
     {
-        Duration = EndTime - StartTime;
+        var newDuration = EndTime - StartTime;
+        if (Math.Abs(newDuration.TotalMilliseconds - Duration.TotalMilliseconds) > 0.001)
+        {
+            Duration = EndTime - StartTime;
+        }
     }
 }

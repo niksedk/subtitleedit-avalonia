@@ -1,6 +1,11 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
@@ -21,50 +26,162 @@ public class FixCommonErrorsProfileWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        var label = new Label
-        {
-            Content = "Language",
-            VerticalAlignment = VerticalAlignment.Center,
-        };
-
- 
-
-        var buttonPanel = UiUtil.MakeButtonBar(
-            UiUtil.MakeButton("OK", vm.OkCommand),
-            UiUtil.MakeButton("Cancel", vm.CancelCommand)
-        );
-
         var grid = new Grid
         {
-            RowDefinitions =
-            {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-            },
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-            },
-            Margin = UiUtil.MakeWindowMargin(),
-            ColumnSpacing = 10,
-            RowSpacing = 10,
-            Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
+            ColumnDefinitions = new ColumnDefinitions("2*,3*"),
+            RowDefinitions = new RowDefinitions("Auto,*")
         };
 
-        grid.Children.Add(label);
-        Grid.SetRow(label, 0);
-        Grid.SetColumn(label, 0);
+        // Header
+        var header = new TextBlock
+        {
+            Text = "Profile Manager",
+            FontSize = 24,
+            Margin = new Thickness(10),
+            HorizontalAlignment = HorizontalAlignment.Center
+        };
+        Grid.SetRow(header, 0);
+        Grid.SetColumnSpan(header, 2);
+        grid.Children.Add(header);
 
-        //grid.Children.Add(combo);
-        //Grid.SetRow(combo, 0);
-        //Grid.SetColumn(combo, 1);
+        // Left column: Profile list
+        var profileListPanel = new StackPanel
+        {
+            Margin = new Thickness(10),
+            Spacing = 10,
+            Children =
+            {
+                new Button
+                {
+                    Content = "New Profile",
+                    Command = vm.NewProfileCommand,
+                },
+                new ListBox
+                {
+                    [!ItemsControl.ItemsSourceProperty] = new Binding("Profiles"),
+                    [!SelectingItemsControl.SelectedItemProperty] = new Binding("SelectedProfile"),
+                    ItemTemplate = new FuncDataTemplate<ProfileDisplayItem>((profile, _) =>
+                        new StackPanel
+                        {
+                            Orientation = Orientation.Horizontal,
+                            Spacing = 5,
+                            Children =
+                            {
+                                new TextBlock
+                                {
+                                    [!TextBlock.TextProperty] = new Binding("Name"),
+                                    VerticalAlignment = VerticalAlignment.Center
+                                },
+                                new Button
+                                {
+                                    Content = "🗑",
+                                    Width = 24,
+                                    Height = 24,
+                                    Margin = new Thickness(5, 0),
+                                    Command = vm.DeleteCommand,
+                                    [!Button.CommandParameterProperty] = new Binding(".")
+                                }
+                            }
+                        })
+                }
+            }
+        };
+        Grid.SetRow(profileListPanel, 1);
+        Grid.SetColumn(profileListPanel, 0);
+        grid.Children.Add(profileListPanel);
 
-        grid.Children.Add(buttonPanel);
-        Grid.SetRow(buttonPanel, 1);
-        Grid.SetColumn(buttonPanel, 0);
-        Grid.SetColumnSpan(buttonPanel, 2);
+        // Right column: Profile editor
+        var editorPanel = new StackPanel
+        {
+            Margin = new Thickness(10),
+            Spacing = 10
+        };
+
+        editorPanel.Children.Add(new TextBlock
+        {
+            Text = "Edit Profile",
+            FontSize = 20
+        });
+
+        editorPanel.Children.Add(new TextBox
+        {
+            Watermark = "Profile Name",
+            [!TextBox.TextProperty] = new Binding("SelectedProfile.Name")
+        });
+
+        editorPanel.Children.Add(new TextBlock
+        {
+            Text = "Rules",
+            FontSize = 16
+        });
+
+        editorPanel.Children.Add(new ItemsControl
+        {
+            [!ItemsControl.ItemsSourceProperty] = new Binding("SelectedProfile.FixRules"),
+            ItemTemplate = new FuncDataTemplate<FixRuleDisplayItem>((rule, _) =>
+            {
+                var grid = new Grid
+                {
+                    ColumnDefinitions = new ColumnDefinitions("Auto,*,*"),
+                    Margin = new Thickness(0, 2)
+                };
+
+                var checkbox = new CheckBox
+                {
+                    [!ToggleButton.IsCheckedProperty] = new Binding("IsSelected")
+                };
+                Grid.SetColumn(checkbox, 0);
+
+                var nameText = new TextBlock
+                {
+                    [!TextBlock.TextProperty] = new Binding("Name"),
+                    FontWeight = FontWeight.Bold
+                };
+                Grid.SetColumn(nameText, 1);
+
+                var exampleText = new TextBlock
+                {
+                    [!TextBlock.TextProperty] = new Binding("Example"),
+                    FontStyle = FontStyle.Italic
+                };
+                Grid.SetColumn(exampleText, 2);
+
+                grid.Children.Add(checkbox);
+                grid.Children.Add(nameText);
+                grid.Children.Add(exampleText);
+
+                return grid;
+            })
+        });
+
+        var buttonRow = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Spacing = 10,
+            Children =
+            {
+                new Button
+                {
+                    Content = "OK",
+                    Command = vm.OkCommand,
+                },
+                new Button
+                {
+                    Content = "Cancel",
+                    Command = vm.CancelCommand,
+                }
+            }
+        };
+
+        editorPanel.Children.Add(buttonRow);
+
+        // Visibility binding (optional)
+        editorPanel.Bind(IsVisibleProperty, new Binding("IsProfileSelected"));
+
+        Grid.SetRow(editorPanel, 1);
+        Grid.SetColumn(editorPanel, 1);
+        grid.Children.Add(editorPanel);
 
         Content = grid;
 

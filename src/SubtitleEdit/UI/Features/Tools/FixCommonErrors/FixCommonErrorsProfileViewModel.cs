@@ -7,8 +7,10 @@ namespace Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 
 public partial class FixCommonErrorsProfileViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<string> languages;
-    [ObservableProperty] private string selectedLanguage;
+    public ObservableCollection<ProfileDisplayItem> Profiles { get; set; }
+
+    [ObservableProperty]
+    private ProfileDisplayItem? _selectedProfile;
 
     public FixCommonErrorsProfileWindow? Window { get; set; }
 
@@ -16,10 +18,20 @@ public partial class FixCommonErrorsProfileViewModel : ObservableObject
 
     public FixCommonErrorsProfileViewModel()
     {
-        Languages = new ObservableCollection<string> { "English", "Danish", "Spanish" };
-        SelectedLanguage = Languages[0];
+        Profiles = new ObservableCollection<ProfileDisplayItem>();  
+        SelectedProfile = null;
     }
 
+    [RelayCommand]
+    private void NewProfile()
+    {
+    }
+    
+    [RelayCommand]
+    private void Delete()
+    {
+    }
+    
     [RelayCommand]
     private void Ok()
     {
