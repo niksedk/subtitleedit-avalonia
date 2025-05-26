@@ -131,7 +131,6 @@ public class FixCommonErrorsWindow : Window
             UiUtil.MakeButton("...", vm.ShowProfileCommand).Compact()
         );
         buttonPanelRules.Bind(IsVisibleProperty, new Binding(nameof(vm.Step1IsVisible)));
-        comboProfile.SelectionChanged += vm.ProfileOnSelectionChanged;
 
         var buttonToApplyFixes = UiUtil.MakeButton("To apply fixes", vm.ToApplyFixesCommand)
             .WithIconRight("fa-solid fa-arrow-right")

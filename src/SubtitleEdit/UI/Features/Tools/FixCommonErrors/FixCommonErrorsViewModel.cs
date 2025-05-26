@@ -519,9 +519,4 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
             return;
         }
     }
-
-    internal void ProfileOnSelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
-       
-    }
 }

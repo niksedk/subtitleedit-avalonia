@@ -137,21 +137,13 @@ public partial class FixCommonErrorsProfileViewModel : ObservableObject
 
     private ProfileDisplayItem MakeDefaultProfile(string name)
     {
-        var defaultFunctionNames = new List<string>
-        {
-            nameof(FixOverlappingDisplayTimes),
-            nameof(FixShortDisplayTimes),
-            nameof(FixLongDisplayTimes),
-            nameof(FixInvalidItalicTags),
-            nameof(FixUnneededSpaces),
-            nameof(FixLongLines),
-            nameof(FixShortLines),
-        };
-
         var profile = new ProfileDisplayItem
         {
             Name = name,
-            FixRules = new ObservableCollection<FixRuleDisplayItem>(_fixRules.Select(p => new FixRuleDisplayItem(p) { IsSelected = defaultFunctionNames.Contains(p.FixCommonErrorFunctionName) }))
+            FixRules = new ObservableCollection<FixRuleDisplayItem>(_fixRules.Select(p => new FixRuleDisplayItem(p) 
+            { 
+                IsSelected = SeFixCommonErrorsProfile.DefaultFixes.Contains(p.FixCommonErrorFunctionName) 
+            }))
         };
 
         return profile;
@@ -169,6 +161,15 @@ public partial class FixCommonErrorsProfileViewModel : ObservableObject
         {
             e.Handled = true;
             Window?.Close();
+        }
+    }
+
+    internal void ProfileNameTextBoxOnKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            e.Handled = true;
+            OkCommand.Execute(null);
         }
     }
 }

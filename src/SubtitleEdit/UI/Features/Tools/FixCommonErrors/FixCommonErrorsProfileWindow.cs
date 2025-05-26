@@ -4,6 +4,7 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Markup.Declarative;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Projektanker.Icons.Avalonia;
@@ -18,9 +19,9 @@ public class FixCommonErrorsProfileWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Fix common errors profile";
-        Width = 1000;
-        Height = 740;
-        CanResize = true;
+        Width = 800;
+        Height = 440;
+        CanResize = false;
 
         _vm = vm;
         vm.Window = this;
@@ -28,7 +29,7 @@ public class FixCommonErrorsProfileWindow : Window
 
         var grid = new Grid
         {
-            ColumnDefinitions = new ColumnDefinitions("*,3*"),
+            ColumnDefinitions = new ColumnDefinitions("*,*"),
             RowDefinitions = new RowDefinitions("Auto,*"),
             Margin = UiUtil.MakeWindowMargin(),
         };
@@ -97,7 +98,8 @@ public class FixCommonErrorsProfileWindow : Window
         var heading = new TextBlock
         {
             Text = "Profile name",
-            FontSize = 20
+            FontSize = 20,
+            Padding = new Thickness(0, 25, 0, 0),
         };
         editorGrid.Children.Add(heading);
         Grid.SetRow(heading, 0);
@@ -108,68 +110,10 @@ public class FixCommonErrorsProfileWindow : Window
             Watermark = "Enter profile name"
         };
         nameBox.Bind(TextBox.TextProperty, new Binding($"{nameof(vm.SelectedProfile)}.{nameof(ProfileDisplayItem.Name)}"));
+        nameBox.KeyDown += vm.ProfileNameTextBoxOnKeyDown;
         editorGrid.Children.Add(nameBox);
         Grid.SetRow(nameBox, 1);
         vm.ProfileNameTextBox = nameBox;
-
-        // "Rules" label
-        var rulesLabel = new TextBlock
-        {
-            Text = "Rules",
-            FontSize = 16,
-            Padding = new Thickness(0, 20, 0, 0),
-        };
-        editorGrid.Children.Add(rulesLabel);
-        Grid.SetRow(rulesLabel, 2);
-
-        // Scrollable rule list
-        var scrollViewer = new ScrollViewer
-        {
-            Content = new ItemsControl
-            {
-                DataContext = vm,
-                // ItemsSource = vm.SelectedProfile?.FixRules,
-                [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.SelectedProfile) + "." + nameof(ProfileDisplayItem.FixRules)) { Mode = BindingMode.TwoWay },
-                ItemTemplate = new FuncDataTemplate<FixRuleDisplayItem>((rule, _) =>
-                {
-                    var ruleRow = new Grid
-                    {
-                        ColumnDefinitions = new ColumnDefinitions("Auto,*,*"),
-                        Margin = new Thickness(0, 2)
-                    };
-
-                    var checkbox = new CheckBox
-                    {
-                        [!CheckBox.IsCheckedProperty] = new Binding(nameof(FixRuleDisplayItem.IsSelected)),
-                        VerticalAlignment = VerticalAlignment.Center,
-                    };
-                    ruleRow.Children.Add(checkbox);
-                    Grid.SetColumn(checkbox, 0);
-
-                    var nameText = new TextBlock
-                    {
-                        Text = rule.Name,
-                        FontWeight = FontWeight.Bold,
-                        VerticalAlignment = VerticalAlignment.Center,
-                    };
-                    ruleRow.Children.Add(nameText);
-                    Grid.SetColumn(nameText, 1);
-
-                    var exampleText = new TextBlock
-                    {
-                        Text = rule.Example,
-                        FontStyle = FontStyle.Italic,
-                        VerticalAlignment = VerticalAlignment.Center,
-                    };
-                    ruleRow.Children.Add(exampleText);
-                    Grid.SetColumn(exampleText, 2);
-
-                    return ruleRow;
-                })
-            }
-        };
-        editorGrid.Children.Add(scrollViewer);
-        Grid.SetRow(scrollViewer, 3);
 
         var buttonRow = UiUtil.MakeButtonBar(
             UiUtil.MakeButton("OK", vm.OkCommand),
