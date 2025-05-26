@@ -82,7 +82,9 @@ public partial class MainViewModel : ObservableObject
     public Window Window { get; set; }
     public Grid ContentGrid { get; set; }
     public MainView MainView { get; set; }
+
     public TextBlock StatusTextLeftLabel { get; set; }
+
     //public Grid Waveform { get; internal set; }
     public MenuItem MenuReopen { get; set; }
     public AudioVisualizer? AudioVisualizer { get; set; }
@@ -245,6 +247,7 @@ public partial class MainViewModel : ObservableObject
         {
             AudioVisualizer.WavePeaks = null;
         }
+
         _shortcutManager.ClearKeys();
     }
 
@@ -426,10 +429,9 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowToolsFixCommonErrors()
     {
-        var viewModel = await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window, vm =>
-        {
-            vm.InitStep1("en", GetUpdateSubtitle());
-        });
+        var viewModel =
+            await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window,
+                vm => { vm.InitStep1("en", GetUpdateSubtitle()); });
 
         if (viewModel.OkPressed)
         {
@@ -1140,6 +1142,7 @@ public partial class MainViewModel : ObservableObject
         {
             Subtitles.Add(new SubtitleLineViewModel(p));
         }
+
         Renumber();
     }
 
@@ -1462,6 +1465,7 @@ public partial class MainViewModel : ObservableObject
         {
             Subtitles.Remove(item);
         }
+
         Renumber();
     }
 
@@ -1765,15 +1769,19 @@ public partial class MainViewModel : ObservableObject
                 {
                     // calculate the center position based on the waveform width
                     var waveformHalfSeconds = (av.EndPositionSeconds - av.StartPositionSeconds) / 2.0;
-                    av.SetPosition(Math.Max(0, mediaPlayerSeconds - waveformHalfSeconds), subtitle, mediaPlayerSeconds, firstSelectedIndex, _selectedSubtitles ?? new List<SubtitleLineViewModel>());
+                    av.SetPosition(Math.Max(0, mediaPlayerSeconds - waveformHalfSeconds), subtitle, mediaPlayerSeconds,
+                        firstSelectedIndex, _selectedSubtitles ?? new List<SubtitleLineViewModel>());
                 }
-                else if ((isPlaying || !av.IsScrolling) && (mediaPlayerSeconds > av.EndPositionSeconds || mediaPlayerSeconds < av.StartPositionSeconds))
+                else if ((isPlaying || !av.IsScrolling) && (mediaPlayerSeconds > av.EndPositionSeconds ||
+                                                            mediaPlayerSeconds < av.StartPositionSeconds))
                 {
-                    av.SetPosition(startPos, subtitle, mediaPlayerSeconds, 0, _selectedSubtitles ?? new List<SubtitleLineViewModel>());
+                    av.SetPosition(startPos, subtitle, mediaPlayerSeconds, 0,
+                        _selectedSubtitles ?? new List<SubtitleLineViewModel>());
                 }
                 else
                 {
-                    av.SetPosition(av.StartPositionSeconds, subtitle, mediaPlayerSeconds, firstSelectedIndex, _selectedSubtitles ?? new List<SubtitleLineViewModel>());
+                    av.SetPosition(av.StartPositionSeconds, subtitle, mediaPlayerSeconds, firstSelectedIndex,
+                        _selectedSubtitles ?? new List<SubtitleLineViewModel>());
                 }
 
                 if (_updateAudioVisualizer)
@@ -1806,10 +1814,7 @@ public partial class MainViewModel : ObservableObject
 
         if (Se.Settings.Waveform.FocusTextBoxAfterInsertNew)
         {
-            Dispatcher.UIThread.Post(() =>
-            {
-                EditTextBox.Focus();
-            }, DispatcherPriority.Background);
+            Dispatcher.UIThread.Post(() => { EditTextBox.Focus(); }, DispatcherPriority.Background);
         }
     }
 
@@ -1853,10 +1858,24 @@ public partial class MainViewModel : ObservableObject
         if (!string.IsNullOrEmpty(_videoFileName) && VideoPlayerControl != null)
         {
             VideoPlayerControl.Position = e.Seconds;
-            var p = Subtitles.FirstOrDefault(p=>p.StartTime.TotalMilliseconds == e.Paragraph.StartTime.TotalMilliseconds);
+            var p = Subtitles.FirstOrDefault(p =>
+                Math.Abs(p.StartTime.TotalMilliseconds - e.Paragraph.StartTime.TotalMilliseconds) < 0.01);
             if (p != null)
             {
                 SelectAndScrollToSubtitle(p);
+            }
+        }
+    }
+
+    public void AudioVisualizerOnAddToSelection(object sender, ParagraphEventArgs e)
+    {
+        if (!string.IsNullOrEmpty(_videoFileName) && VideoPlayerControl != null)
+        {
+            var p = Subtitles.FirstOrDefault(p =>
+                Math.Abs(p.StartTime.TotalMilliseconds - e.Paragraph.StartTime.TotalMilliseconds) < 0.01);
+            if (p != null)
+            {
+                SubtitleGrid.SelectedItems.Add(p);
             }
         }
     }

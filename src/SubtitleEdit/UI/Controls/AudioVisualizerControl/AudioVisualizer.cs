@@ -132,6 +132,7 @@ public class AudioVisualizer : Control
     private readonly double _fontSize = 12;
 
     private readonly List<SubtitleLineViewModel> _displayableParagraphs = new();
+    private bool _isCtrlDown;
     private bool _isAltDown;
     private bool _isShiftDown;
     private long _lastMouseWheelScroll = -1;
@@ -157,6 +158,7 @@ public class AudioVisualizer : Control
     public delegate void PositionEventHandler(object sender, PositionEventArgs e);
     public delegate void ParagraphEventHandler(object sender, ParagraphEventArgs e);
     public event PositionEventHandler? OnVideoPositionChanged;
+    public event ParagraphEventHandler? OnAddToSelection;
     public event PositionEventHandler? OnHorizontalScroll;
     public event ParagraphEventHandler? OnParagraphDoubleTapped;
     public event ParagraphEventHandler? OnPositionSelected;
@@ -215,6 +217,11 @@ public class AudioVisualizer : Control
             _isAltDown = false;
             e.Handled = true;
         }
+        else if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
+        {
+            _isCtrlDown = false;
+            e.Handled = true;
+        }
         else if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
         {
             _isShiftDown = false;
@@ -247,6 +254,11 @@ public class AudioVisualizer : Control
         else if (e.Key == Key.LeftAlt || e.Key == Key.RightAlt)
         {
             _isAltDown = true;
+            e.Handled = true;
+        }
+        else if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
+        {
+            _isCtrlDown = true;
             e.Handled = true;
         }
         else if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
@@ -358,7 +370,13 @@ public class AudioVisualizer : Control
                 _activeParagraph != null &&
                 Math.Abs(_originalStartSeconds - _activeParagraph.StartTime.TotalSeconds) < 0.01))
             {
-                if (OnVideoPositionChanged != null)
+                if (_isCtrlDown && _activeParagraph != null && OnAddToSelection != null)
+                {
+                    var videoPosition = RelativeXPositionToSeconds((int)e.GetPosition(this).X);
+                    _audioVisualizerLastScroll = 0;
+                    OnAddToSelection.Invoke(this, new ParagraphEventArgs(videoPosition, _activeParagraph));
+                }
+                else if (OnVideoPositionChanged != null)
                 {
                     var videoPosition = RelativeXPositionToSeconds((int)e.GetPosition(this).X);
                     _audioVisualizerLastScroll = 0;

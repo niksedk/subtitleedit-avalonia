@@ -66,6 +66,7 @@ public class SettingsPage : UserControl
             Margin = new Thickness(10, 10, 40, 10),
             Children =
             {
+                UiUtil.MakeMenuItem("Rules", vm.ScrollToSectionCommand, "Rules"),
                 UiUtil.MakeMenuItem("General", vm.ScrollToSectionCommand, "General"),
                 UiUtil.MakeMenuItem("Subtitle formats", vm.ScrollToSectionCommand, "Subtitle formats"),
                 UiUtil.MakeMenuItem("Syntax coloring", vm.ScrollToSectionCommand, "Syntax coloring"),
@@ -119,9 +120,8 @@ public class SettingsPage : UserControl
     {
         return new List<SettingsSection>
         {
-            new SettingsSection("General",
+            new SettingsSection("Rules",
             [
-                // Rules
                 MakeNumericSetting("Single line max length", nameof(_vm.SingleLineMaxLength)),
                 MakeNumericSetting("Optimal chars/sec", nameof(_vm.OptimalCharsPerSec)),
                 MakeNumericSetting("Max chars/sec", nameof(_vm.MaxCharsPerSec)),
@@ -130,7 +130,10 @@ public class SettingsPage : UserControl
                 MakeNumericSetting("Max duration (ms)", nameof(_vm.MaxDurationMs)),
                 MakeNumericSetting("Min gap (ms)", nameof(_vm.MinGapMs)),
                 MakeNumericSetting("Max number of lines", nameof(_vm.MaxLines)),
-                MakeSeparator(),
+            ]),
+
+            new SettingsSection("General",
+            [
                 MakeNumericSetting("Default new subtitle duration (ms)", nameof(_vm.NewEmptyDefaultMs)),
                 MakeCheckboxSetting("Prompt for delete lines", nameof(_vm.PromptDeleteLines)),
                 MakeSeparator(),
@@ -138,7 +141,7 @@ public class SettingsPage : UserControl
                 MakeNumericSetting("Auto-backup interval (minutes)", nameof(_vm.AutoBackupIntervalMinutes)),
                 MakeNumericSetting("Auto-backup retention (months)", nameof(_vm.AutoBackupDeleteAfterMonths)),
             ]),
-
+            
             new SettingsSection("Subtitle formats",
             [
                 new SettingsItem("Default format", () => new ComboBox
