@@ -5,6 +5,7 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Markup.Declarative;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Features.Main;
@@ -72,7 +73,8 @@ public class FixCommonErrorsWindow : Window
             VerticalAlignment = VerticalAlignment.Stretch,
             Width = double.NaN,
             Height = double.NaN,
-            ItemsSource = vm.FixRules,
+//            ItemsSource = vm.FixRules,
+            [!DataGrid.ItemsSourceProperty] = new Binding($"{nameof(vm.SelectedProfile)}.{nameof(ProfileDisplayItem.FixRules)}"),
             IsReadOnly = false,
             Columns =
             {
@@ -120,16 +122,16 @@ public class FixCommonErrorsWindow : Window
 
         var step2Grid = MakeStep2Grid();
         step2Grid.Bind(IsVisibleProperty, new Binding(nameof(_vm.Step2IsVisible)));
-
+        var comboProfile = UiUtil.MakeComboBox(vm.Profiles, vm, nameof(vm.SelectedProfile));
         var buttonPanelRules = UiUtil.MakeButtonBar(
             UiUtil.MakeButton("Select all", vm.RulesSelectAllCommand),
             UiUtil.MakeButton("Inverse selection", vm.RulesInverseSelectedCommand),
             UiUtil.MakeTextBlock("Profile").WithMarginLeft(25).WithMarginRight(10),
-            UiUtil.MakeComboBox(vm.Profiles, vm, nameof(vm.SelectedProfile)),
+            comboProfile,
             UiUtil.MakeButton("...", vm.ShowProfileCommand).Compact()
         );
         buttonPanelRules.Bind(IsVisibleProperty, new Binding(nameof(vm.Step1IsVisible)));
-
+        comboProfile.SelectionChanged += vm.ProfileOnSelectionChanged;
 
         var buttonToApplyFixes = UiUtil.MakeButton("To apply fixes", vm.ToApplyFixesCommand)
             .WithIconRight("fa-solid fa-arrow-right")

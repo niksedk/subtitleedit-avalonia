@@ -27,7 +27,6 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
     [ObservableProperty] private string _searchText;
     [ObservableProperty] private ObservableCollection<LanguageDisplayItem> _languages;
     [ObservableProperty] private LanguageDisplayItem? _selectedLanguage;
-    [ObservableProperty] private ObservableCollection<FixRuleDisplayItem> _fixRules;
     [ObservableProperty] private ObservableCollection<FixDisplayItem> _fixes;
     [ObservableProperty] private FixDisplayItem? _selectedFix;
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _paragraphs;
@@ -35,8 +34,8 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
     [ObservableProperty] private string _editText;
     [ObservableProperty] private TimeSpan _editShow;
     [ObservableProperty] private TimeSpan _editDuration;
-    [ObservableProperty] private ObservableCollection<string> _profiles;
-    [ObservableProperty] private string? _selectedProfile;
+    [ObservableProperty] private ObservableCollection<ProfileDisplayItem> _profiles;
+    [ObservableProperty] private ProfileDisplayItem? _selectedProfile;
     [ObservableProperty] private bool _step1IsVisible;
     [ObservableProperty] private bool _step2IsVisible;
 
@@ -50,13 +49,11 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
 
     private List<FixRuleDisplayItem> _allFixRules = new();
     private readonly LanguageFixCommonErrors _language;
-    private int _totalFixes;
-    private int _totalErrors;
     private bool _previewMode = true;
     private List<FixDisplayItem> _oldFixes = new();
-    private LanguageDisplayItem _oldSelectedLanguage = new(CultureInfo.InvariantCulture, "English");
-    private string? _oldSelectedProfile;
-
+    private LanguageDisplayItem _oldSelectedLanguage;
+    private int _totalErrors;
+    private int _totalFixes;
     private readonly INamesList _namesList;
     private readonly IWindowService _windowService;
 
@@ -68,23 +65,14 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
         SearchText = string.Empty;
         Languages = new ObservableCollection<LanguageDisplayItem>();
         Language = new string(' ', 0);
-        FixRules = new ObservableCollection<FixRuleDisplayItem>();
         Fixes = new ObservableCollection<FixDisplayItem>();
         Paragraphs = new ObservableCollection<SubtitleLineViewModel>();
         EditText = string.Empty;
         _language = Se.Language.FixCommonErrors;
         Step1IsVisible = true;
+        _oldSelectedLanguage = new LanguageDisplayItem(new CultureInfo("en"), "English");
 
-        Profiles = new ObservableCollection<string>(Se.Settings.Tools.FixCommonErrors.Profiles.Select(p => p.ProfileName));
-        if (Profiles.Count == 0)
-        {
-            Profiles.Add("Default");
-        }
-
-        var profileName = Se.Settings.Tools.FixCommonErrors.LastProfileName;
-        SelectedProfile = Profiles.Contains(profileName)
-            ? profileName
-            : Profiles.First();
+        Profiles = new ObservableCollection<ProfileDisplayItem>();      
     }
 
     public void Initialize(Subtitle subtitle)
@@ -107,66 +95,72 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
         }
 
         InitStep1(languageCode, subtitle);
+        LoadProfiles();
+        SelectedProfile = Profiles.FirstOrDefault(p => p.Name == Se.Settings.Tools.FixCommonErrors.LastProfileName) ?? Profiles.FirstOrDefault() ?? Profiles.FirstOrDefault();
     }
 
-    private void UpdateRulesSelection()
+
+    private void SaveProfiles()
     {
-        if (string.IsNullOrEmpty(SelectedProfile))
+        Se.Settings.Tools.FixCommonErrors.Profiles.Clear();
+        foreach (var profile in Profiles)
         {
-            return;
-        }
-
-        var profile = Se.Settings.Tools.FixCommonErrors.Profiles.FirstOrDefault(p => p.ProfileName == SelectedProfile);
-        if (profile == null)
-        {
-            return;
-        }
-
-        foreach (var rule in FixRules)
-        {
-            rule.IsSelected = profile.SelectedRules.Contains(rule.Name);
-        }
-    }
-
-    private void SaveRulesSelection()
-    {
-        if (string.IsNullOrEmpty(SelectedProfile))
-        {
-            return;
-        }
-
-        SaveRulesSelection(SelectedProfile);
-    }
-
-    private void SaveRulesSelection(string profileName)
-    {
-        var profile = Se.Settings.Tools.FixCommonErrors.Profiles.FirstOrDefault(p => p.ProfileName == profileName);
-        if (profile == null)
-        {
-            return;
-        }
-
-        profile.SelectedRules.Clear();
-        foreach (var rule in FixRules)
-        {
-            if (rule.IsSelected)
+            var setting = new SeFixCommonErrorsProfile()
             {
-                profile.SelectedRules.Add(rule.Name);
+                ProfileName = profile.Name,
+                SelectedRules = new List<string>()
+            };
+
+            foreach (var rule in profile.FixRules)
+            {
+                if (rule.IsSelected)
+                {
+                    setting.SelectedRules.Add(rule.FixCommonErrorFunctionName);
+                }
             }
+
+            Se.Settings.Tools.FixCommonErrors.Profiles.Add(setting);
         }
 
-        Se.Settings.Tools.FixCommonErrors.LastProfileName = profileName;
-        Se.SaveSettings();
+        Se.Settings.Tools.FixCommonErrors.LastProfileName = SelectedProfile?.Name ?? Profiles.FirstOrDefault()?.Name ?? "Default";        
+    }
+
+    private void LoadProfiles()
+    {
+        Profiles.Clear();   
+        var profiles = Se.Settings.Tools.FixCommonErrors.Profiles;
+        foreach (var setting in profiles)
+        {
+            var profile = new ProfileDisplayItem()
+            {
+                Name = setting.ProfileName,
+                FixRules = new ObservableCollection<FixRuleDisplayItem>(_allFixRules.Select(rule => new FixRuleDisplayItem(rule)
+                {
+                    IsSelected = setting.SelectedRules.Contains(rule.FixCommonErrorFunctionName)
+                }))
+            };
+
+            Profiles.Add(profile);
+        }
     }
 
     [RelayCommand]
     private async Task ShowProfile()
     {
-        await _windowService.ShowDialogAsync<FixCommonErrorsProfileWindow, FixCommonErrorsProfileViewModel>(Window!,
+        SaveProfiles();
+
+        var result = await _windowService.ShowDialogAsync<FixCommonErrorsProfileWindow, FixCommonErrorsProfileViewModel>(Window!,
             vm =>
             {
-                vm.Initialize(_allFixRules);
+                vm.Initialize(_allFixRules, SelectedProfile?.Name);
             });
+
+        if (result.OkPressed)
+        {
+            LoadProfiles();
+            var profile = Profiles.FirstOrDefault(p => p.Name == result.SelectedProfile?.Name);
+            SelectedProfile = profile ?? Profiles.FirstOrDefault();
+        }
     }
 
     [RelayCommand]
@@ -197,9 +191,8 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
         Step1IsVisible = false;
         Step2IsVisible = true;
 
-        SaveRulesSelection();
+        SaveProfiles();
         _oldSelectedLanguage = SelectedLanguage!;
-        _oldSelectedProfile = SelectedProfile!;
 
         RefreshFixes();
     }
@@ -216,13 +209,19 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
         _previewMode = false;
         ApplyFixes();
         OkPressed = true;
+        Se.SaveSettings();
         Window?.Close();
     }
 
     [RelayCommand]
     public void RulesSelectAll()
     {
-        foreach (var rule in FixRules)
+        if (SelectedProfile == null)
+        {
+            return;
+        }
+
+        foreach (var rule in SelectedProfile.FixRules)
         {
             rule.IsSelected = true;
         }
@@ -231,7 +230,12 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
     [RelayCommand]
     public void RulesInverseSelected()
     {
-        foreach (var rule in FixRules)
+        if (SelectedProfile == null)
+        {
+            return;
+        }
+
+        foreach (var rule in SelectedProfile.FixRules)
         {
             rule.IsSelected = !rule.IsSelected;
         }
@@ -274,6 +278,11 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
 
     private void ApplyFixes()
     {
+        if (SelectedProfile == null)
+        {
+            return;
+        }
+
         _totalErrors = 0;
 
         var subtitle = _previewMode ? new Subtitle(FixedSubtitle, false) : FixedSubtitle;
@@ -282,7 +291,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
             paragraph.Text = string.Join(Environment.NewLine, paragraph.Text.SplitToLines());
         }
 
-        foreach (var fix in FixRules)
+        foreach (var fix in SelectedProfile.FixRules)
         {
             if (fix.IsSelected)
             {
@@ -335,7 +344,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
             new (_language.RemoveSpaceBetweenNumber, _language.FixSpaceBetweenNumbersExample, 1, true, nameof(RemoveSpaceBetweenNumbers)),
             new (_language.RemoveDialogFirstInNonDialogs, _language.RemoveDialogFirstInNonDialogsExample, 1, true, nameof(RemoveDialogFirstLineInNonDialogs)),
             new (_language.NormalizeStrings, string.Empty, 1, true, nameof(NormalizeStrings)),
-    };
+        };
 
         if (Configuration.Settings.General.ContinuationStyle == ContinuationStyle.None)
         {
@@ -368,9 +377,6 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
                 "Hablas bien castellano? -> ¿Hablas bien castellano?", 1, true,
                 nameof(FixSpanishInvertedQuestionAndExclamationMarks)));
         }
-
-        FixRules = new ObservableCollection<FixRuleDisplayItem>(_allFixRules);
-        UpdateRulesSelection();
     }
 
     private static string GetDialogStyle(DialogType dialogStyle)
@@ -404,12 +410,18 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
 
     internal void TextBoxSearch_TextChanged(object? sender, TextChangedEventArgs e)
     {
-        FixRules.Clear();
-        foreach (var rule in _allFixRules)
+        if (SelectedProfile == null)
+        {
+            return;
+        }
+
+        var rules = SelectedProfile.FixRules.ToList();
+        SelectedProfile.FixRules.Clear();
+        foreach (var rule in rules)
         {
             if (string.IsNullOrEmpty(SearchText) || rule.Name.ToLowerInvariant().Contains(SearchText.ToLowerInvariant()))
             {
-                FixRules.Add(rule);
+                SelectedProfile.FixRules.Add(rule);
             }
         }
     }
@@ -501,10 +513,15 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
 
     internal void SelectAndScrollTo(FixDisplayItem fixDisplayItem)
     {
-        var p = Paragraphs.FirstOrDefault(p => p.Paragraph?.Id == fixDisplayItem.Paragraph.Id);    
+        var p = Paragraphs.FirstOrDefault(p => p.Paragraph?.Id == fixDisplayItem.Paragraph.Id);
         if (p != null)
         {
             return;
         }
+    }
+
+    internal void ProfileOnSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+       
     }
 }
