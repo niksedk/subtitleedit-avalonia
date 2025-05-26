@@ -21,11 +21,11 @@ public partial class FixCommonErrorsProfileViewModel : ObservableObject
     public FixCommonErrorsProfileViewModel()
     {
         _fixRules = new List<FixRuleDisplayItem>();
-        Profiles = new ObservableCollection<ProfileDisplayItem>();  
+        Profiles = new ObservableCollection<ProfileDisplayItem>();
         SelectedProfile = null;
         IsProfileSelected = true;
     }
-    
+
     public void Initialize(List<FixRuleDisplayItem> allFixRules)
     {
         _fixRules = allFixRules;
@@ -47,6 +47,11 @@ public partial class FixCommonErrorsProfileViewModel : ObservableObject
 
             Profiles.Add(profile);
         }
+
+        if (Profiles.Count > 0)
+        {
+            SelectedProfile = Profiles[0];
+        }
     }
 
     [RelayCommand]
@@ -61,7 +66,7 @@ public partial class FixCommonErrorsProfileViewModel : ObservableObject
         Profiles.Add(newProfile);
         SelectedProfile = newProfile;
     }
-    
+
     [RelayCommand]
     private void Delete(ProfileDisplayItem? profile)
     {
@@ -73,7 +78,7 @@ public partial class FixCommonErrorsProfileViewModel : ObservableObject
         Profiles.Remove(profile);
         SelectedProfile = Profiles.Count > 0 ? Profiles[0] : null;
     }
-    
+
     [RelayCommand]
     private void Ok()
     {
