@@ -53,6 +53,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
     private List<FixRuleDisplayItem> _allFixRules = new();
     private readonly LanguageFixCommonErrors _language;
     private bool _previewMode = true;
+    public List<int> DeleteIndices = new();
     private List<FixDisplayItem> _oldFixes = new();
     private LanguageDisplayItem _oldSelectedLanguage;
     private int _totalErrors;
@@ -515,7 +516,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
 
     public void AddToDeleteIndices(int index)
     {
-        //TODO: Implement functionality to handle delete indices
+        DeleteIndices.Add(index);
     }
 
     internal void SelectAndScrollTo(FixDisplayItem fixDisplayItem)
