@@ -89,6 +89,7 @@ public class LanguageGeneral
     public string GeneralText { get; set; }
     public string LineNumber { get; set; }
     public string Before { get; set; }
+    public string BeforeX { get; set; }
     public string After { get; set; }
     public string Size { get; set; }
     public string Search { get; set; }
@@ -195,6 +196,7 @@ public class LanguageGeneral
         GeneralText = "General";
         LineNumber = "Line#";
         Before = "Before";
+        BeforeX = "Before '{0}'";
         After = "After";
         Size = "Size";
         Search = "Search";

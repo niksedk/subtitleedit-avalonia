@@ -239,6 +239,7 @@ public partial class MainViewModel : ObservableObject
             }
         }
 
+        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "New"));
         Subtitles.Clear();
         _subtitleFileName = string.Empty;
         _subtitle = new Subtitle();
@@ -257,6 +258,7 @@ public partial class MainViewModel : ObservableObject
         var fileName = await _fileHelper.PickOpenSubtitleFile(Window, "Open subtitle file");
         if (!string.IsNullOrEmpty(fileName))
         {
+            MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Open"));
             await SubtitleOpen(fileName);
         }
 
@@ -266,6 +268,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task CommandFileReopen(RecentFile recentFile)
     {
+        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Reopen"));
         await SubtitleOpen(recentFile.SubtitleFileName, recentFile.VideoFileName, recentFile.SelectedLine);
         _shortcutManager.ClearKeys();
     }
@@ -408,7 +411,14 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowToolsAdjustDurations()
     {
-        await _windowService.ShowDialogAsync<AdjustDurationWindow, AdjustDurationViewModel>(Window, vm => { });
+        var result =
+            await _windowService.ShowDialogAsync<AdjustDurationWindow, AdjustDurationViewModel>(Window, vm => { });
+
+        if (result.OkPressed)
+        {
+            MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Adjust durations"));
+        }
+
         _shortcutManager.ClearKeys();
     }
 
@@ -422,7 +432,13 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowToolsChangeCasing()
     {
-        await _windowService.ShowDialogAsync<ChangeCasingWindow, ChangeCasingViewModel>(Window, vm => { });
+        var result = await _windowService.ShowDialogAsync<ChangeCasingWindow, ChangeCasingViewModel>(Window, vm => { });
+
+        if (result.OkPressed)
+        {
+            MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Change casing"));
+        }
+
         _shortcutManager.ClearKeys();
     }
 
@@ -435,6 +451,8 @@ public partial class MainViewModel : ObservableObject
 
         if (viewModel.OkPressed)
         {
+            MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Fix common errors"));
+
             SetSubtitles(viewModel.FixedSubtitle);
             SelectAndScrollToRow(0);
             ShowStatus($"Fixed {viewModel.FixedSubtitle.Paragraphs.Count} lines");
@@ -446,8 +464,15 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowToolsRemoveTextForHearingImpaired()
     {
-        await _windowService.ShowDialogAsync<RemoveTextForHearingImpairedWindow, RemoveTextForHearingImpairedViewModel>(
-            Window, vm => { });
+        var result = await _windowService
+            .ShowDialogAsync<RemoveTextForHearingImpairedWindow, RemoveTextForHearingImpairedViewModel>(
+                Window, vm => { });
+
+        if (result.OkPressed)
+        {
+            MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Remove text for hearing impaired"));
+        }
+
         _shortcutManager.ClearKeys();
     }
 
@@ -508,6 +533,8 @@ public partial class MainViewModel : ObservableObject
 
         if (vm.OkPressed)
         {
+            MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Whisper audio-to-text"));
+
             _subtitle = vm.TranscribedSubtitle;
             SetSubtitles(_subtitle);
             SelectAndScrollToRow(0);
@@ -549,7 +576,13 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowSyncAdjustAllTimes()
     {
-        await _windowService.ShowDialogAsync<AdjustAllTimesWindow, AdjustAllTimesViewModel>(Window, vm => { });
+        var result = await _windowService.ShowDialogAsync<AdjustAllTimesWindow, AdjustAllTimesViewModel>(Window, vm => { });
+        
+        if (result.OkPressed)
+        {
+            MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Adjust all times"));
+        }
+        
         _shortcutManager.ClearKeys();
     }
 
