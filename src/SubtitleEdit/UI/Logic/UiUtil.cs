@@ -477,6 +477,13 @@ public static class UiUtil
         return control;
     }
 
+    public static StackPanel WithAlignmentLeft(this StackPanel control)
+    {
+        var m = control.Margin;
+        control.HorizontalAlignment = HorizontalAlignment.Left;
+        return control;
+    }
+
     public static ComboBox WithMarginTop(this ComboBox control, int marginTop)
     {
         var m = control.Margin;

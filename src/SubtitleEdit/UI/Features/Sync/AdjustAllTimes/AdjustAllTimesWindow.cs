@@ -1,6 +1,8 @@
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Sync.AdjustAllTimes;
@@ -8,13 +10,13 @@ namespace Nikse.SubtitleEdit.Features.Sync.AdjustAllTimes;
 public class AdjustAllTimesWindow : Window
 {
     private AdjustAllTimesViewModel _vm;
-    
+
     public AdjustAllTimesWindow(AdjustAllTimesViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Adjust all times (show earlier/later)";
-        Width = 310;
-        Height = 140;
+        Width = 510;
+        Height = 340;
         CanResize = false;
 
         _vm = vm;
@@ -23,34 +25,87 @@ public class AdjustAllTimesWindow : Window
 
         var label = new Label
         {
-            Content = "Language",
+            Content = "Adjustment",
             VerticalAlignment = VerticalAlignment.Center,
         };
 
-        var combo = new ComboBox
+        var timeCodeUpDown = new TimeCodeUpDown
         {
-            ItemsSource = vm.Languages,
-            SelectedValue = vm.SelectedLanguage,
-            VerticalAlignment = VerticalAlignment.Center,
-            MinWidth = 180,
+            DataContext = vm,
+            [!TimeCodeUpDown.ValueProperty] = new Binding(nameof(vm.Adjustment))
+            {
+                Mode = BindingMode.TwoWay,
+            }
         };
 
+        var panelAdjustment = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            VerticalAlignment = VerticalAlignment.Center,
+            Children =
+            {
+                label,
+                timeCodeUpDown,
+            },
+        };
+
+        var labelInfo = new TextBlock
+        {
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        labelInfo.Bind(TextBlock.TextProperty, new Binding(nameof(vm.TotalAdjustmentInfo)));
+
+        var panelShowEarlierOrLater = UiUtil.MakeButtonBar(
+            UiUtil.MakeButton("Show earlier", vm.ShowEarlierCommand),
+            UiUtil.MakeButton("Show later", vm.ShowLaterCommand),
+            labelInfo
+        ).WithAlignmentLeft();
+
+        var panelRadioButtons = new StackPanel
+        {
+            Orientation = Orientation.Vertical,
+            Children =
+            {
+                new RadioButton
+                {
+                    Content = "Adjust All",
+                    [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustAll))
+                },
+                new RadioButton
+                {
+                    Content = "Adjust Selected Lines",
+                    [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustSelectedLines))
+                },
+                new RadioButton
+                {
+                    Content = "Adjust Selected Lines And Forward",
+                    [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustSelectedLinesAndForward))
+                }
+            }
+        };
         var buttonPanel = UiUtil.MakeButtonBar(
             UiUtil.MakeButton("OK", vm.OkCommand),
             UiUtil.MakeButton("Cancel", vm.CancelCommand)
         );
-        
         var grid = new Grid
         {
             RowDefinitions =
             {
+                new RowDefinition
+                {
+                    Height = new GridLength(1, GridUnitType.Auto)
+                },
+
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition
+                {
+                    Width = new GridLength(1, GridUnitType.Star)
+                },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
@@ -59,19 +114,18 @@ public class AdjustAllTimesWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Children.Add(label);
-        Grid.SetRow(label, 0);
-        Grid.SetColumn(label, 0);
+        grid.Children.Add(panelAdjustment);
+        Grid.SetRow(panelAdjustment, 0);
 
-        grid.Children.Add(combo);
-        Grid.SetRow(combo, 0);
-        Grid.SetColumn(combo, 1);
+        grid.Children.Add(panelShowEarlierOrLater);
+        Grid.SetRow(panelShowEarlierOrLater, 1);
+
+        grid.Children.Add(panelRadioButtons);
+        Grid.SetRow(panelRadioButtons, 2);
 
         grid.Children.Add(buttonPanel);
-        Grid.SetRow(buttonPanel, 1);
-        Grid.SetColumn(buttonPanel, 0);
-        Grid.SetColumnSpan(buttonPanel, 2);
-
+        Grid.SetRow(buttonPanel, 3);
+        
         Content = grid;
         
         Activated += delegate { Focus(); }; // hack to make OnKeyDown work
