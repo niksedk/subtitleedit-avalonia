@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -7,8 +8,14 @@ namespace Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 
 public partial class AdjustDurationViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<string> languages;
-    [ObservableProperty] private string selectedLanguage;
+    [ObservableProperty] private ObservableCollection<AdjustDurationDisplay> _adjustTypes;
+    [ObservableProperty] private AdjustDurationDisplay _selectedLanguageAdjustType;
+    
+    [ObservableProperty] private double _adjustSeconds;
+    [ObservableProperty] private double _adjustPercent;
+    [ObservableProperty] private double _adjustFixed;
+    [ObservableProperty] private double _adjustRecalculateMaxCharacterPerSecond;
+    [ObservableProperty] private double _adjustRecalculateOptimalCharacterPerSecond;
     
     public AdjustDurationWindow? Window { get; set; }
     
@@ -16,8 +23,8 @@ public partial class AdjustDurationViewModel : ObservableObject
 
     public AdjustDurationViewModel()
     {
-        Languages = new ObservableCollection<string> { "English", "Danish", "Spanish" };
-        SelectedLanguage = Languages[0];
+        AdjustTypes = new ObservableCollection<AdjustDurationDisplay>(AdjustDurationDisplay.ListAll());
+        SelectedLanguageAdjustType = AdjustTypes[0]; 
     }
     
     [RelayCommand]                   

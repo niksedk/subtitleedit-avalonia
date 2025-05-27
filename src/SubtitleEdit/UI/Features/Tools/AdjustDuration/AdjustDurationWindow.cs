@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
@@ -9,12 +10,15 @@ public class AdjustDurationWindow : Window
 {
     private AdjustDurationViewModel _vm;
     
+    private const int LabelWidth = 150;
+    private const int NumericUpDownWidth = 150;
+    
     public AdjustDurationWindow(AdjustDurationViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Adjust duration";
-        Width = 310;
-        Height = 140;
+        Width = 610;
+        Height = 340;
         CanResize = false;
 
         _vm = vm;
@@ -23,17 +27,28 @@ public class AdjustDurationWindow : Window
 
         var label = new Label
         {
-            Content = "Language",
+            Content = "Adjust duration by",
             VerticalAlignment = VerticalAlignment.Center,
         };
 
         var combo = new ComboBox
         {
-            ItemsSource = vm.Languages,
-            SelectedValue = vm.SelectedLanguage,
+            ItemsSource = vm.AdjustTypes,
+          //  SelectedValue = vm.SelectedLanguageAdjustType,
             VerticalAlignment = VerticalAlignment.Center,
             MinWidth = 180,
         };
+        combo.Bind(ComboBox.SelectedValueProperty, new Binding
+        {
+            Path = nameof(vm.SelectedLanguageAdjustType),
+            Mode = BindingMode.TwoWay,
+            Source = vm,
+        });
+        
+        var panelSeconds = MakeAdjustSeconds(vm);
+        var panelPercent = MakeAdjustPercent(vm);
+        var panelFixed = MakeAdjustFixed(vm);
+        var panelRecalculate = MakeAdjustRecalculate(vm); 
 
         var buttonPanel = UiUtil.MakeButtonBar(
             UiUtil.MakeButton("OK", vm.OkCommand),
@@ -45,6 +60,7 @@ public class AdjustDurationWindow : Window
             RowDefinitions =
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
@@ -66,9 +82,29 @@ public class AdjustDurationWindow : Window
         grid.Children.Add(combo);
         Grid.SetRow(combo, 0);
         Grid.SetColumn(combo, 1);
+        
+        grid.Children.Add(panelSeconds);
+        Grid.SetRow(panelSeconds, 1);
+        Grid.SetColumn(panelSeconds, 0);
+        Grid.SetColumnSpan(panelSeconds, 2);
+        
+        grid.Children.Add(panelPercent);
+        Grid.SetRow(panelPercent, 1);
+        Grid.SetColumn(panelPercent, 0);
+        Grid.SetColumnSpan(panelPercent, 2);
+        
+        grid.Children.Add(panelFixed);
+        Grid.SetRow(panelFixed, 1);
+        Grid.SetColumn(panelFixed, 0);
+        Grid.SetColumnSpan(panelFixed, 2);
+        
+        grid.Children.Add(panelRecalculate);
+        Grid.SetRow(panelRecalculate, 1);
+        Grid.SetColumn(panelRecalculate, 0);
+        Grid.SetColumnSpan(panelRecalculate, 2);
 
         grid.Children.Add(buttonPanel);
-        Grid.SetRow(buttonPanel, 1);
+        Grid.SetRow(buttonPanel, 2);
         Grid.SetColumn(buttonPanel, 0);
         Grid.SetColumnSpan(buttonPanel, 2);
 
@@ -76,6 +112,216 @@ public class AdjustDurationWindow : Window
         
         Activated += delegate { Focus(); }; // hack to make OnKeyDown work
     }
+    
+    private static StackPanel MakeAdjustSeconds(AdjustDurationViewModel vm)
+    {
+        var textBlockSeconds = new TextBlock
+        {
+            Text = "Seconds",
+            VerticalAlignment = VerticalAlignment.Center,
+            Width = LabelWidth,
+        };
+        var numericUpDownSeconds = new NumericUpDown
+        {
+            Minimum = -1000000,
+            Maximum = 1000000,
+            Width = NumericUpDownWidth,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        numericUpDownSeconds.Bind(NumericUpDown.ValueProperty, new Binding
+        {
+            Path = nameof(vm.AdjustSeconds),
+            Mode = BindingMode.TwoWay,
+            Source = vm,
+        });
+        
+        var panel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            VerticalAlignment = VerticalAlignment.Center,
+            Children =
+            {
+                textBlockSeconds,
+                numericUpDownSeconds
+            }
+        };
+        panel.Bind(StackPanel.IsVisibleProperty, new Binding()
+        {
+            Path = $"{nameof(vm.SelectedLanguageAdjustType)}.{nameof(AdjustDurationDisplay.IsSecondsVisible)}",
+            Source = vm,
+            Mode = BindingMode.TwoWay,
+        });
+        
+        return panel;
+    }
+    
+    private static StackPanel MakeAdjustPercent(AdjustDurationViewModel vm)
+    {
+        var textBlockSeconds = new TextBlock
+        {
+            Text = "Percent",
+            VerticalAlignment = VerticalAlignment.Center,
+            Width = LabelWidth,
+        };
+        var numericUpDownSeconds = new NumericUpDown
+        {
+            Minimum = -1000000,
+            Maximum = 1000000,
+            Width = NumericUpDownWidth,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        numericUpDownSeconds.Bind(NumericUpDown.ValueProperty, new Binding
+        {
+            Path = nameof(vm.AdjustPercent),
+            Mode = BindingMode.TwoWay,
+            Source = vm,
+        });
+        
+        var panel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            VerticalAlignment = VerticalAlignment.Center,
+            Children =
+            {
+                textBlockSeconds,
+                numericUpDownSeconds
+            }
+        };
+        panel.Bind(StackPanel.IsVisibleProperty, new Binding
+        {
+            Path = $"{nameof(vm.SelectedLanguageAdjustType)}.{nameof(AdjustDurationDisplay.IsPercentVisible)}",
+            Source = vm,
+            Mode = BindingMode.TwoWay,
+        });
+        
+        return panel;
+    }
+
+    
+    private static StackPanel MakeAdjustFixed(AdjustDurationViewModel vm)
+    {
+        var textBlockSeconds = new TextBlock
+        {
+            Text = "Fixed seconds",
+            VerticalAlignment = VerticalAlignment.Center,
+            Width = LabelWidth,
+        };
+        var numericUpDownSeconds = new NumericUpDown
+        {
+            Minimum = -1000000,
+            Maximum = 1000000,
+            Width = NumericUpDownWidth,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        numericUpDownSeconds.Bind(NumericUpDown.ValueProperty, new Binding
+        {
+            Mode = BindingMode.TwoWay,
+            Source = vm,
+            Path = nameof(vm.AdjustPercent),
+        });
+        
+        var panel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            VerticalAlignment = VerticalAlignment.Center,
+           // IsVisible = vm.SelectedLanguageAdjustType.IsFixedVisible,
+            Children =
+            {
+                textBlockSeconds,
+                numericUpDownSeconds
+            }
+        };
+        panel.Bind(StackPanel.IsVisibleProperty, new Binding
+        {
+            Path = $"{nameof(vm.SelectedLanguageAdjustType)}.{nameof(AdjustDurationDisplay.IsFixedVisible)}",
+            Source = vm,
+            Mode = BindingMode.TwoWay,
+        });
+        return panel;
+    }
+    
+    private static Grid MakeAdjustRecalculate(AdjustDurationViewModel vm)
+    {
+        var textBlockMax = new TextBlock
+        {
+            Text = "Max characters per second",
+            VerticalAlignment = VerticalAlignment.Center,
+            Width = LabelWidth,
+        };
+        var numericUpDownMax = new NumericUpDown
+        {
+            Minimum = 0,
+            Maximum = 1000,
+            Width = NumericUpDownWidth,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        numericUpDownMax.Bind(NumericUpDown.ValueProperty, new Binding
+        {
+            Path = nameof(vm.AdjustRecalculateMaxCharacterPerSecond),
+            Mode = BindingMode.TwoWay,
+            Source = vm,
+        });
+        
+        var textBlockOptimal = new TextBlock
+        {
+            Text = "Optimal characters per second",
+            VerticalAlignment = VerticalAlignment.Center,
+            Width = LabelWidth,
+        };
+        var numericUpDownOptimal = new NumericUpDown
+        {
+            Minimum = 0,
+            Maximum = 1000,
+            Width = NumericUpDownWidth,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        numericUpDownOptimal.Bind(NumericUpDown.ValueProperty, new Binding
+        {
+            Path = nameof(vm.AdjustRecalculateOptimalCharacterPerSecond),
+            Mode = BindingMode.TwoWay,
+            Source = vm,
+        });
+        
+        var grid = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = GridLength.Auto },
+                new ColumnDefinition { Width = GridLength.Auto },
+            },
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        
+        grid.Children.Add(textBlockMax);
+        Grid.SetColumn(textBlockMax, 0);
+        
+        grid.Children.Add(numericUpDownMax);
+        Grid.SetColumn(numericUpDownMax, 1);
+        
+        grid.Children.Add(textBlockOptimal);
+        Grid.SetColumn(textBlockOptimal, 0);
+        Grid.SetRow(textBlockOptimal, 1);
+        
+        grid.Children.Add(numericUpDownOptimal);
+        Grid.SetColumn(numericUpDownOptimal, 1);
+        Grid.SetRow(numericUpDownOptimal, 1);
+
+        grid.Bind(Grid.IsVisibleProperty, new Binding
+        {
+            Path = $"{nameof(vm.SelectedLanguageAdjustType)}.{nameof(AdjustDurationDisplay.IsRecalculateVisible)}",
+            Source = vm,
+            Mode = BindingMode.TwoWay,
+        });
+        
+        return grid;
+    }
+
 
     protected override void OnKeyDown(KeyEventArgs e)
     {
