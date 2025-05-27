@@ -32,7 +32,7 @@ public class InitWaveform
             };
             vm.AudioVisualizer.OnNewSelectionInsert += vm.AudioVisualizerOnNewSelectionInsert;
             vm.AudioVisualizer.OnVideoPositionChanged += vm.AudioVisualizerOnVideoPositionChanged;
-            vm.AudioVisualizer.OnAddToSelection += vm.AudioVisualizerOnAddToSelection;
+            vm.AudioVisualizer.OnToggleSelection += vm.AudioVisualizerOnToggleSelection;
             vm.AudioVisualizer.OnStatus += vm.AudioVisualizerOnStatus;
             vm.AudioVisualizer.OnParagraphDoubleTapped += vm.OnWaveformDoubleTapped;
         }

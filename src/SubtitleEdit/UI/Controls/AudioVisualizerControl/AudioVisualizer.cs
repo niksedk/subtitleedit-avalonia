@@ -158,7 +158,7 @@ public class AudioVisualizer : Control
     public delegate void PositionEventHandler(object sender, PositionEventArgs e);
     public delegate void ParagraphEventHandler(object sender, ParagraphEventArgs e);
     public event PositionEventHandler? OnVideoPositionChanged;
-    public event ParagraphEventHandler? OnAddToSelection;
+    public event ParagraphEventHandler? OnToggleSelection;
     public event PositionEventHandler? OnHorizontalScroll;
     public event ParagraphEventHandler? OnParagraphDoubleTapped;
     public event ParagraphEventHandler? OnPositionSelected;
@@ -370,11 +370,11 @@ public class AudioVisualizer : Control
                 _activeParagraph != null &&
                 Math.Abs(_originalStartSeconds - _activeParagraph.StartTime.TotalSeconds) < 0.01))
             {
-                if (_isCtrlDown && _activeParagraph != null && OnAddToSelection != null)
+                if (_isCtrlDown && _activeParagraph != null && OnToggleSelection != null)
                 {
                     var videoPosition = RelativeXPositionToSeconds((int)e.GetPosition(this).X);
                     _audioVisualizerLastScroll = 0;
-                    OnAddToSelection.Invoke(this, new ParagraphEventArgs(videoPosition, _activeParagraph));
+                    OnToggleSelection.Invoke(this, new ParagraphEventArgs(videoPosition, _activeParagraph));
                 }
                 else if (OnVideoPositionChanged != null)
                 {

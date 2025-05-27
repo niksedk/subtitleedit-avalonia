@@ -1874,7 +1874,7 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    public void AudioVisualizerOnAddToSelection(object sender, ParagraphEventArgs e)
+    public void AudioVisualizerOnToggleSelection(object sender, ParagraphEventArgs e)
     {
         if (!string.IsNullOrEmpty(_videoFileName) && VideoPlayerControl != null)
         {
