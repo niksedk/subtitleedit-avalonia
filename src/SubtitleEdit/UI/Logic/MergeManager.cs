@@ -1,8 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Nikse.SubtitleEdit.Core.Common;
+﻿using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Enums;
+using Nikse.SubtitleEdit.Features.Main;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Text;
+using static Nikse.SubtitleEdit.Logic.MergeManager;
 
 namespace Nikse.SubtitleEdit.Logic
 {
@@ -120,6 +123,112 @@ namespace Nikse.SubtitleEdit.Logic
 
             subtitle.Renumber();
             return subtitle;
+        }
+
+        public void MergeSelectedLines(ObservableCollection<SubtitleLineViewModel> inputSubtitle, List<SubtitleLineViewModel> selectedItems, BreakMode breakMode = BreakMode.Normal)
+        {
+            if (inputSubtitle.Count <= 0 || selectedItems.Count <= 1)
+            {
+                return;
+            }
+
+           // var subtitle = new Subtitle(inputSubtitle, false);
+            var sb = new StringBuilder();
+            var deleteIndices = new List<int>();
+            var first = true;
+            var firstIndex = 0;
+            double endMilliseconds = 0;
+            var next = 0;
+            foreach (var selectedItem in selectedItems)
+            {
+                var index = inputSubtitle.IndexOf(selectedItem);
+                if (first)
+                {
+                    firstIndex = index;
+                    next = firstIndex + 1;
+                    first = !first;
+                }
+                else
+                {
+                    deleteIndices.Add(index);
+                    if (next != index)
+                    {
+                        return;
+                    }
+
+                    next++;
+                }
+
+                var continuationStyle = Configuration.Settings.General.ContinuationStyle;
+                if (continuationStyle != ContinuationStyle.None)
+                {
+                    var continuationProfile = ContinuationUtilities.GetContinuationProfile(continuationStyle);
+                    if (next < firstIndex + selectedItems.Count)
+                    {
+                        var mergeResult = ContinuationUtilities.MergeHelper(inputSubtitle[index].Text, inputSubtitle[index + 1].Text, continuationProfile, inputSubtitle.AutoDetectGoogleLanguage());
+                        inputSubtitle[index].Text = mergeResult.Item1;
+                        inputSubtitle[index + 1].Text = mergeResult.Item2;
+                    }
+                }
+                var addText = inputSubtitle[index].Text;
+
+                if (firstIndex != index)
+                {
+                    // addText = RemoveAssStartAlignmentTag(addText);
+                }
+
+                if (breakMode == BreakMode.UnbreakNoSpace)
+                {
+                    sb.Append(addText);
+                }
+                else
+                {
+                    sb.AppendLine(addText);
+                }
+
+                endMilliseconds = inputSubtitle[index].EndTime.TotalMilliseconds;
+            }
+
+            var currentParagraph = inputSubtitle[firstIndex];
+            var text = sb.ToString().TrimEnd();
+            text = HtmlUtil.FixInvalidItalicTags(text);
+            //text = FixAssaTagsAfterMerge(text);
+            //text = ChangeAllLinesTagsToSingleTag(text, "i");
+            //text = ChangeAllLinesTagsToSingleTag(text, "b");
+            //text = ChangeAllLinesTagsToSingleTag(text, "u");
+            if (breakMode == BreakMode.Unbreak)
+            {
+                text = Utilities.UnbreakLine(text);
+            }
+            else if (breakMode == BreakMode.UnbreakNoSpace)
+            {
+                text = text.Replace(" " + Environment.NewLine + " ", string.Empty)
+                    .Replace(Environment.NewLine + " ", string.Empty)
+                    .Replace(" " + Environment.NewLine, string.Empty)
+                    .Replace(Environment.NewLine, string.Empty);
+            }
+            else
+            {
+                text = Utilities.AutoBreakLine(text, inputSubtitle.AutoDetectGoogleLanguage());
+            }
+
+            currentParagraph.Text = text;
+
+            //display time
+            currentParagraph.EndTime = TimeSpan.FromMilliseconds(endMilliseconds);
+
+            var nextParagraph = inputSubtitle.GetOrNull(next);
+            if (nextParagraph != null && currentParagraph.EndTime.TotalMilliseconds > nextParagraph.StartTime.TotalMilliseconds && currentParagraph.StartTime.TotalMilliseconds < nextParagraph.StartTime.TotalMilliseconds)
+            {
+                currentParagraph.EndTime = TimeSpan.FromMilliseconds(nextParagraph.StartTime.TotalMilliseconds - 1);
+            }
+
+            for (var i = deleteIndices.Count - 1; i >= 0; i--)
+            {
+                inputSubtitle.RemoveAt(deleteIndices[i]);
+            }
+
+            inputSubtitle.Renumber();
         }
     }
 }

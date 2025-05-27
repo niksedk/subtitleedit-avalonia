@@ -1522,7 +1522,7 @@ public partial class MainViewModel : ObservableObject
         if (selectedItem != null)
         {
             var index = Subtitles.IndexOf(selectedItem);
-            //            _mergeManager.MergeSelectedLines();
+            _mergeManager.MergeSelectedLines(Subtitles, SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList());
             Renumber();
             SelectAndScrollToRow(index - 1);
         }
@@ -1534,7 +1534,9 @@ public partial class MainViewModel : ObservableObject
         if (selectedItem != null)
         {
             var index = Subtitles.IndexOf(selectedItem);
-            //            _mergeManager.MergeSelectedLines();
+
+            _mergeManager.MergeSelectedLines(Subtitles, SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList());
+
             SelectAndScrollToRow(index - 1);
             Renumber();
         }
