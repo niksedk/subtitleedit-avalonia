@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
@@ -10,15 +11,15 @@ public class AdjustDurationWindow : Window
 {
     private AdjustDurationViewModel _vm;
     
-    private const int LabelWidth = 150;
+    private const int LabelMinWidth = 100;
     private const int NumericUpDownWidth = 150;
     
     public AdjustDurationWindow(AdjustDurationViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Adjust duration";
-        Width = 610;
-        Height = 340;
+        Width = 520;
+        Height = 230;
         CanResize = false;
 
         _vm = vm;
@@ -34,13 +35,12 @@ public class AdjustDurationWindow : Window
         var combo = new ComboBox
         {
             ItemsSource = vm.AdjustTypes,
-          //  SelectedValue = vm.SelectedLanguageAdjustType,
             VerticalAlignment = VerticalAlignment.Center,
             MinWidth = 180,
         };
         combo.Bind(ComboBox.SelectedValueProperty, new Binding
         {
-            Path = nameof(vm.SelectedLanguageAdjustType),
+            Path = nameof(vm.SelectedAdjustType),
             Mode = BindingMode.TwoWay,
             Source = vm,
         });
@@ -48,7 +48,15 @@ public class AdjustDurationWindow : Window
         var panelSeconds = MakeAdjustSeconds(vm);
         var panelPercent = MakeAdjustPercent(vm);
         var panelFixed = MakeAdjustFixed(vm);
-        var panelRecalculate = MakeAdjustRecalculate(vm); 
+        var panelRecalculate = MakeAdjustRecalculate(vm);
+
+        var labelInfo = new TextBlock
+        {
+            VerticalAlignment = VerticalAlignment.Bottom,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Text = "Note: Adjustments will not cause overlap",
+            Margin = new Thickness(10),
+        };
 
         var buttonPanel = UiUtil.MakeButtonBar(
             UiUtil.MakeButton("OK", vm.OkCommand),
@@ -108,6 +116,11 @@ public class AdjustDurationWindow : Window
         Grid.SetColumn(buttonPanel, 0);
         Grid.SetColumnSpan(buttonPanel, 2);
 
+        grid.Children.Add(labelInfo);
+        Grid.SetRow(labelInfo, 2);
+        Grid.SetColumn(labelInfo, 0);
+        Grid.SetColumnSpan(labelInfo, 2);
+
         Content = grid;
         
         Activated += delegate { Focus(); }; // hack to make OnKeyDown work
@@ -119,7 +132,7 @@ public class AdjustDurationWindow : Window
         {
             Text = "Seconds",
             VerticalAlignment = VerticalAlignment.Center,
-            Width = LabelWidth,
+            MinWidth = LabelMinWidth,
         };
         var numericUpDownSeconds = new NumericUpDown
         {
@@ -147,7 +160,7 @@ public class AdjustDurationWindow : Window
         };
         panel.Bind(StackPanel.IsVisibleProperty, new Binding()
         {
-            Path = $"{nameof(vm.SelectedLanguageAdjustType)}.{nameof(AdjustDurationDisplay.IsSecondsVisible)}",
+            Path = $"{nameof(vm.SelectedAdjustType)}.{nameof(AdjustDurationDisplay.IsSecondsVisible)}",
             Source = vm,
             Mode = BindingMode.TwoWay,
         });
@@ -161,7 +174,7 @@ public class AdjustDurationWindow : Window
         {
             Text = "Percent",
             VerticalAlignment = VerticalAlignment.Center,
-            Width = LabelWidth,
+            MinWidth = LabelMinWidth,
         };
         var numericUpDownSeconds = new NumericUpDown
         {
@@ -189,7 +202,7 @@ public class AdjustDurationWindow : Window
         };
         panel.Bind(StackPanel.IsVisibleProperty, new Binding
         {
-            Path = $"{nameof(vm.SelectedLanguageAdjustType)}.{nameof(AdjustDurationDisplay.IsPercentVisible)}",
+            Path = $"{nameof(vm.SelectedAdjustType)}.{nameof(AdjustDurationDisplay.IsPercentVisible)}",
             Source = vm,
             Mode = BindingMode.TwoWay,
         });
@@ -204,7 +217,7 @@ public class AdjustDurationWindow : Window
         {
             Text = "Fixed seconds",
             VerticalAlignment = VerticalAlignment.Center,
-            Width = LabelWidth,
+            MinWidth = LabelMinWidth,
         };
         var numericUpDownSeconds = new NumericUpDown
         {
@@ -217,7 +230,7 @@ public class AdjustDurationWindow : Window
         {
             Mode = BindingMode.TwoWay,
             Source = vm,
-            Path = nameof(vm.AdjustPercent),
+            Path = nameof(vm.AdjustFixed),
         });
         
         var panel = new StackPanel
@@ -233,7 +246,7 @@ public class AdjustDurationWindow : Window
         };
         panel.Bind(StackPanel.IsVisibleProperty, new Binding
         {
-            Path = $"{nameof(vm.SelectedLanguageAdjustType)}.{nameof(AdjustDurationDisplay.IsFixedVisible)}",
+            Path = $"{nameof(vm.SelectedAdjustType)}.{nameof(AdjustDurationDisplay.IsFixedVisible)}",
             Source = vm,
             Mode = BindingMode.TwoWay,
         });
@@ -246,7 +259,6 @@ public class AdjustDurationWindow : Window
         {
             Text = "Max characters per second",
             VerticalAlignment = VerticalAlignment.Center,
-            Width = LabelWidth,
         };
         var numericUpDownMax = new NumericUpDown
         {
@@ -254,6 +266,7 @@ public class AdjustDurationWindow : Window
             Maximum = 1000,
             Width = NumericUpDownWidth,
             VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(10,0,0,0),
         };
         numericUpDownMax.Bind(NumericUpDown.ValueProperty, new Binding
         {
@@ -266,7 +279,6 @@ public class AdjustDurationWindow : Window
         {
             Text = "Optimal characters per second",
             VerticalAlignment = VerticalAlignment.Center,
-            Width = LabelWidth,
         };
         var numericUpDownOptimal = new NumericUpDown
         {
@@ -274,6 +286,7 @@ public class AdjustDurationWindow : Window
             Maximum = 1000,
             Width = NumericUpDownWidth,
             VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(10,0,0,0),
         };
         numericUpDownOptimal.Bind(NumericUpDown.ValueProperty, new Binding
         {
@@ -296,6 +309,7 @@ public class AdjustDurationWindow : Window
             },
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center,
+            RowSpacing = 10,
         };
         
         grid.Children.Add(textBlockMax);
@@ -314,7 +328,7 @@ public class AdjustDurationWindow : Window
 
         grid.Bind(Grid.IsVisibleProperty, new Binding
         {
-            Path = $"{nameof(vm.SelectedLanguageAdjustType)}.{nameof(AdjustDurationDisplay.IsRecalculateVisible)}",
+            Path = $"{nameof(vm.SelectedAdjustType)}.{nameof(AdjustDurationDisplay.IsRecalculateVisible)}",
             Source = vm,
             Mode = BindingMode.TwoWay,
         });
