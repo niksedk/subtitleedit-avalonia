@@ -1522,7 +1522,8 @@ public partial class MainViewModel : ObservableObject
         if (selectedItem != null)
         {
             var index = Subtitles.IndexOf(selectedItem);
-            _mergeManager.MergeSelectedLines(Subtitles, SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList());
+            _mergeManager.MergeSelectedLines(Subtitles,
+                SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList());
             Renumber();
             SelectAndScrollToRow(index - 1);
         }
@@ -1535,7 +1536,8 @@ public partial class MainViewModel : ObservableObject
         {
             var index = Subtitles.IndexOf(selectedItem);
 
-            _mergeManager.MergeSelectedLines(Subtitles, SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList());
+            _mergeManager.MergeSelectedLines(Subtitles,
+                SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList());
 
             SelectAndScrollToRow(index - 1);
             Renumber();
@@ -1880,7 +1882,16 @@ public partial class MainViewModel : ObservableObject
                 Math.Abs(p.StartTime.TotalMilliseconds - e.Paragraph.StartTime.TotalMilliseconds) < 0.01);
             if (p != null)
             {
-                SubtitleGrid.SelectedItems.Add(p);
+                if (SubtitleGrid.SelectedItems.Contains(p))
+                {
+                    SubtitleGrid.SelectedItems.Remove(p);
+                }
+                else
+                {
+                    SubtitleGrid.SelectedItems.Add(p);
+                }
+
+                _updateAudioVisualizer = true;
             }
         }
     }
