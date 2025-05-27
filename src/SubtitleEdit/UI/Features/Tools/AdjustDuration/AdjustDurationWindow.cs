@@ -18,8 +18,8 @@ public class AdjustDurationWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Adjust duration";
-        Width = 520;
-        Height = 230;
+        Width = 540;
+        Height = 240;
         CanResize = false;
 
         _vm = vm;
@@ -30,6 +30,7 @@ public class AdjustDurationWindow : Window
         {
             Content = "Adjust duration by",
             VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(10, 0, 0, 0),
         };
 
         var combo = new ComboBox
@@ -55,7 +56,7 @@ public class AdjustDurationWindow : Window
             VerticalAlignment = VerticalAlignment.Bottom,
             HorizontalAlignment = HorizontalAlignment.Left,
             Text = "Note: Adjustments will not cause overlap",
-            Margin = new Thickness(10),
+            Margin = new Thickness(10,10,10,15),
         };
 
         var buttonPanel = UiUtil.MakeButtonBar(
@@ -152,6 +153,7 @@ public class AdjustDurationWindow : Window
         {
             Orientation = Orientation.Horizontal,
             VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(10, 0, 0, 0),
             Children =
             {
                 textBlockSeconds,
@@ -194,6 +196,7 @@ public class AdjustDurationWindow : Window
         {
             Orientation = Orientation.Horizontal,
             VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(10, 0, 0, 0),
             Children =
             {
                 textBlockSeconds,
@@ -237,7 +240,7 @@ public class AdjustDurationWindow : Window
         {
             Orientation = Orientation.Horizontal,
             VerticalAlignment = VerticalAlignment.Center,
-           // IsVisible = vm.SelectedLanguageAdjustType.IsFixedVisible,
+            Margin = new Thickness(10, 0, 0, 0),
             Children =
             {
                 textBlockSeconds,
@@ -310,6 +313,7 @@ public class AdjustDurationWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center,
             RowSpacing = 10,
+            Margin = new Thickness(10, 0, 0, 0),
         };
         
         grid.Children.Add(textBlockMax);

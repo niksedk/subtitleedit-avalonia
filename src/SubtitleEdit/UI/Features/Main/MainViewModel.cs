@@ -417,6 +417,8 @@ public partial class MainViewModel : ObservableObject
         if (result.OkPressed)
         {
             MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Adjust durations"));
+            result.Adjust(Subtitles);
+            _updateAudioVisualizer = true;
         }
 
         _shortcutManager.ClearKeys();
