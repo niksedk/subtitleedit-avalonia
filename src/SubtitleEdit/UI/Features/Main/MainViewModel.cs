@@ -603,12 +603,21 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task CommandShowAutoTranslate()
     {
-        var viewModel = await _windowService.ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(Window,
+        var result = await _windowService.ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(Window,
             viewModel => { viewModel.Initialize(GetUpdateSubtitle()); });
 
-        if (viewModel.OkPressed)
+        if (result.OkPressed)
         {
-            Console.WriteLine("User confirmed the action");
+            MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Auto-translate"));
+            for (var i = 0; i < Subtitles.Count; i++)
+            {
+                if (result.Rows.Count <= i)
+                {
+                    break;
+                }
+                
+                Subtitles[i].Text = result.Rows[i].TranslatedText;
+            }
         }
 
         _shortcutManager.ClearKeys();
@@ -684,42 +693,49 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void InsertLineBefore()
     {
+        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Insert before"));
         InsertBeforeSelectedItem();
     }
 
     [RelayCommand]
     private void InsertLineAfter()
     {
+        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Insert after"));
         InsertAfterSelectedItem();
     }
 
     [RelayCommand]
     private void MergeWithLineBefore()
     {
+        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Merge lines"));
         MergeLineBefore();
     }
 
     [RelayCommand]
     private void MergeWithLineAfter()
     {
+        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Merge lines"));
         MergeLineAfter();
     }
 
     [RelayCommand]
     private void MergeSelectedLines()
     {
+        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Merge lines"));
         MergeLinesSelected();
     }
 
     [RelayCommand]
     private void MergeSelectedLinesDialog()
     {
+        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Merge lines as dialog"));
         MergeLinesSelectedAsDialog();
     }
 
     [RelayCommand]
     private void ToggleLinesItalic()
     {
+        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Toggle italic"));
         ToggleItalic();
         _shortcutManager.ClearKeys();
     }
@@ -727,6 +743,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void ToggleLinesBold()
     {
+        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Toggle bold"));
         ToggleBold();
         _shortcutManager.ClearKeys();
     }
@@ -739,6 +756,7 @@ public partial class MainViewModel : ObservableObject
 
         if (viewModel.OkPressed && !string.IsNullOrEmpty(viewModel.RestoreFileName))
         {
+            MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Restore auto-backup"));
             await SubtitleOpen(viewModel.RestoreFileName);
         }
 
@@ -913,6 +931,7 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
+        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Unbreak line"));
         s.Text = Utilities.UnbreakLine(s.Text);
         _shortcutManager.ClearKeys();
     }
@@ -926,6 +945,7 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
+        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Auto break line"));
         s.Text = Utilities.AutoBreakLine(s.Text);
         _shortcutManager.ClearKeys();
     }
@@ -1030,7 +1050,12 @@ public partial class MainViewModel : ObservableObject
 
     private void RestoreUndoRedoState(UndoRedoItem undoRedoObject)
     {
-        Subtitles = new ObservableCollection<SubtitleLineViewModel>(undoRedoObject.Subtitles);
+        Subtitles.Clear();
+        foreach (var p in undoRedoObject.Subtitles)
+        {
+            Subtitles.Add(p);
+        }
+        
         _subtitleFileName = undoRedoObject.SubtitleFileName;
         SelectAndScrollToRow(undoRedoObject.SelectedLines.First());
     }
@@ -1497,6 +1522,7 @@ public partial class MainViewModel : ObservableObject
             _shortcutManager.ClearKeys();
         }
 
+        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, $"Delete {selectedItems.Count} lines"));
         foreach (var item in selectedItems)
         {
             Subtitles.Remove(item);
@@ -1505,7 +1531,7 @@ public partial class MainViewModel : ObservableObject
         Renumber();
     }
 
-    public void InsertBeforeSelectedItem()
+    private void InsertBeforeSelectedItem()
     {
         var selectedItem = SelectedSubtitle;
         if (selectedItem != null)
@@ -1517,7 +1543,7 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    public void InsertAfterSelectedItem()
+    private void InsertAfterSelectedItem()
     {
         var selectedItem = SelectedSubtitle;
         if (selectedItem != null)
@@ -1537,7 +1563,7 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    public void MergeLineBefore()
+    private void MergeLineBefore()
     {
         var selectedItem = SelectedSubtitle;
         if (selectedItem != null)
@@ -1549,7 +1575,7 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    public void MergeLineAfter()
+    private void MergeLineAfter()
     {
         var selectedItem = SelectedSubtitle;
         if (selectedItem != null)
@@ -1562,7 +1588,7 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    public void MergeLinesSelected()
+    private void MergeLinesSelected()
     {
         var selectedItem = SelectedSubtitle;
         if (selectedItem != null)
@@ -1577,7 +1603,7 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    public void MergeLinesSelectedAsDialog()
+    private void MergeLinesSelectedAsDialog()
     {
         var selectedItem = SelectedSubtitle;
         if (selectedItem != null)
