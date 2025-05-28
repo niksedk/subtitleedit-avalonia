@@ -13,26 +13,52 @@ public class ChangeFrameRateWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Change frame rate";
-        Width = 310;
-        Height = 140;
+        Width = 510;
+        Height = 240;
         CanResize = false;
 
         _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
-        var label = new Label
+        var labelFromFrameRate = new Label
         {
-            Content = "Language",
+            Content = "From frame rate",
             VerticalAlignment = VerticalAlignment.Center,
         };
 
-        var combo = new ComboBox
+        var comboFromFrameRate = new ComboBox
         {
-            ItemsSource = vm.Languages,
-            SelectedValue = vm.SelectedLanguage,
+            ItemsSource = vm.FromFrameRates,
+            SelectedValue = vm.SelectedFromFrameRate,
             VerticalAlignment = VerticalAlignment.Center,
-            MinWidth = 180,
+            MinWidth = 80,
+        };
+
+        var labelToFrameRate = new Label
+        {
+            Content = "To frame rate",
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+
+        var comboToFrameRate = new ComboBox
+        {
+            ItemsSource = vm.ToFrameRates,
+            SelectedValue = vm.SelectedToFrameRate,
+            VerticalAlignment = VerticalAlignment.Center,
+            MinWidth = 80,
+        };
+
+        var panelFromFrameRate = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Children =
+            {
+                labelFromFrameRate,
+                comboFromFrameRate,
+                labelToFrameRate,
+                comboToFrameRate
+            }
         };
 
         var buttonPanel = UiUtil.MakeButtonBar(
@@ -46,10 +72,10 @@ public class ChangeFrameRateWindow : Window
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
@@ -59,18 +85,17 @@ public class ChangeFrameRateWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Children.Add(label);
-        Grid.SetRow(label, 0);
-        Grid.SetColumn(label, 0);
-
-        grid.Children.Add(combo);
-        Grid.SetRow(combo, 0);
-        Grid.SetColumn(combo, 1);
+        grid.Children.Add(panelFromFrameRate);
+        Grid.SetRow(panelFromFrameRate, 0);
+        Grid.SetColumn(panelFromFrameRate, 0);
 
         grid.Children.Add(buttonPanel);
         Grid.SetRow(buttonPanel, 1);
         Grid.SetColumn(buttonPanel, 0);
-        Grid.SetColumnSpan(buttonPanel, 2);
+
+        grid.Children.Add(buttonPanel);
+        Grid.SetRow(buttonPanel, 2);
+        Grid.SetColumn(buttonPanel, 0);
 
         Content = grid;
         

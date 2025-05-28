@@ -7,8 +7,11 @@ namespace Nikse.SubtitleEdit.Features.Sync.ChangeFrameRate;
 
 public partial class ChangeFrameRateViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<string> languages;
-    [ObservableProperty] private string selectedLanguage;
+    [ObservableProperty] private ObservableCollection<double> _fromFrameRates;
+    [ObservableProperty] private double _selectedFromFrameRate;
+    
+    [ObservableProperty] private ObservableCollection<double> _toFrameRates;
+    [ObservableProperty] private double _selectedToFrameRate;
     
     public ChangeFrameRateWindow? Window { get; set; }
     
@@ -16,8 +19,11 @@ public partial class ChangeFrameRateViewModel : ObservableObject
 
     public ChangeFrameRateViewModel()
     {
-        Languages = new ObservableCollection<string> { "English", "Danish", "Spanish" };
-        SelectedLanguage = Languages[0];
+    }
+    
+    [RelayCommand]                   
+    private void SwitchFrameRates() 
+    {
     }
     
     [RelayCommand]                   
