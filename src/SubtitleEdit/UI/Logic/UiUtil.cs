@@ -17,7 +17,7 @@ namespace Nikse.SubtitleEdit.Logic;
 
 public static class UiUtil
 {
-    public const int WindowMarginWidth = 10;
+    public const int WindowMarginWidth = 20;
     public const int CornerRadius = 4;
     public const int SplitterWidthOrHeight = 4;
 
@@ -479,8 +479,13 @@ public static class UiUtil
 
     public static StackPanel WithAlignmentLeft(this StackPanel control)
     {
-        var m = control.Margin;
         control.HorizontalAlignment = HorizontalAlignment.Left;
+        return control;
+    }
+
+    public static StackPanel WithAlignmentTop(this StackPanel control)
+    {
+        control.VerticalAlignment = VerticalAlignment.Top;
         return control;
     }
 
@@ -495,6 +500,13 @@ public static class UiUtil
     {
         var m = control.Margin;
         control.Margin = new Thickness(m.Left, marginTop, m.Right, m.Bottom);
+        return control;
+    }
+
+    public static Button WithMarginLeft(this Button control, int marginLeft)
+    {
+        var m = control.Margin;
+        control.Margin = new Thickness(marginLeft, m.Top, m.Right, m.Bottom);
         return control;
     }
 

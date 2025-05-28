@@ -18,6 +18,8 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     
     private double _totalAdjustment;
     
+    private IAdjustCallback? _adjustCallback;
+    
     public AdjustAllTimesWindow? Window { get; set; }
     
     public bool OkPressed { get; private set; }
@@ -27,6 +29,11 @@ public partial class AdjustAllTimesViewModel : ObservableObject
         TotalAdjustmentInfo = string.Empty;
 
         LoadSettings();
+    }
+
+    public void Initialize(IAdjustCallback adjustCallback)
+    {
+        _adjustCallback = adjustCallback;
     }
 
     private void LoadSettings()
@@ -76,9 +83,17 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     }
     
     [RelayCommand]                   
+    private void Apply()
+    {
+        SaveSettings();
+        InvokeAdjustCallback();
+    }
+
+    [RelayCommand]                   
     private void Ok() 
     {
-        SaveSettings();   
+        SaveSettings();  
+        InvokeAdjustCallback();
         OkPressed = true;
         Window?.Close();
     }
@@ -87,6 +102,17 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     private void Cancel() 
     {
         Window?.Close();
+    }
+    
+    private void InvokeAdjustCallback()
+    {
+        _adjustCallback?.Adjust(
+            TimeSpan.FromSeconds(_totalAdjustment), 
+            AdjustAll, 
+            AdjustSelectedLines, 
+            AdjustSelectedLinesAndForward);
+        
+        _totalAdjustment = 0; // Reset after applying
     }
 
     internal void OnKeyDown(KeyEventArgs e)

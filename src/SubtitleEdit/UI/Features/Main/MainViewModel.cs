@@ -53,7 +53,7 @@ using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
-public partial class MainViewModel : ObservableObject
+public partial class MainViewModel : ObservableObject, IAdjustCallback
 {
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _subtitles;
     [ObservableProperty] private SubtitleLineViewModel? _selectedSubtitle;
@@ -578,7 +578,10 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowSyncAdjustAllTimes()
     {
-        var result = await _windowService.ShowDialogAsync<AdjustAllTimesWindow, AdjustAllTimesViewModel>(Window, vm => { });
+        var result = await _windowService.ShowDialogAsync<AdjustAllTimesWindow, AdjustAllTimesViewModel>(Window, vm =>
+        {
+            vm.Initialize(this);
+        });
         
         if (result.OkPressed)
         {
@@ -1955,5 +1958,52 @@ public partial class MainViewModel : ObservableObject
                 _updateAudioVisualizer = true;
             }
         }
+    }
+
+    public void Adjust(TimeSpan adjustment, bool adjustAll, bool adjustSelectedLines, bool adjustSelectedLinesAndForward)
+    {
+        if (Math.Abs(adjustment.TotalMilliseconds) < 0.01)
+        {
+            return;
+        }
+        
+        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Adjust times"));
+
+        if (adjustSelectedLines)
+        {
+            foreach (SubtitleLineViewModel p in SubtitleGrid.SelectedItems)
+            {
+                p.StartTime += adjustment;
+                p.EndTime += adjustment;
+                p.UpdateDuration();
+            }
+        }
+        else if (adjustSelectedLinesAndForward)
+        {
+            var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+            if (selectedItems.Count > 0)
+            {
+                var first = Subtitles.OrderBy(p=> Subtitles.IndexOf(p)).First();
+                var firstSelectedIndex = Subtitles.IndexOf(first);
+                for (var i = firstSelectedIndex; i < Subtitles.Count; i++)
+                {
+                    var p = Subtitles[i];
+                    p.StartTime += adjustment;
+                    p.EndTime += adjustment;
+                    p.UpdateDuration();
+                }
+            }
+        }
+        else if (adjustAll)
+        {
+            foreach (var p in Subtitles)
+            {
+                p.StartTime += adjustment;
+                p.EndTime += adjustment;
+                p.UpdateDuration();
+            }
+        }
+        
+        _updateAudioVisualizer = true;
     }
 }

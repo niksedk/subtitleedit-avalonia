@@ -16,7 +16,7 @@ public class AdjustAllTimesWindow : Window
         Icon = UiUtil.GetSeIcon();
         Title = "Adjust all times (show earlier/later)";
         Width = 510;
-        Height = 340;
+        Height = 275;
         CanResize = false;
 
         _vm = vm;
@@ -46,6 +46,8 @@ public class AdjustAllTimesWindow : Window
             {
                 label,
                 timeCodeUpDown,
+                UiUtil.MakeButton("Show earlier", vm.ShowEarlierCommand).WithMarginLeft(15),
+                UiUtil.MakeButton("Show later", vm.ShowLaterCommand),
             },
         };
 
@@ -54,12 +56,6 @@ public class AdjustAllTimesWindow : Window
             VerticalAlignment = VerticalAlignment.Center,
         };
         labelInfo.Bind(TextBlock.TextProperty, new Binding(nameof(vm.TotalAdjustmentInfo)));
-
-        var panelShowEarlierOrLater = UiUtil.MakeButtonBar(
-            UiUtil.MakeButton("Show earlier", vm.ShowEarlierCommand),
-            UiUtil.MakeButton("Show later", vm.ShowLaterCommand),
-            labelInfo
-        ).WithAlignmentLeft();
 
         var panelRadioButtons = new StackPanel
         {
@@ -84,6 +80,7 @@ public class AdjustAllTimesWindow : Window
             }
         };
         var buttonPanel = UiUtil.MakeButtonBar(
+            UiUtil.MakeButton("Apply", vm.ApplyCommand),
             UiUtil.MakeButton("OK", vm.OkCommand),
             UiUtil.MakeButton("Cancel", vm.CancelCommand)
         );
@@ -117,8 +114,8 @@ public class AdjustAllTimesWindow : Window
         grid.Children.Add(panelAdjustment);
         Grid.SetRow(panelAdjustment, 0);
 
-        grid.Children.Add(panelShowEarlierOrLater);
-        Grid.SetRow(panelShowEarlierOrLater, 1);
+        // grid.Children.Add(panelShowEarlierOrLater);
+        // Grid.SetRow(panelShowEarlierOrLater, 1);
 
         grid.Children.Add(panelRadioButtons);
         Grid.SetRow(panelRadioButtons, 2);
