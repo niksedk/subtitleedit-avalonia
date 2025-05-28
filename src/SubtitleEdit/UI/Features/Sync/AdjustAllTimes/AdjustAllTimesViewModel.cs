@@ -112,6 +112,7 @@ public partial class AdjustAllTimesViewModel : ObservableObject
             AdjustSelectedLines, 
             AdjustSelectedLinesAndForward);
         
+        TotalAdjustmentInfo = string.Empty;
         _totalAdjustment = 0; // Reset after applying
     }
 

@@ -17,7 +17,7 @@ namespace Nikse.SubtitleEdit.Logic;
 
 public static class UiUtil
 {
-    public const int WindowMarginWidth = 20;
+    public const int WindowMarginWidth = 12;
     public const int CornerRadius = 4;
     public const int SplitterWidthOrHeight = 4;
 
@@ -554,7 +554,7 @@ public static class UiUtil
         {
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Right,
-            Margin = new Thickness(WindowMarginWidth, WindowMarginWidth * 2, WindowMarginWidth, WindowMarginWidth),
+            Margin = new Thickness(10, 20, 10, 10),
             Spacing = 0,
         };
 

@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
@@ -16,7 +17,7 @@ public class AdjustAllTimesWindow : Window
         Icon = UiUtil.GetSeIcon();
         Title = "Adjust all times (show earlier/later)";
         Width = 510;
-        Height = 275;
+        Height = 300;
         CanResize = false;
 
         _vm = vm;
@@ -54,6 +55,7 @@ public class AdjustAllTimesWindow : Window
         var labelInfo = new TextBlock
         {
             VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0,10, 0, 20)
         };
         labelInfo.Bind(TextBlock.TextProperty, new Binding(nameof(vm.TotalAdjustmentInfo)));
 
@@ -114,8 +116,8 @@ public class AdjustAllTimesWindow : Window
         grid.Children.Add(panelAdjustment);
         Grid.SetRow(panelAdjustment, 0);
 
-        // grid.Children.Add(panelShowEarlierOrLater);
-        // Grid.SetRow(panelShowEarlierOrLater, 1);
+        grid.Children.Add(labelInfo);
+        Grid.SetRow(labelInfo, 1);
 
         grid.Children.Add(panelRadioButtons);
         Grid.SetRow(panelRadioButtons, 2);
