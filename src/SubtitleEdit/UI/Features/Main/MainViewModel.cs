@@ -48,6 +48,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -145,10 +146,45 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback
         StatusTextLeft = string.Empty;
         StatusTextRight = string.Empty;
 
+        InitializeLibMpv();
         LoadShortcuts();
         _isWaveformToolbarVisible = Se.Settings.Waveform.ShowToolbar;
         StartTitleTimer();
         _autoBackupService.StartAutoBackup(this);
+    }
+
+    private static void InitializeLibMpv()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            var newFileName = DownloadLibMpvViewModel.GetFallbackLibMpvFileName();
+            if (string.IsNullOrEmpty(Se.Settings.General.LibMpvPath) || File.Exists(newFileName))
+            {
+                var libMpvFileName = DownloadLibMpvViewModel.GetLibMpvFileName();
+                if (File.Exists(newFileName))
+                {
+                    try
+                    {
+                        if (File.Exists(libMpvFileName))
+                        {
+                            File.Delete(libMpvFileName);
+                        }
+                        File.Move(newFileName, libMpvFileName);
+
+                        Directory.Delete(Path.GetDirectoryName(newFileName)!);
+                    }
+                    catch
+                    {
+                        // ignore
+                    }
+                }
+
+                if (File.Exists(libMpvFileName))
+                {
+                    Se.Settings.General.LibMpvPath = libMpvFileName;
+                }
+            }
+        }
     }
 
     private void LoadShortcuts()
@@ -1347,6 +1383,25 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback
 
     internal void OnLoaded()
     {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && string.IsNullOrEmpty(Se.Settings.General.LibMpvPath))
+        {
+            Dispatcher.UIThread.Post(async () =>
+            {
+                var answer = await MessageBox.Show(
+                    Window!,
+                    "Download mpv?",
+                    $"{Environment.NewLine}\"Subtitle Edit\" requires mpv to play video/audio.{Environment.NewLine}{Environment.NewLine}Download and use mpv?",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Question);
+
+                if (answer != MessageBoxResult.Yes)
+                {
+                    return;
+                }
+
+            }, DispatcherPriority.Background);
+        }
+
         if (Se.Settings.File.ShowRecentFiles)
         {
             var first = Se.Settings.File.RecentFiles.FirstOrDefault();

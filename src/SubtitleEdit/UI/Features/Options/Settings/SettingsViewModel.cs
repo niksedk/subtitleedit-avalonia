@@ -1,23 +1,24 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 using Avalonia;
-using Avalonia.Animation.Easings;
 using Avalonia.Animation;
+using Avalonia.Animation.Easings;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
-using Nikse.SubtitleEdit.Logic.Config;
-using Avalonia.Media;
-using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Features.Common;
+using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
 
@@ -37,13 +38,13 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _autoBackupOn;
     [ObservableProperty] private int _autoBackupIntervalMinutes;
     [ObservableProperty] private int _autoBackupDeleteAfterMonths;
-    
+
     [ObservableProperty] private ObservableCollection<string> _defaultSubtitleFormats;
     [ObservableProperty] private string _selectedDefaultSubtitleFormat;
-    
+
     [ObservableProperty] private ObservableCollection<string> _saveSubtitleFormats;
     [ObservableProperty] private string _selectedSaveSubtitleFormat;
-    
+
     [ObservableProperty] private bool _showToolbarNew;
     [ObservableProperty] private bool _showToolbarOpen;
     [ObservableProperty] private bool _showToolbarSave;
@@ -67,14 +68,17 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty] private ObservableCollection<VideoPlayerItem> _videoPlayers;
     [ObservableProperty] private VideoPlayerItem _selectedVideoPlayer;
-    [ObservableProperty] private bool _showStopButton;       
-    [ObservableProperty] private bool _showFullscreenButton; 
+    [ObservableProperty] private bool _showStopButton;
+    [ObservableProperty] private bool _showFullscreenButton;
     [ObservableProperty] private bool _autoOpenVideoFile;
 
     [ObservableProperty] private bool _waveformDrawGridLines;
     [ObservableProperty] private bool _waveformCenterVideoPosition;
     [ObservableProperty] private bool _waveformShowToolbar;
     [ObservableProperty] private bool _waveformFocusTextboxAfterInsertNew;
+    [ObservableProperty] private string _libMpvPath;
+    [ObservableProperty] private string _libMpvStatus;
+    [ObservableProperty] private bool _isLibMpvDownloadVisible;
     [ObservableProperty] private string _ffmpegPath;
     [ObservableProperty] private string _ffmpegStatus;
     [ObservableProperty] private Color _waveformColor;
@@ -114,8 +118,8 @@ public partial class SettingsViewModel : ObservableObject
 
         Themes = ["Light", "Dark"];
         SelectedTheme = Themes[0];
-        
-        ScrollView = new ScrollViewer();    
+
+        ScrollView = new ScrollViewer();
         Sections = new List<SettingsSection>();
 
         VideoPlayers = new ObservableCollection<VideoPlayerItem>(VideoPlayerItem.ListVideoPlayerItem());
@@ -130,7 +134,7 @@ public partial class SettingsViewModel : ObservableObject
             {
                 continue;
             }
-            
+
             defaultSubtitleFormats.Add(format.FriendlyName);
             saveSubtitleFormats.Add(format.FriendlyName);
         }
@@ -143,6 +147,10 @@ public partial class SettingsViewModel : ObservableObject
 
         FfmpegStatus = "Not installed";
         FfmpegPath = string.Empty;
+
+        LibMpvStatus = "Not installed";
+        LibMpvPath = string.Empty;
+        IsLibMpvDownloadVisible = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
         LoadSettings();
     }
@@ -166,7 +174,7 @@ public partial class SettingsViewModel : ObservableObject
         AutoBackupOn = general.AutoBackupOn;
         AutoBackupIntervalMinutes = general.AutoBackupIntervalMinutes;
         AutoBackupDeleteAfterMonths = general.AutoBackupDeleteAfterMonths;
-        
+
         SelectedTheme = appearance.Theme;
         ShowToolbarNew = appearance.ToolbarShowFileNew;
         ShowToolbarOpen = appearance.ToolbarShowFileOpen;
@@ -210,14 +218,16 @@ public partial class SettingsViewModel : ObservableObject
         AutoOpenVideoFile = video.AutoOpen;
 
         FfmpegPath = Se.Settings.General.FfmpegPath;
+        LibMpvPath = Se.Settings.General.LibMpvPath;
         SetFfmpegStatus();
-    }   
+        SetLibMpvStatus();
+    }
 
     private void SaveSettings()
     {
         var general = Se.Settings.General;
         var appearance = Se.Settings.Appearance;
-        var video = Se.Settings.Video;   
+        var video = Se.Settings.Video;
 
         general.SubtitleLineMaximumLength = SingleLineMaxLength;
         general.SubtitleOptimalCharactersPerSeconds = OptimalCharsPerSec;
@@ -271,6 +281,7 @@ public partial class SettingsViewModel : ObservableObject
         video.AutoOpen = AutoOpenVideoFile;
 
         general.FfmpegPath = FfmpegPath;
+        general.LibMpvPath = LibMpvPath;
 
         Se.SaveSettings();
     }
@@ -286,6 +297,19 @@ public partial class SettingsViewModel : ObservableObject
             FfmpegStatus = "Not installed";
         }
     }
+
+    private void SetLibMpvStatus()
+    {
+        if (!string.IsNullOrEmpty(LibMpvPath) && File.Exists(LibMpvPath))
+        {
+            LibMpvStatus = "Installed";
+        }
+        else
+        {
+            LibMpvStatus = "Not installed";
+        }
+    }
+
 
     public async void ScrollElementIntoView(ScrollViewer scrollViewer, Control target)
     {
@@ -379,6 +403,19 @@ public partial class SettingsViewModel : ObservableObject
 
         FfmpegPath = vm.FfmpegFileName;
         SetFfmpegStatus();
+    }
+
+    [RelayCommand]
+    private async Task DownloadLibMpv()
+    {
+        var vm = await _windowService.ShowDialogAsync<DownloadLibMpvWindow, DownloadLibMpvViewModel>(Window!);
+        if (string.IsNullOrEmpty(vm.LibMpvFileName))
+        {
+            return;
+        }
+
+        LibMpvPath = vm.LibMpvFileName;
+        SetLibMpvStatus();
     }
 
     [RelayCommand]

@@ -6,7 +6,8 @@ namespace Nikse.SubtitleEdit.Logic.Config;
 public class SeGeneral
 {
     public int LayoutNumber { get; set; } = 0;
-    public string FfmpegPath { get; set; } = string.Empty;
+    public string FfmpegPath { get; set; }
+    public string LibMpvPath { get; set; }
     public bool UseTimeFormatHhMmSsFf { get; set; } = false;
     public double DefaultFrameRate { get; set; }
     public double CurrentFrameRate { get; set; }
@@ -47,6 +48,7 @@ public class SeGeneral
     {
         LayoutNumber = 0;
         FfmpegPath = string.Empty;
+        LibMpvPath = string.Empty;
         UseTimeFormatHhMmSsFf = false;
         DefaultFrameRate = 23.976;
         CurrentFrameRate = DefaultFrameRate;

@@ -226,6 +226,40 @@ public class SettingsPage : UserControl
                 MakeCheckboxSetting("Show stop button", nameof(_vm.ShowStopButton)),
                 MakeCheckboxSetting("Show fullscreen button", nameof(_vm.ShowFullscreenButton)),
                 MakeCheckboxSetting("Auto-open video file when opening subtitle", nameof(_vm.AutoOpenVideoFile)),
+                new SettingsItem("Download mpv", () => new StackPanel
+                {
+                    Children =
+                    {
+                        new StackPanel
+                        {
+                            Orientation = Orientation.Horizontal,
+                            Spacing = 10,
+                            Children =
+                            {
+                                UiUtil.MakeButton("Download", _vm.DownloadLibMpvCommand),
+                                new TextBlock
+                                {
+                                    DataContext = _vm,
+                                    [!TextBlock.TextProperty] = new Binding(nameof(_vm.LibMpvStatus)),
+                                    Margin = new Thickness(0, 0, 0, 0),
+                                    VerticalAlignment = VerticalAlignment.Center,
+                                    HorizontalAlignment = HorizontalAlignment.Left,
+                                }
+                            }
+                        },
+                        new TextBlock
+                        {
+                            DataContext = _vm,
+                            [!TextBlock.TextProperty] = new Binding(nameof(_vm.LibMpvPath)),
+                            Margin = new Thickness(10, 0, 0, 0),
+                            VerticalAlignment = VerticalAlignment.Center,
+                            Opacity = 0.5,
+                            FontSize = 10,
+                        }
+                    },
+                    [!StackPanel.IsVisibleProperty] = new Binding(nameof(_vm.IsLibMpvDownloadVisible)) { Source = _vm }    
+                }),
+
             ]),
 
             new SettingsSection("Waveform/spectrogram",

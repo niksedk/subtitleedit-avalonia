@@ -1,3 +1,10 @@
+using Avalonia.Input;
+using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Logic.Compression;
+using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Download;
 using System;
 using System.Globalization;
 using System.IO;
@@ -5,14 +12,6 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
-using Avalonia.Input;
-using Avalonia.Threading;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Logic;
-using Nikse.SubtitleEdit.Logic.Compression;
-using Nikse.SubtitleEdit.Logic.Config;
-using Nikse.SubtitleEdit.Logic.Download;
 using Timer = System.Timers.Timer;
 
 namespace Nikse.SubtitleEdit.Features.Common;
@@ -24,9 +23,9 @@ public partial class DownloadLibMpvViewModel : ObservableObject
     [ObservableProperty] private string _error;
 
     public DownloadLibMpvWindow? Window { get; set; }
-    public string FfmpegFileName { get; set; }
+    public string LibMpvFileName { get; set; }
 
-    private IFfmpegDownloadService _ffmpegDownloadService;
+    private ILibMpvDownloadService _libMpvDownloadService;
     private Task? _downloadTask;
     private readonly Timer _timer;
     private bool _done;
@@ -35,9 +34,9 @@ public partial class DownloadLibMpvViewModel : ObservableObject
 
     private readonly IZipUnpacker _zipUnpacker;
 
-    public DownloadLibMpvViewModel(IFfmpegDownloadService ffmpegDownloadService, IZipUnpacker zipUnpacker)
+    public DownloadLibMpvViewModel(ILibMpvDownloadService libMpvDownloadService, IZipUnpacker zipUnpacker)
     {
-        _ffmpegDownloadService = ffmpegDownloadService;
+        _libMpvDownloadService = libMpvDownloadService;
         _zipUnpacker = zipUnpacker;
 
         _cancellationTokenSource = new CancellationTokenSource();
@@ -46,7 +45,7 @@ public partial class DownloadLibMpvViewModel : ObservableObject
 
         StatusText = "Starting...";
         Error = string.Empty;
-        FfmpegFileName = string.Empty;
+        LibMpvFileName = string.Empty;
 
         _timer = new Timer(500);
         _timer.Elapsed += OnTimerOnElapsed;
@@ -76,21 +75,41 @@ public partial class DownloadLibMpvViewModel : ObservableObject
                     return;
                 }
 
-                var ffmpegFileName = GetFfmpegFileName();
+                var fileName = GetLibMpvFileName();
 
-                if (File.Exists(ffmpegFileName))
+                if (File.Exists(fileName))
                 {
-                    File.Delete(ffmpegFileName);
+                    try
+                    {
+                        File.Delete(fileName); //TODO: might be in use... save to temp file instead
+                    }
+                    catch 
+                    {
+                        // If the file is in use, we will not be able to delete it.
+                        // We will just leave it and let the user know to restart SE.
+
+                        StatusText = "Download complete...";
+                        Dispatcher.UIThread.Post(async() =>
+                        {
+                            _ = await MessageBox.Show(
+                                Window!,
+                                "Error",
+                                "Download complete, but could not delete existing file." + Environment.NewLine +
+                                "Please restart SE to use the new libmpv.",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error);
+                            return;
+                        }, DispatcherPriority.Background);
+
+                        UnpackLibMpv(GetFallbackLibMpvFileName());
+                        Close();
+                        return;
+                    }
                 }
 
-                UnpackFfmpeg(ffmpegFileName);
+                UnpackLibMpv(fileName);
                 
-                if (File.Exists(ffmpegFileName) && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    MacHelper.MakeExecutable(ffmpegFileName);   
-                }
-                
-                FfmpegFileName = ffmpegFileName;
+                LibMpvFileName = fileName;
                 Close();
             }
             else if (_downloadTask is { IsFaulted: true })
@@ -112,27 +131,49 @@ public partial class DownloadLibMpvViewModel : ObservableObject
         }
     }
 
-    private void UnpackFfmpeg(string newFileName)
+    private void UnpackLibMpv(string newFileName)
     {
         var folder = Path.GetDirectoryName(newFileName);
         if (folder != null)
         {
             _downloadStream.Position = 0;
-            _zipUnpacker.UnpackZipStream(_downloadStream, folder);
+            _zipUnpacker.UnpackZipStream(
+                _downloadStream, 
+                folder, 
+                string.Empty, 
+                false, 
+                new System.Collections.Generic.List<string> { ".dll"}, 
+                new System.Collections.Generic.List<string> { newFileName });
         }
 
         _downloadStream.Dispose();
     }
 
 
-    public static string GetFfmpegFileName()
+    public static string GetLibMpvFileName()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            return Path.Combine(Se.FfmpegFolder, "ffmpeg.exe");
+            return Path.Combine(Se.BaseFolder, "libmpv-2.dll");
         }
 
-        return Path.Combine(Se.FfmpegFolder, "ffmpeg");
+        return Path.Combine(Se.BaseFolder, "libmpv-2.so");
+    }
+
+    public static string GetFallbackLibMpvFileName()
+    {
+        var newFolder = Path.Combine(Se.BaseFolder, "libmpv-update");
+        if (!Directory.Exists(newFolder))
+        {
+            Directory.CreateDirectory(newFolder);
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return Path.Combine(newFolder, "libmpv-2.dll");
+        }
+
+        return Path.Combine(newFolder, "libmpv-2.so");
     }
 
     private void Close()
@@ -168,7 +209,7 @@ public partial class DownloadLibMpvViewModel : ObservableObject
             Directory.CreateDirectory(folder);
         }
 
-        _downloadTask = _ffmpegDownloadService.DownloadFfmpeg(
+        _downloadTask = _libMpvDownloadService.DownloadLibMpv(
             _downloadStream,
             downloadProgress,
             _cancellationTokenSource.Token);
