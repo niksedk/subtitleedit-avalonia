@@ -521,7 +521,7 @@ public class AudioVisualizer : Control
                 if (newStart < _activeParagraph.EndTime.TotalSeconds - 0.001 &&
                     (previous == null || newStart > previous.EndTime.TotalSeconds + 0.001))
                 {
-                    _activeParagraph.StartTime = TimeSpan.FromSeconds(newStart);
+                    _activeParagraph.SetStartTimeOnly(TimeSpan.FromSeconds(newStart));
                 }
                 break;
 

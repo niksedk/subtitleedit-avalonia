@@ -26,10 +26,21 @@ namespace Nikse.SubtitleEdit.Controls
             get => GetValue(ValueProperty);
             set
             {
-                SetValue(ValueProperty, Clamp(value));
+                var oldValue = GetValue(ValueProperty);
+                var newValue = Clamp(value);
+
+                SetValue(ValueProperty, newValue);
                 UpdateText();
+
+                // Fire the event if the value actually changed
+                if (oldValue != newValue)
+                {
+                    ValueChanged?.Invoke(this, newValue);
+                }
             }
         }
+
+        public event EventHandler<TimeSpan>? ValueChanged;
 
         public TimeCodeUpDown()
         {
@@ -118,7 +129,10 @@ namespace Nikse.SubtitleEdit.Controls
 
         private void OnTextInput(object? sender, TextInputEventArgs e)
         {
-            if (_textBox == null || string.IsNullOrEmpty(e.Text)) return;
+            if (_textBox == null || string.IsNullOrEmpty(e.Text))
+            {
+                return;
+            }
 
             var c = e.Text[0];
             if (!char.IsDigit(c))
@@ -141,7 +155,16 @@ namespace Nikse.SubtitleEdit.Controls
             _textBox.Text = _textBuffer;
             _textBox.CaretIndex = GetNextEditableIndex(pos + 1);
 
-            Value = ParseTime(_textBuffer);
+            // Store old value to compare
+            var oldValue = Value;
+            var newValue = ParseTime(_textBuffer);
+
+            if (oldValue != newValue)
+            {
+                SetValue(ValueProperty, newValue);
+                ValueChanged?.Invoke(this, newValue);
+            }
+
             e.Handled = true;
         }
 

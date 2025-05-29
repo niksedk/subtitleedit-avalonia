@@ -220,7 +220,7 @@ public static class InitListViewAndEditBox
             }
         };
         startTimePanel.Children.Add(timeCodeUpDown);
-
+        timeCodeUpDown.ValueChanged += vm.StartTimeChanged;
 
         timeControlsPanel.Children.Add(startTimePanel);
 
@@ -281,6 +281,7 @@ public static class InitListViewAndEditBox
                 Converter = DurationToBackgroundConverter.Instance,
             },
         };
+        durationUpDown.ValueChanged += vm.DurationChanged;
 
         durationPanel.Children.Add(durationUpDown);
         timeControlsPanel.Children.Add(durationPanel);

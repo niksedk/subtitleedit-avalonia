@@ -33,6 +33,8 @@ public partial class SubtitleLineViewModel : ObservableObject
     public int Layer { get; set; }
     public Guid Id { get; set; }
 
+    private bool _skipUpdate = false;
+
 
     public SubtitleLineViewModel()
     {
@@ -83,12 +85,41 @@ public partial class SubtitleLineViewModel : ObservableObject
     
     partial void OnStartTimeChanged(TimeSpan value)
     {
+        if (_skipUpdate)
+        {
+            return;
+        }
+
+        _skipUpdate = true;
+        EndTime = value + Duration;
         UpdateDuration();
+        _skipUpdate = false;
     }
 
     partial void OnEndTimeChanged(TimeSpan value)
     {
+        if (_skipUpdate)
+        {
+            return;
+        }
+
+        _skipUpdate = true;
         UpdateDuration();
+        _skipUpdate = false;
+    }
+
+    partial void OnDurationChanged(TimeSpan value)
+    {
+        if (_skipUpdate)
+        {
+            return;
+        }
+
+        var newEndTime = StartTime + value;
+        if (Math.Abs(newEndTime.TotalMilliseconds - EndTime.TotalMilliseconds) > 0.001)
+        {
+            EndTime = newEndTime;
+        }
     }
 
     internal void UpdateDuration()
@@ -98,5 +129,12 @@ public partial class SubtitleLineViewModel : ObservableObject
         {
             Duration = EndTime - StartTime;
         }
+    }
+
+    internal void SetStartTimeOnly(TimeSpan timeSpan)
+    {
+        _skipUpdate = true;
+        StartTime = timeSpan;
+        _skipUpdate = false;
     }
 }

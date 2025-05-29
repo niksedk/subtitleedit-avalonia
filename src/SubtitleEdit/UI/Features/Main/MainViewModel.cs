@@ -2006,4 +2006,26 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback
 
         _updateAudioVisualizer = true;
     }
+
+    internal void DurationChanged(object? sender, NumericUpDownValueChangedEventArgs e)
+    {
+        //var selectedItem = SelectedSubtitle;
+        //if (selectedItem == null || e.NewValue == null || e.NewValue == 0)
+        //{
+        //    return;
+        //}
+
+        //// Update the duration of the selected subtitle line via end time
+
+        //var newEndTime = TimeSpan.FromMilliseconds(selectedItem.StartTime.TotalMilliseconds + (double)e.NewValue.Value);
+        //selectedItem.EndTime = newEndTime;
+        //selectedItem.UpdateDuration();
+
+        _updateAudioVisualizer = true;
+    }
+
+    internal void StartTimeChanged(object? sender, TimeSpan e)
+    {
+        _updateAudioVisualizer = true;
+    }
 }
