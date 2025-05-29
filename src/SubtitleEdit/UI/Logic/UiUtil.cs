@@ -452,8 +452,6 @@ public static class UiUtil
     public static Button WithLeftAlignment(this Button control)
     {
         control.HorizontalAlignment = HorizontalAlignment.Left;
-        control.HorizontalContentAlignment = HorizontalAlignment.Left;
-
         return control;
     }
 

@@ -97,7 +97,7 @@ public class AdjustDurationWindow : Window
 
         Content = grid;
 
-        Activated += delegate { Focus(); }; // hack to make OnKeyDown work
+        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 
     private static StackPanel MakeAdjustSeconds(AdjustDurationViewModel vm)

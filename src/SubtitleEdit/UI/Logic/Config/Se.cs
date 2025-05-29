@@ -17,6 +17,7 @@ public class Se
     public SeGeneral General { get; set; } = new();
     public List<SeShortCut> Shortcuts { get; set; }
     public SeFile File { get; set; } = new();
+    public SeEdit Edit { get; set; } = new();
     public SeTools Tools { get; set; } = new();
     public SeAutoTranslate AutoTranslate { get; set; } = new();
     public SeSync Synchronization { get; set; } = new();
@@ -66,17 +67,21 @@ public class Se
             return;
         }
 
+        // Default shortcuts
         Shortcuts =
         [
-            new(nameof(vm.UndoCommand), new List<string> { "Control", "Z" }),
-            new(nameof(vm.RedoCommand), new List<string> { "Control", "Y" }),
-            new(nameof(vm.ShowGoToLineCommand), new List<string> { "Control", "G" }),
+            new(nameof(vm.UndoCommand), new List<string> { "Ctrl", "Z" }),
+            new(nameof(vm.RedoCommand), new List<string> { "Ctrl", "Y" }),
+            new(nameof(vm.ShowGoToLineCommand), new List<string> { "Ctrl", "G" }),
             new(nameof(vm.GoToPreviousLineCommand), new List<string> { "Alt", "Up" }),
             new(nameof(vm.GoToNextLineCommand), new List<string> { "Alt", "Down" }),
-            new(nameof(vm.SelectAllLinesCommand), new List<string> { "Control", "A" }, ShortcutCategory.SubtitleGrid),
-            new(nameof(vm.InverseSelectionCommand), new List<string> { "Control", "Shift", "I" }, ShortcutCategory.SubtitleGrid),
-            new(nameof(vm.ToggleLinesItalicCommand), new List<string> { "Control", "I" }, ShortcutCategory.SubtitleGrid),
-            new(nameof(vm.DeleteSelectedItems), new List<string> { "Del" }, ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.SelectAllLinesCommand), new List<string> { "Ctrl", "A" }, ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.InverseSelectionCommand), new List<string> { "Ctrl", "Shift", "I" }, ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.ToggleLinesItalicCommand), new List<string> { "Ctrl", "I" }, ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.DeleteSelectedLinesCommand), new List<string> { "Delete" }, ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.FindNextCommand), new List<string> { "Ctrl", "F" }, ShortcutCategory.General),
+            new(nameof(vm.ShowReplaceCommand), new List<string> { "Ctrl", "H" }, ShortcutCategory.General),
+            new(nameof(vm.OpenDataFolderCommand), new List<string> { "Ctrl", "Alt", "Shift", "D" }, ShortcutCategory.General),
         ];
     }
 

@@ -64,6 +64,9 @@ public static class ShortcutsMain
 
         { nameof(_mvm.UndoCommand) , "Undo" },
         { nameof(_mvm.RedoCommand) , "Redo" },
+        { nameof(_mvm.FindNextCommand) , Se.Language.Settings.Shortcuts.EditFind },
+        { nameof(_mvm.ShowReplaceCommand) , Se.Language.Settings.Shortcuts.EditReplace },
+        { nameof(_mvm.ShowMultipleReplaceCommand) , Se.Language.Settings.Shortcuts.EditMultipleReplace },
 
         { nameof(_mvm.ShowGoToLineCommand) , Se.Language.Settings.Shortcuts.GeneralGoToLineNumber },
         { nameof(_mvm.ToggleLinesItalicCommand) , Se.Language.Settings.Shortcuts.GeneralToggleItalic },
@@ -92,6 +95,9 @@ public static class ShortcutsMain
 
         AddShortcut(shortcuts, vm.UndoCommand, nameof(vm.UndoCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.RedoCommand, nameof(vm.RedoCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.FindNextCommand, nameof(vm.FindNextCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowReplaceCommand, nameof(vm.ShowReplaceCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowMultipleReplaceCommand, nameof(vm.ShowMultipleReplaceCommand), ShortcutCategory.General);
 
         AddShortcut(shortcuts, vm.ShowGoToLineCommand, nameof(vm.ShowGoToLineCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ToggleLinesItalicCommand, nameof(vm.ToggleLinesItalicCommand), ShortcutCategory.SubtitleGridAndTextBox);
