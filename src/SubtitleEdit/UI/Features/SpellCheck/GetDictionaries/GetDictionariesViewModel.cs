@@ -1,10 +1,11 @@
-using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Platform;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Compression;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Download;
 using System;
@@ -14,7 +15,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
 
@@ -31,12 +34,21 @@ public partial class GetDictionariesViewModel : ObservableObject
     public GetDictionariesWindow? Window { get; set; }
 
     public bool OkPressed { get; private set; }
+    public string? DictionaryFileName { get; private set; }
+
+    private Task? _downloadTask;
+    private bool _done;
+    private readonly System.Timers.Timer _timer;
+    private readonly CancellationTokenSource _cancellationTokenSource;
+    private readonly MemoryStream _downloadStream;
 
     private readonly ISpellCheckDictionaryDownloadService _spellCheckDictionaryDownloadService;
+    private readonly IZipUnpacker _zipUnpacker;
 
-    public GetDictionariesViewModel(ISpellCheckDictionaryDownloadService spellCheckDictionaryDownloadService)
+    public GetDictionariesViewModel(ISpellCheckDictionaryDownloadService spellCheckDictionaryDownloadService, IZipUnpacker zipUnpacker)
     {
         _spellCheckDictionaryDownloadService = spellCheckDictionaryDownloadService;
+        _zipUnpacker = zipUnpacker;
 
         Dictionaries = new ObservableCollection<SpellCheckDictionaryDisplay>();
         SelectedDictionary = null;
@@ -44,8 +56,92 @@ public partial class GetDictionariesViewModel : ObservableObject
         IsDownloadEnabled = true;
         IsProgressVisible = false;
         StatusText = string.Empty;
+        DictionaryFileName = string.Empty;
+
+        _cancellationTokenSource = new CancellationTokenSource();
+        _downloadStream = new MemoryStream();
 
         LoadDictionaries();
+        _timer = new System.Timers.Timer(500);
+        _timer.Elapsed += OnTimerOnElapsed;
+        _timer.Start();
+    }
+
+    private readonly Lock _lockObj = new();
+
+    private void OnTimerOnElapsed(object? sender, ElapsedEventArgs args)
+    {
+        lock (_lockObj)
+        {
+            if (_done)
+            {
+                return;
+            }
+
+            if (_downloadTask is { IsCompleted: true })
+            {
+                _timer.Stop();
+                _done = true;
+
+                if (_downloadStream.Length == 0)
+                {
+                    StatusText = "Download failed";
+                    return;
+                }
+
+                DictionaryFileName = UnpackDictionary();
+
+                Close();
+            }
+            else if (_downloadTask is { IsFaulted: true })
+            {
+                _timer.Stop();
+                _done = true;
+                var ex = _downloadTask.Exception?.InnerException ?? _downloadTask.Exception;
+                if (ex is OperationCanceledException)
+                {
+                    StatusText = "Download canceled";
+                    Close();
+                }
+                else
+                {
+                    StatusText = "Download failed";
+                }
+            }
+        }
+    }
+
+    private void Close()
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            Window?.Close();
+        });
+    }
+
+    private string? UnpackDictionary()
+    {
+        var folder = Se.DictionariesFolder;
+
+        if (!Directory.Exists(folder))
+        {
+            Directory.CreateDirectory(folder);
+        }
+
+        var outputFileNames = new List<string>();
+
+        _downloadStream.Position = 0;
+        _zipUnpacker.UnpackZipStream(
+            _downloadStream,
+            folder,
+            string.Empty,
+            true,
+            new List<string> { ".dic", ".aff" },
+            outputFileNames);
+
+        _downloadStream.Dispose();
+
+        return outputFileNames.FirstOrDefault(p => p.EndsWith(".dic", StringComparison.OrdinalIgnoreCase));
     }
 
     private void LoadDictionaries()
@@ -102,8 +198,34 @@ public partial class GetDictionariesViewModel : ObservableObject
     [RelayCommand]
     private void Download()
     {
+        var selected = SelectedDictionary;
+        if (selected == null)
+        {
+            return;
+        }
+
         IsDownloadEnabled = false;
         IsProgressVisible = true;
+
+        var downloadProgress = new Progress<float>(number =>
+        {
+            var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
+            var pctString = percentage.ToString(CultureInfo.InvariantCulture);
+            Progress = percentage;
+            StatusText = $"Downloading... {pctString}%";
+        });
+
+        var folder = Se.FfmpegFolder;
+        if (!Directory.Exists(folder))
+        {
+            Directory.CreateDirectory(folder);
+        }
+
+        _downloadTask = _spellCheckDictionaryDownloadService.DownloadDictionary(
+            _downloadStream,
+            selected.DownloadLink,
+            downloadProgress,
+            _cancellationTokenSource.Token);
     }
 
     [RelayCommand]
@@ -121,7 +243,7 @@ public partial class GetDictionariesViewModel : ObservableObject
     [RelayCommand]
     private void Ok()
     {
-        Window?.Close();
+        Close();
     }
 
     internal void OnKeyDown(KeyEventArgs e)
@@ -129,7 +251,7 @@ public partial class GetDictionariesViewModel : ObservableObject
         if (e.Key == Key.Escape)
         {
             e.Handled = true;
-            Window?.Close();
+            Close();
         }
     }
 }

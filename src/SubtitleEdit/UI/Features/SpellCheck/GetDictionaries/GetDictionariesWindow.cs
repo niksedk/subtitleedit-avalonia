@@ -41,9 +41,11 @@ public class GetDictionariesWindow : Window
             [!ComboBox.SelectedValueProperty] = new Binding(nameof(vm.SelectedDictionary)),
         };
 
-        var buttonDownload = UiUtil.MakeButton("Download", vm.DownloadCommand)
-            .WithLeftAlignment().WithMargin(10, 0, 200, 10);
-        buttonDownload.Bind(Button.IsEnabledProperty, new Binding(nameof(vm.IsDownloadEnabled)));
+        var buttonDownload = UiUtil
+            .MakeButton("Download", vm.DownloadCommand)
+            .WithLeftAlignment()
+            .WithMargin(10, 0, 200, 10)
+            .WithBindEnabled(nameof(vm.IsDownloadEnabled));
 
         var panelDownload = new StackPanel
         {
@@ -94,7 +96,9 @@ public class GetDictionariesWindow : Window
         var labelDownloadStatus = new Label
         {
             VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(0, 0, 0, 20),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Width = double.NaN,
+            Margin = new Thickness(0, 20, 0, 20),
             [!Label.ContentProperty] = new Binding(nameof(vm.StatusText)),
             [!Label.IsVisibleProperty] = new Binding(nameof(vm.IsProgressVisible)),
         };
@@ -108,7 +112,6 @@ public class GetDictionariesWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
@@ -128,9 +131,9 @@ public class GetDictionariesWindow : Window
         grid.Add(panelDownload, 1, 0);
         grid.Add(labelDescription, 2, 0);
         grid.Add(sliderProgress, 3, 0);
-        grid.Add(labelDownloadStatus, 4, 0);
-        grid.Add(linkOpenFolder, 5, 0);
-        grid.Add(panelButtons, 5, 0);
+        grid.Add(labelDownloadStatus, 3, 0);
+        grid.Add(linkOpenFolder, 4, 0);
+        grid.Add(panelButtons, 4, 0);
 
         Content = grid;
 
