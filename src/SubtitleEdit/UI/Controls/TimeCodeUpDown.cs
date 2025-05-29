@@ -65,13 +65,14 @@ namespace Nikse.SubtitleEdit.Controls
                 {
                     Name = "PART_TextBox",
                     IsReadOnly = false,
-                    Padding = new Thickness(9,2,2,2),
+                    Padding = new Thickness(9, 2, 2, 2),
                     Margin = new Thickness(0),
                     VerticalContentAlignment = VerticalAlignment.Center,
                     HorizontalContentAlignment = HorizontalAlignment.Left,
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                     Width = double.NaN,
                     BorderBrush = Brushes.Transparent,
+                    CaretIndex = 7,
                 };
 
                 var grid = new Grid
