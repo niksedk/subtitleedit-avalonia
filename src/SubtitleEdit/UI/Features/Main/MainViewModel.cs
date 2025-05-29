@@ -549,7 +549,10 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback
     [RelayCommand]
     private async Task ShowSpellCheck()
     {
-        await _windowService.ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(Window, vm => { });
+        var result = await _windowService.ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(Window, vm => 
+        {
+            vm.Initialize();
+        });
         _shortcutManager.ClearKeys();
     }
 

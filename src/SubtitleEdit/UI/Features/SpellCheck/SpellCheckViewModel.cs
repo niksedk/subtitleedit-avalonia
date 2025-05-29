@@ -1,8 +1,11 @@
-using System;
-using System.Collections.ObjectModel;
+using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System;
+using System.Collections.ObjectModel;
 
 namespace Nikse.SubtitleEdit.Features.SpellCheck;
 
@@ -18,35 +21,75 @@ public partial class SpellCheckViewModel : ObservableObject
     [ObservableProperty] private string _selectedSuggestion;
 
     public SpellCheckWindow? Window { get; set; }
-    
+
     public bool OkPressed { get; private set; }
+    public StackPanel PanelWholeText { get; internal set; }
 
     public SpellCheckViewModel()
     {
+        LineText = string.Empty;
         WholeText = string.Empty;
         Word = string.Empty;
         Dictionaries = new ObservableCollection<string>();
         SelectedDictionary = string.Empty;
         Suggestions = new ObservableCollection<string>();
         SelectedSuggestion = string.Empty;
+        PanelWholeText = new StackPanel();
+
+        LineText = "Line 1 of 20";
+        WholeText = "This is a sample text with a missspelled word for testing purposes.";
+        Word = "missspelled";
+        Suggestions.Add("Suggestion 1");
+        Suggestions.Add("Suggestion 2");
+        Suggestions.Add("Suggestion 3");
+
 
         LoadDictionaries();
     }
 
     private void LoadDictionaries()
     {
-        
+
     }
 
-    [RelayCommand]                   
-    private void EditWholeText() 
+    public void Initialize()
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            PanelWholeText.Children.Clear();
+
+            // Add normal text
+            PanelWholeText.Children.Add(new TextBlock
+            {
+                Text = "This is a ",
+            });
+
+            // Add highlighted word
+            PanelWholeText.Children.Add(new TextBlock
+            {
+                Text = "highlighted",
+                Foreground = Brushes.Red,
+                FontWeight = FontWeight.Bold
+            });
+
+            // Add rest of the sentence
+            PanelWholeText.Children.Add(new TextBlock
+            {
+                Text = " word.",
+            });
+
+        }, DispatcherPriority.Background);
+    }
+
+    [RelayCommand]
+    private void EditWholeText()
     {
         OkPressed = true;
         Window?.Close();
     }
-    
-    [RelayCommand]                   
-    private void Change() 
+
+    [RelayCommand]
+    private void Change()
     {
         Window?.Close();
     }
