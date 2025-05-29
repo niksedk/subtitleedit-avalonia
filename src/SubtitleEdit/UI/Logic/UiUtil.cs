@@ -452,6 +452,8 @@ public static class UiUtil
     public static Button WithLeftAlignment(this Button control)
     {
         control.HorizontalAlignment = HorizontalAlignment.Left;
+        control.HorizontalContentAlignment = HorizontalAlignment.Left;
+
         return control;
     }
 
@@ -575,6 +577,12 @@ public static class UiUtil
     public static Button WithMargin(this Button control, int margin)
     {
         control.Margin = new Thickness(margin);
+        return control;
+    }
+
+    public static Button WithMargin(this Button control, int left, int top, int right, int bottom)
+    {
+        control.Margin = new Thickness(left, top, right, bottom);
         return control;
     }
 

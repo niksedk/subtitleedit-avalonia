@@ -81,6 +81,7 @@ public class LanguageSettingsShortcuts
     public string FileExportCustomTextFormat2 { get; set; }
     public string FileExportCustomTextFormat3 { get; set; }
     public string FileExit { get; set; }
+    public string OpenSeDataFolder { get; set; }
 
     public string EditFind { get; set; }
     public string EditFindNext { get; set; }
@@ -179,6 +180,7 @@ public class LanguageSettingsShortcuts
         FileExportCustomTextFormat2 = "Export custom text format 2";
         FileExportCustomTextFormat3 = "Export custom text format 3";
         FileExit = "Exit";
+        OpenSeDataFolder = "Open Subtitle Edit folder";
 
         EditFind = "Find";
         EditFindNext = "Find next";

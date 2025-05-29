@@ -1,6 +1,10 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
@@ -8,13 +12,12 @@ namespace Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
 public class GetDictionariesWindow : Window
 {
     private GetDictionariesViewModel _vm;
-    
+
     public GetDictionariesWindow(GetDictionariesViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Spell check - get dictionaries";
-        Width = 310;
-        Height = 140;
+        SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 
         _vm = vm;
@@ -23,58 +26,115 @@ public class GetDictionariesWindow : Window
 
         var label = new Label
         {
-            Content = "Language",
+            Content = "Choose your language and click download",
             VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 10, 0, 0),
         };
 
         var combo = new ComboBox
         {
-            ItemsSource = vm.Languages,
-            SelectedValue = vm.SelectedLanguage,
+            ItemsSource = vm.Dictionaries,
             VerticalAlignment = VerticalAlignment.Center,
             MinWidth = 180,
+            Margin = new Thickness(0, 10, 10, 10),
+            [!ComboBox.IsEnabledProperty] = new Binding(nameof(vm.IsDownloadEnabled)),
+            [!ComboBox.SelectedValueProperty] = new Binding(nameof(vm.SelectedDictionary)),
         };
 
-        var buttonPanel = UiUtil.MakeButtonBar(
-            UiUtil.MakeButton("OK", vm.OkCommand),
-            UiUtil.MakeButton("Cancel", vm.CancelCommand)
-        );
-        
+        var buttonDownload = UiUtil.MakeButton("Download", vm.DownloadCommand)
+            .WithLeftAlignment().WithMargin(10, 0, 200, 10);
+        buttonDownload.Bind(Button.IsEnabledProperty, new Binding(nameof(vm.IsDownloadEnabled)));
+
+        var panelDownload = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Children =
+            {
+                combo,
+                buttonDownload
+            }
+        };
+
+        var labelDescription = new Label
+        {
+            Content = "Description:",
+            VerticalAlignment = VerticalAlignment.Center,
+            [!Label.ContentProperty] = new Binding(nameof(vm.SelectedDictionary) + "." + nameof(vm.Description)),
+        };
+
+        var sliderProgress = new Slider
+        {
+            Minimum = 0,
+            Maximum = 100,
+            IsHitTestVisible = false,
+            MinWidth = 400,
+            Styles =
+            {
+                new Style(x => x.OfType<Thumb>())
+                {
+                    Setters =
+                    {
+                        new Setter(Thumb.IsVisibleProperty, false)
+                    }
+                },
+                new Style(x => x.OfType<Track>())
+                {
+                    Setters =
+                    {
+                        new Setter(Track.HeightProperty, 6.0)
+                    }
+                },
+            },
+            [!Slider.IsVisibleProperty] = new Binding(nameof(vm.IsProgressVisible)),
+            [!Slider.ValueProperty] = new Binding(nameof(vm.Progress)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
+        };
+
+        var labelDownloadStatus = new Label
+        {
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 20),
+            [!Label.ContentProperty] = new Binding(nameof(vm.StatusText)),
+            [!Label.IsVisibleProperty] = new Binding(nameof(vm.IsProgressVisible)),
+        };
+
+        var linkOpenFolder = UiUtil.MakeLink("Open dictionary folder", vm.OpenFolderCommand);
+
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
+        var panelButtons = UiUtil.MakeButtonBar(buttonOk);
+
         var grid = new Grid
         {
             RowDefinitions =
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
-            ColumnSpacing = 10,
-            RowSpacing = 10,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Children.Add(label);
-        Grid.SetRow(label, 0);
-        Grid.SetColumn(label, 0);
-
-        grid.Children.Add(combo);
-        Grid.SetRow(combo, 0);
-        Grid.SetColumn(combo, 1);
-
-        grid.Children.Add(buttonPanel);
-        Grid.SetRow(buttonPanel, 1);
-        Grid.SetColumn(buttonPanel, 0);
-        Grid.SetColumnSpan(buttonPanel, 2);
+        grid.Add(label, 0, 0);
+        grid.Add(panelDownload, 1, 0);
+        grid.Add(labelDescription, 2, 0);
+        grid.Add(sliderProgress, 3, 0);
+        grid.Add(labelDownloadStatus, 4, 0);
+        grid.Add(linkOpenFolder, 5, 0);
+        grid.Add(panelButtons, 5, 0);
 
         Content = grid;
-        
-        Activated += delegate { Focus(); }; // hack to make OnKeyDown work
+
+        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

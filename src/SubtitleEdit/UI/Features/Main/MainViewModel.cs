@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Platform.Storage;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -147,10 +148,22 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback
         StatusTextRight = string.Empty;
 
         InitializeLibMpv();
+        InitializeFfmpeg();
         LoadShortcuts();
         _isWaveformToolbarVisible = Se.Settings.Waveform.ShowToolbar;
+
         StartTitleTimer();
         _autoBackupService.StartAutoBackup(this);
+    }
+
+    private void InitializeFfmpeg()
+    {
+        var ffmpegFileName = DownloadFfmpegViewModel.GetFfmpegFileName();
+        if (string.IsNullOrEmpty(Se.Settings.General.FfmpegPath) &&
+            File.Exists(ffmpegFileName))
+        {
+            Se.Settings.General.FfmpegPath = DownloadFfmpegViewModel.GetFfmpegFileName();
+        }
     }
 
     private static void InitializeLibMpv()
@@ -722,6 +735,13 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback
         }
 
         _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task OpenDataFolder()
+    {
+        var dirInfo = new DirectoryInfo(Se.BaseFolder);
+        await Window!.Launcher.LaunchDirectoryInfoAsync(dirInfo);
     }
 
     [RelayCommand]
@@ -1398,6 +1418,8 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback
                 {
                     return;
                 }
+
+                var result = await _windowService.ShowDialogAsync<DownloadLibMpvWindow, DownloadLibMpvViewModel>(Window);
 
             }, DispatcherPriority.Background);
         }

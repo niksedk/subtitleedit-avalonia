@@ -3,21 +3,20 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
-using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 
 public class RestoreAutoBackupWindow : Window
 {
     private RestoreAutoBackupViewModel _vm;
-    
+
     public RestoreAutoBackupWindow(RestoreAutoBackupViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Restore auto-backup...";
         Width = 810;
         Height = 640;
-        MinWidth = 800; 
+        MinWidth = 800;
         MinHeight = 600;
         CanResize = true;
 
@@ -34,7 +33,7 @@ public class RestoreAutoBackupWindow : Window
             ItemsSource = _vm.Files,
             SelectionMode = DataGridSelectionMode.Single,
             IsReadOnly = true,
-            AutoGenerateColumns = false, 
+            AutoGenerateColumns = false,
             Columns =
             {
                 new DataGridTextColumn
@@ -66,11 +65,9 @@ public class RestoreAutoBackupWindow : Window
 
         var buttonRestore = UiUtil.MakeButton("Restore auto-backup file", vm.RestoreFileCommand);
         buttonRestore.BindIsEnabled(vm, nameof(vm.IsOkButtonEnabled));
-        var buttonPanel = UiUtil.MakeButtonBar(
-            buttonRestore,
-            UiUtil.MakeButton(Se.Language.General.Ok, vm.CancelCommand)
-        );
-        
+        var buttonOk = UiUtil.MakeButtonOk(vm.CancelCommand);
+        var panelButtons = UiUtil.MakeButtonBar(buttonRestore, buttonOk);
+
         var grid = new Grid
         {
             RowDefinitions =
@@ -94,19 +91,19 @@ public class RestoreAutoBackupWindow : Window
         Grid.SetRow(dataGrid, 0);
         Grid.SetColumn(dataGrid, 0);
         Grid.SetColumnSpan(dataGrid, 2);
-        
+
         grid.Children.Add(linkOpenFolder);
         Grid.SetRow(linkOpenFolder, 1);
         Grid.SetColumn(linkOpenFolder, 0);
 
-        grid.Children.Add(buttonPanel);
-        Grid.SetRow(buttonPanel, 1);
-        Grid.SetColumn(buttonPanel, 0);
-        Grid.SetColumnSpan(buttonPanel, 2);
+        grid.Children.Add(panelButtons);
+        Grid.SetRow(panelButtons, 1);
+        Grid.SetColumn(panelButtons, 0);
+        Grid.SetColumnSpan(panelButtons, 2);
 
         Content = grid;
-        
-        Activated += delegate { Focus(); }; // hack to make OnKeyDown work
+
+        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

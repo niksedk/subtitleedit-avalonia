@@ -56,6 +56,7 @@ public static class ShortcutsMain
         { nameof(_mvm.SelectAllLinesCommand) , Se.Language.Settings.Shortcuts.ListSelectAll },
         { nameof(_mvm.InverseSelectionCommand) , Se.Language.Settings.Shortcuts.ListInverseSelection },
         { nameof(_mvm.DeleteSelectedLinesCommand) , Se.Language.Settings.Shortcuts.ListDeleteSelection },
+        { nameof(_mvm.OpenDataFolderCommand) , Se.Language.Settings.Shortcuts.OpenSeDataFolder },
 
         { nameof(_mvm.CommandFileOpenCommand) , Se.Language.Settings.Shortcuts.FileOpen },
         { nameof(_mvm.CommandExitCommand) , Se.Language.Settings.Shortcuts.FileExit },
@@ -83,6 +84,7 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.SelectAllLinesCommand, nameof(vm.SelectAllLinesCommand), ShortcutCategory.SubtitleGrid);
         AddShortcut(shortcuts, vm.InverseSelectionCommand, nameof(vm.InverseSelectionCommand), ShortcutCategory.SubtitleGrid);
         AddShortcut(shortcuts, vm.DeleteSelectedLinesCommand, nameof(vm.DeleteSelectedLinesCommand), ShortcutCategory.SubtitleGrid);
+        AddShortcut(shortcuts, vm.OpenDataFolderCommand, nameof(vm.OpenDataFolderCommand), ShortcutCategory.General);
 
         AddShortcut(shortcuts, vm.CommandFileOpenCommand, nameof(vm.CommandFileOpenCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.CommandExitCommand, nameof(vm.CommandExitCommand), ShortcutCategory.General);

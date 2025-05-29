@@ -56,6 +56,7 @@
       <None Remove="Assets\FileTypes\sub.ico" />
       <None Remove="Assets\FileTypes\sup.ico" />
       <None Remove="Assets\FileTypes\vtt.ico" />
+      <None Remove="Assets\HunspellDictionaries.json" />
       <None Remove="Assets\Themes\Dark\New.png" />
       <None Remove="Assets\Themes\Light\AssaAttachments.png" />
       <None Remove="Assets\Themes\Light\AssaDraw.png" />
@@ -699,6 +700,10 @@
     <ItemGroup>
       <None Remove="Assets\se.ico" />
       <AvaloniaResource Include="Assets\se.ico" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <AvaloniaResource Include="Assets\HunspellDictionaries.json" />
     </ItemGroup>
 
     <ItemGroup>
