@@ -9,16 +9,16 @@ using Avalonia.Styling;
 
 namespace Nikse.SubtitleEdit.Features.Common;
 
-public class DownloadFfmpegWindow : Window
+public class DownloadLibMpvWindow : Window
 {
-    private readonly DownloadFfmpegViewModel _vm;
+    private readonly DownloadLibMpvViewModel _vm;
 
-    public DownloadFfmpegWindow(DownloadFfmpegViewModel vm)
+    public DownloadLibMpvWindow(DownloadLibMpvViewModel vm)
     {
         _vm = vm;
         vm.Window = this;
         Icon = UiUtil.GetSeIcon();
-        Title = "Downloading ffmpeg";
+        Title = "Downloading libmpv";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -27,7 +27,7 @@ public class DownloadFfmpegWindow : Window
 
         var titleText = new TextBlock
         {
-            Text = "Downloading ffmpeg",
+            Text = "Downloading libmpv",
             FontSize = 20,
             FontWeight = FontWeight.Bold,
         };

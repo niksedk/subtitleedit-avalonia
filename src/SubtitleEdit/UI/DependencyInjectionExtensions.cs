@@ -31,8 +31,8 @@ using Nikse.SubtitleEdit.Features.Edit.Find;
 using Nikse.SubtitleEdit.Features.Edit.Replace;
 using Nikse.SubtitleEdit.Features.Edit.ShowHistory;
 using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
-using RestoreAutoBackupViewModel = Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup.RestoreAutoBackupViewModel;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
+using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 
 namespace Nikse.SubtitleEdit;
 
@@ -57,6 +57,7 @@ public static class DependencyInjectionExtensions
         collection.AddHttpClient<ISpellCheckDictionaryDownloadService, SpellCheckDictionaryDownloadService>();
         collection.AddHttpClient<ITesseractDownloadService, TesseractDownloadService>();
         collection.AddHttpClient<IPaddleOcrDownloadService, PaddleOcrDownloadService>();
+        collection.AddHttpClient<ILibMpvDownloadService, LibMpvDownloadService>();
 
         // Window view models
         collection.AddTransient<MainView>();
@@ -94,5 +95,6 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<WhisperPostProcessingViewModel>();
         collection.AddTransient<DownloadWhisperModelsViewModel>();
         collection.AddTransient<DownloadWhisperEngineViewModel>();
+        collection.AddTransient<DownloadLibMpvViewModel>();
     }
 }
