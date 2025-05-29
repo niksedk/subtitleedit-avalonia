@@ -64,17 +64,17 @@ public class ChangeSpeedWindow : Window
             {
                 new RadioButton
                 {
-                    Content = "Adjust All",
+                    Content = "Adjust all",
                     [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustAll))
                 },
                 new RadioButton
                 {
-                    Content = "Adjust Selected Lines",
+                    Content = "Adjust selected lines",
                     [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustSelectedLines))
                 },
                 new RadioButton
                 {
-                    Content = "Adjust Selected Lines And Forward",
+                    Content = "Adjust selected lines and forward",
                     [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustSelectedLinesAndForward))
                 }
             },

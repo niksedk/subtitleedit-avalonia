@@ -13,8 +13,7 @@ public class LanguageWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Choose language";
-        Width = 310;
-        Height = 140;
+        SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 
         _vm = vm;
@@ -35,10 +34,9 @@ public class LanguageWindow : Window
             MinWidth = 180,
         };
 
-        var buttonPanel = UiUtil.MakeButtonBar(
-            UiUtil.MakeButton("OK", vm.OkCommand),
-            UiUtil.MakeButton("Cancel", vm.CancelCommand)
-        );
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);   
+        var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
         
         var grid = new Grid
         {
@@ -59,22 +57,13 @@ public class LanguageWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Children.Add(label);
-        Grid.SetRow(label, 0);
-        Grid.SetColumn(label, 0);
-
-        grid.Children.Add(combo);
-        Grid.SetRow(combo, 0);
-        Grid.SetColumn(combo, 1);
-
-        grid.Children.Add(buttonPanel);
-        Grid.SetRow(buttonPanel, 1);
-        Grid.SetColumn(buttonPanel, 0);
-        Grid.SetColumnSpan(buttonPanel, 2);
+        grid.Add(label, 0);
+        grid.Add(combo, 0, 1);
+        grid.Add(panelButtons, 1, 0, 1, 2);
 
         Content = grid;
         
-        Activated += delegate { Focus(); }; // hack to make OnKeyDown work
+        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

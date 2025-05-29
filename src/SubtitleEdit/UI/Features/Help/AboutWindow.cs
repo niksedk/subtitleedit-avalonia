@@ -1,8 +1,10 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
+using System;
 
 namespace Nikse.SubtitleEdit.Features.Help;
 
@@ -12,79 +14,99 @@ public class AboutWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "About Subtitle Edit";
-        Width = 400;
-        Height = 250;
+        SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
 
         var titleText = new TextBlock
         {
-            Text = "Subtitle Edit",
+            Text = "Subtitle Edit version 5.0, preview 1",
             FontSize = 20,
             FontWeight = FontWeight.Bold,
         };
 
-        var versionText = new TextBlock
+        var licenseText = new TextBlock
         {
-            Text = "Version 5.0.0 Alpha 0",
+            Text = "Subtitle Edit is free software under the MIT license.",
         };
 
-        var copyrightText = new TextBlock
+        var descriptionText = new TextBlock
         {
-            Text = "© 2025 Nikolaj Lynge Olsson",
+            Text = "Subtitle Edit 5 Preview is an early version of the next major release." + Environment.NewLine +
+           "Some features may be missing, incomplete or experimental." + Environment.NewLine +
+           "We welcome your feedback to help improve the final version." + Environment.NewLine +
+           Environment.NewLine +
+           "Thank you for testing and supporting Subtitle Edit :)",
             FontSize = 12,
-            Margin = new Thickness(0, 10, 0, 0)
+            Margin = new Thickness(0, 10, 0, 10)
         };
 
-        var websiteLink = new TextBlock
+        var githubLink = new TextBlock
         {
-            Text = "Visit Website",
+            Text = "C# source code on Github",
             Foreground = Brushes.Blue,
             Cursor = new Cursor(StandardCursorType.Hand),
         };
-        websiteLink.PointerPressed += (_, _) =>
+        githubLink.PointerPressed += async (_, _) =>
         {
-            // Open link (only works if app has permission)
-            try
+            await Launcher.LaunchUriAsync(new Uri("https://github.com/niksedk/subtitleedit-avalonia"));
+        };
+
+
+        var paypalLink = new TextBlock
+        {
+            Text = "PayPal",
+            Foreground = Brushes.Blue,
+            Cursor = new Cursor(StandardCursorType.Hand),
+        };
+        paypalLink.PointerPressed += async (_, _) =>
+        {
+            await Launcher.LaunchUriAsync(new Uri("https://www.paypal.com/donate/?hosted_button_id=4XEHVLANCQBCU"));
+        };
+
+        var githubSponsorLink = new TextBlock
+        {
+            Text = "Github sponsor",
+            Foreground = Brushes.Blue,
+            Cursor = new Cursor(StandardCursorType.Hand),
+        };
+        githubSponsorLink.PointerPressed += async (_, _) =>
+        {
+            await Launcher.LaunchUriAsync(new Uri("https://github.com/sponsors/niksedk"));
+        };
+
+        var panelDonate = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Children =
             {
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                {
-                    FileName = "https://www.nikse.dk/SubtitleEdit",
-                    UseShellExecute = true
-                });
-            }
-            catch
-            {
-                // Handle errors if needed
+                new TextBlock { Text = "Donate: " },
+                paypalLink,
+                new TextBlock { Text = " or " },
+                githubSponsorLink
             }
         };
 
-        var okButton = new Button
-        {
-            Content = "OK",
-            Width = 80,
-        };
-        okButton.Click += (_, _) => Close();
+        var buttonOk = UiUtil.MakeButtonOk(null);
+        buttonOk.Click += (_, _) => Close();
+        var panelButtons = UiUtil.MakeButtonBar(buttonOk);
 
         Content = new StackPanel
         {
             Spacing = 8,
-            Margin = new Thickness(20),
+            Margin = UiUtil.MakeWindowMargin(),
             Children =
             {
                 titleText,
-                versionText,
-                copyrightText,
-                websiteLink,
-                new StackPanel
-                {
-                    Margin = new Thickness(0, 20, 0, 0),
-                    Children = { okButton }
-                }
+                licenseText,
+                descriptionText,
+                githubLink,
+                panelDonate,
+                panelButtons,
             }
         };
-        
-        Activated += delegate { okButton.Focus(); }; // hack to make OnKeyDown work
+
+        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

@@ -15,8 +15,7 @@ public class GoToLineNumberWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Go to line number";
-        Width = 400;
-        Height = 160;
+        SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 
         _vm = vm;
@@ -26,7 +25,7 @@ public class GoToLineNumberWindow : Window
         vm.UpDown = new NumericUpDown
         {
             VerticalAlignment = VerticalAlignment.Center,
-            Width = 200,
+            Width = 150,
             VerticalContentAlignment = VerticalAlignment.Center,
             [!NumericUpDown.ValueProperty] = new Binding(nameof(_vm.LineNumber))
             {
@@ -58,15 +57,14 @@ public class GoToLineNumberWindow : Window
         };
 
         var buttonPanel = UiUtil.MakeButtonBar(
-                UiUtil.MakeButton("OK", vm.OkCommand),
-                UiUtil.MakeButton("Cancel", vm.CancelCommand))
-            ;
+            UiUtil.MakeButtonOk(vm.OkCommand), 
+            UiUtil.MakeButtonCancel(vm.CancelCommand));
 
         var contentPanel = new StackPanel
         {
             Orientation = Orientation.Vertical,
             Spacing = 15,
-            Margin = new Thickness(10),
+            Margin = UiUtil.MakeWindowMargin(),
             Children =
             {
                 panel,
