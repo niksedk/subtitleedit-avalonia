@@ -26,7 +26,7 @@ public class FindWindow : Window
         {
             VerticalAlignment = VerticalAlignment.Center,
             MinWidth = 180,
-            Margin = new Thickness(0, 0, 0, 10),
+            Margin = new Thickness(0, 0, 0, 3),
             Watermark = "Search text...",
             [!TextBox.TextProperty] = new Binding(nameof(vm.SearchText)) { Mode = BindingMode.TwoWay }   
         };

@@ -13,9 +13,8 @@ public class OpenFromUrlWindow : Window
     public OpenFromUrlWindow(OpenFromUrlViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = "Open from url";
-        Width = 500;
-        Height = 120;
+        Title = "Open video file from URL";
+        SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 
         _vm = vm;
@@ -32,6 +31,7 @@ public class OpenFromUrlWindow : Window
         {
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
+            MinWidth = 380,
             [!TextBox.TextProperty] = new Binding(nameof(vm.Url))
             {
                 Mode = BindingMode.TwoWay
