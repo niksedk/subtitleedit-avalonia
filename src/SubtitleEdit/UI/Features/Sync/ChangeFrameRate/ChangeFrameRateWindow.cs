@@ -13,8 +13,7 @@ public class ChangeFrameRateWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Change frame rate";
-        Width = 350;
-        Height = 200;
+        SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 
         _vm = vm;

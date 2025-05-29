@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -7,19 +6,32 @@ namespace Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
 
 public partial class ChangeSpeedViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<string> languages;
-    [ObservableProperty] private string selectedLanguage;
-    
+    [ObservableProperty] private double _speedPercent;
+    [ObservableProperty] private bool _adjustAll;
+    [ObservableProperty] private bool _adjustSelectedLines;
+    [ObservableProperty] private bool _adjustSelectedLinesAndForward;
+
     public ChangeSpeedWindow? Window { get; set; }
     
     public bool OkPressed { get; private set; }
 
     public ChangeSpeedViewModel()
     {
-        Languages = new ObservableCollection<string> { "English", "Danish", "Spanish" };
-        SelectedLanguage = Languages[0];
+        AdjustAll = true;
     }
-    
+
+    [RelayCommand]
+    private void SetFromDropFrameValue()
+    {
+        SpeedPercent = 100.1001; 
+    }
+
+    [RelayCommand]
+    private void SetToDropFrameValue()
+    {
+        SpeedPercent = 99.9889;
+    }
+
     [RelayCommand]                   
     private void Ok() 
     {

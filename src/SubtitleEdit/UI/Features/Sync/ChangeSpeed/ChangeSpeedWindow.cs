@@ -1,4 +1,6 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
@@ -13,8 +15,7 @@ public class ChangeSpeedWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Change speed";
-        Width = 310;
-        Height = 140;
+        SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 
         _vm = vm;
@@ -23,22 +24,65 @@ public class ChangeSpeedWindow : Window
 
         var label = new Label
         {
-            Content = "Language",
+            Content = "Speed in %",
             VerticalAlignment = VerticalAlignment.Center,
         };
 
-        var combo = new ComboBox
+        var numericUpDownSpeed = new NumericUpDown
         {
-            ItemsSource = vm.Languages,
-            SelectedValue = vm.SelectedLanguage,
-            VerticalAlignment = VerticalAlignment.Center,
-            MinWidth = 180,
+            Width = 150,
+            Margin = new Thickness(0, 0, 10, 0),
+            Minimum = 0,
+            Maximum = 1000,
+            Increment = 0.1m,
+            [!NumericUpDown.ValueProperty] = new Binding(nameof(ChangeSpeedViewModel.SpeedPercent)) { Mode = BindingMode.TwoWay },
         };
 
-        var buttonPanel = UiUtil.MakeButtonBar(
-            UiUtil.MakeButton("OK", vm.OkCommand),
-            UiUtil.MakeButton("Cancel", vm.CancelCommand)
-        );
+        var buttonFromDropFrame = UiUtil.MakeButton("From drop frame value", vm.SetFromDropFrameValueCommand);
+        var buttonToDropFrame = UiUtil.MakeButton("To drop frame value", vm.SetToDropFrameValueCommand);
+
+        var panelSpeed = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Margin = new Thickness(0, 0, 10, 0),
+            Children =
+            {
+                label,
+                numericUpDownSpeed,
+                buttonFromDropFrame,
+                buttonToDropFrame
+            }
+        };
+
+        var panelRadioButtons = new StackPanel
+        {
+            Orientation = Orientation.Vertical,
+            Margin = new Thickness(50, 10, 0, 0),
+            Children =
+            {
+                new RadioButton
+                {
+                    Content = "Adjust All",
+                    [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustAll))
+                },
+                new RadioButton
+                {
+                    Content = "Adjust Selected Lines",
+                    [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustSelectedLines))
+                },
+                new RadioButton
+                {
+                    Content = "Adjust Selected Lines And Forward",
+                    [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustSelectedLinesAndForward))
+                }
+            },
+        };
+
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);   
+        var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
         
         var grid = new Grid
         {
@@ -46,11 +90,11 @@ public class ChangeSpeedWindow : Window
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
             },
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
@@ -59,22 +103,13 @@ public class ChangeSpeedWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Children.Add(label);
-        Grid.SetRow(label, 0);
-        Grid.SetColumn(label, 0);
-
-        grid.Children.Add(combo);
-        Grid.SetRow(combo, 0);
-        Grid.SetColumn(combo, 1);
-
-        grid.Children.Add(buttonPanel);
-        Grid.SetRow(buttonPanel, 1);
-        Grid.SetColumn(buttonPanel, 0);
-        Grid.SetColumnSpan(buttonPanel, 2);
+        grid.Add(panelSpeed, 0);
+        grid.Add(panelRadioButtons, 1);
+        grid.Add(buttonPanel, 2);
 
         Content = grid;
         
-        Activated += delegate { Focus(); }; // hack to make OnKeyDown work
+        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

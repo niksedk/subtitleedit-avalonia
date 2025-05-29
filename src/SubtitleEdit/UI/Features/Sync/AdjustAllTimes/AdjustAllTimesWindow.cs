@@ -16,8 +16,7 @@ public class AdjustAllTimesWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Adjust all times (show earlier/later)";
-        Width = 510;
-        Height = 275;
+        SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 
         _vm = vm;
