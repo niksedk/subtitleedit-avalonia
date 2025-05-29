@@ -36,7 +36,7 @@ public class GetDictionariesWindow : Window
             ItemsSource = vm.Dictionaries,
             VerticalAlignment = VerticalAlignment.Center,
             MinWidth = 180,
-            Margin = new Thickness(0, 10, 10, 10),
+            Margin = new Thickness(0, 10, 10, 2),
             [!ComboBox.IsEnabledProperty] = new Binding(nameof(vm.IsDownloadEnabled)),
             [!ComboBox.SelectedValueProperty] = new Binding(nameof(vm.SelectedDictionary)),
         };
@@ -44,7 +44,7 @@ public class GetDictionariesWindow : Window
         var buttonDownload = UiUtil
             .MakeButton("Download", vm.DownloadCommand)
             .WithLeftAlignment()
-            .WithMargin(10, 0, 200, 10)
+            .WithMargin(0, 10, 10, 2)
             .WithBindEnabled(nameof(vm.IsDownloadEnabled));
 
         var panelDownload = new StackPanel
@@ -89,7 +89,7 @@ public class GetDictionariesWindow : Window
                     }
                 },
             },
-            [!Slider.IsVisibleProperty] = new Binding(nameof(vm.IsProgressVisible)),
+            [!Slider.OpacityProperty] = new Binding(nameof(vm.ProgressOpacity)),
             [!Slider.ValueProperty] = new Binding(nameof(vm.Progress)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
         };
 
@@ -106,7 +106,10 @@ public class GetDictionariesWindow : Window
         var linkOpenFolder = UiUtil.MakeLink("Open dictionary folder", vm.OpenFolderCommand);
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
-        var panelButtons = UiUtil.MakeButtonBar(buttonOk);
+        buttonOk.WithBindIsVisible(nameof(vm.IsDownloadEnabled));
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
+        buttonCancel.WithBindIsVisible(nameof(vm.IsProgressVisible));
+        var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
         var grid = new Grid
         {

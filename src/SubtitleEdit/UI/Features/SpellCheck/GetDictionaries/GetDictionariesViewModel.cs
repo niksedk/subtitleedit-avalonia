@@ -30,6 +30,7 @@ public partial class GetDictionariesViewModel : ObservableObject
     [ObservableProperty] private string _statusText;
     [ObservableProperty] private bool _isDownloadEnabled;
     [ObservableProperty] private bool _isProgressVisible;
+    [ObservableProperty] private double _progressOpacity;
 
     public GetDictionariesWindow? Window { get; set; }
 
@@ -60,6 +61,7 @@ public partial class GetDictionariesViewModel : ObservableObject
 
         _cancellationTokenSource = new CancellationTokenSource();
         _downloadStream = new MemoryStream();
+        _progressOpacity = 0;
 
         LoadDictionaries();
         _timer = new System.Timers.Timer(500);
@@ -204,8 +206,10 @@ public partial class GetDictionariesViewModel : ObservableObject
             return;
         }
 
+        ProgressOpacity = 1.0;
         IsDownloadEnabled = false;
         IsProgressVisible = true;
+        Progress = 0;
 
         var downloadProgress = new Progress<float>(number =>
         {
@@ -243,6 +247,16 @@ public partial class GetDictionariesViewModel : ObservableObject
     [RelayCommand]
     private void Ok()
     {
+        _timer.Stop();
+        Close();
+    }
+
+    [RelayCommand]
+    private void Cancel()
+    {
+        _cancellationTokenSource.Cancel();
+        _timer.Stop();
+        _done = true;
         Close();
     }
 
