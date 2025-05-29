@@ -13,6 +13,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia.FontAwesome;
 using Projektanker.Icons.Avalonia;
+using Projektanker.Icons.Avalonia.MaterialDesign;
 
 var lifetime = new ClassicDesktopStyleApplicationLifetime
 {
@@ -21,8 +22,8 @@ var lifetime = new ClassicDesktopStyleApplicationLifetime
 };
 
 IconProvider.Current
-           .Register<FontAwesomeIconProvider>();
-           //.Register<MaterialDesignIconProvider>();
+           .Register<FontAwesomeIconProvider>()
+           .Register<MaterialDesignIconProvider>();
 
 var appBuilder = AppBuilder.Configure<Application>()
     .UsePlatformDetect()

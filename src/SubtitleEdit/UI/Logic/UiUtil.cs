@@ -9,6 +9,7 @@ using Avalonia.Platform;
 using Avalonia.Styling;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Options.Settings;
+using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 using System;
 using System.Collections.ObjectModel;
@@ -80,6 +81,48 @@ public static class UiUtil
             VerticalContentAlignment = VerticalAlignment.Center,
             Command = command,
         };
+    }
+
+    public static Button MakeButtonOk(IRelayCommand? command)
+    {
+        return MakeButton(Se.Language.General.Ok, command);
+    }
+
+    public static Button MakeButtonCancel(IRelayCommand? command)
+    {
+        return MakeButton(Se.Language.General.Cancel, command);
+    }
+
+    public static Button MakeButton(IRelayCommand? command, string iconName)
+    {
+        var button = new Button
+        {
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center,
+            Command = command,
+        };
+
+        Attached.SetIcon(button, iconName);
+
+        return button;
+    }
+
+    public static Button MakeButtonBrowse(IRelayCommand? command)
+    {
+        var button = new Button
+        {
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center,
+            Command = command,
+        };
+
+        Attached.SetIcon(button, IconNames.MdiDotsHorizontal);
+
+        return button;
     }
 
     public static Button BindIsEnabled(this Button control, object viewModal, string propertyIsEnabledPath)
@@ -414,7 +457,7 @@ public static class UiUtil
 
     public static Button WithIconRight(this Button control, string icon)
     {
-        var label = new TextBlock() { Text = control.Content?.ToString(), Padding = new Thickness(0,0,4,0) };
+        var label = new TextBlock() { Text = control.Content?.ToString(), Padding = new Thickness(0, 0, 4, 0) };
         var image = new ContentControl();
         Attached.SetIcon(image, icon);
         var stackPanelApplyFixes = new StackPanel
@@ -436,7 +479,7 @@ public static class UiUtil
         var stackPanelApplyFixes = new StackPanel
         {
             Orientation = Orientation.Horizontal,
-            Children = { image, label  }
+            Children = { image, label }
         };
 
         control.Content = stackPanelApplyFixes;
@@ -454,6 +497,17 @@ public static class UiUtil
     public static ComboBox WithLeftAlignment(this ComboBox control)
     {
         control.HorizontalAlignment = HorizontalAlignment.Left;
+        return control;
+    }
+
+    public static ComboBox WithBindSelected(this ComboBox control, string selectedPropertyBinding)
+    {
+        control.Bind(ComboBox.SelectedItemProperty, new Binding
+        {
+            Path = selectedPropertyBinding,
+            Mode = BindingMode.TwoWay,
+        });
+
         return control;
     }
 
@@ -554,8 +608,10 @@ public static class UiUtil
         {
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Bottom,
             Margin = new Thickness(10, 20, 10, 10),
             Spacing = 0,
+            Height = double.NaN, // Allow it to grow vertically if needed
         };
 
         stackPanel.Children.AddRange(buttons);

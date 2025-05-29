@@ -582,12 +582,12 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback
         {
             vm.Initialize(this);
         });
-        
+
         if (result.OkPressed)
         {
             MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Adjust all times"));
         }
-        
+
         _shortcutManager.ClearKeys();
     }
 
@@ -620,7 +620,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback
                 {
                     break;
                 }
-                
+
                 Subtitles[i].Text = result.Rows[i].TranslatedText;
             }
         }
@@ -1060,7 +1060,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback
         {
             Subtitles.Add(p);
         }
-        
+
         _subtitleFileName = undoRedoObject.SubtitleFileName;
         SelectAndScrollToRow(undoRedoObject.SelectedLines.First());
     }
@@ -1966,7 +1966,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback
         {
             return;
         }
-        
+
         MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Adjust times"));
 
         if (adjustSelectedLines)
@@ -1983,7 +1983,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback
             var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
             if (selectedItems.Count > 0)
             {
-                var first = Subtitles.OrderBy(p=> Subtitles.IndexOf(p)).First();
+                var first = selectedItems.OrderBy(p => Subtitles.IndexOf(p)).First();
                 var firstSelectedIndex = Subtitles.IndexOf(first);
                 for (var i = firstSelectedIndex; i < Subtitles.Count; i++)
                 {
@@ -2003,7 +2003,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback
                 p.UpdateDuration();
             }
         }
-        
+
         _updateAudioVisualizer = true;
     }
 }

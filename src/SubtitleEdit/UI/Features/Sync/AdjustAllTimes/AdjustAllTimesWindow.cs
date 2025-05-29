@@ -17,7 +17,7 @@ public class AdjustAllTimesWindow : Window
         Icon = UiUtil.GetSeIcon();
         Title = "Adjust all times (show earlier/later)";
         Width = 510;
-        Height = 300;
+        Height = 275;
         CanResize = false;
 
         _vm = vm;
@@ -52,16 +52,10 @@ public class AdjustAllTimesWindow : Window
             },
         };
 
-        var labelInfo = new TextBlock
-        {
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(0,10, 0, 20)
-        };
-        labelInfo.Bind(TextBlock.TextProperty, new Binding(nameof(vm.TotalAdjustmentInfo)));
-
         var panelRadioButtons = new StackPanel
         {
             Orientation = Orientation.Vertical,
+            Margin = new Thickness(50, 10, 0, 0),
             Children =
             {
                 new RadioButton
@@ -79,32 +73,22 @@ public class AdjustAllTimesWindow : Window
                     Content = "Adjust Selected Lines And Forward",
                     [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustSelectedLinesAndForward))
                 }
-            }
+            },
         };
-        var buttonPanel = UiUtil.MakeButtonBar(
-            UiUtil.MakeButton("Apply", vm.ApplyCommand),
-            UiUtil.MakeButton("OK", vm.OkCommand),
-            UiUtil.MakeButton("Cancel", vm.CancelCommand)
-        );
+
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
+        var buttonPanel = UiUtil.MakeButtonBar(buttonOk);
         var grid = new Grid
         {
             RowDefinitions =
             {
-                new RowDefinition
-                {
-                    Height = new GridLength(1, GridUnitType.Auto)
-                },
-
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition
-                {
-                    Width = new GridLength(1, GridUnitType.Star)
-                },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
@@ -113,21 +97,13 @@ public class AdjustAllTimesWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Children.Add(panelAdjustment);
-        Grid.SetRow(panelAdjustment, 0);
+        grid.Add(panelAdjustment, 0);
+        grid.Add(panelRadioButtons, 1);
+        grid.Add(buttonPanel, 2);
 
-        grid.Children.Add(labelInfo);
-        Grid.SetRow(labelInfo, 1);
-
-        grid.Children.Add(panelRadioButtons);
-        Grid.SetRow(panelRadioButtons, 2);
-
-        grid.Children.Add(buttonPanel);
-        Grid.SetRow(buttonPanel, 3);
-        
         Content = grid;
-        
-        Activated += delegate { Focus(); }; // hack to make OnKeyDown work
+
+        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

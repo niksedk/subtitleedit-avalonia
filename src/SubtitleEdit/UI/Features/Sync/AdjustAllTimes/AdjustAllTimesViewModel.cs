@@ -1,10 +1,9 @@
-using System;
-using System.Collections.ObjectModel;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic.Config;
+using System;
 
 namespace Nikse.SubtitleEdit.Features.Sync.AdjustAllTimes;
 
@@ -15,9 +14,9 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     [ObservableProperty] private bool _adjustSelectedLines;
     [ObservableProperty] private bool _adjustSelectedLinesAndForward;
     [ObservableProperty] private string _totalAdjustmentInfo;
-    
+
     private double _totalAdjustment;
-    
+
     private IAdjustCallback? _adjustCallback;
     
     public AdjustAllTimesWindow? Window { get; set; }
@@ -67,6 +66,7 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     private void ShowEarlier()
     {
         _totalAdjustment -= Adjustment.TotalSeconds;
+        Apply();
         ShowTotalAdjustmentInfo();
     }
 
@@ -79,10 +79,10 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     private void ShowLater() 
     {
         _totalAdjustment += Adjustment.TotalSeconds;
+        Apply();
         ShowTotalAdjustmentInfo();
     }
     
-    [RelayCommand]                   
     private void Apply()
     {
         SaveSettings();
@@ -92,15 +92,7 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     [RelayCommand]                   
     private void Ok() 
     {
-        SaveSettings();  
-        InvokeAdjustCallback();
         OkPressed = true;
-        Window?.Close();
-    }
-    
-    [RelayCommand]                   
-    private void Cancel() 
-    {
         Window?.Close();
     }
     
