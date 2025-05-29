@@ -26,6 +26,10 @@ internal class IconNames
     public const string MdiSpellcheck = "mdi-spellcheck";
     public const string MdiStopCircle = "mdi-stop-circle";
     public const string MdiSwapVertical = "mdi-swap-vertical";
-    //public const string Mdi = "mdi-";
+    public const string MdiAlignHorizontalDistribute = "mdi-align-horizontal-distribute";
+    public const string MdiArrowCollapseVertical = "mdi-arrow-collapse-vertical";
+    public const string MdiSetSplit = "mdi-set-split";
+    public const string MdiSetMerge = "mdi-set-merge";
+    public const string MdiScaleBalance = "mdi-scale-balance";
     //public const string Mdi = "mdi-";
 }

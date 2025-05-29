@@ -384,18 +384,12 @@ public static class InitListViewAndEditBox
         };
 
         // Auto Break button
-        var autoBreakButton = new Button();
-        Projektanker.Icons.Avalonia.Attached.SetIcon(autoBreakButton, "fa-solid fa-bolt"); // Example icon
-        ToolTip.SetTip(autoBreakButton, "Auto-break");
+        var autoBreakButton = UiUtil.MakeButton(vm.AutoBreakCommand, IconNames.MdiScaleBalance, 20);
         buttonPanel.Children.Add(autoBreakButton);
-        autoBreakButton.Command = vm.AutoBreakCommand;
 
         // Unbreak button
-        var unbreakButton = new Button();
-        Projektanker.Icons.Avalonia.Attached.SetIcon(unbreakButton, "fa-solid fa-link-slash"); // Example icon
-        ToolTip.SetTip(unbreakButton, "Unbreak");
+        var unbreakButton = UiUtil.MakeButton(vm.UnbreakCommand, IconNames.MdiSetMerge, 20);
         buttonPanel.Children.Add(unbreakButton);
-        unbreakButton.Command = vm.UnbreakCommand;
 
         textEditGrid.Children.Add(buttonPanel);
         Grid.SetRow(buttonPanel, 1);

@@ -82,6 +82,8 @@ public class Se
             new(nameof(vm.FindNextCommand), new List<string> { "Ctrl", "F" }, ShortcutCategory.General),
             new(nameof(vm.ShowReplaceCommand), new List<string> { "Ctrl", "H" }, ShortcutCategory.General),
             new(nameof(vm.OpenDataFolderCommand), new List<string> { "Ctrl", "Alt", "Shift", "D" }, ShortcutCategory.General),
+            new(nameof(vm.CommandFileNewCommand), new List<string> { "Ctrl", "N" }, ShortcutCategory.General),
+            new(nameof(vm.CommandFileSaveCommand), new List<string> { "Ctrl", "S" }, ShortcutCategory.General),
         ];
     }
 

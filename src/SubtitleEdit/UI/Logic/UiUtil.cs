@@ -109,6 +109,24 @@ public static class UiUtil
         return button;
     }
 
+
+    public static Button MakeButton(IRelayCommand? command, string iconName, int fontSize)
+    {
+        var button = new Button
+        {
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center,
+            Command = command,
+            FontSize = fontSize,
+        };
+
+        Attached.SetIcon(button, iconName);
+
+        return button;
+    }
+
     public static Button MakeButtonBrowse(IRelayCommand? command)
     {
         var button = new Button

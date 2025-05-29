@@ -61,6 +61,8 @@ public static class ShortcutsMain
         { nameof(_mvm.CommandFileOpenCommand) , Se.Language.Settings.Shortcuts.FileOpen },
         { nameof(_mvm.CommandExitCommand) , Se.Language.Settings.Shortcuts.FileExit },
         { nameof(_mvm.CommandFileNewCommand) , Se.Language.Settings.Shortcuts.FileNew },
+        { nameof(_mvm.CommandFileSaveCommand) , Se.Language.Settings.Shortcuts.FileSave },
+        { nameof(_mvm.CommandFileSaveAsCommand) , Se.Language.Settings.Shortcuts.FileSaveAs },
 
         { nameof(_mvm.UndoCommand) , "Undo" },
         { nameof(_mvm.RedoCommand) , "Redo" },
@@ -92,6 +94,8 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.CommandFileOpenCommand, nameof(vm.CommandFileOpenCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.CommandExitCommand, nameof(vm.CommandExitCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.CommandFileNewCommand, nameof(vm.CommandFileNewCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.CommandFileSaveCommand, nameof(vm.CommandFileSaveCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.CommandFileSaveAsCommand, nameof(vm.CommandFileSaveAsCommand), ShortcutCategory.General);
 
         AddShortcut(shortcuts, vm.UndoCommand, nameof(vm.UndoCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.RedoCommand, nameof(vm.RedoCommand), ShortcutCategory.General);
