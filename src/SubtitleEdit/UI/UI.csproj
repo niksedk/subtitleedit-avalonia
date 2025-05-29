@@ -9,6 +9,7 @@
         <AssemblyName>Nikse.SubtitleEdit</AssemblyName>
         <RootNamespace>Nikse.SubtitleEdit</RootNamespace>
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+        <ApplicationIcon>SE.ico</ApplicationIcon>
     </PropertyGroup>
     <ItemGroup>
       <AvaloniaXaml Remove="Styles.axaml" />
@@ -654,6 +655,7 @@
       <Content Include="Assets\Whisper\WhisperOpenAI.txt">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
+      <Content Include="SE.ico" />
     </ItemGroup>
 
     <ItemGroup>
