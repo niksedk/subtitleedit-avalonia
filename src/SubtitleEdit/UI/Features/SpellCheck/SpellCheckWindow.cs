@@ -112,11 +112,12 @@ public class SpellCheckWindow : Window
             VerticalAlignment = VerticalAlignment.Center,
             Width = double.NaN,
         };
+        vm.TextBoxWordNotFound = textBoxWord;
 
         var buttonChange = new Button
         {
             Content = "Change",
-            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.ChangeCommand), BindingMode.OneWay),
+            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.ChangeWordCommand), BindingMode.OneWay),
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,
@@ -125,7 +126,7 @@ public class SpellCheckWindow : Window
         var buttonChangeAll = new Button
         {
             Content = "Change all",
-            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.ChangeAllCommand), BindingMode.OneWay),
+            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.ChangeWordAllCommand), BindingMode.OneWay),
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,
@@ -134,7 +135,7 @@ public class SpellCheckWindow : Window
         var buttonSkipOne = new Button
         {
             Content = "Skip one",
-            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.SkipCommand), BindingMode.OneWay),
+            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.SkipWordCommand), BindingMode.OneWay),
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,
@@ -143,7 +144,7 @@ public class SpellCheckWindow : Window
         var buttonSkipAll = new Button
         {
             Content = "Skip all",
-            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.SkipAllCommand), BindingMode.OneWay),
+            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.SkipWordAllCommand), BindingMode.OneWay),
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,
@@ -267,11 +268,14 @@ public class SpellCheckWindow : Window
             Width = double.NaN,
             Height = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
+            Background = new SolidColorBrush(Colors.Transparent),
         };
+        listBoxSuggestions.DoubleTapped += vm.ListBoxSuggestionsDoubleTapped;
 
         var scrollViewSuggestions = new ScrollViewer
         {
             Content = listBoxSuggestions,
+            Height = 240,
         };
 
         var borderSuggestions = new Border

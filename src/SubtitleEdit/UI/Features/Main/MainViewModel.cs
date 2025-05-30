@@ -551,7 +551,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback
     {
         var result = await _windowService.ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(Window, vm => 
         {
-            vm.Initialize();
+            vm.Initialize(Subtitles, SelectedSubtitleIndex);
         });
         _shortcutManager.ClearKeys();
     }

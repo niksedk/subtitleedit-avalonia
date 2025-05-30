@@ -25,6 +25,7 @@ public partial class SpellCheckViewModel : ObservableObject
     [ObservableProperty] private string _lineText;
     [ObservableProperty] private string _wholeText;
     [ObservableProperty] private string _currentWord;
+    [ObservableProperty] private string _wordNotFoundOriginal;
     [ObservableProperty] private string _statusText;
     [ObservableProperty] private ObservableCollection<SpellCheckDictionaryDisplay> _dictionaries;
     [ObservableProperty] private SpellCheckDictionaryDisplay? _selectedDictionary;
@@ -36,9 +37,12 @@ public partial class SpellCheckViewModel : ObservableObject
     [ObservableProperty] private SubtitleLineViewModel? _selectedParagraph;
 
     public SpellCheckWindow? Window { get; set; }
+    public int TotalChangedWords { get; set; }
+    public int TotalSkippedWords { get; set; }
 
     public bool OkPressed { get; private set; }
     public StackPanel PanelWholeText { get; internal set; }
+    public TextBox TextBoxWordNotFound { get; internal set; }
 
     private readonly ISpellCheckManager _spellCheckManager;
     private readonly IWindowService _windowService;
@@ -58,21 +62,16 @@ public partial class SpellCheckViewModel : ObservableObject
         LineText = string.Empty;
         WholeText = string.Empty;
         CurrentWord = string.Empty;
+        WordNotFoundOriginal = string.Empty;
         Dictionaries = new ObservableCollection<SpellCheckDictionaryDisplay>();
         SelectedDictionary = new SpellCheckDictionaryDisplay();
         Suggestions = new ObservableCollection<string>();
         SelectedSuggestion = string.Empty;
         PanelWholeText = new StackPanel();
+        TextBoxWordNotFound = new TextBox();
         StatusText = string.Empty;
         Paragraphs = new ObservableCollection<SubtitleLineViewModel>();
         _currentSpellCheckWord = new SpellCheckWord();
-
-        LineText = "Line 1 of 20";
-        WholeText = "This is a sample text with a missspelled word for testing purposes.";
-        CurrentWord = "missspelled";
-        Suggestions.Add("Suggestion 1");
-        Suggestions.Add("Suggestion 2");
-        Suggestions.Add("Suggestion 3");
 
         LoadDictionaries();
     }
@@ -106,8 +105,6 @@ public partial class SpellCheckViewModel : ObservableObject
             }
 
             _spellCheckManager.Initialize(SelectedDictionary.DictionaryFileName, GetTwoLetterLanguageCode(SelectedDictionary));
-
-            //DoSpellCheck();
         }
 
         //Page?.Initialize(subtitle, videoFileName, this);
@@ -115,34 +112,11 @@ public partial class SpellCheckViewModel : ObservableObject
         //_loading = false;
     }
 
-    public void Initialize()
+    public void Initialize(ObservableCollection<SubtitleLineViewModel> paragraphs, int? selectedSubtitleIndex)
     {
-        Dispatcher.UIThread.Post(() =>
-        {
-            PanelWholeText.Children.Clear();
-
-            var textBlock = new TextBlock();
-            textBlock.Inlines.Add(new Run("Your name is "));
-
-            // Add bound name (for demo, using hardcoded)
-            textBlock.Inlines.Add(new Run
-            {
-                Text = "Alice",
-                FontSize = 24,
-                FontWeight = FontWeight.Bold,
-                Foreground = Brushes.Orange
-            });
-
-            textBlock.Inlines.Add(new Run(" and not Bob.\nHow are you?\n"));
-            textBlock.Inlines.Add(new Run("Next line\n"));
-            textBlock.Inlines.Add(new Run("Next line\n"));
-            textBlock.Inlines.Add(new Run("Next line\n"));
-            textBlock.Inlines.Add(new Run("Next line\n"));
-
-            PanelWholeText.Children.Add(textBlock);
-
-
-        }, DispatcherPriority.Background);
+        Paragraphs.Clear();
+        Paragraphs.AddRange(paragraphs);
+        Dispatcher.UIThread.Post(DoSpellCheck, DispatcherPriority.Background);
     }
 
     [RelayCommand]
@@ -153,39 +127,74 @@ public partial class SpellCheckViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Change()
+    private void ChangeWord()
     {
-        Window?.Close();
+        if (string.IsNullOrWhiteSpace(CurrentWord) || WordNotFoundOriginal == CurrentWord)
+        {
+            Dispatcher.UIThread.Invoke(() => { TextBoxWordNotFound.Focus(); });
+            return;
+        }
+
+        _spellCheckManager.ChangeWord(WordNotFoundOriginal, CurrentWord, _currentSpellCheckWord, SelectedParagraph!);
+        ShowStatus($"Change word from \"{WordNotFoundOriginal}\" to \"{CurrentWord}\"");
+        DoSpellCheck();
     }
 
     [RelayCommand]
-    private void ChangeAll()
+    private void ChangeWordAll()
     {
-        Window?.Close();
+        if (string.IsNullOrWhiteSpace(CurrentWord) || WordNotFoundOriginal == CurrentWord)
+        {
+            Dispatcher.UIThread.Invoke(() => { TextBoxWordNotFound.Focus(); });
+            return;
+        }
+
+        _spellCheckManager.ChangeAllWord(WordNotFoundOriginal, CurrentWord, _currentSpellCheckWord, SelectedParagraph);
+        ShowStatus($"Change all words from \"{WordNotFoundOriginal}\" to \"{CurrentWord}\"");
+        DoSpellCheck();
     }
 
     [RelayCommand]
-    private void Skip()
+    private void SkipWord()
     {
-        Window?.Close();
+        ShowStatus($"Ignore word \"{WordNotFoundOriginal}\" once");
+        DoSpellCheck();
     }
 
     [RelayCommand]
-    private void SkipAll()
+    private void SkipWordAll()
     {
-        Window?.Close();
+        _spellCheckManager.AddIgnoreWord(WordNotFoundOriginal);
+        ShowStatus($"Ignore word \"{WordNotFoundOriginal}\" always");
+        DoSpellCheck();
     }
 
     [RelayCommand]
     private void AddToNamesList()
     {
-        Window?.Close();
+        if (string.IsNullOrWhiteSpace(CurrentWord))
+        {
+            Dispatcher.UIThread.Invoke(() => { TextBoxWordNotFound.Focus(); });
+            return;
+        }
+
+        _spellCheckManager.AddToNames(CurrentWord);
+        ShowStatus($"Word \"{CurrentWord}\" added to names list");
+        DoSpellCheck();
     }
 
     [RelayCommand]
     private void AddToUserDictionary()
     {
-        Window?.Close();
+        if (string.IsNullOrWhiteSpace(CurrentWord))
+        {
+            Dispatcher.UIThread.Invoke(() => { TextBoxWordNotFound.Focus(); });
+            return;
+        }
+
+        _spellCheckManager.AdToUserDictionary(CurrentWord);
+        ShowStatus($"Word \"{CurrentWord}\" added to user dictionary");
+        DoSpellCheck();
     }
 
     [RelayCommand]
@@ -214,19 +223,33 @@ public partial class SpellCheckViewModel : ObservableObject
     [RelayCommand]
     private void SuggestionUseOnce()
     {
-        Window?.Close();
+        if (SelectedSuggestion == null || SelectedParagraph == null)
+        {
+            return;
+        }
+
+        _spellCheckManager.ChangeWord(WordNotFoundOriginal, SelectedSuggestion, _currentSpellCheckWord, SelectedParagraph);
+        ShowStatus($"Use suggestion \"{CurrentWord}\"");
+        DoSpellCheck();
     }
 
     [RelayCommand]
     private void SuggestionUseAlways()
     {
-        Window?.Close();
+        if (SelectedSuggestion == null || SelectedParagraph == null)
+        {
+            return;
+        }
+
+        _spellCheckManager.ChangeAllWord(WordNotFoundOriginal, SelectedSuggestion, _currentSpellCheckWord, SelectedParagraph);
+        ShowStatus($"Use suggestion \"{CurrentWord}\" always");
+        DoSpellCheck();
     }
 
     [RelayCommand]
     private void Ok()
     {
-        Window?.Close();
+        Dispatcher.UIThread.Invoke(() => { Window?.Close(); });        
     }
 
     internal void OnKeyDown(KeyEventArgs e)
@@ -243,12 +266,13 @@ public partial class SpellCheckViewModel : ObservableObject
         var results = _spellCheckManager.CheckSpelling(Paragraphs, _lastSpellCheckResult);
         if (results.Count > 0)
         {
-            //WordNotFoundOriginal = results[0].Word.Text;
+            WordNotFoundOriginal = results[0].Word.Text;
             CurrentWord = results[0].Word.Text;
             WholeText = results[0].Paragraph.Text;
-            // CurrentFormattedText = HighLightCurrentWord(results[0].Word, results[0].Paragraph);
+            HighLightCurrentWord(results[0].Word, results[0].Paragraph);
             _currentSpellCheckWord = results[0].Word;
             _lastSpellCheckResult = results[0];
+            SelectedParagraph = results[0].Paragraph;
             //_currentParagraph = results[0].Paragraph;
 
             var suggestions = _spellCheckManager.GetSuggestions(results[0].Word.Text);
@@ -279,19 +303,44 @@ public partial class SpellCheckViewModel : ObservableObject
         }
         else
         {
-            //_closing = true;
-            //MainThread.BeginInvokeOnMainThread(async () =>
-            //{
-            //    await Shell.Current.GoToAsync("..", new Dictionary<string, object>
-            //    {
-            //        { "Page", nameof(SpellCheckerPage) },
-            //        { "Subtitle", _subtitle },
-            //        { "TotalChangedWords", _spellCheckManager.NoOfChangedWords },
-            //        { "TotalSkippedWords", _spellCheckManager.NoOfSkippedWords },
-            //        { "AutoClose", true },
-            //    });
-            //});
+            TotalChangedWords = _spellCheckManager.NoOfChangedWords;
+            TotalSkippedWords = _spellCheckManager.NoOfSkippedWords;
+            OkPressed = true;
+            Ok();
         }
+    }
+
+    private void HighLightCurrentWord(SpellCheckWord word, SubtitleLineViewModel paragraph)
+    {
+        var textBlock = new TextBlock();
+        var idx = word.Index;
+        if (idx > 0)
+        {
+            var text = paragraph.Text.Substring(0, idx);
+            textBlock.Inlines!.Add(new Run(text));
+        }
+
+        textBlock.Inlines!.Add(new Run
+        {
+            Text = word.Text,
+            FontWeight = FontWeight.Bold,
+            Foreground = Brushes.Red
+        });
+
+        if (idx + word.Text.Length < paragraph.Text.Length)
+        {
+            var text = paragraph.Text.Substring(idx + word.Text.Length);
+            textBlock.Inlines!.Add(new Run(text));
+        }
+
+        PanelWholeText.Children.Clear();
+        PanelWholeText.Children.Add(textBlock);
+    }
+
+    private void ShowStatus(string statusText)
+    {
+        StatusText = statusText;
+        //TODO: remove this info text after a few seconds
     }
 
     private static string GetTwoLetterLanguageCode(SpellCheckDictionaryDisplay? language)
@@ -460,5 +509,10 @@ public partial class SpellCheckViewModel : ObservableObject
         }
 
         return "en";
+    }
+
+    internal void ListBoxSuggestionsDoubleTapped(object? sender, TappedEventArgs e)
+    {
+        SuggestionUseOnce();
     }
 }
