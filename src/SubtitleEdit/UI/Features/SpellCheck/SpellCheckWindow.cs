@@ -17,8 +17,8 @@ public class SpellCheckWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Spell check";
-        Width = 700;
-        Height = 480;
+        Width = 810;
+        Height = 490;
         CanResize = false;
 
         _vm = vm;
@@ -44,7 +44,7 @@ public class SpellCheckWindow : Window
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
             HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
             Content = panelWholeText,
-            Height = 75,
+            Height = 85,
         };
 
         var boderWholeText = new Border
@@ -74,8 +74,8 @@ public class SpellCheckWindow : Window
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(3, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(2, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 20,
@@ -108,7 +108,7 @@ public class SpellCheckWindow : Window
 
         var textBoxWord = new TextBox
         {
-            [!TextBox.TextProperty] = new Binding(nameof(SpellCheckViewModel.Word), BindingMode.TwoWay),
+            [!TextBox.TextProperty] = new Binding(nameof(SpellCheckViewModel.CurrentWord), BindingMode.TwoWay),
             VerticalAlignment = VerticalAlignment.Center,
             Width = double.NaN,
         };

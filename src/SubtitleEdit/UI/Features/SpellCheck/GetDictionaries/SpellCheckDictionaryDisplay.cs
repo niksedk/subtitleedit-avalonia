@@ -9,6 +9,8 @@ public partial class SpellCheckDictionaryDisplay : ObservableObject
     [ObservableProperty] private string _downloadLink;
     [ObservableProperty] private string _description;
 
+    public bool UseShortName { get; set; }
+
     public SpellCheckDictionaryDisplay()
     {
         EnglishName = string.Empty;
@@ -19,7 +21,7 @@ public partial class SpellCheckDictionaryDisplay : ObservableObject
 
     public override string ToString()
     {
-        if (EnglishName == NativeName || string.IsNullOrEmpty(NativeName) || NativeName.Length > 30)
+        if (UseShortName || EnglishName == NativeName || string.IsNullOrEmpty(NativeName) || NativeName.Length > 30)
         {
             return EnglishName;
         }
