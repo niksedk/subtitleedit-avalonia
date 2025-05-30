@@ -53,8 +53,38 @@ public static class UiUtil
 
     public static IBrush GetTextColor()
     {
-        return new TextBlock().Foreground ?? new SolidColorBrush(Colors.Black);
+        var app = Application.Current;
+        if (app == null)
+        {
+            new SolidColorBrush(Colors.Black);
+        }
+
+        var theme = app!.ActualThemeVariant;
+        if (theme == ThemeVariant.Dark)
+        {
+            return new SolidColorBrush(Colors.White);
+        }
+
+        return new SolidColorBrush(Colors.Black);
     }
+
+    public static IBrush GetBorderColor()
+    {
+        var app = Application.Current;
+        if (app == null)
+        {
+            new SolidColorBrush(Colors.Black);
+        }
+
+        var theme = app!.ActualThemeVariant;
+        if (theme == ThemeVariant.Dark)
+        {
+            return new SolidColorBrush(Colors.White, 0.5);
+        }
+
+        return new SolidColorBrush(Colors.Black, 0.5);
+    }
+
 
     public static IBrush GetTextColor(double opacity)
     {
@@ -685,7 +715,7 @@ public static class UiUtil
         return new Border
         {
             Width = 1,
-            Background = GetTextColor(), // Brushes.Gray,
+            Background = GetBorderColor(), 
             Margin = new Thickness(5, 5, 5, 5),
             VerticalAlignment = VerticalAlignment.Center,
         };

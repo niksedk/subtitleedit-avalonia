@@ -75,8 +75,14 @@ public partial class SpellCheckViewModel : ObservableObject
             // Add rest of the sentence
             PanelWholeText.Children.Add(new TextBlock
             {
-                Text = " word.",
+                Text = "word.\n" ,
             });
+
+            PanelWholeText.Children.Add(new TextBlock
+            {
+                Text = "Seconds line.\n",
+            });
+
 
         }, DispatcherPriority.Background);
     }

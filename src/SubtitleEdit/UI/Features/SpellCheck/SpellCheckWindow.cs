@@ -36,16 +36,16 @@ public class SpellCheckWindow : Window
             Margin = new Thickness(0, 0, 10, 0),
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
-        vm.PanelWholeText = panelWholeText; 
+        vm.PanelWholeText = panelWholeText;
         var boderWholeText = new Border
         {
             BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetTextColor(),
+            BorderBrush = UiUtil.GetBorderColor(),
             Child = panelWholeText,
             Padding = new Thickness(10),
             CornerRadius = new CornerRadius(5),
             MinHeight = 70,
-        };  
+        };
 
         var panelButtons = MakeWordNotFound(vm);
 
@@ -268,8 +268,7 @@ public class SpellCheckWindow : Window
         var borderSuggestions = new Border
         {
             BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetTextColor(),
-            Padding = new Thickness(10),
+            BorderBrush = UiUtil.GetBorderColor(),
             CornerRadius = new CornerRadius(5),
             Child = scrollViewSuggestions,
         };
