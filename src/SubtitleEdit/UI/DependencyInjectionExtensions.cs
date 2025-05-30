@@ -52,6 +52,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<IAutoBackupService, AutoBackupService>();
         collection.AddTransient<IUndoRedoManager, UndoRedoManager>();
         collection.AddTransient<ISpellCheckManager, SpellCheckManager>();
+        collection.AddTransient<ITtsDownloadService, TtsDownloadService>();
 
         // Download services
         collection.AddHttpClient<IFfmpegDownloadService, FfmpegDownloadService>();

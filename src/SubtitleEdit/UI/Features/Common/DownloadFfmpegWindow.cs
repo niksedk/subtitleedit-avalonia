@@ -37,6 +37,7 @@ public class DownloadFfmpegWindow : Window
             Minimum = 0,
             Maximum = 100,
             IsHitTestVisible = false,
+            Focusable = false,
             MinWidth = 400,
             Styles =
             {

@@ -503,6 +503,12 @@ public static class UiUtil
         return control;
     }
 
+    public static Button WithTopAlignment(this Button control)
+    {
+        control.VerticalAlignment = VerticalAlignment.Top;
+        return control;
+    }
+
     public static Button WithIconRight(this Button control, string icon)
     {
         var label = new TextBlock() { Text = control.Content?.ToString(), Padding = new Thickness(0, 0, 4, 0) };

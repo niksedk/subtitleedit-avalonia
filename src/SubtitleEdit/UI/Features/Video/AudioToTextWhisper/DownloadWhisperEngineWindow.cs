@@ -40,6 +40,7 @@ public class DownloadWhisperEngineWindow : Window
             Minimum = 0,
             Maximum = 100,
             IsHitTestVisible = false,
+            Focusable = false,
             Styles =
             {
                 new Style(x => x.OfType<Thumb>())

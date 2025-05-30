@@ -238,7 +238,7 @@ public static class InitMenu
                         },
                         new MenuItem
                         {
-                             Header = "_Text to speech and add to video...",
+                             Header = "_Text to speech...",
                             Command = vm.ShowVideoTextToSpeechCommand,
                         },
                         new Separator(),

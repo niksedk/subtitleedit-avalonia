@@ -157,6 +157,7 @@ public class AudioToTextWhisperWindow : Window
             Minimum = 0,
             Maximum = 100,
             IsHitTestVisible = false,
+            Focusable = false,
             Margin = new Thickness(10, 0, 0, 0),
             Width = double.NaN,
             Height = 10,
