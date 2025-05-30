@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Controls.Documents;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -58,30 +59,25 @@ public partial class SpellCheckViewModel : ObservableObject
         {
             PanelWholeText.Children.Clear();
 
-            // Add normal text
-            PanelWholeText.Children.Add(new TextBlock
+            var textBlock = new TextBlock();
+            textBlock.Inlines.Add(new Run("Your name is "));
+
+            // Add bound name (for demo, using hardcoded)
+            textBlock.Inlines.Add(new Run
             {
-                Text = "This is a ",
+                Text = "Alice",
+                FontSize = 24,
+                FontWeight = FontWeight.Bold,
+                Foreground = Brushes.Orange
             });
 
-            // Add highlighted word
-            PanelWholeText.Children.Add(new TextBlock
-            {
-                Text = "highlighted",
-                Foreground = Brushes.Red,
-                FontWeight = FontWeight.Bold
-            });
+            textBlock.Inlines.Add(new Run(" and not Bob.\nHow are you?\n"));
+            textBlock.Inlines.Add(new Run("Next line\n"));
+            textBlock.Inlines.Add(new Run("Next line\n"));
+            textBlock.Inlines.Add(new Run("Next line\n"));
+            textBlock.Inlines.Add(new Run("Next line\n"));
 
-            // Add rest of the sentence
-            PanelWholeText.Children.Add(new TextBlock
-            {
-                Text = "word.\n" ,
-            });
-
-            PanelWholeText.Children.Add(new TextBlock
-            {
-                Text = "Seconds line.\n",
-            });
+            PanelWholeText.Children.Add(textBlock);
 
 
         }, DispatcherPriority.Background);

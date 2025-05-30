@@ -1,8 +1,10 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.SpellCheck;
@@ -16,7 +18,7 @@ public class SpellCheckWindow : Window
         Icon = UiUtil.GetSeIcon();
         Title = "Spell check";
         Width = 700;
-        Height = 475;
+        Height = 480;
         CanResize = false;
 
         _vm = vm;
@@ -37,14 +39,21 @@ public class SpellCheckWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
         vm.PanelWholeText = panelWholeText;
+        var scrollViewerWholeText = new ScrollViewer
+        {
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+            Content = panelWholeText,
+            Height = 75,
+        };
+
         var boderWholeText = new Border
         {
             BorderThickness = new Thickness(1),
             BorderBrush = UiUtil.GetBorderColor(),
-            Child = panelWholeText,
-            Padding = new Thickness(10),
+            Child = scrollViewerWholeText,
+            Padding = new Thickness(10, 0, 10, 0),
             CornerRadius = new CornerRadius(5),
-            MinHeight = 70,
         };
 
         var panelButtons = MakeWordNotFound(vm);
