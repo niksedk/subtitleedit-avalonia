@@ -39,7 +39,7 @@ public class SpellCheckWindow : Window
         var panelWholeText = new StackPanel
         {
             Orientation = Orientation.Horizontal,
-            VerticalAlignment = VerticalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Top,
             Margin = new Thickness(0, 0, 10, 0),
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
@@ -309,7 +309,7 @@ public class SpellCheckWindow : Window
 
         var buttonUseAllways = new Button
         {
-            Content = "Use all",
+            Content = "Use allways",
             [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.SuggestionUseAlwaysCommand), BindingMode.OneWay),
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,

@@ -32,7 +32,7 @@ public class AboutWindow : Window
 
         var descriptionText = new TextBlock
         {
-            Text = "Subtitle Edit 5 Preview is an early version of the next major release." + Environment.NewLine +
+            Text = "Subtitle Edit 5 Alpha is an early version of the next major release." + Environment.NewLine +
            "Some features may be missing, incomplete or experimental." + Environment.NewLine +
            "We welcome your feedback to help improve the final version." + Environment.NewLine +
            Environment.NewLine +
