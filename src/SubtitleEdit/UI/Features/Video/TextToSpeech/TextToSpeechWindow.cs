@@ -4,6 +4,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Markup.Declarative;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
 
@@ -12,7 +13,7 @@ namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech;
 public class TextToSpeechWindow : Window
 {
     private TextToSpeechViewModel _vm;
-    
+
     public TextToSpeechWindow(TextToSpeechViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
@@ -84,26 +85,29 @@ public class TextToSpeechWindow : Window
         Content = grid;
 
         Activated += delegate { buttonDone.Focus(); }; // hack to make OnKeyDown work
-    }    
+    }
 
     private static Border MakeEngineControls(TextToSpeechViewModel vm)
     {
         var labelMinWidth = 100;
         var controlMinWidth = 200;
 
+        var comboBoxEngines = UiUtil.MakeComboBox(vm.Engines, vm, nameof(vm.SelectedEngine)).WithMinwidth(controlMinWidth);
+        comboBoxEngines.SelectionChanged += vm.SelectedEngineChanged;
+
         var panelEngine = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Margin = new Thickness(0, 10, 0, 0),
-            Children = 
-            { 
+            Children =
+            {
                 new Label
                 {
                     Content = "Engine",
                     MinWidth = labelMinWidth,
                 },
-                UiUtil.MakeComboBox(vm.Engines, vm, nameof(vm.SelectedEngine)).WithMinwidth(controlMinWidth),
-                UiUtil.MakeButton(vm.CancelCommand, IconNames.MdiSettings).WithMarginLeft(5),
+                comboBoxEngines,
+                UiUtil.MakeButton(vm.ShowEngineSettingsCommand, IconNames.MdiSettings).WithMarginLeft(5),
             }
         };
 
@@ -111,9 +115,9 @@ public class TextToSpeechWindow : Window
         {
             Orientation = Orientation.Horizontal,
             Children =
-            { 
+            {
                 new Label
-                { 
+                {
                     Content = "Voice",
                     MinWidth = labelMinWidth,
                 },
@@ -122,8 +126,8 @@ public class TextToSpeechWindow : Window
                 {
                     [!Label.ContentProperty] = new Binding(nameof(vm.VoiceCountInfo)) { Mode = BindingMode.TwoWay }
                 },
-                UiUtil.MakeButton("Test voice", vm.CancelCommand),
-                UiUtil.MakeButton(vm.CancelCommand, IconNames.MdiSettings),
+                UiUtil.MakeButton("Test voice", vm.TestVoiceCommand),
+                UiUtil.MakeButton(vm.ShowTestVoiceSettingsCommand, IconNames.MdiSettings),
             }
         };
 
@@ -249,7 +253,7 @@ public class TextToSpeechWindow : Window
             Children =
             {
                 checkBoxAddAudioToVideoFile,
-                UiUtil.MakeButton(vm.CancelCommand, IconNames.MdiSettings)
+                UiUtil.MakeButton(vm.ShowEncodingSettingsCommand, IconNames.MdiSettings)
                       .WithMarginLeft(5).WithMarginTop(0).WithTopAlignment(),
             }
         };
@@ -287,7 +291,7 @@ public class TextToSpeechWindow : Window
     }
 
     private static StackPanel MakeProgressBarControls(TextToSpeechViewModel vm)
-    {        
+    {
         var progressSlider = new Slider
         {
             Minimum = 0,
@@ -322,7 +326,7 @@ public class TextToSpeechWindow : Window
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             Children =
-            { 
+            {
                 progressSlider,
                 new Label
                 {

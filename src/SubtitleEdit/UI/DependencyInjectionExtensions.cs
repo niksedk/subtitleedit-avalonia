@@ -27,6 +27,9 @@ using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Features.Video.OpenFromUrl;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech;
+using Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
+using Nikse.SubtitleEdit.Features.Video.TextToSpeech.EngineSettings;
+using Nikse.SubtitleEdit.Features.Video.TextToSpeech.VoiceSettings;
 using Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Compression;
@@ -100,5 +103,8 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<DownloadWhisperEngineViewModel>();
         collection.AddTransient<DownloadLibMpvViewModel>();
         collection.AddTransient<EditWholeTextViewModel>();
+        collection.AddTransient<EncodingSettingsViewModel>();
+        collection.AddTransient<EngineSettingsViewModel>();
+        collection.AddTransient<VoiceSettingsViewModel>();
     }
 }

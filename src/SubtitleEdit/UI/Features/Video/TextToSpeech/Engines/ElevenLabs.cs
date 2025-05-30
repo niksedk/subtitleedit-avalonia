@@ -1,14 +1,15 @@
-﻿using System;
+﻿using Avalonia.Platform;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Voices;
+using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Download;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Voices;
-using Nikse.SubtitleEdit.Logic.Config;
-using Nikse.SubtitleEdit.Logic.Download;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.Engines;
 
@@ -26,7 +27,7 @@ public class ElevenLabs : ITtsEngine
         return Task.FromResult(!string.IsNullOrEmpty(Se.Settings.Video.TextToSpeech.ElevenLabsApiKey));
     }
 
-    private const string JsonFileName = "eleven-labs-voices.json";
+    private const string JsonFileName = "ElevenLabsVoices.json";
     private readonly ITtsDownloadService _ttsDownloadService;
 
     public ElevenLabs(ITtsDownloadService ttsDownloadService)
@@ -46,9 +47,10 @@ public class ElevenLabs : ITtsEngine
         var voiceFileName = Path.Combine(elevenLabsFolder, JsonFileName);
         if (!File.Exists(voiceFileName))
         {
-            //using var stream = await FileSystem.OpenAppPackageFileAsync("TtsElevenLabVoices.zip");
-            //using var reader = new StreamReader(stream);
-            //ZipFile.ExtractToDirectory(stream, elevenLabsFolder);
+            var uri = new Uri("avares://Nikse.SubtitleEdit/Assets/TextToSpeech/ElevenLabsVoices.json");
+            using var stream = AssetLoader.Open(uri);
+            using var fileStream = File.Create(voiceFileName);
+            stream.CopyTo(fileStream);
         }
 
         return Map(voiceFileName);

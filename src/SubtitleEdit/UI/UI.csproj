@@ -59,6 +59,11 @@
       <None Remove="Assets\FileTypes\sup.ico" />
       <None Remove="Assets\FileTypes\vtt.ico" />
       <None Remove="Assets\HunspellDictionaries.json" />
+      <None Remove="Assets\TextToSpeech\AllTalkVoices.json" />
+      <None Remove="Assets\TextToSpeech\AzureVoices.json" />
+      <None Remove="Assets\TextToSpeech\ElevenLabsVoices.json" />
+      <None Remove="Assets\TextToSpeech\MurfVoices.json" />
+      <None Remove="Assets\TextToSpeech\PiperVoices.json" />
       <None Remove="Assets\Themes\Dark\New.png" />
       <None Remove="Assets\Themes\Light\AssaAttachments.png" />
       <None Remove="Assets\Themes\Light\AssaDraw.png" />
@@ -707,6 +712,11 @@
 
     <ItemGroup>
       <AvaloniaResource Include="Assets\HunspellDictionaries.json" />
+      <AvaloniaResource Include="Assets\TextToSpeech\AllTalkVoices.json" />
+      <AvaloniaResource Include="Assets\TextToSpeech\AzureVoices.json" />
+      <AvaloniaResource Include="Assets\TextToSpeech\ElevenLabsVoices.json" />
+      <AvaloniaResource Include="Assets\TextToSpeech\MurfVoices.json" />
+      <AvaloniaResource Include="Assets\TextToSpeech\PiperVoices.json" />
     </ItemGroup>
 
     <ItemGroup>

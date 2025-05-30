@@ -1,4 +1,5 @@
-﻿using Nikse.SubtitleEdit.Core.Common;
+﻿using Avalonia.Platform;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Voices;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Download;
@@ -6,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -43,13 +45,14 @@ public class Piper : ITtsEngine
     {
         var piperFolder = GetSetPiperFolder();
 
-        var voiceFileName = Path.Combine(piperFolder, "voices.json");
-        //if (!File.Exists(voiceFileName))
-        //{
-        //    using var stream = await FileSystem.OpenAppPackageFileAsync("TtsPiperVoices.zip");
-        //    using var reader = new StreamReader(stream);
-        //    ZipFile.ExtractToDirectory(stream, piperFolder);
-        //}
+        var voiceFileName = Path.Combine(piperFolder, "PiperVoices.json");
+        if (!File.Exists(voiceFileName))
+        {
+            var uri = new Uri("avares://Nikse.SubtitleEdit/Assets/TextToSpeech/PiperVoices.json");
+            using var stream = AssetLoader.Open(uri);
+            using var fileStream = File.Create(voiceFileName);
+            stream.CopyTo(fileStream);
+        }
 
         return Map(voiceFileName);
     }

@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using Avalonia.Platform;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Voices;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Download;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.Engines;
 
@@ -55,19 +57,20 @@ public class AllTalk : ITtsEngine
     public async Task<Voice[]> GetVoices(string language)
     {
         var allTalkFolder = GetSetAllTalkFolder();
-        var jsonFileName = Path.Combine(allTalkFolder, JsonFileName);
+        var voiceFileName = Path.Combine(allTalkFolder, JsonFileName);
 
-        if (!File.Exists(jsonFileName))
+        if (!File.Exists(voiceFileName))
         {
-            //using var stream = await FileSystem.OpenAppPackageFileAsync("TtsAllTalkVoices.zip");
-            //using var reader = new StreamReader(stream);
-            //ZipFile.ExtractToDirectory(stream, allTalkFolder);
+            var uri = new Uri("avares://Nikse.SubtitleEdit/Assets/TextToSpeech/AllTalkVoices.json");
+            using var stream = AssetLoader.Open(uri);
+            using var fileStream = File.Create(voiceFileName);
+            stream.CopyTo(fileStream);
         }
 
         var result = new List<Voice>();
-        if (File.Exists(jsonFileName))
+        if (File.Exists(voiceFileName))
         {
-            var json = await File.ReadAllTextAsync(jsonFileName);
+            var json = await File.ReadAllTextAsync(voiceFileName);
             var parser = new SeJsonParser();
             var voices = parser.GetArrayElementsByName(json, "voices");
             foreach (var voice in voices)
