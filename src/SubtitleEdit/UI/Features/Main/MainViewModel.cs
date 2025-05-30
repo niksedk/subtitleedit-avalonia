@@ -842,8 +842,10 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             return;
         }
 
-        var viewModel =
-            await _windowService.ShowDialogAsync<ShowHistoryWindow, ShowHistoryViewModel>(Window, vm => { });
+        var viewModel = await _windowService.ShowDialogAsync<ShowHistoryWindow, ShowHistoryViewModel>(Window, vm => 
+        {
+            vm.Initialize(_undoRedoManager);
+        });
 
         _shortcutManager.ClearKeys();
     }

@@ -1,27 +1,43 @@
-using System.Collections.ObjectModel;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Logic.UndoRedo;
+using System.Collections.ObjectModel;
 
 namespace Nikse.SubtitleEdit.Features.Edit.ShowHistory;
 
 public partial class ShowHistoryViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<string> languages;
-    [ObservableProperty] private string selectedLanguage;
-    
+    [ObservableProperty] private ObservableCollection<ShowHistoryDisplayItem> _historyItems;
+    [ObservableProperty] private ShowHistoryDisplayItem? _selectedHistoryItem;
+    [ObservableProperty] private bool _isRollbackEnabled;
+
+    private IUndoRedoManager? _undoRedoManager;
+
     public ShowHistoryWindow? Window { get; set; }
     
     public bool OkPressed { get; private set; }
 
     public ShowHistoryViewModel()
     {
-        Languages = new ObservableCollection<string> { "English", "Danish", "Spanish" };
-        SelectedLanguage = Languages[0];
+        HistoryItems = new ObservableCollection<ShowHistoryDisplayItem>();
+    }
+
+    public void Initialize(IUndoRedoManager undoRedoManager)
+    {
+        _undoRedoManager = undoRedoManager;
+        foreach (var item in _undoRedoManager.UndoList)
+        {
+            HistoryItems.Add(new ShowHistoryDisplayItem() 
+            { 
+                Time = item.Created.ToString("yyyy-MM-dd HH:mm:ss"),
+                Description = item.Description
+            });
+        }
     }
     
     [RelayCommand]                   
-    private void Ok() 
+    private void RollbackTo() 
     {
         OkPressed = true;
         Window?.Close();

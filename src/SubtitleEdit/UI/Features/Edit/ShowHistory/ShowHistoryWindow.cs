@@ -1,4 +1,6 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
@@ -8,48 +10,68 @@ namespace Nikse.SubtitleEdit.Features.Edit.ShowHistory;
 public class ShowHistoryWindow : Window
 {
     private ShowHistoryViewModel _vm;
-    
+
     public ShowHistoryWindow(ShowHistoryViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Show history";
-        Width = 310;
-        Height = 140;
-        CanResize = false;
+        Width = 710;
+        Height = 640;
+        CanResize = true;
 
         _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
-        var label = new Label
+        var dataGrid = new DataGrid
         {
-            Content = "Language",
-            VerticalAlignment = VerticalAlignment.Center,
+            AutoGenerateColumns = false,
+            IsReadOnly = true,
+            SelectionMode = DataGridSelectionMode.Single,
+            Margin = new Thickness(0, 10, 0, 0),
+            [!DataGrid.ItemsSourceProperty] = new Binding(nameof(vm.HistoryItems)),
+            [!DataGrid.SelectedItemProperty] = new Binding(nameof(vm.SelectedHistoryItem)),
+            Width = double.NaN,
+            Height = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Columns =
+            {
+                new DataGridTextColumn
+                {
+                    Header = "Time",
+                    Binding = new Binding(nameof(ShowHistoryDisplayItem.Time)),
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
+                },
+                new DataGridTextColumn
+                {
+                    Header = "Description",
+                    Binding = new Binding(nameof(ShowHistoryDisplayItem.Description)),
+                    Width = new DataGridLength(3, DataGridLengthUnitType.Auto)
+                }
+            },
+        };
+        dataGrid.SelectionChanged += (sender, args) =>
+        {
+            vm.IsRollbackEnabled = dataGrid.SelectedItem != null;
         };
 
-        var combo = new ComboBox
-        {
-            ItemsSource = vm.Languages,
-            SelectedValue = vm.SelectedLanguage,
-            VerticalAlignment = VerticalAlignment.Center,
-            MinWidth = 180,
-        };
-
-        var buttonPanel = UiUtil.MakeButtonBar(
-            UiUtil.MakeButton("OK", vm.OkCommand),
-            UiUtil.MakeButton("Cancel", vm.CancelCommand)
+        var buttonRollback = UiUtil.MakeButton("Restore selected", vm.RollbackToCommand).WithBindEnabled(nameof(vm.IsRollbackEnabled));
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
+        var panelButtons = UiUtil.MakeButtonBar(
+            buttonRollback,
+            buttonCancel
         );
-        
+
         var grid = new Grid
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
@@ -59,22 +81,12 @@ public class ShowHistoryWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Children.Add(label);
-        Grid.SetRow(label, 0);
-        Grid.SetColumn(label, 0);
-
-        grid.Children.Add(combo);
-        Grid.SetRow(combo, 0);
-        Grid.SetColumn(combo, 1);
-
-        grid.Children.Add(buttonPanel);
-        Grid.SetRow(buttonPanel, 1);
-        Grid.SetColumn(buttonPanel, 0);
-        Grid.SetColumnSpan(buttonPanel, 2);
+        grid.Add(dataGrid, 0, 0);
+        grid.Add(panelButtons, 1, 0);
 
         Content = grid;
-        
-        Activated += delegate { Focus(); }; // hack to make OnKeyDown work
+
+        Activated += delegate { buttonCancel.Focus(); }; // hack to make OnKeyDown work
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
