@@ -1,23 +1,18 @@
 using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit.Features.Common;
+using Nikse.SubtitleEdit.Features.Edit.Find;
 using Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
+using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
+using Nikse.SubtitleEdit.Features.Edit.Replace;
+using Nikse.SubtitleEdit.Features.Edit.ShowHistory;
+using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Features.Options.Language;
 using Nikse.SubtitleEdit.Features.Options.Settings;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
-using Nikse.SubtitleEdit.Features.Translate;
-using Nikse.SubtitleEdit.Logic.Media;
-using Nikse.SubtitleEdit.Logic;
-using Nikse.SubtitleEdit.Logic.Compression;
-using Nikse.SubtitleEdit.Logic.Dictionaries;
-using Nikse.SubtitleEdit.Logic.Download;
-using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
-using Nikse.SubtitleEdit.Features.Video.BurnIn;
-using Nikse.SubtitleEdit.Features.Video.OpenFromUrl;
-using Nikse.SubtitleEdit.Features.Video.TextToSpeech;
-using Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
 using Nikse.SubtitleEdit.Features.SpellCheck;
+using Nikse.SubtitleEdit.Features.SpellCheck.EditWholeText;
 using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
 using Nikse.SubtitleEdit.Features.Sync.AdjustAllTimes;
 using Nikse.SubtitleEdit.Features.Sync.ChangeFrameRate;
@@ -27,12 +22,18 @@ using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 using Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
 using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 using Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
-using Nikse.SubtitleEdit.Features.Edit.Find;
-using Nikse.SubtitleEdit.Features.Edit.Replace;
-using Nikse.SubtitleEdit.Features.Edit.ShowHistory;
-using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
+using Nikse.SubtitleEdit.Features.Translate;
+using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
+using Nikse.SubtitleEdit.Features.Video.BurnIn;
+using Nikse.SubtitleEdit.Features.Video.OpenFromUrl;
+using Nikse.SubtitleEdit.Features.Video.TextToSpeech;
+using Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
+using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Compression;
+using Nikse.SubtitleEdit.Logic.Dictionaries;
+using Nikse.SubtitleEdit.Logic.Download;
+using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
-using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 
 namespace Nikse.SubtitleEdit;
 
@@ -97,5 +98,6 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<DownloadWhisperModelsViewModel>();
         collection.AddTransient<DownloadWhisperEngineViewModel>();
         collection.AddTransient<DownloadLibMpvViewModel>();
+        collection.AddTransient<EditWholeTextViewModel>();
     }
 }

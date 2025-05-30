@@ -17,7 +17,7 @@ public class SpellCheckWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Spell check";
-        Width = 810;
+        Width = 700;
         Height = 475;
         CanResize = false;
 
@@ -30,6 +30,11 @@ public class SpellCheckWindow : Window
             VerticalAlignment = VerticalAlignment.Bottom,
             [!Label.ContentProperty] = new Binding(nameof(SpellCheckViewModel.LineText), BindingMode.OneWay)
         };
+
+        var buttonEditWholeText = UiUtil.MakeButton(vm.EditWholeTextCommand, IconNames.MdiPencil);
+        buttonEditWholeText.HorizontalAlignment = HorizontalAlignment.Right;
+        buttonEditWholeText.VerticalAlignment = VerticalAlignment.Top;
+        buttonEditWholeText.Margin = new Thickness(0, 3, 0, 5);
 
         var panelWholeText = new StackPanel
         {
@@ -80,8 +85,8 @@ public class SpellCheckWindow : Window
             },
             ColumnDefinitions =
             {
+                new ColumnDefinition { Width = new GridLength(5, GridUnitType.Star) },
                 new ColumnDefinition { Width = new GridLength(3, GridUnitType.Star) },
-                new ColumnDefinition { Width = new GridLength(2, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 20,
@@ -94,6 +99,7 @@ public class SpellCheckWindow : Window
         grid.Add(labelLine, 0, 0);
         grid.Add(boderWholeText, 1, 0);
         grid.Add(panelButtons, 2, 0);
+        grid.Add(buttonEditWholeText, 2, 0);
         grid.Add(panelButtonsOk, 3, 1);
 
         grid.Add(labelDictionary, 0, 1);
@@ -101,16 +107,16 @@ public class SpellCheckWindow : Window
 
         Content = grid;
 
-        Activated += delegate { Focus(); }; // hack to make OnKeyDown work
+        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 
-    private Grid MakeWordNotFound(SpellCheckViewModel vm)
+    private static Grid MakeWordNotFound(SpellCheckViewModel vm)
     {
         var labelWordNotFound = new Label
         {
             VerticalAlignment = VerticalAlignment.Bottom,
             Content = "Word not found",
-            Margin = new Thickness(0, 10, 0, 0),
+            Margin = new Thickness(0, 13, 0, 0),
         };
 
         var textBoxWord = new TextBox
@@ -228,7 +234,7 @@ public class SpellCheckWindow : Window
         return grid;
     }
 
-    private Grid MakeSuggestions(SpellCheckViewModel vm)
+    private static Grid MakeSuggestions(SpellCheckViewModel vm)
     {
         var comboBoxDictionary = new ComboBox
         {
@@ -281,7 +287,7 @@ public class SpellCheckWindow : Window
         var scrollViewSuggestions = new ScrollViewer
         {
             Content = listBoxSuggestions,
-            Height = 240,
+            Height = 243,
         };
 
         var borderSuggestions = new Border
@@ -340,7 +346,6 @@ public class SpellCheckWindow : Window
             VerticalAlignment = VerticalAlignment.Stretch,
             Width = double.NaN,
             Height = double.NaN,
-            Margin = new Thickness(0, 0, 10, 0),
         };
 
         grid.Add(panelDictionary, 0, 0);

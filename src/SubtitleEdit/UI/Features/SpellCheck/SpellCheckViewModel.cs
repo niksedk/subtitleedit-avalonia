@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.SpellCheck;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.SpellCheck.EditWholeText;
 using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -118,9 +119,27 @@ public partial class SpellCheckViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void EditWholeText()
+    private async Task EditWholeText()
     {
-        //TODO: open new edit box
+        var selectedParagraph = SelectedParagraph;
+        if (selectedParagraph == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<EditWholeTextWindow, EditWholeTextViewModel>(Window!, vm =>
+        {
+            vm.WholeText = selectedParagraph.Text;
+            vm.LineInfo = $"Spell checker - line {Paragraphs.IndexOf(selectedParagraph) + 1} of {Paragraphs.Count}";
+        });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        selectedParagraph.Text = result.WholeText;
+        DoSpellCheck();
     }
 
     [RelayCommand]
@@ -246,6 +265,9 @@ public partial class SpellCheckViewModel : ObservableObject
     [RelayCommand]
     private void Ok()
     {
+        TotalChangedWords = _spellCheckManager.NoOfChangedWords;
+        TotalSkippedWords = _spellCheckManager.NoOfSkippedWords;
+        OkPressed = true;
         Dispatcher.UIThread.Invoke(() => { Window?.Close(); });
     }
 
@@ -286,9 +308,6 @@ public partial class SpellCheckViewModel : ObservableObject
         }
         else
         {
-            TotalChangedWords = _spellCheckManager.NoOfChangedWords;
-            TotalSkippedWords = _spellCheckManager.NoOfSkippedWords;
-            OkPressed = true;
             Ok();
         }
     }
