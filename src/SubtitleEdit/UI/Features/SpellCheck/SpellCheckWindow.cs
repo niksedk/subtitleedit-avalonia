@@ -18,7 +18,7 @@ public class SpellCheckWindow : Window
         Icon = UiUtil.GetSeIcon();
         Title = "Spell check";
         Width = 810;
-        Height = 490;
+        Height = 475;
         CanResize = false;
 
         _vm = vm;
@@ -27,7 +27,7 @@ public class SpellCheckWindow : Window
 
         var labelLine = new Label
         {
-            VerticalAlignment = VerticalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Bottom,
             [!Label.ContentProperty] = new Binding(nameof(SpellCheckViewModel.LineText), BindingMode.OneWay)
         };
 
@@ -58,6 +58,12 @@ public class SpellCheckWindow : Window
 
         var panelButtons = MakeWordNotFound(vm);
 
+
+        var labelDictionary = new Label
+        {
+            VerticalAlignment = VerticalAlignment.Bottom,
+            Content = "Dictionary",
+        };
         var panelSuggestions = MakeSuggestions(vm);
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand).WithLeftAlignment();
@@ -79,7 +85,7 @@ public class SpellCheckWindow : Window
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 20,
-            RowSpacing = 10,
+            RowSpacing = 0,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
@@ -90,6 +96,7 @@ public class SpellCheckWindow : Window
         grid.Add(panelButtons, 2, 0);
         grid.Add(panelButtonsOk, 3, 1);
 
+        grid.Add(labelDictionary, 0, 1);
         grid.Add(panelSuggestions, 1, 1, 2);
 
         Content = grid;
@@ -101,7 +108,7 @@ public class SpellCheckWindow : Window
     {
         var labelWordNotFound = new Label
         {
-            VerticalAlignment = VerticalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Bottom,
             Content = "Word not found",
             Margin = new Thickness(0, 10, 0, 0),
         };
@@ -121,6 +128,7 @@ public class SpellCheckWindow : Window
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 5, 0, 0),
         };
 
         var buttonChangeAll = new Button
@@ -130,6 +138,7 @@ public class SpellCheckWindow : Window
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 5, 0, 0),
         };
 
         var buttonSkipOne = new Button
@@ -139,6 +148,7 @@ public class SpellCheckWindow : Window
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 5, 0, 0),
         };
 
         var buttonSkipAll = new Button
@@ -148,6 +158,7 @@ public class SpellCheckWindow : Window
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 5, 0, 0),
         };
 
         var buttonAddToNames = new Button
@@ -157,6 +168,7 @@ public class SpellCheckWindow : Window
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 5, 0, 0),
         };
 
         var buttonAddToDictionary = new Button
@@ -166,6 +178,7 @@ public class SpellCheckWindow : Window
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 5, 0, 0),
         };
 
         var buttonGoogleSearch = new Button
@@ -175,6 +188,7 @@ public class SpellCheckWindow : Window
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 5, 0, 0),
         };
 
         var grid = new Grid
@@ -198,7 +212,7 @@ public class SpellCheckWindow : Window
             VerticalAlignment = VerticalAlignment.Top,
             Margin = new Thickness(0, 0, 0, 0),
             ColumnSpacing = 5,
-            RowSpacing = 5,
+            RowSpacing = 0,
         };
 
         grid.Add(labelWordNotFound, 0, 0, 1, 2);
@@ -216,12 +230,6 @@ public class SpellCheckWindow : Window
 
     private Grid MakeSuggestions(SpellCheckViewModel vm)
     {
-        var labelDictionary = new Label
-        {
-            VerticalAlignment = VerticalAlignment.Center,
-            Content = "Dictionary",
-        };
-
         var comboBoxDictionary = new ComboBox
         {
             [!ComboBox.ItemsSourceProperty] = new Binding(nameof(SpellCheckViewModel.Dictionaries), BindingMode.OneWay),
@@ -243,11 +251,9 @@ public class SpellCheckWindow : Window
         {
             Orientation = Orientation.Horizontal,
             VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(0, 0, 10, 0),
             Spacing = 5,
             Children =
             {
-                labelDictionary,
                 comboBoxDictionary,
                 buttonDictionaryBrowse,
             }
@@ -308,7 +314,7 @@ public class SpellCheckWindow : Window
         {
             Orientation = Orientation.Horizontal,
             VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(0, 5, 0, 0),
+            Margin = new Thickness(0, 5, 0, 10),
             Spacing = 5,
             Children =
             {

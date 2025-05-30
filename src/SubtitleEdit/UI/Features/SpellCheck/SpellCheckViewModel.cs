@@ -46,6 +46,7 @@ public partial class SpellCheckViewModel : ObservableObject
 
     private readonly ISpellCheckManager _spellCheckManager;
     private readonly IWindowService _windowService;
+    private IFocusSubtitleLine? _focusSubtitleLine;
 
     private SpellCheckWord _currentSpellCheckWord;
     private SpellCheckResult? _lastSpellCheckResult;
@@ -106,14 +107,11 @@ public partial class SpellCheckViewModel : ObservableObject
 
             _spellCheckManager.Initialize(SelectedDictionary.DictionaryFileName, GetTwoLetterLanguageCode(SelectedDictionary));
         }
-
-        //Page?.Initialize(subtitle, videoFileName, this);
-
-        //_loading = false;
     }
 
-    public void Initialize(ObservableCollection<SubtitleLineViewModel> paragraphs, int? selectedSubtitleIndex)
+    public void Initialize(ObservableCollection<SubtitleLineViewModel> paragraphs, int? selectedSubtitleIndex, IFocusSubtitleLine focusSubtitleLine)
     {
+        _focusSubtitleLine = focusSubtitleLine;
         Paragraphs.Clear();
         Paragraphs.AddRange(paragraphs);
         Dispatcher.UIThread.Post(DoSpellCheck, DispatcherPriority.Background);
@@ -122,8 +120,7 @@ public partial class SpellCheckViewModel : ObservableObject
     [RelayCommand]
     private void EditWholeText()
     {
-        OkPressed = true;
-        Window?.Close();
+        //TODO: open new edit box
     }
 
     [RelayCommand]
@@ -249,7 +246,7 @@ public partial class SpellCheckViewModel : ObservableObject
     [RelayCommand]
     private void Ok()
     {
-        Dispatcher.UIThread.Invoke(() => { Window?.Close(); });        
+        Dispatcher.UIThread.Invoke(() => { Window?.Close(); });
     }
 
     internal void OnKeyDown(KeyEventArgs e)
@@ -273,7 +270,6 @@ public partial class SpellCheckViewModel : ObservableObject
             _currentSpellCheckWord = results[0].Word;
             _lastSpellCheckResult = results[0];
             SelectedParagraph = results[0].Paragraph;
-            //_currentParagraph = results[0].Paragraph;
 
             var suggestions = _spellCheckManager.GetSuggestions(results[0].Word.Text);
             Suggestions = new ObservableCollection<string>(suggestions);
@@ -286,20 +282,7 @@ public partial class SpellCheckViewModel : ObservableObject
             var lineIndex = Paragraphs.IndexOf(results[0].Paragraph) + 1;
             LineText = $"Spell checker - line {lineIndex} of {Paragraphs.Count}";
 
-            //if (!string.IsNullOrEmpty(_videoFileName))
-            //{
-            //    VideoPlayer.SeekTo(results[0].Paragraph.StartTime.TimeSpan);
-            //    VideoPlayer.Pause();
-            //}
-
-            SelectedParagraph = Paragraphs.FirstOrDefault(p => p.Id == results[0].Paragraph.Id);
-            if (SelectedParagraph != null)
-            {
-                //MainThread.BeginInvokeOnMainThread(() =>
-                //{
-                //    SubtitleList.ScrollTo(SelectedParagraph, null, ScrollToPosition.Center);
-                //});
-            }
+            _focusSubtitleLine?.GoToAndFocusLine(SelectedParagraph);
         }
         else
         {

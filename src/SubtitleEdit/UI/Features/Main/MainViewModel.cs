@@ -52,10 +52,11 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Tmds.DBus.Protocol;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
-public partial class MainViewModel : ObservableObject, IAdjustCallback
+public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSubtitleLine
 {
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _subtitles;
     [ObservableProperty] private SubtitleLineViewModel? _selectedSubtitle;
@@ -551,8 +552,14 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback
     {
         var result = await _windowService.ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(Window, vm => 
         {
-            vm.Initialize(Subtitles, SelectedSubtitleIndex);
+            vm.Initialize(Subtitles, SelectedSubtitleIndex, this);
         });
+
+        if (result.OkPressed && result.TotalChangedWords > 0)
+        {
+            ShowStatus(StatusTextRight = $"{result.TotalChangedWords} words corrected in spell check");
+        }
+
         _shortcutManager.ClearKeys();
     }
 
@@ -1161,11 +1168,11 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback
             return;
         }
 
-        // First, set the selected index (this selects the row)
-        SubtitleGrid.SelectedIndex = index;
-
-        // Then, scroll to the selected item to make it visible
-        SubtitleGrid.ScrollIntoView(SubtitleGrid.SelectedItem, null);
+        Dispatcher.UIThread.Post(() =>
+        {
+            SubtitleGrid.SelectedIndex = index;
+            SubtitleGrid.ScrollIntoView(SubtitleGrid.SelectedItem, null);
+        }, DispatcherPriority.Background);
     }
 
     public void SelectAndScrollToSubtitle(SubtitleLineViewModel subtitle)
@@ -1175,11 +1182,11 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback
             return;
         }
 
-        // First, set the selected item (this selects the row)
-        SubtitleGrid.SelectedItem = subtitle;
-
-        // Then, scroll to the selected item to make it visible
-        SubtitleGrid.ScrollIntoView(subtitle, null);
+        Dispatcher.UIThread.Post(() =>
+        {
+            SubtitleGrid.SelectedItem = subtitle;
+            SubtitleGrid.ScrollIntoView(subtitle, null);
+        }, DispatcherPriority.Background);
     }
 
     private async Task SubtitleOpen(string fileName, string? videoFileName = null, int? selectedSubtitleIndex = null)
@@ -2107,5 +2114,10 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback
     internal void StartTimeChanged(object? sender, TimeSpan e)
     {
         _updateAudioVisualizer = true;
+    }
+
+    public void GoToAndFocusLine(SubtitleLineViewModel p)
+    {
+        SelectAndScrollToSubtitle(p);
     }
 }
