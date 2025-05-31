@@ -44,9 +44,9 @@ public class TextToSpeechWindow : Window
 
         var buttonDone = UiUtil.MakeButton("Done", vm.CancelCommand);
         var buttonPanel = UiUtil.MakeButtonBar(
-            UiUtil.MakeButton("Generate speech from text", vm.OkCommand),
-            UiUtil.MakeButton("Import...", vm.CancelCommand),
-            UiUtil.MakeButton("Export...", vm.CancelCommand),
+            UiUtil.MakeButton("Generate speech from text", vm.GenerateTtsCommand),
+            UiUtil.MakeButton("Import...", vm.ImportCommand),
+            UiUtil.MakeButton("Export...", vm.ExportCommand),
             buttonDone
         ).WithMarginTop(0);
 
@@ -106,7 +106,9 @@ public class TextToSpeechWindow : Window
                     MinWidth = labelMinWidth,
                 },
                 comboBoxEngines,
-                UiUtil.MakeButton(vm.ShowEngineSettingsCommand, IconNames.MdiSettings).WithMarginLeft(5),
+                UiUtil.MakeButton(vm.ShowEngineSettingsCommand, IconNames.MdiSettings)
+                    .WithMarginLeft(5)
+                    .WithBindIsVisible(nameof(vm.IsEngineSettingsVisible)),
             }
         };
 

@@ -14,6 +14,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Download;
 using Nikse.SubtitleEdit.Logic.Media;
+using SubtitleAlchemist.Features.Video.TextToSpeech.DownloadTts;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -252,8 +253,50 @@ public partial class TextToSpeechViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void TestVoice()
+    private async Task TestVoice()
     {
+        var engine = SelectedEngine;
+        var voice = SelectedVoice;
+        if (engine == null || voice == null || Window == null)
+        {
+            return;
+        }
+
+        var isInstalled = await IsEngineInstalled(engine);
+        if (!isInstalled)
+        {
+            return;
+        }
+
+        if (!engine.IsVoiceInstalled(voice) && voice.EngineVoice is PiperVoice piperVoice)
+        {
+            var modelFileName = Path.Combine(Piper.GetSetPiperFolder(), piperVoice.ModelShort);
+            var configFileName = Path.Combine(Piper.GetSetPiperFolder(), piperVoice.ConfigShort);
+            if (!File.Exists(modelFileName) || !File.Exists(configFileName))
+            {
+                var dlResult = await _windowService.ShowDialogAsync<DownloadTtsWindow, DownloadTtsViewModel>(Window, vm => vm.StartDownloadPiperVoice(piperVoice));
+            }
+        }
+
+        SaveSettings();
+
+        var result = await engine.Speak(VoiceTestText, _waveFolder, voice, SelectedLanguage, SelectedRegion, SelectedModel, _cancellationToken);
+        if (!File.Exists(result.FileName))
+        {
+            await MessageBox.Show(
+                Window,
+                "Test voice error",
+                $"Output audio file was not generated: {result.FileName}",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+
+            return;
+        }
+
+        //Player.Stop();
+        //Player.Source = null;
+        //Player.Source = MediaSource.FromFile(result.FileName);
+        //Player.Play();
     }
 
     [RelayCommand]
@@ -266,6 +309,18 @@ public partial class TextToSpeechViewModel : ObservableObject
     private async Task ShowEncodingSettings()
     {
         await _windowService.ShowDialogAsync<EncodingSettingsWindow, EncodingSettingsViewModel>(Window!, vm => { });
+    }
+
+    [RelayCommand]
+    private void Import()
+    {
+    }
+
+    [RelayCommand]
+    private void Export()
+    {
+        OkPressed = true;
+        Window?.Close();
     }
 
     [RelayCommand]
@@ -302,7 +357,7 @@ public partial class TextToSpeechViewModel : ObservableObject
                 return false;
             }
 
-            //TODO:   await _popupService.ShowPopupAsync<DownloadTtsPopupModel>(onPresenting: viewModel => viewModel.StartDownloadPiper(), CancellationToken.None);
+            var result = await _windowService.ShowDialogAsync<DownloadTtsWindow, DownloadTtsViewModel>(Window, vm => vm.StartDownloadPiper());
             return await engine.IsInstalled(SelectedRegion);
         }
 

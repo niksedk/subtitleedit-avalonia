@@ -19,14 +19,14 @@ public sealed class DownloadTtsWindow : Window
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
-
+        vm.Window = this;
         DataContext = vm;
 
         var titleText = new TextBlock
-        {
-            Text = "Downloading ffmpeg",
+        {            
             FontSize = 20,
             FontWeight = FontWeight.Bold,
+            [!TextBlock.TextProperty] = new Binding(nameof(vm.TitleText)),
         };
 
         var progressSlider = new Slider

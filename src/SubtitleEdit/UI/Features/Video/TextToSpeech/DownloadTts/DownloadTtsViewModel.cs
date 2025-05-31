@@ -73,7 +73,6 @@ namespace SubtitleAlchemist.Features.Video.TextToSpeech.DownloadTts
                     return;
                 }
 
-
                 if (_downloadTask is { IsCompleted: true })
                 {
                     _timer.Stop();
@@ -191,7 +190,7 @@ namespace SubtitleAlchemist.Features.Video.TextToSpeech.DownloadTts
             {
                 var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
                 var pctString = percentage.ToString(CultureInfo.InvariantCulture);
-                ProgressValue = number;
+                ProgressValue = percentage;
                 ProgressText = $"Downloading... {pctString}%";
             });
 
@@ -213,7 +212,7 @@ namespace SubtitleAlchemist.Features.Video.TextToSpeech.DownloadTts
             {
                 var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
                 var pctString = percentage.ToString(CultureInfo.InvariantCulture);
-                ProgressValue = number;
+                ProgressValue = percentage;
                 ProgressText = $"Downloading... {pctString}%";
             });
             var downloadProgressNull = new Progress<float>(_ => { });

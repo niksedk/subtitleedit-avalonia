@@ -85,10 +85,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     public Window Window { get; set; }
     public Grid ContentGrid { get; set; }
     public MainView MainView { get; set; }
-
     public TextBlock StatusTextLeftLabel { get; set; }
-
-    //public Grid Waveform { get; internal set; }
     public MenuItem MenuReopen { get; set; }
     public AudioVisualizer? AudioVisualizer { get; set; }
 
