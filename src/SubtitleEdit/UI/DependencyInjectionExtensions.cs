@@ -108,5 +108,6 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<ElevenLabsSettingsViewModel>();
         collection.AddTransient<VoiceSettingsViewModel>();
         collection.AddTransient<DownloadTtsViewModel>();
+        collection.AddTransient<ReviewSpeechViewModel>();
     }
 }

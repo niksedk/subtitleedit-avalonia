@@ -153,7 +153,6 @@ public partial class TextToSpeechViewModel : ObservableObject
 
         DoReviewAudioClips = Se.Settings.Video.TextToSpeech.ReviewAudioClips;
         DoGenerateVideoFile = Se.Settings.Video.TextToSpeech.GenerateVideoFile;
-        //  UseCustomAudioEncoding = Se.Settings.Video.TextToSpeech.CustomAudio;
 
         if (SelectedEngine is AzureSpeech)
         {
@@ -177,7 +176,6 @@ public partial class TextToSpeechViewModel : ObservableObject
         Se.Settings.Video.TextToSpeech.Voice = SelectedVoice?.Name ?? string.Empty;
         Se.Settings.Video.TextToSpeech.ReviewAudioClips = DoReviewAudioClips;
         Se.Settings.Video.TextToSpeech.GenerateVideoFile = DoGenerateVideoFile;
-        //Se.Settings.Video.TextToSpeech.CustomAudio = UseCustomAudioEncoding;
 
         if (SelectedEngine is AzureSpeech)
         {
@@ -710,19 +708,11 @@ public partial class TextToSpeechViewModel : ObservableObject
             return previousStepResult;
         }
 
-        //await Shell.Current.GoToAsync(nameof(ReviewSpeechPage), new Dictionary<string, object>
-        //{
-        //    { "Page", nameof(TextToSpeechPage) },
-        //    { "StepResult", previousStepResult },
-        //    { "Engines", Engines.ToArray() },
-        //    { "Engine", engine },
-        //    { "Voices", Voices.ToArray() },
-        //    { "Voice", voice },
-        //    { "WavePeaks", _wavePeakData },
-        //    { "WaveFolder", _waveFolder },
-        //    { "VideoFileName", _videoFileName },
-        //});
-
+        var result = await _windowService.ShowDialogAsync<ReviewSpeechWindow, ReviewSpeechViewModel>(Window, vm =>
+        {
+            vm.Initialize(previousStepResult, Engines.ToArray(), engine, Voices.ToArray(), voice, _wavePeakData);
+        });
+        
         return null;
     }
 
