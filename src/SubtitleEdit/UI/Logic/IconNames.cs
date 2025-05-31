@@ -43,6 +43,7 @@ internal class IconNames
     public const string MdiTools = "mdi-tools";
     public const string MdiWaveform = "mdi-waveform";
     public const string MdiWeb = "mdi-web";
+    public const string MdiRecycle = "mdi-recycle";
 
     //public const string Mdi = "mdi-";
 }

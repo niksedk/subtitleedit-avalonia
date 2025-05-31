@@ -710,7 +710,15 @@ public partial class TextToSpeechViewModel : ObservableObject
 
         var result = await _windowService.ShowDialogAsync<ReviewSpeechWindow, ReviewSpeechViewModel>(Window, vm =>
         {
-            vm.Initialize(previousStepResult, Engines.ToArray(), engine, Voices.ToArray(), voice, _wavePeakData);
+            vm.Initialize(
+                previousStepResult, 
+                Engines.ToArray(), 
+                engine, 
+                Voices.ToArray(), 
+                voice, 
+                Languages.ToArray(),
+                SelectedLanguage,
+                _wavePeakData);
         });
         
         return null;
