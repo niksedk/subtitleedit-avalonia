@@ -32,5 +32,6 @@ internal class IconNames
     public const string MdiSetMerge = "mdi-set-merge";
     public const string MdiScaleBalance = "mdi-scale-balance";
     public const string MdiPencil = "mdi-pencil";
+    public const string MdiWeb = "mdi-web";
     //public const string Mdi = "mdi-";
 }

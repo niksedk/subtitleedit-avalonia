@@ -176,6 +176,9 @@ public partial class DownloadFfmpegViewModel : ObservableObject
 
     internal void OnKeyDown(KeyEventArgs e)
     {
-        CommandCancel();
+        if (e.Key == Key.Escape)
+        {
+            CommandCancel();
+        }
     }
 }

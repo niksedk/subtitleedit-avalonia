@@ -1,90 +1,89 @@
-//using CommunityToolkit.Maui.Views;
-//using Microsoft.Maui.Controls.Shapes;
-//using SubtitleAlchemist.Logic;
-//using SubtitleAlchemist.Logic.Constants;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Media;
+using Avalonia.Data;
+using Nikse.SubtitleEdit.Logic;
+using Avalonia.Controls.Primitives;
+using Avalonia.Styling;
 
-//namespace SubtitleAlchemist.Features.Video.TextToSpeech.DownloadTts;
+namespace SubtitleAlchemist.Features.Video.TextToSpeech.DownloadTts;
 
-//public sealed class DownloadTtsPopup : Popup
-//{
-//    public DownloadTtsPopup(DownloadTtsPopupModel vm)
-//    {
-//        BindingContext = vm;
+public sealed class DownloadTtsWindow : Window
+{
+    private DownloadTtsViewModel _vm;
 
-//        this.BindDynamicTheme();
-//        CanBeDismissedByTappingOutsideOfPopup = false;
+    public DownloadTtsWindow(DownloadTtsViewModel vm)
+    {
+        Icon = UiUtil.GetSeIcon();
+        Title = "TTS - Download engine";
+        SizeToContent = SizeToContent.WidthAndHeight;
+        CanResize = false;
+        WindowStartupLocation = WindowStartupLocation.CenterOwner;
 
-//        var grid = new Grid
-//        {
-//            RowDefinitions =
-//            {
-//                new RowDefinition { Height = GridLength.Auto },
-//                new RowDefinition { Height = GridLength.Auto },
-//                new RowDefinition { Height = GridLength.Auto },
-//                new RowDefinition { Height = GridLength.Auto },
-//            },
-//            ColumnDefinitions =
-//            {
-//                new ColumnDefinition { Width = GridLength.Auto },
-//            },
-//            Margin = new Thickness(2),
-//            Padding = new Thickness(30, 20, 30 ,10),
-//            RowSpacing = 20,
-//            ColumnSpacing = 10,
-//            HorizontalOptions = LayoutOptions.Fill,
-//            VerticalOptions = LayoutOptions.Fill,
-//        }.BindDynamicTheme();
+        DataContext = vm;
 
-//        var titleLabel = new Label
-//        {
-//            FontAttributes = FontAttributes.Bold,
-//            FontSize = 18,
-//            Padding = new Thickness(0, 0, 0, 10),
-//        }.BindDynamicTheme();
-//        titleLabel.SetBinding(Label.TextProperty, nameof(vm.TitleText));
-//        grid.Add(titleLabel, 0, 0);
+        var titleText = new TextBlock
+        {
+            Text = "Downloading ffmpeg",
+            FontSize = 20,
+            FontWeight = FontWeight.Bold,
+        };
 
-//        var progressLabel = new Label
-//        {
-//            Text = "...",
-//            FontAttributes = FontAttributes.Bold,
-//        }.BindDynamicTheme(); 
-//        progressLabel.SetBinding(Label.TextProperty, nameof(vm.Progress));
-//        grid.Add(progressLabel, 0, 1);
+        var progressSlider = new Slider
+        {
+            Minimum = 0,
+            Maximum = 100,
+            IsHitTestVisible = false,
+            Focusable = false,
+            MinWidth = 400,
+            Styles =
+            {
+                new Style(x => x.OfType<Thumb>())
+                {
+                    Setters =
+                    {
+                        new Setter(Thumb.IsVisibleProperty, false)
+                    }
+                },
+                new Style(x => x.OfType<Track>())
+                {
+                    Setters =
+                    {
+                        new Setter(Track.HeightProperty, 6.0)
+                    }
+                },
+            }
+        };
+        progressSlider.Bind(Slider.ValueProperty, new Binding(nameof(vm.ProgressValue)));
 
-//        var progressBar = new ProgressBar
-//        {
-//            Progress = 0.5,
-//            ProgressColor = (Color)Application.Current!.Resources[ThemeNames.ProgressColor],
-//            HorizontalOptions = LayoutOptions.Fill,
-//        };
-//        progressBar.SetBinding(ProgressBar.ProgressProperty, nameof(vm.ProgressValue));
-//        grid.Add(progressBar, 0, 2);
+        var statusText = new TextBlock();
+        statusText.Bind(TextBlock.TextProperty, new Binding(nameof(vm.ProgressText)));
 
-//        var cancelButton = new Button
-//        {
-//            Text = "Cancel",
-//            HorizontalOptions = LayoutOptions.Center,
-//            Command = vm.CancelCommand,
-//        }.BindDynamicTheme();
-//        grid.Add(cancelButton, 0, 3);
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
+        var buttonBar = UiUtil.MakeButtonBar(buttonCancel);
 
-//        var border = new Border
-//        {
-//            StrokeThickness = 1,
-//            Padding = new Thickness(4, 1, 1, 0),
-//            Margin = new Thickness(2),
-//            HorizontalOptions = LayoutOptions.Fill,
-//            VerticalOptions = LayoutOptions.Fill,
-//            StrokeShape = new RoundRectangle
-//            {
-//                CornerRadius = new CornerRadius(5)
-//            },
-//            Content = grid,
-//        }.BindDynamicTheme();
+        Content = new StackPanel
+        {
+            Spacing = 8,
+            Margin = UiUtil.MakeWindowMargin(),
+            Children =
+            {
+                titleText,
+                progressSlider,
+                statusText,
+                buttonBar,
+            }
+        };
 
-//        Content = border;
+        Activated += delegate
+        {
+            buttonCancel.Focus(); // hack to make OnKeyDown work
+        };
+    }
 
-//        vm.Popup = this;
-//    }
-//}
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        _vm.OnKeyDown(e);
+    }
+}

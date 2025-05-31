@@ -1047,7 +1047,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             var answer = await MessageBox.Show(
                 Window!,
                 "Download ffmpeg?",
-                $"{Environment.NewLine}\"Audio to text\" requires ffmpeg.{Environment.NewLine}{Environment.NewLine}Download and use ffmpeg?",
+                $"{Environment.NewLine}\"Speech to text\" requires ffmpeg.{Environment.NewLine}{Environment.NewLine}Download and use ffmpeg?",
                 MessageBoxButtons.YesNoCancel,
                 MessageBoxIcon.Question);
 

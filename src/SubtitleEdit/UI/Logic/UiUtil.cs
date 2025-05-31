@@ -139,7 +139,6 @@ public static class UiUtil
         return button;
     }
 
-
     public static Button MakeButton(IRelayCommand? command, string iconName, int fontSize)
     {
         var button = new Button
@@ -509,11 +508,11 @@ public static class UiUtil
         return control;
     }
 
-    public static Button WithIconRight(this Button control, string icon)
+    public static Button WithIconRight(this Button control, string iconName)
     {
         var label = new TextBlock() { Text = control.Content?.ToString(), Padding = new Thickness(0, 0, 4, 0) };
         var image = new ContentControl();
-        Attached.SetIcon(image, icon);
+        Attached.SetIcon(image, iconName);
         var stackPanelApplyFixes = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -525,11 +524,11 @@ public static class UiUtil
         return control;
     }
 
-    public static Button WithIconLeft(this Button control, string icon)
+    public static Button WithIconLeft(this Button control, string iconName)
     {
         var label = new TextBlock() { Text = control.Content?.ToString(), Padding = new Thickness(4, 0, 0, 0) };
         var image = new ContentControl();
-        Attached.SetIcon(image, icon);
+        Attached.SetIcon(image, iconName);
         var stackPanelApplyFixes = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -834,6 +833,15 @@ public static class UiUtil
                 Source = vm,
                 Mode = BindingMode.TwoWay
             },
+        };
+    }
+
+    internal static Label MakeLabel(string text)
+    {
+        return new Label
+        {
+            Content = text,
+            VerticalAlignment = VerticalAlignment.Center,
         };
     }
 }

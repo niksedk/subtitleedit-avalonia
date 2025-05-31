@@ -16,7 +16,7 @@ public class AudioToTextWhisperWindow : Window
     public AudioToTextWhisperWindow(AudioToTextWhisperViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = "Audio to text - Whisper";
+        Title = "Speech to text - Whisper";
         Width = 950;
         Height = 660;
         MinWidth = 800;

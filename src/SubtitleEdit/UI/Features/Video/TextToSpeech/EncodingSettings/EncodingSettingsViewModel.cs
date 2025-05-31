@@ -1,7 +1,7 @@
-using System.Collections.ObjectModel;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
 

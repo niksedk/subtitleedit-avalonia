@@ -4,7 +4,6 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
-using Avalonia.Markup.Declarative;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
 

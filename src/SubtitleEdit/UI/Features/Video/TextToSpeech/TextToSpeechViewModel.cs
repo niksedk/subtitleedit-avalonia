@@ -248,7 +248,7 @@ public partial class TextToSpeechViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowEngineSettings()
     {
-        await _windowService.ShowDialogAsync<EngineSettingsWindow, EngineSettingsViewModel>(Window!, vm => { });
+        await _windowService.ShowDialogAsync<ElevenLabsSettingsWindow, ElevenLabsSettingsViewModel>(Window!, vm => { });
     }
 
     [RelayCommand]

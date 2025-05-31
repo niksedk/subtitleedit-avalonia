@@ -37,6 +37,7 @@ using Nikse.SubtitleEdit.Logic.Dictionaries;
 using Nikse.SubtitleEdit.Logic.Download;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
+using SubtitleAlchemist.Features.Video.TextToSpeech.DownloadTts;
 
 namespace Nikse.SubtitleEdit;
 
@@ -104,7 +105,8 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<DownloadLibMpvViewModel>();
         collection.AddTransient<EditWholeTextViewModel>();
         collection.AddTransient<EncodingSettingsViewModel>();
-        collection.AddTransient<EngineSettingsViewModel>();
+        collection.AddTransient<ElevenLabsSettingsViewModel>();
         collection.AddTransient<VoiceSettingsViewModel>();
+        collection.AddTransient<DownloadTtsViewModel>();
     }
 }

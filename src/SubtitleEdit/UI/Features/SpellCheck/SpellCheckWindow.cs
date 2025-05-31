@@ -71,8 +71,8 @@ public class SpellCheckWindow : Window
         };
         var panelSuggestions = MakeSuggestions(vm);
 
-        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand).WithLeftAlignment();
-        var panelButtonsOk = UiUtil.MakeButtonBar(buttonOk);
+        var buttonDone = UiUtil.MakeButton("Done", vm.OkCommand).WithLeftAlignment();
+        var panelButtonsOk = UiUtil.MakeButtonBar(buttonDone);
 
         var grid = new Grid
         {
@@ -107,7 +107,7 @@ public class SpellCheckWindow : Window
 
         Content = grid;
 
-        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        Activated += delegate { buttonDone.Focus(); }; // hack to make OnKeyDown work
     }
 
     private static Grid MakeWordNotFound(SpellCheckViewModel vm)

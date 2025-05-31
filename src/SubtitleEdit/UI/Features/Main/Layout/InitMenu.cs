@@ -233,7 +233,7 @@ public static class InitMenu
                         new Separator(),
                         new MenuItem
                         {
-                            Header = "_Audio to text (Whisper)...",
+                            Header = "_Speech to text (Whisper)...",
                             Command = vm.ShowVideoAudioToTextWhisperCommand,
                         },
                         new MenuItem
