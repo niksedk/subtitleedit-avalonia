@@ -20,6 +20,7 @@ namespace SubtitleAlchemist.Features.Video.TextToSpeech.DownloadTts
     public partial class DownloadTtsViewModel : ObservableObject
     {
         public DownloadTtsWindow? Window { get; set; }
+        public bool OkPressed { get; private set; }
 
         [ObservableProperty] private string _titleText;
         [ObservableProperty] private float _progressValue;
@@ -89,6 +90,7 @@ namespace SubtitleAlchemist.Features.Video.TextToSpeech.DownloadTts
                     _zipUnpacker.UnpackZipStream(_downloadStream, folder, "piper", false, new List<string>(), null);
 
                     _downloadStream.Dispose();
+                    OkPressed = true;
                     Close();
                 }
                 else if (_downloadTask is { IsFaulted: true })
@@ -131,6 +133,7 @@ namespace SubtitleAlchemist.Features.Video.TextToSpeech.DownloadTts
                     _downloadStreamConfig.Position = 0;
                     File.WriteAllBytes(_configFileName, _downloadStreamConfig.ToArray());
                     _downloadStreamConfig.Dispose();
+                    OkPressed = true;
                     Close();
                 }
                 else if (_downloadTaskVoiceModel is { IsFaulted: true })

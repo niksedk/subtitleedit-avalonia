@@ -43,7 +43,7 @@ public class AboutWindow : Window
 
         var githubLink = new TextBlock
         {
-            Text = "C# source code on Github",
+            Text = "Github",
             Foreground = Brushes.Blue,
             Cursor = new Cursor(StandardCursorType.Hand),
         };
@@ -52,6 +52,15 @@ public class AboutWindow : Window
             await Launcher.LaunchUriAsync(new Uri("https://github.com/niksedk/subtitleedit-avalonia"));
         };
 
+        var panelGithub = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Children =
+            {
+                new TextBlock { Text = "Issue tracking and source code: " },
+                githubLink,
+            }
+        };
 
         var paypalLink = new TextBlock
         {
@@ -73,7 +82,8 @@ public class AboutWindow : Window
         githubSponsorLink.PointerPressed += async (_, _) =>
         {
             await Launcher.LaunchUriAsync(new Uri("https://github.com/sponsors/niksedk"));
-        };
+        };      
+
 
         var panelDonate = new StackPanel
         {
@@ -100,7 +110,7 @@ public class AboutWindow : Window
                 titleText,
                 licenseText,
                 descriptionText,
-                githubLink,
+                panelGithub,
                 panelDonate,
                 panelButtons,
             }

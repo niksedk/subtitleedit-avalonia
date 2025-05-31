@@ -1,8 +1,10 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using HanumanInstitute.LibMpv;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Common;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
@@ -22,6 +24,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
+using Timer = System.Timers.Timer;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech;
 
@@ -37,7 +41,6 @@ public partial class TextToSpeechViewModel : ObservableObject
     [ObservableProperty] private string? _selectedRegion;
     [ObservableProperty] private ObservableCollection<string> _models;
     [ObservableProperty] private string? _selectedModel;
-
     [ObservableProperty] private bool _hasLanguageParameter;
     [ObservableProperty] private bool _hasApiKey;
     [ObservableProperty] private string _apiKey;
@@ -47,6 +50,7 @@ public partial class TextToSpeechViewModel : ObservableObject
     [ObservableProperty] private int _voiceCount;
     [ObservableProperty] private string _voiceCountInfo;
     [ObservableProperty] private string _voiceTestText;
+    [ObservableProperty] private bool _isVoiceTestEnabled;
     [ObservableProperty] private bool _doReviewAudioClips;
     [ObservableProperty] private bool _doGenerateVideoFile;
     [ObservableProperty] private bool _isGenerating;
@@ -69,6 +73,10 @@ public partial class TextToSpeechViewModel : ObservableObject
     private FfmpegMediaInfo? _mediaInfo;
     private string _videoFileName = string.Empty;
     private bool _isMerging;
+    private MpvContext? _mpvContext;
+    private Lock _playLock;
+    private readonly Timer _timer;
+
 
     private readonly IWindowService _windowService;
 
@@ -88,11 +96,15 @@ public partial class TextToSpeechViewModel : ObservableObject
         ApiKey = string.Empty;
         Region = string.Empty;
         VoiceCountInfo = string.Empty;
-        VoiceTestText = "The quick brown fox jumps over the lazy dog.";
+        VoiceTestText = string.Empty;
         ProgressText = string.Empty;
         DoneOrCancelText = string.Empty;
+        IsVoiceTestEnabled = true;
 
         _cancellationTokenSource = new CancellationTokenSource();
+        _playLock = new Lock();
+        _timer = new Timer(100);
+        _timer.Elapsed += OnTimerOnElapsed;
 
         Engines = new ObservableCollection<ITtsEngine>
         {
@@ -102,9 +114,21 @@ public partial class TextToSpeechViewModel : ObservableObject
             new AzureSpeech(ttsDownloadService),
             new Murf(ttsDownloadService),
         };
-        SelectedEngine = Engines.FirstOrDefault();
+    }
 
-        LoadSettings();
+    private void OnTimerOnElapsed(object? sender, ElapsedEventArgs args)
+    {
+        lock (_playLock)
+        {
+            if (_mpvContext == null)
+            {
+                IsVoiceTestEnabled = true;
+            }
+            else
+            {
+                IsVoiceTestEnabled = _mpvContext.Pause.Get() ?? false;
+            }
+        }
     }
 
     private void LoadSettings()
@@ -275,6 +299,10 @@ public partial class TextToSpeechViewModel : ObservableObject
             if (!File.Exists(modelFileName) || !File.Exists(configFileName))
             {
                 var dlResult = await _windowService.ShowDialogAsync<DownloadTtsWindow, DownloadTtsViewModel>(Window, vm => vm.StartDownloadPiperVoice(piperVoice));
+                if (!dlResult.OkPressed)
+                {
+                    return;
+                }
             }
         }
 
@@ -293,11 +321,10 @@ public partial class TextToSpeechViewModel : ObservableObject
             return;
         }
 
-        //Player.Stop();
-        //Player.Source = null;
-        //Player.Source = MediaSource.FromFile(result.FileName);
-        //Player.Play();
+        IsVoiceTestEnabled = false;
+        await PlayAudio(result.FileName);
     }
+
 
     [RelayCommand]
     private async Task ShowTestVoiceSettings()
@@ -319,21 +346,35 @@ public partial class TextToSpeechViewModel : ObservableObject
     [RelayCommand]
     private void Export()
     {
-        OkPressed = true;
-        Window?.Close();
     }
 
     [RelayCommand]
     private void Ok()
     {
         OkPressed = true;
-        Window?.Close();
+        Close();
     }
 
     [RelayCommand]
     private void Cancel()
     {
+        Close();
+    }
+
+    private void Close()
+    {
         Window?.Close();
+    }
+
+    private async Task PlayAudio(string fileName)
+    {
+        lock (_playLock)
+        {
+            _mpvContext?.Stop();
+            _mpvContext?.Dispose();
+            _mpvContext = new MpvContext();
+        }
+        await _mpvContext.LoadFile(fileName).InvokeAsync();
     }
 
     private async Task<bool> IsEngineInstalled(ITtsEngine engine)
@@ -776,5 +817,20 @@ public partial class TextToSpeechViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+    }
+
+    internal void OnClosing(WindowClosingEventArgs e)
+    {
+        lock (_playLock)
+        {
+            _mpvContext?.Dispose();
+            _mpvContext = null;
+        }
+    }
+
+    internal void OnLoaded(RoutedEventArgs e)
+    {
+        LoadSettings();
+        _timer.Start();
     }
 }

@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
@@ -112,6 +113,7 @@ public class TextToSpeechWindow : Window
             }
         };
 
+        var buttonTestVoice = UiUtil.MakeButton("Test voice", vm.TestVoiceCommand).WithBindIsEnabled(nameof(vm.IsVoiceTestEnabled));    
         var panelVoice = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -127,7 +129,7 @@ public class TextToSpeechWindow : Window
                 {
                     [!Label.ContentProperty] = new Binding(nameof(vm.VoiceCountInfo)) { Mode = BindingMode.TwoWay }
                 },
-                UiUtil.MakeButton("Test voice", vm.TestVoiceCommand),
+                buttonTestVoice,
                 UiUtil.MakeButton(vm.ShowTestVoiceSettingsCommand, IconNames.MdiSettings),
             }
         };
@@ -143,7 +145,8 @@ public class TextToSpeechWindow : Window
                     MinWidth = labelMinWidth,
                 },
                 UiUtil.MakeComboBox(vm.Models, vm, nameof(vm.SelectedModel)).WithMinwidth(controlMinWidth),
-            }
+            },
+            [!StackPanel.IsVisibleProperty] = new Binding(nameof(vm.HasModel)) { Mode = BindingMode.OneWay },
         };
 
         var panelRegion = new StackPanel
@@ -157,7 +160,8 @@ public class TextToSpeechWindow : Window
                     MinWidth = labelMinWidth,
                 },
                 UiUtil.MakeComboBox(vm.Regions, vm, nameof(vm.SelectedRegion)).WithMinwidth(controlMinWidth),
-            }
+            },
+            [!StackPanel.IsVisibleProperty] = new Binding(nameof(vm.HasRegion)) { Mode = BindingMode.OneWay },
         };
 
         var panelLanguage = new StackPanel
@@ -171,7 +175,8 @@ public class TextToSpeechWindow : Window
                     MinWidth = labelMinWidth,
                 },
                 UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage)).WithMinwidth(controlMinWidth),
-            }
+            },
+            [!StackPanel.IsVisibleProperty] = new Binding(nameof(vm.HasLanguageParameter)) { Mode = BindingMode.OneWay },
         };
 
         var panelApiKey = new StackPanel
@@ -185,7 +190,8 @@ public class TextToSpeechWindow : Window
                     MinWidth = labelMinWidth,
                 },
                 UiUtil.MakeTextBox(325, vm, nameof(vm.ApiKey)),
-            }
+            },
+            [!StackPanel.IsVisibleProperty] = new Binding(nameof(vm.HasApiKey)) { Mode = BindingMode.OneWay },
         };
 
         var grid = new Grid
@@ -345,5 +351,17 @@ public class TextToSpeechWindow : Window
     {
         base.OnKeyDown(e);
         _vm.OnKeyDown(e);
+    }
+
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        base.OnClosing(e);
+        _vm.OnClosing(e);
+    }
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+        _vm.OnLoaded(e);
     }
 }
