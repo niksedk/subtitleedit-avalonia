@@ -66,17 +66,17 @@ public class SettingsPage : UserControl
             Margin = new Thickness(10, 10, 40, 10),
             Children =
             {
-                UiUtil.MakeMenuItem("Rules", vm.ScrollToSectionCommand, "Rules"),
-                UiUtil.MakeMenuItem("General", vm.ScrollToSectionCommand, "General"),
-                UiUtil.MakeMenuItem("Subtitle formats", vm.ScrollToSectionCommand, "Subtitle formats"),
-                UiUtil.MakeMenuItem("Syntax coloring", vm.ScrollToSectionCommand, "Syntax coloring"),
-                UiUtil.MakeMenuItem("Video player", vm.ScrollToSectionCommand, "Video player"),
-                UiUtil.MakeMenuItem("Waveform/spectrogram", vm.ScrollToSectionCommand, "Waveform/spectrogram"),
-                UiUtil.MakeMenuItem("Tools", vm.ScrollToSectionCommand, "Tools"),
-                UiUtil.MakeMenuItem("Toolbar", vm.ScrollToSectionCommand, "Toolbar"),
-                UiUtil.MakeMenuItem("Appearance", vm.ScrollToSectionCommand, "Appearance"),
-                UiUtil.MakeMenuItem("Network", vm.ScrollToSectionCommand, "Network"),
-                UiUtil.MakeMenuItem("File type associations", vm.ScrollToSectionCommand, "File type associations"),
+                UiUtil.MakeMenuItem( "Rules", vm.ScrollToSectionCommand, "Rules", IconNames.MdiPoliceBadge),
+                UiUtil.MakeMenuItem("General", vm.ScrollToSectionCommand, "General", IconNames.MdiCogs),
+                UiUtil.MakeMenuItem("Subtitle formats", vm.ScrollToSectionCommand, "Subtitle formats", IconNames.MdiClosedCaption),
+                UiUtil.MakeMenuItem("Syntax coloring", vm.ScrollToSectionCommand, "Syntax coloring", IconNames.MdiPalette),
+                UiUtil.MakeMenuItem("Video player", vm.ScrollToSectionCommand, "Video player", IconNames.MdiPlayBox),
+                UiUtil.MakeMenuItem("Waveform/spectrogram", vm.ScrollToSectionCommand, "Waveform/spectrogram", IconNames.MdiWaveform),
+                UiUtil.MakeMenuItem("Tools", vm.ScrollToSectionCommand, "Tools", IconNames.MdiTools),
+                UiUtil.MakeMenuItem("Toolbar", vm.ScrollToSectionCommand, "Toolbar", IconNames.MdiDotsHorizontal),
+                UiUtil.MakeMenuItem("Appearance", vm.ScrollToSectionCommand, "Appearance", IconNames.MdiEyeSettings),
+                UiUtil.MakeMenuItem("Network", vm.ScrollToSectionCommand, "Network", IconNames.MdiNetwork),
+                UiUtil.MakeMenuItem("File type associations", vm.ScrollToSectionCommand, "File type associations", IconNames.MdiFileCog),
             }
         };
 

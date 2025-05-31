@@ -377,35 +377,27 @@ public static class UiUtil
         return link;
     }
 
-    public static TextBlock MakeMenuItem(string text, IRelayCommand command, object commandParameter)
+    public static Button MakeMenuItem(string text, IRelayCommand command, object commandParameter, string iconName)
     {
-        var link = new TextBlock
+        var label = new Label() { Content = text, Padding = new Thickness(4, 0, 0, 0) };
+        var image = new ContentControl();
+        Attached.SetIcon(image, iconName);
+        var stackPanelApplyFixes = new StackPanel
         {
-            Text = text,
-            FontWeight = FontWeight.Bold,
-            FontSize = 16,
+            Orientation = Orientation.Horizontal,
+            Children = { image, label }
+        };
+
+        var link = new Button
+        {
+            Content = stackPanelApplyFixes,
+            FontWeight = FontWeight.DemiBold,
             Margin = new Thickness(0),
             Padding = new Thickness(10, 5, 10, 5),
             HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Center
-        };
-
-        link.PointerEntered += (_, __) =>
-        {
-            link.Background = new SolidColorBrush(Colors.LightGray);
-        };
-
-        link.PointerExited += (_, __) =>
-        {
-            link.Background = Brushes.Transparent;
-        };
-
-        link.PointerPressed += (_, __) =>
-        {
-            if (command.CanExecute(commandParameter))
-            {
-                command.Execute(commandParameter);
-            }
+            VerticalAlignment = VerticalAlignment.Center,
+            Command = command,
+            CommandParameter = commandParameter,
         };
 
         return link;
@@ -539,7 +531,6 @@ public static class UiUtil
 
         return control;
     }
-
 
     public static Button WithCommandParameter<T>(this Button control, T parameter)
     {
