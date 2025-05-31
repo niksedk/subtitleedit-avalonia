@@ -1,17 +1,13 @@
-using System.Collections.ObjectModel;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.VoiceSettings;
 
 public partial class VoiceSettingsViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<double> _fromFrameRates;
-    [ObservableProperty] private double _selectedFromFrameRate;
-    
-    [ObservableProperty] private ObservableCollection<double> _toFrameRates;
-    [ObservableProperty] private double _selectedToFrameRate;
+    [ObservableProperty] private string _voiceTestText;
     
     public VoiceSettingsWindow? Window { get; set; }
     
@@ -19,34 +15,14 @@ public partial class VoiceSettingsViewModel : ObservableObject
 
     public VoiceSettingsViewModel()
     {
-        FromFrameRates = new ObservableCollection<double> { 23.976, 24, 25, 29.97, 30, 50, 59.94, 60 };
-        ToFrameRates = new ObservableCollection<double>(FromFrameRates);
-        
-        SelectedFromFrameRate = FromFrameRates[0];
-        SelectedToFrameRate = ToFrameRates[0];
+        VoiceTestText = Se.Settings.Video.TextToSpeech.VoiceTestText;
     }
     
     [RelayCommand]                   
-    private void SwitchFrameRates() 
-    {
-        var temp = SelectedFromFrameRate;
-        SelectedFromFrameRate = SelectedToFrameRate;
-        SelectedToFrameRate = temp;
-    }
-
-    [RelayCommand]
-    private void BrowseFromFrameRate()
-    {
-    }
-
-    [RelayCommand]
-    private void BrowseToFrameRate()
-    {
-    }
-
-    [RelayCommand]                   
     private void Ok() 
     {
+        Se.Settings.Video.TextToSpeech.VoiceTestText = VoiceTestText;
+        Se.SaveSettings();
         OkPressed = true;
         Window?.Close();
     }

@@ -1,17 +1,18 @@
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Logic.Config;
+using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
 
 public partial class EncodingSettingsViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<double> _fromFrameRates;
-    [ObservableProperty] private double _selectedFromFrameRate;
-    
-    [ObservableProperty] private ObservableCollection<double> _toFrameRates;
-    [ObservableProperty] private double _selectedToFrameRate;
+    [ObservableProperty] private ObservableCollection<EncodingDisplayItem> _encodings;
+    [ObservableProperty] private EncodingDisplayItem? _selectedEncoding;
+    [ObservableProperty] private bool _isStereo;
     
     public EncodingSettingsWindow? Window { get; set; }
     
@@ -19,34 +20,34 @@ public partial class EncodingSettingsViewModel : ObservableObject
 
     public EncodingSettingsViewModel()
     {
-        FromFrameRates = new ObservableCollection<double> { 23.976, 24, 25, 29.97, 30, 50, 59.94, 60 };
-        ToFrameRates = new ObservableCollection<double>(FromFrameRates);
-        
-        SelectedFromFrameRate = FromFrameRates[0];
-        SelectedToFrameRate = ToFrameRates[0];
+        Encodings = new ObservableCollection<EncodingDisplayItem>(EncodingDisplayItem.GetDefaultEncodings());
+        LoadSettings();
     }
-    
-    [RelayCommand]                   
-    private void SwitchFrameRates() 
+
+    private void LoadSettings()
     {
-        var temp = SelectedFromFrameRate;
-        SelectedFromFrameRate = SelectedToFrameRate;
-        SelectedToFrameRate = temp;
+        var lastUsedEncoding = Se.Settings.Video.TextToSpeech.CustomAudioEncoding;
+        var encoding = Encodings.FirstOrDefault(e => e.Name.Equals(lastUsedEncoding, StringComparison.OrdinalIgnoreCase));
+        if (encoding != null)
+        {
+            SelectedEncoding = encoding;
+        }
+        else
+        {
+            SelectedEncoding = Encodings.FirstOrDefault(e => e.Name.Equals("Default", StringComparison.OrdinalIgnoreCase));
+        }
     }
 
     [RelayCommand]
-    private void BrowseFromFrameRate()
+    private void Ok()
     {
-    }
+        var encoding = SelectedEncoding;
+        if (encoding != null)
+        {
+            Se.Settings.Video.TextToSpeech.CustomAudioEncoding = encoding.Code;
+            Se.Settings.Video.TextToSpeech.CustomAudioStereo = encoding.IsStereoEnabled;
+        }
 
-    [RelayCommand]
-    private void BrowseToFrameRate()
-    {
-    }
-
-    [RelayCommand]                   
-    private void Ok() 
-    {
         OkPressed = true;
         Window?.Close();
     }

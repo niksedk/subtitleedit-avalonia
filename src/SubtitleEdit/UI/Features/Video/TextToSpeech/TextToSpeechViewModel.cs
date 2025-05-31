@@ -49,7 +49,6 @@ public partial class TextToSpeechViewModel : ObservableObject
     [ObservableProperty] private bool _hasModel;
     [ObservableProperty] private int _voiceCount;
     [ObservableProperty] private string _voiceCountInfo;
-    [ObservableProperty] private string _voiceTestText;
     [ObservableProperty] private bool _isVoiceTestEnabled;
     [ObservableProperty] private bool _doReviewAudioClips;
     [ObservableProperty] private bool _doGenerateVideoFile;
@@ -97,9 +96,8 @@ public partial class TextToSpeechViewModel : ObservableObject
         ApiKey = string.Empty;
         Region = string.Empty;
         VoiceCountInfo = string.Empty;
-        VoiceTestText = string.Empty;
         ProgressText = string.Empty;
-        ProgressText = "laskdf lskadf lsafjk ";
+        ProgressText = string.Empty;
         DoneOrCancelText = string.Empty;
         IsVoiceTestEnabled = true;
 
@@ -153,7 +151,6 @@ public partial class TextToSpeechViewModel : ObservableObject
             SelectedVoice = lastVoice;
         }
 
-        VoiceTestText = Se.Settings.Video.TextToSpeech.VoiceTestText;
         DoReviewAudioClips = Se.Settings.Video.TextToSpeech.ReviewAudioClips;
         DoGenerateVideoFile = Se.Settings.Video.TextToSpeech.GenerateVideoFile;
         //  UseCustomAudioEncoding = Se.Settings.Video.TextToSpeech.CustomAudio;
@@ -178,7 +175,6 @@ public partial class TextToSpeechViewModel : ObservableObject
     {
         Se.Settings.Video.TextToSpeech.Engine = SelectedEngine?.Name ?? string.Empty;
         Se.Settings.Video.TextToSpeech.Voice = SelectedVoice?.Name ?? string.Empty;
-        Se.Settings.Video.TextToSpeech.VoiceTestText = VoiceTestText;
         Se.Settings.Video.TextToSpeech.ReviewAudioClips = DoReviewAudioClips;
         Se.Settings.Video.TextToSpeech.GenerateVideoFile = DoGenerateVideoFile;
         //Se.Settings.Video.TextToSpeech.CustomAudio = UseCustomAudioEncoding;
@@ -312,7 +308,13 @@ public partial class TextToSpeechViewModel : ObservableObject
 
         SaveSettings();
 
-        var result = await engine.Speak(VoiceTestText, _waveFolder, voice, SelectedLanguage, SelectedRegion, SelectedModel, _cancellationToken);
+        var text = Se.Settings.Video.TextToSpeech.VoiceTestText;
+        if (string.IsNullOrEmpty(text))
+        {
+            text = "This is a test";
+        }
+
+        var result = await engine.Speak(text, _waveFolder, voice, SelectedLanguage, SelectedRegion, SelectedModel, _cancellationToken);
         if (!File.Exists(result.FileName))
         {
             await MessageBox.Show(
