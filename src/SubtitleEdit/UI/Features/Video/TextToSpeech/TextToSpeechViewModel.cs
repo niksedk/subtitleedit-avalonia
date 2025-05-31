@@ -57,6 +57,7 @@ public partial class TextToSpeechViewModel : ObservableObject
     [ObservableProperty] private bool _isEngineSettingsVisible;
     [ObservableProperty] private string _progressText;
     [ObservableProperty] private double _progressValue;
+    [ObservableProperty] private double _progressOpacity;
     [ObservableProperty] private string _doneOrCancelText;
 
     //public TextToSpeechPage? Page { get; set; }
@@ -66,7 +67,7 @@ public partial class TextToSpeechViewModel : ObservableObject
 
     private Subtitle _subtitle = new();
     private readonly IFileHelper _fileHelper;
-    private readonly string _waveFolder;
+    private string _waveFolder;
     private CancellationTokenSource _cancellationTokenSource;
     private CancellationToken _cancellationToken;
     private WavePeakData _wavePeakData;
@@ -98,6 +99,7 @@ public partial class TextToSpeechViewModel : ObservableObject
         VoiceCountInfo = string.Empty;
         VoiceTestText = string.Empty;
         ProgressText = string.Empty;
+        ProgressText = "laskdf lskadf lsafjk ";
         DoneOrCancelText = string.Empty;
         IsVoiceTestEnabled = true;
 
@@ -210,8 +212,7 @@ public partial class TextToSpeechViewModel : ObservableObject
         IsEngineSettingsVisible = false;
         ProgressText = string.Empty;
         ProgressValue = 0.0;
-
-        //_waveFolder = waveFolder;
+        _waveFolder = waveFolder;
         //_mediaInfo = mediaInfo;
     }
 
@@ -235,6 +236,7 @@ public partial class TextToSpeechViewModel : ObservableObject
         ProgressValue = 0;
         ProgressText = string.Empty;
         IsGenerating = true;
+        ProgressOpacity = 1.0;
         DoneOrCancelText = "Cancel";
         _isMerging = false;
         SaveSettings();
@@ -245,6 +247,7 @@ public partial class TextToSpeechViewModel : ObservableObject
         {
             DoneOrCancelText = "Done";
             IsGenerating = false;
+            ProgressOpacity = 0;
             return;
         }
 
@@ -254,6 +257,7 @@ public partial class TextToSpeechViewModel : ObservableObject
         {
             DoneOrCancelText = "Done";
             IsGenerating = false;
+            ProgressOpacity = 0;
             return;
         }
 
@@ -433,6 +437,7 @@ public partial class TextToSpeechViewModel : ObservableObject
         {
             DoneOrCancelText = "Done";
             IsGenerating = false;
+            ProgressOpacity = 0;
             return;
         }
 
@@ -456,6 +461,7 @@ public partial class TextToSpeechViewModel : ObservableObject
 
         DoneOrCancelText = "Done";
         IsGenerating = false;
+        ProgressOpacity = 0;
     }
 
     private async Task<string?> MergeAudioParagraphs(TtsStepResult[] previousStepResult, CancellationToken cancellationToken)
@@ -490,7 +496,7 @@ public partial class TextToSpeechViewModel : ObservableObject
 
             DeleteFileNoError(fileNameToDelete);
         }
-        ProgressValue = 1;
+        ProgressValue = 100;
 
         return outputFileName;
     }
@@ -585,9 +591,9 @@ public partial class TextToSpeechViewModel : ObservableObject
                 SpeedFactor = 1.0f,
                 Voice = voice,
             });
-            ProgressValue = (double)(index + 1) / _subtitle.Paragraphs.Count;
+            ProgressValue = (double)(index + 1) / _subtitle.Paragraphs.Count * 100.0;
         }
-        ProgressValue = 1;
+        ProgressValue = 100;
 
         return resultList.ToArray();
     }
@@ -606,7 +612,7 @@ public partial class TextToSpeechViewModel : ObservableObject
         for (var index = 0; index < previousStepResult.Length; index++)
         {
             ProgressText = $"Adjusting speed: segment {index + 1} of {_subtitle.Paragraphs.Count}";
-            ProgressValue = (double)index / _subtitle.Paragraphs.Count;
+            ProgressValue = (double)index / _subtitle.Paragraphs.Count * 100;
 
             var item = previousStepResult[index];
             var p = item.Paragraph;
@@ -682,10 +688,8 @@ public partial class TextToSpeechViewModel : ObservableObject
             _ = mergeProcess.Start();
 #pragma warning restore CA1416 // Validate platform compatibility
             await mergeProcess.WaitForExitAsync(cancellationToken);
-
-            ProgressValue = (double)(index + 1) / _subtitle.Paragraphs.Count;
         }
-        ProgressValue = 1;
+        ProgressValue = 100;
 
         return resultList.ToArray();
     }

@@ -619,7 +619,10 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task ShowVideoTextToSpeech()
     {
-        await _windowService.ShowDialogAsync<TextToSpeechWindow, TextToSpeechViewModel>(Window, vm => { });
+        await _windowService.ShowDialogAsync<TextToSpeechWindow, TextToSpeechViewModel>(Window, vm => 
+        { 
+            vm.Initialize(GetUpdateSubtitle(), _videoFileName, AudioVisualizer.WavePeaks, Path.GetTempPath());
+        });
         _shortcutManager.ClearKeys();
     }
 

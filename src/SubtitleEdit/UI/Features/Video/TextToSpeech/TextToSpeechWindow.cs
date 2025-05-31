@@ -297,8 +297,33 @@ public class TextToSpeechWindow : Window
         return boder;
     }
 
-    private static StackPanel MakeProgressBarControls(TextToSpeechViewModel vm)
+    private static Grid MakeProgressBarControls(TextToSpeechViewModel vm)
     {
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            Margin = new Thickness(0, 0, 0, 20),
+            [!Grid.OpacityProperty] = new Binding(nameof(vm.ProgressOpacity)) { Mode = BindingMode.OneWay },
+        };
+
+        var label = new Label
+        {
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            Margin = new Thickness(0, 20, 0, 0),
+            [!Label.ContentProperty] = new Binding(nameof(vm.ProgressText)) { Mode = BindingMode.TwoWay },
+        };
+
         var progressSlider = new Slider
         {
             Minimum = 0,
@@ -327,24 +352,10 @@ public class TextToSpeechWindow : Window
         };
         progressSlider.Bind(Slider.ValueProperty, new Binding(nameof(vm.ProgressValue)));
 
-        var panelProgress = new StackPanel
-        {
-            Orientation = Orientation.Vertical,
-            Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            Children =
-            {
-                progressSlider,
-                new Label
-                {
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Top,
-                    [!Label.ContentProperty] = new Binding(nameof(vm.ProgressText)) { Mode = BindingMode.TwoWay },
-                },
-            }
-        };
+        grid.Add(label, 0, 0);
+        grid.Add(progressSlider, 0, 0);
 
-        return panelProgress;
+        return grid;
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
