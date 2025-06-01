@@ -551,7 +551,6 @@ public class AudioVisualizer : Control
             }
         }
 
-
         var newStart = _originalStartSeconds;
         var newEnd = _originalEndSeconds;
 
@@ -569,12 +568,14 @@ public class AudioVisualizer : Control
                 // Clamp so it doesn't overlap previous or next
                 if (previous != null && newStart < previous.EndTime.TotalSeconds + 0.001)
                 {
-                    return;
+                    newStart = previous.EndTime.TotalSeconds + 0.001;
+                    newEnd = newStart + (_originalEndSeconds - _originalStartSeconds);
                 }
 
                 if (next != null && newEnd > next.StartTime.TotalSeconds - 0.001)
                 {
-                    return;
+                    newEnd = next.StartTime.TotalSeconds - 0.001;
+                    newStart = newEnd - (_originalEndSeconds - _originalStartSeconds);
                 }
 
                 _activeParagraph.StartTime = TimeSpan.FromSeconds(newStart);
