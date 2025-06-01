@@ -43,7 +43,7 @@ public class TextToSpeechWindow : Window
 
         var progressBarLayout = MakeProgressBarControls(vm);
 
-        var buttonDone = UiUtil.MakeButton("Done", vm.CancelCommand).WithBindIsVisible(nameof(vm.IsNotGenerating));
+        var buttonDone = UiUtil.MakeButton("Done", vm.DoneCommand).WithBindIsVisible(nameof(vm.IsNotGenerating));
         var buttonCancel = UiUtil.MakeButton("Cancel", vm.CancelCommand).WithBindIsVisible(nameof(vm.IsGenerating));
         var buttonPanel = UiUtil.MakeButtonBar(
             UiUtil.MakeButton("Generate speech from text", vm.GenerateTtsCommand).WithBindIsEnabled(nameof(vm.IsNotGenerating)),
@@ -93,7 +93,7 @@ public class TextToSpeechWindow : Window
         var labelMinWidth = 100;
         var controlMinWidth = 200;
 
-        var comboBoxEngines = UiUtil.MakeComboBox(vm.Engines, vm, nameof(vm.SelectedEngine)).WithMinwidth(controlMinWidth);
+        var comboBoxEngines = UiUtil.MakeComboBox(vm.Engines, vm, nameof(vm.SelectedEngine)).WithMinWidth(controlMinWidth);
         comboBoxEngines.SelectionChanged += vm.SelectedEngineChanged;
 
         var panelEngine = new StackPanel
@@ -125,7 +125,7 @@ public class TextToSpeechWindow : Window
                     Content = "Voice",
                     MinWidth = labelMinWidth,
                 },
-                UiUtil.MakeComboBox(vm.Voices, vm, nameof(vm.SelectedVoice)).WithMinwidth(controlMinWidth),
+                UiUtil.MakeComboBox(vm.Voices, vm, nameof(vm.SelectedVoice)).WithMinWidth(controlMinWidth),
                 new Label
                 {
                     [!Label.ContentProperty] = new Binding(nameof(vm.VoiceCountInfo)) { Mode = BindingMode.TwoWay }
@@ -135,7 +135,7 @@ public class TextToSpeechWindow : Window
             }
         };
 
-        var comboBoxModels = UiUtil.MakeComboBox(vm.Models, vm, nameof(vm.SelectedModel)).WithMinwidth(controlMinWidth);
+        var comboBoxModels = UiUtil.MakeComboBox(vm.Models, vm, nameof(vm.SelectedModel)).WithMinWidth(controlMinWidth);
         var panelModel = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -162,12 +162,12 @@ public class TextToSpeechWindow : Window
                     Content = "Region",
                     MinWidth = labelMinWidth,
                 },
-                UiUtil.MakeComboBox(vm.Regions, vm, nameof(vm.SelectedRegion)).WithMinwidth(controlMinWidth),
+                UiUtil.MakeComboBox(vm.Regions, vm, nameof(vm.SelectedRegion)).WithMinWidth(controlMinWidth),
             },
             [!StackPanel.IsVisibleProperty] = new Binding(nameof(vm.HasRegion)) { Mode = BindingMode.OneWay },
         };
 
-        var comboBoxLanguages = UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage)).WithMinwidth(controlMinWidth);
+        var comboBoxLanguages = UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage)).WithMinWidth(controlMinWidth);
         var panelLanguage = new StackPanel
         {
             Orientation = Orientation.Horizontal,

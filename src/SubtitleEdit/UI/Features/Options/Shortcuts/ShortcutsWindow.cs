@@ -43,7 +43,7 @@ public class ShortcutsWindow : Window
 
         var labelFilter = UiUtil.MakeTextBlock(language.Filter);
         var comboBoxFilter = UiUtil.MakeComboBox(vm.Filters, vm, nameof(vm.SelectedFilter))
-            .WithMinwidth(120)
+            .WithMinWidth(120)
             .WithMargin(5, 0, 10, 0);
         comboBoxFilter.SelectionChanged += vm.ComboBoxFilter_SelectionChanged;
 

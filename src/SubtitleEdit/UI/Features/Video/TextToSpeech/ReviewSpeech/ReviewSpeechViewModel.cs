@@ -8,6 +8,7 @@ using HanumanInstitute.LibMpv;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Common;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Engines;
+using Nikse.SubtitleEdit.Features.Video.TextToSpeech.EngineSettings;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Voices;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -39,9 +40,13 @@ public partial class ReviewSpeechViewModel : ObservableObject
     [ObservableProperty] private string? _selectedModel;
     [ObservableProperty] private ObservableCollection<ReviewRow> _lines;
     [ObservableProperty] private ReviewRow? _selectedLine;
+    [ObservableProperty] private bool _isElevelLabsControlsVisible;
     [ObservableProperty] private bool _autoContinue;
     [ObservableProperty] private bool _isPlayVisible;
     [ObservableProperty] private bool _isStopVisible;
+    [ObservableProperty] private double _stability;
+    [ObservableProperty] private double _similarity;
+    [ObservableProperty] private double _speakerBoost;
 
     public ReviewSpeechWindow? Window { get; set; }
 
@@ -65,6 +70,10 @@ public partial class ReviewSpeechViewModel : ObservableObject
         Languages = new ObservableCollection<TtsLanguage>();
         Regions = new ObservableCollection<string>();
         Models = new ObservableCollection<string>();
+
+        Stability = Se.Settings.Video.TextToSpeech.ElevenLabsStability;
+        Similarity = Se.Settings.Video.TextToSpeech.ElevenLabsSimilarity;
+        SpeakerBoost = Se.Settings.Video.TextToSpeech.ElevenLabsSpeakerBoost;
 
         IsPlayVisible = true;
 
@@ -237,6 +246,24 @@ public partial class ReviewSpeechViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task ShowStabilityHelp()
+    {
+        await ElevenLabsSettingsViewModel.ShowStabilityHelp(Window!);
+    }
+
+    [RelayCommand]
+    private async Task ShowSimilarityHelp()
+    {
+        await ElevenLabsSettingsViewModel.ShowSimilarityHelp(Window!);
+    }
+
+    [RelayCommand]
+    private async Task ShowSpeakerBoostHelp()
+    {
+        await ElevenLabsSettingsViewModel.ShowSpeakerBoostHelp(Window!);
+    }
+
+    [RelayCommand]
     private void RegenerateAudio()
     {
     }
@@ -292,14 +319,12 @@ public partial class ReviewSpeechViewModel : ObservableObject
 
         Dispatcher.UIThread.Post(async () =>
         {
-            //IsEngineSettingsVisible = false;
             var voices = await engine.GetVoices(SelectedLanguage?.Code ?? string.Empty);
             Voices.Clear();
             foreach (var vo in voices)
             {
                 Voices.Add(vo);
             }
-            //VoiceCount = Voices.Count;
 
             var lastVoice = Voices.FirstOrDefault(v => v.Name == Se.Settings.Video.TextToSpeech.Voice);
             if (lastVoice == null)
@@ -308,11 +333,6 @@ public partial class ReviewSpeechViewModel : ObservableObject
                                                        p.Name.Contains("English", StringComparison.OrdinalIgnoreCase));
             }
             SelectedVoice = lastVoice ?? Voices.First();
-
-            //HasLanguageParameter = engine.HasLanguageParameter;
-            //HasApiKey = engine.HasApiKey;
-            //HasRegion = engine.HasRegion;
-            //HasModel = engine.HasModel;
 
             if (engine.HasLanguageParameter)
             {
@@ -350,9 +370,9 @@ public partial class ReviewSpeechViewModel : ObservableObject
                 SelectedModel = Models.FirstOrDefault();
             }
 
+            IsElevelLabsControlsVisible = false; 
             if (engine is AzureSpeech)
             {
-                //   ApiKey = Se.Settings.Video.TextToSpeech.AzureApiKey;
                 SelectedRegion = Se.Settings.Video.TextToSpeech.AzureRegion;
                 if (string.IsNullOrEmpty(SelectedRegion))
                 {
@@ -361,13 +381,12 @@ public partial class ReviewSpeechViewModel : ObservableObject
             }
             else if (engine is ElevenLabs)
             {
-                //   ApiKey = Se.Settings.Video.TextToSpeech.ElevenLabsApiKey;
+                IsElevelLabsControlsVisible = true;
                 SelectedModel = Se.Settings.Video.TextToSpeech.ElevenLabsModel;
                 if (string.IsNullOrEmpty(SelectedModel))
                 {
                     SelectedModel = Models.First();
                 }
-                //IsEngineSettingsVisible = true;
             }
         });
     }

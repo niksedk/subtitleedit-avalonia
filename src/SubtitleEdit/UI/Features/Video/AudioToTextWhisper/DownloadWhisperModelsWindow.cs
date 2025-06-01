@@ -33,7 +33,7 @@ public class DownloadWhisperModelsWindow : Window
             Text = "Select model",
         };
 
-        var comboBoxModel = UiUtil.MakeComboBox(vm.Models, vm, nameof(vm.SelectedModel)).WithMinwidth(200);
+        var comboBoxModel = UiUtil.MakeComboBox(vm.Models, vm, nameof(vm.SelectedModel)).WithMinWidth(200);
 
         var buttonDownload = UiUtil.MakeButton(Se.Language.General.Download, vm.DownloadCommand).WithLeftAlignment();
         buttonDownload.Bind(Button.IsEnabledProperty, new Binding(nameof(vm.DownloadIsEnabled)));

@@ -53,7 +53,7 @@ public class AudioToTextWhisperWindow : Window
 
         var labelEngine = UiUtil.MakeTextBlock("Engine").WithMarginTop(10);
         var comboEngine = UiUtil.MakeComboBox(vm.Engines, vm, nameof(vm.SelectedEngine))
-            .WithMinwidth(220)
+            .WithMinWidth(220)
             .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled))
             .WithMarginTop(10);
 
@@ -61,13 +61,13 @@ public class AudioToTextWhisperWindow : Window
 
         var labelLanguage = UiUtil.MakeTextBlock("Language").WithMarginTop(10);
         var comboLanguage = UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage))
-            .WithMinwidth(220)
+            .WithMinWidth(220)
             .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled))
             .WithMarginTop(10);
 
         var labelModel = UiUtil.MakeTextBlock("Model").WithMarginBottom(20).WithMarginTop(10);
         var comboModel = UiUtil.MakeComboBox(vm.Models, vm, nameof(vm.SelectedModel))
-            .WithMinwidth(220)
+            .WithMinWidth(220)
             .WithMarginBottom(20)
             .WithMarginTop(10)
             .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));

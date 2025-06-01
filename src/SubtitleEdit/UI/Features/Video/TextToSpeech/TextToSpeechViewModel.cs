@@ -268,6 +268,10 @@ public partial class TextToSpeechViewModel : ObservableObject
             var reviewAudioClipsResult = await ReviewAudioClips(fixSpeedResult);
             if (reviewAudioClipsResult == null)
             {
+                DoneOrCancelText = "Done";
+                IsGenerating = false;
+                IsNotGenerating = true;
+                ProgressOpacity = 0;
                 return;
             }
         }
@@ -423,9 +427,23 @@ public partial class TextToSpeechViewModel : ObservableObject
         ProgressOpacity = 0;
     }
 
+    [RelayCommand]
+    private void Done()
+    {
+        _cancellationTokenSource.Cancel();
+        IsGenerating = false;
+        IsNotGenerating = true;
+        ProgressOpacity = 0;
+        Close();
+    }
+
+
     private void Close()
     {
-        Window?.Close();
+        Dispatcher.UIThread.Post(() =>
+        {
+            Window?.Close();
+        });
     }
 
     private async Task PlayAudio(string fileName)
@@ -492,7 +510,7 @@ public partial class TextToSpeechViewModel : ObservableObject
     {
         // Merge audio paragraphs
         var mergedAudioFileName = await MergeAudioParagraphs(fixSpeedResult, _cancellationToken);
-        if (mergedAudioFileName == null)
+        if (string.IsNullOrEmpty(mergedAudioFileName))
         {
             DoneOrCancelText = "Done";
             IsGenerating = false;
@@ -586,10 +604,9 @@ public partial class TextToSpeechViewModel : ObservableObject
     {
         try
         {
-
             var engine = SelectedEngine;
             var voice = SelectedVoice;
-            if (engine == null || voice == null)
+            if (engine == null || voice == null || cancellationToken.IsCancellationRequested)
             {
                 return null;
             }
@@ -859,7 +876,7 @@ public partial class TextToSpeechViewModel : ObservableObject
             return previousStepResult;
         }
 
-        var result = await _windowService.ShowDialogAsync<ReviewSpeechWindow, ReviewSpeechViewModel>(Window, vm =>
+        var result = await _windowService.ShowDialogAsync<ReviewSpeechWindow, ReviewSpeechViewModel>(Window!, vm =>
         {
             vm.Initialize(
                 previousStepResult,

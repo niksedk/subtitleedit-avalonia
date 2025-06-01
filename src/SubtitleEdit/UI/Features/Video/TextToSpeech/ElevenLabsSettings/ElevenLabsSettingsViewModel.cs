@@ -1,3 +1,4 @@
+using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -45,19 +46,19 @@ public partial class ElevenLabsSettingsViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowStabilityHelp()
     {
-        await MessageBox.Show(Window!, "Info", "The stability slider determines how stable the voice is and the randomness between each generation. Lowering this slider introduces a broader emotional range for the voice. As mentioned before, this is also influenced heavily by the original voice. Setting the slider too low may result in odd performances that are overly random and cause the character to speak too quickly. On the other hand, setting it too high can lead to a monotonous voice with limited emotion.", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        await ShowStabilityHelp(Window!);
     }
 
     [RelayCommand]
     private async Task ShowSimilarityHelp()
     {
-        await MessageBox.Show(Window!, "Info", "The similarity slider dictates how closely the AI should adhere to the original voice when attempting to replicate it. If the original audio is of poor quality and the similarity slider is set too high, the AI may reproduce artifacts or background noise when trying to mimic the voice if those were present in the original recording.", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        await ShowSimilarityHelp(Window!);
     }
 
     [RelayCommand]
     private async Task ShowSpeakerBoostHelp()
     {
-        await MessageBox.Show(Window!, "Info", "Boosts the similarity to the original speaker. However, using this setting requires a slightly higher computational load, which in turn increases latency. The differences introduced by this setting are generally rather subtle.", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        await ShowSpeakerBoostHelp(Window!);
     }
 
     [RelayCommand]
@@ -78,6 +79,21 @@ public partial class ElevenLabsSettingsViewModel : ObservableObject
     private void Cancel()
     {
         Window?.Close();
+    }
+
+    public static async Task ShowStabilityHelp(Window window)
+    {
+        await MessageBox.Show(window, "Info", "The stability slider determines how stable the voice is and the randomness between each generation. Lowering this slider introduces a broader emotional range for the voice. As mentioned before, this is also influenced heavily by the original voice. Setting the slider too low may result in odd performances that are overly random and cause the character to speak too quickly. On the other hand, setting it too high can lead to a monotonous voice with limited emotion.", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
+
+    public static async Task ShowSimilarityHelp(Window window)
+    {
+        await MessageBox.Show(window, "Info", "The similarity slider dictates how closely the AI should adhere to the original voice when attempting to replicate it. If the original audio is of poor quality and the similarity slider is set too high, the AI may reproduce artifacts or background noise when trying to mimic the voice if those were present in the original recording.", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
+
+    public static async Task ShowSpeakerBoostHelp(Window window)
+    {
+        await MessageBox.Show(window, "Info", "Boosts the similarity to the original speaker. However, using this setting requires a slightly higher computational load, which in turn increases latency. The differences introduced by this setting are generally rather subtle.", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
     internal void OnKeyDown(KeyEventArgs e)

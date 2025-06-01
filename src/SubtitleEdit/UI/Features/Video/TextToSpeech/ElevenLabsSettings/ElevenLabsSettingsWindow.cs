@@ -4,7 +4,6 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
-using Projektanker.Icons.Avalonia;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.EngineSettings;
 

@@ -3,8 +3,10 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Engines;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.VoiceSettings;
 
@@ -26,14 +28,14 @@ public class ReviewSpeechWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        var dataGrid = MakeDataGrid(vm);
         var controls = MakeControls(vm);
+        var dataGrid = MakeDataGrid(vm);
         var waveform = MakeWaveform(vm);
 
         var buttonExport = UiUtil.MakeButton("Export...", vm.ExportCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
+        var panelButtons = UiUtil.MakeButtonBar(buttonExport, buttonOk, buttonCancel);
 
         var grid = new Grid
         {
@@ -120,9 +122,41 @@ public class ReviewSpeechWindow : Window
             },
         };
 
+        var textBox = new TextBox
+        {
+            AcceptsReturn = true,
+            TextWrapping = TextWrapping.Wrap,
+            Height = 80,
+            [!TextBox.TextProperty] = new Binding(nameof(vm.SelectedLine) + "." + nameof(ReviewRow.Text))
+            {
+                Mode = BindingMode.TwoWay
+            },
+            FontSize = Se.Settings.Appearance.SubtitleTextBoxFontSize,
+            FontWeight = Se.Settings.Appearance.SubtitleTextBoxFontBold ? FontWeight.Bold : FontWeight.Normal,
+            Margin = new Thickness(0, 0, 0, 3),
+        };
+
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        grid.Add(dataGrid, 0, 0);
+        grid.Add(textBox, 1, 0);
+
         var border = new Border
         {
-            Child = dataGrid,
+            Child = grid,
             BorderThickness = new Thickness(1),
             BorderBrush = UiUtil.GetBorderColor(),
             Padding = new Thickness(10, 0, 10, 0),
@@ -132,12 +166,12 @@ public class ReviewSpeechWindow : Window
         return border;
     }
 
-    private Border MakeControls(ReviewSpeechViewModel vm)
+    private static Border MakeControls(ReviewSpeechViewModel vm)
     {
         var labelMinWidth = 100;
         var controlMinWidth = 200;
 
-        var comboBoxEngines = UiUtil.MakeComboBox(vm.Engines, vm, nameof(vm.SelectedEngine)).WithMinwidth(controlMinWidth);
+        var comboBoxEngines = UiUtil.MakeComboBox(vm.Engines, vm, nameof(vm.SelectedEngine)).WithMinWidth(controlMinWidth);
         comboBoxEngines.SelectionChanged += vm.SelectedEngineChanged;
 
         var panelEngine = new StackPanel
@@ -158,6 +192,7 @@ public class ReviewSpeechWindow : Window
         var panelVoice = new StackPanel
         {
             Orientation = Orientation.Horizontal,
+            Margin = new Thickness(0, 10, 0, 0),
             Children =
             {
                 new Label
@@ -165,13 +200,14 @@ public class ReviewSpeechWindow : Window
                     Content = "Voice",
                     MinWidth = labelMinWidth,
                 },
-                UiUtil.MakeComboBox(vm.Voices, vm, nameof(vm.SelectedVoice)).WithMinwidth(controlMinWidth),
+                UiUtil.MakeComboBox(vm.Voices, vm, nameof(vm.SelectedVoice)).WithWidth(controlMinWidth),
             }
         };
 
         var panelModel = new StackPanel
         {
             Orientation = Orientation.Horizontal,
+            Margin = new Thickness(0, 10, 0, 0),
             Children =
             {
                 new Label
@@ -179,7 +215,7 @@ public class ReviewSpeechWindow : Window
                     Content = "Model",
                     MinWidth = labelMinWidth,
                 },
-                UiUtil.MakeComboBox(vm.Models, vm, nameof(vm.SelectedModel)).WithMinwidth(controlMinWidth),
+                UiUtil.MakeComboBox(vm.Models, vm, nameof(vm.SelectedModel)).WithWidth(controlMinWidth),
             },
             [!StackPanel.IsVisibleProperty] = new Binding(nameof(vm.SelectedEngine) + "." + nameof(ITtsEngine.HasModel)) { Mode = BindingMode.OneWay },
         };
@@ -187,6 +223,7 @@ public class ReviewSpeechWindow : Window
         var panelRegion = new StackPanel
         {
             Orientation = Orientation.Horizontal,
+            Margin = new Thickness(0, 10, 0, 0),
             Children =
             {
                 new Label
@@ -194,7 +231,7 @@ public class ReviewSpeechWindow : Window
                     Content = "Region",
                     MinWidth = labelMinWidth,
                 },
-                UiUtil.MakeComboBox(vm.Regions, vm, nameof(vm.SelectedRegion)).WithMinwidth(controlMinWidth),
+                UiUtil.MakeComboBox(vm.Regions, vm, nameof(vm.SelectedRegion)).WithWidth(controlMinWidth),
             },
             [!StackPanel.IsVisibleProperty] = new Binding(nameof(vm.SelectedEngine) + "." + nameof(ITtsEngine.HasRegion)) { Mode = BindingMode.OneWay },
         };
@@ -202,6 +239,7 @@ public class ReviewSpeechWindow : Window
         var panelLanguage = new StackPanel
         {
             Orientation = Orientation.Horizontal,
+            Margin = new Thickness(0, 10, 0, 0),
             Children =
             {
                 new Label
@@ -209,25 +247,12 @@ public class ReviewSpeechWindow : Window
                     Content = "Language",
                     MinWidth = labelMinWidth,
                 },
-                UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage)).WithMinwidth(controlMinWidth),
+                UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage)).WithWidth(controlMinWidth),
             },
             [!StackPanel.IsVisibleProperty] = new Binding(nameof(vm.SelectedEngine) + "." + nameof(ITtsEngine.HasLanguageParameter)) { Mode = BindingMode.OneWay },
         };
 
-        //var panelApiKey = new StackPanel
-        //{
-        //    Orientation = Orientation.Horizontal,
-        //    Children =
-        //    {
-        //        new Label
-        //        {
-        //            Content = "API key",
-        //            MinWidth = labelMinWidth,
-        //        },
-        //        UiUtil.MakeTextBox(325, vm, nameof(vm.ApiKey)),
-        //    },
-        //    [!StackPanel.IsVisibleProperty] = new Binding(nameof(vm.HasApiKey)) { Mode = BindingMode.OneWay },
-        //};
+        var elevenLabsControls = MakeElevenLabsControls(vm);
 
         var buttonRegenerateAudio = new Button
         {
@@ -236,8 +261,8 @@ public class ReviewSpeechWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
             Width = double.NaN,
             VerticalAlignment = VerticalAlignment.Center,
-        }.WithMarginBottom(20)
-         .WithIconLeft(IconNames.MdiRecycle);
+            Margin = new Thickness(0, 0, 0, 5),
+        }.WithIconLeft(IconNames.MdiRecycle);
 
         var buttonPlay = new Button
         {
@@ -261,13 +286,13 @@ public class ReviewSpeechWindow : Window
         {
             Content = "Auto continue",
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.AutoContinue)) { Mode = BindingMode.TwoWay },
-            Margin = new Thickness(0, 0, 0, 5),
         };
 
         var grid = new Grid
         {
             RowDefinitions =
             {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
@@ -283,7 +308,6 @@ public class ReviewSpeechWindow : Window
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnSpacing = 10,
-            RowSpacing = 10,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             Margin = new Thickness(0, 0, 0, 15),
@@ -294,10 +318,12 @@ public class ReviewSpeechWindow : Window
         grid.Add(panelModel, 2, 0);
         grid.Add(panelRegion, 3, 0);
         grid.Add(panelLanguage, 4, 0);
-        grid.Add(buttonRegenerateAudio, 6, 0);
-        grid.Add(buttonPlay, 7, 0);
-        grid.Add(buttonStop, 7, 0);
-        grid.Add(checkBoxAutoContinue, 8, 0);
+        grid.Add(elevenLabsControls, 5, 0);
+        // 6 is filler
+        grid.Add(buttonRegenerateAudio, 7, 0);
+        grid.Add(buttonPlay, 8, 0);
+        grid.Add(buttonStop, 8, 0);
+        grid.Add(checkBoxAutoContinue, 9, 0);
 
         var boder = new Border
         {
@@ -311,7 +337,78 @@ public class ReviewSpeechWindow : Window
         return boder;
     }
 
-    private Border MakeWaveform(ReviewSpeechViewModel vm)
+    private static Grid MakeElevenLabsControls(ReviewSpeechViewModel vm)
+    {
+        var labelStability = UiUtil.MakeLabel("Stability");
+        var sliderStability = new Slider
+        {
+            Minimum = 0,
+            Maximum = 1,
+            Value = vm.Stability,
+            Width = 200,
+            [!Slider.ValueProperty] = new Binding(nameof(vm.Stability)),
+        };
+        var buttonStability = UiUtil.MakeButton(vm.ShowStabilityHelpCommand, IconNames.MdiHelp);
+
+        var labelSimilarity = UiUtil.MakeLabel("Similarity");
+        var sliderSimilarity = new Slider
+        {
+            Minimum = 0,
+            Maximum = 1,
+            Value = vm.Similarity,
+            Width = 200,
+            [!Slider.ValueProperty] = new Binding(nameof(vm.Similarity)),
+        };
+        var buttonSimilarity = UiUtil.MakeButton(vm.ShowSimilarityHelpCommand, IconNames.MdiHelp);
+
+        var labelSpeakerBoost = UiUtil.MakeLabel("Speaker Boost");
+        var sliderSpeakerBoost = new Slider
+        {
+            Minimum = 0,
+            Maximum = 100,
+            Value = vm.SpeakerBoost,
+            Width = 200,
+            [!Slider.ValueProperty] = new Binding(nameof(vm.SpeakerBoost)),
+        };
+        var buttonSpeakerBoost = UiUtil.MakeButton(vm.ShowSpeakerBoostHelpCommand, IconNames.MdiHelp);
+
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+            },
+            Margin = UiUtil.MakeWindowMargin(),
+            ColumnSpacing = 10,
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            [!Grid.IsVisibleProperty] = new Binding(nameof(vm.IsElevelLabsControlsVisible)) { Mode = BindingMode.OneWay },
+        };
+
+        grid.Add(labelStability, 0, 0);
+        grid.Add(sliderStability, 0, 1);
+        grid.Add(buttonStability, 0, 2);
+
+        grid.Add(labelSimilarity, 1, 0);
+        grid.Add(sliderSimilarity, 1, 1);
+        grid.Add(buttonSimilarity, 1, 2);
+
+        grid.Add(labelSpeakerBoost, 2, 0);
+        grid.Add(sliderSpeakerBoost, 2, 1);
+        grid.Add(buttonSpeakerBoost, 2, 2);
+
+        return grid;
+    }
+
+    private static Border MakeWaveform(ReviewSpeechViewModel vm)
     {
         return new Border
         {

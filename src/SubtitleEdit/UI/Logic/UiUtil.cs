@@ -679,9 +679,15 @@ public static class UiUtil
         return control;
     }
 
-    public static ComboBox WithMinwidth(this ComboBox control, int width)
+    public static ComboBox WithMinWidth(this ComboBox control, int width)
     {
         control.MinWidth = width;
+        return control;
+    }
+
+    public static ComboBox WithWidth(this ComboBox control, int width)
+    {
+        control.Width = width;
         return control;
     }
 
