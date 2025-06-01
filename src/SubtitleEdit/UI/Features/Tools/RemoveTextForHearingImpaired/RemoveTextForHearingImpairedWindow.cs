@@ -1,7 +1,9 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using System;
 
 namespace Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
 
@@ -13,30 +15,20 @@ public class RemoveTextForHearingImpairedWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Remove text for hearing impaired";
-        Width = 310;
-        Height = 140;
-        CanResize = false;
+        Width = 810;
+        Height = 640;
+        CanResize = true;
 
         _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
-        var label = new Label
-        {
-            Content = "Language",
-            VerticalAlignment = VerticalAlignment.Center,
-        };
+        var settingsView = MakeSettingsView(vm);
+        var fixesView = MakeFixesView(vm);
 
-        var combo = new ComboBox
-        {
-            ItemsSource = vm.Languages,
-            SelectedValue = vm.SelectedLanguage,
-            VerticalAlignment = VerticalAlignment.Center,
-            MinWidth = 180,
-        };
-
-        var buttonPanel = UiUtil.MakeButtonBar(
-            UiUtil.MakeButton("OK", vm.OkCommand),
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
+        var panelButtons = UiUtil.MakeButtonBar(
+            buttonOk,
             UiUtil.MakeButton("Cancel", vm.CancelCommand)
         );
         
@@ -44,7 +36,7 @@ public class RemoveTextForHearingImpairedWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
@@ -59,22 +51,41 @@ public class RemoveTextForHearingImpairedWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Children.Add(label);
-        Grid.SetRow(label, 0);
-        Grid.SetColumn(label, 0);
-
-        grid.Children.Add(combo);
-        Grid.SetRow(combo, 0);
-        Grid.SetColumn(combo, 1);
-
-        grid.Children.Add(buttonPanel);
-        Grid.SetRow(buttonPanel, 1);
-        Grid.SetColumn(buttonPanel, 0);
-        Grid.SetColumnSpan(buttonPanel, 2);
+        grid.Add(settingsView, 0, 0);
+        grid.Add(fixesView, 0, 1);
+        grid.Add(panelButtons, 1, 0, 1, 2);
 
         Content = grid;
         
-        Activated += delegate { Focus(); }; // hack to make OnKeyDown work
+        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+    }
+
+    private Border MakeSettingsView(RemoveTextForHearingImpairedViewModel vm)
+    {
+        var border = new Border
+        {
+            BorderThickness = new Thickness(1),
+            BorderBrush = UiUtil.GetBorderColor(),
+            Margin = new Thickness(0, 0, 0, 10),
+            Padding = new Thickness(5),
+            Child = UiUtil.MakeLabel("settings viw"),
+        };
+
+        return border;
+    }
+
+    private Border MakeFixesView(RemoveTextForHearingImpairedViewModel vm)
+    {
+        var border = new Border
+        {
+            BorderThickness = new Thickness(1),
+            BorderBrush = UiUtil.GetBorderColor(),
+            Margin = new Thickness(0, 0, 0, 10),
+            Padding = new Thickness(5),
+            Child = UiUtil.MakeLabel("fixes view"),
+        };
+
+        return border;
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
