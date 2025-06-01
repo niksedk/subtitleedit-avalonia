@@ -518,8 +518,12 @@ public class AudioVisualizer : Control
             case InteractionMode.ResizingLeft:
                 newStart = _originalStartSeconds + deltaSeconds - StartPositionSeconds;
 
-                if (newStart < _activeParagraph.EndTime.TotalSeconds - 0.001 &&
-                    (previous == null || newStart > previous.EndTime.TotalSeconds + 0.001))
+                if (previous != null && newStart < previous.EndTime.TotalSeconds)
+                { 
+                    newStart = previous.EndTime.TotalSeconds + 0.001; 
+                }
+
+                if (newStart < _activeParagraph.EndTime.TotalSeconds - 0.1)
                 {
                     _activeParagraph.SetStartTimeOnly(TimeSpan.FromSeconds(newStart));
                 }
@@ -528,8 +532,12 @@ public class AudioVisualizer : Control
             case InteractionMode.ResizingRight:
                 newEnd = _originalEndSeconds + deltaSeconds - StartPositionSeconds;
 
-                if (newEnd > _activeParagraph.StartTime.TotalSeconds + 0.001 &&
-                    (next == null || newEnd < next.StartTime.TotalSeconds - 0.001))
+                if (next != null && newEnd > next.StartTime.TotalSeconds)
+                { 
+                    newEnd = next.StartTime.TotalSeconds - 0.001;
+                }
+
+                if (newEnd > _activeParagraph.StartTime.TotalSeconds + 0.1)
                 {
                     _activeParagraph.EndTime = TimeSpan.FromSeconds(newEnd);
                 }
