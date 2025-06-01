@@ -323,6 +323,8 @@ public partial class TextToSpeechViewModel : ObservableObject
             text = "This is a test";
         }
 
+        _cancellationTokenSource = new CancellationTokenSource();
+        _cancellationToken = _cancellationTokenSource.Token;
         var result = await engine.Speak(text, _waveFolder, voice, SelectedLanguage, SelectedRegion, SelectedModel, _cancellationToken);
         if (!File.Exists(result.FileName))
         {
