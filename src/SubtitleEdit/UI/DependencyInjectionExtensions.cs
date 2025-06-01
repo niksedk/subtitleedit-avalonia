@@ -47,6 +47,7 @@ public static class DependencyInjectionExtensions
     {
         // Misc services
         collection.AddSingleton<IFileHelper, FileHelper>();
+        collection.AddSingleton<IFolderHelper, FolderHelper>();
         collection.AddTransient<IShortcutManager, ShortcutManager>();
         collection.AddTransient<IWindowService, WindowService>();
         collection.AddTransient<IZipUnpacker, ZipUnpacker>();

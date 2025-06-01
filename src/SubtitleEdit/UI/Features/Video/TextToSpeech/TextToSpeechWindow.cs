@@ -48,7 +48,6 @@ public class TextToSpeechWindow : Window
         var buttonPanel = UiUtil.MakeButtonBar(
             UiUtil.MakeButton("Generate speech from text", vm.GenerateTtsCommand).WithBindIsEnabled(nameof(vm.IsNotGenerating)),
             UiUtil.MakeButton("Import...", vm.ImportCommand).WithBindIsEnabled(nameof(vm.IsNotGenerating)),
-            UiUtil.MakeButton("Export...", vm.ExportCommand).WithBindIsVisible(nameof(vm.IsButtonExportVisible)),
             buttonCancel,
             buttonDone
         ).WithMarginTop(0);

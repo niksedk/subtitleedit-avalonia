@@ -6,6 +6,7 @@ namespace Nikse.SubtitleEdit.Logic.Media;
 
 public interface IFileHelper
 {
+    Task<string> PickOpenFile(Visual sender, string title, string extensionTitle, string extension);
     Task<string> PickOpenSubtitleFile(Visual sender, string title);
     Task<string> PickSaveSubtitleFile(
         Visual sender, 

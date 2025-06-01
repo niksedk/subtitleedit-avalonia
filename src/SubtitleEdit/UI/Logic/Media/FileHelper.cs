@@ -9,6 +9,35 @@ namespace Nikse.SubtitleEdit.Logic.Media
 {
     public class FileHelper : IFileHelper
     {
+        public async Task<string> PickOpenFile(Visual sender, string title, string extensionTitle, string extension)
+        {
+            // Get top level from the current control. Alternatively, you can use Window reference instead.
+            var topLevel = TopLevel.GetTopLevel(sender)!;
+
+            var fileTypes = new List<FilePickerFileType>
+            {
+                new FilePickerFileType(extension)
+                {
+                    Patterns = new List<string> { extension }
+                },
+            };
+
+            // Start async operation to open the dialog.
+            var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                Title = title,
+                AllowMultiple = false,
+                FileTypeFilter = fileTypes,
+            });
+
+            if (files.Count >= 1)
+            {
+                return files[0].Path.LocalPath;
+            }
+
+            return string.Empty;
+        }
+
         public async Task<string> PickOpenSubtitleFile(Visual sender, string title)
         {
             // Get top level from the current control. Alternatively, you can use Window reference instead.

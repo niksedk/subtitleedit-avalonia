@@ -6,14 +6,18 @@ using CommunityToolkit.Mvvm.Input;
 using DynamicData;
 using HanumanInstitute.LibMpv;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Features.Common;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Engines;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Voices;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -43,12 +47,18 @@ public partial class ReviewSpeechViewModel : ObservableObject
 
     public bool OkPressed { get; private set; }
 
+    private readonly IFileHelper _fileHelper;
+    private readonly IFolderHelper _folderHelper;
     private MpvContext? _mpvContext;
     private Lock _playLock;
     private readonly Timer _timer;
+    private string _videoFileName;
 
-    public ReviewSpeechViewModel()
+    public ReviewSpeechViewModel(IFileHelper fileHelper, IFolderHelper folderHelper)
     {
+        _fileHelper = fileHelper;
+        _folderHelper = folderHelper;
+
         Lines = new ObservableCollection<ReviewRow>();
         Engines = new ObservableCollection<ITtsEngine>();
         Voices = new ObservableCollection<Voice>();
@@ -101,6 +111,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
         Voice voice,
         TtsLanguage[] languages,
         TtsLanguage? language,
+        string videoFileName,
         WavePeakData wavePeakData)
     {
         foreach (var p in stepResults)
@@ -125,12 +136,104 @@ public partial class ReviewSpeechViewModel : ObservableObject
 
         Languages.AddRange(languages);
         SelectedLanguage = language;
+
+        _videoFileName = videoFileName;
     }
 
     [RelayCommand]
-    private void EditText()
+    private async Task Export()
     {
+        if (Window == null)
+        {
+            return;
+        }
 
+        var folder = await _folderHelper.PickFolderAsync(Window!, "Select a folder to save to");
+        if (string.IsNullOrEmpty(folder))
+        {
+            return;
+        }
+
+        var jsonFileName = Path.Combine(folder, "SubtitleEditTts.json");
+
+        // ask if overwrite if jsonFileName exists
+        if (File.Exists(jsonFileName))
+        {
+            var answer = await MessageBox.Show(
+                Window,
+                "Overwrite?",
+                $"Do you want overwrite files in \"{folder}?",
+                 MessageBoxButtons.YesNo,
+                 MessageBoxIcon.Question);
+
+            if (answer != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            try
+            {
+                File.Delete(jsonFileName);
+            }
+            catch (Exception e)
+            {
+                await MessageBox.Show(
+                    Window,
+                    "Overwrite failed",
+                    $"Could not overwrite the file \"{jsonFileName}" + Environment.NewLine + e.Message,
+                    MessageBoxButtons.OK, 
+                    MessageBoxIcon.Error);
+                return;
+            }
+        }
+
+        // Copy files
+        var index = 0;
+        var exportFormat = new TtsImportExport { VideoFileName = _videoFileName };
+        foreach (var line in Lines)
+        {
+            index++;
+            var sourceFileName = line.StepResult.CurrentFileName;
+            var targetFileName = Path.Combine(folder, index.ToString().PadLeft(4, '0') + Path.GetExtension(sourceFileName));
+
+            if (File.Exists(targetFileName))
+            {
+                try
+                {
+                    File.Delete(targetFileName);
+                }
+                catch (Exception e)
+                {
+                    await MessageBox.Show(
+                        Window,
+                        "Overwrite failed",
+                        $"Could not overwrite the file \"{targetFileName}" + Environment.NewLine + e.Message,
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                    return;
+                }
+            }
+
+            File.Copy(sourceFileName, targetFileName, true);
+
+            exportFormat.Items.Add(new TtsImportExportItem
+            {
+                AudioFileName = targetFileName,
+                StartMs = (long)Math.Round(line.StepResult.Paragraph.StartTime.TotalMilliseconds, MidpointRounding.AwayFromZero),
+                EndMs = (long)Math.Round(line.StepResult.Paragraph.EndTime.TotalMilliseconds, MidpointRounding.AwayFromZero),
+                VoiceName = line.StepResult.Voice?.Name ?? string.Empty,
+                EngineName = SelectedEngine != null ? SelectedEngine.ToString() : string.Empty,
+                SpeedFactor = line.StepResult.SpeedFactor,
+                Text = line.Text,
+                Include = line.Include,
+            });
+        }
+
+        // Export json
+        var json = JsonSerializer.Serialize(exportFormat, new JsonSerializerOptions { WriteIndented = true });
+        await File.WriteAllTextAsync(jsonFileName, json);
+
+        await _folderHelper.OpenFolder(Window!, folder); 
     }
 
     [RelayCommand]

@@ -99,6 +99,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     private bool _subtitleGridSelectionChangedSkip;
 
     private readonly IFileHelper _fileHelper;
+    private readonly IFolderHelper _folderHelper;
     private readonly IShortcutManager _shortcutManager;
     private readonly IWindowService _windowService;
     private readonly IInsertService _insertService;
@@ -112,6 +113,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
     public MainViewModel(
         IFileHelper fileHelper,
+        IFolderHelper folderHelper,
         IShortcutManager shortcutManager,
         IWindowService windowService,
         IInsertService insertService,
@@ -120,6 +122,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         IUndoRedoManager undoRedoManager)
     {
         _fileHelper = fileHelper;
+        _folderHelper = folderHelper;
         _shortcutManager = shortcutManager;
         _windowService = windowService;
         _insertService = insertService;
@@ -750,8 +753,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task OpenDataFolder()
     {
-        var dirInfo = new DirectoryInfo(Se.BaseFolder);
-        await Window!.Launcher.LaunchDirectoryInfoAsync(dirInfo);
+        await _folderHelper.OpenFolder(Window!, Se.BaseFolder);
     }
 
     [RelayCommand]

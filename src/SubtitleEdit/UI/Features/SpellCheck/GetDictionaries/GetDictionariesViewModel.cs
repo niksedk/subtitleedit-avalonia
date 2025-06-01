@@ -1,3 +1,4 @@
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Platform;
 using Avalonia.Platform.Storage;
@@ -8,6 +9,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Compression;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Download;
+using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -45,11 +47,13 @@ public partial class GetDictionariesViewModel : ObservableObject
 
     private readonly ISpellCheckDictionaryDownloadService _spellCheckDictionaryDownloadService;
     private readonly IZipUnpacker _zipUnpacker;
+    private readonly IFolderHelper _folderHelper;
 
-    public GetDictionariesViewModel(ISpellCheckDictionaryDownloadService spellCheckDictionaryDownloadService, IZipUnpacker zipUnpacker)
+    public GetDictionariesViewModel(ISpellCheckDictionaryDownloadService spellCheckDictionaryDownloadService, IZipUnpacker zipUnpacker, IFolderHelper folderHelper)
     {
         _spellCheckDictionaryDownloadService = spellCheckDictionaryDownloadService;
         _zipUnpacker = zipUnpacker;
+        _folderHelper = folderHelper;
 
         Dictionaries = new ObservableCollection<SpellCheckDictionaryDisplay>();
         SelectedDictionary = null;
@@ -240,8 +244,7 @@ public partial class GetDictionariesViewModel : ObservableObject
             Directory.CreateDirectory(Se.DictionariesFolder);
         }
 
-        var dirInfo = new DirectoryInfo(Se.DictionariesFolder);
-        await Window!.Launcher.LaunchDirectoryInfoAsync(dirInfo);
+        await _folderHelper.OpenFolder(Window!, Se.DictionariesFolder);
     }
 
     [RelayCommand]

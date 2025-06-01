@@ -1,16 +1,17 @@
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Controls.Shapes;
 using Avalonia.Input;
-using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Common;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 
@@ -26,11 +27,13 @@ public partial class RestoreAutoBackupViewModel : ObservableObject
     public bool OkPressed { get; private set; }
 
     private readonly IAutoBackupService _autoBackupService;
-    
-    public RestoreAutoBackupViewModel(IAutoBackupService autoBackupService)
+    private readonly IFolderHelper _folderHelper;
+
+    public RestoreAutoBackupViewModel(IAutoBackupService autoBackupService, IFolderHelper folderHelper)
     {
         _autoBackupService = autoBackupService;
-        _files  = new ObservableCollection<DisplayFile>();
+        _folderHelper = folderHelper;
+        _files = new ObservableCollection<DisplayFile>();
         Initialize();
     }
 
@@ -40,7 +43,7 @@ public partial class RestoreAutoBackupViewModel : ObservableObject
         {
             var fileInfo = new FileInfo(fileName);
 
-            var path = Path.GetFileName(fileName);
+            var path = System.IO.Path.GetFileName(fileName);
             if (string.IsNullOrEmpty(path))
             {
                 continue;
@@ -105,9 +108,8 @@ public partial class RestoreAutoBackupViewModel : ObservableObject
                 return;
             }
         }
-        
-        var dirInfo = new DirectoryInfo(folder);
-        await Window!.Launcher.LaunchDirectoryInfoAsync(dirInfo);
+
+        await _folderHelper.OpenFolder(Window!, folder);
     }
 
     internal void OnKeyDown(KeyEventArgs e)

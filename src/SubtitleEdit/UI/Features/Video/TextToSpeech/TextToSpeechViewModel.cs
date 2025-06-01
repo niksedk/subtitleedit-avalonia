@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -66,6 +67,7 @@ public partial class TextToSpeechViewModel : ObservableObject
 
     private Subtitle _subtitle = new();
     private readonly IFileHelper _fileHelper;
+    private readonly IFolderHelper _folderHelper;
     private string _waveFolder;
     private CancellationTokenSource _cancellationTokenSource;
     private CancellationToken _cancellationToken;
@@ -78,10 +80,11 @@ public partial class TextToSpeechViewModel : ObservableObject
     private readonly Timer _timer;
     private readonly IWindowService _windowService;
 
-    public TextToSpeechViewModel(ITtsDownloadService ttsDownloadService, IWindowService windowService, IFileHelper fileHelper)
+    public TextToSpeechViewModel(ITtsDownloadService ttsDownloadService, IWindowService windowService, IFileHelper fileHelper, IFolderHelper folderHelper)
     {
         _windowService = windowService;
         _fileHelper = fileHelper;
+        _folderHelper = folderHelper;
 
         Engines = new ObservableCollection<ITtsEngine>();
         Voices = new ObservableCollection<Voice>();
@@ -345,13 +348,61 @@ public partial class TextToSpeechViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Import()
+    private async Task Import()
     {
-    }
+        if (Window == null)
+        {
+            return;
+        }
 
-    [RelayCommand]
-    private void Export()
-    {
+        var fileName = await _fileHelper.PickOpenFile(Window, "Open SubtitleEditTts.json file", "TTS json files", "SubtitleEditTts.json");
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        var json = await File.ReadAllTextAsync(fileName, _cancellationToken);
+        var importExport = JsonSerializer.Deserialize<TtsImportExport>(json);
+        if (importExport == null)
+        {
+            var answer = await MessageBox.Show(
+                Window,
+                "Text to speech",
+                "Nothing to import",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+
+            return;
+        }
+
+        var stepResults = new List<TtsStepResult>();
+        for (var index = 0; index < importExport.Items.Count; index++)
+        {
+            var item = importExport.Items[index];
+            var paragraph = new Paragraph(item.Text, item.StartMs, item.EndMs) { Number = index + 1 };
+            stepResults.Add(new TtsStepResult
+            {
+                Text = item.Text,
+                CurrentFileName = item.AudioFileName,
+                Paragraph = paragraph,
+                SpeedFactor = 1.0f,
+                Voice = Voices.FirstOrDefault(v => v.Name == item.VoiceName),
+            });
+        }
+
+        var result = await _windowService.ShowDialogAsync<ReviewSpeechWindow, ReviewSpeechViewModel>(Window, vm =>
+        {
+            vm.Initialize(
+                stepResults.ToArray(),
+                Engines.ToArray(),
+                SelectedEngine ?? Engines.First(),
+                Voices.ToArray(),
+                SelectedVoice ?? Voices.First(),
+                Languages.ToArray(),
+                SelectedLanguage,
+                _videoFileName,
+                _wavePeakData);
+        });
     }
 
     [RelayCommand]
@@ -431,6 +482,7 @@ public partial class TextToSpeechViewModel : ObservableObject
         return false;
     }
 
+
     private async Task MergeAndAddToVideo(TtsStepResult[] fixSpeedResult)
     {
         // Merge audio paragraphs
@@ -444,28 +496,83 @@ public partial class TextToSpeechViewModel : ObservableObject
             return;
         }
 
-        //        // Choose folder
-        //#pragma warning disable CA1416 // Validate platform compatibility
-        //        var result = await FolderPicker.Default.PickAsync(_cancellationToken);
-        //#pragma warning restore CA1416 // Validate platform compatibility
-        //        if (!result.IsSuccessful)
-        //        {
-        //            DoneOrCancelText = "Done";
-        //            IsGenerating = false;
-        //            return;
-        //        }
-        //        var outputFolder = result.Folder.Path;
-        //        var audioFileName = Path.Combine(outputFolder, GetBestFileName(outputFolder, ".wav"));
+        var result = await _folderHelper.PickFolderAsync(Window!, "Select a folder to save to");
+        if (result == null)
+        {
+            DoneOrCancelText = "Done";
+            IsGenerating = false;
+            return;
+        }
+        var outputFolder = result;
+        var audioFileName = Path.Combine(outputFolder, GetBestFileName(outputFolder, ".wav"));
 
-        //        File.Move(mergedAudioFileName, audioFileName);
+        File.Move(mergedAudioFileName, audioFileName);
 
-        // Add audio to video file
-        //TODO: await HandleAddToVideo(audioFileName, outputFolder, _cancellationToken);
+        await HandleAddToVideo(audioFileName, outputFolder, _cancellationToken);
 
         DoneOrCancelText = "Done";
         IsGenerating = false;
         IsNotGenerating = true;
         ProgressOpacity = 0;
+    }
+
+    private async Task HandleAddToVideo(string mergedAudioFileName, string outputFolder, CancellationToken cancellationToken)
+    {
+        if (DoGenerateVideoFile && !string.IsNullOrEmpty(_videoFileName))
+        {
+            var outputFileName = await AddAudioToVideoFile(mergedAudioFileName, outputFolder, cancellationToken);
+            if (!string.IsNullOrEmpty(outputFileName) && Window != null)
+            {
+                await MessageBox.Show(
+                    Window,
+                    "Text to speech",
+                    $"Video file generated: {outputFileName}",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+
+                var path = Path.GetDirectoryName(outputFileName)!;
+                await _folderHelper.OpenFolder(Window!, path);
+            }
+        }
+        else
+        {
+            var path = Path.GetDirectoryName(mergedAudioFileName)!;
+            await _folderHelper.OpenFolder(Window!, path);
+        }
+    }
+
+    private async Task<string?> AddAudioToVideoFile(string audioFileName, string outputFolder, CancellationToken cancellationToken)
+    {
+        var videoExt = ".mkv";
+        if (_videoFileName.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase))
+        {
+            videoExt = ".mp4";
+        }
+
+        ProgressText = "Adding audio to video file...";
+        var outputFileName = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(audioFileName) + videoExt);
+
+        var useCustomAudioEncoding = !string.IsNullOrEmpty(Se.Settings.Video.TextToSpeech.CustomAudioEncoding);
+        var audioEncoding = Se.Settings.Video.TextToSpeech.CustomAudioEncoding;
+        if (string.IsNullOrWhiteSpace(audioEncoding) || !useCustomAudioEncoding)
+        {
+            audioEncoding = string.Empty;
+        }
+
+        bool? stereo = null;
+        if (Se.Settings.Video.TextToSpeech.CustomAudioStereo && useCustomAudioEncoding)
+        {
+            stereo = true;
+        }
+
+        var addAudioProcess = VideoPreviewGenerator.AddAudioTrack(_videoFileName, audioFileName, outputFileName, audioEncoding, stereo);
+#pragma warning disable CA1416 // Validate platform compatibility
+        var _ = addAudioProcess.Start();
+#pragma warning restore CA1416 // Validate platform compatibility
+        await addAudioProcess.WaitForExitAsync(cancellationToken);
+
+        ProgressText = string.Empty;
+        return outputFileName;
     }
 
     private async Task<string?> MergeAudioParagraphs(TtsStepResult[] previousStepResult, CancellationToken cancellationToken)
@@ -715,16 +822,17 @@ public partial class TextToSpeechViewModel : ObservableObject
         var result = await _windowService.ShowDialogAsync<ReviewSpeechWindow, ReviewSpeechViewModel>(Window, vm =>
         {
             vm.Initialize(
-                previousStepResult, 
-                Engines.ToArray(), 
-                engine, 
-                Voices.ToArray(), 
-                voice, 
+                previousStepResult,
+                Engines.ToArray(),
+                engine,
+                Voices.ToArray(),
+                voice,
                 Languages.ToArray(),
                 SelectedLanguage,
+                _videoFileName,
                 _wavePeakData);
         });
-        
+
         return null;
     }
 

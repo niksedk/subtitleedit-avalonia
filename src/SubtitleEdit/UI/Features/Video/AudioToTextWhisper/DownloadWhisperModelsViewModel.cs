@@ -1,3 +1,12 @@
+using Avalonia.Input;
+using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.AudioToText;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper.Engines;
+using Nikse.SubtitleEdit.Logic.Download;
+using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,15 +17,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
-using Avalonia.Input;
-using Avalonia.Platform.Storage;
-using Avalonia.Threading;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Core.AudioToText;
-using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper.Engines;
-using Nikse.SubtitleEdit.Logic.Download;
 using Timer = System.Timers.Timer;
 
 namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
@@ -38,6 +38,7 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
 
     private IWhisperDownloadService _whisperDownloadService;
     private IWhisperEngine? _whisperEngine;
+    private readonly IFolderHelper _folderHelper;
 
     private Task? _downloadTask;
     private readonly List<string> _downloadUrls = new();
@@ -49,12 +50,13 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
     private readonly Timer _timer;
     private readonly CancellationTokenSource _cancellationTokenSource;
 
-    public DownloadWhisperModelsViewModel(IWhisperDownloadService whisperDownloadService)
+    public DownloadWhisperModelsViewModel(IWhisperDownloadService whisperDownloadService, IFolderHelper folderHelper)
     {
+        _folderHelper = folderHelper;
+        _whisperDownloadService = whisperDownloadService;
+
         Models = new ObservableCollection<WhisperModelDisplay>();
         SelectedModel = Models.FirstOrDefault();
-
-        _whisperDownloadService = whisperDownloadService;
 
         _cancellationTokenSource = new CancellationTokenSource();
 
@@ -221,8 +223,7 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
         }
 
         var folder = _whisperEngine.GetAndCreateWhisperModelFolder(SelectedModel?.Model);
-        var dirInfo = new DirectoryInfo(folder);
-        await Window!.Launcher.LaunchDirectoryInfoAsync(dirInfo);
+        await _folderHelper.OpenFolder(Window!, folder);
     }
 
     [RelayCommand]

@@ -16,7 +16,7 @@ public class ReviewSpeechWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "TTS - Review audio segments";
-        Width = 1000;
+        Width = 1024;
         Height = 650;
         MinWidth = 700;
         MinHeight = 500;
@@ -30,6 +30,7 @@ public class ReviewSpeechWindow : Window
         var controls = MakeControls(vm);
         var waveform = MakeWaveform(vm);
 
+        var buttonExport = UiUtil.MakeButton("Export...", vm.ExportCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
@@ -44,8 +45,8 @@ public class ReviewSpeechWindow : Window
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
@@ -54,8 +55,8 @@ public class ReviewSpeechWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(dataGrid, 0, 0);
-        grid.Add(controls, 0, 1);
+        grid.Add(controls, 0, 0);
+        grid.Add(dataGrid, 0, 1);
         grid.Add(waveform, 1, 0, 1, 2);
         grid.Add(panelButtons, 2, 0, 1, 2);
 
