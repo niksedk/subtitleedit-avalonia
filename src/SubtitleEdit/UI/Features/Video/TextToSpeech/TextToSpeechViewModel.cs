@@ -53,16 +53,16 @@ public partial class TextToSpeechViewModel : ObservableObject
     [ObservableProperty] private bool _doReviewAudioClips;
     [ObservableProperty] private bool _doGenerateVideoFile;
     [ObservableProperty] private bool _isGenerating;
+    [ObservableProperty] private bool _isNotGenerating;
     [ObservableProperty] private bool _isEngineSettingsVisible;
     [ObservableProperty] private string _progressText;
     [ObservableProperty] private double _progressValue;
     [ObservableProperty] private double _progressOpacity;
     [ObservableProperty] private string _doneOrCancelText;
+    [ObservableProperty] private bool _isButtonExportVisible;
 
-    //public TextToSpeechPage? Page { get; set; }
-    //public MediaElement Player { get; set; }
-    //public Label LabelAudioEncodingSettings { get; set; }
-    //public Label LabelEngineSettings { get; set; }
+    public TextToSpeechWindow? Window { get; set; }
+    public bool OkPressed { get; private set; }
 
     private Subtitle _subtitle = new();
     private readonly IFileHelper _fileHelper;
@@ -76,17 +76,12 @@ public partial class TextToSpeechViewModel : ObservableObject
     private MpvContext? _mpvContext;
     private Lock _playLock;
     private readonly Timer _timer;
-
-
     private readonly IWindowService _windowService;
 
-    public TextToSpeechWindow? Window { get; set; }
-
-    public bool OkPressed { get; private set; }
-
-    public TextToSpeechViewModel(ITtsDownloadService ttsDownloadService, IWindowService windowService)
+    public TextToSpeechViewModel(ITtsDownloadService ttsDownloadService, IWindowService windowService, IFileHelper fileHelper)
     {
         _windowService = windowService;
+        _fileHelper = fileHelper;
 
         Engines = new ObservableCollection<ITtsEngine>();
         Voices = new ObservableCollection<Voice>();
@@ -100,6 +95,9 @@ public partial class TextToSpeechViewModel : ObservableObject
         ProgressText = string.Empty;
         DoneOrCancelText = string.Empty;
         IsVoiceTestEnabled = true;
+        IsGenerating = false;
+        IsNotGenerating = true;
+        IsButtonExportVisible = false;
 
         _cancellationTokenSource = new CancellationTokenSource();
         _playLock = new Lock();
@@ -203,6 +201,7 @@ public partial class TextToSpeechViewModel : ObservableObject
         _cancellationTokenSource = new CancellationTokenSource();
         _cancellationToken = _cancellationTokenSource.Token;
         IsGenerating = false;
+        IsNotGenerating = true;
         IsEngineSettingsVisible = false;
         ProgressText = string.Empty;
         ProgressValue = 0.0;
@@ -230,6 +229,7 @@ public partial class TextToSpeechViewModel : ObservableObject
         ProgressValue = 0;
         ProgressText = string.Empty;
         IsGenerating = true;
+        IsNotGenerating = false;
         ProgressOpacity = 1.0;
         DoneOrCancelText = "Cancel";
         _isMerging = false;
@@ -241,6 +241,7 @@ public partial class TextToSpeechViewModel : ObservableObject
         {
             DoneOrCancelText = "Done";
             IsGenerating = false;
+            IsNotGenerating = true;
             ProgressOpacity = 0;
             return;
         }
@@ -251,6 +252,7 @@ public partial class TextToSpeechViewModel : ObservableObject
         {
             DoneOrCancelText = "Done";
             IsGenerating = false;
+            IsNotGenerating = true;
             ProgressOpacity = 0;
             return;
         }
@@ -437,6 +439,7 @@ public partial class TextToSpeechViewModel : ObservableObject
         {
             DoneOrCancelText = "Done";
             IsGenerating = false;
+            IsNotGenerating = true;
             ProgressOpacity = 0;
             return;
         }
@@ -461,6 +464,7 @@ public partial class TextToSpeechViewModel : ObservableObject
 
         DoneOrCancelText = "Done";
         IsGenerating = false;
+        IsNotGenerating = true;
         ProgressOpacity = 0;
     }
 
@@ -836,5 +840,62 @@ public partial class TextToSpeechViewModel : ObservableObject
     {
         LoadSettings();
         _timer.Start();
+    }
+
+    internal void SelectedLanguageChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        var engine = SelectedEngine;
+        if (engine == null)
+        {
+            return;
+        }
+
+        if (engine is Murf murf)
+        {
+            Dispatcher.UIThread.Post(async () =>
+            {
+                var voices = await murf.GetVoices(SelectedLanguage?.Code ?? string.Empty);
+                Voices.Clear();
+                Voices.AddRange(voices);
+
+                var lastVoice = Voices.FirstOrDefault(v => v.Name == Se.Settings.Video.TextToSpeech.Voice);
+                if (lastVoice == null)
+                {
+                    lastVoice = Voices.FirstOrDefault(p => p.Name.StartsWith("en", StringComparison.OrdinalIgnoreCase) ||
+                                                           p.Name.Contains("English", StringComparison.OrdinalIgnoreCase));
+                }
+                SelectedVoice = lastVoice ?? Voices.First();
+            });
+        }
+    }
+
+    internal void SelectedModelChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        var engine = SelectedEngine;
+        var voice = SelectedVoice;
+        var model = SelectedModel;
+        if (engine == null || voice == null || model == null)
+        {
+            return;
+        }
+
+        Dispatcher.UIThread.Post(async () =>
+        {
+            if (engine.HasLanguageParameter)
+            {
+                var languages = await engine.GetLanguages(voice, model);
+                Languages.Clear();
+                foreach (var language in languages)
+                {
+                    Languages.Add(language);
+                }
+
+                SelectedLanguage = Languages.FirstOrDefault(p => p.Name == Se.Settings.Video.TextToSpeech.ElevenLabsLanguage);
+                if (SelectedLanguage == null)
+                {
+                    SelectedLanguage = Languages.FirstOrDefault(p => p.Code == "en");
+                }
+            }
+        });
     }
 }
