@@ -307,9 +307,9 @@ public class SpellCheckWindow : Window
             HorizontalContentAlignment = HorizontalAlignment.Center,
         };
 
-        var buttonUseAllways = new Button
+        var buttonUseAlways = new Button
         {
-            Content = "Use allways",
+            Content = "Use always",
             [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.SuggestionUseAlwaysCommand), BindingMode.OneWay),
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -325,7 +325,7 @@ public class SpellCheckWindow : Window
             Children =
             {
                 buttonUseOnce,
-                buttonUseAllways,
+                buttonUseAlways,
             }
         };
 
