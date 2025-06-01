@@ -6,7 +6,7 @@ using Nikse.SubtitleEdit.Logic;
 using Avalonia.Controls.Primitives;
 using Avalonia.Styling;
 
-namespace SubtitleAlchemist.Features.Video.TextToSpeech.DownloadTts;
+namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.DownloadTts;
 
 public sealed class DownloadTtsWindow : Window
 {
@@ -42,19 +42,19 @@ public sealed class DownloadTtsWindow : Window
                 {
                     Setters =
                     {
-                        new Setter(Thumb.IsVisibleProperty, false)
+                        new Setter(IsVisibleProperty, false)
                     }
                 },
                 new Style(x => x.OfType<Track>())
                 {
                     Setters =
                     {
-                        new Setter(Track.HeightProperty, 6.0)
+                        new Setter(HeightProperty, 6.0)
                     }
                 },
             }
         };
-        progressSlider.Bind(Slider.ValueProperty, new Binding(nameof(vm.ProgressValue)));
+        progressSlider.Bind(RangeBase.ValueProperty, new Binding(nameof(vm.ProgressValue)));
 
         var statusText = new TextBlock();
         statusText.Bind(TextBlock.TextProperty, new Binding(nameof(vm.ProgressText)));

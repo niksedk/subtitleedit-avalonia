@@ -27,6 +27,7 @@ using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Features.Video.OpenFromUrl;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech;
+using Nikse.SubtitleEdit.Features.Video.TextToSpeech.DownloadTts;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.EngineSettings;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.VoiceSettings;
@@ -37,7 +38,6 @@ using Nikse.SubtitleEdit.Logic.Dictionaries;
 using Nikse.SubtitleEdit.Logic.Download;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
-using SubtitleAlchemist.Features.Video.TextToSpeech.DownloadTts;
 
 namespace Nikse.SubtitleEdit;
 
