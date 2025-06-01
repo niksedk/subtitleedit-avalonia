@@ -106,6 +106,8 @@ public partial class TextToSpeechViewModel : ObservableObject
         _playLock = new Lock();
         _timer = new Timer(100);
         _timer.Elapsed += OnTimerOnElapsed;
+        _waveFolder = string.Empty;
+        _wavePeakData = new WavePeakData(1, new List<WavePeak>());
 
         Engines = new ObservableCollection<ITtsEngine>
         {
@@ -415,7 +417,10 @@ public partial class TextToSpeechViewModel : ObservableObject
     [RelayCommand]
     private void Cancel()
     {
-        Close();
+        _cancellationTokenSource.Cancel();
+        IsGenerating = false;
+        IsNotGenerating = true;
+        ProgressOpacity = 0;
     }
 
     private void Close()
@@ -497,10 +502,12 @@ public partial class TextToSpeechViewModel : ObservableObject
         }
 
         var result = await _folderHelper.PickFolderAsync(Window!, "Select a folder to save to");
-        if (result == null)
+        if (string.IsNullOrEmpty(result))
         {
             DoneOrCancelText = "Done";
             IsGenerating = false;
+            IsNotGenerating = true;
+            ProgressOpacity = 0;
             return;
         }
         var outputFolder = result;
@@ -577,39 +584,53 @@ public partial class TextToSpeechViewModel : ObservableObject
 
     private async Task<string?> MergeAudioParagraphs(TtsStepResult[] previousStepResult, CancellationToken cancellationToken)
     {
-        var engine = SelectedEngine;
-        var voice = SelectedVoice;
-        if (engine == null || voice == null)
+        try
         {
+
+            var engine = SelectedEngine;
+            var voice = SelectedVoice;
+            if (engine == null || voice == null)
+            {
+                return null;
+            }
+
+            var silenceFileName = await GenerateSilenceWaveFile(cancellationToken);
+
+            var outputFileName = string.Empty;
+            var inputFileName = silenceFileName;
+            ProgressValue = 0;
+            for (var index = 0; index < previousStepResult.Length; index++)
+            {
+                ProgressText = $"Merging audio: segment {index + 1} of {_subtitle.Paragraphs.Count}";
+
+                var item = previousStepResult[index];
+                outputFileName = Path.Combine(_waveFolder, $"silence{index}.wav");
+                if (File.Exists(outputFileName))
+                {
+                    outputFileName = Path.Combine(_waveFolder, $"silence_{Guid.NewGuid()}.wav");
+                }
+
+                var mergeProcess = VideoPreviewGenerator.MergeAudioTracks(inputFileName, item.CurrentFileName, outputFileName, (float)item.Paragraph.StartTime.TotalSeconds);
+                var fileNameToDelete = inputFileName;
+                inputFileName = outputFileName;
+#pragma warning disable CA1416 // Validate platform compatibility
+                _ = mergeProcess.Start();
+#pragma warning restore CA1416 // Validate platform compatibility
+                await mergeProcess.WaitForExitAsync(cancellationToken);
+
+                ProgressValue = (double)(index + 1) / previousStepResult.Length * 100.0;
+
+                DeleteFileNoError(fileNameToDelete);
+            }
+            ProgressValue = 100;
+
+            return outputFileName;
+        }
+        catch (OperationCanceledException)
+        {
+            ProgressText = "Cancelled";
             return null;
         }
-
-        var silenceFileName = await GenerateSilenceWaveFile(cancellationToken);
-
-        var outputFileName = string.Empty;
-        var inputFileName = silenceFileName;
-        ProgressValue = 0;
-        for (var index = 0; index < previousStepResult.Length; index++)
-        {
-            ProgressText = $"Merging audio: segment {index + 1} of {_subtitle.Paragraphs.Count}";
-
-            var item = previousStepResult[index];
-            outputFileName = Path.Combine(_waveFolder, $"silence{index}.wav");
-            var mergeProcess = VideoPreviewGenerator.MergeAudioTracks(inputFileName, item.CurrentFileName, outputFileName, (float)item.Paragraph.StartTime.TotalSeconds);
-            var fileNameToDelete = inputFileName;
-            inputFileName = outputFileName;
-#pragma warning disable CA1416 // Validate platform compatibility
-            _ = mergeProcess.Start();
-#pragma warning restore CA1416 // Validate platform compatibility
-            await mergeProcess.WaitForExitAsync(cancellationToken);
-
-            ProgressValue = (double)(index + 1) / previousStepResult.Length;
-
-            DeleteFileNoError(fileNameToDelete);
-        }
-        ProgressValue = 100;
-
-        return outputFileName;
     }
 
     private static void DeleteFileNoError(string file)
@@ -682,127 +703,146 @@ public partial class TextToSpeechViewModel : ObservableObject
     {
         var engine = SelectedEngine;
         var voice = SelectedVoice;
-        if (engine == null || voice == null)
+        if (engine == null || voice == null || cancellationToken.IsCancellationRequested)
         {
             return null;
         }
 
-        var resultList = new List<TtsStepResult>();
-        ProgressValue = 0;
-        for (var index = 0; index < _subtitle.Paragraphs.Count; index++)
+        try
         {
-            ProgressText = $"Generating speech: segment {index + 1} of {_subtitle.Paragraphs.Count}";
-            var paragraph = _subtitle.Paragraphs[index];
-            var speakResult = await engine.Speak(paragraph.Text, _waveFolder, voice, SelectedLanguage, SelectedRegion, SelectedModel, cancellationToken);
-            resultList.Add(new TtsStepResult
+            var resultList = new List<TtsStepResult>();
+            ProgressValue = 0;
+            for (var index = 0; index < _subtitle.Paragraphs.Count; index++)
             {
-                Text = paragraph.Text,
-                CurrentFileName = speakResult.FileName,
-                Paragraph = paragraph,
-                SpeedFactor = 1.0f,
-                Voice = voice,
-            });
-            ProgressValue = (double)(index + 1) / _subtitle.Paragraphs.Count * 100.0;
-        }
-        ProgressValue = 100;
+                ProgressText = $"Generating speech: segment {index + 1} of {_subtitle.Paragraphs.Count}";
+                var paragraph = _subtitle.Paragraphs[index];
+                var speakResult = await engine.Speak(paragraph.Text, _waveFolder, voice, SelectedLanguage, SelectedRegion, SelectedModel, cancellationToken);
+                resultList.Add(new TtsStepResult
+                {
+                    Text = paragraph.Text,
+                    CurrentFileName = speakResult.FileName,
+                    Paragraph = paragraph,
+                    SpeedFactor = 1.0f,
+                    Voice = voice,
+                });
+                ProgressValue = (double)(index + 1) / _subtitle.Paragraphs.Count * 100.0;
 
-        return resultList.ToArray();
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return null;
+                }
+            }
+            ProgressValue = 100;
+
+            return resultList.ToArray();
+        }
+        catch (OperationCanceledException)
+        {
+            return null;
+        }
     }
 
     private async Task<TtsStepResult[]?> FixSpeed(TtsStepResult[] previousStepResult, CancellationToken cancellationToken)
     {
         var engine = SelectedEngine;
         var voice = SelectedVoice;
-        if (engine == null || voice == null)
+        if (engine == null || voice == null || cancellationToken.IsCancellationRequested)
         {
             return null;
         }
 
-        var resultList = new List<TtsStepResult>();
-        ProgressValue = 0;
-        for (var index = 0; index < previousStepResult.Length; index++)
+        try
         {
-            ProgressText = $"Adjusting speed: segment {index + 1} of {_subtitle.Paragraphs.Count}";
-            ProgressValue = (double)index / _subtitle.Paragraphs.Count * 100;
-
-            var item = previousStepResult[index];
-            var p = item.Paragraph;
-            var next = index + 1 < previousStepResult.Length ? previousStepResult[index + 1] : null;
-            var outputFileName1 = Path.Combine(Path.GetDirectoryName(item.CurrentFileName)!, Guid.NewGuid() + ".wav");
-            var trimProcess = VideoPreviewGenerator.TrimSilenceStartAndEnd(item.CurrentFileName, outputFileName1);
-#pragma warning disable CA1416 // Validate platform compatibility
-            _ = trimProcess.Start();
-#pragma warning restore CA1416 // Validate platform compatibility
-            await trimProcess.WaitForExitAsync(cancellationToken);
-
-            var addDuration = 0d;
-            if (next != null && p.EndTime.TotalMilliseconds < next.Paragraph.StartTime.TotalMilliseconds)
+            var resultList = new List<TtsStepResult>();
+            ProgressValue = 0;
+            for (var index = 0; index < previousStepResult.Length; index++)
             {
-                var diff = next.Paragraph.StartTime.TotalMilliseconds - p.EndTime.TotalMilliseconds;
-                addDuration = Math.Min(1000, diff);
-                if (addDuration < 0)
+                ProgressText = $"Adjusting speed: segment {index + 1} of {_subtitle.Paragraphs.Count}";
+                ProgressValue = (double)index / _subtitle.Paragraphs.Count * 100;
+
+                var item = previousStepResult[index];
+                var p = item.Paragraph;
+                var next = index + 1 < previousStepResult.Length ? previousStepResult[index + 1] : null;
+                var outputFileName1 = Path.Combine(Path.GetDirectoryName(item.CurrentFileName)!, Guid.NewGuid() + ".wav");
+                var trimProcess = VideoPreviewGenerator.TrimSilenceStartAndEnd(item.CurrentFileName, outputFileName1);
+#pragma warning disable CA1416 // Validate platform compatibility
+                _ = trimProcess.Start();
+#pragma warning restore CA1416 // Validate platform compatibility
+                await trimProcess.WaitForExitAsync(cancellationToken);
+
+                var addDuration = 0d;
+                if (next != null && p.EndTime.TotalMilliseconds < next.Paragraph.StartTime.TotalMilliseconds)
                 {
-                    addDuration = 0;
+                    var diff = next.Paragraph.StartTime.TotalMilliseconds - p.EndTime.TotalMilliseconds;
+                    addDuration = Math.Min(1000, diff);
+                    if (addDuration < 0)
+                    {
+                        addDuration = 0;
+                    }
                 }
-            }
 
-            var mediaInfo = FfmpegMediaInfo.Parse(outputFileName1);
-            if (mediaInfo.Duration.TotalMilliseconds <= p.DurationTotalMilliseconds + addDuration)
-            {
+                var mediaInfo = FfmpegMediaInfo.Parse(outputFileName1);
+                if (mediaInfo.Duration.TotalMilliseconds <= p.DurationTotalMilliseconds + addDuration)
+                {
+                    resultList.Add(new TtsStepResult
+                    {
+                        Paragraph = p,
+                        Text = item.Text,
+                        CurrentFileName = outputFileName1,
+                        SpeedFactor = 1.0f,
+                        Voice = item.Voice,
+                    });
+                    continue;
+                }
+
+                var divisor = (decimal)(p.DurationTotalMilliseconds + addDuration);
+                if (divisor <= 0)
+                {
+                    resultList.Add(new TtsStepResult
+                    {
+                        Paragraph = p,
+                        Text = item.Text,
+                        CurrentFileName = item.CurrentFileName,
+                        SpeedFactor = 1.0f,
+                        Voice = item.Voice,
+                    });
+
+                    SeLogger.Error($"TextToSpeech: Duration is zero (skipping): {item.CurrentFileName}, {p}");
+                    continue;
+                }
+
+                var ext = ".wav";
+                var factor = (decimal)mediaInfo.Duration.TotalMilliseconds / divisor;
+                var outputFileName2 = Path.Combine(_waveFolder, $"{index}_{Guid.NewGuid()}{ext}");
+                var overrideFileName = string.Empty;
+                if (!string.IsNullOrEmpty(overrideFileName) && File.Exists(Path.Combine(_waveFolder, overrideFileName)))
+                {
+                    outputFileName2 = Path.Combine(_waveFolder, $"{Path.GetFileNameWithoutExtension(overrideFileName)}_{Guid.NewGuid()}{ext}");
+                }
+
                 resultList.Add(new TtsStepResult
                 {
                     Paragraph = p,
                     Text = item.Text,
-                    CurrentFileName = outputFileName1,
-                    SpeedFactor = 1.0f,
-                    Voice = item.Voice,
-                });
-                continue;
-            }
-
-            var divisor = (decimal)(p.DurationTotalMilliseconds + addDuration);
-            if (divisor <= 0)
-            {
-                resultList.Add(new TtsStepResult
-                {
-                    Paragraph = p,
-                    Text = item.Text,
-                    CurrentFileName = item.CurrentFileName,
-                    SpeedFactor = 1.0f,
+                    CurrentFileName = outputFileName2,
+                    SpeedFactor = (float)factor,
                     Voice = item.Voice,
                 });
 
-                SeLogger.Error($"TextToSpeech: Duration is zero (skipping): {item.CurrentFileName}, {p}");
-                continue;
-            }
-
-            var ext = ".wav";
-            var factor = (decimal)mediaInfo.Duration.TotalMilliseconds / divisor;
-            var outputFileName2 = Path.Combine(_waveFolder, $"{index}_{Guid.NewGuid()}{ext}");
-            var overrideFileName = string.Empty;
-            if (!string.IsNullOrEmpty(overrideFileName) && File.Exists(Path.Combine(_waveFolder, overrideFileName)))
-            {
-                outputFileName2 = Path.Combine(_waveFolder, $"{Path.GetFileNameWithoutExtension(overrideFileName)}_{Guid.NewGuid()}{ext}");
-            }
-
-            resultList.Add(new TtsStepResult
-            {
-                Paragraph = p,
-                Text = item.Text,
-                CurrentFileName = outputFileName2,
-                SpeedFactor = (float)factor,
-                Voice = item.Voice,
-            });
-
-            var mergeProcess = VideoPreviewGenerator.ChangeSpeed(outputFileName1, outputFileName2, (float)factor);
+                var mergeProcess = VideoPreviewGenerator.ChangeSpeed(outputFileName1, outputFileName2, (float)factor);
 #pragma warning disable CA1416 // Validate platform compatibility
-            _ = mergeProcess.Start();
+                _ = mergeProcess.Start();
 #pragma warning restore CA1416 // Validate platform compatibility
-            await mergeProcess.WaitForExitAsync(cancellationToken);
-        }
-        ProgressValue = 100;
+                await mergeProcess.WaitForExitAsync(cancellationToken);
+            }
+            ProgressValue = 100;
 
-        return resultList.ToArray();
+            return resultList.ToArray();
+        }
+        catch (OperationCanceledException)
+        {
+            return null;
+        }
     }
 
     private async Task<TtsStepResult[]?> ReviewAudioClips(TtsStepResult[] previousStepResult)

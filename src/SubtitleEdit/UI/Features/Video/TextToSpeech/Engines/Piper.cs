@@ -176,7 +176,7 @@ public class Piper : ITtsEngine
 
         var fileNameOnly = Guid.NewGuid() + ".wav";
         var process = StartPiperProcess(piperVoice, text, fileNameOnly);
-        await process.WaitForExitAsync();
+        await process.WaitForExitAsync(cancellationToken);
 
         var fileName = Path.Combine(GetSetPiperFolder(), fileNameOnly);
         return new TtsResult(fileName, text);
