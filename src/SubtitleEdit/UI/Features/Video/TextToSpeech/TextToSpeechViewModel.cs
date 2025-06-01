@@ -363,6 +363,9 @@ public partial class TextToSpeechViewModel : ObservableObject
             return;
         }
 
+        _cancellationTokenSource = new CancellationTokenSource();
+        _cancellationToken = _cancellationTokenSource.Token;
+
         var fileName = await _fileHelper.PickOpenFile(Window, "Open SubtitleEditTts.json file", "TTS json files", "SubtitleEditTts.json");
         if (string.IsNullOrEmpty(fileName))
         {

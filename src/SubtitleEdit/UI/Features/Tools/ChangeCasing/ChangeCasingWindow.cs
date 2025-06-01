@@ -33,7 +33,7 @@ public class ChangeCasingWindow : Window
 
         var checkBoxNormalCasingFixNames = new CheckBox
         {
-            Content = "Ffix names",
+            Content = "Fix names",
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(15, 0, 0, 5),
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.NormalCasingFixNames)) { Mode = BindingMode.TwoWay },
