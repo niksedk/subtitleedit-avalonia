@@ -7,19 +7,21 @@ namespace Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 
 public partial class MultipleReplaceViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<string> languages;
-    [ObservableProperty] private string selectedLanguage;
-    
+    [ObservableProperty] private ObservableCollection<MultipleReplaceGroup> _groups;
+    [ObservableProperty] private MultipleReplaceGroup? _selectedGroup;
+    [ObservableProperty] private ObservableCollection<MultipleReplaceFix> _fixes;
+    [ObservableProperty] private MultipleReplaceFix? _selectedFix;
+
     public MultipleReplaceWindow? Window { get; set; }
     
     public bool OkPressed { get; private set; }
 
     public MultipleReplaceViewModel()
     {
-        Languages = new ObservableCollection<string> { "English", "Danish", "Spanish" };
-        SelectedLanguage = Languages[0];
+        Groups = new ObservableCollection<MultipleReplaceGroup>();
+        Fixes = new ObservableCollection<MultipleReplaceFix>();
     }
-    
+
     [RelayCommand]                   
     private void Ok() 
     {

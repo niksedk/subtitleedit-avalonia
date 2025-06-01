@@ -1,7 +1,10 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using System;
+using System.Net.WebSockets;
 
 namespace Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 
@@ -13,30 +16,20 @@ public class MultipleReplaceWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Multiple replace";
-        Width = 310;
-        Height = 140;
-        CanResize = false;
+        Width = 910;
+        Height = 640;
+        CanResize = true;
 
         _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
-        var label = new Label
-        {
-            Content = "Language",
-            VerticalAlignment = VerticalAlignment.Center,
-        };
+        var rulesView = MakeRulesView(vm);
+        var FixesView = MakeFixesView(vm);
 
-        var combo = new ComboBox
-        {
-            ItemsSource = vm.Languages,
-            SelectedValue = vm.SelectedLanguage,
-            VerticalAlignment = VerticalAlignment.Center,
-            MinWidth = 180,
-        };
-
-        var buttonPanel = UiUtil.MakeButtonBar(
-            UiUtil.MakeButton("OK", vm.OkCommand),
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);    
+        var panelButtons = UiUtil.MakeButtonBar(
+            buttonOk,
             UiUtil.MakeButton("Cancel", vm.CancelCommand)
         );
         
@@ -44,7 +37,7 @@ public class MultipleReplaceWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
@@ -59,22 +52,41 @@ public class MultipleReplaceWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Children.Add(label);
-        Grid.SetRow(label, 0);
-        Grid.SetColumn(label, 0);
-
-        grid.Children.Add(combo);
-        Grid.SetRow(combo, 0);
-        Grid.SetColumn(combo, 1);
-
-        grid.Children.Add(buttonPanel);
-        Grid.SetRow(buttonPanel, 1);
-        Grid.SetColumn(buttonPanel, 0);
-        Grid.SetColumnSpan(buttonPanel, 2);
+        grid.Add(rulesView, 0, 0);
+        grid.Add(FixesView, 0, 1);
+        grid.Add(panelButtons, 1, 0, 1, 2);
 
         Content = grid;
         
         Activated += delegate { Focus(); }; // hack to make OnKeyDown work
+    }
+
+    private Border MakeFixesView(MultipleReplaceViewModel vm)
+    {
+        var border = new Border
+        {
+            BorderThickness = new Thickness(1),
+            BorderBrush = UiUtil.GetBorderColor(),
+            Margin = new Thickness(0, 0, 0, 10),
+            Padding = new Thickness(5),
+            Child = UiUtil.MakeLabel("fixes view"),
+        };
+
+        return border;
+    }
+
+    private Border MakeRulesView(MultipleReplaceViewModel vm)
+    {
+        var border = new Border
+        {
+            BorderThickness = new Thickness(1),
+            BorderBrush = UiUtil.GetBorderColor(),
+            Margin = new Thickness(0, 0, 0, 10),
+            Padding = new Thickness(5),
+            Child = UiUtil.MakeLabel("rules view"),
+        };
+
+        return border;
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
