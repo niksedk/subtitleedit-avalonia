@@ -33,7 +33,7 @@ public class ChangeCasingWindow : Window
 
         var checkBoxNormalCasingFixNames = new CheckBox
         {
-            Content = "Normal casing (fix names)",
+            Content = "Ffix names",
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(15, 0, 0, 5),
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.NormalCasingFixNames)) { Mode = BindingMode.TwoWay },
@@ -41,7 +41,7 @@ public class ChangeCasingWindow : Window
 
         var checkBoxNormalCasingOnlyUpper = new CheckBox
         {
-            Content = "Normal casing (only upper)",
+            Content = "Only fix all uppercase lines)",
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(15, 0, 0, 15),
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.NormalCasingOnlyUpper)) { Mode = BindingMode.TwoWay },
