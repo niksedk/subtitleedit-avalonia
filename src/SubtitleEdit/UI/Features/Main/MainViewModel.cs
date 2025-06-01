@@ -2065,7 +2065,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             foreach (SubtitleLineViewModel p in SubtitleGrid.SelectedItems)
             {
                 p.StartTime += adjustment;
-                p.EndTime += adjustment;
                 p.UpdateDuration();
             }
         }
@@ -2080,7 +2079,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
                 {
                     var p = Subtitles[i];
                     p.StartTime += adjustment;
-                    p.EndTime += adjustment;
                     p.UpdateDuration();
                 }
             }
@@ -2090,7 +2088,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             foreach (var p in Subtitles)
             {
                 p.StartTime += adjustment;
-                p.EndTime += adjustment;
                 p.UpdateDuration();
             }
         }
@@ -2100,18 +2097,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
     internal void DurationChanged(object? sender, NumericUpDownValueChangedEventArgs e)
     {
-        //var selectedItem = SelectedSubtitle;
-        //if (selectedItem == null || e.NewValue == null || e.NewValue == 0)
-        //{
-        //    return;
-        //}
-
-        //// Update the duration of the selected subtitle line via end time
-
-        //var newEndTime = TimeSpan.FromMilliseconds(selectedItem.StartTime.TotalMilliseconds + (double)e.NewValue.Value);
-        //selectedItem.EndTime = newEndTime;
-        //selectedItem.UpdateDuration();
-
         _updateAudioVisualizer = true;
     }
 

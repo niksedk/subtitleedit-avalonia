@@ -1,4 +1,6 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
@@ -13,31 +15,66 @@ public class ChangeCasingWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Change casing";
-        Width = 310;
-        Height = 140;
+        SizeToContent = SizeToContent.WidthAndHeight;
+        MinWidth = 300; 
         CanResize = false;
 
         _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
-        var label = new Label
+        var checkBoxNormalCasing = new RadioButton
         {
-            Content = "Language",
+            Content = "Normal casing",
             VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 5),
+            [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.NormalCasing)) { Mode = BindingMode.TwoWay },
+        };  
+
+        var checkBoxNormalCasingFixNames = new CheckBox
+        {
+            Content = "Normal casing (fix names)",
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(15, 0, 0, 5),
+            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.NormalCasingFixNames)) { Mode = BindingMode.TwoWay },
         };
 
-        var combo = new ComboBox
+        var checkBoxNormalCasingOnlyUpper = new CheckBox
         {
-            ItemsSource = vm.Languages,
-            SelectedValue = vm.SelectedLanguage,
+            Content = "Normal casing (only upper)",
             VerticalAlignment = VerticalAlignment.Center,
-            MinWidth = 180,
+            Margin = new Thickness(15, 0, 0, 15),
+            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.NormalCasingOnlyUpper)) { Mode = BindingMode.TwoWay },
         };
 
+        var checkBoxFixNamesOnly = new RadioButton
+        {
+            Content = "Fix names only",
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 15),
+            [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.FixNamesOnly)) { Mode = BindingMode.TwoWay },
+        };
+
+        var checkBoxAllUppercase = new RadioButton
+        {
+            Content = "All uppercase",
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 15),
+            [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AllUppercase)) { Mode = BindingMode.TwoWay },
+        };
+
+        var checkBoxAllLowercase = new RadioButton
+        {
+            Content = "All lowercase",
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 15),
+            [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AllLowercase)) { Mode = BindingMode.TwoWay },
+        };
+
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);   
         var buttonPanel = UiUtil.MakeButtonBar(
-            UiUtil.MakeButton("OK", vm.OkCommand),
-            UiUtil.MakeButton("Cancel", vm.CancelCommand)
+            buttonOk,
+            UiUtil.MakeButtonCancel(vm.CancelCommand)
         );
         
         var grid = new Grid
@@ -46,31 +83,28 @@ public class ChangeCasingWindow : Window
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
-            ColumnSpacing = 10,
-            RowSpacing = 10,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Children.Add(label);
-        Grid.SetRow(label, 0);
-        Grid.SetColumn(label, 0);
-
-        grid.Children.Add(combo);
-        Grid.SetRow(combo, 0);
-        Grid.SetColumn(combo, 1);
-
-        grid.Children.Add(buttonPanel);
-        Grid.SetRow(buttonPanel, 1);
-        Grid.SetColumn(buttonPanel, 0);
-        Grid.SetColumnSpan(buttonPanel, 2);
+        grid.Add(checkBoxNormalCasing, 0, 0);
+        grid.Add(checkBoxNormalCasingFixNames, 1, 0);
+        grid.Add(checkBoxNormalCasingOnlyUpper, 2, 0);
+        grid.Add(checkBoxFixNamesOnly, 3, 0);
+        grid.Add(checkBoxAllUppercase, 4, 0);
+        grid.Add(checkBoxAllLowercase, 5, 0);
+        grid.Add(buttonPanel, 6, 0);
 
         Content = grid;
         

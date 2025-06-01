@@ -1,14 +1,18 @@
-using System.Collections.ObjectModel;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
 
 public partial class ChangeCasingViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<string> languages;
-    [ObservableProperty] private string selectedLanguage;
+    [ObservableProperty] private bool _normalCasing;
+    [ObservableProperty] private bool _normalCasingFixNames;
+    [ObservableProperty] private bool _normalCasingOnlyUpper;
+    [ObservableProperty] private bool _fixNamesOnly;
+    [ObservableProperty] private bool _allUppercase;
+    [ObservableProperty] private bool _allLowercase;
     
     public ChangeCasingWindow? Window { get; set; }
     
@@ -16,13 +20,29 @@ public partial class ChangeCasingViewModel : ObservableObject
 
     public ChangeCasingViewModel()
     {
-        Languages = new ObservableCollection<string> { "English", "Danish", "Spanish" };
-        SelectedLanguage = Languages[0];
+        NormalCasing = Se.Settings.Tools.ChangeCasing.NormalCasing;
+        NormalCasingFixNames = Se.Settings.Tools.ChangeCasing.NormalCasingFixNames;
+        NormalCasingOnlyUpper = Se.Settings.Tools.ChangeCasing.NormalCasingOnlyUpper;
+        FixNamesOnly = Se.Settings.Tools.ChangeCasing.FixNamesOnly;
+        AllUppercase = Se.Settings.Tools.ChangeCasing.AllUppercase;
+        AllLowercase = Se.Settings.Tools.ChangeCasing.AllLowercase;
     }
-    
+
+    private void SaveSettings()
+    {
+        Se.Settings.Tools.ChangeCasing.NormalCasing = NormalCasing;
+        Se.Settings.Tools.ChangeCasing.NormalCasingFixNames = NormalCasingFixNames;
+        Se.Settings.Tools.ChangeCasing.NormalCasingOnlyUpper = NormalCasingOnlyUpper;
+        Se.Settings.Tools.ChangeCasing.FixNamesOnly = FixNamesOnly;
+        Se.Settings.Tools.ChangeCasing.AllUppercase = AllUppercase;
+        Se.Settings.Tools.ChangeCasing.AllLowercase = AllLowercase;
+        Se.SaveSettings();
+    }
+
     [RelayCommand]                   
     private void Ok() 
     {
+        SaveSettings();
         OkPressed = true;
         Window?.Close();
     }
