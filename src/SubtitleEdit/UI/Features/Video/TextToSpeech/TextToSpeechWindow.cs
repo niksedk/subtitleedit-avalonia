@@ -93,7 +93,7 @@ public class TextToSpeechWindow : Window
         var labelMinWidth = 100;
         var controlMinWidth = 200;
 
-        var comboBoxEngines = UiUtil.MakeComboBox(vm.Engines, vm, nameof(vm.SelectedEngine)).WithMinWidth(controlMinWidth);
+        var comboBoxEngines = UiUtil.MakeComboBox(vm.Engines, vm, nameof(vm.SelectedEngine)).WithWidth(controlMinWidth);
         comboBoxEngines.SelectionChanged += vm.SelectedEngineChanged;
 
         var panelEngine = new StackPanel
@@ -118,6 +118,7 @@ public class TextToSpeechWindow : Window
         var panelVoice = new StackPanel
         {
             Orientation = Orientation.Horizontal,
+            Margin = new Thickness(0, 10, 0, 0),
             Children =
             {
                 new Label
@@ -125,7 +126,7 @@ public class TextToSpeechWindow : Window
                     Content = "Voice",
                     MinWidth = labelMinWidth,
                 },
-                UiUtil.MakeComboBox(vm.Voices, vm, nameof(vm.SelectedVoice)).WithMinWidth(controlMinWidth),
+                UiUtil.MakeComboBox(vm.Voices, vm, nameof(vm.SelectedVoice)).WithWidth(controlMinWidth),
                 new Label
                 {
                     [!Label.ContentProperty] = new Binding(nameof(vm.VoiceCountInfo)) { Mode = BindingMode.TwoWay }
@@ -135,10 +136,11 @@ public class TextToSpeechWindow : Window
             }
         };
 
-        var comboBoxModels = UiUtil.MakeComboBox(vm.Models, vm, nameof(vm.SelectedModel)).WithMinWidth(controlMinWidth);
+        var comboBoxModels = UiUtil.MakeComboBox(vm.Models, vm, nameof(vm.SelectedModel)).WithWidth(controlMinWidth);
         var panelModel = new StackPanel
         {
             Orientation = Orientation.Horizontal,
+            Margin = new Thickness(0, 10, 0, 0),
             Children =
             {
                 new Label
@@ -155,6 +157,7 @@ public class TextToSpeechWindow : Window
         var panelRegion = new StackPanel
         {
             Orientation = Orientation.Horizontal,
+            Margin = new Thickness(0, 10, 0, 0),
             Children =
             {
                 new Label
@@ -162,15 +165,16 @@ public class TextToSpeechWindow : Window
                     Content = "Region",
                     MinWidth = labelMinWidth,
                 },
-                UiUtil.MakeComboBox(vm.Regions, vm, nameof(vm.SelectedRegion)).WithMinWidth(controlMinWidth),
+                UiUtil.MakeComboBox(vm.Regions, vm, nameof(vm.SelectedRegion)).WithWidth(controlMinWidth),
             },
             [!StackPanel.IsVisibleProperty] = new Binding(nameof(vm.HasRegion)) { Mode = BindingMode.OneWay },
         };
 
-        var comboBoxLanguages = UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage)).WithMinWidth(controlMinWidth);
+        var comboBoxLanguages = UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage)).WithWidth(controlMinWidth);
         var panelLanguage = new StackPanel
         {
             Orientation = Orientation.Horizontal,
+            Margin = new Thickness(0, 10, 0, 0),
             Children =
             {
                 new Label
@@ -187,6 +191,7 @@ public class TextToSpeechWindow : Window
         var panelApiKey = new StackPanel
         {
             Orientation = Orientation.Horizontal,
+            Margin = new Thickness(0, 10, 0, 0),
             Children =
             {
                 new Label
@@ -215,7 +220,6 @@ public class TextToSpeechWindow : Window
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnSpacing = 10,
-            RowSpacing = 10,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             Margin = new Thickness(0, 0, 0, 15),

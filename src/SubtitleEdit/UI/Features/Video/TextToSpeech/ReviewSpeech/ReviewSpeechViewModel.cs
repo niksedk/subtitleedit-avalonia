@@ -13,6 +13,7 @@ using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Voices;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
+using SubtitleAlchemist.Features.Video.TextToSpeech.DownloadTts;
 using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -38,8 +39,11 @@ public partial class ReviewSpeechViewModel : ObservableObject
     [ObservableProperty] private string? _selectedRegion;
     [ObservableProperty] private ObservableCollection<string> _models;
     [ObservableProperty] private string? _selectedModel;
+    [ObservableProperty] private ObservableCollection<string> _styles;
+    [ObservableProperty] private string? _selectedStyle;
     [ObservableProperty] private ObservableCollection<ReviewRow> _lines;
     [ObservableProperty] private ReviewRow? _selectedLine;
+    [ObservableProperty] private bool _isRegenerateEnabled;
     [ObservableProperty] private bool _isElevelLabsControlsVisible;
     [ObservableProperty] private bool _autoContinue;
     [ObservableProperty] private bool _isPlayVisible;
@@ -49,56 +53,96 @@ public partial class ReviewSpeechViewModel : ObservableObject
     [ObservableProperty] private double _speakerBoost;
 
     public ReviewSpeechWindow? Window { get; set; }
+    public DataGrid LineGrid { get; internal set; }
 
     public bool OkPressed { get; private set; }
 
-    private readonly IFileHelper _fileHelper;
     private readonly IFolderHelper _folderHelper;
+    private readonly IWindowService _windowService;
+
     private MpvContext? _mpvContext;
     private Lock _playLock;
     private readonly Timer _timer;
     private string _videoFileName;
+    private string _waveFolder;
+    private CancellationTokenSource _cancellationTokenSource;
+    private CancellationToken _cancellationToken;
+    private bool _skipAutoContinue;
+    private long _startPlayTicks;
 
-    public ReviewSpeechViewModel(IFileHelper fileHelper, IFolderHelper folderHelper)
+    public ReviewSpeechViewModel(IFolderHelper folderHelper, IWindowService windowService)
     {
-        _fileHelper = fileHelper;
         _folderHelper = folderHelper;
+        _windowService = windowService;
 
+        LineGrid = new DataGrid();
         Lines = new ObservableCollection<ReviewRow>();
         Engines = new ObservableCollection<ITtsEngine>();
         Voices = new ObservableCollection<Voice>();
         Languages = new ObservableCollection<TtsLanguage>();
         Regions = new ObservableCollection<string>();
         Models = new ObservableCollection<string>();
+        Styles = new ObservableCollection<string>();
 
         Stability = Se.Settings.Video.TextToSpeech.ElevenLabsStability;
         Similarity = Se.Settings.Video.TextToSpeech.ElevenLabsSimilarity;
         SpeakerBoost = Se.Settings.Video.TextToSpeech.ElevenLabsSpeakerBoost;
 
         IsPlayVisible = true;
+        _videoFileName = string.Empty;
+        _waveFolder = string.Empty;
+        _cancellationTokenSource = new CancellationTokenSource();
+        _cancellationToken = _cancellationTokenSource.Token;
 
         _playLock = new Lock();
-        _timer = new Timer(100);
+        _timer = new Timer(200);
         _timer.Elapsed += OnTimerOnElapsed;
         _timer.Start();
     }
 
     private void OnTimerOnElapsed(object? sender, ElapsedEventArgs args)
     {
-        lock (_playLock)
+        _timer.Stop();
+
+        if (_mpvContext == null)
         {
-            if (_mpvContext == null)
-            {
-                IsPlayVisible = true;
-                IsStopVisible = false;
-            }
-            else
-            {
-                var paused = _mpvContext.Pause.Get() ?? false;
-                IsPlayVisible = paused;
-                IsStopVisible = !paused;
-            }
+            IsPlayVisible = true;
+            IsStopVisible = false;
         }
+        else
+        {
+            var paused = _mpvContext.Pause.Get() ?? false;
+
+            var line = SelectedLine;
+            var timeSinceStart = TimeSpan.FromTicks(System.Diagnostics.Stopwatch.GetTimestamp() - _startPlayTicks);
+            if (paused && AutoContinue && !_skipAutoContinue && line != null && timeSinceStart.TotalMilliseconds > 500)
+            {
+                Dispatcher.UIThread.Invoke(async () =>
+                {
+                    var index = Lines.IndexOf(line);
+                    if (index < Lines.Count - 1)
+                    {
+                        var nextLine = Lines[index + 1];
+                        SelectedLine = nextLine;
+                        LineGrid.ScrollIntoView(nextLine, null);
+                        await PlayAudio(nextLine.StepResult.CurrentFileName);
+                    }
+                    else
+                    {
+                        _skipAutoContinue = true; // no more lines to play
+                        IsPlayVisible = true;
+                        IsStopVisible = false;
+                    }
+                });
+
+                return;
+            }
+
+            IsPlayVisible = paused;
+            IsStopVisible = !paused;
+        }
+
+        _timer.Start();
     }
 
     private async Task PlayAudio(string fileName)
@@ -110,6 +154,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
             _mpvContext = new MpvContext();
         }
         await _mpvContext.LoadFile(fileName).InvokeAsync();
+        _timer.Start();
     }
 
     internal void Initialize(
@@ -121,6 +166,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
         TtsLanguage[] languages,
         TtsLanguage? language,
         string videoFileName,
+        string waveFolder,
         WavePeakData wavePeakData)
     {
         foreach (var p in stepResults)
@@ -147,6 +193,14 @@ public partial class ReviewSpeechViewModel : ObservableObject
         SelectedLanguage = language;
 
         _videoFileName = videoFileName;
+        _waveFolder = waveFolder;
+
+        if (Lines.Count > 0)
+        {
+            SelectedLine = Lines[0];
+            LineGrid.SelectedIndex = 0;
+            LineGrid.ScrollIntoView(LineGrid.SelectedItem, null);
+        }
     }
 
     [RelayCommand]
@@ -163,7 +217,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
             return;
         }
 
-        var jsonFileName = Path.Combine(folder, "SubtitleEditTts.json");
+        var jsonFileName = System.IO.Path.Combine(folder, "SubtitleEditTts.json");
 
         // ask if overwrite if jsonFileName exists
         if (File.Exists(jsonFileName))
@@ -190,7 +244,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
                     Window,
                     "Overwrite failed",
                     $"Could not overwrite the file \"{jsonFileName}" + Environment.NewLine + e.Message,
-                    MessageBoxButtons.OK, 
+                    MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
                 return;
             }
@@ -203,7 +257,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
         {
             index++;
             var sourceFileName = line.StepResult.CurrentFileName;
-            var targetFileName = Path.Combine(folder, index.ToString().PadLeft(4, '0') + Path.GetExtension(sourceFileName));
+            var targetFileName = System.IO.Path.Combine(folder, index.ToString().PadLeft(4, '0') + System.IO.Path.GetExtension(sourceFileName));
 
             if (File.Exists(targetFileName))
             {
@@ -242,7 +296,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
         var json = JsonSerializer.Serialize(exportFormat, new JsonSerializerOptions { WriteIndented = true });
         await File.WriteAllTextAsync(jsonFileName, json);
 
-        await _folderHelper.OpenFolder(Window!, folder); 
+        await _folderHelper.OpenFolder(Window!, folder);
     }
 
     [RelayCommand]
@@ -264,18 +318,99 @@ public partial class ReviewSpeechViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void RegenerateAudio()
+    private async Task RegenerateAudio()
     {
+        var engine = SelectedEngine;
+        if (engine == null)
+        {
+            return;
+        }
+
+        var voice = SelectedVoice;
+        var line = SelectedLine;
+        if (engine == null || voice == null || line == null)
+        {
+            return;
+        }
+
+        var isEngineInstalled = await engine.IsInstalled(SelectedRegion);
+        if (!isEngineInstalled)
+        {
+            return;
+        }
+
+        IsRegenerateEnabled = false;
+        _cancellationTokenSource = new CancellationTokenSource();
+        _cancellationToken = _cancellationTokenSource.Token;
+        if (!engine.IsVoiceInstalled(voice) && voice.EngineVoice is PiperVoice piperVoice)
+        {
+            var modelFileName = System.IO.Path.Combine(Piper.GetSetPiperFolder(), piperVoice.ModelShort);
+            var configFileName = System.IO.Path.Combine(Piper.GetSetPiperFolder(), piperVoice.ConfigShort);
+            if (!File.Exists(modelFileName) || !File.Exists(configFileName))
+            {
+                var dlResult = await _windowService.ShowDialogAsync<DownloadTtsWindow, DownloadTtsViewModel>(Window, vm => vm.StartDownloadPiperVoice(piperVoice));
+                if (!dlResult.OkPressed)
+                {
+                    return;
+                }
+            }
+        }
+
+        var oldStyle = SelectedStyle;
+        if (engine is Murf && !string.IsNullOrEmpty(SelectedStyle))
+        {
+            Se.Settings.Video.TextToSpeech.MurfStyle = SelectedStyle;
+        }
+
+        var speakResult = await engine.Speak(line.Text, _waveFolder, voice, SelectedLanguage, SelectedRegion, SelectedModel, _cancellationToken);
+        line.StepResult.CurrentFileName = speakResult.FileName;
+        line.StepResult.Voice = voice;
+
+        var adjustSpeedStepResult = await TrimAndAdjustSpeed(line);
+        line.Speed = Math.Round(adjustSpeedStepResult.SpeedFactor, 2).ToString(CultureInfo.CurrentCulture);
+        line.Cps = Math.Round(adjustSpeedStepResult.Paragraph.GetCharactersPerSecond(), 2).ToString(CultureInfo.CurrentCulture);
+        line.StepResult = adjustSpeedStepResult;
+        line.Voice = voice.ToString();
+
+        _skipAutoContinue = true;
+        await PlayAudio(line.StepResult.CurrentFileName);
+
+        IsRegenerateEnabled = true;
+
+        if (engine is Murf && oldStyle != null)
+        {
+            Se.Settings.Video.TextToSpeech.MurfStyle = oldStyle;
+        }
     }
 
     [RelayCommand]
-    private void Play()
+    private async Task Play()
     {
+        var line = SelectedLine;
+        if (line == null)
+        {
+            return;
+        }
+
+        _cancellationTokenSource = new CancellationTokenSource();
+        _cancellationToken = _cancellationTokenSource.Token;
+        _skipAutoContinue = false;
+        _startPlayTicks = System.Diagnostics.Stopwatch.GetTimestamp();
+        await PlayAudio(line.StepResult.CurrentFileName);
     }
 
     [RelayCommand]
     private void Stop()
     {
+        _skipAutoContinue = true;
+        _timer.Stop();
+        _cancellationTokenSource.Cancel();
+        lock (_playLock)
+        {
+            _mpvContext?.Stop();
+            _mpvContext?.Dispose();
+            _mpvContext = null;
+        }
     }
 
     [RelayCommand]
@@ -298,6 +433,81 @@ public partial class ReviewSpeechViewModel : ObservableObject
         {
             Window?.Close();
         });
+    }
+
+    private async Task<TtsStepResult> TrimAndAdjustSpeed(ReviewRow row)
+    {
+        var item = row.StepResult;
+        var p = item.Paragraph;
+        var index = Lines.IndexOf(row);
+        var next = index + 1 < Lines.Count ? Lines[index + 1] : null;
+        var outputFileNameTrim = System.IO.Path.Combine(_waveFolder, Guid.NewGuid() + ".wav");
+        var trimProcess = VideoPreviewGenerator.TrimSilenceStartAndEnd(item.CurrentFileName, outputFileNameTrim);
+#pragma warning disable CA1416 // Validate platform compatibility
+        _ = trimProcess.Start();
+#pragma warning restore CA1416 // Validate platform compatibility
+        await trimProcess.WaitForExitAsync(_cancellationToken);
+
+        var addDuration = 0d;
+        if (next != null && p.EndTime.TotalMilliseconds < next.StepResult.Paragraph.StartTime.TotalMilliseconds)
+        {
+            var diff = next.StepResult.Paragraph.StartTime.TotalMilliseconds - p.EndTime.TotalMilliseconds;
+            addDuration = Math.Min(1000, diff);
+            if (addDuration < 0)
+            {
+                addDuration = 0;
+            }
+        }
+
+        var mediaInfo = FfmpegMediaInfo.Parse(outputFileNameTrim);
+        if (mediaInfo.Duration.TotalMilliseconds <= p.DurationTotalMilliseconds + addDuration)
+        {
+            return new TtsStepResult
+            {
+                Paragraph = p,
+                Text = item.Text,
+                CurrentFileName = outputFileNameTrim,
+                SpeedFactor = 1.0f,
+                Voice = item.Voice,
+            };
+        }
+
+        var divisor = (decimal)(p.DurationTotalMilliseconds + addDuration);
+        if (divisor <= 0)
+        {
+            return new TtsStepResult
+            {
+                Paragraph = p,
+                Text = item.Text,
+                CurrentFileName = item.CurrentFileName,
+                SpeedFactor = 1.0f,
+                Voice = item.Voice,
+            };
+        }
+
+        var ext = ".wav";
+        var factor = (decimal)mediaInfo.Duration.TotalMilliseconds / divisor;
+        var outputFileName2 = System.IO.Path.Combine(_waveFolder, $"{index}_{Guid.NewGuid()}{ext}");
+        var overrideFileName = string.Empty;
+        if (!string.IsNullOrEmpty(overrideFileName) && File.Exists(System.IO.Path.Combine(_waveFolder, overrideFileName)))
+        {
+            outputFileName2 = System.IO.Path.Combine(_waveFolder, $"{System.IO.Path.GetFileNameWithoutExtension(overrideFileName)}_{Guid.NewGuid()}{ext}");
+        }
+
+        var mergeProcess = VideoPreviewGenerator.ChangeSpeed(outputFileNameTrim, outputFileName2, (float)factor);
+#pragma warning disable CA1416 // Validate platform compatibility
+        _ = mergeProcess.Start();
+#pragma warning restore CA1416 // Validate platform compatibility
+        await mergeProcess.WaitForExitAsync(_cancellationToken);
+
+        return new TtsStepResult
+        {
+            Paragraph = p,
+            Text = item.Text,
+            CurrentFileName = outputFileName2,
+            SpeedFactor = (float)factor,
+            Voice = item.Voice,
+        };
     }
 
     internal void OnKeyDown(KeyEventArgs e)
@@ -370,7 +580,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
                 SelectedModel = Models.FirstOrDefault();
             }
 
-            IsElevelLabsControlsVisible = false; 
+            IsElevelLabsControlsVisible = false;
             if (engine is AzureSpeech)
             {
                 SelectedRegion = Se.Settings.Video.TextToSpeech.AzureRegion;
@@ -389,5 +599,74 @@ public partial class ReviewSpeechViewModel : ObservableObject
                 }
             }
         });
+    }
+
+    internal void SelectedLanguageChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        var engine = SelectedEngine;
+        if (engine == null)
+        {
+            return;
+        }
+
+        if (engine is Murf murf)
+        {
+            Dispatcher.UIThread.Post(async () =>
+            {
+                var voices = await murf.GetVoices(SelectedLanguage?.Code ?? string.Empty);
+                Voices.Clear();
+                Voices.AddRange(voices);
+
+                var lastVoice = Voices.FirstOrDefault(v => v.Name == Se.Settings.Video.TextToSpeech.Voice);
+                if (lastVoice == null)
+                {
+                    lastVoice = Voices.FirstOrDefault(p => p.Name.StartsWith("en", StringComparison.OrdinalIgnoreCase) ||
+                                                           p.Name.Contains("English", StringComparison.OrdinalIgnoreCase));
+                }
+                SelectedVoice = lastVoice ?? Voices.First();
+            });
+        }
+    }
+
+    internal void SelectedModelChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        var engine = SelectedEngine;
+        var voice = SelectedVoice;
+        var model = SelectedModel;
+        if (engine == null || voice == null || model == null)
+        {
+            return;
+        }
+
+        Dispatcher.UIThread.Post(async () =>
+        {
+            if (engine.HasLanguageParameter)
+            {
+                var languages = await engine.GetLanguages(voice, model);
+                Languages.Clear();
+                foreach (var language in languages)
+                {
+                    Languages.Add(language);
+                }
+
+                SelectedLanguage = Languages.FirstOrDefault(p => p.Name == Se.Settings.Video.TextToSpeech.ElevenLabsLanguage);
+                if (SelectedLanguage == null)
+                {
+                    SelectedLanguage = Languages.FirstOrDefault(p => p.Code == "en");
+                }
+            }
+        });
+    }
+
+    internal void OnClosing(WindowClosingEventArgs e)
+    {
+        _skipAutoContinue = true;
+        _timer.Stop();
+        _cancellationTokenSource.Cancel();
+        lock (_playLock)
+        {
+            _mpvContext?.Dispose();
+            _mpvContext = null;
+        }
     }
 }

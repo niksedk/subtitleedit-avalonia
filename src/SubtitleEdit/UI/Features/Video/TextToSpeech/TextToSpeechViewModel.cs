@@ -409,6 +409,7 @@ public partial class TextToSpeechViewModel : ObservableObject
                 Languages.ToArray(),
                 SelectedLanguage,
                 _videoFileName,
+                _waveFolder,
                 _wavePeakData);
         });
     }
@@ -889,6 +890,7 @@ public partial class TextToSpeechViewModel : ObservableObject
                 Languages.ToArray(),
                 SelectedLanguage,
                 _videoFileName,
+                _waveFolder,
                 _wavePeakData);
         });
 

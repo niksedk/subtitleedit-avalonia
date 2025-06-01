@@ -76,7 +76,7 @@ public class ReviewSpeechWindow : Window
             SelectionMode = DataGridSelectionMode.Single,
             Margin = new Thickness(0, 10, 0, 0),
             [!DataGrid.ItemsSourceProperty] = new Binding(nameof(vm.Lines)),
-            [!DataGrid.SelectedItemProperty] = new Binding(nameof(vm.SelectedLine)),
+            [!DataGrid.SelectedItemProperty] = new Binding(nameof(vm.SelectedLine)) { Mode = BindingMode.TwoWay },
             Width = double.NaN,
             Height = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -87,40 +87,47 @@ public class ReviewSpeechWindow : Window
                 {
                     Header = "Include",
                     Binding = new Binding(nameof(ReviewRow.Include)),
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {
                     Header = "#",
                     Binding = new Binding(nameof(ReviewRow.Number)),
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Voice",
                     Binding = new Binding(nameof(ReviewRow.Voice)),
-                    Width = new DataGridLength(3, DataGridLengthUnitType.Auto)
+                    Width = new DataGridLength(3, DataGridLengthUnitType.Auto),
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Char/sec",
                     Binding = new Binding(nameof(ReviewRow.Cps)),
-                    Width = new DataGridLength(3, DataGridLengthUnitType.Auto)
+                    Width = new DataGridLength(3, DataGridLengthUnitType.Auto),
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Speed",
                     Binding = new Binding(nameof(ReviewRow.Speed)),
-                    Width = new DataGridLength(3, DataGridLengthUnitType.Auto)
+                    Width = new DataGridLength(3, DataGridLengthUnitType.Auto),
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Text",
                     Binding = new Binding(nameof(ReviewRow.Text)),
-                    Width = new DataGridLength(3, DataGridLengthUnitType.Auto)
+                    Width = new DataGridLength(3, DataGridLengthUnitType.Auto),
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
             },
         };
+        vm.LineGrid = dataGrid;
 
         var textBox = new TextBox
         {
@@ -204,6 +211,7 @@ public class ReviewSpeechWindow : Window
             }
         };
 
+        var comboBoxModels = UiUtil.MakeComboBox(vm.Models, vm, nameof(vm.SelectedModel)).WithWidth(controlMinWidth);
         var panelModel = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -215,10 +223,11 @@ public class ReviewSpeechWindow : Window
                     Content = "Model",
                     MinWidth = labelMinWidth,
                 },
-                UiUtil.MakeComboBox(vm.Models, vm, nameof(vm.SelectedModel)).WithWidth(controlMinWidth),
+                comboBoxModels,
             },
             [!StackPanel.IsVisibleProperty] = new Binding(nameof(vm.SelectedEngine) + "." + nameof(ITtsEngine.HasModel)) { Mode = BindingMode.OneWay },
         };
+        comboBoxModels.SelectionChanged += vm.SelectedModelChanged;
 
         var panelRegion = new StackPanel
         {
@@ -236,6 +245,7 @@ public class ReviewSpeechWindow : Window
             [!StackPanel.IsVisibleProperty] = new Binding(nameof(vm.SelectedEngine) + "." + nameof(ITtsEngine.HasRegion)) { Mode = BindingMode.OneWay },
         };
 
+        var comboBoxLanguages = UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage)).WithWidth(controlMinWidth);
         var panelLanguage = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -247,10 +257,12 @@ public class ReviewSpeechWindow : Window
                     Content = "Language",
                     MinWidth = labelMinWidth,
                 },
-                UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage)).WithWidth(controlMinWidth),
+                comboBoxLanguages,
             },
             [!StackPanel.IsVisibleProperty] = new Binding(nameof(vm.SelectedEngine) + "." + nameof(ITtsEngine.HasLanguageParameter)) { Mode = BindingMode.OneWay },
         };
+        comboBoxLanguages.SelectionChanged += vm.SelectedLanguageChanged;
+
 
         var elevenLabsControls = MakeElevenLabsControls(vm);
 
@@ -267,7 +279,7 @@ public class ReviewSpeechWindow : Window
         var buttonPlay = new Button
         {
             Content = "Play selected line",
-            Command = vm.RegenerateAudioCommand,
+            Command = vm.PlayCommand,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             Width = double.NaN,
             VerticalAlignment = VerticalAlignment.Center,
@@ -276,7 +288,7 @@ public class ReviewSpeechWindow : Window
         var buttonStop = new Button
         {
             Content = "Stop",
-            Command = vm.RegenerateAudioCommand,
+            Command = vm.StopCommand,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             Width = double.NaN,
             VerticalAlignment = VerticalAlignment.Center,
@@ -412,8 +424,8 @@ public class ReviewSpeechWindow : Window
     {
         return new Border
         {
-            Margin = new Thickness(10),
-            Child = new TextBlock { Text = "Waveform placeholder" } // Placeholder for waveform control
+            Margin = new Thickness(2),
+//          Child = new TextBlock { Text = "Waveform placeholder" } // Placeholder for waveform control
         };
     }
 
@@ -421,5 +433,11 @@ public class ReviewSpeechWindow : Window
     {
         base.OnKeyDown(e);
         _vm.OnKeyDown(e);
+    }
+
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        base.OnClosing(e);
+        _vm.OnClosing(e);
     }
 }
