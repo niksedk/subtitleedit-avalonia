@@ -57,7 +57,6 @@ public class FixCommonErrorsWindow : Window
             HorizontalAlignment = HorizontalAlignment.Right,
             Children =
             {
-//                textBoxSearch,
                 UiUtil.MakeTextBlock("Language").WithMarginRight(5),
                 UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage)),
             },
@@ -73,7 +72,6 @@ public class FixCommonErrorsWindow : Window
             VerticalAlignment = VerticalAlignment.Stretch,
             Width = double.NaN,
             Height = double.NaN,
-//            ItemsSource = vm.FixRules,
             [!DataGrid.ItemsSourceProperty] = new Binding($"{nameof(vm.SelectedProfile)}.{nameof(ProfileDisplayItem.FixRules)}"),
             IsReadOnly = false,
             Columns =

@@ -98,7 +98,10 @@ namespace Nikse.SubtitleEdit.Logic.Media
                     }
                 }
             }
-            AddExt(existingTypes, patterns, ".mks");
+            AddExt(existingTypes, patterns, ".mks"); //TODO: move to settings
+            AddExt(existingTypes, patterns, ".mkv");
+            AddExt(existingTypes, patterns, ".mp4");
+            AddExt(existingTypes, patterns, ".ts");
             return patterns;
         }
 

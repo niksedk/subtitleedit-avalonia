@@ -54,6 +54,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Tmds.DBus.Protocol;
+using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -164,8 +165,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     private void InitializeFfmpeg()
     {
         var ffmpegFileName = DownloadFfmpegViewModel.GetFfmpegFileName();
-        if (string.IsNullOrEmpty(Se.Settings.General.FfmpegPath) &&
-            File.Exists(ffmpegFileName))
+        if (string.IsNullOrEmpty(Se.Settings.General.FfmpegPath) && File.Exists(ffmpegFileName))
         {
             Se.Settings.General.FfmpegPath = DownloadFfmpegViewModel.GetFfmpegFileName();
         }
@@ -1223,12 +1223,11 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             return;
         }
         
-        if (BluRayHelper.IsMatroskaFileFast(fileName) && FileUtil.IsMatroskaFile(fileName))
+        if (FileUtil.IsMatroskaFileFast(fileName) && FileUtil.IsMatroskaFile(fileName))
         {
             ImportSubtitleFromMatroskaFile(fileName, videoFileName);
             return;
         }
-
 
         var subtitle = Subtitle.Parse(fileName);
         if (subtitle == null)
@@ -1302,7 +1301,10 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         {
             Dispatcher.UIThread.Post(async() =>
             {
-                var result = await _windowService.ShowDialogAsync<PickMatroskaTrackWindow, PickMatroskaTrackViewModel>(Window);
+                var result = await _windowService.ShowDialogAsync<PickMatroskaTrackWindow, PickMatroskaTrackViewModel>(Window, vm => 
+                { 
+                    vm.Initialize(matroska, subtitleList);
+                });
                 if (result.SelectedMatroskaTrack != null)
                 {
                     if (LoadMatroskaSubtitle(result.SelectedMatroskaTrack, matroska))
