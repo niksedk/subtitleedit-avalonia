@@ -1302,13 +1302,10 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         {
             Dispatcher.UIThread.Post(async() =>
             {
-//                var result = await _popupService.ShowPopupAsync<PickMatroskaTrackPopupModel>(onPresenting: viewModel => viewModel.Initialize(matroska, subtitleList, fileName), CancellationToken.None);
                 var result = await _windowService.ShowDialogAsync<PickMatroskaTrackWindow, PickMatroskaTrackViewModel>(Window);
-
-                
                 if (result.SelectedMatroskaTrack != null)
                 {
-                    if (LoadMatroskaSubtitle(track, matroska))
+                    if (LoadMatroskaSubtitle(result.SelectedMatroskaTrack, matroska))
                     {
                         // load video?
                     }
@@ -1344,7 +1341,8 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     {
         if (matroskaSubtitleInfo.CodecId.Equals("S_HDMV/PGS", StringComparison.OrdinalIgnoreCase))
         {
-            return LoadBluRaySubFromMatroska(matroskaSubtitleInfo, matroska);
+            var pgsSubtitle = _bluRayHelper.LoadBluRaySubFromMatroska(matroskaSubtitleInfo, matroska, out var errorMessage);
+            return true;
         }
 
         //if (matroskaSubtitleInfo.CodecId.Equals("S_HDMV/TEXTST", StringComparison.OrdinalIgnoreCase))
@@ -1361,7 +1359,11 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         var subtitle = new Subtitle();
         var format = Utilities.LoadMatroskaTextSubtitle(matroskaSubtitleInfo, matroska, sub, subtitle);
         subtitle.Renumber();
-        Paragraphs = new ObservableCollection<DisplayParagraph>(subtitle.Paragraphs.Select(p => new DisplayParagraph(p)));
+        Subtitles.Clear();
+        Subtitles.AddRange(subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
+
+        
+        //        Paragraphs = new ObservableCollection<DisplayParagraph>(subtitle.Paragraphs.Select(p => new DisplayParagraph(p)));
         //SelectedSubtitleFormat = format.Name;
 
         //        ShowStatus(_language.SubtitleImportedFromMatroskaFile);
@@ -1385,6 +1387,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         //SubtitleListview1.Fill(_subtitle, _subtitleOriginal);
         //SubtitleListview1.SelectIndexAndEnsureVisible(0, true);
         //RefreshSelectedParagraph();
+
         return true;
     }
 
