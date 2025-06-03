@@ -412,7 +412,7 @@ public partial class TextToSpeechViewModel : ObservableObject
                 Languages.ToArray(),
                 SelectedLanguage,
                 _videoFileName,
-                _waveFolder,
+                Path.GetDirectoryName(fileName)!,
                 _wavePeakData);
         });
     }
