@@ -52,6 +52,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Tmds.DBus.Protocol;
 
 namespace Nikse.SubtitleEdit.Features.Main;
@@ -106,6 +107,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     private readonly IMergeManager _mergeManager;
     private readonly IAutoBackupService _autoBackupService;
     private readonly IUndoRedoManager _undoRedoManager;
+    private readonly IBluRayHelper _bluRayHelper;
 
     private bool IsEmpty => Subtitles.Count == 0 || string.IsNullOrEmpty(Subtitles[0].Text);
 
@@ -119,7 +121,8 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         IInsertService insertService,
         IMergeManager mergeManager,
         IAutoBackupService autoBackupService,
-        IUndoRedoManager undoRedoManager)
+        IUndoRedoManager undoRedoManager, 
+        IBluRayHelper bluRayHelper)
     {
         _fileHelper = fileHelper;
         _folderHelper = folderHelper;
@@ -129,6 +132,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         _mergeManager = mergeManager;
         _autoBackupService = autoBackupService;
         _undoRedoManager = undoRedoManager;
+        _bluRayHelper = bluRayHelper;
 
         EditText = string.Empty;
         EditTextCharactersPerSecond = string.Empty;
@@ -1218,6 +1222,13 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             await MessageBox.Show(Window, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
+        
+        if (BluRayHelper.IsMatroskaFileFast(fileName) && FileUtil.IsMatroskaFile(fileName))
+        {
+            ImportSubtitleFromMatroskaFile(fileName, videoFileName);
+            return;
+        }
+
 
         var subtitle = Subtitle.Parse(fileName);
         if (subtitle == null)
@@ -1267,6 +1278,116 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         AddToRecentFiles(true);
         _changeSubtitleHash = GetFastSubtitleHash();
     }
+
+    private void ImportSubtitleFromMatroskaFile(string fileName, string? videoFileName)
+    {
+        var matroska = new MatroskaFile(fileName);
+        var subtitleList = matroska.GetTracks(true);
+        if (subtitleList.Count == 0)
+        {
+            matroska.Dispose();
+            Dispatcher.UIThread.Post(async() =>
+            {
+                var answer = await MessageBox.Show(
+                    Window!,
+                    "No subtitle found",
+                    "The Matroska file does not seem to contain any subtitles.",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            });
+            return;
+        }
+
+        if (subtitleList.Count > 1)
+        {
+            Dispatcher.UIThread.Post(async() =>
+            {
+//                var result = await _popupService.ShowPopupAsync<PickMatroskaTrackPopupModel>(onPresenting: viewModel => viewModel.Initialize(matroska, subtitleList, fileName), CancellationToken.None);
+                var result = await _windowService.ShowDialogAsync<PickMatroskaTrackWindow, PickMatroskaTrackViewModel>(Window);
+
+                
+                if (result.SelectedMatroskaTrack != null)
+                {
+                    if (LoadMatroskaSubtitle(track, matroska))
+                    {
+                        // load video?
+                    }
+                }
+
+                matroska.Dispose();
+            });
+        }
+        else
+        {
+            var ext = Path.GetExtension(matroska.Path).ToLowerInvariant();
+            if (LoadMatroskaSubtitle(subtitleList[0], matroska))
+            {
+                if (!Configuration.Settings.General.DisableVideoAutoLoading)
+                {
+                    if (ext == ".mkv")
+                    {
+                        //VideoOpen(matroska.Path);
+                    }
+                    else
+                    {
+                        //TryToFindAndOpenVideoFile(Path.Combine(Path.GetDirectoryName(matroska.Path),
+                        //    Path.GetFileNameWithoutExtension(matroska.Path)));
+                    }
+                }
+            }
+
+            matroska.Dispose();
+        }
+    }
+    
+    private bool LoadMatroskaSubtitle(MatroskaTrackInfo matroskaSubtitleInfo, MatroskaFile matroska)
+    {
+        if (matroskaSubtitleInfo.CodecId.Equals("S_HDMV/PGS", StringComparison.OrdinalIgnoreCase))
+        {
+            return LoadBluRaySubFromMatroska(matroskaSubtitleInfo, matroska);
+        }
+
+        //if (matroskaSubtitleInfo.CodecId.Equals("S_HDMV/TEXTST", StringComparison.OrdinalIgnoreCase))
+        //{
+        //    return LoadTextSTFromMatroska(matroskaSubtitleInfo, matroska, batchMode);
+        //}
+
+        //if (matroskaSubtitleInfo.CodecId.Equals("S_DVBSUB", StringComparison.OrdinalIgnoreCase))
+        //{
+        //    return LoadDvbFromMatroska(matroskaSubtitleInfo, matroska, batchMode);
+        //}
+
+        var sub = matroska.GetSubtitle(matroskaSubtitleInfo.TrackNumber, null);
+        var subtitle = new Subtitle();
+        var format = Utilities.LoadMatroskaTextSubtitle(matroskaSubtitleInfo, matroska, sub, subtitle);
+        subtitle.Renumber();
+        Paragraphs = new ObservableCollection<DisplayParagraph>(subtitle.Paragraphs.Select(p => new DisplayParagraph(p)));
+        //SelectedSubtitleFormat = format.Name;
+
+        //        ShowStatus(_language.SubtitleImportedFromMatroskaFile);
+        //_subtitle.Renumber();
+        //if (matroska.Path.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase) || matroska.Path.EndsWith(".mks", StringComparison.OrdinalIgnoreCase))
+        //{
+        //    _fileName = matroska.Path.Remove(matroska.Path.Length - 4) + format.Extension;
+        //}
+
+        //SetTitle();
+        //_fileDateTime = new DateTime();
+        //_converted = true;
+
+        //if (batchMode)
+        //{
+        //    return true;
+        //}
+
+        //_subtitleListViewIndex = -1;
+        //UpdateSourceView();
+        //SubtitleListview1.Fill(_subtitle, _subtitleOriginal);
+        //SubtitleListview1.SelectIndexAndEnsureVisible(0, true);
+        //RefreshSelectedParagraph();
+        return true;
+    }
+
 
     private void SetSubtitles(Subtitle subtitle)
     {

@@ -58,6 +58,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<IUndoRedoManager, UndoRedoManager>();
         collection.AddTransient<ISpellCheckManager, SpellCheckManager>();
         collection.AddTransient<ITtsDownloadService, TtsDownloadService>();
+        collection.AddTransient<IBluRayHelper, BluRayHelper>();
 
         // Download services
         collection.AddHttpClient<IFfmpegDownloadService, FfmpegDownloadService>();
@@ -110,5 +111,6 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<VoiceSettingsViewModel>();
         collection.AddTransient<DownloadTtsViewModel>();
         collection.AddTransient<ReviewSpeechViewModel>();
+        collection.AddTransient<PickMatroskaTrackViewModel>();
     }
 }
