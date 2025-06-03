@@ -25,8 +25,10 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<MatroskaSubtitleCueDisplay> _rows;
 
     public PickMatroskaTrackWindow? Window { get; set; }
+    public DataGrid TracksGrid { get; set; }
     public MatroskaTrackInfo? SelectedMatroskaTrack { get; set; }
     public bool OkPressed { get; private set; }
+    public string WindowTitle { get; private set; }
 
     private List<MatroskaTrackInfo> _matroskaTracks;
     private MatroskaFile? _matroskaFile;
@@ -34,14 +36,17 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
     public PickMatroskaTrackViewModel()
     {
         Tracks = new ObservableCollection<MatroskaTrackInfoDisplay>();
+        TracksGrid = new DataGrid();
+        WindowTitle = string.Empty;
         Rows = new ObservableCollection<MatroskaSubtitleCueDisplay>();
         _matroskaTracks = new List<MatroskaTrackInfo>();
     }
 
-    public void Initialize(MatroskaFile matroskaFile, List<MatroskaTrackInfo> matroskaTracks)
+    public void Initialize(MatroskaFile matroskaFile, List<MatroskaTrackInfo> matroskaTracks, string fileName)
     {
         _matroskaFile = matroskaFile;
         _matroskaTracks = matroskaTracks;
+        WindowTitle = $"Pick Matroska track - {fileName}";
         foreach (var track in _matroskaTracks)
         {
             var display = new MatroskaTrackInfoDisplay
@@ -74,6 +79,7 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
     [RelayCommand]
     private void Ok()
     {
+        SelectedMatroskaTrack = SelectedTrack?.MatroskaTrackInfo;
         OkPressed = true;
         Close();
     }
@@ -94,10 +100,19 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
 
     internal void DataGridTracksSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
+        bool flowControl = TrackChanged();
+        if (!flowControl)
+        {
+            return;
+        }
+    }
+
+    private bool TrackChanged()
+    {
         var selectedTrack = SelectedTrack;
         if (selectedTrack == null || selectedTrack.MatroskaTrackInfo == null)
         {
-            return;
+            return false;
         }
 
         Rows.Clear();
@@ -133,6 +148,8 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
                 Rows.Add(cue);
             }
         }
+
+        return true;
     }
 
     public static Bitmap ConvertSKBitmapToAvaloniaBitmap(SKBitmap skBitmap)
@@ -162,5 +179,20 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
             };
             Rows.Add(cue);
         }
+    }
+
+    internal void SelectAndScrollToRow(int index)
+    {
+        if (index < 0 || index >= Tracks.Count)
+        {
+            return;
+        }
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            TracksGrid.SelectedIndex = index;
+            TracksGrid.ScrollIntoView(TracksGrid.SelectedItem, null);
+            TrackChanged();
+        }, DispatcherPriority.Background);
     }
 }

@@ -6,8 +6,6 @@ namespace Nikse.SubtitleEdit.Logic.Config;
 public class SeGeneral
 {
     public int LayoutNumber { get; set; } = 0;
-    public string FfmpegPath { get; set; }
-    public string LibMpvPath { get; set; }
     public bool UseTimeFormatHhMmSsFf { get; set; } = false;
     public double DefaultFrameRate { get; set; }
     public double CurrentFrameRate { get; set; }
@@ -44,11 +42,14 @@ public class SeGeneral
     public bool ColorGapTooShort { get; set; }
     public string ErrorColor { get; set; }
 
+    public string FfmpegPath { get; set; }
+    public string LibMpvPath { get; set; }
+    public bool AutoOpenVideo { get; internal set; }
+
+
     public SeGeneral()
     {
         LayoutNumber = 0;
-        FfmpegPath = string.Empty;
-        LibMpvPath = string.Empty;
         UseTimeFormatHhMmSsFf = false;
         DefaultFrameRate = 23.976;
         CurrentFrameRate = DefaultFrameRate;
@@ -84,5 +85,9 @@ public class SeGeneral
         ColorTimeCodeOverlap = true;
         ColorGapTooShort = true;
         ErrorColor = Color.FromArgb(50, 255, 0, 0).FromColorToHex();
+
+        FfmpegPath = string.Empty;
+        LibMpvPath = string.Empty;
+        AutoOpenVideo = true;
     }
 }

@@ -1,7 +1,9 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Features.Common;
 using Nikse.SubtitleEdit.Logic;
@@ -18,8 +20,8 @@ public class PickMatroskaTrackWindow : Window
         _vm = vm;
         vm.Window = this;
         Icon = UiUtil.GetSeIcon();
-        Title = "Pick Matroka track";
-        Width = 1000;
+        Title = vm.WindowTitle;
+        Width = 1024;
         Height = 600;
         MinWidth = 800;
         MinHeight = 600;
@@ -64,6 +66,12 @@ public class PickMatroskaTrackWindow : Window
         {
             buttonOk.Focus(); // hack to make OnKeyDown work
         };
+    }
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+        _vm.SelectAndScrollToRow(0);
     }
 
     private Border MakeTracksView(PickMatroskaTrackViewModel vm)
@@ -128,6 +136,7 @@ public class PickMatroskaTrackWindow : Window
         };
         dataGridTracks.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(_vm.SelectedTrack)));
         dataGridTracks.SelectionChanged += vm.DataGridTracksSelectionChanged;
+        vm.TracksGrid = dataGridTracks; 
 
         var border = new Border
         {
@@ -180,12 +189,45 @@ public class PickMatroskaTrackWindow : Window
                     Binding = new Binding(nameof(MatroskaSubtitleCueDisplay.Duration)) { Converter = shortTimeConverter },
                     IsReadOnly = true,
                 },
-                new DataGridTextColumn
+                new DataGridTemplateColumn
                 {
-                    Header = "Text",
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(MatroskaSubtitleCueDisplay.Text)),
+                    Header = "Text/Image",
                     IsReadOnly = true,
+                    CellTemplate = new FuncDataTemplate<MatroskaSubtitleCueDisplay>((item, _) =>
+                    {
+                        var stackPanel = new StackPanel
+                        {
+                            Orientation = Orientation.Vertical,
+                            Spacing = 5
+                        };
+
+                        // Add text if available
+                        if (!string.IsNullOrEmpty(item.Text))
+                        {
+                            var textBlock = new TextBlock
+                            {
+                                Text = item.Text,
+                                TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                                MaxWidth = 300 // Adjust as needed
+                            };
+                            stackPanel.Children.Add(textBlock);
+                        }
+
+                        // Add image if available
+                        if (item.Image != null)
+                        {
+                            var image = new Image
+                            {
+                                Source = item.Image.Source,
+                                MaxHeight = 100, // Adjust as needed
+                                MaxWidth = 200,  // Adjust as needed
+                                Stretch = Avalonia.Media.Stretch.Uniform
+                            };
+                            stackPanel.Children.Add(image);
+                        }
+
+                        return stackPanel;
+                    })
                 },
             },
         };

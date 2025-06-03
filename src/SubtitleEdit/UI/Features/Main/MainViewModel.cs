@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Platform.Storage;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -53,7 +52,6 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
-using Tmds.DBus.Protocol;
 using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 
 namespace Nikse.SubtitleEdit.Features.Main;
@@ -122,7 +120,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         IInsertService insertService,
         IMergeManager mergeManager,
         IAutoBackupService autoBackupService,
-        IUndoRedoManager undoRedoManager, 
+        IUndoRedoManager undoRedoManager,
         IBluRayHelper bluRayHelper)
     {
         _fileHelper = fileHelper;
@@ -293,6 +291,11 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             }
         }
 
+        ResetSubtitle();
+    }
+
+    private void ResetSubtitle()
+    {
         MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "New"));
         Subtitles.Clear();
         _subtitleFileName = string.Empty;
@@ -554,7 +557,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task ShowSpellCheck()
     {
-        var result = await _windowService.ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(Window, vm => 
+        var result = await _windowService.ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(Window, vm =>
         {
             vm.Initialize(Subtitles, SelectedSubtitleIndex, this);
         });
@@ -626,8 +629,8 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task ShowVideoTextToSpeech()
     {
-        await _windowService.ShowDialogAsync<TextToSpeechWindow, TextToSpeechViewModel>(Window, vm => 
-        { 
+        await _windowService.ShowDialogAsync<TextToSpeechWindow, TextToSpeechViewModel>(Window, vm =>
+        {
             vm.Initialize(GetUpdateSubtitle(), _videoFileName, AudioVisualizer.WavePeaks, Path.GetTempPath());
         });
         _shortcutManager.ClearKeys();
@@ -848,7 +851,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             return;
         }
 
-        var viewModel = await _windowService.ShowDialogAsync<ShowHistoryWindow, ShowHistoryViewModel>(Window, vm => 
+        var viewModel = await _windowService.ShowDialogAsync<ShowHistoryWindow, ShowHistoryViewModel>(Window, vm =>
         {
             vm.Initialize(_undoRedoManager);
         });
@@ -1222,7 +1225,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             await MessageBox.Show(Window, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
-        
+
         if (FileUtil.IsMatroskaFileFast(fileName) && FileUtil.IsMatroskaFile(fileName))
         {
             ImportSubtitleFromMatroskaFile(fileName, videoFileName);
@@ -1285,7 +1288,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         if (subtitleList.Count == 0)
         {
             matroska.Dispose();
-            Dispatcher.UIThread.Post(async() =>
+            Dispatcher.UIThread.Post(async () =>
             {
                 var answer = await MessageBox.Show(
                     Window!,
@@ -1299,17 +1302,29 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
         if (subtitleList.Count > 1)
         {
-            Dispatcher.UIThread.Post(async() =>
+            Dispatcher.UIThread.Post(async () =>
             {
-                var result = await _windowService.ShowDialogAsync<PickMatroskaTrackWindow, PickMatroskaTrackViewModel>(Window, vm => 
-                { 
-                    vm.Initialize(matroska, subtitleList);
+                var result = await _windowService.ShowDialogAsync<PickMatroskaTrackWindow, PickMatroskaTrackViewModel>(Window, vm =>
+                {
+                    vm.Initialize(matroska, subtitleList, fileName);
                 });
-                if (result.SelectedMatroskaTrack != null)
+                if (result.OkPressed && result.SelectedMatroskaTrack != null)
                 {
                     if (LoadMatroskaSubtitle(result.SelectedMatroskaTrack, matroska))
                     {
-                        // load video?
+                        _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
+
+                        if (Se.Settings.General.AutoOpenVideo)
+                        {
+                            if (fileName.EndsWith("mkv", StringComparison.OrdinalIgnoreCase))
+                            {
+                                await VideoOpenFile(fileName);
+                            }
+                            else
+                            {
+                                // load video?
+                            }
+                        }
                     }
                 }
 
@@ -1338,7 +1353,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             matroska.Dispose();
         }
     }
-    
+
     private bool LoadMatroskaSubtitle(MatroskaTrackInfo matroskaSubtitleInfo, MatroskaFile matroska)
     {
         if (matroskaSubtitleInfo.CodecId.Equals("S_HDMV/PGS", StringComparison.OrdinalIgnoreCase))
@@ -1360,11 +1375,13 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         var sub = matroska.GetSubtitle(matroskaSubtitleInfo.TrackNumber, null);
         var subtitle = new Subtitle();
         var format = Utilities.LoadMatroskaTextSubtitle(matroskaSubtitleInfo, matroska, sub, subtitle);
+
+        ResetSubtitle();
         subtitle.Renumber();
         Subtitles.Clear();
         Subtitles.AddRange(subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
 
-        
+
         //        Paragraphs = new ObservableCollection<DisplayParagraph>(subtitle.Paragraphs.Select(p => new DisplayParagraph(p)));
         //SelectedSubtitleFormat = format.Name;
 
