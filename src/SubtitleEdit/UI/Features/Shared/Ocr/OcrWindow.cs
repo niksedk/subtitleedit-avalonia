@@ -29,7 +29,6 @@ public class OcrWindow : Window
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         DataContext = vm;
 
-        var tracksView = MakeTracksView(vm);
         var subtitleView = MakeSubtitleView(vm);
 
         var buttonExport = UiUtil.MakeButton("Export...", vm.ExportCommand);
@@ -55,8 +54,7 @@ public class OcrWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(tracksView, 0, 0);
-        grid.Add(subtitleView, 0, 1);
+        grid.Add(subtitleView, 0, 0);
         grid.Add(panelButtons, 1, 0, 1, 2);
 
         Content = grid;
@@ -73,82 +71,7 @@ public class OcrWindow : Window
         _vm.SelectAndScrollToRow(0);
     }
 
-    private Border MakeTracksView(OcrViewModel vm)
-    {
-        var dataGridTracks = new DataGrid
-        {
-            AutoGenerateColumns = false,
-            SelectionMode = DataGridSelectionMode.Single,
-            CanUserResizeColumns = true,
-            CanUserSortColumns = true,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            Width = double.NaN,
-            Height = double.NaN,
-            DataContext = _vm,
-            ItemsSource = _vm.Tracks,
-            Columns =
-            {
-                new DataGridTextColumn
-                {
-                    Header = "#",
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(MatroskaTrackInfoDisplay.TrackNumber)),
-                    IsReadOnly = true,
-                },
-                new DataGridTextColumn
-                {
-                    Header = "Name",
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(MatroskaTrackInfoDisplay.Name)),
-                    IsReadOnly = true,
-                },
-                new DataGridTextColumn
-                {
-                    Header = "Language",
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(MatroskaTrackInfoDisplay.Language)),
-                    IsReadOnly = true,
-                },
-                new DataGridTextColumn
-                {
-                    Header = "Codec",
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(MatroskaTrackInfoDisplay.Codec)),
-                    IsReadOnly = true,
-                },
-                new DataGridTextColumn
-                {
-                    Header = "Default",
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(MatroskaTrackInfoDisplay.IsDefault)),
-                    IsReadOnly = true,
-                },
-                new DataGridTextColumn
-                {
-                    Header = "Forced",
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(MatroskaTrackInfoDisplay.IsForced)),
-                    IsReadOnly = true,
-                },
-            },
-        };
-        dataGridTracks.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(_vm.SelectedTrack)));
-        dataGridTracks.SelectionChanged += vm.DataGridTracksSelectionChanged;
-        vm.TracksGrid = dataGridTracks; 
-
-        var border = new Border
-        {
-            Child = dataGridTracks,
-            BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetBorderColor(),
-            Padding = new Thickness(10, 0, 10, 0),
-            CornerRadius = new CornerRadius(5),
-        };
-
-        return border;
-    }
-
+   
     private Border MakeSubtitleView(OcrViewModel vm)
     {
         var fullTimeConverter = new TimeSpanToDisplayFullConverter();
@@ -164,7 +87,7 @@ public class OcrWindow : Window
             Width = double.NaN,
             Height = double.NaN,
             DataContext = _vm,
-            ItemsSource = _vm.Rows,
+            ItemsSource = _vm.OcrSubtitleItems,
             Columns =
             {
                 new DataGridTextColumn

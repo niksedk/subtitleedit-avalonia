@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -12,6 +14,7 @@ using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Common.Ocr;
 using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using Nikse.SubtitleEdit.Logic.Media;
 using SkiaSharp;
@@ -20,25 +23,36 @@ namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
 public partial class OcrViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<MatroskaTrackInfoDisplay> _tracks;
-    [ObservableProperty] private MatroskaTrackInfoDisplay? _selectedTrack;
-    [ObservableProperty] private ObservableCollection<MatroskaSubtitleCueDisplay> _rows;
+    [ObservableProperty] private ObservableCollection<OcrEngineItem> _ocrEngines;
+    [ObservableProperty] private OcrEngineItem? _selectedOcrEngine;
+    [ObservableProperty] private ObservableCollection<OcrSubtitleItem> _ocrSubtitleItems;
+    [ObservableProperty] private OcrSubtitleItem? _selectedOcrSubtitleItem;
+    [ObservableProperty] private ObservableCollection<int> _startFromNumbers;
+    [ObservableProperty] private int _selectedStartFromNumber;
+    [ObservableProperty] private Bitmap? _currentImageSource;
+    [ObservableProperty] private string _currentBitmapInfo;
+    [ObservableProperty] private string _currentText;
 
     public OcrWindow? Window { get; set; }
-    public DataGrid TracksGrid { get; set; }
+    public DataGrid SubtitleGrid { get; set; }
     public MatroskaTrackInfo? SelectedMatroskaTrack { get; set; }
     public bool OkPressed { get; private set; }
     public string WindowTitle { get; private set; }
 
     private List<MatroskaTrackInfo> _matroskaTracks;
     private MatroskaFile? _matroskaFile;
+    private IOcrSubtitle _ocrSubtitle;
 
     public OcrViewModel()
     {
-        Tracks = new ObservableCollection<MatroskaTrackInfoDisplay>();
-        TracksGrid = new DataGrid();
+        OcrEngines = new ObservableCollection<OcrEngineItem>(OcrEngineItem.GetOcrEngines());
+        SelectedOcrEngine = OcrEngines.FirstOrDefault();
+        OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>();
+        StartFromNumbers = new ObservableCollection<int>();
+        SubtitleGrid = new DataGrid();
         WindowTitle = string.Empty;
-        Rows = new ObservableCollection<MatroskaSubtitleCueDisplay>();
+        CurrentBitmapInfo = string.Empty;
+        CurrentText = string.Empty;
         _matroskaTracks = new List<MatroskaTrackInfo>();
     }
 
@@ -59,16 +73,13 @@ public partial class OcrViewModel : ObservableObject
                 Name = track.Name,
                 MatroskaTrackInfo = track,
             };
-            Tracks.Add(display);
+          //  Tracks.Add(display);
         }
     }
 
     private void Close()
     {
-        Dispatcher.UIThread.Post(() =>
-        {
-            Window?.Close();
-        });
+        Dispatcher.UIThread.Post(() => { Window?.Close(); });
     }
 
     [RelayCommand]
@@ -79,7 +90,6 @@ public partial class OcrViewModel : ObservableObject
     [RelayCommand]
     private void Ok()
     {
-        SelectedMatroskaTrack = SelectedTrack?.MatroskaTrackInfo;
         OkPressed = true;
         Close();
     }
@@ -109,46 +119,6 @@ public partial class OcrViewModel : ObservableObject
 
     private bool TrackChanged()
     {
-        var selectedTrack = SelectedTrack;
-        if (selectedTrack == null || selectedTrack.MatroskaTrackInfo == null)
-        {
-            return false;
-        }
-
-        Rows.Clear();
-        var trackinfo = selectedTrack.MatroskaTrackInfo!;
-        var subtitles = _matroskaFile?.GetSubtitle(trackinfo.TrackNumber, null);
-        if (trackinfo.CodecId == MatroskaTrackType.SubRip && subtitles != null)
-        {
-            AddTextContent(trackinfo, subtitles, new SubRip());
-        }
-        else if (trackinfo.CodecId is MatroskaTrackType.SubStationAlpha or MatroskaTrackType.SubStationAlpha2 && subtitles != null)
-        {
-            AddTextContent(trackinfo, subtitles, new SubStationAlpha());
-        }
-        else if (trackinfo.CodecId is MatroskaTrackType.AdvancedSubStationAlpha or MatroskaTrackType.AdvancedSubStationAlpha2 && subtitles != null)
-        {
-            AddTextContent(trackinfo, subtitles, new AdvancedSubStationAlpha());
-        }
-        else if (trackinfo.CodecId == MatroskaTrackType.BluRay && subtitles != null && _matroskaFile != null)
-        {
-            var pcsData = BluRaySupParser.ParseBluRaySupFromMatroska(trackinfo, _matroskaFile);
-            for (var i = 0; i < 20 && i < pcsData.Count; i++)
-            {
-                var item = pcsData[i];
-                SKBitmap bitmap = item.GetBitmap();
-                var cue = new MatroskaSubtitleCueDisplay()
-                {
-                    Number = i + 1,
-                    Show = TimeSpan.FromMilliseconds(item.StartTime),
-                    Hide = TimeSpan.FromMilliseconds(item.EndTime),
-                    Duration = TimeSpan.FromMilliseconds(item.EndTime - item.StartTime),
-                    Image = new Image { Source = ConvertSKBitmapToAvaloniaBitmap(bitmap) },
-                };
-                Rows.Add(cue);
-            }
-        }
-
         return true;
     }
 
@@ -161,43 +131,27 @@ public partial class OcrViewModel : ObservableObject
         return new Bitmap(stream);
     }
 
-    private void AddTextContent(MatroskaTrackInfo trackInfo, List<MatroskaSubtitle> subtitles, SubtitleFormat format)
-    {
-        var sub = new Subtitle();
-        Utilities.LoadMatroskaTextSubtitle(trackInfo, _matroskaFile, subtitles, sub);
-        var raw = format.ToText(sub, string.Empty);
-        for (var i = 0; i < sub.Paragraphs.Count; i++)
-        {
-            var p = sub.Paragraphs[i];
-            var cue = new MatroskaSubtitleCueDisplay()
-            {
-                Number = p.Number,
-                Text = p.Text,
-                Show = TimeSpan.FromMilliseconds(p.StartTime.TotalMilliseconds),
-                Hide = TimeSpan.FromMilliseconds(p.EndTime.TotalMilliseconds),
-                Duration = TimeSpan.FromMilliseconds(p.EndTime.TotalMilliseconds - p.StartTime.TotalMilliseconds),
-            };
-            Rows.Add(cue);
-        }
-    }
 
     internal void SelectAndScrollToRow(int index)
     {
-        if (index < 0 || index >= Tracks.Count)
+        if (index < 0 || index >= OcrSubtitleItems.Count)
         {
             return;
         }
 
         Dispatcher.UIThread.Post(() =>
         {
-            TracksGrid.SelectedIndex = index;
-            TracksGrid.ScrollIntoView(TracksGrid.SelectedItem, null);
+            SubtitleGrid.SelectedIndex = index;
+            SubtitleGrid.ScrollIntoView(SubtitleGrid.SelectedItem, null);
             TrackChanged();
         }, DispatcherPriority.Background);
     }
 
     public void Initialize1(List<BluRaySupParser.PcsData> subtitles, string fileName)
     {
+        _ocrSubtitle = new BluRayPcsDataList(subtitles);
+        OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
+        StartFromNumbers = new ObservableCollection<int>(Enumerable.Range(1, _ocrSubtitle.Count));        
         //throw new NotImplementedException();
     }
 }
