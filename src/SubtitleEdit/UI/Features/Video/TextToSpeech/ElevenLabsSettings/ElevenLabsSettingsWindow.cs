@@ -5,7 +5,7 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 
-namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.EngineSettings;
+namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.ElevenLabsSettings;
 
 public class ElevenLabsSettingsWindow : Window
 {
@@ -30,7 +30,7 @@ public class ElevenLabsSettingsWindow : Window
             Value = vm.Stability,
             Width = 200,
             Margin = new Thickness(5, 0, 0, 0),
-            [!Slider.ValueProperty] = new Binding(nameof(vm.Stability)),
+            [!Slider.ValueProperty] = new Binding(nameof(ElevenLabsSettingsViewModel.Stability)),
         };
         var buttonStability = UiUtil.MakeButton(vm.ShowStabilityHelpCommand, IconNames.MdiHelp);
 
@@ -42,7 +42,7 @@ public class ElevenLabsSettingsWindow : Window
             Value = vm.Similarity,
             Width = 200,
             Margin = new Thickness(5, 0, 0, 0),
-            [!Slider.ValueProperty] = new Binding(nameof(vm.Similarity)),
+            [!Slider.ValueProperty] = new Binding(nameof(ElevenLabsSettingsViewModel.Similarity)),
         };
         var buttonSimilarity = UiUtil.MakeButton(vm.ShowSimilarityHelpCommand, IconNames.MdiHelp);
 
@@ -54,7 +54,7 @@ public class ElevenLabsSettingsWindow : Window
             Value = vm.SpeakerBoost,
             Width = 200,
             Margin = new Thickness(5, 0, 0, 0),
-            [!Slider.ValueProperty] = new Binding(nameof(vm.SpeakerBoost)),
+            [!Slider.ValueProperty] = new Binding(nameof(ElevenLabsSettingsViewModel.SpeakerBoost)),
         };
         var buttonSpeakerBoost = UiUtil.MakeButton(vm.ShowSpeakerBoostHelpCommand, IconNames.MdiHelp);
 

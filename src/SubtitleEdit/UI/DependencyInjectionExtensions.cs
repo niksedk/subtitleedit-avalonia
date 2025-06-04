@@ -29,7 +29,6 @@ using Nikse.SubtitleEdit.Features.Video.OpenFromUrl;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.DownloadTts;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
-using Nikse.SubtitleEdit.Features.Video.TextToSpeech.EngineSettings;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.VoiceSettings;
 using Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
 using Nikse.SubtitleEdit.Logic;
@@ -40,6 +39,7 @@ using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
 using DownloadFfmpegViewModel = Nikse.SubtitleEdit.Features.Shared.DownloadFfmpegViewModel;
 using DownloadLibMpvViewModel = Nikse.SubtitleEdit.Features.Shared.DownloadLibMpvViewModel;
+using ElevenLabsSettingsViewModel = Nikse.SubtitleEdit.Features.Video.TextToSpeech.ElevenLabsSettings.ElevenLabsSettingsViewModel;
 using PickMatroskaTrackViewModel = Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack.PickMatroskaTrackViewModel;
 
 namespace Nikse.SubtitleEdit;

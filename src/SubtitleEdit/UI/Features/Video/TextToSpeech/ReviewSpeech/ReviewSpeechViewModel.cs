@@ -7,7 +7,6 @@ using HanumanInstitute.LibMpv;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.DownloadTts;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Engines;
-using Nikse.SubtitleEdit.Features.Video.TextToSpeech.EngineSettings;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Voices;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -22,6 +21,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using Nikse.SubtitleEdit.Features.Shared;
+using ElevenLabsSettingsViewModel = Nikse.SubtitleEdit.Features.Video.TextToSpeech.ElevenLabsSettings.ElevenLabsSettingsViewModel;
 using Timer = System.Timers.Timer;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.VoiceSettings;
