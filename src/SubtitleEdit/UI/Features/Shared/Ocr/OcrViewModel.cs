@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
@@ -10,8 +5,21 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.BluRaySup;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
+using Nikse.SubtitleEdit.Core.VobSub.Ocr.Service;
+using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Ocr;
 using SkiaSharp;
+using SubtitleAlchemist.Logic.Ocr;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
@@ -29,6 +37,8 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private int _selectedNOcrMaxWrongPixels;
     [ObservableProperty] private ObservableCollection<int> _nOcrPixelsAreSpaceList;
     [ObservableProperty] private int _selectedNOcrPixelsAreSpace;
+    [ObservableProperty] private ObservableCollection<string> _ollamaLanguages;
+    [ObservableProperty] private string? _selectedOllamaLanguage;
     [ObservableProperty] private string _progressText;
     [ObservableProperty] private double _progressValue;
     [ObservableProperty] private Bitmap? _currentImageSource;
@@ -36,31 +46,104 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private string _currentText;
     [ObservableProperty] private bool _isOcrRunning;
     [ObservableProperty] private bool _isNOcrVisible;
+    [ObservableProperty] private bool _nOcrDrawUnknownText;
+    [ObservableProperty] private string _ollamaModel;
+    [ObservableProperty] private string _googleVisionApiKey;
+    [ObservableProperty] private ObservableCollection<OcrLanguage> _googleVisionLanguages;
+    [ObservableProperty] private OcrLanguage? _selectedGoogleVisionLanguage;
+
 
     public OcrWindow? Window { get; set; }
     public DataGrid SubtitleGrid { get; set; }
     public MatroskaTrackInfo? SelectedMatroskaTrack { get; set; }
     public bool OkPressed { get; private set; }
     public string WindowTitle { get; private set; }
+    public List<SubtitleLineViewModel> OcredSubtitle;
 
     private List<MatroskaTrackInfo> _matroskaTracks;
     private MatroskaFile? _matroskaFile;
     private IOcrSubtitle? _ocrSubtitle;
+    private readonly INOcrCaseFixer _nOcrCaseFixer;
+    private CancellationTokenSource _cancellationTokenSource;
+    private NOcrDb? _nOcrDb;
+    private readonly List<SkipOnceChar> _runOnceChars;
+    private readonly List<SkipOnceChar> _skipOnceChars;
 
-    public OcrViewModel()
+    public OcrViewModel(INOcrCaseFixer nOcrCaseFixer)
     {
+        _nOcrCaseFixer = nOcrCaseFixer;
+
         OcrEngines = new ObservableCollection<OcrEngineItem>(OcrEngineItem.GetOcrEngines());
         SelectedOcrEngine = OcrEngines.FirstOrDefault();
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>();
         NOcrDatabases = new ObservableCollection<string>();
         NOcrMaxWrongPixelsList = new ObservableCollection<int>(Enumerable.Range(1, 500));
         NOcrPixelsAreSpaceList = new ObservableCollection<int>(Enumerable.Range(1, 50));
+        OllamaLanguages = new ObservableCollection<string>(Iso639Dash2LanguageCode.List
+            .Select(p => p.EnglishName)
+            .OrderBy(p => p));
+        SelectedOllamaLanguage = "English";
         SubtitleGrid = new DataGrid();
         WindowTitle = string.Empty;
         CurrentBitmapInfo = string.Empty;
         CurrentText = string.Empty;
         ProgressText = string.Empty;
+        OllamaModel = string.Empty;
+        GoogleVisionApiKey = string.Empty;
+        GoogleVisionLanguages = new ObservableCollection<OcrLanguage>(GoogleVisionOcr.GetLanguages().OrderBy(p => p.ToString()));
         _matroskaTracks = new List<MatroskaTrackInfo>();
+        _runOnceChars = new List<SkipOnceChar>();
+        _skipOnceChars = new List<SkipOnceChar>();
+        OcredSubtitle = new List<SubtitleLineViewModel>(); 
+        EngineSelectionChanged();
+        LoadSettings();
+    }
+
+    private void LoadSettings()
+    {
+        var ocr = Se.Settings.Ocr;
+        if (!string.IsNullOrEmpty(ocr.Engine) && OcrEngines.Any(p => p.Name == ocr.Engine))
+        {
+            SelectedOcrEngine = OcrEngines.First(p => p.Name == ocr.Engine);
+        }
+
+        if (!string.IsNullOrEmpty(ocr.NOcrDatabase) && NOcrDatabases.Contains(ocr.NOcrDatabase))
+        {
+            SelectedNOcrDatabase = ocr.NOcrDatabase;
+        }
+
+        SelectedNOcrMaxWrongPixels = ocr.NOcrMaxWrongPixels;
+        NOcrDrawUnknownText = ocr.NOcrDrawUnknownText;
+        SelectedNOcrPixelsAreSpace = ocr.NOcrPixelsAreSpace;
+        OllamaModel = ocr.OllamaModel;
+        SelectedOllamaLanguage = ocr.OllamaLanguage;
+        GoogleVisionApiKey = ocr.GoogleVisionApiKey;
+        SelectedGoogleVisionLanguage = GoogleVisionLanguages.FirstOrDefault(p => p.Code == ocr.GoogleVisionLanguage);
+    }
+
+    private void SaveSettings()
+    {
+        var ocr = Se.Settings.Ocr;
+        ocr.Engine = SelectedOcrEngine?.Name ?? "nOCR";
+        ocr.NOcrDatabase = SelectedNOcrDatabase ?? "Latin";
+        ocr.NOcrMaxWrongPixels = SelectedNOcrMaxWrongPixels;
+        ocr.NOcrDrawUnknownText = NOcrDrawUnknownText;
+        ocr.NOcrPixelsAreSpace = SelectedNOcrPixelsAreSpace;
+        ocr.OllamaModel = OllamaModel;
+        ocr.OllamaLanguage = SelectedOllamaLanguage;
+        ocr.GoogleVisionApiKey = GoogleVisionApiKey;
+        ocr.GoogleVisionLanguage = SelectedGoogleVisionLanguage?.Code ?? "en";
+        Se.SaveSettings();
+    }
+
+    private string? GetNOcrLanguageFileName()
+    {
+        if (SelectedNOcrDatabase == null)
+        {
+            return null;
+        }
+
+        return Path.Combine(Se.OcrFolder, $"{SelectedNOcrDatabase}.nocr");
     }
 
     private void Close()
@@ -69,17 +152,208 @@ public partial class OcrViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void StartOcr()
+    private async Task StartOcr()
     {
+        if (IsOcrRunning)
+        {
+            return;
+        }
+
+        if (!(SelectedOcrEngine is { } ocrEngine))
+        {
+            return;
+        }
+
+        if (ocrEngine.EngineType == OcrEngineType.Tesseract)
+        {
+            //var tesseractOk = await CheckAndDownloadTesseract();
+            //if (!tesseractOk)
+            //{
+            //    return;
+            //}
+
+            //if (SelectedTesseractDictionaryItem == null)
+            //{
+            //    var tesseractModelOk = await TesseractModelDownload();
+            //    if (!tesseractModelOk)
+            //    {
+            //        return;
+            //    }
+            //}
+        }
+
+        SaveSettings();
+        _cancellationTokenSource = new CancellationTokenSource();
         IsOcrRunning = true;
+        var startFromIndex = SelectedOcrSubtitleItem == null ? 0 : OcrSubtitleItems.IndexOf(SelectedOcrSubtitleItem);
+        ProgressText = "Running OCR...";
+        ProgressValue = 0d;
+
+        if (ocrEngine.EngineType == OcrEngineType.nOcr)
+        {
+            RunNOcr(startFromIndex);
+        }
+        else if (ocrEngine.EngineType == OcrEngineType.Tesseract)
+        {
+            // RunTesseractOcr(startFromIndex);
+        }
+        else if (ocrEngine.EngineType == OcrEngineType.PaddleOcr)
+        {
+            //if (!Directory.Exists(Se.PaddleOcrFolder))
+            //{
+            //    var answer = await Page.DisplayAlert(
+            //        "Download Paddle OCR models?",
+            //        $"{Environment.NewLine}\"Paddle OCR\" requires AI model files.{Environment.NewLine}{Environment.NewLine}Download and use Paddle OCR models?",
+            //        "Yes",
+            //        "No");
+
+            //    if (!answer)
+            //    {
+            //        await Pause();
+            //        return;
+            //    }
+
+            //    var result = await _popupService.ShowPopupAsync<DownloadPaddleOcrModelsPopupModel>(CancellationToken.None);
+            //    if (result is not string)
+            //    {
+            //        await Pause();
+            //        return;
+            //    }
+            //}
+
+            //RunPaddleOcrBatch(startFromIndex, 10);
+        }
+        else if (ocrEngine.EngineType == OcrEngineType.Ollama)
+        {
+            //  RunOllamaOcr(startFromIndex);
+        }
+        else if (ocrEngine.EngineType == OcrEngineType.Ollama)
+        {
+            //   RunGoogleVisionOcr(startFromIndex);
+        }
+    }
+
+    private void RunNOcr(int startFromIndex)
+    {
+
+        if (!InitNOcrDb())
+        {
+            return;
+        }
+
+        _ = Task.Run(() =>
+        {
+            for (var i = startFromIndex; i < OcrSubtitleItems.Count; i++)
+            {
+                if (_cancellationTokenSource.Token.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                ProgressValue = i / (double)OcrSubtitleItems.Count;
+                ProgressText = $"Running OCR... {i + 1}/{OcrSubtitleItems.Count}";
+
+                var item = OcrSubtitleItems[i];
+                var bitmap = item.GetSkBitmap();
+                var nBmp = new NikseBitmap2(bitmap);
+                nBmp.MakeTwoColor(200);
+                nBmp.CropTop(0, new SKColor(0, 0, 0, 0));
+                var list = NikseBitmapImageSplitter2.SplitBitmapToLettersNew(nBmp, SelectedNOcrPixelsAreSpace, false, true, 20, true);
+                var sb = new StringBuilder();
+                SelectedOcrSubtitleItem = item;
+
+                foreach (var splitterItem in list)
+                {
+                    if (splitterItem.NikseBitmap == null)
+                    {
+                        if (splitterItem.SpecialCharacter != null)
+                        {
+                            sb.Append(splitterItem.SpecialCharacter);
+                        }
+                    }
+                    else
+                    {
+                        var match = _nOcrDb!.GetMatch(nBmp, list, splitterItem, splitterItem.Top, true, SelectedNOcrMaxWrongPixels);
+
+                        if (NOcrDrawUnknownText && match == null)
+                        {
+                            var letterIndex = list.IndexOf(splitterItem);
+
+                            if (_skipOnceChars.Any(p => p.LetterIndex == letterIndex && p.LineIndex == i))
+                            {
+                                sb.Append("*");
+                                continue;
+                            }
+
+                            var runOnceChar = _runOnceChars.FirstOrDefault(p => p.LetterIndex == letterIndex && p.LineIndex == i);
+                            if (runOnceChar != null)
+                            {
+                                sb.Append(runOnceChar.Text);
+                                continue;
+                            }
+
+                            //Dispatcher.UIThread.Invoke(() =>
+                            //{
+                            //    //await Pause();
+                            //    //await Shell.Current.GoToAsync(nameof(NOcrCharacterAddPage), new Dictionary<string, object>
+                            //    //    {
+                            //    //    { "Page", nameof(OcrPage) },
+                            //    //    { "Bitmap", nBmp.GetBitmap() },
+                            //    //    { "Letters", list },
+                            //    //    { "Item", splitterItem },
+                            //    //    { "OcrSubtitleItems", OcrSubtitleItems.ToList() },
+                            //    //    { "StartFromNumber", SelectedStartFromNumber },
+                            //    //    { "ItalicOn", _toolsItalicOn },
+                            //    //    { "nOcrDb", _nOcrDb },
+                            //    //    { "MaxWrongPixels", SelectedNOcrMaxWrongPixels },
+                            //    //    });
+                            //});
+                            //return;
+                        }
+
+                        sb.Append(match != null ? _nOcrCaseFixer.FixUppercaseLowercaseIssues(splitterItem, match) : "*");
+                    }
+                }
+
+                item.Text = sb.ToString().Trim();
+
+                SelectAndScrollToRow(i);
+
+                _runOnceChars.Clear();
+                _skipOnceChars.Clear();
+            }
+
+            IsOcrRunning = false;
+        });
+    }
+
+    private bool InitNOcrDb()
+    {
+        var fileName = GetNOcrLanguageFileName();
+        if (_nOcrDb != null && _nOcrDb.FileName == fileName)
+        {
+            return true;
+        }
+
+        if (fileName == null)
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrEmpty(fileName) && (_nOcrDb == null || _nOcrDb.FileName != fileName))
+        {
+            _nOcrDb = new NOcrDb(fileName);
+        }
+
+        return true;
     }
 
     [RelayCommand]
     private void PauseOcr()
     {
         IsOcrRunning = false;
+        _cancellationTokenSource?.Cancel();
     }
-
 
     [RelayCommand]
     private void Export()
@@ -89,13 +363,30 @@ public partial class OcrViewModel : ObservableObject
     [RelayCommand]
     private void Ok()
     {
+        SaveSettings();
         OkPressed = true;
+
+        OcredSubtitle.Clear();
+        for (var i = 0; i < OcrSubtitleItems.Count; i++)
+        {
+            OcrSubtitleItem? item = OcrSubtitleItems[i];
+            var subtitleLine = new SubtitleLineViewModel
+            {
+                Number = i + 1,
+                Text = item.Text,
+                StartTime = item.StartTime,
+                EndTime = item.EndTime,
+            };
+            OcredSubtitle.Add(subtitleLine);
+        }
+
         Close();
     }
 
     [RelayCommand]
     private void Cancel()
     {
+        _cancellationTokenSource?.Cancel();
         Close();
     }
 
@@ -140,8 +431,9 @@ public partial class OcrViewModel : ObservableObject
 
         Dispatcher.UIThread.Post(() =>
         {
+            SelectedOcrSubtitleItem = OcrSubtitleItems[index];
             SubtitleGrid.SelectedIndex = index;
-            SubtitleGrid.ScrollIntoView(SubtitleGrid.SelectedItem, null);
+            SubtitleGrid.ScrollIntoView(SelectedOcrSubtitleItem, null);
             TrackChanged();
         }, DispatcherPriority.Background);
     }
@@ -154,6 +446,20 @@ public partial class OcrViewModel : ObservableObject
 
     internal void EngineSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
+        EngineSelectionChanged();
+    }
+
+    internal void EngineSelectionChanged()
+    {
         IsNOcrVisible = SelectedOcrEngine?.EngineType == OcrEngineType.nOcr;
+
+        if (NOcrDatabases.Count == 0)
+        {
+            foreach (var s in NOcrDb.GetDatabases().OrderBy(p => p))
+            {
+                NOcrDatabases.Add(s);
+            }
+            SelectedNOcrDatabase = NOcrDb.GetDatabases().FirstOrDefault();
+        }
     }
 }

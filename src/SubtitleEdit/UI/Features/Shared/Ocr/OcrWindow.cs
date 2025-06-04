@@ -74,7 +74,7 @@ public class OcrWindow : Window
     private static StackPanel MakeTopControlsView(OcrViewModel vm)
     {
         var comboBoxEngines = UiUtil.MakeComboBox(vm.OcrEngines, vm, nameof(vm.SelectedOcrEngine))
-            .WithWidth(150)
+            .WithWidth(100)
             .WithMarginRight(10)
             .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter());
         comboBoxEngines.SelectionChanged += vm.EngineSelectionChanged;
@@ -92,7 +92,15 @@ public class OcrWindow : Window
                 comboBoxEngines,
                 UiUtil.MakeLabel("Database", nameof(vm.IsNOcrVisible)),
                 UiUtil.MakeComboBox( vm.NOcrDatabases, vm, nameof(vm.SelectedNOcrDatabase), nameof(vm.IsNOcrVisible))
-                    .WithWidth(150)
+                    .WithWidth(100)
+                    .WithMarginRight(10)
+                    .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
+                UiUtil.MakeLabel("Max wrong pixels", nameof(vm.IsNOcrVisible)),
+                UiUtil.MakeComboBox(vm.NOcrMaxWrongPixelsList, vm, nameof(vm.SelectedNOcrMaxWrongPixels), nameof(vm.IsNOcrVisible))
+                    .WithMarginRight(10)
+                    .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
+                UiUtil.MakeLabel("Number of pixels is space", nameof(vm.IsNOcrVisible)),
+                UiUtil.MakeComboBox(vm.NOcrPixelsAreSpaceList, vm, nameof(vm.SelectedNOcrPixelsAreSpace), nameof(vm.IsNOcrVisible))
                     .WithMarginRight(10)
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
             }
@@ -191,6 +199,8 @@ public class OcrWindow : Window
                 },
             },
         };
+        dataGridSubtitle.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedOcrSubtitleItem)) { Source = vm });
+        vm.SubtitleGrid = dataGridSubtitle;
 
         var border = new Border
         {

@@ -1251,6 +1251,14 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
                     {
                         vm.Initialize(subtitles, fileName);
                     });
+
+                    if (result.OkPressed)
+                    {
+                        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Open Blu-ray SUP"));
+                        _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
+                        Subtitles.Clear();
+                        Subtitles.AddRange(result.OcredSubtitle);
+                    }
                 });
                 return;
             }

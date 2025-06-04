@@ -62,6 +62,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<ISpellCheckManager, SpellCheckManager>();
         collection.AddTransient<ITtsDownloadService, TtsDownloadService>();
         collection.AddTransient<IBluRayHelper, BluRayHelper>();
+        collection.AddTransient<INOcrCaseFixer, NOcrCaseFixer>();
 
         // Download services
         collection.AddHttpClient<IFfmpegDownloadService, FfmpegDownloadService>();
