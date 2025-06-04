@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace Nikse.SubtitleEdit.Features.Common.Ocr;
+namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
 public class PaddleOcrResultParser
 {

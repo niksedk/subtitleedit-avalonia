@@ -1,7 +1,7 @@
-﻿using Nikse.SubtitleEdit.Logic;
-using SkiaSharp;
+﻿using SkiaSharp;
 using System;
 using System.IO;
+using Avalonia.Media.Imaging;
 
 namespace Nikse.SubtitleEdit.Logic;
 
@@ -128,5 +128,14 @@ internal static class SkBitmapExtensions
         using var image = SKImage.FromBitmap(bitmap);
         using var data = image.Encode(SKEncodedImageFormat.Png, 100);
         return data.ToArray();
+    }
+    
+    public static Bitmap ToAvaloniaBitmap(this SKBitmap skBitmap)
+    {
+        using var image = SKImage.FromBitmap(skBitmap);
+        using var data = image.Encode(SKEncodedImageFormat.Png, 100);
+        using var stream = new MemoryStream(data.ToArray());
+
+        return new Bitmap(stream);
     }
 }

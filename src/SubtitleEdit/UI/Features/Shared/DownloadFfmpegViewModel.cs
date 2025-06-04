@@ -15,7 +15,7 @@ using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Download;
 using Timer = System.Timers.Timer;
 
-namespace Nikse.SubtitleEdit.Features.Common;
+namespace Nikse.SubtitleEdit.Features.Shared;
 
 public partial class DownloadFfmpegViewModel : ObservableObject
 {

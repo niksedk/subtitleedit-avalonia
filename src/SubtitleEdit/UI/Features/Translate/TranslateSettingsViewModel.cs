@@ -1,11 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.AutoTranslate;
-using Nikse.SubtitleEdit.Features.Common;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Avalonia.Input;
+using Nikse.SubtitleEdit.Features.Shared;
 
 namespace Nikse.SubtitleEdit.Features.Translate;
 

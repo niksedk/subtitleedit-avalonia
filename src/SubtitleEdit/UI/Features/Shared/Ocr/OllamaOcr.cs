@@ -1,14 +1,14 @@
-﻿using Nikse.SubtitleEdit.Core.Common;
+﻿using System;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using SkiaSharp;
-using System.Net.Http;
-using System;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic;
+using SkiaSharp;
 
-namespace Nikse.SubtitleEdit.Features.Common.Ocr;
+namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
 public class OllamaOcr
 {

@@ -1,6 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -8,15 +10,10 @@ using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
-using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Media;
-using SkiaSharp;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
 
-namespace Nikse.SubtitleEdit.Features.Common;
+namespace Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 
 public partial class PickMatroskaTrackViewModel : ObservableObject
 {
@@ -136,29 +133,20 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
             for (var i = 0; i < 20 && i < pcsData.Count; i++)
             {
                 var item = pcsData[i];
-                SKBitmap bitmap = item.GetBitmap();
+                var bitmap = item.GetBitmap();
                 var cue = new MatroskaSubtitleCueDisplay()
                 {
                     Number = i + 1,
                     Show = TimeSpan.FromMilliseconds(item.StartTime),
                     Hide = TimeSpan.FromMilliseconds(item.EndTime),
                     Duration = TimeSpan.FromMilliseconds(item.EndTime - item.StartTime),
-                    Image = new Image { Source = ConvertSKBitmapToAvaloniaBitmap(bitmap) },
+                    Image = new Image { Source = bitmap.ToAvaloniaBitmap() },
                 };
                 Rows.Add(cue);
             }
         }
 
         return true;
-    }
-
-    public static Bitmap ConvertSKBitmapToAvaloniaBitmap(SKBitmap skBitmap)
-    {
-        using var image = SKImage.FromBitmap(skBitmap);
-        using var data = image.Encode(SKEncodedImageFormat.Png, 100);
-        using var stream = new MemoryStream(data.ToArray());
-
-        return new Bitmap(stream);
     }
 
     private void AddTextContent(MatroskaTrackInfo trackInfo, List<MatroskaSubtitle> subtitles, SubtitleFormat format)

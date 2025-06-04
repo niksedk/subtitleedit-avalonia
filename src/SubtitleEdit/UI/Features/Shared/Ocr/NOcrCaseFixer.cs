@@ -1,8 +1,8 @@
-﻿using Nikse.SubtitleEdit.Logic.Ocr;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Nikse.SubtitleEdit.Logic.Ocr;
 
-namespace Nikse.SubtitleEdit.Features.Common.Ocr;
+namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
 public class NOcrCaseFixer : INOcrCaseFixer
 {

@@ -2,10 +2,10 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Features.Common;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Features.Shared;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.EngineSettings;
 

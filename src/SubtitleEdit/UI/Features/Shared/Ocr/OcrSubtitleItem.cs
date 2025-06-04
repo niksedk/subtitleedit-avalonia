@@ -1,12 +1,14 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using Avalonia.Media.Imaging;
+using CommunityToolkit.Mvvm.ComponentModel;
+using Nikse.SubtitleEdit.Logic;
 using SkiaSharp;
-using System;
 
-namespace Nikse.SubtitleEdit.Features.Common.Ocr;
+namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
 public partial class OcrSubtitleItem : ObservableObject
 {
-    public SKBitmap GetBitmap()
+    public SKBitmap GetSkBitmap()
     {
         if (_bitmap == null)
         {
@@ -16,6 +18,11 @@ public partial class OcrSubtitleItem : ObservableObject
         return _bitmap;
     }
 
+    public Bitmap GetBitmap()
+    {
+        return GetSkBitmap().ToAvaloniaBitmap();
+    }
+    
     public int Number { get; set; }
 
     public TimeSpan StartTime { get; set; }

@@ -1,4 +1,4 @@
-﻿namespace Nikse.SubtitleEdit.Features.Common.Ocr;
+﻿namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
 public class SkipOnceChar
 {

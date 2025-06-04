@@ -8,7 +8,7 @@ using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic;
 
-namespace Nikse.SubtitleEdit.Features.Common;
+namespace Nikse.SubtitleEdit.Features.Shared;
 
 public enum MessageBoxResult
 {

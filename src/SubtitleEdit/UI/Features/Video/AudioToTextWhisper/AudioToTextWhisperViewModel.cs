@@ -21,10 +21,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Globalization;
-using Nikse.SubtitleEdit.Features.Common;
 using System.Threading;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
+using Nikse.SubtitleEdit.Features.Shared;
 
 namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 

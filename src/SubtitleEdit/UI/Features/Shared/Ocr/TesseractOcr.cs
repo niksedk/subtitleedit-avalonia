@@ -8,7 +8,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using SkiaSharp;
 
-namespace Nikse.SubtitleEdit.Features.Common.Ocr;
+namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
 public class TesseractOcr
 {

@@ -1,9 +1,9 @@
-﻿using Avalonia.Controls;
+﻿using System;
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Declarative;
-using System;
 
-namespace Nikse.SubtitleEdit.Features.Common;
+namespace Nikse.SubtitleEdit.Features.Shared;
 
 public class FullScreenVideoWindow : Window
 {

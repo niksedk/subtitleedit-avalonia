@@ -5,6 +5,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Media.Imaging;
 using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
@@ -86,36 +87,37 @@ public class OcrWindow : Window
             VerticalAlignment = VerticalAlignment.Stretch,
             Width = double.NaN,
             Height = double.NaN,
-            DataContext = _vm,
-            ItemsSource = _vm.OcrSubtitleItems,
+            DataContext = vm,
+            ItemsSource = vm.OcrSubtitleItems,
             Columns =
             {
                 new DataGridTextColumn
                 {
                     Header = "#",
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(MatroskaSubtitleCueDisplay.Number)),
+                    Binding = new Binding(nameof(OcrSubtitleItem.Number)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Show",
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(MatroskaSubtitleCueDisplay.Show)) { Converter = fullTimeConverter },
+                    Binding = new Binding(nameof(OcrSubtitleItem.StartTime)) { Converter = fullTimeConverter },
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Duration",
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(MatroskaSubtitleCueDisplay.Duration)) { Converter = shortTimeConverter },
+                    Binding = new Binding(nameof(OcrSubtitleItem.Duration)) { Converter = shortTimeConverter },
                     IsReadOnly = true,
                 },
                 new DataGridTemplateColumn
                 {
                     Header = "Text/Image",
                     IsReadOnly = true,
-                    CellTemplate = new FuncDataTemplate<MatroskaSubtitleCueDisplay>((item, _) =>
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    CellTemplate = new FuncDataTemplate<OcrSubtitleItem>((item, _) =>
                     {
                         var stackPanel = new StackPanel
                         {
@@ -135,12 +137,13 @@ public class OcrWindow : Window
                             stackPanel.Children.Add(textBlock);
                         }
 
-                        // Add image if available
-                        if (item.Image != null)
+                        var bitmap = item.GetBitmap();
+                       // Add image if available
+                        if (bitmap != null)
                         {
                             var image = new Image
                             {
-                                Source = item.Image.Source,
+                                Source = bitmap,
                                 MaxHeight = 100, // Adjust as needed
                                 MaxWidth = 200,  // Adjust as needed
                                 Stretch = Avalonia.Media.Stretch.Uniform

@@ -1,6 +1,6 @@
 ﻿using Nikse.SubtitleEdit.Logic.Ocr;
 
-namespace Nikse.SubtitleEdit.Features.Common.Ocr;
+namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
 public interface INOcrCaseFixer
 {

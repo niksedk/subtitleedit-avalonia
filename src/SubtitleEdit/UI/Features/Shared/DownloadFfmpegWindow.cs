@@ -1,12 +1,12 @@
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Media;
-using Avalonia.Data;
-using Nikse.SubtitleEdit.Logic;
-using Avalonia.Controls.Primitives;
 using Avalonia.Styling;
+using Nikse.SubtitleEdit.Logic;
 
-namespace Nikse.SubtitleEdit.Features.Common;
+namespace Nikse.SubtitleEdit.Features.Shared;
 
 public class DownloadFfmpegWindow : Window
 {
@@ -56,10 +56,10 @@ public class DownloadFfmpegWindow : Window
                 },
             }
         };
-        progressSlider.Bind(Slider.ValueProperty, new Binding(nameof(vm.Progress)));
+        progressSlider.Bind(Slider.ValueProperty, new Binding(nameof(DownloadFfmpegViewModel.Progress)));
 
         var statusText = new TextBlock();
-        statusText.Bind(TextBlock.TextProperty, new Binding(nameof(vm.StatusText)));
+        statusText.Bind(TextBlock.TextProperty, new Binding(nameof(DownloadFfmpegViewModel.StatusText)));
 
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CommandCancelCommand);
         var buttonBar = UiUtil.MakeButtonBar(buttonCancel);

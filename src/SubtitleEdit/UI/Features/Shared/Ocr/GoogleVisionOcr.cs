@@ -1,22 +1,22 @@
-﻿using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Core.VobSub.Ocr.Service;
-using Nikse.SubtitleEdit.Core.VobSub.Ocr;
-using System.Net.Http.Headers;
-using System.Net;
-using System.Runtime.Serialization.Json;
-using System.Runtime.Serialization;
-using System.Text;
-using SkiaSharp;
-using System.Net.Http;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Threading;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.VobSub.Ocr;
+using Nikse.SubtitleEdit.Core.VobSub.Ocr.Service;
 using Nikse.SubtitleEdit.Logic;
+using SkiaSharp;
 
-namespace Nikse.SubtitleEdit.Features.Common.Ocr;
+namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
 /// <summary>
 /// OCR via Google Cloud Vision API - see https://cloud.google.com/vision/docs/ocr

@@ -1,9 +1,9 @@
-﻿using Nikse.SubtitleEdit.Core.BluRaySup;
-using SkiaSharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Nikse.SubtitleEdit.Core.BluRaySup;
+using SkiaSharp;
 
-namespace Nikse.SubtitleEdit.Features.Common.Ocr;
+namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
 public class BluRayPcsDataList : IOcrSubtitle
 {
@@ -32,12 +32,12 @@ public class BluRayPcsDataList : IOcrSubtitle
         Count = pcsDataList.Count;
     }
 
-    public List<OcrSubtitleItem> MakeOcrSubtitleItems()
+    public List<Shared.Ocr.OcrSubtitleItem> MakeOcrSubtitleItems()
     {
-        var ocrSubtitleItems = new List<OcrSubtitleItem>(Count);
+        var ocrSubtitleItems = new List<Shared.Ocr.OcrSubtitleItem>(Count);
         for (var i = 0; i < Count; i++)
         {
-            ocrSubtitleItems.Add(new OcrSubtitleItem(this, i));
+            ocrSubtitleItems.Add(new Shared.Ocr.OcrSubtitleItem(this, i));
         }
 
         return ocrSubtitleItems;
