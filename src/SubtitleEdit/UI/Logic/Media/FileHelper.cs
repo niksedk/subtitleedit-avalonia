@@ -102,6 +102,7 @@ namespace Nikse.SubtitleEdit.Logic.Media
             AddExt(existingTypes, patterns, ".mkv");
             AddExt(existingTypes, patterns, ".mp4");
             AddExt(existingTypes, patterns, ".ts");
+            AddExt(existingTypes, patterns, ".sup");
             return patterns;
         }
 

@@ -11,6 +11,7 @@ using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Features.Options.Language;
 using Nikse.SubtitleEdit.Features.Options.Settings;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
+using Nikse.SubtitleEdit.Features.Shared.Ocr;
 using Nikse.SubtitleEdit.Features.SpellCheck;
 using Nikse.SubtitleEdit.Features.SpellCheck.EditWholeText;
 using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
@@ -112,5 +113,6 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<DownloadTtsViewModel>();
         collection.AddTransient<ReviewSpeechViewModel>();
         collection.AddTransient<PickMatroskaTrackViewModel>();
+        collection.AddTransient<OcrViewModel>();
     }
 }

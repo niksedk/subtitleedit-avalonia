@@ -49,10 +49,14 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
+using Nikse.SubtitleEdit.Features.Shared.Ocr;
 using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
+using OcrViewModel = Nikse.SubtitleEdit.Features.Shared.Ocr.OcrViewModel;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -1230,6 +1234,23 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         {
             ImportSubtitleFromMatroskaFile(fileName, videoFileName);
             return;
+        }
+        
+        if (ext == ".sup" && FileUtil.IsBluRaySup(fileName))
+        {
+            var log = new StringBuilder();
+            var subtitles = BluRaySupParser.ParseBluRaySup(fileName, log);
+            if (subtitles.Count > 0)
+            {
+                Dispatcher.UIThread.Post(async () =>
+                {
+                    var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window, vm =>
+                    {
+                        vm.Initialize1(subtitles, fileName);
+                    });
+                });
+                return;
+            }
         }
 
         var subtitle = Subtitle.Parse(fileName);
