@@ -5,8 +5,6 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
-using Avalonia.Media.Imaging;
-using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 
@@ -30,23 +28,29 @@ public class OcrWindow : Window
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         DataContext = vm;
 
+        var topControlsView = MakeTopControlsView(vm);
         var subtitleView = MakeSubtitleView(vm);
 
-        var buttonExport = UiUtil.MakeButton("Export...", vm.ExportCommand);
+        var buttonStart = UiUtil.MakeButton("Start OCR", vm.StartOcrCommand)
+            .WithBindIsVisible(nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter());
+        var buttonPause = UiUtil.MakeButton("Pause OCR", vm.PauseOcrCommand)
+            .WithBindIsVisible(nameof(OcrViewModel.IsOcrRunning));
+        var buttonExport = UiUtil.MakeButton("Export...", vm.ExportCommand)
+            .WithBindIsEnabled(nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter());
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar(buttonExport, buttonOk, buttonCancel);
+        var panelButtons = UiUtil.MakeButtonBar(buttonStart, buttonPause, buttonExport, buttonOk, buttonCancel);
 
         var grid = new Grid
         {
             RowDefinitions =
             {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
@@ -55,8 +59,9 @@ public class OcrWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(subtitleView, 0, 0);
-        grid.Add(panelButtons, 1, 0, 1, 2);
+        grid.Add(topControlsView, 0, 0);
+        grid.Add(subtitleView, 1, 0);
+        grid.Add(panelButtons, 2, 0);
 
         Content = grid;
 
@@ -66,14 +71,37 @@ public class OcrWindow : Window
         };
     }
 
-    protected override void OnLoaded(RoutedEventArgs e)
+    private static StackPanel MakeTopControlsView(OcrViewModel vm)
     {
-        base.OnLoaded(e);
-        _vm.SelectAndScrollToRow(0);
+        var comboBoxEngines = UiUtil.MakeComboBox(vm.OcrEngines, vm, nameof(vm.SelectedOcrEngine))
+            .WithWidth(150)
+            .WithMarginRight(10)
+            .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter());
+        comboBoxEngines.SelectionChanged += vm.EngineSelectionChanged;
+
+        var panel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 5,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 10),
+            Children =
+            {
+                UiUtil.MakeLabel("OCR Engine"),
+                comboBoxEngines,
+                UiUtil.MakeLabel("Database", nameof(vm.IsNOcrVisible)),
+                UiUtil.MakeComboBox( vm.NOcrDatabases, vm, nameof(vm.SelectedNOcrDatabase), nameof(vm.IsNOcrVisible))
+                    .WithWidth(150)
+                    .WithMarginRight(10)
+                    .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
+            }
+        };
+
+        return panel;
     }
 
-   
-    private Border MakeSubtitleView(OcrViewModel vm)
+    private static Border MakeSubtitleView(OcrViewModel vm)
     {
         var fullTimeConverter = new TimeSpanToDisplayFullConverter();
         var shortTimeConverter = new TimeSpanToDisplayShortConverter();
@@ -114,7 +142,7 @@ public class OcrWindow : Window
                 },
                 new DataGridTemplateColumn
                 {
-                    Header = "Text/Image",
+                    Header = "Image",
                     IsReadOnly = true,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     CellTemplate = new FuncDataTemplate<OcrSubtitleItem>((item, _) =>
@@ -154,6 +182,13 @@ public class OcrWindow : Window
                         return stackPanel;
                     })
                 },
+                new DataGridTextColumn
+                {
+                    Header = "Text",
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(OcrSubtitleItem.Text)),
+                    IsReadOnly = true,
+                },
             },
         };
 
@@ -167,6 +202,12 @@ public class OcrWindow : Window
         };
 
         return border;
+    }
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+        _vm.SelectAndScrollToRow(0);
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

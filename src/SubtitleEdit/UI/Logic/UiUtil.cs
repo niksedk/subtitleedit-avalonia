@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
+using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -193,6 +194,20 @@ public static class UiUtil
             Mode = BindingMode.OneWay,
             Source = viewModal,
             UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+        });
+
+        return control;
+    }
+
+    public static ComboBox BindIsEnabled(this ComboBox control, object viewModal, string propertyIsEnabledPath, IValueConverter converter)
+    {
+        control.Bind(ComboBox.IsEnabledProperty, new Binding
+        {
+            Path = propertyIsEnabledPath,
+            Mode = BindingMode.OneWay,
+            Source = viewModal,
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+            Converter = converter,
         });
 
         return control;
@@ -566,12 +581,37 @@ public static class UiUtil
         return control;
     }
 
+    public static Button WithBindIsVisible(this Button control, string isVisiblePropertyPath, IValueConverter converter)
+    {
+        control.Bind(Button.IsVisibleProperty, new Binding
+        {
+            Path = isVisiblePropertyPath,
+            Mode = BindingMode.TwoWay,
+            Converter = converter,
+        });
+
+        return control;
+    }
+
+
     public static Button WithBindIsEnabled(this Button control, string isEnabledPropertyPath)
     {
         control.Bind(Button.IsEnabledProperty, new Binding
         {
             Path = isEnabledPropertyPath,
             Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
+    public static Button WithBindIsEnabled(this Button control, string isEnabledPropertyPath, IValueConverter converter)
+    {
+        control.Bind(Button.IsEnabledProperty, new Binding
+        {
+            Path = isEnabledPropertyPath,
+            Mode = BindingMode.TwoWay,
+            Converter = converter,
         });
 
         return control;
@@ -624,6 +664,13 @@ public static class UiUtil
     {
         var m = control.Margin;
         control.Margin = new Thickness(m.Left, marginTop, m.Right, m.Bottom);
+        return control;
+    }
+
+    public static ComboBox WithMarginRight(this ComboBox control, int marginRight)
+    {
+        var m = control.Margin;
+        control.Margin = new Thickness(m.Left, m.Top, marginRight, m.Bottom);
         return control;
     }
 
@@ -851,5 +898,22 @@ public static class UiUtil
             Content = text,
             VerticalAlignment = VerticalAlignment.Center,
         };
+    }
+
+    internal static Label MakeLabel(string text, string propertyIsVisiblePath)
+    {
+        var label = new Label
+        {
+            Content = text,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+
+        label.Bind(ComboBox.IsVisibleProperty, new Binding
+        {
+            Path = propertyIsVisiblePath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return label;
     }
 }

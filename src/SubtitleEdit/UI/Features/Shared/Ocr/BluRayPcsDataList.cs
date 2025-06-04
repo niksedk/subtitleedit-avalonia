@@ -34,10 +34,10 @@ public class BluRayPcsDataList : IOcrSubtitle
 
     public List<Shared.Ocr.OcrSubtitleItem> MakeOcrSubtitleItems()
     {
-        var ocrSubtitleItems = new List<Shared.Ocr.OcrSubtitleItem>(Count);
+        var ocrSubtitleItems = new List<OcrSubtitleItem>(Count);
         for (var i = 0; i < Count; i++)
         {
-            ocrSubtitleItems.Add(new Shared.Ocr.OcrSubtitleItem(this, i));
+            ocrSubtitleItems.Add(new OcrSubtitleItem(this, i));
         }
 
         return ocrSubtitleItems;

@@ -6,16 +6,11 @@ using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
-using Avalonia.Platform;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.BluRaySup;
-using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
-using Nikse.SubtitleEdit.Core.SubtitleFormats;
-using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
-using Nikse.SubtitleEdit.Logic.Media;
 using SkiaSharp;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
@@ -26,11 +21,21 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private OcrEngineItem? _selectedOcrEngine;
     [ObservableProperty] private ObservableCollection<OcrSubtitleItem> _ocrSubtitleItems;
     [ObservableProperty] private OcrSubtitleItem? _selectedOcrSubtitleItem;
-    [ObservableProperty] private ObservableCollection<int> _startFromNumbers;
-    [ObservableProperty] private int _selectedStartFromNumber;
+    //[ObservableProperty] private ObservableCollection<int> _startFromNumbers;
+    //[ObservableProperty] private int _selectedStartFromNumber;
+    [ObservableProperty] private ObservableCollection<string> _nOcrDatabases;
+    [ObservableProperty] private string? _selectedNOcrDatabase;
+    [ObservableProperty] private ObservableCollection<int> _nOcrMaxWrongPixelsList;
+    [ObservableProperty] private int _selectedNOcrMaxWrongPixels;
+    [ObservableProperty] private ObservableCollection<int> _nOcrPixelsAreSpaceList;
+    [ObservableProperty] private int _selectedNOcrPixelsAreSpace;
+    [ObservableProperty] private string _progressText;
+    [ObservableProperty] private double _progressValue;
     [ObservableProperty] private Bitmap? _currentImageSource;
     [ObservableProperty] private string _currentBitmapInfo;
     [ObservableProperty] private string _currentText;
+    [ObservableProperty] private bool _isOcrRunning;
+    [ObservableProperty] private bool _isNOcrVisible;
 
     public OcrWindow? Window { get; set; }
     public DataGrid SubtitleGrid { get; set; }
@@ -40,46 +45,41 @@ public partial class OcrViewModel : ObservableObject
 
     private List<MatroskaTrackInfo> _matroskaTracks;
     private MatroskaFile? _matroskaFile;
-    private IOcrSubtitle _ocrSubtitle;
+    private IOcrSubtitle? _ocrSubtitle;
 
     public OcrViewModel()
     {
         OcrEngines = new ObservableCollection<OcrEngineItem>(OcrEngineItem.GetOcrEngines());
         SelectedOcrEngine = OcrEngines.FirstOrDefault();
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>();
-        StartFromNumbers = new ObservableCollection<int>();
+        NOcrDatabases = new ObservableCollection<string>();
+        NOcrMaxWrongPixelsList = new ObservableCollection<int>(Enumerable.Range(1, 500));
+        NOcrPixelsAreSpaceList = new ObservableCollection<int>(Enumerable.Range(1, 50));
         SubtitleGrid = new DataGrid();
         WindowTitle = string.Empty;
         CurrentBitmapInfo = string.Empty;
         CurrentText = string.Empty;
+        ProgressText = string.Empty;
         _matroskaTracks = new List<MatroskaTrackInfo>();
-    }
-
-    public void Initialize(MatroskaFile matroskaFile, List<MatroskaTrackInfo> matroskaTracks, string fileName)
-    {
-        _matroskaFile = matroskaFile;
-        _matroskaTracks = matroskaTracks;
-        WindowTitle = $"Pick Matroska track - {fileName}";
-        foreach (var track in _matroskaTracks)
-        {
-            var display = new MatroskaTrackInfoDisplay
-            {
-                TrackNumber = track.TrackNumber,
-                IsDefault = track.IsDefault,
-                IsForced = track.IsForced,
-                Codec = track.CodecId,
-                Language = track.Language,
-                Name = track.Name,
-                MatroskaTrackInfo = track,
-            };
-          //  Tracks.Add(display);
-        }
     }
 
     private void Close()
     {
         Dispatcher.UIThread.Post(() => { Window?.Close(); });
     }
+
+    [RelayCommand]
+    private void StartOcr()
+    {
+        IsOcrRunning = true;
+    }
+
+    [RelayCommand]
+    private void PauseOcr()
+    {
+        IsOcrRunning = false;
+    }
+
 
     [RelayCommand]
     private void Export()
@@ -146,11 +146,14 @@ public partial class OcrViewModel : ObservableObject
         }, DispatcherPriority.Background);
     }
 
-    public void Initialize1(List<BluRaySupParser.PcsData> subtitles, string fileName)
+    public void Initialize(List<BluRaySupParser.PcsData> subtitles, string fileName)
     {
         _ocrSubtitle = new BluRayPcsDataList(subtitles);
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
-        StartFromNumbers = new ObservableCollection<int>(Enumerable.Range(1, _ocrSubtitle.Count));        
-        //throw new NotImplementedException();
+    }
+
+    internal void EngineSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        IsNOcrVisible = SelectedOcrEngine?.EngineType == OcrEngineType.nOcr;
     }
 }

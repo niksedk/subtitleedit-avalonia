@@ -1249,7 +1249,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
                 {
                     var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window, vm =>
                     {
-                        vm.Initialize1(subtitles, fileName);
+                        vm.Initialize(subtitles, fileName);
                     });
                 });
                 return;
