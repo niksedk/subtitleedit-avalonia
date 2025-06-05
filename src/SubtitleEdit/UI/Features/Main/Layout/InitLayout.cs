@@ -220,7 +220,7 @@ public static partial class InitLayout
             {
                 new RowDefinition(GridLength.Star),
                 new RowDefinition(GridLength.Auto),
-                new RowDefinition(GridLength.Star)
+                new RowDefinition(WaveFormHeight, GridUnitType.Pixel)
             }
         };
 
@@ -319,7 +319,7 @@ public static partial class InitLayout
             {
                 new RowDefinition(GridLength.Star),
                 new RowDefinition(GridLength.Auto),
-                new RowDefinition(GridLength.Star)
+                new RowDefinition(WaveFormHeight, GridUnitType.Pixel),
             }
         };
 
@@ -431,7 +431,7 @@ public static partial class InitLayout
             {
                 new RowDefinition(GridLength.Star),
                 new RowDefinition(GridLength.Auto),
-                new RowDefinition(GridLength.Star)
+                new RowDefinition(WaveFormHeight, GridUnitType.Pixel),
             }
         };
 
