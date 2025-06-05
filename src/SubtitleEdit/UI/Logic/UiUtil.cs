@@ -4,6 +4,7 @@ using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Markup.Declarative;
 using Avalonia.Media;
 using Avalonia.Media.Immutable;
 using Avalonia.Platform;
@@ -217,6 +218,20 @@ public static class UiUtil
     public static ComboBox BindIsEnabled(this ComboBox control, object viewModal, string propertyIsEnabledPath, IValueConverter converter)
     {
         control.Bind(ComboBox.IsEnabledProperty, new Binding
+        {
+            Path = propertyIsEnabledPath,
+            Mode = BindingMode.OneWay,
+            Source = viewModal,
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+            Converter = converter,
+        });
+
+        return control;
+    }
+
+    public static Button BindIsEnabled(this Button control, object viewModal, string propertyIsEnabledPath, IValueConverter converter)
+    {
+        control.Bind(Button.IsEnabledProperty, new Binding
         {
             Path = propertyIsEnabledPath,
             Mode = BindingMode.OneWay,
@@ -478,6 +493,13 @@ public static class UiUtil
         return control;
     }
 
+    public static TextBox WithHeight(this TextBox control, int height)
+    {
+        var m = control.Margin;
+        control.Height = height;
+        return control;
+    }
+
     public static TextBlock WithMarginLeft(this TextBlock control, int marginLeft)
     {
         var m = control.Margin;
@@ -489,6 +511,13 @@ public static class UiUtil
     {
         var m = control.Margin;
         control.Margin = new Thickness(m.Left, m.Top, m.Right, marginBottom);
+        return control;
+    }
+
+    public static TextBlock WithMarginTop(this TextBlock control, int topBottom)
+    {
+        var m = control.Margin;
+        control.Margin = new Thickness(m.Left, topBottom, m.Right, m.Bottom);
         return control;
     }
 
@@ -527,6 +556,12 @@ public static class UiUtil
     public static Button WithTopAlignment(this Button control)
     {
         control.VerticalAlignment = VerticalAlignment.Top;
+        return control;
+    }
+
+    public static Button WithBottomAlignment(this Button control)
+    {
+        control.VerticalAlignment = VerticalAlignment.Bottom;
         return control;
     }
 
@@ -649,13 +684,6 @@ public static class UiUtil
         return control;
     }
 
-    public static TextBlock WithMarginTop(this TextBlock control, int marginTop)
-    {
-        var m = control.Margin;
-        control.Margin = new Thickness(m.Left, marginTop, m.Right, m.Bottom);
-        return control;
-    }
-
     public static StackPanel WithMarginTop(this StackPanel control, int marginTop)
     {
         var m = control.Margin;
@@ -670,6 +698,12 @@ public static class UiUtil
     }
 
     public static StackPanel WithAlignmentTop(this StackPanel control)
+    {
+        control.VerticalAlignment = VerticalAlignment.Top;
+        return control;
+    }
+
+    public static Label WithAlignmentTop(this Label control)
     {
         control.VerticalAlignment = VerticalAlignment.Top;
         return control;

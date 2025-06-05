@@ -78,7 +78,6 @@ public partial class OcrViewModel : ObservableObject
         _windowService = windowService;
 
         OcrEngines = new ObservableCollection<OcrEngineItem>(OcrEngineItem.GetOcrEngines());
-        SelectedOcrEngine = OcrEngines.FirstOrDefault();
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>();
         NOcrDatabases = new ObservableCollection<string>();
         NOcrMaxWrongPixelsList = new ObservableCollection<int>(Enumerable.Range(1, 500));
@@ -100,8 +99,8 @@ public partial class OcrViewModel : ObservableObject
         _skipOnceChars = new List<SkipOnceChar>();
         _cancellationTokenSource = new CancellationTokenSource();
         OcredSubtitle = new List<SubtitleLineViewModel>();
-        EngineSelectionChanged();
         LoadSettings();
+        EngineSelectionChanged();
     }
 
     private void LoadSettings()
@@ -310,7 +309,7 @@ public partial class OcrViewModel : ObservableObject
                     return;
                 }
 
-                ProgressValue = i / (double)OcrSubtitleItems.Count;
+                ProgressValue = i * 100.0 / (double)OcrSubtitleItems.Count;
                 ProgressText = $"Running OCR... {i + 1}/{OcrSubtitleItems.Count}";
 
                 var item = OcrSubtitleItems[i];
@@ -422,7 +421,7 @@ public partial class OcrViewModel : ObservableObject
                     return;
                 }
 
-                ProgressValue = i / (double)OcrSubtitleItems.Count;
+                ProgressValue = i * 100.0 / OcrSubtitleItems.Count;
                 ProgressText = $"Running OCR... {i + 1}/{OcrSubtitleItems.Count}";
 
                 var item = OcrSubtitleItems[i];
@@ -464,7 +463,7 @@ public partial class OcrViewModel : ObservableObject
                     return;
                 }
 
-                ProgressValue = i / (double)OcrSubtitleItems.Count;
+                ProgressValue = i * 100.0 / OcrSubtitleItems.Count;
                 ProgressText = $"Running OCR... {i + 1}/{OcrSubtitleItems.Count}";
 
                 var item = OcrSubtitleItems[i];

@@ -1,10 +1,12 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 
@@ -30,16 +32,8 @@ public class OcrWindow : Window
 
         var topControlsView = MakeTopControlsView(vm);
         var subtitleView = MakeSubtitleView(vm);
-
-        var buttonStart = UiUtil.MakeButton("Start OCR", vm.StartOcrCommand)
-            .WithBindIsVisible(nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter());
-        var buttonPause = UiUtil.MakeButton("Pause OCR", vm.PauseOcrCommand)
-            .WithBindIsVisible(nameof(OcrViewModel.IsOcrRunning));
-        var buttonExport = UiUtil.MakeButton("Export...", vm.ExportCommand)
-            .WithBindIsEnabled(nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter());
-        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
-        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar(buttonStart, buttonPause, buttonExport, buttonOk, buttonCancel);
+        var editView = MakeEditView(vm);
+        var buttonView = MakeBottomView(vm);
 
         var grid = new Grid
         {
@@ -47,6 +41,7 @@ public class OcrWindow : Window
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
@@ -61,13 +56,14 @@ public class OcrWindow : Window
 
         grid.Add(topControlsView, 0, 0);
         grid.Add(subtitleView, 1, 0);
-        grid.Add(panelButtons, 2, 0);
+        grid.Add(editView, 2, 0);
+        grid.Add(buttonView, 3, 0);
 
         Content = grid;
 
         Activated += delegate
         {
-            buttonOk.Focus(); // hack to make OnKeyDown work
+            Focus(); // hack to make OnKeyDown work
         };
     }
 
@@ -109,7 +105,8 @@ public class OcrWindow : Window
                 UiUtil.MakeComboBox( vm.TesseractDictionaryItems, vm, nameof(vm.SelectedTesseractDictionaryItem), nameof(vm.IsTesseractVisible))
                     .WithWidth(100)
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
-                UiUtil.MakeBrowseButton(vm.PickTesseractModelCommand).BindIsVisible(vm, nameof(vm.IsTesseractVisible)),
+                UiUtil.MakeBrowseButton(vm.PickTesseractModelCommand).BindIsVisible(vm, nameof(vm.IsTesseractVisible))
+                     .BindIsEnabled(vm, nameof(vm.IsOcrRunning), new InverseBooleanConverter()),
 
                 // Ollama settings
                 UiUtil.MakeLabel("Language", nameof(vm.IsOllamaVisible)),
@@ -197,8 +194,8 @@ public class OcrWindow : Window
                             var image = new Image
                             {
                                 Source = bitmap,
-                                MaxHeight = 100, 
-                                MaxWidth = 200,  
+                                MaxHeight = 100,
+                                MaxWidth = 200,
                                 Stretch = Avalonia.Media.Stretch.Uniform
                             };
                             stackPanel.Children.Add(image);
@@ -230,6 +227,121 @@ public class OcrWindow : Window
 
         return border;
     }
+
+    private static Border MakeEditView(OcrViewModel vm)
+    {
+        var panel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Top,
+            Margin = new Thickness(10),
+            Children =
+            {
+                UiUtil.MakeLabel("Text").WithAlignmentTop(),
+                new TextBox
+                {
+                    Width = 300,
+                    Height = 60,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    AcceptsReturn = true,
+                    TextWrapping = Avalonia.Media.TextWrapping.NoWrap,
+                    Margin = new Thickness(0, 0, 10, 0),
+                    [!TextBox.TextProperty] = new Binding($"{nameof(vm.SelectedOcrSubtitleItem)}.{nameof(OcrSubtitleItem.Text)}") { Source = vm, Mode = BindingMode.TwoWay }
+                }
+            }
+        };
+
+        var border = new Border
+        {
+            Child = panel,
+            BorderThickness = new Thickness(1),
+            BorderBrush = UiUtil.GetBorderColor(),
+            Padding = new Thickness(10, 0, 10, 0),
+            CornerRadius = new CornerRadius(5),
+            Margin = new Thickness(0, 10, 0, 10),
+        };
+        border.Bind(Border.IsVisibleProperty, new Binding(nameof(vm.IsOcrRunning)) { Source = vm, Converter = new InverseBooleanConverter() });
+
+        return border;
+    }
+
+    private static Grid MakeBottomView(OcrViewModel vm)
+    {
+        var progressSlider = new Slider
+        {
+            Minimum = 0,
+            Maximum = 100,
+            IsHitTestVisible = false,
+            Focusable = false,
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            Styles =
+            {
+                new Style(x => x.OfType<Thumb>())
+                {
+                    Setters =
+                    {
+                        new Setter(Thumb.IsVisibleProperty, false)
+                    }
+                },
+                new Style(x => x.OfType<Track>())
+                {
+                    Setters =
+                    {
+                        new Setter(Track.HeightProperty, 6.0)
+                    }
+                },
+            }
+        };
+        progressSlider.Bind(Slider.ValueProperty, new Binding(nameof(vm.ProgressValue)));
+        progressSlider.Bind(Slider.IsVisibleProperty, new Binding(nameof(vm.IsOcrRunning)) { Source = vm });
+
+        var statusText = new TextBlock().WithMarginTop(22);
+        statusText.Bind(TextBlock.TextProperty, new Binding(nameof(vm.ProgressText)));
+        statusText.Bind(TextBlock.IsVisibleProperty, new Binding(nameof(vm.IsOcrRunning)) { Source = vm });
+
+        var buttonStart = UiUtil.MakeButton("Start OCR", vm.StartOcrCommand)
+            .WithBindIsVisible(nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()).WithBottomAlignment();
+        var buttonPause = UiUtil.MakeButton("Pause OCR", vm.PauseOcrCommand)
+            .WithBindIsVisible(nameof(OcrViewModel.IsOcrRunning)).WithBottomAlignment();
+        var buttonExport = UiUtil.MakeButton("Export...", vm.ExportCommand)
+            .WithBindIsEnabled(nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()).WithBottomAlignment();
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand).WithBottomAlignment();
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand).WithBottomAlignment();
+
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+            },
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        grid.Add(progressSlider, 0, 0);
+        grid.Add(statusText, 0, 0);
+        grid.Add(buttonStart, 0, 1);
+        grid.Add(buttonPause, 0, 2);
+        grid.Add(buttonExport, 0, 3);
+        grid.Add(buttonOk, 0, 4);
+        grid.Add(buttonCancel, 0, 5);
+
+        return grid;
+    }
+
 
     protected override void OnLoaded(RoutedEventArgs e)
     {
