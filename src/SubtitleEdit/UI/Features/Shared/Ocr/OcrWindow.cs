@@ -74,7 +74,6 @@ public class OcrWindow : Window
     private static StackPanel MakeTopControlsView(OcrViewModel vm)
     {
         var comboBoxEngines = UiUtil.MakeComboBox(vm.OcrEngines, vm, nameof(vm.SelectedOcrEngine))
-            .WithWidth(100)
             .WithMarginRight(10)
             .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter());
         comboBoxEngines.SelectionChanged += vm.EngineSelectionChanged;
@@ -94,7 +93,6 @@ public class OcrWindow : Window
                 // NOcr settings
                 UiUtil.MakeLabel("Database", nameof(vm.IsNOcrVisible)),
                 UiUtil.MakeComboBox( vm.NOcrDatabases, vm, nameof(vm.SelectedNOcrDatabase), nameof(vm.IsNOcrVisible))
-                    .WithWidth(100)
                     .WithMarginRight(10)
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
                 UiUtil.MakeLabel("Max wrong pixels", nameof(vm.IsNOcrVisible)),
@@ -108,10 +106,13 @@ public class OcrWindow : Window
 
                 // Tesseract settings
                 UiUtil.MakeLabel("Language", nameof(vm.IsTesseractVisible)),
-
+                UiUtil.MakeComboBox( vm.TesseractDictionaryItems, vm, nameof(vm.SelectedTesseractDictionaryItem), nameof(vm.IsTesseractVisible))
+                    .WithWidth(100)
+                    .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
+                UiUtil.MakeBrowseButton(vm.PickTesseractModelCommand).BindIsVisible(vm, nameof(vm.IsTesseractVisible)),
 
                 // Ollama settings
-                UiUtil.MakeLabel("Language", nameof(vm.IsNOcrVisible)),
+                UiUtil.MakeLabel("Language", nameof(vm.IsOllamaVisible)),
                 UiUtil.MakeComboBox( vm.OllamaLanguages, vm, nameof(vm.SelectedOllamaLanguage), nameof(vm.IsOllamaVisible))
                     .WithWidth(100)
                     .WithMarginRight(10)
@@ -119,7 +120,7 @@ public class OcrWindow : Window
                 UiUtil.MakeLabel("Model", nameof(vm.IsOllamaVisible)),
                 UiUtil.MakeTextBox(200, vm, nameof(vm.OllamaModel))
                 .BindIsVisible(vm, nameof(vm.IsOllamaVisible)),
-                UiUtil.MakeButton("...", vm.PickOllamaModelCommand).BindIsVisible(vm, nameof(vm.IsOllamaVisible)),
+                UiUtil.MakeBrowseButton(vm.PickOllamaModelCommand).BindIsVisible(vm, nameof(vm.IsOllamaVisible)),
             }
         };
 
@@ -191,14 +192,13 @@ public class OcrWindow : Window
                         }
 
                         var bitmap = item.GetBitmap();
-                       // Add image if available
                         if (bitmap != null)
                         {
                             var image = new Image
                             {
                                 Source = bitmap,
-                                MaxHeight = 100, // Adjust as needed
-                                MaxWidth = 200,  // Adjust as needed
+                                MaxHeight = 100, 
+                                MaxWidth = 200,  
                                 Stretch = Avalonia.Media.Stretch.Uniform
                             };
                             stackPanel.Children.Add(image);

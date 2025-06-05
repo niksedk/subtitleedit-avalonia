@@ -9,6 +9,7 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.VobSub.Ocr.Service;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Ocr;
 using SkiaSharp;
@@ -38,6 +39,8 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private int _selectedNOcrPixelsAreSpace;
     [ObservableProperty] private ObservableCollection<string> _ollamaLanguages;
     [ObservableProperty] private string? _selectedOllamaLanguage;
+    [ObservableProperty] private ObservableCollection<TesseractDictionary> _tesseractDictionaryItems;
+    [ObservableProperty] private TesseractDictionary? _selectedTesseractDictionaryItem;
     [ObservableProperty] private string _ollamaModel;
     [ObservableProperty] private string _progressText;
     [ObservableProperty] private double _progressValue;
@@ -63,14 +66,16 @@ public partial class OcrViewModel : ObservableObject
 
     private IOcrSubtitle? _ocrSubtitle;
     private readonly INOcrCaseFixer _nOcrCaseFixer;
+    private readonly IWindowService _windowService;
     private CancellationTokenSource _cancellationTokenSource;
     private NOcrDb? _nOcrDb;
     private readonly List<SkipOnceChar> _runOnceChars;
     private readonly List<SkipOnceChar> _skipOnceChars;
 
-    public OcrViewModel(INOcrCaseFixer nOcrCaseFixer)
+    public OcrViewModel(INOcrCaseFixer nOcrCaseFixer, IWindowService windowService)
     {
         _nOcrCaseFixer = nOcrCaseFixer;
+        _windowService = windowService;
 
         OcrEngines = new ObservableCollection<OcrEngineItem>(OcrEngineItem.GetOcrEngines());
         SelectedOcrEngine = OcrEngines.FirstOrDefault();
@@ -88,6 +93,7 @@ public partial class OcrViewModel : ObservableObject
         CurrentText = string.Empty;
         ProgressText = string.Empty;
         OllamaModel = string.Empty;
+        TesseractDictionaryItems = new ObservableCollection<TesseractDictionary>();
         GoogleVisionApiKey = string.Empty;
         GoogleVisionLanguages = new ObservableCollection<OcrLanguage>(GoogleVisionOcr.GetLanguages().OrderBy(p => p.ToString()));
         _runOnceChars = new List<SkipOnceChar>();
@@ -169,6 +175,12 @@ public partial class OcrViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task PickTesseractModel()
+    {
+        await TesseractModelDownload();
+    }
+
+    [RelayCommand]
     private void Ok()
     {
         SaveSettings();
@@ -214,20 +226,20 @@ public partial class OcrViewModel : ObservableObject
 
         if (ocrEngine.EngineType == OcrEngineType.Tesseract)
         {
-            //var tesseractOk = await CheckAndDownloadTesseract();
-            //if (!tesseractOk)
-            //{
-            //    return;
-            //}
+            var tesseractOk = await CheckAndDownloadTesseract();
+            if (!tesseractOk)
+            {
+                return;
+            }
 
-            //if (SelectedTesseractDictionaryItem == null)
-            //{
-            //    var tesseractModelOk = await TesseractModelDownload();
-            //    if (!tesseractModelOk)
-            //    {
-            //        return;
-            //    }
-            //}
+            if (SelectedTesseractDictionaryItem == null)
+            {
+                var tesseractModelOk = await TesseractModelDownload();
+                if (!tesseractModelOk)
+                {
+                    return;
+                }
+            }
         }
 
         SaveSettings();
@@ -243,7 +255,7 @@ public partial class OcrViewModel : ObservableObject
         }
         else if (ocrEngine.EngineType == OcrEngineType.Tesseract)
         {
-            // RunTesseractOcr(startFromIndex);
+            RunTesseractOcr(startFromIndex);
         }
         else if (ocrEngine.EngineType == OcrEngineType.PaddleOcr)
         {
@@ -396,6 +408,42 @@ public partial class OcrViewModel : ObservableObject
         return true;
     }
 
+    private void RunTesseractOcr(int startFromIndex)
+    {
+        var tesseractOcr = new TesseractOcr();
+        var language = SelectedTesseractDictionaryItem?.Code ?? "eng";
+
+        _ = Task.Run(async () =>
+        {
+            for (var i = startFromIndex; i < OcrSubtitleItems.Count; i++)
+            {
+                if (_cancellationTokenSource.Token.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                ProgressValue = i / (double)OcrSubtitleItems.Count;
+                ProgressText = $"Running OCR... {i + 1}/{OcrSubtitleItems.Count}";
+
+                var item = OcrSubtitleItems[i];
+                var bitmap = item.GetSkBitmap();
+
+                SelectAndScrollToRow(i);
+
+                var text = await tesseractOcr.Ocr(bitmap, language, _cancellationTokenSource.Token);
+                item.Text = text;
+
+                if (SelectedOcrSubtitleItem == item)
+                {
+                    CurrentText = text;
+                }
+            }
+
+            PauseOcr();
+        });
+    }
+
+
     private void RunOllamaOcr()
     {
         var selectedOcrSubtitleItem = SelectedOcrSubtitleItem;
@@ -436,6 +484,81 @@ public partial class OcrViewModel : ObservableObject
             PauseOcr();
         });
     }
+
+    private async Task<bool> CheckAndDownloadTesseract()
+    {
+        var tesseractExe = Path.Combine(Se.TesseractFolder, "tesseract.exe");
+
+        if (!File.Exists(tesseractExe)) //TODO: check for mac/Linux executable on mac/Linux
+        {
+            var answer = await MessageBox.Show(
+                Window!,
+                "Download Tesseract OCR?",
+                $"{Environment.NewLine}\"Tesseract\" requires downloading Tesseract OCR.{Environment.NewLine}{Environment.NewLine}Download and use Tesseract OCR?",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question);
+
+            if (answer != MessageBoxResult.Yes)
+            {
+                return false;
+            }
+
+            var result = await _windowService.ShowDialogAsync<DownloadTesseractWindow, DownloadTesseractViewModel>(Window!, vm => { });
+            return result.OkPressed;
+        }
+
+        return true;
+    }
+
+    private async Task<bool> TesseractModelDownload()
+    {
+        var result = await _windowService.ShowDialogAsync<DownloadTesseractModelWindow, DownloadTesseractModelViewModel>(Window!, vm => { });
+
+        LoadActiveTesseractDictionaries();
+        if (result.OkPressed)
+        {
+            var item = TesseractDictionaryItems.FirstOrDefault(p => p.Code == result.SelectedTesseractDictionaryItem?.Code);
+            SelectedTesseractDictionaryItem = item ?? TesseractDictionaryItems.FirstOrDefault();
+            return true;
+        }
+
+        return false;
+    }
+
+    private void LoadActiveTesseractDictionaries()
+    {
+        TesseractDictionaryItems.Clear();
+
+        var folder = Se.TesseractModelFolder;
+        if (!Directory.Exists(folder))
+        {
+            return;
+        }
+
+        var allDictionaries = TesseractDictionary.List();
+        var items = new List<TesseractDictionary>();
+        foreach (var file in Directory.GetFiles(folder, "*.traineddata"))
+        {
+            var name = Path.GetFileNameWithoutExtension(file);
+            if (name == "osd")
+            {
+                continue;
+            }
+
+            var dictionary = allDictionaries.FirstOrDefault(p => p.Code == name);
+            if (dictionary != null)
+            {
+                items.Add(dictionary);
+            }
+            else
+            {
+                items.Add(new TesseractDictionary { Code = name, Name = name, Url = string.Empty });
+            }
+        }
+
+        TesseractDictionaryItems.AddRange(items.OrderBy(p => p.ToString()));
+    }
+
 
     internal void OnKeyDown(KeyEventArgs e)
     {
@@ -510,6 +633,15 @@ public partial class OcrViewModel : ObservableObject
                 NOcrDatabases.Add(s);
             }
             SelectedNOcrDatabase = NOcrDb.GetDatabases().FirstOrDefault();
+        }
+
+        if (IsTesseractVisible)
+        {
+            LoadActiveTesseractDictionaries();
+            if (SelectedTesseractDictionaryItem == null)
+            {
+                SelectedTesseractDictionaryItem = TesseractDictionaryItems.FirstOrDefault(p => p.Code == "eng") ?? TesseractDictionaryItems.FirstOrDefault();
+            }
         }
     }
 }

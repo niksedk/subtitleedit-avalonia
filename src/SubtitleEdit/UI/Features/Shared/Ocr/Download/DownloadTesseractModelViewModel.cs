@@ -1,52 +1,52 @@
-using System;
-using System.Globalization;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Timers;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Logic;
-using Nikse.SubtitleEdit.Logic.Compression;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Download;
+using System;
+using System.Collections.ObjectModel;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Timers;
 using Timer = System.Timers.Timer;
 
 namespace Nikse.SubtitleEdit.Features.Shared;
 
 public partial class DownloadTesseractModelViewModel : ObservableObject
 {
+    [ObservableProperty] private ObservableCollection<TesseractDictionary> _tesseractDictionaryItems;
+    [ObservableProperty] private TesseractDictionary? _selectedTesseractDictionaryItem;
+    [ObservableProperty] private bool _isProgressVisible;
     [ObservableProperty] private double _progress;
     [ObservableProperty] private string _statusText;
     [ObservableProperty] private string _error;
 
     public DownloadTesseractModelWindow? Window { get; set; }
-    public string FfmpegFileName { get; set; }
+    public bool OkPressed { get; internal set; }
 
-    private IFfmpegDownloadService _ffmpegDownloadService;
+    private readonly ITesseractDownloadService _tesseractDownloadService;
     private Task? _downloadTask;
     private readonly Timer _timer;
     private bool _done;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly MemoryStream _downloadStream;
 
-    private readonly IZipUnpacker _zipUnpacker;
-
-    public DownloadTesseractModelViewModel(IFfmpegDownloadService ffmpegDownloadService, IZipUnpacker zipUnpacker)
+    public DownloadTesseractModelViewModel(ITesseractDownloadService tesseractDownloadService)
     {
-        _ffmpegDownloadService = ffmpegDownloadService;
-        _zipUnpacker = zipUnpacker;
+        _tesseractDownloadService = tesseractDownloadService;
 
         _cancellationTokenSource = new CancellationTokenSource();
-
         _downloadStream = new MemoryStream();
 
+        TesseractDictionaryItems = new ObservableCollection<TesseractDictionary>(TesseractDictionary.List().OrderBy(p => p.ToString()));
+        SelectedTesseractDictionaryItem = TesseractDictionaryItems.FirstOrDefault(p => p.Code == "eng") ?? TesseractDictionaryItems.FirstOrDefault();
         StatusText = "Starting...";
         Error = string.Empty;
-        FfmpegFileName = string.Empty;
 
         _timer = new Timer(500);
         _timer.Elapsed += OnTimerOnElapsed;
@@ -76,21 +76,9 @@ public partial class DownloadTesseractModelViewModel : ObservableObject
                     return;
                 }
 
-                var ffmpegFileName = GetFfmpegFileName();
+                UnpackTesseract();
+                OkPressed = true;
 
-                if (File.Exists(ffmpegFileName))
-                {
-                    File.Delete(ffmpegFileName);
-                }
-
-                UnpackFfmpeg(ffmpegFileName);
-                
-                if (File.Exists(ffmpegFileName) && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    MacHelper.MakeExecutable(ffmpegFileName);   
-                }
-                
-                FfmpegFileName = ffmpegFileName;
                 Close();
             }
             else if (_downloadTask is { IsFaulted: true })
@@ -112,27 +100,17 @@ public partial class DownloadTesseractModelViewModel : ObservableObject
         }
     }
 
-    private void UnpackFfmpeg(string newFileName)
+    private void UnpackTesseract()
     {
-        var folder = Path.GetDirectoryName(newFileName);
-        if (folder != null)
+        if (!(SelectedTesseractDictionaryItem is { } model))
         {
-            _downloadStream.Position = 0;
-            _zipUnpacker.UnpackZipStream(_downloadStream, folder);
+            return;
         }
 
+        _downloadStream.Position = 0;
+        var fileName = Path.Combine(Se.TesseractModelFolder, model.Code + ".traineddata");
+        File.WriteAllBytes(fileName, _downloadStream.ToArray());
         _downloadStream.Dispose();
-    }
-
-
-    public static string GetFfmpegFileName()
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            return Path.Combine(Se.FfmpegFolder, "ffmpeg.exe");
-        }
-
-        return Path.Combine(Se.FfmpegFolder, "ffmpeg");
     }
 
     private void Close()
@@ -152,8 +130,21 @@ public partial class DownloadTesseractModelViewModel : ObservableObject
         Close();
     }
 
+    [RelayCommand]
+    private void Download()
+    {
+        StartDownload();
+    }
+
     public void StartDownload()
     {
+        if (SelectedTesseractDictionaryItem == null)
+        {
+            StatusText = "Please select a Tesseract dictionary to download.";
+            return;
+        }
+
+        IsProgressVisible = true;
         var downloadProgress = new Progress<float>(number =>
         {
             var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
@@ -162,13 +153,8 @@ public partial class DownloadTesseractModelViewModel : ObservableObject
             StatusText = $"Downloading... {pctString}%";
         });
 
-        var folder = Se.FfmpegFolder;
-        if (!Directory.Exists(folder))
-        {
-            Directory.CreateDirectory(folder);
-        }
-
-        _downloadTask = _ffmpegDownloadService.DownloadFfmpeg(
+        _downloadTask = _tesseractDownloadService.DownloadTesseractModel(
+            SelectedTesseractDictionaryItem.Url,
             _downloadStream,
             downloadProgress,
             _cancellationTokenSource.Token);

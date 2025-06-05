@@ -114,6 +114,21 @@ public static class UiUtil
         };
     }
 
+    public static Button MakeBrowseButton(IRelayCommand? command)
+    {
+        return new Button
+        {
+            Content = "...",
+            Margin = new Thickness(4, 0),
+            Padding = new Thickness(6, 6),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center,
+            Command = command,
+        };
+    }
+
     public static Button MakeButtonOk(IRelayCommand? command)
     {
         return MakeButton(Se.Language.General.Ok, command);

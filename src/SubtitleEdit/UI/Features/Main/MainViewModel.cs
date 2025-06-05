@@ -475,8 +475,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task ShowToolsAdjustDurations()
     {
-        var result =
-            await _windowService.ShowDialogAsync<AdjustDurationWindow, AdjustDurationViewModel>(Window, vm => { });
+        var result = await _windowService.ShowDialogAsync<AdjustDurationWindow, AdjustDurationViewModel>(Window, vm => { });
 
         if (result.OkPressed)
         {

@@ -1,7 +1,6 @@
 using System;
 using System.Globalization;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -9,7 +8,6 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Compression;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Download;
@@ -25,8 +23,9 @@ public partial class DownloadTesseractViewModel : ObservableObject
 
     public DownloadTesseractWindow? Window { get; set; }
     public string FfmpegFileName { get; set; }
+    public bool OkPressed { get; private set; }
 
-    private IFfmpegDownloadService _ffmpegDownloadService;
+    private readonly ITesseractDownloadService _tesseractDownloadService;
     private Task? _downloadTask;
     private readonly Timer _timer;
     private bool _done;
@@ -35,9 +34,9 @@ public partial class DownloadTesseractViewModel : ObservableObject
 
     private readonly IZipUnpacker _zipUnpacker;
 
-    public DownloadTesseractViewModel(IFfmpegDownloadService ffmpegDownloadService, IZipUnpacker zipUnpacker)
+    public DownloadTesseractViewModel(ITesseractDownloadService tesseractDownloadService, IZipUnpacker zipUnpacker)
     {
-        _ffmpegDownloadService = ffmpegDownloadService;
+        _tesseractDownloadService = tesseractDownloadService;
         _zipUnpacker = zipUnpacker;
 
         _cancellationTokenSource = new CancellationTokenSource();
@@ -76,21 +75,8 @@ public partial class DownloadTesseractViewModel : ObservableObject
                     return;
                 }
 
-                var ffmpegFileName = GetFfmpegFileName();
+                UnpackTesseract();
 
-                if (File.Exists(ffmpegFileName))
-                {
-                    File.Delete(ffmpegFileName);
-                }
-
-                UnpackFfmpeg(ffmpegFileName);
-                
-                if (File.Exists(ffmpegFileName) && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    MacHelper.MakeExecutable(ffmpegFileName);   
-                }
-                
-                FfmpegFileName = ffmpegFileName;
                 Close();
             }
             else if (_downloadTask is { IsFaulted: true })
@@ -112,27 +98,11 @@ public partial class DownloadTesseractViewModel : ObservableObject
         }
     }
 
-    private void UnpackFfmpeg(string newFileName)
+    private void UnpackTesseract()
     {
-        var folder = Path.GetDirectoryName(newFileName);
-        if (folder != null)
-        {
-            _downloadStream.Position = 0;
-            _zipUnpacker.UnpackZipStream(_downloadStream, folder);
-        }
-
+        _downloadStream.Position = 0;
+        _zipUnpacker.UnpackZipStream(_downloadStream, Se.TesseractFolder);
         _downloadStream.Dispose();
-    }
-
-
-    public static string GetFfmpegFileName()
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            return Path.Combine(Se.FfmpegFolder, "ffmpeg.exe");
-        }
-
-        return Path.Combine(Se.FfmpegFolder, "ffmpeg");
     }
 
     private void Close()
@@ -168,7 +138,7 @@ public partial class DownloadTesseractViewModel : ObservableObject
             Directory.CreateDirectory(folder);
         }
 
-        _downloadTask = _ffmpegDownloadService.DownloadFfmpeg(
+        _downloadTask = _tesseractDownloadService.DownloadTesseract(
             _downloadStream,
             downloadProgress,
             _cancellationTokenSource.Token);
