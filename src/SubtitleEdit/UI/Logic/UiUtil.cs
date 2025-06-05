@@ -243,6 +243,20 @@ public static class UiUtil
         return control;
     }
 
+    public static TextBox BindIsEnabled(this TextBox control, object viewModal, string propertyIsEnabledPath, IValueConverter converter)
+    {
+        control.Bind(TextBox.IsEnabledProperty, new Binding
+        {
+            Path = propertyIsEnabledPath,
+            Mode = BindingMode.OneWay,
+            Source = viewModal,
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+            Converter = converter,
+        });
+
+        return control;
+    }
+
     public static ComboBox MakeComboBox<T>(
         ObservableCollection<T> sourceLanguages,
         object viewModal,

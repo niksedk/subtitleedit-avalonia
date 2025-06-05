@@ -52,10 +52,13 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private bool _isOllamaVisible;
     [ObservableProperty] private bool _isTesseractVisible;
     [ObservableProperty] private bool _isPaddleOcrVisible;
+    [ObservableProperty] private bool _isGoogleVisionVisible;
     [ObservableProperty] private bool _nOcrDrawUnknownText;
     [ObservableProperty] private string _googleVisionApiKey;
     [ObservableProperty] private ObservableCollection<OcrLanguage> _googleVisionLanguages;
     [ObservableProperty] private OcrLanguage? _selectedGoogleVisionLanguage;
+    [ObservableProperty] private ObservableCollection<OcrLanguage2> _paddleOcrLanguages;
+    [ObservableProperty] private OcrLanguage2? _selectedPaddleOcrLanguage;
 
     public OcrWindow? Window { get; set; }
     public DataGrid SubtitleGrid { get; set; }
@@ -95,6 +98,7 @@ public partial class OcrViewModel : ObservableObject
         TesseractDictionaryItems = new ObservableCollection<TesseractDictionary>();
         GoogleVisionApiKey = string.Empty;
         GoogleVisionLanguages = new ObservableCollection<OcrLanguage>(GoogleVisionOcr.GetLanguages().OrderBy(p => p.ToString()));
+        PaddleOcrLanguages = new ObservableCollection<OcrLanguage2>(PaddleOcr.GetLanguages().OrderBy(p => p.ToString()));
         _runOnceChars = new List<SkipOnceChar>();
         _skipOnceChars = new List<SkipOnceChar>();
         _cancellationTokenSource = new CancellationTokenSource();
@@ -624,6 +628,7 @@ public partial class OcrViewModel : ObservableObject
         IsOllamaVisible = SelectedOcrEngine?.EngineType == OcrEngineType.Ollama;
         IsTesseractVisible = SelectedOcrEngine?.EngineType == OcrEngineType.Tesseract;
         IsPaddleOcrVisible = SelectedOcrEngine?.EngineType == OcrEngineType.PaddleOcr;
+        IsGoogleVisionVisible = SelectedOcrEngine?.EngineType == OcrEngineType.GoogleVision;
 
         if (IsNOcrVisible && NOcrDatabases.Count == 0)
         {
@@ -640,6 +645,22 @@ public partial class OcrViewModel : ObservableObject
             if (SelectedTesseractDictionaryItem == null)
             {
                 SelectedTesseractDictionaryItem = TesseractDictionaryItems.FirstOrDefault(p => p.Code == "eng") ?? TesseractDictionaryItems.FirstOrDefault();
+            }
+        }
+
+        if (IsPaddleOcrVisible)
+        {
+            if (SelectedPaddleOcrLanguage == null)
+            {
+                SelectedPaddleOcrLanguage = PaddleOcrLanguages.FirstOrDefault(p => p.Code == "eng") ?? PaddleOcrLanguages.FirstOrDefault();
+            }
+        }
+
+        if (IsGoogleVisionVisible)
+        {
+            if (SelectedGoogleVisionLanguage == null)
+            {
+                SelectedGoogleVisionLanguage = GoogleVisionLanguages.FirstOrDefault(p => p.Code == "eng") ?? GoogleVisionLanguages.FirstOrDefault();
             }
         }
     }

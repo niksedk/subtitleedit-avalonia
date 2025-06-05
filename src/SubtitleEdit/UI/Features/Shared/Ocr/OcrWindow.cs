@@ -116,8 +116,29 @@ public class OcrWindow : Window
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
                 UiUtil.MakeLabel("Model", nameof(vm.IsOllamaVisible)),
                 UiUtil.MakeTextBox(200, vm, nameof(vm.OllamaModel))
-                .BindIsVisible(vm, nameof(vm.IsOllamaVisible)),
-                UiUtil.MakeBrowseButton(vm.PickOllamaModelCommand).BindIsVisible(vm, nameof(vm.IsOllamaVisible)),
+                .BindIsVisible(vm, nameof(vm.IsOllamaVisible))
+                .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
+                UiUtil.MakeBrowseButton(vm.PickOllamaModelCommand)
+                .BindIsVisible(vm, nameof(vm.IsOllamaVisible)) 
+                .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
+
+                // Google vision settings
+                UiUtil.MakeLabel("Language", nameof(vm.IsGoogleVisionVisible)),
+                UiUtil.MakeComboBox( vm.GoogleVisionLanguages, vm, nameof(vm.SelectedGoogleVisionLanguage), nameof(vm.IsGoogleVisionVisible))
+                    .WithWidth(100)
+                    .WithMarginRight(10)
+                    .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
+                UiUtil.MakeLabel("API key", nameof(vm.IsGoogleVisionVisible)),
+                UiUtil.MakeTextBox(200, vm, nameof(vm.GoogleVisionApiKey))
+                .BindIsVisible(vm, nameof(vm.IsGoogleVisionVisible))
+                .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
+
+                // Paddle OCR settings
+                UiUtil.MakeLabel("Language", nameof(vm.IsPaddleOcrVisible)),
+                UiUtil.MakeComboBox( vm.PaddleOcrLanguages, vm, nameof(vm.SelectedPaddleOcrLanguage), nameof(vm.IsPaddleOcrVisible))
+                    .WithWidth(100)
+                    .WithMarginRight(10)
+                    .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
             }
         };
 
