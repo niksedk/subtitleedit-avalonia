@@ -480,7 +480,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         if (result.OkPressed)
         {
             MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Adjust durations"));
-            result.Adjust(Subtitles);
+            result.AdjustDuration(Subtitles);
             _updateAudioVisualizer = true;
         }
 
@@ -655,7 +655,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     {
         var result = await _windowService.ShowDialogAsync<AdjustAllTimesWindow, AdjustAllTimesViewModel>(Window, vm =>
         {
-            vm.Initialize(this);
+            vm.Initialize(this); // uses call from IAdjustCallback: Adjust
         });
 
         if (result.OkPressed)

@@ -32,7 +32,7 @@ public partial class AdjustDurationViewModel : ObservableObject
         LoadSettings();
     }
 
-    public void Adjust(ObservableCollection<SubtitleLineViewModel> subtitles)
+    public void AdjustDuration(ObservableCollection<SubtitleLineViewModel> subtitles)
     {
         if (SelectedAdjustType.Type == AdjustDurationType.Seconds)
         {
@@ -59,9 +59,17 @@ public partial class AdjustDurationViewModel : ObservableObject
             var subtitle = subtitles[i];
             var nextSubtitle = subtitles.GetOrNull(i + 1);
             var newEndTime = subtitle.EndTime + TimeSpan.FromSeconds(AdjustSeconds);
-            if (nextSubtitle != null && newEndTime <= nextSubtitle.StartTime)
+            if (nextSubtitle != null && newEndTime <= nextSubtitle.StartTime || nextSubtitle == null)
             {
                 subtitle.EndTime = newEndTime;
+            }
+            else if (nextSubtitle != null && newEndTime > nextSubtitle.StartTime)
+            {
+                var cappedEndTime = nextSubtitle.StartTime - TimeSpan.FromMilliseconds(10);
+                if (cappedEndTime > subtitle.EndTime)
+                {
+                    subtitle.EndTime = cappedEndTime;
+                }
             }
         }
     }
