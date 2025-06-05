@@ -20,9 +20,9 @@ public class OcrWindow : Window
         vm.Window = this;
         Icon = UiUtil.GetSeIcon();
         Title = vm.WindowTitle;
-        Width = 1024;
-        Height = 600;
-        MinWidth = 800;
+        Width = 1200;
+        Height = 700;
+        MinWidth = 900;
         MinHeight = 600;
         CanResize = true;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -90,6 +90,8 @@ public class OcrWindow : Window
             {
                 UiUtil.MakeLabel("OCR Engine"),
                 comboBoxEngines,
+
+                // NOcr settings
                 UiUtil.MakeLabel("Database", nameof(vm.IsNOcrVisible)),
                 UiUtil.MakeComboBox( vm.NOcrDatabases, vm, nameof(vm.SelectedNOcrDatabase), nameof(vm.IsNOcrVisible))
                     .WithWidth(100)
@@ -103,6 +105,21 @@ public class OcrWindow : Window
                 UiUtil.MakeComboBox(vm.NOcrPixelsAreSpaceList, vm, nameof(vm.SelectedNOcrPixelsAreSpace), nameof(vm.IsNOcrVisible))
                     .WithMarginRight(10)
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
+
+                // Tesseract settings
+                UiUtil.MakeLabel("Language", nameof(vm.IsTesseractVisible)),
+
+
+                // Ollama settings
+                UiUtil.MakeLabel("Language", nameof(vm.IsNOcrVisible)),
+                UiUtil.MakeComboBox( vm.OllamaLanguages, vm, nameof(vm.SelectedOllamaLanguage), nameof(vm.IsOllamaVisible))
+                    .WithWidth(100)
+                    .WithMarginRight(10)
+                    .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
+                UiUtil.MakeLabel("Model", nameof(vm.IsOllamaVisible)),
+                UiUtil.MakeTextBox(200, vm, nameof(vm.OllamaModel))
+                .BindIsVisible(vm, nameof(vm.IsOllamaVisible)),
+                UiUtil.MakeButton("...", vm.PickOllamaModelCommand).BindIsVisible(vm, nameof(vm.IsOllamaVisible)),
             }
         };
 

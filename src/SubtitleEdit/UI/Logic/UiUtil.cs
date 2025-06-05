@@ -793,7 +793,7 @@ public static class UiUtil
         };
     }
 
-    public static T BindVisible<T>(this T control, object vm, string visibilityPropertyPath) where T : Visual
+    public static T BindIsVisible<T>(this T control, object vm, string visibilityPropertyPath) where T : Visual
     {
         control.DataContext = vm;
         control.Bind(Visual.IsVisibleProperty, new Binding

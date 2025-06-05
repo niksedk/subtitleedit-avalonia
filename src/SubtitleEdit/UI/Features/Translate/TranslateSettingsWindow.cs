@@ -79,7 +79,7 @@ public class TranslateSettingsWindow : Window
             Width = double.NaN,
             Height = double.NaN,
             TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-        }.BindVisible(vm, nameof(vm.PromptIsVisible))
+        }.BindIsVisible(vm, nameof(vm.PromptIsVisible))
          .BindText(vm, nameof(vm.PromptText));
 
         var buttonOk = UiUtil.MakeButton("OK", vm.OkCommand);

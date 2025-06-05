@@ -132,14 +132,14 @@ public class FixCommonErrorsWindow : Window
 
         var buttonToApplyFixes = UiUtil.MakeButton("To apply fixes", vm.ToApplyFixesCommand)
             .WithIconRight("fa-solid fa-arrow-right")
-            .BindVisible(vm, nameof(vm.Step1IsVisible));
+            .BindIsVisible(vm, nameof(vm.Step1IsVisible));
 
         var buttonBackToFixList = UiUtil.MakeButton("Back to fix list", vm.BackToFixListCommand)
             .WithIconLeft("fa-solid fa-arrow-left")
-            .BindVisible(vm, nameof(vm.Step2IsVisible));
+            .BindIsVisible(vm, nameof(vm.Step2IsVisible));
 
         var buttonApplyFixes = UiUtil.MakeButton("Apply selected fixes & close", vm.OkCommand)
-            .BindVisible(vm, nameof(vm.Step2IsVisible));
+            .BindIsVisible(vm, nameof(vm.Step2IsVisible));
 
         var buttonPanelRight = UiUtil.MakeButtonBar(
             buttonBackToFixList,

@@ -10,7 +10,9 @@ using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Features.Options.Language;
 using Nikse.SubtitleEdit.Features.Options.Settings;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
+using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.Ocr;
+using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using Nikse.SubtitleEdit.Features.SpellCheck;
 using Nikse.SubtitleEdit.Features.SpellCheck.EditWholeText;
 using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
@@ -28,6 +30,7 @@ using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Features.Video.OpenFromUrl;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.DownloadTts;
+using Nikse.SubtitleEdit.Features.Video.TextToSpeech.ElevenLabsSettings;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.VoiceSettings;
 using Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
@@ -37,10 +40,6 @@ using Nikse.SubtitleEdit.Logic.Dictionaries;
 using Nikse.SubtitleEdit.Logic.Download;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
-using DownloadFfmpegViewModel = Nikse.SubtitleEdit.Features.Shared.DownloadFfmpegViewModel;
-using DownloadLibMpvViewModel = Nikse.SubtitleEdit.Features.Shared.DownloadLibMpvViewModel;
-using ElevenLabsSettingsViewModel = Nikse.SubtitleEdit.Features.Video.TextToSpeech.ElevenLabsSettings.ElevenLabsSettingsViewModel;
-using PickMatroskaTrackViewModel = Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack.PickMatroskaTrackViewModel;
 
 namespace Nikse.SubtitleEdit;
 
@@ -117,5 +116,8 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<ReviewSpeechViewModel>();
         collection.AddTransient<PickMatroskaTrackViewModel>();
         collection.AddTransient<OcrViewModel>();
+        collection.AddTransient<DownloadTesseractModelViewModel>();
+        collection.AddTransient<DownloadTesseractViewModel>();
+        collection.AddTransient<DownloadPaddleOcrViewModel>();
     }
 }
