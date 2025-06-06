@@ -10,7 +10,7 @@ using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using Nikse.SubtitleEdit.Logic.Config.Language;
+using Nikse.SubtitleEdit.Logic.Config.Language.Tools;
 using Nikse.SubtitleEdit.Logic.Dictionaries;
 using System;
 using System.Collections.Generic;
@@ -73,7 +73,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
         Fixes = new ObservableCollection<FixDisplayItem>();
         Paragraphs = new ObservableCollection<SubtitleLineViewModel>();
         EditText = string.Empty;
-        _language = Se.Language.FixCommonErrors;
+        _language = Se.Language.Tools.FixCommonErrors;
         Step1IsVisible = true;
         _oldSelectedLanguage = new LanguageDisplayItem(new CultureInfo("en"), "English");
 

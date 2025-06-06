@@ -60,7 +60,7 @@ public partial class FixRuleDisplayItem : ObservableObject
             new FixCommas(),
             new FixContinuationStyle
             {
-                FixAction = string.Format(Se.Language.FixCommonErrors.FixContinuationStyleX, Se.Language.Settings.GetContinuationStyleName(Configuration.Settings.General.ContinuationStyle))
+                FixAction = string.Format(Se.Language.Tools.FixCommonErrors.FixContinuationStyleX, Se.Language.Settings.GetContinuationStyleName(Configuration.Settings.General.ContinuationStyle))
             },
             new FixDanishLetterI(),
             new FixDialogsOnOneLine(),

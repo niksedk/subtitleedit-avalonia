@@ -26,6 +26,17 @@ public partial class ChangeCasingViewModel : ObservableObject
         FixNamesOnly = Se.Settings.Tools.ChangeCasing.FixNamesOnly;
         AllUppercase = Se.Settings.Tools.ChangeCasing.AllUppercase;
         AllLowercase = Se.Settings.Tools.ChangeCasing.AllLowercase;
+        LoadSettings();
+    }
+
+    private void LoadSettings()
+    {
+        NormalCasing = Se.Settings.Tools.ChangeCasing.NormalCasing;
+        NormalCasingFixNames = Se.Settings.Tools.ChangeCasing.NormalCasingFixNames;
+        NormalCasingOnlyUpper = Se.Settings.Tools.ChangeCasing.NormalCasingOnlyUpper;
+        FixNamesOnly = Se.Settings.Tools.ChangeCasing.FixNamesOnly;
+        AllUppercase = Se.Settings.Tools.ChangeCasing.AllUppercase;
+        AllLowercase = Se.Settings.Tools.ChangeCasing.AllLowercase;
     }
 
     private void SaveSettings()

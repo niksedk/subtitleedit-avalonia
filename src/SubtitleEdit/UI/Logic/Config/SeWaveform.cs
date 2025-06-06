@@ -16,7 +16,7 @@ public class SeWaveform
     {
         DrawGridLines = true;
         FocusTextBoxAfterInsertNew = true;
-        WaveformColor = Color.FromArgb(150, 144, 238, 144).FromColorToHex();
-        WaveformSelectedColor = Color.FromArgb(210, 254, 10, 10).FromColorToHex();
+        WaveformColor = Color.FromArgb(150, 100, 100, 100).FromColorToHex();
+        WaveformSelectedColor = Color.FromArgb(150, 0, 120, 255).FromColorToHex();
     }
 }

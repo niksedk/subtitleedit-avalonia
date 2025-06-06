@@ -979,4 +979,9 @@ public static class UiUtil
 
         return label;
     }
+
+    internal static Control MakeLabel(object fixNames)
+    {
+        throw new NotImplementedException();
+    }
 }

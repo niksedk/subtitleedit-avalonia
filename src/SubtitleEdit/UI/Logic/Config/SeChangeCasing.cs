@@ -8,9 +8,12 @@ public class SeChangeCasing
     public bool FixNamesOnly { get; internal set; }
     public bool AllUppercase { get; internal set; }
     public bool AllLowercase { get; internal set; }
+    public string ExtraNames { get; internal set; }
 
     public SeChangeCasing()
     {
         NormalCasing = true;
+        NormalCasingFixNames = true;
+        ExtraNames = string.Empty;
     }
 }

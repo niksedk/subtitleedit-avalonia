@@ -106,6 +106,8 @@ public class LanguageGeneral
     public string UseLargerFontForThisWindow { get; set; }
     public string ChangeLanguageFilter { get; set; }
     public string MoreInfo { get; set; }
+    public string SelectAll { get; internal set; }
+    public string InvertSelection { get; internal set; }
 
     public LanguageGeneral()
     {
@@ -213,5 +215,7 @@ public class LanguageGeneral
         UseLargerFontForThisWindow = "Use larger font for this window";
         ChangeLanguageFilter = "Change language filter...";
         MoreInfo = "More info";
+        SelectAll = "Select all";
+        InvertSelection = "Invert selection";
     }
 }

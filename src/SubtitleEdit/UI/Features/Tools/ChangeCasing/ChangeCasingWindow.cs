@@ -4,6 +4,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
 
@@ -14,7 +15,7 @@ public class ChangeCasingWindow : Window
     public ChangeCasingWindow(ChangeCasingViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = "Change casing";
+        Title = Se.Language.Tools.ChangeCasing.Title;
         SizeToContent = SizeToContent.WidthAndHeight;
         MinWidth = 300; 
         CanResize = false;
@@ -108,7 +109,7 @@ public class ChangeCasingWindow : Window
 
         Content = grid;
         
-        Activated += delegate { Focus(); }; // hack to make OnKeyDown work
+        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
