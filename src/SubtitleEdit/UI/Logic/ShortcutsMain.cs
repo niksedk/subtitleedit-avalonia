@@ -1,9 +1,9 @@
-using System.Collections.Generic;
-using System.Linq;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Logic.Config;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Logic;
 
@@ -53,33 +53,34 @@ public static class ShortcutsMain
 
     public static Dictionary<string, string> CommandTranslationLookup = new Dictionary<string, string>
     {
-        { nameof(_mvm.SelectAllLinesCommand) , Se.Language.Settings.Shortcuts.ListSelectAll },
-        { nameof(_mvm.InverseSelectionCommand) , Se.Language.Settings.Shortcuts.ListInverseSelection },
-        { nameof(_mvm.DeleteSelectedLinesCommand) , Se.Language.Settings.Shortcuts.ListDeleteSelection },
-        { nameof(_mvm.OpenDataFolderCommand) , Se.Language.Settings.Shortcuts.OpenSeDataFolder },
+        { nameof(_mvm.SelectAllLinesCommand) , Se.Language.Options.Shortcuts.ListSelectAll },
+        { nameof(_mvm.InverseSelectionCommand) , Se.Language.Options.Shortcuts.ListInverseSelection },
+        { nameof(_mvm.DeleteSelectedLinesCommand) , Se.Language.Options.Shortcuts.ListDeleteSelection },
+        { nameof(_mvm.OpenDataFolderCommand) , Se.Language.Options.Shortcuts.OpenSeDataFolder },
 
-        { nameof(_mvm.CommandFileOpenCommand) , Se.Language.Settings.Shortcuts.FileOpen },
-        { nameof(_mvm.CommandExitCommand) , Se.Language.Settings.Shortcuts.FileExit },
-        { nameof(_mvm.CommandFileNewCommand) , Se.Language.Settings.Shortcuts.FileNew },
-        { nameof(_mvm.CommandFileSaveCommand) , Se.Language.Settings.Shortcuts.FileSave },
-        { nameof(_mvm.CommandFileSaveAsCommand) , Se.Language.Settings.Shortcuts.FileSaveAs },
+        { nameof(_mvm.CommandFileOpenCommand) , Se.Language.Options.Shortcuts.FileOpen },
+        { nameof(_mvm.CommandExitCommand) , Se.Language.Options.Shortcuts.FileExit },
+        { nameof(_mvm.CommandFileNewCommand) , Se.Language.Options.Shortcuts.FileNew },
+        { nameof(_mvm.CommandFileSaveCommand) , Se.Language.Options.Shortcuts.FileSave },
+        { nameof(_mvm.CommandFileSaveAsCommand) , Se.Language.Options.Shortcuts.FileSaveAs },
 
         { nameof(_mvm.UndoCommand) , "Undo" },
         { nameof(_mvm.RedoCommand) , "Redo" },
-        { nameof(_mvm.FindNextCommand) , Se.Language.Settings.Shortcuts.EditFind },
-        { nameof(_mvm.ShowReplaceCommand) , Se.Language.Settings.Shortcuts.EditReplace },
-        { nameof(_mvm.ShowMultipleReplaceCommand) , Se.Language.Settings.Shortcuts.EditMultipleReplace },
+        { nameof(_mvm.FindNextCommand) , Se.Language.Options.Shortcuts.EditFind },
+        { nameof(_mvm.ShowReplaceCommand) , Se.Language.Options.Shortcuts.EditReplace },
+        { nameof(_mvm.ShowMultipleReplaceCommand) , Se.Language.Options.Shortcuts.EditMultipleReplace },
 
-        { nameof(_mvm.ShowGoToLineCommand) , Se.Language.Settings.Shortcuts.GeneralGoToLineNumber },
-        { nameof(_mvm.ToggleLinesItalicCommand) , Se.Language.Settings.Shortcuts.GeneralToggleItalic },
-        { nameof(_mvm.ToggleLinesBoldCommand) , Se.Language.Settings.Shortcuts.GeneralToggleBold },
+        { nameof(_mvm.ShowGoToLineCommand) , Se.Language.Options.Shortcuts.GeneralGoToLineNumber },
+        { nameof(_mvm.ToggleLinesItalicCommand) , Se.Language.Options.Shortcuts.GeneralToggleItalic },
+        { nameof(_mvm.ToggleLinesBoldCommand) , Se.Language.Options.Shortcuts.GeneralToggleBold },
 
-        { nameof(_mvm.CommandShowLayoutCommand) , Se.Language.Settings.Shortcuts.GeneralChooseLayout },
-        { nameof(_mvm.CommandShowAutoTranslateCommand) , Se.Language.Settings.Shortcuts.AutoTranslate },
-        { nameof(_mvm.CommandShowSettingsCommand) , Se.Language.Settings.Shortcuts.Settings },
+        { nameof(_mvm.CommandShowLayoutCommand) , Se.Language.Options.Shortcuts.GeneralChooseLayout },
+        { nameof(_mvm.CommandShowAutoTranslateCommand) , Se.Language.Options.Shortcuts.AutoTranslate },
+        { nameof(_mvm.CommandShowSettingsCommand) , Se.Language.Options.Shortcuts.Settings },
 
-        { nameof(_mvm.GoToNextLineCommand) , Se.Language.Settings.Shortcuts.GeneralGoToNextSubtitle },
-        { nameof(_mvm.GoToPreviousLineCommand) , Se.Language.Settings.Shortcuts.GeneralGoToPrevSubtitle },
+        { nameof(_mvm.GoToNextLineCommand) , Se.Language.Options.Shortcuts.GeneralGoToNextSubtitle },
+        { nameof(_mvm.GoToPreviousLineCommand) , Se.Language.Options.Shortcuts.GeneralGoToPrevSubtitle },
+        { nameof(_mvm.SaveLanguageFileCommand) , "Save language file" },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -89,7 +90,6 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.SelectAllLinesCommand, nameof(vm.SelectAllLinesCommand), ShortcutCategory.SubtitleGrid);
         AddShortcut(shortcuts, vm.InverseSelectionCommand, nameof(vm.InverseSelectionCommand), ShortcutCategory.SubtitleGrid);
         AddShortcut(shortcuts, vm.DeleteSelectedLinesCommand, nameof(vm.DeleteSelectedLinesCommand), ShortcutCategory.SubtitleGrid);
-        AddShortcut(shortcuts, vm.OpenDataFolderCommand, nameof(vm.OpenDataFolderCommand), ShortcutCategory.General);
 
         AddShortcut(shortcuts, vm.CommandFileOpenCommand, nameof(vm.CommandFileOpenCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.CommandExitCommand, nameof(vm.CommandExitCommand), ShortcutCategory.General);
@@ -113,6 +113,9 @@ public static class ShortcutsMain
 
         AddShortcut(shortcuts, vm.GoToPreviousLineCommand, nameof(vm.GoToPreviousLineCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.GoToNextLineCommand, nameof(vm.GoToNextLineCommand), ShortcutCategory.General);
+
+        AddShortcut(shortcuts, vm.OpenDataFolderCommand, nameof(vm.OpenDataFolderCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.SaveLanguageFileCommand, nameof(vm.SaveLanguageFileCommand), ShortcutCategory.General);
 
         return shortcuts;
     }

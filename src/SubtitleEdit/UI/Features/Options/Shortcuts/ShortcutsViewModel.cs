@@ -4,6 +4,7 @@ using Avalonia.LogicalTree;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -11,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using HanumanInstitute.Validators;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
@@ -43,8 +43,8 @@ public partial class ShortcutsViewModel : ObservableObject
         Filters = new ObservableCollection<string>
         {
             Se.Language.General.All,
-            Se.Language.Settings.Shortcuts.Assigned,
-            Se.Language.Settings.Shortcuts.Unassigned,
+            Se.Language.Options.Shortcuts.Assigned,
+            Se.Language.Options.Shortcuts.Unassigned,
         };
         SelectedFilter = _filters[0];
         Nodes = new ObservableCollection<ShortcutTreeNode>();
@@ -85,10 +85,10 @@ public partial class ShortcutsViewModel : ObservableObject
     internal void UpdateVisibleShortcuts(string searchText)
     {
         Nodes.Clear();
-        AddShortcuts(ShortcutCategory.General, Se.Language.Settings.Shortcuts.CategoryGeneral, searchText);
-        AddShortcuts(ShortcutCategory.SubtitleGridAndTextBox, Se.Language.Settings.Shortcuts.CategorySubtitleGridAndTextBox, searchText);
-        AddShortcuts(ShortcutCategory.SubtitleGrid, Se.Language.Settings.Shortcuts.CategorySubtitleGrid, searchText);
-        AddShortcuts(ShortcutCategory.Waveform, Se.Language.Settings.Shortcuts.CategoryWaveform, searchText);
+        AddShortcuts(ShortcutCategory.General, Se.Language.Options.Shortcuts.CategoryGeneral, searchText);
+        AddShortcuts(ShortcutCategory.SubtitleGridAndTextBox, Se.Language.Options.Shortcuts.CategorySubtitleGridAndTextBox, searchText);
+        AddShortcuts(ShortcutCategory.SubtitleGrid, Se.Language.Options.Shortcuts.CategorySubtitleGrid, searchText);
+        AddShortcuts(ShortcutCategory.Waveform, Se.Language.Options.Shortcuts.CategoryWaveform, searchText);
         ExpandAll();
     }
 
@@ -211,8 +211,8 @@ public partial class ShortcutsViewModel : ObservableObject
     private bool Search(string searchText, ShortCut p)
     {
         var filterOk = SelectedFilter == Se.Language.General.All ||
-                       SelectedFilter == Se.Language.Settings.Shortcuts.Unassigned && p.Keys.Count == 0 ||
-                       SelectedFilter == Se.Language.Settings.Shortcuts.Assigned && p.Keys.Count > 0;
+                       SelectedFilter == Se.Language.Options.Shortcuts.Unassigned && p.Keys.Count == 0 ||
+                       SelectedFilter == Se.Language.Options.Shortcuts.Assigned && p.Keys.Count > 0;
         if (!filterOk)
         {
             return false;

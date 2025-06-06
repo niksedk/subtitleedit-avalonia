@@ -345,7 +345,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
             new (_language.Fix3PlusLines, "Foo</br>bar</br>baz! -> Foo bar baz!", 1, true, nameof(Fix3PlusLines)),
             new (_language.FixDoubleDash, _language.FixDoubleDashExample, 1, true, nameof(FixDoubleDash)),
             new (_language.FixDoubleGreaterThan, _language.FixDoubleGreaterThanExample, 1, true, nameof(FixDoubleGreaterThan)),
-            new ( string.Format(_language.FixContinuationStyleX, Se.Language.Settings.GetContinuationStyleName(Configuration.Settings.General.ContinuationStyle)), string.Empty, 1, true, nameof(FixContinuationStyle)),
+            new ( string.Format(_language.FixContinuationStyleX, Se.Language.Options.Settings.GetContinuationStyleName(Configuration.Settings.General.ContinuationStyle)), string.Empty, 1, true, nameof(FixContinuationStyle)),
             new (_language.FixMissingOpenBracket, _language.FixMissingOpenBracketExample, 1, true, nameof(FixMissingOpenBracket)),
             //new (_language.FixCommonOcrErrors, _language.FixOcrErrorExample, 1, true, () => FixOcrErrorsViaReplaceList(threeLetterIsoLanguageName), ce.FixOcrErrorsViaReplaceListTicked),
             new (_language.FixUppercaseIInsideLowercaseWords, _language.FixUppercaseIInsideLowercaseWordsExample, 1, true, nameof(FixUppercaseIInsideWords)),
@@ -391,20 +391,20 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
     {
         if (dialogStyle == DialogType.DashSecondLineWithoutSpace)
         {
-            return Se.Language.Settings.DialogStyleDashSecondLineWithoutSpace;
+            return Se.Language.Options.Settings.DialogStyleDashSecondLineWithoutSpace;
         }
 
         if (dialogStyle == DialogType.DashSecondLineWithSpace)
         {
-            return Se.Language.Settings.DialogStyleDashSecondLineWithSpace;
+            return Se.Language.Options.Settings.DialogStyleDashSecondLineWithSpace;
         }
 
         if (dialogStyle == DialogType.DashBothLinesWithoutSpace)
         {
-            return Se.Language.Settings.DialogStyleDashBothLinesWithoutSpace;
+            return Se.Language.Options.Settings.DialogStyleDashBothLinesWithoutSpace;
         }
 
-        return Se.Language.Settings.DialogStyleDashBothLinesWithSpace;
+        return Se.Language.Options.Settings.DialogStyleDashBothLinesWithSpace;
     }
 
     internal void OnKeyDown(KeyEventArgs e)

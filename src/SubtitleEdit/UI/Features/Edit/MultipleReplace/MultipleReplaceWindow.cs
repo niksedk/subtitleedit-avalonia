@@ -3,15 +3,13 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
-using System;
-using System.Net.WebSockets;
 
 namespace Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 
 public class MultipleReplaceWindow : Window
 {
     private MultipleReplaceViewModel _vm;
-    
+
     public MultipleReplaceWindow(MultipleReplaceViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
@@ -27,12 +25,12 @@ public class MultipleReplaceWindow : Window
         var rulesView = MakeRulesView(vm);
         var FixesView = MakeFixesView(vm);
 
-        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);    
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var panelButtons = UiUtil.MakeButtonBar(
             buttonOk,
             UiUtil.MakeButton("Cancel", vm.CancelCommand)
         );
-        
+
         var grid = new Grid
         {
             RowDefinitions =
@@ -57,7 +55,7 @@ public class MultipleReplaceWindow : Window
         grid.Add(panelButtons, 1, 0, 1, 2);
 
         Content = grid;
-        
+
         Activated += delegate { Focus(); }; // hack to make OnKeyDown work
     }
 

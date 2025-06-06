@@ -119,7 +119,7 @@ public class OcrWindow : Window
                 .BindIsVisible(vm, nameof(vm.IsOllamaVisible))
                 .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
                 UiUtil.MakeBrowseButton(vm.PickOllamaModelCommand)
-                .BindIsVisible(vm, nameof(vm.IsOllamaVisible)) 
+                .BindIsVisible(vm, nameof(vm.IsOllamaVisible))
                 .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
 
                 // Google vision settings

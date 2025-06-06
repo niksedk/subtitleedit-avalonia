@@ -1,13 +1,12 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
-using Avalonia.Input;
-using Nikse.SubtitleEdit.Logic;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
-using Projektanker.Icons.Avalonia;
+using Avalonia.Input;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using Avalonia.Markup.Declarative;
+using Projektanker.Icons.Avalonia;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
@@ -18,7 +17,7 @@ public class ShortcutsWindow : Window
 
     public ShortcutsWindow(ShortcutsViewModel vm)
     {
-        var language = Se.Language.Settings.Shortcuts;
+        var language = Se.Language.Options.Shortcuts;
         Icon = UiUtil.GetSeIcon();
         Title = language.Title;
         Width = 700;

@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Globalization;
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -8,6 +5,9 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Nikse.SubtitleEdit.Logic;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 

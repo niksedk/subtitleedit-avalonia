@@ -16,7 +16,7 @@ public partial class FixRuleDisplayItem : ObservableObject
     [ObservableProperty] private string _example;
     [ObservableProperty] private bool _isSelected;
     [ObservableProperty] private int _sortOrder;
-    
+
     public string FixCommonErrorFunctionName { get; set; }
 
     public FixRuleDisplayItem()
@@ -25,7 +25,7 @@ public partial class FixRuleDisplayItem : ObservableObject
         Example = string.Empty;
         FixCommonErrorFunctionName = string.Empty;
     }
-    
+
     public FixRuleDisplayItem(FixRuleDisplayItem item)
     {
         Name = item.Name;
@@ -60,7 +60,7 @@ public partial class FixRuleDisplayItem : ObservableObject
             new FixCommas(),
             new FixContinuationStyle
             {
-                FixAction = string.Format(Se.Language.Tools.FixCommonErrors.FixContinuationStyleX, Se.Language.Settings.GetContinuationStyleName(Configuration.Settings.General.ContinuationStyle))
+                FixAction = string.Format(Se.Language.Tools.FixCommonErrors.FixContinuationStyleX, Se.Language.Options.Settings.GetContinuationStyleName(Configuration.Settings.General.ContinuationStyle))
             },
             new FixDanishLetterI(),
             new FixDialogsOnOneLine(),

@@ -4,7 +4,6 @@ using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Layout;
-using Avalonia.Markup.Declarative;
 using Avalonia.Media;
 using Avalonia.Media.Immutable;
 using Avalonia.Platform;
@@ -838,7 +837,7 @@ public static class UiUtil
         return new Border
         {
             Width = 1,
-            Background = GetBorderColor(), 
+            Background = GetBorderColor(),
             Margin = new Thickness(5, 5, 5, 5),
             VerticalAlignment = VerticalAlignment.Center,
         };

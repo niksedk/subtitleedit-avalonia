@@ -14,7 +14,7 @@ public static class InitToolbar
     public static Border Make(MainViewModel vm)
     {
         var toolbar = CreateToolbar(vm);
-        
+
         return new Border
         {
             Height = 40,
@@ -25,7 +25,7 @@ public static class InitToolbar
     private static StackPanel CreateToolbar(MainViewModel vm)
     {
         var path = $"Assets/Themes/{Se.Settings.Appearance.Theme}/";
-        
+
         var stackPanel = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -35,7 +35,7 @@ public static class InitToolbar
 
         var appearance = Se.Settings.Appearance;
         var isLastSeparator = true;
-        
+
         if (appearance.ToolbarShowFileNew)
         {
             stackPanel.Children.Add(new Button

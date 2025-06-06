@@ -11,13 +11,13 @@ namespace Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
 public class ChangeCasingWindow : Window
 {
     private ChangeCasingViewModel _vm;
-    
+
     public ChangeCasingWindow(ChangeCasingViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
         Title = Se.Language.Tools.ChangeCasing.Title;
         SizeToContent = SizeToContent.WidthAndHeight;
-        MinWidth = 300; 
+        MinWidth = 300;
         CanResize = false;
 
         _vm = vm;
@@ -30,7 +30,7 @@ public class ChangeCasingWindow : Window
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 0, 5),
             [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.NormalCasing)) { Mode = BindingMode.TwoWay },
-        };  
+        };
 
         var checkBoxNormalCasingFixNames = new CheckBox
         {
@@ -72,12 +72,12 @@ public class ChangeCasingWindow : Window
             [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AllLowercase)) { Mode = BindingMode.TwoWay },
         };
 
-        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);   
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonPanel = UiUtil.MakeButtonBar(
             buttonOk,
             UiUtil.MakeButtonCancel(vm.CancelCommand)
         );
-        
+
         var grid = new Grid
         {
             RowDefinitions =
@@ -108,7 +108,7 @@ public class ChangeCasingWindow : Window
         grid.Add(buttonPanel, 6, 0);
 
         Content = grid;
-        
+
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 

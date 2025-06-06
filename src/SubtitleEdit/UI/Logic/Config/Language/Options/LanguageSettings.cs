@@ -4,7 +4,6 @@ namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
 public class LanguageSettings
 {
-    public LanguageSettingsShortcuts Shortcuts { get; set; }
 
     public string DialogStyle { get; set; }
 
@@ -62,8 +61,6 @@ public class LanguageSettings
 
     public LanguageSettings()
     {
-        Shortcuts = new LanguageSettingsShortcuts();
-
         DialogStyle = "Dialog style";
         DialogStyleDashBothLinesWithSpace = "Dash both lines with space";
         DialogStyleDashBothLinesWithoutSpace = "Dash both lines without space";

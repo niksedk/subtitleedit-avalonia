@@ -5,9 +5,7 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
-using Avalonia.Markup.Declarative;
 using Avalonia.Media;
-using Avalonia.Styling;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
@@ -454,7 +452,7 @@ public class FixCommonErrorsWindow : Window
     private void DataGridFixes_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (e.AddedItems.Count == 1 && e.AddedItems[0] is FixDisplayItem fixDisplayItem)
-        { 
+        {
             _vm.SelectAndScrollTo(fixDisplayItem);
         }
     }

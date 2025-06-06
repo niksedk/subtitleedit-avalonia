@@ -8,7 +8,9 @@ using CommunityToolkit.Mvvm.Input;
 using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
+using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Edit.Find;
 using Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
@@ -21,6 +23,9 @@ using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Features.Options.Language;
 using Nikse.SubtitleEdit.Features.Options.Settings;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
+using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Shared.Ocr;
+using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using Nikse.SubtitleEdit.Features.SpellCheck;
 using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
 using Nikse.SubtitleEdit.Features.Sync.AdjustAllTimes;
@@ -51,11 +56,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Core.BluRaySup;
-using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
-using Nikse.SubtitleEdit.Features.Shared;
-using Nikse.SubtitleEdit.Features.Shared.Ocr;
-using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using DownloadFfmpegViewModel = Nikse.SubtitleEdit.Features.Shared.DownloadFfmpegViewModel;
 using DownloadLibMpvViewModel = Nikse.SubtitleEdit.Features.Shared.DownloadLibMpvViewModel;
 using OcrViewModel = Nikse.SubtitleEdit.Features.Shared.Ocr.OcrViewModel;
@@ -264,6 +264,24 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     private async Task ShowHelp()
     {
         await Window!.Launcher.LaunchUriAsync(new Uri("https://www.nikse.dk/subtitleedit/help"));
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task SaveLanguageFile()
+    {
+        var json = System.Text.Json.JsonSerializer.Serialize(Se.Language, new System.Text.Json.JsonSerializerOptions
+        {
+            WriteIndented = true,
+            // Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        });
+
+        var currentDirectory = Directory.GetCurrentDirectory();
+        var fileName = Path.Combine(currentDirectory, "English.json");
+        await File.WriteAllTextAsync(fileName, json, Encoding.UTF8);
+        ShowStatus($"Language file saved to {fileName}");
+        await _folderHelper.OpenFolder(Window!, currentDirectory);
+
         _shortcutManager.ClearKeys();
     }
 
@@ -1237,7 +1255,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             ImportSubtitleFromMatroskaFile(fileName, videoFileName);
             return;
         }
-        
+
         if (ext == ".sup" && FileUtil.IsBluRaySup(fileName))
         {
             var log = new StringBuilder();
