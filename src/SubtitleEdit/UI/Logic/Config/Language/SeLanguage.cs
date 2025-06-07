@@ -10,6 +10,7 @@ public class SeLanguage
     public string Version { get; set; } = "Version 5.0.0";
     public string TranslatedBy { get; set; } = string.Empty;
     public string CultureName { get; set; } = "en-US";
+
     public LanguageGeneral General { get; set; } = new();
     public LanguageMain Main { get; set; } = new();
     public LanguageFile File { get; set; } = new();

@@ -2,11 +2,6 @@
 
 public class LanguageGeneral
 {
-    public string Title { get; set; }
-    public string Version { get; set; }
-    public string TranslatedBy { get; set; }
-    public string CultureName { get; set; }
-
     public string Actor { get; set; }
     public string Advanced { get; set; }
     public string After { get; set; }
@@ -126,11 +121,6 @@ public class LanguageGeneral
 
     public LanguageGeneral()
     {
-        Title = "Subtitle Edit";
-        Version = "5.0.0 Alpha preview";
-        TranslatedBy = " ";
-        CultureName = "en-US";
-
         Actor = "Actor";
         Advanced = "Advanced";
         After = "After";

@@ -273,7 +273,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         var json = System.Text.Json.JsonSerializer.Serialize(Se.Language, new System.Text.Json.JsonSerializerOptions
         {
             WriteIndented = true,
-            // Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
         });
 
         var currentDirectory = Directory.GetCurrentDirectory();
