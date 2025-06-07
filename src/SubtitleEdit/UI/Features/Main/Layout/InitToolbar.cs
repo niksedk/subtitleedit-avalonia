@@ -224,7 +224,7 @@ public static class InitToolbar
         // subtitle formats
         stackPanel.Children.Add(new TextBlock
         {
-            Text = "Subtitle Format",
+            Text = Se.Language.General.SubtitleFormat,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Avalonia.Thickness(5, 0, 0, 0),
         });
@@ -254,7 +254,7 @@ public static class InitToolbar
         {
             stackPanel.Children.Add(new TextBlock
             {
-                Text = "Encoding",
+                Text = Se.Language.General.Encoding,
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Avalonia.Thickness(5, 0, 0, 0),
             });

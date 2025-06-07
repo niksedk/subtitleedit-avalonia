@@ -50,21 +50,21 @@ public static class InitListViewAndEditBox
         });
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
-            Header = "Show",
+            Header = Se.Language.General.Show,
             Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)) { Converter = fullTimeConverter },
             Width = new DataGridLength(120),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
         });
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
-            Header = "Hide",
+            Header = Se.Language.General.Hide,
             Binding = new Binding(nameof(SubtitleLineViewModel.EndTime)) { Converter = fullTimeConverter },
             Width = new DataGridLength(120),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
         });
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
-            Header = "Duration",
+            Header = Se.Language.General.Duration,
             Binding = new Binding(nameof(SubtitleLineViewModel.Duration)) { Converter = shortTimeConverter },
             Width = new DataGridLength(120),
             IsReadOnly = true,
@@ -73,7 +73,7 @@ public static class InitListViewAndEditBox
 
         var originalColumn = new DataGridTextColumn
         {
-            Header = "Original text",
+            Header = Se.Language.General.OriginalText,
             Binding = new Binding(nameof(SubtitleLineViewModel.OriginalText)),
             Width = new DataGridLength(1, DataGridLengthUnitType.Star), // Stretch text column
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
@@ -88,7 +88,7 @@ public static class InitListViewAndEditBox
 
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
-            Header = "Text",
+            Header = Se.Language.General.Text,
             Binding = new Binding(nameof(SubtitleLineViewModel.Text)),
             Width = new DataGridLength(1, DataGridLengthUnitType.Star), // Stretch text column
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
@@ -121,43 +121,43 @@ public static class InitListViewAndEditBox
         flyout.Opening += vm.SubtitleContextOpening;
 
         // Add menu items with commands
-        var deleteMenuItem = new MenuItem { Header = "Delete" };
+        var deleteMenuItem = new MenuItem { Header = Se.Language.General.Delete };
         deleteMenuItem.Command = vm.DeleteSelectedLinesCommand;
         flyout.Items.Add(deleteMenuItem);
 
-        var insertBeforeMenuItem = new MenuItem { Header = "Insert before" };
+        var insertBeforeMenuItem = new MenuItem { Header = Se.Language.General.InsertBefore };
         insertBeforeMenuItem.Command = vm.InsertLineBeforeCommand;
         flyout.Items.Add(insertBeforeMenuItem);
 
-        var insertAfterMenuItem = new MenuItem { Header = "Insert after" };
+        var insertAfterMenuItem = new MenuItem { Header = Se.Language.General.InsertAfter };
         insertAfterMenuItem.Command = vm.InsertLineAfterCommand;
         flyout.Items.Add(insertAfterMenuItem);
 
         flyout.Items.Add(new Separator());
 
-        var mergePreviousMenuItem = new MenuItem { Header = "Merge with line before" };
+        var mergePreviousMenuItem = new MenuItem { Header = Se.Language.General.MergeBefore };
         mergePreviousMenuItem.Command = vm.MergeWithLineBeforeCommand;
         flyout.Items.Add(mergePreviousMenuItem);
 
-        var mergeNextMenuItem = new MenuItem { Header = "Merge with line after" };
+        var mergeNextMenuItem = new MenuItem { Header = Se.Language.General.MergeAfter };
         mergeNextMenuItem.Command = vm.MergeWithLineAfterCommand;
         flyout.Items.Add(mergeNextMenuItem);
 
-        var mergeSelecedMenuItem = new MenuItem { Header = "Merge selected lines" };
+        var mergeSelecedMenuItem = new MenuItem { Header = Se.Language.General.MergeSelected };
         mergeSelecedMenuItem.Command = vm.MergeSelectedLinesCommand;
         flyout.Items.Add(mergeSelecedMenuItem);
 
-        var mergeSelecedAsDialogMenuItem = new MenuItem { Header = "Merge selected lines as dialog" };
+        var mergeSelecedAsDialogMenuItem = new MenuItem { Header = Se.Language.General.MergeSelectedAsDialog };
         mergeSelecedAsDialogMenuItem.Command = vm.MergeSelectedLinesDialogCommand;
         flyout.Items.Add(mergeSelecedAsDialogMenuItem);
 
         flyout.Items.Add(new Separator());
 
-        var italicMenuItem = new MenuItem { Header = "Italic" };
+        var italicMenuItem = new MenuItem { Header = Se.Language.General.Italic };
         italicMenuItem.Command = vm.ToggleLinesItalicCommand;
         flyout.Items.Add(italicMenuItem);
 
-        var boldMenuItem = new MenuItem { Header = "Bold" };
+        var boldMenuItem = new MenuItem { Header = Se.Language.General.Bold };
         boldMenuItem.Command = vm.ToggleLinesBoldCommand;
         flyout.Items.Add(boldMenuItem);
 
@@ -193,7 +193,7 @@ public static class InitListViewAndEditBox
 
         var startTimeLabel = new TextBlock
         {
-            Text = "Show",
+            Text = Se.Language.General.Show,
             FontWeight = FontWeight.Bold
         };
         startTimePanel.Children.Add(startTimeLabel);
@@ -260,7 +260,7 @@ public static class InitListViewAndEditBox
 
         var durationLabel = new TextBlock
         {
-            Text = "Duration",
+            Text = Se.Language.General.Duration,
             FontWeight = FontWeight.Bold,
             Padding = new Thickness(0, 4, 0,0)
 
@@ -304,14 +304,13 @@ public static class InitListViewAndEditBox
 
         var textLabel = new TextBlock
         {
-            Text = "Text",
+            Text = Se.Language.General.Text,
             FontWeight = FontWeight.Bold,
         };
         textEditGrid.Children.Add(textLabel);
 
         var textCharsSecLabel = new TextBlock
         {
-            Text = "Chars/sec: -",
             HorizontalAlignment = HorizontalAlignment.Right,
             VerticalAlignment = VerticalAlignment.Bottom,
             FontSize = 12,
@@ -330,7 +329,7 @@ public static class InitListViewAndEditBox
             TextWrapping = TextWrapping.Wrap,
             MinHeight = 92,
             Height = 92,
-            [!TextBox.TextProperty] = new Binding("SelectedSubtitle.Text")
+            [!TextBox.TextProperty] = new Binding(nameof(vm.SelectedSubtitle) + "." + nameof(SubtitleLineViewModel.Text))
             {
                 Mode = BindingMode.TwoWay
             },
@@ -345,7 +344,6 @@ public static class InitListViewAndEditBox
 
         var textTotalLengthLabel = new TextBlock
         {
-            Text = "Total length: -",
             HorizontalAlignment = HorizontalAlignment.Right,
             VerticalAlignment = VerticalAlignment.Top,
             FontSize = 12,
@@ -362,7 +360,6 @@ public static class InitListViewAndEditBox
 
         var singleLineLengthLabel = new TextBlock
         {
-            Text = "Line length: -",
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Top,
             FontSize = 12,

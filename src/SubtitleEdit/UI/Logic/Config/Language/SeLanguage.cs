@@ -6,7 +6,12 @@ namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
 public class SeLanguage
 {
+    public string Title { get; set; } = "Subtitle Edit";
+    public string Version { get; set; } = "Version 5.0.0";
+    public string TranslatedBy { get; set; } = string.Empty;
+    public string CultureName { get; set; } = "en-US";
     public LanguageGeneral General { get; set; } = new();
+    public LanguageMain Main { get; set; } = new();
     public LanguageFile File { get; set; } = new();
     public LanguageEdit Edit { get; set; } = new();
     public LanguageTools Tools { get; set; } = new();
@@ -15,5 +20,4 @@ public class SeLanguage
     public LanguageSync Sync { get; set; } = new();
     public LanguageOptions Options { get; set; } = new();
     public LanguageHelp Help { get; set; } = new();
-
 }

@@ -2087,7 +2087,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
                     : Path.GetFileName(_subtitleFileName);
             }
 
-            text = text + " - " + "Subtitle Edit 5.0 Alpha";
+            text = text + " - " + Se.Language.Title;
             if (_changeSubtitleHash != GetFastSubtitleHash())
             {
                 text = "*" + text;

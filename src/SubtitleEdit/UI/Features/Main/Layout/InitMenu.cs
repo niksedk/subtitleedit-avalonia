@@ -8,13 +8,16 @@ public static class InitMenu
 {
     public static Menu Make(MainViewModel vm)
     {
+        var l = Se.Language.Main.Menu;
+
         vm.MenuReopen = new MenuItem
         {
-            Header = "_Reopen",
+            Header = l.Reopen,
             Command = vm.CommandFileReopenCommand,
         };
 
         UpdateRecentFiles(vm);
+
 
         return new Menu
         {
@@ -24,41 +27,41 @@ public static class InitMenu
             {
                 new MenuItem
                 {
-                    Header = "_File",
+                    Header = l.File,
                     Items =
                     {
                         new MenuItem
                         {
-                            Header = "_New",
+                            Header = l.New,
                             Command = vm.CommandFileNewCommand,
                         },
                         new Separator(),
                         new MenuItem
                         {
-                            Header = "_Open...",
+                            Header = l.Open,
                             Command = vm.CommandFileOpenCommand,
                         },
                         vm.MenuReopen,
                         new MenuItem
                         {
-                            Header = "Restore auto-backup...",
+                            Header = l.RestoreAutoBackup,
                             Command = vm.ShowRestoreAutoBackupCommand,
                         },
                         new Separator(),
                         new MenuItem
                         {
-                            Header = "_Save",
+                            Header = l.Save,
                             Command = vm.CommandFileSaveCommand,
                         },
                         new MenuItem
                         {
-                            Header = "Save _as...",
+                            Header = l.SaveAs,
                             Command = vm.CommandFileSaveAsCommand,
                         },
                         new Separator(),
                         new MenuItem
                         {
-                            Header = "Export",
+                            Header = l.Export,
                             Items =
                             {
                                 new MenuItem
@@ -96,234 +99,234 @@ public static class InitMenu
                         new Separator(),
                         new MenuItem
                         {
-                            Header = "E_xit",
+                            Header = l.Exit,
                             Command = vm.CommandExitCommand,
                         }
                     }
                 },
                 new MenuItem
                 {
-                    Header = "_Edit",
+                    Header = l.Edit,
                     Items =
                     {
                         new MenuItem
                         {
-                            Header = "_Undo",
+                            Header = l.Undo,
                             Command = vm.UndoCommand,
                         },
                         new MenuItem
                         {
-                            Header = "_Redo",
+                            Header = l.Redo,
                             Command = vm.RedoCommand,
                         },
                         new MenuItem
                         {
-                            Header = "Show _history...",
+                            Header = l.ShowHistory,
                             Command = vm.ShowHistoryCommand,
                         },
                         new Separator(),
                         new MenuItem
                         {
-                            Header = "_Find...",
+                            Header = l.Find,
                             Command = vm.ShowFindCommand,
                         },
                         new MenuItem
                         {
-                            Header = "Find _next",
+                            Header = l.FindNext,
                             Command = vm.FindNextCommand,
                         },
                         new MenuItem
                         {
-                            Header = "_Replace",
+                            Header = l.Replace,
                             Command = vm.ShowReplaceCommand,
                         },
                         new MenuItem
                         {
-                            Header = "_Multiple replace",
+                            Header = l.MultipleReplace,
                             Command = vm.ShowMultipleReplaceCommand,
                         },
                         new MenuItem
                         {
-                            Header = "_Go to line number...",
+                            Header = l.GoToLineNumber,
                             Command = vm.ShowGoToLineCommand,
                         },
                         new Separator(),
                         new MenuItem
                         {
-                            Header = "Select _all",
+                            Header = Se.Language.General.SelectAll,
                             Command = vm.SelectAllLinesCommand,
                         },
                         new MenuItem
                         {
-                            Header = "_Inverse selection",
+                            Header = Se.Language.General.InvertSelection,
                             Command = vm.InverseSelectionCommand,
                         },
                     }
                 },
                 new MenuItem
                 {
-                    Header = "Too_ls",
+                    Header = l.Tools,
                     Items =
                     {
                         new MenuItem
                         {
-                            Header = "_Adjust durations...",
+                            Header = l.AdjustDurations,
                             Command = vm.ShowToolsAdjustDurationsCommand,
                         },
                         new MenuItem
                         {
-                            Header = "_Fix common errors...",
+                            Header = l.FixCommonErrors,
                             Command = vm.ShowToolsFixCommonErrorsCommand,
                         },
                         new MenuItem
                         {
-                            Header = "_Remove text for hearing impaired...",
+                            Header = l.RemoveTextForHearingImpaired,
                             Command = vm.ShowToolsRemoveTextForHearingImpairedCommand,
                         },
                         new MenuItem
                         {
-                            Header = "_Change casing...",
+                            Header = l.ChangeCasing,
                             Command = vm.ShowToolsChangeCasingCommand,
                         },
                         new MenuItem
                         {
-                            Header = "_Batch convert...",
+                            Header = l.BatchConvert,
                             Command = vm.ShowToolsBatchConvertCommand,
                         },
                     }
                 },
                 new MenuItem
                 {
-                    Header = "_Spell Check",
+                    Header = l.SpellCheckTitle,
                     Items =
                     {
                         new MenuItem
                         {
-                            Header = "_Spell check...",
+                            Header = l.SpellCheck,
                             Command = vm.ShowSpellCheckCommand,
                         },
                         new Separator(),
                         new MenuItem
                         {
-                            Header = "_Get dictionaries...",
+                            Header = l.GetDictionaries,
                             Command = vm.ShowSpellCheckDictionariesCommand,
                         },
                     }
                 },
                 new MenuItem
                 {
-                    Header = "_Video",
+                    Header = l.Video,
                     Items =
                     {
                         new MenuItem
                         {
-                            Header = "_Open video file...",
+                            Header = l.OpenVideo,
                             Command = vm.CommandVideoOpenCommand,
                         },
                         new MenuItem
                         {
-                            Header = "Open video file from _URL...",
+                            Header = l.OpenVideoFromUrl,
                             Command = vm.ShowVideoOpenFromUrlCommand,
                         },
                         new MenuItem
                         {
-                            Header = "_Close video file",
+                            Header = l.CloseVideoFile,
                             Command = vm.CommandVideoCloseCommand,
                         },
                         new Separator(),
                         new MenuItem
                         {
-                            Header = "_Speech to text (Whisper)...",
+                            Header = l.SpeechToText,
                             Command = vm.ShowVideoAudioToTextWhisperCommand,
                         },
                         new MenuItem
                         {
-                             Header = "_Text to speech...",
+                            Header = l.TextToSpeech,
                             Command = vm.ShowVideoTextToSpeechCommand,
                         },
                         new Separator(),
                         new MenuItem
                         {
-                             Header = "Generate video with burned-in subtitles...",
+                            Header = l.GenerateBurnIn,
                             Command = vm.ShowVideoBurnInCommand,
                         },
                         new MenuItem
                         {
-                             Header = "Generate transparent video with subtitles...",
+                            Header = l.GenerateTransparent,
                             Command = vm.ShowVideoTransparentSubtitlesCommand,
                         },
                     }
                 },
                 new MenuItem
                 {
-                    Header = "Syn_chronization",
+                    Header = l.Synchronization,
                     Items =
                     {
                         new MenuItem
                         {
-                             Header = "_Adjust all times (show earlier/later)...",
+                            Header = l.AdjustAllTimes,
                             Command = vm.ShowSyncAdjustAllTimesCommand,
                         },
                         new MenuItem
                         {
-                             Header = "_Change frame rate...",
+                            Header = l.ChangeFrameRate,
                             Command = vm.ShowSyncChangeFrameRateCommand,
                         },
                         new MenuItem
                         {
-                             Header = "_Change speed in percent",
+                            Header = l.ChangeSpeed,
                             Command = vm.ShowSyncChangeSpeedCommand,
                         },
                     }
                 },
                 new MenuItem
                 {
-                    Header = "_Options",
+                    Header = l.Options,
                     Items =
                     {
                         new MenuItem
                         {
-                            Header = "_Settings...",
+                            Header = l.Settings,
                             Command = vm.CommandShowSettingsCommand,
                         },
                         new MenuItem
                         {
-                            Header = "Short_cuts...",
+                            Header = l.Shortcuts,
                             Command = vm.CommandShowSettingsShortcutsCommand,
                         },
                         new MenuItem
                         {
-                            Header = "Choose _language...",
+                            Header = l.ChooseLanguage,
                             Command = vm.CommandShowSettingsLanguageCommand,
                         },
                     },
                 },
                 new MenuItem
                 {
-                    Header = "_Translate",
+                    Header = l.Translate,
                     Items =
                     {
                         new MenuItem
                         {
-                            Header = "_Auto-translate...",
+                            Header = l.AutoTranslate,
                             Command = vm.CommandShowAutoTranslateCommand,
                         },
                     }
                 },
                 new MenuItem
                 {
-                    Header = "_Help",
+                    Header = l.HelpTitle,
                     Items =
                     {
                         new MenuItem
                         {
-                            Header = "_About",
+                            Header = l.About,
                             Command = vm.ShowAboutCommand,
                         },
                         new Separator(),
                         new MenuItem
                         {
-                            Header = "_Help",
+                            Header = l.Help,
                             Command = vm.ShowHelpCommand,
                         },
                     }
@@ -352,7 +355,7 @@ public static class InitMenu
 
             var clearItem = new MenuItem
             {
-                Header = "Clear recent files",
+                Header = Se.Language.Main.Menu.ClearRecentFiles,
                 Command = vm.CommandFileClearRecentFilesCommand,
             };
             vm.MenuReopen.Items.Add(clearItem);
