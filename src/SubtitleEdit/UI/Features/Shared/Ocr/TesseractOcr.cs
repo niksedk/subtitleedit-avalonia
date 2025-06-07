@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Controls;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using SkiaSharp;
@@ -19,13 +21,22 @@ public class TesseractOcr
         Error = string.Empty;
     }
 
+    private string _executablePath = string.Empty;  
+
     public async Task<string> Ocr(SKBitmap bitmap, string language, CancellationToken cancellationToken)
     {
-        var executablePath = Path.Combine(Se.TesseractFolder, "tesseract.exe");
-        if (!File.Exists(executablePath))
+        if (string.IsNullOrEmpty(_executablePath))
         {
-            Error = "Tesseract executable not found: " + executablePath;
-            return string.Empty;
+            _executablePath = "tesseract";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                _executablePath = Path.Combine(Se.TesseractFolder, "tesseract.exe");
+                if (!File.Exists(_executablePath))
+                {
+                    Error = "Tesseract executable not found: " + _executablePath;
+                    return string.Empty;
+                }
+            }
         }
 
         var tempImage = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".png");
@@ -36,7 +47,7 @@ public class TesseractOcr
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = executablePath,
+                FileName = _executablePath,
                 Arguments = $"\"{tempImage}\" \"{tempTextFileName}\" -l {language} --psm 6 hocr --tessdata-dir \"{Se.TesseractModelFolder}\"",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,

@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 
@@ -49,8 +51,61 @@ public class Se
     public static string TtsFolder => Path.Combine(BaseFolder, "TTS");
     public static string OcrFolder => Path.Combine(BaseFolder, "OCR");
     public static string PaddleOcrFolder => Path.Combine(BaseFolder, "PaddleOCR");
-    public static string TesseractFolder => Path.Combine(BaseFolder, "Tesseract550");
-    public static string TesseractModelFolder => Path.Combine(TesseractFolder, "tessdata");
+    public static string TesseractFolder
+    {
+        get
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return Path.Combine(BaseFolder, "Tesseract550");
+            }
+
+            var folders = new List<string>();
+            foreach (var folder in Directory.EnumerateDirectories("/opt/homebrew/Cellar/tesseract"))
+            {
+                folders.Add(Path.Combine(folder, "bin"));
+            }
+
+            foreach (var folder in folders.OrderByDescending(p=>p))
+            {
+                var path = Path.Combine(folder, "tesseract");
+                if (System.IO.File.Exists(path))
+                {
+                    return folder;
+                }
+            }
+
+            return string.Empty;
+        }
+    }
+
+    public static string TesseractModelFolder
+    {
+        get
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return Path.Combine(TesseractFolder, "tessdata");
+            }
+            
+            var folders = new List<string>();
+            foreach (var folder in Directory.EnumerateDirectories("/opt/homebrew/Cellar/tesseract-lang"))
+            {
+                folders.Add(Path.Combine(folder, "share/tessdata"));
+            }
+
+            foreach (var folder in folders.OrderByDescending(p=>p))
+            {
+                if (Directory.Exists(folder))
+                {
+                    return folder;
+                }
+            }
+
+            return string.Empty;
+        }
+    }
+
     public static string FfmpegFolder => Path.Combine(BaseFolder, "ffmpeg");
     public static string WhisperFolder => Path.Combine(BaseFolder, "Whisper");
     

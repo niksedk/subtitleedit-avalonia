@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -490,8 +491,23 @@ public partial class OcrViewModel : ObservableObject
 
     private async Task<bool> CheckAndDownloadTesseract()
     {
-        var tesseractExe = Path.Combine(Se.TesseractFolder, "tesseract.exe");
+        var tesseractFolder = Se.TesseractFolder;
+        if (!string.IsNullOrEmpty(tesseractFolder))
+        {
+            return true;
+        }
+        
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            await MessageBox.Show(
+                Window!,
+                "Please install Tesseract",
+                $"{Environment.NewLine}\"Tesseract\" was not detected. Please install Tesserac.",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
 
+        var tesseractExe = Path.Combine(Se.TesseractFolder, "tesseract.exe");
         if (!File.Exists(tesseractExe)) //TODO: check for mac/Linux executable on mac/Linux
         {
             var answer = await MessageBox.Show(
