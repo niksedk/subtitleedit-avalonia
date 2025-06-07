@@ -497,14 +497,28 @@ public partial class OcrViewModel : ObservableObject
             return true;
         }
         
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            await MessageBox.Show(
+                Window!,
+                "Please install Tesseract",
+                $"{Environment.NewLine}\"Tesseract\" was not detected. Please install Tesseract - with e.g. ´brew install tesseract´.",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+            
+            return false;
+        }
+        
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             await MessageBox.Show(
                 Window!,
                 "Please install Tesseract",
-                $"{Environment.NewLine}\"Tesseract\" was not detected. Please install Tesserac.",
+                $"{Environment.NewLine}\"Tesseract\" was not detected. Please install Tesseract.",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
+            
+            return false;
         }
 
         var tesseractExe = Path.Combine(Se.TesseractFolder, "tesseract.exe");
