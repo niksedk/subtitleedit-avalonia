@@ -2067,9 +2067,9 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             lineLenghts[i] = $"{lines[i].Length}";
         }
 
-        EditTextCharactersPerSecond = $"Chars/sec: {cps:0.0}";
-        EditTextTotalLength = $"Total length: {totalLength}";
-        EditTextLineLengths = $"Line length: {string.Join('/', lineLenghts)}";
+        EditTextCharactersPerSecond = string.Format(Se.Language.Main.CharactersPerSecond, $"{cps:0.0}");
+        EditTextTotalLength = string.Format(Se.Language.Main.TotalCharacters, totalLength);
+        EditTextLineLengths = string.Format(Se.Language.Main.SingleLineLength, string.Join('/', lineLenghts));
     }
 
     private DispatcherTimer _positionTimer = new DispatcherTimer();

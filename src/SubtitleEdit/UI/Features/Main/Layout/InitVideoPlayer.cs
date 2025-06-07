@@ -12,10 +12,9 @@ public class InitVideoPlayer
 {
     public static Grid MakeLayoutVideoPlayer(MainView mainPage, MainViewModel vm)
     {
-        // Create main layout grid
         var mainGrid = new Grid
         {
-            RowDefinitions = new RowDefinitions("*"), // Simplified to 3 rows
+            RowDefinitions = new RowDefinitions("*"), 
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
             Margin = new Thickness(0),
