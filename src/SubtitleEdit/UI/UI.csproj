@@ -59,6 +59,7 @@
       <None Remove="Assets\FileTypes\sup.ico" />
       <None Remove="Assets\FileTypes\vtt.ico" />
       <None Remove="Assets\HunspellDictionaries.json" />
+      <None Remove="Assets\Languages\Danish.json" />
       <None Remove="Assets\Languages\English.json" />
       <None Remove="Assets\TextToSpeech\AllTalkVoices.json" />
       <None Remove="Assets\TextToSpeech\AzureVoices.json" />
@@ -138,6 +139,9 @@
       <None Remove="Assets\Whisper\WhisperCPP.txt" />
       <None Remove="Assets\Whisper\WhisperOpenAI.txt" />
       <None Remove="Styles.xaml" />
+      <Content Include="Assets\Languages\Danish.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
       <Content Include="Assets\Languages\English.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>

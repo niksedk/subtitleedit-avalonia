@@ -1,5 +1,7 @@
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 
@@ -32,6 +34,7 @@ public class LanguageWindow : Window
             SelectedValue = vm.SelectedLanguage,
             VerticalAlignment = VerticalAlignment.Center,
             MinWidth = 180,
+            [!ComboBox.SelectedItemProperty] = new Binding(nameof(LanguageViewModel.SelectedLanguage)),
         };
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
@@ -64,6 +67,12 @@ public class LanguageWindow : Window
         Content = grid;
         
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+    }
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+        _vm.OnLoaded();
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

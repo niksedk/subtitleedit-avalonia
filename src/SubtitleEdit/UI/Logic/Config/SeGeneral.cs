@@ -1,10 +1,12 @@
 ﻿using Avalonia.Media;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Features.Options.Language;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 
 public class SeGeneral
 {
+    public string Language { get; set; }
     public int LayoutNumber { get; set; } = 0;
     public bool UseTimeFormatHhMmSsFf { get; set; } = false;
     public double DefaultFrameRate { get; set; }
@@ -44,11 +46,11 @@ public class SeGeneral
 
     public string FfmpegPath { get; set; }
     public string LibMpvPath { get; set; }
-    public bool AutoOpenVideo { get; internal set; }
-
+    public bool AutoOpenVideo { get; set; }
 
     public SeGeneral()
     {
+        Language = "English";
         LayoutNumber = 0;
         UseTimeFormatHhMmSsFf = false;
         DefaultFrameRate = 23.976;

@@ -50,6 +50,7 @@ public class Se
     public static string AutoBackupFolder => Path.Combine(BaseFolder, "AutoBackup");
     public static string TtsFolder => Path.Combine(BaseFolder, "TTS");
     public static string OcrFolder => Path.Combine(BaseFolder, "OCR");
+    public static string LanguageFolder => Path.Combine(BaseFolder, "Assets", "Languages");
     public static string PaddleOcrFolder => Path.Combine(BaseFolder, "PaddleOCR");
     public static string TesseractFolder
     {

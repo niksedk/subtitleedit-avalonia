@@ -44,6 +44,7 @@ using Nikse.SubtitleEdit.Features.Video.TextToSpeech;
 using Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Config.Language;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
 using System;
@@ -118,6 +119,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     private bool IsEmpty => Subtitles.Count == 0 || string.IsNullOrEmpty(Subtitles[0].Text);
 
     public VideoPlayerControl? VideoPlayerControl { get; internal set; }
+    public Menu Menu { get; internal set; }
 
     public MainViewModel(
         IFileHelper fileHelper,
@@ -149,6 +151,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         EditTextBox = new TextBox();
         ContentGrid = new Grid();
         MenuReopen = new MenuItem();
+        Menu = new Menu();
         _subtitle = new Subtitle();
         Subtitles = new ObservableCollection<SubtitleLineViewModel>();
         SubtitleFormats = [.. SubtitleFormat.AllSubtitleFormats];
@@ -773,9 +776,20 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     private async Task CommandShowSettingsLanguage()
     {
         var viewModel = await _windowService.ShowDialogAsync<LanguageWindow, LanguageViewModel>(Window);
-        if (viewModel.OkPressed)
+        if (viewModel.OkPressed && viewModel.SelectedLanguage != null)
         {
-            // todo
+            var jsonFileName = viewModel.SelectedLanguage.FileName;
+            var json = await File.ReadAllTextAsync(jsonFileName, Encoding.UTF8);
+            var language = System.Text.Json.JsonSerializer.Deserialize<SeLanguage>(json, new System.Text.Json.JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            });
+
+            Se.Language = language ?? new SeLanguage();
+
+            // reload current layout
+            InitMenu.Make(this);
+            InitLayout.MakeLayout(MainView, this, Se.Settings.General.LayoutNumber);
         }
 
         _shortcutManager.ClearKeys();
