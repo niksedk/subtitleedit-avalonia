@@ -246,7 +246,7 @@ public class TtsDownloadService : ITtsDownloadService
             encodeAsBase64 = false,
             modelVersion = "GEN2"
         };
-        var json = System.Text.Json.JsonSerializer.Serialize(body);
+        var json = JsonSerializer.Serialize(body);
 
         using var requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
 
@@ -287,19 +287,17 @@ public class TtsDownloadService : ITtsDownloadService
     /// <returns>True if the voice list is successfully retrieved and written to the stream, false otherwise.</returns>
     public async Task<bool> DownloadGoogleVoiceList(string googleJsonKeyFileName, MemoryStream ms, CancellationToken cancellationToken)
     {
-        // 1. Set the GOOGLE_APPLICATION_CREDENTIALS environment variable for authentication.
         if (string.IsNullOrEmpty(googleJsonKeyFileName) || !File.Exists(googleJsonKeyFileName))
         {
             SeLogger.Error("Google Service Account JSON key file path is invalid or file does not exist.");
             return false;
         }
 
-        System.Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", googleJsonKeyFileName);
+        Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", googleJsonKeyFileName);
 
         TextToSpeechClient client;
         try
         {
-            // 2. Create the TextToSpeechClient. It will pick up credentials from the environment variable.
             client = await TextToSpeechClient.CreateAsync(cancellationToken: cancellationToken);
         }
         catch (Exception ex)
@@ -310,25 +308,16 @@ public class TtsDownloadService : ITtsDownloadService
 
         try
         {
-            // 3. Call the ListVoicesAsync method from the client library.
-            // This method returns a strongly-typed ListVoicesResponse object.
-            ListVoicesResponse response = await client.ListVoicesAsync(new ListVoicesRequest(), cancellationToken: cancellationToken);
-
-            // 4. Serialize the ListVoicesResponse object back into JSON format.
-            // The ListVoicesResponse object automatically has a 'Voices' property which will be serialized
-            // as the "voices" array in the JSON, matching your desired output.
+            var response = await client.ListVoicesAsync(new ListVoicesRequest(), cancellationToken: cancellationToken);
             var jsonSerializerOptions = new JsonSerializerOptions
             {
-                WriteIndented = true, // To get the pretty-printed, indented format you showed
+                WriteIndented = true,
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                // You might need other options depending on specific serialization needs,
-                // e.g., PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             };
 
             string jsonContent = JsonSerializer.Serialize(response, jsonSerializerOptions);
 
-            // 5. Write the JSON string content to the MemoryStream.
-            byte[] buffer = Encoding.UTF8.GetBytes(jsonContent);
+            var buffer = Encoding.UTF8.GetBytes(jsonContent);
             await ms.WriteAsync(buffer, 0, buffer.Length, cancellationToken);
             ms.Position = 0; // Reset position for reading from the beginning of the stream
 
@@ -336,21 +325,13 @@ public class TtsDownloadService : ITtsDownloadService
         }
         catch (Google.GoogleApiException gex)
         {
-            // Catch specific Google API exceptions for detailed error messages.
             SeLogger.Error($"Google TTS API error getting voice list: {gex.HttpStatusCode} - {gex.Message} (Details: {gex.Error?.Message})");
             return false;
         }
         catch (Exception ex)
         {
-            // Catch any other unexpected exceptions.
             SeLogger.Error($"An unexpected exception occurred while getting Google TTS voice list: {ex}");
             return false;
-        }
-        finally
-        {
-            // As discussed before, for a desktop app, setting GOOGLE_APPLICATION_CREDENTIALS
-            // once at user config is usually sufficient. No need to unset it here unless
-            // your app's lifecycle demands strict credential management per call.
         }
     }
 
@@ -366,45 +347,33 @@ public class TtsDownloadService : ITtsDownloadService
     /// <returns>True if speech synthesis is successful, false otherwise.</returns>
     public async Task<bool> DownloadGoogleVoiceSpeak(string inputText, GoogleVoice googleVoice, string model, string googleJsonKeyFileName, MemoryStream ms, CancellationToken cancellationToken)
     {
-        // 1. Set the GOOGLE_APPLICATION_CREDENTIALS environment variable.
-        // This is the CRITICAL step for authentication with the service account JSON key file.
-        // The Google Cloud client libraries automatically look for this environment variable.
-        // Set it before creating the TextToSpeechClient.
         if (string.IsNullOrEmpty(googleJsonKeyFileName) || !File.Exists(googleJsonKeyFileName))
         {
             SeLogger.Error("Google Service Account JSON key file path is invalid or file does not exist.");
             return false;
         }
 
-        // Setting this variable tells the Google Cloud client library where to find the credentials.
-        // This setting applies to the current process.
-        System.Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", googleJsonKeyFileName);
+        Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", googleJsonKeyFileName);
 
         TextToSpeechClient client;
         try
         {
-            // 2. Create the TextToSpeechClient.
-            // This will automatically use the credentials specified by GOOGLE_APPLICATION_CREDENTIALS.
             client = await TextToSpeechClient.CreateAsync(cancellationToken: cancellationToken);
         }
         catch (Exception ex)
         {
             SeLogger.Error($"Failed to create Google Text-to-Speech client. Ensure the JSON key file is valid and has 'Cloud Text-to-Speech API User' permissions: {ex.Message}");
-            // It's good practice to clear the environment variable if creation fails,
-            // or if you want to explicitly control its lifetime.
-            // System.Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", null);
             return false;
         }
 
         try
         {
-            // 3. Define the synthesis request using the client library's types
-            SynthesisInput input = new SynthesisInput
+            var input = new SynthesisInput
             {
                 Text = inputText
             };
 
-            VoiceSelectionParams voice = new VoiceSelectionParams
+            var voice = new VoiceSelectionParams
             {
                 LanguageCode = googleVoice.LanguageCode,
                 Name = googleVoice.Name
@@ -418,16 +387,12 @@ public class TtsDownloadService : ITtsDownloadService
                 // SpeakingRate = googleVoice.SpeakingRate ?? 1.0f // Ensure this is a float/double
             };
 
-            // 4. Perform the speech synthesis asynchronously
             var response = await client.SynthesizeSpeechAsync(input, voice, audioConfig, cancellationToken: cancellationToken);
 
-            // 5. Write the audio content to the MemoryStream
             if (response?.AudioContent?.Length > 0)
             {
-                // The client library provides the audio content as a ByteString,
-                // which can be converted to a byte array.
                 await ms.WriteAsync(response.AudioContent.ToByteArray(), cancellationToken);
-                ms.Position = 0; // Reset position for reading from the beginning of the stream
+                ms.Position = 0;
                 return true;
             }
             else
@@ -438,27 +403,13 @@ public class TtsDownloadService : ITtsDownloadService
         }
         catch (Google.GoogleApiException gex)
         {
-            // Catch specific Google API exceptions for more detailed error handling.
-            // This provides status codes and messages directly from the API.
             SeLogger.Error($"Google TTS API error: {gex.HttpStatusCode} - {gex.Message}");
             return false;
         }
         catch (Exception ex)
         {
-            // Catch any other unexpected exceptions.
             SeLogger.Error($"An unexpected exception occurred during Google TTS synthesis: {ex}");
             return false;
-        }
-        finally
-        {
-            // IMPORTANT:
-            // For a desktop application where the user selects a file,
-            // it's generally fine to leave GOOGLE_APPLICATION_CREDENTIALS set
-            // as long as the application is running and using the same credentials.
-            // If you foresee users switching accounts or if you want to be
-            // extremely strict about credential lifetime, you could unset it here.
-            // However, setting it once upon successful file selection is typically sufficient.
-            // Example: System.Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", null);
         }
     }
 
