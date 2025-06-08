@@ -19,6 +19,7 @@ public partial class ChangeCasingViewModel : ObservableObject
 
     public ChangeCasingWindow? Window { get; set; }
     public bool OkPressed { get; private set; }
+    public string Info { get; private set; }
     public Subtitle Subtitle { get; private set; }
 
     private readonly IWindowService _windowService;
@@ -36,6 +37,7 @@ public partial class ChangeCasingViewModel : ObservableObject
         AllLowercase = Se.Settings.Tools.ChangeCasing.AllLowercase;
         _subtitle = new Subtitle();
         Subtitle = new Subtitle();
+        Info = string.Empty;
         LoadSettings();
     }
 
@@ -75,11 +77,11 @@ public partial class ChangeCasingViewModel : ObservableObject
             var result = await ShowFixNames(_subtitle, 0);
             OkPressed = result.OkPressed;
             Subtitle = result.Subtitle;
+            Info = result.Info;
             Window?.Close();
             return;
         }
 
-        var info = string.Empty;
         var language = LanguageAutoDetect.AutoDetectGoogleLanguage(_subtitle);
         var fixCasing = new FixCasing(language)
         {
@@ -95,7 +97,7 @@ public partial class ChangeCasingViewModel : ObservableObject
 
         if (NormalCasing)
         {
-            info = $"Normal Casing - lines changed: {fixCasing.NoOfLinesChanged}";
+            Info = $"Normal Casing - lines changed: {fixCasing.NoOfLinesChanged}";
             if (NormalCasingFixNames)
             {
                 var result = await ShowFixNames(_subtitle, fixCasing.NoOfLinesChanged);
@@ -107,11 +109,11 @@ public partial class ChangeCasingViewModel : ObservableObject
         }
         else if (AllUppercase)
         {
-            info = $"Uppercase - lines changed: {fixCasing.NoOfLinesChanged}";
+            Info = $"Uppercase - lines changed: {fixCasing.NoOfLinesChanged}";
         }
         else if (AllLowercase)
         {
-            info = $"Lowercase - lines changed: {fixCasing.NoOfLinesChanged}";
+            Info = $"Lowercase - lines changed: {fixCasing.NoOfLinesChanged}";
         }
 
         Subtitle = _subtitle;

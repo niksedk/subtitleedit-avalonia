@@ -534,6 +534,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
                 }
                 Subtitles[i].Text = result.Subtitle.Paragraphs[i].Text;
             }
+            ShowStatus(result.Info);
         }
 
         _shortcutManager.ClearKeys();
