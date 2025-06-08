@@ -28,9 +28,10 @@ public class VoiceSettingsWindow : Window
 
         var textBox = UiUtil.MakeTextBox(250, vm, nameof(vm.VoiceTestText));
 
+        var buttonRefresh = UiUtil.MakeButton("Refresh voices", vm.RefreshVoiceListCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
+        var panelButtons = UiUtil.MakeButtonBar(buttonRefresh, buttonOk, buttonCancel);
 
         var grid = new Grid
         {

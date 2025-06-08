@@ -320,6 +320,7 @@ public class TtsDownloadService : ITtsDownloadService
             var jsonSerializerOptions = new JsonSerializerOptions
             {
                 WriteIndented = true, // To get the pretty-printed, indented format you showed
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 // You might need other options depending on specific serialization needs,
                 // e.g., PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             };

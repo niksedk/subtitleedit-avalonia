@@ -12,6 +12,7 @@ public partial class VoiceSettingsViewModel : ObservableObject
     public VoiceSettingsWindow? Window { get; set; }
     
     public bool OkPressed { get; private set; }
+    public bool RefreshVoices { get; private set; }
 
     public VoiceSettingsViewModel()
     {
@@ -26,7 +27,17 @@ public partial class VoiceSettingsViewModel : ObservableObject
         OkPressed = true;
         Window?.Close();
     }
-    
+
+    [RelayCommand]
+    private void RefreshVoiceList()
+    {
+        Se.Settings.Video.TextToSpeech.VoiceTestText = VoiceTestText;
+        Se.SaveSettings();
+        RefreshVoices = true;
+        OkPressed = true;
+        Window?.Close();
+    }
+
     [RelayCommand]                   
     private void Cancel() 
     {

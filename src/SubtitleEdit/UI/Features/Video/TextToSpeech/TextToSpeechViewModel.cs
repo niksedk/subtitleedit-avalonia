@@ -360,7 +360,19 @@ public partial class TextToSpeechViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowTestVoiceSettings()
     {
-        await _windowService.ShowDialogAsync<VoiceSettingsWindow, VoiceSettingsViewModel>(Window!, vm => { });
+        var result = await _windowService.ShowDialogAsync<VoiceSettingsWindow, VoiceSettingsViewModel>(Window!, vm => { });
+
+        var engine = SelectedEngine;
+        if (result.RefreshVoices && engine != null)
+        {
+            var voices = await engine.RefreshVoices(string.Empty, CancellationToken.None);
+            Voices.Clear();
+            foreach (var voice in voices)
+            {
+                Voices.Add(voice);
+            }
+            SelectedVoice = Voices.FirstOrDefault(v => v.Name == Se.Settings.Video.TextToSpeech.Voice) ?? Voices.FirstOrDefault();
+        }
     }
 
     [RelayCommand]
@@ -973,7 +985,7 @@ public partial class TextToSpeechViewModel : ObservableObject
                 lastVoice = Voices.FirstOrDefault(p => p.Name.StartsWith("en", StringComparison.OrdinalIgnoreCase) ||
                                                        p.Name.Contains("English", StringComparison.OrdinalIgnoreCase));
             }
-            SelectedVoice = lastVoice ?? Voices.First();
+            SelectedVoice = lastVoice ?? Voices.FirstOrDefault();
 
             HasLanguageParameter = engine.HasLanguageParameter;
             HasApiKey = engine.HasApiKey;
