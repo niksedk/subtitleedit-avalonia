@@ -346,19 +346,7 @@ public static unsafe partial class MpvApi
     
     [SuppressUnmanagedCodeSecurity]
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate int SetOptionStringDelegate(MpvHandle* ctx,     
-    #if NETSTANDARD2_1_OR_GREATER
-    [MarshalAs(UnmanagedType.LPUTF8Str)]
-    #else
-    [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(Utf8Marshaler))]
-    #endif
-    string name,     
-    #if NETSTANDARD2_1_OR_GREATER
-    [MarshalAs(UnmanagedType.LPUTF8Str)]
-    #else
-    [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(Utf8Marshaler))]
-    #endif
-    string data);
+    public delegate int SetOptionStringDelegate(MpvHandle* ctx, byte[] name, byte[] value);
     public static SetOptionStringDelegate SetOptionString => s_setOptionString ??= GetFunction<SetOptionStringDelegate>("mpv_set_option_string");
     private static SetOptionStringDelegate? s_setOptionString;
     

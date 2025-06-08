@@ -92,6 +92,14 @@ public class VideoPlayerInstanceMpv : IVideoPlayerInstance
 
         MpvContext.Stop();
         await MpvContext.LoadFile(fileName).InvokeAsync();
+
+        if (MpvContext != null)
+        {
+            MpvContext.SetOptionString("keep-open", "always"); // don't auto close video
+            MpvContext.SetOptionString("sid","no"); // don't load subtitles
+            MpvContext.SetOptionString("hr-seek","yes"); // don't load subtitles
+        }
+
         _fileName = fileName;
     }
 

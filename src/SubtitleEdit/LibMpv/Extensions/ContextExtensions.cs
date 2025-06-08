@@ -12,7 +12,7 @@ internal static unsafe class ContextExtensions
         {
             return code;
         }
-        //throw MpvException.FromCode(code);
+        var x =  MpvException.FromCode(code);
 
         return code;
     }

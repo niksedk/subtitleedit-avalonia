@@ -231,9 +231,16 @@ public unsafe partial class MpvContextBase
     /// <param name="format">see enum mpv_format.</param>
     /// <param name="data">Option value (according to the format).</param>
     public void SetOption(string name, MpvFormat format, void* data) => MpvApi.SetOption(Ctx, name, format, data).CheckCode();
-    
+
+
+    private static byte[] GetUtf8Bytes(string s)
+    {
+        return Encoding.UTF8.GetBytes(s + "\0");
+    }
+
+
     /// <summary>Convenience function to set an option to a string value. This is like calling mpv_set_option() with MPV_FORMAT_STRING.</summary>
-    public void SetOptionString(string name, string data) => MpvApi.SetOptionString(Ctx, name, data).CheckCode();
+    public void SetOptionString(string name, string data) => MpvApi.SetOptionString(Ctx, GetUtf8Bytes(name), GetUtf8Bytes(data)).CheckCode();
     
     /// <summary>Set a property to a given value. Properties are essentially variables which can be queried or set at runtime. For example, writing to the pause property will actually pause or unpause playback.</summary>
     /// <param name="name">The property name. See input.rst for a list of properties.</param>

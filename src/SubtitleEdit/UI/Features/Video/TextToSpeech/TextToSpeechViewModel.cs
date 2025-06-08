@@ -61,7 +61,6 @@ public partial class TextToSpeechViewModel : ObservableObject
     [ObservableProperty] private double _progressValue;
     [ObservableProperty] private double _progressOpacity;
     [ObservableProperty] private string _doneOrCancelText;
-    [ObservableProperty] private bool _isButtonExportVisible;
     [ObservableProperty] private bool _hasKeyFile;
     [ObservableProperty] private string _keyFile;
 
@@ -103,7 +102,6 @@ public partial class TextToSpeechViewModel : ObservableObject
         IsVoiceTestEnabled = true;
         IsGenerating = false;
         IsNotGenerating = true;
-        IsButtonExportVisible = false;
 
         _cancellationTokenSource = new CancellationTokenSource();
         _playLock = new Lock();
@@ -289,7 +287,7 @@ public partial class TextToSpeechViewModel : ObservableObject
                 return;
             }
 
-            fixSpeedResult  = reviewAudioClipsResult;
+            fixSpeedResult = reviewAudioClipsResult;
         }
 
         await MergeAndAddToVideo(fixSpeedResult);
@@ -866,6 +864,11 @@ public partial class TextToSpeechViewModel : ObservableObject
                 }
 
                 var mediaInfo = FfmpegMediaInfo.Parse(outputFileName1);
+                if (mediaInfo.Duration == null)
+                {
+                    continue;
+                }
+
                 if (mediaInfo.Duration.TotalMilliseconds <= p.DurationTotalMilliseconds + addDuration)
                 {
                     resultList.Add(new TtsStepResult

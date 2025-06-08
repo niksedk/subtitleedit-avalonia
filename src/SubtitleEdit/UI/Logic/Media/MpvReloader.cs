@@ -137,7 +137,7 @@ public class MpvReloader : IMpvReloader
                 var hash = subtitle.GetFastHashCode(null);
                 if (hash != _mpvSubOldHash || string.IsNullOrEmpty(_mpvTextOld))
                 {
-                    text = subtitle.ToText(format);
+                    text = subtitle.ToText(new SubRip());
                     _mpvSubOldHash = hash;
                 }
                 else
@@ -151,18 +151,18 @@ public class MpvReloader : IMpvReloader
             {
                 if (_retryCount >= 0 || string.IsNullOrEmpty(_mpvTextFileName) || _subtitlePrev == null || _subtitlePrev.FileName != subtitle.FileName || !_mpvTextFileName.EndsWith(format.Extension, StringComparison.Ordinal))
                 {
-                    mpvContext.SubRemove(); // mpv.RemoveSubtitle();
+                    mpvContext.SubRemove().Invoke(); // mpv.RemoveSubtitle();
                     DeleteTempMpvFileName();
                     _mpvTextFileName = FileUtil.GetTempFileName(format.Extension);
                     File.WriteAllText(_mpvTextFileName, text);
-                    mpvContext.SubAdd(_mpvTextFileName); // mpv.LoadSubtitle(_mpvTextFileName);
-                    mpvContext.SetProperty("sid", "auto");
+                    mpvContext.SubAdd(_mpvTextFileName).Invoke(); // mpv.LoadSubtitle(_mpvTextFileName);
+                    mpvContext.SetOptionString("sid", "auto");
                     _retryCount--;
                 }
                 else
                 {
                     File.WriteAllText(_mpvTextFileName, text);
-                    mpvContext.SubReload();
+                    mpvContext.SubReload().Invoke();
                 }
                 _mpvTextOld = text;
             }
