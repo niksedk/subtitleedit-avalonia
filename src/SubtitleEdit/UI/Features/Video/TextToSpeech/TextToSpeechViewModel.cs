@@ -62,6 +62,8 @@ public partial class TextToSpeechViewModel : ObservableObject
     [ObservableProperty] private double _progressOpacity;
     [ObservableProperty] private string _doneOrCancelText;
     [ObservableProperty] private bool _isButtonExportVisible;
+    [ObservableProperty] private bool _hasKeyFile;
+    [ObservableProperty] private string _keyFile;
 
     public TextToSpeechWindow? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -117,6 +119,7 @@ public partial class TextToSpeechViewModel : ObservableObject
             new ElevenLabs(ttsDownloadService),
             new AzureSpeech(ttsDownloadService),
             new Murf(ttsDownloadService),
+            new GoogleSpeech(ttsDownloadService),
         };
     }
 
@@ -172,6 +175,11 @@ public partial class TextToSpeechViewModel : ObservableObject
         {
             ApiKey = Se.Settings.Video.TextToSpeech.MurfApiKey;
         }
+        else if (SelectedEngine is GoogleSpeech)
+        {
+            ApiKey = Se.Settings.Video.TextToSpeech.GoogleApiKey;
+            KeyFile = Se.Settings.Video.TextToSpeech.GoogleKeyFile;
+        }
     }
 
     private void SaveSettings()
@@ -194,6 +202,11 @@ public partial class TextToSpeechViewModel : ObservableObject
         else if (SelectedEngine is Murf)
         {
             Se.Settings.Video.TextToSpeech.MurfApiKey = ApiKey;
+        }
+        else if (SelectedEngine is GoogleSpeech)
+        {
+            Se.Settings.Video.TextToSpeech.GoogleApiKey = ApiKey;
+            Se.Settings.Video.TextToSpeech.GoogleKeyFile = KeyFile;
         }
 
         Se.SaveSettings();
@@ -437,6 +450,7 @@ public partial class TextToSpeechViewModel : ObservableObject
     [RelayCommand]
     private void Done()
     {
+        SaveSettings();
         _cancellationTokenSource.Cancel();
         IsGenerating = false;
         IsNotGenerating = true;
@@ -508,6 +522,39 @@ public partial class TextToSpeechViewModel : ObservableObject
             return await engine.IsInstalled(SelectedRegion);
         }
 
+        if (engine.HasKeyFile)
+        {
+            if (string.IsNullOrEmpty(KeyFile) || !File.Exists(KeyFile))
+            {
+                await MessageBox.Show(
+                Window,
+                "Key file required?",
+                $"\"{engine.Name}\" requires a key file",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+
+                return false;
+            }
+
+            return true;
+        }
+
+        if (engine.HasApiKey)
+        {
+            if (string.IsNullOrEmpty(ApiKey))
+            {
+                await MessageBox.Show(
+                Window,
+                "API key required?",
+                $"\"{engine.Name}\" requires an API key",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+
+                return false;
+            }
+
+            return true;
+        }
 
         return false;
     }
@@ -932,6 +979,7 @@ public partial class TextToSpeechViewModel : ObservableObject
             HasApiKey = engine.HasApiKey;
             HasRegion = engine.HasRegion;
             HasModel = engine.HasModel;
+            HasKeyFile = engine.HasKeyFile;
 
             if (HasLanguageParameter)
             {

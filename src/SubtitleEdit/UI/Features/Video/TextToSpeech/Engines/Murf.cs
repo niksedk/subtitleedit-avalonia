@@ -20,6 +20,7 @@ public class Murf : ITtsEngine
     public bool HasApiKey => true;
     public bool HasRegion => false;
     public bool HasModel => false;
+    public bool HasKeyFile => false;
 
     public Task<bool> IsInstalled(string? region)
     {

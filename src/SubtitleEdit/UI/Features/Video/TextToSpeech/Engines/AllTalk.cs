@@ -19,6 +19,7 @@ public class AllTalk : ITtsEngine
     public bool HasApiKey => false;
     public bool HasRegion => false;
     public bool HasModel => false;
+    public bool HasKeyFile => false;
 
     private bool _isInstalled;
     public async Task<bool> IsInstalled(string? region)

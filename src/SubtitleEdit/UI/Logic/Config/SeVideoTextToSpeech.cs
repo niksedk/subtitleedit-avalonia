@@ -22,6 +22,7 @@ public class SeVideoTextToSpeech
     public string MurfApiKey { get; set; }
     public string MurfStyle { get; set; }
     public string GoogleApiKey { get; set; }
+    public string GoogleKeyFile { get; set; }
 
     public SeVideoTextToSpeech()
     {
@@ -45,5 +46,6 @@ public class SeVideoTextToSpeech
         MurfApiKey = string.Empty;
         MurfStyle = "Conversational";
         GoogleApiKey = string.Empty;
+        GoogleKeyFile = string.Empty;
     }
 }

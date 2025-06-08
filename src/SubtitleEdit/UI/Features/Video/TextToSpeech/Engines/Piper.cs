@@ -22,6 +22,7 @@ public class Piper : ITtsEngine
     public bool HasApiKey => false;
     public bool HasRegion => false;
     public bool HasModel => false;
+    public bool HasKeyFile => false;
 
     public Task<bool> IsInstalled(string? region)
     {

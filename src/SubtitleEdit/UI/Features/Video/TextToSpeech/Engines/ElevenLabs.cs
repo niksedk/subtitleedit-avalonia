@@ -20,6 +20,7 @@ public class ElevenLabs : ITtsEngine
     public bool HasApiKey => true;
     public bool HasRegion => false;
     public bool HasModel => true;
+    public bool HasKeyFile => false;
 
     public Task<bool> IsInstalled(string? region)
     {

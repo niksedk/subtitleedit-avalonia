@@ -6,6 +6,7 @@ public class GoogleVoice
     public string LanguageCode { get; set; }
     public string SsmlGender { get; set; }
     public string NaturalSampleRateHertz { get; set; }
+
     public GoogleVoice()
     {
         Name = string.Empty;

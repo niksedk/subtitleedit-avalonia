@@ -204,10 +204,29 @@ public class TextToSpeechWindow : Window
             [!StackPanel.IsVisibleProperty] = new Binding(nameof(vm.HasApiKey)) { Mode = BindingMode.OneWay },
         };
 
+        var panelKeyFile = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Margin = new Thickness(0, 10, 0, 0),
+            Children =
+            {
+                new Label
+                {
+                    Content = "Key file",
+                    MinWidth = labelMinWidth,
+                },
+                UiUtil.MakeTextBox(325, vm, nameof(vm.KeyFile)),
+            },
+            [!StackPanel.IsVisibleProperty] = new Binding(nameof(vm.HasKeyFile)) { Mode = BindingMode.OneWay },
+        };
+
+
         var grid = new Grid
         {
             RowDefinitions =
             {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
@@ -231,6 +250,7 @@ public class TextToSpeechWindow : Window
         grid.Add(panelRegion, 3, 0);
         grid.Add(panelLanguage, 4, 0);
         grid.Add(panelApiKey, 5, 0);
+        grid.Add(panelKeyFile, 6, 0);
 
         var boder = new Border
         {

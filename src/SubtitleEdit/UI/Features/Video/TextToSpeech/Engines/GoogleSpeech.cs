@@ -16,9 +16,10 @@ public class GoogleSpeech : ITtsEngine
     public string Name => "GoogleSpeech";
     public string Description => "pay/fast/good";
     public bool HasLanguageParameter => false;
-    public bool HasApiKey => true;
+    public bool HasApiKey => false;
     public bool HasRegion => false;
-    public bool HasModel => true;
+    public bool HasModel => false;
+    public bool HasKeyFile => true;
 
     public Task<bool> IsInstalled(string? region)
     {
@@ -65,11 +66,11 @@ public class GoogleSpeech : ITtsEngine
         var result = new List<Voice>();
         var json = File.ReadAllText(voiceFileName);
         var parser = new SeJsonParser();
-        var arr = parser.GetArrayElements(json);
+        var arr = parser.GetArrayElementsByName(json, "voices");
         foreach (var item in arr)
         {
             var name = parser.GetFirstObject(item, "name");
-            var languageCode = parser.GetFirstObject(item, "languageCode");
+            var languageCode = name.Substring(0,5);
             var ssmlGender = parser.GetFirstObject(item, "ssmlGender");
             var naturalSampleRateHertz = parser.GetFirstObject(item, "naturalSampleRateHertz");
 
@@ -114,7 +115,7 @@ public class GoogleSpeech : ITtsEngine
     public async Task<Voice[]> RefreshVoices(string language, CancellationToken cancellationToken)
     {
         var ms = new MemoryStream();
-        await _ttsDownloadService.DownloadGoogleVoiceList(Se.Settings.Video.TextToSpeech.GoogleApiKey, ms, cancellationToken);
+        await _ttsDownloadService.DownloadGoogleVoiceList(Se.Settings.Video.TextToSpeech.GoogleKeyFile, ms, cancellationToken);
         await File.WriteAllBytesAsync(Path.Combine(GetSetGoogleFolder(), JsonFileName), ms.ToArray(), cancellationToken);
         return await GetVoices(language);
     }
@@ -138,7 +139,7 @@ public class GoogleSpeech : ITtsEngine
             text,
             googleVoice,
             model ?? "Standard",
-            Se.Settings.Video.TextToSpeech.GoogleApiKey,
+            Se.Settings.Video.TextToSpeech.GoogleKeyFile,
             ms,
             cancellationToken);
 

@@ -49,6 +49,6 @@ public interface ITtsDownloadService
         MemoryStream ms,
         CancellationToken cancellationToken);
 
-    Task<bool> DownloadGoogleVoiceList(string googleApiKey, MemoryStream ms, CancellationToken cancellationToken);
-    Task<bool> DownloadGoogleVoiceSpeak(string text, GoogleVoice googleVoice, string model, string googleApiKey, MemoryStream ms, CancellationToken cancellationToken);
+    Task<bool> DownloadGoogleVoiceList(string googleKeyFile, MemoryStream ms, CancellationToken cancellationToken);
+    Task<bool> DownloadGoogleVoiceSpeak(string text, GoogleVoice googleVoice, string model, string googleKeyFile, MemoryStream ms, CancellationToken cancellationToken);
 }

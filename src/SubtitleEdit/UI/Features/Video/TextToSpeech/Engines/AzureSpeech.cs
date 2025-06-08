@@ -19,6 +19,7 @@ public class AzureSpeech : ITtsEngine
     public bool HasApiKey => true;
     public bool HasRegion => true;
     public bool HasModel => false;
+    public bool HasKeyFile => false;
 
     public Task<bool> IsInstalled(string? region)
     {
