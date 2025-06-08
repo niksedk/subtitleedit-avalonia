@@ -128,6 +128,8 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
 
         public bool IsPlaying => _videoPlayerInstance.IsPlaying;
 
+        public IVideoPlayerInstance VideoPlayerInstance => _videoPlayerInstance;
+
         double _positionIgnore = -1;
         double _volumeIgnore = -1;
         private readonly Button _playButton;

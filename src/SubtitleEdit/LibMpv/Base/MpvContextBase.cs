@@ -31,9 +31,10 @@ public unsafe partial class MpvContextBase : IDisposable
 
         Initialize();
 
-        //        SetOptionString("vo", "libmpv"); // Prevent mpv from creating its own window
+        //       SetOptionString("vo", "libmpv"); // Prevent mpv from creating its own window
         SetOptionString("keep-open", "always");
         SetOptionString("no-sub", "");
+        SetOptionString("sid", "no");
 
         InitEventHandlers();
 

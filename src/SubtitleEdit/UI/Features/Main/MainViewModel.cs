@@ -115,6 +115,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     private readonly IAutoBackupService _autoBackupService;
     private readonly IUndoRedoManager _undoRedoManager;
     private readonly IBluRayHelper _bluRayHelper;
+    private readonly IMpvReloader _mpvReloader;
 
     private bool IsEmpty => Subtitles.Count == 0 || string.IsNullOrEmpty(Subtitles[0].Text);
 
@@ -130,7 +131,8 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         IMergeManager mergeManager,
         IAutoBackupService autoBackupService,
         IUndoRedoManager undoRedoManager,
-        IBluRayHelper bluRayHelper)
+        IBluRayHelper bluRayHelper,
+        IMpvReloader mpvReloader)
     {
         _fileHelper = fileHelper;
         _folderHelper = folderHelper;
@@ -141,6 +143,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         _autoBackupService = autoBackupService;
         _undoRedoManager = undoRedoManager;
         _bluRayHelper = bluRayHelper;
+        _mpvReloader = mpvReloader;
 
         EditText = string.Empty;
         EditTextCharactersPerSecond = string.Empty;
@@ -2170,6 +2173,13 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
                     _updateAudioVisualizer = false;
                 }
             }
+
+            var mpv = VideoPlayerControl?.VideoPlayerInstance as VideoPlayerInstanceMpv;    
+            if (mpv != null)
+            {
+                _mpvReloader.RefreshMpv(mpv.MpvContext!, GetUpdateSubtitle(), SelectedSubtitleFormat);   
+            }
+            
         };
         _positionTimer.Start();
     }

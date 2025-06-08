@@ -62,6 +62,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<ITtsDownloadService, TtsDownloadService>();
         collection.AddTransient<IBluRayHelper, BluRayHelper>();
         collection.AddTransient<INOcrCaseFixer, NOcrCaseFixer>();
+        collection.AddTransient<IMpvReloader, MpvReloader>();
 
         // Download services
         collection.AddHttpClient<IFfmpegDownloadService, FfmpegDownloadService>();
