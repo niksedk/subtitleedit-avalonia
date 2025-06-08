@@ -17,6 +17,6 @@ public class GoogleVoice
 
     public override string ToString()
     {
-        return $"{Name} - {LanguageCode} ({SsmlGender})";
+        return $"{Name} ({SsmlGender})";
     }
 }

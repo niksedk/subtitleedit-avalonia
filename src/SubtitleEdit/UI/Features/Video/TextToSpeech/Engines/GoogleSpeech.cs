@@ -74,11 +74,25 @@ public class GoogleSpeech : ITtsEngine
             var ssmlGender = parser.GetFirstObject(item, "ssmlGender");
             var naturalSampleRateHertz = parser.GetFirstObject(item, "naturalSampleRateHertz");
 
+            var gender = "Unspecified";
+            if (ssmlGender == "1")
+            {
+                gender = "Male";
+            }
+            else if (ssmlGender == "2")
+            {
+                gender = "Female";
+            }
+            else if (ssmlGender == "3")
+            { 
+                gender = "Neutral";
+            }
+
             result.Add(new Voice(new GoogleVoice
             {
                 Name = name,
                 LanguageCode = languageCode,
-                SsmlGender = ssmlGender,
+                SsmlGender = gender,
                 NaturalSampleRateHertz = naturalSampleRateHertz,
             }));
         }
