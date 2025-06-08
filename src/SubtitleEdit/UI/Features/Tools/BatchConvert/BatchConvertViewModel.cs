@@ -1,8 +1,15 @@
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -68,19 +75,36 @@ public partial class BatchConvertViewModel : ObservableObject
 
     public bool OkPressed { get; private set; }
 
-    public BatchConvertViewModel()
+    private readonly IWindowService _windowService;
+    private readonly IFileHelper _fileHelper;
+
+    public BatchConvertViewModel(IWindowService windowService, IFileHelper fileHelper)
     {
+        _windowService = windowService;
+        _fileHelper = fileHelper;
+
         BatchItems = new ObservableCollection<BatchConvertItem>();
-        BatchFunctions = new ObservableCollection<BatchConvertFunction>();   
-        TargetFormats = new ObservableCollection<string>();
-        TargetEncodings = new ObservableCollection<string>();
+        BatchFunctions = new ObservableCollection<BatchConvertFunction>();
+        TargetFormats = new ObservableCollection<string>(SubtitleFormat.AllSubtitleFormats.Select(p => p.Name));
+        TargetEncodings = new ObservableCollection<string>(EncodingHelper.GetEncodings().Select(p => p.DisplayName).ToList());
         DeleteLineNumbers = new ObservableCollection<int>();
-        FrameRates = new ObservableCollection<double>();
         TargetFormatName = string.Empty;
         TargetEncoding = string.Empty;
         BatchItemsInfo = string.Empty;
         ProgressText = string.Empty;
         DeleteLinesContains = string.Empty;
+        FrameRates = new ObservableCollection<double>
+        {
+            23.976,
+            24,
+            25,
+            29.97,
+            30,
+            48,
+            59.94,
+            60,
+            120,
+        };
     }
 
     [RelayCommand]
@@ -94,6 +118,46 @@ public partial class BatchConvertViewModel : ObservableObject
     private void Cancel()
     {
         Window?.Close();
+    }
+
+    [RelayCommand]
+    private async Task AddFiles()
+    {
+        var fileNames = await _fileHelper.PickOpenSubtitleFiles(Window!, "Select files to convert");
+        if (fileNames.Length == 0)
+        {
+            return;
+        }
+
+        foreach (var fileName in fileNames)
+        {
+            var fileInfo = new FileInfo(fileName);
+            var subtitle = Subtitle.Parse(fileName);
+            var batchItem = new BatchConvertItem(fileName, fileInfo.Length, subtitle != null ? subtitle.OriginalFormat.Name : "Unknown", subtitle);
+            BatchItems.Add(batchItem);
+        }
+
+        MakeBatchItemsInfo();
+    }
+
+    private void MakeBatchItemsInfo()
+    {
+        BatchItemsInfo = $"{BatchItems.Count:#,###,##0} items";
+    }
+
+    [RelayCommand]
+    private void RemoveSelectedFiles()
+    {
+    }
+
+    [RelayCommand]
+    private void ClearAllFiles()
+    {
+    }
+
+    [RelayCommand]
+    private void ShowOutputProperties()
+    {
     }
 
     internal void OnKeyDown(KeyEventArgs e)

@@ -151,11 +151,11 @@ public class MpvReloader : IMpvReloader
             {
                 if (_retryCount >= 0 || string.IsNullOrEmpty(_mpvTextFileName) || _subtitlePrev == null || _subtitlePrev.FileName != subtitle.FileName || !_mpvTextFileName.EndsWith(format.Extension, StringComparison.Ordinal))
                 {
-                    mpvContext.SubRemove().Invoke(); // mpv.RemoveSubtitle();
+                    mpvContext.SubRemove().Invoke(); 
                     DeleteTempMpvFileName();
                     _mpvTextFileName = FileUtil.GetTempFileName(format.Extension);
                     File.WriteAllText(_mpvTextFileName, text);
-                    mpvContext.SubAdd(_mpvTextFileName).Invoke(); // mpv.LoadSubtitle(_mpvTextFileName);
+                    mpvContext.SubAdd(_mpvTextFileName).Invoke();
                     mpvContext.SetOptionString("sid", "auto");
                     _retryCount--;
                 }

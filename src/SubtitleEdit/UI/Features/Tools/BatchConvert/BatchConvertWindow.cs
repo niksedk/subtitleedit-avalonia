@@ -1,7 +1,10 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Nikse.SubtitleEdit.Features.Shared.Ocr;
 using Nikse.SubtitleEdit.Logic;
 using System;
 
@@ -15,8 +18,10 @@ public class BatchConvertWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Batch convert";
-        Width = 910;
+        Width = 1024;
         Height = 740;
+        MinWidth = 900;
+        MinHeight = 600;
         CanResize = true;
 
         _vm = vm;
@@ -30,15 +35,15 @@ public class BatchConvertWindow : Window
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonPanel = UiUtil.MakeButtonBar(
             buttonOk,
-            UiUtil.MakeButton("Cancel", vm.CancelCommand)
+            UiUtil.MakeButtonCancel(vm.CancelCommand)
         );
         
         var grid = new Grid
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
@@ -65,15 +70,92 @@ public class BatchConvertWindow : Window
 
     private Border MakeFileView(BatchConvertViewModel vm)
     {
-        var border = new Border
+        var grid = new Grid
         {
-            BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetBorderColor(),
-            Margin = new Thickness(0, 0, 0, 10),
-            Padding = new Thickness(5),
-            Child = UiUtil.MakeLabel("file view"),
-        };  
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnSpacing = 10,
+            RowSpacing = 10,
+        };
 
+        var dataGrid = new DataGrid
+        {
+            AutoGenerateColumns = false,
+            SelectionMode = DataGridSelectionMode.Single,
+            CanUserResizeColumns = true,
+            CanUserSortColumns = true,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Width = double.NaN,
+            Height = double.NaN,
+            DataContext = vm,
+            ItemsSource = vm.BatchItems,
+            Columns =
+            {
+                new DataGridTextColumn
+                {
+                    Header = "File name",
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(BatchConvertItem.FileName)),
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = "Size",
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(BatchConvertItem.Size)),
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = "Format",
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(BatchConvertItem.Format)),
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = "Status",
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(BatchConvertItem.Status)),
+                    IsReadOnly = true,
+                },
+            },
+        };
+        dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedBatchItem)) { Source = vm });
+
+        var panelFileControls = new StackPanel
+            {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 10),
+            Children =
+            {
+                UiUtil.MakeButton("Add", vm.AddFilesCommand),
+                UiUtil.MakeButton("Remove", vm.RemoveSelectedFilesCommand),
+                UiUtil.MakeButton("Clear", vm.ClearAllFilesCommand),
+                UiUtil.MakeSeparatorForHorizontal(),
+                UiUtil.MakeLabel("Target format"),
+                UiUtil.MakeComboBox(vm.TargetFormats, vm, nameof(vm.SelectedTargetFormat)),
+                UiUtil.MakeLabel("Target encoding"),
+                UiUtil.MakeComboBox(vm.TargetEncodings, vm, nameof(vm.SelectedTargetEncoding)),
+                UiUtil.MakeSeparatorForHorizontal(),
+                UiUtil.MakeButton("Output properties", vm.ShowOutputPropertiesCommand),
+            }
+        };
+
+        grid.Add(dataGrid, 0, 0);
+        grid.Add(panelFileControls, 1, 0);
+
+        var border = UiUtil.MakeBorderForControl(grid);
         return border;  
     }
 

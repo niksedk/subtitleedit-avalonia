@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -57,6 +58,22 @@ namespace Nikse.SubtitleEdit.Logic.Media
             }
 
             return string.Empty;
+        }
+
+        public async Task<string[]> PickOpenSubtitleFiles(Visual sender, string title)
+        {
+            // Get top level from the current control. Alternatively, you can use Window reference instead.
+            var topLevel = TopLevel.GetTopLevel(sender)!;
+
+            // Start async operation to open the dialog.
+            var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                Title = title,
+                AllowMultiple = true,
+                FileTypeFilter = MakeOpenSubtitleFilter(),
+            });
+
+            return files.Select(p=>p.Path.LocalPath).ToArray();
         }
 
         private static IReadOnlyList<FilePickerFileType> MakeOpenSubtitleFilter()

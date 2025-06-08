@@ -8,6 +8,7 @@ public interface IFileHelper
 {
     Task<string> PickOpenFile(Visual sender, string title, string extensionTitle, string extension);
     Task<string> PickOpenSubtitleFile(Visual sender, string title);
+    Task<string[]> PickOpenSubtitleFiles(Visual sender, string title);
     Task<string> PickSaveSubtitleFile(
         Visual sender, 
         SubtitleFormat currentFormat, 
