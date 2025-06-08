@@ -518,14 +518,22 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task ShowToolsChangeCasing()
     {
-        var result = await _windowService.ShowDialogAsync<ChangeCasingWindow, ChangeCasingViewModel>(Window, vm => 
-        { 
+        var result = await _windowService.ShowDialogAsync<ChangeCasingWindow, ChangeCasingViewModel>(Window, vm =>
+        {
             vm.Initialize(GetUpdateSubtitle());
         });
 
         if (result.OkPressed)
         {
             MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Change casing"));
+            for (var i = 0; i < Subtitles.Count; i++)
+            {
+                if (result.Subtitle.Paragraphs.Count <= i)
+                {
+                    break;
+                }
+                Subtitles[i].Text = result.Subtitle.Paragraphs[i].Text;
+            }
         }
 
         _shortcutManager.ClearKeys();

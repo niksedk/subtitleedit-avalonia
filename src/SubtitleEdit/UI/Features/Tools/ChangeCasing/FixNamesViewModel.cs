@@ -26,6 +26,7 @@ public partial class FixNamesViewModel : ObservableObject
     public FixNamesWindow? Window { get; set; }
     public bool OkPressed { get; private set; }
     public string Info { get; private set; }
+    public Subtitle Subtitle { get; private set; }
 
     private Subtitle _subtitle;
     private Subtitle _subtitleBefore;
@@ -55,6 +56,7 @@ public partial class FixNamesViewModel : ObservableObject
         ExtraNames = string.Empty;
         _oldNames = string.Empty;
         Info = string.Empty;
+        Subtitle = new Subtitle();
 
         _previewTimer = new System.Timers.Timer(500);
         _previewTimer.Elapsed += (sender, args) =>
@@ -73,14 +75,16 @@ public partial class FixNamesViewModel : ObservableObject
 
     internal void Initialize(Subtitle subtitle)
     {
+        subtitle.Renumber();
         _subtitle = new Subtitle(subtitle);
         _subtitleBefore = subtitle;
+        _oldNames = string.Empty;
 
         _language = LanguageAutoDetect.AutoDetectGoogleLanguage(_subtitle);
         if (string.IsNullOrEmpty(_language))
         {
             _language = "en_US";
-        }       
+        }
     }
 
     private void FindAllNames()
@@ -223,22 +227,22 @@ public partial class FixNamesViewModel : ObservableObject
     [RelayCommand]
     private void Ok()
     {
-        var subtitle = new Subtitle(_subtitle, false);
+        Subtitle = new Subtitle(_subtitle, false);
 
         foreach (var hit in Hits)
         {
             if (hit.IsEnabled)
             {
-                subtitle.Paragraphs[hit.LineIndex].Text = hit.After;
+                Subtitle.Paragraphs[hit.LineIndex - 1].Text = hit.After;
             }
         }
 
         Se.Settings.Tools.ChangeCasing.ExtraNames = ExtraNames;
 
         var noOfLinesChanged = 0;
-        for (var i = 0; i < _subtitle.Paragraphs.Count; i++)
+        for (var i = 0; i < _subtitleBefore.Paragraphs.Count; i++)
         {
-            if (_subtitleBefore.Paragraphs[i].Text != subtitle.Paragraphs[i].Text)
+            if (_subtitleBefore.Paragraphs[i].Text != Subtitle.Paragraphs[i].Text)
             {
                 noOfLinesChanged++;
             }
@@ -282,5 +286,5 @@ public partial class FixNamesViewModel : ObservableObject
         GeneratePreview();
         _previewTimer.Start();
         _loading = false;
-    }   
+    }
 }

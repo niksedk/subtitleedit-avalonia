@@ -19,6 +19,7 @@ public partial class ChangeCasingViewModel : ObservableObject
 
     public ChangeCasingWindow? Window { get; set; }
     public bool OkPressed { get; private set; }
+    public Subtitle Subtitle { get; private set; }
 
     private readonly IWindowService _windowService;
     private Subtitle _subtitle;
@@ -34,6 +35,7 @@ public partial class ChangeCasingViewModel : ObservableObject
         AllUppercase = Se.Settings.Tools.ChangeCasing.AllUppercase;
         AllLowercase = Se.Settings.Tools.ChangeCasing.AllLowercase;
         _subtitle = new Subtitle();
+        Subtitle = new Subtitle();
         LoadSettings();
     }
 
@@ -72,6 +74,7 @@ public partial class ChangeCasingViewModel : ObservableObject
         {
             var result = await ShowFixNames(_subtitle, 0);
             OkPressed = result.OkPressed;
+            Subtitle = result.Subtitle;
             Window?.Close();
             return;
         }
@@ -96,6 +99,7 @@ public partial class ChangeCasingViewModel : ObservableObject
             if (NormalCasingFixNames)
             {
                 var result = await ShowFixNames(_subtitle, fixCasing.NoOfLinesChanged);
+                Subtitle = result.Subtitle;
                 OkPressed = result.OkPressed;
                 Window?.Close();
                 return;
@@ -110,6 +114,7 @@ public partial class ChangeCasingViewModel : ObservableObject
             info = $"Lowercase - lines changed: {fixCasing.NoOfLinesChanged}";
         }
 
+        Subtitle = _subtitle;
         OkPressed = true;
         Window?.Close();
     }
