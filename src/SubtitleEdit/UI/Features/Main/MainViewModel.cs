@@ -518,7 +518,10 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task ShowToolsChangeCasing()
     {
-        var result = await _windowService.ShowDialogAsync<ChangeCasingWindow, ChangeCasingViewModel>(Window, vm => { });
+        var result = await _windowService.ShowDialogAsync<ChangeCasingWindow, ChangeCasingViewModel>(Window, vm => 
+        { 
+            vm.Initialize(GetUpdateSubtitle());
+        });
 
         if (result.OkPressed)
         {

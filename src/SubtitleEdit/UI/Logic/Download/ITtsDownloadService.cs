@@ -48,4 +48,7 @@ public interface ITtsDownloadService
         string murfApiKey,
         MemoryStream ms,
         CancellationToken cancellationToken);
+
+    Task<bool> DownloadGoogleVoiceList(string googleApiKey, MemoryStream ms, CancellationToken cancellationToken);
+    Task<bool> DownloadGoogleVoiceSpeak(string text, GoogleVoice googleVoice, string model, string googleApiKey, MemoryStream ms, CancellationToken cancellationToken);
 }

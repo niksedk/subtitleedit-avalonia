@@ -21,6 +21,7 @@ public class SeVideoTextToSpeech
     public double ElevenLabsSpeakerBoost { get; set; }
     public string MurfApiKey { get; set; }
     public string MurfStyle { get; set; }
+    public string GoogleApiKey { get; set; }
 
     public SeVideoTextToSpeech()
     {
@@ -43,5 +44,6 @@ public class SeVideoTextToSpeech
         AllTalkUrl = "http://127.0.0.1:7851";
         MurfApiKey = string.Empty;
         MurfStyle = "Conversational";
+        GoogleApiKey = string.Empty;
     }
 }

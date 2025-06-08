@@ -52,21 +52,21 @@ public static class UiUtil
         return MakeButton(text, null);
     }
 
-    public static IBrush GetTextColor()
+    public static IBrush GetTextColor(double opacity = 1.0)
     {
         var app = Application.Current;
         if (app == null)
         {
-            new SolidColorBrush(Colors.Black);
+            new SolidColorBrush(Colors.Black, opacity);
         }
 
         var theme = app!.ActualThemeVariant;
         if (theme == ThemeVariant.Dark)
         {
-            return new SolidColorBrush(Colors.White);
+            return new SolidColorBrush(Colors.White, opacity);
         }
 
-        return new SolidColorBrush(Colors.Black);
+        return new SolidColorBrush(Colors.Black, opacity);
     }
 
     public static IBrush GetBorderColor()
@@ -84,18 +84,6 @@ public static class UiUtil
         }
 
         return new SolidColorBrush(Colors.Black, 0.5);
-    }
-
-
-    public static IBrush GetTextColor(double opacity)
-    {
-        var brush = new TextBlock().Foreground ?? new SolidColorBrush(Colors.Black, opacity);
-        if (brush is ImmutableSolidColorBrush cb)
-        {
-            return new SolidColorBrush(cb.Color, opacity);
-        }
-
-        return brush;
     }
 
     public static Button MakeButton(string text, IRelayCommand? command)
@@ -979,8 +967,15 @@ public static class UiUtil
         return label;
     }
 
-    internal static Control MakeLabel(object fixNames)
+    internal static Control MakeLabel(Binding binding)
     {
-        throw new NotImplementedException();
+        var label = new Label
+        {
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+
+        label.Bind(Label.ContentProperty, binding);
+
+        return label;
     }
 }

@@ -724,6 +724,7 @@
       <AvaloniaResource Include="Assets\TextToSpeech\AzureVoices.json" />
       <AvaloniaResource Include="Assets\TextToSpeech\ElevenLabsVoices.json" />
       <AvaloniaResource Include="Assets\TextToSpeech\MurfVoices.json" />
+      <AvaloniaResource Include="Assets\TextToSpeech\GoogleVoices.json" />
       <AvaloniaResource Include="Assets\TextToSpeech\PiperVoices.json" />
     </ItemGroup>
 

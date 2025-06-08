@@ -1,12 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Threading.Tasks;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Dictionaries;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Dictionaries;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
 
@@ -19,6 +24,8 @@ public partial class FixNamesViewModel : ObservableObject
     [ObservableProperty] private string _extraNames;
 
     public FixNamesWindow? Window { get; set; }
+    public bool OkPressed { get; private set; }
+    public string Info { get; private set; }
 
     private Subtitle _subtitle;
     private Subtitle _subtitleBefore;
@@ -27,7 +34,7 @@ public partial class FixNamesViewModel : ObservableObject
     private string _language;
     private const string ExpectedEndChars = " ,.!?:;…')]<-\"\r\n";
     private readonly HashSet<string> _usedNames;
-    private bool _dirty;
+    private string _oldNames;
     private readonly System.Timers.Timer _previewTimer;
     private bool _loading;
     private readonly object _lock = new object();
@@ -42,60 +49,39 @@ public partial class FixNamesViewModel : ObservableObject
         HitCount = string.Empty;
         _nameListInclMulti = new List<string>();
         _language = "en_US";
+        _subtitleBefore = new Subtitle();
         _subtitle = new Subtitle();
         _usedNames = new HashSet<string>();
         ExtraNames = string.Empty;
-        _subtitleBefore = new Subtitle();
+        _oldNames = string.Empty;
+        Info = string.Empty;
 
         _previewTimer = new System.Timers.Timer(500);
         _previewTimer.Elapsed += (sender, args) =>
         {
-            if (_dirty && !_loading)
+            var namesString = string.Join(' ', Names.Where(p => p.IsChecked).Select(p => p.Name));
+            if (namesString != _oldNames && !_loading)
             {
                 lock (_lock)
                 {
                     GeneratePreview();
-                    _dirty = false;
+                    _oldNames = namesString;
                 }
             }
         };
     }
 
-    //TODO: use this in "OnLoaded" or similar in the view
-    //public void ApplyQueryAttributes(IDictionary<string, object> query)
-    //{
-    //    if (query["Subtitle"] is Subtitle subtitle)
-    //    {
-    //        _subtitle = new Subtitle(subtitle, false);
-    //    }
+    internal void Initialize(Subtitle subtitle)
+    {
+        _subtitle = new Subtitle(subtitle);
+        _subtitleBefore = subtitle;
 
-    //    if (query["SubtitleBefore"] is Subtitle subtitleBefore)
-    //    {
-    //        _subtitleBefore = new Subtitle(subtitleBefore, false);
-    //    }
-
-    //    Page?.Dispatcher.StartTimer(TimeSpan.FromMilliseconds(100), () =>
-    //    {
-    //        MainThread.BeginInvokeOnMainThread(async () =>
-    //        {
-    //            _language = LanguageAutoDetect.AutoDetectGoogleLanguage(_subtitle);
-    //            if (string.IsNullOrEmpty(_language))
-    //            {
-    //                _language = "en_US";
-    //            }
-
-    //            await DictionaryLoader.UnpackIfNotFound();
-    //            _nameList = new NameList(Se.DictionariesFolder, _language, Configuration.Settings.WordLists.UseOnlineNames, Configuration.Settings.WordLists.NamesUrl);
-
-    //            ExtraNames = Se.Settings.Tools.ChangeCasing.ExtraNames;
-    //            FindAllNames();
-    //            GeneratePreview();
-    //            _previewTimer.Start();
-    //            _loading = false;
-    //        });
-    //        return false;
-    //    });
-    //}
+        _language = LanguageAutoDetect.AutoDetectGoogleLanguage(_subtitle);
+        if (string.IsNullOrEmpty(_language))
+        {
+            _language = "en_US";
+        }       
+    }
 
     private void FindAllNames()
     {
@@ -174,7 +160,8 @@ public partial class FixNamesViewModel : ObservableObject
             }
         }
 
-        Names = new ObservableCollection<FixNameItem>(names);
+        Names.Clear();
+        Names.AddRange(names);
         NamesCount = string.Format("Names: {0:#,##0}", Names.Count);
     }
 
@@ -207,8 +194,12 @@ public partial class FixNamesViewModel : ObservableObject
             }
         }
 
-        Hits = new ObservableCollection<FixNameHitItem>(hits);
-        HitCount = string.Format("Hits: {0:#,##0}", Hits.Count);
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            Hits.Clear();
+            Hits.AddRange(hits);
+            HitCount = string.Format("Hits: {0:#,##0}", Hits.Count);
+        });
     }
 
     [RelayCommand]
@@ -229,9 +220,8 @@ public partial class FixNamesViewModel : ObservableObject
         }
     }
 
-
     [RelayCommand]
-    private async Task Ok()
+    private void Ok()
     {
         var subtitle = new Subtitle(_subtitle, false);
 
@@ -253,24 +243,16 @@ public partial class FixNamesViewModel : ObservableObject
                 noOfLinesChanged++;
             }
         }
-        var info = $"Change casing - lines changed: {noOfLinesChanged}";
+        Info = $"Change casing - lines changed: {noOfLinesChanged}";
 
-        //await Shell.Current.GoToAsync("../..", new Dictionary<string, object>
-        //{
-        //    { "Page", nameof(FixNamesPage) },
-        //    { "Subtitle", subtitle },
-        //    { "NoOfLinesChanged", noOfLinesChanged },
-        //    { "Status", info },
-        //});
+        OkPressed = true;
+        Window?.Close();
     }
 
     [RelayCommand]
-    public async Task Cancel()
+    public void Cancel()
     {
-        //await Shell.Current.GoToAsync("../..", new Dictionary<string, object>
-        //{
-        //    { "Page", nameof(FixNamesPage) },
-        //});
+        Window?.Close();
     }
 
     [RelayCommand]
@@ -279,16 +261,26 @@ public partial class FixNamesViewModel : ObservableObject
         _loading = true;
         FindAllNames();
         _loading = false;
-        _dirty = true;
     }
 
-    //public void OnNameToggled(object? sender, ToggledEventArgs e)
-    //{
-    //    if (_loading)
-    //    {
-    //        return;
-    //    }
+    internal void OnKeyDown(KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            CancelCommand.Execute(null);
+        }
+    }
 
-    //    _dirty = true;
-    //}
+    internal void OnLoaded(RoutedEventArgs e)
+    {
+        DictionaryLoader.UnpackIfNotFound().ConfigureAwait(false);
+        _nameList = new NameList(Se.DictionariesFolder, _language, Configuration.Settings.WordLists.UseOnlineNames, Configuration.Settings.WordLists.NamesUrl);
+
+        ExtraNames = Se.Settings.Tools.ChangeCasing.ExtraNames;
+        FindAllNames();
+        GeneratePreview();
+        _previewTimer.Start();
+        _loading = false;
+    }   
 }

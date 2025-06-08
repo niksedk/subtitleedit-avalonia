@@ -1,0 +1,28 @@
+{
+  "voices": [
+    {
+      "languageCodes": [
+        "es-ES"
+      ],
+      "name": "es-ES-Standard-A",
+      "ssmlGender": "FEMALE",
+      "naturalSampleRateHertz": 24000
+    },
+    {
+      "languageCodes": [
+        "ja-JP"
+      ],
+      "name": "ja-JP-Standard-A",
+      "ssmlGender": "FEMALE",
+      "naturalSampleRateHertz": 22050
+    },
+    {
+      "languageCodes": [
+        "pt-BR"
+      ],
+      "name": "pt-BR-Standard-A",
+      "ssmlGender": "FEMALE",
+      "naturalSampleRateHertz": 24000
+    }
+  ]
+}

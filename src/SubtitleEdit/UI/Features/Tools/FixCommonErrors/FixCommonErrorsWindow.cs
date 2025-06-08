@@ -8,6 +8,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 
 namespace Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
@@ -76,7 +77,7 @@ public class FixCommonErrorsWindow : Window
             {
                new DataGridTemplateColumn
                {
-                    Header = "Enabled",
+                    Header = Se.Language.General.Enabled,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     CellTemplate = new FuncDataTemplate<FixRuleDisplayItem>((item, _) =>
                     new Border
@@ -93,7 +94,7 @@ public class FixCommonErrorsWindow : Window
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Name",
+                    Header = Se.Language.General.Name,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(FixRuleDisplayItem.Name)),
                     IsReadOnly = true,

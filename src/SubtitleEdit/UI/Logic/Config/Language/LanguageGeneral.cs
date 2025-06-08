@@ -118,6 +118,8 @@ public class LanguageGeneral
     public string MergeSelectedAsDialog { get; set; }
     public string SubtitleFormat { get; set; }
     public string Encoding { get; set; }
+    public string Refresh { get; set; }
+    public string Enabled { get; set; }
 
     public LanguageGeneral()
     {
@@ -237,5 +239,7 @@ public class LanguageGeneral
         MergeSelectedAsDialog = "Merge selected as dialog";
         SubtitleFormat = "Subtitle format";
         Encoding = "Encoding";
+        Refresh = "Refresh";
+        Enabled = "Enabled";
     }
 }

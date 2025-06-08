@@ -1,16 +1,17 @@
-﻿using System.Globalization;
-using Nikse.SubtitleEdit.Core.Common;
+﻿using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Net.Http;
-using System;
-using System.Threading.Tasks;
-using System.IO;
-using System.Threading;
-using System.Linq;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Voices;
 using Nikse.SubtitleEdit.Logic.Config;
+using System;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Logic.Download;
 
@@ -206,7 +207,7 @@ public class TtsDownloadService : ITtsDownloadService
         if (!result.IsSuccessStatusCode)
         {
             var error = Encoding.UTF8.GetString(stream.ToArray()).Trim();
-            SeLogger.Error($"ElevenLabs TTS failed calling API as base address {_httpClient.BaseAddress} : Status code={result.StatusCode} {error}" + Environment.NewLine + "Data=" + data);
+            SeLogger.Error($"Azure TTS failed calling API as base address {_httpClient.BaseAddress} : Status code={result.StatusCode} {error}" + Environment.NewLine + "Data=" + data);
             return false;
         }
 
@@ -273,5 +274,85 @@ public class TtsDownloadService : ITtsDownloadService
         await audioResult.Content.CopyToAsync(ms, cancellationToken);
 
         return true;
+    }
+
+    public async Task<bool> DownloadGoogleVoiceList(string googleApiKey, MemoryStream ms, CancellationToken cancellationToken)
+    {
+        var url = $"https://texttospeech.googleapis.com/v1/voices?key={googleApiKey}";
+
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+        using var response = await _httpClient.SendAsync(request, cancellationToken);
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            SeLogger.Error($"Failed to get Google TTS voices: {response.StatusCode} {content}");
+            return false;
+        }
+
+        var buffer = Encoding.UTF8.GetBytes(content);
+        await ms.WriteAsync(buffer, 0, buffer.Length, cancellationToken);
+        ms.Position = 0;
+
+        return true;
+    }
+
+    public async Task<bool> DownloadGoogleVoiceSpeak(string inputText, GoogleVoice googleVoice, string model, string googleApiKey, MemoryStream ms, CancellationToken cancellationToken)
+    {
+        var url = $"https://texttospeech.googleapis.com/v1/text:synthesize?key={googleApiKey}";
+
+        var requestPayload = new
+        {
+            input = new { text = inputText },
+            voice = new
+            {
+                languageCode = googleVoice.LanguageCode,
+                name = googleVoice.Name
+            },
+            audioConfig = new
+            {
+                audioEncoding = "MP3",
+                //speakingRate = googleVoice.SpeakingRate ?? 1.0
+            }
+        };
+
+        var json = JsonSerializer.Serialize(requestPayload);
+        using var request = new HttpRequestMessage(HttpMethod.Post, url);
+        request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        using var response = await _httpClient.SendAsync(request, cancellationToken);
+        var responseJson = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            SeLogger.Error($"Google TTS failed: {response.StatusCode} {responseJson}");
+            return false;
+        }
+
+        try
+        {
+            var result = JsonSerializer.Deserialize<GoogleTtsResponse>(responseJson);
+            if (result?.audioContent == null)
+            {
+                SeLogger.Error("Google TTS: audioContent is null");
+                return false;
+            }
+
+            var audioBytes = Convert.FromBase64String(result.audioContent);
+            await ms.WriteAsync(audioBytes, 0, audioBytes.Length, cancellationToken);
+            ms.Position = 0;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            SeLogger.Error($"Exception decoding Google TTS audio: {ex}");
+            return false;
+        }
+    }
+
+    private class GoogleTtsResponse
+    {
+        public string? audioContent { get; set; }
     }
 }

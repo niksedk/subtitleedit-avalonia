@@ -1,7 +1,10 @@
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
 
@@ -13,20 +16,30 @@ public partial class ChangeCasingViewModel : ObservableObject
     [ObservableProperty] private bool _fixNamesOnly;
     [ObservableProperty] private bool _allUppercase;
     [ObservableProperty] private bool _allLowercase;
-    
+
     public ChangeCasingWindow? Window { get; set; }
-    
     public bool OkPressed { get; private set; }
 
-    public ChangeCasingViewModel()
+    private readonly IWindowService _windowService;
+    private Subtitle _subtitle;
+
+    public ChangeCasingViewModel(IWindowService windowService)
     {
+        _windowService = windowService;
+
         NormalCasing = Se.Settings.Tools.ChangeCasing.NormalCasing;
         NormalCasingFixNames = Se.Settings.Tools.ChangeCasing.NormalCasingFixNames;
         NormalCasingOnlyUpper = Se.Settings.Tools.ChangeCasing.NormalCasingOnlyUpper;
         FixNamesOnly = Se.Settings.Tools.ChangeCasing.FixNamesOnly;
         AllUppercase = Se.Settings.Tools.ChangeCasing.AllUppercase;
         AllLowercase = Se.Settings.Tools.ChangeCasing.AllLowercase;
+        _subtitle = new Subtitle();
         LoadSettings();
+    }
+
+    public void Initialize(Subtitle subtitle)
+    {
+        _subtitle = subtitle;
     }
 
     private void LoadSettings()
@@ -50,18 +63,71 @@ public partial class ChangeCasingViewModel : ObservableObject
         Se.SaveSettings();
     }
 
-    [RelayCommand]                   
-    private void Ok() 
+    [RelayCommand]
+    private async Task Ok()
     {
         SaveSettings();
+
+        if (FixNamesOnly)
+        {
+            var result = await ShowFixNames(_subtitle, 0);
+            OkPressed = result.OkPressed;
+            Window?.Close();
+            return;
+        }
+
+        var info = string.Empty;
+        var language = LanguageAutoDetect.AutoDetectGoogleLanguage(_subtitle);
+        var fixCasing = new FixCasing(language)
+        {
+            FixNormal = NormalCasing,
+            FixNormalOnlyAllUppercase = NormalCasingOnlyUpper,
+            FixMakeUppercase = AllUppercase,
+            FixMakeLowercase = AllLowercase,
+            FixMakeProperCase = false,
+            FixProperCaseOnlyAllUppercase = false,
+            Format = _subtitle.OriginalFormat,
+        };
+        fixCasing.Fix(_subtitle);
+
+        if (NormalCasing)
+        {
+            info = $"Normal Casing - lines changed: {fixCasing.NoOfLinesChanged}";
+            if (NormalCasingFixNames)
+            {
+                var result = await ShowFixNames(_subtitle, fixCasing.NoOfLinesChanged);
+                OkPressed = result.OkPressed;
+                Window?.Close();
+                return;
+            }
+        }
+        else if (AllUppercase)
+        {
+            info = $"Uppercase - lines changed: {fixCasing.NoOfLinesChanged}";
+        }
+        else if (AllLowercase)
+        {
+            info = $"Lowercase - lines changed: {fixCasing.NoOfLinesChanged}";
+        }
+
         OkPressed = true;
         Window?.Close();
     }
-    
-    [RelayCommand]                   
-    private void Cancel() 
+
+    [RelayCommand]
+    private void Cancel()
     {
         Window?.Close();
+    }
+
+    private async Task<FixNamesViewModel> ShowFixNames(Subtitle subtitle, int noOfFixes)
+    {
+        var result = await _windowService.ShowDialogAsync<FixNamesWindow, FixNamesViewModel>(Window!, vm =>
+        {
+            vm.Initialize(subtitle);
+        });
+
+        return result;
     }
 
     internal void OnKeyDown(KeyEventArgs e)
