@@ -288,6 +288,8 @@ public partial class TextToSpeechViewModel : ObservableObject
                 ProgressOpacity = 0;
                 return;
             }
+
+            fixSpeedResult  = reviewAudioClipsResult;
         }
 
         await MergeAndAddToVideo(fixSpeedResult);
@@ -621,14 +623,13 @@ public partial class TextToSpeechViewModel : ObservableObject
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
 
-                var path = Path.GetDirectoryName(outputFileName)!;
-                await _folderHelper.OpenFolder(Window!, path);
+                await _folderHelper.OpenFolder(Window!, outputFolder);
             }
         }
         else
         {
             var path = Path.GetDirectoryName(mergedAudioFileName)!;
-            await _folderHelper.OpenFolder(Window!, path);
+            await _folderHelper.OpenFolder(Window!, outputFolder);
         }
     }
 
@@ -956,6 +957,11 @@ public partial class TextToSpeechViewModel : ObservableObject
                 _waveFolder,
                 _wavePeakData);
         });
+
+        if (result.OkPressed)
+        {
+            return result.StepResults;
+        }
 
         return null;
     }

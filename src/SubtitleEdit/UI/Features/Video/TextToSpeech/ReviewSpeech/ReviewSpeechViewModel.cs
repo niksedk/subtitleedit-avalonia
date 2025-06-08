@@ -23,6 +23,7 @@ using System.Timers;
 using Nikse.SubtitleEdit.Features.Shared;
 using ElevenLabsSettingsViewModel = Nikse.SubtitleEdit.Features.Video.TextToSpeech.ElevenLabsSettings.ElevenLabsSettingsViewModel;
 using Timer = System.Timers.Timer;
+using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.VoiceSettings;
 
@@ -53,6 +54,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
 
     public ReviewSpeechWindow? Window { get; set; }
     public DataGrid LineGrid { get; internal set; }
+    public TtsStepResult[] StepResults { get; set; }
 
     public bool OkPressed { get; private set; }
 
@@ -216,7 +218,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
             return;
         }
 
-        var jsonFileName = System.IO.Path.Combine(folder, "SubtitleEditTts.json");
+        var jsonFileName = Path.Combine(folder, "SubtitleEditTts.json");
 
         // ask if overwrite if jsonFileName exists
         if (File.Exists(jsonFileName))
@@ -256,7 +258,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
         {
             index++;
             var sourceFileName = line.StepResult.CurrentFileName;
-            var targetFileName = System.IO.Path.Combine(folder, index.ToString().PadLeft(4, '0') + System.IO.Path.GetExtension(sourceFileName));
+            var targetFileName = Path.Combine(folder, index.ToString().PadLeft(4, '0') + Path.GetExtension(sourceFileName));
 
             if (File.Exists(targetFileName))
             {
@@ -343,8 +345,8 @@ public partial class ReviewSpeechViewModel : ObservableObject
         _cancellationToken = _cancellationTokenSource.Token;
         if (!engine.IsVoiceInstalled(voice) && voice.EngineVoice is PiperVoice piperVoice)
         {
-            var modelFileName = System.IO.Path.Combine(Piper.GetSetPiperFolder(), piperVoice.ModelShort);
-            var configFileName = System.IO.Path.Combine(Piper.GetSetPiperFolder(), piperVoice.ConfigShort);
+            var modelFileName = Path.Combine(Piper.GetSetPiperFolder(), piperVoice.ModelShort);
+            var configFileName = Path.Combine(Piper.GetSetPiperFolder(), piperVoice.ConfigShort);
             if (!File.Exists(modelFileName) || !File.Exists(configFileName))
             {
                 var dlResult = await _windowService.ShowDialogAsync<DownloadTtsWindow, DownloadTtsViewModel>(Window, vm => vm.StartDownloadPiperVoice(piperVoice));
@@ -415,6 +417,33 @@ public partial class ReviewSpeechViewModel : ObservableObject
     [RelayCommand]
     private void Ok()
     {
+        // set StepResults with the current lines
+        var stepResults = new List<TtsStepResult>();
+        foreach (var row in Lines)
+        { 
+            var stepResult = row.StepResult;
+            stepResult.Text = row.Text;
+            stepResults.Add(stepResult);    
+        }
+        StepResults = stepResults.ToArray();
+
+        foreach (var p in stepResults)
+        {
+            Lines.Add(new ReviewRow
+            {
+                Include = true,
+                Number = p.Paragraph.Number,
+                Text = p.Text,
+                Voice = p.Voice == null ? string.Empty : p.Voice.ToString(),
+                Speed = Math.Round(p.SpeedFactor, 2).ToString(CultureInfo.CurrentCulture),
+                Cps = Math.Round(p.Paragraph.GetCharactersPerSecond(), 2).ToString(CultureInfo.CurrentCulture),
+                StepResult = p
+            });
+        }
+
+        StepResults = Lines.Where(p => p.Include).Select(p => p.StepResult).ToArray();
+
+
         Se.SaveSettings();
         OkPressed = true;
         Close();
@@ -440,7 +469,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
         var p = item.Paragraph;
         var index = Lines.IndexOf(row);
         var next = index + 1 < Lines.Count ? Lines[index + 1] : null;
-        var outputFileNameTrim = System.IO.Path.Combine(_waveFolder, Guid.NewGuid() + ".wav");
+        var outputFileNameTrim = Path.Combine(_waveFolder, Guid.NewGuid() + ".wav");
         var trimProcess = VideoPreviewGenerator.TrimSilenceStartAndEnd(item.CurrentFileName, outputFileNameTrim);
 #pragma warning disable CA1416 // Validate platform compatibility
         _ = trimProcess.Start();
@@ -486,11 +515,11 @@ public partial class ReviewSpeechViewModel : ObservableObject
 
         var ext = ".wav";
         var factor = (decimal)mediaInfo.Duration.TotalMilliseconds / divisor;
-        var outputFileName2 = System.IO.Path.Combine(_waveFolder, $"{index}_{Guid.NewGuid()}{ext}");
+        var outputFileName2 = Path.Combine(_waveFolder, $"{index}_{Guid.NewGuid()}{ext}");
         var overrideFileName = string.Empty;
-        if (!string.IsNullOrEmpty(overrideFileName) && File.Exists(System.IO.Path.Combine(_waveFolder, overrideFileName)))
+        if (!string.IsNullOrEmpty(overrideFileName) && File.Exists(Path.Combine(_waveFolder, overrideFileName)))
         {
-            outputFileName2 = System.IO.Path.Combine(_waveFolder, $"{System.IO.Path.GetFileNameWithoutExtension(overrideFileName)}_{Guid.NewGuid()}{ext}");
+            outputFileName2 = Path.Combine(_waveFolder, $"{Path.GetFileNameWithoutExtension(overrideFileName)}_{Guid.NewGuid()}{ext}");
         }
 
         var mergeProcess = VideoPreviewGenerator.ChangeSpeed(outputFileNameTrim, outputFileName2, (float)factor);
