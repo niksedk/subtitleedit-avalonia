@@ -2,6 +2,8 @@ using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
 
@@ -16,8 +18,13 @@ public partial class BatchConvertSettingsViewModel : ObservableObject
     
     public bool OkPressed { get; private set; }
 
-    public BatchConvertSettingsViewModel()
+    private readonly IFolderHelper _folderHelper;
+
+    public BatchConvertSettingsViewModel(IFolderHelper folderHelper)
     {
+        _folderHelper = folderHelper;
+
+        OutputFolder = string.Empty;
         LoadSettings();
     }
 
@@ -44,7 +51,20 @@ public partial class BatchConvertSettingsViewModel : ObservableObject
         OkPressed = true;
         Window?.Close();
     }
-    
+
+
+    [RelayCommand]
+    private async Task BrowseOutputFolder()
+    {
+        var folder = await _folderHelper.PickFolderAsync(Window!, "Select output folder");
+        if (!string.IsNullOrEmpty(folder))
+        {
+            OutputFolder = folder;
+            UseOutputFolder = true;
+            UseSourceFolder = false;
+        }
+    }
+
     [RelayCommand]                   
     private void Cancel() 
     {

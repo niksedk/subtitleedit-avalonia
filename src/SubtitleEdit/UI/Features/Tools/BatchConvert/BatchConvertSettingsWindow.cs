@@ -1,8 +1,10 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Media;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
 
@@ -21,20 +23,28 @@ public class BatchConvertSettingsWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        var checkBoxUseSourceFolder = new CheckBox
+        var checkBoxOverwrite = new CheckBox
+        {
+            Content = "Overwrite existing files",
+            IsChecked = vm.Overwrite,
+            VerticalAlignment = VerticalAlignment.Center,
+            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.Overwrite)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
+        };
+
+        var checkBoxUseSourceFolder = new RadioButton
         {
             Content = "Use source folder",
             IsChecked = vm.UseSourceFolder,
             VerticalAlignment = VerticalAlignment.Center,
-            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.UseSourceFolder)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },  
+            [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.UseSourceFolder)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },  
         };
 
-        var checkBoxUseOutputFolder = new CheckBox
+        var checkBoxUseOutputFolder = new RadioButton
         {
             Content = "Use output folder",
             IsChecked = vm.UseOutputFolder,
             VerticalAlignment = VerticalAlignment.Center,
-            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.UseOutputFolder)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },  
+            [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.UseOutputFolder)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },  
         };
 
         var textBoxOutputFolder = new TextBox
@@ -43,22 +53,22 @@ public class BatchConvertSettingsWindow : Window
             VerticalAlignment = VerticalAlignment.Center,
             [!TextBox.TextProperty] = new Binding(nameof(vm.OutputFolder)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },  
             IsEnabled = vm.UseOutputFolder,
+            Width = 400,
         };
 
-        var buttonBrowse = new Button
-        {
-            Content = "Browse...",
-            VerticalAlignment = VerticalAlignment.Center,
-            IsEnabled = vm.UseOutputFolder,
-        };
+        var buttonBrowse = UiUtil.MakeButtonBrowse(vm.BrowseOutputFolderCommand);
 
-        var checkBoxOverwrite = new CheckBox
+        var panelOutputFolder = new StackPanel
         {
-            Content = "Overwrite existing files",
-            IsChecked = vm.Overwrite,
+            Orientation = Orientation.Horizontal,
             VerticalAlignment = VerticalAlignment.Center,
-            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.Overwrite)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },  
-        };
+            Spacing = 5,
+            Children =
+            {
+                textBoxOutputFolder,
+                buttonBrowse
+            }
+        };  
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
@@ -70,12 +80,13 @@ public class BatchConvertSettingsWindow : Window
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
@@ -84,10 +95,11 @@ public class BatchConvertSettingsWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        //grid.Add(label, 0, 0);
-        //grid.Add(comboEncoding, 0, 1);
-        //grid.Add(checkBoxStereo, 1, 1);
-        grid.Add(panelButtons, 2, 0, 1, 2);
+        grid.Add(checkBoxOverwrite, 0, 0);
+        grid.Add(checkBoxUseSourceFolder, 1, 0);
+        grid.Add(checkBoxUseOutputFolder, 2, 0);
+        grid.Add(panelOutputFolder, 3, 0);
+        grid.Add(panelButtons, 4, 0);
 
         Content = grid;
         

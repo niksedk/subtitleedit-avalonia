@@ -121,5 +121,6 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<DownloadTesseractViewModel>();
         collection.AddTransient<DownloadPaddleOcrViewModel>();
         collection.AddTransient<FixNamesViewModel>();
+        collection.AddTransient<BatchConvertSettingsViewModel>();
     }
 }

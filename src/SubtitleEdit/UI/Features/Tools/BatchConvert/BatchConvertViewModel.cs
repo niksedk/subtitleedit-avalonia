@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Media;
 using System;
@@ -153,11 +154,14 @@ public partial class BatchConvertViewModel : ObservableObject
     [RelayCommand]
     private void ClearAllFiles()
     {
+        BatchItems.Clear();
+        MakeBatchItemsInfo();
     }
 
     [RelayCommand]
-    private void ShowOutputProperties()
+    private async Task ShowOutputProperties()
     {
+        await _windowService.ShowDialogAsync<BatchConvertSettingsWindow, BatchConvertSettingsViewModel>(Window!, vm => { });
     }
 
     internal void OnKeyDown(KeyEventArgs e)
