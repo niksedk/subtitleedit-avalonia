@@ -1,10 +1,8 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
-using Nikse.SubtitleEdit.Logic.Media;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
 

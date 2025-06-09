@@ -1,4 +1,9 @@
 ﻿using Avalonia.Controls;
+using Nikse.SubtitleEdit.Features.Tools.BatchConvert.FunctionViews;
+using Nikse.SubtitleEdit.Logic.Config;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -20,5 +25,24 @@ public class BatchConvertFunction
         Name = name;
         IsSelected = isSelected;
         View = view;
+    }
+
+    public static BatchConvertFunction[] List(BatchConvertViewModel vm)
+    {
+        var activeFunctions = Se.Settings.Tools.BatchConvert.ActiveFunctions;
+        return new List<BatchConvertFunction>()
+        {
+            MakeFunction(BatchConvertFunctionType.RemoveFormatting, "Remove formatting", ViewRemoveFormatting.Make(vm) , activeFunctions),
+            MakeFunction(BatchConvertFunctionType.OffsetTimeCodes, "Offset time codes", ViewOffsetTimeCodes.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.AdjustDisplayDuration, "Adjust display duration", ViewAdjustDuration.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.DeleteLines, "Delete lines", ViewDeleteLines.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.ChangeFrameRate, "Change frame rate", ViewChangeFrameRate.Make(vm), activeFunctions),
+        }.ToArray();
+    }
+
+    private static BatchConvertFunction MakeFunction(BatchConvertFunctionType functionType, string name, Control view, string[] activeFunctions)
+    {
+        var isActive = activeFunctions.Contains(functionType.ToString());
+        return new BatchConvertFunction(functionType, name, isActive, view);
     }
 }

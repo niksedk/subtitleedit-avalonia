@@ -5,7 +5,6 @@ using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
-using Avalonia.Media.Immutable;
 using Avalonia.Platform;
 using Avalonia.Styling;
 using CommunityToolkit.Mvvm.Input;
@@ -398,6 +397,29 @@ public static class UiUtil
         return checkBox;
     }
 
+    public static CheckBox MakeCheckBox(string text, object viewModel, string? isCheckedPropertyPath)
+    {
+        var checkBox = new CheckBox
+        {
+            Content = text,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            DataContext = viewModel,
+        };
+
+        if (isCheckedPropertyPath != null)
+        {
+            checkBox.Bind(CheckBox.IsCheckedProperty, new Binding
+            {
+                Path = isCheckedPropertyPath,
+                Mode = BindingMode.TwoWay,
+            });
+        }
+
+        return checkBox;
+    }
+
+
     public static TextBlock MakeLink(string text, IRelayCommand command)
     {
         var link = new TextBlock
@@ -710,6 +732,13 @@ public static class UiUtil
         return control;
     }
 
+    public static Label WithLarginLeft(this Label control, int marginLeft)
+    {
+        var m = control.Margin;
+        control.Margin = new Thickness(marginLeft, m.Top, m.Right, m.Bottom);
+        return control;
+    }
+
     public static ComboBox WithMarginTop(this ComboBox control, int marginTop)
     {
         var m = control.Margin;
@@ -977,5 +1006,27 @@ public static class UiUtil
         label.Bind(Label.ContentProperty, binding);
 
         return label;
+    }
+
+    internal static RadioButton MakeRadioButton(string text, object viewModel, string isCheckedPropertyPath)
+    {
+        var control = new RadioButton
+        {
+            Content = text,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            DataContext = viewModel,
+        };
+
+        if (isCheckedPropertyPath != null)
+        {
+            control.Bind(RadioButton.IsCheckedProperty, new Binding
+            {
+                Path = isCheckedPropertyPath,
+                Mode = BindingMode.TwoWay,
+            });
+        }
+
+        return control;
     }
 }

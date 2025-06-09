@@ -1,12 +1,10 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
-using Nikse.SubtitleEdit.Features.Shared.Ocr;
 using Nikse.SubtitleEdit.Logic;
-using System;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -101,28 +99,28 @@ public class BatchConvertWindow : Window
             {
                 new DataGridTextColumn
                 {
-                    Header = "File name",
+                    Header = Se.Language.General.FileName,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(BatchConvertItem.FileName)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Size",
+                    Header = Se.Language.General.Size,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(BatchConvertItem.Size)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Format",
+                    Header = Se.Language.General.Format,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(BatchConvertItem.Format)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Status",
+                    Header = Se.Language.General.Status,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(BatchConvertItem.Status)),
                     IsReadOnly = true,
@@ -145,10 +143,11 @@ public class BatchConvertWindow : Window
                 UiUtil.MakeSeparatorForHorizontal(),
                 UiUtil.MakeLabel("Target format"),
                 UiUtil.MakeComboBox(vm.TargetFormats, vm, nameof(vm.SelectedTargetFormat)),
-                UiUtil.MakeLabel("Target encoding"),
+                UiUtil.MakeLabel("Target encoding").WithLarginLeft(5),
                 UiUtil.MakeComboBox(vm.TargetEncodings, vm, nameof(vm.SelectedTargetEncoding)),
                 UiUtil.MakeSeparatorForHorizontal(),
                 UiUtil.MakeButton("Output properties", vm.ShowOutputPropertiesCommand),
+                UiUtil.MakeLabel(new Binding(nameof(vm.OutputPropertiesText))),
             }
         };
 
@@ -161,16 +160,39 @@ public class BatchConvertWindow : Window
 
     private Border MakeFunctionsListView(BatchConvertViewModel vm)
     {
-        var border = new Border
+        var dataGrid = new DataGrid
         {
-            BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetBorderColor(),
-            Margin = new Thickness(0, 0, 0, 10),
-            Padding = new Thickness(5),
-            Child = UiUtil.MakeLabel("functions view"),
+            AutoGenerateColumns = false,
+            HeadersVisibility = DataGridHeadersVisibility.None,
+            SelectionMode = DataGridSelectionMode.Single,
+            CanUserResizeColumns = true,
+            CanUserSortColumns = true,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Width = double.NaN,
+            Height = 300,
+            DataContext = vm,
+            ItemsSource = vm.BatchFunctions,
+            Columns =
+            {
+                new DataGridTextColumn
+                {
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(BatchConvertFunction.IsSelected)),
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(BatchConvertFunction.Name)),
+                    IsReadOnly = true,
+                },
+            },
         };
+        dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedBatchFunction)) { Source = vm });
+        dataGrid.SelectionChanged += vm.SelectedFunctionChanged;
 
-        return border;
+        return UiUtil.MakeBorderForControl(dataGrid);
     }
 
     private Border MakeFunctionView(BatchConvertViewModel vm)
@@ -183,6 +205,7 @@ public class BatchConvertWindow : Window
             Padding = new Thickness(5),
             Child = UiUtil.MakeLabel("function options"),
         };
+        vm.FunctionContainer = border;
 
         return border;
     }

@@ -5,11 +5,11 @@ namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
 public partial class BatchConvertItem : ObservableObject
 {
+    [ObservableProperty] private string _status;
     public string FileName { get; set; }
     public long Size { get; set; }
     public string DisplaySize { get; set; }
     public string Format { get; set; }
-    [ObservableProperty] private string _status;
     public Subtitle? Subtitle { get; set; }
 
     public BatchConvertItem()

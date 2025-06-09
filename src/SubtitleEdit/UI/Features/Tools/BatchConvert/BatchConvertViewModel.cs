@@ -1,13 +1,17 @@
+using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -30,6 +34,7 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private bool _isProgressVisible;
     [ObservableProperty] private bool _isConverting;
     [ObservableProperty] private bool _areControlsEnabled;
+    [ObservableProperty] private string _outputPropertiesText;
     [ObservableProperty] private string _progressText;
     [ObservableProperty] private double _progressValue;
 
@@ -48,8 +53,8 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private TimeSpan _offsetTimeCodesTime;
 
     // Adjust display duration
-    //[ObservableProperty] private ObservableCollection<AdjustDurationItem> AdjustTypes;
-    //[ObservableProperty] private AdjustDurationItem SelectedAdjustType;
+    [ObservableProperty] private ObservableCollection<AdjustDurationDisplay> _adjustTypes;
+    [ObservableProperty] private AdjustDurationDisplay _selectedAdjustType;
     [ObservableProperty] private TimeSpan _adjustSeconds;
     [ObservableProperty] private int _adjustPercentage;
     [ObservableProperty] private TimeSpan _adjustFixedValue;
@@ -74,7 +79,15 @@ public partial class BatchConvertViewModel : ObservableObject
 
     public BatchConvertWindow? Window { get; set; }
 
+    // View for functions
+    public Control ViewRemoveFormatting { get; set; } = new Control();
+    public Control ViewOffsetTimeCodes { get; set; } = new Control();
+    public Control ViewAdjustDuration { get; set; } = new Control();
+    public Control ViewDeleteLines { get; set; } = new Control();
+    public Control ViewChangeFrameRate { get; set; } = new Control();
+
     public bool OkPressed { get; private set; }
+    public Border FunctionContainer { get; internal set; }
 
     private readonly IWindowService _windowService;
     private readonly IFileHelper _fileHelper;
@@ -94,6 +107,8 @@ public partial class BatchConvertViewModel : ObservableObject
         BatchItemsInfo = string.Empty;
         ProgressText = string.Empty;
         DeleteLinesContains = string.Empty;
+        OutputPropertiesText = string.Empty;
+        FunctionContainer = new Border();
         FrameRates = new ObservableCollection<double>
         {
             23.976,
@@ -106,6 +121,11 @@ public partial class BatchConvertViewModel : ObservableObject
             60,
             120,
         };
+        AdjustTypes = new ObservableCollection<AdjustDurationDisplay>(AdjustDurationDisplay.ListAll());
+        SelectedAdjustType = AdjustTypes.First();
+
+        var activeFunctions = Se.Settings.Tools.BatchConvert.ActiveFunctions;
+        BatchFunctions = new ObservableCollection<BatchConvertFunction>(BatchConvertFunction.List(this));
     }
 
     [RelayCommand]
@@ -171,5 +191,16 @@ public partial class BatchConvertViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+    }
+
+    internal void SelectedFunctionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        var selectedFunction = SelectedBatchFunction;
+        if (selectedFunction == null)
+        {
+            return;
+        }
+
+        FunctionContainer.Child = selectedFunction.View;
     }
 }

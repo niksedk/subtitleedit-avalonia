@@ -120,6 +120,9 @@ public class LanguageGeneral
     public string Encoding { get; set; }
     public string Refresh { get; set; }
     public string Enabled { get; set; }
+    public object FileName { get; set; }
+    public object Format { get; set; }
+    public object Status { get; set; }
 
     public LanguageGeneral()
     {
@@ -241,5 +244,8 @@ public class LanguageGeneral
         Encoding = "Encoding";
         Refresh = "Refresh";
         Enabled = "Enabled";
+        FileName = "File name";
+        Format = "Format";
+        Status = "Status";
     }
 }
