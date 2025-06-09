@@ -114,7 +114,7 @@ public class TextToSpeechWindow : Window
             }
         };
 
-        var buttonTestVoice = UiUtil.MakeButton("Test voice", vm.TestVoiceCommand).WithBindIsEnabled(nameof(vm.IsVoiceTestEnabled));    
+        var buttonTestVoice = UiUtil.MakeButton("Test voice", vm.TestVoiceCommand).WithBindIsEnabled(nameof(vm.IsVoiceTestEnabled));
         var panelVoice = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -215,11 +215,11 @@ public class TextToSpeechWindow : Window
                     Content = "Key file",
                     MinWidth = labelMinWidth,
                 },
-                UiUtil.MakeTextBox(325, vm, nameof(vm.KeyFile)),
+                UiUtil.MakeTextBox(325, vm, nameof(vm.KeyFile)).WithMarginRight(4),
+                UiUtil.MakeButtonBrowse(vm.BrowseKeyFileCommand),
             },
             [!StackPanel.IsVisibleProperty] = new Binding(nameof(vm.HasKeyFile)) { Mode = BindingMode.OneWay },
         };
-
 
         var grid = new Grid
         {

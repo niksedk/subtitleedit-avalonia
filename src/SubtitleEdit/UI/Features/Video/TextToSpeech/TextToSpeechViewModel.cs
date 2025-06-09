@@ -229,6 +229,18 @@ public partial class TextToSpeechViewModel : ObservableObject
     }
 
     [RelayCommand]
+    public async Task BrowseKeyFile()
+    {
+        var fileName = await _fileHelper.PickOpenFile(Window!, "Open key file", "json files", "*.json");
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        KeyFile = fileName;
+    }
+
+    [RelayCommand]
     public async Task GenerateTts()
     {
         var engine = SelectedEngine;
