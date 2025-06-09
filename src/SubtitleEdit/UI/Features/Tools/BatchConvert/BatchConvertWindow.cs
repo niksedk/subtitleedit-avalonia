@@ -1,8 +1,12 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Media;
+using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -175,15 +179,26 @@ public class BatchConvertWindow : Window
             ItemsSource = vm.BatchFunctions,
             Columns =
             {
-                new DataGridTextColumn
+                new DataGridTemplateColumn
                 {
+                    Header = Se.Language.General.Enabled,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(BatchConvertFunction.IsSelected)),
-                    IsReadOnly = true,
+                    CellTemplate = new FuncDataTemplate<BatchConvertFunction>((item, _) =>
+                    new Border
+                    {
+                        Background = Brushes.Transparent, // Prevents highlighting
+                        Padding = new Thickness(4),
+                        Child = new CheckBox
+                        {
+                            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(BatchConvertFunction.IsSelected)),
+                            HorizontalAlignment = HorizontalAlignment.Center
+                        }
+                    }),
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
                 },
                 new DataGridTextColumn
                 {
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                     Binding = new Binding(nameof(BatchConvertFunction.Name)),
                     IsReadOnly = true,
                 },
@@ -197,6 +212,15 @@ public class BatchConvertWindow : Window
 
     private Border MakeFunctionView(BatchConvertViewModel vm)
     {
+        var scrollViewer = new ScrollViewer
+        {
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+            Padding = new Thickness(10, 15, 10, 10),
+            Width = double.NaN,
+            Height = 300,
+        };  
+
         var border = new Border
         {
             BorderThickness = new Thickness(1),
@@ -205,9 +229,9 @@ public class BatchConvertWindow : Window
             Padding = new Thickness(5),
             Child = UiUtil.MakeLabel("function options"),
         };
-        vm.FunctionContainer = border;
+        vm.FunctionContainer = scrollViewer;
 
-        return border;
+        return UiUtil.MakeBorderForControl(scrollViewer);
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

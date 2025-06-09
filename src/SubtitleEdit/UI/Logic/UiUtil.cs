@@ -13,6 +13,7 @@ using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 using System;
 using System.Collections.ObjectModel;
+using System.Globalization;
 
 namespace Nikse.SubtitleEdit.Logic;
 
@@ -1029,4 +1030,40 @@ public static class UiUtil
 
         return control;
     }
+
+    public static NumericUpDown MakeNumericUpDownInt(int min, int max, double width, object viewModel, string? propertyValuePath = null, string? propertyIsVisiblePath = null)
+    {
+        var control = new NumericUpDown
+        {
+            Width = width,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            DataContext = viewModel,
+            Minimum = min,
+            Maximum = max,
+            Increment = 1,      
+            FormatString = "F0",
+        };
+
+        if (propertyValuePath != null)
+        {
+            control.Bind(NumericUpDown.ValueProperty, new Binding
+            {
+                Path = propertyValuePath,
+                Mode = BindingMode.TwoWay,
+            });
+        }
+
+        if (propertyIsVisiblePath != null)
+        {
+            control.Bind(NumericUpDown.IsVisibleProperty, new Binding
+            {
+                Path = propertyIsVisiblePath,
+                Mode = BindingMode.TwoWay,
+            });
+        }
+
+        return control;
+    }
+
 }

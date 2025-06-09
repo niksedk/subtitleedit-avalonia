@@ -17,7 +17,7 @@ public static class ViewOffsetTimeCodes
 
         var labelTimeCodeFormat = new Label
         {
-            Content = "Time to offset",
+            Content = "Offset",
         };
 
         var timeUpDown = new TimeCodeUpDown()

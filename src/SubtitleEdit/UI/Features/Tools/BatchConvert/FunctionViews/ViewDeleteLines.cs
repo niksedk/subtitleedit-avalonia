@@ -14,13 +14,32 @@ public static class ViewDeleteLines
             Margin = new Avalonia.Thickness(0,0,0, 10),
         };
 
-        var checkBoxRemoveAll = UiUtil.MakeCheckBox(vm, nameof(vm.FormattingRemoveAll));
-        var checkBoxRemoveItalic = UiUtil.MakeCheckBox(vm, nameof(vm.FormattingRemoveItalic));
-        var checkBoxRemoveBold = UiUtil.MakeCheckBox(vm, nameof(vm.FormattingRemoveBold));
-        var checkBoxRemoveUnderline = UiUtil.MakeCheckBox(vm, nameof(vm.FormattingRemoveUnderline));
-        var checkBoxRemoveFontTags = UiUtil.MakeCheckBox(vm, nameof(vm.FormattingRemoveFontTags));
-        var checkBoxRemoveAlignmentTags = UiUtil.MakeCheckBox(vm, nameof(vm.FormattingRemoveAlignmentTags));
-        var checkBoxRemoveColors = UiUtil.MakeCheckBox(vm, nameof(vm.FormattingRemoveColors));
+        var labelDeleteContains = UiUtil.MakeLabel("Delete lines containing text");
+        var textBoxDeleteContains = UiUtil.MakeTextBox(400, vm, nameof(vm.DeleteLinesContains));
+        var panelDeleteContains = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            Children = { labelDeleteContains, textBoxDeleteContains },
+            Margin = new Avalonia.Thickness(0, 0, 0, 10),
+        };  
+
+        var labelDeleteFirstLines = UiUtil.MakeLabel("Delete first lines");
+        var numericUpDownDeleteFirstLines = UiUtil.MakeNumericUpDownInt(0, 100, 150, vm, nameof(vm.DeleteXFirstLines));
+        var panelDeleteFirstLines = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            Children = { labelDeleteFirstLines, numericUpDownDeleteFirstLines },
+            Margin = new Avalonia.Thickness(0, 0, 0, 10),
+        };
+
+        var labelDeleteLastLines = UiUtil.MakeLabel("Delete last lines");
+        var numericUpDownDeleteLastLines = UiUtil.MakeNumericUpDownInt(0, 100, 150, vm, nameof(vm.DeleteXLastLines));
+        var panelDeleteLastLines = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            Children = { labelDeleteLastLines, numericUpDownDeleteLastLines },
+            Margin = new Avalonia.Thickness(0, 0, 0, 10),
+        };
 
         var panel = new StackPanel
         {
@@ -28,13 +47,9 @@ public static class ViewDeleteLines
             Children = 
             { 
                 header,
-                checkBoxRemoveAll,
-                checkBoxRemoveItalic,
-                checkBoxRemoveBold,
-                checkBoxRemoveUnderline,
-                checkBoxRemoveFontTags,
-                checkBoxRemoveAlignmentTags,
-                checkBoxRemoveColors,
+                panelDeleteContains,
+                panelDeleteFirstLines,
+                panelDeleteLastLines,
             }
         };
 

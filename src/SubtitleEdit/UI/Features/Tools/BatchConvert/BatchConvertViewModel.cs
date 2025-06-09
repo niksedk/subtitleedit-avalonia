@@ -11,7 +11,6 @@ using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -55,11 +54,11 @@ public partial class BatchConvertViewModel : ObservableObject
     // Adjust display duration
     [ObservableProperty] private ObservableCollection<AdjustDurationDisplay> _adjustTypes;
     [ObservableProperty] private AdjustDurationDisplay _selectedAdjustType;
-    [ObservableProperty] private TimeSpan _adjustSeconds;
-    [ObservableProperty] private int _adjustPercentage;
-    [ObservableProperty] private TimeSpan _adjustFixedValue;
-    [ObservableProperty] private decimal _adjustRecalculateMaximumCharacters;
-    [ObservableProperty] private decimal _adjustRecalculateOptimalCharacters;
+    [ObservableProperty] private double _adjustSeconds;
+    [ObservableProperty] private int _adjustPercent;
+    [ObservableProperty] private double _adjustFixed;
+    [ObservableProperty] private double _adjustRecalculateMaxCharacterPerSecond;
+    [ObservableProperty] private double _adjustRecalculateOptimalCharacterPerSecond;
     [ObservableProperty] private bool _adjustIsSecondsVisible;
     [ObservableProperty] private bool _adjustIsPercentVisible;
     [ObservableProperty] private bool _adjustIsFixedVisible;
@@ -87,7 +86,7 @@ public partial class BatchConvertViewModel : ObservableObject
     public Control ViewChangeFrameRate { get; set; } = new Control();
 
     public bool OkPressed { get; private set; }
-    public Border FunctionContainer { get; internal set; }
+    public ScrollViewer FunctionContainer { get; internal set; }
 
     private readonly IWindowService _windowService;
     private readonly IFileHelper _fileHelper;
@@ -108,7 +107,7 @@ public partial class BatchConvertViewModel : ObservableObject
         ProgressText = string.Empty;
         DeleteLinesContains = string.Empty;
         OutputPropertiesText = string.Empty;
-        FunctionContainer = new Border();
+        FunctionContainer = new ScrollViewer();
         FrameRates = new ObservableCollection<double>
         {
             23.976,
@@ -201,6 +200,6 @@ public partial class BatchConvertViewModel : ObservableObject
             return;
         }
 
-        FunctionContainer.Child = selectedFunction.View;
+        FunctionContainer.Content = selectedFunction.View;
     }
 }
