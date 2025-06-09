@@ -213,6 +213,8 @@ public partial class TextToSpeechViewModel : ObservableObject
     public void Initialize(Subtitle subtitle, string videoFileName, WavePeakData wavePeakData, string waveFolder)
     {
         _subtitle = subtitle;
+        _subtitle.RemoveEmptyLines();
+
         _videoFileName = videoFileName;
         _wavePeakData = wavePeakData;
         _cancellationTokenSource = new CancellationTokenSource();
