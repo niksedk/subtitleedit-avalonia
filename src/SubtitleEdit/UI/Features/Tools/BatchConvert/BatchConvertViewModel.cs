@@ -72,10 +72,18 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private string _deleteLinesContains;
 
     // Change frame rate
-    [ObservableProperty] private ObservableCollection<double> _frameRates;
+    [ObservableProperty] private ObservableCollection<double> _fromFrameRates;
     [ObservableProperty] private double _selectedFromFrameRate;
+    [ObservableProperty] private ObservableCollection<double> _toFrameRates;
     [ObservableProperty] private double _selectedToFrameRate;
-
+    
+    // Change speed
+    [ObservableProperty] private double _changeSpeedPercent;
+    [ObservableProperty] private bool _changeSpeedAdjustAll;
+    [ObservableProperty] private bool _changeSpeedAdjustSelectedLines;
+    [ObservableProperty] private bool _changeSpeedAdjustSelectedLinesAndForward;
+    
+    
     public BatchConvertWindow? Window { get; set; }
 
     public bool OkPressed { get; private set; }
@@ -104,7 +112,19 @@ public partial class BatchConvertViewModel : ObservableObject
         OutputPropertiesText = string.Empty;
         StatusText = string.Empty;
         FunctionContainer = new ScrollViewer();
-        FrameRates = new ObservableCollection<double>
+        FromFrameRates = new ObservableCollection<double>
+        {
+            23.976,
+            24,
+            25,
+            29.97,
+            30,
+            48,
+            59.94,
+            60,
+            120,
+        };
+        ToFrameRates = new ObservableCollection<double>
         {
             23.976,
             24,

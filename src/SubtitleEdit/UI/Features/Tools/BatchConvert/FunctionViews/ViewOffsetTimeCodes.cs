@@ -8,7 +8,7 @@ public static class ViewOffsetTimeCodes
 {
     public static Control Make(BatchConvertViewModel vm)
     {
-        var header = new Label
+        var labelHeader = new Label
         {
             Content = "Offset time codes",
             FontWeight = Avalonia.Media.FontWeight.Bold,
@@ -44,7 +44,7 @@ public static class ViewOffsetTimeCodes
             Orientation = Avalonia.Layout.Orientation.Vertical,
             Children = 
             { 
-                header,
+                labelHeader,
                 panelTimeCode,
                 radioForward,
                 radioBackward

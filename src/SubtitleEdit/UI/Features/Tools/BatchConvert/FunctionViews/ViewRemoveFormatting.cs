@@ -7,7 +7,7 @@ public static class ViewRemoveFormatting
 {
     public static Control Make(BatchConvertViewModel vm)
     {
-        var header = new Label
+        var labelHeader = new Label
         {
             Content = "Remove formatting",
             FontWeight = Avalonia.Media.FontWeight.Bold,
@@ -27,7 +27,7 @@ public static class ViewRemoveFormatting
             Orientation = Avalonia.Layout.Orientation.Vertical,
             Children = 
             { 
-                header,
+                labelHeader,
                 checkBoxRemoveAll,
                 checkBoxRemoveItalic,
                 checkBoxRemoveBold,

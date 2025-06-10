@@ -14,7 +14,7 @@ public static class ViewAdjustDuration
 
     public static Control Make(BatchConvertViewModel vm)
     {
-        var label = new Label
+        var labelHeader = new Label
         {
             Content = "Adjust duration by",
             VerticalAlignment = VerticalAlignment.Center,
@@ -66,7 +66,7 @@ public static class ViewAdjustDuration
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(label, 0);
+        grid.Add(labelHeader, 0);
         grid.Add(combo, 0, 1);
         grid.Add(panelSeconds, 1, 0, 1, 2);
         grid.Add(panelPercent, 1, 0, 1, 2);

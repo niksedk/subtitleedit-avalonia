@@ -7,7 +7,7 @@ public static class ViewDeleteLines
 {
     public static Control Make(BatchConvertViewModel vm)
     {
-        var header = new Label
+        var labelHeader = new Label
         {
             Content = "Delete lines",
             FontWeight = Avalonia.Media.FontWeight.Bold,
@@ -46,7 +46,7 @@ public static class ViewDeleteLines
             Orientation = Avalonia.Layout.Orientation.Vertical,
             Children = 
             { 
-                header,
+                labelHeader,
                 panelDeleteContains,
                 panelDeleteFirstLines,
                 panelDeleteLastLines,

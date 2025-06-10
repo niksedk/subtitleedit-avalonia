@@ -37,6 +37,7 @@ public class BatchConvertFunction
             MakeFunction(BatchConvertFunctionType.AdjustDisplayDuration, "Adjust display duration", ViewAdjustDuration.Make(vm), activeFunctions),
             MakeFunction(BatchConvertFunctionType.DeleteLines, "Delete lines", ViewDeleteLines.Make(vm), activeFunctions),
             MakeFunction(BatchConvertFunctionType.ChangeFrameRate, "Change frame rate", ViewChangeFrameRate.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.ChangeSpeed, "Change speed", ViewChangeSpeed.Make(vm), activeFunctions),
         }.ToArray();
     }
 
