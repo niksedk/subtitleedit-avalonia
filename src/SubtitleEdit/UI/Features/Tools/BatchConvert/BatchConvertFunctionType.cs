@@ -8,5 +8,8 @@ public enum BatchConvertFunctionType
     DeleteLines,
     ChangeFrameRate,
     ChangeSpeed,
-    ChangeCasing
+    ChangeCasing,
+    FixCommonErrors,
+    MultipleReplace,
+    AutoTranslate,
 }

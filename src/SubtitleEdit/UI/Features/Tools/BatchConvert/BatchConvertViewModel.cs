@@ -86,6 +86,10 @@ public partial class BatchConvertViewModel : ObservableObject
     // Change casing
     [ObservableProperty] private bool _normalCasing;
     [ObservableProperty] private bool _normalCasingFixNames;
+    [ObservableProperty] private bool _normalCasingOnlyUpper;
+    [ObservableProperty] private bool _fixNamesOnly;
+    [ObservableProperty] private bool _allUppercase;
+    [ObservableProperty] private bool _allLowercase;
     
     public BatchConvertWindow? Window { get; set; }
 

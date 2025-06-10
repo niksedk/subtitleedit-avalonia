@@ -39,6 +39,9 @@ public class BatchConvertFunction
             MakeFunction(BatchConvertFunctionType.ChangeFrameRate, "Change frame rate", ViewChangeFrameRate.Make(vm), activeFunctions),
             MakeFunction(BatchConvertFunctionType.ChangeSpeed, "Change speed", ViewChangeSpeed.Make(vm), activeFunctions),
             MakeFunction(BatchConvertFunctionType.ChangeCasing, "Change casing", ViewChangeCasing.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.FixCommonErrors, "Fix common errors", ViewFixCommonErrors.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.MultipleReplace, "Multiple replace", ViewMultipleReplace.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.AutoTranslate, "Auto-translate", ViewAutoTranslate.Make(vm), activeFunctions),
         }.ToArray();
     }
 
