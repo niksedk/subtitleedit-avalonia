@@ -31,6 +31,7 @@ public class SeBatchConvert
 
     public double ChangeFrameRateFrom { get; set; }
     public double ChangeFrameRateTo { get; set; }
+    public bool SaveInSourceFolder { get; set; }
 
     public SeBatchConvert()
     {

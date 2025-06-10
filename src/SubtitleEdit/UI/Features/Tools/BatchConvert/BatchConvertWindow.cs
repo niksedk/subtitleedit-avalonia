@@ -34,10 +34,11 @@ public class BatchConvertWindow : Window
         var functionsListView = MakeFunctionsListView(vm);
         var functionView = MakeFunctionView(vm);
 
-        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
+        var buttonConvert = UiUtil.MakeButton("Convert", vm.ConvertCommand);
+        var buttonDone = UiUtil.MakeButton("Done", vm.ConvertCommand);
         var buttonPanel = UiUtil.MakeButtonBar(
-            buttonOk,
-            UiUtil.MakeButtonCancel(vm.CancelCommand)
+            buttonConvert,
+             buttonDone
         );
         
         var grid = new Grid
@@ -67,7 +68,7 @@ public class BatchConvertWindow : Window
 
         Content = grid;
         
-        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        Activated += delegate { buttonDone.Focus(); }; // hack to make OnKeyDown work
     }
 
     private Border MakeFileView(BatchConvertViewModel vm)

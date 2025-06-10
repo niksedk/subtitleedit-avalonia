@@ -40,6 +40,7 @@ using Nikse.SubtitleEdit.Logic.Dictionaries;
 using Nikse.SubtitleEdit.Logic.Download;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
+using SubtitleAlchemist.Features.Tools.BatchConvert;
 
 namespace Nikse.SubtitleEdit;
 
@@ -63,6 +64,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<IBluRayHelper, BluRayHelper>();
         collection.AddTransient<INOcrCaseFixer, NOcrCaseFixer>();
         collection.AddTransient<IMpvReloader, MpvReloader>();
+        collection.AddTransient<IBatchConverter, BatchConverter>();
 
         // Download services
         collection.AddHttpClient<IFfmpegDownloadService, FfmpegDownloadService>();

@@ -13,7 +13,9 @@ using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -34,6 +36,7 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private bool _isConverting;
     [ObservableProperty] private bool _areControlsEnabled;
     [ObservableProperty] private string _outputPropertiesText;
+    [ObservableProperty] private string _statusText;
     [ObservableProperty] private string _progressText;
     [ObservableProperty] private double _progressValue;
 
@@ -75,7 +78,6 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private double _selectedFromFrameRate;
     [ObservableProperty] private double _selectedToFrameRate;
 
-
     public BatchConvertWindow? Window { get; set; }
 
     // View for functions
@@ -90,6 +92,9 @@ public partial class BatchConvertViewModel : ObservableObject
 
     private readonly IWindowService _windowService;
     private readonly IFileHelper _fileHelper;
+    private readonly IBatchConverter _batchConverter;
+    private CancellationToken _cancellationToken;
+    private CancellationTokenSource _cancellationTokenSource;
 
     public BatchConvertViewModel(IWindowService windowService, IFileHelper fileHelper)
     {
@@ -99,7 +104,8 @@ public partial class BatchConvertViewModel : ObservableObject
         BatchItems = new ObservableCollection<BatchConvertItem>();
         BatchFunctions = new ObservableCollection<BatchConvertFunction>();
         TargetFormats = new ObservableCollection<string>(SubtitleFormat.AllSubtitleFormats.Select(p => p.Name));
-        TargetEncodings = new ObservableCollection<string>(EncodingHelper.GetEncodings().Select(p => p.DisplayName).ToList());
+        TargetEncodings =
+            new ObservableCollection<string>(EncodingHelper.GetEncodings().Select(p => p.DisplayName).ToList());
         DeleteLineNumbers = new ObservableCollection<int>();
         TargetFormatName = string.Empty;
         TargetEncoding = string.Empty;
@@ -127,17 +133,82 @@ public partial class BatchConvertViewModel : ObservableObject
         BatchFunctions = new ObservableCollection<BatchConvertFunction>(BatchConvertFunction.List(this));
     }
 
+    private void SaveSettings()
+    {
+        Se.SaveSettings();
+    }
+
     [RelayCommand]
-    private void Ok()
+    private void Done()
     {
         OkPressed = true;
         Window?.Close();
     }
 
     [RelayCommand]
-    private void Cancel()
+    private void Convert()
     {
-        Window?.Close();
+        if (BatchItems.Count == 0)
+        {
+            ShowStatus("No files to convert");
+            return;
+        }
+
+        _cancellationTokenSource = new CancellationTokenSource();
+        _cancellationToken = _cancellationTokenSource.Token;
+
+        foreach (var batchItem in BatchItems)
+        {
+            batchItem.Status = "-";
+        }
+
+        SaveSettings();
+
+        var config = MakeBatchConvertConfig();
+        _batchConverter.Initialize(config);
+        var start = System.Diagnostics.Stopwatch.GetTimestamp();
+
+        IsProgressVisible = true;
+        IsConverting = true;
+        AreControlsEnabled = false;
+        var unused = Task.Run(async () =>
+        {
+            var count = 1;
+            foreach (var batchItem in BatchItems)
+            {
+                var countDisplay = count;
+                ProgressText = $"Converting {countDisplay:#,###,##0}/{BatchItems.Count:#,###,##0}";
+                ProgressValue = countDisplay / (double)BatchItems.Count;
+                await _batchConverter.Convert(batchItem);
+                count++;
+
+                if (_cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
+            }
+
+            IsProgressVisible = false;
+            IsConverting = false;
+            AreControlsEnabled = true;
+
+            var end = System.Diagnostics.Stopwatch.GetTimestamp();
+            var message =
+                $"{BatchItems.Count:#,###,##0} files converted in {ProgressHelper.ToTimeResult(new TimeSpan(end - start).TotalMilliseconds)}";
+            if (_cancellationToken.IsCancellationRequested)
+            {
+                message += " - conversion cancelled by user";
+            }
+
+            await ShowStatus(message);
+        });
+    }
+
+    [RelayCommand]
+    private void CancelConvert()
+    {
+        _cancellationTokenSource.Cancel();
+        IsConverting = false;
     }
 
     [RelayCommand]
@@ -153,7 +224,8 @@ public partial class BatchConvertViewModel : ObservableObject
         {
             var fileInfo = new FileInfo(fileName);
             var subtitle = Subtitle.Parse(fileName);
-            var batchItem = new BatchConvertItem(fileName, fileInfo.Length, subtitle != null ? subtitle.OriginalFormat.Name : "Unknown", subtitle);
+            var batchItem = new BatchConvertItem(fileName, fileInfo.Length,
+                subtitle != null ? subtitle.OriginalFormat.Name : "Unknown", subtitle);
             BatchItems.Add(batchItem);
         }
 
@@ -180,7 +252,8 @@ public partial class BatchConvertViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowOutputProperties()
     {
-        await _windowService.ShowDialogAsync<BatchConvertSettingsWindow, BatchConvertSettingsViewModel>(Window!, vm => { });
+        await _windowService.ShowDialogAsync<BatchConvertSettingsWindow, BatchConvertSettingsViewModel>(Window!,
+            vm => { });
     }
 
     internal void OnKeyDown(KeyEventArgs e)
@@ -192,6 +265,65 @@ public partial class BatchConvertViewModel : ObservableObject
         }
     }
 
+    private BatchConvertConfig MakeBatchConvertConfig()
+    {
+        var activeFunctions = BatchFunctions.Where(p => p.IsSelected).Select(p => p.Type).ToList();
+
+        return new BatchConvertConfig
+        {
+            SaveInSourceFolder = Se.Settings.Tools.BatchConvert.SaveInSourceFolder,
+            OutputFolder = Se.Settings.Tools.BatchConvert.OutputFolder,
+            Overwrite = Se.Settings.Tools.BatchConvert.Overwrite,
+            TargetFormatName = SelectedTargetFormat ?? string.Empty,
+            TargetEncoding = SelectedTargetEncoding ?? string.Empty,
+
+            RemoveFormatting = new BatchConvertConfig.RemoveFormattingSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.RemoveFormatting),
+                RemoveAll = FormattingRemoveAll,
+                RemoveItalic = FormattingRemoveItalic,
+                RemoveBold = FormattingRemoveBold,
+                RemoveUnderline = FormattingRemoveUnderline,
+                RemoveColor = FormattingRemoveColors,
+                RemoveFontName = FormattingRemoveFontTags,
+                RemoveAlignment = FormattingRemoveAlignmentTags,
+            },
+
+            OffsetTimeCodes = new BatchConvertConfig.OffsetTimeCodesSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.OffsetTimeCodes),
+                Forward = OffsetTimeCodesForward,
+                Milliseconds = (long)OffsetTimeCodesTime.TotalMilliseconds,
+            },
+
+            AdjustDuration = new BatchConvertConfig.AdjustDurationSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.AdjustDisplayDuration),
+                AdjustmentType = SelectedAdjustType.Type,
+                Percentage = AdjustPercent,
+                FixedMilliseconds = (int)AdjustFixed,
+                MaxCharsPerSecond = (double)AdjustRecalculateMaxCharacterPerSecond,
+                OptimalCharsPerSecond = (double)AdjustRecalculateOptimalCharacterPerSecond,
+            },
+
+            DeleteLines = new BatchConvertConfig.DeleteLinesSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.DeleteLines),
+                DeleteXFirst = DeleteXFirstLines,
+                DeleteXLast = DeleteXLastLines,
+                DeleteContains = DeleteLinesContains,
+            },
+
+            ChangeFrameRate = new BatchConvertConfig.ChangeFrameRateSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.ChangeFrameRate),
+                FromFrameRate = SelectedFromFrameRate,
+                ToFrameRate = SelectedToFrameRate,
+            },
+        };
+    }
+
+
     internal void SelectedFunctionChanged(object? sender, SelectionChangedEventArgs e)
     {
         var selectedFunction = SelectedBatchFunction;
@@ -201,5 +333,12 @@ public partial class BatchConvertViewModel : ObservableObject
         }
 
         FunctionContainer.Content = selectedFunction.View;
+    }
+
+    private async Task ShowStatus(string statusText)
+    {
+        StatusText = statusText;
+        await Task.Delay(6_000, _cancellationToken);
+        StatusText = string.Empty;
     }
 }
