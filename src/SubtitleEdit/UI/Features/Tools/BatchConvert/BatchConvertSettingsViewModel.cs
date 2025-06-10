@@ -1,9 +1,13 @@
+using System.Collections.ObjectModel;
+using System.Linq;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
 
@@ -13,6 +17,9 @@ public partial class BatchConvertSettingsViewModel : ObservableObject
     [ObservableProperty] private bool _useOutputFolder;
     [ObservableProperty] private string _outputFolder;
     [ObservableProperty] private bool _overwrite;
+    [ObservableProperty] private ObservableCollection<string> _targetEncodings;
+    [ObservableProperty] private string? _selectedTargetEncoding;
+
     
     public BatchConvertSettingsWindow? Window { get; set; }
     
@@ -22,6 +29,9 @@ public partial class BatchConvertSettingsViewModel : ObservableObject
 
     public BatchConvertSettingsViewModel(IFolderHelper folderHelper)
     {
+        TargetEncodings =
+            new ObservableCollection<string>(EncodingHelper.GetEncodings().Select(p => p.DisplayName).ToList());
+
         _folderHelper = folderHelper;
 
         OutputFolder = string.Empty;
@@ -30,28 +40,36 @@ public partial class BatchConvertSettingsViewModel : ObservableObject
 
     private void LoadSettings()
     {
-        UseOutputFolder = Se.Settings.Tools.BatchConvert.UseOutputFolder;
-        UseSourceFolder = !UseOutputFolder; 
+        UseSourceFolder = Se.Settings.Tools.BatchConvert.SaveInSourceFolder;;
+        UseOutputFolder = !UseSourceFolder;
         OutputFolder = Se.Settings.Tools.BatchConvert.OutputFolder;
         Overwrite = Se.Settings.Tools.BatchConvert.Overwrite;
+        SelectedTargetEncoding = Se.Settings.Tools.BatchConvert.TargetEncoding;
     }
 
     private void SaveSettings()
     {
-        Se.Settings.Tools.BatchConvert.UseOutputFolder = UseOutputFolder;
+        Se.Settings.Tools.BatchConvert.SaveInSourceFolder = !UseOutputFolder;
         Se.Settings.Tools.BatchConvert.OutputFolder = OutputFolder;
         Se.Settings.Tools.BatchConvert.Overwrite = Overwrite;
+        Se.Settings.Tools.BatchConvert.TargetEncoding = SelectedTargetEncoding ?? TargetEncodings.First();
         Se.SaveSettings();
     }
 
     [RelayCommand]
-    private void Ok()
+    private async Task Ok()
     {
+        if (UseOutputFolder && string.IsNullOrWhiteSpace(OutputFolder))
+        {
+            await MessageBox.Show(Window!, "Error",
+                "Please select output folder", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
         SaveSettings();
         OkPressed = true;
         Window?.Close();
     }
-
 
     [RelayCommand]
     private async Task BrowseOutputFolder()

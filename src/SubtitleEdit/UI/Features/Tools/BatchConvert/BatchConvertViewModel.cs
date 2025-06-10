@@ -10,6 +10,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -21,15 +22,11 @@ namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
 public partial class BatchConvertViewModel : ObservableObject
 {
-    [ObservableProperty] private string _targetFormatName;
-    [ObservableProperty] private string _targetEncoding;
     [ObservableProperty] private ObservableCollection<BatchConvertItem> _batchItems;
     [ObservableProperty] private BatchConvertItem? _selectedBatchItem;
     [ObservableProperty] private string _batchItemsInfo;
     [ObservableProperty] private ObservableCollection<string> _targetFormats;
     [ObservableProperty] private string? _selectedTargetFormat;
-    [ObservableProperty] private ObservableCollection<string> _targetEncodings;
-    [ObservableProperty] private string? _selectedTargetEncoding;
     [ObservableProperty] private ObservableCollection<BatchConvertFunction> _batchFunctions;
     [ObservableProperty] private BatchConvertFunction? _selectedBatchFunction;
     [ObservableProperty] private bool _isProgressVisible;
@@ -81,13 +78,6 @@ public partial class BatchConvertViewModel : ObservableObject
 
     public BatchConvertWindow? Window { get; set; }
 
-    // View for functions
-    public Control ViewRemoveFormatting { get; set; } = new Control();
-    public Control ViewOffsetTimeCodes { get; set; } = new Control();
-    public Control ViewAdjustDuration { get; set; } = new Control();
-    public Control ViewDeleteLines { get; set; } = new Control();
-    public Control ViewChangeFrameRate { get; set; } = new Control();
-
     public bool OkPressed { get; private set; }
     public ScrollViewer FunctionContainer { get; internal set; }
 
@@ -96,6 +86,7 @@ public partial class BatchConvertViewModel : ObservableObject
     private readonly IBatchConverter _batchConverter;
     private CancellationToken _cancellationToken;
     private CancellationTokenSource _cancellationTokenSource;
+    private List<string> _encodings;
 
     public BatchConvertViewModel(IWindowService windowService, IFileHelper fileHelper, IBatchConverter batchConverter)
     {
@@ -106,11 +97,7 @@ public partial class BatchConvertViewModel : ObservableObject
         BatchItems = new ObservableCollection<BatchConvertItem>();
         BatchFunctions = new ObservableCollection<BatchConvertFunction>();
         TargetFormats = new ObservableCollection<string>(SubtitleFormat.AllSubtitleFormats.Select(p => p.Name));
-        TargetEncodings =
-            new ObservableCollection<string>(EncodingHelper.GetEncodings().Select(p => p.DisplayName).ToList());
         DeleteLineNumbers = new ObservableCollection<int>();
-        TargetFormatName = string.Empty;
-        TargetEncoding = string.Empty;
         BatchItemsInfo = string.Empty;
         ProgressText = string.Empty;
         DeleteLinesContains = string.Empty;
@@ -133,13 +120,63 @@ public partial class BatchConvertViewModel : ObservableObject
         SelectedAdjustType = AdjustTypes.First();
 
         BatchFunctions = new ObservableCollection<BatchConvertFunction>(BatchConvertFunction.List(this));
-        
+
         _cancellationTokenSource = new CancellationTokenSource();
         _cancellationToken = _cancellationTokenSource.Token;
+
+        _encodings = EncodingHelper.GetEncodings().Select(p => p.DisplayName).ToList();
+        
+        LoadSettings();
+    }
+
+    private void LoadSettings()
+    {
+        var targetFormat = TargetFormats.FirstOrDefault(p => p == Se.Settings.Tools.BatchConvert.TargetFormat);
+        if (targetFormat == null)
+        {
+            targetFormat = TargetFormats.First();
+        }
+        SelectedTargetFormat = targetFormat;
+
+        UpdateOutputProperties();
+    }
+
+    private void UpdateOutputProperties()
+    {
+        var targetEncoding = 
+            _encodings.FirstOrDefault(p => p == Se.Settings.Tools.BatchConvert.TargetEncoding);
+        if (targetEncoding == null)
+        {
+            targetEncoding = _encodings.First();
+            Se.Settings.Tools.BatchConvert.TargetEncoding = targetEncoding;
+        }
+
+        if (!Se.Settings.Tools.BatchConvert.SaveInSourceFolder &&
+            string.IsNullOrWhiteSpace(Se.Settings.Tools.BatchConvert.OutputFolder))
+        {
+            Se.Settings.Tools.BatchConvert.SaveInSourceFolder = true;
+        }
+        
+        string text;
+        if (Se.Settings.Tools.BatchConvert.SaveInSourceFolder)
+        {
+            text = string.Format("Outputfolder: {0}", "Source folder");
+        }
+        else
+        {
+            text = string.Format("Outputfolder: {0}", Se.Settings.Tools.BatchConvert.OutputFolder);
+        }
+
+        text += Environment.NewLine +
+                "Encoding: " + Se.Settings.Tools.BatchConvert.TargetEncoding + ", overwrite: " +
+                Se.Settings.Tools.BatchConvert.Overwrite;
+        
+        OutputPropertiesText = text;
     }
 
     private void SaveSettings()
     {
+        Se.Settings.Tools.BatchConvert.TargetFormat = SelectedTargetFormat ?? TargetFormats.First();
         Se.SaveSettings();
     }
 
@@ -260,6 +297,7 @@ public partial class BatchConvertViewModel : ObservableObject
     {
         await _windowService.ShowDialogAsync<BatchConvertSettingsWindow, BatchConvertSettingsViewModel>(Window!,
             vm => { });
+        UpdateOutputProperties();
     }
 
     internal void OnKeyDown(KeyEventArgs e)
@@ -281,7 +319,7 @@ public partial class BatchConvertViewModel : ObservableObject
             OutputFolder = Se.Settings.Tools.BatchConvert.OutputFolder,
             Overwrite = Se.Settings.Tools.BatchConvert.Overwrite,
             TargetFormatName = SelectedTargetFormat ?? string.Empty,
-            TargetEncoding = SelectedTargetEncoding ?? string.Empty,
+            TargetEncoding = Se.Settings.Tools.BatchConvert.TargetEncoding,
 
             RemoveFormatting = new BatchConvertConfig.RemoveFormattingSettings
             {

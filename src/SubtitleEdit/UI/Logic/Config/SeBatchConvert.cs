@@ -5,7 +5,6 @@ namespace Nikse.SubtitleEdit.Logic.Config;
 public class SeBatchConvert
 {
     public string[] ActiveFunctions { get; set; } = [];
-    public bool UseOutputFolder { get; set; }
     public string OutputFolder { get; set; }
     public bool Overwrite { get; set; }
     public string TargetFormat { get; set; }
@@ -36,7 +35,7 @@ public class SeBatchConvert
     public SeBatchConvert()
     {
         OutputFolder = string.Empty;
-        UseOutputFolder = true;
+        SaveInSourceFolder = true;
         TargetFormat = string.Empty;
         TargetEncoding = string.Empty;
         OffsetTimeCodesForward = true;

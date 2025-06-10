@@ -6,7 +6,6 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
-using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -35,7 +34,7 @@ public class BatchConvertWindow : Window
         var functionView = MakeFunctionView(vm);
 
         var buttonConvert = UiUtil.MakeButton("Convert", vm.ConvertCommand);
-        var buttonDone = UiUtil.MakeButtonDone(vm.ConvertCommand);
+        var buttonDone = UiUtil.MakeButtonDone(vm.DoneCommand);
         var buttonPanel = UiUtil.MakeButtonBar(
             buttonConvert,
              buttonDone
@@ -148,8 +147,6 @@ public class BatchConvertWindow : Window
                 UiUtil.MakeSeparatorForHorizontal(),
                 UiUtil.MakeLabel("Target format"),
                 UiUtil.MakeComboBox(vm.TargetFormats, vm, nameof(vm.SelectedTargetFormat)),
-                UiUtil.MakeLabel("Target encoding").WithLarginLeft(5),
-                UiUtil.MakeComboBox(vm.TargetEncodings, vm, nameof(vm.SelectedTargetEncoding)),
                 UiUtil.MakeSeparatorForHorizontal(),
                 UiUtil.MakeButton("Output properties", vm.ShowOutputPropertiesCommand),
                 UiUtil.MakeLabel(new Binding(nameof(vm.OutputPropertiesText))),

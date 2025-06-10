@@ -21,6 +21,14 @@ public class BatchConvertSettingsWindow : Window
         vm.Window = this;
         DataContext = vm;
 
+        var labelTargetEncoding = UiUtil.MakeLabel("Target encoding").WithLarginLeft(5);
+        var comboBoxTargetEncoding = UiUtil.MakeComboBox(vm.TargetEncodings, vm, nameof(vm.SelectedTargetEncoding));
+        var panelTargetEncoding = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Children = { labelTargetEncoding, comboBoxTargetEncoding  }
+        };
+
         var checkBoxOverwrite = new CheckBox
         {
             Content = "Overwrite existing files",
@@ -81,6 +89,7 @@ public class BatchConvertSettingsWindow : Window
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
@@ -93,11 +102,12 @@ public class BatchConvertSettingsWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(checkBoxOverwrite, 0, 0);
-        grid.Add(checkBoxUseSourceFolder, 1, 0);
-        grid.Add(checkBoxUseOutputFolder, 2, 0);
-        grid.Add(panelOutputFolder, 3, 0);
-        grid.Add(panelButtons, 4, 0);
+        grid.Add(panelTargetEncoding, 0, 0);
+        grid.Add(checkBoxOverwrite, 1, 0);
+        grid.Add(checkBoxUseSourceFolder, 2, 0);
+        grid.Add(checkBoxUseOutputFolder, 3, 0);
+        grid.Add(panelOutputFolder, 4, 0);
+        grid.Add(panelButtons, 5, 0);
 
         Content = grid;
         
