@@ -10,7 +10,7 @@ namespace Nikse.SubtitleEdit.Features.Translate;
 public class TranslateSettingsWindow : Window
 {
     private TranslateSettingsViewModel _vm;
-    
+
     public TranslateSettingsWindow(TranslateSettingsViewModel vm)
     {
         _vm = vm;
@@ -71,19 +71,19 @@ public class TranslateSettingsWindow : Window
 
         var labelPrompt = UiUtil.MakeTextBlock("Prompt text", vm, null, nameof(vm.PromptIsVisible));
         var promptTextBox = new TextBox
-        {
-            AcceptsReturn = true,
-            AcceptsTab = true,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            Width = double.NaN,
-            Height = double.NaN,
-            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-        }.BindIsVisible(vm, nameof(vm.PromptIsVisible))
-         .BindText(vm, nameof(vm.PromptText));
+            {
+                AcceptsReturn = true,
+                AcceptsTab = true,
+                VerticalAlignment = VerticalAlignment.Stretch,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                Width = double.NaN,
+                Height = double.NaN,
+                TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+            }.BindIsVisible(vm, nameof(vm.PromptIsVisible))
+            .BindText(vm, nameof(vm.PromptText));
 
-        var buttonOk = UiUtil.MakeButton("OK", vm.OkCommand);
-        var buttonCancel = UiUtil.MakeButton("Cancel", vm.CancelCommand);
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var buttonBar = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
         var grid = new Grid
@@ -138,7 +138,7 @@ public class TranslateSettingsWindow : Window
         Grid.SetColumnSpan(buttonBar, 2);
 
         Content = grid;
-        
+
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 

@@ -7,6 +7,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Shared;
 
@@ -39,8 +40,7 @@ public enum MessageBoxIcon
 public class MessageBox : Window
 {
     private MessageBoxResult _result = MessageBoxResult.None;
-    private string _message;
-    private bool _hasCancel;
+    private readonly bool _hasCancel;
 
     private MessageBox(string title, string message, MessageBoxButtons buttons, MessageBoxIcon icon)
     {
@@ -51,7 +51,7 @@ public class MessageBox : Window
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         CanResize = false;
 
-        _message = message;
+        var message1 = message;
 
         var grid = new Grid
         {
@@ -78,7 +78,7 @@ public class MessageBox : Window
 
         if (icon != MessageBoxIcon.None)
         {
-            var iconPath = $"Assets/Themes/Dark/{icon}.png"; // <- change YourAppName
+            var iconPath = $"Assets/Themes/Dark/{icon}.png"; 
             try
             {
                 iconImage.Source = new Bitmap(iconPath);
@@ -150,21 +150,21 @@ public class MessageBox : Window
         switch (buttons)
         {
             case MessageBoxButtons.OK:
-                AddButton("OK", MessageBoxResult.OK);
+                AddButton(Se.Language.General.Ok, MessageBoxResult.OK);
                 break;
             case MessageBoxButtons.OKCancel:
-                AddButton("OK", MessageBoxResult.OK);
-                AddButton("Cancel", MessageBoxResult.Cancel);
+                AddButton(Se.Language.General.Ok, MessageBoxResult.OK);
+                AddButton(Se.Language.General.Cancel, MessageBoxResult.Cancel);
                 _hasCancel = true;
                 break;
             case MessageBoxButtons.YesNo:
-                AddButton("Yes", MessageBoxResult.Yes);
-                AddButton("No", MessageBoxResult.No);
+                AddButton(Se.Language.General.Yes, MessageBoxResult.Yes);
+                AddButton(Se.Language.General.No, MessageBoxResult.No);
                 break;
             case MessageBoxButtons.YesNoCancel:
-                AddButton("Yes", MessageBoxResult.Yes);
-                AddButton("No", MessageBoxResult.No);
-                AddButton("Cancel", MessageBoxResult.Cancel);
+                AddButton(Se.Language.General.Yes, MessageBoxResult.Yes);
+                AddButton(Se.Language.General.No, MessageBoxResult.No);
+                AddButton(Se.Language.General.Cancel, MessageBoxResult.Cancel);
                 _hasCancel = true;
                 break;
         }
@@ -182,10 +182,10 @@ public class MessageBox : Window
             {
                 new MenuItem
                 {
-                    Header = "Copy text to clipboard",
+                    Header = Se.Language.General.CopyTextToClipboard,
                     Command = new RelayCommand(() =>
                     {
-                        Clipboard!.SetTextAsync(_message);
+                        Clipboard!.SetTextAsync(message1);
                     })
                 }
             }

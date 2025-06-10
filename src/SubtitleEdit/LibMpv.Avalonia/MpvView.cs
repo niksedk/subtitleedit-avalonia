@@ -9,7 +9,6 @@ namespace HanumanInstitute.LibMpv.Avalonia;
 public class MpvView : Control
 {
     private IVideoView? _view;
-    public event EventHandler? ViewInitialized;
     // MpvContext property
     public static readonly DirectProperty<MpvView, MpvContext?> MpvContextProperty =
         AvaloniaProperty.RegisterDirect<MpvView, MpvContext?>(nameof(MpvContext), o =>

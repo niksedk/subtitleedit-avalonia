@@ -39,7 +39,7 @@ public class OpenFromUrlWindow : Window
             VerticalAlignment = VerticalAlignment.Center,
         };
 
-        var buttonPanel = UiUtil.MakeButtonBar(UiUtil.MakeButton("OK", vm.OkCommand), UiUtil.MakeButton("Cancel", vm.CancelCommand));
+        var buttonPanel = UiUtil.MakeButtonBar(UiUtil.MakeButtonOk(vm.OkCommand), UiUtil.MakeButtonCancel(vm.CancelCommand));
 
         var grid = new Grid
         {

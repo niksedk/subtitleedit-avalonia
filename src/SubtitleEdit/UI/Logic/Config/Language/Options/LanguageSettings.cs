@@ -1,10 +1,9 @@
 ﻿using Nikse.SubtitleEdit.Core.Enums;
 
-namespace Nikse.SubtitleEdit.Logic.Config.Language;
+namespace Nikse.SubtitleEdit.Logic.Config.Language.Options;
 
 public class LanguageSettings
 {
-
     public string DialogStyle { get; set; }
 
     public string DialogStyleDashSecondLineWithoutSpace { get; set; }

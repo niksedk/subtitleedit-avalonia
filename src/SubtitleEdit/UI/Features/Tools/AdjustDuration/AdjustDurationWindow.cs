@@ -1,9 +1,11 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 
@@ -17,7 +19,7 @@ public class AdjustDurationWindow : Window
     public AdjustDurationWindow(AdjustDurationViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = "Adjust duration";
+        Title = Se.Language.Tools.AdjustDurations.Title;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 
@@ -27,7 +29,7 @@ public class AdjustDurationWindow : Window
 
         var label = new Label
         {
-            Content = "Adjust duration by",
+            Content = Se.Language.Tools.AdjustDurations.AdjustVia,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(10, 0, 0, 0),
         };
@@ -38,7 +40,7 @@ public class AdjustDurationWindow : Window
             VerticalAlignment = VerticalAlignment.Center,
             MinWidth = 180,
         };
-        combo.Bind(ComboBox.SelectedValueProperty, new Binding
+        combo.Bind(SelectingItemsControl.SelectedValueProperty, new Binding
         {
             Path = nameof(vm.SelectedAdjustType),
             Mode = BindingMode.TwoWay,
@@ -54,7 +56,7 @@ public class AdjustDurationWindow : Window
         {
             VerticalAlignment = VerticalAlignment.Bottom,
             HorizontalAlignment = HorizontalAlignment.Left,
-            Text = "Note: Adjustments will not cause overlap",
+            Text = Se.Language.Tools.AdjustDurations.Note,
             Margin = new Thickness(10, 25, 10, 15),
         };
 
@@ -104,7 +106,7 @@ public class AdjustDurationWindow : Window
     {
         var textBlockSeconds = new TextBlock
         {
-            Text = "Seconds",
+            Text = Se.Language.General.Seconds,
             VerticalAlignment = VerticalAlignment.Center,
             MinWidth = LabelMinWidth,
         };
@@ -147,7 +149,7 @@ public class AdjustDurationWindow : Window
     {
         var textBlockSeconds = new TextBlock
         {
-            Text = "Percent",
+            Text = Se.Language.General.Percent,
             VerticalAlignment = VerticalAlignment.Center,
             MinWidth = LabelMinWidth,
         };
@@ -191,7 +193,7 @@ public class AdjustDurationWindow : Window
     {
         var textBlockSeconds = new TextBlock
         {
-            Text = "Fixed seconds",
+            Text = Se.Language.Tools.AdjustDurations.Fixed,
             VerticalAlignment = VerticalAlignment.Center,
             MinWidth = LabelMinWidth,
         };
@@ -233,7 +235,7 @@ public class AdjustDurationWindow : Window
     {
         var textBlockMax = new TextBlock
         {
-            Text = "Max characters per second",
+            Text = Se.Language.General.MaxCharactersPerSecond,
             VerticalAlignment = VerticalAlignment.Center,
         };
         var numericUpDownMax = new NumericUpDown
@@ -253,7 +255,7 @@ public class AdjustDurationWindow : Window
 
         var textBlockOptimal = new TextBlock
         {
-            Text = "Optimal characters per second",
+            Text = Se.Language.General.OptimalCharactersPerSecond,
             VerticalAlignment = VerticalAlignment.Center,
         };
         var numericUpDownOptimal = new NumericUpDown

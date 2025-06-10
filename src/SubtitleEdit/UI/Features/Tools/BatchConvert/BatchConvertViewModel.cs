@@ -39,6 +39,7 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private string _statusText;
     [ObservableProperty] private string _progressText;
     [ObservableProperty] private double _progressValue;
+    [ObservableProperty] private double _progressMaxValue;
 
     // Remove formatting
     [ObservableProperty] private bool _formattingRemoveAll;
@@ -96,10 +97,11 @@ public partial class BatchConvertViewModel : ObservableObject
     private CancellationToken _cancellationToken;
     private CancellationTokenSource _cancellationTokenSource;
 
-    public BatchConvertViewModel(IWindowService windowService, IFileHelper fileHelper)
+    public BatchConvertViewModel(IWindowService windowService, IFileHelper fileHelper, IBatchConverter batchConverter)
     {
         _windowService = windowService;
         _fileHelper = fileHelper;
+        _batchConverter = batchConverter;
 
         BatchItems = new ObservableCollection<BatchConvertItem>();
         BatchFunctions = new ObservableCollection<BatchConvertFunction>();
@@ -113,6 +115,7 @@ public partial class BatchConvertViewModel : ObservableObject
         ProgressText = string.Empty;
         DeleteLinesContains = string.Empty;
         OutputPropertiesText = string.Empty;
+        StatusText = string.Empty;
         FunctionContainer = new ScrollViewer();
         FrameRates = new ObservableCollection<double>
         {
@@ -129,8 +132,10 @@ public partial class BatchConvertViewModel : ObservableObject
         AdjustTypes = new ObservableCollection<AdjustDurationDisplay>(AdjustDurationDisplay.ListAll());
         SelectedAdjustType = AdjustTypes.First();
 
-        var activeFunctions = Se.Settings.Tools.BatchConvert.ActiveFunctions;
         BatchFunctions = new ObservableCollection<BatchConvertFunction>(BatchConvertFunction.List(this));
+        
+        _cancellationTokenSource = new CancellationTokenSource();
+        _cancellationToken = _cancellationTokenSource.Token;
     }
 
     private void SaveSettings()
@@ -146,11 +151,11 @@ public partial class BatchConvertViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Convert()
+    private async Task Convert()
     {
         if (BatchItems.Count == 0)
         {
-            ShowStatus("No files to convert");
+            await ShowStatus("No files to convert");
             return;
         }
 
@@ -171,6 +176,7 @@ public partial class BatchConvertViewModel : ObservableObject
         IsProgressVisible = true;
         IsConverting = true;
         AreControlsEnabled = false;
+        ProgressMaxValue = BatchItems.Count;
         var unused = Task.Run(async () =>
         {
             var count = 1;
@@ -201,7 +207,7 @@ public partial class BatchConvertViewModel : ObservableObject
             }
 
             await ShowStatus(message);
-        });
+        }, _cancellationToken);
     }
 
     [RelayCommand]
@@ -338,7 +344,7 @@ public partial class BatchConvertViewModel : ObservableObject
     private async Task ShowStatus(string statusText)
     {
         StatusText = statusText;
-        await Task.Delay(6_000, _cancellationToken);
+        await Task.Delay(6000, _cancellationToken).ConfigureAwait(false);
         StatusText = string.Empty;
     }
 }

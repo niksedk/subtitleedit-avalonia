@@ -20,6 +20,12 @@ public class ParagraphEventArgs
     public ParagraphEventArgs(double seconds, SubtitleLineViewModel? p)
     {
         Seconds = seconds;
+        if (p == null)
+        {
+            Paragraph = new SubtitleLineViewModel();
+            return;
+        }
+        
         Paragraph = new SubtitleLineViewModel(p, false);
     }
 

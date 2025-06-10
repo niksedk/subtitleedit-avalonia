@@ -277,7 +277,7 @@ public class AudioToTextWhisperWindow : Window
         var transcribeButton = UiUtil.MakeButton("Transcribe", vm.TranscribeCommand).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
         var buttonPanel = UiUtil.MakeButtonBar(
             transcribeButton,
-            UiUtil.MakeButton("Cancel", vm.CancelCommand)
+            UiUtil.MakeButtonCancel(vm.CancelCommand)
         );
 
         var grid = new Grid

@@ -40,7 +40,7 @@ public class ElevenLabs : ITtsEngine
         return $"{Name}";
     }
 
-    public async Task<Voice[]> GetVoices(string language)
+    public Task<Voice[]> GetVoices(string language)
     {
         var elevenLabsFolder = GetSetElevenLabsFolder();
 
@@ -53,14 +53,14 @@ public class ElevenLabs : ITtsEngine
             stream.CopyTo(fileStream);
         }
 
-        return Map(voiceFileName);
+        return Task.FromResult(Map(voiceFileName));
     }
 
     private static Voice[] Map(string voiceFileName)
     {
         if (!File.Exists(voiceFileName))
         {
-            return Array.Empty<Voice>();
+            return [];
         }
 
         var result = new List<Voice>();

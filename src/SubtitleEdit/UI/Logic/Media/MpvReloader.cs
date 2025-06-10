@@ -183,7 +183,7 @@ public class MpvReloader : IMpvReloader
                 UpdateMpvStyle();
             }
 
-            return _mpvPreviewStyleHeader;
+            return _mpvPreviewStyleHeader ?? string.Empty;
         }
         set => _mpvPreviewStyleHeader = value;
     }

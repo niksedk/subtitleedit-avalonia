@@ -20,11 +20,16 @@ public static class Locator
 }
 public class MainView : ViewBase
 {
-    private MainViewModel _vm;
+    private MainViewModel? _vm;
 
     protected override object Build()
     {
         _vm = Locator.Services.GetRequiredService<MainViewModel>();
+        if (_vm == null)
+        {
+            throw new InvalidOperationException("MainViewModel is not registered in the service provider.");
+        }
+        
         _vm.MainView = this;
         DataContext = _vm;
 
@@ -85,6 +90,6 @@ public class MainView : ViewBase
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
-        _vm.KeyDown(e);
+        _vm?.KeyDown(e);
     }
 }

@@ -4,6 +4,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Options.Language;
 
@@ -14,7 +15,7 @@ public class LanguageWindow : Window
     public LanguageWindow(LanguageViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = "Choose language";
+        Title = Se.Language.Options.ChooseLanguage.Title;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 
@@ -24,7 +25,7 @@ public class LanguageWindow : Window
 
         var label = new Label
         {
-            Content = "Language",
+            Content = Se.Language.General.Language,
             VerticalAlignment = VerticalAlignment.Center,
         };
 

@@ -159,13 +159,14 @@ public partial class SpellCheckViewModel : ObservableObject
     [RelayCommand]
     private void ChangeWordAll()
     {
-        if (string.IsNullOrWhiteSpace(CurrentWord) || WordNotFoundOriginal == CurrentWord)
+        var selectedParagraph = SelectedParagraph;
+        if (string.IsNullOrWhiteSpace(CurrentWord) || WordNotFoundOriginal == CurrentWord || selectedParagraph == null)
         {
             Dispatcher.UIThread.Invoke(() => { TextBoxWordNotFound.Focus(); });
             return;
         }
 
-        _spellCheckManager.ChangeAllWord(WordNotFoundOriginal, CurrentWord, _currentSpellCheckWord, SelectedParagraph);
+        _spellCheckManager.ChangeAllWord(WordNotFoundOriginal, CurrentWord, _currentSpellCheckWord, selectedParagraph);
         ShowStatus($"Change all words from \"{WordNotFoundOriginal}\" to \"{CurrentWord}\"");
         DoSpellCheck();
     }

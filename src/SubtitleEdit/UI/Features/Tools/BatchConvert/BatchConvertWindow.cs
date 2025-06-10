@@ -35,7 +35,7 @@ public class BatchConvertWindow : Window
         var functionView = MakeFunctionView(vm);
 
         var buttonConvert = UiUtil.MakeButton("Convert", vm.ConvertCommand);
-        var buttonDone = UiUtil.MakeButton("Done", vm.ConvertCommand);
+        var buttonDone = UiUtil.MakeButtonDone(vm.ConvertCommand);
         var buttonPanel = UiUtil.MakeButtonBar(
             buttonConvert,
              buttonDone

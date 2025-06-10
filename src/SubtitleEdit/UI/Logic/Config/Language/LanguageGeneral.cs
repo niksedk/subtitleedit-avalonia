@@ -123,6 +123,13 @@ public class LanguageGeneral
     public object FileName { get; set; }
     public object Format { get; set; }
     public object Status { get; set; }
+    public string Done { get; set; }
+    public string Language { get; set; }
+    public string CopyTextToClipboard { get; set; }
+    public string Seconds { get; set; }
+    public string Percent { get; set; }
+    public string MaxCharactersPerSecond { get; set; }
+    public string OptimalCharactersPerSecond { get; set; }
 
     public LanguageGeneral()
     {
@@ -247,5 +254,12 @@ public class LanguageGeneral
         FileName = "File name";
         Format = "Format";
         Status = "Status";
+        Done = "Done";
+        Language = "Language";
+        CopyTextToClipboard = "Copy text to clipboard";
+        Seconds = "Seconds";
+        Percent = "Percent";
+        MaxCharactersPerSecond = "Max characters per second";
+        OptimalCharactersPerSecond = "Optimal characters per second";
     }
 }

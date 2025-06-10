@@ -71,7 +71,7 @@ public class SpellCheckWindow : Window
         };
         var panelSuggestions = MakeSuggestions(vm);
 
-        var buttonDone = UiUtil.MakeButton("Done", vm.OkCommand).WithLeftAlignment();
+        var buttonDone = UiUtil.MakeButtonDone(vm.OkCommand).WithLeftAlignment();
         var panelButtonsOk = UiUtil.MakeButtonBar(buttonDone);
 
         var grid = new Grid

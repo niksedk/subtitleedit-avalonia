@@ -123,6 +123,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         EstimatedText = string.Empty;
         TranscribedSubtitle = new Subtitle();
         TextBoxConsoleLog = new TextBox();
+        _audioTrackNumber = 0;
 
         LoadSettings();
 

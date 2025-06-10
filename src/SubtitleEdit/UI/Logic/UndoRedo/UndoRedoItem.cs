@@ -23,7 +23,7 @@ public class UndoRedoItem
     {
         Description = description;
         Subtitles = subtitles;
-        SubtitleFileName = subtitleFileName;
+        SubtitleFileName = subtitleFileName ?? string.Empty;
         SelectedLines = selectedLines;
         CaretIndex = caretIndex;
         SelectionLength = selectionLength;

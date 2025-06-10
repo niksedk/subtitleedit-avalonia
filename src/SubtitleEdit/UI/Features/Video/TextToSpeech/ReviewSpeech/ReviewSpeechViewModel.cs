@@ -84,6 +84,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
         Regions = new ObservableCollection<string>();
         Models = new ObservableCollection<string>();
         Styles = new ObservableCollection<string>();
+        StepResults = [];
 
         Stability = Se.Settings.Video.TextToSpeech.ElevenLabsStability;
         Similarity = Se.Settings.Video.TextToSpeech.ElevenLabsSimilarity;
@@ -168,7 +169,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
         TtsLanguage? language,
         string videoFileName,
         string waveFolder,
-        WavePeakData wavePeakData)
+        WavePeakData? wavePeakData)
     {
         foreach (var p in stepResults)
         {
@@ -349,7 +350,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
             var configFileName = Path.Combine(Piper.GetSetPiperFolder(), piperVoice.ConfigShort);
             if (!File.Exists(modelFileName) || !File.Exists(configFileName))
             {
-                var dlResult = await _windowService.ShowDialogAsync<DownloadTtsWindow, DownloadTtsViewModel>(Window, vm => vm.StartDownloadPiperVoice(piperVoice));
+                var dlResult = await _windowService.ShowDialogAsync<DownloadTtsWindow, DownloadTtsViewModel>(Window!, vm => vm.StartDownloadPiperVoice(piperVoice));
                 if (!dlResult.OkPressed)
                 {
                     return;

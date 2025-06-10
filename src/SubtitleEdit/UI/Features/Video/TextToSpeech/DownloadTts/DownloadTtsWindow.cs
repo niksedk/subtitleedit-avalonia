@@ -10,7 +10,7 @@ namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.DownloadTts;
 
 public sealed class DownloadTtsWindow : Window
 {
-    private DownloadTtsViewModel _vm;
+    private readonly DownloadTtsViewModel _vm;
 
     public DownloadTtsWindow(DownloadTtsViewModel vm)
     {
@@ -21,6 +21,7 @@ public sealed class DownloadTtsWindow : Window
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         vm.Window = this;
         DataContext = vm;
+        _vm = vm;
 
         var titleText = new TextBlock
         {            

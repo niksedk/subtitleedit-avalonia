@@ -17,8 +17,8 @@ using System.Threading;
 
 public class AudioVisualizer : Control
 {
-    public static readonly StyledProperty<WavePeakData> WavePeaksProperty =
-        AvaloniaProperty.Register<AudioVisualizer, WavePeakData>(nameof(WavePeaks));
+    public static readonly StyledProperty<WavePeakData?> WavePeaksProperty =
+        AvaloniaProperty.Register<AudioVisualizer, WavePeakData?>(nameof(WavePeaks));
 
     public static readonly StyledProperty<double> StartPositionSecondsProperty =
         AvaloniaProperty.Register<AudioVisualizer, double>(nameof(StartPositionSeconds));
@@ -164,16 +164,16 @@ public class AudioVisualizer : Control
     public event ParagraphEventHandler? OnToggleSelection;
     public event PositionEventHandler? OnHorizontalScroll;
     public event ParagraphEventHandler? OnParagraphDoubleTapped;
-    public event ParagraphEventHandler? OnPositionSelected;
-    public event ParagraphEventHandler? OnTimeChanged;
-    public event ParagraphEventHandler? OnStartTimeChanged;
-    public event ParagraphEventHandler? OnTimeChangedAndOffsetRest;
-    public event ParagraphEventHandler? OnNewSelectionRightClicked;
+    //public event ParagraphEventHandler? OnPositionSelected;
+    //public event ParagraphEventHandler? OnTimeChanged;
+    //public event ParagraphEventHandler? OnStartTimeChanged;
+    //public event ParagraphEventHandler? OnTimeChangedAndOffsetRest;
+    //public event ParagraphEventHandler? OnNewSelectionRightClicked;
     public event ParagraphEventHandler? OnNewSelectionInsert;
-    public event ParagraphEventHandler? OnParagraphRightClicked;
-    public event ParagraphEventHandler? OnNonParagraphRightClicked;
-    public event ParagraphEventHandler? OnSingleClick;
-    public event ParagraphEventHandler? OnStatus;
+    //public event ParagraphEventHandler? OnParagraphRightClicked;
+    //public event ParagraphEventHandler? OnNonParagraphRightClicked;
+    //public event ParagraphEventHandler? OnSingleClick;
+    //public event ParagraphEventHandler? OnStatus;
 
     public AudioVisualizer()
     {

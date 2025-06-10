@@ -384,7 +384,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     }
 
     [RelayCommand]
-    private async Task ExportBluRaySup()
+    private void ExportBluRaySup()
     {
         _shortcutManager.ClearKeys();
     }
@@ -410,7 +410,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     }
 
     [RelayCommand]
-    private async Task ExportCavena890()
+    private void ExportCavena890()
     {
         //var result = await _popupService
         //    .ShowPopupAsync<ExportCavena890PopupModel>(onPresenting: viewModel
@@ -435,7 +435,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     }
 
     [RelayCommand]
-    private async Task ExportPac()
+    private void ExportPac()
     {
         //var result = await _popupService.ShowPopupAsync<ExportPacPopupModel>(CancellationToken.None);
         //if (result is not int codePage || codePage < 0)
@@ -479,19 +479,19 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     }
 
     [RelayCommand]
-    private async Task ExportEbuStl()
+    private void ExportEbuStl()
     {
         _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
-    private async Task Undo()
+    private void Undo()
     {
         PerformUndo();
     }
 
     [RelayCommand]
-    private async Task Redo()
+    private void Redo()
     {
         PerformRedo();
     }
@@ -673,7 +673,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     {
         await _windowService.ShowDialogAsync<TextToSpeechWindow, TextToSpeechViewModel>(Window, vm =>
         {
-            vm.Initialize(GetUpdateSubtitle(), _videoFileName, AudioVisualizer.WavePeaks, Path.GetTempPath());
+            vm.Initialize(GetUpdateSubtitle(), _videoFileName ?? string.Empty, AudioVisualizer?.WavePeaks, Path.GetTempPath());
         });
         _shortcutManager.ClearKeys();
     }
@@ -926,7 +926,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     }
 
     [RelayCommand]
-    private async Task FindNext()
+    private void FindNext()
     {
         _shortcutManager.ClearKeys();
     }

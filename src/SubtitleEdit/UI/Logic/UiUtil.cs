@@ -13,7 +13,6 @@ using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 using System;
 using System.Collections.ObjectModel;
-using System.Globalization;
 
 namespace Nikse.SubtitleEdit.Logic;
 
@@ -120,6 +119,11 @@ public static class UiUtil
     public static Button MakeButtonOk(IRelayCommand? command)
     {
         return MakeButton(Se.Language.General.Ok, command);
+    }
+
+    public static Button MakeButtonDone(IRelayCommand? command)
+    {
+        return MakeButton(Se.Language.General.Done, command);
     }
 
     public static Button MakeButtonCancel(IRelayCommand? command)

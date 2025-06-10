@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -113,7 +115,7 @@ public class ShortcutsWindow : Window
 
                 return textBlock;
             },
-            node => node.SubNodes
+            node => node.SubNodes ?? []
         );
 
         treeView.ItemTemplate = factory;
@@ -126,8 +128,8 @@ public class ShortcutsWindow : Window
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
         };
 
-        var buttonOk = UiUtil.MakeButton("OK", vm.CommandOkCommand);
-        var buttonCancel = UiUtil.MakeButton("Cancel", vm.CommandCancelCommand);
+        var buttonOk = UiUtil.MakeButtonOk(vm.CommandOkCommand);
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CommandCancelCommand);
         var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
         var grid = new Grid

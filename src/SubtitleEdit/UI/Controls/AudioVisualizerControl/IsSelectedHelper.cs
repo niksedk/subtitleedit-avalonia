@@ -13,7 +13,7 @@ public class IsSelectedHelper
 
     public IsSelectedHelper(List<SubtitleLineViewModel> paragraphs, int sampleRate)
     {
-        var count = paragraphs?.Count ?? 0;
+        var count = paragraphs.Count;
         _ranges = new SelectionRange[count];
         for (var index = 0; index < count; index++)
         {

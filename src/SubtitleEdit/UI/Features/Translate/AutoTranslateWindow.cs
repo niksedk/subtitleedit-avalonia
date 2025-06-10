@@ -150,9 +150,9 @@ public class AutoTranslateWindow : Window
         );
 
         var settingsLink = UiUtil.MakeLink("Settings", vm.OpenSettingsCommand).WithMarginRight(10);
-        var okButton = UiUtil.MakeButton("OK", vm.OkCommand);
+        var okButton = UiUtil.MakeButtonOk(vm.OkCommand);
         okButton.Bind(Button.IsEnabledProperty, new Binding(nameof(vm.IsTranslateEnabled)));
-        var cancelButton = UiUtil.MakeButton("Cancel", vm.CancelCommand);
+        var cancelButton = UiUtil.MakeButtonCancel(vm.CancelCommand);
 
         var bottomGrid = new Grid
         {

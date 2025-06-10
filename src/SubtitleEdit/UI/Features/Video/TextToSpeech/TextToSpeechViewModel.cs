@@ -73,10 +73,9 @@ public partial class TextToSpeechViewModel : ObservableObject
     private string _waveFolder;
     private CancellationTokenSource _cancellationTokenSource;
     private CancellationToken _cancellationToken;
-    private WavePeakData _wavePeakData;
+    private WavePeakData? _wavePeakData;
     private FfmpegMediaInfo? _mediaInfo;
     private string _videoFileName = string.Empty;
-    private bool _isMerging;
     private MpvContext? _mpvContext;
     private Lock _playLock;
     private readonly Timer _timer;
@@ -102,6 +101,7 @@ public partial class TextToSpeechViewModel : ObservableObject
         IsVoiceTestEnabled = true;
         IsGenerating = false;
         IsNotGenerating = true;
+        KeyFile = string.Empty;
 
         _cancellationTokenSource = new CancellationTokenSource();
         _playLock = new Lock();
@@ -109,16 +109,17 @@ public partial class TextToSpeechViewModel : ObservableObject
         _timer.Elapsed += OnTimerOnElapsed;
         _waveFolder = string.Empty;
         _wavePeakData = new WavePeakData(1, new List<WavePeak>());
+        _mediaInfo = null;
 
-        Engines = new ObservableCollection<ITtsEngine>
-        {
+        Engines =
+        [
             new Piper(ttsDownloadService),
             new AllTalk(ttsDownloadService),
             new ElevenLabs(ttsDownloadService),
             new AzureSpeech(ttsDownloadService),
             new Murf(ttsDownloadService),
-            new GoogleSpeech(ttsDownloadService),
-        };
+            new GoogleSpeech(ttsDownloadService)
+        ];
     }
 
     private void OnTimerOnElapsed(object? sender, ElapsedEventArgs args)
@@ -210,7 +211,7 @@ public partial class TextToSpeechViewModel : ObservableObject
         Se.SaveSettings();
     }
 
-    public void Initialize(Subtitle subtitle, string videoFileName, WavePeakData wavePeakData, string waveFolder)
+    public void Initialize(Subtitle subtitle, string videoFileName, WavePeakData? wavePeakData, string waveFolder)
     {
         _subtitle = subtitle;
         _subtitle.RemoveEmptyLines();
@@ -263,7 +264,6 @@ public partial class TextToSpeechViewModel : ObservableObject
         IsNotGenerating = false;
         ProgressOpacity = 1.0;
         DoneOrCancelText = "Cancel";
-        _isMerging = false;
         SaveSettings();
 
         // Generate
@@ -1009,6 +1009,10 @@ public partial class TextToSpeechViewModel : ObservableObject
                                                        p.Name.Contains("English", StringComparison.OrdinalIgnoreCase));
             }
             SelectedVoice = lastVoice ?? Voices.FirstOrDefault();
+            if (SelectedVoice == null)
+            {
+                return;
+            }
 
             HasLanguageParameter = engine.HasLanguageParameter;
             HasApiKey = engine.HasApiKey;

@@ -43,8 +43,8 @@ public class TextToSpeechWindow : Window
 
         var progressBarLayout = MakeProgressBarControls(vm);
 
-        var buttonDone = UiUtil.MakeButton("Done", vm.DoneCommand).WithBindIsVisible(nameof(vm.IsNotGenerating));
-        var buttonCancel = UiUtil.MakeButton("Cancel", vm.CancelCommand).WithBindIsVisible(nameof(vm.IsGenerating));
+        var buttonDone = UiUtil.MakeButtonDone(vm.DoneCommand).WithBindIsVisible(nameof(vm.IsNotGenerating));
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand).WithBindIsVisible(nameof(vm.IsGenerating));
         var buttonPanel = UiUtil.MakeButtonBar(
             UiUtil.MakeButton("Generate speech from text", vm.GenerateTtsCommand).WithBindIsEnabled(nameof(vm.IsNotGenerating)),
             UiUtil.MakeButton("Import...", vm.ImportCommand).WithBindIsEnabled(nameof(vm.IsNotGenerating)),

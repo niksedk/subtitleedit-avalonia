@@ -40,7 +40,7 @@ public class Murf : ITtsEngine
         return $"{Name}";
     }
 
-    public async Task<Voice[]> GetVoices(string languageCode)
+    public Task<Voice[]> GetVoices(string languageCode)
     {
         if (string.IsNullOrEmpty(languageCode))
         {
@@ -66,14 +66,14 @@ public class Murf : ITtsEngine
             resultVoices = voices.Where(p => (p.EngineVoice as MurfVoice)?.Locale == "en-US").ToArray();
         }
 
-        return resultVoices;
+        return Task.FromResult(resultVoices);
     }
 
     private static Voice[] Map(string voiceFileName)
     {
         if (!File.Exists(voiceFileName))
         {
-            return Array.Empty<Voice>();
+            return [];
         }
 
         var result = new List<Voice>();

@@ -29,7 +29,7 @@ public class RemoveTextForHearingImpairedWindow : Window
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var panelButtons = UiUtil.MakeButtonBar(
             buttonOk,
-            UiUtil.MakeButton("Cancel", vm.CancelCommand)
+            UiUtil.MakeButtonCancel(vm.CancelCommand)
         );
         
         var grid = new Grid

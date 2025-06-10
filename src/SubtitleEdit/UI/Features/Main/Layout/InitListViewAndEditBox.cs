@@ -14,8 +14,6 @@ namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
 public static class InitListViewAndEditBox
 {
-    private static bool _isLeftMouseDown;
-
     public static Grid MakeLayoutListViewAndEditBox(MainView mainPage, MainViewModel vm)
     {
         mainPage.DataContext = vm;

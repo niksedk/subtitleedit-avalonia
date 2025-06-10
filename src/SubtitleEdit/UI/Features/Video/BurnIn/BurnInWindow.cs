@@ -36,8 +36,8 @@ public class BurnInWindow : Window
         };
 
         var buttonPanel = UiUtil.MakeButtonBar(
-            UiUtil.MakeButton("OK", vm.OkCommand),
-            UiUtil.MakeButton("Cancel", vm.CancelCommand)
+            UiUtil.MakeButtonOk(vm.OkCommand),
+            UiUtil.MakeButtonCancel(vm.CancelCommand)
         );
 
         var grid = new Grid

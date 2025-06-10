@@ -41,7 +41,7 @@ public class Piper : ITtsEngine
         return $"{Name}";
     }
 
-    public async Task<Voice[]> GetVoices(string language)
+    public Task<Voice[]> GetVoices(string language)
     {
         var piperFolder = GetSetPiperFolder();
 
@@ -54,7 +54,7 @@ public class Piper : ITtsEngine
             stream.CopyTo(fileStream);
         }
 
-        return Map(voiceFileName);
+        return Task.FromResult(Map(voiceFileName));
     }
 
     public bool IsVoiceInstalled(Voice voice)
@@ -114,7 +114,7 @@ public class Piper : ITtsEngine
     {
         if (string.IsNullOrWhiteSpace(voiceFileName))
         {
-            return Array.Empty<Voice>();
+            return [];
         }
 
         var result = new List<Voice>();

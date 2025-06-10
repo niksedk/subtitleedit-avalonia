@@ -88,8 +88,8 @@ public class SettingsPage : UserControl
         Grid.SetRow(scrollViewer, 1);
         Grid.SetColumn(scrollViewer, 1);
 
-        var buttonOk = UiUtil.MakeButton("OK", vm.CommandOkCommand);
-        var buttonCancel = UiUtil.MakeButton("Cancel", vm.CommandCancelCommand);
+        var buttonOk = UiUtil.MakeButtonOk(vm.CommandOkCommand);
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CommandCancelCommand);
 
         var buttonBar = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
         grid.Children.Add(buttonBar);
