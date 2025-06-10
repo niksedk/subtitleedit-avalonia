@@ -83,6 +83,9 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private bool _changeSpeedAdjustSelectedLines;
     [ObservableProperty] private bool _changeSpeedAdjustSelectedLinesAndForward;
     
+    // Change casing
+    [ObservableProperty] private bool _normalCasing;
+    [ObservableProperty] private bool _normalCasingFixNames;
     
     public BatchConvertWindow? Window { get; set; }
 

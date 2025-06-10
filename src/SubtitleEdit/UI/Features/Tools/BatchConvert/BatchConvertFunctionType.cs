@@ -7,5 +7,6 @@ public enum BatchConvertFunctionType
     AdjustDisplayDuration,
     DeleteLines,
     ChangeFrameRate,
-    ChangeSpeed
+    ChangeSpeed,
+    ChangeCasing
 }
