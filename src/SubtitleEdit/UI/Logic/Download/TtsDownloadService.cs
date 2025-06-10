@@ -106,10 +106,26 @@ public class TtsDownloadService : ITtsDownloadService
         return true;
     }
 
-    public async Task DownloadElevenLabsVoiceList(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken)
+    public async Task DownloadElevenLabsVoiceList(Stream ms, IProgress<float>? progress, CancellationToken cancellationToken)
     {
         var url = "https://api.elevenlabs.io/v1/voices";
-        await DownloadHelper.DownloadFileAsync(_httpClient, url, stream, progress, cancellationToken);
+        
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+        requestMessage.Headers.TryAddWithoutValidation("Content-Type", "application/json");
+        requestMessage.Headers.TryAddWithoutValidation("Accept", "application/json");
+
+        if (!string.IsNullOrEmpty(Se.Settings.Video.TextToSpeech.ElevenLabsApiKey))
+        {
+            requestMessage.Headers.TryAddWithoutValidation("xi-api-key", Se.Settings.Video.TextToSpeech.ElevenLabsApiKey);
+        }
+
+        var result = await _httpClient.SendAsync(requestMessage, cancellationToken);
+        await result.Content.CopyToAsync(ms, cancellationToken);
+
+        if (!result.IsSuccessStatusCode)
+        {
+            SeLogger.Error($"ElevenLabs TTS failed calling API address {url} : Status code={result.StatusCode}");
+        }
     }
 
     public async Task DownloadMurfVoiceList(MemoryStream ms, IProgress<float>? progress, CancellationToken cancellationToken)
