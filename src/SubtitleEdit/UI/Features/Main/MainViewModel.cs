@@ -971,7 +971,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
         var viewModel = await _windowService.ShowDialogAsync<GoToLineNumberWindow, GoToLineNumberViewModel>(Window,
             vm => { vm.MaxLineNumber = Subtitles.Count; });
-        if (viewModel is { OkPressed: true, LineNumber: >= 0 } && viewModel.LineNumber < Subtitles.Count)
+        if (viewModel is { OkPressed: true, LineNumber: >= 0 } && viewModel.LineNumber <= Subtitles.Count)
         {
             SelectAndScrollToRow(viewModel.LineNumber - 1);
         }
