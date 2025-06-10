@@ -532,6 +532,11 @@ public class NOcrDb
 
     public static List<string> GetDatabases()
     {
+        if (!Directory.Exists(Se.OcrFolder))
+        {
+            return [];
+        }
+        
         return Directory
             .GetFiles(Se.OcrFolder.TrimEnd(Path.DirectorySeparatorChar), "*.nocr")
             .Select(Path.GetFileNameWithoutExtension)
