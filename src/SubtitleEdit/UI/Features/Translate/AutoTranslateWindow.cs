@@ -2,19 +2,23 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
+using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Markup.Declarative;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Translate;
 
 public class AutoTranslateWindow : Window
 {
+    private readonly AutoTranslateViewModel _vm;
+
     public AutoTranslateWindow(AutoTranslateViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = "Auto-translate";
+        Title = Se.Language.Translate.AutoTranslate.Title;
         Width = 950;
         MinWidth = 750;
         Height = 700;
@@ -22,6 +26,7 @@ public class AutoTranslateWindow : Window
 
         DataContext = vm;
         vm.Window = this;
+        _vm = vm;
 
         var topBarPoweredBy = new StackPanel
         {
@@ -150,9 +155,9 @@ public class AutoTranslateWindow : Window
         );
 
         var settingsLink = UiUtil.MakeLink("Settings", vm.OpenSettingsCommand).WithMarginRight(10);
-        var okButton = UiUtil.MakeButtonOk(vm.OkCommand);
-        okButton.Bind(Button.IsEnabledProperty, new Binding(nameof(vm.IsTranslateEnabled)));
-        var cancelButton = UiUtil.MakeButtonCancel(vm.CancelCommand);
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
+        buttonOk.Bind(Button.IsEnabledProperty, new Binding(nameof(vm.IsTranslateEnabled)));
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
 
         var bottomGrid = new Grid
         {
@@ -193,7 +198,7 @@ public class AutoTranslateWindow : Window
         progressSlider.Bind(Slider.IsVisibleProperty, new Binding(nameof(vm.IsProgressEnabled)));
         bottomGrid.Children.Add(progressSlider);
         Grid.SetRow(progressSlider, 0);
-        var bottomBar = UiUtil.MakeButtonBar(settingsLink, okButton, cancelButton);
+        var bottomBar = UiUtil.MakeButtonBar(settingsLink, buttonOk, buttonCancel);
         bottomGrid.Children.Add(bottomBar);
         Grid.SetRow(bottomBar, 1);
 
@@ -221,6 +226,14 @@ public class AutoTranslateWindow : Window
         Grid.SetRow(bottomGrid, row++);
 
         Content = grid;
+        
+        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+    }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);  
+        _vm.KeyDown(e);
     }
 
     protected override void OnClosing(WindowClosingEventArgs e)

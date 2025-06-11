@@ -15,15 +15,15 @@ namespace HanumanInstitute.LibMpv.Avalonia;
 #if !ANDROID
 public class NativeView : NativeControlHost, IVideoView
 {
-    private static readonly StyledProperty<object> contentProperty =
+    private static readonly StyledProperty<object?> contentProperty =
         ContentControl.ContentProperty.AddOwner<NativeView>();
 
     private IPlatformHandle? _platformHandle;
 
     private bool _attached;
     private Window? _floatingContent;
-    private IDisposable _disposables;
-    private IDisposable _isEffectivellyVisibleSub;
+    private IDisposable? _disposables;
+    private IDisposable? _isEffectivellyVisibleSub;
 
     public static readonly DirectProperty<NativeView, MpvContext> MpvContextProperty =
         AvaloniaProperty.RegisterDirect<NativeView, MpvContext>(nameof(MpvContext), o =>
@@ -46,7 +46,7 @@ public class NativeView : NativeControlHost, IVideoView
 
     public static StyledProperty<object> ContentProperty => ContentProperty1;
 
-    public static StyledProperty<object> ContentProperty1 => contentProperty;
+    public static StyledProperty<object> ContentProperty1 => contentProperty!;
 
     protected override IPlatformHandle CreateNativeControlCore(IPlatformHandle parent)
     {
@@ -93,7 +93,6 @@ public class NativeView : NativeControlHost, IVideoView
         base.OnDetachedFromLogicalTree(e);
 
         _disposables?.Dispose();
-        _disposables = null;
         _floatingContent?.Close();
         _floatingContent = null;
     }
@@ -118,7 +117,7 @@ public class NativeView : NativeControlHost, IVideoView
                 _floatingContent.Bind(Window.ContentProperty, this.GetObservable(ContentProperty)),
                 this.GetObservable(ContentProperty).Skip(1).Subscribe(_ => UpdateOverlayPosition()),
                 this.GetObservable(BoundsProperty).Skip(1).Subscribe(_ => UpdateOverlayPosition()),
-                Observable.FromEventPattern(VisualRoot, nameof(Window.PositionChanged))
+                Observable.FromEventPattern(VisualRoot!, nameof(Window.PositionChanged))
                     .Subscribe(_ => UpdateOverlayPosition())
             };
         }
@@ -135,7 +134,10 @@ public class NativeView : NativeControlHost, IVideoView
 
         if (show && _attached)
         {
-            _floatingContent.Show(VisualRoot as Window);
+            if (VisualRoot is Window window)
+            {
+                _floatingContent.Show(window);
+            }
         }
         else
         {

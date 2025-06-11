@@ -90,9 +90,9 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
-    public Window Window { get; set; }
+    public Window? Window { get; set; }
     public Grid ContentGrid { get; set; }
-    public MainView MainView { get; set; }
+    public MainView? MainView { get; set; }
     public TextBlock StatusTextLeftLabel { get; set; }
     public MenuItem MenuReopen { get; set; }
     public AudioVisualizer? AudioVisualizer { get; set; }
@@ -231,7 +231,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         if (HasChanges())
         {
             var result = await MessageBox.Show(
-                Window,
+                Window!,
                 "Save Changes",
                 "Do you want to save before exiting?",
                 MessageBoxButtons.YesNoCancel,
@@ -255,12 +255,12 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     private async Task CommandShowLayout()
     {
         // Open a dialog with a specific ViewModel and get the result
-        var vm = await _windowService.ShowDialogAsync<LayoutWindow, LayoutViewModel>(Window,
+        var vm = await _windowService.ShowDialogAsync<LayoutWindow, LayoutViewModel>(Window!,
             viewModel => { viewModel.SelectedLayout = Se.Settings.General.LayoutNumber; });
 
         if (vm.OkPressed && vm.SelectedLayout != null && vm.SelectedLayout != Se.Settings.General.LayoutNumber)
         {
-            Se.Settings.General.LayoutNumber = InitLayout.MakeLayout(MainView, this, vm.SelectedLayout.Value);
+            Se.Settings.General.LayoutNumber = InitLayout.MakeLayout(MainView!, this, vm.SelectedLayout.Value);
         }
 
         _shortcutManager.ClearKeys();
@@ -295,7 +295,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     private async Task ShowAbout()
     {
         var newWindow = new AboutWindow();
-        await newWindow.ShowDialog(Window);
+        await newWindow.ShowDialog(Window!);
         _shortcutManager.ClearKeys();
     }
 
@@ -305,7 +305,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         if (HasChanges())
         {
             var result = await MessageBox.Show(
-                Window,
+                Window!,
                 "Save Changes?",
                 "Do you want to save changes?",
                 MessageBoxButtons.YesNoCancel,
@@ -343,7 +343,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task CommandFileOpen()
     {
-        var fileName = await _fileHelper.PickOpenSubtitleFile(Window, "Open subtitle file");
+        var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, "Open subtitle file");
         if (!string.IsNullOrEmpty(fileName))
         {
             MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Open"));
@@ -397,7 +397,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         format.Save(_subtitleFileName, ms, GetUpdateSubtitle(), false);
 
         var fileName = await _fileHelper.PickSaveSubtitleFile(
-            Window,
+            Window!,
             format,
             "newFileName",
             $"Save {format.Name} file as");
@@ -464,7 +464,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         format.Save(_subtitleFileName, ms, GetUpdateSubtitle());
 
         var fileName = await _fileHelper.PickSaveSubtitleFile(
-            Window,
+            Window!,
             format,
             "newFileName",
             $"Save {format.Name} file as");
@@ -499,7 +499,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task ShowToolsAdjustDurations()
     {
-        var result = await _windowService.ShowDialogAsync<AdjustDurationWindow, AdjustDurationViewModel>(Window, vm => { });
+        var result = await _windowService.ShowDialogAsync<AdjustDurationWindow, AdjustDurationViewModel>(Window!, vm => { });
 
         if (result.OkPressed)
         {
@@ -514,14 +514,14 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task ShowToolsBatchConvert()
     {
-        await _windowService.ShowDialogAsync<BatchConvertWindow, BatchConvertViewModel>(Window, vm => { });
+        await _windowService.ShowDialogAsync<BatchConvertWindow, BatchConvertViewModel>(Window!, vm => { });
         _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task ShowToolsChangeCasing()
     {
-        var result = await _windowService.ShowDialogAsync<ChangeCasingWindow, ChangeCasingViewModel>(Window, vm =>
+        var result = await _windowService.ShowDialogAsync<ChangeCasingWindow, ChangeCasingViewModel>(Window!, vm =>
         {
             vm.Initialize(GetUpdateSubtitle());
         });
@@ -547,7 +547,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     private async Task ShowToolsFixCommonErrors()
     {
         var viewModel =
-            await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window,
+            await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window!,
                 vm => { vm.Initialize(GetUpdateSubtitle()); });
 
         if (viewModel.OkPressed)
@@ -567,7 +567,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     {
         var result = await _windowService
             .ShowDialogAsync<RemoveTextForHearingImpairedWindow, RemoveTextForHearingImpairedViewModel>(
-                Window, vm => { });
+                Window!, vm => { });
 
         if (result.OkPressed)
         {
@@ -580,7 +580,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task CommandVideoOpen()
     {
-        var fileName = await _fileHelper.PickOpenVideoFile(Window, "Open video file");
+        var fileName = await _fileHelper.PickOpenVideoFile(Window!, "Open video file");
         if (!string.IsNullOrEmpty(fileName))
         {
             await VideoOpenFile(fileName);
@@ -599,7 +599,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task ShowSpellCheck()
     {
-        var result = await _windowService.ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(Window, vm =>
+        var result = await _windowService.ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(Window!, vm =>
         {
             vm.Initialize(Subtitles, SelectedSubtitleIndex, this);
         });
@@ -616,7 +616,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task ShowSpellCheckDictionaries()
     {
-        await _windowService.ShowDialogAsync<GetDictionariesWindow, GetDictionariesViewModel>(Window, vm => { });
+        await _windowService.ShowDialogAsync<GetDictionariesWindow, GetDictionariesViewModel>(Window!, vm => { });
         _shortcutManager.ClearKeys();
     }
 
@@ -638,7 +638,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             return;
         }
 
-        var vm = await _windowService.ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(Window,
+        var vm = await _windowService.ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(Window!,
             viewModel => { viewModel.Initialize(_videoFileName); });
 
         if (vm.OkPressed)
@@ -657,21 +657,21 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task ShowVideoBurnIn()
     {
-        await _windowService.ShowDialogAsync<BurnInWindow, BurnInViewModel>(Window, vm => { });
+        await _windowService.ShowDialogAsync<BurnInWindow, BurnInViewModel>(Window!, vm => { });
         _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task ShowVideoOpenFromUrl()
     {
-        await _windowService.ShowDialogAsync<OpenFromUrlWindow, OpenFromUrlViewModel>(Window, vm => { });
+        await _windowService.ShowDialogAsync<OpenFromUrlWindow, OpenFromUrlViewModel>(Window!, vm => { });
         _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task ShowVideoTextToSpeech()
     {
-        await _windowService.ShowDialogAsync<TextToSpeechWindow, TextToSpeechViewModel>(Window, vm =>
+        await _windowService.ShowDialogAsync<TextToSpeechWindow, TextToSpeechViewModel>(Window!, vm =>
         {
             vm.Initialize(GetUpdateSubtitle(), _videoFileName ?? string.Empty, AudioVisualizer?.WavePeaks, Path.GetTempPath());
         });
@@ -681,7 +681,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task ShowVideoTransparentSubtitles()
     {
-        await _windowService.ShowDialogAsync<TransparentSubtitlesWindow, TransparentSubtitlesViewModel>(Window,
+        await _windowService.ShowDialogAsync<TransparentSubtitlesWindow, TransparentSubtitlesViewModel>(Window!,
             vm => { });
         _shortcutManager.ClearKeys();
     }
@@ -689,7 +689,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task ShowSyncAdjustAllTimes()
     {
-        var result = await _windowService.ShowDialogAsync<AdjustAllTimesWindow, AdjustAllTimesViewModel>(Window, vm =>
+        var result = await _windowService.ShowDialogAsync<AdjustAllTimesWindow, AdjustAllTimesViewModel>(Window!, vm =>
         {
             vm.Initialize(this); // uses call from IAdjustCallback: Adjust
         });
@@ -705,21 +705,21 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task ShowSyncChangeFrameRate()
     {
-        await _windowService.ShowDialogAsync<ChangeFrameRateWindow, ChangeFrameRateViewModel>(Window, vm => { });
+        await _windowService.ShowDialogAsync<ChangeFrameRateWindow, ChangeFrameRateViewModel>(Window!, vm => { });
         _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task ShowSyncChangeSpeed()
     {
-        await _windowService.ShowDialogAsync<ChangeSpeedWindow, ChangeSpeedViewModel>(Window, vm => { });
+        await _windowService.ShowDialogAsync<ChangeSpeedWindow, ChangeSpeedViewModel>(Window!, vm => { });
         _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task CommandShowAutoTranslate()
     {
-        var result = await _windowService.ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(Window,
+        var result = await _windowService.ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(Window!,
             viewModel => { viewModel.Initialize(GetUpdateSubtitle()); });
 
         if (result.OkPressed)
@@ -744,7 +744,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     {
         var oldTheme = Se.Settings.Appearance.Theme;
 
-        var viewModel = await _windowService.ShowDialogAsync<SettingsWindow, SettingsViewModel>(Window);
+        var viewModel = await _windowService.ShowDialogAsync<SettingsWindow, SettingsViewModel>(Window!);
         _shortcutManager.ClearKeys();
         if (!viewModel.OkPressed)
         {
@@ -782,7 +782,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task CommandShowSettingsShortcuts()
     {
-        await _windowService.ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(Window,
+        await _windowService.ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(Window!,
             vm => { vm.LoadShortCuts(this); });
         _shortcutManager.ClearKeys();
     }
@@ -790,7 +790,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task CommandShowSettingsLanguage()
     {
-        var viewModel = await _windowService.ShowDialogAsync<LanguageWindow, LanguageViewModel>(Window);
+        var viewModel = await _windowService.ShowDialogAsync<LanguageWindow, LanguageViewModel>(Window!);
         if (viewModel.OkPressed && viewModel.SelectedLanguage != null)
         {
             var jsonFileName = viewModel.SelectedLanguage.FileName;
@@ -804,7 +804,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
             // reload current layout
             InitMenu.Make(this);
-            InitLayout.MakeLayout(MainView, this, Se.Settings.General.LayoutNumber);
+            InitLayout.MakeLayout(MainView!, this, Se.Settings.General.LayoutNumber);
         }
 
         _shortcutManager.ClearKeys();
@@ -885,7 +885,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     private async Task ShowRestoreAutoBackup()
     {
         var viewModel = await _windowService
-            .ShowDialogAsync<RestoreAutoBackupWindow, RestoreAutoBackupViewModel>(Window);
+            .ShowDialogAsync<RestoreAutoBackupWindow, RestoreAutoBackupViewModel>(Window!);
 
         if (viewModel.OkPressed && !string.IsNullOrEmpty(viewModel.RestoreFileName))
         {
@@ -904,7 +904,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             return;
         }
 
-        var viewModel = await _windowService.ShowDialogAsync<ShowHistoryWindow, ShowHistoryViewModel>(Window, vm =>
+        var viewModel = await _windowService.ShowDialogAsync<ShowHistoryWindow, ShowHistoryViewModel>(Window!, vm =>
         {
             vm.Initialize(_undoRedoManager);
         });
@@ -920,7 +920,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             return;
         }
 
-        var viewModel = await _windowService.ShowDialogAsync<FindWindow, FindViewModel>(Window, vm => { });
+        var viewModel = await _windowService.ShowDialogAsync<FindWindow, FindViewModel>(Window!, vm => { });
 
         _shortcutManager.ClearKeys();
     }
@@ -940,7 +940,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             return;
         }
 
-        var viewModel = await _windowService.ShowDialogAsync<ReplaceWindow, ReplaceViewModel>(Window, vm => { });
+        var viewModel = await _windowService.ShowDialogAsync<ReplaceWindow, ReplaceViewModel>(Window!, vm => { });
 
         _shortcutManager.ClearKeys();
     }
@@ -955,7 +955,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         }
 
         var viewModel =
-            await _windowService.ShowDialogAsync<MultipleReplaceWindow, MultipleReplaceViewModel>(Window, vm => { });
+            await _windowService.ShowDialogAsync<MultipleReplaceWindow, MultipleReplaceViewModel>(Window!, vm => { });
 
         _shortcutManager.ClearKeys();
     }
@@ -969,7 +969,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             return;
         }
 
-        var viewModel = await _windowService.ShowDialogAsync<GoToLineNumberWindow, GoToLineNumberViewModel>(Window,
+        var viewModel = await _windowService.ShowDialogAsync<GoToLineNumberWindow, GoToLineNumberViewModel>(Window!,
             vm => { vm.MaxLineNumber = Subtitles.Count; });
         if (viewModel is { OkPressed: true, LineNumber: >= 0 } && viewModel.LineNumber <= Subtitles.Count)
         {
@@ -1053,7 +1053,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
             control.IsFullScreen = false;
         });
-        fullscreenWindow.Show(Window);
+        fullscreenWindow.Show(Window!);
         _shortcutManager.ClearKeys();
     }
 
@@ -1118,7 +1118,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
                 return false;
             }
 
-            var result = await _windowService.ShowDialogAsync<DownloadFfmpegWindow, DownloadFfmpegViewModel>(Window);
+            var result = await _windowService.ShowDialogAsync<DownloadFfmpegWindow, DownloadFfmpegViewModel>(Window!);
             if (!string.IsNullOrEmpty(result.FfmpegFileName))
             {
                 Se.Settings.General.FfmpegPath = result.FfmpegFileName;
@@ -1275,7 +1275,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         if (fileSize < 10)
         {
             var message = fileSize == 0 ? "File size is zero!" : $"File size too small - only {fileSize} bytes";
-            await MessageBox.Show(Window, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            await MessageBox.Show(Window!, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
 
@@ -1293,7 +1293,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             {
                 Dispatcher.UIThread.Post(async () =>
                 {
-                    var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window, vm =>
+                    var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm =>
                     {
                         vm.Initialize(subtitles, fileName);
                     });
@@ -1327,7 +1327,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             if (subtitle == null)
             {
                 var message = "Unknown format?";
-                await MessageBox.Show(Window, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                await MessageBox.Show(Window!, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
         }
@@ -1382,7 +1382,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         {
             Dispatcher.UIThread.Post(async () =>
             {
-                var result = await _windowService.ShowDialogAsync<PickMatroskaTrackWindow, PickMatroskaTrackViewModel>(Window, vm =>
+                var result = await _windowService.ShowDialogAsync<PickMatroskaTrackWindow, PickMatroskaTrackViewModel>(Window!, vm =>
                 {
                     vm.Initialize(matroska, subtitleList, fileName);
                 });
@@ -1566,7 +1566,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         }
 
         var fileName = await _fileHelper.PickSaveSubtitleFile(
-            Window,
+            Window!,
             SelectedSubtitleFormat,
             newFileName,
             "Save subtitle file");
@@ -1654,7 +1654,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
                     return;
                 }
 
-                var result = await _windowService.ShowDialogAsync<DownloadLibMpvWindow, DownloadLibMpvViewModel>(Window);
+                var result = await _windowService.ShowDialogAsync<DownloadLibMpvWindow, DownloadLibMpvViewModel>(Window!);
 
             }, DispatcherPriority.Background);
         }
@@ -2122,7 +2122,10 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
                 text = "*" + text;
             }
 
-            Window.Title = text;
+            if (Window != null)
+            {
+                Window.Title = text;
+            }
 
             // update audio visualizer position if available
             var av = AudioVisualizer;

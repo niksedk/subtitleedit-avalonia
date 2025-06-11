@@ -79,7 +79,7 @@ public class VideoPlayerInstanceMpv : IVideoPlayerInstance
 
     public void Close()
     {
-        MpvContext?.Stop();
+        MpvContext?.Stop().Invoke();
         _fileName = string.Empty;
     }
 
@@ -90,7 +90,7 @@ public class VideoPlayerInstanceMpv : IVideoPlayerInstance
             return;
         }
 
-        MpvContext.Stop();
+        await MpvContext.Stop().InvokeAsync();
         await MpvContext.LoadFile(fileName).InvokeAsync();
 
         if (MpvContext != null)

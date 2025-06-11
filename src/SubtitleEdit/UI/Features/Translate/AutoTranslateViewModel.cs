@@ -16,6 +16,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Input;
 using Nikse.SubtitleEdit.Features.Shared;
 
 namespace Nikse.SubtitleEdit.Features.Translate;
@@ -231,7 +232,6 @@ public partial class AutoTranslateViewModel : ObservableObject
         if (IsTranslateEnabled)
         {
             Window?.Close();
-            return;
         }
     }
 
@@ -961,5 +961,13 @@ public partial class AutoTranslateViewModel : ObservableObject
         }
 
         return uiCultureTargetLanguage;
+    }
+
+    public void KeyDown(KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            Cancel();
+        }
     }
 }
