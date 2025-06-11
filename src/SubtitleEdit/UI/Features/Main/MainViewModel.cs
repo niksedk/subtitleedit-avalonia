@@ -567,11 +567,16 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     {
         var result = await _windowService
             .ShowDialogAsync<RemoveTextForHearingImpairedWindow, RemoveTextForHearingImpairedViewModel>(
-                Window!, vm => { });
+                Window!, vm =>
+                {
+                    vm.Initialize(GetUpdateSubtitle());
+                });
 
         if (result.OkPressed)
         {
             MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Remove text for hearing impaired"));
+            Subtitles.Clear();
+            Subtitles.AddRange(result.FixedSubtitle.Paragraphs.Select(p=> new SubtitleLineViewModel(p)));
         }
 
         _shortcutManager.ClearKeys();
