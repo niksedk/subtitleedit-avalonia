@@ -57,10 +57,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using DownloadFfmpegViewModel = Nikse.SubtitleEdit.Features.Shared.DownloadFfmpegViewModel;
-using DownloadLibMpvViewModel = Nikse.SubtitleEdit.Features.Shared.DownloadLibMpvViewModel;
-using OcrViewModel = Nikse.SubtitleEdit.Features.Shared.Ocr.OcrViewModel;
-using PickMatroskaTrackViewModel = Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack.PickMatroskaTrackViewModel;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -577,6 +573,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Remove text for hearing impaired"));
             Subtitles.Clear();
             Subtitles.AddRange(result.FixedSubtitle.Paragraphs.Select(p=> new SubtitleLineViewModel(p)));
+            SelectAndScrollToRow(0);
         }
 
         _shortcutManager.ClearKeys();

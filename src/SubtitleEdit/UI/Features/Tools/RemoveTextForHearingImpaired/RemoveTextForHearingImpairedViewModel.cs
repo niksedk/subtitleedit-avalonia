@@ -8,11 +8,13 @@ using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Timers;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using DynamicData;
 using Nikse.SubtitleEdit.Core.Forms;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
@@ -69,9 +71,13 @@ public partial class RemoveTextForHearingImpairedViewModel : ObservableObject
     private RemoveTextForHI? _removeTextForHiLib;
     private readonly Timer _timer;
     private readonly List<Paragraph> _edited;
+    
+    private IWindowService  _windowService;
 
-    public RemoveTextForHearingImpairedViewModel()
+    public RemoveTextForHearingImpairedViewModel(IWindowService windowService)
     {
+        _windowService = windowService;
+        
         CustomStart = "?";
         CustomEnd = "?";
         TextContains = string.Empty;
@@ -179,8 +185,15 @@ public partial class RemoveTextForHearingImpairedViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void EditInterjections()
+    private async Task EditInterjections()
     {
+        var result = await _windowService.ShowDialogAsync<InterjectionsWindow, InterjectionsViewModel>(Window!,
+            vm =>
+            {
+                vm.Initialize(SelectedLanguage);
+            });
+
+            
     }
 
     private void TimerElapsed(object? sender, ElapsedEventArgs e)
@@ -274,7 +287,7 @@ public partial class RemoveTextForHearingImpairedViewModel : ObservableObject
         }
 
         Fixes.Clear();
-        Fixes.AddRange(newFixes);
+        ListEx.AddRange(Fixes, newFixes);
 
         //groupBoxLinesFound.Text = string.Format(_language.LinesFoundX, count);
     }
