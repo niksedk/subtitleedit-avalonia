@@ -124,5 +124,6 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<DownloadPaddleOcrViewModel>();
         collection.AddTransient<FixNamesViewModel>();
         collection.AddTransient<BatchConvertSettingsViewModel>();
+        collection.AddTransient<OllamaBrowseViewModel>();
     }
 }

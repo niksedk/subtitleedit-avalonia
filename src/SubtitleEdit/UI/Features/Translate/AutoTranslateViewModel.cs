@@ -51,6 +51,7 @@ public partial class AutoTranslateViewModel : ObservableObject
     [ObservableProperty] private string _apiUrlText;
     [ObservableProperty] private bool _buttonApiUrlIsVisible;
     [ObservableProperty] private bool _modelIsVisible;
+    [ObservableProperty] private bool _modelBrowseIsVisible;
     [ObservableProperty] private string _modelText;
     [ObservableProperty] private bool _buttonModelIsVisible;
 
@@ -245,7 +246,7 @@ public partial class AutoTranslateViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task GoToAutranslatorUri()
+    private async Task GoToAutoTranslatorUri()
     {
         var autoTranslator = SelectedAutoTranslator;
         if (autoTranslator == null)
@@ -267,12 +268,43 @@ public partial class AutoTranslateViewModel : ObservableObject
         }
     }
 
-
     [RelayCommand]
     private async Task TranslateRow()
     {
         _onlyCurrentLine = true;
         await DoTranslate();
+    }
+
+    [RelayCommand]
+    private async Task BrowseModel()
+    {
+        var result = await _windowService.ShowDialogAsync<OllamaBrowseWindow, OllamaBrowseViewModel>(Window!, vm =>
+        {
+            var baseUrl = GetBaseUrl(ApiUrlText);
+            _ = vm.InitializeAsync(baseUrl);
+        });
+        
+        if (result is { OkPressed: true, SelectedModel: not null })
+        {
+            ModelText = result.SelectedModel.Model;
+            SaveSettings();
+        }
+    }
+    
+    public static string GetBaseUrl(string url)
+    {
+        if (string.IsNullOrEmpty(url))
+            return string.Empty;
+
+        try
+        {
+            var uri = new Uri(url);
+            return uri.GetLeftPart(UriPartial.Authority);
+        }
+        catch (UriFormatException)
+        {
+            return string.Empty;
+        }
     }
 
     private async Task<bool> DoTranslate()
@@ -618,6 +650,7 @@ public partial class AutoTranslateViewModel : ObservableObject
         //LabelFormality.IsVisible = false;
         //PickerFormality.IsVisible = false;
         ModelIsVisible = false;
+        ModelBrowseIsVisible = false;
         ButtonModelIsVisible = false;
         ModelText = string.Empty;
         //LabelApiUrl.Text = "API url";
@@ -771,6 +804,8 @@ public partial class AutoTranslateViewModel : ObservableObject
 
         if (engineType == typeof(OllamaTranslate))
         {
+            ModelBrowseIsVisible = true;
+            
             if (Configuration.Settings.Tools.OllamaApiUrl == null)
             {
                 Configuration.Settings.Tools.OllamaApiUrl = "http://localhost:11434/api/generate";

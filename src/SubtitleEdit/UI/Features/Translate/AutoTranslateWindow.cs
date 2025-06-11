@@ -37,7 +37,7 @@ public class AutoTranslateWindow : Window
             Children =
             {
                 UiUtil.MakeTextBlock("Powered by"),
-                UiUtil.MakeLink("Google Translate V1", vm.GoToAutranslatorUriCommand, vm, nameof(vm.AutoTranslatorLinkText))
+                UiUtil.MakeLink("Google Translate V1", vm.GoToAutoTranslatorUriCommand, vm, nameof(vm.AutoTranslatorLinkText))
                     .WithMarginRight(UiUtil.WindowMarginWidth),
             }
         };
@@ -151,7 +151,8 @@ public class AutoTranslateWindow : Window
             UiUtil.MakeTextBox(150, vm, nameof(vm.ApiUrlText), nameof(vm.ApiUrlIsVisible)),
             UiUtil.MakeSeparatorForHorizontal(),
             UiUtil.MakeTextBlock("Model", vm, null, nameof(vm.ModelIsVisible)).WithMarginRight(5),
-            UiUtil.MakeTextBox(150, vm, nameof(vm.ModelText), nameof(vm.ModelIsVisible))
+            UiUtil.MakeTextBox(150, vm, nameof(vm.ModelText), nameof(vm.ModelIsVisible)),
+            UiUtil.MakeButtonBrowse(vm.BrowseModelCommand, nameof(vm.ModelBrowseIsVisible))
         );
 
         var settingsLink = UiUtil.MakeLink("Settings", vm.OpenSettingsCommand).WithMarginRight(10);

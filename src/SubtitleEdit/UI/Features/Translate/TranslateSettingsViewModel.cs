@@ -26,7 +26,7 @@ public partial class TranslateSettingsViewModel : ObservableObject
 
     public TranslateSettingsViewModel()
     {
-        MergeOptions = new ObservableCollection<string>();
+        MergeOptions = [];
         SelectedMergeOptions = string.Empty;
         PromptText = string.Empty;
     }
@@ -117,7 +117,7 @@ public partial class TranslateSettingsViewModel : ObservableObject
         MergeOptions = new ObservableCollection<string>
         {
             "Default",
-            "Translate each line seperately",
+            "Translate each line separately",
         };
         SelectedMergeOptions = MergeOptions[0];
 

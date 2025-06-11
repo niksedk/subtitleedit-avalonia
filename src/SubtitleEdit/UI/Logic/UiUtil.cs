@@ -164,7 +164,7 @@ public static class UiUtil
         return button;
     }
 
-    public static Button MakeButtonBrowse(IRelayCommand? command)
+    public static Button MakeButtonBrowse(IRelayCommand? command, string? propertyIsVisiblePath = null)
     {
         var button = new Button
         {
@@ -174,6 +174,14 @@ public static class UiUtil
             VerticalContentAlignment = VerticalAlignment.Center,
             Command = command,
         };
+        
+        if (propertyIsVisiblePath != null)
+        {
+            button.Bind(Button.IsVisibleProperty, new Binding
+            {
+                Path = propertyIsVisiblePath,
+            });
+        }
 
         Attached.SetIcon(button, IconNames.MdiDotsHorizontal);
 
