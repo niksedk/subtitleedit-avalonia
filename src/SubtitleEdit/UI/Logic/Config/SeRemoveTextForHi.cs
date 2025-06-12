@@ -1,7 +1,16 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config;
+﻿using System.Collections.Generic;
+
+namespace Nikse.SubtitleEdit.Logic.Config;
 
 public class SeRemoveTextForHi
 {
+    public class InterjectionLanguage
+    {
+        public string LanguageCode { get; set; }
+        public List<string> Interjections { get; set; }
+        public List<string> SkipStartList { get; set; }
+    }
+
     public bool IsRemoveBracketsOn { get; set; }
     public bool IsRemoveCurlyBracketsOn { get; set; }
     public bool IsRemoveParenthesesOn { get; set; }
@@ -24,6 +33,8 @@ public class SeRemoveTextForHi
 
     public bool IsRemoveInterjectionsOn { get; set; }
     public bool IsInterjectionsSeparateLineOn { get; set; }
+    
+    public List<InterjectionLanguage> Interjections { get; set; }
 
     public SeRemoveTextForHi()
     {
@@ -35,5 +46,28 @@ public class SeRemoveTextForHi
         CustomStart = "?";
         CustomEnd = "?";
         TextContains = string.Empty;
+
+        Interjections =
+        [
+            new InterjectionLanguage
+            {
+                LanguageCode = "en", 
+                Interjections =
+                [
+                    "Ugh",
+                    "Oh",
+                    "Ah",
+                    "Whoa",
+                    "Gee",
+                    "Ouch",
+                    "Ow",
+                    "Hmm",
+                    "Uh",
+                    "Er",
+                    "Uh-huh"
+                ],
+                SkipStartList =[], 
+            },
+        ];
     }
 }
