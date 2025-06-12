@@ -13,12 +13,9 @@ public class InterjectionsWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Interjections";
-        SizeToContent = SizeToContent.WidthAndHeight;
-        CanResize = true;
+        CanResize = false;
         Width = 700;
-        Height = 500;
-        MinWidth = 600;
-        MinHeight = 400;
+        Height = 600;
 
         _vm = vm;
         vm.Window = this;
@@ -40,12 +37,18 @@ public class InterjectionsWindow : Window
         {
             Width = double.NaN,
             Height = double.NaN,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            AcceptsReturn = true,
         }.BindText(vm, nameof(vm.InterjectionsText));
 
         var textBoxSkipList = new TextBox
         {
             Width = double.NaN,
             Height = double.NaN,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            AcceptsReturn = true,
         }.BindText(vm, nameof(vm.InterjectionsSkipStartText));
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
@@ -69,7 +72,9 @@ public class InterjectionsWindow : Window
             ColumnSpacing = 10,
             RowSpacing = 10,
             Width = double.NaN,
+            Height = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
         };
 
         grid.Add(labelInterjections, 0, 0);
