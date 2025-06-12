@@ -23,10 +23,10 @@ public partial class RemoveTextForHearingImpairedViewModel : ObservableObject
 {
     public class LanguageItem
     {
-        public CultureInfo Code { get; }
+        public string Code { get; }
         public string Name { get; }
 
-        public LanguageItem(CultureInfo code, string name)
+        public LanguageItem(string code, string name)
         {
             Code = code;
             Name = name;
@@ -35,6 +35,14 @@ public partial class RemoveTextForHearingImpairedViewModel : ObservableObject
         public override string ToString()
         {
             return Name;
+        }
+
+        public static List<LanguageItem> GetAll()
+        {
+            return Iso639Dash2LanguageCode.List
+                .Select(p => new LanguageItem(p.TwoLetterCode, p.EnglishName))
+                .OrderBy(p => p.Name)
+                .ToList();
         }
     }
 
@@ -71,24 +79,24 @@ public partial class RemoveTextForHearingImpairedViewModel : ObservableObject
     private RemoveTextForHI? _removeTextForHiLib;
     private readonly Timer _timer;
     private readonly List<Paragraph> _edited;
-    
-    private IWindowService  _windowService;
+
+    private readonly IWindowService _windowService;
 
     public RemoveTextForHearingImpairedViewModel(IWindowService windowService)
     {
         _windowService = windowService;
-        
+
         CustomStart = "?";
         CustomEnd = "?";
         TextContains = string.Empty;
-        Languages = new ObservableCollection<LanguageItem>(LanguageHelper);
+        Languages = new ObservableCollection<LanguageItem>(LanguageItem.GetAll());
         Fixes = new ObservableCollection<RemoveItem>();
         FixText = string.Empty;
-        _edited  = new List<Paragraph>();
+        _edited = new List<Paragraph>();
         _timer = new Timer(500);
         _timer.Elapsed += TimerElapsed;
         FixedSubtitle = new Subtitle();
-        _subtitle = new Subtitle(); 
+        _subtitle = new Subtitle();
     }
 
     public void Initialize(Subtitle subtitle)
@@ -187,13 +195,8 @@ public partial class RemoveTextForHearingImpairedViewModel : ObservableObject
     [RelayCommand]
     private async Task EditInterjections()
     {
-        var result = await _windowService.ShowDialogAsync<InterjectionsWindow, InterjectionsViewModel>(Window!,
-            vm =>
-            {
-                vm.Initialize(SelectedLanguage);
-            });
-
-            
+        await _windowService.ShowDialogAsync<InterjectionsWindow, InterjectionsViewModel>(Window!,
+            vm => { vm.Initialize(SelectedLanguage); });
     }
 
     private void TimerElapsed(object? sender, ElapsedEventArgs e)
@@ -220,9 +223,9 @@ public partial class RemoveTextForHearingImpairedViewModel : ObservableObject
         }
 
         _removeTextForHiLib.Settings = GetSettings(_subtitle);
-        _removeTextForHiLib.Warnings = new List<int>();
+        _removeTextForHiLib.Warnings = [];
 
-        _removeTextForHiLib.ReloadInterjection(SelectedLanguage?.Code.TwoLetterISOLanguageName ?? "en");
+        _removeTextForHiLib.ReloadInterjection(SelectedLanguage?.Code ?? "en");
 
         var count = 0;
         var newFixes = new List<RemoveItem>();
@@ -249,7 +252,7 @@ public partial class RemoveTextForHearingImpairedViewModel : ObservableObject
             else
             {
                 var newText = _removeTextForHiLib.RemoveTextFromHearImpaired(p.Text, _subtitle, index,
-                    SelectedLanguage == null ? "en" : SelectedLanguage.Code.TwoLetterISOLanguageName);
+                    SelectedLanguage == null ? "en" : SelectedLanguage.Code);
                 if (p.Text.RemoveChar(' ') != newText.RemoveChar(' '))
                 {
                     var apply = true;
@@ -337,6 +340,10 @@ public partial class RemoveTextForHearingImpairedViewModel : ObservableObject
 
     public void OnLoaded(RoutedEventArgs routedEventArgs)
     {
+        var languageCode = LanguageAutoDetect.AutoDetectGoogleLanguageOrNull(_subtitle) ?? "en";
+        SelectedLanguage = Languages.FirstOrDefault(l => l.Code == languageCode) ??
+            Languages.FirstOrDefault(l => l.Code == "en");
+        
         _timer.Start();
     }
 }

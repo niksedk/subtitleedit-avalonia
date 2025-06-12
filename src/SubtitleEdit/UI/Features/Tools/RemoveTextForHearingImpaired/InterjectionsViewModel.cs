@@ -1,6 +1,10 @@
+using System;
+using System.Linq;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Core.Common;
 
 namespace Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
 
@@ -13,15 +17,36 @@ public partial class InterjectionsViewModel : ObservableObject
     
     public bool OkPressed { get; private set; }
 
+    private string _languageCode;
+
     public InterjectionsViewModel()
     {
         InterjectionsText = string.Empty;
         InterjectionsSkipStartText = string.Empty;
+        _languageCode = string.Empty;
     }
     
     [RelayCommand]                   
     private void Ok() 
     {
+        var interjectionLanguage = Se.Settings.Tools.RemoveTextForHi.Interjections.FirstOrDefault(p =>
+            p.LanguageCode == _languageCode);
+        
+        if (interjectionLanguage == null)
+        {
+            return;
+        }
+        
+        interjectionLanguage.Interjections = InterjectionsText.SplitToLines()
+            .Where(p => !string.IsNullOrWhiteSpace(p))
+            .Select(p => p.Trim())
+            .ToList();
+        
+        interjectionLanguage.SkipStartList = InterjectionsSkipStartText.SplitToLines()
+            .Where(p => !string.IsNullOrWhiteSpace(p))
+            .Select(p => p.Trim())
+            .ToList();
+        
         OkPressed = true;
         Window?.Close();
     }
@@ -43,6 +68,21 @@ public partial class InterjectionsViewModel : ObservableObject
 
     public void Initialize(RemoveTextForHearingImpairedViewModel.LanguageItem? selectedLanguage)
     {
-        //throw new System.NotImplementedException();
+        if (selectedLanguage == null)
+        {
+            throw new ArgumentNullException(nameof(selectedLanguage), "Selected language cannot be null");
+        }
+
+        _languageCode = selectedLanguage.Code;
+        var interjectionLanguage = Se.Settings.Tools.RemoveTextForHi.Interjections.FirstOrDefault(p =>
+                                    p.LanguageCode == _languageCode);
+        
+        if (interjectionLanguage == null)
+        {
+            return;
+        }
+        
+        InterjectionsText = string.Join(Environment.NewLine, interjectionLanguage.Interjections);
+        InterjectionsSkipStartText = string.Join(Environment.NewLine, interjectionLanguage.SkipStartList);
     }
 }

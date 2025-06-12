@@ -6,9 +6,9 @@ public class SeRemoveTextForHi
 {
     public class InterjectionLanguage
     {
-        public string LanguageCode { get; set; }
-        public List<string> Interjections { get; set; }
-        public List<string> SkipStartList { get; set; }
+        public string? LanguageCode { get; set; }
+        public List<string> Interjections { get; set; } = new();
+        public List<string> SkipStartList { get; set; } = new();
     }
 
     public bool IsRemoveBracketsOn { get; set; }
@@ -33,7 +33,7 @@ public class SeRemoveTextForHi
 
     public bool IsRemoveInterjectionsOn { get; set; }
     public bool IsInterjectionsSeparateLineOn { get; set; }
-    
+
     public List<InterjectionLanguage> Interjections { get; set; }
 
     public SeRemoveTextForHi()
@@ -51,7 +51,7 @@ public class SeRemoveTextForHi
         [
             new InterjectionLanguage
             {
-                LanguageCode = "en", 
+                LanguageCode = "en",
                 Interjections =
                 [
                     "Ugh",
@@ -66,7 +66,7 @@ public class SeRemoveTextForHi
                     "Er",
                     "Uh-huh"
                 ],
-                SkipStartList =[], 
+                SkipStartList = [],
             },
         ];
     }
