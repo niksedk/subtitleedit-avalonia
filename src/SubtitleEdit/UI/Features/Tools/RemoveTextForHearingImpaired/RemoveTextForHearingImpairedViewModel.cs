@@ -81,7 +81,7 @@ public partial class RemoveTextForHearingImpairedViewModel : ObservableObject
         CustomStart = "?";
         CustomEnd = "?";
         TextContains = string.Empty;
-        Languages = new ObservableCollection<LanguageItem>();
+        Languages = new ObservableCollection<LanguageItem>(LanguageHelper);
         Fixes = new ObservableCollection<RemoveItem>();
         FixText = string.Empty;
         _edited  = new List<Paragraph>();

@@ -147,7 +147,7 @@ public class RemoveTextForHearingImpairedWindow : Window
         return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5);
     }
 
-    private Border MakeBeforeColonView(RemoveTextForHearingImpairedViewModel vm)
+    private static Border MakeBeforeColonView(RemoveTextForHearingImpairedViewModel vm)
     {
         var comboBoxBrackets = UiUtil.MakeCheckBox("Remove text before colon", vm, nameof(vm.IsRemoveTextBeforeColonOn));
         var comboBoxUppercase = UiUtil
@@ -180,7 +180,7 @@ public class RemoveTextForHearingImpairedWindow : Window
         return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5);
     }
 
-    private Border MakeUppercaseLineView(RemoveTextForHearingImpairedViewModel vm)
+    private static Border MakeUppercaseLineView(RemoveTextForHearingImpairedViewModel vm)
     {
         var comboBoxLineUppercase = UiUtil.MakeCheckBox("If line is uppercase", vm, nameof(vm.IsRemoveTextUppercaseLineOn));
         return UiUtil.MakeBorderForControl(comboBoxLineUppercase).WithMarginBottom(5);
@@ -224,6 +224,19 @@ public class RemoveTextForHearingImpairedWindow : Window
                 buttonEdit,
             }
         };
+
+        var labelLanguage = UiUtil.MakeLabel(Se.Language.General.Language);
+        var comboBoxLanguage = UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage));
+        var panelLanguege = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Children =
+            {
+                labelLanguage,
+                comboBoxLanguage,
+            }
+        };
+        
         var checkBoxOnlySeparateLine = UiUtil
             .MakeCheckBox("Only separate lines", vm, nameof(vm.IsInterjectionsSeparateLineOn))
             .WithMarginTop(5);
@@ -232,6 +245,7 @@ public class RemoveTextForHearingImpairedWindow : Window
         {
             RowDefinitions =
             {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
@@ -244,7 +258,8 @@ public class RemoveTextForHearingImpairedWindow : Window
         };
 
         grid.Add(panelInterjections, 0, 0);
-        grid.Add(checkBoxOnlySeparateLine, 1, 0);
+        grid.Add(panelLanguege, 1, 0);
+        grid.Add(checkBoxOnlySeparateLine, 2, 0);
 
         return UiUtil.MakeBorderForControl(grid);
     }
