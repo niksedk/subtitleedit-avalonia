@@ -21,6 +21,16 @@ public partial class BurnInViewModel : ObservableObject
     }
     
     [RelayCommand]                   
+    private void Help() 
+    {
+    }
+    
+    [RelayCommand]                   
+    private void Generate() 
+    {
+    }
+    
+    [RelayCommand]                   
     private void Ok() 
     {
         OkPressed = true;
