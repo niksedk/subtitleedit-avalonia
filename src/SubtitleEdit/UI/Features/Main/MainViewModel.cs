@@ -152,6 +152,8 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         MenuReopen = new MenuItem();
         Menu = new Menu();
         _subtitle = new Subtitle();
+        _videoFileName = string.Empty;
+        _subtitleFileName = string.Empty;
         Subtitles = new ObservableCollection<SubtitleLineViewModel>();
         SubtitleFormats = [.. SubtitleFormat.AllSubtitleFormats];
         SelectedSubtitleFormat = SubtitleFormats[0];
@@ -319,6 +321,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         }
 
         ResetSubtitle();
+        VideoCloseFile();
     }
 
     private void ResetSubtitle()
@@ -1761,6 +1764,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     private void VideoCloseFile()
     {
         VideoPlayerControl?.Close();
+        _videoFileName = string.Empty;
     }
 
     private int GetFastSubtitleHash()
