@@ -570,7 +570,7 @@ public partial class PaddleOcr
             new("ta", "Tamil"),
             new("te", "Telugu"),
             new("tr", "Turkish"),
-            new("uk", "Ukranian"),
+            new("uk", "Ukrainian"),
             new("ur", "Urdu"),
             new("ug", "Uyghur"),
             new("uz", "Uzbek"),
