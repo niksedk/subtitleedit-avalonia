@@ -52,7 +52,7 @@ public class WhisperAdvancedWindow : Window
             var button = UiUtil.MakeButton(engine.Name, vm.EngineClickedCommand)
                 .WithCommandParameter(engine)
                 .WithLeftAlignment()
-                .WithMinwidth(200);
+                .WithMinWidth(200);
             buttonVerticalPanel.Children.Add(button);
         }
 

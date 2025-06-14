@@ -118,19 +118,19 @@ public class ReplaceWindow : Window
 
         var buttonFindNext = UiUtil.MakeButton("Find Next", vm.FindNextCommand)
             .WithLeftAlignment()
-            .WithMinwidth(150)
+            .WithMinWidth(150)
             .WithMargin(0, 0, 0, 10);
         var buttonReplaceNext = UiUtil.MakeButton("Replace next", vm.ReplaceCommand)
             .WithLeftAlignment()
-            .WithMinwidth(150)
+            .WithMinWidth(150)
             .WithMargin(0, 0, 0, 10);
         var buttonReplaceAll = UiUtil.MakeButton("Replace all", vm.ReplaceAllCommand)
             .WithLeftAlignment()
-            .WithMinwidth(150)
+            .WithMinWidth(150)
             .WithMargin(0, 0, 0, 10);
         var buttonCount = UiUtil.MakeButton("Count", vm.CountCommand)
             .WithLeftAlignment()
-            .WithMinwidth(150)
+            .WithMinWidth(150)
             .WithMargin(0, 0, 0, 10);
 
         var panelButtons = new StackPanel

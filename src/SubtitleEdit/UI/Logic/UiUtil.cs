@@ -826,7 +826,7 @@ public static class UiUtil
         return control;
     }
 
-    public static Button WithMinwidth(this Button control, int width)
+    public static Button WithMinWidth(this Button control, int width)
     {
         control.MinWidth = width;
         return control;

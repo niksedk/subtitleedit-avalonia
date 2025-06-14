@@ -78,15 +78,15 @@ public class FindWindow : Window
 
         var buttonFindPrevious = UiUtil.MakeButton("Find previous", vm.FindPreviousCommand)
             .WithLeftAlignment()
-            .WithMinwidth(150)
+            .WithMinWidth(150)
             .WithMargin(0,0,0, 10);
         var buttonFindNext = UiUtil.MakeButton("Find next", vm.FindNextCommand)
             .WithLeftAlignment()
-            .WithMinwidth(150)
+            .WithMinWidth(150)
             .WithMargin(0, 0, 0, 10);
         var buttonCount = UiUtil.MakeButton("Count", vm.CountCommand)
             .WithLeftAlignment()
-            .WithMinwidth(150)
+            .WithMinWidth(150)
             .WithMargin(0, 0, 0, 10);
 
         var panelButtons = new StackPanel

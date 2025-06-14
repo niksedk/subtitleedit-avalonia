@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Nikse.SubtitleEdit.Features.Edit.AlignmentPicker;
 using Nikse.SubtitleEdit.Features.Edit.Find;
 using Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
 using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
@@ -83,6 +84,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<ShortcutsViewModel>();
         collection.AddTransient<AutoTranslateViewModel>();
         collection.AddTransient<TranslateSettingsViewModel>();
+        collection.AddTransient<AlignmentPickerViewModel>();
         collection.AddTransient<DownloadFfmpegViewModel>();
         collection.AddTransient<GoToLineNumberViewModel>();
         collection.AddTransient<AudioToTextWhisperViewModel>();
