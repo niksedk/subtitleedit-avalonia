@@ -130,6 +130,10 @@ public class LanguageGeneral
     public string Percent { get; set; }
     public string MaxCharactersPerSecond { get; set; }
     public string OptimalCharactersPerSecond { get; set; }
+    public string Generating { get; set; }
+    public string FontName { get; set; }
+    public string TextColor { get; set; }
+    public string Box { get; set; }
 
     public LanguageGeneral()
     {
@@ -261,5 +265,9 @@ public class LanguageGeneral
         Percent = "Percent";
         MaxCharactersPerSecond = "Max characters per second";
         OptimalCharactersPerSecond = "Optimal characters per second";
+        Generating = "Generating...";
+        FontName = "Font name";
+        TextColor = "Text color";
+        Box = "Box";
     }
 }

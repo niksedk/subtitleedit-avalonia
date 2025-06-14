@@ -32,6 +32,7 @@ public class LanguageBurnIn
     public string UseSource { get; set; }
     public string UseSourceResolution { get; set; }
     public string OutputSettings { get; set; }
+    public string FontSizeFactor { get; set; }
 
     public LanguageBurnIn()
     {
@@ -65,5 +66,6 @@ public class LanguageBurnIn
         UseSource = "Use source";
         UseSourceResolution = "Use source resolution";
         OutputSettings = "Output file/folder...";
+        FontSizeFactor = "Font size factor";
     }
 }

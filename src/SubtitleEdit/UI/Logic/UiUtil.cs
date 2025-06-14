@@ -975,7 +975,7 @@ public static class UiUtil
         return new Thickness(WindowMarginWidth, WindowMarginWidth * 2, WindowMarginWidth, WindowMarginWidth);
     }
 
-    internal static ColorPicker MakeColorPicker(SettingsViewModel vm, string colorPropertyPath)
+    internal static ColorPicker MakeColorPicker(object vm, string colorPropertyPath)
     {
         return new ColorPicker
         {
@@ -1092,4 +1092,50 @@ public static class UiUtil
         return control;
     }
 
+    public static NumericUpDown MakeNumericUpDownTwoDecimals(decimal min, decimal max, double width, object viewModel, string? propertyValuePath = null, string? propertyIsVisiblePath = null)
+    {
+        var control = new NumericUpDown
+        {
+            Width = width,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            DataContext = viewModel,
+            Minimum = min,
+            Maximum = max,
+            Increment = 0.01m,
+            FormatString = "F2" // Force two decimals
+        };
+
+        if (propertyValuePath != null)
+        {
+            control.Bind(NumericUpDown.ValueProperty, new Binding
+            {
+                Path = propertyValuePath,
+                Mode = BindingMode.TwoWay,
+            });
+        }
+
+        if (propertyIsVisiblePath != null)
+        {
+            control.Bind(NumericUpDown.IsVisibleProperty, new Binding
+            {
+                Path = propertyIsVisiblePath,
+                Mode = BindingMode.TwoWay,
+            });
+        }
+
+        return control;
+    }
+
+    public static Label WithBindText(this Label control, object viewModel, string contentPropertyPath)
+    {
+        control.DataContext = viewModel;
+        control.Bind(Label.ContentProperty, new Binding
+        {
+            Path = contentPropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
 }
