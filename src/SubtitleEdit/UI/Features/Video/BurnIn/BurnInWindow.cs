@@ -19,9 +19,8 @@ public class BurnInWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = Se.Language.Video.BurnIn.Title;
-        Width = 1200;
-        Height = 900;
-        CanResize = true;
+        SizeToContent = SizeToContent.WidthAndHeight;
+        CanResize = false;
 
         _vm = vm;
         vm.Window = this;
@@ -251,6 +250,7 @@ public class BurnInWindow : Window
 
         var labelEncoding = UiUtil.MakeLabel(Se.Language.General.Encoding);
         var comboBoxEncoding = UiUtil.MakeComboBox(vm.VideoEncodings, vm, nameof(vm.SelectedVideoEncoding));
+        comboBoxEncoding.SelectionChanged += vm.VideoEncodingChanged;
 
         var labelPreset = UiUtil.MakeLabel(Se.Language.Video.BurnIn.Preset);
         var comboBoxPreset = UiUtil.MakeComboBox(vm.VideoPresets, vm, nameof(vm.SelectedVideoPreset));
@@ -309,6 +309,7 @@ public class BurnInWindow : Window
     {
         var checkBoxCut = UiUtil.MakeCheckBox(Se.Language.Video.BurnIn.Cut, vm, nameof(vm.IsCutActive));
 
+        var buttonCutFrom = UiUtil.MakeButtonBrowse(vm.BrowseCutFromCommand).WithMarginTop(10).WithRightAlignment();
         var labelFromTime = UiUtil.MakeLabel(Se.Language.Video.BurnIn.FromTime);
         var timeUpDownFrom = new TimeCodeUpDown
         {
@@ -316,18 +317,8 @@ public class BurnInWindow : Window
             DataContext = vm,
             VerticalAlignment = VerticalAlignment.Center,   
         };
-        var buttonCutFrom = UiUtil.MakeButtonBrowse(vm.BrowseCutFromCommand);
-        var panelCutFrom = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            Spacing = 5,
-            Children =
-            {
-                timeUpDownFrom,
-                buttonCutFrom,               
-            }             
-        };
 
+        var buttonCutTo = UiUtil.MakeButtonBrowse(vm.BrowseCutToCommand).WithMarginTop(10).WithRightAlignment();
         var labelToTime = UiUtil.MakeLabel(Se.Language.Video.BurnIn.ToTime);
         var timeUpDownTo = new TimeCodeUpDown
         {
@@ -335,27 +326,11 @@ public class BurnInWindow : Window
             DataContext = vm,
             VerticalAlignment = VerticalAlignment.Center,
         };
-        var buttonCutTo = UiUtil.MakeButtonBrowse(vm.BrowseCutToCommand);
-        var panelCutTo = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            Spacing = 5,
-            Children =
-            {
-                timeUpDownTo,
-                buttonCutTo,
-            }
-        };
 
         var grid = new Grid
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
@@ -375,11 +350,13 @@ public class BurnInWindow : Window
 
         grid.Add(checkBoxCut, 0, 0);
 
-        grid.Add(labelFromTime, 1, 0);
-        grid.Add(panelCutFrom, 1, 1);
+        grid.Add(buttonCutFrom, 1, 1);
+        grid.Add(labelFromTime, 2, 0);
+        grid.Add(timeUpDownFrom, 2, 1);
 
-        grid.Add(labelToTime, 2, 0);
-        grid.Add(panelCutTo, 2, 1);
+        grid.Add(buttonCutTo, 3, 1);
+        grid.Add(labelToTime, 4, 0);
+        grid.Add(timeUpDownTo, 4, 1);
 
         return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5).WithMarginRight(5); 
     }
@@ -521,8 +498,6 @@ public class BurnInWindow : Window
         var buttonRemove = UiUtil.MakeButton(Se.Language.General.Remove, vm.RemoveCommand);
         var buttonClear = UiUtil.MakeButton(Se.Language.General.Clear, vm.ClearCommand);
         var buttonPickSubtitle = UiUtil.MakeButton(Se.Language.General.PickSubtitle, vm.PickSubtitleCommand);
-        var buttonOutputProperties = UiUtil.MakeButton(Se.Language.Video.BurnIn.OutputProperties, vm.OutputPropertiesCommand);
-        var labelOutputPropertiesSource = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.OutputSourceFolder));
 
         var panelFileControls = new StackPanel
         {
@@ -536,8 +511,21 @@ public class BurnInWindow : Window
                 buttonClear,
                 UiUtil.MakeSeparatorForHorizontal(),
                 buttonPickSubtitle,
+            }
+        };
+
+        var buttonOutputProperties = UiUtil.MakeButton(Se.Language.Video.BurnIn.OutputProperties, vm.OutputPropertiesCommand);
+        var labelOutputPropertiesSource = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.OutputSourceFolder));
+
+        var panelFileControls2 = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            Children =
+            {
                 buttonOutputProperties,
-                labelOutputPropertiesSource
+                labelOutputPropertiesSource,
             }
         };
 
@@ -546,6 +534,7 @@ public class BurnInWindow : Window
             RowDefinitions =
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
@@ -560,6 +549,7 @@ public class BurnInWindow : Window
 
         grid.Add(dataGrid, 0, 0);
         grid.Add(panelFileControls, 1, 0);
+        grid.Add(panelFileControls2, 2, 0);
 
         return UiUtil.MakeBorderForControl(grid)
             .WithBindIsVisible(nameof(vm.IsBatchMode))
@@ -637,7 +627,7 @@ public class BurnInWindow : Window
             .WithMarginRight(5);
     }
 
-    private Grid MakeProgressView(BurnInViewModel vm)
+    private static Grid MakeProgressView(BurnInViewModel vm)
     {
         var progressSlider = new Slider
         {

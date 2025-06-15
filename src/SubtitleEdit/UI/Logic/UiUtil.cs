@@ -610,6 +610,12 @@ public static class UiUtil
         return control;
     }
 
+    public static Button WithRightAlignment(this Button control)
+    {
+        control.HorizontalAlignment = HorizontalAlignment.Right;
+        return control;
+    }
+
     public static Button WithTopAlignment(this Button control)
     {
         control.VerticalAlignment = VerticalAlignment.Top;

@@ -1,3 +1,4 @@
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -15,6 +16,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -113,6 +115,9 @@ public partial class BurnInViewModel : ObservableObject
     {
         _folderHelper = folderHelper;
 
+        FontNames = new ObservableCollection<string>(FontHelper.GetSystemFonts());
+        SelectedFontName = FontNames.FirstOrDefault(p => p == Se.Settings.Video.BurnIn.FontName) ?? FontNames[0];
+
         // font factors between 0-1
         FontFactor = 0.4;
         FontFactorText = string.Empty;
@@ -152,6 +157,9 @@ public partial class BurnInViewModel : ObservableObject
             "320k",
         };
         SelectedAudioBitRate = AudioBitRates[2];
+
+        VideoEncodings = new ObservableCollection<VideoEncodingItem>(VideoEncodingItem.VideoEncodings);
+        SelectedVideoEncoding = VideoEncodings[0];
     }
 
     private void TimerAnalyzeElapsed(object? sender, ElapsedEventArgs e)
@@ -752,7 +760,7 @@ public partial class BurnInViewModel : ObservableObject
     {
         IsBatchMode = true;
     }
-    
+
     [RelayCommand]
     private void Ok()
     {
@@ -772,6 +780,200 @@ public partial class BurnInViewModel : ObservableObject
         {
             e.Handled = true;
             Window?.Close();
+        }
+    }
+
+    internal void VideoEncodingChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (_loading)
+        {
+            return;
+        }
+
+        FillPreset(SelectedVideoEncoding.Codec);
+        FillCrf(SelectedVideoEncoding.Codec);
+    }
+
+    private void FillPreset(string videoCodec)
+    {
+        VideoPresetText = "Preset";
+        SelectedVideoPreset = null;
+
+        var items = new List<string>
+        {
+           "ultrafast",
+           "superfast",
+           "veryfast",
+           "faster",
+           "fast",
+           "medium",
+           "slow",
+           "slower",
+           "veryslow",
+        };
+
+        var defaultItem = "medium";
+
+        if (videoCodec == "h264_nvenc")
+        {
+            items = new List<string>
+            {
+                "default",
+                "slow",
+                "medium",
+                "fast",
+                "hp",
+                "hq",
+                "bd",
+                "ll",
+                "llhq",
+                "llhp",
+                "lossless",
+                "losslesshp",
+                "p1",
+                "p2",
+                "p3",
+                "p4",
+                "p5",
+                "p6",
+                "p7",
+            };
+        }
+        else if (videoCodec == "hevc_nvenc")
+        {
+            items = new List<string>
+            {
+                "default",
+                "slow",
+                "medium",
+                "fast",
+                "hp",
+                "hq",
+                "bd",
+                "ll",
+                "llhq",
+                "llhp",
+                "lossless",
+                "losslesshp",
+                "p1",
+                "p2",
+                "p3",
+                "p4",
+                "p5",
+                "p6",
+                "p7",
+            };
+        }
+        else if (videoCodec == "h264_amf")
+        {
+            items = new List<string> { string.Empty };
+        }
+        else if (videoCodec == "hevc_amf")
+        {
+            items = new List<string> { string.Empty };
+        }
+        else if (videoCodec == "libvpx-vp9")
+        {
+            items = new List<string> { string.Empty };
+        }
+        else if (videoCodec == "prores_ks")
+        {
+            items = new List<string>
+            {
+                "proxy",
+                "lt",
+                "standard",
+                "hq",
+                "4444",
+                "4444xq",
+            };
+
+            defaultItem = "standard";
+
+            VideoPresetText = "Profile";
+        }
+
+        VideoPresets.Clear();
+        VideoPresets.AddRange(items);
+        if (VideoPresets.Contains(defaultItem))
+        {
+            SelectedVideoPreset = defaultItem;
+        }
+    }
+
+    public void FillCrf(string videoCodec)
+    {
+        SelectedVideoCrf = null;
+        VideoCrfText = "CRF";
+
+        var items = new List<string> { " " };
+
+        if (videoCodec == "libx265")
+        {
+            for (var i = 0; i < 51; i++)
+            {
+                items.Add(i.ToString(CultureInfo.InvariantCulture));
+            }
+
+            VideoCrf.Clear();
+            VideoCrf.AddRange(items);
+            SelectedVideoCrf = "28";
+        }
+        else if (videoCodec == "libvpx-vp9")
+        {
+            for (var i = 4; i <= 63; i++)
+            {
+                items.Add(i.ToString(CultureInfo.InvariantCulture));
+            }
+
+            VideoCrf.Clear();
+            VideoCrf.AddRange(items);
+            SelectedVideoCrf = "10";
+        }
+        else if (videoCodec == "h264_nvenc" ||
+                 videoCodec == "hevc_nvenc")
+        {
+            for (var i = 0; i <= 51; i++)
+            {
+                items.Add(i.ToString(CultureInfo.InvariantCulture));
+            }
+
+            VideoCrfText = "CQ";
+            VideoCrfHint = "0=best quality, 51=best speed";
+            VideoCrf.Clear();
+            VideoCrf.AddRange(items);
+            SelectedVideoCrf = null;
+        }
+        else if (videoCodec == "h264_amf" ||
+                 videoCodec == "hevc_amf")
+        {
+            for (var i = 0; i <= 10; i++)
+            {
+                items.Add(i.ToString(CultureInfo.InvariantCulture));
+            }
+
+            VideoCrfText = "Quality";
+            VideoCrfHint = "0=best quality, 10=best speed";
+            VideoCrf.Clear();
+            VideoCrf.AddRange(items);
+            SelectedVideoCrf = null;
+        }
+        else if (videoCodec == "prores_ks")
+        {
+            items = new List<string>();
+            VideoCrf.Clear();
+            VideoCrf.AddRange(items);
+        }
+        else
+        {
+            for (var i = 17; i <= 28; i++)
+            {
+                items.Add(i.ToString(CultureInfo.InvariantCulture));
+            }
+
+            VideoCrf.Clear();
+            VideoCrf.AddRange(items);
+            SelectedVideoCrf = "23";
         }
     }
 }
