@@ -17,8 +17,8 @@ using Projektanker.Icons.Avalonia.MaterialDesign;
 
 var lifetime = new ClassicDesktopStyleApplicationLifetime
 {
-    Args = args, 
-    ShutdownMode = ShutdownMode.OnLastWindowClose 
+    Args = args,
+    ShutdownMode = ShutdownMode.OnLastWindowClose
 };
 
 IconProvider.Current

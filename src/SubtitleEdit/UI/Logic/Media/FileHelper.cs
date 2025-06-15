@@ -204,6 +204,23 @@ namespace Nikse.SubtitleEdit.Logic.Media
             return string.Empty;
         }
 
+        public async Task<string[]> PickOpenVideoFiles(Visual sender, string title)
+        {
+            // Get top level from the current control. Alternatively, you can use Window reference instead.
+            var topLevel = TopLevel.GetTopLevel(sender)!;
+
+            // Start async operation to open the dialog.
+            var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                Title = title,
+                AllowMultiple = false,
+                FileTypeFilter = MakeOpenVideoFilter(),
+            });
+
+            return files.Select(p => p.Path.LocalPath).ToArray();
+        }
+
+
         private static IReadOnlyList<FilePickerFileType> MakeOpenVideoFilter()
         {
             var fileTypes = new List<FilePickerFileType>

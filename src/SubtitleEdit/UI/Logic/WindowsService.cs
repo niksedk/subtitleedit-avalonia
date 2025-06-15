@@ -25,8 +25,8 @@ namespace Nikse.SubtitleEdit.Logic
         /// <typeparam name="TViewModel">The type of ViewModel to associate with the window.</typeparam>
         /// <param name="configure">Optional action to configure the window and ViewModel before showing.</param>
         /// <returns>The created ViewModel instance.</returns>
-        TViewModel ShowWindow<T, TViewModel>(Action<T, TViewModel>? configure = null) 
-            where T : Window 
+        TViewModel ShowWindow<T, TViewModel>(Action<T, TViewModel>? configure = null)
+            where T : Window
             where TViewModel : class;
 
         /// <summary>
@@ -69,27 +69,27 @@ namespace Nikse.SubtitleEdit.Logic
         public T ShowWindow<T>(Action<T>? configure = null) where T : Window
         {
             var window = CreateWindow<T>();
-            
+
             configure?.Invoke(window);
             window.Show();
             window.Focus();
-            
+
             return window;
         }
 
         /// <inheritdoc />
-        public TViewModel ShowWindow<T, TViewModel>(Action<T, TViewModel>? configure = null) 
+        public TViewModel ShowWindow<T, TViewModel>(Action<T, TViewModel>? configure = null)
             where T : Window
             where TViewModel : class
         {
             var viewModel = _serviceProvider.GetRequiredService<TViewModel>();
             var window = CreateWindow<T>();
-            
+
             window.DataContext = viewModel;
             configure?.Invoke(window, viewModel);
             window.Show();
             window.Focus();
-            
+
             return viewModel;
         }
 
@@ -97,15 +97,15 @@ namespace Nikse.SubtitleEdit.Logic
         public async Task<T> ShowDialogAsync<T>(Window owner, Action<T>? configure = null) where T : Window
         {
             var window = CreateWindow<T>();
-            
+
             configure?.Invoke(window);
             await window.ShowDialog(owner);
-            
+
             return window;
         }
-        
+
         public async Task<TViewModel> ShowDialogAsync<TWindow, TViewModel>(
-            Window owner, 
+            Window owner,
             Action<TViewModel>? configureViewModel = null, Action<TWindow>? configureWindow = null)
             where TWindow : Window
             where TViewModel : class
@@ -117,14 +117,14 @@ namespace Nikse.SubtitleEdit.Logic
             var w = Activator.CreateInstance(typeof(TWindow), viewModel);
             if (w == null)
             {
-                throw new InvalidOperationException($"Failed to create window of type {typeof(TWindow).Name} with constructor param {typeof(TViewModel).Name}");   
+                throw new InvalidOperationException($"Failed to create window of type {typeof(TWindow).Name} with constructor param {typeof(TViewModel).Name}");
             }
 
             var window = (TWindow)w;
 
             window.WindowStartupLocation = WindowStartupLocation.CenterOwner; //TODO: does this work on mac?
             configureWindow?.Invoke(window);
-            
+
             await window.ShowDialog(owner);
 
             return viewModel;

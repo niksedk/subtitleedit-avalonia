@@ -148,6 +148,7 @@ public class LanguageGeneral
     public string Clear { get; internal set; }
     public string PickSubtitle { get; set; }
     public string VideoFile { get; set; }
+    public string AddVideoFiles { get; set; }
 
     public LanguageGeneral()
     {
@@ -296,5 +297,6 @@ public class LanguageGeneral
         Clear = "Clear";
         PickSubtitle = "Pick subtitle file...";
         VideoFile = "Video file";
+        AddVideoFiles = "Add video files...";
     }
 }

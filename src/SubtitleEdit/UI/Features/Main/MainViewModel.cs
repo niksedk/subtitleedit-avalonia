@@ -662,7 +662,10 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task ShowVideoBurnIn()
     {
-        await _windowService.ShowDialogAsync<BurnInWindow, BurnInViewModel>(Window!, vm => { });
+        await _windowService.ShowDialogAsync<BurnInWindow, BurnInViewModel>(Window!, vm => 
+        {
+            vm.Initialize(_videoFileName ?? string.Empty, GetUpdateSubtitle(), SelectedSubtitleFormat);
+        });
         _shortcutManager.ClearKeys();
     }
 

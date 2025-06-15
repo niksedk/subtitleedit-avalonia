@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
@@ -33,7 +34,6 @@ public partial class BurnInViewModel : ObservableObject
     [ObservableProperty] private double _fontFactor;
     [ObservableProperty] private string _fontFactorText;
     [ObservableProperty] private bool _fontIsBold;
-    [ObservableProperty] private ObservableCollection<decimal> _fontOutlines;
     [ObservableProperty] private decimal _selectedFontOutline;
     [ObservableProperty] private string _fontOutlineText;
     [ObservableProperty] private ObservableCollection<decimal> _fontShadowWidths;
@@ -109,11 +109,15 @@ public partial class BurnInViewModel : ObservableObject
     private bool _useSourceResolution;
     private SubtitleFormat? _subtitleFormat;
 
+    private readonly IWindowService _windowService;
     private readonly IFolderHelper _folderHelper;
+    private readonly IFileHelper _fileHelper;
 
-    public BurnInViewModel(IFolderHelper folderHelper)
+    public BurnInViewModel(IFolderHelper folderHelper, IFileHelper fileHelper, IWindowService windowService)
     {
         _folderHelper = folderHelper;
+        _fileHelper = fileHelper;
+        _windowService = windowService;
 
         FontNames = new ObservableCollection<string>(FontHelper.GetSystemFonts());
         SelectedFontName = FontNames.FirstOrDefault(p => p == Se.Settings.Video.BurnIn.FontName) ?? FontNames[0];
@@ -124,6 +128,24 @@ public partial class BurnInViewModel : ObservableObject
 
         VideoPresets = new ObservableCollection<string>();
 
+        FontBoxTypes = new ObservableCollection<FontBoxItem>
+        {
+            new(FontBoxType.None, Se.Language.General.None),
+            new(FontBoxType.OneBox, Se.Language.Video.BurnIn.OneBox),
+            new(FontBoxType.BoxPerLine, Se.Language.Video.BurnIn.BoxPerLine),
+        };
+        SelectedFontBoxType = FontBoxTypes[0];
+
+        FontMarginHorizontal = 10;
+        FontMarginVertical = 10;
+
+        FontAlignments = new ObservableCollection<AlignmentItem>(AlignmentItem.Alignments);
+        SelectedFontAlignment = AlignmentItem.Alignments[7];
+
+        FontAssaInfo = string.Empty;
+
+        VideoWidth = 1920;
+        VideoHeight = 1080;
 
         AudioEncodings = new ObservableCollection<string>
         {
@@ -160,6 +182,20 @@ public partial class BurnInViewModel : ObservableObject
 
         VideoEncodings = new ObservableCollection<VideoEncodingItem>(VideoEncodingItem.VideoEncodings);
         SelectedVideoEncoding = VideoEncodings[0];
+
+        JobItems = new ObservableCollection<BurnInJobItem>();
+
+        VideoFileName = string.Empty;
+        VideoFileSize = string.Empty;
+
+        LoadSettings();
+    }
+
+    public void Initialize(string videoFileName, Subtitle subtitle, SubtitleFormat subtitleFormat)
+    {
+        VideoFileName = videoFileName;
+        _subtitle = subtitle;
+        _subtitleFormat = subtitleFormat;
     }
 
     private void TimerAnalyzeElapsed(object? sender, ElapsedEventArgs e)
@@ -698,30 +734,74 @@ public partial class BurnInViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Add()
+    private async Task Add()
     {
+        var fileNames = await _fileHelper.PickOpenVideoFiles(Window!, Se.Language.General.AddVideoFiles);
+        if (fileNames == null || fileNames.Length == 0)
+        {
+            return;
+        }
+
+        foreach (var fileName in fileNames)
+        {
+            var mediaInfo = FfmpegMediaInfo.Parse(fileName);
+            var fileInfo = new FileInfo(fileName);
+            var jobItem = new BurnInJobItem(fileName, mediaInfo.Dimension.Width, mediaInfo.Dimension.Height)
+            {
+                OutputVideoFileName = MakeOutputFileName(fileName),
+                TotalFrames = mediaInfo.GetTotalFrames(),
+                TotalSeconds = mediaInfo.Duration.TotalSeconds,
+                Width = mediaInfo.Dimension.Width,
+                Height = mediaInfo.Dimension.Height,
+                Size = Utilities.FormatBytesToDisplayFileSize(fileInfo.Length),
+                Resolution = mediaInfo.Dimension.ToString(),
+            };
+            jobItem.AddSubtitleFileName(TryGetSubtitleFileName(fileName));
+
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                JobItems.Add(jobItem);
+            });
+        }
     }
 
     [RelayCommand]
     private void Remove()
     {
+        if (SelectedJobItem != null)
+        {
+            var idx = JobItems.IndexOf(SelectedJobItem);
+            JobItems.Remove(SelectedJobItem);
+        }
     }
 
     [RelayCommand]
     private void Clear()
     {
+        JobItems.Clear();
     }
 
 
     [RelayCommand]
-    private void PickSubtitle()
+    private async Task PickSubtitle()
     {
+        if (SelectedJobItem == null)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, "Open subtitle file");
+        if (string.IsNullOrEmpty(fileName))
+        {
+            SelectedJobItem.SubtitleFileName = fileName;
+        }
     }
 
-
     [RelayCommand]
-    private void OutputProperties()
+    private async Task OutputProperties()
     {
+        await _windowService.ShowDialogAsync<BatchConvertSettingsWindow, BatchConvertSettingsViewModel>(Window!);
+        UpdateOutputProperties();
     }
 
     [RelayCommand]
@@ -745,8 +825,92 @@ public partial class BurnInViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Generate()
+    private async Task Generate()
     {
+        if (IsCutActive && CutFrom >= CutTo)
+        {
+            await MessageBox.Show(Window!,
+                "Cut settings error",
+                "Cut end time must be after cut start time",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+
+            return;
+        }
+
+        if (!IsBatchMode)
+        {
+            JobItems = GetCurrentVideoAsJobItems();
+        }
+
+        if (JobItems.Count == 0)
+        {
+            return;
+        }
+
+        // check that all jobs have subtitles
+        foreach (var jobItem in JobItems)
+        {
+            if (string.IsNullOrWhiteSpace(jobItem.SubtitleFileName))
+            {
+                await MessageBox.Show(Window!,
+                   "Missing subtitle",
+                    "Please add a subtitle to all batch items",
+                     MessageBoxButtons.OK,
+                     MessageBoxIcon.Error);
+
+                return;
+            }
+        }
+
+        _doAbort = false;
+        _log.Clear();
+        _processedFrames = 0;
+        ProgressValue = 0;
+        SaveSettings();
+
+        InitAndStartJobItem(0);
+    }
+
+    private void LoadSettings()
+    {
+        var settings = Se.Settings.Video.BurnIn;
+        FontFactor = settings.FontFactor;
+        FontIsBold = settings.FontBold;
+        SelectedFontOutline = settings.OutlineWidth;
+        SelectedFontShadowWidth = settings.ShadowWidth;
+        SelectedFontName = settings.FontName;
+        FontTextColor = settings.NonAssaTextColor.FromHexToColor();
+        FontOutlineColor = settings.NonAssaOutlineColor.FromHexToColor();
+        FontBoxColor = settings.NonAssaBoxColor.FromHexToColor();
+        FontShadowColor = settings.NonAssaShadowColor.FromHexToColor();
+        FontFixRtl = settings.NonAssaFixRtlUnicode;
+        SelectedFontAlignment = FontAlignments.First(p => p.Code == settings.NonAssaAlignment);
+        OutputSourceFolder = settings.OutputFolder;
+        UseOutputFolderVisible = settings.UseOutputFolder;
+        UseSourceFolderVisible = !settings.UseOutputFolder;
+        _useSourceResolution = settings.UseSourceResolution;
+    }
+
+    private void SaveSettings()
+    {
+        var settings = Se.Settings.Video.BurnIn;
+        settings.FontFactor = FontFactor;
+        settings.FontBold = FontIsBold;
+        settings.OutlineWidth = SelectedFontOutline;
+        settings.ShadowWidth = SelectedFontShadowWidth;
+        settings.FontName = SelectedFontName;
+        settings.NonAssaTextColor = FontTextColor.FromColorToHex();
+        settings.NonAssaOutlineColor = FontOutlineColor.FromColorToHex();
+        settings.NonAssaBoxColor = FontBoxColor.FromColorToHex();
+        settings.NonAssaShadowColor = FontShadowColor.FromColorToHex();
+        settings.NonAssaFixRtlUnicode = FontFixRtl;
+        settings.NonAssaAlignment = SelectedFontAlignment.Code;
+        settings.OutputFolder = OutputSourceFolder;
+        settings.UseOutputFolder = UseOutputFolderVisible;
+        settings.UseSourceResolution = _useSourceResolution;
+
+        Se.SaveSettings();
     }
 
     [RelayCommand]
@@ -782,6 +946,44 @@ public partial class BurnInViewModel : ObservableObject
             Window?.Close();
         }
     }
+
+    private static string TryGetSubtitleFileName(string fileName)
+    {
+        var srt = Path.ChangeExtension(fileName, ".srt");
+        if (File.Exists(srt))
+        {
+            return srt;
+        }
+
+        var assa = Path.ChangeExtension(fileName, ".ass");
+        if (File.Exists(srt))
+        {
+            return assa;
+        }
+
+        var dir = Path.GetDirectoryName(fileName);
+        if (string.IsNullOrEmpty(dir))
+        {
+            return string.Empty;
+        }
+
+        var searchPath = Path.GetFileNameWithoutExtension(fileName);
+        var files = Directory.GetFiles(dir, searchPath + "*");
+        var subtitleExtensions = SubtitleFormat.AllSubtitleFormats.Select(p => p.Extension).Distinct();
+        foreach (var ext in subtitleExtensions)
+        {
+            foreach (var file in files)
+            {
+                if (file.EndsWith(ext, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return file;
+                }
+            }
+        }
+
+        return string.Empty;
+    }
+
 
     internal void VideoEncodingChanged(object? sender, SelectionChangedEventArgs e)
     {
@@ -975,5 +1177,30 @@ public partial class BurnInViewModel : ObservableObject
             VideoCrf.AddRange(items);
             SelectedVideoCrf = "23";
         }
+    }
+
+    private void UpdateOutputProperties()
+    {
+
+        if (!Se.Settings.Tools.BatchConvert.SaveInSourceFolder &&
+            string.IsNullOrWhiteSpace(Se.Settings.Tools.BatchConvert.OutputFolder))
+        {
+            Se.Settings.Tools.BatchConvert.SaveInSourceFolder = true;
+        }
+
+        string text;
+        if (Se.Settings.Video.BurnIn.SaveInSourceFolder)
+        {
+            text = string.Format("Outputfolder: {0}", "Source folder");
+        }
+        else
+        {
+            text = string.Format("Outputfolder: {0}", Se.Settings.Video.BurnIn.OutputFolder);
+        }
+
+        text += Environment.NewLine +
+                Se.Settings.Tools.BatchConvert.Overwrite;
+
+        //TODO:       OutputPropertiesText = text;
     }
 }

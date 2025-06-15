@@ -40,6 +40,7 @@ public class SeVideoBurnIn
     public string OutputFolder { get; set; }
     public string BurnInSuffix { get; set; }
     public bool UseSourceResolution { get; set; }
+    public bool SaveInSourceFolder { get; set; }
 
     public SeVideoBurnIn()
     {

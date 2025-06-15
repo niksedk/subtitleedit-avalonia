@@ -54,7 +54,7 @@ public class BurnInWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, 
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
@@ -88,7 +88,7 @@ public class BurnInWindow : Window
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
-    
+
     private static Border MakeSubtitlesView(BurnInViewModel vm)
     {
         var labelFontName = UiUtil.MakeLabel(Se.Language.General.FontName);
@@ -315,7 +315,7 @@ public class BurnInWindow : Window
         {
             [!TimeCodeUpDown.ValueProperty] = new Binding(nameof(vm.CutFrom)),
             DataContext = vm,
-            VerticalAlignment = VerticalAlignment.Center,   
+            VerticalAlignment = VerticalAlignment.Center,
         };
 
         var buttonCutTo = UiUtil.MakeButtonBrowse(vm.BrowseCutToCommand).WithMarginTop(10).WithRightAlignment();
@@ -358,7 +358,7 @@ public class BurnInWindow : Window
         grid.Add(labelToTime, 4, 0);
         grid.Add(timeUpDownTo, 4, 1);
 
-        return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5).WithMarginRight(5); 
+        return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5).WithMarginRight(5);
     }
 
     private static Border MakePreviewView(BurnInViewModel vm)
@@ -404,7 +404,7 @@ public class BurnInWindow : Window
         var comboBoxSampleRate = UiUtil.MakeComboBox(vm.AudioSampleRates, vm, nameof(vm.SelectedAudioSampleRate));
 
         var labelBitRate = UiUtil.MakeLabel(Se.Language.Video.BurnIn.BitRate);
-        var comboBoxBitRate = UiUtil.MakeComboBox(vm.AudioBitRates, vm, nameof(vm.SelectedAudioBitRate));   
+        var comboBoxBitRate = UiUtil.MakeComboBox(vm.AudioBitRates, vm, nameof(vm.SelectedAudioBitRate));
 
         var grid = new Grid
         {
@@ -515,7 +515,8 @@ public class BurnInWindow : Window
         };
 
         var buttonOutputProperties = UiUtil.MakeButton(Se.Language.Video.BurnIn.OutputProperties, vm.OutputPropertiesCommand);
-        var labelOutputPropertiesSource = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.OutputSourceFolder));
+        var labelOutputPropertiesFolder = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.OutputSourceFolder));
+        var labelOutputPropertiesUseSourceFolder = UiUtil.MakeLabel(Se.Language.Video.BurnIn.UseSourceFolder);
 
         var panelFileControls2 = new StackPanel
         {
@@ -525,7 +526,8 @@ public class BurnInWindow : Window
             Children =
             {
                 buttonOutputProperties,
-                labelOutputPropertiesSource,
+                labelOutputPropertiesFolder,
+                labelOutputPropertiesUseSourceFolder,
             }
         };
 

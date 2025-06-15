@@ -128,5 +128,6 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<BatchConvertSettingsViewModel>();
         collection.AddTransient<OllamaBrowseViewModel>();
         collection.AddTransient<InterjectionsViewModel>();
+        collection.AddTransient<BurnInSettingsViewModel>();
     }
 }

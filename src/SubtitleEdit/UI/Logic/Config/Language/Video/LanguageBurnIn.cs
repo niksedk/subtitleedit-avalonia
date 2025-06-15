@@ -30,6 +30,7 @@ public class LanguageBurnIn
     public string GetStartPosition { get; set; }
     public string GetEndPosition { get; set; }
     public string UseSource { get; set; }
+    public string UseSourceFolder { get; set; }
     public string UseSourceResolution { get; set; }
     public string OutputSettings { get; set; }
     public string FontSizeFactor { get; set; }
@@ -41,6 +42,8 @@ public class LanguageBurnIn
     public string AudioEncoding { get; set; }
     public string OutputProperties { get; internal set; }
     public string VideoFileSize { get; set; }
+    public string OneBox { get; set; }
+    public string BoxPerLine { get; set; }
 
     public LanguageBurnIn()
     {
@@ -72,6 +75,7 @@ public class LanguageBurnIn
         GetStartPosition = "Get start position";
         GetEndPosition = "Get end position";
         UseSource = "Use source";
+        UseSourceFolder = "Use source folder";
         UseSourceResolution = "Use source resolution";
         OutputSettings = "Output file/folder...";
         FontSizeFactor = "Font size factor";
@@ -83,5 +87,7 @@ public class LanguageBurnIn
         AudioEncoding = "Audio encoding";
         OutputProperties = "Output properties...";
         VideoFileSize = "Video file size";
+        OneBox = "One box";
+        BoxPerLine = "Box per line";
     }
 }

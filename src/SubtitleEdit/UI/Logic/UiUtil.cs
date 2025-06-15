@@ -8,7 +8,6 @@ using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Styling;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Features.Options.Settings;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 using System;
@@ -174,7 +173,7 @@ public static class UiUtil
             VerticalContentAlignment = VerticalAlignment.Center,
             Command = command,
         };
-        
+
         if (propertyIsVisiblePath != null)
         {
             button.Bind(Button.IsVisibleProperty, new Binding
@@ -1102,7 +1101,7 @@ public static class UiUtil
             DataContext = viewModel,
             Minimum = min,
             Maximum = max,
-            Increment = 1,      
+            Increment = 1,
             FormatString = "F0",
         };
 

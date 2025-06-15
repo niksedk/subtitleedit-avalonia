@@ -322,8 +322,7 @@ public partial class BatchConvertViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowOutputProperties()
     {
-        await _windowService.ShowDialogAsync<BatchConvertSettingsWindow, BatchConvertSettingsViewModel>(Window!,
-            vm => { });
+        await _windowService.ShowDialogAsync<BatchConvertSettingsWindow, BatchConvertSettingsViewModel>(Window!);
         UpdateOutputProperties();
     }
 
