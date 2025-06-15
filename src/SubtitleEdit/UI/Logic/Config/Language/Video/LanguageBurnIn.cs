@@ -38,6 +38,7 @@ public class LanguageBurnIn
     public string Cut { get; set; }
     public string FromTime { get; set; }
     public string ToTime { get; set; }
+    public string AudioEncoding { get; set; }
 
     public LanguageBurnIn()
     {
@@ -77,5 +78,6 @@ public class LanguageBurnIn
         Cut = "Cut";
         FromTime = "From time";
         ToTime = "To time";
+        AudioEncoding = "Audio encoding";
     }
 }

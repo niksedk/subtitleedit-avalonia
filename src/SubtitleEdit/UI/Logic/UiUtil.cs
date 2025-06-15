@@ -693,6 +693,28 @@ public static class UiUtil
         return control;
     }
 
+    public static Border WithBindIsVisible(this Border control, string isVisiblePropertyPath, IValueConverter converter)
+    {
+        control.Bind(Border.IsVisibleProperty, new Binding
+        {
+            Path = isVisiblePropertyPath,
+            Mode = BindingMode.TwoWay,
+            Converter = converter,
+        });
+
+        return control;
+    }
+
+    public static Border WithBindIsVisible(this Border control, string isVisiblePropertyPath)
+    {
+        control.Bind(Border.IsVisibleProperty, new Binding
+        {
+            Path = isVisiblePropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
 
     public static Button WithBindIsEnabled(this Button control, string isEnabledPropertyPath)
     {
@@ -1137,10 +1159,5 @@ public static class UiUtil
         });
 
         return control;
-    }
-
-    internal static object MakeLabel(object alignment)
-    {
-        throw new NotImplementedException();
     }
 }

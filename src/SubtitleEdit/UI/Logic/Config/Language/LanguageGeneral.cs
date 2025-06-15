@@ -141,6 +141,8 @@ public class LanguageGeneral
     public string Vertical { get; set; }
     public string Resolution { get; set; }
     public string Generate { get; set; }
+    public string BatchMode { get; set; }
+    public string SingleMode { get; set; }
 
     public LanguageGeneral()
     {
@@ -282,5 +284,7 @@ public class LanguageGeneral
         Horizontal = "Vertical";
         Resolution = "Resolution";
         Generate = "Generate";
+        BatchMode = "Batch mode";
+        SingleMode = "Single mode";
     }
 }

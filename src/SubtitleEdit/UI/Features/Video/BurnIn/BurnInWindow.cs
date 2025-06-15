@@ -5,6 +5,8 @@ using Avalonia.Layout;
 using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
+using System;
 
 namespace Nikse.SubtitleEdit.Features.Video.BurnIn;
 
@@ -30,11 +32,19 @@ public class BurnInWindow : Window
         var previewView = MakePreviewView(vm);
         var audioSettingsView = MakeAudioSettingsView(vm);
         var batchView = MakeBatchView(vm);
+        var targetFileSizeView = MakeTargetFileSizeView(vm);
+        var videoInfoView = MakeVideoInfoView(vm);
 
         var buttonGenerate = UiUtil.MakeButton(Se.Language.General.Generate, vm.GenerateCommand);
+        var buttonBatchMode = UiUtil.MakeButton(Se.Language.General.BatchMode, vm.BatchModeCommand)
+            .WithBindIsVisible(nameof(vm.IsBatchMode), new InverseBooleanConverter());
+        var buttonSingleMode = UiUtil.MakeButton(Se.Language.General.SingleMode, vm.SingleModeCommand)
+            .WithBindIsVisible(nameof(vm.IsBatchMode));
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonPanel = UiUtil.MakeButtonBar(
             buttonGenerate,
+            buttonBatchMode,
+            buttonSingleMode,
             buttonOk,
             UiUtil.MakeButtonCancel(vm.CancelCommand)
         );
@@ -43,11 +53,13 @@ public class BurnInWindow : Window
         {
             RowDefinitions =
             {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, 
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // target file size + video info
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // progress bar
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // buttons
             },
             ColumnDefinitions =
             {
@@ -68,8 +80,10 @@ public class BurnInWindow : Window
         grid.Add(previewView, 1, 1);
         grid.Add(audioSettingsView, 2, 1);
         grid.Add(batchView, 0, 3, 3, 1);
+        grid.Add(targetFileSizeView, 4, 0);
+        grid.Add(videoInfoView, 4, 1);
 
-        grid.Add(buttonPanel, 4, 0, 1, 3);
+        grid.Add(buttonPanel, 6, 0, 1, 3);
 
         Content = grid;
 
@@ -404,6 +418,17 @@ public class BurnInWindow : Window
 
     private static Border MakeAudioSettingsView(BurnInViewModel vm)
     {
+        var labelAudioEncoding = UiUtil.MakeLabel(Se.Language.Video.BurnIn.AudioEncoding);
+        var comboBoxAudioEncoding = UiUtil.MakeComboBox(vm.AudioEncodings, vm, nameof(vm.SelectedAudioEncoding));
+
+        var checkBoxStereo = UiUtil.MakeCheckBox(Se.Language.Video.BurnIn.Stereo, vm, nameof(vm.AudioIsStereo));
+
+        var labelSampleRate = UiUtil.MakeLabel(Se.Language.Video.BurnIn.SampleRate);
+        var comboBoxSampleRate = UiUtil.MakeComboBox(vm.AudioSampleRates, vm, nameof(vm.SelectedAudioSampleRate));
+
+        var labelBitRate = UiUtil.MakeLabel(Se.Language.Video.BurnIn.BitRate);
+        var comboBoxBitRate = UiUtil.MakeComboBox(vm.AudioBitRates, vm, nameof(vm.SelectedAudioBitRate));   
+
         var grid = new Grid
         {
             RowDefinitions =
@@ -429,6 +454,17 @@ public class BurnInWindow : Window
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
+
+        grid.Add(labelAudioEncoding, 0, 0);
+        grid.Add(comboBoxAudioEncoding, 0, 1);
+
+        grid.Add(checkBoxStereo, 1, 1);
+
+        grid.Add(labelSampleRate, 2, 0);
+        grid.Add(comboBoxSampleRate, 2, 1);
+
+        grid.Add(labelBitRate, 3, 0);
+        grid.Add(comboBoxBitRate, 3, 1);
 
         return UiUtil.MakeBorderForControl(grid);
     }
@@ -461,7 +497,69 @@ public class BurnInWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        return UiUtil.MakeBorderForControl(grid);
+        return UiUtil.MakeBorderForControl(grid).WithBindIsVisible(nameof(vm.IsBatchMode));
+    }
+
+    private static Border MakeTargetFileSizeView(BurnInViewModel vm)
+    {
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnSpacing = 5,
+            RowSpacing = 5,
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        return UiUtil.MakeBorderForControl(grid).WithBindIsVisible(nameof(vm.IsBatchMode), new InverseBooleanConverter());
+    }
+
+    private static Border MakeVideoInfoView(BurnInViewModel vm)
+    {
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnSpacing = 5,
+            RowSpacing = 5,
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        return UiUtil.MakeBorderForControl(grid).WithBindIsVisible(nameof(vm.IsBatchMode), new InverseBooleanConverter());
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

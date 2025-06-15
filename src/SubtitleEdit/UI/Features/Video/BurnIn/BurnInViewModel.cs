@@ -87,6 +87,7 @@ public partial class BurnInViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<BurnInJobItem> _jobItems;
     [ObservableProperty] private BurnInJobItem? _selectedJobItem;
     [ObservableProperty] private bool _isGenerating;
+    [ObservableProperty] private bool _isBatchMode;
 
     public BurnInWindow? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -101,7 +102,6 @@ public partial class BurnInViewModel : ObservableObject
     private readonly Timer _timerAnalyze;
     private readonly Timer _timerGenerate;
     private bool _doAbort;
-    private bool _isBatchMode;
     private int _jobItemIndex = -1;
     private FfmpegMediaInfo? _mediaInfo;
     private bool _useSourceResolution;
@@ -705,10 +705,27 @@ public partial class BurnInViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void BrowseVideoResolution()
+    {
+    }
+
+    [RelayCommand]
     private void Generate()
     {
     }
 
+    [RelayCommand]
+    private void SingleMode()
+    {
+        IsBatchMode = false;
+    }
+
+    [RelayCommand]
+    private void BatchMode()
+    {
+        IsBatchMode = true;
+    }
+    
     [RelayCommand]
     private void Ok()
     {
