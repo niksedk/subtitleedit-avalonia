@@ -1138,4 +1138,9 @@ public static class UiUtil
 
         return control;
     }
+
+    internal static object MakeLabel(object alignment)
+    {
+        throw new NotImplementedException();
+    }
 }

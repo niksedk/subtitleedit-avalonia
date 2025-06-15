@@ -33,6 +33,11 @@ public class LanguageBurnIn
     public string UseSourceResolution { get; set; }
     public string OutputSettings { get; set; }
     public string FontSizeFactor { get; set; }
+    public string BoxType { get; set; }
+    public string FixRightToLeft { get; set; }
+    public string Cut { get; set; }
+    public string FromTime { get; set; }
+    public string ToTime { get; set; }
 
     public LanguageBurnIn()
     {
@@ -67,5 +72,10 @@ public class LanguageBurnIn
         UseSourceResolution = "Use source resolution";
         OutputSettings = "Output file/folder...";
         FontSizeFactor = "Font size factor";
+        BoxType = "Box type";
+        FixRightToLeft = "Fix right-to-left";
+        Cut = "Cut";
+        FromTime = "From time";
+        ToTime = "To time";
     }
 }

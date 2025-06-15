@@ -690,6 +690,21 @@ public partial class BurnInViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void BrowseResolution()
+    {
+    }
+
+    [RelayCommand]
+    private void BrowseCutFrom()
+    {
+    }
+
+    [RelayCommand]
+    private void BrowseCutTo()
+    {
+    }
+
+    [RelayCommand]
     private void Generate()
     {
     }

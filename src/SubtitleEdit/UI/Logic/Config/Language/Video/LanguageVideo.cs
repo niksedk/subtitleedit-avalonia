@@ -2,7 +2,7 @@
 
 public class LanguageVideo
 {
-    public LanguageBurnIn VideoBurnIn { get; set; } = new();
+    public LanguageBurnIn BurnIn { get; set; } = new();
     public LanguageTransparentVideo VideoTransparent { get; set; } = new();
 
 

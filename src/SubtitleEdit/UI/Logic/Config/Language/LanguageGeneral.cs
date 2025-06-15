@@ -134,6 +134,13 @@ public class LanguageGeneral
     public string FontName { get; set; }
     public string TextColor { get; set; }
     public string Box { get; set; }
+    public string Shadow { get; set; }
+    public string Alignment { get; set; }
+    public string Margin { get; set; }
+    public string Horizontal { get; set; }
+    public string Vertical { get; set; }
+    public string Resolution { get; set; }
+    public string Generate { get; set; }
 
     public LanguageGeneral()
     {
@@ -269,5 +276,11 @@ public class LanguageGeneral
         FontName = "Font name";
         TextColor = "Text color";
         Box = "Box";
+        Shadow = "Shadow";
+        Alignment = "Alignment";
+        Margin = "Margin";
+        Horizontal = "Vertical";
+        Resolution = "Resolution";
+        Generate = "Generate";
     }
 }
