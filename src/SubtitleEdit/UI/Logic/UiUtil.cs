@@ -564,6 +564,13 @@ public static class UiUtil
         return control;
     }
 
+    public static Border WithMarginRight(this Border control, int marginRight)
+    {
+        var m = control.Margin;
+        control.Margin = new Thickness(m.Left, m.Top, marginRight, m.Bottom);
+        return control;
+    }
+
     public static TextBlock WithMarginTop(this TextBlock control, int topBottom)
     {
         var m = control.Margin;
@@ -905,7 +912,7 @@ public static class UiUtil
             Width = 1,
             Background = GetBorderColor(),
             Margin = new Thickness(5, 5, 5, 5),
-            VerticalAlignment = VerticalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Stretch,
         };
     }
 

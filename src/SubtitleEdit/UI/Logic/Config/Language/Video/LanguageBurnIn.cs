@@ -39,6 +39,8 @@ public class LanguageBurnIn
     public string FromTime { get; set; }
     public string ToTime { get; set; }
     public string AudioEncoding { get; set; }
+    public string OutputProperties { get; internal set; }
+    public string VideoFileSize { get; set; }
 
     public LanguageBurnIn()
     {
@@ -79,5 +81,7 @@ public class LanguageBurnIn
         FromTime = "From time";
         ToTime = "To time";
         AudioEncoding = "Audio encoding";
+        OutputProperties = "Output properties...";
+        VideoFileSize = "Video file size";
     }
 }

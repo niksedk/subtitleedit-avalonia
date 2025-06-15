@@ -690,6 +690,33 @@ public partial class BurnInViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void Add()
+    {
+    }
+
+    [RelayCommand]
+    private void Remove()
+    {
+    }
+
+    [RelayCommand]
+    private void Clear()
+    {
+    }
+
+
+    [RelayCommand]
+    private void PickSubtitle()
+    {
+    }
+
+
+    [RelayCommand]
+    private void OutputProperties()
+    {
+    }
+
+    [RelayCommand]
     private void BrowseResolution()
     {
     }
