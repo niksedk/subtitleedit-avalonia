@@ -44,19 +44,16 @@ jobs:
           -p:PublishSingleFile=true `
           -o ./publish/windows-x64
         Copy-Item "libmpv-temp/libmpv-2.dll" "./publish/windows-x64/"
+        find ./publish/windows-x64 -name "*.pdb" -type f -delete
    
     - name: Publish Windows ARM64 app
       run: |
         dotnet publish src/UI/UI.csproj -c ${{ inputs.build_configuration }} -r win-arm64 --self-contained true `
           -p:PublishSingleFile=true `
           -o ./publish/windows-arm64
+         find ./publish/windows-arm64 -name "*.pdb" -type f -delete
 #        Copy-Item "libmpv-temp/libmpv-2.dll" "./publish/windows-arm64/"
     
-    - name: Remove PDB files from Windows artifacts
-      run: |
-        find "./publish/windows-x64/" -name "*.pdb" -type f -delete
-        find "./publish/windows-arm64/" -name "*.pdb" -type f -delete
-
     - name: Upload Windows x64 artifact
       uses: actions/upload-artifact@v4
       with:
