@@ -1013,7 +1013,8 @@ public static class UiUtil
     {
         return new ColorPicker
         {
-            Width = 200,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
             IsAlphaEnabled = true,
             IsAlphaVisible = true,
             IsColorSpectrumSliderVisible = false,

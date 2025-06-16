@@ -183,6 +183,8 @@ public partial class BurnInViewModel : ObservableObject
         VideoEncodings = new ObservableCollection<VideoEncodingItem>(VideoEncodingItem.VideoEncodings);
         SelectedVideoEncoding = VideoEncodings[0];
 
+        VideoCrf = new ObservableCollection<string>();
+
         JobItems = new ObservableCollection<BurnInJobItem>();
 
         VideoFileName = string.Empty;
@@ -197,7 +199,10 @@ public partial class BurnInViewModel : ObservableObject
         _timerAnalyze.Elapsed += TimerAnalyzeElapsed;
         _timerAnalyze.Interval = 100;
 
+        _loading = false;
         LoadSettings();
+        BoxTypeChanged();
+        VideoEncodingChanged();
     }
 
     public void Initialize(string videoFileName, Subtitle subtitle, SubtitleFormat subtitleFormat)
@@ -225,7 +230,8 @@ public partial class BurnInViewModel : ObservableObject
 
         if (!_ffmpegProcess.HasExited)
         {
-            var percentage = (int)Math.Round((double)_processedFrames / JobItems[_jobItemIndex].TotalFrames * 100.0, MidpointRounding.AwayFromZero);
+            var percentage = (int)Math.Round((double)_processedFrames / JobItems[_jobItemIndex].TotalFrames * 100.0,
+                MidpointRounding.AwayFromZero);
             percentage = Math.Clamp(percentage, 0, 100);
 
             var durationMs = (DateTime.UtcNow.Ticks - _startTicks) / 10_000;
@@ -239,7 +245,8 @@ public partial class BurnInViewModel : ObservableObject
             }
             else
             {
-                ProgressText = $"Analyzing video {_jobItemIndex + 1}/{JobItems.Count}... {percentage}%     {estimatedLeft}";
+                ProgressText =
+                    $"Analyzing video {_jobItemIndex + 1}/{JobItems.Count}... {percentage}%     {estimatedLeft}";
             }
 
             return;
@@ -276,7 +283,8 @@ public partial class BurnInViewModel : ObservableObject
 
         if (!_ffmpegProcess.HasExited)
         {
-            var percentage = (int)Math.Round((double)_processedFrames / JobItems[_jobItemIndex].TotalFrames * 100.0, MidpointRounding.AwayFromZero);
+            var percentage = (int)Math.Round((double)_processedFrames / JobItems[_jobItemIndex].TotalFrames * 100.0,
+                MidpointRounding.AwayFromZero);
             percentage = Math.Clamp(percentage, 0, 100);
 
             var durationMs = (DateTime.UtcNow.Ticks - _startTicks) / 10_000;
@@ -290,7 +298,8 @@ public partial class BurnInViewModel : ObservableObject
             }
             else
             {
-                ProgressText = $"Generating video {_jobItemIndex + 1}/{JobItems.Count}... {percentage}%     {estimatedLeft}";
+                ProgressText =
+                    $"Generating video {_jobItemIndex + 1}/{JobItems.Count}... {percentage}%     {estimatedLeft}";
             }
 
             return;
@@ -304,7 +313,6 @@ public partial class BurnInViewModel : ObservableObject
 
         if (!File.Exists(jobItem.OutputVideoFileName))
         {
-
             SeLogger.WhisperInfo("Output video file not found: " + jobItem.OutputVideoFileName + Environment.NewLine +
                                  "ffmpeg: " + _ffmpegProcess.StartInfo.FileName + Environment.NewLine +
                                  "Parameters: " + _ffmpegProcess.StartInfo.Arguments + Environment.NewLine +
@@ -349,7 +357,6 @@ public partial class BurnInViewModel : ObservableObject
             }
             else
             {
-
                 await MessageBox.Show(Window!,
                     "Generating done",
                     "Number of files generated: " + JobItems.Count,
@@ -552,6 +559,7 @@ public partial class BurnInViewModel : ObservableObject
             cutEnd,
             audioCutTracks);
     }
+
     private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
     {
         if (string.IsNullOrWhiteSpace(outLine.Data))
@@ -643,9 +651,12 @@ public partial class BurnInViewModel : ObservableObject
         style.FontSize = CalculateFontSize(JobItems[_jobItemIndex].Width, JobItems[_jobItemIndex].Height, FontFactor);
         style.Bold = FontIsBold;
         style.FontName = SelectedFontName;
-        style.Background = ColorUtils.FromArgb(255, (int)(FontShadowColor.R * 255.0), (int)(FontShadowColor.G * 255.0), (int)(FontShadowColor.B * 255.0));
-        style.Primary = ColorUtils.FromArgb(255, (int)(FontTextColor.R * 255.0), (int)(FontTextColor.G * 255.0), (int)(FontTextColor.B * 255.0));
-        style.Outline = ColorUtils.FromArgb(255, (int)(FontOutlineColor.R * 255.0), (int)(FontOutlineColor.G * 255.0), (int)(FontOutlineColor.B * 255.0));
+        style.Background = ColorUtils.FromArgb(255, (int)(FontShadowColor.R * 255.0), (int)(FontShadowColor.G * 255.0),
+            (int)(FontShadowColor.B * 255.0));
+        style.Primary = ColorUtils.FromArgb(255, (int)(FontTextColor.R * 255.0), (int)(FontTextColor.G * 255.0),
+            (int)(FontTextColor.B * 255.0));
+        style.Outline = ColorUtils.FromArgb(255, (int)(FontOutlineColor.R * 255.0), (int)(FontOutlineColor.G * 255.0),
+            (int)(FontOutlineColor.B * 255.0));
         style.OutlineWidth = SelectedFontOutline;
         style.ShadowWidth = SelectedFontShadowWidth;
         style.Alignment = SelectedFontAlignment.Code;
@@ -666,9 +677,13 @@ public partial class BurnInViewModel : ObservableObject
             style.BorderStyle = "4"; // box - multi line
         }
 
-        sub.Header = AdvancedSubStationAlpha.GetHeaderAndStylesFromAdvancedSubStationAlpha(sub.Header, new List<SsaStyle> { style });
-        sub.Header = AdvancedSubStationAlpha.AddTagToHeader("PlayResX", "PlayResX: " + ((int)VideoWidth).ToString(CultureInfo.InvariantCulture), "[Script Info]", sub.Header);
-        sub.Header = AdvancedSubStationAlpha.AddTagToHeader("PlayResY", "PlayResY: " + ((int)VideoHeight).ToString(CultureInfo.InvariantCulture), "[Script Info]", sub.Header);
+        sub.Header =
+            AdvancedSubStationAlpha.GetHeaderAndStylesFromAdvancedSubStationAlpha(sub.Header,
+                new List<SsaStyle> { style });
+        sub.Header = AdvancedSubStationAlpha.AddTagToHeader("PlayResX",
+            "PlayResX: " + ((int)VideoWidth).ToString(CultureInfo.InvariantCulture), "[Script Info]", sub.Header);
+        sub.Header = AdvancedSubStationAlpha.AddTagToHeader("PlayResY",
+            "PlayResY: " + ((int)VideoHeight).ToString(CultureInfo.InvariantCulture), "[Script Info]", sub.Header);
     }
 
     private static string MakeOutputFileName(string videoFileName)
@@ -679,6 +694,7 @@ public partial class BurnInViewModel : ObservableObject
         {
             ext = ".mkv";
         }
+
         ;
 
         var suffix = Se.Settings.Video.BurnIn.BurnInSuffix;
@@ -698,7 +714,8 @@ public partial class BurnInViewModel : ObservableObject
         return fileName;
     }
 
-    public static int CalculateFontSize(int videoWidth, int videoHeight, double factor, int minSize = 8, int maxSize = 2000)
+    public static int CalculateFontSize(int videoWidth, int videoHeight, double factor, int minSize = 8,
+        int maxSize = 2000)
     {
         factor = Math.Clamp(factor, 0, 1);
 
@@ -735,7 +752,8 @@ public partial class BurnInViewModel : ObservableObject
         }
         else if (codec == "prores_ks")
         {
-            await Window!.Launcher.LaunchUriAsync(new Uri("https://ottverse.com/ffmpeg-convert-to-apple-prores-422-4444-hq"));
+            await Window!.Launcher.LaunchUriAsync(
+                new Uri("https://ottverse.com/ffmpeg-convert-to-apple-prores-422-4444-hq"));
         }
         else
         {
@@ -768,10 +786,7 @@ public partial class BurnInViewModel : ObservableObject
             };
             jobItem.AddSubtitleFileName(TryGetSubtitleFileName(fileName));
 
-            Dispatcher.UIThread.Invoke(() =>
-            {
-                JobItems.Add(jobItem);
-            });
+            Dispatcher.UIThread.Invoke(() => { JobItems.Add(jobItem); });
         }
     }
 
@@ -864,10 +879,10 @@ public partial class BurnInViewModel : ObservableObject
             if (string.IsNullOrWhiteSpace(jobItem.SubtitleFileName))
             {
                 await MessageBox.Show(Window!,
-                   "Missing subtitle",
+                    "Missing subtitle",
                     "Please add a subtitle to all batch items",
-                     MessageBoxButtons.OK,
-                     MessageBoxIcon.Error);
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
 
                 return;
             }
@@ -994,8 +1009,12 @@ public partial class BurnInViewModel : ObservableObject
         return string.Empty;
     }
 
-
     internal void VideoEncodingChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        VideoEncodingChanged();
+    }
+
+    private void VideoEncodingChanged()
     {
         if (_loading)
         {
@@ -1013,15 +1032,15 @@ public partial class BurnInViewModel : ObservableObject
 
         var items = new List<string>
         {
-           "ultrafast",
-           "superfast",
-           "veryfast",
-           "faster",
-           "fast",
-           "medium",
-           "slow",
-           "slower",
-           "veryslow",
+            "ultrafast",
+            "superfast",
+            "veryfast",
+            "faster",
+            "fast",
+            "medium",
+            "slow",
+            "slower",
+            "veryslow",
         };
 
         var defaultItem = "medium";
@@ -1191,7 +1210,6 @@ public partial class BurnInViewModel : ObservableObject
 
     private void UpdateOutputProperties()
     {
-
         if (!Se.Settings.Tools.BatchConvert.SaveInSourceFolder &&
             string.IsNullOrWhiteSpace(Se.Settings.Tools.BatchConvert.OutputFolder))
         {
@@ -1212,5 +1230,33 @@ public partial class BurnInViewModel : ObservableObject
                 Se.Settings.Tools.BatchConvert.Overwrite;
 
         //TODO:       OutputPropertiesText = text;
+    }
+
+    public void BoxTypeChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        BoxTypeChanged();
+    }
+
+    private void BoxTypeChanged()
+    {
+        if (SelectedFontBoxType.BoxType == FontBoxType.None)
+        {
+            FontOutlineText = "Outline";
+            FontShadowText = "Shadow";
+        }
+
+        if (SelectedFontBoxType.BoxType == FontBoxType.OneBox)
+        {
+            FontOutlineText = "Outline";
+            FontShadowText = "Box";
+        }
+
+        if (SelectedFontBoxType.BoxType == FontBoxType.BoxPerLine)
+        {
+            FontOutlineText = "Box";
+            FontShadowText = "Shadow";
+        }
+
+        //TODO: UpdateNonAssaPreview();
     }
 }

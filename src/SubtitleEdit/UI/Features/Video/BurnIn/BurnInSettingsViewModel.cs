@@ -13,8 +13,7 @@ public partial class BurnInSettingsViewModel : ObservableObject
     [ObservableProperty] private bool _useSourceFolder;
     [ObservableProperty] private bool _useOutputFolder;
     [ObservableProperty] private string _outputFolder;
-
-
+    
     public BurnInSettingsWindow? Window { get; set; }
 
     public bool OkPressed { get; private set; }

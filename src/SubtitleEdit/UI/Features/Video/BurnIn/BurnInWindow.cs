@@ -3,6 +3,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Markup.Declarative;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Logic;
@@ -92,10 +93,11 @@ public class BurnInWindow : Window
     private static Border MakeSubtitlesView(BurnInViewModel vm)
     {
         var labelFontName = UiUtil.MakeLabel(Se.Language.General.FontName);
-        var comboBoxFontName = UiUtil.MakeComboBox(vm.FontNames, vm, nameof(vm.SelectedFontName));
+        var comboBoxFontName = UiUtil.MakeComboBox(vm.FontNames, vm, nameof(vm.SelectedFontName))
+            .WithMinWidth(200);
 
         var labelFontSizeFactor = UiUtil.MakeLabel(Se.Language.Video.BurnIn.FontSizeFactor);
-        var numericUpDownFontSizeFactor = UiUtil.MakeNumericUpDownTwoDecimals(0.1m, 1.0m, 200, vm, nameof(vm.FontFactor));
+        var numericUpDownFontSizeFactor = UiUtil.MakeNumericUpDownTwoDecimals(0.1m, 1.0m, 150, vm, nameof(vm.FontFactor));
         var labelFontSizeFactorInfo = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.FontFactorText));
         var panelFontSizeFactor = new StackPanel()
         {
@@ -114,8 +116,9 @@ public class BurnInWindow : Window
         var labelTextColor = UiUtil.MakeLabel(Se.Language.General.TextColor);
         var colorPickerTextColor = UiUtil.MakeColorPicker(vm, nameof(vm.FontBoxColor));
 
-        var labelBox = UiUtil.MakeLabel(Se.Language.General.Box);
-        var textBoxBoxWidth = UiUtil.MakeTextBox(100, vm, nameof(vm.SelectedFontShadowWidth));
+        var labelOutline = UiUtil.MakeLabel(string.Empty)
+            .WithBindText(vm, nameof(vm.FontOutlineText));
+        var textBoxBoxWidth = UiUtil.MakeTextBox(50, vm, nameof(vm.SelectedFontOutline));
         var colorPickerBoxColor = UiUtil.MakeColorPicker(vm, nameof(vm.FontBoxColor));
         var panelBox = new StackPanel
         {
@@ -129,8 +132,9 @@ public class BurnInWindow : Window
             }
         };
 
-        var labelShadow = UiUtil.MakeLabel(Se.Language.General.Shadow);
-        var textBoxShadowWidth = UiUtil.MakeTextBox(100, vm, nameof(vm.SelectedFontShadowWidth));
+        var labelShadow = UiUtil.MakeLabel(Se.Language.General.Shadow)
+            .WithBindText(vm, nameof(vm.FontShadowText));
+        var textBoxShadowWidth = UiUtil.MakeTextBox(50, vm, nameof(vm.SelectedFontShadowWidth));
         var colorPickerShadowColor = UiUtil.MakeColorPicker(vm, nameof(vm.FontShadowColor));
         var panelShadow = new StackPanel
         {
@@ -146,6 +150,7 @@ public class BurnInWindow : Window
 
         var labelBoxType = UiUtil.MakeLabel(Se.Language.Video.BurnIn.BoxType);
         var comboBoxBoxType = UiUtil.MakeComboBox(vm.FontBoxTypes, vm, nameof(vm.SelectedFontBoxType));
+        comboBoxBoxType.SelectionChanged += vm.BoxTypeChanged;
 
         var labelAlignment = UiUtil.MakeLabel(Se.Language.General.Alignment);
         var comboBoxAlignment = UiUtil.MakeComboBox(vm.FontAlignments, vm, nameof(vm.SelectedFontAlignment));
@@ -208,7 +213,7 @@ public class BurnInWindow : Window
         grid.Add(labelTextColor, 3, 0);
         grid.Add(colorPickerTextColor, 3, 1);
 
-        grid.Add(labelBox, 4, 0);
+        grid.Add(labelOutline, 4, 0);
         grid.Add(panelBox, 4, 1);
 
         grid.Add(labelShadow, 5, 0);
