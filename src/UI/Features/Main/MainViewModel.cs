@@ -184,7 +184,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            var newFileName = DownloadLibMpvViewModel.GetFallbackLibMpvFileName();
+            var newFileName = DownloadLibMpvViewModel.GetFallbackLibMpvFileName(false);
             if (string.IsNullOrEmpty(Se.Settings.General.LibMpvPath) || File.Exists(newFileName))
             {
                 var libMpvFileName = DownloadLibMpvViewModel.GetLibMpvFileName();

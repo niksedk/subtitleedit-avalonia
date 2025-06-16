@@ -101,7 +101,7 @@ public partial class DownloadLibMpvViewModel : ObservableObject
                             return;
                         }, DispatcherPriority.Background);
 
-                        UnpackLibMpv(GetFallbackLibMpvFileName());
+                        UnpackLibMpv(GetFallbackLibMpvFileName(true));
                         Close();
                         return;
                     }
@@ -160,10 +160,10 @@ public partial class DownloadLibMpvViewModel : ObservableObject
         return Path.Combine(Se.BaseFolder, "libmpv-2.so");
     }
 
-    public static string GetFallbackLibMpvFileName()
+    public static string GetFallbackLibMpvFileName(bool create)
     {
         var newFolder = Path.Combine(Se.BaseFolder, "libmpv-update");
-        if (!Directory.Exists(newFolder))
+        if (!Directory.Exists(newFolder) && create)
         {
             Directory.CreateDirectory(newFolder);
         }
