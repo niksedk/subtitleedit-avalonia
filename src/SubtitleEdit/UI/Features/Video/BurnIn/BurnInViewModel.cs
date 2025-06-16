@@ -188,6 +188,15 @@ public partial class BurnInViewModel : ObservableObject
         VideoFileName = string.Empty;
         VideoFileSize = string.Empty;
 
+        _log = new StringBuilder();
+        _timerGenerate = new();
+        _timerGenerate.Elapsed += TimerGenerateElapsed;
+        _timerGenerate.Interval = 100;
+
+        _timerAnalyze = new();
+        _timerAnalyze.Elapsed += TimerAnalyzeElapsed;
+        _timerAnalyze.Interval = 100;
+
         LoadSettings();
     }
 
@@ -288,6 +297,7 @@ public partial class BurnInViewModel : ObservableObject
         }
 
         _timerGenerate.Stop();
+        ProgressValue = 100;
         ProgressText = string.Empty;
 
         var jobItem = JobItems[_jobItemIndex];
@@ -566,7 +576,7 @@ public partial class BurnInViewModel : ObservableObject
         if (long.TryParse(arr[1].Trim(), out var f))
         {
             _processedFrames = f;
-            ProgressValue = (double)_processedFrames / JobItems[_jobItemIndex].TotalFrames;
+            ProgressValue = (double)_processedFrames * 100.0 / JobItems[_jobItemIndex].TotalFrames;
         }
     }
 
