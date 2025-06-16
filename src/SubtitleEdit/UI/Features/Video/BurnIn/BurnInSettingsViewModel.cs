@@ -34,7 +34,6 @@ public partial class BurnInSettingsViewModel : ObservableObject
         UseSourceFolder = Se.Settings.Video.BurnIn.SaveInSourceFolder; ;
         UseOutputFolder = !UseSourceFolder;
         OutputFolder = Se.Settings.Video.BurnIn.OutputFolder;
-        SelectedTargetEncoding = Se.Settings.Tools.BatchConvert.TargetEncoding;
     }
 
     private void SaveSettings()
