@@ -3,11 +3,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UI", "UI\UI.csproj", "{C27E3654-FA0B-41EB-87C2-9B9A6B27566F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UI", "src\UI\UI.csproj", "{C27E3654-FA0B-41EB-87C2-9B9A6B27566F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibMpv", "LibMpv\LibMpv.csproj", "{7630C7BF-9196-E8CB-EB37-F2BC60AF3D2B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibMpv", "src\LibMpv\LibMpv.csproj", "{7630C7BF-9196-E8CB-EB37-F2BC60AF3D2B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibMpv.Avalonia", "LibMpv.Avalonia\LibMpv.Avalonia.csproj", "{22BB0BF5-41FA-0BE8-9D01-06ACA3CD2B85}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibMpv.Avalonia", "src\LibMpv.Avalonia\LibMpv.Avalonia.csproj", "{22BB0BF5-41FA-0BE8-9D01-06ACA3CD2B85}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\build-all-platforms.yml = .github\workflows\build-all-platforms.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,5 +35,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {27E960EC-896F-428C-95A2-C250321C16D5}
 	EndGlobalSection
 EndGlobal
