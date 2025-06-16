@@ -10,7 +10,7 @@ namespace Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
 
 public class ChangeCasingWindow : Window
 {
-    private ChangeCasingViewModel _vm;
+    private readonly ChangeCasingViewModel _vm;
 
     public ChangeCasingWindow(ChangeCasingViewModel vm)
     {

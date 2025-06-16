@@ -13,7 +13,7 @@ namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
 public class LayoutWindow : Window
 {
-    private LayoutViewModel _vm;
+    private readonly LayoutViewModel _vm;
     private List<Border> _borders = new List<Border>();
     private int _focusedLayout = -1;
 

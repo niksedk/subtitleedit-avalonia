@@ -7,7 +7,7 @@ namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.VoiceSettings;
 
 public class VoiceSettingsWindow : Window
 {
-    private VoiceSettingsViewModel _vm;
+    private readonly VoiceSettingsViewModel _vm;
     
     public VoiceSettingsWindow(VoiceSettingsViewModel vm)
     {

@@ -8,7 +8,7 @@ namespace Nikse.SubtitleEdit.Features.Video.OpenFromUrl;
 
 public class OpenFromUrlWindow : Window
 {
-    private OpenFromUrlViewModel _vm;
+    private readonly OpenFromUrlViewModel _vm;
     
     public OpenFromUrlWindow(OpenFromUrlViewModel vm)
     {

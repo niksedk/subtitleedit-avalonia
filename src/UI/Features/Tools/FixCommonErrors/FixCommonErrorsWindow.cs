@@ -15,7 +15,7 @@ namespace Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 
 public class FixCommonErrorsWindow : Window
 {
-    private FixCommonErrorsViewModel _vm;
+    private readonly FixCommonErrorsViewModel _vm;
 
     public FixCommonErrorsWindow(FixCommonErrorsViewModel vm)
     {

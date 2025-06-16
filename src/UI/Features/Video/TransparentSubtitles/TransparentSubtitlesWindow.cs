@@ -7,7 +7,7 @@ namespace Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
 
 public class TransparentSubtitlesWindow : Window
 {
-    private TransparentSubtitlesViewModel _vm;
+    private readonly TransparentSubtitlesViewModel _vm;
     
     public TransparentSubtitlesWindow(TransparentSubtitlesViewModel vm)
     {

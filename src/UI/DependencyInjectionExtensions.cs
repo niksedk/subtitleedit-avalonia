@@ -129,5 +129,6 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<OllamaBrowseViewModel>();
         collection.AddTransient<InterjectionsViewModel>();
         collection.AddTransient<BurnInSettingsViewModel>();
+        collection.AddTransient<BurnInResolutionPickerViewModel>();
     }
 }

@@ -8,7 +8,7 @@ namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
 
 public class EncodingSettingsWindow : Window
 {
-    private EncodingSettingsViewModel _vm;
+    private readonly EncodingSettingsViewModel _vm;
     
     public EncodingSettingsWindow(EncodingSettingsViewModel vm)
     {

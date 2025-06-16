@@ -9,7 +9,7 @@ namespace Nikse.SubtitleEdit.Features.Edit.Find;
 
 public class FindWindow : Window
 {
-    private FindViewModel _vm;
+    private readonly FindViewModel _vm;
     
     public FindWindow(FindViewModel vm)
     {

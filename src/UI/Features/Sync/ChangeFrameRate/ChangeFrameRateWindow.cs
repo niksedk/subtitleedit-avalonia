@@ -7,7 +7,7 @@ namespace Nikse.SubtitleEdit.Features.Sync.ChangeFrameRate;
 
 public class ChangeFrameRateWindow : Window
 {
-    private ChangeFrameRateViewModel _vm;
+    private readonly ChangeFrameRateViewModel _vm;
     
     public ChangeFrameRateWindow(ChangeFrameRateViewModel vm)
     {

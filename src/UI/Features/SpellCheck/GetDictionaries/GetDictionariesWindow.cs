@@ -11,7 +11,7 @@ namespace Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
 
 public class GetDictionariesWindow : Window
 {
-    private GetDictionariesViewModel _vm;
+    private readonly GetDictionariesViewModel _vm;
 
     public GetDictionariesWindow(GetDictionariesViewModel vm)
     {

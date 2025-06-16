@@ -12,7 +12,7 @@ namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech;
 
 public class TextToSpeechWindow : Window
 {
-    private TextToSpeechViewModel _vm;
+    private readonly TextToSpeechViewModel _vm;
 
     public TextToSpeechWindow(TextToSpeechViewModel vm)
     {

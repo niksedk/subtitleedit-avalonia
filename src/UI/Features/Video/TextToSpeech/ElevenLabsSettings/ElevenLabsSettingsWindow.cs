@@ -9,7 +9,7 @@ namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.ElevenLabsSettings;
 
 public class ElevenLabsSettingsWindow : Window
 {
-    private ElevenLabsSettingsViewModel _vm;
+    private readonly ElevenLabsSettingsViewModel _vm;
 
     public ElevenLabsSettingsWindow(ElevenLabsSettingsViewModel vm)
     {

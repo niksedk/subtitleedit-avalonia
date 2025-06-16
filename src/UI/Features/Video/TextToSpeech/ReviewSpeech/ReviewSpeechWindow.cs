@@ -12,7 +12,7 @@ namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.VoiceSettings;
 
 public class ReviewSpeechWindow : Window
 {
-    private ReviewSpeechViewModel _vm;
+    private readonly ReviewSpeechViewModel _vm;
 
     public ReviewSpeechWindow(ReviewSpeechViewModel vm)
     {

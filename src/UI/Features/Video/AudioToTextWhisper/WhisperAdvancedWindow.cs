@@ -11,7 +11,7 @@ namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 
 public class WhisperAdvancedWindow : Window
 {
-    private WhisperAdvancedViewModel _vm;
+    private readonly WhisperAdvancedViewModel _vm;
 
     public WhisperAdvancedWindow(WhisperAdvancedViewModel vm)
     {

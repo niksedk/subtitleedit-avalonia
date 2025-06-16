@@ -9,7 +9,7 @@ namespace Nikse.SubtitleEdit.Features.Edit.Replace;
 
 public class ReplaceWindow : Window
 {
-    private ReplaceViewModel _vm;
+    private readonly ReplaceViewModel _vm;
 
     public ReplaceWindow(ReplaceViewModel vm)
     {

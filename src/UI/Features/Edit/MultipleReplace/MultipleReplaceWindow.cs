@@ -8,7 +8,7 @@ namespace Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 
 public class MultipleReplaceWindow : Window
 {
-    private MultipleReplaceViewModel _vm;
+    private readonly MultipleReplaceViewModel _vm;
 
     public MultipleReplaceWindow(MultipleReplaceViewModel vm)
     {

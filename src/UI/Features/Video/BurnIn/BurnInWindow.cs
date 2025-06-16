@@ -3,6 +3,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Logic;
@@ -13,7 +14,7 @@ namespace Nikse.SubtitleEdit.Features.Video.BurnIn;
 
 public class BurnInWindow : Window
 {
-    private BurnInViewModel _vm;
+    private readonly BurnInViewModel _vm;
 
     public BurnInWindow(BurnInViewModel vm)
     {
@@ -99,9 +100,11 @@ public class BurnInWindow : Window
         var labelFontName = UiUtil.MakeLabel(Se.Language.General.FontName);
         var comboBoxFontName = UiUtil.MakeComboBox(vm.FontNames, vm, nameof(vm.SelectedFontName))
             .WithMinWidth(200);
+        comboBoxFontName.SelectionChanged += vm.ComboBoxChanged;
 
         var labelFontSizeFactor = UiUtil.MakeLabel(Se.Language.Video.BurnIn.FontSizeFactor);
         var numericUpDownFontSizeFactor = UiUtil.MakeNumericUpDownTwoDecimals(0.1m, 1.0m, 150, vm, nameof(vm.FontFactor));
+        numericUpDownFontSizeFactor.ValueChanged += vm.NumericUpDownChanged;
         var labelFontSizeFactorInfo = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.FontFactorText));
         var panelFontSizeFactor = new StackPanel()
         {
@@ -116,14 +119,18 @@ public class BurnInWindow : Window
         };
 
         var checkBoxUseBold = UiUtil.MakeCheckBox(Se.Language.General.Bold, vm, nameof(vm.FontIsBold));
+        checkBoxUseBold.PropertyChanged += vm.CheckBoxChanged;
 
         var labelTextColor = UiUtil.MakeLabel(Se.Language.General.TextColor);
-        var colorPickerTextColor = UiUtil.MakeColorPicker(vm, nameof(vm.FontBoxColor));
+        var colorPickerTextColor = UiUtil.MakeColorPicker(vm, nameof(vm.FontTextColor));
+        colorPickerTextColor.ColorChanged += vm.ColorChanged;
 
         var labelOutline = UiUtil.MakeLabel(string.Empty)
             .WithBindText(vm, nameof(vm.FontOutlineText));
         var textBoxBoxWidth = UiUtil.MakeTextBox(50, vm, nameof(vm.SelectedFontOutline));
-        var colorPickerBoxColor = UiUtil.MakeColorPicker(vm, nameof(vm.FontBoxColor));
+        textBoxBoxWidth.TextChanged += vm.TextBoxChanged;
+        var colorPickerBoxColor = UiUtil.MakeColorPicker(vm, nameof(vm.FontOutlineColor));
+        colorPickerBoxColor.ColorChanged += vm.ColorChanged;
         var panelBox = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -131,15 +138,18 @@ public class BurnInWindow : Window
             HorizontalAlignment = HorizontalAlignment.Left,
             Children =
             {
+                colorPickerBoxColor,
+                UiUtil.MakeLabel("Width").WithLarginLeft(5),
                 textBoxBoxWidth,
-                colorPickerBoxColor
             }
         };
 
         var labelShadow = UiUtil.MakeLabel(Se.Language.General.Shadow)
             .WithBindText(vm, nameof(vm.FontShadowText));
         var textBoxShadowWidth = UiUtil.MakeTextBox(50, vm, nameof(vm.SelectedFontShadowWidth));
+        textBoxShadowWidth.TextChanged += vm.TextBoxChanged;
         var colorPickerShadowColor = UiUtil.MakeColorPicker(vm, nameof(vm.FontShadowColor));
+        colorPickerShadowColor.ColorChanged += vm.ColorChanged;
         var panelShadow = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -147,8 +157,9 @@ public class BurnInWindow : Window
             HorizontalAlignment = HorizontalAlignment.Left,
             Children =
             {
+                colorPickerShadowColor,
+                UiUtil.MakeLabel(Se.Language.General.Width).WithLarginLeft(5),
                 textBoxShadowWidth,
-                colorPickerShadowColor
             }
         };
 
@@ -158,12 +169,15 @@ public class BurnInWindow : Window
 
         var labelAlignment = UiUtil.MakeLabel(Se.Language.General.Alignment);
         var comboBoxAlignment = UiUtil.MakeComboBox(vm.FontAlignments, vm, nameof(vm.SelectedFontAlignment));
+        comboBoxAlignment.SelectionChanged += vm.ComboBoxChanged;
 
         var labelMargin = UiUtil.MakeLabel(Se.Language.General.Margin);
         var labelMarginHorizontal = UiUtil.MakeLabel(Se.Language.General.Horizontal);
-        var textBoxMarginHorizontal = UiUtil.MakeTextBox(100, vm, nameof(vm.FontMarginHorizontal));
-        var labelMarginVertical = UiUtil.MakeLabel(Se.Language.General.Vertical);
-        var textBoxMarginVertical = UiUtil.MakeTextBox(100, vm, nameof(vm.FontMarginVertical));
+        var textBoxMarginHorizontal = UiUtil.MakeTextBox(50, vm, nameof(vm.FontMarginHorizontal));
+        textBoxMarginHorizontal.TextChanged += vm.TextBoxChanged;
+        var labelMarginVertical = UiUtil.MakeLabel(Se.Language.General.Vertical).WithLarginLeft(5);
+        var textBoxMarginVertical = UiUtil.MakeTextBox(50, vm, nameof(vm.FontMarginVertical));
+        textBoxMarginVertical.TextChanged += vm.TextBoxChanged;
         var panelMargin = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -179,6 +193,7 @@ public class BurnInWindow : Window
         };
 
         var checkBoxFixRightToLeft = UiUtil.MakeCheckBox(Se.Language.Video.BurnIn.FixRightToLeft, vm, nameof(vm.FontFixRtl));
+        checkBoxFixRightToLeft.PropertyChanged += vm.CheckBoxChanged;
 
         var grid = new Grid
         {
@@ -214,17 +229,17 @@ public class BurnInWindow : Window
 
         grid.Add(checkBoxUseBold, 2, 1);
 
-        grid.Add(labelTextColor, 3, 0);
-        grid.Add(colorPickerTextColor, 3, 1);
+        grid.Add(labelBoxType, 3, 0);
+        grid.Add(comboBoxBoxType, 3, 1);
 
-        grid.Add(labelOutline, 4, 0);
-        grid.Add(panelBox, 4, 1);
+        grid.Add(labelTextColor, 4, 0);
+        grid.Add(colorPickerTextColor, 4, 1);
 
-        grid.Add(labelShadow, 5, 0);
-        grid.Add(panelShadow, 5, 1);
+        grid.Add(labelOutline, 5, 0);
+        grid.Add(panelBox, 5, 1);
 
-        grid.Add(labelBoxType, 6, 0);
-        grid.Add(comboBoxBoxType, 6, 1);
+        grid.Add(labelShadow, 6, 0);
+        grid.Add(panelShadow, 6, 1);
 
         grid.Add(labelAlignment, 7, 0);
         grid.Add(comboBoxAlignment, 7, 1);
@@ -373,24 +388,26 @@ public class BurnInWindow : Window
     private static Border MakePreviewView(BurnInViewModel vm)
     {
 
+        var labelPreview = UiUtil.MakeLabel("Preview");
+
+        var image = new Image
+        {
+            [!Image.SourceProperty] = new Binding(nameof(vm.ImagePreview)),
+            DataContext = vm,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Stretch = Stretch.None, // Prevents stretching of the image
+        };
+
         var grid = new Grid
         {
             RowDefinitions =
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnSpacing = 5,
@@ -398,6 +415,9 @@ public class BurnInWindow : Window
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
+
+        grid.Add(labelPreview, 0, 0);
+        grid.Add(image, 1, 0);
 
         return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5).WithMarginRight(5);
     }

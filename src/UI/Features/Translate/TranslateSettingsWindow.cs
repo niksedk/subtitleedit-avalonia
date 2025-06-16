@@ -9,7 +9,7 @@ namespace Nikse.SubtitleEdit.Features.Translate;
 
 public class TranslateSettingsWindow : Window
 {
-    private TranslateSettingsViewModel _vm;
+    private readonly TranslateSettingsViewModel _vm;
 
     public TranslateSettingsWindow(TranslateSettingsViewModel vm)
     {

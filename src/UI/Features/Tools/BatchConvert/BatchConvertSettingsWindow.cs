@@ -8,7 +8,7 @@ namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
 
 public class BatchConvertSettingsWindow : Window
 {
-    private BatchConvertSettingsViewModel _vm;
+    private readonly BatchConvertSettingsViewModel _vm;
     
     public BatchConvertSettingsWindow(BatchConvertSettingsViewModel vm)
     {

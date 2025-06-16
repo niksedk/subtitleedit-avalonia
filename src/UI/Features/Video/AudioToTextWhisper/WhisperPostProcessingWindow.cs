@@ -8,7 +8,7 @@ namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 
 public class WhisperPostProcessingWindow : Window
 {
-    private WhisperPostProcessingViewModel _vm;
+    private readonly WhisperPostProcessingViewModel _vm;
 
     public WhisperPostProcessingWindow(WhisperPostProcessingViewModel vm)
     {

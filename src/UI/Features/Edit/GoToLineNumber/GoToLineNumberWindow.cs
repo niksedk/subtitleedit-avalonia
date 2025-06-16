@@ -9,7 +9,7 @@ namespace Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
 
 public class GoToLineNumberWindow : Window
 {
-    private GoToLineNumberViewModel _vm;
+    private readonly GoToLineNumberViewModel _vm;
 
     public GoToLineNumberWindow(GoToLineNumberViewModel vm)
     {

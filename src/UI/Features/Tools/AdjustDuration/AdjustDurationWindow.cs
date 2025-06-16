@@ -11,7 +11,7 @@ namespace Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 
 public class AdjustDurationWindow : Window
 {
-    private AdjustDurationViewModel _vm;
+    private readonly AdjustDurationViewModel _vm;
 
     private const int LabelMinWidth = 100;
     private const int NumericUpDownWidth = 150;

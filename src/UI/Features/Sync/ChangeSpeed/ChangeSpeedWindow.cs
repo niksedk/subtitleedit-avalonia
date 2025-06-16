@@ -9,7 +9,7 @@ namespace Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
 
 public class ChangeSpeedWindow : Window
 {
-    private ChangeSpeedViewModel _vm;
+    private readonly ChangeSpeedViewModel _vm;
     
     public ChangeSpeedWindow(ChangeSpeedViewModel vm)
     {

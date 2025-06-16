@@ -1,6 +1,9 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
+using Avalonia.Skia;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -11,7 +14,7 @@ using Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
-using Nikse.SubtitleEdit.Logic.ValueConverters;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -91,6 +94,8 @@ public partial class BurnInViewModel : ObservableObject
     [ObservableProperty] private BurnInJobItem? _selectedJobItem;
     [ObservableProperty] private bool _isGenerating;
     [ObservableProperty] private bool _isBatchMode;
+    [ObservableProperty] private Bitmap? _imagePreview;
+
 
     public BurnInWindow? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -654,12 +659,9 @@ public partial class BurnInViewModel : ObservableObject
         style.FontSize = CalculateFontSize(JobItems[_jobItemIndex].Width, JobItems[_jobItemIndex].Height, FontFactor);
         style.Bold = FontIsBold;
         style.FontName = SelectedFontName;
-        style.Background = ColorUtils.FromArgb(255, (int)(FontShadowColor.R * 255.0), (int)(FontShadowColor.G * 255.0),
-            (int)(FontShadowColor.B * 255.0));
-        style.Primary = ColorUtils.FromArgb(255, (int)(FontTextColor.R * 255.0), (int)(FontTextColor.G * 255.0),
-            (int)(FontTextColor.B * 255.0));
-        style.Outline = ColorUtils.FromArgb(255, (int)(FontOutlineColor.R * 255.0), (int)(FontOutlineColor.G * 255.0),
-            (int)(FontOutlineColor.B * 255.0));
+        style.Background = FontShadowColor.ToSKColor();
+        style.Primary = FontTextColor.ToSKColor();
+        style.Outline = FontOutlineColor.ToSKColor();
         style.OutlineWidth = SelectedFontOutline;
         style.ShadowWidth = SelectedFontShadowWidth;
         style.Alignment = SelectedFontAlignment.Code;
@@ -1297,6 +1299,101 @@ public partial class BurnInViewModel : ObservableObject
             FontShadowText = "Shadow";
         }
 
-        //TODO: UpdateNonAssaPreview();
+        UpdateNonAssaPreview();
+    }
+
+    private void UpdateNonAssaPreview()
+    {
+        if (_loading)
+        {
+            return;
+        }
+
+        var text = "This is a test";
+
+        if (_subtitleFormat is { Name: AdvancedSubStationAlpha.NameOfFormat } && !IsBatchMode)
+        {
+            ImagePreview = new SKBitmap(1, 1).ToAvaloniaBitmap();
+            return;
+        }
+
+
+        var fontSize = (float)CalculateFontSize(VideoWidth, VideoHeight, FontFactor);
+        SKBitmap bitmap;
+
+        if (SelectedFontBoxType.BoxType == FontBoxType.BoxPerLine)
+        {
+            bitmap = TextToImageGenerator.GenerateImage(
+                text,
+                SelectedFontName,
+                fontSize,
+                FontIsBold,
+                FontTextColor.ToSKColor(),
+                FontShadowColor.ToSKColor(),
+                FontOutlineColor.ToSKColor(),
+                FontOutlineColor.ToSKColor(),
+                0,
+                (float)SelectedFontShadowWidth);
+
+            if (SelectedFontShadowWidth > 0)
+            {
+                bitmap = TextToImageGenerator.AddShadowToBitmap(bitmap, (int)Math.Round(SelectedFontShadowWidth, MidpointRounding.AwayFromZero), FontShadowColor.ToSKColor());
+            }
+        }
+        else if (SelectedFontBoxType.BoxType == FontBoxType.OneBox)
+        {
+            bitmap = TextToImageGenerator.GenerateImage(
+                text,
+                SelectedFontName,
+                fontSize,
+                FontIsBold,
+                FontTextColor.ToSKColor(),
+                FontOutlineColor.ToSKColor(),
+                SKColors.Red,
+                FontShadowColor.ToSKColor(),
+                (float)SelectedFontOutline,
+                0);
+        }
+        else // FontBoxType.None
+        {
+            bitmap = TextToImageGenerator.GenerateImage(
+                text,
+                SelectedFontName,
+                fontSize,
+                FontIsBold,
+                FontTextColor.ToSKColor(),
+                FontOutlineColor.ToSKColor(),
+                FontShadowColor.ToSKColor(),
+                SKColors.Transparent,
+                (float)SelectedFontOutline,
+                (float)SelectedFontShadowWidth);
+        }
+
+        ImagePreview = bitmap.ToAvaloniaBitmap();
+    }
+
+    internal void ColorChanged(object? sender, ColorChangedEventArgs e)
+    {
+        UpdateNonAssaPreview();
+    }
+
+    internal void ComboBoxChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        UpdateNonAssaPreview();
+    }
+
+    internal void NumericUpDownChanged(object? sender, NumericUpDownValueChangedEventArgs e)
+    {
+        UpdateNonAssaPreview();
+    }
+
+    internal void CheckBoxChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        UpdateNonAssaPreview();
+    }
+
+    internal void TextBoxChanged(object? sender, TextChangedEventArgs e)
+    {
+        UpdateNonAssaPreview();
     }
 }

@@ -10,7 +10,7 @@ namespace Nikse.SubtitleEdit.Features.Sync.AdjustAllTimes;
 
 public class AdjustAllTimesWindow : Window
 {
-    private AdjustAllTimesViewModel _vm;
+    private readonly AdjustAllTimesViewModel _vm;
 
     public AdjustAllTimesWindow(AdjustAllTimesViewModel vm)
     {

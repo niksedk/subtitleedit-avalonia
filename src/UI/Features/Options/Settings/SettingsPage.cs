@@ -15,7 +15,7 @@ public class SettingsPage : UserControl
 {
     private TextBox _searchBox;
     private StackPanel _contentPanel;
-    private SettingsViewModel _vm;
+    private readonly SettingsViewModel _vm;
 
     public SettingsPage(SettingsViewModel vm)
     {

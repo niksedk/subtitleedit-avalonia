@@ -8,7 +8,7 @@ namespace Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 
 public class RestoreAutoBackupWindow : Window
 {
-    private RestoreAutoBackupViewModel _vm;
+    private readonly RestoreAutoBackupViewModel _vm;
 
     public RestoreAutoBackupWindow(RestoreAutoBackupViewModel vm)
     {

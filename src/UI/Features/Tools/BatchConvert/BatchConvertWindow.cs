@@ -13,7 +13,7 @@ namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
 public class BatchConvertWindow : Window
 {
-    private BatchConvertViewModel _vm;
+    private readonly BatchConvertViewModel _vm;
     
     public BatchConvertWindow(BatchConvertViewModel vm)
     {

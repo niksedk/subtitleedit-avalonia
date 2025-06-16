@@ -287,7 +287,8 @@ public class LanguageGeneral
         Shadow = "Shadow";
         Alignment = "Alignment";
         Margin = "Margin";
-        Horizontal = "Vertical";
+        Horizontal = "Horizontal";
+        Vertical = "Vertical";
         Resolution = "Resolution";
         Generate = "Generate";
         BatchMode = "Batch mode";

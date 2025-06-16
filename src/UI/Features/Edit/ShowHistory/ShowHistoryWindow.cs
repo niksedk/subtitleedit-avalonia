@@ -9,7 +9,7 @@ namespace Nikse.SubtitleEdit.Features.Edit.ShowHistory;
 
 public class ShowHistoryWindow : Window
 {
-    private ShowHistoryViewModel _vm;
+    private readonly ShowHistoryViewModel _vm;
 
     public ShowHistoryWindow(ShowHistoryViewModel vm)
     {

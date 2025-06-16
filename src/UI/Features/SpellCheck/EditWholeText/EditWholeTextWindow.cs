@@ -10,7 +10,7 @@ namespace Nikse.SubtitleEdit.Features.SpellCheck.EditWholeText;
 
 public class EditWholeTextWindow : Window
 {
-    private EditWholeTextViewModel _vm;
+    private readonly EditWholeTextViewModel _vm;
 
     public EditWholeTextWindow(EditWholeTextViewModel vm)
     {

@@ -10,7 +10,7 @@ namespace Nikse.SubtitleEdit.Features.Options.Language;
 
 public class LanguageWindow : Window
 {
-    private LanguageViewModel _vm;
+    private readonly LanguageViewModel _vm;
     
     public LanguageWindow(LanguageViewModel vm)
     {

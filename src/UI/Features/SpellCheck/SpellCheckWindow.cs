@@ -11,7 +11,7 @@ namespace Nikse.SubtitleEdit.Features.SpellCheck;
 
 public class SpellCheckWindow : Window
 {
-    private SpellCheckViewModel _vm;
+    private readonly SpellCheckViewModel _vm;
 
     public SpellCheckWindow(SpellCheckViewModel vm)
     {
