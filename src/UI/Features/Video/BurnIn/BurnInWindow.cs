@@ -3,7 +3,6 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
-using Avalonia.Markup.Declarative;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Logic;
@@ -37,12 +36,15 @@ public class BurnInWindow : Window
         var videoInfoView = MakeVideoInfoView(vm);
         var progressView = MakeProgressView(vm);
 
-        var buttonGenerate = UiUtil.MakeButton(Se.Language.General.Generate, vm.GenerateCommand);
+        var buttonGenerate = UiUtil.MakeButton(Se.Language.General.Generate, vm.GenerateCommand)
+            .WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
         var buttonBatchMode = UiUtil.MakeButton(Se.Language.General.BatchMode, vm.BatchModeCommand)
-            .WithBindIsVisible(nameof(vm.IsBatchMode), new InverseBooleanConverter());
+            .WithBindIsVisible(nameof(vm.IsBatchMode), new InverseBooleanConverter())
+            .WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
         var buttonSingleMode = UiUtil.MakeButton(Se.Language.General.SingleMode, vm.SingleModeCommand)
-            .WithBindIsVisible(nameof(vm.IsBatchMode));
-        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
+            .WithBindIsVisible(nameof(vm.IsBatchMode))
+            .WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand).WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter()); 
         var buttonPanel = UiUtil.MakeButtonBar(
             buttonGenerate,
             buttonBatchMode,

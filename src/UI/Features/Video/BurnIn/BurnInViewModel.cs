@@ -180,6 +180,8 @@ public partial class BurnInViewModel : ObservableObject
         };
         SelectedAudioBitRate = AudioBitRates[2];
 
+        VideoPixelFormats = new ObservableCollection<PixelFormatItem>(PixelFormatItem.PixelFormats);
+
         VideoEncodings = new ObservableCollection<VideoEncodingItem>(VideoEncodingItem.VideoEncodings);
         SelectedVideoEncoding = VideoEncodings[0];
 
@@ -752,8 +754,11 @@ public partial class BurnInViewModel : ObservableObject
         }
         else if (codec == "prores_ks")
         {
-            await Window!.Launcher.LaunchUriAsync(
-                new Uri("https://ottverse.com/ffmpeg-convert-to-apple-prores-422-4444-hq"));
+            await Window!.Launcher.LaunchUriAsync(new Uri("https://ottverse.com/ffmpeg-convert-to-apple-prores-422-4444-hq"));
+        }
+        else if (codec.Contains("av1"))
+        {
+            await Window!.Launcher.LaunchUriAsync(new Uri("https://trac.ffmpeg.org/wiki/Encode/AV1"));
         }
         else
         {

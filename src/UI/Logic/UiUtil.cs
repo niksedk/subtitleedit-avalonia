@@ -682,6 +682,18 @@ public static class UiUtil
         return control;
     }
 
+    public static Button WithBindEnabled(this Button control, string isEnabledPropertyPath, IValueConverter converter)
+    {
+        control.Bind(Button.IsEnabledProperty, new Binding
+        {
+            Converter = converter,
+            Path = isEnabledPropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
     public static Button WithBindIsVisible(this Button control, string isVisiblePropertyPath)
     {
         control.Bind(Button.IsVisibleProperty, new Binding
