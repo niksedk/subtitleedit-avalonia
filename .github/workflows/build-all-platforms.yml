@@ -44,10 +44,7 @@ jobs:
           -p:PublishSingleFile=true `
           -o ./publish/windows-x64
         Copy-Item "libmpv-temp/libmpv-2.dll" "./publish/windows-x64/"
-
-    - name: Remove PDB files
-      run: find "./publish/windows-x64/" -name "*.pdb" -type f -delete
-    
+   
     - name: Publish Windows ARM64 app
       run: |
         dotnet publish src/UI/UI.csproj -c ${{ inputs.build_configuration }} -r win-arm64 --self-contained true `
