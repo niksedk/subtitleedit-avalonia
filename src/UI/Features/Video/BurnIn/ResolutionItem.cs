@@ -11,6 +11,7 @@ public partial class ResolutionItem : ObservableObject
     public string DisplayName { get; set; }
     public int Width { get; set; }
     public int Height { get; set; }
+    public bool IsSeperator => ItemType == ResolutionItemType.Separator;
 
     [ObservableProperty] private Color _backgroundColor;
 

@@ -838,8 +838,9 @@ public partial class BurnInViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void BrowseResolution()
+    private async Task BrowseResolution()
     {
+        var result = await _windowService.ShowDialogAsync<BurnInResolutionPickerWindow, BurnInResolutionPickerViewModel>(Window!);
     }
 
     [RelayCommand]

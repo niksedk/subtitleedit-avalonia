@@ -1,4 +1,6 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
@@ -13,51 +15,51 @@ public class BurnInResolutionPickerWindow : Window
     public BurnInResolutionPickerWindow(BurnInResolutionPickerViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = "Batch convert - output settings";
+        Title = "Burn-in - pick resolution";
         SizeToContent = SizeToContent.WidthAndHeight;
+        MaxHeight = 900;
         CanResize = false;
 
         _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
-        var checkBoxUseSourceFolder = new RadioButton
+        var listBoxResolutions = new ListBox
         {
-            Content = "Use source folder",
-            IsChecked = vm.UseSourceFolder,
+            ItemsSource = vm.Resolutions,
+            SelectedItem = vm.SelectedResolution,
             VerticalAlignment = VerticalAlignment.Center,
-            [!Avalonia.Controls.Primitives.ToggleButton.IsCheckedProperty] = new Binding(nameof(vm.UseSourceFolder)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
-        };
-
-        var checkBoxUseOutputFolder = new RadioButton
-        {
-            Content = "Use output folder",
-            IsChecked = vm.UseOutputFolder,
-            VerticalAlignment = VerticalAlignment.Center,
-            [!Avalonia.Controls.Primitives.ToggleButton.IsCheckedProperty] = new Binding(nameof(vm.UseOutputFolder)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
-        };
-
-        var textBoxOutputFolder = new TextBox
-        {
-            Text = vm.OutputFolder,
-            VerticalAlignment = VerticalAlignment.Center,
-            [!TextBox.TextProperty] = new Binding(nameof(vm.OutputFolder)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
-            IsEnabled = vm.UseOutputFolder,
-            Width = 400,
-        };
-
-        var buttonBrowse = UiUtil.MakeButtonBrowse(vm.BrowseOutputFolderCommand);
-
-        var panelOutputFolder = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            VerticalAlignment = VerticalAlignment.Center,
-            Spacing = 5,
-            Children =
+            Margin = new Thickness(0, 0, 0, 0),
+            Padding = new Thickness(0, 0, 0, 0),
+            [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedResolution)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
+            ItemTemplate = new FuncDataTemplate<ResolutionItem>((item, namescope) =>
             {
-                textBoxOutputFolder,
-                buttonBrowse
-            }
+                var panel = new StackPanel();
+
+                var border = new Border
+                {
+                    Padding = new Thickness(2)
+                };
+                border.Bind(Border.BackgroundProperty, new Binding(nameof(ResolutionItem.BackgroundColor)));
+
+                var textBlock = new TextBlock();
+                textBlock.Bind(TextBlock.TextProperty, new Binding(nameof(ResolutionItem.DisplayName)));
+                textBlock.Bind(TextBlock.ForegroundProperty, new Binding(nameof(ResolutionItem.TextColor)));
+
+                border.Child = textBlock;
+                panel.Children.Add(border);
+
+                // Bind to the IsSeperator property to decide if we should add a separator
+                if (item.IsSeperator)
+                {
+                    panel.Children.Add(new Separator
+                    {
+                        Margin = new Thickness(0, 2, 0, 2)
+                    });
+                }
+
+                return panel;
+            }, true)
         };
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
@@ -68,9 +70,7 @@ public class BurnInResolutionPickerWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
@@ -84,10 +84,8 @@ public class BurnInResolutionPickerWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(checkBoxUseSourceFolder, 0, 0);
-        grid.Add(checkBoxUseOutputFolder, 1, 0);
-        grid.Add(panelOutputFolder, 2, 0);
-        grid.Add(panelButtons, 3, 0);
+        grid.Add(listBoxResolutions, 0, 0);
+        grid.Add(panelButtons, 1, 0);
 
         Content = grid;
 

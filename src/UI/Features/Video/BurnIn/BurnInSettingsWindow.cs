@@ -13,7 +13,7 @@ public class BurnInSettingsWindow : Window
     public BurnInSettingsWindow(BurnInSettingsViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = "Batch convert - output settings";
+        Title = "Burn-in - output settings";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
         
