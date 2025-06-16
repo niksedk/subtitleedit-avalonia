@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <LangVersion>default</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>HanumanInstitute.LibMpv.Avalonia</AssemblyName>
+    <RootNamespace>HanumanInstitute.LibMpv.Avalonia</RootNamespace>
+    <Authors>Etienne Charland, Vadim Beloborodov</Authors>
+    <Description>MPV implementation for Avalonia including OpenGL, Native and Software renderers</Description>
+    <Copyright>Copyright © 2023-2023 Etienne Charland</Copyright>
+    <PackageProjectUrl>https://github.com/mysteryx93/LibMpv-OpenGL</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/mysteryx93/LibMpv-OpenGL</RepositoryUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.1" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LibMpv\LibMpv.csproj" />
+  </ItemGroup>
+</Project>
