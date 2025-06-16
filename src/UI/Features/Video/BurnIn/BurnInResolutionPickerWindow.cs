@@ -4,6 +4,7 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Video.BurnIn;
@@ -29,37 +30,62 @@ public class BurnInResolutionPickerWindow : Window
             ItemsSource = vm.Resolutions,
             SelectedItem = vm.SelectedResolution,
             VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(0, 0, 0, 0),
-            Padding = new Thickness(0, 0, 0, 0),
             [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedResolution)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
             ItemTemplate = new FuncDataTemplate<ResolutionItem>((item, namescope) =>
             {
-                var panel = new StackPanel();
-
-                var border = new Border
-                {
-                    Padding = new Thickness(2)
-                };
-                border.Bind(Border.BackgroundProperty, new Binding(nameof(ResolutionItem.BackgroundColor)));
-
-                var textBlock = new TextBlock();
-                textBlock.Bind(TextBlock.TextProperty, new Binding(nameof(ResolutionItem.DisplayName)));
-                textBlock.Bind(TextBlock.ForegroundProperty, new Binding(nameof(ResolutionItem.TextColor)));
-
-                border.Child = textBlock;
-                panel.Children.Add(border);
-
-                // Bind to the IsSeperator property to decide if we should add a separator
                 if (item.IsSeperator)
                 {
-                    panel.Children.Add(new Separator
+                    return new Separator
                     {
-                        Margin = new Thickness(0, 2, 0, 2)
-                    });
+                        Margin = new Thickness(0, 2, 0, 2),
+                        IsHitTestVisible = false, 
+                    };
                 }
+                else
+                {
+                    // Selectable item
+                    var border = new Border();
+                    border.Bind(Border.BackgroundProperty, new Binding(nameof(ResolutionItem.BackgroundColor)));
 
-                return panel;
-            }, true)
+                    var textBlock = new TextBlock();
+                    textBlock.Bind(TextBlock.TextProperty, new Binding(nameof(ResolutionItem.DisplayName)));
+                    textBlock.Bind(TextBlock.ForegroundProperty, new Binding(nameof(ResolutionItem.TextColor)));
+
+                    border.Child = textBlock;
+
+                    border.PointerPressed += (s, e) =>
+                    {
+                        vm.ResolutionItemClicked(item); 
+                    };
+
+                    return border;
+                }
+            }, true),
+        };
+
+        var style = new Style(x => x.OfType<ListBoxItem>());
+        style.Setters.Add(new Setter(ListBoxItem.PaddingProperty, new Thickness(0, 4, 0, 4)));
+        style.Setters.Add(new Setter(ListBoxItem.MarginProperty, new Thickness(0)));
+        listBoxResolutions.Styles.Add(style);
+
+        listBoxResolutions.SelectionChanged += (s, e) =>
+        {
+            if (listBoxResolutions.SelectedItem is ResolutionItem selected && selected.IsSeperator)
+            {
+                listBoxResolutions.SelectedItem = null;
+            }
+        };
+
+        listBoxResolutions.KeyDown += (s, e) =>
+        {
+            if (e.Key == Key.Enter)
+            {
+                if (listBoxResolutions.SelectedItem is ResolutionItem selected && !selected.IsSeperator)
+                {
+                    vm.ResolutionItemClicked(selected);
+                    e.Handled = true; 
+                }
+            }
         };
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);

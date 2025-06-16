@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Video.BurnIn;
 
@@ -21,7 +20,7 @@ public partial class BurnInResolutionPickerViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task Ok()
+    private void Ok()
     {
         OkPressed = true;
         Window?.Close();
@@ -40,5 +39,16 @@ public partial class BurnInResolutionPickerViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+    }
+
+    internal void ResolutionItemClicked(ResolutionItem item)
+    {
+        if (item.IsSeperator)
+        {
+            return; // ignore separators
+        }
+
+        SelectedResolution = item;
+        Ok();
     }
 }
