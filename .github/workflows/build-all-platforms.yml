@@ -1,4 +1,4 @@
-name: Build Avalonia App (Multi-Platform)
+name: Build Subtitle Edit (Multi-Platform)
 
 on:
   workflow_dispatch:
