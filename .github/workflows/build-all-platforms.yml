@@ -35,13 +35,13 @@ jobs:
     
     - name: Publish Windows x64 app
       run: |
-        dotnet publish -c ${{ inputs.build_configuration }} -r win-x64 --self-contained true `
+        dotnet publish src/UI/UI.csproj -c ${{ inputs.build_configuration }} -r win-x64 --self-contained true `
           -p:PublishSingleFile=true `
           -o ./publish/windows-x64
     
     - name: Publish Windows ARM64 app
       run: |
-        dotnet publish -c ${{ inputs.build_configuration }} -r win-arm64 --self-contained true `
+        dotnet publish src/UI/UI.csproj -c ${{ inputs.build_configuration }} -r win-arm64 --self-contained true `
           -p:PublishSingleFile=true `
           -o ./publish/windows-arm64
     
@@ -79,13 +79,13 @@ jobs:
     
     - name: Publish macOS x64 app
       run: |
-        dotnet publish -c ${{ inputs.build_configuration }} -r osx-x64 --self-contained true \
+        dotnet publish src/UI/UI.csproj -c ${{ inputs.build_configuration }} -r osx-x64 --self-contained true \
           -p:PublishSingleFile=true \
           -o ./publish/macos-x64
     
     - name: Publish macOS ARM64 app
       run: |
-        dotnet publish -c ${{ inputs.build_configuration }} -r osx-arm64 --self-contained true \
+        dotnet publish src/UI/UI.csproj -c ${{ inputs.build_configuration }} -r osx-arm64 --self-contained true \
           -p:PublishSingleFile=true \
           -o ./publish/macos-arm64
     
@@ -123,7 +123,7 @@ jobs:
     
     - name: Publish Linux x64 app
       run: |
-        dotnet publish -c ${{ inputs.build_configuration }} -r linux-x64 --self-contained true \
+        dotnet publish src/UI/UI.csproj -c ${{ inputs.build_configuration }} -r linux-x64 --self-contained true \
           -p:PublishSingleFile=true \
           -o ./publish/linux-x64
     
