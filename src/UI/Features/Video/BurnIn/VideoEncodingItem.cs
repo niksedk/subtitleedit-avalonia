@@ -30,10 +30,10 @@ public class VideoEncodingItem
         new VideoEncodingItem("prores_ks", "ProRes (CPU)"),
         new VideoEncodingItem("h264_qsv", "H.264/AVC (Intel QSV)"),
         new VideoEncodingItem("hevc_qsv", "H.265/HEVC (Intel QSV)"),
-        new VideoEncodingItem("libaom-av1", "AOM AV1 Encoder"),
-        new VideoEncodingItem("libsvtav1", "SVT-AV1 Encoder"),
-        new VideoEncodingItem("av1_nvenc", "NVIDIA AV1 Encoder"),
-        new VideoEncodingItem("av1_qsv", "Intel QSV AV1 Encoder"),
-        new VideoEncodingItem("av1_amf", "AMD AV1 Encoder (AMF)"),
+        //new VideoEncodingItem("libaom-av1", "AOM AV1 Encoder"),
+        //new VideoEncodingItem("libsvtav1", "SVT-AV1 Encoder"),
+        //new VideoEncodingItem("av1_nvenc", "NVIDIA AV1 Encoder"),
+        //new VideoEncodingItem("av1_qsv", "Intel QSV AV1 Encoder"),
+        //new VideoEncodingItem("av1_amf", "AMD AV1 Encoder (AMF)"),
     };
 }

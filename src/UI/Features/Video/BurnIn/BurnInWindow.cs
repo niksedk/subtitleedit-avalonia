@@ -41,12 +41,14 @@ public class BurnInWindow : Window
         var buttonBatchMode = UiUtil.MakeButton(Se.Language.General.BatchMode, vm.BatchModeCommand)
             .WithBindIsVisible(nameof(vm.IsBatchMode), new InverseBooleanConverter())
             .WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
+        var buttonHelp = UiUtil.MakeButton("Help", vm.HelpCommand);
         var buttonSingleMode = UiUtil.MakeButton(Se.Language.General.SingleMode, vm.SingleModeCommand)
             .WithBindIsVisible(nameof(vm.IsBatchMode))
             .WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand).WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter()); 
         var buttonPanel = UiUtil.MakeButtonBar(
             buttonGenerate,
+            buttonHelp,
             buttonBatchMode,
             buttonSingleMode,
             buttonOk,

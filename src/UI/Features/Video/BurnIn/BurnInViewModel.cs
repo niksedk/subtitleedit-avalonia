@@ -11,6 +11,7 @@ using Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -1128,6 +1129,30 @@ public partial class BurnInViewModel : ObservableObject
 
             VideoPresetText = "Profile";
         }
+        else if (videoCodec.Contains("av1"))
+        {
+            items = new List<string>
+            {
+                "",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "11",
+                "12",
+                "13",
+            };
+
+            defaultItem = "";
+
+            VideoPresetText = "Preset";
+        }
 
         VideoPresets.Clear();
         VideoPresets.AddRange(items);
@@ -1193,6 +1218,16 @@ public partial class BurnInViewModel : ObservableObject
             VideoCrf.Clear();
             VideoCrf.AddRange(items);
             SelectedVideoCrf = null;
+        }
+        else if (videoCodec.Contains("av1"))
+        {
+            for (var i = 0; i <= 63; i++)
+            {
+                items.Add(i.ToString(CultureInfo.InvariantCulture));
+            }
+            VideoCrf.Clear();
+            VideoCrf.AddRange(items);
+            SelectedVideoCrf = "30";
         }
         else if (videoCodec == "prores_ks")
         {
