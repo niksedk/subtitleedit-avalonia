@@ -33,17 +33,24 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
     
+    - name: Download libmpv for Windows
+      run: |
+        Invoke-WebRequest -Uri "https://github.com/SubtitleEdit/support-files/releases/download/libmpv-2025-01-25/libmpv2-64.zip" -OutFile "libmpv2-64.zip"
+        Expand-Archive -Path "libmpv2-64.zip" -DestinationPath "libmpv-temp"
+    
     - name: Publish Windows x64 app
       run: |
         dotnet publish src/UI/UI.csproj -c ${{ inputs.build_configuration }} -r win-x64 --self-contained true `
           -p:PublishSingleFile=true `
           -o ./publish/windows-x64
+        Copy-Item "libmpv-temp/libmpv-2.dll" "./publish/windows-x64/"
     
     - name: Publish Windows ARM64 app
       run: |
         dotnet publish src/UI/UI.csproj -c ${{ inputs.build_configuration }} -r win-arm64 --self-contained true `
           -p:PublishSingleFile=true `
           -o ./publish/windows-arm64
+#        Copy-Item "libmpv-temp/libmpv-2.dll" "./publish/windows-arm64/"
     
     - name: Upload Windows x64 artifact
       uses: actions/upload-artifact@v4
