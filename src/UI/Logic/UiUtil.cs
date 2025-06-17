@@ -810,10 +810,16 @@ public static class UiUtil
         return control;
     }
 
-    public static Label WithLarginLeft(this Label control, int marginLeft)
+    public static Label WithMarginLeft(this Label control, int marginLeft)
     {
         var m = control.Margin;
         control.Margin = new Thickness(marginLeft, m.Top, m.Right, m.Bottom);
+        return control;
+    }
+
+    public static Label WithFontSize(this Label control, int fontSize)
+    {
+        control.FontSize = fontSize;
         return control;
     }
 
@@ -1207,6 +1213,18 @@ public static class UiUtil
     {
         control.DataContext = viewModel;
         control.Bind(Label.IsVisibleProperty, new Binding
+        {
+            Path = visiblePropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
+    public static Grid WithBindVisible(this Grid control, object viewModel, string visiblePropertyPath)
+    {
+        control.DataContext = viewModel;
+        control.Bind(Grid.IsVisibleProperty, new Binding
         {
             Path = visiblePropertyPath,
             Mode = BindingMode.TwoWay,

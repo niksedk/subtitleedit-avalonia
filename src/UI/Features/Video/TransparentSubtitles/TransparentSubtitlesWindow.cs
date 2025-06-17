@@ -134,7 +134,7 @@ public class TransparentSubtitlesWindow : Window
             Children =
             {
                 colorPickerBoxColor,
-                UiUtil.MakeLabel(Se.Language.General.Width).WithLarginLeft(5),
+                UiUtil.MakeLabel(Se.Language.General.Width).WithMarginLeft(5),
                 textBoxBoxWidth,
             }
         };
@@ -153,7 +153,7 @@ public class TransparentSubtitlesWindow : Window
             Children =
             {
                 colorPickerShadowColor,
-                UiUtil.MakeLabel(Se.Language.General.Width).WithLarginLeft(5),
+                UiUtil.MakeLabel(Se.Language.General.Width).WithMarginLeft(5),
                 textBoxShadowWidth,
             }
         };
@@ -170,7 +170,7 @@ public class TransparentSubtitlesWindow : Window
         var labelMarginHorizontal = UiUtil.MakeLabel(Se.Language.General.Horizontal);
         var textBoxMarginHorizontal = UiUtil.MakeTextBox(50, vm, nameof(vm.FontMarginHorizontal));
         textBoxMarginHorizontal.TextChanged += vm.TextBoxChanged;
-        var labelMarginVertical = UiUtil.MakeLabel(Se.Language.General.Vertical).WithLarginLeft(5);
+        var labelMarginVertical = UiUtil.MakeLabel(Se.Language.General.Vertical).WithMarginLeft(5);
         var textBoxMarginVertical = UiUtil.MakeTextBox(50, vm, nameof(vm.FontMarginVertical));
         textBoxMarginVertical.TextChanged += vm.TextBoxChanged;
         var panelMargin = new StackPanel
@@ -440,9 +440,9 @@ public class TransparentSubtitlesWindow : Window
             {
                 new DataGridTextColumn
                 {
-                    Header = Se.Language.General.FileName,
+                    Header = Se.Language.General.SubtitleFileName,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(BurnInJobItem.InputVideoFileNameShort)),
+                    Binding = new Binding(nameof(BurnInJobItem.SubtitleFileNameShort)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn

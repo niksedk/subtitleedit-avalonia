@@ -689,7 +689,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task ShowVideoTransparentSubtitles()
     {
-        await _windowService.ShowDialogAsync<TransparentSubtitlesWindow, TransparentSubtitlesViewModel>(Window!, vm => 
+        await _windowService.ShowDialogAsync<TransparentSubtitlesWindow, TransparentSubtitlesViewModel>(Window!, vm =>
         {
             vm.Initialize(_videoFileName ?? string.Empty, GetUpdateSubtitle(), SelectedSubtitleFormat);
         });
@@ -1341,6 +1341,8 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
                 return;
             }
         }
+
+        SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == subtitle.OriginalFormat.Name) ?? SelectedSubtitleFormat; ;
 
         _subtitleFileName = fileName;
         _subtitle = subtitle;

@@ -21,7 +21,7 @@ public class BatchConvertSettingsWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        var labelTargetEncoding = UiUtil.MakeLabel("Target encoding").WithLarginLeft(5);
+        var labelTargetEncoding = UiUtil.MakeLabel("Target encoding").WithMarginLeft(5);
         var comboBoxTargetEncoding = UiUtil.MakeComboBox(vm.TargetEncodings, vm, nameof(vm.SelectedTargetEncoding));
         var panelTargetEncoding = new StackPanel
         {

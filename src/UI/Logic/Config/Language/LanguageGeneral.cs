@@ -153,6 +153,7 @@ public class LanguageGeneral
     public string AddVideoFiles { get; set; }
     public string Help { get; set; }
     public string VideoExtension { get; set; }
+    public object SubtitleFileName { get; internal set; }
 
     public LanguageGeneral()
     {
@@ -307,5 +308,6 @@ public class LanguageGeneral
         AddVideoFiles = "Add video files...";
         Help = "Help";
         VideoExtension = "Video file extension";
+        SubtitleFileName = "Subtitle file name";
     }
 }

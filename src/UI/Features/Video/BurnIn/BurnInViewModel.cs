@@ -90,6 +90,8 @@ public partial class BurnInViewModel : ObservableObject
     [ObservableProperty] private bool _isBatchMode;
     [ObservableProperty] private Bitmap? _imagePreview;
     [ObservableProperty] private bool _useSourceResolution;
+    [ObservableProperty] private bool _showAssaOnlyBox;
+    [ObservableProperty] private string _targetVideoBitRateInfo;
 
     public BurnInWindow? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -198,6 +200,7 @@ public partial class BurnInViewModel : ObservableObject
         VideoCrfText = string.Empty;
         VideoCrfHint = string.Empty;
         OutputFolder = string.Empty;
+        TargetVideoBitRateInfo = string.Empty;
 
         _log = new StringBuilder();
         _timerGenerate = new();
@@ -226,14 +229,15 @@ public partial class BurnInViewModel : ObservableObject
         var fileExists = !string.IsNullOrWhiteSpace(videoFileName) && File.Exists(videoFileName);
         if (fileExists)
         {
+            SingleMode();
             VideoFileSize = Utilities.FormatBytesToDisplayFileSize(new FileInfo(videoFileName).Length);
             _ = Task.Run(() =>
             {
-                var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
+                _mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
                 Dispatcher.UIThread.Post(() =>
                 {
-                    VideoWidth = mediaInfo.Dimension.Width;
-                    VideoHeight = mediaInfo.Dimension.Height;
+                    VideoWidth = _mediaInfo.Dimension.Width;
+                    VideoHeight = _mediaInfo.Dimension.Height;
                     UseSourceResolution = false;
                 });
             });
@@ -1058,6 +1062,9 @@ public partial class BurnInViewModel : ObservableObject
     {
         IsBatchMode = false;
         IsSingleModeVisible = false;
+
+        var isAssa = _subtitleFormat is { Name: AdvancedSubStationAlpha.NameOfFormat };
+        ShowAssaOnlyBox = isAssa;
     }
 
     [RelayCommand]
@@ -1065,6 +1072,7 @@ public partial class BurnInViewModel : ObservableObject
     {
         IsBatchMode = true;
         IsSingleModeVisible = !string.IsNullOrEmpty(_inputVideoFileName);
+        ShowAssaOnlyBox = false;
     }
 
     [RelayCommand]
@@ -1283,6 +1291,7 @@ public partial class BurnInViewModel : ObservableObject
     {
         SelectedVideoCrf = null;
         VideoCrfText = "CRF";
+        VideoCrfHint = string.Empty;
 
         var items = new List<string> { " " };
 
@@ -1501,5 +1510,124 @@ public partial class BurnInViewModel : ObservableObject
     internal void TextBoxChanged(object? sender, TextChangedEventArgs e)
     {
         UpdateNonAssaPreview();
+    }
+
+    private int GetAudioFileSizeInMb()
+    {
+        var ffmpegLocation = Configuration.Settings.General.FFmpegLocation;
+        if (!Configuration.IsRunningOnWindows && (string.IsNullOrEmpty(ffmpegLocation) || !File.Exists(ffmpegLocation)))
+        {
+            ffmpegLocation = "ffmpeg";
+        }
+
+        var tempFileName = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".aac");
+        var process = new Process
+        {
+            StartInfo =
+                {
+                    FileName = ffmpegLocation,
+                    Arguments = $"-i \"{_inputVideoFileName}\" -vn -acodec copy \"{tempFileName}\"",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }
+        };
+
+        process.Start();
+        process.WaitForExit();
+        try
+        {
+            var length = (int)Math.Round(new FileInfo(tempFileName).Length / 1024.0 / 1024);
+            try
+            {
+                File.Delete(tempFileName);
+            }
+            catch
+            {
+                // ignore
+            }
+
+            return length;
+        }
+        catch
+        {
+            return 0;
+        }
+    }
+
+    private int GetVideoBitRate()
+    {
+        var audioMb = 0;
+        if (SelectedAudioEncoding == "copy")
+        {
+            audioMb = GetAudioFileSizeInMb();
+        }
+
+        if (_mediaInfo == null || _mediaInfo.Duration == null)
+        {
+            return 0; // Avoid division by zero
+        }
+
+        // (MiB * 8192 [converts MiB to kBit]) / video seconds = kBit/s total bitrate
+        var bitRate = (int)Math.Round(((double)TargetFileSize - audioMb) * 8192.0 / _mediaInfo.Duration.TotalSeconds);
+        if (SelectedAudioEncoding != "copy" && !string.IsNullOrWhiteSpace(SelectedAudioBitRate))
+        {
+            var audioBitRate = int.Parse(SelectedAudioBitRate.RemoveChar('k').TrimEnd());
+            bitRate -= audioBitRate;
+        }
+
+        return bitRate;
+    }
+
+
+    internal void CalculateTargetFileBitRate()
+    {
+        TargetVideoBitRateInfo = string.Empty;
+
+        if (!UseTargetFileSize || _mediaInfo == null)
+        {
+            return;
+        }
+
+        var videoBitRate = GetVideoBitRate();
+        if (videoBitRate <= 0)
+        {
+            return;
+        }
+
+        var separateAudio = SelectedAudioEncoding != "copy" && !string.IsNullOrWhiteSpace(SelectedAudioBitRate);
+        var audioBitRate = 0;
+        if (separateAudio)
+        {
+            audioBitRate = int.Parse(SelectedAudioBitRate.RemoveChar('k').TrimEnd());
+        }
+
+        if (SelectedAudioEncoding == "copy")
+        {
+            var audioTrack = _mediaInfo.Tracks.FirstOrDefault(p => p.TrackType == FfmpegTrackType.Audio);
+            if (audioTrack?.BitRate > 0)
+            {
+                audioBitRate = audioTrack.BitRate / 1024;
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        TargetVideoBitRateInfo = string.Format(Se.Language.Video.BurnIn.TotalBitRateX, $"{(videoBitRate + audioBitRate):#,###,##0}k");
+        if (separateAudio)
+        {
+            TargetVideoBitRateInfo += $" ({videoBitRate:#,###,##0}k + {audioBitRate:#,###,##0}k)";
+        }
+    }
+
+    internal void NumericUpDownTargetFileSizeChanged(object? sender, NumericUpDownValueChangedEventArgs e)
+    {
+        CalculateTargetFileBitRate();
+    }
+
+    internal void CheckBoxTargetFileChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        CalculateTargetFileBitRate();
     }
 }

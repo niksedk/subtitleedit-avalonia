@@ -10,6 +10,7 @@ using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
+using System;
 
 namespace Nikse.SubtitleEdit.Features.Video.BurnIn;
 
@@ -140,7 +141,7 @@ public class BurnInWindow : Window
             Children =
             {
                 colorPickerBoxColor,
-                UiUtil.MakeLabel(Se.Language.General.Width).WithLarginLeft(5),
+                UiUtil.MakeLabel(Se.Language.General.Width).WithMarginLeft(5),
                 textBoxBoxWidth,
             }
         };
@@ -159,7 +160,7 @@ public class BurnInWindow : Window
             Children =
             {
                 colorPickerShadowColor,
-                UiUtil.MakeLabel(Se.Language.General.Width).WithLarginLeft(5),
+                UiUtil.MakeLabel(Se.Language.General.Width).WithMarginLeft(5),
                 textBoxShadowWidth,
             }
         };
@@ -176,7 +177,7 @@ public class BurnInWindow : Window
         var labelMarginHorizontal = UiUtil.MakeLabel(Se.Language.General.Horizontal);
         var textBoxMarginHorizontal = UiUtil.MakeTextBox(50, vm, nameof(vm.FontMarginHorizontal));
         textBoxMarginHorizontal.TextChanged += vm.TextBoxChanged;
-        var labelMarginVertical = UiUtil.MakeLabel(Se.Language.General.Vertical).WithLarginLeft(5);
+        var labelMarginVertical = UiUtil.MakeLabel(Se.Language.General.Vertical).WithMarginLeft(5);
         var textBoxMarginVertical = UiUtil.MakeTextBox(50, vm, nameof(vm.FontMarginVertical));
         textBoxMarginVertical.TextChanged += vm.TextBoxChanged;
         var panelMargin = new StackPanel
@@ -250,6 +251,33 @@ public class BurnInWindow : Window
 
         grid.Add(checkBoxFixRightToLeft, 9, 1);
 
+        var panel = new Grid
+        {
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Width = double.NaN,
+            Height = double.NaN,
+            Background = Brushes.Black,
+            Opacity = 0.8,
+            Children =
+            {
+                new Label
+                {
+                    Content = "Current ASSA style will be used" + Environment.NewLine +
+                    Environment.NewLine +
+                    "Change subtitle format if"+ Environment.NewLine + 
+                    "you want to set styles here",
+                    FontWeight = FontWeight.Bold,
+                    FontSize = 22,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalContentAlignment = HorizontalAlignment.Center,
+                    VerticalContentAlignment = VerticalAlignment.Center
+                },
+            }
+        }.WithBindVisible(vm, nameof(vm.ShowAssaOnlyBox));
+        grid.Add(panel, 0, 0, 10, 2);
+
         return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5).WithMarginRight(5);
     }
 
@@ -294,7 +322,21 @@ public class BurnInWindow : Window
         var comboBoxPreset = UiUtil.MakeComboBox(vm.VideoPresets, vm, nameof(vm.SelectedVideoPreset));
 
         var labelCrf = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.VideoCrfText));
-        var numericUpDownCrf = UiUtil.MakeNumericUpDownInt(0, 1000, 200, vm, nameof(vm.SelectedVideoCrf));
+        var comboBoxCrf = UiUtil.MakeComboBox(vm.VideoCrf, vm, nameof(vm.SelectedVideoCrf));
+        var labelCrfHint = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.VideoCrfHint)).WithMarginLeft(5);
+        labelCrfHint.FontSize = 10;
+        labelCrfHint.Opacity = 0.7;
+        var panelCrf = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Children =
+            {
+                comboBoxCrf,
+                labelCrfHint
+            }
+        };
 
         var labelPixelFormat = UiUtil.MakeLabel(Se.Language.Video.BurnIn.PixelFormat);
         var comboBoxPixelFormat = UiUtil.MakeComboBox(vm.VideoPixelFormats, vm, nameof(vm.SelectedVideoPixelFormat));
@@ -336,7 +378,7 @@ public class BurnInWindow : Window
         grid.Add(comboBoxPreset, 2, 1);
 
         grid.Add(labelCrf, 3, 0);
-        grid.Add(numericUpDownCrf, 3, 1);
+        grid.Add(panelCrf, 3, 1);
 
         grid.Add(labelPixelFormat, 4, 0);
         grid.Add(comboBoxPixelFormat, 4, 1);
@@ -619,9 +661,25 @@ public class BurnInWindow : Window
     private static Border MakeTargetFileSizeView(BurnInViewModel vm)
     {
         var checkBoxUseTargetFileSize = UiUtil.MakeCheckBox(Se.Language.Video.BurnIn.TargetFileSize, vm, nameof(vm.UseTargetFileSize));
+        checkBoxUseTargetFileSize.PropertyChanged += vm.CheckBoxTargetFileChanged;
 
         var labelTargetFileSize = UiUtil.MakeLabel(Se.Language.Video.BurnIn.FileSizeMb);
-        var textBoxTargetFileSize = UiUtil.MakeTextBox(100, vm, nameof(vm.TargetFileSize));
+        var numericUpDownTargetFileSize = UiUtil.MakeNumericUpDownInt(1, 1000_000_000, 150, vm, nameof(vm.TargetFileSize));
+        numericUpDownTargetFileSize.ValueChanged += vm.NumericUpDownTargetFileSizeChanged;
+        var labelVideoBitRate = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.TargetVideoBitRateInfo));
+        labelVideoBitRate.FontSize = 10;
+        labelVideoBitRate.Opacity = 0.7;
+        var panelTargetFileSize = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Children =
+            {
+                numericUpDownTargetFileSize,
+                labelVideoBitRate
+            }
+        };
 
         var grid = new Grid
         {
@@ -643,7 +701,7 @@ public class BurnInWindow : Window
 
         grid.Add(checkBoxUseTargetFileSize, 0, 0, 1, 2);
         grid.Add(labelTargetFileSize, 1, 0);
-        grid.Add(textBoxTargetFileSize, 1, 1);
+        grid.Add(panelTargetFileSize, 1, 1);
 
         return UiUtil.MakeBorderForControl(grid)
             .WithBindIsVisible(nameof(vm.IsBatchMode), new InverseBooleanConverter())
