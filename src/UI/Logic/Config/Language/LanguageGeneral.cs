@@ -151,7 +151,8 @@ public class LanguageGeneral
     public string PickVideoFile { get; set; }
     public string VideoFile { get; set; }
     public string AddVideoFiles { get; set; }
-    public string Help { get; internal set; }
+    public string Help { get; set; }
+    public string VideoExtension { get; set; }
 
     public LanguageGeneral()
     {
@@ -305,5 +306,6 @@ public class LanguageGeneral
         VideoFile = "Video file";
         AddVideoFiles = "Add video files...";
         Help = "Help";
+        VideoExtension = "Video file extension";
     }
 }

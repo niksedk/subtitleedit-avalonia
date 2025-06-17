@@ -17,7 +17,7 @@ namespace Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
 public class TransparentSubtitlesWindow : Window
 {
     private readonly TransparentSubtitlesViewModel _vm;
-    
+
     public TransparentSubtitlesWindow(TransparentSubtitlesViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
@@ -42,14 +42,12 @@ public class TransparentSubtitlesWindow : Window
         var buttonBatchMode = UiUtil.MakeButton(Se.Language.General.BatchMode, vm.BatchModeCommand)
             .WithBindIsVisible(nameof(vm.IsBatchMode), new InverseBooleanConverter())
             .WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
-        var buttonHelp = UiUtil.MakeButton(Se.Language.General.Help, vm.HelpCommand);
         var buttonSingleMode = UiUtil.MakeButton(Se.Language.General.SingleMode, vm.SingleModeCommand)
             .WithBindIsVisible(nameof(vm.IsSingleModeVisible))
             .WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand).WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
         var buttonPanel = UiUtil.MakeButtonBar(
             buttonGenerate,
-            buttonHelp,
             buttonBatchMode,
             buttonSingleMode,
             buttonOk,
@@ -285,10 +283,14 @@ public class TransparentSubtitlesWindow : Window
         var labelFrameRate = UiUtil.MakeLabel(Se.Language.General.FrameRate);
         var comboBoxFrameRate = UiUtil.MakeComboBox(vm.FrameRates, vm, nameof(vm.SelectedFrameRate));
 
+        var labelVideoExtension = UiUtil.MakeLabel(Se.Language.General.VideoExtension);
+        var comboBoxVideoExtensions = UiUtil.MakeComboBox(vm.VideoExtensions, vm, nameof(vm.SelectedVideoExtension));
+
         var grid = new Grid
         {
             RowDefinitions =
             {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
@@ -309,6 +311,9 @@ public class TransparentSubtitlesWindow : Window
 
         grid.Add(labelFrameRate, 1, 0);
         grid.Add(comboBoxFrameRate, 1, 1);
+
+        grid.Add(labelVideoExtension, 2, 0);
+        grid.Add(comboBoxVideoExtensions, 2, 1);
 
         return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5).WithMarginRight(5);
     }
@@ -449,9 +454,9 @@ public class TransparentSubtitlesWindow : Window
                 },
                 new DataGridTextColumn
                 {
-                    Header = Se.Language.General.SubtitleFile,
+                    Header = Se.Language.General.VideoFile,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(BurnInJobItem.SubtitleFileNameShort)),
+                    Binding = new Binding(nameof(BurnInJobItem.InputVideoFileNameShort)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn

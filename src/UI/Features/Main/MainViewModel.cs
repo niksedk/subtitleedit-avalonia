@@ -689,8 +689,10 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task ShowVideoTransparentSubtitles()
     {
-        await _windowService.ShowDialogAsync<TransparentSubtitlesWindow, TransparentSubtitlesViewModel>(Window!,
-            vm => { });
+        await _windowService.ShowDialogAsync<TransparentSubtitlesWindow, TransparentSubtitlesViewModel>(Window!, vm => 
+        {
+            vm.Initialize(_videoFileName ?? string.Empty, GetUpdateSubtitle(), SelectedSubtitleFormat);
+        });
         _shortcutManager.ClearKeys();
     }
 
