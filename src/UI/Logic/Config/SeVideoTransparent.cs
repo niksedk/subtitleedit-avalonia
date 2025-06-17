@@ -11,5 +11,6 @@ public class SeVideoTransparent
     {
         OutputSuffix = "_transparent";
         FrameRate = 23.976;
+        OutputFolder = string.Empty;
     }
 }
