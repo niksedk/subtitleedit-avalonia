@@ -457,9 +457,9 @@ public static class UiUtil
         return link;
     }
 
-    private static SolidColorBrush MakeLinkForeground()
+    public static SolidColorBrush MakeLinkForeground()
     {
-        return new SolidColorBrush(Color.FromArgb(255, 90, 90, 255));
+        return new SolidColorBrush(Color.FromArgb(255, 30, 144, 255)); 
     }
 
     public static Button MakeMenuItem(string text, IRelayCommand command, object commandParameter, string iconName)

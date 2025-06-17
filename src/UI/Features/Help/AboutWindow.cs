@@ -44,7 +44,7 @@ public class AboutWindow : Window
         var githubLink = new TextBlock
         {
             Text = "Github",
-            Foreground = Brushes.Blue,
+            Foreground = UiUtil.MakeLinkForeground(),
             Cursor = new Cursor(StandardCursorType.Hand),
         };
         githubLink.PointerPressed += async (_, _) =>
@@ -65,7 +65,7 @@ public class AboutWindow : Window
         var paypalLink = new TextBlock
         {
             Text = "PayPal",
-            Foreground = Brushes.Blue,
+            Foreground = UiUtil.MakeLinkForeground(),
             Cursor = new Cursor(StandardCursorType.Hand),
         };
         paypalLink.PointerPressed += async (_, _) =>
@@ -76,7 +76,7 @@ public class AboutWindow : Window
         var githubSponsorLink = new TextBlock
         {
             Text = "Github sponsor",
-            Foreground = Brushes.Blue,
+            Foreground = UiUtil.MakeLinkForeground(),
             Cursor = new Cursor(StandardCursorType.Hand),
         };
         githubSponsorLink.PointerPressed += async (_, _) =>
