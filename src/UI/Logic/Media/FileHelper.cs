@@ -39,7 +39,7 @@ namespace Nikse.SubtitleEdit.Logic.Media
             return string.Empty;
         }
 
-        public async Task<string> PickOpenSubtitleFile(Visual sender, string title)
+        public async Task<string> PickOpenSubtitleFile(Visual sender, string title, bool includeVideoFiles = true)
         {
             // Get top level from the current control. Alternatively, you can use Window reference instead.
             var topLevel = TopLevel.GetTopLevel(sender)!;
@@ -49,7 +49,7 @@ namespace Nikse.SubtitleEdit.Logic.Media
             {
                 Title = title,
                 AllowMultiple = false,
-                FileTypeFilter = MakeOpenSubtitleFilter(),
+                FileTypeFilter = MakeOpenSubtitleFilter(includeVideoFiles),
             });
 
             if (files.Count >= 1)
@@ -60,7 +60,7 @@ namespace Nikse.SubtitleEdit.Logic.Media
             return string.Empty;
         }
 
-        public async Task<string[]> PickOpenSubtitleFiles(Visual sender, string title)
+        public async Task<string[]> PickOpenSubtitleFiles(Visual sender, string title, bool includeVideoFiles = true)
         {
             // Get top level from the current control. Alternatively, you can use Window reference instead.
             var topLevel = TopLevel.GetTopLevel(sender)!;
@@ -70,19 +70,19 @@ namespace Nikse.SubtitleEdit.Logic.Media
             {
                 Title = title,
                 AllowMultiple = true,
-                FileTypeFilter = MakeOpenSubtitleFilter(),
+                FileTypeFilter = MakeOpenSubtitleFilter(includeVideoFiles),
             });
 
             return files.Select(p=>p.Path.LocalPath).ToArray();
         }
 
-        private static IReadOnlyList<FilePickerFileType> MakeOpenSubtitleFilter()
+        private static IReadOnlyList<FilePickerFileType> MakeOpenSubtitleFilter(bool includeVideoFiles)
         {
             var fileTypes = new List<FilePickerFileType>
             {
                 new FilePickerFileType("Subtitle files")
                 {
-                    Patterns = MakeOpenSubtitlePatterns(),
+                    Patterns = MakeOpenSubtitlePatterns(includeVideoFiles),
                 },
                 new FilePickerFileType("Video files")
                 {
@@ -97,7 +97,7 @@ namespace Nikse.SubtitleEdit.Logic.Media
             return fileTypes;
         }
 
-        private static List<string> MakeOpenSubtitlePatterns()
+        private static List<string> MakeOpenSubtitlePatterns(bool includeVideoFiles)
         {
             var existingTypes = new HashSet<string>();
             var patterns = new List<string>();
@@ -116,10 +116,14 @@ namespace Nikse.SubtitleEdit.Logic.Media
                 }
             }
             AddExt(existingTypes, patterns, ".mks"); //TODO: move to settings
-            AddExt(existingTypes, patterns, ".mkv");
-            AddExt(existingTypes, patterns, ".mp4");
-            AddExt(existingTypes, patterns, ".ts");
-            AddExt(existingTypes, patterns, ".sup");
+
+            if (includeVideoFiles)
+            {
+                AddExt(existingTypes, patterns, ".mkv");
+                AddExt(existingTypes, patterns, ".mp4");
+                AddExt(existingTypes, patterns, ".ts");
+                AddExt(existingTypes, patterns, ".sup");
+            }
             return patterns;
         }
 

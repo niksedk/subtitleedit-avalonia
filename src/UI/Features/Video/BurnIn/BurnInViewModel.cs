@@ -393,9 +393,15 @@ public partial class BurnInViewModel : ObservableObject
             }
             else
             {
+                var sb = new StringBuilder($"Generated files ({JobItems.Count}):" + Environment.NewLine + Environment.NewLine);
+                foreach (var item in JobItems)
+                {
+                    sb.AppendLine($"{item.OutputVideoFileName} ==> {item.Status}");
+                }
+
                 await MessageBox.Show(Window!,
                     "Generating done",
-                    "Number of files generated: " + JobItems.Count,
+                    sb.ToString(),
                     MessageBoxButtons.OK);
             }
         });
@@ -415,6 +421,7 @@ public partial class BurnInViewModel : ObservableObject
         jobItem.TargetFileSize = UseTargetFileSize ? TargetFileSize : 0;
         jobItem.AssaSubtitleFileName = MakeAssa(jobItem.SubtitleFileName);
         jobItem.Status = Se.Language.General.Generating;
+        jobItem.OutputVideoFileName = MakeOutputFileName(jobItem.InputVideoFileName);
 
         bool result;
         if (jobItem.UseTargetFileSize)
@@ -737,9 +744,11 @@ public partial class BurnInViewModel : ObservableObject
             fileName = Path.Combine(Se.Settings.Video.BurnIn.OutputFolder, nameNoExt + suffix + ext);
         }
 
-        if (File.Exists(fileName))
+        var i = 2;
+        while (File.Exists(fileName))
         {
-            fileName = fileName.Remove(fileName.Length - ext.Length) + "_" + Guid.NewGuid() + ext;
+            fileName = Path.Combine(Se.Settings.Video.BurnIn.OutputFolder, $"{nameNoExt}{suffix}_{i}{ext}");
+            i++;
         }
 
         return fileName;
@@ -873,8 +882,8 @@ public partial class BurnInViewModel : ObservableObject
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, "Open subtitle file");
-        if (string.IsNullOrEmpty(fileName))
+        var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, "Open subtitle file", false);
+        if (!string.IsNullOrEmpty(fileName))
         {
             SelectedJobItem.SubtitleFileName = fileName;
             SelectedJobItem.SubtitleFileNameShort = Path.GetFileName(fileName);
@@ -927,7 +936,7 @@ public partial class BurnInViewModel : ObservableObject
     [RelayCommand]
     private async Task BrowseCutFrom()
     {
-        var result = await _windowService.ShowDialogAsync<SelectVideoPositionWindow, SelectVideoPositionViewModel>(Window!, vm => 
+        var result = await _windowService.ShowDialogAsync<SelectVideoPositionWindow, SelectVideoPositionViewModel>(Window!, vm =>
         {
             vm.Initialize(VideoFileName);
         });
@@ -947,7 +956,7 @@ public partial class BurnInViewModel : ObservableObject
         {
             vm.Initialize(VideoFileName);
         });
-        
+
         if (!result.OkPressed)
         {
             return;
@@ -1358,14 +1367,14 @@ public partial class BurnInViewModel : ObservableObject
 
     private void UpdateOutputProperties()
     {
-        if (!Se.Settings.Video.BurnIn.SaveInSourceFolder &&
+        if (Se.Settings.Video.BurnIn.UseOutputFolder &&
             string.IsNullOrWhiteSpace(Se.Settings.Video.BurnIn.OutputFolder))
         {
-            Se.Settings.Video.BurnIn.SaveInSourceFolder = true;
+            Se.Settings.Video.BurnIn.UseOutputFolder = true;
         }
 
-        UseSourceFolderVisible = Se.Settings.Video.BurnIn.SaveInSourceFolder;
-        UseOutputFolderVisible = !Se.Settings.Video.BurnIn.SaveInSourceFolder;
+        UseSourceFolderVisible = !Se.Settings.Video.BurnIn.UseOutputFolder;
+        UseOutputFolderVisible = Se.Settings.Video.BurnIn.UseOutputFolder;
         OutputFolder = Se.Settings.Video.BurnIn.OutputFolder;
     }
 
