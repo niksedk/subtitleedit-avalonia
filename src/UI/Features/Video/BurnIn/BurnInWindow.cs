@@ -140,7 +140,7 @@ public class BurnInWindow : Window
             Children =
             {
                 colorPickerBoxColor,
-                UiUtil.MakeLabel("Width").WithLarginLeft(5),
+                UiUtil.MakeLabel(Se.Language.General.Width).WithLarginLeft(5),
                 textBoxBoxWidth,
             }
         };
@@ -552,7 +552,7 @@ public class BurnInWindow : Window
         var buttonAdd = UiUtil.MakeButton(Se.Language.General.AddDotDotDot, vm.AddCommand);
         var buttonRemove = UiUtil.MakeButton(Se.Language.General.Remove, vm.RemoveCommand);
         var buttonClear = UiUtil.MakeButton(Se.Language.General.Clear, vm.ClearCommand);
-        var buttonPickSubtitle = UiUtil.MakeButton(Se.Language.General.PickSubtitle, vm.PickSubtitleCommand);
+        var buttonPickSubtitle = UiUtil.MakeButton(Se.Language.General.PickSubtitleFile, vm.PickSubtitleCommand);
 
         var panelFileControls = new StackPanel
         {

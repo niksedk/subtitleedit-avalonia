@@ -437,7 +437,7 @@ public static class UiUtil
         var link = new TextBlock
         {
             Text = text,
-            Foreground = new SolidColorBrush(Color.FromArgb(255, 90, 90, 255)),
+            Foreground = MakeLinkForeground(),
             TextDecorations = TextDecorations.Underline,
             Cursor = new Cursor(StandardCursorType.Hand),
             Margin = new Thickness(0),
@@ -455,6 +455,11 @@ public static class UiUtil
         };
 
         return link;
+    }
+
+    private static SolidColorBrush MakeLinkForeground()
+    {
+        return new SolidColorBrush(Color.FromArgb(255, 90, 90, 255));
     }
 
     public static Button MakeMenuItem(string text, IRelayCommand command, object commandParameter, string iconName)
@@ -488,7 +493,7 @@ public static class UiUtil
         var link = new TextBlock
         {
             Text = text,
-            Foreground = Brushes.Blue,
+            Foreground = MakeLinkForeground(),
             TextDecorations = TextDecorations.Underline,
             Cursor = new Cursor(StandardCursorType.Hand),
             Margin = new Thickness(0),

@@ -147,7 +147,8 @@ public class LanguageGeneral
     public string AddDotDotDot { get; internal set; }
     public string Remove { get; internal set; }
     public string Clear { get; internal set; }
-    public string PickSubtitle { get; set; }
+    public string PickSubtitleFile { get; set; }
+    public string PickVideoFile { get; set; }
     public string VideoFile { get; set; }
     public string AddVideoFiles { get; set; }
     public string Help { get; internal set; }
@@ -299,7 +300,8 @@ public class LanguageGeneral
         AddDotDotDot = "Add...";
         Remove = "Remove";
         Clear = "Clear";
-        PickSubtitle = "Pick subtitle file...";
+        PickSubtitleFile = "Pick subtitle file...";
+        PickVideoFile = "Pick video file...";
         VideoFile = "Video file";
         AddVideoFiles = "Add video files...";
         Help = "Help";

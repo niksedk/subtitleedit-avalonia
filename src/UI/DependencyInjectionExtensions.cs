@@ -131,5 +131,6 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<BurnInSettingsViewModel>();
         collection.AddTransient<BurnInResolutionPickerViewModel>();
         collection.AddTransient<SelectVideoPositionViewModel>();
+        collection.AddTransient<TransparentSettingsViewModel>();
     }
 }
