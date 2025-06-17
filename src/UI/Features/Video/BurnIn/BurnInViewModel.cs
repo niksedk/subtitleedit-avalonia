@@ -10,7 +10,6 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Shared;
-using Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
@@ -74,9 +73,10 @@ public partial class BurnInViewModel : ObservableObject
     [ObservableProperty] private string _selectedAudioSampleRate;
     [ObservableProperty] private ObservableCollection<string> _audioBitRates;
     [ObservableProperty] private string _selectedAudioBitRate;
-    [ObservableProperty] private string _outputSourceFolder;
+    [ObservableProperty] private string _outputFolder;
     [ObservableProperty] private bool _useOutputFolderVisible;
     [ObservableProperty] private bool _useSourceFolderVisible;
+    [ObservableProperty] private bool _isSingleModeVisible;
     [ObservableProperty] private bool _isCutActive;
     [ObservableProperty] private TimeSpan _cutFrom;
     [ObservableProperty] private TimeSpan _cutTo;
@@ -89,6 +89,7 @@ public partial class BurnInViewModel : ObservableObject
     [ObservableProperty] private bool _isGenerating;
     [ObservableProperty] private bool _isBatchMode;
     [ObservableProperty] private Bitmap? _imagePreview;
+    [ObservableProperty] private bool _useSourceResolution;
 
     public BurnInWindow? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -105,8 +106,8 @@ public partial class BurnInViewModel : ObservableObject
     private bool _doAbort;
     private int _jobItemIndex = -1;
     private FfmpegMediaInfo? _mediaInfo;
-    private bool _useSourceResolution;
     private SubtitleFormat? _subtitleFormat;
+    private string _inputVideoFileName;
 
     private readonly IWindowService _windowService;
     private readonly IFolderHelper _folderHelper;
@@ -196,7 +197,7 @@ public partial class BurnInViewModel : ObservableObject
         VideoPresetText = string.Empty;
         VideoCrfText = string.Empty;
         VideoCrfHint = string.Empty;
-        OutputSourceFolder = string.Empty;
+        OutputFolder = string.Empty;
 
         _log = new StringBuilder();
         _timerGenerate = new();
@@ -208,16 +209,39 @@ public partial class BurnInViewModel : ObservableObject
         _timerAnalyze.Interval = 100;
 
         _loading = false;
+        _inputVideoFileName = string.Empty;
         LoadSettings();
         BoxTypeChanged();
         VideoEncodingChanged();
+        UpdateOutputProperties();
     }
 
     public void Initialize(string videoFileName, Subtitle subtitle, SubtitleFormat subtitleFormat)
     {
         VideoFileName = videoFileName;
+        _inputVideoFileName = videoFileName;
         _subtitle = subtitle;
         _subtitleFormat = subtitleFormat;
+
+        var fileExists = !string.IsNullOrWhiteSpace(videoFileName) && File.Exists(videoFileName);
+        if (fileExists)
+        {
+            VideoFileSize = Utilities.FormatBytesToDisplayFileSize(new FileInfo(videoFileName).Length);
+            _ = Task.Run(() =>
+            {
+                var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
+                Dispatcher.UIThread.Post(() =>
+                {
+                    VideoWidth = mediaInfo.Dimension.Width;
+                    VideoHeight = mediaInfo.Dimension.Height;
+                    UseSourceResolution = false;
+                });
+            });
+        }
+        else
+        {
+            BatchMode();
+        }
     }
 
     private void TimerAnalyzeElapsed(object? sender, ElapsedEventArgs e)
@@ -233,6 +257,8 @@ public partial class BurnInViewModel : ObservableObject
 #pragma warning disable CA1416
             _ffmpegProcess.Kill(true);
 #pragma warning restore CA1416
+
+            IsGenerating = false;
             return;
         }
 
@@ -286,6 +312,8 @@ public partial class BurnInViewModel : ObservableObject
 #pragma warning disable CA1416
             _ffmpegProcess.Kill(true);
 #pragma warning restore CA1416
+
+            IsGenerating = false;
             return;
         }
 
@@ -700,8 +728,6 @@ public partial class BurnInViewModel : ObservableObject
             ext = ".mkv";
         }
 
-        ;
-
         var suffix = Se.Settings.Video.BurnIn.BurnInSuffix;
         var fileName = Path.Combine(Path.GetDirectoryName(videoFileName)!, nameNoExt + suffix + ext);
         if (Se.Settings.Video.BurnIn.UseOutputFolder &&
@@ -719,8 +745,7 @@ public partial class BurnInViewModel : ObservableObject
         return fileName;
     }
 
-    public static int CalculateFontSize(int videoWidth, int videoHeight, double factor, int minSize = 8,
-        int maxSize = 2000)
+    public static int CalculateFontSize(int videoWidth, int videoHeight, double factor, int minSize = 8, int maxSize = 2000)
     {
         factor = Math.Clamp(factor, 0, 1);
 
@@ -778,24 +803,50 @@ public partial class BurnInViewModel : ObservableObject
             return;
         }
 
+        var error = false;
+
         foreach (var fileName in fileNames)
         {
             var mediaInfo = FfmpegMediaInfo.Parse(fileName);
             var fileInfo = new FileInfo(fileName);
-            var jobItem = new BurnInJobItem(fileName, mediaInfo.Dimension.Width, mediaInfo.Dimension.Height)
-            {
-                OutputVideoFileName = MakeOutputFileName(fileName),
-                TotalFrames = mediaInfo.GetTotalFrames(),
-                TotalSeconds = mediaInfo.Duration.TotalSeconds,
-                Width = mediaInfo.Dimension.Width,
-                Height = mediaInfo.Dimension.Height,
-                Size = Utilities.FormatBytesToDisplayFileSize(fileInfo.Length),
-                Resolution = mediaInfo.Dimension.ToString(),
-            };
-            jobItem.AddSubtitleFileName(TryGetSubtitleFileName(fileName));
 
-            Dispatcher.UIThread.Invoke(() => { JobItems.Add(jobItem); });
+            if (mediaInfo.Duration == null || mediaInfo.Dimension.Width == 0 || mediaInfo.Dimension.Height == 0)
+            {
+                error = true;
+            }
+            else
+            {
+
+                var jobItem = new BurnInJobItem(fileName, mediaInfo.Dimension.Width, mediaInfo.Dimension.Height)
+                {
+                    OutputVideoFileName = MakeOutputFileName(fileName),
+                    TotalFrames = mediaInfo.GetTotalFrames(),
+                    TotalSeconds = mediaInfo.Duration.TotalSeconds,
+                    Width = mediaInfo.Dimension.Width,
+                    Height = mediaInfo.Dimension.Height,
+                    Size = Utilities.FormatBytesToDisplayFileSize(fileInfo.Length),
+                    Resolution = mediaInfo.Dimension.ToString(),
+                };
+                jobItem.AddSubtitleFileName(TryGetSubtitleFileName(fileName));
+
+                Dispatcher.UIThread.Invoke(() => { JobItems.Add(jobItem); });
+            }
         }
+
+        if (error)
+        {
+            await MessageBox.Show(Window!,
+                    "Unable to get video info",
+                    "File skipped as video info was unavailable",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+        }
+    }
+
+    [RelayCommand]
+    private async Task OpenOutputFolder()
+    {
+        await _folderHelper.OpenFolder(Window!, Se.Settings.Video.BurnIn.OutputFolder);
     }
 
     [RelayCommand]
@@ -814,7 +865,6 @@ public partial class BurnInViewModel : ObservableObject
         JobItems.Clear();
     }
 
-
     [RelayCommand]
     private async Task PickSubtitle()
     {
@@ -827,13 +877,14 @@ public partial class BurnInViewModel : ObservableObject
         if (string.IsNullOrEmpty(fileName))
         {
             SelectedJobItem.SubtitleFileName = fileName;
+            SelectedJobItem.SubtitleFileNameShort = Path.GetFileName(fileName);
         }
     }
 
     [RelayCommand]
     private async Task OutputProperties()
     {
-        await _windowService.ShowDialogAsync<BatchConvertSettingsWindow, BatchConvertSettingsViewModel>(Window!);
+        await _windowService.ShowDialogAsync<BurnInSettingsWindow, BurnInSettingsViewModel>(Window!);
         UpdateOutputProperties();
     }
 
@@ -841,21 +892,68 @@ public partial class BurnInViewModel : ObservableObject
     private async Task BrowseResolution()
     {
         var result = await _windowService.ShowDialogAsync<BurnInResolutionPickerWindow, BurnInResolutionPickerViewModel>(Window!);
+        if (!result.OkPressed || result.SelectedResolution == null)
+        {
+            return;
+        }
+
+        if (result.SelectedResolution.ItemType == ResolutionItemType.PickResolution)
+        {
+            var videoFileName = await _fileHelper.PickOpenVideoFile(Window!, "Open video file");
+            if (string.IsNullOrWhiteSpace(videoFileName))
+            {
+                return;
+            }
+
+            var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
+            VideoWidth = mediaInfo.Dimension.Width;
+            VideoHeight = mediaInfo.Dimension.Height;
+            UseSourceResolution = false;
+        }
+        else if (result.SelectedResolution.ItemType == ResolutionItemType.UseSource)
+        {
+            UseSourceResolution = true;
+        }
+        else if (result.SelectedResolution.ItemType == ResolutionItemType.Resolution)
+        {
+            UseSourceResolution = false;
+            VideoWidth = result.SelectedResolution.Width;
+            VideoHeight = result.SelectedResolution.Height;
+        }
+
+        SaveSettings();
     }
 
     [RelayCommand]
-    private void BrowseCutFrom()
+    private async Task BrowseCutFrom()
     {
+        var result = await _windowService.ShowDialogAsync<SelectVideoPositionWindow, SelectVideoPositionViewModel>(Window!, vm => 
+        {
+            vm.Initialize(VideoFileName);
+        });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        CutFrom = TimeSpan.FromSeconds((long)Math.Round(result.PositionInSeconds, MidpointRounding.AwayFromZero));
     }
 
     [RelayCommand]
-    private void BrowseCutTo()
+    private async Task BrowseCutTo()
     {
-    }
+        var result = await _windowService.ShowDialogAsync<SelectVideoPositionWindow, SelectVideoPositionViewModel>(Window!, vm =>
+        {
+            vm.Initialize(VideoFileName);
+        });
+        
+        if (!result.OkPressed)
+        {
+            return;
+        }
 
-    [RelayCommand]
-    private void BrowseVideoResolution()
-    {
+        CutTo = TimeSpan.FromSeconds((long)Math.Round(result.PositionInSeconds, MidpointRounding.AwayFromZero));
     }
 
     [RelayCommand]
@@ -899,6 +997,7 @@ public partial class BurnInViewModel : ObservableObject
 
         _doAbort = false;
         _log.Clear();
+        IsGenerating = true;
         _processedFrames = 0;
         ProgressValue = 0;
         SaveSettings();
@@ -920,10 +1019,10 @@ public partial class BurnInViewModel : ObservableObject
         FontShadowColor = settings.NonAssaShadowColor.FromHexToColor();
         FontFixRtl = settings.NonAssaFixRtlUnicode;
         SelectedFontAlignment = FontAlignments.First(p => p.Code == settings.NonAssaAlignment);
-        OutputSourceFolder = settings.OutputFolder;
-        UseOutputFolderVisible = settings.UseOutputFolder;
+        OutputFolder = settings.OutputFolder;
+        UseOutputFolderVisible = settings.UseSourceResolution;
         UseSourceFolderVisible = !settings.UseOutputFolder;
-        _useSourceResolution = settings.UseSourceResolution;
+        UseSourceResolution = settings.UseSourceResolution;
     }
 
     private void SaveSettings()
@@ -940,9 +1039,7 @@ public partial class BurnInViewModel : ObservableObject
         settings.NonAssaShadowColor = FontShadowColor.FromColorToHex();
         settings.NonAssaFixRtlUnicode = FontFixRtl;
         settings.NonAssaAlignment = SelectedFontAlignment.Code;
-        settings.OutputFolder = OutputSourceFolder;
-        settings.UseOutputFolder = UseOutputFolderVisible;
-        settings.UseSourceResolution = _useSourceResolution;
+        settings.UseSourceResolution = UseSourceResolution;
 
         Se.SaveSettings();
     }
@@ -951,12 +1048,14 @@ public partial class BurnInViewModel : ObservableObject
     private void SingleMode()
     {
         IsBatchMode = false;
+        IsSingleModeVisible = false;
     }
 
     [RelayCommand]
     private void BatchMode()
     {
         IsBatchMode = true;
+        IsSingleModeVisible = !string.IsNullOrEmpty(_inputVideoFileName);
     }
 
     [RelayCommand]
@@ -969,6 +1068,12 @@ public partial class BurnInViewModel : ObservableObject
     [RelayCommand]
     private void Cancel()
     {
+        if (IsGenerating)
+        {
+            _doAbort = true;
+            return;
+        }
+
         Window?.Close();
     }
 
@@ -1253,26 +1358,15 @@ public partial class BurnInViewModel : ObservableObject
 
     private void UpdateOutputProperties()
     {
-        if (!Se.Settings.Tools.BatchConvert.SaveInSourceFolder &&
-            string.IsNullOrWhiteSpace(Se.Settings.Tools.BatchConvert.OutputFolder))
+        if (!Se.Settings.Video.BurnIn.SaveInSourceFolder &&
+            string.IsNullOrWhiteSpace(Se.Settings.Video.BurnIn.OutputFolder))
         {
-            Se.Settings.Tools.BatchConvert.SaveInSourceFolder = true;
+            Se.Settings.Video.BurnIn.SaveInSourceFolder = true;
         }
 
-        string text;
-        if (Se.Settings.Video.BurnIn.SaveInSourceFolder)
-        {
-            text = string.Format("Outputfolder: {0}", "Source folder");
-        }
-        else
-        {
-            text = string.Format("Outputfolder: {0}", Se.Settings.Video.BurnIn.OutputFolder);
-        }
-
-        text += Environment.NewLine +
-                Se.Settings.Tools.BatchConvert.Overwrite;
-
-        //TODO:       OutputPropertiesText = text;
+        UseSourceFolderVisible = Se.Settings.Video.BurnIn.SaveInSourceFolder;
+        UseOutputFolderVisible = !Se.Settings.Video.BurnIn.SaveInSourceFolder;
+        OutputFolder = Se.Settings.Video.BurnIn.OutputFolder;
     }
 
     public void BoxTypeChanged(object? sender, SelectionChangedEventArgs e)
@@ -1324,7 +1418,7 @@ public partial class BurnInViewModel : ObservableObject
 
         if (SelectedFontBoxType.BoxType == FontBoxType.BoxPerLine)
         {
-            bitmap = TextToImageGenerator.GenerateImage(
+            bitmap = TextToImageGenerator.GenerateImageWithPadding(
                 text,
                 SelectedFontName,
                 fontSize,
@@ -1343,7 +1437,7 @@ public partial class BurnInViewModel : ObservableObject
         }
         else if (SelectedFontBoxType.BoxType == FontBoxType.OneBox)
         {
-            bitmap = TextToImageGenerator.GenerateImage(
+            bitmap = TextToImageGenerator.GenerateImageWithPadding(
                 text,
                 SelectedFontName,
                 fontSize,
@@ -1353,11 +1447,13 @@ public partial class BurnInViewModel : ObservableObject
                 SKColors.Red,
                 FontShadowColor.ToSKColor(),
                 (float)SelectedFontOutline,
-                0);
+                0,
+                1.0f,
+                (int)Math.Round(SelectedFontShadowWidth));
         }
         else // FontBoxType.None
         {
-            bitmap = TextToImageGenerator.GenerateImage(
+            bitmap = TextToImageGenerator.GenerateImageWithPadding(
                 text,
                 SelectedFontName,
                 fontSize,

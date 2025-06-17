@@ -45,7 +45,7 @@ public class InitVideoPlayer
         return mainGrid;
     }
 
-    private static VideoPlayerControl MakeVideoPlayer()
+    public static VideoPlayerControl MakeVideoPlayer()
     {
         VideoPlayerControl control;
 

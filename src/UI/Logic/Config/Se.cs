@@ -67,7 +67,7 @@ public class Se
                 folders.Add(Path.Combine(folder, "bin"));
             }
 
-            foreach (var folder in folders.OrderByDescending(p=>p))
+            foreach (var folder in folders.OrderByDescending(p => p))
             {
                 var path = Path.Combine(folder, "tesseract");
                 if (System.IO.File.Exists(path))
@@ -88,14 +88,14 @@ public class Se
             {
                 return Path.Combine(TesseractFolder, "tessdata");
             }
-            
+
             var folders = new List<string>();
             foreach (var folder in Directory.EnumerateDirectories("/opt/homebrew/Cellar/tesseract-lang"))
             {
                 folders.Add(Path.Combine(folder, "share/tessdata"));
             }
 
-            foreach (var folder in folders.OrderByDescending(p=>p))
+            foreach (var folder in folders.OrderByDescending(p => p))
             {
                 if (Directory.Exists(folder))
                 {
@@ -109,7 +109,7 @@ public class Se
 
     public static string FfmpegFolder => Path.Combine(BaseFolder, "ffmpeg");
     public static string WhisperFolder => Path.Combine(BaseFolder, "Whisper");
-    
+
 
     public Se()
     {
@@ -135,7 +135,8 @@ public class Se
             new(nameof(vm.InverseSelectionCommand), new List<string> { "Ctrl", "Shift", "I" }, ShortcutCategory.SubtitleGrid),
             new(nameof(vm.ToggleLinesItalicCommand), new List<string> { "Ctrl", "I" }, ShortcutCategory.SubtitleGrid),
             new(nameof(vm.DeleteSelectedLinesCommand), new List<string> { "Delete" }, ShortcutCategory.SubtitleGrid),
-            new(nameof(vm.FindNextCommand), new List<string> { "Ctrl", "F" }, ShortcutCategory.General),
+            new(nameof(vm.ShowFindCommand), new List<string> { "Ctrl", "F" }, ShortcutCategory.General),
+            new(nameof(vm.FindNextCommand), new List<string> { "F3" }, ShortcutCategory.General),
             new(nameof(vm.ShowReplaceCommand), new List<string> { "Ctrl", "H" }, ShortcutCategory.General),
             new(nameof(vm.OpenDataFolderCommand), new List<string> { "Ctrl", "Alt", "Shift", "D" }, ShortcutCategory.General),
             new(nameof(vm.CommandFileNewCommand), new List<string> { "Ctrl", "N" }, ShortcutCategory.General),

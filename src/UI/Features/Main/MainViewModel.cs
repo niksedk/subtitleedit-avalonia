@@ -575,7 +575,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         {
             MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Remove text for hearing impaired"));
             Subtitles.Clear();
-            Subtitles.AddRange(result.FixedSubtitle.Paragraphs.Select(p=> new SubtitleLineViewModel(p)));
+            Subtitles.AddRange(result.FixedSubtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
             SelectAndScrollToRow(0);
         }
 
@@ -662,7 +662,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task ShowVideoBurnIn()
     {
-        await _windowService.ShowDialogAsync<BurnInWindow, BurnInViewModel>(Window!, vm => 
+        await _windowService.ShowDialogAsync<BurnInWindow, BurnInViewModel>(Window!, vm =>
         {
             vm.Initialize(_videoFileName ?? string.Empty, GetUpdateSubtitle(), SelectedSubtitleFormat);
         });
@@ -1977,19 +1977,22 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     {
         _shortcutManager.OnKeyPressed(this, keyEventArgs);
 
-        var relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.SubtitleGrid.ToStringInvariant());
-        if (relayCommand != null)
+        if (SubtitleGrid.IsFocused)
         {
-            keyEventArgs.Handled = true;
-            relayCommand.Execute(null);
-            return;
+            var relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.SubtitleGrid.ToStringInvariant());
+            if (relayCommand != null)
+            {
+                keyEventArgs.Handled = true;
+                relayCommand.Execute(null);
+                return;
+            }
         }
 
-        relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.General.ToStringInvariant());
-        if (relayCommand != null)
+        var rc = _shortcutManager.CheckShortcuts(ShortcutCategory.General.ToStringInvariant());
+        if (rc != null)
         {
             keyEventArgs.Handled = true;
-            relayCommand.Execute(null);
+            rc.Execute(null);
             return;
         }
     }
@@ -2186,12 +2189,12 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
                 }
             }
 
-            var mpv = VideoPlayerControl?.VideoPlayerInstance as VideoPlayerInstanceMpv;    
+            var mpv = VideoPlayerControl?.VideoPlayerInstance as VideoPlayerInstanceMpv;
             if (mpv != null)
             {
-                _mpvReloader.RefreshMpv(mpv.MpvContext!, GetUpdateSubtitle(), SelectedSubtitleFormat);   
+                _mpvReloader.RefreshMpv(mpv.MpvContext!, GetUpdateSubtitle(), SelectedSubtitleFormat);
             }
-            
+
         };
         _positionTimer.Start();
     }

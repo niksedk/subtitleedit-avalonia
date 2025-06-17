@@ -437,7 +437,7 @@ public static class UiUtil
         var link = new TextBlock
         {
             Text = text,
-            Foreground = Brushes.Blue,
+            Foreground = new SolidColorBrush(Color.FromArgb(255, 90, 90, 255)),
             TextDecorations = TextDecorations.Underline,
             Cursor = new Cursor(StandardCursorType.Hand),
             Margin = new Thickness(0),
@@ -1181,6 +1181,80 @@ public static class UiUtil
         {
             Path = contentPropertyPath,
             Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
+    public static TextBlock WithBindText(this TextBlock control, object viewModel, string contentPropertyPath)
+    {
+        control.DataContext = viewModel;
+        control.Bind(TextBlock.TextProperty, new Binding
+        {
+            Path = contentPropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
+    public static Label WithBindVisible(this Label control, object viewModel, string visiblePropertyPath)
+    {
+        control.DataContext = viewModel;
+        control.Bind(Label.IsVisibleProperty, new Binding
+        {
+            Path = visiblePropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
+    public static TextBlock WithBindVisible(this TextBlock control, object viewModel, string visiblePropertyPath)
+    {
+        control.DataContext = viewModel;
+        control.Bind(TextBlock.IsVisibleProperty, new Binding
+        {
+            Path = visiblePropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
+    public static Label WithBindVisible(this Label control, object viewModel, string visiblePropertyPath, IValueConverter converter)
+    {
+        control.DataContext = viewModel;
+        control.Bind(Label.IsVisibleProperty, new Binding
+        {
+            Path = visiblePropertyPath,
+            Mode = BindingMode.TwoWay,
+            Converter = converter,
+        });
+
+        return control;
+    }
+
+    public static StackPanel WithBindVisible(this StackPanel control, object viewModel, string visiblePropertyPath)
+    {
+        control.DataContext = viewModel;
+        control.Bind(StackPanel.IsVisibleProperty, new Binding
+        {
+            Path = visiblePropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
+    public static StackPanel WithBindVisible(this StackPanel control, object viewModel, string visiblePropertyPath, IValueConverter converter)
+    {
+        control.DataContext = viewModel;
+        control.Bind(StackPanel.IsVisibleProperty, new Binding
+        {
+            Path = visiblePropertyPath,
+            Mode = BindingMode.TwoWay,
+            Converter = converter,
         });
 
         return control;

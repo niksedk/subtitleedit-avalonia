@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Avalonia.Input;
+﻿using Avalonia.Input;
 using CommunityToolkit.Mvvm.Input;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Logic;
 
@@ -41,8 +41,8 @@ public class ShortcutManager : IShortcutManager
 
         foreach (var shortcut in _shortcuts)
         {
-            if (hashCode == shortcut.HashCode || 
-                inputWithNormalizedModifiers == shortcut.HashCode|| 
+            if (hashCode == shortcut.HashCode ||
+                inputWithNormalizedModifiers == shortcut.HashCode ||
                 inputWithNormalizedModifiers == shortcut.NormalizedHashCode)
             {
                 return shortcut.Action;
@@ -57,12 +57,12 @@ public class ShortcutManager : IShortcutManager
         _shortcuts.Clear();
     }
 
-    public static int CalculateNormalizedHash(List<string> inputKeys, string? control)
+    public static string CalculateNormalizedHash(List<string> inputKeys, string? control)
     {
         var keys = new List<string>();
         foreach (var key in inputKeys)
         {
-            if (key is "LeftCtrl" or "RightCtrl" or "LWin")
+            if (key is "LeftCtrl" or "RightCtrl" or "LWin" or "Ctrl")
             {
                 keys.Add("Control");
             }

@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
@@ -42,11 +43,11 @@ public class BurnInWindow : Window
         var buttonBatchMode = UiUtil.MakeButton(Se.Language.General.BatchMode, vm.BatchModeCommand)
             .WithBindIsVisible(nameof(vm.IsBatchMode), new InverseBooleanConverter())
             .WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
-        var buttonHelp = UiUtil.MakeButton("Help", vm.HelpCommand);
+        var buttonHelp = UiUtil.MakeButton(Se.Language.General.Help, vm.HelpCommand);
         var buttonSingleMode = UiUtil.MakeButton(Se.Language.General.SingleMode, vm.SingleModeCommand)
-            .WithBindIsVisible(nameof(vm.IsBatchMode))
+            .WithBindIsVisible(nameof(vm.IsSingleModeVisible))
             .WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
-        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand).WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter()); 
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand).WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
         var buttonPanel = UiUtil.MakeButtonBar(
             buttonGenerate,
             buttonHelp,
@@ -270,7 +271,20 @@ public class BurnInWindow : Window
                 textBoxHeight,
                 buttonResolution,
             }
-        };
+        }.WithBindVisible(vm, nameof(vm.UseSourceResolution), new InverseBooleanConverter());
+
+        var labelSourceResolution = UiUtil.MakeLabel("Use source resolution").WithBindVisible(vm, nameof(vm.UseSourceResolution));
+        var buttonResolutionSource = UiUtil.MakeButtonBrowse(vm.BrowseResolutionCommand);
+        var panelResolutionSource = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 5,
+            Children =
+            {
+                labelSourceResolution,
+                buttonResolutionSource,
+            }
+        }.WithBindVisible(vm, nameof(vm.UseSourceResolution));
 
         var labelEncoding = UiUtil.MakeLabel(Se.Language.General.Encoding);
         var comboBoxEncoding = UiUtil.MakeComboBox(vm.VideoEncodings, vm, nameof(vm.SelectedVideoEncoding));
@@ -313,6 +327,7 @@ public class BurnInWindow : Window
 
         grid.Add(labelResolution, 0, 0);
         grid.Add(panelResolution, 0, 1);
+        grid.Add(panelResolutionSource, 0, 1);
 
         grid.Add(labelEncoding, 1, 0);
         grid.Add(comboBoxEncoding, 1, 1);
@@ -388,15 +403,26 @@ public class BurnInWindow : Window
     private static Border MakePreviewView(BurnInViewModel vm)
     {
 
-        var labelPreview = UiUtil.MakeLabel("Preview");
+        var labelPreview = UiUtil.MakeLabel(Se.Language.General.Preview);
 
         var image = new Image
         {
             [!Image.SourceProperty] = new Binding(nameof(vm.ImagePreview)),
             DataContext = vm,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Top,
+            Stretch = Stretch.None, // Prevents stretching of the image
+        };
+
+        var scrollViewer = new ScrollViewer
+        {
+            Content = image,
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
-            Stretch = Stretch.None, // Prevents stretching of the image
+            Width = 300,
+            Height = double.NaN,
         };
 
         var grid = new Grid
@@ -417,7 +443,7 @@ public class BurnInWindow : Window
         };
 
         grid.Add(labelPreview, 0, 0);
-        grid.Add(image, 1, 0);
+        grid.Add(scrollViewer, 1, 0);
 
         return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5).WithMarginRight(5);
     }
@@ -507,7 +533,7 @@ public class BurnInWindow : Window
                 },
                 new DataGridTextColumn
                 {
-                    Header = Se.Language.General.Format,
+                    Header = Se.Language.General.SubtitleFile,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(BurnInJobItem.SubtitleFileNameShort)),
                     IsReadOnly = true,
@@ -523,7 +549,7 @@ public class BurnInWindow : Window
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedJobItem)) { Source = vm });
 
-        var buttonAdd = UiUtil.MakeButton(Se.Language.General.Add, vm.AddCommand);
+        var buttonAdd = UiUtil.MakeButton(Se.Language.General.AddDotDotDot, vm.AddCommand);
         var buttonRemove = UiUtil.MakeButton(Se.Language.General.Remove, vm.RemoveCommand);
         var buttonClear = UiUtil.MakeButton(Se.Language.General.Clear, vm.ClearCommand);
         var buttonPickSubtitle = UiUtil.MakeButton(Se.Language.General.PickSubtitle, vm.PickSubtitleCommand);
@@ -544,8 +570,11 @@ public class BurnInWindow : Window
         };
 
         var buttonOutputProperties = UiUtil.MakeButton(Se.Language.Video.BurnIn.OutputProperties, vm.OutputPropertiesCommand);
-        var labelOutputPropertiesFolder = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.OutputSourceFolder));
-        var labelOutputPropertiesUseSourceFolder = UiUtil.MakeLabel(Se.Language.Video.BurnIn.UseSourceFolder);
+        var labelOutputPropertiesFolder = UiUtil.MakeLink(string.Empty, vm.OpenOutputFolderCommand)
+            .WithBindText(vm, nameof(vm.OutputFolder))
+            .WithBindVisible(vm, nameof(vm.UseOutputFolderVisible));
+        var labelOutputPropertiesUseSourceFolder = UiUtil.MakeLabel(Se.Language.Video.BurnIn.UseSourceFolder)
+            .WithBindVisible(vm, nameof(vm.UseSourceFolderVisible));
 
         var panelFileControls2 = new StackPanel
         {
@@ -641,8 +670,6 @@ public class BurnInWindow : Window
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
             },
-            ColumnSpacing = 5,
-            RowSpacing = 5,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
@@ -666,7 +693,6 @@ public class BurnInWindow : Window
             Maximum = 100,
             IsHitTestVisible = false,
             Focusable = false,
-            MinWidth = 400,
             Styles =
             {
                 new Style(x => x.OfType<Thumb>())
@@ -686,9 +712,14 @@ public class BurnInWindow : Window
             }
         };
         progressSlider.Bind(Slider.ValueProperty, new Binding(nameof(vm.ProgressValue)));
+        progressSlider.Bind(Slider.IsVisibleProperty, new Binding(nameof(vm.IsGenerating)));
 
-        var statusText = new TextBlock();
+        var statusText = new TextBlock
+        {
+            Margin = new Thickness(5, 20, 0, 0),
+        };
         statusText.Bind(TextBlock.TextProperty, new Binding(nameof(vm.ProgressText)));
+        statusText.Bind(TextBlock.IsVisibleProperty, new Binding(nameof(vm.IsGenerating)));
 
         var grid = new Grid
         {

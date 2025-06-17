@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Logic.Config;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Logic;
 
@@ -16,8 +15,8 @@ public class ShortCut
     public string? Control { get; set; }
     public string Name { get; set; }
     public IRelayCommand Action { get; set; }
-    public int HashCode { get; set; }
-    public int NormalizedHashCode { get; set; }
+    public string HashCode { get; set; }
+    public string NormalizedHashCode { get; set; }
 
     public ShortCut(string name, List<string> keys, ShortcutCategory category, IRelayCommand action)
     {
@@ -30,15 +29,16 @@ public class ShortCut
         NormalizedHashCode = ShortcutManager.CalculateNormalizedHash(keys, Control);
     }
 
-    public static int CalculateHash(List<string> keys, string? control)
+    public static string CalculateHash(List<string> keys, string? control)
     {
-        var hashCode = keys.Aggregate(0, (hash, keyCode) => hash ^ keyCode.GetHashCode());
-        if (control != null)
+        var sb = new System.Text.StringBuilder();
+        foreach (var key in keys.OrderBy(k => k, StringComparer.OrdinalIgnoreCase))
         {
-            hashCode ^= control.GetHashCode();
+            sb.Append(key.ToLowerInvariant()).Append('+');
         }
 
-        return hashCode;
+        sb.Append(control?.ToLowerInvariant() ?? string.Empty);
+        return sb.ToString();
     }
 
     public ShortCut(ShortcutsMain.AvailableShortcut shortcut, SeShortCut keys)
@@ -47,7 +47,7 @@ public class ShortCut
         Action = shortcut.RelayCommand;
         Category = shortcut.Category;
         Name = shortcut.Name;
-        Control = ShortcutCategory.General.ToStringInvariant(); 
+        Control = ShortcutCategory.General.ToStringInvariant();
         HashCode = CalculateHash(Keys, Control);
         NormalizedHashCode = ShortcutManager.CalculateNormalizedHash(Keys, Control);
     }

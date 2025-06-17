@@ -91,7 +91,7 @@ public static class TextToImageGenerator
         return bitmap;
     }
 
-    public static SKBitmap GenerateImage(
+    public static SKBitmap GenerateImageWithPadding(
      string text,
      string fontName,
      float fontSize,
@@ -102,7 +102,8 @@ public static class TextToImageGenerator
      SKColor backgroundColor,
      float outlineWidth,
      float shadowWidth,
-     float cornerRadius = 1.0f// Parameter for rounded corners
+     float cornerRadius = 1.0f, // Parameter for rounded corners
+     int padding = 20 
  )
     {
         outlineWidth *= 1.7f; // factor to match ASSA
@@ -116,7 +117,6 @@ public static class TextToImageGenerator
         using var font = new SKFont(typeface, fontSize);
         font.MeasureText(text, out var textBounds, paint);
 
-        var padding = 20;
         var width = (int)(textBounds.Width + padding * 2 + outlineWidth * 2 + shadowWidth);
         var height = (int)(textBounds.Height + padding * 2 + outlineWidth * 2 + shadowWidth);
 

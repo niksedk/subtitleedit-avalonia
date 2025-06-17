@@ -4,7 +4,6 @@ using Avalonia.Input;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using System;
@@ -211,6 +210,10 @@ public class AudioVisualizer : Control
         };
         KeyDown += OnKeyDown;
         KeyUp += OnKeyUp;
+        LostFocus += (sender, e) =>
+        {          
+            InvalidateVisual();
+        };
     }
 
     private void OnKeyUp(object? sender, KeyEventArgs e)
@@ -716,8 +719,7 @@ public class AudioVisualizer : Control
 
             if (IsFocused)
             {
-                var redPen = new Pen(Brushes.Red, 1); // 1 = stroke thickness
-                context.DrawRectangle(null, redPen, new Rect(0, 0, Bounds.Width, Bounds.Height));
+                context.DrawRectangle(null, _paintPenSelected, new Rect(0, 0, Bounds.Width, Bounds.Height));
             }
         }
     }

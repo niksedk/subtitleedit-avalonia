@@ -213,7 +213,7 @@ namespace Nikse.SubtitleEdit.Logic.Media
             var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
             {
                 Title = title,
-                AllowMultiple = false,
+                AllowMultiple = true,
                 FileTypeFilter = MakeOpenVideoFilter(),
             });
 

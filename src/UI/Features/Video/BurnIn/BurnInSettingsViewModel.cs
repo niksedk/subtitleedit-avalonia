@@ -30,7 +30,7 @@ public partial class BurnInSettingsViewModel : ObservableObject
 
     private void LoadSettings()
     {
-        UseSourceFolder = Se.Settings.Video.BurnIn.SaveInSourceFolder; ;
+        UseSourceFolder = Se.Settings.Video.BurnIn.SaveInSourceFolder; 
         UseOutputFolder = !UseSourceFolder;
         OutputFolder = Se.Settings.Video.BurnIn.OutputFolder;
     }

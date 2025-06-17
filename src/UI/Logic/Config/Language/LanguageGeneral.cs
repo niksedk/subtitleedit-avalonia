@@ -144,11 +144,13 @@ public class LanguageGeneral
     public string BatchMode { get; set; }
     public string SingleMode { get; set; }
     public string Add { get; internal set; }
+    public string AddDotDotDot { get; internal set; }
     public string Remove { get; internal set; }
     public string Clear { get; internal set; }
     public string PickSubtitle { get; set; }
     public string VideoFile { get; set; }
     public string AddVideoFiles { get; set; }
+    public string Help { get; internal set; }
 
     public LanguageGeneral()
     {
@@ -294,10 +296,12 @@ public class LanguageGeneral
         BatchMode = "Batch mode";
         SingleMode = "Single mode";
         Add = "Add";
+        AddDotDotDot = "Add...";
         Remove = "Remove";
         Clear = "Clear";
         PickSubtitle = "Pick subtitle file...";
         VideoFile = "Video file";
         AddVideoFiles = "Add video files...";
+        Help = "Help";
     }
 }

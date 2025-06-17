@@ -13,7 +13,7 @@ public class BurnInSettingsWindow : Window
     public BurnInSettingsWindow(BurnInSettingsViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = "Burn-in - output settings";
+        Title = "Output settings";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
         
