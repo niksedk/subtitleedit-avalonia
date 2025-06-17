@@ -6,7 +6,7 @@ namespace Nikse.SubtitleEdit.Features.Edit.AlignmentPicker;
 
 public partial class AlignmentPickerViewModel : ObservableObject
 {
-    public AlignmentPickerWindow Window { get; set; }
+    public AlignmentPickerWindow? Window { get; set; }
     public bool OkPressed { get; private set; }
     public string Alignment { get; private set; }
 

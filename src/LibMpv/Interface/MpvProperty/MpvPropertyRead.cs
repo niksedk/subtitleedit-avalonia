@@ -48,7 +48,9 @@ public class MpvPropertyRead<T, TRaw> : MpvProperty<T?, TRaw>
     public async Task<T?> GetAsync(MpvAsyncOptions? options = null)
     {
         var result = await Mpv.GetPropertyAsync<TRaw>(PropertyName, options);
+#pragma warning disable CS8604 // Possible null reference argument.
         return ParseValue(result);
+#pragma warning restore CS8604 // Possible null reference argument.
     }
 
     private ulong _propertyChangeId = 0;
@@ -136,7 +138,9 @@ public class MpvPropertyReadRef<T, TRaw> : MpvProperty<T?, TRaw>
     public virtual async Task<T?> GetAsync(MpvAsyncOptions? options = null)
     {
         var result = await Mpv.GetPropertyAsync<TRaw>(PropertyName, options);
+#pragma warning disable CS8604 // Possible null reference argument.
         return ParseValue(result);
+#pragma warning restore CS8604 // Possible null reference argument.
     }
     
     

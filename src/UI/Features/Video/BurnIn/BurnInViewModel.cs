@@ -40,7 +40,6 @@ public partial class BurnInViewModel : ObservableObject
     [ObservableProperty] private bool _fontIsBold;
     [ObservableProperty] private decimal _selectedFontOutline;
     [ObservableProperty] private string _fontOutlineText;
-    [ObservableProperty] private ObservableCollection<decimal> _fontShadowWidths;
     [ObservableProperty] private decimal _selectedFontShadowWidth;
     [ObservableProperty] private string _fontShadowText;
     [ObservableProperty] private ObservableCollection<FontBoxItem> _fontBoxTypes;
@@ -68,10 +67,6 @@ public partial class BurnInViewModel : ObservableObject
     [ObservableProperty] private string? _selectedVideoCrf;
     [ObservableProperty] private string _videoCrfText;
     [ObservableProperty] private string _videoCrfHint;
-    [ObservableProperty] private ObservableCollection<string> _videoTuneFor;
-    [ObservableProperty] private string? _selectedVideoTuneFor;
-    [ObservableProperty] private ObservableCollection<string> _videoExtension;
-    [ObservableProperty] private int _selectedVideoExtension;
     [ObservableProperty] private ObservableCollection<string> _audioEncodings;
     [ObservableProperty] private string _selectedAudioEncoding;
     [ObservableProperty] private bool _audioIsStereo;
@@ -87,7 +82,6 @@ public partial class BurnInViewModel : ObservableObject
     [ObservableProperty] private TimeSpan _cutTo;
     [ObservableProperty] private bool _useTargetFileSize;
     [ObservableProperty] private int _targetFileSize;
-    [ObservableProperty] private string _buttonModeText;
     [ObservableProperty] private string _progressText;
     [ObservableProperty] private double _progressValue;
     [ObservableProperty] private ObservableCollection<BurnInJobItem> _jobItems;
@@ -95,7 +89,6 @@ public partial class BurnInViewModel : ObservableObject
     [ObservableProperty] private bool _isGenerating;
     [ObservableProperty] private bool _isBatchMode;
     [ObservableProperty] private Bitmap? _imagePreview;
-
 
     public BurnInWindow? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -197,6 +190,13 @@ public partial class BurnInViewModel : ObservableObject
 
         VideoFileName = string.Empty;
         VideoFileSize = string.Empty;
+        ProgressText = string.Empty;
+        FontOutlineText = string.Empty;
+        FontShadowText = string.Empty;
+        VideoPresetText = string.Empty;
+        VideoCrfText = string.Empty;
+        VideoCrfHint = string.Empty;
+        OutputSourceFolder = string.Empty;
 
         _log = new StringBuilder();
         _timerGenerate = new();
@@ -558,7 +558,7 @@ public partial class BurnInViewModel : ObservableObject
             SelectedAudioEncoding,
             AudioIsStereo,
             SelectedAudioSampleRate.Replace("Hz", string.Empty).Trim(),
-            SelectedVideoTuneFor ?? string.Empty,
+            string.Empty,
             SelectedAudioBitRate,
             pass,
             jobItem.VideoBitRate,
@@ -1152,9 +1152,9 @@ public partial class BurnInViewModel : ObservableObject
                 "13",
             };
 
-            defaultItem = "";
+            defaultItem = string.Empty;
 
-            VideoPresetText = "Preset";
+            VideoPresetText = Se.Language.Video.BurnIn.Preset;
         }
 
         VideoPresets.Clear();

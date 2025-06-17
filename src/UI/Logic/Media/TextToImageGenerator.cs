@@ -32,7 +32,6 @@ public static class TextToImageGenerator
         {
             Color = textColor,
             IsAntialias = true,
-            FilterQuality = SKFilterQuality.High,
         };
 
         // Create a new SKBitmap with sufficient dimensions

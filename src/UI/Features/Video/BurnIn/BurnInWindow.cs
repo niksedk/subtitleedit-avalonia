@@ -276,10 +276,10 @@ public class BurnInWindow : Window
         var comboBoxEncoding = UiUtil.MakeComboBox(vm.VideoEncodings, vm, nameof(vm.SelectedVideoEncoding));
         comboBoxEncoding.SelectionChanged += vm.VideoEncodingChanged;
 
-        var labelPreset = UiUtil.MakeLabel(Se.Language.Video.BurnIn.Preset);
+        var labelPreset = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.VideoPresetText));
         var comboBoxPreset = UiUtil.MakeComboBox(vm.VideoPresets, vm, nameof(vm.SelectedVideoPreset));
 
-        var labelCrf = UiUtil.MakeLabel(Se.Language.Video.BurnIn.Crf);
+        var labelCrf = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.VideoCrfText));
         var numericUpDownCrf = UiUtil.MakeNumericUpDownInt(0, 1000, 200, vm, nameof(vm.SelectedVideoCrf));
 
         var labelPixelFormat = UiUtil.MakeLabel(Se.Language.Video.BurnIn.PixelFormat);
