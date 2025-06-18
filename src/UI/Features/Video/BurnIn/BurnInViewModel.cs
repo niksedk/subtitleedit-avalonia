@@ -95,6 +95,7 @@ public partial class BurnInViewModel : ObservableObject
 
     public BurnInWindow? Window { get; set; }
     public bool OkPressed { get; private set; }
+    public DataGrid? BatchGrid { get; internal set; }
 
     private Subtitle _subtitle = new();
     private bool _loading = true;
@@ -426,6 +427,17 @@ public partial class BurnInViewModel : ObservableObject
         jobItem.AssaSubtitleFileName = MakeAssa(jobItem.SubtitleFileName);
         jobItem.Status = Se.Language.General.Generating;
         jobItem.OutputVideoFileName = MakeOutputFileName(jobItem.InputVideoFileName);
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (BatchGrid == null || index >= JobItems.Count)
+            {
+                return;
+            }
+
+            BatchGrid.SelectedItem = jobItem;
+            BatchGrid.ScrollIntoView(jobItem, null);
+        });
 
         bool result;
         if (jobItem.UseTargetFileSize)

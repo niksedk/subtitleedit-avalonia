@@ -590,6 +590,7 @@ public class BurnInWindow : Window
             },
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedJobItem)) { Source = vm });
+        vm.BatchGrid = dataGrid;    
 
         var buttonAdd = UiUtil.MakeButton(Se.Language.General.AddDotDotDot, vm.AddCommand);
         var buttonRemove = UiUtil.MakeButton(Se.Language.General.Remove, vm.RemoveCommand);
