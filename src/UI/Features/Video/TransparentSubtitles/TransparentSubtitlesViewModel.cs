@@ -59,7 +59,7 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<double> _frameRates;
     [ObservableProperty] private double _selectedFrameRate;
     [ObservableProperty] private ObservableCollection<string> _videoExtensions;
-    [ObservableProperty] private string _selectedVideoExtension;   
+    [ObservableProperty] private string _selectedVideoExtension;
     [ObservableProperty] private string _outputFolder;
     [ObservableProperty] private bool _useOutputFolderVisible;
     [ObservableProperty] private bool _useSourceFolderVisible;
@@ -100,7 +100,8 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
     private readonly IFolderHelper _folderHelper;
     private readonly IFileHelper _fileHelper;
 
-    public TransparentSubtitlesViewModel(IFolderHelper folderHelper, IFileHelper fileHelper, IWindowService windowService)
+    public TransparentSubtitlesViewModel(IFolderHelper folderHelper, IFileHelper fileHelper,
+        IWindowService windowService)
     {
         _folderHelper = folderHelper;
         _fileHelper = fileHelper;
@@ -130,7 +131,7 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
         FontAssaInfo = string.Empty;
 
         VideoWidth = 1920;
-        VideoHeight = 1080;       
+        VideoHeight = 1080;
 
         FrameRates = new ObservableCollection<double> { 23.976, 24, 25, 29.97, 30, 50, 59.94, 60 };
         SelectedFrameRate = FrameRates[0];
@@ -232,7 +233,8 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
             }
             else
             {
-                ProgressText = $"Analyzing video {_jobItemIndex + 1}/{JobItems.Count}... {percentage}%     {estimatedLeft}";
+                ProgressText =
+                    $"Analyzing video {_jobItemIndex + 1}/{JobItems.Count}... {percentage}%     {estimatedLeft}";
             }
 
             return;
@@ -345,7 +347,8 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
             }
             else
             {
-                var sb = new StringBuilder($"Generated files ({JobItems.Count}):" + Environment.NewLine + Environment.NewLine);
+                var sb = new StringBuilder($"Generated files ({JobItems.Count}):" + Environment.NewLine +
+                                           Environment.NewLine);
                 foreach (var item in JobItems)
                 {
                     sb.AppendLine($"{item.OutputVideoFileName} ==> {item.Status}");
@@ -394,51 +397,6 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
         return true;
     }
 
-    private int GetAudioFileSizeInMb(BurnInJobItem item)
-    {
-        var ffmpegLocation = Configuration.Settings.General.FFmpegLocation;
-        if (!Configuration.IsRunningOnWindows && (string.IsNullOrEmpty(ffmpegLocation) || !File.Exists(ffmpegLocation)))
-        {
-            ffmpegLocation = "ffmpeg";
-        }
-
-        var tempFileName = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".aac");
-        var process = new Process
-        {
-            StartInfo =
-            {
-                FileName = ffmpegLocation,
-                Arguments = $"-i \"{item.InputVideoFileName}\" -vn -acodec copy \"{tempFileName}\"",
-                UseShellExecute = false,
-                CreateNoWindow = true,
-            }
-        };
-
-
-#pragma warning disable CA1416
-        _ = process.Start();
-#pragma warning restore CA1416
-        process.WaitForExit();
-        try
-        {
-            var length = (int)Math.Round(new FileInfo(tempFileName).Length / 1024.0 / 1024);
-            try
-            {
-                File.Delete(tempFileName);
-            }
-            catch
-            {
-                // ignore
-            }
-
-            return length;
-        }
-        catch
-        {
-            return 0;
-        }
-    }
-
     private Process GetFfmpegProcess(BurnInJobItem jobItem)
     {
         var totalMs = _subtitle.Paragraphs.Max(p => p.EndTime.TotalMilliseconds);
@@ -446,13 +404,13 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
         var timeCode = string.Format($"{ts.Hours:00}\\\\:{ts.Minutes:00}\\\\:{ts.Seconds:00}");
 
         return VideoPreviewGenerator.GenerateTransparentVideoFile(
-         jobItem.AssaSubtitleFileName,
-         jobItem.OutputVideoFileName,
-         jobItem.Width,
-         jobItem.Height,
-         SelectedFrameRate.ToString(CultureInfo.InvariantCulture),
-         timeCode,
-         OutputHandler);
+            jobItem.AssaSubtitleFileName,
+            jobItem.OutputVideoFileName,
+            jobItem.Width,
+            jobItem.Height,
+            SelectedFrameRate.ToString(CultureInfo.InvariantCulture),
+            timeCode,
+            OutputHandler);
     }
 
     private Subtitle GetSubtitleBasedOnCut(Subtitle inputSubtitle)
@@ -465,7 +423,8 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
         var subtitle = new Subtitle();
         foreach (var p in inputSubtitle.Paragraphs)
         {
-            if (p.StartTime.TotalMilliseconds >= CutFrom.TotalMilliseconds && p.EndTime.TotalMilliseconds <= CutTo.TotalMilliseconds)
+            if (p.StartTime.TotalMilliseconds >= CutFrom.TotalMilliseconds &&
+                p.EndTime.TotalMilliseconds <= CutTo.TotalMilliseconds)
             {
                 subtitle.Paragraphs.Add(new Paragraph(p));
             }
@@ -521,16 +480,10 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
             File.WriteAllText(subtitleFileName, srt.ToText(subtitle, string.Empty));
         }
 
-        _mediaInfo = FfmpegMediaInfo.Parse(VideoFileName);
-        VideoWidth = _mediaInfo.Dimension.Width;
-        VideoHeight = _mediaInfo.Dimension.Height;
-
-        var jobItem = new BurnInJobItem(VideoFileName, _mediaInfo.Dimension.Width, _mediaInfo.Dimension.Height)
+        var jobItem = new BurnInJobItem(string.Empty, VideoWidth, VideoHeight)
         {
             InputVideoFileName = VideoFileName,
-            OutputVideoFileName = MakeOutputFileName(VideoFileName),
-            UseTargetFileSize = UseTargetFileSize,
-            TargetFileSize = TargetFileSize,
+            OutputVideoFileName = MakeOutputFileName(_subtitle.FileName),
         };
         jobItem.AddSubtitleFileName(subtitleFileName);
 
@@ -601,15 +554,10 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
             "PlayResY: " + ((int)VideoHeight).ToString(CultureInfo.InvariantCulture), "[Script Info]", sub.Header);
     }
 
-    private static string MakeOutputFileName(string videoFileName)
+    private string MakeOutputFileName(string videoFileName)
     {
         var nameNoExt = Path.GetFileNameWithoutExtension(videoFileName);
-        var ext = Path.GetExtension(videoFileName).ToLowerInvariant();
-        if (ext != ".mp4" && ext != ".mkv")
-        {
-            ext = ".mkv";
-        }
-
+        var ext = SelectedVideoExtension;
         var suffix = Se.Settings.Video.BurnIn.BurnInSuffix;
         var fileName = Path.Combine(Path.GetDirectoryName(videoFileName)!, nameNoExt + suffix + ext);
         if (Se.Settings.Video.BurnIn.UseOutputFolder &&
@@ -629,7 +577,8 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
         return fileName;
     }
 
-    public static int CalculateFontSize(int videoWidth, int videoHeight, double factor, int minSize = 8, int maxSize = 2000)
+    public static int CalculateFontSize(int videoWidth, int videoHeight, double factor, int minSize = 8,
+        int maxSize = 2000)
     {
         factor = Math.Clamp(factor, 0, 1);
 
@@ -650,49 +599,18 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
     [RelayCommand]
     private async Task Add()
     {
-        var fileNames = await _fileHelper.PickOpenVideoFiles(Window!, Se.Language.General.AddVideoFiles);
-        if (fileNames == null || fileNames.Length == 0)
+        var fileNames = await _fileHelper.PickOpenSubtitleFiles(Window!, Se.Language.General.OpenSubtitles);
+        if (fileNames.Length == 0)
         {
             return;
         }
-
-        var error = false;
-
+        
         foreach (var fileName in fileNames)
         {
-            var mediaInfo = FfmpegMediaInfo.Parse(fileName);
-            var fileInfo = new FileInfo(fileName);
-
-            if (mediaInfo.Duration == null || mediaInfo.Dimension.Width == 0 || mediaInfo.Dimension.Height == 0)
-            {
-                error = true;
-            }
-            else
-            {
-
-                var jobItem = new BurnInJobItem(fileName, mediaInfo.Dimension.Width, mediaInfo.Dimension.Height)
-                {
-                    OutputVideoFileName = MakeOutputFileName(fileName),
-                    TotalFrames = mediaInfo.GetTotalFrames(),
-                    TotalSeconds = mediaInfo.Duration.TotalSeconds,
-                    Width = mediaInfo.Dimension.Width,
-                    Height = mediaInfo.Dimension.Height,
-                    Size = Utilities.FormatBytesToDisplayFileSize(fileInfo.Length),
-                    Resolution = mediaInfo.Dimension.ToString(),
-                };
-                jobItem.AddSubtitleFileName(TryGetSubtitleFileName(fileName));
-
-                Dispatcher.UIThread.Invoke(() => { JobItems.Add(jobItem); });
-            }
-        }
-
-        if (error)
-        {
-            await MessageBox.Show(Window!,
-                    "Unable to get video info",
-                    "File skipped as video info was unavailable",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+            var videoFileName = string.Empty;
+            var jobItem = new BurnInJobItem(videoFileName, VideoWidth, VideoHeight);
+            jobItem.AddSubtitleFileName(fileName);
+            Dispatcher.UIThread.Invoke(() => { JobItems.Add(jobItem); });
         }
     }
 
@@ -744,7 +662,9 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
     [RelayCommand]
     private async Task BrowseResolution()
     {
-        var result = await _windowService.ShowDialogAsync<BurnInResolutionPickerWindow, BurnInResolutionPickerViewModel>(Window!);
+        var result =
+            await _windowService
+                .ShowDialogAsync<BurnInResolutionPickerWindow, BurnInResolutionPickerViewModel>(Window!);
         if (!result.OkPressed || result.SelectedResolution == null)
         {
             return;
@@ -780,10 +700,9 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
     [RelayCommand]
     private async Task BrowseCutFrom()
     {
-        var result = await _windowService.ShowDialogAsync<SelectVideoPositionWindow, SelectVideoPositionViewModel>(Window!, vm =>
-        {
-            vm.Initialize(VideoFileName);
-        });
+        var result =
+            await _windowService.ShowDialogAsync<SelectVideoPositionWindow, SelectVideoPositionViewModel>(Window!,
+                vm => { vm.Initialize(VideoFileName); });
 
         if (!result.OkPressed)
         {
@@ -796,10 +715,9 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
     [RelayCommand]
     private async Task BrowseCutTo()
     {
-        var result = await _windowService.ShowDialogAsync<SelectVideoPositionWindow, SelectVideoPositionViewModel>(Window!, vm =>
-        {
-            vm.Initialize(VideoFileName);
-        });
+        var result =
+            await _windowService.ShowDialogAsync<SelectVideoPositionWindow, SelectVideoPositionViewModel>(Window!,
+                vm => { vm.Initialize(VideoFileName); });
 
         if (!result.OkPressed)
         {
@@ -1052,7 +970,9 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
 
             if (SelectedFontShadowWidth > 0)
             {
-                bitmap = TextToImageGenerator.AddShadowToBitmap(bitmap, (int)Math.Round(SelectedFontShadowWidth, MidpointRounding.AwayFromZero), FontShadowColor.ToSKColor());
+                bitmap = TextToImageGenerator.AddShadowToBitmap(bitmap,
+                    (int)Math.Round(SelectedFontShadowWidth, MidpointRounding.AwayFromZero),
+                    FontShadowColor.ToSKColor());
             }
         }
         else if (SelectedFontBoxType.BoxType == FontBoxType.OneBox)

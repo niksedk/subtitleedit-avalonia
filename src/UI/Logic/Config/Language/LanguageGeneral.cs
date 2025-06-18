@@ -59,6 +59,7 @@ public class LanguageGeneral
     public string OnlineVideoFeatureNotAvailable { get; set; }
     public string OpenOriginalSubtitleFile { get; set; }
     public string OpenSubtitle { get; set; }
+    public string OpenSubtitles { get; set; }
     public string OpenVideoFile { get; set; }
     public string OpenVideoFileTitle { get; set; }
     public string OriginalText { get; set; }
@@ -214,6 +215,7 @@ public class LanguageGeneral
         OnlineVideoFeatureNotAvailable = "Feature not available for online video";
         OpenOriginalSubtitleFile = "Open original subtitle file...";
         OpenSubtitle = "Open subtitle...";
+        OpenSubtitles = "Open subtitles...";
         OpenVideoFile = "Open video file...";
         OpenVideoFileTitle = "Open video file...";
         OriginalText = "Original text";
