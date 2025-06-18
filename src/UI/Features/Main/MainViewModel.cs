@@ -173,8 +173,14 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
     private void InitializeFfmpeg()
     {
+        if (!string.IsNullOrEmpty(Se.Settings.General.FfmpegPath) &&
+            File.Exists(Se.Settings.General.FfmpegPath))
+        {
+            return;
+        }
+
         var ffmpegFileName = DownloadFfmpegViewModel.GetFfmpegFileName();
-        if (string.IsNullOrEmpty(Se.Settings.General.FfmpegPath) && File.Exists(ffmpegFileName))
+        if (!string.IsNullOrEmpty(ffmpegFileName) && File.Exists(ffmpegFileName))
         {
             Se.Settings.General.FfmpegPath = DownloadFfmpegViewModel.GetFfmpegFileName();
         }

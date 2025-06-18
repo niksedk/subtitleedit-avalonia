@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -130,6 +131,25 @@ public partial class DownloadFfmpegViewModel : ObservableObject
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             return Path.Combine(Se.FfmpegFolder, "ffmpeg.exe");
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            var paths = new List<string>
+            {
+                Se.FfmpegFolder,
+                "/opt/local/bin/ffmpeg", // MacPorts
+                "/usr/local/bin/ffmpeg", // Intel Macs
+                "/opt/homebrew/bin/ffmpeg", // Apple Silicon Macs
+            };
+
+            foreach (var path in paths)
+            {
+                if (File.Exists(path))
+                {
+                    return path;    
+                }
+            }
         }
 
         return Path.Combine(Se.FfmpegFolder, "ffmpeg");
