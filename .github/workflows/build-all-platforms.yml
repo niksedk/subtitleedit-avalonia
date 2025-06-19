@@ -242,6 +242,10 @@ jobs:
           echo "Release assets:"
           ls -la ./release-assets/
 
+      - name: Get current date
+        id: date
+        run: echo "date=$(date +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
+
       - name: Create Release
         uses: actions/create-release@v1
         id: create_release
@@ -254,14 +258,14 @@ jobs:
             ## Subtitle Edit Multi-Platform Build
             
             **Build Configuration:** ${{ inputs.build_configuration }}
-            **Build Date:** ${{ github.run_id }}
+            **Build Date:** ${{ steps.date.outputs.date }}
             
             ### Downloads
-            - **Windows x64:** SubtitleEdit-Windows-x64.zip
-            - **Windows ARM64:** SubtitleEdit-Windows-ARM64.zip
-            - **macOS x64:** SubtitleEdit-macOS-x64.zip
-            - **macOS ARM64:** SubtitleEdit-macOS-ARM64.zip
-            - **Linux x64:** SubtitleEdit-Linux-x64.tar.gz
+            - **Windows x64:** [SubtitleEdit-Windows-x64.zip](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SubtitleEdit-Windows-x64.zip)
+            - **Windows ARM64:** [SubtitleEdit-Windows-ARM64.zip](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SubtitleEdit-Windows-ARM64.zip)
+            - **macOS x64:** [SubtitleEdit-macOS-x64.zip](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SubtitleEdit-macOS-x64.zip)
+            - **macOS ARM64:** [SubtitleEdit-macOS-ARM64.zip](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SubtitleEdit-macOS-ARM64.zip)
+            - **Linux x64:** [SubtitleEdit-Linux-x64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SubtitleEdit-Linux-x64.tar.gz)
             
             ### Installation
             1. Download the appropriate package for your platform
