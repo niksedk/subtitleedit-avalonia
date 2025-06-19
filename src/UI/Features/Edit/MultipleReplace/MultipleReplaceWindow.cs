@@ -1,5 +1,8 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
@@ -23,7 +26,7 @@ public class MultipleReplaceWindow : Window
         DataContext = vm;
 
         var rulesView = MakeRulesView(vm);
-        var FixesView = MakeFixesView(vm);
+        var fixesView = MakeFixesView(vm);
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var panelButtons = UiUtil.MakeButtonBar(
@@ -51,7 +54,7 @@ public class MultipleReplaceWindow : Window
         };
 
         grid.Add(rulesView, 0, 0);
-        grid.Add(FixesView, 0, 1);
+        grid.Add(fixesView, 0, 1);
         grid.Add(panelButtons, 1, 0, 1, 2);
 
         Content = grid;
@@ -75,13 +78,50 @@ public class MultipleReplaceWindow : Window
 
     private Border MakeRulesView(MultipleReplaceViewModel vm)
     {
+        var treeView = new TreeView
+        {
+            Margin = new Thickness(10),
+            SelectionMode = SelectionMode.Single,
+            DataContext = vm,
+        };
+
+        treeView[!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.Nodes));
+        treeView[!TreeView.SelectedItemProperty] = new Binding(nameof(vm.SelectedNode));
+
+        var factory = new FuncTreeDataTemplate<RuleTreeNode>(
+            node => true,
+            (node, _) =>
+            {
+                var textBlock = new TextBlock();
+                textBlock.DataContext = node;
+                textBlock.Bind(TextBlock.TextProperty, new Binding(nameof(RuleTreeNode.Title))
+                {
+                    Mode = BindingMode.TwoWay,
+                    Source = node,
+                });
+
+                return textBlock;
+            },
+            node => node.SubNodes ?? []
+        );
+
+        treeView.ItemTemplate = factory;
+        vm.RulesTreeView = treeView;
+        treeView.SelectionChanged += vm.RulesTreeView_SelectionChanged;
+
+        var scrollViewer = new ScrollViewer
+        {
+            Content = treeView,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+        };
+        
         var border = new Border
         {
             BorderThickness = new Thickness(1),
             BorderBrush = UiUtil.GetBorderColor(),
             Margin = new Thickness(0, 0, 0, 10),
             Padding = new Thickness(5),
-            Child = UiUtil.MakeLabel("rules view"),
+            Child = scrollViewer,
         };
 
         return border;
