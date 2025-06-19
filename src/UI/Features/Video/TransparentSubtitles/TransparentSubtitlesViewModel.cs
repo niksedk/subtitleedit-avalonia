@@ -92,7 +92,6 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
     private readonly Timer _timerGenerate;
     private bool _doAbort;
     private int _jobItemIndex = -1;
-    private FfmpegMediaInfo? _mediaInfo;
     private SubtitleFormat? _subtitleFormat;
     private string _inputVideoFileName;
 
