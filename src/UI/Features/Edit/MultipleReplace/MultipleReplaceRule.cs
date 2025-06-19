@@ -4,7 +4,8 @@ public class MultipleReplaceRule
 {
     public string Find { get; set; } 
     public string ReplaceWith { get; set; } 
-    public bool Description { get; set; } = false;
+    public string Description { get; set; } 
+    public bool Active { get; set; } = false;
     public MultipleReplaceType Type { get; set; }
     
     public MultipleReplaceRule() 

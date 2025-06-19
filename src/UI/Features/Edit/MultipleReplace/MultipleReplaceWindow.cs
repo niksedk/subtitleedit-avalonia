@@ -5,7 +5,10 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
+using Projektanker.Icons.Avalonia;
 
 namespace Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 
@@ -20,9 +23,7 @@ public class MultipleReplaceWindow : Window
         Width = 910;
         Height = 640;
         CanResize = true;
-
         _vm = vm;
-        vm.Window = this;
         DataContext = vm;
 
         var rulesView = MakeRulesView(vm);
@@ -44,6 +45,7 @@ public class MultipleReplaceWindow : Window
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) }, // For the splitter
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
@@ -53,36 +55,106 @@ public class MultipleReplaceWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
+        // Create the vertical splitter
+        var splitter = new GridSplitter
+        {
+            Background = Brushes.Gray,
+            Width = 5,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            ResizeDirection = GridResizeDirection.Columns
+        };
+
         grid.Add(rulesView, 0, 0);
-        grid.Add(fixesView, 0, 1);
-        grid.Add(panelButtons, 1, 0, 1, 2);
+        grid.Add(splitter, 0, 1);
+        grid.Add(fixesView, 0, 2);
+        grid.Add(panelButtons, 1, 0, 1, 3);
 
         Content = grid;
 
-        Activated += delegate { Focus(); }; // hack to make OnKeyDown work
+        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 
-    private Border MakeFixesView(MultipleReplaceViewModel vm)
+    private static Border MakeFixesView(MultipleReplaceViewModel vm)
     {
+        var dataGrid = new DataGrid
+        {
+            AutoGenerateColumns = false,
+            SelectionMode = DataGridSelectionMode.Single,
+            CanUserResizeColumns = true,
+            CanUserSortColumns = true,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Width = double.NaN,
+            Height = double.NaN,
+            DataContext = vm,
+            ItemsSource = vm.Fixes,
+            Columns =
+            {
+                new DataGridTemplateColumn
+                {
+                    Header = Se.Language.General.Apply,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    CellTemplate = new FuncDataTemplate<MultipleReplaceFix>((item, _) =>
+                        new Border
+                        {
+                            Background = Brushes.Transparent, // Prevents highlighting
+                            Padding = new Thickness(4),
+                            Child = new CheckBox
+                            {
+                                [!ToggleButton.IsCheckedProperty] = new Binding(nameof(MultipleReplaceFix.Apply)),
+                                HorizontalAlignment = HorizontalAlignment.Center
+                            }
+                        }),
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Number,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(MultipleReplaceFix.Number)),
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Before,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(MultipleReplaceFix.Before)),
+                    IsReadOnly = true,
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.After,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(MultipleReplaceFix.After)),
+                    IsReadOnly = true,
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                },
+            },
+        };
+        dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedFix)) { Source = vm });
+
         var border = new Border
         {
             BorderThickness = new Thickness(1),
             BorderBrush = UiUtil.GetBorderColor(),
             Margin = new Thickness(0, 0, 0, 10),
             Padding = new Thickness(5),
-            Child = UiUtil.MakeLabel("fixes view"),
+            Child = dataGrid,
         };
 
         return border;
     }
 
-    private Border MakeRulesView(MultipleReplaceViewModel vm)
+    private static Border MakeRulesView(MultipleReplaceViewModel vm)
     {
         var treeView = new TreeView
         {
-            Margin = new Thickness(10),
+            Margin = new Thickness(5),
             SelectionMode = SelectionMode.Single,
             DataContext = vm,
+            MinWidth = 300,
         };
 
         treeView[!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.Nodes));
@@ -92,15 +164,80 @@ public class MultipleReplaceWindow : Window
             node => true,
             (node, _) =>
             {
-                var textBlock = new TextBlock();
-                textBlock.DataContext = node;
-                textBlock.Bind(TextBlock.TextProperty, new Binding(nameof(RuleTreeNode.Title))
+                var checkBox = new CheckBox
+                {
+                    DataContext = node
+                };
+                checkBox.Bind(CheckBox.IsCheckedProperty, new Binding(nameof(RuleTreeNode.IsActive))
                 {
                     Mode = BindingMode.TwoWay,
                     Source = node,
                 });
 
-                return textBlock;
+                if (node.IsCategory)
+                {
+                    var panel = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Spacing = 8
+                    };
+                    panel.Children.Add(checkBox);
+
+                    var label = UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.Title));
+                    label.FontWeight = FontWeight.Bold;
+                    panel.Children.Add(label);
+                    return panel;
+                }
+
+                var grid = new Grid
+                {
+                    RowDefinitions =
+                    {
+                        new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                        new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                    },
+                    ColumnDefinitions =
+                    {
+                        new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                        new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) }, // For the splitter
+                    },
+                    ColumnSpacing = 1,
+                    RowSpacing = 1,
+                    Width = double.NaN,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                };
+
+                var labelFind = UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.Find));
+                var labelSeparator = UiUtil.MakeLabel("->");
+                var labelReplaceWith =
+                    UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.ReplaceWith));
+                
+                var labelIcon = new Label();
+                Attached.SetIcon(labelIcon, node.IconName);
+                
+                var panelFindAndReplaceWith = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    Spacing = 2,
+                    Children =
+                    {
+                        labelIcon,
+                        labelFind,
+                        labelSeparator,
+                        labelReplaceWith,
+                    }
+                };
+
+                var labelDescription =
+                    UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.Description));
+                labelDescription.Opacity = 0.7;
+                labelDescription.FontStyle = FontStyle.Italic;
+
+                grid.Add(checkBox, 0, 0, 2, 1);
+                grid.Add(panelFindAndReplaceWith, 0, 1);
+                grid.Add(labelDescription, 1, 1);
+
+                return grid;
             },
             node => node.SubNodes ?? []
         );
@@ -114,7 +251,7 @@ public class MultipleReplaceWindow : Window
             Content = treeView,
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
         };
-        
+
         var border = new Border
         {
             BorderThickness = new Thickness(1),

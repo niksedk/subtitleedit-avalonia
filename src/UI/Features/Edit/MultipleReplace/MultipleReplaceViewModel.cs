@@ -21,7 +21,34 @@ public partial class MultipleReplaceViewModel : ObservableObject
         Fixes = new ObservableCollection<MultipleReplaceFix>();
         Nodes = new ObservableCollection<RuleTreeNode>();
         RulesTreeView = new TreeView();
-        Nodes.Add(new RuleTreeNode("test", new MultipleReplaceRule()));
+        
+        var subNodes = new ObservableCollection<RuleTreeNode>();
+        subNodes.Add(new RuleTreeNode("regex", new MultipleReplaceRule()
+        {
+            Find = "abc",
+            ReplaceWith = "cba",
+            Description = "this blaf balf",
+            Active = true,
+            Type = MultipleReplaceType.RegularExpression,
+        } ));
+        subNodes.Add(new RuleTreeNode("Case sensitive", new MultipleReplaceRule()
+        {
+            Find = "1abc",
+            ReplaceWith = "1cba",
+            Description = "1this blaf balf",
+            Active = false,
+            Type = MultipleReplaceType.CaseSensitive,
+        } ));
+        subNodes.Add(new RuleTreeNode("Normal", new MultipleReplaceRule()
+        {
+            Find = "1abc",
+            ReplaceWith = "1cba",
+            Description = "1this blaf balf",
+            Active = false,
+            Type = MultipleReplaceType.Normal,
+        } ));
+        var n1 = new RuleTreeNode("Default", new ObservableCollection<RuleTreeNode>(subNodes), true);
+        Nodes.Add(n1);
     }
 
     [RelayCommand]                   

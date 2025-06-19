@@ -44,6 +44,8 @@ internal class IconNames
     public const string MdiWaveform = "mdi-waveform";
     public const string MdiWeb = "mdi-web";
     public const string MdiRecycle = "mdi-recycle";
+    public const string MdiCaseSensitiveAlt = "mdi-case-sensitive-alt";
+    public const string MdiRegex = "mdi-regex";
 
     //public const string Mdi = "mdi-";
 }
