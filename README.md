@@ -13,7 +13,7 @@ Thank you for testing and supporting Subtitle Edit! 😊
 
 ## 🚀 Automated Builds
 You can find the latest cross-platform builds here:  
-👉 [Builds on GitHub Actions](https://github.com/niksedk/subtitleedit-avalonia/actions/workflows/build-all-platforms.yml)
+👉 [Releases](https://github.com/niksedk/subtitleedit-avalonia/releases)
 
 ---
 
