@@ -24,6 +24,7 @@ public class MultipleReplaceWindow : Window
         Height = 640;
         CanResize = true;
         _vm = vm;
+        vm.Window = this;
         DataContext = vm;
 
         var rulesView = MakeRulesView(vm);
@@ -49,8 +50,8 @@ public class MultipleReplaceWindow : Window
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
-            ColumnSpacing = 10,
-            RowSpacing = 10,
+            ColumnSpacing = 2,
+            RowSpacing = 5,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
@@ -58,11 +59,10 @@ public class MultipleReplaceWindow : Window
         // Create the vertical splitter
         var splitter = new GridSplitter
         {
-            Background = Brushes.Gray,
-            Width = 5,
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Stretch,
-            ResizeDirection = GridResizeDirection.Columns
+            ResizeDirection = GridResizeDirection.Columns,
+            Margin = new Thickness(0,0,0,10),
         };
 
         grid.Add(rulesView, 0, 0);
@@ -199,7 +199,7 @@ public class MultipleReplaceWindow : Window
                     ColumnDefinitions =
                     {
                         new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                        new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) }, // For the splitter
+                        new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                     },
                     ColumnSpacing = 1,
                     RowSpacing = 1,
@@ -208,7 +208,8 @@ public class MultipleReplaceWindow : Window
                 };
 
                 var labelFind = UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.Find));
-                var labelSeparator = UiUtil.MakeLabel("->");
+                var labelSeparator = UiUtil.MakeLabel(string.Empty);
+                Attached.SetIcon(labelSeparator, IconNames.MdiArrowRightThick);
                 var labelReplaceWith =
                     UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.ReplaceWith));
                 
