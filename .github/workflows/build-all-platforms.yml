@@ -271,7 +271,7 @@ jobs:
             1. Check/fix requirements, please see [System Requirements](https://github.com/niksedk/subtitleedit-avalonia#system-requirements).
             2. Download the appropriate package for your platform
             3. Extract the archive
-            4. Run the executable (might need some permissions on Mac)
+            4. Run the executable (might need some permissions on macOS)
             
             *This is an automated build from the GitHub Actions workflow.*
           draft: false
