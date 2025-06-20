@@ -1,0 +1,48 @@
+using Avalonia.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+
+namespace Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
+
+public partial class EditCategoryViewModel : ObservableObject
+{
+    [ObservableProperty] private string _categoryName;
+    
+    public EditCategoryWindow? Window { get; set; }
+    
+    public bool OkPressed { get; private set; }
+    public string? Title { get; internal set; }
+
+    public EditCategoryViewModel()
+    {
+        CategoryName = string.Empty;
+    }
+
+    public void Initialize(string title, RuleTreeNode node)
+    {
+        Title = title;
+        CategoryName = node.Title;
+    }
+
+    [RelayCommand]                   
+    private void Ok() 
+    {
+        OkPressed = true;
+        Window?.Close();
+    }
+    
+    [RelayCommand]                   
+    private void Cancel() 
+    {
+        Window?.Close();
+    }
+
+    internal void OnKeyDown(KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            Window?.Close();
+        }
+    }
+}

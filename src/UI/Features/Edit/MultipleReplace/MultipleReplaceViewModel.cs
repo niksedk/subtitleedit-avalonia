@@ -70,10 +70,139 @@ public partial class MultipleReplaceViewModel : ObservableObject
     {
         Window?.Close();
     }
+    
+    [RelayCommand]
+    private void NodeCategoryOpenContextMenu(RuleTreeNode node)
+    {
+        var contextMenu = new ContextMenu
+        {
+            Items =
+            {
+                new MenuItem { Header = "Edit", Command = CategoryEditCommand },
+                new Separator(),
+                new MenuItem { Header = "Duplicate", Command = CategoryDuplicateCommand, CommandParameter = node },
+                new MenuItem { Header = "Insert Before", Command = CategoryInsertBeforeCommand, CommandParameter = node },
+                new MenuItem { Header = "Insert After", Command = CategoryInsertAfterCommand, CommandParameter = node },
+                new Separator(),
+                new MenuItem { Header = "Move up", Command = CategoryMoveUpCommand, CommandParameter = node },
+                new MenuItem { Header = "Move down", Command = CategoryMoveDownCommand, CommandParameter = node },
+                new Separator(),
+                new MenuItem { Header = "Delete", Command = CategoryDeleteCommand, CommandParameter = node }
+            }
+        };
+
+        RulesTreeView.ContextMenu = contextMenu;
+        contextMenu.Open();
+    }
+    
+    [RelayCommand]
+    private async Task CategoryEdit()
+    {
+        var node = SelectedNode;
+        if (node == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<EditCategoryWindow, EditCategoryViewModel>(Window!, vm => 
+        {
+            vm.Initialize(Se.Language.Edit.MultipleReplace.EditCategory, node);
+        });
+
+        if (result.OkPressed)
+        {
+        }
+    }
+
 
     [RelayCommand]
-    private void NodeOpenContextMenu(RuleTreeNode node)
+    private void CategoryDuplicate()
     {
+        var node = SelectedNode;
+        if (node == null)
+        {
+            return;
+        }
+    }
+
+
+    [RelayCommand]
+    private async Task CategoryInsertBefore()
+    {
+        var node = SelectedNode;
+        if (node == null)
+        {
+            return;
+        }
+        
+        var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!, vm =>
+        {
+            vm.Initialize(Se.Language.Edit.MultipleReplace.NewRule, node);
+        });
+
+        if (result.OkPressed)
+        {
+        }
+    }
+
+    [RelayCommand]
+    private async Task CategoryInsertAfter()
+    {
+        var node = SelectedNode;
+        if (node == null)
+        {
+            return;
+        }
+        
+        var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!, vm =>
+        {
+            vm.Initialize(Se.Language.Edit.MultipleReplace.NewRule, node);
+        });
+
+        if (result.OkPressed)
+        {
+        }
+    }
+
+    [RelayCommand]
+    private void CategoryDelete()
+    {
+        var node = SelectedNode;
+        if (node == null)
+        {
+            return;
+        }
+    }
+
+    [RelayCommand]
+    private void CategoryMoveUp()
+    {
+        var node = SelectedNode;
+        if (node == null)
+        {
+            return;
+        }
+    }
+
+    [RelayCommand]
+    private void CategoryMoveDown()
+    {
+        var node = SelectedNode;
+        if (node == null)
+        {
+            return;
+        }
+    }
+
+    [RelayCommand]
+    private void NodeOpenContextMenu()
+    {
+        var node = SelectedNode;
+        if (node == null)
+        {
+            return;
+        }
+        
         var contextMenu = new ContextMenu
         {
             Items =
@@ -96,8 +225,14 @@ public partial class MultipleReplaceViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task NodeEdit(RuleTreeNode node)
+    private async Task NodeEdit()
     {
+        var node = SelectedNode;
+        if (node == null)
+        {
+            return;
+        }
+        
         var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!, vm => 
         {
             vm.Initialize(Se.Language.Edit.MultipleReplace.EditRule, node);
@@ -110,14 +245,24 @@ public partial class MultipleReplaceViewModel : ObservableObject
 
 
     [RelayCommand]
-    private void NodeDuplicate(RuleTreeNode node)
+    private void NodeDuplicate()
     {
+        var node = SelectedNode;
+        if (node == null)
+        {
+            return;
+        }
     }
 
-
     [RelayCommand]
-    private async Task NodeInsertBefore(RuleTreeNode node)
+    private async Task NodeInsertBefore()
     {
+        var node = SelectedNode;
+        if (node == null)
+        {
+            return;
+        }
+        
         var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!, vm =>
         {
             vm.Initialize(Se.Language.Edit.MultipleReplace.NewRule, node);
@@ -129,31 +274,43 @@ public partial class MultipleReplaceViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task NodeInsertAfter(RuleTreeNode node)
+    private async Task NodeInsertAfter()
     {
-        var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!, vm =>
+        var node = SelectedNode;
+        if (node == null)
         {
-            vm.Initialize(Se.Language.Edit.MultipleReplace.NewRule, node);
-        });
-
-        if (result.OkPressed)
-        {
+            return;
         }
     }
 
     [RelayCommand]
-    private void NodeDelete(RuleTreeNode node)
+    private void NodeDelete()
     {
+        var node = SelectedNode;
+        if (node == null)
+        {
+            return;
+        }
     }
 
     [RelayCommand]
-    private void NodeMoveUp(RuleTreeNode node)
+    private void NodeMoveUp()
     {
+        var node = SelectedNode;
+        if (node == null)
+        {
+            return;
+        }
     }
 
     [RelayCommand]
-    private void NodeMoveDown(RuleTreeNode node)
-    {
+    private void NodeMoveDown()
+    { 
+        var node = SelectedNode;
+        if (node == null)
+        {
+            return;
+        }
     }
 
     internal void OnKeyDown(KeyEventArgs e)

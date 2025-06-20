@@ -133,5 +133,6 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<SelectVideoPositionViewModel>();
         collection.AddTransient<TransparentSettingsViewModel>();
         collection.AddTransient<EditRuleViewModel>();
+        collection.AddTransient<EditCategoryViewModel>();
     }
 }

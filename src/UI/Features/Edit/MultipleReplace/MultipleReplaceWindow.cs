@@ -104,17 +104,42 @@ public class MultipleReplaceWindow : Window
 
                 if (node.IsCategory)
                 {
-                    var panel = new StackPanel
-                    {
-                        Orientation = Orientation.Horizontal,
-                        Spacing = 8
-                    };
-                    panel.Children.Add(checkBox);
-
                     var label = UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.Title));
                     label.FontWeight = FontWeight.Bold;
-                    panel.Children.Add(label);
-                    return panel;
+                    
+                    var buttonCategoryActions = new Button
+                    {
+                        HorizontalAlignment = HorizontalAlignment.Left,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        HorizontalContentAlignment = HorizontalAlignment.Center,
+                        VerticalContentAlignment = VerticalAlignment.Center,
+                        Command = vm.NodeCategoryOpenContextMenuCommand,
+                        CommandParameter = node,
+                    };
+                    buttonCategoryActions.Bind(Button.CommandParameterProperty, new Binding { Source = node });
+                    Attached.SetIcon(buttonCategoryActions, IconNames.MdiDotsHorizontal);
+
+                    var gridCategory = new Grid
+                    {
+                        RowDefinitions =
+                        {
+                            new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                        },
+                        ColumnDefinitions =
+                        {
+                            new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                            new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                            new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                        },
+                        Width = double.NaN,
+                        HorizontalAlignment = HorizontalAlignment.Stretch,
+                    };
+                    
+                    gridCategory.Add(checkBox, 0,0);
+                    gridCategory.Add(label, 0, 1);                    
+                    gridCategory.Add(buttonCategoryActions, 0, 2);                    
+                    
+                    return gridCategory;
                 }
 
                 var grid = new Grid
@@ -152,6 +177,7 @@ public class MultipleReplaceWindow : Window
                     Command = vm.NodeOpenContextMenuCommand,
                     CommandParameter = node,
                 };
+                buttonActions.Bind(Button.CommandParameterProperty, new Binding { Source = node });
                 Attached.SetIcon(buttonActions, IconNames.MdiDotsHorizontal);
 
               //  UiUtil.MakeButton(vm.NodeOpenContextMenuCommand, IconNames.MdiDotsHorizontal);

@@ -26,12 +26,27 @@ public partial class EditRuleViewModel : ObservableObject
         Description = string.Empty;
         IsRegularExpression = false;
         IsCaseSensitive = false;
-        IsCaseInsensitive = true;
+        IsCaseInsensitive = false;
     }
 
     public void Initialize(string title, RuleTreeNode node)
     {
         Title = title;
+        FindWhat = node.Find;
+        ReplaceWith = node.ReplaceWith;
+        Description = node.Description;
+        if (node.Type == MultipleReplaceType.RegularExpression)
+        {
+            IsRegularExpression = true;
+        }
+        else if (node.Type == MultipleReplaceType.CaseSensitive)
+        {
+            IsCaseSensitive= true;
+        }
+        else
+        {
+            IsCaseInsensitive = true;
+        }
     }
 
     [RelayCommand]                   
