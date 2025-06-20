@@ -2,9 +2,9 @@
 
 public class LanguageEdit
 {
+    public LanguageMultipleReplace MultipleReplace { get; set; } = new();
 
     public LanguageEdit()
     {
-
     }
 }

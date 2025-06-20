@@ -2,7 +2,7 @@
 
 public enum MultipleReplaceType
 {
-    Normal,
+    CaseInsensitive,
     CaseSensitive,
     RegularExpression,
 }

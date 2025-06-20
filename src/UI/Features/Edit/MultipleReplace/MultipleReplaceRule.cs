@@ -13,6 +13,6 @@ public class MultipleReplaceRule
         Find = string.Empty;
         ReplaceWith = string.Empty;
         Description = string.Empty;
-        Type = MultipleReplaceType.Normal;
+        Type = MultipleReplaceType.CaseInsensitive;
     }
 }

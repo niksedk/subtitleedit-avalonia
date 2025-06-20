@@ -37,7 +37,7 @@ public partial class RuleTreeNode : ObservableObject
         {
             IconName = IconNames.MdiRegex;
         }
-        else if (Type == MultipleReplaceType.Normal)
+        else if (Type == MultipleReplaceType.CaseInsensitive)
         {
             IconName = IconNames.MdiFindReplace;
         }
