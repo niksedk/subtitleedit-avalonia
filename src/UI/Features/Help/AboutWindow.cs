@@ -20,7 +20,7 @@ public class AboutWindow : Window
 
         var titleText = new TextBlock
         {
-            Text = "Subtitle Edit version 5.0, Alpha 1",
+            Text = "Subtitle Edit version 5.0, Alpha 3",
             FontSize = 20,
             FontWeight = FontWeight.Bold,
         };
