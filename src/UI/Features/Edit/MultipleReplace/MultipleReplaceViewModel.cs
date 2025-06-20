@@ -1,9 +1,14 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.LogicalTree;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
@@ -70,15 +75,15 @@ public partial class MultipleReplaceViewModel : ObservableObject
     {
         Window?.Close();
     }
-    
+
     [RelayCommand]
-    private void NodeCategoryOpenContextMenu(RuleTreeNode node)
+    private void NodeCategoryOpenContextMenu(RuleTreeNode? node)
     {
         var contextMenu = new ContextMenu
         {
             Items =
             {
-                new MenuItem { Header = "Edit", Command = CategoryEditCommand },
+                new MenuItem { Header = "Edit", Command = CategoryEditCommand, CommandParameter = node },
                 new Separator(),
                 new MenuItem { Header = "Duplicate", Command = CategoryDuplicateCommand, CommandParameter = node },
                 new MenuItem { Header = "Insert Before", Command = CategoryInsertBeforeCommand, CommandParameter = node },
@@ -94,31 +99,30 @@ public partial class MultipleReplaceViewModel : ObservableObject
         RulesTreeView.ContextMenu = contextMenu;
         contextMenu.Open();
     }
-    
+
     [RelayCommand]
-    private async Task CategoryEdit()
+    private async Task CategoryEdit(RuleTreeNode? node)
     {
-        var node = SelectedNode;
         if (node == null)
         {
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<EditCategoryWindow, EditCategoryViewModel>(Window!, vm => 
+        var result = await _windowService.ShowDialogAsync<EditCategoryWindow, EditCategoryViewModel>(Window!, vm =>
         {
             vm.Initialize(Se.Language.Edit.MultipleReplace.EditCategory, node);
         });
 
         if (result.OkPressed)
         {
+            node.Title = result.CategoryName;
         }
     }
 
 
     [RelayCommand]
-    private void CategoryDuplicate()
+    private void CategoryDuplicate(RuleTreeNode? node)
     {
-        var node = SelectedNode;
         if (node == null)
         {
             return;
@@ -127,17 +131,16 @@ public partial class MultipleReplaceViewModel : ObservableObject
 
 
     [RelayCommand]
-    private async Task CategoryInsertBefore()
+    private async Task CategoryInsertBefore(RuleTreeNode? node)
     {
-        var node = SelectedNode;
         if (node == null)
         {
             return;
         }
-        
-        var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!, vm =>
+
+        var result = await _windowService.ShowDialogAsync<EditCategoryWindow, EditCategoryViewModel>(Window!, vm =>
         {
-            vm.Initialize(Se.Language.Edit.MultipleReplace.NewRule, node);
+            vm.Initialize(Se.Language.Edit.MultipleReplace.NewCategory, node);
         });
 
         if (result.OkPressed)
@@ -146,17 +149,16 @@ public partial class MultipleReplaceViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task CategoryInsertAfter()
+    private async Task CategoryInsertAfter(RuleTreeNode? node)
     {
-        var node = SelectedNode;
         if (node == null)
         {
             return;
         }
-        
-        var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!, vm =>
+
+        var result = await _windowService.ShowDialogAsync<EditCategoryWindow, EditCategoryViewModel>(Window!, vm =>
         {
-            vm.Initialize(Se.Language.Edit.MultipleReplace.NewRule, node);
+            vm.Initialize(Se.Language.Edit.MultipleReplace.NewCategory, node);
         });
 
         if (result.OkPressed)
@@ -165,49 +167,59 @@ public partial class MultipleReplaceViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void CategoryDelete()
+    private void CategoryDelete(RuleTreeNode? node)
     {
-        var node = SelectedNode;
         if (node == null)
         {
             return;
+        }
+
+        Nodes.Remove(node);
+    }
+
+    [RelayCommand]
+    private void CategoryMoveUp(RuleTreeNode? node)
+    {
+        if (node == null)
+        {
+            return;
+        }
+
+        var index = Nodes.IndexOf(node);
+        if (index > 0)
+        {
+            Nodes.Move(index, index - 1);
         }
     }
 
     [RelayCommand]
-    private void CategoryMoveUp()
+    private void CategoryMoveDown(RuleTreeNode? node)
     {
-        var node = SelectedNode;
         if (node == null)
         {
             return;
+        }
+
+        var index = Nodes.IndexOf(node);
+        if (index < Nodes.Count - 1)
+        {
+            Nodes.Move(index, index + 1);
         }
     }
 
     [RelayCommand]
-    private void CategoryMoveDown()
+    private void NodeOpenContextMenu(RuleTreeNode? node)
     {
-        var node = SelectedNode;
         if (node == null)
         {
             return;
         }
-    }
 
-    [RelayCommand]
-    private void NodeOpenContextMenu()
-    {
-        var node = SelectedNode;
-        if (node == null)
-        {
-            return;
-        }
-        
         var contextMenu = new ContextMenu
         {
             Items =
             {
-                new MenuItem { Header = "Edit", Command = NodeEditCommand },
+                new MenuItem { Header = "Edit", Command = NodeEditCommand, CommandParameter = node  },
                 new Separator(),
                 new MenuItem { Header = "Duplicate", Command = NodeDuplicateCommand, CommandParameter = node },
                 new MenuItem { Header = "Insert Before", Command = NodeInsertBeforeCommand, CommandParameter = node },
@@ -225,29 +237,41 @@ public partial class MultipleReplaceViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task NodeEdit()
+    private async Task NodeEdit(RuleTreeNode? node)
     {
-        var node = SelectedNode;
         if (node == null)
         {
             return;
         }
-        
-        var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!, vm => 
+
+        var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!, vm =>
         {
             vm.Initialize(Se.Language.Edit.MultipleReplace.EditRule, node);
         });
 
         if (result.OkPressed)
         {
+            node.Find = result.FindWhat;
+            node.ReplaceWith = result.ReplaceWith;
+            node.Description = result.Description;
+            if (result.IsRegularExpression)
+            {
+                node.Type = MultipleReplaceType.RegularExpression;
+            }
+            else if (result.IsCaseSensitive)
+            {
+                node.Type = MultipleReplaceType.CaseSensitive;
+            }
+            else
+            {
+                node.Type = MultipleReplaceType.CaseInsensitive;
+            }
         }
     }
 
-
     [RelayCommand]
-    private void NodeDuplicate()
+    private void NodeDuplicate(RuleTreeNode? node)
     {
-        var node = SelectedNode;
         if (node == null)
         {
             return;
@@ -255,14 +279,13 @@ public partial class MultipleReplaceViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task NodeInsertBefore()
+    private async Task NodeInsertBefore(RuleTreeNode? node)
     {
-        var node = SelectedNode;
         if (node == null)
         {
             return;
         }
-        
+
         var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!, vm =>
         {
             vm.Initialize(Se.Language.Edit.MultipleReplace.NewRule, node);
@@ -274,42 +297,61 @@ public partial class MultipleReplaceViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task NodeInsertAfter()
+    private async Task NodeInsertAfter(RuleTreeNode? node)
     {
-        var node = SelectedNode;
         if (node == null)
         {
             return;
         }
-    }
 
-    [RelayCommand]
-    private void NodeDelete()
-    {
-        var node = SelectedNode;
-        if (node == null)
+        var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!, vm =>
         {
-            return;
+            vm.Initialize(Se.Language.Edit.MultipleReplace.NewRule, node);
+        });
+
+        if (result.OkPressed)
+        {
         }
     }
 
     [RelayCommand]
-    private void NodeMoveUp()
+    private void NodeDelete(RuleTreeNode? node)
     {
-        var node = SelectedNode;
         if (node == null)
         {
             return;
         }
+
+        Nodes.Remove(node);
     }
 
     [RelayCommand]
-    private void NodeMoveDown()
-    { 
-        var node = SelectedNode;
+    private void NodeMoveUp(RuleTreeNode? node)
+    {
         if (node == null)
         {
             return;
+        }
+
+        var index = Nodes.IndexOf(node);
+        if (index > 0)
+        {
+            Nodes.Move(index, index - 1);
+        }
+    }
+
+    [RelayCommand]
+    private void NodeMoveDown(RuleTreeNode? node)
+    {
+        if (node == null)
+        {
+            return;
+        }
+
+        var index = Nodes.IndexOf(node);
+        if (index < Nodes.Count - 1)
+        {
+            Nodes.Move(index, index + 1);
         }
     }
 
@@ -322,8 +364,44 @@ public partial class MultipleReplaceViewModel : ObservableObject
         }
     }
 
+    public void ExpandAll()
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            var allTreeViewItems = FindAllTreeViewItems(RulesTreeView);
+            foreach (var item in allTreeViewItems)
+            {
+                item.IsExpanded = true;
+            }
+        }, DispatcherPriority.Background);
+    }
+
+    private IEnumerable<TreeViewItem> FindAllTreeViewItems(Control parent)
+    {
+        var result = new List<TreeViewItem>();
+        if (parent is TreeViewItem tvi)
+        {
+            result.Add(tvi);
+        }
+
+        foreach (var child in parent.GetLogicalDescendants())
+        {
+            if (child is TreeViewItem treeViewItem)
+            {
+                result.Add(treeViewItem);
+            }
+        }
+
+        return result;
+    }
+
     public void RulesTreeView_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         //throw new System.NotImplementedException();
+    }
+
+    internal void OnLoaded(RoutedEventArgs e)
+    {
+        ExpandAll();
     }
 }

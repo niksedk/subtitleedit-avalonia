@@ -4,6 +4,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
@@ -116,8 +117,7 @@ public class MultipleReplaceWindow : Window
                         Command = vm.NodeCategoryOpenContextMenuCommand,
                         CommandParameter = node,
                     };
-                    buttonCategoryActions.Bind(Button.CommandParameterProperty, new Binding { Source = node });
-                    Attached.SetIcon(buttonCategoryActions, IconNames.MdiDotsHorizontal);
+                    Attached.SetIcon(buttonCategoryActions, IconNames.MdiDotsVertical);
 
                     var gridCategory = new Grid
                     {
@@ -162,8 +162,7 @@ public class MultipleReplaceWindow : Window
                 var labelFind = UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.Find));
                 var labelSeparator = UiUtil.MakeLabel(string.Empty);
                 Attached.SetIcon(labelSeparator, IconNames.MdiArrowRightThick);
-                var labelReplaceWith =
-                    UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.ReplaceWith));
+                var labelReplaceWith = UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.ReplaceWith));
 
                 var labelIcon = new Label();
                 Attached.SetIcon(labelIcon, node.IconName);
@@ -177,10 +176,7 @@ public class MultipleReplaceWindow : Window
                     Command = vm.NodeOpenContextMenuCommand,
                     CommandParameter = node,
                 };
-                buttonActions.Bind(Button.CommandParameterProperty, new Binding { Source = node });
-                Attached.SetIcon(buttonActions, IconNames.MdiDotsHorizontal);
-
-              //  UiUtil.MakeButton(vm.NodeOpenContextMenuCommand, IconNames.MdiDotsHorizontal);
+                Attached.SetIcon(buttonActions, IconNames.MdiDotsVertical);
 
                 var panelFindAndReplaceWith = new StackPanel
                 {
@@ -301,6 +297,12 @@ public class MultipleReplaceWindow : Window
         };
 
         return border;
+    }
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+        _vm.OnLoaded(e);
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

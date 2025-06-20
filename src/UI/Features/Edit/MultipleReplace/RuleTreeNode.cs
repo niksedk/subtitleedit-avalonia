@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Nikse.SubtitleEdit.Logic;
-using Projektanker.Icons.Avalonia;
 
 namespace Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 
@@ -9,13 +8,13 @@ public partial class RuleTreeNode : ObservableObject
 {
     [ObservableProperty] private string _title;
     public ObservableCollection<RuleTreeNode>? SubNodes { get; }
-    public string Find { get; set; } 
-    public string ReplaceWith { get; set; } 
-    public string Description { get; set; } 
-    public bool IsActive { get; set; } = false;
-    public bool IsCategory { get; set; } = false;
-    public string IconName { get; set; }
-    
+    [ObservableProperty] private string _find;
+    [ObservableProperty] private string _replaceWith;
+    [ObservableProperty] private string _description;
+    [ObservableProperty] private bool _isActive = false;
+    [ObservableProperty] private bool _isCategory = false;
+    [ObservableProperty] private string _iconName;
+
     public MultipleReplaceType Type { get; set; }
 
     public RuleTreeNode(string title, MultipleReplaceRule rule)
