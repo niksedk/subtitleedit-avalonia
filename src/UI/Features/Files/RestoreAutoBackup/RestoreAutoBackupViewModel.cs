@@ -20,7 +20,7 @@ public partial class RestoreAutoBackupViewModel : ObservableObject
     [ObservableProperty] private DisplayFile? _selectedFile;
     [ObservableProperty] private ObservableCollection<DisplayFile> _files;
 
-    public RestoreAutoBackupWindow? Window { get; set; }
+    public Window? Window { get; set; }
     public string? RestoreFileName { get; set; }
 
     public bool OkPressed { get; private set; }

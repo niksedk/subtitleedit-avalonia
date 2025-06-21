@@ -1,13 +1,14 @@
-using System.Collections.ObjectModel;
-using System.Linq;
+using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Logic.Config;
-using Nikse.SubtitleEdit.Logic.Media;
-using System.Threading.Tasks;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
 
@@ -21,7 +22,7 @@ public partial class BatchConvertSettingsViewModel : ObservableObject
     [ObservableProperty] private string? _selectedTargetEncoding;
 
     
-    public BatchConvertSettingsWindow? Window { get; set; }
+    public Window? Window { get; set; }
     
     public bool OkPressed { get; private set; }
 

@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading.Tasks;
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -11,6 +6,12 @@ using CommunityToolkit.Mvvm.Input;
 using DynamicData;
 using Nikse.SubtitleEdit.Features.Shared;
 using Projektanker.Icons.Avalonia;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Net.Http;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Translate;
 
@@ -24,7 +25,7 @@ public partial class OllamaBrowseViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<OllamaModelDisplay> _models;
     [ObservableProperty] private OllamaModelDisplay? _selectedModel;
     
-    public OllamaBrowseWindow? Window { get; set; }
+    public Window? Window { get; set; }
     
     public bool OkPressed { get; private set; }
     

@@ -1,10 +1,11 @@
-using System;
-using System.Linq;
+using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Logic.Config;
+using System;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
 
@@ -13,7 +14,7 @@ public partial class InterjectionsViewModel : ObservableObject
     [ObservableProperty] private string _interjectionsText;
     [ObservableProperty] private string _interjectionsSkipStartText;
     
-    public InterjectionsWindow? Window { get; set; }
+    public Window? Window { get; set; }
     
     public bool OkPressed { get; private set; }
 

@@ -61,7 +61,7 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<OcrLanguage2> _paddleOcrLanguages;
     [ObservableProperty] private OcrLanguage2? _selectedPaddleOcrLanguage;
 
-    public OcrWindow? Window { get; set; }
+    public Window? Window { get; set; }
     public DataGrid SubtitleGrid { get; set; }
     public MatroskaTrackInfo? SelectedMatroskaTrack { get; set; }
     public bool OkPressed { get; private set; }

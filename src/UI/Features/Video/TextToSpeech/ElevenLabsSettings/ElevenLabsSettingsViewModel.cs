@@ -15,7 +15,7 @@ public partial class ElevenLabsSettingsViewModel : ObservableObject
     [ObservableProperty] private double _similarity;
     [ObservableProperty] private double _speakerBoost;
 
-    public ElevenLabsSettingsWindow? Window { get; set; }
+    public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
 

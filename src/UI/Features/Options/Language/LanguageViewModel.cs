@@ -1,9 +1,10 @@
-using System.Collections.ObjectModel;
-using System.Linq;
+using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic.Config;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Options.Language;
 
@@ -12,7 +13,7 @@ public partial class LanguageViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<LanguageItem> _languages;
     [ObservableProperty] private LanguageItem? _selectedLanguage;
 
-    public LanguageWindow? Window { get; set; }
+    public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
 

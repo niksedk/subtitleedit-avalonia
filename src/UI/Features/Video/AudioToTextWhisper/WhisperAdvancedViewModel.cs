@@ -1,3 +1,4 @@
+using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -14,7 +15,7 @@ public partial class WhisperAdvancedViewModel : ObservableObject
     [ObservableProperty] private string _parameters;
     [ObservableProperty] private string _helpText;
 
-    public WhisperAdvancedWindow? Window { get; set; }
+    public Window? Window { get; set; }
     public List<IWhisperEngine> Engines { get; set; }
 
     public bool OkPressed { get; private set; }

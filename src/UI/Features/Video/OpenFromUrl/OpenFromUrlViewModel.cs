@@ -1,3 +1,4 @@
+using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -8,7 +9,7 @@ public partial class OpenFromUrlViewModel : ObservableObject
 {
     [ObservableProperty] private string _url;
     
-    public OpenFromUrlWindow? Window { get; set; }
+    public Window? Window { get; set; }
     
     public bool OkPressed { get; private set; }
 

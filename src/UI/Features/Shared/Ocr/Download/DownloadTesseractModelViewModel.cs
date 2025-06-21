@@ -1,3 +1,4 @@
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -26,7 +27,7 @@ public partial class DownloadTesseractModelViewModel : ObservableObject
     [ObservableProperty] private string _statusText;
     [ObservableProperty] private string _error;
 
-    public DownloadTesseractModelWindow? Window { get; set; }
+    public Window? Window { get; set; }
     public bool OkPressed { get; internal set; }
 
     private readonly ITesseractDownloadService _tesseractDownloadService;

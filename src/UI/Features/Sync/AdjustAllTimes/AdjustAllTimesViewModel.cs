@@ -1,3 +1,4 @@
+using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -19,7 +20,7 @@ public partial class AdjustAllTimesViewModel : ObservableObject
 
     private IAdjustCallback? _adjustCallback;
     
-    public AdjustAllTimesWindow? Window { get; set; }
+    public Window? Window { get; set; }
     
     public bool OkPressed { get; private set; }
 

@@ -37,7 +37,7 @@ public partial class SpellCheckViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _paragraphs;
     [ObservableProperty] private SubtitleLineViewModel? _selectedParagraph;
 
-    public SpellCheckWindow? Window { get; set; }
+    public Window? Window { get; set; }
     public int TotalChangedWords { get; set; }
     public int TotalSkippedWords { get; set; }
 

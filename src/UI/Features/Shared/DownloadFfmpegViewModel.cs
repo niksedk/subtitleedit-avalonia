@@ -1,11 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Timers;
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -14,6 +7,14 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Compression;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Download;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Timers;
 using Timer = System.Timers.Timer;
 
 namespace Nikse.SubtitleEdit.Features.Shared;
@@ -24,7 +25,7 @@ public partial class DownloadFfmpegViewModel : ObservableObject
     [ObservableProperty] private string _statusText;
     [ObservableProperty] private string _error;
 
-    public DownloadFfmpegWindow? Window { get; set; }
+    public Window? Window { get; set; }
     public string FfmpegFileName { get; set; }
 
     private IFfmpegDownloadService _ffmpegDownloadService;

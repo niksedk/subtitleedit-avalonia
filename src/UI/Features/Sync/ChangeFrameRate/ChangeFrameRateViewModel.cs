@@ -1,7 +1,8 @@
-using System.Collections.ObjectModel;
+using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
 
 namespace Nikse.SubtitleEdit.Features.Sync.ChangeFrameRate;
 
@@ -13,7 +14,7 @@ public partial class ChangeFrameRateViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<double> _toFrameRates;
     [ObservableProperty] private double _selectedToFrameRate;
     
-    public ChangeFrameRateWindow? Window { get; set; }
+    public Window? Window { get; set; }
     
     public bool OkPressed { get; private set; }
 

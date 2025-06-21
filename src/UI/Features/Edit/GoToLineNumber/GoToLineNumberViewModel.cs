@@ -14,7 +14,7 @@ public partial class GoToLineNumberViewModel : ObservableObject
     [ObservableProperty] private int _lineNumber;
     [ObservableProperty] private int _maxLineNumber;
     
-    public GoToLineNumberWindow? Window { get; set; }
+    public Window? Window { get; set; }
     public NumericUpDown UpDown { get; set; }
 
     public bool OkPressed { get; private set; }

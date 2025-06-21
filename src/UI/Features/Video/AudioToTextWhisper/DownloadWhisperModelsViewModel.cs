@@ -1,3 +1,4 @@
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -33,7 +34,7 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
     [ObservableProperty] private string _error;
     [ObservableProperty] bool _downloadIsEnabled;
 
-    public DownloadWhisperModelsWindow? Window { get; set; }
+    public Window? Window { get; set; }
     public bool OkPressed { get; internal set; }
 
     private IWhisperDownloadService _whisperDownloadService;

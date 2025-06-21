@@ -78,7 +78,7 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
     [ObservableProperty] private Bitmap? _imagePreview;
     [ObservableProperty] private bool _useSourceResolution;
 
-    public TransparentSubtitlesWindow? Window { get; set; }
+    public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
 
     private Subtitle _subtitle = new();

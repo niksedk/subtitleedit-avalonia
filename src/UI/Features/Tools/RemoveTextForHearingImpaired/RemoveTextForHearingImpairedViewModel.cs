@@ -1,21 +1,22 @@
-using System;
-using System.Collections.Generic;
+using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DynamicData;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.Forms;
 using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
+using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
-using Avalonia.Interactivity;
-using Avalonia.Threading;
-using DynamicData;
-using Nikse.SubtitleEdit.Core.Forms;
-using Nikse.SubtitleEdit.Logic;
-using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
 
@@ -70,7 +71,7 @@ public partial class RemoveTextForHearingImpairedViewModel : ObservableObject
     [ObservableProperty] private string _fixText;
     [ObservableProperty] private bool _fixTextEnabled;
 
-    public RemoveTextForHearingImpairedWindow? Window { get; set; }
+    public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
     public Subtitle FixedSubtitle { get; private set; }

@@ -64,7 +64,7 @@ public partial class TextToSpeechViewModel : ObservableObject
     [ObservableProperty] private bool _hasKeyFile;
     [ObservableProperty] private string _keyFile;
 
-    public TextToSpeechWindow? Window { get; set; }
+    public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
 
     private Subtitle _subtitle = new();

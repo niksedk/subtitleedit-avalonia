@@ -24,7 +24,7 @@ namespace Nikse.SubtitleEdit.Features.Translate;
 public partial class AutoTranslateViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<TranslateRow> _rows;
-    public AutoTranslateWindow? Window { get; set; }
+    public Window? Window { get; set; }
     public bool OkPressed { get; set; }
 
     [ObservableProperty] private ObservableCollection<IAutoTranslator> _autoTranslators;

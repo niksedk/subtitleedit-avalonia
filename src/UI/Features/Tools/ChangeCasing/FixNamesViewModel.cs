@@ -1,3 +1,4 @@
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
@@ -23,7 +24,7 @@ public partial class FixNamesViewModel : ObservableObject
     [ObservableProperty] private string _hitCount;
     [ObservableProperty] private string _extraNames;
 
-    public FixNamesWindow? Window { get; set; }
+    public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
     public string Info { get; private set; }
     public Subtitle Subtitle { get; private set; }

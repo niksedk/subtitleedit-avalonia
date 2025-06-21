@@ -1,3 +1,4 @@
+using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -14,7 +15,7 @@ public partial class FindViewModel : ObservableObject
     [ObservableProperty] private bool _findTypeCanseInsensitive;
     [ObservableProperty] private bool _findTypeRegularExpression;
 
-    public FindWindow? Window { get; set; }
+    public Window? Window { get; set; }
     
     public bool OkPressed { get; private set; }
 

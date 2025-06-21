@@ -55,7 +55,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     [ObservableProperty] private string _elapsedText;
     [ObservableProperty] private string _estimatedText;
 
-    public AudioToTextWhisperWindow? Window { get; set; }
+    public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
     public Subtitle TranscribedSubtitle { get; private set; }

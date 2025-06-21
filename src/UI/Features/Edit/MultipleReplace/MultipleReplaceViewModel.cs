@@ -21,7 +21,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
     [ObservableProperty] private RuleTreeNode? _selectedNode;
     public ObservableCollection<RuleTreeNode> Nodes { get; }
     public TreeView RulesTreeView { get; internal set; }
-    public MultipleReplaceWindow? Window { get; set; }
+    public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
 
     private IWindowService _windowService;

@@ -1,7 +1,8 @@
-using System.Collections.ObjectModel;
+using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
 
 namespace Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 
@@ -14,7 +15,7 @@ public partial class EditRuleViewModel : ObservableObject
     [ObservableProperty] private bool _isCaseSensitive;
     [ObservableProperty] private bool _isCaseInsensitive;
     
-    public EditRuleWindow? Window { get; set; }
+    public Window? Window { get; set; }
     
     public bool OkPressed { get; private set; }
     public string? Title { get; internal set; }

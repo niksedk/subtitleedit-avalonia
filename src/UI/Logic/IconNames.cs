@@ -10,7 +10,7 @@ internal class IconNames
     public const string MdiCogs = "mdi-cogs";
     public const string MdiContentSave = "mdi-content-save";
     public const string MdiDotsHorizontal = "mdi-dots-horizontal";
-    public const string MdiDotsVertical = "mdi-dots-horizontal";
+    public const string MdiDotsVertical = "mdi-dots-vertical";
     public const string MdiEyeSettings = "mdi-eye-settings";
     public const string MdiFileCog = "mdi-file-cog";
     public const string MdiFind = "mdi-magnify";

@@ -108,7 +108,7 @@ public partial class SettingsViewModel : ObservableObject
     };
 
     public bool OkPressed { get; set; }
-    public SettingsWindow? Window { get; internal set; }
+    public Window? Window { get; internal set; }
     public ScrollViewer ScrollView { get; internal set; }
     public List<SettingsSection> Sections { get; internal set; }
 

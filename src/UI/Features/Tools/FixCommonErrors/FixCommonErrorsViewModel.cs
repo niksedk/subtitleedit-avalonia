@@ -40,7 +40,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
     [ObservableProperty] private bool _step2IsVisible;
     [ObservableProperty] private string _step2Title;
 
-    public FixCommonErrorsWindow? Window { get; set; }
+    public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
     public SubtitleFormat Format { get; set; } = new SubRip();

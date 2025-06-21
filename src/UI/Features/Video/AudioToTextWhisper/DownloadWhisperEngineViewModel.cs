@@ -1,11 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Timers;
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -17,6 +10,14 @@ using Nikse.SubtitleEdit.Logic.Download;
 using SharpCompress.Archives.SevenZip;
 using SharpCompress.Common;
 using SharpCompress.Readers;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Timers;
 using Timer = System.Timers.Timer;
 
 namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
@@ -29,7 +30,7 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
     [ObservableProperty] private string _progressText;
     [ObservableProperty] private string _error;
 
-    public DownloadWhisperEngineWindow? Window { get; set; }
+    public Window? Window { get; set; }
     public bool OkPressed { get; internal set; }
     public IWhisperEngine? Engine { get; internal set; }
 

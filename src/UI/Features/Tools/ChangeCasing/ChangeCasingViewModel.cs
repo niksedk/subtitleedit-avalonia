@@ -1,3 +1,4 @@
+using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -17,7 +18,7 @@ public partial class ChangeCasingViewModel : ObservableObject
     [ObservableProperty] private bool _allUppercase;
     [ObservableProperty] private bool _allLowercase;
 
-    public ChangeCasingWindow? Window { get; set; }
+    public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
     public string Info { get; private set; }
     public Subtitle Subtitle { get; private set; }

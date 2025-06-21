@@ -1,3 +1,4 @@
+using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -9,7 +10,7 @@ public partial class EditCategoryViewModel : ObservableObject
 {
     [ObservableProperty] private string _categoryName;
     
-    public EditCategoryWindow? Window { get; set; }
+    public Window? Window { get; set; }
     
     public bool OkPressed { get; private set; }
     public string? Title { get; internal set; }

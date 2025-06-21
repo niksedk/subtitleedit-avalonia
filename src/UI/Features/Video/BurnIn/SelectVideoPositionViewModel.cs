@@ -1,4 +1,5 @@
-﻿using Avalonia.Input;
+﻿using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -8,7 +9,7 @@ namespace Nikse.SubtitleEdit.Features.Video.BurnIn;
 
 public partial class SelectVideoPositionViewModel : ObservableObject
 {
-    public SelectVideoPositionWindow? Window { get; set; }
+    public Window? Window { get; set; }
     public string VideoFileName { get; set; }
     public bool OkPressed { get; private set; }
     public VideoPlayerControl? VideoPlayerControl { get; set; }

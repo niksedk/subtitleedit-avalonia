@@ -91,7 +91,7 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private bool _allUppercase;
     [ObservableProperty] private bool _allLowercase;
     
-    public BatchConvertWindow? Window { get; set; }
+    public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
     public ScrollViewer FunctionContainer { get; internal set; }

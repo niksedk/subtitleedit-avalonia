@@ -34,7 +34,7 @@ public partial class GetDictionariesViewModel : ObservableObject
     [ObservableProperty] private bool _isProgressVisible;
     [ObservableProperty] private double _progressOpacity;
 
-    public GetDictionariesWindow? Window { get; set; }
+    public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
     public string? DictionaryFileName { get; private set; }

@@ -30,7 +30,7 @@ public partial class ShortcutsViewModel : ObservableObject
 
     public ObservableCollection<ShortcutTreeNode> Nodes { get; }
     public bool OkPressed { get; set; }
-    public ShortcutsWindow? Window { get; set; }
+    public Window? Window { get; set; }
     public TreeView ShortcutsTreeView { get; internal set; }
 
     private List<ShortCut> _allShortcuts;

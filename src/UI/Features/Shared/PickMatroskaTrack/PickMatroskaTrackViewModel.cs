@@ -21,7 +21,7 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
     [ObservableProperty] private MatroskaTrackInfoDisplay? _selectedTrack;
     [ObservableProperty] private ObservableCollection<MatroskaSubtitleCueDisplay> _rows;
 
-    public PickMatroskaTrackWindow? Window { get; set; }
+    public Window? Window { get; set; }
     public DataGrid TracksGrid { get; set; }
     public MatroskaTrackInfo? SelectedMatroskaTrack { get; set; }
     public bool OkPressed { get; private set; }

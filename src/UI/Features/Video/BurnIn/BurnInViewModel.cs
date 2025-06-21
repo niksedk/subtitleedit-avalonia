@@ -93,7 +93,7 @@ public partial class BurnInViewModel : ObservableObject
     [ObservableProperty] private bool _showAssaOnlyBox;
     [ObservableProperty] private string _targetVideoBitRateInfo;
 
-    public BurnInWindow? Window { get; set; }
+    public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
     public DataGrid? BatchGrid { get; internal set; }
 

@@ -1,9 +1,4 @@
-using System;
-using System.Globalization;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Timers;
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -11,6 +6,12 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic.Compression;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Download;
+using System;
+using System.Globalization;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Timers;
 using Timer = System.Timers.Timer;
 
 namespace Nikse.SubtitleEdit.Features.Shared;
@@ -21,7 +22,7 @@ public partial class DownloadTesseractViewModel : ObservableObject
     [ObservableProperty] private string _statusText;
     [ObservableProperty] private string _error;
 
-    public DownloadTesseractWindow? Window { get; set; }
+    public Window? Window { get; set; }
     public string FfmpegFileName { get; set; }
     public bool OkPressed { get; private set; }
 

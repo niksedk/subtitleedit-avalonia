@@ -52,7 +52,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
     [ObservableProperty] private double _similarity;
     [ObservableProperty] private double _speakerBoost;
 
-    public ReviewSpeechWindow? Window { get; set; }
+    public Window? Window { get; set; }
     public DataGrid LineGrid { get; internal set; }
     public TtsStepResult[] StepResults { get; set; }
 

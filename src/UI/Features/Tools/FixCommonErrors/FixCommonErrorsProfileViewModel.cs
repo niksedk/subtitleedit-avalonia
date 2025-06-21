@@ -19,7 +19,7 @@ public partial class FixCommonErrorsProfileViewModel : ObservableObject
     [ObservableProperty] private ProfileDisplayItem? _selectedProfile;
     [ObservableProperty] private bool _isProfileSelected;
 
-    public FixCommonErrorsProfileWindow? Window { get; set; }
+    public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
     public TextBox ProfileNameTextBox { get; internal set; }

@@ -1,3 +1,4 @@
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -11,7 +12,7 @@ public partial class EditWholeTextViewModel : ObservableObject
     [ObservableProperty] private string _lineInfo;
     [ObservableProperty] private string _wholeText;
 
-    public EditWholeTextWindow? Window { get; set; }
+    public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
 

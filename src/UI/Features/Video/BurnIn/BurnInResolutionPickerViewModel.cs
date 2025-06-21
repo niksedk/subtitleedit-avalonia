@@ -1,4 +1,5 @@
-﻿using Avalonia.Input;
+﻿using Avalonia.Controls;
+using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
@@ -10,7 +11,7 @@ public partial class BurnInResolutionPickerViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<ResolutionItem> _resolutions;
     [ObservableProperty] private ResolutionItem? _selectedResolution;
 
-    public BurnInResolutionPickerWindow? Window { get; set; }
+    public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
 

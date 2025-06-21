@@ -1,3 +1,4 @@
+using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -6,7 +7,7 @@ namespace Nikse.SubtitleEdit.Features.Edit.AlignmentPicker;
 
 public partial class AlignmentPickerViewModel : ObservableObject
 {
-    public AlignmentPickerWindow? Window { get; set; }
+    public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
     public string Alignment { get; private set; }
 

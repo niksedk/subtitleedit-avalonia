@@ -1,3 +1,4 @@
+using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -14,7 +15,7 @@ public partial class TransparentSettingsViewModel : ObservableObject
     [ObservableProperty] private bool _useOutputFolder;
     [ObservableProperty] private string _outputFolder;
     
-    public TransparentSettingsWindow? Window { get; set; }
+    public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
 

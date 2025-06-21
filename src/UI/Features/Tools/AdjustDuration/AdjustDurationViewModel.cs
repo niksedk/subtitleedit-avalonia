@@ -1,12 +1,13 @@
-using System;
-using System.Collections.ObjectModel;
-using System.Linq;
+using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 
@@ -21,7 +22,7 @@ public partial class AdjustDurationViewModel : ObservableObject
     [ObservableProperty] private double _adjustRecalculateMaxCharacterPerSecond;
     [ObservableProperty] private double _adjustRecalculateOptimalCharacterPerSecond;
 
-    public AdjustDurationWindow? Window { get; set; }
+    public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
 
