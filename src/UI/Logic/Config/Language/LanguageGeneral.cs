@@ -154,7 +154,12 @@ public class LanguageGeneral
     public string AddVideoFiles { get; set; }
     public string Help { get; set; }
     public string VideoExtension { get; set; }
-    public object SubtitleFileName { get; internal set; }
+    public object SubtitleFileName { get; set; }
+    public string Default { get; set; }
+    public object EditDotDotDot { get; internal set; }
+    public object MoveUp { get; internal set; }
+    public object MoveDown { get; internal set; }
+    public object Duplicate { get; internal set; }
 
     public LanguageGeneral()
     {
@@ -311,5 +316,10 @@ public class LanguageGeneral
         Help = "Help";
         VideoExtension = "Video file extension";
         SubtitleFileName = "Subtitle file name";
+        Default = "Default";
+        EditDotDotDot = "Edit...";
+        MoveUp = "Move up";
+        MoveDown = "Move down";
+        Duplicate = "Duplicate";
     }
 }

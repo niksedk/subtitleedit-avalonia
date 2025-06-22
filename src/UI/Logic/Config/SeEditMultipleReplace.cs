@@ -7,6 +7,8 @@ public class SeEditMultipleReplace
 {
     public class MultipleReplaceCategory
     { 
+        public string Name { get; set; } = string.Empty;
+        public bool IsActive { get; set; } 
         public List<MultipleReplaceRule> Rules { get; set; } = new List<MultipleReplaceRule>();
     }
 
