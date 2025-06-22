@@ -971,7 +971,10 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         }
 
         var viewModel =
-            await _windowService.ShowDialogAsync<MultipleReplaceWindow, MultipleReplaceViewModel>(Window!, vm => { });
+            await _windowService.ShowDialogAsync<MultipleReplaceWindow, MultipleReplaceViewModel>(Window!, vm => 
+            { 
+                vm.Initialize(GetUpdateSubtitle());
+            });
 
         _shortcutManager.ClearKeys();
     }

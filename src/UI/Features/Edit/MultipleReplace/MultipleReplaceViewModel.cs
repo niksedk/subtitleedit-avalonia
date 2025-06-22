@@ -5,10 +5,14 @@ using Avalonia.LogicalTree;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
@@ -24,6 +28,8 @@ public partial class MultipleReplaceViewModel : ObservableObject
     public bool OkPressed { get; private set; }
 
     private IWindowService _windowService;
+    private Subtitle _subtitle = new Subtitle();
+    private readonly Dictionary<string, Regex> _compiledRegExList;
 
     public MultipleReplaceViewModel(IWindowService windowService)
     {
@@ -32,6 +38,13 @@ public partial class MultipleReplaceViewModel : ObservableObject
         Fixes = new ObservableCollection<MultipleReplaceFix>();
         Nodes = new ObservableCollection<RuleTreeNode>(GetNodes());
         RulesTreeView = new TreeView();
+
+        _compiledRegExList = new Dictionary<string, Regex>();
+    }
+
+    public void Initialize(Subtitle subtitle)
+    {
+        _subtitle = subtitle;
     }
 
     private IEnumerable<RuleTreeNode> GetNodes()
@@ -89,7 +102,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
     {
         if (nodes.Count == 0)
         {
-            var defaultCategory = new RuleTreeNode(null,Se.Language.General.Default, new ObservableCollection<RuleTreeNode>(), true)
+            var defaultCategory = new RuleTreeNode(null, Se.Language.General.Default, new ObservableCollection<RuleTreeNode>(), true)
             {
                 IsCategory = true,
             };
@@ -188,9 +201,9 @@ public partial class MultipleReplaceViewModel : ObservableObject
 
         if (result.OkPressed)
         {
-            category.CategoryName = result.CategoryName;   
+            category.CategoryName = result.CategoryName;
             Nodes.Add(category);
-            SelectedNode = category; 
+            SelectedNode = category;
         }
     }
 
@@ -211,7 +224,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
         {
             var rule = MakeRuleTreeNode(node, result);
             node.SubNodes?.Add(rule);
-            SelectedNode = rule;    
+            SelectedNode = rule;
         }
     }
 
@@ -331,8 +344,8 @@ public partial class MultipleReplaceViewModel : ObservableObject
         var index = nodes.IndexOf(node);
         if (index >= 0)
         {
-            nodes.Insert(index, new RuleTreeNode(node.Parent, new MultipleReplaceRule 
-            { 
+            nodes.Insert(index, new RuleTreeNode(node.Parent, new MultipleReplaceRule
+            {
                 Active = node.IsActive,
                 Description = node.Description,
                 Find = node.Find,
@@ -483,6 +496,88 @@ public partial class MultipleReplaceViewModel : ObservableObject
                                result.IsCaseSensitive ? MultipleReplaceType.CaseSensitive :
                                MultipleReplaceType.CaseInsensitive,
         });
+    }
+
+    private void GeneratePreview()
+    {
+        var FixedSubtitle = new Subtitle(_subtitle, false);
+        int fixedLines = 0;
+        var replaceExpressions = new HashSet<ReplaceExpression>();
+        foreach (var group in Nodes.Where(p => p.IsActive && p.SubNodes != null))
+        {
+            foreach (var rule in group.SubNodes!)
+            {
+                if (rule.IsActive)
+                {
+                    string findWhat = rule.Find;
+                    if (!string.IsNullOrEmpty(findWhat)) // allow space or spaces
+                    {
+                        string replaceWith = RegexUtils.FixNewLine(rule.ReplaceWith);
+                        findWhat = RegexUtils.FixNewLine(findWhat);
+                        var ruleInfo = string.IsNullOrEmpty(rule.Description) ? $"Group name: {group.CategoryName} - Rule number: {group.SubNodes.IndexOf(rule) + 1}" : $"Group name: {group.CategoryName} - Rule number: {group.SubNodes.IndexOf(rule) + 1}. {rule.Description}";
+                        var mpi = new ReplaceExpression(findWhat, replaceWith, rule.Type.ToString(), ruleInfo);
+                        replaceExpressions.Add(mpi);
+                        if (mpi.SearchType == ReplaceExpression.SearchRegEx && !_compiledRegExList.ContainsKey(findWhat))
+                        {
+                            _compiledRegExList.Add(findWhat, new Regex(findWhat, RegexOptions.Compiled | RegexOptions.Multiline));
+                        }
+                    }
+                }
+            }
+        }
+
+        for (var i = 0; i < _subtitle.Paragraphs.Count; i++)
+        {
+            Paragraph p = _subtitle.Paragraphs[i];
+            bool hit = false;
+            string newText = p.Text;
+            string ruleInfo = string.Empty;
+            foreach (ReplaceExpression item in replaceExpressions)
+            {
+                if (item.SearchType == ReplaceExpression.SearchCaseSensitive)
+                {
+                    if (newText.Contains(item.FindWhat))
+                    {
+                        hit = true;
+                        ruleInfo = string.IsNullOrEmpty(ruleInfo) ? item.RuleInfo : $"{ruleInfo} + {item.RuleInfo}";
+                        newText = newText.Replace(item.FindWhat, item.ReplaceWith);
+                    }
+                }
+                else if (item.SearchType == ReplaceExpression.SearchRegEx)
+                {
+                    Regex r = _compiledRegExList[item.FindWhat];
+                    if (r.IsMatch(newText))
+                    {
+                        hit = true;
+                        ruleInfo = string.IsNullOrEmpty(ruleInfo) ? item.RuleInfo : $"{ruleInfo} + {item.RuleInfo}";
+                        newText = RegexUtils.ReplaceNewLineSafe(r, newText, item.ReplaceWith);
+                    }
+                }
+                else
+                {
+                    int index = newText.IndexOf(item.FindWhat, StringComparison.OrdinalIgnoreCase);
+                    if (index >= 0)
+                    {
+                        hit = true;
+                        ruleInfo = string.IsNullOrEmpty(ruleInfo) ? item.RuleInfo : $"{ruleInfo} + {item.RuleInfo}";
+                        do
+                        {
+                            newText = newText.Remove(index, item.FindWhat.Length).Insert(index, item.ReplaceWith);
+                            index = newText.IndexOf(item.FindWhat, index + item.ReplaceWith.Length, StringComparison.OrdinalIgnoreCase);
+                        } while (index >= 0);
+                    }
+                }
+            }
+
+            if (hit && newText != p.Text)
+            {
+                fixedLines++;
+                //fixes.Add(MakePreviewListItem(p, newText, ruleInfo));
+                FixedSubtitle.Paragraphs[i].Text = newText;
+            }
+        }
+
+        //groupBoxLinesFound.Text = string.Format(LanguageSettings.Current.MultipleReplace.LinesFoundX, fixedLines);
     }
 
     public void RulesTreeView_SelectionChanged(object? sender, SelectionChangedEventArgs e)
