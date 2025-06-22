@@ -23,7 +23,7 @@ public partial class EditCategoryViewModel : ObservableObject
     public void Initialize(string title, RuleTreeNode node)
     {
         Title = title;
-        CategoryName = node.Title;
+        CategoryName = node.CategoryName;
     }
 
     [RelayCommand]                   

@@ -40,7 +40,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
 
         foreach (var category in Se.Settings.Edit.MultipleReplace.Categories)
         {
-            var categoryNode = new RuleTreeNode(category.Name, new ObservableCollection<RuleTreeNode>(), category.IsActive)
+            var categoryNode = new RuleTreeNode(null, category.Name, new ObservableCollection<RuleTreeNode>(), category.IsActive)
             {
                 IsCategory = true,
             };
@@ -48,7 +48,8 @@ public partial class MultipleReplaceViewModel : ObservableObject
 
             foreach (var rule in category.Rules)
             {
-                var node = new RuleTreeNode(string.Empty, rule);
+                var node = new RuleTreeNode(categoryNode, rule);
+                node.Parent = categoryNode;
                 categoryNode.SubNodes?.Add(node);
             }
         }
@@ -64,7 +65,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
         foreach (var category in Nodes)
         {
             var c = new SeEditMultipleReplace.MultipleReplaceCategory();
-            c.Name = category.Title;
+            c.Name = category.CategoryName;
             c.IsActive = category.IsActive;
             Se.Settings.Edit.MultipleReplace.Categories.Add(c);
 
@@ -88,13 +89,27 @@ public partial class MultipleReplaceViewModel : ObservableObject
     {
         if (nodes.Count == 0)
         {
-            var defaultCategory = new RuleTreeNode(Se.Language.General.Default, new ObservableCollection<RuleTreeNode>(), true)
+            var defaultCategory = new RuleTreeNode(null,Se.Language.General.Default, new ObservableCollection<RuleTreeNode>(), true)
             {
                 IsCategory = true,
             };
             nodes.Add(defaultCategory);
         }
     }
+
+    private void AddDefaultCategoryIfNone()
+    {
+        if (Nodes.Count == 0)
+        {
+            var defaultCategory = new RuleTreeNode(null, Se.Language.General.Default, new ObservableCollection<RuleTreeNode>(), true)
+            {
+                IsCategory = true,
+            };
+            Nodes.Add(defaultCategory);
+            SelectedNode = defaultCategory;
+        }
+    }
+
 
     [RelayCommand]
     private void Ok()
@@ -153,7 +168,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
 
         if (result.OkPressed)
         {
-            node.Title = result.CategoryName;
+            node.CategoryName = result.CategoryName;
         }
     }
 
@@ -165,7 +180,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
             return;
         }
 
-        var category = new RuleTreeNode(string.Empty, new ObservableCollection<RuleTreeNode>(), true);
+        var category = new RuleTreeNode(node, string.Empty, new ObservableCollection<RuleTreeNode>(), true);
         var result = await _windowService.ShowDialogAsync<EditCategoryWindow, EditCategoryViewModel>(Window!, vm =>
         {
             vm.Initialize(Se.Language.Edit.MultipleReplace.NewCategory, category);
@@ -173,7 +188,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
 
         if (result.OkPressed)
         {
-            category.Title = result.CategoryName;   
+            category.CategoryName = result.CategoryName;   
             Nodes.Add(category);
             SelectedNode = category; 
         }
@@ -194,17 +209,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
 
         if (result.OkPressed)
         {
-            var rule = new RuleTreeNode(string.Empty, new MultipleReplaceRule
-            {
-                Active = true,
-                Description = result.Description,
-                Find = result.FindWhat,
-                ReplaceWith = result.ReplaceWith,
-                Type = result.IsRegularExpression ? MultipleReplaceType.RegularExpression :
-                       result.IsCaseSensitive ? MultipleReplaceType.CaseSensitive :
-                       MultipleReplaceType.CaseInsensitive,
-
-            });
+            var rule = MakeRuleTreeNode(node, result);
             node.SubNodes?.Add(rule);
             SelectedNode = rule;    
         }
@@ -219,6 +224,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
         }
 
         Nodes.Remove(node);
+        AddDefaultCategoryIfNone();
     }
 
     [RelayCommand]
@@ -316,16 +322,30 @@ public partial class MultipleReplaceViewModel : ObservableObject
     [RelayCommand]
     private void NodeDuplicate(RuleTreeNode? node)
     {
-        if (node == null)
+        if (node == null || node.Parent == null || node.Parent.SubNodes == null)
         {
             return;
+        }
+
+        var nodes = node.Parent.SubNodes;
+        var index = nodes.IndexOf(node);
+        if (index >= 0)
+        {
+            nodes.Insert(index, new RuleTreeNode(node.Parent, new MultipleReplaceRule 
+            { 
+                Active = node.IsActive,
+                Description = node.Description,
+                Find = node.Find,
+                ReplaceWith = node.ReplaceWith,
+                Type = node.Type,
+            }));
         }
     }
 
     [RelayCommand]
     private async Task NodeInsertBefore(RuleTreeNode? node)
     {
-        if (node == null)
+        if (node == null || node.Parent == null || node.Parent.SubNodes == null)
         {
             return;
         }
@@ -337,13 +357,18 @@ public partial class MultipleReplaceViewModel : ObservableObject
 
         if (result.OkPressed)
         {
+            var nodes = node.Parent.SubNodes;
+            var index = nodes.IndexOf(node);
+            var rule = MakeRuleTreeNode(node, result);
+            nodes.Insert(index, rule);
+            SelectedNode = rule;
         }
     }
 
     [RelayCommand]
     private async Task NodeInsertAfter(RuleTreeNode? node)
     {
-        if (node == null)
+        if (node == null || node.Parent == null || node.Parent.SubNodes == null)
         {
             return;
         }
@@ -355,6 +380,11 @@ public partial class MultipleReplaceViewModel : ObservableObject
 
         if (result.OkPressed)
         {
+            var nodes = node.Parent.SubNodes;
+            var index = nodes.IndexOf(node);
+            var rule = MakeRuleTreeNode(node, result);
+            nodes.Insert(index + 1, rule);
+            SelectedNode = rule;
         }
     }
 
@@ -372,30 +402,32 @@ public partial class MultipleReplaceViewModel : ObservableObject
     [RelayCommand]
     private void NodeMoveUp(RuleTreeNode? node)
     {
-        if (node == null)
+        if (node == null || node.Parent == null || node.Parent.SubNodes == null)
         {
             return;
         }
 
-        var index = Nodes.IndexOf(node);
+        var nodes = node.Parent.SubNodes;
+        var index = nodes.IndexOf(node);
         if (index > 0)
         {
-            Nodes.Move(index, index - 1);
+            nodes.Move(index, index - 1);
         }
     }
 
     [RelayCommand]
     private void NodeMoveDown(RuleTreeNode? node)
     {
-        if (node == null)
+        if (node == null || node.Parent == null || node.Parent.SubNodes == null)
         {
             return;
         }
 
-        var index = Nodes.IndexOf(node);
-        if (index < Nodes.Count - 1)
+        var nodes = node.Parent.SubNodes;
+        var index = nodes.IndexOf(node);
+        if (index < nodes.Count - 1)
         {
-            Nodes.Move(index, index + 1);
+            nodes.Move(index, index + 1);
         }
     }
 
@@ -420,7 +452,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
         }, DispatcherPriority.Background);
     }
 
-    private IEnumerable<TreeViewItem> FindAllTreeViewItems(Control parent)
+    private static IEnumerable<TreeViewItem> FindAllTreeViewItems(Control parent)
     {
         var result = new List<TreeViewItem>();
         if (parent is TreeViewItem tvi)
@@ -437,6 +469,20 @@ public partial class MultipleReplaceViewModel : ObservableObject
         }
 
         return result;
+    }
+
+    private static RuleTreeNode MakeRuleTreeNode(RuleTreeNode node, EditRuleViewModel result)
+    {
+        return new RuleTreeNode(node.Parent, new MultipleReplaceRule
+        {
+            Active = node.IsActive,
+            Description = result.Description,
+            Find = result.FindWhat,
+            ReplaceWith = result.ReplaceWith,
+            Type = result.IsRegularExpression ? MultipleReplaceType.RegularExpression :
+                               result.IsCaseSensitive ? MultipleReplaceType.CaseSensitive :
+                               MultipleReplaceType.CaseInsensitive,
+        });
     }
 
     public void RulesTreeView_SelectionChanged(object? sender, SelectionChangedEventArgs e)

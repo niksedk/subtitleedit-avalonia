@@ -6,7 +6,7 @@ namespace Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 
 public partial class RuleTreeNode : ObservableObject
 {
-    [ObservableProperty] private string _title;
+    [ObservableProperty] private string _categoryName;
     public ObservableCollection<RuleTreeNode>? SubNodes { get; }
     [ObservableProperty] private string _find;
     [ObservableProperty] private string _replaceWith;
@@ -17,9 +17,11 @@ public partial class RuleTreeNode : ObservableObject
 
     public MultipleReplaceType Type { get; set; }
 
-    public RuleTreeNode(string title, MultipleReplaceRule rule)
+    public RuleTreeNode? Parent { get; set; }
+
+    public RuleTreeNode(RuleTreeNode? parent, MultipleReplaceRule rule)
     {
-        Title = title;
+        CategoryName = string.Empty;
         Find = rule.Find;
         ReplaceWith = rule.ReplaceWith;
         Description = rule.Description;
@@ -27,6 +29,7 @@ public partial class RuleTreeNode : ObservableObject
         IsCategory = false;
         Type = rule.Type;
         IconName = string.Empty;
+        Parent = parent;
         UpdateIconName();
     }
 
@@ -46,9 +49,9 @@ public partial class RuleTreeNode : ObservableObject
         }
     }
 
-    public RuleTreeNode(string title, ObservableCollection<RuleTreeNode> subNodes, bool active)
+    public RuleTreeNode(RuleTreeNode? parent, string categoryName, ObservableCollection<RuleTreeNode> subNodes, bool active)
     {
-        Title = title;
+        CategoryName = categoryName;
         SubNodes = subNodes;
         Find = string.Empty;
         ReplaceWith = string.Empty;
@@ -56,5 +59,6 @@ public partial class RuleTreeNode : ObservableObject
         IconName = string.Empty;
         IsActive = active;
         IsCategory = true;
+        Parent = parent;
     }
 }

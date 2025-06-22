@@ -21,8 +21,10 @@ public class MultipleReplaceWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = Se.Language.Edit.MultipleReplace.Title;
-        Width = 910;
-        Height = 640;
+        Width = 1010;
+        Height = 740;
+        MinWidth = 400;
+        MinHeight = 300;
         CanResize = true;
         _vm = vm;
         vm.Window = this;
@@ -105,7 +107,7 @@ public class MultipleReplaceWindow : Window
 
                 if (node.IsCategory)
                 {
-                    var label = UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.Title));
+                    var label = UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.CategoryName));
                     label.FontWeight = FontWeight.Bold;
                     
                     var buttonCategoryActions = new Button

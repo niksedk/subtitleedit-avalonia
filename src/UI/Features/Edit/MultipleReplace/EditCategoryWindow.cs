@@ -3,6 +3,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 
@@ -20,8 +21,16 @@ public class EditCategoryWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        var labelCategoryName = UiUtil.MakeLabel("Category name");
+        var labelCategoryName = UiUtil.MakeLabel(Se.Language.Edit.MultipleReplace.CategoryName);
         var textBoxCategoryName = UiUtil.MakeTextBox(300, vm, nameof(vm.CategoryName));
+        textBoxCategoryName.KeyDown += (sender, args) =>
+        {
+            if (args.Key == Key.Enter)
+            {
+                vm.OkCommand.Execute(null);
+                args.Handled = true;
+            }
+        };
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
