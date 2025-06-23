@@ -14,6 +14,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 
@@ -26,10 +27,13 @@ public partial class MultipleReplaceViewModel : ObservableObject
     public TreeView RulesTreeView { get; internal set; }
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
+    public Subtitle FixedSubtitle { get; private set; }
 
     private IWindowService _windowService;
-    private Subtitle _subtitle = new Subtitle();
+    private Subtitle _subtitle;
     private readonly Dictionary<string, Regex> _compiledRegExList;
+    private readonly Timer _timerReplace;
+    private bool _dirty;
 
     public MultipleReplaceViewModel(IWindowService windowService)
     {
@@ -40,11 +44,33 @@ public partial class MultipleReplaceViewModel : ObservableObject
         RulesTreeView = new TreeView();
 
         _compiledRegExList = new Dictionary<string, Regex>();
+        
+        _timerReplace = new Timer();
+        _timerReplace.Interval = 250;
+        _timerReplace.Elapsed += TimerReplaceElapsed;
+        _timerReplace.Start();
+        
+        _subtitle = new Subtitle();
+        FixedSubtitle = new Subtitle();
+    }
+
+    private void TimerReplaceElapsed(object? sender, ElapsedEventArgs e)
+    {
+        if (!_dirty)
+        {
+            return;
+        }
+        
+        _timerReplace.Stop();
+        _dirty  = false;
+        GeneratePreview();
+        _timerReplace.Start();
     }
 
     public void Initialize(Subtitle subtitle)
     {
         _subtitle = subtitle;
+        _dirty = true;
     }
 
     private IEnumerable<RuleTreeNode> GetNodes()
@@ -53,7 +79,8 @@ public partial class MultipleReplaceViewModel : ObservableObject
 
         foreach (var category in Se.Settings.Edit.MultipleReplace.Categories)
         {
-            var categoryNode = new RuleTreeNode(null, category.Name, new ObservableCollection<RuleTreeNode>(), category.IsActive)
+            var categoryNode = new RuleTreeNode(null, category.Name, new ObservableCollection<RuleTreeNode>(),
+                category.IsActive)
             {
                 IsCategory = true,
             };
@@ -102,7 +129,8 @@ public partial class MultipleReplaceViewModel : ObservableObject
     {
         if (nodes.Count == 0)
         {
-            var defaultCategory = new RuleTreeNode(null, Se.Language.General.Default, new ObservableCollection<RuleTreeNode>(), true)
+            var defaultCategory = new RuleTreeNode(null, Se.Language.General.Default,
+                new ObservableCollection<RuleTreeNode>(), true)
             {
                 IsCategory = true,
             };
@@ -114,7 +142,8 @@ public partial class MultipleReplaceViewModel : ObservableObject
     {
         if (Nodes.Count == 0)
         {
-            var defaultCategory = new RuleTreeNode(null, Se.Language.General.Default, new ObservableCollection<RuleTreeNode>(), true)
+            var defaultCategory = new RuleTreeNode(null, Se.Language.General.Default,
+                new ObservableCollection<RuleTreeNode>(), true)
             {
                 IsCategory = true,
             };
@@ -141,7 +170,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
     [RelayCommand]
     private void NodeCategoryOpenContextMenu(RuleTreeNode? node)
     {
-        if (node == null || !node.IsCategory)
+        if (node is not { IsCategory: true })
         {
             return;
         }
@@ -150,15 +179,31 @@ public partial class MultipleReplaceViewModel : ObservableObject
         {
             Items =
             {
-                new MenuItem { Header = Se.Language.General.EditDotDotDot, Command = CategoryEditCommand, CommandParameter = node },
+                new MenuItem
+                {
+                    Header = Se.Language.General.EditDotDotDot, Command = CategoryEditCommand, CommandParameter = node
+                },
                 new Separator(),
-                new MenuItem { Header = Se.Language.Edit.MultipleReplace.NewCategory, Command = CategoryAddCategoryCommand, CommandParameter = node },
-                new MenuItem { Header = Se.Language.Edit.MultipleReplace.NewRule, Command = CategoryAddRuleCommand, CommandParameter = node },
+                new MenuItem
+                {
+                    Header = Se.Language.Edit.MultipleReplace.NewCategory, Command = CategoryAddCategoryCommand,
+                    CommandParameter = node
+                },
+                new MenuItem
+                {
+                    Header = Se.Language.Edit.MultipleReplace.NewRule, Command = CategoryAddRuleCommand,
+                    CommandParameter = node
+                },
                 new Separator(),
-                new MenuItem { Header = Se.Language.General.MoveUp, Command = CategoryMoveUpCommand, CommandParameter = node },
-                new MenuItem { Header = Se.Language.General.MoveDown, Command = CategoryMoveDownCommand, CommandParameter = node },
+                new MenuItem
+                    { Header = Se.Language.General.MoveUp, Command = CategoryMoveUpCommand, CommandParameter = node },
+                new MenuItem
+                {
+                    Header = Se.Language.General.MoveDown, Command = CategoryMoveDownCommand, CommandParameter = node
+                },
                 new Separator(),
-                new MenuItem { Header = Se.Language.General.Delete, Command = CategoryDeleteCommand, CommandParameter = node }
+                new MenuItem
+                    { Header = Se.Language.General.Delete, Command = CategoryDeleteCommand, CommandParameter = node }
             }
         };
 
@@ -174,14 +219,13 @@ public partial class MultipleReplaceViewModel : ObservableObject
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<EditCategoryWindow, EditCategoryViewModel>(Window!, vm =>
-        {
-            vm.Initialize(Se.Language.Edit.MultipleReplace.EditCategory, node);
-        });
+        var result = await _windowService.ShowDialogAsync<EditCategoryWindow, EditCategoryViewModel>(Window!,
+            vm => { vm.Initialize(Se.Language.Edit.MultipleReplace.EditCategory, node); });
 
         if (result.OkPressed)
         {
             node.CategoryName = result.CategoryName;
+            _dirty = true;
         }
     }
 
@@ -194,16 +238,15 @@ public partial class MultipleReplaceViewModel : ObservableObject
         }
 
         var category = new RuleTreeNode(node, string.Empty, new ObservableCollection<RuleTreeNode>(), true);
-        var result = await _windowService.ShowDialogAsync<EditCategoryWindow, EditCategoryViewModel>(Window!, vm =>
-        {
-            vm.Initialize(Se.Language.Edit.MultipleReplace.NewCategory, category);
-        });
+        var result = await _windowService.ShowDialogAsync<EditCategoryWindow, EditCategoryViewModel>(Window!,
+            vm => { vm.Initialize(Se.Language.Edit.MultipleReplace.NewCategory, category); });
 
         if (result.OkPressed)
         {
             category.CategoryName = result.CategoryName;
             Nodes.Add(category);
             SelectedNode = category;
+            _dirty = true;
         }
     }
 
@@ -215,16 +258,15 @@ public partial class MultipleReplaceViewModel : ObservableObject
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!, vm =>
-        {
-            vm.Initialize(Se.Language.Edit.MultipleReplace.NewRule, node);
-        });
+        var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!,
+            vm => { vm.Initialize(Se.Language.Edit.MultipleReplace.NewRule, node); });
 
         if (result.OkPressed)
         {
             var rule = MakeRuleTreeNode(node, result);
             node.SubNodes?.Add(rule);
             SelectedNode = rule;
+            _dirty = true;
         }
     }
 
@@ -238,6 +280,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
 
         Nodes.Remove(node);
         AddDefaultCategoryIfNone();
+        _dirty = true;
     }
 
     [RelayCommand]
@@ -252,6 +295,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
         if (index > 0)
         {
             Nodes.Move(index, index - 1);
+            _dirty = true;
         }
     }
 
@@ -268,6 +312,8 @@ public partial class MultipleReplaceViewModel : ObservableObject
         {
             Nodes.Move(index, index + 1);
         }
+        
+        _dirty = true;
     }
 
     [RelayCommand]
@@ -282,16 +328,31 @@ public partial class MultipleReplaceViewModel : ObservableObject
         {
             Items =
             {
-                new MenuItem { Header = Se.Language.Edit.MultipleReplace.EditRule, Command = NodeEditCommand, CommandParameter = node  },
+                new MenuItem
+                {
+                    Header = Se.Language.Edit.MultipleReplace.EditRule, Command = NodeEditCommand,
+                    CommandParameter = node
+                },
                 new Separator(),
-                new MenuItem { Header = Se.Language.General.Duplicate, Command = NodeDuplicateCommand, CommandParameter = node },
-                new MenuItem { Header = Se.Language.General.InsertBefore, Command = NodeInsertBeforeCommand, CommandParameter = node },
-                new MenuItem { Header = Se.Language.General.InsertAfter, Command = NodeInsertAfterCommand, CommandParameter = node },
+                new MenuItem
+                    { Header = Se.Language.General.Duplicate, Command = NodeDuplicateCommand, CommandParameter = node },
+                new MenuItem
+                {
+                    Header = Se.Language.General.InsertBefore, Command = NodeInsertBeforeCommand,
+                    CommandParameter = node
+                },
+                new MenuItem
+                {
+                    Header = Se.Language.General.InsertAfter, Command = NodeInsertAfterCommand, CommandParameter = node
+                },
                 new Separator(),
-                new MenuItem { Header = Se.Language.General.MoveUp , Command = NodeMoveUpCommand, CommandParameter = node },
-                new MenuItem { Header = Se.Language.General.MoveDown, Command = NodeMoveDownCommand, CommandParameter = node },
+                new MenuItem
+                    { Header = Se.Language.General.MoveUp, Command = NodeMoveUpCommand, CommandParameter = node },
+                new MenuItem
+                    { Header = Se.Language.General.MoveDown, Command = NodeMoveDownCommand, CommandParameter = node },
                 new Separator(),
-                new MenuItem { Header = Se.Language.General.Delete, Command = NodeDeleteCommand, CommandParameter = node }
+                new MenuItem
+                    { Header = Se.Language.General.Delete, Command = NodeDeleteCommand, CommandParameter = node }
             }
         };
 
@@ -307,10 +368,8 @@ public partial class MultipleReplaceViewModel : ObservableObject
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!, vm =>
-        {
-            vm.Initialize(Se.Language.Edit.MultipleReplace.EditRule, node);
-        });
+        var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!,
+            vm => { vm.Initialize(Se.Language.Edit.MultipleReplace.EditRule, node); });
 
         if (result.OkPressed)
         {
@@ -329,6 +388,8 @@ public partial class MultipleReplaceViewModel : ObservableObject
             {
                 node.Type = MultipleReplaceType.CaseInsensitive;
             }
+            
+            _dirty = true;
         }
     }
 
@@ -352,6 +413,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
                 ReplaceWith = node.ReplaceWith,
                 Type = node.Type,
             }));
+            _dirty = true;
         }
     }
 
@@ -363,10 +425,8 @@ public partial class MultipleReplaceViewModel : ObservableObject
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!, vm =>
-        {
-            vm.Initialize(Se.Language.Edit.MultipleReplace.NewRule, node);
-        });
+        var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!,
+            vm => { vm.Initialize(Se.Language.Edit.MultipleReplace.NewRule, node); });
 
         if (result.OkPressed)
         {
@@ -375,6 +435,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
             var rule = MakeRuleTreeNode(node, result);
             nodes.Insert(index, rule);
             SelectedNode = rule;
+            _dirty = true;
         }
     }
 
@@ -386,10 +447,8 @@ public partial class MultipleReplaceViewModel : ObservableObject
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!, vm =>
-        {
-            vm.Initialize(Se.Language.Edit.MultipleReplace.NewRule, node);
-        });
+        var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!,
+            vm => { vm.Initialize(Se.Language.Edit.MultipleReplace.NewRule, node); });
 
         if (result.OkPressed)
         {
@@ -398,6 +457,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
             var rule = MakeRuleTreeNode(node, result);
             nodes.Insert(index + 1, rule);
             SelectedNode = rule;
+            _dirty = true;
         }
     }
 
@@ -410,6 +470,8 @@ public partial class MultipleReplaceViewModel : ObservableObject
         }
 
         Nodes.Remove(node);
+        
+        _dirty = true;
     }
 
     [RelayCommand]
@@ -426,6 +488,8 @@ public partial class MultipleReplaceViewModel : ObservableObject
         {
             nodes.Move(index, index - 1);
         }
+        
+        _dirty = true;
     }
 
     [RelayCommand]
@@ -442,6 +506,8 @@ public partial class MultipleReplaceViewModel : ObservableObject
         {
             nodes.Move(index, index + 1);
         }
+
+        _dirty = true;
     }
 
     internal void OnKeyDown(KeyEventArgs e)
@@ -493,46 +559,25 @@ public partial class MultipleReplaceViewModel : ObservableObject
             Find = result.FindWhat,
             ReplaceWith = result.ReplaceWith,
             Type = result.IsRegularExpression ? MultipleReplaceType.RegularExpression :
-                               result.IsCaseSensitive ? MultipleReplaceType.CaseSensitive :
-                               MultipleReplaceType.CaseInsensitive,
+                result.IsCaseSensitive ? MultipleReplaceType.CaseSensitive :
+                MultipleReplaceType.CaseInsensitive,
         });
     }
 
     private void GeneratePreview()
     {
-        var FixedSubtitle = new Subtitle(_subtitle, false);
-        int fixedLines = 0;
-        var replaceExpressions = new HashSet<ReplaceExpression>();
-        foreach (var group in Nodes.Where(p => p.IsActive && p.SubNodes != null))
-        {
-            foreach (var rule in group.SubNodes!)
-            {
-                if (rule.IsActive)
-                {
-                    string findWhat = rule.Find;
-                    if (!string.IsNullOrEmpty(findWhat)) // allow space or spaces
-                    {
-                        string replaceWith = RegexUtils.FixNewLine(rule.ReplaceWith);
-                        findWhat = RegexUtils.FixNewLine(findWhat);
-                        var ruleInfo = string.IsNullOrEmpty(rule.Description) ? $"Group name: {group.CategoryName} - Rule number: {group.SubNodes.IndexOf(rule) + 1}" : $"Group name: {group.CategoryName} - Rule number: {group.SubNodes.IndexOf(rule) + 1}. {rule.Description}";
-                        var mpi = new ReplaceExpression(findWhat, replaceWith, rule.Type.ToString(), ruleInfo);
-                        replaceExpressions.Add(mpi);
-                        if (mpi.SearchType == ReplaceExpression.SearchRegEx && !_compiledRegExList.ContainsKey(findWhat))
-                        {
-                            _compiledRegExList.Add(findWhat, new Regex(findWhat, RegexOptions.Compiled | RegexOptions.Multiline));
-                        }
-                    }
-                }
-            }
-        }
-
+        FixedSubtitle = new Subtitle(_subtitle, false);
+        var fixedLines = 0;
+        var replaceExpressions = BuildReplaceExpressions();
+        var fixes = new List<MultipleReplaceFix>();
         for (var i = 0; i < _subtitle.Paragraphs.Count; i++)
         {
-            Paragraph p = _subtitle.Paragraphs[i];
-            bool hit = false;
-            string newText = p.Text;
-            string ruleInfo = string.Empty;
-            foreach (ReplaceExpression item in replaceExpressions)
+            var p = _subtitle.Paragraphs[i];
+            var hit = false;
+            var newText = p.Text;
+            var ruleInfo = string.Empty;
+            var ruleHits = new List<MultipleReplaceRule>();
+            foreach (var item in replaceExpressions)
             {
                 if (item.SearchType == ReplaceExpression.SearchCaseSensitive)
                 {
@@ -545,7 +590,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
                 }
                 else if (item.SearchType == ReplaceExpression.SearchRegEx)
                 {
-                    Regex r = _compiledRegExList[item.FindWhat];
+                    var r = _compiledRegExList[item.FindWhat];
                     if (r.IsMatch(newText))
                     {
                         hit = true;
@@ -555,7 +600,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
                 }
                 else
                 {
-                    int index = newText.IndexOf(item.FindWhat, StringComparison.OrdinalIgnoreCase);
+                    var index = newText.IndexOf(item.FindWhat, StringComparison.OrdinalIgnoreCase);
                     if (index >= 0)
                     {
                         hit = true;
@@ -563,7 +608,8 @@ public partial class MultipleReplaceViewModel : ObservableObject
                         do
                         {
                             newText = newText.Remove(index, item.FindWhat.Length).Insert(index, item.ReplaceWith);
-                            index = newText.IndexOf(item.FindWhat, index + item.ReplaceWith.Length, StringComparison.OrdinalIgnoreCase);
+                            index = newText.IndexOf(item.FindWhat, index + item.ReplaceWith.Length,
+                                StringComparison.OrdinalIgnoreCase);
                         } while (index >= 0);
                     }
                 }
@@ -572,12 +618,55 @@ public partial class MultipleReplaceViewModel : ObservableObject
             if (hit && newText != p.Text)
             {
                 fixedLines++;
-                //fixes.Add(MakePreviewListItem(p, newText, ruleInfo));
+
+                var fix = new MultipleReplaceFix
+                {
+                    Apply = true,
+                    Number = i +1,
+                    Before = p.Text,
+                    After = newText,
+                };
+                fixes.Add(fix);
                 FixedSubtitle.Paragraphs[i].Text = newText;
             }
         }
+        
+        Dispatcher.UIThread.Post(() =>
+        {
+            Fixes.Clear();
+            Fixes.AddRange(fixes); 
+        });
 
         //groupBoxLinesFound.Text = string.Format(LanguageSettings.Current.MultipleReplace.LinesFoundX, fixedLines);
+    }
+
+    private HashSet<ReplaceExpression> BuildReplaceExpressions()
+    {
+        var replaceExpressions = new HashSet<ReplaceExpression>();
+        foreach (var group in Nodes.Where(p => p.IsActive && p.SubNodes != null))
+        {
+            foreach (var rule in group.SubNodes!.Where(p => p.IsActive))
+            {
+                var findWhat = rule.Find;
+                if (!string.IsNullOrEmpty(findWhat)) // allow space or spaces
+                {
+                    var replaceWith = RegexUtils.FixNewLine(rule.ReplaceWith);
+                    findWhat = RegexUtils.FixNewLine(findWhat);
+                    var ruleInfo = string.IsNullOrEmpty(rule.Description)
+                        ? $"Group name: {group.CategoryName} - Rule number: {group.SubNodes.IndexOf(rule) + 1}"
+                        : $"Group name: {group.CategoryName} - Rule number: {group.SubNodes.IndexOf(rule) + 1}. {rule.Description}";
+                    var mpi = new ReplaceExpression(findWhat, replaceWith, rule.Type.ToString(), ruleInfo);
+                    replaceExpressions.Add(mpi);
+                    if (mpi.SearchType == ReplaceExpression.SearchRegEx && !_compiledRegExList.ContainsKey(findWhat))
+                    {
+                        _compiledRegExList.Add(findWhat,
+                            new Regex(findWhat, RegexOptions.Compiled | RegexOptions.Multiline));
+                    }
+                }
+            }
+        }
+
+        return replaceExpressions;
     }
 
     public void RulesTreeView_SelectionChanged(object? sender, SelectionChangedEventArgs e)
@@ -588,5 +677,10 @@ public partial class MultipleReplaceViewModel : ObservableObject
     internal void OnLoaded(RoutedEventArgs e)
     {
         ExpandAll();
+    }
+
+    public void OnActiveChanged(object? sender, RoutedEventArgs e)
+    {
+        _dirty = true;
     }
 }

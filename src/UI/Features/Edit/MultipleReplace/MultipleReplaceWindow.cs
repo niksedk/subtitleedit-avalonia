@@ -104,6 +104,7 @@ public class MultipleReplaceWindow : Window
                     Mode = BindingMode.TwoWay,
                     Source = node,
                 });
+                checkBox.IsCheckedChanged += vm.OnActiveChanged;
 
                 if (node.IsCategory)
                 {
