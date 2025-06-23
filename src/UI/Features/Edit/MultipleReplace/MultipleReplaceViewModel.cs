@@ -167,9 +167,22 @@ public partial class MultipleReplaceViewModel : ObservableObject
     [RelayCommand]
     private void Ok()
     {
+        GeneratePreview();
+        UndoUnchecked();
         SaveSettings();
         OkPressed = true;
         Window?.Close();
+    }
+
+    private void UndoUnchecked()
+    {
+        foreach (var fix in Fixes)
+        {
+            if (!fix.Apply)
+            {
+                FixedSubtitle.Paragraphs[fix.Number - 1].Text = _subtitle.Paragraphs[fix.Number - 1].Text;
+            }
+        }
     }
 
     [RelayCommand]

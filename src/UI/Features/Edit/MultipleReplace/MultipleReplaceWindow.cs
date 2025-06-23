@@ -324,7 +324,7 @@ public class MultipleReplaceWindow : Window
                 },
                 new DataGridTextColumn
                 {
-                    Header = Se.Language.General.Number,
+                    Header = Se.Language.General.NumberSymbol,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(MultipleReplaceFix.Number)),
                     IsReadOnly = true,
