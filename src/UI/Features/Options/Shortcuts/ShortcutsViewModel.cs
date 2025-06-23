@@ -12,6 +12,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
@@ -34,10 +36,12 @@ public partial class ShortcutsViewModel : ObservableObject
     public TreeView ShortcutsTreeView { get; internal set; }
 
     private List<ShortCut> _allShortcuts;
-    public MainViewModel? _mainViewModel;
 
-    public ShortcutsViewModel()
+    private IWindowService _windowService;
+
+    public ShortcutsViewModel(IWindowService windowService)
     {
+        _windowService = windowService;
         SearchText = string.Empty;
         Shortcuts = new ObservableCollection<string>(GetShortcutKeys());
         Filters = new ObservableCollection<string>
@@ -77,7 +81,6 @@ public partial class ShortcutsViewModel : ObservableObject
 
     public void LoadShortCuts(MainViewModel vm)
     {
-        _mainViewModel = vm;
         _allShortcuts = ShortcutsMain.GetAllShortcuts(vm);
         UpdateVisibleShortcuts(string.Empty);
     }
@@ -86,7 +89,8 @@ public partial class ShortcutsViewModel : ObservableObject
     {
         Nodes.Clear();
         AddShortcuts(ShortcutCategory.General, Se.Language.Options.Shortcuts.CategoryGeneral, searchText);
-        AddShortcuts(ShortcutCategory.SubtitleGridAndTextBox, Se.Language.Options.Shortcuts.CategorySubtitleGridAndTextBox, searchText);
+        AddShortcuts(ShortcutCategory.SubtitleGridAndTextBox,
+            Se.Language.Options.Shortcuts.CategorySubtitleGridAndTextBox, searchText);
         AddShortcuts(ShortcutCategory.SubtitleGrid, Se.Language.Options.Shortcuts.CategorySubtitleGrid, searchText);
         AddShortcuts(ShortcutCategory.Waveform, Se.Language.Options.Shortcuts.CategoryWaveform, searchText);
         ExpandAll();
@@ -94,7 +98,7 @@ public partial class ShortcutsViewModel : ObservableObject
 
     private void AddShortcuts(ShortcutCategory category, string categoryName, string searchText)
     {
-        List<ShortCut> shortcuts = _allShortcuts.Where(p => p.Category == category && Search(searchText, p)).ToList();
+        var shortcuts = _allShortcuts.Where(p => p.Category == category && Search(searchText, p)).ToList();
 
         var children = new ObservableCollection<ShortcutTreeNode>(
             shortcuts.Select(x => new ShortcutTreeNode(MakeDisplayName(x), x))
@@ -109,7 +113,9 @@ public partial class ShortcutsViewModel : ObservableObject
 
     private static string MakeDisplayName(ShortCut x)
     {
-        var name = ShortcutsMain.CommandTranslationLookup.TryGetValue(x.Name, out var displayName) ? displayName : x.Name;
+        var name = ShortcutsMain.CommandTranslationLookup.TryGetValue(x.Name, out var displayName)
+            ? displayName
+            : x.Name;
 
         if (x.Keys.Count > 0)
         {
@@ -145,6 +151,18 @@ public partial class ShortcutsViewModel : ObservableObject
     private void CommandCancel()
     {
         Window?.Close();
+    }
+
+    [RelayCommand]
+    private async Task ShowGetKey()
+    {
+        var result =
+            await _windowService
+                .ShowDialogAsync<GetKeyWindow, GetKeyViewModel>(Window!);
+
+        if (result.OkPressed)
+        {
+        }
     }
 
     [RelayCommand]

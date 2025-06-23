@@ -134,5 +134,6 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<TransparentSettingsViewModel>();
         collection.AddTransient<EditRuleViewModel>();
         collection.AddTransient<EditCategoryViewModel>();
+        collection.AddTransient<GetKeyViewModel>();
     }
 }

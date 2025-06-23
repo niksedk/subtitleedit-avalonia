@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -182,7 +180,12 @@ public class ShortcutsWindow : Window
         comboBoxKeys.Bind(ComboBox.SelectedItemProperty, new Binding(nameof(vm.SelectedShortcut)) { Source = vm });
         comboBoxKeys.Bind(ComboBox.IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(comboBoxKeys);
-
+        
+        // browse button
+        var buttonBrowse = UiUtil.MakeButtonBrowse(vm.ShowGetKeyCommand);
+        editPanel.Children.Add(buttonBrowse);
+        buttonBrowse.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
+        
         // Update button
         var buttonUpdate = UiUtil.MakeButton("Update", vm.UpdateShortcutCommand);
         editPanel.Children.Add(buttonUpdate);
