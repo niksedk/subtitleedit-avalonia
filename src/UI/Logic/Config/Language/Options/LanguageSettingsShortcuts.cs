@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language.Options;
+﻿using System;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language.Options;
 
 public class LanguageSettingsShortcuts
 {
@@ -100,6 +102,9 @@ public class LanguageSettingsShortcuts
     public string Settings { get; set; }
     public string Assigned { get; internal set; }
     public string Unassigned { get; internal set; }
+    public string PressedKeyX { get; set; }
+    public string PressAKey { get; set; }
+    public string DetectKey { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -200,5 +205,10 @@ public class LanguageSettingsShortcuts
 
         Assigned = "Assigned";
         Unassigned = "Unassigned";
+        
+        PressedKeyX = "Pressed key: {0}";
+        PressAKey = "Press a key";
+        
+        DetectKey = "Detect key";
     }
 }

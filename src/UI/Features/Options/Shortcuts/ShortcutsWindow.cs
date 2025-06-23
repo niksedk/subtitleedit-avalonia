@@ -173,7 +173,7 @@ public class ShortcutsWindow : Window
         var comboBoxKeys = new ComboBox
         {
             Width = 200,
-            Margin = new Thickness(10, 0, 10, 0),
+            Margin = new Thickness(10, 0, 5, 0),
             //ItemsSource = Enum.GetValues(typeof(Key)).Cast<Key>(),
         };
         comboBoxKeys.Bind(ComboBox.ItemsSourceProperty, new Binding(nameof(vm.Shortcuts)) { Source = vm });
@@ -185,6 +185,7 @@ public class ShortcutsWindow : Window
         var buttonBrowse = UiUtil.MakeButtonBrowse(vm.ShowGetKeyCommand);
         editPanel.Children.Add(buttonBrowse);
         buttonBrowse.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
+        buttonBrowse.Margin = new Thickness(0,0,10,0);  
         
         // Update button
         var buttonUpdate = UiUtil.MakeButton("Update", vm.UpdateShortcutCommand);

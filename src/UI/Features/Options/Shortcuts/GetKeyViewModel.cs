@@ -2,19 +2,23 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
 public partial class GetKeyViewModel : ObservableObject
 {
-    [ObservableProperty] private string _currentKey;
+    [ObservableProperty] private string _infoText;
     
     public Window? Window { get; set; }
     
     public bool OkPressed { get; private set; }
+    public string PressedKey { get; private set; }
 
     public GetKeyViewModel()
     {
+        InfoText = "Press a key";
+        PressedKey = string.Empty;
     }
 
     [RelayCommand]                   
@@ -36,6 +40,11 @@ public partial class GetKeyViewModel : ObservableObject
         {
             e.Handled = true;
             Window?.Close();
+        }
+        else
+        {
+            PressedKey = e.Key.ToString();
+            InfoText = string.Format(Se.Language.Options.Shortcuts.PressedKeyX,  PressedKey);
         }
     }
 }

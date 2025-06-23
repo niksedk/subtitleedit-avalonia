@@ -160,8 +160,9 @@ public partial class ShortcutsViewModel : ObservableObject
             await _windowService
                 .ShowDialogAsync<GetKeyWindow, GetKeyViewModel>(Window!);
 
-        if (result.OkPressed)
+        if (result.OkPressed && !string.IsNullOrEmpty(result.PressedKey))
         {
+            SelectedShortcut = result.PressedKey;
         }
     }
 
