@@ -1282,9 +1282,4 @@ public static class UiUtil
 
         return control;
     }
-
-    internal static object MakeLabel(object videoExtension)
-    {
-        throw new NotImplementedException();
-    }
 }

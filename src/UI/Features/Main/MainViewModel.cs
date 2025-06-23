@@ -970,11 +970,19 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             return;
         }
 
-        var viewModel =
+        var result =
             await _windowService.ShowDialogAsync<MultipleReplaceWindow, MultipleReplaceViewModel>(Window!, vm => 
             { 
                 vm.Initialize(GetUpdateSubtitle());
             });
+        
+        if (result.OkPressed)
+        {
+            MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Multiple replace"));
+            SetSubtitles(result.FixedSubtitle);
+            SelectAndScrollToRow(0);
+            ShowStatus($"Replaced {result.TotalReplaced} occurrences");
+        }
 
         _shortcutManager.ClearKeys();
     }

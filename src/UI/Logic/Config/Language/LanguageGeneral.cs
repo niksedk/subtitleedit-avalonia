@@ -154,12 +154,18 @@ public class LanguageGeneral
     public string AddVideoFiles { get; set; }
     public string Help { get; set; }
     public string VideoExtension { get; set; }
-    public object SubtitleFileName { get; set; }
+    public string SubtitleFileName { get; set; }
     public string Default { get; set; }
-    public object EditDotDotDot { get; internal set; }
-    public object MoveUp { get; internal set; }
-    public object MoveDown { get; internal set; }
-    public object Duplicate { get; internal set; }
+    public string EditDotDotDot { get; internal set; }
+    public string MoveUp { get; internal set; }
+    public string MoveDown { get; internal set; }
+    public string Duplicate { get; internal set; }
+    public string Find { get; internal set; }
+    public string CaseInsensitive { get; set; }
+    public string CaseSensitive { get; set; }
+    public string RegularExpression { get; set; }
+    public string ReplaceWith { get; set; }
+    public string Type { get; set; }
 
     public LanguageGeneral()
     {
@@ -321,5 +327,11 @@ public class LanguageGeneral
         MoveUp = "Move up";
         MoveDown = "Move down";
         Duplicate = "Duplicate";
+        Find = "Find";
+        CaseInsensitive = "Case insensitive";
+        CaseSensitive = "Case sensitive";
+        RegularExpression = "Regular expression";
+        ReplaceWith = "Replace with";
+        Type = "Type";
     }
 }

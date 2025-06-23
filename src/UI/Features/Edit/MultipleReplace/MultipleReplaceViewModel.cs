@@ -15,21 +15,25 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
+using Avalonia;
 
 namespace Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 
 public partial class MultipleReplaceViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<MultipleReplaceFix> _fixes;
+    [ObservableProperty] private ObservableCollection<MultipleReplaceTypeItem> _replaceTypes;
     [ObservableProperty] private MultipleReplaceFix? _selectedFix;
     [ObservableProperty] private RuleTreeNode? _selectedNode;
+    [ObservableProperty] private bool _isEditPanelVisible;
     public ObservableCollection<RuleTreeNode> Nodes { get; }
     public TreeView RulesTreeView { get; internal set; }
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
     public Subtitle FixedSubtitle { get; private set; }
+    public int TotalReplaced  { get; private set; }
 
-    private IWindowService _windowService;
+    private readonly IWindowService _windowService;
     private Subtitle _subtitle;
     private readonly Dictionary<string, Regex> _compiledRegExList;
     private readonly Timer _timerReplace;
@@ -52,6 +56,13 @@ public partial class MultipleReplaceViewModel : ObservableObject
         
         _subtitle = new Subtitle();
         FixedSubtitle = new Subtitle();
+        
+        ReplaceTypes =
+        [
+            new MultipleReplaceTypeItem(Se.Language.General.CaseInsensitive, MultipleReplaceType.CaseInsensitive),
+            new MultipleReplaceTypeItem(Se.Language.General.CaseSensitive, MultipleReplaceType.CaseSensitive),
+            new MultipleReplaceTypeItem(Se.Language.General.RegularExpression, MultipleReplaceType.RegularExpression)
+        ];
     }
 
     private void TimerReplaceElapsed(object? sender, ElapsedEventArgs e)
@@ -73,7 +84,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
         _dirty = true;
     }
 
-    private IEnumerable<RuleTreeNode> GetNodes()
+    private static IEnumerable<RuleTreeNode> GetNodes()
     {
         var nodes = new List<RuleTreeNode>();
 
@@ -89,7 +100,6 @@ public partial class MultipleReplaceViewModel : ObservableObject
             foreach (var rule in category.Rules)
             {
                 var node = new RuleTreeNode(categoryNode, rule);
-                node.Parent = categoryNode;
                 categoryNode.SubNodes?.Add(node);
             }
         }
@@ -104,9 +114,11 @@ public partial class MultipleReplaceViewModel : ObservableObject
         Se.Settings.Edit.MultipleReplace.Categories.Clear();
         foreach (var category in Nodes)
         {
-            var c = new SeEditMultipleReplace.MultipleReplaceCategory();
-            c.Name = category.CategoryName;
-            c.IsActive = category.IsActive;
+            var c = new SeEditMultipleReplace.MultipleReplaceCategory
+            {
+                Name = category.CategoryName,
+                IsActive = category.IsActive
+            };
             Se.Settings.Edit.MultipleReplace.Categories.Add(c);
 
             foreach (var rule in category.SubNodes ?? [])
@@ -151,7 +163,6 @@ public partial class MultipleReplaceViewModel : ObservableObject
             SelectedNode = defaultCategory;
         }
     }
-
 
     [RelayCommand]
     private void Ok()
@@ -208,6 +219,10 @@ public partial class MultipleReplaceViewModel : ObservableObject
         };
 
         RulesTreeView.ContextMenu = contextMenu;
+        contextMenu.Closing += (sender, args) =>
+        {
+            RulesTreeView.ContextMenu = null;
+        };
         contextMenu.Open();
     }
 
@@ -357,6 +372,10 @@ public partial class MultipleReplaceViewModel : ObservableObject
         };
 
         RulesTreeView.ContextMenu = contextMenu;
+        contextMenu.Closing += (sender, args) =>
+        {
+            RulesTreeView.ContextMenu = null;
+        };
         contextMenu.Open();
     }
 
@@ -567,7 +586,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
     private void GeneratePreview()
     {
         FixedSubtitle = new Subtitle(_subtitle, false);
-        var fixedLines = 0;
+        TotalReplaced = 0;
         var replaceExpressions = BuildReplaceExpressions();
         var fixes = new List<MultipleReplaceFix>();
         for (var i = 0; i < _subtitle.Paragraphs.Count; i++)
@@ -617,7 +636,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
 
             if (hit && newText != p.Text)
             {
-                fixedLines++;
+                TotalReplaced++;
 
                 var fix = new MultipleReplaceFix
                 {
@@ -655,7 +674,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
                     var ruleInfo = string.IsNullOrEmpty(rule.Description)
                         ? $"Group name: {group.CategoryName} - Rule number: {group.SubNodes.IndexOf(rule) + 1}"
                         : $"Group name: {group.CategoryName} - Rule number: {group.SubNodes.IndexOf(rule) + 1}. {rule.Description}";
-                    var mpi = new ReplaceExpression(findWhat, replaceWith, rule.Type.ToString(), ruleInfo);
+                    var mpi = new ReplaceExpression(findWhat, replaceWith, rule.SearchType, ruleInfo);
                     replaceExpressions.Add(mpi);
                     if (mpi.SearchType == ReplaceExpression.SearchRegEx && !_compiledRegExList.ContainsKey(findWhat))
                     {
@@ -671,7 +690,8 @@ public partial class MultipleReplaceViewModel : ObservableObject
 
     public void RulesTreeView_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        //throw new System.NotImplementedException();
+        var node = e.AddedItems.OfType<RuleTreeNode>().FirstOrDefault();
+        IsEditPanelVisible = node is { IsCategory: false };
     }
 
     internal void OnLoaded(RoutedEventArgs e)
@@ -681,6 +701,29 @@ public partial class MultipleReplaceViewModel : ObservableObject
 
     public void OnActiveChanged(object? sender, RoutedEventArgs e)
     {
+        _dirty = true;
+    }
+
+    public void RuleTextChanged(object? sender, TextChangedEventArgs e)
+    {
+        _dirty = true;
+    }
+
+    public void RuleComboBoxChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.NewValue is not MultipleReplaceTypeItem newType)
+        {
+            return;
+        }
+
+        var node = SelectedNode;
+        if (node is null)   
+        {
+            return;
+        }
+        
+        node.Type = newType.Type;
+        
         _dirty = true;
     }
 }

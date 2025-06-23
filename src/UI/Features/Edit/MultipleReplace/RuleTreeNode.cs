@@ -18,6 +18,20 @@ public partial class RuleTreeNode : ObservableObject
     public MultipleReplaceType Type { get; set; }
 
     public RuleTreeNode? Parent { get; set; }
+    
+    public string SearchType 
+    {
+        get
+        {
+            return Type switch
+            {
+                MultipleReplaceType.RegularExpression => "RegularExpression",
+                MultipleReplaceType.CaseInsensitive => "Normal",
+                MultipleReplaceType.CaseSensitive => "CaseSensitive",
+                _ => "Unknown"
+            };
+        }
+    }
 
     public RuleTreeNode(RuleTreeNode? parent, MultipleReplaceRule rule)
     {

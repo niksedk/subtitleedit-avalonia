@@ -92,7 +92,7 @@ public class MultipleReplaceWindow : Window
         treeView[!TreeView.SelectedItemProperty] = new Binding(nameof(vm.SelectedNode));
 
         var factory = new FuncTreeDataTemplate<RuleTreeNode>(
-            node => true,
+            _ => true,
             (node, _) =>
             {
                 var checkBox = new CheckBox
@@ -184,7 +184,6 @@ public class MultipleReplaceWindow : Window
                 var panelFindAndReplaceWith = new StackPanel
                 {
                     Orientation = Orientation.Horizontal,
-                    Spacing = 2,
                     Children =
                     {
                         labelIcon,
@@ -232,6 +231,66 @@ public class MultipleReplaceWindow : Window
 
     private static Border MakeFixesView(MultipleReplaceViewModel vm)
     {
+        var editGrid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+            },
+            Margin = new Thickness(0, 0, 0, 10),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        }.WithBindVisible(vm, nameof(vm.IsEditPanelVisible));
+
+        var labelFind = UiUtil.MakeLabel(Se.Language.General.Find);
+        var textBoxFind = new TextBox
+        {
+            Width = 200,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            [!TextBox.TextProperty] = new Binding(nameof(vm.SelectedNode) + "." + nameof(RuleTreeNode.Find)) { Source = vm }
+        };
+        textBoxFind.TextChanged += vm.RuleTextChanged;
+        
+        var labelReplaceWith = UiUtil.MakeLabel(Se.Language.General.ReplaceWith);
+        var textBoxReplaceWith = new TextBox
+        {
+            Width = 200,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            [!TextBox.TextProperty] = new Binding(nameof(vm.SelectedNode)+ "." + nameof(RuleTreeNode.ReplaceWith)) { Source = vm }
+        };
+        textBoxReplaceWith.TextChanged += vm.RuleTextChanged;
+        
+        var labelType = UiUtil.MakeLabel(Se.Language.General.Type);
+        var comboBoxType = new ComboBox
+        {
+            Width = 200,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            [!ComboBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedNode)+ "." + nameof(RuleTreeNode.Type)) { Source = vm }
+        };
+        comboBoxType.PropertyChanged += vm.RuleComboBoxChanged;
+        
+        editGrid.Add(labelFind, 0, 0);
+        editGrid.Add(textBoxFind, 1, 0);
+        
+        editGrid.Add(labelReplaceWith, 0, 2);
+        editGrid.Add(textBoxReplaceWith, 1, 2);
+        
+        editGrid.Add(labelType, 0, 3);
+        editGrid.Add(comboBoxType, 1, 4);
+        
         var dataGrid = new DataGrid
         {
             AutoGenerateColumns = false,
@@ -289,14 +348,29 @@ public class MultipleReplaceWindow : Window
             },
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedFix)) { Source = vm });
-
+        
+        var gridFixes = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+        };
+        gridFixes.Add(editGrid,0,0);
+        gridFixes.Add(dataGrid,1,0);
+        
         var border = new Border
         {
             BorderThickness = new Thickness(1),
             BorderBrush = UiUtil.GetBorderColor(),
             Margin = new Thickness(0, 0, 0, 10),
             Padding = new Thickness(5),
-            Child = dataGrid,
+            Child = gridFixes,
         };
 
         return border;
