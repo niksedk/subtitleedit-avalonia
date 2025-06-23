@@ -64,9 +64,10 @@ public static class ShortcutsMain
         { nameof(_mvm.CommandFileSaveCommand) , Se.Language.Options.Shortcuts.FileSave },
         { nameof(_mvm.CommandFileSaveAsCommand) , Se.Language.Options.Shortcuts.FileSaveAs },
 
-        { nameof(_mvm.UndoCommand) , "Undo" },
-        { nameof(_mvm.RedoCommand) , "Redo" },
-        { nameof(_mvm.FindNextCommand) , Se.Language.Options.Shortcuts.EditFind },
+        { nameof(_mvm.UndoCommand) , Se.Language.General.Undo },
+        { nameof(_mvm.RedoCommand) , Se.Language.General.Redo },
+        { nameof(_mvm.ShowFindCommand) , Se.Language.Options.Shortcuts.EditFind },
+        { nameof(_mvm.FindNextCommand) , Se.Language.Options.Shortcuts.EditFindNext },
         { nameof(_mvm.ShowReplaceCommand) , Se.Language.Options.Shortcuts.EditReplace },
         { nameof(_mvm.ShowMultipleReplaceCommand) , Se.Language.Options.Shortcuts.EditMultipleReplace },
 
@@ -99,6 +100,7 @@ public static class ShortcutsMain
 
         AddShortcut(shortcuts, vm.UndoCommand, nameof(vm.UndoCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.RedoCommand, nameof(vm.RedoCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowFindCommand, nameof(vm.ShowFindCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.FindNextCommand, nameof(vm.FindNextCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowReplaceCommand, nameof(vm.ShowReplaceCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowMultipleReplaceCommand, nameof(vm.ShowMultipleReplaceCommand), ShortcutCategory.General);

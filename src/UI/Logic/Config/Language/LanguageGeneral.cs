@@ -166,6 +166,8 @@ public class LanguageGeneral
     public string RegularExpression { get; set; }
     public string ReplaceWith { get; set; }
     public string Type { get; set; }
+    public string Undo { get; set; }
+    public string Redo { get; set; }
 
     public LanguageGeneral()
     {
@@ -333,5 +335,7 @@ public class LanguageGeneral
         RegularExpression = "Regular expression";
         ReplaceWith = "Replace with";
         Type = "Type";
+        Undo = "Undo";
+        Redo = "Redo";
     }
 }

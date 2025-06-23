@@ -112,6 +112,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     private readonly IUndoRedoManager _undoRedoManager;
     private readonly IBluRayHelper _bluRayHelper;
     private readonly IMpvReloader _mpvReloader;
+    private readonly IFindService  _findService;
 
     private bool IsEmpty => Subtitles.Count == 0 || string.IsNullOrEmpty(Subtitles[0].Text);
 
@@ -128,7 +129,8 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         IAutoBackupService autoBackupService,
         IUndoRedoManager undoRedoManager,
         IBluRayHelper bluRayHelper,
-        IMpvReloader mpvReloader)
+        IMpvReloader mpvReloader, 
+        IFindService findService)
     {
         _fileHelper = fileHelper;
         _folderHelper = folderHelper;
@@ -140,6 +142,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         _undoRedoManager = undoRedoManager;
         _bluRayHelper = bluRayHelper;
         _mpvReloader = mpvReloader;
+        _findService = findService;
 
         EditText = string.Empty;
         EditTextCharactersPerSecond = string.Empty;
@@ -936,8 +939,15 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             return;
         }
 
-        var viewModel = await _windowService.ShowDialogAsync<FindWindow, FindViewModel>(Window!, vm => { });
+        var result = await _windowService.ShowDialogAsync<FindWindow, FindViewModel>(Window!, vm => { });
 
+        if (result.OkPressed && !string.IsNullOrEmpty(result.SearchText))
+        {
+            var idx = _findService.Find(_findService.SearchText);
+            SelectAndScrollToRow(idx);
+            ShowStatus($"'{_findService.SearchText}' found in line '{idx + 1}'");
+        }
+        
         _shortcutManager.ClearKeys();
     }
 

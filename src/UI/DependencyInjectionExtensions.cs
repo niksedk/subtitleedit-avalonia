@@ -66,6 +66,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<INOcrCaseFixer, NOcrCaseFixer>();
         collection.AddTransient<IMpvReloader, MpvReloader>();
         collection.AddTransient<IBatchConverter, BatchConverter>();
+        collection.AddTransient<IFindService, FindService>();
 
         // Download services
         collection.AddHttpClient<IFfmpegDownloadService, FfmpegDownloadService>();
