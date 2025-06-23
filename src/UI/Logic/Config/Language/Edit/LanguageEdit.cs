@@ -3,6 +3,7 @@
 public class LanguageEdit
 {
     public LanguageMultipleReplace MultipleReplace { get; set; } = new();
+    public LanguageEditFind Find { get; set; } = new();
 
     public LanguageEdit()
     {

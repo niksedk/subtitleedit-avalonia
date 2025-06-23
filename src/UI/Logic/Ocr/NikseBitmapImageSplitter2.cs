@@ -1,10 +1,9 @@
-﻿using Nikse.SubtitleEdit.Logic.Ocr;
-using SkiaSharp;
+﻿using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SubtitleAlchemist.Logic.Ocr;
+namespace Nikse.SubtitleEdit.Logic.Ocr;
 
 public class NiksePoint
 {
@@ -39,7 +38,7 @@ public class NikseBitmapImageSplitter2
             return true; // dark, non transparent
         }
 
-        var diff = (a.Red + a.Green + a.Blue) - (b.Red + b.Green + b.Blue);
+        var diff = a.Red + a.Green + a.Blue - (b.Red + b.Green + b.Blue);
         return diff < tolerance && diff > -tolerance;
     }
 
@@ -56,7 +55,7 @@ public class NikseBitmapImageSplitter2
             return true; // dark, non transparent
         }
 
-        var diff = (ar + ag + ab) - (b.Red + b.Green + b.Blue);
+        var diff = ar + ag + ab - (b.Red + b.Green + b.Blue);
         return diff < tolerance && diff > -tolerance;
     }
 
@@ -694,7 +693,7 @@ public class NikseBitmapImageSplitter2
                                     x -= k;
                                     points.RemoveAll(p => p.X > x);
                                     done = true;
-                                    yChange -= (i + 1);
+                                    yChange -= i + 1;
                                     break;
                                 }
                             }

@@ -3,6 +3,7 @@ using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic.Config;
+using static Nikse.SubtitleEdit.Logic.FindService;
 
 namespace Nikse.SubtitleEdit.Features.Edit.Replace;
 
@@ -29,7 +30,20 @@ public partial class ReplaceViewModel : ObservableObject
 
     private void LoadSettings()
     {
-        WholeWord = Se.Settings.Edit.FindWholeWords;
+        WholeWord = Se.Settings.Edit.Find.FindWholeWords;
+
+        if (Se.Settings.Edit.Find.FindSearchType == FindMode.CaseInsensitive.ToString())
+        {
+            FindTypeCanseInsensitive = true;
+        }
+        else if (Se.Settings.Edit.Find.FindSearchType == FindMode.CaseSensitive.ToString())
+        {
+            FindTypeNormal = true;
+        }
+        else
+        {
+            FindTypeRegularExpression = true;
+        }
     }
 
     [RelayCommand]

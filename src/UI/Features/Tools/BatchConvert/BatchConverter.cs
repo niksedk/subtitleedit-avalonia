@@ -1,14 +1,13 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
-using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SubtitleAlchemist.Features.Tools.BatchConvert;
+namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
 public class BatchConverter : IBatchConverter
 {

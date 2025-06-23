@@ -13,11 +13,7 @@ public partial class FindService : IFindService
 
     private List<string> _items = new List<string>();
 
-    public FindService()
-    {
-    }
-
-    public FindService(List<string> items, int currentIndex, bool wholeWord, FindMode findMode)
+    public void Initialize(List<string> items, int currentIndex, bool wholeWord, FindMode findMode)
     {
         _items = items;
         CurrentIndex = currentIndex;

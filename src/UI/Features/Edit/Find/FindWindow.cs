@@ -3,7 +3,9 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Markup.Declarative;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Edit.Find;
 
@@ -14,7 +16,7 @@ public class FindWindow : Window
     public FindWindow(FindViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = "Find";
+        Title = Se.Language.General.Find;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 
@@ -27,21 +29,22 @@ public class FindWindow : Window
             VerticalAlignment = VerticalAlignment.Center,
             MinWidth = 180,
             Margin = new Thickness(0, 0, 0, 3),
-            Watermark = "Search text...",
+            Watermark = Se.Language.Edit.Find.SearchTextWatermark,
             [!TextBox.TextProperty] = new Binding(nameof(vm.SearchText)) { Mode = BindingMode.TwoWay }   
         };
+        textBoxFind.KeyDown += vm.FindTextBoxKeyDown;
 
         var checkBoxWholeWord = new CheckBox
         {
-            Content = "Whole word",
+            Content = Se.Language.Edit.Find.WholeWord,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 0, 10),
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.WholeWord)) { Mode = BindingMode.TwoWay }
         };
 
-        var radioButtonNormal = new RadioButton
+        var radioButtonCaseSensitive = new RadioButton
         {
-            Content = "Normal",
+            Content = Se.Language.Edit.Find.CaseSensitive,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(10, 0, 0, 3),
             [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.FindTypeNormal)) { Mode = BindingMode.TwoWay }
@@ -49,7 +52,7 @@ public class FindWindow : Window
 
         var radioButtonCaseInsensitive = new RadioButton
         {
-            Content = "Case insensitive",
+            Content = Se.Language.Edit.Find.CaseInsensitive,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(10, 0, 0, 3),
             [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.FindTypeCanseInsensitive)) { Mode = BindingMode.TwoWay }
@@ -57,7 +60,7 @@ public class FindWindow : Window
 
         var radioButtonRegularExpression = new RadioButton
         {
-            Content = "Regular expression",
+            Content = Se.Language.General.RegularExpression,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(10, 0, 0, 3),
             [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.FindTypeRegularExpression)) { Mode = BindingMode.TwoWay }
@@ -70,21 +73,21 @@ public class FindWindow : Window
             Margin = new Thickness(0, 0, 0, 10),
             Children =
             {
-                radioButtonNormal,
+                radioButtonCaseSensitive,
                 radioButtonCaseInsensitive,
                 radioButtonRegularExpression
             }
         };
 
-        var buttonFindPrevious = UiUtil.MakeButton("Find previous", vm.FindPreviousCommand)
+        var buttonFindPrevious = UiUtil.MakeButton(Se.Language.Edit.Find.FindPrevious, vm.FindPreviousCommand)
             .WithLeftAlignment()
             .WithMinWidth(150)
             .WithMargin(0,0,0, 10);
-        var buttonFindNext = UiUtil.MakeButton("Find next", vm.FindNextCommand)
+        var buttonFindNext = UiUtil.MakeButton(Se.Language.Edit.Find.FindNext, vm.FindNextCommand)
             .WithLeftAlignment()
             .WithMinWidth(150)
             .WithMargin(0, 0, 0, 10);
-        var buttonCount = UiUtil.MakeButton("Count", vm.CountCommand)
+        var buttonCount = UiUtil.MakeButton(Se.Language.General.Count, vm.CountCommand)
             .WithLeftAlignment()
             .WithMinWidth(150)
             .WithMargin(0, 0, 0, 10);

@@ -41,7 +41,6 @@ using Nikse.SubtitleEdit.Logic.Dictionaries;
 using Nikse.SubtitleEdit.Logic.Download;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
-using SubtitleAlchemist.Features.Tools.BatchConvert;
 
 namespace Nikse.SubtitleEdit;
 

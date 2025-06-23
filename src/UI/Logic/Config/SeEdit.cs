@@ -2,13 +2,11 @@
 
 public class SeEdit
 {
-    public bool FindWholeWords { get; set; } 
-    public string FindSearchType { get; set; }
     public SeEditMultipleReplace MultipleReplace { get; set; } = new SeEditMultipleReplace();
+    public SeEditFind Find { get; set; } = new SeEditFind();
 
     public SeEdit()
     {
-        FindWholeWords = false;
-        FindSearchType = "Normal"; 
+       
     }
 }

@@ -11,6 +11,7 @@ using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
+using Nikse.SubtitleEdit.Core.Settings;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Edit.Find;
 using Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
@@ -225,6 +226,16 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
     private void LoadShortcuts()
     {
+        Se.Settings.InitializeMainShortcuts(this);
+        foreach (var shortCut in ShortcutsMain.GetUsedShortcuts(this))
+        {
+            _shortcutManager.RegisterShortcut(shortCut);
+        }
+    }
+
+    private void ReloadShortcuts()
+    {
+        _shortcutManager.ClearShortcuts();
         Se.Settings.InitializeMainShortcuts(this);
         foreach (var shortCut in ShortcutsMain.GetUsedShortcuts(this))
         {
@@ -764,9 +775,10 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         var oldTheme = Se.Settings.Appearance.Theme;
 
         var viewModel = await _windowService.ShowDialogAsync<SettingsWindow, SettingsViewModel>(Window!);
-        _shortcutManager.ClearKeys();
+
         if (!viewModel.OkPressed)
         {
+            _shortcutManager.ClearKeys();
             return;
         }
 
@@ -796,13 +808,19 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         }
 
         _updateAudioVisualizer = true;
+
+        _shortcutManager.ClearKeys();
+
     }
 
     [RelayCommand]
     private async Task CommandShowSettingsShortcuts()
     {
-        await _windowService.ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(Window!,
-            vm => { vm.LoadShortCuts(this); });
+        await _windowService.ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(Window!, vm => 
+        { 
+            vm.LoadShortCuts(this); 
+        });
+        ReloadShortcuts();
         _shortcutManager.ClearKeys();
     }
 
@@ -943,7 +961,8 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
         if (result.OkPressed && !string.IsNullOrEmpty(result.SearchText))
         {
-            var idx = _findService.Find(_findService.SearchText);
+            _findService.Initialize(Subtitles.Select(p => p.Text).ToList(), SelectedSubtitleIndex ?? 0, Se.Settings.Edit.Find.FindWholeWords, FindService.FindMode.CaseSensitive);
+            var idx = _findService.Find(result.SearchText);
             SelectAndScrollToRow(idx);
             ShowStatus($"'{_findService.SearchText}' found in line '{idx + 1}'");
         }

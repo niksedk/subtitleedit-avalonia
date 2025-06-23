@@ -156,11 +156,11 @@ public class LanguageGeneral
     public string VideoExtension { get; set; }
     public string SubtitleFileName { get; set; }
     public string Default { get; set; }
-    public string EditDotDotDot { get; internal set; }
-    public string MoveUp { get; internal set; }
-    public string MoveDown { get; internal set; }
-    public string Duplicate { get; internal set; }
-    public string Find { get; internal set; }
+    public string EditDotDotDot { get; set; }
+    public string MoveUp { get; set; }
+    public string MoveDown { get; set; }
+    public string Duplicate { get; set; }
+    public string Find { get; set; }
     public string CaseInsensitive { get; set; }
     public string CaseSensitive { get; set; }
     public string RegularExpression { get; set; }
@@ -168,6 +168,7 @@ public class LanguageGeneral
     public string Type { get; set; }
     public string Undo { get; set; }
     public string Redo { get; set; }
+    public string Count { get; set; }
 
     public LanguageGeneral()
     {
@@ -337,5 +338,6 @@ public class LanguageGeneral
         Type = "Type";
         Undo = "Undo";
         Redo = "Redo";
+        Count = "Count";
     }
 }
