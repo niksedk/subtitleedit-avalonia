@@ -5,6 +5,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
@@ -22,15 +23,16 @@ public static class InitToolbar
         };
     }
 
-    private static StackPanel CreateToolbar(MainViewModel vm)
+    private static Grid CreateToolbar(MainViewModel vm)
     {
         var path = $"Assets/Themes/{Se.Settings.Appearance.Theme}/";
 
-        var stackPanel = new StackPanel
+        var stackPanelLeft = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Spacing = 5,
             Margin = new Avalonia.Thickness(5),
+            VerticalAlignment = VerticalAlignment.Top,
         };
 
         var appearance = Se.Settings.Appearance;
@@ -38,7 +40,7 @@ public static class InitToolbar
 
         if (appearance.ToolbarShowFileNew)
         {
-            stackPanel.Children.Add(new Button
+            stackPanelLeft.Children.Add(new Button
             {
                 Content = new Image
                 {
@@ -54,7 +56,7 @@ public static class InitToolbar
 
         if (appearance.ToolbarShowFileOpen)
         {
-            stackPanel.Children.Add(new Button
+            stackPanelLeft.Children.Add(new Button
             {
                 Content = new Image
                 {
@@ -70,7 +72,7 @@ public static class InitToolbar
 
         if (appearance.ToolbarShowSave)
         {
-            stackPanel.Children.Add(new Button
+            stackPanelLeft.Children.Add(new Button
             {
                 Content = new Image
                 {
@@ -86,7 +88,7 @@ public static class InitToolbar
 
         if (appearance.ToolbarShowSaveAs)
         {
-            stackPanel.Children.Add(new Button
+            stackPanelLeft.Children.Add(new Button
             {
                 Content = new Image
                 {
@@ -102,13 +104,13 @@ public static class InitToolbar
 
         if (!isLastSeparator)
         {
-            stackPanel.Children.Add(MakeSeparator());
+            stackPanelLeft.Children.Add(MakeSeparator());
             isLastSeparator = true;
         }
 
         if (appearance.ToolbarShowFind)
         {
-            stackPanel.Children.Add(new Button
+            stackPanelLeft.Children.Add(new Button
             {
                 Content = new Image
                 {
@@ -124,7 +126,7 @@ public static class InitToolbar
 
         if (appearance.ToolbarShowReplace)
         {
-            stackPanel.Children.Add(new Button
+            stackPanelLeft.Children.Add(new Button
             {
                 Content = new Image
                 {
@@ -141,13 +143,13 @@ public static class InitToolbar
 
         if (!isLastSeparator)
         {
-            stackPanel.Children.Add(MakeSeparator());
+            stackPanelLeft.Children.Add(MakeSeparator());
             isLastSeparator = true;
         }
 
         if (appearance.ToolbarShowSpellCheck)
         {
-            stackPanel.Children.Add(new Button
+            stackPanelLeft.Children.Add(new Button
             {
                 Content = new Image
                 {
@@ -163,7 +165,7 @@ public static class InitToolbar
 
         if (appearance.ToolbarShowSettings)
         {
-            stackPanel.Children.Add(new Button
+            stackPanelLeft.Children.Add(new Button
             {
                 Content = new Image
                 {
@@ -179,7 +181,7 @@ public static class InitToolbar
 
         if (appearance.ToolbarShowLayout)
         {
-            stackPanel.Children.Add(new Button
+            stackPanelLeft.Children.Add(new Button
             {
                 Content = new Image
                 {
@@ -195,13 +197,12 @@ public static class InitToolbar
 
         if (!isLastSeparator)
         {
-            stackPanel.Children.Add(MakeSeparator());
-            isLastSeparator = true;
+            stackPanelLeft.Children.Add(MakeSeparator());
         }
 
         if (appearance.ToolbarShowHelp)
         {
-            stackPanel.Children.Add(new Button
+            stackPanelLeft.Children.Add(new Button
             {
                 Content = new Image
                 {
@@ -212,23 +213,26 @@ public static class InitToolbar
                 Command = vm.ShowHelpCommand,
                 Background = Brushes.Transparent,
             });
-            isLastSeparator = false;
         }
 
-        if (!isLastSeparator)
+
+        var stackPanelRight = new StackPanel
         {
-            stackPanel.Children.Add(MakeSeparator());
-            isLastSeparator = true;
-        }
+            Orientation = Orientation.Horizontal,
+            Spacing = 5,
+            Margin = new Avalonia.Thickness(5),
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Top,
+        };
 
         // subtitle formats
-        stackPanel.Children.Add(new TextBlock
+        stackPanelRight.Children.Add(new TextBlock
         {
             Text = Se.Language.General.SubtitleFormat,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Avalonia.Thickness(5, 0, 0, 0),
         });
-        stackPanel.Children.Add(new ComboBox
+        stackPanelRight.Children.Add(new ComboBox
         {
             Width = 200,
             Height = 30,
@@ -247,18 +251,18 @@ public static class InitToolbar
 
         if (!isLastSeparator && appearance.ToolbarShowEncoding)
         {
-            stackPanel.Children.Add(MakeSeparator());
+            stackPanelRight.Children.Add(MakeSeparator());
         }
 
         if (appearance.ToolbarShowEncoding)
         {
-            stackPanel.Children.Add(new TextBlock
+            stackPanelRight.Children.Add(new TextBlock
             {
                 Text = Se.Language.General.Encoding,
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Avalonia.Thickness(5, 0, 0, 0),
             });
-            stackPanel.Children.Add(new ComboBox
+            stackPanelRight.Children.Add(new ComboBox
             {
                 Width = 200,
                 Height = 30,
@@ -268,7 +272,26 @@ public static class InitToolbar
             });
         }
 
-        return stackPanel;
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+
+        grid.Add(stackPanelLeft, 0, 0);
+        grid.Add(stackPanelRight, 0, 1);
+
+        return grid;
     }
 
     private static Border MakeSeparator()

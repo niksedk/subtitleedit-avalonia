@@ -71,6 +71,29 @@ jobs:
           Get-ChildItem -Path "./publish/windows-x64/" -Recurse -Include *.pdb | Remove-Item -Force
           Get-ChildItem -Path "./publish/windows-arm64/" -Recurse -Include *.pdb | Remove-Item -Force
 
+      - name: Setup WiX
+        run: |
+          dotnet tool install --global wix --version 5.0.1
+          wix extension add -g WixToolset.UI.wixext/5.0.1
+
+      - name: Build MSI Installer for x64
+        run: |
+          wix build ./installer/Product.wxs `
+            -arch x64 `
+            -ext WixToolset.UI.wixext `
+            -d SourceDir="./publish/windows-x64/" `
+            -d ProductVersion="1.0.0" `
+            -o ./SubtitleEdit-Windows-x64.msi
+
+      - name: Build MSI Installer for ARM64
+        run: |
+          wix build ./installer/Product.wxs `
+            -arch arm64 `
+            -ext WixToolset.UI.wixext `
+            -d SourceDir="./publish/windows-arm64/" `
+            -d ProductVersion="1.0.0" `
+            -o ./SubtitleEdit-Windows-ARM64.msi
+
       - name: Create Windows ZIP packages
         run: |
           Compress-Archive -Path "./publish/windows-x64/*" -DestinationPath "./SubtitleEdit-Windows-x64.zip"
@@ -95,6 +118,14 @@ jobs:
           path: |
             ./SubtitleEdit-Windows-x64.zip
             ./SubtitleEdit-Windows-ARM64.zip
+
+      - name: Upload Windows MSI Installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-msi-installers
+          path: |
+            ./SubtitleEdit-Windows-x64.msi
+            ./SubtitleEdit-Windows-ARM64.msi
 
   build-macos:
     runs-on: macos-latest
