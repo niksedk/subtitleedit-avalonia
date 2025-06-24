@@ -267,6 +267,7 @@ jobs:
           mkdir -p ./release-assets
           
           # Copy ZIP/TAR packages to release assets
+          cp ./artifacts/windows-msi-installers/*.msi ./release-assets/
           cp ./artifacts/windows-zip-packages/*.zip ./release-assets/
           cp ./artifacts/macos-zip-packages/*.zip ./release-assets/
           cp ./artifacts/linux-tar-package/*.tar.gz ./release-assets/
