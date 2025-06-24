@@ -14,7 +14,4 @@ public interface IShortcutManager
     IRelayCommand? CheckShortcuts(string? control);
 
     void ClearShortcuts();
-    bool IsControlDown { get; }
-    bool IsAltDown { get; }
-    bool IsShiftDown { get; }
 }

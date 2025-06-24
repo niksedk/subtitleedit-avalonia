@@ -118,7 +118,10 @@ public class Se
 
     public void InitializeMainShortcuts(MainViewModel vm)
     {
-        Shortcuts.Clear();
+        if (Shortcuts.Count > 0)
+        {
+            return;
+        }
 
         // Default shortcuts
         Shortcuts =

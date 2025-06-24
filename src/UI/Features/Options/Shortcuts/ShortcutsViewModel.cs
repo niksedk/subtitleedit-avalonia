@@ -13,7 +13,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
@@ -28,6 +27,7 @@ public partial class ShortcutsViewModel : ObservableObject
     [ObservableProperty] private bool _ctrlIsSelected;
     [ObservableProperty] private bool _altIsSelected;
     [ObservableProperty] private bool _shiftIsSelected;
+    [ObservableProperty] private bool _winIsSelected;
     [ObservableProperty] private ShortcutTreeNode? _selectedNode;
 
     public ObservableCollection<ShortcutTreeNode> Nodes { get; }
@@ -37,7 +37,7 @@ public partial class ShortcutsViewModel : ObservableObject
 
     private List<ShortCut> _allShortcuts;
 
-    private IWindowService _windowService;
+    private readonly IWindowService _windowService;
 
     public ShortcutsViewModel(IWindowService windowService)
     {

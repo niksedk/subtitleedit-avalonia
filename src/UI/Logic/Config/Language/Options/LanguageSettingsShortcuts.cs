@@ -105,6 +105,10 @@ public class LanguageSettingsShortcuts
     public string PressedKeyX { get; set; }
     public string PressAKey { get; set; }
     public string DetectKey { get; set; }
+    public string Control { get; set; }
+    public string Alt { get; set; }
+    public string Win { get; set; }
+    public string Shift { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -210,5 +214,10 @@ public class LanguageSettingsShortcuts
         PressAKey = "Press a key";
         
         DetectKey = "Detect key";
+        
+        Control = "Control";
+        Alt = "Alt";
+        Win = "Win";
+        Shift = "Shift";
     }
 }

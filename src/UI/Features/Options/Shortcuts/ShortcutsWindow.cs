@@ -20,16 +20,15 @@ public class ShortcutsWindow : Window
         var language = Se.Language.Options.Shortcuts;
         Icon = UiUtil.GetSeIcon();
         Title = language.Title;
-        Width = 700;
+        Width = 750;
         Height = 650;
-        MinWidth = 650;
+        MinWidth = 725;
         MinHeight = 500;
         CanResize = true;
 
         _vm = vm;
         vm.Window = this;
         DataContext = vm;
-
 
         _searchBox = new TextBox
         {
@@ -88,14 +87,12 @@ public class ShortcutsWindow : Window
         Grid.SetRow(buttonCollapse, 0);
         Grid.SetColumn(buttonCollapse, 4);
 
-
         var treeView = new TreeView
         {
             Margin = new Thickness(10),
             SelectionMode = SelectionMode.Single,
             DataContext = vm,
         };
-
         treeView[!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.Nodes));
         treeView[!TreeView.SelectedItemProperty] = new Binding(nameof(vm.SelectedNode));
 
@@ -151,30 +148,34 @@ public class ShortcutsWindow : Window
         };
 
         // Control checkbox and label
-        editPanel.Children.Add(UiUtil.MakeTextBlock("Control").WithMarginRight(3));
+        editPanel.Children.Add(UiUtil.MakeTextBlock(Se.Language.Options.Shortcuts.Control).WithMarginRight(3));
         var controlCheckBox = UiUtil.MakeCheckBox(vm, nameof(vm.CtrlIsSelected));
         controlCheckBox.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(controlCheckBox);
 
         // Alt checkbox and label
-        editPanel.Children.Add(UiUtil.MakeTextBlock("Alt").WithMarginRight(3));
+        editPanel.Children.Add(UiUtil.MakeTextBlock(Se.Language.Options.Shortcuts.Alt).WithMarginRight(3));
         var checkBoxAlt = UiUtil.MakeCheckBox(vm, nameof(vm.AltIsSelected));
         checkBoxAlt.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(checkBoxAlt);
-
-
+        
         // Shift checkbox and label
-        editPanel.Children.Add(UiUtil.MakeTextBlock("Shift").WithMarginRight(3));
+        editPanel.Children.Add(UiUtil.MakeTextBlock(Se.Language.Options.Shortcuts.Shift).WithMarginRight(3));
         var checkBoxShift = UiUtil.MakeCheckBox(vm, nameof(vm.ShiftIsSelected));
         checkBoxShift.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(checkBoxShift);
+
+        // Win key checkbox and label
+        editPanel.Children.Add(UiUtil.MakeTextBlock(Se.Language.Options.Shortcuts.Win).WithMarginRight(3));
+        var checkBoxWin = UiUtil.MakeCheckBox(vm, nameof(vm.WinIsSelected));
+        checkBoxWin.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
+        editPanel.Children.Add(checkBoxWin);
 
         // Key combobox
         var comboBoxKeys = new ComboBox
         {
             Width = 200,
             Margin = new Thickness(10, 0, 5, 0),
-            //ItemsSource = Enum.GetValues(typeof(Key)).Cast<Key>(),
         };
         comboBoxKeys.Bind(ComboBox.ItemsSourceProperty, new Binding(nameof(vm.Shortcuts)) { Source = vm });
         comboBoxKeys.Bind(ComboBox.SelectedItemProperty, new Binding(nameof(vm.SelectedShortcut)) { Source = vm });
@@ -188,15 +189,14 @@ public class ShortcutsWindow : Window
         buttonBrowse.Margin = new Thickness(0,0,10,0);  
         
         // Update button
-        var buttonUpdate = UiUtil.MakeButton("Update", vm.UpdateShortcutCommand);
+        var buttonUpdate = UiUtil.MakeButton(Se.Language.General.Update, vm.UpdateShortcutCommand);
         editPanel.Children.Add(buttonUpdate);
         buttonUpdate.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
 
         // Reset button
-        var buttonReset = UiUtil.MakeButton("Reset", vm.ResetShortcutCommand);
+        var buttonReset = UiUtil.MakeButton(Se.Language.General.Reset, vm.ResetShortcutCommand);
         editPanel.Children.Add(buttonReset);
         buttonReset.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
-
 
         var editGridBorder = UiUtil.MakeBorderForControl(editPanel);
         grid.Children.Add(editGridBorder);

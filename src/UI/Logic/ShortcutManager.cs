@@ -9,9 +9,6 @@ public class ShortcutManager : IShortcutManager
 {
     private readonly HashSet<Key> _activeKeys = [];
     private readonly List<ShortCut> _shortcuts = [];
-    public bool IsControlDown => _activeKeys.Contains(Key.LeftCtrl) || _activeKeys.Contains(Key.RightCtrl) || _activeKeys.Contains(Key.LWin);
-    public bool IsAltDown => _activeKeys.Contains(Key.LeftAlt) || _activeKeys.Contains(Key.RightAlt);
-    public bool IsShiftDown => _activeKeys.Contains(Key.LeftShift) || _activeKeys.Contains(Key.RightShift);
 
     public void OnKeyPressed(object? sender, KeyEventArgs e)
     {
@@ -73,6 +70,10 @@ public class ShortcutManager : IShortcutManager
             else if (key is "LeftAlt" or "RightAlt")
             {
                 keys.Add("Alt");
+            }
+            else if (key is "LWin" or "RWin")
+            {
+                keys.Add("Win");
             }
             else
             {

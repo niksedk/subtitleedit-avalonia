@@ -169,6 +169,7 @@ public class LanguageGeneral
     public string Undo { get; set; }
     public string Redo { get; set; }
     public string Count { get; set; }
+    public string Update { get; set; }
 
     public LanguageGeneral()
     {
@@ -339,5 +340,6 @@ public class LanguageGeneral
         Undo = "Undo";
         Redo = "Redo";
         Count = "Count";
+        Update = "Update";
     }
 }
