@@ -152,7 +152,7 @@ public partial class GetDictionariesViewModel : ObservableObject
 
     private void LoadDictionaries()
     {
-        var uri = new Uri("avares://Nikse.SubtitleEdit/Assets/HunspellDictionaries.json");
+        var uri = new Uri("avares://SubtitleEdit/Assets/HunspellDictionaries.json");
         using var stream = AssetLoader.Open(uri);
         using var reader = new StreamReader(stream);
 

@@ -1,0 +1,1 @@
+wix build ./installer/Product.wxs -arch x64 -ext WixToolset.UI.wixext -d ProjectDir="./" -d SourceDir="./UI/bin/Debug/net9.0" -d ProductVersion="5.0.0" -o ./SubtitleEdit-Windows-x64.msi 

@@ -47,7 +47,7 @@ public class ElevenLabs : ITtsEngine
         var voiceFileName = Path.Combine(elevenLabsFolder, JsonFileName);
         if (!File.Exists(voiceFileName))
         {
-            var uri = new Uri("avares://Nikse.SubtitleEdit/Assets/TextToSpeech/ElevenLabsVoices.json");
+            var uri = new Uri("avares://SubtitleEdit/Assets/TextToSpeech/ElevenLabsVoices.json");
             using var stream = AssetLoader.Open(uri);
             using var fileStream = File.Create(voiceFileName);
             stream.CopyTo(fileStream);

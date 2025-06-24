@@ -48,7 +48,7 @@ public class Piper : ITtsEngine
         var voiceFileName = Path.Combine(piperFolder, "PiperVoices.json");
         if (!File.Exists(voiceFileName))
         {
-            var uri = new Uri("avares://Nikse.SubtitleEdit/Assets/TextToSpeech/PiperVoices.json");
+            var uri = new Uri("avares://SubtitleEdit/Assets/TextToSpeech/PiperVoices.json");
             using var stream = AssetLoader.Open(uri);
             using var fileStream = File.Create(voiceFileName);
             stream.CopyTo(fileStream);

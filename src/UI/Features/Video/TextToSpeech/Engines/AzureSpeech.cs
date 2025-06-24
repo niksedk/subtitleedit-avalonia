@@ -49,7 +49,7 @@ public class AzureSpeech : ITtsEngine
         var voiceFileName = Path.Combine(azureFolder, JsonFileName);
         if (!File.Exists(voiceFileName))
         {
-            var uri = new Uri("avares://Nikse.SubtitleEdit/Assets/TextToSpeech/AzureVoices.json");
+            var uri = new Uri("avares://SubtitleEdit/Assets/TextToSpeech/AzureVoices.json");
             using var stream = AssetLoader.Open(uri);
             using var fileStream = File.Create(voiceFileName);
             stream.CopyTo(fileStream);

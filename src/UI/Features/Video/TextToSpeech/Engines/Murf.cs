@@ -53,7 +53,7 @@ public class Murf : ITtsEngine
         var voiceFileName = Path.Combine(murfFolder, JsonFileName);
         if (!File.Exists(voiceFileName))
         {
-            var uri = new Uri("avares://Nikse.SubtitleEdit/Assets/TextToSpeech/MurfVoices.json");
+            var uri = new Uri("avares://SubtitleEdit/Assets/TextToSpeech/MurfVoices.json");
             using var stream = AssetLoader.Open(uri);
             using var fileStream = File.Create(voiceFileName);
             stream.CopyTo(fileStream);
