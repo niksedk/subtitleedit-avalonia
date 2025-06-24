@@ -25,7 +25,7 @@
     </Feature>
 
     <!-- UI -->
-    <UIRef Id="WixUI_InstallDir" />
+    <UIRef Id="WixToolset.UI:WixUI_InstallDir" />
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
 
     <!-- License -->
