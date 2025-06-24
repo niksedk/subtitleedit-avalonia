@@ -6,7 +6,7 @@
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-        <AssemblyName>Nikse.SubtitleEdit</AssemblyName>
+        <AssemblyName>SubtitleEdit</AssemblyName>
         <RootNamespace>Nikse.SubtitleEdit</RootNamespace>
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
         <ApplicationIcon>SE.ico</ApplicationIcon>

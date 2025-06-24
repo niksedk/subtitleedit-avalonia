@@ -53,14 +53,14 @@
 			<!-- Main executable -->
 			<Component Id="SubtitleEditExe">
 				<File Id="SubtitleEditExe"
-					  Source="$(var.SourceDir)Nikse.SubtitleEdit.exe" />
+					  Source="$(var.SourceDir)SubtitleEdit.exe" />
 			</Component>
 
 			<!-- libmpv library -->
-			<Component Id="LibmpvDll">
+			<!--<Component Id="LibmpvDll">
 				<File Id="LibmpvDll"
 					  Source="$(var.SourceDir)libmpv-2.dll" />
-			</Component>
+			</Component> -->
 		</ComponentGroup>
 
 		<!-- Start Menu Shortcut -->
@@ -69,7 +69,7 @@
 			<Shortcut Id="ApplicationStartMenuShortcut"
 					  Name="Subtitle Edit"
 					  Description="Subtitle editor"
-					  Target="[INSTALLFOLDER]Nikse.SubtitleEdit.exe"
+					  Target="[INSTALLFOLDER]SubtitleEdit.exe"
 					  WorkingDirectory="INSTALLFOLDER"
 					  Icon="icon.ico" />
 			<RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
@@ -87,7 +87,7 @@
 			<Shortcut Id="ApplicationDesktopShortcut"
 					  Name="Subtitle Edit"
 					  Description="Subtitle editor"
-					  Target="[INSTALLFOLDER]Nikse.SubtitleEdit.exe"
+					  Target="[INSTALLFOLDER]SubtitleEdit.exe"
 					  WorkingDirectory="INSTALLFOLDER"
 					  Icon="icon.ico" />
 			<RegistryValue Root="HKCU"
