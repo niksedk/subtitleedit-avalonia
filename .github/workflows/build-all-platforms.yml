@@ -292,6 +292,7 @@ jobs:
             **Build Date:** ${{ steps.date.outputs.date }}
             
             ### Downloads
+            - **Windows x64 installer:** [SubtitleEdit-Windows-x64.msi](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SubtitleEdit-Windows-x64.msi)
             - **Windows x64:** [SubtitleEdit-Windows-x64.zip](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SubtitleEdit-Windows-x64.zip)
             - **Windows ARM64:** [SubtitleEdit-Windows-ARM64.zip](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SubtitleEdit-Windows-ARM64.zip)
             - **macOS x64:** [SubtitleEdit-macOS-x64.zip](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SubtitleEdit-macOS-x64.zip)
@@ -307,6 +308,16 @@ jobs:
             *This is an automated build from the GitHub Actions workflow.*
           draft: false
           prerelease: ${{ inputs.is_prerelease }}
+
+      - name: Upload Windows x64 MSI Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release-assets/SubtitleEdit-Windows-x64.msi
+          asset_name: SubtitleEdit-Windows-x64.msi
+          asset_content_type: application/x-msi
 
       - name: Upload Windows x64 Release Asset
         uses: actions/upload-release-asset@v1
