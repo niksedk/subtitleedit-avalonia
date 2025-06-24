@@ -10,8 +10,6 @@
 			 InstallerVersion="500"
 			 Compressed="yes">
 
-		<!--<Property Id="ALLUSERS" Value="1" />-->
-
 		<SummaryInformation Description="Subtitle Edit - Subtitle editor"
 							Comments="Subtitle editing software" />
 
@@ -27,8 +25,7 @@
 
 		<!-- UI -->
 		<ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
-		<!--<Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />-->
-		
+
 		<!-- License -->
 		<WixVariable Id="WixUILicenseRtf" Value="$(var.ProjectDir)LICENSE" Overridable="yes" />
 
@@ -39,10 +36,19 @@
 		<!-- Add/Remove Programs -->
 		<Property Id="ARPHELPLINK" Value="https://github.com/niksedk/subtitleedit-avalonia" />
 		<Property Id="ARPURLINFOABOUT" Value="https://github.com/niksedk/subtitleedit-avalonia" />
-		<!--<Property Id="ARPNOMODIFY" Value="yes" Secure="yes" />-->
 
 		<StandardDirectory Id="ProgramFiles6432Folder">
-			<Directory Id="INSTALLFOLDER" Name="Subtitle Edit" />
+			<Directory Id="INSTALLFOLDER" Name="Subtitle Edit">
+				<Directory Id="AssetsFolder" Name="Assets">
+					<Directory Id="LanguagesFolder" Name="Languages" />
+					<Directory Id="LayoutFolder" Name="Layout" />
+					<Directory Id="ThemesFolder" Name="Themes">
+						<Directory Id="LightThemeFolder" Name="Light" />
+						<Directory Id="DarkThemeFolder" Name="Dark" />
+					</Directory>
+					<Directory Id="WhisperFolder" Name="Whisper" />
+				</Directory>
+			</Directory>
 		</StandardDirectory>
 
 		<StandardDirectory Id="ProgramMenuFolder">
@@ -52,15 +58,22 @@
 		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
 			<!-- Main executable -->
 			<Component Id="SubtitleEditExe">
-				<File Id="SubtitleEditExe"
-					  Source="$(var.SourceDir)SubtitleEdit.exe" />
+				<File Id="SubtitleEditExe" Source="$(var.SourceDir)SubtitleEdit.exe" />
 			</Component>
 
-			<!-- libmpv library -->
-			<!--<Component Id="LibmpvDll">
-				<File Id="LibmpvDll"
-					  Source="$(var.SourceDir)libmpv-2.dll" />
-			</Component> -->
+			<!-- Additional files -->
+			<Component Id="avlibglesv2">
+				<File Source="$(var.SourceDir)av_libglesv2.dll" />
+			</Component>
+			<Component Id="libHarfBuzzSharp">
+				<File Source="$(var.SourceDir)libHarfBuzzSharp.dll" />
+			</Component>
+			<Component Id="libSkiaSharp">
+				<File Source="$(var.SourceDir)libSkiaSharp.dll" />
+			</Component>
+			<Component Id="LibmpvDll">
+				<File Source="$(var.SourceDir)libmpv-2.dll" />
+			</Component>
 		</ComponentGroup>
 
 		<!-- Start Menu Shortcut -->

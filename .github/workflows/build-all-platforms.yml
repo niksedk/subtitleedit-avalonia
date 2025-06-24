@@ -86,15 +86,15 @@ jobs:
             -d ProductVersion="1.0.0" `
             -o ./SubtitleEdit-Windows-x64.msi
 
-      - name: Build MSI Installer for ARM64
-        run: |
-          wix build ./installer/Product.wxs `
-            -arch arm64 `
-            -ext WixToolset.UI.wixext `
-            -d SourceDir="./publish/windows-arm64/" `
-            -d ProjectDir="./" `
-            -d ProductVersion="1.0.0" `
-            -o ./SubtitleEdit-Windows-ARM64.msi
+      # - name: Build MSI Installer for ARM64
+      #   run: |
+      #     wix build ./installer/Product.wxs `
+      #       -arch arm64 `
+      #       -ext WixToolset.UI.wixext `
+      #       -d SourceDir="./publish/windows-arm64/" `
+      #       -d ProjectDir="./" `
+      #       -d ProductVersion="1.0.0" `
+      #       -o ./SubtitleEdit-Windows-ARM64.msi
 
       - name: Create Windows ZIP packages
         run: |
@@ -127,7 +127,7 @@ jobs:
           name: windows-msi-installers
           path: |
             ./SubtitleEdit-Windows-x64.msi
-            ./SubtitleEdit-Windows-ARM64.msi
+            # ./SubtitleEdit-Windows-ARM64.msi
 
   build-macos:
     runs-on: macos-latest
