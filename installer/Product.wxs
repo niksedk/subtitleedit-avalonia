@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+<Wix xmlns="http://wixtoolset.org/schemas/v5/wxs">
 
   <Package Name="Subtitle Edit"
            Language="1033"
            Version="$(var.ProductVersion)"
            Manufacturer="nikse.dk@gmail.com"
            UpgradeCode="82d638aa-36fa-4cf2-a8b9-023fd4acede2"
-           InstallerVersion="200"
-           Compressed="yes"
-           InstallScope="perMachine">
+           InstallerVersion="500"
+           Compressed="yes">
+
+    <Property Id="ALLUSERS" Value="1" />
 
     <SummaryInformation Description="Subtitle Edit - Subtitle editor"
                         Comments="Subtitle editing software" />
