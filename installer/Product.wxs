@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
 
   <Package Name="Subtitle Edit"
            Language="1033"
@@ -25,7 +26,7 @@
     </Feature>
 
     <!-- UI -->
-    <UIRef Id="WixToolset.UI:WixUI_InstallDir" />
+    <UIRef Id="ui:WixUI_InstallDir" />
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
 
     <!-- License -->
