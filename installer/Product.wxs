@@ -2,101 +2,101 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
      xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
 
-  <Package Name="Subtitle Edit"
-           Language="1033"
-           Version="$(var.ProductVersion)"
-           Manufacturer="nikse.dk@gmail.com"
-           UpgradeCode="82d638aa-36fa-4cf2-a8b9-023fd4acede2"
-           InstallerVersion="500"
-           Compressed="yes">
+	<Package Name="Subtitle Edit"
+			 Language="1033"
+			 Version="$(var.ProductVersion)"
+			 Manufacturer="nikse.dk@gmail.com"
+			 UpgradeCode="82d638aa-36fa-4cf2-a8b9-023fd4acede2"
+			 InstallerVersion="500"
+			 Compressed="yes">
 
-    <Property Id="ALLUSERS" Value="1" />
+		<!--<Property Id="ALLUSERS" Value="1" />-->
 
-    <SummaryInformation Description="Subtitle Edit - Subtitle editor"
-                        Comments="Subtitle editing software" />
+		<SummaryInformation Description="Subtitle Edit - Subtitle editor"
+							Comments="Subtitle editing software" />
 
-    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
 
-    <MediaTemplate EmbedCab="yes" />
+		<MediaTemplate EmbedCab="yes" />
 
-    <Feature Id="ProductFeature" Title="Subtitle Edit" Level="1">
-      <ComponentGroupRef Id="ProductComponents" />
-      <ComponentRef Id="ApplicationShortcut" />
-      <ComponentRef Id="DesktopShortcut" />
-    </Feature>
+		<Feature Id="ProductFeature" Title="Subtitle Edit" Level="1">
+			<ComponentGroupRef Id="ProductComponents" />
+			<ComponentRef Id="ApplicationShortcut" />
+			<ComponentRef Id="DesktopShortcut" />
+		</Feature>
 
-    <!-- UI -->
-    <UIRef Id="ui:WixUI_InstallDir" />
-    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+		<!-- UI -->
+		<ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+		<!--<Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />-->
+		
+		<!-- License -->
+		<WixVariable Id="WixUILicenseRtf" Value="$(var.ProjectDir)LICENSE" Overridable="yes" />
 
-    <!-- License -->
-    <WixVariable Id="WixUILicenseRtf" Value="$(var.SourceDir)License.rtf" Overridable="yes" />
+		<!-- Icon -->
+		<Icon Id="icon.ico" SourceFile="$(var.ProjectDir)src/UI/SE.ico" />
+		<Property Id="ARPPRODUCTICON" Value="icon.ico" />
 
-    <!-- Icon -->
-    <Icon Id="icon.ico" SourceFile="$(var.SourceDir)Nikse.SubtitleEdit.exe" />
-    <Property Id="ARPPRODUCTICON" Value="icon.ico" />
+		<!-- Add/Remove Programs -->
+		<Property Id="ARPHELPLINK" Value="https://github.com/niksedk/subtitleedit-avalonia" />
+		<Property Id="ARPURLINFOABOUT" Value="https://github.com/niksedk/subtitleedit-avalonia" />
+		<!--<Property Id="ARPNOMODIFY" Value="yes" Secure="yes" />-->
 
-    <!-- Add/Remove Programs -->
-    <Property Id="ARPHELPLINK" Value="https://github.com/niksedk/subtitleedit-avalonia" />
-    <Property Id="ARPURLINFOABOUT" Value="https://github.com/niksedk/subtitleedit-avalonia" />
-    <Property Id="ARPNOMODIFY" Value="yes" Secure="yes" />
+		<StandardDirectory Id="ProgramFiles6432Folder">
+			<Directory Id="INSTALLFOLDER" Name="Subtitle Edit" />
+		</StandardDirectory>
 
-    <StandardDirectory Id="ProgramFiles6432Folder">
-      <Directory Id="INSTALLFOLDER" Name="Subtitle Edit" />
-    </StandardDirectory>
+		<StandardDirectory Id="ProgramMenuFolder">
+			<Directory Id="ApplicationProgramsFolder" Name="Subtitle Edit"/>
+		</StandardDirectory>
 
-    <StandardDirectory Id="ProgramMenuFolder">
-      <Directory Id="ApplicationProgramsFolder" Name="Subtitle Edit"/>
-    </StandardDirectory>
+		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+			<!-- Main executable -->
+			<Component Id="SubtitleEditExe">
+				<File Id="SubtitleEditExe"
+					  Source="$(var.SourceDir)Nikse.SubtitleEdit.exe" />
+			</Component>
 
-    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-      <!-- Main executable -->
-      <Component Id="SubtitleEditExe">
-        <File Id="SubtitleEditExe"
-              Source="$(var.SourceDir)Nikse.SubtitleEdit.exe" />
-      </Component>
+			<!-- libmpv library -->
+			<Component Id="LibmpvDll">
+				<File Id="LibmpvDll"
+					  Source="$(var.SourceDir)libmpv-2.dll" />
+			</Component>
+		</ComponentGroup>
 
-      <!-- libmpv library -->
-      <Component Id="LibmpvDll">
-        <File Id="LibmpvDll"
-              Source="$(var.SourceDir)libmpv-2.dll" />
-      </Component>
-    </ComponentGroup>
+		<!-- Start Menu Shortcut -->
+		<Component Id="ApplicationShortcut"
+				   Directory="ApplicationProgramsFolder">
+			<Shortcut Id="ApplicationStartMenuShortcut"
+					  Name="Subtitle Edit"
+					  Description="Subtitle editor"
+					  Target="[INSTALLFOLDER]Nikse.SubtitleEdit.exe"
+					  WorkingDirectory="INSTALLFOLDER"
+					  Icon="icon.ico" />
+			<RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
+			<RegistryValue Root="HKCU"
+						   Key="Software\SubtitleEdit\SubtitleEdit"
+						   Name="installed"
+						   Type="integer"
+						   Value="1"
+						   KeyPath="yes"/>
+		</Component>
 
-    <!-- Start Menu Shortcut -->
-    <Component Id="ApplicationShortcut"
-               Directory="ApplicationProgramsFolder">
-      <Shortcut Id="ApplicationStartMenuShortcut"
-                Name="Subtitle Edit"
-                Description="Subtitle editor"
-                Target="[INSTALLFOLDER]Nikse.SubtitleEdit.exe"
-                WorkingDirectory="INSTALLFOLDER"
-                Icon="icon.ico" />
-      <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
-      <RegistryValue Root="HKCU"
-                     Key="Software\SubtitleEdit\SubtitleEdit"
-                     Name="installed"
-                     Type="integer"
-                     Value="1"
-                     KeyPath="yes"/>
-    </Component>
+		<!-- Desktop Shortcut -->
+		<Component Id="DesktopShortcut"
+				   Directory="DesktopFolder">
+			<Shortcut Id="ApplicationDesktopShortcut"
+					  Name="Subtitle Edit"
+					  Description="Subtitle editor"
+					  Target="[INSTALLFOLDER]Nikse.SubtitleEdit.exe"
+					  WorkingDirectory="INSTALLFOLDER"
+					  Icon="icon.ico" />
+			<RegistryValue Root="HKCU"
+						   Key="Software\SubtitleEdit\SubtitleEdit"
+						   Name="desktop"
+						   Type="integer"
+						   Value="1"
+						   KeyPath="yes"/>
+		</Component>
 
-    <!-- Desktop Shortcut -->
-    <Component Id="DesktopShortcut"
-               Directory="DesktopFolder">
-      <Shortcut Id="ApplicationDesktopShortcut"
-                Name="Subtitle Edit"
-                Description="Subtitle editor"
-                Target="[INSTALLFOLDER]Nikse.SubtitleEdit.exe"
-                WorkingDirectory="INSTALLFOLDER"
-                Icon="icon.ico" />
-      <RegistryValue Root="HKCU"
-                     Key="Software\SubtitleEdit\SubtitleEdit"
-                     Name="desktop"
-                     Type="integer"
-                     Value="1"
-                     KeyPath="yes"/>
-    </Component>
-
-  </Package>
+	</Package>
 </Wix>
