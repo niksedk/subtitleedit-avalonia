@@ -1772,7 +1772,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
                 var tempWaveFileName = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.wav");
                 var process = WaveFileExtractor.GetCommandLineProcess(videoFileName, -1, tempWaveFileName,
                     Configuration.Settings.General.VlcWaveTranscodeSettings, out _);
-                ShowStatus("Extracting wave info...");
+                ShowStatus(Se.Language.Main.ExtractingWaveInfo);
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 Task.Run(async () =>
                 {
@@ -1783,7 +1783,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         }
         else
         {
-            ShowStatus("Loading wave info from cache...");
+            ShowStatus(Se.Language.Main.LoadingWaveInfoFromCache);
             var wavePeaks = WavePeakData.FromDisk(peakWaveFileName);
             if (AudioVisualizer != null)
             {
@@ -1813,7 +1813,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
         if (process.ExitCode != 0)
         {
-            ShowStatus("Failed to extract wave info.");
+            ShowStatus(Se.Language.Main.FailedToExtractWaveInfo);
             return;
         }
 

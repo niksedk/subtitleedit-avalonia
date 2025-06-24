@@ -1,5 +1,6 @@
 ﻿using Nikse.SubtitleEdit.Logic.Config.Language.Edit;
 using Nikse.SubtitleEdit.Logic.Config.Language.File;
+using Nikse.SubtitleEdit.Logic.Config.Language.Main;
 using Nikse.SubtitleEdit.Logic.Config.Language.Options;
 using Nikse.SubtitleEdit.Logic.Config.Language.Tools;
 using Nikse.SubtitleEdit.Logic.Config.Language.Translate;
