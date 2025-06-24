@@ -5,16 +5,18 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Platform;
+using Avalonia.Threading;
 using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
 
 public class SettingsPage : UserControl
 {
-    private TextBox _searchBox;
-    private StackPanel _contentPanel;
+    private readonly TextBox _searchBox;
+    private readonly StackPanel _contentPanel;
     private readonly SettingsViewModel _vm;
 
     public SettingsPage(SettingsViewModel vm)
@@ -400,6 +402,16 @@ public class SettingsPage : UserControl
         {
             VerticalAlignment = VerticalAlignment.Center,
             [!ToggleButton.IsCheckedProperty] = new Binding(bindingProperty) { Source = _vm, Mode = BindingMode.TwoWay }
+        });
+    }
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e); 
+        
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            _searchBox.Focus(); // hack to make OnKeyDown work
         });
     }
 }

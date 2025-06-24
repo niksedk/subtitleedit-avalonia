@@ -692,7 +692,18 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task ShowVideoOpenFromUrl()
     {
-        await _windowService.ShowDialogAsync<OpenFromUrlWindow, OpenFromUrlViewModel>(Window!, vm => { });
+        var result = await _windowService.ShowDialogAsync<OpenFromUrlWindow, OpenFromUrlViewModel>(Window!);
+
+        if (result.OkPressed)
+        {
+            var videoFileName = result.Url.Trim();
+            if (!string.IsNullOrEmpty(videoFileName))
+            {
+                await VideoOpenFile(videoFileName);
+                _videoFileName = videoFileName;
+            }
+        }
+
         _shortcutManager.ClearKeys();
     }
 
@@ -1727,6 +1738,17 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         }
     }
 
+    private static bool IsValidUrl(string url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return false;
+        }
+
+        return Uri.TryCreate(url, UriKind.Absolute, out var uriResult)
+               && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+    }
+
     private async Task VideoOpenFile(string videoFileName)
     {
         if (VideoPlayerControl == null)
@@ -1735,6 +1757,12 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         }
 
         await VideoPlayerControl.Open(videoFileName);
+        
+        if (IsValidUrl(videoFileName))
+        {
+            //TODO: create empty waveform
+            return;
+        }
 
         var peakWaveFileName = WavePeakGenerator.GetPeakWaveFileName(videoFileName);
         if (!File.Exists(peakWaveFileName))

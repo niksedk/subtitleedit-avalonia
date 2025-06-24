@@ -684,15 +684,18 @@ public partial class MultipleReplaceViewModel : ObservableObject
                 {
                     var replaceWith = RegexUtils.FixNewLine(rule.ReplaceWith);
                     findWhat = RegexUtils.FixNewLine(findWhat);
-                    var ruleInfo = string.IsNullOrEmpty(rule.Description)
-                        ? $"Group name: {group.CategoryName} - Rule number: {group.SubNodes.IndexOf(rule) + 1}"
-                        : $"Group name: {group.CategoryName} - Rule number: {group.SubNodes.IndexOf(rule) + 1}. {rule.Description}";
-                    var mpi = new ReplaceExpression(findWhat, replaceWith, rule.SearchType, ruleInfo);
-                    replaceExpressions.Add(mpi);
-                    if (mpi.SearchType == ReplaceExpression.SearchRegEx && !_compiledRegExList.ContainsKey(findWhat))
+                    if (group.SubNodes != null)
                     {
-                        _compiledRegExList.Add(findWhat,
-                            new Regex(findWhat, RegexOptions.Compiled | RegexOptions.Multiline));
+                        var ruleInfo = string.IsNullOrEmpty(rule.Description)
+                            ? $"Group name: {group.CategoryName} - Rule number: {group.SubNodes.IndexOf(rule) + 1}"
+                            : $"Group name: {group.CategoryName} - Rule number: {group.SubNodes.IndexOf(rule) + 1}. {rule.Description}";
+                        var mpi = new ReplaceExpression(findWhat, replaceWith, rule.SearchType, ruleInfo);
+                        replaceExpressions.Add(mpi);
+                        if (mpi.SearchType == ReplaceExpression.SearchRegEx && !_compiledRegExList.ContainsKey(findWhat))
+                        {
+                            _compiledRegExList.Add(findWhat,
+                                new Regex(findWhat, RegexOptions.Compiled | RegexOptions.Multiline));
+                        }
                     }
                 }
             }
