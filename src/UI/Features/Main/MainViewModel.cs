@@ -861,7 +861,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task OpenDataFolder()
     {
-        await _folderHelper.OpenFolder(Window!, Se.BaseFolder);
+        await _folderHelper.OpenFolder(Window!, Se.DataFolder);
     }
 
     [RelayCommand]

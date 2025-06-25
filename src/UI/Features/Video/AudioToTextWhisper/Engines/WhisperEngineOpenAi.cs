@@ -84,7 +84,7 @@ public class WhisperEngineOpenAi : IWhisperEngine
     public async Task<string> GetHelpText()
     {
         var assetName = $"{StaticName.Replace(" ", string.Empty)}.txt";
-        var path = Path.Combine(Se.BaseFolder, "Assets", "Whisper", assetName);
+        var path = Path.Combine(Se.DataFolder, "Assets", "Whisper", assetName);
 
         await using var stream = File.OpenRead(path);
         using var reader = new StreamReader(stream);

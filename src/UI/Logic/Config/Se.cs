@@ -31,34 +31,53 @@ public class Se
     public static SeLanguage Language { get; set; } = new();
     public static Se Settings { get; set; } = new();
 
-    private static string _baseFolder = string.Empty;
+    public static readonly bool IsInstalledInProgramFiles;
+    public static readonly bool IsPortable;
+    public static readonly string ExePath;
+    public static readonly string DataFolder;
 
-    public static string BaseFolder
+    static Se()
     {
-        get
-        {
-            if (string.IsNullOrEmpty(_baseFolder))
-            {
-                _baseFolder = AppContext.BaseDirectory;
-            }
+        ExePath = AppContext.BaseDirectory;
+        var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+        var programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
 
-            return _baseFolder;
+        IsInstalledInProgramFiles =
+            ExePath.StartsWith(programFiles, StringComparison.OrdinalIgnoreCase) ||
+            ExePath.StartsWith(programFilesX86, StringComparison.OrdinalIgnoreCase);
+
+        IsPortable = !IsInstalledInProgramFiles;
+
+        DataFolder = IsPortable
+            ? ExePath
+            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Subtitle Edit");
+
+        if (!Directory.Exists(DataFolder))
+        {
+            try
+            {
+                Directory.CreateDirectory(DataFolder);
+            }
+            catch
+            {
+                //TODO: og error creating data folder
+            }
         }
     }
 
-    public static string DictionariesFolder => Path.Combine(BaseFolder, "Dictionaries");
-    public static string AutoBackupFolder => Path.Combine(BaseFolder, "AutoBackup");
-    public static string TtsFolder => Path.Combine(BaseFolder, "TTS");
-    public static string OcrFolder => Path.Combine(BaseFolder, "OCR");
-    public static string LanguageFolder => Path.Combine(BaseFolder, "Assets", "Languages");
-    public static string PaddleOcrFolder => Path.Combine(BaseFolder, "PaddleOCR");
+    public static string DictionariesFolder => Path.Combine(DataFolder, "Dictionaries");
+    public static string AutoBackupFolder => Path.Combine(DataFolder, "AutoBackup");
+    public static string TtsFolder => Path.Combine(DataFolder, "TTS");
+    public static string OcrFolder => Path.Combine(DataFolder, "OCR");
+    public static string LanguageFolder => Path.Combine(DataFolder, "Assets", "Languages");
+    public static string PaddleOcrFolder => Path.Combine(DataFolder, "PaddleOCR");
     public static string TesseractFolder
     {
         get
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                return Path.Combine(BaseFolder, "Tesseract550");
+                return Path.Combine(DataFolder, "Tesseract550");
             }
 
             var folders = new List<string>();
@@ -107,8 +126,8 @@ public class Se
         }
     }
 
-    public static string FfmpegFolder => Path.Combine(BaseFolder, "ffmpeg");
-    public static string WhisperFolder => Path.Combine(BaseFolder, "Whisper");
+    public static string FfmpegFolder => Path.Combine(DataFolder, "ffmpeg");
+    public static string WhisperFolder => Path.Combine(DataFolder, "Whisper");
 
 
     public Se()
@@ -146,7 +165,7 @@ public class Se
 
     public static void SaveSettings()
     {
-        var settingsFileName = Path.Combine(BaseFolder, "Settings.json");
+        var settingsFileName = Path.Combine(DataFolder, "Settings.json");
         SaveSettings(settingsFileName);
     }
 
@@ -161,7 +180,7 @@ public class Se
 
     public static void LoadSettings()
     {
-        var settingsFileName = Path.Combine(BaseFolder, "Settings.json");
+        var settingsFileName = Path.Combine(DataFolder, "Settings.json");
         LoadSettings(settingsFileName);
     }
 
@@ -293,7 +312,7 @@ public class Se
 
     public static string GetWhisperLogFilePath()
     {
-        return Path.Combine(BaseFolder, "whisper_log.txt");
+        return Path.Combine(DataFolder, "whisper_log.txt");
     }
 
     private static void UpdateLibSeSettings()

@@ -155,15 +155,15 @@ public partial class DownloadLibMpvViewModel : ObservableObject
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            return Path.Combine(Se.BaseFolder, "libmpv-2.dll");
+            return Path.Combine(Se.DataFolder, "libmpv-2.dll");
         }
 
-        return Path.Combine(Se.BaseFolder, "libmpv-2.so");
+        return Path.Combine(Se.DataFolder, "libmpv-2.so");
     }
 
     public static string GetFallbackLibMpvFileName(bool create)
     {
-        var newFolder = Path.Combine(Se.BaseFolder, "libmpv-update");
+        var newFolder = Path.Combine(Se.DataFolder, "libmpv-update");
         if (!Directory.Exists(newFolder) && create)
         {
             Directory.CreateDirectory(newFolder);

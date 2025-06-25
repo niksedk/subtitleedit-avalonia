@@ -18,7 +18,7 @@ public static class DictionaryLoader
 
     private static async Task UnpackDictionaries()
     {
-        var zipFilePath = Path.Combine(Se.BaseFolder, "Assets",  "Dictionaries.zip");
+        var zipFilePath = Path.Combine(Se.DataFolder, "Assets",  "Dictionaries.zip");
         await using var stream = new FileStream(zipFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true);
     
         var zipUnpacker = new ZipUnpacker();
