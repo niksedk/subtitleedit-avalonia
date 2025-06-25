@@ -43,7 +43,7 @@ public class LanguageInitializer : ILanguageInitializer
             return true;
         }
 
-        var currentNormalizedVersion = new SemanticVersion(Se.Language.Version);
+        var currentNormalizedVersion = new SemanticVersion(Se.Version);
 
         var version = await File.ReadAllTextAsync(versionFileName);
         var themeNormalizedVersion = new SemanticVersion(version);

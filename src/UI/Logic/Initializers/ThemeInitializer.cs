@@ -29,7 +29,7 @@ public class ThemeInitializer : IThemeInitializer
         }
     }
 
-    private async Task<bool> NeedsUpdate()
+    private static async Task<bool> NeedsUpdate()
     {
         string outputDir = Se.ThemesFolder;
         if (!Directory.Exists(outputDir))
@@ -43,7 +43,7 @@ public class ThemeInitializer : IThemeInitializer
             return true;
         }
 
-        var currentNormalizedVersion = new SemanticVersion(Se.Language.Version);
+        var currentNormalizedVersion = new SemanticVersion(Se.Version);
 
         var version = await File.ReadAllTextAsync(versionFileName);
         var themeNormalizedVersion = new SemanticVersion(version);

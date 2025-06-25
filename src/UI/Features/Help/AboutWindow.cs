@@ -4,6 +4,7 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 using System;
 
 namespace Nikse.SubtitleEdit.Features.Help;
@@ -20,7 +21,7 @@ public class AboutWindow : Window
 
         var titleText = new TextBlock
         {
-            Text = "Subtitle Edit version 5.0, Alpha 3",
+            Text = $"Subtitle Edit version {Se.Version}", 
             FontSize = 20,
             FontWeight = FontWeight.Bold,
         };

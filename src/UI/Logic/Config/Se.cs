@@ -130,6 +130,7 @@ public class Se
     public static string FfmpegFolder => Path.Combine(DataFolder, "ffmpeg");
     public static string WhisperFolder => Path.Combine(DataFolder, "Whisper");
 
+    public static string Version { get; set; } = "v5.0.0-alpha4";
 
     public Se()
     {
