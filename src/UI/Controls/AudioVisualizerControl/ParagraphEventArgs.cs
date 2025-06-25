@@ -1,5 +1,4 @@
-﻿using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Features.Main;
+﻿using Nikse.SubtitleEdit.Features.Main;
 
 namespace Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 

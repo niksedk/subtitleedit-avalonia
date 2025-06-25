@@ -5,7 +5,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DynamicData;
 using Nikse.SubtitleEdit.Features.Shared;
-using Projektanker.Icons.Avalonia;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

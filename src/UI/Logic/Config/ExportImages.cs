@@ -1,5 +1,4 @@
-﻿using Avalonia.Media;
-using SkiaSharp;
+﻿using SkiaSharp;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Nikse.SubtitleEdit.Logic.Config;
+﻿namespace Nikse.SubtitleEdit.Logic.Config;
 
 public class SeBatchConvert
 {

@@ -4,7 +4,9 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Nikse.SubtitleEdit.Logic;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
@@ -36,9 +38,11 @@ public class LayoutWindow : Window
 
         for (var i = 1; i <= 12; i++)
         {
+            var uri = new Uri($"avares://SubtitleEdit/Assets/Layout/Layout{i:D2}.png");
+
             var image = new Image
             {
-                Source = new Bitmap($"Assets/Layout/Layout{i:D2}.png"),
+                Source = new Bitmap(AssetLoader.Open(uri)),
                 Width = 200,
                 Height = 139
             };

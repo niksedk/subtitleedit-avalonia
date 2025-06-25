@@ -1,5 +1,7 @@
-﻿using Nikse.SubtitleEdit.Core.AudioToText;
+﻿using Avalonia.Platform;
+using Nikse.SubtitleEdit.Core.AudioToText;
 using Nikse.SubtitleEdit.Logic.Config;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -111,10 +113,10 @@ public class WhisperEngineConstMe : IWhisperEngine
 
     public async Task<string> GetHelpText()
     {
-        var assetName = $"{StaticName.Replace(" ", string.Empty).Replace("-", string.Empty)}.txt";
-        var path = Path.Combine(Se.DataFolder, "Assets", "Whisper", assetName);
+        var assetName = $"{StaticName.Replace(" ", string.Empty)}.txt";
+        var uri = new Uri($"avares://SubtitleEdit/Assets/Whisper/{assetName}");
 
-        await using var stream = File.OpenRead(path);
+        await using var stream = AssetLoader.Open(uri);
         using var reader = new StreamReader(stream);
 
         var contents = await reader.ReadToEndAsync();

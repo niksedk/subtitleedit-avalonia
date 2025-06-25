@@ -1,6 +1,5 @@
 using Avalonia.Controls;
 using Avalonia.Layout;
-using Avalonia.Media;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 

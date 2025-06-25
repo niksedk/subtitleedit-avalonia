@@ -16,7 +16,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Avalonia.Threading;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 

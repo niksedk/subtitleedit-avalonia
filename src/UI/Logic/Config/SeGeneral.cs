@@ -1,6 +1,5 @@
 ﻿using Avalonia.Media;
 using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Features.Options.Language;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 
