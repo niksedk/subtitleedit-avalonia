@@ -39,15 +39,6 @@
 
 		<StandardDirectory Id="ProgramFiles6432Folder">
 			<Directory Id="INSTALLFOLDER" Name="Subtitle Edit">
-				<Directory Id="AssetsFolder" Name="Assets">
-					<Directory Id="LanguagesFolder" Name="Languages" />
-					<Directory Id="LayoutFolder" Name="Layout" />
-					<Directory Id="ThemesFolder" Name="Themes">
-						<Directory Id="LightThemeFolder" Name="Light" />
-						<Directory Id="DarkThemeFolder" Name="Dark" />
-					</Directory>
-					<Directory Id="WhisperFolder" Name="Whisper" />
-				</Directory>
 			</Directory>
 		</StandardDirectory>
 
