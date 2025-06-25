@@ -20,6 +20,11 @@ public class ZipUnpacker : IZipUnpacker
     List<string> allowedExtensions,
     List<string>? outputFileNames)
     {
+        if (!Directory.Exists(outputPath))
+        {
+            Directory.CreateDirectory(outputPath);
+        }
+
         allowedExtensions = allowedExtensions.Select(x => x.ToLowerInvariant()).ToList();
 
         using var archive = new ZipArchive(zipStream, ZipArchiveMode.Read);

@@ -25,7 +25,7 @@ public static class InitToolbar
 
     private static Grid CreateToolbar(MainViewModel vm)
     {
-        var path = $"Assets/Themes/{Se.Settings.Appearance.Theme}/";
+        var path = System.IO.Path.Combine(Se.ThemesFolder, Se.Settings.Appearance.Theme);
 
         var stackPanelLeft = new StackPanel
         {
@@ -44,7 +44,7 @@ public static class InitToolbar
             {
                 Content = new Image
                 {
-                    Source = new Bitmap(path + "New.png"),
+                    Source = new Bitmap(System.IO.Path.Combine(path, "New.png")),
                     Width = 32,
                     Height = 32,
                 },
@@ -60,7 +60,7 @@ public static class InitToolbar
             {
                 Content = new Image
                 {
-                    Source = new Bitmap(path + "Open.png"),
+                    Source = new Bitmap(System.IO.Path.Combine(path, "Open.png")),
                     Width = 32,
                     Height = 32,
                 },
@@ -76,7 +76,7 @@ public static class InitToolbar
             {
                 Content = new Image
                 {
-                    Source = new Bitmap(path + "Save.png"),
+                    Source = new Bitmap(System.IO.Path.Combine(path, "Save.png")),
                     Width = 32,
                     Height = 32,
                 },
@@ -92,7 +92,7 @@ public static class InitToolbar
             {
                 Content = new Image
                 {
-                    Source = new Bitmap(path + "SaveAs.png"),
+                    Source = new Bitmap(System.IO.Path.Combine(path, "SaveAs.png")),
                     Width = 32,
                     Height = 32,
                 },
@@ -114,7 +114,7 @@ public static class InitToolbar
             {
                 Content = new Image
                 {
-                    Source = new Bitmap(path + "Find.png"),
+                    Source = new Bitmap(System.IO.Path.Combine(path, "Find.png")),
                     Width = 32,
                     Height = 32,
                 },
@@ -130,7 +130,7 @@ public static class InitToolbar
             {
                 Content = new Image
                 {
-                    Source = new Bitmap(path + "Replace.png"),
+                    Source = new Bitmap(System.IO.Path.Combine(path, "Replace.png")),
                     Width = 32,
                     Height = 32,
                 },
@@ -153,7 +153,7 @@ public static class InitToolbar
             {
                 Content = new Image
                 {
-                    Source = new Bitmap(path + "SpellCheck.png"),
+                    Source = new Bitmap(System.IO.Path.Combine(path, "SpellCheck.png")),
                     Width = 32,
                     Height = 32,
                 },
@@ -169,7 +169,7 @@ public static class InitToolbar
             {
                 Content = new Image
                 {
-                    Source = new Bitmap(path + "Settings.png"),
+                    Source = new Bitmap(System.IO.Path.Combine(path, "Settings.png")),
                     Width = 32,
                     Height = 32,
                 },
@@ -185,7 +185,7 @@ public static class InitToolbar
             {
                 Content = new Image
                 {
-                    Source = new Bitmap(path + "Layout.png"),
+                    Source = new Bitmap(System.IO.Path.Combine(path, "Layout.png")),
                     Width = 32,
                     Height = 32,
                 },
@@ -206,7 +206,7 @@ public static class InitToolbar
             {
                 Content = new Image
                 {
-                    Source = new Bitmap(path + "Help.png"),
+                    Source = new Bitmap(System.IO.Path.Combine(path, "Help.png")),
                     Width = 32,
                     Height = 32,
                 },

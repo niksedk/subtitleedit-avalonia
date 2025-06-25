@@ -66,10 +66,11 @@ public class Se
     }
 
     public static string DictionariesFolder => Path.Combine(DataFolder, "Dictionaries");
+    public static string ThemesFolder => Path.Combine(DataFolder, "Themes");
     public static string AutoBackupFolder => Path.Combine(DataFolder, "AutoBackup");
     public static string TtsFolder => Path.Combine(DataFolder, "TTS");
     public static string OcrFolder => Path.Combine(DataFolder, "OCR");
-    public static string LanguageFolder => Path.Combine(DataFolder, "Assets", "Languages");
+    public static string LanguageFolder => Path.Combine(DataFolder, "Languages");
     public static string PaddleOcrFolder => Path.Combine(DataFolder, "PaddleOCR");
     public static string TesseractFolder
     {

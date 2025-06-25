@@ -39,6 +39,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Compression;
 using Nikse.SubtitleEdit.Logic.Dictionaries;
 using Nikse.SubtitleEdit.Logic.Download;
+using Nikse.SubtitleEdit.Logic.Initializers;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
 
@@ -66,6 +67,9 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<IMpvReloader, MpvReloader>();
         collection.AddTransient<IBatchConverter, BatchConverter>();
         collection.AddTransient<IFindService, FindService>();
+        collection.AddTransient<ILanguageInitializer, LanguageInitializer>();
+        collection.AddTransient<IThemeInitializer, ThemeInitializer>();
+        collection.AddTransient<IDictionaryInitializer, DictionaryInitializer>();
 
         // Download services
         collection.AddHttpClient<IFfmpegDownloadService, FfmpegDownloadService>();
