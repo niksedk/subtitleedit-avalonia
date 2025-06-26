@@ -11,7 +11,9 @@ using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
+using Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Core.VobSub;
 using Nikse.SubtitleEdit.Features.Edit.Find;
 using Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
 using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
@@ -113,7 +115,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     private readonly IUndoRedoManager _undoRedoManager;
     private readonly IBluRayHelper _bluRayHelper;
     private readonly IMpvReloader _mpvReloader;
-    private readonly IFindService  _findService;
+    private readonly IFindService _findService;
 
     private bool IsEmpty => Subtitles.Count == 0 || string.IsNullOrEmpty(Subtitles[0].Text);
 
@@ -171,7 +173,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         StatusTextRight = string.Empty;
 
         themeInitializer.UpdateThemesIfNeeded().ConfigureAwait(true);
-        Dispatcher.UIThread.Post(async() =>
+        Dispatcher.UIThread.Post(async () =>
         {
             await languageInitializer.UpdateLanguagesIfNeeded();
             await dictionaryInitializer.UpdateDictionariesIfNeeded();
@@ -838,9 +840,9 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task CommandShowSettingsShortcuts()
     {
-        await _windowService.ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(Window!, vm => 
-        { 
-            vm.LoadShortCuts(this); 
+        await _windowService.ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(Window!, vm =>
+        {
+            vm.LoadShortCuts(this);
         });
         ReloadShortcuts();
         _shortcutManager.ClearKeys();
@@ -988,7 +990,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             SelectAndScrollToRow(idx);
             ShowStatus($"'{_findService.SearchText}' found in line '{idx + 1}'");
         }
-        
+
         _shortcutManager.ClearKeys();
     }
 
@@ -1022,11 +1024,11 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         }
 
         var result =
-            await _windowService.ShowDialogAsync<MultipleReplaceWindow, MultipleReplaceViewModel>(Window!, vm => 
-            { 
+            await _windowService.ShowDialogAsync<MultipleReplaceWindow, MultipleReplaceViewModel>(Window!, vm =>
+            {
                 vm.Initialize(GetUpdateSubtitle());
             });
-        
+
         if (result.OkPressed)
         {
             MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Multiple replace"));
@@ -1498,12 +1500,20 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
                 {
                     if (ext == ".mkv")
                     {
-                        //VideoOpen(matroska.Path);
+                        Dispatcher.UIThread.Post(async () =>
+                        {
+                            await VideoOpenFile(matroska.Path);
+                        });
                     }
                     else
                     {
-                        //TryToFindAndOpenVideoFile(Path.Combine(Path.GetDirectoryName(matroska.Path),
-                        //    Path.GetFileNameWithoutExtension(matroska.Path)));
+                        if (FindVideoFileName.TryFindVideoFileName(matroska.Path, out videoFileName))
+                        {
+                            Dispatcher.UIThread.Post(async () =>
+                            {
+                                await VideoOpenFile(videoFileName);
+                            });
+                        }
                     }
                 }
             }
@@ -1520,15 +1530,15 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             return true;
         }
 
-        //if (matroskaSubtitleInfo.CodecId.Equals("S_HDMV/TEXTST", StringComparison.OrdinalIgnoreCase))
-        //{
-        //    return LoadTextSTFromMatroska(matroskaSubtitleInfo, matroska, batchMode);
-        //}
+        if (matroskaSubtitleInfo.CodecId.Equals("S_HDMV/TEXTST", StringComparison.OrdinalIgnoreCase))
+        {
+            return LoadTextSTFromMatroska(matroskaSubtitleInfo, matroska);
+        }
 
-        //if (matroskaSubtitleInfo.CodecId.Equals("S_DVBSUB", StringComparison.OrdinalIgnoreCase))
-        //{
-        //    return LoadDvbFromMatroska(matroskaSubtitleInfo, matroska, batchMode);
-        //}
+        if (matroskaSubtitleInfo.CodecId.Equals("S_DVBSUB", StringComparison.OrdinalIgnoreCase))
+        {
+            return LoadDvbFromMatroska(matroskaSubtitleInfo, matroska);
+        }
 
         var sub = matroska.GetSubtitle(matroskaSubtitleInfo.TrackNumber, null);
         var subtitle = new Subtitle();
@@ -1568,6 +1578,161 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         return true;
     }
 
+    private bool LoadDvbFromMatroska(MatroskaTrackInfo matroskaSubtitleInfo, MatroskaFile matroska)
+    {
+        ShowStatus(Se.Language.Main.ParsingMatroskaFile);
+        var sub = matroska.GetSubtitle(matroskaSubtitleInfo.TrackNumber, MatroskaProgress);
+
+        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, Se.Language.Main.SubtitleImportedFromMatroskaFile));
+        ResetSubtitle();
+
+        _subtitle.Paragraphs.Clear();
+        var subtitleImages = new List<DvbSubPes>();
+        var subtitle = new Subtitle();
+        Utilities.LoadMatroskaTextSubtitle(matroskaSubtitleInfo, matroska, sub, _subtitle);
+        for (int index = 0; index < sub.Count; index++)
+        {
+            try
+            {
+                var msub = sub[index];
+                DvbSubPes pes = null;
+                var data = msub.GetData(matroskaSubtitleInfo);
+                if (data != null && data.Length > 9 && data[0] == 15 && data[1] >= SubtitleSegment.PageCompositionSegment && data[1] <= SubtitleSegment.DisplayDefinitionSegment) // sync byte + segment id
+                {
+                    var buffer = new byte[data.Length + 3];
+                    Buffer.BlockCopy(data, 0, buffer, 2, data.Length);
+                    buffer[0] = 32;
+                    buffer[1] = 0;
+                    buffer[buffer.Length - 1] = 255;
+                    pes = new DvbSubPes(0, buffer);
+                }
+                else if (VobSubParser.IsMpeg2PackHeader(data))
+                {
+                    pes = new DvbSubPes(data, Mpeg2Header.Length);
+                }
+                else if (VobSubParser.IsPrivateStream1(data, 0))
+                {
+                    pes = new DvbSubPes(data, 0);
+                }
+                else if (data.Length > 9 && data[0] == 32 && data[1] == 0 && data[2] == 14 && data[3] == 16)
+                {
+                    pes = new DvbSubPes(0, data);
+                }
+
+                if (pes == null && subtitle.Paragraphs.Count > 0)
+                {
+                    var last = subtitle.Paragraphs[subtitle.Paragraphs.Count - 1];
+                    if (last.DurationTotalMilliseconds < 100)
+                    {
+                        last.EndTime.TotalMilliseconds = msub.Start;
+                        if (last.DurationTotalMilliseconds > Configuration.Settings.General.SubtitleMaximumDisplayMilliseconds)
+                        {
+                            last.EndTime.TotalMilliseconds = last.StartTime.TotalMilliseconds + 3000;
+                        }
+                    }
+                }
+
+                if (pes != null && pes.PageCompositions != null && pes.PageCompositions.Any(p => p.Regions.Count > 0))
+                {
+                    subtitleImages.Add(pes);
+                    subtitle.Paragraphs.Add(new Paragraph(string.Empty, msub.Start, msub.End));
+                }
+            }
+            catch
+            {
+                // continue
+            }
+        }
+
+        if (subtitleImages.Count == 0)
+        {
+            return false;
+        }
+
+        for (var index = 0; index < subtitle.Paragraphs.Count; index++)
+        {
+            var p = subtitle.Paragraphs[index];
+            if (p.DurationTotalMilliseconds < 200)
+            {
+                p.EndTime.TotalMilliseconds = p.StartTime.TotalMilliseconds + 3000;
+            }
+
+            var next = subtitle.GetParagraphOrDefault(index + 1);
+            if (next != null && next.StartTime.TotalMilliseconds < p.EndTime.TotalMilliseconds)
+            {
+                p.EndTime.TotalMilliseconds = next.StartTime.TotalMilliseconds - Se.Settings.General.MinimumMillisecondsBetweenLines;
+            }
+        }
+
+        //using (var formSubOcr = new VobSubOcr())
+        //{
+        //    formSubOcr.Initialize(subtitle, subtitleImages, Configuration.Settings.VobSubOcr); // TODO: language???
+        //    if (_loading)
+        //    {
+        //        formSubOcr.Icon = (Icon)Icon.Clone();
+        //        formSubOcr.ShowInTaskbar = true;
+        //        formSubOcr.ShowIcon = true;
+        //    }
+
+        //    if (formSubOcr.ShowDialog(this) == DialogResult.OK)
+        //    {
+        //        ResetSubtitle();
+        //        _subtitle.Paragraphs.Clear();
+        //        foreach (var p in formSubOcr.SubtitleFromOcr.Paragraphs)
+        //        {
+        //            _subtitle.Paragraphs.Add(p);
+        //        }
+
+        //        UpdateSourceView();
+        //        SubtitleListview1.Fill(_subtitle, _subtitleOriginal);
+        //        _subtitleListViewIndex = -1;
+        //        SubtitleListview1.FirstVisibleIndex = -1;
+        //        SubtitleListview1.SelectIndexAndEnsureVisible(0, true);
+        //        RefreshSelectedParagraph();
+        //        _fileName = Utilities.GetPathAndFileNameWithoutExtension(matroska.Path) + GetCurrentSubtitleFormat().Extension;
+        //        _converted = true;
+        //        SetTitle();
+
+        //        Configuration.Settings.Save();
+        //        return true;
+        //    }
+        //}
+
+        return false;
+    }
+
+    private void MatroskaProgress(long position, long total)
+    {
+        // UpdateProgress(position, total, _language.ParsingMatroskaFile);
+    }
+
+    private bool LoadTextSTFromMatroska(MatroskaTrackInfo matroskaSubtitleInfo, MatroskaFile matroska)
+    {
+        ShowStatus(Se.Language.Main.ParsingMatroskaFile);
+        var sub = matroska.GetSubtitle(matroskaSubtitleInfo.TrackNumber, MatroskaProgress);
+        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, Se.Language.Main.SubtitleImportedFromMatroskaFile));
+        ResetSubtitle();
+
+        _subtitle.Paragraphs.Clear();
+        Utilities.LoadMatroskaTextSubtitle(matroskaSubtitleInfo, matroska, sub, _subtitle);
+        Utilities.ParseMatroskaTextSt(matroskaSubtitleInfo, sub, _subtitle);
+
+        SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == Configuration.Settings.General.DefaultSubtitleFormat) ?? SelectedSubtitleFormat;
+        ShowStatus(Se.Language.Main.SubtitleImportedFromMatroskaFile);
+        _subtitle.Renumber();
+        Subtitles.Clear();
+        Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
+
+
+        if (matroska.Path.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase) || matroska.Path.EndsWith(".mks", StringComparison.OrdinalIgnoreCase))
+        {
+            _subtitleFileName = matroska.Path.Remove(matroska.Path.Length - 4) + SelectedSubtitleFormat.Extension;
+        }
+
+        SelectAndScrollToRow(0);
+
+        return true;
+    }
 
     private void SetSubtitles(Subtitle subtitle)
     {
@@ -1768,7 +1933,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         }
 
         await VideoPlayerControl.Open(videoFileName);
-        
+
         if (IsValidUrl(videoFileName))
         {
             //TODO: create empty waveform

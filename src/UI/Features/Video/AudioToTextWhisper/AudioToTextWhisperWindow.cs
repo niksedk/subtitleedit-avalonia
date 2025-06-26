@@ -6,6 +6,8 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
 
 namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 
@@ -274,9 +276,17 @@ public class AudioToTextWhisperWindow : Window
             },
         };
 
+        var buttonBatchMode = UiUtil.MakeButton(Se.Language.General.BatchMode, vm.BatchModeCommand)
+                  .WithBindIsVisible(nameof(vm.IsSingleModeVisible))
+                  .WithBindEnabled(nameof(vm.IsTranscribeEnabled));
+        var buttonSingleMode = UiUtil.MakeButton(Se.Language.General.SingleMode, vm.SingleModeCommand)
+            .WithBindIsVisible(nameof(vm.IsBatchModeVisible))
+            .WithBindEnabled(nameof(vm.IsTranscribeEnabled));
         var transcribeButton = UiUtil.MakeButton("Transcribe", vm.TranscribeCommand).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
         var buttonPanel = UiUtil.MakeButtonBar(
             transcribeButton,
+            buttonBatchMode,
+            buttonSingleMode,
             UiUtil.MakeButtonCancel(vm.CancelCommand)
         );
 

@@ -47,6 +47,9 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
     [ObservableProperty] private string _consoleLog;
 
+    [ObservableProperty] private bool _isBatchMode;
+    [ObservableProperty] private bool _isBatchModeVisible;
+    [ObservableProperty] private bool _isSingleModeVisible;
     [ObservableProperty] private bool _isTranscribeEnabled;
     [ObservableProperty] private double _progressOpacity;
 
@@ -653,6 +656,22 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         return model.Name.EndsWith(".en", StringComparison.InvariantCulture) ||
                model.Name == "distil-large-v2" ||
                model.Name == "distil-large-v3";
+    }
+
+    [RelayCommand]
+    private void SingleMode()
+    {
+        IsBatchMode = false;
+        IsSingleModeVisible = false;
+        IsBatchModeVisible = true;
+    }
+
+    [RelayCommand]
+    private void BatchMode()
+    {
+        IsBatchMode = true;
+        IsSingleModeVisible = true;
+        IsBatchModeVisible = false;
     }
 
     [RelayCommand]

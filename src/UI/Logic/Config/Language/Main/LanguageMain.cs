@@ -10,6 +10,8 @@ public class LanguageMain
     public string ExtractingWaveInfo { get; set; }
     public string LoadingWaveInfoFromCache { get; set; }
     public string FailedToExtractWaveInfo { get; set; }
+    public string ParsingMatroskaFile { get; internal set; }
+    public string SubtitleImportedFromMatroskaFile { get; internal set; }
 
     public LanguageMain()
     {
@@ -19,5 +21,7 @@ public class LanguageMain
         ExtractingWaveInfo = "Extracting wave info...";
         LoadingWaveInfoFromCache = "Loading wave info from cache...";
         FailedToExtractWaveInfo = "Failed to extract wave info.";
+        ParsingMatroskaFile = "Parsing Matroska file...";
+        SubtitleImportedFromMatroskaFile = "Subtitle imported from Matroska file";
     }
 }

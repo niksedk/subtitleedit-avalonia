@@ -5,6 +5,7 @@ namespace Nikse.SubtitleEdit.Logic.Config;
 
 public class SeGeneral
 {
+    public string Version { get; set; }
     public string Language { get; set; }
     public int LayoutNumber { get; set; } = 0;
     public bool UseTimeFormatHhMmSsFf { get; set; } = false;
@@ -49,6 +50,7 @@ public class SeGeneral
 
     public SeGeneral()
     {
+        Version = Se.Version;
         Language = "English";
         LayoutNumber = 0;
         UseTimeFormatHhMmSsFf = false;
