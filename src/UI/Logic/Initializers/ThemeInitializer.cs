@@ -12,15 +12,8 @@ public interface  IThemeInitializer
     Task UpdateThemesIfNeeded();
 }
 
-public class ThemeInitializer : IThemeInitializer
+public class ThemeInitializer(IZipUnpacker zipUnpacker) : IThemeInitializer
 {
-    private readonly IZipUnpacker _zipUnpacker;
-
-    public ThemeInitializer(IZipUnpacker zipUnpacker)
-    {
-        _zipUnpacker = zipUnpacker;
-    }
-
     public async Task UpdateThemesIfNeeded()
     {
         if (await NeedsUpdate())
@@ -55,6 +48,6 @@ public class ThemeInitializer : IThemeInitializer
     {
         var zipUri = new Uri("avares://SubtitleEdit/Assets/Themes.zip");
         await using var zipStream = AssetLoader.Open(zipUri);
-        _zipUnpacker.UnpackZipStream(zipStream, Se.ThemesFolder);
+        zipUnpacker.UnpackZipStream(zipStream, Se.ThemesFolder);
     }
 }

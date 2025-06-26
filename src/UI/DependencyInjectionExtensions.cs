@@ -69,6 +69,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<IFindService, FindService>();
         collection.AddTransient<ILanguageInitializer, LanguageInitializer>();
         collection.AddTransient<IThemeInitializer, ThemeInitializer>();
+        collection.AddTransient<IOcrInitializer, OcrInitializer>();
         collection.AddTransient<IDictionaryInitializer, DictionaryInitializer>();
 
         // Download services

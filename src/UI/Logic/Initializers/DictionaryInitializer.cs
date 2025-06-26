@@ -12,15 +12,8 @@ public interface IDictionaryInitializer
     Task UpdateDictionariesIfNeeded();
 }
 
-public class DictionaryInitializer : IDictionaryInitializer
+public class DictionaryInitializer(IZipUnpacker zipUnpacker) : IDictionaryInitializer
 {
-    private readonly IZipUnpacker _zipUnpacker;
-
-    public DictionaryInitializer(IZipUnpacker zipUnpacker)
-    {
-        _zipUnpacker = zipUnpacker;
-    }
-
     public async Task UpdateDictionariesIfNeeded()
     {
         if (await NeedsUpdate())
@@ -55,6 +48,6 @@ public class DictionaryInitializer : IDictionaryInitializer
     {    
         var zipUri = new Uri("avares://SubtitleEdit/Assets/Dictionaries.zip");
         await using var zipStream = AssetLoader.Open(zipUri);
-        _zipUnpacker.UnpackZipStream(zipStream, Se.DictionariesFolder);
+        zipUnpacker.UnpackZipStream(zipStream, Se.DictionariesFolder);
     }
 }

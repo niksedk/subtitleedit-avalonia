@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Logic.Initializers;
 
-public interface ILanguageInitializer
+public interface  IOcrInitializer
 {
-    Task UpdateLanguagesIfNeeded();
+    Task UpdateOcrDictionariesIfNeeded();
 }
 
-public class LanguageInitializer(IZipUnpacker zipUnpacker) : ILanguageInitializer
+public class OcrInitializer(IZipUnpacker zipUnpacker) : IOcrInitializer
 {
-    public async Task UpdateLanguagesIfNeeded()
+    public async Task UpdateOcrDictionariesIfNeeded()
     {
         if (await NeedsUpdate())
         {
@@ -24,7 +24,7 @@ public class LanguageInitializer(IZipUnpacker zipUnpacker) : ILanguageInitialize
 
     private static async Task<bool> NeedsUpdate()
     {
-        string outputDir = Se.LanguageFolder;
+        string outputDir = Se.OcrFolder;
         if (!Directory.Exists(outputDir))
         {
             return true;
@@ -46,8 +46,8 @@ public class LanguageInitializer(IZipUnpacker zipUnpacker) : ILanguageInitialize
 
     private async Task Unpack()
     {
-        var zipUri = new Uri("avares://SubtitleEdit/Assets/Languages.zip");
+        var zipUri = new Uri("avares://SubtitleEdit/Assets/Ocr.zip");
         await using var zipStream = AssetLoader.Open(zipUri);
-        zipUnpacker.UnpackZipStream(zipStream, Se.LanguageFolder);
+        zipUnpacker.UnpackZipStream(zipStream, Se.OcrFolder);
     }
 }

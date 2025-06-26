@@ -114,9 +114,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     private readonly IBluRayHelper _bluRayHelper;
     private readonly IMpvReloader _mpvReloader;
     private readonly IFindService  _findService;
-    private readonly IDictionaryInitializer  _dictionaryInitializer;
-    private readonly ILanguageInitializer _languageInitializer;
-    private readonly IThemeInitializer _themeInitializer;
 
     private bool IsEmpty => Subtitles.Count == 0 || string.IsNullOrEmpty(Subtitles[0].Text);
 
@@ -137,6 +134,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         IFindService findService,
         IDictionaryInitializer dictionaryInitializer,
         ILanguageInitializer languageInitializer,
+        IOcrInitializer ocrInitializer,
         IThemeInitializer themeInitializer)
     {
         _fileHelper = fileHelper;
@@ -150,9 +148,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         _bluRayHelper = bluRayHelper;
         _mpvReloader = mpvReloader;
         _findService = findService;
-        _dictionaryInitializer = dictionaryInitializer;
-        _languageInitializer = languageInitializer;
-        _themeInitializer = themeInitializer;
 
         EditText = string.Empty;
         EditTextCharactersPerSecond = string.Empty;
@@ -175,11 +170,12 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         StatusTextLeft = string.Empty;
         StatusTextRight = string.Empty;
 
-        _themeInitializer.UpdateThemesIfNeeded().ConfigureAwait(true);
-        Dispatcher.UIThread.Post(async () =>
+        themeInitializer.UpdateThemesIfNeeded().ConfigureAwait(true);
+        Dispatcher.UIThread.Post(async() =>
         {
-            await _languageInitializer.UpdateLanguagesIfNeeded();
-            await _dictionaryInitializer.UpdateDictionariesIfNeeded();
+            await languageInitializer.UpdateLanguagesIfNeeded();
+            await dictionaryInitializer.UpdateDictionariesIfNeeded();
+            //await ocrInitializer.UpdateOcrDictionariesIfNeeded();
         }, DispatcherPriority.Loaded);
         InitializeLibMpv();
         InitializeFfmpeg();
