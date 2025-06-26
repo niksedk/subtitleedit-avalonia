@@ -175,7 +175,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         {
             await languageInitializer.UpdateLanguagesIfNeeded();
             await dictionaryInitializer.UpdateDictionariesIfNeeded();
-            //await ocrInitializer.UpdateOcrDictionariesIfNeeded();
+            await ocrInitializer.UpdateOcrDictionariesIfNeeded();
         }, DispatcherPriority.Loaded);
         InitializeLibMpv();
         InitializeFfmpeg();

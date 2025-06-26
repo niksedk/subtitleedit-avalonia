@@ -24,7 +24,7 @@ public class OcrInitializer(IZipUnpacker zipUnpacker) : IOcrInitializer
 
     private static async Task<bool> NeedsUpdate()
     {
-        string outputDir = Se.OcrFolder;
+        var outputDir = Se.OcrFolder;
         if (!Directory.Exists(outputDir))
         {
             return true;

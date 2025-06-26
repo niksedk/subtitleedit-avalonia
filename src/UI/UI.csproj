@@ -110,6 +110,8 @@
 			<CopyToOutputDirectory></CopyToOutputDirectory>
 		</AvaloniaResource>
 		<Content Include="SE.ico" />
+		<None Remove="Assets\Ocr.zip" />
+		<AvaloniaResource Include="Assets\Ocr.zip" />
 	</ItemGroup>
 
 	<ItemGroup>
