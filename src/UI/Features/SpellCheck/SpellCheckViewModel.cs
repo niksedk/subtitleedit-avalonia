@@ -138,7 +138,7 @@ public partial class SpellCheckViewModel : ObservableObject
 
         if (!string.IsNullOrEmpty(dictionaryFileName))
         {
-            SelectedDictionary = Dictionaries.FirstOrDefault(l => l.DictionaryFileName.Equals(sdictionaryFileName, StringComparison.OrdinalIgnoreCase));
+            SelectedDictionary = Dictionaries.FirstOrDefault(l => l.DictionaryFileName.Equals(dictionaryFileName, StringComparison.OrdinalIgnoreCase));
         }
 
         if (SelectedDictionary == null)

@@ -145,8 +145,27 @@ public partial class GetDictionariesViewModel : ObservableObject
             outputFileNames);
 
         _downloadStream.Dispose();
+        
+        var dicFiles = outputFileNames.Where(p=>p.EndsWith(".dic")).ToList();
+        if (dicFiles.Count == 0)
+        {
+            return string.Empty;
+        }
 
-        return outputFileNames.FirstOrDefault(p => p.EndsWith(".dic", StringComparison.OrdinalIgnoreCase));
+        var largestFileSize = (long)-1;
+        var largestFileName = string.Empty;
+
+        foreach (var file in dicFiles)
+        {
+            var fi = new FileInfo(file);
+            if (fi.Length > largestFileSize)
+            {
+                largestFileSize = fi.Length;
+                largestFileName = file;
+            }
+        }
+
+        return largestFileName;
     }
 
     private void LoadDictionaries()
