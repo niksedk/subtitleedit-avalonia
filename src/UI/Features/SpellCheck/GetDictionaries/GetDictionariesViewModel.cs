@@ -95,7 +95,7 @@ public partial class GetDictionariesViewModel : ObservableObject
                 }
 
                 DictionaryFileName = UnpackDictionary();
-
+                OkPressed = true;
                 Close();
             }
             else if (_downloadTask is { IsFaulted: true })
