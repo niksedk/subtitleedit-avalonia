@@ -18,6 +18,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using Nikse.SubtitleEdit.Core.Common;
 
 namespace Nikse.SubtitleEdit.Features.SpellCheck;
 
@@ -115,7 +116,50 @@ public partial class SpellCheckViewModel : ObservableObject
         _focusSubtitleLine = focusSubtitleLine;
         Paragraphs.Clear();
         Paragraphs.AddRange(paragraphs);
+        SetLanguage(null);
         Dispatcher.UIThread.Post(DoSpellCheck, DispatcherPriority.Background);
+    }
+
+    private void SetLanguage(string? dictionaryFileName)
+    {
+        if (Dictionaries.Count <= 0)
+        {
+            return;
+        }
+
+        var subtitle = new Subtitle();
+        foreach (var vm in Paragraphs)
+        {
+            var p = new Paragraph(vm.Text, 0, 0);
+            subtitle.Paragraphs.Add(p);
+        }
+        
+        var languageCode = LanguageAutoDetect.AutoDetectGoogleLanguageOrNull(subtitle);
+
+        if (!string.IsNullOrEmpty(dictionaryFileName))
+        {
+            SelectedDictionary = Dictionaries.FirstOrDefault(l => l.DictionaryFileName.Equals(dictionaryFileName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (SelectedDictionary == null)
+        {
+            SelectedDictionary = Dictionaries.FirstOrDefault(l => l.DictionaryFileName.StartsWith(languageCode, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (SelectedDictionary == null)
+        {
+            if (!string.IsNullOrEmpty(Se.Settings.SpellCheck.LastLanguageDictionaryFile))
+            {
+                SelectedDictionary = Dictionaries.FirstOrDefault(l => l.DictionaryFileName == Se.Settings.SpellCheck.LastLanguageDictionaryFile);
+            }
+        }
+
+        if (SelectedDictionary == null)
+        {
+            SelectedDictionary = Dictionaries[0];
+        }
+
+        _spellCheckManager.Initialize(SelectedDictionary.DictionaryFileName, GetTwoLetterLanguageCode(SelectedDictionary));
     }
 
     [RelayCommand]
@@ -232,8 +276,7 @@ public partial class SpellCheckViewModel : ObservableObject
         if (result.OkPressed)
         {
             LoadDictionaries();
-
-            //TODO: pick the selected dictionary and re-initialize the spell checker
+            SetLanguage(result.DictionaryFileName);
         }
     }
 
