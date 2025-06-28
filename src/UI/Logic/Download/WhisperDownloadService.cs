@@ -10,7 +10,7 @@ namespace Nikse.SubtitleEdit.Logic.Download;
 public class WhisperDownloadService : IWhisperDownloadService
 {
     private readonly HttpClient _httpClient;
-    private const string WindowsUrl = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-175/whisper-blas-bin-x64.zip";
+    private const string WindowsUrl = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-176/whisper176-blas-bin-x64.zip";
     private const string MacUrl = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-175/whisper-cpp.mac.zip";
 
     private const string DownloadUrlConstMe = "https://github.com/Const-me/Whisper/releases/download/1.12.0/cli.zip";
