@@ -34,7 +34,7 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
     public bool OkPressed { get; internal set; }
     public IWhisperEngine? Engine { get; internal set; }
 
-    private IWhisperDownloadService _whisperDownloadService;
+    private readonly IWhisperDownloadService _whisperDownloadService;
     private Task? _downloadTask;
     private readonly Timer _timer;
     private readonly CancellationTokenSource _cancellationTokenSource;
