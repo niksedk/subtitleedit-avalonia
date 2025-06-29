@@ -1,30 +1,32 @@
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
-using System.Text;
+using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.AudioToText;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper.Engines;
-using System.Timers;
+using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Logic;
-using System.Runtime.InteropServices;
+using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media;
 using System;
-using Avalonia.Threading;
-using Avalonia.Controls;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Logic.Config;
-using System.Globalization;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
-using Nikse.SubtitleEdit.Core.SubtitleFormats;
-using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
-using Nikse.SubtitleEdit.Features.Shared;
+using System.Threading.Tasks;
+using System.Timers;
 
 namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 
@@ -38,6 +40,9 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
     [ObservableProperty] private ObservableCollection<WhisperModelDisplay> _models;
     [ObservableProperty] private WhisperModelDisplay? _selectedModel;
+
+    [ObservableProperty] private ObservableCollection<WhisperJobItem> _batchItems;
+    [ObservableProperty] private WhisperJobItem? _selectedBatchItem;
 
     [ObservableProperty] private bool _doTranslateToEnglish;
     [ObservableProperty] private bool _doAdjustTimings;
@@ -63,6 +68,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     public bool OkPressed { get; private set; }
     public Subtitle TranscribedSubtitle { get; private set; }
     public TextBox TextBoxConsoleLog { get; internal set; }
+    public DataGrid BatchGrid { get; internal set; }
 
     private bool _unknownArgument;
     private bool _cudaOutOfMemory;
@@ -93,10 +99,12 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     private readonly Lock _lockObj = new();
 
     IWindowService _windowService;
+    private readonly IFileHelper _fileHelper;
 
-    public AudioToTextWhisperViewModel(IWindowService windowService)
+    public AudioToTextWhisperViewModel(IWindowService windowService, IFileHelper fileHelper)
     {
         _windowService = windowService;
+        _fileHelper = fileHelper;
 
         Engines = new ObservableCollection<IWhisperEngine>();
         Engines.Add(new WhisperEngineCpp());
@@ -118,6 +126,8 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
         Models = new ObservableCollection<WhisperModelDisplay>();
 
+        BatchItems = new ObservableCollection<WhisperJobItem>();
+
         IsTranscribeEnabled = true;
         Parameters = string.Empty;
         ConsoleLog = string.Empty;
@@ -126,6 +136,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         EstimatedText = string.Empty;
         TranscribedSubtitle = new Subtitle();
         TextBoxConsoleLog = new TextBox();
+        BatchGrid = new DataGrid();
         _audioTrackNumber = 0;
 
         LoadSettings();
@@ -209,7 +220,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             if (!_whisperProcess.HasExited)
             {
                 var durationMs = (DateTime.UtcNow.Ticks - _startTicks) / 10_000;
-                ProgressText = "Transcribing...";
+                ProgressText = Se.Language.Video.AudioToText.Transcribing;
 
                 ElapsedText = $"Time elapsed: {new TimeCode(durationMs).ToShortDisplayString()}";
                 if (_endSeconds <= 0)
@@ -672,6 +683,61 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         IsBatchMode = true;
         IsSingleModeVisible = true;
         IsBatchModeVisible = false;
+    }
+
+    [RelayCommand]
+    private async Task Add()
+    {
+        var fileNames = await _fileHelper.PickOpenVideoFiles(Window!, Se.Language.General.AddVideoFiles);
+        if (fileNames == null || fileNames.Length == 0)
+        {
+            return;
+        }
+
+        var error = false;
+
+        foreach (var fileName in fileNames)
+        {
+            var mediaInfo = FfmpegMediaInfo.Parse(fileName);
+            var fileInfo = new FileInfo(fileName);
+
+            if (mediaInfo.Duration == null || mediaInfo.Dimension.Width == 0 || mediaInfo.Dimension.Height == 0)
+            {
+                error = true;
+            }
+            else
+            {
+                var batchItem = new WhisperJobItem(fileName, string.Empty);
+                Dispatcher.UIThread.Invoke(() => { BatchItems.Add(batchItem); });
+            }
+        }
+
+        if (error)
+        {
+            await MessageBox.Show(Window!,
+                    "Unable to get video info",
+                    "File skipped as video info was unavailable",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+        }
+    }
+
+
+    [RelayCommand]
+    private void Remove()
+    {
+        if (SelectedBatchItem != null)
+        {
+            var idx = BatchItems.IndexOf(SelectedBatchItem);
+            BatchItems.Remove(SelectedBatchItem);
+        }
+    }
+
+
+    [RelayCommand]
+    private void Clear()
+    {
+        BatchItems.Clear();
     }
 
     [RelayCommand]
@@ -1407,5 +1473,17 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     internal void Initialize(string? videoFileName)
     {
         _videoFileName = videoFileName;
+        if (string.IsNullOrEmpty(_videoFileName) || !File.Exists(_videoFileName))
+        {
+            IsBatchModeVisible = false;
+            IsSingleModeVisible = false;
+            IsBatchMode = true;
+        }
+        else
+        {
+            IsBatchModeVisible = true;
+            IsSingleModeVisible = false;
+            IsBatchMode = false;
+        }
     }
 }

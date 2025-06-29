@@ -5,9 +5,11 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Styling;
+using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
+using System;
 
 namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 
@@ -18,7 +20,7 @@ public class AudioToTextWhisperWindow : Window
     public AudioToTextWhisperWindow(AudioToTextWhisperViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = "Speech to text - Whisper";
+        Title = Se.Language.Video.AudioToText.Title;
         Width = 950;
         Height = 660;
         MinWidth = 800;
@@ -31,29 +33,15 @@ public class AudioToTextWhisperWindow : Window
 
         var labelConsoleLog = new TextBlock
         {
-            Text = "Console log",
+            Text = Se.Language.General.ConsoleLog,
             HorizontalAlignment = HorizontalAlignment.Left,
             Margin = new Thickness(10, 12, 10, 10),
         };
-        var textBoxConsoleLog = new TextBox()
-        {
-            Width = double.NaN,
-            Height = double.NaN,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            IsReadOnly = true,
-            Margin = new Thickness(10),
-        };
-        textBoxConsoleLog.Bind(TextBox.TextProperty, new Binding
-        {
-            Path = nameof(vm.ConsoleLog),
-            Mode = BindingMode.OneWay,
-            Source = vm,
-            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
-        });
-        vm.TextBoxConsoleLog = textBoxConsoleLog;
 
-        var labelEngine = UiUtil.MakeTextBlock("Engine").WithMarginTop(10);
+        var consoleLogAndBatchView = MakeConsoleLogAndBatchView(vm);       
+        var consoleLogOnlyView = MakeConsoleLogOnlyView(vm);       
+
+        var labelEngine = UiUtil.MakeTextBlock(Se.Language.General.Engine).WithMarginTop(10);
         var comboEngine = UiUtil.MakeComboBox(vm.Engines, vm, nameof(vm.SelectedEngine))
             .WithMinWidth(220)
             .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled))
@@ -61,29 +49,23 @@ public class AudioToTextWhisperWindow : Window
 
         comboEngine.SelectionChanged += vm.OnEngineChanged;
 
-        var labelLanguage = UiUtil.MakeTextBlock("Language").WithMarginTop(10);
+        var labelLanguage = UiUtil.MakeTextBlock(Se.Language.General.Language).WithMarginTop(10);
         var comboLanguage = UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage))
             .WithMinWidth(220)
             .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled))
             .WithMarginTop(10);
 
-        var labelModel = UiUtil.MakeTextBlock("Model").WithMarginBottom(20).WithMarginTop(10);
+        var labelModel = UiUtil.MakeTextBlock(Se.Language.General.Model).WithMarginBottom(20).WithMarginTop(10);
         var comboModel = UiUtil.MakeComboBox(vm.Models, vm, nameof(vm.SelectedModel))
             .WithMinWidth(220)
             .WithMarginBottom(20)
             .WithMarginTop(10)
             .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
 
-        var buttonModelDownload = new Button
-        {
-            Content = "...",
-            HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Center,
-            HorizontalContentAlignment = HorizontalAlignment.Center,
-            VerticalContentAlignment = VerticalAlignment.Center,
-            Command = vm.DownloadModelCommand,
-            Margin = new Thickness(5, 0, 0, 0),
-        }.WithMarginBottom(20).WithMarginTop(10).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
+        var buttonModelDownload = UiUtil.MakeButtonBrowse(vm.DownloadModelCommand)
+            .WithMarginBottom(20)
+            .WithMarginTop(10)
+            .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
 
         var panelModelControls = new StackPanel
         {
@@ -97,14 +79,14 @@ public class AudioToTextWhisperWindow : Window
             }
         };
 
-        var labelTranslateToEnglish = UiUtil.MakeTextBlock("Translate to English");
+        var labelTranslateToEnglish = UiUtil.MakeTextBlock(Se.Language.Video.AudioToText.TranslateToEnglish);
         var checkTranslateToEnglish = UiUtil.MakeCheckBox(vm, nameof(vm.DoTranslateToEnglish)).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
 
-        var labelPostProcessing = UiUtil.MakeTextBlock("Post processing").WithMarginTop(15);
+        var labelPostProcessing = UiUtil.MakeTextBlock(Se.Language.General.PostProcessing).WithMarginTop(15);
         var checkPostProcessing = UiUtil.MakeCheckBox(vm, nameof(vm.DoPostProcessing)).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
         var buttonPostProcessing = new Button()
         {
-            Content = "Settings",
+            Content = Se.Language.General.Settings,
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Center,
             HorizontalContentAlignment = HorizontalAlignment.Center,
@@ -124,10 +106,10 @@ public class AudioToTextWhisperWindow : Window
             }
         };
 
-        var labelAdvancedSettings = UiUtil.MakeTextBlock("Advanced settings").WithMarginTop(15);
+        var labelAdvancedSettings = UiUtil.MakeTextBlock(Se.Language.General.AdvancedSettings).WithMarginTop(15);
         var buttonAdvancedSettings = new Button()
         {
-            Content = "Settings",
+            Content = Se.Language.General.Settings,
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Center,
             HorizontalContentAlignment = HorizontalAlignment.Center,
@@ -277,12 +259,12 @@ public class AudioToTextWhisperWindow : Window
         };
 
         var buttonBatchMode = UiUtil.MakeButton(Se.Language.General.BatchMode, vm.BatchModeCommand)
-                  .WithBindIsVisible(nameof(vm.IsSingleModeVisible))
-                  .WithBindEnabled(nameof(vm.IsTranscribeEnabled));
-        var buttonSingleMode = UiUtil.MakeButton(Se.Language.General.SingleMode, vm.SingleModeCommand)
             .WithBindIsVisible(nameof(vm.IsBatchModeVisible))
             .WithBindEnabled(nameof(vm.IsTranscribeEnabled));
-        var transcribeButton = UiUtil.MakeButton("Transcribe", vm.TranscribeCommand).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
+        var buttonSingleMode = UiUtil.MakeButton(Se.Language.General.SingleMode, vm.SingleModeCommand)
+            .WithBindIsVisible(nameof(vm.IsSingleModeVisible))
+            .WithBindEnabled(nameof(vm.IsTranscribeEnabled));
+        var transcribeButton = UiUtil.MakeButton(Se.Language.Video.AudioToText.Transcribe, vm.TranscribeCommand).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
         var buttonPanel = UiUtil.MakeButtonBar(
             transcribeButton,
             buttonBatchMode,
@@ -327,10 +309,14 @@ public class AudioToTextWhisperWindow : Window
         Grid.SetRowSpan(labelConsoleLog, 2);
         row++;
 
-        grid.Children.Add(textBoxConsoleLog);
-        Grid.SetRow(textBoxConsoleLog, row);
-        Grid.SetColumn(textBoxConsoleLog, 2);
-        Grid.SetRowSpan(textBoxConsoleLog, 8);
+        grid.Children.Add(consoleLogAndBatchView);
+        Grid.SetRow(consoleLogAndBatchView, row);
+        Grid.SetColumn(consoleLogAndBatchView, 2);
+        Grid.SetRowSpan(consoleLogAndBatchView, 8);
+        grid.Children.Add(consoleLogOnlyView);
+        Grid.SetRow(consoleLogOnlyView, row);
+        Grid.SetColumn(consoleLogOnlyView, 2);
+        Grid.SetRowSpan(consoleLogOnlyView, 8);
         row++;
 
         grid.Children.Add(labelEngine);
@@ -408,6 +394,149 @@ public class AudioToTextWhisperWindow : Window
         Content = grid;
 
         Activated += delegate { Focus(); }; // hack to make OnKeyDown work
+    }
+
+    private static Grid MakeConsoleLogAndBatchView(AudioToTextWhisperViewModel vm)
+    {
+        var textBoxConsoleLog = new TextBox()
+        {
+            Width = double.NaN,
+            Height = double.NaN,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            IsReadOnly = true,
+            Margin = new Thickness(0, 0, 0, 10),
+        };
+        textBoxConsoleLog.Bind(TextBox.TextProperty, new Binding
+        {
+            Path = nameof(vm.ConsoleLog),
+            Mode = BindingMode.OneWay,
+            Source = vm,
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+        });
+        vm.TextBoxConsoleLog = textBoxConsoleLog;
+
+
+        var dataGrid = new DataGrid
+        {
+            AutoGenerateColumns = false,
+            SelectionMode = DataGridSelectionMode.Single,
+            CanUserResizeColumns = true,
+            CanUserSortColumns = true,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Width = double.NaN,
+            Height = double.NaN,
+            DataContext = vm,
+            ItemsSource = vm.BatchItems,
+            Columns =
+            {
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.FileName,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(WhisperJobItem.InputVideoFileNameShort)),
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Size,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(WhisperJobItem.SizeDisplay)),
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Status,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(WhisperJobItem.Status)),
+                    IsReadOnly = true,
+                },
+            },
+        };
+        dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedBatchItem)) { Source = vm });
+        vm.BatchGrid = dataGrid;
+
+        var buttonAdd = UiUtil.MakeButton(Se.Language.General.AddDotDotDot, vm.AddCommand);
+        var buttonRemove = UiUtil.MakeButton(Se.Language.General.Remove, vm.RemoveCommand);
+        var buttonClear = UiUtil.MakeButton(Se.Language.General.Clear, vm.ClearCommand);
+
+        var panelFileControls = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            Children =
+            {
+                buttonAdd,
+                buttonRemove,
+                buttonClear,
+            }
+        };
+
+        var gridBatch = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // Batch view
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Batch view buttons
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+        gridBatch.Add(dataGrid, 0, 0);
+        gridBatch.Add(panelFileControls, 1, 0);
+
+        var borderBatch = UiUtil.MakeBorderForControl(gridBatch);
+
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // Console log
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // Batch view
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Margin = new Thickness(10),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        grid.Add(textBoxConsoleLog, 0, 0);
+        grid.Add(borderBatch, 1, 0);
+
+        grid.WithBindVisible(vm, nameof(vm.IsBatchMode));
+
+        return grid;
+    }
+
+    private static TextBox MakeConsoleLogOnlyView(AudioToTextWhisperViewModel vm)
+    {
+        var textBoxConsoleLog = new TextBox()
+        {
+            Width = double.NaN,
+            Height = double.NaN,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            IsReadOnly = true,
+            Margin = new Thickness(10),
+        };
+        textBoxConsoleLog.Bind(TextBox.TextProperty, new Binding
+        {
+            Path = nameof(vm.ConsoleLog),
+            Mode = BindingMode.OneWay,
+            Source = vm,
+            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+        });
+        textBoxConsoleLog.WithBindIsVisible(nameof(vm.IsBatchMode), new InverseBooleanConverter());
+        vm.TextBoxConsoleLog = textBoxConsoleLog;
+
+        return textBoxConsoleLog;
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

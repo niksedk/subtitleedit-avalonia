@@ -4,6 +4,7 @@ public class LanguageVideo
 {
     public LanguageBurnIn BurnIn { get; set; } = new();
     public LanguageTransparentVideo VideoTransparent { get; set; } = new();
+    public LanguageAudioToText AudioToText { get; set; } = new();
 
 
     public LanguageVideo()

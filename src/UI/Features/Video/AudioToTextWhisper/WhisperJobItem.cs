@@ -1,0 +1,33 @@
+﻿using System.IO;
+using CommunityToolkit.Mvvm.ComponentModel;
+using Nikse.SubtitleEdit.Core.Common;
+
+namespace Nikse.SubtitleEdit.Features.Video.BurnIn;
+
+public partial class WhisperJobItem : ObservableObject
+{
+    [ObservableProperty] private string _inputVideoFileName;
+    [ObservableProperty] private string _inputVideoFileNameShort;
+    [ObservableProperty] private long _size;
+    [ObservableProperty] private string _sizeDisplay;
+    [ObservableProperty] private string _status;
+
+    public WhisperJobItem(string inputVideoFileName, string status)
+    {
+        InputVideoFileName = inputVideoFileName;
+        if (inputVideoFileName.Length > 75)
+        {
+            InputVideoFileNameShort = Path.GetFileName(inputVideoFileName);
+        }
+        else
+        {
+            InputVideoFileNameShort = inputVideoFileName;
+        }
+
+        var fileInfo = new FileInfo(inputVideoFileName);
+        Size = fileInfo.Length;
+
+        SizeDisplay = Utilities.FormatBytesToDisplayFileSize(fileInfo.Length);
+        Status = status;
+    }
+}

@@ -699,6 +699,29 @@ public static class UiUtil
         return control;
     }
 
+    public static TextBox WithBindIsVisible(this TextBox control, string isVisiblePropertyPath)
+    {
+        control.Bind(TextBox.IsVisibleProperty, new Binding
+        {
+            Path = isVisiblePropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
+    public static TextBox WithBindIsVisible(this TextBox control, string isEnabledPropertyPath, IValueConverter converter)
+    {
+        control.Bind(TextBox.IsVisibleProperty, new Binding
+        {
+            Converter = converter,
+            Path = isEnabledPropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
     public static Button WithBindIsVisible(this Button control, string isVisiblePropertyPath)
     {
         control.Bind(Button.IsVisibleProperty, new Binding
