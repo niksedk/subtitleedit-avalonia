@@ -133,7 +133,7 @@ public partial class SpellCheckViewModel : ObservableObject
             var p = new Paragraph(vm.Text, 0, 0);
             subtitle.Paragraphs.Add(p);
         }
-        
+
         var languageCode = LanguageAutoDetect.AutoDetectGoogleLanguageOrNull(subtitle);
 
         if (!string.IsNullOrEmpty(dictionaryFileName))
@@ -326,6 +326,22 @@ public partial class SpellCheckViewModel : ObservableObject
 
     private void DoSpellCheck()
     {
+        if (Dictionaries.Count == 0)
+        {
+            Dispatcher.UIThread.Post(async() =>
+            {
+                var result = await _windowService.ShowDialogAsync<GetDictionariesWindow, GetDictionariesViewModel>(Window!, vm => { });
+                if (result.OkPressed)
+                {
+                    LoadDictionaries();
+                    SetLanguage(result.DictionaryFileName);
+                    DoSpellCheck();
+                }
+            }, DispatcherPriority.Background);
+
+            return;
+        }
+
         var results = _spellCheckManager.CheckSpelling(Paragraphs, _lastSpellCheckResult);
         if (results.Count > 0)
         {
