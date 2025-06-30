@@ -275,21 +275,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
             _timerWhisper.Stop();
 
-            _batchIndex++;
-            if (_batchIndex < BatchItems.Count)
-            {
-                _videoFileName = BatchItems[_batchIndex].InputVideoFileName;
-                _videoInfo.TotalMilliseconds = BatchItems[_batchIndex].MediaInfo.Duration.TotalMilliseconds;
-                _videoInfo.TotalSeconds = BatchItems[_batchIndex].MediaInfo.Duration.TotalSeconds;
-                _videoInfo.Width = BatchItems[_batchIndex].MediaInfo.Dimension.Width;
-                _videoInfo.Height = BatchItems[_batchIndex].MediaInfo.Dimension.Height;
-
-                ProgressOpacity = 1;
-                ProgressText = Se.Language.General.GeneratingWavFile;
-                _startTicks = DateTime.UtcNow.Ticks;
-
-                var startGenerateWaveFileOk = GenerateWavFile(_videoFileName, _audioTrackNumber);
-            }
+            
 
             Dispatcher.UIThread.Invoke(async () =>
             {
@@ -319,6 +305,51 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                 await MakeResult(transcribedSubtitleFromStdOut);
             });
         }
+    }
+
+    private void StartNext(Subtitle? transcribedSubtitle)
+    {
+        var currentItem = BatchItems[_batchIndex];
+        if (transcribedSubtitle != null && transcribedSubtitle.Paragraphs.Count > 0)
+        {
+            currentItem.Status = Se.Language.General.Converted;
+            var subtitleFileName = GetSubtitleFileName(currentItem.InputVideoFileName);
+            var format = new SubRip();
+            var text =format.ToText(transcribedSubtitle, string.Empty);
+            File.WriteAllText(subtitleFileName, text);
+        }
+
+        _batchIndex++;
+        if (_batchIndex < BatchItems.Count)
+        {
+            _videoFileName = BatchItems[_batchIndex].InputVideoFileName;
+            _videoInfo.TotalMilliseconds = BatchItems[_batchIndex].MediaInfo.Duration.TotalMilliseconds;
+            _videoInfo.TotalSeconds = BatchItems[_batchIndex].MediaInfo.Duration.TotalSeconds;
+            _videoInfo.Width = BatchItems[_batchIndex].MediaInfo.Dimension.Width;
+            _videoInfo.Height = BatchItems[_batchIndex].MediaInfo.Dimension.Height;
+
+            ProgressOpacity = 1;
+            ProgressText = Se.Language.General.GeneratingWavFile;
+            _startTicks = DateTime.UtcNow.Ticks;
+
+            var startGenerateWaveFileOk = GenerateWavFile(_videoFileName, _audioTrackNumber);
+        }
+    }
+
+    private string GetSubtitleFileName(string videoFileName)
+    {
+        var path = Path.GetDirectoryName(videoFileName);
+        var fileName = Path.GetFileNameWithoutExtension(videoFileName);
+        var extension = ".srt";
+        var subtitleFileName = Path.Combine(path!, fileName + "." + extension);
+        int count = 2;
+        while (File.Exists(subtitleFileName))
+        {
+            subtitleFileName = Path.Combine(path!, fileName + "_" + count + "." + extension);
+            count++;
+        }
+        
+        return subtitleFileName;
     }
 
     private Subtitle PostProcess(Subtitle transcript)
@@ -572,6 +603,12 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
         var anyLinesTranscribed = transcribedSubtitle != null && transcribedSubtitle.Paragraphs.Count > 0;
 
+        if (IsBatchMode)
+        {
+            StartNext(transcribedSubtitle);
+            return;
+        }
+        
         if (anyLinesTranscribed)
         {
             TranscribedSubtitle = transcribedSubtitle!;

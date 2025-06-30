@@ -209,7 +209,7 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
             var cppPath = Path.Combine(folder, "whisper-cli");
             if (File.Exists(cppPath))
             {
-                MacHelper.MakeExecutable(folder);
+                MacHelper.MakeExecutable(cppPath);
             }
         }
     }

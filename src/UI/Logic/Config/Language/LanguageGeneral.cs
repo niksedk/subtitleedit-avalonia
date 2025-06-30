@@ -175,6 +175,7 @@ public class LanguageGeneral
     public string AdvancedSettings { get; set; }
     public string ConsoleLog { get; set; }
     public string GeneratingWavFile { get; set; }
+    public string Converted { get; set; }
 
     public LanguageGeneral()
     {
@@ -351,5 +352,6 @@ public class LanguageGeneral
         AdvancedSettings = "Advanced settings";
         ConsoleLog = "Console log";
         GeneratingWavFile = "Generating wav file...";
+        Converted = "Converted";
     }
 }
