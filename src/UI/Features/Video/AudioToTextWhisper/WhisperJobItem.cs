@@ -12,7 +12,9 @@ public partial class WhisperJobItem : ObservableObject
     [ObservableProperty] private string _sizeDisplay;
     [ObservableProperty] private string _status;
 
-    public WhisperJobItem(string inputVideoFileName, string status)
+    public FfmpegMediaInfo MediaInfo { get; set; }
+
+    public WhisperJobItem(string inputVideoFileName, string status, FfmpegMediaInfo mediaInfo)
     {
         InputVideoFileName = inputVideoFileName;
         if (inputVideoFileName.Length > 75)
@@ -29,5 +31,7 @@ public partial class WhisperJobItem : ObservableObject
 
         SizeDisplay = Utilities.FormatBytesToDisplayFileSize(fileInfo.Length);
         Status = status;
+        
+        MediaInfo = mediaInfo;
     }
 }

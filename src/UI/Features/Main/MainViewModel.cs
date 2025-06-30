@@ -1590,12 +1590,12 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         var subtitleImages = new List<DvbSubPes>();
         var subtitle = new Subtitle();
         Utilities.LoadMatroskaTextSubtitle(matroskaSubtitleInfo, matroska, sub, _subtitle);
-        for (int index = 0; index < sub.Count; index++)
+        for (var index = 0; index < sub.Count; index++)
         {
             try
             {
                 var msub = sub[index];
-                DvbSubPes pes = null;
+                DvbSubPes? pes = null;
                 var data = msub.GetData(matroskaSubtitleInfo);
                 if (data != null && data.Length > 9 && data[0] == 15 && data[1] >= SubtitleSegment.PageCompositionSegment && data[1] <= SubtitleSegment.DisplayDefinitionSegment) // sync byte + segment id
                 {
@@ -1614,7 +1614,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
                 {
                     pes = new DvbSubPes(data, 0);
                 }
-                else if (data.Length > 9 && data[0] == 32 && data[1] == 0 && data[2] == 14 && data[3] == 16)
+                else if (data!.Length > 9 && data[0] == 32 && data[1] == 0 && data[2] == 14 && data[3] == 16)
                 {
                     pes = new DvbSubPes(0, data);
                 }
