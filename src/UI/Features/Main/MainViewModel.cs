@@ -661,32 +661,25 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task ShowVideoAudioToTextWhisper()
     {
-        if (string.IsNullOrEmpty(_videoFileName))
-        {
-            await CommandVideoOpen();
-            if (string.IsNullOrEmpty(_videoFileName))
-            {
-                return;
-            }
-        }
-
         var ffmpegOk = await RequireFfmpegOk();
         if (!ffmpegOk)
         {
             return;
         }
 
-        var vm = await _windowService.ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(Window!,
-            viewModel => { viewModel.Initialize(_videoFileName); });
+        var result = await _windowService.ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(Window!, vm => 
+        { 
+            vm.Initialize(_videoFileName); 
+        });
 
-        if (vm.OkPressed)
+        if (result.OkPressed && !result.IsBatchMode)
         {
             MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Whisper audio-to-text"));
 
-            _subtitle = vm.TranscribedSubtitle;
+            _subtitle = result.TranscribedSubtitle;
             SetSubtitles(_subtitle);
             SelectAndScrollToRow(0);
-            ShowStatus($"Transcription completed with {vm.TranscribedSubtitle.Paragraphs.Count} lines");
+            ShowStatus($"Transcription completed with {result.TranscribedSubtitle.Paragraphs.Count} lines");
         }
 
         _shortcutManager.ClearKeys();

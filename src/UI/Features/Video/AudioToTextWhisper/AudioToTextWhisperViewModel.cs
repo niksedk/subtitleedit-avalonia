@@ -113,8 +113,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         _windowService = windowService;
         _fileHelper = fileHelper;
 
-        Engines = new ObservableCollection<IWhisperEngine>();
-        Engines.Add(new WhisperEngineCpp());
+        Engines = [new WhisperEngineCpp()];
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             Engines.Add(new WhisperEnginePurfviewFasterWhisperXxl());
@@ -231,7 +230,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             if (!_whisperProcess.HasExited)
             {
                 var durationMs = (DateTime.UtcNow.Ticks - _startTicks) / 10_000;
-                ProgressText = Se.Language.Video.AudioToText.Transcribing;
+                ProgressText = GetProgressText();
 
                 ElapsedText = $"Time elapsed: {new TimeCode(durationMs).ToShortDisplayString()}";
                 if (_endSeconds <= 0)
@@ -275,7 +274,6 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
             _timerWhisper.Stop();
 
-            
 
             Dispatcher.UIThread.Invoke(async () =>
             {
@@ -307,6 +305,18 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         }
     }
 
+    private string GetProgressText()
+    {
+        if (IsBatchMode)
+        {
+            return string.Format(Se.Language.Video.AudioToText.TranscribingXOfY, _batchIndex + 1, BatchItems.Count);
+        }
+        else
+        {
+            return Se.Language.Video.AudioToText.Transcribing;
+        }
+    }
+
     private void StartNext(Subtitle? transcribedSubtitle)
     {
         var currentItem = BatchItems[_batchIndex];
@@ -315,25 +325,70 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             currentItem.Status = Se.Language.General.Converted;
             var subtitleFileName = GetSubtitleFileName(currentItem.InputVideoFileName);
             var format = new SubRip();
-            var text =format.ToText(transcribedSubtitle, string.Empty);
+            var text = format.ToText(transcribedSubtitle, string.Empty);
             File.WriteAllText(subtitleFileName, text);
         }
 
         _batchIndex++;
         if (_batchIndex < BatchItems.Count)
         {
-            _videoFileName = BatchItems[_batchIndex].InputVideoFileName;
-            _videoInfo.TotalMilliseconds = BatchItems[_batchIndex].MediaInfo.Duration.TotalMilliseconds;
-            _videoInfo.TotalSeconds = BatchItems[_batchIndex].MediaInfo.Duration.TotalSeconds;
-            _videoInfo.Width = BatchItems[_batchIndex].MediaInfo.Dimension.Width;
-            _videoInfo.Height = BatchItems[_batchIndex].MediaInfo.Dimension.Height;
+            ProgressValue = 0;
+            _startTicks = 0;
+            _endSeconds = 0; ;
+            _showProgressPct = -1;
+            _lastEstimatedMs = double.MaxValue;
+            _outputText.Clear();
+            ConsoleLog = string.Empty;
+            ProgressText = string.Empty;
+            ElapsedText = string.Empty;
+            EstimatedText = string.Empty;
+
+            var jobItem = BatchItems[_batchIndex];
+            _videoFileName = jobItem.InputVideoFileName;
+            _videoInfo.TotalMilliseconds = jobItem.MediaInfo.Duration.TotalMilliseconds;
+            _videoInfo.TotalSeconds = jobItem.MediaInfo.Duration.TotalSeconds;
+            _videoInfo.Width = jobItem.MediaInfo.Dimension.Width;
+            _videoInfo.Height = jobItem.MediaInfo.Dimension.Height;
 
             ProgressOpacity = 1;
             ProgressText = Se.Language.General.GeneratingWavFile;
             _startTicks = DateTime.UtcNow.Ticks;
 
+            Dispatcher.UIThread.Post(() =>
+            {
+                if (BatchGrid == null)
+                {
+                    return;
+                }
+
+                BatchGrid.SelectedItem = jobItem;
+                BatchGrid.ScrollIntoView(jobItem, null);
+            });
+
             var startGenerateWaveFileOk = GenerateWavFile(_videoFileName, _audioTrackNumber);
+            return;
         }
+
+        var convertedJobs = BatchItems.Count(p => p.Status == Se.Language.General.Converted);
+        var failed = BatchItems.Count(p => p.Status != Se.Language.General.Converted);
+
+        Dispatcher.UIThread.Invoke(async () =>
+        {
+            var msg = $"Videos converted: " + convertedJobs;
+            if (failed > 0)
+            {
+                msg += Environment.NewLine + $"Videos failed: " + failed;
+            }
+
+            await MessageBox.Show(
+                Window!,
+                Se.Language.Video.AudioToText.Title,
+                msg,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+
+            IsTranscribeEnabled = true;
+        });
     }
 
     private string GetSubtitleFileName(string videoFileName)
@@ -341,14 +396,14 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         var path = Path.GetDirectoryName(videoFileName);
         var fileName = Path.GetFileNameWithoutExtension(videoFileName);
         var extension = ".srt";
-        var subtitleFileName = Path.Combine(path!, fileName + "." + extension);
+        var subtitleFileName = Path.Combine(path!, fileName + extension);
         int count = 2;
         while (File.Exists(subtitleFileName))
         {
-            subtitleFileName = Path.Combine(path!, fileName + "_" + count + "." + extension);
+            subtitleFileName = Path.Combine(path!, fileName + "_" + count + extension);
             count++;
         }
-        
+
         return subtitleFileName;
     }
 
@@ -608,7 +663,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             StartNext(transcribedSubtitle);
             return;
         }
-        
+
         if (anyLinesTranscribed)
         {
             TranscribedSubtitle = transcribedSubtitle!;
@@ -875,6 +930,11 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     [RelayCommand]
     private async Task Transcribe()
     {
+        if (IsBatchMode && BatchItems.Count > 0)
+        {
+            _videoFileName = BatchItems[0].InputVideoFileName;
+        }
+
         if (string.IsNullOrEmpty(_videoFileName))
         {
             return;
@@ -981,14 +1041,30 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                 return;
             }
 
-            _batchIndex = 0;
             BatchItems.Add(new WhisperJobItem(_videoFileName, string.Empty, mediaInfo));
         }
+        _batchIndex = 0;
 
         if (BatchItems.Count == 0)
         {
             return;
         }
+
+        if (IsBatchMode) 
+        {
+            var jobItem = BatchItems[0];
+            Dispatcher.UIThread.Post(() =>
+            {
+                if (BatchGrid == null)
+                {
+                    return;
+                }
+
+                BatchGrid.SelectedItem = jobItem;
+                BatchGrid.ScrollIntoView(jobItem, null);
+            });
+        }
+
 
         _videoFileName = BatchItems[0].InputVideoFileName;
         _videoInfo.TotalMilliseconds = BatchItems[0].MediaInfo.Duration.TotalMilliseconds;
@@ -1057,7 +1133,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         _showProgressPct = -1;
         IsTranscribeEnabled = false;
         ProgressOpacity = 1;
-        ProgressText = "Transcribing...";
+        ProgressText = GetProgressText();
 
         //if (_batchMode)
         //{
@@ -1131,7 +1207,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
         _abort = false;
 
-        ProgressText = "Transcribing...";
+        ProgressText = GetProgressText();
         _timerWhisper.Start();
 
         return true;
@@ -1190,7 +1266,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         var process = new Process
         {
             StartInfo = new ProcessStartInfo(w, parameters)
-                { WindowStyle = ProcessWindowStyle.Hidden, CreateNoWindow = true }
+            { WindowStyle = ProcessWindowStyle.Hidden, CreateNoWindow = true }
         };
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {

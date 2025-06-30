@@ -6,6 +6,7 @@ public class LanguageAudioToText
     public string Transcribe { get; set; }
     public string TranslateToEnglish { get; set; }
     public string Transcribing { get; set; }
+    public string TranscribingXOfY { get; internal set; }
 
     public LanguageAudioToText()
     {
@@ -13,5 +14,6 @@ public class LanguageAudioToText
         Transcribe = "Transcribe";
         TranslateToEnglish = "Translate to English";
         Transcribing = "Transcribing...";
+        TranscribingXOfY = "Transcribing {0} of {1}...";
     }
 }
