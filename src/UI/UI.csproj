@@ -100,7 +100,7 @@
 		<AvaloniaResource Include="Assets\Whisper\PurfviewFasterWhisperXXL.txt">
 			<CopyToOutputDirectory></CopyToOutputDirectory>
 		</AvaloniaResource>
-		<AvaloniaResource Include="Assets\Whisper\WhisperConst-m2e.txt">
+		<AvaloniaResource Include="Assets\Whisper\WhisperConst-me.txt">
 			<CopyToOutputDirectory></CopyToOutputDirectory>
 		</AvaloniaResource>
 		<AvaloniaResource Include="Assets\Whisper\WhisperCPP.txt">
