@@ -1,5 +1,6 @@
 ﻿using Avalonia.Media;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.Enums;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 
@@ -47,6 +48,7 @@ public class SeGeneral
     public string FfmpegPath { get; set; }
     public string LibMpvPath { get; set; }
     public bool AutoOpenVideo { get; set; }
+    public DialogType DialogStyle { get; internal set; }
 
     public SeGeneral()
     {
@@ -92,5 +94,7 @@ public class SeGeneral
         FfmpegPath = string.Empty;
         LibMpvPath = string.Empty;
         AutoOpenVideo = true;
+
+        DialogStyle = DialogType.DashBothLinesWithSpace;
     }
 }

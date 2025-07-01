@@ -110,7 +110,7 @@ public partial class SubtitleLineViewModel : ObservableObject
     {
         get
         {
-            if (Se.Settings.General.ColorTextTooLong)
+            if (Se.Settings.General.ColorTextTooLong && !string.IsNullOrEmpty(Text))
             {
                 if (CharactersPerSecond > Se.Settings.General.SubtitleMaximumCharactersPerSeconds)
                 {

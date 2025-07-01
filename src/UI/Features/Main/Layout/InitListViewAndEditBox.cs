@@ -184,6 +184,7 @@ public static class InitListViewAndEditBox
         var mergeSelecedAsDialogMenuItem = new MenuItem { Header = Se.Language.General.MergeSelectedAsDialog };
         mergeSelecedAsDialogMenuItem.Command = vm.MergeSelectedLinesDialogCommand;
         flyout.Items.Add(mergeSelecedAsDialogMenuItem);
+        vm.MenuItemMergeAsDialog = mergeSelecedAsDialogMenuItem;
 
         flyout.Items.Add(new Separator());
 
@@ -201,6 +202,8 @@ public static class InitListViewAndEditBox
             RoutingStrategies.Tunnel);
         vm.SubtitleGrid.AddHandler(InputElement.PointerReleasedEvent, vm.SubtitleGrid_PointerReleased,
             RoutingStrategies.Tunnel);
+
+
 
         // Edit area - restructured with time controls on left, multiline text on right
         var editGrid = new Grid

@@ -10,4 +10,5 @@ public interface IMergeManager
 {
     Subtitle MergeSelectedLines(Subtitle subtitle, int[] selectedIndices, MergeManager.BreakMode breakMode = MergeManager.BreakMode.Normal);
     void MergeSelectedLines(ObservableCollection<SubtitleLineViewModel> subtitles, List<SubtitleLineViewModel> subtitleLineViewModels, BreakMode breakMode = BreakMode.Normal);
+    void MergeSelectedLinesAsDialog(ObservableCollection<SubtitleLineViewModel> subtitles, List<SubtitleLineViewModel> selectedItems);
 }

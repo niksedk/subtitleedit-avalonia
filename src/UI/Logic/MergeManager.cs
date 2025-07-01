@@ -1,10 +1,14 @@
-﻿using Nikse.SubtitleEdit.Core.Common;
+﻿using DynamicData;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Enums;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text;
+using static Nikse.SubtitleEdit.Logic.MergeManager;
 
 namespace Nikse.SubtitleEdit.Logic
 {
@@ -228,6 +232,32 @@ namespace Nikse.SubtitleEdit.Logic
             }
 
             inputSubtitle.Renumber();
+        }
+
+        public void MergeSelectedLinesAsDialog(ObservableCollection<SubtitleLineViewModel> subtitles, List<SubtitleLineViewModel> selectedItems)
+        {
+            if (subtitles.Count != 2)
+            {
+                return;
+            }
+
+            var currentParagraph = subtitles[0];
+            var currentText = Utilities.UnbreakLine(currentParagraph.Text);
+
+            var nextParagraph = subtitles[1];
+            var nextText = Utilities.UnbreakLine(nextParagraph.Text);
+
+            var subtitle = new Subtitle();
+            subtitle.Paragraphs.Add(subtitles.Select(p=>new Paragraph(p.Text, p.StartTime.TotalMilliseconds, p.EndTime.TotalMilliseconds)));
+            var language = LanguageAutoDetect.AutoDetectGoogleLanguage(subtitle);
+            var dialogHelper = new DialogSplitMerge { DialogStyle = Se.Settings.General.DialogStyle, TwoLetterLanguageCode = language };
+            var dialogText = dialogHelper.FixDashes("- " + currentText.TrimStart(' ', '-') + Environment.NewLine + "- " + nextText.TrimStart(' ', '-'));
+            currentParagraph.Text = dialogText;
+
+            currentParagraph.EndTime = TimeSpan.FromMilliseconds(nextParagraph.EndTime.TotalMilliseconds);
+
+            subtitles.Remove(nextParagraph);
+            subtitles.Renumber();
         }
     }
 }

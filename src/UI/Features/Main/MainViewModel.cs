@@ -127,6 +127,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     public VideoPlayerControl? VideoPlayerControl { get; internal set; }
     public Menu Menu { get; internal set; }
     public StackPanel PanelSingleLineLenghts { get; internal set; }
+    public MenuItem MenuItemMergeAsDialog { get; internal set; }
 
     public MainViewModel(
         IFileHelper fileHelper,
@@ -170,6 +171,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         MenuReopen = new MenuItem();
         Menu = new Menu();
         PanelSingleLineLenghts = new StackPanel();
+        MenuItemMergeAsDialog = new MenuItem();
         _subtitle = new Subtitle();
         _videoFileName = string.Empty;
         _subtitleFileName = string.Empty;
@@ -2150,7 +2152,19 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         if (selectedItem != null)
         {
             var index = Subtitles.IndexOf(selectedItem);
-            //            _mergeManager.MergeSelectedLines();
+            var previous = Subtitles.GetOrNull(index - 1);
+
+            if (previous == null)
+            {
+                return; // no next item to merge with
+            }
+
+            var list = new List<SubtitleLineViewModel>()
+            {
+                previous,
+                selectedItem,
+            };
+            _mergeManager.MergeSelectedLines(Subtitles, list);
             Renumber();
             SelectAndScrollToRow(index - 1);
         }
@@ -2162,10 +2176,21 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         if (selectedItem != null)
         {
             var index = Subtitles.IndexOf(selectedItem);
-            _mergeManager.MergeSelectedLines(Subtitles,
-                SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList());
+            var next = Subtitles.GetOrNull(index + 1);
+
+            if (next == null)
+            {
+                return; // no next item to merge with
+            }
+
+            var list = new List<SubtitleLineViewModel>()
+            {
+                selectedItem,
+                next
+            };
+            _mergeManager.MergeSelectedLines(Subtitles, list);
             Renumber();
-            SelectAndScrollToRow(index - 1);
+            SelectAndScrollToRow(index);
         }
     }
 
@@ -2186,14 +2211,17 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
     private void MergeLinesSelectedAsDialog()
     {
-        var selectedItem = SelectedSubtitle;
-        if (selectedItem != null)
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (selectedItems.Count != 2)
         {
-            var index = Subtitles.IndexOf(selectedItem);
-            //            _mergeManager.MergeSelectedLines();
-            SelectAndScrollToRow(index - 1);
-            Renumber();
+            return; // only two items can be merged as dialog
         }
+
+        var index = Subtitles.IndexOf(selectedItems[0]);
+        _mergeManager.MergeSelectedLinesAsDialog(Subtitles, selectedItems);
+        SelectAndScrollToRow(index);
+        Renumber();
+
     }
 
     private void ToggleItalic()
@@ -2226,6 +2254,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
     public void SubtitleContextOpening(object? sender, EventArgs e)
     {
+        MenuItemMergeAsDialog.IsVisible = SubtitleGrid.SelectedItems.Count == 2;
     }
 
     public void KeyDown(KeyEventArgs keyEventArgs)
