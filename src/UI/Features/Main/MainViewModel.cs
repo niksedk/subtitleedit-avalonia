@@ -2349,8 +2349,11 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         SelectedSubtitleIndex = Subtitles.IndexOf(item);
         StatusTextRight = $"{Subtitles.IndexOf(item) + 1}/{Subtitles.Count}";
 
-        MakeSubtitleTextInfo(item.Text, item);
         _updateAudioVisualizer = true;
+        Dispatcher.UIThread.Post(() =>
+        {
+            MakeSubtitleTextInfo(item.Text, item);
+        });
     }
 
     private void MakeSubtitleTextInfo(string text, SubtitleLineViewModel item)
@@ -2632,7 +2635,10 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             return;
         }
 
-        MakeSubtitleTextInfo(selectedSubtitle.Text, selectedSubtitle);
+        Dispatcher.UIThread.Post(() =>
+        {
+            MakeSubtitleTextInfo(selectedSubtitle.Text, selectedSubtitle);
+        });
     }
 
     internal void StartTimeChanged(object? sender, TimeSpan e)
@@ -2645,7 +2651,10 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             return;
         }
 
-        MakeSubtitleTextInfo(selectedSubtitle.Text, selectedSubtitle);
+        Dispatcher.UIThread.Post(() =>
+        {
+            MakeSubtitleTextInfo(selectedSubtitle.Text, selectedSubtitle);
+        });
     }
 
     public void GoToAndFocusLine(SubtitleLineViewModel p)

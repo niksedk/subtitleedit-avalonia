@@ -110,9 +110,22 @@ public partial class SubtitleLineViewModel : ObservableObject
     {
         get
         {
-            if (Se.Settings.General.ColorTextTooLong && CharactersPerSecond > Se.Settings.General.SubtitleMaximumCharactersPerSeconds)
+            if (Se.Settings.General.ColorTextTooLong)
             {
-                return new SolidColorBrush(_errorColor);
+                if (CharactersPerSecond > Se.Settings.General.SubtitleMaximumCharactersPerSeconds)
+                {
+                    return new SolidColorBrush(_errorColor);
+                }
+
+                var text = HtmlUtil.RemoveHtmlTags(Text, true);
+                var lines = text.SplitToLines();
+                foreach (var line in lines)
+                {
+                    if (line.Length > Se.Settings.General.SubtitleLineMaximumLength)
+                    {
+                        return new SolidColorBrush(_errorColor);
+                    }
+                }
             }
 
             return new SolidColorBrush(Colors.Transparent);
@@ -129,8 +142,7 @@ public partial class SubtitleLineViewModel : ObservableObject
                 return new SolidColorBrush(_errorColor);
             }
 
-            if (Se.Settings.General.ColorDurationTooLong &&
-                Duration.TotalMilliseconds > Se.Settings.General.SubtitleMaximumDisplayMilliseconds)
+            if (Se.Settings.General.ColorDurationTooLong && Duration.TotalMilliseconds > Se.Settings.General.SubtitleMaximumDisplayMilliseconds)
             {
                 return new SolidColorBrush(_errorColor);
             }
