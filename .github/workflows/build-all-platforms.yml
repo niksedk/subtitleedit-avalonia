@@ -281,17 +281,17 @@ jobs:
         run: echo "date=$(date +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
 
       - name: Create Release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v2
         id: create_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.tag.outputs.tag }}
-          release_name: Subtitle Edit ${{ steps.tag.outputs.tag }}
+          name: Subtitle Edit ${{ steps.tag.outputs.tag }}
           body: |
             **Build Configuration:** ${{ inputs.build_configuration }}
             **Build Date:** ${{ steps.date.outputs.date }}
-            
+      
             ### Downloads
             - **Windows x64 installer:** [SubtitleEdit-Windows-x64.msi](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SubtitleEdit-Windows-x64.msi)
             - **Windows x64:** [SubtitleEdit-Windows-x64.zip](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SubtitleEdit-Windows-x64.zip)
@@ -299,73 +299,20 @@ jobs:
             - **macOS ARM64 (Apple Silicon - M1/M2/M3/M4 architecture):** [SubtitleEdit-macOS-ARM64.zip](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SubtitleEdit-macOS-ARM64.zip)
             - **macOS x64 (Intel 64-bit):** [SubtitleEdit-macOS-x64.zip](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SubtitleEdit-macOS-x64.zip)
             - **Linux x64:** [SubtitleEdit-Linux-x64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SubtitleEdit-Linux-x64.tar.gz)
-            
+      
             ### Installation
             1. Fix requirements, please see [System Requirements](https://github.com/niksedk/subtitleedit-avalonia#system-requirements)
             2. Download the appropriate package for your platform
             3. Extract the archive (or use installer if available)
             4. Run the executable (might need some permissions on macOS)
-            
+      
             *This is an automated build from the GitHub Actions workflow.*
           draft: false
           prerelease: ${{ inputs.is_prerelease }}
-
-      - name: Upload Windows x64 MSI Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release-assets/SubtitleEdit-Windows-x64.msi
-          asset_name: SubtitleEdit-Windows-x64.msi
-          asset_content_type: application/x-msi
-
-      - name: Upload Windows x64 Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release-assets/SubtitleEdit-Windows-x64.zip
-          asset_name: SubtitleEdit-Windows-x64.zip
-          asset_content_type: application/zip
-
-      - name: Upload Windows ARM64 Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release-assets/SubtitleEdit-Windows-ARM64.zip
-          asset_name: SubtitleEdit-Windows-ARM64.zip
-          asset_content_type: application/zip
-
-      - name: Upload macOS x64 Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release-assets/SubtitleEdit-macOS-x64.zip
-          asset_name: SubtitleEdit-macOS-x64.zip
-          asset_content_type: application/zip
-
-      - name: Upload macOS ARM64 Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release-assets/SubtitleEdit-macOS-ARM64.zip
-          asset_name: SubtitleEdit-macOS-ARM64.zip
-          asset_content_type: application/zip
-
-      - name: Upload Linux x64 Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release-assets/SubtitleEdit-Linux-x64.tar.gz
-          asset_name: SubtitleEdit-Linux-x64.tar.gz
-          asset_content_type: application/gzip
+          files: |
+            ./release-assets/SubtitleEdit-Windows-x64.msi
+            ./release-assets/SubtitleEdit-Windows-x64.zip
+            ./release-assets/SubtitleEdit-Windows-ARM64.zip
+            ./release-assets/SubtitleEdit-macOS-ARM64.zip
+            ./release-assets/SubtitleEdit-macOS-x64.zip
+            ./release-assets/SubtitleEdit-Linux-x64.tar.gz
