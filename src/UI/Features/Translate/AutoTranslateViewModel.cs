@@ -1,11 +1,14 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.AutoTranslate;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.Translate;
+using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
@@ -16,8 +19,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Avalonia.Input;
-using Nikse.SubtitleEdit.Features.Shared;
 
 namespace Nikse.SubtitleEdit.Features.Translate;
 
@@ -104,33 +105,7 @@ public partial class AutoTranslateViewModel : ObservableObject
 
     public void Initialize(Subtitle subtitle)
     {
-        _subtitle = subtitle;
-        var rows = subtitle.Paragraphs.Select(p => new TranslateRow
-        {
-            Number = p.Number,
-            Show = p.StartTime.TimeSpan,
-            Hide = p.EndTime.TimeSpan,
-            Duration = p.Duration.ToShortDisplayString(),
-            Text = p.Text,
-        });
-        Rows.AddRange(rows);
-
-        UpdateSourceLanguages(SelectedAutoTranslator);
-        UpdateTargetLanguages(SelectedAutoTranslator);
-
-        if (!string.IsNullOrEmpty(Se.Settings.AutoTranslate.AutoTranslateLastName))
-        {
-            var autoTranslator = AutoTranslators.FirstOrDefault(x => x.Name == Se.Settings.AutoTranslate.AutoTranslateLastName);
-            if (autoTranslator != null)
-            {
-                SetAutoTranslatorEngine(autoTranslator);
-            }
-        }
-
-        if (Rows.Count > 0)
-        {
-            SelectedTranslateRow = Rows[0];
-        }
+        _subtitle = new Subtitle(subtitle, false);      
     }
 
     private void UpdateSourceLanguages(IAutoTranslator autoTranslator)
@@ -1004,5 +979,40 @@ public partial class AutoTranslateViewModel : ObservableObject
         {
             Cancel();
         }
+    }
+
+    internal void OnLoaded()
+    {
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            var rows = _subtitle.Paragraphs.Select(p => new TranslateRow
+            {
+                Number = p.Number,
+                Show = p.StartTime.TimeSpan,
+                Hide = p.EndTime.TimeSpan,
+                Duration = p.Duration.ToShortDisplayString(),
+                Text = p.Text,
+            });
+
+            Rows.Clear();
+            Rows.AddRange(rows);
+
+            UpdateSourceLanguages(SelectedAutoTranslator);
+            UpdateTargetLanguages(SelectedAutoTranslator);
+
+            if (!string.IsNullOrEmpty(Se.Settings.AutoTranslate.AutoTranslateLastName))
+            {
+                var autoTranslator = AutoTranslators.FirstOrDefault(x => x.Name == Se.Settings.AutoTranslate.AutoTranslateLastName);
+                if (autoTranslator != null)
+                {
+                    SetAutoTranslatorEngine(autoTranslator);
+                }
+            }
+
+            if (Rows.Count > 0)
+            {
+                SelectedTranslateRow = Rows[0];
+            }
+        });
     }
 }

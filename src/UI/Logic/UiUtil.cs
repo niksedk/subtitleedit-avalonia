@@ -808,6 +808,18 @@ public static class UiUtil
         return control;
     }
 
+    public static TextBlock WithPadding(this TextBlock control, int padding)
+    {
+        control.Padding = new Thickness(padding);
+        return control;
+    }
+
+    public static TextBlock WithFontSize(this TextBlock control, double fontSize)
+    {
+        control.FontSize = fontSize;
+        return control;
+    }
+
     public static StackPanel WithMarginTop(this StackPanel control, int marginTop)
     {
         var m = control.Margin;

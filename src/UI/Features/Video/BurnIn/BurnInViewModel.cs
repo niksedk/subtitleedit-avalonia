@@ -224,7 +224,7 @@ public partial class BurnInViewModel : ObservableObject
     {
         VideoFileName = videoFileName;
         _inputVideoFileName = videoFileName;
-        _subtitle = subtitle;
+        _subtitle = new Subtitle(subtitle, false);
         _subtitleFormat = subtitleFormat;
 
         var fileExists = !string.IsNullOrWhiteSpace(videoFileName) && File.Exists(videoFileName);
@@ -998,6 +998,16 @@ public partial class BurnInViewModel : ObservableObject
         if (!IsBatchMode)
         {
             JobItems = GetCurrentVideoAsJobItems();
+        }
+
+        if (IsBatchMode && JobItems.Count == 0)
+        {
+            await Add();
+
+            if (IsBatchMode && JobItems.Count == 0)
+            {
+                return;
+            }
         }
 
         if (JobItems.Count == 0)

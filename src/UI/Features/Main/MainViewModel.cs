@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -73,7 +74,9 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
     [ObservableProperty] private string _editText;
     [ObservableProperty] private string _editTextCharactersPerSecond;
+    [ObservableProperty] private IBrush _editTextCharactersPerSecondBackground;
     [ObservableProperty] private string _editTextTotalLength;
+    [ObservableProperty] private IBrush _editTextTotalLengthBackground;
     [ObservableProperty] private string _editTextLineLengths;
 
     [ObservableProperty] private ObservableCollection<SubtitleFormat> _subtitleFormats;
@@ -95,6 +98,8 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     public TextBlock StatusTextLeftLabel { get; set; }
     public MenuItem MenuReopen { get; set; }
     public AudioVisualizer? AudioVisualizer { get; set; }
+
+    private static Color _errorColor = Se.Settings.General.ErrorColor.FromHexToColor();
 
     private bool _updateAudioVisualizer = false;
     private string? _subtitleFileName;
@@ -121,6 +126,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
     public VideoPlayerControl? VideoPlayerControl { get; internal set; }
     public Menu Menu { get; internal set; }
+    public StackPanel PanelSingleLineLenghts { get; internal set; }
 
     public MainViewModel(
         IFileHelper fileHelper,
@@ -153,7 +159,9 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
         EditText = string.Empty;
         EditTextCharactersPerSecond = string.Empty;
+        EditTextCharactersPerSecondBackground = Brushes.Transparent;
         EditTextTotalLength = string.Empty;
+        EditTextTotalLengthBackground = Brushes.Transparent;
         EditTextLineLengths = string.Empty;
         StatusTextLeftLabel = new TextBlock();
         SubtitleGrid = new DataGrid();
@@ -161,6 +169,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         ContentGrid = new Grid();
         MenuReopen = new MenuItem();
         Menu = new Menu();
+        PanelSingleLineLenghts = new StackPanel();
         _subtitle = new Subtitle();
         _videoFileName = string.Empty;
         _subtitleFileName = string.Empty;
@@ -667,9 +676,9 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(Window!, vm => 
-        { 
-            vm.Initialize(_videoFileName); 
+        var result = await _windowService.ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(Window!, vm =>
+        {
+            vm.Initialize(_videoFileName);
         });
 
         if (result.OkPressed && !result.IsBatchMode)
@@ -824,10 +833,9 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             AudioVisualizer.InvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel;
         }
 
+        _errorColor = Se.Settings.General.ErrorColor.FromHexToColor();
         _updateAudioVisualizer = true;
-
         _shortcutManager.ClearKeys();
-
     }
 
     [RelayCommand]
@@ -2309,7 +2317,9 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             _selectedSubtitles = null;
             StatusTextRight = string.Empty;
             EditTextCharactersPerSecond = string.Empty;
+            EditTextCharactersPerSecondBackground = Brushes.Transparent;
             EditTextTotalLength = string.Empty;
+            EditTextTotalLengthBackground = Brushes.Transparent;
             EditTextLineLengths = string.Empty;
             return;
         }
@@ -2319,6 +2329,8 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         {
             StatusTextRight = $"{selectedItems.Count} lines selected of {Subtitles.Count}";
             EditTextCharactersPerSecond = string.Empty;
+            EditTextCharactersPerSecondBackground = Brushes.Transparent;
+            EditTextTotalLengthBackground = Brushes.Transparent;
             EditTextTotalLength = string.Empty;
             EditTextLineLengths = string.Empty;
             return;
@@ -2350,14 +2362,39 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
         var lines = text.SplitToLines();
         var lineLenghts = new List<string>(lines);
+        PanelSingleLineLenghts.Children.Clear();
+        PanelSingleLineLenghts.Children.Add(UiUtil.MakeTextBlock(Se.Language.Main.SingleLineLength).WithFontSize(12).WithPadding(2));
+        var first = true;
         for (var i = 0; i < lines.Count; i++)
         {
-            lineLenghts[i] = $"{lines[i].Length}";
+            if (first)
+            {
+                first = false;
+            }
+            else
+            {
+                PanelSingleLineLenghts.Children.Add(UiUtil.MakeTextBlock("/").WithFontSize(12).WithPadding(2));
+            }
+
+            var tb = UiUtil.MakeTextBlock(lineLenghts[i].Length.ToStringInvariant()).WithFontSize(12).WithPadding(2);
+            if (Se.Settings.General.ColorTextTooLong && lineLenghts[i].Length > Se.Settings.General.SubtitleLineMaximumLength)
+            {
+                tb.Background = new SolidColorBrush(_errorColor);
+            }
+
+            PanelSingleLineLenghts.Children.Add(tb);
         }
 
         EditTextCharactersPerSecond = string.Format(Se.Language.Main.CharactersPerSecond, $"{cps:0.0}");
         EditTextTotalLength = string.Format(Se.Language.Main.TotalCharacters, totalLength);
-        EditTextLineLengths = string.Format(Se.Language.Main.SingleLineLength, string.Join('/', lineLenghts));
+
+        EditTextCharactersPerSecondBackground = Se.Settings.General.ColorTextTooLong && cps > Se.Settings.General.SubtitleMaximumCharactersPerSeconds
+                ? new SolidColorBrush(_errorColor)
+                : new SolidColorBrush(Colors.Transparent);
+
+        EditTextTotalLengthBackground = Se.Settings.General.ColorTextTooLong && totalLength > Se.Settings.General.SubtitleLineMaximumLength * lines.Count
+            ? new SolidColorBrush(_errorColor)
+                : new SolidColorBrush(Colors.Transparent);
     }
 
     private DispatcherTimer _positionTimer = new DispatcherTimer();
@@ -2588,11 +2625,27 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     internal void DurationChanged(object? sender, NumericUpDownValueChangedEventArgs e)
     {
         _updateAudioVisualizer = true;
+
+        var selectedSubtitle = SelectedSubtitle;
+        if (selectedSubtitle == null)
+        {
+            return;
+        }
+
+        MakeSubtitleTextInfo(selectedSubtitle.Text, selectedSubtitle);
     }
 
     internal void StartTimeChanged(object? sender, TimeSpan e)
     {
         _updateAudioVisualizer = true;
+
+        var selectedSubtitle = SelectedSubtitle;
+        if (selectedSubtitle == null)
+        {
+            return;
+        }
+
+        MakeSubtitleTextInfo(selectedSubtitle.Text, selectedSubtitle);
     }
 
     public void GoToAndFocusLine(SubtitleLineViewModel p)

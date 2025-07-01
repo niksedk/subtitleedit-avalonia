@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Markup.Declarative;
 using Avalonia.Styling;
@@ -235,6 +236,12 @@ public class AutoTranslateWindow : Window
     {
         base.OnKeyDown(e);  
         _vm.KeyDown(e);
+    }
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+        _vm.OnLoaded();
     }
 
     protected override void OnClosing(WindowClosingEventArgs e)

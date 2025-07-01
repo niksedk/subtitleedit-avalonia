@@ -16,7 +16,7 @@ public class LanguageMain
     public LanguageMain()
     {
         CharactersPerSecond = "Chars/second: {0}";
-        SingleLineLength = "Line length: {0}";
+        SingleLineLength = "Line length: ";
         TotalCharacters = "Total chars: {0}";
         ExtractingWaveInfo = "Extracting wave info...";
         LoadingWaveInfoFromCache = "Loading wave info from cache...";

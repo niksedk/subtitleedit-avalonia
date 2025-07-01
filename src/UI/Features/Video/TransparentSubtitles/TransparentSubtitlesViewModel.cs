@@ -173,7 +173,7 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
     {
         VideoFileName = videoFileName;
         _inputVideoFileName = videoFileName;
-        _subtitle = subtitle;
+        _subtitle = new Subtitle(subtitle, false);
         _subtitleFormat = subtitleFormat;
 
         var fileExists = !string.IsNullOrWhiteSpace(videoFileName) && File.Exists(videoFileName);
@@ -603,7 +603,7 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
         {
             return;
         }
-        
+
         foreach (var fileName in fileNames)
         {
             var videoFileName = string.Empty;
@@ -743,6 +743,16 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
         if (!IsBatchMode)
         {
             JobItems = GetCurrentVideoAsJobItems();
+        }
+
+        if (IsBatchMode && JobItems.Count == 0)
+        {
+            await Add();
+
+            if (IsBatchMode && JobItems.Count == 0)
+            {
+                return;
+            }
         }
 
         if (JobItems.Count == 0)

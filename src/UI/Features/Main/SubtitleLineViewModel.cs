@@ -1,5 +1,8 @@
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 using System;
 
 namespace Nikse.SubtitleEdit.Features.Main;
@@ -25,15 +28,16 @@ public partial class SubtitleLineViewModel : ObservableObject
     private string _originalText;
 
     public Paragraph? Paragraph { get; set; }
-    public string Extra { get;  set; }
-    public string Language { get;  set; }
-    public string Region { get;  set; }
-    public string Style { get;  set; }
+    public string Extra { get; set; }
+    public string Language { get; set; }
+    public string Region { get; set; }
+    public string Style { get; set; }
     public string Actor { get; set; }
     public int Layer { get; set; }
     public Guid Id { get; set; }
 
     private bool _skipUpdate = false;
+    private static Color _errorColor = Se.Settings.General.ErrorColor.FromHexToColor();
 
 
     public SubtitleLineViewModel()
@@ -81,8 +85,61 @@ public partial class SubtitleLineViewModel : ObservableObject
         EndTime = TimeSpan.FromMilliseconds(paragraph.EndTime.TotalMilliseconds);
         UpdateDuration();
         Id = Guid.TryParse(paragraph.Id, out var guid) ? guid : Guid.NewGuid();
+        Paragraph = paragraph;
     }
-    
+
+    public double CharactersPerSecond
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(Text))
+            {
+                return 0;
+            }
+
+            if (Duration.TotalMilliseconds <= 1.0)
+            {
+                return 999.0;
+            }
+
+            return (double)HtmlUtil.RemoveHtmlTags(Text, true).CountCharacters(forCps: true) / Duration.TotalSeconds;
+        }
+    }
+
+    public IBrush TextBackgroundBrush
+    {
+        get
+        {
+            if (Se.Settings.General.ColorTextTooLong && CharactersPerSecond > Se.Settings.General.SubtitleMaximumCharactersPerSeconds)
+            {
+                return new SolidColorBrush(_errorColor);
+            }
+
+            return new SolidColorBrush(Colors.Transparent);
+        }
+    }
+
+    public IBrush DurationBackgroundBrush
+    {
+        get
+        {
+            if (Se.Settings.General.ColorDurationTooShort &&
+                Duration.TotalMilliseconds < Se.Settings.General.SubtitleMinimumDisplayMilliseconds)
+            {
+                return new SolidColorBrush(_errorColor);
+            }
+
+            if (Se.Settings.General.ColorDurationTooLong &&
+                Duration.TotalMilliseconds > Se.Settings.General.SubtitleMaximumDisplayMilliseconds)
+            {
+                return new SolidColorBrush(_errorColor);
+            }
+
+            return new SolidColorBrush(Colors.Transparent);
+        }
+    }
+
+
     partial void OnStartTimeChanged(TimeSpan value)
     {
         if (_skipUpdate)
@@ -106,6 +163,10 @@ public partial class SubtitleLineViewModel : ObservableObject
         _skipUpdate = true;
         UpdateDuration();
         _skipUpdate = false;
+
+        OnPropertyChanged(nameof(CharactersPerSecond));
+        OnPropertyChanged(nameof(TextBackgroundBrush));
+        OnPropertyChanged(nameof(DurationBackgroundBrush));
     }
 
     partial void OnDurationChanged(TimeSpan value)
@@ -119,6 +180,10 @@ public partial class SubtitleLineViewModel : ObservableObject
         if (Math.Abs(newEndTime.TotalMilliseconds - EndTime.TotalMilliseconds) > 0.001)
         {
             EndTime = newEndTime;
+
+            OnPropertyChanged(nameof(CharactersPerSecond));
+            OnPropertyChanged(nameof(TextBackgroundBrush));
+            OnPropertyChanged(nameof(DurationBackgroundBrush));
         }
     }
 
@@ -128,7 +193,17 @@ public partial class SubtitleLineViewModel : ObservableObject
         if (Math.Abs(newDuration.TotalMilliseconds - Duration.TotalMilliseconds) > 0.001)
         {
             Duration = EndTime - StartTime;
+
+            OnPropertyChanged(nameof(CharactersPerSecond));
+            OnPropertyChanged(nameof(TextBackgroundBrush));
+            OnPropertyChanged(nameof(DurationBackgroundBrush));
         }
+    }
+
+    partial void OnTextChanged(string value)
+    {
+        OnPropertyChanged(nameof(CharactersPerSecond));
+        OnPropertyChanged(nameof(TextBackgroundBrush));
     }
 
     internal void SetStartTimeOnly(TimeSpan timeSpan)

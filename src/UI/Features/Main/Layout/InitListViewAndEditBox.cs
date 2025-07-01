@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -31,6 +32,7 @@ public static class InitListViewAndEditBox
             CanUserSortColumns = false,
             IsReadOnly = true,
             SelectionMode = DataGridSelectionMode.Extended,
+            DataContext = vm.Subtitles,
         };
 
         vm.SubtitleGrid.DoubleTapped += vm.OnSubtitleGridDoubleTapped;
@@ -41,7 +43,7 @@ public static class InitListViewAndEditBox
         // Columns
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
-            Header = "#",
+            Header = Se.Language.General.NumberSymbol,
             Binding = new Binding(nameof(SubtitleLineViewModel.Number)),
             Width = new DataGridLength(50),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
@@ -60,13 +62,30 @@ public static class InitListViewAndEditBox
             Width = new DataGridLength(120),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
         });
-        vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
+
+        vm.SubtitleGrid.Columns.Add(new DataGridTemplateColumn
         {
             Header = Se.Language.General.Duration,
-            Binding = new Binding(nameof(SubtitleLineViewModel.Duration)) { Converter = shortTimeConverter },
-            Width = new DataGridLength(120),
-            IsReadOnly = true,
+            Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
+            CellTemplate = new FuncDataTemplate<SubtitleLineViewModel>((value, nameScope) =>
+            {
+                var border = new Border
+                {
+                    Padding = new Thickness(4, 2),
+                    [!Border.BackgroundProperty] = new Binding(nameof(SubtitleLineViewModel.DurationBackgroundBrush))
+                };
+
+                var textBlock = new TextBlock
+                {
+                    VerticalAlignment = VerticalAlignment.Center,
+                    TextWrapping = TextWrapping.Wrap,
+                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.Duration)) { Converter = shortTimeConverter },
+                };
+
+                border.Child = textBlock;
+                return border;
+            })
         });
 
         var originalColumn = new DataGridTextColumn
@@ -84,12 +103,29 @@ public static class InitListViewAndEditBox
             });
         vm.SubtitleGrid.Columns.Add(originalColumn);
 
-        vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
+        vm.SubtitleGrid.Columns.Add(new DataGridTemplateColumn
         {
             Header = Se.Language.General.Text,
-            Binding = new Binding(nameof(SubtitleLineViewModel.Text)),
-            Width = new DataGridLength(1, DataGridLengthUnitType.Star), // Stretch text column
+            Width = new DataGridLength(1, DataGridLengthUnitType.Star),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
+            CellTemplate = new FuncDataTemplate<SubtitleLineViewModel>((value, nameScope) =>
+            {
+                var border = new Border
+                {
+                    Padding = new Thickness(4, 2),
+                    [!Border.BackgroundProperty] = new Binding(nameof(SubtitleLineViewModel.TextBackgroundBrush))
+                };
+
+                var textBlock = new TextBlock
+                {
+                    VerticalAlignment = VerticalAlignment.Center,
+                    TextWrapping = TextWrapping.Wrap,
+                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.Text))
+                };
+
+                border.Child = textBlock;
+                return border;
+            })
         });
 
         vm.SubtitleGrid.DataContext = vm.Subtitles;
@@ -109,7 +145,7 @@ public static class InitListViewAndEditBox
             Mode = BindingMode.TwoWay,
             Source = vm
         };
-        
+
         Grid.SetRow(vm.SubtitleGrid, 0);
         mainGrid.Children.Add(vm.SubtitleGrid);
 
@@ -260,8 +296,7 @@ public static class InitListViewAndEditBox
         {
             Text = Se.Language.General.Duration,
             FontWeight = FontWeight.Bold,
-            Padding = new Thickness(0, 4, 0,0)
-
+            Padding = new Thickness(2, 2, 2, 2)
         };
         durationPanel.Children.Add(durationLabel);
 
@@ -312,13 +347,16 @@ public static class InitListViewAndEditBox
             HorizontalAlignment = HorizontalAlignment.Right,
             VerticalAlignment = VerticalAlignment.Bottom,
             FontSize = 12,
-            Padding = new Thickness(0, 0, 3, 0),
+            Padding = new Thickness(2, 2, 2, 2),
         };
-        textCharsSecLabel.Bind(TextBlock.TextProperty,
-            new Binding(nameof(vm.EditTextCharactersPerSecond))
-            {
-                Mode = BindingMode.OneWay
-            });
+        textCharsSecLabel.Bind(TextBlock.TextProperty, new Binding(nameof(vm.EditTextCharactersPerSecond))
+        {
+            Mode = BindingMode.OneWay
+        });
+        textCharsSecLabel.Bind(TextBlock.BackgroundProperty, new Binding(nameof(vm.EditTextCharactersPerSecondBackground))
+        {
+            Mode = BindingMode.OneWay
+        });
         textEditGrid.Children.Add(textCharsSecLabel);
 
         var textBox = new TextBox
@@ -345,31 +383,29 @@ public static class InitListViewAndEditBox
             HorizontalAlignment = HorizontalAlignment.Right,
             VerticalAlignment = VerticalAlignment.Top,
             FontSize = 12,
-            Padding = new Thickness(0, 2, 3, 0),
+            Padding = new Thickness(2, 2, 2, 2),
         };
-        textTotalLengthLabel.Bind(TextBlock.TextProperty,
-            new Binding(nameof(vm.EditTextTotalLength))
-            {
-                Mode = BindingMode.OneWay
-            });
+        textTotalLengthLabel.Bind(TextBlock.TextProperty, new Binding(nameof(vm.EditTextTotalLength))
+        {
+            Mode = BindingMode.OneWay
+        });
+        textTotalLengthLabel.Bind(TextBlock.BackgroundProperty, new Binding(nameof(vm.EditTextTotalLengthBackground))
+        {
+            Mode = BindingMode.OneWay
+        });
         textEditGrid.Children.Add(textTotalLengthLabel);
         Grid.SetRow(textTotalLengthLabel, 2);
 
-
-        var singleLineLengthLabel = new TextBlock
+        
+        var panelSingleLineLengths = new StackPanel
         {
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Top,
-            FontSize = 12,
-            Padding = new Thickness(3, 2, 0, 0),
+            Orientation = Orientation.Horizontal,
         };
-        singleLineLengthLabel.Bind(TextBlock.TextProperty,
-            new Binding(nameof(vm.EditTextLineLengths))
-            {
-                Mode = BindingMode.OneWay
-            });
-        textEditGrid.Children.Add(singleLineLengthLabel);
-        Grid.SetRow(singleLineLengthLabel, 2);
+        vm.PanelSingleLineLenghts = panelSingleLineLengths;
+        textEditGrid.Children.Add(panelSingleLineLengths);
+        Grid.SetRow(panelSingleLineLengths, 2);
 
         var buttonPanel = new StackPanel
         {

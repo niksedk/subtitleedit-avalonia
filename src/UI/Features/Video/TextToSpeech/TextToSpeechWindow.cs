@@ -7,6 +7,7 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech;
 
@@ -17,7 +18,7 @@ public class TextToSpeechWindow : Window
     public TextToSpeechWindow(TextToSpeechViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = "Text to speech";
+        Title = Se.Language.Video.TextToSpeech.Title;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 
@@ -27,7 +28,7 @@ public class TextToSpeechWindow : Window
 
         var labelEngine = new Label
         {
-            Content = "Text To Speech engine",
+            Content = Se.Language.Video.TextToSpeech.TextToSpeechEngine,
             VerticalAlignment = VerticalAlignment.Bottom,
         };
 

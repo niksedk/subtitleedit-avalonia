@@ -38,8 +38,8 @@ public class AudioToTextWhisperWindow : Window
             Margin = new Thickness(10, 12, 10, 10),
         };
 
-        var consoleLogAndBatchView = MakeConsoleLogAndBatchView(vm);       
-        var consoleLogOnlyView = MakeConsoleLogOnlyView(vm);       
+        var consoleLogAndBatchView = MakeConsoleLogAndBatchView(vm);
+        var consoleLogOnlyView = MakeConsoleLogOnlyView(vm);
 
         var labelEngine = UiUtil.MakeTextBlock(Se.Language.General.Engine).WithMarginTop(10);
         var comboEngine = UiUtil.MakeComboBox(vm.Engines, vm, nameof(vm.SelectedEngine))
@@ -65,6 +65,7 @@ public class AudioToTextWhisperWindow : Window
         var buttonModelDownload = UiUtil.MakeButtonBrowse(vm.DownloadModelCommand)
             .WithMarginBottom(20)
             .WithMarginTop(10)
+            .WithMarginLeft(5)
             .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
 
         var panelModelControls = new StackPanel
@@ -84,15 +85,9 @@ public class AudioToTextWhisperWindow : Window
 
         var labelPostProcessing = UiUtil.MakeTextBlock(Se.Language.General.PostProcessing).WithMarginTop(15);
         var checkPostProcessing = UiUtil.MakeCheckBox(vm, nameof(vm.DoPostProcessing)).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
-        var buttonPostProcessing = new Button()
-        {
-            Content = Se.Language.General.Settings,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Center,
-            HorizontalContentAlignment = HorizontalAlignment.Center,
-            VerticalContentAlignment = VerticalAlignment.Center,
-            Command = vm.ShowPostProcessingSettingsCommand,
-        }.BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
+        var buttonPostProcessing = UiUtil.MakeButton(vm.ShowPostProcessingSettingsCommand, IconNames.MdiSettings)
+                    .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
+
         var panelPostProcessingControls = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -107,15 +102,9 @@ public class AudioToTextWhisperWindow : Window
         };
 
         var labelAdvancedSettings = UiUtil.MakeTextBlock(Se.Language.General.AdvancedSettings).WithMarginTop(15);
-        var buttonAdvancedSettings = new Button()
-        {
-            Content = Se.Language.General.Settings,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Center,
-            HorizontalContentAlignment = HorizontalAlignment.Center,
-            VerticalContentAlignment = VerticalAlignment.Center,
-            Command = vm.ShowAdvancedSettingsCommand,
-        }.BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled)).WithMarginTop(15);
+
+        var buttonAdvancedSettings = UiUtil.MakeButton(vm.ShowAdvancedSettingsCommand, IconNames.MdiSettings)
+                    .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
 
         var textBoxAdvancedSettings = new TextBox()
         {

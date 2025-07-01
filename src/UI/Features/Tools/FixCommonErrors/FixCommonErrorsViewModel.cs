@@ -105,7 +105,6 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
         SelectedProfile = Profiles.FirstOrDefault(p => p.Name == Se.Settings.Tools.FixCommonErrors.LastProfileName) ?? Profiles.FirstOrDefault() ?? Profiles.FirstOrDefault();
     }
 
-
     private void SaveProfiles()
     {
         Se.Settings.Tools.FixCommonErrors.Profiles.Clear();
@@ -314,7 +313,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
 
     private void InitStep1(string languageCode, Subtitle subtitle)
     {
-        FixedSubtitle = subtitle;
+        FixedSubtitle = new Subtitle(subtitle, false);
 
         _allFixRules = new List<FixRuleDisplayItem>
         {
@@ -441,7 +440,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
             return true;
         }
 
-        var allowFix = Fixes.Any(f => f.Paragraph.Id == p.Id && f.Action == action && f.IsSelected);
+        var allowFix = Fixes.Any(f => f.Paragraph.Id.ToLowerInvariant() == p.Id.ToLowerInvariant() && f.Action == action && f.IsSelected);
         return allowFix;
     }
 
@@ -452,7 +451,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
             return;
         }
 
-        var oldFix = _oldFixes.FirstOrDefault(f => f.Paragraph.Id == p.Id && f.Action == action);
+        var oldFix = _oldFixes.FirstOrDefault(f => f.Paragraph.Id.ToLowerInvariant() == p.Id.ToLowerInvariant() && f.Action == action);
         var isSelected = oldFix is not { IsSelected: false };
 
         Fixes.Add(new FixDisplayItem(p, p.Number, action, before, after, isSelected));
@@ -465,7 +464,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
             return;
         }
 
-        var oldFix = _oldFixes.FirstOrDefault(f => f.Paragraph.Id == p.Id && f.Action == action);
+        var oldFix = _oldFixes.FirstOrDefault(f => f.Paragraph.Id.ToLowerInvariant() == p.Id.ToLowerInvariant() && f.Action == action);
         var isSelected = isChecked;
         if (oldFix is { IsSelected: false })
         {

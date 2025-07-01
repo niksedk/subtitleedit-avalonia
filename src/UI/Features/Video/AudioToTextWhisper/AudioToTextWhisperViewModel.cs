@@ -930,6 +930,16 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     [RelayCommand]
     private async Task Transcribe()
     {
+        if (IsBatchMode && BatchItems.Count == 0)
+        {
+            await Add();
+
+            if (IsBatchMode && BatchItems.Count == 0)
+            {
+                return;
+            }
+        }
+
         if (IsBatchMode && BatchItems.Count > 0)
         {
             _videoFileName = BatchItems[0].InputVideoFileName;
@@ -1050,7 +1060,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             return;
         }
 
-        if (IsBatchMode) 
+        if (IsBatchMode)
         {
             var jobItem = BatchItems[0];
             Dispatcher.UIThread.Post(() =>
