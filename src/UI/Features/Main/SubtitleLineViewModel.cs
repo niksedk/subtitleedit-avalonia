@@ -223,5 +223,7 @@ public partial class SubtitleLineViewModel : ObservableObject
         _skipUpdate = true;
         StartTime = timeSpan;
         _skipUpdate = false;
+
+        UpdateDuration();
     }
 }
