@@ -100,6 +100,13 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
             SelectedLanguage = Languages.First(p => p.Code.TwoLetterISOLanguageName == "en");
         }
 
+        Configuration.Settings.General.SubtitleMinimumDisplayMilliseconds = Se.Settings.General.SubtitleMinimumDisplayMilliseconds;
+        Configuration.Settings.General.SubtitleMaximumDisplayMilliseconds = Se.Settings.General.SubtitleMaximumDisplayMilliseconds;
+        Configuration.Settings.General.SubtitleMaximumCharactersPerSeconds = Se.Settings.General.SubtitleMaximumCharactersPerSeconds;
+        Configuration.Settings.General.MaxNumberOfLines = Se.Settings.General.MaxNumberOfLines;
+        Configuration.Settings.General.SubtitleOptimalCharactersPerSeconds = Se.Settings.General.SubtitleOptimalCharactersPerSeconds;
+        Configuration.Settings.General.MinimumMillisecondsBetweenLines = Se.Settings.General.MinimumMillisecondsBetweenLines;
+
         InitStep1(languageCode, subtitle);
         LoadProfiles();
         SelectedProfile = Profiles.FirstOrDefault(p => p.Name == Se.Settings.Tools.FixCommonErrors.LastProfileName) ?? Profiles.FirstOrDefault() ?? Profiles.FirstOrDefault();
