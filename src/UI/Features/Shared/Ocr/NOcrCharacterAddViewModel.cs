@@ -42,6 +42,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     public NOcrChar NOcrChar { get; private set; }
     //public NOcrDrawingCanvasView NOcrDrawingCanvas { get; set; }
     public TextBox EntryNewText { get; set; }
+    public bool OkPressed { get; set; }
 
     private List<OcrSubtitleItem> _ocrSubtitleItems;
     private int _startFromNumber;
@@ -53,7 +54,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         Title = "Add new character";
         LinesForeground = new ObservableCollection<NOcrLine>();
         LinesBackground = new ObservableCollection<NOcrLine>();
-        //DrawModes = NOcrDrawModeItem.GetDrawModes();
+        DrawModes = new  ObservableCollection<NOcrDrawModeItem>(NOcrDrawModeItem.Items);
         SelectedDrawMode = DrawModes.FirstOrDefault();
         IsNewLinesForegroundActive = true;
         IsNewLinesBackgroundActive = false;
@@ -65,5 +66,10 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         _ocrSubtitleItems = new List<OcrSubtitleItem>();
         //_nOcrDb = new NOcrDb();
 
+    }
+
+    public void Initialize(OcrSubtitleItem item, List<ImageSplitterItem2> list, int i, NOcrDb nOcrDb,
+        int selectedNOcrMaxWrongPixels)
+    {
     }
 }

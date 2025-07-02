@@ -298,7 +298,6 @@ public partial class OcrViewModel : ObservableObject
 
     private void RunNOcr(int startFromIndex)
     {
-
         if (!InitNOcrDb())
         {
             return;
@@ -306,88 +305,96 @@ public partial class OcrViewModel : ObservableObject
 
         _ = Task.Run(() =>
         {
-            for (var i = startFromIndex; i < OcrSubtitleItems.Count; i++)
+            RunNOcrLoop(startFromIndex);
+        });
+    }
+
+    private void RunNOcrLoop(int startFromIndex)
+    {
+        for (var i = startFromIndex; i < OcrSubtitleItems.Count; i++)
+        {
+            if (_cancellationTokenSource.Token.IsCancellationRequested)
             {
-                if (_cancellationTokenSource.Token.IsCancellationRequested)
-                {
-                    return;
-                }
-
-                ProgressValue = i * 100.0 / (double)OcrSubtitleItems.Count;
-                ProgressText = $"Running OCR... {i + 1}/{OcrSubtitleItems.Count}";
-
-                var item = OcrSubtitleItems[i];
-                var bitmap = item.GetSkBitmap();
-                var nBmp = new NikseBitmap2(bitmap);
-                nBmp.MakeTwoColor(200);
-                nBmp.CropTop(0, new SKColor(0, 0, 0, 0));
-                var list = NikseBitmapImageSplitter2.SplitBitmapToLettersNew(nBmp, SelectedNOcrPixelsAreSpace, false, true, 20, true);
-                var sb = new StringBuilder();
-                SelectedOcrSubtitleItem = item;
-
-                foreach (var splitterItem in list)
-                {
-                    if (splitterItem.NikseBitmap == null)
-                    {
-                        if (splitterItem.SpecialCharacter != null)
-                        {
-                            sb.Append(splitterItem.SpecialCharacter);
-                        }
-                    }
-                    else
-                    {
-                        var match = _nOcrDb!.GetMatch(nBmp, list, splitterItem, splitterItem.Top, true, SelectedNOcrMaxWrongPixels);
-
-                        if (NOcrDrawUnknownText && match == null)
-                        {
-                            var letterIndex = list.IndexOf(splitterItem);
-
-                            if (_skipOnceChars.Any(p => p.LetterIndex == letterIndex && p.LineIndex == i))
-                            {
-                                sb.Append("*");
-                                continue;
-                            }
-
-                            var runOnceChar = _runOnceChars.FirstOrDefault(p => p.LetterIndex == letterIndex && p.LineIndex == i);
-                            if (runOnceChar != null)
-                            {
-                                sb.Append(runOnceChar.Text);
-                                continue;
-                            }
-
-                            //Dispatcher.UIThread.Invoke(() =>
-                            //{
-                            //    //await PauseOcr();
-                            //    //await Shell.Current.GoToAsync(nameof(NOcrCharacterAddPage), new Dictionary<string, object>
-                            //    //    {
-                            //    //    { "Page", nameof(OcrPage) },
-                            //    //    { "Bitmap", nBmp.GetBitmap() },
-                            //    //    { "Letters", list },
-                            //    //    { "Item", splitterItem },
-                            //    //    { "OcrSubtitleItems", OcrSubtitleItems.ToList() },
-                            //    //    { "StartFromNumber", SelectedStartFromNumber },
-                            //    //    { "ItalicOn", _toolsItalicOn },
-                            //    //    { "nOcrDb", _nOcrDb },
-                            //    //    { "MaxWrongPixels", SelectedNOcrMaxWrongPixels },
-                            //    //    });
-                            //});
-                            //return;
-                        }
-
-                        sb.Append(match != null ? _nOcrCaseFixer.FixUppercaseLowercaseIssues(splitterItem, match) : "*");
-                    }
-                }
-
-                item.Text = sb.ToString().Trim();
-
-                SelectAndScrollToRow(i);
-
-                _runOnceChars.Clear();
-                _skipOnceChars.Clear();
+                IsOcrRunning = false;
+                return;
             }
 
-            IsOcrRunning = false;
-        });
+            ProgressValue = i * 100.0 / (double)OcrSubtitleItems.Count;
+            ProgressText = $"Running OCR... {i + 1}/{OcrSubtitleItems.Count}";
+
+            var item = OcrSubtitleItems[i];
+            var bitmap = item.GetSkBitmap();
+            var nBmp = new NikseBitmap2(bitmap);
+            nBmp.MakeTwoColor(200);
+            nBmp.CropTop(0, new SKColor(0, 0, 0, 0));
+            var list = NikseBitmapImageSplitter2.SplitBitmapToLettersNew(nBmp, SelectedNOcrPixelsAreSpace, false, true, 20, true);
+            var sb = new StringBuilder();
+            SelectedOcrSubtitleItem = item;
+
+            foreach (var splitterItem in list)
+            {
+                if (splitterItem.NikseBitmap == null)
+                {
+                    if (splitterItem.SpecialCharacter != null)
+                    {
+                        sb.Append(splitterItem.SpecialCharacter);
+                    }
+                }
+                else
+                {
+                    var match = _nOcrDb!.GetMatch(nBmp, list, splitterItem, splitterItem.Top, true, SelectedNOcrMaxWrongPixels);
+
+                    if (NOcrDrawUnknownText && match == null)
+                    {
+                        var letterIndex = list.IndexOf(splitterItem);
+
+                        if (_skipOnceChars.Any(p => p.LetterIndex == letterIndex && p.LineIndex == i))
+                        {
+                            sb.Append("*");
+                            continue;
+                        }
+
+                        var runOnceChar = _runOnceChars.FirstOrDefault(p => p.LetterIndex == letterIndex && p.LineIndex == i);
+                        if (runOnceChar != null)
+                        {
+                            sb.Append(runOnceChar.Text);
+                            continue;
+                        }
+
+                        Dispatcher.UIThread.Post(async () =>
+                        {
+                            var result = await _windowService
+                                .ShowDialogAsync<NOcrCharacterAddWindow, NOcrCharacterAddViewModel>(Window!,
+                                    vm =>
+                                    {
+                                        vm.Initialize(item, list, i, _nOcrDb, SelectedNOcrMaxWrongPixels);
+                                    });
+
+                            if (result.OkPressed)
+                            {
+                            }
+                            else
+                            {
+                                IsOcrRunning = false;
+                            }
+                        });
+                        return;
+                    }
+
+                    sb.Append(match != null ? _nOcrCaseFixer.FixUppercaseLowercaseIssues(splitterItem, match) : "*");
+                }
+            }
+
+            item.Text = sb.ToString().Trim();
+
+            SelectAndScrollToRow(i);
+
+            _runOnceChars.Clear();
+            _skipOnceChars.Clear();
+        }
+        
+        IsOcrRunning = false;
+        return;
     }
 
     private bool InitNOcrDb()
