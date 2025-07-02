@@ -140,5 +140,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<EditRuleViewModel>();
         collection.AddTransient<EditCategoryViewModel>();
         collection.AddTransient<GetKeyViewModel>();
+        collection.AddTransient<NOcrCharacterAddViewModel>();
+        collection.AddTransient<NOcrCharacterInspectViewModel>();
     }
 }
