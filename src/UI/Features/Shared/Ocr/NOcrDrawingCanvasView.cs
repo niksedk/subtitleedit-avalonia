@@ -7,56 +7,52 @@ using Nikse.SubtitleEdit.Logic.Ocr;
 using System;
 using System.Collections.Generic;
 
-namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
-
-public sealed class NOcrDrawingCanvasView : Control
+public class NOcrDrawingCanvasView : Control
 {
-    public List<NOcrLine> HitPaths { get; } = new();
-    public List<NOcrLine> MissPaths { get; } = new();
+    public List<NOcrLine> HitPaths { get; set; }
+    public List<NOcrLine> MissPaths { get; set; }
 
-    public double ZoomFactor
+    public float ZoomFactor
     {
         get => _zoomFactor;
         set
         {
-            _zoomFactor = Math.Max(0.01, value);
-            if (BackgroundImage is { } bmp)
+            _zoomFactor = value;
+            if (BackgroundImage != null)
             {
-                Width = bmp.Size.Width * _zoomFactor;
-                Height = bmp.Size.Height * _zoomFactor;
+                Width = BackgroundImage.PixelSize.Width * _zoomFactor;
+                Height = BackgroundImage.PixelSize.Height * _zoomFactor;
             }
             InvalidateVisual();
         }
     }
 
+    private NOcrLine _currentPath;
+    private bool _isDrawing = false;
+    private int _mouseMoveStartX = -1;
+    private int _mouseMoveStartY = -1;
+
+    private float _zoomFactor = 1.0f;
+    private float _strokeWidth = 3.0f;
+
     public bool NewLinesAreHits { get; set; } = true;
 
-    public Color CanvasColor { get; set; } = Colors.DarkGray;
-    public Color HitColor { get; set; } = Colors.Green;
-    public Color MissColor { get; set; } = Colors.Red;
-
-    private Bitmap? _backgroundImage;
-    public Bitmap? BackgroundImage 
-    {
-        get => _backgroundImage;
-        set
-        {
-            _backgroundImage = value;
-            InvalidateVisual();
-        }
-    }
-
-    public void SetStrokeWidth(double width)
-    {
-        _strokeWidth = Math.Max(0.1, width);
-        InvalidateVisual();
-    }
+    public IBrush CanvasColor { get; set; } = new SolidColorBrush(Colors.DarkGray);
+    public IBrush HitColor { get; set; } = new SolidColorBrush(Colors.Green);
+    public IBrush MissColor { get; set; } = new SolidColorBrush(Colors.Red);
+    public Bitmap? BackgroundImage { get; set; }
 
     public NOcrDrawingCanvasView()
     {
-        ClipToBounds = true;
-        ZoomFactor = 1.0;
+        HitPaths = new List<NOcrLine>();
+        MissPaths = new List<NOcrLine>();
         _currentPath = new NOcrLine();
+
+        ClipToBounds = true;
+
+        // Set initial size
+        Width = 100;
+        Height = 100;
     }
 
     protected override void OnPointerPressed(PointerPressedEventArgs e)
@@ -65,8 +61,9 @@ public sealed class NOcrDrawingCanvasView : Control
 
         _isDrawing = true;
         var pos = e.GetPosition(this);
-        _mouseStartX = (int)Math.Round(pos.X / ZoomFactor);
-        _mouseStartY = (int)Math.Round(pos.Y / ZoomFactor);
+
+        _mouseMoveStartX = (int)Math.Round(pos.X / ZoomFactor, MidpointRounding.AwayFromZero);
+        _mouseMoveStartY = (int)Math.Round(pos.Y / ZoomFactor, MidpointRounding.AwayFromZero);
 
         e.Pointer.Capture(this);
         e.Handled = true;
@@ -76,15 +73,16 @@ public sealed class NOcrDrawingCanvasView : Control
     {
         base.OnPointerMoved(e);
 
-        if (!_isDrawing) return;
-
         var pos = e.GetPosition(this);
-        var x = (int)Math.Round(pos.X / ZoomFactor);
-        var y = (int)Math.Round(pos.Y / ZoomFactor);
+        var x = (int)Math.Round(pos.X / ZoomFactor, MidpointRounding.AwayFromZero);
+        var y = (int)Math.Round(pos.Y / ZoomFactor, MidpointRounding.AwayFromZero);
 
-        _currentPath = new NOcrLine(new OcrPoint(_mouseStartX, _mouseStartY),
-                                    new OcrPoint(x, y));
-        InvalidateVisual();
+        if (_isDrawing)
+        {
+            _currentPath = new NOcrLine(new OcrPoint(_mouseMoveStartX, _mouseMoveStartY), new OcrPoint(x, y));
+            InvalidateVisual();
+        }
+
         e.Handled = true;
     }
 
@@ -92,12 +90,19 @@ public sealed class NOcrDrawingCanvasView : Control
     {
         base.OnPointerReleased(e);
 
-        if (_isDrawing && !_currentPath.IsEmpty)
+        _isDrawing = false;
+        if (!_currentPath.IsEmpty)
         {
-            (NewLinesAreHits ? HitPaths : MissPaths).Add(_currentPath);
+            if (NewLinesAreHits)
+            {
+                HitPaths.Add(_currentPath);
+            }
+            else
+            {
+                MissPaths.Add(_currentPath);
+            }
             _currentPath = new NOcrLine();
         }
-        _isDrawing = false;
 
         e.Pointer.Capture(null);
         e.Handled = true;
@@ -107,61 +112,73 @@ public sealed class NOcrDrawingCanvasView : Control
     {
         base.Render(context);
 
-        var bounds = new Rect(0, 0, Bounds.Width, Bounds.Height);
+        // Fill background
+        context.FillRectangle(CanvasColor, new Rect(0, 0, Bounds.Width, Bounds.Height));
 
-        context.FillRectangle(new SolidColorBrush(CanvasColor), bounds);
-
-        if (BackgroundImage is { } bmp)
+        // Draw background image if available
+        if (BackgroundImage != null)
         {
-            var dest = new Rect(0, 0,
-                                bmp.Size.Width * ZoomFactor,
-                                bmp.Size.Height * ZoomFactor);
-            context.DrawImage(bmp, sourceRect: default, destRect: dest);
+            var imageRect = new Rect(
+                0, 0,
+                BackgroundImage.PixelSize.Width * ZoomFactor,
+                BackgroundImage.PixelSize.Height * ZoomFactor
+            );
+            context.DrawImage(BackgroundImage, imageRect);
         }
 
-        DrawPathCollection(context, MissPaths, MissColor);
-        DrawPathCollection(context, HitPaths, HitColor);
+        // Create pen for drawing lines
+        var missPen = new Pen(MissColor, _strokeWidth);
+        var hitPen = new Pen(HitColor, _strokeWidth);
 
+        // Draw miss paths
+        foreach (var path in MissPaths)
+        {
+            DrawLine(context, path, missPen);
+        }
+
+        // Draw hit paths
+        foreach (var path in HitPaths)
+        {
+            DrawLine(context, path, hitPen);
+        }
+
+        // Draw the current path if drawing
         if (_isDrawing && !_currentPath.IsEmpty)
-            DrawSinglePath(context,
-                           _currentPath,
-                           NewLinesAreHits ? HitColor : MissColor);
+        {
+            var currentPen = NewLinesAreHits ? hitPen : missPen;
+            DrawLine(context, _currentPath, currentPen);
+        }
     }
 
-    private void DrawPathCollection(
-        DrawingContext ctx,
-        IEnumerable<NOcrLine> paths,
-        Color colour)
+    private void DrawLine(DrawingContext context, NOcrLine line, IPen pen)
     {
-        var pen = GetPen(colour);
+        var startPoint = new Point(line.Start.X * ZoomFactor, line.Start.Y * ZoomFactor);
+        var endPoint = new Point(line.End.X * ZoomFactor, line.End.Y * ZoomFactor);
 
-        foreach (var p in paths)
-            DrawSinglePath(ctx, p, pen);
+        context.DrawLine(pen, startPoint, endPoint);
     }
 
-    private void DrawSinglePath(
-        DrawingContext ctx,
-        NOcrLine p,
-        Color colour) =>
-        DrawSinglePath(ctx, p, GetPen(colour));
-
-    private void DrawSinglePath(
-        DrawingContext ctx,
-        NOcrLine p,
-        Pen pen)
+    public void SetStrokeWidth(float width)
     {
-        ctx.DrawLine(pen,
-            new Point(p.Start.X * ZoomFactor, p.Start.Y * ZoomFactor),
-            new Point(p.End.X * ZoomFactor, p.End.Y * ZoomFactor));
+        _strokeWidth = width;
+        InvalidateVisual();
     }
 
-    private Pen GetPen(Color colour) =>
-        new(new SolidColorBrush(colour), _strokeWidth, lineCap: PenLineCap.Round);
+    public void ClearPaths()
+    {
+        HitPaths.Clear();
+        MissPaths.Clear();
+        InvalidateVisual();
+    }
 
-    private NOcrLine _currentPath;
-    private bool _isDrawing;
-    private int _mouseStartX;
-    private int _mouseStartY;
-    private double _strokeWidth = 3.0;
-    private double _zoomFactor = 1.0;
+    public void SetBackgroundImage(Bitmap? bitmap)
+    {
+        BackgroundImage = bitmap;
+        if (bitmap != null)
+        {
+            Width = bitmap.PixelSize.Width * ZoomFactor;
+            Height = bitmap.PixelSize.Height * ZoomFactor;
+        }
+        InvalidateVisual();
+    }
 }
