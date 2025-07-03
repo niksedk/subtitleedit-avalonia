@@ -108,7 +108,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
             {
                 CurrentBitmap = _splitItem.NikseBitmap!.GetBitmap().ToAvaloniaBitmap();
 
-                NOcrDrawingCanvas.BackgroundImage = _splitItem.NikseBitmap.GetBitmap();
+                NOcrDrawingCanvas.BackgroundImage = CurrentBitmap;
                 NOcrDrawingCanvas.ZoomFactor = 4;
                 DrawAgain();
             }

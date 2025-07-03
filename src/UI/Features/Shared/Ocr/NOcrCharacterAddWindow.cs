@@ -135,11 +135,6 @@ public class NOcrCharacterAddWindow : Window
             }
         };
 
-        vm.NOcrDrawingCanvas = new NOcrDrawingCanvasView
-        {
-            Width = 200,
-            Height = 200,
-        };
         vm.NOcrDrawingCanvas.SetStrokeWidth(1);
 
         var panelZoom = new StackPanel

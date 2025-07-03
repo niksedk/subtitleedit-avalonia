@@ -2,63 +2,61 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
-using Avalonia.Platform;
-using Avalonia.Rendering.SceneGraph;
-using Avalonia.Skia;
+using Avalonia.Media.Imaging;
 using Nikse.SubtitleEdit.Logic.Ocr;
-using SkiaSharp;
 using System;
 using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
-public class NOcrDrawingCanvasView : Control
+public sealed class NOcrDrawingCanvasView : Control
 {
-    public List<NOcrLine> HitPaths { get; set; }
-    public List<NOcrLine> MissPaths { get; set; }
+    public List<NOcrLine> HitPaths { get; } = new();
+    public List<NOcrLine> MissPaths { get; } = new();
 
-    public float ZoomFactor
+    public double ZoomFactor
     {
         get => _zoomFactor;
         set
         {
-            _zoomFactor = value;
-            Width = BackgroundImage.Width * _zoomFactor;
-            Height = BackgroundImage.Height * _zoomFactor;
+            _zoomFactor = Math.Max(0.01, value);
+            if (BackgroundImage is { } bmp)
+            {
+                Width = bmp.Size.Width * _zoomFactor;
+                Height = bmp.Size.Height * _zoomFactor;
+            }
             InvalidateVisual();
         }
     }
 
-    private NOcrLine _currentPath;
-    private bool _isDrawing = false;
-    private int _mouseMoveStartX = -1;
-    private int _mouseMoveStartY = -1;
-
-    private readonly SKPaint _drawingPaint = new()
-    {
-        Style = SKPaintStyle.Stroke,
-        StrokeWidth = 3,
-        IsAntialias = true
-    };
-
-    private float _zoomFactor = 1.0f;
-
     public bool NewLinesAreHits { get; set; } = true;
 
-    public SKColor CanvasColor { get; set; } = SKColors.DarkGray;
-    public SKColor HitColor { get; set; } = SKColors.Green;
-    public SKColor MissColor { get; set; } = SKColors.Red;
-    public SKBitmap BackgroundImage { get; set; }
+    public Color CanvasColor { get; set; } = Colors.DarkGray;
+    public Color HitColor { get; set; } = Colors.Green;
+    public Color MissColor { get; set; } = Colors.Red;
+
+    private Bitmap? _backgroundImage;
+    public Bitmap? BackgroundImage 
+    {
+        get => _backgroundImage;
+        set
+        {
+            _backgroundImage = value;
+            InvalidateVisual();
+        }
+    }
+
+    public void SetStrokeWidth(double width)
+    {
+        _strokeWidth = Math.Max(0.1, width);
+        InvalidateVisual();
+    }
 
     public NOcrDrawingCanvasView()
     {
-        HitPaths = new List<NOcrLine>();
-        MissPaths = new List<NOcrLine>();
-        _currentPath = new NOcrLine();
-        BackgroundImage = new SKBitmap(1, 1);
-        ZoomFactor = 1;
-
         ClipToBounds = true;
+        ZoomFactor = 1.0;
+        _currentPath = new NOcrLine();
     }
 
     protected override void OnPointerPressed(PointerPressedEventArgs e)
@@ -67,9 +65,8 @@ public class NOcrDrawingCanvasView : Control
 
         _isDrawing = true;
         var pos = e.GetPosition(this);
-
-        _mouseMoveStartX = (int)Math.Round(pos.X / ZoomFactor, MidpointRounding.AwayFromZero);
-        _mouseMoveStartY = (int)Math.Round(pos.Y / ZoomFactor, MidpointRounding.AwayFromZero);
+        _mouseStartX = (int)Math.Round(pos.X / ZoomFactor);
+        _mouseStartY = (int)Math.Round(pos.Y / ZoomFactor);
 
         e.Pointer.Capture(this);
         e.Handled = true;
@@ -79,16 +76,15 @@ public class NOcrDrawingCanvasView : Control
     {
         base.OnPointerMoved(e);
 
+        if (!_isDrawing) return;
+
         var pos = e.GetPosition(this);
-        var x = (int)Math.Round(pos.X / ZoomFactor, MidpointRounding.AwayFromZero);
-        var y = (int)Math.Round(pos.Y / ZoomFactor, MidpointRounding.AwayFromZero);
+        var x = (int)Math.Round(pos.X / ZoomFactor);
+        var y = (int)Math.Round(pos.Y / ZoomFactor);
 
-        if (_isDrawing)
-        {
-            _currentPath = new NOcrLine(new OcrPoint(_mouseMoveStartX, _mouseMoveStartY), new OcrPoint(x, y));
-            InvalidateVisual();
-        }
-
+        _currentPath = new NOcrLine(new OcrPoint(_mouseStartX, _mouseStartY),
+                                    new OcrPoint(x, y));
+        InvalidateVisual();
         e.Handled = true;
     }
 
@@ -96,19 +92,12 @@ public class NOcrDrawingCanvasView : Control
     {
         base.OnPointerReleased(e);
 
-        _isDrawing = false;
-        if (!_currentPath.IsEmpty)
+        if (_isDrawing && !_currentPath.IsEmpty)
         {
-            if (NewLinesAreHits)
-            {
-                HitPaths.Add(_currentPath);
-            }
-            else
-            {
-                MissPaths.Add(_currentPath);
-            }
+            (NewLinesAreHits ? HitPaths : MissPaths).Add(_currentPath);
             _currentPath = new NOcrLine();
         }
+        _isDrawing = false;
 
         e.Pointer.Capture(null);
         e.Handled = true;
@@ -118,75 +107,61 @@ public class NOcrDrawingCanvasView : Control
     {
         base.Render(context);
 
-        var customDrawOp = new SkiaDrawOperation(
-            new Rect(0, 0, Bounds.Width, Bounds.Height),
-            this);
+        var bounds = new Rect(0, 0, Bounds.Width, Bounds.Height);
 
-        context.Custom(customDrawOp);
-    }
+        context.FillRectangle(new SolidColorBrush(CanvasColor), bounds);
 
-    private class SkiaDrawOperation : ICustomDrawOperation
-    {
-        private readonly NOcrDrawingCanvasView _owner;
-
-        public SkiaDrawOperation(Rect bounds, NOcrDrawingCanvasView owner)
+        if (BackgroundImage is { } bmp)
         {
-            Bounds = bounds;
-            _owner = owner;
+            var dest = new Rect(0, 0,
+                                bmp.Size.Width * ZoomFactor,
+                                bmp.Size.Height * ZoomFactor);
+            context.DrawImage(bmp, sourceRect: default, destRect: dest);
         }
 
-        public Rect Bounds { get; }
-        public bool HitTest(Point p) => false;
-        public bool Equals(ICustomDrawOperation? other) => false;
+        DrawPathCollection(context, MissPaths, MissColor);
+        DrawPathCollection(context, HitPaths, HitColor);
 
-        public void Dispose() { }
-
-        public void Render(ImmediateDrawingContext context)
-        {
-            var leaseFeature = context.TryGetFeature<ISkiaSharpApiLeaseFeature>();
-            if (leaseFeature is null)
-            {
-                return;
-            }
-
-            using var lease = leaseFeature.Lease();
-            var canvas = lease.SkCanvas;
-
-            canvas.Clear(_owner.CanvasColor);
-            canvas.DrawBitmap(_owner.BackgroundImage,
-                new SKRect(0, 0, _owner.BackgroundImage.Width * _owner.ZoomFactor, _owner.BackgroundImage.Height * _owner.ZoomFactor));
-
-            _owner._drawingPaint.Color = _owner.MissColor;
-            foreach (var path in _owner.MissPaths)
-            {
-                _owner.DrawNOcrLine(path, canvas);
-            }
-
-            _owner._drawingPaint.Color = _owner.HitColor;
-            foreach (var path in _owner.HitPaths)
-            {
-                _owner.DrawNOcrLine(path, canvas);
-            }
-
-            // Draw the current path if drawing
-            _owner._drawingPaint.Color = _owner.NewLinesAreHits ? _owner.HitColor : _owner.MissColor;
-            if (_owner._isDrawing && !_owner._currentPath.IsEmpty)
-            {
-                _owner.DrawNOcrLine(_owner._currentPath, canvas);
-            }
-        }
+        if (_isDrawing && !_currentPath.IsEmpty)
+            DrawSinglePath(context,
+                           _currentPath,
+                           NewLinesAreHits ? HitColor : MissColor);
     }
 
-    private void DrawNOcrLine(NOcrLine path, SKCanvas canvas)
+    private void DrawPathCollection(
+        DrawingContext ctx,
+        IEnumerable<NOcrLine> paths,
+        Color colour)
     {
-        var skPath = new SKPath();
-        skPath.MoveTo(path.Start.X * ZoomFactor, path.Start.Y * ZoomFactor);
-        skPath.LineTo(path.End.X * ZoomFactor, path.End.Y * ZoomFactor);
-        canvas.DrawPath(skPath, _drawingPaint);
+        var pen = GetPen(colour);
+
+        foreach (var p in paths)
+            DrawSinglePath(ctx, p, pen);
     }
 
-    public void SetStrokeWidth(float width)
+    private void DrawSinglePath(
+        DrawingContext ctx,
+        NOcrLine p,
+        Color colour) =>
+        DrawSinglePath(ctx, p, GetPen(colour));
+
+    private void DrawSinglePath(
+        DrawingContext ctx,
+        NOcrLine p,
+        Pen pen)
     {
-        _drawingPaint.StrokeWidth = width;
+        ctx.DrawLine(pen,
+            new Point(p.Start.X * ZoomFactor, p.Start.Y * ZoomFactor),
+            new Point(p.End.X * ZoomFactor, p.End.Y * ZoomFactor));
     }
+
+    private Pen GetPen(Color colour) =>
+        new(new SolidColorBrush(colour), _strokeWidth, lineCap: PenLineCap.Round);
+
+    private NOcrLine _currentPath;
+    private bool _isDrawing;
+    private int _mouseStartX;
+    private int _mouseStartY;
+    private double _strokeWidth = 3.0;
+    private double _zoomFactor = 1.0;
 }
