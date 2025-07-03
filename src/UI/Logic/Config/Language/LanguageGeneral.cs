@@ -176,6 +176,10 @@ public class LanguageGeneral
     public string ConsoleLog { get; set; }
     public string GeneratingWavFile { get; set; }
     public string Converted { get; set; }
+    public string Expand { get; set; }
+    public string UseOnce { get; set; }
+    public string Skip { get; set; }
+    public string Abort { get; set; }
 
     public LanguageGeneral()
     {
@@ -353,5 +357,9 @@ public class LanguageGeneral
         ConsoleLog = "Console log";
         GeneratingWavFile = "Generating wav file...";
         Converted = "Converted";
+        Expand = "Expand";
+        UseOnce = "Use once";
+        Skip = "Skip";
+        Abort = "Abort";
     }
 }

@@ -3,12 +3,9 @@ using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Nikse.SubtitleEdit.Logic.Ocr;
 using SkiaSharp;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
@@ -41,7 +38,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     private ImageSplitterItem2 _splitItem;
     private SKBitmap _sentenceBitmap;
     public NOcrChar NOcrChar { get; private set; }
-    //public NOcrDrawingCanvasView NOcrDrawingCanvas { get; set; }
+    public NOcrDrawingCanvasView NOcrDrawingCanvas { get; set; }
     public TextBox EntryNewText { get; set; }
     public bool OkPressed { get; set; }
 
@@ -80,7 +77,11 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         _splitItem = new ImageSplitterItem2(string.Empty);
     }
 
-    public void Initialize(OcrSubtitleItem item, List<ImageSplitterItem2> letters, int i, NOcrDb nOcrDb,
+    public void Initialize(
+        OcrSubtitleItem item, 
+        List<ImageSplitterItem2> letters, 
+        int i, 
+        NOcrDb nOcrDb,
         int maxWrongPixels)
     {
         _nOcrDb = nOcrDb;
@@ -97,6 +98,42 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
 
     [RelayCommand]
     private void Expand()
+    {
+
+    }
+
+    [RelayCommand]
+    private void Ok()
+    {
+
+    }
+
+    [RelayCommand]
+    private void UseOnce()
+    {
+
+    }
+
+    [RelayCommand]
+    private void Skip()
+    {
+
+    }
+
+    [RelayCommand]
+    private void Abort()
+    {
+
+    }
+
+    [RelayCommand]
+    private void DrawAgain()
+    {
+
+    }
+
+    [RelayCommand]
+    private void ClearDraw()
     {
 
     }
