@@ -367,7 +367,7 @@ public partial class OcrViewModel : ObservableObject
                                 .ShowDialogAsync<NOcrCharacterAddWindow, NOcrCharacterAddViewModel>(Window!,
                                     vm =>
                                     {
-                                        vm.Initialize(item, list, i, _nOcrDb, SelectedNOcrMaxWrongPixels);
+                                        vm.Initialize(item, list, letterIndex, _nOcrDb, SelectedNOcrMaxWrongPixels);
                                     });
 
                             if (result.OkPressed)

@@ -1,12 +1,16 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Ocr;
 using SkiaSharp;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
-using CommunityToolkit.Mvvm.Input;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
@@ -36,11 +40,15 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
 
     private List<ImageSplitterItem2> _letters;
     private ImageSplitterItem2 _splitItem;
-    private SKBitmap _sentenceBitmap;
+    public Bitmap SentenceBitmap { get; set; }
+    public Bitmap CurrentBitmap { get; set; }
     public NOcrChar NOcrChar { get; private set; }
     public NOcrDrawingCanvasView NOcrDrawingCanvas { get; set; }
-    public TextBox EntryNewText { get; set; }
+    public TextBox TextBoxNew { get; set; }
     public bool OkPressed { get; set; }
+    public bool AbortPressed { get; set; }
+    public bool SkipPressed { get; set; }
+    public bool UseOncePressed { get; set; }
 
     private List<OcrSubtitleItem> _ocrSubtitleItems;
     private int _startFromNumber;
@@ -52,7 +60,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         Title = "Add new character";
         LinesForeground = new ObservableCollection<NOcrLine>();
         LinesBackground = new ObservableCollection<NOcrLine>();
-        DrawModes = new  ObservableCollection<NOcrDrawModeItem>(NOcrDrawModeItem.Items);
+        DrawModes = new ObservableCollection<NOcrDrawModeItem>(NOcrDrawModeItem.Items);
         SelectedDrawMode = DrawModes.First();
         IsNewLinesForegroundActive = true;
         IsNewLinesBackgroundActive = false;
@@ -61,7 +69,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         IsNewTextItalic = false;
         SubmitOnFirstLetter = true;
         _letters = new List<ImageSplitterItem2>();
-        
+
         const int maxLines = 500;
         NoOfLinesToAutoDrawList = new ObservableCollection<int>();
         for (var i = 0; i <= maxLines; i++)
@@ -73,14 +81,17 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         NOcrChar = new NOcrChar();
         _ocrSubtitleItems = new List<OcrSubtitleItem>();
         _nOcrDb = new NOcrDb(string.Empty);
-        _sentenceBitmap = new SKBitmap(1, 1);
+        SentenceBitmap = new SKBitmap(1, 1).ToAvaloniaBitmap();
+        CurrentBitmap = new SKBitmap(1, 1).ToAvaloniaBitmap();
         _splitItem = new ImageSplitterItem2(string.Empty);
+        NOcrDrawingCanvas = new NOcrDrawingCanvasView();
+        TextBoxNew = new TextBox();
     }
 
     public void Initialize(
-        OcrSubtitleItem item, 
-        List<ImageSplitterItem2> letters, 
-        int i, 
+        OcrSubtitleItem item,
+        List<ImageSplitterItem2> letters,
+        int i,
         NOcrDb nOcrDb,
         int maxWrongPixels)
     {
@@ -88,8 +99,51 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         _letters = letters;
         _startFromNumber = i;
         _maxWrongPixels = maxWrongPixels;
+
+        if (i >= 0 && i < letters.Count)
+        {
+            _splitItem = letters[i];
+
+            if (_splitItem.NikseBitmap != null)
+            {
+                CurrentBitmap = _splitItem.NikseBitmap!.GetBitmap().ToAvaloniaBitmap();
+
+                NOcrDrawingCanvas.BackgroundImage = _splitItem.NikseBitmap.GetBitmap();
+                NOcrDrawingCanvas.ZoomFactor = 4;
+                DrawAgain();
+            }
+        }
+
+        InitSentenceBitmap(item);
+
+        SetTitle();
     }
-    
+
+    private void InitSentenceBitmap(OcrSubtitleItem item)
+    {
+        var skBitmap = item.GetSkBitmap();
+
+        if (_splitItem.NikseBitmap != null)
+        {
+            var rect = new SKRect(_splitItem.X, _splitItem.Y, _splitItem.X + _splitItem.NikseBitmap.Width, _splitItem.Y + _splitItem.NikseBitmap.Height);
+            using (var canvas = new SKCanvas(skBitmap))
+            {
+                using (var paint = new SKPaint
+                {
+                    Style = SKPaintStyle.Stroke,
+                    Color = SKColors.Red,
+                    StrokeWidth = 2, // Thickness of the rectangle border
+                    IsAntialias = true
+                })
+                {
+                    canvas.DrawRect(rect, paint);
+                }
+            }
+        }
+
+        SentenceBitmap = skBitmap.ToAvaloniaBitmap();
+    }
+
     [RelayCommand]
     private void Shrink()
     {
@@ -105,36 +159,90 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     [RelayCommand]
     private void Ok()
     {
-
+        OkPressed = true;
+        Close();
     }
 
     [RelayCommand]
     private void UseOnce()
     {
-
+        UseOncePressed = true;
+        Close();
     }
 
     [RelayCommand]
     private void Skip()
     {
-
+        SkipPressed = true;
+        Close();
     }
 
     [RelayCommand]
     private void Abort()
     {
-
+        AbortPressed = true;
+        Close();
     }
 
     [RelayCommand]
     private void DrawAgain()
     {
-
+        NOcrChar.LinesForeground.Clear();
+        NOcrChar.LinesBackground.Clear();
+        NOcrChar.GenerateLineSegments(SelectedNoOfLinesToAutoDraw, false, NOcrChar, _splitItem.NikseBitmap!);
+        ShowOcrPoints();
     }
 
     [RelayCommand]
     private void ClearDraw()
     {
+        NOcrChar.LinesForeground.Clear();
+        NOcrChar.LinesBackground.Clear();
+        ShowOcrPoints();
+    }
 
+    [RelayCommand]
+    private void ZoomIn()
+    {
+        if (NOcrDrawingCanvas.ZoomFactor < 10)
+        {
+            NOcrDrawingCanvas.ZoomFactor++;
+        }
+    }
+
+    [RelayCommand]
+    private void ZoomOut()
+    {
+        if (NOcrDrawingCanvas.ZoomFactor > 1)
+        {
+            NOcrDrawingCanvas.ZoomFactor--;
+        }
+    }
+
+    private void Close()
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            Window?.Close();
+        });
+    }
+
+    private void ShowOcrPoints()
+    {
+        NOcrDrawingCanvas.MissPaths.Clear();
+        NOcrDrawingCanvas.HitPaths.Clear();
+
+        NOcrDrawingCanvas.MissPaths.AddRange(NOcrChar.LinesBackground);
+        NOcrDrawingCanvas.HitPaths.AddRange(NOcrChar.LinesForeground);
+    }
+
+    private void SetTitle()
+    {
+        Title = $"Add nOCR character for line  {_startFromNumber}, character {_letters.IndexOf(_splitItem) + 1} of {_letters.Count} using database \"{Path.GetFileNameWithoutExtension(_nOcrDb.FileName)}\"";
+    }
+
+    internal void OnLoaded()
+    {
+        throw new NotImplementedException();
     }
 }

@@ -1,4 +1,7 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -44,7 +47,11 @@ public class NOcrCharacterAddWindow : Window
 
         var labelTitle = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.Title));
 
-        var image = new Image();
+        var image = new Image
+        {
+            Source = vm.SentenceBitmap,
+            Stretch = Stretch.Uniform
+        };
 
         var controlsView = MakeControlsView(vm);
 
@@ -63,7 +70,7 @@ public class NOcrCharacterAddWindow : Window
 
         Activated += delegate
         {
-            buttonOk.Focus(); // hack to make OnKeyDown work
+            vm.TextBoxNew.Focus(); // hack to make OnKeyDown work
         };
     }
 
@@ -85,17 +92,35 @@ public class NOcrCharacterAddWindow : Window
             Width = double.NaN,
         };
 
+        vm.TextBoxNew = UiUtil.MakeTextBox(200, vm, nameof(vm.NewText));
+        var image = new Image
+        {
+            Margin = new Thickness(5),
+            Source = vm.CurrentBitmap,
+            Stretch = Stretch.Uniform,
+            MinWidth = 30,
+            MinHeight = 30,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,            
+        };
+
+        var panelCurrentImage = new StackPanel
+        {
+            Background = new SolidColorBrush(Colors.LightGray),  
+            Children = { image },
+        };
+
         var panelCurrent = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Vertical,
             Children =
             {
                 UiUtil.MakeLabel("Current image"),
-                new Image(),
-                UiUtil.MakeTextBox(200, vm, nameof(vm.NewText)),
+                panelCurrentImage,
+                vm.TextBoxNew,
                 UiUtil.MakeCheckBox("Italic", vm, nameof(vm.IsNewTextItalic)),
                 UiUtil.MakeLabel("26x32, top margin 11"), //.WithBindText(vm, nameof(vm.Current))
-            }
+            },
         };
 
         var panelDrawControls = new StackPanel
@@ -110,13 +135,32 @@ public class NOcrCharacterAddWindow : Window
             }
         };
 
+        vm.NOcrDrawingCanvas = new NOcrDrawingCanvasView
+        {
+            Width = 200,
+            Height = 200,
+        };
+        vm.NOcrDrawingCanvas.SetStrokeWidth(1);
+
+        var panelZoom = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            Children =
+            {
+                UiUtil.MakeButton("-", vm.ZoomOutCommand),
+                UiUtil.MakeButton("+", vm.ZoomInCommand),
+            }
+        };
+
         var panelImage = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Vertical,
             Children =
             {
-                UiUtil.MakeLabel("- + foreground"),
-                new Image(),
+                panelZoom,
+                vm.NOcrDrawingCanvas,
             }
         };
 
@@ -125,5 +169,11 @@ public class NOcrCharacterAddWindow : Window
         grid.Add(panelImage, 0, 2);
 
         return grid;
+    }
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+        Title = _vm.Title;
     }
 }

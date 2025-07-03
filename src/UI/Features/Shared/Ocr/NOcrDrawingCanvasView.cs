@@ -145,7 +145,9 @@ public class NOcrDrawingCanvasView : Control
         {
             var leaseFeature = context.TryGetFeature<ISkiaSharpApiLeaseFeature>();
             if (leaseFeature is null)
+            {
                 return;
+            }
 
             using var lease = leaseFeature.Lease();
             var canvas = lease.SkCanvas;
