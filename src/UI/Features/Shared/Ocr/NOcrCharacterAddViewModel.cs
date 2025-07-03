@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
@@ -55,7 +56,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         LinesForeground = new ObservableCollection<NOcrLine>();
         LinesBackground = new ObservableCollection<NOcrLine>();
         DrawModes = new  ObservableCollection<NOcrDrawModeItem>(NOcrDrawModeItem.Items);
-        SelectedDrawMode = DrawModes.FirstOrDefault();
+        SelectedDrawMode = DrawModes.First();
         IsNewLinesForegroundActive = true;
         IsNewLinesBackgroundActive = false;
         NewText = string.Empty;
@@ -63,13 +64,40 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         IsNewTextItalic = false;
         SubmitOnFirstLetter = true;
         _letters = new List<ImageSplitterItem2>();
+        
+        const int maxLines = 500;
+        NoOfLinesToAutoDrawList = new ObservableCollection<int>();
+        for (var i = 0; i <= maxLines; i++)
+        {
+            NoOfLinesToAutoDrawList.Add(i);
+        }
+
+        SelectedNoOfLinesToAutoDraw = 100;
+        NOcrChar = new NOcrChar();
         _ocrSubtitleItems = new List<OcrSubtitleItem>();
-        //_nOcrDb = new NOcrDb();
+        _nOcrDb = new NOcrDb(string.Empty);
+        _sentenceBitmap = new SKBitmap(1, 1);
+        _splitItem = new ImageSplitterItem2(string.Empty);
+    }
+
+    public void Initialize(OcrSubtitleItem item, List<ImageSplitterItem2> letters, int i, NOcrDb nOcrDb,
+        int maxWrongPixels)
+    {
+        _nOcrDb = nOcrDb;
+        _letters = letters;
+        _startFromNumber = i;
+        _maxWrongPixels = maxWrongPixels;
+    }
+    
+    [RelayCommand]
+    private void Shrink()
+    {
 
     }
 
-    public void Initialize(OcrSubtitleItem item, List<ImageSplitterItem2> list, int i, NOcrDb nOcrDb,
-        int selectedNOcrMaxWrongPixels)
+    [RelayCommand]
+    private void Expand()
     {
+
     }
 }

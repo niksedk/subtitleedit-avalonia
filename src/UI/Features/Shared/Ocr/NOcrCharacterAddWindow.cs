@@ -31,10 +31,10 @@ public class NOcrCharacterAddWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Title + collapse/expand buttons
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Image
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // border with settings
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Buttons
             },
             ColumnDefinitions =
             {
@@ -43,9 +43,18 @@ public class NOcrCharacterAddWindow : Window
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
             Width = double.NaN,
-           // HorizontalAlignment = HorizontalAlignment.Stretch,
         };
+        
+        var labelTitle = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.Title));
 
+        var buttonCollapse = UiUtil.MakeButton("Collapse", vm.ShrinkCommand).WithBindIsVisible(nameof(vm.CanShrink));
+        var buttonExpand = UiUtil.MakeButton("Expand", vm.ExpandCommand).WithBindIsVisible(nameof(vm.ExpandCommand));
+        var panelCollapseAndExpand = UiUtil.MakeButtonBar(buttonCollapse, buttonExpand); 
+
+        
+        grid.Add(labelTitle, 0, 0);
+        grid.Add(panelCollapseAndExpand, 0, 1);
+        
         Content = grid;
 
         Activated += delegate
