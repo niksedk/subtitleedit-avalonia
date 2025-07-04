@@ -38,6 +38,15 @@ public unsafe partial class MpvContextBase : IDisposable
         //       SetOptionString("vo", "libmpv"); // Prevent mpv from creating its own window
         SetOptionString("keep-open", "always");
         SetOptionString("sid", "no");
+        SetOptionString("force-window", "no");
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            SetOptionString("vo", "gpu");
+            SetOptionString("gpu-context", "wayland");
+            SetOptionString("gpu-api", "opengl");
+        }
+
         InitEventHandlers();
 
         _eventLoop = mpvEventLoop switch

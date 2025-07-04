@@ -153,7 +153,31 @@ public partial class DownloadFfmpegViewModel : ObservableObject
             }
         }
 
-        return Path.Combine(Se.FfmpegFolder, "ffmpeg");
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            var paths = new List<string>
+            {
+                Se.FfmpegFolder,
+                "/user/bin/ffmpeg",
+                "/snap/bin/ffmpeg",
+            };
+
+            foreach (var path in paths)
+            {
+                if (File.Exists(path))
+                {
+                    return path;
+                }
+            }
+        }
+
+        var seFfmpeg = Path.Combine(Se.FfmpegFolder, "ffmpeg");
+        if (File.Exists(seFfmpeg))
+        {
+            return seFfmpeg;
+        }
+
+        return "ffmpeg";
     }
 
     private void Close()
