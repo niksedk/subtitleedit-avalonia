@@ -15,6 +15,8 @@ public class SeOcr
     public string OllamaLanguage { get; set; }
     public string GoogleVisionApiKey { get; set; }
     public string GoogleVisionLanguage { get; set; }
+    public bool IsNewLetterItalic { get; set; }
+    public bool SubmitOnFirstLetter { get; set; }
 
     public SeOcr()
     {

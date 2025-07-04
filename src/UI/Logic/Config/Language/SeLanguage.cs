@@ -25,4 +25,5 @@ public class SeLanguage
     public LanguageTranslate Translate { get; set; } = new();
     public LanguageOptions Options { get; set; } = new();
     public LanguageHelp Help { get; set; } = new();
+    public LanguageOcr Ocr { get; set; } = new();
 }

@@ -1,12 +1,13 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Ocr;
 using SkiaSharp;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -67,7 +68,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         NewText = string.Empty;
         ResolutionAndTopMargin = string.Empty;
         IsNewTextItalic = false;
-        SubmitOnFirstLetter = true;
+        SubmitOnFirstLetter = false;
         _letters = new List<ImageSplitterItem2>();
 
         const int maxLines = 500;
@@ -86,6 +87,20 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         _splitItem = new ImageSplitterItem2(string.Empty);
         NOcrDrawingCanvas = new NOcrDrawingCanvasView();
         TextBoxNew = new TextBox();
+        LoadSettings();
+    }
+
+    private void LoadSettings()
+    {
+        IsNewTextItalic = Se.Settings.Ocr.IsNewLetterItalic;
+        SubmitOnFirstLetter = Se.Settings.Ocr.SubmitOnFirstLetter;
+    }
+
+    private void SaveSettings()
+    {
+        Se.Settings.Ocr.IsNewLetterItalic = IsNewTextItalic;
+        Se.Settings.Ocr.SubmitOnFirstLetter = SubmitOnFirstLetter;
+        Se.SaveSettings();
     }
 
     public void Initialize(
@@ -104,8 +119,18 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         {
             _splitItem = letters[i];
 
+
             if (_splitItem.NikseBitmap != null)
             {
+                NOcrChar = new NOcrChar
+                {
+                    Width = _splitItem.NikseBitmap.Width,
+                    Height = _splitItem.NikseBitmap.Height,
+                    MarginTop = _splitItem.Top,
+                };
+
+                ResolutionAndTopMargin = string.Format("{0}x{1}, margin top: {2}", NOcrChar.Width, NOcrChar.Height, NOcrChar.MarginTop);
+
                 CurrentBitmap = _splitItem.NikseBitmap!.GetBitmap().ToAvaloniaBitmap();
 
                 NOcrDrawingCanvas.BackgroundImage = CurrentBitmap;
@@ -121,7 +146,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
 
     private void InitSentenceBitmap(OcrSubtitleItem item)
     {
-        var skBitmap = item.GetSkBitmap();
+        var skBitmap = item.GetSkBitmap().Copy();
 
         if (_splitItem.NikseBitmap != null)
         {
@@ -159,7 +184,9 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     [RelayCommand]
     private void Ok()
     {
+        NOcrChar.Text = NewText;
         OkPressed = true;
+        SaveSettings();
         Close();
     }
 
@@ -234,6 +261,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
 
         NOcrDrawingCanvas.MissPaths.AddRange(NOcrChar.LinesBackground);
         NOcrDrawingCanvas.HitPaths.AddRange(NOcrChar.LinesForeground);
+        NOcrDrawingCanvas.InvalidateVisual();
     }
 
     private void SetTitle()
@@ -241,8 +269,23 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         Title = $"Add nOCR character for line  {_startFromNumber}, character {_letters.IndexOf(_splitItem) + 1} of {_letters.Count} using database \"{Path.GetFileNameWithoutExtension(_nOcrDb.FileName)}\"";
     }
 
-    internal void OnLoaded()
+    internal void TextBoxNewOnKeyDown(object? sender, KeyEventArgs e)
     {
-        throw new NotImplementedException();
+        if (e.Key == Key.Enter && !string.IsNullOrWhiteSpace(TextBoxNew.Text))
+        {
+            Ok();
+        }
+        else if (e.Key == Key.Escape)
+        {
+            Abort();
+        }
+    }
+
+    internal void TextBoxNewOnKeyUp(object? sender, KeyEventArgs e)
+    {
+        if (SubmitOnFirstLetter && NewText.Length >= 1)
+        {
+            Ok();
+        }
     }
 }

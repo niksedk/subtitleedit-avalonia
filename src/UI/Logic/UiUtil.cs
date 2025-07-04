@@ -845,6 +845,12 @@ public static class UiUtil
         return control;
     }
 
+    public static Label WithBold(this Label control)
+    {
+        control.FontWeight = FontWeight.Bold;
+        return control;
+    }
+
     public static Label WithMarginLeft(this Label control, int marginLeft)
     {
         var m = control.Margin;

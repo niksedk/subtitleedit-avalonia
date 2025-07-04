@@ -29,7 +29,6 @@ public class NOcrCharacterAddWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Title
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Whole image for subtitle
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // Controls
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Buttons
@@ -45,12 +44,11 @@ public class NOcrCharacterAddWindow : Window
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
         };
 
-        var labelTitle = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.Title));
-
         var image = new Image
         {
             Source = vm.SentenceBitmap,
-            Stretch = Stretch.Uniform
+            Stretch = Stretch.Uniform,
+            Margin = new Thickness(0, 0, 0, 10),
         };
 
         var controlsView = MakeControlsView(vm);
@@ -61,12 +59,14 @@ public class NOcrCharacterAddWindow : Window
         var buttonAbort = UiUtil.MakeButton(Se.Language.General.Abort, vm.AbortCommand);
         var buttonBar = UiUtil.MakeButtonBar(buttonOk, buttonUseOnce, buttonSkip, buttonAbort);
 
-        grid.Add(labelTitle, 0, 0);
-        grid.Add(image, 1, 0);
-        grid.Add(controlsView, 2, 0);
-        grid.Add(buttonBar, 3, 0);
+        grid.Add(image, 0, 0);
+        grid.Add(controlsView, 1, 0);
+        grid.Add(buttonBar, 2, 0);
 
         Content = grid;
+
+        vm.TextBoxNew.KeyDown += vm.TextBoxNewOnKeyDown;
+        vm.TextBoxNew.KeyUp += vm.TextBoxNewOnKeyUp;
 
         Activated += delegate
         {
@@ -88,11 +88,11 @@ public class NOcrCharacterAddWindow : Window
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
             },
-            ColumnSpacing = 10,
+            ColumnSpacing = 20,
             Width = double.NaN,
         };
 
-        vm.TextBoxNew = UiUtil.MakeTextBox(200, vm, nameof(vm.NewText));
+        vm.TextBoxNew = UiUtil.MakeTextBox(100, vm, nameof(vm.NewText));
         var image = new Image
         {
             Margin = new Thickness(5),
@@ -101,13 +101,15 @@ public class NOcrCharacterAddWindow : Window
             MinWidth = 30,
             MinHeight = 30,
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,            
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
         };
 
         var panelCurrentImage = new StackPanel
         {
-            Background = new SolidColorBrush(Colors.LightGray),  
+            Background = new SolidColorBrush(Colors.LightGray),
             Children = { image },
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+            Margin = new Thickness(0, 0, 0, 5),
         };
 
         var panelCurrent = new StackPanel
@@ -115,11 +117,11 @@ public class NOcrCharacterAddWindow : Window
             Orientation = Avalonia.Layout.Orientation.Vertical,
             Children =
             {
-                UiUtil.MakeLabel("Current image"),
+                UiUtil.MakeLabel(Se.Language.Ocr.CurrentImage).WithBold(),
                 panelCurrentImage,
                 vm.TextBoxNew,
-                UiUtil.MakeCheckBox("Italic", vm, nameof(vm.IsNewTextItalic)),
-                UiUtil.MakeLabel("26x32, top margin 11"), //.WithBindText(vm, nameof(vm.Current))
+                UiUtil.MakeCheckBox(Se.Language.General.Italic, vm, nameof(vm.IsNewTextItalic)),
+                UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.ResolutionAndTopMargin))
             },
         };
 
@@ -128,24 +130,33 @@ public class NOcrCharacterAddWindow : Window
             Orientation = Avalonia.Layout.Orientation.Vertical,
             Children =
             {
-                UiUtil.MakeLabel("Lines to draw"),
+                UiUtil.MakeLabel(Se.Language.Ocr.LinesToDraw).WithBold(),
                 UiUtil.MakeComboBox(vm.NoOfLinesToAutoDrawList, vm, nameof(vm.SelectedNoOfLinesToAutoDraw)),
-                UiUtil.MakeButton("Auto draw again", vm.DrawAgainCommand),
-                UiUtil.MakeButton("Clear", vm.ClearDrawCommand),
+                UiUtil.MakeButton(Se.Language.Ocr.AutoDrawAgain, vm.DrawAgainCommand).WithMinWidth(100).WithMarginTop(10).WithLeftAlignment(),
+                UiUtil.MakeButton(Se.Language.General.Clear, vm.ClearDrawCommand).WithMinWidth(100).WithMarginTop(5).WithLeftAlignment(),
             }
         };
 
         vm.NOcrDrawingCanvas.SetStrokeWidth(1);
+        var borderDrawingCanvas = new Border
+        {
+            BorderThickness = new Thickness(1),
+            BorderBrush = new SolidColorBrush(Colors.Black),
+            Child = vm.NOcrDrawingCanvas,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+        };
 
         var panelZoom = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Horizontal,
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 5),
             Children =
             {
-                UiUtil.MakeButton("-", vm.ZoomOutCommand),
-                UiUtil.MakeButton("+", vm.ZoomInCommand),
+                UiUtil.MakeButton(vm.ZoomOutCommand, IconNames.MdiMinus),
+                UiUtil.MakeButton(vm.ZoomInCommand, IconNames.MdiPlus),
             }
         };
 
@@ -155,7 +166,7 @@ public class NOcrCharacterAddWindow : Window
             Children =
             {
                 panelZoom,
-                vm.NOcrDrawingCanvas,
+                borderDrawingCanvas,
             }
         };
 

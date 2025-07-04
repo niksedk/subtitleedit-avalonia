@@ -372,10 +372,34 @@ public partial class OcrViewModel : ObservableObject
 
                             if (result.OkPressed)
                             {
+                                if (result.NOcrChar != null)
+                                {
+                                    _nOcrDb.Add(result.NOcrChar);
+                                }
+
+                                RunNOcrLoop(i);
                             }
-                            else
+                            else if (result.AbortPressed)
                             {
                                 IsOcrRunning = false;
+                            }
+                            else if (result.UseOncePressed)
+                            {
+                                if (result.NOcrChar != null)
+                                {
+                                    _runOnceChars.Add(new SkipOnceChar(i, letterIndex, result.NewText));
+                                }
+
+                                RunNOcrLoop(i);
+                            }
+                            else if (result.SkipPressed)
+                            {
+                                if (result.NOcrChar != null)
+                                {
+                                    _skipOnceChars.Add(new SkipOnceChar(i, letterIndex));
+                                }
+
+                                RunNOcrLoop(i);
                             }
                         });
                         return;
