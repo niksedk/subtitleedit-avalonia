@@ -10,6 +10,7 @@ using Avalonia.Layout;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
 
@@ -26,7 +27,7 @@ public class SettingsPage : UserControl
 
         _searchBox = new TextBox
         {
-            Watermark = "Search settings...",
+            Watermark = Se.Language.Options.Settings.SearchSettingsDotDoDot,
             Margin = new Thickness(10),
             MaxWidth = 500,
             MinWidth = 360,
@@ -68,17 +69,17 @@ public class SettingsPage : UserControl
             Margin = new Thickness(10, 10, 40, 10),
             Children =
             {
-                UiUtil.MakeMenuItem( "Rules", vm.ScrollToSectionCommand, "Rules", IconNames.MdiPoliceBadge),
-                UiUtil.MakeMenuItem("General", vm.ScrollToSectionCommand, "General", IconNames.MdiCogs),
-                UiUtil.MakeMenuItem("Subtitle formats", vm.ScrollToSectionCommand, "Subtitle formats", IconNames.MdiClosedCaption),
-                UiUtil.MakeMenuItem("Syntax coloring", vm.ScrollToSectionCommand, "Syntax coloring", IconNames.MdiPalette),
-                UiUtil.MakeMenuItem("Video player", vm.ScrollToSectionCommand, "Video player", IconNames.MdiPlayBox),
-                UiUtil.MakeMenuItem("Waveform/spectrogram", vm.ScrollToSectionCommand, "Waveform/spectrogram", IconNames.MdiWaveform),
-                UiUtil.MakeMenuItem("Tools", vm.ScrollToSectionCommand, "Tools", IconNames.MdiTools),
-                UiUtil.MakeMenuItem("Toolbar", vm.ScrollToSectionCommand, "Toolbar", IconNames.MdiDotsHorizontal),
-                UiUtil.MakeMenuItem("Appearance", vm.ScrollToSectionCommand, "Appearance", IconNames.MdiEyeSettings),
-                UiUtil.MakeMenuItem("Network", vm.ScrollToSectionCommand, "Network", IconNames.MdiNetwork),
-                UiUtil.MakeMenuItem("File type associations", vm.ScrollToSectionCommand, "File type associations", IconNames.MdiFileCog),
+                UiUtil.MakeMenuItem(Se.Language.General.Rules, vm.ScrollToSectionCommand, "Rules", IconNames.MdiPoliceBadge),
+                UiUtil.MakeMenuItem(Se.Language.General.General, vm.ScrollToSectionCommand, "General", IconNames.MdiCogs),
+                UiUtil.MakeMenuItem(Se.Language.General.SubtitleFormat, vm.ScrollToSectionCommand, "Subtitle formats", IconNames.MdiClosedCaption),
+                UiUtil.MakeMenuItem(Se.Language.Options.Settings.SyntaxColoring, vm.ScrollToSectionCommand, "Syntax coloring", IconNames.MdiPalette),
+                UiUtil.MakeMenuItem(Se.Language.General.VideoPlayer, vm.ScrollToSectionCommand, "Video player", IconNames.MdiPlayBox),
+                UiUtil.MakeMenuItem(Se.Language.Options.Settings.WaveformSpectrogram, vm.ScrollToSectionCommand, "Waveform/spectrogram", IconNames.MdiWaveform),
+                UiUtil.MakeMenuItem(Se.Language.General.Tools, vm.ScrollToSectionCommand, "Tools", IconNames.MdiTools),
+                UiUtil.MakeMenuItem(Se.Language.General.Toolbar, vm.ScrollToSectionCommand, "Toolbar", IconNames.MdiDotsHorizontal),
+                UiUtil.MakeMenuItem(Se.Language.General.Appearance, vm.ScrollToSectionCommand, "Appearance", IconNames.MdiEyeSettings),
+                UiUtil.MakeMenuItem(Se.Language.Options.Settings.Network, vm.ScrollToSectionCommand, "Network", IconNames.MdiNetwork),
+                UiUtil.MakeMenuItem(Se.Language.Options.Settings.FileTypeAssociations, vm.ScrollToSectionCommand, "File type associations", IconNames.MdiFileCog),
             }
         };
 
@@ -122,7 +123,7 @@ public class SettingsPage : UserControl
     {
         return new List<SettingsSection>
         {
-            new SettingsSection("Rules",
+            new SettingsSection(Se.Language.General.Rules,
             [
                 MakeNumericSetting("Single line max length", nameof(_vm.SingleLineMaxLength)),
                 MakeNumericSetting("Optimal chars/sec", nameof(_vm.OptimalCharsPerSec)),
@@ -134,7 +135,7 @@ public class SettingsPage : UserControl
                 MakeNumericSetting("Max number of lines", nameof(_vm.MaxLines)),
             ]),
 
-            new SettingsSection("General",
+            new SettingsSection(Se.Language.General.General,
             [
                 MakeNumericSetting("Default new subtitle duration (ms)", nameof(_vm.NewEmptyDefaultMs)),
                 MakeCheckboxSetting("Prompt for delete lines", nameof(_vm.PromptDeleteLines)),
@@ -144,7 +145,7 @@ public class SettingsPage : UserControl
                 MakeNumericSetting("Auto-backup retention (months)", nameof(_vm.AutoBackupDeleteAfterMonths)),
             ]),
             
-            new SettingsSection("Subtitle formats",
+            new SettingsSection(Se.Language.General.SubtitleFormats,
             [
                 new SettingsItem("Default format", () => new ComboBox
                 {
@@ -169,7 +170,7 @@ public class SettingsPage : UserControl
                 }),
             ]),
 
-            new SettingsSection("Syntax coloring",
+            new SettingsSection(Se.Language.Options.Settings.SyntaxColoring,
             [
                 MakeCheckboxSetting("Color duration if too short", nameof(_vm.ColorDurationTooShort)),
                 MakeCheckboxSetting("Color duration if too long", nameof(_vm.ColorDurationTooLong)),
@@ -202,7 +203,7 @@ public class SettingsPage : UserControl
                 }),
             ]),
 
-            new SettingsSection("Video player",
+            new SettingsSection(Se.Language.General.VideoPlayer,
             [
                 new SettingsItem("Video player", () => new StackPanel
                 {
@@ -264,7 +265,7 @@ public class SettingsPage : UserControl
 
             ]),
 
-            new SettingsSection("Waveform/spectrogram",
+            new SettingsSection(Se.Language.Options.Settings.WaveformSpectrogram,
             [
                 MakeCheckboxSetting("Draw grid lines", nameof(_vm.WaveformDrawGridLines)),
                 MakeCheckboxSetting("Center video position", nameof(_vm.WaveformCenterVideoPosition)),
@@ -307,7 +308,7 @@ public class SettingsPage : UserControl
                 }),
             ]),
 
-            new SettingsSection("Tools",
+            new SettingsSection(Se.Language.General.Tools,
             [
                 new SettingsItem("Developer Mode", () => new CheckBox { IsChecked = false }),
                 new SettingsItem("Verbose Output", () => new CheckBox { IsChecked = false }),
@@ -328,21 +329,21 @@ public class SettingsPage : UserControl
                 MakeCheckboxSetting("Show encoding", nameof(_vm.ShowToolbarEncoding)),
             ]),
 
-            new SettingsSection("Appearance",
+            new SettingsSection(Se.Language.General.Appearance,
             [
                 new SettingsItem("Theme", () => UiUtil.MakeComboBox(_vm.Themes, _vm, nameof(_vm.SelectedTheme))),
                 MakeNumericSetting("Text box font size", nameof(_vm.TextBoxFontSize)),
                 MakeCheckboxSetting("Text box font bold", nameof(_vm.TextBoxFontBold)),
             ]),
 
-            new SettingsSection("Network",
+            new SettingsSection(Se.Language.Options.Settings.Network,
             [
                 new SettingsItem("Proxy address", () => new TextBox { Width = 250 }),
                 new SettingsItem("Username", () => new TextBox { Width = 250 }),
                 new SettingsItem("Password", () => new TextBox { Width = 250 }),
             ]),
 
-            new SettingsSection("File type associations",
+            new SettingsSection(Se.Language.Options.Settings.FileTypeAssociations,
             [
                 new SettingsItem("Associate file types", () => new ItemsControl
                 {

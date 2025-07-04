@@ -39,7 +39,6 @@ public partial class SubtitleLineViewModel : ObservableObject
     private bool _skipUpdate = false;
     private static Color _errorColor = Se.Settings.General.ErrorColor.FromHexToColor();
 
-
     public SubtitleLineViewModel()
     {
         Text = string.Empty;
@@ -57,9 +56,9 @@ public partial class SubtitleLineViewModel : ObservableObject
     {
         Text = p.Text;
         OriginalText = p.OriginalText;
-        StartTime = p.StartTime;
-        EndTime = p.EndTime;
-        Duration = p.Duration;
+        StartTime = TimeSpan.FromMilliseconds(p.StartTime.TotalMilliseconds);
+        EndTime = TimeSpan.FromMilliseconds(p.EndTime.TotalMilliseconds);
+        UpdateDuration();
         Language = p.Language;
         Region = p.Region;
         Style = p.Style;
@@ -67,6 +66,7 @@ public partial class SubtitleLineViewModel : ObservableObject
         Layer = p.Layer;
         Number = p.Number;
         Extra = p.Extra;
+        Paragraph = new Paragraph(p.Paragraph, generateNewId);
         Id = generateNewId ? Guid.NewGuid() : p.Id;
     }
 

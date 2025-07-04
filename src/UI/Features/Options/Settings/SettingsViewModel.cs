@@ -9,8 +9,10 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -18,7 +20,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Features.Shared;
 using DownloadFfmpegViewModel = Nikse.SubtitleEdit.Features.Shared.DownloadFfmpegViewModel;
 using DownloadLibMpvViewModel = Nikse.SubtitleEdit.Features.Shared.DownloadLibMpvViewModel;
 
@@ -294,9 +295,20 @@ public partial class SettingsViewModel : ObservableObject
         {
             FfmpegStatus = "Installed";
         }
+        else if (File.Exists(DownloadFfmpegViewModel.GetFfmpegFileName()))
+        {
+            FfmpegStatus = "Installed";
+        }
         else
         {
-            FfmpegStatus = "Not installed";
+            if (FfmpegHelper.IsFfmpegInstalled())
+            {
+                FfmpegStatus = string.Empty;
+            }
+            else
+            {
+                FfmpegStatus = "Not installed";
+            }
         }
     }
 

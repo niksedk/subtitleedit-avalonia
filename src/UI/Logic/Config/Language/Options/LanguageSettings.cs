@@ -57,6 +57,11 @@ public class LanguageSettings
     public string AutoBackupEveryXthMinute { get; set; }
 
     public string AutoBackupDeleteAfterXMonths { get; set; }
+    public string SearchSettingsDotDoDot { get; set; }
+    public string SyntaxColoring { get; set; }
+    public string WaveformSpectrogram { get; set; }
+    public string Network { get; set; }
+    public string FileTypeAssociations { get; set; }
 
     public LanguageSettings()
     {
@@ -110,8 +115,13 @@ public class LanguageSettings
 
         AutoBackupEveryMinute = "Every minute";
         AutoBackupEveryXthMinute = "Every {0}th minute";
-
         AutoBackupDeleteAfterXMonths = "Delete auto-backups after {0} months";
+
+        SearchSettingsDotDoDot = "Search for settings...";
+        SyntaxColoring = "Syntax coloring";
+        WaveformSpectrogram = "Waveform/Spectrogram";
+        Network = "Network";
+        FileTypeAssociations = "File type associations";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

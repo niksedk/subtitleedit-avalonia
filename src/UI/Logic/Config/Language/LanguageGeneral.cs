@@ -118,6 +118,7 @@ public class LanguageGeneral
     public string MergeSelected { get; set; }
     public string MergeSelectedAsDialog { get; set; }
     public string SubtitleFormat { get; set; }
+    public string SubtitleFormats { get; set; }
     public string Encoding { get; set; }
     public string Refresh { get; set; }
     public string Enabled { get; set; }
@@ -180,6 +181,12 @@ public class LanguageGeneral
     public string UseOnce { get; set; }
     public string Skip { get; set; }
     public string Abort { get; set; }
+    public string Rules { get; set; }
+    public string General { get; set; }
+    public string VideoPlayer { get; set; }
+    public string Tools { get; set; }
+    public string Toolbar { get; set; }
+    public string Appearance { get; set; }
 
     public LanguageGeneral()
     {
@@ -299,6 +306,7 @@ public class LanguageGeneral
         MergeSelected = "Merge selected";
         MergeSelectedAsDialog = "Merge selected as dialog";
         SubtitleFormat = "Subtitle format";
+        SubtitleFormats = "Subtitle formats";
         Encoding = "Encoding";
         Refresh = "Refresh";
         Enabled = "Enabled";
@@ -361,5 +369,11 @@ public class LanguageGeneral
         UseOnce = "Use once";
         Skip = "Skip";
         Abort = "Abort";
+        Rules = "Rules";
+        General = "General";
+        VideoPlayer = "Video player";
+        Tools = "Tools";
+        Toolbar = "Toolbar";
+        Appearance = "Appearance";
     }
 }
