@@ -16,6 +16,7 @@ using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -417,7 +418,7 @@ public partial class OcrViewModel : ObservableObject
             _runOnceChars.Clear();
             _skipOnceChars.Clear();
         }
-        
+
         IsOcrRunning = false;
         return;
     }
@@ -523,38 +524,15 @@ public partial class OcrViewModel : ObservableObject
     private async Task<bool> CheckAndDownloadTesseract()
     {
         var tesseractFolder = Se.TesseractFolder;
-        if (!string.IsNullOrEmpty(tesseractFolder))
-        {
-            return true;
-        }
-        
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            await MessageBox.Show(
-                Window!,
-                "Please install Tesseract",
-                $"{Environment.NewLine}\"Tesseract\" was not detected. Please install Tesseract - with e.g. ´brew install tesseract´.",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-            
-            return false;
-        }
-        
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            await MessageBox.Show(
-                Window!,
-                "Please install Tesseract",
-                $"{Environment.NewLine}\"Tesseract\" was not detected. Please install Tesseract.",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-            
-            return false;
-        }
 
-        var tesseractExe = Path.Combine(Se.TesseractFolder, "tesseract.exe");
-        if (!File.Exists(tesseractExe)) //TODO: check for mac/Linux executable on mac/Linux
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
+            var tesseractExe = Path.Combine(Se.TesseractFolder, "tesseract.exe");
+            if (File.Exists(tesseractExe))
+            {
+                return true;
+            }
+
             var answer = await MessageBox.Show(
                 Window!,
                 "Download Tesseract OCR?",
@@ -567,11 +545,62 @@ public partial class OcrViewModel : ObservableObject
                 return false;
             }
 
-            var result = await _windowService.ShowDialogAsync<DownloadTesseractWindow, DownloadTesseractViewModel>(Window!, vm => { });
-            return result.OkPressed;
+            await _windowService.ShowDialogAsync<DownloadTesseractWindow, DownloadTesseractViewModel>(Window!);
+
+            return File.Exists(tesseractExe);
         }
 
-        return true;
+        try
+        {
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "tesseract",
+                    Arguments = "--version",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }
+            };
+
+            process.Start();
+            process.WaitForExit(2000); // Wait max 2 seconds
+
+            if (process.ExitCode == 0)
+            {
+                return true;
+            }
+        }
+        catch
+        {
+            // ignore
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            await MessageBox.Show(
+                Window!,
+                "Please install Tesseract",
+                $"{Environment.NewLine}\"Tesseract\" was not detected. Please install Tesseract." + Environment.NewLine + "" +
+                "E.g. ´brew install tesseract´.",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            await MessageBox.Show(
+                Window!,
+                "Please install Tesseract",
+                $"{Environment.NewLine}\"Tesseract\" was not detected. Please install Tesseract." + Environment.NewLine +
+                $"E.g. ´sudo apt install tesseract-ocr´ or ´sudo pacman -S tesseract´.",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
+
+        return false;
     }
 
     private async Task<bool> TesseractModelDownload()
