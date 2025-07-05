@@ -108,6 +108,11 @@ public partial class DownloadTesseractModelViewModel : ObservableObject
             return;
         }
 
+        if (!Directory.Exists(Se.TesseractModelFolder))
+        {
+            Directory.CreateDirectory(Se.TesseractModelFolder);
+        }
+
         _downloadStream.Position = 0;
         var fileName = Path.Combine(Se.TesseractModelFolder, model.Code + ".traineddata");
         File.WriteAllBytes(fileName, _downloadStream.ToArray());

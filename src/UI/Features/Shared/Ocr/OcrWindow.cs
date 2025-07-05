@@ -196,19 +196,6 @@ public class OcrWindow : Window
                             Orientation = Orientation.Vertical,
                             Spacing = 5
                         };
-
-                        // Add text if available
-                        if (!string.IsNullOrEmpty(item.Text))
-                        {
-                            var textBlock = new TextBlock
-                            {
-                                Text = item.Text,
-                                TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-                                MaxWidth = 300 // Adjust as needed
-                            };
-                            stackPanel.Children.Add(textBlock);
-                        }
-
                         var bitmap = item.GetBitmap();
                         if (bitmap != null)
                         {
@@ -231,6 +218,7 @@ public class OcrWindow : Window
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(OcrSubtitleItem.Text)),
                     IsReadOnly = true,
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
             },
         };

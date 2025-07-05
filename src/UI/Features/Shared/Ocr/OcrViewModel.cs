@@ -377,7 +377,7 @@ public partial class OcrViewModel : ObservableObject
                                     _nOcrDb.Add(result.NOcrChar);
                                 }
 
-                                RunNOcrLoop(i);
+                                var _ = Task.Run(() => RunNOcrLoop(i));
                             }
                             else if (result.AbortPressed)
                             {
@@ -390,7 +390,7 @@ public partial class OcrViewModel : ObservableObject
                                     _runOnceChars.Add(new SkipOnceChar(i, letterIndex, result.NewText));
                                 }
 
-                                RunNOcrLoop(i);
+                                var _ = Task.Run(() => RunNOcrLoop(i));
                             }
                             else if (result.SkipPressed)
                             {
@@ -399,9 +399,10 @@ public partial class OcrViewModel : ObservableObject
                                     _skipOnceChars.Add(new SkipOnceChar(i, letterIndex));
                                 }
 
-                                RunNOcrLoop(i);
+                                var _ = Task.Run(() => RunNOcrLoop(i));
                             }
                         });
+
                         return;
                     }
 
@@ -668,7 +669,7 @@ public partial class OcrViewModel : ObservableObject
             SubtitleGrid.SelectedIndex = index;
             SubtitleGrid.ScrollIntoView(SelectedOcrSubtitleItem, null);
             TrackChanged();
-        }, DispatcherPriority.Background);
+        });
     }
 
     public void Initialize(List<BluRaySupParser.PcsData> subtitles, string fileName)
