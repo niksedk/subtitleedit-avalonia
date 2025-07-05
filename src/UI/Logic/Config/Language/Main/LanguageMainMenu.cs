@@ -81,7 +81,7 @@ public class LanguageMainMenu
         Edit = "Edit";
         Undo = "Undo";
         Redo = "Redo";
-        ShowHistory = "Show history...";
+        ShowHistory = "Show history for undo...";
         Find = "Find...";
         FindNext = "Find next";
         Replace = "Replace...";

@@ -953,11 +953,6 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowHistory()
     {
-        if (Subtitles.Count == 0)
-        {
-            return;
-        }
-
         _undoRedoManager.CheckForChanges(null);
         _undoRedoManager.StopChangeDetection();
 

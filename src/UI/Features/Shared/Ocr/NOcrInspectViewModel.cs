@@ -307,11 +307,20 @@ public partial class NOcrInspectViewModel : ObservableObject
             if (match != null)
             {
                 NOcrDrawingCanvas.HitPaths.Clear();
-                NOcrDrawingCanvas.HitPaths.AddRange(match.LinesForeground);
+                foreach (var line in match.LinesForeground)
+                {
+                    NOcrDrawingCanvas.HitPaths.Add(new NOcrLine(
+                        line.GetScaledStart(match, NOcrChar.Width, NOcrChar.Height),
+                        line.GetScaledEnd(match, NOcrChar.Width, NOcrChar.Height)));
+                }
 
                 NOcrDrawingCanvas.MissPaths.Clear();
-                NOcrDrawingCanvas.MissPaths.AddRange(match.LinesBackground);
-
+                foreach (var line in match.LinesBackground)
+                {
+                    NOcrDrawingCanvas.MissPaths.Add(new NOcrLine(
+                        line.GetScaledStart(match, NOcrChar.Width, NOcrChar.Height),
+                        line.GetScaledEnd(match, NOcrChar.Width, NOcrChar.Height)));
+                }
             }
 
             NOcrDrawingCanvas.InvalidateVisual();

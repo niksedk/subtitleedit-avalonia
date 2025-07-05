@@ -9,7 +9,7 @@ public class LanguageEdit
 
     public LanguageEdit()
     {
-        ShowHistory = "Show history";
+        ShowHistory = "History for undo";
         RestoreSelected = "Restore selected";
     }
 }
