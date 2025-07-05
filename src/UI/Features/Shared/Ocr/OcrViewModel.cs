@@ -183,18 +183,35 @@ public partial class OcrViewModel : ObservableObject
             return;
         }
 
+        if (!InitNOcrDb())
+        {
+            return;
+        }
+
         var bitmap = item.GetSkBitmap();
         var nBmp = new NikseBitmap2(bitmap);
         nBmp.MakeTwoColor(200);
         nBmp.CropTop(0, new SKColor(0, 0, 0, 0));
         var letters = NikseBitmapImageSplitter2.SplitBitmapToLettersNew(nBmp, SelectedNOcrPixelsAreSpace, false, true, 20, true);
-
-        var result = await _windowService
-            .ShowDialogAsync<NOcrInspectWindow, NOcrInspectViewModel>(Window!,
-            vm =>
+        var matches = new List<NOcrChar?>();
+        foreach (var splitterItem in letters)
+        {
+            if (splitterItem.NikseBitmap == null)
             {
-                vm.Initialize(SelectedOcrSubtitleItem, _nOcrDb, SelectedNOcrMaxWrongPixels, letters);
-            });
+                var match = new NOcrChar { Text = splitterItem?.SpecialCharacter ?? string.Empty };
+                matches.Add(match);
+            }
+            else
+            {
+                var match = _nOcrDb!.GetMatch(nBmp, letters, splitterItem, splitterItem.Top, true, SelectedNOcrMaxWrongPixels);
+                matches.Add(match);
+            }
+        }
+
+        var result = await _windowService.ShowDialogAsync<NOcrInspectWindow, NOcrInspectViewModel>(Window!, vm =>
+        {
+            vm.Initialize(SelectedOcrSubtitleItem, _nOcrDb, SelectedNOcrMaxWrongPixels, letters, matches);
+        });
 
         if (result.OkPressed)
         {
@@ -356,11 +373,11 @@ public partial class OcrViewModel : ObservableObject
             var nBmp = new NikseBitmap2(bitmap);
             nBmp.MakeTwoColor(200);
             nBmp.CropTop(0, new SKColor(0, 0, 0, 0));
-            var list = NikseBitmapImageSplitter2.SplitBitmapToLettersNew(nBmp, SelectedNOcrPixelsAreSpace, false, true, 20, true);
+            var letters = NikseBitmapImageSplitter2.SplitBitmapToLettersNew(nBmp, SelectedNOcrPixelsAreSpace, false, true, 20, true);
             var sb = new StringBuilder();
             SelectedOcrSubtitleItem = item;
 
-            foreach (var splitterItem in list)
+            foreach (var splitterItem in letters)
             {
                 if (splitterItem.NikseBitmap == null)
                 {
@@ -371,11 +388,11 @@ public partial class OcrViewModel : ObservableObject
                 }
                 else
                 {
-                    var match = _nOcrDb!.GetMatch(nBmp, list, splitterItem, splitterItem.Top, true, SelectedNOcrMaxWrongPixels);
+                    var match = _nOcrDb!.GetMatch(nBmp, letters, splitterItem, splitterItem.Top, true, SelectedNOcrMaxWrongPixels);
 
                     if (NOcrDrawUnknownText && match == null)
                     {
-                        var letterIndex = list.IndexOf(splitterItem);
+                        var letterIndex = letters.IndexOf(splitterItem);
 
                         if (_skipOnceChars.Any(p => p.LetterIndex == letterIndex && p.LineIndex == i))
                         {
@@ -396,7 +413,7 @@ public partial class OcrViewModel : ObservableObject
                                 .ShowDialogAsync<NOcrCharacterAddWindow, NOcrCharacterAddViewModel>(Window!,
                                     vm =>
                                     {
-                                        vm.Initialize(item, list, letterIndex, _nOcrDb, SelectedNOcrMaxWrongPixels);
+                                        vm.Initialize(item, letters, letterIndex, _nOcrDb, SelectedNOcrMaxWrongPixels);
                                     });
 
                             if (result.OkPressed)

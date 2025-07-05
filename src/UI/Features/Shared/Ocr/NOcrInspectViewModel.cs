@@ -1,5 +1,7 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Layout;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -8,6 +10,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Ocr;
 using SkiaSharp;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -37,13 +40,15 @@ public partial class NOcrInspectViewModel : ObservableObject
     [ObservableProperty] private bool _canExpand;
     [ObservableProperty] private ObservableCollection<int> _noOfLinesToAutoDrawList;
     [ObservableProperty] private int _selectedNoOfLinesToAutoDraw;
+    [ObservableProperty] private Bitmap _currentBitmap;
+    [ObservableProperty] private Bitmap _sentenceBitmap;
 
     private List<ImageSplitterItem2> _letters;
+    private List<NOcrChar?> _matches;
     private ImageSplitterItem2 _splitItem;
-    public Bitmap SentenceBitmap { get; set; }
-    public Bitmap CurrentBitmap { get; set; }
     public NOcrChar NOcrChar { get; private set; }
     public NOcrDrawingCanvasView NOcrDrawingCanvas { get; set; }
+    public StackPanel PanelLines { get; set; }
     public TextBox TextBoxNew { get; set; }
     public bool OkPressed { get; set; }
     public bool AbortPressed { get; set; }
@@ -62,6 +67,7 @@ public partial class NOcrInspectViewModel : ObservableObject
         LinesBackground = new ObservableCollection<NOcrLine>();
         DrawModes = new ObservableCollection<NOcrDrawModeItem>(NOcrDrawModeItem.Items);
         SelectedDrawMode = DrawModes.First();
+        PanelLines = new StackPanel();
         IsNewLinesForegroundActive = true;
         IsNewLinesBackgroundActive = false;
         NewText = string.Empty;
@@ -69,6 +75,7 @@ public partial class NOcrInspectViewModel : ObservableObject
         IsNewTextItalic = false;
         SubmitOnFirstLetter = false;
         _letters = new List<ImageSplitterItem2>();
+        _matches = new List<NOcrChar?>();
 
         const int maxLines = 500;
         NoOfLinesToAutoDrawList = new ObservableCollection<int>();
@@ -88,74 +95,24 @@ public partial class NOcrInspectViewModel : ObservableObject
         TextBoxNew = new TextBox();
     }
 
-    internal void Initialize(OcrSubtitleItem? selectedOcrSubtitleItem, NOcrDb? nOcrDb, int selectedNOcrMaxWrongPixels, List<ImageSplitterItem2> letters)
+    internal void Initialize(OcrSubtitleItem? selectedOcrSubtitleItem, NOcrDb? nOcrDb, int selectedNOcrMaxWrongPixels, List<ImageSplitterItem2> letters, List<NOcrChar?> matches)
     {
         _letters = letters;
+        _matches = matches;
         _nOcrDb = nOcrDb ?? new NOcrDb(string.Empty);
         _maxWrongPixels = selectedNOcrMaxWrongPixels;
-        CurrentBitmap = selectedOcrSubtitleItem!.GetSkBitmap().ToAvaloniaBitmap();
+        NOcrDrawingCanvas.BackgroundImage = CurrentBitmap;
+        NOcrDrawingCanvas.ZoomFactor = 4;
 
         if (letters.Count > 0)
         {
-            _splitItem = letters[0];
-
-            if (_splitItem.NikseBitmap != null)
-            {
-                NOcrChar = new NOcrChar
-                {
-                    Width = _splitItem.NikseBitmap.Width,
-                    Height = _splitItem.NikseBitmap.Height,
-                    MarginTop = _splitItem.Top,
-                };
-
-                ResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, NOcrChar.Width, NOcrChar.Height, NOcrChar.MarginTop);
-
-                CurrentBitmap = _splitItem.NikseBitmap!.GetBitmap().ToAvaloniaBitmap();
-
-                NOcrDrawingCanvas.BackgroundImage = CurrentBitmap;
-                NOcrDrawingCanvas.ZoomFactor = 4;
-            }
+            OnLetterClicked(0, _matches[0]);
         }
 
-    }
-
-    public void Initialize(
-        OcrSubtitleItem item,
-        List<ImageSplitterItem2> letters,
-        int i,
-        NOcrDb nOcrDb,
-        int maxWrongPixels)
-    {
-        _nOcrDb = nOcrDb;
-        _letters = letters;
-        _startFromNumber = i;
-        _maxWrongPixels = maxWrongPixels;
-
-        if (i >= 0 && i < letters.Count)
+        if (selectedOcrSubtitleItem != null)
         {
-            _splitItem = letters[i];
-
-
-            if (_splitItem.NikseBitmap != null)
-            {
-                NOcrChar = new NOcrChar
-                {
-                    Width = _splitItem.NikseBitmap.Width,
-                    Height = _splitItem.NikseBitmap.Height,
-                    MarginTop = _splitItem.Top,
-                };
-
-                ResolutionAndTopMargin = string.Format("{0}x{1}, margin top: {2}", NOcrChar.Width, NOcrChar.Height, NOcrChar.MarginTop);
-
-                CurrentBitmap = _splitItem.NikseBitmap!.GetBitmap().ToAvaloniaBitmap();
-
-                NOcrDrawingCanvas.BackgroundImage = CurrentBitmap;
-                NOcrDrawingCanvas.ZoomFactor = 4;
-                DrawAgain();
-            }
+            InitSentenceBitmap(selectedOcrSubtitleItem);
         }
-
-        InitSentenceBitmap(item);
     }
 
     private void InitSentenceBitmap(OcrSubtitleItem item)
@@ -268,6 +225,97 @@ public partial class NOcrInspectViewModel : ObservableObject
         if (e.Key == Key.Escape)
         {
             Ok();
+        }
+    }
+
+    internal void OnLoaded()
+    {
+        WrapPanel currentLine = new WrapPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Margin = new Thickness(2)
+        };
+        PanelLines.Children.Add(currentLine);
+
+        for (var i = 0; i < _matches.Count; i++)
+        {
+            NOcrChar? match = _matches[i];
+            if (match == null)
+            {
+                var buttonNotFound = UiUtil.MakeButton(string.Empty)
+                    .WithIconLeft(IconNames.MdiHelp)
+                    .WithMargin(4)
+                    .WithPadding(8)
+                    .WithMinWidth(0);                   ;
+                var indexNotFound = i;  
+                buttonNotFound.Click += (_, _) => OnLetterClicked(indexNotFound, match);
+                currentLine.Children.Add(buttonNotFound);
+                continue;
+            }
+
+            if (match.Text == Environment.NewLine)
+            {
+                currentLine = new WrapPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    Margin = new Thickness(2)
+                };
+                PanelLines.Children.Add(currentLine);
+                continue;
+            }
+
+            if (match.Text == " ")
+            {
+                var labelSpace = UiUtil.MakeLabel(string.Empty).WithMarginLeft(10);
+                currentLine.Children.Add(labelSpace);
+                continue;
+            }
+
+            var button = new Button
+            {
+                Content = match.Text ?? "*",
+                Margin = new Thickness(4),
+                Padding = new Thickness(8)
+            };
+
+            var index = i;
+            button.Click += (_, _) => OnLetterClicked(index, match);
+            currentLine.Children.Add(button);
+        }
+    }
+
+    private void OnLetterClicked(int index, NOcrChar? match)
+    {
+        _splitItem = _letters[index];
+
+        if (_splitItem.NikseBitmap != null)
+        {
+            NOcrChar = new NOcrChar
+            {
+                Width = _splitItem.NikseBitmap.Width,
+                Height = _splitItem.NikseBitmap.Height,
+                MarginTop = _splitItem.Top,
+            };
+
+            NewText = match?.Text ?? string.Empty;
+
+            ResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, NOcrChar.Width, NOcrChar.Height, NOcrChar.MarginTop);
+
+            CurrentBitmap = _splitItem.NikseBitmap!.GetBitmap().ToAvaloniaBitmap();
+            NOcrDrawingCanvas.BackgroundImage = CurrentBitmap;
+
+            if (match != null)
+            {
+                NOcrDrawingCanvas.HitPaths.Clear();
+                NOcrDrawingCanvas.HitPaths.AddRange(match.LinesForeground);
+
+                NOcrDrawingCanvas.MissPaths.Clear();
+                NOcrDrawingCanvas.MissPaths.AddRange(match.LinesBackground);
+
+            }
+
+            NOcrDrawingCanvas.InvalidateVisual();
+            NOcrDrawingCanvas.ZoomFactor = 4;
         }
     }
 }

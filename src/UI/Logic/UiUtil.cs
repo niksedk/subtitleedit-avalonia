@@ -906,6 +906,12 @@ public static class UiUtil
         return control;
     }
 
+    public static Button WithPadding(this Button control, int padding)
+    {
+        control.Padding = new Thickness(padding);
+        return control;
+    }
+
     public static Button WithMargin(this Button control, int left, int top, int right, int bottom)
     {
         control.Margin = new Thickness(left, top, right, bottom);

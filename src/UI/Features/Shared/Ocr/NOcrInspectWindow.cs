@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
@@ -35,7 +36,6 @@ public class NOcrInspectWindow : Window
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
@@ -46,16 +46,14 @@ public class NOcrInspectWindow : Window
         };
 
         var linesView = MakeLinesView(vm);
-        var currentImageView = MakeCurrentImageView(vm);
         var controlsView = MakeControlsView(vm);
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonBar = UiUtil.MakeButtonBar(buttonOk);
 
-        grid.Add(linesView, 0, 0, 1, 2);
-        grid.Add(currentImageView, 1, 0);
-        grid.Add(controlsView, 1, 1);
-        grid.Add(buttonBar, 2, 0, 1, 2);
+        grid.Add(linesView, 0, 0);
+        grid.Add(controlsView, 1, 0);
+        grid.Add(buttonBar, 2, 0);
 
         Content = grid;
 
@@ -69,16 +67,13 @@ public class NOcrInspectWindow : Window
 
     private static Border MakeLinesView(NOcrInspectViewModel vm)
     {
-        var label = UiUtil.MakeLabel("Lines");
+        vm.PanelLines = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Vertical,
+            Margin = new Thickness(5),
+        };
 
-        return UiUtil.MakeBorderForControl(label).WithMarginBottom(10);
-    }
-
-    private static Border MakeCurrentImageView(NOcrInspectViewModel vm)
-    {
-        var label = UiUtil.MakeLabel("Current image");
-
-        return UiUtil.MakeBorderForControl(label);
+        return UiUtil.MakeBorderForControl(vm.PanelLines).WithMarginBottom(10);
     }
 
     private static Border MakeControlsView(NOcrInspectViewModel vm)
@@ -103,7 +98,7 @@ public class NOcrInspectWindow : Window
         var image = new Image
         {
             Margin = new Thickness(5),
-            Source = vm.CurrentBitmap,
+            [!Image.SourceProperty] = new Binding(nameof(vm.CurrentBitmap)),
             Stretch = Stretch.Uniform,
             MinWidth = 30,
             MinHeight = 30,
@@ -188,5 +183,6 @@ public class NOcrInspectWindow : Window
     {
         base.OnLoaded(e);
         Title = _vm.Title;
+        _vm.OnLoaded();
     }
 }
