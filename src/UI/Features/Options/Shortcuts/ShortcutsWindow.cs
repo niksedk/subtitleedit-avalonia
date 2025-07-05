@@ -124,8 +124,9 @@ public class ShortcutsWindow : Window
         };
 
         var buttonOk = UiUtil.MakeButtonOk(vm.CommandOkCommand);
+        var buttonResetAllShortcuts = UiUtil.MakeButton(Se.Language.General.Reset, vm.ResetAllShortcutsCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CommandCancelCommand);
-        var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
+        var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonResetAllShortcuts, buttonCancel);
 
         var grid = new Grid
         {

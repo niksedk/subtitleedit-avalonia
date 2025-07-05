@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
@@ -33,6 +34,7 @@ public partial class ShortcutsViewModel : ObservableObject
     public ObservableCollection<ShortcutTreeNode> Nodes { get; }
     public bool OkPressed { get; set; }
     public Window? Window { get; set; }
+    public MainViewModel? MainViewModel { get; set; }
     public TreeView ShortcutsTreeView { get; internal set; }
 
     private List<ShortCut> _allShortcuts;
@@ -81,6 +83,7 @@ public partial class ShortcutsViewModel : ObservableObject
 
     public void LoadShortCuts(MainViewModel vm)
     {
+        MainViewModel = vm;
         _allShortcuts = ShortcutsMain.GetAllShortcuts(vm);
         UpdateVisibleShortcuts(string.Empty);
     }
@@ -213,6 +216,32 @@ public partial class ShortcutsViewModel : ObservableObject
         AltIsSelected = false;
         ShiftIsSelected = false;
         SelectedShortcut = null;
+    }
+
+    [RelayCommand]
+    private async Task ResetAllShortcuts()
+    {
+        if (MainViewModel == null)
+        {
+            return;
+        }
+
+        var answer = await MessageBox.Show(
+                  Window!,
+                  Se.Language.Options.Shortcuts.ResetShortcuts,
+                  Se.Language.Options.Shortcuts.ResetShortcutsDetail,
+                  MessageBoxButtons.YesNoCancel,
+                  MessageBoxIcon.Question);
+
+        if (answer != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        Se.Settings.Shortcuts.Clear();
+        Se.Settings.InitializeMainShortcuts(MainViewModel);
+        _allShortcuts = ShortcutsMain.GetAllShortcuts(MainViewModel);
+        UpdateVisibleShortcuts(string.Empty);
     }
 
     [RelayCommand]

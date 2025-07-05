@@ -107,6 +107,8 @@ public class LanguageSettingsShortcuts
     public string Alt { get; set; }
     public string Win { get; set; }
     public string Shift { get; set; }
+    public string ResetShortcuts { get; set; }
+    public string ResetShortcutsDetail { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -217,5 +219,8 @@ public class LanguageSettingsShortcuts
         Alt = "Alt";
         Win = "Win";
         Shift = "Shift";
+
+        ResetShortcuts = "Reset shortcuts";
+        ResetShortcutsDetail = "Do you want to reset all shortcuts to default values?";
     }
 }
