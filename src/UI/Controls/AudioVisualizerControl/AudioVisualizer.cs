@@ -260,17 +260,14 @@ public class AudioVisualizer : Control
         else if (e.Key == Key.LeftAlt || e.Key == Key.RightAlt)
         {
             _isAltDown = true;
-            e.Handled = true;
         }
         else if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
         {
             _isCtrlDown = true;
-            e.Handled = true;
         }
         else if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
         {
             _isShiftDown = true;
-            e.Handled = true;
         }
     }
 
