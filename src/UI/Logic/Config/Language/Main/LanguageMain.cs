@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language.Main;
+﻿using System;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language.Main;
 
 public class LanguageMain
 {
@@ -10,8 +12,11 @@ public class LanguageMain
     public string ExtractingWaveInfo { get; set; }
     public string LoadingWaveInfoFromCache { get; set; }
     public string FailedToExtractWaveInfo { get; set; }
-    public string ParsingMatroskaFile { get; internal set; }
-    public string SubtitleImportedFromMatroskaFile { get; internal set; }
+    public string ParsingMatroskaFile { get; set; }
+    public string SubtitleImportedFromMatroskaFile { get; set; }
+    public string LineXTextAndTimingChanged { get; set; }
+    public string LineXTextChangedFromYToZ { get; set; }
+    public string LineXTimingChanged { get; set; }
 
     public LanguageMain()
     {
@@ -23,5 +28,8 @@ public class LanguageMain
         FailedToExtractWaveInfo = "Failed to extract wave info.";
         ParsingMatroskaFile = "Parsing Matroska file...";
         SubtitleImportedFromMatroskaFile = "Subtitle imported from Matroska file";
+        LineXTextAndTimingChanged = "Line {0}: Text and timing changed";
+        LineXTextChangedFromYToZ = "Line {0}: Text changed from '{1}' to '{2}'";
+        LineXTimingChanged = "Line {0}: Timing changed";
     }
 }

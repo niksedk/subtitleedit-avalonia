@@ -1221,12 +1221,12 @@ public partial class MainViewModel :
 
     private void PerformRedo()
     {
+        _undoRedoManager.CheckForChanges(null);
         if (!_undoRedoManager.CanRedo)
         {
             return;
         }
 
-        _undoRedoManager.CheckForChanges(null);
         _undoRedoManager.StopChangeDetection();
         var undoRedoObject = _undoRedoManager.Redo()!;
         RestoreUndoRedoState(undoRedoObject);
@@ -1429,6 +1429,7 @@ public partial class MainViewModel :
         finally
         {
             _undoRedoManager.Do(MakeUndoRedoObject("Open subtitle file " + _subtitleFileName));
+            _undoRedoManager.StartChangeDetection();
         }
     }
 
@@ -1901,7 +1902,11 @@ public partial class MainViewModel :
             }
         }
 
-        _undoRedoManager.StartChangeDetection();
+        Task.Run(async () =>
+        {
+            await Task.Delay(1000); // delay 1 second (off UI thread)
+            _undoRedoManager.StartChangeDetection();
+        });
     }
 
     private static bool IsValidUrl(string url)

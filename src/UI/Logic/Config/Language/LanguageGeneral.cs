@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language;
+﻿using System;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
 public class LanguageGeneral
 {
@@ -187,6 +189,8 @@ public class LanguageGeneral
     public string Tools { get; set; }
     public string Toolbar { get; set; }
     public string Appearance { get; set; }
+    public string LinesDeletedX { get; set; }
+    public string LinesAddedX { get; set; }
 
     public LanguageGeneral()
     {
@@ -375,5 +379,7 @@ public class LanguageGeneral
         Tools = "Tools";
         Toolbar = "Toolbar";
         Appearance = "Appearance";
+        LinesDeletedX = "Lines deleted: {0}";
+        LinesAddedX = "Lines added: {0}";
     }
 }

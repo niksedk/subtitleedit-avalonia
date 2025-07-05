@@ -1,4 +1,5 @@
-﻿using Nikse.SubtitleEdit.Logic.UndoRedo;
+﻿using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.UndoRedo;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,8 +14,6 @@ public class UndoRedoManager : IUndoRedoManager
     private IUndoRedoClient? _undoRedoClient;
     private bool _isChangeDetectionActive;
     private bool _disposed;
-
-    public StateAppliedHandler? OnStateApplied { get; set; }
 
     public List<UndoRedoItem> UndoList
     {
@@ -82,13 +81,11 @@ public class UndoRedoManager : IUndoRedoManager
         }
     }
 
-    public void SetupChangeDetection(IUndoRedoClient hashProvider, TimeSpan? interval = null)
+    public void SetupChangeDetection(IUndoRedoClient undoRedoClient, TimeSpan? interval = null)
     {
         lock (_lock)
         {
-            _undoRedoClient = hashProvider;
-            //_lastKnownHash = hashProvider.GetFastHash();
-
+            _undoRedoClient = undoRedoClient;
             var detectionInterval = interval ?? TimeSpan.FromSeconds(1);
             _changeDetectionTimer = new Timer(CheckForChanges, null, Timeout.InfiniteTimeSpan, detectionInterval);
         }
@@ -106,12 +103,6 @@ public class UndoRedoManager : IUndoRedoManager
             if (!_isChangeDetectionActive)
             {
                 _isChangeDetectionActive = true;
-
-                //if (_undoRedoClient != null)
-                //{
-                //    _lastKnownHash = _undoRedoClient.GetFastHash();
-                //}
-
                 _changeDetectionTimer.Change(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
             }
         }
@@ -139,22 +130,13 @@ public class UndoRedoManager : IUndoRedoManager
         lock (_lock)
         {
             _undoList.Add(action);
-
             _redoList.Clear();
-
-            //if (_undoRedoClient != null)
-            //{
-            //    _lastKnownHash = _undoRedoClient.GetFastHash();
-            //}
         }
-
-        // Apply the current state (the action represents the current state)
-        OnStateApplied?.Invoke(action);
     }
 
     public UndoRedoItem? Undo()
     {
-        UndoRedoItem? currentItem = null;
+        UndoRedoItem? undoItem = null;
 
         lock (_lock)
         {
@@ -165,26 +147,34 @@ public class UndoRedoManager : IUndoRedoManager
 
             var currentHash = _undoRedoClient?.GetFastHash() ?? 0;
 
-            currentItem = _undoList.Last();
+            undoItem = _undoList.Last();
             if (_undoList.Count > 1) // always keep last undo item (initial starting state)
             {
                 _undoList.RemoveAt(_undoList.Count - 1);
             }
 
-            if (currentItem.Hash == currentHash && _undoList.Count > 0)
+            if (_undoRedoClient != null)
             {
-                currentItem = _undoList.Last();
+                _redoList.Add(undoItem);
+            }
+
+            if (undoItem.Hash == currentHash && _undoList.Count > 0)
+            {
+                // no changes detected, go on to the next item
+
+                undoItem = _undoList.Last();
                 if (_undoList.Count > 1) // always keep last undo item (initial starting state)
                 {
                     _undoList.RemoveAt(_undoList.Count - 1);
                 }
+
+                if (_undoRedoClient != null)
+                {
+                    _redoList.Add(undoItem);
+                }
             }
 
-            _redoList.Add(currentItem);
-
-            //_lastKnownHash = currentItem.Hash;
-
-            return currentItem;
+            return undoItem;
         }
     }
 
@@ -199,33 +189,20 @@ public class UndoRedoManager : IUndoRedoManager
                 return null;
             }
 
+            var currentHash = _undoRedoClient?.GetFastHash() ?? 0;
 
             item = _redoList.Last();
             _redoList.RemoveAt(_redoList.Count - 1);
 
-            //TODO: fix
-            //// Check if the last item in redo list matches the current hash
-            //var currentHash = _hashProvider?.GetFastHash() ?? 0;
-            //if (_redoList.Last().Hash == currentHash && _redoList.Count > 0)
-            //{
-            //    item = _redoList.Last();
-            //    _redoList.RemoveAt(_redoList.Count - 1);
-            //}
-
-            // Add back to undo list
             _undoList.Add(item);
 
-            // Update last known hash if hash provider is available
-            //if (_undoRedoClient != null)
-            //{
-            //    _lastKnownHash = _undoRedoClient.GetFastHash();
-            //}
-        }
+            if (item.Hash == currentHash && _redoList.Count > 0)
+            {
+                item = _redoList.Last();
+                _redoList.RemoveAt(_redoList.Count - 1);
 
-        // Apply the redo state
-        if (item != null)
-        {
-            OnStateApplied?.Invoke(item);
+                _undoList.Add(item);
+            }
         }
 
         return item;
@@ -242,65 +219,155 @@ public class UndoRedoManager : IUndoRedoManager
         {
             lock (_lock)
             {
-                //var currentHash = _hashProvider.GetFastHash();
+                var currentHash = _undoRedoClient.GetFastHash();
+
                 var lastUndoItem = _undoList.LastOrDefault();
-                //if (lastUndoItem != null && lastUndoItem.Hash == currentHash)
-                //{
-                //    return;
-                //}
-
-                //if (_lastKnownHash != currentHash)
+                if (lastUndoItem?.Hash == currentHash)
                 {
-                   // _lastKnownHash = currentHash;
+                    return;
+                }
 
-                    var undoRedoItem = _undoRedoClient.MakeUndoRedoObject("Changes detected");
-                    if (undoRedoItem == null)
+                var lastRedoItem = _redoList.LastOrDefault();
+                if (lastRedoItem?.Hash == currentHash)
+                {
+                    return;
+                }
+
+                var undoRedoItem = _undoRedoClient.MakeUndoRedoObject("Changes detected");
+                if (undoRedoItem == null)
+                {
+                    return;
+                }
+
+                if (lastUndoItem != null)
+                {
+                    var hasChanges = HasChangesAndSetText(lastUndoItem, undoRedoItem);
+                    if (!hasChanges)
                     {
                         return;
                     }
-
-                    if (lastUndoItem != null)
-                    {
-                        if (lastUndoItem.Subtitles.Length > undoRedoItem.Subtitles.Length)
-                        {
-                            undoRedoItem.Description = "Lines deleted: " + (lastUndoItem.Subtitles.Length - undoRedoItem.Subtitles.Length);
-                        }
-                        else if (lastUndoItem.Subtitles.Length < undoRedoItem.Subtitles.Length)
-                        {
-                            undoRedoItem.Description = "Lines added: " + (undoRedoItem.Subtitles.Length - lastUndoItem.Subtitles.Length);
-                        }
-                        else if (lastUndoItem.Subtitles.Length == undoRedoItem.Subtitles.Length)
-                        {
-                            var difference = false;
-                            for (var i = 0; i < lastUndoItem.Subtitles.Length; i++)
-                            {
-                                var p1 = lastUndoItem.Subtitles[i];
-                                var p2 = undoRedoItem.Subtitles[i];
-
-                                if (p1.Text != p2.Text || 
-                                    p1.StartTime.TotalMilliseconds != p2.StartTime.TotalMilliseconds || 
-                                    p1.EndTime.TotalMilliseconds != p2.EndTime.TotalMilliseconds)
-                                {
-                                    difference = true;
-                                    break;
-                                }
-                            }
-
-                            if (!difference)
-                            {
-                                return;
-                            }
-                        }
-                    }
-
-                    Do(undoRedoItem);
                 }
+
+                Do(undoRedoItem);
             }
         }
         catch
         {
             // Ignore exceptions in change detection
         }
+    }
+
+    private bool HasChangesAndSetText(UndoRedoItem lastUndoItem, UndoRedoItem undoRedoItem)
+    {
+        if (lastUndoItem.Subtitles.Length > undoRedoItem.Subtitles.Length)
+        {
+            undoRedoItem.Description = string.Format(Se.Language.General.LinesDeletedX, (lastUndoItem.Subtitles.Length - undoRedoItem.Subtitles.Length));
+        }
+        else if (lastUndoItem.Subtitles.Length < undoRedoItem.Subtitles.Length)
+        {
+            undoRedoItem.Description = string.Format(Se.Language.General.LinesAddedX, (undoRedoItem.Subtitles.Length - lastUndoItem.Subtitles.Length));
+        }
+        else if (lastUndoItem.Subtitles.Length == undoRedoItem.Subtitles.Length)
+        {
+            var changedLines = new List<int>();
+            var textChanges = 0;
+            var timingChanges = 0;
+
+            for (var i = 0; i < lastUndoItem.Subtitles.Length; i++)
+            {
+                var p1 = lastUndoItem.Subtitles[i];
+                var p2 = undoRedoItem.Subtitles[i];
+
+                bool hasTextChange = p1.Text != p2.Text;
+                bool hasTimingChange = p1.StartTime.TotalMilliseconds != p2.StartTime.TotalMilliseconds ||
+                                      p1.EndTime.TotalMilliseconds != p2.EndTime.TotalMilliseconds;
+
+                if (hasTextChange || hasTimingChange)
+                {
+                    changedLines.Add(i + 1); // 1-based line numbering
+
+                    if (hasTextChange)
+                    {
+                        textChanges++;
+                    }
+
+                    if (hasTimingChange)
+                    {
+                        timingChanges++;
+                    }
+                }
+            }
+
+            if (changedLines.Count == 0)
+            {
+                return false;
+            }
+
+            // Generate descriptive messages based on the type and scope of changes
+            if (changedLines.Count == 1)
+            {
+                // Single line change - be very specific
+                var lineNum = changedLines[0];
+                var p1 = lastUndoItem.Subtitles[lineNum - 1];
+                var p2 = undoRedoItem.Subtitles[lineNum - 1];
+
+                bool hasTextChange = p1.Text != p2.Text;
+                bool hasTimingChange = p1.StartTime.TotalMilliseconds != p2.StartTime.TotalMilliseconds ||
+                                      p1.EndTime.TotalMilliseconds != p2.EndTime.TotalMilliseconds;
+
+                if (hasTextChange && hasTimingChange)
+                {
+                    undoRedoItem.Description = string.Format(Se.Language.Main.LineXTextAndTimingChanged, lineNum);
+                }
+                else if (hasTextChange)
+                {
+                    // Show text change preview if not too long
+                    var oldText = p1.Text.Length > 30 ? p1.Text.Substring(0, 30) + "..." : p1.Text;
+                    var newText = p2.Text.Length > 30 ? p2.Text.Substring(0, 30) + "..." : p2.Text;
+                    undoRedoItem.Description = string.Format(Se.Language.Main.LineXTextChangedFromYToZ, lineNum, oldText, newText);
+                }
+                else if (hasTimingChange)
+                {
+                    undoRedoItem.Description = string.Format(Se.Language.Main.LineXTimingChanged, lineNum);
+                }
+            }
+            else if (changedLines.Count <= 5)
+            {
+                // Multiple lines but not too many - list them
+                var linesList = string.Join(", ", changedLines);
+                var changeTypes = new List<string>();
+
+                if (textChanges > 0)
+                {
+                    changeTypes.Add($"{textChanges} text");
+                }
+
+                if (timingChanges > 0)
+                {
+                    changeTypes.Add($"{timingChanges} timing");
+                }
+
+                undoRedoItem.Description = $"Lines {linesList}: {string.Join(" and ", changeTypes)} changes";
+            }
+            else
+            {
+                // Many lines changed - give summary
+                var changeTypes = new List<string>();
+                if (textChanges > 0)
+                {
+                    changeTypes.Add($"{textChanges} text");
+                }
+
+                if (timingChanges > 0)
+                {
+                    changeTypes.Add($"{timingChanges} timing");
+                }
+
+                undoRedoItem.Description = $"{changedLines.Count} lines modified: {string.Join(" and ", changeTypes)} changes";
+            }
+        }
+
+        return true;
     }
 
     public void Dispose()
@@ -313,14 +380,5 @@ public class UndoRedoManager : IUndoRedoManager
         StopChangeDetection();
         _changeDetectionTimer?.Dispose();
         _disposed = true;
-    }
-
-    public void SetLastActionDescription(string description)
-    {
-        var last = UndoList.LastOrDefault();
-        if (last != null)
-        {
-            last.Description = description;
-        }
     }
 }
