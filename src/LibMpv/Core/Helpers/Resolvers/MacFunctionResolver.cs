@@ -15,7 +15,6 @@ public class MacFunctionResolver : FunctionResolverBase
         "/usr/local/lib",
         "/opt/homebrew/lib",
         "/opt/lib",
-        "/opt/lib",
     ];
     protected override IntPtr LoadNativeLibrary(string libraryName) => dlopen(libraryName, RTLD_NOW);
     protected override IntPtr FindFunctionPointer(IntPtr nativeLibraryHandle, string functionName) => dlsym(nativeLibraryHandle, functionName);

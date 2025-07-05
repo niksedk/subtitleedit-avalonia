@@ -15,7 +15,9 @@ public class LinuxFunctionResolver : FunctionResolverBase
         "/usr/lib64", 
         "/lib", 
         "/usr/lib",
-        "/lib/x86_64-linux-gnu", // Ubuntu/Debian specific
+        "/lib/x86_64-linux-gnu",
+        "/usr/lib/x86_64-linux-gnu",
+        "/usr/local/lib",
     };
     protected override IntPtr LoadNativeLibrary(string libraryName) => dlopen(libraryName, RTLD_NOW);
     protected override IntPtr FindFunctionPointer(IntPtr nativeLibraryHandle, string functionName) => dlsym(nativeLibraryHandle, functionName);
