@@ -66,8 +66,13 @@ public partial class SubtitleLineViewModel : ObservableObject
         Layer = p.Layer;
         Number = p.Number;
         Extra = p.Extra;
-        Paragraph = new Paragraph(p.Paragraph, generateNewId);
+
         Id = generateNewId ? Guid.NewGuid() : p.Id;
+
+        if (p.Paragraph != null)
+        {
+            Paragraph = new Paragraph(p.Paragraph, generateNewId);
+        }
     }
 
     public SubtitleLineViewModel(Paragraph paragraph)

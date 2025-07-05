@@ -38,11 +38,14 @@ public class ShortcutManager : IShortcutManager
 
         foreach (var shortcut in _shortcuts)
         {
-            if (hashCode == shortcut.HashCode ||
-                inputWithNormalizedModifiers == shortcut.HashCode ||
-                inputWithNormalizedModifiers == shortcut.NormalizedHashCode)
+            if (shortcut.Keys.Count > 0)
             {
-                return shortcut.Action;
+                if (hashCode == shortcut.HashCode ||
+                    inputWithNormalizedModifiers == shortcut.HashCode ||
+                    inputWithNormalizedModifiers == shortcut.NormalizedHashCode)
+                {
+                    return shortcut.Action;
+                }
             }
         }
 

@@ -12,10 +12,12 @@ public class UndoRedoItem
     public int CaretIndex { get; set; }
     public int SelectionLength { get; set; }
     public DateTime Created { get; set; }
+    public int Hash { get; set; }
 
     public UndoRedoItem(
         string description, 
         SubtitleLineViewModel[] subtitles, 
+        int hash,
         string? subtitleFileName, 
         int[] selectedLines, 
         int caretIndex, 
@@ -28,5 +30,6 @@ public class UndoRedoItem
         CaretIndex = caretIndex;
         SelectionLength = selectionLength;
         Created = DateTime.Now;
+        Hash = hash;
     }
 }

@@ -64,7 +64,11 @@ using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
-public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSubtitleLine
+public partial class MainViewModel :
+    ObservableObject,
+    IAdjustCallback,
+    IFocusSubtitleLine,
+    IUndoRedoClient
 {
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _subtitles;
     [ObservableProperty] private SubtitleLineViewModel? _selectedSubtitle;
@@ -109,6 +113,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     private CancellationTokenSource? _statusFadeCts;
     private int _changeSubtitleHash = -1;
     private bool _subtitleGridSelectionChangedSkip;
+    private long _lastKeyPressedTicks;
 
     private readonly IFileHelper _fileHelper;
     private readonly IFolderHelper _folderHelper;
@@ -197,6 +202,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
         StartTitleTimer();
         _autoBackupService.StartAutoBackup(this);
+        _undoRedoManager.SetupChangeDetection(this, TimeSpan.FromSeconds(1));
     }
 
     private void InitializeFfmpeg()
@@ -370,11 +376,10 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
     private void ResetSubtitle()
     {
-        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "New"));
         Subtitles.Clear();
         _subtitleFileName = string.Empty;
         _subtitle = new Subtitle();
-        _changeSubtitleHash = GetFastSubtitleHash();
+        _changeSubtitleHash = GetFastHash();
         if (AudioVisualizer?.WavePeaks != null)
         {
             AudioVisualizer.WavePeaks = null;
@@ -389,7 +394,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, "Open subtitle file");
         if (!string.IsNullOrEmpty(fileName))
         {
-            MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Open"));
             await SubtitleOpen(fileName);
         }
 
@@ -399,7 +403,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private async Task CommandFileReopen(RecentFile recentFile)
     {
-        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Reopen"));
         await SubtitleOpen(recentFile.SubtitleFileName, recentFile.VideoFileName, recentFile.SelectedLine);
         _shortcutManager.ClearKeys();
     }
@@ -546,7 +549,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
         if (result.OkPressed)
         {
-            MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Adjust durations"));
             result.AdjustDuration(Subtitles);
             _updateAudioVisualizer = true;
         }
@@ -571,7 +573,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
         if (result.OkPressed)
         {
-            MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Change casing"));
             for (var i = 0; i < Subtitles.Count; i++)
             {
                 if (result.Subtitle.Paragraphs.Count <= i)
@@ -595,8 +596,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
         if (viewModel.OkPressed)
         {
-            MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Fix common errors"));
-
             SetSubtitles(viewModel.FixedSubtitle);
             SelectAndScrollToRow(0);
             ShowStatus($"Fixed {viewModel.FixedSubtitle.Paragraphs.Count} lines");
@@ -617,7 +616,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
         if (result.OkPressed)
         {
-            MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Remove text for hearing impaired"));
             Subtitles.Clear();
             Subtitles.AddRange(result.FixedSubtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
             SelectAndScrollToRow(0);
@@ -685,8 +683,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
         if (result.OkPressed && !result.IsBatchMode)
         {
-            MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Whisper audio-to-text"));
-
             _subtitle = result.TranscribedSubtitle;
             SetSubtitles(_subtitle);
             SelectAndScrollToRow(0);
@@ -752,11 +748,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             vm.Initialize(this); // uses call from IAdjustCallback: Adjust
         });
 
-        if (result.OkPressed)
-        {
-            MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Adjust all times"));
-        }
-
         _shortcutManager.ClearKeys();
     }
 
@@ -782,7 +773,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
         if (result.OkPressed)
         {
-            MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Auto-translate"));
             for (var i = 0; i < Subtitles.Count; i++)
             {
                 if (result.Rows.Count <= i)
@@ -890,49 +880,51 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private void InsertLineBefore()
     {
-        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Insert before"));
+        _undoRedoManager.StopChangeDetection();
         InsertBeforeSelectedItem();
+        _undoRedoManager.StartChangeDetection();
+
     }
 
     [RelayCommand]
     private void InsertLineAfter()
     {
-        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Insert after"));
+        _undoRedoManager.StopChangeDetection();
         InsertAfterSelectedItem();
+        _undoRedoManager.StartChangeDetection();
     }
 
     [RelayCommand]
     private void MergeWithLineBefore()
     {
-        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Merge lines"));
+        _undoRedoManager.StopChangeDetection();
         MergeLineBefore();
+        _undoRedoManager.StartChangeDetection();
     }
 
     [RelayCommand]
     private void MergeWithLineAfter()
     {
-        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Merge lines"));
+        _undoRedoManager.StopChangeDetection();
         MergeLineAfter();
+        _undoRedoManager.StartChangeDetection();
     }
 
     [RelayCommand]
     private void MergeSelectedLines()
     {
-        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Merge lines"));
         MergeLinesSelected();
     }
 
     [RelayCommand]
     private void MergeSelectedLinesDialog()
     {
-        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Merge lines as dialog"));
         MergeLinesSelectedAsDialog();
     }
 
     [RelayCommand]
     private void ToggleLinesItalic()
     {
-        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Toggle italic"));
         ToggleItalic();
         _shortcutManager.ClearKeys();
     }
@@ -940,7 +932,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     [RelayCommand]
     private void ToggleLinesBold()
     {
-        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Toggle bold"));
         ToggleBold();
         _shortcutManager.ClearKeys();
     }
@@ -953,7 +944,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
         if (viewModel.OkPressed && !string.IsNullOrEmpty(viewModel.RestoreFileName))
         {
-            MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Restore auto-backup"));
             await SubtitleOpen(viewModel.RestoreFileName);
         }
 
@@ -1034,7 +1024,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
         if (result.OkPressed)
         {
-            MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Multiple replace"));
             SetSubtitles(result.FixedSubtitle);
             SelectAndScrollToRow(0);
             ShowStatus($"Replaced {result.TotalReplaced} occurrences");
@@ -1149,7 +1138,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             return;
         }
 
-        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Unbreak line"));
         s.Text = Utilities.UnbreakLine(s.Text);
         _shortcutManager.ClearKeys();
     }
@@ -1163,7 +1151,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             return;
         }
 
-        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Auto break line"));
         s.Text = Utilities.AutoBreakLine(s.Text);
         _shortcutManager.ClearKeys();
     }
@@ -1220,9 +1207,11 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             return;
         }
 
+        _undoRedoManager.StopChangeDetection();
         var undoRedoObject = _undoRedoManager.Undo()!;
         RestoreUndoRedoState(undoRedoObject);
-        ShowStatus("Undo performed");
+        ShowStatus("Undo performed: " + _undoRedoManager.UndoList.Count + " undo actions left");
+        _undoRedoManager.StartChangeDetection();
     }
 
     private void PerformRedo()
@@ -1232,36 +1221,21 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             return;
         }
 
+        _undoRedoManager.StopChangeDetection();
         var undoRedoObject = _undoRedoManager.Redo()!;
         RestoreUndoRedoState(undoRedoObject);
-        ShowStatus("Redo performed");
+        ShowStatus("Redo performed: " + _undoRedoManager.RedoList.Count + " redo actions left");
+        _undoRedoManager.StartChangeDetection();
     }
 
-    private void MakeHistoryForUndo(string description)
-    {
-        if (Subtitles.Count == 0 || Subtitles.Count == 1 && string.IsNullOrWhiteSpace(SelectedSubtitle?.Text))
-        {
-            return;
-        }
-
-        var hash = GetFastSubtitleHash();
-        if (hash == _changeSubtitleHash && _undoRedoManager.CanUndo)
-        {
-            return; // no changes
-        }
-
-        var undoRedoObject = MakeUndoRedoObject(description);
-        _undoRedoManager.Do(undoRedoObject);
-        _changeSubtitleHash = GetFastSubtitleHash();
-    }
-
-    private UndoRedoItem MakeUndoRedoObject(string description)
+    public UndoRedoItem MakeUndoRedoObject(string description)
     {
         return new UndoRedoItem(
             description,
-            Subtitles.ToArray(),
+            Subtitles.Select(p => new SubtitleLineViewModel(p)).ToArray(),
+            GetFastHash(),
             _subtitleFileName,
-            new int[] { 0 },
+            [SelectedSubtitleIndex ?? 0],
             1,
             1);
     }
@@ -1362,86 +1336,94 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             return;
         }
 
-        if (FileUtil.IsMatroskaFileFast(fileName) && FileUtil.IsMatroskaFile(fileName))
+        try
         {
-            ImportSubtitleFromMatroskaFile(fileName, videoFileName);
-            return;
-        }
 
-        if (ext == ".sup" && FileUtil.IsBluRaySup(fileName))
-        {
-            var log = new StringBuilder();
-            var subtitles = BluRaySupParser.ParseBluRaySup(fileName, log);
-            if (subtitles.Count > 0)
+            if (FileUtil.IsMatroskaFileFast(fileName) && FileUtil.IsMatroskaFile(fileName))
             {
-                Dispatcher.UIThread.Post(async () =>
-                {
-                    var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm =>
-                    {
-                        vm.Initialize(subtitles, fileName);
-                    });
-
-                    if (result.OkPressed)
-                    {
-                        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Open Blu-ray SUP"));
-                        _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
-                        Subtitles.Clear();
-                        Subtitles.AddRange(result.OcredSubtitle);
-                    }
-                });
+                ImportSubtitleFromMatroskaFile(fileName, videoFileName);
                 return;
             }
-        }
 
-        var subtitle = Subtitle.Parse(fileName);
-        if (subtitle == null)
-        {
-            foreach (var f in SubtitleFormat.GetBinaryFormats(false))
+            if (ext == ".sup" && FileUtil.IsBluRaySup(fileName))
             {
-                if (f.IsMine(null, fileName))
+                var log = new StringBuilder();
+                var subtitles = BluRaySupParser.ParseBluRaySup(fileName, log);
+                if (subtitles.Count > 0)
                 {
-                    subtitle = new Subtitle();
-                    f.LoadSubtitle(subtitle, null, fileName);
-                    subtitle.OriginalFormat = f;
-                    break; // format found, exit the loop
+                    Dispatcher.UIThread.Post(async () =>
+                    {
+                        var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm =>
+                        {
+                            vm.Initialize(subtitles, fileName);
+                        });
+
+                        if (result.OkPressed)
+                        {
+                            _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
+                            Subtitles.Clear();
+                            Subtitles.AddRange(result.OcredSubtitle);
+                        }
+                    });
+                    return;
                 }
             }
 
+            var subtitle = Subtitle.Parse(fileName);
             if (subtitle == null)
             {
-                var message = "Unknown format?";
-                await MessageBox.Show(Window!, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                foreach (var f in SubtitleFormat.GetBinaryFormats(false))
+                {
+                    if (f.IsMine(null, fileName))
+                    {
+                        subtitle = new Subtitle();
+                        f.LoadSubtitle(subtitle, null, fileName);
+                        subtitle.OriginalFormat = f;
+                        break; // format found, exit the loop
+                    }
+                }
+
+                if (subtitle == null)
+                {
+                    var message = "Unknown format?";
+                    await MessageBox.Show(Window!, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
             }
-        }
 
-        SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == subtitle.OriginalFormat.Name) ?? SelectedSubtitleFormat; ;
+            SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == subtitle.OriginalFormat.Name) ?? SelectedSubtitleFormat; ;
 
-        _subtitleFileName = fileName;
-        _subtitle = subtitle;
-        _lastOpenSaveFormat = subtitle.OriginalFormat;
-        SetSubtitles(_subtitle);
-        ShowStatus($"Subtitle loaded: {fileName}");
+            _subtitleFileName = fileName;
+            _subtitle = subtitle;
+            _lastOpenSaveFormat = subtitle.OriginalFormat;
+            SetSubtitles(_subtitle);
+            ShowStatus($"Subtitle loaded: {fileName}");
 
-        if (selectedSubtitleIndex != null)
-        {
-            SelectAndScrollToRow(selectedSubtitleIndex.Value);
-        }
-
-        if (Se.Settings.Video.AutoOpen)
-        {
-            if (!string.IsNullOrEmpty(videoFileName) && File.Exists(videoFileName))
+            if (selectedSubtitleIndex != null)
             {
-                await VideoOpenFile(videoFileName);
+                SelectAndScrollToRow(selectedSubtitleIndex.Value);
             }
-            else if (FindVideoFileName.TryFindVideoFileName(fileName, out videoFileName))
-            {
-                await VideoOpenFile(videoFileName);
-            }
-        }
 
-        AddToRecentFiles(true);
-        _changeSubtitleHash = GetFastSubtitleHash();
+            if (Se.Settings.Video.AutoOpen)
+            {
+                if (!string.IsNullOrEmpty(videoFileName) && File.Exists(videoFileName))
+                {
+                    await VideoOpenFile(videoFileName);
+                }
+                else if (FindVideoFileName.TryFindVideoFileName(fileName, out videoFileName))
+                {
+                    await VideoOpenFile(videoFileName);
+                }
+            }
+
+            AddToRecentFiles(true);
+            _changeSubtitleHash = GetFastHash();
+
+        }
+        finally
+        {
+            _undoRedoManager.Do(MakeUndoRedoObject("Open subtitle file " + _subtitleFileName));
+        }
     }
 
     private void ImportSubtitleFromMatroskaFile(string fileName, string? videoFileName)
@@ -1585,8 +1567,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     {
         ShowStatus(Se.Language.Main.ParsingMatroskaFile);
         var sub = matroska.GetSubtitle(matroskaSubtitleInfo.TrackNumber, MatroskaProgress);
-
-        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, Se.Language.Main.SubtitleImportedFromMatroskaFile));
         ResetSubtitle();
 
         _subtitle.Paragraphs.Clear();
@@ -1713,7 +1693,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
     {
         ShowStatus(Se.Language.Main.ParsingMatroskaFile);
         var sub = matroska.GetSubtitle(matroskaSubtitleInfo.TrackNumber, MatroskaProgress);
-        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, Se.Language.Main.SubtitleImportedFromMatroskaFile));
         ResetSubtitle();
 
         _subtitle.Paragraphs.Clear();
@@ -1750,7 +1729,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
     public bool HasChanges()
     {
-        return !IsEmpty && _changeSubtitleHash != GetFastSubtitleHash();
+        return !IsEmpty && _changeSubtitleHash != GetFastHash();
     }
 
     private async Task SaveSubtitle()
@@ -1775,7 +1754,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
         var text = GetUpdateSubtitle().ToText(SelectedSubtitleFormat);
         await File.WriteAllTextAsync(_subtitleFileName, text);
-        _changeSubtitleHash = GetFastSubtitleHash();
+        _changeSubtitleHash = GetFastHash();
         _lastOpenSaveFormat = SelectedSubtitleFormat;
     }
 
@@ -1915,6 +1894,8 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
                 SubtitleOpen(first.SubtitleFileName, first.VideoFileName, first.SelectedLine).ConfigureAwait(false);
             }
         }
+
+        _undoRedoManager.StartChangeDetection();
     }
 
     private static bool IsValidUrl(string url)
@@ -1971,11 +1952,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         }
 
         _videoFileName = videoFileName;
-
-        //if (!_stopping)
-        //{
-        //    _timer.Start();
-        //}
     }
 
     private async Task ExtractWaveformAndSpectrogram(Process process, string tempWaveFileName, string peakWaveFileName)
@@ -2009,13 +1985,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
                 {
                     AudioVisualizer.WavePeaks = wavePeaks;
                 }
-
-                //if (!_stopping)
-                //{
-                //    _timer.Start();
-                //    _audioVisualizer.InvalidateSurface();
-                //    ShowStatus("Wave info loaded.");
-                //}
                 _updateAudioVisualizer = true;
             }, DispatcherPriority.Background);
         }
@@ -2027,7 +1996,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         _videoFileName = string.Empty;
     }
 
-    private int GetFastSubtitleHash()
+    public int GetFastHash()
     {
         var pre = _subtitleFileName + SelectedEncoding.DisplayName;
         unchecked // Overflow is fine, just wrap
@@ -2105,13 +2074,13 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             _shortcutManager.ClearKeys();
         }
 
-        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, $"Delete {selectedItems.Count} lines"));
+        _undoRedoManager.StopChangeDetection();
         foreach (var item in selectedItems)
         {
             Subtitles.Remove(item);
         }
-
         Renumber();
+        _undoRedoManager.StartChangeDetection();
     }
 
     private void InsertBeforeSelectedItem()
@@ -2259,6 +2228,14 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
 
     public void KeyDown(KeyEventArgs keyEventArgs)
     {
+        var ticks = Stopwatch.GetTimestamp();
+        var timeSpan = TimeSpan.FromTicks(ticks - _lastKeyPressedTicks);
+        if (timeSpan.Seconds > 5)
+        {
+            _shortcutManager.ClearKeys(); // reset shortcuts if no key pressed for 2 seconds
+        }
+        _lastKeyPressedTicks = ticks;
+
         _shortcutManager.OnKeyPressed(this, keyEventArgs);
 
         if (SubtitleGrid.IsFocused)
@@ -2445,7 +2422,7 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
             }
 
             text = text + " - " + Se.Language.Title;
-            if (_changeSubtitleHash != GetFastSubtitleHash())
+            if (_changeSubtitleHash != GetFastHash())
             {
                 text = "*" + text;
             }
@@ -2616,8 +2593,6 @@ public partial class MainViewModel : ObservableObject, IAdjustCallback, IFocusSu
         {
             return;
         }
-
-        MakeHistoryForUndo(string.Format(Se.Language.General.BeforeX, "Adjust times"));
 
         if (adjustSelectedLines)
         {

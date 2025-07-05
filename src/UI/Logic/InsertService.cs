@@ -12,7 +12,7 @@ public interface IInsertService
 {
     void InsertBefore(SubtitleFormat format, Subtitle subtitle, ObservableCollection<SubtitleLineViewModel> subtitles, int? index, string text);
     void InsertAfter(SubtitleFormat format, Subtitle subtitle, ObservableCollection<SubtitleLineViewModel> subtitles, int? index, string text);
-    int InsertInCorrectPosition( ObservableCollection<SubtitleLineViewModel> subtitles, SubtitleLineViewModel paragraph);
+    int InsertInCorrectPosition(ObservableCollection<SubtitleLineViewModel> subtitles, SubtitleLineViewModel paragraph);
 }
 
 public class InsertService : IInsertService
@@ -41,10 +41,10 @@ public class InsertService : IInsertService
         if (prev != null && next != null)
         {
             newParagraph.EndTime = TimeSpan.FromMilliseconds(next.StartTime.TotalMilliseconds - addMilliseconds);
-            newParagraph.StartTime = TimeSpan.FromMilliseconds(newParagraph.EndTime.TotalMilliseconds - 2000);
+            newParagraph.SetStartTimeOnly(TimeSpan.FromMilliseconds(newParagraph.EndTime.TotalMilliseconds - 2000));
             if (newParagraph.StartTime.TotalMilliseconds <= prev.EndTime.TotalMilliseconds)
             {
-                newParagraph.StartTime = TimeSpan.FromMilliseconds(prev.EndTime.TotalMilliseconds + 1);
+                newParagraph.SetStartTimeOnly(TimeSpan.FromMilliseconds(prev.EndTime.TotalMilliseconds + 1));
             }
 
             if (newParagraph.Duration.TotalMilliseconds < 100)
@@ -54,28 +54,28 @@ public class InsertService : IInsertService
 
             if (next.StartTime.IsMaxTime() && prev.EndTime.IsMaxTime())
             {
-                newParagraph.StartTime = TimeSpan.FromMilliseconds(TimeCode.MaxTimeTotalMilliseconds);
+                newParagraph.SetStartTimeOnly(TimeSpan.FromMilliseconds(TimeCode.MaxTimeTotalMilliseconds));
                 newParagraph.EndTime = TimeSpan.FromMilliseconds(TimeCode.MaxTimeTotalMilliseconds);
             }
             else if (next.StartTime.TotalMilliseconds == 0 && prev.EndTime.TotalMilliseconds == 0)
             {
-                newParagraph.StartTime = TimeSpan.FromMilliseconds(0);
+                newParagraph.SetStartTimeOnly(TimeSpan.FromMilliseconds(0));
                 newParagraph.EndTime = TimeSpan.FromMilliseconds(0);
             }
             else if (prev.StartTime.TotalMilliseconds == next.StartTime.TotalMilliseconds &&
                      prev.EndTime.TotalMilliseconds == next.EndTime.TotalMilliseconds)
             {
-                newParagraph.StartTime = TimeSpan.FromMilliseconds(prev.StartTime.TotalMilliseconds);
+                newParagraph.SetStartTimeOnly(TimeSpan.FromMilliseconds(prev.StartTime.TotalMilliseconds));
                 newParagraph.EndTime = TimeSpan.FromMilliseconds(prev.EndTime.TotalMilliseconds);
             }
         }
         else if (prev != null)
         {
-            newParagraph.StartTime = TimeSpan.FromMilliseconds(prev.EndTime.TotalMilliseconds + addMilliseconds);
+            newParagraph.SetStartTimeOnly(TimeSpan.FromMilliseconds(prev.EndTime.TotalMilliseconds + addMilliseconds));
             newParagraph.EndTime = TimeSpan.FromMilliseconds(newParagraph.StartTime.TotalMilliseconds + Se.Settings.General.NewEmptyDefaultMs);
             if (newParagraph.StartTime.TotalMilliseconds > newParagraph.EndTime.TotalMilliseconds)
             {
-                newParagraph.StartTime = TimeSpan.FromMilliseconds(prev.EndTime.TotalMilliseconds + 1);
+                newParagraph.SetStartTimeOnly(TimeSpan.FromMilliseconds(prev.EndTime.TotalMilliseconds + 1));
             }
         }
         else if (next != null)
@@ -85,18 +85,18 @@ public class InsertService : IInsertService
 
             if (next.StartTime.IsMaxTime())
             {
-                newParagraph.StartTime = TimeSpan.FromMilliseconds(TimeCode.MaxTimeTotalMilliseconds);
+                newParagraph.SetStartTimeOnly(TimeSpan.FromMilliseconds(TimeCode.MaxTimeTotalMilliseconds));
                 newParagraph.EndTime = TimeSpan.FromMilliseconds(TimeCode.MaxTimeTotalMilliseconds);
             }
             else if (next.StartTime.TotalMilliseconds == 0 && next.EndTime.TotalMilliseconds == 0)
             {
-                newParagraph.StartTime = TimeSpan.FromMilliseconds(0);
+                newParagraph.SetStartTimeOnly(TimeSpan.FromMilliseconds(0));
                 newParagraph.EndTime = TimeSpan.FromMilliseconds(0);
             }
         }
         else
         {
-            newParagraph.StartTime = TimeSpan.FromMilliseconds(1000);
+            newParagraph.SetStartTimeOnly(TimeSpan.FromMilliseconds(1000));
             newParagraph.EndTime = TimeSpan.FromMilliseconds(3000);
             if (newParagraph.Duration.TotalMilliseconds < Se.Settings.General.SubtitleMinimumDisplayMilliseconds)
             {
@@ -108,7 +108,6 @@ public class InsertService : IInsertService
         if (newParagraph.Duration.TotalMilliseconds < 100)
         {
             newParagraph.EndTime = TimeSpan.FromMilliseconds(newParagraph.StartTime.TotalMilliseconds + Se.Settings.General.SubtitleMinimumDisplayMilliseconds);
-            newParagraph.Duration = newParagraph.EndTime - newParagraph.StartTime;
         }
 
         subtitles.Insert(firstSelectedIndex, newParagraph);
@@ -126,8 +125,8 @@ public class InsertService : IInsertService
 
         SetStyleForNewParagraph(format, subtitle, subtitles, newParagraph, firstSelectedIndex);
 
-        var prev = subtitles.GetOrNull(firstSelectedIndex - 1);
-        var next = subtitles.GetOrNull(firstSelectedIndex);
+        var prev = subtitles.GetOrNull(firstSelectedIndex);
+        var next = subtitles.GetOrNull(firstSelectedIndex + 1);
 
         var minGapBetweenLines = Se.Settings.General.MinimumMillisecondsBetweenLines;
         var addMilliseconds = minGapBetweenLines;
@@ -138,7 +137,7 @@ public class InsertService : IInsertService
 
         if (prev != null)
         {
-            newParagraph.StartTime = TimeSpan.FromMilliseconds(prev.EndTime.TotalMilliseconds + addMilliseconds);
+            newParagraph.SetStartTimeOnly(TimeSpan.FromMilliseconds(prev.EndTime.TotalMilliseconds + addMilliseconds));
             newParagraph.EndTime = TimeSpan.FromMilliseconds(newParagraph.StartTime.TotalMilliseconds + Se.Settings.General.NewEmptyDefaultMs);
             if (next != null && newParagraph.EndTime.TotalMilliseconds > next.StartTime.TotalMilliseconds)
             {
@@ -147,45 +146,45 @@ public class InsertService : IInsertService
 
             if (newParagraph.StartTime.TotalMilliseconds > newParagraph.EndTime.TotalMilliseconds)
             {
-                newParagraph.StartTime = TimeSpan.FromMilliseconds(prev.EndTime.TotalMilliseconds + addMilliseconds);
+                newParagraph.SetStartTimeOnly(TimeSpan.FromMilliseconds(prev.EndTime.TotalMilliseconds + addMilliseconds));
             }
 
             if (next != null && next.StartTime.IsMaxTime() && prev.EndTime.IsMaxTime())
             {
-                newParagraph.StartTime = TimeSpan.FromMilliseconds(TimeCode.MaxTimeTotalMilliseconds);
+                newParagraph.SetStartTimeOnly(TimeSpan.FromMilliseconds(TimeCode.MaxTimeTotalMilliseconds));
                 newParagraph.EndTime = TimeSpan.FromMilliseconds(TimeCode.MaxTimeTotalMilliseconds);
             }
             else if (next != null && next.StartTime.TotalMilliseconds == 0 && prev.EndTime.TotalMilliseconds == 0)
             {
-                newParagraph.StartTime = TimeSpan.FromMilliseconds(0);
+                newParagraph.SetStartTimeOnly(TimeSpan.FromMilliseconds(0));
                 newParagraph.EndTime = TimeSpan.FromMilliseconds(0);
             }
             else if (next == null && prev.EndTime.IsMaxTime())
             {
-                newParagraph.StartTime = TimeSpan.FromMilliseconds(TimeCode.MaxTimeTotalMilliseconds);
+                newParagraph.SetStartTimeOnly(TimeSpan.FromMilliseconds(TimeCode.MaxTimeTotalMilliseconds));
                 newParagraph.EndTime = TimeSpan.FromMilliseconds(TimeCode.MaxTimeTotalMilliseconds);
             }
             else if (next == null && prev.EndTime.TotalMilliseconds == 0)
             {
-                newParagraph.StartTime = TimeSpan.FromMilliseconds(0);
+                newParagraph.SetStartTimeOnly(TimeSpan.FromMilliseconds(0));
                 newParagraph.EndTime = TimeSpan.FromMilliseconds(0);
             }
             else if (next != null &&
                      prev.StartTime.TotalMilliseconds == next.StartTime.TotalMilliseconds &&
                      prev.EndTime.TotalMilliseconds == next.EndTime.TotalMilliseconds)
             {
-                newParagraph.StartTime = TimeSpan.FromMilliseconds(prev.StartTime.TotalMilliseconds);
+                newParagraph.SetStartTimeOnly(TimeSpan.FromMilliseconds(prev.StartTime.TotalMilliseconds));
                 newParagraph.EndTime = TimeSpan.FromMilliseconds(prev.EndTime.TotalMilliseconds);
             }
         }
         else if (next != null)
         {
-            newParagraph.StartTime = TimeSpan.FromMilliseconds(next.StartTime.TotalMilliseconds - 2000);
+            newParagraph.SetStartTimeOnly(TimeSpan.FromMilliseconds(next.StartTime.TotalMilliseconds - 2000));
             newParagraph.EndTime = TimeSpan.FromMilliseconds(next.StartTime.TotalMilliseconds - addMilliseconds);
         }
         else
         {
-            newParagraph.StartTime = TimeSpan.FromMilliseconds(1000);
+            newParagraph.SetStartTimeOnly(TimeSpan.FromMilliseconds(1000));
             newParagraph.EndTime = TimeSpan.FromMilliseconds(3000);
             if (newParagraph.Duration.TotalMilliseconds < Se.Settings.General.SubtitleMinimumDisplayMilliseconds)
             {
