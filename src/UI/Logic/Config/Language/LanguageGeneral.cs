@@ -191,6 +191,8 @@ public class LanguageGeneral
     public string Appearance { get; set; }
     public string LinesDeletedX { get; set; }
     public string LinesAddedX { get; set; }
+    public string Time { get; internal set; }
+    public string Description { get; internal set; }
 
     public LanguageGeneral()
     {
@@ -381,5 +383,7 @@ public class LanguageGeneral
         Appearance = "Appearance";
         LinesDeletedX = "Lines deleted: {0}";
         LinesAddedX = "Lines added: {0}";
+        Time = "Time";
+        Description = "Description";
     }
 }

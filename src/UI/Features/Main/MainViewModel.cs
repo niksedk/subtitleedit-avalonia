@@ -961,10 +961,24 @@ public partial class MainViewModel :
         _undoRedoManager.CheckForChanges(null);
         _undoRedoManager.StopChangeDetection();
 
-        var viewModel = await _windowService.ShowDialogAsync<ShowHistoryWindow, ShowHistoryViewModel>(Window!, vm =>
+        var result = await _windowService.ShowDialogAsync<ShowHistoryWindow, ShowHistoryViewModel>(Window!, vm =>
         {
             vm.Initialize(_undoRedoManager);
         });
+
+        if (result.OkPressed && result.SelectedHistoryItem != null)
+        {
+            for (int i = 0; i <= _undoRedoManager.UndoCount; i++)
+            {
+                var undoItem = _undoRedoManager.Undo();
+                if (undoItem?.Hash == result.SelectedHistoryItem.Hash)
+                {
+                    RestoreUndoRedoState(undoItem);
+                    ShowStatus("Undo performed: " + _undoRedoManager.UndoList.Count + " undo actions left");
+                    break;
+                }
+            }
+        }
 
         _undoRedoManager.StartChangeDetection();
         _shortcutManager.ClearKeys();

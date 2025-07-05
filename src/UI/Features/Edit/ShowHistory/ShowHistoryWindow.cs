@@ -4,6 +4,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Edit.ShowHistory;
 
@@ -14,7 +15,7 @@ public class ShowHistoryWindow : Window
     public ShowHistoryWindow(ShowHistoryViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = "Show history";
+        Title = Se.Language.Edit.ShowHistory;
         Width = 710;
         Height = 640;
         CanResize = true;
@@ -39,15 +40,15 @@ public class ShowHistoryWindow : Window
             {
                 new DataGridTextColumn
                 {
-                    Header = "Time",
+                    Header = Se.Language.General.Time,
                     Binding = new Binding(nameof(ShowHistoryDisplayItem.Time)),
                     Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Description",
+                    Header = Se.Language.General.Description,
                     Binding = new Binding(nameof(ShowHistoryDisplayItem.Description)),
-                    Width = new DataGridLength(3, DataGridLengthUnitType.Auto)
+                    Width = new DataGridLength(3, DataGridLengthUnitType.Star)
                 }
             },
         };
@@ -56,7 +57,7 @@ public class ShowHistoryWindow : Window
             vm.IsRollbackEnabled = dataGrid.SelectedItem != null;
         };
 
-        var buttonRollback = UiUtil.MakeButton("Restore selected", vm.RollbackToCommand).WithBindEnabled(nameof(vm.IsRollbackEnabled));
+        var buttonRollback = UiUtil.MakeButton(Se.Language.Edit.RestoreSelected, vm.RollbackToCommand).WithBindEnabled(nameof(vm.IsRollbackEnabled));
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(
             buttonRollback,

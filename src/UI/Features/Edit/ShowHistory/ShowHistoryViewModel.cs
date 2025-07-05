@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Edit.ShowHistory;
 
@@ -16,7 +17,7 @@ public partial class ShowHistoryViewModel : ObservableObject
     private IUndoRedoManager? _undoRedoManager;
 
     public Window? Window { get; set; }
-    
+
     public bool OkPressed { get; private set; }
 
     public ShowHistoryViewModel()
@@ -27,25 +28,26 @@ public partial class ShowHistoryViewModel : ObservableObject
     public void Initialize(IUndoRedoManager undoRedoManager)
     {
         _undoRedoManager = undoRedoManager;
-        foreach (var item in _undoRedoManager.UndoList)
+        foreach (var item in _undoRedoManager.UndoList.OrderByDescending(p => p.Created))
         {
-            HistoryItems.Add(new ShowHistoryDisplayItem() 
-            { 
+            HistoryItems.Add(new ShowHistoryDisplayItem()
+            {
                 Time = item.Created.ToString("yyyy-MM-dd HH:mm:ss"),
-                Description = item.Description
+                Description = item.Description,
+                Hash = item.Hash,
             });
         }
     }
-    
-    [RelayCommand]                   
-    private void RollbackTo() 
+
+    [RelayCommand]
+    private void RollbackTo()
     {
         OkPressed = true;
         Window?.Close();
     }
-    
-    [RelayCommand]                   
-    private void Cancel() 
+
+    [RelayCommand]
+    private void Cancel()
     {
         Window?.Close();
     }
