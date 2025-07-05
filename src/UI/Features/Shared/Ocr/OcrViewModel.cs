@@ -177,11 +177,23 @@ public partial class OcrViewModel : ObservableObject
     [RelayCommand]
     private async Task InspectLine()
     {
+        var item = SelectedOcrSubtitleItem;
+        if (item == null)
+        {
+            return;
+        }
+
+        var bitmap = item.GetSkBitmap();
+        var nBmp = new NikseBitmap2(bitmap);
+        nBmp.MakeTwoColor(200);
+        nBmp.CropTop(0, new SKColor(0, 0, 0, 0));
+        var letters = NikseBitmapImageSplitter2.SplitBitmapToLettersNew(nBmp, SelectedNOcrPixelsAreSpace, false, true, 20, true);
+
         var result = await _windowService
             .ShowDialogAsync<NOcrInspectWindow, NOcrInspectViewModel>(Window!,
             vm =>
             {
-                vm.Initialize(SelectedOcrSubtitleItem, _nOcrDb, SelectedNOcrMaxWrongPixels);
+                vm.Initialize(SelectedOcrSubtitleItem, _nOcrDb, SelectedNOcrMaxWrongPixels, letters);
             });
 
         if (result.OkPressed)

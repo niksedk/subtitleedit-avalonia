@@ -8,10 +8,8 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Ocr;
 using SkiaSharp;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
@@ -59,7 +57,7 @@ public partial class NOcrInspectViewModel : ObservableObject
 
     public NOcrInspectViewModel()
     {
-        Title = "Add new character";
+        Title = Se.Language.Ocr.InspectImageMatches;
         LinesForeground = new ObservableCollection<NOcrLine>();
         LinesBackground = new ObservableCollection<NOcrLine>();
         DrawModes = new ObservableCollection<NOcrDrawModeItem>(NOcrDrawModeItem.Items);
@@ -88,24 +86,36 @@ public partial class NOcrInspectViewModel : ObservableObject
         _splitItem = new ImageSplitterItem2(string.Empty);
         NOcrDrawingCanvas = new NOcrDrawingCanvasView();
         TextBoxNew = new TextBox();
-        LoadSettings();
     }
 
-    private void LoadSettings()
+    internal void Initialize(OcrSubtitleItem? selectedOcrSubtitleItem, NOcrDb? nOcrDb, int selectedNOcrMaxWrongPixels, List<ImageSplitterItem2> letters)
     {
-        IsNewTextItalic = Se.Settings.Ocr.IsNewLetterItalic;
-        SubmitOnFirstLetter = Se.Settings.Ocr.SubmitOnFirstLetter;
-    }
+        _letters = letters;
+        _nOcrDb = nOcrDb ?? new NOcrDb(string.Empty);
+        _maxWrongPixels = selectedNOcrMaxWrongPixels;
+        CurrentBitmap = selectedOcrSubtitleItem!.GetSkBitmap().ToAvaloniaBitmap();
 
-    private void SaveSettings()
-    {
-        Se.Settings.Ocr.IsNewLetterItalic = IsNewTextItalic;
-        Se.Settings.Ocr.SubmitOnFirstLetter = SubmitOnFirstLetter;
-        Se.SaveSettings();
-    }
+        if (letters.Count > 0)
+        {
+            _splitItem = letters[0];
 
-    internal void Initialize(OcrSubtitleItem? selectedOcrSubtitleItem, NOcrDb? nOcrDb, int selectedNOcrMaxWrongPixels)
-    {
+            if (_splitItem.NikseBitmap != null)
+            {
+                NOcrChar = new NOcrChar
+                {
+                    Width = _splitItem.NikseBitmap.Width,
+                    Height = _splitItem.NikseBitmap.Height,
+                    MarginTop = _splitItem.Top,
+                };
+
+                ResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, NOcrChar.Width, NOcrChar.Height, NOcrChar.MarginTop);
+
+                CurrentBitmap = _splitItem.NikseBitmap!.GetBitmap().ToAvaloniaBitmap();
+
+                NOcrDrawingCanvas.BackgroundImage = CurrentBitmap;
+                NOcrDrawingCanvas.ZoomFactor = 4;
+            }
+        }
 
     }
 
@@ -146,8 +156,6 @@ public partial class NOcrInspectViewModel : ObservableObject
         }
 
         InitSentenceBitmap(item);
-
-        SetTitle();
     }
 
     private void InitSentenceBitmap(OcrSubtitleItem item)
@@ -192,31 +200,16 @@ public partial class NOcrInspectViewModel : ObservableObject
     {
         NOcrChar.Text = NewText;
         OkPressed = true;
-        SaveSettings();
         Close();
     }
 
     [RelayCommand]
-    private void UseOnce()
+    private void Cancel()
     {
-        UseOncePressed = true;
         Close();
     }
 
-    [RelayCommand]
-    private void Skip()
-    {
-        SkipPressed = true;
-        Close();
-    }
-
-    [RelayCommand]
-    private void Abort()
-    {
-        AbortPressed = true;
-        Close();
-    }
-
+  
     [RelayCommand]
     private void DrawAgain()
     {
@@ -270,26 +263,9 @@ public partial class NOcrInspectViewModel : ObservableObject
         NOcrDrawingCanvas.InvalidateVisual();
     }
 
-    private void SetTitle()
-    {
-        Title = $"Add nOCR character for line  {_startFromNumber}, character {_letters.IndexOf(_splitItem) + 1} of {_letters.Count} using database \"{Path.GetFileNameWithoutExtension(_nOcrDb.FileName)}\"";
-    }
-
     internal void TextBoxNewOnKeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Enter && !string.IsNullOrWhiteSpace(TextBoxNew.Text))
-        {
-            Ok();
-        }
-        else if (e.Key == Key.Escape)
-        {
-            Abort();
-        }
-    }
-
-    internal void TextBoxNewOnKeyUp(object? sender, KeyEventArgs e)
-    {
-        if (SubmitOnFirstLetter && NewText.Length >= 1)
+        if (e.Key == Key.Escape)
         {
             Ok();
         }

@@ -1,7 +1,10 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language.Translate;
+﻿using System;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language.Translate;
 
 public class LanguageOcr
 {
+
     public string LinesToDraw { get; set; }
     public string CurrentImage { get; set; }
     public string AutoDrawAgain { get; set; }
@@ -12,6 +15,8 @@ public class LanguageOcr
     public string Database { get; set; }
     public string MaxWrongPixels { get; set; }
     public string NumberOfPixelsIsSpace { get; set; }
+    public string InspectImageMatches { get; set; }
+    public string ResolutionXYAndTopmarginZ { get; set; }
 
     public LanguageOcr()
     {
@@ -25,5 +30,7 @@ public class LanguageOcr
         Database = "Database";
         MaxWrongPixels = "Max wrong pixels";
         NumberOfPixelsIsSpace = "Number of pixels is space";
+        InspectImageMatches = "Inspect image matches";
+        ResolutionXYAndTopmarginZ = "Resolution {0}x{1}, top margin {2}";
     }
 }

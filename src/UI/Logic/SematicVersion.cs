@@ -44,8 +44,9 @@ public class SemanticVersion
     private static int GetPreReleaseRank(string label) => label switch
     {
         "alpha" => 10,
-        "beta" => 20,
-        "rc" => 30,
+        "preview" => 20,
+        "beta" => 30,
+        "rc" => 40,
         _ => 1 // unknown tags treated lowest
     };
 

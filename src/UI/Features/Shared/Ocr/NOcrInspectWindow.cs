@@ -16,7 +16,7 @@ public class NOcrInspectWindow : Window
         _vm = vm;
         vm.Window = this;
         Icon = UiUtil.GetSeIcon();
-        Title = "";
+        Title = "nOCR inspect image matches";
         Width = 1200;
         Height = 700;
         MinWidth = 900;
@@ -29,12 +29,13 @@ public class NOcrInspectWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Whole image for subtitle
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Lines
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // Controls
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Buttons
             },
             ColumnDefinitions =
             {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
@@ -44,29 +45,21 @@ public class NOcrInspectWindow : Window
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
         };
 
-        var image = new Image
-        {
-            Source = vm.SentenceBitmap,
-            Stretch = Stretch.Uniform,
-            Margin = new Thickness(0, 0, 0, 10),
-        };
-
+        var linesView = MakeLinesView(vm);
+        var currentImageView = MakeCurrentImageView(vm);
         var controlsView = MakeControlsView(vm);
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
-        var buttonUseOnce = UiUtil.MakeButton(Se.Language.General.UseOnce, vm.UseOnceCommand);
-        var buttonSkip = UiUtil.MakeButton(Se.Language.General.Skip, vm.SkipCommand);
-        var buttonAbort = UiUtil.MakeButton(Se.Language.General.Abort, vm.AbortCommand);
-        var buttonBar = UiUtil.MakeButtonBar(buttonOk, buttonUseOnce, buttonSkip, buttonAbort);
+        var buttonBar = UiUtil.MakeButtonBar(buttonOk);
 
-        grid.Add(image, 0, 0);
-        grid.Add(controlsView, 1, 0);
-        grid.Add(buttonBar, 2, 0);
+        grid.Add(linesView, 0, 0, 1, 2);
+        grid.Add(currentImageView, 1, 0);
+        grid.Add(controlsView, 1, 1);
+        grid.Add(buttonBar, 2, 0, 1, 2);
 
         Content = grid;
 
         vm.TextBoxNew.KeyDown += vm.TextBoxNewOnKeyDown;
-        vm.TextBoxNew.KeyUp += vm.TextBoxNewOnKeyUp;
 
         Activated += delegate
         {
@@ -74,7 +67,21 @@ public class NOcrInspectWindow : Window
         };
     }
 
-    private static Grid MakeControlsView(NOcrInspectViewModel vm)
+    private static Border MakeLinesView(NOcrInspectViewModel vm)
+    {
+        var label = UiUtil.MakeLabel("Lines");
+
+        return UiUtil.MakeBorderForControl(label).WithMarginBottom(10);
+    }
+
+    private static Border MakeCurrentImageView(NOcrInspectViewModel vm)
+    {
+        var label = UiUtil.MakeLabel("Current image");
+
+        return UiUtil.MakeBorderForControl(label);
+    }
+
+    private static Border MakeControlsView(NOcrInspectViewModel vm)
     {
         var grid = new Grid
         {
@@ -174,7 +181,7 @@ public class NOcrInspectWindow : Window
         grid.Add(panelDrawControls, 0, 1);
         grid.Add(panelImage, 0, 2);
 
-        return grid;
+        return UiUtil.MakeBorderForControl(grid);
     }
 
     protected override void OnLoaded(RoutedEventArgs e)
