@@ -3,9 +3,6 @@ using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Logic.UndoRedo;
 
-// Delegate for applying state changes
-public delegate void StateAppliedHandler(UndoRedoItem item);
-
 public interface IUndoRedoManager : IDisposable
 {
     List<UndoRedoItem> UndoList { get; }

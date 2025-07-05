@@ -974,7 +974,7 @@ public partial class MainViewModel :
                 if (undoItem?.Hash == result.SelectedHistoryItem.Hash)
                 {
                     RestoreUndoRedoState(undoItem);
-                    ShowStatus("Undo performed: " + _undoRedoManager.UndoList.Count + " undo actions left");
+                    ShowUndoStatus();
                     break;
                 }
             }
@@ -1229,8 +1229,32 @@ public partial class MainViewModel :
         _undoRedoManager.StopChangeDetection();
         var undoRedoObject = _undoRedoManager.Undo()!;
         RestoreUndoRedoState(undoRedoObject);
-        ShowStatus("Undo performed: " + _undoRedoManager.UndoList.Count + " undo actions left");
+        ShowUndoStatus();
         _undoRedoManager.StartChangeDetection();
+    }
+
+    private void ShowUndoStatus()
+    {
+        if (_undoRedoManager.CanUndo)
+        {
+            ShowStatus(Se.Language.Main.UndoPerformedXActionLeft);
+        }
+        else
+        {
+            ShowStatus(Se.Language.Main.UndoPerformed);
+        }
+    }
+
+    private void ShowRedoStatus()
+    {
+        if (_undoRedoManager.CanRedo)
+        {
+            ShowStatus(Se.Language.Main.RedoPerformedXActionLeft);
+        }
+        else
+        {
+            ShowStatus(Se.Language.Main.RedoPerformed);
+        }
     }
 
     private void PerformRedo()
@@ -1244,7 +1268,7 @@ public partial class MainViewModel :
         _undoRedoManager.StopChangeDetection();
         var undoRedoObject = _undoRedoManager.Redo()!;
         RestoreUndoRedoState(undoRedoObject);
-        ShowStatus("Redo performed: " + _undoRedoManager.RedoList.Count + " redo actions left");
+        ShowRedoStatus();
         _undoRedoManager.StartChangeDetection();
     }
 

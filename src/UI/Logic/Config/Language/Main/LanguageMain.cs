@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Nikse.SubtitleEdit.Logic.Config.Language.Main;
+﻿namespace Nikse.SubtitleEdit.Logic.Config.Language.Main;
 
 public class LanguageMain
 {
@@ -17,6 +15,10 @@ public class LanguageMain
     public string LineXTextAndTimingChanged { get; set; }
     public string LineXTextChangedFromYToZ { get; set; }
     public string LineXTimingChanged { get; set; }
+    public string UndoPerformed { get; set; }
+    public string RedoPerformed { get; set; }
+    public string RedoPerformedXActionLeft { get; set; }
+    public string UndoPerformedXActionLeft { get; set; }
 
     public LanguageMain()
     {
@@ -31,5 +33,9 @@ public class LanguageMain
         LineXTextAndTimingChanged = "Line {0}: Text and timing changed";
         LineXTextChangedFromYToZ = "Line {0}: Text changed from '{1}' to '{2}'";
         LineXTimingChanged = "Line {0}: Timing changed";
+        UndoPerformed = "Undo performed";
+        RedoPerformed = "Redo performed";
+        RedoPerformedXActionLeft = "Redo performed (actions left: {0})";
+        UndoPerformedXActionLeft = "Undo performed (actions left: {0})";
     }
 }

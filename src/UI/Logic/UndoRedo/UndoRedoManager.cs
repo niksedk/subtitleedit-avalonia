@@ -43,7 +43,18 @@ public class UndoRedoManager : IUndoRedoManager
         {
             lock (_lock)
             {
-                return _undoList.Count > 0;
+                if (_undoList.Count == 0)
+                {
+                    return false;
+                }
+
+                var currentHash = _undoRedoClient?.GetFastHash() ?? 0;
+                if (_undoList.Count == 1 && _undoList[0].Hash == currentHash)
+                {
+                    return false;
+                }
+
+                return true;
             }
         }
     }
@@ -153,7 +164,7 @@ public class UndoRedoManager : IUndoRedoManager
                 _undoList.RemoveAt(_undoList.Count - 1);
             }
 
-            if (_undoRedoClient != null)
+            if (_undoRedoClient != null && !_redoList.Contains(undoItem))
             {
                 _redoList.Add(undoItem);
             }
@@ -168,7 +179,7 @@ public class UndoRedoManager : IUndoRedoManager
                     _undoList.RemoveAt(_undoList.Count - 1);
                 }
 
-                if (_undoRedoClient != null)
+                if (_undoRedoClient != null && !_redoList.Contains(undoItem))
                 {
                     _redoList.Add(undoItem);
                 }
