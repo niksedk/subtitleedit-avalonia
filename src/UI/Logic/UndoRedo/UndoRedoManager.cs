@@ -10,9 +10,7 @@ public class UndoRedoManager : IUndoRedoManager
     private readonly List<UndoRedoItem> _redoList = new();
     private readonly object _lock = new();
     private Timer? _changeDetectionTimer;
-    private IUndoRedoClient? _hashProvider;
-
-    private int _lastKnownHash;
+    private IUndoRedoClient? _undoRedoClient;
     private bool _isChangeDetectionActive;
     private bool _disposed;
 
@@ -88,8 +86,8 @@ public class UndoRedoManager : IUndoRedoManager
     {
         lock (_lock)
         {
-            _hashProvider = hashProvider;
-            _lastKnownHash = hashProvider.GetFastHash();
+            _undoRedoClient = hashProvider;
+            //_lastKnownHash = hashProvider.GetFastHash();
 
             var detectionInterval = interval ?? TimeSpan.FromSeconds(1);
             _changeDetectionTimer = new Timer(CheckForChanges, null, Timeout.InfiniteTimeSpan, detectionInterval);
@@ -109,10 +107,10 @@ public class UndoRedoManager : IUndoRedoManager
             {
                 _isChangeDetectionActive = true;
 
-                if (_hashProvider != null)
-                {
-                    _lastKnownHash = _hashProvider.GetFastHash();
-                }
+                //if (_undoRedoClient != null)
+                //{
+                //    _lastKnownHash = _undoRedoClient.GetFastHash();
+                //}
 
                 _changeDetectionTimer.Change(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
             }
@@ -144,10 +142,10 @@ public class UndoRedoManager : IUndoRedoManager
 
             _redoList.Clear();
 
-            if (_hashProvider != null)
-            {
-                _lastKnownHash = _hashProvider.GetFastHash();
-            }
+            //if (_undoRedoClient != null)
+            //{
+            //    _lastKnownHash = _undoRedoClient.GetFastHash();
+            //}
         }
 
         // Apply the current state (the action represents the current state)
@@ -165,7 +163,7 @@ public class UndoRedoManager : IUndoRedoManager
                 return null;
             }
 
-            var currentHash = _hashProvider?.GetFastHash() ?? 0;
+            var currentHash = _undoRedoClient?.GetFastHash() ?? 0;
 
             currentItem = _undoList.Last();
             if (_undoList.Count > 1) // always keep last undo item (initial starting state)
@@ -184,7 +182,7 @@ public class UndoRedoManager : IUndoRedoManager
 
             _redoList.Add(currentItem);
 
-            _lastKnownHash = currentItem.Hash;
+            //_lastKnownHash = currentItem.Hash;
 
             return currentItem;
         }
@@ -218,10 +216,10 @@ public class UndoRedoManager : IUndoRedoManager
             _undoList.Add(item);
 
             // Update last known hash if hash provider is available
-            if (_hashProvider != null)
-            {
-                _lastKnownHash = _hashProvider.GetFastHash();
-            }
+            //if (_undoRedoClient != null)
+            //{
+            //    _lastKnownHash = _undoRedoClient.GetFastHash();
+            //}
         }
 
         // Apply the redo state
@@ -233,48 +231,43 @@ public class UndoRedoManager : IUndoRedoManager
         return item;
     }
 
-    private void CheckForChanges(object? state)
+    public void CheckForChanges(object? state)
     {
-        if (_hashProvider == null || !_isChangeDetectionActive)
+        if (_undoRedoClient == null || !_isChangeDetectionActive)
         {
             return;
         }
 
         try
         {
-            var currentHash = _hashProvider.GetFastHash();
-
             lock (_lock)
             {
+                //var currentHash = _hashProvider.GetFastHash();
                 var lastUndoItem = _undoList.LastOrDefault();
-                if (lastUndoItem != null && lastUndoItem.Hash == currentHash)
-                {
-                    return;
-                }
+                //if (lastUndoItem != null && lastUndoItem.Hash == currentHash)
+                //{
+                //    return;
+                //}
 
-                if (_lastKnownHash != currentHash)
+                //if (_lastKnownHash != currentHash)
                 {
-                    _lastKnownHash = currentHash;
+                   // _lastKnownHash = currentHash;
 
-                    var undoRedoItem = _hashProvider.MakeUndoRedoObject("Changes detected");
+                    var undoRedoItem = _undoRedoClient.MakeUndoRedoObject("Changes detected");
                     if (undoRedoItem == null)
                     {
                         return;
                     }
-                    //if (undoRedoItem.Hash == _lastKnownHash)
-                    //{
-                    //    return;
-                    //}
 
                     if (lastUndoItem != null)
                     {
-                        if (lastUndoItem.Subtitles.Length + 1 == undoRedoItem.Subtitles.Length)
+                        if (lastUndoItem.Subtitles.Length > undoRedoItem.Subtitles.Length)
                         {
-                            undoRedoItem.Description = "Changes detected: line added";
+                            undoRedoItem.Description = "Lines deleted: " + (lastUndoItem.Subtitles.Length - undoRedoItem.Subtitles.Length);
                         }
-                        else if (lastUndoItem.Subtitles.Length - 1 == undoRedoItem.Subtitles.Length)
+                        else if (lastUndoItem.Subtitles.Length < undoRedoItem.Subtitles.Length)
                         {
-                            undoRedoItem.Description = "Changes detected: line deleted";
+                            undoRedoItem.Description = "Lines added: " + (undoRedoItem.Subtitles.Length - lastUndoItem.Subtitles.Length);
                         }
                         else if (lastUndoItem.Subtitles.Length == undoRedoItem.Subtitles.Length)
                         {
@@ -284,7 +277,9 @@ public class UndoRedoManager : IUndoRedoManager
                                 var p1 = lastUndoItem.Subtitles[i];
                                 var p2 = undoRedoItem.Subtitles[i];
 
-                                if (p1.Text != p2.Text || p1.StartTime != p2.StartTime || p1.EndTime != p2.EndTime)
+                                if (p1.Text != p2.Text || 
+                                    p1.StartTime.TotalMilliseconds != p2.StartTime.TotalMilliseconds || 
+                                    p1.EndTime.TotalMilliseconds != p2.EndTime.TotalMilliseconds)
                                 {
                                     difference = true;
                                     break;

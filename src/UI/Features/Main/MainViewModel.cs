@@ -958,11 +958,15 @@ public partial class MainViewModel :
             return;
         }
 
+        _undoRedoManager.CheckForChanges(null);
+        _undoRedoManager.StopChangeDetection();
+
         var viewModel = await _windowService.ShowDialogAsync<ShowHistoryWindow, ShowHistoryViewModel>(Window!, vm =>
         {
             vm.Initialize(_undoRedoManager);
         });
 
+        _undoRedoManager.StartChangeDetection();
         _shortcutManager.ClearKeys();
     }
 
@@ -1207,6 +1211,7 @@ public partial class MainViewModel :
             return;
         }
 
+        _undoRedoManager.CheckForChanges(null);
         _undoRedoManager.StopChangeDetection();
         var undoRedoObject = _undoRedoManager.Undo()!;
         RestoreUndoRedoState(undoRedoObject);
@@ -1221,6 +1226,7 @@ public partial class MainViewModel :
             return;
         }
 
+        _undoRedoManager.CheckForChanges(null);
         _undoRedoManager.StopChangeDetection();
         var undoRedoObject = _undoRedoManager.Redo()!;
         RestoreUndoRedoState(undoRedoObject);
@@ -2364,6 +2370,11 @@ public partial class MainViewModel :
 
     private void MakeSubtitleTextInfo(string text, SubtitleLineViewModel item)
     {
+        if (text == null)
+        {
+            text = string.Empty;
+        }
+
         text = HtmlUtil.RemoveHtmlTags(text, true);
         var totalLength = text.CountCharacters(false);
         var cps = new Paragraph(text, item.StartTime.TotalMilliseconds, item.EndTime.TotalMilliseconds)

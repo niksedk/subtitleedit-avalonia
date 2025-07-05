@@ -374,6 +374,7 @@ public static class InitListViewAndEditBox
             },
             FontSize = Se.Settings.Appearance.SubtitleTextBoxFontSize,
             FontWeight = Se.Settings.Appearance.SubtitleTextBoxFontBold ? FontWeight.Bold : FontWeight.Normal,
+            IsUndoEnabled = false,
         };
         vm.EditTextBox = textBox;
         textEditGrid.Children.Add(textBox);
@@ -399,7 +400,7 @@ public static class InitListViewAndEditBox
         textEditGrid.Children.Add(textTotalLengthLabel);
         Grid.SetRow(textTotalLengthLabel, 2);
 
-        
+
         var panelSingleLineLengths = new StackPanel
         {
             HorizontalAlignment = HorizontalAlignment.Left,
