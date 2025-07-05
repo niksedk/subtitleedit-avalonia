@@ -1232,7 +1232,7 @@ public partial class MainViewModel :
     {
         if (_undoRedoManager.CanUndo)
         {
-            ShowStatus(Se.Language.Main.UndoPerformedXActionLeft);
+            ShowStatus(string.Format(Se.Language.Main.UndoPerformedXActionLeft, _undoRedoManager.UndoList.Count));
         }
         else
         {
@@ -1244,7 +1244,7 @@ public partial class MainViewModel :
     {
         if (_undoRedoManager.CanRedo)
         {
-            ShowStatus(Se.Language.Main.RedoPerformedXActionLeft);
+            ShowStatus(string.Format(Se.Language.Main.RedoPerformedXActionLeft, _undoRedoManager.RedoList.Count));
         }
         else
         {
@@ -2042,6 +2042,11 @@ public partial class MainViewModel :
 
     public bool IsTyping()
     {
+        if (_lastKeyPressedTicks == 0)
+        {
+            return false;
+        }
+
         var ticks = Stopwatch.GetTimestamp();
         var timeSpan = TimeSpan.FromTicks(ticks - _lastKeyPressedTicks);
         if (timeSpan.Milliseconds < 500)
@@ -2049,7 +2054,7 @@ public partial class MainViewModel :
             return true;
         }
 
-        return false; 
+        return false;
     }
 
     public int GetFastHash()
