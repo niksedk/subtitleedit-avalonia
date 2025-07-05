@@ -1,0 +1,185 @@
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.Media;
+using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
+
+namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
+
+public class NOcrInspectWindow : Window
+{
+    private readonly NOcrInspectViewModel _vm;
+
+    public NOcrInspectWindow(NOcrInspectViewModel vm)
+    {
+        _vm = vm;
+        vm.Window = this;
+        Icon = UiUtil.GetSeIcon();
+        Title = "";
+        Width = 1200;
+        Height = 700;
+        MinWidth = 900;
+        MinHeight = 600;
+        CanResize = true;
+        WindowStartupLocation = WindowStartupLocation.CenterOwner;
+        DataContext = vm;
+
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Whole image for subtitle
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // Controls
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Buttons
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Margin = UiUtil.MakeWindowMargin(),
+            ColumnSpacing = 10,
+            Width = double.NaN,
+            Height = double.NaN,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+        };
+
+        var image = new Image
+        {
+            Source = vm.SentenceBitmap,
+            Stretch = Stretch.Uniform,
+            Margin = new Thickness(0, 0, 0, 10),
+        };
+
+        var controlsView = MakeControlsView(vm);
+
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
+        var buttonUseOnce = UiUtil.MakeButton(Se.Language.General.UseOnce, vm.UseOnceCommand);
+        var buttonSkip = UiUtil.MakeButton(Se.Language.General.Skip, vm.SkipCommand);
+        var buttonAbort = UiUtil.MakeButton(Se.Language.General.Abort, vm.AbortCommand);
+        var buttonBar = UiUtil.MakeButtonBar(buttonOk, buttonUseOnce, buttonSkip, buttonAbort);
+
+        grid.Add(image, 0, 0);
+        grid.Add(controlsView, 1, 0);
+        grid.Add(buttonBar, 2, 0);
+
+        Content = grid;
+
+        vm.TextBoxNew.KeyDown += vm.TextBoxNewOnKeyDown;
+        vm.TextBoxNew.KeyUp += vm.TextBoxNewOnKeyUp;
+
+        Activated += delegate
+        {
+            vm.TextBoxNew.Focus(); // hack to make OnKeyDown work
+        };
+    }
+
+    private static Grid MakeControlsView(NOcrInspectViewModel vm)
+    {
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnSpacing = 20,
+            Width = double.NaN,
+        };
+
+        vm.TextBoxNew = UiUtil.MakeTextBox(100, vm, nameof(vm.NewText));
+        var image = new Image
+        {
+            Margin = new Thickness(5),
+            Source = vm.CurrentBitmap,
+            Stretch = Stretch.Uniform,
+            MinWidth = 30,
+            MinHeight = 30,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+        };
+
+        var panelCurrentImage = new StackPanel
+        {
+            Background = new SolidColorBrush(Colors.LightGray),
+            Children = { image },
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+            Margin = new Thickness(0, 0, 0, 5),
+        };
+
+        var panelCurrent = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Vertical,
+            Children =
+            {
+                UiUtil.MakeLabel(Se.Language.Ocr.CurrentImage).WithBold(),
+                panelCurrentImage,
+                vm.TextBoxNew,
+                UiUtil.MakeCheckBox(Se.Language.General.Italic, vm, nameof(vm.IsNewTextItalic)),
+                UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.ResolutionAndTopMargin))
+            },
+        };
+
+        var panelDrawControls = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Vertical,
+            Children =
+            {
+                UiUtil.MakeLabel(Se.Language.Ocr.LinesToDraw).WithBold(),
+                UiUtil.MakeComboBox(vm.NoOfLinesToAutoDrawList, vm, nameof(vm.SelectedNoOfLinesToAutoDraw)),
+                UiUtil.MakeButton(Se.Language.Ocr.AutoDrawAgain, vm.DrawAgainCommand).WithMinWidth(100).WithMarginTop(10).WithLeftAlignment(),
+                UiUtil.MakeButton(Se.Language.General.Clear, vm.ClearDrawCommand).WithMinWidth(100).WithMarginTop(5).WithLeftAlignment(),
+            }
+        };
+
+        vm.NOcrDrawingCanvas.SetStrokeWidth(1);
+        var borderDrawingCanvas = new Border
+        {
+            BorderThickness = new Thickness(1),
+            BorderBrush = new SolidColorBrush(Colors.Black),
+            Child = vm.NOcrDrawingCanvas,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+        };
+
+        var panelZoom = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 5),
+            Children =
+            {
+                UiUtil.MakeButton(vm.ZoomOutCommand, IconNames.MdiMinus),
+                UiUtil.MakeButton(vm.ZoomInCommand, IconNames.MdiPlus),
+            }
+        };
+
+        var panelImage = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Vertical,
+            Children =
+            {
+                panelZoom,
+                borderDrawingCanvas,
+            }
+        };
+
+        grid.Add(panelCurrent, 0, 0);
+        grid.Add(panelDrawControls, 0, 1);
+        grid.Add(panelImage, 0, 2);
+
+        return grid;
+    }
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+        Title = _vm.Title;
+    }
+}

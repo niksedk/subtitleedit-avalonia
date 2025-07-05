@@ -142,5 +142,6 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<GetKeyViewModel>();
         collection.AddTransient<NOcrCharacterAddViewModel>();
         collection.AddTransient<NOcrCharacterInspectViewModel>();
+        collection.AddTransient<NOcrInspectViewModel>();
     }
 }

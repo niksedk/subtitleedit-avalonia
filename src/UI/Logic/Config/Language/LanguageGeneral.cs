@@ -147,10 +147,10 @@ public class LanguageGeneral
     public string Generate { get; set; }
     public string BatchMode { get; set; }
     public string SingleMode { get; set; }
-    public string Add { get; internal set; }
-    public string AddDotDotDot { get; internal set; }
-    public string Remove { get; internal set; }
-    public string Clear { get; internal set; }
+    public string Add { get; set; }
+    public string AddDotDotDot { get; set; }
+    public string Remove { get; set; }
+    public string Clear { get; set; }
     public string PickSubtitleFile { get; set; }
     public string PickVideoFile { get; set; }
     public string VideoFile { get; set; }
@@ -191,8 +191,11 @@ public class LanguageGeneral
     public string Appearance { get; set; }
     public string LinesDeletedX { get; set; }
     public string LinesAddedX { get; set; }
-    public string Time { get; internal set; }
-    public string Description { get; internal set; }
+    public string Time { get; set; }
+    public string Description { get; set; }
+    public string Image { get; set; }
+    public string ApiKey { get; set; }
+    public string ExportDotDotDot { get; set; }
 
     public LanguageGeneral()
     {
@@ -385,5 +388,8 @@ public class LanguageGeneral
         LinesAddedX = "Lines added: {0}";
         Time = "Time";
         Description = "Description";
+        Image = "Image";
+        ApiKey = "API key";
+        ExportDotDotDot = "Export...";
     }
 }

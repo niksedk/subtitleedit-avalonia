@@ -8,6 +8,7 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
@@ -83,25 +84,25 @@ public class OcrWindow : Window
             Margin = new Thickness(0, 0, 0, 10),
             Children =
             {
-                UiUtil.MakeLabel("OCR Engine"),
+                UiUtil.MakeLabel(Se.Language.Ocr.OcrEngine),
                 comboBoxEngines,
 
                 // NOcr settings
-                UiUtil.MakeLabel("Database", nameof(vm.IsNOcrVisible)),
+                UiUtil.MakeLabel(Se.Language.Ocr.Database, nameof(vm.IsNOcrVisible)),
                 UiUtil.MakeComboBox( vm.NOcrDatabases, vm, nameof(vm.SelectedNOcrDatabase), nameof(vm.IsNOcrVisible))
                     .WithMarginRight(10)
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
-                UiUtil.MakeLabel("Max wrong pixels", nameof(vm.IsNOcrVisible)),
+                UiUtil.MakeLabel(Se.Language.Ocr.MaxWrongPixels, nameof(vm.IsNOcrVisible)),
                 UiUtil.MakeComboBox(vm.NOcrMaxWrongPixelsList, vm, nameof(vm.SelectedNOcrMaxWrongPixels), nameof(vm.IsNOcrVisible))
                     .WithMarginRight(10)
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
-                UiUtil.MakeLabel("Number of pixels is space", nameof(vm.IsNOcrVisible)),
+                UiUtil.MakeLabel(Se.Language.Ocr.NumberOfPixelsIsSpace, nameof(vm.IsNOcrVisible)),
                 UiUtil.MakeComboBox(vm.NOcrPixelsAreSpaceList, vm, nameof(vm.SelectedNOcrPixelsAreSpace), nameof(vm.IsNOcrVisible))
                     .WithMarginRight(10)
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
 
                 // Tesseract settings
-                UiUtil.MakeLabel("Language", nameof(vm.IsTesseractVisible)),
+                UiUtil.MakeLabel(Se.Language.General.Language, nameof(vm.IsTesseractVisible)),
                 UiUtil.MakeComboBox( vm.TesseractDictionaryItems, vm, nameof(vm.SelectedTesseractDictionaryItem), nameof(vm.IsTesseractVisible))
                     .WithWidth(100)
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
@@ -109,12 +110,12 @@ public class OcrWindow : Window
                      .BindIsEnabled(vm, nameof(vm.IsOcrRunning), new InverseBooleanConverter()),
 
                 // Ollama settings
-                UiUtil.MakeLabel("Language", nameof(vm.IsOllamaVisible)),
+                UiUtil.MakeLabel(Se.Language.General.Language, nameof(vm.IsOllamaVisible)),
                 UiUtil.MakeComboBox( vm.OllamaLanguages, vm, nameof(vm.SelectedOllamaLanguage), nameof(vm.IsOllamaVisible))
                     .WithWidth(100)
                     .WithMarginRight(10)
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
-                UiUtil.MakeLabel("Model", nameof(vm.IsOllamaVisible)),
+                UiUtil.MakeLabel(Se.Language.General.Model, nameof(vm.IsOllamaVisible)),
                 UiUtil.MakeTextBox(200, vm, nameof(vm.OllamaModel))
                 .BindIsVisible(vm, nameof(vm.IsOllamaVisible))
                 .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
@@ -123,18 +124,18 @@ public class OcrWindow : Window
                 .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
 
                 // Google vision settings
-                UiUtil.MakeLabel("Language", nameof(vm.IsGoogleVisionVisible)),
+                UiUtil.MakeLabel(Se.Language.General.Language, nameof(vm.IsGoogleVisionVisible)),
                 UiUtil.MakeComboBox( vm.GoogleVisionLanguages, vm, nameof(vm.SelectedGoogleVisionLanguage), nameof(vm.IsGoogleVisionVisible))
                     .WithWidth(100)
                     .WithMarginRight(10)
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
-                UiUtil.MakeLabel("API key", nameof(vm.IsGoogleVisionVisible)),
+                UiUtil.MakeLabel(Se.Language.General.ApiKey, nameof(vm.IsGoogleVisionVisible)),
                 UiUtil.MakeTextBox(200, vm, nameof(vm.GoogleVisionApiKey))
                 .BindIsVisible(vm, nameof(vm.IsGoogleVisionVisible))
                 .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
 
                 // Paddle OCR settings
-                UiUtil.MakeLabel("Language", nameof(vm.IsPaddleOcrVisible)),
+                UiUtil.MakeLabel(Se.Language.General.Language, nameof(vm.IsPaddleOcrVisible)),
                 UiUtil.MakeComboBox( vm.PaddleOcrLanguages, vm, nameof(vm.SelectedPaddleOcrLanguage), nameof(vm.IsPaddleOcrVisible))
                     .WithWidth(100)
                     .WithMarginRight(10)
@@ -165,28 +166,28 @@ public class OcrWindow : Window
             {
                 new DataGridTextColumn
                 {
-                    Header = "#",
+                    Header = Se.Language.General.NumberSymbol,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(OcrSubtitleItem.Number)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Show",
+                    Header = Se.Language.General.Show,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(OcrSubtitleItem.StartTime)) { Converter = fullTimeConverter },
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Duration",
+                    Header = Se.Language.General.Duration,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(OcrSubtitleItem.Duration)) { Converter = shortTimeConverter },
                     IsReadOnly = true,
                 },
                 new DataGridTemplateColumn
                 {
-                    Header = "Image",
+                    Header =Se.Language.General.Image,
                     IsReadOnly = true,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     CellTemplate = new FuncDataTemplate<OcrSubtitleItem>((item, _) =>
@@ -214,7 +215,7 @@ public class OcrWindow : Window
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Text",
+                    Header = Se.Language.General.Text,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(OcrSubtitleItem.Text)),
                     IsReadOnly = true,
@@ -247,7 +248,7 @@ public class OcrWindow : Window
             Margin = new Thickness(10),
             Children =
             {
-                UiUtil.MakeLabel("Text").WithAlignmentTop(),
+                UiUtil.MakeLabel(Se.Language.General.Text).WithAlignmentTop(),
                 new TextBox
                 {
                     Width = 300,
@@ -311,11 +312,15 @@ public class OcrWindow : Window
         statusText.Bind(TextBlock.TextProperty, new Binding(nameof(vm.ProgressText)));
         statusText.Bind(TextBlock.IsVisibleProperty, new Binding(nameof(vm.IsOcrRunning)) { Source = vm });
 
-        var buttonStart = UiUtil.MakeButton("Start OCR", vm.StartOcrCommand)
+        var buttonStart = UiUtil.MakeButton(Se.Language.Ocr.StartOcr, vm.StartOcrCommand)
             .WithBindIsVisible(nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()).WithBottomAlignment();
-        var buttonPause = UiUtil.MakeButton("Pause OCR", vm.PauseOcrCommand)
+        var buttonPause = UiUtil.MakeButton(Se.Language.Ocr.PauseOcr, vm.PauseOcrCommand)
             .WithBindIsVisible(nameof(OcrViewModel.IsOcrRunning)).WithBottomAlignment();
-        var buttonExport = UiUtil.MakeButton("Export...", vm.ExportCommand)
+        var buttonInspect = UiUtil.MakeButton(Se.Language.Ocr.InspectLine, vm.InspectLineCommand)
+            .WithBindIsVisible(nameof(OcrViewModel.IsInspectLineVisible))
+            .WithBindIsEnabled(nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter())
+            .WithBottomAlignment();
+        var buttonExport = UiUtil.MakeButton(Se.Language.General.ExportDotDotDot, vm.ExportCommand)
             .WithBindIsEnabled(nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()).WithBottomAlignment();
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand).WithBottomAlignment();
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand).WithBottomAlignment();
@@ -335,6 +340,7 @@ public class OcrWindow : Window
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
             },
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -344,9 +350,10 @@ public class OcrWindow : Window
         grid.Add(statusText, 0, 0);
         grid.Add(buttonStart, 0, 1);
         grid.Add(buttonPause, 0, 2);
-        grid.Add(buttonExport, 0, 3);
-        grid.Add(buttonOk, 0, 4);
-        grid.Add(buttonCancel, 0, 5);
+        grid.Add(buttonInspect, 0, 3);
+        grid.Add(buttonExport, 0, 4);
+        grid.Add(buttonOk, 0, 5);
+        grid.Add(buttonCancel, 0, 6);
 
         return grid;
     }

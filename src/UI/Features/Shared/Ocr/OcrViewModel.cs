@@ -55,6 +55,7 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private bool _isPaddleOcrVisible;
     [ObservableProperty] private bool _isGoogleVisionVisible;
     [ObservableProperty] private bool _nOcrDrawUnknownText;
+    [ObservableProperty] private bool _isInspectLineVisible;
     [ObservableProperty] private string _googleVisionApiKey;
     [ObservableProperty] private ObservableCollection<OcrLanguage> _googleVisionLanguages;
     [ObservableProperty] private OcrLanguage? _selectedGoogleVisionLanguage;
@@ -171,6 +172,21 @@ public partial class OcrViewModel : ObservableObject
     [RelayCommand]
     private void Export()
     {
+    }
+
+    [RelayCommand]
+    private async Task InspectLine()
+    {
+        var result = await _windowService
+            .ShowDialogAsync<NOcrInspectWindow, NOcrInspectViewModel>(Window!,
+            vm =>
+            {
+                vm.Initialize(SelectedOcrSubtitleItem, _nOcrDb, SelectedNOcrMaxWrongPixels);
+            });
+
+        if (result.OkPressed)
+        {
+        }
     }
 
     [RelayCommand]
@@ -715,6 +731,7 @@ public partial class OcrViewModel : ObservableObject
     internal void EngineSelectionChanged()
     {
         IsNOcrVisible = SelectedOcrEngine?.EngineType == OcrEngineType.nOcr;
+        IsInspectLineVisible = SelectedOcrEngine?.EngineType == OcrEngineType.nOcr;
         IsOllamaVisible = SelectedOcrEngine?.EngineType == OcrEngineType.Ollama;
         IsTesseractVisible = SelectedOcrEngine?.EngineType == OcrEngineType.Tesseract;
         IsPaddleOcrVisible = SelectedOcrEngine?.EngineType == OcrEngineType.PaddleOcr;
