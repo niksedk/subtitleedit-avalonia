@@ -16,7 +16,7 @@ public class ShowHistoryWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = Se.Language.Edit.ShowHistory;
-        Width = 710;
+        Width = 810;
         Height = 640;
         CanResize = true;
 

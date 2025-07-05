@@ -2040,6 +2040,18 @@ public partial class MainViewModel :
         _videoFileName = string.Empty;
     }
 
+    public bool IsTyping()
+    {
+        var ticks = Stopwatch.GetTimestamp();
+        var timeSpan = TimeSpan.FromTicks(ticks - _lastKeyPressedTicks);
+        if (timeSpan.Milliseconds < 500)
+        {
+            return true;
+        }
+
+        return false; 
+    }
+
     public int GetFastHash()
     {
         var pre = _subtitleFileName + SelectedEncoding.DisplayName;

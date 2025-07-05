@@ -226,6 +226,11 @@ public class UndoRedoManager : IUndoRedoManager
             return;
         }
 
+        if (_undoRedoClient.IsTyping())
+        {
+            return; // Skip change detection while typing
+        }
+
         try
         {
             lock (_lock)
