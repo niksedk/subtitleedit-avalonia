@@ -56,7 +56,6 @@ public partial class NOcrInspectViewModel : ObservableObject
     public bool UseOncePressed { get; set; }
 
     private List<OcrSubtitleItem> _ocrSubtitleItems;
-    private int _startFromNumber;
     private int _maxWrongPixels;
     private NOcrDb _nOcrDb;
 
