@@ -1,4 +1,5 @@
-﻿using Nikse.SubtitleEdit.Logic.Config;
+﻿using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
 using System;
 using System.Collections.Generic;
@@ -172,7 +173,7 @@ public class UndoRedoManager : IUndoRedoManager
             // Always add the returned undo item to redo list (unless it's already there)
             if (undoItem != null && _undoRedoClient != null && !_redoList.Contains(undoItem))
             {
-                _redoList.Add(undoItem);
+                _redoList.Add(UndoRedoItem.Clone(undoItem)!);
             }
 
             return undoItem;
@@ -193,7 +194,7 @@ public class UndoRedoManager : IUndoRedoManager
             // Add the current item to redo list before getting the next one
             if (_undoRedoClient != null && !_redoList.Contains(undoItem))
             {
-                _redoList.Add(undoItem);
+                _redoList.Add(UndoRedoItem.Clone(undoItem)!);
             }
 
             undoItem = _undoList.Last();
@@ -203,7 +204,7 @@ public class UndoRedoManager : IUndoRedoManager
             }
         }
 
-        return undoItem;
+        return UndoRedoItem.Clone(undoItem);
     }
 
     public UndoRedoItem? Redo()
@@ -223,7 +224,7 @@ public class UndoRedoManager : IUndoRedoManager
                 _undoList.Add(item);
             }
 
-            return item;
+            return UndoRedoItem.Clone(item);
         }
     }
 

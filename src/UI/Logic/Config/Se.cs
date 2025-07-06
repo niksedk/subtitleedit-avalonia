@@ -161,6 +161,16 @@ public class Se
         Shortcuts = new List<SeShortCut>();
     }
 
+    private string GetCommandOrWin()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            return "Win";
+        }
+
+        return "Ctrl";
+    }
+
     public void InitializeMainShortcuts(MainViewModel vm)
     {
         if (Shortcuts.Count > 0)
@@ -171,21 +181,21 @@ public class Se
         // Default shortcuts
         Shortcuts =
         [
-            new(nameof(vm.UndoCommand), new List<string> { "Ctrl", "Z" }),
-            new(nameof(vm.RedoCommand), new List<string> { "Ctrl", "Y" }),
-            new(nameof(vm.ShowGoToLineCommand), new List<string> { "Ctrl", "G" }),
+            new(nameof(vm.UndoCommand), new List<string> { GetCommandOrWin(), "Z" }),
+            new(nameof(vm.RedoCommand), new List<string> { GetCommandOrWin(), "Y" }),
+            new(nameof(vm.ShowGoToLineCommand), new List<string> { GetCommandOrWin(), "G" }),
             new(nameof(vm.GoToPreviousLineCommand), new List<string> { "Alt", "Up" }),
             new(nameof(vm.GoToNextLineCommand), new List<string> { "Alt", "Down" }),
-            new(nameof(vm.SelectAllLinesCommand), new List<string> { "Ctrl", "A" }, ShortcutCategory.SubtitleGrid),
-            new(nameof(vm.InverseSelectionCommand), new List<string> { "Ctrl", "Shift", "I" }, ShortcutCategory.SubtitleGrid),
-            new(nameof(vm.ToggleLinesItalicCommand), new List<string> { "Ctrl", "I" }, ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.SelectAllLinesCommand), new List<string> { GetCommandOrWin(), "A" }, ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.InverseSelectionCommand), new List<string> { GetCommandOrWin(), "Shift", "I" }, ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.ToggleLinesItalicCommand), new List<string> { GetCommandOrWin(), "I" }, ShortcutCategory.SubtitleGrid),
             new(nameof(vm.DeleteSelectedLinesCommand), new List<string> { "Delete" }, ShortcutCategory.SubtitleGrid),
-            new(nameof(vm.ShowFindCommand), new List<string> { "Ctrl", "F" }, ShortcutCategory.General),
+            new(nameof(vm.ShowFindCommand), new List<string> { GetCommandOrWin(), "F" }, ShortcutCategory.General),
             new(nameof(vm.FindNextCommand), new List<string> { "F3" }, ShortcutCategory.General),
-            new(nameof(vm.ShowReplaceCommand), new List<string> { "Ctrl", "H" }, ShortcutCategory.General),
-            new(nameof(vm.OpenDataFolderCommand), new List<string> { "Ctrl", "Alt", "Shift", "D" }, ShortcutCategory.General),
-            new(nameof(vm.CommandFileNewCommand), new List<string> { "Ctrl", "N" }, ShortcutCategory.General),
-            new(nameof(vm.CommandFileSaveCommand), new List<string> { "Ctrl", "S" }, ShortcutCategory.General),
+            new(nameof(vm.ShowReplaceCommand), new List<string> { GetCommandOrWin(), "H" }, ShortcutCategory.General),
+            new(nameof(vm.OpenDataFolderCommand), new List<string> { GetCommandOrWin(), "Alt", "Shift", "D" }, ShortcutCategory.General),
+            new(nameof(vm.CommandFileNewCommand), new List<string> { GetCommandOrWin(), "N" }, ShortcutCategory.General),
+            new(nameof(vm.CommandFileSaveCommand), new List<string> { GetCommandOrWin(), "S" }, ShortcutCategory.General),
         ];
     }
 

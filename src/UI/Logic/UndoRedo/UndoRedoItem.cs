@@ -1,5 +1,6 @@
 ﻿using Nikse.SubtitleEdit.Features.Main;
 using System;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Logic.UndoRedo;
 
@@ -15,12 +16,12 @@ public class UndoRedoItem
     public int Hash { get; set; }
 
     public UndoRedoItem(
-        string description, 
-        SubtitleLineViewModel[] subtitles, 
+        string description,
+        SubtitleLineViewModel[] subtitles,
         int hash,
-        string? subtitleFileName, 
-        int[] selectedLines, 
-        int caretIndex, 
+        string? subtitleFileName,
+        int[] selectedLines,
+        int caretIndex,
         int selectionLength)
     {
         Description = description;
@@ -31,5 +32,22 @@ public class UndoRedoItem
         SelectionLength = selectionLength;
         Created = DateTime.Now;
         Hash = hash;
+    }
+
+    public static UndoRedoItem? Clone(UndoRedoItem? item)
+    {
+        if (item == null)
+        {
+            return null;
+        }
+
+        return new UndoRedoItem(
+            item.Description,
+            item.Subtitles.Select(p => new SubtitleLineViewModel(p, false)).ToArray(),
+            item.Hash,
+            item.SubtitleFileName,
+            item.SelectedLines,
+            item.CaretIndex,
+            item.SelectionLength);
     }
 }

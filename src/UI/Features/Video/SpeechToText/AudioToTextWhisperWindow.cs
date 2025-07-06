@@ -104,7 +104,8 @@ public class AudioToTextWhisperWindow : Window
         var labelAdvancedSettings = UiUtil.MakeTextBlock(Se.Language.General.AdvancedSettings).WithMarginTop(15);
 
         var buttonAdvancedSettings = UiUtil.MakeButton(vm.ShowAdvancedSettingsCommand, IconNames.MdiSettings)
-                    .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
+                    .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled))
+                    .WithMarginTop(15);
 
         var textBoxAdvancedSettings = new TextBox()
         {
