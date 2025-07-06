@@ -246,6 +246,7 @@ public partial class OcrViewModel : ObservableObject
 
         if (result.NewPressed)
         {
+            var newResult = await _windowService.ShowDialogAsync<NOcrDbNewWindow, NOcrDbNewViewModel>(Window!);
             return;
         }
     }

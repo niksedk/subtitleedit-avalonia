@@ -143,5 +143,6 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<NOcrCharacterAddViewModel>();
         collection.AddTransient<NOcrInspectViewModel>();
         collection.AddTransient<NOcrSettingsViewModel>();
+        collection.AddTransient<NOcrDbNewViewModel>();
     }
 }
