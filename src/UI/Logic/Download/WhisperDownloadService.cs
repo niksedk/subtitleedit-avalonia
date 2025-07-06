@@ -12,6 +12,7 @@ public class WhisperDownloadService : IWhisperDownloadService
     private readonly HttpClient _httpClient;
     private const string WindowsUrl = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-176/whisper176-blas-bin-x64.zip";
     private const string MacUrl = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-176/WhisperCpp176MacArm.zip";
+    private const string LinuxUrl = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-176/whisper176-linux-x64.zip";
 
     private const string DownloadUrlConstMe = "https://github.com/Const-me/Whisper/releases/download/1.12.0/cli.zip";
 
@@ -61,6 +62,11 @@ public class WhisperDownloadService : IWhisperDownloadService
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             return WindowsUrl;
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            return LinuxUrl;
         }
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))

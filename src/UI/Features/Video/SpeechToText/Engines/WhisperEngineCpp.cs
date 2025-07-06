@@ -1,4 +1,5 @@
-﻿using Avalonia.Platform;
+﻿using Avalonia.Controls.Shapes;
+using Avalonia.Platform;
 using Nikse.SubtitleEdit.Core.AudioToText;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
@@ -50,7 +51,7 @@ public class WhisperEngineCpp : IWhisperEngine
             Directory.CreateDirectory(baseFolder);
         }
 
-        var folder = Path.Combine(baseFolder, "Cpp");
+        var folder = System.IO.Path.Combine(baseFolder, "Cpp");
         if (!Directory.Exists(folder))
         {
             Directory.CreateDirectory(folder);
@@ -63,7 +64,7 @@ public class WhisperEngineCpp : IWhisperEngine
     {
         var baseFolder = GetAndCreateWhisperFolder();
 
-        var folder = Path.Combine(baseFolder, "Models");
+        var folder = System.IO.Path.Combine(baseFolder, "Models");
         if (!Directory.Exists(folder))
         {
             Directory.CreateDirectory(folder);
@@ -74,7 +75,19 @@ public class WhisperEngineCpp : IWhisperEngine
 
     public string GetExecutable()
     {
-        var fullPath = Path.Combine(GetAndCreateWhisperFolder(), GetExecutableFileName());
+        var fullPath = System.IO.Path.Combine(GetAndCreateWhisperFolder(), GetExecutableFileName());
+
+        if (!File.Exists(fullPath) && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            string[] paths = ["/usr/bin/whisper-cli", "usr/local/bin/"];
+            foreach (var path in paths)
+            {
+                if (File.Exists(path))
+                {
+                    return path;
+                }
+            }
+        }
 
         return fullPath;
     }
@@ -82,13 +95,13 @@ public class WhisperEngineCpp : IWhisperEngine
     public bool IsModelInstalled(WhisperModel model)
     {
         var baseFolder = GetAndCreateWhisperFolder();
-        var folder = Path.Combine(baseFolder, "Models");
+        var folder = System.IO.Path.Combine(baseFolder, "Models");
         if (!Directory.Exists(folder))
         {
             return false;
         }
 
-        var modelFileName = Path.Combine(folder, model.Name);
+        var modelFileName = System.IO.Path.Combine(folder, model.Name);
         if (Extension.Length > 0 && !modelFileName.EndsWith(Extension))
         {
             modelFileName += Extension;
@@ -105,7 +118,7 @@ public class WhisperEngineCpp : IWhisperEngine
 
     public string GetModelForCmdLine(string modelName)
     {
-        var modelFileName = Path.Combine(GetAndCreateWhisperModelFolder(null), modelName);
+        var modelFileName = System.IO.Path.Combine(GetAndCreateWhisperModelFolder(null), modelName);
         if (Extension.Length > 0 && !modelFileName.EndsWith(Extension))
         {
             modelFileName += Extension;
@@ -129,7 +142,7 @@ public class WhisperEngineCpp : IWhisperEngine
     public string GetWhisperModelDownloadFileName(WhisperModel whisperModel, string url)
     {
         var folder = GetAndCreateWhisperModelFolder(whisperModel);
-        var fileName = Path.Combine(folder, whisperModel.Name + Extension);
+        var fileName = System.IO.Path.Combine(folder, whisperModel.Name + Extension);
         return fileName;
     }
 
