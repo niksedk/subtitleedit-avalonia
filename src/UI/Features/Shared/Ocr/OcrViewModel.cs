@@ -21,8 +21,10 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using static Nikse.SubtitleEdit.Core.Common.LanguageAutoDetect;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
@@ -221,6 +223,31 @@ public partial class OcrViewModel : ObservableObject
     [RelayCommand]
     private void PickOllamaModel()
     {
+    }
+
+    [RelayCommand]
+    private async Task ShowNOcrSettings()
+    {
+        InitNOcrDb();
+        var result = await _windowService.ShowDialogAsync<NOcrSettingsWindow, NOcrSettingsViewModel>(Window!, vm =>
+        {
+            vm.Initialize(_nOcrDb!);
+        });
+
+        if (result.EditPressed)
+        {
+            return;
+        }
+
+        if (result.DeletePressed)
+        {
+            return;
+        }
+
+        if (result.NewPressed)
+        {
+            return;
+        }
     }
 
     [RelayCommand]

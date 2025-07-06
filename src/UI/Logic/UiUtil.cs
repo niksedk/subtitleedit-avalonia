@@ -626,6 +626,12 @@ public static class UiUtil
         return control;
     }
 
+    public static Button WithCenterAlignment(this Button control)
+    {
+        control.VerticalAlignment = VerticalAlignment.Center;
+        return control;
+    }
+
     public static Button WithBottomAlignment(this Button control)
     {
         control.VerticalAlignment = VerticalAlignment.Bottom;
@@ -845,6 +851,12 @@ public static class UiUtil
         return control;
     }
 
+    public static Label HorizontalContentAlignmentCenter(this Label control)
+    {
+        control.HorizontalContentAlignment = HorizontalAlignment.Center;
+        return control;
+    }
+
     public static Label WithBold(this Label control)
     {
         control.FontWeight = FontWeight.Bold;
@@ -902,6 +914,13 @@ public static class UiUtil
     {
         var m = control.Margin;
         control.Margin = new Thickness(marginLeft, m.Top, m.Right, m.Bottom);
+        return control;
+    }
+
+    public static Button WithMarginRight(this Button control, int marginRight)
+    {
+        var m = control.Margin;
+        control.Margin = new Thickness(m.Left, m.Top, m.Right, marginRight);
         return control;
     }
 

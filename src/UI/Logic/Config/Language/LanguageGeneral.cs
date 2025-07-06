@@ -196,6 +196,8 @@ public class LanguageGeneral
     public string Image { get; set; }
     public string ApiKey { get; set; }
     public string ExportDotDotDot { get; set; }
+    public string Edit { get; set; }
+    public string New { get; set; }
 
     public LanguageGeneral()
     {
@@ -391,5 +393,7 @@ public class LanguageGeneral
         Image = "Image";
         ApiKey = "API key";
         ExportDotDotDot = "Export...";
+        Edit = "Edit";
+        New = "New";
     }
 }

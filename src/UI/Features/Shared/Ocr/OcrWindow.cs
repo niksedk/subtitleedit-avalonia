@@ -90,8 +90,12 @@ public class OcrWindow : Window
                 // NOcr settings
                 UiUtil.MakeLabel(Se.Language.Ocr.Database, nameof(vm.IsNOcrVisible)),
                 UiUtil.MakeComboBox( vm.NOcrDatabases, vm, nameof(vm.SelectedNOcrDatabase), nameof(vm.IsNOcrVisible))
-                    .WithMarginRight(10)
+                    .WithMarginRight(0)
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
+                UiUtil.MakeButton(vm.ShowNOcrSettingsCommand, IconNames.MdiSettings)
+                .WithMarginRight(20)
+                .WithMarginBottom(2)
+                .WithBottomAlignment(),
                 UiUtil.MakeLabel(Se.Language.Ocr.MaxWrongPixels, nameof(vm.IsNOcrVisible)),
                 UiUtil.MakeComboBox(vm.NOcrMaxWrongPixelsList, vm, nameof(vm.SelectedNOcrMaxWrongPixels), nameof(vm.IsNOcrVisible))
                     .WithMarginRight(10)
