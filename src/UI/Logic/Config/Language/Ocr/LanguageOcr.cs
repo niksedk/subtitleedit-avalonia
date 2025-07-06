@@ -17,6 +17,8 @@ public class LanguageOcr
     public string NumberOfPixelsIsSpace { get; set; }
     public string InspectImageMatches { get; set; }
     public string ResolutionXYAndTopmarginZ { get; set; }
+    public string RunningOcrDotDotDotXY { get; set; }
+    public string RunningOcrDotDotDot { get; set; }
 
     public LanguageOcr()
     {
@@ -32,5 +34,7 @@ public class LanguageOcr
         NumberOfPixelsIsSpace = "Number of pixels is space";
         InspectImageMatches = "Inspect image matches";
         ResolutionXYAndTopmarginZ = "Resolution {0}x{1}, top margin {2}";
+        RunningOcrDotDotDotXY = "Running OCR... {0}/{1}";
+        RunningOcrDotDotDot = "Running OCR...";
     }
 }

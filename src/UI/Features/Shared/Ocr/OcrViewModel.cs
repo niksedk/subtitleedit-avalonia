@@ -210,7 +210,7 @@ public partial class OcrViewModel : ObservableObject
 
         var result = await _windowService.ShowDialogAsync<NOcrInspectWindow, NOcrInspectViewModel>(Window!, vm =>
         {
-            vm.Initialize(SelectedOcrSubtitleItem, _nOcrDb, SelectedNOcrMaxWrongPixels, letters, matches);
+            vm.Initialize(nBmp.GetBitmap(), SelectedOcrSubtitleItem, _nOcrDb, SelectedNOcrMaxWrongPixels, letters, matches);
         });
 
         if (result.OkPressed)
@@ -295,7 +295,7 @@ public partial class OcrViewModel : ObservableObject
         _cancellationTokenSource = new CancellationTokenSource();
         IsOcrRunning = true;
         var startFromIndex = SelectedOcrSubtitleItem == null ? 0 : OcrSubtitleItems.IndexOf(SelectedOcrSubtitleItem);
-        ProgressText = "Running OCR...";
+        ProgressText = Se.Language.Ocr.RunningOcrDotDotDot;
         ProgressValue = 0d;
 
         if (ocrEngine.EngineType == OcrEngineType.nOcr)
@@ -366,7 +366,7 @@ public partial class OcrViewModel : ObservableObject
             }
 
             ProgressValue = i * 100.0 / (double)OcrSubtitleItems.Count;
-            ProgressText = $"Running OCR... {i + 1}/{OcrSubtitleItems.Count}";
+            ProgressText = string.Format(Se.Language.Ocr.RunningOcrDotDotDotXY, i + 1, OcrSubtitleItems.Count);
 
             var item = OcrSubtitleItems[i];
             var bitmap = item.GetSkBitmap();
@@ -413,7 +413,7 @@ public partial class OcrViewModel : ObservableObject
                                 .ShowDialogAsync<NOcrCharacterAddWindow, NOcrCharacterAddViewModel>(Window!,
                                     vm =>
                                     {
-                                        vm.Initialize(item, letters, letterIndex, _nOcrDb, SelectedNOcrMaxWrongPixels);
+                                        vm.Initialize(nBmp, item, letters, letterIndex, _nOcrDb, SelectedNOcrMaxWrongPixels);
                                     });
 
                             if (result.OkPressed)
@@ -504,7 +504,7 @@ public partial class OcrViewModel : ObservableObject
                 }
 
                 ProgressValue = i * 100.0 / OcrSubtitleItems.Count;
-                ProgressText = $"Running OCR... {i + 1}/{OcrSubtitleItems.Count}";
+                ProgressText = string.Format(Se.Language.Ocr.RunningOcrDotDotDotXY, i + 1, OcrSubtitleItems.Count);
 
                 var item = OcrSubtitleItems[i];
                 var bitmap = item.GetSkBitmap();
@@ -546,7 +546,7 @@ public partial class OcrViewModel : ObservableObject
                 }
 
                 ProgressValue = i * 100.0 / OcrSubtitleItems.Count;
-                ProgressText = $"Running OCR... {i + 1}/{OcrSubtitleItems.Count}";
+                ProgressText = string.Format(Se.Language.Ocr.RunningOcrDotDotDotXY, i + 1, OcrSubtitleItems.Count);
 
                 var item = OcrSubtitleItems[i];
                 var bitmap = item.GetSkBitmap();

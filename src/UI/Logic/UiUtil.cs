@@ -871,6 +871,13 @@ public static class UiUtil
         return control;
     }
 
+    public static ComboBox WithMarginLeft(this ComboBox control, int marginLeft)
+    {
+        var m = control.Margin;
+        control.Margin = new Thickness(marginLeft, m.Top, m.Right, m.Bottom);
+        return control;
+    }
+
     public static ComboBox WithMarginRight(this ComboBox control, int marginRight)
     {
         var m = control.Margin;
@@ -882,6 +889,12 @@ public static class UiUtil
     {
         var m = control.Margin;
         control.Margin = new Thickness(m.Left, marginTop, m.Right, m.Bottom);
+        return control;
+    }
+
+    public static Button WithFontSize(this Button control, double fontSize)
+    {
+        control.FontSize = fontSize;
         return control;
     }
 

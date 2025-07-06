@@ -104,6 +104,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     }
 
     public void Initialize(
+        NikseBitmap2 nBmp,
         OcrSubtitleItem item,
         List<ImageSplitterItem2> letters,
         int i,
@@ -139,14 +140,15 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
             }
         }
 
-        InitSentenceBitmap(item);
+        InitSentenceBitmap(item, nBmp);
 
         SetTitle();
     }
 
-    private void InitSentenceBitmap(OcrSubtitleItem item)
+    private void InitSentenceBitmap(OcrSubtitleItem item, NikseBitmap2 nBmp)
     {
-        var skBitmap = item.GetSkBitmap().Copy();
+        var tempBitmap = item.GetSkBitmap();
+        var skBitmap = RemoveTopLines(tempBitmap, tempBitmap.Height - nBmp.Height);
 
         if (_splitItem.NikseBitmap != null)
         {
@@ -156,9 +158,9 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
                 using (var paint = new SKPaint
                 {
                     Style = SKPaintStyle.Stroke,
-                    Color = SKColors.Red,
+                    Color = new SKColor(255, 0, 0, 140), // Semi-transparent red
                     StrokeWidth = 2, // Thickness of the rectangle border
-                    IsAntialias = true
+                    IsAntialias = true,
                 })
                 {
                     canvas.DrawRect(rect, paint);
@@ -167,6 +169,26 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         }
 
         SentenceBitmap = skBitmap.ToAvaloniaBitmap();
+    }
+
+    public static SKBitmap RemoveTopLines(SKBitmap original, int linesToRemove)
+    {
+        if (linesToRemove <= 0 || linesToRemove >= original.Height)
+        {
+            return original.Copy();
+        }
+
+        int newHeight = original.Height - linesToRemove;
+        var newBitmap = new SKBitmap(original.Width, newHeight);
+
+        using (var canvas = new SKCanvas(newBitmap))
+        {
+            var sourceRect = new SKRect(0, linesToRemove, original.Width, original.Height);
+            var destRect = new SKRect(0, 0, original.Width, newHeight);
+            canvas.DrawBitmap(original, sourceRect, destRect);
+        }
+
+        return newBitmap;
     }
 
     [RelayCommand]

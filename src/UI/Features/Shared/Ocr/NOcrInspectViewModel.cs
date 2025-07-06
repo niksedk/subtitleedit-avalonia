@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
@@ -51,12 +52,10 @@ public partial class NOcrInspectViewModel : ObservableObject
     public StackPanel PanelLines { get; set; }
     public TextBox TextBoxNew { get; set; }
     public bool OkPressed { get; set; }
-    public bool AbortPressed { get; set; }
-    public bool SkipPressed { get; set; }
-    public bool UseOncePressed { get; set; }
+    public bool UpdatePressed { get; set; }
+    public bool DeletePressed { get; set; }
+    public bool AddBetterMatchPressed { get; set; }
 
-    private List<OcrSubtitleItem> _ocrSubtitleItems;
-    private int _maxWrongPixels;
     private NOcrDb _nOcrDb;
 
     public NOcrInspectViewModel()
@@ -85,7 +84,6 @@ public partial class NOcrInspectViewModel : ObservableObject
 
         SelectedNoOfLinesToAutoDraw = 100;
         NOcrChar = new NOcrChar();
-        _ocrSubtitleItems = new List<OcrSubtitleItem>();
         _nOcrDb = new NOcrDb(string.Empty);
         SentenceBitmap = new SKBitmap(1, 1).ToAvaloniaBitmap();
         CurrentBitmap = new SKBitmap(1, 1).ToAvaloniaBitmap();
@@ -94,12 +92,11 @@ public partial class NOcrInspectViewModel : ObservableObject
         TextBoxNew = new TextBox();
     }
 
-    internal void Initialize(OcrSubtitleItem? selectedOcrSubtitleItem, NOcrDb? nOcrDb, int selectedNOcrMaxWrongPixels, List<ImageSplitterItem2> letters, List<NOcrChar?> matches)
+    internal void Initialize(SKBitmap sKBitmap, OcrSubtitleItem? selectedOcrSubtitleItem, NOcrDb? nOcrDb, int selectedNOcrMaxWrongPixels, List<ImageSplitterItem2> letters, List<NOcrChar?> matches)
     {
         _letters = letters;
         _matches = matches;
         _nOcrDb = nOcrDb ?? new NOcrDb(string.Empty);
-        _maxWrongPixels = selectedNOcrMaxWrongPixels;
         NOcrDrawingCanvas.BackgroundImage = CurrentBitmap;
         NOcrDrawingCanvas.ZoomFactor = 4;
 
@@ -110,13 +107,13 @@ public partial class NOcrInspectViewModel : ObservableObject
 
         if (selectedOcrSubtitleItem != null)
         {
-            InitSentenceBitmap(selectedOcrSubtitleItem);
+            InitSentenceBitmap(selectedOcrSubtitleItem, sKBitmap);
         }
     }
 
-    private void InitSentenceBitmap(OcrSubtitleItem item)
+    private void InitSentenceBitmap(OcrSubtitleItem item, SKBitmap skBitmap)
     {
-        var skBitmap = item.GetSkBitmap().Copy();
+        //var skBitmap = item.GetSkBitmap().Copy();
 
         if (_splitItem.NikseBitmap != null)
         {
@@ -165,7 +162,41 @@ public partial class NOcrInspectViewModel : ObservableObject
         Close();
     }
 
-  
+    [RelayCommand]
+    private void Update()
+    {
+        NOcrChar.Text = NewText;
+        UpdatePressed = true;
+        Close();
+    }
+
+    [RelayCommand]
+    private async Task Delete()
+    {
+        var answer = await MessageBox.Show(
+                   Window,
+                   "Delete nOCR item?",
+                   $"Do you want to delete the current nOCR item?",
+                   MessageBoxButtons.YesNoCancel,
+                   MessageBoxIcon.Question);
+
+        if (answer != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        DeletePressed = true;
+        Close();
+    }
+
+    [RelayCommand]
+    private void AddBetterMatch()
+    {
+        NOcrChar.Text = NewText;
+        AddBetterMatchPressed = true;
+        Close();
+    }
+
     [RelayCommand]
     private void DrawAgain()
     {
@@ -325,5 +356,10 @@ public partial class NOcrInspectViewModel : ObservableObject
             NOcrDrawingCanvas.InvalidateVisual();
             NOcrDrawingCanvas.ZoomFactor = 4;
         }
+    }
+
+    internal void DrawModeChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        NOcrDrawingCanvas.NewLinesAreHits = SelectedDrawMode.Type == NOcrDrawModeItemType.Foreground;
     }
 }

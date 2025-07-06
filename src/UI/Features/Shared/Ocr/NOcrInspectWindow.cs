@@ -123,7 +123,10 @@ public class NOcrInspectWindow : Window
                 panelCurrentImage,
                 vm.TextBoxNew,
                 UiUtil.MakeCheckBox(Se.Language.General.Italic, vm, nameof(vm.IsNewTextItalic)),
-                UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.ResolutionAndTopMargin))
+                UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.ResolutionAndTopMargin)),
+                UiUtil.MakeButton("Update", vm.UpdateCommand).WithMarginTop(25).WithLeftAlignment(),
+                UiUtil.MakeButton("Delete", vm.DeleteCommand).WithMarginTop(5).WithLeftAlignment(),
+                UiUtil.MakeButton("Add better match", vm.AddBetterMatchCommand).WithMarginTop(5).WithLeftAlignment(),
             },
         };
 
@@ -149,6 +152,8 @@ public class NOcrInspectWindow : Window
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
         };
 
+        var comboDrawModes = UiUtil.MakeComboBox(vm.DrawModes, vm, nameof(vm.SelectedDrawMode)).WithMarginLeft(5);
+        comboDrawModes.SelectionChanged += vm.DrawModeChanged;
         var panelZoom = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Horizontal,
@@ -157,8 +162,9 @@ public class NOcrInspectWindow : Window
             Margin = new Thickness(0, 0, 0, 5),
             Children =
             {
-                UiUtil.MakeButton(vm.ZoomOutCommand, IconNames.MdiMinus),
-                UiUtil.MakeButton(vm.ZoomInCommand, IconNames.MdiPlus),
+                UiUtil.MakeButton(vm.ZoomOutCommand, IconNames.MdiMinus).WithFontSize(20),
+                UiUtil.MakeButton(vm.ZoomInCommand, IconNames.MdiPlus).WithFontSize(20),
+                comboDrawModes,
             }
         };
 
