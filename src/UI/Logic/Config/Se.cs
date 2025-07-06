@@ -60,7 +60,7 @@ public class Se
             }
             catch
             {
-                //TODO: og error creating data folder
+                SeLogger.Error("Error creating data folder: " + DataFolder);
             }
         }
     }
@@ -82,10 +82,19 @@ public class Se
             }
 
             var folders = new List<string>();
-            foreach (var folder in Directory.EnumerateDirectories("/opt/homebrew/Cellar/tesseract"))
+            if (Directory.Exists("/opt/homebrew/Cellar/tesseract-lang"))
             {
-                folders.Add(Path.Combine(folder, "bin"));
+                foreach (var folder in Directory.EnumerateDirectories("/opt/homebrew/Cellar/tesseract"))
+                {
+                    folders.Add(Path.Combine(folder, "bin"));
+                }
             }
+
+            folders.Add("/usr/local/bin");
+            folders.Add("/usr/bin");
+            folders.Add("/opt/homebrew/bin");
+            folders.Add("/opt/local/bin");
+            folders.Add("/usr/local/Cellar");
 
             foreach (var folder in folders.OrderByDescending(p => p))
             {
@@ -96,7 +105,7 @@ public class Se
                 }
             }
 
-            return string.Empty;
+            return Path.Combine(DataFolder, "Tesseract550");
         }
     }
 
@@ -110,10 +119,25 @@ public class Se
             }
 
             var folders = new List<string>();
-            foreach (var folder in Directory.EnumerateDirectories("/opt/homebrew/Cellar/tesseract-lang"))
+
+            if (Directory.Exists("/opt/homebrew/Cellar/tesseract-lang"))
             {
-                folders.Add(Path.Combine(folder, "share/tessdata"));
+                foreach (var folder in Directory.EnumerateDirectories("/opt/homebrew/Cellar/tesseract-lang"))
+                {
+                    folders.Add(Path.Combine(folder, "share/tessdata"));
+                }
             }
+
+            if (Directory.Exists("/usr/share/tesseract-ocr"))
+            {
+                foreach (var folder in Directory.EnumerateDirectories("/usr/share/tesseract-ocr"))
+                {
+                    folders.Add(Path.Combine(folder, "tessdata"));
+                }
+            }
+
+            folders.Add(Path.Combine("/usr/share/tessdata"));
+            folders.Add(Path.Combine("/opt/homebrew/share/tessdata/"));
 
             foreach (var folder in folders.OrderByDescending(p => p))
             {
@@ -123,7 +147,7 @@ public class Se
                 }
             }
 
-            return string.Empty;
+            return Path.Combine(TesseractFolder, "tessdata");
         }
     }
 
