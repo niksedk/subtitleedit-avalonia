@@ -365,8 +365,16 @@ jobs:
           </dict>
           </plist>
           EOF
+      - name: Free disk space before DMG build
+        run: |
+          echo "Before cleanup:"; df -h /
+          dotnet nuget locals all --clear
+          brew cleanup --prune=all -s
+          rm -rf ./publish/macos-* || true
+          echo "After cleanup:"; df -h /    
       - name: Create DMG files
         run: |
+   
           # Create DMG for x64
           mkdir -p "./dmg-temp-x64"
           cp -R "./SubtitleEdit-x64.app" "./dmg-temp-x64/"
