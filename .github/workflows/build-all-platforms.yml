@@ -131,7 +131,7 @@ jobs:
 
   build-macos:
     runs-on: macos-latest
-  
+    
     steps:
       - uses: actions/checkout@v4
       - name: Setup .NET
@@ -162,10 +162,10 @@ jobs:
         run: |
           # Convert ICO to PNG first (extract largest size)
           sips -s format png "src/UI/SE.ico" --out "SE.png"
-        
+          
           # Create iconset directory
           mkdir SE.iconset
-        
+          
           # Generate different sizes for ICNS
           sips -z 16 16 "SE.png" --out "SE.iconset/icon_16x16.png"
           sips -z 32 32 "SE.png" --out "SE.iconset/icon_16x16@2x.png"
@@ -177,7 +177,7 @@ jobs:
           sips -z 512 512 "SE.png" --out "SE.iconset/icon_256x256@2x.png"
           sips -z 512 512 "SE.png" --out "SE.iconset/icon_512x512.png"
           sips -z 1024 1024 "SE.png" --out "SE.iconset/icon_512x512@2x.png"
-        
+          
           # Convert to ICNS
           iconutil -c icns SE.iconset
       - name: Create macOS app bundles
@@ -185,12 +185,13 @@ jobs:
           # Create app bundle structure for x64
           mkdir -p "./SubtitleEdit-x64.app/Contents/MacOS"
           mkdir -p "./SubtitleEdit-x64.app/Contents/Resources"
-        
-          # Copy executable and icon to app bundle
-          cp "./publish/macos-x64/UI" "./SubtitleEdit-x64.app/Contents/MacOS/"
+          
+          # Copy all files (executable + dylibs) to app bundle
+          cp "./publish/macos-x64/SubtitleEdit" "./SubtitleEdit-x64.app/Contents/MacOS/"
+          cp "./publish/macos-x64/"*.dylib "./SubtitleEdit-x64.app/Contents/MacOS/"
           cp "./SE.icns" "./SubtitleEdit-x64.app/Contents/Resources/"
-          chmod +x "./SubtitleEdit-x64.app/Contents/MacOS/UI"
-        
+          chmod +x "./SubtitleEdit-x64.app/Contents/MacOS/SubtitleEdit"
+          
           # Create Info.plist for x64
           cat > "./SubtitleEdit-x64.app/Contents/Info.plist" << 'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
@@ -198,7 +199,7 @@ jobs:
           <plist version="1.0">
           <dict>
               <key>CFBundleExecutable</key>
-              <string>UI</string>
+              <string>SubtitleEdit</string>
               <key>CFBundleIdentifier</key>
               <string>dk.nikse.subtitleedit</string>
               <key>CFBundleName</key>
@@ -277,10 +278,11 @@ jobs:
           mkdir -p "./SubtitleEdit-ARM64.app/Contents/MacOS"
           mkdir -p "./SubtitleEdit-ARM64.app/Contents/Resources"
           
-          # Copy executable and icon to app bundle
-          cp "./publish/macos-arm64/UI" "./SubtitleEdit-ARM64.app/Contents/MacOS/"
+          # Copy all files (executable + dylibs) to app bundle
+          cp "./publish/macos-arm64/SubtitleEdit" "./SubtitleEdit-ARM64.app/Contents/MacOS/"
+          cp "./publish/macos-arm64/"*.dylib "./SubtitleEdit-ARM64.app/Contents/MacOS/"
           cp "./SE.icns" "./SubtitleEdit-ARM64.app/Contents/Resources/"
-          chmod +x "./SubtitleEdit-ARM64.app/Contents/MacOS/UI"
+          chmod +x "./SubtitleEdit-ARM64.app/Contents/MacOS/SubtitleEdit"
           
           # Create Info.plist for ARM64
           cat > "./SubtitleEdit-ARM64.app/Contents/Info.plist" << 'EOF'
@@ -289,7 +291,7 @@ jobs:
           <plist version="1.0">
           <dict>
               <key>CFBundleExecutable</key>
-              <string>UI</string>
+              <string>SubtitleEdit</string>
               <key>CFBundleIdentifier</key>
               <string>dk.nikse.subtitleedit</string>
               <key>CFBundleName</key>
@@ -404,7 +406,7 @@ jobs:
           path: |
             ./SubtitleEdit-macOS-x64.dmg
             ./SubtitleEdit-macOS-ARM64.dmg
-
+  
   build-linux:
     runs-on: ubuntu-latest
     
