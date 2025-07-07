@@ -14,6 +14,8 @@ public class NOcrDb
     public List<NOcrChar> OcrCharacters = new();
     public List<NOcrChar> OcrCharactersExpanded = new();
 
+    public int TotalCharacterCount => OcrCharacters.Count + OcrCharactersExpanded.Count;
+
     private const string Version = "V2";
 
     public NOcrDb(string fileName)

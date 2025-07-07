@@ -21,10 +21,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using static Nikse.SubtitleEdit.Core.Common.LanguageAutoDetect;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
@@ -241,12 +239,65 @@ public partial class OcrViewModel : ObservableObject
 
         if (result.DeletePressed)
         {
+            try
+            {
+                File.Delete(_nOcrDb!.FileName);
+                NOcrDatabases.Remove(SelectedNOcrDatabase!);
+                SelectedNOcrDatabase = NOcrDatabases.FirstOrDefault();
+
+                if (SelectedNOcrDatabase == null)
+                {
+                    _nOcrDb = new NOcrDb(Path.Combine(Se.OcrFolder, "Default.nocr"));
+                    _nOcrDb.Save();
+                    NOcrDatabases.Add("Default");
+                    SelectedNOcrDatabase = NOcrDatabases.FirstOrDefault();
+                }
+            }
+            catch
+            { 
+                var answer = await MessageBox.Show(
+                    Window!,
+                    "Error deleting file",
+                    $"Could not delete the file {_nOcrDb!.FileName}.",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                return;
+            }
+
             return;
         }
 
         if (result.NewPressed)
         {
             var newResult = await _windowService.ShowDialogAsync<NOcrDbNewWindow, NOcrDbNewViewModel>(Window!);
+            if (newResult.OkPressed)
+            {
+                if (!Directory.Exists(Se.OcrFolder))
+                {
+                    Directory.CreateDirectory(Se.OcrFolder);
+
+                }
+
+                var newFileName = Path.Combine(Se.OcrFolder, newResult.DatabaseName + ".nocr");
+                if (File.Exists(newFileName))
+                {
+                    var answer = await MessageBox.Show(
+                        Window!,
+                        "File already exists",
+                        $"The file {newFileName} already exists.",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                    return;
+                }
+
+                _nOcrDb = new NOcrDb(newFileName);
+                _nOcrDb.Save();
+                NOcrDatabases.Add(newResult.DatabaseName);
+                var sortedList = NOcrDatabases.OrderBy(p => p).ToList();
+                NOcrDatabases.Clear();
+                NOcrDatabases.AddRange(sortedList);
+                SelectedNOcrDatabase = newResult.DatabaseName;
+            }
             return;
         }
     }

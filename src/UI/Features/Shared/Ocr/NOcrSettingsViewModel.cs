@@ -50,7 +50,7 @@ public partial class NOcrSettingsViewModel : ObservableObject
     private async Task Delete()
     {
         var name = Path.GetFileNameWithoutExtension(_nOcrDb.FileName);
-        var totalItemsCount = _nOcrDb.OcrCharacters.Count + _nOcrDb.OcrCharactersExpanded.Count;
+        var totalItemsCount = _nOcrDb.TotalCharacterCount;
         var answer = await MessageBox.Show(
            Window!,
            "Delete nOCR database?",
