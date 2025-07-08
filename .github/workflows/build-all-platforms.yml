@@ -186,7 +186,7 @@ jobs:
         run: |
           # Create DMG for x64
           mkdir -p "./dmg-temp-x64"
-          cp -R "./SubtitleEdit-x64.app" "./dmg-temp-x64/"
+          cp -R "./SubtitleEdit-x64.app" "./dmg-temp-x64/Subtitle Edit.app"
           
           # Create symbolic link to Applications folder
           ln -s /Applications "./dmg-temp-x64/Applications"
@@ -196,7 +196,7 @@ jobs:
           
           # Create DMG for ARM64
           mkdir -p "./dmg-temp-arm64"
-          cp -R "./SubtitleEdit-ARM64.app" "./dmg-temp-arm64/"
+          cp -R "./SubtitleEdit-ARM64.app" "./dmg-temp-arm64/Subtitle Edit.app"
           
           # Create symbolic link to Applications folder
           ln -s /Applications "./dmg-temp-arm64/Applications"
