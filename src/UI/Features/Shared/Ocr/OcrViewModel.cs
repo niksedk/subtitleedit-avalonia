@@ -500,9 +500,10 @@ public partial class OcrViewModel : ObservableObject
                                 if (result.NOcrChar != null)
                                 {
                                     _nOcrDb.Add(result.NOcrChar);
+                                     _ = Task.Run(() => _nOcrDb.Save());
                                 }
 
-                                var _ = Task.Run(() => RunNOcrLoop(i));
+                                _ = Task.Run(() => RunNOcrLoop(i));
                             }
                             else if (result.AbortPressed)
                             {

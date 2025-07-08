@@ -12,6 +12,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using Avalonia.Interactivity;
+using Avalonia.Media;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
@@ -55,6 +57,8 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     private int _startFromNumber;
     private int _maxWrongPixels;
     private NOcrDb _nOcrDb;
+    private bool _isControlDown = false;
+    private bool _isWinDown = false;
 
     public NOcrCharacterAddViewModel()
     {
@@ -130,7 +134,8 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
                     MarginTop = _splitItem.Top,
                 };
 
-                ResolutionAndTopMargin = string.Format("{0}x{1}, margin top: {2}", NOcrChar.Width, NOcrChar.Height, NOcrChar.MarginTop);
+                ResolutionAndTopMargin = string.Format("{0}x{1}, margin top: {2}", NOcrChar.Width, NOcrChar.Height,
+                    NOcrChar.MarginTop);
 
                 CurrentBitmap = _splitItem.NikseBitmap!.GetBitmap().ToAvaloniaBitmap();
 
@@ -152,16 +157,17 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
 
         if (_splitItem.NikseBitmap != null)
         {
-            var rect = new SKRect(_splitItem.X, _splitItem.Y, _splitItem.X + _splitItem.NikseBitmap.Width, _splitItem.Y + _splitItem.NikseBitmap.Height);
+            var rect = new SKRect(_splitItem.X, _splitItem.Y, _splitItem.X + _splitItem.NikseBitmap.Width,
+                _splitItem.Y + _splitItem.NikseBitmap.Height);
             using (var canvas = new SKCanvas(skBitmap))
             {
                 using (var paint = new SKPaint
-                {
-                    Style = SKPaintStyle.Stroke,
-                    Color = new SKColor(255, 0, 0, 140), // Semi-transparent red
-                    StrokeWidth = 2, // Thickness of the rectangle border
-                    IsAntialias = true,
-                })
+                       {
+                           Style = SKPaintStyle.Stroke,
+                           Color = new SKColor(255, 0, 0, 140), // Semi-transparent red
+                           StrokeWidth = 2, // Thickness of the rectangle border
+                           IsAntialias = true,
+                       })
                 {
                     canvas.DrawRect(rect, paint);
                 }
@@ -194,13 +200,11 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     [RelayCommand]
     private void Shrink()
     {
-
     }
 
     [RelayCommand]
     private void Expand()
     {
-
     }
 
     [RelayCommand]
@@ -270,10 +274,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
 
     private void Close()
     {
-        Dispatcher.UIThread.Post(() =>
-        {
-            Window?.Close();
-        });
+        Dispatcher.UIThread.Post(() => { Window?.Close(); });
     }
 
     private void ShowOcrPoints()
@@ -288,7 +289,8 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
 
     private void SetTitle()
     {
-        Title = $"Add nOCR character for line  {_startFromNumber}, character {_letters.IndexOf(_splitItem) + 1} of {_letters.Count} using database \"{Path.GetFileNameWithoutExtension(_nOcrDb.FileName)}\"";
+        Title =
+            $"Add nOCR character for line  {_startFromNumber}, character {_letters.IndexOf(_splitItem) + 1} of {_letters.Count} using database \"{Path.GetFileNameWithoutExtension(_nOcrDb.FileName)}\"";
     }
 
     internal void TextBoxNewOnKeyDown(object? sender, KeyEventArgs e)
@@ -309,5 +311,58 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         {
             Ok();
         }
+    }
+
+    public void KeyDown(KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            Abort();
+        }
+        else if (e.Key == Key.I)
+        {
+            if (_isControlDown || _isWinDown)
+            {
+                e.Handled = true;
+                IsNewTextItalic = !IsNewTextItalic;
+            }
+        }
+        else if (e.Key == Key.F)
+        {
+            if (_isControlDown || _isWinDown)
+            {
+                e.Handled = true;
+                SubmitOnFirstLetter = !SubmitOnFirstLetter;
+            }
+        }
+        else if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
+        {
+            _isControlDown = true;
+        }
+        else if (e.Key == Key.LWin || e.Key == Key.RWin)
+        {
+            _isWinDown = true;
+        }
+    }
+
+    public void KeyUp(KeyEventArgs e)
+    { 
+        if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
+        {
+            _isControlDown = false;
+        }
+        else if (e.Key == Key.LWin || e.Key == Key.RWin)
+        {
+            _isWinDown = false;
+        }
+    }
+
+    public void ItalicCheckChanged(object? sender, RoutedEventArgs e)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            TextBoxNew.FontStyle = IsNewTextItalic ? FontStyle.Italic : FontStyle.Normal;
+        });
     }
 }

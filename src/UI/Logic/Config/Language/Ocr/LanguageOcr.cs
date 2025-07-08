@@ -19,6 +19,7 @@ public class LanguageOcr
     public string ResolutionXYAndTopmarginZ { get; set; }
     public string RunningOcrDotDotDotXY { get; set; }
     public string RunningOcrDotDotDot { get; set; }
+    public string AutoSubmitFirstCharacter { get; set; }
 
     public LanguageOcr()
     {
@@ -36,5 +37,6 @@ public class LanguageOcr
         ResolutionXYAndTopmarginZ = "Resolution {0}x{1}, top margin {2}";
         RunningOcrDotDotDotXY = "Running OCR... {0}/{1}";
         RunningOcrDotDotDot = "Running OCR...";
+        AutoSubmitFirstCharacter = "Auto submit first character";
     }
 }

@@ -1,6 +1,8 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Markup.Declarative;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -49,6 +51,7 @@ public class NOcrCharacterAddWindow : Window
             Source = vm.SentenceBitmap,
             Stretch = Stretch.Uniform,
             Margin = new Thickness(0, 0, 0, 10),
+            MaxHeight = 350,
         };
 
         var controlsView = MakeControlsView(vm);
@@ -112,6 +115,11 @@ public class NOcrCharacterAddWindow : Window
             Margin = new Thickness(0, 0, 0, 5),
         };
 
+        var checkBoxItalic = UiUtil.MakeCheckBox(Se.Language.General.Italic, vm, nameof(vm.IsNewTextItalic));
+        checkBoxItalic.IsCheckedChanged += vm.ItalicCheckChanged;
+
+        var checkBoAutoSubmitFirsChar = UiUtil.MakeCheckBox(Se.Language.Ocr.AutoSubmitFirstCharacter, vm, nameof(vm.SubmitOnFirstLetter));
+        
         var panelCurrent = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Vertical,
@@ -120,8 +128,9 @@ public class NOcrCharacterAddWindow : Window
                 UiUtil.MakeLabel(Se.Language.Ocr.CurrentImage).WithBold(),
                 panelCurrentImage,
                 vm.TextBoxNew,
-                UiUtil.MakeCheckBox(Se.Language.General.Italic, vm, nameof(vm.IsNewTextItalic)),
-                UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.ResolutionAndTopMargin))
+                checkBoxItalic,
+                UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.ResolutionAndTopMargin)),
+                checkBoAutoSubmitFirsChar,
             },
         };
 
@@ -175,6 +184,18 @@ public class NOcrCharacterAddWindow : Window
         grid.Add(panelImage, 0, 2);
 
         return grid;
+    }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        _vm.KeyDown(e);
+    }
+
+    protected override void OnKeyUp(KeyEventArgs e)
+    {
+        base.OnKeyUp(e);
+        _vm.KeyUp(e);
     }
 
     protected override void OnLoaded(RoutedEventArgs e)
