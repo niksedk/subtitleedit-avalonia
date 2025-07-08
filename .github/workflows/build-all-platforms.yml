@@ -175,6 +175,35 @@ jobs:
           cp "./publish/macos-arm64/SubtitleEdit" "./SubtitleEdit-ARM64.app/Contents/MacOS/"
           cp "./publish/macos-arm64/"*.dylib "./SubtitleEdit-ARM64.app/Contents/MacOS/" 2>/dev/null || true
           chmod +x "./SubtitleEdit-ARM64.app/Contents/MacOS/SubtitleEdit"
+      - name: Sign macOS app bundles (if certificates available)
+        run: |
+          # Check if signing certificate is available
+          if [ -n "${{ secrets.MACOS_CERTIFICATE }}" ]; then
+            echo "Signing certificates found, signing apps..."
+            
+            # Import certificate
+            echo "${{ secrets.MACOS_CERTIFICATE }}" | base64 --decode > certificate.p12
+            security create-keychain -p "${{ secrets.MACOS_CERTIFICATE_PASSWORD }}" build.keychain
+            security default-keychain -s build.keychain
+            security unlock-keychain -p "${{ secrets.MACOS_CERTIFICATE_PASSWORD }}" build.keychain
+            security import certificate.p12 -k build.keychain -P "${{ secrets.MACOS_CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
+            security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "${{ secrets.MACOS_CERTIFICATE_PASSWORD }}" build.keychain
+            
+            # Sign the apps
+            codesign --force --options runtime --deep --sign "${{ secrets.MACOS_CERTIFICATE_NAME }}" "./SubtitleEdit-x64.app"
+            codesign --force --options runtime --deep --sign "${{ secrets.MACOS_CERTIFICATE_NAME }}" "./SubtitleEdit-ARM64.app"
+            
+            # Verify signatures
+            codesign --verify --verbose "./SubtitleEdit-x64.app"
+            codesign --verify --verbose "./SubtitleEdit-ARM64.app"
+            
+            # Clean up
+            rm certificate.p12
+            security delete-keychain build.keychain
+          else
+            echo "No signing certificates found, skipping code signing"
+            echo "Apps will need to be opened with right-click -> Open on first launch"
+          fi
       - name: Free disk space before DMG build
         run: |
           echo "Before cleanup:"; df -h /
