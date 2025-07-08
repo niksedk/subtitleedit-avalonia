@@ -493,7 +493,7 @@ jobs:
           # Copy ZIP/TAR packages to release assets
           cp ./artifacts/windows-msi-installers/*.msi ./release-assets/
           cp ./artifacts/windows-zip-packages/*.zip ./release-assets/
-          cp ./artifacts/macos-zip-packages/*.dmg ./release-assets/
+          cp ./artifacts/macos-dmg-packages/*.dmg ./release-assets/
           cp ./artifacts/linux-tar-package/*.tar.gz ./release-assets/
           
           # List all files that will be uploaded
