@@ -260,11 +260,13 @@ jobs:
         with:
           name: se-macos-x64
           path: ./publish/macos-x64/
+          overwrite: true
       - name: Upload macOS ARM64 artifact
         uses: actions/upload-artifact@v4
         with:
           name: se-macos-arm64
           path: ./publish/macos-arm64/
+          overwrite: true
       - name: Upload macOS DMG packages
         uses: actions/upload-artifact@v4
         with:
@@ -272,6 +274,7 @@ jobs:
           path: |
             ./SubtitleEdit-macOS-x64.dmg
             ./SubtitleEdit-macOS-ARM64.dmg
+          overwrite: true
   
   build-linux:
     runs-on: ubuntu-latest
