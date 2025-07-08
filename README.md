@@ -23,9 +23,27 @@ You can find the latest cross-platform builds here:
 - Minimum: Windows 7 SP1 or newer (recommended: Windows 10 or newer)
 
 ### macOS
-- Minimum: macOS 10.15 (Catalina) or newer
-- Requires **libmpv** (install via [MacPorts](https://www.macports.org/) or [Homebrew](https://brew.sh/), e.g. `sudo port install mpv` or `brew install mpv`)
-- Requires **ffmpeg** (e.g. `brew install ffmpeg`)
+
+- **Minimum macOS version**: 10.15 (Catalina) or newer
+- **Dependencies** (install via [Homebrew](https://brew.sh/) or [MacPorts](https://www.macports.org/)):
+    - `mpv`
+        - Homebrew: `brew install mpv`
+        - MacPorts: `sudo port install mpv`
+    - `ffmpeg`
+        - Homebrew: `brew install ffmpeg`
+
+
+
+#### Installing Subtitle Edit on macOS (Unsigned App)
+
+Because *Subtitle Edit* is not signed with an Apple developer certificate, macOS will block it by default. You can still install and run it by following these steps:
+
+1. **Download** and **double-click** the `.dmg` file to mount it.
+2. In the window that appears, **drag `Subtitle Edit.app` into your `Applications` folder**.
+3. Open the **Terminal** app (you can find it via Spotlight or in `/Applications/Utilities/`).
+4. In Terminal, run the following command to remove macOS’s security quarantine flag:
+   ```bash
+   sudo xattr -rd com.apple.quarantine /Applications/Subtitle\ Edit.app
 
 ### Linux
 - Requires **libmpv** (install via package manager, e.g. `sudo apt install mpv libmpv-dev`)
