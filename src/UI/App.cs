@@ -8,6 +8,7 @@ using Avalonia.Styling;
 using Avalonia.Themes.Fluent;
 using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit;
+using Nikse.SubtitleEdit.Features.Help;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -38,6 +39,29 @@ var appBuilder = AppBuilder.Configure<Application>()
         {
             Source = new Uri("avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml", UriKind.Absolute)
         });
+        
+        // Set application name
+        if (b.Instance != null)
+        {
+            b.Instance.Name = "Subtitle Edit";
+        }
+        
+        // Add Native Menu
+        if (b.Instance != null)
+        {
+            var nativeMenu = new NativeMenu();
+            var aboutMenu = new NativeMenuItem("About Subtitle Edit");
+            aboutMenu.Click += async (sender, e) =>
+            {
+                var aboutWindow = new AboutWindow();
+                if (lifetime.MainWindow != null)
+                {
+                    await aboutWindow.ShowDialog(lifetime.MainWindow);
+                }
+            };
+            nativeMenu.Items.Add(aboutMenu);
+            NativeMenu.SetMenu(b.Instance, nativeMenu);
+        }
     })
     .SetupWithLifetime(lifetime);
 
