@@ -198,6 +198,7 @@ public class LanguageGeneral
     public string ExportDotDotDot { get; set; }
     public string Edit { get; set; }
     public string New { get; set; }
+    public string Shrink { get; set; }
 
     public LanguageGeneral()
     {
@@ -395,5 +396,6 @@ public class LanguageGeneral
         ExportDotDotDot = "Export...";
         Edit = "Edit";
         New = "New";
+        Shrink = "Shrink";
     }
 }

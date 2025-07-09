@@ -1,8 +1,8 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Declarative;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -48,11 +48,11 @@ public class NOcrCharacterAddWindow : Window
 
         var image = new Image
         {
-            Source = vm.SentenceBitmap,
             Stretch = Stretch.Uniform,
             Margin = new Thickness(0, 0, 0, 10),
             MaxHeight = 350,
         };
+        image.Bind(Image.SourceProperty, new Binding(nameof(vm.SentenceBitmap)));
 
         var controlsView = MakeControlsView(vm);
 
@@ -90,6 +90,7 @@ public class NOcrCharacterAddWindow : Window
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             ColumnSpacing = 20,
             Width = double.NaN,
@@ -119,7 +120,7 @@ public class NOcrCharacterAddWindow : Window
         checkBoxItalic.IsCheckedChanged += vm.ItalicCheckChanged;
 
         var checkBoAutoSubmitFirsChar = UiUtil.MakeCheckBox(Se.Language.Ocr.AutoSubmitFirstCharacter, vm, nameof(vm.SubmitOnFirstLetter));
-        
+
         var panelCurrent = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Vertical,
@@ -179,9 +180,28 @@ public class NOcrCharacterAddWindow : Window
             }
         };
 
+        var buttonShrink = UiUtil.MakeButton(Se.Language.General.Shrink, vm.ShrinkCommand)
+            .WithMinWidth(100).WithBindEnabled(nameof(vm.CanShrink));
+        var buttonExpand = UiUtil.MakeButton(Se.Language.General.Expand, vm.ExpandCommand)
+            .WithMinWidth(100).WithBindEnabled(nameof(vm.CanExpand));
+        var panelButtons = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
+            Width = double.NaN,
+            Margin = new Thickness(0, 0, 0, 5),
+            Children =
+            {
+                buttonShrink,
+                buttonExpand,
+            }
+        };
+
         grid.Add(panelCurrent, 0, 0);
         grid.Add(panelDrawControls, 0, 1);
         grid.Add(panelImage, 0, 2);
+        grid.Add(panelButtons, 0, 3);
 
         return grid;
     }

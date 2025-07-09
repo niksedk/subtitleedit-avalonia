@@ -1,5 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -8,12 +10,11 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Ocr;
 using SkiaSharp;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using Avalonia.Interactivity;
-using Avalonia.Media;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
@@ -40,10 +41,10 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     [ObservableProperty] private bool _canExpand;
     [ObservableProperty] private ObservableCollection<int> _noOfLinesToAutoDrawList;
     [ObservableProperty] private int _selectedNoOfLinesToAutoDraw;
+    [ObservableProperty] Bitmap _sentenceBitmap;
 
     private List<ImageSplitterItem2> _letters;
     private ImageSplitterItem2 _splitItem;
-    public Bitmap SentenceBitmap { get; set; }
     public Bitmap CurrentBitmap { get; set; }
     public NOcrChar NOcrChar { get; private set; }
     public NOcrDrawingCanvasView NOcrDrawingCanvas { get; set; }
@@ -53,9 +54,10 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     public bool SkipPressed { get; set; }
     public bool UseOncePressed { get; set; }
 
-    private List<OcrSubtitleItem> _ocrSubtitleItems;
     private int _startFromNumber;
-    private int _maxWrongPixels;
+    private NikseBitmap2 _nBmp;
+    private OcrSubtitleItem? _item;
+    private int _expandCount;
     private NOcrDb _nOcrDb;
     private bool _isControlDown = false;
     private bool _isWinDown = false;
@@ -84,13 +86,13 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
 
         SelectedNoOfLinesToAutoDraw = 100;
         NOcrChar = new NOcrChar();
-        _ocrSubtitleItems = new List<OcrSubtitleItem>();
         _nOcrDb = new NOcrDb(string.Empty);
         SentenceBitmap = new SKBitmap(1, 1).ToAvaloniaBitmap();
         CurrentBitmap = new SKBitmap(1, 1).ToAvaloniaBitmap();
         _splitItem = new ImageSplitterItem2(string.Empty);
         NOcrDrawingCanvas = new NOcrDrawingCanvasView();
         TextBoxNew = new TextBox();
+        _nBmp = new NikseBitmap2(1,1);
         LoadSettings();
     }
 
@@ -118,7 +120,10 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         _nOcrDb = nOcrDb;
         _letters = letters;
         _startFromNumber = i;
-        _maxWrongPixels = maxWrongPixels;
+        _nBmp = nBmp;
+        _item = item;
+
+        UpdateShrintExpand();
 
         if (i >= 0 && i < letters.Count)
         {
@@ -145,29 +150,60 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
             }
         }
 
-        InitSentenceBitmap(item, nBmp);
+        InitSentenceBitmap(_item, _nBmp);
 
         SetTitle();
     }
 
-    private void InitSentenceBitmap(OcrSubtitleItem item, NikseBitmap2 nBmp)
+    private void InitSentenceBitmap(OcrSubtitleItem? item, NikseBitmap2 nBmp)
     {
+        if (item == null || nBmp == null)
+        {
+            return;
+        }
+
         var tempBitmap = item.GetSkBitmap();
         var skBitmap = RemoveTopLines(tempBitmap, tempBitmap.Height - nBmp.Height);
 
         if (_splitItem.NikseBitmap != null)
         {
-            var rect = new SKRect(_splitItem.X, _splitItem.Y, _splitItem.X + _splitItem.NikseBitmap.Width,
+            var rect = new SKRect(
+                _splitItem.X,
+                _splitItem.Y,
+                _splitItem.X + _splitItem.NikseBitmap.Width,
                 _splitItem.Y + _splitItem.NikseBitmap.Height);
+
+            if (_expandCount > 0)
+            {
+                var minX = int.MaxValue;
+                var minY = int.MaxValue;
+                var maxX = 0;
+                var maxY = 0;
+
+                for (var i = _startFromNumber; i < _startFromNumber + _expandCount + 1 && i < _letters.Count; i++)
+                {
+                    var letter = _letters[i];
+                    if (letter.NikseBitmap != null)
+                    {
+                        minX = Math.Min(minX, letter.X);
+                        minY = Math.Min(minY, letter.Y);
+                        maxX = Math.Max(maxX, letter.X + letter.NikseBitmap.Width);
+                        maxY = Math.Max(maxY, letter.Y + letter.NikseBitmap.Height);
+                    }
+                }
+
+                rect = new SKRect(minX, minY, maxX, maxY);
+            }
+
             using (var canvas = new SKCanvas(skBitmap))
             {
                 using (var paint = new SKPaint
-                       {
-                           Style = SKPaintStyle.Stroke,
-                           Color = new SKColor(255, 0, 0, 140), // Semi-transparent red
-                           StrokeWidth = 2, // Thickness of the rectangle border
-                           IsAntialias = true,
-                       })
+                {
+                    Style = SKPaintStyle.Stroke,
+                    Color = new SKColor(255, 0, 0, 140), // Semi-transparent red
+                    StrokeWidth = 2, // Thickness of the rectangle border
+                    IsAntialias = true,
+                })
                 {
                     canvas.DrawRect(rect, paint);
                 }
@@ -200,11 +236,27 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     [RelayCommand]
     private void Shrink()
     {
+        if (_expandCount <= 0)
+        {
+            return;
+        }
+
+        _expandCount--;
+        InitSentenceBitmap(_item, _nBmp);
+        UpdateShrintExpand();
     }
 
     [RelayCommand]
     private void Expand()
     {
+        if (_startFromNumber + _expandCount < _letters.Count - 1 && _letters[_startFromNumber + _expandCount + 1].NikseBitmap == null)
+        {
+            return;
+        }
+
+        _expandCount++;
+        InitSentenceBitmap(_item, _nBmp);
+        UpdateShrintExpand();
     }
 
     [RelayCommand]
@@ -277,6 +329,12 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         Dispatcher.UIThread.Post(() => { Window?.Close(); });
     }
 
+    private void UpdateShrintExpand()
+    {
+        CanExpand = _startFromNumber + _expandCount < _letters.Count - 1 && _letters[_startFromNumber + _expandCount + 1].NikseBitmap != null;
+        CanShrink = _expandCount > 0;
+    }
+
     private void ShowOcrPoints()
     {
         NOcrDrawingCanvas.MissPaths.Clear();
@@ -320,6 +378,22 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
             e.Handled = true;
             Abort();
         }
+        else if (e.Key == Key.Left)
+        {
+            if (CanShrink)
+            {
+                Shrink();
+            }
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Right)
+        {
+            if (CanExpand)
+            {
+                Expand();
+            }
+            e.Handled = true;
+        }
         else if (e.Key == Key.I)
         {
             if (_isControlDown || _isWinDown)
@@ -347,7 +421,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     }
 
     public void KeyUp(KeyEventArgs e)
-    { 
+    {
         if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
         {
             _isControlDown = false;
