@@ -11,6 +11,7 @@ public class MacFunctionResolver : FunctionResolverBase
     protected override string[] GetSearchPaths() => 
     [
         MpvApi.RootPath, 
+        "/Applications/Subtitle Edit.app/Contents/Frameworks",
         "/opt/local/lib",
         "/usr/local/lib",
         "/opt/homebrew/lib",
