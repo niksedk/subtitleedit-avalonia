@@ -41,11 +41,11 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     [ObservableProperty] private bool _canExpand;
     [ObservableProperty] private ObservableCollection<int> _noOfLinesToAutoDrawList;
     [ObservableProperty] private int _selectedNoOfLinesToAutoDraw;
-    [ObservableProperty] Bitmap _sentenceBitmap;
+    [ObservableProperty] private Bitmap _sentenceBitmap;
+    [ObservableProperty] private Bitmap _currentBitmap;
 
     private List<ImageSplitterItem2> _letters;
     private ImageSplitterItem2 _splitItem;
-    public Bitmap CurrentBitmap { get; set; }
     public NOcrChar NOcrChar { get; private set; }
     public NOcrDrawingCanvasView NOcrDrawingCanvas { get; set; }
     public TextBox TextBoxNew { get; set; }
@@ -139,14 +139,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
                     MarginTop = _splitItem.Top,
                 };
 
-                ResolutionAndTopMargin = string.Format("{0}x{1}, margin top: {2}", NOcrChar.Width, NOcrChar.Height,
-                    NOcrChar.MarginTop);
-
-                CurrentBitmap = _splitItem.NikseBitmap!.GetBitmap().ToAvaloniaBitmap();
-
-                NOcrDrawingCanvas.BackgroundImage = CurrentBitmap;
-                NOcrDrawingCanvas.ZoomFactor = 4;
-                DrawAgain();
+                ResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, NOcrChar.Width, NOcrChar.Height, NOcrChar.MarginTop);             
             }
         }
 
@@ -167,11 +160,13 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
 
         if (_splitItem.NikseBitmap != null)
         {
-            var rect = new SKRect(
+            var rect = new SKRectI(
                 _splitItem.X,
                 _splitItem.Y,
                 _splitItem.X + _splitItem.NikseBitmap.Width,
                 _splitItem.Y + _splitItem.NikseBitmap.Height);
+
+            CurrentBitmap = _splitItem.NikseBitmap!.GetBitmap().ToAvaloniaBitmap();
 
             if (_expandCount > 0)
             {
@@ -192,8 +187,18 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
                     }
                 }
 
-                rect = new SKRect(minX, minY, maxX, maxY);
+                rect = new SKRectI(minX, minY, maxX, maxY);
+                var subset = new SKBitmap();
+                if (!nBmp.GetBitmap().ExtractSubset(subset, rect))
+                {
+                    throw new InvalidOperationException("Subset extraction failed.");
+                }
+                CurrentBitmap = subset.ToAvaloniaBitmap();
             }
+
+            NOcrDrawingCanvas.BackgroundImage = CurrentBitmap;
+            NOcrDrawingCanvas.ZoomFactor = 4;
+            DrawAgain();
 
             using (var canvas = new SKCanvas(skBitmap))
             {

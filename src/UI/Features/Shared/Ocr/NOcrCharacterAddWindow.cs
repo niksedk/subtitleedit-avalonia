@@ -100,13 +100,14 @@ public class NOcrCharacterAddWindow : Window
         var image = new Image
         {
             Margin = new Thickness(5),
-            Source = vm.CurrentBitmap,
             Stretch = Stretch.Uniform,
             MinWidth = 30,
             MinHeight = 30,
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
         };
+        image.Bind(Image.SourceProperty, new Binding(nameof(vm.CurrentBitmap)));
+
 
         var panelCurrentImage = new StackPanel
         {
