@@ -114,7 +114,7 @@ public class NOcrCharacterAddWindow : Window
             Background = new SolidColorBrush(Colors.LightGray),
             Children = { image },
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-            Margin = new Thickness(0, 0, 0, 5),
+            Margin = new Thickness(5, 2, 0, 5),
         };
 
         var checkBoxItalic = UiUtil.MakeCheckBox(Se.Language.General.Italic, vm, nameof(vm.IsNewTextItalic));
@@ -128,10 +128,10 @@ public class NOcrCharacterAddWindow : Window
             Children =
             {
                 UiUtil.MakeLabel(Se.Language.Ocr.CurrentImage).WithBold(),
+                UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.ResolutionAndTopMargin)),
                 panelCurrentImage,
                 vm.TextBoxNew,
                 checkBoxItalic,
-                UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.ResolutionAndTopMargin)),
                 checkBoAutoSubmitFirsChar,
             },
         };
@@ -202,7 +202,7 @@ public class NOcrCharacterAddWindow : Window
         grid.Add(panelCurrent, 0, 0);
         grid.Add(panelDrawControls, 0, 1);
         grid.Add(panelImage, 0, 2);
-        grid.Add(panelButtons, 0, 3);
+        grid.Add(panelButtons, 0, 2, 1, 2);
 
         return grid;
     }

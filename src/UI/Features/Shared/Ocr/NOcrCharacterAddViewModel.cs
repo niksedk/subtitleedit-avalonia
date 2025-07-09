@@ -92,7 +92,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         _splitItem = new ImageSplitterItem2(string.Empty);
         NOcrDrawingCanvas = new NOcrDrawingCanvasView();
         TextBoxNew = new TextBox();
-        _nBmp = new NikseBitmap2(1,1);
+        _nBmp = new NikseBitmap2(1, 1);
         LoadSettings();
     }
 
@@ -122,33 +122,18 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         _startFromNumber = i;
         _nBmp = nBmp;
         _item = item;
-
-        UpdateShrintExpand();
-
+        NOcrDrawingCanvas.ZoomFactor = 4;
         if (i >= 0 && i < letters.Count)
         {
             _splitItem = letters[i];
-
-
-            if (_splitItem.NikseBitmap != null)
-            {
-                NOcrChar = new NOcrChar
-                {
-                    Width = _splitItem.NikseBitmap.Width,
-                    Height = _splitItem.NikseBitmap.Height,
-                    MarginTop = _splitItem.Top,
-                };
-
-                ResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, NOcrChar.Width, NOcrChar.Height, NOcrChar.MarginTop);             
-            }
         }
 
-        InitSentenceBitmap(_item, _nBmp);
-
+        UpdateShrintExpand();
+        SetImages(_item, _nBmp);
         SetTitle();
     }
 
-    private void InitSentenceBitmap(OcrSubtitleItem? item, NikseBitmap2 nBmp)
+    private void SetImages(OcrSubtitleItem? item, NikseBitmap2 nBmp)
     {
         if (item == null || nBmp == null)
         {
@@ -157,6 +142,20 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
 
         var tempBitmap = item.GetSkBitmap();
         var skBitmap = RemoveTopLines(tempBitmap, tempBitmap.Height - nBmp.Height);
+
+        if (_splitItem.NikseBitmap != null)
+        {
+            NOcrChar = new NOcrChar
+            {
+                Width = _splitItem.NikseBitmap.Width,
+                Height = _splitItem.NikseBitmap.Height,
+                MarginTop = _splitItem.Top,
+                ExpandCount = 0,
+            };
+
+            ResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, NOcrChar.Width, NOcrChar.Height, NOcrChar.MarginTop);
+        }
+
 
         if (_splitItem.NikseBitmap != null)
         {
@@ -170,6 +169,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
 
             if (_expandCount > 0)
             {
+                var minMarginTop = int.MaxValue;
                 var minX = int.MaxValue;
                 var minY = int.MaxValue;
                 var maxX = 0;
@@ -180,6 +180,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
                     var letter = _letters[i];
                     if (letter.NikseBitmap != null)
                     {
+                        minMarginTop = Math.Min(minMarginTop, letter.Top);
                         minX = Math.Min(minX, letter.X);
                         minY = Math.Min(minY, letter.Y);
                         maxX = Math.Max(maxX, letter.X + letter.NikseBitmap.Width);
@@ -194,10 +195,20 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
                     throw new InvalidOperationException("Subset extraction failed.");
                 }
                 CurrentBitmap = subset.ToAvaloniaBitmap();
+
+                NOcrChar = new NOcrChar
+                {
+                    Width = subset.Width,
+                    Height = subset.Height,
+                    MarginTop = minMarginTop,
+                    ExpandCount = _expandCount,
+                };
+
+                ResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, NOcrChar.Width, NOcrChar.Height, NOcrChar.MarginTop);
             }
 
             NOcrDrawingCanvas.BackgroundImage = CurrentBitmap;
-            NOcrDrawingCanvas.ZoomFactor = 4;
+            NOcrDrawingCanvas.ZoomFactor = NOcrDrawingCanvas.ZoomFactor;
             DrawAgain();
 
             using (var canvas = new SKCanvas(skBitmap))
@@ -247,7 +258,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         }
 
         _expandCount--;
-        InitSentenceBitmap(_item, _nBmp);
+        SetImages(_item, _nBmp);
         UpdateShrintExpand();
     }
 
@@ -260,7 +271,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         }
 
         _expandCount++;
-        InitSentenceBitmap(_item, _nBmp);
+        SetImages(_item, _nBmp);
         UpdateShrintExpand();
     }
 
@@ -299,7 +310,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     {
         NOcrChar.LinesForeground.Clear();
         NOcrChar.LinesBackground.Clear();
-        NOcrChar.GenerateLineSegments(SelectedNoOfLinesToAutoDraw, false, NOcrChar, _splitItem.NikseBitmap!);
+        NOcrChar.GenerateLineSegments(SelectedNoOfLinesToAutoDraw, false, NOcrChar, new NikseBitmap2(CurrentBitmap.ToSkBitmap()));
         ShowOcrPoints();
     }
 

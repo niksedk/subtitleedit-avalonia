@@ -69,7 +69,6 @@ internal static class SkBitmapExtensions
     {
         var borderedBitmap = new SKBitmap(originalBitmap.Width, originalBitmap.Height);
         using var canvas = new SKCanvas(borderedBitmap);
-        //canvas.Clear(SKColors.Transparent);
         canvas.DrawBitmap(originalBitmap, borderWidth, borderWidth);
 
         using var borderPaint = new SKPaint
@@ -137,5 +136,13 @@ internal static class SkBitmapExtensions
         using var stream = new MemoryStream(data.ToArray());
 
         return new Bitmap(stream);
+    }
+
+    public static SKBitmap ToSkBitmap(this Bitmap avaloniaBitmap)
+    {
+        using var stream = new MemoryStream();
+        avaloniaBitmap.Save(stream);
+        stream.Seek(0, SeekOrigin.Begin);
+        return SKBitmap.Decode(stream);
     }
 }
