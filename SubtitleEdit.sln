@@ -19,6 +19,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "macBundle", "macBundle", "{20ABFC11-A537-4519-BC53-961E337091C3}"
+	ProjectSection(SolutionItems) = preProject
+		installer\macBundle\SubtitleEdit.app\Contents\Info.plist = installer\macBundle\SubtitleEdit.app\Contents\Info.plist
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,5 +48,8 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {27E960EC-896F-428C-95A2-C250321C16D5}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{20ABFC11-A537-4519-BC53-961E337091C3} = {8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}
 	EndGlobalSection
 EndGlobal
