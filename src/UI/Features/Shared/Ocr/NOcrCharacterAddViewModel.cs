@@ -201,7 +201,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
                     Width = subset.Width,
                     Height = subset.Height,
                     MarginTop = minMarginTop,
-                    ExpandCount = _expandCount,
+                    ExpandCount = _expandCount + 1,
                 };
 
                 ResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, NOcrChar.Width, NOcrChar.Height, NOcrChar.MarginTop);

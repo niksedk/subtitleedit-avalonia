@@ -20,6 +20,7 @@ public class LanguageOcr
     public string RunningOcrDotDotDotXY { get; set; }
     public string RunningOcrDotDotDot { get; set; }
     public string AutoSubmitFirstCharacter { get; set; }
+    public string EditNOcrDatabase { get; set; }
 
     public LanguageOcr()
     {
@@ -38,5 +39,6 @@ public class LanguageOcr
         RunningOcrDotDotDotXY = "Running OCR... {0}/{1}";
         RunningOcrDotDotDot = "Running OCR...";
         AutoSubmitFirstCharacter = "Auto submit first character";
+        EditNOcrDatabase = "Edit nOCR database";
     }
 }

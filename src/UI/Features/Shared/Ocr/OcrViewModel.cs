@@ -234,6 +234,11 @@ public partial class OcrViewModel : ObservableObject
 
         if (result.EditPressed)
         {
+            var editResult = await _windowService.ShowDialogAsync<NOcrDbEditWindow, NOcrDbEditViewModel>(Window!, vm =>
+            {
+                vm.Initialize(_nOcrDb!);
+            });
+
             return;
         }
 
@@ -254,7 +259,7 @@ public partial class OcrViewModel : ObservableObject
                 }
             }
             catch
-            { 
+            {
                 var answer = await MessageBox.Show(
                     Window!,
                     "Error deleting file",
@@ -298,6 +303,7 @@ public partial class OcrViewModel : ObservableObject
                 NOcrDatabases.AddRange(sortedList);
                 SelectedNOcrDatabase = newResult.DatabaseName;
             }
+
             return;
         }
     }
@@ -449,15 +455,16 @@ public partial class OcrViewModel : ObservableObject
 
             var item = OcrSubtitleItems[i];
             var bitmap = item.GetSkBitmap();
-            var nBmp = new NikseBitmap2(bitmap);
-            nBmp.MakeTwoColor(200);
-            nBmp.CropTop(0, new SKColor(0, 0, 0, 0));
-            var letters = NikseBitmapImageSplitter2.SplitBitmapToLettersNew(nBmp, SelectedNOcrPixelsAreSpace, false, true, 20, true);
+            var parentBitmap = new NikseBitmap2(bitmap);
+            parentBitmap.MakeTwoColor(200);
+            parentBitmap.CropTop(0, new SKColor(0, 0, 0, 0));
+            var letters = NikseBitmapImageSplitter2.SplitBitmapToLettersNew(parentBitmap, SelectedNOcrPixelsAreSpace, false, true, 20, true);
             var sb = new StringBuilder();
             SelectedOcrSubtitleItem = item;
-
-            foreach (var splitterItem in letters)
+            int index = 0;
+            while (index < letters.Count)
             {
+                ImageSplitterItem2? splitterItem = letters[index];
                 if (splitterItem.NikseBitmap == null)
                 {
                     if (splitterItem.SpecialCharacter != null)
@@ -467,7 +474,7 @@ public partial class OcrViewModel : ObservableObject
                 }
                 else
                 {
-                    var match = _nOcrDb!.GetMatch(nBmp, letters, splitterItem, splitterItem.Top, true, SelectedNOcrMaxWrongPixels);
+                    var match = _nOcrDb!.GetMatch(parentBitmap, letters, splitterItem, splitterItem.Top, true, SelectedNOcrMaxWrongPixels);
 
                     if (NOcrDrawUnknownText && match == null)
                     {
@@ -488,19 +495,18 @@ public partial class OcrViewModel : ObservableObject
 
                         Dispatcher.UIThread.Post(async () =>
                         {
-                            var result = await _windowService
-                                .ShowDialogAsync<NOcrCharacterAddWindow, NOcrCharacterAddViewModel>(Window!,
-                                    vm =>
-                                    {
-                                        vm.Initialize(nBmp, item, letters, letterIndex, _nOcrDb, SelectedNOcrMaxWrongPixels);
-                                    });
+                            var result = await _windowService.ShowDialogAsync<NOcrCharacterAddWindow, NOcrCharacterAddViewModel>(Window!,
+                            vm =>
+                            {
+                                vm.Initialize(parentBitmap, item, letters, letterIndex, _nOcrDb, SelectedNOcrMaxWrongPixels);
+                            });
 
                             if (result.OkPressed)
                             {
                                 if (result.NOcrChar != null)
                                 {
                                     _nOcrDb.Add(result.NOcrChar);
-                                     _ = Task.Run(() => _nOcrDb.Save());
+                                    _ = Task.Run(() => _nOcrDb.Save());
                                 }
 
                                 _ = Task.Run(() => RunNOcrLoop(i));
@@ -532,8 +538,15 @@ public partial class OcrViewModel : ObservableObject
                         return;
                     }
 
+                    if (match != null)
+                    {
+                        index += match.ExpandCount - 1;
+                    }
+
                     sb.Append(match != null ? _nOcrCaseFixer.FixUppercaseLowercaseIssues(splitterItem, match) : "*");
                 }
+
+                index++;
             }
 
             item.Text = sb.ToString().Trim();
