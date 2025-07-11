@@ -117,6 +117,7 @@ public class NOcrDbEditWindow : Window
             },
             ColumnSpacing = 20,
             Width = double.NaN,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
         };
 
         vm.TextBoxItem = UiUtil.MakeTextBox(100, vm, nameof(vm.ItemText));
@@ -130,6 +131,7 @@ public class NOcrDbEditWindow : Window
                 vm.TextBoxItem,
                 UiUtil.MakeCheckBox(Se.Language.General.Italic, vm, nameof(vm.IsItemItalic)),
                 UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.ResolutionAndTopMargin)),
+                UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.ExpandInfo)),
                 UiUtil.MakeButton("Update", vm.UpdateCommand).WithMarginTop(25).WithLeftAlignment(),
                 UiUtil.MakeButton("Delete", vm.DeleteCommand).WithMarginTop(5).WithLeftAlignment(),
             },
@@ -141,26 +143,28 @@ public class NOcrDbEditWindow : Window
             BorderThickness = new Thickness(1),
             BorderBrush = new SolidColorBrush(Colors.Black),
             Child = vm.NOcrDrawingCanvas,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
         };
 
         var panelZoom = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Horizontal,
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
             Margin = new Thickness(0, 0, 0, 5),
             Children =
             {
                 UiUtil.MakeButton(vm.ZoomOutCommand, IconNames.MdiMinus).WithFontSize(20),
                 UiUtil.MakeButton(vm.ZoomInCommand, IconNames.MdiPlus).WithFontSize(20),
+                UiUtil.MakeLabel(string.Empty).WithMarginLeft(10).WithBindText(vm, nameof(vm.ZoomFactorInfo)),
             }
         };
 
         var panelImage = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Vertical,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
             Children =
             {
                 panelZoom,

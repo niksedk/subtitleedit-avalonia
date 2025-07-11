@@ -21,6 +21,8 @@ public class LanguageOcr
     public string RunningOcrDotDotDot { get; set; }
     public string AutoSubmitFirstCharacter { get; set; }
     public string EditNOcrDatabase { get; set; }
+    public string ZoomFactorX { get; set; }
+    public string ExpandInfoX { get; set; }
 
     public LanguageOcr()
     {
@@ -40,5 +42,7 @@ public class LanguageOcr
         RunningOcrDotDotDot = "Running OCR...";
         AutoSubmitFirstCharacter = "Auto submit first character";
         EditNOcrDatabase = "Edit nOCR database";
+        ZoomFactorX = "Zoom factor: {0}x";
+        ExpandInfoX = "Expand count: {0}";
     }
 }

@@ -24,6 +24,8 @@ public partial class NOcrDbEditViewModel : ObservableObject
     [ObservableProperty] private bool _isItemItalic;
     [ObservableProperty] private string _databaseName;
     [ObservableProperty] private string _resolutionAndTopMargin;
+    [ObservableProperty] private string _zoomFactorInfo;
+    [ObservableProperty] private string _expandInfo;
 
     public Window? Window { get; set; }
     public NOcrDrawingCanvasView NOcrDrawingCanvas { get; set; }
@@ -43,6 +45,8 @@ public partial class NOcrDbEditViewModel : ObservableObject
         NOcrDrawingCanvas = new NOcrDrawingCanvasView();
         TextBoxItem = new TextBox();
         ResolutionAndTopMargin = string.Empty;
+        ZoomFactorInfo = string.Empty;
+        ExpandInfo = string.Empty;
         NOcrDrawingCanvas.ZoomFactor = 4;
     }
 
@@ -77,6 +81,8 @@ public partial class NOcrDbEditViewModel : ObservableObject
         {
             NOcrDrawingCanvas.ZoomFactor++;
         }
+
+        ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
     }
 
     [RelayCommand]
@@ -86,6 +92,8 @@ public partial class NOcrDbEditViewModel : ObservableObject
         {
             NOcrDrawingCanvas.ZoomFactor--;
         }
+
+        ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
     }
 
     [RelayCommand]
@@ -100,7 +108,7 @@ public partial class NOcrDbEditViewModel : ObservableObject
     private async Task Delete()
     {
         var answer = await MessageBox.Show(
-                   Window,
+                   Window!,
                    "Delete nOCR item?",
                    $"Do you want to delete the current nOCR item?",
                    MessageBoxButtons.YesNoCancel,
@@ -149,8 +157,15 @@ public partial class NOcrDbEditViewModel : ObservableObject
             .Distinct()
             .OrderBy(c => c)
             .ToList();
-
         Characters.AddRange(characters);
+
+        var charactersExpanded = nOcrDb.OcrCharactersExpanded.Where(c => !string.IsNullOrWhiteSpace(c.Text))
+            .Select(c => c.Text)
+            .Distinct()
+            .OrderBy(c => c)
+            .ToList();
+        characters.AddRange(charactersExpanded);
+
         SelectedCharacter = characters.FirstOrDefault();
         CharactersChanged();
     }
@@ -182,6 +197,7 @@ public partial class NOcrDbEditViewModel : ObservableObject
             ItemText = string.Empty;
             IsItemItalic = false;
             ResolutionAndTopMargin = string.Empty;
+            ExpandInfo = string.Empty;
             return;
         }
 
@@ -189,6 +205,15 @@ public partial class NOcrDbEditViewModel : ObservableObject
         IsItemItalic = selectedItem.Italic;
         ResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, selectedItem.Width, selectedItem.Height, selectedItem.MarginTop);
         
+        if (selectedItem.ExpandCount == 0)
+        {
+            ExpandInfo = string.Empty;
+        }
+        else
+        {
+            ExpandInfo = string.Format(Se.Language.Ocr.ExpandInfoX, selectedItem.ExpandCount);
+        }
+
         var skBitmap = new SKBitmap(selectedItem.Width, selectedItem.Height);
         using (var canvas = new SKCanvas(skBitmap))
         {
@@ -202,5 +227,6 @@ public partial class NOcrDbEditViewModel : ObservableObject
         NOcrDrawingCanvas.HitPaths.Clear();
         NOcrDrawingCanvas.HitPaths.AddRange(selectedItem.LinesForeground);
         NOcrDrawingCanvas.InvalidateVisual();
+        ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
     }
 }
