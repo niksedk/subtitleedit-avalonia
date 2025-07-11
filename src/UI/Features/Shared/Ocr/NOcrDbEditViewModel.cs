@@ -3,9 +3,14 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using HanumanInstitute.Validators;
+using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Ocr;
-using System;
+using SkiaSharp;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
@@ -18,9 +23,11 @@ public partial class NOcrDbEditViewModel : ObservableObject
     [ObservableProperty] private string _itemText;
     [ObservableProperty] private bool _isItemItalic;
     [ObservableProperty] private string _databaseName;
+    [ObservableProperty] private string _resolutionAndTopMargin;
 
     public Window? Window { get; set; }
-
+    public NOcrDrawingCanvasView NOcrDrawingCanvas { get; set; }
+    public TextBox TextBoxItem { get; set; }
 
     public bool OkPressed { get; set; }
     private NOcrDb _nOcrDb;
@@ -28,6 +35,15 @@ public partial class NOcrDbEditViewModel : ObservableObject
     public NOcrDbEditViewModel()
     {
         DatabaseName = string.Empty;
+        Characters = new ObservableCollection<string>();
+        CurrentCharacterItems = new ObservableCollection<NOcrChar>();
+        ItemText = string.Empty;
+        IsItemItalic = false;
+        _nOcrDb = new NOcrDb(string.Empty);
+        NOcrDrawingCanvas = new NOcrDrawingCanvasView();
+        TextBoxItem = new TextBox();
+        ResolutionAndTopMargin = string.Empty;
+        NOcrDrawingCanvas.ZoomFactor = 4;
     }
 
 
@@ -53,6 +69,52 @@ public partial class NOcrDbEditViewModel : ObservableObject
     private void DeleteCurrentItem()
     {
     }
+
+    [RelayCommand]
+    private void ZoomIn()
+    {
+        if (NOcrDrawingCanvas.ZoomFactor < 10)
+        {
+            NOcrDrawingCanvas.ZoomFactor++;
+        }
+    }
+
+    [RelayCommand]
+    private void ZoomOut()
+    {
+        if (NOcrDrawingCanvas.ZoomFactor > 1)
+        {
+            NOcrDrawingCanvas.ZoomFactor--;
+        }
+    }
+
+    [RelayCommand]
+    private void Update()
+    {
+        //NOcrChar.Text = NewText;
+        ////UpdatePressed = true;
+        //Close();
+    }
+
+    [RelayCommand]
+    private async Task Delete()
+    {
+        var answer = await MessageBox.Show(
+                   Window,
+                   "Delete nOCR item?",
+                   $"Do you want to delete the current nOCR item?",
+                   MessageBoxButtons.YesNoCancel,
+                   MessageBoxIcon.Question);
+
+        if (answer != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        //DeletePressed = true;
+        //Close();
+    }
+
 
     private void Close()
     {
@@ -82,5 +144,63 @@ public partial class NOcrDbEditViewModel : ObservableObject
     internal void Initialize(NOcrDb nOcrDb)
     {
         _nOcrDb = nOcrDb;
+        var characters = nOcrDb.OcrCharacters.Where(c => !string.IsNullOrWhiteSpace(c.Text))
+            .Select(c => c.Text)
+            .Distinct()
+            .OrderBy(c => c)
+            .ToList();
+
+        Characters.AddRange(characters);
+        SelectedCharacter = characters.FirstOrDefault();
+        CharactersChanged();
+    }
+
+    internal void CharactersChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        CharactersChanged();
+    }
+
+    internal void CharactersChanged()
+    {
+        CurrentCharacterItems.Clear();
+        var selectedCharacter = SelectedCharacter;
+        if (string.IsNullOrWhiteSpace(selectedCharacter))
+        {
+            return;
+        }
+
+        var items = _nOcrDb.OcrCharacters.Where(c => c.Text == selectedCharacter).ToList();
+        CurrentCharacterItems.AddRange(items);
+        SelectedCurrentCharacterItem = CurrentCharacterItems.FirstOrDefault();
+    }
+
+    internal void CurrentCharacterItemsChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        var selectedItem = SelectedCurrentCharacterItem;
+        if (selectedItem == null)
+        {
+            ItemText = string.Empty;
+            IsItemItalic = false;
+            ResolutionAndTopMargin = string.Empty;
+            return;
+        }
+
+        ItemText = selectedItem.Text;
+        IsItemItalic = selectedItem.Italic;
+        ResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, selectedItem.Width, selectedItem.Height, selectedItem.MarginTop);
+        
+        var skBitmap = new SKBitmap(selectedItem.Width, selectedItem.Height);
+        using (var canvas = new SKCanvas(skBitmap))
+        {
+            canvas.Clear(SKColors.LightGray);
+        }
+        NOcrDrawingCanvas.SetBackgroundImage(skBitmap.ToAvaloniaBitmap());
+
+        NOcrDrawingCanvas.SetStrokeWidth(1);
+        NOcrDrawingCanvas.MissPaths.Clear();
+        NOcrDrawingCanvas.MissPaths.AddRange(selectedItem.LinesBackground);
+        NOcrDrawingCanvas.HitPaths.Clear();
+        NOcrDrawingCanvas.HitPaths.AddRange(selectedItem.LinesForeground);
+        NOcrDrawingCanvas.InvalidateVisual();
     }
 }

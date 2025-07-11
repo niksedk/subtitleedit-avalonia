@@ -1,9 +1,10 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using System;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
@@ -17,16 +18,19 @@ public class NOcrDbEditWindow : Window
         _vm = vm;
         vm.Window = this;
         Icon = UiUtil.GetSeIcon();
-        SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         DataContext = vm;
+        Width = 900;
+        Height = 800;
+        MinWidth = 600;
+        MinHeight = 500;
 
         var grid = new Grid
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Controls
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // Controls
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Buttons
             },
             ColumnDefinitions =
@@ -60,17 +64,15 @@ public class NOcrDbEditWindow : Window
         };
     }
 
-    private Border MakeCharacterControlsView(NOcrDbEditViewModel vm)
+    private static Border MakeCharacterControlsView(NOcrDbEditViewModel vm)
     {
         var grid = new Grid
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, 
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, 
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, 
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, 
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, 
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
             },
             ColumnDefinitions =
             {
@@ -78,21 +80,19 @@ public class NOcrDbEditWindow : Window
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
-            Width = double.NaN,
-            Height = double.NaN,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
         };
 
         var labelCharacters = UiUtil.MakeLabel("Character(s)");
         var charactersComboBox = UiUtil.MakeComboBox(vm.Characters, vm, nameof(vm.SelectedCharacter));
+        charactersComboBox.SelectionChanged += vm.CharactersChanged;
         var listBoxCurrentItems = new ListBox
         {
-            ItemsSource = vm.CurrentCharacterItems,
-            SelectedItem = vm.SelectedCurrentCharacterItem,
             Margin = new Thickness(0, 5, 0, 0),
-            MinHeight = 100,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
         };
+        listBoxCurrentItems.Bind(ListBox.SelectedItemProperty, new Binding(nameof(vm.SelectedCurrentCharacterItem)));
+        listBoxCurrentItems.Bind(ListBox.ItemsSourceProperty, new Binding(nameof(vm.CurrentCharacterItems)));
+        listBoxCurrentItems.SelectionChanged += vm.CurrentCharacterItemsChanged;
 
         grid.Add(labelCharacters, 0, 0);
         grid.Add(charactersComboBox, 1, 0);
@@ -107,25 +107,71 @@ public class NOcrDbEditWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, 
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, 
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, 
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, 
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, 
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
             },
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
             },
-            Margin = UiUtil.MakeWindowMargin(),
-            ColumnSpacing = 10,
+            ColumnSpacing = 20,
             Width = double.NaN,
-            Height = double.NaN,
+        };
+
+        vm.TextBoxItem = UiUtil.MakeTextBox(100, vm, nameof(vm.ItemText));
+
+        var panelCurrent = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Vertical,
+            Children =
+            {
+                UiUtil.MakeLabel(Se.Language.Ocr.CurrentImage).WithBold(),
+                vm.TextBoxItem,
+                UiUtil.MakeCheckBox(Se.Language.General.Italic, vm, nameof(vm.IsItemItalic)),
+                UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.ResolutionAndTopMargin)),
+                UiUtil.MakeButton("Update", vm.UpdateCommand).WithMarginTop(25).WithLeftAlignment(),
+                UiUtil.MakeButton("Delete", vm.DeleteCommand).WithMarginTop(5).WithLeftAlignment(),
+            },
+        };
+
+        vm.NOcrDrawingCanvas.SetStrokeWidth(1);
+        var borderDrawingCanvas = new Border
+        {
+            BorderThickness = new Thickness(1),
+            BorderBrush = new SolidColorBrush(Colors.Black),
+            Child = vm.NOcrDrawingCanvas,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
         };
 
-        return UiUtil.MakeBorderForControl(UiUtil.MakeLabel("Current item"));
+        var panelZoom = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 5),
+            Children =
+            {
+                UiUtil.MakeButton(vm.ZoomOutCommand, IconNames.MdiMinus).WithFontSize(20),
+                UiUtil.MakeButton(vm.ZoomInCommand, IconNames.MdiPlus).WithFontSize(20),
+            }
+        };
+
+        var panelImage = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Vertical,
+            Children =
+            {
+                panelZoom,
+                borderDrawingCanvas,
+            }
+        };
+
+        grid.Add(panelCurrent, 0, 0);
+        grid.Add(panelImage, 0, 2);
+
+        return UiUtil.MakeBorderForControl(grid);
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
