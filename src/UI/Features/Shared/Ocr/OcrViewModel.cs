@@ -538,7 +538,7 @@ public partial class OcrViewModel : ObservableObject
                         return;
                     }
 
-                    if (match != null)
+                    if (match != null && match.ExpandCount > 0)
                     {
                         index += match.ExpandCount - 1;
                     }

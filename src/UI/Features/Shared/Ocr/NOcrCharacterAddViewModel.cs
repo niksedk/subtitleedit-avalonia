@@ -141,7 +141,8 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         }
 
         var tempBitmap = item.GetSkBitmap();
-        var skBitmap = RemoveTopLines(tempBitmap, tempBitmap.Height - nBmp.Height);
+        var topDiff = tempBitmap.Height - nBmp.Height;
+        var skBitmap = RemoveTopLines(tempBitmap, topDiff);
 
         if (_splitItem.NikseBitmap != null)
         {
@@ -200,7 +201,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
                 {
                     Width = subset.Width,
                     Height = subset.Height,
-                    MarginTop = minMarginTop,
+                    MarginTop = 0,
                     ExpandCount = _expandCount + 1,
                 };
 

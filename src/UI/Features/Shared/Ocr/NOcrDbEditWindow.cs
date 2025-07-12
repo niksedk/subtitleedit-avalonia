@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -182,5 +183,12 @@ public class NOcrDbEditWindow : Window
     {
         base.OnKeyDown(e);
         _vm.KeyDown(e);
+    }
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+            
+        base.OnLoaded(e);
+        Title = _vm.Title;  
     }
 }

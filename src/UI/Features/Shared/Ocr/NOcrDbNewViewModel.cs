@@ -15,7 +15,6 @@ public partial class NOcrDbNewViewModel : ObservableObject
     [ObservableProperty] private string _databaseName;
 
     public bool OkPressed { get; set; }
-    private NOcrDb _nOcrDb;
 
     public NOcrDbNewViewModel()
     {

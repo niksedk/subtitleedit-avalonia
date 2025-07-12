@@ -32,6 +32,8 @@ public class NOcrDb
         OcrCharactersExpanded = new List<NOcrChar>(db.OcrCharactersExpanded);
     }
 
+    public List<NOcrChar> OcrCharactersCombined => OcrCharacters.Concat(OcrCharactersExpanded).ToList();
+
     public void Save()
     {
         if (File.Exists(FileName))

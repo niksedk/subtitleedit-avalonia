@@ -23,6 +23,7 @@ public class LanguageOcr
     public string EditNOcrDatabase { get; set; }
     public string ZoomFactorX { get; set; }
     public string ExpandInfoX { get; set; }
+    public string EditNOcrDatabaseXWithYItems { get; set; }
 
     public LanguageOcr()
     {
@@ -44,5 +45,6 @@ public class LanguageOcr
         EditNOcrDatabase = "Edit nOCR database";
         ZoomFactorX = "Zoom factor: {0}x";
         ExpandInfoX = "Expand count: {0}";
+        EditNOcrDatabaseXWithYItems = "Edit nOCR database {0} with {1} items";
     }
 }

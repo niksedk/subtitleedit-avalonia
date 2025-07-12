@@ -26,6 +26,7 @@ public partial class NOcrDbEditViewModel : ObservableObject
     [ObservableProperty] private string _resolutionAndTopMargin;
     [ObservableProperty] private string _zoomFactorInfo;
     [ObservableProperty] private string _expandInfo;
+    [ObservableProperty] private string _title;
 
     public Window? Window { get; set; }
     public NOcrDrawingCanvasView NOcrDrawingCanvas { get; set; }
@@ -48,6 +49,7 @@ public partial class NOcrDbEditViewModel : ObservableObject
         ZoomFactorInfo = string.Empty;
         ExpandInfo = string.Empty;
         NOcrDrawingCanvas.ZoomFactor = 4;
+        Title = string.Empty;
     }
 
 
@@ -152,22 +154,17 @@ public partial class NOcrDbEditViewModel : ObservableObject
     internal void Initialize(NOcrDb nOcrDb)
     {
         _nOcrDb = nOcrDb;
-        var characters = nOcrDb.OcrCharacters.Where(c => !string.IsNullOrWhiteSpace(c.Text))
+        var characters = nOcrDb.OcrCharactersCombined.Where(c => !string.IsNullOrWhiteSpace(c.Text))
             .Select(c => c.Text)
             .Distinct()
             .OrderBy(c => c)
             .ToList();
         Characters.AddRange(characters);
 
-        var charactersExpanded = nOcrDb.OcrCharactersExpanded.Where(c => !string.IsNullOrWhiteSpace(c.Text))
-            .Select(c => c.Text)
-            .Distinct()
-            .OrderBy(c => c)
-            .ToList();
-        characters.AddRange(charactersExpanded);
-
         SelectedCharacter = characters.FirstOrDefault();
         CharactersChanged();
+
+        Title = string.Format(Se.Language.Ocr.EditNOcrDatabaseXWithYItems, System.IO.Path.GetFileNameWithoutExtension(nOcrDb.FileName), nOcrDb.OcrCharactersCombined.Count);
     }
 
     internal void CharactersChanged(object? sender, SelectionChangedEventArgs e)
@@ -184,7 +181,7 @@ public partial class NOcrDbEditViewModel : ObservableObject
             return;
         }
 
-        var items = _nOcrDb.OcrCharacters.Where(c => c.Text == selectedCharacter).ToList();
+        var items = _nOcrDb.OcrCharactersCombined.Where(c => c.Text == selectedCharacter).ToList();
         CurrentCharacterItems.AddRange(items);
         SelectedCurrentCharacterItem = CurrentCharacterItems.FirstOrDefault();
     }
@@ -204,7 +201,7 @@ public partial class NOcrDbEditViewModel : ObservableObject
         ItemText = selectedItem.Text;
         IsItemItalic = selectedItem.Italic;
         ResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, selectedItem.Width, selectedItem.Height, selectedItem.MarginTop);
-        
+
         if (selectedItem.ExpandCount == 0)
         {
             ExpandInfo = string.Empty;

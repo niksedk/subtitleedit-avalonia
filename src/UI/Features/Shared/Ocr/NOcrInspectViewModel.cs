@@ -174,7 +174,7 @@ public partial class NOcrInspectViewModel : ObservableObject
     private async Task Delete()
     {
         var answer = await MessageBox.Show(
-                   Window,
+                   Window!,
                    "Delete nOCR item?",
                    $"Do you want to delete the current nOCR item?",
                    MessageBoxButtons.YesNoCancel,
