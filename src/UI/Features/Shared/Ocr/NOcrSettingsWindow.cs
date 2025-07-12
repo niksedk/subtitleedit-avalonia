@@ -11,7 +11,7 @@ public class NOcrSettingsWindow : Window
 
     public NOcrSettingsWindow(NOcrSettingsViewModel vm)
     {
-        Title = "nOCR database";
+        Title = Se.Language.Ocr.NOcrDatabase;
         _vm = vm;
         vm.Window = this;
         Icon = UiUtil.GetSeIcon();
@@ -42,9 +42,10 @@ public class NOcrSettingsWindow : Window
 
         var buttonEdit = UiUtil.MakeButton(Se.Language.General.Edit, vm.EditCommand);
         var buttonDelete = UiUtil.MakeButton(Se.Language.General.Delete, vm.DeleteCommand);
+        var buttonRename = UiUtil.MakeButton(Se.Language.General.Rename, vm.RenameCommand);
         var buttonNew = UiUtil.MakeButton(Se.Language.General.New, vm.NewCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var buttonBar = UiUtil.MakeButtonBar(buttonEdit, buttonDelete, buttonNew, buttonCancel);
+        var buttonBar = UiUtil.MakeButtonBar(buttonEdit, buttonDelete, buttonRename, buttonNew, buttonCancel);
 
         grid.Add(labelTitle, 0, 0);
         grid.Add(buttonBar, 1, 0);

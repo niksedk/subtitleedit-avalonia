@@ -199,6 +199,9 @@ public class LanguageGeneral
     public string Edit { get; set; }
     public string New { get; set; }
     public string Shrink { get; set; }
+    public string Rename { get; set; }
+    public string FileAlreadyExists { get; set; }
+    public string FileXAlreadyExists { get; set; }
 
     public LanguageGeneral()
     {
@@ -397,5 +400,8 @@ public class LanguageGeneral
         Edit = "Edit";
         New = "New";
         Shrink = "Shrink";
+        Rename = "Rename";
+        FileAlreadyExists = "File already exists";
+        FileXAlreadyExists = "File '{0}' already exists.";
     }
 }

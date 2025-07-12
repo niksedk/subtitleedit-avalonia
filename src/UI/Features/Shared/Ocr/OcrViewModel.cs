@@ -274,7 +274,10 @@ public partial class OcrViewModel : ObservableObject
 
         if (result.NewPressed)
         {
-            var newResult = await _windowService.ShowDialogAsync<NOcrDbNewWindow, NOcrDbNewViewModel>(Window!);
+            var newResult = await _windowService.ShowDialogAsync<NOcrDbNewWindow, NOcrDbNewViewModel>(Window!, vm =>
+            {
+                vm.Initialize(Se.Language.Ocr.NewNOcrDatabase, string.Empty);
+            });
             if (newResult.OkPressed)
             {
                 if (!Directory.Exists(Se.OcrFolder))
@@ -288,8 +291,8 @@ public partial class OcrViewModel : ObservableObject
                 {
                     var answer = await MessageBox.Show(
                         Window!,
-                        "File already exists",
-                        $"The file {newFileName} already exists.",
+                        Se.Language.General.FileAlreadyExists,
+                        string.Format(Se.Language.General.FileXAlreadyExists, newFileName),
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
                     return;
@@ -301,6 +304,44 @@ public partial class OcrViewModel : ObservableObject
                 var sortedList = NOcrDatabases.OrderBy(p => p).ToList();
                 NOcrDatabases.Clear();
                 NOcrDatabases.AddRange(sortedList);
+                SelectedNOcrDatabase = newResult.DatabaseName;
+            }
+
+            return;
+        }
+
+        if (result.RenamePressed)
+        {
+            var newResult = await _windowService.ShowDialogAsync<NOcrDbNewWindow, NOcrDbNewViewModel>(Window!, vm =>
+            {
+                vm.Initialize(Se.Language.Ocr.RenameNOcrDatabase, Path.GetFileNameWithoutExtension(_nOcrDb!.FileName));
+            });
+            if (newResult.OkPressed)
+            {
+                if (!Directory.Exists(Se.OcrFolder))
+                {
+                    Directory.CreateDirectory(Se.OcrFolder);
+
+                }
+
+                var newFileName = Path.Combine(Se.OcrFolder, newResult.DatabaseName + ".nocr");
+                if (File.Exists(newFileName))
+                {
+                    var answer = await MessageBox.Show(
+                        Window!,
+                        Se.Language.General.FileAlreadyExists,
+                        string.Format(Se.Language.General.FileXAlreadyExists, newFileName),
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                    return;
+                }
+
+                File.Move(_nOcrDb!.FileName, newFileName);
+                NOcrDatabases.Clear();
+                foreach (var s in NOcrDb.GetDatabases().OrderBy(p => p))
+                {
+                    NOcrDatabases.Add(s);
+                }
                 SelectedNOcrDatabase = newResult.DatabaseName;
             }
 

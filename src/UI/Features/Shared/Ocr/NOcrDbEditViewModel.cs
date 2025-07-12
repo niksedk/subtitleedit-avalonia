@@ -52,7 +52,6 @@ public partial class NOcrDbEditViewModel : ObservableObject
         Title = string.Empty;
     }
 
-
     [RelayCommand]
     private void Ok()
     {
@@ -99,16 +98,37 @@ public partial class NOcrDbEditViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Update()
+    private async Task Update()
     {
-        //NOcrChar.Text = NewText;
-        ////UpdatePressed = true;
-        //Close();
+        var item = SelectedCurrentCharacterItem;
+        if (item == null)
+        {
+            return;
+        }
+
+        // Validate the item text
+        if (string.IsNullOrWhiteSpace(ItemText))
+        {
+            await MessageBox.Show(Window!,  "Validation Error", "Item text cannot be empty.", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        item.Text = ItemText;
+        item.Italic = IsItemItalic;
+        _nOcrDb.Save();
+
+        Close();
     }
 
     [RelayCommand]
     private async Task Delete()
     {
+        var item = SelectedCurrentCharacterItem;
+        if (item == null)
+        {
+            return;
+        }
+
         var answer = await MessageBox.Show(
                    Window!,
                    "Delete nOCR item?",
@@ -121,8 +141,11 @@ public partial class NOcrDbEditViewModel : ObservableObject
             return;
         }
 
-        //DeletePressed = true;
-        //Close();
+        _nOcrDb.OcrCharacters.Remove(item);
+        _nOcrDb.OcrCharactersExpanded.Remove(item);
+        _nOcrDb.Save();
+
+        Close();
     }
 
 

@@ -1,6 +1,8 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
@@ -10,7 +12,7 @@ public class NOcrDbNewWindow : Window
 
     public NOcrDbNewWindow(NOcrDbNewViewModel vm)
     {
-        Title = "New nOCR database";
+        Title = "New/rename nOCR database";
         _vm = vm;
         vm.Window = this;
         Icon = UiUtil.GetSeIcon();
@@ -38,7 +40,7 @@ public class NOcrDbNewWindow : Window
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
         };
 
-        var labelTitle = UiUtil.MakeLabel("nOCR name");
+        var labelTitle = UiUtil.MakeLabel(Se.Language.Ocr.EditNOcrDatabase);
         var textBoxDatabaseName = UiUtil.MakeTextBox(200, vm, nameof(vm.DatabaseName));
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
@@ -63,5 +65,12 @@ public class NOcrDbNewWindow : Window
     {
         base.OnKeyDown(e);
         _vm.KeyDown(e);
+    }
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+            
+        base.OnLoaded(e);
+        Title = _vm.Title;
     }
 }

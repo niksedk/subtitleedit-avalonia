@@ -52,8 +52,6 @@ public partial class NOcrInspectViewModel : ObservableObject
     public StackPanel PanelLines { get; set; }
     public TextBox TextBoxNew { get; set; }
     public bool OkPressed { get; set; }
-    public bool UpdatePressed { get; set; }
-    public bool DeletePressed { get; set; }
     public bool AddBetterMatchPressed { get; set; }
 
     private NOcrDb _nOcrDb;
@@ -165,14 +163,28 @@ public partial class NOcrInspectViewModel : ObservableObject
     [RelayCommand]
     private void Update()
     {
-        NOcrChar.Text = NewText;
-        UpdatePressed = true;
+        var item = NOcrChar;
+        if (item == null || string.IsNullOrEmpty(NewText))
+        {
+            return;
+        }
+
+        item.Text = NewText;
+        item.Italic = IsNewTextItalic;
+        _nOcrDb.Save();
+
         Close();
     }
 
     [RelayCommand]
     private async Task Delete()
     {
+        var item = NOcrChar;
+        if (item == null)
+        {
+            return;
+        }
+
         var answer = await MessageBox.Show(
                    Window!,
                    "Delete nOCR item?",
@@ -185,7 +197,10 @@ public partial class NOcrInspectViewModel : ObservableObject
             return;
         }
 
-        DeletePressed = true;
+        _nOcrDb.OcrCharacters.Remove(item);
+        _nOcrDb.OcrCharactersExpanded.Remove(item);
+        _nOcrDb.Save();
+
         Close();
     }
 
@@ -320,11 +335,11 @@ public partial class NOcrInspectViewModel : ObservableObject
 
         if (_splitItem.NikseBitmap != null)
         {
-            NOcrChar = new NOcrChar
+            NOcrChar = match ?? new NOcrChar
             {
                 Width = _splitItem.NikseBitmap.Width,
                 Height = _splitItem.NikseBitmap.Height,
-                MarginTop = _splitItem.Top,
+                MarginTop = 0
             };
 
             NewText = match?.Text ?? string.Empty;

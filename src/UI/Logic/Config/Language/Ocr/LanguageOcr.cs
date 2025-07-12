@@ -24,6 +24,9 @@ public class LanguageOcr
     public string ZoomFactorX { get; set; }
     public string ExpandInfoX { get; set; }
     public string EditNOcrDatabaseXWithYItems { get; set; }
+    public string NewNOcrDatabase { get; set; }
+    public string RenameNOcrDatabase { get; set; }
+    public string NOcrDatabase { get; set; }
 
     public LanguageOcr()
     {
@@ -46,5 +49,8 @@ public class LanguageOcr
         ZoomFactorX = "Zoom factor: {0}x";
         ExpandInfoX = "Expand count: {0}";
         EditNOcrDatabaseXWithYItems = "Edit nOCR database {0} with {1} items";
+        NewNOcrDatabase = "New nOCR database";
+        RenameNOcrDatabase = "Rename nOCR database";
+        NOcrDatabase = "nOCR database";
     }
 }

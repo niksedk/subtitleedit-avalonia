@@ -3,24 +3,23 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Logic.Ocr;
 using System;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
 public partial class NOcrDbNewViewModel : ObservableObject
 {
-    public Window? Window { get; set; }
-
     [ObservableProperty] private string _databaseName;
+    [ObservableProperty] private string _title;
 
+    public Window? Window { get; set; }
     public bool OkPressed { get; set; }
 
     public NOcrDbNewViewModel()
     {
         DatabaseName = string.Empty;
+        Title = string.Empty;
     }
-
 
     [RelayCommand]
     private void Ok()
@@ -63,5 +62,11 @@ public partial class NOcrDbNewViewModel : ObservableObject
             e.Handled = true;
             Ok();
         }
+    }
+
+    internal void Initialize(string title, string databaseName)
+    {
+        Title = title;
+        DatabaseName = databaseName;
     }
 }
