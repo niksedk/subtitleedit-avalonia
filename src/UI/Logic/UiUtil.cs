@@ -693,6 +693,28 @@ public static class UiUtil
         return control;
     }
 
+    public static CheckBox WithBindEnabled(this CheckBox control, string isEnabledPropertyPath)
+    {
+        control.Bind(CheckBox.IsEnabledProperty, new Binding
+        {
+            Path = isEnabledPropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
+    public static TextBox WithBindEnabled(this TextBox control, string isEnabledPropertyPath)
+    {
+        control.Bind(TextBox.IsEnabledProperty, new Binding
+        {
+            Path = isEnabledPropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
     public static Button WithBindEnabled(this Button control, string isEnabledPropertyPath, IValueConverter converter)
     {
         control.Bind(Button.IsEnabledProperty, new Binding

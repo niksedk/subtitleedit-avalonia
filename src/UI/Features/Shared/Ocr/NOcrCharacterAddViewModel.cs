@@ -39,6 +39,8 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     [ObservableProperty] private Bitmap? _itemImageSource;
     [ObservableProperty] private bool _canShrink;
     [ObservableProperty] private bool _canExpand;
+    [ObservableProperty] private bool _showUseOnce;
+    [ObservableProperty] private bool _showSkip;
     [ObservableProperty] private ObservableCollection<int> _noOfLinesToAutoDrawList;
     [ObservableProperty] private int _selectedNoOfLinesToAutoDraw;
     [ObservableProperty] private Bitmap _sentenceBitmap;
@@ -93,6 +95,8 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         NOcrDrawingCanvas = new NOcrDrawingCanvasView();
         TextBoxNew = new TextBox();
         _nBmp = new NikseBitmap2(1, 1);
+        ShowSkip = true;
+        ShowUseOnce = true;
         LoadSettings();
     }
 
@@ -115,13 +119,17 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         List<ImageSplitterItem2> letters,
         int i,
         NOcrDb nOcrDb,
-        int maxWrongPixels)
+        int maxWrongPixels,
+        bool showUseOnce,
+        bool showSkip)
     {
         _nOcrDb = nOcrDb;
         _letters = letters;
         _startFromNumber = i;
         _nBmp = nBmp;
         _item = item;
+        ShowSkip = showSkip;
+        ShowUseOnce = showUseOnce;
         NOcrDrawingCanvas.ZoomFactor = 4;
         if (i >= 0 && i < letters.Count)
         {

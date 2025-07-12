@@ -1,7 +1,9 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -37,8 +39,7 @@ public partial class NOcrInspectViewModel : ObservableObject
     [ObservableProperty] private bool _submitOnFirstLetter;
     [ObservableProperty] private Bitmap? _sentenceImageSource;
     [ObservableProperty] private Bitmap? _itemImageSource;
-    [ObservableProperty] private bool _canShrink;
-    [ObservableProperty] private bool _canExpand;
+    [ObservableProperty] private bool _isEditControlsEnabled;
     [ObservableProperty] private ObservableCollection<int> _noOfLinesToAutoDrawList;
     [ObservableProperty] private int _selectedNoOfLinesToAutoDraw;
     [ObservableProperty] private Bitmap _currentBitmap;
@@ -53,8 +54,11 @@ public partial class NOcrInspectViewModel : ObservableObject
     public TextBox TextBoxNew { get; set; }
     public bool OkPressed { get; set; }
     public bool AddBetterMatchPressed { get; set; }
+    public int LetterIndex { get; internal set; }
 
     private NOcrDb _nOcrDb;
+    private bool _isControlDown = false;
+    private bool _isWinDown = false;
 
     public NOcrInspectViewModel()
     {
@@ -132,18 +136,6 @@ public partial class NOcrInspectViewModel : ObservableObject
         }
 
         SentenceBitmap = skBitmap.ToAvaloniaBitmap();
-    }
-
-    [RelayCommand]
-    private void Shrink()
-    {
-
-    }
-
-    [RelayCommand]
-    private void Expand()
-    {
-
     }
 
     [RelayCommand]
@@ -291,8 +283,8 @@ public partial class NOcrInspectViewModel : ObservableObject
                     .WithIconLeft(IconNames.MdiHelp)
                     .WithMargin(4)
                     .WithPadding(8)
-                    .WithMinWidth(0);                   ;
-                var indexNotFound = i;  
+                    .WithMinWidth(0); ;
+                var indexNotFound = i;
                 buttonNotFound.Click += (_, _) => OnLetterClicked(indexNotFound, match);
                 currentLine.Children.Add(buttonNotFound);
                 continue;
@@ -331,7 +323,10 @@ public partial class NOcrInspectViewModel : ObservableObject
 
     private void OnLetterClicked(int index, NOcrChar? match)
     {
+        LetterIndex = index;
         _splitItem = _letters[index];
+
+        IsEditControlsEnabled = match != null;
 
         if (_splitItem.NikseBitmap != null)
         {
@@ -349,7 +344,13 @@ public partial class NOcrInspectViewModel : ObservableObject
             CurrentBitmap = _splitItem.NikseBitmap!.GetBitmap().ToAvaloniaBitmap();
             NOcrDrawingCanvas.BackgroundImage = CurrentBitmap;
 
-            if (match != null)
+            if (match == null)
+            {
+                NOcrDrawingCanvas.BackgroundImage = new SKBitmap(1, 1).ToAvaloniaBitmap();
+                NOcrDrawingCanvas.HitPaths.Clear();
+                NOcrDrawingCanvas.MissPaths.Clear();
+            }
+            else
             {
                 NOcrDrawingCanvas.HitPaths.Clear();
                 foreach (var line in match.LinesForeground)
@@ -371,10 +372,78 @@ public partial class NOcrInspectViewModel : ObservableObject
             NOcrDrawingCanvas.InvalidateVisual();
             NOcrDrawingCanvas.ZoomFactor = 4;
         }
+        else
+        {
+            NOcrDrawingCanvas.HitPaths.Clear();
+            NOcrDrawingCanvas.MissPaths.Clear();
+            NOcrDrawingCanvas.InvalidateVisual();
+        }
     }
 
     internal void DrawModeChanged(object? sender, SelectionChangedEventArgs e)
     {
         NOcrDrawingCanvas.NewLinesAreHits = SelectedDrawMode.Type == NOcrDrawModeItemType.Foreground;
+    }
+
+    public void KeyDown(KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            Cancel();
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Left)
+        {
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Right)
+        {
+            e.Handled = true;
+        }
+        else if (e.Key == Key.I)
+        {
+            if (_isControlDown || _isWinDown)
+            {
+                e.Handled = true;
+                IsNewTextItalic = !IsNewTextItalic;
+            }
+        }
+        else if (e.Key == Key.F)
+        {
+            if (_isControlDown || _isWinDown)
+            {
+                e.Handled = true;
+                SubmitOnFirstLetter = !SubmitOnFirstLetter;
+            }
+        }
+        else if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
+        {
+            _isControlDown = true;
+        }
+        else if (e.Key == Key.LWin || e.Key == Key.RWin)
+        {
+            _isWinDown = true;
+        }
+    }
+
+    public void KeyUp(KeyEventArgs e)
+    {
+        if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
+        {
+            _isControlDown = false;
+        }
+        else if (e.Key == Key.LWin || e.Key == Key.RWin)
+        {
+            _isWinDown = false;
+        }
+    }
+
+    public void ItalicCheckChanged(object? sender, RoutedEventArgs e)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            TextBoxNew.FontStyle = IsNewTextItalic ? FontStyle.Italic : FontStyle.Normal;
+        });
     }
 }

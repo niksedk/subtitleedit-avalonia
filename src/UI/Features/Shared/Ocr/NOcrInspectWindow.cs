@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
@@ -94,7 +95,9 @@ public class NOcrInspectWindow : Window
             Width = double.NaN,
         };
 
-        vm.TextBoxNew = UiUtil.MakeTextBox(100, vm, nameof(vm.NewText));
+        vm.TextBoxNew = UiUtil.MakeTextBox(100, vm, nameof(vm.NewText))
+            .WithBindEnabled(nameof(vm.IsEditControlsEnabled));
+
         var image = new Image
         {
             Margin = new Thickness(5),
@@ -114,6 +117,10 @@ public class NOcrInspectWindow : Window
             Margin = new Thickness(0, 0, 0, 5),
         };
 
+        var checkBoxItalic = UiUtil.MakeCheckBox(Se.Language.General.Italic, vm, nameof(vm.IsNewTextItalic))
+            .WithBindEnabled(nameof(vm.IsEditControlsEnabled));
+        checkBoxItalic.IsCheckedChanged += vm.ItalicCheckChanged;
+
         var panelCurrent = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Vertical,
@@ -122,10 +129,10 @@ public class NOcrInspectWindow : Window
                 UiUtil.MakeLabel(Se.Language.Ocr.CurrentImage).WithBold(),
                 panelCurrentImage,
                 vm.TextBoxNew,
-                UiUtil.MakeCheckBox(Se.Language.General.Italic, vm, nameof(vm.IsNewTextItalic)),
+                checkBoxItalic,
                 UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.ResolutionAndTopMargin)),
-                UiUtil.MakeButton("Update", vm.UpdateCommand).WithMarginTop(25).WithLeftAlignment(),
-                UiUtil.MakeButton("Delete", vm.DeleteCommand).WithMarginTop(5).WithLeftAlignment(),
+                UiUtil.MakeButton("Update", vm.UpdateCommand).WithMarginTop(25).WithLeftAlignment().WithBindEnabled(nameof(vm.IsEditControlsEnabled)),
+                UiUtil.MakeButton("Delete", vm.DeleteCommand).WithMarginTop(5).WithLeftAlignment().WithBindEnabled(nameof(vm.IsEditControlsEnabled)),
                 UiUtil.MakeButton("Add better match", vm.AddBetterMatchCommand).WithMarginTop(5).WithLeftAlignment(),
             },
         };
@@ -137,8 +144,16 @@ public class NOcrInspectWindow : Window
             {
                 UiUtil.MakeLabel(Se.Language.Ocr.LinesToDraw).WithBold(),
                 UiUtil.MakeComboBox(vm.NoOfLinesToAutoDrawList, vm, nameof(vm.SelectedNoOfLinesToAutoDraw)),
-                UiUtil.MakeButton(Se.Language.Ocr.AutoDrawAgain, vm.DrawAgainCommand).WithMinWidth(100).WithMarginTop(10).WithLeftAlignment(),
-                UiUtil.MakeButton(Se.Language.General.Clear, vm.ClearDrawCommand).WithMinWidth(100).WithMarginTop(5).WithLeftAlignment(),
+                UiUtil.MakeButton(Se.Language.Ocr.AutoDrawAgain, vm.DrawAgainCommand)
+                    .WithMinWidth(100)
+                    .WithMarginTop(10)
+                    .WithLeftAlignment()
+                    .WithBindEnabled(nameof(vm.IsEditControlsEnabled)),
+                UiUtil.MakeButton(Se.Language.General.Clear, vm.ClearDrawCommand)
+                    .WithMinWidth(100)
+                    .WithMarginTop(5)
+                    .WithLeftAlignment()
+                    .WithBindEnabled(nameof(vm.IsEditControlsEnabled)),
             }
         };
 
@@ -148,8 +163,8 @@ public class NOcrInspectWindow : Window
             BorderThickness = new Thickness(1),
             BorderBrush = new SolidColorBrush(Colors.Black),
             Child = vm.NOcrDrawingCanvas,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
         };
 
         var comboDrawModes = UiUtil.MakeComboBox(vm.DrawModes, vm, nameof(vm.SelectedDrawMode)).WithMarginLeft(5);
@@ -183,6 +198,18 @@ public class NOcrInspectWindow : Window
         grid.Add(panelImage, 0, 2);
 
         return UiUtil.MakeBorderForControl(grid);
+    }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        _vm.KeyDown(e);
+    }
+
+    protected override void OnKeyUp(KeyEventArgs e)
+    {
+        base.OnKeyUp(e);
+        _vm.KeyUp(e);
     }
 
     protected override void OnLoaded(RoutedEventArgs e)

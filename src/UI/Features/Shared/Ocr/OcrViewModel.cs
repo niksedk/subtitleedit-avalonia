@@ -213,8 +213,21 @@ public partial class OcrViewModel : ObservableObject
             vm.Initialize(nBmp.GetBitmap(), SelectedOcrSubtitleItem, _nOcrDb, SelectedNOcrMaxWrongPixels, letters, matches);
         });
 
-        if (result.OkPressed)
+        if (result.AddBetterMatchPressed)
         {
+            var characterAddResult = await _windowService.ShowDialogAsync<NOcrCharacterAddWindow, NOcrCharacterAddViewModel>(Window!, vm =>
+            {
+                vm.Initialize(nBmp, item, letters, result.LetterIndex, _nOcrDb!, SelectedNOcrMaxWrongPixels, false, false);
+            });
+
+            if (characterAddResult.OkPressed)
+            {
+                if (characterAddResult.NOcrChar != null)
+                {
+                    _nOcrDb!.Add(characterAddResult.NOcrChar);
+                    _ = Task.Run(_nOcrDb.Save);
+                }
+            }
         }
     }
 
@@ -539,7 +552,7 @@ public partial class OcrViewModel : ObservableObject
                             var result = await _windowService.ShowDialogAsync<NOcrCharacterAddWindow, NOcrCharacterAddViewModel>(Window!,
                             vm =>
                             {
-                                vm.Initialize(parentBitmap, item, letters, letterIndex, _nOcrDb, SelectedNOcrMaxWrongPixels);
+                                vm.Initialize(parentBitmap, item, letters, letterIndex, _nOcrDb, SelectedNOcrMaxWrongPixels, true, true);
                             });
 
                             if (result.OkPressed)
