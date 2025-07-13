@@ -148,8 +148,6 @@ public class NOcrCharacterAddWindow : Window
                 UiUtil.MakeComboBox(vm.NoOfLinesToAutoDrawList, vm, nameof(vm.SelectedNoOfLinesToAutoDraw)),
                 UiUtil.MakeButton(Se.Language.Ocr.AutoDrawAgain, vm.DrawAgainCommand).WithMinWidth(100).WithMarginTop(10).WithLeftAlignment(),
                 UiUtil.MakeButton(Se.Language.General.Clear, vm.ClearDrawCommand).WithMinWidth(100).WithMarginTop(5).WithLeftAlignment(),
-                UiUtil.MakeLabel(Se.Language.Ocr.DrawMode).WithBold().WithMarginTop(10),
-                comboDrawModes,
             }
         };
 
@@ -159,8 +157,8 @@ public class NOcrCharacterAddWindow : Window
             BorderThickness = new Thickness(1),
             BorderBrush = new SolidColorBrush(Colors.Black),
             Child = vm.NOcrDrawingCanvas,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
         };
 
         var panelZoom = new StackPanel
@@ -174,6 +172,8 @@ public class NOcrCharacterAddWindow : Window
                 UiUtil.MakeButton(vm.ZoomOutCommand, IconNames.MdiMinus),
                 UiUtil.MakeButton(vm.ZoomInCommand, IconNames.MdiPlus),
                 UiUtil.MakeLabel(string.Empty).WithMarginLeft(10).WithBindText(vm, nameof(vm.ZoomFactorInfo)),
+                UiUtil.MakeLabel(Se.Language.Ocr.DrawMode).WithMarginLeft(10),
+                comboDrawModes,
             }
         };
 
