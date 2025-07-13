@@ -111,24 +111,27 @@ public partial class OcrViewModel : ObservableObject
 
     private void LoadSettings()
     {
-        var ocr = Se.Settings.Ocr;
-        if (!string.IsNullOrEmpty(ocr.Engine) && OcrEngines.Any(p => p.Name == ocr.Engine))
+        Dispatcher.UIThread.Invoke(() =>
         {
-            SelectedOcrEngine = OcrEngines.First(p => p.Name == ocr.Engine);
-        }
+            var ocr = Se.Settings.Ocr;
+            if (!string.IsNullOrEmpty(ocr.Engine) && OcrEngines.Any(p => p.Name == ocr.Engine))
+            {
+                SelectedOcrEngine = OcrEngines.First(p => p.Name == ocr.Engine);
+            }
 
-        if (!string.IsNullOrEmpty(ocr.NOcrDatabase) && NOcrDatabases.Contains(ocr.NOcrDatabase))
-        {
-            SelectedNOcrDatabase = ocr.NOcrDatabase;
-        }
+            if (!string.IsNullOrEmpty(ocr.NOcrDatabase) && NOcrDatabases.Contains(ocr.NOcrDatabase))
+            {
+                SelectedNOcrDatabase = ocr.NOcrDatabase;
+            }
 
-        SelectedNOcrMaxWrongPixels = ocr.NOcrMaxWrongPixels;
-        NOcrDrawUnknownText = ocr.NOcrDrawUnknownText;
-        SelectedNOcrPixelsAreSpace = ocr.NOcrPixelsAreSpace;
-        OllamaModel = ocr.OllamaModel;
-        SelectedOllamaLanguage = ocr.OllamaLanguage;
-        GoogleVisionApiKey = ocr.GoogleVisionApiKey;
-        SelectedGoogleVisionLanguage = GoogleVisionLanguages.FirstOrDefault(p => p.Code == ocr.GoogleVisionLanguage);
+            SelectedNOcrMaxWrongPixels = ocr.NOcrMaxWrongPixels;
+            NOcrDrawUnknownText = ocr.NOcrDrawUnknownText;
+            SelectedNOcrPixelsAreSpace = ocr.NOcrPixelsAreSpace;
+            OllamaModel = ocr.OllamaModel;
+            SelectedOllamaLanguage = ocr.OllamaLanguage;
+            GoogleVisionApiKey = ocr.GoogleVisionApiKey;
+            SelectedGoogleVisionLanguage = GoogleVisionLanguages.FirstOrDefault(p => p.Code == ocr.GoogleVisionLanguage);
+        });
     }
 
     private void SaveSettings()
