@@ -8,6 +8,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Ocr;
 using SkiaSharp;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,6 +21,8 @@ public partial class NOcrDbEditViewModel : ObservableObject
     [ObservableProperty] private string? _selectedCharacter;
     [ObservableProperty] private ObservableCollection<NOcrChar> _currentCharacterItems;
     [ObservableProperty] private NOcrChar? _selectedCurrentCharacterItem;
+    [ObservableProperty] private ObservableCollection<NOcrDrawModeItem> _drawModes;
+    [ObservableProperty] private NOcrDrawModeItem _selectedDrawMode;
     [ObservableProperty] private string _itemText;
     [ObservableProperty] private bool _isItemItalic;
     [ObservableProperty] private string _databaseName;
@@ -37,6 +40,8 @@ public partial class NOcrDbEditViewModel : ObservableObject
 
     public NOcrDbEditViewModel()
     {
+        DrawModes = new ObservableCollection<NOcrDrawModeItem>(NOcrDrawModeItem.Items);
+        SelectedDrawMode = DrawModes.First();
         DatabaseName = string.Empty;
         Characters = new ObservableCollection<string>();
         CurrentCharacterItems = new ObservableCollection<NOcrChar>();
@@ -248,5 +253,10 @@ public partial class NOcrDbEditViewModel : ObservableObject
         NOcrDrawingCanvas.HitPaths.AddRange(selectedItem.LinesForeground);
         NOcrDrawingCanvas.InvalidateVisual();
         ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
+    }
+
+    internal void DrawModeChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        NOcrDrawingCanvas.NewLinesAreHits = SelectedDrawMode.Type == NOcrDrawModeItemType.Foreground;
     }
 }

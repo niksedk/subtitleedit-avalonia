@@ -33,6 +33,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     [ObservableProperty] private bool _isNewLinesBackgroundActive;
     [ObservableProperty] private string _newText;
     [ObservableProperty] private string _resolutionAndTopMargin;
+    [ObservableProperty] private string _zoomFactorInfo;
     [ObservableProperty] private bool _isNewTextItalic;
     [ObservableProperty] private bool _submitOnFirstLetter;
     [ObservableProperty] private Bitmap? _sentenceImageSource;
@@ -78,6 +79,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         IsNewTextItalic = false;
         SubmitOnFirstLetter = false;
         _letters = new List<ImageSplitterItem2>();
+        ZoomFactorInfo = string.Empty;
 
         const int maxLines = 500;
         NoOfLinesToAutoDrawList = new ObservableCollection<int>();
@@ -218,6 +220,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
 
             NOcrDrawingCanvas.BackgroundImage = CurrentBitmap;
             NOcrDrawingCanvas.ZoomFactor = NOcrDrawingCanvas.ZoomFactor;
+            ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
             DrawAgain();
 
             using (var canvas = new SKCanvas(skBitmap))
@@ -338,6 +341,8 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         {
             NOcrDrawingCanvas.ZoomFactor++;
         }
+
+        ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
     }
 
     [RelayCommand]
@@ -347,6 +352,8 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         {
             NOcrDrawingCanvas.ZoomFactor--;
         }
+
+        ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
     }
 
     private void Close()
@@ -463,5 +470,10 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         {
             TextBoxNew.FontStyle = IsNewTextItalic ? FontStyle.Italic : FontStyle.Normal;
         });
+    }
+
+    internal void DrawModeChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        NOcrDrawingCanvas.NewLinesAreHits = SelectedDrawMode.Type == NOcrDrawModeItemType.Foreground;
     }
 }

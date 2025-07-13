@@ -136,6 +136,9 @@ public class NOcrCharacterAddWindow : Window
             },
         };
 
+        var comboDrawModes = UiUtil.MakeComboBox(vm.DrawModes, vm, nameof(vm.SelectedDrawMode)).WithMarginLeft(5);
+        comboDrawModes.SelectionChanged += vm.DrawModeChanged;
+
         var panelDrawControls = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Vertical,
@@ -145,6 +148,8 @@ public class NOcrCharacterAddWindow : Window
                 UiUtil.MakeComboBox(vm.NoOfLinesToAutoDrawList, vm, nameof(vm.SelectedNoOfLinesToAutoDraw)),
                 UiUtil.MakeButton(Se.Language.Ocr.AutoDrawAgain, vm.DrawAgainCommand).WithMinWidth(100).WithMarginTop(10).WithLeftAlignment(),
                 UiUtil.MakeButton(Se.Language.General.Clear, vm.ClearDrawCommand).WithMinWidth(100).WithMarginTop(5).WithLeftAlignment(),
+                UiUtil.MakeLabel(Se.Language.Ocr.DrawMode).WithBold().WithMarginTop(10),
+                comboDrawModes,
             }
         };
 
@@ -168,6 +173,7 @@ public class NOcrCharacterAddWindow : Window
             {
                 UiUtil.MakeButton(vm.ZoomOutCommand, IconNames.MdiMinus),
                 UiUtil.MakeButton(vm.ZoomInCommand, IconNames.MdiPlus),
+                UiUtil.MakeLabel(string.Empty).WithMarginLeft(10).WithBindText(vm, nameof(vm.ZoomFactorInfo)),
             }
         };
 

@@ -27,6 +27,7 @@ public class LanguageOcr
     public string NewNOcrDatabase { get; set; }
     public string RenameNOcrDatabase { get; set; }
     public string NOcrDatabase { get; set; }
+    public string DrawMode { get; set; }
 
     public LanguageOcr()
     {
@@ -52,5 +53,6 @@ public class LanguageOcr
         NewNOcrDatabase = "New nOCR database";
         RenameNOcrDatabase = "Rename nOCR database";
         NOcrDatabase = "nOCR database";
+        DrawMode = "Draw mode:";
     }
 }

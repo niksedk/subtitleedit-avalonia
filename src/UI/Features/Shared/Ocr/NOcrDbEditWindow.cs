@@ -148,6 +148,9 @@ public class NOcrDbEditWindow : Window
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
         };
 
+        var comboDrawModes = UiUtil.MakeComboBox(vm.DrawModes, vm, nameof(vm.SelectedDrawMode)).WithMarginLeft(5);
+        comboDrawModes.SelectionChanged += vm.DrawModeChanged;
+
         var panelZoom = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Horizontal,
@@ -159,6 +162,8 @@ public class NOcrDbEditWindow : Window
                 UiUtil.MakeButton(vm.ZoomOutCommand, IconNames.MdiMinus).WithFontSize(20),
                 UiUtil.MakeButton(vm.ZoomInCommand, IconNames.MdiPlus).WithFontSize(20),
                 UiUtil.MakeLabel(string.Empty).WithMarginLeft(10).WithBindText(vm, nameof(vm.ZoomFactorInfo)),
+                UiUtil.MakeLabel(Se.Language.Ocr.DrawMode).WithMarginLeft(10),
+                comboDrawModes,
             }
         };
 

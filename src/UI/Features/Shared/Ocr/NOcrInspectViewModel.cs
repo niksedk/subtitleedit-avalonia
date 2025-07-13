@@ -35,6 +35,7 @@ public partial class NOcrInspectViewModel : ObservableObject
     [ObservableProperty] private bool _isNewLinesBackgroundActive;
     [ObservableProperty] private string _newText;
     [ObservableProperty] private string _resolutionAndTopMargin;
+    [ObservableProperty] private string _zoomFactorInfo;
     [ObservableProperty] private bool _isNewTextItalic;
     [ObservableProperty] private bool _submitOnFirstLetter;
     [ObservableProperty] private Bitmap? _sentenceImageSource;
@@ -76,6 +77,7 @@ public partial class NOcrInspectViewModel : ObservableObject
         SubmitOnFirstLetter = false;
         _letters = new List<ImageSplitterItem2>();
         _matches = new List<NOcrChar?>();
+        ZoomFactorInfo = string.Empty;
 
         const int maxLines = 500;
         NoOfLinesToAutoDrawList = new ObservableCollection<int>();
@@ -228,6 +230,8 @@ public partial class NOcrInspectViewModel : ObservableObject
         {
             NOcrDrawingCanvas.ZoomFactor++;
         }
+
+        ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
     }
 
     [RelayCommand]
@@ -237,6 +241,8 @@ public partial class NOcrInspectViewModel : ObservableObject
         {
             NOcrDrawingCanvas.ZoomFactor--;
         }
+
+        ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
     }
 
     private void Close()
@@ -371,6 +377,7 @@ public partial class NOcrInspectViewModel : ObservableObject
 
             NOcrDrawingCanvas.InvalidateVisual();
             NOcrDrawingCanvas.ZoomFactor = 4;
+            ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
         }
         else
         {

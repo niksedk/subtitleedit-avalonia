@@ -921,7 +921,16 @@ public partial class OcrViewModel : ObservableObject
             {
                 NOcrDatabases.Add(s);
             }
-            SelectedNOcrDatabase = NOcrDb.GetDatabases().FirstOrDefault();
+
+            if (!string.IsNullOrEmpty(Se.Settings.Ocr.NOcrDatabase) && NOcrDatabases.Contains(Se.Settings.Ocr.NOcrDatabase))
+            {
+                SelectedNOcrDatabase = Se.Settings.Ocr.NOcrDatabase;
+            }
+
+            if (SelectedNOcrDatabase == null)
+            {
+                SelectedNOcrDatabase = NOcrDb.GetDatabases().FirstOrDefault();
+            }
         }
 
         if (IsTesseractVisible)
