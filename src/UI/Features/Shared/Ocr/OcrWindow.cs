@@ -380,6 +380,12 @@ public class OcrWindow : Window
         _vm.SelectAndScrollToRow(0);
     }
 
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        base.OnClosing(e);
+        _vm.OnClosing(e);
+    }
+
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);

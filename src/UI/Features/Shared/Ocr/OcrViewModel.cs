@@ -371,7 +371,6 @@ public partial class OcrViewModel : ObservableObject
     [RelayCommand]
     private void Ok()
     {
-        SaveSettings();
         OkPressed = true;
 
         OcredSubtitle.Clear();
@@ -946,5 +945,10 @@ public partial class OcrViewModel : ObservableObject
                 SelectedGoogleVisionLanguage = GoogleVisionLanguages.FirstOrDefault(p => p.Code == "eng") ?? GoogleVisionLanguages.FirstOrDefault();
             }
         }
+    }
+
+    internal void OnClosing(WindowClosingEventArgs e)
+    {
+        SaveSettings();
     }
 }
