@@ -57,6 +57,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     public bool AbortPressed { get; set; }
     public bool SkipPressed { get; set; }
     public bool UseOncePressed { get; set; }
+    public bool InspectHistoryPressed { get; set; }
 
     private int _startFromNumber;
     private NikseBitmap2 _nBmp;
@@ -293,6 +294,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     private void Ok()
     {
         NOcrChar.Text = NewText;
+        NOcrChar.Italic = IsNewTextItalic;
         OkPressed = true;
         SaveSettings();
         Close();
@@ -301,6 +303,9 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     [RelayCommand]
     private void InspectAdditions()
     {
+        InspectHistoryPressed = true;
+        SaveSettings();
+        Close();
     }
 
     [RelayCommand]

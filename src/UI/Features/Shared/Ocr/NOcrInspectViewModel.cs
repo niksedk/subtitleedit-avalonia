@@ -344,7 +344,7 @@ public partial class NOcrInspectViewModel : ObservableObject
             };
 
             NewText = match?.Text ?? string.Empty;
-
+            IsNewTextItalic = match is { Italic: true };
             ResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, NOcrChar.Width, NOcrChar.Height, NOcrChar.MarginTop);
 
             CurrentBitmap = _splitItem.NikseBitmap!.GetBitmap().ToAvaloniaBitmap();

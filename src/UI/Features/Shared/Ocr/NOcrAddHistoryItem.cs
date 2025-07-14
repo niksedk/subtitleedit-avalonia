@@ -17,4 +17,9 @@ public class NOcrAddHistoryItem
         DateTime = DateTime.Now;
         LineIndex = lineIndex;
     }
+
+    public override string ToString()
+    {
+        return $"{NOcrChar.Text} - created at {DateTime.ToShortTimeString()}"; 
+    }
 }

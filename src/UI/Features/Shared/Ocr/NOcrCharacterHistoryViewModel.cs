@@ -10,11 +10,9 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Ocr;
 using SkiaSharp;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
@@ -24,7 +22,9 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
 
     [ObservableProperty] private string _title;
     [ObservableProperty] private ObservableCollection<NOcrAddHistoryItem> _historyItems;
+    [ObservableProperty] private NOcrAddHistoryItem? _selectedHistoryItem;
     [ObservableProperty] private string _newText;
+    [ObservableProperty] private string _lineIndex;
     [ObservableProperty] private string _resolutionAndTopMargin;
     [ObservableProperty] private string _zoomFactorInfo;
     [ObservableProperty] private bool _isNewTextItalic;
@@ -43,6 +43,7 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
         ResolutionAndTopMargin = string.Empty;
         IsNewTextItalic = false;
         ZoomFactorInfo = string.Empty;
+        LineIndex = string.Empty;
 
         HistoryItems = new ObservableCollection<NOcrAddHistoryItem>();
         NOcrChar = new NOcrChar();
@@ -60,10 +61,12 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
         _nOcrDb = nOcrDb;
         NOcrDrawingCanvas.ZoomFactor = 4;
         nOcrAddHistoryManager.ClearNotInOcrDb(nOcrDb);
-        foreach (var historyItem in nOcrAddHistoryManager.Items)
+        foreach (var historyItem in nOcrAddHistoryManager.Items.OrderByDescending(p=>p.DateTime))
         {
             HistoryItems.Add(historyItem);
         }
+
+        SelectedHistoryItem = HistoryItems.FirstOrDefault();
     }
 
     [RelayCommand]
@@ -99,6 +102,45 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
         }
 
         ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
+    }
+    
+    [RelayCommand]
+    private void Update()
+    {
+        var item = NOcrChar;
+        if (string.IsNullOrEmpty(NewText))
+        {
+            return;
+        }
+
+        item.Text = NewText;
+        item.Italic = IsNewTextItalic;
+        _nOcrDb.Save();
+
+        Close();
+    }
+
+    [RelayCommand]
+    private async Task Delete()
+    {
+        var item = NOcrChar;
+        var answer = await MessageBox.Show(
+            Window!,
+            "Delete nOCR item?",
+            $"Do you want to delete the current nOCR item?",
+            MessageBoxButtons.YesNoCancel,
+            MessageBoxIcon.Question);
+
+        if (answer != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        _nOcrDb.OcrCharacters.Remove(item);
+        _nOcrDb.OcrCharactersExpanded.Remove(item);
+        _nOcrDb.Save();
+
+        Close();
     }
 
     private void Close()
@@ -143,5 +185,39 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
         {
             TextBoxNew.FontStyle = IsNewTextItalic ? FontStyle.Italic : FontStyle.Normal;
         });
+    }
+
+    public void HistoryItemChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        HistoryItemChanged();
+    }
+
+    private void HistoryItemChanged()
+    {
+        var selectedItem = SelectedHistoryItem;
+        if (selectedItem == null)
+        {
+            return;
+        }
+
+        if (selectedItem.Bitmap != null)
+        {
+            CurrentBitmap = selectedItem.Bitmap.GetBitmap().ToAvaloniaBitmap();
+        }
+
+        NOcrChar = selectedItem.NOcrChar;
+        IsNewTextItalic = NOcrChar.Italic;
+        NewText = NOcrChar.Text;
+        LineIndex = string.Format(Se.Language.Ocr.LineIndexX,  selectedItem.LineIndex + 1);
+        ResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, NOcrChar.Width, NOcrChar.Height, NOcrChar.MarginTop);
+        
+        NOcrDrawingCanvas.BackgroundImage = CurrentBitmap;
+        NOcrDrawingCanvas.ZoomFactor = NOcrDrawingCanvas.ZoomFactor;
+        ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
+        NOcrDrawingCanvas.MissPaths.Clear();
+        NOcrDrawingCanvas.HitPaths.Clear();
+        NOcrDrawingCanvas.MissPaths.AddRange(NOcrChar.LinesBackground);
+        NOcrDrawingCanvas.HitPaths.AddRange(NOcrChar.LinesForeground);
+        NOcrDrawingCanvas.InvalidateVisual();   
     }
 }

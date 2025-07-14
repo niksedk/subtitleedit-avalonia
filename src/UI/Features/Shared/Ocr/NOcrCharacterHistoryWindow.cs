@@ -47,7 +47,7 @@ public class NOcrCharacterHistoryWindow : Window
         };
 
         var listView = MakeListView(vm);
-        var detailsView = MakeListView(vm);
+        var detailsView = MakeDetailsView(vm);
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonBar = UiUtil.MakeButtonBar(buttonOk);
@@ -66,26 +66,17 @@ public class NOcrCharacterHistoryWindow : Window
         };
     }
 
-    private static Grid MakeListView(NOcrCharacterHistoryViewModel vm)
+    private static Border MakeListView(NOcrCharacterHistoryViewModel vm)
     {
-        var grid = new Grid
+        var listBoxCurrentItems = new ListBox
         {
-            RowDefinitions =
-            {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
-            },
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-            },
-            ColumnSpacing = 20,
-            Width = double.NaN,
+            Margin = new Thickness(0, 5, 0, 0),
         };
+        listBoxCurrentItems.Bind(ListBox.SelectedItemProperty, new Binding(nameof(vm.SelectedHistoryItem)));
+        listBoxCurrentItems.Bind(ListBox.ItemsSourceProperty, new Binding(nameof(vm.HistoryItems)));
+        listBoxCurrentItems.SelectionChanged += vm.HistoryItemChanged;
 
-        return grid;
+        return UiUtil.MakeBorderForControl(listBoxCurrentItems);
     }
 
     private static Grid MakeDetailsView(NOcrCharacterHistoryViewModel vm)
@@ -98,7 +89,6 @@ public class NOcrCharacterHistoryWindow : Window
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
@@ -138,19 +128,13 @@ public class NOcrCharacterHistoryWindow : Window
             {
                 UiUtil.MakeLabel(Se.Language.Ocr.CurrentImage).WithBold(),
                 UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.ResolutionAndTopMargin)),
+                UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.LineIndex)),
                 panelCurrentImage,
                 vm.TextBoxNew,
                 checkBoxItalic,
+                UiUtil.MakeButton(Se.Language.General.Update, vm.UpdateCommand).WithMarginTop(25).WithLeftAlignment(),
+                UiUtil.MakeButton(Se.Language.General.Delete, vm.DeleteCommand).WithMarginTop(5).WithLeftAlignment(),
             },
-        };
-
-        var panelDrawControls = new StackPanel
-        {
-            Orientation = Avalonia.Layout.Orientation.Vertical,
-            Children =
-            {
-                UiUtil.MakeLabel(Se.Language.Ocr.LinesToDraw).WithBold(),
-            }
         };
 
         vm.NOcrDrawingCanvas.SetStrokeWidth(1);
@@ -174,7 +158,6 @@ public class NOcrCharacterHistoryWindow : Window
                 UiUtil.MakeButton(vm.ZoomOutCommand, IconNames.MdiMinus),
                 UiUtil.MakeButton(vm.ZoomInCommand, IconNames.MdiPlus),
                 UiUtil.MakeLabel(string.Empty).WithMarginLeft(10).WithBindText(vm, nameof(vm.ZoomFactorInfo)),
-                UiUtil.MakeLabel(Se.Language.Ocr.DrawMode).WithMarginLeft(10),
             }
         };
 
@@ -190,8 +173,7 @@ public class NOcrCharacterHistoryWindow : Window
 
 
         grid.Add(panelCurrent, 0, 0);
-        grid.Add(panelDrawControls, 0, 1);
-        grid.Add(panelImage, 0, 2);
+        grid.Add(panelImage, 0, 1);
 
         return grid;
     }

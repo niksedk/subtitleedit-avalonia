@@ -29,6 +29,7 @@ public class LanguageOcr
     public string NOcrDatabase { get; set; }
     public string DrawMode { get; set; }
     public string AddNewCharcter { get; set; }
+    public string LineIndexX { get; set; }
 
     public LanguageOcr()
     {
@@ -56,5 +57,6 @@ public class LanguageOcr
         NOcrDatabase = "nOCR database";
         DrawMode = "Draw mode:";
         AddNewCharcter = "Add new character";
+        LineIndexX = "Line {0}";
     }
 }
