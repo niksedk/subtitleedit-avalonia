@@ -56,6 +56,7 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private bool _isGoogleVisionVisible;
     [ObservableProperty] private bool _nOcrDrawUnknownText;
     [ObservableProperty] private bool _isInspectLineVisible;
+    [ObservableProperty] private bool _isInspectAdditionsVisible;
     [ObservableProperty] private string _googleVisionApiKey;
     [ObservableProperty] private ObservableCollection<OcrLanguage> _googleVisionLanguages;
     [ObservableProperty] private OcrLanguage? _selectedGoogleVisionLanguage;
@@ -67,7 +68,7 @@ public partial class OcrViewModel : ObservableObject
     public MatroskaTrackInfo? SelectedMatroskaTrack { get; set; }
     public bool OkPressed { get; private set; }
     public string WindowTitle { get; private set; }
-    public List<SubtitleLineViewModel> OcredSubtitle;
+    public readonly List<SubtitleLineViewModel> OcredSubtitle;
 
     private IOcrSubtitle? _ocrSubtitle;
     private readonly INOcrCaseFixer _nOcrCaseFixer;
@@ -174,7 +175,7 @@ public partial class OcrViewModel : ObservableObject
     private void PauseOcr()
     {
         IsOcrRunning = false;
-        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource.Cancel();
     }
 
     [RelayCommand]
@@ -207,7 +208,7 @@ public partial class OcrViewModel : ObservableObject
         {
             if (splitterItem.NikseBitmap == null)
             {
-                var match = new NOcrChar { Text = splitterItem?.SpecialCharacter ?? string.Empty };
+                var match = new NOcrChar { Text = splitterItem.SpecialCharacter ?? string.Empty };
                 matches.Add(match);
             }
             else
@@ -245,12 +246,16 @@ public partial class OcrViewModel : ObservableObject
             else if (characterAddResult.InspectHistoryPressed)
             {
                 await _windowService.ShowDialogAsync<NOcrCharacterHistoryWindow, NOcrCharacterHistoryViewModel>(Window!,
-                    vm =>
-                {
-                    vm.Initialize(_nOcrDb!, _nOcrAddHistoryManager);
-                });
+                    vm => { vm.Initialize(_nOcrDb!, _nOcrAddHistoryManager); });
             }
         }
+    }
+    
+    [RelayCommand]
+    private async Task InspectAdditions()
+    {
+        await _windowService.ShowDialogAsync<NOcrCharacterHistoryWindow, NOcrCharacterHistoryViewModel>(Window!,
+            vm => { vm.Initialize(_nOcrDb!, _nOcrAddHistoryManager); });
     }
 
     [RelayCommand]
@@ -268,9 +273,8 @@ public partial class OcrViewModel : ObservableObject
 
         if (result.EditPressed)
         {
-            var editResult =
-                await _windowService.ShowDialogAsync<NOcrDbEditWindow, NOcrDbEditViewModel>(Window!,
-                    vm => { vm.Initialize(_nOcrDb!); });
+            await _windowService.ShowDialogAsync<NOcrDbEditWindow, NOcrDbEditViewModel>(Window!,
+                vm => { vm.Initialize(_nOcrDb!); });
 
             return;
         }
@@ -293,13 +297,12 @@ public partial class OcrViewModel : ObservableObject
             }
             catch
             {
-                var answer = await MessageBox.Show(
+                await MessageBox.Show(
                     Window!,
                     "Error deleting file",
                     $"Could not delete the file {_nOcrDb!.FileName}.",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
-                return;
             }
 
             return;
@@ -319,7 +322,7 @@ public partial class OcrViewModel : ObservableObject
                 var newFileName = Path.Combine(Se.OcrFolder, newResult.DatabaseName + ".nocr");
                 if (File.Exists(newFileName))
                 {
-                    var answer = await MessageBox.Show(
+                    await MessageBox.Show(
                         Window!,
                         Se.Language.General.FileAlreadyExists,
                         string.Format(Se.Language.General.FileXAlreadyExists, newFileName),
@@ -358,7 +361,7 @@ public partial class OcrViewModel : ObservableObject
                 var newFileName = Path.Combine(Se.OcrFolder, newResult.DatabaseName + ".nocr");
                 if (File.Exists(newFileName))
                 {
-                    var answer = await MessageBox.Show(
+                    await MessageBox.Show(
                         Window!,
                         Se.Language.General.FileAlreadyExists,
                         string.Format(Se.Language.General.FileXAlreadyExists, newFileName),
@@ -376,8 +379,6 @@ public partial class OcrViewModel : ObservableObject
 
                 SelectedNOcrDatabase = newResult.DatabaseName;
             }
-
-            return;
         }
     }
 
@@ -395,7 +396,7 @@ public partial class OcrViewModel : ObservableObject
         OcredSubtitle.Clear();
         for (var i = 0; i < OcrSubtitleItems.Count; i++)
         {
-            OcrSubtitleItem? item = OcrSubtitleItems[i];
+            var item = OcrSubtitleItems[i];
             var subtitleLine = new SubtitleLineViewModel
             {
                 Number = i + 1,
@@ -412,7 +413,7 @@ public partial class OcrViewModel : ObservableObject
     [RelayCommand]
     private void Cancel()
     {
-        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource.Cancel();
         Close();
     }
 
@@ -519,7 +520,7 @@ public partial class OcrViewModel : ObservableObject
                 return;
             }
 
-            ProgressValue = i * 100.0 / (double)OcrSubtitleItems.Count;
+            ProgressValue = i * 100.0 / OcrSubtitleItems.Count;
             ProgressText = string.Format(Se.Language.Ocr.RunningOcrDotDotDotXY, i + 1, OcrSubtitleItems.Count);
 
             var item = OcrSubtitleItems[i];
@@ -534,7 +535,7 @@ public partial class OcrViewModel : ObservableObject
             int index = 0;
             while (index < letters.Count)
             {
-                ImageSplitterItem2? splitterItem = letters[index];
+                var splitterItem = letters[index];
                 if (splitterItem.NikseBitmap == null)
                 {
                     if (splitterItem.SpecialCharacter != null)
@@ -554,6 +555,8 @@ public partial class OcrViewModel : ObservableObject
                         if (_skipOnceChars.Any(p => p.LetterIndex == letterIndex && p.LineIndex == i))
                         {
                             sb.Append("*");
+                            index++;
+                            _skipOnceChars.Clear();
                             continue;
                         }
 
@@ -562,10 +565,12 @@ public partial class OcrViewModel : ObservableObject
                         if (runOnceChar != null)
                         {
                             sb.Append(runOnceChar.Text);
+                            _runOnceChars.Clear();
+                            index++;
                             continue;
                         }
 
-                        Dispatcher.UIThread.Post(async () =>
+                        Dispatcher.UIThread.Post(async void () =>
                         {
                             var result =
                                 await _windowService.ShowDialogAsync<NOcrCharacterAddWindow, NOcrCharacterAddViewModel>(
@@ -578,15 +583,12 @@ public partial class OcrViewModel : ObservableObject
 
                             if (result.OkPressed)
                             {
-                                if (result.NOcrChar != null)
-                                {
-                                    var letterBitmap = letters[letterIndex].NikseBitmap;
-                                    _nOcrAddHistoryManager.Add(result.NOcrChar, letterBitmap,
-                                        OcrSubtitleItems.IndexOf(item));
-                                    _nOcrDb.Add(result.NOcrChar);
-                                    _ = Task.Run(() => _nOcrDb.Save());
-                                }
-
+                                var letterBitmap = letters[letterIndex].NikseBitmap;
+                                _nOcrAddHistoryManager.Add(result.NOcrChar, letterBitmap,
+                                    OcrSubtitleItems.IndexOf(item));
+                                IsInspectAdditionsVisible = true;
+                                _nOcrDb.Add(result.NOcrChar);
+                                _ = Task.Run(() => _nOcrDb.Save());
                                 _ = Task.Run(() => RunNOcrLoop(i));
                             }
                             else if (result.AbortPressed)
@@ -595,37 +597,27 @@ public partial class OcrViewModel : ObservableObject
                             }
                             else if (result.UseOncePressed)
                             {
-                                if (result.NOcrChar != null)
-                                {
-                                    _runOnceChars.Add(new SkipOnceChar(i, letterIndex, result.NewText));
-                                }
-
-                                var _ = Task.Run(() => RunNOcrLoop(i));
+                                _runOnceChars.Add(new SkipOnceChar(i, letterIndex, result.NewText));
+                                _ = Task.Run(() => RunNOcrLoop(i));
                             }
                             else if (result.SkipPressed)
                             {
-                                if (result.NOcrChar != null)
-                                {
-                                    _skipOnceChars.Add(new SkipOnceChar(i, letterIndex));
-                                }
-
-                                var _ = Task.Run(() => RunNOcrLoop(i));
+                                _skipOnceChars.Add(new SkipOnceChar(i, letterIndex));
+                                _ = Task.Run(() => RunNOcrLoop(i));
                             }
                             else if (result.InspectHistoryPressed)
                             {
                                 IsOcrRunning = false;
-                                await _windowService.ShowDialogAsync<NOcrCharacterHistoryWindow, NOcrCharacterHistoryViewModel>(Window!,
-                                    vm =>
-                                    {
-                                        vm.Initialize(_nOcrDb!, _nOcrAddHistoryManager);
-                                    });
+                                await _windowService
+                                    .ShowDialogAsync<NOcrCharacterHistoryWindow, NOcrCharacterHistoryViewModel>(Window!,
+                                        vm => { vm.Initialize(_nOcrDb!, _nOcrAddHistoryManager); });
                             }
                         });
 
                         return;
                     }
 
-                    if (match != null && match.ExpandCount > 0)
+                    if (match is { ExpandCount: > 0 })
                     {
                         index += match.ExpandCount - 1;
                     }
@@ -645,7 +637,6 @@ public partial class OcrViewModel : ObservableObject
         }
 
         IsOcrRunning = false;
-        return;
     }
 
     private bool InitNOcrDb()
@@ -749,8 +740,6 @@ public partial class OcrViewModel : ObservableObject
 
     private async Task<bool> CheckAndDownloadTesseract()
     {
-        var tesseractFolder = Se.TesseractFolder;
-
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             var tesseractExe = Path.Combine(Se.TesseractFolder, "tesseract.exe");
@@ -834,8 +823,7 @@ public partial class OcrViewModel : ObservableObject
     private async Task<bool> TesseractModelDownload()
     {
         var result =
-            await _windowService.ShowDialogAsync<DownloadTesseractModelWindow, DownloadTesseractModelViewModel>(Window!,
-                vm => { });
+            await _windowService.ShowDialogAsync<DownloadTesseractModelWindow, DownloadTesseractModelViewModel>(Window!);
 
         LoadActiveTesseractDictionaries();
         if (result.OkPressed)
@@ -906,7 +894,7 @@ public partial class OcrViewModel : ObservableObject
         return true;
     }
 
-    public static Bitmap ConvertSKBitmapToAvaloniaBitmap(SKBitmap skBitmap)
+    public static Bitmap ConvertSkBitmapToAvaloniaBitmap(SKBitmap skBitmap)
     {
         using var image = SKImage.FromBitmap(skBitmap);
         using var data = image.Encode(SKEncodedImageFormat.Png, 100);

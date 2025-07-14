@@ -30,6 +30,7 @@ public class LanguageOcr
     public string DrawMode { get; set; }
     public string AddNewCharcter { get; set; }
     public string LineIndexX { get; set; }
+    public string InspectNOcrAdditions { get; set; }
 
     public LanguageOcr()
     {
@@ -58,5 +59,6 @@ public class LanguageOcr
         DrawMode = "Draw mode:";
         AddNewCharcter = "Add new character";
         LineIndexX = "Line {0}";
+        InspectNOcrAdditions = "Inspect new nOCR additions"; 
     }
 }

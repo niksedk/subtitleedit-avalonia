@@ -54,7 +54,7 @@ public class NOcrCharacterHistoryWindow : Window
 
         grid.Add(listView, 0, 0);
         grid.Add(detailsView, 0, 1);
-        grid.Add(buttonBar, 1, 0, 2, 1);
+        grid.Add(buttonBar, 1, 0, 1, 2);
 
         Content = grid;
 
@@ -109,7 +109,6 @@ public class NOcrCharacterHistoryWindow : Window
         };
         image.Bind(Image.SourceProperty, new Binding(nameof(vm.CurrentBitmap)));
 
-
         var panelCurrentImage = new StackPanel
         {
             Background = new SolidColorBrush(Colors.LightGray),
@@ -133,6 +132,7 @@ public class NOcrCharacterHistoryWindow : Window
                 vm.TextBoxNew,
                 checkBoxItalic,
                 UiUtil.MakeButton(Se.Language.General.Update, vm.UpdateCommand).WithMarginTop(25).WithLeftAlignment(),
+                UiUtil.MakeButton(Se.Language.General.UpdateAndClose, vm.UpdateAndCloseCommand).WithMarginTop(25).WithLeftAlignment(),
                 UiUtil.MakeButton(Se.Language.General.Delete, vm.DeleteCommand).WithMarginTop(5).WithLeftAlignment(),
             },
         };
@@ -170,7 +170,6 @@ public class NOcrCharacterHistoryWindow : Window
                 borderDrawingCanvas,
             }
         };
-
 
         grid.Add(panelCurrent, 0, 0);
         grid.Add(panelImage, 0, 1);

@@ -38,7 +38,7 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
 
     public NOcrCharacterHistoryViewModel()
     {
-        Title = Se.Language.Ocr.AddNewCharcter;
+        Title = Se.Language.Ocr.InspectNOcrAdditions;
         NewText = string.Empty;
         ResolutionAndTopMargin = string.Empty;
         IsNewTextItalic = false;
@@ -53,10 +53,7 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
         TextBoxNew = new TextBox();
     }
 
-
-    public void Initialize(
-        NOcrDb nOcrDb,
-        NOcrAddHistoryManager nOcrAddHistoryManager)
+    public void Initialize(NOcrDb nOcrDb, NOcrAddHistoryManager nOcrAddHistoryManager)
     {
         _nOcrDb = nOcrDb;
         NOcrDrawingCanvas.ZoomFactor = 4;
@@ -106,6 +103,20 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
     
     [RelayCommand]
     private void Update()
+    {
+        var item = NOcrChar;
+        if (string.IsNullOrEmpty(NewText))
+        {
+            return;
+        }
+
+        item.Text = NewText;
+        item.Italic = IsNewTextItalic;
+        _nOcrDb.Save();
+    }
+    
+    [RelayCommand]
+    private void UpdateAndClose()
     {
         var item = NOcrChar;
         if (string.IsNullOrEmpty(NewText))
@@ -214,10 +225,7 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
         NOcrDrawingCanvas.BackgroundImage = CurrentBitmap;
         NOcrDrawingCanvas.ZoomFactor = NOcrDrawingCanvas.ZoomFactor;
         ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
-        NOcrDrawingCanvas.MissPaths.Clear();
-        NOcrDrawingCanvas.HitPaths.Clear();
-        NOcrDrawingCanvas.MissPaths.AddRange(NOcrChar.LinesBackground);
-        NOcrDrawingCanvas.HitPaths.AddRange(NOcrChar.LinesForeground);
-        NOcrDrawingCanvas.InvalidateVisual();   
+
+        ShowOcrPoints();
     }
 }

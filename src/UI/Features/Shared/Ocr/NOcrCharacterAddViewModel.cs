@@ -42,7 +42,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     [ObservableProperty] private bool _canExpand;
     [ObservableProperty] private bool _showUseOnce;
     [ObservableProperty] private bool _showSkip;
-    [ObservableProperty] private bool _showInspectAdditions;
+    [ObservableProperty] private bool _isInspectAdditionsVisible;
     [ObservableProperty] private ObservableCollection<int> _noOfLinesToAutoDrawList;
     [ObservableProperty] private int _selectedNoOfLinesToAutoDraw;
     [ObservableProperty] private Bitmap _sentenceBitmap;
@@ -64,8 +64,8 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     private OcrSubtitleItem? _item;
     private int _expandCount;
     private NOcrDb _nOcrDb;
-    private bool _isControlDown = false;
-    private bool _isWinDown = false;
+    private bool _isControlDown;
+    private bool _isWinDown;
 
     public NOcrCharacterAddViewModel()
     {
@@ -144,11 +144,12 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         UpdateShrintExpand();
         SetImages(_item, _nBmp);
         SetTitle();
+        IsInspectAdditionsVisible = nOcrAddHistoryManager.Items.Count > 0;
     }
 
     private void SetImages(OcrSubtitleItem? item, NikseBitmap2 nBmp)
     {
-        if (item == null || nBmp == null)
+        if (item == null)
         {
             return;
         }

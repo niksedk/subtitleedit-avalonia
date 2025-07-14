@@ -173,6 +173,7 @@ public class LanguageGeneral
     public string Redo { get; set; }
     public string Count { get; set; }
     public string Update { get; set; }
+    public string UpdateAndClose { get; set; }
     public string Engine { get; set; }
     public string PostProcessing { get; set; }
     public string AdvancedSettings { get; set; }
@@ -375,6 +376,7 @@ public class LanguageGeneral
         Redo = "Redo";
         Count = "Count";
         Update = "Update";
+        UpdateAndClose = "Update and close";
         Engine = "Engine";
         PostProcessing = "Post processing";
         AdvancedSettings = "Advanced settings";

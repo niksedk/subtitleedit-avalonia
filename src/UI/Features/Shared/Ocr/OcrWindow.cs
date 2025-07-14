@@ -335,6 +335,10 @@ public class OcrWindow : Window
             .WithBindIsVisible(nameof(OcrViewModel.IsInspectLineVisible))
             .WithBindIsEnabled(nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter())
             .WithBottomAlignment();
+        var buttonInspectAdditions = UiUtil.MakeButton(Se.Language.General.InspectAdditions, vm.InspectAdditionsCommand)
+            .WithBindIsVisible(nameof(vm.IsInspectAdditionsVisible))
+            .WithBindIsEnabled(nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter())
+            .WithBottomAlignment();
         var buttonExport = UiUtil.MakeButton(Se.Language.General.ExportDotDotDot, vm.ExportCommand)
             .WithBindIsEnabled(nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()).WithBottomAlignment();
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand).WithBottomAlignment();
@@ -366,9 +370,10 @@ public class OcrWindow : Window
         grid.Add(buttonStart, 0, 1);
         grid.Add(buttonPause, 0, 2);
         grid.Add(buttonInspect, 0, 3);
-        grid.Add(buttonExport, 0, 4);
-        grid.Add(buttonOk, 0, 5);
-        grid.Add(buttonCancel, 0, 6);
+        grid.Add(buttonInspectAdditions, 0, 4);
+        grid.Add(buttonExport, 0, 5);
+        grid.Add(buttonOk, 0, 6);
+        grid.Add(buttonCancel, 0, 7);
 
         return grid;
     }
