@@ -507,6 +507,7 @@ public partial class OcrViewModel : ObservableObject
             return;
         }
 
+        _skipOnceChars.Clear();
         _ = Task.Run(() => { RunNOcrLoop(startFromIndex); });
     }
 
@@ -556,7 +557,6 @@ public partial class OcrViewModel : ObservableObject
                         {
                             sb.Append("*");
                             index++;
-                            _skipOnceChars.Clear();
                             continue;
                         }
 
