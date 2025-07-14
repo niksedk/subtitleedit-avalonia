@@ -202,6 +202,7 @@ public class LanguageGeneral
     public string Rename { get; set; }
     public string FileAlreadyExists { get; set; }
     public string FileXAlreadyExists { get; set; }
+    public string InspectAdditions { get; set; }
 
     public LanguageGeneral()
     {
@@ -403,5 +404,6 @@ public class LanguageGeneral
         Rename = "Rename";
         FileAlreadyExists = "File already exists";
         FileXAlreadyExists = "File '{0}' already exists.";
+        InspectAdditions = "Inspect additions...";
     }
 }

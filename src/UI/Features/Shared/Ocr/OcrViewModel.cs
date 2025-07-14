@@ -76,6 +76,7 @@ public partial class OcrViewModel : ObservableObject
     private NOcrDb? _nOcrDb;
     private readonly List<SkipOnceChar> _runOnceChars;
     private readonly List<SkipOnceChar> _skipOnceChars;
+    private readonly NOcrAddHistoryManager _nOcrAddHistoryManager;
 
     public OcrViewModel(INOcrCaseFixer nOcrCaseFixer, IWindowService windowService)
     {
@@ -103,6 +104,7 @@ public partial class OcrViewModel : ObservableObject
         PaddleOcrLanguages = new ObservableCollection<OcrLanguage2>(PaddleOcr.GetLanguages().OrderBy(p => p.ToString()));
         _runOnceChars = new List<SkipOnceChar>();
         _skipOnceChars = new List<SkipOnceChar>();
+        _nOcrAddHistoryManager = new NOcrAddHistoryManager();
         _cancellationTokenSource = new CancellationTokenSource();
         OcredSubtitle = new List<SubtitleLineViewModel>();
         LoadSettings();
@@ -220,13 +222,15 @@ public partial class OcrViewModel : ObservableObject
         {
             var characterAddResult = await _windowService.ShowDialogAsync<NOcrCharacterAddWindow, NOcrCharacterAddViewModel>(Window!, vm =>
             {
-                vm.Initialize(nBmp, item, letters, result.LetterIndex, _nOcrDb!, SelectedNOcrMaxWrongPixels, false, false);
+                vm.Initialize(nBmp, item, letters, result.LetterIndex, _nOcrDb!, SelectedNOcrMaxWrongPixels, _nOcrAddHistoryManager, false, false);
             });
 
             if (characterAddResult.OkPressed)
             {
                 if (characterAddResult.NOcrChar != null)
                 {
+                    var letterBitmap = letters[result.LetterIndex].NikseBitmap;
+                    _nOcrAddHistoryManager.Add(characterAddResult.NOcrChar, letterBitmap, OcrSubtitleItems.IndexOf(item));
                     _nOcrDb!.Add(characterAddResult.NOcrChar);
                     _ = Task.Run(_nOcrDb.Save);
                 }
@@ -554,13 +558,15 @@ public partial class OcrViewModel : ObservableObject
                             var result = await _windowService.ShowDialogAsync<NOcrCharacterAddWindow, NOcrCharacterAddViewModel>(Window!,
                             vm =>
                             {
-                                vm.Initialize(parentBitmap, item, letters, letterIndex, _nOcrDb, SelectedNOcrMaxWrongPixels, true, true);
+                                vm.Initialize(parentBitmap, item, letters, letterIndex, _nOcrDb, SelectedNOcrMaxWrongPixels, _nOcrAddHistoryManager, true, true);
                             });
 
                             if (result.OkPressed)
                             {
                                 if (result.NOcrChar != null)
                                 {
+                                    var letterBitmap = letters[letterIndex].NikseBitmap;
+                                    _nOcrAddHistoryManager.Add(result.NOcrChar, letterBitmap, OcrSubtitleItems.IndexOf(item));
                                     _nOcrDb.Add(result.NOcrChar);
                                     _ = Task.Run(() => _nOcrDb.Save());
                                 }

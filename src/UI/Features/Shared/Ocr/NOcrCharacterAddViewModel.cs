@@ -42,6 +42,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     [ObservableProperty] private bool _canExpand;
     [ObservableProperty] private bool _showUseOnce;
     [ObservableProperty] private bool _showSkip;
+    [ObservableProperty] private bool _showInspectAdditions;
     [ObservableProperty] private ObservableCollection<int> _noOfLinesToAutoDrawList;
     [ObservableProperty] private int _selectedNoOfLinesToAutoDraw;
     [ObservableProperty] private Bitmap _sentenceBitmap;
@@ -67,7 +68,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
 
     public NOcrCharacterAddViewModel()
     {
-        Title = "Add new character";
+        Title = Se.Language.Ocr.AddNewCharcter;
         LinesForeground = new ObservableCollection<NOcrLine>();
         LinesBackground = new ObservableCollection<NOcrLine>();
         DrawModes = new ObservableCollection<NOcrDrawModeItem>(NOcrDrawModeItem.Items);
@@ -122,6 +123,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         int i,
         NOcrDb nOcrDb,
         int maxWrongPixels,
+        NOcrAddHistoryManager nOcrAddHistoryManager,
         bool showUseOnce,
         bool showSkip)
     {
@@ -294,6 +296,11 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         OkPressed = true;
         SaveSettings();
         Close();
+    }
+
+    [RelayCommand]
+    private void InspectAdditions()
+    {
     }
 
     [RelayCommand]
