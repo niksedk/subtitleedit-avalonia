@@ -505,6 +505,8 @@ public partial class MainViewModel :
         }
 
         pac.Save(fileName, ms, GetUpdateSubtitle(), false);
+        ms.Position = 0;
+        File.WriteAllBytes(fileName, ms.ToArray());
 
         ShowStatus($"File exported in format {pac.Name} to {fileName}");
 
