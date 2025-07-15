@@ -112,7 +112,7 @@ public class ExportEbuStlWindow : Window
         var comboBoxCodeNumbers = UiUtil.MakeComboBox(vm.CodePages, vm, nameof(vm.SelectedCodePage)).WithMinWidth(textBoxWidth);
 
         var labelDiskFormatCode = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.DiskFormatCode);
-        var comboboxDiskFormatCodes = UiUtil.MakeComboBox(vm.DiskFormatCodes, vm, nameof(vm.SelectedCodePage)).WithMinWidth(textBoxWidth);
+        var comboboxDiskFormatCodes = UiUtil.MakeComboBox(vm.DiskFormatCodes, vm, nameof(vm.SelectedDiskFormatCode)).WithMinWidth(textBoxWidth);
 
         var labelFrameRate = UiUtil.MakeLabel(Se.Language.General.FrameRate);
         var comboBoxFrameRates = UiUtil.MakeComboBox(vm.FrameRates, vm, nameof(vm.SelectedFrameRate)).WithMinWidth(textBoxWidth);
@@ -132,6 +132,14 @@ public class ExportEbuStlWindow : Window
         var labelOriginalEpisodeTitle = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.OriginalEpisodeTitle);
         var textBoxOriginalEpisodeTitle = UiUtil.MakeTextBox(textBoxWidth, vm, nameof(vm.OriginalEpisodeTitle));
 
+        var labelTranslatedProgramTitle = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.TranslatedProgramTitle);
+        var textBoxTranslatedProgramTitle = UiUtil.MakeTextBox(textBoxWidth, vm, nameof(vm.TranslatedProgramTitle));
+
+        var labelTranslatedEpisodeTitle = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.TranslatedEpisodeTitle);
+        var textBoxTranslatedEpisodeTitle = UiUtil.MakeTextBox(textBoxWidth, vm, nameof(vm.TranslatedEpisodeTitle));
+
+        var labelTranslatorsName = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.TranslatorsName);
+        var textBoxTranslatorsName = UiUtil.MakeTextBox(textBoxWidth, vm, nameof(vm.TranslatorsName));
 
         grid.Add(labelCodePageNumber, 0, 0);
         grid.Add(comboBoxCodeNumbers, 0, 1);
@@ -156,6 +164,75 @@ public class ExportEbuStlWindow : Window
 
         grid.Add(labelOriginalEpisodeTitle, 7, 0);
         grid.Add(textBoxOriginalEpisodeTitle, 7, 1);
+
+        grid.Add(labelTranslatedProgramTitle, 8, 0);
+        grid.Add(textBoxTranslatedProgramTitle, 8, 1);
+
+        grid.Add(labelTranslatedEpisodeTitle, 9, 0);
+        grid.Add(textBoxTranslatedEpisodeTitle, 9, 1);
+
+        grid.Add(labelTranslatorsName, 10, 0);
+        grid.Add(textBoxTranslatorsName, 10, 1);
+
+
+        var labelSubtitleListReferenceCode = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.SubtitleListReferenceCode);
+        var textBoxSubtitleListReferenceCode = UiUtil.MakeTextBox(textBoxWidth, vm, nameof(vm.SubtitleListReferenceCode));
+
+        var labelCountryOfOrigin = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.CountryOfOrigin);
+        var textBoxCountryOfOrigin = UiUtil.MakeTextBox(textBoxWidth, vm, nameof(vm.CountryOfOrigin));
+
+        var labelTimeCodeStatus = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.TimeCodeStatus);
+        var comboBoxTimeCodeStatus = UiUtil.MakeComboBox(vm.TimeCodeStatusList, vm, nameof(vm.SelectedTimeCodeStatus)).WithMinWidth(textBoxWidth);
+
+        var labelStartOfProgramme = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.TimeCodeStartOfProgramme);
+        var textBoxStartOfProgramme = UiUtil.MakeTextBox(textBoxWidth, vm, nameof(vm.StartOfProgramme));
+
+        grid.Add(labelSubtitleListReferenceCode, 0, 2);
+        grid.Add(textBoxSubtitleListReferenceCode, 0, 3);
+
+        grid.Add(labelCountryOfOrigin, 1, 2);
+        grid.Add(textBoxCountryOfOrigin, 1, 3);
+
+        grid.Add(labelTimeCodeStatus, 2, 2);
+        grid.Add(comboBoxTimeCodeStatus, 2, 3);
+
+        grid.Add(labelStartOfProgramme, 3, 2);
+        grid.Add(textBoxStartOfProgramme, 3, 3);
+
+
+        var labelRevisionNumber = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.RevisionNumber);
+        var comboBoxRevisionNumbers = UiUtil.MakeComboBox(vm.RevisionNumbers, vm, nameof(vm.SelectedRevisionNumber)).WithMinWidth(textBoxWidth);
+
+        var labelMaxCharsPerRow = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.MaxNoOfDisplayableChars);
+        var comboBoxMaxCharsPerRowList = UiUtil.MakeComboBox(vm.MaxCharactersPerRow, vm, nameof(vm.SelectedMaxCharactersPerRow)).WithMinWidth(textBoxWidth);
+
+        var labelMaxRows = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.MaxNumberOfDisplayableRows);
+        var comboBoxMaxRows = UiUtil.MakeComboBox(vm.MaxRows, vm, nameof(vm.SelectedMaxRow)).WithMinWidth(textBoxWidth);
+
+        var labelDiscSequenceNumber = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.DiscSequenceNumber);
+        var comboBoxDiscSequenceNumbers = UiUtil.MakeComboBox(vm.DiscSequenceNumbers, vm, nameof(vm.SelectedDiscSequenceNumber)).WithMinWidth(textBoxWidth);
+
+        var labelTotalNumberOfDisks = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.TotalNumberOfDisks);
+        var comboBoxTotalNumberOfDisks = UiUtil.MakeComboBox(vm.TotalNumerOfDiscsList, vm, nameof(vm.SelectedTotalNumberOfDiscs)).WithMinWidth(textBoxWidth);
+
+        grid.Add(labelRevisionNumber, 5, 2);
+        grid.Add(comboBoxRevisionNumbers, 5, 3);
+
+        grid.Add(labelMaxCharsPerRow, 6, 2);
+        grid.Add(comboBoxMaxCharsPerRowList, 6, 3);
+
+        grid.Add(labelMaxRows, 7, 2);
+        grid.Add(comboBoxMaxRows, 7, 3);
+
+        grid.Add(labelDiscSequenceNumber, 8, 2);
+        grid.Add(comboBoxDiscSequenceNumbers, 8, 3);
+
+        grid.Add(labelTotalNumberOfDisks, 9, 2);
+        grid.Add(comboBoxTotalNumberOfDisks, 9, 3);
+
+
+        var buttonImport = UiUtil.MakeButton(Se.Language.General.ImportDotDotDot, vm.ImportCommand); 
+        grid.Add(buttonImport, 0, 4);
 
         return UiUtil.MakeBorderForControl(grid);
     }

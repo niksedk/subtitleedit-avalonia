@@ -25,6 +25,17 @@ public partial class ExportEbuStlViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<string> _timeCodeStatusList;
     [ObservableProperty] private string? _selectedTimeCodeStatus;
 
+    [ObservableProperty] private ObservableCollection<string> _revisionNumbers;
+    [ObservableProperty] private string? _selectedRevisionNumber;
+    [ObservableProperty] private ObservableCollection<string> _maxCharactersPerRow;
+    [ObservableProperty] private string? _selectedMaxCharactersPerRow;
+    [ObservableProperty] private ObservableCollection<string> _maxRows;
+    [ObservableProperty] private string? _selectedMaxRow;
+    [ObservableProperty] private ObservableCollection<string> _discSequenceNumbers;
+    [ObservableProperty] private string? _selectedDiscSequenceNumber;
+    [ObservableProperty] private ObservableCollection<string> _totalNumerOfDiscsList;
+    [ObservableProperty] private string? _selectedTotalNumberOfDiscs;
+
     [ObservableProperty] private string _originalProgramTitle;
     [ObservableProperty] private string _originalEpisodeTitle;
     [ObservableProperty] private string _translatedProgramTitle;

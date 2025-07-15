@@ -44,6 +44,7 @@ public class LanguageEbuSaveOptions
     public string TextCenteredText { get; set; }
     public string TextRightJustifiedText { get; set; }
     public string UseBoxForOneNewLine { get; set; }
+    public string DiscSequenceNumber { get; internal set; }
 
     public LanguageEbuSaveOptions()
     {
@@ -89,5 +90,6 @@ public class LanguageEbuSaveOptions
         TextCenteredText = "Centered text";
         TextRightJustifiedText = "Right justified text";
         UseBoxForOneNewLine = "Check 'Use box around text' for only one new-line";
+        DiscSequenceNumber = "Disc sequence number";
     }
 }
