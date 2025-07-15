@@ -1,3 +1,4 @@
+using System;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
@@ -9,44 +10,29 @@ namespace Nikse.SubtitleEdit.Features.Files.Export;
 
 public partial class ExportCavena890ViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<string> _pacCodePages;
-    [ObservableProperty] private string? _selectedPacCodePage;
+    [ObservableProperty] private string _translatedTitle;
+    [ObservableProperty] private string _originalTitle;
+    [ObservableProperty] private string _translator;
+    [ObservableProperty] private string _comment;
+    [ObservableProperty] private string _language;
+    [ObservableProperty] private TimeSpan _startOfProgramme;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
-    public int? PacCodePage { get; private set; }
 
     public ExportCavena890ViewModel()
     {
-        PacCodePages = new ObservableCollection<string>
-        {
-            "Latin",
-            "Greek",
-            "Latin Czech",
-            "Arabic",
-            "Hebrew",
-            "Thai",
-            "Cyrillic",
-            "Chinese Traditional (Big5)",
-            "Chinese Simplified (gb2312)",
-            "Korean",
-            "Japanese",
-            "Portuguese",
-        };
-
-        SelectedPacCodePage = PacCodePages[0];
+        TranslatedTitle = string.Empty;
+        OriginalTitle = string.Empty;
+        Translator = string.Empty;
+        Comment = string.Empty;
+        Language = string.Empty;
     }
 
     [RelayCommand]
     private void Ok()
     {
-        if (string.IsNullOrEmpty(SelectedPacCodePage))
-        {
-            return;
-        }
-
         OkPressed = true;
-        PacCodePage = PacCodePages.IndexOf(SelectedPacCodePage);
         Close();
     }
 
@@ -54,6 +40,11 @@ public partial class ExportCavena890ViewModel : ObservableObject
     private void Cancel()
     {
         Close();
+    }
+
+    [RelayCommand]
+    private void Importl()
+    {
     }
     
     private void Close()

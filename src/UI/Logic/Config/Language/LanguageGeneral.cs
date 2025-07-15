@@ -204,6 +204,7 @@ public class LanguageGeneral
     public string FileAlreadyExists { get; set; }
     public string FileXAlreadyExists { get; set; }
     public string InspectAdditions { get; set; }
+    public string Import { get; set; }
 
     public LanguageGeneral()
     {
@@ -407,5 +408,6 @@ public class LanguageGeneral
         FileAlreadyExists = "File already exists";
         FileXAlreadyExists = "File '{0}' already exists.";
         InspectAdditions = "Inspect additions...";
+        Import = "Import";
     }
 }

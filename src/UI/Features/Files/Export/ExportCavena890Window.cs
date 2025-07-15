@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Files.Export;
 
@@ -12,7 +13,7 @@ public class ExportCavena890Window : Window
     public ExportCavena890Window(ExportCavena890ViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = "Export Pac";
+        Title = "Export Cavena 890";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 
@@ -20,18 +21,16 @@ public class ExportCavena890Window : Window
         vm.Window = this;
         DataContext = vm;
 
-        var labelPac = UiUtil.MakeLabel("Choose PAC code page");
-        var comboBoxPacFormats = UiUtil.MakeComboBox(vm.PacCodePages, vm, nameof(vm.SelectedPacCodePage))
-            .WithMinWidth(200);
-        
-        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
-        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar( buttonOk, buttonCancel);
-
         var grid = new Grid
         {
             RowDefinitions =
             {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
@@ -46,10 +45,45 @@ public class ExportCavena890Window : Window
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
+        
+        var buttonImport = UiUtil.MakeButton(Se.Language.General.Import, vm.OkCommand).WithRightAlignment();
 
-        grid.Add(labelPac, 0);
-        grid.Add(comboBoxPacFormats, 0, 1);
-        grid.Add(panelButtons, 1, 0, 1, 2);
+        var labelTranslatedTitle = UiUtil.MakeLabel("Translated title");
+        var textBoxTranslatedTitle = UiUtil.MakeTextBox(300, vm, nameof(vm.TranslatedTitle));
+        
+        var labelOriginalTitle = UiUtil.MakeLabel("Original title");
+        var textBoxOriginalTitle = UiUtil.MakeTextBox(300, vm, nameof(vm.OriginalTitle));
+        
+        var labelTranslator = UiUtil.MakeLabel("Translator");
+        var textBoxTranslator = UiUtil.MakeTextBox(300, vm, nameof(vm.Translator));
+        
+        var labelComment =  UiUtil.MakeLabel("Comment");
+        var textBoxComment = UiUtil.MakeTextBox(300, vm, nameof(vm.Comment));
+        
+        var labelLanguage = UiUtil.MakeLabel("Language");
+        var textBoxLanguage = UiUtil.MakeTextBox(300, vm, nameof(vm.Language));
+        
+        var labelStartOfProgramme = UiUtil.MakeLabel("Start of programme");
+        var textBoxStartOfProgramme = UiUtil.MakeTextBox(300, vm, nameof(vm.StartOfProgramme));
+        
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
+        var panelButtons = UiUtil.MakeButtonBar( buttonOk, buttonCancel);
+
+        grid.Add(buttonImport, 0, 1);
+        grid.Add(labelTranslatedTitle, 1, 0);
+        grid.Add(textBoxTranslatedTitle, 1, 1);
+        grid.Add(labelOriginalTitle, 2, 0);
+        grid.Add(textBoxOriginalTitle, 2, 1);
+        grid.Add(labelTranslator, 3, 0);
+        grid.Add(textBoxTranslator, 3, 1);
+        grid.Add(labelComment, 4, 0);
+        grid.Add(textBoxComment, 4, 1);
+        grid.Add(labelLanguage, 5, 0);
+        grid.Add(textBoxLanguage, 5, 1);
+        grid.Add(labelStartOfProgramme, 6, 0);
+        grid.Add(textBoxStartOfProgramme, 6, 1);
+        grid.Add(panelButtons, 7, 0, 1, 2);
 
         Content = grid;
 

@@ -515,7 +515,7 @@ public partial class MainViewModel :
 
         pac.Save(fileName, ms, GetUpdateSubtitle(), false);
         ms.Position = 0;
-        File.WriteAllBytes(fileName, ms.ToArray());
+        await File.WriteAllBytesAsync(fileName, ms.ToArray());
 
         ShowStatus($"File exported in format {pac.Name} to {fileName}");
 
@@ -537,7 +537,7 @@ public partial class MainViewModel :
 
         if (!string.IsNullOrEmpty(fileName))
         {
-            File.WriteAllBytes(fileName, ms.ToArray());
+            await File.WriteAllBytesAsync(fileName, ms.ToArray());
             ShowStatus($"File exported in format {format.Name} to {fileName}");
         }
 
@@ -545,8 +545,30 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private void ExportEbuStl()
+    private async Task ExportEbuStl()
     {
+        var result = await _windowService.ShowDialogAsync<ExportEbuStlWindow, ExportEbuStlViewModel>(Window!);
+        if (!result.OkPressed)
+        {
+            return;
+        }
+        
+        var format = new Ebu();
+        using var ms = new MemoryStream();
+        format.Save(_subtitleFileName, ms, GetUpdateSubtitle(), false);
+
+        var fileName = await _fileHelper.PickSaveSubtitleFile(
+            Window!,
+            format,
+            "newFileName",
+            $"Save {format.Name} file as");
+
+        if (!string.IsNullOrEmpty(fileName))
+        {
+            await File.WriteAllBytesAsync(fileName, ms.ToArray());
+            ShowStatus($"File exported in format {format.Name} to {fileName}");
+        }
+        
         _shortcutManager.ClearKeys();
     }
 
