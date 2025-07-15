@@ -116,6 +116,7 @@ namespace Nikse.SubtitleEdit.Logic.Media
                 }
             }
             AddExt(existingTypes, patterns, ".mks"); //TODO: move to settings
+            AddExt(existingTypes, patterns, ".pac"); //TODO: move to settings
 
             if (includeVideoFiles)
             {
@@ -139,14 +140,14 @@ namespace Nikse.SubtitleEdit.Logic.Media
         public async Task<string> PickSaveSubtitleFile(
             Visual sender, 
             SubtitleFormat currentFormat,
-            string saveSubtitleFile, 
+            string suggestedFileName, 
             string title)
         {
             var topLevel = TopLevel.GetTopLevel(sender)!;
             var options = new FilePickerSaveOptions
             {
                 Title = title,
-                SuggestedFileName = saveSubtitleFile,
+                SuggestedFileName = suggestedFileName,
                 FileTypeChoices = MakeSaveFilePickerFileTypes(currentFormat),
                 DefaultExtension = currentFormat.Extension.TrimStart('.')
             };

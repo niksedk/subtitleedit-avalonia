@@ -12,7 +12,7 @@ public interface IFileHelper
     Task<string> PickSaveSubtitleFile(
         Visual sender, 
         SubtitleFormat currentFormat, 
-        string saveSubtitleFile,
+        string suggestedFileName,
         string title);
 
     Task<string> PickOpenVideoFile(Visual sender, string title);

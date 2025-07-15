@@ -61,6 +61,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Features.Files.Export;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -481,25 +482,33 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private void ExportPac()
+    private async Task ExportPac()
     {
-        //var result = await _popupService.ShowPopupAsync<ExportPacPopupModel>(CancellationToken.None);
-        //if (result is not int codePage || codePage < 0)
-        //{
-        //    return;
-        //}
+        var result = await _windowService.ShowDialogAsync<ExportPacWindow, ExportPacViewModel>(Window!);
+        if (!result.OkPressed || result.PacCodePage == null)
+        {
+            return;
+        }
 
-        //var pac = new Pac { CodePage = codePage };
-        //using var ms = new MemoryStream();
-        //pac.Save(_subtitleFileName, ms, GetUpdateSubtitle(), false);
+        var pac = new Pac { CodePage = result.PacCodePage!.Value };
+        using var ms = new MemoryStream();
+        var suggestedFileName = string.Empty;
+        if (!string.IsNullOrEmpty(_subtitleFileName))
+        {
+            suggestedFileName = Path.GetFileNameWithoutExtension(_subtitleFileName);
+        }
 
-        //var fileHelper = new FileHelper();
-        //var subtitleFileName = await fileHelper.SaveStreamAs(ms, $"Save {CurrentSubtitleFormat.Name} file as", _videoFileName, pac);
-        //if (!string.IsNullOrEmpty(subtitleFileName))
-        //{
-        //    ShowStatus($"File exported in format {pac.Name} to {subtitleFileName}");
-        //}
-        //_shortcutManager.ClearKeys();
+        var fileName = await _fileHelper.PickSaveSubtitleFile(Window!, pac, suggestedFileName, "Save PAC file as");
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        pac.Save(fileName, ms, GetUpdateSubtitle(), false);
+
+        ShowStatus($"File exported in format {pac.Name} to {fileName}");
+
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]

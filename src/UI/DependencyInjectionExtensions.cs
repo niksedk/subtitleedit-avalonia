@@ -5,6 +5,7 @@ using Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
 using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 using Nikse.SubtitleEdit.Features.Edit.Replace;
 using Nikse.SubtitleEdit.Features.Edit.ShowHistory;
+using Nikse.SubtitleEdit.Features.Files.Export;
 using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Main.Layout;
@@ -146,5 +147,6 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<NOcrDbNewViewModel>();
         collection.AddTransient<NOcrDbEditViewModel>();
         collection.AddTransient<NOcrCharacterHistoryViewModel>();
+        collection.AddTransient<ExportPacViewModel>();
     }
 }
