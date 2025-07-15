@@ -148,5 +148,6 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<NOcrDbEditViewModel>();
         collection.AddTransient<NOcrCharacterHistoryViewModel>();
         collection.AddTransient<ExportPacViewModel>();
+        collection.AddTransient<ExportCavena890ViewModel>();
     }
 }

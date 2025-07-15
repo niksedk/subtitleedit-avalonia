@@ -8,7 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace Nikse.SubtitleEdit.Features.Files.Export;
 
-public partial class ExportPacViewModel : ObservableObject
+public partial class ExportCavena890ViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<string> _pacCodePages;
     [ObservableProperty] private string? _selectedPacCodePage;
@@ -17,7 +17,7 @@ public partial class ExportPacViewModel : ObservableObject
     public bool OkPressed { get; private set; }
     public int? PacCodePage { get; private set; }
 
-    public ExportPacViewModel()
+    public ExportCavena890ViewModel()
     {
         PacCodePages = new ObservableCollection<string>
         {
