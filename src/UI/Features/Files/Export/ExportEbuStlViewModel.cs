@@ -1,13 +1,13 @@
-using System.Collections.ObjectModel;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
 
 namespace Nikse.SubtitleEdit.Features.Files.Export;
 
-public partial class ExportPacViewModel : ObservableObject
+public partial class ExportEbuStlViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<string> _pacCodePages;
     [ObservableProperty] private string? _selectedPacCodePage;
@@ -16,7 +16,7 @@ public partial class ExportPacViewModel : ObservableObject
     public bool OkPressed { get; private set; }
     public int? PacCodePage { get; private set; }
 
-    public ExportPacViewModel()
+    public ExportEbuStlViewModel()
     {
         PacCodePages = new ObservableCollection<string>
         {

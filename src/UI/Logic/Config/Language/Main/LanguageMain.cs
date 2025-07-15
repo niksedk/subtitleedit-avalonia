@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language.Main;
+﻿using System;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language.Main;
 
 public class LanguageMain
 {
@@ -19,6 +21,7 @@ public class LanguageMain
     public string RedoPerformed { get; set; }
     public string RedoPerformedXActionLeft { get; set; }
     public string UndoPerformedXActionLeft { get; set; }
+    public string SaveXFileAs { get; set; }
 
     public LanguageMain()
     {
@@ -37,5 +40,6 @@ public class LanguageMain
         RedoPerformed = "Redo performed";
         RedoPerformedXActionLeft = "Redo performed (actions left: {0})";
         UndoPerformedXActionLeft = "Undo performed (actions left: {0})";
+        SaveXFileAs = "Save {0} file as";
     }
 }

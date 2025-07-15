@@ -457,28 +457,37 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private void ExportCavena890()
+    private async Task ExportCavena890()
     {
-        //var result = await _popupService
-        //    .ShowPopupAsync<ExportCavena890PopupModel>(onPresenting: viewModel
-        //        => viewModel.SetValues(UpdatedSubtitle), CancellationToken.None);
+        var result = await _windowService.ShowDialogAsync<ExportCavena890Window, ExportCavena890ViewModel>(Window!);
+        if (!result.OkPressed)
+        {
+            return;
+        }
 
-        //if (result is not (string and "OK"))
-        //{
-        //    return;
-        //}
+        var cavena = new Cavena890();
+        using var ms = new MemoryStream();
+        cavena.Save(_subtitleFileName, ms, GetUpdateSubtitle(), false);
 
-        //var cavena = new Cavena890();
-        //using var ms = new MemoryStream();
-        //cavena.Save(_subtitleFileName, ms, UpdatedSubtitle, false);
+        var suggestedFileName = string.Empty;
+        if (!string.IsNullOrEmpty(_subtitleFileName))
+        {
+            suggestedFileName = Path.GetFileNameWithoutExtension(_subtitleFileName);
+        }
 
-        //var fileHelper = new FileHelper();
-        //var subtitleFileName = await fileHelper.SaveStreamAs(ms, $"Save {CurrentSubtitleFormat.Name} file as", _videoFileName, cavena);
-        //if (!string.IsNullOrEmpty(subtitleFileName))
-        //{
-        //    ShowStatus($"File exported in format {cavena.Name} to {subtitleFileName}");
-        //}
-        //_shortcutManager.ClearKeys();
+        var fileName = await _fileHelper.PickSaveSubtitleFile(Window!, cavena, suggestedFileName, string.Format(Se.Language.Main.SaveXFileAs, cavena.Name));
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        cavena.Save(fileName, ms, GetUpdateSubtitle(), false);
+        ms.Position = 0;
+        File.WriteAllBytes(fileName, ms.ToArray());
+
+        ShowStatus($"File exported in format {cavena.Name} to {fileName}");
+
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -498,7 +507,7 @@ public partial class MainViewModel :
             suggestedFileName = Path.GetFileNameWithoutExtension(_subtitleFileName);
         }
 
-        var fileName = await _fileHelper.PickSaveSubtitleFile(Window!, pac, suggestedFileName, "Save PAC file as");
+        var fileName = await _fileHelper.PickSaveSubtitleFile(Window!, pac, suggestedFileName, string.Format(Se.Language.Main.SaveXFileAs, pac.Name));
         if (string.IsNullOrEmpty(fileName))
         {
             return;

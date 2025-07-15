@@ -1,10 +1,9 @@
-using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
 
 namespace Nikse.SubtitleEdit.Features.Files.Export;
 
