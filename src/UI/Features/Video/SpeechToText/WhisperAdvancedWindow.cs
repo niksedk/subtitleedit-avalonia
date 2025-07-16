@@ -16,7 +16,7 @@ public class WhisperAdvancedWindow : Window
     public WhisperAdvancedWindow(WhisperAdvancedViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = "Advanced Whisper settings";
+        Title = Se.Language.Video.AudioToText.AdvancedWhisperSettings;
         Width = 1050;
         Height = 660;
         MinWidth = 800;

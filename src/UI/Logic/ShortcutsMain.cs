@@ -1,9 +1,11 @@
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.Settings;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Nikse.SubtitleEdit.Logic;
 
@@ -75,6 +77,9 @@ public static class ShortcutsMain
         { nameof(_mvm.ToggleLinesItalicCommand) , Se.Language.Options.Shortcuts.GeneralToggleItalic },
         { nameof(_mvm.ToggleLinesBoldCommand) , Se.Language.Options.Shortcuts.GeneralToggleBold },
 
+        { nameof(_mvm.TogglePlayPauseCommand) , Se.Language.Options.Shortcuts.TogglePlayPause },
+        { nameof(_mvm.TogglePlayPause2Command) , Se.Language.Options.Shortcuts.TogglePlayPause },
+
         { nameof(_mvm.CommandShowLayoutCommand) , Se.Language.Options.Shortcuts.GeneralChooseLayout },
         { nameof(_mvm.CommandShowAutoTranslateCommand) , Se.Language.Options.Shortcuts.AutoTranslate },
         { nameof(_mvm.CommandShowSettingsCommand) , Se.Language.Options.Shortcuts.Settings },
@@ -109,6 +114,9 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.ToggleLinesItalicCommand, nameof(vm.ToggleLinesItalicCommand), ShortcutCategory.SubtitleGridAndTextBox);
         AddShortcut(shortcuts, vm.ToggleLinesBoldCommand, nameof(vm.ToggleLinesBoldCommand), ShortcutCategory.SubtitleGridAndTextBox);
 
+        AddShortcut(shortcuts, vm.TogglePlayPauseCommand, nameof(vm.TogglePlayPauseCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.TogglePlayPause2Command, nameof(vm.TogglePlayPause2Command), ShortcutCategory.General);
+
         AddShortcut(shortcuts, vm.CommandShowLayoutCommand, nameof(vm.CommandShowLayoutCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.CommandShowAutoTranslateCommand, nameof(vm.CommandShowAutoTranslateCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.CommandShowSettingsCommand, nameof(vm.CommandShowSettingsCommand), ShortcutCategory.General);
@@ -120,6 +128,42 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.SaveLanguageFileCommand, nameof(vm.SaveLanguageFileCommand), ShortcutCategory.General);
 
         return shortcuts;
+    }
+
+    public static List<SeShortCut> GetDefaultShorcuts(MainViewModel vm)
+    {
+        var commandOrWin = GetCommandOrWin();
+
+        return new List<SeShortCut>
+        {
+            new(nameof(vm.UndoCommand), new List<string> { commandOrWin, "Z" }),
+            new(nameof(vm.RedoCommand), new List<string> { commandOrWin, "Y" }),
+            new(nameof(vm.ShowGoToLineCommand), new List<string> { commandOrWin, "G" }),
+            new(nameof(vm.GoToPreviousLineCommand), new List<string> { "Alt", "Up" }),
+            new(nameof(vm.GoToNextLineCommand), new List<string> { "Alt", "Down" }),
+            new(nameof(vm.SelectAllLinesCommand), new List<string> { commandOrWin, "A" }, ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.InverseSelectionCommand), new List<string> { commandOrWin, "Shift", "I" }, ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.ToggleLinesItalicCommand), new List<string> { commandOrWin, "I" }, ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.DeleteSelectedLinesCommand), new List<string> { "Delete" }, ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.ShowFindCommand), new List<string> { commandOrWin, "F" }, ShortcutCategory.General),
+            new(nameof(vm.FindNextCommand), new List<string> { "F3" }, ShortcutCategory.General),
+            new(nameof(vm.ShowReplaceCommand), new List<string> { commandOrWin, "H" }, ShortcutCategory.General),
+            new(nameof(vm.OpenDataFolderCommand), new List<string> { commandOrWin, "Alt", "Shift", "D" }, ShortcutCategory.General),
+            new(nameof(vm.CommandFileNewCommand), new List<string> { commandOrWin, "N" }, ShortcutCategory.General),
+            new(nameof(vm.CommandFileSaveCommand), new List<string> { commandOrWin, "S" }, ShortcutCategory.General),
+            new(nameof(vm.TogglePlayPauseCommand), new List<string> { Avalonia.Input.Key.Space.ToString() }, ShortcutCategory.General),
+            new(nameof(vm.TogglePlayPause2Command), new List<string> { commandOrWin, Avalonia.Input.Key.Space.ToString() }, ShortcutCategory.General),
+       };
+    }
+
+    private static string GetCommandOrWin()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            return "Win";
+        }
+
+        return "Ctrl";
     }
 
     public class AvailableShortcut

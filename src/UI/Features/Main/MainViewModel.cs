@@ -317,6 +317,26 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void TogglePlayPause()
+    {
+        var control = VideoPlayerControl;
+        if (control == null)
+        {
+            return;
+        }
+
+        control.TogglePlayPause();
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private void TogglePlayPause2()
+    {
+        TogglePlayPause();
+    }
+
+    [RelayCommand]
     private async Task ShowHelp()
     {
         await Window!.Launcher.LaunchUriAsync(new Uri("https://www.nikse.dk/subtitleedit/help"));
@@ -548,8 +568,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ExportEbuStl()
     {
-        var result = await _windowService.ShowDialogAsync<ExportEbuStlWindow, ExportEbuStlViewModel>(Window!, vm => 
-        { 
+        var result = await _windowService.ShowDialogAsync<ExportEbuStlWindow, ExportEbuStlViewModel>(Window!, vm =>
+        {
             vm.Initialize(GetUpdateSubtitle());
         });
 
@@ -557,7 +577,7 @@ public partial class MainViewModel :
         {
             return;
         }
-        
+
         var format = new Ebu();
         using var ms = new MemoryStream();
         format.Save(_subtitleFileName, ms, GetUpdateSubtitle(), false);
@@ -573,7 +593,7 @@ public partial class MainViewModel :
             await File.WriteAllBytesAsync(fileName, ms.ToArray());
             ShowStatus($"File exported in format {format.Name} to {fileName}");
         }
-        
+
         _shortcutManager.ClearKeys();
     }
 
@@ -2334,6 +2354,24 @@ public partial class MainViewModel :
         MenuItemMergeAsDialog.IsVisible = SubtitleGrid.SelectedItems.Count == 2;
     }
 
+    private bool IsTextInputFocused()
+    {
+        var focusedElement = Window?.FocusManager?.GetFocusedElement();
+
+        return focusedElement is TextBox ||
+               focusedElement is MaskedTextBox ||
+               focusedElement is AutoCompleteBox ||
+               (focusedElement is Control control && IsTextInputControl(control));
+    }
+
+    private static bool IsTextInputControl(Control control)
+    {
+        var typeName = control.GetType().Name;
+        return typeName.Contains("TextBox") ||
+               typeName.Contains("TextEditor") ||
+               typeName.Contains("TextInput");
+    }
+
     public void KeyDown(KeyEventArgs keyEventArgs)
     {
         var ticks = Stopwatch.GetTimestamp();
@@ -2345,6 +2383,49 @@ public partial class MainViewModel :
         _lastKeyPressedTicks = ticks;
 
         _shortcutManager.OnKeyPressed(this, keyEventArgs);
+
+        if (IsTextInputFocused())
+        {
+            var currentKeys = _shortcutManager.GetActiveKeys();
+            if (currentKeys.Count == 1)
+            {
+                var key = currentKeys.First();
+                var allowedSingleKeyShortcuts = new HashSet<Key>
+                {
+                    Key.Enter,
+                    Key.Escape,
+                    Key.Tab,
+                    Key.Back,
+                    Key.Delete,
+                    Key.Left,
+                    Key.Right,
+                    Key.Up,
+                    Key.Down,
+                    Key.PageUp,
+                    Key.PageDown,
+                    Key.Home,
+                    Key.End,
+                    Key.Insert,
+                    Key.F1,
+                    Key.F2,
+                    Key.F3,
+                    Key.F4,
+                    Key.F5,
+                    Key.F6,
+                    Key.F7,
+                    Key.F8,
+                    Key.F9,
+                    Key.F10,
+                    Key.F11,
+                    Key.F12,
+                };
+
+                if (!allowedSingleKeyShortcuts.Contains(key))
+                {
+                    return;
+                }
+            }
+        }
 
         if (SubtitleGrid.IsFocused)
         {

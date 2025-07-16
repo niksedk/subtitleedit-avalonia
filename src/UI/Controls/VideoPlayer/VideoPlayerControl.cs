@@ -427,6 +427,11 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             ProgressText = string.Empty;
         }
 
+        internal void TogglePlayPause()
+        {
+            _videoPlayerInstance.PlayOrPause();
+        }
+
         private void StartPositionTimer()
         {
             _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };

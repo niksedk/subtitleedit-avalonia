@@ -1,5 +1,6 @@
 ﻿using Avalonia.Input;
 using CommunityToolkit.Mvvm.Input;
+using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Logic;
 
@@ -10,6 +11,6 @@ public interface IShortcutManager
     void ClearKeys();
     void RegisterShortcut(ShortCut shortcut);
     IRelayCommand? CheckShortcuts(string? control);
-
     void ClearShortcuts();
+    HashSet<Key> GetActiveKeys();
 }

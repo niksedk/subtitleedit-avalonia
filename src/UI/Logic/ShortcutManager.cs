@@ -57,6 +57,11 @@ public class ShortcutManager : IShortcutManager
         _shortcuts.Clear();
     }
 
+    public HashSet<Key> GetActiveKeys()
+    {
+        return [.. _activeKeys];
+    }
+
     public static string CalculateNormalizedHash(List<string> inputKeys, string? control)
     {
         var keys = new List<string>();

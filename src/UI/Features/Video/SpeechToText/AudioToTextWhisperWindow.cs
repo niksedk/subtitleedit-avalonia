@@ -49,7 +49,7 @@ public class AudioToTextWhisperWindow : Window
 
         comboEngine.SelectionChanged += vm.OnEngineChanged;
 
-        var labelLanguage = UiUtil.MakeTextBlock(Se.Language.General.Language).WithMarginTop(10);
+        var labelLanguage = UiUtil.MakeTextBlock(Se.Language.Video.AudioToText.InputLanguage).WithMarginTop(10);
         var comboLanguage = UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage))
             .WithMinWidth(220)
             .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled))

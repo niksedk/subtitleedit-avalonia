@@ -109,6 +109,7 @@ public class LanguageSettingsShortcuts
     public string Shift { get; set; }
     public string ResetShortcuts { get; set; }
     public string ResetShortcutsDetail { get; set; }
+    public string TogglePlayPause { get; internal set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -204,6 +205,8 @@ public class LanguageSettingsShortcuts
         ListDeleteSelection = "Delete selection";
 
         AutoTranslate = "Auto-translate";
+
+        TogglePlayPause = "Toggle play/pause";
 
         Settings = "Settings";
 
