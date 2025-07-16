@@ -1,7 +1,6 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Forms.FixCommonErrors;
 using Nikse.SubtitleEdit.Features.Main;
-using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Logic.Config.Language;
 using System;
 using System.Collections.Generic;
@@ -154,7 +153,7 @@ public class Se
     public static string FfmpegFolder => Path.Combine(DataFolder, "ffmpeg");
     public static string WhisperFolder => Path.Combine(DataFolder, "Whisper");
 
-    public static string Version { get; set; } = "v5.0.0-preview9";
+    public static string Version { get; set; } = "v5.0.0-preview10";
 
     public Se()
     {
