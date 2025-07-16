@@ -43,6 +43,7 @@ using Nikse.SubtitleEdit.Logic.Download;
 using Nikse.SubtitleEdit.Logic.Initializers;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
+using ExportEbuStlViewModel = Nikse.SubtitleEdit.Features.Files.Export.ExportEbuStl.ExportEbuStlViewModel;
 
 namespace Nikse.SubtitleEdit;
 

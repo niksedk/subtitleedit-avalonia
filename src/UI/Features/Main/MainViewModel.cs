@@ -62,6 +62,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Nikse.SubtitleEdit.Features.Files.Export;
+using Nikse.SubtitleEdit.Features.Files.Export.ExportEbuStl;
+using ExportEbuStlViewModel = Nikse.SubtitleEdit.Features.Files.Export.ExportEbuStl.ExportEbuStlViewModel;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 

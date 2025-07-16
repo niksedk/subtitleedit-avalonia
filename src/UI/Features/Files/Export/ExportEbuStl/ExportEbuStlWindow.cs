@@ -1,16 +1,18 @@
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Files.Export;
+namespace Nikse.SubtitleEdit.Features.Files.Export.ExportEbuStl;
 
 public class ExportEbuStlWindow : Window
 {
-    private readonly ExportEbuStlViewModel _vm;
+    private readonly ExportEbuStl.ExportEbuStlViewModel _vm;
 
-    public ExportEbuStlWindow(ExportEbuStlViewModel vm)
+    public ExportEbuStlWindow(ExportEbuStl.ExportEbuStlViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Export EBU STL";
@@ -73,7 +75,7 @@ public class ExportEbuStlWindow : Window
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 
-    private Border MakeGeneralView(ExportEbuStlViewModel vm)
+    private Border MakeGeneralView(ExportEbuStl.ExportEbuStlViewModel vm)
     {
         var grid = new Grid
         {
@@ -106,7 +108,7 @@ public class ExportEbuStlWindow : Window
         };
 
 
-        var textBoxWidth = 250;
+        var textBoxWidth = 225;
 
         var labelCodePageNumber = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.CodePageNumber);
         var comboBoxCodeNumbers = UiUtil.MakeComboBox(vm.CodePages, vm, nameof(vm.SelectedCodePage)).WithMinWidth(textBoxWidth);
@@ -185,7 +187,14 @@ public class ExportEbuStlWindow : Window
         var comboBoxTimeCodeStatus = UiUtil.MakeComboBox(vm.TimeCodeStatusList, vm, nameof(vm.SelectedTimeCodeStatus)).WithMinWidth(textBoxWidth);
 
         var labelStartOfProgramme = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.TimeCodeStartOfProgramme);
-        var textBoxStartOfProgramme = UiUtil.MakeTextBox(textBoxWidth, vm, nameof(vm.StartOfProgramme));
+        var timeCodeUpDownStartOfProgramme = new TimeCodeUpDown
+        {
+            DataContext = vm,
+            [!TimeCodeUpDown.ValueProperty] = new Binding(nameof(vm.StartOfProgramme))
+            {
+                Mode = BindingMode.TwoWay,
+            }
+        };
 
         grid.Add(labelSubtitleListReferenceCode, 0, 2);
         grid.Add(textBoxSubtitleListReferenceCode, 0, 3);
@@ -197,7 +206,7 @@ public class ExportEbuStlWindow : Window
         grid.Add(comboBoxTimeCodeStatus, 2, 3);
 
         grid.Add(labelStartOfProgramme, 3, 2);
-        grid.Add(textBoxStartOfProgramme, 3, 3);
+        grid.Add(timeCodeUpDownStartOfProgramme, 3, 3);
 
 
         var labelRevisionNumber = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.RevisionNumber);
@@ -236,9 +245,9 @@ public class ExportEbuStlWindow : Window
         return UiUtil.MakeBorderForControl(grid);
     }
 
-    private Border MakeTextAndTimingView(ExportEbuStlViewModel vm)
+    private Border MakeTextAndTimingView(ExportEbuStl.ExportEbuStlViewModel vm)
     {
-var grid = new Grid
+        var grid = new Grid
         {
             RowDefinitions =
             {
@@ -264,7 +273,7 @@ var grid = new Grid
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        var textBoxWidth = 250;
+        var textBoxWidth = 225;
 
         var labelJustification = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.JustificationCode);
         var comboBoxJustifications = UiUtil.MakeComboBox(vm.Justifications, vm, nameof(vm.SelectedJustification)).WithMinWidth(textBoxWidth);
@@ -314,13 +323,13 @@ var grid = new Grid
         grid.Add(labelUseDoubleHeight, 9, 0);
         grid.Add(checkBoxUseDoubleHeight, 9, 1);
 
-        return UiUtil.MakeBorderForControl(grid).WithMinWidth(950).WithMinHeight(465);
+        return UiUtil.MakeBorderForControl(grid).WithMinWidth(944).WithMinHeight(465);
     }
     
-    private Border MakeErrorsView(ExportEbuStlViewModel vm)
+    private Border MakeErrorsView(ExportEbuStl.ExportEbuStlViewModel vm)
     {
         var label = UiUtil.MakeLabel("Errors");
-        return UiUtil.MakeBorderForControl(label);
+        return UiUtil.MakeBorderForControl(label).WithMinWidth(944).WithMinHeight(465);
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

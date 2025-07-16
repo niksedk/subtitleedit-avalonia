@@ -251,7 +251,6 @@ public static class InitListViewAndEditBox
         {
             DataContext = vm,
             [!TimeCodeUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.StartTime)}")
-
             {
                 Mode = BindingMode.TwoWay,
             }
