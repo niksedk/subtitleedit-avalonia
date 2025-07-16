@@ -1,4 +1,4 @@
-﻿namespace Nikse.SubtitleEdit.Features.Files.Export.ExportEbuStl;
+﻿namespace Nikse.SubtitleEdit.Features.Files.ExportEbuStl;
 
 public class LanguageItem
 {

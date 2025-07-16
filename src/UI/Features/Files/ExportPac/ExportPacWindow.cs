@@ -3,7 +3,7 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 
-namespace Nikse.SubtitleEdit.Features.Files.Export;
+namespace Nikse.SubtitleEdit.Features.Files.ExportPac;
 
 public class ExportPacWindow : Window
 {

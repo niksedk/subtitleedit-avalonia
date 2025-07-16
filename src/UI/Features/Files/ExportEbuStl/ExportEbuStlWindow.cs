@@ -3,11 +3,11 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Controls;
-using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
+using Nikse.SubtitleEdit.Features.Files.Export.ExportEbuStl;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Files.Export.ExportEbuStl;
+namespace Nikse.SubtitleEdit.Features.Files.ExportEbuStl;
 
 public class ExportEbuStlWindow : Window
 {
@@ -41,7 +41,7 @@ public class ExportEbuStlWindow : Window
 
         var tabErrors = new TabItem
         {
-            [!TabItem.HeaderProperty] = new Binding(nameof(vm.ErrorTitle)) { Source = vm },
+            [!Avalonia.Controls.Primitives.HeaderedContentControl.HeaderProperty] = new Binding(nameof(vm.ErrorTitle)) { Source = vm },
             Content = MakeErrorsView(vm),
         };
         tabControl.Items.Add(tabErrors);

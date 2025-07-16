@@ -5,7 +5,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-namespace Nikse.SubtitleEdit.Features.Files.Export;
+namespace Nikse.SubtitleEdit.Features.Files.ExportPac;
 
 public partial class ExportPacViewModel : ObservableObject
 {

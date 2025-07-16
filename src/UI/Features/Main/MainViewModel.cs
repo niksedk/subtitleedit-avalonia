@@ -63,6 +63,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nikse.SubtitleEdit.Features.Files.Export;
 using Nikse.SubtitleEdit.Features.Files.Export.ExportEbuStl;
+using Nikse.SubtitleEdit.Features.Files.ExportEbuStl;
+using Nikse.SubtitleEdit.Features.Files.ExportCavena890;
+using Nikse.SubtitleEdit.Features.Files.ExportPac;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 

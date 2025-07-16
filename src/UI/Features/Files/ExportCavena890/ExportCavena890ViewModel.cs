@@ -4,9 +4,8 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.Collections.ObjectModel;
 
-namespace Nikse.SubtitleEdit.Features.Files.Export;
+namespace Nikse.SubtitleEdit.Features.Files.ExportCavena890;
 
 public partial class ExportCavena890ViewModel : ObservableObject
 {

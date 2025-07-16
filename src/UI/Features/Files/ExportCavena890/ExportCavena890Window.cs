@@ -4,7 +4,7 @@ using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Files.Export;
+namespace Nikse.SubtitleEdit.Features.Files.ExportCavena890;
 
 public class ExportCavena890Window : Window
 {
