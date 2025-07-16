@@ -45,6 +45,17 @@ public partial class ExportEbuStlViewModel : ObservableObject
     [ObservableProperty] private string _countryOfOrigin;
     [ObservableProperty] private TimeSpan _startOfProgramme;
 
+    [ObservableProperty] private ObservableCollection<string> _justifications;
+    [ObservableProperty] private string? _selectedJustification;
+    [ObservableProperty] private ObservableCollection<string> _topAlignments;
+    [ObservableProperty] private string? _selectedTopAlignment;
+    [ObservableProperty] private ObservableCollection<string> _bottomAlignments;
+    [ObservableProperty] private string? _selectedBottomAlignment;
+    [ObservableProperty] private ObservableCollection<string> _rowsAddByNewLine;
+    [ObservableProperty] private string? _selectedRowsAddByNewLine;
+    [ObservableProperty] private bool _useBox;
+    [ObservableProperty] private bool _useDoubleHeight;
+    
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
     public int? PacCodePage { get; private set; }

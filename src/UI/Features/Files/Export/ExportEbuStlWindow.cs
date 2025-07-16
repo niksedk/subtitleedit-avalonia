@@ -230,18 +230,93 @@ public class ExportEbuStlWindow : Window
         grid.Add(labelTotalNumberOfDisks, 9, 2);
         grid.Add(comboBoxTotalNumberOfDisks, 9, 3);
 
-
         var buttonImport = UiUtil.MakeButton(Se.Language.General.ImportDotDotDot, vm.ImportCommand); 
         grid.Add(buttonImport, 0, 4);
 
         return UiUtil.MakeBorderForControl(grid);
     }
 
-    private object MakeTextAndTimingView(ExportEbuStlViewModel vm)
+    private Border MakeTextAndTimingView(ExportEbuStlViewModel vm)
     {
-        var label = UiUtil.MakeLabel("Text and timing");
-        return UiUtil.MakeBorderForControl(label);
+var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnSpacing = 10,
+            RowSpacing = 10,
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        var textBoxWidth = 250;
+
+        var labelJustification = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.JustificationCode);
+        var comboBoxJustifications = UiUtil.MakeComboBox(vm.Justifications, vm, nameof(vm.SelectedJustification)).WithMinWidth(textBoxWidth);
+
+        
+        var labelVerticalPosition = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.VerticalPosition);
+        
+        var labelMarginTop = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.MarginTop);
+        var comboBoxMarginTops= UiUtil.MakeComboBox(vm.TopAlignments, vm, nameof(vm.SelectedTopAlignment)).WithMinWidth(textBoxWidth);
+
+        var labelMarginBottom = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.MarginBottom);
+        var comboBoxMarginBottoms = UiUtil.MakeComboBox(vm.BottomAlignments, vm, nameof(vm.SelectedBottomAlignment)).WithMinWidth(textBoxWidth);
+
+        var labelRowsAddedByNewLine = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.NewLineRows);
+        var comboBoxRowsAddedByNewLine = UiUtil.MakeComboBox(vm.RowsAddByNewLine, vm, nameof(vm.SelectedRowsAddByNewLine)).WithMinWidth(textBoxWidth);
+
+        
+        var labelTeletext = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.Teletext);
+
+        var labelUseBox = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.UseBox);
+        var checkBoxUseBox = UiUtil.MakeCheckBox(vm, nameof(vm.UseBox));
+
+        var labelUseDoubleHeight = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.DoubleHeight);
+        var checkBoxUseDoubleHeight = UiUtil.MakeCheckBox(vm, nameof(vm.UseDoubleHeight));
+
+
+        grid.Add(labelJustification, 0, 0);
+        grid.Add(comboBoxJustifications, 0, 1);
+
+        grid.Add(labelVerticalPosition, 2, 0);
+
+        grid.Add(labelMarginTop, 3, 0);
+        grid.Add(comboBoxMarginTops, 3, 1);
+
+        grid.Add(labelMarginBottom, 4, 0);
+        grid.Add(comboBoxMarginBottoms, 4, 1);
+
+        grid.Add(labelRowsAddedByNewLine, 5, 0);
+        grid.Add(comboBoxRowsAddedByNewLine, 5, 1);
+
+        
+        grid.Add(labelTeletext, 7, 0);
+
+        grid.Add(labelUseBox, 8, 0);
+        grid.Add(checkBoxUseBox, 8, 1);
+
+        grid.Add(labelUseDoubleHeight, 9, 0);
+        grid.Add(checkBoxUseDoubleHeight, 9, 1);
+
+        return UiUtil.MakeBorderForControl(grid).WithMinWidth(950).WithMinHeight(465);
     }
+    
     private Border MakeErrorsView(ExportEbuStlViewModel vm)
     {
         var label = UiUtil.MakeLabel("Errors");

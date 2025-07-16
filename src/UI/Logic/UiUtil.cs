@@ -567,6 +567,18 @@ public static class UiUtil
         control.Margin = new Thickness(m.Left, m.Top, m.Right, marginBottom);
         return control;
     }
+    
+    public static Border WithMinWidth(this Border control, int minWidth)
+    {
+        control.MinWidth = minWidth;
+        return control;
+    }
+
+    public static Border WithMinHeight(this Border control, int minHeight)
+    {
+        control.MinHeight = minHeight;
+        return control;
+    }
 
     public static Border WithMarginRight(this Border control, int marginRight)
     {
