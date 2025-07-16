@@ -3,10 +3,17 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.ObjectModel;
+using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Files.Export.ExportEbuStl;
 
@@ -57,12 +64,17 @@ public partial class ExportEbuStlViewModel : ObservableObject
     [ObservableProperty] private int? _selectedRowsAddByNewLine;
     [ObservableProperty] private bool _useBox;
     [ObservableProperty] private bool _useDoubleHeight;
+    [ObservableProperty] private string _errorTitle;
+    [ObservableProperty] private string _errorLog;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
     public int? PacCodePage { get; private set; }
 
     private IFileHelper _fileHelper;
+    private Subtitle _subtitle = new Subtitle();
+    private bool _useSubtitleFileName = false;
+    private Ebu.EbuGeneralSubtitleInformation _header = new Ebu.EbuGeneralSubtitleInformation();
 
     public ExportEbuStlViewModel(IFileHelper fileHelper)
     {
@@ -235,6 +247,41 @@ public partial class ExportEbuStlViewModel : ObservableObject
         TopAlignments = new ObservableCollection<int>(Enumerable.Range(0, 51).ToList());
         BottomAlignments = new ObservableCollection<int>(Enumerable.Range(0, 51).ToList());
         RowsAddByNewLine = new ObservableCollection<int>(Enumerable.Range(0, 11).ToList());
+        OriginalEpisodeTitle = string.Empty;
+        OriginalProgramTitle = string.Empty;
+        TranslatorsName = string.Empty;
+        TranslatedEpisodeTitle = string.Empty;
+        TranslatedProgramTitle = string.Empty;
+        CountryOfOrigin = string.Empty;
+        SubtitleListReferenceCode = string.Empty;
+        ErrorLog = string.Empty;
+        ErrorTitle = Se.Language.File.EbuSaveOptions.Errors;
+    }
+
+    public void Initialize(Subtitle? subtitle)
+    {
+        _subtitle = subtitle ?? new Subtitle();
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            SelectedDiskFormatCode = DiskFormatCodes[2];
+            SelectedFrameRate = FrameRates[2];
+            SelectedDisplayStandardCode = DisplayStandardCodes[0];
+            SelectedCharacterTable = CharacterTables[0];
+            SelectedLanguageCode = LanguageCodes.FirstOrDefault(p => p.Language == "English");
+            SelectedTimeCodeStatus = TimeCodeStatusList[1];
+            SelectedJustification = Justifications[1];
+            SelectedRevisionNumber = 1;
+            SelectedMaxCharactersPerRow = 40;
+            SelectedMaxRow = 23;
+            SelectedDiscSequenceNumber = 1;
+            SelectedTotalNumberOfDiscs = 1;
+            SelectedTopAlignment = 0;
+            SelectedBottomAlignment = 2;
+            SelectedRowsAddByNewLine = 2;
+
+            CheckErrors(_subtitle);
+        });
     }
 
     [RelayCommand]
@@ -251,8 +298,190 @@ public partial class ExportEbuStlViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Import()
+    private async Task Import()
     {
+        var format = new Ebu();
+        var subtitleFileName = await _fileHelper.PickOpenFile(Window!, "Open", format.Name, format.Extension);
+        if (string.IsNullOrEmpty(subtitleFileName))
+        {
+            return;
+        }
+
+        var buffer = await File.ReadAllBytesAsync(subtitleFileName);
+        if (buffer.Length <= 270)
+        {
+            return;
+        }
+
+        FillHeaderFromFile(subtitleFileName);
+    }
+
+    private void FillHeaderFromFile(string fileName)
+    {
+        if (File.Exists(fileName))
+        {
+            var ebu = new Ebu();
+            var temp = new Subtitle();
+            ebu.LoadSubtitle(temp, null, fileName);
+            FillFromHeader(ebu.Header);
+            if (ebu.JustificationCodes.Count > 2 && ebu.JustificationCodes[1] == ebu.JustificationCodes[2])
+            {
+                if (ebu.JustificationCodes[1] >= 0 && ebu.JustificationCodes[1] < Justifications.Count)
+                {
+                    SelectedJustification = Justifications[ebu.JustificationCodes[1]];
+                }
+            }
+        }
+    }
+
+    private void FillFromHeader(Ebu.EbuGeneralSubtitleInformation header)
+    {
+        SelectedCodePage = CodePages.FirstOrDefault(p => p.CodePage == header.CodePageNumber);
+
+        SelectedDiskFormatCode = DiskFormatCodes.First(p => p.Contains(header.DiskFormatCode, StringComparison.OrdinalIgnoreCase));
+
+        if (header.FrameRateFromSaveDialog is > 20 and < 200)
+        {
+            SelectedFrameRate = header.FrameRateFromSaveDialog.ToString(CultureInfo.CurrentCulture);
+        }
+
+        SelectedDisplayStandardCode = DisplayStandardCodes.First(p => p.StartsWith(header.DisplayStandardCode, StringComparison.InvariantCulture));
+
+        if (int.TryParse(header.CharacterCodeTableNumber, out var tableNumber))
+        {
+            SelectedCharacterTable = CharacterTables[tableNumber];
+        }
+
+        SelectedLanguageCode = LanguageCodes.FirstOrDefault(p => p.Code == header.LanguageCode);
+        OriginalProgramTitle = header.OriginalProgrammeTitle.TrimEnd();
+        OriginalEpisodeTitle = header.OriginalEpisodeTitle.TrimEnd();
+        TranslatedProgramTitle = header.TranslatedProgrammeTitle.TrimEnd();
+        TranslatedEpisodeTitle = header.TranslatedEpisodeTitle.TrimEnd();
+        TranslatorsName = header.TranslatorsName.TrimEnd();
+        SubtitleListReferenceCode = header.SubtitleListReferenceCode.TrimEnd();
+        CountryOfOrigin = header.CountryOfOrigin;
+
+        SelectedTimeCodeStatus = TimeCodeStatusList.Last();
+        if (header.TimeCodeStatus == "0")
+        {
+            SelectedTimeCodeStatus = TimeCodeStatusList.First();
+        }
+
+        try
+        {
+            // HHMMSSFF
+            var hh = int.Parse(header.TimeCodeStartOfProgramme.Substring(0, 2));
+            var mm = int.Parse(header.TimeCodeStartOfProgramme.Substring(2, 2));
+            var ss = int.Parse(header.TimeCodeStartOfProgramme.Substring(4, 2));
+            var ff = int.Parse(header.TimeCodeStartOfProgramme.Substring(6, 2));
+            StartOfProgramme = new TimeCode(hh, mm, ss, SubtitleFormat.FramesToMillisecondsMax999(ff)).TimeSpan;
+        }
+        catch (Exception)
+        {
+            StartOfProgramme = new TimeSpan(0);
+        }
+
+        if (int.TryParse(header.RevisionNumber, out var number))
+        {
+            SelectedRevisionNumber = number;
+        }
+        else
+        {
+            SelectedRevisionNumber = 1;
+        }
+
+        if (int.TryParse(header.MaximumNumberOfDisplayableCharactersInAnyTextRow, out number))
+        {
+            SelectedMaxCharactersPerRow = number;
+        }
+
+        SelectedMaxRow = 23;
+        if (int.TryParse(header.MaximumNumberOfDisplayableRows, out number))
+        {
+            SelectedMaxRow = number;
+        }
+
+        if (int.TryParse(header.DiskSequenceNumber, out number))
+        {
+            SelectedDiscSequenceNumber = number;
+        }
+        else
+        {
+            SelectedDiscSequenceNumber = 1;
+        }
+
+        if (int.TryParse(header.TotalNumberOfDisks, out number))
+        {
+            SelectedTotalNumberOfDiscs = number;
+        }
+        else
+        {
+            SelectedTotalNumberOfDiscs = 1;
+        }
+    }
+
+    private string RemoveAfterParenthesisAndTrim(string input)
+    {
+        var index = input.IndexOf("(");
+        return index >= 0 ? input.Substring(0, index).TrimEnd() : input;
+    }
+
+    private void CheckErrors(Subtitle subtitle)
+    {
+        if (subtitle.Paragraphs.Count == 0)
+        {
+            return;
+        }
+
+        var sb = new StringBuilder();
+        var errorCount = 0;
+        var i = 1;
+        var isTeletext = SelectedDiskFormatCode?.Contains("teletext", StringComparison.OrdinalIgnoreCase) ?? false;
+        foreach (var p in subtitle.Paragraphs)
+        {
+            var arr = p.Text.SplitToLines();
+            for (var index = 0; index < arr.Count; index++)
+            {
+                var line = arr[index];
+                var s = HtmlUtil.RemoveHtmlTags(line, true);
+                if (s.Length > SelectedMaxCharactersPerRow)
+                {
+                    sb.AppendLine(string.Format(Se.Language.File.EbuSaveOptions.MaxLengthError, i, SelectedMaxCharactersPerRow, s.Length - SelectedMaxCharactersPerRow, s));
+                    errorCount++;
+                }
+
+                if (isTeletext)
+                {
+                    // See https://kb.fab-online.com/0040-fabsubtitler-editor/00010-linelengthineditor/
+
+                    // 36 characters for double height colored tex
+                    if (arr.Count == 2 && s.Length > 36 && arr[index].Contains("<font ", StringComparison.OrdinalIgnoreCase))
+                    {
+                        sb.AppendLine($"Line {i}-{index + 1}: 36 (not {s.Length}) should be maximum characters for double height colored text");
+                        errorCount++;
+                    }
+
+                    // 37 characters for double height white text
+                    else if (arr.Count == 2 && s.Length > 37 && !p.Text.Contains("<font ", StringComparison.OrdinalIgnoreCase))
+                    {
+                        sb.AppendLine($"Line {i}-{index + 1}: 37 (not {s.Length}) should be maximum characters for double height white text");
+                        errorCount++;
+                    }
+
+                    // 38 characters for single height white text
+                    else if (arr.Count == 1 && s.Length > 38)
+                    {
+                        sb.AppendLine($"Line {i}: 38 (not {s.Length}) should be maximum characters for single height white text");
+                        errorCount++;
+                    }
+                }
+            }
+
+            i++;
+        }
+
+        ErrorLog = sb.ToString();
+        ErrorTitle = string.Format(Se.Language.File.EbuSaveOptions.ErrorsX, errorCount);
     }
 
     private void Close()

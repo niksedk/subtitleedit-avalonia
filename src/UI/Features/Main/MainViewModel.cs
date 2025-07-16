@@ -63,7 +63,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nikse.SubtitleEdit.Features.Files.Export;
 using Nikse.SubtitleEdit.Features.Files.Export.ExportEbuStl;
-using ExportEbuStlViewModel = Nikse.SubtitleEdit.Features.Files.Export.ExportEbuStl.ExportEbuStlViewModel;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -549,7 +548,11 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ExportEbuStl()
     {
-        var result = await _windowService.ShowDialogAsync<ExportEbuStlWindow, ExportEbuStlViewModel>(Window!);
+        var result = await _windowService.ShowDialogAsync<ExportEbuStlWindow, ExportEbuStlViewModel>(Window!, vm => 
+        { 
+            vm.Initialize(GetUpdateSubtitle());
+        });
+
         if (!result.OkPressed)
         {
             return;

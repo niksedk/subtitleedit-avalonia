@@ -3,6 +3,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Controls;
+using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -10,9 +11,9 @@ namespace Nikse.SubtitleEdit.Features.Files.Export.ExportEbuStl;
 
 public class ExportEbuStlWindow : Window
 {
-    private readonly ExportEbuStl.ExportEbuStlViewModel _vm;
+    private readonly ExportEbuStlViewModel _vm;
 
-    public ExportEbuStlWindow(ExportEbuStl.ExportEbuStlViewModel vm)
+    public ExportEbuStlWindow(ExportEbuStlViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
         Title = "Export EBU STL";
@@ -40,7 +41,7 @@ public class ExportEbuStlWindow : Window
 
         var tabErrors = new TabItem
         {
-            Header = Se.Language.File.EbuSaveOptions.Errors,
+            [!TabItem.HeaderProperty] = new Binding(nameof(vm.ErrorTitle)) { Source = vm },
             Content = MakeErrorsView(vm),
         };
         tabControl.Items.Add(tabErrors);
@@ -75,7 +76,7 @@ public class ExportEbuStlWindow : Window
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 
-    private Border MakeGeneralView(ExportEbuStl.ExportEbuStlViewModel vm)
+    private Border MakeGeneralView(ExportEbuStlViewModel vm)
     {
         var grid = new Grid
         {
@@ -245,7 +246,7 @@ public class ExportEbuStlWindow : Window
         return UiUtil.MakeBorderForControl(grid);
     }
 
-    private Border MakeTextAndTimingView(ExportEbuStl.ExportEbuStlViewModel vm)
+    private Border MakeTextAndTimingView(ExportEbuStlViewModel vm)
     {
         var grid = new Grid
         {
@@ -326,9 +327,9 @@ public class ExportEbuStlWindow : Window
         return UiUtil.MakeBorderForControl(grid).WithMinWidth(944).WithMinHeight(465);
     }
     
-    private Border MakeErrorsView(ExportEbuStl.ExportEbuStlViewModel vm)
+    private Border MakeErrorsView(ExportEbuStlViewModel vm)
     {
-        var label = UiUtil.MakeLabel("Errors");
+        var label = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.ErrorLog)).WithAlignmentTop();
         return UiUtil.MakeBorderForControl(label).WithMinWidth(944).WithMinHeight(465);
     }
 
