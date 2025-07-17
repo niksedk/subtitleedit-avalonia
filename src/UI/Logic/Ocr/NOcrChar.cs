@@ -73,7 +73,7 @@ public class NOcrChar
                 LoadedOk = false;
                 return;
             }
-            
+
             var isShort = (file[position] & 0b0001_0000) > 0;
             Italic = (file[position] & 0b0010_0000) > 0;
 
@@ -318,22 +318,33 @@ public class NOcrChar
         // Phase 1: Generate systematic lines (vertical and horizontal)
         hits += GenerateSystematicLines(nOcrChar, bitmap, isForeground, Math.Min(maxNumberOfLines / 3, 20));
 
+        var usedRegions = new Dictionary<(int, int), int>();
+
         // Phase 2: Generate remaining lines with different strategies
         while (hits < maxNumberOfLines && count < giveUpCount)
         {
             NOcrLine line;
 
-            if (hits < maxNumberOfLines * 0.15) // 15% long lines
+            if (count % 50 == 0)
             {
-                line = GenerateLongLine(nOcrChar, r);
+                RemoveDuplicates(isForeground ? nOcrChar.LinesForeground : nOcrChar.LinesBackground);
             }
-            else if (hits < maxNumberOfLines * 0.35) // 20% medium lines
+
+            if (hits < maxNumberOfLines * 0.1) // 20% short lines
+            {
+                line = GenerateShortLineSimple(nOcrChar, r);
+            }
+            else if (hits < maxNumberOfLines * 0.65) // 45% short lines for details
+            {
+                line = GenerateShortLine(nOcrChar, r, usedRegions);
+            }
+            else if (hits < maxNumberOfLines * 0.85) // 20% medium lines
             {
                 line = GenerateMediumLine(nOcrChar, r);
             }
-            else // 65% short lines for details
+            else // 15% long lines
             {
-                line = GenerateShortLine(nOcrChar, r);
+                line = GenerateLongLine(nOcrChar, r);
             }
 
             // Only check for exact duplicates and zero-length lines
@@ -412,7 +423,7 @@ public class NOcrChar
     {
         var minLength = Math.Max(nOcrChar.Width, nOcrChar.Height) / 3;
 
-        for (int attempt = 0; attempt < 100; attempt++)
+        for (int attempt = 0; attempt < 250; attempt++)
         {
             var start = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
 
@@ -436,11 +447,7 @@ public class NOcrChar
             }
         }
 
-        // Fallback to random line
-        return new NOcrLine(
-            new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height)),
-            new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height))
-        );
+        return new NOcrLine();
     }
 
     private static NOcrLine GenerateMediumLine(NOcrChar nOcrChar, Random r)
@@ -448,7 +455,7 @@ public class NOcrChar
         var minLength = 3;
         var maxLength = Math.Max(nOcrChar.Width, nOcrChar.Height) / 2;
 
-        for (int attempt = 0; attempt < 50; attempt++)
+        for (int attempt = 0; attempt < 200; attempt++)
         {
             var start = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
             var end = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
@@ -461,38 +468,92 @@ public class NOcrChar
             }
         }
 
-        // Fallback
-        return new NOcrLine(
-            new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height)),
-            new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height))
-        );
+        return new NOcrLine();
     }
 
-    private static NOcrLine GenerateShortLine(NOcrChar nOcrChar, Random r)
+    private static readonly int regionRows = 3;
+    private static readonly int regionCols = 3;
+    private static NOcrLine GenerateShortLine(NOcrChar nOcrChar, Random r, Dictionary<(int, int), int>? usedRegions = null)
     {
-        var maxLength = Math.Max(2, Math.Min(nOcrChar.Width, nOcrChar.Height) / 2);
+        const int maxLength = 10;
+        const int minLength = 2;
+        const int maxAttempts = 300;
 
-        for (int attempt = 0; attempt < 20; attempt++)
+        int cellWidth = nOcrChar.Width / regionCols;
+        int cellHeight = nOcrChar.Height / regionRows;
+
+        for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
-            var start2 = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
-            var end2 = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
+            // Choose a random region, but prefer less-used ones
+            var allRegions = Enumerable.Range(0, regionCols)
+                .SelectMany(x => Enumerable.Range(0, regionRows).Select(y => (x, y)))
+                .OrderBy(region =>
+                    usedRegions?.GetValueOrDefault(region, 0) + r.Next(0, 3)) // favor less-used regions with some randomness
+                .ToList();
 
-            var length = Math.Abs(start2.X - end2.X) + Math.Abs(start2.Y - end2.Y);
-
-            if (length <= maxLength && length > 0)
+            foreach (var region in allRegions)
             {
-                return new NOcrLine(start2, end2);
+                int regionX = region.Item1;
+                int regionY = region.Item2;
+
+                int startX = r.Next(regionX * cellWidth, Math.Min((regionX + 1) * cellWidth, nOcrChar.Width));
+                int startY = r.Next(regionY * cellHeight, Math.Min((regionY + 1) * cellHeight, nOcrChar.Height));
+
+                int offsetX = r.Next(-maxLength, maxLength + 1);
+                int offsetY = r.Next(-maxLength, maxLength + 1);
+
+                int endX = Math.Clamp(startX + offsetX, 0, nOcrChar.Width - 1);
+                int endY = Math.Clamp(startY + offsetY, 0, nOcrChar.Height - 1);
+
+                int length = Math.Abs(endX - startX) + Math.Abs(endY - startY);
+                if (length >= minLength && length <= maxLength)
+                {
+                    // Mark region as used
+                    if (usedRegions != null)
+                    {
+                        usedRegions.TryGetValue(region, out int count);
+                        usedRegions[region] = count + 1;
+                    }
+
+                    return new NOcrLine(new OcrPoint(startX, startY), new OcrPoint(endX, endY));
+                }
             }
         }
 
-        // Fallback - ensure we always return a valid line
-        var start = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
-        var end = new OcrPoint(
-            Math.Max(0, Math.Min(nOcrChar.Width - 1, start.X + r.Next(-2, 3))),
-            Math.Max(0, Math.Min(nOcrChar.Height - 1, start.Y + r.Next(-2, 3)))
-        );
+        return new NOcrLine();
+    }
 
-        return new NOcrLine(start, end);
+    private static int ShortLineLastX = -1;
+    private static NOcrLine GenerateShortLineSimple(NOcrChar nOcrChar, Random r)
+    {
+        for (int attempt = 0; attempt < 200; attempt++)
+        {
+            var start = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
+            var end = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
+
+            var length = Math.Abs(start.X - end.X) + Math.Abs(start.Y - end.Y);
+
+            if (length > 5 || length <= 1)
+            {
+                continue;
+            }
+
+            if (ShortLineLastX >= 0)
+            {
+                var halfX = nOcrChar.Width / 2;
+                if (start.X < halfX && ShortLineLastX < halfX ||
+                    start.X > halfX && ShortLineLastX > halfX)
+                {
+                    // Avoid generating too many short lines in the same side
+                    continue;
+                }
+            }
+
+            ShortLineLastX = start.X;
+            return new NOcrLine(start, end);
+        }
+
+        return new NOcrLine();
     }
 
     private static bool IsExactDuplicate(NOcrLine line, List<NOcrLine> existingLines)

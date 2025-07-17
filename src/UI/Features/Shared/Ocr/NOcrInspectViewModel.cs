@@ -81,12 +81,12 @@ public partial class NOcrInspectViewModel : ObservableObject
 
         const int maxLines = 500;
         NoOfLinesToAutoDrawList = new ObservableCollection<int>();
-        for (var i = 0; i <= maxLines; i++)
+        for (var i = 10; i <= maxLines; i++)
         {
             NoOfLinesToAutoDrawList.Add(i);
         }
 
-        SelectedNoOfLinesToAutoDraw = 100;
+        SelectedNoOfLinesToAutoDraw = Se.Settings.Ocr.NOcrNoOfLinesToAutoDraw;
         NOcrChar = new NOcrChar();
         _nOcrDb = new NOcrDb(string.Empty);
         SentenceBitmap = new SKBitmap(1, 1).ToAvaloniaBitmap();
@@ -117,8 +117,6 @@ public partial class NOcrInspectViewModel : ObservableObject
 
     private void InitSentenceBitmap(OcrSubtitleItem item, SKBitmap skBitmap)
     {
-        //var skBitmap = item.GetSkBitmap().Copy();
-
         if (_splitItem.NikseBitmap != null)
         {
             var rect = new SKRect(_splitItem.X, _splitItem.Y, _splitItem.X + _splitItem.NikseBitmap.Width, _splitItem.Y + _splitItem.NikseBitmap.Height);
@@ -143,6 +141,7 @@ public partial class NOcrInspectViewModel : ObservableObject
     [RelayCommand]
     private void Ok()
     {
+        Se.Settings.Ocr.NOcrNoOfLinesToAutoDraw = SelectedNoOfLinesToAutoDraw;
         NOcrChar.Text = NewText;
         OkPressed = true;
         Close();

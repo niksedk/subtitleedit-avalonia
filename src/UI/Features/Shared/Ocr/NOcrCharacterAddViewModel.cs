@@ -85,7 +85,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
 
         const int maxLines = 500;
         NoOfLinesToAutoDrawList = new ObservableCollection<int>();
-        for (var i = 0; i <= maxLines; i++)
+        for (var i = 10; i <= maxLines; i++)
         {
             NoOfLinesToAutoDrawList.Add(i);
         }
@@ -108,12 +108,14 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     {
         IsNewTextItalic = Se.Settings.Ocr.IsNewLetterItalic;
         SubmitOnFirstLetter = Se.Settings.Ocr.SubmitOnFirstLetter;
+        SelectedNoOfLinesToAutoDraw = Se.Settings.Ocr.NOcrNoOfLinesToAutoDraw;
     }
 
     private void SaveSettings()
     {
         Se.Settings.Ocr.IsNewLetterItalic = IsNewTextItalic;
         Se.Settings.Ocr.SubmitOnFirstLetter = SubmitOnFirstLetter;
+        Se.Settings.Ocr.NOcrNoOfLinesToAutoDraw = SelectedNoOfLinesToAutoDraw;
         Se.SaveSettings();
     }
 

@@ -17,6 +17,7 @@ public class SeOcr
     public string GoogleVisionLanguage { get; set; }
     public bool IsNewLetterItalic { get; set; }
     public bool SubmitOnFirstLetter { get; set; }
+    public int NOcrNoOfLinesToAutoDraw { get; set; }
 
     public SeOcr()
     {
@@ -26,6 +27,7 @@ public class SeOcr
         NOcrMaxWrongPixels = 25;
         NOcrPixelsAreSpace = 12;
         NOcrDrawUnknownText = true;
+        NOcrNoOfLinesToAutoDraw = 60;
 
         OllamaModels = new List<string> { "llama3.2-vision", "llava-phi3", "moondream", "minicpm-v" };
         OllamaLanguage = "English";
