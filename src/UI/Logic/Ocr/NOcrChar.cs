@@ -296,17 +296,47 @@ public class NOcrChar
     {
         const int giveUpCount = 15_000;
         var r = new Random();
+
+        GenerateLines(
+            maxNumberOfLines, veryPrecise, giveUpCount, nOcrChar, bitmap, r,
+            isForeground: true,
+            isMatch: IsMatchPointForeGround,
+            getLines: c => c.LinesForeground);
+
+        GenerateLines(
+            maxNumberOfLines, veryPrecise, giveUpCount, nOcrChar, bitmap, r,
+            isForeground: false,
+            isMatch: IsMatchPointBackGround,
+            getLines: c => c.LinesBackground);
+
+        RemoveDuplicates(nOcrChar.LinesForeground);
+        RemoveDuplicates(nOcrChar.LinesBackground);
+    }
+
+    private static void GenerateLines(
+        int maxNumberOfLines,
+        bool veryPrecise,
+        int giveUpCount,
+        NOcrChar nOcrChar,
+        NikseBitmap2 bitmap,
+        Random r,
+        bool isForeground,
+        Func<NOcrLine, bool, NikseBitmap2, NOcrChar, bool> isMatch,
+        Func<NOcrChar, List<NOcrLine>> getLines)
+    {
         var count = 0;
         var hits = 0;
         var tempVeryPrecise = veryPrecise;
         var verticalLineX = 2;
         var horizontalLineY = 2;
+        var lines = getLines(nOcrChar);
+
         while (hits < maxNumberOfLines && count < giveUpCount)
         {
             var start = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
             var end = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
 
-            if (hits < 5 && count < 200 && nOcrChar.Width > 4 && nOcrChar.Height > 4) // vertical lines
+            if (isForeground && hits < 5 && count < 200 && nOcrChar.Width > 4 && nOcrChar.Height > 4) // vertical lines
             {
                 start = new OcrPoint(0, 0);
                 end = new OcrPoint(0, 0);
@@ -315,30 +345,30 @@ public class NOcrChar
                     start = new OcrPoint(verticalLineX, 2);
                     end = new OcrPoint(verticalLineX, nOcrChar.Height - 3);
 
-                    if (IsMatchPointForeGround(new NOcrLine(start, end), true, bitmap, nOcrChar))
+                    if (isMatch(new NOcrLine(start, end), true, bitmap, nOcrChar))
                     {
                         verticalLineX++;
                         break;
                     }
                 }
             }
-            else if (hits < 10 && count < 400 && nOcrChar.Width > 4 && nOcrChar.Height > 4) // horizontal lines
+            else if (hits < 10 && count < (isForeground ? 400 : 1000) && nOcrChar.Width > 4 && nOcrChar.Height > 4) // horizontal lines
             {
                 start = new OcrPoint(0, 0);
                 end = new OcrPoint(0, 0);
                 for (; horizontalLineY < nOcrChar.Height - 3; horizontalLineY += 1)
                 {
                     start = new OcrPoint(2, horizontalLineY);
-                    end = new OcrPoint(nOcrChar.Width - 3, horizontalLineY);
+                    end = new OcrPoint(nOcrChar.Width - (isForeground ? 3 : 2), horizontalLineY);
 
-                    if (IsMatchPointForeGround(new NOcrLine(start, end), true, bitmap, nOcrChar))
+                    if (isMatch(new NOcrLine(start, end), true, bitmap, nOcrChar))
                     {
                         horizontalLineY++;
                         break;
                     }
                 }
             }
-            else if (hits < 20 && count < 2000) // a few large lines
+            else if (hits < (isForeground ? 20 : 10) && count < (isForeground ? 2000 : 1000)) // large lines
             {
                 for (var k = 0; k < 500; k++)
                 {
@@ -350,7 +380,7 @@ public class NOcrChar
                     end = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
                 }
             }
-            else if (hits < 30 && count < 3000) // some medium lines
+            else if (hits < (isForeground ? 30 : 30) && count < (isForeground ? 3000 : 2000)) // medium lines
             {
                 for (var k = 0; k < 500; k++)
                 {
@@ -362,11 +392,12 @@ public class NOcrChar
                     end = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
                 }
             }
-            else // and a lot of small lines
+            else // small lines
             {
                 for (var k = 0; k < 500; k++)
                 {
-                    if (Math.Abs(start.X - end.X) + Math.Abs(start.Y - end.Y) < 15)
+                    int minLength = isForeground ? 15 : 5;
+                    if (Math.Abs(start.X - end.X) + Math.Abs(start.Y - end.Y) < minLength)
                     {
                         break;
                     }
@@ -377,7 +408,7 @@ public class NOcrChar
 
             var op = new NOcrLine(start, end);
             var ok = true;
-            foreach (var existingOp in nOcrChar.LinesForeground)
+            foreach (var existingOp in lines)
             {
                 if (existingOp.Start.X == op.Start.X && existingOp.Start.Y == op.Start.Y &&
                     existingOp.End.X == op.End.X && existingOp.End.Y == op.End.Y)
@@ -391,107 +422,18 @@ public class NOcrChar
                 ok = false;
             }
 
-            if (ok && IsMatchPointForeGround(op, !tempVeryPrecise, bitmap, nOcrChar))
+            if (ok && isMatch(op, !tempVeryPrecise, bitmap, nOcrChar))
             {
-                nOcrChar.LinesForeground.Add(op);
+                lines.Add(op);
                 hits++;
             }
+
             count++;
             if (count > giveUpCount - 100 && !tempVeryPrecise)
             {
                 tempVeryPrecise = true;
             }
         }
-
-        count = 0;
-        hits = 0;
-        horizontalLineY = 2;
-        tempVeryPrecise = veryPrecise;
-        while (hits < maxNumberOfLines && count < giveUpCount)
-        {
-            var start = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
-            var end = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
-
-            if (hits < 5 && count < 400 && nOcrChar.Width > 4 && nOcrChar.Height > 4) // horizontal lines
-            {
-                for (; horizontalLineY < nOcrChar.Height - 3; horizontalLineY += 1)
-                {
-                    start = new OcrPoint(2, horizontalLineY);
-                    end = new OcrPoint(nOcrChar.Width - 2, horizontalLineY);
-
-                    if (IsMatchPointBackGround(new NOcrLine(start, end), true, bitmap, nOcrChar))
-                    {
-                        horizontalLineY++;
-                        break;
-                    }
-                }
-            }
-            if (hits < 10 && count < 1000) // a few large lines
-            {
-                for (var k = 0; k < 500; k++)
-                {
-                    if (Math.Abs(start.X - end.X) + Math.Abs(start.Y - end.Y) > nOcrChar.Height / 2)
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        end = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
-                    }
-                }
-            }
-            else if (hits < 30 && count < 2000) // some medium lines
-            {
-                for (var k = 0; k < 500; k++)
-                {
-                    if (Math.Abs(start.X - end.X) + Math.Abs(start.Y - end.Y) < 15)
-                    {
-                        break;
-                    }
-
-                    end = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
-                }
-            }
-            else // and a lot of small lines
-            {
-                for (var k = 0; k < 500; k++)
-                {
-                    if (Math.Abs(start.X - end.X) + Math.Abs(start.Y - end.Y) < 5)
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        end = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
-                    }
-                }
-            }
-
-            var op = new NOcrLine(start, end);
-            var ok = true;
-            foreach (var existingOp in nOcrChar.LinesBackground)
-            {
-                if (existingOp.Start.X == op.Start.X && existingOp.Start.Y == op.Start.Y &&
-                    existingOp.End.X == op.End.X && existingOp.End.Y == op.End.Y)
-                {
-                    ok = false;
-                }
-            }
-            if (ok && IsMatchPointBackGround(op, !tempVeryPrecise, bitmap, nOcrChar))
-            {
-                nOcrChar.LinesBackground.Add(op);
-                hits++;
-            }
-            count++;
-
-            if (count > giveUpCount - 100 && !tempVeryPrecise)
-            {
-                tempVeryPrecise = true;
-            }
-        }
-
-        RemoveDuplicates(nOcrChar.LinesForeground);
-        RemoveDuplicates(nOcrChar.LinesBackground);
     }
 
     private static bool IsMatchPointForeGround(NOcrLine op, bool loose, NikseBitmap2 nbmp, NOcrChar nOcrChar)
