@@ -336,7 +336,27 @@ public class NOcrChar
             var start = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
             var end = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
 
-            if (isForeground && hits < 5 && count < 200 && nOcrChar.Width > 4 && nOcrChar.Height > 4) // vertical lines
+            if (count == 1 && !isForeground && nOcrChar.Width > 4 && nOcrChar.Height > 4)
+            {
+                start = new OcrPoint(0, 4);
+                end = new OcrPoint(4, 0);
+            }
+            else if (count == 2 && !isForeground && nOcrChar.Width > 4 && nOcrChar.Height > 4)
+            {
+                start = new OcrPoint(0, 2);
+                end = new OcrPoint(2, 0);
+            }
+            else if (count == 3 && !isForeground && nOcrChar.Width > 4 && nOcrChar.Height > 4)
+            {
+                start = new OcrPoint(nOcrChar.Width, 4);
+                end = new OcrPoint(nOcrChar.Width - 4, 0);
+            }
+            else if (count == 4 && !isForeground && nOcrChar.Width > 4 && nOcrChar.Height > 4)
+            {
+                start = new OcrPoint(nOcrChar.Width, 2);
+                end = new OcrPoint(nOcrChar.Width - 2, 0);
+            }
+            else if (isForeground && hits < 5 && count < 200 && nOcrChar.Width > 4 && nOcrChar.Height > 4) // vertical lines
             {
                 start = new OcrPoint(0, 0);
                 end = new OcrPoint(0, 0);
