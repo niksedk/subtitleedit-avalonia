@@ -296,6 +296,232 @@ public class NOcrChar
     {
         const int giveUpCount = 15_000;
         var r = new Random();
+
+        // Generate foreground lines
+        GenerateLineSegmentsForType(maxNumberOfLines, veryPrecise, nOcrChar, bitmap, r, giveUpCount, true);
+
+        // Generate background lines (same amount as foreground)
+        GenerateLineSegmentsForType(maxNumberOfLines, veryPrecise, nOcrChar, bitmap, r, giveUpCount, false);
+
+        RemoveDuplicates(nOcrChar.LinesForeground);
+        RemoveDuplicates(nOcrChar.LinesBackground);
+    }
+
+    private static void GenerateLineSegmentsForType(int maxNumberOfLines, bool veryPrecise, NOcrChar nOcrChar,
+        NikseBitmap2 bitmap, Random r, int giveUpCount, bool isForeground)
+    {
+        var count = 0;
+        var hits = 0;
+        var tempVeryPrecise = veryPrecise;
+        var lines = isForeground ? nOcrChar.LinesForeground : nOcrChar.LinesBackground;
+
+        // Phase 1: Generate systematic lines (vertical and horizontal)
+        hits += GenerateSystematicLines(nOcrChar, bitmap, isForeground, Math.Min(maxNumberOfLines / 3, 20));
+
+        // Phase 2: Generate remaining lines with different strategies
+        while (hits < maxNumberOfLines && count < giveUpCount)
+        {
+            NOcrLine line;
+
+            if (hits < maxNumberOfLines * 0.15) // 15% long lines
+            {
+                line = GenerateLongLine(nOcrChar, r);
+            }
+            else if (hits < maxNumberOfLines * 0.35) // 20% medium lines
+            {
+                line = GenerateMediumLine(nOcrChar, r);
+            }
+            else // 65% short lines for details
+            {
+                line = GenerateShortLine(nOcrChar, r);
+            }
+
+            // Only check for exact duplicates and zero-length lines
+            if (IsExactDuplicate(line, lines))
+            {
+                count++;
+                continue;
+            }
+
+            // Test the line
+            bool isMatch = isForeground ?
+                IsMatchPointForeGround(line, !tempVeryPrecise, bitmap, nOcrChar) :
+                IsMatchPointBackGround(line, !tempVeryPrecise, bitmap, nOcrChar);
+
+            if (isMatch)
+            {
+                lines.Add(line);
+                hits++;
+            }
+
+            count++;
+
+            // Switch to more precise mode near the end
+            if (count > giveUpCount - 1000 && !tempVeryPrecise)
+            {
+                tempVeryPrecise = true;
+            }
+        }
+    }
+
+    private static int GenerateSystematicLines(NOcrChar nOcrChar, NikseBitmap2 bitmap, bool isForeground, int maxLines)
+    {
+        var lines = isForeground ? nOcrChar.LinesForeground : nOcrChar.LinesBackground;
+        var hits = 0;
+
+        if (nOcrChar.Width <= 4 || nOcrChar.Height <= 4) return 0;
+
+        // Generate vertical lines with reasonable spacing
+        var verticalSpacing = Math.Max(1, nOcrChar.Width / 15);
+        for (int x = 2; x < nOcrChar.Width - 2 && hits < maxLines / 2; x += verticalSpacing)
+        {
+            var line = new NOcrLine(new OcrPoint(x, 1), new OcrPoint(x, nOcrChar.Height - 2));
+
+            bool isMatch = isForeground ?
+                IsMatchPointForeGround(line, true, bitmap, nOcrChar) :
+                IsMatchPointBackGround(line, true, bitmap, nOcrChar);
+
+            if (isMatch)
+            {
+                lines.Add(line);
+                hits++;
+            }
+        }
+
+        // Generate horizontal lines with reasonable spacing
+        var horizontalSpacing = Math.Max(1, nOcrChar.Height / 15);
+        for (int y = 2; y < nOcrChar.Height - 2 && hits < maxLines; y += horizontalSpacing)
+        {
+            var line = new NOcrLine(new OcrPoint(1, y), new OcrPoint(nOcrChar.Width - 2, y));
+
+            bool isMatch = isForeground ?
+                IsMatchPointForeGround(line, true, bitmap, nOcrChar) :
+                IsMatchPointBackGround(line, true, bitmap, nOcrChar);
+
+            if (isMatch)
+            {
+                lines.Add(line);
+                hits++;
+            }
+        }
+
+        return hits;
+    }
+
+    private static NOcrLine GenerateLongLine(NOcrChar nOcrChar, Random r)
+    {
+        var minLength = Math.Max(nOcrChar.Width, nOcrChar.Height) / 3;
+
+        for (int attempt = 0; attempt < 100; attempt++)
+        {
+            var start = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
+
+            // Generate end point in random direction
+            var angle = r.NextDouble() * Math.PI * 2;
+            var length = r.Next((int)minLength, Math.Max(nOcrChar.Width, nOcrChar.Height));
+
+            var endX = (int)(start.X + Math.Cos(angle) * length);
+            var endY = (int)(start.Y + Math.Sin(angle) * length);
+
+            // Clamp to bounds
+            endX = Math.Max(0, Math.Min(nOcrChar.Width - 1, endX));
+            endY = Math.Max(0, Math.Min(nOcrChar.Height - 1, endY));
+
+            var end = new OcrPoint(endX, endY);
+            var actualLength = Math.Abs(start.X - end.X) + Math.Abs(start.Y - end.Y);
+
+            if (actualLength >= minLength)
+            {
+                return new NOcrLine(start, end);
+            }
+        }
+
+        // Fallback to random line
+        return new NOcrLine(
+            new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height)),
+            new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height))
+        );
+    }
+
+    private static NOcrLine GenerateMediumLine(NOcrChar nOcrChar, Random r)
+    {
+        var minLength = 3;
+        var maxLength = Math.Max(nOcrChar.Width, nOcrChar.Height) / 2;
+
+        for (int attempt = 0; attempt < 50; attempt++)
+        {
+            var start = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
+            var end = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
+
+            var length = Math.Abs(start.X - end.X) + Math.Abs(start.Y - end.Y);
+
+            if (length >= minLength && length <= maxLength)
+            {
+                return new NOcrLine(start, end);
+            }
+        }
+
+        // Fallback
+        return new NOcrLine(
+            new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height)),
+            new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height))
+        );
+    }
+
+    private static NOcrLine GenerateShortLine(NOcrChar nOcrChar, Random r)
+    {
+        var maxLength = Math.Max(2, Math.Min(nOcrChar.Width, nOcrChar.Height) / 2);
+
+        for (int attempt = 0; attempt < 20; attempt++)
+        {
+            var start2 = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
+            var end2 = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
+
+            var length = Math.Abs(start2.X - end2.X) + Math.Abs(start2.Y - end2.Y);
+
+            if (length <= maxLength && length > 0)
+            {
+                return new NOcrLine(start2, end2);
+            }
+        }
+
+        // Fallback - ensure we always return a valid line
+        var start = new OcrPoint(r.Next(nOcrChar.Width), r.Next(nOcrChar.Height));
+        var end = new OcrPoint(
+            Math.Max(0, Math.Min(nOcrChar.Width - 1, start.X + r.Next(-2, 3))),
+            Math.Max(0, Math.Min(nOcrChar.Height - 1, start.Y + r.Next(-2, 3)))
+        );
+
+        return new NOcrLine(start, end);
+    }
+
+    private static bool IsExactDuplicate(NOcrLine line, List<NOcrLine> existingLines)
+    {
+        // Check for zero-length lines
+        if (line.Start.X == line.End.X && line.Start.Y == line.End.Y)
+        {
+            return true;
+        }
+
+        // Check for exact duplicates (including reverse)
+        foreach (var existing in existingLines)
+        {
+            if ((existing.Start.X == line.Start.X && existing.Start.Y == line.Start.Y &&
+                 existing.End.X == line.End.X && existing.End.Y == line.End.Y) ||
+                (existing.Start.X == line.End.X && existing.Start.Y == line.End.Y &&
+                 existing.End.X == line.Start.X && existing.End.Y == line.Start.Y))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static void GenerateLineSegmentsOld(int maxNumberOfLines, bool veryPrecise, NOcrChar nOcrChar, NikseBitmap2 bitmap)
+    {
+        const int giveUpCount = 15_000;
+        var r = new Random();
         var count = 0;
         var hits = 0;
         var tempVeryPrecise = veryPrecise;
