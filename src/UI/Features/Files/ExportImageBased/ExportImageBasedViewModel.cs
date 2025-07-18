@@ -28,6 +28,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
     [ObservableProperty] SubtitleLineViewModel? _selectedLeftRightMargin;
     [ObservableProperty] private ObservableCollection<string> _borderStyles;
     [ObservableProperty] SubtitleLineViewModel? _selectedBorderStyle;
+    [ObservableProperty] private ObservableCollection<int> _shadowWidths;
+    [ObservableProperty] SubtitleLineViewModel? _selectedShadowWidth;
     [ObservableProperty] private bool _isBold;
     [ObservableProperty] private Color _fontColor;
     [ObservableProperty] private Color _borderColor;

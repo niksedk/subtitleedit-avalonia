@@ -188,6 +188,8 @@ public class ExportImageBasedWindow : Window
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
@@ -283,6 +285,36 @@ public class ExportImageBasedWindow : Window
         grid.Add(colorPickerBorderColor, 0, 5);
         grid.Add(labelBorderStyle, 1, 4);
         grid.Add(comboBoxBorderStyle, 1, 5);
+
+
+        // column 4
+        var labelShadowColor = UiUtil.MakeLabel(Se.Language.General.ShadowColor);
+        var colorPickerShadowColor = new ColorPicker
+        {
+            Width = 100,
+            IsAlphaEnabled = true,
+            IsAlphaVisible = true,
+            IsColorSpectrumSliderVisible = false,
+            IsColorComponentsVisible = true,
+            IsColorModelVisible = false,
+            IsColorPaletteVisible = false,
+            IsAccentColorsVisible = false,
+            IsColorSpectrumVisible = true,
+            IsComponentTextInputVisible = true,
+            [!ColorPicker.ColorProperty] = new Binding(nameof(_vm.ShadowColor))
+            {
+                Source = _vm,
+                Mode = BindingMode.TwoWay
+            },
+        };
+
+        var labelShadowWidth = UiUtil.MakeLabel(Se.Language.General.ShadowWidth);
+        var comboBoxShadowWidth = UiUtil.MakeComboBox(vm.ShadowWidths, vm, nameof(vm.SelectedShadowWidth));
+
+        grid.Add(labelShadowColor, 0, 6);
+        grid.Add(colorPickerShadowColor, 0, 7);
+        grid.Add(labelShadowWidth, 1, 6);
+        grid.Add(comboBoxShadowWidth, 1, 7);
 
         return UiUtil.MakeBorderForControl(grid); 
     }

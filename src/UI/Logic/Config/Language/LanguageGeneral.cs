@@ -210,6 +210,8 @@ public class LanguageGeneral
     public string FontColor { get; set; }
     public string BorderColor { get; set; }
     public string BorderStyle { get; set; }
+    public string ShadowColor { get; set; }
+    public string ShadowWidth { get; set; }
 
     public LanguageGeneral()
     {
@@ -419,5 +421,7 @@ public class LanguageGeneral
         FontColor = "Font color";
         BorderColor = "Border color";
         BorderStyle = "Border style";
+        ShadowColor = "Shadow color";
+        ShadowWidth = "Shadow width";
     }
 }
