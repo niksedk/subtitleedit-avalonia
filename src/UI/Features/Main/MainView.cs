@@ -48,7 +48,7 @@ public class MainView : ViewBase
         Se.Settings.General.Language = Se.Settings.General.Language ?? "English"; // default to English if not set
         if (Se.Settings.General.Language != "English")
         {
-            var jsonFileName = System.IO.Path.Combine(Se.LanguageFolder, Se.Settings.General.Language + ".json");
+            var jsonFileName = System.IO.Path.Combine(Se.TranslationFolder, Se.Settings.General.Language + ".json");
             if (System.IO.File.Exists(jsonFileName))
             {
                 var json = System.IO.File.ReadAllText(jsonFileName, Encoding.UTF8);

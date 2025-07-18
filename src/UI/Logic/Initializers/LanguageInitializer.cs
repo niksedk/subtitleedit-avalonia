@@ -24,7 +24,7 @@ public class LanguageInitializer(IZipUnpacker zipUnpacker) : ILanguageInitialize
 
     private static async Task<bool> NeedsUpdate()
     {
-        string outputDir = Se.LanguageFolder;
+        string outputDir = Se.TranslationFolder;
         if (!Directory.Exists(outputDir))
         {
             return true;
@@ -48,6 +48,6 @@ public class LanguageInitializer(IZipUnpacker zipUnpacker) : ILanguageInitialize
     {
         var zipUri = new Uri("avares://SubtitleEdit/Assets/Languages.zip");
         await using var zipStream = AssetLoader.Open(zipUri);
-        zipUnpacker.UnpackZipStream(zipStream, Se.LanguageFolder);
+        zipUnpacker.UnpackZipStream(zipStream, Se.TranslationFolder);
     }
 }

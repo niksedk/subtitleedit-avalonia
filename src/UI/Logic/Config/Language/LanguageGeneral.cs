@@ -206,6 +206,7 @@ public class LanguageGeneral
     public string InspectAdditions { get; set; }
     public string Import { get; set; }
     public string ImportDotDotDot { get; set; }
+    public string FontSize { get; set; }
 
     public LanguageGeneral()
     {
@@ -411,5 +412,6 @@ public class LanguageGeneral
         InspectAdditions = "Inspect additions...";
         Import = "Import";
         ImportDotDotDot = "Import...";
+        FontSize = "Font size";
     }
 }

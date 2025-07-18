@@ -52,7 +52,7 @@ public partial class LanguageViewModel : ObservableObject
 
     internal void OnLoaded()
     {
-        var jsonFiles = System.IO.Directory.GetFiles(Se.LanguageFolder, "*.json", System.IO.SearchOption.TopDirectoryOnly);
+        var jsonFiles = System.IO.Directory.GetFiles(Se.TranslationFolder, "*.json", System.IO.SearchOption.TopDirectoryOnly);
         Languages.Clear();
         foreach (var file in jsonFiles.OrderBy(p => p))
         {

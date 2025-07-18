@@ -5,6 +5,7 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DynamicData;
 using Nikse.SubtitleEdit.Features.Main;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
@@ -12,24 +13,30 @@ namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 public partial class ExportImageBasedViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _subtitles;
-    [ObservableProperty] private string _translatedTitle;
-    [ObservableProperty] private string _originalTitle;
-    [ObservableProperty] private string _translator;
-    [ObservableProperty] private string _comment;
-    [ObservableProperty] private string _language;
+    [ObservableProperty] SubtitleLineViewModel? _selectedSubtitle;
+    [ObservableProperty] private ObservableCollection<string> _fontFamilies;
+    [ObservableProperty] SubtitleLineViewModel? _selectedFontFamily;
+    [ObservableProperty] private ObservableCollection<int> _fontSizes;
+    [ObservableProperty] SubtitleLineViewModel? _selectedFontSize;
+    [ObservableProperty] private bool _isBold;
     [ObservableProperty] private TimeSpan _startOfProgramme;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
+    public DataGrid SubtitleGrid { get; set; }
+
+    private string _subtitleFileName;
+    private string _videoFileName;
 
     public ExportImageBasedViewModel()
     {
         Subtitles = new ObservableCollection<SubtitleLineViewModel>();
-        TranslatedTitle = string.Empty;
-        OriginalTitle = string.Empty;
-        Translator = string.Empty;
-        Comment = string.Empty;
-        Language = string.Empty;
+        FontFamilies = new ObservableCollection<string>();
+        FontSizes = new ObservableCollection<int>();
+        SubtitleGrid = new DataGrid();
+
+        _subtitleFileName = string.Empty;
+        _videoFileName = string.Empty;
     }
 
     [RelayCommand]
@@ -46,7 +53,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Importl()
+    private void Export()
     {
     }
     
@@ -67,7 +74,14 @@ public partial class ExportImageBasedViewModel : ObservableObject
         }
     }
 
-    public void Initialize(ObservableCollection<SubtitleLineViewModel> observableCollection, string? subtitleFileName, string? videoFileName)
+    public void Initialize(ObservableCollection<SubtitleLineViewModel> subtitles, string? subtitleFileName, string? videoFileName)
     {
+        Subtitles.Clear();
+        Subtitles.AddRange(subtitles);
+    }
+
+    public void SubtitleGrid_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        
     }
 }
