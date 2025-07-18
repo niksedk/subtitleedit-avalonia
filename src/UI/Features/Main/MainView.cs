@@ -51,7 +51,6 @@ public class MainView : ViewBase
             var jsonFileName = System.IO.Path.Combine(Se.LanguageFolder, Se.Settings.General.Language + ".json");
             if (System.IO.File.Exists(jsonFileName))
             {
-
                 var json = System.IO.File.ReadAllText(jsonFileName, Encoding.UTF8);
                 var language = System.Text.Json.JsonSerializer.Deserialize<SeLanguage>(json, new System.Text.Json.JsonSerializerOptions
                 {

@@ -1,0 +1,4 @@
+enum ExportImageType
+{
+    BluRaySup,
+}

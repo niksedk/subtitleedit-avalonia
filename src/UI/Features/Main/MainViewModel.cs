@@ -65,6 +65,7 @@ using Nikse.SubtitleEdit.Features.Files.Export;
 using Nikse.SubtitleEdit.Features.Files.Export.ExportEbuStl;
 using Nikse.SubtitleEdit.Features.Files.ExportEbuStl;
 using Nikse.SubtitleEdit.Features.Files.ExportCavena890;
+using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Files.ExportPac;
 
 namespace Nikse.SubtitleEdit.Features.Main;
@@ -455,8 +456,18 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private void ExportBluRaySup()
+    private async Task ExportBluRaySup()
     {
+        var result = await _windowService.ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(Window!, vm =>
+        {
+            vm.Initialize(Subtitles, _subtitleFileName, _videoFileName);
+        });
+        
+        if (!result.OkPressed)
+        {
+            return;
+        }
+        
         _shortcutManager.ClearKeys();
     }
 
