@@ -207,6 +207,9 @@ public class LanguageGeneral
     public string Import { get; set; }
     public string ImportDotDotDot { get; set; }
     public string FontSize { get; set; }
+    public string FontColor { get; set; }
+    public string BorderColor { get; set; }
+    public string BorderStyle { get; set; }
 
     public LanguageGeneral()
     {
@@ -413,5 +416,8 @@ public class LanguageGeneral
         Import = "Import";
         ImportDotDotDot = "Import...";
         FontSize = "Font size";
+        FontColor = "Font color";
+        BorderColor = "Border color";
+        BorderStyle = "Border style";
     }
 }

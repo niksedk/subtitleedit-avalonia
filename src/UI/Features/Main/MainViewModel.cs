@@ -460,7 +460,7 @@ public partial class MainViewModel :
     {
         var result = await _windowService.ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(Window!, vm =>
         {
-            vm.Initialize(Subtitles, _subtitleFileName, _videoFileName);
+            vm.Initialize(ExportImageType.BluRaySup, Subtitles, _subtitleFileName, _videoFileName);
         });
         
         if (!result.OkPressed)

@@ -133,7 +133,32 @@ public class ExportImageBasedWindow : Window
                 return border;
             })
         });
-        
+
+        vm.SubtitleGrid.Columns.Add(new DataGridTemplateColumn
+        {
+            Header = Se.Language.General.Text,
+            Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
+            CellTemplate = new FuncDataTemplate<SubtitleLineViewModel>((value, nameScope) =>
+            {
+                var border = new Border
+                {
+                    Padding = new Thickness(4, 2),
+                    [!Border.BackgroundProperty] = new Binding(nameof(SubtitleLineViewModel.TextBackgroundBrush))
+                };
+
+                var textBlock = new TextBlock
+                {
+                    VerticalAlignment = VerticalAlignment.Center,
+                    TextWrapping = TextWrapping.Wrap,
+                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.Text))
+                };
+
+                border.Child = textBlock;
+                return border;
+            })
+        });
+
         vm.SubtitleGrid.DataContext = vm.Subtitles;
         vm.SubtitleGrid.SelectionChanged += vm.SubtitleGrid_SelectionChanged;
 
@@ -161,6 +186,8 @@ public class ExportImageBasedWindow : Window
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
@@ -169,18 +196,94 @@ public class ExportImageBasedWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
+
+        // column 1
         var labelFontFamily = UiUtil.MakeLabel(Se.Language.General.FontName);
         var comboBoxFontFamily = UiUtil.MakeComboBox(vm.FontFamilies, vm, nameof(vm.SelectedFontFamily));
 
         var labelFontSize = UiUtil.MakeLabel(Se.Language.General.FontSize);
         var comboBoxFontSize = UiUtil.MakeComboBox(vm.FontSizes, vm, nameof(vm.SelectedFontSize));
-        
+
+        var labelResolution = UiUtil.MakeLabel(Se.Language.General.Resolution);
+        var comboBoxResolution = UiUtil.MakeComboBox(vm.Resolutions, vm, nameof(vm.SelectedResolution));
+
+        var labelTopBottomMargin = UiUtil.MakeLabel(Se.Language.File.Export.TopBottomMargin);
+        var comboBoxTopBottomMargin = UiUtil.MakeComboBox(vm.TopBottomMargins, vm, nameof(vm.SelectedTopBottomMargin));
+
+        var labelLeftRightMargin = UiUtil.MakeLabel(Se.Language.File.Export.LeftRightMargin);
+        var comboBoxLeftRightMargin = UiUtil.MakeComboBox(vm.LeftRightMargins, vm, nameof(vm.SelectedLeftRightMargin));
+
         grid.Add(labelFontFamily, 0);
         grid.Add(comboBoxFontFamily, 0,1);
-        
+
         grid.Add(labelFontSize, 1, 0);
-        grid.Add(comboBoxFontSize, 1, 1);   
-        
+        grid.Add(comboBoxFontSize, 1, 1);
+
+        grid.Add(labelResolution, 2, 0);
+        grid.Add(comboBoxResolution, 2, 1);
+
+        grid.Add(labelTopBottomMargin, 3, 0);
+        grid.Add(comboBoxTopBottomMargin, 3, 1);
+
+        grid.Add(labelLeftRightMargin, 4, 0);
+        grid.Add(comboBoxLeftRightMargin, 4, 1);
+
+        // column 2
+        var labelFontColor = UiUtil.MakeLabel(Se.Language.General.FontColor);
+        var colorPickerFontColor = new ColorPicker
+        {
+            Width = 100,
+            IsAlphaEnabled = true,
+            IsAlphaVisible = true,
+            IsColorSpectrumSliderVisible = false,
+            IsColorComponentsVisible = true,
+            IsColorModelVisible = false,
+            IsColorPaletteVisible = false,
+            IsAccentColorsVisible = false,
+            IsColorSpectrumVisible = true,
+            IsComponentTextInputVisible = true,
+            [!ColorPicker.ColorProperty] = new Binding(nameof(_vm.FontColor))
+            {
+                Source = _vm,
+                Mode = BindingMode.TwoWay
+            },
+        };
+        var checkBoxBold = UiUtil.MakeCheckBox(Se.Language.General.Bold, vm, nameof(vm.IsBold));
+
+        grid.Add(labelFontColor, 0, 2);
+        grid.Add(colorPickerFontColor, 0, 3);
+        grid.Add(checkBoxBold, 1, 3);
+
+
+        // column 3
+        var labelBorderColor = UiUtil.MakeLabel(Se.Language.General.BorderColor);
+        var colorPickerBorderColor = new ColorPicker
+        {
+            Width = 100,
+            IsAlphaEnabled = true,
+            IsAlphaVisible = true,
+            IsColorSpectrumSliderVisible = false,
+            IsColorComponentsVisible = true,
+            IsColorModelVisible = false,
+            IsColorPaletteVisible = false,
+            IsAccentColorsVisible = false,
+            IsColorSpectrumVisible = true,
+            IsComponentTextInputVisible = true,
+            [!ColorPicker.ColorProperty] = new Binding(nameof(_vm.BorderColor))
+            {
+                Source = _vm,
+                Mode = BindingMode.TwoWay
+            },
+        };
+
+        var labelBorderStyle = UiUtil.MakeLabel(Se.Language.General.BorderStyle);
+        var comboBoxBorderStyle = UiUtil.MakeComboBox(vm.BorderStyles, vm, nameof(vm.SelectedBorderStyle));
+
+        grid.Add(labelBorderColor, 0, 4);
+        grid.Add(colorPickerBorderColor, 0, 5);
+        grid.Add(labelBorderStyle, 1, 4);
+        grid.Add(comboBoxBorderStyle, 1, 5);
+
         return UiUtil.MakeBorderForControl(grid); 
     }
 
