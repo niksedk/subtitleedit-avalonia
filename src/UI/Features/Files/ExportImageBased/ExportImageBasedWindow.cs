@@ -19,7 +19,7 @@ public class ExportImageBasedWindow : Window
     public ExportImageBasedWindow(ExportImageBasedViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = "Export Blu-ray sup";
+        Bind(TitleProperty, new Binding(nameof(vm.Title)));
         CanResize = true;
         Width = 1000;
         Height = 800;
@@ -160,6 +160,11 @@ public class ExportImageBasedWindow : Window
         });
 
         vm.SubtitleGrid.DataContext = vm.Subtitles;
+        vm.SubtitleGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedSubtitle))
+        {
+            Source = vm,
+            Mode = BindingMode.TwoWay
+        });
         vm.SubtitleGrid.SelectionChanged += vm.SubtitleGrid_SelectionChanged;
 
         return UiUtil.MakeBorderForControl(vm.SubtitleGrid); 
@@ -202,18 +207,23 @@ public class ExportImageBasedWindow : Window
         // column 1
         var labelFontFamily = UiUtil.MakeLabel(Se.Language.General.FontName);
         var comboBoxFontFamily = UiUtil.MakeComboBox(vm.FontFamilies, vm, nameof(vm.SelectedFontFamily));
+        comboBoxFontFamily.SelectionChanged += vm.ComboChanged;
 
         var labelFontSize = UiUtil.MakeLabel(Se.Language.General.FontSize);
         var comboBoxFontSize = UiUtil.MakeComboBox(vm.FontSizes, vm, nameof(vm.SelectedFontSize));
+        comboBoxFontSize.SelectionChanged += vm.ComboChanged;
 
         var labelResolution = UiUtil.MakeLabel(Se.Language.General.Resolution);
         var comboBoxResolution = UiUtil.MakeComboBox(vm.Resolutions, vm, nameof(vm.SelectedResolution));
+        comboBoxResolution.SelectionChanged += vm.ComboChanged;
 
         var labelTopBottomMargin = UiUtil.MakeLabel(Se.Language.File.Export.TopBottomMargin);
         var comboBoxTopBottomMargin = UiUtil.MakeComboBox(vm.TopBottomMargins, vm, nameof(vm.SelectedTopBottomMargin));
+        comboBoxTopBottomMargin.SelectionChanged += vm.ComboChanged;
 
         var labelLeftRightMargin = UiUtil.MakeLabel(Se.Language.File.Export.LeftRightMargin);
         var comboBoxLeftRightMargin = UiUtil.MakeComboBox(vm.LeftRightMargins, vm, nameof(vm.SelectedLeftRightMargin));
+        comboBoxLeftRightMargin.SelectionChanged += vm.ComboChanged;
 
         grid.Add(labelFontFamily, 0);
         grid.Add(comboBoxFontFamily, 0,1);
@@ -251,6 +261,7 @@ public class ExportImageBasedWindow : Window
             },
         };
         var checkBoxBold = UiUtil.MakeCheckBox(Se.Language.General.Bold, vm, nameof(vm.IsBold));
+        checkBoxBold.IsCheckedChanged += vm.CheckBoxChanged;
 
         grid.Add(labelFontColor, 0, 2);
         grid.Add(colorPickerFontColor, 0, 3);
@@ -310,6 +321,7 @@ public class ExportImageBasedWindow : Window
 
         var labelShadowWidth = UiUtil.MakeLabel(Se.Language.General.ShadowWidth);
         var comboBoxShadowWidth = UiUtil.MakeComboBox(vm.ShadowWidths, vm, nameof(vm.SelectedShadowWidth));
+        comboBoxShadowWidth.SelectionChanged += vm.ComboChanged;
 
         grid.Add(labelShadowColor, 0, 6);
         grid.Add(colorPickerShadowColor, 0, 7);
@@ -321,8 +333,17 @@ public class ExportImageBasedWindow : Window
 
     private Border MakePreviewView(ExportImageBasedViewModel vm)
     {
-        var labelControls = UiUtil.MakeLabel("preview");   
-        return UiUtil.MakeBorderForControl(labelControls); 
+        var imagePreview = new Image
+        {
+            MaxHeight = 200,
+            Stretch = Stretch.Uniform,
+        };  
+        imagePreview.Bind(Image.SourceProperty, new Binding(nameof(vm.BitmapPreview))
+        {
+            Source = vm,
+            Mode = BindingMode.OneWay
+        }); 
+        return UiUtil.MakeBorderForControl(imagePreview); 
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
