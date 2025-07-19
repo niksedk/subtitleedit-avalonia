@@ -462,12 +462,12 @@ public partial class MainViewModel :
         {
             vm.Initialize(ExportImageType.BluRaySup, Subtitles, _subtitleFileName, _videoFileName);
         });
-        
+
         if (!result.OkPressed)
         {
             return;
         }
-        
+
         _shortcutManager.ClearKeys();
     }
 
@@ -592,23 +592,43 @@ public partial class MainViewModel :
             return;
         }
 
+        if (Ebu.EbuUiHelper == null)
+        {
+            Ebu.EbuUiHelper = new UiEbuSaveHelper();
+        }
+
         var format = new Ebu();
-        using var ms = new MemoryStream();
-        format.Save(_subtitleFileName, ms, GetUpdateSubtitle(), false);
 
         var fileName = await _fileHelper.PickSaveSubtitleFile(
             Window!,
             format,
-            "newFileName",
+            GetNewFileName(),
             $"Save {format.Name} file as");
 
-        if (!string.IsNullOrEmpty(fileName))
+        if (string.IsNullOrEmpty(fileName))
         {
-            await File.WriteAllBytesAsync(fileName, ms.ToArray());
-            ShowStatus($"File exported in format {format.Name} to {fileName}");
+            return;
         }
 
+        format.Save(fileName, result.Subtitle);
+        ShowStatus($"File exported in format {format.Name} to {fileName}");
+
         _shortcutManager.ClearKeys();
+    }
+
+    private string GetNewFileName()
+    {
+        if (!string.IsNullOrEmpty(_subtitleFileName))
+        {
+            return Path.GetFileNameWithoutExtension(_subtitleFileName);
+        }
+
+        if (!string.IsNullOrEmpty(_videoFileName))
+        {
+            return Path.GetFileNameWithoutExtension(_videoFileName);
+        }
+
+        return string.Empty;
     }
 
     [RelayCommand]

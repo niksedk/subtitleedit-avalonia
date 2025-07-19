@@ -21,7 +21,7 @@ public class AboutWindow : Window
 
         var titleText = new TextBlock
         {
-            Text = $"Subtitle Edit version {Se.Version}", 
+            Text = $"Subtitle Edit {Se.Version}", 
             FontSize = 20,
             FontWeight = FontWeight.Bold,
         };

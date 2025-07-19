@@ -115,8 +115,11 @@ namespace Nikse.SubtitleEdit.Logic.Media
                     }
                 }
             }
-            AddExt(existingTypes, patterns, ".mks"); //TODO: move to settings
-            AddExt(existingTypes, patterns, ".pac"); //TODO: move to settings
+
+            AddExt(existingTypes, patterns, ".mks");
+            AddExt(existingTypes, patterns, ".pac");
+            AddExt(existingTypes, patterns, ".890");
+            AddExt(existingTypes, patterns, ".fpc");
 
             if (includeVideoFiles)
             {
@@ -125,6 +128,7 @@ namespace Nikse.SubtitleEdit.Logic.Media
                 AddExt(existingTypes, patterns, ".ts");
                 AddExt(existingTypes, patterns, ".sup");
             }
+
             return patterns;
         }
 

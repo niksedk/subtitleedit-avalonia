@@ -70,7 +70,9 @@ public partial class ExportEbuStlViewModel : ObservableObject
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
+    public Subtitle Subtitle => _subtitle;
     public int? PacCodePage { get; private set; }
+    public byte JustificationCode { get; private set; }
 
     private IFileHelper _fileHelper;
     private Subtitle _subtitle = new Subtitle();
@@ -288,6 +290,80 @@ public partial class ExportEbuStlViewModel : ObservableObject
     [RelayCommand]
     private void Ok()
     {
+        _header.CodePageNumber = SelectedCodePage?.CodePage ?? string.Empty;
+        if (_header.CodePageNumber.Length < 3)
+        {
+            _header.CodePageNumber = "865";
+        }
+
+        _header.DiskFormatCode = SelectedDiskFormatCode?.Substring(0, 8) ?? "STL25.01";
+
+        double d = 25.0;
+        if (SelectedFrameRate != null && double.TryParse(SelectedFrameRate.Replace(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator, "."), out d) && d > 20 && d < 200)
+        {
+            _header.FrameRateFromSaveDialog = d;
+        }
+
+        if (SelectedDisplayStandardCode != null && SelectedDisplayStandardCode.StartsWith("0"))
+        {
+            _header.DisplayStandardCode = "0";
+        }
+        if (SelectedDisplayStandardCode != null && SelectedDisplayStandardCode.StartsWith("1"))
+        {
+            _header.DisplayStandardCode = "1";
+        }
+        if (SelectedDisplayStandardCode != null && SelectedDisplayStandardCode.StartsWith("2"))
+        {
+            _header.DisplayStandardCode = "2";
+        }
+        else
+        {
+            _header.DisplayStandardCode = " ";
+        }
+
+        var characterTableNumber = CharacterTables.IndexOf(SelectedCharacterTable ?? CharacterTables[0]);
+        _header.CharacterCodeTableNumber = "0" + characterTableNumber.ToString(CultureInfo.InvariantCulture);
+
+        _header.LanguageCode = SelectedLanguageCode != null ? SelectedLanguageCode.Code : "09"; // Default to English
+        if (_header.LanguageCode.Length != 2)
+        {
+            _header.LanguageCode = "0A";
+        }
+
+        _header.OriginalProgrammeTitle = OriginalProgramTitle.PadRight(32, ' ');
+        _header.OriginalEpisodeTitle = OriginalEpisodeTitle.PadRight(32, ' ');
+        _header.TranslatedProgrammeTitle = TranslatedProgramTitle.PadRight(32, ' ');
+        _header.TranslatedEpisodeTitle = TranslatedEpisodeTitle.PadRight(32, ' ');
+        _header.TranslatorsName = TranslatorsName.PadRight(32, ' ');
+        _header.SubtitleListReferenceCode = SubtitleListReferenceCode.PadRight(16, ' ');
+        _header.CountryOfOrigin = CountryOfOrigin;
+        if (_header.CountryOfOrigin.Length != 3)
+        {
+            _header.CountryOfOrigin = "USA";
+        }
+
+        var timeCodeStatus = SelectedTimeCodeStatus ?? TimeCodeStatusList.Last();
+        _header.TimeCodeStatus = TimeCodeStatusList.IndexOf(timeCodeStatus).ToString(CultureInfo.InvariantCulture);
+        _header.TimeCodeStartOfProgramme = new TimeCode(StartOfProgramme).ToHHMMSSFF().RemoveChar(':');
+
+        _header.RevisionNumber = SelectedRevisionNumber?.ToString("00") ?? "00";
+        _header.MaximumNumberOfDisplayableCharactersInAnyTextRow = SelectedMaxCharactersPerRow?.ToString("00") ?? "00";
+        _header.MaximumNumberOfDisplayableRows = SelectedMaxRow?.ToString("00") ?? "00";
+        _header.DiskSequenceNumber = SelectedDiscSequenceNumber?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
+        _header.TotalNumberOfDisks = SelectedTotalNumberOfDiscs?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
+
+        JustificationCode = (byte)Justifications.IndexOf(SelectedJustification ?? Justifications[0]);
+        Configuration.Settings.SubtitleSettings.EbuStlMarginTop = (int)(SelectedTopAlignment ?? 0);
+        Configuration.Settings.SubtitleSettings.EbuStlMarginBottom = (int)(SelectedBottomAlignment ?? 0);
+        Configuration.Settings.SubtitleSettings.EbuStlNewLineRows = (int)(SelectedRowsAddByNewLine ?? 1);
+        Configuration.Settings.SubtitleSettings.EbuStlTeletextUseBox = UseBox;
+        Configuration.Settings.SubtitleSettings.EbuStlTeletextUseDoubleHeight = UseDoubleHeight;
+
+        if (_subtitle != null)
+        {
+            _subtitle.Header = _header.ToString();
+        }
+
         OkPressed = true;
         Close();
     }
