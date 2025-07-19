@@ -91,10 +91,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         if (_dirty)
         {
             _dirty = false;
-            Dispatcher.UIThread.Post(() =>
-            {
-                SubtitleLineChanged();
-            });
+            Dispatcher.UIThread.Post(() => { SubtitleLineChanged(); });
         }
     }
 
@@ -123,10 +120,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
 
     private void Close()
     {
-        Dispatcher.UIThread.Post(() =>
-        {
-            Window?.Close();
-        });
+        Dispatcher.UIThread.Post(() => { Window?.Close(); });
     }
 
     internal void OnKeyDown(KeyEventArgs e)
@@ -153,9 +147,6 @@ public partial class ExportImageBasedViewModel : ObservableObject
         }
 
         SelectedSubtitle = Subtitles.FirstOrDefault();
-        Dispatcher.UIThread.Invoke(() =>
-        {
-        });
     }
 
     public void SubtitleGrid_SelectionChanged(object? sender, SelectionChangedEventArgs e)
@@ -228,6 +219,11 @@ public partial class ExportImageBasedViewModel : ObservableObject
     }
 
     internal void CheckBoxChanged(object? sender, RoutedEventArgs e)
+    {
+        _dirty = true;
+    }
+
+    public void OnLoaded()
     {
         _dirty = true;
     }
