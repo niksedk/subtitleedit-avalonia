@@ -580,6 +580,12 @@ public static class UiUtil
         return control;
     }
 
+    public static Border WithHeight(this Border control, int height)
+    {
+        control.Height = height;
+        return control;
+    }
+
     public static Border WithMarginRight(this Border control, int marginRight)
     {
         var m = control.Margin;

@@ -344,7 +344,8 @@ public class ExportImageBasedWindow : Window
             Source = vm,
             Mode = BindingMode.OneWay
         }); 
-        return UiUtil.MakeBorderForControl(imagePreview); 
+        
+        return UiUtil.MakeBorderForControl(imagePreview).WithHeight(204); 
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
