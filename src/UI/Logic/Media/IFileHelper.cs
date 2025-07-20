@@ -10,8 +10,13 @@ public interface IFileHelper
     Task<string> PickOpenSubtitleFile(Visual sender, string title, bool includeVideoFiles = true);
     Task<string[]> PickOpenSubtitleFiles(Visual sender, string title, bool includeVideoFiles = true);
     Task<string> PickSaveSubtitleFile(
-        Visual sender, 
-        SubtitleFormat currentFormat, 
+        Visual sender,
+        SubtitleFormat currentFormat,
+        string suggestedFileName,
+        string title);
+    Task<string> PickSaveSubtitleFile(
+        Visual sender,
+        string extension,
         string suggestedFileName,
         string title);
 

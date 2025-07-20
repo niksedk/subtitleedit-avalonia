@@ -5,41 +5,60 @@ using System.IO;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 
-public class ExportImageBluRaySup
+public interface IExportHandler
+{
+     ExportImageType ExportImageType { get; set; }
+    string Extension { get; }
+    string Title { get; }
+    public void WriteHeader(string fileOrFolderName, int width, int height);
+    void CreateParagraph(ImageParameter param);
+    void WriteParagraph(ImageParameter param);
+    public void WriteFooter();
+}
+
+public class ExportHandlerBluRaySup : IExportHandler
 {
     public ExportImageType ExportImageType { get; set; }
     public string Extension => ".sup";
     public string Title => "Blu-ray sup";
 
-    private string _fileName = string.Empty;
+    private int _width;
+    private int _height;
     private FileStream? _fileStream;
 
-    public int CreateParagraph(int width, int height, int index)
+
+    public void WriteHeader(string fileOrFolderName, int width, int height)
     {
-        return 0;
+        _width = width;
+        _height = height;
+        _fileStream = new FileStream(fileOrFolderName, FileMode.Create);
     }
 
-    public int WriteParagraph(int width, int height, int index)
+    public void CreateParagraph(ImageParameter param)
     {
-        return 0; 
+        MakeBluRaySupImage(param);
     }
 
-    public void InitializeExport(string fileName)
+    public void WriteParagraph(ImageParameter param)
     {
-        _fileName = fileName;
-        _fileStream = new FileStream(fileName, FileMode.Create);
+        _fileStream!.Write(param.Buffer, 0, param.Buffer.Length);    
+    }
+
+    public void WriteFooter()
+    {
+        _fileStream!.Close();
     }
 
     internal static void MakeBluRaySupImage(ImageParameter param)
     {
         var brSub = new BluRaySupPicture
         {
-            StartTime = (long)Math.Round(param.P.StartTime.TotalMilliseconds, MidpointRounding.AwayFromZero),
-            EndTime = (long)Math.Round(param.P.EndTime.TotalMilliseconds, MidpointRounding.AwayFromZero),
+            StartTime = (long)Math.Round(param.StartTime.TotalMilliseconds, MidpointRounding.AwayFromZero),
+            EndTime = (long)Math.Round(param.EndTime.TotalMilliseconds, MidpointRounding.AwayFromZero),
             Width = param.ScreenWidth,
             Height = param.ScreenHeight,
             IsForced = param.IsForced,
-            CompositionNumber = param.P.Number * 2,
+            CompositionNumber = (param.Index+1) * 2,
         };
         if (param.IsFullFrame)
         {

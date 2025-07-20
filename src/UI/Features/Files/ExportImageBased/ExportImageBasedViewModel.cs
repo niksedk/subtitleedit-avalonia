@@ -11,11 +11,13 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
@@ -57,9 +59,12 @@ public partial class ExportImageBasedViewModel : ObservableObject
     private string _videoFileName;
     private bool _dirty;
     private readonly Timer _timerUpdatePreview;
+    private readonly IFileHelper _fileHelper;
 
-    public ExportImageBasedViewModel()
+    public ExportImageBasedViewModel(IFileHelper fileHelper)
     {
+        _fileHelper = fileHelper;
+
         Subtitles = new ObservableCollection<SubtitleLineViewModel>();
         FontFamilies = new ObservableCollection<string>(FontHelper.GetSystemFonts());
         SelectedFontFamily = FontFamilies.FirstOrDefault();
@@ -71,10 +76,10 @@ public partial class ExportImageBasedViewModel : ObservableObject
         SelectedTopBottomMargin = 10;
         LeftRightMargins = new ObservableCollection<int> { 0, 5, 10, 15, 20, 25, 30 };
         SelectedLeftRightMargin = 10;
-        OutlineWidths = new ObservableCollection<double>(Enumerable.Range(1, 15).Select(i => (double)i));
+        OutlineWidths = new ObservableCollection<double>(Enumerable.Range(0, 16).Select(i => (double)i));
         SelectedOutlineWidth = OutlineWidths.FirstOrDefault();
-        ShadowWidths = new ObservableCollection<double>(Enumerable.Range(1, 15).Select(i => (double)i));
-        BoxCornerRadiusList = new ObservableCollection<double>( Enumerable.Range(1, 50).Select(i => (double)i));
+        ShadowWidths = new ObservableCollection<double>(Enumerable.Range(0, 16).Select(i => (double)i));
+        BoxCornerRadiusList = new ObservableCollection<double>(Enumerable.Range(0, 51).Select(i => (double)i));
         SelectedBoxCornerRadius = 0;
         SelectedShadowWidth = 3;
         FontColor = Colors.White;
@@ -116,17 +121,26 @@ public partial class ExportImageBasedViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Export()
+    private async Task Export()
     {
-        var exportImageHandler = new ExportImageBluRaySup();
-        exportImageHandler.InitializeExport(_subtitleFileName);
-        var imageParameters = new List<ImageParameter>();
-        foreach (var subtitle in Subtitles)
+        var fileName = await _fileHelper.PickSaveSubtitleFile(Window!, ".sup", string.Empty, "Export to Blu-ray .sup");
+        if (string.IsNullOrEmpty(fileName))
         {
+            return;
+        }
+
+        IExportHandler exportImageHandler = new ExportHandlerBluRaySup();
+        var imageParameters = new List<ImageParameter>();
+        for (int i = 0; i < Subtitles.Count; i++)
+        {
+            SubtitleLineViewModel? subtitle = Subtitles[i];
             var imageParameter = new ImageParameter
             {
                 Alignment = ExportAlignment.BottomCenter,
-                P = subtitle.Paragraph,
+                Index = i,
+                Text = subtitle.Text,
+                StartTime = subtitle.StartTime,
+                EndTime = subtitle.EndTime,
                 FontColor = FontColor.ToSKColor(),
                 FontName = SelectedFontFamily ?? "Arial",
                 FontSize = SelectedFontSize ?? 20,
@@ -144,6 +158,21 @@ public partial class ExportImageBasedViewModel : ObservableObject
             };
             imageParameters.Add(imageParameter);
         }
+
+        for (var i = 0; i < Subtitles.Count; i++)
+        {
+            var ip = imageParameters[i];
+            ip.Bitmap = GenerateBitmap(ip);
+            exportImageHandler.CreateParagraph(ip);
+        }
+
+        exportImageHandler.WriteHeader(fileName, SelectedResolution?.Width ?? 1920, SelectedResolution?.Height ?? 1080);
+        for (var i = 0; i < Subtitles.Count; i++)
+        {
+            var ip = imageParameters[i];
+            exportImageHandler.WriteParagraph(ip);
+        }
+        exportImageHandler.WriteFooter();
     }
 
     [RelayCommand]
@@ -202,18 +231,35 @@ public partial class ExportImageBasedViewModel : ObservableObject
             return;
         }
 
-        var fontName = SelectedFontFamily ?? "Arial";
-        var fontSize = SelectedFontSize ?? 20;
-        var fontColor = FontColor.ToSKColor(); 
+        var ip = new ImageParameter
+        {
+            Text = text,
+            FontName = SelectedFontFamily ?? "Arial",
+            FontSize = SelectedFontSize ?? 20,
+            FontColor = FontColor.ToSKColor(),
+            OutlineColor = OutlineColor.ToSKColor(),
+            OutlineWidth = SelectedOutlineWidth ?? 0,
+            ShadowColor = ShadowColor.ToSKColor(),
+            ShadowWidth = SelectedShadowWidth,
+        };
 
-        var outlineColor = OutlineColor.ToSKColor(); 
-        var outlineWidth = SelectedOutlineWidth ?? 0; 
+        BitmapPreview = GenerateBitmap(ip).ToAvaloniaBitmap();
+    }
 
-        var shadowColor = ShadowColor.ToSKColor(); 
-        var shadowWidth = SelectedShadowWidth; 
+    private SKBitmap GenerateBitmap(ImageParameter ip)
+    {
+        var fontName = ip.FontName;
+        var fontSize = ip.FontSize;
+        var fontColor = ip.FontColor;
+
+        var outlineColor = OutlineColor.ToSKColor();
+        var outlineWidth = SelectedOutlineWidth ?? 0;
+
+        var shadowColor = ShadowColor.ToSKColor();
+        var shadowWidth = SelectedShadowWidth;
 
         // Parse text and create text segments with styling
-        var segments = ParseTextWithStyling(text, fontColor);
+        var segments = ParseTextWithStyling(ip.Text, fontColor);
 
         // Create fonts
         using var regularTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.Normal);
@@ -359,8 +405,9 @@ public partial class ExportImageBasedViewModel : ObservableObject
             currentY += lineHeight + lineSpacing;
         }
 
-        BitmapPreview = bitmap.ToAvaloniaBitmap();
+        return bitmap;
     }
+
 
     private static SKFont GetFont(TextSegment segment, SKFont regular, SKFont bold, SKFont italic, SKFont boldItalic)
     {

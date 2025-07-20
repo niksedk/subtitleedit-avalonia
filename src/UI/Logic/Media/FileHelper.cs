@@ -165,6 +165,31 @@ namespace Nikse.SubtitleEdit.Logic.Media
             return string.Empty;
         }
 
+        public async Task<string> PickSaveSubtitleFile(
+            Visual sender,
+            string extension,
+            string suggestedFileName,
+            string title)
+        {
+            var topLevel = TopLevel.GetTopLevel(sender)!;
+            var options = new FilePickerSaveOptions
+            {
+                Title = title,
+                SuggestedFileName = suggestedFileName,
+                FileTypeChoices = MakeSaveFilePickerFileTypes(extension, extension),
+                DefaultExtension = extension.TrimStart('.')
+            };
+            var file = await topLevel.StorageProvider.SaveFilePickerAsync(options);
+
+            if (file != null)
+            {
+                return file.Path.LocalPath;
+            }
+
+            return string.Empty;
+        }
+
+
         private static List<FilePickerFileType> MakeSaveFilePickerFileTypes(SubtitleFormat currentFormat)
         {
             var fileType = new FilePickerFileType(currentFormat.Name)
@@ -188,6 +213,18 @@ namespace Nikse.SubtitleEdit.Logic.Media
             //        });
             //    }
             //}            
+
+            return fileTypes;
+        }
+
+        private static List<FilePickerFileType> MakeSaveFilePickerFileTypes(string name, string extension)
+        {
+            var fileType = new FilePickerFileType(name)
+            {
+                Patterns = new List<string> { "*" + extension }
+            };
+
+            var fileTypes = new List<FilePickerFileType> { fileType };
 
             return fileTypes;
         }

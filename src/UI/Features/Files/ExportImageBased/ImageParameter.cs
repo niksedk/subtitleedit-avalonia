@@ -1,6 +1,7 @@
 ﻿using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
 using SkiaSharp;
+using System;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 
@@ -8,7 +9,10 @@ public class ImageParameter
 {
     public ExportAlignment Alignment { get; set; }
     public SKBitmap Bitmap { get; set; }
-    public Paragraph P { get; set; }
+    public string Text { get; set; }
+    public TimeSpan StartTime { get; set; }
+    public TimeSpan EndTime { get; set; }
+    public int Index { get; set; }
     public SKColor FontColor { get; set; }
     public string FontName { get; set; }
     public float FontSize { get; set; }
@@ -43,5 +47,4 @@ public class ImageParameter
         ExportAlignment.BottomRight => BluRayContentAlignment.BottomRight,
         _ => BluRayContentAlignment.BottomCenter,
     };
-
 }
