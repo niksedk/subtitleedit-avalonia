@@ -54,8 +54,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
     [ObservableProperty] private string _progressText;
     [ObservableProperty] private double _progressValue;
     [ObservableProperty] private bool _isGenerating;
-    [ObservableProperty] private ObservableCollection<string> _alignments;
-    [ObservableProperty] string _selectedAlignment;
+    [ObservableProperty] private ObservableCollection<ExportAlignmentDisplay> _alignments;
+    [ObservableProperty] ExportAlignmentDisplay _selectedAlignment;
     [ObservableProperty] private ObservableCollection<int> _lineSpacings;
     [ObservableProperty] int _selectedLineSpacing;
 
@@ -97,8 +97,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
         SelectedShadowWidth = 3;
         FontColor = Colors.White;
         ShadowColor = Colors.Black;
-        Alignments = new ObservableCollection<string> { "Centered", "Left", "Right"};
-        _selectedAlignment = Alignments[0];
+        Alignments = new ObservableCollection<ExportAlignmentDisplay>(ExportAlignmentDisplay.GetExportAlignmentDisplays());
+        SelectedAlignment = Alignments[0];
         LineSpacings = new ObservableCollection<int>(Enumerable.Range(-50, 151));
         SelectedLineSpacing = 0;
         SubtitleGrid = new DataGrid();
