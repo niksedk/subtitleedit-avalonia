@@ -10,6 +10,7 @@ public interface IExportHandler
      ExportImageType ExportImageType { get; set; }
     string Extension { get; }
     string Title { get; }
+    bool UseFileName { get; }
     public void WriteHeader(string fileOrFolderName, int width, int height);
     void CreateParagraph(ImageParameter param);
     void WriteParagraph(ImageParameter param);
@@ -20,7 +21,8 @@ public class ExportHandlerBluRaySup : IExportHandler
 {
     public ExportImageType ExportImageType { get; set; }
     public string Extension => ".sup";
-    public string Title => "Blu-ray sup";
+    public bool UseFileName => true;    
+    public string Title => "Export to Blu-ray sup";
 
     private int _width;
     private int _height;

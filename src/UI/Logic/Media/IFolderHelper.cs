@@ -7,13 +7,13 @@ namespace Nikse.SubtitleEdit.Logic.Media;
 
 public interface IFolderHelper
 {
-    Task<string?> PickFolderAsync(Window window, string title);
+    Task<string> PickFolderAsync(Window window, string title);
     Task OpenFolder(Window window, string folder);
 }
 
 public class FolderHelper : IFolderHelper
 {
-    public async Task<string?> PickFolderAsync(Window window, string title)
+    public async Task<string> PickFolderAsync(Window window, string title)
     {
         var storageProvider = window.StorageProvider;
 
@@ -29,7 +29,7 @@ public class FolderHelper : IFolderHelper
             return selected?.Path.LocalPath; 
         }
 
-        return null;
+        return string.Empty;
     }
 
     public async Task OpenFolder(Window window, string folder)

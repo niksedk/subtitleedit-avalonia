@@ -60,10 +60,12 @@ public partial class ExportImageBasedViewModel : ObservableObject
     private bool _dirty;
     private readonly Timer _timerUpdatePreview;
     private readonly IFileHelper _fileHelper;
+    private readonly IFolderHelper _folderHelper;
 
-    public ExportImageBasedViewModel(IFileHelper fileHelper)
+    public ExportImageBasedViewModel(IFileHelper fileHelper, IFolderHelper folderHelper)
     {
         _fileHelper = fileHelper;
+        _folderHelper = folderHelper;
 
         Subtitles = new ObservableCollection<SubtitleLineViewModel>();
         FontFamilies = new ObservableCollection<string>(FontHelper.GetSystemFonts());
@@ -83,11 +85,11 @@ public partial class ExportImageBasedViewModel : ObservableObject
         SelectedBoxCornerRadius = 0;
         SelectedShadowWidth = 3;
         FontColor = Colors.White;
-        ShadowColor = Colors.Green;
+        ShadowColor = Colors.Black;
         SubtitleGrid = new DataGrid();
         Title = string.Empty;
         BitmapPreview = new SKBitmap(1, 1).ToAvaloniaBitmap();
-        OutlineColor = Colors.Pink;
+        OutlineColor = Colors.Black;
 
         _subtitleFileName = string.Empty;
         _videoFileName = string.Empty;
@@ -95,7 +97,6 @@ public partial class ExportImageBasedViewModel : ObservableObject
         _timerUpdatePreview = new Timer();
         _timerUpdatePreview.Interval = 250;
         _timerUpdatePreview.Elapsed += TimerUpdatePreviewElapsed;
-        _timerUpdatePreview.Start();
     }
 
     private void TimerUpdatePreviewElapsed(object? sender, ElapsedEventArgs e)
@@ -103,7 +104,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         if (_dirty)
         {
             _dirty = false;
-            Dispatcher.UIThread.Post(() => { SubtitleLineChanged(); });
+            Dispatcher.UIThread.Post(SubtitleLineChanged);
         }
     }
 
@@ -123,13 +124,22 @@ public partial class ExportImageBasedViewModel : ObservableObject
     [RelayCommand]
     private async Task Export()
     {
-        var fileName = await _fileHelper.PickSaveSubtitleFile(Window!, ".sup", string.Empty, "Export to Blu-ray .sup");
-        if (string.IsNullOrEmpty(fileName))
+        IExportHandler exportImageHandler = new ExportHandlerBluRaySup();
+        var fileOrFolderName = string.Empty;
+        if (exportImageHandler.UseFileName)
+        {
+            fileOrFolderName = await _fileHelper.PickSaveSubtitleFile(Window!, exportImageHandler.Extension, string.Empty, exportImageHandler.Title);
+        }
+        else
+        {
+            fileOrFolderName = await _folderHelper.PickFolderAsync(Window!, exportImageHandler.Title);
+        }
+
+        if (string.IsNullOrEmpty(fileOrFolderName))
         {
             return;
         }
 
-        IExportHandler exportImageHandler = new ExportHandlerBluRaySup();
         var imageParameters = new List<ImageParameter>();
         for (int i = 0; i < Subtitles.Count; i++)
         {
@@ -166,7 +176,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
             exportImageHandler.CreateParagraph(ip);
         }
 
-        exportImageHandler.WriteHeader(fileName, SelectedResolution?.Width ?? 1920, SelectedResolution?.Height ?? 1080);
+        exportImageHandler.WriteHeader(fileOrFolderName, SelectedResolution?.Width ?? 1920, SelectedResolution?.Height ?? 1080);
         for (var i = 0; i < Subtitles.Count; i++)
         {
             var ip = imageParameters[i];
@@ -719,6 +729,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
     public void OnLoaded()
     {
         _dirty = true;
+        _timerUpdatePreview.Start();
     }
 
     internal void ColorChanged(object? sender, ColorChangedEventArgs e)
