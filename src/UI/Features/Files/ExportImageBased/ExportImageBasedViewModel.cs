@@ -3,6 +3,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Skia;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -44,6 +45,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
     [ObservableProperty] private Color _shadowColor;
     [ObservableProperty] private TimeSpan _startOfProgramme;
     [ObservableProperty] private Bitmap _bitmapPreview;
+    [ObservableProperty] private Color _outlineColor;
+    [ObservableProperty] private double _outlineWidth;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -77,6 +80,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
         SubtitleGrid = new DataGrid();
         Title = string.Empty;
         BitmapPreview = new SKBitmap(1, 1).ToAvaloniaBitmap();
+        OutlineColor = Colors.Pink;
+        OutlineWidth = 6.0;
 
         _subtitleFileName = string.Empty;
         _videoFileName = string.Empty;
@@ -171,17 +176,19 @@ public partial class ExportImageBasedViewModel : ObservableObject
         }
 
         var fontName = SelectedFontFamily ?? "Arial";
-        var fontSize = SelectedFontSize ?? 27;
+        var fontSize = SelectedFontSize ?? 20;
+
+        // Outline properties - you can set these from your UI or make them configurable
+        var outlineColor = OutlineColor.ToSKColor(); // Assuming you have this property
+        var outlineWidth = OutlineWidth; // Assuming you have this property
 
         // Parse text and create text segments with styling
         var segments = ParseTextWithStyling(text);
 
         // Create fonts
-        using var regularTypeface = IsBold ? SKTypeface.FromFamilyName(fontName, SKFontStyle.Bold) :  SKTypeface.FromFamilyName(fontName, SKFontStyle.Normal);
+        using var regularTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.Normal);
         using var boldTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.Bold);
         using var italicTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.Italic);
-        using var italicAndBoldTypeface = SKTypeface.FromFamilyName(fontName,
-            new SKFontStyle(SKFontStyleWeight.Bold, SKFontStyleWidth.Normal, SKFontStyleSlant.Italic));
         using var boldItalicTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.BoldItalic);
 
         using var regularFont = new SKFont(regularTypeface, fontSize);
@@ -207,11 +214,12 @@ public partial class ExportImageBasedViewModel : ObservableObject
             maxWidth = Math.Max(maxWidth, lineWidth);
         }
 
-        // Calculate bitmap dimensions with padding
-        var padding = 10;
-        var width = (int)Math.Ceiling(maxWidth) + padding * 2;
+        // Calculate bitmap dimensions with padding (including outline width)
+        var outlinePadding = (float)Math.Ceiling(outlineWidth);
+        var padding = 10 + outlinePadding;
+        var width = (int)Math.Ceiling(maxWidth) + (int)(padding * 2);
         var totalHeight = (lines.Count * lineHeight) + ((lines.Count - 1) * lineSpacing);
-        var height = (int)Math.Ceiling(totalHeight) + padding * 2;
+        var height = (int)Math.Ceiling(totalHeight) + (int)(padding * 2);
 
         // Ensure minimum size
         width = Math.Max(width, 1);
@@ -236,13 +244,31 @@ public partial class ExportImageBasedViewModel : ObservableObject
                 var segment = line[i];
                 var currentFont = GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont);
 
-                using var paint = new SKPaint
+                // Draw outline first (if outline width > 0)
+                if (OutlineWidth > 0)
+                {
+                    using var outlinePaint = new SKPaint
+                    {
+                        Color = outlineColor,
+                        IsAntialias = true,
+                        Style = SKPaintStyle.Stroke,
+                        StrokeWidth = (float)OutlineWidth,
+                        StrokeJoin = SKStrokeJoin.Round,
+                        StrokeCap = SKStrokeCap.Round
+                    };
+
+                    canvas.DrawText(segment.Text, currentX, currentY, currentFont, outlinePaint);
+                }
+
+                // Draw the main text on top
+                using var textPaint = new SKPaint
                 {
                     Color = segment.Color,
-                    IsAntialias = true
+                    IsAntialias = true,
+                    Style = SKPaintStyle.Fill
                 };
 
-                canvas.DrawText(segment.Text, currentX, currentY, currentFont, paint);
+                canvas.DrawText(segment.Text, currentX, currentY, currentFont, textPaint);
                 currentX += currentFont.MeasureText(segment.Text);
 
                 // Add small spacing after styled segments to prevent crowding
