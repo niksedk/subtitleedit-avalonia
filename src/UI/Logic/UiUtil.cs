@@ -459,7 +459,7 @@ public static class UiUtil
 
     public static SolidColorBrush MakeLinkForeground()
     {
-        return new SolidColorBrush(Color.FromArgb(255, 30, 144, 255)); 
+        return new SolidColorBrush(Color.FromArgb(255, 30, 144, 255));
     }
 
     public static Button MakeMenuItem(string text, IRelayCommand command, object commandParameter, string iconName)
@@ -567,7 +567,7 @@ public static class UiUtil
         control.Margin = new Thickness(m.Left, m.Top, m.Right, marginBottom);
         return control;
     }
-    
+
     public static Border WithMinWidth(this Border control, int minWidth)
     {
         control.MinWidth = minWidth;
@@ -1407,10 +1407,5 @@ public static class UiUtil
         });
 
         return control;
-    }
-
-    internal static object MakeLabel(object topBottomMargin)
-    {
-        throw new NotImplementedException();
     }
 }

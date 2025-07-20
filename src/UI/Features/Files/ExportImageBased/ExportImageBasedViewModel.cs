@@ -35,18 +35,19 @@ public partial class ExportImageBasedViewModel : ObservableObject
     [ObservableProperty] int? _selectedTopBottomMargin;
     [ObservableProperty] private ObservableCollection<int> _leftRightMargins;
     [ObservableProperty] int? _selectedLeftRightMargin;
-    [ObservableProperty] private ObservableCollection<string> _borderStyles;
-    [ObservableProperty] string? _selectedBorderStyle;
-    [ObservableProperty] private ObservableCollection<int> _shadowWidths;
-    [ObservableProperty] int? _selectedShadowWidth;
+    [ObservableProperty] private ObservableCollection<double> _outlineWidths;
+    [ObservableProperty] double? _selectedOutlineWidth;
+    [ObservableProperty] private ObservableCollection<double> _shadowWidths;
+    [ObservableProperty] double _selectedShadowWidth;
     [ObservableProperty] private bool _isBold;
     [ObservableProperty] private Color _fontColor;
-    [ObservableProperty] private Color _borderColor;
     [ObservableProperty] private Color _shadowColor;
-    [ObservableProperty] private TimeSpan _startOfProgramme;
     [ObservableProperty] private Bitmap _bitmapPreview;
     [ObservableProperty] private Color _outlineColor;
-    [ObservableProperty] private double _outlineWidth;
+    [ObservableProperty] private double _lineGapPercentage;
+    [ObservableProperty] private Color _boxColor;
+    [ObservableProperty] private ObservableCollection<double> _boxCornerRadiusList;
+    [ObservableProperty] private double _selectedBoxCornerRadius;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -70,18 +71,18 @@ public partial class ExportImageBasedViewModel : ObservableObject
         SelectedTopBottomMargin = 10;
         LeftRightMargins = new ObservableCollection<int> { 0, 5, 10, 15, 20, 25, 30 };
         SelectedLeftRightMargin = 10;
-        BorderStyles = new ObservableCollection<string> { "None", "Solid", "Dashed", "Dotted" };
-        SelectedBorderStyle = BorderStyles.FirstOrDefault();
-        ShadowWidths = new ObservableCollection<int> { 0, 1, 2, 3, 4, 5 };
+        OutlineWidths = new ObservableCollection<double>(Enumerable.Range(1, 15).Select(i => (double)i));
+        SelectedOutlineWidth = OutlineWidths.FirstOrDefault();
+        ShadowWidths = new ObservableCollection<double>(Enumerable.Range(1, 15).Select(i => (double)i));
+        BoxCornerRadiusList = new ObservableCollection<double>( Enumerable.Range(1, 50).Select(i => (double)i));
+        SelectedBoxCornerRadius = 0;
         SelectedShadowWidth = 3;
         FontColor = Colors.White;
-        BorderColor = Colors.Black;
-        ShadowColor = Colors.Black;
+        ShadowColor = Colors.Green;
         SubtitleGrid = new DataGrid();
         Title = string.Empty;
         BitmapPreview = new SKBitmap(1, 1).ToAvaloniaBitmap();
         OutlineColor = Colors.Pink;
-        OutlineWidth = 6.0;
 
         _subtitleFileName = string.Empty;
         _videoFileName = string.Empty;
@@ -177,13 +178,16 @@ public partial class ExportImageBasedViewModel : ObservableObject
 
         var fontName = SelectedFontFamily ?? "Arial";
         var fontSize = SelectedFontSize ?? 20;
+        var fontColor = FontColor.ToSKColor(); 
 
-        // Outline properties - you can set these from your UI or make them configurable
-        var outlineColor = OutlineColor.ToSKColor(); // Assuming you have this property
-        var outlineWidth = OutlineWidth; // Assuming you have this property
+        var outlineColor = OutlineColor.ToSKColor(); 
+        var outlineWidth = SelectedOutlineWidth ?? 0; 
+
+        var shadowColor = ShadowColor.ToSKColor(); 
+        var shadowWidth = SelectedShadowWidth; 
 
         // Parse text and create text segments with styling
-        var segments = ParseTextWithStyling(text);
+        var segments = ParseTextWithStyling(text, fontColor);
 
         // Create fonts
         using var regularTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.Normal);
@@ -200,7 +204,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         var lines = SplitIntoLines(segments);
         var fontMetrics = regularFont.Metrics;
         var lineHeight = fontMetrics.Descent - fontMetrics.Ascent;
-        var lineSpacing = lineHeight * 0.17f; // 17% of line height for spacing between lines
+        var lineSpacing = lineHeight * 0.17f; //TODO: Move to UI setting!!! -  % of line height 
 
         float maxWidth = 0;
         foreach (var line in lines)
@@ -214,23 +218,36 @@ public partial class ExportImageBasedViewModel : ObservableObject
             maxWidth = Math.Max(maxWidth, lineWidth);
         }
 
-        // Calculate bitmap dimensions with padding (including outline width)
+        // Calculate bitmap dimensions with padding (including outline width and shadow)
         var outlinePadding = (float)Math.Ceiling(outlineWidth);
-        var padding = 10 + outlinePadding;
-        var width = (int)Math.Ceiling(maxWidth) + (int)(padding * 2);
+        var shadowPadding = (float)Math.Ceiling(shadowWidth);
+        var padding = 10 + Math.Max(outlinePadding, shadowPadding);
+        var width = (int)Math.Ceiling(maxWidth) + (int)(padding * 2) + (int)Math.Ceiling(shadowWidth);
         var totalHeight = (lines.Count * lineHeight) + ((lines.Count - 1) * lineSpacing);
-        var height = (int)Math.Ceiling(totalHeight) + (int)(padding * 2);
+        var height = (int)Math.Ceiling(totalHeight) + (int)(padding * 2) + (int)Math.Ceiling(shadowWidth);
 
         // Ensure minimum size
         width = Math.Max(width, 1);
         height = Math.Max(height, 1);
 
         // Create bitmap and canvas
-        var bitmap = new SKBitmap(width, height);
+        var bitmap = new SKBitmap(width, height, true);
         using var canvas = new SKCanvas(bitmap);
 
-        // Clear background
-        canvas.Clear(SKColors.White);
+        // Set up paint
+        using var paint = new SKPaint
+        {
+            Color = BoxColor.ToSKColor(),
+            IsAntialias = true,
+        };
+
+        // Define the rounded rectangle
+        var rect = new SKRect(0, 0, width, height);
+        float cornerRadius = (float)SelectedBoxCornerRadius;
+
+        // Draw the rounded rectangle
+        canvas.DrawRoundRect(rect, cornerRadius, cornerRadius, paint);
+
 
         // Draw text lines
         float currentY = padding - fontMetrics.Ascent;
@@ -244,15 +261,49 @@ public partial class ExportImageBasedViewModel : ObservableObject
                 var segment = line[i];
                 var currentFont = GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont);
 
-                // Draw outline first (if outline width > 0)
-                if (OutlineWidth > 0)
+                // Draw shadow first (if shadow width > 0)
+                if (shadowWidth > 0)
+                {
+                    // Offset shadow to right and down
+                    var shadowOffsetX = currentX + (float)shadowWidth;
+                    var shadowOffsetY = currentY + (float)shadowWidth;
+
+                    // If we have an outline, draw shadow of the outline
+                    if (outlineWidth > 0)
+                    {
+                        using var shadowOutlinePaint = new SKPaint
+                        {
+                            Color = shadowColor,
+                            IsAntialias = true,
+                            Style = SKPaintStyle.Stroke,
+                            StrokeWidth = (float)outlineWidth,
+                            StrokeJoin = SKStrokeJoin.Round,
+                            StrokeCap = SKStrokeCap.Round
+                        };
+
+                        canvas.DrawText(segment.Text, shadowOffsetX, shadowOffsetY, currentFont, shadowOutlinePaint);
+                    }
+
+                    // Always draw shadow of the text fill (this creates the shadow behind the text)
+                    using var shadowTextPaint = new SKPaint
+                    {
+                        Color = shadowColor,
+                        IsAntialias = true,
+                        Style = SKPaintStyle.Fill
+                    };
+
+                    canvas.DrawText(segment.Text, shadowOffsetX, shadowOffsetY, currentFont, shadowTextPaint);
+                }
+
+                // Draw outline second (if outline width > 0)
+                if (outlineWidth > 0)
                 {
                     using var outlinePaint = new SKPaint
                     {
                         Color = outlineColor,
                         IsAntialias = true,
                         Style = SKPaintStyle.Stroke,
-                        StrokeWidth = (float)OutlineWidth,
+                        StrokeWidth = (float)outlineWidth,
                         StrokeJoin = SKStrokeJoin.Round,
                         StrokeCap = SKStrokeCap.Round
                     };
@@ -274,7 +325,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                 // Add small spacing after styled segments to prevent crowding
                 if ((segment.IsItalic || segment.IsBold) && i < line.Count - 1)
                 {
-                    currentX += fontSize * 0.1f; // Add 10% of font size as spacing
+                    currentX += fontSize * 0.17f; // Add 17% of font size as spacing
                 }
             }
 
@@ -288,11 +339,20 @@ public partial class ExportImageBasedViewModel : ObservableObject
     private static SKFont GetFont(TextSegment segment, SKFont regular, SKFont bold, SKFont italic, SKFont boldItalic)
     {
         if (segment.IsBold && segment.IsItalic)
+        {
             return boldItalic;
+        }
+
         if (segment.IsBold)
+        {
             return bold;
+        }
+
         if (segment.IsItalic)
+        {
             return italic;
+        }
+
         return regular;
     }
 
@@ -347,12 +407,12 @@ public partial class ExportImageBasedViewModel : ObservableObject
         return lines;
     }
 
-    static List<TextSegment> ParseTextWithStyling(string text)
+    static List<TextSegment> ParseTextWithStyling(string text, SKColor defaultFontColor)
     {
         var segments = new List<TextSegment>();
         var currentPos = 0;
         var styleStack = new Stack<TextStyle>();
-        var currentStyle = new TextStyle();
+        var currentStyle = new TextStyle() { Color = defaultFontColor };
 
         while (currentPos < text.Length)
         {
@@ -383,7 +443,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
             }
 
             // Process the tag
-            var tagInfo = ParseTag(text, nextTagPos);
+            var tagInfo = ParseTag(text, nextTagPos, defaultFontColor);
             if (tagInfo != null)
             {
                 switch (tagInfo.TagType)
@@ -394,9 +454,14 @@ public partial class ExportImageBasedViewModel : ObservableObject
                         break;
                     case TagType.ItalicClose:
                         if (styleStack.Count > 0)
+                        {
                             currentStyle = styleStack.Pop();
+                        }
                         else
+                        {
                             currentStyle = currentStyle with { IsItalic = false };
+                        }
+
                         break;
                     case TagType.BoldOpen:
                         styleStack.Push(currentStyle);
@@ -404,9 +469,14 @@ public partial class ExportImageBasedViewModel : ObservableObject
                         break;
                     case TagType.BoldClose:
                         if (styleStack.Count > 0)
+                        {
                             currentStyle = styleStack.Pop();
+                        }
                         else
+                        {
                             currentStyle = currentStyle with { IsBold = false };
+                        }
+
                         break;
                     case TagType.FontOpen:
                         styleStack.Push(currentStyle);
@@ -414,9 +484,14 @@ public partial class ExportImageBasedViewModel : ObservableObject
                         break;
                     case TagType.FontClose:
                         if (styleStack.Count > 0)
+                        {
                             currentStyle = styleStack.Pop();
+                        }
                         else
-                            currentStyle = currentStyle with { Color = SKColors.Black };
+                        {
+                            currentStyle = currentStyle with { Color = defaultFontColor };
+                        }
+
                         break;
                 }
                 currentPos = tagInfo.EndPosition;
@@ -438,45 +513,59 @@ public partial class ExportImageBasedViewModel : ObservableObject
         return openBracket;
     }
 
-    private static TagInfo ParseTag(string text, int startPos)
+    private static TagInfo? ParseTag(string text, int startPos, SKColor defaultFontColor)
     {
         if (startPos >= text.Length || text[startPos] != '<')
+        {
             return null;
+        }
 
         var endBracket = text.IndexOf('>', startPos);
         if (endBracket == -1)
+        {
             return null;
+        }
 
         var tagContent = text.Substring(startPos + 1, endBracket - startPos - 1);
         var endPosition = endBracket + 1;
 
         // Check for specific tags
         if (tagContent.Equals("i", StringComparison.OrdinalIgnoreCase))
+        {
             return new TagInfo(TagType.ItalicOpen, endPosition);
+        }
 
         if (tagContent.Equals("/i", StringComparison.OrdinalIgnoreCase))
+        {
             return new TagInfo(TagType.ItalicClose, endPosition);
+        }
 
         if (tagContent.Equals("b", StringComparison.OrdinalIgnoreCase))
+        {
             return new TagInfo(TagType.BoldOpen, endPosition);
+        }
 
         if (tagContent.Equals("/b", StringComparison.OrdinalIgnoreCase))
+        {
             return new TagInfo(TagType.BoldClose, endPosition);
+        }
 
         if (tagContent.Equals("/font", StringComparison.OrdinalIgnoreCase))
+        {
             return new TagInfo(TagType.FontClose, endPosition);
+        }
 
         // Check for font tag with color attribute
         if (tagContent.StartsWith("font", StringComparison.OrdinalIgnoreCase))
         {
-            var color = ParseColorFromFontTag(tagContent);
+            var color = ParseColorFromFontTag(tagContent, defaultFontColor);
             return new TagInfo(TagType.FontOpen, endPosition, color);
         }
 
         return null;
     }
 
-    private static SKColor ParseColorFromFontTag(string tagContent)
+    private static SKColor ParseColorFromFontTag(string tagContent, SKColor defaultFontColor)
     {
         // Look for color="#ffffff" pattern
         var colorMatch = System.Text.RegularExpressions.Regex.Match(
@@ -501,7 +590,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                 }
                 catch
                 {
-                    return SKColors.Black;
+                    return defaultFontColor;
                 }
             }
 
@@ -518,11 +607,11 @@ public partial class ExportImageBasedViewModel : ObservableObject
                 "purple" => SKColors.Purple,
                 "pink" => SKColors.Pink,
                 "gray" or "grey" => SKColors.Gray,
-                _ => SKColors.Black
+                _ => defaultFontColor
             };
         }
 
-        return SKColors.Black;
+        return defaultFontColor;
     }
 
     record TextSegment(string Text, bool IsItalic, bool IsBold, SKColor Color);
@@ -555,6 +644,11 @@ public partial class ExportImageBasedViewModel : ObservableObject
     }
 
     public void OnLoaded()
+    {
+        _dirty = true;
+    }
+
+    internal void ColorChanged(object? sender, ColorChangedEventArgs e)
     {
         _dirty = true;
     }

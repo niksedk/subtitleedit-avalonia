@@ -209,9 +209,14 @@ public class LanguageGeneral
     public string FontSize { get; set; }
     public string FontColor { get; set; }
     public string BorderColor { get; set; }
+    public string OutlineColor { get; set; }
     public string BorderStyle { get; set; }
     public string ShadowColor { get; set; }
+    public string BackgroundColor { get; set; }
     public string ShadowWidth { get; set; }
+    public string BoxColor { get; set; }
+    public string OutlineWidth { get; set; }
+    public string BoxCornerRadius { get; set; }
 
     public LanguageGeneral()
     {
@@ -420,8 +425,13 @@ public class LanguageGeneral
         FontSize = "Font size";
         FontColor = "Font color";
         BorderColor = "Border color";
+        OutlineColor = "Outline color";
         BorderStyle = "Border style";
         ShadowColor = "Shadow color";
         ShadowWidth = "Shadow width";
+        BackgroundColor = "Background color";
+        BoxColor = "Box color";
+        OutlineWidth = "Outline width";
+        BoxCornerRadius = "Box corner radius";
     }
 }
