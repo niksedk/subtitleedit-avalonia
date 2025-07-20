@@ -12,7 +12,6 @@ using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
-using System;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 

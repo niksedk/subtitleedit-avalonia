@@ -102,7 +102,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         _subtitleFileName = string.Empty;
         _videoFileName = string.Empty;
         _generateLock = new Lock();
-        _cancellationTokenSource = new CancellationTokenSource();   
+        _cancellationTokenSource = new CancellationTokenSource();
 
         _timerUpdatePreview = new System.Timers.Timer();
         _timerUpdatePreview.Interval = 250;
@@ -193,7 +193,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         IsGenerating = true;
         var imageParameters = new List<ImageParameter>();
         for (var i = 0; i < Subtitles.Count; i++)
-        {            
+        {
             SubtitleLineViewModel? subtitle = Subtitles[i];
             var imageParameter = new ImageParameter
             {
@@ -245,7 +245,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                     Dispatcher.UIThread.Post(() =>
                     {
                         ProgressValue = percent;
-                        ProgressText = $"Generating image {completed} of {total}...";
+                        ProgressText = string.Format(Se.Language.General.GeneratingImageXofY, completed, total);
                     });
                 }
             });
@@ -256,7 +256,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
             }
 
             ProgressValue = 100;
-            ProgressText = $"Saving...";
+            ProgressText = Se.Language.General.SavingDotDotDot;
 
             exportImageHandler.WriteHeader(fileOrFolderName, SelectedResolution?.Width ?? 1920, SelectedResolution?.Height ?? 1080);
             for (var i = 0; i < Subtitles.Count; i++)

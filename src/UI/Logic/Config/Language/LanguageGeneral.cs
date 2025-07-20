@@ -217,6 +217,8 @@ public class LanguageGeneral
     public string BoxColor { get; set; }
     public string OutlineWidth { get; set; }
     public string BoxCornerRadius { get; set; }
+    public string SavingDotDotDot { get; set; }
+    public string GeneratingImageXofY { get; set; }
 
     public LanguageGeneral()
     {
@@ -433,5 +435,7 @@ public class LanguageGeneral
         BoxColor = "Box color";
         OutlineWidth = "Outline width";
         BoxCornerRadius = "Box corner radius";
+        SavingDotDotDot = "Saving...";
+        GeneratingImageXofY = "Generating image {0} of {1}...";
     }
 }
