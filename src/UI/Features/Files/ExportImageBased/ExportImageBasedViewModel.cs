@@ -6,6 +6,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -170,39 +171,45 @@ public partial class ExportImageBasedViewModel : ObservableObject
         }
 
         var fontName = SelectedFontFamily ?? "Arial";
-        var fontSize = SelectedFontSize ?? 20;
+        var fontSize = SelectedFontSize ?? 27;
 
         // Parse text and create text segments with styling
-        var segments = ParseTextWithItalics(text);
+        var segments = ParseTextWithStyling(text);
 
         // Create fonts
-        using var regularTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.Normal);
+        using var regularTypeface = IsBold ? SKTypeface.FromFamilyName(fontName, SKFontStyle.Bold) :  SKTypeface.FromFamilyName(fontName, SKFontStyle.Normal);
+        using var boldTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.Bold);
         using var italicTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.Italic);
+        using var boldItalicTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.BoldItalic);
+
         using var regularFont = new SKFont(regularTypeface, fontSize);
+        using var boldFont = new SKFont(boldTypeface, fontSize);
         using var italicFont = new SKFont(italicTypeface, fontSize);
-        using var paint = new SKPaint
-        {
-            Color = SKColors.Black,
-            IsAntialias = true
-        };
+        using var boldItalicFont = new SKFont(boldItalicTypeface, fontSize);
 
-        // Measure total text dimensions
-        float totalWidth = 0;
-        float maxHeight = 0;
+        // Split segments into lines and measure dimensions
+        var lines = SplitIntoLines(segments);
         var fontMetrics = regularFont.Metrics;
-        var textHeight = fontMetrics.Descent - fontMetrics.Ascent;
-        maxHeight = Math.Max(maxHeight, textHeight);
+        var lineHeight = fontMetrics.Descent - fontMetrics.Ascent;
+        var lineSpacing = lineHeight * 0.17f; // 17% of line height for spacing between lines
 
-        foreach (var segment in segments)
+        float maxWidth = 0;
+        foreach (var line in lines)
         {
-            var currentFont = segment.IsItalic ? italicFont : regularFont;
-            totalWidth += currentFont.MeasureText(segment.Text);
+            float lineWidth = 0;
+            foreach (var segment in line)
+            {
+                var currentFont = GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont);
+                lineWidth += currentFont.MeasureText(segment.Text);
+            }
+            maxWidth = Math.Max(maxWidth, lineWidth);
         }
 
         // Calculate bitmap dimensions with padding
         var padding = 10;
-        var width = (int)Math.Ceiling(totalWidth) + padding * 2;
-        var height = (int)Math.Ceiling(maxHeight) + padding * 2;
+        var width = (int)Math.Ceiling(maxWidth) + padding * 2;
+        var totalHeight = (lines.Count * lineHeight) + ((lines.Count - 1) * lineSpacing);
+        var height = (int)Math.Ceiling(totalHeight) + padding * 2;
 
         // Ensure minimum size
         width = Math.Max(width, 1);
@@ -215,39 +222,115 @@ public partial class ExportImageBasedViewModel : ObservableObject
         // Clear background
         canvas.Clear(SKColors.White);
 
-        // Draw text segments
-        float currentX = padding;
-        var baselineY = padding - fontMetrics.Ascent;
+        // Draw text lines
+        float currentY = padding - fontMetrics.Ascent;
 
-        for (int i = 0; i < segments.Count; i++)
+        foreach (var line in lines)
         {
-            var segment = segments[i];
-            var currentFont = segment.IsItalic ? italicFont : regularFont;
-            canvas.DrawText(segment.Text, currentX, baselineY, currentFont, paint);
-            currentX += currentFont.MeasureText(segment.Text);
+            float currentX = padding;
 
-            // Add small spacing after italic segments to prevent crowding
-            if (segment.IsItalic && i < segments.Count - 1)
+            for (int i = 0; i < line.Count; i++)
             {
-                currentX += fontSize * 0.15f; // Add 15% of font size as spacing
+                var segment = line[i];
+                var currentFont = GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont);
+
+                using var paint = new SKPaint
+                {
+                    Color = segment.Color,
+                    IsAntialias = true
+                };
+
+                canvas.DrawText(segment.Text, currentX, currentY, currentFont, paint);
+                currentX += currentFont.MeasureText(segment.Text);
+
+                // Add small spacing after styled segments to prevent crowding
+                if ((segment.IsItalic || segment.IsBold) && i < line.Count - 1)
+                {
+                    currentX += fontSize * 0.1f; // Add 10% of font size as spacing
+                }
             }
+
+            // Move to next line
+            currentY += lineHeight + lineSpacing;
         }
 
         BitmapPreview = bitmap.ToAvaloniaBitmap();
     }
 
-    static List<TextSegment> ParseTextWithItalics(string text)
+    private static SKFont GetFont(TextSegment segment, SKFont regular, SKFont bold, SKFont italic, SKFont boldItalic)
+    {
+        if (segment.IsBold && segment.IsItalic)
+            return boldItalic;
+        if (segment.IsBold)
+            return bold;
+        if (segment.IsItalic)
+            return italic;
+        return regular;
+    }
+
+    static List<List<TextSegment>> SplitIntoLines(List<TextSegment> segments)
+    {
+        var lines = new List<List<TextSegment>>();
+        var currentLine = new List<TextSegment>();
+
+        foreach (var segment in segments)
+        {
+            var text = segment.Text;
+            var parts = text.SplitToLines();
+
+            for (int i = 0; i < parts.Count; i++)
+            {
+                var part = parts[i];
+
+                if (!string.IsNullOrEmpty(part))
+                {
+                    currentLine.Add(new TextSegment(part, segment.IsItalic, segment.IsBold, segment.Color));
+                }
+
+                // Add line break (except for the last part)
+                if (i < parts.Count - 1)
+                {
+                    if (currentLine.Count > 0)
+                    {
+                        lines.Add(currentLine);
+                        currentLine = new List<TextSegment>();
+                    }
+                    else
+                    {
+                        // Empty line
+                        lines.Add(new List<TextSegment>());
+                    }
+                }
+            }
+        }
+
+        // Add the last line if it has content
+        if (currentLine.Count > 0)
+        {
+            lines.Add(currentLine);
+        }
+
+        // Ensure we have at least one line
+        if (lines.Count == 0)
+        {
+            lines.Add(new List<TextSegment>());
+        }
+
+        return lines;
+    }
+
+    static List<TextSegment> ParseTextWithStyling(string text)
     {
         var segments = new List<TextSegment>();
         var currentPos = 0;
-        var isItalic = false;
+        var styleStack = new Stack<TextStyle>();
+        var currentStyle = new TextStyle();
 
         while (currentPos < text.Length)
         {
-            var italicStart = text.IndexOf("<i>", currentPos);
-            var italicEnd = text.IndexOf("</i>", currentPos);
+            var nextTagPos = FindNextTag(text, currentPos);
 
-            if (italicStart == -1 && italicEnd == -1)
+            if (nextTagPos == -1)
             {
                 // No more tags, add remaining text
                 if (currentPos < text.Length)
@@ -255,39 +338,65 @@ public partial class ExportImageBasedViewModel : ObservableObject
                     var remainingText = text.Substring(currentPos);
                     if (!string.IsNullOrEmpty(remainingText))
                     {
-                        segments.Add(new TextSegment(remainingText, isItalic));
+                        segments.Add(new TextSegment(remainingText, currentStyle.IsItalic, currentStyle.IsBold, currentStyle.Color));
                     }
                 }
                 break;
             }
 
-            if (italicStart != -1 && (italicEnd == -1 || italicStart < italicEnd))
+            // Add text before the tag
+            if (nextTagPos > currentPos)
             {
-                // Found opening tag
-                if (italicStart > currentPos)
+                var beforeTag = text.Substring(currentPos, nextTagPos - currentPos);
+                if (!string.IsNullOrEmpty(beforeTag))
                 {
-                    var beforeItalic = text.Substring(currentPos, italicStart - currentPos);
-                    if (!string.IsNullOrEmpty(beforeItalic))
-                    {
-                        segments.Add(new TextSegment(beforeItalic, isItalic));
-                    }
+                    segments.Add(new TextSegment(beforeTag, currentStyle.IsItalic, currentStyle.IsBold, currentStyle.Color));
                 }
-                isItalic = true;
-                currentPos = italicStart + 3; // Skip "<i>"
             }
-            else if (italicEnd != -1)
+
+            // Process the tag
+            var tagInfo = ParseTag(text, nextTagPos);
+            if (tagInfo != null)
             {
-                // Found closing tag
-                if (italicEnd > currentPos)
+                switch (tagInfo.TagType)
                 {
-                    var italicText = text.Substring(currentPos, italicEnd - currentPos);
-                    if (!string.IsNullOrEmpty(italicText))
-                    {
-                        segments.Add(new TextSegment(italicText, isItalic));
-                    }
+                    case TagType.ItalicOpen:
+                        styleStack.Push(currentStyle);
+                        currentStyle = currentStyle with { IsItalic = true };
+                        break;
+                    case TagType.ItalicClose:
+                        if (styleStack.Count > 0)
+                            currentStyle = styleStack.Pop();
+                        else
+                            currentStyle = currentStyle with { IsItalic = false };
+                        break;
+                    case TagType.BoldOpen:
+                        styleStack.Push(currentStyle);
+                        currentStyle = currentStyle with { IsBold = true };
+                        break;
+                    case TagType.BoldClose:
+                        if (styleStack.Count > 0)
+                            currentStyle = styleStack.Pop();
+                        else
+                            currentStyle = currentStyle with { IsBold = false };
+                        break;
+                    case TagType.FontOpen:
+                        styleStack.Push(currentStyle);
+                        currentStyle = currentStyle with { Color = tagInfo.Color ?? currentStyle.Color };
+                        break;
+                    case TagType.FontClose:
+                        if (styleStack.Count > 0)
+                            currentStyle = styleStack.Pop();
+                        else
+                            currentStyle = currentStyle with { Color = SKColors.Black };
+                        break;
                 }
-                isItalic = false;
-                currentPos = italicEnd + 4; // Skip "</i>"
+                currentPos = tagInfo.EndPosition;
+            }
+            else
+            {
+                // Invalid tag, treat as regular text
+                currentPos++;
             }
         }
 
@@ -295,7 +404,117 @@ public partial class ExportImageBasedViewModel : ObservableObject
         return segments.Where(s => !string.IsNullOrEmpty(s.Text)).ToList();
     }
 
-    record TextSegment(string Text, bool IsItalic);
+    private static int FindNextTag(string text, int startPos)
+    {
+        var openBracket = text.IndexOf('<', startPos);
+        return openBracket;
+    }
+
+    private static TagInfo ParseTag(string text, int startPos)
+    {
+        if (startPos >= text.Length || text[startPos] != '<')
+            return null;
+
+        var endBracket = text.IndexOf('>', startPos);
+        if (endBracket == -1)
+            return null;
+
+        var tagContent = text.Substring(startPos + 1, endBracket - startPos - 1);
+        var endPosition = endBracket + 1;
+
+        // Check for specific tags
+        if (tagContent.Equals("i", StringComparison.OrdinalIgnoreCase))
+            return new TagInfo(TagType.ItalicOpen, endPosition);
+
+        if (tagContent.Equals("/i", StringComparison.OrdinalIgnoreCase))
+            return new TagInfo(TagType.ItalicClose, endPosition);
+
+        if (tagContent.Equals("b", StringComparison.OrdinalIgnoreCase))
+            return new TagInfo(TagType.BoldOpen, endPosition);
+
+        if (tagContent.Equals("/b", StringComparison.OrdinalIgnoreCase))
+            return new TagInfo(TagType.BoldClose, endPosition);
+
+        if (tagContent.Equals("/font", StringComparison.OrdinalIgnoreCase))
+            return new TagInfo(TagType.FontClose, endPosition);
+
+        // Check for font tag with color attribute
+        if (tagContent.StartsWith("font", StringComparison.OrdinalIgnoreCase))
+        {
+            var color = ParseColorFromFontTag(tagContent);
+            return new TagInfo(TagType.FontOpen, endPosition, color);
+        }
+
+        return null;
+    }
+
+    private static SKColor ParseColorFromFontTag(string tagContent)
+    {
+        // Look for color="#ffffff" pattern
+        var colorMatch = System.Text.RegularExpressions.Regex.Match(
+            tagContent,
+            @"color\s*=\s*[""']([^""']+)[""']",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        if (colorMatch.Success)
+        {
+            var colorValue = colorMatch.Groups[1].Value;
+
+            // Handle hex colors
+            if (colorValue.StartsWith("#") && colorValue.Length == 7)
+            {
+                try
+                {
+                    var hex = colorValue.Substring(1);
+                    var r = Convert.ToByte(hex.Substring(0, 2), 16);
+                    var g = Convert.ToByte(hex.Substring(2, 2), 16);
+                    var b = Convert.ToByte(hex.Substring(4, 2), 16);
+                    return new SKColor(r, g, b);
+                }
+                catch
+                {
+                    return SKColors.Black;
+                }
+            }
+
+            // Handle named colors (basic set)
+            return colorValue.ToLowerInvariant() switch
+            {
+                "red" => SKColors.Red,
+                "green" => SKColors.Green,
+                "blue" => SKColors.Blue,
+                "white" => SKColors.White,
+                "black" => SKColors.Black,
+                "yellow" => SKColors.Yellow,
+                "orange" => SKColors.Orange,
+                "purple" => SKColors.Purple,
+                "pink" => SKColors.Pink,
+                "gray" or "grey" => SKColors.Gray,
+                _ => SKColors.Black
+            };
+        }
+
+        return SKColors.Black;
+    }
+
+    record TextSegment(string Text, bool IsItalic, bool IsBold, SKColor Color);
+
+    record TextStyle(bool IsItalic = false, bool IsBold = false, SKColor Color = default)
+    {
+        public SKColor Color { get; init; } = Color == default ? SKColors.Black : Color;
+    }
+
+    record TagInfo(TagType TagType, int EndPosition, SKColor? Color = null);
+
+    enum TagType
+    {
+        ItalicOpen,
+        ItalicClose,
+        BoldOpen,
+        BoldClose,
+        FontOpen,
+        FontClose
+    }
 
     internal void ComboChanged(object? sender, SelectionChangedEventArgs e)
     {
