@@ -436,6 +436,6 @@ public class LanguageGeneral
         OutlineWidth = "Outline width";
         BoxCornerRadius = "Box corner radius";
         SavingDotDotDot = "Saving...";
-        GeneratingImageXofY = "Generating image {0} of {1}...";
+        GeneratingImageXofY = "Generating image {0:#,##0} of {1:#,##0}...";
     }
 }
