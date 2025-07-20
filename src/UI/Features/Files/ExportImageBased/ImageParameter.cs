@@ -22,6 +22,7 @@ public class ImageParameter
     public double ShadowWidth { get; set; }
     public SKColor BackgroundColor { get; set; }
     public double BackgroundCornerRadius { get; set; }
+    public int LineSpacingPercent { get; set; }
     public byte[] Buffer { get; set; }
     public int ScreenWidth { get; set; }
     public int ScreenHeight { get; set; }

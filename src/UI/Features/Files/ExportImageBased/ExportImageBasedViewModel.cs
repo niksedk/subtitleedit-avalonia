@@ -54,6 +54,11 @@ public partial class ExportImageBasedViewModel : ObservableObject
     [ObservableProperty] private string _progressText;
     [ObservableProperty] private double _progressValue;
     [ObservableProperty] private bool _isGenerating;
+    [ObservableProperty] private ObservableCollection<string> _alignments;
+    [ObservableProperty] string _selectedAlignment;
+    [ObservableProperty] private ObservableCollection<int> _lineSpacings;
+    [ObservableProperty] int _selectedLineSpacing;
+
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -92,6 +97,10 @@ public partial class ExportImageBasedViewModel : ObservableObject
         SelectedShadowWidth = 3;
         FontColor = Colors.White;
         ShadowColor = Colors.Black;
+        Alignments = new ObservableCollection<string> { "Centered", "Left", "Right"};
+        _selectedAlignment = Alignments[0];
+        LineSpacings = new ObservableCollection<int>(Enumerable.Range(-50, 151));
+        SelectedLineSpacing = 0;
         SubtitleGrid = new DataGrid();
         Title = string.Empty;
         BitmapPreview = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
@@ -194,32 +203,9 @@ public partial class ExportImageBasedViewModel : ObservableObject
         var imageParameters = new List<ImageParameter>();
         for (var i = 0; i < Subtitles.Count; i++)
         {
-            SubtitleLineViewModel? subtitle = Subtitles[i];
-            var imageParameter = new ImageParameter
-            {
-                Alignment = ExportAlignment.BottomCenter,
-                Index = i,
-                Text = subtitle.Text,
-                StartTime = subtitle.StartTime,
-                EndTime = subtitle.EndTime,
-                FontColor = FontColor.ToSKColor(),
-                FontName = SelectedFontFamily ?? FontFamilies.First(),
-                FontSize = SelectedFontSize ?? 20,
-                IsBold = IsBold,
-                OutlineColor = OutlineColor.ToSKColor(),
-                OutlineWidth = SelectedOutlineWidth ?? 0,
-                ShadowColor = ShadowColor.ToSKColor(),
-                ShadowWidth = SelectedShadowWidth,
-                BackgroundColor = BoxColor.ToSKColor(),
-                BackgroundCornerRadius = SelectedBoxCornerRadius,
-                ScreenWidth = SelectedResolution?.Width ?? 1920,
-                ScreenHeight = SelectedResolution?.Height ?? 1080,
-                BottomTopMargin = SelectedTopBottomMargin ?? 10,
-                LeftRightMargin = SelectedLeftRightMargin ?? 10,
-            };
+            var imageParameter = GetImageParameter(i);
             imageParameters.Add(imageParameter);
         }
-
 
         int total = Subtitles.Count;
         int completed = 0;
@@ -267,6 +253,36 @@ public partial class ExportImageBasedViewModel : ObservableObject
             exportImageHandler.WriteFooter();
             IsGenerating = false;
         });
+    }
+
+    private ImageParameter GetImageParameter(int i)
+    {
+        SubtitleLineViewModel? subtitle = Subtitles[i];
+        var imageParameter = new ImageParameter
+        {
+            Alignment = ExportAlignment.BottomCenter,
+            Index = i,
+            Text = subtitle.Text,
+            StartTime = subtitle.StartTime,
+            EndTime = subtitle.EndTime,
+            FontColor = FontColor.ToSKColor(),
+            FontName = SelectedFontFamily ?? FontFamilies.First(),
+            FontSize = SelectedFontSize ?? 26,
+            IsBold = IsBold,
+            LineSpacingPercent = SelectedLineSpacing,
+            OutlineColor = OutlineColor.ToSKColor(),
+            OutlineWidth = SelectedOutlineWidth ?? 0,
+            ShadowColor = ShadowColor.ToSKColor(),
+            ShadowWidth = SelectedShadowWidth,
+            BackgroundColor = BoxColor.ToSKColor(),
+            BackgroundCornerRadius = SelectedBoxCornerRadius,
+            ScreenWidth = SelectedResolution?.Width ?? 1920,
+            ScreenHeight = SelectedResolution?.Height ?? 1080,
+            BottomTopMargin = SelectedTopBottomMargin ?? 10,
+            LeftRightMargin = SelectedLeftRightMargin ?? 10,
+        };
+
+        return imageParameter;
     }
 
     [RelayCommand]
@@ -325,18 +341,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
             return;
         }
 
-        var ip = new ImageParameter
-        {
-            Text = text,
-            FontName = SelectedFontFamily ?? FontFamilies.First(),
-            FontSize = SelectedFontSize ?? 20,
-            FontColor = FontColor.ToSKColor(),
-            OutlineColor = OutlineColor.ToSKColor(),
-            OutlineWidth = SelectedOutlineWidth ?? 0,
-            ShadowColor = ShadowColor.ToSKColor(),
-            ShadowWidth = SelectedShadowWidth,
-        };
-
+        var idx = Subtitles.IndexOf(selected);
+        var ip = GetImageParameter(idx);
         BitmapPreview = GenerateBitmap(ip).ToAvaloniaBitmap();
     }
 
@@ -370,7 +376,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         var lines = SplitIntoLines(segments);
         var fontMetrics = regularFont.Metrics;
         var lineHeight = fontMetrics.Descent - fontMetrics.Ascent;
-        var lineSpacing = lineHeight * 0.17f; //TODO: Move to UI setting!!! -  % of line height 
+        var lineSpacing = (float)(lineHeight * ip.LineSpacingPercent / 100.0);
 
         float maxWidth = 0;
         foreach (var line in lines)

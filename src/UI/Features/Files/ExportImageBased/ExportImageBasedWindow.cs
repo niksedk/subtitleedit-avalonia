@@ -244,6 +244,10 @@ public class ExportImageBasedWindow : Window
         var comboBoxLeftRightMargin = UiUtil.MakeComboBox(vm.LeftRightMargins, vm, nameof(vm.SelectedLeftRightMargin));
         comboBoxLeftRightMargin.SelectionChanged += vm.ComboChanged;
 
+        var labelAlignment = UiUtil.MakeLabel(Se.Language.General.Alignment);
+        var comboBoxAlignment = UiUtil.MakeComboBox(vm.Alignments, vm, nameof(vm.SelectedAlignment));
+        comboBoxAlignment.SelectionChanged += vm.ComboChanged;
+
         grid.Add(labelFontFamily, 0);
         grid.Add(comboBoxFontFamily, 0, 1);
 
@@ -258,6 +262,9 @@ public class ExportImageBasedWindow : Window
 
         grid.Add(labelLeftRightMargin, 4, 0);
         grid.Add(comboBoxLeftRightMargin, 4, 1);
+
+        grid.Add(labelAlignment, 5, 0);
+        grid.Add(comboBoxAlignment, 5, 1);
 
         // column 2
         var labelFontColor = UiUtil.MakeLabel(Se.Language.General.FontColor);
@@ -352,6 +359,11 @@ public class ExportImageBasedWindow : Window
         grid.Add(labelBaclgroundColor, 3, 2);
         grid.Add(colorPickerBackgroundColor, 3, 3);
 
+        var labelLineHeight = UiUtil.MakeLabel(Se.Language.File.Export.LineSpacingPercent).WithMarginTop(20);
+        var comboBoxLineHeight = UiUtil.MakeComboBox(vm.LineSpacings, vm, nameof(vm.SelectedLineSpacing)).WithMarginTop(20);
+        comboBoxLineHeight.SelectionChanged += vm.ComboChanged;
+        grid.Add(labelLineHeight, 4, 2);
+        grid.Add(comboBoxLineHeight, 4, 3);
 
         // column 3
 
