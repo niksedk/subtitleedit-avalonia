@@ -55,9 +55,10 @@ public class ExportImageBasedWindow : Window
         var controlsView = MakeControlsView(vm);
         var previewView = MakePreviewView(vm);
         
+        var buttonExport = UiUtil.MakeButton(Se.Language.General.ExportDotDotDot, vm.ExportCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar( buttonOk, buttonCancel);
+        var panelButtons = UiUtil.MakeButtonBar(buttonExport, buttonOk, buttonCancel);
 
         grid.Add(subtitlesView, 0);
         grid.Add(controlsView, 1);

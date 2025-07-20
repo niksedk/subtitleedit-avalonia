@@ -118,6 +118,32 @@ public partial class ExportImageBasedViewModel : ObservableObject
     [RelayCommand]
     private void Export()
     {
+        var exportImageHandler = new ExportImageBluRaySup();
+        exportImageHandler.InitializeExport(_subtitleFileName);
+        var imageParameters = new List<ImageParameter>();
+        foreach (var subtitle in Subtitles)
+        {
+            var imageParameter = new ImageParameter
+            {
+                Alignment = ExportAlignment.BottomCenter,
+                P = subtitle.Paragraph,
+                FontColor = FontColor.ToSKColor(),
+                FontName = SelectedFontFamily ?? "Arial",
+                FontSize = SelectedFontSize ?? 20,
+                IsBold = IsBold,
+                OutlineColor = OutlineColor.ToSKColor(),
+                OutlineWidth = SelectedOutlineWidth ?? 0,
+                ShadowColor = ShadowColor.ToSKColor(),
+                ShadowWidth = SelectedShadowWidth,
+                BackgroundColor = BoxColor.ToSKColor(),
+                BackgroundCornerRadius = SelectedBoxCornerRadius,
+                ScreenWidth = SelectedResolution?.Width ?? 1920,
+                ScreenHeight = SelectedResolution?.Height ?? 1080,
+                BottomTopMargin = SelectedTopBottomMargin ?? 10,
+                LeftRightMargin = SelectedLeftRightMargin ?? 10,
+            };
+            imageParameters.Add(imageParameter);
+        }
     }
 
     [RelayCommand]
