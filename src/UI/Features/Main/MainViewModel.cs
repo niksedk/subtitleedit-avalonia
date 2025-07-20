@@ -481,7 +481,7 @@ public partial class MainViewModel :
         var fileName = await _fileHelper.PickSaveSubtitleFile(
             Window!,
             format,
-            "newFileName",
+            GetNewFileName(),
             $"Save {format.Name} file as");
 
         if (!string.IsNullOrEmpty(fileName))
@@ -501,24 +501,18 @@ public partial class MainViewModel :
         }
 
         var cavena = new Cavena890();
-        using var ms = new MemoryStream();
-        cavena.Save(_subtitleFileName, ms, GetUpdateSubtitle(), false);
-
-        var suggestedFileName = string.Empty;
-        if (!string.IsNullOrEmpty(_subtitleFileName))
-        {
-            suggestedFileName = Path.GetFileNameWithoutExtension(_subtitleFileName);
-        }
-
-        var fileName = await _fileHelper.PickSaveSubtitleFile(Window!, cavena, suggestedFileName, string.Format(Se.Language.Main.SaveXFileAs, cavena.Name));
+        var fileName = await _fileHelper.PickSaveSubtitleFile(Window!, cavena, GetNewFileName(), string.Format(Se.Language.Main.SaveXFileAs, cavena.Name));
         if (string.IsNullOrEmpty(fileName))
         {
             return;
         }
 
-        cavena.Save(fileName, ms, GetUpdateSubtitle(), false);
-        ms.Position = 0;
-        File.WriteAllBytes(fileName, ms.ToArray());
+        using (var ms = new MemoryStream())
+        {
+            cavena.Save(fileName, ms, GetUpdateSubtitle(), false);
+            ms.Position = 0;
+            File.WriteAllBytes(fileName, ms.ToArray());
+        }
 
         ShowStatus($"File exported in format {cavena.Name} to {fileName}");
 
@@ -535,19 +529,14 @@ public partial class MainViewModel :
         }
 
         var pac = new Pac { CodePage = result.PacCodePage!.Value };
-        using var ms = new MemoryStream();
-        var suggestedFileName = string.Empty;
-        if (!string.IsNullOrEmpty(_subtitleFileName))
-        {
-            suggestedFileName = Path.GetFileNameWithoutExtension(_subtitleFileName);
-        }
 
-        var fileName = await _fileHelper.PickSaveSubtitleFile(Window!, pac, suggestedFileName, string.Format(Se.Language.Main.SaveXFileAs, pac.Name));
+        var fileName = await _fileHelper.PickSaveSubtitleFile(Window!, pac, GetNewFileName(), string.Format(Se.Language.Main.SaveXFileAs, pac.Name));
         if (string.IsNullOrEmpty(fileName))
         {
             return;
         }
 
+        using var ms = new MemoryStream();
         pac.Save(fileName, ms, GetUpdateSubtitle(), false);
         ms.Position = 0;
         await File.WriteAllBytesAsync(fileName, ms.ToArray());
@@ -567,7 +556,7 @@ public partial class MainViewModel :
         var fileName = await _fileHelper.PickSaveSubtitleFile(
             Window!,
             format,
-            "newFileName",
+            GetNewFileName(),
             $"Save {format.Name} file as");
 
         if (!string.IsNullOrEmpty(fileName))
