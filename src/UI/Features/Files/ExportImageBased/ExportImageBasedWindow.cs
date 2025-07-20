@@ -38,7 +38,7 @@ public class ExportImageBasedWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, 
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
@@ -61,9 +61,9 @@ public class ExportImageBasedWindow : Window
         var progressView = MakeProgressView(vm);
 
         var buttonExport = UiUtil.MakeButton(Se.Language.General.ExportDotDotDot, vm.ExportCommand);
-        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand).WithBindIsEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());  
-        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar(buttonExport, buttonOk, buttonCancel);
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand).WithBindIsVisible(nameof(vm.IsGenerating));
+        var buttonDone = UiUtil.MakeButtonDone(vm.CancelCommand).WithBindIsVisible(nameof(vm.IsGenerating), new InverseBooleanConverter());
+        var panelButtons = UiUtil.MakeButtonBar(buttonExport, buttonDone, buttonCancel);
 
         grid.Add(subtitlesView, 0);
         grid.Add(controlsView, 1);
@@ -73,11 +73,11 @@ public class ExportImageBasedWindow : Window
 
         Content = grid;
 
-        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        Activated += delegate { buttonExport.Focus(); }; // hack to make OnKeyDown work
     }
 
     private Border MakeSubtitlesView(ExportImageBasedViewModel vm)
-    { 
+    {
         vm.SubtitleGrid = new DataGrid
         {
             Height = double.NaN, // auto size inside scroll viewer
@@ -89,7 +89,7 @@ public class ExportImageBasedWindow : Window
             DataContext = vm.Subtitles,
         };
 
-     //   vm.SubtitleGrid.DoubleTapped += vm.OnSubtitleGridDoubleTapped;
+        //   vm.SubtitleGrid.DoubleTapped += vm.OnSubtitleGridDoubleTapped;
 
         var fullTimeConverter = new TimeSpanToDisplayFullConverter();
         var shortTimeConverter = new TimeSpanToDisplayShortConverter();
@@ -175,7 +175,7 @@ public class ExportImageBasedWindow : Window
         });
         vm.SubtitleGrid.SelectionChanged += vm.SubtitleGrid_SelectionChanged;
 
-        return UiUtil.MakeBorderForControl(vm.SubtitleGrid); 
+        return UiUtil.MakeBorderForControl(vm.SubtitleGrid);
     }
 
     private Border MakeControlsView(ExportImageBasedViewModel vm)
@@ -246,7 +246,7 @@ public class ExportImageBasedWindow : Window
         comboBoxLeftRightMargin.SelectionChanged += vm.ComboChanged;
 
         grid.Add(labelFontFamily, 0);
-        grid.Add(comboBoxFontFamily, 0,1);
+        grid.Add(comboBoxFontFamily, 0, 1);
 
         grid.Add(labelFontSize, 1, 0);
         grid.Add(panelFontSizeAndBold, 1, 1);
@@ -374,7 +374,7 @@ public class ExportImageBasedWindow : Window
         grid.Add(labelBoxCornerRadius, 3, 4);
         grid.Add(comboBoxBoxCornerRadius, 3, 5);
 
-        return UiUtil.MakeBorderForControl(grid); 
+        return UiUtil.MakeBorderForControl(grid);
     }
 
     private Border MakePreviewView(ExportImageBasedViewModel vm)
@@ -383,14 +383,14 @@ public class ExportImageBasedWindow : Window
         {
             MaxHeight = 200,
             Stretch = Stretch.Uniform,
-        };  
+        };
         imagePreview.Bind(Image.SourceProperty, new Binding(nameof(vm.BitmapPreview))
         {
             Source = vm,
             Mode = BindingMode.OneWay
-        }); 
-        
-        return UiUtil.MakeBorderForControl(imagePreview).WithHeight(204); 
+        });
+
+        return UiUtil.MakeBorderForControl(imagePreview).WithHeight(204);
     }
 
     private static Grid MakeProgressView(ExportImageBasedViewModel vm)

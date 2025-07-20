@@ -159,13 +159,6 @@ public partial class ExportImageBasedViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Ok()
-    {
-        OkPressed = true;
-        Close();
-    }
-
-    [RelayCommand]
     private void Cancel()
     {
         if (IsGenerating)
