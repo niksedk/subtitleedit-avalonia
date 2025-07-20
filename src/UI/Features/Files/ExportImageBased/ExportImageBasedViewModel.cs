@@ -180,6 +180,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
         using var regularTypeface = IsBold ? SKTypeface.FromFamilyName(fontName, SKFontStyle.Bold) :  SKTypeface.FromFamilyName(fontName, SKFontStyle.Normal);
         using var boldTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.Bold);
         using var italicTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.Italic);
+        using var italicAndBoldTypeface = SKTypeface.FromFamilyName(fontName,
+            new SKFontStyle(SKFontStyleWeight.Bold, SKFontStyleWidth.Normal, SKFontStyleSlant.Italic));
         using var boldItalicTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.BoldItalic);
 
         using var regularFont = new SKFont(regularTypeface, fontSize);
