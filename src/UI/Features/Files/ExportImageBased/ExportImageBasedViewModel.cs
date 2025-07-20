@@ -97,6 +97,38 @@ public partial class ExportImageBasedViewModel : ObservableObject
         _timerUpdatePreview = new Timer();
         _timerUpdatePreview.Interval = 250;
         _timerUpdatePreview.Elapsed += TimerUpdatePreviewElapsed;
+        LoadSettings();
+    }
+
+    private void LoadSettings()
+    {
+        var profile = Se.Settings.File.ExportImages.Profiles.FirstOrDefault() ?? new SeExportImagesProfile();
+
+        SelectedFontFamily = profile.FontName;
+        SelectedFontSize = (int)profile.FontSize;
+        SelectedResolution = Resolutions.FirstOrDefault(p=>p.Width == profile.ScreenWidth);
+        SelectedTopBottomMargin = profile.BottomTopMargin;
+        SelectedLeftRightMargin = profile.LeftRightMargin;
+        SelectedOutlineWidth = profile.OutlineWidth;
+        SelectedShadowWidth = profile.ShadowWidth;
+        IsBold = profile.IsBold;
+    }
+
+    private void SaveSettings()
+    {
+        var profile = Se.Settings.File.ExportImages.Profiles.FirstOrDefault() ?? new SeExportImagesProfile();
+
+        profile.FontName = SelectedFontFamily ?? string.Empty;
+        profile.FontSize = SelectedFontSize ?? 26;
+        profile.ScreenWidth = SelectedResolution?.Width ?? 1920;
+        profile.ScreenHeight = SelectedResolution?.Height ?? 1080;
+        profile.BottomTopMargin = SelectedTopBottomMargin ?? 10;
+        profile.LeftRightMargin = SelectedLeftRightMargin ?? 10;
+        profile.OutlineWidth = SelectedOutlineWidth ?? 3;
+        profile.ShadowWidth = SelectedShadowWidth;
+        profile.IsBold = IsBold;
+
+        Se.SaveSettings();
     }
 
     private void TimerUpdatePreviewElapsed(object? sender, ElapsedEventArgs e)
@@ -735,5 +767,10 @@ public partial class ExportImageBasedViewModel : ObservableObject
     internal void ColorChanged(object? sender, ColorChangedEventArgs e)
     {
         _dirty = true;
+    }
+
+    internal void OnClosing()
+    {
+        SaveSettings();
     }
 }

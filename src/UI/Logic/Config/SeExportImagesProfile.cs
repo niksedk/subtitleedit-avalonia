@@ -1,11 +1,13 @@
-﻿using Nikse.SubtitleEdit.Core.BluRaySup;
+﻿using Avalonia.Media;
+using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using SkiaSharp;
 using System;
 
-namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
+namespace Nikse.SubtitleEdit.Logic.Config;
 
-public class ImageParameter
+public class SeExportImagesProfile
 {
+    public string ProfileName { get; set; } = "Default";
     public ExportAlignment Alignment { get; set; }
     public SKBitmap Bitmap { get; set; }
     public string Text { get; set; }
@@ -33,26 +35,26 @@ public class ImageParameter
     public bool IsFullFrame { get; set; }
     public double FramesPerSecond { get; set; }
 
-    public ImageParameter()
+    public SeExportImagesProfile()
     {
+        Alignment = ExportAlignment.BottomCenter;
         Bitmap = new SKBitmap(1, 1, true);
         Text = string.Empty;
+        FontColor = SKColors.White;
         FontName = string.Empty;
-        Buffer = new byte[0];
+        FontSize = 26;
+        OutlineColor = SKColors.Black;
+        OutlineWidth = 2;
+        ShadowColor = SKColors.Black;
+        ShadowWidth = 2;
+        BackgroundColor = SKColors.Transparent;
+        BackgroundCornerRadius = 0;
+        ScreenWidth = 1920;
+        ScreenHeight = 1080;
+        BottomTopMargin = 10;
+        LeftRightMargin = 10;
         Error = string.Empty;
-    }
+        FramesPerSecond = 25;
 
-    public BluRayContentAlignment BluRayContentAlignment => Alignment switch
-    {
-        ExportAlignment.TopLeft => BluRayContentAlignment.TopLeft,
-        ExportAlignment.TopCenter => BluRayContentAlignment.TopCenter,
-        ExportAlignment.TopRight => BluRayContentAlignment.TopRight,
-        ExportAlignment.MiddleLeft => BluRayContentAlignment.MiddleLeft,
-        ExportAlignment.MiddleCenter => BluRayContentAlignment.MiddleCenter,
-        ExportAlignment.MiddleRight => BluRayContentAlignment.MiddleRight,
-        ExportAlignment.BottomLeft => BluRayContentAlignment.BottomLeft,
-        ExportAlignment.BottomCenter => BluRayContentAlignment.BottomCenter,
-        ExportAlignment.BottomRight => BluRayContentAlignment.BottomRight,
-        _ => BluRayContentAlignment.BottomCenter,
-    };
+    }
 }

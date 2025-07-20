@@ -7,7 +7,7 @@ public class SeFile
     public bool ShowRecentFiles { get; set; } = true;
     public int RecentFilesMaximum { get; set; } = 25;
     public List<RecentFile> RecentFiles { get; set; } = new();
-    public ExportImages ExportImages { get; set; } = new();
+    public SeExportImages ExportImages { get; set; } = new();
 
     public void AddToRecentFiles(string subtitleFileName, string videoFileName, int selectedLine, string encoding)
     {

@@ -398,4 +398,10 @@ public class ExportImageBasedWindow : Window
         base.OnLoaded(e);
         _vm.OnLoaded();
     }
+
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        base.OnClosing(e);
+        _vm.OnClosing();
+    }
 }
