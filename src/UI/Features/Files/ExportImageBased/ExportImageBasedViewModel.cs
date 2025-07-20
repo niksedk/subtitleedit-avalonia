@@ -11,6 +11,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using SkiaSharp;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Timers;
@@ -171,24 +172,37 @@ public partial class ExportImageBasedViewModel : ObservableObject
         var fontName = SelectedFontFamily ?? "Arial";
         var fontSize = SelectedFontSize ?? 20;
 
-        // Create font and paint objects
-        using var typeface = SKTypeface.FromFamilyName(fontName, IsBold ? SKFontStyle.Bold : SKFontStyle.Normal);
-        using var font = new SKFont(typeface, fontSize);
+        // Parse text and create text segments with styling
+        var segments = ParseTextWithItalics(text);
+
+        // Create fonts
+        using var regularTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.Normal);
+        using var italicTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.Italic);
+        using var regularFont = new SKFont(regularTypeface, fontSize);
+        using var italicFont = new SKFont(italicTypeface, fontSize);
         using var paint = new SKPaint
         {
             Color = SKColors.Black,
             IsAntialias = true
         };
 
-        // Measure the text to determine bitmap size
-        var textWidth = font.MeasureText(text);
-        var fontMetrics = font.Metrics;
+        // Measure total text dimensions
+        float totalWidth = 0;
+        float maxHeight = 0;
+        var fontMetrics = regularFont.Metrics;
         var textHeight = fontMetrics.Descent - fontMetrics.Ascent;
+        maxHeight = Math.Max(maxHeight, textHeight);
 
-        // Calculate bitmap dimensions with some padding
+        foreach (var segment in segments)
+        {
+            var currentFont = segment.IsItalic ? italicFont : regularFont;
+            totalWidth += currentFont.MeasureText(segment.Text);
+        }
+
+        // Calculate bitmap dimensions with padding
         var padding = 10;
-        var width = (int)Math.Ceiling(textWidth) + padding * 2;
-        var height = (int)Math.Ceiling(textHeight) + padding * 2;
+        var width = (int)Math.Ceiling(totalWidth) + padding * 2;
+        var height = (int)Math.Ceiling(maxHeight) + padding * 2;
 
         // Ensure minimum size
         width = Math.Max(width, 1);
@@ -198,19 +212,90 @@ public partial class ExportImageBasedViewModel : ObservableObject
         var bitmap = new SKBitmap(width, height);
         using var canvas = new SKCanvas(bitmap);
 
-        // Clear background (optional - white background)
+        // Clear background
         canvas.Clear(SKColors.White);
 
-        // Calculate text position (centered with padding)
-        var x = padding;
-        var y = padding - fontMetrics.Ascent; // Ascent is negative, so we subtract it
+        // Draw text segments
+        float currentX = padding;
+        var baselineY = padding - fontMetrics.Ascent;
 
-        // Draw the text
-        canvas.DrawText(text, x, y, font, paint);
+        for (int i = 0; i < segments.Count; i++)
+        {
+            var segment = segments[i];
+            var currentFont = segment.IsItalic ? italicFont : regularFont;
+            canvas.DrawText(segment.Text, currentX, baselineY, currentFont, paint);
+            currentX += currentFont.MeasureText(segment.Text);
 
-        // Convert to Avalonia bitmap
+            // Add small spacing after italic segments to prevent crowding
+            if (segment.IsItalic && i < segments.Count - 1)
+            {
+                currentX += fontSize * 0.15f; // Add 15% of font size as spacing
+            }
+        }
+
         BitmapPreview = bitmap.ToAvaloniaBitmap();
     }
+
+    static List<TextSegment> ParseTextWithItalics(string text)
+    {
+        var segments = new List<TextSegment>();
+        var currentPos = 0;
+        var isItalic = false;
+
+        while (currentPos < text.Length)
+        {
+            var italicStart = text.IndexOf("<i>", currentPos);
+            var italicEnd = text.IndexOf("</i>", currentPos);
+
+            if (italicStart == -1 && italicEnd == -1)
+            {
+                // No more tags, add remaining text
+                if (currentPos < text.Length)
+                {
+                    var remainingText = text.Substring(currentPos);
+                    if (!string.IsNullOrEmpty(remainingText))
+                    {
+                        segments.Add(new TextSegment(remainingText, isItalic));
+                    }
+                }
+                break;
+            }
+
+            if (italicStart != -1 && (italicEnd == -1 || italicStart < italicEnd))
+            {
+                // Found opening tag
+                if (italicStart > currentPos)
+                {
+                    var beforeItalic = text.Substring(currentPos, italicStart - currentPos);
+                    if (!string.IsNullOrEmpty(beforeItalic))
+                    {
+                        segments.Add(new TextSegment(beforeItalic, isItalic));
+                    }
+                }
+                isItalic = true;
+                currentPos = italicStart + 3; // Skip "<i>"
+            }
+            else if (italicEnd != -1)
+            {
+                // Found closing tag
+                if (italicEnd > currentPos)
+                {
+                    var italicText = text.Substring(currentPos, italicEnd - currentPos);
+                    if (!string.IsNullOrEmpty(italicText))
+                    {
+                        segments.Add(new TextSegment(italicText, isItalic));
+                    }
+                }
+                isItalic = false;
+                currentPos = italicEnd + 4; // Skip "</i>"
+            }
+        }
+
+        // Filter out empty segments
+        return segments.Where(s => !string.IsNullOrEmpty(s.Text)).ToList();
+    }
+
+    record TextSegment(string Text, bool IsItalic);
 
     internal void ComboChanged(object? sender, SelectionChangedEventArgs e)
     {
