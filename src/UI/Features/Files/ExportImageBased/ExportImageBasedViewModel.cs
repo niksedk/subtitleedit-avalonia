@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -50,6 +51,9 @@ public partial class ExportImageBasedViewModel : ObservableObject
     [ObservableProperty] private Color _boxColor;
     [ObservableProperty] private ObservableCollection<double> _boxCornerRadiusList;
     [ObservableProperty] private double _selectedBoxCornerRadius;
+    [ObservableProperty] private string _progressText;
+    [ObservableProperty] private double _progressValue;
+    [ObservableProperty] private bool _isGenerating;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -58,7 +62,9 @@ public partial class ExportImageBasedViewModel : ObservableObject
     private string _subtitleFileName;
     private string _videoFileName;
     private bool _dirty;
-    private readonly Timer _timerUpdatePreview;
+    private Lock _generateLock;
+    private readonly CancellationTokenSource _cancellationTokenSource;
+    private readonly System.Timers.Timer _timerUpdatePreview;
     private readonly IFileHelper _fileHelper;
     private readonly IFolderHelper _folderHelper;
 
@@ -90,11 +96,15 @@ public partial class ExportImageBasedViewModel : ObservableObject
         Title = string.Empty;
         BitmapPreview = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
         OutlineColor = Colors.Black;
+        ProgressText = string.Empty;
+        ProgressValue = 0;
 
         _subtitleFileName = string.Empty;
         _videoFileName = string.Empty;
+        _generateLock = new Lock();
+        _cancellationTokenSource = new CancellationTokenSource();   
 
-        _timerUpdatePreview = new Timer();
+        _timerUpdatePreview = new System.Timers.Timer();
         _timerUpdatePreview.Interval = 250;
         _timerUpdatePreview.Elapsed += TimerUpdatePreviewElapsed;
         LoadSettings();
@@ -158,6 +168,13 @@ public partial class ExportImageBasedViewModel : ObservableObject
     [RelayCommand]
     private void Cancel()
     {
+        if (IsGenerating)
+        {
+            _cancellationTokenSource.Cancel();
+            IsGenerating = false;
+            return;
+        }
+
         Close();
     }
 
@@ -180,9 +197,10 @@ public partial class ExportImageBasedViewModel : ObservableObject
             return;
         }
 
+        IsGenerating = true;
         var imageParameters = new List<ImageParameter>();
-        for (int i = 0; i < Subtitles.Count; i++)
-        {
+        for (var i = 0; i < Subtitles.Count; i++)
+        {            
             SubtitleLineViewModel? subtitle = Subtitles[i];
             var imageParameter = new ImageParameter
             {
@@ -209,20 +227,53 @@ public partial class ExportImageBasedViewModel : ObservableObject
             imageParameters.Add(imageParameter);
         }
 
-        for (var i = 0; i < Subtitles.Count; i++)
-        {
-            var ip = imageParameters[i];
-            ip.Bitmap = GenerateBitmap(ip);
-            exportImageHandler.CreateParagraph(ip);
-        }
 
-        exportImageHandler.WriteHeader(fileOrFolderName, SelectedResolution?.Width ?? 1920, SelectedResolution?.Height ?? 1080);
-        for (var i = 0; i < Subtitles.Count; i++)
+        int total = Subtitles.Count;
+        int completed = 0;
+        var progressLock = new object();
+        await Task.Run(() =>
         {
-            var ip = imageParameters[i];
-            exportImageHandler.WriteParagraph(ip);
-        }
-        exportImageHandler.WriteFooter();
+            Parallel.For(0, total, i =>
+            {
+                if (_cancellationTokenSource.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                var ip = imageParameters[i];
+                ip.Bitmap = GenerateBitmap(ip);
+                exportImageHandler.CreateParagraph(ip);
+
+                lock (_generateLock)
+                {
+                    completed++;
+                    var percent = completed * 100.0 / total;
+
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        ProgressValue = percent;
+                        ProgressText = $"Generating image {completed} of {total}...";
+                    });
+                }
+            });
+
+            if (_cancellationTokenSource.IsCancellationRequested)
+            {
+                return;
+            }
+
+            ProgressValue = 100;
+            ProgressText = $"Saving...";
+
+            exportImageHandler.WriteHeader(fileOrFolderName, SelectedResolution?.Width ?? 1920, SelectedResolution?.Height ?? 1080);
+            for (var i = 0; i < Subtitles.Count; i++)
+            {
+                var ip = imageParameters[i];
+                exportImageHandler.WriteParagraph(ip);
+            }
+            exportImageHandler.WriteFooter();
+            IsGenerating = false;
+        });
     }
 
     [RelayCommand]

@@ -1,15 +1,18 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Styling;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
+using System;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 
@@ -39,6 +42,7 @@ public class ExportImageBasedWindow : Window
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
@@ -54,16 +58,18 @@ public class ExportImageBasedWindow : Window
         var subtitlesView = MakeSubtitlesView(vm);
         var controlsView = MakeControlsView(vm);
         var previewView = MakePreviewView(vm);
-        
+        var progressView = MakeProgressView(vm);
+
         var buttonExport = UiUtil.MakeButton(Se.Language.General.ExportDotDotDot, vm.ExportCommand);
-        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand).WithBindIsEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());  
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonExport, buttonOk, buttonCancel);
 
         grid.Add(subtitlesView, 0);
         grid.Add(controlsView, 1);
         grid.Add(previewView, 2);
-        grid.Add(panelButtons, 3);
+        grid.Add(progressView, 3);
+        grid.Add(panelButtons, 4);
 
         Content = grid;
 
@@ -385,6 +391,62 @@ public class ExportImageBasedWindow : Window
         }); 
         
         return UiUtil.MakeBorderForControl(imagePreview).WithHeight(204); 
+    }
+
+    private static Grid MakeProgressView(ExportImageBasedViewModel vm)
+    {
+        var progressSlider = new Slider
+        {
+            Minimum = 0,
+            Maximum = 100,
+            IsHitTestVisible = false,
+            Focusable = false,
+            Styles =
+            {
+                new Style(x => x.OfType<Thumb>())
+                {
+                    Setters =
+                    {
+                        new Setter(Thumb.IsVisibleProperty, false)
+                    }
+                },
+                new Style(x => x.OfType<Track>())
+                {
+                    Setters =
+                    {
+                        new Setter(Track.HeightProperty, 6.0)
+                    }
+                },
+            }
+        };
+        progressSlider.Bind(Slider.ValueProperty, new Binding(nameof(vm.ProgressValue)));
+        progressSlider.Bind(Slider.IsVisibleProperty, new Binding(nameof(vm.IsGenerating)));
+
+        var statusText = new TextBlock
+        {
+            Margin = new Thickness(5, 20, 0, 0),
+        };
+        statusText.Bind(TextBlock.TextProperty, new Binding(nameof(vm.ProgressText)));
+        statusText.Bind(TextBlock.IsVisibleProperty, new Binding(nameof(vm.IsGenerating)));
+
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        grid.Add(progressSlider, 0, 0);
+        grid.Add(statusText, 0, 0);
+
+        return grid;
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
