@@ -88,7 +88,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         ShadowColor = Colors.Black;
         SubtitleGrid = new DataGrid();
         Title = string.Empty;
-        BitmapPreview = new SKBitmap(1, 1).ToAvaloniaBitmap();
+        BitmapPreview = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
         OutlineColor = Colors.Black;
 
         _subtitleFileName = string.Empty;
@@ -106,19 +106,23 @@ public partial class ExportImageBasedViewModel : ObservableObject
 
         SelectedFontFamily = profile.FontName;
         SelectedFontSize = (int)profile.FontSize;
-        SelectedResolution = Resolutions.FirstOrDefault(p=>p.Width == profile.ScreenWidth);
+        SelectedResolution = Resolutions.FirstOrDefault(r => r.Width == profile.ScreenWidth);
         SelectedTopBottomMargin = profile.BottomTopMargin;
         SelectedLeftRightMargin = profile.LeftRightMargin;
         SelectedOutlineWidth = profile.OutlineWidth;
         SelectedShadowWidth = profile.ShadowWidth;
         IsBold = profile.IsBold;
+        FontColor = profile.FontColor.FromHex().ToAvaloniaColor();
+        ShadowColor = profile.ShadowColor.FromHex().ToAvaloniaColor();
+        BoxColor = profile.BackgroundColor.FromHex().ToAvaloniaColor();
+        SelectedBoxCornerRadius = profile.BackgroundCornerRadius;
     }
 
     private void SaveSettings()
     {
         var profile = Se.Settings.File.ExportImages.Profiles.FirstOrDefault() ?? new SeExportImagesProfile();
 
-        profile.FontName = SelectedFontFamily ?? string.Empty;
+        profile.FontName = SelectedFontFamily ?? FontFamilies.First();
         profile.FontSize = SelectedFontSize ?? 26;
         profile.ScreenWidth = SelectedResolution?.Width ?? 1920;
         profile.ScreenHeight = SelectedResolution?.Height ?? 1080;
@@ -127,6 +131,10 @@ public partial class ExportImageBasedViewModel : ObservableObject
         profile.OutlineWidth = SelectedOutlineWidth ?? 3;
         profile.ShadowWidth = SelectedShadowWidth;
         profile.IsBold = IsBold;
+        profile.FontColor = FontColor.ToSKColor().ToHex(true);
+        profile.ShadowColor = ShadowColor.ToSKColor().ToHex(true);
+        profile.BackgroundColor = BoxColor.ToSKColor().ToHex(true);
+        profile.BackgroundCornerRadius = SelectedBoxCornerRadius;
 
         Se.SaveSettings();
     }
@@ -184,7 +192,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                 StartTime = subtitle.StartTime,
                 EndTime = subtitle.EndTime,
                 FontColor = FontColor.ToSKColor(),
-                FontName = SelectedFontFamily ?? "Arial",
+                FontName = SelectedFontFamily ?? FontFamilies.First(),
                 FontSize = SelectedFontSize ?? 20,
                 IsBold = IsBold,
                 OutlineColor = OutlineColor.ToSKColor(),
@@ -269,14 +277,14 @@ public partial class ExportImageBasedViewModel : ObservableObject
         var text = selected.Text;
         if (string.IsNullOrEmpty(text))
         {
-            BitmapPreview = new SKBitmap(1, 1).ToAvaloniaBitmap();
+            BitmapPreview = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
             return;
         }
 
         var ip = new ImageParameter
         {
             Text = text,
-            FontName = SelectedFontFamily ?? "Arial",
+            FontName = SelectedFontFamily ?? FontFamilies.First(),
             FontSize = SelectedFontSize ?? 20,
             FontColor = FontColor.ToSKColor(),
             OutlineColor = OutlineColor.ToSKColor(),

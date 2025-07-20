@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using Avalonia.Media;
 using SkiaSharp;
 
 namespace Nikse.SubtitleEdit.Logic;
@@ -16,7 +17,12 @@ public static class SkColorExtensions
             ? $"#{color.Alpha:X2}{color.Red:X2}{color.Green:X2}{color.Blue:X2}" // ARGB
             : $"#{color.Red:X2}{color.Green:X2}{color.Blue:X2}";               // RGB
     }
-    
+
+    public static Color ToAvaloniaColor(this SKColor color)
+    {
+        return new Color(color.Alpha, color.Red, color.Green, color.Blue);
+    }
+
     /// <summary>
     /// Converts a hex string (e.g., "#RRGGBB" or "#AARRGGBB") to an SKColor.
     /// </summary>

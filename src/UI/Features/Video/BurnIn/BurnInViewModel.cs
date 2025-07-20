@@ -1448,7 +1448,7 @@ public partial class BurnInViewModel : ObservableObject
 
         if (_subtitleFormat is { Name: AdvancedSubStationAlpha.NameOfFormat } && !IsBatchMode)
         {
-            ImagePreview = new SKBitmap(1, 1).ToAvaloniaBitmap();
+            ImagePreview = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
             return;
         }
 

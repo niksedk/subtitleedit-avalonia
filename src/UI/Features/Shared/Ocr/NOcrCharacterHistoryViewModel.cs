@@ -48,7 +48,7 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
         HistoryItems = new ObservableCollection<NOcrAddHistoryItem>();
         NOcrChar = new NOcrChar();
         _nOcrDb = new NOcrDb(string.Empty);
-        CurrentBitmap = new SKBitmap(1, 1).ToAvaloniaBitmap();
+        CurrentBitmap = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
         NOcrDrawingCanvas = new NOcrDrawingCanvasView();
         TextBoxNew = new TextBox();
     }

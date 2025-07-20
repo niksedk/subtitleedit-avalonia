@@ -89,8 +89,8 @@ public partial class NOcrInspectViewModel : ObservableObject
         SelectedNoOfLinesToAutoDraw = Se.Settings.Ocr.NOcrNoOfLinesToAutoDraw;
         NOcrChar = new NOcrChar();
         _nOcrDb = new NOcrDb(string.Empty);
-        SentenceBitmap = new SKBitmap(1, 1).ToAvaloniaBitmap();
-        CurrentBitmap = new SKBitmap(1, 1).ToAvaloniaBitmap();
+        SentenceBitmap = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
+        CurrentBitmap = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
         _splitItem = new ImageSplitterItem2(string.Empty);
         NOcrDrawingCanvas = new NOcrDrawingCanvasView();
         TextBoxNew = new TextBox();
@@ -351,7 +351,7 @@ public partial class NOcrInspectViewModel : ObservableObject
 
             if (match == null)
             {
-                NOcrDrawingCanvas.BackgroundImage = new SKBitmap(1, 1).ToAvaloniaBitmap();
+                NOcrDrawingCanvas.BackgroundImage = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
                 NOcrDrawingCanvas.HitPaths.Clear();
                 NOcrDrawingCanvas.MissPaths.Clear();
             }

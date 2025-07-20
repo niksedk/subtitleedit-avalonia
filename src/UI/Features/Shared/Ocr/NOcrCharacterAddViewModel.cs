@@ -93,8 +93,8 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         SelectedNoOfLinesToAutoDraw = 100;
         NOcrChar = new NOcrChar();
         _nOcrDb = new NOcrDb(string.Empty);
-        SentenceBitmap = new SKBitmap(1, 1).ToAvaloniaBitmap();
-        CurrentBitmap = new SKBitmap(1, 1).ToAvaloniaBitmap();
+        SentenceBitmap = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
+        CurrentBitmap = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
         _splitItem = new ImageSplitterItem2(string.Empty);
         NOcrDrawingCanvas = new NOcrDrawingCanvasView();
         TextBoxNew = new TextBox();

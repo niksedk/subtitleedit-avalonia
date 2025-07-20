@@ -217,7 +217,7 @@ public partial class PaddleOcr
         for (var i = 0; i < bitmaps.Count; i++)
         {
             var input = bitmaps[i];
-            var bitmap = input.Bitmap == null ? new SKBitmap(1, 1) : input.Bitmap.Copy(input.Bitmap.ColorType);  
+            var bitmap = input.Bitmap == null ? new SKBitmap(1, 1, true) : input.Bitmap.Copy(input.Bitmap.ColorType);  
             bitmap = MakeTransparentBlack(bitmap);
             var borderedBitmapTemp = AddBorder(bitmap, 10, SKColors.Black);
             bitmap.Dispose();
