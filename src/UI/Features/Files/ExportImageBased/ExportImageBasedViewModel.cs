@@ -58,8 +58,9 @@ public partial class ExportImageBasedViewModel : ObservableObject
     [ObservableProperty] ExportAlignmentDisplay _selectedAlignment;
     [ObservableProperty] private ObservableCollection<int> _lineSpacings;
     [ObservableProperty] int _selectedLineSpacing;
-
-
+    [ObservableProperty] private ObservableCollection<string> _profiles;
+    [ObservableProperty] private string? _selectedProfile;
+    
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
     public DataGrid SubtitleGrid { get; set; }
@@ -67,16 +68,18 @@ public partial class ExportImageBasedViewModel : ObservableObject
     private string _subtitleFileName;
     private string _videoFileName;
     private bool _dirty;
-    private Lock _generateLock;
+    private readonly Lock _generateLock;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly System.Timers.Timer _timerUpdatePreview;
     private readonly IFileHelper _fileHelper;
     private readonly IFolderHelper _folderHelper;
+    private readonly IWindowService _windowService;
 
-    public ExportImageBasedViewModel(IFileHelper fileHelper, IFolderHelper folderHelper)
+    public ExportImageBasedViewModel(IFileHelper fileHelper, IFolderHelper folderHelper, IWindowService windowService)
     {
         _fileHelper = fileHelper;
         _folderHelper = folderHelper;
+        _windowService = windowService;
 
         Subtitles = new ObservableCollection<SubtitleLineViewModel>();
         FontFamilies = new ObservableCollection<string>(FontHelper.GetSystemFonts());
@@ -107,6 +110,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         OutlineColor = Colors.Black;
         ProgressText = string.Empty;
         ProgressValue = 0;
+        Profiles = new ObservableCollection<string>();    
 
         _subtitleFileName = string.Empty;
         _videoFileName = string.Empty;
@@ -121,9 +125,34 @@ public partial class ExportImageBasedViewModel : ObservableObject
 
     private void LoadSettings()
     {
-        var profile = Se.Settings.File.ExportImages.Profiles.FirstOrDefault() ?? new SeExportImagesProfile();
+        var settings = Se.Settings.File.ExportImages;
+        if (settings.Profiles.Count == 0)
+        {
+            settings.Profiles.Add(new SeExportImagesProfile());
+        }
 
-        SelectedFontFamily = profile.FontName;
+        var profile = settings.Profiles.FirstOrDefault() ?? new SeExportImagesProfile();
+        if (!string.IsNullOrEmpty(Se.Settings.File.ExportImages.LastProfileName))
+        {
+            var lastProfile =  settings.Profiles.FirstOrDefault(p=>p.ProfileName == settings.LastProfileName);
+            if (lastProfile != null)
+            {
+                profile = lastProfile;
+            }
+        }
+
+        Profiles.Clear();
+        Profiles.AddRange(settings.Profiles.Select(p=>p.ProfileName));
+
+        if (!string.IsNullOrEmpty(profile.FontName))
+        {
+            var fontFamily = FontFamilies.FirstOrDefault(ff => ff == profile.FontName);
+            if (!string.IsNullOrEmpty(fontFamily))
+            {
+                SelectedFontFamily = fontFamily;
+            }
+        }
+
         SelectedFontSize = (int)profile.FontSize;
         SelectedResolution = Resolutions.FirstOrDefault(r => r.Width == profile.ScreenWidth);
         SelectedTopBottomMargin = profile.BottomTopMargin;
@@ -133,6 +162,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         IsBold = profile.IsBold;
         FontColor = profile.FontColor.FromHex().ToAvaloniaColor();
         ShadowColor = profile.ShadowColor.FromHex().ToAvaloniaColor();
+        OutlineColor = profile.OutlineColor.FromHex().ToAvaloniaColor();
         BoxColor = profile.BackgroundColor.FromHex().ToAvaloniaColor();
         SelectedBoxCornerRadius = profile.BackgroundCornerRadius;
     }
@@ -152,6 +182,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         profile.IsBold = IsBold;
         profile.FontColor = FontColor.ToSKColor().ToHex(true);
         profile.ShadowColor = ShadowColor.ToSKColor().ToHex(true);
+        profile.OutlineColor = OutlineColor.ToSKColor().ToHex(true);
         profile.BackgroundColor = BoxColor.ToSKColor().ToHex(true);
         profile.BackgroundCornerRadius = SelectedBoxCornerRadius;
 
@@ -178,6 +209,25 @@ public partial class ExportImageBasedViewModel : ObservableObject
         }
 
         Close();
+    }
+    
+    [RelayCommand]
+    private async Task ShowProfile()
+    {
+     //   SaveProfiles();
+
+        var result = await _windowService.ShowDialogAsync<ImageBasedProfileWindow, ImageBasedProfileViewModel>(Window!,
+            vm =>
+            {
+                vm.Initialize(Profiles, SelectedProfile);
+            });
+
+        if (result.OkPressed)
+        {
+            //LoadProfiles();
+            // var profile = Profiles.FirstOrDefault(p => p.ProfileName == result.SelectedProfile?.Name);
+            // SelectedProfile = profile ?? Profiles.FirstOrDefault();
+        }
     }
 
     [RelayCommand]

@@ -63,6 +63,10 @@ public class ExportImageBasedWindow : Window
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand).WithBindIsVisible(nameof(vm.IsGenerating));
         var buttonDone = UiUtil.MakeButtonDone(vm.CancelCommand).WithBindIsVisible(nameof(vm.IsGenerating), new InverseBooleanConverter());
         var panelButtons = UiUtil.MakeButtonBar(buttonExport, buttonDone, buttonCancel);
+        
+        var comboProfile = UiUtil.MakeComboBox(vm.Profiles, vm, nameof(vm.SelectedProfile));
+        var labelProfile = UiUtil.MakeLabel("Profile");
+        var buttonProfileBrowse = UiUtil.MakeButton("...", vm.ShowProfileCommand);
 
         grid.Add(subtitlesView, 0);
         grid.Add(controlsView, 1);
