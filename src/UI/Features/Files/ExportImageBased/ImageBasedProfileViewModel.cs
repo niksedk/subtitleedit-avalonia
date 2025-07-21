@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,7 +8,6 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Shared;
-using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
@@ -21,15 +19,11 @@ public partial class ImageBasedProfileViewModel : ObservableObject
     [ObservableProperty] private bool _isProfileSelected;
 
     public Window? Window { get; set; }
-
     public bool OkPressed { get; private set; }
     public TextBox ProfileNameTextBox { get; internal set; }
 
-    private List<FixRuleDisplayItem> _fixRules;
-
     public ImageBasedProfileViewModel()
     {
-        _fixRules = new List<FixRuleDisplayItem>();
         Profiles = new ObservableCollection<ProfileDisplayItem>();
         SelectedProfile = null;
         IsProfileSelected = true;
@@ -38,27 +32,14 @@ public partial class ImageBasedProfileViewModel : ObservableObject
 
     public void Initialize(ObservableCollection<string> profiles, string? selectedProfile)
     {
-        //_fixRules = allFixRules;
+        foreach (var profile in profiles)
+        {
+            Profiles.Add(new ProfileDisplayItem(profile, profile == selectedProfile));
+        }
 
-        // foreach (var rule in Se.Settings.Tools.FixCommonErrors.Profiles)
-        // {
-        //     var profile = new ProfileDisplayItem
-        //     {
-        //         Name = rule.ProfileName,
-        //         FixRules = new ObservableCollection<FixRuleDisplayItem>()
-        //     };
-        //
-        //     foreach (var fixRule in allFixRules)
-        //     {
-        //         var isSelected = rule.SelectedRules.Any(x => x == fixRule.FixCommonErrorFunctionName);
-        //         profile.FixRules.Add(new FixRuleDisplayItem(fixRule) { IsSelected = isSelected });
-        //     }
-        //
-        //     Profiles.Add(profile);
-        // }
-        //
-        // SelectedProfile = Profiles.FirstOrDefault(p => p.Name.Equals(selectedProfileName, StringComparison.OrdinalIgnoreCase)) 
-        //                   ?? Profiles.FirstOrDefault();
+        SelectedProfile =
+            Profiles.FirstOrDefault(p => p.Name.Equals(selectedProfile, StringComparison.OrdinalIgnoreCase))
+            ?? Profiles.FirstOrDefault();
     }
 
     [RelayCommand]
@@ -68,10 +49,7 @@ public partial class ImageBasedProfileViewModel : ObservableObject
         Profiles.Add(newProfile);
         SelectedProfile = newProfile;
 
-        Dispatcher.UIThread.Invoke(() =>
-        {
-            ProfileNameTextBox.Focus();
-        });
+        Dispatcher.UIThread.Invoke(() => { ProfileNameTextBox.Focus(); });
     }
 
     [RelayCommand]
@@ -119,17 +97,6 @@ public partial class ImageBasedProfileViewModel : ObservableObject
             }
         }
 
-        var profiles = Se.Settings.Tools.FixCommonErrors.Profiles;
-        profiles.Clear();
-        foreach (var profile in Profiles)
-        {
-            profiles.Add(new SeFixCommonErrorsProfile
-            {
-                ProfileName = profile.Name,
-                SelectedRules = profile.FixRules.Where(p => p.IsSelected).Select(p => p.FixCommonErrorFunctionName).ToList(),
-            });
-        }
-
         OkPressed = true;
         Se.SaveSettings();
         Window?.Close();
@@ -137,16 +104,7 @@ public partial class ImageBasedProfileViewModel : ObservableObject
 
     private ProfileDisplayItem MakeDefaultProfile(string name)
     {
-        var profile = new ProfileDisplayItem
-        {
-            Name = name,
-            FixRules = new ObservableCollection<FixRuleDisplayItem>(_fixRules.Select(p => new FixRuleDisplayItem(p) 
-            { 
-                IsSelected = SeFixCommonErrorsProfile.DefaultFixes.Contains(p.FixCommonErrorFunctionName) 
-            }))
-        };
-
-        return profile;
+        return new ProfileDisplayItem(string.Empty, false);
     }
 
     [RelayCommand]

@@ -141,6 +141,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
             }
         }
 
+        SelectedProfile = profile.ProfileName;
+
         Profiles.Clear();
         Profiles.AddRange(settings.Profiles.Select(p=>p.ProfileName));
 
