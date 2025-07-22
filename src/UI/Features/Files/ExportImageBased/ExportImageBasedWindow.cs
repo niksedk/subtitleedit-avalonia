@@ -403,6 +403,25 @@ public class ExportImageBasedWindow : Window
         grid.Add(labelLineHeight, 4, 2);
         grid.Add(comboBoxLineHeight, 4, 3);
 
+        var labelPadding = UiUtil.MakeLabel("Padding").WithMarginTop(20);
+        var comboBoxPaddingLeftRight = UiUtil.MakeComboBox(vm.PaddingsLeftRight, vm, nameof(vm.SelectedPaddingLeftRight)).WithMarginTop(20);
+        comboBoxPaddingLeftRight.SelectionChanged += vm.ComboChanged;
+        var comboBoxPaddingTopBottom = UiUtil.MakeComboBox(vm.PaddingsTopBottom, vm, nameof(vm.SelectedPaddingTopBottom)).WithMarginTop(20);
+        comboBoxPaddingTopBottom.SelectionChanged += vm.ComboChanged;
+        var panelPaddingComboBoxes = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 5,
+            Children =
+            {
+                comboBoxPaddingLeftRight,
+                comboBoxPaddingTopBottom
+            }
+        };
+        grid.Add(labelPadding, 5, 2);
+        grid.Add(panelPaddingComboBoxes, 5, 3);
+
+
         // column 3
 
         var labelOutlineWidth = UiUtil.MakeLabel(Se.Language.General.OutlineWidth);

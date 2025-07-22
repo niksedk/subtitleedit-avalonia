@@ -63,6 +63,10 @@ public partial class ExportImageBasedViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<string> _profiles;
     [ObservableProperty] private string? _selectedProfile;
     [ObservableProperty] private string _imageInfo;
+    [ObservableProperty] private ObservableCollection<int> _paddingsLeftRight;
+    [ObservableProperty] private int _selectedPaddingLeftRight;
+    [ObservableProperty] private ObservableCollection<int> _paddingsTopBottom;
+    [ObservableProperty] private int _selectedPaddingTopBottom;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -117,6 +121,10 @@ public partial class ExportImageBasedViewModel : ObservableObject
         ProgressValue = 0;
         Profiles = new ObservableCollection<string>();
         ImageInfo = string.Empty;
+        PaddingsLeftRight = new ObservableCollection<int> { 0, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30 };
+        SelectedPaddingLeftRight = 10;
+        PaddingsTopBottom = new ObservableCollection<int> { 0, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30 };
+        SelectedPaddingTopBottom = 10;
 
         _subtitleFileName = string.Empty;
         _videoFileName = string.Empty;
@@ -320,6 +328,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
         {
             Alignment = ExportAlignment.BottomCenter,
             ContentAlignment = SelectedContentAlignment.ContentAlignment,
+            PaddingLeftRight = SelectedPaddingLeftRight,
+            PaddingTopBottom = SelectedPaddingTopBottom,
             Index = i,
             Text = subtitle.Text,
             StartTime = subtitle.StartTime,
