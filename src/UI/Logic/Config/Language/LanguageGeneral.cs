@@ -219,6 +219,7 @@ public class LanguageGeneral
     public string BoxCornerRadius { get; set; }
     public string SavingDotDotDot { get; set; }
     public string GeneratingImageXofY { get; set; }
+    public object VideoPosition { get; set; }
 
     public LanguageGeneral()
     {
@@ -437,5 +438,6 @@ public class LanguageGeneral
         BoxCornerRadius = "Box corner radius";
         SavingDotDotDot = "Saving...";
         GeneratingImageXofY = "Generating image {0:#,##0} of {1:#,##0}...";
+        VideoPosition = "Video position";
     }
 }

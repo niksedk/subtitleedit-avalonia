@@ -74,6 +74,7 @@ public static class ShortcutsMain
         { nameof(_mvm.ShowMultipleReplaceCommand) , Se.Language.Options.Shortcuts.EditMultipleReplace },
 
         { nameof(_mvm.ShowGoToLineCommand) , Se.Language.Options.Shortcuts.GeneralGoToLineNumber },
+        { nameof(_mvm.ShowGoToVideoPositionCommand) , Se.Language.Options.Shortcuts.GeneralGoToVideoPosition },
         { nameof(_mvm.ToggleLinesItalicCommand) , Se.Language.Options.Shortcuts.GeneralToggleItalic },
         { nameof(_mvm.ToggleLinesBoldCommand) , Se.Language.Options.Shortcuts.GeneralToggleBold },
 
@@ -111,6 +112,7 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.ShowMultipleReplaceCommand, nameof(vm.ShowMultipleReplaceCommand), ShortcutCategory.General);
 
         AddShortcut(shortcuts, vm.ShowGoToLineCommand, nameof(vm.ShowGoToLineCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowGoToVideoPositionCommand, nameof(vm.ShowGoToVideoPositionCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ToggleLinesItalicCommand, nameof(vm.ToggleLinesItalicCommand), ShortcutCategory.SubtitleGridAndTextBox);
         AddShortcut(shortcuts, vm.ToggleLinesBoldCommand, nameof(vm.ToggleLinesBoldCommand), ShortcutCategory.SubtitleGridAndTextBox);
 

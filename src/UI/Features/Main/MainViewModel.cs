@@ -61,7 +61,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Features.Files.Export;
 using Nikse.SubtitleEdit.Features.Files.Export.ExportEbuStl;
 using Nikse.SubtitleEdit.Features.Files.ExportEbuStl;
 using Nikse.SubtitleEdit.Features.Files.ExportCavena890;
@@ -730,6 +729,28 @@ public partial class MainViewModel :
     private void CommandVideoClose()
     {
         VideoCloseFile();
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowGoToVideoPosition()
+    {
+        if (Subtitles.Count == 0 || string.IsNullOrEmpty(_videoFileName) || VideoPlayerControl == null)
+        {
+            return;
+        }
+
+        var viewModel = await _windowService.ShowDialogAsync<GoToVideoPositionWindow, GoToVideoPositionViewModel>(Window!, vm => 
+        { 
+            vm.Time = TimeSpan.FromSeconds(VideoPlayerControl.Position);
+        });
+
+        if (viewModel is { OkPressed: true, Time.TotalMicroseconds: >= 0 })
+        {
+            VideoPlayerControl.Position = viewModel.Time.TotalSeconds;
+            _updateAudioVisualizer = true;
+        }
+
         _shortcutManager.ClearKeys();
     }
 

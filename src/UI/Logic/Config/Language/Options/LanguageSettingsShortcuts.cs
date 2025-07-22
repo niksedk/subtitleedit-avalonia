@@ -48,6 +48,7 @@ public class LanguageSettingsShortcuts
     public string GeneralGoToPreviousSubtitleAndFocusWaveform { get; set; }
     public string GeneralGoToNextSubtitleAndFocusWaveform { get; set; }
     public string GeneralGoToLineNumber { get; set; }
+    public string GeneralGoToVideoPosition { get; set; }
     public string GeneralToggleItalic { get; set; }
     public string GeneralToggleBold { get; set; }
     public string GeneralToggleBookmarks { get; set; }
@@ -159,6 +160,7 @@ public class LanguageSettingsShortcuts
         GeneralGoToPreviousSubtitleAndFocusWaveform = "Go to previous subtitle and focus waveform";
         GeneralGoToNextSubtitleAndFocusWaveform = "Go to next subtitle and focus waveform";
         GeneralGoToLineNumber = "Go to line number";
+        GeneralGoToVideoPosition = "Go to video position";
         GeneralToggleItalic = "Toggle italic";
         GeneralToggleBold = "Toggle bold";
         GeneralToggleBookmarks = "Toggle bookmarks";
