@@ -234,9 +234,8 @@ public class ExportImageBasedWindow : Window
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
             },
-            Margin = UiUtil.MakeWindowMargin(),
-            ColumnSpacing = 10,
-            RowSpacing = 10,
+            ColumnSpacing = 5,
+            RowSpacing = 5,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
@@ -267,13 +266,13 @@ public class ExportImageBasedWindow : Window
         var comboBoxResolution = UiUtil.MakeComboBox(vm.Resolutions, vm, nameof(vm.SelectedResolution));
         comboBoxResolution.SelectionChanged += vm.ComboChanged;
 
-        var labelTopBottomMargin = UiUtil.MakeLabel(Se.Language.File.Export.TopBottomMargin);
-        var comboBoxTopBottomMargin = UiUtil.MakeComboBox(vm.TopBottomMargins, vm, nameof(vm.SelectedTopBottomMargin));
-        comboBoxTopBottomMargin.SelectionChanged += vm.ComboChanged;
-
         var labelLeftRightMargin = UiUtil.MakeLabel(Se.Language.File.Export.LeftRightMargin);
         var comboBoxLeftRightMargin = UiUtil.MakeComboBox(vm.LeftRightMargins, vm, nameof(vm.SelectedLeftRightMargin));
         comboBoxLeftRightMargin.SelectionChanged += vm.ComboChanged;
+
+        var labelTopBottomMargin = UiUtil.MakeLabel(Se.Language.File.Export.TopBottomMargin);
+        var comboBoxTopBottomMargin = UiUtil.MakeComboBox(vm.TopBottomMargins, vm, nameof(vm.SelectedTopBottomMargin));
+        comboBoxTopBottomMargin.SelectionChanged += vm.ComboChanged;
 
         var labelAlignment = UiUtil.MakeLabel(Se.Language.General.Alignment);
         var comboBoxAlignment = UiUtil.MakeComboBox(vm.Alignments, vm, nameof(vm.SelectedAlignment));
@@ -292,11 +291,11 @@ public class ExportImageBasedWindow : Window
         grid.Add(labelResolution, 2, 0);
         grid.Add(comboBoxResolution, 2, 1);
 
-        grid.Add(labelTopBottomMargin, 3, 0);
-        grid.Add(comboBoxTopBottomMargin, 3, 1);
+        grid.Add(labelLeftRightMargin, 3, 0);
+        grid.Add(comboBoxLeftRightMargin, 3, 1);
 
-        grid.Add(labelLeftRightMargin, 4, 0);
-        grid.Add(comboBoxLeftRightMargin, 4, 1);
+        grid.Add(labelTopBottomMargin, 4, 0);
+        grid.Add(comboBoxTopBottomMargin, 4, 1);
 
         grid.Add(labelAlignment, 5, 0);
         grid.Add(comboBoxAlignment, 5, 1);
@@ -397,29 +396,23 @@ public class ExportImageBasedWindow : Window
         grid.Add(labelBaclgroundColor, 3, 2);
         grid.Add(colorPickerBackgroundColor, 3, 3);
 
-        var labelLineHeight = UiUtil.MakeLabel(Se.Language.File.Export.LineSpacingPercent).WithMarginTop(20);
-        var comboBoxLineHeight = UiUtil.MakeComboBox(vm.LineSpacings, vm, nameof(vm.SelectedLineSpacing)).WithMarginTop(20);
+        var labelLineHeight = UiUtil.MakeLabel(Se.Language.File.Export.LineSpacingPercent);
+        var comboBoxLineHeight = UiUtil.MakeComboBox(vm.LineSpacings, vm, nameof(vm.SelectedLineSpacing));
         comboBoxLineHeight.SelectionChanged += vm.ComboChanged;
         grid.Add(labelLineHeight, 4, 2);
         grid.Add(comboBoxLineHeight, 4, 3);
 
-        var labelPadding = UiUtil.MakeLabel("Padding").WithMarginTop(20);
-        var comboBoxPaddingLeftRight = UiUtil.MakeComboBox(vm.PaddingsLeftRight, vm, nameof(vm.SelectedPaddingLeftRight)).WithMarginTop(20);
+        var labelPaddingLeftRight = UiUtil.MakeLabel(Se.Language.File.Export.PaddingLeftRight);
+        var comboBoxPaddingLeftRight = UiUtil.MakeComboBox(vm.PaddingsLeftRight, vm, nameof(vm.SelectedPaddingLeftRight));
         comboBoxPaddingLeftRight.SelectionChanged += vm.ComboChanged;
-        var comboBoxPaddingTopBottom = UiUtil.MakeComboBox(vm.PaddingsTopBottom, vm, nameof(vm.SelectedPaddingTopBottom)).WithMarginTop(20);
+        grid.Add(labelPaddingLeftRight, 5, 2);
+        grid.Add(comboBoxPaddingLeftRight, 5, 3);
+
+        var labelPaddingTopBottom = UiUtil.MakeLabel(Se.Language.File.Export.PaddingTopBottom);
+        var comboBoxPaddingTopBottom = UiUtil.MakeComboBox(vm.PaddingsTopBottom, vm, nameof(vm.SelectedPaddingTopBottom));
         comboBoxPaddingTopBottom.SelectionChanged += vm.ComboChanged;
-        var panelPaddingComboBoxes = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            Spacing = 5,
-            Children =
-            {
-                comboBoxPaddingLeftRight,
-                comboBoxPaddingTopBottom
-            }
-        };
-        grid.Add(labelPadding, 5, 2);
-        grid.Add(panelPaddingComboBoxes, 5, 3);
+        grid.Add(labelPaddingTopBottom, 6, 2);
+        grid.Add(comboBoxPaddingTopBottom, 6, 3);
 
 
         // column 3

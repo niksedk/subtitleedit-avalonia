@@ -222,6 +222,7 @@ public class LanguageGeneral
     public string GeneratingImageXofY { get; set; }
     public string Profile { get; set; }
     public object VideoPosition { get; set; }
+    public string Padding { get; set; }
 
     public LanguageGeneral()
     {
@@ -443,5 +444,6 @@ public class LanguageGeneral
         GeneratingImageXofY = "Generating image {0:#,##0} of {1:#,##0}...";
         VideoPosition = "Video position";
         Profile =  "Profile";
+        Padding = "Padding";
     }
 }

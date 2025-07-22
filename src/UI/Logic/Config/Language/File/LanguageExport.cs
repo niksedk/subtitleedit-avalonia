@@ -6,6 +6,8 @@ public class LanguageExport
     public string TopBottomMargin { get; set; }
     public string TitleExportBluRaySup { get;    set; }
     public string LineSpacingPercent { get;  set; }
+    public string PaddingLeftRight { get; set; }
+    public string PaddingTopBottom { get; set; }
 
     public LanguageExport()
     {
@@ -13,5 +15,7 @@ public class LanguageExport
         TopBottomMargin = "Top/bottom margin";
         TitleExportBluRaySup = "Export Blu-ray sup";
         LineSpacingPercent = "Line spacing %";
+        PaddingLeftRight = "Padding left/right";
+        PaddingTopBottom = "Padding top/bottom";
     }
 }

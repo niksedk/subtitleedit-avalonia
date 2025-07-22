@@ -95,14 +95,14 @@ public partial class ExportImageBasedViewModel : ObservableObject
         SelectedFontSize = 20;
         Resolutions = new ObservableCollection<ResolutionItem>(ResolutionItem.GetResolutions());
         SelectedResolution = Resolutions.FirstOrDefault(r => r.Width == 1920 && r.Height == 1080);
-        TopBottomMargins = new ObservableCollection<int> { 0, 5, 10, 15, 20, 25, 30 };
+        TopBottomMargins = new ObservableCollection<int> (Enumerable.Range(0, 101));
         SelectedTopBottomMargin = 10;
-        LeftRightMargins = new ObservableCollection<int> { 0, 5, 10, 15, 20, 25, 30 };
+        LeftRightMargins = new ObservableCollection<int>(Enumerable.Range(0, 101));
         SelectedLeftRightMargin = 10;
         OutlineWidths = new ObservableCollection<double>(Enumerable.Range(0, 16).Select(i => (double)i));
         SelectedOutlineWidth = OutlineWidths.FirstOrDefault();
         ShadowWidths = new ObservableCollection<double>(Enumerable.Range(0, 16).Select(i => (double)i));
-        BoxCornerRadiusList = new ObservableCollection<double>(Enumerable.Range(0, 51).Select(i => (double)i));
+        BoxCornerRadiusList = new ObservableCollection<double>(Enumerable.Range(0, 101).Select(i => (double)i));
         SelectedBoxCornerRadius = 0;
         SelectedShadowWidth = 3;
         FontColor = Colors.White;
@@ -121,9 +121,9 @@ public partial class ExportImageBasedViewModel : ObservableObject
         ProgressValue = 0;
         Profiles = new ObservableCollection<string>();
         ImageInfo = string.Empty;
-        PaddingsLeftRight = new ObservableCollection<int> { 0, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30 };
+        PaddingsLeftRight = new ObservableCollection<int>(Enumerable.Range(0, 101));
         SelectedPaddingLeftRight = 10;
-        PaddingsTopBottom = new ObservableCollection<int> { 0, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30 };
+        PaddingsTopBottom = new ObservableCollection<int>(Enumerable.Range(0, 101));
         SelectedPaddingTopBottom = 10;
 
         _subtitleFileName = string.Empty;
@@ -453,7 +453,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
 
         // Calculate line spacing once
         var baseLineHeight = Math.Abs(fontMetrics.Ascent) + Math.Abs(fontMetrics.Descent);
-        var lineSpacing = (float)(baseLineHeight * ip.LineSpacingPercent / 100.0) - baseLineHeight;
+        var lineSpacing = (float)(baseLineHeight * ip.LineSpacingPercent / 100.0);
 
         float currentY = 0; // Start measuring from 0
 
