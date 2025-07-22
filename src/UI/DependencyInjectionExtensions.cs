@@ -156,5 +156,6 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<ExportCavena890ViewModel>();
         collection.AddTransient<ExportImageBasedViewModel>();
         collection.AddTransient<GoToVideoPositionViewModel>();
+        collection.AddTransient<ImageBasedProfileViewModel>();
     }
 }

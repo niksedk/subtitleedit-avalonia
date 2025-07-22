@@ -63,12 +63,43 @@ public class ExportImageBasedWindow : Window
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand).WithBindIsVisible(nameof(vm.IsGenerating));
         var buttonDone = UiUtil.MakeButtonDone(vm.CancelCommand).WithBindIsVisible(nameof(vm.IsGenerating), new InverseBooleanConverter());
         var panelButtons = UiUtil.MakeButtonBar(buttonExport, buttonDone, buttonCancel);
+        
+        var comboProfile = UiUtil.MakeComboBox(vm.Profiles, vm, nameof(vm.SelectedProfile));
+        var labelProfile = UiUtil.MakeLabel(Se.Language.General.Profile);
+        var buttonProfileBrowse = UiUtil.MakeButtonBrowse(vm.ShowProfileCommand).WithMarginLeft(5);
+        var panelProfile = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Children =
+            {
+                labelProfile,
+                comboProfile,
+                buttonProfileBrowse,
+            }
+        };
+        
+        var gridButtons = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+        gridButtons.Add(panelProfile, 0);
+        gridButtons.Add(panelButtons, 0, 1);
 
         grid.Add(subtitlesView, 0);
         grid.Add(controlsView, 1);
         grid.Add(previewView, 2);
         grid.Add(progressView, 3);
-        grid.Add(panelButtons, 4);
+        grid.Add(gridButtons, 4);
 
         Content = grid;
 
