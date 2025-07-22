@@ -8,6 +8,8 @@ public class ImageParameter
 {
     public ExportAlignment Alignment { get; set; }
     public ExportContentAlignment ContentAlignment { get; set; }
+    public int PaddingLeftRight { get; set; }
+    public int PaddingTopBottom { get; set; }
     public SKBitmap Bitmap { get; set; }
     public string Text { get; set; }
     public TimeSpan StartTime { get; set; }

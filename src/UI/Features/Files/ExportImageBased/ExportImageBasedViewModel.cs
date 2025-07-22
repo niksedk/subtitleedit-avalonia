@@ -319,7 +319,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         var imageParameter = new ImageParameter
         {
             Alignment = ExportAlignment.BottomCenter,
-            ContentAlignment = SelectedContentAlignment.ExportAlignment,
+            ContentAlignment = SelectedContentAlignment.ContentAlignment,
             Index = i,
             Text = subtitle.Text,
             StartTime = subtitle.StartTime,
@@ -453,8 +453,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
         // Calculate bitmap dimensions with padding (including outline width and shadow)
         var outlinePadding = (float)Math.Ceiling(outlineWidth);
         var shadowPadding = (float)Math.Ceiling(shadowWidth);
-        var paddingLeftRight = 10;
-        var paddingTopBottom = 10;
+        var paddingLeftRight = ip.PaddingLeftRight;
+        var paddingTopBottom = ip.PaddingTopBottom;
         var width = (int)Math.Ceiling(maxWidth) + (int)(paddingLeftRight * 2) + (int)Math.Ceiling(shadowWidth);
         var totalHeight = (lines.Count * lineHeight) + ((lines.Count - 1) * lineSpacing);
         var height = (int)Math.Ceiling(totalHeight) + (int)(paddingTopBottom * 2) + (int)Math.Ceiling(shadowWidth);

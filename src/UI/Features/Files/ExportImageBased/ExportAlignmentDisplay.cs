@@ -4,12 +4,12 @@ namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 
 public class ExportAlignmentDisplay
 {
-    public ExportAlignment ExportAlignment { get; set; }
+    public ExportAlignment Alignment { get; set; }
     public string DisplayName { get; set; }
 
     public ExportAlignmentDisplay(ExportAlignment exportAlignment, string displayName)
     {
-        ExportAlignment = exportAlignment;
+        Alignment = exportAlignment;
         DisplayName = displayName;
     }
 
