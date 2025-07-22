@@ -445,29 +445,68 @@ public partial class ExportImageBasedViewModel : ObservableObject
         // Split segments into lines and measure dimensions
         var lines = SplitIntoLines(segments);
         var fontMetrics = regularFont.Metrics;
-        var lineHeight = fontMetrics.Descent - fontMetrics.Ascent;
-        var lineSpacing = (float)(lineHeight * ip.LineSpacingPercent / 100.0);
 
+        // IMPROVED: Measure actual text bounds instead of using font metrics
         float maxWidth = 0;
+        float minY = float.MaxValue; // Highest point of any text
+        float maxY = float.MinValue; // Lowest point of any text
+
+        // Calculate line spacing once
+        var baseLineHeight = Math.Abs(fontMetrics.Ascent) + Math.Abs(fontMetrics.Descent);
+        var lineSpacing = (float)(baseLineHeight * ip.LineSpacingPercent / 100.0) - baseLineHeight;
+
+        float currentY = 0; // Start measuring from 0
+
         foreach (var line in lines)
         {
             float lineWidth = 0;
+            float lineMinY = float.MaxValue;
+            float lineMaxY = float.MinValue;
+
             foreach (var segment in line)
             {
                 var currentFont = GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont);
                 lineWidth += currentFont.MeasureText(segment.Text);
+
+                // Get actual text bounds for this segment using paint
+                using var measurePaint = new SKPaint();
+                measurePaint.Typeface = currentFont.Typeface;
+                measurePaint.TextSize = currentFont.Size;
+
+                var textBounds = new SKRect();
+                measurePaint.MeasureText(segment.Text, ref textBounds);
+
+                // Adjust bounds to current Y position
+                var segmentMinY = currentY + textBounds.Top;
+                var segmentMaxY = currentY + textBounds.Bottom;
+
+                lineMinY = Math.Min(lineMinY, segmentMinY);
+                lineMaxY = Math.Max(lineMaxY, segmentMaxY);
             }
+
             maxWidth = Math.Max(maxWidth, lineWidth);
+            minY = Math.Min(minY, lineMinY);
+            maxY = Math.Max(maxY, lineMaxY);
+
+            // Move to next line position
+            currentY += baseLineHeight + lineSpacing;
         }
 
-        // Calculate bitmap dimensions with padding (including outline width and shadow)
-        var outlinePadding = (float)Math.Ceiling(outlineWidth);
-        var shadowPadding = (float)Math.Ceiling(shadowWidth);
-        var paddingLeftRight = ip.PaddingLeftRight;
-        var paddingTopBottom = ip.PaddingTopBottom;
-        var width = (int)Math.Ceiling(maxWidth) + (int)(paddingLeftRight * 2) + (int)Math.Ceiling(shadowWidth);
-        var totalHeight = (lines.Count * lineHeight) + ((lines.Count - 1) * lineSpacing);
-        var height = (int)Math.Ceiling(totalHeight) + (int)(paddingTopBottom * 2) + (int)Math.Ceiling(shadowWidth);
+        // Calculate actual text height from measured bounds
+        var actualTextHeight = lines.Count > 0 ? maxY - minY : 0;
+
+        // IMPROVED: Calculate precise content area and effects padding
+        var effectsPadding = (float)Math.Max(outlineWidth, shadowWidth);
+        var paddingLeftRight = (float)ip.PaddingLeftRight;
+        var paddingTopBottom = (float)ip.PaddingTopBottom;
+
+        // Content area (text + specified padding)
+        var contentWidth = maxWidth + (paddingLeftRight * 2);
+        var contentHeight = actualTextHeight + (paddingTopBottom * 2);
+
+        // Total bitmap size (content + effects padding)
+        var width = (int)Math.Ceiling(contentWidth + (effectsPadding * 2));
+        var height = (int)Math.Ceiling(contentHeight + (effectsPadding * 2));
 
         // Ensure minimum size
         width = Math.Max(width, 1);
@@ -484,30 +523,46 @@ public partial class ExportImageBasedViewModel : ObservableObject
             IsAntialias = true,
         };
 
-        // Define the rounded rectangle
-        var rect = new SKRect(0, 0, width, height);
+        // IMPROVED: Define the rounded rectangle with proper bounds
+        // The background box should cover the content area, positioned to account for effects
+        var boxRect = new SKRect(
+            effectsPadding,
+            effectsPadding,
+            width - effectsPadding,
+            height - effectsPadding
+        );
         float cornerRadius = (float)SelectedBoxCornerRadius;
 
         // Draw the rounded rectangle
-        canvas.DrawRoundRect(rect, cornerRadius, cornerRadius, paint);
+        canvas.DrawRoundRect(boxRect, cornerRadius, cornerRadius, paint);
 
-        // Draw text lines
-        float currentY = paddingTopBottom - fontMetrics.Ascent;
+        // IMPROVED: Calculate precise text positioning
+        // Start position accounts for effects padding + specified padding
+        var textStartX = effectsPadding + paddingLeftRight;
+        // Position text baseline to account for the measured minY offset
+        var textStartY = effectsPadding + paddingTopBottom - minY;
+
+        currentY = 0; // Reset for actual drawing
 
         foreach (var line in lines)
         {
-            float currentX = paddingLeftRight;
+            float currentX = textStartX;
+
+            // Calculate line width for alignment
+            var lineWidth = line.Sum(segment => GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont).MeasureText(segment.Text));
+
+            // Adjust X position based on content alignment
             if (ip.ContentAlignment == ExportContentAlignment.Center)
             {
-                // Center the line horizontally
-                var lineWidth = line.Sum(segment => GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont).MeasureText(segment.Text));
-                currentX += (width - lineWidth) / 2;
+                // Center within the content area (not the entire bitmap)
+                var contentAreaWidth = contentWidth - (paddingLeftRight * 2);
+                currentX += (contentAreaWidth - lineWidth) / 2;
             }
             else if (ip.ContentAlignment == ExportContentAlignment.Right)
             {
-                // Align the line to the right
-                var lineWidth = line.Sum(segment => GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont).MeasureText(segment.Text));
-                currentX += width - lineWidth - paddingLeftRight;
+                // Align right within the content area
+                var contentAreaWidth = contentWidth - (paddingLeftRight * 2);
+                currentX += contentAreaWidth - lineWidth;
             }
 
             for (int i = 0; i < line.Count; i++)
@@ -518,11 +573,9 @@ public partial class ExportImageBasedViewModel : ObservableObject
                 // Draw shadow first (if shadow width > 0)
                 if (shadowWidth > 0)
                 {
-                    // Offset shadow to right and down
                     var shadowOffsetX = currentX + (float)shadowWidth;
-                    var shadowOffsetY = currentY + (float)shadowWidth;
+                    var shadowOffsetY = textStartY + currentY + (float)shadowWidth;
 
-                    // If we have an outline, draw shadow of the outline
                     if (outlineWidth > 0)
                     {
                         using var shadowOutlinePaint = new SKPaint
@@ -538,7 +591,6 @@ public partial class ExportImageBasedViewModel : ObservableObject
                         canvas.DrawText(segment.Text, shadowOffsetX, shadowOffsetY, currentFont, shadowOutlinePaint);
                     }
 
-                    // Always draw shadow of the text fill (this creates the shadow behind the text)
                     using var shadowTextPaint = new SKPaint
                     {
                         Color = shadowColor,
@@ -562,7 +614,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                         StrokeCap = SKStrokeCap.Round
                     };
 
-                    canvas.DrawText(segment.Text, currentX, currentY, currentFont, outlinePaint);
+                    canvas.DrawText(segment.Text, currentX, textStartY + currentY, currentFont, outlinePaint);
                 }
 
                 // Draw the main text on top
@@ -573,18 +625,18 @@ public partial class ExportImageBasedViewModel : ObservableObject
                     Style = SKPaintStyle.Fill
                 };
 
-                canvas.DrawText(segment.Text, currentX, currentY, currentFont, textPaint);
+                canvas.DrawText(segment.Text, currentX, textStartY + currentY, currentFont, textPaint);
                 currentX += currentFont.MeasureText(segment.Text);
 
                 // Add small spacing after styled segments to prevent crowding
                 if ((segment.IsItalic || segment.IsBold) && i < line.Count - 1)
                 {
-                    currentX += fontSize * 0.17f; // Add 17% of font size as spacing
+                    currentX += fontSize * 0.17f;
                 }
             }
 
             // Move to next line
-            currentY += lineHeight + lineSpacing;
+            currentY += baseLineHeight + lineSpacing;
         }
 
         return bitmap;
