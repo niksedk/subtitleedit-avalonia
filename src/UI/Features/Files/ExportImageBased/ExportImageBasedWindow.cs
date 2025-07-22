@@ -279,6 +279,10 @@ public class ExportImageBasedWindow : Window
         var comboBoxAlignment = UiUtil.MakeComboBox(vm.Alignments, vm, nameof(vm.SelectedAlignment));
         comboBoxAlignment.SelectionChanged += vm.ComboChanged;
 
+        var labelContentAlignment = UiUtil.MakeLabel(Se.Language.General.ContentAlignment);
+        var comboBoxContentAlignment = UiUtil.MakeComboBox(vm.ContentAlignments, vm, nameof(vm.SelectedContentAlignment));
+        comboBoxContentAlignment.SelectionChanged += vm.ComboChanged;
+
         grid.Add(labelFontFamily, 0);
         grid.Add(comboBoxFontFamily, 0, 1);
 
@@ -296,6 +300,9 @@ public class ExportImageBasedWindow : Window
 
         grid.Add(labelAlignment, 5, 0);
         grid.Add(comboBoxAlignment, 5, 1);
+
+        grid.Add(labelContentAlignment, 6, 0);
+        grid.Add(comboBoxContentAlignment, 6, 1);
 
         // column 2
         var labelFontColor = UiUtil.MakeLabel(Se.Language.General.FontColor);
@@ -421,6 +428,20 @@ public class ExportImageBasedWindow : Window
 
     private Border MakePreviewView(ExportImageBasedViewModel vm)
     {
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
         var imagePreview = new Image
         {
             MaxHeight = 200,
@@ -432,7 +453,21 @@ public class ExportImageBasedWindow : Window
             Mode = BindingMode.OneWay
         });
 
-        return UiUtil.MakeBorderForControl(imagePreview).WithHeight(204);
+        var labelImageInfo = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.ImageInfo));   
+        var panelImageInfo = new StackPanel
+        {
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Top,
+            Children =
+            {
+                UiUtil.MakeBorderForControl(labelImageInfo),
+            }
+        };  
+
+        grid.Add(imagePreview, 0);
+        grid.Add(panelImageInfo, 0);
+
+        return UiUtil.MakeBorderForControl(grid).WithHeight(204);
     }
 
     private static Grid MakeProgressView(ExportImageBasedViewModel vm)

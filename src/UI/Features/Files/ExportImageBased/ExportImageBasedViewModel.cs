@@ -56,11 +56,14 @@ public partial class ExportImageBasedViewModel : ObservableObject
     [ObservableProperty] private bool _isGenerating;
     [ObservableProperty] private ObservableCollection<ExportAlignmentDisplay> _alignments;
     [ObservableProperty] ExportAlignmentDisplay _selectedAlignment;
+    [ObservableProperty] private ObservableCollection<ExportContentAlignmentDisplay> _contentAlignments;
+    [ObservableProperty] ExportContentAlignmentDisplay _selectedContentAlignment;
     [ObservableProperty] private ObservableCollection<int> _lineSpacings;
     [ObservableProperty] int _selectedLineSpacing;
     [ObservableProperty] private ObservableCollection<string> _profiles;
     [ObservableProperty] private string? _selectedProfile;
-    
+    [ObservableProperty] private string _imageInfo;
+
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
     public DataGrid SubtitleGrid { get; set; }
@@ -100,8 +103,10 @@ public partial class ExportImageBasedViewModel : ObservableObject
         SelectedShadowWidth = 3;
         FontColor = Colors.White;
         ShadowColor = Colors.Black;
-        Alignments = new ObservableCollection<ExportAlignmentDisplay>(ExportAlignmentDisplay.GetExportAlignmentDisplays());
+        Alignments = new ObservableCollection<ExportAlignmentDisplay>(ExportAlignmentDisplay.GetAlignments());
         SelectedAlignment = Alignments[0];
+        ContentAlignments = new ObservableCollection<ExportContentAlignmentDisplay>(ExportContentAlignmentDisplay.GetAlignments());
+        SelectedContentAlignment = ContentAlignments[0];
         LineSpacings = new ObservableCollection<int>(Enumerable.Range(-50, 151));
         SelectedLineSpacing = 0;
         SubtitleGrid = new DataGrid();
@@ -110,7 +115,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
         OutlineColor = Colors.Black;
         ProgressText = string.Empty;
         ProgressValue = 0;
-        Profiles = new ObservableCollection<string>();    
+        Profiles = new ObservableCollection<string>();
+        ImageInfo = string.Empty;
 
         _subtitleFileName = string.Empty;
         _videoFileName = string.Empty;
@@ -134,7 +140,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         var profile = settings.Profiles.FirstOrDefault() ?? new SeExportImagesProfile();
         if (!string.IsNullOrEmpty(Se.Settings.File.ExportImages.LastProfileName))
         {
-            var lastProfile =  settings.Profiles.FirstOrDefault(p=>p.ProfileName == settings.LastProfileName);
+            var lastProfile = settings.Profiles.FirstOrDefault(p => p.ProfileName == settings.LastProfileName);
             if (lastProfile != null)
             {
                 profile = lastProfile;
@@ -144,7 +150,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         SelectedProfile = profile.ProfileName;
 
         Profiles.Clear();
-        Profiles.AddRange(settings.Profiles.Select(p=>p.ProfileName));
+        Profiles.AddRange(settings.Profiles.Select(p => p.ProfileName));
 
         if (!string.IsNullOrEmpty(profile.FontName))
         {
@@ -212,11 +218,11 @@ public partial class ExportImageBasedViewModel : ObservableObject
 
         Close();
     }
-    
+
     [RelayCommand]
     private async Task ShowProfile()
     {
-     //   SaveProfiles();
+        //   SaveProfiles();
 
         var result = await _windowService.ShowDialogAsync<ImageBasedProfileWindow, ImageBasedProfileViewModel>(Window!,
             vm =>
@@ -313,6 +319,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         var imageParameter = new ImageParameter
         {
             Alignment = ExportAlignment.BottomCenter,
+            ContentAlignment = SelectedContentAlignment.ExportAlignment,
             Index = i,
             Text = subtitle.Text,
             StartTime = subtitle.StartTime,
@@ -396,6 +403,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         var idx = Subtitles.IndexOf(selected);
         var ip = GetImageParameter(idx);
         BitmapPreview = GenerateBitmap(ip).ToAvaloniaBitmap();
+        ImageInfo = $"{BitmapPreview.Size.Width}x{BitmapPreview.Size.Height}";
     }
 
     private SKBitmap GenerateBitmap(ImageParameter ip)
@@ -445,10 +453,11 @@ public partial class ExportImageBasedViewModel : ObservableObject
         // Calculate bitmap dimensions with padding (including outline width and shadow)
         var outlinePadding = (float)Math.Ceiling(outlineWidth);
         var shadowPadding = (float)Math.Ceiling(shadowWidth);
-        var padding = 10 + Math.Max(outlinePadding, shadowPadding);
-        var width = (int)Math.Ceiling(maxWidth) + (int)(padding * 2) + (int)Math.Ceiling(shadowWidth);
+        var paddingLeftRight = 10;
+        var paddingTopBottom = 10;
+        var width = (int)Math.Ceiling(maxWidth) + (int)(paddingLeftRight * 2) + (int)Math.Ceiling(shadowWidth);
         var totalHeight = (lines.Count * lineHeight) + ((lines.Count - 1) * lineSpacing);
-        var height = (int)Math.Ceiling(totalHeight) + (int)(padding * 2) + (int)Math.Ceiling(shadowWidth);
+        var height = (int)Math.Ceiling(totalHeight) + (int)(paddingTopBottom * 2) + (int)Math.Ceiling(shadowWidth);
 
         // Ensure minimum size
         width = Math.Max(width, 1);
@@ -472,13 +481,24 @@ public partial class ExportImageBasedViewModel : ObservableObject
         // Draw the rounded rectangle
         canvas.DrawRoundRect(rect, cornerRadius, cornerRadius, paint);
 
-
         // Draw text lines
-        float currentY = padding - fontMetrics.Ascent;
+        float currentY = paddingTopBottom - fontMetrics.Ascent;
 
         foreach (var line in lines)
         {
-            float currentX = padding;
+            float currentX = paddingLeftRight;
+            if (ip.ContentAlignment == ExportContentAlignment.Center)
+            {
+                // Center the line horizontally
+                var lineWidth = line.Sum(segment => GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont).MeasureText(segment.Text));
+                currentX += (width - lineWidth) / 2;
+            }
+            else if (ip.ContentAlignment == ExportContentAlignment.Right)
+            {
+                // Align the line to the right
+                var lineWidth = line.Sum(segment => GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont).MeasureText(segment.Text));
+                currentX += width - lineWidth - paddingLeftRight;
+            }
 
             for (int i = 0; i < line.Count; i++)
             {

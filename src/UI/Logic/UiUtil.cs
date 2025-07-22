@@ -891,6 +891,12 @@ public static class UiUtil
         return control;
     }
 
+    public static Label WithAlignmentRight(this Label control)
+    {
+        control.HorizontalAlignment = HorizontalAlignment.Right;
+        return control;
+    }
+
     public static Label HorizontalContentAlignmentCenter(this Label control)
     {
         control.HorizontalContentAlignment = HorizontalAlignment.Center;

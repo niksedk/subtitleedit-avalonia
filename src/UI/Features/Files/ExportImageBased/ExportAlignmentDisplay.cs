@@ -18,7 +18,7 @@ public class ExportAlignmentDisplay
         return DisplayName;
     }   
 
-    public static List<ExportAlignmentDisplay> GetExportAlignmentDisplays()
+    public static List<ExportAlignmentDisplay> GetAlignments()
     {
         return new List<ExportAlignmentDisplay>
         {

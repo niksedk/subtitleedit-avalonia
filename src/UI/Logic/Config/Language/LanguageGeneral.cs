@@ -140,6 +140,7 @@ public class LanguageGeneral
     public string Box { get; set; }
     public string Shadow { get; set; }
     public string Alignment { get; set; }
+    public string ContentAlignment { get; set; }
     public string Margin { get; set; }
     public string Horizontal { get; set; }
     public string Vertical { get; set; }
@@ -360,6 +361,7 @@ public class LanguageGeneral
         Box = "Box";
         Shadow = "Shadow";
         Alignment = "Alignment";
+        ContentAlignment = "Content alignment";
         Margin = "Margin";
         Horizontal = "Horizontal";
         Vertical = "Vertical";

@@ -7,6 +7,7 @@ namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 public class ImageParameter
 {
     public ExportAlignment Alignment { get; set; }
+    public ExportContentAlignment ContentAlignment { get; set; }
     public SKBitmap Bitmap { get; set; }
     public string Text { get; set; }
     public TimeSpan StartTime { get; set; }
