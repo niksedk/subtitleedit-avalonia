@@ -585,6 +585,12 @@ public class ExportImageBasedWindow : Window
         _vm.OnKeyDown(e);
     }
 
+    protected override void OnKeyUp(KeyEventArgs e)
+    {
+        base.OnKeyUp(e);
+        _vm.OnKeyUp(e);
+    }
+
     protected override void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);

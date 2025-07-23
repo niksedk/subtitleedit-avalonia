@@ -8,6 +8,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DynamicData;
+using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Shared;
@@ -80,6 +81,9 @@ public partial class ExportImageBasedViewModel : ObservableObject
     private bool _dirty;
     private bool _subtitleGridSelectionChangedSkip;
     private readonly Lock _generateLock;
+    private bool _isCtrlDown;
+    private bool _isAltDown;
+    private bool _isShiftDown;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly System.Timers.Timer _timerUpdatePreview;
     private readonly IFileHelper _fileHelper;
@@ -485,15 +489,6 @@ public partial class ExportImageBasedViewModel : ObservableObject
     private void Close()
     {
         Dispatcher.UIThread.Post(() => { Window?.Close(); });
-    }
-
-    internal void OnKeyDown(KeyEventArgs e)
-    {
-        if (e.Key == Key.Escape)
-        {
-            e.Handled = true;
-            Close();
-        }
     }
 
     public void Initialize(
@@ -1189,6 +1184,54 @@ public partial class ExportImageBasedViewModel : ObservableObject
             profile.PaddingLeftRight = SelectedPaddingLeftRight;
             profile.PaddingTopBottom = SelectedPaddingTopBottom;
             profile.LineSpacingPercent = SelectedLineSpacing;   
+        }
+    }
+
+    internal void OnKeyDown(KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            Close();
+        }
+        else if (e.Key == Key.LeftAlt || e.Key == Key.RightAlt)
+        {
+            _isAltDown = true;
+        }
+        else if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
+        {
+            _isCtrlDown = true;
+        }
+        else if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
+        {
+            _isShiftDown = true;
+        }
+        else if (e.Key == Key.I && _isCtrlDown)
+        {
+            ToggleLinesItalic();
+        }
+        else if (e.Key == Key.N && _isCtrlDown)
+        {
+            ToggleLinesBold();
+        }
+    }
+
+    internal void OnKeyUp(KeyEventArgs e)
+    {
+        if (e.Key == Key.LeftAlt || e.Key == Key.RightAlt)
+        {
+            _isAltDown = false;
+            e.Handled = true;
+        }
+        else if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
+        {
+            _isCtrlDown = false;
+            e.Handled = true;
+        }
+        else if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
+        {
+            _isShiftDown = false;
+            e.Handled = true;
         }
     }
 }
