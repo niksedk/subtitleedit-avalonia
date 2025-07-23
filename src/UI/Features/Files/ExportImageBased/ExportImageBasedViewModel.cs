@@ -164,48 +164,12 @@ public partial class ExportImageBasedViewModel : ObservableObject
         Profiles.Clear();
         Profiles.AddRange(settings.Profiles);
 
-        if (!string.IsNullOrEmpty(profile.FontName))
-        {
-            var fontFamily = FontFamilies.FirstOrDefault(ff => ff == profile.FontName);
-            if (!string.IsNullOrEmpty(fontFamily))
-            {
-                SelectedFontFamily = fontFamily;
-            }
-        }
-
-        SelectedFontSize = (int)profile.FontSize;
-        SelectedResolution = Resolutions.FirstOrDefault(r => r.Width == profile.ScreenWidth);
-        SelectedTopBottomMargin = profile.BottomTopMargin;
-        SelectedLeftRightMargin = profile.LeftRightMargin;
-        SelectedOutlineWidth = profile.OutlineWidth;
-        SelectedShadowWidth = profile.ShadowWidth;
-        IsBold = profile.IsBold;
-        FontColor = profile.FontColor.FromHex().ToAvaloniaColor();
-        ShadowColor = profile.ShadowColor.FromHex().ToAvaloniaColor();
-        OutlineColor = profile.OutlineColor.FromHex().ToAvaloniaColor();
-        BoxColor = profile.BackgroundColor.FromHex().ToAvaloniaColor();
-        SelectedBoxCornerRadius = profile.BackgroundCornerRadius;
+        LoadProfile(profile);
     }
 
     private void SaveSettings()
     {
-        var profile = Se.Settings.File.ExportImages.Profiles.FirstOrDefault() ?? new SeExportImagesProfile();
-
-        profile.FontName = SelectedFontFamily ?? FontFamilies.First();
-        profile.FontSize = (float)SelectedFontSize;
-        profile.ScreenWidth = SelectedResolution?.Width ?? 1920;
-        profile.ScreenHeight = SelectedResolution?.Height ?? 1080;
-        profile.BottomTopMargin = SelectedTopBottomMargin;
-        profile.LeftRightMargin = SelectedLeftRightMargin;
-        profile.OutlineWidth = SelectedOutlineWidth;
-        profile.ShadowWidth = SelectedShadowWidth;
-        profile.IsBold = IsBold;
-        profile.FontColor = FontColor.ToSKColor().ToHex(true);
-        profile.ShadowColor = ShadowColor.ToSKColor().ToHex(true);
-        profile.OutlineColor = OutlineColor.ToSKColor().ToHex(true);
-        profile.BackgroundColor = BoxColor.ToSKColor().ToHex(true);
-        profile.BackgroundCornerRadius = SelectedBoxCornerRadius;
-
+        SaveProfile(SelectedProfile);
         Se.SaveSettings();
     }
 
@@ -1162,5 +1126,67 @@ public partial class ExportImageBasedViewModel : ObservableObject
     internal void OnClosing()
     {
         SaveSettings();
+    }
+
+    internal void ProfileChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (e.RemovedItems.Count == 1)
+        {
+            SaveProfile(e.RemovedItems[0]);
+        }
+
+        if (e.AddedItems.Count == 1)
+        {
+            LoadProfile(e.AddedItems[0]);
+        }
+    }
+
+    private void LoadProfile(object? v)
+    {
+        if (v is SeExportImagesProfile profile)
+        {
+            SelectedFontSize = (int)profile.FontSize;
+            SelectedResolution = Resolutions.FirstOrDefault(r => r.Width == profile.ScreenWidth);
+            SelectedTopBottomMargin = profile.BottomTopMargin;
+            SelectedLeftRightMargin = profile.LeftRightMargin;
+            SelectedOutlineWidth = profile.OutlineWidth;
+            SelectedShadowWidth = profile.ShadowWidth;
+            SelectedAlignment = Alignments.FirstOrDefault(p=>p.Alignment == profile.Alignment) ?? Alignments[0];
+            SelectedContentAlignment = ContentAlignments.FirstOrDefault(p => p.ContentAlignment == profile.ContentAlignment) ?? ContentAlignments[0];
+            IsBold = profile.IsBold;
+            SelectedFontFamily = profile.FontName;
+            FontColor = profile.FontColor.FromHex().ToAvaloniaColor();
+            OutlineColor = profile.OutlineColor.FromHex().ToAvaloniaColor();
+            ShadowColor = profile.ShadowColor.FromHex().ToAvaloniaColor();
+            BoxColor = profile.BackgroundColor.FromHex().ToAvaloniaColor();
+            SelectedBoxCornerRadius = profile.BackgroundCornerRadius;
+            SelectedPaddingLeftRight = profile.PaddingLeftRight;
+            SelectedPaddingTopBottom = profile.PaddingTopBottom;
+        }
+    }
+
+    private void SaveProfile(object? v)
+    {
+        if (v is SeExportImagesProfile profile)
+        {
+            profile.FontSize = SelectedFontSize;
+            profile.ScreenWidth = SelectedResolution?.Width ?? 1920;
+            profile.ScreenHeight = SelectedResolution?.Height ?? 1080;
+            profile.BottomTopMargin = SelectedTopBottomMargin;
+            profile.LeftRightMargin = SelectedLeftRightMargin;
+            profile.OutlineWidth = SelectedOutlineWidth;
+            profile.ShadowWidth = SelectedShadowWidth;
+            profile.Alignment = SelectedAlignment.Alignment;
+            profile.ContentAlignment = SelectedContentAlignment.ContentAlignment;
+            profile.IsBold = IsBold;
+            profile.FontName = SelectedFontFamily ?? string.Empty;
+            profile.FontColor = FontColor.FromColorToHex(true);
+            profile.OutlineColor = OutlineColor.FromColorToHex(true);
+            profile.ShadowColor = ShadowColor.FromColorToHex(true);
+            profile.BackgroundColor = BoxColor.FromColorToHex(true);
+            profile.BackgroundCornerRadius = SelectedBoxCornerRadius;
+            profile.PaddingLeftRight = SelectedPaddingLeftRight;
+            profile.PaddingTopBottom = SelectedPaddingTopBottom;
+        }
     }
 }

@@ -65,6 +65,7 @@ public class ExportImageBasedWindow : Window
         var panelButtons = UiUtil.MakeButtonBar(buttonExport, buttonDone, buttonCancel);
         
         var comboProfile = UiUtil.MakeComboBox(vm.Profiles, vm, nameof(vm.SelectedProfile));
+        comboProfile.SelectionChanged += vm.ProfileChanged;
         var labelProfile = UiUtil.MakeLabel(Se.Language.General.Profile);
         var buttonProfileBrowse = UiUtil.MakeButtonBrowse(vm.ShowProfileCommand).WithMarginLeft(5);
         var panelProfile = new StackPanel

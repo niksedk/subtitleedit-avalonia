@@ -8,6 +8,7 @@ public class SeExportImagesProfile
 {
     public string ProfileName { get; set; } = "Default";
     public ExportAlignment Alignment { get; set; }
+    public ExportContentAlignment ContentAlignment { get; set; }
     public string Text { get; set; }
     public TimeSpan StartTime { get; set; }
     public TimeSpan EndTime { get; set; }
@@ -31,6 +32,8 @@ public class SeExportImagesProfile
     public bool IsForced { get; set; }
     public bool IsFullFrame { get; set; }
     public double FramesPerSecond { get; set; }
+    public int PaddingLeftRight { get; set; }
+    public int PaddingTopBottom { get; set; }
 
     public SeExportImagesProfile()
     {
