@@ -31,15 +31,15 @@ public partial class ExportImageBasedViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<string> _fontFamilies;
     [ObservableProperty] string? _selectedFontFamily;
     [ObservableProperty] private ObservableCollection<int> _fontSizes;
-    [ObservableProperty] int? _selectedFontSize;
+    [ObservableProperty] int _selectedFontSize;
     [ObservableProperty] private ObservableCollection<ResolutionItem> _resolutions;
     [ObservableProperty] ResolutionItem? _selectedResolution;
     [ObservableProperty] private ObservableCollection<int> _topBottomMargins;
-    [ObservableProperty] int? _selectedTopBottomMargin;
+    [ObservableProperty] int _selectedTopBottomMargin;
     [ObservableProperty] private ObservableCollection<int> _leftRightMargins;
-    [ObservableProperty] int? _selectedLeftRightMargin;
+    [ObservableProperty] int _selectedLeftRightMargin;
     [ObservableProperty] private ObservableCollection<double> _outlineWidths;
-    [ObservableProperty] double? _selectedOutlineWidth;
+    [ObservableProperty] double _selectedOutlineWidth;
     [ObservableProperty] private ObservableCollection<double> _shadowWidths;
     [ObservableProperty] double _selectedShadowWidth;
     [ObservableProperty] private bool _isBold;
@@ -92,7 +92,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         FontFamilies = new ObservableCollection<string>(FontHelper.GetSystemFonts());
         SelectedFontFamily = FontFamilies.FirstOrDefault();
         FontSizes = new ObservableCollection<int>(Enumerable.Range(15, 486));
-        SelectedFontSize = 20;
+        SelectedFontSize = 26;
         Resolutions = new ObservableCollection<ResolutionItem>(ResolutionItem.GetResolutions());
         SelectedResolution = Resolutions.FirstOrDefault(r => r.Width == 1920 && r.Height == 1080);
         TopBottomMargins = new ObservableCollection<int>(Enumerable.Range(0, 101));
@@ -100,7 +100,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         LeftRightMargins = new ObservableCollection<int>(Enumerable.Range(0, 101));
         SelectedLeftRightMargin = 10;
         OutlineWidths = new ObservableCollection<double>(Enumerable.Range(0, 16).Select(i => (double)i));
-        SelectedOutlineWidth = OutlineWidths.FirstOrDefault();
+        SelectedOutlineWidth = OutlineWidths.First();
         ShadowWidths = new ObservableCollection<double>(Enumerable.Range(0, 16).Select(i => (double)i));
         BoxCornerRadiusList = new ObservableCollection<double>(Enumerable.Range(0, 101).Select(i => (double)i));
         SelectedBoxCornerRadius = 0;
@@ -188,12 +188,12 @@ public partial class ExportImageBasedViewModel : ObservableObject
         var profile = Se.Settings.File.ExportImages.Profiles.FirstOrDefault() ?? new SeExportImagesProfile();
 
         profile.FontName = SelectedFontFamily ?? FontFamilies.First();
-        profile.FontSize = SelectedFontSize ?? 26;
+        profile.FontSize = (float)SelectedFontSize;
         profile.ScreenWidth = SelectedResolution?.Width ?? 1920;
         profile.ScreenHeight = SelectedResolution?.Height ?? 1080;
-        profile.BottomTopMargin = SelectedTopBottomMargin ?? 10;
-        profile.LeftRightMargin = SelectedLeftRightMargin ?? 10;
-        profile.OutlineWidth = SelectedOutlineWidth ?? 3;
+        profile.BottomTopMargin = SelectedTopBottomMargin;
+        profile.LeftRightMargin = SelectedLeftRightMargin;
+        profile.OutlineWidth = SelectedOutlineWidth;
         profile.ShadowWidth = SelectedShadowWidth;
         profile.IsBold = IsBold;
         profile.FontColor = FontColor.ToSKColor().ToHex(true);
@@ -336,19 +336,19 @@ public partial class ExportImageBasedViewModel : ObservableObject
             EndTime = subtitle.EndTime,
             FontColor = FontColor.ToSKColor(),
             FontName = SelectedFontFamily ?? FontFamilies.First(),
-            FontSize = SelectedFontSize ?? 26,
+            FontSize = SelectedFontSize,
             IsBold = IsBold,
             LineSpacingPercent = SelectedLineSpacing,
             OutlineColor = OutlineColor.ToSKColor(),
-            OutlineWidth = SelectedOutlineWidth ?? 0,
+            OutlineWidth = SelectedOutlineWidth,
             ShadowColor = ShadowColor.ToSKColor(),
             ShadowWidth = SelectedShadowWidth,
             BackgroundColor = BoxColor.ToSKColor(),
             BackgroundCornerRadius = SelectedBoxCornerRadius,
             ScreenWidth = SelectedResolution?.Width ?? 1920,
             ScreenHeight = SelectedResolution?.Height ?? 1080,
-            BottomTopMargin = SelectedTopBottomMargin ?? 10,
-            LeftRightMargin = SelectedLeftRightMargin ?? 10,
+            BottomTopMargin = SelectedTopBottomMargin,
+            LeftRightMargin = SelectedLeftRightMargin,
         };
 
         return imageParameter;
@@ -488,7 +488,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         var fontColor = ip.FontColor;
 
         var outlineColor = OutlineColor.ToSKColor();
-        var outlineWidth = SelectedOutlineWidth ?? 0;
+        var outlineWidth = SelectedOutlineWidth;
 
         var shadowColor = ShadowColor.ToSKColor();
         var shadowWidth = SelectedShadowWidth;
@@ -531,15 +531,13 @@ public partial class ExportImageBasedViewModel : ObservableObject
             foreach (var segment in line)
             {
                 var currentFont = GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont);
+
+                // Use SKFont.MeasureText for width measurement
                 lineWidth += currentFont.MeasureText(segment.Text);
 
-                // Get actual text bounds for this segment using paint
-                using var measurePaint = new SKPaint();
-                measurePaint.Typeface = currentFont.Typeface;
-                measurePaint.TextSize = currentFont.Size;
-
+                // Get actual text bounds for this segment
                 var textBounds = new SKRect();
-                measurePaint.MeasureText(segment.Text, ref textBounds);
+                currentFont.MeasureText(segment.Text, out textBounds);
 
                 // Adjust bounds to current Y position
                 var segmentMinY = currentY + textBounds.Top;

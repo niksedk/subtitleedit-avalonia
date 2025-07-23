@@ -76,7 +76,6 @@ public partial class ExportEbuStlViewModel : ObservableObject
 
     private IFileHelper _fileHelper;
     private Subtitle _subtitle = new Subtitle();
-    private bool _useSubtitleFileName = false;
     private Ebu.EbuGeneralSubtitleInformation _header = new Ebu.EbuGeneralSubtitleInformation();
 
     public ExportEbuStlViewModel(IFileHelper fileHelper)

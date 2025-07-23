@@ -26,7 +26,7 @@ public class FolderHelper : IFolderHelper
             });
 
             var selected = folders.Count > 0 ? folders[0] : null;
-            return selected?.Path.LocalPath; 
+            return selected?.Path.LocalPath ?? string.Empty; 
         }
 
         return string.Empty;
