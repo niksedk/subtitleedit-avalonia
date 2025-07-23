@@ -7,13 +7,13 @@ using Avalonia.Skia;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DynamicData;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
-using Nikse.SubtitleEdit.Logic.UndoRedo;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -62,8 +62,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
     [ObservableProperty] ExportContentAlignmentDisplay _selectedContentAlignment;
     [ObservableProperty] private ObservableCollection<int> _lineSpacings;
     [ObservableProperty] int _selectedLineSpacing;
-    [ObservableProperty] private ObservableCollection<string> _profiles;
-    [ObservableProperty] private string? _selectedProfile;
+    [ObservableProperty] private ObservableCollection<SeExportImagesProfile> _profiles;
+    [ObservableProperty] private SeExportImagesProfile? _selectedProfile;
     [ObservableProperty] private string _imageInfo;
     [ObservableProperty] private ObservableCollection<int> _paddingsLeftRight;
     [ObservableProperty] private int _selectedPaddingLeftRight;
@@ -123,7 +123,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         OutlineColor = Colors.Black;
         ProgressText = string.Empty;
         ProgressValue = 0;
-        Profiles = new ObservableCollection<string>();
+        Profiles = new ObservableCollection<SeExportImagesProfile>();
         ImageInfo = string.Empty;
         PaddingsLeftRight = new ObservableCollection<int>(Enumerable.Range(0, 101));
         SelectedPaddingLeftRight = 10;
@@ -159,10 +159,10 @@ public partial class ExportImageBasedViewModel : ObservableObject
             }
         }
 
-        SelectedProfile = profile.ProfileName;
+        SelectedProfile = profile;
 
         Profiles.Clear();
-        Profiles.AddRange(settings.Profiles.Select(p => p.ProfileName));
+        Profiles.AddRange(settings.Profiles);
 
         if (!string.IsNullOrEmpty(profile.FontName))
         {
@@ -231,22 +231,46 @@ public partial class ExportImageBasedViewModel : ObservableObject
         Close();
     }
 
+    private void SaveProfiles()
+    {
+        Se.Settings.File.ExportImages.Profiles.Clear();
+        foreach (var profile in Profiles)
+        {
+            Se.Settings.File.ExportImages.Profiles.Add(profile);
+        }
+
+        Se.Settings.File.ExportImages.LastProfileName = SelectedProfile?.ProfileName ?? "Default";
+    }
+
+    private void LoadProfiles()
+    {
+        Profiles.Clear();
+        var profiles = Se.Settings.File.ExportImages.Profiles;
+        if (profiles.Count == 0)
+        {
+            profiles.Add(new SeExportImagesProfile());
+        }
+        foreach (var profile in profiles)
+        {
+            Profiles.Add(profile);
+        }
+    }
+
     [RelayCommand]
     private async Task ShowProfile()
     {
-        //   SaveProfiles();
+        SaveProfiles();
 
-        var result = await _windowService.ShowDialogAsync<ImageBasedProfileWindow, ImageBasedProfileViewModel>(Window!,
-            vm =>
-            {
-                vm.Initialize(Profiles, SelectedProfile);
-            });
+        var result = await _windowService.ShowDialogAsync<ImageBasedProfileWindow, ImageBasedProfileViewModel>(Window!, vm =>
+        {
+            vm.Initialize(Profiles, SelectedProfile);
+        });
 
         if (result.OkPressed)
         {
-            //LoadProfiles();
-            // var profile = Profiles.FirstOrDefault(p => p.ProfileName == result.SelectedProfile?.Name);
-            // SelectedProfile = profile ?? Profiles.FirstOrDefault();
+            LoadProfiles();
+            var profile = Profiles.FirstOrDefault(p => p.ProfileName == result.SelectedProfile?.Name);
+            SelectedProfile = profile ?? Profiles.FirstOrDefault();
         }
     }
 

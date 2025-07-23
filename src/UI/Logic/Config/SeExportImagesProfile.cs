@@ -1,5 +1,4 @@
-﻿using Avalonia.Media;
-using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
+﻿using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using SkiaSharp;
 using System;
 
@@ -35,6 +34,7 @@ public class SeExportImagesProfile
 
     public SeExportImagesProfile()
     {
+        ProfileName = "Default";
         Alignment = ExportAlignment.BottomCenter;
         Text = string.Empty;
         FontColor = SKColors.White.ToHex(true);
@@ -53,5 +53,10 @@ public class SeExportImagesProfile
         Error = string.Empty;
         FramesPerSecond = 25;
         OverridePosition = string.Empty;
+    }
+
+    public override string ToString()
+    {
+        return ProfileName;
     }
 }

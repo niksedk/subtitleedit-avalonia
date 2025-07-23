@@ -5,6 +5,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 
 namespace Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
@@ -16,7 +17,7 @@ public class FixCommonErrorsProfileWindow : Window
     public FixCommonErrorsProfileWindow(FixCommonErrorsProfileViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = "Fix common errors profile";
+        Title = Se.Language.Tools.FixCommonErrors.FixCommonErrorsProfiles;
         Width = 800;
         Height = 440;
         CanResize = false;
@@ -41,7 +42,7 @@ public class FixCommonErrorsProfileWindow : Window
             {
                 new Button
                 {
-                    Content = "New Profile",
+                    Content = Se.Language.General.NewProfile,
                     Command = vm.NewProfileCommand
                 },
                 new ListBox
@@ -95,7 +96,7 @@ public class FixCommonErrorsProfileWindow : Window
         // "Edit Profile" heading
         var heading = new TextBlock
         {
-            Text = "Profile name",
+            Text = Se.Language.General.ProfileName,
             FontSize = 20,
             Padding = new Thickness(0, 25, 0, 0),
         };
@@ -105,7 +106,7 @@ public class FixCommonErrorsProfileWindow : Window
         // Name textbox
         var nameBox = new TextBox
         {
-            Watermark = "Enter profile name"
+            Watermark = Se.Language.General.EnterProfileName,
         };
         nameBox.Bind(TextBox.TextProperty, new Binding($"{nameof(vm.SelectedProfile)}.{nameof(ProfileDisplayItem.Name)}"));
         nameBox.KeyDown += vm.ProfileNameTextBoxOnKeyDown;

@@ -112,7 +112,8 @@ public class LanguageFixCommonErrors
     public string SetDefault { get; set; }
     public string FixContinuationStyleX { get; set; }
     public string FixUnnecessaryLeadingDots { get; set; }
-    
+    public string FixCommonErrorsProfiles { get; set; }
+
     public LanguageFixCommonErrors()
     {
         Title = "Fix common errors";
@@ -225,5 +226,6 @@ public class LanguageFixCommonErrors
         SetDefault = "Set current fixes as default";
         FixContinuationStyleX = "Fix continuation style: {0}";
         FixUnnecessaryLeadingDots = "Remove unnecessary leading dots";
+        FixCommonErrorsProfiles = "Fix common errors profiles";
     }
 }

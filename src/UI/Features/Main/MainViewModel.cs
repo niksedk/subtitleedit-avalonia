@@ -740,8 +740,8 @@ public partial class MainViewModel :
             return;
         }
 
-        var viewModel = await _windowService.ShowDialogAsync<GoToVideoPositionWindow, GoToVideoPositionViewModel>(Window!, vm => 
-        { 
+        var viewModel = await _windowService.ShowDialogAsync<GoToVideoPositionWindow, GoToVideoPositionViewModel>(Window!, vm =>
+        {
             vm.Time = TimeSpan.FromSeconds(VideoPlayerControl.Position);
         });
 

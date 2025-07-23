@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic.Config;
+using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 
@@ -30,15 +30,15 @@ public partial class ImageBasedProfileViewModel : ObservableObject
         ProfileNameTextBox = new TextBox();
     }
 
-    public void Initialize(ObservableCollection<string> profiles, string? selectedProfile)
+    public void Initialize(ObservableCollection<SeExportImagesProfile> profiles, SeExportImagesProfile? selectedProfile)
     {
         foreach (var profile in profiles)
         {
-            Profiles.Add(new ProfileDisplayItem(profile, profile == selectedProfile));
+            Profiles.Add(new ProfileDisplayItem(profile.ProfileName, profile == selectedProfile, profile));
         }
 
         SelectedProfile =
-            Profiles.FirstOrDefault(p => p.Name.Equals(selectedProfile, StringComparison.OrdinalIgnoreCase))
+            Profiles.FirstOrDefault(p => p.Name.Equals(selectedProfile?.ProfileName, StringComparison.OrdinalIgnoreCase))
             ?? Profiles.FirstOrDefault();
     }
 
@@ -98,13 +98,24 @@ public partial class ImageBasedProfileViewModel : ObservableObject
         }
 
         OkPressed = true;
+
+        Se.Settings.File.ExportImages.Profiles.Clear();
+        foreach (var profile in Profiles)
+        {
+            if (profile.Profile is SeExportImagesProfile seProfile)
+            {
+                seProfile.ProfileName = profile.Name;
+                Se.Settings.File.ExportImages.Profiles.Add(seProfile);
+            }
+        }
+
         Se.SaveSettings();
         Window?.Close();
     }
 
     private ProfileDisplayItem MakeDefaultProfile(string name)
     {
-        return new ProfileDisplayItem(string.Empty, false);
+        return new ProfileDisplayItem(string.Empty, false, new SeExportImagesProfile());
     }
 
     [RelayCommand]
