@@ -205,6 +205,34 @@ public class ExportImageBasedWindow : Window
         });
         vm.SubtitleGrid.SelectionChanged += vm.SubtitleGrid_SelectionChanged;
 
+
+
+        var flyout = new MenuFlyout();
+
+        //flyout.Opening += vm.SubtitleContextOpening;
+
+        var deleteMenuItem = new MenuItem { Header = Se.Language.General.Delete };
+        deleteMenuItem.Command = vm.DeleteSelectedLinesCommand;
+        flyout.Items.Add(deleteMenuItem);
+
+        flyout.Items.Add(new Separator());
+
+        var italicMenuItem = new MenuItem { Header = Se.Language.General.Italic };
+        italicMenuItem.Command = vm.ToggleLinesItalicCommand;
+        flyout.Items.Add(italicMenuItem);
+
+        var boldMenuItem = new MenuItem { Header = Se.Language.General.Bold };
+        boldMenuItem.Command = vm.ToggleLinesBoldCommand;
+        flyout.Items.Add(boldMenuItem);
+
+        // Set the ContextFlyout property
+        vm.SubtitleGrid.ContextFlyout = flyout;
+        //vm.SubtitleGrid.AddHandler(InputElement.PointerPressedEvent, vm.SubtitleGrid_PointerPressed,
+        //    RoutingStrategies.Tunnel);
+        //vm.SubtitleGrid.AddHandler(InputElement.PointerReleasedEvent, vm.SubtitleGrid_PointerReleased,
+        //    RoutingStrategies.Tunnel);
+
+
         return UiUtil.MakeBorderForControl(vm.SubtitleGrid);
     }
 
@@ -258,7 +286,7 @@ public class ExportImageBasedWindow : Window
             Children =
             {
                 comboBoxFontSize,
-                checkBoxBold
+//                checkBoxBold
             }
         };
 

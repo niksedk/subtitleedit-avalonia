@@ -2,6 +2,7 @@
 
 public class LanguageExport
 {
+    public string ExportImagesProfiles { get; set; }
     public string LeftRightMargin { get;  set; }
     public string TopBottomMargin { get; set; }
     public string TitleExportBluRaySup { get;    set; }
@@ -11,6 +12,7 @@ public class LanguageExport
 
     public LanguageExport()
     {
+        ExportImagesProfiles = "Export images profiles";
         LeftRightMargin = "Lefr/right margin";
         TopBottomMargin = "Top/bottom margin";
         TitleExportBluRaySup = "Export Blu-ray sup";

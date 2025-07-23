@@ -1,9 +1,11 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 
-public class ProfileDisplayItem
+public partial class ProfileDisplayItem : ObservableObject
 {
-    public string Name { get; set; }
-    public bool IsSelected { get; set; }
+    [ObservableProperty] private string _name;
+    [ObservableProperty] private bool _isSelected;
 
     public ProfileDisplayItem(string displayName, bool isSelected)
     {

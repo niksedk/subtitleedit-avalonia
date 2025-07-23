@@ -225,6 +225,9 @@ public class LanguageGeneral
     public object VideoPosition { get; set; }
     public string Padding { get; set; }
     public string SaveImageAs { get; set; }
+    public string NewProfile { get; set; }
+    public string ProfileName { get; set; }
+    public string EnterProfileName { get; set; }
 
     public LanguageGeneral()
     {
@@ -449,5 +452,8 @@ public class LanguageGeneral
         Profile =  "Profile";
         Padding = "Padding";
         SaveImageAs = "Save image as";
+        NewProfile = "New profile";
+        ProfileName = "Profile name";
+        EnterProfileName = "Enter profile name";
     }
 }

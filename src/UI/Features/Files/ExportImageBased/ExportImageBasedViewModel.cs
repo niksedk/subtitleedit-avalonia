@@ -9,9 +9,11 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
+using Nikse.SubtitleEdit.Logic.UndoRedo;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -72,9 +74,11 @@ public partial class ExportImageBasedViewModel : ObservableObject
     public bool OkPressed { get; private set; }
     public DataGrid SubtitleGrid { get; set; }
 
+    private List<SubtitleLineViewModel>? _selectedSubtitles;
     private string _subtitleFileName;
     private string _videoFileName;
     private bool _dirty;
+    private bool _subtitleGridSelectionChangedSkip;
     private readonly Lock _generateLock;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly System.Timers.Timer _timerUpdatePreview;
@@ -247,6 +251,81 @@ public partial class ExportImageBasedViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void ToggleLinesItalic()
+    {
+        var selectedItems = _selectedSubtitles?.ToList() ?? new List<SubtitleLineViewModel>();
+        if (selectedItems.Any())
+        {
+            foreach (var item in selectedItems)
+            {
+                item.Text = item.Text.Contains("<i>")
+                    ? item.Text.Replace("<i>", "").Replace("</i>", "")
+                    : $"<i>{item.Text}</i>";
+            }
+        }
+
+        _dirty = true;
+    }
+
+    [RelayCommand]
+    private void ToggleLinesBold()
+    {
+        var selectedItems = _selectedSubtitles?.ToList() ?? new List<SubtitleLineViewModel>();
+        if (selectedItems.Any())
+        {
+            foreach (var item in selectedItems)
+            {
+                item.Text = item.Text.Contains("<b>")
+                    ? item.Text.Replace("<b>", "").Replace("</b>", "")
+                    : $"<b>{item.Text}</b>";
+            }
+        }
+
+        _dirty = true;
+    }
+
+    [RelayCommand]
+    private async Task DeleteSelectedLines()
+    {
+        var selectedItems = _selectedSubtitles?.ToList() ?? new List<SubtitleLineViewModel>();
+        if (selectedItems == null || !selectedItems.Any())
+        {
+            return;
+        }
+
+        if (Se.Settings.General.PromptDeleteLines)
+        {
+            var answer = await MessageBox.Show(
+                Window!,
+                "Delete lines?",
+                $"Do you want to delete {selectedItems.Count} lines?",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question);
+
+            if (answer != MessageBoxResult.Yes)
+            {
+                return;
+            }
+        }
+
+        foreach (var item in selectedItems)
+        {
+            Subtitles.Remove(item);
+        }
+        Renumber();
+
+        _dirty = true;
+    }
+
+    private void Renumber()
+    {
+        for (var index = 0; index < Subtitles.Count; index++)
+        {
+            Subtitles[index].Number = index + 1;
+        }
+    }
+
+    [RelayCommand]
     private async Task Export()
     {
         IExportHandler exportImageHandler = new ExportHandlerBluRaySup();
@@ -319,6 +398,44 @@ public partial class ExportImageBasedViewModel : ObservableObject
             exportImageHandler.WriteFooter();
             IsGenerating = false;
         });
+    }
+
+    public void SubtitleGrid_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (_subtitleGridSelectionChangedSkip)
+        {
+            return;
+        }
+
+        SubtitleGridSelectionChanged();
+        SubtitleLineChanged();
+    }
+
+    private void SubtitleGridSelectionChanged()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems;
+
+        if (selectedItems == null)
+        {
+            SelectedSubtitle = null;
+            _selectedSubtitles = null;
+            return;
+        }
+
+        _selectedSubtitles = selectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (selectedItems.Count > 1)
+        {
+            return;
+        }
+
+        var item = _selectedSubtitles.FirstOrDefault();
+        if (item == null)
+        {
+            SelectedSubtitle = null;
+            return;
+        }
+
+        SelectedSubtitle = item;
     }
 
     private ImageParameter GetImageParameter(int i)
@@ -406,11 +523,6 @@ public partial class ExportImageBasedViewModel : ObservableObject
         }
 
         SelectedSubtitle = Subtitles.FirstOrDefault();
-    }
-
-    public void SubtitleGrid_SelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
-        SubtitleLineChanged();
     }
 
     private void SubtitleLineChanged()
