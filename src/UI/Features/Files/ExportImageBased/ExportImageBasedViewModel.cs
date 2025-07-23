@@ -1210,7 +1210,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         {
             ToggleLinesItalic();
         }
-        else if (e.Key == Key.N && _isCtrlDown)
+        else if (e.Key == Key.B && _isCtrlDown)
         {
             ToggleLinesBold();
         }
