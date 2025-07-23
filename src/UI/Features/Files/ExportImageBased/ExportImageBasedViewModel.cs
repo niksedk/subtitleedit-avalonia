@@ -95,7 +95,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         SelectedFontSize = 20;
         Resolutions = new ObservableCollection<ResolutionItem>(ResolutionItem.GetResolutions());
         SelectedResolution = Resolutions.FirstOrDefault(r => r.Width == 1920 && r.Height == 1080);
-        TopBottomMargins = new ObservableCollection<int> (Enumerable.Range(0, 101));
+        TopBottomMargins = new ObservableCollection<int>(Enumerable.Range(0, 101));
         SelectedTopBottomMargin = 10;
         LeftRightMargins = new ObservableCollection<int>(Enumerable.Range(0, 101));
         SelectedLeftRightMargin = 10;
@@ -326,7 +326,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         SubtitleLineViewModel? subtitle = Subtitles[i];
         var imageParameter = new ImageParameter
         {
-            Alignment = ExportAlignment.BottomCenter,
+            Alignment = SelectedAlignment.Alignment,
             ContentAlignment = SelectedContentAlignment.ContentAlignment,
             PaddingLeftRight = SelectedPaddingLeftRight,
             PaddingTopBottom = SelectedPaddingTopBottom,
@@ -357,6 +357,24 @@ public partial class ExportImageBasedViewModel : ObservableObject
     [RelayCommand]
     private void ChangeFontColor()
     {
+    }
+
+    [RelayCommand]
+    private async Task SavePreview()
+    {
+        if (BitmapPreview == null || SelectedSubtitle == null)
+        {
+            return;
+        }
+
+        var imageIndex = Subtitles.IndexOf(SelectedSubtitle!);
+        var fileName = await _fileHelper.PickSaveSubtitleFile(Window!, ".png", $"image{imageIndex}", Se.Language.General.SaveImageAs);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        BitmapPreview.Save(fileName, 100);
     }
 
     private void Close()
@@ -413,7 +431,54 @@ public partial class ExportImageBasedViewModel : ObservableObject
         var idx = Subtitles.IndexOf(selected);
         var ip = GetImageParameter(idx);
         BitmapPreview = GenerateBitmap(ip).ToAvaloniaBitmap();
-        ImageInfo = $"{BitmapPreview.Size.Width}x{BitmapPreview.Size.Height}";
+        var position = CalculatePosition(ip, BitmapPreview.Size.Width, BitmapPreview.Size.Height);
+        ImageInfo = $"{BitmapPreview.Size.Width}x{BitmapPreview.Size.Height} @ {position.X},{position.Y}";
+    }
+
+    private static SKPointI CalculatePosition(ImageParameter ip, double width, double height)
+    {
+        var x = 0;
+        var y = 0;
+
+        if (ip.Alignment == ExportAlignment.TopLeft ||
+            ip.Alignment == ExportAlignment.MiddleLeft ||
+            ip.Alignment == ExportAlignment.BottomLeft)
+        {
+            x = (int)ip.LeftRightMargin;
+        }
+        else if (ip.Alignment == ExportAlignment.TopCenter ||
+                 ip.Alignment == ExportAlignment.MiddleCenter ||
+                 ip.Alignment == ExportAlignment.BottomCenter)
+        {
+            x = (int)((ip.ScreenWidth - width) / 2);
+        }
+        else if (ip.Alignment == ExportAlignment.TopRight ||
+                 ip.Alignment == ExportAlignment.MiddleRight ||
+                 ip.Alignment == ExportAlignment.BottomRight)
+        {
+            x = (int)(ip.ScreenWidth - width - ip.LeftRightMargin);
+        }
+
+        if (ip.Alignment == ExportAlignment.TopLeft ||
+            ip.Alignment == ExportAlignment.TopCenter ||
+            ip.Alignment == ExportAlignment.TopRight)
+        {
+            y = (int)ip.BottomTopMargin;
+        }
+        else if (ip.Alignment == ExportAlignment.MiddleLeft ||
+                 ip.Alignment == ExportAlignment.MiddleCenter ||
+                 ip.Alignment == ExportAlignment.MiddleRight)
+        {
+            y = (int)((ip.ScreenHeight - height) / 2);
+        }
+        else if (ip.Alignment == ExportAlignment.BottomLeft ||
+                 ip.Alignment == ExportAlignment.BottomCenter ||
+                 ip.Alignment == ExportAlignment.BottomRight)
+        {
+            y = (int)(ip.ScreenHeight - height - ip.BottomTopMargin);
+        }
+
+        return new SKPointI(x, y);
     }
 
     private SKBitmap GenerateBitmap(ImageParameter ip)
@@ -641,7 +706,6 @@ public partial class ExportImageBasedViewModel : ObservableObject
 
         return bitmap;
     }
-
 
     private static SKFont GetFont(TextSegment segment, SKFont regular, SKFont bold, SKFont italic, SKFont boldItalic)
     {

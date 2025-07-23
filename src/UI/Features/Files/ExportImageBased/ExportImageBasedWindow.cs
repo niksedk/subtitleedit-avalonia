@@ -438,7 +438,7 @@ public class ExportImageBasedWindow : Window
         return UiUtil.MakeBorderForControl(grid);
     }
 
-    private Border MakePreviewView(ExportImageBasedViewModel vm)
+    private static Border MakePreviewView(ExportImageBasedViewModel vm)
     {
         var grid = new Grid
         {
@@ -470,14 +470,26 @@ public class ExportImageBasedWindow : Window
         {
             HorizontalAlignment = HorizontalAlignment.Right,
             VerticalAlignment = VerticalAlignment.Top,
+            Background = UiUtil.GetBorderColor(),
+            Opacity = 0.8,
             Children =
             {
                 UiUtil.MakeBorderForControl(labelImageInfo),
             }
-        };  
+        };
 
+        var buttonButtonSavePreview = new Button
+        {
+            Content = Se.Language.General.SaveDotDotDot,
+            Command = vm.SavePreviewCommand,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            Opacity = 0.8,
+        };
+            
         grid.Add(imagePreview, 0);
         grid.Add(panelImageInfo, 0);
+        grid.Add(buttonButtonSavePreview, 0);
 
         return UiUtil.MakeBorderForControl(grid).WithHeight(204);
     }

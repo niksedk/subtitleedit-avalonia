@@ -218,11 +218,13 @@ public class LanguageGeneral
     public string BoxColor { get; set; }
     public string OutlineWidth { get; set; }
     public string BoxCornerRadius { get; set; }
+    public string SaveDotDotDot { get; set; }
     public string SavingDotDotDot { get; set; }
     public string GeneratingImageXofY { get; set; }
     public string Profile { get; set; }
     public object VideoPosition { get; set; }
     public string Padding { get; set; }
+    public string SaveImageAs { get; set; }
 
     public LanguageGeneral()
     {
@@ -441,9 +443,11 @@ public class LanguageGeneral
         OutlineWidth = "Outline width";
         BoxCornerRadius = "Box corner radius";
         SavingDotDotDot = "Saving...";
+        SaveDotDotDot = "Save...";
         GeneratingImageXofY = "Generating image {0:#,##0} of {1:#,##0}...";
         VideoPosition = "Video position";
         Profile =  "Profile";
         Padding = "Padding";
+        SaveImageAs = "Save image as";
     }
 }
