@@ -1162,6 +1162,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
             SelectedBoxCornerRadius = profile.BackgroundCornerRadius;
             SelectedPaddingLeftRight = profile.PaddingLeftRight;
             SelectedPaddingTopBottom = profile.PaddingTopBottom;
+            SelectedLineSpacing = profile.LineSpacingPercent;
         }
     }
 
@@ -1187,6 +1188,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
             profile.BackgroundCornerRadius = SelectedBoxCornerRadius;
             profile.PaddingLeftRight = SelectedPaddingLeftRight;
             profile.PaddingTopBottom = SelectedPaddingTopBottom;
+            profile.LineSpacingPercent = SelectedLineSpacing;   
         }
     }
 }

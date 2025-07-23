@@ -34,6 +34,7 @@ public class SeExportImagesProfile
     public double FramesPerSecond { get; set; }
     public int PaddingLeftRight { get; set; }
     public int PaddingTopBottom { get; set; }
+    public int LineSpacingPercent { get; set; }
 
     public SeExportImagesProfile()
     {
@@ -56,6 +57,7 @@ public class SeExportImagesProfile
         Error = string.Empty;
         FramesPerSecond = 25;
         OverridePosition = string.Empty;
+        LineSpacingPercent = 17;
     }
 
     public override string ToString()
