@@ -7,10 +7,13 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Projektanker.Icons.Avalonia;
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
 
@@ -69,17 +72,17 @@ public class SettingsPage : UserControl
             Margin = new Thickness(10, 10, 40, 10),
             Children =
             {
-                UiUtil.MakeMenuItem(Se.Language.General.Rules, vm.ScrollToSectionCommand, "Rules", IconNames.MdiPoliceBadge),
-                UiUtil.MakeMenuItem(Se.Language.General.General, vm.ScrollToSectionCommand, "General", IconNames.MdiCogs),
-                UiUtil.MakeMenuItem(Se.Language.General.SubtitleFormat, vm.ScrollToSectionCommand, "Subtitle formats", IconNames.MdiClosedCaption),
-                UiUtil.MakeMenuItem(Se.Language.Options.Settings.SyntaxColoring, vm.ScrollToSectionCommand, "Syntax coloring", IconNames.MdiPalette),
-                UiUtil.MakeMenuItem(Se.Language.General.VideoPlayer, vm.ScrollToSectionCommand, "Video player", IconNames.MdiPlayBox),
-                UiUtil.MakeMenuItem(Se.Language.Options.Settings.WaveformSpectrogram, vm.ScrollToSectionCommand, "Waveform/spectrogram", IconNames.MdiWaveform),
-                UiUtil.MakeMenuItem(Se.Language.General.Tools, vm.ScrollToSectionCommand, "Tools", IconNames.MdiTools),
-                UiUtil.MakeMenuItem(Se.Language.General.Toolbar, vm.ScrollToSectionCommand, "Toolbar", IconNames.MdiDotsHorizontal),
-                UiUtil.MakeMenuItem(Se.Language.General.Appearance, vm.ScrollToSectionCommand, "Appearance", IconNames.MdiEyeSettings),
-                UiUtil.MakeMenuItem(Se.Language.Options.Settings.Network, vm.ScrollToSectionCommand, "Network", IconNames.MdiNetwork),
-                UiUtil.MakeMenuItem(Se.Language.Options.Settings.FileTypeAssociations, vm.ScrollToSectionCommand, "File type associations", IconNames.MdiFileCog),
+                MakeMenuItem(Se.Language.General.Rules, vm.ScrollToSectionCommand, IconNames.MdiPoliceBadge),
+                MakeMenuItem(Se.Language.General.General, vm.ScrollToSectionCommand,  IconNames.MdiCogs),
+                MakeMenuItem(Se.Language.General.SubtitleFormats, vm.ScrollToSectionCommand, IconNames.MdiClosedCaption),
+                MakeMenuItem(Se.Language.Options.Settings.SyntaxColoring, vm.ScrollToSectionCommand, IconNames.MdiPalette),
+                MakeMenuItem(Se.Language.General.VideoPlayer, vm.ScrollToSectionCommand, IconNames.MdiPlayBox),
+                MakeMenuItem(Se.Language.Options.Settings.WaveformSpectrogram, vm.ScrollToSectionCommand,  IconNames.MdiWaveform),
+                MakeMenuItem(Se.Language.General.Tools, vm.ScrollToSectionCommand,  IconNames.MdiTools),
+                MakeMenuItem(Se.Language.General.Toolbar, vm.ScrollToSectionCommand,  IconNames.MdiDotsHorizontal),
+                MakeMenuItem(Se.Language.General.Appearance, vm.ScrollToSectionCommand,  IconNames.MdiEyeSettings),
+                MakeMenuItem(Se.Language.Options.Settings.Network, vm.ScrollToSectionCommand,  IconNames.MdiNetwork),
+                MakeMenuItem(Se.Language.Options.Settings.FileTypeAssociations, vm.ScrollToSectionCommand, IconNames.MdiFileCog),
             }
         };
 
@@ -103,6 +106,33 @@ public class SettingsPage : UserControl
         UpdateVisibleSections(string.Empty);
 
         _searchBox.TextChanged += (_, e) => UpdateVisibleSections(_searchBox.Text ?? string.Empty);
+    }
+
+    public static Button MakeMenuItem(string text, IRelayCommand command, string iconName)
+    {
+        var commandParameter = text;
+        var label = new Label { Content = text, Padding = new Thickness(4, 0, 0, 0) };
+        var image = new ContentControl();
+        Attached.SetIcon(image, iconName);
+        var stackPanelApplyFixes = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Children = { image, label }
+        };
+
+        var link = new Button
+        {
+            Content = stackPanelApplyFixes,
+            FontWeight = FontWeight.DemiBold,
+            Margin = new Thickness(0),
+            Padding = new Thickness(10, 5, 10, 5),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            Command = command,
+            CommandParameter = commandParameter,
+        };
+
+        return link;
     }
 
     private void UpdateVisibleSections(string filter)

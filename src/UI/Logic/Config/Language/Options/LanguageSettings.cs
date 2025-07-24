@@ -119,7 +119,7 @@ public class LanguageSettings
 
         SearchSettingsDotDoDot = "Search for settings...";
         SyntaxColoring = "Syntax coloring";
-        WaveformSpectrogram = "Waveform/Spectrogram";
+        WaveformSpectrogram = "Waveform/spectrogram";
         Network = "Network";
         FileTypeAssociations = "File type associations";
     }
