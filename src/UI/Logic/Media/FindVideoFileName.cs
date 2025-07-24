@@ -1,4 +1,6 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -8,12 +10,23 @@ public static class FindVideoFileName
 {
     public static bool TryFindVideoFileName(string inputFileName, out string videoFileName)
     {
+        return TryFindVideoFileNameInner(inputFileName, out videoFileName, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+    }
+
+    public static bool TryFindVideoFileNameInner(string inputFileName, out string videoFileName, HashSet<string> videoFileNamesTried)
+    {
         videoFileName = string.Empty;
 
         if (string.IsNullOrEmpty(inputFileName))
         {
             return false;
         }
+
+        if (videoFileNamesTried.Contains(inputFileName))
+        {
+            return false;
+        }
+        videoFileNamesTried.Add(inputFileName);
 
         foreach (var extension in Utilities.VideoFileExtensions.Concat(Utilities.AudioFileExtensions))
         {
