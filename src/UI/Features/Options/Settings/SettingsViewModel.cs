@@ -130,7 +130,7 @@ public partial class SettingsViewModel : ObservableObject
 
         var subtitleFormats = SubtitleFormat.AllSubtitleFormats;
         var defaultSubtitleFormats = new List<string>();
-        var saveSubtitleFormats = new List<string>() { "Auto" };
+        var saveSubtitleFormats = new List<string> { "Auto" };
         foreach (var format in subtitleFormats)
         {
             if (format.Name.StartsWith("Unknown", StringComparison.OrdinalIgnoreCase))
@@ -347,28 +347,9 @@ public partial class SettingsViewModel : ObservableObject
             }
 
             await Task.Yield(); // Ensures target has been laid out
-            //await FadeToAsync(ScrollView, 1, TimeSpan.FromMilliseconds(100));
             await RunFadeAnimation(ScrollView, from: 0, to: 1, TimeSpan.FromMilliseconds(200));
 
         }, DispatcherPriority.Background);
-    }
-
-    private static async Task FadeToAsync(Control control, double targetOpacity, TimeSpan duration)
-    {
-        double startOpacity = control.Opacity;
-        double delta = targetOpacity - startOpacity;
-        const int fps = 60;
-        int steps = (int)(duration.TotalSeconds * fps);
-        if (steps <= 0) steps = 1;
-
-        for (int i = 0; i <= steps; i++)
-        {
-            double progress = (double)i / steps;
-            control.Opacity = startOpacity + (delta * progress);
-            await Task.Delay((int)(1000.0 / fps));
-        }
-
-        control.Opacity = targetOpacity;
     }
 
     private static Task RunFadeAnimation(Control control, double from, double to, TimeSpan duration)
@@ -383,12 +364,12 @@ public partial class SettingsViewModel : ObservableObject
                 new KeyFrame
                 {
                     Cue = new Cue(0),
-                    Setters = { new Setter(Control.OpacityProperty, from) }
+                    Setters = { new Setter(Visual.OpacityProperty, from) }
                 },
                 new KeyFrame
                 {
                     Cue = new Cue(1),
-                    Setters = { new Setter(Control.OpacityProperty, to) }
+                    Setters = { new Setter(Visual.OpacityProperty, to) }
                 }
             }
         };

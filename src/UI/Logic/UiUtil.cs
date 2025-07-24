@@ -461,33 +461,7 @@ public static class UiUtil
     {
         return new SolidColorBrush(Color.FromArgb(255, 30, 144, 255));
     }
-
-    public static Button MakeMenuItem(string text, IRelayCommand command, object commandParameter, string iconName)
-    {
-        var label = new Label() { Content = text, Padding = new Thickness(4, 0, 0, 0) };
-        var image = new ContentControl();
-        Attached.SetIcon(image, iconName);
-        var stackPanelApplyFixes = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            Children = { image, label }
-        };
-
-        var link = new Button
-        {
-            Content = stackPanelApplyFixes,
-            FontWeight = FontWeight.DemiBold,
-            Margin = new Thickness(0),
-            Padding = new Thickness(10, 5, 10, 5),
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Center,
-            Command = command,
-            CommandParameter = commandParameter,
-        };
-
-        return link;
-    }
-
+   
     public static TextBlock MakeLink(string text, IRelayCommand command, object viewModel, string propertyTextPath)
     {
         var link = new TextBlock
