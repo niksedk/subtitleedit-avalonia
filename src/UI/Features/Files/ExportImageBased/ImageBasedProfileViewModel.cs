@@ -17,6 +17,7 @@ public partial class ImageBasedProfileViewModel : ObservableObject
     public ObservableCollection<ProfileDisplayItem> Profiles { get; set; }
     [ObservableProperty] private ProfileDisplayItem? _selectedProfile;
     [ObservableProperty] private bool _isProfileSelected;
+    [ObservableProperty] private bool _isProfileDeleteEnabled;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -40,6 +41,8 @@ public partial class ImageBasedProfileViewModel : ObservableObject
         SelectedProfile =
             Profiles.FirstOrDefault(p => p.Name.Equals(selectedProfile?.ProfileName, StringComparison.OrdinalIgnoreCase))
             ?? Profiles.FirstOrDefault();
+
+        IsProfileDeleteEnabled = Profiles.Count > 1;
     }
 
     [RelayCommand]
@@ -50,6 +53,7 @@ public partial class ImageBasedProfileViewModel : ObservableObject
         SelectedProfile = newProfile;
 
         Dispatcher.UIThread.Invoke(() => { ProfileNameTextBox.Focus(); });
+        IsProfileDeleteEnabled = Profiles.Count > 1;
     }
 
     [RelayCommand]
@@ -62,6 +66,7 @@ public partial class ImageBasedProfileViewModel : ObservableObject
 
         Profiles.Remove(profile);
         SelectedProfile = Profiles.Count > 0 ? Profiles[0] : null;
+        IsProfileDeleteEnabled = Profiles.Count > 1;
     }
 
     [RelayCommand]

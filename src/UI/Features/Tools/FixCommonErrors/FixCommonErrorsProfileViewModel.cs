@@ -18,6 +18,7 @@ public partial class FixCommonErrorsProfileViewModel : ObservableObject
     public ObservableCollection<ProfileDisplayItem> Profiles { get; set; }
     [ObservableProperty] private ProfileDisplayItem? _selectedProfile;
     [ObservableProperty] private bool _isProfileSelected;
+    [ObservableProperty] private bool _isProfileDeleteEnabled;
 
     public Window? Window { get; set; }
 
@@ -58,6 +59,8 @@ public partial class FixCommonErrorsProfileViewModel : ObservableObject
 
         SelectedProfile = Profiles.FirstOrDefault(p => p.Name.Equals(selectedProfileName, StringComparison.OrdinalIgnoreCase)) 
                           ?? Profiles.FirstOrDefault();
+        
+        IsProfileDeleteEnabled = Profiles.Count > 1;
     }
 
     [RelayCommand]
@@ -70,6 +73,7 @@ public partial class FixCommonErrorsProfileViewModel : ObservableObject
         Dispatcher.UIThread.Invoke(() =>
         {
             ProfileNameTextBox.Focus();
+            IsProfileDeleteEnabled = Profiles.Count > 1;
         });
     }
 
@@ -83,6 +87,7 @@ public partial class FixCommonErrorsProfileViewModel : ObservableObject
 
         Profiles.Remove(profile);
         SelectedProfile = Profiles.Count > 0 ? Profiles[0] : null;
+        IsProfileDeleteEnabled = Profiles.Count > 1;
     }
 
     [RelayCommand]
