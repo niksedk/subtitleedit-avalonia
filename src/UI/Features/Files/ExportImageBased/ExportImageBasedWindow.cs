@@ -507,7 +507,7 @@ public class ExportImageBasedWindow : Window
             }
         };
 
-        var buttonButtonSavePreview = new Button
+        var buttonSavePreview = new Button
         {
             Content = Se.Language.General.SaveDotDotDot,
             Command = vm.SavePreviewCommand,
@@ -515,10 +515,33 @@ public class ExportImageBasedWindow : Window
             VerticalAlignment = VerticalAlignment.Bottom,
             Opacity = 0.8,
         };
-            
+
+        var buttonShowPreview = new Button
+        {
+            Content = Se.Language.General.ShowPreview,
+            Command = vm.ShowPreviewCommand,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            Opacity = 0.8,
+        };
+
+        var panelButtons = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            Spacing = 5,
+            Children =
+            {
+                buttonSavePreview,
+                buttonShowPreview
+            }
+        };
+
+
         grid.Add(imagePreview, 0);
         grid.Add(panelImageInfo, 0);
-        grid.Add(buttonButtonSavePreview, 0);
+        grid.Add(panelButtons, 0);
 
         return UiUtil.MakeBorderForControl(grid).WithHeight(204);
     }

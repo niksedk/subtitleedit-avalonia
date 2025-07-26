@@ -157,5 +157,6 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<ExportImageBasedViewModel>();
         collection.AddTransient<GoToVideoPositionViewModel>();
         collection.AddTransient<ImageBasedProfileViewModel>();
+        collection.AddTransient<ImageBasedPreviewViewModel>();
     }
 }

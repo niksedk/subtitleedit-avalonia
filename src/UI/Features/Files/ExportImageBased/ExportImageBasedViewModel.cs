@@ -477,6 +477,24 @@ public partial class ExportImageBasedViewModel : ObservableObject
         BitmapPreview.Save(fileName, 100);
     }
 
+
+    [RelayCommand]
+    private async Task ShowPreview()
+    {
+        if (BitmapPreview == null || SelectedSubtitle == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<ImageBasedPreviewWindow, ImageBasedPreviewViewModel>(Window!, vm =>
+        {
+            var ip = GetImageParameter(Subtitles.IndexOf(SelectedSubtitle!));
+            var bitmap = GenerateBitmap(ip);
+            var position = CalculatePosition(ip, bitmap.Width, bitmap.Height);
+            vm.Initialize(bitmap, ip.ScreenWidth, ip.ScreenHeight, position.X, position.Y);
+        });
+    }
+
     private void Close()
     {
         Dispatcher.UIThread.Post(() => { Window?.Close(); });
@@ -1272,6 +1290,20 @@ public partial class ExportImageBasedViewModel : ObservableObject
         else if (e.Key == Key.B && _isCtrlDown)
         {
             ToggleLinesBold();
+        }
+        else if (e.Key == Key.P && _isCtrlDown)
+        {
+            Dispatcher.UIThread.Post(async void () =>
+            {
+                try
+                {
+                    await ShowPreview();
+                }
+                catch (Exception exception)
+                {
+                    Se.LogError(exception);
+                }
+            });
         }
     }
 
