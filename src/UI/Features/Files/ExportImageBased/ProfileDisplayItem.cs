@@ -8,12 +8,6 @@ public partial class ProfileDisplayItem : ObservableObject
     [ObservableProperty] private bool _isSelected;
     public object Profile { get; set; }
 
-    public ProfileDisplayItem(string displayName, bool isSelected)
-    {
-        Name = displayName;
-        IsSelected = isSelected;
-    }
-
     public ProfileDisplayItem(string displayName, bool isSelected, object profile)
     {
         Name = displayName;

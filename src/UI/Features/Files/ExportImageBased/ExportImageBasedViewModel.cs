@@ -82,8 +82,6 @@ public partial class ExportImageBasedViewModel : ObservableObject
     private bool _subtitleGridSelectionChangedSkip;
     private readonly Lock _generateLock;
     private bool _isCtrlDown;
-    private bool _isAltDown;
-    private bool _isShiftDown;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly System.Timers.Timer _timerUpdatePreview;
     private readonly IFileHelper _fileHelper;
@@ -1194,17 +1192,9 @@ public partial class ExportImageBasedViewModel : ObservableObject
             e.Handled = true;
             Close();
         }
-        else if (e.Key == Key.LeftAlt || e.Key == Key.RightAlt)
-        {
-            _isAltDown = true;
-        }
         else if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
         {
             _isCtrlDown = true;
-        }
-        else if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
-        {
-            _isShiftDown = true;
         }
         else if (e.Key == Key.I && _isCtrlDown)
         {
@@ -1217,20 +1207,10 @@ public partial class ExportImageBasedViewModel : ObservableObject
     }
 
     internal void OnKeyUp(KeyEventArgs e)
-    {
-        if (e.Key == Key.LeftAlt || e.Key == Key.RightAlt)
-        {
-            _isAltDown = false;
-            e.Handled = true;
-        }
-        else if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
+    { 
+        if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
         {
             _isCtrlDown = false;
-            e.Handled = true;
-        }
-        else if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
-        {
-            _isShiftDown = false;
             e.Handled = true;
         }
     }
