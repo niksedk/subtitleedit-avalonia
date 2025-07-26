@@ -634,7 +634,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         var lines = SplitIntoLines(segments);
         var fontMetrics = regularFont.Metrics;
 
-        // IMPROVED: Measure actual text bounds instead of using font metrics
+        // Measure actual text bounds instead of using font metrics
         float maxWidth = 0;
         float minY = float.MaxValue; // Highest point of any text
         float maxY = float.MinValue; // Lowest point of any text
@@ -681,7 +681,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         // Calculate actual text height from measured bounds
         var actualTextHeight = lines.Count > 0 ? maxY - minY : 0;
 
-        // IMPROVED: Calculate precise content area and effects padding
+        // Calculate precise content area and effects padding
         var effectsPadding = (float)Math.Max(outlineWidth, shadowWidth);
         var paddingLeftRight = (float)ip.PaddingLeftRight;
         var paddingTopBottom = (float)ip.PaddingTopBottom;
@@ -709,7 +709,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
             IsAntialias = true,
         };
 
-        // IMPROVED: Define the rounded rectangle with proper bounds
+        // Define the rounded rectangle with proper bounds
         // The background box should cover the content area, positioned to account for effects
         var boxRect = new SKRect(
             effectsPadding,
@@ -722,7 +722,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         // Draw the rounded rectangle
         canvas.DrawRoundRect(boxRect, cornerRadius, cornerRadius, paint);
 
-        // IMPROVED: Calculate precise text positioning
+        // Calculate precise text positioning
         // Start position accounts for effects padding + specified padding
         var textStartX = effectsPadding + paddingLeftRight;
         // Position text baseline to account for the measured minY offset
@@ -771,7 +771,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                             Style = SKPaintStyle.Stroke,
                             StrokeWidth = (float)outlineWidth,
                             StrokeJoin = SKStrokeJoin.Round,
-                            StrokeCap = SKStrokeCap.Round
+                            StrokeCap = SKStrokeCap.Round,
                         };
 
                         canvas.DrawText(segment.Text, shadowOffsetX, shadowOffsetY, currentFont, shadowOutlinePaint);
@@ -781,7 +781,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                     {
                         Color = shadowColor,
                         IsAntialias = true,
-                        Style = SKPaintStyle.Fill
+                        Style = SKPaintStyle.Fill,
                     };
 
                     canvas.DrawText(segment.Text, shadowOffsetX, shadowOffsetY, currentFont, shadowTextPaint);
@@ -797,7 +797,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                         Style = SKPaintStyle.Stroke,
                         StrokeWidth = (float)outlineWidth,
                         StrokeJoin = SKStrokeJoin.Round,
-                        StrokeCap = SKStrokeCap.Round
+                        StrokeCap = SKStrokeCap.Round,
                     };
 
                     canvas.DrawText(segment.Text, currentX, textStartY + currentY, currentFont, outlinePaint);
@@ -808,7 +808,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                 {
                     Color = segment.Color,
                     IsAntialias = true,
-                    Style = SKPaintStyle.Fill
+                    Style = SKPaintStyle.Fill,
                 };
 
                 canvas.DrawText(segment.Text, currentX, textStartY + currentY, currentFont, textPaint);
