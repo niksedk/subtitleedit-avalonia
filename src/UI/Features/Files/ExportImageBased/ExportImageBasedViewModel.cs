@@ -497,6 +497,25 @@ public partial class ExportImageBasedViewModel : ObservableObject
         }
 
         SelectedSubtitle = Subtitles.FirstOrDefault();
+
+        if (!string.IsNullOrEmpty(videoFileName))
+        {
+            _ = Task.Run(() =>
+            {
+                var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
+                if (mediaInfo?.Dimension is { Width: > 0, Height: > 0 })
+                {
+                    var resolutionItem = new ResolutionItem(string.Empty, mediaInfo.Dimension.Width, mediaInfo.Dimension.Height);
+
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        Resolutions.Insert(1, resolutionItem);
+                        SelectedResolution = resolutionItem;
+                        _dirty = true;
+                    });
+                }
+            });
+        }
     }
 
     private void SubtitleLineChanged()
@@ -1143,14 +1162,21 @@ public partial class ExportImageBasedViewModel : ObservableObject
                     return;
                 }
 
-                var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
-                if (mediaInfo?.Dimension is { Width: > 0, Height: > 0 })
+                _ = Task.Run(() =>
                 {
-                    var resolutionItem = new ResolutionItem(string.Empty, mediaInfo.Dimension.Width, mediaInfo.Dimension.Height);
-                    Resolutions.Insert(1, resolutionItem);
-                    SelectedResolution = resolutionItem;
-                    _dirty = true;
-                }
+                    var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
+                    if (mediaInfo?.Dimension is { Width: > 0, Height: > 0 })
+                    {
+                        var resolutionItem = new ResolutionItem(string.Empty, mediaInfo.Dimension.Width, mediaInfo.Dimension.Height);
+
+                        Dispatcher.UIThread.Post(() =>
+                        {
+                            Resolutions.Insert(1, resolutionItem);
+                            SelectedResolution = resolutionItem;
+                            _dirty = true;
+                        });
+                    }
+                });
             }
             catch (Exception exception)
             {
