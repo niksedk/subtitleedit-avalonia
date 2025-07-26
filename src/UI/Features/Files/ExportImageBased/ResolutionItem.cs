@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 
@@ -26,7 +27,19 @@ public partial class ResolutionItem : ObservableObject
 
     private void SetDisplayName(string name)
     {
-        DisplayName = $"{name} - {Width}x{Height}";
+        if (Width > 0 && Height > 0)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                DisplayName = $"{Width}x{Height}";
+                return;
+            }
+
+            DisplayName = $"{name} - {Width}x{Height}";
+            return;
+        }
+        
+        DisplayName = name; 
     }
 
     public ResolutionItem(string name, int width, int height)
@@ -40,6 +53,8 @@ public partial class ResolutionItem : ObservableObject
 
     public static IEnumerable<ResolutionItem> GetResolutions()
     {
+        yield return new ResolutionItem(Se.Language.General.PickResolutionFromVideoDotDotDot, 0, 0);
+        
         yield return new ResolutionItem("4K DCI", 4096, 2160);
         yield return new ResolutionItem("4K UHD", 3840, 2160);
         yield return new ResolutionItem("2K WQHD", 2560, 1440);

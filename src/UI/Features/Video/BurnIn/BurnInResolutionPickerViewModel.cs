@@ -44,7 +44,7 @@ public partial class BurnInResolutionPickerViewModel : ObservableObject
 
     internal void ResolutionItemClicked(ResolutionItem item)
     {
-        if (item.IsSeperator)
+        if (item.IsSeparator)
         {
             return; // ignore separators
         }

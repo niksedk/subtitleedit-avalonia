@@ -7,8 +7,6 @@ using Avalonia.Skia;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DynamicData;
-using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Shared;
@@ -100,7 +98,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         FontSizes = new ObservableCollection<int>(Enumerable.Range(15, 486));
         SelectedFontSize = 26;
         Resolutions = new ObservableCollection<ResolutionItem>(ResolutionItem.GetResolutions());
-        SelectedResolution = Resolutions.FirstOrDefault(r => r.Width == 1920 && r.Height == 1080);
+        SelectedResolution = Resolutions.FirstOrDefault(r => r.Width == 1920);
         TopBottomMargins = new ObservableCollection<int>(Enumerable.Range(0, 101));
         SelectedTopBottomMargin = 10;
         LeftRightMargins = new ObservableCollection<int>(Enumerable.Range(0, 101));
@@ -430,7 +428,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
 
     private ImageParameter GetImageParameter(int i)
     {
-        SubtitleLineViewModel? subtitle = Subtitles[i];
+        var subtitle = Subtitles[i];
         var imageParameter = new ImageParameter
         {
             Alignment = SelectedAlignment.Alignment,
@@ -459,11 +457,6 @@ public partial class ExportImageBasedViewModel : ObservableObject
         };
 
         return imageParameter;
-    }
-
-    [RelayCommand]
-    private void ChangeFontColor()
-    {
     }
 
     [RelayCommand]
@@ -1114,6 +1107,56 @@ public partial class ExportImageBasedViewModel : ObservableObject
     internal void ColorChanged(object? sender, ColorChangedEventArgs e)
     {
         _dirty = true;
+    }
+    
+    public void ComboResolutionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        _dirty = true;
+        var res = SelectedResolution;
+        if (res == null)
+        {
+            return;
+        }
+
+        _dirty = true;
+        if (res is { Width: > 0, Height: > 0 })
+        {
+            return;
+        }
+
+        Dispatcher.UIThread.Post(async void () =>
+        {
+            try
+            {
+                var videoFileName = await _fileHelper.PickOpenVideoFile(Window!, Se.Language.General.OpenVideoFileTitle);
+                if (string.IsNullOrWhiteSpace(videoFileName))
+                {
+                    if (e.RemovedItems.Count > 0 && e.RemovedItems[0] is ResolutionItem item)
+                    {
+                        SelectedResolution = item;
+                    }
+                    else
+                    {
+                        SelectedResolution = Resolutions.FirstOrDefault(p => p.Width == 1920);
+                    }
+
+                    return;
+                }
+
+                var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
+                if (mediaInfo?.Dimension is { Width: > 0, Height: > 0 })
+                {
+                    var resolutionItem = new ResolutionItem(string.Empty, mediaInfo.Dimension.Width, mediaInfo.Dimension.Height);
+                    Resolutions.Insert(1, resolutionItem);
+                    SelectedResolution = resolutionItem;
+                    _dirty = true;
+                }
+            }
+            catch (Exception exception)
+            {
+                Se.LogError(exception);
+            }
+        });
     }
 
     internal void OnClosing()

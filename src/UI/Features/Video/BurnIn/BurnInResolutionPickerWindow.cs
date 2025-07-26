@@ -33,7 +33,7 @@ public class BurnInResolutionPickerWindow : Window
             [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedResolution)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
             ItemTemplate = new FuncDataTemplate<ResolutionItem>((item, namescope) =>
             {
-                if (item.IsSeperator)
+                if (item.IsSeparator)
                 {
                     return new Separator
                     {
@@ -70,7 +70,7 @@ public class BurnInResolutionPickerWindow : Window
 
         listBoxResolutions.SelectionChanged += (s, e) =>
         {
-            if (listBoxResolutions.SelectedItem is ResolutionItem selected && selected.IsSeperator)
+            if (listBoxResolutions.SelectedItem is ResolutionItem selected && selected.IsSeparator)
             {
                 listBoxResolutions.SelectedItem = null;
             }
@@ -80,7 +80,7 @@ public class BurnInResolutionPickerWindow : Window
         {
             if (e.Key == Key.Enter)
             {
-                if (listBoxResolutions.SelectedItem is ResolutionItem selected && !selected.IsSeperator)
+                if (listBoxResolutions.SelectedItem is ResolutionItem selected && !selected.IsSeparator)
                 {
                     vm.ResolutionItemClicked(selected);
                     e.Handled = true; 

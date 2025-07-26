@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Video.BurnIn;
 
@@ -11,7 +12,7 @@ public partial class ResolutionItem : ObservableObject
     public string DisplayName { get; set; }
     public int Width { get; set; }
     public int Height { get; set; }
-    public bool IsSeperator => ItemType == ResolutionItemType.Separator;
+    public bool IsSeparator => ItemType == ResolutionItemType.Separator;
 
     [ObservableProperty] private Color _backgroundColor;
 
@@ -23,15 +24,6 @@ public partial class ResolutionItem : ObservableObject
         Name = name;
         ItemType = itemType;
         BackgroundColor = Colors.Transparent;
-        // if (itemType == ResolutionItemType.Separator)
-        // {
-        //     TextColor = (Color)Application.Current!.Resources[ThemeNames.BorderColor]; // disabled color?
-        // }
-        // else
-        // {
-        //     TextColor = (Color)Application.Current!.Resources[ThemeNames.TextColor];
-        // }
-
         SetDisplayName(name, itemType);
     }
 
@@ -48,15 +40,14 @@ public partial class ResolutionItem : ObservableObject
         Width = width;
         Height = height;
         BackgroundColor = Colors.Transparent;
-        //TextColor = (Color)Application.Current!.Resources[ThemeNames.TextColor];
         SetDisplayName(name, ResolutionItemType.Resolution);
     }
 
 
     public static IEnumerable<ResolutionItem> GetResolutions()
     {
-        yield return new ResolutionItem("Use source resolution", ResolutionItemType.UseSource);
-        yield return new ResolutionItem("Pick resolution from video...", ResolutionItemType.PickResolution);
+        yield return new ResolutionItem( Se.Language.General.UseSourceResolution, ResolutionItemType.UseSource);
+        yield return new ResolutionItem( Se.Language.General.PickResolutionFromVideoDotDotDot, ResolutionItemType.PickResolution);
         yield return new ResolutionItem("Landscape modes", ResolutionItemType.Separator);
         yield return new ResolutionItem("4K DCI - Aspect Ratio 16∶9", 4096, 2160);
         yield return new ResolutionItem("4K UHD - Aspect Ratio 16∶9", 3840, 2160);

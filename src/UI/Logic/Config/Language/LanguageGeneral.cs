@@ -228,6 +228,8 @@ public class LanguageGeneral
     public string NewProfile { get; set; }
     public string ProfileName { get; set; }
     public string EnterProfileName { get; set; }
+    public string PickResolutionFromVideoDotDotDot { get; set; }
+    public string UseSourceResolution { get; set; }
 
     public LanguageGeneral()
     {
@@ -455,5 +457,7 @@ public class LanguageGeneral
         NewProfile = "New profile";
         ProfileName = "Profile name";
         EnterProfileName = "Enter profile name";
+        PickResolutionFromVideoDotDotDot = "Pick resolution from video...";
+        UseSourceResolution = "Use source resolution";
     }
 }

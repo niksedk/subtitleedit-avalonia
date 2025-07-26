@@ -924,7 +924,7 @@ public partial class BurnInViewModel : ObservableObject
 
         if (result.SelectedResolution.ItemType == ResolutionItemType.PickResolution)
         {
-            var videoFileName = await _fileHelper.PickOpenVideoFile(Window!, "Open video file");
+            var videoFileName = await _fileHelper.PickOpenVideoFile(Window!, Se.Language.General.OpenVideoFileTitle);
             if (string.IsNullOrWhiteSpace(videoFileName))
             {
                 return;

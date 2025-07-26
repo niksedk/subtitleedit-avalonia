@@ -286,24 +286,6 @@ public class Se
         }
     }
 
-    public static void WriteWhisperLog(string log)
-    {
-        try
-        {
-            var filePath = GetWhisperLogFilePath();
-            using var writer = new StreamWriter(filePath, true, Encoding.UTF8);
-            writer.WriteLine("-----------------------------------------------------------------------------");
-            writer.WriteLine($"Date: {DateTime.Now.ToString(CultureInfo.InvariantCulture)}");
-            writer.WriteLine($"SE: {GetSeInfo()}");
-            writer.WriteLine(log);
-            writer.WriteLine();
-        }
-        catch
-        {
-            // ignore
-        }
-    }
-
     private static string GetSeInfo()
     {
         try
@@ -315,11 +297,6 @@ public class Se
         {
             return string.Empty;
         }
-    }
-
-    public static string GetWhisperLogFilePath()
-    {
-        return Path.Combine(DataFolder, "whisper_log.txt");
     }
 
     private static void UpdateLibSeSettings()
@@ -354,5 +331,52 @@ public class Se
         Configuration.Settings.Tools.VoskPostProcessing = tts.PostProcessing;
 
         Configuration.Settings.Tools.AutoTranslateLastName = Settings.AutoTranslate.AutoTranslateLastName;
+    }
+    
+    public static string GetErrorLogFilePath()
+    {
+        return Path.Combine(DataFolder, "error_log.txt");
+    }
+    
+    public static string GetWhisperLogFilePath()
+    {
+        return Path.Combine(DataFolder, "whisper_log.txt");
+    }
+
+    public static void WriteWhisperLog(string log)
+    {
+        try
+        {
+            var filePath = GetWhisperLogFilePath();
+            using var writer = new StreamWriter(filePath, true, Encoding.UTF8);
+            writer.WriteLine("-----------------------------------------------------------------------------");
+            writer.WriteLine($"Date: {DateTime.Now.ToString(CultureInfo.InvariantCulture)}");
+            writer.WriteLine($"SE: {GetSeInfo()}");
+            writer.WriteLine(log);
+            writer.WriteLine();
+        }
+        catch
+        {
+            // ignore
+        }
+    }
+    
+    public static void LogError(Exception exception)
+    {
+        try
+        {
+            var filePath = GetWhisperLogFilePath();
+            using var writer = new StreamWriter(filePath, true, Encoding.UTF8);
+            writer.WriteLine("-----------------------------------------------------------------------------");
+            writer.WriteLine($"Date: {DateTime.Now.ToString(CultureInfo.InvariantCulture)}");
+            writer.WriteLine($"SE: {GetSeInfo()}");
+            writer.WriteLine(exception.Message);
+            writer.WriteLine(exception.StackTrace);
+            writer.WriteLine();
+        }
+        catch
+        {
+            // ignore
+        }
     }
 }

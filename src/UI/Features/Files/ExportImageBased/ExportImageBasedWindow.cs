@@ -293,7 +293,7 @@ public class ExportImageBasedWindow : Window
 
         var labelResolution = UiUtil.MakeLabel(Se.Language.General.Resolution);
         var comboBoxResolution = UiUtil.MakeComboBox(vm.Resolutions, vm, nameof(vm.SelectedResolution));
-        comboBoxResolution.SelectionChanged += vm.ComboChanged;
+        comboBoxResolution.SelectionChanged += vm.ComboResolutionChanged;
 
         var labelLeftRightMargin = UiUtil.MakeLabel(Se.Language.File.Export.LeftRightMargin);
         var comboBoxLeftRightMargin = UiUtil.MakeComboBox(vm.LeftRightMargins, vm, nameof(vm.SelectedLeftRightMargin));
