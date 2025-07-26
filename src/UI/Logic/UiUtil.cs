@@ -10,6 +10,7 @@ using Avalonia.Styling;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
+using SkiaSharp;
 using System;
 using System.Collections.ObjectModel;
 
@@ -55,7 +56,7 @@ public static class UiUtil
         var app = Application.Current;
         if (app == null)
         {
-            new SolidColorBrush(Colors.Black, opacity);
+            return new SolidColorBrush(Colors.Black, opacity);
         }
 
         var theme = app!.ActualThemeVariant;
@@ -1387,5 +1388,58 @@ public static class UiUtil
         });
 
         return control;
+    }
+
+    private static bool IsDarkTheme()
+    {
+        var app = Application.Current;
+        if (app == null)
+        {
+            return false;
+        }
+
+        var theme = app!.ActualThemeVariant;
+        return theme == ThemeVariant.Dark;
+    }
+
+    public static void DrawCheckerboardBackground(SKCanvas canvas, int width, int height, int squareSize = 16)
+    {
+        // Define colors for the checkerboard pattern        
+        var lightColor = SKColor.Parse("#EEEEEE");
+        var darkColor = SKColor.Parse("#BBBBBB");
+
+        if (UiUtil.IsDarkTheme())
+        {
+            lightColor = SKColor.Parse("#333333"); // Darker color for light squares in dark theme
+            darkColor = SKColor.Parse("#555555"); // Lighter color for dark squares in dark theme
+        }
+
+        using (var lightPaint = new SKPaint { Color = lightColor, Style = SKPaintStyle.Fill })
+        using (var darkPaint = new SKPaint { Color = darkColor, Style = SKPaintStyle.Fill })
+        {
+            // Calculate number of squares needed
+            var cols = (int)Math.Ceiling((double)width / squareSize);
+            var rows = (int)Math.Ceiling((double)height / squareSize);
+
+            for (var row = 0; row < rows; row++)
+            {
+                for (var col = 0; col < cols; col++)
+                {
+                    // Determine if this square should be light or dark
+                    var isLight = (row + col) % 2 == 0;
+                    var paint = isLight ? lightPaint : darkPaint;
+
+                    // Calculate square position and size
+                    var rect = new SKRect(
+                        col * squareSize,
+                        row * squareSize,
+                        Math.Min((col + 1) * squareSize, width),
+                        Math.Min((row + 1) * squareSize, height)
+                    );
+
+                    canvas.DrawRect(rect, paint);
+                }
+            }
+        }
     }
 }

@@ -24,7 +24,7 @@ public partial class ImageBasedPreviewViewModel : ObservableObject
 
     public ImageBasedPreviewViewModel()
     {
-        _bitmapPreview = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
+        BitmapPreview = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
         Title = Se.Language.General.Preview;
         ImagePreview = new Image();
 
@@ -43,48 +43,13 @@ public partial class ImageBasedPreviewViewModel : ObservableObject
         var skBitmap = new SKBitmap(width, height, true);
         using (var canvas = new SKCanvas(skBitmap))
         {
-            DrawCheckerboardBackground(canvas, width, height);
+            UiUtil.DrawCheckerboardBackground(canvas, width, height);
             canvas.DrawBitmap(bitmap, x, y);
         }
 
         BitmapPreview = skBitmap.ToAvaloniaBitmap();
         _timerUpdatePreview.Start();
-    }
-
-    private void DrawCheckerboardBackground(SKCanvas canvas, int width, int height, int squareSize = 16)
-    {
-        // Define colors for the checkerboard pattern
-        var lightColor = SKColor.Parse("#EEEEEE"); 
-        var darkColor = SKColor.Parse("#BBBBBB"); 
-
-        using (var lightPaint = new SKPaint { Color = lightColor, Style = SKPaintStyle.Fill })
-        using (var darkPaint = new SKPaint { Color = darkColor, Style = SKPaintStyle.Fill })
-        {
-            // Calculate number of squares needed
-            var cols = (int)Math.Ceiling((double)width / squareSize);
-            var rows = (int)Math.Ceiling((double)height / squareSize);
-
-            for (var row = 0; row < rows; row++)
-            {
-                for (var col = 0; col < cols; col++)
-                {
-                    // Determine if this square should be light or dark
-                    var isLight = (row + col) % 2 == 0;
-                    var paint = isLight ? lightPaint : darkPaint;
-
-                    // Calculate square position and size
-                    var rect = new SKRect(
-                        col * squareSize,
-                        row * squareSize,
-                        Math.Min((col + 1) * squareSize, width),
-                        Math.Min((row + 1) * squareSize, height)
-                    );
-
-                    canvas.DrawRect(rect, paint);
-                }
-            }
-        }
-    }
+    }    
 
     [RelayCommand]
     private void Ok()

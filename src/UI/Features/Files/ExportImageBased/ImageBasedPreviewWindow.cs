@@ -16,6 +16,8 @@ public class ImageBasedPreviewWindow : Window
         Width = 1060;
         Height = 700;
         CanResize = true;
+        MinWidth = 720;
+        MinHeight = 480;
 
         _vm = vm;
         vm.Window = this;
