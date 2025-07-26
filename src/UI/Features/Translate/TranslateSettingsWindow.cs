@@ -4,6 +4,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Translate;
 
@@ -15,7 +16,7 @@ public class TranslateSettingsWindow : Window
     {
         _vm = vm;
         Icon = UiUtil.GetSeIcon();
-        Title = "Settings";
+        Title = Se.Language.General.Settings;
         Width = 750;
         MinWidth = 600;
         Height = 400;
@@ -42,6 +43,8 @@ public class TranslateSettingsWindow : Window
             Width = 150,
             VerticalAlignment = VerticalAlignment.Center,
             HorizontalAlignment = HorizontalAlignment.Left,
+            Increment = 1,
+            FormatString = "#,###,##0",
         };
         delayNumericUpDown.Bind(NumericUpDown.ValueProperty, new Binding
         {
@@ -71,15 +74,15 @@ public class TranslateSettingsWindow : Window
 
         var labelPrompt = UiUtil.MakeTextBlock("Prompt text", vm, null, nameof(vm.PromptIsVisible));
         var promptTextBox = new TextBox
-            {
-                AcceptsReturn = true,
-                AcceptsTab = true,
-                VerticalAlignment = VerticalAlignment.Stretch,
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                Width = double.NaN,
-                Height = double.NaN,
-                TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-            }.BindIsVisible(vm, nameof(vm.PromptIsVisible))
+        {
+            AcceptsReturn = true,
+            AcceptsTab = true,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            Width = double.NaN,
+            Height = double.NaN,
+            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+        }.BindIsVisible(vm, nameof(vm.PromptIsVisible))
             .BindText(vm, nameof(vm.PromptText));
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);

@@ -6,7 +6,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.AutoTranslate;
 using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.Translate;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
