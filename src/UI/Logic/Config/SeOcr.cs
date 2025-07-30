@@ -18,6 +18,8 @@ public class SeOcr
     public bool IsNewLetterItalic { get; set; }
     public bool SubmitOnFirstLetter { get; set; }
     public int NOcrNoOfLinesToAutoDraw { get; set; }
+    public string PaddleOcrMode { get; set; }
+    public string PaddleOcrLastLanguage { get; set; }
 
     public SeOcr()
     {
@@ -35,5 +37,8 @@ public class SeOcr
 
         GoogleVisionApiKey = "";
         GoogleVisionLanguage = "en";
+
+        PaddleOcrMode = "mobile";
+        PaddleOcrLastLanguage = "en";
     }
 }

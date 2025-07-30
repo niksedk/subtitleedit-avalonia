@@ -24,6 +24,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
@@ -63,6 +64,7 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private OcrLanguage? _selectedGoogleVisionLanguage;
     [ObservableProperty] private ObservableCollection<OcrLanguage2> _paddleOcrLanguages;
     [ObservableProperty] private OcrLanguage2? _selectedPaddleOcrLanguage;
+    [ObservableProperty] private bool _paddleUseGpu;
 
     public Window? Window { get; set; }
     public DataGrid SubtitleGrid { get; set; }
@@ -134,8 +136,8 @@ public partial class OcrViewModel : ObservableObject
             OllamaModel = ocr.OllamaModel;
             SelectedOllamaLanguage = ocr.OllamaLanguage;
             GoogleVisionApiKey = ocr.GoogleVisionApiKey;
-            SelectedGoogleVisionLanguage =
-                GoogleVisionLanguages.FirstOrDefault(p => p.Code == ocr.GoogleVisionLanguage);
+            SelectedGoogleVisionLanguage = GoogleVisionLanguages.FirstOrDefault(p => p.Code == ocr.GoogleVisionLanguage);
+            SelectedPaddleOcrLanguage = PaddleOcrLanguages.FirstOrDefault(p=>p.Code == Se.Settings.Ocr.PaddleOcrLastLanguage) ?? PaddleOcrLanguages.First();
         });
     }
 
@@ -249,7 +251,7 @@ public partial class OcrViewModel : ObservableObject
             }
         }
     }
-    
+
     [RelayCommand]
     private async Task InspectAdditions()
     {
@@ -489,8 +491,12 @@ public partial class OcrViewModel : ObservableObject
                     PauseOcr();
                     return;
                 }
+            }
 
-                result = await _windowService.ShowDialogAsync<DownloadPaddleOcrWindow, DownloadPaddleOcrViewModel>(Window!, vm =>
+            var modelsDirectory = Path.Combine(Se.PaddleOcrFolder, "models");
+            if (!Directory.Exists(modelsDirectory))
+            {
+                var result = await _windowService.ShowDialogAsync<DownloadPaddleOcrWindow, DownloadPaddleOcrViewModel>(Window!, vm =>
                 {
                     vm.Initialize(PaddleOcrDownloadType.Models);
                 });
@@ -512,23 +518,42 @@ public partial class OcrViewModel : ObservableObject
             //   RunGoogleVisionOcr(startFromIndex);
         }
     }
-    
-    private Lock BatchLock = new Lock();    
+
+    private Lock BatchLock = new Lock();
 
     private void RunPaddleOcr(int startFromIndex, int numberOfImages)
     {
         var ocrEngine = new PaddleOcr();
         var language = SelectedPaddleOcrLanguage?.Code ?? "en";
+        var mode = Se.Settings.Ocr.PaddleOcrMode;
+        Se.Settings.Ocr.PaddleOcrLastLanguage = language;
 
         var batchImages = new List<PaddleOcrBatchInput>(numberOfImages);
-        var max = -1;
+        var max = startFromIndex + numberOfImages;
+        ProgressText = $"Initializing Paddle OCR...";
+        for (var i = startFromIndex; i < max; i++)
+        {
+            var ocrItem = OcrSubtitleItems[i];
+            batchImages.Add(new PaddleOcrBatchInput
+            {
+                Bitmap = ocrItem.GetSkBitmap(),
+                Index = i,
+                Text = $"{i} / {max}: {ocrItem.StartTime} - {ocrItem.EndTime}"
+            });
+
+            if (_cancellationTokenSource.Token.IsCancellationRequested)
+            {
+                IsOcrRunning = false;
+                return;
+            }
+        }
 
         var ocrProgress = new Progress<PaddleOcrBatchProgress>(p =>
         {
             if (_cancellationTokenSource.Token.IsCancellationRequested)
             {
                 return;
-            }   
+            }
 
             lock (BatchLock)
             {
@@ -555,64 +580,17 @@ public partial class OcrViewModel : ObservableObject
                 }
 
                 item.Text = p.Text;
-                MainThread.BeginInvokeOnMainThread(() =>
+                Dispatcher.UIThread.Post(() =>
                 {
-                    ListView.ScrollTo(scrollToIndex, -1, ScrollToPosition.MakeVisible, false);
-                    SelectedOcrSubtitleItem = item;
-                    ListView.Focus();
-                    ListView.SelectedItem = item;
-                    ListView.UpdateSelectedItems(new List<object> { item });
+                    SelectAndScrollToRow(scrollToIndex);
                 });
             }
         });
 
         _ = Task.Run(async () =>
         {
-            var i = startFromIndex;
-            for (; i < OcrSubtitleItems.Count; i++)
-            {
-                if (_cancellationTokenSource.Token.IsCancellationRequested)
-                {
-                    return;
-                }
-
-                if (batchImages.Count >= numberOfImages)
-                {
-                    await ocrEngine.OcrBatch(batchImages, language, false, "mobile", ocrProgress, _cancellationTokenSource.Token);
-                    batchImages.Clear();
-                }
-
-                var item = OcrSubtitleItems[i];
-                var bitmap = item.GetBitmap();
-
-                if (item == null)
-                {
-                }
-                else
-                {
-                    var paddleOcrBatchInput = new PaddleOcrBatchInput()
-                    {
-                        Bitmap = bitmap,
-                        Index = i,
-                        Item = item,
-                    };
-                    batchImages.Add(paddleOcrBatchInput);
-                }
-            }
-
-            if (batchImages.Count > 0)
-            {
-                await ocrEngine.OcrBatch(batchImages, language, PaddleUseGpu, ocrProgress, _cancellationTokenSource.Token);
-            }
-
-            MainThread.BeginInvokeOnMainThread(async () =>
-            {
-                SelectedStartFromNumber = OcrSubtitleItems.Count;
-                await Pause();
-            });
+            await ocrEngine.OcrBatch(batchImages, language, PaddleUseGpu, mode, ocrProgress, _cancellationTokenSource.Token);
         });
-
-
     }
 
     private void RunNOcr(int startFromIndex)
