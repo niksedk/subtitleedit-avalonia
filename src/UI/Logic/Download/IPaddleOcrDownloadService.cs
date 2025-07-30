@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,5 +6,7 @@ namespace Nikse.SubtitleEdit.Logic.Download;
 
 public interface IPaddleOcrDownloadService
 {
-    Task DownloadModels(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken);
+    Task DownloadModels(string destinationFileName, IProgress<float>? progress, CancellationToken cancellationToken);
+    Task DownloadEngineCpu(string destinationFileName, IProgress<float>? progress, CancellationToken cancellationToken);
+    Task DownloadEngineGpu(string destinationFileName, IProgress<float>? progress, CancellationToken cancellationToken);
 }

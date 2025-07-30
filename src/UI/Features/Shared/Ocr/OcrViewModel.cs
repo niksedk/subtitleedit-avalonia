@@ -101,10 +101,8 @@ public partial class OcrViewModel : ObservableObject
         OllamaModel = string.Empty;
         TesseractDictionaryItems = new ObservableCollection<TesseractDictionary>();
         GoogleVisionApiKey = string.Empty;
-        GoogleVisionLanguages =
-            new ObservableCollection<OcrLanguage>(GoogleVisionOcr.GetLanguages().OrderBy(p => p.ToString()));
-        PaddleOcrLanguages =
-            new ObservableCollection<OcrLanguage2>(PaddleOcr.GetLanguages().OrderBy(p => p.ToString()));
+        GoogleVisionLanguages = new ObservableCollection<OcrLanguage>(GoogleVisionOcr.GetLanguages().OrderBy(p => p.ToString()));
+        PaddleOcrLanguages = new ObservableCollection<OcrLanguage2>(PaddleOcr.GetLanguages().OrderBy(p => p.ToString()));
         _runOnceChars = new List<SkipOnceChar>();
         _skipOnceChars = new List<SkipOnceChar>();
         _nOcrAddHistoryManager = new NOcrAddHistoryManager();
@@ -466,29 +464,43 @@ public partial class OcrViewModel : ObservableObject
         }
         else if (ocrEngine.EngineType == OcrEngineType.PaddleOcr)
         {
-            //if (!Directory.Exists(Se.PaddleOcrFolder))
-            //{
-            //    var answer = await Page.DisplayAlert(
-            //        "Download Paddle OCR models?",
-            //        $"{Environment.NewLine}\"Paddle OCR\" requires AI model files.{Environment.NewLine}{Environment.NewLine}Download and use Paddle OCR models?",
-            //        "Yes",
-            //        "No");
+            if (Configuration.IsRunningOnWindows && !Directory.Exists(Se.PaddleOcrFolder))
+            {
+                var answer = await MessageBox.Show(
+                    Window!,
+                    "Download Paddle OCR?",
+                    $"{Environment.NewLine}\"PaddleOCR\" requires downloading Paddle OCR.{Environment.NewLine}{Environment.NewLine}Download and use Paddle OCR?",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Question);
 
-            //    if (!answer)
-            //    {
-            //        await PauseOcr();
-            //        return;
-            //    }
+                if (answer != MessageBoxResult.Yes)
+                {
+                    PauseOcr();
+                    return;
+                }
 
-            //    var result = await _popupService.ShowPopupAsync<DownloadPaddleOcrModelsPopupModel>(CancellationToken.None);
-            //    if (result is not string)
-            //    {
-            //        await PauseOcr();
-            //        return;
-            //    }
-            //}
+                var result = await _windowService.ShowDialogAsync<DownloadPaddleOcrWindow, DownloadPaddleOcrViewModel>(Window!, vm =>
+                {
+                    vm.Initialize(PaddleOcrDownloadType.EngineCpu);
+                });
+                if (!result.OkPressed)
+                {
+                    PauseOcr();
+                    return;
+                }
 
-            //RunPaddleOcrBatch(startFromIndex, 10);
+                result = await _windowService.ShowDialogAsync<DownloadPaddleOcrWindow, DownloadPaddleOcrViewModel>(Window!, vm =>
+                {
+                    vm.Initialize(PaddleOcrDownloadType.Models);
+                });
+                if (!result.OkPressed)
+                {
+                    PauseOcr();
+                    return;
+                }
+            }
+
+            RunPaddleOcr(startFromIndex, _ocrSubtitle!.Count - startFromIndex);
         }
         else if (ocrEngine.EngineType == OcrEngineType.Ollama)
         {
@@ -498,6 +510,11 @@ public partial class OcrViewModel : ObservableObject
         {
             //   RunGoogleVisionOcr(startFromIndex);
         }
+    }
+
+    private void RunPaddleOcr(int startFromIndex, int numberOfImages)
+    {
+        
     }
 
     private void RunNOcr(int startFromIndex)
@@ -694,7 +711,6 @@ public partial class OcrViewModel : ObservableObject
             PauseOcr();
         });
     }
-
 
     private void RunOllamaOcr()
     {

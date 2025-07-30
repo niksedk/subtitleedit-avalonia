@@ -3,14 +3,14 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Logic;
-using Nikse.SubtitleEdit.Logic.Compression;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Download;
+using SharpCompress.Archives.SevenZip;
+using SharpCompress.Common;
+using SharpCompress.Readers;
 using System;
 using System.Globalization;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -20,34 +20,32 @@ namespace Nikse.SubtitleEdit.Features.Shared;
 
 public partial class DownloadPaddleOcrViewModel : ObservableObject
 {
-    [ObservableProperty] private double _progress;
+    [ObservableProperty] private double _progressValue;
+    [ObservableProperty] private string _progressText;
     [ObservableProperty] private string _statusText;
     [ObservableProperty] private string _error;
 
     public Window? Window { get; set; }
-    public string FfmpegFileName { get; set; }
+    public bool OkPressed { get; internal set; }
 
-    private IFfmpegDownloadService _ffmpegDownloadService;
+    private string _tempFileName;
+    private IPaddleOcrDownloadService _paddleOcrDownloadService;
     private Task? _downloadTask;
     private readonly Timer _timer;
     private bool _done;
     private readonly CancellationTokenSource _cancellationTokenSource;
-    private readonly MemoryStream _downloadStream;
+    private PaddleOcrDownloadType _downloadType;
 
-    private readonly IZipUnpacker _zipUnpacker;
-
-    public DownloadPaddleOcrViewModel(IFfmpegDownloadService ffmpegDownloadService, IZipUnpacker zipUnpacker)
+    public DownloadPaddleOcrViewModel(IPaddleOcrDownloadService paddleOcrDownloadService)
     {
-        _ffmpegDownloadService = ffmpegDownloadService;
-        _zipUnpacker = zipUnpacker;
+        _paddleOcrDownloadService = paddleOcrDownloadService;
 
         _cancellationTokenSource = new CancellationTokenSource();
 
-        _downloadStream = new MemoryStream();
-
         StatusText = "Starting...";
         Error = string.Empty;
-        FfmpegFileName = string.Empty;
+        _tempFileName = string.Empty;
+        _downloadType = PaddleOcrDownloadType.Models;
 
         _timer = new Timer(500);
         _timer.Elapsed += OnTimerOnElapsed;
@@ -55,6 +53,11 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
     }
 
     private readonly Lock _lockObj = new();
+
+    public void Initialize(PaddleOcrDownloadType paddleOcrDownloadType)
+    {
+        _downloadType = paddleOcrDownloadType;
+    }
 
     private void OnTimerOnElapsed(object? sender, ElapsedEventArgs args)
     {
@@ -70,28 +73,23 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
                 _timer.Stop();
                 _done = true;
 
-                if (_downloadStream.Length == 0)
+                if (!File.Exists(_tempFileName))
                 {
                     StatusText = "Download failed";
                     Error = "No data received";
                     return;
                 }
 
-                var ffmpegFileName = GetFfmpegFileName();
-
-                if (File.Exists(ffmpegFileName))
+                var fileInfo = new FileInfo(_tempFileName); 
+                if (fileInfo.Length == 0)
                 {
-                    File.Delete(ffmpegFileName);
+                    StatusText = "Download failed";
+                    Error = "No data received";
+                    return;
                 }
 
-                UnpackFfmpeg(ffmpegFileName);
-                
-                if (File.Exists(ffmpegFileName) && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    MacHelper.MakeExecutable(ffmpegFileName);   
-                }
-                
-                FfmpegFileName = ffmpegFileName;
+                Extract7Zip(_tempFileName, Se.PaddleOcrFolder);
+
                 Close();
             }
             else if (_downloadTask is { IsFaulted: true })
@@ -113,27 +111,68 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
         }
     }
 
-    private void UnpackFfmpeg(string newFileName)
+    private void Extract7Zip(string tempFileName, string dir)
     {
-        var folder = Path.GetDirectoryName(newFileName);
-        if (folder != null)
+        using Stream stream = File.OpenRead(tempFileName);
+        using var archive = SevenZipArchive.Open(stream);
+        double totalSize = archive.TotalUncompressSize;
+        double unpackedSize = 0;
+
+        var skipFolderLevel = "Faster-Whisper-XXL";
+        var reader = archive.ExtractAllEntries();
+        while (reader.MoveToNextEntry())
         {
-            _downloadStream.Position = 0;
-            _zipUnpacker.UnpackZipStream(_downloadStream, folder);
+            if (_cancellationTokenSource.IsCancellationRequested)
+            {
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(reader.Entry.Key))
+            {
+                var entryFullName = reader.Entry.Key;
+                if (!string.IsNullOrEmpty(skipFolderLevel) && entryFullName.StartsWith(skipFolderLevel))
+                {
+                    entryFullName = entryFullName[skipFolderLevel.Length..];
+                }
+
+                entryFullName = entryFullName.Replace('/', Path.DirectorySeparatorChar);
+                entryFullName = entryFullName.TrimStart(Path.DirectorySeparatorChar);
+
+                var fullFileName = Path.Combine(dir, entryFullName);
+
+                if (reader.Entry.IsDirectory)
+                {
+                    if (!Directory.Exists(fullFileName))
+                    {
+                        Directory.CreateDirectory(fullFileName);
+                    }
+
+                    continue;
+                }
+
+                var fullPath = Path.GetDirectoryName(fullFileName);
+                if (fullPath == null)
+                {
+                    continue;
+                }
+
+                var displayName = entryFullName;
+                if (displayName.Length > 30)
+                {
+                    displayName = "..." + displayName.Remove(0, displayName.Length - 26).Trim();
+                }
+
+                ProgressText = $"Unpacking: {displayName}";
+                reader.WriteEntryToDirectory(fullPath, new ExtractionOptions()
+                {
+                    ExtractFullPath = false,
+                    Overwrite = true
+                });
+                unpackedSize += reader.Entry.Size;
+            }
         }
 
-        _downloadStream.Dispose();
-    }
-
-
-    public static string GetFfmpegFileName()
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            return Path.Combine(Se.FfmpegFolder, "ffmpeg.exe");
-        }
-
-        return Path.Combine(Se.FfmpegFolder, "ffmpeg");
+        ProgressValue = 100.0f;
     }
 
     private void Close()
@@ -159,20 +198,30 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
         {
             var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
             var pctString = percentage.ToString(CultureInfo.InvariantCulture);
-            Progress = percentage;
+            ProgressValue = percentage;
             StatusText = $"Downloading... {pctString}%";
         });
 
-        var folder = Se.FfmpegFolder;
+        var folder = Se.PaddleOcrFolder;
         if (!Directory.Exists(folder))
         {
             Directory.CreateDirectory(folder);
         }
 
-        _downloadTask = _ffmpegDownloadService.DownloadFfmpeg(
-            _downloadStream,
-            downloadProgress,
-            _cancellationTokenSource.Token);
+        _tempFileName = Path.Combine(folder, $"{Guid.NewGuid()}.7z");
+
+        if (_downloadType == PaddleOcrDownloadType.Models)
+        {
+            _downloadTask = _paddleOcrDownloadService.DownloadModels(_tempFileName, downloadProgress, _cancellationTokenSource.Token);
+        }
+        else if (_downloadType == PaddleOcrDownloadType.EngineGpu)
+        {
+            _downloadTask = _paddleOcrDownloadService.DownloadEngineGpu(_tempFileName, downloadProgress, _cancellationTokenSource.Token);
+        }
+        else
+        {
+            _downloadTask = _paddleOcrDownloadService.DownloadEngineCpu(_tempFileName, downloadProgress, _cancellationTokenSource.Token);
+        }
     }
 
     internal void OnKeyDown(KeyEventArgs e)

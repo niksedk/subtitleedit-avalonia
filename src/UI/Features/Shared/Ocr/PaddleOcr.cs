@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
+using SkiaSharp;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -8,9 +11,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Logic;
-using Nikse.SubtitleEdit.Logic.Config;
-using SkiaSharp;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
@@ -27,88 +27,37 @@ public partial class PaddleOcr
     private string _recPath;
     private CancellationToken _cancellationToken;
 
-    private List<string> LatinLanguageCodes =
-    [
-        "af",
-        "az",
-        "bs",
-        "cs",
-        "cy",
-        "da",
-        "de",
-        "es",
-        "et",
-        "fr",
-        "ga",
-        "hr",
-        "hu",
-        "id",
-        "is",
-        "it",
-        "ku",
-        "la",
-        "lt",
-        "lv",
-        "mi",
-        "ms",
-        "mt",
-        "nl",
-        "no",
-        "oc",
-        "pi",
-        "pl",
-        "pt",
-        "ro",
-        "rs_latin",
-        "sk",
-        "sl",
-        "sq",
-        "sv",
-        "sw",
-        "tl",
-        "tr",
-        "uz",
-        "vi",
-        "french",
-        "german"
-    ];
+    private const string TextlineOrientationModelName = "PP-LCNet_x1_0_textline_ori";
 
-    private List<string> ArabicLanguageCodes = ["ar", "fa", "ug", "ur", "sa"];
-    private List<string> CyrillicLanguageCodes =
-    [
-        "ru",
-        "rs_cyrillic",
-        "be",
-        "bg",
-        "uk",
-        "mn",
-        "abq",
-        "ady",
-        "kbd",
-        "ava",
-        "dar",
-        "inh",
-        "che",
-        "lbe",
-        "lez",
-        "tab"
-    ];
+    private readonly List<string> LatinLanguageCodes = new List<string>
+    {
+        "af", "az", "bs", "cs", "cy", "da", "de", "es", "et", "fr", "ga",
+        "hr", "hu", "id", "is", "it", "ku", "la", "lt", "lv", "mi", "ms",
+        "mt", "nl", "no", "oc", "pi", "pl", "pt", "ro", "rs_latin", "sk",
+        "sl", "sq", "sv", "sw", "tl", "tr", "uz", "vi", "french", "german"
+    };
 
-    private List<string> DevanagariLanguageCodes =
-    [
-        "hi",
-        "mr",
-        "ne",
-        "bh",
-        "mai",
-        "ang",
-        "bho",
-        "mah",
-        "sck",
-        "new",
-        "gom",
-        "bgc"
-    ];
+    private readonly List<string> ArabicLanguageCodes = new List<string>
+    {
+        "ar", "fa", "ug", "ur"
+    };
+
+    private readonly List<string> EslavLanguageCodes = new List<string>
+    {
+        "ru", "be", "uk"
+    };
+
+    private readonly List<string> CyrillicLanguageCodes = new List<string>
+    {
+        "rs_cyrillic", "bg", "mn", "abq", "ady", "kbd", "ava", "dar",
+        "inh", "che", "lbe", "lez", "tab"
+    };
+
+    private readonly List<string> DevanagariLanguageCodes = new List<string>
+    {
+        "hi", "mr", "ne", "bh", "mai", "ang", "bho", "mah",
+        "sck", "new", "gom", "bgc", "sa"
+    };
 
     public PaddleOcr()
     {
@@ -119,11 +68,14 @@ public partial class PaddleOcr
         _recPath = Path.Combine(_paddingOcrPath, "rec");
     }
 
-    public async Task<string> Ocr(SKBitmap bitmap, string language, bool useGpu, CancellationToken cancellationToken)
+    public async Task<string> Ocr(SKBitmap bitmap, string language, bool useGpu, string mode, CancellationToken cancellationToken)
     {
         _cancellationToken = cancellationToken;
         string detFilePrefix = MakeDetPrefix(language);
         string recFilePrefix = MakeRecPrefix(language);
+
+        var detName = GetDetectionName(language, mode);
+        var recName = GetRecName(language, mode);
 
         var blackBlackground = MakeTransparentBlack(bitmap.Copy(bitmap.ColorType));
         var borderedBitmapTemp = AddBorder(blackBlackground, 10, SKColors.Transparent);
@@ -133,7 +85,20 @@ public partial class PaddleOcr
         var tempImage = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".png");
         await File.WriteAllBytesAsync(tempImage, borderedBitmap.ToPngArray(), cancellationToken);
         borderedBitmap.Dispose();
-        var parameters = $"--image_dir \"{tempImage}\" --ocr_version PP-OCRv4 --use_angle_cls true --use_gpu {useGpu.ToString().ToLowerInvariant()} --lang {language} --show_log false --det_model_dir \"{_detPath}\\{detFilePrefix}\" --rec_model_dir \"{_recPath}\\{recFilePrefix}\" --cls_model_dir \"{_clsPath}\\ch_ppocr_mobile_v2.0_cls_infer\"";
+
+        var parameters = $"ocr -i \"{tempImage}\" " +
+                 "--use_textline_orientation true " +
+                 "--use_doc_orientation_classify false " +
+                 "--use_doc_unwarping false " +
+                 $"--device {(useGpu ? "gpu" : "cpu")} " +
+                 $"--lang {language} " +
+                 $"--text_detection_model_dir \"{_detPath + Path.DirectorySeparatorChar + detName}\" " +
+                 $"--text_detection_model_name \"{detName}\" " +
+                 $"--text_recognition_model_dir \"{_recPath + Path.DirectorySeparatorChar + recName}\" " +
+                 $"--text_recognition_model_name \"{recName}\" " +
+                 $"--textline_orientation_model_dir \"{_clsPath + Path.DirectorySeparatorChar + TextlineOrientationModelName}\" " +
+                 $"--textline_orientation_model_name \"{TextlineOrientationModelName}\"";
+
         var process = new Process
         {
             StartInfo = new ProcessStartInfo
@@ -174,7 +139,63 @@ public partial class PaddleOcr
         return result;
     }
 
-    private SKBitmap MakeTransparentBlack(SKBitmap bitmap)
+    private string GetRecName(string language, string mode)
+    {
+        string recName;
+        if (language == "ch" ||
+            language == "chinese_cht" ||
+            language == "en" ||
+            language == "japan")
+        {
+            recName = $"PP-OCRv5_{mode}_rec";
+        }
+        else if (ArabicLanguageCodes.Contains(language))
+        {
+            recName = "arabic_PP-OCRv3_mobile_rec";
+        }
+        else if (EslavLanguageCodes.Contains(language))
+        {
+            recName = "eslav_PP-OCRv5_mobile_rec";
+        }
+        else if (CyrillicLanguageCodes.Contains(language))
+        {
+            recName = "cyrillic_PP-OCRv3_mobile_rec";
+        }
+        else if (DevanagariLanguageCodes.Contains(language))
+        {
+            recName = "devanagari_PP-OCRv3_mobile_rec";
+        }
+        else if (language == "korean")
+        {
+            recName = "korean_PP-OCRv5_mobile_rec";
+        }
+        else
+        {
+            recName = "latin_PP-OCRv5_mobile_rec";
+        }
+
+        return recName;
+    }
+
+    private string GetDetectionName(string language, string mode)
+    {
+        if (language == "ch" ||
+            language == "chinese_cht" ||
+            language == "en" ||
+            language == "japan" ||
+            language == "korean" ||
+            LatinLanguageCodes.Contains(language) ||
+            EslavLanguageCodes.Contains(language))
+        {
+            return $"PP-OCRv5_{mode}_det";
+        }
+        else
+        {
+            return "PP-OCRv3_mobile_det";
+        }
+    }
+
+    private static SKBitmap MakeTransparentBlack(SKBitmap bitmap)
     {
         if (bitmap == null)
         {
@@ -205,10 +226,12 @@ public partial class PaddleOcr
     }
 
 
-    public async Task OcrBatch(List<PaddleOcrBatchInput> bitmaps, string language, bool useGpu, IProgress<PaddleOcrBatchProgress> progress, CancellationToken cancellationToken)
+    public async Task OcrBatch(List<PaddleOcrBatchInput> bitmaps, string language, bool useGpu, string mode, IProgress<PaddleOcrBatchProgress> progress, CancellationToken cancellationToken)
     {
         string detFilePrefix = MakeDetPrefix(language);
         string recFilePrefix = MakeRecPrefix(language);
+        var detName = GetDetectionName(language, mode);
+        var recName = GetRecName(language, mode);
         _batchProgress = progress;
         var folder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
         Directory.CreateDirectory(folder);
@@ -217,7 +240,7 @@ public partial class PaddleOcr
         for (var i = 0; i < bitmaps.Count; i++)
         {
             var input = bitmaps[i];
-            var bitmap = input.Bitmap == null ? new SKBitmap(1, 1, true) : input.Bitmap.Copy(input.Bitmap.ColorType);  
+            var bitmap = input.Bitmap == null ? new SKBitmap(1, 1, true) : input.Bitmap.Copy(input.Bitmap.ColorType);
             bitmap = MakeTransparentBlack(bitmap);
             var borderedBitmapTemp = AddBorder(bitmap, 10, SKColors.Black);
             bitmap.Dispose();
@@ -230,7 +253,19 @@ public partial class PaddleOcr
             borderedBitmap.Dispose();
         }
 
-        var parameters = $"--image_dir \"{folder}\" --ocr_version PP-OCRv4 --use_angle_cls true --use_gpu {useGpu.ToString().ToLowerInvariant()} --lang {language} --show_log false --det_model_dir \"{_detPath}\\{detFilePrefix}\" --rec_model_dir \"{_recPath}\\{recFilePrefix}\" --cls_model_dir \"{_clsPath}\\ch_ppocr_mobile_v2.0_cls_infer\"";
+        var parameters = $"ocr -i \"{folder}\" " +
+                    "--use_textline_orientation true " +
+                    "--use_doc_orientation_classify false " +
+                    "--use_doc_unwarping false " +
+                    $"--device {(useGpu ? "gpu" : "cpu")} " +
+                    $"--lang {language} " +
+                    $"--text_detection_model_dir \"{_detPath + Path.DirectorySeparatorChar + detName}\" " +
+                    $"--text_detection_model_name \"{detName}\" " +
+                    $"--text_recognition_model_dir \"{_recPath + Path.DirectorySeparatorChar + recName}\" " +
+                    $"--text_recognition_model_name \"{recName}\" " +
+                    $"--textline_orientation_model_dir \"{_clsPath + Path.DirectorySeparatorChar + TextlineOrientationModelName}\" " +
+                    $"--textline_orientation_model_name \"{TextlineOrientationModelName}\"";
+
         var process = new Process
         {
             StartInfo = new ProcessStartInfo
