@@ -710,6 +710,7 @@ public class AudioVisualizer : Control
         {
             DrawAllGridLines(context);
             DrawWaveForm(context);
+            DrawTimeLine(context);
             DrawParagraphs(context);
             DrawCurrentVideoPosition(context);
             DrawNewParagraph(context);
@@ -719,6 +720,76 @@ public class AudioVisualizer : Control
                 context.DrawRectangle(null, _paintPenSelected, new Rect(0, 0, Bounds.Width, Bounds.Height));
             }
         }
+    }
+
+    private void DrawTimeLine(DrawingContext context)
+    {
+        if (WavePeaks == null || Bounds.Height < 1)
+        {
+            return;
+        }
+
+        var seconds = Math.Ceiling(StartPositionSeconds) - StartPositionSeconds;
+        var position = SecondsToXPosition(seconds);
+        var imageHeight = Bounds.Height;
+
+        // Create pen and brush for drawing (you'll need to define these as class fields)
+        // Assuming you have similar fields like the other drawing methods
+        var pen = _paintTimeLine; // You'll need to define this Pen
+        var textBrush = _paintTimeText; // You'll need to define this Brush
+
+        while (position < Bounds.Width)
+        {
+            var n = ZoomFactor * WavePeaks.SampleRate;
+
+            if (n > 38 || (int)Math.Round(StartPositionSeconds + seconds) % 5 == 0)
+            {
+                // Draw major tick line
+                context.DrawLine(pen, new Point(position, imageHeight), new Point(position, imageHeight - 10));
+
+                // Draw time text - try different positions and larger font
+                var timeText = GetDisplayTime(StartPositionSeconds + seconds);
+                var formattedText = new FormattedText(
+                    timeText,
+                    CultureInfo.CurrentCulture,
+                    FlowDirection.LeftToRight,
+                    Typeface.Default, // Use default typeface instead of custom one
+                    12, // Increased font size for better visibility
+                    textBrush);
+
+                // Try different Y positions - adjust these based on your control height
+                var textY = Math.Max(0, imageHeight - formattedText.Height - 2); // Ensure text is within bounds
+                context.DrawText(formattedText, new Point(position + 2, textY));
+            }
+
+            seconds += 0.5;
+            position = SecondsToXPosition(seconds);
+
+            if (n > 64)
+            {
+                // Draw minor tick line
+                context.DrawLine(pen, new Point(position, imageHeight), new Point(position, imageHeight - 5));
+            }
+
+            seconds += 0.5;
+            position = SecondsToXPosition(seconds);
+        }
+    }
+
+    // You'll also need to add these fields to your class if they don't exist:
+    private readonly Pen _paintTimeLine = new Pen(Brushes.Gray, 1);
+    private readonly IBrush _paintTimeText = Brushes.White;
+    private readonly Typeface _timelineTypeface = new Typeface("Arial"); // Or your preferred font
+
+    // And you'll need the GetDisplayTime method if it doesn't exist:
+    private string GetDisplayTime(double seconds)
+    {
+        var timeSpan = TimeSpan.FromSeconds(seconds);
+        if (timeSpan.TotalHours >= 1)
+        {
+            return timeSpan.ToString(@"h\:mm\:ss");
+        }
+        return timeSpan.ToString(@"m\:ss");
     }
 
     public double EndPositionSeconds
