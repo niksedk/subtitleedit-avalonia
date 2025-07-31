@@ -1340,6 +1340,44 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void WaveformSetStart()
+    {
+        var s = SelectedSubtitle;
+        if (s == null || VideoPlayerControl == null)
+        {
+            return;
+        }
+
+        var videoPositionSeconds = VideoPlayerControl.Position;
+        var gap = Se.Settings.General.MinimumMillisecondsBetweenLines / 1000.0;
+        if (videoPositionSeconds >= s.EndTime.TotalSeconds - gap)
+        {
+            return;
+        }
+
+        s.SetStartTimeOnly(TimeSpan.FromSeconds(videoPositionSeconds));
+    }
+
+    [RelayCommand]
+    private void WaveformSetEnd()
+    {
+        var s = SelectedSubtitle;
+        if (s == null || VideoPlayerControl == null)
+        {
+            return;
+        }
+
+        var videoPositionSeconds = VideoPlayerControl.Position;
+        var gap = Se.Settings.General.MinimumMillisecondsBetweenLines / 1000.0;
+        if (videoPositionSeconds < s.StartTime.TotalSeconds + gap)
+        {
+            return;
+        }
+
+        s.EndTime = TimeSpan.FromSeconds(videoPositionSeconds);
+    }
+
+    [RelayCommand]
     private void WaveformOneSecondBack()
     {
         MoveVideoPositionMs(-1000);
@@ -1367,7 +1405,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private void TextBoxDelete()
     {
-        
+
     }
 
     [RelayCommand]
@@ -1384,13 +1422,28 @@ public partial class MainViewModel :
 
     private void SplitSelectedLine(bool atVideoPosition, bool atTextBoxPosition)
     {
-        var selectedSubtitle = SelectedSubtitle;
-        if (selectedSubtitle == null)
+        var s = SelectedSubtitle;
+        if (s == null || VideoPlayerControl == null || EditTextBox == null)
         {
             return;
         }
 
-        _splitManager.Split(Subtitles, selectedSubtitle);
+        if (atTextBoxPosition && atTextBoxPosition)
+        {
+            _splitManager.Split(Subtitles, s, VideoPlayerControl.Position, EditTextBox.SelectionStart);
+        }
+        else if (atVideoPosition)
+        {
+            _splitManager.Split(Subtitles, s, VideoPlayerControl.Position);
+        }
+        else if (atTextBoxPosition)
+        {
+            _splitManager.Split(Subtitles, s, EditTextBox.SelectionStart);
+        }
+        else
+        {
+            _splitManager.Split(Subtitles, s);
+        }
     }
 
     private void MoveVideoPositionMs(int ms)

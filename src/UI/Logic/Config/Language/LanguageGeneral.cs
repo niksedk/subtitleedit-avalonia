@@ -241,6 +241,8 @@ public class LanguageGeneral
     public string Cut { get; set; }
     public string SplitLineAtTextBoxCursorPosition { get; set; }
     public string Copy { get; set; }
+    public string SetStart { get; set; }
+    public string SetEnd { get; set; }
 
     public LanguageGeneral()
     {
@@ -481,5 +483,7 @@ public class LanguageGeneral
         Cut = "Cut";
         Copy = "Copy";  
         SplitLineAtTextBoxCursorPosition = "Split line at cursor position";
+        SetStart = "Set start";
+        SetEnd = "Set end";
     }
 }

@@ -1,5 +1,4 @@
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Core.Settings;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -97,6 +96,8 @@ public static class ShortcutsMain
         { nameof(_mvm.WaveformOneSecondBackCommand) , Se.Language.General.WaveformOneSecondBack },
         { nameof(_mvm.WaveformOneSecondForwardCommand) ,  Se.Language.General.WaveformOneSecondForward },
         { nameof(_mvm.WaveformSetStartAndOffsetTheRestCommand) ,  Se.Language.General.SetStartAndOffsetTheRest },
+        { nameof(_mvm.WaveformSetStartCommand) ,  Se.Language.General.SetStart },
+        { nameof(_mvm.WaveformSetEndCommand) ,  Se.Language.General.SetEnd },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -146,6 +147,8 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.WaveformOneSecondBackCommand, nameof(vm.WaveformOneSecondBackCommand), ShortcutCategory.Waveform);
         AddShortcut(shortcuts, vm.WaveformOneSecondForwardCommand, nameof(vm.WaveformOneSecondForwardCommand), ShortcutCategory.Waveform);
         AddShortcut(shortcuts, vm.WaveformSetStartAndOffsetTheRestCommand, nameof(vm.WaveformSetStartAndOffsetTheRestCommand), ShortcutCategory.Waveform);
+        AddShortcut(shortcuts, vm.WaveformSetStartCommand, nameof(vm.WaveformSetStartCommand), ShortcutCategory.Waveform);
+        AddShortcut(shortcuts, vm.WaveformSetEndCommand, nameof(vm.WaveformSetEndCommand), ShortcutCategory.Waveform);
 
         return shortcuts;
     }
