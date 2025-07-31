@@ -237,6 +237,10 @@ public class LanguageGeneral
     public string WaveformOneSecondBack { get; set; }
     public string WaveformOneSecondForward { get; set; }
     public string SetStartAndOffsetTheRest { get; set; }
+    public string Paste { get; set; }
+    public string Cut { get; set; }
+    public string SplitLineAtTextBoxCursorPosition { get; set; }
+    public string Copy { get; set; }
 
     public LanguageGeneral()
     {
@@ -473,5 +477,9 @@ public class LanguageGeneral
         WaveformOneSecondBack = "Waveform, one second back";
         WaveformOneSecondForward = "Waveform, one second forward";
         SetStartAndOffsetTheRest = "Set start and offset the rest";
+        Paste = "Paste";
+        Cut = "Cut";
+        Copy = "Copy";  
+        SplitLineAtTextBoxCursorPosition = "Split line at cursor position";
     }
 }

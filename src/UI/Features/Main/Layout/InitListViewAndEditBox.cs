@@ -382,6 +382,42 @@ public static class InitListViewAndEditBox
         textBox.TextChanged += vm.SubtitleTextChanged;
         Grid.SetRow(textBox, 1);
 
+        // Create a Flyout for the TextBox
+        var flyoutTextBox = new MenuFlyout();
+        textBox.ContextFlyout = flyoutTextBox;
+        flyoutTextBox.Opening += vm.TextBoxContextOpening;
+
+        var cutMenuItem = new MenuItem { Header = Se.Language.General.Cut };
+        cutMenuItem.Command = vm.TextBoxCutCommand;
+        flyoutTextBox.Items.Add(cutMenuItem);
+
+        var copyMenuItem = new MenuItem { Header = Se.Language.General.Copy };
+        copyMenuItem.Command = vm.TextBoxCopyCommand;
+        flyoutTextBox.Items.Add(copyMenuItem);
+
+        var pasteMenuItem = new MenuItem { Header = Se.Language.General.Paste };
+        pasteMenuItem.Command = vm.TextBoxPasteCommand;
+        flyoutTextBox.Items.Add(pasteMenuItem);
+
+        var selectAllMenuItem = new MenuItem { Header = Se.Language.General.SelectAll };
+        selectAllMenuItem.Command = vm.TextBoxSelectAllCommand;
+        flyoutTextBox.Items.Add(selectAllMenuItem);
+
+        var menuItemTextBoxSplitAtCursor = new MenuItem { Header = Se.Language.General.SplitLineAtTextBoxCursorPosition };
+        menuItemTextBoxSplitAtCursor.Command = vm.SplitAtTextBoxCursorPositionCommand;
+        flyoutTextBox.Items.Add(menuItemTextBoxSplitAtCursor);
+
+        var menuItemTextBoxSplitAtCursorAndVideoPosition = new MenuItem { Header = Se.Language.General.SplitLineAtVideoAndTextBoxPosition };
+        menuItemTextBoxSplitAtCursorAndVideoPosition.Command = vm.SplitAtVideoPositionAndTextBoxCursorPositionCommand;
+        flyoutTextBox.Items.Add(menuItemTextBoxSplitAtCursorAndVideoPosition);
+
+        //var pasteMenuItem = new MenuItem { Header = Se.Language.General.Paste };
+        //pasteMenuItem.Command = vm.PasteTextCommand;
+        //flyoutTextBox.Items.Add(pasteMenuItem);
+        //var selectAllMenuItem = new MenuItem { Header = Se.Language.General.SelectAll };
+        //selectAllMenuItem.Command = vm.SelectAllTextCommand;
+        //flyoutTextBox.Items.Add(selectAllMenuItem);
+
 
         var textTotalLengthLabel = new TextBlock
         {

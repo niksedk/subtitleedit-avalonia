@@ -1298,6 +1298,12 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void SplitAtTextBoxCursorPosition()
+    {
+        SplitSelectedLine(false, true);
+    }
+
+    [RelayCommand]
     private void SplitAtVideoPositionAndTextBoxCursorPosition()
     {
         SplitSelectedLine(true, true);
@@ -1343,6 +1349,37 @@ public partial class MainViewModel :
     private void WaveformOneSecondForward()
     {
         MoveVideoPositionMs(1000);
+    }
+
+    [RelayCommand]
+    private void TextBoxCut()
+    {
+        EditTextBox.Cut();
+    }
+
+    [RelayCommand]
+    private void TextBoxCopy()
+    {
+        EditTextBox.Copy();
+    }
+
+
+    [RelayCommand]
+    private void TextBoxDelete()
+    {
+        
+    }
+
+    [RelayCommand]
+    private void TextBoxPaste()
+    {
+        EditTextBox.Paste();
+    }
+
+    [RelayCommand]
+    private void TextBoxSelectAll()
+    {
+        EditTextBox.SelectAll();
     }
 
     private void SplitSelectedLine(bool atVideoPosition, bool atTextBoxPosition)
@@ -3001,5 +3038,9 @@ public partial class MainViewModel :
     public void GoToAndFocusLine(SubtitleLineViewModel p)
     {
         SelectAndScrollToSubtitle(p);
+    }
+
+    internal void TextBoxContextOpening(object? sender, EventArgs e)
+    {
     }
 }
