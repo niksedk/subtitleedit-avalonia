@@ -20,6 +20,11 @@ using Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
 using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 using Nikse.SubtitleEdit.Features.Edit.Replace;
 using Nikse.SubtitleEdit.Features.Edit.ShowHistory;
+using Nikse.SubtitleEdit.Features.Files.Export.ExportEbuStl;
+using Nikse.SubtitleEdit.Features.Files.ExportCavena890;
+using Nikse.SubtitleEdit.Features.Files.ExportEbuStl;
+using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
+using Nikse.SubtitleEdit.Features.Files.ExportPac;
 using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 using Nikse.SubtitleEdit.Features.Help;
 using Nikse.SubtitleEdit.Features.Main.Layout;
@@ -52,6 +57,7 @@ using Nikse.SubtitleEdit.Logic.Initializers;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -61,11 +67,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Features.Files.Export.ExportEbuStl;
-using Nikse.SubtitleEdit.Features.Files.ExportEbuStl;
-using Nikse.SubtitleEdit.Features.Files.ExportCavena890;
-using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
-using Nikse.SubtitleEdit.Features.Files.ExportPac;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -126,6 +127,7 @@ public partial class MainViewModel :
     private readonly IWindowService _windowService;
     private readonly IInsertService _insertService;
     private readonly IMergeManager _mergeManager;
+    private readonly ISplitManager _splitManager;
     private readonly IAutoBackupService _autoBackupService;
     private readonly IUndoRedoManager _undoRedoManager;
     private readonly IBluRayHelper _bluRayHelper;
@@ -138,6 +140,7 @@ public partial class MainViewModel :
     public Menu Menu { get; internal set; }
     public StackPanel PanelSingleLineLenghts { get; internal set; }
     public MenuItem MenuItemMergeAsDialog { get; internal set; }
+    public MenuItem MenuItemMerge { get; internal set; }
 
     public MainViewModel(
         IFileHelper fileHelper,
@@ -146,6 +149,7 @@ public partial class MainViewModel :
         IWindowService windowService,
         IInsertService insertService,
         IMergeManager mergeManager,
+        ISplitManager splitManager,
         IAutoBackupService autoBackupService,
         IUndoRedoManager undoRedoManager,
         IBluRayHelper bluRayHelper,
@@ -162,6 +166,7 @@ public partial class MainViewModel :
         _windowService = windowService;
         _insertService = insertService;
         _mergeManager = mergeManager;
+        _splitManager = splitManager;
         _autoBackupService = autoBackupService;
         _undoRedoManager = undoRedoManager;
         _bluRayHelper = bluRayHelper;
@@ -182,6 +187,7 @@ public partial class MainViewModel :
         Menu = new Menu();
         PanelSingleLineLenghts = new StackPanel();
         MenuItemMergeAsDialog = new MenuItem();
+        MenuItemMerge = new MenuItem();
         _subtitle = new Subtitle();
         _videoFileName = string.Empty;
         _subtitleFileName = string.Empty;
@@ -1277,6 +1283,98 @@ public partial class MainViewModel :
 
         s.Text = Utilities.AutoBreakLine(s.Text);
         _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private void Split()
+    {
+        SplitSelectedLine(false, false);
+    }
+
+    [RelayCommand]
+    private void SplitAtVideoPosition()
+    {
+        SplitSelectedLine(true, false);
+    }
+
+    [RelayCommand]
+    private void SplitAtVideoPositionAndTextBoxCursorPosition()
+    {
+        SplitSelectedLine(true, true);
+    }
+
+    [RelayCommand]
+    private void WaveformSetStartAndOffsetTheRest()
+    {
+        var s = SelectedSubtitle;
+        if (s == null || VideoPlayerControl == null)
+        {
+            return;
+        }
+
+        var videoPositionSeconds = VideoPlayerControl.Position;
+        var index = Subtitles.IndexOf(s);
+        if (index < 0 || index >= Subtitles.Count)
+        {
+            return;
+        }
+
+        _undoRedoManager.StopChangeDetection();
+        var videoStartTime = TimeSpan.FromSeconds(videoPositionSeconds);
+        var subtitleStartTime = s.StartTime;
+        var difference = videoStartTime - subtitleStartTime;
+
+        for (var i = index; i < Subtitles.Count; i++)
+        {
+            var subtitle = Subtitles[i];
+            subtitle.StartTime = subtitle.StartTime + difference;
+        }
+        _updateAudioVisualizer = true;
+        _undoRedoManager.StartChangeDetection();
+    }
+
+    [RelayCommand]
+    private void WaveformOneSecondBack()
+    {
+        MoveVideoPositionMs(-1000);
+    }
+
+    [RelayCommand]
+    private void WaveformOneSecondForward()
+    {
+        MoveVideoPositionMs(1000);
+    }
+
+    private void SplitSelectedLine(bool atVideoPosition, bool atTextBoxPosition)
+    {
+        var selectedSubtitle = SelectedSubtitle;
+        if (selectedSubtitle == null)
+        {
+            return;
+        }
+
+        _splitManager.Split(Subtitles, selectedSubtitle);
+    }
+
+    private void MoveVideoPositionMs(int ms)
+    {
+        if (VideoPlayerControl == null || string.IsNullOrEmpty(_videoFileName))
+        {
+            return;
+        }
+
+        var newPosition = VideoPlayerControl.Position + (ms / 1000.0);
+        if (newPosition < 0)
+        {
+            newPosition = 0;
+        }
+
+        if (newPosition > VideoPlayerControl.Duration)
+        {
+            newPosition = VideoPlayerControl.Duration;
+        }
+
+        VideoPlayerControl.Position = newPosition;
     }
 
     private async Task<bool> RequireFfmpegOk()
@@ -2396,6 +2494,7 @@ public partial class MainViewModel :
     public void SubtitleContextOpening(object? sender, EventArgs e)
     {
         MenuItemMergeAsDialog.IsVisible = SubtitleGrid.SelectedItems.Count == 2;
+        MenuItemMerge.IsVisible = SubtitleGrid.SelectedItems.Count > 1;
     }
 
     private bool IsTextInputFocused()

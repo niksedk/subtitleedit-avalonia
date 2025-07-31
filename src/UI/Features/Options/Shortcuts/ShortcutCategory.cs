@@ -6,4 +6,5 @@ public enum ShortcutCategory
     SubtitleGridAndTextBox,
     Waveform,
     SubtitleGrid,
+    TextBox,
 }

@@ -88,6 +88,15 @@ public static class ShortcutsMain
         { nameof(_mvm.GoToNextLineCommand) , Se.Language.Options.Shortcuts.GeneralGoToNextSubtitle },
         { nameof(_mvm.GoToPreviousLineCommand) , Se.Language.Options.Shortcuts.GeneralGoToPrevSubtitle },
         { nameof(_mvm.SaveLanguageFileCommand) , "Save language file" },
+
+        { nameof(_mvm.UnbreakCommand) , Se.Language.General.Unbreak },
+        { nameof(_mvm.AutoBreakCommand) , Se.Language.General.AutoBreak },
+        { nameof(_mvm.SplitCommand) , Se.Language.General.SplitLine },
+        { nameof(_mvm.SplitAtVideoPositionCommand) , Se.Language.General.SplitLineAtVideoPosition },
+        { nameof(_mvm.SplitAtVideoPositionAndTextBoxCursorPositionCommand) , Se.Language.General.SplitLineAtVideoAndTextBoxPosition },
+        { nameof(_mvm.WaveformOneSecondBackCommand) , Se.Language.General.WaveformOneSecondBack },
+        { nameof(_mvm.WaveformOneSecondForwardCommand) ,  Se.Language.General.WaveformOneSecondForward },
+        { nameof(_mvm.WaveformSetStartAndOffsetTheRestCommand) ,  Se.Language.General.SetStartAndOffsetTheRest },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -129,6 +138,15 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.OpenDataFolderCommand, nameof(vm.OpenDataFolderCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.SaveLanguageFileCommand, nameof(vm.SaveLanguageFileCommand), ShortcutCategory.General);
 
+        AddShortcut(shortcuts, vm.UnbreakCommand, nameof(vm.UnbreakCommand), ShortcutCategory.SubtitleGridAndTextBox);
+        AddShortcut(shortcuts, vm.AutoBreakCommand, nameof(vm.AutoBreakCommand), ShortcutCategory.SubtitleGridAndTextBox);
+        AddShortcut(shortcuts, vm.SplitCommand, nameof(vm.SplitCommand), ShortcutCategory.SubtitleGridAndTextBox);
+        AddShortcut(shortcuts, vm.SplitAtVideoPositionCommand, nameof(vm.SplitAtVideoPositionCommand), ShortcutCategory.SubtitleGridAndTextBox);
+        AddShortcut(shortcuts, vm.SplitAtVideoPositionAndTextBoxCursorPositionCommand, nameof(vm.SplitAtVideoPositionAndTextBoxCursorPositionCommand), ShortcutCategory.TextBox);
+        AddShortcut(shortcuts, vm.WaveformOneSecondBackCommand, nameof(vm.WaveformOneSecondBackCommand), ShortcutCategory.Waveform);
+        AddShortcut(shortcuts, vm.WaveformOneSecondForwardCommand, nameof(vm.WaveformOneSecondForwardCommand), ShortcutCategory.Waveform);
+        AddShortcut(shortcuts, vm.WaveformSetStartAndOffsetTheRestCommand, nameof(vm.WaveformSetStartAndOffsetTheRestCommand), ShortcutCategory.Waveform);
+
         return shortcuts;
     }
 
@@ -155,6 +173,8 @@ public static class ShortcutsMain
             new(nameof(vm.CommandFileSaveCommand), new List<string> { commandOrWin, "S" }, ShortcutCategory.General),
             new(nameof(vm.TogglePlayPauseCommand), new List<string> { Avalonia.Input.Key.Space.ToString() }, ShortcutCategory.General),
             new(nameof(vm.TogglePlayPause2Command), new List<string> { commandOrWin, Avalonia.Input.Key.Space.ToString() }, ShortcutCategory.General),
+            new(nameof(vm.WaveformOneSecondBackCommand), new List<string> { Avalonia.Input.Key.Left.ToString() }, ShortcutCategory.Waveform),
+            new(nameof(vm.WaveformOneSecondForwardCommand), new List<string> { Avalonia.Input.Key.Right.ToString() }, ShortcutCategory.Waveform),
        };
     }
 

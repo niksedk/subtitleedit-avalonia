@@ -169,6 +169,10 @@ public static class InitListViewAndEditBox
 
         flyout.Items.Add(new Separator());
 
+        var splitMenuItem = new MenuItem { Header = Se.Language.General.SplitLine };
+        splitMenuItem.Command = vm.SplitCommand;
+        flyout.Items.Add(splitMenuItem);
+
         var mergePreviousMenuItem = new MenuItem { Header = Se.Language.General.MergeBefore };
         mergePreviousMenuItem.Command = vm.MergeWithLineBeforeCommand;
         flyout.Items.Add(mergePreviousMenuItem);
@@ -180,6 +184,7 @@ public static class InitListViewAndEditBox
         var mergeSelecedMenuItem = new MenuItem { Header = Se.Language.General.MergeSelected };
         mergeSelecedMenuItem.Command = vm.MergeSelectedLinesCommand;
         flyout.Items.Add(mergeSelecedMenuItem);
+        vm.MenuItemMerge = mergeSelecedMenuItem;
 
         var mergeSelecedAsDialogMenuItem = new MenuItem { Header = Se.Language.General.MergeSelectedAsDialog };
         mergeSelecedAsDialogMenuItem.Command = vm.MergeSelectedLinesDialogCommand;
@@ -198,11 +203,8 @@ public static class InitListViewAndEditBox
 
         // Set the ContextFlyout property
         vm.SubtitleGrid.ContextFlyout = flyout;
-        vm.SubtitleGrid.AddHandler(InputElement.PointerPressedEvent, vm.SubtitleGrid_PointerPressed,
-            RoutingStrategies.Tunnel);
-        vm.SubtitleGrid.AddHandler(InputElement.PointerReleasedEvent, vm.SubtitleGrid_PointerReleased,
-            RoutingStrategies.Tunnel);
-
+        vm.SubtitleGrid.AddHandler(InputElement.PointerPressedEvent, vm.SubtitleGrid_PointerPressed, RoutingStrategies.Tunnel);
+        vm.SubtitleGrid.AddHandler(InputElement.PointerReleasedEvent, vm.SubtitleGrid_PointerReleased, RoutingStrategies.Tunnel);
 
 
         // Edit area - restructured with time controls on left, multiline text on right

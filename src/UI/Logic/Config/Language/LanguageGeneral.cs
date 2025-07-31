@@ -230,6 +230,13 @@ public class LanguageGeneral
     public string EnterProfileName { get; set; }
     public string PickResolutionFromVideoDotDotDot { get; set; }
     public string UseSourceResolution { get; set; }
+    public string Unbreak { get; set; }
+    public string AutoBreak { get; set; }
+    public string SplitLineAtVideoPosition { get; set; }
+    public string SplitLineAtVideoAndTextBoxPosition { get; set; }
+    public string WaveformOneSecondBack { get; set; }
+    public string WaveformOneSecondForward { get; set; }
+    public string SetStartAndOffsetTheRest { get; set; }
 
     public LanguageGeneral()
     {
@@ -315,7 +322,7 @@ public class LanguageGeneral
         ShowPreview = "Show preview";
         SingleLineLengths = "Single line length:";
         Size = "Size";
-        SplitLine = "Split line!";
+        SplitLine = "Split line";
         StartTime = "Start time";
         Strikeout = "Strikeout";
         Style = "Style";
@@ -459,5 +466,12 @@ public class LanguageGeneral
         EnterProfileName = "Enter profile name";
         PickResolutionFromVideoDotDotDot = "Pick resolution from video...";
         UseSourceResolution = "Use source resolution";
+        Unbreak = "Unbreak text";
+        AutoBreak = "Auto-break text";
+        SplitLineAtVideoPosition = "Split line at video position";
+        SplitLineAtVideoAndTextBoxPosition = "Split line at video and text box position";
+        WaveformOneSecondBack = "Waveform, one second back";
+        WaveformOneSecondForward = "Waveform, one second forward";
+        SetStartAndOffsetTheRest = "Set start and offset the rest";
     }
 }
