@@ -778,17 +778,22 @@ public class AudioVisualizer : Control
 
     // You'll also need to add these fields to your class if they don't exist:
     private readonly Pen _paintTimeLine = new Pen(Brushes.Gray, 1);
-    private readonly IBrush _paintTimeText = Brushes.White;
-    private readonly Typeface _timelineTypeface = new Typeface("Arial"); // Or your preferred font
+    private readonly IBrush _paintTimeText = Brushes.WhiteSmoke;
 
-    // And you'll need the GetDisplayTime method if it doesn't exist:
     private string GetDisplayTime(double seconds)
     {
+        var secs = (int)Math.Round(seconds, MidpointRounding.AwayFromZero);
+        if (secs < 60)
+        {
+            return secs.ToString(CultureInfo.InvariantCulture);
+        }
+
         var timeSpan = TimeSpan.FromSeconds(seconds);
         if (timeSpan.TotalHours >= 1)
         {
             return timeSpan.ToString(@"h\:mm\:ss");
         }
+
         return timeSpan.ToString(@"m\:ss");
     }
 
