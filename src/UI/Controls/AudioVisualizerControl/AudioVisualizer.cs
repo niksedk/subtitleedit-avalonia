@@ -141,14 +141,28 @@ public class AudioVisualizer : Control
     public SubtitleLineViewModel? NewSelectionParagraph { get; set; }
     public double _newSelectionSeconds { get; set; }
     private SubtitleLineViewModel? _activeParagraph;
-    private SubtitleLineViewModel? _activeParagraphPrevoius;
+    private SubtitleLineViewModel? _activeParagraphPrevious;
     private SubtitleLineViewModel? _activeParagraphNext;
     private Point _startPointerPosition;
     private double _originalStartSeconds;
     private double _originalEndSeconds;
+    private double _originalPreviousEndSeconds;
+    private double _originalNextStartSeconds;
     private long _audioVisualizerLastScroll;
     private long _lastPointerPressed = -1;
-    private enum InteractionMode { None, Moving, ResizingLeft, ResizingLeftOr, ResizingRight, ResizingRightOr, New }
+
+    private enum InteractionMode
+    {
+        None, 
+        Moving, 
+        ResizingLeft, 
+        ResizingLeftOr, 
+        ResizingRight, 
+        ResizingRightOr, 
+        ResizeLeftAnd, 
+        ResizeRightAnd, 
+        New,
+    }
     private InteractionMode _interactionMode = InteractionMode.None;
 
     public readonly double ResizeMargin = 5.0; // Margin for resizing paragraphs
@@ -445,8 +459,19 @@ public class AudioVisualizer : Control
             var p2 = HitTestParagraph(point, displayableParagraphs, idx - 1);
             if (p2 != null)
             {
-                _activeParagraphPrevoius = p2;
+                _activeParagraphPrevious = p2;
                 _interactionMode = InteractionMode.ResizingLeftOr;
+            }
+
+            if (_isAltDown) 
+            {
+                p2 = HitTestParagraph(point, displayableParagraphs, idx - 1, 100);
+                if (p2 != null)
+                {
+                    _activeParagraphPrevious = p2;
+                    _originalPreviousEndSeconds  = p2.EndTime.TotalSeconds;
+                    _interactionMode = InteractionMode.ResizeLeftAnd; // move the prev end too
+                }
             }
         }
         else if (Math.Abs(point.X - right) <= ResizeMargin)
@@ -459,6 +484,17 @@ public class AudioVisualizer : Control
             {
                 _activeParagraphNext = p2;
                 _interactionMode = InteractionMode.ResizingRightOr;
+            }
+            
+            if (_isAltDown) 
+            {
+                p2 = HitTestParagraphRight(point, displayableParagraphs, idx + 1, 100);
+                if (p2 != null)
+                {
+                    _activeParagraphNext = p2;
+                    _originalNextStartSeconds  = p2.StartTime.TotalSeconds;
+                    _interactionMode = InteractionMode.ResizeRightAnd; // move the prev end too
+                }
             }
         }
         else if (point.X > left && point.X < right)
@@ -518,7 +554,7 @@ public class AudioVisualizer : Control
         var deltaX = point.X - _startPointerPosition.X;
         var deltaSeconds = RelativeXPositionToSeconds((int)deltaX);
 
-        if (_interactionMode == InteractionMode.ResizingLeftOr && _activeParagraphPrevoius != null)
+        if (_interactionMode == InteractionMode.ResizingLeftOr && _activeParagraphPrevious != null)
         {
             if (Math.Abs(deltaX) < 3)
             {
@@ -531,7 +567,7 @@ public class AudioVisualizer : Control
             }
             else
             {
-                _activeParagraph = _activeParagraphPrevoius;
+                _activeParagraph = _activeParagraphPrevious;
                 _originalStartSeconds = _activeParagraph.StartTime.TotalSeconds;
                 _originalEndSeconds = _activeParagraph.EndTime.TotalSeconds;
                 _interactionMode = InteractionMode.ResizingRight;
@@ -564,7 +600,6 @@ public class AudioVisualizer : Control
         var previous = currentIndex > 0 ? _displayableParagraphs[currentIndex - 1] : null;
         var next = currentIndex < _displayableParagraphs.Count - 1 ? _displayableParagraphs[currentIndex + 1] : null;
 
-
         switch (_interactionMode)
         {
             case InteractionMode.Moving:
@@ -587,7 +622,24 @@ public class AudioVisualizer : Control
                 _activeParagraph.StartTime = TimeSpan.FromSeconds(newStart);
                 _activeParagraph.EndTime = TimeSpan.FromSeconds(newEnd);
                 break;
-
+            case InteractionMode.ResizeLeftAnd:
+                newStart = _originalStartSeconds + deltaSeconds - StartPositionSeconds;
+                var newPrevEnd = _originalPreviousEndSeconds + deltaSeconds - StartPositionSeconds;
+                if (_activeParagraphPrevious != null)
+                {
+                    _activeParagraph.SetStartTimeOnly(TimeSpan.FromSeconds(newStart));
+                    _activeParagraphPrevious.EndTime = TimeSpan.FromSeconds(newPrevEnd);
+                }
+                break;
+            case InteractionMode.ResizeRightAnd:
+                newEnd = _originalEndSeconds + deltaSeconds - StartPositionSeconds;
+                var newNextStart = _originalNextStartSeconds + deltaSeconds - StartPositionSeconds;
+                if (_activeParagraphNext != null)
+                {
+                    _activeParagraph.EndTime = TimeSpan.FromSeconds(newEnd);
+                    _activeParagraphNext.SetStartTimeOnly(TimeSpan.FromSeconds(newNextStart));
+                }
+                break;
             case InteractionMode.ResizingLeft:
                 newStart = _originalStartSeconds + deltaSeconds - StartPositionSeconds;
 
@@ -600,8 +652,8 @@ public class AudioVisualizer : Control
                 {
                     _activeParagraph.SetStartTimeOnly(TimeSpan.FromSeconds(newStart));
                 }
+                
                 break;
-
             case InteractionMode.ResizingRight:
                 newEnd = _originalEndSeconds + deltaSeconds - StartPositionSeconds;
 
@@ -708,6 +760,48 @@ public class AudioVisualizer : Control
 
         return null;
     }
+    
+    private SubtitleLineViewModel? HitTestParagraph(Point point, List<SubtitleLineViewModel> subtitles, int index, double resizeMargin)
+    {
+        if (subtitles == null || index < 0 || index > subtitles.Count - 1)
+        {
+            return null;
+        }
+
+        var p = subtitles[index];
+
+        double left = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds);
+        double right = SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds);
+
+        if (point.X >= left - ResizeMargin && point.X <= right + resizeMargin)
+        {
+            return p;
+        }
+
+        return null;
+    }
+    
+    private SubtitleLineViewModel? HitTestParagraphRight(Point point, List<SubtitleLineViewModel> subtitles, int index, double resizeMargin)
+    {
+        if (index < 0 || index > subtitles.Count - 1)
+        {
+            return null;
+        }
+
+        var p = subtitles[index];
+
+        double left = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds) - resizeMargin;
+        double right = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds) + resizeMargin;
+
+        if (point.X >= left && point.X <= right)
+        {
+            return p;
+        }
+
+        return null;
+    }
+
+
 
     public override void Render(DrawingContext context)
     {
