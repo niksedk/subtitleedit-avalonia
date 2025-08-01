@@ -940,6 +940,7 @@ public partial class MainViewModel :
             AudioVisualizer.WaveformColor = Se.Settings.Waveform.WaveformColor.FromHexToColor();
             AudioVisualizer.WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor();
             AudioVisualizer.InvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel;
+            AudioVisualizer.UpdateTheme();
         }
 
         _errorColor = Se.Settings.General.ErrorColor.FromHexToColor();
@@ -1388,6 +1389,42 @@ public partial class MainViewModel :
     {
         MoveVideoPositionMs(1000);
     }
+    
+    [RelayCommand]
+    private void ExtendSelectedToPrevious()
+    {
+        var s = SelectedSubtitle;
+        var idx = SelectedSubtitleIndex;
+        if (s == null || idx == null || idx == 0)
+        {
+            return;
+        }
+        
+        var prev = Subtitles[idx.Value - 1];
+        s.StartTime = TimeSpan.FromMilliseconds(prev.EndTime.TotalMilliseconds + Se.Settings.General.MinimumMillisecondsBetweenLines);
+        _updateAudioVisualizer = true;     
+    }
+
+    
+    [RelayCommand]
+    private void ExtendSelectedToNext()
+    {
+        var s = SelectedSubtitle;
+        var idx = SelectedSubtitleIndex;
+        if (s == null || idx == null || idx < Subtitles.Count -1)
+        {
+            return;
+        }
+
+        var next = Subtitles.GetOrNull(idx.Value + 1);
+        if (next == null)
+        {
+            return;
+        }
+        ;
+        s.EndTime = TimeSpan.FromMilliseconds(next.StartTime.TotalMilliseconds - Se.Settings.General.MinimumMillisecondsBetweenLines);
+        _updateAudioVisualizer = true;     
+    }
 
     [RelayCommand]
     private void TextBoxCut()
@@ -1399,13 +1436,6 @@ public partial class MainViewModel :
     private void TextBoxCopy()
     {
         EditTextBox.Copy();
-    }
-
-
-    [RelayCommand]
-    private void TextBoxDelete()
-    {
-
     }
 
     [RelayCommand]
@@ -2409,20 +2439,28 @@ public partial class MainViewModel :
         }
     }
 
-    public async Task DeleteSelectedItems()
+    private async Task DeleteSelectedItems()
     {
-        var selectedItems = _selectedSubtitles?.ToList() ?? new List<SubtitleLineViewModel>();
-        if (selectedItems == null || !selectedItems.Any())
+        var selectedItems = _selectedSubtitles?.ToList() ?? [];
+        if (selectedItems.Count == 0)
         {
             return;
         }
 
         if (Se.Settings.General.PromptDeleteLines)
         {
+            var title = Se.Language.General.Delete;
+            
+            var message = string.Format(Se.Language.General.DeleteXLinesPrompt, selectedItems.Count);
+            if (selectedItems.Count == 1)
+            {
+                message = string.Format(Se.Language.General.DeleteLineXPrompt, SelectedSubtitleIndex + 1);
+            }
+
             var answer = await MessageBox.Show(
                 Window!,
-                "Delete lines?",
-                $"Do you want to delete {selectedItems.Count} lines?",
+                title,
+                message,
                 MessageBoxButtons.YesNoCancel,
                 MessageBoxIcon.Question);
 

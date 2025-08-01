@@ -167,7 +167,7 @@ public class Se
             return;
         }
 
-        Shortcuts = ShortcutsMain.GetDefaultShorcuts(vm);
+        Shortcuts = ShortcutsMain.GetDefaultShortcuts(vm);
     }
 
     public static void SaveSettings()

@@ -1,18 +1,19 @@
-﻿using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Media;
-using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
-using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Features.Main;
-using Nikse.SubtitleEdit.Logic;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Media;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Logic;
+
+namespace Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 
 public class AudioVisualizer : Control
 {
@@ -215,6 +216,11 @@ public class AudioVisualizer : Control
             InvalidateVisual();
         };
     }
+    
+    public void UpdateTheme()
+    {
+        _paintTimeText = UiUtil.GetTextColor();
+    }
 
     private void OnKeyUp(object? sender, KeyEventArgs e)
     {
@@ -370,8 +376,8 @@ public class AudioVisualizer : Control
             var ts = TimeSpan.FromTicks(Stopwatch.GetTimestamp() - _lastPointerPressed);
             if (ts.TotalMilliseconds < 100 ||
                 (
-                _activeParagraph != null &&
-                Math.Abs(_originalStartSeconds - _activeParagraph.StartTime.TotalSeconds) < 0.01))
+                    _activeParagraph != null &&
+                    Math.Abs(_originalStartSeconds - _activeParagraph.StartTime.TotalSeconds) < 0.01))
             {
                 if (_isCtrlDown && _activeParagraph != null && OnToggleSelection != null)
                 {
@@ -733,10 +739,8 @@ public class AudioVisualizer : Control
         var position = SecondsToXPosition(seconds);
         var imageHeight = Bounds.Height;
 
-        // Create pen and brush for drawing (you'll need to define these as class fields)
-        // Assuming you have similar fields like the other drawing methods
-        var pen = _paintTimeLine; // You'll need to define this Pen
-        var textBrush = _paintTimeText; // You'll need to define this Brush
+        var pen = _paintTimeLine;
+        var textBrush = _paintTimeText; 
 
         while (position < Bounds.Width)
         {
@@ -744,10 +748,10 @@ public class AudioVisualizer : Control
 
             if (n > 38 || (int)Math.Round(StartPositionSeconds + seconds) % 5 == 0)
             {
-                // Draw major tick line
+                // Draw major tick lines (seconds)
                 context.DrawLine(pen, new Point(position, imageHeight), new Point(position, imageHeight - 10));
 
-                // Draw time text - try different positions and larger font
+                // Draw time text 
                 var timeText = GetDisplayTime(StartPositionSeconds + seconds);
                 var formattedText = new FormattedText(
                     timeText,
@@ -776,11 +780,10 @@ public class AudioVisualizer : Control
         }
     }
 
-    // You'll also need to add these fields to your class if they don't exist:
-    private readonly Pen _paintTimeLine = new Pen(Brushes.Gray, 1);
-    private readonly IBrush _paintTimeText = Brushes.WhiteSmoke;
-
-    private string GetDisplayTime(double seconds)
+    private readonly Pen _paintTimeLine =  new Pen(Brushes.Gray, 1);
+    private IBrush _paintTimeText = UiUtil.GetTextColor();
+    
+    private static string GetDisplayTime(double seconds)
     {
         var secs = (int)Math.Round(seconds, MidpointRounding.AwayFromZero);
         if (secs < 60)

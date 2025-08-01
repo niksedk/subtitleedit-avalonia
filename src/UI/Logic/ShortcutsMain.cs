@@ -52,7 +52,7 @@ public static class ShortcutsMain
 
     private static MainViewModel _mvm = null!;
 
-    public static Dictionary<string, string> CommandTranslationLookup = new Dictionary<string, string>
+    public static readonly Dictionary<string, string> CommandTranslationLookup = new Dictionary<string, string>
     {
         { nameof(_mvm.SelectAllLinesCommand) , Se.Language.Options.Shortcuts.ListSelectAll },
         { nameof(_mvm.InverseSelectionCommand) , Se.Language.Options.Shortcuts.ListInverseSelection },
@@ -98,6 +98,8 @@ public static class ShortcutsMain
         { nameof(_mvm.WaveformSetStartAndOffsetTheRestCommand) ,  Se.Language.General.SetStartAndOffsetTheRest },
         { nameof(_mvm.WaveformSetStartCommand) ,  Se.Language.General.SetStart },
         { nameof(_mvm.WaveformSetEndCommand) ,  Se.Language.General.SetEnd },
+        { nameof(_mvm.ExtendSelectedToPreviousCommand) ,  Se.Language.General.ExtendSelectedToPrevious },
+        { nameof(_mvm.ExtendSelectedToNextCommand) ,  Se.Language.General.ExtendSelectedToNext },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -149,11 +151,13 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.WaveformSetStartAndOffsetTheRestCommand, nameof(vm.WaveformSetStartAndOffsetTheRestCommand), ShortcutCategory.Waveform);
         AddShortcut(shortcuts, vm.WaveformSetStartCommand, nameof(vm.WaveformSetStartCommand), ShortcutCategory.Waveform);
         AddShortcut(shortcuts, vm.WaveformSetEndCommand, nameof(vm.WaveformSetEndCommand), ShortcutCategory.Waveform);
+        AddShortcut(shortcuts, vm.ExtendSelectedToPreviousCommand, nameof(vm.ExtendSelectedToPreviousCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ExtendSelectedToNextCommand, nameof(vm.ExtendSelectedToNextCommand), ShortcutCategory.General);
 
         return shortcuts;
     }
 
-    public static List<SeShortCut> GetDefaultShorcuts(MainViewModel vm)
+    public static List<SeShortCut> GetDefaultShortcuts(MainViewModel vm)
     {
         var commandOrWin = GetCommandOrWin();
 
