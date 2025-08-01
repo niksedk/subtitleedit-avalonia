@@ -138,7 +138,9 @@ public partial class DownloadFfmpegViewModel : ObservableObject
         {
             var paths = new List<string>
             {
+                Path.Combine(AppContext.BaseDirectory, "ffmpeg"),
                 Se.FfmpegFolder,
+                "/Applications/Subtitle Edit.app/Contents/MacOS", // Bundled with "Subtitle Edit" app
                 "/Applications/Subtitle Edit.app/Contents/Frameworks/ffmpeg", // Bundled with "Subtitle Edit" app
                 "/opt/local/bin/ffmpeg", // MacPorts
                 "/usr/local/bin/ffmpeg", // Intel Macs
