@@ -25,9 +25,8 @@ You can find the latest cross-platform builds here:
 ### macOS
 
 - **Minimum macOS version**: 10.15 (Catalina) or newer
-- **Dependencies** (install via [Homebrew](https://brew.sh/) or [MacPorts](https://www.macports.org/)):
+- **Dependencies** (install via [MacPorts](https://www.macports.org/)):
     - `mpv`
-        - Homebrew: `brew install mpv`
         - MacPorts: `sudo port install mpv`
     - `ffmpeg`
         - Homebrew: `brew install ffmpeg`
