@@ -144,6 +144,10 @@ jobs:
           run: dotnet build --configuration ${{ inputs.build_configuration }} --no-restore
         - name: Test
           run: dotnet test --no-build --verbosity normal
+        - name: Download ffmpeg for macOS
+          run: |
+            curl -L -o ffmpeg-mac-7.1.1.zip "https://github.com/SubtitleEdit/support-files/releases/download/ffmpeg-v7-1/ffmpeg-mac-7.1.1.zip"
+            unzip ffmpeg-mac-7.1.1.zip -d ffmpeg-temp
         - name: Publish macOS x64 app
           run: |
             dotnet publish src/UI/UI.csproj -c ${{ inputs.build_configuration }} -r osx-x64 --self-contained true \
@@ -175,6 +179,10 @@ jobs:
             cp "./publish/macos-arm64/SubtitleEdit" "./SubtitleEdit-ARM64.app/Contents/MacOS/"
             cp "./publish/macos-arm64/"*.dylib "./SubtitleEdit-ARM64.app/Contents/MacOS/" 2>/dev/null || true
             chmod +x "./SubtitleEdit-ARM64.app/Contents/MacOS/SubtitleEdit"
+            
+            # Copy ffmpeg to ARM64 bundle (assuming it's universal or ARM64 compatible)
+            cp "./ffmpeg-temp/ffmpeg" "./SubtitleEdit-ARM64.app/Contents/MacOS/" 2>/dev/null || true
+            chmod +x "./SubtitleEdit-ARM64.app/Contents/MacOS/ffmpeg" 2>/dev/null || true
         - name: Sign macOS app bundles (if certificates available)
           run: |
             # Check if signing certificate is available
