@@ -1,4 +1,5 @@
-﻿using Avalonia;
+﻿using System;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
@@ -7,7 +8,7 @@ using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
-public class InitVideoPlayer
+public static class InitVideoPlayer
 {
     public static Grid MakeLayoutVideoPlayer(MainView mainPage, MainViewModel vm)
     {
@@ -60,13 +61,26 @@ public class InitVideoPlayer
         //}
         //else
         {
-            var videoPlayerInstanceMpv = new VideoPlayerInstanceMpv();
-            control = new VideoPlayerControl(videoPlayerInstanceMpv)
+            try
             {
-                PlayerContent = videoPlayerInstanceMpv.MpvView,
-                StopIsVisible = Se.Settings.Video.ShowStopButton,
-                FullScreenIsVisible = Se.Settings.Video.ShowFullscreenButton,
-            };
+                var videoPlayerInstanceMpv = new VideoPlayerInstanceMpv();
+                control = new VideoPlayerControl(videoPlayerInstanceMpv)
+                {
+                    PlayerContent = videoPlayerInstanceMpv.MpvView,
+                    StopIsVisible = Se.Settings.Video.ShowStopButton,
+                    FullScreenIsVisible = Se.Settings.Video.ShowFullscreenButton,
+                };
+            }
+            catch 
+            {
+                var videoPlayerInstanceNone = new VideoPlayerInstanceNone();
+                control = new VideoPlayerControl(videoPlayerInstanceNone)
+                {
+                    PlayerContent = new Label(),
+                    StopIsVisible = Se.Settings.Video.ShowStopButton,
+                    FullScreenIsVisible = Se.Settings.Video.ShowFullscreenButton,
+                };
+            }
         }
 
         control.VerticalAlignment = VerticalAlignment.Stretch;
