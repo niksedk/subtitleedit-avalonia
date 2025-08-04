@@ -25,11 +25,11 @@ You can find the latest cross-platform builds here:
 ### macOS
 
 - **Minimum macOS version**: 10.15 (Catalina) or newer
-- **Dependencies** (install via [MacPorts](https://www.macports.org/)):
+- **Dependencies for Intel macs** (install via [MacPorts](https://www.macports.org/)):
     - `mpv`
         - MacPorts: `sudo port install mpv`
     - `ffmpeg`
-        - Homebrew: `brew install ffmpeg`
+        - Homebrew: `sudo port install ffmpeg`
 
 
 
@@ -40,9 +40,11 @@ Because *Subtitle Edit* is not signed with an Apple developer certificate, macOS
 1. **Download** and **double-click** the `.dmg` file to mount it.
 2. In the window that appears, **drag `Subtitle Edit.app` into your `Applications` folder**.
 3. Open the **Terminal** app (you can find it via Spotlight or in `/Applications/Utilities/`).
-4. In Terminal, run the following command to remove macOS’s security quarantine flag:
+4. In Terminal, run the following command to remove macOS’s security quarantine flag and add adhoc code signature:
    ```bash
-   sudo xattr -rd com.apple.quarantine /Applications/Subtitle\ Edit.app
+   sudo xattr -rd com.apple.quarantine "/Applications/Subtitle Edit.app"
+   sudo codesign --force --deep --sign - "/Applications/Subtitle Edit.app"
+
 
 ### Linux
 - Requires **libmpv** (install via package manager, e.g. `sudo apt install mpv libmpv-dev`)
