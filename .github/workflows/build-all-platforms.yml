@@ -230,7 +230,50 @@ jobs:
           brew cleanup --prune=all -s
           rm -rf ./publish/macos-* || true
           rm -rf ./libmpv-temp || true
-          echo "After cleanup:"; df -h /    
+          echo "After cleanup:"; df -h /   
+          
+      - name: Fix library linking in macOS bundles
+        run: |
+          # Add rpath and fix any absolute library paths
+          for app in "./SubtitleEdit-x64.app" "./SubtitleEdit-ARM64.app"; do
+            if [ -d "$app" ]; then
+              executable="$app/Contents/MacOS/SubtitleEdit"
+          
+              # Add rpath if not present
+              if ! otool -l "$executable" | grep -q "@executable_path/../Frameworks"; then
+                install_name_tool -add_rpath "@executable_path/../Frameworks" "$executable" || true
+              fi
+          
+              # Fix any absolute paths to libmpv in the executable
+              otool -L "$executable" | grep -E "libmpv|/opt/local|/usr/local" | awk '{print $1}' | while read lib; do
+                if [ -n "$lib" ] && [[ "$lib" != @* ]]; then
+                  lib_name=$(basename "$lib")
+                  install_name_tool -change "$lib" "@rpath/$lib_name" "$executable" 2>/dev/null || true
+                fi
+              done
+          
+              # Fix any bundled dylibs in Frameworks
+              frameworks_dir="$app/Contents/Frameworks"
+              if [ -d "$frameworks_dir" ]; then
+                for dylib in "$frameworks_dir"/*.dylib; do
+                  if [ -f "$dylib" ]; then
+                    filename=$(basename "$dylib")
+                    # Update library ID
+                    install_name_tool -id "@rpath/$filename" "$dylib" 2>/dev/null || true
+          
+                    # Fix absolute references in this dylib
+                    otool -L "$dylib" | grep -E "/opt/local|/usr/local" | awk '{print $1}' | while read dep; do
+                      if [ -n "$dep" ]; then
+                        dep_name=$(basename "$dep")
+                        install_name_tool -change "$dep" "@rpath/$dep_name" "$dylib" 2>/dev/null || true
+                      fi
+                    done
+                  fi
+                done
+              fi
+            fi
+          done          
+              
       - name: Create DMG files
         run: |
           # Create DMG for x64
