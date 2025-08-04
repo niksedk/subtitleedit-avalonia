@@ -194,35 +194,6 @@ jobs:
           
           # Set proper permissions for libmpv files
           chmod -R 755 "./SubtitleEdit-ARM64.app/Contents/Frameworks/"
-      - name: Sign macOS app bundles (if certificates available)
-        run: |
-          # Check if signing certificate is available
-          if [ -n "${{ secrets.MACOS_CERTIFICATE }}" ]; then
-            echo "Signing certificates found, signing apps..."
-          
-            # Import certificate
-            echo "${{ secrets.MACOS_CERTIFICATE }}" | base64 --decode > certificate.p12
-            security create-keychain -p "${{ secrets.MACOS_CERTIFICATE_PASSWORD }}" build.keychain
-            security default-keychain -s build.keychain
-            security unlock-keychain -p "${{ secrets.MACOS_CERTIFICATE_PASSWORD }}" build.keychain
-            security import certificate.p12 -k build.keychain -P "${{ secrets.MACOS_CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
-            security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "${{ secrets.MACOS_CERTIFICATE_PASSWORD }}" build.keychain
-          
-            # Sign the apps
-            codesign --force --options runtime --deep --sign "${{ secrets.MACOS_CERTIFICATE_NAME }}" "./SubtitleEdit-x64.app"
-            codesign --force --options runtime --deep --sign "${{ secrets.MACOS_CERTIFICATE_NAME }}" "./SubtitleEdit-ARM64.app"
-          
-            # Verify signatures
-            codesign --verify --verbose "./SubtitleEdit-x64.app"
-            codesign --verify --verbose "./SubtitleEdit-ARM64.app"
-          
-            # Clean up
-            rm certificate.p12
-            security delete-keychain build.keychain
-          else
-            echo "No signing certificates found, skipping code signing"
-            echo "Apps will need to be opened with right-click -> Open on first launch"
-          fi
       - name: Free disk space before DMG build
         run: |
           echo "Before cleanup:"; df -h /
@@ -230,8 +201,7 @@ jobs:
           brew cleanup --prune=all -s
           rm -rf ./publish/macos-* || true
           rm -rf ./libmpv-temp || true
-          echo "After cleanup:"; df -h /   
-          
+          echo "After cleanup:"; df -h /             
       - name: Fix library linking in macOS bundles
         run: |
           # Add rpath and fix any absolute library paths
@@ -273,7 +243,35 @@ jobs:
               fi
             fi
           done          
-              
+      - name: Sign macOS app bundles (if certificates available)
+        run: |
+          # Check if signing certificate is available
+          if [ -n "${{ secrets.MACOS_CERTIFICATE }}" ]; then
+            echo "Signing certificates found, signing apps..."
+          
+            # Import certificate
+            echo "${{ secrets.MACOS_CERTIFICATE }}" | base64 --decode > certificate.p12
+            security create-keychain -p "${{ secrets.MACOS_CERTIFICATE_PASSWORD }}" build.keychain
+            security default-keychain -s build.keychain
+            security unlock-keychain -p "${{ secrets.MACOS_CERTIFICATE_PASSWORD }}" build.keychain
+            security import certificate.p12 -k build.keychain -P "${{ secrets.MACOS_CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
+            security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "${{ secrets.MACOS_CERTIFICATE_PASSWORD }}" build.keychain
+          
+            # Sign the apps
+            codesign --force --options runtime --deep --sign "${{ secrets.MACOS_CERTIFICATE_NAME }}" "./SubtitleEdit-x64.app"
+            codesign --force --options runtime --deep --sign "${{ secrets.MACOS_CERTIFICATE_NAME }}" "./SubtitleEdit-ARM64.app"
+          
+            # Verify signatures
+            codesign --verify --verbose "./SubtitleEdit-x64.app"
+            codesign --verify --verbose "./SubtitleEdit-ARM64.app"
+          
+            # Clean up
+            rm certificate.p12
+            security delete-keychain build.keychain
+          else
+            echo "No signing certificates found, skipping code signing"
+            echo "Apps will need to be opened with right-click -> Open on first launch"
+          fi              
       - name: Create DMG files
         run: |
           # Create DMG for x64
