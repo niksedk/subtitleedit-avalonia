@@ -113,6 +113,8 @@
 		<Content Include="SE.ico" />
 		<None Remove="Assets\Ocr.zip" />
 		<AvaloniaResource Include="Assets\Ocr.zip" />
+		<None Remove="Assets\about.png" />
+		<AvaloniaResource Include="Assets\about.png" />
 	</ItemGroup>
 
 	<ItemGroup>

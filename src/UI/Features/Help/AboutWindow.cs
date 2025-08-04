@@ -6,6 +6,8 @@ using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 
 namespace Nikse.SubtitleEdit.Features.Help;
 
@@ -30,6 +32,16 @@ public class AboutWindow : Window
         {
             Text = "Subtitle Edit is free software under the MIT license.",
         };
+        
+        var uri = new Uri("avares://SubtitleEdit/Assets/about.png");
+        var imageAbout = new Image
+        {
+            Source = new Bitmap(AssetLoader.Open(uri)),
+            Stretch = Stretch.Uniform,
+            Margin = new Thickness(10), 
+            Width = 128,
+            Height = 128,
+        };
 
         var descriptionText = new TextBlock
         {
@@ -38,7 +50,6 @@ public class AboutWindow : Window
            "We welcome your feedback to help improve the final version." + Environment.NewLine +
            Environment.NewLine +
            "Thank you for testing and supporting Subtitle Edit :)",
-            FontSize = 12,
             Margin = new Thickness(0, 10, 0, 10)
         };
 
@@ -110,6 +121,7 @@ public class AboutWindow : Window
             {
                 titleText,
                 licenseText,
+                imageAbout,
                 descriptionText,
                 panelGithub,
                 panelDonate,
