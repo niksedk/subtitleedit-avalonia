@@ -859,11 +859,12 @@ public partial class OcrViewModel : ObservableObject
 
         try
         {
+            var fileName = TesseractOcr.GetExecutablePath();
             var process = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = "tesseract",
+                    FileName = fileName,
                     Arguments = "--version",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,

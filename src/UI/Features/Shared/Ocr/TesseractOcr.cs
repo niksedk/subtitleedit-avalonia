@@ -20,22 +20,48 @@ public class TesseractOcr
         Error = string.Empty;
     }
 
-    private string _executablePath = string.Empty;  
+    private string _executablePath = string.Empty;
+
+    public static string GetExecutablePath()
+    {
+        string path;
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            path = Path.Combine(Se.TesseractFolder, "tesseract.exe");
+            if (File.Exists(path))
+            {
+                return path; 
+            }
+            
+            return "tesseract.exe";
+        }
+
+        path = "/opt/homebrew/bin/tesseract";
+        if (File.Exists(path))
+        {
+            return path;
+        }
+        
+        path = "/opt/local/bin/tesseract";
+        if (File.Exists(path))
+        {
+            return path;
+        }
+        
+        path = "/usr/bin/tesseract";
+        if (File.Exists(path))
+        {
+            return path;
+        }
+
+        return "tesseract";
+    }
 
     public async Task<string> Ocr(SKBitmap bitmap, string language, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(_executablePath))
         {
-            _executablePath = "tesseract";
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                _executablePath = Path.Combine(Se.TesseractFolder, "tesseract.exe");
-                if (!File.Exists(_executablePath))
-                {
-                    Error = "Tesseract executable not found: " + _executablePath;
-                    return string.Empty;
-                }
-            }
+            _executablePath = GetExecutablePath();
         }
 
         var tempImage = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".png");
