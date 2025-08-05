@@ -247,13 +247,14 @@ public class LanguageGeneral
     public string ExtendSelectedToNext { get; set; }
     public string DeleteLineXPrompt { get; set; }
     public string DeleteXLinesPrompt { get; set; }
+    public string InsertNewSelection { get; set; }
 
     public LanguageGeneral()
     {
         Actor = "Actor";
         Advanced = "Advanced";
         After = "After";
-        All = "All";
+        All = "All";    
         AllFiles = "All files";
         Apply = "Apply";
         ApplyTo = "Apply to";
@@ -493,5 +494,6 @@ public class LanguageGeneral
         ExtendSelectedToNext = "Extend selected to next";
         DeleteLineXPrompt = "Delete line number {0}?";
         DeleteXLinesPrompt = "Delete {0} lines?";
+        InsertNewSelection = "Insert new selection";
     }
 }

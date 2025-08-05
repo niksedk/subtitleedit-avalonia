@@ -181,15 +181,15 @@ public static class InitListViewAndEditBox
         mergeNextMenuItem.Command = vm.MergeWithLineAfterCommand;
         flyout.Items.Add(mergeNextMenuItem);
 
-        var mergeSelecedMenuItem = new MenuItem { Header = Se.Language.General.MergeSelected };
-        mergeSelecedMenuItem.Command = vm.MergeSelectedLinesCommand;
-        flyout.Items.Add(mergeSelecedMenuItem);
-        vm.MenuItemMerge = mergeSelecedMenuItem;
+        var mergeSelectedMenuItem = new MenuItem { Header = Se.Language.General.MergeSelected };
+        mergeSelectedMenuItem.Command = vm.MergeSelectedLinesCommand;
+        flyout.Items.Add(mergeSelectedMenuItem);
+        vm.MenuItemMerge = mergeSelectedMenuItem;
 
-        var mergeSelecedAsDialogMenuItem = new MenuItem { Header = Se.Language.General.MergeSelectedAsDialog };
-        mergeSelecedAsDialogMenuItem.Command = vm.MergeSelectedLinesDialogCommand;
-        flyout.Items.Add(mergeSelecedAsDialogMenuItem);
-        vm.MenuItemMergeAsDialog = mergeSelecedAsDialogMenuItem;
+        var mergeSelectedAsDialogMenuItem = new MenuItem { Header = Se.Language.General.MergeSelectedAsDialog };
+        mergeSelectedAsDialogMenuItem.Command = vm.MergeSelectedLinesDialogCommand;
+        flyout.Items.Add(mergeSelectedAsDialogMenuItem);
+        vm.MenuItemMergeAsDialog = mergeSelectedAsDialogMenuItem;
 
         flyout.Items.Add(new Separator());
 

@@ -46,7 +46,7 @@ public class AudioVisualizer : Control
 
     public static readonly StyledProperty<Color> WaveformSelectedColorProperty =
         AvaloniaProperty.Register<AudioVisualizer, Color>(nameof(WaveformSelectedColor));
-
+    
     public WavePeakData? WavePeaks
     {
         get => GetValue(WavePeaksProperty);
@@ -172,9 +172,18 @@ public class AudioVisualizer : Control
     {
         public double PositionInSeconds { get; set; }
     }
+    
+    public class ContextEventArgs : EventArgs
+    {
+        public double PositionInSeconds { get; set; }
+        public SubtitleLineViewModel? NewParagraph { get; set; }
+    }
+    
     public delegate void PositionEventHandler(object sender, PositionEventArgs e);
+    public delegate void ContextEventHandler(object sender, ContextEventArgs e);
     public delegate void ParagraphEventHandler(object sender, ParagraphEventArgs e);
     public event PositionEventHandler? OnVideoPositionChanged;
+    public event ContextEventHandler? FlyoutMenuOpening;
     public event ParagraphEventHandler? OnToggleSelection;
     public event PositionEventHandler? OnHorizontalScroll;
     public event ParagraphEventHandler? OnParagraphDoubleTapped;
@@ -358,7 +367,30 @@ public class AudioVisualizer : Control
     private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
     {
         var nsp = NewSelectionParagraph;
-        if (nsp != null)
+        if (nsp is { Duration.TotalMilliseconds: <= 1 })
+        {
+            nsp = null;
+        }
+
+        if (e.InitialPressMouseButton == MouseButton.Right)
+        {
+            _isAltDown = false;
+            _isCtrlDown = false;
+            _isShiftDown = false;
+            _interactionMode = InteractionMode.None;
+            nsp?.UpdateDuration();
+            _audioVisualizerLastScroll = 0;
+            e.Handled = true;
+            var videoPosition = RelativeXPositionToSeconds((int)e.GetPosition(this).X);
+            OnVideoPositionChanged?.Invoke(this, new PositionEventArgs { PositionInSeconds = videoPosition });
+            FlyoutMenuOpening?.Invoke(this, new ContextEventArgs { PositionInSeconds = videoPosition, NewParagraph = nsp });
+            InvalidateVisual();
+            MenuFlyout.ShowAt(this, true);
+            return;
+        }
+        
+        
+        if (nsp is { Duration.TotalMilliseconds: > 1  })
         {
             nsp.UpdateDuration();
             if (nsp.Duration.TotalMilliseconds < 10)
@@ -373,7 +405,7 @@ public class AudioVisualizer : Control
             }
         }
 
-        if (_interactionMode == InteractionMode.None || _interactionMode == InteractionMode.New)
+        if (_interactionMode is InteractionMode.None or InteractionMode.New)
         {
             if (OnVideoPositionChanged != null)
             {
@@ -506,7 +538,7 @@ public class AudioVisualizer : Control
     private void OnPointerExited(object? sender, PointerEventArgs e)
     {
         base.OnPointerExited(e);
-        NewSelectionParagraph = null;
+        //NewSelectionParagraph = null;
         InvalidateVisual();
     }
 
@@ -906,6 +938,8 @@ public class AudioVisualizer : Control
             return RelativeXPositionToSeconds((int)Bounds.Width);
         }
     }
+
+    public MenuFlyout MenuFlyout { get; set; }
 
     private void DrawAllGridLines(DrawingContext context)
     {

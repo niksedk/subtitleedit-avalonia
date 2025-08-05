@@ -141,8 +141,13 @@ public partial class MainViewModel :
     public StackPanel PanelSingleLineLenghts { get; internal set; }
     public MenuItem MenuItemMergeAsDialog { get; internal set; }
     public MenuItem MenuItemMerge { get; internal set; }
+    public MenuItem MenuItemAudioVisualizerInsertNewSelection { get; set; }
+    public MenuItem MenuItemAudioVisualizerDelete { get; set; }
+    public MenuItem MenuItemAudioVisualizerInsertBefore { get; set; }
+    public MenuItem MenuItemAudioVisualizerInsertAfter { get; set; }
+    public MenuItem MenuItemAudioVisualizerSplit { get; set; }
 
-    public MainViewModel(
+    public MainViewModel(   
         IFileHelper fileHelper,
         IFolderHelper folderHelper,
         IShortcutManager shortcutManager,
@@ -188,6 +193,11 @@ public partial class MainViewModel :
         PanelSingleLineLenghts = new StackPanel();
         MenuItemMergeAsDialog = new MenuItem();
         MenuItemMerge = new MenuItem();
+        MenuItemAudioVisualizerInsertNewSelection  = new MenuItem();
+        MenuItemAudioVisualizerDelete = new MenuItem();
+        MenuItemAudioVisualizerInsertBefore = new MenuItem();
+        MenuItemAudioVisualizerInsertAfter = new MenuItem();
+        MenuItemAudioVisualizerSplit = new MenuItem();
         _subtitle = new Subtitle();
         _videoFileName = string.Empty;
         _subtitleFileName = string.Empty;
@@ -1124,7 +1134,6 @@ public partial class MainViewModel :
         _shortcutManager.ClearKeys();
     }
 
-
     [RelayCommand]
     private async Task ShowReplace()
     {
@@ -1137,8 +1146,7 @@ public partial class MainViewModel :
 
         _shortcutManager.ClearKeys();
     }
-
-
+    
     [RelayCommand]
     private async Task ShowMultipleReplace()
     {
@@ -1308,6 +1316,24 @@ public partial class MainViewModel :
     private void SplitAtVideoPositionAndTextBoxCursorPosition()
     {
         SplitSelectedLine(true, true);
+    }
+    
+    [RelayCommand]
+    private void WaveformInsertNewSelection()
+    {
+        if (VideoPlayerControl == null ||
+            AudioVisualizer == null ||
+            AudioVisualizer.NewSelectionParagraph == null)
+        {
+            return;
+        }
+        
+        var newParagraph = AudioVisualizer.NewSelectionParagraph;
+        _insertService.InsertInCorrectPosition(Subtitles, newParagraph);
+        AudioVisualizer.NewSelectionParagraph = null;
+        SelectAndScrollToSubtitle(newParagraph);
+        EditTextBox.Focus();
+        _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
@@ -3133,5 +3159,24 @@ public partial class MainViewModel :
 
     internal void TextBoxContextOpening(object? sender, EventArgs e)
     {
+    }
+
+    public void AudioVisualizerFlyoutMenuOpening(object sender, AudioVisualizer.ContextEventArgs e)
+    {
+        if (e.NewParagraph != null)
+        {
+            MenuItemAudioVisualizerInsertNewSelection.IsVisible = true;
+            MenuItemAudioVisualizerInsertAfter.IsVisible = false;
+            MenuItemAudioVisualizerInsertBefore.IsVisible = false;
+            MenuItemAudioVisualizerDelete.IsVisible = false;
+            MenuItemAudioVisualizerSplit.IsVisible = false;
+            return;
+        }
+        
+        MenuItemAudioVisualizerInsertNewSelection.IsVisible = false;
+        MenuItemAudioVisualizerInsertAfter.IsVisible = true;
+        MenuItemAudioVisualizerInsertBefore.IsVisible = true;
+        MenuItemAudioVisualizerDelete.IsVisible = true;
+        MenuItemAudioVisualizerSplit.IsVisible = true;
     }
 }

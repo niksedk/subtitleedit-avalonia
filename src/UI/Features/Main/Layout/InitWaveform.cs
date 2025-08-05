@@ -1,4 +1,5 @@
-﻿using Avalonia;
+﻿using System.Runtime.CompilerServices;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
@@ -7,6 +8,7 @@ using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
+using MenuItem = Avalonia.Controls.MenuItem;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -36,10 +38,63 @@ public class InitWaveform
             vm.AudioVisualizer.OnToggleSelection += vm.AudioVisualizerOnToggleSelection;
             //vm.AudioVisualizer.OnStatus += vm.AudioVisualizerOnStatus;
             vm.AudioVisualizer.OnParagraphDoubleTapped += vm.OnWaveformDoubleTapped;
+
+
+            // Create a Flyout for the DataGrid
+            var flyout = new MenuFlyout();
+
+            //flyout.Opening += vm.AudioVisualizerContextOpening;
+            vm.AudioVisualizer.FlyoutMenuOpening += vm.AudioVisualizerFlyoutMenuOpening;
+
+            var insertNewMenuItem = new MenuItem
+            {
+                Header = Se.Language.General.InsertNewSelection,
+                Command = vm.WaveformInsertNewSelectionCommand,
+            };
+            flyout.Items.Add(insertNewMenuItem);
+            vm.MenuItemAudioVisualizerInsertNewSelection = insertNewMenuItem;
+            
+            // Add menu items with commands
+            var deleteMenuItem = new MenuItem
+            {
+                Header = Se.Language.General.Delete,
+                Command = vm.DeleteSelectedLinesCommand
+            };
+            flyout.Items.Add(deleteMenuItem);
+            vm.MenuItemAudioVisualizerDelete = deleteMenuItem;
+
+            var insertBeforeMenuItem = new MenuItem
+            {
+                Header = Se.Language.General.InsertBefore,
+                Command = vm.InsertLineBeforeCommand
+            };
+            flyout.Items.Add(insertBeforeMenuItem);
+            vm.MenuItemAudioVisualizerInsertBefore = insertBeforeMenuItem;
+
+            var insertAfterMenuItem = new MenuItem
+            {
+                Header = Se.Language.General.InsertAfter,
+                Command = vm.InsertLineAfterCommand
+            };
+            flyout.Items.Add(insertAfterMenuItem);
+            vm.MenuItemAudioVisualizerInsertAfter = insertAfterMenuItem;
+
+            flyout.Items.Add(new Separator());
+
+            var splitMenuItem = new MenuItem
+            {
+                Header = Se.Language.General.SplitLine,
+                Command = vm.SplitCommand
+            };
+            flyout.Items.Add(splitMenuItem);
+            vm.MenuItemAudioVisualizerSplit = splitMenuItem;
+
+            //flyout.Items.Add(new Separator());
+            vm.AudioVisualizer.MenuFlyout = flyout;
         }
         else
         {
-            UiUtil.RemoveControlFromParent(vm.AudioVisualizer);
+            vm.AudioVisualizer.RemoveControlFromParent();
         }
 
         Grid.SetRow(vm.AudioVisualizer, 0);
