@@ -24,6 +24,7 @@ using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
 using Nikse.SubtitleEdit.Features.Sync.AdjustAllTimes;
 using Nikse.SubtitleEdit.Features.Sync.ChangeFrameRate;
 using Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
+using Nikse.SubtitleEdit.Features.Sync.VisualSync;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 using Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
@@ -83,7 +84,7 @@ public static class DependencyInjectionExtensions
         collection.AddHttpClient<IPaddleOcrDownloadService, PaddleOcrDownloadService>();
         collection.AddHttpClient<ISpellCheckDictionaryDownloadService, SpellCheckDictionaryDownloadService>();
         collection.AddHttpClient<ITesseractDownloadService, TesseractDownloadService>();
-        collection.AddHttpClient<IWhisperDownloadService, WhisperDownloadService>(); ;
+        collection.AddHttpClient<IWhisperDownloadService, WhisperDownloadService>();
 
         // Window view models
         collection.AddTransient<AdjustAllTimesViewModel>();
@@ -155,6 +156,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<TranslateSettingsViewModel>();
         collection.AddTransient<TransparentSettingsViewModel>();
         collection.AddTransient<TransparentSubtitlesViewModel>();
+        collection.AddTransient<VisualSyncViewModel>();
         collection.AddTransient<VoiceSettingsViewModel>();
         collection.AddTransient<WhisperAdvancedViewModel>();
         collection.AddTransient<WhisperPostProcessingViewModel>();

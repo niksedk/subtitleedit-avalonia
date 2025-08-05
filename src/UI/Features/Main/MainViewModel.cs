@@ -67,6 +67,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Features.Sync.VisualSync;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -879,6 +880,17 @@ public partial class MainViewModel :
         var result = await _windowService.ShowDialogAsync<AdjustAllTimesWindow, AdjustAllTimesViewModel>(Window!, vm =>
         {
             vm.Initialize(this); // uses call from IAdjustCallback: Adjust
+        });
+
+        _shortcutManager.ClearKeys();
+    }
+    
+    [RelayCommand]
+    private async Task ShowVisualSync()
+    {
+        var result = await _windowService.ShowDialogAsync<VisualSyncWindow, VisualSyncViewModel>(Window!, vm =>
+        {
+            //vm.Initialize(this); // uses call from IAdjustCallback: Adjust
         });
 
         _shortcutManager.ClearKeys();

@@ -63,6 +63,7 @@ public class LanguageMainMenu
     public string HelpTitle { get; set; }
     public string Help { get; set; }
     public string About { get; set; }
+    public string VisualSync { get; set; }
 
 
     public LanguageMainMenu()
@@ -110,6 +111,7 @@ public class LanguageMainMenu
 
         Synchronization = "Synchronization";
         AdjustAllTimes = "Adjust all times...";
+        VisualSync = "Visual sync...";
         ChangeFrameRate = "Change frame rate...";
         ChangeSpeed = "Change speed...";
 

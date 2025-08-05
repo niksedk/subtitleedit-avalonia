@@ -1,0 +1,57 @@
+using Avalonia.Controls;
+using Avalonia.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+
+namespace Nikse.SubtitleEdit.Features.Sync.VisualSync;
+
+public partial class VisualSyncViewModel : ObservableObject
+{
+    [ObservableProperty] private double _speedPercent;
+    [ObservableProperty] private bool _adjustAll;
+    [ObservableProperty] private bool _adjustSelectedLines;
+    [ObservableProperty] private bool _adjustSelectedLinesAndForward;
+
+    public Window? Window { get; set; }
+    
+    public bool OkPressed { get; private set; }
+
+    public VisualSyncViewModel()
+    {
+        AdjustAll = true;
+    }
+
+    [RelayCommand]
+    private void SetFromDropFrameValue()
+    {
+        SpeedPercent = 100.1001; 
+    }
+
+    [RelayCommand]
+    private void SetToDropFrameValue()
+    {
+        SpeedPercent = 99.9889;
+    }
+
+    [RelayCommand]                   
+    private void Ok() 
+    {
+        OkPressed = true;
+        Window?.Close();
+    }
+    
+    [RelayCommand]                   
+    private void Cancel() 
+    {
+        Window?.Close();
+    }
+
+    internal void OnKeyDown(KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            Window?.Close();
+        }
+    }
+}

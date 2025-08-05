@@ -273,6 +273,11 @@ public static class InitMenu
                 },
                 new MenuItem
                 {
+                    Header = l.VisualSync,
+                    Command = vm.ShowVisualSyncCommand,
+                },
+                new MenuItem
+                {
                     Header = l.ChangeFrameRate,
                     Command = vm.ShowSyncChangeFrameRateCommand,
                 },
