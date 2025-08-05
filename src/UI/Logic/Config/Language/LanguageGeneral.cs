@@ -248,6 +248,8 @@ public class LanguageGeneral
     public string DeleteLineXPrompt { get; set; }
     public string DeleteXLinesPrompt { get; set; }
     public string InsertNewSelection { get; set; }
+    public string InsertAtPosition { get; set; }
+    public string DeleteAtPosition { get; set; }
 
     public LanguageGeneral()
     {
@@ -495,5 +497,7 @@ public class LanguageGeneral
         DeleteLineXPrompt = "Delete line number {0}?";
         DeleteXLinesPrompt = "Delete {0} lines?";
         InsertNewSelection = "Insert new selection";
+        InsertAtPosition = "Insert at video position";
+        DeleteAtPosition = "Delete at video position";
     }
 }

@@ -1024,7 +1024,7 @@ public partial class OcrViewModel : ObservableObject
         EngineSelectionChanged();
     }
 
-    internal void EngineSelectionChanged()
+    private void EngineSelectionChanged()
     {
         IsNOcrVisible = SelectedOcrEngine?.EngineType == OcrEngineType.nOcr;
         IsInspectLineVisible = SelectedOcrEngine?.EngineType == OcrEngineType.nOcr;

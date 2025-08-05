@@ -46,13 +46,29 @@ public class InitWaveform
             //flyout.Opening += vm.AudioVisualizerContextOpening;
             vm.AudioVisualizer.FlyoutMenuOpening += vm.AudioVisualizerFlyoutMenuOpening;
 
-            var insertNewMenuItem = new MenuItem
+            var insertSelectionMenuItem = new MenuItem
             {
                 Header = Se.Language.General.InsertNewSelection,
                 Command = vm.WaveformInsertNewSelectionCommand,
             };
+            flyout.Items.Add(insertSelectionMenuItem);
+            vm.MenuItemAudioVisualizerInsertNewSelection = insertSelectionMenuItem;
+            
+            var insertNewMenuItem = new MenuItem
+            {
+                Header = Se.Language.General.InsertAtPosition,
+                Command = vm.WaveformInsertAtPositionCommand,
+            };
             flyout.Items.Add(insertNewMenuItem);
-            vm.MenuItemAudioVisualizerInsertNewSelection = insertNewMenuItem;
+            vm.MenuItemAudioVisualizerInsertAtPosition = insertNewMenuItem;
+            
+            var deleteAtPositionMenuItem = new MenuItem
+            {
+                Header = Se.Language.General.DeleteAtPosition,
+                Command = vm.WaveformDeleteAtPositionCommand,
+            };
+            flyout.Items.Add(deleteAtPositionMenuItem);
+            vm.MenuItemAudioVisualizerDeleteAtPosition = deleteAtPositionMenuItem;
             
             // Add menu items with commands
             var deleteMenuItem = new MenuItem
@@ -79,7 +95,9 @@ public class InitWaveform
             flyout.Items.Add(insertAfterMenuItem);
             vm.MenuItemAudioVisualizerInsertAfter = insertAfterMenuItem;
 
-            flyout.Items.Add(new Separator());
+            var separator1 = new Separator();
+            flyout.Items.Add(separator1);
+            vm.MenuItemAudioVisualizerSeparator1 = separator1;
 
             var splitMenuItem = new MenuItem
             {
