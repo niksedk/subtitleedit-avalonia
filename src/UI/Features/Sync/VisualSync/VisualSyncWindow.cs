@@ -49,25 +49,101 @@ public class VisualSyncWindow : Window
         vm.AudioVisualizerRight.OnVideoPositionChanged += vm.AudioVisualizerRightPositionChanged;
 
         var comboBoxLeft = UiUtil.MakeComboBox(vm.Paragraphs, vm, nameof(vm.SelectedParagraphLeft));
+        comboBoxLeft.Width = double.NaN;
+        comboBoxLeft.MinHeight = 50;
+        comboBoxLeft.HorizontalAlignment = HorizontalAlignment.Stretch;
         comboBoxLeft.SelectionChanged += vm.ComboBoxLeftChanged;
 
+        var panelLeftButtons = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Children =
+            {
+                UiUtil.MakeButton(Se.Language.Sync.PlayTwoSecondsAndBack, vm.PlayTwoSecondsAndBackLeftCommand),
+                UiUtil.MakeButton(Se.Language.Sync.FindText, vm.FindTextLeftCommand),
+            }
+        };
+
         var comboBoxRight = UiUtil.MakeComboBox(vm.Paragraphs, vm, nameof(vm.SelectedParagraphRight));
+        comboBoxRight.Width = double.NaN;
+        comboBoxRight.MinHeight = 50;
+        comboBoxRight.HorizontalAlignment = HorizontalAlignment.Stretch;
         comboBoxRight.SelectionChanged += vm.ComboBoxRightChanged;
+
+        var panelRightButtons = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Children =
+            {
+                UiUtil.MakeButton(Se.Language.Sync.PlayTwoSecondsAndBack, vm.PlayTwoSecondsAndBackRightCommand),
+                UiUtil.MakeButton(Se.Language.Sync.FindText, vm.FindTextRightCommand),
+            }
+        };
 
         var buttonSync = UiUtil.MakeButton(Se.Language.Sync.Sync, vm.SyncCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var buttonPanel = UiUtil.MakeButtonBar(buttonSync, buttonOk, buttonCancel);
 
+        var gridLeft = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // label
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // video player
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // audio visualizer
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // combo box
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // buttons
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnSpacing = 10,
+            RowSpacing = 10,
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        gridLeft.Add(UiUtil.MakeLabel(Se.Language.Sync.StartScene), 0);
+        gridLeft.Add(vm.VideoPlayerControlLeft, 1);
+        gridLeft.Add(vm.AudioVisualizerLeft, 2);
+        gridLeft.Add(comboBoxLeft, 3);
+        gridLeft.Add(panelLeftButtons, 4);
+
+        var gridRight = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // label
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // video player
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // audio visualizer
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // combo box
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // buttons
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnSpacing = 10,
+            RowSpacing = 10,
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        gridRight.Add(UiUtil.MakeLabel(Se.Language.Sync.EndScene), 0);
+        gridRight.Add(vm.VideoPlayerControlRight, 1);
+        gridRight.Add(vm.AudioVisualizerRight, 2);
+        gridRight.Add(comboBoxRight, 3);
+        gridRight.Add(panelRightButtons, 4);
+
         var grid = new Grid
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // video info
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // video player etc. for left/right
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // sync, ok, cancel buttons
             },
             ColumnDefinitions =
             {
@@ -82,13 +158,9 @@ public class VisualSyncWindow : Window
         };
 
         grid.Add(panelVideo, 0, 0, 1, 2);
-        grid.Add(vm.VideoPlayerControlLeft, 1);
-        grid.Add(vm.VideoPlayerControlRight, 1, 1);
-        grid.Add(vm.AudioVisualizerLeft, 2);
-        grid.Add(vm.AudioVisualizerRight, 2, 2);
-        grid.Add(comboBoxLeft, 3);
-        grid.Add(comboBoxRight, 3, 1);
-        grid.Add(buttonPanel, 4, 0, 1, 2);
+        grid.Add(UiUtil.MakeBorderForControl(gridLeft), 1);
+        grid.Add(UiUtil.MakeBorderForControl(gridRight), 1, 1);
+        grid.Add(buttonPanel, 2, 0, 1, 2);
 
         Content = grid;
 
