@@ -112,7 +112,7 @@ public partial class MainViewModel :
 
     private static Color _errorColor = Se.Settings.General.ErrorColor.FromHexToColor();
 
-    private bool _updateAudioVisualizer = false;
+    private bool _updateAudioVisualizer;
     private string? _subtitleFileName;
     private Subtitle _subtitle;
     private SubtitleFormat? _lastOpenSaveFormat;
