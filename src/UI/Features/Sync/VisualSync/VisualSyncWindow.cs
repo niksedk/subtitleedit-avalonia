@@ -1,4 +1,3 @@
-using System;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Layout;
@@ -12,7 +11,7 @@ namespace Nikse.SubtitleEdit.Features.Sync.VisualSync;
 public class VisualSyncWindow : Window
 {
     private readonly VisualSyncViewModel _vm;
-    
+
     public VisualSyncWindow(VisualSyncViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
@@ -39,23 +38,27 @@ public class VisualSyncWindow : Window
 
         vm.VideoPlayerControlLeft = InitVideoPlayer.MakeVideoPlayer();
         vm.VideoPlayerControlLeft.FullScreenIsVisible = false;
+
         vm.VideoPlayerControlRight = InitVideoPlayer.MakeVideoPlayer();
         vm.VideoPlayerControlRight.FullScreenIsVisible = false;
 
         vm.AudioVisualizerLeft = new AudioVisualizer { Height = 80, Width = double.NaN, IsReadOnly = true };
         vm.AudioVisualizerLeft.OnVideoPositionChanged += vm.AudioVisualizerLeftPositionChanged;
-        
-        vm.AudioVisualizerRight = new AudioVisualizer{ Height = 80, Width = double.NaN,  IsReadOnly = true };
+
+        vm.AudioVisualizerRight = new AudioVisualizer { Height = 80, Width = double.NaN, IsReadOnly = true };
         vm.AudioVisualizerRight.OnVideoPositionChanged += vm.AudioVisualizerRightPositionChanged;
 
         var comboBoxLeft = UiUtil.MakeComboBox(vm.Paragraphs, vm, nameof(vm.SelectedParagraphLeft));
+        comboBoxLeft.SelectionChanged += vm.ComboBoxLeftChanged;
+
         var comboBoxRight = UiUtil.MakeComboBox(vm.Paragraphs, vm, nameof(vm.SelectedParagraphRight));
+        comboBoxRight.SelectionChanged += vm.ComboBoxRightChanged;
 
         var buttonSync = UiUtil.MakeButton(Se.Language.Sync.Sync, vm.SyncCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
-        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);   
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var buttonPanel = UiUtil.MakeButtonBar(buttonSync, buttonOk, buttonCancel);
-        
+
         var grid = new Grid
         {
             RowDefinitions =
@@ -80,15 +83,15 @@ public class VisualSyncWindow : Window
 
         grid.Add(panelVideo, 0, 0, 1, 2);
         grid.Add(vm.VideoPlayerControlLeft, 1);
-        grid.Add(vm.VideoPlayerControlRight, 1,1);
+        grid.Add(vm.VideoPlayerControlRight, 1, 1);
         grid.Add(vm.AudioVisualizerLeft, 2);
         grid.Add(vm.AudioVisualizerRight, 2, 2);
-        grid.Add(comboBoxRight, 3);
-        grid.Add(comboBoxLeft, 3,1);
+        grid.Add(comboBoxLeft, 3);
+        grid.Add(comboBoxRight, 3, 1);
         grid.Add(buttonPanel, 4, 0, 1, 2);
 
         Content = grid;
-        
+
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 
@@ -96,5 +99,11 @@ public class VisualSyncWindow : Window
     {
         base.OnKeyDown(e);
         _vm.OnKeyDown(e);
+    }
+
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        base.OnClosing(e);
+        _vm.OnClosing();
     }
 }
