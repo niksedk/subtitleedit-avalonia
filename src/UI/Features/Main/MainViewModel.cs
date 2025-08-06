@@ -1,8 +1,6 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
-using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -57,7 +55,6 @@ using Nikse.SubtitleEdit.Logic.Initializers;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -217,11 +214,18 @@ public partial class MainViewModel :
         StatusTextRight = string.Empty;
 
         themeInitializer.UpdateThemesIfNeeded().ConfigureAwait(true);
-        Dispatcher.UIThread.Post(async () =>
+        Dispatcher.UIThread.Post(async void () =>
         {
-            await languageInitializer.UpdateLanguagesIfNeeded();
-            await dictionaryInitializer.UpdateDictionariesIfNeeded();
-            await ocrInitializer.UpdateOcrDictionariesIfNeeded();
+            try
+            {
+                await languageInitializer.UpdateLanguagesIfNeeded();
+                await dictionaryInitializer.UpdateDictionariesIfNeeded();
+                await ocrInitializer.UpdateOcrDictionariesIfNeeded();
+            }
+            catch (Exception e)
+            {
+                Se.LogError(e);
+            }
         }, DispatcherPriority.Loaded);
         InitializeLibMpv();
         InitializeFfmpeg();
@@ -233,7 +237,7 @@ public partial class MainViewModel :
         _undoRedoManager.SetupChangeDetection(this, TimeSpan.FromSeconds(1));
     }
 
-    private void InitializeFfmpeg()
+    private static void InitializeFfmpeg()
     {
         if (!string.IsNullOrEmpty(Se.Settings.General.FfmpegPath) &&
             File.Exists(Se.Settings.General.FfmpegPath))
@@ -2324,22 +2328,28 @@ public partial class MainViewModel :
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && string.IsNullOrEmpty(Se.Settings.General.LibMpvPath))
         {
-            Dispatcher.UIThread.Post(async () =>
+            Dispatcher.UIThread.Post(async void () =>
             {
-                var answer = await MessageBox.Show(
-                    Window!,
-                    "Download mpv?",
-                    $"{Environment.NewLine}\"Subtitle Edit\" requires mpv to play video/audio.{Environment.NewLine}{Environment.NewLine}Download and use mpv?",
-                    MessageBoxButtons.YesNoCancel,
-                    MessageBoxIcon.Question);
-
-                if (answer != MessageBoxResult.Yes)
+                try
                 {
-                    return;
+                    var answer = await MessageBox.Show(
+                        Window!,
+                        "Download mpv?",
+                        $"{Environment.NewLine}\"Subtitle Edit\" requires mpv to play video/audio.{Environment.NewLine}{Environment.NewLine}Download and use mpv?",
+                        MessageBoxButtons.YesNoCancel,
+                        MessageBoxIcon.Question);
+
+                    if (answer != MessageBoxResult.Yes)
+                    {
+                        return;
+                    }
+
+                    var result = await _windowService.ShowDialogAsync<DownloadLibMpvWindow, DownloadLibMpvViewModel>(Window!);
                 }
-
-                var result = await _windowService.ShowDialogAsync<DownloadLibMpvWindow, DownloadLibMpvViewModel>(Window!);
-
+                catch (Exception e)
+                {
+                    Se.LogError(e);
+                }
             }, DispatcherPriority.Background);
         }
 

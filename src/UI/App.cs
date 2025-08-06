@@ -73,28 +73,7 @@ var services = collection.BuildServiceProvider();
 
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 Se.LoadSettings();
-
 UiUtil.SetCurrentTheme();
-var themeSetting = Se.Settings.Appearance.Theme;
-
-if (themeSetting == "System")
-{
-    // Use the current system theme at startup
-    var systemTheme = Application.Current!.ActualThemeVariant;
-
-    Application.Current!.RequestedThemeVariant = systemTheme == ThemeVariant.Dark
-        ? ThemeVariant.Dark 
-        : ThemeVariant.Light;
-}
-else if (themeSetting == "Dark")
-{
-    Application.Current!.RequestedThemeVariant = ThemeVariant.Dark;
-}
-else
-{
-    Application.Current!.RequestedThemeVariant = ThemeVariant.Light;
-}
-
 
 // Main window setup
 lifetime.MainWindow = new Window
