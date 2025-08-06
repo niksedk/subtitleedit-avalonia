@@ -1442,4 +1442,42 @@ public static class UiUtil
             }
         }
     }
+
+    public static string ThemeName
+    {
+        get
+        {
+            var themeSetting = Se.Settings.Appearance.Theme;
+            if (themeSetting == "System")
+            {
+                if (Application.Current!.ActualThemeVariant == ThemeVariant.Dark)
+                {
+                    return "Dark";
+                }
+                
+                return "Light";
+            }
+
+            return themeSetting;
+        }
+    }
+
+    public static void SetCurrentTheme()
+    {
+        var themeSetting = Se.Settings.Appearance.Theme;
+
+        if (themeSetting == "System")
+        {
+            // Let Avalonia track system theme automatically
+            Application.Current!.RequestedThemeVariant = ThemeVariant.Default;
+        }
+        else if (themeSetting == "Dark")
+        {
+            Application.Current!.RequestedThemeVariant = ThemeVariant.Dark;
+        }
+        else
+        {
+            Application.Current!.RequestedThemeVariant = ThemeVariant.Light;
+        }
+    }
 }

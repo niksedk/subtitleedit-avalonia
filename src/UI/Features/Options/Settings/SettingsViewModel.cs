@@ -119,7 +119,7 @@ public partial class SettingsViewModel : ObservableObject
     {
         _windowService = windowService;
 
-        Themes = ["Light", "Dark"];
+        Themes = ["Light", "Dark", "System"];
         SelectedTheme = Themes[0];
 
         ScrollView = new ScrollViewer();

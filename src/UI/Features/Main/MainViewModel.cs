@@ -948,18 +948,7 @@ public partial class MainViewModel :
 
         if (oldTheme != viewModel.SelectedTheme)
         {
-            if (viewModel.SelectedTheme == "Dark")
-            {
-                Application.Current!.RequestedThemeVariant = ThemeVariant.Dark;
-            }
-            else if (viewModel.SelectedTheme == "Light")
-            {
-                Application.Current!.RequestedThemeVariant = ThemeVariant.Light;
-            }
-            else
-            {
-                Application.Current!.RequestedThemeVariant = ThemeVariant.Default;
-            }
+            UiUtil.SetCurrentTheme();
         }
 
         if (AudioVisualizer != null)
