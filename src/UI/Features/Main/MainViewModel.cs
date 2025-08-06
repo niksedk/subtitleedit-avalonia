@@ -148,7 +148,7 @@ public partial class MainViewModel :
     public MenuItem MenuItemAudioVisualizerInsertAtPosition { get; set; }
     public MenuItem MenuItemAudioVisualizerDeleteAtPosition { get; set; }
 
-    public MainViewModel(   
+    public MainViewModel(
         IFileHelper fileHelper,
         IFolderHelper folderHelper,
         IShortcutManager shortcutManager,
@@ -194,7 +194,7 @@ public partial class MainViewModel :
         PanelSingleLineLenghts = new StackPanel();
         MenuItemMergeAsDialog = new MenuItem();
         MenuItemMerge = new MenuItem();
-        MenuItemAudioVisualizerInsertNewSelection  = new MenuItem();
+        MenuItemAudioVisualizerInsertNewSelection = new MenuItem();
         MenuItemAudioVisualizerDelete = new MenuItem();
         MenuItemAudioVisualizerInsertBefore = new MenuItem();
         MenuItemAudioVisualizerInsertAfter = new MenuItem();
@@ -268,6 +268,7 @@ public partial class MainViewModel :
                         {
                             File.Delete(libMpvFileName);
                         }
+
                         File.Move(newFileName, libMpvFileName);
 
                         Directory.Delete(Path.GetDirectoryName(newFileName)!);
@@ -484,10 +485,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ExportBluRaySup()
     {
-        var result = await _windowService.ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(Window!, vm =>
-        {
-            vm.Initialize(ExportImageType.BluRaySup, Subtitles, _subtitleFileName, _videoFileName);
-        });
+        var result = await _windowService.ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(Window!,
+            vm => { vm.Initialize(ExportImageType.BluRaySup, Subtitles, _subtitleFileName, _videoFileName); });
 
         if (!result.OkPressed)
         {
@@ -527,7 +526,8 @@ public partial class MainViewModel :
         }
 
         var cavena = new Cavena890();
-        var fileName = await _fileHelper.PickSaveSubtitleFile(Window!, cavena, GetNewFileName(), string.Format(Se.Language.Main.SaveXFileAs, cavena.Name));
+        var fileName = await _fileHelper.PickSaveSubtitleFile(Window!, cavena, GetNewFileName(),
+            string.Format(Se.Language.Main.SaveXFileAs, cavena.Name));
         if (string.IsNullOrEmpty(fileName))
         {
             return;
@@ -556,7 +556,8 @@ public partial class MainViewModel :
 
         var pac = new Pac { CodePage = result.PacCodePage!.Value };
 
-        var fileName = await _fileHelper.PickSaveSubtitleFile(Window!, pac, GetNewFileName(), string.Format(Se.Language.Main.SaveXFileAs, pac.Name));
+        var fileName = await _fileHelper.PickSaveSubtitleFile(Window!, pac, GetNewFileName(),
+            string.Format(Se.Language.Main.SaveXFileAs, pac.Name));
         if (string.IsNullOrEmpty(fileName))
         {
             return;
@@ -597,10 +598,9 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ExportEbuStl()
     {
-        var result = await _windowService.ShowDialogAsync<ExportEbuStlWindow, ExportEbuStlViewModel>(Window!, vm =>
-        {
-            vm.Initialize(GetUpdateSubtitle());
-        });
+        var result =
+            await _windowService.ShowDialogAsync<ExportEbuStlWindow, ExportEbuStlViewModel>(Window!,
+                vm => { vm.Initialize(GetUpdateSubtitle()); });
 
         if (!result.OkPressed)
         {
@@ -661,7 +661,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowToolsAdjustDurations()
     {
-        var result = await _windowService.ShowDialogAsync<AdjustDurationWindow, AdjustDurationViewModel>(Window!, vm => { });
+        var result =
+            await _windowService.ShowDialogAsync<AdjustDurationWindow, AdjustDurationViewModel>(Window!, vm => { });
 
         if (result.OkPressed)
         {
@@ -682,10 +683,9 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowToolsChangeCasing()
     {
-        var result = await _windowService.ShowDialogAsync<ChangeCasingWindow, ChangeCasingViewModel>(Window!, vm =>
-        {
-            vm.Initialize(GetUpdateSubtitle());
-        });
+        var result =
+            await _windowService.ShowDialogAsync<ChangeCasingWindow, ChangeCasingViewModel>(Window!,
+                vm => { vm.Initialize(GetUpdateSubtitle()); });
 
         if (result.OkPressed)
         {
@@ -695,8 +695,10 @@ public partial class MainViewModel :
                 {
                     break;
                 }
+
                 Subtitles[i].Text = result.Subtitle.Paragraphs[i].Text;
             }
+
             ShowStatus(result.Info);
         }
 
@@ -725,10 +727,7 @@ public partial class MainViewModel :
     {
         var result = await _windowService
             .ShowDialogAsync<RemoveTextForHearingImpairedWindow, RemoveTextForHearingImpairedViewModel>(
-                Window!, vm =>
-                {
-                    vm.Initialize(GetUpdateSubtitle());
-                });
+                Window!, vm => { vm.Initialize(GetUpdateSubtitle()); });
 
         if (result.OkPressed)
         {
@@ -767,10 +766,9 @@ public partial class MainViewModel :
             return;
         }
 
-        var viewModel = await _windowService.ShowDialogAsync<GoToVideoPositionWindow, GoToVideoPositionViewModel>(Window!, vm =>
-        {
-            vm.Time = TimeSpan.FromSeconds(VideoPlayerControl.Position);
-        });
+        var viewModel =
+            await _windowService.ShowDialogAsync<GoToVideoPositionWindow, GoToVideoPositionViewModel>(Window!,
+                vm => { vm.Time = TimeSpan.FromSeconds(VideoPlayerControl.Position); });
 
         if (viewModel is { OkPressed: true, Time.TotalMicroseconds: >= 0 })
         {
@@ -784,10 +782,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowSpellCheck()
     {
-        var result = await _windowService.ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(Window!, vm =>
-        {
-            vm.Initialize(Subtitles, SelectedSubtitleIndex, this);
-        });
+        var result = await _windowService.ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(Window!,
+            vm => { vm.Initialize(Subtitles, SelectedSubtitleIndex, this); });
 
         if (result.OkPressed && result.TotalChangedWords > 0)
         {
@@ -814,10 +810,9 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(Window!, vm =>
-        {
-            vm.Initialize(_videoFileName);
-        });
+        var result =
+            await _windowService.ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(Window!,
+                vm => { vm.Initialize(_videoFileName); });
 
         if (result.OkPressed && !result.IsBatchMode)
         {
@@ -833,10 +828,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowVideoBurnIn()
     {
-        await _windowService.ShowDialogAsync<BurnInWindow, BurnInViewModel>(Window!, vm =>
-        {
-            vm.Initialize(_videoFileName ?? string.Empty, GetUpdateSubtitle(), SelectedSubtitleFormat);
-        });
+        await _windowService.ShowDialogAsync<BurnInWindow, BurnInViewModel>(Window!,
+            vm => { vm.Initialize(_videoFileName ?? string.Empty, GetUpdateSubtitle(), SelectedSubtitleFormat); });
         _shortcutManager.ClearKeys();
     }
 
@@ -861,20 +854,20 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowVideoTextToSpeech()
     {
-        await _windowService.ShowDialogAsync<TextToSpeechWindow, TextToSpeechViewModel>(Window!, vm =>
-        {
-            vm.Initialize(GetUpdateSubtitle(), _videoFileName ?? string.Empty, AudioVisualizer?.WavePeaks, Path.GetTempPath());
-        });
+        await _windowService.ShowDialogAsync<TextToSpeechWindow, TextToSpeechViewModel>(Window!,
+            vm =>
+            {
+                vm.Initialize(GetUpdateSubtitle(), _videoFileName ?? string.Empty, AudioVisualizer?.WavePeaks,
+                    Path.GetTempPath());
+            });
         _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task ShowVideoTransparentSubtitles()
     {
-        await _windowService.ShowDialogAsync<TransparentSubtitlesWindow, TransparentSubtitlesViewModel>(Window!, vm =>
-        {
-            vm.Initialize(_videoFileName ?? string.Empty, GetUpdateSubtitle(), SelectedSubtitleFormat);
-        });
+        await _windowService.ShowDialogAsync<TransparentSubtitlesWindow, TransparentSubtitlesViewModel>(Window!,
+            vm => { vm.Initialize(_videoFileName ?? string.Empty, GetUpdateSubtitle(), SelectedSubtitleFormat); });
         _shortcutManager.ClearKeys();
     }
 
@@ -888,14 +881,15 @@ public partial class MainViewModel :
 
         _shortcutManager.ClearKeys();
     }
-    
+
     [RelayCommand]
     private async Task ShowVisualSync()
     {
         var result = await _windowService.ShowDialogAsync<VisualSyncWindow, VisualSyncViewModel>(Window!, vm =>
         {
             var paragraphs = Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList();
-            vm.Initialize(paragraphs, _videoFileName, _subtitleFileName, AudioVisualizer); // uses call from IAdjustCallback: Adjust
+            vm.Initialize(paragraphs, _videoFileName, _subtitleFileName,
+                AudioVisualizer); // uses call from IAdjustCallback: Adjust
         });
 
         _shortcutManager.ClearKeys();
@@ -973,10 +967,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task CommandShowSettingsShortcuts()
     {
-        await _windowService.ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(Window!, vm =>
-        {
-            vm.LoadShortCuts(this);
-        });
+        await _windowService.ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(Window!,
+            vm => { vm.LoadShortCuts(this); });
         ReloadShortcuts();
         _shortcutManager.ClearKeys();
     }
@@ -989,10 +981,11 @@ public partial class MainViewModel :
         {
             var jsonFileName = viewModel.SelectedLanguage.FileName;
             var json = await File.ReadAllTextAsync(jsonFileName, Encoding.UTF8);
-            var language = System.Text.Json.JsonSerializer.Deserialize<SeLanguage>(json, new System.Text.Json.JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-            });
+            var language = System.Text.Json.JsonSerializer.Deserialize<SeLanguage>(json,
+                new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                });
 
             Se.Language = language ?? new SeLanguage();
 
@@ -1023,7 +1016,6 @@ public partial class MainViewModel :
         _undoRedoManager.StopChangeDetection();
         InsertBeforeSelectedItem();
         _undoRedoManager.StartChangeDetection();
-
     }
 
     [RelayCommand]
@@ -1096,10 +1088,9 @@ public partial class MainViewModel :
         _undoRedoManager.CheckForChanges(null);
         _undoRedoManager.StopChangeDetection();
 
-        var result = await _windowService.ShowDialogAsync<ShowHistoryWindow, ShowHistoryViewModel>(Window!, vm =>
-        {
-            vm.Initialize(_undoRedoManager);
-        });
+        var result =
+            await _windowService.ShowDialogAsync<ShowHistoryWindow, ShowHistoryViewModel>(Window!,
+                vm => { vm.Initialize(_undoRedoManager); });
 
         if (result.OkPressed && result.SelectedHistoryItem != null)
         {
@@ -1131,7 +1122,8 @@ public partial class MainViewModel :
 
         if (result.OkPressed && !string.IsNullOrEmpty(result.SearchText))
         {
-            _findService.Initialize(Subtitles.Select(p => p.Text).ToList(), SelectedSubtitleIndex ?? 0, Se.Settings.Edit.Find.FindWholeWords, FindService.FindMode.CaseSensitive);
+            _findService.Initialize(Subtitles.Select(p => p.Text).ToList(), SelectedSubtitleIndex ?? 0,
+                Se.Settings.Edit.Find.FindWholeWords, FindService.FindMode.CaseSensitive);
             var idx = _findService.Find(result.SearchText);
             SelectAndScrollToRow(idx);
             ShowStatus($"'{_findService.SearchText}' found in line '{idx + 1}'");
@@ -1158,7 +1150,7 @@ public partial class MainViewModel :
 
         _shortcutManager.ClearKeys();
     }
-    
+
     [RelayCommand]
     private async Task ShowMultipleReplace()
     {
@@ -1168,10 +1160,8 @@ public partial class MainViewModel :
         }
 
         var result =
-            await _windowService.ShowDialogAsync<MultipleReplaceWindow, MultipleReplaceViewModel>(Window!, vm =>
-            {
-                vm.Initialize(GetUpdateSubtitle());
-            });
+            await _windowService.ShowDialogAsync<MultipleReplaceWindow, MultipleReplaceViewModel>(Window!,
+                vm => { vm.Initialize(GetUpdateSubtitle()); });
 
         if (result.OkPressed)
         {
@@ -1329,7 +1319,7 @@ public partial class MainViewModel :
     {
         SplitSelectedLine(true, true);
     }
-    
+
     [RelayCommand]
     private void WaveformInsertNewSelection()
     {
@@ -1339,7 +1329,7 @@ public partial class MainViewModel :
         {
             return;
         }
-        
+
         var newParagraph = AudioVisualizer.NewSelectionParagraph;
         _insertService.InsertInCorrectPosition(Subtitles, newParagraph);
         AudioVisualizer.NewSelectionParagraph = null;
@@ -1347,7 +1337,7 @@ public partial class MainViewModel :
         EditTextBox.Focus();
         _updateAudioVisualizer = true;
     }
-    
+
     [RelayCommand]
     private void WaveformInsertAtPosition()
     {
@@ -1367,7 +1357,8 @@ public partial class MainViewModel :
         {
             if (next.StartTime.TotalMilliseconds < endMs)
             {
-                newParagraph.EndTime =  TimeSpan.FromMilliseconds(next.StartTime.TotalMilliseconds- Se.Settings.General.MinimumMillisecondsBetweenLines);
+                newParagraph.EndTime = TimeSpan.FromMilliseconds(next.StartTime.TotalMilliseconds -
+                                                                 Se.Settings.General.MinimumMillisecondsBetweenLines);
             }
         }
 
@@ -1388,7 +1379,7 @@ public partial class MainViewModel :
 
         var pos = VideoPlayerControl.Position;
         var subtitlesAtPosition = Subtitles
-            .Where(p => 
+            .Where(p =>
                 p.StartTime.TotalSeconds < pos &&
                 p.EndTime.TotalSeconds > pos).ToList();
 
@@ -1396,9 +1387,9 @@ public partial class MainViewModel :
         {
             Subtitles.Remove(p);
         }
-        
+
         Renumber();
-        
+
         _updateAudioVisualizer = true;
     }
 
@@ -1428,6 +1419,7 @@ public partial class MainViewModel :
             var subtitle = Subtitles[i];
             subtitle.StartTime = subtitle.StartTime + difference;
         }
+
         _updateAudioVisualizer = true;
         _undoRedoManager.StartChangeDetection();
     }
@@ -1481,7 +1473,7 @@ public partial class MainViewModel :
     {
         MoveVideoPositionMs(1000);
     }
-    
+
     [RelayCommand]
     private void ExtendSelectedToPrevious()
     {
@@ -1491,19 +1483,21 @@ public partial class MainViewModel :
         {
             return;
         }
-        
+
         var prev = Subtitles[idx.Value - 1];
-        s.StartTime = TimeSpan.FromMilliseconds(prev.EndTime.TotalMilliseconds + Se.Settings.General.MinimumMillisecondsBetweenLines);
-        _updateAudioVisualizer = true;     
+        s.StartTime =
+            TimeSpan.FromMilliseconds(prev.EndTime.TotalMilliseconds +
+                                      Se.Settings.General.MinimumMillisecondsBetweenLines);
+        _updateAudioVisualizer = true;
     }
 
-    
+
     [RelayCommand]
     private void ExtendSelectedToNext()
     {
         var s = SelectedSubtitle;
         var idx = SelectedSubtitleIndex;
-        if (s == null || idx == null || idx < Subtitles.Count -1)
+        if (s == null || idx == null || idx < Subtitles.Count - 1)
         {
             return;
         }
@@ -1513,9 +1507,11 @@ public partial class MainViewModel :
         {
             return;
         }
+
         ;
-        s.EndTime = TimeSpan.FromMilliseconds(next.StartTime.TotalMilliseconds - Se.Settings.General.MinimumMillisecondsBetweenLines);
-        _updateAudioVisualizer = true;     
+        s.EndTime = TimeSpan.FromMilliseconds(next.StartTime.TotalMilliseconds -
+                                              Se.Settings.General.MinimumMillisecondsBetweenLines);
+        _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
@@ -1798,7 +1794,6 @@ public partial class MainViewModel :
 
         try
         {
-
             if (FileUtil.IsMatroskaFileFast(fileName) && FileUtil.IsMatroskaFile(fileName))
             {
                 ImportSubtitleFromMatroskaFile(fileName, videoFileName);
@@ -1813,10 +1808,8 @@ public partial class MainViewModel :
                 {
                     Dispatcher.UIThread.Post(async () =>
                     {
-                        var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm =>
-                        {
-                            vm.Initialize(subtitles, fileName);
-                        });
+                        var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!,
+                            vm => { vm.Initialize(subtitles, fileName); });
 
                         if (result.OkPressed)
                         {
@@ -1851,7 +1844,9 @@ public partial class MainViewModel :
                 }
             }
 
-            SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == subtitle.OriginalFormat.Name) ?? SelectedSubtitleFormat; ;
+            SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == subtitle.OriginalFormat.Name) ??
+                                     SelectedSubtitleFormat;
+            ;
 
             _subtitleFileName = fileName;
             _subtitle = subtitle;
@@ -1878,7 +1873,6 @@ public partial class MainViewModel :
 
             AddToRecentFiles(true);
             _changeSubtitleHash = GetFastHash();
-
         }
         finally
         {
@@ -1910,10 +1904,9 @@ public partial class MainViewModel :
         {
             Dispatcher.UIThread.Post(async () =>
             {
-                var result = await _windowService.ShowDialogAsync<PickMatroskaTrackWindow, PickMatroskaTrackViewModel>(Window!, vm =>
-                {
-                    vm.Initialize(matroska, subtitleList, fileName);
-                });
+                var result =
+                    await _windowService.ShowDialogAsync<PickMatroskaTrackWindow, PickMatroskaTrackViewModel>(Window!,
+                        vm => { vm.Initialize(matroska, subtitleList, fileName); });
                 if (result.OkPressed && result.SelectedMatroskaTrack != null)
                 {
                     if (LoadMatroskaSubtitle(result.SelectedMatroskaTrack, matroska))
@@ -1946,19 +1939,13 @@ public partial class MainViewModel :
                 {
                     if (ext == ".mkv")
                     {
-                        Dispatcher.UIThread.Post(async () =>
-                        {
-                            await VideoOpenFile(matroska.Path);
-                        });
+                        Dispatcher.UIThread.Post(async () => { await VideoOpenFile(matroska.Path); });
                     }
                     else
                     {
                         if (FindVideoFileName.TryFindVideoFileName(matroska.Path, out videoFileName))
                         {
-                            Dispatcher.UIThread.Post(async () =>
-                            {
-                                await VideoOpenFile(videoFileName);
-                            });
+                            Dispatcher.UIThread.Post(async () => { await VideoOpenFile(videoFileName); });
                         }
                     }
                 }
@@ -1972,7 +1959,8 @@ public partial class MainViewModel :
     {
         if (matroskaSubtitleInfo.CodecId.Equals("S_HDMV/PGS", StringComparison.OrdinalIgnoreCase))
         {
-            var pgsSubtitle = _bluRayHelper.LoadBluRaySubFromMatroska(matroskaSubtitleInfo, matroska, out var errorMessage);
+            var pgsSubtitle =
+                _bluRayHelper.LoadBluRaySubFromMatroska(matroskaSubtitleInfo, matroska, out var errorMessage);
             return true;
         }
 
@@ -2041,7 +2029,9 @@ public partial class MainViewModel :
                 var msub = sub[index];
                 DvbSubPes? pes = null;
                 var data = msub.GetData(matroskaSubtitleInfo);
-                if (data != null && data.Length > 9 && data[0] == 15 && data[1] >= SubtitleSegment.PageCompositionSegment && data[1] <= SubtitleSegment.DisplayDefinitionSegment) // sync byte + segment id
+                if (data != null && data.Length > 9 && data[0] == 15 &&
+                    data[1] >= SubtitleSegment.PageCompositionSegment &&
+                    data[1] <= SubtitleSegment.DisplayDefinitionSegment) // sync byte + segment id
                 {
                     var buffer = new byte[data.Length + 3];
                     Buffer.BlockCopy(data, 0, buffer, 2, data.Length);
@@ -2069,7 +2059,8 @@ public partial class MainViewModel :
                     if (last.DurationTotalMilliseconds < 100)
                     {
                         last.EndTime.TotalMilliseconds = msub.Start;
-                        if (last.DurationTotalMilliseconds > Configuration.Settings.General.SubtitleMaximumDisplayMilliseconds)
+                        if (last.DurationTotalMilliseconds >
+                            Configuration.Settings.General.SubtitleMaximumDisplayMilliseconds)
                         {
                             last.EndTime.TotalMilliseconds = last.StartTime.TotalMilliseconds + 3000;
                         }
@@ -2104,7 +2095,8 @@ public partial class MainViewModel :
             var next = subtitle.GetParagraphOrDefault(index + 1);
             if (next != null && next.StartTime.TotalMilliseconds < p.EndTime.TotalMilliseconds)
             {
-                p.EndTime.TotalMilliseconds = next.StartTime.TotalMilliseconds - Se.Settings.General.MinimumMillisecondsBetweenLines;
+                p.EndTime.TotalMilliseconds = next.StartTime.TotalMilliseconds -
+                                              Se.Settings.General.MinimumMillisecondsBetweenLines;
             }
         }
 
@@ -2160,14 +2152,17 @@ public partial class MainViewModel :
         Utilities.LoadMatroskaTextSubtitle(matroskaSubtitleInfo, matroska, sub, _subtitle);
         Utilities.ParseMatroskaTextSt(matroskaSubtitleInfo, sub, _subtitle);
 
-        SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == Configuration.Settings.General.DefaultSubtitleFormat) ?? SelectedSubtitleFormat;
+        SelectedSubtitleFormat =
+            SubtitleFormats.FirstOrDefault(p => p.Name == Configuration.Settings.General.DefaultSubtitleFormat) ??
+            SelectedSubtitleFormat;
         ShowStatus(Se.Language.Main.SubtitleImportedFromMatroskaFile);
         _subtitle.Renumber();
         Subtitles.Clear();
         Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
 
 
-        if (matroska.Path.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase) || matroska.Path.EndsWith(".mks", StringComparison.OrdinalIgnoreCase))
+        if (matroska.Path.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase) ||
+            matroska.Path.EndsWith(".mks", StringComparison.OrdinalIgnoreCase))
         {
             _subtitleFileName = matroska.Path.Remove(matroska.Path.Length - 4) + SelectedSubtitleFormat.Extension;
         }
@@ -2344,7 +2339,8 @@ public partial class MainViewModel :
                         return;
                     }
 
-                    var result = await _windowService.ShowDialogAsync<DownloadLibMpvWindow, DownloadLibMpvViewModel>(Window!);
+                    var result =
+                        await _windowService.ShowDialogAsync<DownloadLibMpvWindow, DownloadLibMpvViewModel>(Window!);
                 }
                 catch (Exception e)
                 {
@@ -2353,12 +2349,44 @@ public partial class MainViewModel :
             }, DispatcherPriority.Background);
         }
 
-        if (Se.Settings.File.ShowRecentFiles)
+        var subtitleFileLoaded = false;
+        var arguments = Environment.GetCommandLineArgs();
+        if (arguments.Length > 1)
+        {
+            var fileName = arguments[1];
+            if (File.Exists(fileName))
+            {
+                subtitleFileLoaded = true;
+                Dispatcher.UIThread.Post(async void () =>
+                {
+                    try
+                    {
+                        await SubtitleOpen(fileName);
+                    }
+                    catch (Exception e)
+                    {
+                        Se.LogError(e);
+                    }
+                });
+            }
+        }
+
+        if (!subtitleFileLoaded && Se.Settings.File.ShowRecentFiles)
         {
             var first = Se.Settings.File.RecentFiles.FirstOrDefault();
             if (first != null && File.Exists(first.SubtitleFileName))
             {
-                SubtitleOpen(first.SubtitleFileName, first.VideoFileName, first.SelectedLine).ConfigureAwait(false);
+                Dispatcher.UIThread.Post(async void () =>
+                {
+                    try
+                    {
+                        await SubtitleOpen(first.SubtitleFileName, first.VideoFileName, first.SelectedLine);
+                    }
+                    catch (Exception e)
+                    {
+                        Se.LogError(e);
+                    }
+                });
             }
         }
 
@@ -2425,7 +2453,8 @@ public partial class MainViewModel :
         _videoFileName = videoFileName;
     }
 
-    private async Task ExtractWaveformAndSpectrogram(Process process, string tempWaveFileName, string peakWaveFileName)
+    private async Task ExtractWaveformAndSpectrogram(Process process, string tempWaveFileName,
+        string peakWaveFileName)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
         process.Start();
@@ -2456,6 +2485,7 @@ public partial class MainViewModel :
                 {
                     AudioVisualizer.WavePeaks = wavePeaks;
                 }
+
                 _updateAudioVisualizer = true;
             }, DispatcherPriority.Background);
         }
@@ -2548,7 +2578,7 @@ public partial class MainViewModel :
         if (Se.Settings.General.PromptDeleteLines)
         {
             var title = Se.Language.General.Delete;
-            
+
             var message = string.Format(Se.Language.General.DeleteXLinesPrompt, selectedItems.Count);
             if (selectedItems.Count == 1)
             {
@@ -2575,6 +2605,7 @@ public partial class MainViewModel :
         {
             Subtitles.Remove(item);
         }
+
         Renumber();
         _undoRedoManager.StartChangeDetection();
     }
@@ -2686,7 +2717,6 @@ public partial class MainViewModel :
         _mergeManager.MergeSelectedLinesAsDialog(Subtitles, selectedItems);
         SelectAndScrollToRow(index);
         Renumber();
-
     }
 
     private void ToggleItalic()
@@ -2749,6 +2779,7 @@ public partial class MainViewModel :
         {
             _shortcutManager.ClearKeys(); // reset shortcuts if no key pressed for 2 seconds
         }
+
         _lastKeyPressedTicks = ticks;
 
         _shortcutManager.OnKeyPressed(this, keyEventArgs);
@@ -2914,10 +2945,7 @@ public partial class MainViewModel :
         StatusTextRight = $"{Subtitles.IndexOf(item) + 1}/{Subtitles.Count}";
 
         _updateAudioVisualizer = true;
-        Dispatcher.UIThread.Post(() =>
-        {
-            MakeSubtitleTextInfo(item.Text, item);
-        });
+        Dispatcher.UIThread.Post(() => { MakeSubtitleTextInfo(item.Text, item); });
     }
 
     private void MakeSubtitleTextInfo(string text, SubtitleLineViewModel item)
@@ -2935,7 +2963,8 @@ public partial class MainViewModel :
         var lines = text.SplitToLines();
         var lineLenghts = new List<string>(lines);
         PanelSingleLineLenghts.Children.Clear();
-        PanelSingleLineLenghts.Children.Add(UiUtil.MakeTextBlock(Se.Language.Main.SingleLineLength).WithFontSize(12).WithPadding(2));
+        PanelSingleLineLenghts.Children.Add(UiUtil.MakeTextBlock(Se.Language.Main.SingleLineLength).WithFontSize(12)
+            .WithPadding(2));
         var first = true;
         for (var i = 0; i < lines.Count; i++)
         {
@@ -2949,7 +2978,8 @@ public partial class MainViewModel :
             }
 
             var tb = UiUtil.MakeTextBlock(lineLenghts[i].Length.ToStringInvariant()).WithFontSize(12).WithPadding(2);
-            if (Se.Settings.General.ColorTextTooLong && lineLenghts[i].Length > Se.Settings.General.SubtitleLineMaximumLength)
+            if (Se.Settings.General.ColorTextTooLong &&
+                lineLenghts[i].Length > Se.Settings.General.SubtitleLineMaximumLength)
             {
                 tb.Background = new SolidColorBrush(_errorColor);
             }
@@ -2960,13 +2990,15 @@ public partial class MainViewModel :
         EditTextCharactersPerSecond = string.Format(Se.Language.Main.CharactersPerSecond, $"{cps:0.0}");
         EditTextTotalLength = string.Format(Se.Language.Main.TotalCharacters, totalLength);
 
-        EditTextCharactersPerSecondBackground = Se.Settings.General.ColorTextTooLong && cps > Se.Settings.General.SubtitleMaximumCharactersPerSeconds
-                ? new SolidColorBrush(_errorColor)
-                : new SolidColorBrush(Colors.Transparent);
-
-        EditTextTotalLengthBackground = Se.Settings.General.ColorTextTooLong && totalLength > Se.Settings.General.SubtitleLineMaximumLength * lines.Count
+        EditTextCharactersPerSecondBackground = Se.Settings.General.ColorTextTooLong &&
+                                                cps > Se.Settings.General.SubtitleMaximumCharactersPerSeconds
             ? new SolidColorBrush(_errorColor)
-                : new SolidColorBrush(Colors.Transparent);
+            : new SolidColorBrush(Colors.Transparent);
+
+        EditTextTotalLengthBackground = Se.Settings.General.ColorTextTooLong &&
+                                        totalLength > Se.Settings.General.SubtitleLineMaximumLength * lines.Count
+            ? new SolidColorBrush(_errorColor)
+            : new SolidColorBrush(Colors.Transparent);
     }
 
     private DispatcherTimer _positionTimer = new DispatcherTimer();
@@ -3050,7 +3082,6 @@ public partial class MainViewModel :
             {
                 _mpvReloader.RefreshMpv(mpv.MpvContext!, GetUpdateSubtitle(), SelectedSubtitleFormat);
             }
-
         };
         _positionTimer.Start();
     }
@@ -3150,7 +3181,8 @@ public partial class MainViewModel :
         }
     }
 
-    public void Adjust(TimeSpan adjustment, bool adjustAll, bool adjustSelectedLines, bool adjustSelectedLinesAndForward)
+    public void Adjust(TimeSpan adjustment, bool adjustAll, bool adjustSelectedLines,
+        bool adjustSelectedLinesAndForward)
     {
         if (Math.Abs(adjustment.TotalMilliseconds) < 0.01)
         {
@@ -3202,10 +3234,7 @@ public partial class MainViewModel :
             return;
         }
 
-        Dispatcher.UIThread.Post(() =>
-        {
-            MakeSubtitleTextInfo(selectedSubtitle.Text, selectedSubtitle);
-        });
+        Dispatcher.UIThread.Post(() => { MakeSubtitleTextInfo(selectedSubtitle.Text, selectedSubtitle); });
     }
 
     internal void StartTimeChanged(object? sender, TimeSpan e)
@@ -3218,10 +3247,7 @@ public partial class MainViewModel :
             return;
         }
 
-        Dispatcher.UIThread.Post(() =>
-        {
-            MakeSubtitleTextInfo(selectedSubtitle.Text, selectedSubtitle);
-        });
+        Dispatcher.UIThread.Post(() => { MakeSubtitleTextInfo(selectedSubtitle.Text, selectedSubtitle); });
     }
 
     public void GoToAndFocusLine(SubtitleLineViewModel p)
@@ -3243,7 +3269,7 @@ public partial class MainViewModel :
         MenuItemAudioVisualizerDelete.IsVisible = false;
         MenuItemAudioVisualizerDeleteAtPosition.IsVisible = false;
         MenuItemAudioVisualizerSplit.IsVisible = false;
-        
+
         if (e.NewParagraph != null)
         {
             MenuItemAudioVisualizerInsertNewSelection.IsVisible = true;
@@ -3255,7 +3281,7 @@ public partial class MainViewModel :
             .Where(p => p.StartTime.TotalSeconds < e.PositionInSeconds &&
                         p.EndTime.TotalSeconds > e.PositionInSeconds).ToList();
 
-        if (selectedSubtitles?.Count == 1 && 
+        if (selectedSubtitles?.Count == 1 &&
             subtitlesAtPosition.Count == 1 &&
             selectedSubtitles[0] == subtitlesAtPosition[0])
         {
@@ -3266,13 +3292,13 @@ public partial class MainViewModel :
             MenuItemAudioVisualizerSplit.IsVisible = true;
             return;
         }
-        
+
         if (subtitlesAtPosition.Count == 0)
         {
             MenuItemAudioVisualizerInsertAtPosition.IsVisible = true;
             return;
         }
-        
+
         if (subtitlesAtPosition.Count > 0)
         {
             MenuItemAudioVisualizerDeleteAtPosition.IsVisible = true;
