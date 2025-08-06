@@ -208,4 +208,16 @@ public partial class VisualSyncViewModel : ObservableObject
             Window?.Close();
         }
     }
+
+    public void AudioVisualizerLeftPositionChanged(object sender, AudioVisualizer.PositionEventArgs e)
+    {
+        VideoPlayerControlLeft.VideoPlayerInstance.Position = e.PositionInSeconds;
+        _updateAudioVisualizer = true;
+    }
+
+    public void AudioVisualizerRightPositionChanged(object sender, AudioVisualizer.PositionEventArgs e)
+    {
+        VideoPlayerControlRight.VideoPlayerInstance.Position = e.PositionInSeconds;
+        _updateAudioVisualizer = true;
+    }
 }

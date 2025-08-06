@@ -35,6 +35,9 @@ public class AudioVisualizer : Control
     public static readonly StyledProperty<bool> DrawGridLinesProperty =
         AvaloniaProperty.Register<AudioVisualizer, bool>(nameof(DrawGridLines));
 
+    public static readonly StyledProperty<bool> IsReadOnlyProperty =
+        AvaloniaProperty.Register<AudioVisualizer, bool>(nameof(IsReadOnly));
+
     public static readonly StyledProperty<bool> InvertMouseWheelProperty =
         AvaloniaProperty.Register<AudioVisualizer, bool>(nameof(InvertMouseWheel));
 
@@ -87,6 +90,12 @@ public class AudioVisualizer : Control
     {
         get => GetValue(DrawGridLinesProperty);
         set => SetValue(DrawGridLinesProperty, value);
+    }
+    
+    public bool IsReadOnly
+    {
+        get => GetValue(IsReadOnlyProperty);
+        set => SetValue(IsReadOnlyProperty, value);
     }
 
     public List<SubtitleLineViewModel> AllSelectedParagraphs
@@ -453,6 +462,13 @@ public class AudioVisualizer : Control
         _lastPointerPressed = Stopwatch.GetTimestamp();
         e.Handled = true;
         var point = e.GetPosition(this);
+        _startPointerPosition = point;
+        if (IsReadOnly)
+        {
+            InvalidateVisual();
+            return;
+        }
+
         var p = HitTestParagraph(point);
         if (p == null)
         {
@@ -473,7 +489,6 @@ public class AudioVisualizer : Control
         double right = SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds);
 
         _activeParagraph = p;
-        _startPointerPosition = point;
         _originalStartSeconds = p.StartTime.TotalSeconds;
         _originalEndSeconds = p.EndTime.TotalSeconds;
 
@@ -556,6 +571,11 @@ public class AudioVisualizer : Control
 
     private void OnPointerMoved(object? sender, PointerEventArgs e)
     {
+        if (IsReadOnly)
+        {
+            return;
+        }
+        
         var point = e.GetPosition(this);
         var properties = e.GetCurrentPoint(this).Properties;
         var newP = NewSelectionParagraph;

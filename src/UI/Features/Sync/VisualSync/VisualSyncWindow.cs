@@ -42,8 +42,11 @@ public class VisualSyncWindow : Window
         vm.VideoPlayerControlRight = InitVideoPlayer.MakeVideoPlayer();
         vm.VideoPlayerControlRight.FullScreenIsVisible = false;
 
-        vm.AudioVisualizerLeft = new AudioVisualizer { Height = 80, Width = double.NaN };
-        vm.AudioVisualizerRight = new AudioVisualizer{ Height = 80, Width = double.NaN };
+        vm.AudioVisualizerLeft = new AudioVisualizer { Height = 80, Width = double.NaN, IsReadOnly = true };
+        vm.AudioVisualizerLeft.OnVideoPositionChanged += vm.AudioVisualizerLeftPositionChanged;
+        
+        vm.AudioVisualizerRight = new AudioVisualizer{ Height = 80, Width = double.NaN,  IsReadOnly = true };
+        vm.AudioVisualizerRight.OnVideoPositionChanged += vm.AudioVisualizerRightPositionChanged;
 
         var comboBoxLeft = UiUtil.MakeComboBox(vm.Paragraphs, vm, nameof(vm.SelectedParagraphLeft));
         var comboBoxRight = UiUtil.MakeComboBox(vm.Paragraphs, vm, nameof(vm.SelectedParagraphRight));
