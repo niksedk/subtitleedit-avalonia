@@ -890,7 +890,8 @@ public partial class MainViewModel :
     {
         var result = await _windowService.ShowDialogAsync<VisualSyncWindow, VisualSyncViewModel>(Window!, vm =>
         {
-            //vm.Initialize(this); // uses call from IAdjustCallback: Adjust
+            var paragraphs = Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList();
+            vm.Initialize(paragraphs, _videoFileName, _subtitleFileName, AudioVisualizer); // uses call from IAdjustCallback: Adjust
         });
 
         _shortcutManager.ClearKeys();

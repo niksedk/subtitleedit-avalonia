@@ -77,8 +77,8 @@ public static class InitVideoPlayer
                 control = new VideoPlayerControl(videoPlayerInstanceNone)
                 {
                     PlayerContent = new Label(),
-                    StopIsVisible = Se.Settings.Video.ShowStopButton,
-                    FullScreenIsVisible = Se.Settings.Video.ShowFullscreenButton,
+                    StopIsVisible = false,
+                    FullScreenIsVisible = false,
                 };
             }
         }

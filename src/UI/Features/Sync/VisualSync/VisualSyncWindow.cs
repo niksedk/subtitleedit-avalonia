@@ -1,8 +1,9 @@
-using Avalonia;
+using System;
 using Avalonia.Controls;
-using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
+using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -16,86 +17,56 @@ public class VisualSyncWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = Se.Language.Sync.VisualSync;
-        SizeToContent = SizeToContent.WidthAndHeight;
-        CanResize = false;
+        CanResize = true;
+        Width = 1000;
+        Height = 700;
+        MinWidth = 600;
+        MinHeight = 400;
 
         _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
-        var label = new Label
-        {
-            Content = "Speed in %",
-            VerticalAlignment = VerticalAlignment.Center,
-        };
-
-        var numericUpDownSpeed = new NumericUpDown
-        {
-            Width = 150,
-            Margin = new Thickness(0, 0, 10, 0),
-            Minimum = 0,
-            Maximum = 1000,
-            Increment = 0.1m,
-            [!NumericUpDown.ValueProperty] = new Binding(nameof(VisualSyncViewModel.SpeedPercent)) { Mode = BindingMode.TwoWay },
-        };
-
-        var buttonFromDropFrame = UiUtil.MakeButton("From drop frame value", vm.SetFromDropFrameValueCommand);
-        var buttonToDropFrame = UiUtil.MakeButton("To drop frame value", vm.SetToDropFrameValueCommand);
-
-        var panelSpeed = new StackPanel
+        var labelVideoInfo = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.VideoInfo));
+        var panelVideo = new StackPanel
         {
             Orientation = Orientation.Horizontal,
-            VerticalAlignment = VerticalAlignment.Center,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Margin = new Thickness(0, 0, 10, 0),
             Children =
             {
-                label,
-                numericUpDownSpeed,
-                buttonFromDropFrame,
-                buttonToDropFrame
+                labelVideoInfo
             }
         };
 
-        var panelRadioButtons = new StackPanel
-        {
-            Orientation = Orientation.Vertical,
-            Margin = new Thickness(50, 10, 0, 0),
-            Children =
-            {
-                new RadioButton
-                {
-                    Content = "Adjust all",
-                    [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustAll))
-                },
-                new RadioButton
-                {
-                    Content = "Adjust selected lines",
-                    [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustSelectedLines))
-                },
-                new RadioButton
-                {
-                    Content = "Adjust selected lines and forward",
-                    [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustSelectedLinesAndForward))
-                }
-            },
-        };
+        vm.VideoPlayerControlLeft = InitVideoPlayer.MakeVideoPlayer();
+        vm.VideoPlayerControlLeft.FullScreenIsVisible = false;
+        vm.VideoPlayerControlRight = InitVideoPlayer.MakeVideoPlayer();
+        vm.VideoPlayerControlRight.FullScreenIsVisible = false;
 
+        vm.AudioVisualizerLeft = new AudioVisualizer { Height = 80, Width = double.NaN };
+        vm.AudioVisualizerRight = new AudioVisualizer{ Height = 80, Width = double.NaN };
+
+        var comboBoxLeft = UiUtil.MakeComboBox(vm.Paragraphs, vm, nameof(vm.SelectedParagraphLeft));
+        var comboBoxRight = UiUtil.MakeComboBox(vm.Paragraphs, vm, nameof(vm.SelectedParagraphRight));
+
+        var buttonSync = UiUtil.MakeButton(Se.Language.Sync.Sync, vm.SyncCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);   
-        var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
+        var buttonPanel = UiUtil.MakeButtonBar(buttonSync, buttonOk, buttonCancel);
         
         var grid = new Grid
         {
             RowDefinitions =
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
@@ -104,9 +75,14 @@ public class VisualSyncWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(panelSpeed, 0);
-        grid.Add(panelRadioButtons, 1);
-        grid.Add(buttonPanel, 2);
+        grid.Add(panelVideo, 0, 0, 1, 2);
+        grid.Add(vm.VideoPlayerControlLeft, 1);
+        grid.Add(vm.VideoPlayerControlRight, 1,1);
+        grid.Add(vm.AudioVisualizerLeft, 2);
+        grid.Add(vm.AudioVisualizerRight, 2, 2);
+        grid.Add(comboBoxRight, 3);
+        grid.Add(comboBoxLeft, 3,1);
+        grid.Add(buttonPanel, 4, 0, 1, 2);
 
         Content = grid;
         
