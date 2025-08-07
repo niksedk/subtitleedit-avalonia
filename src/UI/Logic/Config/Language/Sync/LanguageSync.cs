@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language.Sync;
+﻿using System;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language.Sync;
 
 public class LanguageSync
 {
@@ -8,6 +10,7 @@ public class LanguageSync
     public string EndScene { get; set; }
     public string PlayTwoSecondsAndBack { get; set; }
     public string FindText { get; set; }
+    public string ResolutionXDurationYFrameRateZ { get; set; }
 
     public LanguageSync()
     {
@@ -17,5 +20,6 @@ public class LanguageSync
         EndScene = "End scene";
         PlayTwoSecondsAndBack = "Play 2 secs & back";
         FindText = "Find text";
+        ResolutionXDurationYFrameRateZ = "Resolution: {0}, duration: {1}, frame rate: {2}";
     }
 }

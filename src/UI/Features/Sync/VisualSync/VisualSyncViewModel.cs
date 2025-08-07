@@ -101,10 +101,11 @@ public partial class VisualSyncViewModel : ObservableObject
                 var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
                 if (mediaInfo?.Dimension is { Width: > 0, Height: > 0 })
                 {
-                    VideoInfo = $"File name: {videoFileName}" + Environment.NewLine +
-                                $"Resolution: {mediaInfo.Dimension.Width}x{mediaInfo.Dimension.Height}, " +
-                                $"duration: {mediaInfo.Duration.ToShortDisplayString()}, " +
-                                $"frame rate: {mediaInfo.FramesRate}";
+                    VideoInfo = string.Format(Se.Language.General.FileNameX, videoFileName) + Environment.NewLine +
+                                string.Format(Se.Language.Sync.ResolutionXDurationYFrameRateZ, 
+                                    $"{mediaInfo.Dimension.Width}x{mediaInfo.Dimension.Height}",
+                                    mediaInfo.Duration.ToShortDisplayString(),
+                                    mediaInfo.FramesRate);
                     return;
                 }
 
@@ -184,13 +185,15 @@ public partial class VisualSyncViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void PlayTwoSecondsAndBackLeft()
+    private async Task PlayTwoSecondsAndBackLeft()
     {
+        await PlayAndBack(VideoPlayerControlLeft, 2000);
     }
 
     [RelayCommand]
-    private void PlayTwoSecondsAndBackRight()
+    private async Task PlayTwoSecondsAndBackRight()
     {
+        await PlayAndBack(VideoPlayerControlRight, 2000);
     }
 
     [RelayCommand]
@@ -229,6 +232,15 @@ public partial class VisualSyncViewModel : ObservableObject
     private void Cancel()
     {
         Window?.Close();
+    }
+
+    private async Task PlayAndBack(VideoPlayerControl videoPlayer, int milliseconds)
+    {
+        var originalPosition = videoPlayer.Position;
+        videoPlayer.VideoPlayerInstance.Play();
+        await Task.Delay(milliseconds);
+        videoPlayer.VideoPlayerInstance.Pause();
+        videoPlayer.Position = originalPosition;
     }
 
     internal void OnKeyDown(KeyEventArgs e)

@@ -161,4 +161,8 @@
 	    <CopyToOutputDirectory></CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Features\Shared\FindText\" />
+	</ItemGroup>
 </Project>

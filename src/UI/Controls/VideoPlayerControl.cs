@@ -50,12 +50,18 @@ namespace Nikse.SubtitleEdit.Controls
             set => SetValue(VolumeProperty, value);
         }
 
+        /// <summary>
+        /// Position in seconds.
+        /// </summary>
         public double Position
         {
             get => GetValue(PositionProperty);
             set => SetValue(PositionProperty, value);
         }
 
+        /// <summary>
+        /// Duration in seconds.    
+        /// </summary>
         public double Duration
         {
             get => GetValue(DurationProperty);

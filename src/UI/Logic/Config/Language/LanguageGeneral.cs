@@ -250,6 +250,7 @@ public class LanguageGeneral
     public string InsertNewSelection { get; set; }
     public string InsertAtPosition { get; set; }
     public string DeleteAtPosition { get; set; }
+    public string FileNameX { get; set; }
 
     public LanguageGeneral()
     {
@@ -499,5 +500,6 @@ public class LanguageGeneral
         InsertNewSelection = "Insert new selection";
         InsertAtPosition = "Insert at video position";
         DeleteAtPosition = "Delete at video position";
+        FileNameX = "File name: {0}";
     }
 }
