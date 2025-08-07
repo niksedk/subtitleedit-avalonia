@@ -22,8 +22,8 @@ namespace Nikse.SubtitleEdit.Features.Sync.VisualSync;
 public partial class VisualSyncViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<SubtitleDisplayItem> _paragraphs;
-    [ObservableProperty] private SubtitleDisplayItem? _selectedParagraphLeft;
-    [ObservableProperty] private SubtitleDisplayItem? _selectedParagraphRight;
+    [ObservableProperty] private int _selectedParagraphLeftIndex = -1;
+    [ObservableProperty] private int _selectedParagraphRightIndex = -1;
     [ObservableProperty] private bool _isAudioVisualizerVisible;
     [ObservableProperty] private string _title;
     [ObservableProperty] private string _videoInfo;
@@ -70,13 +70,13 @@ public partial class VisualSyncViewModel : ObservableObject
         Paragraphs = new ObservableCollection<SubtitleDisplayItem>(paragraphs.Select(p => new SubtitleDisplayItem(p)));
         _videoFileName = videoFileName;
         _subtitleFileName = subtitleFileName;
-
         _subtitleLines = paragraphs;
-        SelectedParagraphLeft = Paragraphs[0];
-        SelectedParagraphRight = Paragraphs[^1];
 
         Dispatcher.UIThread.Post(() =>
         {
+            SelectedParagraphLeftIndex = 0;
+            SelectedParagraphRightIndex = Paragraphs.Count - 1;
+
             if (!string.IsNullOrEmpty(videoFileName))
             {
                 _ = VideoPlayerControlLeft.Open(videoFileName);
@@ -89,7 +89,6 @@ public partial class VisualSyncViewModel : ObservableObject
                 AudioVisualizerRight.WavePeaks = audioVisualizer.WavePeaks;
                 IsAudioVisualizerVisible = true;
             }
-
             StartTitleTimer();
             _updateAudioVisualizer = true;
         });
@@ -111,7 +110,7 @@ public partial class VisualSyncViewModel : ObservableObject
                 if (mediaInfo?.Dimension is { Width: > 0, Height: > 0 })
                 {
                     VideoInfo = string.Format(Se.Language.General.FileNameX, videoFileName) + Environment.NewLine +
-                                string.Format(Se.Language.Sync.ResolutionXDurationYFrameRateZ, 
+                                string.Format(Se.Language.Sync.ResolutionXDurationYFrameRateZ,
                                     $"{mediaInfo.Dimension.Width}x{mediaInfo.Dimension.Height}",
                                     mediaInfo.Duration.ToShortDisplayString(),
                                     mediaInfo.FramesRate);
@@ -131,8 +130,8 @@ public partial class VisualSyncViewModel : ObservableObject
         _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(150) };
         _positionTimer.Tick += (s, e) =>
         {
-            UpdateAudioVisualizer(VideoPlayerControlLeft.VideoPlayerInstance, AudioVisualizerLeft, SelectedParagraphLeft);
-            UpdateAudioVisualizer(VideoPlayerControlRight.VideoPlayerInstance, AudioVisualizerRight, SelectedParagraphRight);
+            UpdateAudioVisualizer(VideoPlayerControlLeft.VideoPlayerInstance, AudioVisualizerLeft, SelectedParagraphLeftIndex);
+            UpdateAudioVisualizer(VideoPlayerControlRight.VideoPlayerInstance, AudioVisualizerRight, SelectedParagraphRightIndex);
 
             if (_updateAudioVisualizer)
             {
@@ -147,8 +146,12 @@ public partial class VisualSyncViewModel : ObservableObject
     private void UpdateAudioVisualizer(
         IVideoPlayerInstance vp,
         AudioVisualizer av,
-        SubtitleDisplayItem? selectedParagraph)
+        int selectedParagraphIndex)
     {
+        SubtitleDisplayItem? selectedParagraph = selectedParagraphIndex < 0
+            ? null
+            : Paragraphs[selectedParagraphIndex];
+
         var subtitle = new ObservableCollection<SubtitleLineViewModel>();
         var orderedList = _subtitleLines.OrderBy(p => p.StartTime.TotalMilliseconds).ToList();
         var firstSelectedIndex = -1;
@@ -173,15 +176,8 @@ public partial class VisualSyncViewModel : ObservableObject
             selectedParagraph?.Subtitle ??  new  SubtitleLineViewModel(),
         };
 
-        if (Se.Settings.Waveform.CenterVideoPosition)
-        {
-            // calculate the center position based on the waveform width
-            var waveformHalfSeconds = (av.EndPositionSeconds - av.StartPositionSeconds) / 2.0;
-            av.SetPosition(Math.Max(0, mediaPlayerSeconds - waveformHalfSeconds), subtitle, mediaPlayerSeconds,
-                firstSelectedIndex, selectedSubtitles);
-        }
-        else if ((isPlaying || !av.IsScrolling) && (mediaPlayerSeconds > av.EndPositionSeconds ||
-                                                    mediaPlayerSeconds < av.StartPositionSeconds))
+        if ((isPlaying || !av.IsScrolling) && (mediaPlayerSeconds > av.EndPositionSeconds ||
+                                               mediaPlayerSeconds < av.StartPositionSeconds))
         {
             av.SetPosition(startPos, subtitle, mediaPlayerSeconds, 0,
                 selectedSubtitles);
@@ -206,21 +202,11 @@ public partial class VisualSyncViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void GoToSubtitlePositionLeft()
-    {
-    }
-
-    [RelayCommand]
-    private void GoToSubtitlePositionRight()
-    {
-    }
-
-    [RelayCommand]
     private async Task FindTextLeft()
     {
-        var result = await _windowService.ShowDialogAsync<FindTextWindow, FindTextViewModel>(Window!, vm => 
-        { 
-            vm.Initialize(_subtitleLines, string.Format(Se.Language.General.FindTextX, Se.Language.Sync.StartScene)); 
+        var result = await _windowService.ShowDialogAsync<FindTextWindow, FindTextViewModel>(Window!, vm =>
+        {
+            vm.Initialize(_subtitleLines, string.Format(Se.Language.General.FindTextX, Se.Language.Sync.StartScene));
         });
 
         if (!result.OkPressed || result.SelectedSubtitle == null)
@@ -228,13 +214,13 @@ public partial class VisualSyncViewModel : ObservableObject
             return;
         }
 
-        var s = Paragraphs.FirstOrDefault(p=>p.Subtitle == result.SelectedSubtitle);
+        var s = Paragraphs.FirstOrDefault(p => p.Subtitle == result.SelectedSubtitle);
         if (s == null)
         {
             return;
         }
 
-        SelectedParagraphLeft = s;
+        SelectedParagraphLeftIndex = Paragraphs.IndexOf(s);
         VideoPlayerControlLeft.Position = s.Subtitle.StartTime.TotalSeconds;
         _updateAudioVisualizer = true;
     }
@@ -258,7 +244,7 @@ public partial class VisualSyncViewModel : ObservableObject
             return;
         }
 
-        SelectedParagraphRight = s;
+        SelectedParagraphRightIndex = Paragraphs.IndexOf(s);
         VideoPlayerControlRight.Position = s.Subtitle.StartTime.TotalSeconds;
         _updateAudioVisualizer = true;
     }
@@ -266,9 +252,9 @@ public partial class VisualSyncViewModel : ObservableObject
     [RelayCommand]
     private async Task Sync()
     {
-        if (SelectedParagraphLeft == null || SelectedParagraphRight == null)
-        { 
-            return; 
+        if (SelectedParagraphLeftIndex < 0 || SelectedParagraphRightIndex < 0)
+        {
+            return;
         }
 
         // Video player current start and end position.
@@ -276,8 +262,8 @@ public partial class VisualSyncViewModel : ObservableObject
         double videoPlayerCurrentEndPos = VideoPlayerControlRight.Position;
 
         // Subtitle start and end time in seconds.
-        double subStart = SelectedParagraphLeft.Subtitle.StartTime.TotalSeconds;
-        double subEnd = SelectedParagraphRight.Subtitle.StartTime.TotalSeconds;
+        double subStart = Paragraphs[SelectedParagraphLeftIndex].Subtitle.StartTime.TotalSeconds;
+        double subEnd = Paragraphs[SelectedParagraphRightIndex].Subtitle.StartTime.TotalSeconds;
 
         // Validate: End time must be greater than start time.
         if (!(videoPlayerCurrentEndPos > videoPlayerCurrentStartPos && subEnd > subStart))
@@ -303,28 +289,22 @@ public partial class VisualSyncViewModel : ObservableObject
             p.UpdateText();
         }
 
-        //// fix overlapping time codes
-        //var tmpSubtitle = new Subtitle();
-        //foreach (Paragraph p in Paragraphs)
-        //{
-        //    tmpSubtitle.Paragraphs.Add(new Paragraph(p));
-        //}
+        // fix overlapping time codes
+        for (var i = 0; i < Paragraphs.Count - 1; i++)
+        {
+            var current = Paragraphs[i].Subtitle;
+            var next = Paragraphs[i + 1].Subtitle;
+            if (current.EndTime.TotalMilliseconds > next.StartTime.TotalMilliseconds)
+            {
+                var newEndTime = TimeSpan.FromMilliseconds(next.StartTime.TotalMilliseconds - 1);
+                if (newEndTime < current.StartTime)
+                {
+                    continue;
+                }
 
-        //new FixOverlappingDisplayTimes().Fix(tmpSubtitle, new EmptyFixCallback());
-        //_paragraphs = tmpSubtitle.Paragraphs;
-
-        //// fix overlapping time codes for alternate subtitle (translation)
-        //if (_inputOriginalSubtitle != null)
-        //{
-        //    tmpSubtitle = new Subtitle();
-        //    foreach (Paragraph p in _paragraphsOriginal)
-        //    {
-        //        tmpSubtitle.Paragraphs.Add(new Paragraph(p));
-        //    }
-
-        //    new FixOverlappingDisplayTimes().Fix(tmpSubtitle, new EmptyFixCallback());
-        //    _paragraphsOriginal = tmpSubtitle.Paragraphs;
-        //}
+                current.EndTime = TimeSpan.FromMilliseconds(next.StartTime.TotalMilliseconds - 1);
+            }
+        }
 
         _updateAudioVisualizer = true;
     }
@@ -344,7 +324,7 @@ public partial class VisualSyncViewModel : ObservableObject
 
     private void SetSyncFactorLabel(double videoPlayerCurrentStartPos, double videoPlayerCurrentEndPos)
     {
-        if (string.IsNullOrWhiteSpace(_videoFileName) || SelectedParagraphLeft == null || SelectedParagraphRight == null)
+        if (string.IsNullOrWhiteSpace(_videoFileName) || SelectedParagraphLeftIndex < 0 || SelectedParagraphRightIndex < 0)
         {
             return;
         }
@@ -352,8 +332,8 @@ public partial class VisualSyncViewModel : ObservableObject
         AdjustInfo = string.Empty;
         if (videoPlayerCurrentEndPos > videoPlayerCurrentStartPos)
         {
-            double subStart = SelectedParagraphLeft.Subtitle.StartTime.TotalSeconds;
-            double subEnd = SelectedParagraphRight.Subtitle.StartTime.TotalSeconds;
+            double subStart = Paragraphs[SelectedParagraphLeftIndex].Subtitle.StartTime.TotalSeconds;
+            double subEnd = Paragraphs[SelectedParagraphRightIndex].Subtitle.StartTime.TotalSeconds;
 
             double subDiff = subEnd - subStart;
             double realDiff = videoPlayerCurrentEndPos - videoPlayerCurrentStartPos;
@@ -410,12 +390,13 @@ public partial class VisualSyncViewModel : ObservableObject
 
     internal void ComboBoxLeftChanged(object? sender, SelectionChangedEventArgs e)
     {
-        var selected = SelectedParagraphLeft;
-        if (selected == null)
+        var selectedIndex = SelectedParagraphLeftIndex;
+        if (selectedIndex < 0)
         {
             return;
         }
 
+        var selected = Paragraphs[selectedIndex];
         VideoPlayerControlLeft.Position = selected.Subtitle.StartTime.TotalSeconds;
         AudioVisualizerLeft.CurrentVideoPositionSeconds = selected.Subtitle.StartTime.TotalSeconds;
         _updateAudioVisualizer = true;
@@ -423,12 +404,13 @@ public partial class VisualSyncViewModel : ObservableObject
 
     internal void ComboBoxRightChanged(object? sender, SelectionChangedEventArgs e)
     {
-        var selected = SelectedParagraphRight;
-        if (selected == null)
+        var selectedIndex = SelectedParagraphRightIndex;
+        if (selectedIndex < 0)
         {
             return;
         }
 
+        var selected = Paragraphs[selectedIndex];
         VideoPlayerControlRight.Position = selected.Subtitle.StartTime.TotalSeconds;
         AudioVisualizerRight.CurrentVideoPositionSeconds = selected.Subtitle.StartTime.TotalSeconds;
         _updateAudioVisualizer = true;

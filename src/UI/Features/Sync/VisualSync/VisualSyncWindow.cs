@@ -1,6 +1,4 @@
 using Avalonia.Controls;
-using Avalonia.Controls.Templates;
-using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
@@ -50,11 +48,10 @@ public class VisualSyncWindow : Window
         vm.AudioVisualizerRight = new AudioVisualizer { Height = 80, Width = double.NaN, IsReadOnly = true };
         vm.AudioVisualizerRight.OnVideoPositionChanged += vm.AudioVisualizerRightPositionChanged;
 
-        var comboBoxLeft = UiUtil.MakeComboBoxBindText(vm.Paragraphs, vm, nameof(SubtitleDisplayItem.Text), nameof(vm.SelectedParagraphRight));
+        var comboBoxLeft = UiUtil.MakeComboBoxBindText(vm.Paragraphs, vm, nameof(SubtitleDisplayItem.Text), nameof(vm.SelectedParagraphLeftIndex));
         comboBoxLeft.Width = double.NaN;
         comboBoxLeft.MinHeight = 50;
         comboBoxLeft.HorizontalAlignment = HorizontalAlignment.Stretch;
-        comboBoxLeft.SelectionChanged += vm.ComboBoxRightChanged;
         comboBoxLeft.SelectionChanged += vm.ComboBoxLeftChanged;
 
         var panelLeftButtons = new StackPanel
@@ -67,7 +64,7 @@ public class VisualSyncWindow : Window
             }
         };
 
-        var comboBoxRight = UiUtil.MakeComboBoxBindText(vm.Paragraphs, vm, nameof(SubtitleDisplayItem.Text), nameof(vm.SelectedParagraphRight));
+        var comboBoxRight = UiUtil.MakeComboBoxBindText(vm.Paragraphs, vm, nameof(SubtitleDisplayItem.Text), nameof(vm.SelectedParagraphRightIndex));
         comboBoxRight.Width = double.NaN;
         comboBoxRight.MinHeight = 50;
         comboBoxRight.HorizontalAlignment = HorizontalAlignment.Stretch;
@@ -83,10 +80,11 @@ public class VisualSyncWindow : Window
             }
         };
 
+        var labelInfo = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.AdjustInfo));
         var buttonSync = UiUtil.MakeButton(Se.Language.Sync.Sync, vm.SyncCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var buttonPanel = UiUtil.MakeButtonBar(buttonSync, buttonOk, buttonCancel);
+        var buttonPanel = UiUtil.MakeButtonBar(labelInfo, buttonSync, buttonOk, buttonCancel);
 
         var gridLeft = new Grid
         {

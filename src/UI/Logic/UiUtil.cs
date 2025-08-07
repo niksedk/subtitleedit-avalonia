@@ -8,7 +8,6 @@ using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Styling;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Features.Sync.VisualSync;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 using SkiaSharp;
@@ -294,14 +293,21 @@ public static class UiUtil
         return comboBox;
     }
 
-    internal static ComboBox MakeComboBoxBindText<T>(ObservableCollection<T> sourceItems, object vm, string textPath, string propertySelectedPath)
+    internal static ComboBox MakeComboBoxBindText<T>(ObservableCollection<T> sourceItems, object vm, string textPath, string propertySelectedIndexPath)
     {
         var comboBox = new ComboBox
         {
             ItemsSource = sourceItems,
             DataContext = vm,
             DisplayMemberBinding = new Binding(textPath),
-        }.WithBindSelected(nameof(propertySelectedPath));
+        };
+
+        comboBox.Bind(ComboBox.SelectedIndexProperty, new Binding
+        {
+            Path = propertySelectedIndexPath,
+            Mode = BindingMode.TwoWay,
+        });
+        
 
         return comboBox;
     }

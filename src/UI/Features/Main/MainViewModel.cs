@@ -888,9 +888,19 @@ public partial class MainViewModel :
         var result = await _windowService.ShowDialogAsync<VisualSyncWindow, VisualSyncViewModel>(Window!, vm =>
         {
             var paragraphs = Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList();
-            vm.Initialize(paragraphs, _videoFileName, _subtitleFileName,
-                AudioVisualizer); // uses call from IAdjustCallback: Adjust
+            vm.Initialize(paragraphs, _videoFileName, _subtitleFileName, AudioVisualizer); 
         });
+
+        if (result.OkPressed)
+        {
+            Subtitles.Clear();
+            foreach (var p in result.Paragraphs)
+            {
+                Subtitles.Add(p.Subtitle);
+            }
+
+            SelectAndScrollToRow(0);
+        }
 
         _shortcutManager.ClearKeys();
     }
