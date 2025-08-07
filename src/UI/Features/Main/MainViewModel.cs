@@ -97,6 +97,7 @@ public partial class MainViewModel :
     [ObservableProperty] private string _statusTextRight;
 
     [ObservableProperty] private bool _isWaveformToolbarVisible;
+    [ObservableProperty] private bool _isSubtitleGridFlyoutHeaderVisible;
 
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
@@ -2796,6 +2797,11 @@ public partial class MainViewModel :
 
     public void SubtitleContextOpening(object? sender, EventArgs e)
     {
+        if (IsSubtitleGridFlyoutHeaderVisible)
+        {
+            
+        }
+
         MenuItemMergeAsDialog.IsVisible = SubtitleGrid.SelectedItems.Count == 2;
         MenuItemMerge.IsVisible = SubtitleGrid.SelectedItems.Count > 1;
     }
@@ -2908,13 +2914,26 @@ public partial class MainViewModel :
         _subtitleGridIsControlPressed = false;
         _subtitleGridIsLeftClick = false;
         _subtitleGridIsRightClick = false;
-
+        IsSubtitleGridFlyoutHeaderVisible = false;
         if (sender is Control { ContextFlyout: not null } control)
         {
             var props = e.GetCurrentPoint(control).Properties;
             _subtitleGridIsLeftClick = props.IsLeftButtonPressed;
             _subtitleGridIsRightClick = props.IsRightButtonPressed;
             _subtitleGridIsControlPressed = e.KeyModifiers.HasFlag(KeyModifiers.Control);
+            
+            var hitTest = SubtitleGrid.InputHitTest(e.GetPosition(SubtitleGrid));
+            var current = hitTest as Control;
+            while (current != null)
+            {
+                if (current is DataGridColumnHeader)
+                {
+                    IsSubtitleGridFlyoutHeaderVisible = true;
+                    return;
+                }
+
+                current = current.Parent as Control;
+            }
         }
     }
 

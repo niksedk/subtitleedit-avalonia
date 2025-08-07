@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
+using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
@@ -10,6 +11,8 @@ using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
+using Projektanker.Icons.Avalonia;
+using MenuItem = Avalonia.Controls.MenuItem;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -153,52 +156,88 @@ public static class InitListViewAndEditBox
         var flyout = new MenuFlyout();
 
         flyout.Opening += vm.SubtitleContextOpening;
+        vm.SubtitleGrid.PointerPressed  += vm.SubtitleGrid_PointerPressed;
 
         // Add menu items with commands
-        var deleteMenuItem = new MenuItem { Header = Se.Language.General.Delete };
+        var showEndTimeMenuItem = new MenuItem
+        {
+            Header = Se.Language.General.ShowHideColumn, 
+            DataContext = vm,
+            Icon = new Icon
+            {
+                Value = IconNames.MdiCheckBold,
+                VerticalAlignment = VerticalAlignment.Center,
+            }
+        };
+        showEndTimeMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible), BindingMode.TwoWay));
+        flyout.Items.Add(showEndTimeMenuItem);
+        
+        var deleteMenuItem = new MenuItem { Header = Se.Language.General.Delete, DataContext = vm };
+        deleteMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
         deleteMenuItem.Command = vm.DeleteSelectedLinesCommand;
         flyout.Items.Add(deleteMenuItem);
 
-        var insertBeforeMenuItem = new MenuItem { Header = Se.Language.General.InsertBefore };
+        var insertBeforeMenuItem = new MenuItem { Header = Se.Language.General.InsertBefore, DataContext = vm };
+        insertBeforeMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
         insertBeforeMenuItem.Command = vm.InsertLineBeforeCommand;
         flyout.Items.Add(insertBeforeMenuItem);
 
-        var insertAfterMenuItem = new MenuItem { Header = Se.Language.General.InsertAfter };
+        var insertAfterMenuItem = new MenuItem { Header = Se.Language.General.InsertAfter, DataContext = vm };
+        insertAfterMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
         insertAfterMenuItem.Command = vm.InsertLineAfterCommand;
         flyout.Items.Add(insertAfterMenuItem);
 
-        flyout.Items.Add(new Separator());
+        var sep1 = new Separator();
+        sep1.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
+        flyout.Items.Add(sep1);
 
-        var splitMenuItem = new MenuItem { Header = Se.Language.General.SplitLine };
+        var splitMenuItem = new MenuItem { Header = Se.Language.General.SplitLine, DataContext = vm };
+        splitMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
         splitMenuItem.Command = vm.SplitCommand;
         flyout.Items.Add(splitMenuItem);
 
-        var mergePreviousMenuItem = new MenuItem { Header = Se.Language.General.MergeBefore };
+        var mergePreviousMenuItem = new MenuItem { Header = Se.Language.General.MergeBefore, DataContext = vm };
+        mergePreviousMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
         mergePreviousMenuItem.Command = vm.MergeWithLineBeforeCommand;
         flyout.Items.Add(mergePreviousMenuItem);
 
-        var mergeNextMenuItem = new MenuItem { Header = Se.Language.General.MergeAfter };
+        var mergeNextMenuItem = new MenuItem { Header = Se.Language.General.MergeAfter, DataContext = vm };
+        mergeNextMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
         mergeNextMenuItem.Command = vm.MergeWithLineAfterCommand;
         flyout.Items.Add(mergeNextMenuItem);
 
-        var mergeSelectedMenuItem = new MenuItem { Header = Se.Language.General.MergeSelected };
+        var mergeSelectedMenuItem = new MenuItem { Header = Se.Language.General.MergeSelected, DataContext = vm };
+        mergeSelectedMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
         mergeSelectedMenuItem.Command = vm.MergeSelectedLinesCommand;
         flyout.Items.Add(mergeSelectedMenuItem);
         vm.MenuItemMerge = mergeSelectedMenuItem;
 
-        var mergeSelectedAsDialogMenuItem = new MenuItem { Header = Se.Language.General.MergeSelectedAsDialog };
+        var mergeSelectedAsDialogMenuItem = new MenuItem { Header = Se.Language.General.MergeSelectedAsDialog, DataContext = vm };
+        mergeSelectedAsDialogMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
         mergeSelectedAsDialogMenuItem.Command = vm.MergeSelectedLinesDialogCommand;
         flyout.Items.Add(mergeSelectedAsDialogMenuItem);
         vm.MenuItemMergeAsDialog = mergeSelectedAsDialogMenuItem;
 
-        flyout.Items.Add(new Separator());
+        var sep2 = new Separator();
+        sep2.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
+        flyout.Items.Add(sep2);
 
-        var italicMenuItem = new MenuItem { Header = Se.Language.General.Italic };
-        italicMenuItem.Command = vm.ToggleLinesItalicCommand;
+        var italicMenuItem = new MenuItem
+        {
+            Header = Se.Language.General.Italic,
+            Command = vm.ToggleLinesItalicCommand, 
+            DataContext = vm,
+        };
+        italicMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
         flyout.Items.Add(italicMenuItem);
 
-        var boldMenuItem = new MenuItem { Header = Se.Language.General.Bold };
-        boldMenuItem.Command = vm.ToggleLinesBoldCommand;
+        var boldMenuItem = new MenuItem
+        {
+            Header = Se.Language.General.Bold,
+            Command = vm.ToggleLinesBoldCommand,
+            DataContext = vm,
+        };
+        boldMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
         flyout.Items.Add(boldMenuItem);
 
         // Set the ContextFlyout property

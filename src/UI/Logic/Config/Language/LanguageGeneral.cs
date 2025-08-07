@@ -252,7 +252,8 @@ public class LanguageGeneral
     public string DeleteAtPosition { get; set; }
     public string FileNameX { get; set; }
     public string FindTextX { get; set; }
-    public string FindNext { get; internal set; }
+    public string FindNext { get; set; }
+    public string ShowHideColumn { get; set; }
 
     public LanguageGeneral()
     {
@@ -505,5 +506,6 @@ public class LanguageGeneral
         FileNameX = "File name: {0}";
         FindTextX = "Find text - {0}";
         FindNext = "Find next";
+        ShowHideColumn = "Show 'Hide' column";
     }
 }

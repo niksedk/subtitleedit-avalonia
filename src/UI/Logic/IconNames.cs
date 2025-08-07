@@ -49,6 +49,8 @@ internal class IconNames
     public const string MdiArrowRightThick = "mdi-arrow-right-thick";
     public const string MdiPlus = "mdi-plus";
     public const string MdiMinus = "mdi-minus";
+    public const string MdiCheck = "mdi-check";
+    public const string MdiCheckBold = "mdi-check-bold";
 
     //public const string Mdi = "mdi-";
 }
