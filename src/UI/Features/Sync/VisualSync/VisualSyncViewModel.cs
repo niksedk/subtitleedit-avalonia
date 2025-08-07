@@ -39,7 +39,6 @@ public partial class VisualSyncViewModel : ObservableObject
     private readonly IWindowService _windowService;
 
     private string? _videoFileName;
-    private string? _subtitleFileName;
     private DispatcherTimer _positionTimer = new DispatcherTimer();
     private List<SubtitleLineViewModel> _subtitleLines = new List<SubtitleLineViewModel>();
     private bool _updateAudioVisualizer;
@@ -52,7 +51,6 @@ public partial class VisualSyncViewModel : ObservableObject
         VideoInfo = string.Empty;
         AdjustInfo = string.Empty;
         _videoFileName = string.Empty;
-        _subtitleFileName = string.Empty;
         VideoPlayerControlLeft = new VideoPlayerControl(new VideoPlayerInstanceNone());
         VideoPlayerControlRight = new VideoPlayerControl(new VideoPlayerInstanceNone());
         AudioVisualizerLeft = new AudioVisualizer();
@@ -69,14 +67,10 @@ public partial class VisualSyncViewModel : ObservableObject
         SetVideoInFo(videoFileName);
         Paragraphs = new ObservableCollection<SubtitleDisplayItem>(paragraphs.Select(p => new SubtitleDisplayItem(p)));
         _videoFileName = videoFileName;
-        _subtitleFileName = subtitleFileName;
         _subtitleLines = paragraphs;
 
         Dispatcher.UIThread.Post(() =>
         {
-            SelectedParagraphLeftIndex = 0;
-            SelectedParagraphRightIndex = Paragraphs.Count - 1;
-
             if (!string.IsNullOrEmpty(videoFileName))
             {
                 _ = VideoPlayerControlLeft.Open(videoFileName);
@@ -414,5 +408,41 @@ public partial class VisualSyncViewModel : ObservableObject
         VideoPlayerControlRight.Position = selected.Subtitle.StartTime.TotalSeconds;
         AudioVisualizerRight.CurrentVideoPositionSeconds = selected.Subtitle.StartTime.TotalSeconds;
         _updateAudioVisualizer = true;
+    }
+
+    internal void OnLoaded()
+    {
+        if (string.IsNullOrEmpty(_videoFileName))
+        {
+            return;
+        }
+
+        SelectedParagraphLeftIndex = 0;
+        SelectedParagraphRightIndex = Paragraphs.Count - 1;
+
+        var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+        timer.Tick += (s, e) =>
+        {
+            var left = Paragraphs[SelectedParagraphLeftIndex];
+            if (VideoPlayerControlLeft.Position < left.Subtitle.StartTime.TotalSeconds - 0.1)
+            {
+                VideoPlayerControlLeft.Position = left.Subtitle.StartTime.TotalSeconds;
+                AudioVisualizerLeft.CurrentVideoPositionSeconds = left.Subtitle.StartTime.TotalSeconds;
+                _updateAudioVisualizer = true;
+                return;
+            }
+
+            var right = Paragraphs[SelectedParagraphRightIndex];
+            if (VideoPlayerControlRight.Position < right.Subtitle.StartTime.TotalSeconds - 0.1)
+            {
+                VideoPlayerControlRight.Position = right.Subtitle.StartTime.TotalSeconds;
+                AudioVisualizerRight.CurrentVideoPositionSeconds = right.Subtitle.StartTime.TotalSeconds;
+                _updateAudioVisualizer = true;
+                return;
+            }
+
+            timer.Stop();
+        };
+        timer.Start();
     }
 }

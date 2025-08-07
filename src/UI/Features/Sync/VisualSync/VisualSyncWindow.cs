@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Features.Main.Layout;
@@ -172,6 +173,12 @@ public class VisualSyncWindow : Window
     {
         base.OnKeyDown(e);
         _vm.OnKeyDown(e);
+    }
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+        _vm.OnLoaded();
     }
 
     protected override void OnClosing(WindowClosingEventArgs e)

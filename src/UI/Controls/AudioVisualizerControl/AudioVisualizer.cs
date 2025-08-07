@@ -213,6 +213,7 @@ public class AudioVisualizer : Control
         Focusable = true;
         IsHitTestVisible = true;
         ClipToBounds = true;
+        MenuFlyout = new MenuFlyout();
 
         AffectsRender<AudioVisualizer>(
             WavePeaksProperty,

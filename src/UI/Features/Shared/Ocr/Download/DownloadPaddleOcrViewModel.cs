@@ -43,6 +43,7 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
         _cancellationTokenSource = new CancellationTokenSource();
 
         StatusText = "Starting...";
+        ProgressText = string.Empty;
         Error = string.Empty;
         _tempFileName = string.Empty;
         _downloadType = PaddleOcrDownloadType.Models;

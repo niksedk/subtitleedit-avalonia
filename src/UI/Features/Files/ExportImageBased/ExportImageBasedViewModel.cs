@@ -74,10 +74,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
     public DataGrid SubtitleGrid { get; set; }
 
     private List<SubtitleLineViewModel>? _selectedSubtitles;
-    private string _subtitleFileName;
-    private string _videoFileName;
     private bool _dirty;
-    private bool _subtitleGridSelectionChangedSkip;
     private readonly Lock _generateLock;
     private bool _isCtrlDown;
     private readonly CancellationTokenSource _cancellationTokenSource;
@@ -130,8 +127,6 @@ public partial class ExportImageBasedViewModel : ObservableObject
         PaddingsTopBottom = new ObservableCollection<int>(Enumerable.Range(0, 101));
         SelectedPaddingTopBottom = 10;
 
-        _subtitleFileName = string.Empty;
-        _videoFileName = string.Empty;
         _generateLock = new Lock();
         _cancellationTokenSource = new CancellationTokenSource();
 
@@ -390,11 +385,6 @@ public partial class ExportImageBasedViewModel : ObservableObject
 
     public void SubtitleGrid_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        if (_subtitleGridSelectionChangedSkip)
-        {
-            return;
-        }
-
         SubtitleGridSelectionChanged();
         SubtitleLineChanged();
     }
