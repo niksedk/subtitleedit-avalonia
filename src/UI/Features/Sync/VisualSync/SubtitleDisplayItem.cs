@@ -1,18 +1,25 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
 
 namespace Nikse.SubtitleEdit.Features.Sync.VisualSync;
 
-public class SubtitleDisplayItem
+public partial class SubtitleDisplayItem : ObservableObject
 {
+    [ObservableProperty] private string _text;
     public SubtitleLineViewModel Subtitle { get; set; }
-    public string Text { get; set; }
 
     public SubtitleDisplayItem(SubtitleLineViewModel subtitle)
     {
+        Text = string.Empty;
         Subtitle = subtitle;
-        var startTime = new TimeCode(subtitle.StartTime);
-        Text = $"{startTime.ToDisplayString()}  {subtitle.Text}";
+        UpdateText();
+    }
+
+    public void UpdateText()
+    {
+        var startTime = new TimeCode(Subtitle.StartTime);
+        Text = $"{startTime.ToDisplayString()}  {Subtitle.Text}";
     }
 
     public override string ToString()

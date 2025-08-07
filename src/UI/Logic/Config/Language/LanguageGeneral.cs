@@ -251,6 +251,8 @@ public class LanguageGeneral
     public string InsertAtPosition { get; set; }
     public string DeleteAtPosition { get; set; }
     public string FileNameX { get; set; }
+    public string FindTextX { get; set; }
+    public string FindNext { get; internal set; }
 
     public LanguageGeneral()
     {
@@ -501,5 +503,7 @@ public class LanguageGeneral
         InsertAtPosition = "Insert at video position";
         DeleteAtPosition = "Delete at video position";
         FileNameX = "File name: {0}";
+        FindTextX = "Find text - {0}";
+        FindNext = "Find next";
     }
 }

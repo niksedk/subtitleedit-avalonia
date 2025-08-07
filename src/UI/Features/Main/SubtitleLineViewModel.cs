@@ -231,4 +231,15 @@ public partial class SubtitleLineViewModel : ObservableObject
 
         UpdateDuration();
     }
+
+    internal void Adjust(double factor, double adjustmentInSeconds)
+    {
+        if (StartTime.IsMaxTime())
+        {
+            return;
+        }
+
+        SetStartTimeOnly(TimeSpan.FromMilliseconds(StartTime.TotalMilliseconds * factor + adjustmentInSeconds * TimeCode.BaseUnit));
+        EndTime = TimeSpan.FromMilliseconds(EndTime.TotalMilliseconds * factor + adjustmentInSeconds * TimeCode.BaseUnit);
+    }
 }

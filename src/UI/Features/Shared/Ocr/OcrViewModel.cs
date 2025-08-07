@@ -24,7 +24,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 

@@ -8,6 +8,7 @@ using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Styling;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Features.Sync.VisualSync;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 using SkiaSharp;
@@ -257,7 +258,7 @@ public static class UiUtil
     }
 
     public static ComboBox MakeComboBox<T>(
-        ObservableCollection<T> sourceLanguages,
+        ObservableCollection<T> sourceItems,
         object viewModal,
         string? propertySelectedPath,
         string? propertyIsVisiblePath)
@@ -269,7 +270,7 @@ public static class UiUtil
             HorizontalContentAlignment = HorizontalAlignment.Left,
             VerticalContentAlignment = VerticalAlignment.Center,
         };
-        comboBox.ItemsSource = sourceLanguages;
+        comboBox.ItemsSource = sourceItems;
         comboBox.DataContext = viewModal;
 
         if (propertySelectedPath != null)
@@ -293,12 +294,24 @@ public static class UiUtil
         return comboBox;
     }
 
+    internal static ComboBox MakeComboBoxBindText<T>(ObservableCollection<T> sourceItems, object vm, string textPath, string propertySelectedPath)
+    {
+        var comboBox = new ComboBox
+        {
+            ItemsSource = sourceItems,
+            DataContext = vm,
+            DisplayMemberBinding = new Binding(textPath),
+        }.WithBindSelected(nameof(propertySelectedPath));
+
+        return comboBox;
+    }
+
     public static ComboBox MakeComboBox<T>(
-        ObservableCollection<T> sourceLanguages,
+        ObservableCollection<T> sourceItems,
         object viewModal,
         string? propertySelectedPath)
     {
-        return MakeComboBox(sourceLanguages, viewModal, propertySelectedPath, null);
+        return MakeComboBox(sourceItems, viewModal, propertySelectedPath, null);
     }
 
     public static TextBox MakeTextBox(int width, object viewModel, string propertyTextPath)

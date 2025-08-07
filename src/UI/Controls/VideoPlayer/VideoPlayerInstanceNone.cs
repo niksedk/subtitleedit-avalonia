@@ -26,20 +26,21 @@ public class VideoPlayerInstanceNone : IVideoPlayerInstance
 
     public double Volume
     {
-        get =>  0;
+        get => 0;
         set
         {
         }
-    }   
+    }
 
     public void Close()
     {
         _fileName = string.Empty;
     }
 
-    public async Task Open(string fileName)
+    public Task Open(string fileName)
     {
         _fileName = fileName;
+        return Task.CompletedTask;
     }
 
     public void Pause()

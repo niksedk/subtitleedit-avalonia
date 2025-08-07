@@ -7,6 +7,9 @@ using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Shared.FindText;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Collections.Generic;
@@ -24,6 +27,7 @@ public partial class VisualSyncViewModel : ObservableObject
     [ObservableProperty] private bool _isAudioVisualizerVisible;
     [ObservableProperty] private string _title;
     [ObservableProperty] private string _videoInfo;
+    [ObservableProperty] private string _adjustInfo;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -32,16 +36,21 @@ public partial class VisualSyncViewModel : ObservableObject
     public AudioVisualizer AudioVisualizerLeft { get; set; }
     public AudioVisualizer AudioVisualizerRight { get; set; }
 
+    private readonly IWindowService _windowService;
+
     private string? _videoFileName;
     private string? _subtitleFileName;
     private DispatcherTimer _positionTimer = new DispatcherTimer();
     private List<SubtitleLineViewModel> _subtitleLines = new List<SubtitleLineViewModel>();
     private bool _updateAudioVisualizer;
 
-    public VisualSyncViewModel()
+    public VisualSyncViewModel(IWindowService windowService)
     {
+        _windowService = windowService;
+
         Title = string.Empty;
         VideoInfo = string.Empty;
+        AdjustInfo = string.Empty;
         _videoFileName = string.Empty;
         _subtitleFileName = string.Empty;
         VideoPlayerControlLeft = new VideoPlayerControl(new VideoPlayerInstanceNone());
@@ -207,18 +216,117 @@ public partial class VisualSyncViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void FindTextLeft()
+    private async Task FindTextLeft()
     {
+        var result = await _windowService.ShowDialogAsync<FindTextWindow, FindTextViewModel>(Window!, vm => 
+        { 
+            vm.Initialize(_subtitleLines, string.Format(Se.Language.General.FindTextX, Se.Language.Sync.StartScene)); 
+        });
+
+        if (!result.OkPressed || result.SelectedSubtitle == null)
+        {
+            return;
+        }
+
+        var s = Paragraphs.FirstOrDefault(p=>p.Subtitle == result.SelectedSubtitle);
+        if (s == null)
+        {
+            return;
+        }
+
+        SelectedParagraphLeft = s;
+        VideoPlayerControlLeft.Position = s.Subtitle.StartTime.TotalSeconds;
+        _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
-    private void FindTextRight()
+    private async Task FindTextRight()
     {
+        var result = await _windowService.ShowDialogAsync<FindTextWindow, FindTextViewModel>(Window!, vm =>
+        {
+            vm.Initialize(_subtitleLines, string.Format(Se.Language.General.FindTextX, Se.Language.Sync.EndScene));
+        });
+
+        if (!result.OkPressed || result.SelectedSubtitle == null)
+        {
+            return;
+        }
+
+        var s = Paragraphs.FirstOrDefault(p => p.Subtitle == result.SelectedSubtitle);
+        if (s == null)
+        {
+            return;
+        }
+
+        SelectedParagraphRight = s;
+        VideoPlayerControlRight.Position = s.Subtitle.StartTime.TotalSeconds;
+        _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
-    private void Sync()
+    private async Task Sync()
     {
+        if (SelectedParagraphLeft == null || SelectedParagraphRight == null)
+        { 
+            return; 
+        }
+
+        // Video player current start and end position.
+        double videoPlayerCurrentStartPos = VideoPlayerControlLeft.Position;
+        double videoPlayerCurrentEndPos = VideoPlayerControlRight.Position;
+
+        // Subtitle start and end time in seconds.
+        double subStart = SelectedParagraphLeft.Subtitle.StartTime.TotalSeconds;
+        double subEnd = SelectedParagraphRight.Subtitle.StartTime.TotalSeconds;
+
+        // Validate: End time must be greater than start time.
+        if (!(videoPlayerCurrentEndPos > videoPlayerCurrentStartPos && subEnd > subStart))
+        {
+            await MessageBox.Show(Window!, Title, Se.Language.Sync.StartSceneMustComeBeforeEndScene);
+            return;
+        }
+
+        SetSyncFactorLabel(videoPlayerCurrentStartPos, videoPlayerCurrentEndPos);
+
+        double subDiff = subEnd - subStart;
+        double realDiff = videoPlayerCurrentEndPos - videoPlayerCurrentStartPos;
+
+        // speed factor
+        double factor = realDiff / subDiff;
+
+        // adjust to starting position
+        double adjust = videoPlayerCurrentStartPos - subStart * factor;
+
+        foreach (var p in Paragraphs)
+        {
+            p.Subtitle.Adjust(factor, adjust);
+            p.UpdateText();
+        }
+
+        //// fix overlapping time codes
+        //var tmpSubtitle = new Subtitle();
+        //foreach (Paragraph p in Paragraphs)
+        //{
+        //    tmpSubtitle.Paragraphs.Add(new Paragraph(p));
+        //}
+
+        //new FixOverlappingDisplayTimes().Fix(tmpSubtitle, new EmptyFixCallback());
+        //_paragraphs = tmpSubtitle.Paragraphs;
+
+        //// fix overlapping time codes for alternate subtitle (translation)
+        //if (_inputOriginalSubtitle != null)
+        //{
+        //    tmpSubtitle = new Subtitle();
+        //    foreach (Paragraph p in _paragraphsOriginal)
+        //    {
+        //        tmpSubtitle.Paragraphs.Add(new Paragraph(p));
+        //    }
+
+        //    new FixOverlappingDisplayTimes().Fix(tmpSubtitle, new EmptyFixCallback());
+        //    _paragraphsOriginal = tmpSubtitle.Paragraphs;
+        //}
+
+        _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
@@ -232,6 +340,35 @@ public partial class VisualSyncViewModel : ObservableObject
     private void Cancel()
     {
         Window?.Close();
+    }
+
+    private void SetSyncFactorLabel(double videoPlayerCurrentStartPos, double videoPlayerCurrentEndPos)
+    {
+        if (string.IsNullOrWhiteSpace(_videoFileName) || SelectedParagraphLeft == null || SelectedParagraphRight == null)
+        {
+            return;
+        }
+
+        AdjustInfo = string.Empty;
+        if (videoPlayerCurrentEndPos > videoPlayerCurrentStartPos)
+        {
+            double subStart = SelectedParagraphLeft.Subtitle.StartTime.TotalSeconds;
+            double subEnd = SelectedParagraphRight.Subtitle.StartTime.TotalSeconds;
+
+            double subDiff = subEnd - subStart;
+            double realDiff = videoPlayerCurrentEndPos - videoPlayerCurrentStartPos;
+
+            // speed factor
+            double factor = realDiff / subDiff;
+
+            // adjust to starting position
+            double adjust = videoPlayerCurrentStartPos - subStart * factor;
+
+            if (Math.Abs(adjust) > 0.001 || (Math.Abs(1 - factor)) > 0.001)
+            {
+                AdjustInfo = string.Format("*{0:0.000}, {1:+0.000;-0.000}", factor, adjust);
+            }
+        }
     }
 
     private async Task PlayAndBack(VideoPlayerControl videoPlayer, int milliseconds)
