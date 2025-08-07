@@ -33,7 +33,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             AvaloniaProperty.Register<VideoPlayerControl, string>(nameof(ProgressText), default!);
 
         public static readonly StyledProperty<ICommand> PlayCommandProperty =
-                AvaloniaProperty.Register<VideoPlayerControl, ICommand>(nameof(PlayCommand));
+            AvaloniaProperty.Register<VideoPlayerControl, ICommand>(nameof(PlayCommand));
 
         public static readonly StyledProperty<ICommand> StopCommandProperty =
             AvaloniaProperty.Register<VideoPlayerControl, ICommand>(nameof(StopCommand));
@@ -115,6 +115,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         }
 
         private bool _isFullScreen = false;
+
         public bool IsFullScreen
         {
             get => _isFullScreen;
@@ -159,6 +160,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         {
             Position = seconds;
         }
+
         public void SetPositionDisplayOnly(double seconds)
         {
             _positionIgnore = seconds;
@@ -296,10 +298,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             positionSlider.Focusable = true;
 
             // For any direct value changes
-            positionSlider.ValueChanged += (s, e) =>
-            {
-                NotifyPositionChanged(e.NewValue);
-            };
+            positionSlider.ValueChanged += (s, e) => { NotifyPositionChanged(e.NewValue); };
 
             progressGrid.Children.Add(positionSlider);
             Grid.SetColumn(positionSlider, 1);
@@ -412,10 +411,8 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         {
             await _videoPlayerInstance.Open(videoFileName);
             _videoPlayerInstance.Volume = Volume;
-            if (_positionTimer == null)
-            {
-                StartPositionTimer();
-            }
+            _positionTimer?.Stop();
+            StartPositionTimer();
             _videoPlayerInstance.Pause();
             _textBlockPlayerName.Text = _videoPlayerInstance.Name;
         }
@@ -439,7 +436,8 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             {
                 var pos = _videoPlayerInstance.Position;
                 SetPositionDisplayOnly(pos);
-                ProgressText = $"{TimeCode.FromSeconds(pos).ToShortDisplayString()} / {TimeCode.FromSeconds(Duration).ToShortDisplayString()}";
+                ProgressText =
+                    $"{TimeCode.FromSeconds(pos).ToShortDisplayString()} / {TimeCode.FromSeconds(Duration).ToShortDisplayString()}";
 
                 //TODO: move to a slower timer or events
                 Duration = _videoPlayerInstance.Duration;

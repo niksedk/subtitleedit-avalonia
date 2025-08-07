@@ -1898,21 +1898,30 @@ public partial class MainViewModel :
         if (subtitleList.Count == 0)
         {
             matroska.Dispose();
-            Dispatcher.UIThread.Post(async () =>
+            Dispatcher.UIThread.Post(async void () =>
             {
-                var answer = await MessageBox.Show(
-                    Window!,
-                    "No subtitle found",
-                    "The Matroska file does not seem to contain any subtitles.",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                try
+                {
+                    var answer = await MessageBox.Show(
+                        Window!,
+                        "No subtitle found",
+                        "The Matroska file does not seem to contain any subtitles.",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                }
+                catch (Exception e)
+                {
+                    Se.LogError(e);
+                }
             });
+          
+            matroska.Dispose();
             return;
         }
 
         if (subtitleList.Count > 1)
         {
-            Dispatcher.UIThread.Post(async () =>
+            Dispatcher.UIThread.Post(async void () =>
             {
                 var result =
                     await _windowService.ShowDialogAsync<PickMatroskaTrackWindow, PickMatroskaTrackViewModel>(Window!,
@@ -1949,19 +1958,47 @@ public partial class MainViewModel :
                 {
                     if (ext == ".mkv")
                     {
-                        Dispatcher.UIThread.Post(async () => { await VideoOpenFile(matroska.Path); });
+                        Dispatcher.UIThread.Post(async void () =>
+                        {
+                            try
+                            {
+                                await VideoOpenFile(matroska.Path);
+                                matroska.Dispose();
+                            }
+                            catch (Exception e)
+                            {
+                                Se.LogError(e);
+                            }
+                        });
                     }
                     else
                     {
                         if (FindVideoFileName.TryFindVideoFileName(matroska.Path, out videoFileName))
                         {
-                            Dispatcher.UIThread.Post(async () => { await VideoOpenFile(videoFileName); });
+                            Dispatcher.UIThread.Post(async void () =>
+                            {
+                                try
+                                {
+                                    await VideoOpenFile(videoFileName);
+                                    matroska.Dispose();
+                                }
+                                catch (Exception e)
+                                {
+                                    Se.LogError(e);
+                                }
+                            });
+                        }
+                        else
+                        {
+                            matroska.Dispose();
                         }
                     }
                 }
             }
-
-            matroska.Dispose();
+            else
+            {
+                matroska.Dispose();
+            }
         }
     }
 
