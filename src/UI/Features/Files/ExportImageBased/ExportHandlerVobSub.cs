@@ -17,12 +17,11 @@ public class ExportHandlerVobSub : IExportHandler
     private int _height;
     VobSubWriter? _vobSubWriter;
 
-    public void WriteHeader(string fileOrFolderName, int width, int height)
+    public void WriteHeader(string fileOrFolderName, ImageParameter imageParameter)
     {
-        _width = width;
-        _height = height;
-        _vobSubWriter = new VobSubWriter(fileOrFolderName, width, height, 10, 10, 32, SKColors.Wheat, SKColors.Black, true, DvdSubtitleLanguage.English);
-//        _vobSubWriter = new VobSubWriter(fileOrFolderName, width, height, GetBottomMarginInPixels(p), GetLeftMarginInPixels(p), 32, _subtitleColor, _borderColor, !checkBoxTransAntiAliase.Checked, (DvdSubtitleLanguage)comboBoxLanguage.SelectedItem);
+        _width = imageParameter.ScreenWidth;
+        _height = imageParameter.ScreenHeight;
+        _vobSubWriter = new VobSubWriter(fileOrFolderName, _width, _height, imageParameter.BottomTopMargin, imageParameter.LeftRightMargin, 32, imageParameter.FontColor, imageParameter.OutlineColor, true, DvdSubtitleLanguage.English);
     }
 
     public void CreateParagraph(ImageParameter param)
@@ -37,8 +36,44 @@ public class ExportHandlerVobSub : IExportHandler
         }
 
         var p = new Paragraph(param.Text, param.StartTime.TotalMilliseconds, param.EndTime.TotalMilliseconds);
-        BluRayContentAlignment alignment = BluRayContentAlignment.BottomCenter;
-        _vobSubWriter.WriteParagraph(p, param.Bitmap,  alignment);
+        var alignment = MapAlignment(param);
+
+        _vobSubWriter.WriteParagraph(p, param.Bitmap, alignment);
+    }
+
+    private static BluRayContentAlignment MapAlignment(ImageParameter param)
+    {
+        var alignment = BluRayContentAlignment.BottomCenter;
+        switch (param.Alignment)
+        {
+            case ExportAlignment.BottomLeft:
+                alignment = BluRayContentAlignment.BottomLeft;
+                break;
+            case ExportAlignment.BottomRight:
+                alignment = BluRayContentAlignment.BottomRight;
+                break;
+            case ExportAlignment.MiddleLeft:
+                alignment = BluRayContentAlignment.MiddleLeft;
+                break;
+            case ExportAlignment.MiddleRight:
+                alignment = BluRayContentAlignment.MiddleRight;
+                break;
+            case ExportAlignment.TopLeft:
+                alignment = BluRayContentAlignment.TopLeft;
+                break;
+            case ExportAlignment.TopRight:
+                alignment = BluRayContentAlignment.TopRight;
+                break;
+            case ExportAlignment.TopCenter:
+                alignment = BluRayContentAlignment.TopCenter;
+                break;
+            case ExportAlignment.MiddleCenter:
+                alignment = BluRayContentAlignment.MiddleCenter;
+                break;
+            case ExportAlignment.BottomCenter:
+                break;
+        }
+        return alignment;
     }
 
     public void WriteFooter()

@@ -6,7 +6,7 @@ public interface IExportHandler
     string Extension { get; }
     string Title { get; }
     bool UseFileName { get; }
-    public void WriteHeader(string fileOrFolderName, int width, int height);
+    public void WriteHeader(string fileOrFolderName, ImageParameter imageParameter);
     void CreateParagraph(ImageParameter param);
     void WriteParagraph(ImageParameter param);
     public void WriteFooter();

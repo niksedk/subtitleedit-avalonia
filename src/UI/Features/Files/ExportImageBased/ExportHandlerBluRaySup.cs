@@ -17,10 +17,10 @@ public class ExportHandlerBluRaySup : IExportHandler
     private FileStream? _fileStream;
 
 
-    public void WriteHeader(string fileOrFolderName, int width, int height)
+    public void WriteHeader(string fileOrFolderName, ImageParameter imageParameter)
     {
-        _width = width;
-        _height = height;
+        _width = imageParameter.ScreenWidth;
+        _height = imageParameter.ScreenHeight;
         _fileStream = new FileStream(fileOrFolderName, FileMode.Create);
     }
 

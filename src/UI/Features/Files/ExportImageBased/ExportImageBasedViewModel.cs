@@ -379,8 +379,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
             ProgressValue = 100;
             ProgressText = Se.Language.General.SavingDotDotDot;
 
-            _exportImageHandler.WriteHeader(fileOrFolderName, SelectedResolution?.Width ?? 1920,
-                SelectedResolution?.Height ?? 1080);
+            _exportImageHandler.WriteHeader(fileOrFolderName, GetImageParameter(0));
             for (var i = 0; i < Subtitles.Count; i++)
             {
                 var ip = imageParameters[i];
