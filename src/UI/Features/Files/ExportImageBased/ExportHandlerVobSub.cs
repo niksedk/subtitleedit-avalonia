@@ -1,4 +1,9 @@
 using System.IO;
+using Avalonia.Media;
+using Nikse.SubtitleEdit.Core.BluRaySup;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.VobSub;
+using SkiaSharp;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 
@@ -11,13 +16,14 @@ public class ExportHandlerVobSub : IExportHandler
 
     private int _width;
     private int _height;
-    private FileStream? _fileStream;
+    VobSubWriter _vobSubWriter;
 
     public void WriteHeader(string fileOrFolderName, int width, int height)
     {
         _width = width;
         _height = height;
-        _fileStream = new FileStream(fileOrFolderName, FileMode.Create);
+        _vobSubWriter = new VobSubWriter(fileOrFolderName, width, height, 10, 10, 32, SKColors.Wheat, SKColors.Black, true, DvdSubtitleLanguage.English);
+//        _vobSubWriter = new VobSubWriter(fileOrFolderName, width, height, GetBottomMarginInPixels(p), GetLeftMarginInPixels(p), 32, _subtitleColor, _borderColor, !checkBoxTransAntiAliase.Checked, (DvdSubtitleLanguage)comboBoxLanguage.SelectedItem);
     }
 
     public void CreateParagraph(ImageParameter param)
@@ -26,11 +32,14 @@ public class ExportHandlerVobSub : IExportHandler
 
     public void WriteParagraph(ImageParameter param)
     {
-        _fileStream?.Write(param.Buffer, 0, param.Buffer.Length);    
+        var p = new Paragraph(param.Text, param.StartTime.TotalMilliseconds, param.EndTime.TotalMilliseconds);
+        BluRayContentAlignment alignment = BluRayContentAlignment.BottomCenter;
+        _vobSubWriter.WriteParagraph(p, param.Bitmap,  alignment);
     }
 
     public void WriteFooter()
     {
-        _fileStream!.Close();
+        _vobSubWriter.WriteIdxFile();
+        _vobSubWriter.Dispose();
     }
 }

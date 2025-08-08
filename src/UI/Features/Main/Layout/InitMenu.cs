@@ -80,6 +80,11 @@ public static class InitMenu
                         },
                         new MenuItem
                         {
+                            Header = Ebu.NameOfFormat,
+                            Command = vm.ExportEbuStlCommand,
+                        },
+                        new MenuItem
+                        {
                             Header = Pac.NameOfFormat,
                             Command = vm.ExportPacCommand,
                         },
@@ -90,9 +95,9 @@ public static class InitMenu
                         },
                         new MenuItem
                         {
-                            Header = Ebu.NameOfFormat,
-                            Command = vm.ExportEbuStlCommand,
-                        }
+                            Header = "VobSub (sub/idx)",
+                            Command = vm.ExportVobSubCommand,
+                        },
                     }
                 },
                 new Separator(),
