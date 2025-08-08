@@ -7,7 +7,7 @@ namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 
 public class ExportHandlerBluRaySup : IExportHandler
 {
-    public ExportImageType ExportImageType { get; set; }
+    public ExportImageType ExportImageType => ExportImageType.BluRaySup;
     public string Extension => ".sup";
     public bool UseFileName => true;    
     public string Title => "Export to Blu-ray sup";

@@ -494,7 +494,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ExportBluRaySup()
     {
-        IExportHandler exportHandler = new ExportHandlerVobSub();
+        IExportHandler exportHandler = new ExportHandlerBluRaySup();
         var result = await _windowService.ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(Window!,
             vm => { vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName); });
 
@@ -509,7 +509,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ExportVobSub()
     {
-        IExportHandler exportHandler = new ExportHandlerBluRaySup();
+        IExportHandler exportHandler = new ExportHandlerVobSub();
         var result = await _windowService.ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(Window!, vm=>
         {
             vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName);

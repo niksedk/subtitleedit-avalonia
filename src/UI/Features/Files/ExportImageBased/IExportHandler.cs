@@ -2,7 +2,7 @@ namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 
 public interface IExportHandler
 {
-    ExportImageType ExportImageType { get; set; }
+    ExportImageType ExportImageType { get; }
     string Extension { get; }
     string Title { get; }
     bool UseFileName { get; }
