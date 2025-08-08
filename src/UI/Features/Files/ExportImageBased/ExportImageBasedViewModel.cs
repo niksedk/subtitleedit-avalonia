@@ -77,6 +77,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
     private bool _dirty;
     private readonly Lock _generateLock;
     private bool _isCtrlDown;
+    private IExportHandler? _exportImageHandler;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly System.Timers.Timer _timerUpdatePreview;
     private readonly IFileHelper _fileHelper;
@@ -110,7 +111,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
         ShadowColor = Colors.Black;
         Alignments = new ObservableCollection<ExportAlignmentDisplay>(ExportAlignmentDisplay.GetAlignments());
         SelectedAlignment = Alignments[0];
-        ContentAlignments = new ObservableCollection<ExportContentAlignmentDisplay>(ExportContentAlignmentDisplay.GetAlignments());
+        ContentAlignments =
+            new ObservableCollection<ExportContentAlignmentDisplay>(ExportContentAlignmentDisplay.GetAlignments());
         SelectedContentAlignment = ContentAlignments[0];
         LineSpacings = new ObservableCollection<int>(Enumerable.Range(-50, 151));
         SelectedLineSpacing = 0;
@@ -209,6 +211,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         {
             profiles.Add(new SeExportImagesProfile());
         }
+
         foreach (var profile in profiles)
         {
             Profiles.Add(profile);
@@ -220,10 +223,9 @@ public partial class ExportImageBasedViewModel : ObservableObject
     {
         SaveProfiles();
 
-        var result = await _windowService.ShowDialogAsync<ImageBasedProfileWindow, ImageBasedProfileViewModel>(Window!, vm =>
-        {
-            vm.Initialize(Profiles, SelectedProfile);
-        });
+        var result =
+            await _windowService.ShowDialogAsync<ImageBasedProfileWindow, ImageBasedProfileViewModel>(Window!,
+                vm => { vm.Initialize(Profiles, SelectedProfile); });
 
         if (result.OkPressed)
         {
@@ -295,6 +297,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         {
             Subtitles.Remove(item);
         }
+
         Renumber();
 
         _dirty = true;
@@ -311,15 +314,20 @@ public partial class ExportImageBasedViewModel : ObservableObject
     [RelayCommand]
     private async Task Export()
     {
-        IExportHandler exportImageHandler = new ExportHandlerBluRaySup();
-        var fileOrFolderName = string.Empty;
-        if (exportImageHandler.UseFileName)
+        if (_exportImageHandler == null)
         {
-            fileOrFolderName = await _fileHelper.PickSaveSubtitleFile(Window!, exportImageHandler.Extension, string.Empty, exportImageHandler.Title);
+            return;
+        }
+
+        string fileOrFolderName;
+        if (_exportImageHandler.UseFileName)
+        {
+            fileOrFolderName = await _fileHelper.PickSaveSubtitleFile(Window!, _exportImageHandler.Extension,
+                string.Empty, _exportImageHandler.Title);
         }
         else
         {
-            fileOrFolderName = await _folderHelper.PickFolderAsync(Window!, exportImageHandler.Title);
+            fileOrFolderName = await _folderHelper.PickFolderAsync(Window!, _exportImageHandler.Title);
         }
 
         if (string.IsNullOrEmpty(fileOrFolderName))
@@ -337,7 +345,6 @@ public partial class ExportImageBasedViewModel : ObservableObject
 
         int total = Subtitles.Count;
         int completed = 0;
-        var progressLock = new object();
         await Task.Run(() =>
         {
             Parallel.For(0, total, i =>
@@ -349,7 +356,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
 
                 var ip = imageParameters[i];
                 ip.Bitmap = GenerateBitmap(ip);
-                exportImageHandler.CreateParagraph(ip);
+                _exportImageHandler.CreateParagraph(ip);
 
                 lock (_generateLock)
                 {
@@ -372,13 +379,15 @@ public partial class ExportImageBasedViewModel : ObservableObject
             ProgressValue = 100;
             ProgressText = Se.Language.General.SavingDotDotDot;
 
-            exportImageHandler.WriteHeader(fileOrFolderName, SelectedResolution?.Width ?? 1920, SelectedResolution?.Height ?? 1080);
+            _exportImageHandler.WriteHeader(fileOrFolderName, SelectedResolution?.Width ?? 1920,
+                SelectedResolution?.Height ?? 1080);
             for (var i = 0; i < Subtitles.Count; i++)
             {
                 var ip = imageParameters[i];
-                exportImageHandler.WriteParagraph(ip);
+                _exportImageHandler.WriteParagraph(ip);
             }
-            exportImageHandler.WriteFooter();
+
+            _exportImageHandler.WriteFooter();
             IsGenerating = false;
         });
     }
@@ -452,13 +461,15 @@ public partial class ExportImageBasedViewModel : ObservableObject
     [RelayCommand]
     private async Task SavePreview()
     {
-        if (BitmapPreview == null || SelectedSubtitle == null)
+        if (SelectedSubtitle == null)
         {
             return;
         }
 
         var imageIndex = Subtitles.IndexOf(SelectedSubtitle!);
-        var fileName = await _fileHelper.PickSaveSubtitleFile(Window!, ".png", $"image{imageIndex}", Se.Language.General.SaveImageAs);
+        var fileName =
+            await _fileHelper.PickSaveSubtitleFile(Window!, ".png", $"image{imageIndex}",
+                Se.Language.General.SaveImageAs);
         if (string.IsNullOrEmpty(fileName))
         {
             return;
@@ -467,22 +478,22 @@ public partial class ExportImageBasedViewModel : ObservableObject
         BitmapPreview.Save(fileName, 100);
     }
 
-
     [RelayCommand]
     private async Task ShowPreview()
     {
-        if (BitmapPreview == null || SelectedSubtitle == null)
+        if (SelectedSubtitle == null)
         {
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<ImageBasedPreviewWindow, ImageBasedPreviewViewModel>(Window!, vm =>
-        {
-            var ip = GetImageParameter(Subtitles.IndexOf(SelectedSubtitle!));
-            var bitmap = GenerateBitmap(ip);
-            var position = CalculatePosition(ip, bitmap.Width, bitmap.Height);
-            vm.Initialize(bitmap, ip.ScreenWidth, ip.ScreenHeight, position.X, position.Y);
-        });
+        var result = await _windowService.ShowDialogAsync<ImageBasedPreviewWindow, ImageBasedPreviewViewModel>(Window!,
+            vm =>
+            {
+                var ip = GetImageParameter(Subtitles.IndexOf(SelectedSubtitle));
+                var bitmap = GenerateBitmap(ip);
+                var position = CalculatePosition(ip, bitmap.Width, bitmap.Height);
+                vm.Initialize(bitmap, ip.ScreenWidth, ip.ScreenHeight, position.X, position.Y);
+            });
     }
 
     private void Close()
@@ -491,7 +502,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
     }
 
     public void Initialize(
-        ExportImageType exportImageType,
+        IExportHandler exportHandler,
         ObservableCollection<SubtitleLineViewModel> subtitles,
         string? subtitleFileName,
         string? videoFileName)
@@ -499,10 +510,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
         Subtitles.Clear();
         Subtitles.AddRange(subtitles);
 
-        if (exportImageType == ExportImageType.BluRaySup)
-        {
-            Title = Se.Language.File.Export.TitleExportBluRaySup;
-        }
+        _exportImageHandler = exportHandler;
+        Title = exportHandler.Title;
 
         SelectedSubtitle = Subtitles.FirstOrDefault();
 
@@ -513,7 +522,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
                 var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
                 if (mediaInfo?.Dimension is { Width: > 0, Height: > 0 })
                 {
-                    var resolutionItem = new ResolutionItem(string.Empty, mediaInfo.Dimension.Width, mediaInfo.Dimension.Height);
+                    var resolutionItem = new ResolutionItem(string.Empty, mediaInfo.Dimension.Width,
+                        mediaInfo.Dimension.Height);
 
                     Dispatcher.UIThread.Post(() =>
                     {
@@ -725,7 +735,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
             float currentX = textStartX;
 
             // Calculate line width for alignment
-            var lineWidth = line.Sum(segment => GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont).MeasureText(segment.Text));
+            var lineWidth = line.Sum(segment =>
+                GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont).MeasureText(segment.Text));
 
             // Adjust X position based on content alignment
             if (ip.ContentAlignment == ExportContentAlignment.Center)
@@ -908,9 +919,11 @@ public partial class ExportImageBasedViewModel : ObservableObject
                     var remainingText = text.Substring(currentPos);
                     if (!string.IsNullOrEmpty(remainingText))
                     {
-                        segments.Add(new TextSegment(remainingText, currentStyle.IsItalic, currentStyle.IsBold, currentStyle.Color));
+                        segments.Add(new TextSegment(remainingText, currentStyle.IsItalic, currentStyle.IsBold,
+                            currentStyle.Color));
                     }
                 }
+
                 break;
             }
 
@@ -920,7 +933,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
                 var beforeTag = text.Substring(currentPos, nextTagPos - currentPos);
                 if (!string.IsNullOrEmpty(beforeTag))
                 {
-                    segments.Add(new TextSegment(beforeTag, currentStyle.IsItalic, currentStyle.IsBold, currentStyle.Color));
+                    segments.Add(new TextSegment(beforeTag, currentStyle.IsItalic, currentStyle.IsBold,
+                        currentStyle.Color));
                 }
             }
 
@@ -976,6 +990,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
 
                         break;
                 }
+
                 currentPos = tagInfo.EndPosition;
             }
             else
@@ -1135,7 +1150,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
     {
         _dirty = true;
     }
-    
+
     public void ComboResolutionChanged(object? sender, SelectionChangedEventArgs e)
     {
         _dirty = true;
@@ -1155,7 +1170,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
         {
             try
             {
-                var videoFileName = await _fileHelper.PickOpenVideoFile(Window!, Se.Language.General.OpenVideoFileTitle);
+                var videoFileName =
+                    await _fileHelper.PickOpenVideoFile(Window!, Se.Language.General.OpenVideoFileTitle);
                 if (string.IsNullOrWhiteSpace(videoFileName))
                 {
                     if (e.RemovedItems.Count > 0 && e.RemovedItems[0] is ResolutionItem item)
@@ -1175,7 +1191,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
                     var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
                     if (mediaInfo?.Dimension is { Width: > 0, Height: > 0 })
                     {
-                        var resolutionItem = new ResolutionItem(string.Empty, mediaInfo.Dimension.Width, mediaInfo.Dimension.Height);
+                        var resolutionItem = new ResolutionItem(string.Empty, mediaInfo.Dimension.Width,
+                            mediaInfo.Dimension.Height);
 
                         Dispatcher.UIThread.Post(() =>
                         {
@@ -1221,8 +1238,10 @@ public partial class ExportImageBasedViewModel : ObservableObject
             SelectedLeftRightMargin = profile.LeftRightMargin;
             SelectedOutlineWidth = profile.OutlineWidth;
             SelectedShadowWidth = profile.ShadowWidth;
-            SelectedAlignment = Alignments.FirstOrDefault(p=>p.Alignment == profile.Alignment) ?? Alignments[0];
-            SelectedContentAlignment = ContentAlignments.FirstOrDefault(p => p.ContentAlignment == profile.ContentAlignment) ?? ContentAlignments[0];
+            SelectedAlignment = Alignments.FirstOrDefault(p => p.Alignment == profile.Alignment) ?? Alignments[0];
+            SelectedContentAlignment =
+                ContentAlignments.FirstOrDefault(p => p.ContentAlignment == profile.ContentAlignment) ??
+                ContentAlignments[0];
             IsBold = profile.IsBold;
             SelectedFontFamily = profile.FontName;
             FontColor = profile.FontColor.FromHex().ToAvaloniaColor();
@@ -1258,7 +1277,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
             profile.BackgroundCornerRadius = SelectedBoxCornerRadius;
             profile.PaddingLeftRight = SelectedPaddingLeftRight;
             profile.PaddingTopBottom = SelectedPaddingTopBottom;
-            profile.LineSpacingPercent = SelectedLineSpacing;   
+            profile.LineSpacingPercent = SelectedLineSpacing;
         }
     }
 
@@ -1298,7 +1317,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
     }
 
     internal void OnKeyUp(KeyEventArgs e)
-    { 
+    {
         if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
         {
             _isCtrlDown = false;

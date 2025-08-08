@@ -488,8 +488,26 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ExportBluRaySup()
     {
+        IExportHandler exportHandler = new ExportHandlerVobSub();
         var result = await _windowService.ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(Window!,
-            vm => { vm.Initialize(ExportImageType.BluRaySup, Subtitles, _subtitleFileName, _videoFileName); });
+            vm => { vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName); });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+    
+    [RelayCommand]
+    private async Task ExportVobSub()
+    {
+        IExportHandler exportHandler = new ExportHandlerBluRaySup();
+        var result = await _windowService.ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(Window!, vm=>
+        {
+            vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName);
+        });
 
         if (!result.OkPressed)
         {
