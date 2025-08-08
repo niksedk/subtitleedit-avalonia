@@ -429,6 +429,12 @@ public partial class MainViewModel :
         ResetSubtitle();
         VideoCloseFile();
     }
+    
+    [RelayCommand]
+    private void FileOpenOriginal()
+    {
+      
+    }
 
     private void ResetSubtitle()
     {

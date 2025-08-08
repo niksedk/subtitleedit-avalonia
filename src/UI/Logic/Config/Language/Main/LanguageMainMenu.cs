@@ -5,6 +5,7 @@ public class LanguageMainMenu
     public string File { get; set; }
     public string New { get; set; }
     public string Open { get; set; }
+    public string OpenOriginal { get; set; }
     public string Reopen { get; set; }
     public string ClearRecentFiles { get; set; }
     public string RestoreAutoBackup { get; set; }
@@ -71,6 +72,7 @@ public class LanguageMainMenu
         File = "File";
         New = "New";
         Open = "Open...";
+        OpenOriginal = "Open original...";
         Reopen = "Reopen...";
         ClearRecentFiles = "Clear recent files";
         RestoreAutoBackup = "Restore auto-backup...";

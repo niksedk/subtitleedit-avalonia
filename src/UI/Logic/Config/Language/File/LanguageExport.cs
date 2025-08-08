@@ -9,17 +9,19 @@ public class LanguageExport
     public string LineSpacingPercent { get;  set; }
     public string PaddingLeftRight { get; set; }
     public string PaddingTopBottom { get; set; }
-    public string PreviewTitle { get; internal set; }
+    public string PreviewTitle { get; set; }
+    public string TitleExportVobSub { get; set; }
 
     public LanguageExport()
     {
         ExportImagesProfiles = "Export images profiles";
         LeftRightMargin = "Lefr/right margin";
         TopBottomMargin = "Top/bottom margin";
-        TitleExportBluRaySup = "Export Blu-ray sup";
+        TitleExportBluRaySup = "Export Blu-ray (sup)";
         LineSpacingPercent = "Line spacing %";
         PaddingLeftRight = "Padding left/right";
         PaddingTopBottom = "Padding top/bottom";
         PreviewTitle = "Preview - current size: {0}x{1}, target size: {2}x{3}, zoom: {4}%";
+        TitleExportVobSub = "VobSub (sub/idx)";
     }
 }

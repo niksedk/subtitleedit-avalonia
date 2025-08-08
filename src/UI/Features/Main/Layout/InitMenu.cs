@@ -40,6 +40,11 @@ public static class InitMenu
                     Header = l.Open,
                     Command = vm.CommandFileOpenCommand,
                 },
+                new MenuItem
+                {
+                    Header = l.OpenOriginal,
+                    Command = vm.FileOpenOriginalCommand,
+                },
                 vm.MenuReopen,
                 new MenuItem
                 {
@@ -65,7 +70,7 @@ public static class InitMenu
                     {
                         new MenuItem
                         {
-                            Header = "Blu-ray .sup",
+                            Header = Se.Language.File.Export.TitleExportBluRaySup,
                             Command = vm.ExportBluRaySupCommand,
                         },
                         new MenuItem
@@ -95,7 +100,7 @@ public static class InitMenu
                         },
                         new MenuItem
                         {
-                            Header = "VobSub (sub/idx)",
+                            Header = Se.Language.File.Export.TitleExportVobSub,
                             Command = vm.ExportVobSubCommand,
                         },
                     }
