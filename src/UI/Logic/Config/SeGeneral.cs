@@ -48,7 +48,8 @@ public class SeGeneral
     public string FfmpegPath { get; set; }
     public string LibMpvPath { get; set; }
     public bool AutoOpenVideo { get; set; }
-    public DialogType DialogStyle { get; internal set; }
+    public DialogType DialogStyle { get; set; }
+    public bool ShowColumnEndTime { get; set; }
 
     public SeGeneral()
     {
@@ -96,5 +97,6 @@ public class SeGeneral
         AutoOpenVideo = true;
 
         DialogStyle = DialogType.DashBothLinesWithSpace;
+        ShowColumnEndTime = true;
     }
 }

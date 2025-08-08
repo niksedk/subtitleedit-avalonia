@@ -58,13 +58,21 @@ public static class InitListViewAndEditBox
             Width = new DataGridLength(120),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
         });
-        vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
+
+        var hideColumn = new DataGridTextColumn
         {
             Header = Se.Language.General.Hide,
             Binding = new Binding(nameof(SubtitleLineViewModel.EndTime)) { Converter = fullTimeConverter },
             Width = new DataGridLength(120),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
-        });
+        };
+        vm.SubtitleGrid.Columns.Add(hideColumn);
+        hideColumn.Bind(DataGridColumn.IsVisibleProperty,    
+            new Binding(nameof(vm.ShowColumnEndTime))           
+            {                                                        
+                Mode = BindingMode.OneWay,                           
+                Source = vm                                          
+            });                                                      
 
         vm.SubtitleGrid.Columns.Add(new DataGridTemplateColumn
         {
@@ -162,11 +170,13 @@ public static class InitListViewAndEditBox
         var showEndTimeMenuItem = new MenuItem
         {
             Header = Se.Language.General.ShowHideColumn, 
+            Command = vm.ToggleShowColumnEndTimeCommand,
             DataContext = vm,
             Icon = new Icon
             {
                 Value = IconNames.MdiCheckBold,
                 VerticalAlignment = VerticalAlignment.Center,
+                [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnEndTime)),
             }
         };
         showEndTimeMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible), BindingMode.TwoWay));
@@ -187,7 +197,7 @@ public static class InitListViewAndEditBox
         insertAfterMenuItem.Command = vm.InsertLineAfterCommand;
         flyout.Items.Add(insertAfterMenuItem);
 
-        var sep1 = new Separator();
+        var sep1 = new Separator { DataContext = vm };
         sep1.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
         flyout.Items.Add(sep1);
 
@@ -218,7 +228,7 @@ public static class InitListViewAndEditBox
         flyout.Items.Add(mergeSelectedAsDialogMenuItem);
         vm.MenuItemMergeAsDialog = mergeSelectedAsDialogMenuItem;
 
-        var sep2 = new Separator();
+        var sep2 = new Separator { DataContext = vm };
         sep2.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
         flyout.Items.Add(sep2);
 

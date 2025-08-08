@@ -98,6 +98,7 @@ public partial class MainViewModel :
 
     [ObservableProperty] private bool _isWaveformToolbarVisible;
     [ObservableProperty] private bool _isSubtitleGridFlyoutHeaderVisible;
+    [ObservableProperty] private bool _showColumnEndTime;
 
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
@@ -213,6 +214,7 @@ public partial class MainViewModel :
         SelectedEncoding = Encodings[0];
         StatusTextLeft = string.Empty;
         StatusTextRight = string.Empty;
+        ShowColumnEndTime = Se.Settings.General.ShowColumnEndTime;  
 
         themeInitializer.UpdateThemesIfNeeded().ConfigureAwait(true);
         Dispatcher.UIThread.Post(async void () =>
@@ -1012,6 +1014,13 @@ public partial class MainViewModel :
     private async Task OpenDataFolder()
     {
         await _folderHelper.OpenFolder(Window!, Se.DataFolder);
+    }
+    
+    [RelayCommand]
+    private void ToggleShowColumnEndTime()
+    {
+        Se.Settings.General.ShowColumnEndTime = !Se.Settings.General.ShowColumnEndTime;
+        ShowColumnEndTime = Se.Settings.General.ShowColumnEndTime;
     }
 
     [RelayCommand]
