@@ -1,6 +1,8 @@
 using Avalonia.Controls;
+using Avalonia.Data;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -44,6 +46,13 @@ public static class InitMenu
                 {
                     Header = l.OpenOriginal,
                     Command = vm.FileOpenOriginalCommand,
+                    [!MenuItem.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnOriginalText)) { Converter = new InverseBooleanConverter() }
+                },
+                new MenuItem
+                {
+                    Header = l.CloseOriginal,
+                    Command = vm.FileCloseOriginalCommand,
+                    [!MenuItem.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnOriginalText))
                 },
                 vm.MenuReopen,
                 new MenuItem

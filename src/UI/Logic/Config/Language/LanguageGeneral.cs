@@ -254,6 +254,8 @@ public class LanguageGeneral
     public string FindTextX { get; set; }
     public string FindNext { get; set; }
     public string ShowHideColumn { get; set; }
+    public string OpenSubtitleFileTitle { get; set; }
+    public string OpenOriginalSubtitleFileTitle { get; set; }
 
     public LanguageGeneral()
     {
@@ -507,5 +509,7 @@ public class LanguageGeneral
         FindTextX = "Find text - {0}";
         FindNext = "Find next";
         ShowHideColumn = "Show 'Hide' column";
+        OpenSubtitleFileTitle = "Open subtitle file";
+        OpenOriginalSubtitleFileTitle = "Open original subtitle file";
     }
 }

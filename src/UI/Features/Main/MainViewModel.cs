@@ -214,7 +214,7 @@ public partial class MainViewModel :
         SelectedEncoding = Encodings[0];
         StatusTextLeft = string.Empty;
         StatusTextRight = string.Empty;
-        ShowColumnEndTime = Se.Settings.General.ShowColumnEndTime;  
+        ShowColumnEndTime = Se.Settings.General.ShowColumnEndTime;
 
         themeInitializer.UpdateThemesIfNeeded().ConfigureAwait(true);
         Dispatcher.UIThread.Post(async void () =>
@@ -429,15 +429,10 @@ public partial class MainViewModel :
         ResetSubtitle();
         VideoCloseFile();
     }
-    
-    [RelayCommand]
-    private void FileOpenOriginal()
-    {
-      
-    }
 
     private void ResetSubtitle()
     {
+        ShowColumnOriginalText = false;
         Subtitles.Clear();
         _subtitleFileName = string.Empty;
         _subtitle = new Subtitle();
@@ -447,13 +442,74 @@ public partial class MainViewModel :
             AudioVisualizer.WavePeaks = null;
         }
 
+        AutoFitColumns();
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task FileOpenOriginal()
+    {
+        var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, "Open original subtitle file");
+        if (string.IsNullOrEmpty(fileName))
+        {
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        var subtitle = Subtitle.Parse(fileName);
+        if (subtitle == null)
+        {
+            foreach (var f in SubtitleFormat.GetBinaryFormats(false))
+            {
+                if (f.IsMine(null, fileName))
+                {
+                    subtitle = new Subtitle();
+                    f.LoadSubtitle(subtitle, null, fileName);
+                    subtitle.OriginalFormat = f;
+                    break; // format found, exit the loop
+                }
+            }
+
+            if (subtitle == null)
+            {
+                var message = "Unknown format?";
+                await MessageBox.Show(Window!, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                _shortcutManager.ClearKeys();
+                return;
+            }
+        }
+
+        if (subtitle.Paragraphs.Count == Subtitles.Count)
+        {
+            for (var i = 0; i < Subtitles.Count; i++)
+            {
+                Subtitles[i].OriginalText = subtitle.Paragraphs[i].Text;
+            }
+            ShowColumnOriginalText = true;
+            AutoFitColumns();
+        }
+        else
+        {
+            var message = "The original subtitle does not have the same number of lines as the current subtitle.";
+            await MessageBox.Show(Window!, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private void FileCloseOriginal()
+    {
+        ShowColumnOriginalText = false;
+        AutoFitColumns();
         _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task CommandFileOpen()
     {
-        var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, "Open subtitle file");
+        var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, Se.Language.General.OpenSubtitleFileTitle);
         if (!string.IsNullOrEmpty(fileName))
         {
             await SubtitleOpen(fileName);
@@ -505,12 +561,12 @@ public partial class MainViewModel :
 
         _shortcutManager.ClearKeys();
     }
-    
+
     [RelayCommand]
     private async Task ExportVobSub()
     {
         IExportHandler exportHandler = new ExportHandlerVobSub();
-        var result = await _windowService.ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(Window!, vm=>
+        var result = await _windowService.ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(Window!, vm =>
         {
             vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName);
         });
@@ -915,7 +971,7 @@ public partial class MainViewModel :
         var result = await _windowService.ShowDialogAsync<VisualSyncWindow, VisualSyncViewModel>(Window!, vm =>
         {
             var paragraphs = Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList();
-            vm.Initialize(paragraphs, _videoFileName, _subtitleFileName, AudioVisualizer); 
+            vm.Initialize(paragraphs, _videoFileName, _subtitleFileName, AudioVisualizer);
         });
 
         if (result.OkPressed)
@@ -1039,7 +1095,7 @@ public partial class MainViewModel :
     {
         await _folderHelper.OpenFolder(Window!, Se.DataFolder);
     }
-    
+
     [RelayCommand]
     private void ToggleShowColumnEndTime()
     {
@@ -1752,6 +1808,32 @@ public partial class MainViewModel :
         SelectAndScrollToRow(undoRedoObject.SelectedLines.First());
     }
 
+    public void AutoFitColumns()
+    {
+        var columns = SubtitleGrid.Columns;
+
+        for (var i = 0; i < columns.Count - 1; i++)
+        {
+            var column = columns[i];
+
+            var originalWidth = column.Width;
+            column.Width = new DataGridLength(1, DataGridLengthUnitType.Auto);
+            SubtitleGrid.UpdateLayout();
+
+            if (column.Header.ToString() == Se.Language.General.OriginalText ||
+                column.Header.ToString() == Se.Language.General.Text)
+            {
+                column.Width = new DataGridLength(1, DataGridLengthUnitType.Star);
+            }
+            else
+            {
+                column.Width = originalWidth;
+            }
+        }
+
+        SubtitleGrid.UpdateLayout();
+    }
+
     private void SelectAllRows()
     {
         SubtitleGrid.SelectAll();
@@ -1866,6 +1948,12 @@ public partial class MainViewModel :
                 }
             }
 
+            if (FileUtil.IsVobSub(fileName) && ext == ".sub")
+            {
+                ImportSubtitleFromVobSubFile(fileName, videoFileName);
+                return;
+            }
+
             var subtitle = Subtitle.Parse(fileName);
             if (subtitle == null)
             {
@@ -1890,7 +1978,6 @@ public partial class MainViewModel :
 
             SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == subtitle.OriginalFormat.Name) ??
                                      SelectedSubtitleFormat;
-            ;
 
             _subtitleFileName = fileName;
             _subtitle = subtitle;
@@ -1948,7 +2035,7 @@ public partial class MainViewModel :
                     Se.LogError(e);
                 }
             });
-          
+
             matroska.Dispose();
             return;
         }
@@ -2251,6 +2338,28 @@ public partial class MainViewModel :
         SelectAndScrollToRow(0);
 
         return true;
+    }
+
+
+    private void ImportSubtitleFromVobSubFile(string fileName, string? videoFileName)
+    {
+        //var log = new StringBuilder();
+        //var subtitles = VobSubParser.ParseBluRaySup(fileName, log);
+        //if (subtitles.Count > 0)
+        //{
+        //    Dispatcher.UIThread.Post(async () =>
+        //    {
+        //        var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!,
+        //            vm => { vm.Initialize(subtitles, fileName); });
+
+        //        if (result.OkPressed)
+        //        {
+        //            _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
+        //            Subtitles.Clear();
+        //            Subtitles.AddRange(result.OcredSubtitle);
+        //        }
+        //    });
+        //}
     }
 
     private void SetSubtitles(Subtitle subtitle)
@@ -2832,7 +2941,7 @@ public partial class MainViewModel :
     {
         if (IsSubtitleGridFlyoutHeaderVisible)
         {
-            
+
         }
 
         MenuItemMergeAsDialog.IsVisible = SubtitleGrid.SelectedItems.Count == 2;
@@ -2954,7 +3063,7 @@ public partial class MainViewModel :
             _subtitleGridIsLeftClick = props.IsLeftButtonPressed;
             _subtitleGridIsRightClick = props.IsRightButtonPressed;
             _subtitleGridIsControlPressed = e.KeyModifiers.HasFlag(KeyModifiers.Control);
-            
+
             var hitTest = SubtitleGrid.InputHitTest(e.GetPosition(SubtitleGrid));
             var current = hitTest as Control;
             while (current != null)

@@ -36,6 +36,7 @@ public static class InitListViewAndEditBox
             IsReadOnly = true,
             SelectionMode = DataGridSelectionMode.Extended,
             DataContext = vm.Subtitles,
+            CanUserResizeColumns = true,
         };
 
         vm.SubtitleGrid.DoubleTapped += vm.OnSubtitleGridDoubleTapped;
@@ -99,21 +100,6 @@ public static class InitListViewAndEditBox
             })
         });
 
-        var originalColumn = new DataGridTextColumn
-        {
-            Header = Se.Language.General.OriginalText,
-            Binding = new Binding(nameof(SubtitleLineViewModel.OriginalText)),
-            Width = new DataGridLength(1, DataGridLengthUnitType.Star), // Stretch text column
-            CellTheme = UiUtil.DataGridNoBorderCellTheme,
-        };
-        originalColumn.Bind(DataGridTextColumn.IsVisibleProperty,
-            new Binding(nameof(vm.ShowColumnOriginalText))
-            {
-                Mode = BindingMode.OneWay,
-                Source = vm
-            });
-        vm.SubtitleGrid.Columns.Add(originalColumn);
-
         vm.SubtitleGrid.Columns.Add(new DataGridTemplateColumn
         {
             Header = Se.Language.General.Text,
@@ -138,6 +124,21 @@ public static class InitListViewAndEditBox
                 return border;
             })
         });
+
+        var originalColumn = new DataGridTextColumn
+        {
+            Header = Se.Language.General.OriginalText,
+            Binding = new Binding(nameof(SubtitleLineViewModel.OriginalText)),
+            Width = new DataGridLength(1, DataGridLengthUnitType.Star), // Stretch text column
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
+        };
+        originalColumn.Bind(DataGridTextColumn.IsVisibleProperty, new Binding(nameof(vm.ShowColumnOriginalText))
+        {
+            Mode = BindingMode.OneWay,
+            Source = vm
+        });
+        vm.SubtitleGrid.Columns.Add(originalColumn);
+
 
         vm.SubtitleGrid.DataContext = vm.Subtitles;
         vm.SubtitleGrid.SelectionChanged += vm.SubtitleGrid_SelectionChanged;
