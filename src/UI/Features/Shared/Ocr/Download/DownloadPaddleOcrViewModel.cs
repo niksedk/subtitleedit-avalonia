@@ -58,6 +58,18 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
     public void Initialize(PaddleOcrDownloadType paddleOcrDownloadType)
     {
         _downloadType = paddleOcrDownloadType;
+        if (_downloadType == PaddleOcrDownloadType.EngineCpu)
+        {
+            StatusText = "Downloading Paddle OCR engine...";
+        }
+        else if (_downloadType == PaddleOcrDownloadType.EngineGpu)
+        {
+            StatusText = "Downloading Paddle OCR engine...";
+        }
+        else if (_downloadType == PaddleOcrDownloadType.Models)
+        {
+            StatusText = "Downloading Paddle OCR models...";
+        }
     }
 
     private void OnTimerOnElapsed(object? sender, ElapsedEventArgs args)
@@ -76,21 +88,29 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
 
                 if (!File.Exists(_tempFileName))
                 {
-                    StatusText = "Download failed";
+                    ProgressText = "Download failed";
                     Error = "No data received";
                     return;
                 }
 
-                var fileInfo = new FileInfo(_tempFileName); 
+                var fileInfo = new FileInfo(_tempFileName);
                 if (fileInfo.Length == 0)
                 {
-                    StatusText = "Download failed";
+                    ProgressText = "Download failed";
                     Error = "No data received";
                     return;
                 }
 
-                Extract7Zip(_tempFileName, Se.PaddleOcrFolder);
+                if (_downloadType == PaddleOcrDownloadType.Models)
+                {
+                    Extract7Zip(_tempFileName, Se.PaddleOcrModelsFolder, string.Empty);
+                }
+                else
+                {
+                    Extract7Zip(_tempFileName, Se.PaddleOcrFolder, "PaddleOCR-CPU-v1.3.0");
+                }
 
+                OkPressed = true;
                 Close();
             }
             else if (_downloadTask is { IsFaulted: true })
@@ -100,26 +120,25 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
                 var ex = _downloadTask.Exception?.InnerException ?? _downloadTask.Exception;
                 if (ex is OperationCanceledException)
                 {
-                    StatusText = "Download canceled";
+                    ProgressText = "Download canceled";
                     Close();
                 }
                 else
                 {
-                    StatusText = "Download failed";
+                    ProgressText = "Download failed";
                     Error = ex?.Message ?? "Unknown error";
                 }
             }
         }
     }
 
-    private void Extract7Zip(string tempFileName, string dir)
+    private void Extract7Zip(string tempFileName, string dir, string skipFolderLevel)
     {
         using Stream stream = File.OpenRead(tempFileName);
         using var archive = SevenZipArchive.Open(stream);
         double totalSize = archive.TotalUncompressSize;
         double unpackedSize = 0;
 
-        var skipFolderLevel = "Faster-Whisper-XXL";
         var reader = archive.ExtractAllEntries();
         while (reader.MoveToNextEntry())
         {
@@ -163,7 +182,11 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
                     displayName = "..." + displayName.Remove(0, displayName.Length - 26).Trim();
                 }
 
-                ProgressText = $"Unpacking: {displayName}";
+                Dispatcher.UIThread.Post(() =>
+                {
+                    ProgressText = $"Unpacking: {displayName}";
+                });
+
                 reader.WriteEntryToDirectory(fullPath, new ExtractionOptions()
                 {
                     ExtractFullPath = false,
@@ -200,7 +223,7 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
             var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
             var pctString = percentage.ToString(CultureInfo.InvariantCulture);
             ProgressValue = percentage;
-            StatusText = $"Downloading... {pctString}%";
+            ProgressText = $"Downloading... {pctString}%";
         });
 
         var folder = Se.PaddleOcrFolder;

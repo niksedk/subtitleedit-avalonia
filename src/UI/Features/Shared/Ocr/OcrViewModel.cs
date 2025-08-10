@@ -466,12 +466,12 @@ public partial class OcrViewModel : ObservableObject
         }
         else if (ocrEngine.EngineType == OcrEngineType.PaddleOcr)
         {
-            if (Configuration.IsRunningOnWindows && !Directory.Exists(Se.PaddleOcrFolder))
+            if (Configuration.IsRunningOnWindows && !File.Exists(Path.Combine(Se.PaddleOcrFolder, "paddleocr.exe")))
             {
                 var answer = await MessageBox.Show(
                     Window!,
                     "Download Paddle OCR?",
-                    $"{Environment.NewLine}\"PaddleOCR\" requires downloading Paddle OCR.{Environment.NewLine}{Environment.NewLine}Download and use Paddle OCR?",
+                    $"{Environment.NewLine}\"Paddle OCR\" requires downloading Paddle OCR.{Environment.NewLine}{Environment.NewLine}Download and use Paddle OCR?",
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question);
 
@@ -492,7 +492,7 @@ public partial class OcrViewModel : ObservableObject
                 }
             }
 
-            var modelsDirectory = Path.Combine(Se.PaddleOcrFolder, "models");
+            var modelsDirectory = Se.PaddleOcrModelsFolder;
             if (!Directory.Exists(modelsDirectory))
             {
                 var result = await _windowService.ShowDialogAsync<DownloadPaddleOcrWindow, DownloadPaddleOcrViewModel>(Window!, vm =>

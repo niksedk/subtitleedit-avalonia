@@ -26,10 +26,9 @@ public class DownloadPaddleOcrWindow : Window
 
         var titleText = new TextBlock
         {
-            Text = "Downloading Paddle OCR",
             FontSize = 20,
             FontWeight = FontWeight.Bold,
-        };
+        }.WithBindText(vm, nameof(vm.StatusText));
 
         var progressSlider = new Slider
         {
@@ -56,10 +55,10 @@ public class DownloadPaddleOcrWindow : Window
                 },
             }
         };
-        progressSlider.Bind(Slider.ValueProperty, new Binding(nameof(DownloadFfmpegViewModel.Progress)));
+        progressSlider.Bind(Slider.ValueProperty, new Binding(nameof(vm.ProgressValue)));
 
         var statusText = new TextBlock();
-        statusText.Bind(TextBlock.TextProperty, new Binding(nameof(DownloadFfmpegViewModel.StatusText)));
+        statusText.Bind(TextBlock.TextProperty, new Binding(nameof(vm.ProgressText)));
 
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CommandCancelCommand);
         var buttonBar = UiUtil.MakeButtonBar(buttonCancel);

@@ -71,6 +71,7 @@ public class Se
     public static string OcrFolder => Path.Combine(DataFolder, "OCR");
     public static string TranslationFolder => Path.Combine(DataFolder, "Languages");
     public static string PaddleOcrFolder => Path.Combine(DataFolder, "PaddleOCR3-1");
+    public static string PaddleOcrModelsFolder => Path.Combine(PaddleOcrFolder, "models");
     public static string TesseractFolder
     {
         get
