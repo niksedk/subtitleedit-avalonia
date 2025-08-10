@@ -22,11 +22,6 @@ public class AutoBackupService : IAutoBackupService
     private System.Timers.Timer? _timerAutoBackup;
     private static readonly Regex RegexFileNamePattern = new Regex(@"^\d\d\d\d-\d\d-\d\d_\d\d-\d\d-\d\d", RegexOptions.Compiled);
 
-    public AutoBackupService()
-    {
-        
-    }
-
     public void StartAutoBackup(MainViewModel mainViewModel)
     {
         _mainViewModel = mainViewModel;
@@ -42,7 +37,7 @@ public class AutoBackupService : IAutoBackupService
             minutes = 1;
         }
         _timerAutoBackup = new System.Timers.Timer(TimeSpan.FromMinutes(minutes));
-        _timerAutoBackup.Elapsed += (sender, args) =>
+        _timerAutoBackup.Elapsed += (_, _) =>
         {
             if (!_mainViewModel.HasChanges())
             {
@@ -61,11 +56,11 @@ public class AutoBackupService : IAutoBackupService
         _timerAutoBackup?.Stop();
     }
 
-    private bool SaveAutoBackup(Subtitle subtitle, SubtitleFormat saveFormat)
+    private static void SaveAutoBackup(Subtitle subtitle, SubtitleFormat saveFormat)
     {
         if (subtitle.Paragraphs.Count == 0)
         {
-            return false;
+            return;
         }
 
         var folder = Se.AutoBackupFolder;
@@ -75,9 +70,9 @@ public class AutoBackupService : IAutoBackupService
             {
                 Directory.CreateDirectory(folder);
             }
-            catch 
+            catch
             {
-                return false;
+                return;
             }
         }
 
@@ -92,11 +87,10 @@ public class AutoBackupService : IAutoBackupService
         {
             var format = saveFormat.IsTextBased ? saveFormat : new SubRip();
             File.WriteAllText(fileName, format.ToText(subtitle, string.Empty));
-            return true;
         }
-        catch 
+        catch
         {
-            return false;
+            // ignore
         }
     }
 
