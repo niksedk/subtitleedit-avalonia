@@ -113,6 +113,7 @@ public partial class MainViewModel :
 
     private bool _updateAudioVisualizer;
     private string? _subtitleFileName;
+    private string? _subtitleFileNameOriginal;
     private Subtitle _subtitle;
     private SubtitleFormat? _lastOpenSaveFormat;
     private string? _videoFileName;
@@ -435,6 +436,7 @@ public partial class MainViewModel :
         ShowColumnOriginalText = false;
         Subtitles.Clear();
         _subtitleFileName = string.Empty;
+        _subtitleFileNameOriginal  = string.Empty;
         _subtitle = new Subtitle();
         _changeSubtitleHash = GetFastHash();
         if (AudioVisualizer?.WavePeaks != null)
@@ -482,6 +484,7 @@ public partial class MainViewModel :
 
         if (subtitle.Paragraphs.Count == Subtitles.Count)
         {
+            _subtitleFileName = fileName;
             for (var i = 0; i < Subtitles.Count; i++)
             {
                 Subtitles[i].OriginalText = subtitle.Paragraphs[i].Text;
@@ -1053,6 +1056,10 @@ public partial class MainViewModel :
         }
 
         _errorColor = Se.Settings.General.ErrorColor.FromHexToColor();
+
+        _autoBackupService.StopAutobackup();
+        _autoBackupService.StartAutoBackup(this);
+        
         _updateAudioVisualizer = true;
         _shortcutManager.ClearKeys();
     }
