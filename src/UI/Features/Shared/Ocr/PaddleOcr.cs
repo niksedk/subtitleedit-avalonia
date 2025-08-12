@@ -159,7 +159,7 @@ public partial class PaddleOcr
     }
 
 
-    public async Task OcrBatch(OcrEngineType engineType, int startFromIndex, List<PaddleOcrBatchInput> bitmaps, string language, bool useGpu, string mode, IProgress<PaddleOcrBatchProgress> progress, CancellationToken cancellationToken)
+    public async Task OcrBatch(OcrEngineType engineType, List<PaddleOcrBatchInput> bitmaps, string language, bool useGpu, string mode, IProgress<PaddleOcrBatchProgress> progress, CancellationToken cancellationToken)
     {
         string detFilePrefix = MakeDetPrefix(language);
         string recFilePrefix = MakeRecPrefix(language);
@@ -187,7 +187,7 @@ public partial class PaddleOcr
                 bitmap = input.Bitmap?.Copy() ?? new SKBitmap(1, 1, true);
                 // bitmap = MakeTransparentBlack(bitmap);
                 borderedBitmap = CreateDoubleBorder(bitmap, 10, SKColors.Black, new SKColor(0, 0, 0, 0));
-                var tempImage = Path.Combine(folder, (input.Index + startFromIndex).ToString("0000") + ".png");
+                var tempImage = Path.Combine(folder, input.Index.ToString("0000") + ".png");
                 input.FileName = tempImage;
                 batchFileNamesList.Add(input);
 
@@ -222,6 +222,11 @@ public partial class PaddleOcr
         if (engineType == OcrEngineType.PaddleOcrStandalone && File.Exists(Path.Combine(Se.PaddleOcrFolder, "paddleocr.exe")))
         {
             paddleOCRPath = Path.Combine(Se.PaddleOcrFolder, "paddleocr.exe");
+        }
+
+        if (engineType == OcrEngineType.PaddleOcrPython)
+        {
+           paddleOCRPath = GetPaddleOcrPytonPath();
         }
 
         var process = new Process
@@ -279,6 +284,50 @@ public partial class PaddleOcr
         catch
         {
             // ignore
+        }
+    }
+
+    private string GetPaddleOcrPytonPath()
+    {
+        var possiblePaths = new[]
+       {
+            // Windows user install
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Programs\Python"),
+            // Windows pip scripts dir (per environment)
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @"AppData\Local\Programs\Python"),
+            // Mac default Frameworks path
+            "/Library/Frameworks/Python.framework/Versions",
+            // Mac Homebrew path
+            "/usr/local/Cellar/python",
+            "/opt/homebrew/Cellar/python",
+            // Conda default paths
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "opt", "anaconda3"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "miniconda3")
+        };
+
+        string[] executableNames;
+        if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+        {
+            executableNames = new[] { "paddleocr.exe" };
+        }
+        else
+        {
+            executableNames = new[] { "paddleocr" }; // Mac/Linux - no .exe
+        }
+
+        var foundFiles = possiblePaths
+            .Where(Directory.Exists)
+            .SelectMany(baseDir => Directory.GetFiles(baseDir, "*", SearchOption.AllDirectories))
+            .Where(file => executableNames.Contains(Path.GetFileName(file)))
+            .ToList();
+
+        if (foundFiles.Any())
+        {
+            return foundFiles.First();
+        }
+        else
+        {
+            return "paddleocr"; // Fallback to just the command name
         }
     }
 

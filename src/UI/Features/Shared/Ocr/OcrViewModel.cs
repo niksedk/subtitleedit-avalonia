@@ -136,7 +136,7 @@ public partial class OcrViewModel : ObservableObject
             SelectedOllamaLanguage = ocr.OllamaLanguage;
             GoogleVisionApiKey = ocr.GoogleVisionApiKey;
             SelectedGoogleVisionLanguage = GoogleVisionLanguages.FirstOrDefault(p => p.Code == ocr.GoogleVisionLanguage);
-            SelectedPaddleOcrLanguage = PaddleOcrLanguages.FirstOrDefault(p=>p.Code == Se.Settings.Ocr.PaddleOcrLastLanguage) ?? PaddleOcrLanguages.First();
+            SelectedPaddleOcrLanguage = PaddleOcrLanguages.FirstOrDefault(p => p.Code == Se.Settings.Ocr.PaddleOcrLastLanguage) ?? PaddleOcrLanguages.First();
         });
     }
 
@@ -602,7 +602,7 @@ public partial class OcrViewModel : ObservableObject
 
         _ = Task.Run(async () =>
         {
-            await ocrEngine.OcrBatch(engineType, startFromIndex,  batchImages, language, PaddleUseGpu, mode, ocrProgress, _cancellationTokenSource.Token);
+            await ocrEngine.OcrBatch(engineType, batchImages, language, PaddleUseGpu, mode, ocrProgress, _cancellationTokenSource.Token);
             IsOcrRunning = false;
         });
     }
