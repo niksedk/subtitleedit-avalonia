@@ -226,7 +226,7 @@ public partial class PaddleOcr
 
         if (engineType == OcrEngineType.PaddleOcrPython)
         {
-           paddleOCRPath = GetPaddleOcrPytonPath();
+            paddleOCRPath = GetPaddleOcrPytonPath();
         }
 
         var process = new Process
@@ -287,43 +287,55 @@ public partial class PaddleOcr
         }
     }
 
-    private string GetPaddleOcrPytonPath()
+    private static string GetPaddleOcrPytonPath()
     {
         var possiblePaths = new[]
        {
             // Windows user install
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Programs\Python"),
+//            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Programs\Python"),
+
             // Windows pip scripts dir (per environment)
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @"AppData\Local\Programs\Python"),
+            
             // Mac default Frameworks path
             "/Library/Frameworks/Python.framework/Versions",
+
             // Mac Homebrew path
             "/usr/local/Cellar/python",
             "/opt/homebrew/Cellar/python",
+
             // Conda default paths
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "opt", "anaconda3"),
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "miniconda3")
         };
 
-        string[] executableNames;
+        string executableName;
         if (Environment.OSVersion.Platform == PlatformID.Win32NT)
         {
-            executableNames = new[] { "paddleocr.exe" };
+            executableName = "paddleocr.exe";
         }
         else
         {
-            executableNames = new[] { "paddleocr" }; // Mac/Linux - no .exe
+            executableName = "paddleocr"; // Mac/Linux - no .exe
         }
 
         var foundFiles = possiblePaths
             .Where(Directory.Exists)
-            .SelectMany(baseDir => Directory.GetFiles(baseDir, "*", SearchOption.AllDirectories))
-            .Where(file => executableNames.Contains(Path.GetFileName(file)))
+            .SelectMany(baseDir => Directory.GetFiles(baseDir, executableName, SearchOption.AllDirectories))
             .ToList();
 
         if (foundFiles.Any())
         {
-            return foundFiles.First();
+            var sitePackages = foundFiles
+                .Where(p => p.Contains("site-packages"))
+                .OrderByDescending(p => p.Length)
+                .ToList();
+            if (sitePackages.Any())
+            {
+                return sitePackages.Last();
+            }
+
+            return foundFiles.Last();
         }
         else
         {

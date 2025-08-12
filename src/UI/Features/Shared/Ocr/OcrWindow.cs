@@ -96,6 +96,7 @@ public class OcrWindow : Window
                     .WithMarginRight(20)
                     .WithMarginBottom(2)
                     .WithBottomAlignment()
+                    .WithBindIsVisible(nameof(vm.IsNOcrVisible))
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
                 UiUtil.MakeLabel(Se.Language.Ocr.MaxWrongPixels, nameof(vm.IsNOcrVisible)),
                 UiUtil.MakeComboBox(vm.NOcrMaxWrongPixelsList, vm, nameof(vm.SelectedNOcrMaxWrongPixels),
