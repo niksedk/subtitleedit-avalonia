@@ -159,7 +159,7 @@ public partial class PaddleOcr
     }
 
 
-    public async Task OcrBatch(List<PaddleOcrBatchInput> bitmaps, string language, bool useGpu, string mode, IProgress<PaddleOcrBatchProgress> progress, CancellationToken cancellationToken)
+    public async Task OcrBatch(OcrEngineType engineType, int startFromIndex, List<PaddleOcrBatchInput> bitmaps, string language, bool useGpu, string mode, IProgress<PaddleOcrBatchProgress> progress, CancellationToken cancellationToken)
     {
         string detFilePrefix = MakeDetPrefix(language);
         string recFilePrefix = MakeRecPrefix(language);
@@ -185,9 +185,9 @@ public partial class PaddleOcr
             try
             {
                 bitmap = input.Bitmap?.Copy() ?? new SKBitmap(1, 1, true);
-               // bitmap = MakeTransparentBlack(bitmap);
+                // bitmap = MakeTransparentBlack(bitmap);
                 borderedBitmap = CreateDoubleBorder(bitmap, 10, SKColors.Black, new SKColor(0, 0, 0, 0));
-                var tempImage = Path.Combine(folder, input.Index.ToString("0000") + ".png");
+                var tempImage = Path.Combine(folder, (input.Index + startFromIndex).ToString("0000") + ".png");
                 input.FileName = tempImage;
                 batchFileNamesList.Add(input);
 
@@ -219,7 +219,7 @@ public partial class PaddleOcr
                     $"--textline_orientation_model_name \"{TextlineOrientationModelName}\"";
 
         string paddleOCRPath = "paddleocr";
-        if (File.Exists(Path.Combine(Se.PaddleOcrFolder, "paddleocr.exe")))
+        if (engineType == OcrEngineType.PaddleOcrStandalone && File.Exists(Path.Combine(Se.PaddleOcrFolder, "paddleocr.exe")))
         {
             paddleOCRPath = Path.Combine(Se.PaddleOcrFolder, "paddleocr.exe");
         }

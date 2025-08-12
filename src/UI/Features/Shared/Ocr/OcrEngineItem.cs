@@ -30,7 +30,8 @@ public class OcrEngineItem
         {
             new("nOcr", OcrEngineType.nOcr, "nOcr is an internal OCR engine (free/open source)", "", ""),
             new("Tesseract", OcrEngineType.Tesseract, "Tesseract is an open-source OCR engine", "", ""),
-            new("Paddle OCR", OcrEngineType.PaddleOcr, "Paddle OCR", "", ""),
+            new("Paddle OCR Standalone", OcrEngineType.PaddleOcrStandalone, "Paddle OCR Standalone", "", ""),
+            new("Paddle OCR Python", OcrEngineType.PaddleOcrPython, "Paddle OCR Python", "", ""),
             new("Ollama", OcrEngineType.Ollama, "Ollama e.g. via llama-vision", "", "http://localhost:11434/api/chat"),
             new("Google Vision", OcrEngineType.GoogleVision, "Google Vision is a cloud-based OCR engine by Google", "", ""),
             new("Azure Vision", OcrEngineType.AzureVision, "Azure Vision is a cloud-based OCR engine by Microsoft", "", ""),

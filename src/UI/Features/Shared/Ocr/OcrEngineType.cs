@@ -4,7 +4,8 @@ public enum OcrEngineType
 {
     nOcr,
     Tesseract,
-    PaddleOcr,
+    PaddleOcrStandalone,
+    PaddleOcrPython,
     Ollama,
     GoogleVision,
     AzureVision,

@@ -464,7 +464,7 @@ public partial class OcrViewModel : ObservableObject
         {
             RunTesseractOcr(startFromIndex);
         }
-        else if (ocrEngine.EngineType == OcrEngineType.PaddleOcr)
+        else if (ocrEngine.EngineType == OcrEngineType.PaddleOcrStandalone)
         {
             if (Configuration.IsRunningOnWindows && !File.Exists(Path.Combine(Se.PaddleOcrFolder, "paddleocr.exe")))
             {
@@ -506,7 +506,25 @@ public partial class OcrViewModel : ObservableObject
                 }
             }
 
-            RunPaddleOcr(startFromIndex, _ocrSubtitle!.Count - startFromIndex);
+            RunPaddleOcr(startFromIndex, _ocrSubtitle!.Count - startFromIndex, ocrEngine.EngineType);
+        }
+        else if (ocrEngine.EngineType == OcrEngineType.PaddleOcrPython)
+        {
+            var modelsDirectory = Se.PaddleOcrModelsFolder;
+            if (!Directory.Exists(modelsDirectory))
+            {
+                var result = await _windowService.ShowDialogAsync<DownloadPaddleOcrWindow, DownloadPaddleOcrViewModel>(Window!, vm =>
+                {
+                    vm.Initialize(PaddleOcrDownloadType.Models);
+                });
+                if (!result.OkPressed)
+                {
+                    PauseOcr();
+                    return;
+                }
+            }
+
+            RunPaddleOcr(startFromIndex, _ocrSubtitle!.Count - startFromIndex, ocrEngine.EngineType);
         }
         else if (ocrEngine.EngineType == OcrEngineType.Ollama)
         {
@@ -520,7 +538,7 @@ public partial class OcrViewModel : ObservableObject
 
     private Lock BatchLock = new Lock();
 
-    private void RunPaddleOcr(int startFromIndex, int numberOfImages)
+    private void RunPaddleOcr(int startFromIndex, int numberOfImages, OcrEngineType engineType)
     {
         var ocrEngine = new PaddleOcr();
         var language = SelectedPaddleOcrLanguage?.Code ?? "en";
@@ -584,7 +602,7 @@ public partial class OcrViewModel : ObservableObject
 
         _ = Task.Run(async () =>
         {
-            await ocrEngine.OcrBatch(batchImages, language, PaddleUseGpu, mode, ocrProgress, _cancellationTokenSource.Token);
+            await ocrEngine.OcrBatch(engineType, startFromIndex,  batchImages, language, PaddleUseGpu, mode, ocrProgress, _cancellationTokenSource.Token);
             IsOcrRunning = false;
         });
     }
@@ -1026,7 +1044,7 @@ public partial class OcrViewModel : ObservableObject
         IsInspectLineVisible = SelectedOcrEngine?.EngineType == OcrEngineType.nOcr;
         IsOllamaVisible = SelectedOcrEngine?.EngineType == OcrEngineType.Ollama;
         IsTesseractVisible = SelectedOcrEngine?.EngineType == OcrEngineType.Tesseract;
-        IsPaddleOcrVisible = SelectedOcrEngine?.EngineType == OcrEngineType.PaddleOcr;
+        IsPaddleOcrVisible = SelectedOcrEngine?.EngineType == OcrEngineType.PaddleOcrStandalone || SelectedOcrEngine?.EngineType == OcrEngineType.PaddleOcrPython;
         IsGoogleVisionVisible = SelectedOcrEngine?.EngineType == OcrEngineType.GoogleVision;
 
         if (IsNOcrVisible && NOcrDatabases.Count == 0)
