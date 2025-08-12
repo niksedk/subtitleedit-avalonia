@@ -103,7 +103,7 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
 
                 if (_downloadType == PaddleOcrDownloadType.Models)
                 {
-                    Extract7Zip(_tempFileName, Se.PaddleOcrModelsFolder, string.Empty);
+                    Extract7Zip(_tempFileName, Se.PaddleOcrModelsFolder, "PaddleOCR.PP-OCRv5.support.files");
                 }
                 else
                 {

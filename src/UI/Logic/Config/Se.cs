@@ -364,6 +364,11 @@ public class Se
     
     public static void LogError(Exception exception)
     {
+        LogError(exception.Message + Environment.NewLine + exception.StackTrace);
+    }
+
+    public static void LogError(string error)
+    {
         try
         {
             var filePath = GetWhisperLogFilePath();
@@ -371,8 +376,7 @@ public class Se
             writer.WriteLine("-----------------------------------------------------------------------------");
             writer.WriteLine($"Date: {DateTime.Now.ToString(CultureInfo.InvariantCulture)}");
             writer.WriteLine($"SE: {GetSeInfo()}");
-            writer.WriteLine(exception.Message);
-            writer.WriteLine(exception.StackTrace);
+            writer.WriteLine(error);
             writer.WriteLine();
         }
         catch

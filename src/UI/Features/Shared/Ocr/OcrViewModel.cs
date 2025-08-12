@@ -557,11 +557,7 @@ public partial class OcrViewModel : ObservableObject
             lock (BatchLock)
             {
                 var number = p.Index;
-                if (max < number)
-                {
-                    max = number;
-                }
-                else
+                if (number > max)
                 {
                     return;
                 }
@@ -589,6 +585,7 @@ public partial class OcrViewModel : ObservableObject
         _ = Task.Run(async () =>
         {
             await ocrEngine.OcrBatch(batchImages, language, PaddleUseGpu, mode, ocrProgress, _cancellationTokenSource.Token);
+            IsOcrRunning = false;
         });
     }
 

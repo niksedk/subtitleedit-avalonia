@@ -1,10 +1,9 @@
-﻿using Nikse.SubtitleEdit.Logic;
-using Nikse.SubtitleEdit.Logic.Config;
+﻿using Nikse.SubtitleEdit.Logic.Config;
 using SkiaSharp;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -62,81 +61,10 @@ public partial class PaddleOcr
     public PaddleOcr()
     {
         Error = string.Empty;
-        _paddingOcrPath = Se.PaddleOcrFolder;
+        _paddingOcrPath = Se.PaddleOcrModelsFolder;
         _clsPath = Path.Combine(_paddingOcrPath, "cls");
         _detPath = Path.Combine(_paddingOcrPath, "det");
         _recPath = Path.Combine(_paddingOcrPath, "rec");
-    }
-
-    public async Task<string> Ocr(SKBitmap bitmap, string language, bool useGpu, string mode, CancellationToken cancellationToken)
-    {
-        _cancellationToken = cancellationToken;
-        string detFilePrefix = MakeDetPrefix(language);
-        string recFilePrefix = MakeRecPrefix(language);
-
-        var detName = GetDetectionName(language, mode);
-        var recName = GetRecName(language, mode);
-
-        var blackBlackground = MakeTransparentBlack(bitmap.Copy(bitmap.ColorType));
-        var borderedBitmapTemp = AddBorder(blackBlackground, 10, SKColors.Transparent);
-        blackBlackground.Dispose();
-        var borderedBitmap = AddBorder(borderedBitmapTemp, 10, SKColors.Black);
-        borderedBitmapTemp.Dispose();
-        var tempImage = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".png");
-        await File.WriteAllBytesAsync(tempImage, borderedBitmap.ToPngArray(), cancellationToken);
-        borderedBitmap.Dispose();
-
-        var parameters = $"ocr -i \"{tempImage}\" " +
-                 "--use_textline_orientation true " +
-                 "--use_doc_orientation_classify false " +
-                 "--use_doc_unwarping false " +
-                 $"--device {(useGpu ? "gpu" : "cpu")} " +
-                 $"--lang {language} " +
-                 $"--text_detection_model_dir \"{_detPath + Path.DirectorySeparatorChar + detName}\" " +
-                 $"--text_detection_model_name \"{detName}\" " +
-                 $"--text_recognition_model_dir \"{_recPath + Path.DirectorySeparatorChar + recName}\" " +
-                 $"--text_recognition_model_name \"{recName}\" " +
-                 $"--textline_orientation_model_dir \"{_clsPath + Path.DirectorySeparatorChar + TextlineOrientationModelName}\" " +
-                 $"--textline_orientation_model_name \"{TextlineOrientationModelName}\"";
-
-        var process = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = "paddleocr",
-                Arguments = parameters,
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true,
-            },
-        };
-
-        process.StartInfo.StandardOutputEncoding = Encoding.UTF8;
-        process.StartInfo.RedirectStandardOutput = true;
-        process.StartInfo.EnvironmentVariables["PYTHONIOENCODING"] = "utf-8";
-        process.StartInfo.EnvironmentVariables["PYTHONUTF8"] = "1";
-        process.OutputDataReceived += OutputHandler;
-        _textDetectionResults.Clear();
-
-#pragma warning disable CA1416 // Validate platform compatibility
-        process.Start();
-#pragma warning restore CA1416 // Validate platform compatibility;
-
-        process.BeginOutputReadLine();
-
-        await process.WaitForExitAsync(cancellationToken);
-
-        if (process.ExitCode != 0)
-        {
-            Error = await process.StandardError.ReadToEndAsync(cancellationToken);
-            return string.Empty;
-        }
-
-        File.Delete(tempImage);
-
-        var result = MakeResult(_textDetectionResults);
-        return result;
     }
 
     private string GetRecName(string language, string mode)
@@ -202,27 +130,32 @@ public partial class PaddleOcr
             throw new ArgumentNullException(nameof(bitmap));
         }
 
-        // Ensure the bitmap is mutable
-        if (!bitmap.IsImmutable)
-        {
-            // Lock the pixels for modification
-            for (int y = 0; y < bitmap.Height; y++)
-            {
-                for (int x = 0; x < bitmap.Width; x++)
-                {
-                    var color = bitmap.GetPixel(x, y);
+        var workingBitmap = bitmap.IsImmutable
+            ? new SKBitmap(bitmap.Width, bitmap.Height, bitmap.ColorType, bitmap.AlphaType)
+            : bitmap;
 
-                    // Check if the pixel is black
-                    if (color.Alpha < 100)
-                    {
-                        // Set the pixel to be transparent
-                        bitmap.SetPixel(x, y, new SKColor(0, 0, 0, 255));
-                    }
-                }
+        if (workingBitmap != bitmap)
+        {
+            using var canvas = new SKCanvas(workingBitmap);
+            canvas.DrawBitmap(bitmap, 0, 0);
+        }
+
+        // Get all pixels at once
+        var colors = workingBitmap.Pixels;
+        var blackOpaque = new SKColor(0, 0, 0, 255);
+
+        for (int i = 0; i < colors.Length; i++)
+        {
+            if (colors[i].Alpha < 100)
+            {
+                colors[i] = blackOpaque;
             }
         }
 
-        return bitmap;
+        // Set all pixels back at once
+        workingBitmap.Pixels = colors;
+
+        return workingBitmap;
     }
 
 
@@ -235,23 +168,42 @@ public partial class PaddleOcr
         _batchProgress = progress;
         var folder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
         Directory.CreateDirectory(folder);
-        _batchFileNames = new List<PaddleOcrBatchInput>();
+        _batchFileNames = new List<PaddleOcrBatchInput>(bitmaps.Count);
 
-        for (var i = 0; i < bitmaps.Count; i++)
+        var batchFileNamesList = new ConcurrentBag<PaddleOcrBatchInput>();
+
+        var parallelOptions = new ParallelOptions
         {
-            var input = bitmaps[i];
-            var bitmap = input.Bitmap == null ? new SKBitmap(1, 1, true) : input.Bitmap.Copy(input.Bitmap.ColorType);
-            bitmap = MakeTransparentBlack(bitmap);
-            var borderedBitmapTemp = AddBorder(bitmap, 10, SKColors.Black);
-            bitmap.Dispose();
-            var borderedBitmap = AddBorder(borderedBitmapTemp, 10, new SKColor(0, 0, 0, 0));
-            borderedBitmapTemp.Dispose();
-            var tempImage = Path.Combine(folder, input.Index.ToString(CultureInfo.InvariantCulture) + ".png");
-            input.FileName = tempImage;
-            _batchFileNames.Add(input);
-            await File.WriteAllBytesAsync(tempImage, borderedBitmap.ToPngArray(), cancellationToken);
-            borderedBitmap.Dispose();
-        }
+            CancellationToken = cancellationToken,
+            MaxDegreeOfParallelism = Environment.ProcessorCount // Adjust as needed
+        };
+
+        await Parallel.ForEachAsync(bitmaps, parallelOptions, async (input, ct) =>
+        {
+            SKBitmap? bitmap = null;
+            SKBitmap? borderedBitmap = null;
+            try
+            {
+                bitmap = input.Bitmap?.Copy() ?? new SKBitmap(1, 1, true);
+               // bitmap = MakeTransparentBlack(bitmap);
+                borderedBitmap = CreateDoubleBorder(bitmap, 10, SKColors.Black, new SKColor(0, 0, 0, 0));
+                var tempImage = Path.Combine(folder, input.Index.ToString("0000") + ".png");
+                input.FileName = tempImage;
+                batchFileNamesList.Add(input);
+
+                using var image = SKImage.FromBitmap(borderedBitmap);
+                using var data = image.Encode(SKEncodedImageFormat.Png, 90);
+                await File.WriteAllBytesAsync(tempImage, data.ToArray(), ct);
+            }
+            finally
+            {
+                bitmap?.Dispose();
+                borderedBitmap?.Dispose();
+            }
+        });
+
+        // Add all processed items back to the original collection
+        _batchFileNames.AddRange(batchFileNamesList);
 
         var parameters = $"ocr -i \"{folder}\" " +
                     "--use_textline_orientation true " +
@@ -266,11 +218,17 @@ public partial class PaddleOcr
                     $"--textline_orientation_model_dir \"{_clsPath + Path.DirectorySeparatorChar + TextlineOrientationModelName}\" " +
                     $"--textline_orientation_model_name \"{TextlineOrientationModelName}\"";
 
+        string paddleOCRPath = "paddleocr";
+        if (File.Exists(Path.Combine(Se.PaddleOcrFolder, "paddleocr.exe")))
+        {
+            paddleOCRPath = Path.Combine(Se.PaddleOcrFolder, "paddleocr.exe");
+        }
+
         var process = new Process
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = "paddleocr",
+                FileName = paddleOCRPath,
                 Arguments = parameters,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
@@ -297,6 +255,7 @@ public partial class PaddleOcr
         if (process.ExitCode != 0)
         {
             Error = await process.StandardError.ReadToEndAsync(cancellationToken);
+            Se.LogError($"PaddleOCR failed with exit code {process.ExitCode} and error: {Error}");
             return;
         }
 
@@ -321,6 +280,29 @@ public partial class PaddleOcr
         {
             // ignore
         }
+    }
+
+    private static SKBitmap CreateDoubleBorder(SKBitmap source, int borderSize, SKColor innerColor, SKColor outerColor)
+    {
+        var totalBorder = borderSize * 2;
+        var finalWidth = source.Width + totalBorder * 2;
+        var finalHeight = source.Height + totalBorder * 2;
+
+        var result = new SKBitmap(finalWidth, finalHeight);
+        using var canvas = new SKCanvas(result);
+
+        // Clear with outer border color
+        canvas.Clear(outerColor);
+
+        // Draw inner border rectangle
+        using var paint = new SKPaint { Color = innerColor };
+        canvas.DrawRect(borderSize, borderSize,
+                       finalWidth - borderSize * 2, finalHeight - borderSize * 2, paint);
+
+        // Draw original bitmap in center
+        canvas.DrawBitmap(source, totalBorder, totalBorder);
+
+        return result;
     }
 
     private string MakeRecPrefix(string language)
