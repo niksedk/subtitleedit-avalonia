@@ -1536,7 +1536,7 @@ public partial class MainViewModel :
     private void WaveformSetStartAndOffsetTheRest()
     {
         var s = SelectedSubtitle;
-        if (s == null || VideoPlayerControl == null)
+        if (s == null || VideoPlayerControl == null || LockTimeCodes)
         {
             return;
         }
@@ -1567,7 +1567,7 @@ public partial class MainViewModel :
     private void WaveformSetStart()
     {
         var s = SelectedSubtitle;
-        if (s == null || VideoPlayerControl == null)
+        if (s == null || VideoPlayerControl == null || LockTimeCodes)
         {
             return;
         }
@@ -1586,7 +1586,7 @@ public partial class MainViewModel :
     private void WaveformSetEnd()
     {
         var s = SelectedSubtitle;
-        if (s == null || VideoPlayerControl == null)
+        if (s == null || VideoPlayerControl == null || LockTimeCodes)
         {
             return;
         }
@@ -1618,7 +1618,7 @@ public partial class MainViewModel :
     {
         var s = SelectedSubtitle;
         var idx = SelectedSubtitleIndex;
-        if (s == null || idx == null || idx == 0)
+        if (s == null || idx == null || idx == 0 || LockTimeCodes)
         {
             return;
         }
@@ -1636,7 +1636,7 @@ public partial class MainViewModel :
     {
         var s = SelectedSubtitle;
         var idx = SelectedSubtitleIndex;
-        if (s == null || idx == null || idx < Subtitles.Count - 1)
+        if (s == null || idx == null || idx < Subtitles.Count - 1 || LockTimeCodes)
         {
             return;
         }
