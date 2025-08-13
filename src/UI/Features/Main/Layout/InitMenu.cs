@@ -277,7 +277,31 @@ public static class InitMenu
                     Header = l.GenerateTransparent,
                     Command = vm.ShowVideoTransparentSubtitlesCommand,
                 },
-            }
+
+
+                new MenuItem
+                {
+                    Header = Se.Language.General.More,
+                    Items =
+                    {
+                        new MenuItem
+                        {
+                            Header = Se.Language.Video.GenerateBlankVideoDotDotDot,
+                            //Command = vm.ExportBluRaySupCommand,
+                        },
+                        new MenuItem
+                        {
+                            Header = Se.Language.Video.ReEncodeVideoForBetterSubtitlingDotDotDot,
+                            //Command = vm.ExportBluRaySupCommand,
+                        },
+                        new MenuItem
+                        {
+                            Header = Se.Language.Video.CutVideoDotDotDot,
+                            //Command = vm.ExportBluRaySupCommand,
+                        },
+                    }
+                },
+            },
         });
 
         menu.Items.Add(new MenuItem
@@ -308,10 +332,10 @@ public static class InitMenu
             }
         });
 
-        menu.Items.Add(new MenuItem
-        {
-            Header = l.Options,
-            Items =
+menu.Items.Add(new MenuItem
+{
+    Header = l.Options,
+    Items =
             {
                 new MenuItem
                 {
@@ -329,12 +353,12 @@ public static class InitMenu
                     Command = vm.CommandShowSettingsLanguageCommand,
                 },
             },
-        });
+});
 
-        menu.Items.Add(new MenuItem
-        {
-            Header = l.Translate,
-            Items =
+menu.Items.Add(new MenuItem
+{
+    Header = l.Translate,
+    Items =
             {
                 new MenuItem
                 {
@@ -342,12 +366,12 @@ public static class InitMenu
                     Command = vm.CommandShowAutoTranslateCommand,
                 },
             }
-        });
+});
 
-        menu.Items.Add(new MenuItem
-        {
-            Header = l.HelpTitle,
-            Items =
+menu.Items.Add(new MenuItem
+{
+    Header = l.HelpTitle,
+    Items =
             {
                 new MenuItem
                 {
@@ -361,39 +385,39 @@ public static class InitMenu
                     Command = vm.ShowHelpCommand,
                 },
             }
-        });
+});
     }
 
     public static void UpdateRecentFiles(MainViewModel vm)
+{
+    vm.MenuReopen.Items.Clear();
+    if (Se.Settings.File.RecentFiles.Count > 0)
     {
-        vm.MenuReopen.Items.Clear();
-        if (Se.Settings.File.RecentFiles.Count > 0)
+        foreach (var file in Se.Settings.File.RecentFiles)
         {
-            foreach (var file in Se.Settings.File.RecentFiles)
+            var item = new MenuItem
             {
-                var item = new MenuItem
-                {
-                    Header = file.SubtitleFileName,
-                    Command = vm.CommandFileReopenCommand,
-                };
-                item.CommandParameter = file;
-                vm.MenuReopen.Items.Add(item);
-            }
-
-            vm.MenuReopen.Items.Add(new Separator());
-
-            var clearItem = new MenuItem
-            {
-                Header = Se.Language.Main.Menu.ClearRecentFiles,
-                Command = vm.CommandFileClearRecentFilesCommand,
+                Header = file.SubtitleFileName,
+                Command = vm.CommandFileReopenCommand,
             };
-            vm.MenuReopen.Items.Add(clearItem);
+            item.CommandParameter = file;
+            vm.MenuReopen.Items.Add(item);
+        }
 
-            vm.MenuReopen.IsVisible = true;
-        }
-        else
+        vm.MenuReopen.Items.Add(new Separator());
+
+        var clearItem = new MenuItem
         {
-            vm.MenuReopen.IsVisible = false;
-        }
+            Header = Se.Language.Main.Menu.ClearRecentFiles,
+            Command = vm.CommandFileClearRecentFilesCommand,
+        };
+        vm.MenuReopen.Items.Add(clearItem);
+
+        vm.MenuReopen.IsVisible = true;
     }
+    else
+    {
+        vm.MenuReopen.IsVisible = false;
+    }
+}
 }

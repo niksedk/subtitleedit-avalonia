@@ -257,6 +257,9 @@ public class LanguageGeneral
     public string OpenSubtitleFileTitle { get; set; }
     public string OpenOriginalSubtitleFileTitle { get; set; }
     public string SubtitleLoadedX { get; set; }
+    public string Effect { get; set; }
+    public string PickVideoPosition { get; set; }
+    public string More { get; set; }
 
     public LanguageGeneral()
     {
@@ -513,5 +516,8 @@ public class LanguageGeneral
         OpenSubtitleFileTitle = "Open subtitle file";
         OpenOriginalSubtitleFileTitle = "Open original subtitle file";
         SubtitleLoadedX = "Subtitle loaded: {0}";
+        Effect = "Effect";
+        PickVideoPosition = "Pick video position";
+        More = "More";
     }
 }

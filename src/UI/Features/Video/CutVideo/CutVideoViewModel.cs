@@ -10,6 +10,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
@@ -26,9 +27,9 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
 
-namespace Nikse.SubtitleEdit.Features.Video.BurnIn;
+namespace Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
 
-public partial class BurnInViewModel : ObservableObject
+public partial class CutVideoViewModel : ObservableObject
 {
     [ObservableProperty] private string _videoFileName;
     [ObservableProperty] private string _videoFileSize;
@@ -55,24 +56,10 @@ public partial class BurnInViewModel : ObservableObject
     [ObservableProperty] private string _fontAssaInfo;
     [ObservableProperty] private int _videoWidth;
     [ObservableProperty] private int _videoHeight;
-    [ObservableProperty] private ObservableCollection<VideoEncodingItem> _videoEncodings;
-    [ObservableProperty] private VideoEncodingItem _selectedVideoEncoding;
-    [ObservableProperty] private ObservableCollection<PixelFormatItem> _videoPixelFormats;
-    [ObservableProperty] private PixelFormatItem? _selectedVideoPixelFormat;
-    [ObservableProperty] private ObservableCollection<string> _videoPresets;
-    [ObservableProperty] private string? _selectedVideoPreset;
-    [ObservableProperty] private string _videoPresetText;
-    [ObservableProperty] private ObservableCollection<string> _videoCrf;
-    [ObservableProperty] private string? _selectedVideoCrf;
-    [ObservableProperty] private string _videoCrfText;
-    [ObservableProperty] private string _videoCrfHint;
-    [ObservableProperty] private ObservableCollection<string> _audioEncodings;
-    [ObservableProperty] private string _selectedAudioEncoding;
-    [ObservableProperty] private bool _audioIsStereo;
-    [ObservableProperty] private ObservableCollection<string> _audioSampleRates;
-    [ObservableProperty] private string _selectedAudioSampleRate;
-    [ObservableProperty] private ObservableCollection<string> _audioBitRates;
-    [ObservableProperty] private string _selectedAudioBitRate;
+    [ObservableProperty] private ObservableCollection<double> _frameRates;
+    [ObservableProperty] private double _selectedFrameRate;
+    [ObservableProperty] private ObservableCollection<string> _videoExtensions;
+    [ObservableProperty] private string _selectedVideoExtension;
     [ObservableProperty] private string _outputFolder;
     [ObservableProperty] private bool _useOutputFolderVisible;
     [ObservableProperty] private bool _useSourceFolderVisible;
@@ -90,13 +77,9 @@ public partial class BurnInViewModel : ObservableObject
     [ObservableProperty] private bool _isBatchMode;
     [ObservableProperty] private Bitmap? _imagePreview;
     [ObservableProperty] private bool _useSourceResolution;
-    [ObservableProperty] private bool _showAssaOnlyBox;
-    [ObservableProperty] private string _targetVideoBitRateInfo;
-    [ObservableProperty] private string _selectedEffect;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
-    public DataGrid? BatchGrid { get; internal set; }
 
     private Subtitle _subtitle = new();
     private bool _loading = true;
@@ -109,7 +92,6 @@ public partial class BurnInViewModel : ObservableObject
     private readonly Timer _timerGenerate;
     private bool _doAbort;
     private int _jobItemIndex = -1;
-    private FfmpegMediaInfo? _mediaInfo;
     private SubtitleFormat? _subtitleFormat;
     private string _inputVideoFileName;
 
@@ -117,7 +99,8 @@ public partial class BurnInViewModel : ObservableObject
     private readonly IFolderHelper _folderHelper;
     private readonly IFileHelper _fileHelper;
 
-    public BurnInViewModel(IFolderHelper folderHelper, IFileHelper fileHelper, IWindowService windowService)
+    public CutVideoViewModel(IFolderHelper folderHelper, IFileHelper fileHelper,
+        IWindowService windowService)
     {
         _folderHelper = folderHelper;
         _fileHelper = fileHelper;
@@ -125,13 +108,10 @@ public partial class BurnInViewModel : ObservableObject
 
         FontNames = new ObservableCollection<string>(FontHelper.GetSystemFonts());
         SelectedFontName = FontNames.FirstOrDefault(p => p == Se.Settings.Video.BurnIn.FontName) ?? FontNames[0];
-        SelectedEffect = string.Empty;
 
         // font factors between 0-1
         FontFactor = 0.4;
         FontFactorText = string.Empty;
-
-        VideoPresets = new ObservableCollection<string>();
 
         FontBoxTypes = new ObservableCollection<FontBoxItem>
         {
@@ -152,45 +132,17 @@ public partial class BurnInViewModel : ObservableObject
         VideoWidth = 1920;
         VideoHeight = 1080;
 
-        AudioEncodings = new ObservableCollection<string>
+        FrameRates = new ObservableCollection<double> { 23.976, 24, 25, 29.97, 30, 50, 59.94, 60 };
+        SelectedFrameRate = FrameRates[0];
+
+        VideoExtensions = new ObservableCollection<string>
         {
-            "copy",
-            "aac",
-            "ac3",
-            "mp3",
-            "opus",
-            "vorbis",
+            ".mov",
+            ".mkv",
+            ".mp4",
+            ".webm",
         };
-        SelectedAudioEncoding = "copy";
-
-        AudioSampleRates = new ObservableCollection<string>
-        {
-            "44100 Hz",
-            "48000 Hz",
-            "88200 Hz",
-            "96000 Hz",
-            "192000 Hz",
-        };
-        SelectedAudioSampleRate = AudioSampleRates[1];
-
-        AudioBitRates = new ObservableCollection<string>
-        {
-            "64k",
-            "96k",
-            "128k",
-            "160k",
-            "192k",
-            "256k",
-            "320k",
-        };
-        SelectedAudioBitRate = AudioBitRates[2];
-
-        VideoPixelFormats = new ObservableCollection<PixelFormatItem>(PixelFormatItem.PixelFormats);
-
-        VideoEncodings = new ObservableCollection<VideoEncodingItem>(VideoEncodingItem.VideoEncodings);
-        SelectedVideoEncoding = VideoEncodings[0];
-
-        VideoCrf = new ObservableCollection<string>();
+        SelectedVideoExtension = VideoExtensions[0];
 
         JobItems = new ObservableCollection<BurnInJobItem>();
 
@@ -199,11 +151,7 @@ public partial class BurnInViewModel : ObservableObject
         ProgressText = string.Empty;
         FontOutlineText = string.Empty;
         FontShadowText = string.Empty;
-        VideoPresetText = string.Empty;
-        VideoCrfText = string.Empty;
-        VideoCrfHint = string.Empty;
         OutputFolder = string.Empty;
-        TargetVideoBitRateInfo = string.Empty;
 
         _log = new StringBuilder();
         _timerGenerate = new();
@@ -218,7 +166,6 @@ public partial class BurnInViewModel : ObservableObject
         _inputVideoFileName = string.Empty;
         LoadSettings();
         BoxTypeChanged();
-        VideoEncodingChanged();
         UpdateOutputProperties();
     }
 
@@ -232,15 +179,14 @@ public partial class BurnInViewModel : ObservableObject
         var fileExists = !string.IsNullOrWhiteSpace(videoFileName) && File.Exists(videoFileName);
         if (fileExists)
         {
-            SingleMode();
             VideoFileSize = Utilities.FormatBytesToDisplayFileSize(new FileInfo(videoFileName).Length);
             _ = Task.Run(() =>
             {
-                _mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
+                var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
                 Dispatcher.UIThread.Post(() =>
                 {
-                    VideoWidth = _mediaInfo.Dimension.Width;
-                    VideoHeight = _mediaInfo.Dimension.Height;
+                    VideoWidth = mediaInfo.Dimension.Width;
+                    VideoHeight = mediaInfo.Dimension.Height;
                     UseSourceResolution = false;
                 });
             });
@@ -296,7 +242,7 @@ public partial class BurnInViewModel : ObservableObject
         _timerAnalyze.Stop();
 
         var jobItem = JobItems[_jobItemIndex];
-        _ffmpegProcess = GetFfmpegProcess(jobItem, 2);
+        _ffmpegProcess = GetFfmpegProcess(jobItem);
 #pragma warning disable CA1416 // Validate platform compatibility
         _ffmpegProcess.Start();
 #pragma warning restore CA1416 // Validate platform compatibility
@@ -400,7 +346,8 @@ public partial class BurnInViewModel : ObservableObject
             }
             else
             {
-                var sb = new StringBuilder($"Generated files ({JobItems.Count}):" + Environment.NewLine + Environment.NewLine);
+                var sb = new StringBuilder($"Generated files ({JobItems.Count}):" + Environment.NewLine +
+                                           Environment.NewLine);
                 foreach (var item in JobItems)
                 {
                     sb.AppendLine($"{item.OutputVideoFileName} ==> {item.Status}");
@@ -430,130 +377,14 @@ public partial class BurnInViewModel : ObservableObject
         jobItem.Status = Se.Language.General.Generating;
         jobItem.OutputVideoFileName = MakeOutputFileName(jobItem.InputVideoFileName);
 
-        Dispatcher.UIThread.Post(() =>
+        var result = RunEncoding(jobItem);
+        if (result)
         {
-            if (BatchGrid == null || index >= JobItems.Count)
-            {
-                return;
-            }
-
-            BatchGrid.SelectedItem = jobItem;
-            BatchGrid.ScrollIntoView(jobItem, null);
-        });
-
-        bool result;
-        if (jobItem.UseTargetFileSize)
-        {
-            result = RunTwoPassEncoding(jobItem);
-            if (result)
-            {
-                _timerAnalyze.Start();
-            }
-        }
-        else
-        {
-            result = RunOnePassEncoding(jobItem);
-            if (result)
-            {
-                _timerGenerate.Start();
-            }
+            _timerGenerate.Start();
         }
     }
 
-    private bool RunTwoPassEncoding(BurnInJobItem jobItem)
-    {
-        var bitRate = GetVideoBitRate(jobItem);
-        jobItem.VideoBitRate = bitRate.ToString(CultureInfo.InvariantCulture) + "k";
-
-        if (bitRate < 10)
-        {
-            Dispatcher.UIThread.Invoke(async () =>
-            {
-                await MessageBox.Show(Window!,
-                    "Unable to generate video",
-                    $"Bit rate too low: {bitRate}k",
-                    MessageBoxButtons.OK);
-            });
-            return false;
-        }
-
-        _ffmpegProcess = GetFfmpegProcess(jobItem, 1);
-
-#pragma warning disable CA1416 // Validate platform compatibility
-        _ffmpegProcess.Start();
-#pragma warning restore CA1416 // Validate platform compatibility
-        _ffmpegProcess.BeginOutputReadLine();
-        _ffmpegProcess.BeginErrorReadLine();
-        _startTicks = DateTime.UtcNow.Ticks;
-
-        return true;
-    }
-
-    private int GetVideoBitRate(BurnInJobItem item)
-    {
-        var audioMb = 0;
-        if (SelectedAudioEncoding == "copy")
-        {
-            audioMb = GetAudioFileSizeInMb(item);
-        }
-
-        // (MiB * 8192 [converts MiB to kBit]) / video seconds = kBit/s total bitrate
-        var bitRate = (int)Math.Round(((double)TargetFileSize - audioMb) * 8192.0 / item.TotalSeconds);
-        if (SelectedAudioEncoding != "copy" && !string.IsNullOrWhiteSpace(SelectedAudioBitRate))
-        {
-            var audioBitRate = int.Parse(SelectedAudioBitRate.RemoveChar('k').TrimEnd());
-            bitRate -= audioBitRate;
-        }
-
-        return bitRate;
-    }
-
-    private int GetAudioFileSizeInMb(BurnInJobItem item)
-    {
-        var ffmpegLocation = Configuration.Settings.General.FFmpegLocation;
-        if (!Configuration.IsRunningOnWindows && (string.IsNullOrEmpty(ffmpegLocation) || !File.Exists(ffmpegLocation)))
-        {
-            ffmpegLocation = "ffmpeg";
-        }
-
-        var tempFileName = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".aac");
-        var process = new Process
-        {
-            StartInfo =
-            {
-                FileName = ffmpegLocation,
-                Arguments = $"-i \"{item.InputVideoFileName}\" -vn -acodec copy \"{tempFileName}\"",
-                UseShellExecute = false,
-                CreateNoWindow = true,
-            }
-        };
-
-
-#pragma warning disable CA1416
-        _ = process.Start();
-#pragma warning restore CA1416
-        process.WaitForExit();
-        try
-        {
-            var length = (int)Math.Round(new FileInfo(tempFileName).Length / 1024.0 / 1024);
-            try
-            {
-                File.Delete(tempFileName);
-            }
-            catch
-            {
-                // ignore
-            }
-
-            return length;
-        }
-        catch
-        {
-            return 0;
-        }
-    }
-
-    private bool RunOnePassEncoding(BurnInJobItem jobItem)
+    private bool RunEncoding(BurnInJobItem jobItem)
     {
         _ffmpegProcess = GetFfmpegProcess(jobItem);
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -565,60 +396,42 @@ public partial class BurnInViewModel : ObservableObject
         return true;
     }
 
-    private Process GetFfmpegProcess(BurnInJobItem jobItem, int? passNumber = null, bool preview = false)
+    private Process GetFfmpegProcess(BurnInJobItem jobItem)
     {
-        var audioCutTracks = string.Empty;
-        //if (listViewAudioTracks.Visible)
-        //{
-        //    for (var index = 0; index < listViewAudioTracks.Items.Count; index++)
-        //    {
-        //        var listViewItem = listViewAudioTracks.Items[index];
-        //        if (!listViewItem.Checked)
-        //        {
-        //            audioCutTracks += $"-map 0:a:{index} ";
-        //        }
-        //    }
-        //}
+        var totalMs = _subtitle.Paragraphs.Max(p => p.EndTime.TotalMilliseconds);
+        var ts = TimeSpan.FromMilliseconds(totalMs + 2000);
+        var timeCode = string.Format($"{ts.Hours:00}\\\\:{ts.Minutes:00}\\\\:{ts.Seconds:00}");
 
-        var pass = string.Empty;
-        if (passNumber.HasValue)
-        {
-            pass = passNumber.Value.ToString(CultureInfo.InvariantCulture);
-        }
-
-        var cutStart = string.Empty;
-        var cutEnd = string.Empty;
-        if (IsCutActive && !preview)
-        {
-            var start = CutFrom;
-            cutStart = $"-ss {start.Hours:00}:{start.Minutes:00}:{start.Seconds:00}";
-
-            var end = CutTo;
-            var duration = end - start;
-            cutEnd = $"-t {duration.Hours:00}:{duration.Minutes:00}:{duration.Seconds:00}";
-        }
-
-        return VideoPreviewGenerator.GenerateHardcodedVideoFile(
-            jobItem.InputVideoFileName,
+        return VideoPreviewGenerator.GenerateTransparentVideoFile(
             jobItem.AssaSubtitleFileName,
             jobItem.OutputVideoFileName,
             jobItem.Width,
             jobItem.Height,
-            SelectedVideoEncoding.Codec,
-            SelectedVideoPreset ?? string.Empty,
-            SelectedVideoPixelFormat?.Codec ?? string.Empty,
-            SelectedVideoCrf ?? string.Empty,
-            SelectedAudioEncoding,
-            AudioIsStereo,
-            SelectedAudioSampleRate.Replace("Hz", string.Empty).Trim(),
-            string.Empty,
-            SelectedAudioBitRate,
-            pass,
-            jobItem.VideoBitRate,
-            OutputHandler,
-            cutStart,
-            cutEnd,
-            audioCutTracks);
+            SelectedFrameRate.ToString(CultureInfo.InvariantCulture),
+            timeCode,
+            OutputHandler);
+    }
+
+    private Subtitle GetSubtitleBasedOnCut(Subtitle inputSubtitle)
+    {
+        if (!IsCutActive)
+        {
+            return inputSubtitle;
+        }
+
+        var subtitle = new Subtitle();
+        foreach (var p in inputSubtitle.Paragraphs)
+        {
+            if (p.StartTime.TotalMilliseconds >= CutFrom.TotalMilliseconds &&
+                p.EndTime.TotalMilliseconds <= CutTo.TotalMilliseconds)
+            {
+                subtitle.Paragraphs.Add(new Paragraph(p));
+            }
+        }
+
+        subtitle.AddTimeToAllParagraphs(TimeSpan.FromMilliseconds(-CutFrom.TotalMilliseconds));
+
+        return subtitle;
     }
 
     private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
@@ -666,16 +479,10 @@ public partial class BurnInViewModel : ObservableObject
             File.WriteAllText(subtitleFileName, srt.ToText(subtitle, string.Empty));
         }
 
-        _mediaInfo = FfmpegMediaInfo.Parse(VideoFileName);
-        VideoWidth = _mediaInfo.Dimension.Width;
-        VideoHeight = _mediaInfo.Dimension.Height;
-
-        var jobItem = new BurnInJobItem(VideoFileName, _mediaInfo.Dimension.Width, _mediaInfo.Dimension.Height)
+        var jobItem = new BurnInJobItem(string.Empty, VideoWidth, VideoHeight)
         {
             InputVideoFileName = VideoFileName,
-            OutputVideoFileName = MakeOutputFileName(VideoFileName),
-            UseTargetFileSize = UseTargetFileSize,
-            TargetFileSize = TargetFileSize,
+            OutputVideoFileName = MakeOutputFileName(_subtitle.FileName),
         };
         jobItem.AddSubtitleFileName(subtitleFileName);
 
@@ -693,6 +500,8 @@ public partial class BurnInViewModel : ObservableObject
         var isAssa = subtitleFileName.EndsWith(".ass", StringComparison.OrdinalIgnoreCase);
 
         var subtitle = Subtitle.Parse(subtitleFileName);
+
+        subtitle = GetSubtitleBasedOnCut(subtitle);
 
         if (!isAssa)
         {
@@ -744,15 +553,10 @@ public partial class BurnInViewModel : ObservableObject
             "PlayResY: " + ((int)VideoHeight).ToString(CultureInfo.InvariantCulture), "[Script Info]", sub.Header);
     }
 
-    private static string MakeOutputFileName(string videoFileName)
+    private string MakeOutputFileName(string videoFileName)
     {
         var nameNoExt = Path.GetFileNameWithoutExtension(videoFileName);
-        var ext = Path.GetExtension(videoFileName).ToLowerInvariant();
-        if (ext != ".mp4" && ext != ".mkv")
-        {
-            ext = ".mkv";
-        }
-
+        var ext = SelectedVideoExtension;
         var suffix = Se.Settings.Video.BurnIn.BurnInSuffix;
         var fileName = Path.Combine(Path.GetDirectoryName(videoFileName)!, nameNoExt + suffix + ext);
         if (Se.Settings.Video.BurnIn.UseOutputFolder &&
@@ -772,7 +576,8 @@ public partial class BurnInViewModel : ObservableObject
         return fileName;
     }
 
-    public static int CalculateFontSize(int videoWidth, int videoHeight, double factor, int minSize = 8, int maxSize = 2000)
+    public static int CalculateFontSize(int videoWidth, int videoHeight, double factor, int minSize = 8,
+        int maxSize = 2000)
     {
         factor = Math.Clamp(factor, 0, 1);
 
@@ -791,82 +596,20 @@ public partial class BurnInViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task Help()
-    {
-        var codec = SelectedVideoEncoding.Codec;
-
-        if (codec == "libx265")
-        {
-            await Window!.Launcher.LaunchUriAsync(new Uri("http://trac.ffmpeg.org/wiki/Encode/H.265"));
-        }
-        else if (codec == "libvpx-vp9")
-        {
-            await Window!.Launcher.LaunchUriAsync(new Uri("http://trac.ffmpeg.org/wiki/Encode/VP9"));
-        }
-        else if (codec is "h264_nvenc" or "hevc_nvenc")
-        {
-            await Window!.Launcher.LaunchUriAsync(new Uri("https://trac.ffmpeg.org/wiki/HWAccelIntro"));
-        }
-        else if (codec == "prores_ks")
-        {
-            await Window!.Launcher.LaunchUriAsync(new Uri("https://ottverse.com/ffmpeg-convert-to-apple-prores-422-4444-hq"));
-        }
-        else if (codec.Contains("av1"))
-        {
-            await Window!.Launcher.LaunchUriAsync(new Uri("https://trac.ffmpeg.org/wiki/Encode/AV1"));
-        }
-        else
-        {
-            await Window!.Launcher.LaunchUriAsync(new Uri("http://trac.ffmpeg.org/wiki/Encode/H.264"));
-        }
-    }
-
-    [RelayCommand]
     private async Task Add()
     {
-        var fileNames = await _fileHelper.PickOpenVideoFiles(Window!, Se.Language.General.AddVideoFiles);
-        if (fileNames == null || fileNames.Length == 0)
+        var fileNames = await _fileHelper.PickOpenSubtitleFiles(Window!, Se.Language.General.OpenSubtitles);
+        if (fileNames.Length == 0)
         {
             return;
         }
 
-        var error = false;
-
         foreach (var fileName in fileNames)
         {
-            var mediaInfo = FfmpegMediaInfo.Parse(fileName);
-            var fileInfo = new FileInfo(fileName);
-
-            if (mediaInfo.Duration == null || mediaInfo.Dimension.Width == 0 || mediaInfo.Dimension.Height == 0)
-            {
-                error = true;
-            }
-            else
-            {
-
-                var jobItem = new BurnInJobItem(fileName, mediaInfo.Dimension.Width, mediaInfo.Dimension.Height)
-                {
-                    OutputVideoFileName = MakeOutputFileName(fileName),
-                    TotalFrames = mediaInfo.GetTotalFrames(),
-                    TotalSeconds = mediaInfo.Duration.TotalSeconds,
-                    Width = mediaInfo.Dimension.Width,
-                    Height = mediaInfo.Dimension.Height,
-                    Size = Utilities.FormatBytesToDisplayFileSize(fileInfo.Length),
-                    Resolution = mediaInfo.Dimension.ToString(),
-                };
-                jobItem.AddSubtitleFileName(TryGetSubtitleFileName(fileName));
-
-                Dispatcher.UIThread.Invoke(() => { JobItems.Add(jobItem); });
-            }
-        }
-
-        if (error)
-        {
-            await MessageBox.Show(Window!,
-                    "Unable to get video info",
-                    "File skipped as video info was unavailable",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+            var videoFileName = string.Empty;
+            var jobItem = new BurnInJobItem(videoFileName, VideoWidth, VideoHeight);
+            jobItem.AddSubtitleFileName(fileName);
+            Dispatcher.UIThread.Invoke(() => { JobItems.Add(jobItem); });
         }
     }
 
@@ -893,18 +636,18 @@ public partial class BurnInViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task PickSubtitle()
+    private async Task PickVideoFile()
     {
         if (SelectedJobItem == null)
         {
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, "Open subtitle file", false);
+        var fileName = await _fileHelper.PickOpenVideoFile(Window!, "Open video file");
         if (!string.IsNullOrEmpty(fileName))
         {
-            SelectedJobItem.SubtitleFileName = fileName;
-            SelectedJobItem.SubtitleFileNameShort = Path.GetFileName(fileName);
+            SelectedJobItem.InputVideoFileName = fileName;
+            SelectedJobItem.InputVideoFileName = Path.GetFileName(fileName);
         }
     }
 
@@ -918,7 +661,9 @@ public partial class BurnInViewModel : ObservableObject
     [RelayCommand]
     private async Task BrowseResolution()
     {
-        var result = await _windowService.ShowDialogAsync<BurnInResolutionPickerWindow, BurnInResolutionPickerViewModel>(Window!);
+        var result =
+            await _windowService
+                .ShowDialogAsync<BurnInResolutionPickerWindow, BurnInResolutionPickerViewModel>(Window!);
         if (!result.OkPressed || result.SelectedResolution == null)
         {
             return;
@@ -926,7 +671,7 @@ public partial class BurnInViewModel : ObservableObject
 
         if (result.SelectedResolution.ItemType == ResolutionItemType.PickResolution)
         {
-            var videoFileName = await _fileHelper.PickOpenVideoFile(Window!, Se.Language.General.OpenVideoFileTitle);
+            var videoFileName = await _fileHelper.PickOpenVideoFile(Window!, "Open video file");
             if (string.IsNullOrWhiteSpace(videoFileName))
             {
                 return;
@@ -954,10 +699,9 @@ public partial class BurnInViewModel : ObservableObject
     [RelayCommand]
     private async Task BrowseCutFrom()
     {
-        var result = await _windowService.ShowDialogAsync<SelectVideoPositionWindow, SelectVideoPositionViewModel>(Window!, vm =>
-        {
-            vm.Initialize(VideoFileName);
-        });
+        var result =
+            await _windowService.ShowDialogAsync<SelectVideoPositionWindow, SelectVideoPositionViewModel>(Window!,
+                vm => { vm.Initialize(VideoFileName); });
 
         if (!result.OkPressed)
         {
@@ -970,10 +714,9 @@ public partial class BurnInViewModel : ObservableObject
     [RelayCommand]
     private async Task BrowseCutTo()
     {
-        var result = await _windowService.ShowDialogAsync<SelectVideoPositionWindow, SelectVideoPositionViewModel>(Window!, vm =>
-        {
-            vm.Initialize(VideoFileName);
-        });
+        var result =
+            await _windowService.ShowDialogAsync<SelectVideoPositionWindow, SelectVideoPositionViewModel>(Window!,
+                vm => { vm.Initialize(VideoFileName); });
 
         if (!result.OkPressed)
         {
@@ -1086,9 +829,6 @@ public partial class BurnInViewModel : ObservableObject
     {
         IsBatchMode = false;
         IsSingleModeVisible = false;
-
-        var isAssa = _subtitleFormat is { Name: AdvancedSubStationAlpha.NameOfFormat };
-        ShowAssaOnlyBox = isAssa;
     }
 
     [RelayCommand]
@@ -1096,7 +836,6 @@ public partial class BurnInViewModel : ObservableObject
     {
         IsBatchMode = true;
         IsSingleModeVisible = !string.IsNullOrEmpty(_inputVideoFileName);
-        ShowAssaOnlyBox = false;
     }
 
     [RelayCommand]
@@ -1116,21 +855,6 @@ public partial class BurnInViewModel : ObservableObject
         }
 
         Window?.Close();
-    }
-
-    [RelayCommand]
-    private async Task ShowEffects()
-    {
-        var result = await _windowService.ShowDialogAsync<BurnInEffectWindow, BurnInEffectViewModel>(Window!, vm =>
-        {
-          //  vm.Initialize(VideoFileName);
-        });
-
-        if (!result.OkPressed)
-        {
-            return;
-        }
-
     }
 
     internal void OnKeyDown(KeyEventArgs e)
@@ -1179,251 +903,17 @@ public partial class BurnInViewModel : ObservableObject
         return string.Empty;
     }
 
-    internal void VideoEncodingChanged(object? sender, SelectionChangedEventArgs e)
-    {
-        VideoEncodingChanged();
-    }
-
-    private void VideoEncodingChanged()
-    {
-        if (_loading)
-        {
-            return;
-        }
-
-        FillPreset(SelectedVideoEncoding.Codec);
-        FillCrf(SelectedVideoEncoding.Codec);
-    }
-
-    private void FillPreset(string videoCodec)
-    {
-        VideoPresetText = "Preset";
-        SelectedVideoPreset = null;
-
-        var items = new List<string>
-        {
-            "ultrafast",
-            "superfast",
-            "veryfast",
-            "faster",
-            "fast",
-            "medium",
-            "slow",
-            "slower",
-            "veryslow",
-        };
-
-        var defaultItem = "medium";
-
-        if (videoCodec == "h264_nvenc")
-        {
-            items = new List<string>
-            {
-                "default",
-                "slow",
-                "medium",
-                "fast",
-                "hp",
-                "hq",
-                "bd",
-                "ll",
-                "llhq",
-                "llhp",
-                "lossless",
-                "losslesshp",
-                "p1",
-                "p2",
-                "p3",
-                "p4",
-                "p5",
-                "p6",
-                "p7",
-            };
-        }
-        else if (videoCodec == "hevc_nvenc")
-        {
-            items = new List<string>
-            {
-                "default",
-                "slow",
-                "medium",
-                "fast",
-                "hp",
-                "hq",
-                "bd",
-                "ll",
-                "llhq",
-                "llhp",
-                "lossless",
-                "losslesshp",
-                "p1",
-                "p2",
-                "p3",
-                "p4",
-                "p5",
-                "p6",
-                "p7",
-            };
-        }
-        else if (videoCodec == "h264_amf")
-        {
-            items = new List<string> { string.Empty };
-        }
-        else if (videoCodec == "hevc_amf")
-        {
-            items = new List<string> { string.Empty };
-        }
-        else if (videoCodec == "libvpx-vp9")
-        {
-            items = new List<string> { string.Empty };
-        }
-        else if (videoCodec == "prores_ks")
-        {
-            items = new List<string>
-            {
-                "proxy",
-                "lt",
-                "standard",
-                "hq",
-                "4444",
-                "4444xq",
-            };
-
-            defaultItem = "standard";
-
-            VideoPresetText = "Profile";
-        }
-        else if (videoCodec.Contains("av1"))
-        {
-            items = new List<string>
-            {
-                "",
-                "1",
-                "2",
-                "3",
-                "4",
-                "5",
-                "6",
-                "7",
-                "8",
-                "9",
-                "10",
-                "11",
-                "12",
-                "13",
-            };
-
-            defaultItem = string.Empty;
-
-            VideoPresetText = Se.Language.Video.BurnIn.Preset;
-        }
-
-        VideoPresets.Clear();
-        VideoPresets.AddRange(items);
-        if (VideoPresets.Contains(defaultItem))
-        {
-            SelectedVideoPreset = defaultItem;
-        }
-    }
-
-    public void FillCrf(string videoCodec)
-    {
-        SelectedVideoCrf = null;
-        VideoCrfText = "CRF";
-        VideoCrfHint = string.Empty;
-
-        var items = new List<string> { " " };
-
-        if (videoCodec == "libx265")
-        {
-            for (var i = 0; i < 51; i++)
-            {
-                items.Add(i.ToString(CultureInfo.InvariantCulture));
-            }
-
-            VideoCrf.Clear();
-            VideoCrf.AddRange(items);
-            SelectedVideoCrf = "28";
-        }
-        else if (videoCodec == "libvpx-vp9")
-        {
-            for (var i = 4; i <= 63; i++)
-            {
-                items.Add(i.ToString(CultureInfo.InvariantCulture));
-            }
-
-            VideoCrf.Clear();
-            VideoCrf.AddRange(items);
-            SelectedVideoCrf = "10";
-        }
-        else if (videoCodec == "h264_nvenc" ||
-                 videoCodec == "hevc_nvenc")
-        {
-            for (var i = 0; i <= 51; i++)
-            {
-                items.Add(i.ToString(CultureInfo.InvariantCulture));
-            }
-
-            VideoCrfText = "CQ";
-            VideoCrfHint = "0=best quality, 51=best speed";
-            VideoCrf.Clear();
-            VideoCrf.AddRange(items);
-            SelectedVideoCrf = null;
-        }
-        else if (videoCodec == "h264_amf" ||
-                 videoCodec == "hevc_amf")
-        {
-            for (var i = 0; i <= 10; i++)
-            {
-                items.Add(i.ToString(CultureInfo.InvariantCulture));
-            }
-
-            VideoCrfText = "Quality";
-            VideoCrfHint = "0=best quality, 10=best speed";
-            VideoCrf.Clear();
-            VideoCrf.AddRange(items);
-            SelectedVideoCrf = null;
-        }
-        else if (videoCodec.Contains("av1"))
-        {
-            for (var i = 0; i <= 63; i++)
-            {
-                items.Add(i.ToString(CultureInfo.InvariantCulture));
-            }
-            VideoCrf.Clear();
-            VideoCrf.AddRange(items);
-            SelectedVideoCrf = "30";
-        }
-        else if (videoCodec == "prores_ks")
-        {
-            items = new List<string>();
-            VideoCrf.Clear();
-            VideoCrf.AddRange(items);
-        }
-        else
-        {
-            for (var i = 17; i <= 28; i++)
-            {
-                items.Add(i.ToString(CultureInfo.InvariantCulture));
-            }
-
-            VideoCrf.Clear();
-            VideoCrf.AddRange(items);
-            SelectedVideoCrf = "23";
-        }
-    }
-
     private void UpdateOutputProperties()
     {
-        if (Se.Settings.Video.BurnIn.UseOutputFolder &&
-            string.IsNullOrWhiteSpace(Se.Settings.Video.BurnIn.OutputFolder))
+        if (Se.Settings.Video.Transparent.UseOutputFolder &&
+            string.IsNullOrWhiteSpace(Se.Settings.Video.Transparent.OutputFolder))
         {
-            Se.Settings.Video.BurnIn.UseOutputFolder = true;
+            Se.Settings.Video.Transparent.UseOutputFolder = true;
         }
 
-        UseSourceFolderVisible = !Se.Settings.Video.BurnIn.UseOutputFolder;
-        UseOutputFolderVisible = Se.Settings.Video.BurnIn.UseOutputFolder;
-        OutputFolder = Se.Settings.Video.BurnIn.OutputFolder;
+        UseSourceFolderVisible = !Se.Settings.Video.Transparent.UseOutputFolder;
+        UseOutputFolderVisible = Se.Settings.Video.Transparent.UseOutputFolder;
+        OutputFolder = Se.Settings.Video.Transparent.OutputFolder;
     }
 
     public void BoxTypeChanged(object? sender, SelectionChangedEventArgs e)
@@ -1465,7 +955,7 @@ public partial class BurnInViewModel : ObservableObject
 
         if (_subtitleFormat is { Name: AdvancedSubStationAlpha.NameOfFormat } && !IsBatchMode)
         {
-            ImagePreview = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
+            ImagePreview = new SKBitmap(1, 1).ToAvaloniaBitmap();
             return;
         }
 
@@ -1489,7 +979,9 @@ public partial class BurnInViewModel : ObservableObject
 
             if (SelectedFontShadowWidth > 0)
             {
-                bitmap = TextToImageGenerator.AddShadowToBitmap(bitmap, (int)Math.Round(SelectedFontShadowWidth, MidpointRounding.AwayFromZero), FontShadowColor.ToSKColor());
+                bitmap = TextToImageGenerator.AddShadowToBitmap(bitmap,
+                    (int)Math.Round(SelectedFontShadowWidth, MidpointRounding.AwayFromZero),
+                    FontShadowColor.ToSKColor());
             }
         }
         else if (SelectedFontBoxType.BoxType == FontBoxType.OneBox)
@@ -1549,124 +1041,5 @@ public partial class BurnInViewModel : ObservableObject
     internal void TextBoxChanged(object? sender, TextChangedEventArgs e)
     {
         UpdateNonAssaPreview();
-    }
-
-    private int GetAudioFileSizeInMb()
-    {
-        var ffmpegLocation = Configuration.Settings.General.FFmpegLocation;
-        if (!Configuration.IsRunningOnWindows && (string.IsNullOrEmpty(ffmpegLocation) || !File.Exists(ffmpegLocation)))
-        {
-            ffmpegLocation = "ffmpeg";
-        }
-
-        var tempFileName = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".aac");
-        var process = new Process
-        {
-            StartInfo =
-                {
-                    FileName = ffmpegLocation,
-                    Arguments = $"-i \"{_inputVideoFileName}\" -vn -acodec copy \"{tempFileName}\"",
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                }
-        };
-
-        process.Start();
-        process.WaitForExit();
-        try
-        {
-            var length = (int)Math.Round(new FileInfo(tempFileName).Length / 1024.0 / 1024);
-            try
-            {
-                File.Delete(tempFileName);
-            }
-            catch
-            {
-                // ignore
-            }
-
-            return length;
-        }
-        catch
-        {
-            return 0;
-        }
-    }
-
-    private int GetVideoBitRate()
-    {
-        var audioMb = 0;
-        if (SelectedAudioEncoding == "copy")
-        {
-            audioMb = GetAudioFileSizeInMb();
-        }
-
-        if (_mediaInfo == null || _mediaInfo.Duration == null)
-        {
-            return 0; // Avoid division by zero
-        }
-
-        // (MiB * 8192 [converts MiB to kBit]) / video seconds = kBit/s total bitrate
-        var bitRate = (int)Math.Round(((double)TargetFileSize - audioMb) * 8192.0 / _mediaInfo.Duration.TotalSeconds);
-        if (SelectedAudioEncoding != "copy" && !string.IsNullOrWhiteSpace(SelectedAudioBitRate))
-        {
-            var audioBitRate = int.Parse(SelectedAudioBitRate.RemoveChar('k').TrimEnd());
-            bitRate -= audioBitRate;
-        }
-
-        return bitRate;
-    }
-
-
-    internal void CalculateTargetFileBitRate()
-    {
-        TargetVideoBitRateInfo = string.Empty;
-
-        if (!UseTargetFileSize || _mediaInfo == null)
-        {
-            return;
-        }
-
-        var videoBitRate = GetVideoBitRate();
-        if (videoBitRate <= 0)
-        {
-            return;
-        }
-
-        var separateAudio = SelectedAudioEncoding != "copy" && !string.IsNullOrWhiteSpace(SelectedAudioBitRate);
-        var audioBitRate = 0;
-        if (separateAudio)
-        {
-            audioBitRate = int.Parse(SelectedAudioBitRate.RemoveChar('k').TrimEnd());
-        }
-
-        if (SelectedAudioEncoding == "copy")
-        {
-            var audioTrack = _mediaInfo.Tracks.FirstOrDefault(p => p.TrackType == FfmpegTrackType.Audio);
-            if (audioTrack?.BitRate > 0)
-            {
-                audioBitRate = audioTrack.BitRate / 1024;
-            }
-            else
-            {
-                return;
-            }
-        }
-
-        TargetVideoBitRateInfo = string.Format(Se.Language.Video.BurnIn.TotalBitRateX, $"{(videoBitRate + audioBitRate):#,###,##0}k");
-        if (separateAudio)
-        {
-            TargetVideoBitRateInfo += $" ({videoBitRate:#,###,##0}k + {audioBitRate:#,###,##0}k)";
-        }
-    }
-
-    internal void NumericUpDownTargetFileSizeChanged(object? sender, NumericUpDownValueChangedEventArgs e)
-    {
-        CalculateTargetFileBitRate();
-    }
-
-    internal void CheckBoxTargetFileChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
-    {
-        CalculateTargetFileBitRate();
     }
 }

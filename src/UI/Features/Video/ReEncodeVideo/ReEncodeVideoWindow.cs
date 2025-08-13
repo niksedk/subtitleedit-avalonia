@@ -7,21 +7,21 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Controls;
+using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
-using System;
 
-namespace Nikse.SubtitleEdit.Features.Video.BurnIn;
+namespace Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
 
-public class BurnInWindow : Window
+public class ReEncodeVideoWindow : Window
 {
-    private readonly BurnInViewModel _vm;
+    private readonly ReEncodeVideoViewModel _vm;
 
-    public BurnInWindow(BurnInViewModel vm)
+    public ReEncodeVideoWindow(ReEncodeVideoViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = Se.Language.Video.BurnIn.Title;
+        Title = Se.Language.Video.VideoTransparent.Title;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 
@@ -33,9 +33,7 @@ public class BurnInWindow : Window
         var videoSettingsView = MakeVideoSettingsView(vm);
         var cutView = MakeCutView(vm);
         var previewView = MakePreviewView(vm);
-        var audioSettingsView = MakeAudioSettingsView(vm);
         var batchView = MakeBatchView(vm);
-        var targetFileSizeView = MakeTargetFileSizeView(vm);
         var videoInfoView = MakeVideoInfoView(vm);
         var progressView = MakeProgressView(vm);
 
@@ -44,14 +42,12 @@ public class BurnInWindow : Window
         var buttonBatchMode = UiUtil.MakeButton(Se.Language.General.BatchMode, vm.BatchModeCommand)
             .WithBindIsVisible(nameof(vm.IsBatchMode), new InverseBooleanConverter())
             .WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
-        var buttonHelp = UiUtil.MakeButton(Se.Language.General.Help, vm.HelpCommand);
         var buttonSingleMode = UiUtil.MakeButton(Se.Language.General.SingleMode, vm.SingleModeCommand)
             .WithBindIsVisible(nameof(vm.IsSingleModeVisible))
             .WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand).WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
         var buttonPanel = UiUtil.MakeButtonBar(
             buttonGenerate,
-            buttonHelp,
             buttonBatchMode,
             buttonSingleMode,
             buttonOk,
@@ -65,15 +61,14 @@ public class BurnInWindow : Window
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // target file size + video info
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // subtitle settings (lower) + preview
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // progress bar
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // buttons
             },
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) }, // subtitle/video settings
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) }, // cut/preview/audio settings
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) }, // cut/preview/video info
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }, // batch mode
             },
             Margin = UiUtil.MakeWindowMargin(),
@@ -85,19 +80,17 @@ public class BurnInWindow : Window
         grid.Add(videoSettingsView, 2, 0);
         grid.Add(cutView, 0, 1);
         grid.Add(previewView, 1, 1);
-        grid.Add(audioSettingsView, 2, 1);
         grid.Add(batchView, 0, 3, 3, 1);
-        grid.Add(targetFileSizeView, 4, 0);
-        grid.Add(videoInfoView, 4, 1);
-        grid.Add(progressView, 5, 0, 1, 3);
-        grid.Add(buttonPanel, 6, 0, 1, 3);
+        grid.Add(videoInfoView, 2, 1);
+        grid.Add(progressView, 4, 0, 1, 3);
+        grid.Add(buttonPanel, 5, 0, 1, 3);
 
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 
-    private static Border MakeSubtitlesView(BurnInViewModel vm)
+    private static Border MakeSubtitlesView(ReEncodeVideoViewModel vm)
     {
         var labelFontName = UiUtil.MakeLabel(Se.Language.General.FontName);
         var comboBoxFontName = UiUtil.MakeComboBox(vm.FontNames, vm, nameof(vm.SelectedFontName))
@@ -194,20 +187,8 @@ public class BurnInWindow : Window
             }
         };
 
-        var labelEffect = UiUtil.MakeLabel(Se.Language.General.Effect);
-        var labelSelectedEffect = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.SelectedEffect));
-        var buttonEffect = UiUtil.MakeButton(vm.ShowEffectsCommand, IconNames.MdiSettings).WithMarginLeft(5);
-        var panelEffect = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            VerticalAlignment = VerticalAlignment.Center,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Children =
-            {
-                labelSelectedEffect,
-                buttonEffect,
-            }
-        };  
+        var checkBoxFixRightToLeft = UiUtil.MakeCheckBox(Se.Language.Video.BurnIn.FixRightToLeft, vm, nameof(vm.FontFixRtl));
+        checkBoxFixRightToLeft.PropertyChanged += vm.CheckBoxChanged;
 
         var grid = new Grid
         {
@@ -261,40 +242,12 @@ public class BurnInWindow : Window
         grid.Add(labelMargin, 8, 0);
         grid.Add(panelMargin, 8, 1);
 
-        grid.Add(labelEffect, 9, 0);
-        grid.Add(panelEffect, 9, 1);
-
-        var panel = new Grid
-        {
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            Width = double.NaN,
-            Height = double.NaN,
-            Background = Brushes.Black,
-            Opacity = 0.8,
-            Children =
-            {
-                new Label
-                {
-                    Content = "Current ASSA style will be used" + Environment.NewLine +
-                    Environment.NewLine +
-                    "Change subtitle format if"+ Environment.NewLine + 
-                    "you want to set styles here",
-                    FontWeight = FontWeight.Bold,
-                    FontSize = 22,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    HorizontalContentAlignment = HorizontalAlignment.Center,
-                    VerticalContentAlignment = VerticalAlignment.Center
-                },
-            }
-        }.WithBindVisible(vm, nameof(vm.ShowAssaOnlyBox));
-        grid.Add(panel, 0, 0, 10, 2);
+        grid.Add(checkBoxFixRightToLeft, 9, 1);
 
         return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5).WithMarginRight(5);
     }
 
-    private static Border MakeVideoSettingsView(BurnInViewModel vm)
+    private static Border MakeVideoSettingsView(ReEncodeVideoViewModel vm)
     {
         var labelResolution = UiUtil.MakeLabel(Se.Language.General.Resolution);
         var textBoxWidth = UiUtil.MakeTextBox(100, vm, nameof(vm.VideoWidth));
@@ -327,44 +280,16 @@ public class BurnInWindow : Window
             }
         }.WithBindVisible(vm, nameof(vm.UseSourceResolution));
 
-        var labelEncoding = UiUtil.MakeLabel(Se.Language.General.Encoding);
-        var comboBoxEncoding = UiUtil.MakeComboBox(vm.VideoEncodings, vm, nameof(vm.SelectedVideoEncoding));
-        comboBoxEncoding.SelectionChanged += vm.VideoEncodingChanged;
+        var labelFrameRate = UiUtil.MakeLabel(Se.Language.General.FrameRate);
+        var comboBoxFrameRate = UiUtil.MakeComboBox(vm.FrameRates, vm, nameof(vm.SelectedFrameRate));
 
-        var labelPreset = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.VideoPresetText));
-        var comboBoxPreset = UiUtil.MakeComboBox(vm.VideoPresets, vm, nameof(vm.SelectedVideoPreset));
-
-        var labelCrf = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.VideoCrfText));
-        var comboBoxCrf = UiUtil.MakeComboBox(vm.VideoCrf, vm, nameof(vm.SelectedVideoCrf));
-        var labelCrfHint = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.VideoCrfHint)).WithMarginLeft(5);
-        labelCrfHint.FontSize = 10;
-        labelCrfHint.Opacity = 0.7;
-        var panelCrf = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            VerticalAlignment = VerticalAlignment.Center,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Children =
-            {
-                comboBoxCrf,
-                labelCrfHint
-            }
-        };
-
-        var labelPixelFormat = UiUtil.MakeLabel(Se.Language.Video.BurnIn.PixelFormat);
-        var comboBoxPixelFormat = UiUtil.MakeComboBox(vm.VideoPixelFormats, vm, nameof(vm.SelectedVideoPixelFormat));
+        var labelVideoExtension = UiUtil.MakeLabel(Se.Language.General.VideoExtension);
+        var comboBoxVideoExtensions = UiUtil.MakeComboBox(vm.VideoExtensions, vm, nameof(vm.SelectedVideoExtension));
 
         var grid = new Grid
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
@@ -384,22 +309,16 @@ public class BurnInWindow : Window
         grid.Add(panelResolution, 0, 1);
         grid.Add(panelResolutionSource, 0, 1);
 
-        grid.Add(labelEncoding, 1, 0);
-        grid.Add(comboBoxEncoding, 1, 1);
+        grid.Add(labelFrameRate, 1, 0);
+        grid.Add(comboBoxFrameRate, 1, 1);
 
-        grid.Add(labelPreset, 2, 0);
-        grid.Add(comboBoxPreset, 2, 1);
-
-        grid.Add(labelCrf, 3, 0);
-        grid.Add(panelCrf, 3, 1);
-
-        grid.Add(labelPixelFormat, 4, 0);
-        grid.Add(comboBoxPixelFormat, 4, 1);
+        grid.Add(labelVideoExtension, 2, 0);
+        grid.Add(comboBoxVideoExtensions, 2, 1);
 
         return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5).WithMarginRight(5);
     }
 
-    private static Border MakeCutView(BurnInViewModel vm)
+    private static Border MakeCutView(ReEncodeVideoViewModel vm)
     {
         var checkBoxCut = UiUtil.MakeCheckBox(Se.Language.Video.BurnIn.Cut, vm, nameof(vm.IsCutActive));
 
@@ -452,10 +371,10 @@ public class BurnInWindow : Window
         grid.Add(labelToTime, 4, 0);
         grid.Add(timeUpDownTo, 4, 1);
 
-        return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5).WithMarginRight(5);
+        return UiUtil.MakeBorderForControl(grid).WithMarginRight(5);
     }
 
-    private static Border MakePreviewView(BurnInViewModel vm)
+    private static Border MakePreviewView(ReEncodeVideoViewModel vm)
     {
 
         var labelPreview = UiUtil.MakeLabel(Se.Language.General.Preview);
@@ -503,60 +422,7 @@ public class BurnInWindow : Window
         return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5).WithMarginRight(5);
     }
 
-    private static Border MakeAudioSettingsView(BurnInViewModel vm)
-    {
-        var labelAudioEncoding = UiUtil.MakeLabel(Se.Language.Video.BurnIn.AudioEncoding);
-        var comboBoxAudioEncoding = UiUtil.MakeComboBox(vm.AudioEncodings, vm, nameof(vm.SelectedAudioEncoding));
-
-        var checkBoxStereo = UiUtil.MakeCheckBox(Se.Language.Video.BurnIn.Stereo, vm, nameof(vm.AudioIsStereo));
-
-        var labelSampleRate = UiUtil.MakeLabel(Se.Language.Video.BurnIn.SampleRate);
-        var comboBoxSampleRate = UiUtil.MakeComboBox(vm.AudioSampleRates, vm, nameof(vm.SelectedAudioSampleRate));
-
-        var labelBitRate = UiUtil.MakeLabel(Se.Language.Video.BurnIn.BitRate);
-        var comboBoxBitRate = UiUtil.MakeComboBox(vm.AudioBitRates, vm, nameof(vm.SelectedAudioBitRate));
-
-        var grid = new Grid
-        {
-            RowDefinitions =
-            {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-            },
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-            },
-            ColumnSpacing = 5,
-            RowSpacing = 5,
-            Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-        };
-
-        grid.Add(labelAudioEncoding, 0, 0);
-        grid.Add(comboBoxAudioEncoding, 0, 1);
-
-        grid.Add(checkBoxStereo, 1, 1);
-
-        grid.Add(labelSampleRate, 2, 0);
-        grid.Add(comboBoxSampleRate, 2, 1);
-
-        grid.Add(labelBitRate, 3, 0);
-        grid.Add(comboBoxBitRate, 3, 1);
-
-        return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5).WithMarginRight(5);
-    }
-
-    private static Border MakeBatchView(BurnInViewModel vm)
+    private static Border MakeBatchView(ReEncodeVideoViewModel vm)
     {
         var dataGrid = new DataGrid
         {
@@ -574,9 +440,9 @@ public class BurnInWindow : Window
             {
                 new DataGridTextColumn
                 {
-                    Header = Se.Language.General.FileName,
+                    Header = Se.Language.General.SubtitleFileName,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(BurnInJobItem.InputVideoFileNameShort)),
+                    Binding = new Binding(nameof(BurnInJobItem.SubtitleFileNameShort)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
@@ -588,9 +454,9 @@ public class BurnInWindow : Window
                 },
                 new DataGridTextColumn
                 {
-                    Header = Se.Language.General.SubtitleFile,
+                    Header = Se.Language.General.VideoFile,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(BurnInJobItem.SubtitleFileNameShort)),
+                    Binding = new Binding(nameof(BurnInJobItem.InputVideoFileNameShort)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
@@ -603,12 +469,11 @@ public class BurnInWindow : Window
             },
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedJobItem)) { Source = vm });
-        vm.BatchGrid = dataGrid;    
 
         var buttonAdd = UiUtil.MakeButton(Se.Language.General.AddDotDotDot, vm.AddCommand);
         var buttonRemove = UiUtil.MakeButton(Se.Language.General.Remove, vm.RemoveCommand);
         var buttonClear = UiUtil.MakeButton(Se.Language.General.Clear, vm.ClearCommand);
-        var buttonPickSubtitle = UiUtil.MakeButton(Se.Language.General.PickSubtitleFile, vm.PickSubtitleCommand);
+        var buttonPickSubtitle = UiUtil.MakeButton(Se.Language.General.PickVideoFile, vm.PickVideoFileCommand);
 
         var panelFileControls = new StackPanel
         {
@@ -672,57 +537,7 @@ public class BurnInWindow : Window
             .WithMarginBottom(5);
     }
 
-    private static Border MakeTargetFileSizeView(BurnInViewModel vm)
-    {
-        var checkBoxUseTargetFileSize = UiUtil.MakeCheckBox(Se.Language.Video.BurnIn.TargetFileSize, vm, nameof(vm.UseTargetFileSize));
-        checkBoxUseTargetFileSize.PropertyChanged += vm.CheckBoxTargetFileChanged;
-
-        var labelTargetFileSize = UiUtil.MakeLabel(Se.Language.Video.BurnIn.FileSizeMb);
-        var numericUpDownTargetFileSize = UiUtil.MakeNumericUpDownInt(1, 1000_000_000, 150, vm, nameof(vm.TargetFileSize));
-        numericUpDownTargetFileSize.ValueChanged += vm.NumericUpDownTargetFileSizeChanged;
-        var labelVideoBitRate = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.TargetVideoBitRateInfo));
-        labelVideoBitRate.FontSize = 10;
-        labelVideoBitRate.Opacity = 0.7;
-        var panelTargetFileSize = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            VerticalAlignment = VerticalAlignment.Center,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Children =
-            {
-                numericUpDownTargetFileSize,
-                labelVideoBitRate
-            }
-        };
-
-        var grid = new Grid
-        {
-            RowDefinitions =
-            {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-            },
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-            },
-            ColumnSpacing = 5,
-            RowSpacing = 5,
-            Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-        };
-
-        grid.Add(checkBoxUseTargetFileSize, 0, 0, 1, 2);
-        grid.Add(labelTargetFileSize, 1, 0);
-        grid.Add(panelTargetFileSize, 1, 1);
-
-        return UiUtil.MakeBorderForControl(grid)
-            .WithBindIsVisible(nameof(vm.IsBatchMode), new InverseBooleanConverter())
-            .WithMarginRight(5);
-    }
-
-    private static Border MakeVideoInfoView(BurnInViewModel vm)
+    private static Border MakeVideoInfoView(ReEncodeVideoViewModel vm)
     {
         var labelVideoFile = UiUtil.MakeLabel(Se.Language.General.VideoFile);
         var labelVideoFileName = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.VideoFileName));
@@ -757,7 +572,7 @@ public class BurnInWindow : Window
             .WithMarginRight(5);
     }
 
-    private static Grid MakeProgressView(BurnInViewModel vm)
+    private static Grid MakeProgressView(ReEncodeVideoViewModel vm)
     {
         var progressSlider = new Slider
         {

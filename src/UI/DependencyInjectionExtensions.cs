@@ -95,12 +95,15 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<AutoTranslateViewModel>();
         collection.AddTransient<BatchConvertSettingsViewModel>();
         collection.AddTransient<BatchConvertViewModel>();
+        collection.AddTransient<BlankVideoViewModel>();
+        collection.AddTransient<BurnInEffectViewModel>();
         collection.AddTransient<BurnInResolutionPickerViewModel>();
         collection.AddTransient<BurnInSettingsViewModel>();
         collection.AddTransient<BurnInViewModel>();
         collection.AddTransient<ChangeCasingViewModel>();
         collection.AddTransient<ChangeFrameRateViewModel>();
         collection.AddTransient<ChangeSpeedViewModel>();
+        collection.AddTransient<CutVideoViewModel>();
         collection.AddTransient<DownloadFfmpegViewModel>();
         collection.AddTransient<DownloadLibMpvViewModel>();
         collection.AddTransient<DownloadPaddleOcrViewModel>();
@@ -145,6 +148,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<OllamaBrowseViewModel>();
         collection.AddTransient<OpenFromUrlViewModel>();
         collection.AddTransient<PickMatroskaTrackViewModel>();
+        collection.AddTransient<ReEncodeVideoViewModel>();
         collection.AddTransient<RemoveTextForHearingImpairedViewModel>();
         collection.AddTransient<ReplaceViewModel>();
         collection.AddTransient<RestoreAutoBackupViewModel>();

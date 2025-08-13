@@ -1,34 +1,27 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
-using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Video.BurnIn;
 
-public class SelectVideoPositionWindow : Window
+public class BurnInEffectWindow : Window
 {
-    private readonly SelectVideoPositionViewModel _vm;
+    private readonly BurnInEffectViewModel _vm;
 
-    public SelectVideoPositionWindow(SelectVideoPositionViewModel vm)
+    public BurnInEffectWindow(BurnInEffectViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = Se.Language.General.PickVideoPosition;
-        Width = 1280;
-        Height = 800;
-        CanResize = true;
+        Title = Se.Language.General.Effect;
+        SizeToContent = SizeToContent.WidthAndHeight;
+        CanResize = false;
 
         _vm = vm;
         vm.Window = this;
         DataContext = vm;
-
-        vm.VideoPlayerControl = InitVideoPlayer.MakeVideoPlayer();
-        vm.VideoPlayerControl.Width = double.NaN;
-        vm.VideoPlayerControl.Height = double.NaN;
-        vm.VideoPlayerControl.HorizontalAlignment = HorizontalAlignment.Stretch;
-        vm.VideoPlayerControl.VerticalAlignment = VerticalAlignment.Stretch;
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
@@ -53,7 +46,45 @@ public class SelectVideoPositionWindow : Window
             VerticalAlignment = VerticalAlignment.Stretch,
         };
 
-        grid.Add(vm.VideoPlayerControl, 0, 0);
+        // Create a StackPanel to hold all checkboxes
+        var checkBoxPanel = new StackPanel
+        {
+            Orientation = Orientation.Vertical,
+            Spacing = 10,
+            Margin = new Thickness(10)
+        };
+
+        // Create checkboxes for each effect
+        foreach (var effect in vm.Effects)
+        {
+            var checkBox = new CheckBox
+            {
+                Content = effect.Name,
+                Tag = effect, // Store the effect item for later reference
+            };
+
+            // Handle checkbox state changes
+            checkBox.IsCheckedChanged += (sender, e) =>
+            {
+                var cb = sender as CheckBox;
+                var effectItem = cb?.Tag as BurnInEffectItem;
+                if (effectItem != null && cb != null)
+                {
+                    if (cb.IsChecked == true)
+                    {
+                        vm.AddSelectedEffect(effectItem);
+                    }
+                    else
+                    {
+                        vm.RemoveSelectedEffect(effectItem);
+                    }
+                }
+            };
+
+            checkBoxPanel.Children.Add(checkBox);
+        }
+
+        grid.Add(checkBoxPanel, 0, 0);
         grid.Add(panelButtons, 1, 0);
 
         Content = grid;
