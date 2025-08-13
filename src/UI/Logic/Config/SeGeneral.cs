@@ -32,6 +32,7 @@ public class SeGeneral
     public double SubtitleMaximumWordsPerMinute { get; set; }
     public int NewEmptyDefaultMs { get; set; }
     public bool PromptDeleteLines { get; set; }
+    public bool LockTimeCodes { get; set; }
     public bool AutoBackupOn { get; set; }
     public int AutoBackupIntervalMinutes { get; set; }
     public int AutoBackupDeleteAfterMonths { get; set; }

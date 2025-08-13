@@ -106,6 +106,7 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _isWaveformToolbarVisible;
     [ObservableProperty] private bool _isSubtitleGridFlyoutHeaderVisible;
     [ObservableProperty] private bool _showColumnEndTime;
+    [ObservableProperty] private bool _lockTimeCodes;
 
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
@@ -256,6 +257,7 @@ public partial class MainViewModel :
         StartTitleTimer();
         _autoBackupService.StartAutoBackup(this);
         _undoRedoManager.SetupChangeDetection(this, TimeSpan.FromSeconds(1));
+        LockTimeCodes = Se.Settings.General.LockTimeCodes;
     }
 
     private static void InitializeFfmpeg()
@@ -378,14 +380,23 @@ public partial class MainViewModel :
         }
 
         control.TogglePlayPause();
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private void TogglePlayPause2()
     {
         TogglePlayPause();
+    }
+
+    [RelayCommand]
+    private void ToggleLockTimeCodes()
+    {
+        LockTimeCodes = !LockTimeCodes;
+        Se.Settings.General.LockTimeCodes = LockTimeCodes;
+        if (AudioVisualizer != null)
+        {
+            AudioVisualizer.IsReadOnly = LockTimeCodes;
+        }
     }
 
     [RelayCommand]
@@ -1063,6 +1074,8 @@ public partial class MainViewModel :
             UiUtil.SetCurrentTheme();
         }
 
+        LockTimeCodes = Se.Settings.General.LockTimeCodes;
+
         if (AudioVisualizer != null)
         {
             AudioVisualizer.DrawGridLines = Se.Settings.Waveform.DrawGridLines;
@@ -1071,6 +1084,7 @@ public partial class MainViewModel :
             AudioVisualizer.WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor();
             AudioVisualizer.InvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel;
             AudioVisualizer.UpdateTheme();
+            AudioVisualizer.IsReadOnly = LockTimeCodes;
         }
 
         _errorColor = Se.Settings.General.ErrorColor.FromHexToColor();
@@ -2008,7 +2022,7 @@ public partial class MainViewModel :
             _subtitle = subtitle;
             _lastOpenSaveFormat = subtitle.OriginalFormat;
             SetSubtitles(_subtitle);
-            ShowStatus($"Subtitle loaded: {fileName}");
+            ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
 
             if (selectedSubtitleIndex != null)
             {
@@ -2036,7 +2050,7 @@ public partial class MainViewModel :
         }
         finally
         {
-            _undoRedoManager.Do(MakeUndoRedoObject("Open subtitle file " + _subtitleFileName));
+            _undoRedoManager.Do(MakeUndoRedoObject(string.Format(Se.Language.General.SubtitleLoadedX, fileName)));
             _undoRedoManager.StartChangeDetection();
         }
     }
@@ -2588,6 +2602,11 @@ public partial class MainViewModel :
                     }
                 });
             }
+        }
+
+        if (AudioVisualizer != null)
+        {
+            AudioVisualizer.IsReadOnly = LockTimeCodes;
         }
 
         if (!subtitleFileLoaded && Se.Settings.File.ShowRecentFiles)

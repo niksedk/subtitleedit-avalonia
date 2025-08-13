@@ -38,6 +38,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private int _unbreakShorterThanMs;
     [ObservableProperty] private int _newEmptyDefaultMs;
     [ObservableProperty] private bool _promptDeleteLines;
+    [ObservableProperty] private bool _lockTimeCodes;
     [ObservableProperty] private bool _autoBackupOn;
     [ObservableProperty] private int _autoBackupIntervalMinutes;
     [ObservableProperty] private int _autoBackupDeleteAfterMonths;
@@ -174,6 +175,7 @@ public partial class SettingsViewModel : ObservableObject
         UnbreakShorterThanMs = general.MergeLinesShorterThan;
         NewEmptyDefaultMs = general.NewEmptyDefaultMs;
         PromptDeleteLines = general.PromptDeleteLines;
+        LockTimeCodes = general.LockTimeCodes;
         AutoBackupOn = general.AutoBackupOn;
         AutoBackupIntervalMinutes = general.AutoBackupIntervalMinutes;
         AutoBackupDeleteAfterMonths = general.AutoBackupDeleteAfterMonths;
@@ -242,6 +244,7 @@ public partial class SettingsViewModel : ObservableObject
         general.MergeLinesShorterThan = UnbreakShorterThanMs;
         general.NewEmptyDefaultMs = NewEmptyDefaultMs;
         general.PromptDeleteLines = PromptDeleteLines;
+        general.LockTimeCodes = LockTimeCodes;
         general.AutoBackupOn = AutoBackupOn;
         general.AutoBackupIntervalMinutes = AutoBackupIntervalMinutes;
         general.AutoBackupDeleteAfterMonths = AutoBackupDeleteAfterMonths;

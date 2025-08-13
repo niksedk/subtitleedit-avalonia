@@ -99,8 +99,8 @@ public class LanguageSettingsShortcuts
     public string AutoTranslate { get; set; }
 
     public string Settings { get; set; }
-    public string Assigned { get; internal set; }
-    public string Unassigned { get; internal set; }
+    public string Assigned { get; set; }
+    public string Unassigned { get; set; }
     public string PressedKeyX { get; set; }
     public string PressAKey { get; set; }
     public string DetectKey { get; set; }
@@ -110,7 +110,9 @@ public class LanguageSettingsShortcuts
     public string Shift { get; set; }
     public string ResetShortcuts { get; set; }
     public string ResetShortcutsDetail { get; set; }
-    public string TogglePlayPause { get; internal set; }
+    public string TogglePlayPause { get; set; }
+    public string ToggleLockTimeCodes { get; set; }
+
 
     public LanguageSettingsShortcuts()
     {
@@ -227,5 +229,6 @@ public class LanguageSettingsShortcuts
 
         ResetShortcuts = "Reset shortcuts";
         ResetShortcutsDetail = "Do you want to reset all shortcuts to default values?";
+        ToggleLockTimeCodes = "Toggle lock time codes";
     }
 }

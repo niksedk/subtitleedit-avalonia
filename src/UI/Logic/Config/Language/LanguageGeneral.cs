@@ -256,6 +256,7 @@ public class LanguageGeneral
     public string ShowHideColumn { get; set; }
     public string OpenSubtitleFileTitle { get; set; }
     public string OpenOriginalSubtitleFileTitle { get; set; }
+    public string SubtitleLoadedX { get; set; }
 
     public LanguageGeneral()
     {
@@ -511,5 +512,6 @@ public class LanguageGeneral
         ShowHideColumn = "Show 'Hide' column";
         OpenSubtitleFileTitle = "Open subtitle file";
         OpenOriginalSubtitleFileTitle = "Open original subtitle file";
+        SubtitleLoadedX = "Subtitle loaded: {0}";
     }
 }

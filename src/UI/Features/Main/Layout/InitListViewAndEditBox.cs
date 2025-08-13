@@ -2,13 +2,11 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
-using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Controls;
-using Nikse.SubtitleEdit.Features.SpellCheck.EditWholeText;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
@@ -296,6 +294,7 @@ public static class InitListViewAndEditBox
                 Mode = BindingMode.TwoWay,
             }
         };
+        timeCodeUpDown.Bind(TimeCodeUpDown.IsEnabledProperty, new Binding(nameof(vm.LockTimeCodes)) { Mode = BindingMode.TwoWay, Converter = new InverseBooleanConverter() });
         startTimePanel.Children.Add(timeCodeUpDown);
         timeCodeUpDown.ValueChanged += vm.StartTimeChanged;
         timeControlsPanel.Children.Add(startTimePanel);
@@ -329,6 +328,7 @@ public static class InitListViewAndEditBox
                 Converter = DurationToBackgroundConverter.Instance,
             },
         };
+        durationUpDown.Bind(NumericUpDown.IsEnabledProperty, new Binding(nameof(vm.LockTimeCodes)) { Mode = BindingMode.TwoWay, Converter = new InverseBooleanConverter() });
         durationUpDown.ValueChanged += vm.DurationChanged;
 
         durationPanel.Children.Add(durationUpDown);

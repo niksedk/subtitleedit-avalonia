@@ -25,6 +25,8 @@ internal class IconNames
     public const string MdiNetflix = "mdi-netflix";
     public const string MdiNetwork = "mdi-network";
     public const string MdiNew = "mdi-invoice-text-plus";
+    public const string MdiLock = "mdi-lock";
+    public const string MdiLockClock = "mdi-lock-clock";
     public const string MdiOcr = "mdi-ocr";
     public const string MdiPalette = "mdi-palette";
     public const string MdiPauseCircle = "mdi-pause-circle";

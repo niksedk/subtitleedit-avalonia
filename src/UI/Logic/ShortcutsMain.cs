@@ -100,6 +100,7 @@ public static class ShortcutsMain
         { nameof(_mvm.WaveformSetEndCommand) ,  Se.Language.General.SetEnd },
         { nameof(_mvm.ExtendSelectedToPreviousCommand) ,  Se.Language.General.ExtendSelectedToPrevious },
         { nameof(_mvm.ExtendSelectedToNextCommand) ,  Se.Language.General.ExtendSelectedToNext },
+        { nameof(_mvm.ToggleLockTimeCodesCommand) , Se.Language.Options.Shortcuts.ToggleLockTimeCodes },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -153,6 +154,7 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.WaveformSetEndCommand, nameof(vm.WaveformSetEndCommand), ShortcutCategory.Waveform);
         AddShortcut(shortcuts, vm.ExtendSelectedToPreviousCommand, nameof(vm.ExtendSelectedToPreviousCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ExtendSelectedToNextCommand, nameof(vm.ExtendSelectedToNextCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ToggleLockTimeCodesCommand, nameof(vm.ToggleLockTimeCodesCommand), ShortcutCategory.General);
 
         return shortcuts;
     }

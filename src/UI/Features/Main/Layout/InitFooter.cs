@@ -2,6 +2,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
+using Nikse.SubtitleEdit.Logic;
+using Projektanker.Icons.Avalonia;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -25,9 +27,8 @@ public static class InitFooter
             VerticalAlignment = VerticalAlignment.Center,
             DataContext = vm,
         };
-        grid.Children.Add(vm.StatusTextLeftLabel);
+        grid.Add(vm.StatusTextLeftLabel, 0);
         vm.StatusTextLeftLabel.Bind(TextBlock.TextProperty, new Binding(nameof(vm.StatusTextLeft)));
-        Grid.SetColumn(vm.StatusTextLeftLabel, 0);
 
         var right = new TextBlock
         {
@@ -37,8 +38,25 @@ public static class InitFooter
             DataContext = vm,
         };
         right.Bind(TextBlock.TextProperty, new Binding(nameof(vm.StatusTextRight)));
-        grid.Children.Add(right);
-        Grid.SetColumn(right, 2);
+
+        var panelRight = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Center,
+            Children =
+            {
+                new Icon
+                {
+                    Value = IconNames.MdiLockClock,
+                    [!Visual.IsVisibleProperty] = new Binding(nameof(vm.LockTimeCodes)),
+                    FontSize = 20,
+                },
+                right,
+            },
+        };  
+
+        grid.Add(panelRight, 0, 1);
 
         return grid;
     }
