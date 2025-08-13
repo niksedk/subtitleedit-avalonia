@@ -8,6 +8,7 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Controls;
+using Nikse.SubtitleEdit.Features.SpellCheck.EditWholeText;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
@@ -68,12 +69,12 @@ public static class InitListViewAndEditBox
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
         };
         vm.SubtitleGrid.Columns.Add(hideColumn);
-        hideColumn.Bind(DataGridColumn.IsVisibleProperty,    
-            new Binding(nameof(vm.ShowColumnEndTime))           
-            {                                                        
-                Mode = BindingMode.OneWay,                           
-                Source = vm                                          
-            });                                                      
+        hideColumn.Bind(DataGridColumn.IsVisibleProperty,
+            new Binding(nameof(vm.ShowColumnEndTime))
+            {
+                Mode = BindingMode.OneWay,
+                Source = vm
+            });
 
         vm.SubtitleGrid.Columns.Add(new DataGridTemplateColumn
         {
@@ -165,12 +166,12 @@ public static class InitListViewAndEditBox
         var flyout = new MenuFlyout();
 
         flyout.Opening += vm.SubtitleContextOpening;
-        vm.SubtitleGrid.PointerPressed  += vm.SubtitleGrid_PointerPressed;
+        vm.SubtitleGrid.PointerPressed += vm.SubtitleGrid_PointerPressed;
 
         // Add menu items with commands
         var showEndTimeMenuItem = new MenuItem
         {
-            Header = Se.Language.General.ShowHideColumn, 
+            Header = Se.Language.General.ShowHideColumn,
             Command = vm.ToggleShowColumnEndTimeCommand,
             DataContext = vm,
             Icon = new Icon
@@ -182,64 +183,64 @@ public static class InitListViewAndEditBox
         };
         showEndTimeMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible), BindingMode.TwoWay));
         flyout.Items.Add(showEndTimeMenuItem);
-        
+
         var deleteMenuItem = new MenuItem { Header = Se.Language.General.Delete, DataContext = vm };
-        deleteMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
+        deleteMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
         deleteMenuItem.Command = vm.DeleteSelectedLinesCommand;
         flyout.Items.Add(deleteMenuItem);
 
         var insertBeforeMenuItem = new MenuItem { Header = Se.Language.General.InsertBefore, DataContext = vm };
-        insertBeforeMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
+        insertBeforeMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
         insertBeforeMenuItem.Command = vm.InsertLineBeforeCommand;
         flyout.Items.Add(insertBeforeMenuItem);
 
         var insertAfterMenuItem = new MenuItem { Header = Se.Language.General.InsertAfter, DataContext = vm };
-        insertAfterMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
+        insertAfterMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
         insertAfterMenuItem.Command = vm.InsertLineAfterCommand;
         flyout.Items.Add(insertAfterMenuItem);
 
         var sep1 = new Separator { DataContext = vm };
-        sep1.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
+        sep1.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
         flyout.Items.Add(sep1);
 
         var splitMenuItem = new MenuItem { Header = Se.Language.General.SplitLine, DataContext = vm };
-        splitMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
+        splitMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
         splitMenuItem.Command = vm.SplitCommand;
         flyout.Items.Add(splitMenuItem);
 
         var mergePreviousMenuItem = new MenuItem { Header = Se.Language.General.MergeBefore, DataContext = vm };
-        mergePreviousMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
+        mergePreviousMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
         mergePreviousMenuItem.Command = vm.MergeWithLineBeforeCommand;
         flyout.Items.Add(mergePreviousMenuItem);
 
         var mergeNextMenuItem = new MenuItem { Header = Se.Language.General.MergeAfter, DataContext = vm };
-        mergeNextMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
+        mergeNextMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
         mergeNextMenuItem.Command = vm.MergeWithLineAfterCommand;
         flyout.Items.Add(mergeNextMenuItem);
 
         var mergeSelectedMenuItem = new MenuItem { Header = Se.Language.General.MergeSelected, DataContext = vm };
-        mergeSelectedMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
+        mergeSelectedMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
         mergeSelectedMenuItem.Command = vm.MergeSelectedLinesCommand;
         flyout.Items.Add(mergeSelectedMenuItem);
         vm.MenuItemMerge = mergeSelectedMenuItem;
 
         var mergeSelectedAsDialogMenuItem = new MenuItem { Header = Se.Language.General.MergeSelectedAsDialog, DataContext = vm };
-        mergeSelectedAsDialogMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
+        mergeSelectedAsDialogMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
         mergeSelectedAsDialogMenuItem.Command = vm.MergeSelectedLinesDialogCommand;
         flyout.Items.Add(mergeSelectedAsDialogMenuItem);
         vm.MenuItemMergeAsDialog = mergeSelectedAsDialogMenuItem;
 
         var sep2 = new Separator { DataContext = vm };
-        sep2.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
+        sep2.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
         flyout.Items.Add(sep2);
 
         var italicMenuItem = new MenuItem
         {
             Header = Se.Language.General.Italic,
-            Command = vm.ToggleLinesItalicCommand, 
+            Command = vm.ToggleLinesItalicCommand,
             DataContext = vm,
         };
-        italicMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
+        italicMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
         flyout.Items.Add(italicMenuItem);
 
         var boldMenuItem = new MenuItem
@@ -248,7 +249,7 @@ public static class InitListViewAndEditBox
             Command = vm.ToggleLinesBoldCommand,
             DataContext = vm,
         };
-        boldMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter()});
+        boldMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
         flyout.Items.Add(boldMenuItem);
 
         // Set the ContextFlyout property
@@ -287,18 +288,6 @@ public static class InitListViewAndEditBox
         };
         startTimePanel.Children.Add(startTimeLabel);
 
-        //var startTimeBox = new TextBox
-        //{
-        //    Watermark = "hh:mm:ss.fff",
-        //    Height = 32,
-        //    [!TextBox.TextProperty] = new Binding("SelectedSubtitle.StartTime")
-        //    {
-        //        Mode = BindingMode.TwoWay,
-        //        StringFormat = "c" // "c" = constant ("00:00:00.000")
-        //    }
-        //};
-        //startTimePanel.Children.Add(startTimeBox);
-
         var timeCodeUpDown = new TimeCodeUpDown
         {
             DataContext = vm,
@@ -309,35 +298,7 @@ public static class InitListViewAndEditBox
         };
         startTimePanel.Children.Add(timeCodeUpDown);
         timeCodeUpDown.ValueChanged += vm.StartTimeChanged;
-
         timeControlsPanel.Children.Add(startTimePanel);
-
-        //// End Time controls
-        //var endTimePanel = new StackPanel
-        //{
-        //    Spacing = 4,
-        //    Orientation = Orientation.Vertical
-        //};
-
-        //var endTimeLabel = new TextBlock
-        //{
-        //    Text = "End Time:",
-        //    FontWeight = FontWeight.Bold
-        //};
-        //endTimePanel.Children.Add(endTimeLabel);
-
-        //var endTimeBox = new TextBox
-        //{
-        //    Watermark = "hh:mm:ss.fff",
-        //    Height = 32,
-        //    [!TextBox.TextProperty] = new Binding("SelectedSubtitle.EndTime")
-        //    {
-        //        Mode = BindingMode.TwoWay,
-        //        StringFormat = "c" // "c" = constant ("00:00:00.000")
-        //    }
-        //};
-        //endTimePanel.Children.Add(endTimeBox);
-        //timeControlsPanel.Children.Add(endTimePanel);
 
         // Duration display
         var durationPanel = new StackPanel
@@ -376,18 +337,12 @@ public static class InitListViewAndEditBox
         Grid.SetColumn(timeControlsPanel, 0);
         editGrid.Children.Add(timeControlsPanel);
 
-        // Right panel for text editing
+        // Right panel for text editing (show/duration is to the left)
         var textEditGrid = new Grid
         {
-            ColumnDefinitions = new ColumnDefinitions("*,Auto"),
-            RowDefinitions = new RowDefinitions("Auto,*,Auto")
+            ColumnDefinitions = new ColumnDefinitions("*,*,Auto"),
+            RowDefinitions = new RowDefinitions("Auto,*,Auto"),
         };
-
-        //var textEditPanel = new StackPanel
-        //{
-        //    Spacing = 4,
-        //    Orientation = Orientation.Vertical
-        //};
 
         var textLabel = new TextBlock
         {
@@ -432,43 +387,6 @@ public static class InitListViewAndEditBox
         textBox.TextChanged += vm.SubtitleTextChanged;
         Grid.SetRow(textBox, 1);
 
-        // Create a Flyout for the TextBox
-        var flyoutTextBox = new MenuFlyout();
-        textBox.ContextFlyout = flyoutTextBox;
-        flyoutTextBox.Opening += vm.TextBoxContextOpening;
-
-        var cutMenuItem = new MenuItem { Header = Se.Language.General.Cut };
-        cutMenuItem.Command = vm.TextBoxCutCommand;
-        flyoutTextBox.Items.Add(cutMenuItem);
-
-        var copyMenuItem = new MenuItem { Header = Se.Language.General.Copy };
-        copyMenuItem.Command = vm.TextBoxCopyCommand;
-        flyoutTextBox.Items.Add(copyMenuItem);
-
-        var pasteMenuItem = new MenuItem { Header = Se.Language.General.Paste };
-        pasteMenuItem.Command = vm.TextBoxPasteCommand;
-        flyoutTextBox.Items.Add(pasteMenuItem);
-
-        var selectAllMenuItem = new MenuItem { Header = Se.Language.General.SelectAll };
-        selectAllMenuItem.Command = vm.TextBoxSelectAllCommand;
-        flyoutTextBox.Items.Add(selectAllMenuItem);
-
-        var menuItemTextBoxSplitAtCursor = new MenuItem { Header = Se.Language.General.SplitLineAtTextBoxCursorPosition };
-        menuItemTextBoxSplitAtCursor.Command = vm.SplitAtTextBoxCursorPositionCommand;
-        flyoutTextBox.Items.Add(menuItemTextBoxSplitAtCursor);
-
-        var menuItemTextBoxSplitAtCursorAndVideoPosition = new MenuItem { Header = Se.Language.General.SplitLineAtVideoAndTextBoxPosition };
-        menuItemTextBoxSplitAtCursorAndVideoPosition.Command = vm.SplitAtVideoPositionAndTextBoxCursorPositionCommand;
-        flyoutTextBox.Items.Add(menuItemTextBoxSplitAtCursorAndVideoPosition);
-
-        //var pasteMenuItem = new MenuItem { Header = Se.Language.General.Paste };
-        //pasteMenuItem.Command = vm.PasteTextCommand;
-        //flyoutTextBox.Items.Add(pasteMenuItem);
-        //var selectAllMenuItem = new MenuItem { Header = Se.Language.General.SelectAll };
-        //selectAllMenuItem.Command = vm.SelectAllTextCommand;
-        //flyoutTextBox.Items.Add(selectAllMenuItem);
-
-
         var textTotalLengthLabel = new TextBlock
         {
             HorizontalAlignment = HorizontalAlignment.Right,
@@ -498,6 +416,145 @@ public static class InitListViewAndEditBox
         textEditGrid.Children.Add(panelSingleLineLengths);
         Grid.SetRow(panelSingleLineLengths, 2);
 
+        // Create a Flyout for the TextBox
+        var flyoutTextBox = new MenuFlyout();
+        textBox.ContextFlyout = flyoutTextBox;
+        flyoutTextBox.Opening += vm.TextBoxContextOpening;
+
+        var cutMenuItem = new MenuItem { Header = Se.Language.General.Cut };
+        cutMenuItem.Command = vm.TextBoxCutCommand;
+        flyoutTextBox.Items.Add(cutMenuItem);
+
+        var copyMenuItem = new MenuItem { Header = Se.Language.General.Copy };
+        copyMenuItem.Command = vm.TextBoxCopyCommand;
+        flyoutTextBox.Items.Add(copyMenuItem);
+
+        var pasteMenuItem = new MenuItem { Header = Se.Language.General.Paste };
+        pasteMenuItem.Command = vm.TextBoxPasteCommand;
+        flyoutTextBox.Items.Add(pasteMenuItem);
+
+        var selectAllMenuItem = new MenuItem { Header = Se.Language.General.SelectAll };
+        selectAllMenuItem.Command = vm.TextBoxSelectAllCommand;
+        flyoutTextBox.Items.Add(selectAllMenuItem);
+
+        var menuItemTextBoxSplitAtCursor = new MenuItem { Header = Se.Language.General.SplitLineAtTextBoxCursorPosition };
+        menuItemTextBoxSplitAtCursor.Command = vm.SplitAtTextBoxCursorPositionCommand;
+        flyoutTextBox.Items.Add(menuItemTextBoxSplitAtCursor);
+
+        var menuItemTextBoxSplitAtCursorAndVideoPosition = new MenuItem { Header = Se.Language.General.SplitLineAtVideoAndTextBoxPosition };
+        menuItemTextBoxSplitAtCursorAndVideoPosition.Command = vm.SplitAtVideoPositionAndTextBoxCursorPositionCommand;
+        flyoutTextBox.Items.Add(menuItemTextBoxSplitAtCursorAndVideoPosition);
+
+
+        // translation mode (original text)
+        var textLabelOriginal = new TextBlock
+        {
+            Text = Se.Language.General.OriginalText,
+            FontWeight = FontWeight.Bold,
+            Margin = new Thickness(3, 0, 0, 0),
+        };
+        textEditGrid.Add(textLabelOriginal, 0, 1);
+        textLabelOriginal.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowColumnOriginalText))
+        {
+            Mode = BindingMode.OneWay,
+            Source = vm
+        });
+
+        var textCharsSecLabelOriginal = new TextBlock
+        {
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            FontSize = 12,
+            Padding = new Thickness(2, 2, 2, 2),
+        };
+        textCharsSecLabelOriginal.Bind(TextBlock.TextProperty, new Binding(nameof(vm.EditTextCharactersPerSecondOriginal))
+        {
+            Mode = BindingMode.OneWay
+        });
+        textCharsSecLabelOriginal.Bind(TextBlock.BackgroundProperty, new Binding(nameof(vm.EditTextCharactersPerSecondBackgroundOriginal))
+        {
+            Mode = BindingMode.OneWay
+        });
+        textEditGrid.Add(textCharsSecLabelOriginal, 0, 1);
+        textCharsSecLabelOriginal.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowColumnOriginalText))
+        {
+            Mode = BindingMode.OneWay,
+            Source = vm
+        });
+
+        var textBoxOriginal = new TextBox
+        {
+            AcceptsReturn = true,
+            TextWrapping = TextWrapping.Wrap,
+            MinHeight = 92,
+            Height = 92,
+            [!TextBox.TextProperty] = new Binding(nameof(vm.SelectedSubtitle) + "." + nameof(SubtitleLineViewModel.OriginalText))
+            {
+                Mode = BindingMode.TwoWay
+            },
+            FontSize = Se.Settings.Appearance.SubtitleTextBoxFontSize,
+            FontWeight = Se.Settings.Appearance.SubtitleTextBoxFontBold ? FontWeight.Bold : FontWeight.Normal,
+            IsUndoEnabled = false,
+            Margin = new Thickness(3, 0, 0, 0),
+        };
+        vm.EditTextBoxOriginal = textBoxOriginal;
+        textEditGrid.Add(textBoxOriginal, 1, 1);
+        textBoxOriginal.TextChanged += vm.SubtitleTextOriginalChanged;
+        textBoxOriginal.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowColumnOriginalText))
+        {
+            Mode = BindingMode.OneWay,
+            Source = vm
+        });
+
+        var textTotalLengthLabelOriginal = new TextBlock
+        {
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Top,
+            FontSize = 12,
+            Padding = new Thickness(2, 2, 2, 2),
+        };
+        textTotalLengthLabelOriginal.Bind(TextBlock.TextProperty, new Binding(nameof(vm.EditTextTotalLengthOriginal))
+        {
+            Mode = BindingMode.OneWay
+        });
+        textTotalLengthLabelOriginal.Bind(TextBlock.BackgroundProperty, new Binding(nameof(vm.EditTextTotalLengthBackgroundOriginal))
+        {
+            Mode = BindingMode.OneWay
+        });
+        textEditGrid.Add(textTotalLengthLabelOriginal, 2, 1);
+        textTotalLengthLabelOriginal.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowColumnOriginalText))
+        {
+            Mode = BindingMode.OneWay,
+            Source = vm
+        });
+
+
+        var panelSingleLineLengthsOriginal = new StackPanel
+        {
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Top,
+            Orientation = Orientation.Horizontal,
+        };
+        vm.PanelSingleLineLenghtsOriginal = panelSingleLineLengthsOriginal;
+        textEditGrid.Add(panelSingleLineLengthsOriginal, 2, 1);
+        panelSingleLineLengthsOriginal.DataContext = vm;
+        panelSingleLineLengthsOriginal.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowColumnOriginalText))
+        {
+            Mode = BindingMode.OneWay,
+            Source = vm
+        });
+        // add label to panelSingleLineLengthsOriginal
+        var singleLineLengthLabel = new TextBlock
+        {
+            Text = "Line lengths: x/x",
+            FontWeight = FontWeight.Bold,
+            Margin = new Thickness(0, 0, 5, 0)
+        };
+        panelSingleLineLengthsOriginal.Children.Add(singleLineLengthLabel);
+
+
+
+
         var buttonPanel = new StackPanel
         {
             Orientation = Orientation.Vertical,
@@ -513,15 +570,21 @@ public static class InitListViewAndEditBox
         var unbreakButton = UiUtil.MakeButton(vm.UnbreakCommand, IconNames.MdiSetMerge, 20);
         buttonPanel.Children.Add(unbreakButton);
 
-        textEditGrid.Children.Add(buttonPanel);
-        Grid.SetRow(buttonPanel, 1);
-        Grid.SetColumn(buttonPanel, 1);
+        textEditGrid.Add(buttonPanel, 1, 2);
 
         Grid.SetColumn(textEditGrid, 1);
         editGrid.Children.Add(textEditGrid);
 
         Grid.SetRow(editGrid, 1);
         mainGrid.Children.Add(editGrid);
+
+
+        textEditGrid.ColumnDefinitions[1].Bind(ColumnDefinition.WidthProperty, new Binding(nameof(vm.ShowColumnOriginalText))
+        {
+            Mode = BindingMode.OneWay,
+            Source = vm,
+            Converter = new BooleanToGridLengthConverter()
+        });
 
         return mainGrid;
     }
