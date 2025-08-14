@@ -136,7 +136,7 @@ public partial class AutoTranslateViewModel : ObservableObject
             }
         }
 
-        if (!string.IsNullOrEmpty(Se.Settings.AutoTranslate.AutoTranslateLastSource))
+        if (SelectedSourceLanguage == null && !string.IsNullOrEmpty(Se.Settings.AutoTranslate.AutoTranslateLastSource))
         {
             var lang = SourceLanguages.FirstOrDefault(p => p.Code == Se.Settings.AutoTranslate.AutoTranslateLastSource);
             if (lang != null)
@@ -178,7 +178,7 @@ public partial class AutoTranslateViewModel : ObservableObject
         if (!string.IsNullOrEmpty(Se.Settings.AutoTranslate.AutoTranslateLastTarget))
         {
             var lang = TargetLanguages.FirstOrDefault(p => p.Code == Se.Settings.AutoTranslate.AutoTranslateLastTarget);
-            if (lang != null)
+            if ((SelectedSourceLanguage == null || lang == null || SelectedSourceLanguage.Code != lang.Code) && lang != null)
             {
                 SelectedTargetLanguage = lang;
             }
@@ -889,6 +889,7 @@ public partial class AutoTranslateViewModel : ObservableObject
         {
             defaultSourceLanguageCode = LanguageAutoDetect.AutoDetectGoogleLanguage(encoding); // Guess language via encoding
         }
+
         if (string.IsNullOrEmpty(defaultSourceLanguageCode))
         {
             defaultSourceLanguageCode = LanguageAutoDetect.AutoDetectGoogleLanguage(subtitle); // Guess language based on subtitle contents
