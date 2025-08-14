@@ -83,7 +83,12 @@ public partial class ReEncodeVideoViewModel : ObservableObject
 
         JobItems = new ObservableCollection<BurnInJobItem>();
 
-        InfoText = string.Empty;
+        InfoText = "Re-encoding can make subtitling smoother:" + Environment.NewLine +
+                    "• Smaller resolution (high resolutions take make subtitling slow)" + Environment.NewLine +
+                    "• Lower frame rate (high frame rates take make subtitling slow)" + Environment.NewLine +
+                    "• Re-encode the video to H.264 + yuv420p makes it more compatible" + Environment.NewLine +
+                    "• Optimized for fast seeking";
+
         VideoFileName = string.Empty;
         VideoFileSize = string.Empty;
         ProgressText = string.Empty;

@@ -26,7 +26,7 @@ public class ReEncodeVideoWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        var labelInfoText = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.InfoText));
+        var labelInfoText = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.InfoText)).WithMarginBottom(8);
 
         var videoSettingsView = MakeVideoSettingsView(vm);
         var progressView = MakeProgressView(vm);
@@ -58,7 +58,7 @@ public class ReEncodeVideoWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(labelInfoText, 1);
+        grid.Add(labelInfoText, 0);
         grid.Add(videoSettingsView, 1);
         grid.Add(progressView, 2);
         grid.Add(buttonPanel, 3);
@@ -126,9 +126,9 @@ public class ReEncodeVideoWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(labelResolution, 0, 0);
-        grid.Add(panelResolution, 0, 1);
-        grid.Add(panelResolutionSource, 0, 1);
+        //grid.Add(labelResolution, 0, 0);
+        //grid.Add(panelResolution, 0, 1);
+        //grid.Add(panelResolutionSource, 0, 1);
 
         grid.Add(labelFrameRate, 1, 0);
         grid.Add(comboBoxFrameRate, 1, 1);
