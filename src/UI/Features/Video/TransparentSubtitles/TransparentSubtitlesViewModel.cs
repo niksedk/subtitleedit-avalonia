@@ -77,6 +77,7 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
     [ObservableProperty] private bool _isBatchMode;
     [ObservableProperty] private Bitmap? _imagePreview;
     [ObservableProperty] private bool _useSourceResolution;
+    [ObservableProperty] private string _displayEffect;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -94,6 +95,7 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
     private int _jobItemIndex = -1;
     private SubtitleFormat? _subtitleFormat;
     private string _inputVideoFileName;
+    private List<BurnInEffectItem> _selectedEffects;
 
     private readonly IWindowService _windowService;
     private readonly IFolderHelper _folderHelper;
@@ -152,7 +154,9 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
         FontOutlineText = string.Empty;
         FontShadowText = string.Empty;
         OutputFolder = string.Empty;
+        DisplayEffect = string.Empty;
 
+        _selectedEffects = new List<BurnInEffectItem>();
         _log = new StringBuilder();
         _timerGenerate = new();
         _timerGenerate.Elapsed += TimerGenerateElapsed;
@@ -287,8 +291,7 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
             }
             else
             {
-                ProgressText =
-                    $"Generating video {_jobItemIndex + 1}/{JobItems.Count}... {percentage}%     {estimatedLeft}";
+                ProgressText = $"Generating video {_jobItemIndex + 1}/{JobItems.Count}... {percentage}%     {estimatedLeft}";
             }
 
             return;
@@ -342,12 +345,11 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
 
             if (JobItems.Count == 1)
             {
-                await _folderHelper.OpenFolder(Window!, jobItem.OutputVideoFileName);
+                await _folderHelper.OpenFolderWithFileSelected(Window!, jobItem.OutputVideoFileName);
             }
             else
             {
-                var sb = new StringBuilder($"Generated files ({JobItems.Count}):" + Environment.NewLine +
-                                           Environment.NewLine);
+                var sb = new StringBuilder($"Generated files ({JobItems.Count}):" + Environment.NewLine + Environment.NewLine);
                 foreach (var item in JobItems)
                 {
                     sb.AppendLine($"{item.OutputVideoFileName} ==> {item.Status}");
@@ -803,6 +805,10 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
         UseOutputFolderVisible = settings.UseSourceResolution;
         UseSourceFolderVisible = !settings.UseOutputFolder;
         UseSourceResolution = settings.UseSourceResolution;
+
+        var effectsAsStringArray = settings.Effects?.Split(',') ?? [];
+        _selectedEffects = BurnInEffectItem.List().Where(p => effectsAsStringArray.Contains(p.Name)).ToList();
+        DisplayEffect = string.Join(", ", _selectedEffects.Select(p => p.Name));
     }
 
     private void SaveSettings()
@@ -855,6 +861,23 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
         }
 
         Window?.Close();
+    }
+
+    [RelayCommand]
+    private async Task ShowEffects()
+    {
+        var result = await _windowService.ShowDialogAsync<BurnInEffectWindow, BurnInEffectViewModel>(Window!, vm =>
+        {
+            vm.Initialize(VideoFileName, _selectedEffects);
+        });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        _selectedEffects = result.SelectedEffects.ToList();
+        DisplayEffect = string.Join(", ", _selectedEffects.Select(p => p.Name));
     }
 
     internal void OnKeyDown(KeyEventArgs e)

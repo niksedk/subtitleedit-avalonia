@@ -187,8 +187,20 @@ public class TransparentSubtitlesWindow : Window
             }
         };
 
-        var checkBoxFixRightToLeft = UiUtil.MakeCheckBox(Se.Language.Video.BurnIn.FixRightToLeft, vm, nameof(vm.FontFixRtl));
-        checkBoxFixRightToLeft.PropertyChanged += vm.CheckBoxChanged;
+        var labelEffect = UiUtil.MakeLabel(Se.Language.General.Effect);
+        var labelSelectedEffect = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.DisplayEffect)).WithMarginRight(3);
+        var buttonEffect = UiUtil.MakeButtonBrowse(vm.ShowEffectsCommand);
+        var panelEffect = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Children =
+            {
+                labelSelectedEffect,
+                buttonEffect,
+            }
+        };
 
         var grid = new Grid
         {
@@ -242,7 +254,8 @@ public class TransparentSubtitlesWindow : Window
         grid.Add(labelMargin, 8, 0);
         grid.Add(panelMargin, 8, 1);
 
-        grid.Add(checkBoxFixRightToLeft, 9, 1);
+        grid.Add(labelEffect, 9, 0);
+        grid.Add(panelEffect, 9, 1);
 
         return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5).WithMarginRight(5);
     }
