@@ -2543,6 +2543,7 @@ public partial class MainViewModel :
             SelectedSubtitleFormat,
             newFileName,
             "Save subtitle file");
+
         if (!string.IsNullOrEmpty(fileName))
         {
             _subtitleFileName = fileName;
@@ -2677,6 +2678,10 @@ public partial class MainViewModel :
                         Se.LogError(e);
                     }
                 });
+            }
+            else
+            {
+                Se.Settings.File.RecentFiles = Se.Settings.File.RecentFiles.Where(p => File.Exists(p.SubtitleFileName)).ToList();
             }
         }
 
