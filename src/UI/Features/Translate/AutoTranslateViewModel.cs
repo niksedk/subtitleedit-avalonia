@@ -413,7 +413,7 @@ public partial class AutoTranslateViewModel : ObservableObject
                     _translationProgressIndex = index;
                     errorCount = 0;
 
-                    if (noErrorCount > 5)
+                    if (noErrorCount > 7)
                     {
                         forceSingleLineMode = false;
                     }
@@ -427,7 +427,7 @@ public partial class AutoTranslateViewModel : ObservableObject
                 {
                     forceSingleLineMode = true;
                 }
-      
+
 
                 var translateCount = await MergeAndSplitHelper.MergeAndTranslateIfPossible(
                     Rows,
