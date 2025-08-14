@@ -21,6 +21,11 @@ public interface IFileHelper
         string extension,
         string suggestedFileName,
         string title);
+    Task<string> PickSaveVideoFile(
+        Visual sender,
+        string extension,
+        string suggestedFileName,
+        string title);
 
     Task<string> PickOpenVideoFile(Visual sender, string title);
     Task<string[]> PickOpenVideoFiles(Visual sender, string title);

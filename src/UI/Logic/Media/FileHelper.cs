@@ -73,7 +73,7 @@ namespace Nikse.SubtitleEdit.Logic.Media
                 FileTypeFilter = MakeOpenSubtitleFilter(includeVideoFiles),
             });
 
-            return files.Select(p=>p.Path.LocalPath).ToArray();
+            return files.Select(p => p.Path.LocalPath).ToArray();
         }
 
         private static IReadOnlyList<FilePickerFileType> MakeOpenSubtitleFilter(bool includeVideoFiles)
@@ -142,9 +142,9 @@ namespace Nikse.SubtitleEdit.Logic.Media
         }
 
         public async Task<string> PickSaveSubtitleFile(
-            Visual sender, 
+            Visual sender,
             SubtitleFormat currentFormat,
-            string suggestedFileName, 
+            string suggestedFileName,
             string title)
         {
             var topLevel = TopLevel.GetTopLevel(sender)!;
@@ -189,6 +189,29 @@ namespace Nikse.SubtitleEdit.Logic.Media
             return string.Empty;
         }
 
+        public async Task<string> PickSaveVideoFile(
+            Visual sender,
+            string extension,
+            string suggestedFileName,
+            string title)
+        {
+            var topLevel = TopLevel.GetTopLevel(sender)!;
+            var options = new FilePickerSaveOptions
+            {
+                Title = title,
+                SuggestedFileName = suggestedFileName,
+                FileTypeChoices = MakeSaveFilePickerFileTypes(extension, extension),
+                DefaultExtension = extension.TrimStart('.')
+            };
+            var file = await topLevel.StorageProvider.SaveFilePickerAsync(options);
+
+            if (file != null)
+            {
+                return file.Path.LocalPath;
+            }
+
+            return string.Empty;
+        }
 
         private static List<FilePickerFileType> MakeSaveFilePickerFileTypes(SubtitleFormat currentFormat)
         {
@@ -319,6 +342,5 @@ namespace Nikse.SubtitleEdit.Logic.Media
 
             return fileTypes;
         }
-
     }
 }

@@ -1,10 +1,13 @@
-﻿using System;
+﻿using Avalonia.Media;
+using Avalonia.Media.Imaging;
+using HanumanInstitute.LibMpv;
+using Nikse.SubtitleEdit.Core.Common;
+using SkiaSharp;
+using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using Avalonia.Media;
-using Nikse.SubtitleEdit.Core.Common;
 
 namespace Nikse.SubtitleEdit.Logic.Media;
 
@@ -717,5 +720,85 @@ public class VideoPreviewGenerator
         processMakeVideo.StartInfo.Arguments = processMakeVideo.StartInfo.Arguments.Trim();
         SetupDataReceiveHandler(dataReceivedHandler, processMakeVideo);
         return processMakeVideo;
+    }
+
+    public static Process GenerateVideoFile(string previewFileName, int seconds, int width, int height, Color color, bool checkered, decimal frameRate, Bitmap? bitmap, DataReceivedEventHandler dataReceivedHandler = null, bool addTimeCode = false, string addTimeColor = "white")
+    {
+        Process processMakeVideo;
+
+        if (width % 2 == 1)
+        {
+            width++;
+        }
+
+        if (height % 2 == 1)
+        {
+            height++;
+        }
+
+        if (bitmap != null)
+        {
+            var tempImageFileName = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".png");
+            using (var skBitmap = bitmap.ToSkBitmap())
+            {
+                using (var resizedBitmap = ResizeBitmap(skBitmap, width, height))
+                {
+                    using (var image = SKImage.FromBitmap(resizedBitmap))
+                    using (var data = image.Encode(SKEncodedImageFormat.Png, 100))
+                    using (var stream = File.OpenWrite(tempImageFileName))
+                    {
+                        data.SaveTo(stream);
+                    }
+                }
+            }
+            processMakeVideo = GetFFmpegProcess(tempImageFileName, previewFileName, width, height, seconds, frameRate, addTimeCode, addTimeColor);
+        }
+        else if (checkered)
+        {
+            var tempImageFileName = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".png");
+            var skBitmap = new SKBitmap(width, height, true);
+            using (var canvas = new SKCanvas(skBitmap))
+            {
+                UiUtil.DrawCheckerboardBackground(canvas, width, height);
+                canvas.DrawBitmap(skBitmap, 0, 0);
+            }
+
+            using (var resizedBitmap = ResizeBitmap(skBitmap, width, height))
+            {
+                using (var image = SKImage.FromBitmap(resizedBitmap))
+                using (var data = image.Encode(SKEncodedImageFormat.Png, 100))
+                using (var stream = File.OpenWrite(tempImageFileName))
+                {
+                    data.SaveTo(stream);
+                }
+            }
+
+            processMakeVideo = GetFFmpegProcess(tempImageFileName, previewFileName, width, height, seconds, frameRate, addTimeCode, addTimeColor);
+        }
+        else
+        {
+            processMakeVideo = GetFFmpegProcess(color, previewFileName, width, height, seconds, frameRate, addTimeCode, addTimeColor);
+        }
+
+        SetupDataReceiveHandler(dataReceivedHandler, processMakeVideo);
+
+        return processMakeVideo;
+    }
+
+    public static SKBitmap ResizeBitmap(SKBitmap originalBitmap, int width, int height)
+    {
+        var resizedBitmap = new SKBitmap(width, height);
+        using (var canvas = new SKCanvas(resizedBitmap))
+        {
+            canvas.Clear(SKColors.Transparent);
+            using (var paint = new SKPaint())
+            {
+                paint.IsAntialias = true;
+                var destRect = new SKRect(0, 0, width, height);
+                canvas.DrawBitmap(originalBitmap, destRect, paint);
+            }
+        }
+
+        return resizedBitmap;
     }
 }

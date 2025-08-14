@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -62,13 +63,13 @@ public partial class BlankVideoViewModel : ObservableObject
     private int _jobItemIndex = -1;
     private SubtitleFormat? _subtitleFormat;
     private string _fullBackgroundImageFileName;
+    private string _subtitleFileName;
 
     private readonly IWindowService _windowService;
     private readonly IFolderHelper _folderHelper;
     private readonly IFileHelper _fileHelper;
 
-    public BlankVideoViewModel(IFolderHelper folderHelper, IFileHelper fileHelper,
-        IWindowService windowService)
+    public BlankVideoViewModel(IFolderHelper folderHelper, IFileHelper fileHelper, IWindowService windowService)
     {
         _folderHelper = folderHelper;
         _fileHelper = fileHelper;
@@ -101,7 +102,13 @@ public partial class BlankVideoViewModel : ObservableObject
 
         _loading = false;
         _fullBackgroundImageFileName = string.Empty;
+        _subtitleFileName = string.Empty;
         LoadSettings();
+    }
+
+    public void Initialize(string subtitleFileName)
+    {
+        _subtitleFileName = subtitleFileName;
     }
 
     private void TimerAnalyzeElapsed(object? sender, ElapsedEventArgs e)
@@ -282,9 +289,41 @@ public partial class BlankVideoViewModel : ObservableObject
 
     private Process GetFfmpegProcess(BurnInJobItem jobItem)
     {
-        var totalMs = _subtitle.Paragraphs.Max(p => p.EndTime.TotalMilliseconds);
+        var totalMs = jobItem.TotalSeconds * 1000; // _subtitle.Paragraphs.Max(p => p.EndTime.TotalMilliseconds);
         var ts = TimeSpan.FromMilliseconds(totalMs + 2000);
         var timeCode = string.Format($"{ts.Hours:00}\\\\:{ts.Minutes:00}\\\\:{ts.Seconds:00}");
+
+        var addTimeColor = "white";
+        if (UseCheckedImage)
+        {
+            addTimeColor = "black";
+        }
+
+        Bitmap? bmp = null;
+        if (UseBackgroundImage && !string.IsNullOrEmpty(_fullBackgroundImageFileName) && File.Exists(_fullBackgroundImageFileName))
+        {
+            try
+            {
+                bmp = new Bitmap(_fullBackgroundImageFileName);
+            }
+            catch (Exception ex)
+            {
+                Se.LogError(ex);
+            }
+        }
+
+        var process = VideoPreviewGenerator.GenerateVideoFile(
+               VideoFileName,
+               DurationMinutes * 60,
+               jobItem.Width,
+               jobItem.Height,
+               SolidColor,
+               UseCheckedImage,
+               (decimal)SelectedFrameRate,
+               bmp,
+               OutputHandler,
+               GenerateTimeCodes,
+               addTimeColor);
 
         return VideoPreviewGenerator.GenerateTransparentVideoFile(
             jobItem.AssaSubtitleFileName,
@@ -374,25 +413,6 @@ public partial class BlankVideoViewModel : ObservableObject
         return fileName;
     }
 
-    public static int CalculateFontSize(int videoWidth, int videoHeight, double factor, int minSize = 8,
-        int maxSize = 2000)
-    {
-        factor = Math.Clamp(factor, 0, 1);
-
-        // Calculate the diagonal resolution
-        var diagonalResolution = Math.Sqrt(videoWidth * videoWidth + videoHeight * videoHeight);
-
-        // Calculate base size (when factor is 0.5)
-        var baseSize = diagonalResolution * 0.019; // around 2% of diagonal as base size
-
-        // Apply logarithmic scaling
-        var scaleFactor = Math.Pow(maxSize / baseSize, 2 * (factor - 0.5));
-        var fontSize = (int)Math.Round(baseSize * scaleFactor);
-
-        // Clamp the font size between minSize and maxSize
-        return Math.Clamp(fontSize, minSize, maxSize);
-    }
-
     [RelayCommand]
     private async Task Add()
     {
@@ -472,26 +492,30 @@ public partial class BlankVideoViewModel : ObservableObject
     [RelayCommand]
     private async Task Generate()
     {
+        var videoFileName = UseSolidColor ? "blank_video_solid" : (UseCheckedImage ? "blank_video_checkered" : "blank_video_image");
+        var path = Path.Combine(Se.Settings.Video.BurnIn.OutputFolder, videoFileName + ".mkv");
+        if (!string.IsNullOrEmpty(_subtitleFileName))
+        {
+            path = Path.Combine(Path.GetDirectoryName(_subtitleFileName) ?? Se.Settings.Video.BurnIn.OutputFolder, videoFileName + ".mkv");
+        }
+
+        videoFileName = await _fileHelper.PickSaveVideoFile(Window!, ".mkv", videoFileName, "Save video as");
+        if (string.IsNullOrEmpty(videoFileName))
+        {
+            return;
+        }
+
+        VideoFileName = videoFileName;
+        if (File.Exists(VideoFileName))
+        {
+            File.Delete(VideoFileName);
+        }
+
         JobItems = GetCurrentVideoAsJobItems();
 
         if (JobItems.Count == 0)
         {
             return;
-        }
-
-        // check that all jobs have subtitles
-        foreach (var jobItem in JobItems)
-        {
-            if (string.IsNullOrWhiteSpace(jobItem.SubtitleFileName))
-            {
-                await MessageBox.Show(Window!,
-                    "Missing subtitle",
-                    "Please add a subtitle to all batch items",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-
-                return;
-            }
         }
 
         _doAbort = false;
@@ -500,7 +524,6 @@ public partial class BlankVideoViewModel : ObservableObject
         _processedFrames = 0;
         ProgressValue = 0;
         SaveSettings();
-
         InitAndStartJobItem(0);
     }
 
@@ -509,11 +532,11 @@ public partial class BlankVideoViewModel : ObservableObject
         _startTicks = DateTime.UtcNow.Ticks;
         _jobItemIndex = index;
         var jobItem = JobItems[index];
-        var mediaInfo = FfmpegMediaInfo.Parse(jobItem.InputVideoFileName);
-        jobItem.TotalFrames = mediaInfo.GetTotalFrames();
-        jobItem.TotalSeconds = mediaInfo.Duration.TotalSeconds;
-        jobItem.Width = mediaInfo.Dimension.Width;
-        jobItem.Height = mediaInfo.Dimension.Height;
+        var totalFrames = (long)Math.Round(SelectedFrameRate * DurationMinutes * 60.0f);
+        jobItem.TotalFrames = totalFrames;
+        jobItem.TotalSeconds = DurationMinutes * 60.0f;
+        jobItem.Width = VideoWidth;
+        jobItem.Height = VideoHeight;
         jobItem.Status = Se.Language.General.Generating;
         jobItem.OutputVideoFileName = MakeOutputFileName(jobItem.InputVideoFileName);
 
