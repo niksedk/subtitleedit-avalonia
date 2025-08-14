@@ -37,6 +37,7 @@ using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
 using Nikse.SubtitleEdit.Features.Sync.AdjustAllTimes;
 using Nikse.SubtitleEdit.Features.Sync.ChangeFrameRate;
 using Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
+using Nikse.SubtitleEdit.Features.Sync.VisualSync;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 using Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
@@ -44,6 +45,7 @@ using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 using Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
 using Nikse.SubtitleEdit.Features.Translate;
 using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
+using Nikse.SubtitleEdit.Features.Video.BlankVideo;
 using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Features.Video.OpenFromUrl;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech;
@@ -64,8 +66,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Features.Sync.VisualSync;
-using Nikse.SubtitleEdit.Features.Video.BlankVideo;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -458,6 +458,7 @@ public partial class MainViewModel :
 
         ResetSubtitle();
         VideoCloseFile();
+        AddToRecentFiles(false);
     }
 
     private void ResetSubtitle()
@@ -765,8 +766,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task VideoGenerateBlank()
     {
-        var result = await _windowService.ShowDialogAsync<BlankVideoWindow, BlankVideoViewModel>(Window!, vm => 
-        { 
+        var result = await _windowService.ShowDialogAsync<BlankVideoWindow, BlankVideoViewModel>(Window!, vm =>
+        {
             //vm.Initialize(GetUpdateSubtitle()); 
         });
 
@@ -774,7 +775,7 @@ public partial class MainViewModel :
         {
             return;
         }
-        
+
         _shortcutManager.ClearKeys();
     }
 
@@ -1103,7 +1104,7 @@ public partial class MainViewModel :
             }
         }
 
-        _subtitleFileNameOriginal = _subtitleFileName;  
+        _subtitleFileNameOriginal = _subtitleFileName;
         _subtitleFileName = string.Empty;
         ShowColumnOriginalText = true;
         AutoFitColumns();
@@ -2554,13 +2555,8 @@ public partial class MainViewModel :
 
     private void AddToRecentFiles(bool updateMenu)
     {
-        if (string.IsNullOrEmpty(_subtitleFileName))
-        {
-            return;
-        }
-
-        Se.Settings.File.AddToRecentFiles(_subtitleFileName, _videoFileName ?? string.Empty, SelectedSubtitleIndex ?? 0,
-            SelectedEncoding.DisplayName);
+        var idx = SelectedSubtitleIndex ?? 0;
+        Se.Settings.File.AddToRecentFiles(_subtitleFileName ?? string.Empty, _videoFileName ?? string.Empty, idx, SelectedEncoding.DisplayName);
         Se.SaveSettings();
 
         if (updateMenu)

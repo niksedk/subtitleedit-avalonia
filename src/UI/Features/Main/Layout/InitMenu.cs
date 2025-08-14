@@ -3,6 +3,7 @@ using Avalonia.Data;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -332,10 +333,10 @@ public static class InitMenu
             }
         });
 
-menu.Items.Add(new MenuItem
-{
-    Header = l.Options,
-    Items =
+        menu.Items.Add(new MenuItem
+        {
+            Header = l.Options,
+            Items =
             {
                 new MenuItem
                 {
@@ -353,12 +354,12 @@ menu.Items.Add(new MenuItem
                     Command = vm.CommandShowSettingsLanguageCommand,
                 },
             },
-});
+        });
 
-menu.Items.Add(new MenuItem
-{
-    Header = l.Translate,
-    Items =
+        menu.Items.Add(new MenuItem
+        {
+            Header = l.Translate,
+            Items =
             {
                 new MenuItem
                 {
@@ -366,12 +367,12 @@ menu.Items.Add(new MenuItem
                     Command = vm.CommandShowAutoTranslateCommand,
                 },
             }
-});
+        });
 
-menu.Items.Add(new MenuItem
-{
-    Header = l.HelpTitle,
-    Items =
+        menu.Items.Add(new MenuItem
+        {
+            Header = l.HelpTitle,
+            Items =
             {
                 new MenuItem
                 {
@@ -385,39 +386,39 @@ menu.Items.Add(new MenuItem
                     Command = vm.ShowHelpCommand,
                 },
             }
-});
+        });
     }
 
     public static void UpdateRecentFiles(MainViewModel vm)
-{
-    vm.MenuReopen.Items.Clear();
-    if (Se.Settings.File.RecentFiles.Count > 0)
     {
-        foreach (var file in Se.Settings.File.RecentFiles)
+        vm.MenuReopen.Items.Clear();
+        if (Se.Settings.File.RecentFiles.Count > 0)
         {
-            var item = new MenuItem
+            foreach (var file in Se.Settings.File.RecentFiles.Where(p => !string.IsNullOrEmpty(p.SubtitleFileName) && System.IO.File.Exists(p.SubtitleFileName)))
             {
-                Header = file.SubtitleFileName,
-                Command = vm.CommandFileReopenCommand,
+                var item = new MenuItem
+                {
+                    Header = file.SubtitleFileName,
+                    Command = vm.CommandFileReopenCommand,
+                };
+                item.CommandParameter = file;
+                vm.MenuReopen.Items.Add(item);
+            }
+
+            vm.MenuReopen.Items.Add(new Separator());
+
+            var clearItem = new MenuItem
+            {
+                Header = Se.Language.Main.Menu.ClearRecentFiles,
+                Command = vm.CommandFileClearRecentFilesCommand,
             };
-            item.CommandParameter = file;
-            vm.MenuReopen.Items.Add(item);
+            vm.MenuReopen.Items.Add(clearItem);
+
+            vm.MenuReopen.IsVisible = true;
         }
-
-        vm.MenuReopen.Items.Add(new Separator());
-
-        var clearItem = new MenuItem
+        else
         {
-            Header = Se.Language.Main.Menu.ClearRecentFiles,
-            Command = vm.CommandFileClearRecentFilesCommand,
-        };
-        vm.MenuReopen.Items.Add(clearItem);
-
-        vm.MenuReopen.IsVisible = true;
+            vm.MenuReopen.IsVisible = false;
+        }
     }
-    else
-    {
-        vm.MenuReopen.IsVisible = false;
-    }
-}
 }
