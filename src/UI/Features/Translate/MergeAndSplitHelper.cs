@@ -72,6 +72,18 @@ public static partial class MergeAndSplitHelper
         var linesTranslate = 0;
         var mergedTranslation = await autoTranslator.Translate(text, source.Code, target.Code, cancellationToken);
 
+        if (forceSingleLineMode || mergeCount == 1)
+        { 
+            // Single line mode, so just reformat and return
+            if (index < rows.Count && formattingList.Count > 0)
+            {
+                var reformattedText = formattingList[0].ReAddFormatting(mergedTranslation);
+                rows[index].TranslatedText = reformattedText;
+                linesTranslate++;
+            }
+
+            return linesTranslate;
+        }
 
         // Split by line ending chars where period count matches
         var splitResult = SplitMultipleLines(mergeResult, mergedTranslation, target.Code);

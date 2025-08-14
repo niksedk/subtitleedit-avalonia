@@ -104,7 +104,7 @@ public partial class AutoTranslateViewModel : ObservableObject
 
     public void Initialize(Subtitle subtitle)
     {
-        _subtitle = new Subtitle(subtitle, false);      
+        _subtitle = new Subtitle(subtitle, false);
     }
 
     private void UpdateSourceLanguages(IAutoTranslator autoTranslator)
@@ -257,14 +257,14 @@ public partial class AutoTranslateViewModel : ObservableObject
             var baseUrl = GetBaseUrl(ApiUrlText);
             _ = vm.InitializeAsync(baseUrl);
         });
-        
+
         if (result is { OkPressed: true, SelectedModel: not null })
         {
             ModelText = result.SelectedModel.Model;
             SaveSettings();
         }
     }
-    
+
     public static string GetBaseUrl(string url)
     {
         if (string.IsNullOrEmpty(url))
@@ -347,7 +347,6 @@ public partial class AutoTranslateViewModel : ObservableObject
         Configuration.Settings.Tools.GoogleTranslateLastSourceLanguage = sourceLanguage.TwoLetterIsoLanguageName;
         Configuration.Settings.Tools.GoogleTranslateLastTargetLanguage = targetLanguage.TwoLetterIsoLanguageName;
 
-
         // do translation in background
 #pragma warning disable CS4014
         Task.Run(() =>
@@ -378,6 +377,7 @@ public partial class AutoTranslateViewModel : ObservableObject
             var index = start;
             var linesTranslated = 0;
             var errorCount = 0;
+            var noErrorCount = 0;
             while (index < Rows.Count)
             {
                 if (_abort || cancellationToken.IsCancellationRequested)
@@ -396,6 +396,7 @@ public partial class AutoTranslateViewModel : ObservableObject
 
                 if (linesMergedAndTranslated > 0)
                 {
+                    noErrorCount++;
                     index += linesMergedAndTranslated;
 
                     var index1 = index;
@@ -411,14 +412,22 @@ public partial class AutoTranslateViewModel : ObservableObject
                     linesTranslated += linesMergedAndTranslated;
                     _translationProgressIndex = index;
                     errorCount = 0;
+
+                    if (noErrorCount > 5)
+                    {
+                        forceSingleLineMode = false;
+                    }
+
                     continue;
                 }
 
                 errorCount++;
+                noErrorCount = 0;
                 if (errorCount > 3)
                 {
                     forceSingleLineMode = true;
                 }
+      
 
                 var translateCount = await MergeAndSplitHelper.MergeAndTranslateIfPossible(
                     Rows,
@@ -454,7 +463,7 @@ public partial class AutoTranslateViewModel : ObservableObject
                 }
                 else
                 {
-                    break;
+                    forceSingleLineMode = true;
                 }
             }
 
@@ -779,7 +788,7 @@ public partial class AutoTranslateViewModel : ObservableObject
         if (engineType == typeof(OllamaTranslate))
         {
             ModelBrowseIsVisible = true;
-            
+
             if (Configuration.Settings.Tools.OllamaApiUrl == null)
             {
                 Configuration.Settings.Tools.OllamaApiUrl = "http://localhost:11434/api/generate";

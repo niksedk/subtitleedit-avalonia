@@ -136,13 +136,7 @@ public class AutoTranslateWindow : Window
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedTranslateRow)));
         vm.RowGrid = dataGrid;
 
-
-        var scrollViewer = new ScrollViewer
-        {
-            Content = dataGrid,
-            VerticalScrollBarVisibility = ScrollBarVisibility.Auto
-        };
-        var scrollViewerBorder = UiUtil.MakeBorderForControl(scrollViewer);
+        var dataGridBorder = UiUtil.MakeBorderForControl(dataGrid);
 
         StackPanel settingsBar = UiUtil.MakeControlBarLeft(
             UiUtil.MakeTextBlock("API key", vm, null, nameof(vm.ApiKeyIsVisible)).WithMarginRight(5),
@@ -218,8 +212,8 @@ public class AutoTranslateWindow : Window
         grid.Children.Add(topBar);
         Grid.SetRow(topBar, row++);
 
-        grid.Children.Add(scrollViewerBorder);
-        Grid.SetRow(scrollViewerBorder, row++);
+        grid.Children.Add(dataGridBorder);
+        Grid.SetRow(dataGridBorder, row++);
 
         grid.Children.Add(settingsBar);
         Grid.SetRow(settingsBar, row++);
