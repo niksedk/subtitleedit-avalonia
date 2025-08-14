@@ -195,8 +195,8 @@ public class BurnInWindow : Window
         };
 
         var labelEffect = UiUtil.MakeLabel(Se.Language.General.Effect);
-        var labelSelectedEffect = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.DisplayEffect));
-        var buttonEffect = UiUtil.MakeButton(vm.ShowEffectsCommand, IconNames.MdiSettings).WithMarginLeft(5);
+        var labelSelectedEffect = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.DisplayEffect)).WithMarginRight(3);
+        var buttonEffect = UiUtil.MakeButtonBrowse(vm.ShowEffectsCommand);
         var panelEffect = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -765,6 +765,7 @@ public class BurnInWindow : Window
             Maximum = 100,
             IsHitTestVisible = false,
             Focusable = false,
+            Margin = new Thickness(0, 0, 5, 0),
             Styles =
             {
                 new Style(x => x.OfType<Thumb>())

@@ -910,6 +910,13 @@ public static class UiUtil
         return control;
     }
 
+    public static Label WithMarginRight(this Label control, int marginRight)
+    {
+        var m = control.Margin;
+        control.Margin = new Thickness(m.Left, m.Top, marginRight, m.Bottom);
+        return control;
+    }
+
     public static Label WithMarginTop(this Label control, int marginTop)
     {
         var m = control.Margin;

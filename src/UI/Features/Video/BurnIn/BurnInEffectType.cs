@@ -2,8 +2,13 @@
 
 public enum BurnInEffectType
 {
+    FixRightToLeft,
     FadeInOut,
     SlowFontSizeChange,    
     IncreaseFontKerning,
-    FixRightToLeft,
+    SrollUp,
+    ScrollDown,
+    RotateIn,
+    TiltBounce,
+    FontSizeBounceIn,
 }

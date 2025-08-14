@@ -687,9 +687,11 @@ public partial class BurnInViewModel : ObservableObject
 
     private string MakeAssa(string subtitleFileName)
     {
+        var jobItem = JobItems[_jobItemIndex];
+
         if (string.IsNullOrWhiteSpace(subtitleFileName) || !File.Exists(subtitleFileName))
         {
-            JobItems[_jobItemIndex].Status = "Skipped";
+            jobItem.Status = "Skipped";
             return string.Empty;
         }
 
@@ -703,8 +705,9 @@ public partial class BurnInViewModel : ObservableObject
             {
                 foreach (var effect in _selectedEffects)
                 {
-                    var fontSize = CalculateFontSize(JobItems[_jobItemIndex].Width, JobItems[_jobItemIndex].Height, FontFactor);
-                    s.Text = effect.ApplyEffect(s.Text, VideoWidth, VideoHeight, fontSize);
+                    var fontSize = CalculateFontSize(jobItem.Width, jobItem.Height, FontFactor);
+                    var durationMs = (int)(s.Duration.TotalMilliseconds);
+                    s.Text = effect.ApplyEffect(s.Text, VideoWidth, VideoHeight, fontSize, durationMs);
                 }
             }
 
