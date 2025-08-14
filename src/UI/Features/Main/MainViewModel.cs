@@ -65,6 +65,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Nikse.SubtitleEdit.Features.Sync.VisualSync;
+using Nikse.SubtitleEdit.Features.Video.BlankVideo;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -759,6 +760,54 @@ public partial class MainViewModel :
         }
 
         return string.Empty;
+    }
+
+    [RelayCommand]
+    private async Task VideoGenerateBlank()
+    {
+        var result = await _windowService.ShowDialogAsync<BlankVideoWindow, BlankVideoViewModel>(Window!, vm => 
+        { 
+            //vm.Initialize(GetUpdateSubtitle()); 
+        });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+        
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task VideoCut()
+    {
+        var result = await _windowService.ShowDialogAsync<CutVideoWindow, CutVideoViewModel>(Window!, vm =>
+        {
+            //vm.Initialize(GetUpdateSubtitle()); 
+        });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task VideoReEncode()
+    {
+        var result = await _windowService.ShowDialogAsync<ReEncodeVideoWindow, ReEncodeVideoViewModel>(Window!, vm =>
+        {
+            //vm.Initialize(GetUpdateSubtitle()); 
+        });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]

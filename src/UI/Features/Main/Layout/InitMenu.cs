@@ -287,17 +287,17 @@ public static class InitMenu
                         new MenuItem
                         {
                             Header = Se.Language.Video.GenerateBlankVideoDotDotDot,
-                            //Command = vm.ExportBluRaySupCommand,
+                            Command = vm.VideoGenerateBlankCommand,
                         },
                         new MenuItem
                         {
                             Header = Se.Language.Video.ReEncodeVideoForBetterSubtitlingDotDotDot,
-                            //Command = vm.ExportBluRaySupCommand,
+                            Command = vm.VideoReEncodeCommand,
                         },
                         new MenuItem
                         {
                             Header = Se.Language.Video.CutVideoDotDotDot,
-                            //Command = vm.ExportBluRaySupCommand,
+                            Command = vm.VideoCutCommand,
                         },
                     }
                 },
