@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -38,6 +39,7 @@ public partial class BlankVideoViewModel : ObservableObject
     [ObservableProperty] private int _durationMinutes;
     [ObservableProperty] private bool _useCheckedImage;
     [ObservableProperty] private bool _useSolidColor;
+    [ObservableProperty] private Color _solidColor;
     [ObservableProperty] private bool _useBackgroundImage;
     [ObservableProperty] private string _backgroundImageFileName;
     [ObservableProperty] private bool _generateTimeCodes;
@@ -59,7 +61,7 @@ public partial class BlankVideoViewModel : ObservableObject
     private bool _doAbort;
     private int _jobItemIndex = -1;
     private SubtitleFormat? _subtitleFormat;
-    private string _inputVideoFileName;
+    private string _fullBackgroundImageFileName;
 
     private readonly IWindowService _windowService;
     private readonly IFolderHelper _folderHelper;
@@ -72,8 +74,12 @@ public partial class BlankVideoViewModel : ObservableObject
         _fileHelper = fileHelper;
         _windowService = windowService;
 
-        VideoWidth = 1920;
-        VideoHeight = 1080;
+        VideoWidth = 1280;
+        VideoHeight = 720;
+
+        DurationMinutes = 2;
+
+        UseCheckedImage = true;
 
         FrameRates = new ObservableCollection<double> { 23.976, 24, 25, 29.97, 30, 50, 59.94, 60 };
         SelectedFrameRate = FrameRates[0];
@@ -94,17 +100,8 @@ public partial class BlankVideoViewModel : ObservableObject
         _timerAnalyze.Interval = 100;
 
         _loading = false;
-        _inputVideoFileName = string.Empty;
+        _fullBackgroundImageFileName = string.Empty;
         LoadSettings();
-        UpdateOutputProperties();
-    }
-
-    public void Initialize(string videoFileName, Subtitle subtitle, SubtitleFormat subtitleFormat)
-    {
-        VideoFileName = videoFileName;
-        _inputVideoFileName = videoFileName;
-        _subtitle = new Subtitle(subtitle, false);
-        _subtitleFormat = subtitleFormat;
     }
 
     private void TimerAnalyzeElapsed(object? sender, ElapsedEventArgs e)
@@ -420,12 +417,18 @@ public partial class BlankVideoViewModel : ObservableObject
         await _folderHelper.OpenFolder(Window!, Se.Settings.Video.BurnIn.OutputFolder);
     }
 
-
     [RelayCommand]
-    private async Task OutputProperties()
+    private async Task BrowseImage()
     {
-        await _windowService.ShowDialogAsync<BurnInSettingsWindow, BurnInSettingsViewModel>(Window!);
-        UpdateOutputProperties();
+        var fileName = await _fileHelper.PickOpenImageFile(Window!, Se.Language.General.OpenImageFile);
+
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return;
+        }
+
+        BackgroundImageFileName = Path.GetFileName(fileName);
+        _fullBackgroundImageFileName = fileName;
     }
 
     [RelayCommand]
@@ -560,15 +563,6 @@ public partial class BlankVideoViewModel : ObservableObject
         {
             e.Handled = true;
             Window?.Close();
-        }
-    }
-
-    private void UpdateOutputProperties()
-    {
-        if (Se.Settings.Video.Transparent.UseOutputFolder &&
-            string.IsNullOrWhiteSpace(Se.Settings.Video.Transparent.OutputFolder))
-        {
-            Se.Settings.Video.Transparent.UseOutputFolder = true;
         }
     }
 }

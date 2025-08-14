@@ -13,6 +13,8 @@ public class LanguageVideo
     public string ReEncodeVideoForBetterSubtitlingDotDotDot { get; set; }
     public string CutVideoTitle { get; set; }
     public string CutVideoDotDotDot { get; set; }
+    public string GenerateTimeCodes { get; set; }
+    public string CheckeredImage { get; set; }
 
     public LanguageVideo()
     {
@@ -24,5 +26,7 @@ public class LanguageVideo
         ReEncodeVideoForBetterSubtitlingDotDotDot = "Re-encode video for better subtitling...";
         CutVideoTitle = "Cut video";
         CutVideoDotDotDot = "Cut video...";
+        GenerateTimeCodes = "Generate time codes";
+        CheckeredImage = "Checkered image";
     }
 }

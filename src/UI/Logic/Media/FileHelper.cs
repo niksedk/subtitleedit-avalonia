@@ -283,5 +283,42 @@ namespace Nikse.SubtitleEdit.Logic.Media
 
             return fileTypes;
         }
+
+        public async Task<string> PickOpenImageFile(Visual sender, string title)
+        {
+            var topLevel = TopLevel.GetTopLevel(sender)!;
+
+            var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                Title = title,
+                AllowMultiple = false,
+                FileTypeFilter = MakeOpenImageFilter(),
+            });
+
+            if (files.Count >= 1)
+            {
+                return files[0].Path.LocalPath;
+            }
+
+            return string.Empty;
+        }
+
+        private static IReadOnlyList<FilePickerFileType> MakeOpenImageFilter()
+        {
+            var fileTypes = new List<FilePickerFileType>
+            {
+                new FilePickerFileType("Image files")
+                {
+                    Patterns = new List<string> { "*.png", "*.jpg" }
+                },
+                new FilePickerFileType("All files")
+                {
+                    Patterns = new List<string> { "*" },
+                }
+            };
+
+            return fileTypes;
+        }
+
     }
 }

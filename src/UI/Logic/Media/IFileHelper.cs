@@ -1,5 +1,7 @@
 ﻿using Avalonia;
+using Avalonia.Controls;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using System;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Logic.Media;
@@ -22,4 +24,5 @@ public interface IFileHelper
 
     Task<string> PickOpenVideoFile(Visual sender, string title);
     Task<string[]> PickOpenVideoFiles(Visual sender, string title);
+    Task<string> PickOpenImageFile(Visual sender, string title);
 }

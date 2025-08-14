@@ -8,6 +8,7 @@ using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Styling;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Features.Video.BlankVideo;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 using SkiaSharp;
@@ -1228,12 +1229,18 @@ public static class UiUtil
 
     internal static RadioButton MakeRadioButton(string text, object viewModel, string isCheckedPropertyPath)
     {
+        return MakeRadioButton(text, viewModel, isCheckedPropertyPath, null);
+    }
+
+    internal static RadioButton MakeRadioButton(string text, object viewModel, string isCheckedPropertyPath, string? groupName)
+    {
         var control = new RadioButton
         {
             Content = text,
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Center,
             DataContext = viewModel,
+            GroupName = groupName,
         };
 
         if (isCheckedPropertyPath != null)

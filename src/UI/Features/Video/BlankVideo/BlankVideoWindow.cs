@@ -27,6 +27,7 @@ public class BlankVideoWindow : Window
         DataContext = vm;
 
         var videoSettingsView = MakeVideoSettingsView(vm);
+        var backgroundSettingsView = MakeBackgroundSettingsView(vm);
         var progressView = MakeProgressView(vm);
 
         var buttonGenerate = UiUtil.MakeButton(Se.Language.General.Generate, vm.GenerateCommand)
@@ -43,10 +44,7 @@ public class BlankVideoWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // subtitle settings (lower) + preview
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // settings
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // progress bar
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // buttons
             },
@@ -54,16 +52,16 @@ public class BlankVideoWindow : Window
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) }, // subtitle/video settings
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) }, // cut/preview/video info
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }, // batch mode
             },
             Margin = UiUtil.MakeWindowMargin(),
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(videoSettingsView, 2, 0);
-        grid.Add(progressView, 4, 0, 1, 3);
-        grid.Add(buttonPanel, 5, 0, 1, 3);
+        grid.Add(videoSettingsView, 0, 0);
+        grid.Add(backgroundSettingsView, 0, 1);
+        grid.Add(progressView, 1, 0, 1, 2);
+        grid.Add(buttonPanel, 2, 0, 1, 2);
 
         Content = grid;
 
@@ -72,6 +70,9 @@ public class BlankVideoWindow : Window
 
     private static Border MakeVideoSettingsView(BlankVideoViewModel vm)
     {
+        var labelDuration = UiUtil.MakeLabel(Se.Language.General.DurationMinutes);
+        var numericUpDownDuration = UiUtil.MakeNumericUpDownInt(0, 10000, 120, vm, nameof(vm.DurationMinutes));
+
         var labelResolution = UiUtil.MakeLabel(Se.Language.General.Resolution);
         var textBoxWidth = UiUtil.MakeTextBox(100, vm, nameof(vm.VideoWidth));
         var labelX = UiUtil.MakeLabel("x");
@@ -90,7 +91,7 @@ public class BlankVideoWindow : Window
             }
         }.WithBindVisible(vm, nameof(vm.UseSourceResolution), new InverseBooleanConverter());
 
-        var labelSourceResolution = UiUtil.MakeLabel("Use source resolution").WithBindVisible(vm, nameof(vm.UseSourceResolution));
+        var labelSourceResolution = UiUtil.MakeLabel(Se.Language.General.UseSourceResolution).WithBindVisible(vm, nameof(vm.UseSourceResolution));
         var buttonResolutionSource = UiUtil.MakeButtonBrowse(vm.BrowseResolutionCommand);
         var panelResolutionSource = new StackPanel
         {
@@ -106,12 +107,13 @@ public class BlankVideoWindow : Window
         var labelFrameRate = UiUtil.MakeLabel(Se.Language.General.FrameRate);
         var comboBoxFrameRate = UiUtil.MakeComboBox(vm.FrameRates, vm, nameof(vm.SelectedFrameRate));
 
-        var labelVideoExtension = UiUtil.MakeLabel(Se.Language.General.VideoExtension);
+        var checkBoxGenerateTimeCodes = UiUtil.MakeCheckBox(Se.Language.Video.GenerateTimeCodes, vm, nameof(vm.GenerateTimeCodes));
 
         var grid = new Grid
         {
             RowDefinitions =
             {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
@@ -127,12 +129,77 @@ public class BlankVideoWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(labelResolution, 0, 0);
-        grid.Add(panelResolution, 0, 1);
-        grid.Add(panelResolutionSource, 0, 1);
+        grid.Add(labelDuration, 0, 0);
+        grid.Add(numericUpDownDuration, 0, 1);
 
-        grid.Add(labelFrameRate, 1, 0);
-        grid.Add(comboBoxFrameRate, 1, 1);
+        grid.Add(labelResolution, 1, 0);
+        grid.Add(panelResolution, 1, 1);
+        grid.Add(panelResolutionSource, 1, 1);
+
+        grid.Add(labelFrameRate, 2, 0);
+        grid.Add(comboBoxFrameRate, 2, 1);
+
+        grid.Add(checkBoxGenerateTimeCodes, 3, 1);
+
+        return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5).WithMarginRight(5);
+    }
+
+    private static Border MakeBackgroundSettingsView(BlankVideoViewModel vm)
+    {
+        var radioButtonCheckeredImage = UiUtil.MakeRadioButton(Se.Language.Video.CheckeredImage, vm, nameof(vm.UseCheckedImage), "background");
+
+        var radioButtonUseSolidColor = UiUtil.MakeRadioButton(Se.Language.General.SolidColor, vm, nameof(vm.UseSolidColor), "background");
+        var colorPicker = UiUtil.MakeColorPicker(vm, nameof(_vm.SolidColor));
+        var panelSolidColor = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 5,
+            Children =
+            {
+                radioButtonUseSolidColor,
+                colorPicker,
+            }
+        };  
+
+        var radioButtonImage = UiUtil.MakeRadioButton(Se.Language.General.Image, vm, nameof(vm.UseBackgroundImage), "background");
+        var buttonBrowseImage = UiUtil.MakeButtonBrowse(vm.BrowseImageCommand);
+        var labelImage = UiUtil.MakeLabel(string.Empty).WithBindVisible(vm, nameof(vm.BackgroundImageFileName));
+        var panelImage = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 5,
+            Children =
+            {
+                radioButtonImage,
+                buttonBrowseImage,
+                labelImage,
+            }
+        };
+
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnSpacing = 5,
+            RowSpacing = 5,
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        grid.Add(radioButtonCheckeredImage, 0, 0);
+        grid.Add(panelSolidColor, 1, 0);
+        grid.Add(panelImage, 3, 0);
 
         return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5).WithMarginRight(5);
     }

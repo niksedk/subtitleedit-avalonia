@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Nikse.SubtitleEdit.Logic.Config.Language;
+﻿namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
 public class LanguageGeneral
 {
@@ -27,6 +25,7 @@ public class LanguageGeneral
     public string Download { get; set; }
     public string DownloadX { get; set; }
     public string Duration { get; set; }
+    public string DurationMinutes { get; set; }
     public string EndTime { get; set; }
     public string Error { get; set; }
     public string ExampleX { get; set; }
@@ -260,6 +259,8 @@ public class LanguageGeneral
     public string Effect { get; set; }
     public string PickVideoPosition { get; set; }
     public string More { get; set; }
+    public string SolidColor { get; set; }
+    public string OpenImageFile { get; internal set; }
 
     public LanguageGeneral()
     {
@@ -286,6 +287,7 @@ public class LanguageGeneral
         Download = "Download";
         DownloadX = "Download {0}";
         Duration = "Duration";
+        DurationMinutes = "Duration in minutes";
         EndTime = "End time";
         Error = "Error";
         ExampleX = "Example: {0}";
@@ -519,5 +521,7 @@ public class LanguageGeneral
         Effect = "Effect";
         PickVideoPosition = "Pick video position";
         More = "More";
+        SolidColor = "Solid color";
+        OpenImageFile = "Open image file";
     }
 }
