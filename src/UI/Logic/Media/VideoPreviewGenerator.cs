@@ -1,6 +1,6 @@
 ﻿using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using HanumanInstitute.LibMpv;
+using Google.Type;
 using Nikse.SubtitleEdit.Core.Common;
 using SkiaSharp;
 using System;
@@ -302,7 +302,7 @@ public class VideoPreviewGenerator
         };
     }
 
-    private static Process GetFFmpegProcess(Color color, string outputFileName, int videoWidth, int videoHeight, int seconds, decimal frameRate, bool addTimeCode = false, string addTimeColor = "white")
+    private static Process GetFFmpegProcess(Avalonia.Media.Color color, string outputFileName, int videoWidth, int videoHeight, int seconds, decimal frameRate, bool addTimeCode = false, string addTimeColor = "white")
     {
         if (videoWidth % 2 == 1)
         {
@@ -722,7 +722,7 @@ public class VideoPreviewGenerator
         return processMakeVideo;
     }
 
-    public static Process GenerateVideoFile(string previewFileName, int seconds, int width, int height, Color color, bool checkered, decimal frameRate, Bitmap? bitmap, DataReceivedEventHandler dataReceivedHandler = null, bool addTimeCode = false, string addTimeColor = "white")
+    public static Process GenerateVideoFile(string previewFileName, int seconds, int width, int height, Avalonia.Media.Color color, bool checkered, decimal frameRate, Bitmap? bitmap, DataReceivedEventHandler dataReceivedHandler = null, bool addTimeCode = false, string addTimeColor = "white")
     {
         Process processMakeVideo;
 
@@ -800,5 +800,45 @@ public class VideoPreviewGenerator
         }
 
         return resizedBitmap;
+    }
+
+    public static Process ReEncodeVideoForSubtitling(string inputVideoFileName, string outputVideoFileName, int width, int height, string frameRate, DataReceivedEventHandler? dataReceivedHandler)
+    {
+        if (width % 2 == 1)
+        {
+            width++;
+        }
+
+        if (height % 2 == 1)
+        {
+            height++;
+        }
+
+        outputVideoFileName = $"\"{outputVideoFileName}\"";
+        var frameRateInt = (int)double.Parse(frameRate, CultureInfo.InvariantCulture);
+
+        var processMakeVideo = new Process
+        {
+            StartInfo =
+            {
+                FileName = GetFfmpegLocation(),
+                Arguments =
+                    $"-y -i \"{inputVideoFileName}\" " +
+                    $"-vf scale={width}:{height},fps={frameRate} " +
+                    $"-c:v libx264 -preset ultrafast -movflags +faststart " +
+                    $"-g {frameRateInt / 2} -keyint_min {frameRateInt / 2} -sc_threshold 0 " +
+                    $"-pix_fmt yuv420p -c:a copy {outputVideoFileName}",
+                UseShellExecute = false,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true,
+            }
+        };
+
+        processMakeVideo.StartInfo.Arguments = processMakeVideo.StartInfo.Arguments.Trim();
+
+        SetupDataReceiveHandler(dataReceivedHandler, processMakeVideo);
+
+        return processMakeVideo;
     }
 }

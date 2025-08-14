@@ -798,9 +798,15 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task VideoReEncode()
     {
+        if (string.IsNullOrEmpty(_videoFileName))
+        {
+            await CommandVideoOpen();
+            return;
+        }
+
         var result = await _windowService.ShowDialogAsync<ReEncodeVideoWindow, ReEncodeVideoViewModel>(Window!, vm =>
         {
-            //vm.Initialize(GetUpdateSubtitle()); 
+            vm.Initialize(_videoFileName);
         });
 
         if (!result.OkPressed)
