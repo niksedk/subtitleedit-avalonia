@@ -39,6 +39,7 @@ public class SeVideoBurnIn
     public string OutputFolder { get; set; }
     public string BurnInSuffix { get; set; }
     public bool UseSourceResolution { get; set; }
+    public string Effects { get; set; }
 
     public SeVideoBurnIn()
     {
@@ -67,5 +68,6 @@ public class SeVideoBurnIn
         BurnInSuffix = "_new";
         GenTransparentVideoExtension = ".mkv";
         NonAssaAlignment = "2";
+        Effects = string.Empty;
     }
 }

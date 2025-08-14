@@ -195,7 +195,7 @@ public class BurnInWindow : Window
         };
 
         var labelEffect = UiUtil.MakeLabel(Se.Language.General.Effect);
-        var labelSelectedEffect = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.SelectedEffect));
+        var labelSelectedEffect = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.DisplayEffect));
         var buttonEffect = UiUtil.MakeButton(vm.ShowEffectsCommand, IconNames.MdiSettings).WithMarginLeft(5);
         var panelEffect = new StackPanel
         {

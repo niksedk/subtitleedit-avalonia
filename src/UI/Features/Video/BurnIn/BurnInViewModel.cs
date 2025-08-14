@@ -92,7 +92,7 @@ public partial class BurnInViewModel : ObservableObject
     [ObservableProperty] private bool _useSourceResolution;
     [ObservableProperty] private bool _showAssaOnlyBox;
     [ObservableProperty] private string _targetVideoBitRateInfo;
-    [ObservableProperty] private string _selectedEffect;
+    [ObservableProperty] private string _displayEffect;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -112,6 +112,7 @@ public partial class BurnInViewModel : ObservableObject
     private FfmpegMediaInfo? _mediaInfo;
     private SubtitleFormat? _subtitleFormat;
     private string _inputVideoFileName;
+    private List<BurnInEffectItem> _selectedEffects;
 
     private readonly IWindowService _windowService;
     private readonly IFolderHelper _folderHelper;
@@ -125,7 +126,6 @@ public partial class BurnInViewModel : ObservableObject
 
         FontNames = new ObservableCollection<string>(FontHelper.GetSystemFonts());
         SelectedFontName = FontNames.FirstOrDefault(p => p == Se.Settings.Video.BurnIn.FontName) ?? FontNames[0];
-        SelectedEffect = string.Empty;
 
         // font factors between 0-1
         FontFactor = 0.4;
@@ -204,8 +204,13 @@ public partial class BurnInViewModel : ObservableObject
         VideoCrfHint = string.Empty;
         OutputFolder = string.Empty;
         TargetVideoBitRateInfo = string.Empty;
+        DisplayEffect = string.Empty;
 
+        _selectedEffects = new List<BurnInEffectItem>();
         _log = new StringBuilder();
+        _loading = false;
+        _inputVideoFileName = string.Empty;
+
         _timerGenerate = new();
         _timerGenerate.Elapsed += TimerGenerateElapsed;
         _timerGenerate.Interval = 100;
@@ -214,8 +219,6 @@ public partial class BurnInViewModel : ObservableObject
         _timerAnalyze.Elapsed += TimerAnalyzeElapsed;
         _timerAnalyze.Interval = 100;
 
-        _loading = false;
-        _inputVideoFileName = string.Empty;
         LoadSettings();
         BoxTypeChanged();
         VideoEncodingChanged();
@@ -396,7 +399,7 @@ public partial class BurnInViewModel : ObservableObject
 
             if (JobItems.Count == 1)
             {
-                await _folderHelper.OpenFolder(Window!, jobItem.OutputVideoFileName);
+                await _folderHelper.OpenFolderWithFileSelected(Window!, jobItem.OutputVideoFileName);
             }
             else
             {
@@ -696,6 +699,15 @@ public partial class BurnInViewModel : ObservableObject
 
         if (!isAssa)
         {
+            foreach (var s in subtitle.Paragraphs)
+            {
+                foreach (var effect in _selectedEffects)
+                {
+                    var fontSize = CalculateFontSize(JobItems[_jobItemIndex].Width, JobItems[_jobItemIndex].Height, FontFactor);
+                    s.Text = effect.ApplyEffect(s.Text, VideoWidth, VideoHeight, fontSize);
+                }
+            }
+
             SetStyleForNonAssa(subtitle);
         }
 
@@ -1060,6 +1072,10 @@ public partial class BurnInViewModel : ObservableObject
         UseOutputFolderVisible = settings.UseSourceResolution;
         UseSourceFolderVisible = !settings.UseOutputFolder;
         UseSourceResolution = settings.UseSourceResolution;
+
+        var effectsAsStringArray = settings.Effects?.Split(',') ?? [];
+        _selectedEffects = BurnInEffectItem.List().Where(p => effectsAsStringArray.Contains(p.Name)).ToList();
+        DisplayEffect = string.Join(", ", _selectedEffects.Select(p => p.Name));
     }
 
     private void SaveSettings()
@@ -1077,6 +1093,8 @@ public partial class BurnInViewModel : ObservableObject
         settings.NonAssaFixRtlUnicode = FontFixRtl;
         settings.NonAssaAlignment = SelectedFontAlignment.Code;
         settings.UseSourceResolution = UseSourceResolution;
+
+        settings.Effects = string.Join(",", _selectedEffects.Select(p => p.Name).Distinct());
 
         Se.SaveSettings();
     }
@@ -1123,7 +1141,7 @@ public partial class BurnInViewModel : ObservableObject
     {
         var result = await _windowService.ShowDialogAsync<BurnInEffectWindow, BurnInEffectViewModel>(Window!, vm =>
         {
-          //  vm.Initialize(VideoFileName);
+            vm.Initialize(VideoFileName, _selectedEffects);
         });
 
         if (!result.OkPressed)
@@ -1131,6 +1149,8 @@ public partial class BurnInViewModel : ObservableObject
             return;
         }
 
+        _selectedEffects = result.SelectedEffects.ToList();
+        DisplayEffect = string.Join(", ", _selectedEffects.Select(p => p.Name));
     }
 
     internal void OnKeyDown(KeyEventArgs e)

@@ -5,6 +5,7 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Features.Video.BurnIn;
 
@@ -61,7 +62,10 @@ public class BurnInEffectWindow : Window
             {
                 Content = effect.Name,
                 Tag = effect, // Store the effect item for later reference
+                Name = effect.Type.ToString(),
             };
+            vm.CheckBoxes.Add(checkBox);
+
 
             // Handle checkbox state changes
             checkBox.IsCheckedChanged += (sender, e) =>

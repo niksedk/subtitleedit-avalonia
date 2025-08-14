@@ -4,7 +4,9 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Video.BurnIn;
 
@@ -19,17 +21,31 @@ public partial class BurnInEffectViewModel : ObservableObject
     public bool OkPressed { get; private set; }
     public VideoPlayerControl? VideoPlayerControl { get; set; }
     public double PositionInSeconds { get; set; }
+    public List<CheckBox> CheckBoxes { get; set; }
 
     public BurnInEffectViewModel()
     {
         VideoFileName = string.Empty;
         Effects = new ObservableCollection<BurnInEffectItem>(BurnInEffectItem.List());
         SelectedEffects = new ObservableCollection<BurnInEffectItem>();
+        CheckBoxes = new List<CheckBox>();  
     }
 
-    public void Initialize(string videoFileName)
+    public void Initialize(string videoFileName, List<BurnInEffectItem> selectedEffects)
     {
-        VideoFileName = videoFileName;        
+        Dispatcher.UIThread.Post(() =>
+        {
+            VideoFileName = videoFileName;
+
+            foreach (var effect in Effects.Where(p=>selectedEffects.Any(s => s.Name == p.Name)))
+            {
+                AddSelectedEffect(effect);
+                if (CheckBoxes.Any(c => c.Name == effect.Type.ToString()))
+                {
+                    CheckBoxes.First(c => c.Name == effect.Type.ToString()).IsChecked = true;
+                }
+            }
+        });
     }
 
     [RelayCommand]

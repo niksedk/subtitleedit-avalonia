@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Features.Video.BurnIn;
+﻿using Nikse.SubtitleEdit.Core.Common;
+
+namespace Nikse.SubtitleEdit.Features.Video.BurnIn;
 
 public class BurnInEffectItem(string name, BurnInEffectType type, string description)
 {
@@ -20,7 +22,7 @@ public class BurnInEffectItem(string name, BurnInEffectType type, string descrip
         }
         else if (Type == BurnInEffectType.SlowFontSizeChange)
         {
-            return $"{{\\t(\\fs60)}}{subtitleText}";
+            return $"{{\\t(\\fs{((int)(fontSize * 1.2))})}}{subtitleText}";
         }
         else if (Type == BurnInEffectType.IncreaseFontKerning)
         {
@@ -28,8 +30,7 @@ public class BurnInEffectItem(string name, BurnInEffectType type, string descrip
         }
         else if (Type == BurnInEffectType.FixRightToLeft)
         {
-            // TODO: Implement fix right-to-left effect logic here
-            return subtitleText;
+            return Utilities.FixRtlViaUnicodeChars(subtitleText);
         }
 
         return subtitleText; // No effect applied
@@ -42,7 +43,7 @@ public class BurnInEffectItem(string name, BurnInEffectType type, string descrip
             new BurnInEffectItem("Fade in/out", BurnInEffectType.FadeInOut, "Fades the subtitles in and out."),
             new BurnInEffectItem("Font size change", BurnInEffectType.SlowFontSizeChange, "Slowly changes the font size of the subtitles."),
             new BurnInEffectItem("Increase font kerning", BurnInEffectType.IncreaseFontKerning, "Gradually increases the space between characters in the subtitles."),
-            new BurnInEffectItem("Fix right-to-left", BurnInEffectType.FixRightToLeft, "Adjusts the subtitles for right-to-left languages."),   
+            new BurnInEffectItem("Fix right-to-left", BurnInEffectType.FixRightToLeft, "Adjusts the subtitles for right-to-left languages."),
         ];
     }
 }

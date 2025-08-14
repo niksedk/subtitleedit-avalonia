@@ -51,6 +51,20 @@ public class FolderHelper : IFolderHelper
             return;
         }
 
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "explorer",
+                Arguments = $"\"{folder}\"",
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = Process.Start(startInfo);
+            return;
+        }
+
         var dirInfo = new DirectoryInfo(folder);
         await window.Launcher.LaunchDirectoryInfoAsync(dirInfo);
     }
@@ -63,6 +77,20 @@ public class FolderHelper : IFolderHelper
             {
                 FileName = "open",
                 Arguments = $"-R \"{selectedFile}\"", // -R flag reveals the file in Finder
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = Process.Start(startInfo);
+            return;
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "explorer.exe",
+                Arguments = @"/select, " + selectedFile,
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
