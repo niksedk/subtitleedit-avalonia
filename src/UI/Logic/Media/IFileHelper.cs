@@ -1,7 +1,5 @@
 ﻿using Avalonia;
-using Avalonia.Controls;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
-using System;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Logic.Media;

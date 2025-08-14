@@ -15,9 +15,7 @@ using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -57,7 +55,6 @@ public partial class BlankVideoViewModel : ObservableObject
     private long _startTicks;
     private long _processedFrames;
     private Process? _ffmpegProcess;
-    private readonly Timer _timerAnalyze;
     private readonly Timer _timerGenerate;
     private bool _doAbort;
     private int _jobItemIndex = -1;
@@ -94,14 +91,9 @@ public partial class BlankVideoViewModel : ObservableObject
         _log = new StringBuilder();
         _timerGenerate = new();
         _timerGenerate.Elapsed += TimerGenerateElapsed;
-        _timerGenerate.Interval = 100;
-
-        _timerAnalyze = new();
-        _timerAnalyze.Elapsed += TimerAnalyzeElapsed;
-        _timerAnalyze.Interval = 100;
+        _timerGenerate.Interval = 200;
 
         _loading = false;
-        _fullBackgroundImageFileName = string.Empty;
         _subtitleFileName = string.Empty;
         LoadSettings();
     }
@@ -109,61 +101,6 @@ public partial class BlankVideoViewModel : ObservableObject
     public void Initialize(string subtitleFileName)
     {
         _subtitleFileName = subtitleFileName;
-    }
-
-    private void TimerAnalyzeElapsed(object? sender, ElapsedEventArgs e)
-    {
-        if (_ffmpegProcess == null)
-        {
-            return;
-        }
-
-        if (_doAbort)
-        {
-            _timerAnalyze.Stop();
-#pragma warning disable CA1416
-            _ffmpegProcess.Kill(true);
-#pragma warning restore CA1416
-
-            IsGenerating = false;
-            return;
-        }
-
-        if (!_ffmpegProcess.HasExited)
-        {
-            //var percentage = (int)Math.Round((double)_processedFrames / JobItems[_jobItemIndex].TotalFrames * 100.0,
-            //    MidpointRounding.AwayFromZero);
-            //percentage = Math.Clamp(percentage, 0, 100);
-
-            //var durationMs = (DateTime.UtcNow.Ticks - _startTicks) / 10_000;
-            //var msPerFrame = (float)durationMs / _processedFrames;
-            //var estimatedTotalMs = msPerFrame * JobItems[_jobItemIndex].TotalFrames;
-            //var estimatedLeft = ProgressHelper.ToProgressTime(estimatedTotalMs - durationMs);
-
-            //if (JobItems.Count == 1)
-            //{
-            //    ProgressText = $"Analyzing video... {percentage}%     {estimatedLeft}";
-            //}
-            //else
-            //{
-            //    ProgressText =
-            //        $"Analyzing video {_jobItemIndex + 1}/{JobItems.Count}... {percentage}%     {estimatedLeft}";
-            //}
-
-            return;
-        }
-
-        _timerAnalyze.Stop();
-
-        var jobItem = JobItems[_jobItemIndex];
-        _ffmpegProcess = GetFfmpegProcess(jobItem);
-#pragma warning disable CA1416 // Validate platform compatibility
-        _ffmpegProcess.Start();
-#pragma warning restore CA1416 // Validate platform compatibility
-        _ffmpegProcess.BeginOutputReadLine();
-        _ffmpegProcess.BeginErrorReadLine();
-
-        _timerGenerate.Start();
     }
 
     private void TimerGenerateElapsed(object? sender, ElapsedEventArgs e)
@@ -216,7 +153,7 @@ public partial class BlankVideoViewModel : ObservableObject
 
         if (!File.Exists(jobItem.OutputVideoFileName))
         {
-            SeLogger.WhisperInfo("Output video file not found: " + jobItem.OutputVideoFileName + Environment.NewLine +
+            SeLogger.Error("Output video file not found: " + jobItem.OutputVideoFileName + Environment.NewLine +
                                  "ffmpeg: " + _ffmpegProcess.StartInfo.FileName + Environment.NewLine +
                                  "Parameters: " + _ffmpegProcess.StartInfo.Arguments + Environment.NewLine +
                                  "OS: " + Environment.OSVersion + Environment.NewLine +
@@ -227,7 +164,7 @@ public partial class BlankVideoViewModel : ObservableObject
             Dispatcher.UIThread.Invoke(async () =>
             {
                 await MessageBox.Show(Window!,
-                    "Unable to generate video",
+                    "Unable to generate blank video",
                     "Output video file not generated: " + jobItem.OutputVideoFileName + Environment.NewLine +
                     "Parameters: " + _ffmpegProcess.StartInfo.Arguments,
                     MessageBoxButtons.OK,
@@ -256,12 +193,11 @@ public partial class BlankVideoViewModel : ObservableObject
 
             if (JobItems.Count == 1)
             {
-                await _folderHelper.OpenFolder(Window!, jobItem.OutputVideoFileName);
+                await _folderHelper.OpenFolderWithFileSelected(Window!, jobItem.OutputVideoFileName);
             }
             else
             {
-                var sb = new StringBuilder($"Generated files ({JobItems.Count}):" + Environment.NewLine +
-                                           Environment.NewLine);
+                var sb = new StringBuilder($"Generated files ({JobItems.Count}):" + Environment.NewLine + Environment.NewLine);
                 foreach (var item in JobItems)
                 {
                     sb.AppendLine($"{item.OutputVideoFileName} ==> {item.Status}");
@@ -312,7 +248,7 @@ public partial class BlankVideoViewModel : ObservableObject
             }
         }
 
-        var process = VideoPreviewGenerator.GenerateVideoFile(
+        return VideoPreviewGenerator.GenerateVideoFile(
                VideoFileName,
                DurationMinutes * 60,
                jobItem.Width,
@@ -324,15 +260,6 @@ public partial class BlankVideoViewModel : ObservableObject
                OutputHandler,
                GenerateTimeCodes,
                addTimeColor);
-
-        return VideoPreviewGenerator.GenerateTransparentVideoFile(
-            jobItem.AssaSubtitleFileName,
-            jobItem.OutputVideoFileName,
-            jobItem.Width,
-            jobItem.Height,
-            SelectedFrameRate.ToString(CultureInfo.InvariantCulture),
-            timeCode,
-            OutputHandler);
     }
 
     private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
@@ -383,34 +310,11 @@ public partial class BlankVideoViewModel : ObservableObject
         var jobItem = new BurnInJobItem(string.Empty, VideoWidth, VideoHeight)
         {
             InputVideoFileName = VideoFileName,
-            OutputVideoFileName = MakeOutputFileName(_subtitle.FileName),
+            OutputVideoFileName = VideoFileName,
         };
         jobItem.AddSubtitleFileName(subtitleFileName);
 
         return new ObservableCollection<BurnInJobItem>(new[] { jobItem });
-    }
-
-    private string MakeOutputFileName(string videoFileName)
-    {
-        var nameNoExt = Path.GetFileNameWithoutExtension(videoFileName);
-        var ext = ".mkv"; // SelectedVideoExtension;
-        var suffix = Se.Settings.Video.BurnIn.BurnInSuffix;
-        var fileName = Path.Combine(Path.GetDirectoryName(videoFileName)!, nameNoExt + suffix + ext);
-        if (Se.Settings.Video.BurnIn.UseOutputFolder &&
-            !string.IsNullOrEmpty(Se.Settings.Video.BurnIn.OutputFolder) &&
-            Directory.Exists(Se.Settings.Video.BurnIn.OutputFolder))
-        {
-            fileName = Path.Combine(Se.Settings.Video.BurnIn.OutputFolder, nameNoExt + suffix + ext);
-        }
-
-        var i = 2;
-        while (File.Exists(fileName))
-        {
-            fileName = Path.Combine(Se.Settings.Video.BurnIn.OutputFolder, $"{nameNoExt}{suffix}_{i}{ext}");
-            i++;
-        }
-
-        return fileName;
     }
 
     [RelayCommand]
@@ -492,6 +396,18 @@ public partial class BlankVideoViewModel : ObservableObject
     [RelayCommand]
     private async Task Generate()
     {
+        if (UseBackgroundImage && string.IsNullOrEmpty(_fullBackgroundImageFileName))
+        {
+            await MessageBox.Show(Window!, "Background image file not selected", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        if (UseBackgroundImage && !File.Exists(_fullBackgroundImageFileName))
+        {
+            await MessageBox.Show(Window!, "Background image file does not exist: " + _fullBackgroundImageFileName, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
         var videoFileName = UseSolidColor ? "blank_video_solid" : (UseCheckedImage ? "blank_video_checkered" : "blank_video_image");
         var path = Path.Combine(Se.Settings.Video.BurnIn.OutputFolder, videoFileName + ".mkv");
         if (!string.IsNullOrEmpty(_subtitleFileName))
@@ -499,7 +415,7 @@ public partial class BlankVideoViewModel : ObservableObject
             path = Path.Combine(Path.GetDirectoryName(_subtitleFileName) ?? Se.Settings.Video.BurnIn.OutputFolder, videoFileName + ".mkv");
         }
 
-        videoFileName = await _fileHelper.PickSaveVideoFile(Window!, ".mkv", videoFileName, "Save video as");
+        videoFileName = await _fileHelper.PickSaveVideoFile(Window!, ".mkv", videoFileName, Se.Language.Video.SaveVideoAsTitle);
         if (string.IsNullOrEmpty(videoFileName))
         {
             return;
@@ -538,7 +454,7 @@ public partial class BlankVideoViewModel : ObservableObject
         jobItem.Width = VideoWidth;
         jobItem.Height = VideoHeight;
         jobItem.Status = Se.Language.General.Generating;
-        jobItem.OutputVideoFileName = MakeOutputFileName(jobItem.InputVideoFileName);
+        jobItem.OutputVideoFileName = VideoFileName;
 
         var result = RunEncoding(jobItem);
         if (result)

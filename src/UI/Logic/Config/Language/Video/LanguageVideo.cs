@@ -15,12 +15,13 @@ public class LanguageVideo
     public string CutVideoDotDotDot { get; set; }
     public string GenerateTimeCodes { get; set; }
     public string CheckeredImage { get; set; }
+    public string SaveVideoAsTitle { get; set; }
 
     public LanguageVideo()
     {
 
         GoToVideoPosition = "Go to video position";
-        GenerateBlankVideoTitle = "Generate blank video...";
+        GenerateBlankVideoTitle = "Generate blank video";
         GenerateBlankVideoDotDotDot = "Generate blank video...";
         ReEncodeVideoForBetterSubtitlingTitle = "Re-encode video for better subtitling";
         ReEncodeVideoForBetterSubtitlingDotDotDot = "Re-encode video for better subtitling...";
@@ -28,5 +29,6 @@ public class LanguageVideo
         CutVideoDotDotDot = "Cut video...";
         GenerateTimeCodes = "Generate time codes";
         CheckeredImage = "Checkered image";
+        SaveVideoAsTitle = "Save video as";
     }
 }

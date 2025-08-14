@@ -556,6 +556,13 @@ public static class UiUtil
         return control;
     }
 
+    public static Label WithMarginBottom(this Label control, int marginBottom)
+    {
+        var m = control.Margin;
+        control.Margin = new Thickness(m.Left, m.Top, m.Right, marginBottom);
+        return control;
+    }
+
     public static Border WithMarginBottom(this Border control, int marginBottom)
     {
         var m = control.Margin;

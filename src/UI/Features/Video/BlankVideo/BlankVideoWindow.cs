@@ -146,6 +146,8 @@ public class BlankVideoWindow : Window
 
     private static Border MakeBackgroundSettingsView(BlankVideoViewModel vm)
     {
+        var labelBackground = UiUtil.MakeLabel(Se.Language.General.Background).WithBold().WithMarginBottom(8);
+
         var radioButtonCheckeredImage = UiUtil.MakeRadioButton(Se.Language.Video.CheckeredImage, vm, nameof(vm.UseCheckedImage), "background");
 
         var radioButtonUseSolidColor = UiUtil.MakeRadioButton(Se.Language.General.SolidColor, vm, nameof(vm.UseSolidColor), "background");
@@ -163,7 +165,7 @@ public class BlankVideoWindow : Window
 
         var radioButtonImage = UiUtil.MakeRadioButton(Se.Language.General.Image, vm, nameof(vm.UseBackgroundImage), "background");
         var buttonBrowseImage = UiUtil.MakeButtonBrowse(vm.BrowseImageCommand);
-        var labelImage = UiUtil.MakeLabel(string.Empty).WithBindVisible(vm, nameof(vm.BackgroundImageFileName));
+        var labelImage = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.BackgroundImageFileName));
         var panelImage = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -184,8 +186,6 @@ public class BlankVideoWindow : Window
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
@@ -197,8 +197,9 @@ public class BlankVideoWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(radioButtonCheckeredImage, 0, 0);
-        grid.Add(panelSolidColor, 1, 0);
+        grid.Add(labelBackground, 0, 0);
+        grid.Add(radioButtonCheckeredImage, 1, 0);
+        grid.Add(panelSolidColor, 2, 0);
         grid.Add(panelImage, 3, 0);
 
         return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5).WithMarginRight(5);

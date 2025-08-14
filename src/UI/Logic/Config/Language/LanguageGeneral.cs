@@ -260,7 +260,8 @@ public class LanguageGeneral
     public string PickVideoPosition { get; set; }
     public string More { get; set; }
     public string SolidColor { get; set; }
-    public string OpenImageFile { get; internal set; }
+    public string OpenImageFile { get; set; }
+    public string Background { get; set; }
 
     public LanguageGeneral()
     {
@@ -523,5 +524,6 @@ public class LanguageGeneral
         More = "More";
         SolidColor = "Solid color";
         OpenImageFile = "Open image file";
+        Background = "Background";
     }
 }
