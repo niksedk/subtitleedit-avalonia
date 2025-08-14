@@ -1098,9 +1098,16 @@ public partial class MainViewModel :
                     break;
                 }
 
+                Subtitles[i].OriginalText = Subtitles[i].Text;
                 Subtitles[i].Text = result.Rows[i].TranslatedText;
             }
         }
+
+        _subtitleFileNameOriginal = _subtitleFileName;  
+        _subtitleFileName = string.Empty;
+        ShowColumnOriginalText = true;
+        AutoFitColumns();
+        _updateAudioVisualizer = true;
 
         _shortcutManager.ClearKeys();
     }
