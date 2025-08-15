@@ -1,4 +1,7 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language.Tools;
+﻿using Nikse.SubtitleEdit.Features.Video.CutVideo;
+using System.Collections.ObjectModel;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language.Tools;
 
 public class LanguageVideo
 {
@@ -17,6 +20,10 @@ public class LanguageVideo
     public string CheckeredImage { get; set; }
     public string SaveVideoAsTitle { get; set; }
     public object PromptForFfmpegParamsAndGenerate { get; set; }
+    public string CutVideoCutSegments { get; set; }
+    public string CutVideoMergeSegments { get; set; }
+    public string CutVideoSplitSegments { get; set; }
+    public string CutVideoType { get; set; }
 
     public LanguageVideo()
     {
@@ -32,5 +39,9 @@ public class LanguageVideo
         CheckeredImage = "Checkered image";
         SaveVideoAsTitle = "Save video as";
         PromptForFfmpegParamsAndGenerate = "Prompt for ffmpeg parameters and generate";
+        CutVideoCutSegments = "Cut segments";
+        CutVideoMergeSegments = "Merge segments";
+        CutVideoSplitSegments = "Save segments individually";
+        CutVideoType = "Cut type";
     }
 }

@@ -7,6 +7,7 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
+using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -37,10 +38,16 @@ public class CutVideoWindow : Window
         var audioVisualizerView = MakeAudioVisualizerView(vm);
         var progressView = MakeProgressView(vm);
 
+        var comboBoxCutType = UiUtil.MakeComboBox<CutTypeDisplay>(
+            vm.CutTypes,
+            vm,
+            nameof(vm.SelectedCutType)
+        );
         var buttonGenerate = UiUtil.MakeButton(Se.Language.General.Generate, vm.GenerateCommand)
             .WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand).WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
         var buttonPanel = UiUtil.MakeButtonBar(
+            comboBoxCutType,
             buttonGenerate,
             buttonOk,
             UiUtil.MakeButtonCancel(vm.CancelCommand)
@@ -78,33 +85,66 @@ public class CutVideoWindow : Window
 
     private static Border MakeSegmentsView(CutVideoViewModel vm)
     {
-        var grid = new Grid
+        var fullTimeConverter = new TimeSpanToDisplayFullConverter();
+        var shortTimeConverter = new TimeSpanToDisplayShortConverter();
+        var dataGridSubtitle = new DataGrid
         {
-            RowDefinitions =
-            {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-            },
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-            },
-            ColumnSpacing = 5,
-            RowSpacing = 5,
-            Width = double.NaN,
+            AutoGenerateColumns = false,
+            SelectionMode = DataGridSelectionMode.Single,
+            CanUserResizeColumns = true,
+            CanUserSortColumns = true,
             HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Width = double.NaN,
+            Height = double.NaN,
+            DataContext = vm,
+            ItemsSource = vm.Segments,
+            Columns =
+            {
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.NumberSymbol,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(SubtitleLineViewModel.Number)),
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Show,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)) { Converter = fullTimeConverter },
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Hide,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(SubtitleLineViewModel.EndTime)) { Converter = fullTimeConverter },
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Duration,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(SubtitleLineViewModel.Duration)) { Converter = shortTimeConverter },
+                    IsReadOnly = true,
+                },
+            },
+        };
+        dataGridSubtitle.Bind(DataGrid.SelectedItemProperty,
+            new Binding(nameof(vm.SelectedSegment)) { Source = vm });
+        vm.SegmentGrid = dataGridSubtitle;
+
+        var border = new Border
+        {
+            Child = dataGridSubtitle,
+            BorderThickness = new Thickness(1),
+            BorderBrush = UiUtil.GetBorderColor(),
+            Padding = new Thickness(10, 0, 10, 0),
+            CornerRadius = new CornerRadius(5),
         };
 
-        return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5).WithMarginRight(5);
+        return border;
     }
 
     private static Border MakeVideoPlayerView(CutVideoViewModel vm)
@@ -118,6 +158,7 @@ public class CutVideoWindow : Window
     {
         vm.AudioVisualizer = new AudioVisualizer { Height = 80, Width = double.NaN, IsReadOnly = false };
         vm.AudioVisualizer.OnVideoPositionChanged += vm.AudioVisualizerPositionChanged;
+        vm.AudioVisualizer.OnNewSelectionInsert += vm.AudioVisualizerOnNewSelectionInsert;
 
         return UiUtil.MakeBorderForControl(vm.AudioVisualizer).WithMarginRight(5);
     }

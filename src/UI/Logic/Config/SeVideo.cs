@@ -10,6 +10,7 @@ public class SeVideo
     public bool ShowStopButton { get; set; }
     public bool ShowFullscreenButton { get; set; }
     public bool AutoOpen { get; set; }
+    public string CutType { get; set; }
 
     public SeVideo()
     {
@@ -21,5 +22,6 @@ public class SeVideo
         ShowStopButton = true;
         ShowFullscreenButton = true;
         AutoOpen = true;
+        CutType = Nikse.SubtitleEdit.Features.Video.CutVideo.CutType.MergeSegments.ToString();
     }
 }

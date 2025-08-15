@@ -3512,6 +3512,8 @@ public partial class MainViewModel :
     {
         var index = _insertService.InsertInCorrectPosition(Subtitles, e.Paragraph);
         SelectAndScrollToRow(index);
+        Renumber();
+        _updateAudioVisualizer = true;
 
         if (Se.Settings.Waveform.FocusTextBoxAfterInsertNew)
         {

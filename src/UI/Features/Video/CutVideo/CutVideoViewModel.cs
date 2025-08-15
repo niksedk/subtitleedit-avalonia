@@ -9,7 +9,6 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Shared;
-using Nikse.SubtitleEdit.Features.Sync.VisualSync;
 using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -46,12 +45,16 @@ public partial class CutVideoViewModel : ObservableObject
     [ObservableProperty] private bool _useSourceResolution;
     [ObservableProperty] private bool _isAudioVisualizerVisible;
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _segments;
+    [ObservableProperty] private SubtitleLineViewModel _selectedSegment;
     [ObservableProperty] private int _selectedSegmentIndex;
+    [ObservableProperty] private ObservableCollection<CutTypeDisplay> _cutTypes;
+    [ObservableProperty] private CutTypeDisplay _selectedCutType;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
     public VideoPlayerControl VideoPlayer { get; internal set; }
     public AudioVisualizer AudioVisualizer { get; internal set; }
+    public DataGrid SegmentGrid { get; internal set; }
 
     private Subtitle _subtitle = new();
     private bool _loading = true;
@@ -74,12 +77,14 @@ public partial class CutVideoViewModel : ObservableObject
     private readonly IWindowService _windowService;
     private readonly IFolderHelper _folderHelper;
     private readonly IFileHelper _fileHelper;
+    private readonly IInsertService _insertService;
 
-    public CutVideoViewModel(IFolderHelper folderHelper, IFileHelper fileHelper, IWindowService windowService)
+    public CutVideoViewModel(IFolderHelper folderHelper, IFileHelper fileHelper, IWindowService windowService, IInsertService insertService)
     {
         _folderHelper = folderHelper;
         _fileHelper = fileHelper;
         _windowService = windowService;
+        _insertService = insertService;
 
         VideoWidth = 1920;
         VideoHeight = 1080;
@@ -96,13 +101,18 @@ public partial class CutVideoViewModel : ObservableObject
         };
         SelectedVideoExtension = VideoExtensions[0];
 
+        CutTypes = new ObservableCollection<CutTypeDisplay>(CutTypeDisplay.GetCutTypes());
+        SelectedCutType = CutTypes[0];
+
         JobItems = new ObservableCollection<BurnInJobItem>();
         VideoPlayer = new VideoPlayerControl(new VideoPlayerInstanceNone());
         AudioVisualizer = new AudioVisualizer();
+        SegmentGrid = new DataGrid();
         Segments = new ObservableCollection<SubtitleLineViewModel>();
         VideoFileName = string.Empty;
         VideoFileSize = string.Empty;
         ProgressText = string.Empty;
+        SelectedSegment = new SubtitleLineViewModel();
 
         _log = new StringBuilder();
         _keyFramesInSeconds = new List<double>();
@@ -676,15 +686,14 @@ public partial class CutVideoViewModel : ObservableObject
 
     private void LoadSettings()
     {
-        var settings = Se.Settings.Video.BurnIn;
-        UseSourceResolution = settings.UseSourceResolution;
+        var settings = Se.Settings.Video;
+        SelectedCutType = CutTypes.FirstOrDefault(ct => ct.CutType.ToString() == settings.CutType) ?? CutTypes[0];
     }
 
     private void SaveSettings()
     {
-        var settings = Se.Settings.Video.BurnIn;
-        settings.UseSourceResolution = UseSourceResolution;
-
+        var settings = Se.Settings.Video;
+        settings.CutType = SelectedCutType.CutType.ToString();
         Se.SaveSettings();
     }
 
@@ -731,5 +740,36 @@ public partial class CutVideoViewModel : ObservableObject
     {
         StartTitleTimer();
         _updateAudioVisualizer = true;
+    }
+
+    internal void AudioVisualizerOnNewSelectionInsert(object sender, ParagraphEventArgs e)
+    {
+        var index = _insertService.InsertInCorrectPosition(Segments, e.Paragraph);
+        SelectAndScrollToRow(index);
+        Renumber();
+        _updateAudioVisualizer = true;
+    }
+
+    private void Renumber()
+    {
+        for (var index = 0; index < Segments.Count; index++)
+        {
+            Segments[index].Number = index + 1;
+        }
+    }
+
+
+    private void SelectAndScrollToRow(int index)
+    {
+        if (index < 0 || index >= Segments.Count)
+        {
+            return;
+        }
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            SegmentGrid.SelectedIndex = index;
+            SegmentGrid.ScrollIntoView(SegmentGrid.SelectedItem, null);
+        }, DispatcherPriority.Background);
     }
 }
