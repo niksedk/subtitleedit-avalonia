@@ -790,7 +790,7 @@ public partial class MainViewModel :
 
         var result = await _windowService.ShowDialogAsync<CutVideoWindow, CutVideoViewModel>(Window!, vm =>
         {
-            vm.Initialize(_videoFileName);
+            vm.Initialize(_videoFileName, AudioVisualizer?.WavePeaks);
         });
 
         if (!result.OkPressed)

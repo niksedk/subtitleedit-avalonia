@@ -16,6 +16,7 @@ public class LanguageVideo
     public string GenerateTimeCodes { get; set; }
     public string CheckeredImage { get; set; }
     public string SaveVideoAsTitle { get; set; }
+    public object PromptForFfmpegParamsAndGenerate { get; set; }
 
     public LanguageVideo()
     {
@@ -30,5 +31,6 @@ public class LanguageVideo
         GenerateTimeCodes = "Generate time codes";
         CheckeredImage = "Checkered image";
         SaveVideoAsTitle = "Save video as";
+        PromptForFfmpegParamsAndGenerate = "Prompt for ffmpeg parameters and generate";
     }
 }

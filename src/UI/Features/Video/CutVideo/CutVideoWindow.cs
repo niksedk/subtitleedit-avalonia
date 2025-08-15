@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
@@ -118,28 +119,7 @@ public class CutVideoWindow : Window
         vm.AudioVisualizer = new AudioVisualizer { Height = 80, Width = double.NaN, IsReadOnly = false };
         vm.AudioVisualizer.OnVideoPositionChanged += vm.AudioVisualizerPositionChanged;
 
-        var grid = new Grid
-        {
-            RowDefinitions =
-            {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-            },
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-            },
-            ColumnSpacing = 5,
-            RowSpacing = 5,
-            Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-        };
-
-        return UiUtil.MakeBorderForControl(grid).WithMarginRight(5);
+        return UiUtil.MakeBorderForControl(vm.AudioVisualizer).WithMarginRight(5);
     }
 
     private static Grid MakeProgressView(CutVideoViewModel vm)
@@ -202,5 +182,17 @@ public class CutVideoWindow : Window
     {
         base.OnKeyDown(e);
         _vm.OnKeyDown(e);
+    }
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+        _vm.OnLoaded();
+    }
+
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        base.OnClosing(e);
+        _vm.OnClosing();
     }
 }

@@ -33,11 +33,11 @@ public class ReEncodeVideoWindow : Window
 
         var buttonGenerate = UiUtil.MakeButton(Se.Language.General.Generate, vm.GenerateCommand)
             .WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
-        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand).WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
+        var buttonDone = UiUtil.MakeButtonDone(vm.OkCommand).WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
         var buttonPanel = UiUtil.MakeButtonBar(
             buttonGenerate,
-            buttonOk,
-            UiUtil.MakeButtonCancel(vm.CancelCommand)
+            buttonDone,
+            UiUtil.MakeButtonCancel(vm.CancelCommand).WithBindIsVisible(nameof(vm.IsGenerating))
         );
 
         buttonGenerate.ContextFlyout = new MenuFlyout
@@ -46,7 +46,7 @@ public class ReEncodeVideoWindow : Window
             {
                 new MenuItem
                 {
-                    Header = "Prompt for ffmpeg parameters and generate",
+                    Header = Se.Language.Video.PromptForFfmpegParamsAndGenerate,
                     Command = vm.PromptFfmpegParametersAndGeenrateCommand,
                 },
             }
@@ -77,7 +77,7 @@ public class ReEncodeVideoWindow : Window
 
         Content = grid;
 
-        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        Activated += delegate { buttonGenerate.Focus(); }; // hack to make OnKeyDown work
     }
 
     private static Border MakeVideoSettingsView(ReEncodeVideoViewModel vm)
@@ -100,7 +100,7 @@ public class ReEncodeVideoWindow : Window
             }
         }.WithBindVisible(vm, nameof(vm.UseSourceResolution), new InverseBooleanConverter());
 
-        var labelSourceResolution = UiUtil.MakeLabel("Use source resolution").WithBindVisible(vm, nameof(vm.UseSourceResolution));
+        var labelSourceResolution = UiUtil.MakeLabel(Se.Language.General.UseSourceResolution).WithBindVisible(vm, nameof(vm.UseSourceResolution));
         var buttonResolutionSource = UiUtil.MakeButtonBrowse(vm.BrowseResolutionCommand);
         var panelResolutionSource = new StackPanel
         {

@@ -76,7 +76,6 @@ public class LanguageBurnIn
         GetEndPosition = "Get end position";
         UseSource = "Use source";
         UseSourceFolder = "Use source folder";
-        UseSourceResolution = "Use source resolution";
         OutputSettings = "Output file/folder...";
         FontSizeFactor = "Font size factor";
         BoxType = "Box type";

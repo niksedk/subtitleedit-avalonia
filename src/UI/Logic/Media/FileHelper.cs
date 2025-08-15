@@ -199,9 +199,9 @@ namespace Nikse.SubtitleEdit.Logic.Media
             var options = new FilePickerSaveOptions
             {
                 Title = title,
-                SuggestedFileName = suggestedFileName,
+                SuggestedFileName = System.IO.Path.GetFileName(suggestedFileName),
                 FileTypeChoices = MakeSaveFilePickerFileTypes(extension, extension),
-                DefaultExtension = extension.TrimStart('.')
+                DefaultExtension = extension.TrimStart('.'),                
             };
             var file = await topLevel.StorageProvider.SaveFilePickerAsync(options);
 

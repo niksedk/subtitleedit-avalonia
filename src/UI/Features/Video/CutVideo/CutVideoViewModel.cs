@@ -1,8 +1,5 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Media.Imaging;
-using Avalonia.Skia;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -10,12 +7,13 @@ using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Sync.VisualSync;
 using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
-using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -46,6 +44,9 @@ public partial class CutVideoViewModel : ObservableObject
     [ObservableProperty] private BurnInJobItem? _selectedJobItem;
     [ObservableProperty] private bool _isGenerating;
     [ObservableProperty] private bool _useSourceResolution;
+    [ObservableProperty] private bool _isAudioVisualizerVisible;
+    [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _segments;
+    [ObservableProperty] private int _selectedSegmentIndex;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -67,13 +68,14 @@ public partial class CutVideoViewModel : ObservableObject
     private SubtitleFormat? _subtitleFormat;
     private string _inputVideoFileName;
     private List<double> _keyFramesInSeconds;
-    private bool _updateAudioVisualizer;    
+    private bool _updateAudioVisualizer;
+    private DispatcherTimer _positionTimer = new DispatcherTimer();
 
     private readonly IWindowService _windowService;
     private readonly IFolderHelper _folderHelper;
     private readonly IFileHelper _fileHelper;
 
-    public CutVideoViewModel(IFolderHelper folderHelper, IFileHelper fileHelper,  IWindowService windowService)
+    public CutVideoViewModel(IFolderHelper folderHelper, IFileHelper fileHelper, IWindowService windowService)
     {
         _folderHelper = folderHelper;
         _fileHelper = fileHelper;
@@ -95,7 +97,9 @@ public partial class CutVideoViewModel : ObservableObject
         SelectedVideoExtension = VideoExtensions[0];
 
         JobItems = new ObservableCollection<BurnInJobItem>();
-
+        VideoPlayer = new VideoPlayerControl(new VideoPlayerInstanceNone());
+        AudioVisualizer = new AudioVisualizer();
+        Segments = new ObservableCollection<SubtitleLineViewModel>();
         VideoFileName = string.Empty;
         VideoFileSize = string.Empty;
         ProgressText = string.Empty;
@@ -115,7 +119,7 @@ public partial class CutVideoViewModel : ObservableObject
         LoadSettings();
     }
 
-    public void Initialize(string videoFileName)
+    public void Initialize(string videoFileName, WavePeakData? wavePeakData)
     {
         VideoFileName = videoFileName;
         _inputVideoFileName = videoFileName;
@@ -128,6 +132,84 @@ public partial class CutVideoViewModel : ObservableObject
         _ffmpegListKeyFramesProcess.BeginErrorReadLine();
 
         _ffmpegListKeyFramesProcess.Start();
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (!string.IsNullOrEmpty(videoFileName))
+            {
+                _ = VideoPlayer.Open(videoFileName);
+            }
+
+            if (wavePeakData != null)
+            {
+                AudioVisualizer.WavePeaks = wavePeakData;
+                IsAudioVisualizerVisible = true;
+            }
+            _updateAudioVisualizer = true;
+        });
+    }
+
+    private void StartTitleTimer()
+    {
+        _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(150) };
+        _positionTimer.Tick += (s, e) =>
+        {
+            UpdateAudioVisualizer(VideoPlayer.VideoPlayerInstance, AudioVisualizer, SelectedSegmentIndex);
+
+            if (_updateAudioVisualizer)
+            {
+                AudioVisualizer.InvalidateVisual();
+                _updateAudioVisualizer = false;
+            }
+        };
+
+        _positionTimer.Start();
+    }
+
+    private void UpdateAudioVisualizer(
+        IVideoPlayerInstance vp,
+        AudioVisualizer av,
+        int selectedParagraphIndex)
+    {
+        SubtitleLineViewModel? selectedParagraph = selectedParagraphIndex < 0
+            ? null
+            : (Segments.Count == 0 ? null : Segments[selectedParagraphIndex]) ;
+
+        var subtitle = new ObservableCollection<SubtitleLineViewModel>();
+        var orderedList = Segments.OrderBy(p => p.StartTime.TotalMilliseconds).ToList();
+        var firstSelectedIndex = -1;
+        for (var i = 0; i < orderedList.Count; i++)
+        {
+            var dp = orderedList[i];
+            subtitle.Add(dp);
+        }
+
+        var mediaPlayerSeconds = vp.Position;
+        var startPos = mediaPlayerSeconds - 0.01;
+        if (startPos < 0)
+        {
+            startPos = 0;
+        }
+
+        av.CurrentVideoPositionSeconds = vp.Position;
+        var isPlaying = vp.IsPlaying;
+
+        var selectedSubtitles = new List<SubtitleLineViewModel>
+        {
+            selectedParagraph ??  new  SubtitleLineViewModel(),
+        };
+
+        if ((isPlaying || !av.IsScrolling) && (mediaPlayerSeconds > av.EndPositionSeconds ||
+                                               mediaPlayerSeconds < av.StartPositionSeconds))
+        {
+            av.SetPosition(startPos, subtitle, mediaPlayerSeconds, 0,
+                selectedSubtitles);
+        }
+        else
+        {
+            av.SetPosition(av.StartPositionSeconds, subtitle, mediaPlayerSeconds, firstSelectedIndex,
+                selectedSubtitles);
+        }
     }
 
     private void OutputHandlerKeyFrames(object sendingProcess, DataReceivedEventArgs outLine)
@@ -637,6 +719,17 @@ public partial class CutVideoViewModel : ObservableObject
     internal void AudioVisualizerPositionChanged(object sender, AudioVisualizer.PositionEventArgs e)
     {
         VideoPlayer.Position = e.PositionInSeconds;
+        _updateAudioVisualizer = true;
+    }
+
+    internal void OnClosing()
+    {
+        VideoPlayer.VideoPlayerInstance.Close();
+    }
+
+    internal void OnLoaded()
+    {
+        StartTitleTimer();
         _updateAudioVisualizer = true;
     }
 }
