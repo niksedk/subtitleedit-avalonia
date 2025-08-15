@@ -21,7 +21,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
 
-namespace Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
+namespace Nikse.SubtitleEdit.Features.Video.ReEncodeVideo;
 
 public partial class ReEncodeVideoViewModel : ObservableObject
 {

@@ -49,6 +49,7 @@ using Nikse.SubtitleEdit.Features.Video.BlankVideo;
 using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Features.Video.CutVideo;
 using Nikse.SubtitleEdit.Features.Video.OpenFromUrl;
+using Nikse.SubtitleEdit.Features.Video.ReEncodeVideo;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech;
 using Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
 using Nikse.SubtitleEdit.Logic;
@@ -1055,12 +1056,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowVideoTextToSpeech()
     {
-        await _windowService.ShowDialogAsync<TextToSpeechWindow, TextToSpeechViewModel>(Window!,
-            vm =>
-            {
-                vm.Initialize(GetUpdateSubtitle(), _videoFileName ?? string.Empty, AudioVisualizer?.WavePeaks,
-                    Path.GetTempPath());
-            });
+        var ffmpegOk = await RequireFfmpegOk();
+        if (!ffmpegOk)
+        {
+            return;
+        }
+
+        await _windowService.ShowDialogAsync<TextToSpeechWindow, TextToSpeechViewModel>(Window!, vm =>
+        {
+            vm.Initialize(GetUpdateSubtitle(), _videoFileName ?? string.Empty, AudioVisualizer?.WavePeaks,
+                Path.GetTempPath());
+        });
         _shortcutManager.ClearKeys();
     }
 

@@ -9,7 +9,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 
-namespace Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
+namespace Nikse.SubtitleEdit.Features.Video.ReEncodeVideo;
 
 public class ReEncodeVideoWindow : Window
 {
