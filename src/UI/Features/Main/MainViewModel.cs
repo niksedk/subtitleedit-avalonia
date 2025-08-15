@@ -767,6 +767,12 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task VideoGenerateBlank()
     {
+        var ffmpegOk = await RequireFfmpegOk();
+        if (!ffmpegOk)
+        {
+            return;
+        }
+
         var result = await _windowService.ShowDialogAsync<BlankVideoWindow, BlankVideoViewModel>(Window!, vm =>
         {
         });
@@ -782,6 +788,12 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task VideoCut()
     {
+        var ffmpegOk = await RequireFfmpegOk();
+        if (!ffmpegOk)
+        {
+            return;
+        }
+
         if (string.IsNullOrEmpty(_videoFileName))
         {
             await CommandVideoOpen();
@@ -804,6 +816,12 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task VideoReEncode()
     {
+        var ffmpegOk = await RequireFfmpegOk();
+        if (!ffmpegOk)
+        {
+            return;
+        }
+
         if (string.IsNullOrEmpty(_videoFileName))
         {
             await CommandVideoOpen();
