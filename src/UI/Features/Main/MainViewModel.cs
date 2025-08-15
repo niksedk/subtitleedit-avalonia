@@ -1023,6 +1023,12 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowVideoBurnIn()
     {
+        var ffmpegOk = await RequireFfmpegOk();
+        if (!ffmpegOk)
+        {
+            return;
+        }
+
         await _windowService.ShowDialogAsync<BurnInWindow, BurnInViewModel>(Window!,
             vm => { vm.Initialize(_videoFileName ?? string.Empty, GetUpdateSubtitle(), SelectedSubtitleFormat); });
         _shortcutManager.ClearKeys();
@@ -1061,6 +1067,12 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowVideoTransparentSubtitles()
     {
+        var ffmpegOk = await RequireFfmpegOk();
+        if (!ffmpegOk)
+        {
+            return;
+        }
+
         await _windowService.ShowDialogAsync<TransparentSubtitlesWindow, TransparentSubtitlesViewModel>(Window!,
             vm => { vm.Initialize(_videoFileName ?? string.Empty, GetUpdateSubtitle(), SelectedSubtitleFormat); });
         _shortcutManager.ClearKeys();
