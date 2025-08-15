@@ -1,12 +1,13 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Skia;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
+using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Shared;
@@ -27,59 +28,29 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
 
-namespace Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
+namespace Nikse.SubtitleEdit.Features.Video.CutVideo;
 
 public partial class CutVideoViewModel : ObservableObject
 {
     [ObservableProperty] private string _videoFileName;
     [ObservableProperty] private string _videoFileSize;
-    [ObservableProperty] private ObservableCollection<string> _fontNames;
-    [ObservableProperty] private string _selectedFontName;
-    [ObservableProperty] private double _fontFactor;
-    [ObservableProperty] private string _fontFactorText;
-    [ObservableProperty] private bool _fontIsBold;
-    [ObservableProperty] private decimal _selectedFontOutline;
-    [ObservableProperty] private string _fontOutlineText;
-    [ObservableProperty] private decimal _selectedFontShadowWidth;
-    [ObservableProperty] private string _fontShadowText;
-    [ObservableProperty] private ObservableCollection<FontBoxItem> _fontBoxTypes;
-    [ObservableProperty] private FontBoxItem _selectedFontBoxType;
-    [ObservableProperty] private Color _fontTextColor;
-    [ObservableProperty] private Color _fontBoxColor;
-    [ObservableProperty] private Color _fontOutlineColor;
-    [ObservableProperty] private Color _fontShadowColor;
-    [ObservableProperty] private int _fontMarginHorizontal;
-    [ObservableProperty] private int _fontMarginVertical;
-    [ObservableProperty] private bool _fontFixRtl;
-    [ObservableProperty] private ObservableCollection<AlignmentItem> _fontAlignments;
-    [ObservableProperty] private AlignmentItem _selectedFontAlignment;
-    [ObservableProperty] private string _fontAssaInfo;
     [ObservableProperty] private int _videoWidth;
     [ObservableProperty] private int _videoHeight;
     [ObservableProperty] private ObservableCollection<double> _frameRates;
     [ObservableProperty] private double _selectedFrameRate;
     [ObservableProperty] private ObservableCollection<string> _videoExtensions;
     [ObservableProperty] private string _selectedVideoExtension;
-    [ObservableProperty] private string _outputFolder;
-    [ObservableProperty] private bool _useOutputFolderVisible;
-    [ObservableProperty] private bool _useSourceFolderVisible;
-    [ObservableProperty] private bool _isSingleModeVisible;
-    [ObservableProperty] private bool _isCutActive;
-    [ObservableProperty] private TimeSpan _cutFrom;
-    [ObservableProperty] private TimeSpan _cutTo;
-    [ObservableProperty] private bool _useTargetFileSize;
-    [ObservableProperty] private int _targetFileSize;
     [ObservableProperty] private string _progressText;
     [ObservableProperty] private double _progressValue;
     [ObservableProperty] private ObservableCollection<BurnInJobItem> _jobItems;
     [ObservableProperty] private BurnInJobItem? _selectedJobItem;
     [ObservableProperty] private bool _isGenerating;
-    [ObservableProperty] private bool _isBatchMode;
-    [ObservableProperty] private Bitmap? _imagePreview;
     [ObservableProperty] private bool _useSourceResolution;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
+    public VideoPlayerControl VideoPlayer { get; internal set; }
+    public AudioVisualizer AudioVisualizer { get; internal set; }
 
     private Subtitle _subtitle = new();
     private bool _loading = true;
@@ -88,46 +59,25 @@ public partial class CutVideoViewModel : ObservableObject
     private long _startTicks;
     private long _processedFrames;
     private Process? _ffmpegProcess;
+    private Process? _ffmpegListKeyFramesProcess;
     private readonly Timer _timerAnalyze;
     private readonly Timer _timerGenerate;
     private bool _doAbort;
     private int _jobItemIndex = -1;
     private SubtitleFormat? _subtitleFormat;
     private string _inputVideoFileName;
+    private List<double> _keyFramesInSeconds;
+    private bool _updateAudioVisualizer;    
 
     private readonly IWindowService _windowService;
     private readonly IFolderHelper _folderHelper;
     private readonly IFileHelper _fileHelper;
 
-    public CutVideoViewModel(IFolderHelper folderHelper, IFileHelper fileHelper,
-        IWindowService windowService)
+    public CutVideoViewModel(IFolderHelper folderHelper, IFileHelper fileHelper,  IWindowService windowService)
     {
         _folderHelper = folderHelper;
         _fileHelper = fileHelper;
         _windowService = windowService;
-
-        FontNames = new ObservableCollection<string>(FontHelper.GetSystemFonts());
-        SelectedFontName = FontNames.FirstOrDefault(p => p == Se.Settings.Video.BurnIn.FontName) ?? FontNames[0];
-
-        // font factors between 0-1
-        FontFactor = 0.4;
-        FontFactorText = string.Empty;
-
-        FontBoxTypes = new ObservableCollection<FontBoxItem>
-        {
-            new(FontBoxType.None, Se.Language.General.None),
-            new(FontBoxType.OneBox, Se.Language.Video.BurnIn.OneBox),
-            new(FontBoxType.BoxPerLine, Se.Language.Video.BurnIn.BoxPerLine),
-        };
-        SelectedFontBoxType = FontBoxTypes[0];
-
-        FontMarginHorizontal = 10;
-        FontMarginVertical = 10;
-
-        FontAlignments = new ObservableCollection<AlignmentItem>(AlignmentItem.Alignments);
-        SelectedFontAlignment = AlignmentItem.Alignments[7];
-
-        FontAssaInfo = string.Empty;
 
         VideoWidth = 1920;
         VideoHeight = 1080;
@@ -149,11 +99,9 @@ public partial class CutVideoViewModel : ObservableObject
         VideoFileName = string.Empty;
         VideoFileSize = string.Empty;
         ProgressText = string.Empty;
-        FontOutlineText = string.Empty;
-        FontShadowText = string.Empty;
-        OutputFolder = string.Empty;
 
         _log = new StringBuilder();
+        _keyFramesInSeconds = new List<double>();
         _timerGenerate = new();
         _timerGenerate.Elapsed += TimerGenerateElapsed;
         _timerGenerate.Interval = 100;
@@ -165,35 +113,42 @@ public partial class CutVideoViewModel : ObservableObject
         _loading = false;
         _inputVideoFileName = string.Empty;
         LoadSettings();
-        BoxTypeChanged();
-        UpdateOutputProperties();
     }
 
-    public void Initialize(string videoFileName, Subtitle subtitle, SubtitleFormat subtitleFormat)
+    public void Initialize(string videoFileName)
     {
         VideoFileName = videoFileName;
         _inputVideoFileName = videoFileName;
-        _subtitle = new Subtitle(subtitle, false);
-        _subtitleFormat = subtitleFormat;
 
-        var fileExists = !string.IsNullOrWhiteSpace(videoFileName) && File.Exists(videoFileName);
-        if (fileExists)
+        _ffmpegListKeyFramesProcess = VideoPreviewGenerator.ListKeyFrames(videoFileName, OutputHandlerKeyFrames);
+#pragma warning disable CA1416 // Validate platform compatibility
+        _ffmpegListKeyFramesProcess.Start();
+#pragma warning restore CA1416 // Validate platform compatibility
+        _ffmpegListKeyFramesProcess.BeginOutputReadLine();
+        _ffmpegListKeyFramesProcess.BeginErrorReadLine();
+
+        _ffmpegListKeyFramesProcess.Start();
+    }
+
+    private void OutputHandlerKeyFrames(object sendingProcess, DataReceivedEventArgs outLine)
+    {
+        if (string.IsNullOrWhiteSpace(outLine.Data))
         {
-            VideoFileSize = Utilities.FormatBytesToDisplayFileSize(new FileInfo(videoFileName).Length);
-            _ = Task.Run(() =>
-            {
-                var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
-                Dispatcher.UIThread.Post(() =>
-                {
-                    VideoWidth = mediaInfo.Dimension.Width;
-                    VideoHeight = mediaInfo.Dimension.Height;
-                    UseSourceResolution = false;
-                });
-            });
+            return;
         }
-        else
+
+        const string marker = "pts_time:";
+        var idx = outLine.Data.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        if (idx >= 0)
         {
-            BatchMode();
+            var afterMarker = outLine.Data.Substring(idx + marker.Length);
+            var endIdx = afterMarker.IndexOf(' ');
+            var ptsValue = endIdx > 0 ? afterMarker.Substring(0, endIdx) : afterMarker;
+
+            if (double.TryParse(ptsValue, NumberStyles.Float, CultureInfo.InvariantCulture, out double seconds))
+            {
+                _keyFramesInSeconds.Add(seconds);
+            }
         }
     }
 
@@ -221,7 +176,7 @@ public partial class CutVideoViewModel : ObservableObject
                 MidpointRounding.AwayFromZero);
             percentage = Math.Clamp(percentage, 0, 100);
 
-            var durationMs = (DateTime.UtcNow.Ticks - _startTicks) / 10_000;
+            var durationMs = (System.DateTime.UtcNow.Ticks - _startTicks) / 10_000;
             var msPerFrame = (float)durationMs / _processedFrames;
             var estimatedTotalMs = msPerFrame * JobItems[_jobItemIndex].TotalFrames;
             var estimatedLeft = ProgressHelper.ToProgressTime(estimatedTotalMs - durationMs);
@@ -363,7 +318,7 @@ public partial class CutVideoViewModel : ObservableObject
 
     private void InitAndStartJobItem(int index)
     {
-        _startTicks = DateTime.UtcNow.Ticks;
+        _startTicks = System.DateTime.UtcNow.Ticks;
         _jobItemIndex = index;
         var jobItem = JobItems[index];
         var mediaInfo = FfmpegMediaInfo.Parse(jobItem.InputVideoFileName);
@@ -371,9 +326,7 @@ public partial class CutVideoViewModel : ObservableObject
         jobItem.TotalSeconds = mediaInfo.Duration.TotalSeconds;
         jobItem.Width = mediaInfo.Dimension.Width;
         jobItem.Height = mediaInfo.Dimension.Height;
-        jobItem.UseTargetFileSize = UseTargetFileSize;
-        jobItem.TargetFileSize = UseTargetFileSize ? TargetFileSize : 0;
-        jobItem.AssaSubtitleFileName = MakeAssa(jobItem.SubtitleFileName);
+        jobItem.UseTargetFileSize = false;
         jobItem.Status = Se.Language.General.Generating;
         jobItem.OutputVideoFileName = MakeOutputFileName(jobItem.InputVideoFileName);
 
@@ -410,28 +363,6 @@ public partial class CutVideoViewModel : ObservableObject
             SelectedFrameRate.ToString(CultureInfo.InvariantCulture),
             timeCode,
             OutputHandler);
-    }
-
-    private Subtitle GetSubtitleBasedOnCut(Subtitle inputSubtitle)
-    {
-        if (!IsCutActive)
-        {
-            return inputSubtitle;
-        }
-
-        var subtitle = new Subtitle();
-        foreach (var p in inputSubtitle.Paragraphs)
-        {
-            if (p.StartTime.TotalMilliseconds >= CutFrom.TotalMilliseconds &&
-                p.EndTime.TotalMilliseconds <= CutTo.TotalMilliseconds)
-            {
-                subtitle.Paragraphs.Add(new Paragraph(p));
-            }
-        }
-
-        subtitle.AddTimeToAllParagraphs(TimeSpan.FromMilliseconds(-CutFrom.TotalMilliseconds));
-
-        return subtitle;
     }
 
     private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
@@ -487,70 +418,6 @@ public partial class CutVideoViewModel : ObservableObject
         jobItem.AddSubtitleFileName(subtitleFileName);
 
         return new ObservableCollection<BurnInJobItem>(new[] { jobItem });
-    }
-
-    private string MakeAssa(string subtitleFileName)
-    {
-        if (string.IsNullOrWhiteSpace(subtitleFileName) || !File.Exists(subtitleFileName))
-        {
-            JobItems[_jobItemIndex].Status = "Skipped";
-            return string.Empty;
-        }
-
-        var isAssa = subtitleFileName.EndsWith(".ass", StringComparison.OrdinalIgnoreCase);
-
-        var subtitle = Subtitle.Parse(subtitleFileName);
-
-        subtitle = GetSubtitleBasedOnCut(subtitle);
-
-        if (!isAssa)
-        {
-            SetStyleForNonAssa(subtitle);
-        }
-
-        var assa = new AdvancedSubStationAlpha();
-        var assaFileName = Path.Combine(Path.GetTempFileName() + assa.Extension);
-        File.WriteAllText(assaFileName, assa.ToText(subtitle, string.Empty));
-        return assaFileName;
-    }
-
-    private void SetStyleForNonAssa(Subtitle sub)
-    {
-        sub.Header = AdvancedSubStationAlpha.DefaultHeader;
-        var style = AdvancedSubStationAlpha.GetSsaStyle("Default", sub.Header);
-        style.FontSize = CalculateFontSize(JobItems[_jobItemIndex].Width, JobItems[_jobItemIndex].Height, FontFactor);
-        style.Bold = FontIsBold;
-        style.FontName = SelectedFontName;
-        style.Background = FontShadowColor.ToSKColor();
-        style.Primary = FontTextColor.ToSKColor();
-        style.Outline = FontOutlineColor.ToSKColor();
-        style.OutlineWidth = SelectedFontOutline;
-        style.ShadowWidth = SelectedFontShadowWidth;
-        style.Alignment = SelectedFontAlignment.Code;
-        style.MarginLeft = FontMarginHorizontal;
-        style.MarginRight = FontMarginHorizontal;
-        style.MarginVertical = FontMarginVertical;
-
-        if (SelectedFontBoxType.BoxType == FontBoxType.None)
-        {
-            style.BorderStyle = "0"; // bo box
-        }
-        else if (SelectedFontBoxType.BoxType == FontBoxType.BoxPerLine)
-        {
-            style.BorderStyle = "3"; // box - per line
-        }
-        else
-        {
-            style.BorderStyle = "4"; // box - multi line
-        }
-
-        sub.Header =
-            AdvancedSubStationAlpha.GetHeaderAndStylesFromAdvancedSubStationAlpha(sub.Header,
-                new List<SsaStyle> { style });
-        sub.Header = AdvancedSubStationAlpha.AddTagToHeader("PlayResX",
-            "PlayResX: " + ((int)VideoWidth).ToString(CultureInfo.InvariantCulture), "[Script Info]", sub.Header);
-        sub.Header = AdvancedSubStationAlpha.AddTagToHeader("PlayResY",
-            "PlayResY: " + ((int)VideoHeight).ToString(CultureInfo.InvariantCulture), "[Script Info]", sub.Header);
     }
 
     private string MakeOutputFileName(string videoFileName)
@@ -652,13 +519,6 @@ public partial class CutVideoViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task OutputProperties()
-    {
-        await _windowService.ShowDialogAsync<BurnInSettingsWindow, BurnInSettingsViewModel>(Window!);
-        UpdateOutputProperties();
-    }
-
-    [RelayCommand]
     private async Task BrowseResolution()
     {
         var result =
@@ -697,63 +557,10 @@ public partial class CutVideoViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task BrowseCutFrom()
-    {
-        var result =
-            await _windowService.ShowDialogAsync<SelectVideoPositionWindow, SelectVideoPositionViewModel>(Window!,
-                vm => { vm.Initialize(VideoFileName); });
-
-        if (!result.OkPressed)
-        {
-            return;
-        }
-
-        CutFrom = TimeSpan.FromSeconds((long)Math.Round(result.PositionInSeconds, MidpointRounding.AwayFromZero));
-    }
-
-    [RelayCommand]
-    private async Task BrowseCutTo()
-    {
-        var result =
-            await _windowService.ShowDialogAsync<SelectVideoPositionWindow, SelectVideoPositionViewModel>(Window!,
-                vm => { vm.Initialize(VideoFileName); });
-
-        if (!result.OkPressed)
-        {
-            return;
-        }
-
-        CutTo = TimeSpan.FromSeconds((long)Math.Round(result.PositionInSeconds, MidpointRounding.AwayFromZero));
-    }
-
-    [RelayCommand]
     private async Task Generate()
     {
-        if (IsCutActive && CutFrom >= CutTo)
-        {
-            await MessageBox.Show(Window!,
-                "Cut settings error",
-                "Cut end time must be after cut start time",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+        JobItems = GetCurrentVideoAsJobItems();
 
-            return;
-        }
-
-        if (!IsBatchMode)
-        {
-            JobItems = GetCurrentVideoAsJobItems();
-        }
-
-        if (IsBatchMode && JobItems.Count == 0)
-        {
-            await Add();
-
-            if (IsBatchMode && JobItems.Count == 0)
-            {
-                return;
-            }
-        }
 
         if (JobItems.Count == 0)
         {
@@ -788,54 +595,15 @@ public partial class CutVideoViewModel : ObservableObject
     private void LoadSettings()
     {
         var settings = Se.Settings.Video.BurnIn;
-        FontFactor = settings.FontFactor;
-        FontIsBold = settings.FontBold;
-        SelectedFontOutline = settings.OutlineWidth;
-        SelectedFontShadowWidth = settings.ShadowWidth;
-        SelectedFontName = settings.FontName;
-        FontTextColor = settings.NonAssaTextColor.FromHexToColor();
-        FontOutlineColor = settings.NonAssaOutlineColor.FromHexToColor();
-        FontBoxColor = settings.NonAssaBoxColor.FromHexToColor();
-        FontShadowColor = settings.NonAssaShadowColor.FromHexToColor();
-        FontFixRtl = settings.NonAssaFixRtlUnicode;
-        SelectedFontAlignment = FontAlignments.First(p => p.Code == settings.NonAssaAlignment);
-        OutputFolder = settings.OutputFolder;
-        UseOutputFolderVisible = settings.UseSourceResolution;
-        UseSourceFolderVisible = !settings.UseOutputFolder;
         UseSourceResolution = settings.UseSourceResolution;
     }
 
     private void SaveSettings()
     {
         var settings = Se.Settings.Video.BurnIn;
-        settings.FontFactor = FontFactor;
-        settings.FontBold = FontIsBold;
-        settings.OutlineWidth = SelectedFontOutline;
-        settings.ShadowWidth = SelectedFontShadowWidth;
-        settings.FontName = SelectedFontName;
-        settings.NonAssaTextColor = FontTextColor.FromColorToHex();
-        settings.NonAssaOutlineColor = FontOutlineColor.FromColorToHex();
-        settings.NonAssaBoxColor = FontBoxColor.FromColorToHex();
-        settings.NonAssaShadowColor = FontShadowColor.FromColorToHex();
-        settings.NonAssaFixRtlUnicode = FontFixRtl;
-        settings.NonAssaAlignment = SelectedFontAlignment.Code;
         settings.UseSourceResolution = UseSourceResolution;
 
         Se.SaveSettings();
-    }
-
-    [RelayCommand]
-    private void SingleMode()
-    {
-        IsBatchMode = false;
-        IsSingleModeVisible = false;
-    }
-
-    [RelayCommand]
-    private void BatchMode()
-    {
-        IsBatchMode = true;
-        IsSingleModeVisible = !string.IsNullOrEmpty(_inputVideoFileName);
     }
 
     [RelayCommand]
@@ -866,180 +634,9 @@ public partial class CutVideoViewModel : ObservableObject
         }
     }
 
-    private static string TryGetSubtitleFileName(string fileName)
+    internal void AudioVisualizerPositionChanged(object sender, AudioVisualizer.PositionEventArgs e)
     {
-        var srt = Path.ChangeExtension(fileName, ".srt");
-        if (File.Exists(srt))
-        {
-            return srt;
-        }
-
-        var assa = Path.ChangeExtension(fileName, ".ass");
-        if (File.Exists(srt))
-        {
-            return assa;
-        }
-
-        var dir = Path.GetDirectoryName(fileName);
-        if (string.IsNullOrEmpty(dir))
-        {
-            return string.Empty;
-        }
-
-        var searchPath = Path.GetFileNameWithoutExtension(fileName);
-        var files = Directory.GetFiles(dir, searchPath + "*");
-        var subtitleExtensions = SubtitleFormat.AllSubtitleFormats.Select(p => p.Extension).Distinct();
-        foreach (var ext in subtitleExtensions)
-        {
-            foreach (var file in files)
-            {
-                if (file.EndsWith(ext, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    return file;
-                }
-            }
-        }
-
-        return string.Empty;
-    }
-
-    private void UpdateOutputProperties()
-    {
-        if (Se.Settings.Video.Transparent.UseOutputFolder &&
-            string.IsNullOrWhiteSpace(Se.Settings.Video.Transparent.OutputFolder))
-        {
-            Se.Settings.Video.Transparent.UseOutputFolder = true;
-        }
-
-        UseSourceFolderVisible = !Se.Settings.Video.Transparent.UseOutputFolder;
-        UseOutputFolderVisible = Se.Settings.Video.Transparent.UseOutputFolder;
-        OutputFolder = Se.Settings.Video.Transparent.OutputFolder;
-    }
-
-    public void BoxTypeChanged(object? sender, SelectionChangedEventArgs e)
-    {
-        BoxTypeChanged();
-    }
-
-    private void BoxTypeChanged()
-    {
-        if (SelectedFontBoxType.BoxType == FontBoxType.None)
-        {
-            FontOutlineText = "Outline";
-            FontShadowText = "Shadow";
-        }
-
-        if (SelectedFontBoxType.BoxType == FontBoxType.OneBox)
-        {
-            FontOutlineText = "Outline";
-            FontShadowText = "Box";
-        }
-
-        if (SelectedFontBoxType.BoxType == FontBoxType.BoxPerLine)
-        {
-            FontOutlineText = "Box";
-            FontShadowText = "Shadow";
-        }
-
-        UpdateNonAssaPreview();
-    }
-
-    private void UpdateNonAssaPreview()
-    {
-        if (_loading)
-        {
-            return;
-        }
-
-        var text = "This is a test";
-
-        if (_subtitleFormat is { Name: AdvancedSubStationAlpha.NameOfFormat } && !IsBatchMode)
-        {
-            ImagePreview = new SKBitmap(1, 1).ToAvaloniaBitmap();
-            return;
-        }
-
-
-        var fontSize = (float)CalculateFontSize(VideoWidth, VideoHeight, FontFactor);
-        SKBitmap bitmap;
-
-        if (SelectedFontBoxType.BoxType == FontBoxType.BoxPerLine)
-        {
-            bitmap = TextToImageGenerator.GenerateImageWithPadding(
-                text,
-                SelectedFontName,
-                fontSize,
-                FontIsBold,
-                FontTextColor.ToSKColor(),
-                FontShadowColor.ToSKColor(),
-                FontOutlineColor.ToSKColor(),
-                FontOutlineColor.ToSKColor(),
-                0,
-                (float)SelectedFontShadowWidth);
-
-            if (SelectedFontShadowWidth > 0)
-            {
-                bitmap = TextToImageGenerator.AddShadowToBitmap(bitmap,
-                    (int)Math.Round(SelectedFontShadowWidth, MidpointRounding.AwayFromZero),
-                    FontShadowColor.ToSKColor());
-            }
-        }
-        else if (SelectedFontBoxType.BoxType == FontBoxType.OneBox)
-        {
-            bitmap = TextToImageGenerator.GenerateImageWithPadding(
-                text,
-                SelectedFontName,
-                fontSize,
-                FontIsBold,
-                FontTextColor.ToSKColor(),
-                FontOutlineColor.ToSKColor(),
-                SKColors.Red,
-                FontShadowColor.ToSKColor(),
-                (float)SelectedFontOutline,
-                0,
-                1.0f,
-                (int)Math.Round(SelectedFontShadowWidth));
-        }
-        else // FontBoxType.None
-        {
-            bitmap = TextToImageGenerator.GenerateImageWithPadding(
-                text,
-                SelectedFontName,
-                fontSize,
-                FontIsBold,
-                FontTextColor.ToSKColor(),
-                FontOutlineColor.ToSKColor(),
-                FontShadowColor.ToSKColor(),
-                SKColors.Transparent,
-                (float)SelectedFontOutline,
-                (float)SelectedFontShadowWidth);
-        }
-
-        ImagePreview = bitmap.ToAvaloniaBitmap();
-    }
-
-    internal void ColorChanged(object? sender, ColorChangedEventArgs e)
-    {
-        UpdateNonAssaPreview();
-    }
-
-    internal void ComboBoxChanged(object? sender, SelectionChangedEventArgs e)
-    {
-        UpdateNonAssaPreview();
-    }
-
-    internal void NumericUpDownChanged(object? sender, NumericUpDownValueChangedEventArgs e)
-    {
-        UpdateNonAssaPreview();
-    }
-
-    internal void CheckBoxChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
-    {
-        UpdateNonAssaPreview();
-    }
-
-    internal void TextBoxChanged(object? sender, TextChangedEventArgs e)
-    {
-        UpdateNonAssaPreview();
+        VideoPlayer.Position = e.PositionInSeconds;
+        _updateAudioVisualizer = true;
     }
 }

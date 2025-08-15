@@ -47,6 +47,7 @@ using Nikse.SubtitleEdit.Features.Translate;
 using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 using Nikse.SubtitleEdit.Features.Video.BlankVideo;
 using Nikse.SubtitleEdit.Features.Video.BurnIn;
+using Nikse.SubtitleEdit.Features.Video.CutVideo;
 using Nikse.SubtitleEdit.Features.Video.OpenFromUrl;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech;
 using Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
@@ -768,7 +769,6 @@ public partial class MainViewModel :
     {
         var result = await _windowService.ShowDialogAsync<BlankVideoWindow, BlankVideoViewModel>(Window!, vm =>
         {
-            //vm.Initialize(GetUpdateSubtitle()); 
         });
 
         if (!result.OkPressed)
@@ -782,9 +782,15 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task VideoCut()
     {
+        if (string.IsNullOrEmpty(_videoFileName))
+        {
+            await CommandVideoOpen();
+            return;
+        }
+
         var result = await _windowService.ShowDialogAsync<CutVideoWindow, CutVideoViewModel>(Window!, vm =>
         {
-            //vm.Initialize(GetUpdateSubtitle()); 
+            vm.Initialize(_videoFileName);
         });
 
         if (!result.OkPressed)

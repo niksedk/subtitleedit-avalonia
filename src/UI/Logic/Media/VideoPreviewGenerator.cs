@@ -1,6 +1,4 @@
-﻿using Avalonia.Media;
-using Avalonia.Media.Imaging;
-using Google.Type;
+﻿using Avalonia.Media.Imaging;
 using Nikse.SubtitleEdit.Core.Common;
 using SkiaSharp;
 using System;
@@ -840,5 +838,26 @@ public class VideoPreviewGenerator
         SetupDataReceiveHandler(dataReceivedHandler, processMakeVideo);
 
         return processMakeVideo;
+    }
+
+    public static Process ListKeyFrames(string inputVideoFileName, DataReceivedEventHandler? dataReceivedHandler)
+    {
+        var process = new Process
+        {
+            StartInfo =
+            {
+                FileName = GetFfmpegLocation(),
+                Arguments = $"-i \"{inputVideoFileName}\" -vf select='eq(pict_type\\,I)',showinfo -f null -",
+                UseShellExecute = false,
+                RedirectStandardError = true, 
+                RedirectStandardOutput = false,
+                CreateNoWindow = true,
+                WorkingDirectory = Path.GetDirectoryName(inputVideoFileName) ?? string.Empty
+            }
+        };
+
+        SetupDataReceiveHandler(dataReceivedHandler, process);
+
+        return process;
     }
 }
