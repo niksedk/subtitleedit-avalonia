@@ -19,6 +19,7 @@ using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.FindText;
 using Nikse.SubtitleEdit.Features.Shared.Ocr;
 using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
+using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 using Nikse.SubtitleEdit.Features.SpellCheck;
 using Nikse.SubtitleEdit.Features.SpellCheck.EditWholeText;
 using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
@@ -150,6 +151,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<OllamaBrowseViewModel>();
         collection.AddTransient<OpenFromUrlViewModel>();
         collection.AddTransient<PickMatroskaTrackViewModel>();
+        collection.AddTransient<PromptTextBoxViewModel>();
         collection.AddTransient<ReEncodeVideoViewModel>();
         collection.AddTransient<RemoveTextForHearingImpairedViewModel>();
         collection.AddTransient<ReplaceViewModel>();

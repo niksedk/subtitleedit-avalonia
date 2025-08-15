@@ -40,6 +40,18 @@ public class ReEncodeVideoWindow : Window
             UiUtil.MakeButtonCancel(vm.CancelCommand)
         );
 
+        buttonGenerate.ContextFlyout = new MenuFlyout
+        {
+            Items =
+            {
+                new MenuItem
+                {
+                    Header = "Prompt for ffmpeg parameters and generate",
+                    Command = vm.PromptFfmpegParametersAndGeenrateCommand,
+                },
+            }
+        };
+
         var grid = new Grid
         {
             RowDefinitions =
@@ -51,7 +63,7 @@ public class ReEncodeVideoWindow : Window
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) }, 
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             Width = double.NaN,

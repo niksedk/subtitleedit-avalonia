@@ -840,6 +840,54 @@ public class VideoPreviewGenerator
         return processMakeVideo;
     }
 
+    public static Process GetProcess(string parameters, DataReceivedEventHandler? dataReceivedHandler, string workingDirectory = "")
+    {
+        var processMakeVideo = new Process
+        {
+            StartInfo =
+            {
+                FileName = GetFfmpegLocation(),
+                Arguments = parameters,
+                UseShellExecute = false,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true,
+                WorkingDirectory = workingDirectory,
+            }
+        };
+
+        processMakeVideo.StartInfo.Arguments = processMakeVideo.StartInfo.Arguments.Trim();
+
+        SetupDataReceiveHandler(dataReceivedHandler, processMakeVideo);
+
+        return processMakeVideo;
+    }
+
+    public static string GetReEncodeVideoForSubtitlingParameters(string inputVideoFileName, string outputVideoFileName, int width, int height, string frameRate)
+    {
+        if (width % 2 == 1)
+        {
+            width++;
+        }
+
+        if (height % 2 == 1)
+        {
+            height++;
+        }
+
+        outputVideoFileName = $"\"{outputVideoFileName}\"";
+        var frameRateInt = (int)double.Parse(frameRate, CultureInfo.InvariantCulture);
+
+        var arguments =
+            $"-y -i \"{inputVideoFileName}\" " +
+            $"-vf scale={width}:{height},fps={frameRate} " +
+            $"-c:v libx264 -preset ultrafast -movflags +faststart " +
+            $"-g {frameRateInt / 2} -keyint_min {frameRateInt / 2} -sc_threshold 0 " +
+            $"-pix_fmt yuv420p -c:a copy {outputVideoFileName}";
+
+        return arguments.Trim();
+    }
+
     public static Process ListKeyFrames(string inputVideoFileName, DataReceivedEventHandler? dataReceivedHandler)
     {
         var process = new Process

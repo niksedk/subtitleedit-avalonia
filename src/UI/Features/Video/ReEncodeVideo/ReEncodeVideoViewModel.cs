@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -39,6 +40,7 @@ public partial class ReEncodeVideoViewModel : ObservableObject
     [ObservableProperty] private bool _isGenerating;
     [ObservableProperty] private bool _useSourceResolution;
     [ObservableProperty] private string _infoText;
+    [ObservableProperty] private bool _promptForFfmpegParameters;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -60,8 +62,7 @@ public partial class ReEncodeVideoViewModel : ObservableObject
     private readonly IFolderHelper _folderHelper;
     private readonly IFileHelper _fileHelper;
 
-    public ReEncodeVideoViewModel(IFolderHelper folderHelper, IFileHelper fileHelper,
-        IWindowService windowService)
+    public ReEncodeVideoViewModel(IFolderHelper folderHelper, IFileHelper fileHelper, IWindowService windowService)
     {
         _folderHelper = folderHelper;
         _fileHelper = fileHelper;
@@ -85,7 +86,6 @@ public partial class ReEncodeVideoViewModel : ObservableObject
 
         InfoText = "Re-encoding can make subtitling smoother:" + Environment.NewLine +
                     "• Smaller resolution (high resolutions take make subtitling slow)" + Environment.NewLine +
-                    "• Lower frame rate (high frame rates take make subtitling slow)" + Environment.NewLine +
                     "• Re-encode the video to H.264 + yuv420p makes it more compatible" + Environment.NewLine +
                     "• Optimized for fast seeking";
 
@@ -123,6 +123,9 @@ public partial class ReEncodeVideoViewModel : ObservableObject
                         UseSourceResolution = false;
                         return;
                     }
+
+                    var frameRate = FrameRateHelper.RoundToNearestCinematicFrameRate((double)mediaInfo.FramesRate);
+                    SelectedFrameRate = frameRate;
 
                     if (mediaInfo.Dimension.Width > 1280)
                     {
@@ -217,7 +220,7 @@ public partial class ReEncodeVideoViewModel : ObservableObject
 
             if (_jobItemIndex < JobItems.Count - 1)
             {
-                InitAndStartJobItem(_jobItemIndex + 1);
+                var result = await InitAndStartJobItem(_jobItemIndex + 1);
                 return;
             }
 
@@ -244,7 +247,7 @@ public partial class ReEncodeVideoViewModel : ObservableObject
         });
     }
 
-    private void InitAndStartJobItem(int index)
+    private async Task<bool> InitAndStartJobItem(int index)
     {
         _startTicks = DateTime.UtcNow.Ticks;
         _jobItemIndex = index;
@@ -257,16 +260,40 @@ public partial class ReEncodeVideoViewModel : ObservableObject
         jobItem.UseTargetFileSize = false;
         jobItem.Status = Se.Language.General.Generating;
 
-        var result = RunEncoding(jobItem);
+        var result = await RunEncoding(jobItem);
         if (result)
         {
             _timerGenerate.Start();
         }
+
+        return result;
     }
 
-    private bool RunEncoding(BurnInJobItem jobItem)
+    private async Task<bool> RunEncoding(BurnInJobItem jobItem)
     {
-        _ffmpegProcess = GetFfmpegProcess(jobItem);
+        var ffmpegParameters = VideoPreviewGenerator.GetReEncodeVideoForSubtitlingParameters(
+                   jobItem.InputVideoFileName,
+                   jobItem.OutputVideoFileName,
+                   jobItem.Width,
+                   jobItem.Height,
+                   SelectedFrameRate.ToString(CultureInfo.InvariantCulture));
+
+        if (PromptForFfmpegParameters)
+        {
+            var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!, vm =>
+            {
+                vm.Initialize("ffmpeg parameters", ffmpegParameters, 1000, 200);
+            });
+
+            if (!result.OkPressed || string.IsNullOrWhiteSpace(result.Text))
+            {
+                return false;
+            }
+
+            ffmpegParameters = result.Text.Trim();
+        }
+
+        _ffmpegProcess = VideoPreviewGenerator.GetProcess(ffmpegParameters, OutputHandler);
 #pragma warning disable CA1416 // Validate platform compatibility
         _ffmpegProcess.Start();
 #pragma warning restore CA1416 // Validate platform compatibility
@@ -274,17 +301,6 @@ public partial class ReEncodeVideoViewModel : ObservableObject
         _ffmpegProcess.BeginErrorReadLine();
 
         return true;
-    }
-
-    private Process GetFfmpegProcess(BurnInJobItem jobItem)
-    {
-        return VideoPreviewGenerator.ReEncodeVideoForSubtitling(
-            jobItem.InputVideoFileName,
-            jobItem.OutputVideoFileName,
-            jobItem.Width,
-            jobItem.Height,
-            SelectedFrameRate.ToString(CultureInfo.InvariantCulture),
-            OutputHandler);
     }
 
     private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
@@ -346,9 +362,7 @@ public partial class ReEncodeVideoViewModel : ObservableObject
     [RelayCommand]
     private async Task BrowseResolution()
     {
-        var result =
-            await _windowService
-                .ShowDialogAsync<BurnInResolutionPickerWindow, BurnInResolutionPickerViewModel>(Window!);
+        var result = await _windowService.ShowDialogAsync<BurnInResolutionPickerWindow, BurnInResolutionPickerViewModel>(Window!);
         if (!result.OkPressed || result.SelectedResolution == null)
         {
             return;
@@ -381,6 +395,13 @@ public partial class ReEncodeVideoViewModel : ObservableObject
         SaveSettings();
     }
 
+    [RelayCommand]
+    private async Task PromptFfmpegParametersAndGeenrate()
+    {
+        PromptForFfmpegParameters = true;
+        await Generate();
+        PromptForFfmpegParameters = false;
+    }
 
     [RelayCommand]
     private async Task Generate()
@@ -405,7 +426,11 @@ public partial class ReEncodeVideoViewModel : ObservableObject
         ProgressValue = 0;
         SaveSettings();
 
-        InitAndStartJobItem(0);
+        var result = await InitAndStartJobItem(0);
+        if (!result)
+        {
+            IsGenerating = false;
+        }
     }
 
     private void LoadSettings()
