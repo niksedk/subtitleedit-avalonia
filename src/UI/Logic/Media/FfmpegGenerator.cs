@@ -1,7 +1,9 @@
 ﻿using Avalonia.Media.Imaging;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Features.Main;
 using SkiaSharp;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -9,7 +11,7 @@ using System.Linq;
 
 namespace Nikse.SubtitleEdit.Logic.Media;
 
-public class VideoPreviewGenerator
+public class FfmpegGenerator
 {
     //public static string GetVideoPreviewFileName()
     //{
@@ -897,7 +899,7 @@ public class VideoPreviewGenerator
                 FileName = GetFfmpegLocation(),
                 Arguments = $"-i \"{inputVideoFileName}\" -vf select='eq(pict_type\\,I)',showinfo -f null -",
                 UseShellExecute = false,
-                RedirectStandardError = true, 
+                RedirectStandardError = true,
                 RedirectStandardOutput = false,
                 CreateNoWindow = true,
                 WorkingDirectory = Path.GetDirectoryName(inputVideoFileName) ?? string.Empty
@@ -907,5 +909,105 @@ public class VideoPreviewGenerator
         SetupDataReceiveHandler(dataReceivedHandler, process);
 
         return process;
+    }
+
+    public static string GetMergeSegmentsParameters(
+        string inputVideoFileName,
+        string outputVideoFileName,
+        string frameRate,
+        List<SubtitleLineViewModel> segments)
+    {
+        outputVideoFileName = $"\"{outputVideoFileName}\"";
+
+        var filterParts = new List<string>();
+        var concatInputs = new List<string>();
+
+        for (var i = 0; i < segments.Count; i++)
+        {
+            var s = segments[i];
+            var startSeconds = s.StartTime.TotalSeconds.ToString(CultureInfo.InvariantCulture);
+            var endSeconds = s.EndTime.TotalSeconds.ToString(CultureInfo.InvariantCulture);
+
+            filterParts.Add(
+                $"[0:v]trim=start={startSeconds}:end={endSeconds},setpts=PTS-STARTPTS[v{i}]; " +
+                $"[0:a]atrim=start={startSeconds}:end={endSeconds},asetpts=PTS-STARTPTS[a{i}]"
+            );
+
+            concatInputs.Add($"[v{i}][a{i}]");
+        }
+
+        string filterComplex = string.Join("; ", filterParts) + "; " +
+                               string.Join("", concatInputs) +
+                               $"concat=n={segments.Count}:v=1:a=1[outv][outa]";
+
+        var arguments =
+            $"-y -i \"{inputVideoFileName}\" " +
+            $"-filter_complex \"{filterComplex}\" " +
+            $"-map \"[outv]\" -map \"[outa]\" " +
+            $"-vf fps={frameRate} " +
+            $"-c:v libx264 -preset veryfast -crf 23 " +
+            $"-c:a copy -movflags +faststart -pix_fmt yuv420p " +
+            $"{outputVideoFileName}";
+
+        return arguments.Trim();
+    }
+
+    public static string GetRemoveSegmentsParameters(
+        string inputVideoFileName,
+        string outputVideoFileName,
+        string frameRate,
+        List<SubtitleLineViewModel> segments)
+    {
+        outputVideoFileName = $"\"{outputVideoFileName}\"";
+
+        var filterParts = new List<string>();
+        var concatInputs = new List<string>();
+
+        double lastEnd = 0;
+        int keepIndex = 0;
+
+        foreach (var seg in segments)
+        {
+            // "keep" part = from lastEnd until start of this segment
+            if (seg.StartTime.TotalSeconds > lastEnd)
+            {
+                string start = lastEnd.ToString(CultureInfo.InvariantCulture);
+                string end = seg.StartTime.TotalSeconds.ToString(CultureInfo.InvariantCulture);
+
+                filterParts.Add(
+                    $"[0:v]trim=start={start}:end={end},setpts=PTS-STARTPTS[v{keepIndex}]; " +
+                    $"[0:a]atrim=start={start}:end={end},asetpts=PTS-STARTPTS[a{keepIndex}]"
+                );
+
+                concatInputs.Add($"[v{keepIndex}][a{keepIndex}]");
+                keepIndex++;
+            }
+
+            lastEnd = seg.EndTime.TotalSeconds;
+        }
+
+        // Keep the remainder after the last segment
+        string inputDuration = $"$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 \"{inputVideoFileName}\")";
+        filterParts.Add(
+            $"[0:v]trim=start={lastEnd},setpts=PTS-STARTPTS[v{keepIndex}]; " +
+            $"[0:a]atrim=start={lastEnd},asetpts=PTS-STARTPTS[a{keepIndex}]"
+        );
+        concatInputs.Add($"[v{keepIndex}][a{keepIndex}]");
+
+        // Build concat filter
+        string filterComplex = string.Join("; ", filterParts) + "; " +
+                               string.Join("", concatInputs) +
+                               $"concat=n={keepIndex + 1}:v=1:a=1[outv][outa]";
+
+        var arguments =
+            $"-y -i \"{inputVideoFileName}\" " +
+            $"-filter_complex \"{filterComplex}\" " +
+            $"-map \"[outv]\" -map \"[outa]\" " +
+            (string.IsNullOrEmpty(frameRate) ? "" : $"-vf fps={frameRate} ") +
+            $"-c:v libx264 -preset veryfast -crf 23 " +
+            $"-c:a copy -movflags +faststart -pix_fmt yuv420p " +
+            $"{outputVideoFileName}";
+
+        return arguments.Trim();
     }
 }

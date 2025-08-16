@@ -236,8 +236,7 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
             }
             else
             {
-                ProgressText =
-                    $"Analyzing video {_jobItemIndex + 1}/{JobItems.Count}... {percentage}%     {estimatedLeft}";
+                ProgressText = $"Analyzing video {_jobItemIndex + 1}/{JobItems.Count}... {percentage}%     {estimatedLeft}";
             }
 
             return;
@@ -404,7 +403,7 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
         var ts = TimeSpan.FromMilliseconds(totalMs + 2000);
         var timeCode = string.Format($"{ts.Hours:00}\\\\:{ts.Minutes:00}\\\\:{ts.Seconds:00}");
 
-        return VideoPreviewGenerator.GenerateTransparentVideoFile(
+        return FfmpegGenerator.GenerateTransparentVideoFile(
             jobItem.AssaSubtitleFileName,
             jobItem.OutputVideoFileName,
             jobItem.Width,

@@ -271,7 +271,7 @@ public partial class ReEncodeVideoViewModel : ObservableObject
 
     private async Task<bool> RunEncoding(BurnInJobItem jobItem)
     {
-        var ffmpegParameters = VideoPreviewGenerator.GetReEncodeVideoForSubtitlingParameters(
+        var ffmpegParameters = FfmpegGenerator.GetReEncodeVideoForSubtitlingParameters(
                    jobItem.InputVideoFileName,
                    jobItem.OutputVideoFileName,
                    jobItem.Width,
@@ -293,7 +293,7 @@ public partial class ReEncodeVideoViewModel : ObservableObject
             ffmpegParameters = result.Text.Trim();
         }
 
-        _ffmpegProcess = VideoPreviewGenerator.GetProcess(ffmpegParameters, OutputHandler);
+        _ffmpegProcess = FfmpegGenerator.GetProcess(ffmpegParameters, OutputHandler);
 #pragma warning disable CA1416 // Validate platform compatibility
         _ffmpegProcess.Start();
 #pragma warning restore CA1416 // Validate platform compatibility

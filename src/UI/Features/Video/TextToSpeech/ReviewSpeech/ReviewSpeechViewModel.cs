@@ -471,7 +471,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
         var index = Lines.IndexOf(row);
         var next = index + 1 < Lines.Count ? Lines[index + 1] : null;
         var outputFileNameTrim = Path.Combine(_waveFolder, Guid.NewGuid() + ".wav");
-        var trimProcess = VideoPreviewGenerator.TrimSilenceStartAndEnd(item.CurrentFileName, outputFileNameTrim);
+        var trimProcess = FfmpegGenerator.TrimSilenceStartAndEnd(item.CurrentFileName, outputFileNameTrim);
 #pragma warning disable CA1416 // Validate platform compatibility
         _ = trimProcess.Start();
 #pragma warning restore CA1416 // Validate platform compatibility
@@ -523,7 +523,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
             outputFileName2 = Path.Combine(_waveFolder, $"{Path.GetFileNameWithoutExtension(overrideFileName)}_{Guid.NewGuid()}{ext}");
         }
 
-        var mergeProcess = VideoPreviewGenerator.ChangeSpeed(outputFileNameTrim, outputFileName2, (float)factor);
+        var mergeProcess = FfmpegGenerator.ChangeSpeed(outputFileNameTrim, outputFileName2, (float)factor);
 #pragma warning disable CA1416 // Validate platform compatibility
         _ = mergeProcess.Start();
 #pragma warning restore CA1416 // Validate platform compatibility

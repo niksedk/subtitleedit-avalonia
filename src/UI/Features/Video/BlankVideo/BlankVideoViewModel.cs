@@ -138,8 +138,7 @@ public partial class BlankVideoViewModel : ObservableObject
             }
             else
             {
-                ProgressText =
-                    $"Generating video {_jobItemIndex + 1}/{JobItems.Count}... {percentage}%     {estimatedLeft}";
+                ProgressText = $"Generating video {_jobItemIndex + 1}/{JobItems.Count}... {percentage}%     {estimatedLeft}";
             }
 
             return;
@@ -248,7 +247,7 @@ public partial class BlankVideoViewModel : ObservableObject
             }
         }
 
-        return VideoPreviewGenerator.GenerateVideoFile(
+        return FfmpegGenerator.GenerateVideoFile(
                VideoFileName,
                DurationMinutes * 60,
                jobItem.Width,

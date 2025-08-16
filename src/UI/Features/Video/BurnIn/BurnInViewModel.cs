@@ -289,8 +289,7 @@ public partial class BurnInViewModel : ObservableObject
             }
             else
             {
-                ProgressText =
-                    $"Analyzing video {_jobItemIndex + 1}/{JobItems.Count}... {percentage}%     {estimatedLeft}";
+                ProgressText = $"Analyzing video {_jobItemIndex + 1}/{JobItems.Count}... {percentage}%     {estimatedLeft}";
             }
 
             return;
@@ -601,7 +600,7 @@ public partial class BurnInViewModel : ObservableObject
             cutEnd = $"-t {duration.Hours:00}:{duration.Minutes:00}:{duration.Seconds:00}";
         }
 
-        return VideoPreviewGenerator.GenerateHardcodedVideoFile(
+        return FfmpegGenerator.GenerateHardcodedVideoFile(
             jobItem.InputVideoFileName,
             jobItem.AssaSubtitleFileName,
             jobItem.OutputVideoFileName,

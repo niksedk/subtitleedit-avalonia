@@ -669,7 +669,7 @@ public partial class TextToSpeechViewModel : ObservableObject
             stereo = true;
         }
 
-        var addAudioProcess = VideoPreviewGenerator.AddAudioTrack(_videoFileName, audioFileName, outputFileName, audioEncoding, stereo);
+        var addAudioProcess = FfmpegGenerator.AddAudioTrack(_videoFileName, audioFileName, outputFileName, audioEncoding, stereo);
 #pragma warning disable CA1416 // Validate platform compatibility
         var _ = addAudioProcess.Start();
 #pragma warning restore CA1416 // Validate platform compatibility
@@ -706,7 +706,7 @@ public partial class TextToSpeechViewModel : ObservableObject
                     outputFileName = Path.Combine(_waveFolder, $"silence_{Guid.NewGuid()}.wav");
                 }
 
-                var mergeProcess = VideoPreviewGenerator.MergeAudioTracks(inputFileName, item.CurrentFileName, outputFileName, (float)item.Paragraph.StartTime.TotalSeconds);
+                var mergeProcess = FfmpegGenerator.MergeAudioTracks(inputFileName, item.CurrentFileName, outputFileName, (float)item.Paragraph.StartTime.TotalSeconds);
                 var fileNameToDelete = inputFileName;
                 inputFileName = outputFileName;
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -763,7 +763,7 @@ public partial class TextToSpeechViewModel : ObservableObject
             durationInSeconds = (float)_subtitle.Paragraphs.Max(p => p.EndTime.TotalSeconds);
         }
 
-        var silenceProcess = VideoPreviewGenerator.GenerateEmptyAudio(silenceFileName, durationInSeconds);
+        var silenceProcess = FfmpegGenerator.GenerateEmptyAudio(silenceFileName, durationInSeconds);
 #pragma warning disable CA1416 // Validate platform compatibility
         _ = silenceProcess.Start();
 #pragma warning restore CA1416 // Validate platform compatibility
@@ -860,7 +860,7 @@ public partial class TextToSpeechViewModel : ObservableObject
                 var p = item.Paragraph;
                 var next = index + 1 < previousStepResult.Length ? previousStepResult[index + 1] : null;
                 var outputFileName1 = Path.Combine(Path.GetDirectoryName(item.CurrentFileName)!, Guid.NewGuid() + ".wav");
-                var trimProcess = VideoPreviewGenerator.TrimSilenceStartAndEnd(item.CurrentFileName, outputFileName1);
+                var trimProcess = FfmpegGenerator.TrimSilenceStartAndEnd(item.CurrentFileName, outputFileName1);
 #pragma warning disable CA1416 // Validate platform compatibility
                 _ = trimProcess.Start();
 #pragma warning restore CA1416 // Validate platform compatibility
@@ -930,7 +930,7 @@ public partial class TextToSpeechViewModel : ObservableObject
                     Voice = item.Voice,
                 });
 
-                var mergeProcess = VideoPreviewGenerator.ChangeSpeed(outputFileName1, outputFileName2, (float)factor);
+                var mergeProcess = FfmpegGenerator.ChangeSpeed(outputFileName1, outputFileName2, (float)factor);
 #pragma warning disable CA1416 // Validate platform compatibility
                 _ = mergeProcess.Start();
 #pragma warning restore CA1416 // Validate platform compatibility

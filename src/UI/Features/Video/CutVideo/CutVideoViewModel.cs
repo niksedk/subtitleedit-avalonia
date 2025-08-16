@@ -64,13 +64,11 @@ public partial class CutVideoViewModel : ObservableObject
     private long _processedFrames;
     private Process? _ffmpegProcess;
     private Process? _ffmpegListKeyFramesProcess;
-    private readonly Timer _timerAnalyze;
     private readonly Timer _timerGenerate;
     private bool _doAbort;
     private int _jobItemIndex = -1;
     private SubtitleFormat? _subtitleFormat;
     private string _inputVideoFileName;
-    private List<double> _keyFramesInSeconds;
     private bool _updateAudioVisualizer;
     private DispatcherTimer _positionTimer = new DispatcherTimer();
 
@@ -115,14 +113,9 @@ public partial class CutVideoViewModel : ObservableObject
         SelectedSegment = new SubtitleLineViewModel();
 
         _log = new StringBuilder();
-        _keyFramesInSeconds = new List<double>();
         _timerGenerate = new();
         _timerGenerate.Elapsed += TimerGenerateElapsed;
         _timerGenerate.Interval = 100;
-
-        _timerAnalyze = new();
-        _timerAnalyze.Elapsed += TimerAnalyzeElapsed;
-        _timerAnalyze.Interval = 100;
 
         _loading = false;
         _inputVideoFileName = string.Empty;
@@ -134,14 +127,19 @@ public partial class CutVideoViewModel : ObservableObject
         VideoFileName = videoFileName;
         _inputVideoFileName = videoFileName;
 
-        _ffmpegListKeyFramesProcess = VideoPreviewGenerator.ListKeyFrames(videoFileName, OutputHandlerKeyFrames);
+        _ffmpegListKeyFramesProcess = FfmpegGenerator.ListKeyFrames(videoFileName, OutputHandlerKeyFrames);
+
 #pragma warning disable CA1416 // Validate platform compatibility
-        _ffmpegListKeyFramesProcess.Start();
+        var startResult = _ffmpegListKeyFramesProcess.Start();
+        if (!startResult)
+        {
+            SeLogger.Error("Failed to start ffmpeg process for listing key frames: " + _ffmpegListKeyFramesProcess.StartInfo.FileName + " " + _ffmpegListKeyFramesProcess.StartInfo.Arguments);
+            return;
+        }
 #pragma warning restore CA1416 // Validate platform compatibility
+
         _ffmpegListKeyFramesProcess.BeginOutputReadLine();
         _ffmpegListKeyFramesProcess.BeginErrorReadLine();
-
-        _ffmpegListKeyFramesProcess.Start();
 
         Dispatcher.UIThread.Post(() =>
         {
@@ -183,7 +181,7 @@ public partial class CutVideoViewModel : ObservableObject
     {
         SubtitleLineViewModel? selectedParagraph = selectedParagraphIndex < 0
             ? null
-            : (Segments.Count == 0 ? null : Segments[selectedParagraphIndex]) ;
+            : (Segments.Count == 0 ? null : Segments[selectedParagraphIndex]);
 
         var subtitle = new ObservableCollection<SubtitleLineViewModel>();
         var orderedList = Segments.OrderBy(p => p.StartTime.TotalMilliseconds).ToList();
@@ -239,64 +237,10 @@ public partial class CutVideoViewModel : ObservableObject
 
             if (double.TryParse(ptsValue, NumberStyles.Float, CultureInfo.InvariantCulture, out double seconds))
             {
-                _keyFramesInSeconds.Add(seconds);
+                AudioVisualizer.ShotChanges.Add(seconds);
+                _updateAudioVisualizer = true;
             }
         }
-    }
-
-    private void TimerAnalyzeElapsed(object? sender, ElapsedEventArgs e)
-    {
-        if (_ffmpegProcess == null)
-        {
-            return;
-        }
-
-        if (_doAbort)
-        {
-            _timerAnalyze.Stop();
-#pragma warning disable CA1416
-            _ffmpegProcess.Kill(true);
-#pragma warning restore CA1416
-
-            IsGenerating = false;
-            return;
-        }
-
-        if (!_ffmpegProcess.HasExited)
-        {
-            var percentage = (int)Math.Round((double)_processedFrames / JobItems[_jobItemIndex].TotalFrames * 100.0,
-                MidpointRounding.AwayFromZero);
-            percentage = Math.Clamp(percentage, 0, 100);
-
-            var durationMs = (System.DateTime.UtcNow.Ticks - _startTicks) / 10_000;
-            var msPerFrame = (float)durationMs / _processedFrames;
-            var estimatedTotalMs = msPerFrame * JobItems[_jobItemIndex].TotalFrames;
-            var estimatedLeft = ProgressHelper.ToProgressTime(estimatedTotalMs - durationMs);
-
-            if (JobItems.Count == 1)
-            {
-                ProgressText = $"Analyzing video... {percentage}%     {estimatedLeft}";
-            }
-            else
-            {
-                ProgressText =
-                    $"Analyzing video {_jobItemIndex + 1}/{JobItems.Count}... {percentage}%     {estimatedLeft}";
-            }
-
-            return;
-        }
-
-        _timerAnalyze.Stop();
-
-        var jobItem = JobItems[_jobItemIndex];
-        _ffmpegProcess = GetFfmpegProcess(jobItem);
-#pragma warning disable CA1416 // Validate platform compatibility
-        _ffmpegProcess.Start();
-#pragma warning restore CA1416 // Validate platform compatibility
-        _ffmpegProcess.BeginOutputReadLine();
-        _ffmpegProcess.BeginErrorReadLine();
-
-        _timerGenerate.Start();
     }
 
     private void TimerGenerateElapsed(object? sender, ElapsedEventArgs e)
@@ -334,8 +278,7 @@ public partial class CutVideoViewModel : ObservableObject
             }
             else
             {
-                ProgressText =
-                    $"Generating video {_jobItemIndex + 1}/{JobItems.Count}... {percentage}%     {estimatedLeft}";
+                ProgressText = $"Generating video {_jobItemIndex + 1}/{JobItems.Count}... {percentage}%     {estimatedLeft}";
             }
 
             return;
@@ -349,7 +292,7 @@ public partial class CutVideoViewModel : ObservableObject
 
         if (!File.Exists(jobItem.OutputVideoFileName))
         {
-            SeLogger.WhisperInfo("Output video file not found: " + jobItem.OutputVideoFileName + Environment.NewLine +
+            SeLogger.Error("Output video file not found: " + jobItem.OutputVideoFileName + Environment.NewLine +
                                  "ffmpeg: " + _ffmpegProcess.StartInfo.FileName + Environment.NewLine +
                                  "Parameters: " + _ffmpegProcess.StartInfo.Arguments + Environment.NewLine +
                                  "OS: " + Environment.OSVersion + Environment.NewLine +
@@ -389,7 +332,7 @@ public partial class CutVideoViewModel : ObservableObject
 
             if (JobItems.Count == 1)
             {
-                await _folderHelper.OpenFolder(Window!, jobItem.OutputVideoFileName);
+                await _folderHelper.OpenFolderWithFileSelected(Window!, jobItem.OutputVideoFileName);
             }
             else
             {
@@ -410,7 +353,7 @@ public partial class CutVideoViewModel : ObservableObject
 
     private void InitAndStartJobItem(int index)
     {
-        _startTicks = System.DateTime.UtcNow.Ticks;
+        _startTicks = DateTime.UtcNow.Ticks;
         _jobItemIndex = index;
         var jobItem = JobItems[index];
         var mediaInfo = FfmpegMediaInfo.Parse(jobItem.InputVideoFileName);
@@ -431,7 +374,18 @@ public partial class CutVideoViewModel : ObservableObject
 
     private bool RunEncoding(BurnInJobItem jobItem)
     {
-        _ffmpegProcess = GetFfmpegProcess(jobItem);
+        string arguments;
+
+        if (SelectedCutType.CutType == CutType.MergeSegments)
+        {
+            arguments = FfmpegGenerator.GetMergeSegmentsParameters(jobItem.InputVideoFileName, jobItem.OutputVideoFileName, "25", Segments.ToList());
+        }
+        else
+        { 
+            arguments = FfmpegGenerator.GetRemoveSegmentsParameters(jobItem.InputVideoFileName, jobItem.OutputVideoFileName, "25", Segments.ToList());
+        }
+
+        _ffmpegProcess = FfmpegGenerator.GetProcess(arguments, OutputHandler);
 #pragma warning disable CA1416 // Validate platform compatibility
         _ffmpegProcess.Start();
 #pragma warning restore CA1416 // Validate platform compatibility
@@ -439,22 +393,6 @@ public partial class CutVideoViewModel : ObservableObject
         _ffmpegProcess.BeginErrorReadLine();
 
         return true;
-    }
-
-    private Process GetFfmpegProcess(BurnInJobItem jobItem)
-    {
-        var totalMs = _subtitle.Paragraphs.Max(p => p.EndTime.TotalMilliseconds);
-        var ts = TimeSpan.FromMilliseconds(totalMs + 2000);
-        var timeCode = string.Format($"{ts.Hours:00}\\\\:{ts.Minutes:00}\\\\:{ts.Seconds:00}");
-
-        return VideoPreviewGenerator.GenerateTransparentVideoFile(
-            jobItem.AssaSubtitleFileName,
-            jobItem.OutputVideoFileName,
-            jobItem.Width,
-            jobItem.Height,
-            SelectedFrameRate.ToString(CultureInfo.InvariantCulture),
-            timeCode,
-            OutputHandler);
     }
 
     private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
@@ -485,7 +423,7 @@ public partial class CutVideoViewModel : ObservableObject
         }
     }
 
-    private ObservableCollection<BurnInJobItem> GetCurrentVideoAsJobItems()
+    private ObservableCollection<BurnInJobItem> GetCurrentVideoAsJobItems(string outputVideoFileName)
     {
         var subtitle = new Subtitle(_subtitle);
 
@@ -505,7 +443,7 @@ public partial class CutVideoViewModel : ObservableObject
         var jobItem = new BurnInJobItem(string.Empty, VideoWidth, VideoHeight)
         {
             InputVideoFileName = VideoFileName,
-            OutputVideoFileName = MakeOutputFileName(_subtitle.FileName),
+            OutputVideoFileName = outputVideoFileName,
         };
         jobItem.AddSubtitleFileName(subtitleFileName);
 
@@ -651,29 +589,32 @@ public partial class CutVideoViewModel : ObservableObject
     [RelayCommand]
     private async Task Generate()
     {
-        JobItems = GetCurrentVideoAsJobItems();
+        if (Segments.Count == 0)
+        {
+            await MessageBox.Show(
+                Window!,
+                "No segments added",
+                $"Add one or more segments - e.g. via the waveform",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
 
+            return;
+        }
+
+        var outputVideoFileName = Path.ChangeExtension(VideoFileName, SelectedVideoExtension);
+        outputVideoFileName = await _fileHelper.PickSaveVideoFile(Window!, SelectedVideoExtension, outputVideoFileName, Se.Language.Video.SaveVideoAsTitle);
+        if (string.IsNullOrEmpty(outputVideoFileName))
+        {
+            return;
+        }
+
+        JobItems = GetCurrentVideoAsJobItems(outputVideoFileName);
 
         if (JobItems.Count == 0)
         {
             return;
         }
-
-        // check that all jobs have subtitles
-        foreach (var jobItem in JobItems)
-        {
-            if (string.IsNullOrWhiteSpace(jobItem.SubtitleFileName))
-            {
-                await MessageBox.Show(Window!,
-                    "Missing subtitle",
-                    "Please add a subtitle to all batch items",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-
-                return;
-            }
-        }
-
+      
         _doAbort = false;
         _log.Clear();
         IsGenerating = true;
@@ -733,7 +674,21 @@ public partial class CutVideoViewModel : ObservableObject
 
     internal void OnClosing()
     {
+        _positionTimer.Stop();
+
         VideoPlayer.VideoPlayerInstance.Close();
+
+        if (_ffmpegListKeyFramesProcess != null && !_ffmpegListKeyFramesProcess.HasExited)
+        {
+            try
+            {
+                _ffmpegListKeyFramesProcess.Kill(true);
+            }
+            catch 
+            {
+                // ignore
+            }
+        }
     }
 
     internal void OnLoaded()
@@ -757,7 +712,6 @@ public partial class CutVideoViewModel : ObservableObject
             Segments[index].Number = index + 1;
         }
     }
-
 
     private void SelectAndScrollToRow(int index)
     {
