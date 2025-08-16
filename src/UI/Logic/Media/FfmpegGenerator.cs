@@ -878,13 +878,11 @@ public class FfmpegGenerator
         }
 
         outputVideoFileName = $"\"{outputVideoFileName}\"";
-        var frameRateInt = (int)double.Parse(frameRate, CultureInfo.InvariantCulture);
 
         var arguments =
             $"-y -i \"{inputVideoFileName}\" " +
             $"-vf scale={width}:{height},fps={frameRate} " +
-            $"-c:v libx264 -preset ultrafast -movflags +faststart " +
-            $"-g {frameRateInt} -keyint_min {frameRateInt} -sc_threshold 0 " +
+            $"-c:v libx264 -preset veryfast -movflags +faststart " +
             $"-pix_fmt yuv420p -c:a copy {outputVideoFileName}";
 
         return arguments.Trim();
