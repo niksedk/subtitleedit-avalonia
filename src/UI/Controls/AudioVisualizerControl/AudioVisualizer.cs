@@ -49,7 +49,7 @@ public class AudioVisualizer : Control
 
     public static readonly StyledProperty<Color> WaveformSelectedColorProperty =
         AvaloniaProperty.Register<AudioVisualizer, Color>(nameof(WaveformSelectedColor));
-    
+
     public WavePeakData? WavePeaks
     {
         get => GetValue(WavePeaksProperty);
@@ -91,7 +91,7 @@ public class AudioVisualizer : Control
         get => GetValue(DrawGridLinesProperty);
         set => SetValue(DrawGridLinesProperty, value);
     }
-    
+
     public bool IsReadOnly
     {
         get => GetValue(IsReadOnlyProperty);
@@ -124,7 +124,25 @@ public class AudioVisualizer : Control
         }
     }
 
+
     public SubtitleLineViewModel? SelectedParagraph { get; set; }
+
+    public int ShotChangeSnapPixels { get; set; } = 8;
+
+    private List<double> _shotChanges = new List<double>();
+
+    /// <summary>
+    /// Shot changes (seconds)
+    /// </summary>
+    public List<double> ShotChanges
+    {
+        get => _shotChanges;
+        set
+        {
+            _shotChanges = value;
+        }
+    }
+
 
     // Pens and brushes
     private Pen _paintWaveform = new Pen(new SolidColorBrush(Color.FromArgb(150, 144, 238, 144)), 1);
@@ -162,14 +180,14 @@ public class AudioVisualizer : Control
 
     private enum InteractionMode
     {
-        None, 
-        Moving, 
-        ResizingLeft, 
-        ResizingLeftOr, 
-        ResizingRight, 
-        ResizingRightOr, 
-        ResizeLeftAnd, 
-        ResizeRightAnd, 
+        None,
+        Moving,
+        ResizingLeft,
+        ResizingLeftOr,
+        ResizingRight,
+        ResizingRightOr,
+        ResizeLeftAnd,
+        ResizeRightAnd,
         New,
     }
     private InteractionMode _interactionMode = InteractionMode.None;
@@ -181,13 +199,13 @@ public class AudioVisualizer : Control
     {
         public double PositionInSeconds { get; set; }
     }
-    
+
     public class ContextEventArgs : EventArgs
     {
         public double PositionInSeconds { get; set; }
         public SubtitleLineViewModel? NewParagraph { get; set; }
     }
-    
+
     public delegate void PositionEventHandler(object sender, PositionEventArgs e);
     public delegate void ContextEventHandler(object sender, ContextEventArgs e);
     public delegate void ParagraphEventHandler(object sender, ParagraphEventArgs e);
@@ -245,11 +263,11 @@ public class AudioVisualizer : Control
         KeyDown += OnKeyDown;
         KeyUp += OnKeyUp;
         LostFocus += (sender, e) =>
-        {          
+        {
             InvalidateVisual();
         };
     }
-    
+
     public void UpdateTheme()
     {
         _paintTimeText = UiUtil.GetTextColor();
@@ -398,9 +416,9 @@ public class AudioVisualizer : Control
             MenuFlyout.ShowAt(this, true);
             return;
         }
-        
-        
-        if (nsp is { Duration.TotalMilliseconds: > 1  })
+
+
+        if (nsp is { Duration.TotalMilliseconds: > 1 })
         {
             nsp.UpdateDuration();
             if (nsp.Duration.TotalMilliseconds < 10)
@@ -511,13 +529,13 @@ public class AudioVisualizer : Control
                 _interactionMode = InteractionMode.ResizingLeftOr;
             }
 
-            if (_isAltDown) 
+            if (_isAltDown)
             {
                 p2 = HitTestParagraph(point, displayableParagraphs, idx - 1, 100);
                 if (p2 != null)
                 {
                     _activeParagraphPrevious = p2;
-                    _originalPreviousEndSeconds  = p2.EndTime.TotalSeconds;
+                    _originalPreviousEndSeconds = p2.EndTime.TotalSeconds;
                     _interactionMode = InteractionMode.ResizeLeftAnd; // move the prev end too
                 }
             }
@@ -533,14 +551,14 @@ public class AudioVisualizer : Control
                 _activeParagraphNext = p2;
                 _interactionMode = InteractionMode.ResizingRightOr;
             }
-            
-            if (_isAltDown) 
+
+            if (_isAltDown)
             {
                 p2 = HitTestParagraphRight(point, displayableParagraphs, idx + 1, 100);
                 if (p2 != null)
                 {
                     _activeParagraphNext = p2;
-                    _originalNextStartSeconds  = p2.StartTime.TotalSeconds;
+                    _originalNextStartSeconds = p2.StartTime.TotalSeconds;
                     _interactionMode = InteractionMode.ResizeRightAnd; // move the prev end too
                 }
             }
@@ -576,7 +594,7 @@ public class AudioVisualizer : Control
         {
             return;
         }
-        
+
         var point = e.GetPosition(this);
         var properties = e.GetCurrentPoint(this).Properties;
         var newP = NewSelectionParagraph;
@@ -705,7 +723,7 @@ public class AudioVisualizer : Control
                 {
                     _activeParagraph.SetStartTimeOnly(TimeSpan.FromSeconds(newStart));
                 }
-                
+
                 break;
             case InteractionMode.ResizingRight:
                 newEnd = _originalEndSeconds + deltaSeconds - StartPositionSeconds;
@@ -813,7 +831,7 @@ public class AudioVisualizer : Control
 
         return null;
     }
-    
+
     private SubtitleLineViewModel? HitTestParagraph(Point point, List<SubtitleLineViewModel> subtitles, int index, double resizeMargin)
     {
         if (subtitles == null || index < 0 || index > subtitles.Count - 1)
@@ -833,7 +851,7 @@ public class AudioVisualizer : Control
 
         return null;
     }
-    
+
     private SubtitleLineViewModel? HitTestParagraphRight(Point point, List<SubtitleLineViewModel> subtitles, int index, double resizeMargin)
     {
         if (index < 0 || index > subtitles.Count - 1)
@@ -865,6 +883,7 @@ public class AudioVisualizer : Control
             DrawWaveForm(context);
             DrawTimeLine(context);
             DrawParagraphs(context);
+            DrawShotChanges(context);
             DrawCurrentVideoPosition(context);
             DrawNewParagraph(context);
 
@@ -887,7 +906,7 @@ public class AudioVisualizer : Control
         var imageHeight = Bounds.Height;
 
         var pen = _paintTimeLine;
-        var textBrush = _paintTimeText; 
+        var textBrush = _paintTimeText;
 
         while (position < Bounds.Width)
         {
@@ -927,9 +946,9 @@ public class AudioVisualizer : Control
         }
     }
 
-    private readonly Pen _paintTimeLine =  new Pen(Brushes.Gray, 1);
+    private readonly Pen _paintTimeLine = new Pen(Brushes.Gray, 1);
     private IBrush _paintTimeText = UiUtil.GetTextColor();
-    
+
     private static string GetDisplayTime(double seconds)
     {
         var secs = (int)Math.Round(seconds, MidpointRounding.AwayFromZero);
@@ -1139,6 +1158,73 @@ public class AudioVisualizer : Control
                         _typeface, _fontSize, _paintText);
                     context.DrawText(formattedText, new Point(currentRegionLeft + 3, 14 + addY));
                     addY += formattedText.Height;
+                }
+            }
+        }
+    }
+
+    private void DrawShotChanges(DrawingContext context)
+    {
+        var index = 0;
+        var currentPositionPos = SecondsToXPosition(CurrentVideoPositionSeconds - StartPositionSeconds);
+
+        var startPositionMilliseconds = StartPositionSeconds * 1000.0;
+        var endPositionMilliseconds = RelativeXPositionToSeconds((int)Bounds.Width) * 1000.0; //TODO: Bounds.Width or Width ???
+        var paragraphStartList = new List<int>();
+        var paragraphEndList = new List<int>();
+        foreach (var p in _displayableParagraphs)
+        {
+            if (p.EndTime.TotalMilliseconds >= startPositionMilliseconds && p.StartTime.TotalMilliseconds <= endPositionMilliseconds)
+            {
+                paragraphStartList.Add(SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds));
+                paragraphEndList.Add(SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds));
+            }
+        }
+
+        while (index < _shotChanges.Count)
+        {
+            int pos;
+            try
+            {
+                var time = _shotChanges[index++];
+                pos = SecondsToXPosition(time - StartPositionSeconds);
+            }
+            catch
+            {
+                pos = -1;
+            }
+
+            if (pos > 0 && pos < Bounds.Width)
+            {
+                if (currentPositionPos == pos)
+                {
+                    // shot change and current pos are the same
+                    var pen1 = new Pen(Brushes.AntiqueWhite, 2);
+                    context.DrawLine(pen1, new Point(pos, 0), new Point(pos, Bounds.Height));
+                    context.DrawLine(_paintCurrentPosition, new Point(pos, 0), new Point(pos, Bounds.Height));
+                }
+                else if (paragraphStartList.Contains(pos))
+                {
+                    var pen1 = new Pen(Brushes.AntiqueWhite, 2);
+                    context.DrawLine(pen1, new Point(pos, 0), new Point(pos, Bounds.Height));
+
+                    var brush = new SolidColorBrush(Color.FromArgb(175, 0, 100, 0));
+                    var pen2 = new Pen(brush, 2, dashStyle: DashStyle.Dash);
+                    context.DrawLine(pen2, new Point(pos, 0), new Point(pos, Bounds.Height));
+                }
+                else if (paragraphEndList.Contains(pos))
+                {
+                    var pen1 = new Pen(Brushes.AntiqueWhite, 2);
+                    context.DrawLine(pen1, new Point(pos, 0), new Point(pos, Bounds.Height));
+
+                    var brush = new SolidColorBrush(Color.FromArgb(175, 110, 10, 10));
+                    var pen2 = new Pen(brush, 2, dashStyle: DashStyle.Dash);
+                    context.DrawLine(pen2, new Point(pos, 0), new Point(pos, Bounds.Height));
+                }
+                else
+                {
+                    var pen = new Pen(Brushes.AntiqueWhite, 1);
+                    context.DrawLine(pen, new Point(pos, 0), new Point(pos, Bounds.Height));
                 }
             }
         }
