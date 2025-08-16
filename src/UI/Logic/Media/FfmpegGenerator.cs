@@ -914,7 +914,6 @@ public class FfmpegGenerator
     public static string GetMergeSegmentsParameters(
         string inputVideoFileName,
         string outputVideoFileName,
-        string frameRate,
         List<SubtitleLineViewModel> segments)
     {
         outputVideoFileName = $"\"{outputVideoFileName}\"";
@@ -944,9 +943,9 @@ public class FfmpegGenerator
             $"-y -i \"{inputVideoFileName}\" " +
             $"-filter_complex \"{filterComplex}\" " +
             $"-map \"[outv]\" -map \"[outa]\" " +
-            $"-vf fps={frameRate} " +
             $"-c:v libx264 -preset veryfast -crf 23 " +
-            $"-c:a copy -movflags +faststart -pix_fmt yuv420p " +
+            $"-c:a aac -b:a 192k " +
+            $"-movflags +faststart -pix_fmt yuv420p " +
             $"{outputVideoFileName}";
 
         return arguments.Trim();
@@ -955,7 +954,6 @@ public class FfmpegGenerator
     public static string GetRemoveSegmentsParameters(
         string inputVideoFileName,
         string outputVideoFileName,
-        string frameRate,
         List<SubtitleLineViewModel> segments)
     {
         outputVideoFileName = $"\"{outputVideoFileName}\"";
@@ -1003,9 +1001,9 @@ public class FfmpegGenerator
             $"-y -i \"{inputVideoFileName}\" " +
             $"-filter_complex \"{filterComplex}\" " +
             $"-map \"[outv]\" -map \"[outa]\" " +
-            (string.IsNullOrEmpty(frameRate) ? "" : $"-vf fps={frameRate} ") +
             $"-c:v libx264 -preset veryfast -crf 23 " +
-            $"-c:a copy -movflags +faststart -pix_fmt yuv420p " +
+            $"-c:a aac -b:a 192k " +
+            $"-movflags +faststart -pix_fmt yuv420p " +
             $"{outputVideoFileName}";
 
         return arguments.Trim();

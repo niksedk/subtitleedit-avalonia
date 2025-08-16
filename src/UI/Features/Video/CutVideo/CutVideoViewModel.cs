@@ -92,7 +92,6 @@ public partial class CutVideoViewModel : ObservableObject
 
         VideoExtensions = new ObservableCollection<string>
         {
-            ".mov",
             ".mkv",
             ".mp4",
             ".webm",
@@ -363,7 +362,6 @@ public partial class CutVideoViewModel : ObservableObject
         jobItem.Height = mediaInfo.Dimension.Height;
         jobItem.UseTargetFileSize = false;
         jobItem.Status = Se.Language.General.Generating;
-        jobItem.OutputVideoFileName = MakeOutputFileName(jobItem.InputVideoFileName);
 
         var result = RunEncoding(jobItem);
         if (result)
@@ -378,11 +376,11 @@ public partial class CutVideoViewModel : ObservableObject
 
         if (SelectedCutType.CutType == CutType.MergeSegments)
         {
-            arguments = FfmpegGenerator.GetMergeSegmentsParameters(jobItem.InputVideoFileName, jobItem.OutputVideoFileName, "25", Segments.ToList());
+            arguments = FfmpegGenerator.GetMergeSegmentsParameters(jobItem.InputVideoFileName, jobItem.OutputVideoFileName, Segments.ToList());
         }
         else
         { 
-            arguments = FfmpegGenerator.GetRemoveSegmentsParameters(jobItem.InputVideoFileName, jobItem.OutputVideoFileName, "25", Segments.ToList());
+            arguments = FfmpegGenerator.GetRemoveSegmentsParameters(jobItem.InputVideoFileName, jobItem.OutputVideoFileName, Segments.ToList());
         }
 
         _ffmpegProcess = FfmpegGenerator.GetProcess(arguments, OutputHandler);
