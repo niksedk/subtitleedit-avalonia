@@ -86,7 +86,7 @@ namespace Nikse.SubtitleEdit.Logic.Media
                 },
                 new FilePickerFileType("Video files")
                 {
-                    Patterns = new List<string> { "*.mkv", "*.mp4", ".ts" }
+                    Patterns = GetVideoExtensions(),
                 },
                 new FilePickerFileType("All files")
                 {
@@ -296,7 +296,7 @@ namespace Nikse.SubtitleEdit.Logic.Media
             {
                 new FilePickerFileType("Video files")
                 {
-                    Patterns = new List<string> { "*.mkv", "*.mp4", ".ts", ".mov", "*.mpeg" }
+                    Patterns = GetVideoExtensions()
                 },
                 new FilePickerFileType("All files")
                 {
@@ -305,6 +305,11 @@ namespace Nikse.SubtitleEdit.Logic.Media
             };
 
             return fileTypes;
+        }
+
+        private static List<string> GetVideoExtensions()
+        {
+            return new List<string> { "*.mkv", "*.mp4", "*.ts", "*.mov", "*.mpeg", "*.m2ts" };
         }
 
         public async Task<string> PickOpenImageFile(Visual sender, string title)
