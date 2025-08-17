@@ -19,12 +19,14 @@ using Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
 using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 using Nikse.SubtitleEdit.Features.Edit.Replace;
 using Nikse.SubtitleEdit.Features.Edit.ShowHistory;
+using Nikse.SubtitleEdit.Features.Files.Compare;
 using Nikse.SubtitleEdit.Features.Files.Export.ExportEbuStl;
 using Nikse.SubtitleEdit.Features.Files.ExportCavena890;
 using Nikse.SubtitleEdit.Features.Files.ExportEbuStl;
 using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Files.ExportPac;
 using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
+using Nikse.SubtitleEdit.Features.Files.Statistics;
 using Nikse.SubtitleEdit.Features.Help;
 using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Features.Options.Language;
@@ -574,14 +576,24 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private async Task Compare()
+    private async Task ShowCompare()
     {
+        var result = await _windowService.ShowDialogAsync<CompareWindow, CompareViewModel>(Window!, vm => 
+        { 
+            vm.Initialize(Subtitles); 
+        });
+
         _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
-    private async Task Statistics()
+    private async Task ShowStatistics()
     {
+        var result = await _windowService.ShowDialogAsync<StatisticsWindow, StatisticsViewModel>(Window!, vm =>
+        {
+            vm.Initialize(Subtitles);
+        });
+
         _shortcutManager.ClearKeys();
     }
 

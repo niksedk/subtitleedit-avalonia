@@ -76,12 +76,12 @@ public static class InitMenu
                 new MenuItem
                 {
                     Header = l.Compare,
-                    Command = vm.CompareCommand,
+                    Command = vm.ShowCompareCommand,
                 },
                 new MenuItem
                 {
                     Header = l.Statistics,
-                    Command = vm.StatisticsCommand,
+                    Command = vm.ShowStatisticsCommand,
                 },
                 new Separator(),
                 new MenuItem
