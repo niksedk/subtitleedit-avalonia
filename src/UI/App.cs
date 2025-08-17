@@ -65,7 +65,7 @@ var appBuilder = AppBuilder.Configure<Application>()
     .SetupWithLifetime(lifetime);
 
 var collection = new ServiceCollection();
-collection.AddCommonServices(); // DI
+collection.AddSubtitleEditServices(); // DI
 
 Locator.Services = collection.BuildServiceProvider();
 var services = collection.BuildServiceProvider();

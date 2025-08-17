@@ -57,7 +57,7 @@ namespace Nikse.SubtitleEdit;
 
 public static class DependencyInjectionExtensions
 {
-    public static void AddCommonServices(this IServiceCollection collection)
+    public static void AddSubtitleEditServices(this IServiceCollection collection)
     {
         // Misc services
         collection.AddSingleton<IFileHelper, FileHelper>();
