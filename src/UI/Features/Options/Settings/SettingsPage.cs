@@ -342,8 +342,7 @@ public class SettingsPage : UserControl
 
             new SettingsSection(Se.Language.General.Tools,
             [
-                new SettingsItem("Developer Mode", () => new CheckBox { IsChecked = false }),
-                new SettingsItem("Verbose Output", () => new CheckBox { IsChecked = false }),
+                new SettingsItem("TODO", () => new CheckBox { IsChecked = false }),
             ]),
 
             new SettingsSection("Toolbar",

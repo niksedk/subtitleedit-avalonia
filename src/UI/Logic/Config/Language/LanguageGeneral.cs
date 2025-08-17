@@ -263,7 +263,7 @@ public class LanguageGeneral
     public string OpenImageFile { get; set; }
     public string Background { get; set; }
     public string SaveChangesTitle { get; set; }
-    public string SaveChangesQuestion { get; set; }
+    public string SaveChangesMessage { get; set; }
 
     public LanguageGeneral()
     {
@@ -528,6 +528,6 @@ public class LanguageGeneral
         OpenImageFile = "Open image file";
         Background = "Background";
         SaveChangesTitle = "Save changes?";
-        SaveChangesQuestion = "Do you want to save changes to the current subtitle file?";
+        SaveChangesMessage = "Do you want to save changes to the current subtitle file?";
     }
 }

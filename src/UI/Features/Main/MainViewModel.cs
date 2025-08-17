@@ -223,7 +223,12 @@ public partial class MainViewModel :
         _videoFileName = string.Empty;
         _subtitleFileName = string.Empty;
         Subtitles = new ObservableCollection<SubtitleLineViewModel>();
+        
         SubtitleFormats = [.. SubtitleFormat.AllSubtitleFormats];
+        var defaultFormat = SubtitleFormats.Where(f => f.FriendlyName == Se.Settings.General.DefaultSubtitleFormat).FirstOrDefault() ?? SubtitleFormats[0];
+        SubtitleFormats.Remove(defaultFormat);
+        SubtitleFormats.Insert(0, defaultFormat);   
+
         SelectedSubtitleFormat = SubtitleFormats[0];
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         SelectedEncoding = Encodings[0];
@@ -423,8 +428,8 @@ public partial class MainViewModel :
         {
             var result = await MessageBox.Show(
                 Window!,
-                "Save Changes?",
-                "Do you want to save changes?",
+                Se.Language.General.SaveChangesTitle,
+                Se.Language.General.SaveChangesMessage,
                 MessageBoxButtons.YesNoCancel,
                 MessageBoxIcon.Question);
 
@@ -448,6 +453,7 @@ public partial class MainViewModel :
     {
         ShowColumnOriginalText = false;
         Subtitles.Clear();
+        SelectedSubtitleFormat = SubtitleFormats.Where(f => f.FriendlyName == Se.Settings.General.DefaultSubtitleFormat).FirstOrDefault() ?? SubtitleFormats[0];
         _subtitleFileName = string.Empty;
         _subtitleFileNameOriginal = string.Empty;
         _subtitle = new Subtitle();
@@ -2633,7 +2639,7 @@ public partial class MainViewModel :
             var result = await MessageBox.Show(
                 Window,
                 Se.Language.General.SaveChangesTitle,
-                Se.Language.General.SaveChangesQuestion,
+                Se.Language.General.SaveChangesMessage,
                 MessageBoxButtons.YesNoCancel,
                 MessageBoxIcon.Question);
 
@@ -2651,10 +2657,7 @@ public partial class MainViewModel :
             Window.Closing -= OnClosing;
             Window.Close();
         }
-    }
 
-    private void Close()
-    {
         VideoPlayerControl?.VideoPlayerInstance.Close();
 
         AddToRecentFiles(false);
@@ -3816,7 +3819,7 @@ public partial class MainViewModel :
         var result = await MessageBox.Show(
             Window,
             Se.Language.General.SaveChangesTitle,
-            Se.Language.General.SaveChangesQuestion,
+            Se.Language.General.SaveChangesMessage,
             MessageBoxButtons.YesNoCancel,
             MessageBoxIcon.Question);
 
