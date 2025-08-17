@@ -75,6 +75,17 @@ public static class InitMenu
                 new Separator(),
                 new MenuItem
                 {
+                    Header = l.Compare,
+                    Command = vm.CompareCommand,
+                },
+                new MenuItem
+                {
+                    Header = l.Statistics,
+                    Command = vm.StatisticsCommand,
+                },
+                new Separator(),
+                new MenuItem
+                {
                     Header = l.Export,
                     Items =
                     {

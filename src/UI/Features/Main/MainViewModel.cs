@@ -574,6 +574,18 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private async Task Compare()
+    {
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task Statistics()
+    {
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
     private async Task ExportBluRaySup()
     {
         IExportHandler exportHandler = new ExportHandlerBluRaySup();

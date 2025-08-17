@@ -66,7 +66,8 @@ public class LanguageMainMenu
     public string Help { get; set; }
     public string About { get; set; }
     public string VisualSync { get; set; }
-
+    public string Compare { get; set; }
+    public string Statistics { get; set; }
 
     public LanguageMainMenu()
     {
@@ -80,6 +81,8 @@ public class LanguageMainMenu
         RestoreAutoBackup = "Restore auto-_backup...";
         Save = "_Save";
         SaveAs = "Save _as...";
+        Compare = "Com_pare...";
+        Statistics = "Stat_istics...";
         Export = "_Export";
         Exit = "E_xit";
 
