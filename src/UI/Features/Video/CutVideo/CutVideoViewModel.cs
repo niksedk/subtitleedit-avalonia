@@ -42,13 +42,15 @@ public partial class CutVideoViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<BurnInJobItem> _jobItems;
     [ObservableProperty] private BurnInJobItem? _selectedJobItem;
     [ObservableProperty] private bool _isGenerating;
-    [ObservableProperty] private bool _useSourceResolution;
     [ObservableProperty] private bool _isAudioVisualizerVisible;
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _segments;
     [ObservableProperty] private SubtitleLineViewModel _selectedSegment;
     [ObservableProperty] private int _selectedSegmentIndex;
     [ObservableProperty] private ObservableCollection<CutTypeDisplay> _cutTypes;
     [ObservableProperty] private CutTypeDisplay _selectedCutType;
+    [ObservableProperty] private bool _isSetStartEnabled;
+    [ObservableProperty] private bool _isSetEndEnabled;
+    [ObservableProperty] private bool _isDeleteEnabled;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -118,6 +120,7 @@ public partial class CutVideoViewModel : ObservableObject
 
         _loading = false;
         _inputVideoFileName = string.Empty;
+        UpdateSelection();
         LoadSettings();
     }
 
@@ -379,7 +382,7 @@ public partial class CutVideoViewModel : ObservableObject
             arguments = FfmpegGenerator.GetMergeSegmentsParameters(jobItem.InputVideoFileName, jobItem.OutputVideoFileName, Segments.ToList());
         }
         else
-        { 
+        {
             arguments = FfmpegGenerator.GetRemoveSegmentsParameters(jobItem.InputVideoFileName, jobItem.OutputVideoFileName, Segments.ToList());
         }
 
@@ -493,95 +496,72 @@ public partial class CutVideoViewModel : ObservableObject
     [RelayCommand]
     private async Task Add()
     {
-        var fileNames = await _fileHelper.PickOpenSubtitleFiles(Window!, Se.Language.General.OpenSubtitles);
-        if (fileNames.Length == 0)
+        var ms = VideoPlayer.Position * 1000;
+        var segment = new SubtitleLineViewModel(new Paragraph(string.Empty, ms, ms + Se.Settings.General.NewEmptyDefaultMs));
+        var index = _insertService.InsertInCorrectPosition(Segments, segment);
+        SelectAndScrollToRow(index);
+        Renumber();
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void Delete()
+    {
+        var segment = SelectedSegment;
+        if (segment == null)
         {
             return;
         }
 
-        foreach (var fileName in fileNames)
-        {
-            var videoFileName = string.Empty;
-            var jobItem = new BurnInJobItem(videoFileName, VideoWidth, VideoHeight);
-            jobItem.AddSubtitleFileName(fileName);
-            Dispatcher.UIThread.Invoke(() => { JobItems.Add(jobItem); });
-        }
-    }
+        var idx = Segments.IndexOf(segment);
+        Segments.Remove(segment);
 
-    [RelayCommand]
-    private async Task OpenOutputFolder()
-    {
-        await _folderHelper.OpenFolder(Window!, Se.Settings.Video.BurnIn.OutputFolder);
-    }
-
-    [RelayCommand]
-    private void Remove()
-    {
-        if (SelectedJobItem != null)
+        if (idx < Segments.Count)
         {
-            var idx = JobItems.IndexOf(SelectedJobItem);
-            JobItems.Remove(SelectedJobItem);
+            SelectedSegment = Segments[idx];
         }
+        else if (idx - 1 < Segments.Count && idx > 0)
+        {
+            SelectedSegment = Segments[idx - 1];
+        }
+
+        _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
     private void Clear()
     {
-        JobItems.Clear();
+        Segments.Clear();
+        _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
-    private async Task PickVideoFile()
+    private void SetStart()
     {
-        if (SelectedJobItem == null)
+        var segment = SelectedSegment;
+        if (segment == null)
         {
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenVideoFile(Window!, "Open video file");
-        if (!string.IsNullOrEmpty(fileName))
-        {
-            SelectedJobItem.InputVideoFileName = fileName;
-            SelectedJobItem.InputVideoFileName = Path.GetFileName(fileName);
-        }
+        var seconds = VideoPlayer.Position;
+        segment.SetStartTimeOnly(TimeSpan.FromSeconds(seconds));
+        _updateAudioVisualizer = true;
+
     }
 
     [RelayCommand]
-    private async Task BrowseResolution()
+    private void SetEnd()
     {
-        var result =
-            await _windowService
-                .ShowDialogAsync<BurnInResolutionPickerWindow, BurnInResolutionPickerViewModel>(Window!);
-        if (!result.OkPressed || result.SelectedResolution == null)
+        var segment = SelectedSegment;
+        if (segment == null)
         {
             return;
         }
 
-        if (result.SelectedResolution.ItemType == ResolutionItemType.PickResolution)
-        {
-            var videoFileName = await _fileHelper.PickOpenVideoFile(Window!, "Open video file");
-            if (string.IsNullOrWhiteSpace(videoFileName))
-            {
-                return;
-            }
-
-            var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
-            VideoWidth = mediaInfo.Dimension.Width;
-            VideoHeight = mediaInfo.Dimension.Height;
-            UseSourceResolution = false;
-        }
-        else if (result.SelectedResolution.ItemType == ResolutionItemType.UseSource)
-        {
-            UseSourceResolution = true;
-        }
-        else if (result.SelectedResolution.ItemType == ResolutionItemType.Resolution)
-        {
-            UseSourceResolution = false;
-            VideoWidth = result.SelectedResolution.Width;
-            VideoHeight = result.SelectedResolution.Height;
-        }
-
-        SaveSettings();
+        var seconds = VideoPlayer.Position;
+        segment.EndTime = TimeSpan.FromSeconds(seconds);
+        _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
@@ -612,7 +592,7 @@ public partial class CutVideoViewModel : ObservableObject
         {
             return;
         }
-      
+
         _doAbort = false;
         _log.Clear();
         IsGenerating = true;
@@ -662,6 +642,11 @@ public partial class CutVideoViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.Space)
+        { 
+            e.Handled = true;
+            VideoPlayer.TogglePlayPause();
+        }
     }
 
     internal void AudioVisualizerPositionChanged(object sender, AudioVisualizer.PositionEventArgs e)
@@ -682,7 +667,7 @@ public partial class CutVideoViewModel : ObservableObject
             {
                 _ffmpegListKeyFramesProcess.Kill(true);
             }
-            catch 
+            catch
             {
                 // ignore
             }
@@ -722,6 +707,19 @@ public partial class CutVideoViewModel : ObservableObject
         {
             SegmentGrid.SelectedIndex = index;
             SegmentGrid.ScrollIntoView(SegmentGrid.SelectedItem, null);
+            UpdateSelection();
         }, DispatcherPriority.Background);
+    }
+
+    internal void SegmentsGridChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        UpdateSelection();
+    }
+
+    private void UpdateSelection()
+    {
+        IsDeleteEnabled = SelectedSegment != null;
+        IsSetStartEnabled = SelectedSegment != null;
+        IsSetEndEnabled = SelectedSegment != null;
     }
 }

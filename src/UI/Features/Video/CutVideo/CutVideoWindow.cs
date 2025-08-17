@@ -70,6 +70,8 @@ public class CutVideoWindow : Window
             Margin = UiUtil.MakeWindowMargin(),
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
+            ColumnSpacing = 5,
+            RowSpacing = 5,
         };
 
         grid.Add(segmentsView, 0, 0);
@@ -131,27 +133,56 @@ public class CutVideoWindow : Window
                 },
             },
         };
-        dataGridSubtitle.Bind(DataGrid.SelectedItemProperty,
-            new Binding(nameof(vm.SelectedSegment)) { Source = vm });
+        dataGridSubtitle.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedSegment)) { Source = vm });
+        dataGridSubtitle.SelectionChanged += vm.SegmentsGridChanged;
         vm.SegmentGrid = dataGridSubtitle;
 
-        var border = new Border
+
+        var buttonAdd = UiUtil.MakeButton(Se.Language.General.Add, vm.AddCommand);
+        var buttonSetStart = UiUtil.MakeButton(Se.Language.General.SetStart, vm.SetStartCommand).WithBindIsEnabled(nameof(vm.IsSetStartEnabled));
+        var buttonSetEnd = UiUtil.MakeButton(Se.Language.General.SetEnd, vm.SetEndCommand).WithBindIsEnabled(nameof(vm.IsSetEndEnabled));
+        var buttonDelete = UiUtil.MakeButton(Se.Language.General.Delete, vm.DeleteCommand).WithBindIsEnabled(nameof(vm.IsDeleteEnabled));
+
+        var panelButtons = new StackPanel
         {
-            Child = dataGridSubtitle,
-            BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetBorderColor(),
-            Padding = new Thickness(10, 0, 10, 0),
-            CornerRadius = new CornerRadius(5),
+            Orientation = Orientation.Horizontal,
+            Children =
+            { 
+                buttonAdd,
+                buttonSetStart,
+                buttonSetEnd,
+                buttonDelete,
+            },
         };
 
-        return border;
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // segments
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // buttons
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            ColumnSpacing = 5,
+            RowSpacing = 5,
+        };
+
+        grid.Add(dataGridSubtitle, 0, 0);
+        grid.Add(panelButtons, 1, 0);
+
+        return UiUtil.MakeBorderForControl(grid);
     }
 
     private static Border MakeVideoPlayerView(CutVideoViewModel vm)
     {
         vm.VideoPlayer = InitVideoPlayer.MakeVideoPlayer();
         vm.VideoPlayer.FullScreenIsVisible = false;
-        return UiUtil.MakeBorderForControl(vm.VideoPlayer).WithMarginBottom(5).WithMarginRight(5);
+        return UiUtil.MakeBorderForControl(vm.VideoPlayer);
     }
 
     private static Border MakeAudioVisualizerView(CutVideoViewModel vm)
@@ -160,7 +191,7 @@ public class CutVideoWindow : Window
         vm.AudioVisualizer.OnVideoPositionChanged += vm.AudioVisualizerPositionChanged;
         vm.AudioVisualizer.OnNewSelectionInsert += vm.AudioVisualizerOnNewSelectionInsert;
 
-        return UiUtil.MakeBorderForControl(vm.AudioVisualizer).WithMarginRight(5);
+        return UiUtil.MakeBorderForControl(vm.AudioVisualizer);
     }
 
     private static Grid MakeProgressView(CutVideoViewModel vm)
