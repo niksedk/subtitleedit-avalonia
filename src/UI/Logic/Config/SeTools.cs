@@ -8,11 +8,11 @@ public class SeTools
     public SeBatchConvert BatchConvert { get; set; } = new();
     public SeChangeCasing ChangeCasing { get; set; } = new();
     public SeRemoveTextForHi RemoveTextForHi { get; set; } = new();
-    public string OllamaPrompt { get; internal set; }
-    public string LmStudioPrompt { get; internal set; }
-    public string AnthropicPrompt { get; internal set; }
-    public string GroqPrompt { get; internal set; }
-    public string OpenRouterPrompt { get; internal set; }
+    public string OllamaPrompt { get; set; }
+    public string LmStudioPrompt { get; set; }
+    public string AnthropicPrompt { get; set; }
+    public string GroqPrompt { get; set; }
+    public string OpenRouterPrompt { get; set; }
 
     public SeTools()
     {

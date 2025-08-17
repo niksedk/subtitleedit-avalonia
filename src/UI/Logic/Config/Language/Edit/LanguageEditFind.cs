@@ -7,7 +7,7 @@ public class LanguageEditFind
     public string CaseSensitive { get; set; }
     public string CaseInsensitive { get; set; }
     public string FindPrevious { get; set; }
-    public string FindNext { get; internal set; }
+    public string FindNext { get; set; }
 
     public LanguageEditFind()
     {

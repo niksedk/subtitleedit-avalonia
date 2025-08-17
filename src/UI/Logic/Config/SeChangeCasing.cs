@@ -5,10 +5,10 @@ public class SeChangeCasing
     public bool NormalCasing { get; internal set; }
     public bool NormalCasingFixNames { get; internal set; }
     public bool NormalCasingOnlyUpper { get; internal set; }
-    public bool FixNamesOnly { get; internal set; }
-    public bool AllUppercase { get; internal set; }
-    public bool AllLowercase { get; internal set; }
-    public string ExtraNames { get; internal set; }
+    public bool FixNamesOnly { get; set; }
+    public bool AllUppercase { get; set; }
+    public bool AllLowercase { get; set; }
+    public string ExtraNames { get; set; }
 
     public SeChangeCasing()
     {

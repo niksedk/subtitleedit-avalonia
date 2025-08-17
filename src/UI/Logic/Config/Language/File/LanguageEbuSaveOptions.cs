@@ -44,7 +44,7 @@ public class LanguageEbuSaveOptions
     public string TextCenteredText { get; set; }
     public string TextRightJustifiedText { get; set; }
     public string UseBoxForOneNewLine { get; set; }
-    public string DiscSequenceNumber { get; internal set; }
+    public string DiscSequenceNumber { get; set; }
 
     public LanguageEbuSaveOptions()
     {

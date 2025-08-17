@@ -3,9 +3,9 @@
 public class LanguageChangeCasing
 {
     public string Title { get; set; }
-    public string FixNames { get; internal set; }
-    public string ExtraNames { get; internal set; }
-    public string? EnterExtraNamesHint { get; internal set; }
+    public string FixNames { get; set; }
+    public string ExtraNames { get; set; }
+    public string? EnterExtraNamesHint { get; set; }
 
     public LanguageChangeCasing()
     {

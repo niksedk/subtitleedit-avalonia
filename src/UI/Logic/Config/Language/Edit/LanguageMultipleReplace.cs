@@ -4,8 +4,8 @@ public class LanguageMultipleReplace
 {
 
     public string Title { get; set; }
-    public string EditRule { get; internal set; }
-    public string NewRule { get; internal set; }
+    public string EditRule { get; set; }
+    public string NewRule { get; set; }
     public string EditCategory { get; set; }
     public string NewCategory { get; set; }
     public string CategoryName { get; set; }

@@ -7,7 +7,7 @@ public class SeWaveform
     public bool CenterVideoPosition { get; set; }
     public bool DrawGridLines { get; set; }
     public bool FocusTextBoxAfterInsertNew { get; set; }
-    public bool ShowToolbar { get; internal set; }
+    public bool ShowToolbar { get; set; }
     public string WaveformColor { get; set; }
     public string WaveformSelectedColor { get; set; }
     public bool InvertMouseWheel { get; set; }
