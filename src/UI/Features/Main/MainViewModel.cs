@@ -68,6 +68,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -521,9 +522,9 @@ public partial class MainViewModel :
             {
                 Subtitles[i].OriginalText = subtitle.Paragraphs[i].Text;
             }
+
             ShowColumnOriginalText = true;
             AutoFitColumns();
-
         }
         else
         {
@@ -602,10 +603,8 @@ public partial class MainViewModel :
     private async Task ExportVobSub()
     {
         IExportHandler exportHandler = new ExportHandlerVobSub();
-        var result = await _windowService.ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(Window!, vm =>
-        {
-            vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName);
-        });
+        var result = await _windowService.ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(Window!,
+            vm => { vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName); });
 
         if (!result.OkPressed)
         {
@@ -774,9 +773,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<BlankVideoWindow, BlankVideoViewModel>(Window!, vm =>
-        {
-        });
+        var result = await _windowService.ShowDialogAsync<BlankVideoWindow, BlankVideoViewModel>(Window!, vm => { });
 
         if (!result.OkPressed)
         {
@@ -801,10 +798,8 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<CutVideoWindow, CutVideoViewModel>(Window!, vm =>
-        {
-            vm.Initialize(_videoFileName, AudioVisualizer?.WavePeaks);
-        });
+        var result = await _windowService.ShowDialogAsync<CutVideoWindow, CutVideoViewModel>(Window!,
+            vm => { vm.Initialize(_videoFileName, AudioVisualizer?.WavePeaks); });
 
         if (!result.OkPressed)
         {
@@ -829,10 +824,9 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<ReEncodeVideoWindow, ReEncodeVideoViewModel>(Window!, vm =>
-        {
-            vm.Initialize(_videoFileName);
-        });
+        var result =
+            await _windowService.ShowDialogAsync<ReEncodeVideoWindow, ReEncodeVideoViewModel>(Window!,
+                vm => { vm.Initialize(_videoFileName); });
 
         if (!result.OkPressed)
         {
@@ -2605,7 +2599,8 @@ public partial class MainViewModel :
     private void AddToRecentFiles(bool updateMenu)
     {
         var idx = SelectedSubtitleIndex ?? 0;
-        Se.Settings.File.AddToRecentFiles(_subtitleFileName ?? string.Empty, _videoFileName ?? string.Empty, idx, SelectedEncoding.DisplayName);
+        Se.Settings.File.AddToRecentFiles(_subtitleFileName ?? string.Empty, _videoFileName ?? string.Empty, idx,
+            SelectedEncoding.DisplayName);
         Se.SaveSettings();
 
         if (updateMenu)
@@ -2646,15 +2641,30 @@ public partial class MainViewModel :
 
     internal void OnClosing()
     {
-        //MediaPlayerVlc?.Dispose();
-        //libVLC?.Dispose();
+        VideoPlayerControl?.VideoPlayerInstance.Close();
 
         AddToRecentFiles(false);
+
+        if (Window != null)
+        {
+            Se.Settings.General.PositionIsFullScreen = Window.WindowState == WindowState.FullScreen;
+            Se.Settings.General.PositionIsMaximized = Window.WindowState == WindowState.Maximized;
+            if (Window.WindowState == WindowState.Normal)
+            {
+                Se.Settings.General.PositionX = Window.Position.X;
+                Se.Settings.General.PositionY = Window.Position.Y;
+                Se.Settings.General.PositionWidth = (int)Window.Width;
+                Se.Settings.General.PositionHeight = (int)Window.Height;
+            }
+        }
+        
         Se.SaveSettings();
     }
 
     internal void OnLoaded()
     {
+        RestoreWindowPositionAndSize();
+        
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && string.IsNullOrEmpty(Se.Settings.General.LibMpvPath))
         {
             Dispatcher.UIThread.Post(async void () =>
@@ -2729,7 +2739,8 @@ public partial class MainViewModel :
             }
             else
             {
-                Se.Settings.File.RecentFiles = Se.Settings.File.RecentFiles.Where(p => File.Exists(p.SubtitleFileName)).ToList();
+                Se.Settings.File.RecentFiles =
+                    Se.Settings.File.RecentFiles.Where(p => File.Exists(p.SubtitleFileName)).ToList();
             }
         }
 
@@ -2739,6 +2750,100 @@ public partial class MainViewModel :
             _undoRedoManager.StartChangeDetection();
         });
     }
+
+    private void RestoreWindowPositionAndSize()
+    {
+        if (!Se.Settings.General.RememberPositionAndSize &&
+            Se.Settings.General.PositionWidth > 0 &&
+            Se.Settings.General.PositionHeight > 0)
+        {
+            return;
+        }
+
+        if (Window == null)
+        {
+            return;
+        }
+
+        try
+        {
+            var settings = Se.Settings.General;
+
+            var width = (int)Math.Max(Window.MinWidth, settings.PositionWidth); // Minimum width
+            var height = (int)Math.Max(Window.MinHeight, settings.PositionHeight); // Minimum height
+
+            // Check if the saved position is within any available screen
+            var savedBounds = new PixelRect(settings.PositionX, settings.PositionY, width, height);
+            if (IsPositionOnAnyScreen(savedBounds))
+            {
+                Window.Width = width;
+                Window.Height = height;
+                Window.Position = new PixelPoint(settings.PositionX, settings.PositionY);
+            }
+
+            // Restore fullscreen state if it was saved
+            if (settings.PositionIsFullScreen)
+            {
+                Window.WindowState = WindowState.FullScreen;
+            }
+            else if (settings.PositionIsMaximized)
+            {
+                Window.WindowState = WindowState.Maximized;
+            }
+        }
+        catch (Exception ex)
+        {
+            Se.LogError(ex);
+        }
+    }
+
+    private bool IsPositionOnAnyScreen(PixelRect windowBounds)
+    {
+        if (Window?.Screens?.All == null)
+        {
+            return false;
+        }
+
+        foreach (var screen in Window.Screens.All)
+        {
+            // Check if at least part of the window would be visible on this screen
+            var screenBounds = screen.WorkingArea;
+            if (screenBounds.Intersects(windowBounds))
+            {
+                // Ensure at least 100px of the title bar is visible for dragging
+                var titleBarArea = new PixelRect(
+                    windowBounds.X,
+                    windowBounds.Y,
+                    windowBounds.Width,
+                    30); // Approximate title bar height
+
+                if (screenBounds.Intersects(titleBarArea))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void CenterWindowOnPrimaryScreen()
+    {
+        if (Window?.Screens?.Primary == null)
+        {
+            return;
+        }
+
+        var screen = Window.Screens.Primary.WorkingArea;
+        var width = Math.Min(800, screen.Width - 100); // Default width, but not larger than screen
+        var height = Math.Min(600, screen.Height - 100); // Default height, but not larger than screen
+
+        Window.Width = width;
+        Window.Height = height;
+        Window.Position = new PixelPoint(
+            screen.X + (screen.Width - width) / 2,
+            screen.Y + (screen.Height - height) / 2
+        );
+    }
+
 
     private static bool IsValidUrl(string url)
     {
@@ -3094,7 +3199,6 @@ public partial class MainViewModel :
     {
         if (IsSubtitleGridFlyoutHeaderVisible)
         {
-
         }
 
         MenuItemMergeAsDialog.IsVisible = SubtitleGrid.SelectedItems.Count == 2;
@@ -3396,7 +3500,8 @@ public partial class MainViewModel :
         var lines = text.SplitToLines();
         var lineLenghts = new List<string>(lines);
         PanelSingleLineLenghtsOriginal.Children.Clear();
-        PanelSingleLineLenghtsOriginal.Children.Add(UiUtil.MakeTextBlock(Se.Language.Main.SingleLineLength).WithFontSize(12)
+        PanelSingleLineLenghtsOriginal.Children.Add(UiUtil.MakeTextBlock(Se.Language.Main.SingleLineLength)
+            .WithFontSize(12)
             .WithPadding(2));
         var first = true;
         for (var i = 0; i < lines.Count; i++)
@@ -3424,12 +3529,13 @@ public partial class MainViewModel :
         EditTextTotalLengthOriginal = string.Format(Se.Language.Main.TotalCharacters, totalLength);
 
         EditTextCharactersPerSecondBackgroundOriginal = Se.Settings.General.ColorTextTooLong &&
-                                                cps > Se.Settings.General.SubtitleMaximumCharactersPerSeconds
+                                                        cps > Se.Settings.General.SubtitleMaximumCharactersPerSeconds
             ? new SolidColorBrush(_errorColor)
             : new SolidColorBrush(Colors.Transparent);
 
         EditTextTotalLengthBackgroundOriginal = Se.Settings.General.ColorTextTooLong &&
-                                        totalLength > Se.Settings.General.SubtitleLineMaximumLength * lines.Count
+                                                totalLength > Se.Settings.General.SubtitleLineMaximumLength *
+                                                lines.Count
             ? new SolidColorBrush(_errorColor)
             : new SolidColorBrush(Colors.Transparent);
     }

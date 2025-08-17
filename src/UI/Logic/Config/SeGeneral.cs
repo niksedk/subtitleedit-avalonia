@@ -33,6 +33,13 @@ public class SeGeneral
     public int NewEmptyDefaultMs { get; set; }
     public bool PromptDeleteLines { get; set; }
     public bool LockTimeCodes { get; set; }
+    public bool RememberPositionAndSize { get; set; }
+    public bool PositionIsFullScreen { get; set; }
+    public bool PositionIsMaximized { get; set; }
+    public int PositionX { get; set; }
+    public int PositionY { get; set; }
+    public int PositionWidth { get; set; }
+    public int PositionHeight { get; set; }
     public bool AutoBackupOn { get; set; }
     public int AutoBackupIntervalMinutes { get; set; }
     public int AutoBackupDeleteAfterMonths { get; set; }

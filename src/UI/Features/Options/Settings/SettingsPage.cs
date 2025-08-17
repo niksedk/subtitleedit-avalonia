@@ -170,6 +170,7 @@ public class SettingsPage : UserControl
                 MakeNumericSetting("Default new subtitle duration (ms)", nameof(_vm.NewEmptyDefaultMs)),
                 MakeCheckboxSetting("Prompt for delete lines", nameof(_vm.PromptDeleteLines)),
                 MakeCheckboxSetting("Lock time codes", nameof(_vm.LockTimeCodes)),
+                MakeCheckboxSetting("Remember window position and size", nameof(_vm.RememberPositionAndSize)),
                 MakeSeparator(),
                 MakeCheckboxSetting("Auto-backup", nameof(_vm.AutoBackupOn)),
                 MakeNumericSetting("Auto-backup interval (minutes)", nameof(_vm.AutoBackupIntervalMinutes)),
