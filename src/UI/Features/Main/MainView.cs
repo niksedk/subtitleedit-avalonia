@@ -67,7 +67,8 @@ public class MainView : ViewBase
         root.Children.Add(_vm.Menu.Dock(Dock.Top));
 
         // Toolbar
-        root.Children.Add(InitToolbar.Make(_vm).Dock(Dock.Top));
+        _vm.Toolbar = InitToolbar.Make(_vm);
+        root.Children.Add(_vm.Toolbar.Dock(Dock.Top));
 
         // Footer
         root.Children.Add(InitFooter.Make(_vm).Dock(Dock.Bottom));

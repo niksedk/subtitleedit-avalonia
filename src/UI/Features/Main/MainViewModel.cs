@@ -1,5 +1,7 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Markup.Declarative;
 using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -68,7 +70,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Avalonia;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -151,6 +152,7 @@ public partial class MainViewModel :
 
     public VideoPlayerControl? VideoPlayerControl { get; internal set; }
     public Menu Menu { get; internal set; }
+    public Border Toolbar { get; internal set; }
     public StackPanel PanelSingleLineLenghts { get; internal set; }
     public MenuItem MenuItemMergeAsDialog { get; internal set; }
     public MenuItem MenuItemMerge { get; internal set; }
@@ -219,6 +221,7 @@ public partial class MainViewModel :
         MenuItemAudioVisualizerSeparator1 = new Separator();
         MenuItemAudioVisualizerInsertAtPosition = new MenuItem();
         MenuItemAudioVisualizerDeleteAtPosition = new MenuItem();
+        Toolbar = new Border();
         _subtitle = new Subtitle();
         _videoFileName = string.Empty;
         _subtitleFileName = string.Empty;
@@ -1161,6 +1164,17 @@ public partial class MainViewModel :
         if (oldTheme != viewModel.SelectedTheme)
         {
             UiUtil.SetCurrentTheme();
+        }
+
+        if (Toolbar is Border toolbarBorder)
+        {
+            var tb = InitToolbar.Make(this);   
+            if (tb is Border newToolbarBorder)
+            {
+                var grid = newToolbarBorder.Child;
+                newToolbarBorder.Child = null;
+                toolbarBorder.Child = grid;
+            }
         }
 
         LockTimeCodes = Se.Settings.General.LockTimeCodes;

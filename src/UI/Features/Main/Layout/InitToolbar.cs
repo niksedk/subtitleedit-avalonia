@@ -195,13 +195,14 @@ public static class InitToolbar
             isLastSeparator = false;
         }
 
-        if (!isLastSeparator)
-        {
-            stackPanelLeft.Children.Add(MakeSeparator());
-        }
-
         if (appearance.ToolbarShowHelp)
         {
+            if (!isLastSeparator)
+            {
+                stackPanelLeft.Children.Add(MakeSeparator());
+                isLastSeparator = true;
+            }
+
             stackPanelLeft.Children.Add(new Button
             {
                 Content = new Image
@@ -214,7 +215,6 @@ public static class InitToolbar
                 Background = Brushes.Transparent,
             });
         }
-
 
         var stackPanelRight = new StackPanel
         {
