@@ -2,6 +2,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml.Styling;
+using Avalonia.Media;
+using Avalonia.Styling;
 using Avalonia.Themes.Fluent;
 using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit;
@@ -38,13 +40,70 @@ var appBuilder = AppBuilder.Configure<Application>()
         {
             Source = new Uri("avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml", UriKind.Absolute)
         });
-        
+
+        if (Application.Current != null && !string.IsNullOrEmpty(Se.Settings.Appearance.FontName))
+        {
+            var fontName = Se.Settings.Appearance.FontName;
+
+            // Existing styles
+            Application.Current.Styles.Add(new Style(x => x.OfType<TextBlock>())
+            {
+                Setters =
+                {
+                    new Setter(TextBlock.FontFamilyProperty, new FontFamily(fontName)),
+                }
+            });
+
+            Application.Current.Styles.Add(new Style(x => x.OfType<TextBox>())
+            {
+                Setters =
+                {
+                    new Setter(TextBox.FontFamilyProperty, new FontFamily(fontName)),
+                }
+            });
+
+            // Add Button style
+            Application.Current.Styles.Add(new Style(x => x.OfType<Button>())
+            {
+                Setters =
+                {
+                    new Setter(Button.FontFamilyProperty, new FontFamily(fontName)),
+                }
+            });
+
+            // Add MenuItem style
+            Application.Current.Styles.Add(new Style(x => x.OfType<Avalonia.Controls.MenuItem>())
+            {
+                Setters =
+                {
+                    new Setter(Avalonia.Controls.MenuItem.FontFamilyProperty, new FontFamily(fontName)),
+                }
+            });
+
+            // Add other common controls
+            Application.Current.Styles.Add(new Style(x => x.OfType<Label>())
+            {
+                Setters =
+                {
+                    new Setter(Label.FontFamilyProperty, new FontFamily(fontName)),
+                }
+            });
+
+            Application.Current.Styles.Add(new Style(x => x.OfType<ComboBox>())
+            {
+                Setters =
+                {
+                    new Setter(ComboBox.FontFamilyProperty, new FontFamily(fontName)),
+                }
+            });
+        }
+
         // Set application name
         if (b.Instance != null)
         {
             b.Instance.Name = "Subtitle Edit";
         }
-        
+
         // Add Native Menu
         if (b.Instance != null)
         {
@@ -90,3 +149,5 @@ lifetime.MainWindow.AttachDevTools();
 #endif
 
 lifetime.Start(args);
+
+

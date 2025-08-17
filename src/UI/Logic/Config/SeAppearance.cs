@@ -3,6 +3,7 @@
 public class SeAppearance
 {
     public string Theme { get; set; }
+    public string FontName { get; set; }
 
     public bool ToolbarShowFileNew { get; set; }
     public bool ToolbarShowFileOpen { get; set; }
