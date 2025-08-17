@@ -34,10 +34,7 @@ public class MainView : ViewBase
 
         _vm.Window = (Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow!;
 
-        _vm.Window.OnClosing(e =>
-        {
-            _vm.OnClosing();
-        });
+        _vm.Window.Closing += _vm.OnClosing;
 
         _vm.Window.OnLoaded(e =>
         {
@@ -83,11 +80,5 @@ public class MainView : ViewBase
         AddHandler(KeyUpEvent, _vm.OnKeyUpHandler, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
 
         return root;
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm?.KeyDown(e);
     }
 }

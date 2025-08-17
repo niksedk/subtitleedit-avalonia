@@ -262,6 +262,8 @@ public class LanguageGeneral
     public string SolidColor { get; set; }
     public string OpenImageFile { get; set; }
     public string Background { get; set; }
+    public string SaveChangesTitle { get; set; }
+    public string SaveChangesQuestion { get; set; }
 
     public LanguageGeneral()
     {
@@ -525,5 +527,7 @@ public class LanguageGeneral
         SolidColor = "Solid color";
         OpenImageFile = "Open image file";
         Background = "Background";
+        SaveChangesTitle = "Save changes?";
+        SaveChangesQuestion = "Do you want to save changes to the current subtitle file?";
     }
 }

@@ -552,9 +552,6 @@ public static class InitListViewAndEditBox
         };
         panelSingleLineLengthsOriginal.Children.Add(singleLineLengthLabel);
 
-
-
-
         var buttonPanel = new StackPanel
         {
             Orientation = Orientation.Vertical,

@@ -1,10 +1,7 @@
-using System;
-using System.Text;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml.Styling;
-using Avalonia.Styling;
 using Avalonia.Themes.Fluent;
 using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit;
@@ -12,9 +9,11 @@ using Nikse.SubtitleEdit.Features.Help;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using Projektanker.Icons.Avalonia.FontAwesome;
 using Projektanker.Icons.Avalonia;
+using Projektanker.Icons.Avalonia.FontAwesome;
 using Projektanker.Icons.Avalonia.MaterialDesign;
+using System;
+using System.Text;
 
 var lifetime = new ClassicDesktopStyleApplicationLifetime
 {
@@ -50,7 +49,7 @@ var appBuilder = AppBuilder.Configure<Application>()
         if (b.Instance != null)
         {
             var nativeMenu = new NativeMenu();
-            var aboutMenu = new NativeMenuItem("About Subtitle Edit");
+            var aboutMenu = new NativeMenuItem(Se.Language.Help.AboutSubtitleEdit);
             aboutMenu.Click += async (sender, e) =>
             {
                 var aboutWindow = new AboutWindow();

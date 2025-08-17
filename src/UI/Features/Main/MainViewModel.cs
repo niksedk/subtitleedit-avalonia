@@ -334,28 +334,8 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private async Task CommandExit()
+    private void CommandExit()
     {
-        if (HasChanges())
-        {
-            var result = await MessageBox.Show(
-                Window!,
-                "Save Changes",
-                "Do you want to save before exiting?",
-                MessageBoxButtons.YesNoCancel,
-                MessageBoxIcon.Question);
-
-            if (result == MessageBoxResult.Cancel)
-            {
-                return;
-            }
-
-            if (result == MessageBoxResult.Yes)
-            {
-                await SaveSubtitle();
-            }
-        }
-
         Environment.Exit(0);
     }
 
@@ -2639,7 +2619,37 @@ public partial class MainViewModel :
         }
     }
 
-    internal void OnClosing()
+    internal async void OnClosing(object? sender, WindowClosingEventArgs e)
+    {
+        if (HasChanges() && Window != null)
+        {
+            // Cancel the closing to show the dialog
+            e.Cancel = true;
+
+            var result = await MessageBox.Show(
+                Window,
+                Se.Language.General.SaveChangesTitle,
+                Se.Language.General.SaveChangesQuestion,
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question);
+
+            if (result == MessageBoxResult.Cancel)
+            {
+                // Stay cancelled - window won't close
+                return;
+            }
+
+            if (result == MessageBoxResult.Yes)
+            {
+                await SaveSubtitle();
+            }
+
+            Window.Closing -= OnClosing;
+            Window.Close();
+        }
+    }
+
+    private void Close()
     {
         VideoPlayerControl?.VideoPlayerInstance.Close();
 
@@ -2763,8 +2773,8 @@ public partial class MainViewModel :
         try
         {
             var settings = Se.Settings.General;
-            var width = (int)Math.Max(Window.MinWidth, settings.PositionWidth); 
-            var height = (int)Math.Max(Window.MinHeight, settings.PositionHeight); 
+            var width = (int)Math.Max(Window.MinWidth, settings.PositionWidth);
+            var height = (int)Math.Max(Window.MinHeight, settings.PositionHeight);
 
             if (settings.PositionIsFullScreen)
             {
@@ -2797,7 +2807,6 @@ public partial class MainViewModel :
 
         foreach (var screen in Window.Screens.All)
         {
-            // Check if at least part of the window would be visible on this screen
             var screenBounds = screen.WorkingArea;
             if (screenBounds.Intersects(windowBounds))
             {
@@ -2815,26 +2824,6 @@ public partial class MainViewModel :
 
         return false;
     }
-
-    private void CenterWindowOnPrimaryScreen()
-    {
-        if (Window?.Screens?.Primary == null)
-        {
-            return;
-        }
-
-        var screen = Window.Screens.Primary.WorkingArea;
-        var width = Math.Min(800, screen.Width - 100); // Default width, but not larger than screen
-        var height = Math.Min(600, screen.Height - 100); // Default height, but not larger than screen
-
-        Window.Width = width;
-        Window.Height = height;
-        Window.Position = new PixelPoint(
-            screen.X + (screen.Width - width) / 2,
-            screen.Y + (screen.Height - height) / 2
-        );
-    }
-
 
     private static bool IsValidUrl(string url)
     {
@@ -3809,6 +3798,36 @@ public partial class MainViewModel :
 
     internal void TextBoxContextOpening(object? sender, EventArgs e)
     {
+    }
+
+    private async void OnWindowClosing(object? sender, WindowClosingEventArgs e)
+    {
+        if (Window == null || !HasChanges())
+        {
+            return;
+        }
+
+        e.Cancel = true;
+
+        var result = await MessageBox.Show(
+            Window,
+            Se.Language.General.SaveChangesTitle,
+            Se.Language.General.SaveChangesQuestion,
+            MessageBoxButtons.YesNoCancel,
+            MessageBoxIcon.Question);
+
+        if (result == MessageBoxResult.Cancel)
+        {
+            return;
+        }
+
+        if (result == MessageBoxResult.Yes)
+        {
+            await SaveSubtitle();
+        }
+
+        Window.Closing -= OnWindowClosing;
+        Window.Close();
     }
 
     public void AudioVisualizerFlyoutMenuOpening(object sender, AudioVisualizer.ContextEventArgs e)
