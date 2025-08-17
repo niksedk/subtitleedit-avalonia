@@ -2657,14 +2657,14 @@ public partial class MainViewModel :
                 Se.Settings.General.PositionHeight = (int)Window.Height;
             }
         }
-        
+
         Se.SaveSettings();
     }
 
     internal void OnLoaded()
     {
         RestoreWindowPositionAndSize();
-        
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && string.IsNullOrEmpty(Se.Settings.General.LibMpvPath))
         {
             Dispatcher.UIThread.Post(async void () =>
@@ -2739,8 +2739,7 @@ public partial class MainViewModel :
             }
             else
             {
-                Se.Settings.File.RecentFiles =
-                    Se.Settings.File.RecentFiles.Where(p => File.Exists(p.SubtitleFileName)).ToList();
+                Se.Settings.File.RecentFiles = Se.Settings.File.RecentFiles.Where(p => File.Exists(p.SubtitleFileName)).ToList();
             }
         }
 
@@ -2753,14 +2752,10 @@ public partial class MainViewModel :
 
     private void RestoreWindowPositionAndSize()
     {
-        if (!Se.Settings.General.RememberPositionAndSize &&
-            Se.Settings.General.PositionWidth > 0 &&
-            Se.Settings.General.PositionHeight > 0)
-        {
-            return;
-        }
-
-        if (Window == null)
+        if (!Se.Settings.General.RememberPositionAndSize ||
+            Se.Settings.General.PositionWidth <= 0 ||
+            Se.Settings.General.PositionHeight <= 0 ||
+            Window == null)
         {
             return;
         }
@@ -2768,20 +2763,9 @@ public partial class MainViewModel :
         try
         {
             var settings = Se.Settings.General;
+            var width = (int)Math.Max(Window.MinWidth, settings.PositionWidth); 
+            var height = (int)Math.Max(Window.MinHeight, settings.PositionHeight); 
 
-            var width = (int)Math.Max(Window.MinWidth, settings.PositionWidth); // Minimum width
-            var height = (int)Math.Max(Window.MinHeight, settings.PositionHeight); // Minimum height
-
-            // Check if the saved position is within any available screen
-            var savedBounds = new PixelRect(settings.PositionX, settings.PositionY, width, height);
-            if (IsPositionOnAnyScreen(savedBounds))
-            {
-                Window.Width = width;
-                Window.Height = height;
-                Window.Position = new PixelPoint(settings.PositionX, settings.PositionY);
-            }
-
-            // Restore fullscreen state if it was saved
             if (settings.PositionIsFullScreen)
             {
                 Window.WindowState = WindowState.FullScreen;
@@ -2790,6 +2774,13 @@ public partial class MainViewModel :
             {
                 Window.WindowState = WindowState.Maximized;
             }
+            else if (IsPositionOnAnyScreen(new PixelRect(settings.PositionX, settings.PositionY, width, height)))
+            {
+                Window.Width = width;
+                Window.Height = height;
+                Window.Position = new PixelPoint(settings.PositionX, settings.PositionY);
+            }
+
         }
         catch (Exception ex)
         {

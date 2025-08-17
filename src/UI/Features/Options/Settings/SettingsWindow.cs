@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
 
@@ -12,7 +13,7 @@ public class SettingsWindow : Window
     {
         _vm = vm;
         Icon = UiUtil.GetSeIcon();
-        Title = "Settings";
+        Title = Se.Language.General.Settings;
         Width = 900;
         Height = 700;
         MinWidth = 650;

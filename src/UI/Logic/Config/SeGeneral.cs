@@ -1,6 +1,7 @@
 ﻿using Avalonia.Media;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Enums;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 
@@ -68,7 +69,7 @@ public class SeGeneral
         DefaultFrameRate = 23.976;
         CurrentFrameRate = DefaultFrameRate;
         SubtitleLineMaximumPixelWidth = 576;
-        DefaultSubtitleFormat = "SubRip";
+        DefaultSubtitleFormat = new SubRip().FriendlyName;
         DefaultEncoding = TextEncoding.Utf8WithBom;
         AutoConvertToUtf8 = false;
         AutoGuessAnsiEncoding = true;

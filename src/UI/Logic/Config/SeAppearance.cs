@@ -23,7 +23,7 @@ public class SeAppearance
 
     public SeAppearance()
     {
-        Theme = "Dark";
+        Theme = "System";
 
         ToolbarShowFileNew = true;
         ToolbarShowFileOpen = true;

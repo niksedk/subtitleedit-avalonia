@@ -121,7 +121,7 @@ public partial class SettingsViewModel : ObservableObject
     {
         _windowService = windowService;
 
-        Themes = ["Light", "Dark", "System"];
+        Themes = ["System", "Light", "Dark"];
         SelectedTheme = Themes[0];
 
         ScrollView = new ScrollViewer();
@@ -181,6 +181,12 @@ public partial class SettingsViewModel : ObservableObject
         AutoBackupOn = general.AutoBackupOn;
         AutoBackupIntervalMinutes = general.AutoBackupIntervalMinutes;
         AutoBackupDeleteAfterMonths = general.AutoBackupDeleteAfterMonths;
+        
+        SelectedDefaultSubtitleFormat = general.DefaultSubtitleFormat;
+        if (!DefaultSubtitleFormats.Contains(SelectedDefaultSubtitleFormat))
+        { 
+            SelectedDefaultSubtitleFormat = DefaultSubtitleFormats.FirstOrDefault() ?? string.Empty;
+        }
 
         SelectedTheme = appearance.Theme;
         ShowToolbarNew = appearance.ToolbarShowFileNew;
@@ -251,6 +257,7 @@ public partial class SettingsViewModel : ObservableObject
         general.AutoBackupOn = AutoBackupOn;
         general.AutoBackupIntervalMinutes = AutoBackupIntervalMinutes;
         general.AutoBackupDeleteAfterMonths = AutoBackupDeleteAfterMonths;
+        general.DefaultSubtitleFormat = SelectedDefaultSubtitleFormat;
 
         appearance.Theme = SelectedTheme;
         appearance.ToolbarShowFileNew = ShowToolbarNew;
