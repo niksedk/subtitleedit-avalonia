@@ -775,11 +775,14 @@ public partial class MainViewModel :
         if (string.IsNullOrEmpty(_videoFileName))
         {
             await CommandVideoOpen();
+        }
+
+        if (string.IsNullOrEmpty(_videoFileName))
+        {
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<CutVideoWindow, CutVideoViewModel>(Window!,
-            vm => { vm.Initialize(_videoFileName, AudioVisualizer?.WavePeaks); });
+        var result = await _windowService.ShowDialogAsync<CutVideoWindow, CutVideoViewModel>(Window!, vm => { vm.Initialize(_videoFileName, AudioVisualizer?.WavePeaks); });
 
         if (!result.OkPressed)
         {
@@ -801,13 +804,14 @@ public partial class MainViewModel :
         if (string.IsNullOrEmpty(_videoFileName))
         {
             await CommandVideoOpen();
+        }
+
+        if (string.IsNullOrEmpty(_videoFileName))
+        {
             return;
         }
 
-        var result =
-            await _windowService.ShowDialogAsync<ReEncodeVideoWindow, ReEncodeVideoViewModel>(Window!,
-                vm => { vm.Initialize(_videoFileName); });
-
+        var result = await _windowService.ShowDialogAsync<ReEncodeVideoWindow, ReEncodeVideoViewModel>(Window!, vm => { vm.Initialize(_videoFileName); });
         if (!result.OkPressed)
         {
             return;
@@ -912,7 +916,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task CommandVideoOpen()
     {
-        var fileName = await _fileHelper.PickOpenVideoFile(Window!, "Open video file");
+        var fileName = await _fileHelper.PickOpenVideoFile(Window!, Se.Language.General.OpenVideoFileTitle);
         if (!string.IsNullOrEmpty(fileName))
         {
             await VideoOpenFile(fileName);
