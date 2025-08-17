@@ -12,8 +12,7 @@ public class FullScreenVideoWindow : Window
         WindowState = WindowState.FullScreen;
         SystemDecorations = SystemDecorations.None;
 
-        var grid = new Grid()
-            .Children(videoPlayer);
+        var grid = new Grid().Children(videoPlayer);
 
         Content = grid;
 
@@ -22,6 +21,14 @@ public class FullScreenVideoWindow : Window
             if (e.Key == Key.Escape)
             {
                 Close();
+            }
+            else if (e.Key == Key.F11)
+            {
+                Close();
+            }
+            else if (e.Key == Key.Space)
+            {
+                videoPlayer.TogglePlayPause();
             }
         };
 
