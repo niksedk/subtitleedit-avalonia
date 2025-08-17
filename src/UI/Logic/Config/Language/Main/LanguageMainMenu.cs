@@ -70,66 +70,66 @@ public class LanguageMainMenu
 
     public LanguageMainMenu()
     {
-        File = "File";
-        New = "New";
-        Open = "Open...";
-        OpenOriginal = "Open original...";
-        CloseOriginal = "Close original";
-        Reopen = "Reopen...";
-        ClearRecentFiles = "Clear recent files";
-        RestoreAutoBackup = "Restore auto-backup...";
-        Save = "Save";
-        SaveAs = "Save as...";
-        Export = "Export";
-        Exit = "Exit";
+        File = "_File";
+        New = "_New";
+        Open = "_Open...";
+        OpenOriginal = "Open ori_ginal...";
+        CloseOriginal = "_Close original";
+        Reopen = "_Reopen...";
+        ClearRecentFiles = "_Clear recent files";
+        RestoreAutoBackup = "Restore auto-_backup...";
+        Save = "_Save";
+        SaveAs = "Save _as...";
+        Export = "_Export";
+        Exit = "E_xit";
 
-        Edit = "Edit";
-        Undo = "Undo";
-        Redo = "Redo";
-        ShowHistory = "Show history for undo...";
-        Find = "Find...";
-        FindNext = "Find next";
-        Replace = "Replace...";
-        MultipleReplace = "Multiple replace...";
-        GoToLineNumber = "Go to line number...";
+        Edit = "_Edit";
+        Undo = "_Undo";
+        Redo = "Re_do";
+        ShowHistory = "_Show history for undo...";
+        Find = "_Find...";
+        FindNext = "Find _next";
+        Replace = "_Replace...";
+        MultipleReplace = "_Multiple replace...";
+        GoToLineNumber = "_Go to line number...";
 
-        Tools = "Tools";
-        AdjustDurations = "Adjust durations...";
-        FixCommonErrors = "Fix common errors...";
-        RemoveTextForHearingImpaired = "Remove text for hearing impaired...";
-        ChangeCasing = "Change casing...";
-        BatchConvert = "Batch convert...";
+        Tools = "_Tools";
+        AdjustDurations = "_Adjust durations...";
+        FixCommonErrors = "_Fix common errors...";
+        RemoveTextForHearingImpaired = "_Remove text for hearing impaired...";
+        ChangeCasing = "_Change casing...";
+        BatchConvert = "_Batch convert...";
 
-        SpellCheckTitle = "Spell check";
-        SpellCheck = "Spell check...";
-        GetDictionaries = "Get dictionaries...";
+        SpellCheckTitle = "_Spell check";
+        SpellCheck = "_Spell check...";
+        GetDictionaries = "_Get dictionaries...";
 
-        Video = "Video";
-        OpenVideo = "Open video...";
-        OpenVideoFromUrl = "Open video from URL...";
-        CloseVideoFile = "Close video file";
-        SpeechToText = "Speech to text...";
-        TextToSpeech = "Text to speech...";
-        GenerateBurnIn = "Generate video with burned-in subtitles...";
-        GenerateTransparent = "Generate transparent video with subtitles...";
+        Video = "_Video";
+        OpenVideo = "_Open video...";
+        OpenVideoFromUrl = "Open video from _URL...";
+        CloseVideoFile = "_Close video file";
+        SpeechToText = "_Speech to text...";
+        TextToSpeech = "_Text to speech...";
+        GenerateBurnIn = "Generate video with _burned-in subtitles...";
+        GenerateTransparent = "_Generate transparent video with subtitles...";
 
-        Synchronization = "Synchronization";
-        AdjustAllTimes = "Adjust all times...";
-        VisualSync = "Visual sync...";
-        ChangeFrameRate = "Change frame rate...";
-        ChangeSpeed = "Change speed...";
+        Synchronization = "S_ynchronization";
+        AdjustAllTimes = "_Adjust all times...";
+        VisualSync = "_Visual sync...";
+        ChangeFrameRate = "Change _frame rate...";
+        ChangeSpeed = "Change _speed...";
 
-        Options = "Options";
-        Settings = "Settings...";
-        Shortcuts = "Shortcuts...";
-        ChooseLanguage = "Choose language...";
-        WordLists = "Word lists...";
+        Options = "_Options";
+        Settings = "_Settings...";
+        Shortcuts = "S_hortcuts...";
+        ChooseLanguage = "_Choose language...";
+        WordLists = "_Word lists...";
 
-        Translate = "Translate";
-        AutoTranslate = "Auto-translate...";
+        Translate = "Tr_anslate";
+        AutoTranslate = "_Auto-translate...";
         
-        HelpTitle = "Help";
-        Help = "Help...";
-        About = "About...";
+        HelpTitle = "_Help";
+        Help = "_Help...";
+        About = "_About...";
     }
 }
