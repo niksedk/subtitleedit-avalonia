@@ -61,6 +61,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _showToolbarLayout;
     [ObservableProperty] private bool _showToolbarHelp;
     [ObservableProperty] private bool _showToolbarEncoding;
+    [ObservableProperty] private bool _showToolbarHints;
 
     [ObservableProperty] private bool _colorDurationTooShort;
     [ObservableProperty] private bool _colorDurationTooLong;
@@ -200,6 +201,7 @@ public partial class SettingsViewModel : ObservableObject
         ShowToolbarLayout = appearance.ToolbarShowLayout;
         ShowToolbarHelp = appearance.ToolbarShowHelp;
         ShowToolbarEncoding = appearance.ToolbarShowEncoding;
+        ShowToolbarHints = appearance.ToolbarShowHints;
         TextBoxFontSize = appearance.SubtitleTextBoxFontSize;
         TextBoxFontBold = appearance.SubtitleTextBoxFontBold;
 
@@ -271,6 +273,7 @@ public partial class SettingsViewModel : ObservableObject
         appearance.ToolbarShowLayout = ShowToolbarLayout;
         appearance.ToolbarShowHelp = ShowToolbarHelp;
         appearance.ToolbarShowEncoding = ShowToolbarEncoding;
+        appearance.ToolbarShowHints = ShowToolbarHints;
         appearance.SubtitleTextBoxFontSize = TextBoxFontSize;
         appearance.SubtitleTextBoxFontBold = TextBoxFontBold;
 

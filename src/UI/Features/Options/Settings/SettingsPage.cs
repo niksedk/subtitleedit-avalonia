@@ -358,6 +358,7 @@ public class SettingsPage : UserControl
                 MakeCheckboxSetting("Show layout icon", nameof(_vm.ShowToolbarLayout)),
                 MakeCheckboxSetting("Show help icon", nameof(_vm.ShowToolbarHelp)),
                 MakeCheckboxSetting("Show encoding", nameof(_vm.ShowToolbarEncoding)),
+                MakeCheckboxSetting("Show icon button hints", nameof(_vm.ShowToolbarHints)),
             ]),
 
             new SettingsSection(Se.Language.General.Appearance,

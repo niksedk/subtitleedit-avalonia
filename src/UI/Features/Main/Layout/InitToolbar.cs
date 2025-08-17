@@ -7,6 +7,7 @@ using Avalonia.Media.Imaging;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -37,9 +38,12 @@ public static class InitToolbar
 
         var appearance = Se.Settings.Appearance;
         var isLastSeparator = true;
+        var languageHints = Se.Language.Main.Toolbar;
+        var shortcuts = ShortcutsMain.GetUsedShortcuts(vm);
 
         if (appearance.ToolbarShowFileNew)
         {
+            var shortcut = shortcuts.FirstOrDefault(s => s.Name == nameof(vm.CommandFileNewCommand));
             stackPanelLeft.Children.Add(new Button
             {
                 Content = new Image
@@ -50,6 +54,7 @@ public static class InitToolbar
                 },
                 Command = vm.CommandFileNewCommand,
                 Background = Brushes.Transparent,
+                [ToolTip.TipProperty] = MakeToolTip(languageHints.NewHint, shortcuts, nameof(vm.CommandFileNewCommand)),
             });
             isLastSeparator = false;
         }
@@ -66,6 +71,7 @@ public static class InitToolbar
                 },
                 Command = vm.CommandFileOpenCommand,
                 Background = Brushes.Transparent,
+                [ToolTip.TipProperty] = MakeToolTip(languageHints.OpenHint, shortcuts, nameof(vm.CommandFileOpenCommand)),
             });
             isLastSeparator = false;
         }
@@ -82,6 +88,7 @@ public static class InitToolbar
                 },
                 Command = vm.CommandFileSaveCommand,
                 Background = Brushes.Transparent,
+                [ToolTip.TipProperty] = MakeToolTip(languageHints.SaveHint, shortcuts, nameof(vm.CommandFileSaveCommand)),
             });
             isLastSeparator = false;
         }
@@ -98,6 +105,7 @@ public static class InitToolbar
                 },
                 Command = vm.CommandFileSaveAsCommand,
                 Background = Brushes.Transparent,
+                [ToolTip.TipProperty] = MakeToolTip(languageHints.SaveAsHint, shortcuts, nameof(vm.CommandFileSaveAsCommand)),
             });
             isLastSeparator = false;
         }
@@ -120,6 +128,7 @@ public static class InitToolbar
                 },
                 Command = vm.ShowFindCommand,
                 Background = Brushes.Transparent,
+                [ToolTip.TipProperty] = MakeToolTip(languageHints.FindHint, shortcuts, nameof(vm.ShowFindCommand)),
             });
             isLastSeparator = false;
         }
@@ -136,6 +145,7 @@ public static class InitToolbar
                 },
                 Command = vm.ShowReplaceCommand,
                 Background = Brushes.Transparent,
+                [ToolTip.TipProperty] = MakeToolTip(languageHints.ReplaceHint, shortcuts, nameof(vm.ShowReplaceCommand)),
             });
             isLastSeparator = false;
         }
@@ -159,6 +169,7 @@ public static class InitToolbar
                 },
                 Command = vm.ShowSpellCheckCommand,
                 Background = Brushes.Transparent,
+                [ToolTip.TipProperty] = MakeToolTip(languageHints.SpellCheckHint, shortcuts, nameof(vm.ShowSpellCheckCommand)),
             });
             isLastSeparator = false;
         }
@@ -175,6 +186,7 @@ public static class InitToolbar
                 },
                 Command = vm.CommandShowSettingsCommand,
                 Background = Brushes.Transparent,
+                [ToolTip.TipProperty] = MakeToolTip(languageHints.SettingsHint, shortcuts, nameof(vm.CommandShowSettingsCommand)),
             });
             isLastSeparator = false;
         }
@@ -191,6 +203,7 @@ public static class InitToolbar
                 },
                 Command = vm.CommandShowLayoutCommand,
                 Background = Brushes.Transparent,
+                [ToolTip.TipProperty] = MakeToolTip(languageHints.LayoutHint, shortcuts, nameof(vm.CommandShowLayoutCommand)),
             });
             isLastSeparator = false;
         }
@@ -213,6 +226,7 @@ public static class InitToolbar
                 },
                 Command = vm.ShowHelpCommand,
                 Background = Brushes.Transparent,
+                [ToolTip.TipProperty] = MakeToolTip(languageHints.HelpHint, shortcuts, nameof(vm.ShowHelpCommand)),
             });
         }
 
@@ -292,6 +306,21 @@ public static class InitToolbar
         grid.Add(stackPanelRight, 0, 1);
 
         return grid;
+    }
+
+    private static string? MakeToolTip(string hint, System.Collections.Generic.List<ShortCut> shortcuts, string shortcutName = "")
+    {
+        var shortcut = shortcuts.FirstOrDefault(s => s.Name == shortcutName);
+        var shortcutString = string.Empty;
+        if (shortcut != null && shortcut.Keys.Count > 0)
+        {
+            shortcutString = string.Join("+", shortcut.Keys.Select(k => k.ToString()));
+            shortcutString = $"({shortcutString})";
+        }
+
+        return Se.Settings.Appearance.ToolbarShowHints
+            ? string.Format(hint, shortcutString).Trim()
+            : null;
     }
 
     private static Border MakeSeparator()

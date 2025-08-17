@@ -19,7 +19,7 @@ public class SeAppearance
     public bool ToolbarShowEncoding { get; set; }
     public double SubtitleTextBoxFontSize { get; set; }
     public bool SubtitleTextBoxFontBold { get; set; }
-
+    public bool ToolbarShowHints { get; set; }
 
     public SeAppearance()
     {

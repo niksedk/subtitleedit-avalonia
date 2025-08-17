@@ -5,6 +5,7 @@ namespace Nikse.SubtitleEdit.Logic.Config.Language.Main;
 public class LanguageMain
 {
     public LanguageMainMenu Menu { get; set; } = new();
+    public LanguageMainToolbar Toolbar { get; set; } = new();
 
     public string CharactersPerSecond { get; set; }
     public string SingleLineLength { get; set; }
