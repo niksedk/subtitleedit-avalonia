@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Markup.Declarative;
 using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -246,6 +245,7 @@ public partial class MainViewModel :
         EditTextLineLengthsOriginal = string.Empty;
         EditTextOriginal = string.Empty;
         PanelSingleLineLenghtsOriginal = new StackPanel();
+        IsWaveformToolbarVisible = Se.Settings.Waveform.ShowToolbar;
 
         themeInitializer.UpdateThemesIfNeeded().ConfigureAwait(true);
         Dispatcher.UIThread.Post(async void () =>
