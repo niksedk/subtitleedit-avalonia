@@ -414,7 +414,7 @@ public partial class BlankVideoViewModel : ObservableObject
             path = Path.Combine(Path.GetDirectoryName(_subtitleFileName) ?? Se.Settings.Video.BurnIn.OutputFolder, videoFileName + ".mkv");
         }
 
-        videoFileName = await _fileHelper.PickSaveVideoFile(Window!, ".mkv", videoFileName, Se.Language.Video.SaveVideoAsTitle);
+        videoFileName = await _fileHelper.PickSaveFile(Window!, ".mkv", videoFileName, Se.Language.Video.SaveVideoAsTitle);
         if (string.IsNullOrEmpty(videoFileName))
         {
             return;

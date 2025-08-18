@@ -189,7 +189,7 @@ namespace Nikse.SubtitleEdit.Logic.Media
             return string.Empty;
         }
 
-        public async Task<string> PickSaveVideoFile(
+        public async Task<string> PickSaveFile(
             Visual sender,
             string extension,
             string suggestedFileName,

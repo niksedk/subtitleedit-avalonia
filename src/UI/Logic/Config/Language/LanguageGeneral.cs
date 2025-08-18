@@ -265,6 +265,7 @@ public class LanguageGeneral
     public string SaveChangesTitle { get; set; }
     public string SaveChangesMessage { get; set; }
     public string Export { get; set; }
+    public string SaveFileAsTitle { get; set; }
 
     public LanguageGeneral()
     {
@@ -531,5 +532,6 @@ public class LanguageGeneral
         SaveChangesTitle = "Save changes?";
         SaveChangesMessage = "Do you want to save changes to the current subtitle file?";
         Export = "Export";
+        SaveFileAsTitle = "Save file as";
     }
 }

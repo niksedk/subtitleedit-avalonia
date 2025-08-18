@@ -580,7 +580,7 @@ public partial class CutVideoViewModel : ObservableObject
         }
 
         var outputVideoFileName = Path.ChangeExtension(VideoFileName, SelectedVideoExtension);
-        outputVideoFileName = await _fileHelper.PickSaveVideoFile(Window!, SelectedVideoExtension, outputVideoFileName, Se.Language.Video.SaveVideoAsTitle);
+        outputVideoFileName = await _fileHelper.PickSaveFile(Window!, SelectedVideoExtension, outputVideoFileName, Se.Language.Video.SaveVideoAsTitle);
         if (string.IsNullOrEmpty(outputVideoFileName))
         {
             return;
