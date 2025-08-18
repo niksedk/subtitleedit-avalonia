@@ -147,7 +147,7 @@ https://github.com/SubtitleEdit/subtitleedit
             {
                 Title = string.Format(_l.TitleWithFileName, _fileName);
             }
-        });      
+        });
     }
 
     private void CalculateGeneralStatistics()

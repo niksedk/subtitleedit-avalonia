@@ -227,11 +227,11 @@ public partial class MainViewModel :
         _videoFileName = string.Empty;
         _subtitleFileName = string.Empty;
         Subtitles = new ObservableCollection<SubtitleLineViewModel>();
-        
+
         SubtitleFormats = [.. SubtitleFormat.AllSubtitleFormats];
         var defaultFormat = SubtitleFormats.Where(f => f.FriendlyName == Se.Settings.General.DefaultSubtitleFormat).FirstOrDefault() ?? SubtitleFormats[0];
         SubtitleFormats.Remove(defaultFormat);
-        SubtitleFormats.Insert(0, defaultFormat);   
+        SubtitleFormats.Insert(0, defaultFormat);
 
         SelectedSubtitleFormat = SubtitleFormats[0];
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
@@ -578,9 +578,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowCompare()
     {
-        var result = await _windowService.ShowDialogAsync<CompareWindow, CompareViewModel>(Window!, vm => 
-        { 
-            vm.Initialize(Subtitles); 
+        var result = await _windowService.ShowDialogAsync<CompareWindow, CompareViewModel>(Window!, vm =>
+        {
+            var right = new ObservableCollection<SubtitleLineViewModel>();
+            foreach (var line in Subtitles)
+            {
+                right.Add(new SubtitleLineViewModel(line, true));
+            }
+            right[0].Text += "...";
+            right.RemoveAt(right.Count - 1);
+
+            vm.Initialize(Subtitles, right);
         });
 
         _shortcutManager.ClearKeys();
@@ -1192,7 +1200,7 @@ public partial class MainViewModel :
 
         if (Toolbar is Border toolbarBorder)
         {
-            var tb = InitToolbar.Make(this);   
+            var tb = InitToolbar.Make(this);
             if (tb is Border newToolbarBorder)
             {
                 var grid = newToolbarBorder.Child;
