@@ -59,6 +59,9 @@ public class CompareWindow : Window
         Grid.SetColumnSpan(panelButtons, 2);
 
         Content = grid;
+
+        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += vm.KeyDown;
     }
 
     private Border MakeSubtitlesView(ObservableCollection<SubtitleLineViewModel> items, string selectedBinding)
