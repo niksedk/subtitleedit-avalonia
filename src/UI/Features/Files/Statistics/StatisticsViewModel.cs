@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -119,9 +120,21 @@ https://github.com/SubtitleEdit/subtitleedit
         _format = format;
         _fileName = fileName;
 
-        CalculateGeneralStatistics();
         CalculateWordStatistics();
+        CalculateGeneralStatistics();
         CalculateMostUsedLines();
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (string.IsNullOrEmpty(_fileName))
+            {
+                Title = _l.Title;
+            }
+            else
+            {
+                Title = string.Format(_l.TitleWithFileName, _fileName);
+            }
+        });      
     }
 
     private void CalculateGeneralStatistics()
@@ -666,5 +679,13 @@ https://github.com/SubtitleEdit/subtitleedit
         }
 
         TextMostUsedLines = sb.ToString();
+    }
+
+    internal void KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            Close();
+        }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Avalonia;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Data;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -11,6 +10,11 @@ public class StatisticsWindow : Window
     public StatisticsWindow(StatisticsViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
+        Bind(Window.TitleProperty, new Binding(nameof(vm.Title))
+        {
+            Source = vm,
+            Mode = BindingMode.TwoWay,
+        });
         Title = Se.Language.File.Statitics;
         CanResize = true;
         Width = 950;
@@ -26,6 +30,7 @@ public class StatisticsWindow : Window
             RowDefinitions =
             {
                 new RowDefinition { Height = new GridLength(2, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
@@ -35,8 +40,8 @@ public class StatisticsWindow : Window
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
-            ColumnSpacing = 10,
-            RowSpacing = 10,
+            ColumnSpacing = 5,
+            RowSpacing = 5,
             Width = double.NaN,
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
         };
@@ -50,6 +55,8 @@ public class StatisticsWindow : Window
         };
         textBoxGeneralStatistics.Bind(TextBox.TextProperty, new Binding(nameof(vm.TextGeneral)));
 
+
+        var labelMostUsedWords = UiUtil.MakeLabel(Se.Language.File.Statistics.MostUsedWords).WithMarginTop(10);
         var textBoxMostUsedWords = new TextBox
         {
             IsReadOnly = true,
@@ -59,6 +66,7 @@ public class StatisticsWindow : Window
         };  
         textBoxMostUsedWords.Bind(TextBox.TextProperty, new Binding(nameof(vm.TextMostUsedWords)));
 
+        var labelMostUsedLines = UiUtil.MakeLabel(Se.Language.File.Statistics.MostUsedLines).WithMarginTop(10);
         var textBoxMostUsedLines = new TextBox
         {
             IsReadOnly = true,
@@ -69,17 +77,19 @@ public class StatisticsWindow : Window
         textBoxMostUsedLines.Bind(TextBox.TextProperty, new Binding(nameof(vm.TextMostUsedLines)));
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
-        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
+        var buttonExport = UiUtil.MakeButton(Se.Language.General.Export, vm.ExportCommand);
+        var panelButtons = UiUtil.MakeButtonBar(buttonExport, buttonOk);
 
         grid.Add(textBoxGeneralStatistics, 0, 0, 1, 2);
-        grid.Add(textBoxMostUsedWords, 1, 0);
-        grid.Add(textBoxMostUsedLines, 1, 1);
-        grid.Add(panelButtons, 2, 0, 1, 2);
+        grid.Add(labelMostUsedWords, 1, 0);
+        grid.Add(labelMostUsedLines, 1, 1);
+        grid.Add(textBoxMostUsedWords, 2, 0);
+        grid.Add(textBoxMostUsedLines, 2, 1);
+        grid.Add(panelButtons, 3, 0, 1, 2);
 
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
-
+        KeyDown += vm.KeyDown;
     }
 }

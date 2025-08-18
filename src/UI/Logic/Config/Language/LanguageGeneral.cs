@@ -264,6 +264,7 @@ public class LanguageGeneral
     public string Background { get; set; }
     public string SaveChangesTitle { get; set; }
     public string SaveChangesMessage { get; set; }
+    public string Export { get; set; }
 
     public LanguageGeneral()
     {
@@ -529,5 +530,6 @@ public class LanguageGeneral
         Background = "Background";
         SaveChangesTitle = "Save changes?";
         SaveChangesMessage = "Do you want to save changes to the current subtitle file?";
+        Export = "Export";
     }
 }
