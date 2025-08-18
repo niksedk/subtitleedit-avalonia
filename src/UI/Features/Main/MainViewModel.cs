@@ -591,7 +591,7 @@ public partial class MainViewModel :
     {
         var result = await _windowService.ShowDialogAsync<StatisticsWindow, StatisticsViewModel>(Window!, vm =>
         {
-            vm.Initialize(Subtitles);
+            vm.Initialize(GetUpdateSubtitle(), SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
         });
 
         _shortcutManager.ClearKeys();

@@ -5,6 +5,7 @@ public class LanguageFile
 
     public LanguageEbuSaveOptions EbuSaveOptions { get; set; } = new();
     public LanguageExport Export { get; set; } = new();
+    public LanguageStatistics Statistics { get; set; } = new();
     public string Compare { get; set; }
     public string Statitics { get; set; }
 

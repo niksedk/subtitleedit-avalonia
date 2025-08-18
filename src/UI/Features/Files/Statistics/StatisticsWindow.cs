@@ -1,11 +1,8 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Data;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Files.Statistics;
 
@@ -15,8 +12,11 @@ public class StatisticsWindow : Window
     {
         Icon = UiUtil.GetSeIcon();
         Title = Se.Language.File.Statitics;
-        SizeToContent = SizeToContent.WidthAndHeight;
-        CanResize = false;
+        CanResize = true;
+        Width = 950;
+        Height = 850;
+        MinWidth = 800;
+        MinHeight = 600;
 
         vm.Window = this;
         DataContext = vm;
@@ -25,19 +25,14 @@ public class StatisticsWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(2, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
@@ -46,12 +41,41 @@ public class StatisticsWindow : Window
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
         };
 
+        var textBoxGeneralStatistics = new TextBox
+        {
+            IsReadOnly = true,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            DataContext = vm,
+        };
+        textBoxGeneralStatistics.Bind(TextBox.TextProperty, new Binding(nameof(vm.TextGeneral)));
+
+        var textBoxMostUsedWords = new TextBox
+        {
+            IsReadOnly = true,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            DataContext = vm,
+        };  
+        textBoxMostUsedWords.Bind(TextBox.TextProperty, new Binding(nameof(vm.TextMostUsedWords)));
+
+        var textBoxMostUsedLines = new TextBox
+        {
+            IsReadOnly = true,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            DataContext = vm,
+        };  
+        textBoxMostUsedLines.Bind(TextBox.TextProperty, new Binding(nameof(vm.TextMostUsedLines)));
+
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
-
-        grid.Add(panelButtons, 7, 0, 1, 2);
+        grid.Add(textBoxGeneralStatistics, 0, 0, 1, 2);
+        grid.Add(textBoxMostUsedWords, 1, 0);
+        grid.Add(textBoxMostUsedLines, 1, 1);
+        grid.Add(panelButtons, 2, 0, 1, 2);
 
         Content = grid;
 
