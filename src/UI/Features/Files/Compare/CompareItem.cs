@@ -1,6 +1,8 @@
-﻿using Avalonia.Media;
+﻿using Avalonia.Controls;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Logic;
 using System;
 
 namespace Nikse.SubtitleEdit.Features.Files.Compare;
@@ -12,6 +14,7 @@ public partial class CompareItem : ObservableObject
     [ObservableProperty] private TimeSpan _endTime;
     [ObservableProperty] private TimeSpan _duration;
     [ObservableProperty] private string _text;
+    [ObservableProperty] private StackPanel _textPanel;
     [ObservableProperty] private string _originalText;
     [ObservableProperty] private IBrush _backgroundBrush;
     [ObservableProperty] private IBrush _numberBackgroundBrush;
@@ -33,6 +36,7 @@ public partial class CompareItem : ObservableObject
         StartTimeBackgroundBrush = new SolidColorBrush(Colors.Transparent);
         EndTimeBackgroundBrush = new SolidColorBrush(Colors.Transparent);
         TextBackgroundBrush = new SolidColorBrush(Colors.Transparent);
+        TextPanel = new StackPanel();
     }
 
     public CompareItem(SubtitleLineViewModel line)
@@ -48,5 +52,9 @@ public partial class CompareItem : ObservableObject
         StartTimeBackgroundBrush = new SolidColorBrush(Colors.Transparent);
         EndTimeBackgroundBrush = new SolidColorBrush(Colors.Transparent);
         TextBackgroundBrush = new SolidColorBrush(Colors.Transparent);
+        TextPanel = new StackPanel
+        {
+            Children = { UiUtil.MakeLabel(line.Text) }
+        };
     }
 }

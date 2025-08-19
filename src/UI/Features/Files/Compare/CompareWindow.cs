@@ -237,7 +237,11 @@ public class CompareWindow : Window
                     [!TextBlock.TextProperty] = new Binding(nameof(CompareItem.Text))
                 };
 
-                border.Child = textBlock;
+                var stackPanel = new StackPanel();
+                stackPanel.Children.Add(item.TextPanel);
+
+                //border.Child = textBlock;
+                border.Child = stackPanel;
                 return border;
             })
         });

@@ -96,8 +96,28 @@ public partial class CompareViewModel : ObservableObject
         StatusText = string.Empty;
         InsertMissingLines();
         AddColoringAndCountDifferences();
+        SetTextStackPanels();
         IsExportVisible = LeftSubtitles.Count > 0 && RightSubtitles.Count > 0;
         SelectAndScrollToRow(LeftDataGrid, 0);
+    }
+
+    private void SetTextStackPanels()
+    {
+        if (LeftSubtitles.Count != RightSubtitles.Count)
+        {
+            return;
+        }
+
+        for (var i = 0; i < LeftSubtitles.Count; i++)
+        {
+            var left = LeftSubtitles[i];
+            var right = RightSubtitles[i];
+            var (leftBlock, rightBlock) = TextDiffHighlighter.Compare(left.Text, right.Text);
+            left.TextPanel.Children.Clear();
+            left.TextPanel.Children.Add(leftBlock);
+            right.TextPanel.Children.Clear();
+            right.TextPanel.Children.Add(rightBlock);
+        }
     }
 
     private void AddColoringAndCountDifferences()
