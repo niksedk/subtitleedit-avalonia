@@ -11,21 +11,17 @@ using System.Collections.ObjectModel;
 
 public class CompareWindow : Window
 {
-    private CompareViewModel _vm;
-
     public CompareWindow(CompareViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
         Title = Se.Language.File.Compare;
         Width = 1200;
         Height = 600;
-        MinWidth = 850;
-        MinHeight = 400;
+        MinWidth = 900;
+        MinHeight = 500;
         CanResize = true;
-
         vm.Window = this;
         DataContext = vm;
-        _vm = vm;
 
         var grid = new Grid
         {
@@ -96,11 +92,27 @@ public class CompareWindow : Window
         var checkBoxIngoreFormatting = UiUtil.MakeCheckBox(Se.Language.File.IgnoreFormatting, vm, nameof(vm.IgnoreFormatting))
             .WithMarginLeft(10).WithMarginRight(15);
         checkBoxIngoreFormatting.IsCheckedChanged += vm.CheckBoxChanged;
-        var buttonPreviousDifference = UiUtil.MakeButton(Se.Language.File.PreviousDifference, vm.PreviousDifferenceCommand);
-        var buttonNextDifference = UiUtil.MakeButton(Se.Language.File.NextDifference, vm.NextDifferenceCommand);
-        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
+        var buttonPreviousDifference = UiUtil.MakeButton(vm.PreviousDifferenceCommand, IconNames.MdiChevronLeft).WithBindIsVisible(nameof(vm.IsExportVisible));
+        if (Se.Settings.Appearance.ToolbarShowHints)
+        {
+            ToolTip.SetTip(buttonPreviousDifference, Se.Language.File.PreviousDifference);
+        }
+        var buttonNextDifference = UiUtil.MakeButton(vm.NextDifferenceCommand, IconNames.MdiChevronRight).WithBindIsVisible(nameof(vm.IsExportVisible));
+        if (Se.Settings.Appearance.ToolbarShowHints)
+        {
+            ToolTip.SetTip(buttonNextDifference, Se.Language.File.NextDifference);
+        }
+        var buttonExport = UiUtil.MakeButton(Se.Language.General.Export, vm.ExportCommand);
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand).WithBindIsVisible(nameof(vm.IsExportVisible));
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar(checkBoxIgnoreWhiteSpace, checkBoxIngoreFormatting, buttonPreviousDifference, buttonNextDifference, buttonOk, buttonCancel);
+        var panelButtons = UiUtil.MakeButtonBar(
+            checkBoxIgnoreWhiteSpace, 
+            checkBoxIngoreFormatting, 
+            buttonPreviousDifference, 
+            buttonNextDifference,
+            buttonExport,
+            buttonOk, 
+            buttonCancel);
         grid.Add(panelButtons, 3, 0, 1, 2);
 
         Content = grid;

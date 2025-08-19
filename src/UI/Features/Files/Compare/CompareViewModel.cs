@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Files.Compare;
@@ -28,6 +29,7 @@ public partial class CompareViewModel : ObservableObject
     [ObservableProperty] private bool _ignoreFormatting;
     [ObservableProperty] private bool _ignoreWhiteSpace;
     [ObservableProperty] private bool _isReloadFromFileVisible;
+    [ObservableProperty] private bool _isExportVisible;
     [ObservableProperty] private string _leftFileName = string.Empty;
     [ObservableProperty] private string _rightFileName = string.Empty;
     [ObservableProperty] private string _statusText = string.Empty;
@@ -39,6 +41,7 @@ public partial class CompareViewModel : ObservableObject
     public DataGrid? RightDataGrid { get; set; } = new();
 
     private IFileHelper _fileHelper;
+    private IFolderHelper _folderHelper;
     private List<SubtitleLineViewModel> _leftLines = new();
     private List<SubtitleLineViewModel> _rightLines = new();
     private string _language = string.Empty;
@@ -48,9 +51,10 @@ public partial class CompareViewModel : ObservableObject
     private static readonly IBrush ListViewOrange = new SolidColorBrush(Colors.Yellow, 0.6);
     private static readonly IBrush TransparentBrush = new SolidColorBrush(Colors.Transparent);
 
-    public CompareViewModel(IFileHelper fileHelper)
+    public CompareViewModel(IFileHelper fileHelper, IFolderHelper folderHelper)
     {
         _fileHelper = fileHelper;
+        _folderHelper = folderHelper;
 
         CompareVisuals = new ObservableCollection<CompareVisual>(CompareVisual.GetCompareVisuals());
         SelectedCompareVisual = CompareVisuals[0];
@@ -92,7 +96,7 @@ public partial class CompareViewModel : ObservableObject
         StatusText = string.Empty;
         InsertMissingLines();
         AddColoringAndCountDifferences();
-
+        IsExportVisible = LeftSubtitles.Count > 0 && RightSubtitles.Count > 0;
         SelectAndScrollToRow(LeftDataGrid, 0);
     }
 
@@ -646,6 +650,94 @@ public partial class CompareViewModel : ObservableObject
     private void Cancel()
     {
         Close();
+    }
+
+    [RelayCommand]
+    private async Task Export()
+    {
+        var targetFileName = string.IsNullOrEmpty(LeftFileName) ? "compare.html" : System.IO.Path.GetFileNameWithoutExtension(LeftFileName) + "-compare.html";
+        var fileName = await _fileHelper.PickSaveFile(Window!, Se.Language.File.SaveCompareHtmlTitle, targetFileName, "HTML files (*.html)|*.html");
+        var sb = new StringBuilder();
+        sb.AppendLine("<!DOCTYPE html>");
+        sb.AppendLine("<html>");
+        sb.AppendLine("  <head>");
+        sb.AppendLine("    <title>Subtitle Edit compare</title>");
+        sb.AppendLine("  </head>");
+        sb.AppendLine("  <style>");
+        sb.AppendLine("    td { font-family: Tahoma, Verdana, 'Noto Sans', Ubuntu; padding: 8px; }");
+        sb.AppendLine("  </style>");
+        sb.AppendLine("  <body>");
+        sb.AppendLine("    <h1>Subtitle Edit compare</h1>");
+        sb.AppendLine("    <table>");
+        sb.AppendLine("    <tr>");
+        sb.AppendLine("      <th colspan='4' style='text-align:left'>" + GetFileName(LeftFileName) + "</th>");
+        sb.AppendLine("      <th>&nbsp;</th>");
+        sb.AppendLine("      <th colspan='4' style='text-align:left'>" + GetFileName(RightFileName) + "</th>");
+        sb.AppendLine("    </tr>");
+        for (var i = 0; i < LeftSubtitles.Count; i++)
+        {
+            var itemLeft = LeftSubtitles[i];
+            var itemRight = RightSubtitles[i];
+
+            sb.AppendLine("    <tr>");
+            sb.AppendLine("      <td" + GetHtmlBackgroundColor(itemLeft.NumberBackgroundBrush) + ">" + GetHtmlText(itemLeft, itemLeft.Number.ToString()) + "</td>");
+            sb.AppendLine("      <td" + GetHtmlBackgroundColor(itemLeft.StartTimeBackgroundBrush) + ">" + GetHtmlText(itemLeft, new TimeCode(itemLeft.StartTime).ToDisplayString()) + "</td>");
+            sb.AppendLine("      <td" + GetHtmlBackgroundColor(itemLeft.EndTimeBackgroundBrush) + ">" + GetHtmlText(itemLeft, new TimeCode(itemLeft.EndTime).ToDisplayString()) + "</td>");
+            sb.AppendLine("      <td" + GetHtmlBackgroundColor(itemLeft.TextBackgroundBrush) + ">" + GetHtmlText(itemLeft, itemLeft.Text) + "</td>");
+            sb.AppendLine("      <td>&nbsp;</td>");
+            sb.AppendLine("      <td" + GetHtmlBackgroundColor(itemRight.NumberBackgroundBrush) + ">" + GetHtmlText(itemRight, itemRight.Number.ToString()) + "</td>");
+            sb.AppendLine("      <td" + GetHtmlBackgroundColor(itemRight.StartTimeBackgroundBrush) + ">" + GetHtmlText(itemRight, new TimeCode(itemRight.StartTime).ToDisplayString()) + "</td>");
+            sb.AppendLine("      <td" + GetHtmlBackgroundColor(itemRight.EndTimeBackgroundBrush) + ">" + GetHtmlText(itemRight, new TimeCode(itemRight.EndTime).ToDisplayString()) + "</td>");
+            sb.AppendLine("      <td" + GetHtmlBackgroundColor(itemRight.TextBackgroundBrush) + ">" + GetHtmlText(itemRight, itemRight.Text) + "</td>");
+            sb.AppendLine("    </tr>");
+        }
+        sb.AppendLine("    <tr>");
+        sb.AppendLine("      <td colspan='9' style='text-align:left'><br />" + StatusText + "</td>");
+        sb.AppendLine("    </tr>");
+        sb.AppendLine("    </table>");
+        sb.AppendLine("  </body>");
+        sb.AppendLine("</html>");
+        System.IO.File.WriteAllText(fileName, sb.ToString());
+        await _folderHelper.OpenFolderWithFileSelected(Window!, fileName);
+    }
+
+    private static string GetFileName(string fileName)
+    {
+        try
+        {
+            return string.IsNullOrEmpty(fileName) ? string.Empty : System.IO.Path.GetFileName(fileName);
+        }
+        catch
+        {
+            return fileName;
+        }
+    }
+
+    private static string GetHtmlText(CompareItem p, string text)
+    {
+        return p.IsDefault ? string.Empty : HtmlUtil.EncodeNamed(text);
+    }
+
+    private static string GetHtmlBackgroundColor(IBrush brush)
+    {
+        if (brush == null)
+        {
+            return string.Empty;
+        }
+
+        if (brush is SolidColorBrush solidColorBrush)
+        {
+            if (solidColorBrush.Color == Colors.Transparent)
+            {
+                return string.Empty;
+            }
+
+            var c = solidColorBrush.Color;
+            var htmlColor = $"#{c.R:X2}{c.G:X2}{c.B:X2}";
+            return $" style='background-color:{htmlColor}'";
+        }
+
+        return string.Empty;
     }
 
     private void Close()

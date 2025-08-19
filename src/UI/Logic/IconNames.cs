@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic;
+﻿using CommunityToolkit.Mvvm.Input;
+
+namespace Nikse.SubtitleEdit.Logic;
 
 internal class IconNames
 {
@@ -53,6 +55,6 @@ internal class IconNames
     public const string MdiMinus = "mdi-minus";
     public const string MdiCheck = "mdi-check";
     public const string MdiCheckBold = "mdi-check-bold";
-
-    //public const string Mdi = "mdi-";
+    public const string MdiChevronLeft = "mdi-chevron-left";
+    public const string MdiChevronRight = "mdi-chevron-right";
 }

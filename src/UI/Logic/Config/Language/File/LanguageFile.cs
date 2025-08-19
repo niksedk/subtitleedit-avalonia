@@ -22,13 +22,14 @@ public class LanguageFile
     public string Statitics { get; set; }
     public string ShowOnlyDifferencesInText { get; set; }
     public string LoadXFromFile { get; set; }
+    public string SaveCompareHtmlTitle { get; internal set; }
 
     public LanguageFile()
     {
         Compare = "Compare";
         Statitics = "Statitics";
-        PreviousDifference = "_Previous difference";
-        NextDifference = "_Next difference";
+        PreviousDifference = "Previous difference";
+        NextDifference = "Next difference";
         SubtitlesNotAlike = "Subtitles have no similarities";
         XNumberOfDifference = "Number of differences: {0}";
         XNumberOfDifferenceAndPercentChanged = "Number of differences: {0} ({1:0.##}% of words changed)";
@@ -41,5 +42,6 @@ public class LanguageFile
         OnlyLookForDifferencesInText = "Only look for differences in text";
         CannotCompareWithImageBasedSubtitles = "Cannot compare with image-based subtitles";
         LoadXFromFile = "Load \"{0}\" from file";
+        SaveCompareHtmlTitle = "Save compare HTML file";
     }
 }
