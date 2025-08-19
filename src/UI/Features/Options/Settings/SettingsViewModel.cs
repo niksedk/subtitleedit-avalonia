@@ -8,6 +8,7 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
@@ -49,6 +50,9 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty] private ObservableCollection<string> _saveSubtitleFormats;
     [ObservableProperty] private string _selectedSaveSubtitleFormat;
+
+    [ObservableProperty] private ObservableCollection<TextEncoding> _encodings;
+    [ObservableProperty] private TextEncoding _defaultEncoding;
 
     [ObservableProperty] private bool _showToolbarNew;
     [ObservableProperty] private bool _showToolbarOpen;
@@ -148,6 +152,8 @@ public partial class SettingsViewModel : ObservableObject
         SaveSubtitleFormats = new ObservableCollection<string>(saveSubtitleFormats);
         SelectedDefaultSubtitleFormat = DefaultSubtitleFormats.First();
         SelectedSaveSubtitleFormat = SaveSubtitleFormats.First();
+        Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
+        DefaultEncoding = Encodings.First();
 
         ErrorColor = Color.FromArgb(50, 255, 0, 0);
 
@@ -182,7 +188,8 @@ public partial class SettingsViewModel : ObservableObject
         AutoBackupOn = general.AutoBackupOn;
         AutoBackupIntervalMinutes = general.AutoBackupIntervalMinutes;
         AutoBackupDeleteAfterMonths = general.AutoBackupDeleteAfterMonths;
-        
+        DefaultEncoding = Encodings.FirstOrDefault(e => e.DisplayName == general.DefaultEncoding) ?? Encodings.First();
+
         SelectedDefaultSubtitleFormat = general.DefaultSubtitleFormat;
         if (!DefaultSubtitleFormats.Contains(SelectedDefaultSubtitleFormat))
         { 
@@ -259,6 +266,7 @@ public partial class SettingsViewModel : ObservableObject
         general.AutoBackupOn = AutoBackupOn;
         general.AutoBackupIntervalMinutes = AutoBackupIntervalMinutes;
         general.AutoBackupDeleteAfterMonths = AutoBackupDeleteAfterMonths;
+        general.DefaultEncoding = DefaultEncoding?.DisplayName ?? Encodings.First().DisplayName;
         general.DefaultSubtitleFormat = SelectedDefaultSubtitleFormat;
 
         appearance.Theme = SelectedTheme;

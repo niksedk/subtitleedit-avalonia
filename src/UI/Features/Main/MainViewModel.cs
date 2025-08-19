@@ -104,7 +104,7 @@ public partial class MainViewModel :
     [ObservableProperty] private SubtitleFormat _selectedSubtitleFormat;
 
     [ObservableProperty] private ObservableCollection<TextEncoding> _encodings;
-    public TextEncoding SelectedEncoding { get; set; }
+    [ObservableProperty] private TextEncoding _selectedEncoding;
 
     [ObservableProperty] private string _statusTextLeft;
     [ObservableProperty] private string _statusTextRight;
@@ -235,7 +235,7 @@ public partial class MainViewModel :
 
         SelectedSubtitleFormat = SubtitleFormats[0];
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
-        SelectedEncoding = Encodings[0];
+        SelectedEncoding = Encodings.FirstOrDefault(p => p.DisplayName == Se.Settings.General.DefaultEncoding) ?? Encodings[0];
         StatusTextLeft = string.Empty;
         StatusTextRight = string.Empty;
         ShowColumnEndTime = Se.Settings.General.ShowColumnEndTime;
@@ -458,7 +458,8 @@ public partial class MainViewModel :
     {
         ShowColumnOriginalText = false;
         Subtitles.Clear();
-        SelectedSubtitleFormat = SubtitleFormats.Where(f => f.FriendlyName == Se.Settings.General.DefaultSubtitleFormat).FirstOrDefault() ?? SubtitleFormats[0];
+        SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(f => f.FriendlyName == Se.Settings.General.DefaultSubtitleFormat) ?? SubtitleFormats[0];
+        SelectedEncoding = Encodings.FirstOrDefault(p => p.DisplayName == Se.Settings.General.DefaultEncoding) ?? Encodings[0];
         _subtitleFileName = string.Empty;
         _subtitleFileNameOriginal = string.Empty;
         _subtitle = new Subtitle();

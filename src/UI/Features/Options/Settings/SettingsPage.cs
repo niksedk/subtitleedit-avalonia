@@ -175,6 +175,16 @@ public class SettingsPage : UserControl
                 MakeCheckboxSetting("Auto-backup", nameof(_vm.AutoBackupOn)),
                 MakeNumericSetting("Auto-backup interval (minutes)", nameof(_vm.AutoBackupIntervalMinutes)),
                 MakeNumericSetting("Auto-backup retention (months)", nameof(_vm.AutoBackupDeleteAfterMonths)),
+                new SettingsItem("Default encoding", () => new ComboBox
+                {
+                    Width = 200,
+                    DataContext = _vm,
+                    [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.Encodings)),
+                    [!SelectingItemsControl.SelectedItemProperty] =
+                        new Binding(nameof(_vm.DefaultEncoding)) { Mode = BindingMode.TwoWay },
+                    ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
+                        new TextBlock { Text = f?.Name }, true)
+                }),
             ]),
             
             new SettingsSection(Se.Language.General.SubtitleFormats,
