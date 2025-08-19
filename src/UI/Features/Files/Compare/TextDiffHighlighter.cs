@@ -1,111 +1,178 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Controls.Documents;
 using Avalonia.Media;
 using System;
-using Avalonia.Controls.Documents;
 
-namespace Nikse.SubtitleEdit.Features.Files.Compare;
-
-public class TextDiffHighlighter
+public static class TextDiffHighlighter
 {
     private static readonly IBrush ForegroundDifferenceColor = Brushes.Red;
     private static readonly IBrush BackDifferenceColor = Brushes.Yellow;
     private static readonly IBrush NormalColor = Brushes.Black;
-
-    public static TextBlock BuildDiffBlock(string text1, string text2)
-    {
-        var tb = new TextBlock { TextWrapping = Avalonia.Media.TextWrapping.Wrap };
-        int startCharactersOk = 0;
-        int minLength = Math.Min(text1.Length, text2.Length);
-
-        // from start
-        for (int i = 0; i < minLength; i++)
-        {
-            if (text1[i] == text2[i])
-            {
-                tb.Inlines.Add(new Run(text1[i].ToString()) { Foreground = NormalColor });
-                startCharactersOk++;
-            }
-            else
-            {
-                tb.Inlines.Add(new Run(text1[i].ToString())
-                {
-                    Foreground = ForegroundDifferenceColor,
-                    Background = " .,".Contains(text1[i]) ? BackDifferenceColor : null
-                });
-                startCharactersOk++;
-                break; // stop after first mismatch (similar to your code)
-            }
-        }
-
-        // middle differences
-        for (int i = startCharactersOk; i < text1.Length; i++)
-        {
-            tb.Inlines.Add(new Run(text1[i].ToString())
-            {
-                Foreground = ForegroundDifferenceColor,
-                Background = " .,".Contains(text1[i]) ? BackDifferenceColor : null
-            });
-        }
-
-        return tb;
-    }
+    private static readonly IBrush DiffBackgroundColor = Brushes.LightGreen;
 
     public static (TextBlock left, TextBlock right) Compare(string text1, string text2)
     {
-        var left = new TextBlock { TextWrapping = Avalonia.Media.TextWrapping.Wrap };
-        var right = new TextBlock { TextWrapping = Avalonia.Media.TextWrapping.Wrap };
+        var left = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var right = new TextBlock { TextWrapping = TextWrapping.Wrap };
 
-        int startCharactersOk = 0;
-        int minLength = Math.Min(text1.Length, text2.Length);
-
-        // from start
-        for (int i = 0; i < minLength; i++)
+        if (left.Inlines == null || right.Inlines == null)
         {
-            if (text1[i] == text2[i])
+            return (left, right);
+        }
+
+        bool hasDifferences = false;
+
+        // One string is a pure prefix of the other
+        if (text1.StartsWith(text2, StringComparison.Ordinal))
+        {
+            left.Inlines.Add(new Run(text2)
             {
-                var run1 = new Run(text1[i].ToString()) { Foreground = NormalColor };
-                var run2 = new Run(text2[i].ToString()) { Foreground = NormalColor };
-                left.Inlines.Add(run1);
-                right.Inlines.Add(run2);
-                startCharactersOk++;
+                Foreground = NormalColor
+            });
+            left.Inlines.Add(new Run(text1.Substring(text2.Length))
+            {
+                Foreground = ForegroundDifferenceColor,
+                Background = BackDifferenceColor
+            });
+
+            right.Inlines.Add(new Run(text2)
+            {
+                Foreground = NormalColor
+            });
+
+            hasDifferences = true;
+        }
+        else if (text2.StartsWith(text1, StringComparison.Ordinal))
+        {
+            right.Inlines.Add(new Run(text1)
+            {
+                Foreground = NormalColor
+            });
+            right.Inlines.Add(new Run(text2.Substring(text1.Length))
+            {
+                Foreground = ForegroundDifferenceColor,
+                Background = BackDifferenceColor
+            });
+
+            left.Inlines.Add(new Run(text1)
+            {
+                Foreground = NormalColor
+            });
+
+            hasDifferences = true;
+        }
+        else
+        {
+            // Diff from start
+            int startOk = 0;
+            int minLength = Math.Min(text1.Length, text2.Length);
+
+            for (int i = 0; i < minLength; i++)
+            {
+                if (text1[i] == text2[i])
+                {
+                    left.Inlines.Add(new Run(text1[i].ToString())
+                    {
+                        Foreground = NormalColor
+                    });
+                    right.Inlines.Add(new Run(text2[i].ToString())
+                    {
+                        Foreground = NormalColor
+                    });
+                    startOk++;
+                }
+                else
+                {
+                    break;
+                }
             }
-            else
+
+            // Diff from end
+            int endOk = 0;
+            while (endOk < minLength - startOk &&
+                   text1[text1.Length - 1 - endOk] == text2[text2.Length - 1 - endOk])
             {
-                var run1 = new Run(text1[i].ToString())
+                endOk++;
+            }
+
+            // Middle difference (per character)
+            string mid1 = text1.Substring(startOk, text1.Length - startOk - endOk);
+            string mid2 = text2.Substring(startOk, text2.Length - startOk - endOk);
+
+            int maxMid = Math.Max(mid1.Length, mid2.Length);
+            for (int i = 0; i < maxMid; i++)
+            {
+                char? c1 = i < mid1.Length ? mid1[i] : (char?)null;
+                char? c2 = i < mid2.Length ? mid2[i] : (char?)null;
+
+                if (c1 == c2 && c1 != null)
                 {
-                    Foreground = ForegroundDifferenceColor,
-                    Background = " .,".Contains(text1[i]) ? BackDifferenceColor : null
-                };
-                var run2 = new Run(text2[i].ToString())
+                    left.Inlines.Add(new Run(c1.ToString())
+                    {
+                        Foreground = NormalColor
+                    });
+                    right.Inlines.Add(new Run(c2!.ToString())
+                    {
+                        Foreground = NormalColor
+                    });
+                }
+                else
                 {
-                    Foreground = ForegroundDifferenceColor,
-                    Background = " .,".Contains(text2[i]) ? BackDifferenceColor : null
-                };
-                left.Inlines.Add(run1);
-                right.Inlines.Add(run2);
-                startCharactersOk++;
-                break;
+                    if (c1 != null)
+                    {
+                        left.Inlines.Add(new Run(c1.ToString())
+                        {
+                            Foreground = ForegroundDifferenceColor,
+                            Background = BackDifferenceColor
+                        });
+                        hasDifferences = true;
+                    }
+                    if (c2 != null)
+                    {
+                        right.Inlines.Add(new Run(c2.ToString())
+                        {
+                            Foreground = ForegroundDifferenceColor,
+                            Background = BackDifferenceColor
+                        });
+                        hasDifferences = true;
+                    }
+                }
+            }
+
+            // Add suffix (if any)
+            if (endOk > 0)
+            {
+                string suffix = text1.Substring(text1.Length - endOk);
+                left.Inlines.Add(new Run(suffix)
+                {
+                    Foreground = NormalColor
+                });
+
+                suffix = text2.Substring(text2.Length - endOk);
+                right.Inlines.Add(new Run(suffix)
+                {
+                    Foreground = NormalColor
+                });
             }
         }
 
-        // remaining characters in text1
-        for (int i = startCharactersOk; i < text1.Length; i++)
+        // Apply green background only to normal text if differences exist
+        if (hasDifferences)
         {
-            left.Inlines.Add(new Run(text1[i].ToString())
+            foreach (var run in left.Inlines)
             {
-                Foreground = ForegroundDifferenceColor,
-                Background = " .,".Contains(text1[i]) ? BackDifferenceColor : null
-            });
-        }
-
-        // remaining characters in text2
-        for (int i = startCharactersOk; i < text2.Length; i++)
-        {
-            right.Inlines.Add(new Run(text2[i].ToString())
+                if (run is Run r && r.Background == null)
+                {
+                    r.Background = DiffBackgroundColor;
+                }
+            }
+            foreach (var run in right.Inlines)
             {
-                Foreground = ForegroundDifferenceColor,
-                Background = " .,".Contains(text2[i]) ? BackDifferenceColor : null
-            });
+                if (run is Run r && r.Background == null)
+                {
+                    r.Background = DiffBackgroundColor;
+                }
+            }
         }
 
         return (left, right);

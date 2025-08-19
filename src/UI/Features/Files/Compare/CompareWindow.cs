@@ -230,17 +230,13 @@ public class CompareWindow : Window
                     [!Border.BackgroundProperty] = new Binding(nameof(CompareItem.TextBackgroundBrush))
                 };
 
-                var textBlock = new TextBlock
-                {
-                    VerticalAlignment = VerticalAlignment.Center,
-                    TextWrapping = TextWrapping.Wrap,
-                    [!TextBlock.TextProperty] = new Binding(nameof(CompareItem.Text))
-                };
-
                 var stackPanel = new StackPanel();
+                if (item.TextPanel.Parent is Panel parent)
+                {
+                    parent.Children.Remove(item.TextPanel);
+                }
                 stackPanel.Children.Add(item.TextPanel);
 
-                //border.Child = textBlock;
                 border.Child = stackPanel;
                 return border;
             })
