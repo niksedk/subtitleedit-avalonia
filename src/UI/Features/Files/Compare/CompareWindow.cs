@@ -5,8 +5,10 @@ using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Threading;
 using Nikse.SubtitleEdit.Features.Files.Compare;
+using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
 using System.Collections.ObjectModel;
 
 public class CompareWindow : Window
@@ -104,7 +106,7 @@ public class CompareWindow : Window
             ToolTip.SetTip(buttonNextDifference, Se.Language.File.NextDifference);
         }
         var buttonExport = UiUtil.MakeButton(Se.Language.General.Export, vm.ExportCommand);
-        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand).WithBindIsVisible(nameof(vm.IsExportVisible));
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(
             checkBoxIgnoreWhiteSpace, 
@@ -168,6 +170,8 @@ public class CompareWindow : Window
             })
         });
 
+        var fullTimeConverter = new TimeSpanToDisplayFullConverter();
+
         // StartTime column
         dg.Columns.Add(new DataGridTemplateColumn
         {
@@ -185,7 +189,7 @@ public class CompareWindow : Window
                 var textBlock = new TextBlock
                 {
                     VerticalAlignment = VerticalAlignment.Center,
-                    [!TextBlock.TextProperty] = new Binding(nameof(CompareItem.StartTime))
+                    [!TextBlock.TextProperty] = new Binding(nameof(CompareItem.StartTime)) { Converter = fullTimeConverter },
                 };
 
                 border.Child = textBlock;
@@ -210,7 +214,7 @@ public class CompareWindow : Window
                 var textBlock = new TextBlock
                 {
                     VerticalAlignment = VerticalAlignment.Center,
-                    [!TextBlock.TextProperty] = new Binding(nameof(CompareItem.EndTime))
+                    [!TextBlock.TextProperty] = new Binding(nameof(CompareItem.EndTime)) { Converter = fullTimeConverter },
                 };
 
                 border.Child = textBlock;
