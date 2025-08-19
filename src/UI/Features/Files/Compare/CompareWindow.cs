@@ -2,7 +2,6 @@
 using Avalonia.Controls;
 using Avalonia.Data;
 using Nikse.SubtitleEdit.Features.Files.Compare;
-using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.ObjectModel;
@@ -64,7 +63,7 @@ public class CompareWindow : Window
         KeyDown += vm.KeyDown;
     }
 
-    private Border MakeSubtitlesView(ObservableCollection<SubtitleLineViewModel> items, string selectedBinding)
+    private static Border MakeSubtitlesView(ObservableCollection<CompareItem> items, string selectedBinding)
     {
         var dg = new DataGrid
         {
@@ -79,7 +78,7 @@ public class CompareWindow : Window
         dg.Columns.Add(new DataGridTextColumn
         {
             Header = Se.Language.General.NumberSymbol,
-            Binding = new Binding(nameof(SubtitleLineViewModel.Number)),
+            Binding = new Binding(nameof(CompareItem.Number)),
             Width = new DataGridLength(50),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
         });
@@ -87,7 +86,7 @@ public class CompareWindow : Window
         dg.Columns.Add(new DataGridTextColumn
         {
             Header = Se.Language.General.Show,
-            Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)),
+            Binding = new Binding(nameof(CompareItem.StartTime)),
             Width = new DataGridLength(120),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
         });
@@ -95,7 +94,7 @@ public class CompareWindow : Window
         dg.Columns.Add(new DataGridTextColumn
         {
             Header = Se.Language.General.Hide,
-            Binding = new Binding(nameof(SubtitleLineViewModel.EndTime)),
+            Binding = new Binding(nameof(CompareItem.EndTime)),
             Width = new DataGridLength(120),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
         });
@@ -103,7 +102,7 @@ public class CompareWindow : Window
         dg.Columns.Add(new DataGridTextColumn
         {
             Header = Se.Language.General.Text,
-            Binding = new Binding(nameof(SubtitleLineViewModel.Text)),
+            Binding = new Binding(nameof(CompareItem.Text)),
             Width = new DataGridLength(1, DataGridLengthUnitType.Star),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
         });

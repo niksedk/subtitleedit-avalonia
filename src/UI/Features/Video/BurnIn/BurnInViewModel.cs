@@ -914,7 +914,7 @@ public partial class BurnInViewModel : ObservableObject
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, "Open subtitle file", false);
+        var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, Se.Language.General.OpenSubtitleFileTitle, false);
         if (!string.IsNullOrEmpty(fileName))
         {
             SelectedJobItem.SubtitleFileName = fileName;

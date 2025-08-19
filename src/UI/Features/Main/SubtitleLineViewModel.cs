@@ -35,6 +35,7 @@ public partial class SubtitleLineViewModel : ObservableObject
     public string Actor { get; set; }
     public int Layer { get; set; }
     public Guid Id { get; set; }
+    public bool IsDefault => Text == string.Empty && Number == 0 && Duration == TimeSpan.Zero && StartTime == TimeSpan.Zero;
 
     private bool _skipUpdate = false;
     private static Color _errorColor = Se.Settings.General.ErrorColor.FromHexToColor();
@@ -155,7 +156,6 @@ public partial class SubtitleLineViewModel : ObservableObject
             return new SolidColorBrush(Colors.Transparent);
         }
     }
-
 
     partial void OnStartTimeChanged(TimeSpan value)
     {

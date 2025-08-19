@@ -588,7 +588,7 @@ public partial class MainViewModel :
             right[0].Text += "...";
             right.RemoveAt(right.Count - 1);
 
-            vm.Initialize(Subtitles, right);
+            vm.Initialize(Subtitles, _subtitleFileName ?? string.Empty, right, string.Empty);
         });
 
         _shortcutManager.ClearKeys();
