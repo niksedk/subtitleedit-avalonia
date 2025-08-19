@@ -5,7 +5,6 @@ using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Threading;
 using Nikse.SubtitleEdit.Features.Files.Compare;
-using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
