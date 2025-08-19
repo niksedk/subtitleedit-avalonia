@@ -56,11 +56,13 @@ public class CompareWindow : Window
         grid.Add(panelLeftBrowse, 0);
 
         var buttonRightFileName = UiUtil.MakeButtonBrowse(vm.PickRightSubtitleFileCommand);
+        var buttonRightReload = UiUtil.MakeButton(string.Format(Se.Language.File.LoadXFromFile, System.IO.Path.GetFileName(vm.LeftFileName)), vm.ReloadRightFromFileCommand)
+            .WithBindIsVisible(nameof(vm.IsReloadFromFileVisible));
         var labelRightFileName = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.RightFileName));
         var panelRightBrowse = new StackPanel()
         {
             Orientation = Orientation.Horizontal,
-            Children = { buttonRightFileName, labelRightFileName },
+            Children = { buttonRightFileName, buttonRightReload, labelRightFileName },
         };
         grid.Add(panelRightBrowse, 0, 1);
 
@@ -76,16 +78,29 @@ public class CompareWindow : Window
         var statusText = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.StatusText));
         grid.Add(statusText, 2, 0, 1, 2);
 
-        // Buttons
+        // display type combo box
+        var labelDisplayType = UiUtil.MakeLabel(Se.Language.General.Show).WithMarginRight(5);  
+        var comboBoxCompareVisual = UiUtil.MakeComboBox(vm.CompareVisuals, vm, nameof(vm.SelectedCompareVisual));
+        comboBoxCompareVisual.SelectionChanged += vm.ComboBoxCompareVisualSelectionChanged;
+        var panelDisplayType = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Children = { labelDisplayType, comboBoxCompareVisual }
+        };  
+        grid.Add(panelDisplayType, 3, 0, 1, 2);
+
+        // buttons
         CheckBox checkBoxIgnoreWhiteSpace = UiUtil.MakeCheckBox(Se.Language.File.IgnoreWhitespace, vm, nameof(vm.IgnoreWhiteSpace))
             .WithMarginLeft(10);
         checkBoxIgnoreWhiteSpace.IsCheckedChanged += vm.CheckBoxChanged;
         var checkBoxIngoreFormatting = UiUtil.MakeCheckBox(Se.Language.File.IgnoreFormatting, vm, nameof(vm.IgnoreFormatting))
             .WithMarginLeft(10).WithMarginRight(15);
         checkBoxIngoreFormatting.IsCheckedChanged += vm.CheckBoxChanged;
+        var buttonPreviousDifference = UiUtil.MakeButton(Se.Language.File.PreviousDifference, vm.PreviousDifferenceCommand);
+        var buttonNextDifference = UiUtil.MakeButton(Se.Language.File.NextDifference, vm.NextDifferenceCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar(checkBoxIgnoreWhiteSpace, checkBoxIngoreFormatting, buttonOk, buttonCancel);
+        var panelButtons = UiUtil.MakeButtonBar(checkBoxIgnoreWhiteSpace, checkBoxIngoreFormatting, buttonPreviousDifference, buttonNextDifference, buttonOk, buttonCancel);
         grid.Add(panelButtons, 3, 0, 1, 2);
 
         Content = grid;
@@ -222,28 +237,4 @@ public class CompareWindow : Window
 
         return UiUtil.MakeBorderForControl(dg);
     }
-
-    //private static void SyncScroll(DataGrid grid1, DataGrid grid2)
-    //{
-    //    grid1.AttachedToVisualTree += (_, __) =>
-    //    {
-    //        var sv1 = grid1.GetVisualDescendants().OfType<ScrollViewer>().FirstOrDefault();
-    //        var sv2 = grid2.GetVisualDescendants().OfType<ScrollViewer>().FirstOrDefault();
-
-    //        if (sv1 != null && sv2 != null)
-    //        {
-    //            // When left scrolls, update right
-    //            sv1.ScrollChanged += (_, e) =>
-    //            {
-    //                sv2.Offset = sv1.Offset;
-    //            };
-
-    //            // When right scrolls, update left
-    //            sv2.ScrollChanged += (_, e) =>
-    //            {
-    //                sv1.Offset = sv2.Offset;
-    //            };
-    //        }
-    //    };
-    //}
 }

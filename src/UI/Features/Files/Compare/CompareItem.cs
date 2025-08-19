@@ -18,7 +18,7 @@ public partial class CompareItem : ObservableObject
     [ObservableProperty] private IBrush _startTimeBackgroundBrush;
     [ObservableProperty] private IBrush _endTimeBackgroundBrush;
     [ObservableProperty] private IBrush _textBackgroundBrush;
-
+    public bool HasDifference { get; set; }
     public bool IsDefault => Text == string.Empty && Number == 0 && Duration == TimeSpan.Zero && StartTime == TimeSpan.Zero;
 
     public CompareItem()

@@ -21,16 +21,17 @@ public partial class CompareViewModel : ObservableObject
 {
     public ObservableCollection<CompareItem> LeftSubtitles { get; } = new();
     public ObservableCollection<CompareItem> RightSubtitles { get; } = new();
+    public ObservableCollection<CompareVisual> CompareVisuals { get; } = new();
 
     [ObservableProperty] private CompareItem? _selectedLeft;
     [ObservableProperty] private CompareItem? _selectedRight;
     [ObservableProperty] private bool _ignoreFormatting;
     [ObservableProperty] private bool _ignoreWhiteSpace;
-    [ObservableProperty] private bool _onlyShowDifferences;
-    [ObservableProperty] private bool _onlyCheckTextDifferences;
+    [ObservableProperty] private bool _isReloadFromFileVisible;
     [ObservableProperty] private string _leftFileName = string.Empty;
     [ObservableProperty] private string _rightFileName = string.Empty;
     [ObservableProperty] private string _statusText = string.Empty;
+    [ObservableProperty] private CompareVisual _selectedCompareVisual;
 
     public Window? Window { get; internal set; }
     public bool OkPressed { get; private set; }
@@ -40,7 +41,6 @@ public partial class CompareViewModel : ObservableObject
     private IFileHelper _fileHelper;
     private List<SubtitleLineViewModel> _leftLines = new();
     private List<SubtitleLineViewModel> _rightLines = new();
-    private List<int> _differences = new();
     private string _language = string.Empty;
 
     private static readonly IBrush ListViewRed = new SolidColorBrush(Color.FromArgb(120, 255, 0, 0));
@@ -51,6 +51,9 @@ public partial class CompareViewModel : ObservableObject
     public CompareViewModel(IFileHelper fileHelper)
     {
         _fileHelper = fileHelper;
+
+        CompareVisuals = new ObservableCollection<CompareVisual>(CompareVisual.GetCompareVisuals());
+        SelectedCompareVisual = CompareVisuals[0];
     }
 
     internal void Initialize(
@@ -67,10 +70,9 @@ public partial class CompareViewModel : ObservableObject
         _rightLines.AddRange(right.Select(p => new SubtitleLineViewModel(p)));
         RightFileName = rightFileName;
 
-        Dispatcher.UIThread.Post(() =>
-        {
-            Compare();
-        });
+        IsReloadFromFileVisible = !string.IsNullOrEmpty(LeftFileName);
+
+        Dispatcher.UIThread.Post(Compare);
     }
 
     private void Compare()
@@ -96,7 +98,7 @@ public partial class CompareViewModel : ObservableObject
 
     private void AddColoringAndCountDifferences()
     {
-        _differences = new List<int>();
+        var differences = new List<int>();
         var index = 0;
         var left = GetLeftItemOrNull(index);
         var right = GetRightItemOrNull(index);
@@ -104,7 +106,8 @@ public partial class CompareViewModel : ObservableObject
         var wordsChanged = 0;
         var max = Math.Max(LeftSubtitles.Count, RightSubtitles.Count);
         var min = Math.Min(LeftSubtitles.Count, RightSubtitles.Count);
-        var onlyTextDiff = OnlyCheckTextDifferences;
+        var onlyShowTextDiff = SelectedCompareVisual.Type == CompareVisualType.ShowOnlyDifferencesInText;
+        var onlyShowDiff = SelectedCompareVisual.Type == CompareVisualType.ShowOnlyDifferences;
 
         ResetAllBackgroundColors();
 
@@ -113,7 +116,7 @@ public partial class CompareViewModel : ObservableObject
             return;
         }
 
-        if (onlyTextDiff)
+        if (onlyShowTextDiff)
         {
             while (index < min)
             {
@@ -139,7 +142,7 @@ public partial class CompareViewModel : ObservableObject
 
                 if (addIndexToDifferences)
                 {
-                    _differences.Add(index);
+                    differences.Add(index);
                 }
 
                 index++;
@@ -219,7 +222,7 @@ public partial class CompareViewModel : ObservableObject
 
                 if (addIndexToDifferences)
                 {
-                    _differences.Add(index);
+                    differences.Add(index);
                 }
 
                 index++;
@@ -228,7 +231,31 @@ public partial class CompareViewModel : ObservableObject
             }
         }
 
-        if (_differences.Count >= min)
+        foreach (var idx in differences)
+        {
+            LeftSubtitles[idx].HasDifference = true;
+            RightSubtitles[idx].HasDifference = true;
+        }
+
+        // remove items not in differences
+        if (onlyShowTextDiff || onlyShowDiff)
+        {
+            for (var idx = LeftSubtitles.Count - 1; idx >= 0; idx--)
+            {
+                if (!differences.Contains(idx))
+                {
+                    LeftSubtitles.RemoveAt(idx);
+                    RightSubtitles.RemoveAt(idx);
+                }
+            }
+        }
+
+        SetStatusText(differences, totalWords, wordsChanged, min);
+    }
+
+    private void SetStatusText(List<int> differences, int totalWords, int wordsChanged, int min)
+    {
+        if (differences.Count >= min)
         {
             StatusText = Se.Language.File.SubtitlesNotAlike;
         }
@@ -242,11 +269,11 @@ public partial class CompareViewModel : ObservableObject
                     formatString = Se.Language.File.XNumberOfDifferenceAndPercentLettersChanged;
                 }
 
-                StatusText = string.Format(formatString, _differences.Count, wordsChanged * 100.00 / totalWords);
+                StatusText = string.Format(formatString, differences.Count, wordsChanged * 100.00 / totalWords);
             }
             else
             {
-                StatusText = string.Format(Se.Language.File.XNumberOfDifference, _differences.Count);
+                StatusText = string.Format(Se.Language.File.XNumberOfDifference, differences.Count);
             }
         }
     }
@@ -499,10 +526,7 @@ public partial class CompareViewModel : ObservableObject
 
         LeftFileName = fileName;
 
-        Dispatcher.UIThread.Post(() =>
-        {
-            Compare();
-        });
+        Dispatcher.UIThread.Post(Compare);
     }
 
     [RelayCommand]
@@ -527,11 +551,88 @@ public partial class CompareViewModel : ObservableObject
         }
 
         RightFileName = fileName;
+        IsReloadFromFileVisible = false;
 
-        Dispatcher.UIThread.Post(() =>
+        Dispatcher.UIThread.Post(Compare);
+    }
+
+    [RelayCommand]
+    private void ReloadRightFromFile()
+    {
+        var fileName = LeftFileName;
+        if (string.IsNullOrEmpty(fileName))
         {
-            Compare();
-        });
+            return;
+        }
+
+        var subtitle = Subtitle.Parse(fileName);
+        if (subtitle == null)
+        {
+            return;
+        }
+
+        _rightLines.Clear();
+        foreach (var line in subtitle.Paragraphs)
+        {
+            _rightLines.Add(new SubtitleLineViewModel(line));
+        }
+
+        RightFileName = fileName;
+        IsReloadFromFileVisible = false;
+
+        Dispatcher.UIThread.Post(Compare);
+    }
+
+    [RelayCommand]
+    private void PreviousDifference()
+    {
+        var selected = SelectedLeft;
+        if (selected == null)
+        {
+            return;
+        }
+
+        var idx = LeftSubtitles.IndexOf(selected);
+        if (idx < 0)
+        {
+            return;
+        }
+
+        while (idx > 0)
+        {
+            idx--;
+            if (LeftSubtitles[idx].HasDifference)
+            {
+                SelectAndScrollToRow(LeftDataGrid, idx);
+                return;
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void NextDifference()
+    {
+        var selected = SelectedLeft;
+        if (selected == null)
+        {
+            return;
+        }
+
+        var idx = LeftSubtitles.IndexOf(selected);
+        if (idx < 0)
+        {
+            return;
+        }
+
+        while (idx < LeftSubtitles.Count - 1)
+        {
+            idx++;
+            if (LeftSubtitles[idx].HasDifference)
+            {
+                SelectAndScrollToRow(LeftDataGrid, idx);
+                return;
+            }
+        }
     }
 
     [RelayCommand]
@@ -623,9 +724,17 @@ public partial class CompareViewModel : ObservableObject
 
     internal void CheckBoxChanged(object? sender, RoutedEventArgs e)
     {
-        Dispatcher.UIThread.Post(() =>
+        Task.Delay(100).ContinueWith(_ =>
         {
-            Compare();
+            Dispatcher.UIThread.Post(Compare);
+        });
+    }
+
+    internal void ComboBoxCompareVisualSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        Task.Delay(100).ContinueWith(_ =>
+        {
+            Dispatcher.UIThread.Post(Compare);
         });
     }
 }
