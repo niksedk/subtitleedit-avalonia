@@ -11,6 +11,8 @@ using System.Collections.ObjectModel;
 
 public class CompareWindow : Window
 {
+    private CompareViewModel _vm;
+
     public CompareWindow(CompareViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
@@ -23,6 +25,7 @@ public class CompareWindow : Window
 
         vm.Window = this;
         DataContext = vm;
+        _vm = vm;
 
         var grid = new Grid
         {
@@ -30,6 +33,7 @@ public class CompareWindow : Window
             {
                 new RowDefinition(GridLength.Auto), // browse buttons + file names
                 new RowDefinition(GridLength.Star), // subtitle views
+                new RowDefinition(GridLength.Auto), // status text
                 new RowDefinition(GridLength.Auto), // buttons
             },
             ColumnDefinitions =
@@ -60,7 +64,6 @@ public class CompareWindow : Window
         };
         grid.Add(panelRightBrowse, 0, 1);
 
-
         // left subtitle view (original)
         var leftView = MakeSubtitlesView(vm.LeftSubtitles, nameof(vm.SelectedLeft));
         grid.Add(leftView, 1);
@@ -69,16 +72,34 @@ public class CompareWindow : Window
         var rightView = MakeSubtitlesView(vm.RightSubtitles, nameof(vm.SelectedRight));
         grid.Add(rightView, 1, 1);
 
+        // status text
+        var statusText = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.StatusText));
+        grid.Add(statusText, 2, 0, 1, 2);
+
         // Buttons
+        CheckBox checkBoxIgnoreWhiteSpace = UiUtil.MakeCheckBox(Se.Language.File.IgnoreWhitespace, vm, nameof(vm.IgnoreWhiteSpace))
+            .WithMarginLeft(10);
+        checkBoxIgnoreWhiteSpace.IsCheckedChanged += vm.CheckBoxChanged;
+        var checkBoxIngoreFormatting = UiUtil.MakeCheckBox(Se.Language.File.IgnoreFormatting, vm, nameof(vm.IgnoreFormatting))
+            .WithMarginLeft(10).WithMarginRight(15);
+        checkBoxIngoreFormatting.IsCheckedChanged += vm.CheckBoxChanged;
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
-        grid.Add(panelButtons, 2, 0, 1, 2);
+        var panelButtons = UiUtil.MakeButtonBar(checkBoxIgnoreWhiteSpace, checkBoxIngoreFormatting, buttonOk, buttonCancel);
+        grid.Add(panelButtons, 3, 0, 1, 2);
 
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
         KeyDown += vm.KeyDown;
+
+        vm.LeftDataGrid = leftView.Child as DataGrid;
+        vm.RightDataGrid = rightView.Child as DataGrid;
+        if (vm.LeftDataGrid != null && vm.RightDataGrid != null)
+        {
+            vm.LeftDataGrid.SelectionChanged += vm.LeftDataGridSelectionChanged;
+            vm.RightDataGrid.SelectionChanged += vm.RightDataGridSelectionChanged;
+        }
     }
 
     private static Border MakeSubtitlesView(ObservableCollection<CompareItem> items, string selectedBinding)
@@ -202,4 +223,27 @@ public class CompareWindow : Window
         return UiUtil.MakeBorderForControl(dg);
     }
 
+    //private static void SyncScroll(DataGrid grid1, DataGrid grid2)
+    //{
+    //    grid1.AttachedToVisualTree += (_, __) =>
+    //    {
+    //        var sv1 = grid1.GetVisualDescendants().OfType<ScrollViewer>().FirstOrDefault();
+    //        var sv2 = grid2.GetVisualDescendants().OfType<ScrollViewer>().FirstOrDefault();
+
+    //        if (sv1 != null && sv2 != null)
+    //        {
+    //            // When left scrolls, update right
+    //            sv1.ScrollChanged += (_, e) =>
+    //            {
+    //                sv2.Offset = sv1.Offset;
+    //            };
+
+    //            // When right scrolls, update left
+    //            sv2.ScrollChanged += (_, e) =>
+    //            {
+    //                sv1.Offset = sv2.Offset;
+    //            };
+    //        }
+    //    };
+    //}
 }

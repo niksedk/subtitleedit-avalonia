@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -29,9 +30,12 @@ public partial class CompareViewModel : ObservableObject
     [ObservableProperty] private bool _onlyCheckTextDifferences;
     [ObservableProperty] private string _leftFileName = string.Empty;
     [ObservableProperty] private string _rightFileName = string.Empty;
+    [ObservableProperty] private string _statusText = string.Empty;
 
     public Window? Window { get; internal set; }
     public bool OkPressed { get; private set; }
+    public DataGrid? LeftDataGrid { get; set; } = new();
+    public DataGrid? RightDataGrid { get; set; } = new();
 
     private IFileHelper _fileHelper;
     private List<SubtitleLineViewModel> _leftLines = new();
@@ -39,9 +43,9 @@ public partial class CompareViewModel : ObservableObject
     private List<int> _differences = new();
     private string _language = string.Empty;
 
-    private static readonly IBrush ListViewRed = new SolidColorBrush(Colors.Red);
-    private static readonly IBrush ListViewGreen = new SolidColorBrush(Colors.LightGreen);
-    private static readonly IBrush ListViewOrange = new SolidColorBrush(Color.FromArgb(255, 255, 200, 100));
+    private static readonly IBrush ListViewRed = new SolidColorBrush(Color.FromArgb(120, 255, 0, 0));
+    private static readonly IBrush ListViewGreen = new SolidColorBrush(Color.FromArgb(120, 0, 255, 0));
+    private static readonly IBrush ListViewOrange = new SolidColorBrush(Colors.Yellow, 0.6);
     private static readonly IBrush TransparentBrush = new SolidColorBrush(Colors.Transparent);
 
     public CompareViewModel(IFileHelper fileHelper)
@@ -80,10 +84,11 @@ public partial class CompareViewModel : ObservableObject
             RightSubtitles.Add(new CompareItem(r));
         }
 
+        StatusText = string.Empty;
         InsertMissingLines();
-
-        // coloring + differences index list
         AddColoringAndCountDifferences();
+
+        SelectAndScrollToRow(LeftDataGrid, 0);
     }
 
     private void AddColoringAndCountDifferences()
@@ -98,8 +103,12 @@ public partial class CompareViewModel : ObservableObject
         var min = Math.Min(LeftSubtitles.Count, RightSubtitles.Count);
         var onlyTextDiff = OnlyCheckTextDifferences;
 
-        // Reset all background colors first
         ResetAllBackgroundColors();
+
+        if (LeftSubtitles.Count == 0 || RightSubtitles.Count == 0)
+        {
+            return;
+        }
 
         if (onlyTextDiff)
         {
@@ -215,6 +224,28 @@ public partial class CompareViewModel : ObservableObject
                 right = GetRightItemOrNull(index);
             }
         }
+
+        if (_differences.Count >= min)
+        {
+            StatusText = Se.Language.File.SubtitlesNotAlike;
+        }
+        else
+        {
+            if (wordsChanged != totalWords && wordsChanged > 0)
+            {
+                var formatString = Se.Language.File.XNumberOfDifferenceAndPercentChanged;
+                if (ShouldBreakToLetter())
+                {
+                    formatString = Se.Language.File.XNumberOfDifferenceAndPercentLettersChanged;
+                }
+
+                StatusText = string.Format(formatString, _differences.Count, wordsChanged * 100.00 / totalWords);
+            }
+            else
+            {
+                StatusText = string.Format(Se.Language.File.XNumberOfDifference, _differences.Count);
+            }
+        }
     }
 
     private enum ItemColumn
@@ -229,7 +260,10 @@ public partial class CompareViewModel : ObservableObject
     private void SetItemBackgroundColor(int index, bool isLeft, IBrush brush, ItemColumn column)
     {
         var collection = isLeft ? LeftSubtitles : RightSubtitles;
-        if (index >= collection.Count) return;
+        if (index >= collection.Count)
+        {
+            return;
+        }
 
         var item = collection[index];
 
@@ -279,6 +313,11 @@ public partial class CompareViewModel : ObservableObject
 
     private void InsertMissingLines()
     {
+        if (LeftSubtitles.Count == 0 || RightSubtitles.Count == 0)
+        {
+            return;
+        }
+
         var index = 0;
         var left = GetLeftItemOrNull(index);
         var right = GetRightItemOrNull(index);
@@ -453,7 +492,7 @@ public partial class CompareViewModel : ObservableObject
         foreach (var line in subtitle.Paragraphs)
         {
             _leftLines.Add(new SubtitleLineViewModel(line));
-        }   
+        }
 
         LeftFileName = fileName;
 
@@ -513,5 +552,71 @@ public partial class CompareViewModel : ObservableObject
         {
             Close();
         }
+    }
+
+    internal void LeftDataGridSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (e.AddedItems.Count == 0)
+        {
+            return;
+        }
+
+        var selection = e.AddedItems[0] as CompareItem;
+        if (selection == null)
+        {
+            return;
+        }
+
+        var idx = LeftSubtitles.IndexOf(selection);
+        Dispatcher.UIThread.Post(() =>
+        {
+            SelectAndScrollToRow(RightDataGrid, idx);
+        });
+    }
+
+    internal void RightDataGridSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (e.AddedItems.Count == 0)
+        {
+            return;
+        }
+
+        var selection = e.AddedItems[0] as CompareItem;
+        if (selection == null)
+        {
+            return;
+        }
+
+        var idx = RightSubtitles.IndexOf(selection);
+        Dispatcher.UIThread.Post(() =>
+        {
+            SelectAndScrollToRow(LeftDataGrid, idx);
+        });
+    }
+
+    private void SelectAndScrollToRow(DataGrid? datagrid, int index)
+    {
+        if (index < 0 || datagrid == null)
+        {
+            return;
+        }
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (datagrid.SelectedIndex != index)
+            {
+                datagrid.SelectedIndex = index;
+            }
+
+            datagrid.ScrollIntoView(datagrid.SelectedItem, null);
+        });
+    }
+
+    internal void CheckBoxChanged(object? sender, RoutedEventArgs e)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            Compare();
+        });
     }
 }

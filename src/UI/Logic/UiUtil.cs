@@ -980,10 +980,24 @@ public static class UiUtil
         return control;
     }
 
+    public static CheckBox WithMarginLeft(this CheckBox control, int marginLeft)
+    {
+        var m = control.Margin;
+        control.Margin = new Thickness(marginLeft, m.Top, m.Right, m.Bottom);
+        return control;
+    }
+
     public static Button WithMarginRight(this Button control, int marginRight)
     {
         var m = control.Margin;
-        control.Margin = new Thickness(m.Left, m.Top, m.Right, marginRight);
+        control.Margin = new Thickness(m.Left, m.Top, marginRight, m.Bottom);
+        return control;
+    }
+
+    public static CheckBox WithMarginRight(this CheckBox control, int marginRight)
+    {
+        var m = control.Margin;
+        control.Margin = new Thickness(m.Left, m.Top, marginRight, m.Bottom);
         return control;
     }
 
