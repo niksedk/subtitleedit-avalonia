@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
-using Avalonia.Media;
+using Avalonia.Threading;
 using Nikse.SubtitleEdit.Features.Files.Compare;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -44,10 +44,11 @@ public class CompareWindow : Window
 
         var buttonLeftFileName = UiUtil.MakeButtonBrowse(vm.PickLeftSubtitleFileCommand);
         var labelLeftFileName = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.LeftFileName));
+        var labelLeftFileNameHasChanges = UiUtil.MakeLabel("*").WithBindVisible(vm, nameof(vm.LeftFileNameHasChanges));
         var panelLeftBrowse = new StackPanel()
         {
             Orientation = Orientation.Horizontal,
-            Children = { buttonLeftFileName, labelLeftFileName },
+            Children = { buttonLeftFileName, labelLeftFileName, labelLeftFileNameHasChanges },
         };
         grid.Add(panelLeftBrowse, 0);
 
@@ -111,13 +112,14 @@ public class CompareWindow : Window
             buttonPreviousDifference, 
             buttonNextDifference,
             buttonExport,
-            buttonOk, 
-            buttonCancel);
+            buttonOk
+            //buttonCancel
+            );
         grid.Add(panelButtons, 3, 0, 1, 2);
 
         Content = grid;
 
-        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        Activated += delegate { Dispatcher.UIThread.Post(() => buttonOk.Focus()); }; // hack to make OnKeyDown work
         KeyDown += vm.KeyDown;
 
         vm.LeftDataGrid = leftView.Child as DataGrid;

@@ -31,6 +31,7 @@ public partial class CompareViewModel : ObservableObject
     [ObservableProperty] private bool _isReloadFromFileVisible;
     [ObservableProperty] private bool _isExportVisible;
     [ObservableProperty] private string _leftFileName = string.Empty;
+    [ObservableProperty] private bool _leftFileNameHasChanges;
     [ObservableProperty] private string _rightFileName = string.Empty;
     [ObservableProperty] private string _statusText = string.Empty;
     [ObservableProperty] private CompareVisual _selectedCompareVisual;
@@ -64,11 +65,16 @@ public partial class CompareViewModel : ObservableObject
         ObservableCollection<SubtitleLineViewModel> left,
         string leftFileName,
         ObservableCollection<SubtitleLineViewModel> right,
-        string rightFileName)
+        string rightFileName,
+        bool hasChanges)
     {
         _leftLines.Clear();
         _leftLines.AddRange(left.Select(p => new SubtitleLineViewModel(p)));
         LeftFileName = leftFileName;
+        if (!string.IsNullOrEmpty(leftFileName) && hasChanges)
+        {
+            LeftFileNameHasChanges = true;
+        }
 
         _rightLines.Clear();
         _rightLines.AddRange(right.Select(p => new SubtitleLineViewModel(p)));
@@ -548,6 +554,7 @@ public partial class CompareViewModel : ObservableObject
             _leftLines.Add(new SubtitleLineViewModel(line));
         }
 
+        LeftFileNameHasChanges = false;
         LeftFileName = fileName;
 
         Dispatcher.UIThread.Post(Compare);

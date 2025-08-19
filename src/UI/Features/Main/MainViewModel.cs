@@ -582,7 +582,7 @@ public partial class MainViewModel :
         var result = await _windowService.ShowDialogAsync<CompareWindow, CompareViewModel>(Window!, vm =>
         {
             var right = new ObservableCollection<SubtitleLineViewModel>();
-            vm.Initialize(Subtitles, _subtitleFileName ?? string.Empty, right, string.Empty);
+            vm.Initialize(Subtitles, _subtitleFileName ?? string.Empty, right, string.Empty, HasChanges());
         });
 
         _shortcutManager.ClearKeys();
