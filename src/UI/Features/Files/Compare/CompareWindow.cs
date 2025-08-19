@@ -17,6 +17,8 @@ public class CompareWindow : Window
         Title = Se.Language.File.Compare;
         Width = 1200;
         Height = 600;
+        MinWidth = 850;
+        MinHeight = 400;
         CanResize = true;
 
         vm.Window = this;
@@ -26,6 +28,7 @@ public class CompareWindow : Window
         {
             RowDefinitions =
             {
+                new RowDefinition(GridLength.Auto), // browse buttons + file names
                 new RowDefinition(GridLength.Star), // subtitle views
                 new RowDefinition(GridLength.Auto), // buttons
             },
@@ -39,26 +42,38 @@ public class CompareWindow : Window
             RowSpacing = 10
         };
 
-        // left (original)
-        var leftView = MakeSubtitlesView(vm.LeftSubtitles, nameof(vm.SelectedLeft));
-        grid.Children.Add(leftView);
-        Grid.SetRow(leftView, 0);
-        Grid.SetColumn(leftView, 0);
+        var buttonLeftFileName = UiUtil.MakeButtonBrowse(vm.PickLeftSubtitleFileCommand);
+        var labelLeftFileName = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.LeftFileName));
+        var panelLeftBrowse = new StackPanel()
+        {
+            Orientation = Orientation.Horizontal,
+            Children = { buttonLeftFileName, labelLeftFileName },
+        };
+        grid.Add(panelLeftBrowse, 0);
 
-        // right (modified)
+        var buttonRightFileName = UiUtil.MakeButtonBrowse(vm.PickRightSubtitleFileCommand);
+        var labelRightFileName = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.RightFileName));
+        var panelRightBrowse = new StackPanel()
+        {
+            Orientation = Orientation.Horizontal,
+            Children = { buttonRightFileName, labelRightFileName },
+        };
+        grid.Add(panelRightBrowse, 0, 1);
+
+
+        // left subtitle view (original)
+        var leftView = MakeSubtitlesView(vm.LeftSubtitles, nameof(vm.SelectedLeft));
+        grid.Add(leftView, 1);
+
+        // right subtitle view (modified)
         var rightView = MakeSubtitlesView(vm.RightSubtitles, nameof(vm.SelectedRight));
-        grid.Children.Add(rightView);
-        Grid.SetRow(rightView, 0);
-        Grid.SetColumn(rightView, 1);
+        grid.Add(rightView, 1, 1);
 
         // Buttons
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-
         var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
-        grid.Children.Add(panelButtons);
-        Grid.SetRow(panelButtons, 1);
-        Grid.SetColumnSpan(panelButtons, 2);
+        grid.Add(panelButtons, 2, 0, 1, 2);
 
         Content = grid;
 

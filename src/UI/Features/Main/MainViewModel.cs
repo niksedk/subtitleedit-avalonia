@@ -581,13 +581,6 @@ public partial class MainViewModel :
         var result = await _windowService.ShowDialogAsync<CompareWindow, CompareViewModel>(Window!, vm =>
         {
             var right = new ObservableCollection<SubtitleLineViewModel>();
-            foreach (var line in Subtitles)
-            {
-                right.Add(new SubtitleLineViewModel(line, true));
-            }
-            right[0].Text += "...";
-            right.RemoveAt(right.Count - 1);
-
             vm.Initialize(Subtitles, _subtitleFileName ?? string.Empty, right, string.Empty);
         });
 

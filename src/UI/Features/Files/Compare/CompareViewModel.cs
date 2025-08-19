@@ -18,7 +18,6 @@ namespace Nikse.SubtitleEdit.Features.Files.Compare;
 
 public partial class CompareViewModel : ObservableObject
 {
-
     public ObservableCollection<CompareItem> LeftSubtitles { get; } = new();
     public ObservableCollection<CompareItem> RightSubtitles { get; } = new();
 
@@ -28,13 +27,13 @@ public partial class CompareViewModel : ObservableObject
     [ObservableProperty] private bool _ignoreWhiteSpace;
     [ObservableProperty] private bool _onlyShowDifferences;
     [ObservableProperty] private bool _onlyCheckTextDifferences;
+    [ObservableProperty] private string _leftFileName = string.Empty;
+    [ObservableProperty] private string _rightFileName = string.Empty;
 
     public Window? Window { get; internal set; }
     public bool OkPressed { get; private set; }
 
     private IFileHelper _fileHelper;
-    private string _leftFileName = string.Empty;
-    private string _rightFileName = string.Empty;
     private List<SubtitleLineViewModel> _leftLines = new();
     private List<SubtitleLineViewModel> _rightLines = new();
     private List<int> _differences = new();
@@ -58,11 +57,11 @@ public partial class CompareViewModel : ObservableObject
     {
         _leftLines.Clear();
         _leftLines.AddRange(left.Select(p => new SubtitleLineViewModel(p)));
-        _leftFileName = leftFileName;
+        LeftFileName = leftFileName;
 
         _rightLines.Clear();
         _rightLines.AddRange(right.Select(p => new SubtitleLineViewModel(p)));
-        _rightFileName = rightFileName;
+        RightFileName = rightFileName;
 
         Compare();
     }
@@ -450,7 +449,13 @@ public partial class CompareViewModel : ObservableObject
             return;
         }
 
-        _leftFileName = fileName;
+        _leftLines.Clear();
+        foreach (var line in subtitle.Paragraphs)
+        {
+            _leftLines.Add(new SubtitleLineViewModel(line));
+        }   
+
+        LeftFileName = fileName;
 
         Compare();
     }
@@ -470,7 +475,13 @@ public partial class CompareViewModel : ObservableObject
             return;
         }
 
-        _rightFileName = fileName;
+        _rightLines.Clear();
+        foreach (var line in subtitle.Paragraphs)
+        {
+            _rightLines.Add(new SubtitleLineViewModel(line));
+        }
+
+        RightFileName = fileName;
 
         Compare();
     }
