@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -38,6 +39,11 @@ public partial class CompareViewModel : ObservableObject
     private List<SubtitleLineViewModel> _rightLines = new();
     private List<int> _differences = new();
     private string _language = string.Empty;
+
+    private static readonly IBrush ListViewRed = new SolidColorBrush(Colors.Red);
+    private static readonly IBrush ListViewGreen = new SolidColorBrush(Colors.LightGreen);
+    private static readonly IBrush ListViewOrange = new SolidColorBrush(Color.FromArgb(255, 255, 200, 100));
+    private static readonly IBrush TransparentBrush = new SolidColorBrush(Colors.Transparent);
 
     public CompareViewModel(IFileHelper fileHelper)
     {
@@ -93,28 +99,33 @@ public partial class CompareViewModel : ObservableObject
         var min = Math.Min(LeftSubtitles.Count, RightSubtitles.Count);
         var onlyTextDiff = OnlyCheckTextDifferences;
 
+        // Reset all background colors first
+        ResetAllBackgroundColors();
+
         if (onlyTextDiff)
         {
             while (index < min)
             {
                 var addIndexToDifferences = false;
                 Utilities.GetTotalAndChangedWords(left?.Text, right?.Text, ref totalWords, ref wordsChanged, IgnoreWhiteSpace, IgnoreFormatting, ShouldBreakToLetter());
+
                 if (left == null || left.IsDefault)
                 {
                     addIndexToDifferences = true;
-                    subtitleListView1.ColorOut(index, ListViewRed);
+                    SetItemBackgroundColor(index, true, ListViewRed, ItemColumn.All);
                 }
                 else if (right == null || right.IsDefault)
                 {
                     addIndexToDifferences = true;
-                    subtitleListView2.ColorOut(index, ListViewRed);
+                    SetItemBackgroundColor(index, false, ListViewRed, ItemColumn.All);
                 }
                 else if (!AreTextsEqual(left, right))
                 {
                     addIndexToDifferences = true;
-                    subtitleListView1.SetBackgroundColor(index, ListViewGreen, subtitleListView1.ColumnIndexText);
-                    subtitleListView2.SetBackgroundColor(index, ListViewGreen, subtitleListView2.ColumnIndexText);
+                    SetItemBackgroundColor(index, true, ListViewGreen, ItemColumn.Text);
+                    SetItemBackgroundColor(index, false, ListViewGreen, ItemColumn.Text);
                 }
+
                 if (addIndexToDifferences)
                 {
                     _differences.Add(index);
@@ -131,15 +142,16 @@ public partial class CompareViewModel : ObservableObject
             {
                 Utilities.GetTotalAndChangedWords(left?.Text, right?.Text, ref totalWords, ref wordsChanged, IgnoreWhiteSpace, IgnoreFormatting, ShouldBreakToLetter());
                 var addIndexToDifferences = false;
+
                 if (left == null || left.IsDefault)
                 {
                     addIndexToDifferences = true;
-                    subtitleListView1.ColorOut(index, ListViewRed);
+                    SetItemBackgroundColor(index, true, ListViewRed, ItemColumn.All);
                 }
                 else if (right == null || right.IsDefault)
                 {
                     addIndexToDifferences = true;
-                    subtitleListView2.ColorOut(index, ListViewRed);
+                    SetItemBackgroundColor(index, false, ListViewRed, ItemColumn.All);
                 }
                 else
                 {
@@ -148,10 +160,11 @@ public partial class CompareViewModel : ObservableObject
                     if (columnsAlike == 0)
                     {
                         addIndexToDifferences = true;
-                        subtitleListView1.SetBackgroundColor(index, ListViewGreen);
-                        subtitleListView2.SetBackgroundColor(index, ListViewGreen);
-                        subtitleListView1.SetBackgroundColor(index, subtitleListView1.BackColor, subtitleListView1.ColumnIndexNumber);
-                        subtitleListView2.SetBackgroundColor(index, subtitleListView2.BackColor, subtitleListView2.ColumnIndexNumber);
+                        SetItemBackgroundColor(index, true, ListViewGreen, ItemColumn.All);
+                        SetItemBackgroundColor(index, false, ListViewGreen, ItemColumn.All);
+                        // Keep number column with default background
+                        SetItemBackgroundColor(index, true, TransparentBrush, ItemColumn.Number);
+                        SetItemBackgroundColor(index, false, TransparentBrush, ItemColumn.Number);
                     }
                     else if (columnsAlike < 4)
                     {
@@ -159,36 +172,40 @@ public partial class CompareViewModel : ObservableObject
                         // Start time
                         if (!IsTimeEqual(left.StartTime, right.StartTime))
                         {
-                            subtitleListView1.SetBackgroundColor(index, ListViewGreen, subtitleListView1.ColumnIndexStart);
-                            subtitleListView2.SetBackgroundColor(index, ListViewGreen, subtitleListView2.ColumnIndexStart);
+                            SetItemBackgroundColor(index, true, ListViewGreen, ItemColumn.StartTime);
+                            SetItemBackgroundColor(index, false, ListViewGreen, ItemColumn.StartTime);
                         }
                         // End time
                         if (!IsTimeEqual(left.EndTime, right.EndTime))
                         {
-                            subtitleListView1.SetBackgroundColor(index, ListViewGreen, subtitleListView1.ColumnIndexEnd);
-                            subtitleListView2.SetBackgroundColor(index, ListViewGreen, subtitleListView2.ColumnIndexEnd);
+                            SetItemBackgroundColor(index, true, ListViewGreen, ItemColumn.EndTime);
+                            SetItemBackgroundColor(index, false, ListViewGreen, ItemColumn.EndTime);
                         }
                         // Duration
                         if (!IsTimeEqual(left.Duration, right.Duration))
                         {
-                            subtitleListView1.SetBackgroundColor(index, ListViewGreen, subtitleListView1.ColumnIndexDuration);
-                            subtitleListView2.SetBackgroundColor(index, ListViewGreen, subtitleListView2.ColumnIndexDuration);
+                            // Since we don't have a duration column in the grid, we can highlight the time columns
+                            SetItemBackgroundColor(index, true, ListViewGreen, ItemColumn.StartTime);
+                            SetItemBackgroundColor(index, false, ListViewGreen, ItemColumn.StartTime);
+                            SetItemBackgroundColor(index, true, ListViewGreen, ItemColumn.EndTime);
+                            SetItemBackgroundColor(index, false, ListViewGreen, ItemColumn.EndTime);
                         }
                         // Text
                         else if (!AreTextsEqual(left, right))
                         {
-                            subtitleListView1.SetBackgroundColor(index, ListViewGreen, subtitleListView1.ColumnIndexText);
-                            subtitleListView2.SetBackgroundColor(index, ListViewGreen, subtitleListView2.ColumnIndexText);
+                            SetItemBackgroundColor(index, true, ListViewGreen, ItemColumn.Text);
+                            SetItemBackgroundColor(index, false, ListViewGreen, ItemColumn.Text);
                         }
                     }
                     // Number
                     if (left.Number != right.Number)
                     {
                         addIndexToDifferences = true;
-                        subtitleListView1.SetBackgroundColor(index, Color.FromArgb(255, 200, 100), subtitleListView1.ColumnIndexNumber);
-                        subtitleListView2.SetBackgroundColor(index, Color.FromArgb(255, 200, 100), subtitleListView2.ColumnIndexNumber);
+                        SetItemBackgroundColor(index, true, ListViewOrange, ItemColumn.Number);
+                        SetItemBackgroundColor(index, false, ListViewOrange, ItemColumn.Number);
                     }
                 }
+
                 if (addIndexToDifferences)
                 {
                     _differences.Add(index);
@@ -198,6 +215,64 @@ public partial class CompareViewModel : ObservableObject
                 left = GetLeftItemOrNull(index);
                 right = GetRightItemOrNull(index);
             }
+        }
+    }
+
+    private enum ItemColumn
+    {
+        All,
+        Number,
+        StartTime,
+        EndTime,
+        Text
+    }
+
+    private void SetItemBackgroundColor(int index, bool isLeft, IBrush brush, ItemColumn column)
+    {
+        var collection = isLeft ? LeftSubtitles : RightSubtitles;
+        if (index >= collection.Count) return;
+
+        var item = collection[index];
+
+        switch (column)
+        {
+            case ItemColumn.All:
+                item.NumberBackgroundBrush = brush;
+                item.StartTimeBackgroundBrush = brush;
+                item.EndTimeBackgroundBrush = brush;
+                item.TextBackgroundBrush = brush;
+                break;
+            case ItemColumn.Number:
+                item.NumberBackgroundBrush = brush;
+                break;
+            case ItemColumn.StartTime:
+                item.StartTimeBackgroundBrush = brush;
+                break;
+            case ItemColumn.EndTime:
+                item.EndTimeBackgroundBrush = brush;
+                break;
+            case ItemColumn.Text:
+                item.TextBackgroundBrush = brush;
+                break;
+        }
+    }
+
+    private void ResetAllBackgroundColors()
+    {
+        foreach (var item in LeftSubtitles)
+        {
+            item.NumberBackgroundBrush = TransparentBrush;
+            item.StartTimeBackgroundBrush = TransparentBrush;
+            item.EndTimeBackgroundBrush = TransparentBrush;
+            item.TextBackgroundBrush = TransparentBrush;
+        }
+
+        foreach (var item in RightSubtitles)
+        {
+            item.NumberBackgroundBrush = TransparentBrush;
+            item.StartTimeBackgroundBrush = TransparentBrush;
+            item.EndTimeBackgroundBrush = TransparentBrush;
+            item.TextBackgroundBrush = TransparentBrush;
         }
     }
 
@@ -270,7 +345,7 @@ public partial class CompareViewModel : ObservableObject
     }
 
 
-    private int GetColumnsEqualExceptNumberAndDuration(SubtitleLineViewModel p1, SubtitleLineViewModel p2)
+    private int GetColumnsEqualExceptNumberAndDuration(CompareItem p1, CompareItem p2)
     {
         if (p1 == null || p2 == null)
         {

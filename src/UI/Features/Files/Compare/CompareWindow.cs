@@ -1,6 +1,9 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
+using Avalonia.Layout;
+using Avalonia.Media;
 using Nikse.SubtitleEdit.Features.Files.Compare;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -75,36 +78,105 @@ public class CompareWindow : Window
             Margin = new Thickness(2)
         };
 
-        dg.Columns.Add(new DataGridTextColumn
+        // Number column
+        dg.Columns.Add(new DataGridTemplateColumn
         {
             Header = Se.Language.General.NumberSymbol,
-            Binding = new Binding(nameof(CompareItem.Number)),
             Width = new DataGridLength(50),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
+            CellTemplate = new FuncDataTemplate<CompareItem>((item, ns) =>
+            {
+                var border = new Border
+                {
+                    Padding = new Thickness(4, 2),
+                    [!Border.BackgroundProperty] = new Binding(nameof(CompareItem.NumberBackgroundBrush))
+                };
+
+                var textBlock = new TextBlock
+                {
+                    VerticalAlignment = VerticalAlignment.Center,
+                    [!TextBlock.TextProperty] = new Binding(nameof(CompareItem.Number))
+                };
+
+                border.Child = textBlock;
+                return border;
+            })
         });
 
-        dg.Columns.Add(new DataGridTextColumn
+        // StartTime column
+        dg.Columns.Add(new DataGridTemplateColumn
         {
             Header = Se.Language.General.Show,
-            Binding = new Binding(nameof(CompareItem.StartTime)),
             Width = new DataGridLength(120),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
+            CellTemplate = new FuncDataTemplate<CompareItem>((item, ns) =>
+            {
+                var border = new Border
+                {
+                    Padding = new Thickness(4, 2),
+                    [!Border.BackgroundProperty] = new Binding(nameof(CompareItem.StartTimeBackgroundBrush))
+                };
+
+                var textBlock = new TextBlock
+                {
+                    VerticalAlignment = VerticalAlignment.Center,
+                    [!TextBlock.TextProperty] = new Binding(nameof(CompareItem.StartTime))
+                };
+
+                border.Child = textBlock;
+                return border;
+            })
         });
 
-        dg.Columns.Add(new DataGridTextColumn
+        // EndTime column
+        dg.Columns.Add(new DataGridTemplateColumn
         {
             Header = Se.Language.General.Hide,
-            Binding = new Binding(nameof(CompareItem.EndTime)),
             Width = new DataGridLength(120),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
+            CellTemplate = new FuncDataTemplate<CompareItem>((item, ns) =>
+            {
+                var border = new Border
+                {
+                    Padding = new Thickness(4, 2),
+                    [!Border.BackgroundProperty] = new Binding(nameof(CompareItem.EndTimeBackgroundBrush))
+                };
+
+                var textBlock = new TextBlock
+                {
+                    VerticalAlignment = VerticalAlignment.Center,
+                    [!TextBlock.TextProperty] = new Binding(nameof(CompareItem.EndTime))
+                };
+
+                border.Child = textBlock;
+                return border;
+            })
         });
 
-        dg.Columns.Add(new DataGridTextColumn
+        // Text column
+        dg.Columns.Add(new DataGridTemplateColumn
         {
             Header = Se.Language.General.Text,
-            Binding = new Binding(nameof(CompareItem.Text)),
             Width = new DataGridLength(1, DataGridLengthUnitType.Star),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
+            CellTemplate = new FuncDataTemplate<CompareItem>((item, ns) =>
+            {
+                var border = new Border
+                {
+                    Padding = new Thickness(4, 2),
+                    [!Border.BackgroundProperty] = new Binding(nameof(CompareItem.TextBackgroundBrush))
+                };
+
+                var textBlock = new TextBlock
+                {
+                    VerticalAlignment = VerticalAlignment.Center,
+                    TextWrapping = TextWrapping.Wrap,
+                    [!TextBlock.TextProperty] = new Binding(nameof(CompareItem.Text))
+                };
+
+                border.Child = textBlock;
+                return border;
+            })
         });
 
         dg.Bind(DataGrid.SelectedItemProperty, new Binding(selectedBinding)
@@ -114,4 +186,5 @@ public class CompareWindow : Window
 
         return UiUtil.MakeBorderForControl(dg);
     }
+
 }

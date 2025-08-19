@@ -13,14 +13,13 @@ public partial class CompareItem : ObservableObject
     [ObservableProperty] private TimeSpan _duration;
     [ObservableProperty] private string _text;
     [ObservableProperty] private string _originalText;
-
+    [ObservableProperty] private IBrush _backgroundBrush;
     [ObservableProperty] private IBrush _numberBackgroundBrush;
     [ObservableProperty] private IBrush _startTimeBackgroundBrush;
     [ObservableProperty] private IBrush _endTimeBackgroundBrush;
     [ObservableProperty] private IBrush _textBackgroundBrush;
 
     public bool IsDefault => Text == string.Empty && Number == 0 && Duration == TimeSpan.Zero && StartTime == TimeSpan.Zero;
-
 
     public CompareItem()
     {
@@ -29,6 +28,11 @@ public partial class CompareItem : ObservableObject
         StartTime = TimeSpan.Zero;
         EndTime = TimeSpan.Zero;
         Duration = TimeSpan.Zero;
+        BackgroundBrush = new SolidColorBrush(Colors.Transparent);
+        NumberBackgroundBrush = new SolidColorBrush(Colors.Transparent);
+        StartTimeBackgroundBrush = new SolidColorBrush(Colors.Transparent);
+        EndTimeBackgroundBrush = new SolidColorBrush(Colors.Transparent);
+        TextBackgroundBrush = new SolidColorBrush(Colors.Transparent);
     }
 
     public CompareItem(SubtitleLineViewModel line)
@@ -39,5 +43,10 @@ public partial class CompareItem : ObservableObject
         EndTime = line.EndTime;
         Duration = line.Duration;
         Number = line.Number;
+        BackgroundBrush = new SolidColorBrush(Colors.Transparent);
+        NumberBackgroundBrush = new SolidColorBrush(Colors.Transparent);
+        StartTimeBackgroundBrush = new SolidColorBrush(Colors.Transparent);
+        EndTimeBackgroundBrush = new SolidColorBrush(Colors.Transparent);
+        TextBackgroundBrush = new SolidColorBrush(Colors.Transparent);
     }
 }
