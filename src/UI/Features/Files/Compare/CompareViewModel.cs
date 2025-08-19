@@ -67,7 +67,10 @@ public partial class CompareViewModel : ObservableObject
         _rightLines.AddRange(right.Select(p => new SubtitleLineViewModel(p)));
         RightFileName = rightFileName;
 
-        Compare();
+        Dispatcher.UIThread.Post(() =>
+        {
+            Compare();
+        });
     }
 
     private void Compare()
@@ -496,7 +499,10 @@ public partial class CompareViewModel : ObservableObject
 
         LeftFileName = fileName;
 
-        Compare();
+        Dispatcher.UIThread.Post(() =>
+        {
+            Compare();
+        });
     }
 
     [RelayCommand]
@@ -522,7 +528,10 @@ public partial class CompareViewModel : ObservableObject
 
         RightFileName = fileName;
 
-        Compare();
+        Dispatcher.UIThread.Post(() =>
+        {
+            Compare();
+        });
     }
 
     [RelayCommand]
