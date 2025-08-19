@@ -41,5 +41,6 @@ public class SeAppearance
         ToolbarShowEncoding = false;
         SubtitleTextBoxFontSize = 15d;
         SubtitleTextBoxFontBold = true;
+        ToolbarShowHints = true;
     }
 }
