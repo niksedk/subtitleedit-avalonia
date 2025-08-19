@@ -64,6 +64,8 @@ public static class ShortcutsMain
         { nameof(_mvm.CommandFileNewCommand) , Se.Language.Options.Shortcuts.FileNew },
         { nameof(_mvm.CommandFileSaveCommand) , Se.Language.Options.Shortcuts.FileSave },
         { nameof(_mvm.CommandFileSaveAsCommand) , Se.Language.Options.Shortcuts.FileSaveAs },
+        { nameof(_mvm.ShowStatisticsCommand) , Se.Language.Options.Shortcuts.FileStatistics },
+        { nameof(_mvm.ShowCompareCommand) , Se.Language.Options.Shortcuts.FileCompare },
 
         { nameof(_mvm.UndoCommand) , Se.Language.General.Undo },
         { nameof(_mvm.RedoCommand) , Se.Language.General.Redo },
@@ -116,6 +118,8 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.CommandFileNewCommand, nameof(vm.CommandFileNewCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.CommandFileSaveCommand, nameof(vm.CommandFileSaveCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.CommandFileSaveAsCommand, nameof(vm.CommandFileSaveAsCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowStatisticsCommand, nameof(vm.ShowStatisticsCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowCompareCommand, nameof(vm.ShowCompareCommand), ShortcutCategory.General);
 
         AddShortcut(shortcuts, vm.UndoCommand, nameof(vm.UndoCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.RedoCommand, nameof(vm.RedoCommand), ShortcutCategory.General);

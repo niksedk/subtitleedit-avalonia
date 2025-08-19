@@ -70,6 +70,7 @@ public class LanguageSettingsShortcuts
     public string FileCloseOriginalSubtitle { get; set; }
     public string FileTranslatedSubtitle { get; set; }
     public string FileCompare { get; set; }
+    public string FileStatistics { get; set; }
     public string FileImportPlainText { get; set; }
     public string FileImportBluRaySupForOcr { get; set; }
     public string FileImportBluRaySupForEdit { get; set; }
@@ -181,6 +182,7 @@ public class LanguageSettingsShortcuts
         FileOpenOriginalSubtitle = "Open original subtitle";
         FileCloseOriginalSubtitle = "Close original subtitle";
         FileTranslatedSubtitle = "Translated subtitle";
+        FileStatistics = "Statistics";
         FileCompare = "Compare";
         FileImportPlainText = "Import plain text";
         FileImportBluRaySupForOcr = "Import Blu-ray SUP for OCR";
