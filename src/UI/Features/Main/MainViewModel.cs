@@ -2491,10 +2491,6 @@ public partial class MainViewModel :
                             {
                                 await VideoOpenFile(fileName);
                             }
-                            else
-                            {
-                                // load video?
-                            }
                         }
                     }
                 }
