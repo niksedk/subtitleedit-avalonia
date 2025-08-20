@@ -2810,7 +2810,6 @@ public partial class MainViewModel :
     {
         ShowStatus(Se.Language.Main.ParsingMatroskaFile);
         var sub = matroska.GetSubtitle(matroskaSubtitleInfo.TrackNumber, MatroskaProgress);
-        ResetSubtitle();
 
         _subtitle.Paragraphs.Clear();
         Utilities.LoadMatroskaTextSubtitle(matroskaSubtitleInfo, matroska, sub, _subtitle);

@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
@@ -8,10 +5,14 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.ContainerFormats;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Media;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 
@@ -141,6 +142,27 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
                     Hide = TimeSpan.FromMilliseconds(item.EndTime),
                     Duration = TimeSpan.FromMilliseconds(item.EndTime - item.StartTime),
                     Image = new Image { Source = bitmap.ToAvaloniaBitmap() },
+                };
+                Rows.Add(cue);
+            }
+        }
+        else if (trackinfo.CodecId == MatroskaTrackType.TextSt && subtitles != null && _matroskaFile != null)
+        {
+            var subtitle = new Subtitle();
+            var sub = _matroskaFile.GetSubtitle(trackinfo.TrackNumber, null);
+            Utilities.LoadMatroskaTextSubtitle(trackinfo, _matroskaFile, sub, subtitle);
+            Utilities.ParseMatroskaTextSt(trackinfo, sub, subtitle);
+
+            for (var i = 0; i < 20 && i < subtitle.Paragraphs.Count; i++)
+            {
+                var item = subtitle.Paragraphs[i];
+                var cue = new MatroskaSubtitleCueDisplay()
+                {
+                    Number = i + 1,
+                    Show = item.StartTime.TimeSpan,
+                    Hide = item.EndTime.TimeSpan,
+                    Duration = TimeSpan.FromMilliseconds(item.EndTime.TotalMilliseconds - item.StartTime.TotalMilliseconds),
+                    Text = item.Text,
                 };
                 Rows.Add(cue);
             }

@@ -11,4 +11,8 @@ public class MatroskaTrackType
     public const string AdvancedSubStationAlpha2 = "S_ASS";
 
     public const string BluRay = "S_HDMV/PGS";
+
+    public const string TextSt = "S_HDMV/TEXTST";
+
+
 }
