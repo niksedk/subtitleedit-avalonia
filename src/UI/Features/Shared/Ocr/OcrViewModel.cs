@@ -9,6 +9,7 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4.Boxes;
+using Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream;
 using Nikse.SubtitleEdit.Core.VobSub;
 using Nikse.SubtitleEdit.Core.VobSub.Ocr.Service;
 using Nikse.SubtitleEdit.Features.Main;
@@ -1054,8 +1055,11 @@ public partial class OcrViewModel : ObservableObject
         _ocrSubtitle = new OcrSubtitleVobSub(mergedVobSubPacks);
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
     }
-
-
+    public void Initialize(MatroskaTrackInfo matroskaSubtitleInfo, Subtitle subtitle, List<DvbSubPes> subtitleImages, string fileName)
+    {
+        _ocrSubtitle = new OcrSubtitleMkvDvb(matroskaSubtitleInfo, subtitle, subtitleImages);
+        OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
+    }
 
     public void Initialize(MatroskaTrackInfo matroskaSubtitleInfo, List<BluRaySupParser.PcsData> pcsDataList, string fileName)
     {

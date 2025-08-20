@@ -2586,7 +2586,7 @@ public partial class MainViewModel :
 
         if (matroskaSubtitleInfo.CodecId.Equals("S_DVBSUB", StringComparison.OrdinalIgnoreCase))
         {
-            return LoadDvbFromMatroska(matroskaSubtitleInfo, matroska);
+            return LoadDvbFromMatroska(matroskaSubtitleInfo, matroska, fileName);
         }
 
         if (matroskaSubtitleInfo.CodecId.Equals("S_VOBSUB", StringComparison.OrdinalIgnoreCase))
@@ -2632,11 +2632,10 @@ public partial class MainViewModel :
         return true;
     }
 
-    private bool LoadDvbFromMatroska(MatroskaTrackInfo matroskaSubtitleInfo, MatroskaFile matroska)
+    private bool LoadDvbFromMatroska(MatroskaTrackInfo matroskaSubtitleInfo, MatroskaFile matroska, string fileName)
     {
         ShowStatus(Se.Language.Main.ParsingMatroskaFile);
         var sub = matroska.GetSubtitle(matroskaSubtitleInfo.TrackNumber, MatroskaProgress);
-        ResetSubtitle();
 
         _subtitle.Paragraphs.Clear();
         var subtitleImages = new List<DvbSubPes>();
@@ -2720,41 +2719,26 @@ public partial class MainViewModel :
             }
         }
 
-        //using (var formSubOcr = new VobSubOcr())
-        //{
-        //    formSubOcr.Initialize(subtitle, subtitleImages, Configuration.Settings.VobSubOcr); // TODO: language???
-        //    if (_loading)
-        //    {
-        //        formSubOcr.Icon = (Icon)Icon.Clone();
-        //        formSubOcr.ShowInTaskbar = true;
-        //        formSubOcr.ShowIcon = true;
-        //    }
+        Dispatcher.UIThread.Post(async () =>
+        {
+            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm =>
+            {
+                vm.Initialize(matroskaSubtitleInfo, subtitle, subtitleImages, fileName);
+            });
 
-        //    if (formSubOcr.ShowDialog(this) == DialogResult.OK)
-        //    {
-        //        ResetSubtitle();
-        //        _subtitle.Paragraphs.Clear();
-        //        foreach (var p in formSubOcr.SubtitleFromOcr.Paragraphs)
-        //        {
-        //            _subtitle.Paragraphs.Add(p);
-        //        }
+            if (result.OkPressed)
+            {
+                ResetSubtitle();
+                _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
+                Subtitles.Clear();
+                Subtitles.AddRange(result.OcredSubtitle);
+                Renumber();
+                SelectAndScrollToRow(0);
+                ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
+            }
+        });
 
-        //        UpdateSourceView();
-        //        SubtitleListview1.Fill(_subtitle, _subtitleOriginal);
-        //        _subtitleListViewIndex = -1;
-        //        SubtitleListview1.FirstVisibleIndex = -1;
-        //        SubtitleListview1.SelectIndexAndEnsureVisible(0, true);
-        //        RefreshSelectedParagraph();
-        //        _fileName = Utilities.GetPathAndFileNameWithoutExtension(matroska.Path) + GetCurrentSubtitleFormat().Extension;
-        //        _converted = true;
-        //        SetTitle();
-
-        //        Configuration.Settings.Save();
-        //        return true;
-        //    }
-        //}
-
-        return false;
+        return true;
     }
 
     private async Task<bool> LoadVobSubFromMatroska(MatroskaTrackInfo matroskaSubtitleInfo, MatroskaFile matroska, string fileName)
