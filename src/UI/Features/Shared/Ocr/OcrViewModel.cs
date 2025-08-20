@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.ContainerFormats;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4.Boxes;
 using Nikse.SubtitleEdit.Core.VobSub;
@@ -23,6 +24,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -1041,11 +1043,26 @@ public partial class OcrViewModel : ObservableObject
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
     }
 
-    public void Initialize(Trak mp4SubtitleTrack,  List<Paragraph> paragraphs, string fileName)
+    public void Initialize(Trak mp4SubtitleTrack, List<Paragraph> paragraphs, string fileName)
     {
         _ocrSubtitle = new OcrSubtitleMp4VobSub(mp4SubtitleTrack, paragraphs);
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
     }
+
+    public void Initialize(List<VobSubMergedPack> mergedVobSubPacks, MatroskaTrackInfo matroskaSubtitleInfo)
+    {
+        _ocrSubtitle = new OcrSubtitleVobSub(mergedVobSubPacks);
+        OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
+    }
+
+
+
+    public void Initialize(MatroskaTrackInfo matroskaSubtitleInfo, List<BluRaySupParser.PcsData> pcsDataList, string fileName)
+    {
+        _ocrSubtitle = new OcrSubtitleMkvBluRay(matroskaSubtitleInfo, pcsDataList);
+        OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
+    }
+
 
     internal void EngineSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {

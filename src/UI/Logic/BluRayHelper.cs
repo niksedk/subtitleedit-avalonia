@@ -9,13 +9,13 @@ namespace Nikse.SubtitleEdit.Logic;
 
 public class BluRayHelper : IBluRayHelper
 {
-    public Subtitle LoadBluRaySubFromMatroska(MatroskaTrackInfo track, MatroskaFile matroska, out string errorMessage)
+    public List<BluRaySupParser.PcsData> LoadBluRaySubFromMatroska(MatroskaTrackInfo track, MatroskaFile matroska, out string errorMessage)
     {
         errorMessage = string.Empty;
         if (track.ContentEncodingType == 1)
         {
             errorMessage = "Encrypted content not supported";
-            return new  Subtitle();
+            return new List<BluRaySupParser.PcsData>();
         }
 
         var sub = matroska.GetSubtitle(track.TrackNumber, null);
@@ -79,7 +79,7 @@ public class BluRayHelper : IBluRayHelper
             errorMessage = string.Format("{0} error(s) occurred during extraction of bdsup\r\n\r\n{1}", noOfErrors, lastError);
         }
 
-        return subtitle;
+        return subtitles;
     }
 
     private static bool ContainsBluRayStartSegment(byte[] buffer)

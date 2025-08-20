@@ -65,19 +65,16 @@ using Nikse.SubtitleEdit.Logic.Config.Language;
 using Nikse.SubtitleEdit.Logic.Initializers;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
-using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Tmds.DBus.Protocol;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -2097,7 +2094,7 @@ public partial class MainViewModel :
         {
             if (FileUtil.IsMatroskaFileFast(fileName) && FileUtil.IsMatroskaFile(fileName))
             {
-                ImportSubtitleFromMatroskaFile(fileName, videoFileName);
+                await ImportSubtitleFromMatroskaFile(fileName, videoFileName);
                 return;
             }
 
@@ -2446,7 +2443,7 @@ public partial class MainViewModel :
         }
     }
 
-    private void ImportSubtitleFromMatroskaFile(string fileName, string? videoFileName)
+    private async Task ImportSubtitleFromMatroskaFile(string fileName, string? videoFileName)
     {
         var matroska = new MatroskaFile(fileName);
         var subtitleList = matroska.GetTracks(true);
@@ -2484,7 +2481,7 @@ public partial class MainViewModel :
                 });
                 if (result.OkPressed && result.SelectedMatroskaTrack != null)
                 {
-                    if (LoadMatroskaSubtitle(result.SelectedMatroskaTrack, matroska))
+                    if (await LoadMatroskaSubtitle(result.SelectedMatroskaTrack, matroska, fileName))
                     {
                         _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
 
@@ -2508,7 +2505,7 @@ public partial class MainViewModel :
         else
         {
             var ext = Path.GetExtension(matroska.Path).ToLowerInvariant();
-            if (LoadMatroskaSubtitle(subtitleList[0], matroska))
+            if (await LoadMatroskaSubtitle(subtitleList[0], matroska, fileName))
             {
                 if (!Configuration.Settings.General.DisableVideoAutoLoading)
                 {
@@ -2558,12 +2555,27 @@ public partial class MainViewModel :
         }
     }
 
-    private bool LoadMatroskaSubtitle(MatroskaTrackInfo matroskaSubtitleInfo, MatroskaFile matroska)
+    private async Task<bool> LoadMatroskaSubtitle(MatroskaTrackInfo matroskaSubtitleInfo, MatroskaFile matroska, string fileName)
     {
         if (matroskaSubtitleInfo.CodecId.Equals("S_HDMV/PGS", StringComparison.OrdinalIgnoreCase))
         {
-            var pgsSubtitle =
-                _bluRayHelper.LoadBluRaySubFromMatroska(matroskaSubtitleInfo, matroska, out var errorMessage);
+            var pgsSubtitle = _bluRayHelper.LoadBluRaySubFromMatroska(matroskaSubtitleInfo, matroska, out var errorMessage);
+
+            Dispatcher.UIThread.Post(async () =>
+            {
+                var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm =>
+                {
+                    vm.Initialize(matroskaSubtitleInfo, pgsSubtitle, fileName);
+                });
+
+                if (result.OkPressed)
+                {
+                    _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
+                    Subtitles.Clear();
+                    Subtitles.AddRange(result.OcredSubtitle);
+                }
+            });
+
             return true;
         }
 
@@ -2575,6 +2587,11 @@ public partial class MainViewModel :
         if (matroskaSubtitleInfo.CodecId.Equals("S_DVBSUB", StringComparison.OrdinalIgnoreCase))
         {
             return LoadDvbFromMatroska(matroskaSubtitleInfo, matroska);
+        }
+
+        if (matroskaSubtitleInfo.CodecId.Equals("S_VOBSUB", StringComparison.OrdinalIgnoreCase))
+        {
+            return await LoadVobSubFromMatroska(matroskaSubtitleInfo, matroska, fileName);
         }
 
         var sub = matroska.GetSubtitle(matroskaSubtitleInfo.TrackNumber, null);
@@ -2736,6 +2753,66 @@ public partial class MainViewModel :
         //        return true;
         //    }
         //}
+
+        return false;
+    }
+
+    private async Task<bool> LoadVobSubFromMatroska(MatroskaTrackInfo matroskaSubtitleInfo, MatroskaFile matroska, string fileName)
+    {
+        if (matroskaSubtitleInfo.ContentEncodingType == 1)
+        {
+            var message = "Encrypted VobSub subtitles are not supported.";
+            await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return false;
+        }
+
+        var sub = matroska.GetSubtitle(matroskaSubtitleInfo.TrackNumber, MatroskaProgress);
+        _subtitle.Paragraphs.Clear();
+
+        List<VobSubMergedPack> mergedVobSubPacks = new List<VobSubMergedPack>();
+        var idx = new Core.VobSub.Idx(matroskaSubtitleInfo.GetCodecPrivate().SplitToLines());
+        foreach (var p in sub)
+        {
+            mergedVobSubPacks.Add(new VobSubMergedPack(p.GetData(matroskaSubtitleInfo), TimeSpan.FromMilliseconds(p.Start), 32, null));
+            if (mergedVobSubPacks.Count > 0)
+            {
+                mergedVobSubPacks[mergedVobSubPacks.Count - 1].EndTime = TimeSpan.FromMilliseconds(p.End);
+            }
+
+            // fix overlapping (some versions of Handbrake makes overlapping time codes - thx Hawke)
+            if (mergedVobSubPacks.Count > 1 && mergedVobSubPacks[mergedVobSubPacks.Count - 2].EndTime > mergedVobSubPacks[mergedVobSubPacks.Count - 1].StartTime)
+            {
+                mergedVobSubPacks[mergedVobSubPacks.Count - 2].EndTime = TimeSpan.FromMilliseconds(mergedVobSubPacks[mergedVobSubPacks.Count - 1].StartTime.TotalMilliseconds - 1);
+            }
+        }
+
+        // Remove bad packs
+        for (int i = mergedVobSubPacks.Count - 1; i >= 0; i--)
+        {
+            if (mergedVobSubPacks[i].SubPicture.SubPictureDateSize <= 2)
+            {
+                mergedVobSubPacks.RemoveAt(i);
+            }
+            else if (mergedVobSubPacks[i].SubPicture.SubPictureDateSize <= 67 && mergedVobSubPacks[i].SubPicture.Delay.TotalMilliseconds < 35)
+            {
+                mergedVobSubPacks.RemoveAt(i);
+            }
+        }
+
+        Dispatcher.UIThread.Post(async () =>
+        {
+            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm =>
+            {
+                vm.Initialize(mergedVobSubPacks, matroskaSubtitleInfo);
+            });
+
+            if (result.OkPressed)
+            {
+                _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
+                Subtitles.Clear();
+                Subtitles.AddRange(result.OcredSubtitle);
+            }
+        });
 
         return false;
     }
