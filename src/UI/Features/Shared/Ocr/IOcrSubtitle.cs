@@ -10,5 +10,5 @@ public interface IOcrSubtitle
     SKBitmap GetBitmap(int index);
     TimeSpan GetStartTime(int index);
     TimeSpan GetEndTime(int index);
-    List<Shared.Ocr.OcrSubtitleItem> MakeOcrSubtitleItems();
+    List<OcrSubtitleItem> MakeOcrSubtitleItems();
 }

@@ -5,11 +5,17 @@ using SkiaSharp;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 
-public class BluRayPcsDataList : IOcrSubtitle
+public class OcrSubtitleBluRay : IOcrSubtitle
 {
     public int Count { get; private set; }
 
     private readonly List<BluRaySupParser.PcsData> _pcsDataList;
+
+    public OcrSubtitleBluRay(List<BluRaySupParser.PcsData> pcsDataList)
+    {
+        _pcsDataList = pcsDataList;
+        Count = pcsDataList.Count;
+    }
 
     public SKBitmap GetBitmap(int index)
     {
@@ -26,13 +32,7 @@ public class BluRayPcsDataList : IOcrSubtitle
         return TimeSpan.FromMilliseconds(_pcsDataList[index].EndTime / 90.0);
     }
 
-    public BluRayPcsDataList(List<BluRaySupParser.PcsData> pcsDataList)
-    {
-        _pcsDataList = pcsDataList;
-        Count = pcsDataList.Count;
-    }
-
-    public List<Shared.Ocr.OcrSubtitleItem> MakeOcrSubtitleItems()
+    public List<OcrSubtitleItem> MakeOcrSubtitleItems()
     {
         var ocrSubtitleItems = new List<OcrSubtitleItem>(Count);
         for (var i = 0; i < Count; i++)

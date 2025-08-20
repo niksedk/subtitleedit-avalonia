@@ -11,6 +11,8 @@ using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
+using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
+using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4.Boxes;
 using Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.VobSub;
@@ -67,10 +69,12 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Tmds.DBus.Protocol;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -2116,6 +2120,32 @@ public partial class MainViewModel :
                 }
             }
 
+            if ((ext == ".mp4" || ext == ".m4v" || ext == ".3gp" || ext == ".mov" || ext == ".cmaf") && fileSize > 2000 || ext == ".m4s")
+            {
+                if (!new IsmtDfxp().IsMine(null, fileName))
+                {
+                    await ImportSubtitleFromMp4(fileName);
+                    return;
+                }
+            }
+
+            if (((ext == ".m2ts" || ext == ".ts" || ext == ".tsv" || ext == ".tts" || ext == ".mts") && fileSize > 10000 && FileUtil.IsM2TransportStream(fileName)) ||
+                            (ext == ".textst" && FileUtil.IsMpeg2PrivateStream2(fileName)))
+            {
+                bool isTextSt = false;
+                if (fileSize < 2000000)
+                {
+                    var textSt = new TextST();
+                    isTextSt = textSt.IsMine(null, fileName);
+                }
+
+                if (!isTextSt)
+                {
+                    ImportSubtitleFromTransportStream(fileName);
+                    return;
+                }
+            }
+
             if (FileUtil.IsVobSub(fileName) && ext == ".sub")
             {
                 ImportSubtitleFromVobSubFile(fileName, videoFileName);
@@ -2181,6 +2211,249 @@ public partial class MainViewModel :
         {
             _undoRedoManager.Do(MakeUndoRedoObject(string.Format(Se.Language.General.SubtitleLoadedX, fileName)));
             _undoRedoManager.StartChangeDetection();
+        }
+    }
+
+    private async Task ImportSubtitleFromTransportStream(string fileName)
+    {
+        //ShowStatus(_language.ParsingTransportStream);
+        var tsParser = new TransportStreamParser();
+        tsParser.Parse(fileName, (pos, total) => UpdateProgress(pos, total, string.Format("Parsing {0}", fileName))); // _language.ParsingTransportStreamFile););
+        //ShowStatus(string.Empty);
+        //TaskbarList.SetProgressState(Handle, TaskbarButtonProgressFlags.NoProgress);
+
+        if (tsParser.SubtitlePacketIds.Count == 0 && tsParser.TeletextSubtitlesLookup.Count == 0)
+        {
+            await MessageBox.Show(Window!, Se.Language.General.NoSubtitlesFound, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        if (tsParser.SubtitlePacketIds.Count == 0 && tsParser.TeletextSubtitlesLookup.Count == 1 && tsParser.TeletextSubtitlesLookup.First().Value.Count == 1)
+        {
+            ResetSubtitle();
+            _subtitle = new Subtitle(tsParser.TeletextSubtitlesLookup.First().Value.First().Value);
+            _subtitle.Renumber();
+            Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
+            SelectAndScrollToRow(0);
+            //if (!Configuration.Settings.General.DisableVideoAutoLoading)
+            //{
+            //    OpenVideo(fileName);
+            //}
+
+            //_fileName = Path.GetFileNameWithoutExtension(fileName) + GetCurrentSubtitleFormat().Extension;
+            //_converted = true;
+            //SetTitle();
+            return;
+        }
+
+        int packetId = 0;
+        if (tsParser.SubtitlePacketIds.Count + tsParser.TeletextSubtitlesLookup.Sum(p => p.Value.Count) > 1)
+        {
+            //using (var subChooser = new TransportStreamSubtitleChooser())
+            //{
+            //    subChooser.Initialize(tsParser, fileName);
+            //    if (subChooser.ShowDialog(this) == DialogResult.Cancel)
+            //    {
+            //        return false;
+            //    }
+
+            //    if (subChooser.IsTeletext)
+            //    {
+            //        new SubRip().LoadSubtitle(_subtitle, subChooser.Srt.SplitToLines(), null);
+            //        _subtitle.Renumber();
+            //        SubtitleListview1.Fill(_subtitle);
+            //        SubtitleListview1.SelectIndexAndEnsureVisible(0);
+            //        if (!Configuration.Settings.General.DisableVideoAutoLoading)
+            //        {
+            //            OpenVideo(fileName);
+            //        }
+
+            //        _fileName = Path.GetFileNameWithoutExtension(fileName) + GetCurrentSubtitleFormat().Extension;
+            //        _converted = true;
+            //        SetTitle();
+            //        return true;
+            //    }
+
+            //    packetId = tsParser.SubtitlePacketIds[subChooser.SelectedIndex];
+            //}
+        }
+        else
+        {
+            packetId = tsParser.SubtitlePacketIds[0];
+        }
+
+
+        var subtitles = tsParser.GetDvbSubtitles(packetId);
+        //using (var formSubOcr = new VobSubOcr())
+        //{
+        //    string language = null;
+        //    var programMapTableParser = new ProgramMapTableParser();
+        //    programMapTableParser.Parse(fileName); // get languages
+        //    if (programMapTableParser.GetSubtitlePacketIds().Count > 0)
+        //    {
+        //        language = programMapTableParser.GetSubtitleLanguage(packetId);
+        //    }
+
+        //    formSubOcr.Initialize(subtitles, Configuration.Settings.VobSubOcr, fileName, language);
+        //    if (formSubOcr.ShowDialog(this) == DialogResult.OK)
+        //    {
+        //        MakeHistoryForUndo(_language.BeforeImportingDvdSubtitle);
+
+        //        _subtitle.Paragraphs.Clear();
+        //        SetCurrentFormat(Configuration.Settings.General.DefaultSubtitleFormat);
+        //        foreach (var p in formSubOcr.SubtitleFromOcr.Paragraphs)
+        //        {
+        //            _subtitle.Paragraphs.Add(p);
+        //        }
+
+        //        UpdateSourceView();
+        //        SubtitleListview1.Fill(_subtitle, _subtitleOriginal);
+        //        _subtitleListViewIndex = -1;
+        //        SubtitleListview1.FirstVisibleIndex = -1;
+        //        SubtitleListview1.SelectIndexAndEnsureVisible(0, true);
+
+        //        _fileName = string.Empty;
+        //        if (!string.IsNullOrEmpty(formSubOcr.FileName))
+        //        {
+        //            var currentFormat = GetCurrentSubtitleFormat();
+        //            _fileName = Utilities.GetPathAndFileNameWithoutExtension(formSubOcr.FileName) + currentFormat.Extension;
+        //            if (!Configuration.Settings.General.DisableVideoAutoLoading)
+        //            {
+        //                OpenVideo(fileName);
+        //            }
+
+        //            _converted = true;
+        //        }
+
+        //        SetTitle();
+        //        Configuration.Settings.Save();
+        //        return true;
+        //    }
+        //}
+
+        return;
+    }
+
+    private int _lastProgressPercent = -1;
+
+    private void UpdateProgress(long position, long total, string statusMessage)
+    {
+        var percent = (int)Math.Round(position * 100.0 / total);
+        if (percent == _lastProgressPercent)
+        {
+            return;
+        }
+
+        ShowStatus(string.Format("{0}, {1:0}%", statusMessage, _lastProgressPercent));
+        //TaskbarList.SetProgressValue(Handle, percent, 100);
+        //if (Stopwatch.GetTimestamp() % 10 == 0)
+        //{
+        //    Application.DoEvents();
+        //}
+
+        _lastProgressPercent = percent;
+    }
+
+    private async Task ImportSubtitleFromMp4(string fileName)
+    {
+        var mp4Parser = new MP4Parser(fileName);
+        var mp4SubtitleTracks = mp4Parser.GetSubtitleTracks();
+        if (mp4SubtitleTracks.Count == 0)
+        {
+            if (mp4Parser.VttcSubtitle?.Paragraphs.Count > 0)
+            {
+                ResetSubtitle();
+                _subtitle = mp4Parser.VttcSubtitle;
+                _subtitleFileName = Utilities.GetPathAndFileNameWithoutExtension(fileName) + SelectedSubtitleFormat.Extension;
+                Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
+                ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, _subtitleFileName));
+                SelectAndScrollToRow(0);
+                return;
+            }
+
+            if (mp4Parser.TrunCea608Subtitle?.Paragraphs.Count > 0)
+            {
+                ResetSubtitle();
+                _subtitle = mp4Parser.TrunCea608Subtitle;
+                _subtitleFileName = Utilities.GetPathAndFileNameWithoutExtension(fileName) + SelectedSubtitleFormat.Extension;
+                Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
+                ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, _subtitleFileName));
+                SelectAndScrollToRow(0);
+                return;
+            }
+
+            await MessageBox.Show(Window!, Se.Language.General.NoSubtitlesFound, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        else if (mp4SubtitleTracks.Count == 1)
+        {
+            LoadMp4Subtitle(fileName, mp4SubtitleTracks[0]);
+        }
+        else
+        {
+            //using (var subtitleChooser = new MatroskaSubtitleChooser("mp4"))
+            //{
+            //    subtitleChooser.Initialize(mp4SubtitleTracks);
+            //    if (subtitleChooser.ShowDialog(this) == DialogResult.OK)
+            //    {
+            //        LoadMp4Subtitle(fileName, mp4SubtitleTracks[subtitleChooser.SelectedIndex]);
+            //        return true;
+            //    }
+            //}
+        }
+    }
+
+    private void LoadMp4Subtitle(string fileName, Trak mp4SubtitleTrack)
+    {
+        if (mp4SubtitleTrack.Mdia.IsVobSubSubtitle)
+        {
+            //var subPicturesWithTimeCodes = new List<VobSubOcr.SubPicturesWithSeparateTimeCodes>();
+            //var paragraphs = mp4SubtitleTrack.Mdia.Minf.Stbl.GetParagraphs();
+            //for (int i = 0; i < paragraphs.Count; i++)
+            //{
+            //    if (mp4SubtitleTrack.Mdia.Minf.Stbl.SubPictures.Count > i)
+            //    {
+            //        var start = paragraphs[i].StartTime.TimeSpan;
+            //        var end = paragraphs[i].EndTime.TimeSpan;
+            //        subPicturesWithTimeCodes.Add(new VobSubOcr.SubPicturesWithSeparateTimeCodes(mp4SubtitleTrack.Mdia.Minf.Stbl.SubPictures[i], start, end));
+            //    }
+            //}
+
+            //using (var formSubOcr = new VobSubOcr())
+            //{
+            //    formSubOcr.Initialize(subPicturesWithTimeCodes, Configuration.Settings.VobSubOcr, fileName); // TODO: language???
+            //    if (formSubOcr.ShowDialog(this) == DialogResult.OK)
+            //    {
+            //        MakeHistoryForUndo(_language.BeforeImportFromMatroskaFile);
+            //        _subtitleListViewIndex = -1;
+            //        FileNew();
+            //        foreach (var p in formSubOcr.SubtitleFromOcr.Paragraphs)
+            //        {
+            //            _subtitle.Paragraphs.Add(p);
+            //        }
+
+            //        UpdateSourceView();
+            //        SubtitleListview1.Fill(_subtitle, _subtitleOriginal);
+            //        _subtitleListViewIndex = -1;
+            //        SubtitleListview1.FirstVisibleIndex = -1;
+            //        SubtitleListview1.SelectIndexAndEnsureVisible(0, true);
+
+            //        _fileName = Utilities.GetPathAndFileNameWithoutExtension(fileName) + GetCurrentSubtitleFormat().Extension;
+            //        _converted = true;
+            //        SetTitle();
+
+            //        Configuration.Settings.Save();
+            //    }
+            //}
+        }
+        else
+        {
+            ResetSubtitle();
+            _subtitle.Paragraphs.Clear();
+            _subtitle.Paragraphs.AddRange(mp4SubtitleTrack.Mdia.Minf.Stbl.GetParagraphs());
+            Subtitles.Clear();
+            Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
+            ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, _subtitleFileName));
+            SelectAndScrollToRow(0);
         }
     }
 
@@ -2512,26 +2785,84 @@ public partial class MainViewModel :
         return true;
     }
 
-
-    private void ImportSubtitleFromVobSubFile(string fileName, string? videoFileName)
+    private bool ImportSubtitleFromVobSubFile(string vobSubFileName, string? videoFileName)
     {
-        //var log = new StringBuilder();
-        //var subtitles = VobSubParser.ParseBluRaySup(fileName, log);
-        //if (subtitles.Count > 0)
-        //{
-        //    Dispatcher.UIThread.Post(async () =>
-        //    {
-        //        var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!,
-        //            vm => { vm.Initialize(subtitles, fileName); });
+        var vobSubParser = new VobSubParser(true);
+        string idxFileName = Path.ChangeExtension(vobSubFileName, ".idx");
+        vobSubParser.OpenSubIdx(vobSubFileName, idxFileName);
+        var vobSubMergedPackList = vobSubParser.MergeVobSubPacks();
+        var palette = vobSubParser.IdxPalette;
+        vobSubParser.VobSubPacks.Clear();
 
-        //        if (result.OkPressed)
-        //        {
-        //            _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
-        //            Subtitles.Clear();
-        //            Subtitles.AddRange(result.OcredSubtitle);
-        //        }
-        //    });
-        //}
+        var languageStreamIds = new List<int>();
+        var streamIdDictionary = new Dictionary<int, List<VobSubMergedPack>>();
+        foreach (var pack in vobSubMergedPackList)
+        {
+            if (pack.SubPicture.Delay.TotalMilliseconds > 500 && !languageStreamIds.Contains(pack.StreamId))
+            {
+                languageStreamIds.Add(pack.StreamId);
+            }
+
+            if (!streamIdDictionary.ContainsKey(pack.StreamId))
+            {
+                streamIdDictionary.Add(pack.StreamId, new List<VobSubMergedPack>([pack]));
+            }
+            else
+            {
+                streamIdDictionary[pack.StreamId].Add(pack);
+            }
+        }
+
+        if (languageStreamIds.Count == 0)
+        {
+            return false;
+        }
+
+        if (languageStreamIds.Count > 1)
+        {
+            //using (var chooseLanguage = new DvdSubRipChooseLanguage())
+            //{
+            //    if (ShowInTaskbar)
+            //    {
+            //        chooseLanguage.Icon = (Icon)Icon.Clone();
+            //        chooseLanguage.ShowInTaskbar = true;
+            //        chooseLanguage.ShowIcon = true;
+            //    }
+
+            //    chooseLanguage.Initialize(_vobSubMergedPackList, _palette, vobSubParser.IdxLanguages, string.Empty);
+            //    var form = _main ?? (Form)this;
+            //    if (batchMode)
+            //    {
+            //        chooseLanguage.SelectActive();
+            //        vobSubMergedPackList = chooseLanguage.SelectedVobSubMergedPacks;
+            //        SetTesseractLanguageFromLanguageString(chooseLanguage.SelectedLanguageString);
+            //        _importLanguageString = chooseLanguage.SelectedLanguageString;
+            //        return true;
+            //    }
+
+            //    chooseLanguage.Activate();
+            //    if (chooseLanguage.ShowDialog(form) == DialogResult.OK)
+            //    {
+            //        _vobSubMergedPackList = chooseLanguage.SelectedVobSubMergedPacks;
+            //        SetTesseractLanguageFromLanguageString(chooseLanguage.SelectedLanguageString);
+            //        _importLanguageString = chooseLanguage.SelectedLanguageString;
+            //        return true;
+            //    }
+
+            //    return false;
+            //}
+        }
+
+        var streamId = languageStreamIds.First();
+        Dispatcher.UIThread.Post(async () =>
+        {
+            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm =>
+            {
+                vm.Initialize(streamIdDictionary[streamId], palette, vobSubFileName);
+            });
+        });
+
+        return false;
     }
 
     private void SetSubtitles(Subtitle subtitle)

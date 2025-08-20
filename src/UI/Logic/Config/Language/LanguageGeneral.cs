@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language;
+﻿using Avalonia.Controls;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
 public class LanguageGeneral
 {
@@ -266,6 +268,7 @@ public class LanguageGeneral
     public string SaveChangesMessage { get; set; }
     public string Export { get; set; }
     public string SaveFileAsTitle { get; set; }
+    public string NoSubtitlesFound { get; internal set; }
 
     public LanguageGeneral()
     {
@@ -533,5 +536,6 @@ public class LanguageGeneral
         SaveChangesMessage = "Do you want to save changes to the current subtitle file?";
         Export = "Export";
         SaveFileAsTitle = "Save file as";
+        NoSubtitlesFound = "No subtitles found!";
     }
 }
