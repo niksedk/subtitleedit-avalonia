@@ -185,6 +185,7 @@ public static class ShortcutsMain
             new(nameof(vm.ShowReplaceCommand), new List<string> { commandOrWin, "H" }, ShortcutCategory.General),
             new(nameof(vm.OpenDataFolderCommand), new List<string> { commandOrWin, "Alt", "Shift", "D" }, ShortcutCategory.General),
             new(nameof(vm.CommandFileNewCommand), new List<string> { commandOrWin, "N" }, ShortcutCategory.General),
+            new(nameof(vm.CommandFileOpenCommand), new List<string> { commandOrWin, "O" }, ShortcutCategory.General),
             new(nameof(vm.CommandFileSaveCommand), new List<string> { commandOrWin, "S" }, ShortcutCategory.General),
             new(nameof(vm.TogglePlayPauseCommand), new List<string> { Avalonia.Input.Key.Space.ToString() }, ShortcutCategory.General),
             new(nameof(vm.TogglePlayPause2Command), new List<string> { commandOrWin, Avalonia.Input.Key.Space.ToString() }, ShortcutCategory.General),

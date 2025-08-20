@@ -505,7 +505,7 @@ public partial class MainViewModel :
             if (subtitle == null)
             {
                 var message = "Unknown format?";
-                await MessageBox.Show(Window!, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 _shortcutManager.ClearKeys();
                 return;
             }
@@ -525,7 +525,7 @@ public partial class MainViewModel :
         else
         {
             var message = "The original subtitle does not have the same number of lines as the current subtitle.";
-            await MessageBox.Show(Window!, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         _shortcutManager.ClearKeys();
@@ -2086,7 +2086,7 @@ public partial class MainViewModel :
         if (fileSize < 10)
         {
             var message = fileSize == 0 ? "File size is zero!" : $"File size too small - only {fileSize} bytes";
-            await MessageBox.Show(Window!, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
 
@@ -2141,7 +2141,7 @@ public partial class MainViewModel :
 
                 if (!isTextSt)
                 {
-                    ImportSubtitleFromTransportStream(fileName);
+                    await ImportSubtitleFromTransportStream(fileName);
                     return;
                 }
             }
@@ -2169,7 +2169,7 @@ public partial class MainViewModel :
                 if (subtitle == null)
                 {
                     var message = "Unknown format?";
-                    await MessageBox.Show(Window!, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
             }
@@ -2224,7 +2224,7 @@ public partial class MainViewModel :
 
         if (tsParser.SubtitlePacketIds.Count == 0 && tsParser.TeletextSubtitlesLookup.Count == 0)
         {
-            await MessageBox.Show(Window!, Se.Language.General.NoSubtitlesFound, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            await MessageBox.Show(Window!, Se.Language.General.Error, Se.Language.General.NoSubtitlesFound, MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
 
@@ -2364,9 +2364,10 @@ public partial class MainViewModel :
             {
                 ResetSubtitle();
                 _subtitle = mp4Parser.VttcSubtitle;
+                _subtitle.Renumber();
                 _subtitleFileName = Utilities.GetPathAndFileNameWithoutExtension(fileName) + SelectedSubtitleFormat.Extension;
                 Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
-                ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, _subtitleFileName));
+                ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
                 SelectAndScrollToRow(0);
                 return;
             }
@@ -2375,14 +2376,15 @@ public partial class MainViewModel :
             {
                 ResetSubtitle();
                 _subtitle = mp4Parser.TrunCea608Subtitle;
+                _subtitle.Renumber();
                 _subtitleFileName = Utilities.GetPathAndFileNameWithoutExtension(fileName) + SelectedSubtitleFormat.Extension;
                 Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
-                ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, _subtitleFileName));
+                ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
                 SelectAndScrollToRow(0);
                 return;
             }
 
-            await MessageBox.Show(Window!, Se.Language.General.NoSubtitlesFound, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            await MessageBox.Show(Window!, Se.Language.General.Error, Se.Language.General.NoSubtitlesFound, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         else if (mp4SubtitleTracks.Count == 1)
         {
@@ -2452,7 +2454,8 @@ public partial class MainViewModel :
             _subtitle.Paragraphs.AddRange(mp4SubtitleTrack.Mdia.Minf.Stbl.GetParagraphs());
             Subtitles.Clear();
             Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
-            ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, _subtitleFileName));
+            Renumber();
+            ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
             SelectAndScrollToRow(0);
         }
     }
