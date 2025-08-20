@@ -1,5 +1,4 @@
 using Avalonia;
-using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
@@ -2106,9 +2105,9 @@ public partial class MainViewModel :
                 {
                     Dispatcher.UIThread.Post(async () =>
                     {
-                        var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm => 
-                        { 
-                            vm.Initialize(subtitles, fileName); 
+                        var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm =>
+                        {
+                            vm.Initialize(subtitles, fileName);
                         });
 
                         if (result.OkPressed)
@@ -2475,9 +2474,9 @@ public partial class MainViewModel :
         {
             Dispatcher.UIThread.Post(async void () =>
             {
-                var result = await _windowService.ShowDialogAsync<PickMatroskaTrackWindow, PickMatroskaTrackViewModel>(Window!, vm => 
-                { 
-                    vm.Initialize(matroska, subtitleList, fileName); 
+                var result = await _windowService.ShowDialogAsync<PickMatroskaTrackWindow, PickMatroskaTrackViewModel>(Window!, vm =>
+                {
+                    vm.Initialize(matroska, subtitleList, fileName);
                 });
                 if (result.OkPressed && result.SelectedMatroskaTrack != null)
                 {
