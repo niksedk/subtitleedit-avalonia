@@ -37,6 +37,7 @@ using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.Ocr;
 using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
+using Nikse.SubtitleEdit.Features.Shared.PickMp4Track;
 using Nikse.SubtitleEdit.Features.SpellCheck;
 using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
 using Nikse.SubtitleEdit.Features.Sync.AdjustAllTimes;
@@ -2392,15 +2393,15 @@ public partial class MainViewModel :
         }
         else
         {
-            //using (var subtitleChooser = new MatroskaSubtitleChooser("mp4"))
-            //{
-            //    subtitleChooser.Initialize(mp4SubtitleTracks);
-            //    if (subtitleChooser.ShowDialog(this) == DialogResult.OK)
-            //    {
-            //        LoadMp4Subtitle(fileName, mp4SubtitleTracks[subtitleChooser.SelectedIndex]);
-            //        return true;
-            //    }
-            //}
+            var result = await _windowService.ShowDialogAsync<PickMp4TrackWindow, PickMp4TrackViewModel>(Window!, vm =>
+            {
+                vm.Initialize(mp4SubtitleTracks, fileName);
+            });
+
+            if (result.OkPressed && result.SelectedTrack != null && result.SelectedTrack.Track != null)
+            {
+                LoadMp4Subtitle(fileName, result.SelectedTrack.Track);
+            }
         }
     }
 
@@ -2492,9 +2493,10 @@ public partial class MainViewModel :
         {
             Dispatcher.UIThread.Post(async void () =>
             {
-                var result =
-                    await _windowService.ShowDialogAsync<PickMatroskaTrackWindow, PickMatroskaTrackViewModel>(Window!,
-                        vm => { vm.Initialize(matroska, subtitleList, fileName); });
+                var result = await _windowService.ShowDialogAsync<PickMatroskaTrackWindow, PickMatroskaTrackViewModel>(Window!, vm => 
+                { 
+                    vm.Initialize(matroska, subtitleList, fileName); 
+                });
                 if (result.OkPressed && result.SelectedMatroskaTrack != null)
                 {
                     if (LoadMatroskaSubtitle(result.SelectedMatroskaTrack, matroska))
