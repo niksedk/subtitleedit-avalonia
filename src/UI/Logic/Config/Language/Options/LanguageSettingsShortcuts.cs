@@ -113,7 +113,7 @@ public class LanguageSettingsShortcuts
     public string ResetShortcutsDetail { get; set; }
     public string TogglePlayPause { get; set; }
     public string ToggleLockTimeCodes { get; set; }
-
+    public string Help { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -232,5 +232,6 @@ public class LanguageSettingsShortcuts
         ResetShortcuts = "Reset shortcuts";
         ResetShortcutsDetail = "Do you want to reset all shortcuts to default values?";
         ToggleLockTimeCodes = "Toggle lock time codes";
+        Help = "Help";
     }
 }

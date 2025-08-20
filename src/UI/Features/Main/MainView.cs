@@ -78,6 +78,7 @@ public class MainView : ViewBase
         InitLayout.MakeLayout(this, _vm, Se.Settings.General.LayoutNumber);
         root.Children.Add(_vm.ContentGrid);
 
+        AddHandler(KeyDownEvent, _vm.OnKeyDownHandler, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: false);
         AddHandler(KeyUpEvent, _vm.OnKeyUpHandler, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
 
         return root;

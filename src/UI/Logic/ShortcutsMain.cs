@@ -103,6 +103,7 @@ public static class ShortcutsMain
         { nameof(_mvm.ExtendSelectedToPreviousCommand) ,  Se.Language.General.ExtendSelectedToPrevious },
         { nameof(_mvm.ExtendSelectedToNextCommand) ,  Se.Language.General.ExtendSelectedToNext },
         { nameof(_mvm.ToggleLockTimeCodesCommand) , Se.Language.Options.Shortcuts.ToggleLockTimeCodes },
+        { nameof(_mvm.ShowHelpCommand) , Se.Language.Options.Shortcuts.Help },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -159,6 +160,7 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.ExtendSelectedToPreviousCommand, nameof(vm.ExtendSelectedToPreviousCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ExtendSelectedToNextCommand, nameof(vm.ExtendSelectedToNextCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ToggleLockTimeCodesCommand, nameof(vm.ToggleLockTimeCodesCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowHelpCommand, nameof(vm.ShowHelpCommand), ShortcutCategory.General);
 
         return shortcuts;
     }
@@ -188,6 +190,7 @@ public static class ShortcutsMain
             new(nameof(vm.TogglePlayPause2Command), new List<string> { commandOrWin, Avalonia.Input.Key.Space.ToString() }, ShortcutCategory.General),
             new(nameof(vm.WaveformOneSecondBackCommand), new List<string> { Avalonia.Input.Key.Left.ToString() }, ShortcutCategory.Waveform),
             new(nameof(vm.WaveformOneSecondForwardCommand), new List<string> { Avalonia.Input.Key.Right.ToString() }, ShortcutCategory.Waveform),
+            new(nameof(vm.ShowHelpCommand), new List<string> { Avalonia.Input.Key.F1.ToString() }, ShortcutCategory.General),
        };
     }
 

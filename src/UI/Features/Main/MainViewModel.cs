@@ -3250,13 +3250,13 @@ public partial class MainViewModel :
                typeName.Contains("TextInput");
     }
 
-    public void KeyDown(KeyEventArgs keyEventArgs)
+    internal void OnKeyDownHandler(object? sender, KeyEventArgs keyEventArgs)
     {
         var ticks = Stopwatch.GetTimestamp();
         var timeSpan = TimeSpan.FromTicks(ticks - _lastKeyPressedTicks);
         if (timeSpan.Seconds > 5)
         {
-            _shortcutManager.ClearKeys(); // reset shortcuts if no key pressed for 2 seconds
+            _shortcutManager.ClearKeys(); // reset shortcuts if no key pressed for 5 seconds
         }
 
         _lastKeyPressedTicks = ticks;
