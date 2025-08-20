@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
@@ -64,6 +65,7 @@ using Nikse.SubtitleEdit.Logic.Config.Language;
 using Nikse.SubtitleEdit.Logic.Initializers;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -2107,8 +2109,10 @@ public partial class MainViewModel :
                 {
                     Dispatcher.UIThread.Post(async () =>
                     {
-                        var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!,
-                            vm => { vm.Initialize(subtitles, fileName); });
+                        var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm => 
+                        { 
+                            vm.Initialize(subtitles, fileName); 
+                        });
 
                         if (result.OkPressed)
                         {
@@ -2409,44 +2413,25 @@ public partial class MainViewModel :
     {
         if (mp4SubtitleTrack.Mdia.IsVobSubSubtitle)
         {
-            //var subPicturesWithTimeCodes = new List<VobSubOcr.SubPicturesWithSeparateTimeCodes>();
-            //var paragraphs = mp4SubtitleTrack.Mdia.Minf.Stbl.GetParagraphs();
-            //for (int i = 0; i < paragraphs.Count; i++)
-            //{
-            //    if (mp4SubtitleTrack.Mdia.Minf.Stbl.SubPictures.Count > i)
-            //    {
-            //        var start = paragraphs[i].StartTime.TimeSpan;
-            //        var end = paragraphs[i].EndTime.TimeSpan;
-            //        subPicturesWithTimeCodes.Add(new VobSubOcr.SubPicturesWithSeparateTimeCodes(mp4SubtitleTrack.Mdia.Minf.Stbl.SubPictures[i], start, end));
-            //    }
-            //}
+            Dispatcher.UIThread.Post(async () =>
+            {
+                var paragraphs = mp4SubtitleTrack.Mdia.Minf.Stbl.GetParagraphs();
+                var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm =>
+                {
+                    vm.Initialize(mp4SubtitleTrack, paragraphs, fileName);
+                });
 
-            //using (var formSubOcr = new VobSubOcr())
-            //{
-            //    formSubOcr.Initialize(subPicturesWithTimeCodes, Configuration.Settings.VobSubOcr, fileName); // TODO: language???
-            //    if (formSubOcr.ShowDialog(this) == DialogResult.OK)
-            //    {
-            //        MakeHistoryForUndo(_language.BeforeImportFromMatroskaFile);
-            //        _subtitleListViewIndex = -1;
-            //        FileNew();
-            //        foreach (var p in formSubOcr.SubtitleFromOcr.Paragraphs)
-            //        {
-            //            _subtitle.Paragraphs.Add(p);
-            //        }
-
-            //        UpdateSourceView();
-            //        SubtitleListview1.Fill(_subtitle, _subtitleOriginal);
-            //        _subtitleListViewIndex = -1;
-            //        SubtitleListview1.FirstVisibleIndex = -1;
-            //        SubtitleListview1.SelectIndexAndEnsureVisible(0, true);
-
-            //        _fileName = Utilities.GetPathAndFileNameWithoutExtension(fileName) + GetCurrentSubtitleFormat().Extension;
-            //        _converted = true;
-            //        SetTitle();
-
-            //        Configuration.Settings.Save();
-            //    }
-            //}
+                if (result.OkPressed)
+                {
+                    ResetSubtitle();
+                    _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
+                    Subtitles.Clear();
+                    Subtitles.AddRange(result.OcredSubtitle);
+                    Renumber();
+                    ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
+                    SelectAndScrollToRow(0);
+                }
+            });
         }
         else
         {

@@ -4,6 +4,8 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4.Boxes;
+using Nikse.SubtitleEdit.Logic;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -107,39 +109,28 @@ public partial class PickMp4TrackViewModel : ObservableObject
         Rows.Clear();
         var trackinfo = selectedTrack.Track!;
         var subtitles = trackinfo.Mdia.Minf.Stbl.GetParagraphs();
-        if (selectedTrack.IsVobSubSubtitle)
+        var i = 0;
+        foreach (var item in subtitles)
         {
-            var i = 0;
-            foreach (var item in subtitles)
+            i++;
+            var cue = new Mp4SubtitleCueDisplay()
             {
-                i++;
-                var cue = new Mp4SubtitleCueDisplay()
-                {
-                    Number = i + 1,
-                    Show = item.StartTime.TimeSpan,
-                    Hide = item.EndTime.TimeSpan,
-                    Duration = TimeSpan.FromMilliseconds(item.EndTime.TotalMilliseconds - item.StartTime.TotalMilliseconds),
-                    //Image = new Image { Source = trackinfo.Mdia.Minf.Stbl.SubPictures[i-1].GetBitmap().ToAvaloniaBitmap() },
-                };
-                Rows.Add(cue);
-            }
-        }
-        else
-        {
-            var i = 0;
-            foreach (var item in subtitles)
+                Number = i + 1,
+                Show = item.StartTime.TimeSpan,
+                Hide = item.EndTime.TimeSpan,
+                Duration = TimeSpan.FromMilliseconds(item.EndTime.TotalMilliseconds - item.StartTime.TotalMilliseconds),
+            };
+
+            if (selectedTrack.IsVobSubSubtitle)
             {
-                i++;
-                var cue = new Mp4SubtitleCueDisplay()
-                {
-                    Number = i + 1,
-                    Show = item.StartTime.TimeSpan,
-                    Hide = item.EndTime.TimeSpan,
-                    Duration = TimeSpan.FromMilliseconds(item.EndTime.TotalMilliseconds - item.StartTime.TotalMilliseconds),
-                    Text = item.Text,
-                };
-                Rows.Add(cue);
+                cue.Image = new Image { Source = trackinfo.Mdia.Minf.Stbl.SubPictures[i - 1].GetBitmap(null, SKColors.Transparent, SKColors.Black, SKColors.White, SKColors.Black, false).ToAvaloniaBitmap() };
             }
+            else
+            {
+                cue.Text = item.Text;
+            }
+
+            Rows.Add(cue);
         }
 
         return true;
