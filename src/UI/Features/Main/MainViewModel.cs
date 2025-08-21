@@ -118,6 +118,7 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _isSubtitleGridFlyoutHeaderVisible;
     [ObservableProperty] private bool _showColumnEndTime;
     [ObservableProperty] private bool _lockTimeCodes;
+    [ObservableProperty] private bool _isVideoControlsUndocked;
 
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
@@ -995,11 +996,55 @@ public partial class MainViewModel :
         _shortcutManager.ClearKeys();
     }
 
+    VideoPlayerUndockedViewModel? _videoPlayerUndockedViewModel;
+    AudioVisualizerUndockedViewModel? _audioVisualizerUndockedViewModel;
+    int _beforeUndockLayout;
+
+    [RelayCommand]
+    private void VideoUndockControls()
+    {
+        IsVideoControlsUndocked = true;
+
+        _windowService.ShowWindow<VideoPlayerUndockedWindow, VideoPlayerUndockedViewModel>(async (window, vm) =>
+        {
+            _videoPlayerUndockedViewModel = vm;
+            await vm.Initialize(VideoPlayerControl!, this);
+        });
+
+        _windowService.ShowWindow<AudioVisualizerUndockedWindow, AudioVisualizerUndockedViewModel>((window, vm) =>
+        {
+            _audioVisualizerUndockedViewModel = vm;
+            vm.Initialize(AudioVisualizer!, this);
+        });
+    }
+
+    [RelayCommand]
+    private async Task VideoRedockControls()
+    {
+        IsVideoControlsUndocked = false;
+        // _videoPlayerUndockedViewModel?.Redock();
+        // _audioVisualizerUndockedViewModel?.Redock();
+        var videoFileName = _videoFileName ?? string.Empty;
+        VideoCloseFile();
+        VideoPlayerControl = InitVideoPlayer.MakeVideoPlayer();
+        _videoPlayerUndockedViewModel.Window.Close();
+        _audioVisualizerUndockedViewModel.Window.Close();
+        VideoPlayerControl = null;
+        InitLayout.MakeLayout(MainView!, this, Se.Settings.General.LayoutNumber);
+       
+        Dispatcher.UIThread.Post(async void() =>
+        {
+            await VideoOpenFile(videoFileName);
+        });
+    }
+
     [RelayCommand]
     private async Task ShowSpellCheck()
     {
-        var result = await _windowService.ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(Window!,
-            vm => { vm.Initialize(Subtitles, SelectedSubtitleIndex, this); });
+        var result = await _windowService.ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(Window!, vm => 
+        { 
+            vm.Initialize(Subtitles, SelectedSubtitleIndex, this); 
+        });
 
         if (result.OkPressed && result.TotalChangedWords > 0)
         {

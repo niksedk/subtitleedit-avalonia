@@ -99,6 +99,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<AdjustDurationViewModel>();
         collection.AddTransient<AlignmentPickerViewModel>();
         collection.AddTransient<AudioToTextWhisperViewModel>();
+        collection.AddTransient<AudioVisualizerUndockedViewModel>();
         collection.AddTransient<AutoTranslateViewModel>();
         collection.AddTransient<BatchConvertSettingsViewModel>();
         collection.AddTransient<BatchConvertViewModel>();
@@ -173,6 +174,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<TranslateSettingsViewModel>();
         collection.AddTransient<TransparentSettingsViewModel>();
         collection.AddTransient<TransparentSubtitlesViewModel>();
+        collection.AddTransient<VideoPlayerUndockedViewModel>();
         collection.AddTransient<VisualSyncViewModel>();
         collection.AddTransient<VoiceSettingsViewModel>();
         collection.AddTransient<WhisperAdvancedViewModel>();

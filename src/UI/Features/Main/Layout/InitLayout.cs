@@ -76,7 +76,7 @@ public static partial class InitLayout
         // Right part of nested grid
         var nestedRight = new Border
         {
-            Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
+            Child = InitVideoPlayer.MakeLayoutVideoPlayer(vm),
         };
         Grid.SetColumn(nestedRight, 2);
         nestedGrid.Children.Add(nestedRight);
@@ -97,7 +97,7 @@ public static partial class InitLayout
         // Bottom content
         var bottomContent = new Border
         {
-            Child = InitWaveform.MakeWaveform(mainPage, vm),
+            Child = InitWaveform.MakeWaveform(vm),
         };
         Grid.SetRow(bottomContent, 2);
         contentGrid.Children.Add(bottomContent);
@@ -142,7 +142,7 @@ public static partial class InitLayout
         // Left part of nested grid
         var nestedLeft = new Border
         {
-            Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
+            Child = InitVideoPlayer.MakeLayoutVideoPlayer(vm),
         };
         Grid.SetColumn(nestedLeft, 0);
         nestedGrid.Children.Add(nestedLeft);
@@ -181,7 +181,7 @@ public static partial class InitLayout
         // Bottom content
         var bottomContent = new Border
         {
-            Child = InitWaveform.MakeWaveform(mainPage, vm),
+            Child = InitWaveform.MakeWaveform(vm),
         };
         Grid.SetRow(bottomContent, 2);
         contentGrid.Children.Add(bottomContent);
@@ -244,7 +244,7 @@ public static partial class InitLayout
         // Bottom part of nested grid
         var nestedBottom = new Border
         {
-            Child = InitWaveform.MakeWaveform(mainPage, vm),
+            Child = InitWaveform.MakeWaveform(vm),
         };
         Grid.SetRow(nestedBottom, 2);
         nestedGrid.Children.Add(nestedBottom);
@@ -265,7 +265,7 @@ public static partial class InitLayout
         // Right content
         var rightContent = new Border
         {
-            Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
+            Child = InitVideoPlayer.MakeLayoutVideoPlayer(vm),
         };
         Grid.SetColumn(rightContent, 2);
         contentGrid.Children.Add(rightContent);
@@ -291,7 +291,7 @@ public static partial class InitLayout
         // Left content (single panel, no splitter)
         var leftContent = new Border
         {
-            Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
+            Child = InitVideoPlayer.MakeLayoutVideoPlayer(vm),
         };
         Grid.SetColumn(leftContent, 0);
         contentGrid.Children.Add(leftContent);
@@ -343,7 +343,7 @@ public static partial class InitLayout
         // Bottom part of right nested grid
         var rightNestedBottom = new Border
         {
-            Child = InitWaveform.MakeWaveform(mainPage, vm),
+            Child = InitWaveform.MakeWaveform(vm),
         };
         Grid.SetRow(rightNestedBottom, 2);
         rightNestedGrid.Children.Add(rightNestedBottom);
@@ -374,7 +374,7 @@ public static partial class InitLayout
         // Top section
         var topContent = new Border
         {
-            Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
+            Child = InitVideoPlayer.MakeLayoutVideoPlayer(vm),
         };
         Grid.SetRow(topContent, 0);
         contentGrid.Children.Add(topContent);
@@ -410,7 +410,7 @@ public static partial class InitLayout
         // Bottom section
         var bottomContent = new Border
         {
-            Child = InitWaveform.MakeWaveform(mainPage, vm),
+            Child = InitWaveform.MakeWaveform(vm),
         };
         Grid.SetRow(bottomContent, 4);
         contentGrid.Children.Add(bottomContent);
@@ -463,7 +463,7 @@ public static partial class InitLayout
         // Bottom section
         var bottomContent = new Border
         {
-            Child = InitWaveform.MakeWaveform(mainPage, vm),
+            Child = InitWaveform.MakeWaveform(vm),
         };
         Grid.SetRow(bottomContent, 2);
         contentGrid.Children.Add(bottomContent);
@@ -507,7 +507,7 @@ public static partial class InitLayout
         // Right section
         var rightContent = new Border
         {
-            Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
+            Child = InitVideoPlayer.MakeLayoutVideoPlayer(vm),
         };
         Grid.SetColumn(rightContent, 2);
         contentGrid.Children.Add(rightContent);
@@ -551,7 +551,7 @@ public static partial class InitLayout
         // Bottom section
         var bottomContent = new Border
         {
-            Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
+            Child = InitVideoPlayer.MakeLayoutVideoPlayer(vm),
         };
         Grid.SetRow(bottomContent, 2);
         contentGrid.Children.Add(bottomContent);
@@ -577,7 +577,7 @@ public static partial class InitLayout
         // Top section
         var topContent = new Border
         {
-            Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
+            Child = InitVideoPlayer.MakeLayoutVideoPlayer(vm),
         };
         Grid.SetRow(topContent, 0);
         contentGrid.Children.Add(topContent);
@@ -637,7 +637,7 @@ public static partial class InitLayout
         // Left part of nested grid
         var nestedLeft = new Border
         {
-            Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
+            Child = InitVideoPlayer.MakeLayoutVideoPlayer(vm),
         };
         Grid.SetColumn(nestedLeft, 0);
         nestedGrid.Children.Add(nestedLeft);
@@ -655,7 +655,7 @@ public static partial class InitLayout
         // Right part of nested grid
         var nestedRight = new Border
         {
-            Child = InitWaveform.MakeWaveform(mainPage, vm),
+            Child = InitWaveform.MakeWaveform(vm),
         };
         Grid.SetColumn(nestedRight, 2);
         nestedGrid.Children.Add(nestedRight);
@@ -704,7 +704,7 @@ public static partial class InitLayout
         // Top section
         var topContent = new Border
         {
-            Child = InitVideoPlayer.MakeLayoutVideoPlayer(mainPage, vm),
+            Child = InitVideoPlayer.MakeLayoutVideoPlayer(vm),
         };
         Grid.SetRow(topContent, 0);
         contentGrid.Children.Add(topContent);
@@ -722,7 +722,7 @@ public static partial class InitLayout
         // Middle section
         var middleContent = new Border
         {
-            Child = InitWaveform.MakeWaveform(mainPage, vm),
+            Child = InitWaveform.MakeWaveform(vm),
         };
         Grid.SetRow(middleContent, 2);
         contentGrid.Children.Add(middleContent);

@@ -1,5 +1,4 @@
-﻿using System;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
@@ -10,7 +9,7 @@ namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
 public static class InitVideoPlayer
 {
-    public static Grid MakeLayoutVideoPlayer(MainView mainPage, MainViewModel vm)
+    public static Grid MakeLayoutVideoPlayer(MainViewModel vm)
     {
         var mainGrid = new Grid
         {

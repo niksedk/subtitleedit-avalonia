@@ -78,15 +78,23 @@ namespace Nikse.SubtitleEdit.Logic
         }
 
         /// <inheritdoc />
-        public TViewModel ShowWindow<T, TViewModel>(Action<T, TViewModel>? configure = null)
+        public TViewModel ShowWindow<T, TViewModel>(Action<T, TViewModel>? configureViewModel = null)
             where T : Window
             where TViewModel : class
         {
             var viewModel = _serviceProvider.GetRequiredService<TViewModel>();
-            var window = CreateWindow<T>();
 
-            window.DataContext = viewModel;
-            configure?.Invoke(window, viewModel);
+            // Create the window using reflection, passing in the viewModel
+            var w = Activator.CreateInstance(typeof(T), viewModel);
+            if (w == null)
+            {
+                throw new InvalidOperationException($"Failed to create window of type {typeof(T).Name} with constructor param {typeof(TViewModel).Name}");
+            }
+
+            var window = (T)w;
+            configureViewModel?.Invoke(window, viewModel);
+
+            window.WindowStartupLocation = WindowStartupLocation.CenterOwner; //TODO: does this work on mac?
             window.Show();
             window.Focus();
 

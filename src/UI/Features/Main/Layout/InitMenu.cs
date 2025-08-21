@@ -289,7 +289,19 @@ public static class InitMenu
                     Header = l.GenerateTransparent,
                     Command = vm.ShowVideoTransparentSubtitlesCommand,
                 },
-
+                new Separator(),
+                new MenuItem
+                {
+                    Header = l.UndockVideoControls,
+                    Command = vm.VideoUndockControlsCommand,
+                    [!MenuItem.IsVisibleProperty] = new Binding(nameof(vm.IsVideoControlsUndocked)) {  Converter = new InverseBooleanConverter() },
+                },
+                new MenuItem
+                {
+                    Header = l.DockVideoControls,
+                    Command = vm.VideoRedockControlsCommand,
+                    [!MenuItem.IsVisibleProperty] = new Binding(nameof(vm.IsVideoControlsUndocked)),
+                },
 
                 new MenuItem
                 {

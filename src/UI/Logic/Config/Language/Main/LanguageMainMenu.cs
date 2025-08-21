@@ -12,6 +12,8 @@ public class LanguageMainMenu
     public string RestoreAutoBackup { get; set; }
     public string Save { get; set; }
     public string SaveAs { get; set; }
+    public string Compare { get; set; }
+    public string Statistics { get; set; }
     public string Export { get; set; }
     public string Exit { get; set; }
 
@@ -46,11 +48,14 @@ public class LanguageMainMenu
     public string TextToSpeech { get; set; }
     public string GenerateBurnIn { get; set; }
     public string GenerateTransparent { get; set; }
+    public object UndockVideoControls { get; set; }
+    public object DockVideoControls { get; set; }
 
     public string Synchronization { get; set; }
     public string AdjustAllTimes { get; set; }
     public string ChangeFrameRate { get; set; }
     public string ChangeSpeed { get; set; }
+    public string VisualSync { get; set; }
 
 
     public string Options { get; set; }
@@ -65,9 +70,6 @@ public class LanguageMainMenu
     public string HelpTitle { get; set; }
     public string Help { get; set; }
     public string About { get; set; }
-    public string VisualSync { get; set; }
-    public string Compare { get; set; }
-    public string Statistics { get; set; }
 
     public LanguageMainMenu()
     {
@@ -113,6 +115,8 @@ public class LanguageMainMenu
         CloseVideoFile = "_Close video file";
         SpeechToText = "_Speech to text...";
         TextToSpeech = "_Text to speech...";
+        UndockVideoControls = "_Undock video controls";
+        DockVideoControls = "_Dock video controls";
         GenerateBurnIn = "Generate video with _burned-in subtitles...";
         GenerateTransparent = "_Generate transparent video with subtitles...";
 

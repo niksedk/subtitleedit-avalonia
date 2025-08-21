@@ -14,7 +14,7 @@ namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
 public class InitWaveform
 {
-    public static Grid MakeWaveform(MainView mainPage, MainViewModel vm)
+    public static Grid MakeWaveform(MainViewModel vm)
     {
         // Create main layout grid
         var mainGrid = new Grid
