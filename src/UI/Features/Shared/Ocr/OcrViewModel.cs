@@ -9,6 +9,7 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4.Boxes;
 using Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream;
+using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Core.VobSub;
 using Nikse.SubtitleEdit.Core.VobSub.Ocr.Service;
 using Nikse.SubtitleEdit.Features.Main;
@@ -1065,6 +1066,17 @@ public partial class OcrViewModel : ObservableObject
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
     }
 
+    public void Initialize(IList<IBinaryParagraphWithPosition> list, string fileName)
+    {
+        _ocrSubtitle = new OcrSubtitleIBinaryParagrap(list);
+        OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
+    }
+
+    public void InitializeBdn(Subtitle subtitle, string fileName, bool isSon)
+    {
+        _ocrSubtitle = new OcrSubtitleBdn(subtitle, fileName, isSon);
+        OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
+    }
 
     internal void EngineSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {

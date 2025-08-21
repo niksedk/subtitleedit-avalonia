@@ -5,15 +5,18 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DynamicData;
 using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.ContainerFormats.MaterialExchangeFormat;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4.Boxes;
 using Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream;
+using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.VobSub;
 using Nikse.SubtitleEdit.Features.Edit.Find;
@@ -74,6 +77,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static Nikse.SubtitleEdit.Core.SubtitleFormats.TextST;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -131,6 +135,7 @@ public partial class MainViewModel :
     private bool _updateAudioVisualizer;
     private string? _subtitleFileName;
     private string? _subtitleFileNameOriginal;
+    private bool _converted;
     private Subtitle _subtitle;
     private SubtitleFormat? _lastOpenSaveFormat;
     private string? _videoFileName;
@@ -460,6 +465,7 @@ public partial class MainViewModel :
     private void ResetSubtitle()
     {
         ShowColumnOriginalText = false;
+        _subtitle.Paragraphs.Clear(); // TODO: remove variable?
         Subtitles.Clear();
         SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(f => f.FriendlyName == Se.Settings.General.DefaultSubtitleFormat) ?? SubtitleFormats[0];
         SelectedEncoding = Encodings.FirstOrDefault(p => p.DisplayName == Se.Settings.General.DefaultEncoding) ?? Encodings[0];
@@ -2153,6 +2159,36 @@ public partial class MainViewModel :
                 return;
             }
 
+            if (ext == ".ismt" || ext == ".mp4" || ext == ".m4v" || ext == ".mov" || ext == ".3gp" || ext == ".cmaf" || ext == ".m4s")
+            {
+                var f = new IsmtDfxp();
+                if (f.IsMine(null, fileName))
+                {
+                    f.LoadSubtitle(_subtitle, null, fileName);
+
+                    if (_subtitle.OriginalFormat?.Name == new TimedTextBase64Image().Name)
+                    {
+                        ImportAndInlineBase64(_subtitle, fileName);
+                        return;
+                    }
+
+                    if (_subtitle.OriginalFormat?.Name == new TimedTextImage().Name)
+                    {
+                        ImportAndOcrDost(fileName, _subtitle);
+                        return;
+                    }
+
+                    ResetSubtitle();
+                    _subtitleFileName = Utilities.GetPathAndFileNameWithoutExtension(fileName) + SelectedSubtitleFormat.Extension;
+                    _subtitle.Renumber();
+                    Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
+                    ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
+                    SelectAndScrollToRow(0);
+                    _converted = true;
+                    return;
+                }
+            }
+
             var subtitle = Subtitle.Parse(fileName);
             if (subtitle == null)
             {
@@ -2215,6 +2251,89 @@ public partial class MainViewModel :
         }
     }
 
+    private void ImportAndOcrDost(string fileName, Subtitle subtitle)
+    {
+        Dispatcher.UIThread.Post(async () =>
+        {
+            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm =>
+            {
+                vm.InitializeBdn(subtitle, fileName, false);
+            });
+
+            if (result.OkPressed)
+            {
+                ResetSubtitle();
+                _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
+                _converted = true;
+                _subtitle.Paragraphs.Clear();
+                Subtitles.Clear();
+                Subtitles.AddRange(result.OcredSubtitle);
+                Renumber();
+                ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
+                SelectAndScrollToRow(0);
+            }
+        });
+    }
+
+    private void ImportAndInlineBase64(Subtitle subtitle, string fileName)
+    {
+        IList<IBinaryParagraphWithPosition> list = new List<IBinaryParagraphWithPosition>();
+        foreach (var p in subtitle.Paragraphs)
+        {
+            var x = new TimedTextBase64Image.Base64PngImage()
+            {
+                Text = p.Text,
+                StartTimeCode = p.StartTime,
+                EndTimeCode = p.EndTime,
+            };
+
+            using (var bitmap = x.GetBitmap())
+            {
+                var nikseBmp = new NikseBitmap(bitmap);
+                var nonTransparentHeight = nikseBmp.GetNonTransparentHeight();
+                if (nonTransparentHeight > 1)
+                {
+                    list.Add(x);
+                }
+            }
+        }
+
+        if (list.Count == 0)
+        {
+            Dispatcher.UIThread.Post(async void () =>
+            {
+                await MessageBox.Show(
+                   Window!,
+                   Se.Language.General.Error,
+                   Se.Language.General.NoSubtitlesFound,
+                   MessageBoxButtons.OK,
+                   MessageBoxIcon.Error);
+            });
+            return;
+        }
+
+        Dispatcher.UIThread.Post(async () =>
+        {
+            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm =>
+            {
+                vm.Initialize(list, fileName);
+            });
+
+            if (result.OkPressed)
+            {
+                ResetSubtitle();
+                _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
+                _converted = true;
+                _subtitle.Paragraphs.Clear();
+                Subtitles.Clear();
+                Subtitles.AddRange(result.OcredSubtitle);
+                Renumber();
+                ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
+                SelectAndScrollToRow(0);
+            }
+        });
+    }
+
     private async Task ImportSubtitleFromTransportStream(string fileName)
     {
         //ShowStatus(_language.ParsingTransportStream);
@@ -2241,9 +2360,8 @@ public partial class MainViewModel :
             //    OpenVideo(fileName);
             //}
 
-            //_fileName = Path.GetFileNameWithoutExtension(fileName) + GetCurrentSubtitleFormat().Extension;
-            //_converted = true;
-            //SetTitle();
+            _subtitleFileName = Path.GetFileNameWithoutExtension(fileName) + SelectedSubtitleFormat.Extension;
+            _converted = true;
             return;
         }
 
