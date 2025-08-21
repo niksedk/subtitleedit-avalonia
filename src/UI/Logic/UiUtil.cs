@@ -1590,7 +1590,7 @@ public static class UiUtil
         {
             return;
         }
-        // Existing styles
+
         Application.Current.Styles.Add(new Style(x => x.OfType<TextBlock>())
         {
             Setters =
@@ -1607,7 +1607,6 @@ public static class UiUtil
                 }
         });
 
-        // Add Button style
         Application.Current.Styles.Add(new Style(x => x.OfType<Button>())
         {
             Setters =
@@ -1616,7 +1615,6 @@ public static class UiUtil
                 }
         });
 
-        // Add MenuItem style
         Application.Current.Styles.Add(new Style(x => x.OfType<Avalonia.Controls.MenuItem>())
         {
             Setters =
@@ -1625,7 +1623,6 @@ public static class UiUtil
                 }
         });
 
-        // Add other common controls
         Application.Current.Styles.Add(new Style(x => x.OfType<Label>())
         {
             Setters =
