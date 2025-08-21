@@ -8,8 +8,6 @@ using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Styling;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Features.Video.BlankVideo;
-using Nikse.SubtitleEdit.Features.Video.CutVideo;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 using SkiaSharp;
@@ -1584,5 +1582,64 @@ public static class UiUtil
         {
             Application.Current!.RequestedThemeVariant = ThemeVariant.Light;
         }
+    }
+
+    public static void SetFontName(string fontName)
+    {
+        if (Application.Current == null || string.IsNullOrEmpty(Se.Settings.Appearance.FontName))
+        {
+            return;
+        }
+        // Existing styles
+        Application.Current.Styles.Add(new Style(x => x.OfType<TextBlock>())
+        {
+            Setters =
+                {
+                    new Setter(TextBlock.FontFamilyProperty, new FontFamily(fontName)),
+                }
+        });
+
+        Application.Current.Styles.Add(new Style(x => x.OfType<TextBox>())
+        {
+            Setters =
+                {
+                    new Setter(TextBox.FontFamilyProperty, new FontFamily(fontName)),
+                }
+        });
+
+        // Add Button style
+        Application.Current.Styles.Add(new Style(x => x.OfType<Button>())
+        {
+            Setters =
+                {
+                    new Setter(Button.FontFamilyProperty, new FontFamily(fontName)),
+                }
+        });
+
+        // Add MenuItem style
+        Application.Current.Styles.Add(new Style(x => x.OfType<Avalonia.Controls.MenuItem>())
+        {
+            Setters =
+                {
+                    new Setter(Avalonia.Controls.MenuItem.FontFamilyProperty, new FontFamily(fontName)),
+                }
+        });
+
+        // Add other common controls
+        Application.Current.Styles.Add(new Style(x => x.OfType<Label>())
+        {
+            Setters =
+                {
+                    new Setter(Label.FontFamilyProperty, new FontFamily(fontName)),
+                }
+        });
+
+        Application.Current.Styles.Add(new Style(x => x.OfType<ComboBox>())
+        {
+            Setters =
+                {
+                    new Setter(ComboBox.FontFamilyProperty, new FontFamily(fontName)),
+                }
+        });
     }
 }

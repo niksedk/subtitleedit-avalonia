@@ -1194,10 +1194,8 @@ public partial class MainViewModel :
             return;
         }
 
-        if (oldTheme != viewModel.SelectedTheme)
-        {
-            UiUtil.SetCurrentTheme();
-        }
+        UiUtil.SetFontName(Se.Settings.Appearance.FontName);
+        UiUtil.SetCurrentTheme();
 
         if (Toolbar is Border toolbarBorder)
         {
@@ -1229,7 +1227,7 @@ public partial class MainViewModel :
         _autoBackupService.StartAutoBackup(this);
 
         _updateAudioVisualizer = true;
-        _shortcutManager.ClearKeys();
+        _shortcutManager.ClearKeys();       
     }
 
     [RelayCommand]
