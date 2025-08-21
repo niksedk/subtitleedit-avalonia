@@ -13,7 +13,7 @@ public static class InitVideoPlayer
     {
         var mainGrid = new Grid
         {
-            RowDefinitions = new RowDefinitions("*"), 
+            RowDefinitions = new RowDefinitions("*"),
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
             Margin = new Thickness(0),
@@ -70,7 +70,7 @@ public static class InitVideoPlayer
                     FullScreenIsVisible = Se.Settings.Video.ShowFullscreenButton,
                 };
             }
-            catch 
+            catch
             {
                 var videoPlayerInstanceNone = new VideoPlayerInstanceNone();
                 control = new VideoPlayerControl(videoPlayerInstanceNone)

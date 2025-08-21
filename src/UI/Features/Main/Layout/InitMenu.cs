@@ -294,13 +294,13 @@ public static class InitMenu
                 {
                     Header = l.UndockVideoControls,
                     Command = vm.VideoUndockControlsCommand,
-                    [!MenuItem.IsVisibleProperty] = new Binding(nameof(vm.IsVideoControlsUndocked)) {  Converter = new InverseBooleanConverter() },
+                    [!MenuItem.IsVisibleProperty] = new Binding(nameof(vm.AreVideoControlsUndocked)) {  Converter = new InverseBooleanConverter() },
                 },
                 new MenuItem
                 {
                     Header = l.DockVideoControls,
                     Command = vm.VideoRedockControlsCommand,
-                    [!MenuItem.IsVisibleProperty] = new Binding(nameof(vm.IsVideoControlsUndocked)),
+                    [!MenuItem.IsVisibleProperty] = new Binding(nameof(vm.AreVideoControlsUndocked)),
                 },
 
                 new MenuItem

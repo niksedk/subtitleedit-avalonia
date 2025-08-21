@@ -118,7 +118,7 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _isSubtitleGridFlyoutHeaderVisible;
     [ObservableProperty] private bool _showColumnEndTime;
     [ObservableProperty] private bool _lockTimeCodes;
-    [ObservableProperty] private bool _isVideoControlsUndocked;
+    [ObservableProperty] private bool _areVideoControlsUndocked;
 
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
@@ -360,11 +360,18 @@ public partial class MainViewModel :
     private async Task CommandShowLayout()
     {
         // Open a dialog with a specific ViewModel and get the result
-        var vm = await _windowService.ShowDialogAsync<LayoutWindow, LayoutViewModel>(Window!,
-            viewModel => { viewModel.SelectedLayout = Se.Settings.General.LayoutNumber; });
+        var vm = await _windowService.ShowDialogAsync<LayoutWindow, LayoutViewModel>(Window!, viewModel => 
+        { 
+            viewModel.SelectedLayout = Se.Settings.General.LayoutNumber; 
+        });
 
         if (vm.OkPressed && vm.SelectedLayout != null && vm.SelectedLayout != Se.Settings.General.LayoutNumber)
         {
+            if (AreVideoControlsUndocked)
+            {
+                await VideoRedockControls();
+            }
+
             Se.Settings.General.LayoutNumber = InitLayout.MakeLayout(MainView!, this, vm.SelectedLayout.Value);
         }
 
@@ -1003,7 +1010,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private void VideoUndockControls()
     {
-        IsVideoControlsUndocked = true;
+        AreVideoControlsUndocked = true;
 
         _windowService.ShowWindow<VideoPlayerUndockedWindow, VideoPlayerUndockedViewModel>(async (window, vm) =>
         {
@@ -1023,7 +1030,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task VideoRedockControls()
     {
-        IsVideoControlsUndocked = false;
+        AreVideoControlsUndocked = false;
         var videoFileName = _videoFileName ?? string.Empty;
         VideoCloseFile();
         VideoPlayerControl = InitVideoPlayer.MakeVideoPlayer();
