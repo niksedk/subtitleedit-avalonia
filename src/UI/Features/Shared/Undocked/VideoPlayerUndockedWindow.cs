@@ -12,7 +12,7 @@ public class VideoPlayerUndockedWindow : Window
         _vm = vm;
         vm.Window = this;
         Icon = UiUtil.GetSeIcon();
-        Title = "Video player undocked";
+        Title = "Video player";
         MinWidth = 400;
         MinHeight = 200;
         Width = 800;

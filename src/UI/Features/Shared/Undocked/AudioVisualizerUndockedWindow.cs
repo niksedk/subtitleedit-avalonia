@@ -12,7 +12,7 @@ public class AudioVisualizerUndockedWindow : Window
         _vm = vm;
         vm.Window = this;
         Icon = UiUtil.GetSeIcon();
-        Title = "Video player undocked";
+        Title = "Audio visualizer";
         MinWidth = 400;
         MinHeight = 100;
         Width = 800;

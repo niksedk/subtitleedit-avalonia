@@ -1016,14 +1016,14 @@ public partial class MainViewModel :
             _audioVisualizerUndockedViewModel = vm;
             vm.Initialize(AudioVisualizer!, this);
         });
+
+        InitLayout.MakeLayout12KeepVideo(MainView!, this);
     }
 
     [RelayCommand]
     private async Task VideoRedockControls()
     {
         IsVideoControlsUndocked = false;
-        // _videoPlayerUndockedViewModel?.Redock();
-        // _audioVisualizerUndockedViewModel?.Redock();
         var videoFileName = _videoFileName ?? string.Empty;
         VideoCloseFile();
         VideoPlayerControl = InitVideoPlayer.MakeVideoPlayer();

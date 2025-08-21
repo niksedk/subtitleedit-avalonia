@@ -767,4 +767,11 @@ public static partial class InitLayout
 
         return 12;
     }
+
+    internal static void MakeLayout12KeepVideo(MainView mainPage, MainViewModel vm)
+    {
+
+        vm.ContentGrid.Children.Clear();
+        vm.ContentGrid.Children.Add(InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm));
+    }
 }

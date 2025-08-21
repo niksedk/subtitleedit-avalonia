@@ -1,5 +1,4 @@
-﻿using Avalonia;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -37,30 +36,5 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
     internal void Onloaded(object? sender, RoutedEventArgs e)
     {
         Window!.Content = VideoPlayer;
-    }
-
-    internal void Redock()
-    {
-        return;
-
-        if (OriginalParent is not null && VideoPlayer is not null)
-        {
-            if (Window != null)
-            {
-                Window.Content = null;
-            }
-
-            Grid.SetRow(VideoPlayer, OriginalRow);
-            Grid.SetColumn(VideoPlayer, OriginalColumn);
-
-            if (OriginalIndex >= 0 && OriginalIndex <= OriginalParent.Children.Count)
-            {
-                OriginalParent.Children.Insert(OriginalIndex, VideoPlayer);
-            }
-            else
-            {
-                OriginalParent.Children.Add(VideoPlayer);
-            }
-        }
     }
 }

@@ -35,9 +35,4 @@ public partial class AudioVisualizerUndockedViewModel : ObservableObject
     {
         Window!.Content = AudioVisualizer;
     }
-
-    internal void Redock()
-    {
-//        MainViewModel!.AudioVisualizer = InitWaveform.MakeWaveform(MainViewModel);
-    }
 }
