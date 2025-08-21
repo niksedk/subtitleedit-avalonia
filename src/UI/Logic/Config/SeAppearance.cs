@@ -20,6 +20,7 @@ public class SeAppearance
     public bool ToolbarShowEncoding { get; set; }
     public double SubtitleTextBoxFontSize { get; set; }
     public bool SubtitleTextBoxFontBold { get; set; }
+    public bool SubtitleTextBoxCenterText { get; set; }
     public bool ToolbarShowHints { get; set; }
 
     public SeAppearance()
@@ -42,5 +43,6 @@ public class SeAppearance
         SubtitleTextBoxFontSize = 15d;
         SubtitleTextBoxFontBold = true;
         ToolbarShowHints = true;
+        FontName = string.Empty;
     }
 }

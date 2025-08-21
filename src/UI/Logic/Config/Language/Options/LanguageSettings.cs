@@ -62,6 +62,9 @@ public class LanguageSettings
     public string WaveformSpectrogram { get; set; }
     public string Network { get; set; }
     public string FileTypeAssociations { get; set; }
+    public string TextBoxCenterText { get; set; }
+    public string TextBoxFontBold { get;  set; }
+    public string TextBoxFontSize { get; set; }
 
     public LanguageSettings()
     {
@@ -122,6 +125,9 @@ public class LanguageSettings
         WaveformSpectrogram = "Waveform/spectrogram";
         Network = "Network";
         FileTypeAssociations = "File type associations";
+        TextBoxCenterText = "Center text in subtitle text box";
+        TextBoxFontBold = "Bold text in subtitle text box";
+        TextBoxFontSize = "Font size in subtitle text box";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

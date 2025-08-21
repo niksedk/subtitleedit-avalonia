@@ -382,6 +382,10 @@ public static class InitListViewAndEditBox
             FontWeight = Se.Settings.Appearance.SubtitleTextBoxFontBold ? FontWeight.Bold : FontWeight.Normal,
             IsUndoEnabled = false,
         };
+        if (Se.Settings.Appearance.SubtitleTextBoxCenterText)
+        {
+            textBox.TextAlignment = TextAlignment.Center;
+        }
         vm.EditTextBox = textBox;
         textEditGrid.Children.Add(textBox);
         textBox.TextChanged += vm.SubtitleTextChanged;
@@ -497,6 +501,10 @@ public static class InitListViewAndEditBox
             IsUndoEnabled = false,
             Margin = new Thickness(3, 0, 0, 0),
         };
+        if (Se.Settings.Appearance.SubtitleTextBoxCenterText)
+        {
+            textBoxOriginal.TextAlignment = TextAlignment.Center;
+        }
         vm.EditTextBoxOriginal = textBoxOriginal;
         textEditGrid.Add(textBoxOriginal, 1, 1);
         textBoxOriginal.TextChanged += vm.SubtitleTextOriginalChanged;

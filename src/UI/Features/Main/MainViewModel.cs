@@ -1197,6 +1197,17 @@ public partial class MainViewModel :
         UiUtil.SetFontName(Se.Settings.Appearance.FontName);
         UiUtil.SetCurrentTheme();
 
+        if (Se.Settings.Appearance.SubtitleTextBoxCenterText)
+        {
+            EditTextBox.TextAlignment = TextAlignment.Center;
+            EditTextBoxOriginal.TextAlignment = TextAlignment.Center;
+        }
+        else
+        {
+            EditTextBox.TextAlignment = TextAlignment.Left;
+            EditTextBoxOriginal.TextAlignment = TextAlignment.Left;
+        }
+
         if (Toolbar is Border toolbarBorder)
         {
             var tb = InitToolbar.Make(this);
@@ -1227,7 +1238,7 @@ public partial class MainViewModel :
         _autoBackupService.StartAutoBackup(this);
 
         _updateAudioVisualizer = true;
-        _shortcutManager.ClearKeys();       
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]

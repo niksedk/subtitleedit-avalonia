@@ -101,6 +101,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _selectedFontName;
     [ObservableProperty] private double _textBoxFontSize;
     [ObservableProperty] private bool _textBoxFontBold;
+    [ObservableProperty] private bool _textBoxCenterText;
 
     public ObservableCollection<FileTypeAssociationViewModel> FileTypeAssociations { get; set; } = new()
     {
@@ -218,6 +219,7 @@ public partial class SettingsViewModel : ObservableObject
         ShowToolbarHints = appearance.ToolbarShowHints;
         TextBoxFontSize = appearance.SubtitleTextBoxFontSize;
         TextBoxFontBold = appearance.SubtitleTextBoxFontBold;
+        TextBoxCenterText = appearance.SubtitleTextBoxCenterText;
 
         WaveformDrawGridLines = Se.Settings.Waveform.DrawGridLines;
         WaveformCenterVideoPosition = Se.Settings.Waveform.CenterVideoPosition;
@@ -294,6 +296,7 @@ public partial class SettingsViewModel : ObservableObject
         appearance.ToolbarShowHints = ShowToolbarHints;
         appearance.SubtitleTextBoxFontSize = TextBoxFontSize;
         appearance.SubtitleTextBoxFontBold = TextBoxFontBold;
+        appearance.SubtitleTextBoxCenterText = TextBoxCenterText;
 
         Se.Settings.Waveform.DrawGridLines = WaveformDrawGridLines;
         Se.Settings.Waveform.CenterVideoPosition = WaveformCenterVideoPosition;

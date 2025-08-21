@@ -375,8 +375,9 @@ public class SettingsPage : UserControl
             [
                 new SettingsItem("Theme", () => UiUtil.MakeComboBox(_vm.Themes, _vm, nameof(_vm.SelectedTheme))),
                 new SettingsItem("UI font", () => UiUtil.MakeComboBox(_vm.FontNames, _vm, nameof(_vm.SelectedFontName))),
-                MakeNumericSetting("Text box font size", nameof(_vm.TextBoxFontSize)),
-                MakeCheckboxSetting("Text box font bold", nameof(_vm.TextBoxFontBold)),
+                MakeNumericSetting(Se.Language.Options.Settings.TextBoxFontSize, nameof(_vm.TextBoxFontSize)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxFontBold, nameof(_vm.TextBoxFontBold)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxCenterText, nameof(_vm.TextBoxCenterText)),
             ]),
 
             new SettingsSection(Se.Language.Options.Settings.Network,
