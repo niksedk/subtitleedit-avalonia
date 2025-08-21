@@ -97,6 +97,8 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty] private ObservableCollection<string> _themes;
     [ObservableProperty] private string _selectedTheme;
+    [ObservableProperty] private ObservableCollection<string> _fontNames;
+    [ObservableProperty] private string _selectedFontName;
     [ObservableProperty] private double _textBoxFontSize;
     [ObservableProperty] private bool _textBoxFontBold;
 
@@ -128,7 +130,11 @@ public partial class SettingsViewModel : ObservableObject
 
         Themes = ["System", "Light", "Dark"];
         SelectedTheme = Themes[0];
-
+        
+        FontNames = new  ObservableCollection<string>(FontHelper.GetSystemFonts());
+        FontNames.Insert(0, "Default");
+        SelectedFontName = FontNames.First();
+        
         ScrollView = new ScrollViewer();
         Sections = new List<SettingsSection>();
 
@@ -197,6 +203,7 @@ public partial class SettingsViewModel : ObservableObject
         }
 
         SelectedTheme = appearance.Theme;
+        SelectedFontName = FontNames.FirstOrDefault(p=>p == appearance.FontName) ?? FontNames.First();
         ShowToolbarNew = appearance.ToolbarShowFileNew;
         ShowToolbarOpen = appearance.ToolbarShowFileOpen;
         ShowToolbarSave = appearance.ToolbarShowSave;
@@ -270,6 +277,9 @@ public partial class SettingsViewModel : ObservableObject
         general.DefaultSubtitleFormat = SelectedDefaultSubtitleFormat;
 
         appearance.Theme = SelectedTheme;
+        appearance.FontName = SelectedFontName == FontNames.First() 
+                                ? string.Empty
+                                : SelectedFontName;
         appearance.ToolbarShowFileNew = ShowToolbarNew;
         appearance.ToolbarShowFileOpen = ShowToolbarOpen;
         appearance.ToolbarShowSave = ShowToolbarSave;

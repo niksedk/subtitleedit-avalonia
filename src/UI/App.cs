@@ -27,6 +27,8 @@ IconProvider.Current
            .Register<FontAwesomeIconProvider>()
            .Register<MaterialDesignIconProvider>();
 
+Se.LoadSettings();
+
 var appBuilder = AppBuilder.Configure<Application>()
     .UsePlatformDetect()
     .AfterSetup(b =>
@@ -130,7 +132,6 @@ Locator.Services = collection.BuildServiceProvider();
 var services = collection.BuildServiceProvider();
 
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-Se.LoadSettings();
 UiUtil.SetCurrentTheme();
 
 // Main window setup

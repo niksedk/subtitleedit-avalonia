@@ -14,7 +14,9 @@ using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 using SkiaSharp;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Logic;
 
@@ -51,6 +53,43 @@ public static class UiUtil
     public static Button MakeButton(string text)
     {
         return MakeButton(text, null);
+    }
+
+    public static string GetDefaultFontName()
+    {
+        if (!string.IsNullOrEmpty(Se.Settings.Appearance.FontName))
+        {
+            return Se.Settings.Appearance.FontName;
+        }
+
+        var systemFontNames = FontHelper.GetSystemFonts();
+        var goodFontNames = new List<string>()
+        {
+            "Segoe UI",
+            "San Francisco",
+            "SF Pro Text",
+            "Roboto",
+            "Open Sans",
+            "Lato",
+            "Source Sans Pro",
+            "Calibri",
+            "Verdana",
+            "Tahoma",
+            "Inter",
+            "Noto Sans",
+            "System UI",
+            "Arial",
+        };
+
+        foreach (var goodFontName in goodFontNames)
+        {
+            if (systemFontNames.Contains(goodFontName))
+            {
+                return goodFontName;
+            }
+        }
+
+        return systemFontNames.First();
     }
 
     public static IBrush GetTextColor(double opacity = 1.0)
@@ -216,7 +255,8 @@ public static class UiUtil
         return control;
     }
 
-    public static ComboBox BindIsEnabled(this ComboBox control, object viewModal, string propertyIsEnabledPath, IValueConverter converter)
+    public static ComboBox BindIsEnabled(this ComboBox control, object viewModal, string propertyIsEnabledPath,
+        IValueConverter converter)
     {
         control.Bind(ComboBox.IsEnabledProperty, new Binding
         {
@@ -230,7 +270,8 @@ public static class UiUtil
         return control;
     }
 
-    public static Button BindIsEnabled(this Button control, object viewModal, string propertyIsEnabledPath, IValueConverter converter)
+    public static Button BindIsEnabled(this Button control, object viewModal, string propertyIsEnabledPath,
+        IValueConverter converter)
     {
         control.Bind(Button.IsEnabledProperty, new Binding
         {
@@ -244,7 +285,8 @@ public static class UiUtil
         return control;
     }
 
-    public static TextBox BindIsEnabled(this TextBox control, object viewModal, string propertyIsEnabledPath, IValueConverter converter)
+    public static TextBox BindIsEnabled(this TextBox control, object viewModal, string propertyIsEnabledPath,
+        IValueConverter converter)
     {
         control.Bind(TextBox.IsEnabledProperty, new Binding
         {
@@ -295,7 +337,8 @@ public static class UiUtil
         return comboBox;
     }
 
-    internal static ComboBox MakeComboBoxBindText<T>(ObservableCollection<T> sourceItems, object vm, string textPath, string propertySelectedIndexPath)
+    internal static ComboBox MakeComboBoxBindText<T>(ObservableCollection<T> sourceItems, object vm, string textPath,
+        string propertySelectedIndexPath)
     {
         var comboBox = new ComboBox
         {
@@ -309,7 +352,7 @@ public static class UiUtil
             Path = propertySelectedIndexPath,
             Mode = BindingMode.TwoWay,
         });
-        
+
 
         return comboBox;
     }
@@ -324,11 +367,11 @@ public static class UiUtil
 
     public static TextBox MakeTextBox(int width, object viewModel, string propertyTextPath)
     {
-
         return MakeTextBox(width, viewModel, propertyTextPath, null);
     }
 
-    public static TextBox MakeTextBox(int width, object viewModel, string? propertyTextPath, string? propertyIsVisiblePath)
+    public static TextBox MakeTextBox(int width, object viewModel, string? propertyTextPath,
+        string? propertyIsVisiblePath)
     {
         var textBox = new TextBox
         {
@@ -370,7 +413,8 @@ public static class UiUtil
         };
     }
 
-    public static TextBlock MakeTextBlock(string text, object viewModel, string? textPropertyPath, string? visibilityPropertyPath)
+    public static TextBlock MakeTextBlock(string text, object viewModel, string? textPropertyPath,
+        string? visibilityPropertyPath)
     {
         var textBlock = new TextBlock
         {
@@ -483,7 +527,7 @@ public static class UiUtil
     {
         return new SolidColorBrush(Color.FromArgb(255, 30, 144, 255));
     }
-   
+
     public static TextBlock MakeLink(string text, IRelayCommand command, object viewModel, string propertyTextPath)
     {
         var link = new TextBlock
@@ -759,7 +803,8 @@ public static class UiUtil
         return control;
     }
 
-    public static TextBox WithBindIsVisible(this TextBox control, string isEnabledPropertyPath, IValueConverter converter)
+    public static TextBox WithBindIsVisible(this TextBox control, string isEnabledPropertyPath,
+        IValueConverter converter)
     {
         control.Bind(TextBox.IsVisibleProperty, new Binding
         {
@@ -1254,7 +1299,8 @@ public static class UiUtil
         return MakeRadioButton(text, viewModel, isCheckedPropertyPath, null);
     }
 
-    internal static RadioButton MakeRadioButton(string text, object viewModel, string isCheckedPropertyPath, string? groupName)
+    internal static RadioButton MakeRadioButton(string text, object viewModel, string isCheckedPropertyPath,
+        string? groupName)
     {
         var control = new RadioButton
         {
@@ -1277,7 +1323,8 @@ public static class UiUtil
         return control;
     }
 
-    public static NumericUpDown MakeNumericUpDownInt(int min, int max, double width, object viewModel, string? propertyValuePath = null, string? propertyIsVisiblePath = null)
+    public static NumericUpDown MakeNumericUpDownInt(int min, int max, double width, object viewModel,
+        string? propertyValuePath = null, string? propertyIsVisiblePath = null)
     {
         var control = new NumericUpDown
         {
@@ -1312,7 +1359,8 @@ public static class UiUtil
         return control;
     }
 
-    public static NumericUpDown MakeNumericUpDownTwoDecimals(decimal min, decimal max, double width, object viewModel, string? propertyValuePath = null, string? propertyIsVisiblePath = null)
+    public static NumericUpDown MakeNumericUpDownTwoDecimals(decimal min, decimal max, double width, object viewModel,
+        string? propertyValuePath = null, string? propertyIsVisiblePath = null)
     {
         var control = new NumericUpDown
         {
@@ -1407,7 +1455,8 @@ public static class UiUtil
         return control;
     }
 
-    public static Label WithBindVisible(this Label control, object viewModel, string visiblePropertyPath, IValueConverter converter)
+    public static Label WithBindVisible(this Label control, object viewModel, string visiblePropertyPath,
+        IValueConverter converter)
     {
         control.DataContext = viewModel;
         control.Bind(Label.IsVisibleProperty, new Binding
@@ -1432,7 +1481,8 @@ public static class UiUtil
         return control;
     }
 
-    public static StackPanel WithBindVisible(this StackPanel control, object viewModel, string visiblePropertyPath, IValueConverter converter)
+    public static StackPanel WithBindVisible(this StackPanel control, object viewModel, string visiblePropertyPath,
+        IValueConverter converter)
     {
         control.DataContext = viewModel;
         control.Bind(StackPanel.IsVisibleProperty, new Binding
@@ -1509,7 +1559,7 @@ public static class UiUtil
                 {
                     return "Dark";
                 }
-                
+
                 return "Light";
             }
 

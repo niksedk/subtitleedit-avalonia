@@ -156,7 +156,7 @@ public class AudioVisualizer : Control
     private readonly Pen _paintLeft = new Pen(new SolidColorBrush(Color.FromArgb(60, 0, 255, 0)), 2);
     private readonly Pen _paintRight = new Pen(new SolidColorBrush(Color.FromArgb(100, 255, 0, 0)), 2);
     private readonly IBrush _paintText = Brushes.White;
-    private readonly Typeface _typeface = new Typeface("Arial");
+    private readonly Typeface _typeface = new Typeface(UiUtil.GetDefaultFontName());
     private readonly double _fontSize = 12;
 
     private readonly List<SubtitleLineViewModel> _displayableParagraphs = new();
