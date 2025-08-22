@@ -684,6 +684,11 @@ public partial class CompareViewModel : ObservableObject
     {
         var targetFileName = string.IsNullOrEmpty(LeftFileName) ? "compare.html" : System.IO.Path.GetFileNameWithoutExtension(LeftFileName) + "-compare.html";
         var fileName = await _fileHelper.PickSaveFile(Window!, Se.Language.File.SaveCompareHtmlTitle, targetFileName, "HTML files (*.html)|*.html");
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
         var sb = new StringBuilder();
         sb.AppendLine("<!DOCTYPE html>");
         sb.AppendLine("<html>");
