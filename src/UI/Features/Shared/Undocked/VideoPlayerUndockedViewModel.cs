@@ -23,7 +23,11 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
     internal async Task Initialize(VideoPlayerControl originalVideoPlayerControl, Main.MainViewModel mainViewModel)
     {
         VideoPlayer = InitVideoPlayer.MakeLayoutVideoPlayer(mainViewModel);
-        await mainViewModel.VideoPlayerControl!.Open(originalVideoPlayerControl.VideoPlayerInstance.FileName);
+        if (mainViewModel.VideoPlayerControl is VideoPlayerControl videoPlayerControl)
+        { 
+            videoPlayerControl.FullScreenIsVisible = false;
+            await videoPlayerControl.Open(originalVideoPlayerControl.VideoPlayerInstance.FileName);
+        }
 
         MainViewModel = mainViewModel;
     }
