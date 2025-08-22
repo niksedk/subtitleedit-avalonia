@@ -5,6 +5,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Markup.Declarative;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Logic;
@@ -389,6 +390,7 @@ public static class InitListViewAndEditBox
         vm.EditTextBox = textBox;
         textEditGrid.Children.Add(textBox);
         textBox.TextChanged += vm.SubtitleTextChanged;
+        textBox.GotFocus += vm.SubtitleTextBoxGotFocus;
         Grid.SetRow(textBox, 1);
 
         var textTotalLengthLabel = new TextBlock

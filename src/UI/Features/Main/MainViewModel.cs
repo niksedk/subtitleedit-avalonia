@@ -156,7 +156,7 @@ public partial class MainViewModel :
     private readonly IMpvReloader _mpvReloader;
     private readonly IFindService _findService;
 
-    private bool IsEmpty => Subtitles.Count == 0 || string.IsNullOrEmpty(Subtitles[0].Text);
+    private bool IsEmpty => Subtitles.Count == 0 || (Subtitles.Count == 1 &&  string.IsNullOrEmpty(Subtitles[0].Text));
 
     public VideoPlayerControl? VideoPlayerControl { get; internal set; }
     public Menu Menu { get; internal set; }
@@ -4474,6 +4474,25 @@ public partial class MainViewModel :
         {
             MenuItemAudioVisualizerDeleteAtPosition.IsVisible = true;
             return;
+        }
+    }
+
+    internal void SubtitleTextBoxGotFocus(object? sender, GotFocusEventArgs e)
+    {
+        if (Subtitles.Count == 0)
+        { 
+            var newSubtitle = new SubtitleLineViewModel
+            {
+                StartTime = TimeSpan.Zero,
+                EndTime = TimeSpan.FromMilliseconds(Se.Settings.General.NewEmptyDefaultMs),
+                Text = string.Empty,
+                OriginalText = string.Empty,
+                Number = 1
+            };
+
+            Subtitles.Add(newSubtitle);
+            SelectedSubtitle = newSubtitle;
+            SelectedSubtitleIndex = 0;
         }
     }
 }
