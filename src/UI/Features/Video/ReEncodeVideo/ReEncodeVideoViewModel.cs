@@ -46,7 +46,6 @@ public partial class ReEncodeVideoViewModel : ObservableObject
     public bool OkPressed { get; private set; }
 
     private Subtitle _subtitle = new();
-    private bool _loading = true;
     private readonly StringBuilder _log;
     private static readonly Regex FrameFinderRegex = new(@"[Ff]rame=\s*\d+", RegexOptions.Compiled);
     private long _startTicks;
@@ -98,15 +97,15 @@ public partial class ReEncodeVideoViewModel : ObservableObject
         _timerGenerate.Elapsed += TimerGenerateElapsed;
         _timerGenerate.Interval = 100;
 
-        _loading = false;
         _inputVideoFileName = string.Empty;
         LoadSettings();
     }
 
-    public void Initialize(string videoFileName)
+    public void Initialize(string videoFileName, SubtitleFormat subtitleFormat)
     {
         VideoFileName = videoFileName;
         _inputVideoFileName = videoFileName;
+        _subtitleFormat = subtitleFormat;
         var fileExists = !string.IsNullOrWhiteSpace(videoFileName) && File.Exists(videoFileName);
         if (fileExists)
         {
@@ -116,6 +115,7 @@ public partial class ReEncodeVideoViewModel : ObservableObject
                 var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
                 Dispatcher.UIThread.Post(() =>
                 {
+#pragma warning disable CS8073 // The result of the expression is always the same since a value of this type is never equal to 'null'
                     if (mediaInfo == null || mediaInfo.Dimension == null || mediaInfo.Dimension.Width <= 0)
                     {
                         VideoWidth = 1280;
@@ -123,6 +123,7 @@ public partial class ReEncodeVideoViewModel : ObservableObject
                         UseSourceResolution = false;
                         return;
                     }
+#pragma warning restore CS8073 // The result of the expression is always the same since a value of this type is never equal to 'null'
 
                     var frameRate = FrameRateHelper.RoundToNearestCinematicFrameRate((double)mediaInfo.FramesRate);
                     SelectedFrameRate = frameRate;

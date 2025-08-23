@@ -14,6 +14,7 @@ public class LanguageMainToolbar
     public string HelpHint { get; set; }
     public string AutoBreakHint { get; set; }
     public string UnbreakHint { get; set; }
+    public string AssaStyleHint { get; set; }
 
 
     public LanguageMainToolbar()
@@ -30,5 +31,6 @@ public class LanguageMainToolbar
         HelpHint = "Open help website {0}";
         AutoBreakHint = "Automatically break long lines {0}";
         UnbreakHint = "Merge multi-line subtitles into one line {0}";
+        AssaStyleHint = "Advanced Sub Station Alpha styles";
     }
 }

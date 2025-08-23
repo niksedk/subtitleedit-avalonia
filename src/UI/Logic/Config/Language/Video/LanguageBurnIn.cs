@@ -88,5 +88,6 @@ public class LanguageBurnIn
         VideoFileSize = "Video file size";
         OneBox = "One box";
         BoxPerLine = "Box per line";
+        UseSourceResolution = "Use source resolution";
     }
 }

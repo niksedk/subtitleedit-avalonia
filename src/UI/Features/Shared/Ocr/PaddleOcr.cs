@@ -65,6 +65,8 @@ public partial class PaddleOcr
         _clsPath = Path.Combine(_paddingOcrPath, "cls");
         _detPath = Path.Combine(_paddingOcrPath, "det");
         _recPath = Path.Combine(_paddingOcrPath, "rec");
+
+        _cancellationToken = new CancellationToken();
     }
 
     private string GetRecName(string language, string mode)

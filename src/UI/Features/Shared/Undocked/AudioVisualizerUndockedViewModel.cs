@@ -9,7 +9,7 @@ namespace Nikse.SubtitleEdit.Features.Shared;
 
 public partial class AudioVisualizerUndockedViewModel : ObservableObject
 {
-    [ObservableProperty] private string _error;
+    [ObservableProperty] private string _error = string.Empty;
 
     public Window? Window { get; set; }
     public Grid? OriginalParent { get; set; }

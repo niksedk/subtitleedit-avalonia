@@ -15,11 +15,14 @@ public class OcrSubtitleBdn : IOcrSubtitle
     private readonly bool _makeTransparent;
     private readonly bool _autoTransparentBackground;
 
-    public OcrSubtitleBdn(Subtitle subtitle, string bdnFileName, bool isSon)
+    public OcrSubtitleBdn(Subtitle subtitle, string bdnFileName, bool isSon, bool makeTransparent = false, bool autoTransparentBackground = false)
     {
         _bdnXmlSubtitle = subtitle;
         _bdnFileName = bdnFileName;
         _isSon = isSon;
+        _makeTransparent = makeTransparent;
+        _autoTransparentBackground = autoTransparentBackground;
+
         Count = subtitle.Paragraphs.Count;
     }
 
@@ -31,7 +34,7 @@ public class OcrSubtitleBdn : IOcrSubtitle
         var emphasis1 = SKColors.Black;
         var emphasis2 = SKColors.Red;
 
-        SKBitmap returnBmp = null;
+        var returnBmp = new SKBitmap(1, 1, true);
 
         if (index >= 0 && index < _bdnXmlSubtitle.Paragraphs.Count)
         {
@@ -67,7 +70,7 @@ public class OcrSubtitleBdn : IOcrSubtitle
             {
                 foreach (string fn in fileNames)
                 {
-                    fullFileName = Path.Combine(Path.GetDirectoryName(_bdnFileName), fn);
+                    fullFileName = Path.Combine(Path.GetDirectoryName(_bdnFileName) ?? string.Empty, fn);
 
                     //TODO
                     //// Check if we need to load the original VSF image
@@ -89,7 +92,7 @@ public class OcrSubtitleBdn : IOcrSubtitle
                             int idxOfSpace = fn.IndexOf(' ', idxOfIEquals);
                             if (idxOfSpace > 0)
                             {
-                                fullFileName = Path.Combine(Path.GetDirectoryName(_bdnFileName),
+                                fullFileName = Path.Combine(Path.GetDirectoryName(_bdnFileName) ?? string.Empty,
                                     fn.Remove(0, idxOfSpace).Trim());
                             }
                         }
@@ -110,12 +113,12 @@ public class OcrSubtitleBdn : IOcrSubtitle
                         }
                         catch
                         {
-                            return new SKBitmap(1,1, true);
+                            return new SKBitmap(1, 1, true);
                         }
                     }
                 }
 
-                SKBitmap b = new SKBitmap(1,1, true);
+                SKBitmap b = new SKBitmap(1, 1, true);
                 if (bitmaps.Count > 1)
                 {
                     var imageInfo = new SKImageInfo(maxWidth, totalHeight + 7 * bitmaps.Count, SKColorType.Rgba8888);
@@ -188,7 +191,7 @@ public class OcrSubtitleBdn : IOcrSubtitle
     {
         if (original == null)
         {
-            return new SKBitmap(1,1, true);
+            return new SKBitmap(1, 1, true);
         }
 
         var imageInfo = new SKImageInfo(original.Width, original.Height, SKColorType.Rgba8888);
@@ -229,11 +232,8 @@ public class OcrSubtitleBdn : IOcrSubtitle
     }
 
     // Helper method to apply custom colors (replaces the FastBitmap logic)
-    private SKBitmap ApplyCustomColors(SKBitmap original, SKColor background, SKColor pattern,
-        SKColor emphasis1, SKColor emphasis2)
+    private SKBitmap ApplyCustomColors(SKBitmap original, SKColor background, SKColor pattern, SKColor emphasis1, SKColor emphasis2)
     {
-        if (original == null) return null;
-
         var imageInfo = new SKImageInfo(original.Width, original.Height, SKColorType.Rgba8888);
         var result = new SKBitmap(imageInfo);
 

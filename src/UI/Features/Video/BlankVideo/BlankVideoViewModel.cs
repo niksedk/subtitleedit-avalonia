@@ -49,7 +49,6 @@ public partial class BlankVideoViewModel : ObservableObject
     public bool OkPressed { get; private set; }
 
     private Subtitle _subtitle = new();
-    private bool _loading = true;
     private readonly StringBuilder _log;
     private static readonly Regex FrameFinderRegex = new(@"[Ff]rame=\s*\d+", RegexOptions.Compiled);
     private long _startTicks;
@@ -93,14 +92,15 @@ public partial class BlankVideoViewModel : ObservableObject
         _timerGenerate.Elapsed += TimerGenerateElapsed;
         _timerGenerate.Interval = 200;
 
-        _loading = false;
         _subtitleFileName = string.Empty;
+        _fullBackgroundImageFileName = string.Empty;
         LoadSettings();
     }
 
-    public void Initialize(string subtitleFileName)
+    public void Initialize(string subtitleFileName, SubtitleFormat subtitleFormat)
     {
         _subtitleFileName = subtitleFileName;
+        _subtitleFormat = subtitleFormat;
     }
 
     private void TimerGenerateElapsed(object? sender, ElapsedEventArgs e)

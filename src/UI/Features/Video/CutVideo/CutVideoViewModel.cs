@@ -59,7 +59,6 @@ public partial class CutVideoViewModel : ObservableObject
     public DataGrid SegmentGrid { get; internal set; }
 
     private Subtitle _subtitle = new();
-    private bool _loading = true;
     private readonly StringBuilder _log;
     private static readonly Regex FrameFinderRegex = new(@"[Ff]rame=\s*\d+", RegexOptions.Compiled);
     private long _startTicks;
@@ -118,16 +117,16 @@ public partial class CutVideoViewModel : ObservableObject
         _timerGenerate.Elapsed += TimerGenerateElapsed;
         _timerGenerate.Interval = 100;
 
-        _loading = false;
         _inputVideoFileName = string.Empty;
         UpdateSelection();
         LoadSettings();
     }
 
-    public void Initialize(string videoFileName, WavePeakData? wavePeakData)
+    public void Initialize(string videoFileName, WavePeakData? wavePeakData, SubtitleFormat subtitleFormat)
     {
         VideoFileName = videoFileName;
         _inputVideoFileName = videoFileName;
+        _subtitleFormat = subtitleFormat;
 
         _ffmpegListKeyFramesProcess = FfmpegGenerator.ListKeyFrames(videoFileName, OutputHandlerKeyFrames);
 
@@ -494,7 +493,7 @@ public partial class CutVideoViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task Add()
+    private void Add()
     {
         var ms = VideoPlayer.Position * 1000;
         var segment = new SubtitleLineViewModel(new Paragraph(string.Empty, ms, ms + Se.Settings.General.NewEmptyDefaultMs));

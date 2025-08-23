@@ -119,6 +119,7 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _showColumnEndTime;
     [ObservableProperty] private bool _lockTimeCodes;
     [ObservableProperty] private bool _areVideoControlsUndocked;
+    [ObservableProperty] private bool _isFormatAssa;
 
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
@@ -359,7 +360,6 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task CommandShowLayout()
     {
-        // Open a dialog with a specific ViewModel and get the result
         var vm = await _windowService.ShowDialogAsync<LayoutWindow, LayoutViewModel>(Window!, viewModel => 
         { 
             viewModel.SelectedLayout = Se.Settings.General.LayoutNumber; 
@@ -369,7 +369,7 @@ public partial class MainViewModel :
         {
             if (AreVideoControlsUndocked)
             {
-                await VideoRedockControls();
+                VideoRedockControls();
             }
 
             Se.Settings.General.LayoutNumber = InitLayout.MakeLayout(MainView!, this, vm.SelectedLayout.Value);
@@ -411,6 +411,20 @@ public partial class MainViewModel :
     private async Task ShowHelp()
     {
         await Window!.Launcher.LaunchUriAsync(new Uri("https://www.nikse.dk/subtitleedit/help"));
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowAssaStyles()
+    {
+        var vm = await _windowService.ShowDialogAsync<AssaStylesWindow, AssaStylesViewModel>(Window!, viewModel =>
+        {
+        });
+
+        if (vm.OkPressed)
+        {
+        }
+
         _shortcutManager.ClearKeys();
     }
 
@@ -803,7 +817,10 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<BlankVideoWindow, BlankVideoViewModel>(Window!, vm => { });
+        var result = await _windowService.ShowDialogAsync<BlankVideoWindow, BlankVideoViewModel>(Window!, vm => 
+        {
+            vm.Initialize(_subtitleFileName ?? string.Empty, SelectedSubtitleFormat);
+        });
 
         if (!result.OkPressed)
         {
@@ -832,7 +849,10 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<CutVideoWindow, CutVideoViewModel>(Window!, vm => { vm.Initialize(_videoFileName, AudioVisualizer?.WavePeaks); });
+        var result = await _windowService.ShowDialogAsync<CutVideoWindow, CutVideoViewModel>(Window!, vm => 
+        { 
+            vm.Initialize(_videoFileName, AudioVisualizer?.WavePeaks, SelectedSubtitleFormat); 
+        });
 
         if (!result.OkPressed)
         {
@@ -861,7 +881,11 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<ReEncodeVideoWindow, ReEncodeVideoViewModel>(Window!, vm => { vm.Initialize(_videoFileName); });
+        var result = await _windowService.ShowDialogAsync<ReEncodeVideoWindow, ReEncodeVideoViewModel>(Window!, vm => 
+        { 
+            vm.Initialize(_videoFileName, SelectedSubtitleFormat); 
+        });
+
         if (!result.OkPressed)
         {
             return;
@@ -1005,7 +1029,6 @@ public partial class MainViewModel :
 
     VideoPlayerUndockedViewModel? _videoPlayerUndockedViewModel;
     AudioVisualizerUndockedViewModel? _audioVisualizerUndockedViewModel;
-    int _beforeUndockLayout;
 
     [RelayCommand]
     private void VideoUndockControls()
@@ -1028,14 +1051,14 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private async Task VideoRedockControls()
+    private void VideoRedockControls()
     {
         AreVideoControlsUndocked = false;
         var videoFileName = _videoFileName ?? string.Empty;
         VideoCloseFile();
         VideoPlayerControl = InitVideoPlayer.MakeVideoPlayer();
-        _videoPlayerUndockedViewModel.Window.Close();
-        _audioVisualizerUndockedViewModel.Window.Close();
+        _videoPlayerUndockedViewModel?.Window?.Close();
+        _audioVisualizerUndockedViewModel?.Window?.Close();
         VideoPlayerControl = null;
         InitLayout.MakeLayout(MainView!, this, Se.Settings.General.LayoutNumber);
        
@@ -3111,7 +3134,7 @@ public partial class MainViewModel :
             return;
         }
 
-        if (string.IsNullOrEmpty(_subtitleFileName))
+        if (string.IsNullOrEmpty(_subtitleFileName) || _converted)
         {
             await SaveSubtitleAs();
             return;
@@ -4494,5 +4517,14 @@ public partial class MainViewModel :
             SelectedSubtitle = newSubtitle;
             SelectedSubtitleIndex = 0;
         }
+    }
+
+    internal void ComboBoxEncodingChanged(object? sender, SelectionChangedEventArgs e)
+    {
+    }
+
+    internal void ComboBoxSubtitleFormatChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        IsFormatAssa = SelectedSubtitleFormat?.Name == AdvancedSubStationAlpha.NameOfFormat;
     }
 }

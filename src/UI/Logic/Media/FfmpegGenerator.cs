@@ -722,7 +722,7 @@ public class FfmpegGenerator
         return processMakeVideo;
     }
 
-    public static Process GenerateVideoFile(string previewFileName, int seconds, int width, int height, Avalonia.Media.Color color, bool checkered, decimal frameRate, Bitmap? bitmap, DataReceivedEventHandler dataReceivedHandler = null, bool addTimeCode = false, string addTimeColor = "white")
+    public static Process GenerateVideoFile(string previewFileName, int seconds, int width, int height, Avalonia.Media.Color color, bool checkered, decimal frameRate, Bitmap? bitmap, DataReceivedEventHandler? dataReceivedHandler = null, bool addTimeCode = false, string addTimeColor = "white")
     {
         Process processMakeVideo;
 

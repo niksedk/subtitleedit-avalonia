@@ -36,10 +36,12 @@ public class SeOcr
         OllamaLanguage = "English";
         OllamaModel = OllamaModels.First();
 
-        GoogleVisionApiKey = "";
+        GoogleVisionApiKey = string.Empty;
         GoogleVisionLanguage = "en";
 
         PaddleOcrMode = "mobile";
         PaddleOcrLastLanguage = "en";
+
+        MistralApiKey = string.Empty;
     }
 }

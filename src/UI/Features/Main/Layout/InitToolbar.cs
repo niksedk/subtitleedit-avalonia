@@ -228,7 +228,31 @@ public static class InitToolbar
                 Background = Brushes.Transparent,
                 [ToolTip.TipProperty] = MakeToolTip(languageHints.HelpHint, shortcuts, nameof(vm.ShowHelpCommand)),
             });
+            isLastSeparator = false;
         }
+
+        if (!isLastSeparator)
+        {
+            stackPanelLeft.Children.Add(MakeSeparator());
+            isLastSeparator = true;
+        }
+
+        stackPanelLeft.Children.Add(new Button
+        {
+            Content = new Image
+            {
+                Source = new Bitmap(System.IO.Path.Combine(path, "AssaStyle.png")),
+                Width = 32,
+                Height = 32,
+            },
+            Command = vm.ShowAssaStylesCommand,
+            Background = Brushes.Transparent,
+            [ToolTip.TipProperty] = MakeToolTip(languageHints.AssaStyleHint, shortcuts, nameof(vm.ShowAssaStylesCommand)),
+            [!Button.IsVisibleProperty] = new Binding(nameof(vm.IsFormatAssa))
+            {
+                Source = vm,
+            },
+        });
 
         var stackPanelRight = new StackPanel
         {
@@ -246,7 +270,7 @@ public static class InitToolbar
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Avalonia.Thickness(5, 0, 0, 0),
         });
-        stackPanelRight.Children.Add(new ComboBox
+        var comboBoxSubtitleFormat = new ComboBox
         {
             Width = 200,
             Height = 30,
@@ -259,7 +283,9 @@ public static class InitToolbar
                     [!TextBlock.TextProperty] = new Binding(nameof(SubtitleFormat.Name)),
                     Width = 150,
                 }, true)
-        });
+        };
+        comboBoxSubtitleFormat.SelectionChanged += vm.ComboBoxSubtitleFormatChanged;
+        stackPanelRight.Children.Add(comboBoxSubtitleFormat);
         isLastSeparator = false;
 
 
@@ -276,14 +302,15 @@ public static class InitToolbar
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Avalonia.Thickness(5, 0, 0, 0),
             });
-            stackPanelRight.Children.Add(new ComboBox
+            var comboBoxEncoding = new ComboBox
             {
                 Width = 200,
                 Height = 30,
                 [!ComboBox.ItemsSourceProperty] = new Binding(nameof(vm.Encodings)),
                 [!ComboBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedEncoding)),
                 DataContext = vm,
-            });
+            };
+            stackPanelRight.Children.Add(comboBoxEncoding);
         }
 
         var grid = new Grid
