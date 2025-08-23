@@ -152,6 +152,12 @@ public class OcrWindow : Window
                     .WithWidth(100)
                     .WithMarginRight(10)
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
+
+                // Mistral OCR settings
+                UiUtil.MakeLabel(Se.Language.General.ApiKey, nameof(vm.IsMistralOcrVisible)),
+                UiUtil.MakeTextBox(200, vm, nameof(vm.MistralApiKey))
+                    .BindIsVisible(vm, nameof(vm.IsMistralOcrVisible))
+                    .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
             }
         };
 

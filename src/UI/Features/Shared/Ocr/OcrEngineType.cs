@@ -10,4 +10,5 @@ public enum OcrEngineType
     GoogleVision,
     AzureVision,
     AmazonRekognition,
+    Mistral,
 }

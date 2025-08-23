@@ -59,10 +59,12 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private bool _isTesseractVisible;
     [ObservableProperty] private bool _isPaddleOcrVisible;
     [ObservableProperty] private bool _isGoogleVisionVisible;
+    [ObservableProperty] private bool _isMistralOcrVisible;
     [ObservableProperty] private bool _nOcrDrawUnknownText;
     [ObservableProperty] private bool _isInspectLineVisible;
     [ObservableProperty] private bool _isInspectAdditionsVisible;
     [ObservableProperty] private string _googleVisionApiKey;
+    [ObservableProperty] private string _mistralApiKey;
     [ObservableProperty] private ObservableCollection<OcrLanguage> _googleVisionLanguages;
     [ObservableProperty] private OcrLanguage? _selectedGoogleVisionLanguage;
     [ObservableProperty] private ObservableCollection<OcrLanguage2> _paddleOcrLanguages;
@@ -107,6 +109,7 @@ public partial class OcrViewModel : ObservableObject
         OllamaModel = string.Empty;
         TesseractDictionaryItems = new ObservableCollection<TesseractDictionary>();
         GoogleVisionApiKey = string.Empty;
+        MistralApiKey = string.Empty;
         GoogleVisionLanguages = new ObservableCollection<OcrLanguage>(GoogleVisionOcr.GetLanguages().OrderBy(p => p.ToString()));
         PaddleOcrLanguages = new ObservableCollection<OcrLanguage2>(PaddleOcr.GetLanguages().OrderBy(p => p.ToString()));
         _runOnceChars = new List<SkipOnceChar>();
@@ -139,6 +142,7 @@ public partial class OcrViewModel : ObservableObject
             OllamaModel = ocr.OllamaModel;
             SelectedOllamaLanguage = ocr.OllamaLanguage;
             GoogleVisionApiKey = ocr.GoogleVisionApiKey;
+            MistralApiKey = ocr.MistralApiKey;
             SelectedGoogleVisionLanguage = GoogleVisionLanguages.FirstOrDefault(p => p.Code == ocr.GoogleVisionLanguage);
             SelectedPaddleOcrLanguage = PaddleOcrLanguages.FirstOrDefault(p => p.Code == Se.Settings.Ocr.PaddleOcrLastLanguage) ?? PaddleOcrLanguages.First();
         });
@@ -155,6 +159,7 @@ public partial class OcrViewModel : ObservableObject
         ocr.OllamaModel = OllamaModel;
         ocr.OllamaLanguage = SelectedOllamaLanguage ?? "English";
         ocr.GoogleVisionApiKey = GoogleVisionApiKey;
+        ocr.MistralApiKey = MistralApiKey;
         ocr.GoogleVisionLanguage = SelectedGoogleVisionLanguage?.Code ?? "en";
         Se.SaveSettings();
     }
@@ -534,6 +539,22 @@ public partial class OcrViewModel : ObservableObject
         {
             RunOllamaOcr();
         }
+        else if (ocrEngine.EngineType == OcrEngineType.Mistral)
+        {
+            if (string.IsNullOrEmpty(MistralApiKey))
+            {
+                await MessageBox.Show(
+                    Window!,
+                    "Mistral API key missing",
+                    $"You must enter a valid Mistral API key.{Environment.NewLine}{Environment.NewLine}Get your API key from https://mistral.ai/",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                IsOcrRunning = false;
+                return;
+            }
+
+            RunMistralOcr();
+        }
         else if (ocrEngine.EngineType == OcrEngineType.GoogleVision)
         {
             //   RunGoogleVisionOcr(startFromIndex);
@@ -848,6 +869,47 @@ public partial class OcrViewModel : ObservableObject
         });
     }
 
+    private void RunMistralOcr()
+    {
+        var selectedOcrSubtitleItem = SelectedOcrSubtitleItem;
+        if (selectedOcrSubtitleItem == null)
+        {
+            return;
+        }
+
+        var mistralOcr = new MistralOcr(MistralApiKey);
+        var startFromIndex = OcrSubtitleItems.IndexOf(selectedOcrSubtitleItem);
+
+        _ = Task.Run(async () =>
+        {
+            for (var i = startFromIndex; i < OcrSubtitleItems.Count; i++)
+            {
+                if (_cancellationTokenSource.Token.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                ProgressValue = i * 100.0 / OcrSubtitleItems.Count;
+                ProgressText = string.Format(Se.Language.Ocr.RunningOcrDotDotDotXY, i + 1, OcrSubtitleItems.Count);
+
+                var item = OcrSubtitleItems[i];
+                var bitmap = item.GetSkBitmap();
+
+                SelectAndScrollToRow(i);
+
+                var text = await mistralOcr.Ocr(bitmap, SelectedOllamaLanguage ?? "English", _cancellationTokenSource.Token);
+                item.Text = text;
+
+                if (SelectedOcrSubtitleItem == item)
+                {
+                    CurrentText = text;
+                }
+            }
+
+            PauseOcr();
+        });
+    }
+
     private async Task<bool> CheckAndDownloadTesseract()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -1091,6 +1153,7 @@ public partial class OcrViewModel : ObservableObject
         IsTesseractVisible = SelectedOcrEngine?.EngineType == OcrEngineType.Tesseract;
         IsPaddleOcrVisible = SelectedOcrEngine?.EngineType == OcrEngineType.PaddleOcrStandalone || SelectedOcrEngine?.EngineType == OcrEngineType.PaddleOcrPython;
         IsGoogleVisionVisible = SelectedOcrEngine?.EngineType == OcrEngineType.GoogleVision;
+        IsMistralOcrVisible = SelectedOcrEngine?.EngineType == OcrEngineType.Mistral;
 
         if (IsNOcrVisible && NOcrDatabases.Count == 0)
         {

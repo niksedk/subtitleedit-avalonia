@@ -36,6 +36,7 @@ public class OcrEngineItem
             new("Google Vision", OcrEngineType.GoogleVision, "Google Vision is a cloud-based OCR engine by Google", "", ""),
             new("Azure Vision", OcrEngineType.AzureVision, "Azure Vision is a cloud-based OCR engine by Microsoft", "", ""),
             new("Amazon Rekognition", OcrEngineType.AmazonRekognition, "Amazon Rekognition is a cloud-based OCR engine by Amazon", "", ""),
+            new("Mistral OCR", OcrEngineType.Mistral, "Mistral OCR is a cloud-based OCR engine", "", ""),
         };
     }
 }
