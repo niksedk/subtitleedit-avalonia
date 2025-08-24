@@ -183,7 +183,7 @@ public partial class SettingsViewModel : ObservableObject
         OptimalCharsPerSec = general.SubtitleOptimalCharactersPerSeconds;
         MaxCharsPerSec = general.SubtitleMaximumCharactersPerSeconds;
         MaxWordsPerMin = general.SubtitleMaximumWordsPerMinute;
-        MinDurationMs = general.SubtitleMaximumDisplayMilliseconds;
+        MinDurationMs = general.SubtitleMinimumDisplayMilliseconds;
         MaxDurationMs = general.SubtitleMaximumDisplayMilliseconds;
         MinGapMs = general.MinimumMillisecondsBetweenLines;
         MaxLines = general.MaxNumberOfLines;
@@ -264,7 +264,8 @@ public partial class SettingsViewModel : ObservableObject
         general.SubtitleOptimalCharactersPerSeconds = OptimalCharsPerSec;
         general.SubtitleMaximumCharactersPerSeconds = MaxCharsPerSec;
         general.SubtitleMaximumWordsPerMinute = MaxWordsPerMin;
-        general.SubtitleMaximumDisplayMilliseconds = MaxDurationMs; // Assuming MinDurationMs and MaxDurationMs are the same source
+        general.SubtitleMinimumDisplayMilliseconds = MinDurationMs;
+        general.SubtitleMaximumDisplayMilliseconds = MaxDurationMs;
         general.MinimumMillisecondsBetweenLines = MinGapMs;
         general.MaxNumberOfLines = MaxLines;
         general.MergeLinesShorterThan = UnbreakShorterThanMs;
