@@ -155,26 +155,26 @@ public class SettingsPage : UserControl
         {
             new SettingsSection(Se.Language.General.Rules,
             [
-                MakeNumericSetting("Single line max length", nameof(_vm.SingleLineMaxLength)),
+                MakeNumericSettingInt("Single line max length", nameof(_vm.SingleLineMaxLength)),
                 MakeNumericSetting("Optimal chars/sec", nameof(_vm.OptimalCharsPerSec)),
                 MakeNumericSetting("Max chars/sec", nameof(_vm.MaxCharsPerSec)),
                 MakeNumericSetting("Max words/min", nameof(_vm.MaxWordsPerMin)),
-                MakeNumericSetting("Min duration (ms)", nameof(_vm.MinDurationMs)),
-                MakeNumericSetting("Max duration (ms)", nameof(_vm.MaxDurationMs)),
-                MakeNumericSetting("Min gap (ms)", nameof(_vm.MinGapMs)),
-                MakeNumericSetting("Max number of lines", nameof(_vm.MaxLines)),
+                MakeNumericSettingInt("Min duration (ms)", nameof(_vm.MinDurationMs)),
+                MakeNumericSettingInt("Max duration (ms)", nameof(_vm.MaxDurationMs)),
+                MakeNumericSettingInt("Min gap (ms)", nameof(_vm.MinGapMs)),
+                MakeNumericSettingInt("Max number of lines", nameof(_vm.MaxLines)),
             ]),
 
             new SettingsSection(Se.Language.General.General,
             [
-                MakeNumericSetting("Default new subtitle duration (ms)", nameof(_vm.NewEmptyDefaultMs)),
+                MakeNumericSettingInt("Default new subtitle duration (ms)", nameof(_vm.NewEmptyDefaultMs)),
                 MakeCheckboxSetting("Prompt for delete lines", nameof(_vm.PromptDeleteLines)),
                 MakeCheckboxSetting("Lock time codes", nameof(_vm.LockTimeCodes)),
                 MakeCheckboxSetting("Remember window position and size", nameof(_vm.RememberPositionAndSize)),
                 MakeSeparator(),
                 MakeCheckboxSetting("Auto-backup", nameof(_vm.AutoBackupOn)),
-                MakeNumericSetting("Auto-backup interval (minutes)", nameof(_vm.AutoBackupIntervalMinutes)),
-                MakeNumericSetting("Auto-backup retention (months)", nameof(_vm.AutoBackupDeleteAfterMonths)),
+                MakeNumericSettingInt("Auto-backup interval (minutes)", nameof(_vm.AutoBackupIntervalMinutes)),
+                MakeNumericSettingInt("Auto-backup retention (months)", nameof(_vm.AutoBackupDeleteAfterMonths)),
                 new SettingsItem("Default encoding", () => new ComboBox
                 {
                     Width = 200,
@@ -437,6 +437,16 @@ public class SettingsPage : UserControl
         return new SettingsItem(label, () => new NumericUpDown
         {
             Width = 150,
+            [!NumericUpDown.ValueProperty] = new Binding(bindingProperty) { Source = _vm, Mode = BindingMode.TwoWay },
+        });
+    }
+
+    private SettingsItem MakeNumericSettingInt(string label, string bindingProperty)
+    {
+        return new SettingsItem(label, () => new NumericUpDown
+        {
+            Width = 150,
+            FormatString = "F0",
             [!NumericUpDown.ValueProperty] = new Binding(bindingProperty) { Source = _vm, Mode = BindingMode.TwoWay },
         });
     }
