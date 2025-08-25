@@ -8,6 +8,7 @@ using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Linq;
+using Avalonia;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -233,7 +234,10 @@ public static class InitToolbar
 
         if (!isLastSeparator)
         {
-            stackPanelLeft.Children.Add(MakeSeparator());
+            var assaSeparator = MakeSeparator();
+            stackPanelLeft.Children.Add(assaSeparator);
+            assaSeparator.DataContext = vm;
+            assaSeparator.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsFormatAssa), BindingMode.TwoWay));   
             isLastSeparator = true;
         }
 
@@ -248,7 +252,7 @@ public static class InitToolbar
             Command = vm.ShowAssaStylesCommand,
             Background = Brushes.Transparent,
             [ToolTip.TipProperty] = MakeToolTip(languageHints.AssaStyleHint, shortcuts, nameof(vm.ShowAssaStylesCommand)),
-            [!Button.IsVisibleProperty] = new Binding(nameof(vm.IsFormatAssa))
+            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsFormatAssa))
             {
                 Source = vm,
             },
