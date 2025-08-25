@@ -5,24 +5,20 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
-using Nikse.SubtitleEdit.Logic;
-using Nikse.SubtitleEdit.Logic.Config;
-using Nikse.SubtitleEdit.Logic.Config.Language;
+using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Logic.Media;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.ObjectModel;
 
 namespace Nikse.SubtitleEdit.Features.Files.Statistics;
 
 public partial class AssaStylesViewModel : ObservableObject
 {
     [ObservableProperty] private string _title;
-    [ObservableProperty] private string _textGeneral;
-    [ObservableProperty] private string _textMostUsedWords;
-    [ObservableProperty] private string _textMostUsedLines;
+    [ObservableProperty] private ObservableCollection<StyleDisplay> _fileStyles;
+    [ObservableProperty] private StyleDisplay? _selectedFileStyles;
+    [ObservableProperty] private ObservableCollection<StyleDisplay> _storageStyles;
+    [ObservableProperty] private StyleDisplay? _selectedStorageStyles;
+    [ObservableProperty] private StyleDisplay? _currentStyle;
 
     public Window? Window { get; internal set; }
     public bool OkPressed { get; private set; }
@@ -36,9 +32,8 @@ public partial class AssaStylesViewModel : ObservableObject
         _fileHelper = fileHelper;
 
         Title = string.Empty;
-        TextGeneral = string.Empty;
-        TextMostUsedWords = string.Empty;
-        TextMostUsedLines = string.Empty;
+        FileStyles = new ObservableCollection<StyleDisplay>();
+        StorageStyles = new ObservableCollection<StyleDisplay>();
 
         _fileName = string.Empty;
     }
@@ -57,7 +52,32 @@ public partial class AssaStylesViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Export()
+    private void FileImport()
+    {
+    }
+
+    [RelayCommand]
+    private void FileNew()
+    {
+    }
+
+    [RelayCommand]
+    private void FileRemove()
+    {
+    }
+
+    [RelayCommand]
+    private void FileRemoveAll()
+    {
+    }
+
+    [RelayCommand]
+    private void FileCopy()
+    {
+    }
+
+    [RelayCommand]
+    private void FileExport()
     {
     }
 

@@ -8,6 +8,7 @@ using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Styling;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.Settings;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 using SkiaSharp;
@@ -202,6 +203,24 @@ public static class UiUtil
 
         return button;
     }
+
+    public static Button MakeButton(IRelayCommand? command, string iconName, string hint)
+    {
+        var button = new Button
+        {
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center,
+            Command = command,
+            [ToolTip.TipProperty] = hint,
+        };
+
+        Attached.SetIcon(button, iconName);
+
+        return button;
+    }
+
 
     public static Button MakeButtonBrowse(IRelayCommand? command, string? propertyIsVisiblePath = null)
     {

@@ -1,4 +1,5 @@
-﻿using Nikse.SubtitleEdit.Logic.Config.Language.Edit;
+﻿using Nikse.SubtitleEdit.Logic.Config.Language.Assa;
+using Nikse.SubtitleEdit.Logic.Config.Language.Edit;
 using Nikse.SubtitleEdit.Logic.Config.Language.File;
 using Nikse.SubtitleEdit.Logic.Config.Language.Main;
 using Nikse.SubtitleEdit.Logic.Config.Language.Options;
@@ -27,4 +28,5 @@ public class SeLanguage
     public LanguageOptions Options { get; set; } = new();
     public LanguageHelp Help { get; set; } = new();
     public LanguageOcr Ocr { get; set; } = new();
+    public LanguageAssa Assa { get; set; } = new();
 }

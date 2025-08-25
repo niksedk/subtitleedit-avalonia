@@ -57,4 +57,8 @@ internal class IconNames
     public const string MdiCheckBold = "mdi-check-bold";
     public const string MdiChevronLeft = "mdi-chevron-left";
     public const string MdiChevronRight = "mdi-chevron-right";
+    public const string MdiImport = "mdi-import";
+    public const string MdiExport = "mdi-export";
+    public const string MdiNewText = "mdi-invoice-text-plus-outline";
+    public const string MdiTrash = "mdi-trash-can-outline";
 }

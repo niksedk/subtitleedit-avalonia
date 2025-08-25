@@ -268,7 +268,8 @@ public class LanguageGeneral
     public string SaveChangesMessage { get; set; }
     public string Export { get; set; }
     public string SaveFileAsTitle { get; set; }
-    public string NoSubtitlesFound { get; internal set; }
+    public string NoSubtitlesFound { get; set; }
+    public object Usages { get; set; }
 
     public LanguageGeneral()
     {
@@ -537,5 +538,6 @@ public class LanguageGeneral
         Export = "Export";
         SaveFileAsTitle = "Save file as";
         NoSubtitlesFound = "No subtitles found!";
+        Usages = "Usages";
     }
 }
