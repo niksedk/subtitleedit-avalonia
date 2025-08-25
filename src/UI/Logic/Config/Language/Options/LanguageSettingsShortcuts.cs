@@ -114,6 +114,7 @@ public class LanguageSettingsShortcuts
     public string TogglePlayPause { get; set; }
     public string ToggleLockTimeCodes { get; set; }
     public string Help { get; set; }
+    public string DuplicateSelectedLines { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -233,5 +234,6 @@ public class LanguageSettingsShortcuts
         ResetShortcutsDetail = "Do you want to reset all shortcuts to default values?";
         ToggleLockTimeCodes = "Toggle lock time codes";
         Help = "Help";
+        DuplicateSelectedLines = "Duplicate selected lines";
     }
 }

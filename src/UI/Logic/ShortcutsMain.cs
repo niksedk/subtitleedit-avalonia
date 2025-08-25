@@ -54,56 +54,57 @@ public static class ShortcutsMain
 
     public static readonly Dictionary<string, string> CommandTranslationLookup = new Dictionary<string, string>
     {
-        { nameof(_mvm.SelectAllLinesCommand) , Se.Language.Options.Shortcuts.ListSelectAll },
-        { nameof(_mvm.InverseSelectionCommand) , Se.Language.Options.Shortcuts.ListInverseSelection },
-        { nameof(_mvm.DeleteSelectedLinesCommand) , Se.Language.Options.Shortcuts.ListDeleteSelection },
-        { nameof(_mvm.OpenDataFolderCommand) , Se.Language.Options.Shortcuts.OpenSeDataFolder },
+        { nameof(_mvm.SelectAllLinesCommand), Se.Language.Options.Shortcuts.ListSelectAll },
+        { nameof(_mvm.InverseSelectionCommand), Se.Language.Options.Shortcuts.ListInverseSelection },
+        { nameof(_mvm.DeleteSelectedLinesCommand), Se.Language.Options.Shortcuts.ListDeleteSelection },
+        { nameof(_mvm.DuplicateSelectedLinesCommand), Se.Language.Options.Shortcuts.DuplicateSelectedLines},
+        { nameof(_mvm.OpenDataFolderCommand), Se.Language.Options.Shortcuts.OpenSeDataFolder },
 
-        { nameof(_mvm.CommandFileOpenCommand) , Se.Language.Options.Shortcuts.FileOpen },
-        { nameof(_mvm.CommandExitCommand) , Se.Language.Options.Shortcuts.FileExit },
-        { nameof(_mvm.CommandFileNewCommand) , Se.Language.Options.Shortcuts.FileNew },
-        { nameof(_mvm.CommandFileSaveCommand) , Se.Language.Options.Shortcuts.FileSave },
-        { nameof(_mvm.CommandFileSaveAsCommand) , Se.Language.Options.Shortcuts.FileSaveAs },
-        { nameof(_mvm.ShowStatisticsCommand) , Se.Language.Options.Shortcuts.FileStatistics },
-        { nameof(_mvm.ShowCompareCommand) , Se.Language.Options.Shortcuts.FileCompare },
+        { nameof(_mvm.CommandFileOpenCommand), Se.Language.Options.Shortcuts.FileOpen },
+        { nameof(_mvm.CommandExitCommand), Se.Language.Options.Shortcuts.FileExit },
+        { nameof(_mvm.CommandFileNewCommand), Se.Language.Options.Shortcuts.FileNew },
+        { nameof(_mvm.CommandFileSaveCommand), Se.Language.Options.Shortcuts.FileSave },
+        { nameof(_mvm.CommandFileSaveAsCommand), Se.Language.Options.Shortcuts.FileSaveAs },
+        { nameof(_mvm.ShowStatisticsCommand), Se.Language.Options.Shortcuts.FileStatistics },
+        { nameof(_mvm.ShowCompareCommand), Se.Language.Options.Shortcuts.FileCompare },
 
-        { nameof(_mvm.UndoCommand) , Se.Language.General.Undo },
-        { nameof(_mvm.RedoCommand) , Se.Language.General.Redo },
-        { nameof(_mvm.ShowFindCommand) , Se.Language.Options.Shortcuts.EditFind },
-        { nameof(_mvm.FindNextCommand) , Se.Language.Options.Shortcuts.EditFindNext },
-        { nameof(_mvm.ShowReplaceCommand) , Se.Language.Options.Shortcuts.EditReplace },
-        { nameof(_mvm.ShowMultipleReplaceCommand) , Se.Language.Options.Shortcuts.EditMultipleReplace },
+        { nameof(_mvm.UndoCommand), Se.Language.General.Undo },
+        { nameof(_mvm.RedoCommand), Se.Language.General.Redo },
+        { nameof(_mvm.ShowFindCommand), Se.Language.Options.Shortcuts.EditFind },
+        { nameof(_mvm.FindNextCommand), Se.Language.Options.Shortcuts.EditFindNext },
+        { nameof(_mvm.ShowReplaceCommand), Se.Language.Options.Shortcuts.EditReplace },
+        { nameof(_mvm.ShowMultipleReplaceCommand), Se.Language.Options.Shortcuts.EditMultipleReplace },
 
-        { nameof(_mvm.ShowGoToLineCommand) , Se.Language.Options.Shortcuts.GeneralGoToLineNumber },
-        { nameof(_mvm.ShowGoToVideoPositionCommand) , Se.Language.Options.Shortcuts.GeneralGoToVideoPosition },
-        { nameof(_mvm.ToggleLinesItalicCommand) , Se.Language.Options.Shortcuts.GeneralToggleItalic },
-        { nameof(_mvm.ToggleLinesBoldCommand) , Se.Language.Options.Shortcuts.GeneralToggleBold },
+        { nameof(_mvm.ShowGoToLineCommand), Se.Language.Options.Shortcuts.GeneralGoToLineNumber },
+        { nameof(_mvm.ShowGoToVideoPositionCommand), Se.Language.Options.Shortcuts.GeneralGoToVideoPosition },
+        { nameof(_mvm.ToggleLinesItalicCommand), Se.Language.Options.Shortcuts.GeneralToggleItalic },
+        { nameof(_mvm.ToggleLinesBoldCommand), Se.Language.Options.Shortcuts.GeneralToggleBold },
 
-        { nameof(_mvm.TogglePlayPauseCommand) , Se.Language.Options.Shortcuts.TogglePlayPause },
-        { nameof(_mvm.TogglePlayPause2Command) , Se.Language.Options.Shortcuts.TogglePlayPause },
+        { nameof(_mvm.TogglePlayPauseCommand), Se.Language.Options.Shortcuts.TogglePlayPause },
+        { nameof(_mvm.TogglePlayPause2Command), Se.Language.Options.Shortcuts.TogglePlayPause },
 
-        { nameof(_mvm.CommandShowLayoutCommand) , Se.Language.Options.Shortcuts.GeneralChooseLayout },
-        { nameof(_mvm.CommandShowAutoTranslateCommand) , Se.Language.Options.Shortcuts.AutoTranslate },
-        { nameof(_mvm.CommandShowSettingsCommand) , Se.Language.Options.Shortcuts.Settings },
+        { nameof(_mvm.CommandShowLayoutCommand), Se.Language.Options.Shortcuts.GeneralChooseLayout },
+        { nameof(_mvm.CommandShowAutoTranslateCommand), Se.Language.Options.Shortcuts.AutoTranslate },
+        { nameof(_mvm.CommandShowSettingsCommand), Se.Language.Options.Shortcuts.Settings },
 
-        { nameof(_mvm.GoToNextLineCommand) , Se.Language.Options.Shortcuts.GeneralGoToNextSubtitle },
-        { nameof(_mvm.GoToPreviousLineCommand) , Se.Language.Options.Shortcuts.GeneralGoToPrevSubtitle },
-        { nameof(_mvm.SaveLanguageFileCommand) , "Save language file" },
+        { nameof(_mvm.GoToNextLineCommand), Se.Language.Options.Shortcuts.GeneralGoToNextSubtitle },
+        { nameof(_mvm.GoToPreviousLineCommand), Se.Language.Options.Shortcuts.GeneralGoToPrevSubtitle },
+        { nameof(_mvm.SaveLanguageFileCommand), Se.Language.Main.SaveLanguageFile },
 
-        { nameof(_mvm.UnbreakCommand) , Se.Language.General.Unbreak },
-        { nameof(_mvm.AutoBreakCommand) , Se.Language.General.AutoBreak },
-        { nameof(_mvm.SplitCommand) , Se.Language.General.SplitLine },
-        { nameof(_mvm.SplitAtVideoPositionCommand) , Se.Language.General.SplitLineAtVideoPosition },
-        { nameof(_mvm.SplitAtVideoPositionAndTextBoxCursorPositionCommand) , Se.Language.General.SplitLineAtVideoAndTextBoxPosition },
-        { nameof(_mvm.WaveformOneSecondBackCommand) , Se.Language.General.WaveformOneSecondBack },
-        { nameof(_mvm.WaveformOneSecondForwardCommand) ,  Se.Language.General.WaveformOneSecondForward },
-        { nameof(_mvm.WaveformSetStartAndOffsetTheRestCommand) ,  Se.Language.General.SetStartAndOffsetTheRest },
-        { nameof(_mvm.WaveformSetStartCommand) ,  Se.Language.General.SetStart },
-        { nameof(_mvm.WaveformSetEndCommand) ,  Se.Language.General.SetEnd },
-        { nameof(_mvm.ExtendSelectedToPreviousCommand) ,  Se.Language.General.ExtendSelectedToPrevious },
-        { nameof(_mvm.ExtendSelectedToNextCommand) ,  Se.Language.General.ExtendSelectedToNext },
-        { nameof(_mvm.ToggleLockTimeCodesCommand) , Se.Language.Options.Shortcuts.ToggleLockTimeCodes },
-        { nameof(_mvm.ShowHelpCommand) , Se.Language.Options.Shortcuts.Help },
+        { nameof(_mvm.UnbreakCommand), Se.Language.General.Unbreak },
+        { nameof(_mvm.AutoBreakCommand), Se.Language.General.AutoBreak },
+        { nameof(_mvm.SplitCommand), Se.Language.General.SplitLine },
+        { nameof(_mvm.SplitAtVideoPositionCommand), Se.Language.General.SplitLineAtVideoPosition },
+        { nameof(_mvm.SplitAtVideoPositionAndTextBoxCursorPositionCommand), Se.Language.General.SplitLineAtVideoAndTextBoxPosition },
+        { nameof(_mvm.WaveformOneSecondBackCommand), Se.Language.General.WaveformOneSecondBack },
+        { nameof(_mvm.WaveformOneSecondForwardCommand),  Se.Language.General.WaveformOneSecondForward },
+        { nameof(_mvm.WaveformSetStartAndOffsetTheRestCommand),  Se.Language.General.SetStartAndOffsetTheRest },
+        { nameof(_mvm.WaveformSetStartCommand),  Se.Language.General.SetStart },
+        { nameof(_mvm.WaveformSetEndCommand),  Se.Language.General.SetEnd },
+        { nameof(_mvm.ExtendSelectedToPreviousCommand),  Se.Language.General.ExtendSelectedToPrevious },
+        { nameof(_mvm.ExtendSelectedToNextCommand),  Se.Language.General.ExtendSelectedToNext },
+        { nameof(_mvm.ToggleLockTimeCodesCommand), Se.Language.Options.Shortcuts.ToggleLockTimeCodes },
+        { nameof(_mvm.ShowHelpCommand), Se.Language.Options.Shortcuts.Help },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -113,6 +114,7 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.SelectAllLinesCommand, nameof(vm.SelectAllLinesCommand), ShortcutCategory.SubtitleGrid);
         AddShortcut(shortcuts, vm.InverseSelectionCommand, nameof(vm.InverseSelectionCommand), ShortcutCategory.SubtitleGrid);
         AddShortcut(shortcuts, vm.DeleteSelectedLinesCommand, nameof(vm.DeleteSelectedLinesCommand), ShortcutCategory.SubtitleGrid);
+        AddShortcut(shortcuts, vm.DuplicateSelectedLinesCommand, nameof(vm.DuplicateSelectedLinesCommand), ShortcutCategory.SubtitleGrid);
 
         AddShortcut(shortcuts, vm.CommandFileOpenCommand, nameof(vm.CommandFileOpenCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.CommandExitCommand, nameof(vm.CommandExitCommand), ShortcutCategory.General);

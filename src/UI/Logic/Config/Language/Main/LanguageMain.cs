@@ -23,6 +23,7 @@ public class LanguageMain
     public string RedoPerformedXActionLeft { get; set; }
     public string UndoPerformedXActionLeft { get; set; }
     public string SaveXFileAs { get; set; }
+    public string SaveLanguageFile { get; internal set; }
 
     public LanguageMain()
     {
@@ -42,5 +43,6 @@ public class LanguageMain
         RedoPerformedXActionLeft = "Redo performed (actions left: {0})";
         UndoPerformedXActionLeft = "Undo performed (actions left: {0})";
         SaveXFileAs = "Save {0} file as";
+        SaveLanguageFile = "Save language file";
     }
 }

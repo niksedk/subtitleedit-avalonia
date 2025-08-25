@@ -157,7 +157,7 @@ public partial class MainViewModel :
     private readonly IMpvReloader _mpvReloader;
     private readonly IFindService _findService;
 
-    private bool IsEmpty => Subtitles.Count == 0 || (Subtitles.Count == 1 &&  string.IsNullOrEmpty(Subtitles[0].Text));
+    private bool IsEmpty => Subtitles.Count == 0 || (Subtitles.Count == 1 && string.IsNullOrEmpty(Subtitles[0].Text));
 
     public VideoPlayerControl? VideoPlayerControl { get; internal set; }
     public Menu Menu { get; internal set; }
@@ -360,9 +360,9 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task CommandShowLayout()
     {
-        var vm = await _windowService.ShowDialogAsync<LayoutWindow, LayoutViewModel>(Window!, viewModel => 
-        { 
-            viewModel.SelectedLayout = Se.Settings.General.LayoutNumber; 
+        var vm = await _windowService.ShowDialogAsync<LayoutWindow, LayoutViewModel>(Window!, viewModel =>
+        {
+            viewModel.SelectedLayout = Se.Settings.General.LayoutNumber;
         });
 
         if (vm.OkPressed && vm.SelectedLayout != null && vm.SelectedLayout != Se.Settings.General.LayoutNumber)
@@ -817,7 +817,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<BlankVideoWindow, BlankVideoViewModel>(Window!, vm => 
+        var result = await _windowService.ShowDialogAsync<BlankVideoWindow, BlankVideoViewModel>(Window!, vm =>
         {
             vm.Initialize(_subtitleFileName ?? string.Empty, SelectedSubtitleFormat);
         });
@@ -849,9 +849,9 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<CutVideoWindow, CutVideoViewModel>(Window!, vm => 
-        { 
-            vm.Initialize(_videoFileName, AudioVisualizer?.WavePeaks, SelectedSubtitleFormat); 
+        var result = await _windowService.ShowDialogAsync<CutVideoWindow, CutVideoViewModel>(Window!, vm =>
+        {
+            vm.Initialize(_videoFileName, AudioVisualizer?.WavePeaks, SelectedSubtitleFormat);
         });
 
         if (!result.OkPressed)
@@ -881,9 +881,9 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<ReEncodeVideoWindow, ReEncodeVideoViewModel>(Window!, vm => 
-        { 
-            vm.Initialize(_videoFileName, SelectedSubtitleFormat); 
+        var result = await _windowService.ShowDialogAsync<ReEncodeVideoWindow, ReEncodeVideoViewModel>(Window!, vm =>
+        {
+            vm.Initialize(_videoFileName, SelectedSubtitleFormat);
         });
 
         if (!result.OkPressed)
@@ -1061,8 +1061,8 @@ public partial class MainViewModel :
         _audioVisualizerUndockedViewModel?.Window?.Close();
         VideoPlayerControl = null;
         InitLayout.MakeLayout(MainView!, this, Se.Settings.General.LayoutNumber);
-       
-        Dispatcher.UIThread.Post(async void() =>
+
+        Dispatcher.UIThread.Post(async void () =>
         {
             await VideoOpenFile(videoFileName);
         });
@@ -1071,9 +1071,9 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowSpellCheck()
     {
-        var result = await _windowService.ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(Window!, vm => 
-        { 
-            vm.Initialize(Subtitles, SelectedSubtitleIndex, this); 
+        var result = await _windowService.ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(Window!, vm =>
+        {
+            vm.Initialize(Subtitles, SelectedSubtitleIndex, this);
         });
 
         if (result.OkPressed && result.TotalChangedWords > 0)
@@ -1361,6 +1361,24 @@ public partial class MainViewModel :
         Se.Settings.General.ShowColumnEndTime = !Se.Settings.General.ShowColumnEndTime;
         ShowColumnEndTime = Se.Settings.General.ShowColumnEndTime;
     }
+
+    [RelayCommand]
+    private void DuplicateSelectedLines()
+    {
+        var newSubtitles = new List<SubtitleLineViewModel>();
+        foreach (var selected in _selectedSubtitles ?? new List<SubtitleLineViewModel>())
+        {
+            newSubtitles.Add(new SubtitleLineViewModel(selected));
+        }
+
+        foreach (var newSubtitle in newSubtitles)
+        {
+            _insertService.InsertInCorrectPosition(Subtitles, newSubtitle);
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
 
     [RelayCommand]
     private async Task DeleteSelectedLines()
@@ -4503,7 +4521,7 @@ public partial class MainViewModel :
     internal void SubtitleTextBoxGotFocus(object? sender, GotFocusEventArgs e)
     {
         if (Subtitles.Count == 0)
-        { 
+        {
             var newSubtitle = new SubtitleLineViewModel
             {
                 StartTime = TimeSpan.Zero,
