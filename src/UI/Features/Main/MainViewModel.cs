@@ -3865,19 +3865,19 @@ public partial class MainViewModel :
                 var key = currentKeys.First();
                 var allowedSingleKeyShortcuts = new HashSet<Key>
                 {
-                    //Key.Enter,
                     Key.Escape,
                     Key.Tab,
-                    //Key.Back,
-                    //Key.Delete,
-                    // Key.Left,
-                    //Key.Right,
-                    //Key.Up,
-                    //Key.Down,
                     Key.PageUp,
                     Key.PageDown,
-                    //Key.Home,
-                    //Key.End,
+                    Key.BrowserBack,
+                    Key.BrowserForward,
+                    Key.BrowserFavorites,
+                    Key.BrowserHome,
+                    Key.Execute,
+                    Key.ExSel,
+                    Key.LaunchApplication1,
+                    Key.LaunchApplication2,
+                    Key.LaunchMail,
                     Key.Insert,
                     Key.F1,
                     Key.F2,
@@ -3891,6 +3891,18 @@ public partial class MainViewModel :
                     Key.F10,
                     Key.F11,
                     Key.F12,
+                    Key.F13,
+                    Key.F14,
+                    Key.F15,
+                    Key.F16,
+                    Key.F17,
+                    Key.F18,
+                    Key.F19,
+                    Key.F20,
+                    Key.F21,
+                    Key.F22,
+                    Key.F23,
+                    Key.F24,
                 };
 
                 if (!allowedSingleKeyShortcuts.Contains(key))
@@ -3903,6 +3915,17 @@ public partial class MainViewModel :
         if (SubtitleGrid.IsFocused)
         {
             var relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.SubtitleGrid.ToStringInvariant());
+            if (relayCommand != null)
+            {
+                keyEventArgs.Handled = true;
+                relayCommand.Execute(null);
+                return;
+            }
+        }
+
+        if (AudioVisualizer != null && AudioVisualizer.IsFocused)
+        {
+            var relayCommand = _shortcutManager.CheckShortcuts( ShortcutCategory.Waveform.ToStringInvariant());
             if (relayCommand != null)
             {
                 keyEventArgs.Handled = true;

@@ -30,11 +30,11 @@ public class ShortcutManager : IShortcutManager
         _shortcuts.Add(shortcut);
     }
 
-    public IRelayCommand? CheckShortcuts(string? control)
+    public IRelayCommand? CheckShortcuts(string activeControl)
     {
         var keys = _activeKeys.Select(p => p.ToString()).ToList();
-        var hashCode = ShortCut.CalculateHash(keys, control);
-        var inputWithNormalizedModifiers = CalculateNormalizedHash(keys, control);
+        var hashCode = ShortCut.CalculateHash(keys, activeControl);
+        var inputWithNormalizedModifiers = CalculateNormalizedHash(keys, activeControl);
 
         foreach (var shortcut in _shortcuts)
         {

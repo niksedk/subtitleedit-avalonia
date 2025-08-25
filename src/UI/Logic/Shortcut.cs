@@ -47,7 +47,7 @@ public class ShortCut
         Action = shortcut.RelayCommand;
         Category = shortcut.Category;
         Name = shortcut.Name;
-        Control = ShortcutCategory.General.ToStringInvariant();
+        Control = shortcut.Category.ToStringInvariant();
         HashCode = CalculateHash(Keys, Control);
         NormalizedHashCode = ShortcutManager.CalculateNormalizedHash(Keys, Control);
     }
