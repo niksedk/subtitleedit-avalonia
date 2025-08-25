@@ -31,14 +31,9 @@ public static class ShortcutsMain
         var keys = Se.Settings.Shortcuts.ToDictionary(p => p.ActionName, p => p);
         foreach (var shortcut in GetAllAvailableShortcuts(vm))
         {
-            if (keys.TryGetValue(shortcut.Name, out var match))
-            {
-                shortcuts.Add(new ShortCut(shortcut, match));
-            }
-            else
-            {
-                shortcuts.Add(new ShortCut(shortcut));
-            }
+            shortcuts.Add(keys.TryGetValue(shortcut.Name, out var match)
+                ? new ShortCut(shortcut, match)
+                : new ShortCut(shortcut));
         }
 
         return shortcuts;
@@ -50,61 +45,59 @@ public static class ShortcutsMain
         list.Add(new AvailableShortcut(command, name, category));
     }
 
-    private static MainViewModel _mvm = null!;
-
     public static readonly Dictionary<string, string> CommandTranslationLookup = new Dictionary<string, string>
     {
-        { nameof(_mvm.SelectAllLinesCommand), Se.Language.Options.Shortcuts.ListSelectAll },
-        { nameof(_mvm.InverseSelectionCommand), Se.Language.Options.Shortcuts.ListInverseSelection },
-        { nameof(_mvm.DeleteSelectedLinesCommand), Se.Language.Options.Shortcuts.ListDeleteSelection },
-        { nameof(_mvm.DuplicateSelectedLinesCommand), Se.Language.Options.Shortcuts.DuplicateSelectedLines},
-        { nameof(_mvm.OpenDataFolderCommand), Se.Language.Options.Shortcuts.OpenSeDataFolder },
+        { nameof(MainViewModel.SelectAllLinesCommand), Se.Language.Options.Shortcuts.ListSelectAll },
+        { nameof(MainViewModel.InverseSelectionCommand), Se.Language.Options.Shortcuts.ListInverseSelection },
+        { nameof(MainViewModel.DeleteSelectedLinesCommand), Se.Language.Options.Shortcuts.ListDeleteSelection },
+        { nameof(MainViewModel.DuplicateSelectedLinesCommand), Se.Language.Options.Shortcuts.DuplicateSelectedLines},
+        { nameof(MainViewModel.OpenDataFolderCommand), Se.Language.Options.Shortcuts.OpenSeDataFolder },
 
-        { nameof(_mvm.CommandFileOpenCommand), Se.Language.Options.Shortcuts.FileOpen },
-        { nameof(_mvm.CommandExitCommand), Se.Language.Options.Shortcuts.FileExit },
-        { nameof(_mvm.CommandFileNewCommand), Se.Language.Options.Shortcuts.FileNew },
-        { nameof(_mvm.CommandFileSaveCommand), Se.Language.Options.Shortcuts.FileSave },
-        { nameof(_mvm.CommandFileSaveAsCommand), Se.Language.Options.Shortcuts.FileSaveAs },
-        { nameof(_mvm.ShowStatisticsCommand), Se.Language.Options.Shortcuts.FileStatistics },
-        { nameof(_mvm.ShowCompareCommand), Se.Language.Options.Shortcuts.FileCompare },
+        { nameof(MainViewModel.CommandFileOpenCommand), Se.Language.Options.Shortcuts.FileOpen },
+        { nameof(MainViewModel.CommandExitCommand), Se.Language.Options.Shortcuts.FileExit },
+        { nameof(MainViewModel.CommandFileNewCommand), Se.Language.Options.Shortcuts.FileNew },
+        { nameof(MainViewModel.CommandFileSaveCommand), Se.Language.Options.Shortcuts.FileSave },
+        { nameof(MainViewModel.CommandFileSaveAsCommand), Se.Language.Options.Shortcuts.FileSaveAs },
+        { nameof(MainViewModel.ShowStatisticsCommand), Se.Language.Options.Shortcuts.FileStatistics },
+        { nameof(MainViewModel.ShowCompareCommand), Se.Language.Options.Shortcuts.FileCompare },
 
-        { nameof(_mvm.UndoCommand), Se.Language.General.Undo },
-        { nameof(_mvm.RedoCommand), Se.Language.General.Redo },
-        { nameof(_mvm.ShowFindCommand), Se.Language.Options.Shortcuts.EditFind },
-        { nameof(_mvm.FindNextCommand), Se.Language.Options.Shortcuts.EditFindNext },
-        { nameof(_mvm.ShowReplaceCommand), Se.Language.Options.Shortcuts.EditReplace },
-        { nameof(_mvm.ShowMultipleReplaceCommand), Se.Language.Options.Shortcuts.EditMultipleReplace },
+        { nameof(MainViewModel.UndoCommand), Se.Language.General.Undo },
+        { nameof(MainViewModel.RedoCommand), Se.Language.General.Redo },
+        { nameof(MainViewModel.ShowFindCommand), Se.Language.Options.Shortcuts.EditFind },
+        { nameof(MainViewModel.FindNextCommand), Se.Language.Options.Shortcuts.EditFindNext },
+        { nameof(MainViewModel.ShowReplaceCommand), Se.Language.Options.Shortcuts.EditReplace },
+        { nameof(MainViewModel.ShowMultipleReplaceCommand), Se.Language.Options.Shortcuts.EditMultipleReplace },
 
-        { nameof(_mvm.ShowGoToLineCommand), Se.Language.Options.Shortcuts.GeneralGoToLineNumber },
-        { nameof(_mvm.ShowGoToVideoPositionCommand), Se.Language.Options.Shortcuts.GeneralGoToVideoPosition },
-        { nameof(_mvm.ToggleLinesItalicCommand), Se.Language.Options.Shortcuts.GeneralToggleItalic },
-        { nameof(_mvm.ToggleLinesBoldCommand), Se.Language.Options.Shortcuts.GeneralToggleBold },
+        { nameof(MainViewModel.ShowGoToLineCommand), Se.Language.Options.Shortcuts.GeneralGoToLineNumber },
+        { nameof(MainViewModel.ShowGoToVideoPositionCommand), Se.Language.Options.Shortcuts.GeneralGoToVideoPosition },
+        { nameof(MainViewModel.ToggleLinesItalicCommand), Se.Language.Options.Shortcuts.GeneralToggleItalic },
+        { nameof(MainViewModel.ToggleLinesBoldCommand), Se.Language.Options.Shortcuts.GeneralToggleBold },
 
-        { nameof(_mvm.TogglePlayPauseCommand), Se.Language.Options.Shortcuts.TogglePlayPause },
-        { nameof(_mvm.TogglePlayPause2Command), Se.Language.Options.Shortcuts.TogglePlayPause },
+        { nameof(MainViewModel.TogglePlayPauseCommand), Se.Language.Options.Shortcuts.TogglePlayPause },
+        { nameof(MainViewModel.TogglePlayPause2Command), Se.Language.Options.Shortcuts.TogglePlayPause },
 
-        { nameof(_mvm.CommandShowLayoutCommand), Se.Language.Options.Shortcuts.GeneralChooseLayout },
-        { nameof(_mvm.CommandShowAutoTranslateCommand), Se.Language.Options.Shortcuts.AutoTranslate },
-        { nameof(_mvm.CommandShowSettingsCommand), Se.Language.Options.Shortcuts.Settings },
+        { nameof(MainViewModel.CommandShowLayoutCommand), Se.Language.Options.Shortcuts.GeneralChooseLayout },
+        { nameof(MainViewModel.CommandShowAutoTranslateCommand), Se.Language.Options.Shortcuts.AutoTranslate },
+        { nameof(MainViewModel.CommandShowSettingsCommand), Se.Language.Options.Shortcuts.Settings },
 
-        { nameof(_mvm.GoToNextLineCommand), Se.Language.Options.Shortcuts.GeneralGoToNextSubtitle },
-        { nameof(_mvm.GoToPreviousLineCommand), Se.Language.Options.Shortcuts.GeneralGoToPrevSubtitle },
-        { nameof(_mvm.SaveLanguageFileCommand), Se.Language.Main.SaveLanguageFile },
+        { nameof(MainViewModel.GoToNextLineCommand), Se.Language.Options.Shortcuts.GeneralGoToNextSubtitle },
+        { nameof(MainViewModel.GoToPreviousLineCommand), Se.Language.Options.Shortcuts.GeneralGoToPrevSubtitle },
+        { nameof(MainViewModel.SaveLanguageFileCommand), Se.Language.Main.SaveLanguageFile },
 
-        { nameof(_mvm.UnbreakCommand), Se.Language.General.Unbreak },
-        { nameof(_mvm.AutoBreakCommand), Se.Language.General.AutoBreak },
-        { nameof(_mvm.SplitCommand), Se.Language.General.SplitLine },
-        { nameof(_mvm.SplitAtVideoPositionCommand), Se.Language.General.SplitLineAtVideoPosition },
-        { nameof(_mvm.SplitAtVideoPositionAndTextBoxCursorPositionCommand), Se.Language.General.SplitLineAtVideoAndTextBoxPosition },
-        { nameof(_mvm.WaveformOneSecondBackCommand), Se.Language.General.WaveformOneSecondBack },
-        { nameof(_mvm.WaveformOneSecondForwardCommand),  Se.Language.General.WaveformOneSecondForward },
-        { nameof(_mvm.WaveformSetStartAndOffsetTheRestCommand),  Se.Language.General.SetStartAndOffsetTheRest },
-        { nameof(_mvm.WaveformSetStartCommand),  Se.Language.General.SetStart },
-        { nameof(_mvm.WaveformSetEndCommand),  Se.Language.General.SetEnd },
-        { nameof(_mvm.ExtendSelectedToPreviousCommand),  Se.Language.General.ExtendSelectedToPrevious },
-        { nameof(_mvm.ExtendSelectedToNextCommand),  Se.Language.General.ExtendSelectedToNext },
-        { nameof(_mvm.ToggleLockTimeCodesCommand), Se.Language.Options.Shortcuts.ToggleLockTimeCodes },
-        { nameof(_mvm.ShowHelpCommand), Se.Language.Options.Shortcuts.Help },
+        { nameof(MainViewModel.UnbreakCommand), Se.Language.General.Unbreak },
+        { nameof(MainViewModel.AutoBreakCommand), Se.Language.General.AutoBreak },
+        { nameof(MainViewModel.SplitCommand), Se.Language.General.SplitLine },
+        { nameof(MainViewModel.SplitAtVideoPositionCommand), Se.Language.General.SplitLineAtVideoPosition },
+        { nameof(MainViewModel.SplitAtVideoPositionAndTextBoxCursorPositionCommand), Se.Language.General.SplitLineAtVideoAndTextBoxPosition },
+        { nameof(MainViewModel.WaveformOneSecondBackCommand), Se.Language.General.WaveformOneSecondBack },
+        { nameof(MainViewModel.WaveformOneSecondForwardCommand),  Se.Language.General.WaveformOneSecondForward },
+        { nameof(MainViewModel.WaveformSetStartAndOffsetTheRestCommand),  Se.Language.General.SetStartAndOffsetTheRest },
+        { nameof(MainViewModel.WaveformSetStartCommand),  Se.Language.General.SetStart },
+        { nameof(MainViewModel.WaveformSetEndCommand),  Se.Language.General.SetEnd },
+        { nameof(MainViewModel.ExtendSelectedToPreviousCommand),  Se.Language.General.ExtendSelectedToPrevious },
+        { nameof(MainViewModel.ExtendSelectedToNextCommand),  Se.Language.General.ExtendSelectedToNext },
+        { nameof(MainViewModel.ToggleLockTimeCodesCommand), Se.Language.Options.Shortcuts.ToggleLockTimeCodes },
+        { nameof(MainViewModel.ShowHelpCommand), Se.Language.Options.Shortcuts.Help },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -171,30 +164,32 @@ public static class ShortcutsMain
     {
         var commandOrWin = GetCommandOrWin();
 
-        return new List<SeShortCut>
-        {
-            new(nameof(vm.UndoCommand), new List<string> { commandOrWin, "Z" }),
-            new(nameof(vm.RedoCommand), new List<string> { commandOrWin, "Y" }),
-            new(nameof(vm.ShowGoToLineCommand), new List<string> { commandOrWin, "G" }),
-            new(nameof(vm.GoToPreviousLineCommand), new List<string> { "Alt", "Up" }),
-            new(nameof(vm.GoToNextLineCommand), new List<string> { "Alt", "Down" }),
-            new(nameof(vm.SelectAllLinesCommand), new List<string> { commandOrWin, "A" }, ShortcutCategory.SubtitleGrid),
-            new(nameof(vm.InverseSelectionCommand), new List<string> { commandOrWin, "Shift", "I" }, ShortcutCategory.SubtitleGrid),
-            new(nameof(vm.ToggleLinesItalicCommand), new List<string> { commandOrWin, "I" }, ShortcutCategory.SubtitleGrid),
-            new(nameof(vm.DeleteSelectedLinesCommand), new List<string> { "Delete" }, ShortcutCategory.SubtitleGrid),
-            new(nameof(vm.ShowFindCommand), new List<string> { commandOrWin, "F" }, ShortcutCategory.General),
-            new(nameof(vm.FindNextCommand), new List<string> { "F3" }, ShortcutCategory.General),
-            new(nameof(vm.ShowReplaceCommand), new List<string> { commandOrWin, "H" }, ShortcutCategory.General),
-            new(nameof(vm.OpenDataFolderCommand), new List<string> { commandOrWin, "Alt", "Shift", "D" }, ShortcutCategory.General),
-            new(nameof(vm.CommandFileNewCommand), new List<string> { commandOrWin, "N" }, ShortcutCategory.General),
-            new(nameof(vm.CommandFileOpenCommand), new List<string> { commandOrWin, "O" }, ShortcutCategory.General),
-            new(nameof(vm.CommandFileSaveCommand), new List<string> { commandOrWin, "S" }, ShortcutCategory.General),
-            new(nameof(vm.TogglePlayPauseCommand), new List<string> { Avalonia.Input.Key.Space.ToString() }, ShortcutCategory.General),
-            new(nameof(vm.TogglePlayPause2Command), new List<string> { commandOrWin, Avalonia.Input.Key.Space.ToString() }, ShortcutCategory.General),
-            new(nameof(vm.WaveformOneSecondBackCommand), new List<string> { Avalonia.Input.Key.Left.ToString() }, ShortcutCategory.Waveform),
-            new(nameof(vm.WaveformOneSecondForwardCommand), new List<string> { Avalonia.Input.Key.Right.ToString() }, ShortcutCategory.Waveform),
-            new(nameof(vm.ShowHelpCommand), new List<string> { Avalonia.Input.Key.F1.ToString() }, ShortcutCategory.General),
-       };
+        return
+        [
+            new(nameof(vm.UndoCommand), [commandOrWin, "Z"]),
+            new(nameof(vm.RedoCommand), [commandOrWin, "Y"]),
+            new(nameof(vm.ShowGoToLineCommand), [commandOrWin, "G"]),
+            new(nameof(vm.GoToPreviousLineCommand), ["Alt", "Up"]),
+            new(nameof(vm.GoToNextLineCommand), ["Alt", "Down"]),
+            new(nameof(vm.SelectAllLinesCommand), [commandOrWin, "A"], ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.InverseSelectionCommand), [commandOrWin, "Shift", "I"], ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.ToggleLinesItalicCommand), [commandOrWin, "I"], ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.DeleteSelectedLinesCommand), ["Delete"], ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.ShowFindCommand), [commandOrWin, "F"], ShortcutCategory.General),
+            new(nameof(vm.FindNextCommand), ["F3"], ShortcutCategory.General),
+            new(nameof(vm.ShowReplaceCommand), [commandOrWin, "H"], ShortcutCategory.General),
+            new(nameof(vm.OpenDataFolderCommand), [commandOrWin, "Alt", "Shift", "D"], ShortcutCategory.General),
+            new(nameof(vm.CommandFileNewCommand), [commandOrWin, "N"], ShortcutCategory.General),
+            new(nameof(vm.CommandFileOpenCommand), [commandOrWin, "O"], ShortcutCategory.General),
+            new(nameof(vm.CommandFileSaveCommand), [commandOrWin, "S"], ShortcutCategory.General),
+            new(nameof(vm.TogglePlayPauseCommand), [nameof(Avalonia.Input.Key.Space)], ShortcutCategory.General),
+            new(nameof(vm.TogglePlayPause2Command), [commandOrWin, nameof(Avalonia.Input.Key.Space)],
+                ShortcutCategory.General),
+            new(nameof(vm.WaveformOneSecondBackCommand), [nameof(Avalonia.Input.Key.Left)], ShortcutCategory.Waveform),
+            new(nameof(vm.WaveformOneSecondForwardCommand), [nameof(Avalonia.Input.Key.Right)],
+                ShortcutCategory.Waveform),
+            new(nameof(vm.ShowHelpCommand), [nameof(Avalonia.Input.Key.F1)], ShortcutCategory.General)
+        ];
     }
 
     private static string GetCommandOrWin()
