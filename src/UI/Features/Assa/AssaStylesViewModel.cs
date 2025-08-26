@@ -5,12 +5,12 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
-using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using System.Collections.ObjectModel;
 
-namespace Nikse.SubtitleEdit.Features.Files.Statistics;
+namespace Nikse.SubtitleEdit.Features.Assa;
 
 public partial class AssaStylesViewModel : ObservableObject
 {
@@ -21,6 +21,8 @@ public partial class AssaStylesViewModel : ObservableObject
     [ObservableProperty] private StyleDisplay? _selectedStorageStyles;
     [ObservableProperty] private StyleDisplay? _currentStyle;
     [ObservableProperty] private ObservableCollection<string> _fonts;
+    [ObservableProperty] private ObservableCollection<string> _borderTypes;
+    [ObservableProperty] private string _selectedBorderType;
 
     public Window? Window { get; internal set; }
     public bool OkPressed { get; private set; }
@@ -36,7 +38,9 @@ public partial class AssaStylesViewModel : ObservableObject
         Title = string.Empty;
         FileStyles = new ObservableCollection<StyleDisplay>();
         StorageStyles = new ObservableCollection<StyleDisplay>();
-        _fonts = new ObservableCollection<string>(FontHelper.GetSystemFonts());
+        Fonts = new ObservableCollection<string>(FontHelper.GetSystemFonts());
+        BorderTypes = new ObservableCollection<string>(new[] { Se.Language.General.Outline, Se.Language.General.Box, Se.Language.General.BoxPerLine });
+        SelectedBorderType = BorderTypes[0];
 
         _fileName = string.Empty;
     }

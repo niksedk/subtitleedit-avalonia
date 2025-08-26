@@ -270,6 +270,10 @@ public class LanguageGeneral
     public string SaveFileAsTitle { get; set; }
     public string NoSubtitlesFound { get; set; }
     public object Usages { get; set; }
+    public string Left { get; set; }
+    public string Right { get; set; }
+    public string Outline { get; set; }
+    public string BoxPerLine { get; set; }
 
     public LanguageGeneral()
     {
@@ -539,5 +543,9 @@ public class LanguageGeneral
         SaveFileAsTitle = "Save file as";
         NoSubtitlesFound = "No subtitles found!";
         Usages = "Usages";
+        Left = "Left";
+        Right = "Right";
+        Outline = "Outline";
+        BoxPerLine = "Box per line";
     }
 }

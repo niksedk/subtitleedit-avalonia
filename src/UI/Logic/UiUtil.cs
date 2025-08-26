@@ -938,6 +938,13 @@ public static class UiUtil
         return control;
     }
 
+    public static StackPanel WithMarginBottom(this StackPanel control, int marginBottom)
+    {
+        var m = control.Margin;
+        control.Margin = new Thickness(m.Left, m.Top, m.Right, marginBottom);
+        return control;
+    }
+
     public static StackPanel WithAlignmentLeft(this StackPanel control)
     {
         control.HorizontalAlignment = HorizontalAlignment.Left;
@@ -978,6 +985,12 @@ public static class UiUtil
     {
         var m = control.Margin;
         control.Margin = new Thickness(marginLeft, m.Top, m.Right, m.Bottom);
+        return control;
+    }
+
+    public static Label WithMinWidth(this Label control, int minWidth)
+    {
+        control.MinWidth = minWidth;
         return control;
     }
 
@@ -1316,8 +1329,7 @@ public static class UiUtil
         return MakeRadioButton(text, viewModel, isCheckedPropertyPath, null);
     }
 
-    internal static RadioButton MakeRadioButton(string text, object viewModel, string isCheckedPropertyPath,
-        string? groupName)
+    internal static RadioButton MakeRadioButton(string text, object viewModel, string isCheckedPropertyPath, string? groupName)
     {
         var control = new RadioButton
         {

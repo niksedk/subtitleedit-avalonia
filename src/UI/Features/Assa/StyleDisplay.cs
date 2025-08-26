@@ -1,33 +1,45 @@
-﻿using Avalonia.Media;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Drawing;
 
 namespace Nikse.SubtitleEdit.Features.Assa;
 
-public class StyleDisplay
+public partial class StyleDisplay : ObservableObject
 {
-    public string Name { get; set; } = string.Empty;
-    public string FontName { get; set; } = string.Empty;    
-    public decimal FontSize { get; set; }
-    public int UsageCount { get; set; }
-    public Color ColorPrimary { get; set; }
-    public Color ColorSecondary { get; set; }
-    public Color ColorOutline { get; set; }
-    public Color ColorShadow { get; set; }
-    public decimal OutlineWidth { get; set; }
-    public decimal ShadowWidth { get; set; }
-    public bool Bold { get; set; }
-    public bool Italic { get; set; }
-    public bool Underline { get; set; }
-    public bool Strikeout { get; set; }
-    public decimal ScaleX { get; set; }
-    public decimal ScaleY { get; set; }
-    public decimal Spacing { get; set; }
-    public decimal Angle { get; set; }
-    public string Alignment { get; set; } = string.Empty;
-    public decimal MarginLeft { get; set; }
-    public decimal MarginRight { get; set; }
-    public decimal MarginVertical { get; set; }
-    public bool UseOpaqueBox { get; set; }
-    public bool UseOpaqueBoxPerLine { get; set; }
+    [ObservableProperty] private string _name = string.Empty;
+    [ObservableProperty] private string _fontName = string.Empty;
+    [ObservableProperty] private decimal _fontSize;
+    [ObservableProperty] private int _usageCount;
+    [ObservableProperty] private Color _colorPrimary;
+    [ObservableProperty] private Color _colorSecondary;
+    [ObservableProperty] private Color _colorOutline;
+    [ObservableProperty] private Color _colorShadow;
+    [ObservableProperty] private decimal _outlineWidth;
+    [ObservableProperty] private decimal _shadowWidth;
+    [ObservableProperty] private bool _bold;
+    [ObservableProperty] private bool _italic;
+    [ObservableProperty] private bool _underline;
+    [ObservableProperty] private bool _strikeout;
+    [ObservableProperty] private decimal _scaleX;
+    [ObservableProperty] private decimal _scaleY;
+    [ObservableProperty] private decimal _spacing;
+    [ObservableProperty] private decimal _angle;
+    [ObservableProperty] private bool _alignmentAn1;
+    [ObservableProperty] private bool _alignmentAn2;
+    [ObservableProperty] private bool _alignmentAn3;
+    [ObservableProperty] private bool _alignmentAn4;
+    [ObservableProperty] private bool _alignmentAn5;
+    [ObservableProperty] private bool _alignmentAn6;
+    [ObservableProperty] private bool _alignmentAn7;
+    [ObservableProperty] private bool _alignmentAn8;
+    [ObservableProperty] private bool _alignmentAn9;
+    [ObservableProperty] private decimal _marginLeft;
+    [ObservableProperty] private decimal _marginRight;
+    [ObservableProperty] private decimal _marginVertical;
+    [ObservableProperty] private bool _useOpaqueBox;
+    [ObservableProperty] private bool _useOpaqueBoxPerLine;
 
-
+    public StyleDisplay()
+    {
+        _name = string.Empty;
+    }
 }
