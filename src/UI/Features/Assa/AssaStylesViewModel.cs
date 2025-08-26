@@ -7,8 +7,12 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Config.Language.Options;
 using Nikse.SubtitleEdit.Logic.Media;
+using System;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
 
 namespace Nikse.SubtitleEdit.Features.Assa;
 
@@ -16,13 +20,14 @@ public partial class AssaStylesViewModel : ObservableObject
 {
     [ObservableProperty] private string _title;
     [ObservableProperty] private ObservableCollection<StyleDisplay> _fileStyles;
-    [ObservableProperty] private StyleDisplay? _selectedFileStyles;
+    [ObservableProperty] private StyleDisplay? _selectedFileStyle;
     [ObservableProperty] private ObservableCollection<StyleDisplay> _storageStyles;
-    [ObservableProperty] private StyleDisplay? _selectedStorageStyles;
+    [ObservableProperty] private StyleDisplay? _selectedStorageStyle;
     [ObservableProperty] private StyleDisplay? _currentStyle;
     [ObservableProperty] private ObservableCollection<string> _fonts;
     [ObservableProperty] private ObservableCollection<string> _borderTypes;
     [ObservableProperty] private string _selectedBorderType;
+    [ObservableProperty] private bool _isFileStylesFocused;
 
     public Window? Window { get; internal set; }
     public bool OkPressed { get; private set; }
@@ -30,6 +35,8 @@ public partial class AssaStylesViewModel : ObservableObject
     public IFileHelper _fileHelper;
 
     private string _fileName;
+    private string _header;
+    private Subtitle _subtitle;
 
     public AssaStylesViewModel(IFileHelper fileHelper)
     {
@@ -43,6 +50,8 @@ public partial class AssaStylesViewModel : ObservableObject
         SelectedBorderType = BorderTypes[0];
 
         _fileName = string.Empty;
+        _header = string.Empty;
+        _subtitle = new Subtitle();
     }
 
     [RelayCommand]
@@ -61,11 +70,28 @@ public partial class AssaStylesViewModel : ObservableObject
     [RelayCommand]
     private void FileImport()
     {
+        UpdateUsages();
     }
 
     [RelayCommand]
     private void FileNew()
     {
+        var name = Se.Language.General.New;
+        if (FileStyles.Any(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+        {
+            var count = 2;
+            var doRepeat = true;
+            while (doRepeat)
+            {
+                name = Se.Language.General.New + count;
+                doRepeat = FileStyles.Any(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+                count++;
+            }
+        }
+
+        var style = new SsaStyle { Name = name };
+        FileStyles.Add(new StyleDisplay(style));
+        UpdateUsages();
     }
 
     [RelayCommand]
@@ -96,8 +122,57 @@ public partial class AssaStylesViewModel : ObservableObject
         });
     }
 
-    internal void Initialize(Subtitle subtitle, SubtitleFormat format, string fileName)
+    public void Initialize(Subtitle subtitle, SubtitleFormat format, string fileName)
     {
+        _header = subtitle.Header;
+
+        if (_header != null && _header.Contains("http://www.w3.org/ns/ttml"))
+        {
+            var s = new Subtitle { Header = _header };
+            AdvancedSubStationAlpha.LoadStylesFromTimedText10(s, string.Empty, _header, AdvancedSubStationAlpha.HeaderNoStyles, new StringBuilder());
+            _header = s.Header;
+        }
+        else if (_header != null && _header.StartsWith("WEBVTT", StringComparison.Ordinal))
+        {
+            _subtitle = WebVttToAssa.Convert(subtitle, new SsaStyle(), 0, 0);
+            _header = _subtitle.Header;
+        }
+
+        if (_header == null || !_header.Contains("style:", StringComparison.OrdinalIgnoreCase))
+        {
+            ResetHeader();
+        }
+
+        FileStyles.Clear();
+        foreach (var styleName in AdvancedSubStationAlpha.GetStylesFromHeader(_header))
+        {
+            var style = AdvancedSubStationAlpha.GetSsaStyle(styleName, _header);
+            if (style != null)
+            {
+                var display = new StyleDisplay(style);
+                FileStyles.Add(display);
+            }
+        }
+
+        UpdateUsages();
+    }
+
+    private void UpdateUsages()
+    {
+        foreach (var style in FileStyles)
+        {
+            style.UsageCount = _subtitle.Paragraphs.Where(p => p.Style.Equals(style.Name)).Count();
+        }
+    }
+
+    private void ResetHeader()
+    {
+        var format = new AdvancedSubStationAlpha();
+        var sub = new Subtitle();
+        var text = format.ToText(sub, string.Empty);
+        var lines = text.SplitToLines();
+        format.LoadSubtitle(sub, lines, string.Empty);
+        _header = sub.Header;
     }
 
     internal void KeyDown(object? sender, KeyEventArgs e)
@@ -106,5 +181,11 @@ public partial class AssaStylesViewModel : ObservableObject
         {
             Close();
         }
+    }
+
+    internal void FileStylesChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        var selectedStyle = SelectedFileStyle;
+        CurrentStyle = selectedStyle;
     }
 }

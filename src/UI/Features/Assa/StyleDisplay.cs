@@ -1,5 +1,7 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System.Drawing;
+﻿using Avalonia.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Assa;
 
@@ -41,5 +43,127 @@ public partial class StyleDisplay : ObservableObject
     public StyleDisplay()
     {
         _name = string.Empty;
+        AlignmentAn2 = true;
+    }
+
+    public void SetAlignment(string alignment)
+    {
+        AlignmentAn1 = alignment == "an1";
+        AlignmentAn2 = alignment == "an2";
+        AlignmentAn3 = alignment == "an3";
+        AlignmentAn4 = alignment == "an4";
+        AlignmentAn5 = alignment == "an5";
+        AlignmentAn6 = alignment == "an6";
+        AlignmentAn7 = alignment == "an7";
+        AlignmentAn8 = alignment == "an8";
+        AlignmentAn9 = alignment == "an9";
+
+        UpdateAlignment();
+    }
+
+    public string GetAlignment()
+    {
+        if (AlignmentAn1)
+        {
+            return "an1";
+        }
+
+        if (AlignmentAn2)
+        {
+            return "an2";
+        }
+
+        if (AlignmentAn3)
+        {
+            return "an3";
+        }
+
+        if (AlignmentAn3)
+        {
+            return "an3";
+        }
+
+        if (AlignmentAn4)
+        {
+            return "an4";
+        }
+
+        if (AlignmentAn5)
+        {
+            return "an5";
+        }
+
+        if (AlignmentAn6)
+        {
+            return "an6";
+        }
+
+        if (AlignmentAn7)
+        {
+            return "an7";
+        }
+
+        if (AlignmentAn8)
+        {
+            return "an8";
+        }
+
+        if (AlignmentAn9)
+        {
+            return "an9";
+        }
+
+        return "an2";
+    }
+
+    public StyleDisplay(SsaStyle style)
+    {
+        Name = style.Name;
+        FontName = style.FontName;
+        FontSize = style.FontSize;
+        ColorPrimary = style.Primary.ToAvaloniaColor();
+        ColorSecondary = style.Secondary.ToAvaloniaColor();
+        ColorOutline = style.Outline.ToAvaloniaColor();
+        ColorShadow = style.Tertiary.ToAvaloniaColor();
+        OutlineWidth = style.OutlineWidth;
+        ShadowWidth = style.ShadowWidth;
+        Bold = style.Bold;
+        Italic = style.Italic;
+        Underline = style.Underline;
+        Strikeout = style.Strikeout;
+        ScaleX = style.ScaleX;
+        ScaleY = style.ScaleY;
+        Spacing = style.Spacing;
+        Angle = style.Angle;
+        AlignmentAn1 = style.Alignment == "an1";
+        AlignmentAn2 = style.Alignment == "an2";
+        AlignmentAn3 = style.Alignment == "an3";
+        AlignmentAn4 = style.Alignment == "an4";
+        AlignmentAn5 = style.Alignment == "an5";
+        AlignmentAn6 = style.Alignment == "an6";
+        AlignmentAn7 = style.Alignment == "an7";
+        AlignmentAn8 = style.Alignment == "an8";
+        AlignmentAn9 = style.Alignment == "an9";
+        MarginLeft = style.MarginLeft;
+        MarginRight = style.MarginRight;
+        MarginVertical = style.MarginVertical;
+        UseOpaqueBox = style.BorderStyle == "3";
+        UseOpaqueBoxPerLine = style.BorderStyle == "4";
+        UpdateAlignment();
+    }
+
+    private void UpdateAlignment()
+    {
+        if (!AlignmentAn1 &&
+                    !AlignmentAn3 &&
+                    !AlignmentAn4 &&
+                    !AlignmentAn5 &&
+                    !AlignmentAn6 &&
+                    !AlignmentAn7 &&
+                    !AlignmentAn8 &&
+                    !AlignmentAn9)
+        {
+            AlignmentAn2 = true; // bottom center
+        }
     }
 }

@@ -418,11 +418,12 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowAssaStyles()
     {
-        var vm = await _windowService.ShowDialogAsync<AssaStylesWindow, AssaStylesViewModel>(Window!, viewModel =>
+        var result = await _windowService.ShowDialogAsync<AssaStylesWindow, AssaStylesViewModel>(Window!, vm =>
         {
+            vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);    
         });
 
-        if (vm.OkPressed)
+        if (result.OkPressed)
         {
         }
 

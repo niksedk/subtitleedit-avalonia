@@ -148,7 +148,8 @@ public class AssaStylesWindow : Window
                 },
             },
         };
-        dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedFileStyles)) { Source = vm });
+        dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedFileStyle)) { Source = vm });
+        dataGrid.SelectionChanged += vm.FileStylesChanged;
 
         var buttonNew = UiUtil.MakeButton(vm.FileNewCommand, IconNames.MdiPlus, Se.Language.General.New);
         var buttonRemove = UiUtil.MakeButton(vm.FileRemoveCommand, IconNames.MdiTrash, Se.Language.General.Delete);
@@ -199,7 +200,7 @@ public class AssaStylesWindow : Window
             Width = double.NaN,
             Height = double.NaN,
             DataContext = vm,
-            ItemsSource = vm.FileStyles,
+            ItemsSource = vm.StorageStyles,
             Columns =
             {
                 new DataGridTextColumn
@@ -235,7 +236,7 @@ public class AssaStylesWindow : Window
                 },
             },
         };
-        dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedFileStyles)) { Source = vm });
+        dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedStorageStyle)) { Source = vm });
 
         var buttonNew = UiUtil.MakeButton(vm.FileNewCommand, IconNames.MdiPlus, Se.Language.General.New);
         var buttonRemove = UiUtil.MakeButton(vm.FileRemoveCommand, IconNames.MdiTrash, Se.Language.General.Delete);
