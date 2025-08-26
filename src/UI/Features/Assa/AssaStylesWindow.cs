@@ -4,6 +4,7 @@ using Avalonia.Layout;
 using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using System;
 
 namespace Nikse.SubtitleEdit.Features.Files.Statistics;
 
@@ -100,7 +101,7 @@ public class AssaStylesWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        var label = UiUtil.MakeLabel(Se.Language.Assa.StylesInFile);
+        var label = UiUtil.MakeLabel(Se.Language.Assa.StylesInFile).WithBold();
 
         var dataGrid = new DataGrid
         {
@@ -180,7 +181,7 @@ public class AssaStylesWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        var label = UiUtil.MakeLabel(Se.Language.Assa.StylesSaved);
+        var label = UiUtil.MakeLabel(Se.Language.Assa.StylesSaved).WithBold();
 
         var dataGrid = new DataGrid
         {
@@ -267,8 +268,13 @@ public class AssaStylesWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(2, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(2, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
@@ -278,12 +284,131 @@ public class AssaStylesWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        var label = UiUtil.MakeLabel("Selcted style (x)");
+        var label = UiUtil.MakeLabel("Selcted style (x)").WithBold();
 
+        var labelName = UiUtil.MakeLabel(Se.Language.General.Name);
+        var textBoxName = UiUtil.MakeTextBox(200, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.Name));
+        var panelName = UiUtil.MakeHorizontalPanel(labelName, textBoxName);
+
+        var labelFontName = UiUtil.MakeLabel(Se.Language.General.FontName);
+        var comboBoxFontName = UiUtil.MakeComboBox(vm.Fonts, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.FontName));
+        var labelFontSize = UiUtil.MakeLabel(Se.Language.General.FontSize);
+        var numericUpDownFontSize = UiUtil.MakeNumericUpDownInt(1, 1000, 100, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.FontSize));
+        var panelFont = UiUtil.MakeHorizontalPanel(labelFontName, comboBoxFontName, labelFontSize, numericUpDownFontSize);
+
+        var checkBoxBold = UiUtil.MakeCheckBox(Se.Language.General.Bold, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.Bold));
+        var checkBoxItalic = UiUtil.MakeCheckBox(Se.Language.General.Italic, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.Italic));
+        var checkBoxUnderline = UiUtil.MakeCheckBox(Se.Language.General.Underline, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.Underline));
+        var checkBoxStrikeout = UiUtil.MakeCheckBox(Se.Language.General.Strikeout, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.Strikeout));
+        var panelFontStyle = UiUtil.MakeHorizontalPanel(checkBoxBold, checkBoxItalic, checkBoxUnderline, checkBoxStrikeout);
+
+        var labelScaleX = UiUtil.MakeLabel("Scale X");
+        var numericUpDownScaleX = UiUtil.MakeNumericUpDownTwoDecimals(1, 1000, 100, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ScaleX));
+        var labelScaleY = UiUtil.MakeLabel("Scale Y");
+        var numericUpDownScaleY = UiUtil.MakeNumericUpDownTwoDecimals(1, 1000, 100, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ScaleY));
+        var labelSpacing = UiUtil.MakeLabel("Spacing");
+        var numericUpDownSpacing = UiUtil.MakeNumericUpDownTwoDecimals(-100, 100, 10, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.Spacing));
+        var labelAngle = UiUtil.MakeLabel("Angle");
+        var numericUpDownAngle = UiUtil.MakeNumericUpDownTwoDecimals(-360, 360, 90, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.Angle));
+        var panelTransform = UiUtil.MakeHorizontalPanel(labelScaleX, numericUpDownScaleX, labelScaleY, numericUpDownScaleY, labelSpacing, numericUpDownSpacing, labelAngle, numericUpDownAngle);
+
+        var labelColorPrimary = UiUtil.MakeLabel("Primary");
+        var colorPickerPrimary = UiUtil.MakeColorPicker(vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ColorPrimary));
+        var labelColorSecondary = UiUtil.MakeLabel("Secondary");
+        var colorPickerSecondary = UiUtil.MakeColorPicker(vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ColorSecondary));
+        var labelColorOutline = UiUtil.MakeLabel("Outline");
+        var colorPickerOutline = UiUtil.MakeColorPicker(vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ColorOutline));
+        var labelColorShadow = UiUtil.MakeLabel("Shadow");
+        var colorPickerShadow = UiUtil.MakeColorPicker(vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ColorShadow));
+        var panelColors = UiUtil.MakeHorizontalPanel(labelColorPrimary, colorPickerPrimary, labelColorSecondary, colorPickerSecondary, labelColorOutline, colorPickerOutline, labelColorShadow, colorPickerShadow);
+
+        var alignmentView = MakeAlignmentView(vm);
+        var marginView = MakeMarginView(vm);
+        var borderView = MakeBorderView(vm);
 
         grid.Add(label, 0, 0);
+        grid.Add(panelName, 1, 0);
+        grid.Add(panelFont, 2, 0);
+        grid.Add(panelFontStyle, 3, 0);
+        grid.Add(panelTransform, 4, 0);
+        grid.Add(panelColors, 5, 0);
 
         return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5);
+    }
+
+    private static Border MakeAlignmentView(AssaStylesViewModel vm)
+    {
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        return UiUtil.MakeBorderForControl(grid);
+    }
+
+    private static Border MakeMarginView(AssaStylesViewModel vm)
+    {
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        return UiUtil.MakeBorderForControl(grid);
+    }
+
+    private static Border MakeBorderView(AssaStylesViewModel vm)
+    {
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        return UiUtil.MakeBorderForControl(grid);
     }
 
     private static Border MakePreviewView(AssaStylesViewModel vm)

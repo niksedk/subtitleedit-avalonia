@@ -1658,4 +1658,19 @@ public static class UiUtil
                 }
         });
     }
+
+    public static StackPanel MakeHorizontalPanel(params Control[] controls)
+    {
+        var stackPanel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            Spacing = 5,
+        };
+
+        stackPanel.Children.AddRange(controls);
+     
+        return stackPanel;
+    }
 }

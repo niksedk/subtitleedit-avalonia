@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Assa;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Media;
 using System.Collections.ObjectModel;
 
@@ -19,6 +20,7 @@ public partial class AssaStylesViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<StyleDisplay> _storageStyles;
     [ObservableProperty] private StyleDisplay? _selectedStorageStyles;
     [ObservableProperty] private StyleDisplay? _currentStyle;
+    [ObservableProperty] private ObservableCollection<string> _fonts;
 
     public Window? Window { get; internal set; }
     public bool OkPressed { get; private set; }
@@ -34,6 +36,7 @@ public partial class AssaStylesViewModel : ObservableObject
         Title = string.Empty;
         FileStyles = new ObservableCollection<StyleDisplay>();
         StorageStyles = new ObservableCollection<StyleDisplay>();
+        _fonts = new ObservableCollection<string>(FontHelper.GetSystemFonts());
 
         _fileName = string.Empty;
     }
