@@ -7,7 +7,6 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using Nikse.SubtitleEdit.Logic.Config.Language.Options;
 using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.ObjectModel;
@@ -52,12 +51,15 @@ public partial class AssaStylesViewModel : ObservableObject
         _fileName = string.Empty;
         _header = string.Empty;
         _subtitle = new Subtitle();
+
+        LoadSettings();
     }
 
     [RelayCommand]
     private void Ok()
     {
         OkPressed = true;
+        SaveSettings();
         Close();
     }
 
@@ -114,6 +116,52 @@ public partial class AssaStylesViewModel : ObservableObject
     {
     }
 
+    [RelayCommand]
+    private void StorageImport()
+    {
+        UpdateUsages();
+    }
+
+    [RelayCommand]
+    private void StorageNew()
+    {
+        var name = Se.Language.General.New;
+        if (StorageStyles.Any(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+        {
+            var count = 2;
+            var doRepeat = true;
+            while (doRepeat)
+            {
+                name = Se.Language.General.New + count;
+                doRepeat = StorageStyles.Any(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+                count++;
+            }
+        }
+
+        var style = new SsaStyle { Name = name };
+        StorageStyles.Add(new StyleDisplay(style));
+    }
+
+    [RelayCommand]
+    private void StorageRemove()
+    {
+    }
+
+    [RelayCommand]
+    private void StorageRemoveAll()
+    {
+    }
+
+    [RelayCommand]
+    private void StorageCopy()
+    {
+    }
+
+    [RelayCommand]
+    private void StorageExport()
+    {
+    }
+
     private void Close()
     {
         Dispatcher.UIThread.Post(() =>
@@ -152,14 +200,7 @@ public partial class AssaStylesViewModel : ObservableObject
                 var display = new StyleDisplay(style);
                 FileStyles.Add(display);
             }
-        }
-        
-        StorageStyles.Clear();
-        foreach (var style in Se.Settings.Assa.StoredStyles)
-        {
-            var display = new StyleDisplay(style);
-            StorageStyles.Add(display);
-        }
+        }      
 
         UpdateUsages();
     }
@@ -181,6 +222,27 @@ public partial class AssaStylesViewModel : ObservableObject
         format.LoadSubtitle(sub, lines, string.Empty);
         _header = sub.Header;
     }
+
+    private void SaveSettings()
+    {
+        Se.Settings.Assa.StoredStyles.Clear();
+        foreach (var style in StorageStyles)
+        {
+            var s = new SeAssaStyle(style);
+            Se.Settings.Assa.StoredStyles.Add(s);
+        }
+    }
+
+    private void LoadSettings()
+    {
+        StorageStyles.Clear();
+        foreach (var style in Se.Settings.Assa.StoredStyles)
+        {
+            var display = new StyleDisplay(style);
+            StorageStyles.Add(display);
+        }
+    }
+
 
     internal void KeyDown(object? sender, KeyEventArgs e)
     {

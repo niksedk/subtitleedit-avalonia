@@ -158,10 +158,10 @@ public partial class StyleDisplay : ObservableObject
         Name = style.Name;
         FontName = style.FontName;
         FontSize = style.FontSize;
-        ColorPrimary = style.Primary.ToAvaloniaColor();
-        ColorSecondary = style.Secondary.ToAvaloniaColor();
-        ColorOutline = style.Outline.ToAvaloniaColor();
-        ColorShadow = style.Tertiary.ToAvaloniaColor();
+        ColorPrimary = style.ColorPrimary;
+        ColorSecondary = style.ColorSecondary;
+        ColorOutline = style.ColorOutline;
+        ColorShadow = style.ColorShadow;
         OutlineWidth = style.OutlineWidth;
         ShadowWidth = style.ShadowWidth;
         Bold = style.Bold;
@@ -172,34 +172,24 @@ public partial class StyleDisplay : ObservableObject
         ScaleY = style.ScaleY;
         Spacing = style.Spacing;
         Angle = style.Angle;
-        AlignmentAn1 = style.Alignment == "an1";
-        AlignmentAn2 = style.Alignment == "an2";
-        AlignmentAn3 = style.Alignment == "an3";
-        AlignmentAn4 = style.Alignment == "an4";
-        AlignmentAn5 = style.Alignment == "an5";
-        AlignmentAn6 = style.Alignment == "an6";
-        AlignmentAn7 = style.Alignment == "an7";
-        AlignmentAn8 = style.Alignment == "an8";
-        AlignmentAn9 = style.Alignment == "an9";
         MarginLeft = style.MarginLeft;
         MarginRight = style.MarginRight;
         MarginVertical = style.MarginVertical;
-        UseOpaqueBox = style.BorderStyle == "3";
-        UseOpaqueBoxPerLine = style.BorderStyle == "4";
-        UpdateAlignment();
+        UseOpaqueBox = style.UseOpaqueBox;
+        UseOpaqueBoxPerLine = style.UseOpaqueBoxPerLine;
+        SetAlignment(style.Alignment);
     }
-
 
     private void UpdateAlignment()
     {
         if (!AlignmentAn1 &&
-                    !AlignmentAn3 &&
-                    !AlignmentAn4 &&
-                    !AlignmentAn5 &&
-                    !AlignmentAn6 &&
-                    !AlignmentAn7 &&
-                    !AlignmentAn8 &&
-                    !AlignmentAn9)
+            !AlignmentAn3 &&
+            !AlignmentAn4 &&
+            !AlignmentAn5 &&
+            !AlignmentAn6 &&
+            !AlignmentAn7 &&
+            !AlignmentAn8 &&
+            !AlignmentAn9)
         {
             AlignmentAn2 = true; // bottom center
         }

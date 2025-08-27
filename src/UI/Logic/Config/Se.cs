@@ -251,6 +251,11 @@ public class Se
             Settings.Appearance = new();
         }
 
+        if (Settings.Assa == null)
+        {
+            Settings.Assa = new();
+        }
+
         if (Settings.Video == null)
         {
             Settings.Video = new();
