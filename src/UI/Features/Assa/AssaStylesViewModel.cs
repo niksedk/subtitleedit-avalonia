@@ -153,6 +153,13 @@ public partial class AssaStylesViewModel : ObservableObject
                 FileStyles.Add(display);
             }
         }
+        
+        StorageStyles.Clear();
+        foreach (var style in Se.Settings.Assa.StoredStyles)
+        {
+            var display = new StyleDisplay(style);
+            StorageStyles.Add(display);
+        }
 
         UpdateUsages();
     }

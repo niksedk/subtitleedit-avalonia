@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Assa;
 
@@ -151,6 +152,43 @@ public partial class StyleDisplay : ObservableObject
         UseOpaqueBoxPerLine = style.BorderStyle == "4";
         UpdateAlignment();
     }
+    
+    public StyleDisplay(SeAssaStyle style)
+    {
+        Name = style.Name;
+        FontName = style.FontName;
+        FontSize = style.FontSize;
+        ColorPrimary = style.Primary.ToAvaloniaColor();
+        ColorSecondary = style.Secondary.ToAvaloniaColor();
+        ColorOutline = style.Outline.ToAvaloniaColor();
+        ColorShadow = style.Tertiary.ToAvaloniaColor();
+        OutlineWidth = style.OutlineWidth;
+        ShadowWidth = style.ShadowWidth;
+        Bold = style.Bold;
+        Italic = style.Italic;
+        Underline = style.Underline;
+        Strikeout = style.Strikeout;
+        ScaleX = style.ScaleX;
+        ScaleY = style.ScaleY;
+        Spacing = style.Spacing;
+        Angle = style.Angle;
+        AlignmentAn1 = style.Alignment == "an1";
+        AlignmentAn2 = style.Alignment == "an2";
+        AlignmentAn3 = style.Alignment == "an3";
+        AlignmentAn4 = style.Alignment == "an4";
+        AlignmentAn5 = style.Alignment == "an5";
+        AlignmentAn6 = style.Alignment == "an6";
+        AlignmentAn7 = style.Alignment == "an7";
+        AlignmentAn8 = style.Alignment == "an8";
+        AlignmentAn9 = style.Alignment == "an9";
+        MarginLeft = style.MarginLeft;
+        MarginRight = style.MarginRight;
+        MarginVertical = style.MarginVertical;
+        UseOpaqueBox = style.BorderStyle == "3";
+        UseOpaqueBoxPerLine = style.BorderStyle == "4";
+        UpdateAlignment();
+    }
+
 
     private void UpdateAlignment()
     {

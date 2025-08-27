@@ -226,14 +226,6 @@ public class AssaStylesWindow : Window
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
-                new DataGridTextColumn
-                {
-                    Header = Se.Language.General.Usages,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(StyleDisplay.UsageCount)),
-                    IsReadOnly = true,
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
-                },
             },
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedStorageStyle)) { Source = vm });
@@ -424,6 +416,7 @@ public class AssaStylesWindow : Window
             },
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
+            RowSpacing = 5,
         };
 
         var label = UiUtil.MakeLabel(Se.Language.General.Alignment);
@@ -466,6 +459,7 @@ public class AssaStylesWindow : Window
             },
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
+            RowSpacing = 5,
         };
 
         var label = UiUtil.MakeLabel(Se.Language.General.BorderStyle);
