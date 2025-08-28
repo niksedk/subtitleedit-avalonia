@@ -33,6 +33,7 @@ using Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
 using Nikse.SubtitleEdit.Features.Sync.VisualSync;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
+using Nikse.SubtitleEdit.Features.Tools.BridgeGaps;
 using Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
 using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 using Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
@@ -106,6 +107,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<BatchConvertSettingsViewModel>();
         collection.AddTransient<BatchConvertViewModel>();
         collection.AddTransient<BlankVideoViewModel>();
+        collection.AddTransient<BridgeGapsViewModel>();
         collection.AddTransient<BurnInEffectViewModel>();
         collection.AddTransient<BurnInResolutionPickerViewModel>();
         collection.AddTransient<BurnInSettingsViewModel>();

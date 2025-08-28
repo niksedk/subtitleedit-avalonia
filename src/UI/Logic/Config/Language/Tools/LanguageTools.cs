@@ -4,6 +4,7 @@ public class LanguageTools
 {
     public LanguageFixCommonErrors FixCommonErrors { get; set; } = new();
     public LanguageAdjustDisplayDurations AdjustDurations { get; set; } = new();
+    public LanguageBridgeGaps BridgeGaps { get; set; } = new();
     public LanguageChangeCasing ChangeCasing { get; set; } = new();
 
     public LanguageTools()

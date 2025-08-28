@@ -49,6 +49,7 @@ using Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
 using Nikse.SubtitleEdit.Features.Sync.VisualSync;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
+using Nikse.SubtitleEdit.Features.Tools.BridgeGaps;
 using Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
 using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 using Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
@@ -927,6 +928,24 @@ public partial class MainViewModel :
     private async Task ShowToolsBatchConvert()
     {
         await _windowService.ShowDialogAsync<BatchConvertWindow, BatchConvertViewModel>(Window!, vm => { });
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowBridgeGaps()
+    {
+        var result = await _windowService.ShowDialogAsync<BridgeGapsWindow, BridgeGapsViewModel>(Window!, vm =>
+        {
+            vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList());
+        });      
+
+        if (result.OkPressed)
+        {
+            Subtitles.Clear();
+            Subtitles.AddRange(result.AllSubtitles.Select(p => new SubtitleLineViewModel(p)));
+            SelectAndScrollToRow(0);
+        }
+
         _shortcutManager.ClearKeys();
     }
 

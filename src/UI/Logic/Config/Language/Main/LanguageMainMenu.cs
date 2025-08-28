@@ -33,6 +33,7 @@ public class LanguageMainMenu
     public string FixCommonErrors { get; set; }
     public string RemoveTextForHearingImpaired { get; set; }
     public string ChangeCasing { get; set; }
+    public string BridgeGaps { get; set; }
     public string BatchConvert { get; set; }
 
     public string SpellCheckTitle { get; set; }
@@ -103,6 +104,7 @@ public class LanguageMainMenu
         FixCommonErrors = "_Fix common errors...";
         RemoveTextForHearingImpaired = "_Remove text for hearing impaired...";
         ChangeCasing = "_Change casing...";
+        BridgeGaps = "Bridge _gaps...";
         BatchConvert = "_Batch convert...";
 
         SpellCheckTitle = "_Spell check";

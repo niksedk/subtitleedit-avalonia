@@ -222,6 +222,11 @@ public static class InitMenu
                 },
                 new MenuItem
                 {
+                    Header = l.BridgeGaps,
+                    Command = vm.ShowBridgeGapsCommand,
+                },
+                new MenuItem
+                {
                     Header = l.BatchConvert,
                     Command = vm.ShowToolsBatchConvertCommand,
                 },
