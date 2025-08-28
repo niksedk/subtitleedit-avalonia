@@ -158,10 +158,10 @@ public partial class StyleDisplay : ObservableObject
         Name = style.Name;
         FontName = style.FontName;
         FontSize = style.FontSize;
-        ColorPrimary = style.ColorPrimary;
-        ColorSecondary = style.ColorSecondary;
-        ColorOutline = style.ColorOutline;
-        ColorShadow = style.ColorShadow;
+        ColorPrimary = style.ColorPrimary.FromHexToColor();
+        ColorSecondary = style.ColorSecondary.FromHexToColor();
+        ColorOutline = style.ColorOutline.FromHexToColor();
+        ColorShadow = style.ColorShadow.FromHexToColor();
         OutlineWidth = style.OutlineWidth;
         ShadowWidth = style.ShadowWidth;
         Bold = style.Bold;

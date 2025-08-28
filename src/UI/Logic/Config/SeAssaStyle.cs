@@ -8,10 +8,10 @@ public class SeAssaStyle
         Name = style.Name;
         FontName = style.FontName;
         FontSize = style.FontSize;
-        ColorPrimary = style.ColorPrimary;
-        ColorSecondary = style.ColorSecondary;
-        ColorOutline = style.ColorOutline;
-        ColorShadow = style.ColorShadow;
+        ColorPrimary = style.ColorPrimary.FromColorToHex();
+        ColorSecondary = style.ColorSecondary.FromColorToHex();
+        ColorOutline = style.ColorOutline.FromColorToHex();
+        ColorShadow = style.ColorShadow.FromColorToHex();
         OutlineWidth = style.OutlineWidth;
         ShadowWidth = style.ShadowWidth;
         Bold = style.Bold;
@@ -34,10 +34,10 @@ public class SeAssaStyle
     public string FontName { get; set; } = string.Empty;
     public decimal FontSize { get; set; }
     public int UsageCount { get; set; }
-    public Avalonia.Media.Color ColorPrimary { get; set; }
-    public Avalonia.Media.Color ColorSecondary { get; set; }
-    public Avalonia.Media.Color ColorOutline { get; set; }
-    public Avalonia.Media.Color ColorShadow { get; set; }
+    public string ColorPrimary { get; set; }
+    public string ColorSecondary { get; set; }
+    public string ColorOutline { get; set; }
+    public string ColorShadow { get; set; }
     public decimal OutlineWidth { get; set; }
     public decimal ShadowWidth { get; set; }
     public bool Bold { get; set; }
@@ -54,6 +54,15 @@ public class SeAssaStyle
     public decimal MarginVertical { get; set; }
     public bool UseOpaqueBox { get; set; }
     public bool UseOpaqueBoxPerLine { get; set; }
+
+    public SeAssaStyle()
+    {
+        Alignment = string.Empty;
+        ColorPrimary = string.Empty;
+        ColorSecondary = string.Empty;
+        ColorOutline = string.Empty;
+        ColorShadow = string.Empty;
+    }
 }
 
 

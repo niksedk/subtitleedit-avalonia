@@ -203,8 +203,9 @@ public class Se
             {
                 Settings = JsonSerializer.Deserialize<Se>(json)!;
             }
-            catch
+            catch (Exception exception)
             {
+                Se.LogError(exception);
                 Settings = new Se();
             }
 
