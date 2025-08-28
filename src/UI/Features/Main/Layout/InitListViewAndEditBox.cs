@@ -5,7 +5,6 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
-using Avalonia.Markup.Declarative;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Logic;
@@ -75,7 +74,7 @@ public static class InitListViewAndEditBox
                 Source = vm
             });
 
-        vm.SubtitleGrid.Columns.Add(new DataGridTemplateColumn
+        var columnDuration = new DataGridTemplateColumn
         {
             Header = Se.Language.General.Duration,
             Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
@@ -98,6 +97,12 @@ public static class InitListViewAndEditBox
                 border.Child = textBlock;
                 return border;
             })
+        };
+        vm.SubtitleGrid.Columns.Add(columnDuration);
+        columnDuration.Bind(DataGridTextColumn.IsVisibleProperty, new Binding(nameof(vm.ShowColumnDuration))
+        {
+            Mode = BindingMode.OneWay,
+            Source = vm,
         });
 
         vm.SubtitleGrid.Columns.Add(new DataGridTemplateColumn
@@ -139,6 +144,34 @@ public static class InitListViewAndEditBox
         });
         vm.SubtitleGrid.Columns.Add(originalColumn);
 
+
+        var styleColumn = new DataGridTextColumn
+        {
+            Header = Se.Language.General.Style,
+            Binding = new Binding(nameof(SubtitleLineViewModel.Style)),
+            Width = new DataGridLength(120), 
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
+        };
+        styleColumn.Bind(DataGridTextColumn.IsVisibleProperty, new Binding(nameof(vm.HasFormatStyle))
+        {
+            Mode = BindingMode.OneWay,
+            Source = vm,
+        });
+        vm.SubtitleGrid.Columns.Add(styleColumn);
+
+        var columnGap = new DataGridTextColumn
+        {
+            Header = Se.Language.General.Gap,
+            Binding = new Binding(nameof(SubtitleLineViewModel.Gap)),
+            Width = new DataGridLength(100),
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
+        };
+        columnGap.Bind(DataGridTextColumn.IsVisibleProperty, new Binding(nameof(vm.ShowColumnGap))
+        {
+            Mode = BindingMode.OneWay,
+            Source = vm,
+        });
+        vm.SubtitleGrid.Columns.Add(columnGap);
 
         vm.SubtitleGrid.DataContext = vm.Subtitles;
         vm.SubtitleGrid.SelectionChanged += vm.SubtitleGrid_SelectionChanged;
@@ -182,6 +215,37 @@ public static class InitListViewAndEditBox
         };
         showEndTimeMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible), BindingMode.TwoWay));
         flyout.Items.Add(showEndTimeMenuItem);
+
+        var showDurationMenuItem = new MenuItem
+        {
+            Header = Se.Language.General.ShowDurationColumn,
+            Command = vm.ToggleShowColumnDurationCommand,
+            DataContext = vm,
+            Icon = new Icon
+            {
+                Value = IconNames.MdiCheckBold,
+                VerticalAlignment = VerticalAlignment.Center,
+                [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnDuration)),
+            }
+        };
+        showDurationMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible), BindingMode.TwoWay));
+        flyout.Items.Add(showDurationMenuItem);
+
+        var showGapMenuItem = new MenuItem
+        {
+            Header = Se.Language.General.ShowGapColumn,
+            Command = vm.ToggleShowColumnGapCommand,
+            DataContext = vm,
+            Icon = new Icon
+            {
+                Value = IconNames.MdiCheckBold,
+                VerticalAlignment = VerticalAlignment.Center,
+                [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnGap)),
+            }
+        };
+        showGapMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible), BindingMode.TwoWay));
+        flyout.Items.Add(showGapMenuItem);
+
 
         var deleteMenuItem = new MenuItem { Header = Se.Language.General.Delete, DataContext = vm };
         deleteMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });

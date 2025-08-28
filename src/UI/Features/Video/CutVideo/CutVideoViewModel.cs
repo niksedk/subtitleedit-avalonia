@@ -496,7 +496,7 @@ public partial class CutVideoViewModel : ObservableObject
     private void Add()
     {
         var ms = VideoPlayer.Position * 1000;
-        var segment = new SubtitleLineViewModel(new Paragraph(string.Empty, ms, ms + Se.Settings.General.NewEmptyDefaultMs));
+        var segment = new SubtitleLineViewModel(new Paragraph(string.Empty, ms, ms + Se.Settings.General.NewEmptyDefaultMs), _subtitleFormat ?? new SubRip());
         var index = _insertService.InsertInCorrectPosition(Segments, segment);
         SelectAndScrollToRow(index);
         Renumber();

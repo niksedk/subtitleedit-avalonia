@@ -119,9 +119,12 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _isWaveformToolbarVisible;
     [ObservableProperty] private bool _isSubtitleGridFlyoutHeaderVisible;
     [ObservableProperty] private bool _showColumnEndTime;
+    [ObservableProperty] private bool _showColumnGap;
+    [ObservableProperty] private bool _showColumnDuration;
     [ObservableProperty] private bool _lockTimeCodes;
     [ObservableProperty] private bool _areVideoControlsUndocked;
     [ObservableProperty] private bool _isFormatAssa;
+    [ObservableProperty] private bool _hasFormatStyle;
 
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
@@ -249,6 +252,8 @@ public partial class MainViewModel :
         StatusTextLeft = string.Empty;
         StatusTextRight = string.Empty;
         ShowColumnEndTime = Se.Settings.General.ShowColumnEndTime;
+        ShowColumnDuration = Se.Settings.General.ShowColumnDuration;
+        ShowColumnGap = Se.Settings.General.ShowColumnGap;
         EditTextBoxOriginal = new TextBox();
         EditTextCharactersPerSecondOriginal = string.Empty;
         EditTextCharactersPerSecondBackgroundOriginal = Brushes.Transparent;
@@ -421,7 +426,7 @@ public partial class MainViewModel :
     {
         var result = await _windowService.ShowDialogAsync<AssaStylesWindow, AssaStylesViewModel>(Window!, vm =>
         {
-            vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);    
+            vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
         });
 
         if (result.OkPressed)
@@ -939,7 +944,7 @@ public partial class MainViewModel :
         var result = await _windowService.ShowDialogAsync<BridgeGapsWindow, BridgeGapsViewModel>(Window!, vm =>
         {
             vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList());
-        });      
+        });
 
         if (result.OkPressed)
         {
@@ -979,9 +984,10 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowToolsFixCommonErrors()
     {
-        var viewModel =
-            await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window!,
-                vm => { vm.Initialize(GetUpdateSubtitle()); });
+        var viewModel = await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window!, vm => 
+        { 
+            vm.Initialize(GetUpdateSubtitle(), SelectedSubtitleFormat); 
+        });
 
         if (viewModel.OkPressed)
         {
@@ -1003,7 +1009,7 @@ public partial class MainViewModel :
         if (result.OkPressed)
         {
             Subtitles.Clear();
-            Subtitles.AddRange(result.FixedSubtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
+            Subtitles.AddRange(result.FixedSubtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
             SelectAndScrollToRow(0);
         }
 
@@ -1383,6 +1389,23 @@ public partial class MainViewModel :
     {
         Se.Settings.General.ShowColumnEndTime = !Se.Settings.General.ShowColumnEndTime;
         ShowColumnEndTime = Se.Settings.General.ShowColumnEndTime;
+        AutoFitColumns();
+    }
+
+    [RelayCommand]
+    private void ToggleShowColumnGap()
+    {
+        Se.Settings.General.ShowColumnGap = !Se.Settings.General.ShowColumnGap;
+        ShowColumnGap = Se.Settings.General.ShowColumnGap;
+        AutoFitColumns();
+    }
+
+    [RelayCommand]
+    private void ToggleShowColumnDuration()
+    {
+        Se.Settings.General.ShowColumnDuration = !Se.Settings.General.ShowColumnDuration;
+        ShowColumnDuration = Se.Settings.General.ShowColumnDuration;
+        AutoFitColumns();
     }
 
     [RelayCommand]
@@ -1750,7 +1773,7 @@ public partial class MainViewModel :
 
         var startMs = VideoPlayerControl.Position * 1000.0;
         var endMs = startMs + Se.Settings.General.NewEmptyDefaultMs;
-        var newParagraph = new SubtitleLineViewModel(new Paragraph(string.Empty, startMs, endMs));
+        var newParagraph = new SubtitleLineViewModel(new Paragraph(string.Empty, startMs, endMs), SelectedSubtitleFormat);
         var idx = _insertService.InsertInCorrectPosition(Subtitles, newParagraph);
         var next = Subtitles.GetOrNull(idx + 1);
         if (next != null)
@@ -2304,7 +2327,7 @@ public partial class MainViewModel :
                     ResetSubtitle();
                     _subtitleFileName = Utilities.GetPathAndFileNameWithoutExtension(fileName) + SelectedSubtitleFormat.Extension;
                     _subtitle.Renumber();
-                    Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
+                    Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
                     ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
                     SelectAndScrollToRow(0);
                     _converted = true;
@@ -2476,7 +2499,7 @@ public partial class MainViewModel :
             ResetSubtitle();
             _subtitle = new Subtitle(tsParser.TeletextSubtitlesLookup.First().Value.First().Value);
             _subtitle.Renumber();
-            Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
+            Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
             SelectAndScrollToRow(0);
             //if (!Configuration.Settings.General.DisableVideoAutoLoading)
             //{
@@ -2605,10 +2628,11 @@ public partial class MainViewModel :
             if (mp4Parser.VttcSubtitle?.Paragraphs.Count > 0)
             {
                 ResetSubtitle();
+                SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == new WebVTT().Name) ?? SelectedSubtitleFormat;
                 _subtitle = mp4Parser.VttcSubtitle;
                 _subtitle.Renumber();
                 _subtitleFileName = Utilities.GetPathAndFileNameWithoutExtension(fileName) + SelectedSubtitleFormat.Extension;
-                Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
+                Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
                 ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
                 SelectAndScrollToRow(0);
                 return;
@@ -2620,7 +2644,7 @@ public partial class MainViewModel :
                 _subtitle = mp4Parser.TrunCea608Subtitle;
                 _subtitle.Renumber();
                 _subtitleFileName = Utilities.GetPathAndFileNameWithoutExtension(fileName) + SelectedSubtitleFormat.Extension;
-                Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
+                Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
                 ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
                 SelectAndScrollToRow(0);
                 return;
@@ -2676,7 +2700,7 @@ public partial class MainViewModel :
             _subtitle.Paragraphs.Clear();
             _subtitle.Paragraphs.AddRange(mp4SubtitleTrack.Mdia.Minf.Stbl.GetParagraphs());
             Subtitles.Clear();
-            Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
+            Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
             Renumber();
             ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
             SelectAndScrollToRow(0);
@@ -2837,7 +2861,7 @@ public partial class MainViewModel :
         ResetSubtitle();
         subtitle.Renumber();
         Subtitles.Clear();
-        Subtitles.AddRange(subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
+        Subtitles.AddRange(subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
 
 
         //        Paragraphs = new ObservableCollection<DisplayParagraph>(subtitle.Paragraphs.Select(p => new DisplayParagraph(p)));
@@ -3057,7 +3081,7 @@ public partial class MainViewModel :
         ShowStatus(Se.Language.Main.SubtitleImportedFromMatroskaFile);
         _subtitle.Renumber();
         Subtitles.Clear();
-        Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
+        Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
 
 
         if (matroska.Path.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase) ||
@@ -3156,7 +3180,7 @@ public partial class MainViewModel :
         Subtitles.Clear();
         foreach (var p in subtitle.Paragraphs)
         {
-            Subtitles.Add(new SubtitleLineViewModel(p));
+            Subtitles.Add(new SubtitleLineViewModel(p, SelectedSubtitleFormat));
         }
 
         Renumber();
@@ -3321,6 +3345,10 @@ public partial class MainViewModel :
 
         if (Window != null)
         {
+            Se.Settings.General.ShowColumnEndTime = ShowColumnEndTime;
+            Se.Settings.General.ShowColumnDuration = ShowColumnDuration;
+            Se.Settings.General.ShowColumnGap = ShowColumnGap;
+
             Se.Settings.General.PositionIsFullScreen = Window.WindowState == WindowState.FullScreen;
             Se.Settings.General.PositionIsMaximized = Window.WindowState == WindowState.Maximized;
             if (Window.WindowState == WindowState.Normal)
@@ -3949,7 +3977,7 @@ public partial class MainViewModel :
 
         if (AudioVisualizer != null && AudioVisualizer.IsFocused)
         {
-            var relayCommand = _shortcutManager.CheckShortcuts( ShortcutCategory.Waveform.ToStringInvariant());
+            var relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.Waveform.ToStringInvariant());
             if (relayCommand != null)
             {
                 keyEventArgs.Handled = true;
@@ -4584,12 +4612,10 @@ public partial class MainViewModel :
         }
     }
 
-    internal void ComboBoxEncodingChanged(object? sender, SelectionChangedEventArgs e)
-    {
-    }
-
     internal void ComboBoxSubtitleFormatChanged(object? sender, SelectionChangedEventArgs e)
     {
-        IsFormatAssa = SelectedSubtitleFormat?.Name == AdvancedSubStationAlpha.NameOfFormat;
+        IsFormatAssa = SelectedSubtitleFormat is AdvancedSubStationAlpha;
+        HasFormatStyle = SelectedSubtitleFormat is AdvancedSubStationAlpha;
+        AutoFitColumns();
     }
 }

@@ -1,6 +1,7 @@
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
@@ -76,8 +77,8 @@ public partial class SubtitleLineViewModel : ObservableObject
         }
     }
 
-    public SubtitleLineViewModel(Paragraph paragraph)
-    {
+    public SubtitleLineViewModel(Paragraph paragraph, SubtitleFormat subtitleFormat)
+    {        
         Text = paragraph.Text;
         OriginalText = string.Empty;
         Extra = paragraph.Extra;
@@ -92,6 +93,11 @@ public partial class SubtitleLineViewModel : ObservableObject
         UpdateDuration();
         Id = Guid.TryParse(paragraph.Id, out var guid) ? guid : Guid.NewGuid();
         Paragraph = paragraph;
+
+        if (subtitleFormat is AdvancedSubStationAlpha)
+        {
+            Style = paragraph.Extra;
+        }
     }
 
     public double CharactersPerSecond
@@ -241,5 +247,10 @@ public partial class SubtitleLineViewModel : ObservableObject
 
         SetStartTimeOnly(TimeSpan.FromMilliseconds(StartTime.TotalMilliseconds * factor + adjustmentInSeconds * TimeCode.BaseUnit));
         EndTime = TimeSpan.FromMilliseconds(EndTime.TotalMilliseconds * factor + adjustmentInSeconds * TimeCode.BaseUnit);
+    }
+
+    internal static object Gap()
+    {
+        throw new NotImplementedException();
     }
 }

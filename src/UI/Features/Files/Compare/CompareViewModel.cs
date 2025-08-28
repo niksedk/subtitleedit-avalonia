@@ -551,7 +551,7 @@ public partial class CompareViewModel : ObservableObject
         _leftLines.Clear();
         foreach (var line in subtitle.Paragraphs)
         {
-            _leftLines.Add(new SubtitleLineViewModel(line));
+            _leftLines.Add(new SubtitleLineViewModel(line, subtitle.OriginalFormat));
         }
 
         LeftFileNameHasChanges = false;
@@ -578,7 +578,7 @@ public partial class CompareViewModel : ObservableObject
         _rightLines.Clear();
         foreach (var line in subtitle.Paragraphs)
         {
-            _rightLines.Add(new SubtitleLineViewModel(line));
+            _rightLines.Add(new SubtitleLineViewModel(line, subtitle.OriginalFormat));
         }
 
         RightFileName = fileName;
@@ -605,7 +605,7 @@ public partial class CompareViewModel : ObservableObject
         _rightLines.Clear();
         foreach (var line in subtitle.Paragraphs)
         {
-            _rightLines.Add(new SubtitleLineViewModel(line));
+            _rightLines.Add(new SubtitleLineViewModel(line, subtitle.OriginalFormat));
         }
 
         RightFileName = fileName;

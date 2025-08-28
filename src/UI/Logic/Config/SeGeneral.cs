@@ -60,6 +60,9 @@ public class SeGeneral
     public DialogType DialogStyle { get; set; }
     public bool ShowColumnEndTime { get; set; }
 
+    public bool ShowColumnGap { get; set; }
+    public bool ShowColumnDuration { get; set; }
+
     public SeGeneral()
     {
         Version = Se.Version;
@@ -107,5 +110,7 @@ public class SeGeneral
 
         DialogStyle = DialogType.DashBothLinesWithSpace;
         ShowColumnEndTime = true;
+        ShowColumnGap = false;
+        ShowColumnDuration = true;
     }
 }

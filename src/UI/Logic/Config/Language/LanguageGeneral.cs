@@ -255,6 +255,8 @@ public class LanguageGeneral
     public string FindTextX { get; set; }
     public string FindNext { get; set; }
     public string ShowHideColumn { get; set; }
+    public string ShowGapColumn { get; set; }
+    public string ShowDurationColumn { get; set; }
     public string OpenSubtitleFileTitle { get; set; }
     public string OpenOriginalSubtitleFileTitle { get; set; }
     public string SubtitleLoadedX { get; set; }
@@ -528,6 +530,8 @@ public class LanguageGeneral
         FindTextX = "Find text - {0}";
         FindNext = "Find next";
         ShowHideColumn = "Show 'Hide' column";
+        ShowGapColumn = "Show 'Gap' column";
+        ShowDurationColumn = "Show 'Duration' column";
         OpenSubtitleFileTitle = "Open subtitle file";
         OpenOriginalSubtitleFileTitle = "Open original subtitle file";
         SubtitleLoadedX = "Subtitle loaded: {0}";

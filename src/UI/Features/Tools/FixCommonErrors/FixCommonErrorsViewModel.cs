@@ -58,6 +58,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
     private LanguageDisplayItem _oldSelectedLanguage;
     private int _totalErrors;
     private int _totalFixes;
+    private SubtitleFormat _subtitleFormat;
     private readonly INamesList _namesList;
     private readonly IWindowService _windowService;
 
@@ -76,13 +77,14 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
         _language = Se.Language.Tools.FixCommonErrors;
         Step1IsVisible = true;
         _oldSelectedLanguage = new LanguageDisplayItem(new CultureInfo("en"), "English");
-
+        _subtitleFormat = new SubRip(); 
         Profiles = new ObservableCollection<ProfileDisplayItem>();
         Step2Title = "Fix common errors, step 2";
     }
 
-    public void Initialize(Subtitle subtitle)
+    public void Initialize(Subtitle subtitle, SubtitleFormat subtitleFormat)
     {
+        _subtitleFormat = subtitleFormat;
         var languages = new List<LanguageDisplayItem>();
         foreach (var ci in Utilities.GetSubtitleLanguageCultures(true))
         {
@@ -313,7 +315,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
         }
 
         Paragraphs.Clear();
-        Paragraphs.AddRange(FixedSubtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p)));
+        Paragraphs.AddRange(FixedSubtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, _subtitleFormat)));
 
         Step2Title = $"Fix common errors, step 2      Fixes found: {Fixes.Count}";
     }
