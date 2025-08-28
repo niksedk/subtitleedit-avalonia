@@ -137,9 +137,9 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
                 var cue = new MatroskaSubtitleCueDisplay()
                 {
                     Number = i + 1,
-                    Show = TimeSpan.FromMilliseconds(item.StartTime),
-                    Hide = TimeSpan.FromMilliseconds(item.EndTime),
-                    Duration = TimeSpan.FromMilliseconds(item.EndTime - item.StartTime),
+                    Show = TimeSpan.FromMilliseconds(item.StartTimeCode.TotalMilliseconds),
+                    Hide = TimeSpan.FromMilliseconds(item.EndTimeCode.TotalMilliseconds),
+                    Duration = TimeSpan.FromMilliseconds(item.EndTimeCode.TotalMilliseconds - item.StartTimeCode.TotalMilliseconds),
                     Image = new Image { Source = bitmap.ToAvaloniaBitmap() },
                 };
                 Rows.Add(cue);

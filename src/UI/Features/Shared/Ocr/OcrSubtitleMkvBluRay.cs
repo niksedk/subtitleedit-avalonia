@@ -26,12 +26,12 @@ public class OcrSubtitleMkvBluRay : IOcrSubtitle
 
     public TimeSpan GetStartTime(int index)
     {
-        return TimeSpan.FromMilliseconds(_pcsDataList[index].StartTime * 90.0);
+        return TimeSpan.FromMilliseconds(_pcsDataList[index].StartTimeCode.TotalMilliseconds);
     }
 
     public TimeSpan GetEndTime(int index)
     {
-        return TimeSpan.FromMilliseconds(_pcsDataList[index].EndTime * 90.0);
+        return TimeSpan.FromMilliseconds(_pcsDataList[index].EndTimeCode.TotalMilliseconds);
     }
 
     public List<OcrSubtitleItem> MakeOcrSubtitleItems()
