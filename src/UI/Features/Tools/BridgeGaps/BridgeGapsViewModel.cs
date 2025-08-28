@@ -69,20 +69,18 @@ public partial class BridgeGapsViewModel : ObservableObject
             maxMs = SubtitleFormat.FramesToMilliseconds(maxMs);
         }
 
-        var fixedCount = Core.Forms.DurationsBridgeGaps2.BridgeGaps(AllSubtitles, minMsBetweenLines, PercentForLeft, maxMs, fixedIndexes, _dic, Configuration.Settings.General.UseTimeFormatHHMMSSFF);
+        var fixedCount = DurationsBridgeGaps2.BridgeGaps(AllSubtitles, minMsBetweenLines, PercentForLeft, maxMs, fixedIndexes, _dic, Configuration.Settings.General.UseTimeFormatHHMMSSFF);
 
         Dispatcher.UIThread.Post(() =>
         {
             Subtitles.Clear();
-            
-
-            foreach (SubtitleLineViewModel v in AllSubtitles)
+            foreach (var v in AllSubtitles)
             {
                 var vm = new BridgeGapDisplayItem(v);
                 Subtitles.Add(vm);
             }
 
-            for (int i = 0; i < Subtitles.Count-1; i++)
+            for (var i = 0; i < Subtitles.Count-1; i++)
             {
                 var cur = Subtitles[i];
                 if (_dic.ContainsKey(cur.SubtitleLineViewModel.Id.ToString()))
