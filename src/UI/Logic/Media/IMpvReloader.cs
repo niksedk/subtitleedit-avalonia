@@ -7,4 +7,5 @@ namespace Nikse.SubtitleEdit.Logic.Media;
 public interface IMpvReloader
 {
     void RefreshMpv(MpvContext mpv, Subtitle subtitle, SubtitleFormat uiFormat);
+    void Reset();
 }

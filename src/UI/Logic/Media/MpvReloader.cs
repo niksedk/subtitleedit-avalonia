@@ -230,4 +230,11 @@ public class MpvReloader : IMpvReloader
             // ignored
         }
     }
+
+    public void Reset()
+    {
+        _mpvTextFileName = null;
+        _mpvTextOld = string.Empty;
+        _retryCount = 3;
+    }
 }

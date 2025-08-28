@@ -503,6 +503,8 @@ public partial class MainViewModel :
 
         AutoFitColumns();
 
+        _mpvReloader.Reset();
+
         _shortcutManager.ClearKeys();
     }
 
@@ -3506,6 +3508,7 @@ public partial class MainViewModel :
         }
 
         await VideoPlayerControl.Open(videoFileName);
+        _mpvReloader.Reset();
 
         if (IsValidUrl(videoFileName))
         {
