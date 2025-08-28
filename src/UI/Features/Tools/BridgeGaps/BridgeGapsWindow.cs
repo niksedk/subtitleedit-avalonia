@@ -35,7 +35,7 @@ public class BridgeGapsWindow : Window
         var numericUpDownMinGap = UiUtil.MakeNumericUpDownInt(0, 1000, 130, vm, nameof(vm.MinGapMs));
         numericUpDownMinGap.ValueChanged += vm.ValueChanged;
 
-        var labelPercentForLeft = UiUtil.MakeLabel(Se.Language.Tools.BridgeGaps.PercentForLeft);
+        var labelPercentForLeft = UiUtil.MakeLabel(Se.Language.Tools.BridgeGaps.PercentFoPrevious);
         var numericUpDownPercentForLeft = UiUtil.MakeNumericUpDownInt(0, 100, 130, vm, nameof(vm.PercentForLeft));
         numericUpDownPercentForLeft.ValueChanged += vm.ValueChanged;
 
@@ -133,11 +133,11 @@ public class BridgeGapsWindow : Window
                 },
                 new DataGridTextColumn
                 {
-                    Header = Se.Language.General.Status,
+                    Header = Se.Language.Tools.BridgeGaps.GapChange,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(BridgeGapDisplayItem.InfoText)),
                     IsReadOnly = true,
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
+                    Width = new DataGridLength(120),
                 },
             },
         };

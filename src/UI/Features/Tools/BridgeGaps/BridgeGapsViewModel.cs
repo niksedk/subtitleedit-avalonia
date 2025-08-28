@@ -10,6 +10,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BridgeGaps;
 
@@ -69,18 +70,19 @@ public partial class BridgeGapsViewModel : ObservableObject
             maxMs = SubtitleFormat.FramesToMilliseconds(maxMs);
         }
 
-        var fixedCount = DurationsBridgeGaps2.BridgeGaps(AllSubtitles, minMsBetweenLines, PercentForLeft, maxMs, fixedIndexes, _dic, Configuration.Settings.General.UseTimeFormatHHMMSSFF);
+        var allSubtitles = new ObservableCollection<SubtitleLineViewModel>(AllSubtitles.Select(p => new SubtitleLineViewModel(p)));
+        var fixedCount = DurationsBridgeGaps2.BridgeGaps(allSubtitles, minMsBetweenLines, PercentForLeft, maxMs, fixedIndexes, _dic, Configuration.Settings.General.UseTimeFormatHHMMSSFF);
 
         Dispatcher.UIThread.Post(() =>
         {
             Subtitles.Clear();
-            foreach (var v in AllSubtitles)
+            foreach (var v in allSubtitles)
             {
                 var vm = new BridgeGapDisplayItem(v);
                 Subtitles.Add(vm);
             }
 
-            for (var i = 0; i < Subtitles.Count-1; i++)
+            for (var i = 0; i < Subtitles.Count - 1; i++)
             {
                 var cur = Subtitles[i];
                 if (_dic.ContainsKey(cur.SubtitleLineViewModel.Id.ToString()))
@@ -100,16 +102,9 @@ public partial class BridgeGapsViewModel : ObservableObject
                             info = $"{SubtitleFormat.MillisecondsToFrames(gap)}";
                         }
                     }
-                    //SubtitleListview1.SetExtraText(i, info, SubtitleListview1.ForeColor);
                 }
 
-                //SubtitleListview1.SetBackgroundColor(i, SubtitleListview1.BackColor);
             }
-
-            //foreach (var index in fixedIndexes)
-            //{
-            //    SubtitleListview1.SetBackgroundColor(index, ListViewGreen);
-            //}
 
             StatusText = string.Format(Se.Language.Tools.BridgeGaps.NumberOfSmallGapsBridgedX, fixedCount);
         });
@@ -118,7 +113,7 @@ public partial class BridgeGapsViewModel : ObservableObject
     public void Initialize(List<SubtitleLineViewModel> subtitles)
     {
         AllSubtitles.Clear();
-        AllSubtitles.AddRange(subtitles);
+        AllSubtitles.AddRange(subtitles.Select(p => new SubtitleLineViewModel(p)));
         _dirty = true;
         _timerUpdatePreview.Start();
     }

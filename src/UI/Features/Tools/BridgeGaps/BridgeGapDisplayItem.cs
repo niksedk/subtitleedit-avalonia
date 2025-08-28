@@ -24,7 +24,7 @@ namespace Nikse.SubtitleEdit.Features.Tools.BridgeGaps
 
         public BridgeGapDisplayItem(SubtitleLineViewModel p)
         {
-            SubtitleLineViewModel = p;
+            SubtitleLineViewModel = new SubtitleLineViewModel(p);
             Text = p.Text;
             StartTime = TimeSpan.FromMilliseconds(p.StartTime.TotalMilliseconds);
             EndTime = TimeSpan.FromMilliseconds(p.EndTime.TotalMilliseconds);

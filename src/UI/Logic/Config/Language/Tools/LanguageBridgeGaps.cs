@@ -6,7 +6,8 @@ public class LanguageBridgeGaps
     public string BridgeGapsSmallerThan { get; set; }
     public string MinGap { get; set; }
     public string NumberOfSmallGapsBridgedX { get; set; }
-    public string PercentForLeft { get; internal set; }
+    public string PercentFoPrevious { get; set; }
+    public object GapChange { get; set; }
 
     public LanguageBridgeGaps()
     {
@@ -14,6 +15,7 @@ public class LanguageBridgeGaps
         BridgeGapsSmallerThan = "Bridge gaps smaller than (ms)";
         MinGap = "Minimum gap (ms)";
         NumberOfSmallGapsBridgedX = "Number of small gaps bridged: {0}";
-        PercentForLeft = "Percent of gap for left";
+        PercentFoPrevious = "Gap for previous (%)";
+        GapChange = "Gap change";
     }
 }
