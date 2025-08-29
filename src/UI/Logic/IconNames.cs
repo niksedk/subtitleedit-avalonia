@@ -61,4 +61,6 @@ internal class IconNames
     public const string MdiExport = "mdi-export";
     public const string MdiNewText = "mdi-invoice-text-plus-outline";
     public const string MdiTrash = "mdi-trash-can-outline";
+    public const string MdiCopy = "mdi-content-copy";
+    public const string MdiDuplicate = "mdi-content-duplicate";
 }

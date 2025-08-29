@@ -12,6 +12,7 @@ public class LanguageMainMenu
     public string RestoreAutoBackup { get; set; }
     public string Save { get; set; }
     public string SaveAs { get; set; }
+    public string OpenContainingFolder { get; set; }
     public string Compare { get; set; }
     public string Statistics { get; set; }
     public string Export { get; set; }
@@ -85,6 +86,7 @@ public class LanguageMainMenu
         Save = "_Save";
         SaveAs = "Save _as...";
         Compare = "Com_pare...";
+        OpenContainingFolder = "Open containing _folder";
         Statistics = "Stat_istics...";
         Export = "_Export";
         Exit = "E_xit";

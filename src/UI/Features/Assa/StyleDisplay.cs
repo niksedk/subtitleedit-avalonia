@@ -1,8 +1,10 @@
 ﻿using Avalonia.Media;
+using Avalonia.Skia;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using System;
 
 namespace Nikse.SubtitleEdit.Features.Assa;
 
@@ -35,15 +37,18 @@ public partial class StyleDisplay : ObservableObject
     [ObservableProperty] private bool _alignmentAn7;
     [ObservableProperty] private bool _alignmentAn8;
     [ObservableProperty] private bool _alignmentAn9;
-    [ObservableProperty] private decimal _marginLeft;
-    [ObservableProperty] private decimal _marginRight;
-    [ObservableProperty] private decimal _marginVertical;
+    [ObservableProperty] private int _marginLeft;
+    [ObservableProperty] private int _marginRight;
+    [ObservableProperty] private int _marginVertical;
     [ObservableProperty] private bool _useOpaqueBox;
     [ObservableProperty] private bool _useOpaqueBoxPerLine;
+
+    public string OriginalName { get; set; } = string.Empty;    
 
     public StyleDisplay()
     {
         _name = string.Empty;
+        OriginalName = string.Empty;
         AlignmentAn2 = true;
     }
 
@@ -120,6 +125,7 @@ public partial class StyleDisplay : ObservableObject
     public StyleDisplay(SsaStyle style)
     {
         Name = style.Name;
+        OriginalName = style.Name;
         FontName = style.FontName;
         FontSize = style.FontSize;
         ColorPrimary = style.Primary.ToAvaloniaColor();
@@ -156,6 +162,7 @@ public partial class StyleDisplay : ObservableObject
     public StyleDisplay(SeAssaStyle style)
     {
         Name = style.Name;
+        OriginalName = style.Name;
         FontName = style.FontName;
         FontSize = style.FontSize;
         ColorPrimary = style.ColorPrimary.FromHexToColor();
@@ -193,5 +200,29 @@ public partial class StyleDisplay : ObservableObject
         {
             AlignmentAn2 = true; // bottom center
         }
+    }
+
+    internal SsaStyle ToSsaStyle()
+    {
+        return new SsaStyle
+        {
+            Name = Name,
+            Alignment = GetAlignment(),
+            Angle = Angle,
+            ScaleX = ScaleX,
+            ScaleY = ScaleY,
+            MarginLeft = MarginLeft,
+            MarginRight = MarginRight,
+            MarginVertical = MarginVertical,
+            FontName = FontName,
+            FontSize = FontSize,
+            Italic = Italic,
+            Bold = Bold,
+            Strikeout = Strikeout,
+            Primary = ColorPrimary.ToSKColor(),
+            Secondary = ColorSecondary.ToSKColor(),
+            Tertiary = ColorShadow.ToSKColor(),
+            Outline = ColorOutline.ToSKColor(),
+        };
     }
 }

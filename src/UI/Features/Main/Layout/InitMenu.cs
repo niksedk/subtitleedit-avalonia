@@ -75,6 +75,11 @@ public static class InitMenu
                 new Separator(),
                 new MenuItem
                 {
+                    Header = l.OpenContainingFolder,
+                    Command = vm.OpenContainingFolderCommand,
+                },
+                new MenuItem
+                {
                     Header = l.Compare,
                     Command = vm.ShowCompareCommand,
                 },

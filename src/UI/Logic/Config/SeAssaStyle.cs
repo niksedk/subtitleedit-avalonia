@@ -49,9 +49,9 @@ public class SeAssaStyle
     public decimal Spacing { get; set; }
     public decimal Angle { get; set; }
     public string Alignment { get; set; } = string.Empty;
-    public decimal MarginLeft { get; set; }
-    public decimal MarginRight { get; set; }
-    public decimal MarginVertical { get; set; }
+    public int MarginLeft { get; set; }
+    public int MarginRight { get; set; }
+    public int MarginVertical { get; set; }
     public bool UseOpaqueBox { get; set; }
     public bool UseOpaqueBoxPerLine { get; set; }
 

@@ -28,13 +28,19 @@ public partial class SubtitleLineViewModel : ObservableObject
     [ObservableProperty]
     private string _originalText;
 
+    [ObservableProperty]
+    private string _style;
+
+    [ObservableProperty]
+    private string _actor;
+
+    [ObservableProperty]
+    private int _layer;
+
     public Paragraph? Paragraph { get; set; }
     public string Extra { get; set; }
     public string Language { get; set; }
     public string Region { get; set; }
-    public string Style { get; set; }
-    public string Actor { get; set; }
-    public int Layer { get; set; }
     public Guid Id { get; set; }
     public bool IsDefault => Text == string.Empty && Number == 0 && Duration == TimeSpan.Zero && StartTime == TimeSpan.Zero;
 

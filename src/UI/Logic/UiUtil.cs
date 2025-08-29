@@ -1286,7 +1286,7 @@ public static class UiUtil
         };
     }
 
-    internal static Label MakeLabel(string text)
+    internal static Label MakeLabel(string text = "")
     {
         return new Label
         {

@@ -41,6 +41,7 @@ using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.Ocr;
 using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using Nikse.SubtitleEdit.Features.Shared.PickMp4Track;
+using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 using Nikse.SubtitleEdit.Features.SpellCheck;
 using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
 using Nikse.SubtitleEdit.Features.Sync.AdjustAllTimes;
@@ -128,6 +129,7 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _areVideoControlsUndocked;
     [ObservableProperty] private bool _isFormatAssa;
     [ObservableProperty] private bool _hasFormatStyle;
+    [ObservableProperty] private bool _areAssaContentMenuItemsVisible;
 
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
@@ -181,8 +183,10 @@ public partial class MainViewModel :
     public Separator MenuItemAudioVisualizerSeparator1 { get; set; }
     public MenuItem MenuItemAudioVisualizerInsertAtPosition { get; set; }
     public MenuItem MenuItemAudioVisualizerDeleteAtPosition { get; set; }
-    public TextBox EditTextBoxOriginal { get; internal set; }
-    public StackPanel PanelSingleLineLenghtsOriginal { get; internal set; }
+    public TextBox EditTextBoxOriginal { get; set; }
+    public StackPanel PanelSingleLineLenghtsOriginal { get; set; }
+    public MenuItem MenuItemStyles { get; set; }
+    public MenuItem MenuItemActors { get; set; }
 
     public MainViewModel(
         IFileHelper fileHelper,
@@ -238,6 +242,8 @@ public partial class MainViewModel :
         MenuItemAudioVisualizerSeparator1 = new Separator();
         MenuItemAudioVisualizerInsertAtPosition = new MenuItem();
         MenuItemAudioVisualizerDeleteAtPosition = new MenuItem();
+        MenuItemStyles = new MenuItem();
+        MenuItemActors = new MenuItem();
         Toolbar = new Border();
         _subtitle = new Subtitle();
         _videoFileName = string.Empty;
@@ -437,6 +443,7 @@ public partial class MainViewModel :
 
         if (result.OkPressed)
         {
+            _subtitle.Header = result.Header;
         }
 
         _shortcutManager.ClearKeys();
@@ -545,7 +552,7 @@ public partial class MainViewModel :
 
             if (subtitle == null)
             {
-                var message = "Unknown format?";
+                var message = Se.Language.General.UnknownSubtitleFormat;
                 await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 _shortcutManager.ClearKeys();
                 return;
@@ -618,6 +625,19 @@ public partial class MainViewModel :
     private async Task CommandFileSaveAs()
     {
         await SaveSubtitleAs();
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task OpenContainingFolder()
+    {
+        if (string.IsNullOrEmpty(_subtitleFileName))
+        {
+            return;
+        }
+
+        await _folderHelper.OpenFolderWithFileSelected(Window!, _subtitleFileName); 
+
         _shortcutManager.ClearKeys();
     }
 
@@ -990,9 +1010,9 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowToolsFixCommonErrors()
     {
-        var viewModel = await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window!, vm => 
-        { 
-            vm.Initialize(GetUpdateSubtitle(), SelectedSubtitleFormat); 
+        var viewModel = await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window!, vm =>
+        {
+            vm.Initialize(GetUpdateSubtitle(), SelectedSubtitleFormat);
         });
 
         if (viewModel.OkPressed)
@@ -1991,6 +2011,63 @@ public partial class MainViewModel :
         EditTextBox.SelectAll();
     }
 
+    [RelayCommand]
+    private async Task SetNewStyleForSelectedLines(string styleName)
+    {
+        var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!, vm =>
+        {
+            vm.Initialize(Se.Language.General.Style + " - " + Se.Language.General.New, string.Empty, 250, 20, true);
+        });
+
+        if (result.OkPressed && !string.IsNullOrWhiteSpace(result.Text))
+        {
+            SetStyleForSelectedLines(result.Text);
+        }
+    }
+
+    [RelayCommand]
+    private void SetStyleForSelectedLines(string styleName)
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            foreach (var p in selectedItems)
+            {
+                p.Style = styleName;
+            }
+        });
+
+    }
+
+    [RelayCommand]
+    private async Task SetNewActorForSelectedLines(string styleName)
+    {
+        var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!, vm =>
+        {
+            vm.Initialize(Se.Language.General.Actor + " - " + Se.Language.General.New, string.Empty, 250, 20, true);
+        });
+
+        if (result.OkPressed && !string.IsNullOrWhiteSpace(result.Text))
+        {
+            SetActorForSelectedLines(result.Text);
+        }
+    }
+
+    [RelayCommand]
+    private void SetActorForSelectedLines(string actorName)
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            foreach (var p in selectedItems)
+            {
+                p.Actor = actorName;
+            }
+        });
+    }
+
     private void SplitSelectedLine(bool atVideoPosition, bool atTextBoxPosition)
     {
         var s = SelectedSubtitle;
@@ -2381,7 +2458,7 @@ public partial class MainViewModel :
 
                 if (subtitle == null)
                 {
-                    var message = "Unknown format?";
+                    var message = Se.Language.General.UnknownSubtitleFormat;
                     await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
@@ -3261,7 +3338,14 @@ public partial class MainViewModel :
                 Actor = line.Actor,
                 Style = line.Style,
                 Language = line.Language,
+                Region = line.Region,
+                Layer = line.Layer,
             };
+
+            if (IsFormatAssa)
+            {
+                p.Extra = line.Style;
+            }
 
             _subtitle.Paragraphs.Add(p);
         }
@@ -3285,7 +3369,7 @@ public partial class MainViewModel :
             Window!,
             SelectedSubtitleFormat,
             newFileName,
-            "Save subtitle file");
+            Se.Language.General.SaveFileAsTitle);
 
         if (!string.IsNullOrEmpty(fileName))
         {
@@ -3334,9 +3418,9 @@ public partial class MainViewModel :
             await Task.Delay(delayMs, token); // Wait 3 seconds, cancellable
             Dispatcher.UIThread.Post(() => { StatusTextLeft = string.Empty; }, DispatcherPriority.Background);
         }
-        catch (TaskCanceledException)
+        catch
         {
-            // Ignore - a new message came in and interrupted
+            // Ignore
         }
     }
 
@@ -3378,9 +3462,9 @@ public partial class MainViewModel :
             Se.Settings.General.ShowColumnEndTime = ShowColumnEndTime;
             Se.Settings.General.ShowColumnDuration = ShowColumnDuration;
             Se.Settings.General.ShowColumnGap = ShowColumnGap;
-            Se.Settings.General.ShowColumnActor = ShowColumnGap;
-            Se.Settings.General.ShowColumnCps = ShowColumnGap;
-            Se.Settings.General.ShowColumnWpm = ShowColumnGap;
+            Se.Settings.General.ShowColumnActor = ShowColumnActor;
+            Se.Settings.General.ShowColumnCps = ShowColumnCps;
+            Se.Settings.General.ShowColumnWpm = ShowColumnWpm;
 
             Se.Settings.General.PositionIsFullScreen = Window.WindowState == WindowState.FullScreen;
             Se.Settings.General.PositionIsMaximized = Window.WindowState == WindowState.Maximized;
@@ -3903,12 +3987,53 @@ public partial class MainViewModel :
 
     public void SubtitleContextOpening(object? sender, EventArgs e)
     {
+        MenuItemMergeAsDialog.IsVisible = SubtitleGrid.SelectedItems.Count == 2;
+        MenuItemMerge.IsVisible = SubtitleGrid.SelectedItems.Count > 1;
+        AreAssaContentMenuItemsVisible = false;
+
         if (IsSubtitleGridFlyoutHeaderVisible)
         {
         }
+        else
+        {
+            if (IsFormatAssa)
+            {
+                AreAssaContentMenuItemsVisible = true;
 
-        MenuItemMergeAsDialog.IsVisible = SubtitleGrid.SelectedItems.Count == 2;
-        MenuItemMerge.IsVisible = SubtitleGrid.SelectedItems.Count > 1;
+                MenuItemStyles.Items.Clear();
+                var styles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(_subtitle.Header);
+                foreach (var style in styles.Select(p => p.Name).Where(p => !string.IsNullOrEmpty(p)).DistinctBy(p => p).OrderBy(p => p))
+                {
+                    MenuItemStyles.Items.Add(new MenuItem
+                    {
+                        Header = style,
+                        Command = SetStyleForSelectedLinesCommand,
+                        CommandParameter = style,
+                    });
+                }
+                MenuItemStyles.Items.Add(new MenuItem
+                {
+                    Header = Se.Language.General.NewDotDotDot,
+                    Command = SetNewStyleForSelectedLinesCommand,
+                });
+
+                MenuItemActors.Items.Clear();
+                foreach (var actor in Subtitles.Select(p => p.Actor).Where(p => !string.IsNullOrEmpty(p)).DistinctBy(p => p).OrderBy(p => p))
+                {
+                    MenuItemActors.Items.Add(new MenuItem
+                    {
+                        Header = actor,
+                        Command = SetActorForSelectedLinesCommand,
+                        CommandParameter = actor,
+                    });
+                }
+                MenuItemActors.Items.Add(new MenuItem
+                {
+                    Header = Se.Language.General.NewDotDotDot,
+                    Command = SetNewActorForSelectedLinesCommand,
+                });
+            }
+        }
     }
 
     private bool IsTextInputFocused()

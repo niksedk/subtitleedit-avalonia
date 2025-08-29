@@ -244,7 +244,28 @@ public static class InitListViewAndEditBox
         flyout.Opening += vm.SubtitleContextOpening;
         vm.SubtitleGrid.PointerPressed += vm.SubtitleGrid_PointerPressed;
 
-        // Add menu items with commands
+        var assaStylesMenuItem = new MenuItem
+        {
+            Header = Se.Language.General.Styles,
+            DataContext = vm,
+        };
+        assaStylesMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.AreAssaContentMenuItemsVisible), BindingMode.TwoWay));
+        flyout.Items.Add(assaStylesMenuItem);
+        vm.MenuItemStyles = assaStylesMenuItem;
+
+        var assaActorsMenuItem = new MenuItem
+        {
+            Header = Se.Language.General.Actors,
+            DataContext = vm,
+        };
+        assaActorsMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.AreAssaContentMenuItemsVisible), BindingMode.TwoWay));
+        flyout.Items.Add(assaActorsMenuItem);
+        vm.MenuItemActors = assaActorsMenuItem;
+
+        var sepAssa = new Separator { DataContext = vm };
+        sepAssa.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.AreAssaContentMenuItemsVisible)));
+        flyout.Items.Add(sepAssa);
+
         var showEndTimeMenuItem = new MenuItem
         {
             Header = Se.Language.General.ShowHideColumn,

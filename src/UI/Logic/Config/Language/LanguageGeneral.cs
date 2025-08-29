@@ -5,6 +5,7 @@ namespace Nikse.SubtitleEdit.Logic.Config.Language;
 public class LanguageGeneral
 {
     public string Actor { get; set; }
+    public string Actors { get; set; }
     public string Advanced { get; set; }
     public string After { get; set; }
     public string All { get; set; }
@@ -91,6 +92,7 @@ public class LanguageGeneral
     public string StartTime { get; set; }
     public string Strikeout { get; set; }
     public string Style { get; set; }
+    public string Styles { get; set; }
     public string StyleLanguage { get; set; }
     public string SubtitleFile { get; set; }
     public string SubtitleFiles { get; set; }
@@ -201,6 +203,7 @@ public class LanguageGeneral
     public string ExportDotDotDot { get; set; }
     public string Edit { get; set; }
     public string New { get; set; }
+    public string NewDotDotDot { get; set; }
     public string Shrink { get; set; }
     public string Rename { get; set; }
     public string FileAlreadyExists { get; set; }
@@ -281,10 +284,12 @@ public class LanguageGeneral
     public string BoxPerLine { get; set; }
     public string Cps { get; set; }
     public string Wpm { get; set; }
+    public string UnknownSubtitleFormat { get; set; }
 
     public LanguageGeneral()
     {
         Actor = "Actor";
+        Actors = "Actors";
         Advanced = "Advanced";
         After = "After";
         All = "All";    
@@ -371,6 +376,7 @@ public class LanguageGeneral
         StartTime = "Start time";
         Strikeout = "Strikeout";
         Style = "Style";
+        Styles = "Styles";
         StyleLanguage = "Style / Language";
         SubtitleFile = "Subtitle file";
         SubtitleFiles = "Subtitle files";
@@ -481,6 +487,7 @@ public class LanguageGeneral
         ExportDotDotDot = "Export...";
         Edit = "Edit";
         New = "New";
+        NewDotDotDot = "New...";
         Shrink = "Shrink";
         Rename = "Rename";
         FileAlreadyExists = "File already exists";
@@ -561,5 +568,6 @@ public class LanguageGeneral
         BoxPerLine = "Box per line";
         Cps = "Chars/sec";
         Wpm = "Words/min";
+        UnknownSubtitleFormat = "Unknown subtitle format";
     }
 }

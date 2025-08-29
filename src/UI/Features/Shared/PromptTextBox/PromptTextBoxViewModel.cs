@@ -2,7 +2,6 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System;
 
 namespace Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 
@@ -12,6 +11,8 @@ public partial class PromptTextBoxViewModel : ObservableObject
     [ObservableProperty] private string _text;
     [ObservableProperty] private int _textBoxWidth;
     [ObservableProperty] private int _textBoxHeight;
+
+    private bool _returnSubmits;
 
     public Window? Window { get; set; }
 
@@ -23,12 +24,13 @@ public partial class PromptTextBoxViewModel : ObservableObject
         Text = string.Empty;
     }
 
-    internal void Initialize(string title, string text, int textBoxWidth, int textBoxHeight)
+    internal void Initialize(string title, string text, int textBoxWidth, int textBoxHeight, bool returnSubmits = false)
     {
         Title = title;
         Text = text;
         TextBoxWidth = textBoxWidth;
         TextBoxHeight = textBoxHeight;
+        _returnSubmits = returnSubmits;
     }
 
     [RelayCommand]
@@ -50,6 +52,11 @@ public partial class PromptTextBoxViewModel : ObservableObject
         {
             e.Handled = true;
             Window?.Close();
+        }
+        else if (e.Key == Key.Enter && _returnSubmits)
+        {
+            e.Handled = true;
+            Ok();
         }
     }
 }

@@ -46,7 +46,8 @@ public class AssaStylesWindow : Window
         };
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
-        var panelButtons = UiUtil.MakeButtonBar(buttonOk);
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
+        var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
         grid.Add(MakeLeftView(vm), 0);
         grid.Add(MakeRightView(vm), 0, 1);
@@ -153,10 +154,12 @@ public class AssaStylesWindow : Window
 
         var buttonNew = UiUtil.MakeButton(vm.FileNewCommand, IconNames.MdiPlus, Se.Language.General.New);
         var buttonRemove = UiUtil.MakeButton(vm.FileRemoveCommand, IconNames.MdiTrash, Se.Language.General.Delete);
+        var buttonDuplicate = UiUtil.MakeButton(vm.FileCopyCommand, IconNames.MdiDuplicate, Se.Language.General.Duplicate);
         var buttonImport = UiUtil.MakeButton(vm.FileImportCommand, IconNames.MdiImport, Se.Language.General.Import);
         var buttonExport = UiUtil.MakeButton(vm.FileExportCommand, IconNames.MdiExport, Se.Language.General.Export);
         var panelButtons = UiUtil.MakeButtonBar(
             buttonNew,
+            buttonDuplicate,
             buttonRemove,
             buttonImport,
             buttonExport
@@ -229,8 +232,10 @@ public class AssaStylesWindow : Window
             },
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedStorageStyle)) { Source = vm });
+        dataGrid.SelectionChanged += vm.StorageStylesChanged;
 
         var buttonNew = UiUtil.MakeButton(vm.StorageNewCommand, IconNames.MdiPlus, Se.Language.General.New);
+        var buttonDuplicate = UiUtil.MakeButton(vm.StorageCopyCommand, IconNames.MdiDuplicate, Se.Language.General.Duplicate);
         var buttonRemove = UiUtil.MakeButton(vm.StorageRemoveCommand, IconNames.MdiTrash, Se.Language.General.Delete);
         var buttonImport = UiUtil.MakeButton(vm.StorageImportCommand, IconNames.MdiImport, Se.Language.General.Import);
         var buttonExport = UiUtil.MakeButton(vm.StorageExportCommand, IconNames.MdiExport, Se.Language.General.Export);
@@ -296,7 +301,7 @@ public class AssaStylesWindow : Window
             RowSpacing = 5,
         };
 
-        var label = UiUtil.MakeLabel("Selcted style (x)").WithBold();
+        var label = UiUtil.MakeLabel().WithBold().WithBindText(vm, nameof(vm.CurrentTitle));
 
         var labelName = UiUtil.MakeLabel(Se.Language.General.Name);
         var textBoxName = UiUtil.MakeTextBox(200, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.Name));
