@@ -24,7 +24,7 @@ public class BurnInWindow : Window
         Title = Se.Language.Video.BurnIn.Title;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
-
+        
         _vm = vm;
         vm.Window = this;
         DataContext = vm;

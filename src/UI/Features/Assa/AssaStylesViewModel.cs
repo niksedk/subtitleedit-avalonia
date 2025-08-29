@@ -1,13 +1,17 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media.Imaging;
+using Avalonia.Skia;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
+using SkiaSharp;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -28,6 +32,7 @@ public partial class AssaStylesViewModel : ObservableObject
     [ObservableProperty] private BorderStyleItem _selectedBorderType;
     [ObservableProperty] private string _currentTitle;
     [ObservableProperty] private bool _isFileStylesFocused;
+    [ObservableProperty] private Bitmap? _imagePreview;
 
     public Window? Window { get; internal set; }
     public bool OkPressed { get; private set; }
@@ -36,6 +41,7 @@ public partial class AssaStylesViewModel : ObservableObject
     private readonly IFileHelper _fileHelper;
     private string _fileName;
     private Subtitle _subtitle;
+    private readonly System.Timers.Timer _timerUpdatePreview;
 
     public AssaStylesViewModel(IFileHelper fileHelper)
     {
@@ -54,6 +60,14 @@ public partial class AssaStylesViewModel : ObservableObject
         _subtitle = new Subtitle();
 
         LoadSettings();
+
+        _timerUpdatePreview = new System.Timers.Timer(500);
+        _timerUpdatePreview.Elapsed += (s, e) =>
+        {
+            _timerUpdatePreview.Stop();
+            UpdatePreview();
+            _timerUpdatePreview.Start();
+        };
     }
 
     [RelayCommand]
@@ -131,7 +145,7 @@ public partial class AssaStylesViewModel : ObservableObject
     [RelayCommand]
     private void FileCopy()
     {
-        var selectedStyle = SelectedFileStyle;  
+        var selectedStyle = SelectedFileStyle;
         if (selectedStyle == null)
         {
             return;
@@ -276,6 +290,8 @@ public partial class AssaStylesViewModel : ObservableObject
             CurrentStyle = SelectedFileStyle;
             CurrentTitle = Se.Language.Assa.StylesInFile;
         }
+
+        _timerUpdatePreview.Start();
     }
 
     private void UpdateUsages()
@@ -320,6 +336,73 @@ public partial class AssaStylesViewModel : ObservableObject
             var display = new StyleDisplay(style);
             StorageStyles.Add(display);
         }
+    }
+
+    private void UpdatePreview()
+    {
+        var style = CurrentStyle;
+        if (style == null)
+        {
+            ImagePreview = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
+            return;
+        }
+
+        var text = "This is a test";
+
+        var fontSize = (float)style.FontSize;
+        SKBitmap bitmap;
+
+        if (style.BorderStyle.Style == BorderStyleType.BoxPerLine)
+        {
+            bitmap = TextToImageGenerator.GenerateImageWithPadding(
+                text,
+                style.FontName,
+                fontSize,
+                style.Bold,
+                style.ColorPrimary.ToSKColor(),
+                style.ColorShadow.ToSKColor(),
+                style.ColorOutline.ToSKColor(),
+                style.ColorOutline.ToSKColor(),
+                0,
+                (float)style.ShadowWidth);
+
+            if (style.ShadowWidth > 0)
+            {
+                bitmap = TextToImageGenerator.AddShadowToBitmap(bitmap, (int)Math.Round(style.ShadowWidth, MidpointRounding.AwayFromZero), style.ColorShadow.ToSKColor());
+            }
+        }
+        else if (style.BorderStyle.Style == BorderStyleType.OneBox)
+        {
+            bitmap = TextToImageGenerator.GenerateImageWithPadding(
+                text,
+                style.FontName,
+                fontSize,
+                style.Bold,
+                style.ColorPrimary.ToSKColor(),
+                style.ColorOutline.ToSKColor(),
+                SKColors.Red,
+                style.ColorShadow.ToSKColor(),
+                (float)style.OutlineWidth,
+                0,
+                1.0f,
+                (int)Math.Round(style.ShadowWidth));
+        }
+        else // FontBoxType.None
+        {
+            bitmap = TextToImageGenerator.GenerateImageWithPadding(
+                text,
+                style.FontName,
+                fontSize,
+                style.Bold,
+                style.ColorPrimary.ToSKColor(),
+                style.ColorOutline.ToSKColor(),
+                style.ColorShadow.ToSKColor(),
+                SKColors.Transparent,
+                (float)style.OutlineWidth,
+                (float)style.ShadowWidth);
+        }
+
+        ImagePreview = bitmap.ToAvaloniaBitmap();
     }
 
     internal void KeyDown(object? sender, KeyEventArgs e)

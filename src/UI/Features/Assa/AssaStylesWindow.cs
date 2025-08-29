@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -511,10 +512,19 @@ public class AssaStylesWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        var label = UiUtil.MakeLabel("Preview");
+        var label = UiUtil.MakeLabel(Se.Language.General.Preview).WithBold();   
 
+        var image = new Image
+        {
+            [!Image.SourceProperty] = new Binding(nameof(vm.ImagePreview)),
+            DataContext = vm,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Top,
+            Stretch = Stretch.None, // Prevents stretching of the image
+        };
 
-        grid.Add(label, 0, 0);
+        grid.Add(label, 0);
+        grid.Add(image, 1);
 
         return UiUtil.MakeBorderForControl(grid);
     }

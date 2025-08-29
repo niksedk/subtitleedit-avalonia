@@ -163,7 +163,7 @@ public partial class StyleDisplay : ObservableObject
         }
         else if (style.BorderStyle == "4")
         {
-            BorderStyle = BorderStyleItem.List().First(p => p.Style == Assa.BorderStyleType.SingleBox);
+            BorderStyle = BorderStyleItem.List().First(p => p.Style == Assa.BorderStyleType.OneBox);
         }
         else
         {
@@ -199,7 +199,7 @@ public partial class StyleDisplay : ObservableObject
 
         if (style.UseOpaqueBox)
         {
-            BorderStyle = BorderStyleItem.List().First(p => p.Style == Assa.BorderStyleType.SingleBox);
+            BorderStyle = BorderStyleItem.List().First(p => p.Style == Assa.BorderStyleType.OneBox);
         }
         else if (style.UseOpaqueBoxPerLine)
         {

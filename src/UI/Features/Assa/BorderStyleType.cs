@@ -4,5 +4,5 @@ public enum BorderStyleType
 {
     Outline = 1,
     BoxPerLine = 3,
-    SingleBox = 4,
+    OneBox = 4,
 }

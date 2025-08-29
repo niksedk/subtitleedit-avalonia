@@ -55,7 +55,6 @@ public partial class BridgeGapsViewModel : ObservableObject
             }
             _timerUpdatePreview.Start();
         };
-
     }
 
     private void UpdatePreview()

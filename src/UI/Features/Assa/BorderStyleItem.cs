@@ -11,7 +11,7 @@ public class BorderStyleItem
     {
         new(Se.Language.General.Outline, BorderStyleType.Outline),
         new(Se.Language.General.BoxPerLine, BorderStyleType.BoxPerLine),
-        new(Se.Language.General.Box, BorderStyleType.SingleBox),
+        new(Se.Language.General.Box, BorderStyleType.OneBox),
     };
 
     public BorderStyleItem(string name, BorderStyleType style)
