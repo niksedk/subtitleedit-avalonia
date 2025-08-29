@@ -17,7 +17,7 @@ public class AssaStylesWindow : Window
             Source = vm,
             Mode = BindingMode.TwoWay,
         });
-        Title = Se.Language.File.Statitics;
+        Title = Se.Language.Assa.StylesTitle;
         CanResize = true;
         Width = 1200;
         Height = 850;
