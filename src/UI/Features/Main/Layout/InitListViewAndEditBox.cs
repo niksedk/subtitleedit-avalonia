@@ -67,12 +67,53 @@ public static class InitListViewAndEditBox
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
         };
         vm.SubtitleGrid.Columns.Add(hideColumn);
-        hideColumn.Bind(DataGridColumn.IsVisibleProperty,
-            new Binding(nameof(vm.ShowColumnEndTime))
-            {
-                Mode = BindingMode.OneWay,
-                Source = vm
-            });
+        hideColumn.Bind(DataGridColumn.IsVisibleProperty, new Binding(nameof(vm.ShowColumnEndTime))
+        {
+            Mode = BindingMode.OneWay,
+            Source = vm
+        });
+
+        var actorColumn = new DataGridTextColumn
+        {
+            Header = Se.Language.General.Hide,
+            Binding = new Binding(nameof(SubtitleLineViewModel.Actor)),
+            Width = new DataGridLength(120),
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
+        };
+        vm.SubtitleGrid.Columns.Add(actorColumn);
+        hideColumn.Bind(DataGridColumn.IsVisibleProperty, new Binding(nameof(vm.ShowColumnActor))
+        {
+            Mode = BindingMode.OneWay,
+            Source = vm
+        });
+
+        var cpsColumn = new DataGridTextColumn
+        {
+            Header = Se.Language.General.Hide,
+            Binding = new Binding(nameof(SubtitleLineViewModel.CharactersPerSecond)),
+            Width = new DataGridLength(120),
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
+        };
+        vm.SubtitleGrid.Columns.Add(cpsColumn);
+        hideColumn.Bind(DataGridColumn.IsVisibleProperty, new Binding(nameof(vm.ShowColumnCps))
+        {
+            Mode = BindingMode.OneWay,
+            Source = vm
+        });
+
+        var wpmColumn = new DataGridTextColumn
+        {
+            Header = Se.Language.General.Hide,
+            Binding = new Binding(nameof(SubtitleLineViewModel.WordsPerMinute)),
+            Width = new DataGridLength(120),
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
+        };
+        vm.SubtitleGrid.Columns.Add(wpmColumn);
+        hideColumn.Bind(DataGridColumn.IsVisibleProperty, new Binding(nameof(vm.ShowColumnWpm))
+        {
+            Mode = BindingMode.OneWay,
+            Source = vm
+        });
 
         var columnDuration = new DataGridTemplateColumn
         {
@@ -245,6 +286,51 @@ public static class InitListViewAndEditBox
         };
         showGapMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible), BindingMode.TwoWay));
         flyout.Items.Add(showGapMenuItem);
+
+        var showActorMenuItem = new MenuItem
+        {
+            Header = Se.Language.General.ShowActorColumn,
+            Command = vm.ToggleShowColumnActorCommand,
+            DataContext = vm,
+            Icon = new Icon
+            {
+                Value = IconNames.MdiCheckBold,
+                VerticalAlignment = VerticalAlignment.Center,
+                [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnActor)),
+            }
+        };
+        showActorMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible), BindingMode.TwoWay));
+        flyout.Items.Add(showActorMenuItem);
+
+        var showCpsMenuItem = new MenuItem
+        {
+            Header = Se.Language.General.ShowCpsColumn,
+            Command = vm.ToggleShowColumnCpsCommand,
+            DataContext = vm,
+            Icon = new Icon
+            {
+                Value = IconNames.MdiCheckBold,
+                VerticalAlignment = VerticalAlignment.Center,
+                [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnCps)),
+            }
+        };
+        showCpsMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible), BindingMode.TwoWay));
+        flyout.Items.Add(showCpsMenuItem);
+
+        var showWpmMenuItem = new MenuItem
+        {
+            Header = Se.Language.General.ShowWpmColumn,
+            Command = vm.ToggleShowColumnWpmCommand,
+            DataContext = vm,
+            Icon = new Icon
+            {
+                Value = IconNames.MdiCheckBold,
+                VerticalAlignment = VerticalAlignment.Center,
+                [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnWpm)),
+            }
+        };
+        showWpmMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible), BindingMode.TwoWay));
+        flyout.Items.Add(showWpmMenuItem);
 
 
         var deleteMenuItem = new MenuItem { Header = Se.Language.General.Delete, DataContext = vm };

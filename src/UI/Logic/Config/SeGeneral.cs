@@ -59,9 +59,11 @@ public class SeGeneral
     public bool AutoOpenVideo { get; set; }
     public DialogType DialogStyle { get; set; }
     public bool ShowColumnEndTime { get; set; }
-
     public bool ShowColumnGap { get; set; }
     public bool ShowColumnDuration { get; set; }
+    public bool ShowColumnActor { get; set; }
+    public bool ShowColumnCps { get; set; }
+    public bool ShowColumnWpm { get; set; }
 
     public SeGeneral()
     {

@@ -121,6 +121,9 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _showColumnEndTime;
     [ObservableProperty] private bool _showColumnGap;
     [ObservableProperty] private bool _showColumnDuration;
+    [ObservableProperty] private bool _showColumnActor;
+    [ObservableProperty] private bool _showColumnCps;
+    [ObservableProperty] private bool _showColumnWpm;
     [ObservableProperty] private bool _lockTimeCodes;
     [ObservableProperty] private bool _areVideoControlsUndocked;
     [ObservableProperty] private bool _isFormatAssa;
@@ -254,6 +257,9 @@ public partial class MainViewModel :
         ShowColumnEndTime = Se.Settings.General.ShowColumnEndTime;
         ShowColumnDuration = Se.Settings.General.ShowColumnDuration;
         ShowColumnGap = Se.Settings.General.ShowColumnGap;
+        ShowColumnActor = Se.Settings.General.ShowColumnActor;
+        ShowColumnCps = Se.Settings.General.ShowColumnCps;
+        ShowColumnWpm = Se.Settings.General.ShowColumnWpm;
         EditTextBoxOriginal = new TextBox();
         EditTextCharactersPerSecondOriginal = string.Empty;
         EditTextCharactersPerSecondBackgroundOriginal = Brushes.Transparent;
@@ -1405,6 +1411,30 @@ public partial class MainViewModel :
     {
         Se.Settings.General.ShowColumnDuration = !Se.Settings.General.ShowColumnDuration;
         ShowColumnDuration = Se.Settings.General.ShowColumnDuration;
+        AutoFitColumns();
+    }
+
+    [RelayCommand]
+    private void ToggleShowColumnActor()
+    {
+        Se.Settings.General.ShowColumnActor = !Se.Settings.General.ShowColumnActor;
+        ShowColumnActor = Se.Settings.General.ShowColumnActor;
+        AutoFitColumns();
+    }
+
+    [RelayCommand]
+    private void ToggleShowColumnCps()
+    {
+        Se.Settings.General.ShowColumnCps = !Se.Settings.General.ShowColumnCps;
+        ShowColumnCps = Se.Settings.General.ShowColumnCps;
+        AutoFitColumns();
+    }
+
+    [RelayCommand]
+    private void ToggleShowColumnWpm()
+    {
+        Se.Settings.General.ShowColumnWpm = !Se.Settings.General.ShowColumnWpm;
+        ShowColumnWpm = Se.Settings.General.ShowColumnWpm;
         AutoFitColumns();
     }
 
@@ -3348,6 +3378,9 @@ public partial class MainViewModel :
             Se.Settings.General.ShowColumnEndTime = ShowColumnEndTime;
             Se.Settings.General.ShowColumnDuration = ShowColumnDuration;
             Se.Settings.General.ShowColumnGap = ShowColumnGap;
+            Se.Settings.General.ShowColumnActor = ShowColumnGap;
+            Se.Settings.General.ShowColumnCps = ShowColumnGap;
+            Se.Settings.General.ShowColumnWpm = ShowColumnGap;
 
             Se.Settings.General.PositionIsFullScreen = Window.WindowState == WindowState.FullScreen;
             Se.Settings.General.PositionIsMaximized = Window.WindowState == WindowState.Maximized;

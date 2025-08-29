@@ -118,6 +118,25 @@ public partial class SubtitleLineViewModel : ObservableObject
         }
     }
 
+    public double WordsPerMinute
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(Text))
+            {
+                return 0;
+            }
+
+            if (Duration.TotalMilliseconds <= 1.0)
+            {
+                return 999.0;
+            }
+
+            //TODO: fix
+            return (double)HtmlUtil.RemoveHtmlTags(Text, true).CountCharacters(forCps: true) / Duration.TotalSeconds;
+        }
+    }
+
     public IBrush TextBackgroundBrush
     {
         get

@@ -419,7 +419,7 @@ public class AssaStylesWindow : Window
             RowSpacing = 5,
         };
 
-        var label = UiUtil.MakeLabel(Se.Language.General.Alignment);
+        var label = UiUtil.MakeLabel(Se.Language.General.Margin);
         grid.Add(label, 0);
 
         var labelMarginLeft = UiUtil.MakeLabel(Se.Language.General.Left);
