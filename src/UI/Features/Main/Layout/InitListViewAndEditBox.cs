@@ -42,6 +42,7 @@ public static class InitListViewAndEditBox
 
         var fullTimeConverter = new TimeSpanToDisplayFullConverter();
         var shortTimeConverter = new TimeSpanToDisplayShortConverter();
+        var doubleRoundedConverter = new DoubleToOneDecimalConverter();
 
         // Columns
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
@@ -68,48 +69,6 @@ public static class InitListViewAndEditBox
         };
         vm.SubtitleGrid.Columns.Add(hideColumn);
         hideColumn.Bind(DataGridColumn.IsVisibleProperty, new Binding(nameof(vm.ShowColumnEndTime))
-        {
-            Mode = BindingMode.OneWay,
-            Source = vm
-        });
-
-        var actorColumn = new DataGridTextColumn
-        {
-            Header = Se.Language.General.Hide,
-            Binding = new Binding(nameof(SubtitleLineViewModel.Actor)),
-            Width = new DataGridLength(120),
-            CellTheme = UiUtil.DataGridNoBorderCellTheme,
-        };
-        vm.SubtitleGrid.Columns.Add(actorColumn);
-        hideColumn.Bind(DataGridColumn.IsVisibleProperty, new Binding(nameof(vm.ShowColumnActor))
-        {
-            Mode = BindingMode.OneWay,
-            Source = vm
-        });
-
-        var cpsColumn = new DataGridTextColumn
-        {
-            Header = Se.Language.General.Hide,
-            Binding = new Binding(nameof(SubtitleLineViewModel.CharactersPerSecond)),
-            Width = new DataGridLength(120),
-            CellTheme = UiUtil.DataGridNoBorderCellTheme,
-        };
-        vm.SubtitleGrid.Columns.Add(cpsColumn);
-        hideColumn.Bind(DataGridColumn.IsVisibleProperty, new Binding(nameof(vm.ShowColumnCps))
-        {
-            Mode = BindingMode.OneWay,
-            Source = vm
-        });
-
-        var wpmColumn = new DataGridTextColumn
-        {
-            Header = Se.Language.General.Hide,
-            Binding = new Binding(nameof(SubtitleLineViewModel.WordsPerMinute)),
-            Width = new DataGridLength(120),
-            CellTheme = UiUtil.DataGridNoBorderCellTheme,
-        };
-        vm.SubtitleGrid.Columns.Add(wpmColumn);
-        hideColumn.Bind(DataGridColumn.IsVisibleProperty, new Binding(nameof(vm.ShowColumnWpm))
         {
             Mode = BindingMode.OneWay,
             Source = vm
@@ -150,6 +109,7 @@ public static class InitListViewAndEditBox
         {
             Header = Se.Language.General.Text,
             Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+            MinWidth = 100,
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
             CellTemplate = new FuncDataTemplate<SubtitleLineViewModel>((value, nameScope) =>
             {
@@ -176,6 +136,7 @@ public static class InitListViewAndEditBox
             Header = Se.Language.General.OriginalText,
             Binding = new Binding(nameof(SubtitleLineViewModel.OriginalText)),
             Width = new DataGridLength(1, DataGridLengthUnitType.Star), // Stretch text column
+            MinWidth = 100,
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
         };
         originalColumn.Bind(DataGridTextColumn.IsVisibleProperty, new Binding(nameof(vm.ShowColumnOriginalText))
@@ -190,7 +151,7 @@ public static class InitListViewAndEditBox
         {
             Header = Se.Language.General.Style,
             Binding = new Binding(nameof(SubtitleLineViewModel.Style)),
-            Width = new DataGridLength(120), 
+            Width = new DataGridLength(120),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
         };
         styleColumn.Bind(DataGridTextColumn.IsVisibleProperty, new Binding(nameof(vm.HasFormatStyle))
@@ -214,6 +175,48 @@ public static class InitListViewAndEditBox
         });
         vm.SubtitleGrid.Columns.Add(columnGap);
 
+        var actorColumn = new DataGridTextColumn
+        {
+            Header = Se.Language.General.Actor,
+            Binding = new Binding(nameof(SubtitleLineViewModel.Actor)),
+            Width = new DataGridLength(120),
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
+        };
+        vm.SubtitleGrid.Columns.Add(actorColumn);
+        actorColumn.Bind(DataGridColumn.IsVisibleProperty, new Binding(nameof(vm.ShowColumnActor))
+        {
+            Mode = BindingMode.OneWay,
+            Source = vm,
+        });
+
+        var cpsColumn = new DataGridTextColumn
+        {
+            Header = Se.Language.General.Cps,
+            Binding = new Binding(nameof(SubtitleLineViewModel.CharactersPerSecond)) { Converter = doubleRoundedConverter },
+            Width = new DataGridLength(100),
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
+        };
+        vm.SubtitleGrid.Columns.Add(cpsColumn);
+        cpsColumn.Bind(DataGridColumn.IsVisibleProperty, new Binding(nameof(vm.ShowColumnCps))
+        {
+            Mode = BindingMode.OneWay,
+            Source = vm,
+        });
+
+        var wpmColumn = new DataGridTextColumn
+        {
+            Header = Se.Language.General.Wpm,
+            Binding = new Binding(nameof(SubtitleLineViewModel.WordsPerMinute)) { Converter = doubleRoundedConverter },
+            Width = new DataGridLength(100),
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
+        };
+        vm.SubtitleGrid.Columns.Add(wpmColumn);
+        wpmColumn.Bind(DataGridColumn.IsVisibleProperty, new Binding(nameof(vm.ShowColumnWpm))
+        {
+            Mode = BindingMode.OneWay,
+            Source = vm,
+        });
+
         vm.SubtitleGrid.DataContext = vm.Subtitles;
         vm.SubtitleGrid.SelectionChanged += vm.SubtitleGrid_SelectionChanged;
 
@@ -222,14 +225,14 @@ public static class InitListViewAndEditBox
         vm.SubtitleGrid[!DataGrid.SelectedItemProperty] = new Binding(nameof(vm.SelectedSubtitle))
         {
             Mode = BindingMode.TwoWay,
-            Source = vm
+            Source = vm,
         };
 
         // Set up two-way binding for SelectedIndex
         vm.SubtitleGrid[!DataGrid.SelectedIndexProperty] = new Binding(nameof(vm.SelectedSubtitleIndex))
         {
             Mode = BindingMode.TwoWay,
-            Source = vm
+            Source = vm,
         };
 
         Grid.SetRow(vm.SubtitleGrid, 0);

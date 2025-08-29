@@ -279,6 +279,8 @@ public class LanguageGeneral
     public string Right { get; set; }
     public string Outline { get; set; }
     public string BoxPerLine { get; set; }
+    public string Cps { get; set; }
+    public string Wpm { get; set; }
 
     public LanguageGeneral()
     {
@@ -557,5 +559,7 @@ public class LanguageGeneral
         Right = "Right";
         Outline = "Outline";
         BoxPerLine = "Box per line";
+        Cps = "Chars/sec";
+        Wpm = "Words/min";
     }
 }

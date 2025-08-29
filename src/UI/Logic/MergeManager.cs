@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
-using static Nikse.SubtitleEdit.Logic.MergeManager;
 
 namespace Nikse.SubtitleEdit.Logic
 {

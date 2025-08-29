@@ -118,7 +118,7 @@ public partial class SubtitleLineViewModel : ObservableObject
         }
     }
 
-    public double WordsPerMinute
+    public double WordsPerMinute // WPM
     {
         get
         {
@@ -132,8 +132,7 @@ public partial class SubtitleLineViewModel : ObservableObject
                 return 999.0;
             }
 
-            //TODO: fix
-            return (double)HtmlUtil.RemoveHtmlTags(Text, true).CountCharacters(forCps: true) / Duration.TotalSeconds;
+            return 60.0 / Duration.TotalSeconds * Text.CountWords();
         }
     }
 
