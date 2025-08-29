@@ -141,6 +141,7 @@ public class LanguageGeneral
     public string FontName { get; set; }
     public string TextColor { get; set; }
     public string Box { get; set; }
+    public string SingleBox { get; set; }
     public string Shadow { get; set; }
     public string Alignment { get; set; }
     public string ContentAlignment { get; set; }
@@ -425,6 +426,7 @@ public class LanguageGeneral
         FontName = "Font name";
         TextColor = "Text color";
         Box = "Box";
+        SingleBox = "Single box";
         Shadow = "Shadow";
         Alignment = "Alignment";
         ContentAlignment = "Content alignment";

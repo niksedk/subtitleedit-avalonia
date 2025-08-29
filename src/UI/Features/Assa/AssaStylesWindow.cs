@@ -471,6 +471,7 @@ public class AssaStylesWindow : Window
         grid.Add(label, 1, 0);
 
         var comboBoxBorderType = UiUtil.MakeComboBox(vm.BorderTypes, vm, nameof(vm.SelectedBorderType));
+        comboBoxBorderType.SelectionChanged += vm.BorderTypeChanged;
         grid.Add(comboBoxBorderType, 2, 0, 1, 2);
 
         var labelOutlineWidth = UiUtil.MakeLabel(Se.Language.General.OutlineWidth);

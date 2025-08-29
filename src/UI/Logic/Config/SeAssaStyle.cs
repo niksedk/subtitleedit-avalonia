@@ -26,8 +26,8 @@ public class SeAssaStyle
         MarginLeft = style.MarginLeft;
         MarginRight = style.MarginRight;
         MarginVertical = style.MarginVertical;
-        UseOpaqueBox = style.UseOpaqueBox;
-        UseOpaqueBoxPerLine = style.UseOpaqueBoxPerLine;
+        UseOpaqueBox = style.BorderStyle.Style == BorderStyleType.SingleBox;
+        UseOpaqueBoxPerLine = style.BorderStyle.Style == BorderStyleType.BoxPerLine;
     }
 
     public string Name { get; set; } = string.Empty;

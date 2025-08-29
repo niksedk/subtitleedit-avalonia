@@ -24,8 +24,8 @@ public partial class AssaStylesViewModel : ObservableObject
     [ObservableProperty] private StyleDisplay? _selectedStorageStyle;
     [ObservableProperty] private StyleDisplay? _currentStyle;
     [ObservableProperty] private ObservableCollection<string> _fonts;
-    [ObservableProperty] private ObservableCollection<string> _borderTypes;
-    [ObservableProperty] private string _selectedBorderType;
+    [ObservableProperty] private ObservableCollection<BorderStyleItem> _borderTypes;
+    [ObservableProperty] private BorderStyleItem _selectedBorderType;
     [ObservableProperty] private string _currentTitle;
     [ObservableProperty] private bool _isFileStylesFocused;
 
@@ -45,7 +45,7 @@ public partial class AssaStylesViewModel : ObservableObject
         FileStyles = new ObservableCollection<StyleDisplay>();
         StorageStyles = new ObservableCollection<StyleDisplay>();
         Fonts = new ObservableCollection<string>(FontHelper.GetSystemFonts());
-        BorderTypes = new ObservableCollection<string>(new[] { Se.Language.General.Outline, Se.Language.General.Box, Se.Language.General.BoxPerLine });
+        BorderTypes = new ObservableCollection<BorderStyleItem>(BorderStyleItem.List());
         SelectedBorderType = BorderTypes[0];
         CurrentTitle = string.Empty;
 
@@ -262,6 +262,7 @@ public partial class AssaStylesViewModel : ObservableObject
             if (style != null)
             {
                 var display = new StyleDisplay(style);
+                SelectedBorderType = display.BorderStyle;
                 FileStyles.Add(display);
             }
         }
@@ -333,6 +334,7 @@ public partial class AssaStylesViewModel : ObservableObject
         var selectedStyle = SelectedFileStyle;
         CurrentStyle = selectedStyle;
         CurrentTitle = Se.Language.Assa.StylesInFile;
+        SelectedBorderType = selectedStyle?.BorderStyle ?? BorderTypes[0];
     }
 
     internal void StorageStylesChanged(object? sender, SelectionChangedEventArgs e)
@@ -340,5 +342,17 @@ public partial class AssaStylesViewModel : ObservableObject
         var selectedStyle = SelectedStorageStyle;
         CurrentStyle = selectedStyle;
         CurrentTitle = Se.Language.Assa.StylesSaved;
+        SelectedBorderType = selectedStyle?.BorderStyle ?? BorderTypes[0];
+    }
+
+    internal void BorderTypeChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        var selectedStyle = CurrentStyle;
+        if (selectedStyle == null)
+        {
+            return;
+        }
+
+        selectedStyle.BorderStyle = SelectedBorderType;
     }
 }

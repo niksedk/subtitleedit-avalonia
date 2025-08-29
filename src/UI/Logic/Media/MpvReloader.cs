@@ -137,7 +137,7 @@ public class MpvReloader : IMpvReloader
                 var hash = subtitle.GetFastHashCode(null);
                 if (hash != _mpvSubOldHash || string.IsNullOrEmpty(_mpvTextOld))
                 {
-                    text = subtitle.ToText(new SubRip());
+                    text = subtitle.ToText(new AdvancedSubStationAlpha());
                     _mpvSubOldHash = hash;
                 }
                 else

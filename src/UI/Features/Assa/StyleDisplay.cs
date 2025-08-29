@@ -1,10 +1,12 @@
 ﻿using Avalonia.Media;
 using Avalonia.Skia;
 using CommunityToolkit.Mvvm.ComponentModel;
+using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Assa;
 
@@ -40,29 +42,29 @@ public partial class StyleDisplay : ObservableObject
     [ObservableProperty] private int _marginLeft;
     [ObservableProperty] private int _marginRight;
     [ObservableProperty] private int _marginVertical;
-    [ObservableProperty] private bool _useOpaqueBox;
-    [ObservableProperty] private bool _useOpaqueBoxPerLine;
+    [ObservableProperty] private BorderStyleItem _borderStyle;
 
-    public string OriginalName { get; set; } = string.Empty;    
+    public string OriginalName { get; set; } = string.Empty;
 
     public StyleDisplay()
     {
         _name = string.Empty;
         OriginalName = string.Empty;
         AlignmentAn2 = true;
+        BorderStyle = BorderStyleItem.List().First();
     }
 
     public void SetAlignment(string alignment)
     {
-        AlignmentAn1 = alignment == "an1";
-        AlignmentAn2 = alignment == "an2";
-        AlignmentAn3 = alignment == "an3";
-        AlignmentAn4 = alignment == "an4";
-        AlignmentAn5 = alignment == "an5";
-        AlignmentAn6 = alignment == "an6";
-        AlignmentAn7 = alignment == "an7";
-        AlignmentAn8 = alignment == "an8";
-        AlignmentAn9 = alignment == "an9";
+        AlignmentAn1 = alignment.EndsWith("1");
+        AlignmentAn2 = alignment.EndsWith("2");
+        AlignmentAn3 = alignment.EndsWith("3");
+        AlignmentAn4 = alignment.EndsWith("4");
+        AlignmentAn5 = alignment.EndsWith("5");
+        AlignmentAn6 = alignment.EndsWith("6");
+        AlignmentAn7 = alignment.EndsWith("7");
+        AlignmentAn8 = alignment.EndsWith("8");
+        AlignmentAn9 = alignment.EndsWith("9");
 
         UpdateAlignment();
     }
@@ -71,55 +73,55 @@ public partial class StyleDisplay : ObservableObject
     {
         if (AlignmentAn1)
         {
-            return "an1";
+            return "1";
         }
 
         if (AlignmentAn2)
         {
-            return "an2";
+            return "2";
         }
 
         if (AlignmentAn3)
         {
-            return "an3";
+            return "3";
         }
 
         if (AlignmentAn3)
         {
-            return "an3";
+            return "3";
         }
 
         if (AlignmentAn4)
         {
-            return "an4";
+            return "4";
         }
 
         if (AlignmentAn5)
         {
-            return "an5";
+            return "5";
         }
 
         if (AlignmentAn6)
         {
-            return "an6";
+            return "6";
         }
 
         if (AlignmentAn7)
         {
-            return "an7";
+            return "7";
         }
 
         if (AlignmentAn8)
         {
-            return "an8";
+            return "8";
         }
 
         if (AlignmentAn9)
         {
-            return "an9";
+            return "9";
         }
 
-        return "an2";
+        return "2";
     }
 
     public StyleDisplay(SsaStyle style)
@@ -131,7 +133,7 @@ public partial class StyleDisplay : ObservableObject
         ColorPrimary = style.Primary.ToAvaloniaColor();
         ColorSecondary = style.Secondary.ToAvaloniaColor();
         ColorOutline = style.Outline.ToAvaloniaColor();
-        ColorShadow = style.Tertiary.ToAvaloniaColor();
+        ColorShadow = style.Background.ToAvaloniaColor();
         OutlineWidth = style.OutlineWidth;
         ShadowWidth = style.ShadowWidth;
         Bold = style.Bold;
@@ -142,23 +144,35 @@ public partial class StyleDisplay : ObservableObject
         ScaleY = style.ScaleY;
         Spacing = style.Spacing;
         Angle = style.Angle;
-        AlignmentAn1 = style.Alignment == "an1";
-        AlignmentAn2 = style.Alignment == "an2";
-        AlignmentAn3 = style.Alignment == "an3";
-        AlignmentAn4 = style.Alignment == "an4";
-        AlignmentAn5 = style.Alignment == "an5";
-        AlignmentAn6 = style.Alignment == "an6";
-        AlignmentAn7 = style.Alignment == "an7";
-        AlignmentAn8 = style.Alignment == "an8";
-        AlignmentAn9 = style.Alignment == "an9";
+        AlignmentAn1 = style.Alignment.EndsWith("1");
+        AlignmentAn2 = style.Alignment.EndsWith("2");
+        AlignmentAn3 = style.Alignment.EndsWith("3");
+        AlignmentAn4 = style.Alignment.EndsWith("4");
+        AlignmentAn5 = style.Alignment.EndsWith("5");
+        AlignmentAn6 = style.Alignment.EndsWith("6");
+        AlignmentAn7 = style.Alignment.EndsWith("7");
+        AlignmentAn8 = style.Alignment.EndsWith("8");
+        AlignmentAn9 = style.Alignment.EndsWith("9");
         MarginLeft = style.MarginLeft;
         MarginRight = style.MarginRight;
         MarginVertical = style.MarginVertical;
-        UseOpaqueBox = style.BorderStyle == "3";
-        UseOpaqueBoxPerLine = style.BorderStyle == "4";
+        
+        if (style.BorderStyle == "3")
+        {
+            BorderStyle = BorderStyleItem.List().First(p => p.Style == Assa.BorderStyleType.BoxPerLine);
+        }
+        else if (style.BorderStyle == "4")
+        {
+            BorderStyle = BorderStyleItem.List().First(p => p.Style == Assa.BorderStyleType.SingleBox);
+        }
+        else
+        {
+            BorderStyle = BorderStyleItem.List().First(p => p.Style == Assa.BorderStyleType.Outline);
+        }
+
         UpdateAlignment();
     }
-    
+
     public StyleDisplay(SeAssaStyle style)
     {
         Name = style.Name;
@@ -182,8 +196,20 @@ public partial class StyleDisplay : ObservableObject
         MarginLeft = style.MarginLeft;
         MarginRight = style.MarginRight;
         MarginVertical = style.MarginVertical;
-        UseOpaqueBox = style.UseOpaqueBox;
-        UseOpaqueBoxPerLine = style.UseOpaqueBoxPerLine;
+
+        if (style.UseOpaqueBox)
+        {
+            BorderStyle = BorderStyleItem.List().First(p => p.Style == Assa.BorderStyleType.SingleBox);
+        }
+        else if (style.UseOpaqueBoxPerLine)
+        {
+            BorderStyle = BorderStyleItem.List().First(p => p.Style == Assa.BorderStyleType.BoxPerLine);
+        }
+        else
+        {
+            BorderStyle = BorderStyleItem.List().First(p => p.Style == Assa.BorderStyleType.Outline);
+        }
+
         SetAlignment(style.Alignment);
     }
 
@@ -222,7 +248,11 @@ public partial class StyleDisplay : ObservableObject
             Primary = ColorPrimary.ToSKColor(),
             Secondary = ColorSecondary.ToSKColor(),
             Tertiary = ColorShadow.ToSKColor(),
+            Background = ColorShadow.ToSKColor(),
             Outline = ColorOutline.ToSKColor(),
+            OutlineWidth = OutlineWidth,
+            ShadowWidth = ShadowWidth,
+            BorderStyle = ((int)BorderStyle.Style).ToStringInvariant(),
         };
     }
 }
