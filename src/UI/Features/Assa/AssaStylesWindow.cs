@@ -320,34 +320,39 @@ public class AssaStylesWindow : Window
         var panelFontStyle = UiUtil.MakeHorizontalPanel(checkBoxBold, checkBoxItalic, checkBoxUnderline, checkBoxStrikeout).WithMarginBottom(10);
 
         var labelScaleX = UiUtil.MakeLabel("Scale X").WithMinWidth(60);
-        var numericUpDownScaleX = UiUtil.MakeNumericUpDownTwoDecimals(1, 1000, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ScaleX));
+        var numericUpDownScaleX = UiUtil.MakeNumericUpDownOneDecimal(1, 1000, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ScaleX));
+        numericUpDownScaleX.Increment = 1;
         var labelScaleY = UiUtil.MakeLabel("Scale Y").WithMinWidth(60);
-        var numericUpDownScaleY = UiUtil.MakeNumericUpDownTwoDecimals(1, 1000, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ScaleY));
+        var numericUpDownScaleY = UiUtil.MakeNumericUpDownOneDecimal(1, 1000, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ScaleY));
+        numericUpDownScaleY.Increment = 1;
         var panelTransform1 = UiUtil.MakeHorizontalPanel(labelScaleX, numericUpDownScaleX, labelScaleY, numericUpDownScaleY);
 
         var labelSpacing = UiUtil.MakeLabel("Spacing").WithMinWidth(60);
-        var numericUpDownSpacing = UiUtil.MakeNumericUpDownTwoDecimals(-100, 100, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.Spacing));
+        var numericUpDownSpacing = UiUtil.MakeNumericUpDownOneDecimal(-100, 100, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.Spacing));
+        numericUpDownSpacing.Increment = 1;
         var labelAngle = UiUtil.MakeLabel("Angle").WithMinWidth(60);
-        var numericUpDownAngle = UiUtil.MakeNumericUpDownTwoDecimals(-360, 360, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.Angle));
+        var numericUpDownAngle = UiUtil.MakeNumericUpDownOneDecimal(-360, 360, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.Angle));
+        numericUpDownAngle.Increment = 1;
         var panelTransform2 = UiUtil.MakeHorizontalPanel(labelSpacing, numericUpDownSpacing, labelAngle, numericUpDownAngle).WithMarginBottom(10);
 
         var labelColorPrimary = UiUtil.MakeLabel("Primary");
         var colorPickerPrimary = UiUtil.MakeColorPicker(vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ColorPrimary));
-        var labelColorSecondary = UiUtil.MakeLabel("Secondary");
-        var colorPickerSecondary = UiUtil.MakeColorPicker(vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ColorSecondary));
         var labelColorOutline = UiUtil.MakeLabel("Outline");
         var colorPickerOutline = UiUtil.MakeColorPicker(vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ColorOutline));
         var labelColorShadow = UiUtil.MakeLabel("Shadow");
         var colorPickerShadow = UiUtil.MakeColorPicker(vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ColorShadow));
+        var labelColorSecondary = UiUtil.MakeLabel("Secondary");
+        var colorPickerSecondary = UiUtil.MakeColorPicker(vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ColorSecondary));
         var panelColors = UiUtil.MakeHorizontalPanel(
             labelColorPrimary,
             colorPickerPrimary,
-            labelColorSecondary,
-            colorPickerSecondary,
             labelColorOutline,
             colorPickerOutline,
             labelColorShadow,
-            colorPickerShadow).WithMarginBottom(10);
+            colorPickerShadow,
+            labelColorSecondary,
+            colorPickerSecondary
+            ).WithMarginBottom(10);
 
         var alignmentView = MakeAlignmentView(vm);
         var marginView = MakeMarginView(vm);
@@ -475,12 +480,14 @@ public class AssaStylesWindow : Window
         grid.Add(comboBoxBorderType, 2, 0, 1, 2);
 
         var labelOutlineWidth = UiUtil.MakeLabel(Se.Language.General.OutlineWidth);
-        var numericUpDownOutlineWidth = UiUtil.MakeNumericUpDownTwoDecimals(0, 100, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.OutlineWidth));
+        var numericUpDownOutlineWidth = UiUtil.MakeNumericUpDownOneDecimal(0, 100, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.OutlineWidth));
+        numericUpDownOutlineWidth.Increment = 0.5m;
         grid.Add(labelOutlineWidth, 3, 0);
         grid.Add(numericUpDownOutlineWidth, 3, 1);
 
         var labelShadowWidth = UiUtil.MakeLabel(Se.Language.General.ShadowWidth);
-        var numericUpDownShadowWidth = UiUtil.MakeNumericUpDownTwoDecimals(0, 100, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ShadowWidth));
+        var numericUpDownShadowWidth = UiUtil.MakeNumericUpDownOneDecimal(0, 100, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ShadowWidth));
+        numericUpDownShadowWidth.Increment = 0.5m;
         grid.Add(labelShadowWidth, 4, 0);
         grid.Add(numericUpDownShadowWidth, 4, 1);
 

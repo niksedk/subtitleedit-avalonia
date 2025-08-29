@@ -237,6 +237,7 @@ public partial class AssaStylesViewModel : ObservableObject
     public void Initialize(Subtitle subtitle, SubtitleFormat format, string fileName)
     {
         Header = subtitle.Header;
+        _subtitle = subtitle;
 
         if (Header != null && Header.Contains("http://www.w3.org/ns/ttml"))
         {
@@ -281,7 +282,7 @@ public partial class AssaStylesViewModel : ObservableObject
     {
         foreach (var style in FileStyles)
         {
-            style.UsageCount = _subtitle.Paragraphs.Where(p => p.Extra.Equals(style.Name)).Count();
+            style.UsageCount = _subtitle.Paragraphs.Count(p => p.Extra.TrimStart('*').Equals(style.Name.TrimStart('*')));
         }
     }
 

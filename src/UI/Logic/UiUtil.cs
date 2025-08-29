@@ -1424,6 +1424,42 @@ public static class UiUtil
         return control;
     }
 
+    public static NumericUpDown MakeNumericUpDownOneDecimal(decimal min, decimal max, double width, object viewModel,
+        string? propertyValuePath = null, string? propertyIsVisiblePath = null)
+    {
+        var control = new NumericUpDown
+        {
+            Width = width,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            DataContext = viewModel,
+            Minimum = min,
+            Maximum = max,
+            Increment = 0.1m,
+            FormatString = "F1",
+        };
+
+        if (propertyValuePath != null)
+        {
+            control.Bind(NumericUpDown.ValueProperty, new Binding
+            {
+                Path = propertyValuePath,
+                Mode = BindingMode.TwoWay,
+            });
+        }
+
+        if (propertyIsVisiblePath != null)
+        {
+            control.Bind(NumericUpDown.IsVisibleProperty, new Binding
+            {
+                Path = propertyIsVisiblePath,
+                Mode = BindingMode.TwoWay,
+            });
+        }
+
+        return control;
+    }
+
     public static Label WithBindText(this Label control, object viewModel, string contentPropertyPath)
     {
         control.DataContext = viewModel;
