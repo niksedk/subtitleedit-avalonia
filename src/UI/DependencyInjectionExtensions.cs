@@ -100,6 +100,8 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<AdjustAllTimesViewModel>();
         collection.AddTransient<AdjustDurationViewModel>();
         collection.AddTransient<AlignmentPickerViewModel>();
+        collection.AddTransient<AssaAttachmentsViewModel>();
+        collection.AddTransient<AssaPropertiesViewModel>();
         collection.AddTransient<AssaStylesViewModel>();
         collection.AddTransient<AudioToTextWhisperViewModel>();
         collection.AddTransient<AudioVisualizerUndockedViewModel>();

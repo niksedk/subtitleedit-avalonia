@@ -7,7 +7,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
-using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
@@ -19,7 +18,7 @@ using System.Text;
 
 namespace Nikse.SubtitleEdit.Features.Assa;
 
-public partial class AssaStylesViewModel : ObservableObject
+public partial class AssaPropertiesViewModel : ObservableObject
 {
     [ObservableProperty] private string _title;
     [ObservableProperty] private ObservableCollection<StyleDisplay> _fileStyles;
@@ -43,7 +42,7 @@ public partial class AssaStylesViewModel : ObservableObject
     private Subtitle _subtitle;
     private readonly System.Timers.Timer _timerUpdatePreview;
 
-    public AssaStylesViewModel(IFileHelper fileHelper)
+    public AssaPropertiesViewModel(IFileHelper fileHelper)
     {
         _fileHelper = fileHelper;
 
@@ -250,7 +249,7 @@ public partial class AssaStylesViewModel : ObservableObject
 
     public void Initialize(Subtitle subtitle, SubtitleFormat format, string fileName)
     {
-        Title = string.Format(Se.Language.Assa.StylesTitleX, fileName);
+        Title = string.Format(Se.Language.Assa.PropertiesTitleX, fileName);
         Header = subtitle.Header;
         _subtitle = subtitle;
 

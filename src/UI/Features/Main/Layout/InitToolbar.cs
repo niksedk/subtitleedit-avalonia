@@ -251,12 +251,48 @@ public static class InitToolbar
             },
             Command = vm.ShowAssaStylesCommand,
             Background = Brushes.Transparent,
-            [ToolTip.TipProperty] = MakeToolTip(languageHints.AssaStyleHint, shortcuts, nameof(vm.ShowAssaStylesCommand)),
+            [ToolTip.TipProperty] = MakeToolTip(languageHints.AssaStylesHint, shortcuts, nameof(vm.ShowAssaStylesCommand)),
             [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsFormatAssa))
             {
                 Source = vm,
             },
         });
+
+        stackPanelLeft.Children.Add(new Button
+        {
+            Content = new Image
+            {
+                Source = new Bitmap(System.IO.Path.Combine(path, "AssaProperties.png")),
+                Width = 32,
+                Height = 32,
+            },
+            Command = vm.ShowAssaPropertiesCommand,
+            Background = Brushes.Transparent,
+            [ToolTip.TipProperty] = MakeToolTip(languageHints.AssaPropertiesHint, shortcuts, nameof(vm.ShowAssaPropertiesCommand)),
+            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsFormatAssa))
+            {
+                Source = vm,
+            },
+        });
+
+
+        stackPanelLeft.Children.Add(new Button
+        {
+            Content = new Image
+            {
+                Source = new Bitmap(System.IO.Path.Combine(path, "AssaAttachments.png")),
+                Width = 32,
+                Height = 32,
+            },
+            Command = vm.ShowAssaAttachmentsCommand,
+            Background = Brushes.Transparent,
+            [ToolTip.TipProperty] = MakeToolTip(languageHints.AssaAttachmentsHint, shortcuts, nameof(vm.ShowAssaAttachmentsCommand)),
+            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsFormatAssa))
+            {
+                Source = vm,
+            },
+        });
+
 
         var stackPanelRight = new StackPanel
         {

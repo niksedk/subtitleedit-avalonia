@@ -7,9 +7,9 @@ using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Assa;
 
-public class AssaStylesWindow : Window
+public class AssaAttachmentsWindow : Window
 {
-    public AssaStylesWindow(AssaStylesViewModel vm)
+    public AssaAttachmentsWindow(AssaAttachmentsViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
         Bind(Window.TitleProperty, new Binding(nameof(vm.Title))
@@ -59,7 +59,7 @@ public class AssaStylesWindow : Window
         KeyDown += vm.KeyDown;
     }
 
-    private static Grid MakeLeftView(AssaStylesViewModel vm)
+    private static Grid MakeLeftView(AssaAttachmentsViewModel vm)
     {
         var grid = new Grid
         {
@@ -82,7 +82,7 @@ public class AssaStylesWindow : Window
         return grid;
     }
 
-    private static Border MakeFileStyles(AssaStylesViewModel vm)
+    private static Border MakeFileStyles(AssaAttachmentsViewModel vm)
     {
         var grid = new Grid
         {
@@ -172,7 +172,7 @@ public class AssaStylesWindow : Window
         return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5);
     }
 
-    private static Border MakeStorageStyles(AssaStylesViewModel vm)
+    private static Border MakeStorageStyles(AssaAttachmentsViewModel vm)
     {
         var grid = new Grid
         {
@@ -253,7 +253,7 @@ public class AssaStylesWindow : Window
         return UiUtil.MakeBorderForControl(grid);
     }
 
-    private static Grid MakeRightView(AssaStylesViewModel vm)
+    private static Grid MakeRightView(AssaAttachmentsViewModel vm)
     {
         var grid = new Grid
         {
@@ -276,7 +276,7 @@ public class AssaStylesWindow : Window
         return grid;
     }
 
-    private static Border MakeSelectedStyleView(AssaStylesViewModel vm)
+    private static Border MakeSelectedStyleView(AssaAttachmentsViewModel vm)
     {
         var grid = new Grid
         {
@@ -371,7 +371,7 @@ public class AssaStylesWindow : Window
         return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5);
     }
 
-    private static Border MakeAlignmentView(AssaStylesViewModel vm)
+    private static Border MakeAlignmentView(AssaAttachmentsViewModel vm)
     {
         var grid = new Grid
         {
@@ -408,7 +408,7 @@ public class AssaStylesWindow : Window
         return UiUtil.MakeBorderForControl(grid);
     }
 
-    private static Border MakeMarginView(AssaStylesViewModel vm)
+    private static Border MakeMarginView(AssaAttachmentsViewModel vm)
     {
         var grid = new Grid
         {
@@ -450,7 +450,7 @@ public class AssaStylesWindow : Window
         return UiUtil.MakeBorderForControl(grid);
     }
 
-    private static Border MakeBorderView(AssaStylesViewModel vm)
+    private static Border MakeBorderView(AssaAttachmentsViewModel vm)
     {
         var grid = new Grid
         {
@@ -494,7 +494,7 @@ public class AssaStylesWindow : Window
         return UiUtil.MakeBorderForControl(grid);
     }
 
-    private static Border MakePreviewView(AssaStylesViewModel vm)
+    private static Border MakePreviewView(AssaAttachmentsViewModel vm)
     {
         var grid = new Grid
         {

@@ -450,6 +450,39 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private async Task ShowAssaProperties()
+    {
+        var result = await _windowService.ShowDialogAsync<AssaPropertiesWindow, AssaPropertiesViewModel>(Window!, vm =>
+        {
+            vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
+        });
+
+        if (result.OkPressed)
+        {
+            _subtitle.Header = result.Header;
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+
+    [RelayCommand]
+    private async Task ShowAssaAttachments()
+    {
+        var result = await _windowService.ShowDialogAsync<AssaAttachmentsWindow, AssaAttachmentsViewModel>(Window!, vm =>
+        {
+            vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
+        });
+
+        if (result.OkPressed)
+        {
+            _subtitle.Header = result.Header;
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
     private async Task SaveLanguageFile()
     {
         var json = System.Text.Json.JsonSerializer.Serialize(Se.Language, new System.Text.Json.JsonSerializerOptions
