@@ -286,6 +286,17 @@ public class LanguageGeneral
     public string Cps { get; set; }
     public string Wpm { get; set; }
     public string UnknownSubtitleFormat { get; set; }
+    public string AttachDotDotDot { get; set; }
+    public string Options { get; set; }
+    public string VideoResolution { get; set; }
+    public string Title { get; set; }
+    public string Translation { get; set; }
+    public string Editing { get; set; }
+    public string Timing { get; set; }
+    public string Sync { get; set; }
+    public string UpdatedBy { get; set; }
+    public string UpdateDetails { get; set; }
+    public string Script { get; set; }
 
     public LanguageGeneral()
     {
@@ -571,5 +582,16 @@ public class LanguageGeneral
         Cps = "Chars/sec";
         Wpm = "Words/min";
         UnknownSubtitleFormat = "Unknown subtitle format";
+        AttachDotDotDot = "Attach...";
+        Options = "Options";
+        VideoResolution = "Video resolution";
+        Title = "Title";
+        Translation = "Translation";
+        Editing = "Editing";
+        Timing = "Timing";
+        Sync = "Sync";
+        UpdatedBy = "Updated by";
+        UpdateDetails = "Update details";
+        Script = "Script";
     }
 }

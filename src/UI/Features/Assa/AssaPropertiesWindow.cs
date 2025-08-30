@@ -2,6 +2,7 @@
 using Avalonia.Data;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Assa;
 
@@ -79,32 +80,33 @@ public class AssaPropertiesWindow : Window
             },
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
+            RowSpacing = 5,
         };
 
-        var label = UiUtil.MakeLabel("Script").WithBold().WithMarginBottom(10);
+        var label = UiUtil.MakeLabel(Se.Language.General.Script).WithBold().WithMarginBottom(10);
 
-        var labelTitle = UiUtil.MakeLabel("Title:");
+        var labelTitle = UiUtil.MakeLabel(Se.Language.General.Title);
         var textBoxTitle = UiUtil.MakeTextBox(200, vm, nameof(vm.ScriptTitle));
 
-        var labelOriginalScript = UiUtil.MakeLabel("Original Script:");
+        var labelOriginalScript = UiUtil.MakeLabel(Se.Language.Assa.OriginalScript);
         var textBoxOriginalScript = UiUtil.MakeTextBox(200, vm, nameof(vm.OriginalScript));
 
-        var labelTranslation = UiUtil.MakeLabel("Translation:");
+        var labelTranslation = UiUtil.MakeLabel(Se.Language.General.Translation);
         var textBoxTranslation = UiUtil.MakeTextBox(200, vm, nameof(vm.Translation));
 
-        var labelEditing = UiUtil.MakeLabel("Editing:");
+        var labelEditing = UiUtil.MakeLabel(Se.Language.General.Editing);
         var textBoxEditing = UiUtil.MakeTextBox(200, vm, nameof(vm.Editing));
 
-        var labelTiming = UiUtil.MakeLabel("Timing:");
+        var labelTiming = UiUtil.MakeLabel(Se.Language.General.Timing);
         var textBoxTiming = UiUtil.MakeTextBox(200, vm, nameof(vm.Timing));
 
-        var labelSyncPoint = UiUtil.MakeLabel("Sync Point:");
+        var labelSyncPoint = UiUtil.MakeLabel(Se.Language.General.Sync);
         var textBoxSyncPoint = UiUtil.MakeTextBox(200, vm, nameof(vm.SyncPoint));
 
-        var labelUpdatedBy = UiUtil.MakeLabel("Updated By:");
+        var labelUpdatedBy = UiUtil.MakeLabel(Se.Language.General.UpdatedBy);
         var textBoxUpdatedBy = UiUtil.MakeTextBox(200, vm, nameof(vm.UpdatedBy));
 
-        var labelUpdateDetails = UiUtil.MakeLabel("Update Details:");
+        var labelUpdateDetails = UiUtil.MakeLabel(Se.Language.General.UpdateDetails);
         var textBoxUpdateDetails = UiUtil.MakeTextBox(200, vm, nameof(vm.UpdateDetails));
 
         grid.Add(label, 0, 0, 1, 2);
@@ -149,16 +151,17 @@ public class AssaPropertiesWindow : Window
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             ColumnSpacing = 5,
+            RowSpacing = 5,
         };
 
-        var label = UiUtil.MakeLabel("Resolution").WithBold().WithMarginBottom(10);
+        var label = UiUtil.MakeLabel(Se.Language.General.Resolution).WithBold().WithMarginBottom(10);
 
-        var labelVideoResolution = UiUtil.MakeLabel("Video Resolution");
+        var labelVideoResolution = UiUtil.MakeLabel(Se.Language.General.VideoResolution);
         var numericUpDownWidth = UiUtil.MakeNumericUpDownInt(0, 10000, 120, vm, nameof(vm.VideoWidth));
         var labelX = UiUtil.MakeLabel("x");
         var numericUpDownHeight = UiUtil.MakeNumericUpDownInt(0, 10000, 120, vm, nameof(vm.VideoHeight));
         var buttonBrowseResolution = UiUtil.MakeButtonBrowse(vm.BrowseResolutionCommand);
-        var buttonFromCurrentVideo = UiUtil.MakeButton("From Current Video", vm.GetResolutionFromCurrentVideoCommand);
+        var buttonFromCurrentVideo = UiUtil.MakeButton(Se.Language.General.PickResolutionFromVideoDotDotDot, vm.GetResolutionFromCurrentVideoCommand);
 
         grid.Add(label, 0, 0, 1, 6);
         grid.Add(labelVideoResolution, 1, 0);
@@ -188,14 +191,15 @@ public class AssaPropertiesWindow : Window
             },
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
+            RowSpacing = 5,
         };
 
-        var label = UiUtil.MakeLabel("Options").WithBold().WithMarginBottom(10);
+        var label = UiUtil.MakeLabel(Se.Language.General.Options).WithBold().WithMarginBottom(10);
 
-        var labelWrapStyle = UiUtil.MakeLabel("Wrap Style:");
+        var labelWrapStyle = UiUtil.MakeLabel(Se.Language.Assa.WrapStyle);
         var comboBoxWrapStyle = UiUtil.MakeComboBox(vm.WrapStyles, vm, nameof(vm.SelectedWrapStyle));
 
-        var labelBorderAndShadowScaling = UiUtil.MakeLabel("Border and Shadow Scaling:");
+        var labelBorderAndShadowScaling = UiUtil.MakeLabel(Se.Language.Assa.BorderAndShadowScaling);
         var comboBoxBorderAndShadowScaling = UiUtil.MakeComboBox(vm.BorderAndShadowScalingStyles, vm, nameof(vm.SelectedBorderAndShadowScalingStyle));
 
         grid.Add(label, 0, 0, 1, 2);

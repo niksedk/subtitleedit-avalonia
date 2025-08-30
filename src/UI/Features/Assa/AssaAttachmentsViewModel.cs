@@ -12,6 +12,7 @@ using Nikse.SubtitleEdit.Logic.Media;
 using SkiaSharp;
 using System;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Text;
 
 namespace Nikse.SubtitleEdit.Features.Assa;
@@ -61,16 +62,19 @@ public partial class AssaAttachmentsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void FileImport()
+    private void FileAttach()
     {
     }
 
+    [RelayCommand]
+    private void FileImport()
+    {
+    }
 
     [RelayCommand]
     private void FileExport()
     {
     }
-
 
     private void Close()
     {
@@ -98,10 +102,20 @@ public partial class AssaAttachmentsViewModel : ObservableObject
             Header = _subtitle.Header;
         }
 
-        //if (Header == null || !Header.Contains("style:", StringComparison.OrdinalIgnoreCase))
-        //{
-        //    ResetHeader();
-        //}
+        if (Header == null || !Header.Contains("style:", StringComparison.OrdinalIgnoreCase))
+        {
+            ResetHeader();
+        }
+    }
+
+    private void ResetHeader()
+    {
+        var format = new AdvancedSubStationAlpha();
+        var sub = new Subtitle();
+        var text = format.ToText(sub, string.Empty);
+        var lines = text.SplitToLines();
+        format.LoadSubtitle(sub, lines, string.Empty);
+        Header = sub.Header;
     }
 
     private void SaveSettings()

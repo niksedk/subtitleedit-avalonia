@@ -12,6 +12,10 @@ public class LanguageAssa
     public string EndOfLineWrapping { get; set; }
     public string NoWrapping { get; set; }
     public string SmartWrappingBottomWide { get; set; }
+    public string FontsAndImages { get; set; }
+    public string WrapStyle { get; set; }
+    public string BorderAndShadowScaling { get; set; }
+    public string OriginalScript { get; set; }
 
     public LanguageAssa()
     {
@@ -25,5 +29,9 @@ public class LanguageAssa
         EndOfLineWrapping = "1: End-of-line word wrapping, only \\N breaks";
         NoWrapping = "2: No wrapping, both \\N an \\n breaks";
         SmartWrappingBottomWide = "3: Smart wrapping (bottom wide)";
+        FontsAndImages = "Fonts and images";
+        WrapStyle = "Wrap style";
+        BorderAndShadowScaling = "Border and shadow scaling";
+        OriginalScript = "Original script";
     }
 }

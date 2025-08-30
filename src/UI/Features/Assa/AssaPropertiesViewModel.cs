@@ -7,7 +7,10 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
+using System;
 using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Assa;
 
@@ -91,6 +94,105 @@ public partial class AssaPropertiesViewModel : ObservableObject
         Title = string.Format(Se.Language.Assa.PropertiesTitleX, fileName);
         Header = subtitle.Header;
         _subtitle = subtitle;
+
+        if (Header == null || !Header.Contains("style:", StringComparison.OrdinalIgnoreCase))
+        {
+            ResetHeader();
+        }
+
+        LoadFromHeader();
+    }
+
+    private void LoadFromHeader()
+    {
+        foreach (var line in Header.SplitToLines())
+        {
+            var s = line.ToLowerInvariant().Trim();
+            if (s.StartsWith("title:", StringComparison.Ordinal))
+            {
+                ScriptTitle = line.Trim().Remove(0, 6).Trim();
+            }
+            else if (s.StartsWith("original script:", StringComparison.Ordinal))
+            {
+                OriginalScript = line.Trim().Remove(0, 16).Trim();
+            }
+            else if (s.StartsWith("original translation:", StringComparison.Ordinal))
+            {
+                Translation = line.Trim().Remove(0, 21).Trim();
+            }
+            else if (s.StartsWith("original editing:", StringComparison.Ordinal))
+            {
+                Editing = line.Trim().Remove(0, 17).Trim();
+            }
+            else if (s.StartsWith("original timing:", StringComparison.Ordinal))
+            {
+                Timing = line.Trim().Remove(0, 16).Trim();
+            }
+            else if (s.StartsWith("synch point:", StringComparison.Ordinal))
+            {
+                SyncPoint = line.Trim().Remove(0, 12).Trim();
+            }
+            else if (s.StartsWith("script updated by:", StringComparison.Ordinal))
+            {
+                UpdatedBy = line.Trim().Remove(0, 18).Trim();
+            }
+            else if (s.StartsWith("update details:", StringComparison.Ordinal))
+            {
+                UpdateDetails = line.Trim().Remove(0, 15).Trim();
+            }
+            else if (s.StartsWith("playresx:", StringComparison.Ordinal))
+            {
+                if (int.TryParse(line.Trim().Remove(0, 9).Trim(), out var number))
+                {
+                    VideoWidth = number;
+                }
+            }
+            else if (s.StartsWith("playresy:", StringComparison.Ordinal))
+            {
+                if (int.TryParse(line.Trim().Remove(0, 9).Trim(), out var number))
+                {
+                    VideoHeight = number;
+                }
+            }
+            else if (s.StartsWith("scaledborderandshadow:", StringComparison.Ordinal))
+            {
+                var scale = line.Trim().Remove(0, 22).Trim().ToLowerInvariant();
+                if (scale == "yes")
+                {
+                    SelectedBorderAndShadowScalingStyle = BorderAndShadowScalingStyles.First(p=>p.Style == BorderAndShadowScalingType.Yes);
+                }
+                else if (scale == "no")
+                {
+                    SelectedBorderAndShadowScalingStyle = BorderAndShadowScalingStyles.First(p => p.Style == BorderAndShadowScalingType.No);
+                }
+                else
+                {
+                    SelectedBorderAndShadowScalingStyle = BorderAndShadowScalingStyles.First(p => p.Style == BorderAndShadowScalingType.NotSet);
+                }
+            }
+            else if (s.StartsWith("wrapstyle:", StringComparison.Ordinal))
+            {
+                var wrapStyle = line.Trim().Remove(0, 10).Trim();
+                SelectedWrapStyle = WrapStyles.FirstOrDefault(p => ((int)p.Style).ToString().Equals(wrapStyle, StringComparison.OrdinalIgnoreCase));
+                foreach (var ws in WrapStyles)
+                {
+                    if (((int)ws.Style).ToString().Equals(wrapStyle, StringComparison.OrdinalIgnoreCase))
+                    {
+                        SelectedWrapStyle = ws;
+                    }
+                }
+            }
+        }
+    }
+
+    private void ResetHeader()
+    {
+        var format = new AdvancedSubStationAlpha();
+        var sub = new Subtitle();
+        var text = format.ToText(sub, string.Empty);
+        var lines = text.SplitToLines();
+        format.LoadSubtitle(sub, lines, string.Empty);
+        Header = sub.Header;
     }
 
     private void Close()
