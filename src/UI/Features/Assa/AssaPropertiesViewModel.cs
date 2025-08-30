@@ -36,7 +36,6 @@ public partial class AssaPropertiesViewModel : ObservableObject
     private readonly IFileHelper _fileHelper;
     private string _fileName;
     private Subtitle _subtitle;
-    private readonly System.Timers.Timer _timerUpdatePreview;
 
     public AssaPropertiesViewModel(IFileHelper fileHelper)
     {

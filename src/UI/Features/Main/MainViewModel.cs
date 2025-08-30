@@ -669,7 +669,7 @@ public partial class MainViewModel :
             return;
         }
 
-        await _folderHelper.OpenFolderWithFileSelected(Window!, _subtitleFileName); 
+        await _folderHelper.OpenFolderWithFileSelected(Window!, _subtitleFileName);
 
         _shortcutManager.ClearKeys();
     }

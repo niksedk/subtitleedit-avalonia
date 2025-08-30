@@ -511,7 +511,7 @@ public class AssaStylesWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        var label = UiUtil.MakeLabel(Se.Language.General.Preview).WithBold();   
+        var label = UiUtil.MakeLabel(Se.Language.General.Preview).WithBold();
 
         var image = new Image
         {
