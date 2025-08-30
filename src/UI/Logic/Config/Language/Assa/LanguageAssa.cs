@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Nikse.SubtitleEdit.Logic.Config.Language.Assa;
+﻿namespace Nikse.SubtitleEdit.Logic.Config.Language.Assa;
 
 public class LanguageAssa
 {
@@ -10,6 +8,10 @@ public class LanguageAssa
     public string StylesTitleX { get; set; }
     public string PropertiesTitleX { get; set; }
     public string AttachmentsTitleX { get; set; }
+    public string SmartWrappingTopWide { get; set; }
+    public string EndOfLineWrapping { get; set; }
+    public string NoWrapping { get; set; }
+    public string SmartWrappingBottomWide { get; set; }
 
     public LanguageAssa()
     {
@@ -19,5 +21,9 @@ public class LanguageAssa
         StylesTitleX = "Styles - {0}";
         PropertiesTitleX = "Properties - {0}";
         AttachmentsTitleX = "Attachments - {0}";
+        SmartWrappingTopWide = "0: Smart wrapping (top wide)";
+        EndOfLineWrapping = "1: End-of-line word wrapping, only \\N breaks";
+        NoWrapping = "2: No wrapping, both \\N an \\n breaks";
+        SmartWrappingBottomWide = "3: Smart wrapping (bottom wide)";
     }
 }

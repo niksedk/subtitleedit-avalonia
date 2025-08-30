@@ -1,9 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
-using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
-using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Assa;
 
@@ -17,11 +15,8 @@ public class AssaPropertiesWindow : Window
             Source = vm,
             Mode = BindingMode.TwoWay,
         });
-        CanResize = true;
-        Width = 1200;
-        Height = 850;
-        MinWidth = 1100;
-        MinHeight = 600;
+        SizeToContent = SizeToContent.WidthAndHeight;
+        CanResize = false;
 
         vm.Window = this;
         DataContext = vm;
@@ -30,12 +25,13 @@ public class AssaPropertiesWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(2, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
@@ -49,9 +45,10 @@ public class AssaPropertiesWindow : Window
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
-        grid.Add(MakeLeftView(vm), 0);
-        grid.Add(MakeRightView(vm), 0, 1);
-        grid.Add(panelButtons, 3, 0, 1, 2);
+        grid.Add(MakeScriptView(vm), 0);
+        grid.Add(MakeResolutionView(vm), 1);
+        grid.Add(MakeOptionsView(vm), 2);
+        grid.Add(panelButtons, 3);
 
         Content = grid;
 
@@ -59,224 +56,79 @@ public class AssaPropertiesWindow : Window
         KeyDown += vm.KeyDown;
     }
 
-    private static Grid MakeLeftView(AssaPropertiesViewModel vm)
+    private static Border MakeScriptView(AssaPropertiesViewModel vm)
     {
         var grid = new Grid
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(MakeFileStyles(vm), 0);
-        grid.Add(MakeStorageStyles(vm), 1);
+        var label = UiUtil.MakeLabel("Script").WithBold().WithMarginBottom(10);
 
-        return grid;
-    }
+        var labelTitle = UiUtil.MakeLabel("Title:");
+        var textBoxTitle = UiUtil.MakeTextBox(200, vm, nameof(vm.ScriptTitle));
 
-    private static Border MakeFileStyles(AssaPropertiesViewModel vm)
-    {
-        var grid = new Grid
-        {
-            RowDefinitions =
-            {
-                new RowDefinition { Height = new GridLength(2, GridUnitType.Auto) }, // label
-                new RowDefinition { Height = new GridLength(2, GridUnitType.Star) }, // datagrid
-                new RowDefinition { Height = new GridLength(2, GridUnitType.Auto) }, // buttons
-            },
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-            },
-            Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-        };
+        var labelOriginalScript = UiUtil.MakeLabel("Original Script:");
+        var textBoxOriginalScript = UiUtil.MakeTextBox(200, vm, nameof(vm.OriginalScript));
 
-        var label = UiUtil.MakeLabel(Se.Language.Assa.StylesInFile).WithBold();
+        var labelTranslation = UiUtil.MakeLabel("Translation:");
+        var textBoxTranslation = UiUtil.MakeTextBox(200, vm, nameof(vm.Translation));
 
-        var dataGrid = new DataGrid
-        {
-            AutoGenerateColumns = false,
-            SelectionMode = DataGridSelectionMode.Single,
-            CanUserResizeColumns = true,
-            CanUserSortColumns = true,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            Width = double.NaN,
-            Height = double.NaN,
-            DataContext = vm,
-            ItemsSource = vm.FileStyles,
-            Columns =
-            {
-                new DataGridTextColumn
-                {
-                    Header = Se.Language.General.Name,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(StyleDisplay.Name)),
-                    IsReadOnly = true,
-                },
-                new DataGridTextColumn
-                {
-                    Header = Se.Language.General.FontName,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(StyleDisplay.FontName)),
-                    IsReadOnly = true,
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
-                },
-                new DataGridTextColumn
-                {
-                    Header = Se.Language.General.FontSize,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(StyleDisplay.FontSize)),
-                    IsReadOnly = true,
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
-                },
-                new DataGridTextColumn
-                {
-                    Header = Se.Language.General.Usages,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(StyleDisplay.UsageCount)),
-                    IsReadOnly = true,
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
-                },
-            },
-        };
-        dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedFileStyle)) { Source = vm });
-        dataGrid.SelectionChanged += vm.FileStylesChanged;
+        var labelEditing = UiUtil.MakeLabel("Editing:");
+        var textBoxEditing = UiUtil.MakeTextBox(200, vm, nameof(vm.Editing));
 
-        var buttonNew = UiUtil.MakeButton(vm.FileNewCommand, IconNames.MdiPlus, Se.Language.General.New);
-        var buttonRemove = UiUtil.MakeButton(vm.FileRemoveCommand, IconNames.MdiTrash, Se.Language.General.Delete);
-        var buttonDuplicate = UiUtil.MakeButton(vm.FileCopyCommand, IconNames.MdiDuplicate, Se.Language.General.Duplicate);
-        var buttonImport = UiUtil.MakeButton(vm.FileImportCommand, IconNames.MdiImport, Se.Language.General.Import);
-        var buttonExport = UiUtil.MakeButton(vm.FileExportCommand, IconNames.MdiExport, Se.Language.General.Export);
-        var panelButtons = UiUtil.MakeButtonBar(
-            buttonNew,
-            buttonDuplicate,
-            buttonRemove,
-            buttonImport,
-            buttonExport
-            ).WithAlignmentLeft();
+        var labelTiming = UiUtil.MakeLabel("Timing:");
+        var textBoxTiming = UiUtil.MakeTextBox(200, vm, nameof(vm.Timing));
 
-        grid.Add(label, 0, 0);
-        grid.Add(dataGrid, 1, 0);
-        grid.Add(panelButtons, 2, 0);
+        var labelSyncPoint = UiUtil.MakeLabel("Sync Point:");
+        var textBoxSyncPoint = UiUtil.MakeTextBox(200, vm, nameof(vm.SyncPoint));
 
-        return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5);
-    }
+        var labelUpdatedBy = UiUtil.MakeLabel("Updated By:");
+        var textBoxUpdatedBy = UiUtil.MakeTextBox(200, vm, nameof(vm.UpdatedBy));
 
-    private static Border MakeStorageStyles(AssaPropertiesViewModel vm)
-    {
-        var grid = new Grid
-        {
-            RowDefinitions =
-            {
-                new RowDefinition { Height = new GridLength(2, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(2, GridUnitType.Star) },
-                new RowDefinition { Height = new GridLength(2, GridUnitType.Auto) },
-            },
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-            },
-            Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-        };
+        var labelUpdateDetails = UiUtil.MakeLabel("Update Details:");
+        var textBoxUpdateDetails = UiUtil.MakeTextBox(200, vm, nameof(vm.UpdateDetails));
 
-        var label = UiUtil.MakeLabel(Se.Language.Assa.StylesSaved).WithBold();
-
-        var dataGrid = new DataGrid
-        {
-            AutoGenerateColumns = false,
-            SelectionMode = DataGridSelectionMode.Single,
-            CanUserResizeColumns = true,
-            CanUserSortColumns = true,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            Width = double.NaN,
-            Height = double.NaN,
-            DataContext = vm,
-            ItemsSource = vm.StorageStyles,
-            Columns =
-            {
-                new DataGridTextColumn
-                {
-                    Header = Se.Language.General.Name,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(StyleDisplay.Name)),
-                    IsReadOnly = true,
-                },
-                new DataGridTextColumn
-                {
-                    Header = Se.Language.General.FontName,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(StyleDisplay.FontName)),
-                    IsReadOnly = true,
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
-                },
-                new DataGridTextColumn
-                {
-                    Header = Se.Language.General.FontSize,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(StyleDisplay.FontSize)),
-                    IsReadOnly = true,
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
-                },
-            },
-        };
-        dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedStorageStyle)) { Source = vm });
-        dataGrid.SelectionChanged += vm.StorageStylesChanged;
-
-        var buttonNew = UiUtil.MakeButton(vm.StorageNewCommand, IconNames.MdiPlus, Se.Language.General.New);
-        var buttonDuplicate = UiUtil.MakeButton(vm.StorageCopyCommand, IconNames.MdiDuplicate, Se.Language.General.Duplicate);
-        var buttonRemove = UiUtil.MakeButton(vm.StorageRemoveCommand, IconNames.MdiTrash, Se.Language.General.Delete);
-        var buttonImport = UiUtil.MakeButton(vm.StorageImportCommand, IconNames.MdiImport, Se.Language.General.Import);
-        var buttonExport = UiUtil.MakeButton(vm.StorageExportCommand, IconNames.MdiExport, Se.Language.General.Export);
-        var panelButtons = UiUtil.MakeButtonBar(
-            buttonNew,
-            buttonRemove,
-            buttonImport,
-            buttonExport
-            ).WithAlignmentLeft();
-
-        grid.Add(label, 0, 0);
-        grid.Add(dataGrid, 1, 0);
-        grid.Add(panelButtons, 2, 0);
+        grid.Add(label, 0, 0, 1, 2);
+        grid.Add(labelTitle, 1, 0);
+        grid.Add(textBoxTitle, 1, 1);
+        grid.Add(labelOriginalScript, 2, 0);
+        grid.Add(textBoxOriginalScript, 2, 1);
+        grid.Add(labelTranslation, 3, 0);
+        grid.Add(textBoxTranslation, 3, 1);
+        grid.Add(labelEditing, 4, 0);
+        grid.Add(textBoxEditing, 4, 1);
+        grid.Add(labelTiming, 5, 0);
+        grid.Add(textBoxTiming, 5, 1);
+        grid.Add(labelSyncPoint, 6, 0);
+        grid.Add(textBoxSyncPoint, 6, 1);
+        grid.Add(labelUpdatedBy, 7, 0);
+        grid.Add(textBoxUpdatedBy, 7, 1);
+        grid.Add(labelUpdateDetails, 8, 0);
+        grid.Add(textBoxUpdateDetails, 8, 1);
 
         return UiUtil.MakeBorderForControl(grid);
     }
 
-    private static Grid MakeRightView(AssaPropertiesViewModel vm)
-    {
-        var grid = new Grid
-        {
-            RowDefinitions =
-            {
-                new RowDefinition { Height = new GridLength(2, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
-            },
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-            },
-            Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-        };
-
-        grid.Add(MakeSelectedStyleView(vm), 0);
-        grid.Add(MakePreviewView(vm), 1);
-
-        return grid;
-    }
-
-    private static Border MakeSelectedStyleView(AssaPropertiesViewModel vm)
+    private static Border MakeResolutionView(AssaPropertiesViewModel vm)
     {
         var grid = new Grid
         {
@@ -284,180 +136,47 @@ public class AssaPropertiesWindow : Window
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
             },
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             ColumnSpacing = 5,
-            RowSpacing = 5,
         };
 
-        var label = UiUtil.MakeLabel().WithBold().WithBindText(vm, nameof(vm.CurrentTitle));
+        var label = UiUtil.MakeLabel("Resolution").WithBold().WithMarginBottom(10);
 
-        var labelName = UiUtil.MakeLabel(Se.Language.General.Name);
-        var textBoxName = UiUtil.MakeTextBox(200, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.Name));
-        var panelName = UiUtil.MakeHorizontalPanel(labelName, textBoxName).WithMarginBottom(10);
+        var labelVideoResolution = UiUtil.MakeLabel("Video Resolution");
+        var numericUpDownWidth = UiUtil.MakeNumericUpDownInt(0, 10000, 120, vm, nameof(vm.VideoWidth));
+        var labelX = UiUtil.MakeLabel("x");
+        var numericUpDownHeight = UiUtil.MakeNumericUpDownInt(0, 10000, 120, vm, nameof(vm.VideoHeight));
+        var buttonBrowseResolution = UiUtil.MakeButtonBrowse(vm.BrowseResolutionCommand);
+        var buttonFromCurrentVideo = UiUtil.MakeButton("From Current Video", vm.GetResolutionFromCurrentVideoCommand);
 
-        var labelFontName = UiUtil.MakeLabel(Se.Language.General.FontName);
-        var comboBoxFontName = UiUtil.MakeComboBox(vm.Fonts, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.FontName)).WithMinWidth(150);
-        var labelFontSize = UiUtil.MakeLabel(Se.Language.General.FontSize);
-        var numericUpDownFontSize = UiUtil.MakeNumericUpDownInt(1, 1000, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.FontSize));
-        var panelFont = UiUtil.MakeHorizontalPanel(labelFontName, comboBoxFontName, labelFontSize, numericUpDownFontSize);
-
-        var checkBoxBold = UiUtil.MakeCheckBox(Se.Language.General.Bold, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.Bold));
-        var checkBoxItalic = UiUtil.MakeCheckBox(Se.Language.General.Italic, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.Italic));
-        var checkBoxUnderline = UiUtil.MakeCheckBox(Se.Language.General.Underline, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.Underline));
-        var checkBoxStrikeout = UiUtil.MakeCheckBox(Se.Language.General.Strikeout, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.Strikeout));
-        var panelFontStyle = UiUtil.MakeHorizontalPanel(checkBoxBold, checkBoxItalic, checkBoxUnderline, checkBoxStrikeout).WithMarginBottom(10);
-
-        var labelScaleX = UiUtil.MakeLabel("Scale X").WithMinWidth(60);
-        var numericUpDownScaleX = UiUtil.MakeNumericUpDownOneDecimal(1, 1000, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ScaleX));
-        numericUpDownScaleX.Increment = 1;
-        var labelScaleY = UiUtil.MakeLabel("Scale Y").WithMinWidth(60);
-        var numericUpDownScaleY = UiUtil.MakeNumericUpDownOneDecimal(1, 1000, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ScaleY));
-        numericUpDownScaleY.Increment = 1;
-        var panelTransform1 = UiUtil.MakeHorizontalPanel(labelScaleX, numericUpDownScaleX, labelScaleY, numericUpDownScaleY);
-
-        var labelSpacing = UiUtil.MakeLabel("Spacing").WithMinWidth(60);
-        var numericUpDownSpacing = UiUtil.MakeNumericUpDownOneDecimal(-100, 100, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.Spacing));
-        numericUpDownSpacing.Increment = 1;
-        var labelAngle = UiUtil.MakeLabel("Angle").WithMinWidth(60);
-        var numericUpDownAngle = UiUtil.MakeNumericUpDownOneDecimal(-360, 360, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.Angle));
-        numericUpDownAngle.Increment = 1;
-        var panelTransform2 = UiUtil.MakeHorizontalPanel(labelSpacing, numericUpDownSpacing, labelAngle, numericUpDownAngle).WithMarginBottom(10);
-
-        var labelColorPrimary = UiUtil.MakeLabel("Primary");
-        var colorPickerPrimary = UiUtil.MakeColorPicker(vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ColorPrimary));
-        var labelColorOutline = UiUtil.MakeLabel("Outline");
-        var colorPickerOutline = UiUtil.MakeColorPicker(vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ColorOutline));
-        var labelColorShadow = UiUtil.MakeLabel("Shadow");
-        var colorPickerShadow = UiUtil.MakeColorPicker(vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ColorShadow));
-        var labelColorSecondary = UiUtil.MakeLabel("Secondary");
-        var colorPickerSecondary = UiUtil.MakeColorPicker(vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ColorSecondary));
-        var panelColors = UiUtil.MakeHorizontalPanel(
-            labelColorPrimary,
-            colorPickerPrimary,
-            labelColorOutline,
-            colorPickerOutline,
-            labelColorShadow,
-            colorPickerShadow,
-            labelColorSecondary,
-            colorPickerSecondary
-            ).WithMarginBottom(10);
-
-        var alignmentView = MakeAlignmentView(vm);
-        var marginView = MakeMarginView(vm);
-        var borderView = MakeBorderView(vm);
-        var panelMore = UiUtil.MakeHorizontalPanel(alignmentView, marginView, borderView);
-
-        grid.Add(label, 0, 0);
-        grid.Add(panelName, 1, 0);
-        grid.Add(panelFont, 2, 0);
-        grid.Add(panelFontStyle, 3, 0);
-        grid.Add(panelTransform1, 4, 0);
-        grid.Add(panelTransform2, 5, 0);
-        grid.Add(panelColors, 6, 0);
-        grid.Add(panelMore, 7, 0);
-
-        return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5);
-    }
-
-    private static Border MakeAlignmentView(AssaPropertiesViewModel vm)
-    {
-        var grid = new Grid
-        {
-            RowDefinitions =
-            {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-            },
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-            },
-            Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-        };
-
-        var label = UiUtil.MakeLabel(Se.Language.General.Alignment);
-
-        grid.Add(label, 0, 0, 1, 3);
-        grid.Add(UiUtil.MakeRadioButton(string.Empty, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.AlignmentAn7), "align"), 1, 0);
-        grid.Add(UiUtil.MakeRadioButton(string.Empty, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.AlignmentAn8), "align"), 1, 1);
-        grid.Add(UiUtil.MakeRadioButton(string.Empty, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.AlignmentAn9), "align"), 1, 2);
-        grid.Add(UiUtil.MakeRadioButton(string.Empty, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.AlignmentAn4), "align"), 2, 0);
-        grid.Add(UiUtil.MakeRadioButton(string.Empty, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.AlignmentAn5), "align"), 2, 1);
-        grid.Add(UiUtil.MakeRadioButton(string.Empty, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.AlignmentAn6), "align"), 2, 2);
-        grid.Add(UiUtil.MakeRadioButton(string.Empty, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.AlignmentAn1), "align"), 3, 0);
-        grid.Add(UiUtil.MakeRadioButton(string.Empty, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.AlignmentAn2), "align"), 3, 1);
-        grid.Add(UiUtil.MakeRadioButton(string.Empty, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.AlignmentAn3), "align"), 3, 2);
+        grid.Add(label, 0, 0, 1, 6);
+        grid.Add(labelVideoResolution, 1, 0);
+        grid.Add(numericUpDownWidth, 1, 1);
+        grid.Add(labelX, 1, 2);
+        grid.Add(numericUpDownHeight, 1, 3);
+        grid.Add(buttonBrowseResolution, 1, 4);
+        grid.Add(buttonFromCurrentVideo, 1, 5);
 
         return UiUtil.MakeBorderForControl(grid);
     }
 
-    private static Border MakeMarginView(AssaPropertiesViewModel vm)
+    private static Border MakeOptionsView(AssaPropertiesViewModel vm)
     {
         var grid = new Grid
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-            },
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-            },
-            Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            RowSpacing = 5,
-        };
-
-        var label = UiUtil.MakeLabel(Se.Language.General.Margin);
-        grid.Add(label, 0);
-
-        var labelMarginLeft = UiUtil.MakeLabel(Se.Language.General.Left);
-        var numericUpDownMarginLeft = UiUtil.MakeNumericUpDownInt(0, 1000, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.MarginLeft));
-        grid.Add(labelMarginLeft, 1, 0);
-        grid.Add(numericUpDownMarginLeft, 1, 1);
-
-        var labelMarginRight = UiUtil.MakeLabel(Se.Language.General.Right);
-        var numericUpDownMarginRight = UiUtil.MakeNumericUpDownInt(0, 1000, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.MarginRight));
-        grid.Add(labelMarginRight, 2, 0);
-        grid.Add(numericUpDownMarginRight, 2, 1);
-
-        var labelMarginVertical = UiUtil.MakeLabel(Se.Language.General.Vertical);
-        var numericUpDownMarginVertical = UiUtil.MakeNumericUpDownInt(0, 1000, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.MarginVertical));
-        grid.Add(labelMarginVertical, 3, 0);
-        grid.Add(numericUpDownMarginVertical, 3, 1);
-
-        return UiUtil.MakeBorderForControl(grid);
-    }
-
-    private static Border MakeBorderView(AssaPropertiesViewModel vm)
-    {
-        var grid = new Grid
-        {
-            RowDefinitions =
-            {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
@@ -465,65 +184,25 @@ public class AssaPropertiesWindow : Window
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-            },
-            Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            RowSpacing = 5,
-        };
-
-        var label = UiUtil.MakeLabel(Se.Language.General.BorderStyle);
-        grid.Add(label, 1, 0);
-
-        var comboBoxBorderType = UiUtil.MakeComboBox(vm.BorderTypes, vm, nameof(vm.SelectedBorderType));
-        comboBoxBorderType.SelectionChanged += vm.BorderTypeChanged;
-        grid.Add(comboBoxBorderType, 2, 0, 1, 2);
-
-        var labelOutlineWidth = UiUtil.MakeLabel(Se.Language.General.OutlineWidth);
-        var numericUpDownOutlineWidth = UiUtil.MakeNumericUpDownOneDecimal(0, 100, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.OutlineWidth));
-        numericUpDownOutlineWidth.Increment = 0.5m;
-        grid.Add(labelOutlineWidth, 3, 0);
-        grid.Add(numericUpDownOutlineWidth, 3, 1);
-
-        var labelShadowWidth = UiUtil.MakeLabel(Se.Language.General.ShadowWidth);
-        var numericUpDownShadowWidth = UiUtil.MakeNumericUpDownOneDecimal(0, 100, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ShadowWidth));
-        numericUpDownShadowWidth.Increment = 0.5m;
-        grid.Add(labelShadowWidth, 4, 0);
-        grid.Add(numericUpDownShadowWidth, 4, 1);
-
-        return UiUtil.MakeBorderForControl(grid);
-    }
-
-    private static Border MakePreviewView(AssaPropertiesViewModel vm)
-    {
-        var grid = new Grid
-        {
-            RowDefinitions =
-            {
-                new RowDefinition { Height = new GridLength(2, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(2, GridUnitType.Star) },
-            },
-            ColumnDefinitions =
-            {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        var label = UiUtil.MakeLabel(Se.Language.General.Preview).WithBold();   
+        var label = UiUtil.MakeLabel("Options").WithBold().WithMarginBottom(10);
 
-        var image = new Image
-        {
-            [!Image.SourceProperty] = new Binding(nameof(vm.ImagePreview)),
-            DataContext = vm,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Top,
-            Stretch = Stretch.None, // Prevents stretching of the image
-        };
+        var labelWrapStyle = UiUtil.MakeLabel("Wrap Style:");
+        var comboBoxWrapStyle = UiUtil.MakeComboBox(vm.WrapStyles, vm, nameof(vm.SelectedWrapStyle));
 
-        grid.Add(label, 0);
-        grid.Add(image, 1);
+        var labelBorderAndShadowScaling = UiUtil.MakeLabel("Border and Shadow Scaling:");
+        var comboBoxBorderAndShadowScaling = UiUtil.MakeComboBox(vm.BorderAndShadowScalingStyles, vm, nameof(vm.SelectedBorderAndShadowScalingStyle));
+
+        grid.Add(label, 0, 0, 1, 2);
+        grid.Add(labelWrapStyle, 1, 0);
+        grid.Add(comboBoxWrapStyle, 1, 1);
+        grid.Add(labelBorderAndShadowScaling, 2, 0);
+        grid.Add(comboBoxBorderAndShadowScaling, 2, 1);
 
         return UiUtil.MakeBorderForControl(grid);
     }
