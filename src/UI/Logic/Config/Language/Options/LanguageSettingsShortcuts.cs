@@ -115,6 +115,7 @@ public class LanguageSettingsShortcuts
     public string ToggleLockTimeCodes { get; set; }
     public string Help { get; set; }
     public string DuplicateSelectedLines { get; set; }
+    public string SourceView { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -235,5 +236,6 @@ public class LanguageSettingsShortcuts
         ToggleLockTimeCodes = "Toggle lock time codes";
         Help = "Help";
         DuplicateSelectedLines = "Duplicate selected lines";
+        SourceView = "Source view";
     }
 }

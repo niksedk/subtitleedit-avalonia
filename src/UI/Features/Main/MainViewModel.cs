@@ -42,6 +42,7 @@ using Nikse.SubtitleEdit.Features.Shared.Ocr;
 using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using Nikse.SubtitleEdit.Features.Shared.PickMp4Track;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
+using Nikse.SubtitleEdit.Features.Shared.SourceView;
 using Nikse.SubtitleEdit.Features.SpellCheck;
 using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
 using Nikse.SubtitleEdit.Features.Sync.AdjustAllTimes;
@@ -434,6 +435,24 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private async Task ShowSourceView()
+    {
+        var result = await _windowService.ShowDialogAsync<SourceViewWindow, SourceViewViewModel>(Window!, vm =>
+        {
+            var text = GetUpdateSubtitle().ToText(SelectedSubtitleFormat);
+            vm.Initialize("Source view - " + (string.IsNullOrEmpty(_subtitleFileName) ? "untitled" : Path.GetFileName(_subtitleFileName)), text);
+        });
+
+        if (result.OkPressed)
+        {
+            //_subtitle.Header = result.Header;
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+
+    [RelayCommand]
     private async Task ShowAssaStyles()
     {
         var result = await _windowService.ShowDialogAsync<AssaStylesWindow, AssaStylesViewModel>(Window!, vm =>
@@ -477,6 +496,7 @@ public partial class MainViewModel :
         if (result.OkPressed)
         {
             _subtitle.Header = result.Header;
+            _subtitle.Footer = result.Footer;
         }
 
         _shortcutManager.ClearKeys();

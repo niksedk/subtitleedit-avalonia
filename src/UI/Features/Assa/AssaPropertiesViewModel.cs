@@ -11,6 +11,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 
 namespace Nikse.SubtitleEdit.Features.Assa;
 
@@ -28,9 +29,9 @@ public partial class AssaPropertiesViewModel : ObservableObject
     [ObservableProperty] private int _videoWidth;
     [ObservableProperty] private int _videoHeight;
     [ObservableProperty] private ObservableCollection<WrapStyleItem> _wrapStyles;
-    [ObservableProperty] private WrapStyleItem? _selectedWrapStyle;
+    [ObservableProperty] private WrapStyleItem _selectedWrapStyle;
     [ObservableProperty] private ObservableCollection<BorderAndShadowScalingItem> _borderAndShadowScalingStyles;
-    [ObservableProperty] private BorderAndShadowScalingItem? _selectedBorderAndShadowScalingStyle;
+    [ObservableProperty] private BorderAndShadowScalingItem _selectedBorderAndShadowScalingStyle;
 
     public Window? Window { get; internal set; }
     public bool OkPressed { get; private set; }
@@ -70,7 +71,78 @@ public partial class AssaPropertiesViewModel : ObservableObject
     {
         OkPressed = true;
         SaveSettings();
+        UpdateHeader();
         Close();
+    }
+
+    private void UpdateHeader()
+    {
+        UpdateTag("Original Script", OriginalScript, string.IsNullOrWhiteSpace(OriginalScript));
+        UpdateTag("Original Translation", Translation, string.IsNullOrWhiteSpace(Translation));
+        UpdateTag("Original Editing", Editing, string.IsNullOrWhiteSpace(Editing));
+        UpdateTag("Original Timing", Timing, string.IsNullOrWhiteSpace(Timing));
+        UpdateTag("Synch Point", SyncPoint, string.IsNullOrWhiteSpace(SyncPoint));
+        UpdateTag("Script Updated By", UpdatedBy, string.IsNullOrWhiteSpace(UpdatedBy));
+        UpdateTag("Update Details", UpdateDetails, string.IsNullOrWhiteSpace(UpdateDetails));
+        UpdateTag("PlayResX", VideoWidth.ToString(CultureInfo.InvariantCulture), VideoWidth == 0);
+        UpdateTag("PlayResY", VideoHeight.ToString(CultureInfo.InvariantCulture), VideoHeight == 0);
+        UpdateTag("WrapStyle", ((int)SelectedWrapStyle.Style).ToString(CultureInfo.InvariantCulture), false);
+
+        if (SelectedBorderAndShadowScalingStyle.Style == BorderAndShadowScalingType.Yes)
+        {
+            UpdateTag("ScaledBorderAndShadow", "Yes", false);
+        }
+        else if (SelectedBorderAndShadowScalingStyle.Style == BorderAndShadowScalingType.No)
+        {
+            UpdateTag("ScaledBorderAndShadow", "No", false);
+        }
+        else
+        {
+            UpdateTag("ScaledBorderAndShadow", "Hide", true);
+        }
+    }
+
+    private void UpdateTag(string tag, string text, bool remove)
+    {
+        var scriptInfoOn = false;
+        var sb = new StringBuilder();
+        var found = false;
+        foreach (var line in Header.SplitToLines())
+        {
+            if (line.StartsWith("[script info]", StringComparison.OrdinalIgnoreCase))
+            {
+                scriptInfoOn = true;
+            }
+            else if (line.StartsWith('['))
+            {
+                if (!found && scriptInfoOn && !remove)
+                {
+                    sb = new StringBuilder(sb.ToString().Trim() + Environment.NewLine);
+                    sb.AppendLine(tag + ": " + text);
+                }
+                sb = new StringBuilder(sb.ToString().TrimEnd());
+                sb.AppendLine();
+                sb.AppendLine();
+                scriptInfoOn = false;
+            }
+
+            var s = line.ToLowerInvariant();
+            if (s.StartsWith(tag.ToLowerInvariant() + ":", StringComparison.Ordinal))
+            {
+                if (!remove)
+                {
+                    sb.AppendLine(line.Substring(0, tag.Length) + ": " + text);
+                }
+
+                found = true;
+            }
+            else
+            {
+                sb.AppendLine(line);
+            }
+        }
+
+        Header = sb.ToString().Trim();
     }
 
     [RelayCommand]
@@ -173,7 +245,7 @@ public partial class AssaPropertiesViewModel : ObservableObject
             else if (s.StartsWith("wrapstyle:", StringComparison.Ordinal))
             {
                 var wrapStyle = line.Trim().Remove(0, 10).Trim();
-                SelectedWrapStyle = WrapStyles.FirstOrDefault(p => ((int)p.Style).ToString().Equals(wrapStyle, StringComparison.OrdinalIgnoreCase));
+                SelectedWrapStyle = WrapStyles.First(p => ((int)p.Style).ToString().Equals(wrapStyle, StringComparison.OrdinalIgnoreCase));
                 foreach (var ws in WrapStyles)
                 {
                     if (((int)ws.Style).ToString().Equals(wrapStyle, StringComparison.OrdinalIgnoreCase))

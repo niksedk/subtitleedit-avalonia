@@ -10,18 +10,26 @@ namespace Nikse.SubtitleEdit.Logic.Media
 {
     public class FileHelper : IFileHelper
     {
-        public async Task<string> PickOpenFile(Visual sender, string title, string extensionTitle, string extension)
+        public async Task<string> PickOpenFile(Visual sender, string title, string extensionTitle, string extension, string extensionTitle2 = "", string extension2 = "")
         {
             // Get top level from the current control. Alternatively, you can use Window reference instead.
             var topLevel = TopLevel.GetTopLevel(sender)!;
 
             var fileTypes = new List<FilePickerFileType>
             {
-                new FilePickerFileType(extension)
+                new FilePickerFileType(extensionTitle)
                 {
                     Patterns = new List<string> { extension }
                 },
             };
+
+            if (!string.IsNullOrEmpty(extensionTitle2) && !string.IsNullOrEmpty(extension2))
+            {
+                fileTypes.Add(new FilePickerFileType(extensionTitle2)
+                {
+                    Patterns = new List<string> { extension2 }
+                });
+            }
 
             // Start async operation to open the dialog.
             var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
@@ -37,6 +45,38 @@ namespace Nikse.SubtitleEdit.Logic.Media
             }
 
             return string.Empty;
+        }
+
+        public async Task<string[]> PickOpenFiles(Visual sender, string title, string extensionTitle, List<string> extensions, string extensionTitle2, List<string> extensions2)
+        {
+            // Get top level from the current control. Alternatively, you can use Window reference instead.
+            var topLevel = TopLevel.GetTopLevel(sender)!;
+
+            var fileTypes = new List<FilePickerFileType>
+            {
+                new FilePickerFileType(extensionTitle)
+                {
+                    Patterns = extensions,
+                },
+            };
+
+            if (!string.IsNullOrEmpty(extensionTitle2) && extensions2.Count > 0)
+            {
+                fileTypes.Add(new FilePickerFileType(extensionTitle2)
+                {
+                    Patterns = extensions2
+                });
+            }
+
+            // Start async operation to open the dialog.
+            var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                Title = title,
+                AllowMultiple = true,
+                FileTypeFilter = fileTypes,
+            });
+
+            return files.Select(p => p.Path.LocalPath).ToArray();
         }
 
         public async Task<string> PickOpenSubtitleFile(Visual sender, string title, bool includeVideoFiles = true)
@@ -201,7 +241,7 @@ namespace Nikse.SubtitleEdit.Logic.Media
                 Title = title,
                 SuggestedFileName = System.IO.Path.GetFileName(suggestedFileName),
                 FileTypeChoices = MakeSaveFilePickerFileTypes(extension, extension),
-                DefaultExtension = extension.TrimStart('.'),                
+                DefaultExtension = extension.TrimStart('.'),
             };
             var file = await topLevel.StorageProvider.SaveFilePickerAsync(options);
 

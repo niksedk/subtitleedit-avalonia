@@ -2,6 +2,7 @@
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -102,14 +103,14 @@ public class AssaAttachmentsWindow : Window
                 {
                     Header = Se.Language.General.NumberSymbol,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(AttachmentItem.FileName)),
+                    Binding = new Binding(nameof(AssaAttachmentItem.FileName)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Before,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(AttachmentItem.Type)),
+                    Binding = new Binding(nameof(AssaAttachmentItem.Category)),
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
@@ -117,13 +118,14 @@ public class AssaAttachmentsWindow : Window
                 {
                     Header = Se.Language.General.After,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(AttachmentItem.Size)),
+                    Binding = new Binding(nameof(AssaAttachmentItem.Size)),
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
             },
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedAttachment)) { Source = vm });
+        dataGrid.SelectionChanged += vm.DataGridSelectionChanged;
 
         grid.Add(dataGrid, 0);
 

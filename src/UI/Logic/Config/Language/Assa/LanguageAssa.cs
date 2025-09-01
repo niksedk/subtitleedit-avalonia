@@ -16,6 +16,7 @@ public class LanguageAssa
     public string WrapStyle { get; set; }
     public string BorderAndShadowScaling { get; set; }
     public string OriginalScript { get; set; }
+    public string Graphics { get; set; }
 
     public LanguageAssa()
     {
@@ -33,5 +34,6 @@ public class LanguageAssa
         WrapStyle = "Wrap style";
         BorderAndShadowScaling = "Border and shadow scaling";
         OriginalScript = "Original script";
+        Graphics = "Graphics";
     }
 }

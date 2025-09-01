@@ -24,6 +24,7 @@ using Nikse.SubtitleEdit.Features.Shared.Ocr;
 using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using Nikse.SubtitleEdit.Features.Shared.PickMp4Track;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
+using Nikse.SubtitleEdit.Features.Shared.SourceView;
 using Nikse.SubtitleEdit.Features.SpellCheck;
 using Nikse.SubtitleEdit.Features.SpellCheck.EditWholeText;
 using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
@@ -174,6 +175,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<SettingsViewModel>();
         collection.AddTransient<ShortcutsViewModel>();
         collection.AddTransient<ShowHistoryViewModel>();
+        collection.AddTransient<SourceViewViewModel>();
         collection.AddTransient<SpellCheckViewModel>();
         collection.AddTransient<StatisticsViewModel>();
         collection.AddTransient<TextToSpeechViewModel>();
