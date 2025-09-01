@@ -20,7 +20,6 @@ public static class InitToolbar
 
         return new Border
         {
-            Height = 40,
             Child = toolbar,
         };
     }
@@ -32,8 +31,8 @@ public static class InitToolbar
         var stackPanelLeft = new StackPanel
         {
             Orientation = Orientation.Horizontal,
-            Spacing = 5,
-            Margin = new Avalonia.Thickness(5),
+            Spacing = 3,
+            Margin = new Thickness(3),
             VerticalAlignment = VerticalAlignment.Top,
         };
 
@@ -297,8 +296,8 @@ public static class InitToolbar
         var stackPanelRight = new StackPanel
         {
             Orientation = Orientation.Horizontal,
-            Spacing = 5,
-            Margin = new Avalonia.Thickness(5),
+            Spacing = 3,
+            Margin = new Avalonia.Thickness(3),
             HorizontalAlignment = HorizontalAlignment.Right,
             VerticalAlignment = VerticalAlignment.Top,
         };

@@ -4111,7 +4111,8 @@ public partial class MainViewModel :
 
                 MenuItemStyles.Items.Clear();
                 var styles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(_subtitle.Header);
-                foreach (var style in styles.Select(p => p.Name).Where(p => !string.IsNullOrEmpty(p)).DistinctBy(p => p).OrderBy(p => p))
+                var stylesToAdd = styles.Select(p => p.Name).Where(p => !string.IsNullOrEmpty(p)).DistinctBy(p => p).OrderBy(p => p);
+                foreach (var style in stylesToAdd)
                 {
                     MenuItemStyles.Items.Add(new MenuItem
                     {
@@ -4119,6 +4120,10 @@ public partial class MainViewModel :
                         Command = SetStyleForSelectedLinesCommand,
                         CommandParameter = style,
                     });
+                }
+                if (stylesToAdd.Count() > 0)
+                {
+                    MenuItemStyles.Items.Add(new Separator());
                 }
                 MenuItemStyles.Items.Add(new MenuItem
                 {
@@ -4135,6 +4140,10 @@ public partial class MainViewModel :
                         Command = SetActorForSelectedLinesCommand,
                         CommandParameter = actor,
                     });
+                }
+                if (MenuItemActors.Items.Count() > 0)
+                {
+                    MenuItemActors.Items.Add(new Separator());
                 }
                 MenuItemActors.Items.Add(new MenuItem
                 {
