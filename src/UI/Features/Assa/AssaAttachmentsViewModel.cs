@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -340,7 +341,7 @@ public partial class AssaAttachmentsViewModel : ObservableObject
     private void ShowImage(byte[] bytes)
     {
         using var skBitmap = SKBitmap.Decode(bytes);
-        PreviewTitle = $"{Se.Language.General.Image}: {skBitmap.Width}x{skBitmap.Height}";
+        PreviewTitle = $"{Se.Language.General.Image}: {SelectedAttachment?.FileName ?? "untitled"}, {skBitmap.Width}x{skBitmap.Height}";
         PreviewImage?.Dispose();
         PreviewImage = skBitmap.ToAvaloniaBitmap();
     }
@@ -380,9 +381,11 @@ public partial class AssaAttachmentsViewModel : ObservableObject
         // Draw the text
         var previewText = 
                 "Hello World!" + Environment.NewLine +
-                "مرحبا بالعالم (Arabic)" + Environment.NewLine +
+                "æøåäöüß (Latin)" + Environment.NewLine +
                 "你好世界 (Chinese simplified)" + Environment.NewLine +
-                "1234567890"; 
+                "こんにちは世界。 (Japanese)" + Environment.NewLine +
+                "مرحبا بالعالم (Arabic)" + Environment.NewLine +
+                "1234567890 (Numbers)"; 
         var text = $"{skTypeface.FamilyName}\n\n{previewText}";
         var lines = text.SplitToLines() ?? [];
         float y = 23;

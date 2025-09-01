@@ -177,7 +177,7 @@ public class AssaAttachmentsWindow : Window
             DataContext = vm,
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Top,
-            Stretch = Stretch.None,
+            Stretch = Stretch.Uniform,
         };
 
         grid.Add(image, 0);
