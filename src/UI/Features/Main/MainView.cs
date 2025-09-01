@@ -5,6 +5,7 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Declarative;
 using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit.Features.Main.Layout;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Config.Language;
 using System;
@@ -64,6 +65,8 @@ public class MainView : ViewBase
         // Menu bar
         InitMenu.Make(_vm);
         root.Children.Add(_vm.Menu.Dock(Dock.Top));
+
+        root.Children.Add(UiUtil.MakeVerticalSeperator().Dock(Dock.Top));
 
         // Toolbar
         _vm.Toolbar = InitToolbar.Make(_vm);

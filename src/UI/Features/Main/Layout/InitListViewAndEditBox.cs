@@ -36,6 +36,7 @@ public static class InitListViewAndEditBox
             SelectionMode = DataGridSelectionMode.Extended,
             DataContext = vm.Subtitles,
             CanUserResizeColumns = true,
+            GridLinesVisibility = DataGridGridLinesVisibility.All,
         };
 
         vm.SubtitleGrid.DoubleTapped += vm.OnSubtitleGridDoubleTapped;

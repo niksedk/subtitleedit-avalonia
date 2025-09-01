@@ -31,7 +31,13 @@ var appBuilder = AppBuilder.Configure<Application>()
     .UsePlatformDetect()
     .AfterSetup(b =>
     {
-        b.Instance?.Styles.Add(new FluentTheme());
+        var fluent = new FluentTheme();
+        fluent.Palettes.Add(Avalonia.Styling.ThemeVariant.Dark, new ColorPaletteResources() 
+        {
+            RegionColor = new Avalonia.Media.Color(255, 31, 31, 31),
+        });
+
+        b.Instance?.Styles.Add(fluent);
         b.Instance?.Styles.Add(new StyleInclude(new Uri("avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml", UriKind.Absolute))
         {
             Source = new Uri("avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml")
