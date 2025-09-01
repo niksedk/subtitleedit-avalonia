@@ -9,6 +9,7 @@ using DynamicData;
 using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
+using Nikse.SubtitleEdit.Core.AudioToText;
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
@@ -457,12 +458,22 @@ public partial class MainViewModel :
     {
         var result = await _windowService.ShowDialogAsync<AssaStylesWindow, AssaStylesViewModel>(Window!, vm =>
         {
-            vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
+            vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty, SelectedSubtitle?.Style ?? string.Empty);
         });
 
         if (result.OkPressed)
         {
             _subtitle.Header = result.Header;
+            var styles = AdvancedSubStationAlpha.GetStylesFromHeader(_subtitle.Header);
+            var first = styles.FirstOrDefault() ?? "Default";
+
+            foreach (var s in Subtitles)
+            {
+                if (string.IsNullOrEmpty(s.Style) || !styles.Contains(s.Style))
+                {
+                    s.Style = first;
+                }
+            }   
         }
 
         _shortcutManager.ClearKeys();
@@ -1417,7 +1428,7 @@ public partial class MainViewModel :
 
         _updateAudioVisualizer = true;
         _shortcutManager.ClearKeys();
-    }    
+    }
 
     [RelayCommand]
     private async Task CommandShowSettingsShortcuts()
@@ -2069,8 +2080,59 @@ public partial class MainViewModel :
 
         if (result.OkPressed && !string.IsNullOrWhiteSpace(result.Text))
         {
-            SetStyleForSelectedLines(result.Text);
+            if (_subtitle == null)
+            {
+                _subtitle = new Subtitle(); 
+            }
+
+            var header = _subtitle?.Header ?? string.Empty;
+            if (header != null && header.Contains("http://www.w3.org/ns/ttml"))
+            {
+                var s = new Subtitle { Header = header };
+                AdvancedSubStationAlpha.LoadStylesFromTimedText10(s, string.Empty, header, AdvancedSubStationAlpha.HeaderNoStyles, new StringBuilder());
+                header = s.Header;
+            }
+            else if (header != null && header.StartsWith("WEBVTT", StringComparison.Ordinal))
+            {
+                _subtitle = WebVttToAssa.Convert(_subtitle, new SsaStyle(), 0, 0);
+                header = _subtitle.Header;
+            }
+
+            var defaultHeader = GetDefaultAssaHeader();
+            if (header == null || !header.Contains("style:", StringComparison.OrdinalIgnoreCase))
+            {
+                header = defaultHeader;
+            }
+
+            var styles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(header);
+            var newStyle = AdvancedSubStationAlpha.GetSsaStylesFromHeader(defaultHeader).First();
+
+            newStyle.Name = result.Text.Trim();
+
+            // ensure unique style name
+            var idx = 1;
+            while (styles.Any(s => s.Name.Equals(newStyle.Name, StringComparison.OrdinalIgnoreCase)))
+            {
+                idx++;
+                newStyle.Name = $"{result.Text.Trim()}_{idx}";
+            }
+
+            styles.Add(newStyle);
+            header = AdvancedSubStationAlpha.GetHeaderAndStylesFromAdvancedSubStationAlpha(header, styles);
+            _subtitle.Header = header;  
+
+            SetStyleForSelectedLines(newStyle.Name);
         }
+    }
+
+    private static string GetDefaultAssaHeader()
+    {
+        var format = new AdvancedSubStationAlpha();
+        var sub = new Subtitle();
+        var text = format.ToText(sub, string.Empty);
+        var lines = text.SplitToLines();
+        format.LoadSubtitle(sub, lines, string.Empty);
+        return sub.Header;
     }
 
     [RelayCommand]
@@ -2085,7 +2147,6 @@ public partial class MainViewModel :
                 p.Style = styleName;
             }
         });
-
     }
 
     [RelayCommand]
@@ -2098,7 +2159,7 @@ public partial class MainViewModel :
 
         if (result.OkPressed && !string.IsNullOrWhiteSpace(result.Text))
         {
-            SetActorForSelectedLines(result.Text);
+            SetStyleForSelectedLines(result.Text);
         }
     }
 

@@ -40,15 +40,11 @@ public partial class AssaStylesViewModel : ObservableObject
     public bool OkPressed { get; private set; }
     public string Header { get; set; }
 
-    private readonly IFileHelper _fileHelper;
-    private string _fileName;
     private Subtitle _subtitle;
     private readonly System.Timers.Timer _timerUpdatePreview;
 
     public AssaStylesViewModel(IFileHelper fileHelper)
     {
-        _fileHelper = fileHelper;
-
         Title = string.Empty;
         FileStyles = new ObservableCollection<StyleDisplay>();
         StorageStyles = new ObservableCollection<StyleDisplay>();
@@ -57,7 +53,6 @@ public partial class AssaStylesViewModel : ObservableObject
         SelectedBorderType = BorderTypes[0];
         CurrentTitle = string.Empty;
 
-        _fileName = string.Empty;
         Header = string.Empty;
         _subtitle = new Subtitle();
 
@@ -123,7 +118,7 @@ public partial class AssaStylesViewModel : ObservableObject
     [RelayCommand]
     private void FileRemoveAll()
     {
-        FileStyles.Clear();        
+        FileStyles.Clear();
     }
 
     [RelayCommand]
@@ -232,7 +227,7 @@ public partial class AssaStylesViewModel : ObservableObject
         });
     }
 
-    public void Initialize(Subtitle subtitle, SubtitleFormat format, string fileName)
+    public void Initialize(Subtitle subtitle, SubtitleFormat format, string fileName, string selectedStyleName)
     {
         Title = string.Format(Se.Language.Assa.StylesTitleX, fileName);
         Header = subtitle.Header;
@@ -271,7 +266,12 @@ public partial class AssaStylesViewModel : ObservableObject
 
         if (FileStyles.Count > 0)
         {
-            SelectedFileStyle = FileStyles[0];
+            SelectedFileStyle = FileStyles.FirstOrDefault(p => p.Name.Equals(selectedStyleName, StringComparison.OrdinalIgnoreCase));
+            if (SelectedFileStyle == null)
+            {
+                SelectedFileStyle = FileStyles[0];
+            }
+
             CurrentStyle = SelectedFileStyle;
             CurrentTitle = Se.Language.Assa.StylesInFile;
         }
@@ -436,12 +436,12 @@ public partial class AssaStylesViewModel : ObservableObject
 
         Dispatcher.UIThread.Post(async void () =>
         {
-           var answer = await MessageBox.Show(
-           Window!,
-           "Delete style?",
-           $"Do you want to delete {selectedStyle.Name}?",
-           MessageBoxButtons.YesNoCancel,
-           MessageBoxIcon.Question);
+            var answer = await MessageBox.Show(
+            Window!,
+            "Delete style?",
+            $"Do you want to delete {selectedStyle.Name}?",
+            MessageBoxButtons.YesNoCancel,
+            MessageBoxIcon.Question);
 
             if (answer != MessageBoxResult.Yes)
             {
