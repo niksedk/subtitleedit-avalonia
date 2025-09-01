@@ -339,43 +339,10 @@ public partial class AssaAttachmentsViewModel : ObservableObject
 
     private void ShowImage(byte[] bytes)
     {
-        // Assuming you have width/height properties or can get them from your view
-        var previewWidth = 400; // Replace with actual width from your control
-        var previewHeight = 300; // Replace with actual height from your control
-        if (previewWidth <= 1 || previewHeight <= 1)
-        {
-            return;
-        }
-        // Load image using SkiaSharp
-        using var skImage = SKImage.FromEncodedData(bytes);
-        if (skImage == null)
-        {
-            return;
-        }
-        // Set the info text
-        PreviewTitle = $"{Se.Language.General.Image}: {skImage.Width}x{skImage.Height}";
-        // Dispose previous image
+        using var skBitmap = SKBitmap.Decode(bytes);
+        PreviewTitle = $"{Se.Language.General.Image}: {skBitmap.Width}x{skBitmap.Height}";
         PreviewImage?.Dispose();
-        // Create Skia surface and canvas
-        var imageInfo = new SKImageInfo(previewWidth, previewHeight, SKColorType.Bgra8888, SKAlphaType.Premul);
-        using var surface = SKSurface.Create(imageInfo);
-        var canvas = surface.Canvas;
-        // Clear background
-        canvas.Clear(SKColors.Transparent);
-        // Calculate scaling to fit the image within the preview area
-        float scale = Math.Min((float)previewWidth / skImage.Width, (float)previewHeight / skImage.Height);
-        float scaledWidth = skImage.Width * scale;
-        float scaledHeight = skImage.Height * scale;
-        float x = (previewWidth - scaledWidth) / 2;
-        float y = (previewHeight - scaledHeight) / 2;
-        // Draw the image centered and scaled
-        var destRect = new SKRect(x, y, x + scaledWidth, y + scaledHeight);
-        canvas.DrawImage(skImage, destRect);
-        // Convert to Avalonia bitmap
-        using var finalImage = surface.Snapshot();
-        using var skData = finalImage.Encode(SKEncodedImageFormat.Png, 100);
-        using var stream = new MemoryStream(skData.ToArray());
-        PreviewImage = new Bitmap(stream);
+        PreviewImage = skBitmap.ToAvaloniaBitmap();
     }
 
     public void ShowFont(byte[] fontBytes)
@@ -411,7 +378,12 @@ public partial class AssaAttachmentsViewModel : ObservableObject
         };
 
         // Draw the text
-        var text = $"{skTypeface.FamilyName}\n\n{Configuration.Settings.Tools.AssaAttachmentFontTextPreview}";
+        var previewText = 
+                "Hello World!" + Environment.NewLine +
+                "مرحبا بالعالم (Arabic)" + Environment.NewLine +
+                "你好世界 (Chinese simplified)" + Environment.NewLine +
+                "1234567890"; 
+        var text = $"{skTypeface.FamilyName}\n\n{previewText}";
         var lines = text.SplitToLines() ?? [];
         float y = 23;
         foreach (var line in lines)
