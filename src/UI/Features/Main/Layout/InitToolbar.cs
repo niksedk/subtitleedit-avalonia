@@ -385,7 +385,7 @@ public static class InitToolbar
             shortcutString = $"({shortcutString})";
         }
 
-        return Se.Settings.Appearance.ToolbarShowHints
+        return Se.Settings.Appearance.ShowHints
             ? string.Format(hint, shortcutString).Trim()
             : null;
     }

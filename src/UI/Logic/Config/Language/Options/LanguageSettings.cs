@@ -65,6 +65,16 @@ public class LanguageSettings
     public string TextBoxCenterText { get; set; }
     public string TextBoxFontBold { get;  set; }
     public string TextBoxFontSize { get; set; }
+    public string ShowButtonHints { get; set; }
+    public string GridCompactMode { get; set; }
+    public string UiFont { get; set; }
+    public string Theme { get; set; }
+    public string DarkThemeBackgroundColor { get; set; }
+    public string ShowGridLines { get; set; }
+    public string ResetSettings { get; set; }
+    public string ResetSettingsDetail { get; set; }
+    public string ShowHorizontalLineAboveToolbar { get; set; }
+    public string ShowHorizontalLineBelowToolbar { get; set; }
 
     public LanguageSettings()
     {
@@ -128,23 +138,33 @@ public class LanguageSettings
         TextBoxCenterText = "Center text in subtitle text box";
         TextBoxFontBold = "Bold text in subtitle text box";
         TextBoxFontSize = "Font size in subtitle text box";
+        ShowButtonHints = "Show button hints";
+        GridCompactMode = "Use compact mode for grids";
+        UiFont = "UI font";
+        Theme = "Theme";
+        DarkThemeBackgroundColor = "Dark theme background color";
+        ShowGridLines = "Show grid lines";
+        ResetSettings = "Reset settings?";
+        ResetSettingsDetail = "This will reset all settings to their default values.\n\nContinue?";
+        ShowHorizontalLineAboveToolbar = "Show horizontal line above toolbar";
+        ShowHorizontalLineBelowToolbar = "Show horizontal line below toolbar";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)
     {
         return continuationStyle switch
         {
-            Nikse.SubtitleEdit.Core.Enums.ContinuationStyle.NoneTrailingDots => ContinuationStyleNoneTrailingDots,
-            Nikse.SubtitleEdit.Core.Enums.ContinuationStyle.NoneLeadingTrailingDots => ContinuationStyleNoneLeadingTrailingDots,
-            Nikse.SubtitleEdit.Core.Enums.ContinuationStyle.NoneTrailingEllipsis => ContinuationStyleNoneTrailingEllipsis,
-            Nikse.SubtitleEdit.Core.Enums.ContinuationStyle.NoneLeadingTrailingEllipsis => ContinuationStyleNoneLeadingTrailingEllipsis,
-            Nikse.SubtitleEdit.Core.Enums.ContinuationStyle.OnlyTrailingDots => ContinuationStyleOnlyTrailingDots,
-            Nikse.SubtitleEdit.Core.Enums.ContinuationStyle.LeadingTrailingDots => ContinuationStyleLeadingTrailingDots,
-            Nikse.SubtitleEdit.Core.Enums.ContinuationStyle.OnlyTrailingEllipsis => ContinuationStyleOnlyTrailingEllipsis,
-            Nikse.SubtitleEdit.Core.Enums.ContinuationStyle.LeadingTrailingEllipsis => ContinuationStyleLeadingTrailingEllipsis,
-            Nikse.SubtitleEdit.Core.Enums.ContinuationStyle.LeadingTrailingDash => ContinuationStyleLeadingTrailingDash,
-            Nikse.SubtitleEdit.Core.Enums.ContinuationStyle.LeadingTrailingDashDots => ContinuationStyleLeadingTrailingDashDots,
-            Nikse.SubtitleEdit.Core.Enums.ContinuationStyle.Custom => ContinuationStyleCustom,
+            Core.Enums.ContinuationStyle.NoneTrailingDots => ContinuationStyleNoneTrailingDots,
+            Core.Enums.ContinuationStyle.NoneLeadingTrailingDots => ContinuationStyleNoneLeadingTrailingDots,
+            Core.Enums.ContinuationStyle.NoneTrailingEllipsis => ContinuationStyleNoneTrailingEllipsis,
+            Core.Enums.ContinuationStyle.NoneLeadingTrailingEllipsis => ContinuationStyleNoneLeadingTrailingEllipsis,
+            Core.Enums.ContinuationStyle.OnlyTrailingDots => ContinuationStyleOnlyTrailingDots,
+            Core.Enums.ContinuationStyle.LeadingTrailingDots => ContinuationStyleLeadingTrailingDots,
+            Core.Enums.ContinuationStyle.OnlyTrailingEllipsis => ContinuationStyleOnlyTrailingEllipsis,
+            Core.Enums.ContinuationStyle.LeadingTrailingEllipsis => ContinuationStyleLeadingTrailingEllipsis,
+            Core.Enums.ContinuationStyle.LeadingTrailingDash => ContinuationStyleLeadingTrailingDash,
+            Core.Enums.ContinuationStyle.LeadingTrailingDashDots => ContinuationStyleLeadingTrailingDashDots,
+            Core.Enums.ContinuationStyle.Custom => ContinuationStyleCustom,
             _ => ContinuationStyleNone,
         };
     }

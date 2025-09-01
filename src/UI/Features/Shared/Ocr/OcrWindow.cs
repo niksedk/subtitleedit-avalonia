@@ -249,7 +249,7 @@ public class OcrWindow : Window
         {
             Child = dataGridSubtitle,
             BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetBorderColor(),
+            BorderBrush = UiUtil.GetBorderBrush(),
             Padding = new Thickness(10, 0, 10, 0),
             CornerRadius = new CornerRadius(5),
         };
@@ -288,7 +288,7 @@ public class OcrWindow : Window
         {
             Child = panel,
             BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetBorderColor(),
+            BorderBrush = UiUtil.GetBorderBrush(),
             Padding = new Thickness(10, 0, 10, 0),
             CornerRadius = new CornerRadius(5),
             Margin = new Thickness(0, 10, 0, 10),

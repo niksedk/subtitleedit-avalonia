@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -14,6 +12,8 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
+using System;
+using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
 
@@ -79,8 +79,8 @@ public class SettingsPage : UserControl
                 MakeMenuItem(Se.Language.General.VideoPlayer, vm.ScrollToSectionCommand, IconNames.MdiPlayBox),
                 MakeMenuItem(Se.Language.Options.Settings.WaveformSpectrogram, vm.ScrollToSectionCommand,  IconNames.MdiWaveform),
                 MakeMenuItem(Se.Language.General.Tools, vm.ScrollToSectionCommand,  IconNames.MdiTools),
-                MakeMenuItem(Se.Language.General.Toolbar, vm.ScrollToSectionCommand,  IconNames.MdiDotsHorizontal),
                 MakeMenuItem(Se.Language.General.Appearance, vm.ScrollToSectionCommand,  IconNames.MdiEyeSettings),
+                MakeMenuItem(Se.Language.General.Toolbar, vm.ScrollToSectionCommand,  IconNames.MdiDotsHorizontal),
                 MakeMenuItem(Se.Language.Options.Settings.Network, vm.ScrollToSectionCommand,  IconNames.MdiNetwork),
                 MakeMenuItem(Se.Language.Options.Settings.FileTypeAssociations, vm.ScrollToSectionCommand, IconNames.MdiFileCog),
             }
@@ -94,10 +94,10 @@ public class SettingsPage : UserControl
         Grid.SetRow(scrollViewer, 1);
         Grid.SetColumn(scrollViewer, 1);
 
+        var buttonReset = UiUtil.MakeButton(Se.Language.General.Reset, vm.ResetAllSettingsCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.CommandOkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CommandCancelCommand);
-
-        var buttonBar = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
+        var buttonBar = UiUtil.MakeButtonBar(buttonReset, buttonOk, buttonCancel);
         grid.Children.Add(buttonBar);
         Grid.SetRow(buttonBar, 2);
         Grid.SetColumn(buttonBar, 0);
@@ -186,7 +186,7 @@ public class SettingsPage : UserControl
                         new TextBlock { Text = f?.Name }, true)
                 }),
             ]),
-            
+
             new SettingsSection(Se.Language.General.SubtitleFormats,
             [
                 new SettingsItem("Default format", () => new ComboBox
@@ -302,7 +302,7 @@ public class SettingsPage : UserControl
                             FontSize = 10,
                         }
                     },
-                    [!StackPanel.IsVisibleProperty] = new Binding(nameof(_vm.IsLibMpvDownloadVisible)) { Source = _vm }    
+                    [!StackPanel.IsVisibleProperty] = new Binding(nameof(_vm.IsLibMpvDownloadVisible)) { Source = _vm }
                 }),
 
             ]),
@@ -355,6 +355,21 @@ public class SettingsPage : UserControl
                 new SettingsItem("TODO", () => new CheckBox { IsChecked = false }),
             ]),
 
+            new SettingsSection(Se.Language.General.Appearance,
+            [
+                new SettingsItem(Se.Language.Options.Settings.Theme, () => UiUtil.MakeComboBox(_vm.Themes, _vm, nameof(_vm.SelectedTheme))),
+                new SettingsItem(Se.Language.Options.Settings.DarkThemeBackgroundColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.DarkModeBackgroundColor))),
+                new SettingsItem(Se.Language.Options.Settings.UiFont, () => UiUtil.MakeComboBox(_vm.FontNames, _vm, nameof(_vm.SelectedFontName))),
+                MakeNumericSetting(Se.Language.Options.Settings.TextBoxFontSize, nameof(_vm.TextBoxFontSize)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxFontBold, nameof(_vm.TextBoxFontBold)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxCenterText, nameof(_vm.TextBoxCenterText)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.ShowButtonHints, nameof(_vm.ShowButtonHints)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.GridCompactMode, nameof(_vm.GridCompactMode)),
+                new SettingsItem(Se.Language.Options.Settings.ShowGridLines, () => UiUtil.MakeComboBox(_vm.GridLinesVisibilities, _vm, nameof(_vm.SelectedGridLinesVisibility))),
+                MakeCheckboxSetting(Se.Language.Options.Settings.ShowHorizontalLineAboveToolbar, nameof(_vm.ShowHorizontalLineAboveToolbar)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.ShowHorizontalLineBelowToolbar, nameof(_vm.ShowHorizontalLineBelowToolbar)),
+            ]),
+
             new SettingsSection("Toolbar",
             [
                 MakeCheckboxSetting("Show new icon", nameof(_vm.ShowToolbarNew)),
@@ -368,16 +383,6 @@ public class SettingsPage : UserControl
                 MakeCheckboxSetting("Show layout icon", nameof(_vm.ShowToolbarLayout)),
                 MakeCheckboxSetting("Show help icon", nameof(_vm.ShowToolbarHelp)),
                 MakeCheckboxSetting("Show encoding", nameof(_vm.ShowToolbarEncoding)),
-                MakeCheckboxSetting("Show icon button hints", nameof(_vm.ShowToolbarHints)),
-            ]),
-
-            new SettingsSection(Se.Language.General.Appearance,
-            [
-                new SettingsItem("Theme", () => UiUtil.MakeComboBox(_vm.Themes, _vm, nameof(_vm.SelectedTheme))),
-                new SettingsItem("UI font", () => UiUtil.MakeComboBox(_vm.FontNames, _vm, nameof(_vm.SelectedFontName))),
-                MakeNumericSetting(Se.Language.Options.Settings.TextBoxFontSize, nameof(_vm.TextBoxFontSize)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxFontBold, nameof(_vm.TextBoxFontBold)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxCenterText, nameof(_vm.TextBoxCenterText)),
             ]),
 
             new SettingsSection(Se.Language.Options.Settings.Network,
@@ -462,8 +467,8 @@ public class SettingsPage : UserControl
 
     protected override void OnLoaded(RoutedEventArgs e)
     {
-        base.OnLoaded(e); 
-        
+        base.OnLoaded(e);
+
         Dispatcher.UIThread.Invoke(() =>
         {
             _searchBox.Focus(); // hack to make OnKeyDown work

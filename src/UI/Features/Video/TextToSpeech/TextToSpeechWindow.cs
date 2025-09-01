@@ -256,7 +256,7 @@ public class TextToSpeechWindow : Window
         var boder = new Border
         {
             BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetBorderColor(),
+            BorderBrush = UiUtil.GetBorderBrush(),
             Child = grid,
             Padding = new Thickness(10, 0, 10, 0),
             CornerRadius = new CornerRadius(5),
@@ -318,7 +318,7 @@ public class TextToSpeechWindow : Window
         var boder = new Border
         {
             BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetBorderColor(),
+            BorderBrush = UiUtil.GetBorderBrush(),
             Child = grid,
             Padding = new Thickness(10, 0, 10, 0),
             CornerRadius = new CornerRadius(5),

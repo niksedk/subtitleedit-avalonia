@@ -28,7 +28,7 @@ public class MainView : ViewBase
         {
             throw new InvalidOperationException("MainViewModel is not registered in the service provider.");
         }
-        
+
         _vm.MainView = this;
         DataContext = _vm;
 
@@ -66,11 +66,19 @@ public class MainView : ViewBase
         InitMenu.Make(_vm);
         root.Children.Add(_vm.Menu.Dock(Dock.Top));
 
-        root.Children.Add(UiUtil.MakeVerticalSeperator().Dock(Dock.Top));
+        if (Se.Settings.Appearance.ShowHorizontalLineAboveToolbar)
+        {
+            root.Children.Add(UiUtil.MakeVerticalSeperator(0.5, 0.5, new Thickness(0, 10, 0, 0)).Dock(Dock.Top));
+        }
 
         // Toolbar
         _vm.Toolbar = InitToolbar.Make(_vm);
         root.Children.Add(_vm.Toolbar.Dock(Dock.Top));
+
+        if (Se.Settings.Appearance.ShowHorizontalLineBelowToolbar)
+        {
+            root.Children.Add(UiUtil.MakeVerticalSeperator(0.5, 0.5, new Thickness(0, 10, 0, 10)).Dock(Dock.Top));
+        }
 
         // Footer
         root.Children.Add(InitFooter.Make(_vm).Dock(Dock.Bottom));

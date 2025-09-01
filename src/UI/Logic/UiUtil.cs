@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Input;
@@ -7,8 +8,8 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Styling;
+using Avalonia.Themes.Fluent;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Core.Settings;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 using SkiaSharp;
@@ -24,30 +25,50 @@ public static class UiUtil
     public const int WindowMarginWidth = 12;
     public const int CornerRadius = 4;
     public const int SplitterWidthOrHeight = 4;
+    private static IStyle? _lighterDarkStyle;
+    public static FluentTheme? FluentTheme { get; internal set; }
 
-    public static readonly ControlTheme DataGridNoBorderCellTheme = new ControlTheme(typeof(DataGridCell))
-    {
-        Setters =
-        {
-            new Setter(DataGridCell.BorderThicknessProperty, new Thickness(0)),
-            new Setter(DataGridCell.BorderBrushProperty, Brushes.Transparent),
-            new Setter(DataGridCell.BackgroundProperty, Brushes.Transparent),
-            new Setter(DataGridCell.FocusAdornerProperty, null),
-            new Setter(DataGridCell.PaddingProperty, new Thickness(4)),
-        }
-    };
+    public static ControlTheme DataGridNoBorderCellTheme => GetDataGridNoBorderCellTheme();
 
-    public static readonly ControlTheme DataGridNoBorderNoPaddingCellTheme = new ControlTheme(typeof(DataGridCell))
+    private static ControlTheme GetDataGridNoBorderCellTheme()
     {
-        Setters =
+        var showVertical = Se.Settings.Appearance.GridLinesAppearance == DataGridGridLinesVisibility.Vertical.ToString() ||
+                           Se.Settings.Appearance.GridLinesAppearance == DataGridGridLinesVisibility.All.ToString();
+
+        var compactMode = Se.Settings.Appearance.GridCompactMode;
+
+        return new ControlTheme(typeof(DataGridCell))
         {
-            new Setter(DataGridCell.BorderThicknessProperty, new Thickness(0)),
-            new Setter(DataGridCell.BorderBrushProperty, Brushes.Transparent),
-            new Setter(DataGridCell.BackgroundProperty, Brushes.Transparent),
-            new Setter(DataGridCell.FocusAdornerProperty, null),
-            new Setter(DataGridCell.PaddingProperty, new Thickness(0)),
-        }
-    };
+            Setters =
+            {
+                new Setter(DataGridCell.BackgroundProperty, Brushes.Transparent),
+                new Setter(DataGridCell.FocusAdornerProperty, null),
+                new Setter(DataGridCell.PaddingProperty, new Thickness(compactMode ? 0 : 4)),
+                new Setter(DataGridCell.BorderBrushProperty, GetBorderBrush()),
+                new Setter(DataGridCell.BorderThicknessProperty, new Thickness(0, 0, showVertical ? 1: 0, 0)), // 1px vertical line
+            }
+        };
+    }
+
+    public static ControlTheme DataGridNoBorderNoPaddingCellTheme => GetDataGridNoBorderNoPaddingCellTheme();
+
+    private static ControlTheme GetDataGridNoBorderNoPaddingCellTheme()
+    {
+        var showVertical = Se.Settings.Appearance.GridLinesAppearance == DataGridGridLinesVisibility.Vertical.ToString() ||
+                           Se.Settings.Appearance.GridLinesAppearance == DataGridGridLinesVisibility.All.ToString();
+
+        return new ControlTheme(typeof(DataGridCell))
+        {
+            Setters =
+            {   
+                new Setter(DataGridCell.BackgroundProperty, Brushes.Transparent),
+                new Setter(DataGridCell.FocusAdornerProperty, null),
+                new Setter(DataGridCell.PaddingProperty, new Thickness(0)),
+                new Setter(DataGridCell.BorderBrushProperty, GetBorderBrush()),
+                new Setter(DataGridCell.BorderThicknessProperty, new Thickness(0, 0, showVertical ? 1: 0, 0)), // 1px vertical line
+            }
+        };
+    }
 
     public static Button MakeButton(string text)
     {
@@ -99,7 +120,7 @@ public static class UiUtil
             return new SolidColorBrush(Colors.Black, opacity);
         }
 
-        var theme = app!.ActualThemeVariant;
+        var theme = app.ActualThemeVariant;
         if (theme == ThemeVariant.Dark)
         {
             return new SolidColorBrush(Colors.White, opacity);
@@ -108,7 +129,7 @@ public static class UiUtil
         return new SolidColorBrush(Colors.Black, opacity);
     }
 
-    public static IBrush GetBorderColor()
+    public static IBrush GetBorderBrush()
     {
         var app = Application.Current;
         if (app == null)
@@ -116,7 +137,7 @@ public static class UiUtil
             return new SolidColorBrush(Colors.Black);
         }
 
-        var theme = app!.ActualThemeVariant;
+        var theme = app.ActualThemeVariant;
         if (theme == ThemeVariant.Dark)
         {
             return new SolidColorBrush(Colors.White, 0.5);
@@ -125,13 +146,30 @@ public static class UiUtil
         return new SolidColorBrush(Colors.Black, 0.5);
     }
 
+    public static Color GetBorderColor()
+    {
+        var color = Colors.Black;
+
+        var app = Application.Current;
+        if (app != null)
+        {
+            var theme = app.ActualThemeVariant;
+            if (theme == ThemeVariant.Dark)
+            {
+                color = Colors.White;
+            }
+        }
+
+        return new Color(128, color.R, color.G, color.B);
+    }
+
     public static Separator MakeVerticalSeperator(double height = 0.5, double opacity = 0.5, Thickness? margin = null, IBrush? backgroud = null)
     {
         return new Separator
         {
             Height = height,
             Margin = margin ?? new Thickness(5, 1),
-            Background = backgroud ?? GetBorderColor(),
+            Background = backgroud ?? GetBorderBrush(),
             Opacity = opacity,
         };
     }
@@ -142,7 +180,7 @@ public static class UiUtil
         {
             Width = width,
             Margin = margin ?? new Thickness(1, 5),
-            Background = backgroud ?? GetBorderColor(),
+            Background = backgroud ?? GetBorderBrush(),
             Opacity = opacity,
             VerticalAlignment = VerticalAlignment.Stretch,
             HorizontalAlignment = HorizontalAlignment.Center
@@ -1193,7 +1231,7 @@ public static class UiUtil
         return new Border
         {
             Width = 1,
-            Background = GetBorderColor(),
+            Background = GetBorderBrush(),
             Margin = new Thickness(5, 5, 5, 5),
             VerticalAlignment = VerticalAlignment.Stretch,
         };
@@ -1592,7 +1630,7 @@ public static class UiUtil
             return false;
         }
 
-        var theme = app!.ActualThemeVariant;
+        var theme = app.ActualThemeVariant;
         return theme == ThemeVariant.Dark;
     }
 
@@ -1660,23 +1698,115 @@ public static class UiUtil
     {
         var themeSetting = Se.Settings.Appearance.Theme;
 
+        RemoveLighterDark();
+
         if (themeSetting == "System")
         {
             // Let Avalonia track system theme automatically
             Application.Current!.RequestedThemeVariant = ThemeVariant.Default;
+            if (ThemeName == "Dark")
+            {
+                ApplyLighterDark();
+            }
         }
         else if (themeSetting == "Dark")
         {
             Application.Current!.RequestedThemeVariant = ThemeVariant.Dark;
+            ApplyLighterDark();
         }
         else
         {
             Application.Current!.RequestedThemeVariant = ThemeVariant.Light;
         }
+    }
 
-        Application.Current!.Resources["DataGridColumnHeaderBackgroundBrush"] = 
-            Application.Current!.ActualThemeVariant == ThemeVariant.Dark ?
-            new SolidColorBrush(new Color(255, 25, 25, 25)) : new SolidColorBrush(new Color(255, 249, 249, 249));
+    public static void UpdateRegionColor()
+    {
+        if (FluentTheme == null)
+        {
+            return;
+        }
+
+        if (FluentTheme.Palettes.TryGetValue(ThemeVariant.Dark, out var palette))
+        {
+            palette.RegionColor = GetDarkThemeBackgroundColor();
+        }
+    }
+
+    public static void ApplyLighterDark()
+    {
+        UpdateRegionColor();
+
+        if (_lighterDarkStyle == null)
+        {
+            _lighterDarkStyle = new Styles
+            {
+                // TextBox
+                new Style(x => x.OfType<TextBox>())
+                {
+                    Setters =
+                    {
+                        new Setter(TextBox.BackgroundProperty, new SolidColorBrush(UiUtil.GetDarkThemeBackgroundColor()))
+                    }
+                },
+
+                // NumericUpDown
+                new Style(x => x.OfType<NumericUpDown>())
+                {
+                    Setters =
+                    {
+                        new Setter(NumericUpDown.BackgroundProperty, new SolidColorBrush(UiUtil.GetDarkThemeBackgroundColor()))
+                    }
+                },
+
+                // Menu / ContextMenu
+                new Style(x => x.OfType<ContextMenu>())
+                {
+                    Setters =
+                    {
+                        new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(UiUtil.GetDarkThemeBackgroundColor()))
+                    }
+                },
+
+                // Flyout
+                new Style(x => x.OfType<FlyoutPresenter>())
+                {
+                    Setters =
+                    {
+                        new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(UiUtil.GetDarkThemeBackgroundColor()))
+                    }
+                },
+
+                // DataGrid header
+                new Style(x => x.OfType<DataGridColumnHeader>())
+                {
+                    Setters =
+                    {
+                        new Setter(DataGridColumnHeader.BackgroundProperty, new SolidColorBrush(UiUtil.GetDarkThemeBackgroundColor()))
+                    }
+                },
+
+                // DataGrid header
+                new Style(x => x.OfType<ButtonSpinner>())
+                {
+                    Setters =
+                    {
+                        new Setter(ButtonSpinner.BackgroundProperty, new SolidColorBrush(UiUtil.GetDarkThemeBackgroundColor()))
+                    }
+                },
+            };
+        }
+
+        Application.Current!.Styles.Add(_lighterDarkStyle);
+    }
+
+    public static void RemoveLighterDark()
+    {
+        if (_lighterDarkStyle != null)
+        {
+            Application.Current!.Styles.Remove(_lighterDarkStyle);
+            _lighterDarkStyle = null;
+        }
     }
 
     public static void SetFontName(string fontName)
@@ -1746,7 +1876,74 @@ public static class UiUtil
         };
 
         stackPanel.Children.AddRange(controls);
-     
+
         return stackPanel;
+    }
+
+    internal static DataGridGridLinesVisibility GetGridLinesVisibility()
+    {
+        if (Se.Settings.Appearance.GridLinesAppearance == DataGridGridLinesVisibility.Horizontal.ToString())
+        {
+            return DataGridGridLinesVisibility.Horizontal;
+        }
+
+        if (Se.Settings.Appearance.GridLinesAppearance == DataGridGridLinesVisibility.Vertical.ToString())
+        {
+            return DataGridGridLinesVisibility.Vertical;
+        }
+
+        if (Se.Settings.Appearance.GridLinesAppearance == DataGridGridLinesVisibility.All.ToString())
+        {
+            return DataGridGridLinesVisibility.All;
+        }
+
+        return DataGridGridLinesVisibility.None;
+    }
+
+    internal static Color GetDarkThemeBackgroundColor()
+    {
+        return Se.Settings.Appearance.DarkModeBackgroundColor.FromHexToColor();
+    }
+
+    internal static void ReplaceControl(Control old, Control replacement)
+    {
+        var replacementParent = replacement.Parent;
+        if (replacementParent != null)
+        {
+            if (replacementParent is Panel panelReplacement)
+            {
+                panelReplacement.Children.Remove(replacement);
+            }
+            else if (replacementParent is ContentControl contentControl)
+            {
+                contentControl.Content = null;
+            }
+            else if (replacementParent is Grid grid)
+            {
+                grid.Children.Remove(replacement);
+            }
+        }
+
+        var parent = old.Parent;
+        if (parent is Panel panel)
+        {
+            var index = panel.Children.IndexOf(old);
+            if (index >= 0)
+            {
+                panel.Children[index] = replacement;
+            }
+        }
+        else if (parent is ContentControl contentControl)
+        {
+            contentControl.Content = replacement;
+        }
+        else if (parent is Grid grid)
+        {
+            var index = grid.Children.IndexOf(old);
+            if (index >= 0)
+            {
+                grid.Children[index] = replacement;
+            }
+        }
     }
 }

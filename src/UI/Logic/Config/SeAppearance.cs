@@ -1,9 +1,21 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config;
+﻿using Avalonia.Controls;
+using Avalonia.Media;
+
+namespace Nikse.SubtitleEdit.Logic.Config;
 
 public class SeAppearance
 {
     public string Theme { get; set; }
     public string FontName { get; set; }
+    public double SubtitleTextBoxFontSize { get; set; }
+    public bool SubtitleTextBoxFontBold { get; set; }
+    public bool SubtitleTextBoxCenterText { get; set; }
+    public bool ShowHints { get; set; }
+    public bool GridCompactMode { get; set; }
+    public string DarkModeBackgroundColor { get; set; }
+    public string GridLinesAppearance { get; set; }
+    public bool ShowHorizontalLineAboveToolbar { get; set; }
+    public bool ShowHorizontalLineBelowToolbar { get; set; }
 
     public bool ToolbarShowFileNew { get; set; }
     public bool ToolbarShowFileOpen { get; set; }
@@ -18,14 +30,18 @@ public class SeAppearance
     public bool ToolbarShowLayout { get; set; }
     public bool ToolbarShowHelp { get; set; }
     public bool ToolbarShowEncoding { get; set; }
-    public double SubtitleTextBoxFontSize { get; set; }
-    public bool SubtitleTextBoxFontBold { get; set; }
-    public bool SubtitleTextBoxCenterText { get; set; }
-    public bool ToolbarShowHints { get; set; }
 
     public SeAppearance()
     {
         Theme = "System";
+        FontName = string.Empty;
+        SubtitleTextBoxFontSize = 15d;
+        SubtitleTextBoxFontBold = true;
+        ShowHints = true;
+        SubtitleTextBoxCenterText = false;
+        GridLinesAppearance = DataGridGridLinesVisibility.None.ToString();
+        DarkModeBackgroundColor = new Color(255, 33, 33, 33).FromColorToHex();
+        GridCompactMode = true;
 
         ToolbarShowFileNew = true;
         ToolbarShowFileOpen = true;
@@ -40,9 +56,5 @@ public class SeAppearance
         ToolbarShowLayout = true;
         ToolbarShowHelp = true;
         ToolbarShowEncoding = false;
-        SubtitleTextBoxFontSize = 15d;
-        SubtitleTextBoxFontBold = true;
-        ToolbarShowHints = true;
-        FontName = string.Empty;
     }
 }

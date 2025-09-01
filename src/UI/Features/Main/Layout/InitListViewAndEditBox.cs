@@ -23,20 +23,22 @@ public static class InitListViewAndEditBox
 
         var mainGrid = new Grid
         {
-            RowDefinitions = new RowDefinitions("*,Auto") // First row fills, second is auto-sized
+            RowDefinitions = new RowDefinitions("*,Auto")
         };
 
         vm.SubtitleGrid = new DataGrid
         {
-            Height = double.NaN, // auto size inside scroll viewer
-            Margin = new Thickness(2),
-            ItemsSource = vm.Subtitles, // Use ItemsSource instead of Items
+            Height = double.NaN,
+            Margin = new Thickness(Se.Settings.Appearance.GridCompactMode ? 0 : 2),
+            ItemsSource = vm.Subtitles,
             CanUserSortColumns = false,
             IsReadOnly = true,
             SelectionMode = DataGridSelectionMode.Extended,
             DataContext = vm.Subtitles,
             CanUserResizeColumns = true,
-            GridLinesVisibility = DataGridGridLinesVisibility.All,
+            GridLinesVisibility = UiUtil.GetGridLinesVisibility(),
+            VerticalGridLinesBrush = UiUtil.GetBorderBrush(),
+            HorizontalGridLinesBrush = UiUtil.GetBorderBrush(),
         };
 
         vm.SubtitleGrid.DoubleTapped += vm.OnSubtitleGridDoubleTapped;

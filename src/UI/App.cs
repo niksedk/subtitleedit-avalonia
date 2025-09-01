@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml.Styling;
+using Avalonia.Styling;
 using Avalonia.Themes.Fluent;
 using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit;
@@ -31,13 +32,13 @@ var appBuilder = AppBuilder.Configure<Application>()
     .UsePlatformDetect()
     .AfterSetup(b =>
     {
-        var fluent = new FluentTheme();
-        fluent.Palettes.Add(Avalonia.Styling.ThemeVariant.Dark, new ColorPaletteResources() 
+        UiUtil.FluentTheme = new FluentTheme();
+        UiUtil.FluentTheme.Palettes.Add(ThemeVariant.Dark, new ColorPaletteResources()
         {
-            RegionColor = new Avalonia.Media.Color(255, 31, 31, 31),
+            RegionColor = UiUtil.GetDarkThemeBackgroundColor(),
         });
 
-        b.Instance?.Styles.Add(fluent);
+        b.Instance?.Styles.Add(UiUtil.FluentTheme);
         b.Instance?.Styles.Add(new StyleInclude(new Uri("avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml", UriKind.Absolute))
         {
             Source = new Uri("avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml")

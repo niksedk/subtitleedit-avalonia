@@ -65,7 +65,6 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _showToolbarLayout;
     [ObservableProperty] private bool _showToolbarHelp;
     [ObservableProperty] private bool _showToolbarEncoding;
-    [ObservableProperty] private bool _showToolbarHints;
 
     [ObservableProperty] private bool _colorDurationTooShort;
     [ObservableProperty] private bool _colorDurationTooLong;
@@ -102,6 +101,13 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private double _textBoxFontSize;
     [ObservableProperty] private bool _textBoxFontBold;
     [ObservableProperty] private bool _textBoxCenterText;
+    [ObservableProperty] private bool _showButtonHints;
+    [ObservableProperty] private bool _gridCompactMode;
+    [ObservableProperty] private bool _showHorizontalLineAboveToolbar;
+    [ObservableProperty] private bool _showHorizontalLineBelowToolbar;
+    [ObservableProperty] private ObservableCollection<GridLinesVisibilityDisplay> _gridLinesVisibilities;
+    [ObservableProperty] private GridLinesVisibilityDisplay _selectedGridLinesVisibility;
+    [ObservableProperty] private Color _darkModeBackgroundColor;
 
     public ObservableCollection<FileTypeAssociationViewModel> FileTypeAssociations { get; set; } = new()
     {
@@ -162,6 +168,9 @@ public partial class SettingsViewModel : ObservableObject
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         DefaultEncoding = Encodings.First();
 
+        GridLinesVisibilities = new ObservableCollection<GridLinesVisibilityDisplay>(GridLinesVisibilityDisplay.GetAll());
+        SelectedGridLinesVisibility = GridLinesVisibilities[0];
+
         ErrorColor = Color.FromArgb(50, 255, 0, 0);
 
         FfmpegStatus = "Not installed";
@@ -216,10 +225,15 @@ public partial class SettingsViewModel : ObservableObject
         ShowToolbarLayout = appearance.ToolbarShowLayout;
         ShowToolbarHelp = appearance.ToolbarShowHelp;
         ShowToolbarEncoding = appearance.ToolbarShowEncoding;
-        ShowToolbarHints = appearance.ToolbarShowHints;
         TextBoxFontSize = appearance.SubtitleTextBoxFontSize;
         TextBoxFontBold = appearance.SubtitleTextBoxFontBold;
         TextBoxCenterText = appearance.SubtitleTextBoxCenterText;
+        ShowButtonHints = appearance.ShowHints;
+        GridCompactMode = appearance.GridCompactMode;
+        ShowHorizontalLineAboveToolbar = appearance.ShowHorizontalLineAboveToolbar;
+        ShowHorizontalLineBelowToolbar = appearance.ShowHorizontalLineBelowToolbar;
+        SelectedGridLinesVisibility = GridLinesVisibilities.FirstOrDefault(p => p.Type.ToString() == appearance.GridLinesAppearance) ?? GridLinesVisibilities[0];
+        DarkModeBackgroundColor = appearance.DarkModeBackgroundColor.FromHexToColor();
 
         WaveformDrawGridLines = Se.Settings.Waveform.DrawGridLines;
         WaveformCenterVideoPosition = Se.Settings.Waveform.CenterVideoPosition;
@@ -294,10 +308,15 @@ public partial class SettingsViewModel : ObservableObject
         appearance.ToolbarShowLayout = ShowToolbarLayout;
         appearance.ToolbarShowHelp = ShowToolbarHelp;
         appearance.ToolbarShowEncoding = ShowToolbarEncoding;
-        appearance.ToolbarShowHints = ShowToolbarHints;
         appearance.SubtitleTextBoxFontSize = TextBoxFontSize;
         appearance.SubtitleTextBoxFontBold = TextBoxFontBold;
         appearance.SubtitleTextBoxCenterText = TextBoxCenterText;
+        appearance.ShowHints = ShowButtonHints;
+        appearance.DarkModeBackgroundColor = DarkModeBackgroundColor.FromColorToHex();
+        appearance.GridCompactMode = GridCompactMode;
+        appearance.GridLinesAppearance = SelectedGridLinesVisibility.Type.ToString();
+        appearance.ShowHorizontalLineAboveToolbar = ShowHorizontalLineAboveToolbar;
+        appearance.ShowHorizontalLineBelowToolbar = ShowHorizontalLineBelowToolbar;
 
         Se.Settings.Waveform.DrawGridLines = WaveformDrawGridLines;
         Se.Settings.Waveform.CenterVideoPosition = WaveformCenterVideoPosition;
@@ -449,6 +468,32 @@ public partial class SettingsViewModel : ObservableObject
 
         LibMpvPath = vm.LibMpvFileName;
         SetLibMpvStatus();
+    }
+
+    [RelayCommand]
+    private async Task ResetAllSettings()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var answer = await MessageBox.Show(
+                  Window,
+                  Se.Language.Options.Settings.ResetSettings,
+                  Se.Language.Options.Settings.ResetSettingsDetail,
+                  MessageBoxButtons.YesNoCancel,
+                  MessageBoxIcon.Question);
+
+        if (answer != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        Se.Settings = new Se();
+        Se.SaveSettings();
+        OkPressed = true;
+        Window?.Close();
     }
 
     [RelayCommand]

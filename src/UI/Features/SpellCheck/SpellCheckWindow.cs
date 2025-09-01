@@ -55,7 +55,7 @@ public class SpellCheckWindow : Window
         var boderWholeText = new Border
         {
             BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetBorderColor(),
+            BorderBrush = UiUtil.GetBorderBrush(),
             Child = scrollViewerWholeText,
             Padding = new Thickness(10, 0, 10, 0),
             CornerRadius = new CornerRadius(5),
@@ -293,7 +293,7 @@ public class SpellCheckWindow : Window
         var borderSuggestions = new Border
         {
             BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetBorderColor(),
+            BorderBrush = UiUtil.GetBorderBrush(),
             CornerRadius = new CornerRadius(5),
             Child = scrollViewSuggestions,
         };

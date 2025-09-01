@@ -1368,6 +1368,8 @@ public partial class MainViewModel :
     private async Task CommandShowSettings()
     {
         var oldTheme = Se.Settings.Appearance.Theme;
+        var oldSubtitleGrid = SubtitleGrid;
+        var oldEditTextBox = EditTextBox;
 
         var viewModel = await _windowService.ShowDialogAsync<SettingsWindow, SettingsViewModel>(Window!);
 
@@ -1380,16 +1382,9 @@ public partial class MainViewModel :
         UiUtil.SetFontName(Se.Settings.Appearance.FontName);
         UiUtil.SetCurrentTheme();
 
-        if (Se.Settings.Appearance.SubtitleTextBoxCenterText)
-        {
-            EditTextBox.TextAlignment = TextAlignment.Center;
-            EditTextBoxOriginal.TextAlignment = TextAlignment.Center;
-        }
-        else
-        {
-            EditTextBox.TextAlignment = TextAlignment.Left;
-            EditTextBoxOriginal.TextAlignment = TextAlignment.Left;
-        }
+        InitListViewAndEditBox.MakeLayoutListViewAndEditBox(MainView!, this);
+        UiUtil.ReplaceControl(oldSubtitleGrid, SubtitleGrid);
+        UiUtil.ReplaceControl(oldEditTextBox, EditTextBox);
 
         if (Toolbar is Border toolbarBorder)
         {
@@ -1422,7 +1417,7 @@ public partial class MainViewModel :
 
         _updateAudioVisualizer = true;
         _shortcutManager.ClearKeys();
-    }
+    }    
 
     [RelayCommand]
     private async Task CommandShowSettingsShortcuts()

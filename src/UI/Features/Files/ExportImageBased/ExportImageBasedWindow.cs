@@ -499,7 +499,7 @@ public class ExportImageBasedWindow : Window
         {
             HorizontalAlignment = HorizontalAlignment.Right,
             VerticalAlignment = VerticalAlignment.Top,
-            Background = UiUtil.GetBorderColor(),
+            Background = UiUtil.GetBorderBrush(),
             Opacity = 0.8,
             Children =
             {

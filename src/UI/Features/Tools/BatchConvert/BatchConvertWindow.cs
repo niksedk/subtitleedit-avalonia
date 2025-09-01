@@ -222,7 +222,7 @@ public class BatchConvertWindow : Window
         var border = new Border
         {
             BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetBorderColor(),
+            BorderBrush = UiUtil.GetBorderBrush(),
             Margin = new Thickness(0, 0, 0, 10),
             Padding = new Thickness(5),
             Child = UiUtil.MakeLabel("function options"),
