@@ -473,7 +473,7 @@ public partial class MainViewModel :
                 {
                     s.Style = first;
                 }
-            }   
+            }
         }
 
         _shortcutManager.ClearKeys();
@@ -666,6 +666,26 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task CommandFileReopen(RecentFile recentFile)
     {
+        if (HasChanges())
+        {
+            var result = await MessageBox.Show(
+                Window!,
+                Se.Language.General.SaveChangesTitle,
+                Se.Language.General.SaveChangesMessage,
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question);
+
+            if (result == MessageBoxResult.Cancel)
+            {
+                return;
+            }
+
+            if (result == MessageBoxResult.Yes)
+            {
+                await SaveSubtitle();
+            }
+        }
+
         await SubtitleOpen(recentFile.SubtitleFileName, recentFile.VideoFileName, recentFile.SelectedLine);
         _shortcutManager.ClearKeys();
     }
@@ -2082,7 +2102,7 @@ public partial class MainViewModel :
         {
             if (_subtitle == null)
             {
-                _subtitle = new Subtitle(); 
+                _subtitle = new Subtitle();
             }
 
             var header = _subtitle?.Header ?? string.Empty;
@@ -2119,7 +2139,7 @@ public partial class MainViewModel :
 
             styles.Add(newStyle);
             header = AdvancedSubStationAlpha.GetHeaderAndStylesFromAdvancedSubStationAlpha(header, styles);
-            _subtitle.Header = header;  
+            _subtitle.Header = header;
 
             SetStyleForSelectedLines(newStyle.Name);
         }
