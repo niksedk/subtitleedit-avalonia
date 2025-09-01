@@ -60,7 +60,7 @@ public static class UiUtil
         return new ControlTheme(typeof(DataGridCell))
         {
             Setters =
-            {   
+            {
                 new Setter(DataGridCell.BackgroundProperty, Brushes.Transparent),
                 new Setter(DataGridCell.FocusAdornerProperty, null),
                 new Setter(DataGridCell.PaddingProperty, new Thickness(0)),
@@ -1739,6 +1739,9 @@ public static class UiUtil
 
         if (_lighterDarkStyle == null)
         {
+            var bgColor = UiUtil.GetDarkThemeBackgroundColor();
+            var bgColorLighter = MakeColorLighter(bgColor, 7);
+
             _lighterDarkStyle = new Styles
             {
                 // TextBox
@@ -1746,7 +1749,21 @@ public static class UiUtil
                 {
                     Setters =
                     {
-                        new Setter(TextBox.BackgroundProperty, new SolidColorBrush(UiUtil.GetDarkThemeBackgroundColor()))
+                        new Setter(TextBox.BackgroundProperty, new SolidColorBrush(bgColor))
+                    }
+                },
+                new Style(x => x.OfType<TextBox>().Class(":focus").Template().OfType<Border>().Name("PART_BorderElement"))
+                {
+                    Setters =
+                    {
+                        new Setter(Border.BackgroundProperty, new SolidColorBrush(bgColor)) // focused color
+                    }
+                },
+                new Style(x => x.OfType<TextBox>().Class(":pointerover").Template().OfType<Border>().Name("PART_BorderElement"))
+                {
+                    Setters =
+                    {
+                        new Setter(Border.BackgroundProperty, new SolidColorBrush(bgColorLighter)) // mouse over color
                     }
                 },
 
@@ -1755,7 +1772,7 @@ public static class UiUtil
                 {
                     Setters =
                     {
-                        new Setter(NumericUpDown.BackgroundProperty, new SolidColorBrush(UiUtil.GetDarkThemeBackgroundColor()))
+                        new Setter(NumericUpDown.BackgroundProperty, new SolidColorBrush(bgColor))
                     }
                 },
 
@@ -1764,7 +1781,7 @@ public static class UiUtil
                 {
                     Setters =
                     {
-                        new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(UiUtil.GetDarkThemeBackgroundColor()))
+                        new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(bgColor))
                     }
                 },
 
@@ -1773,7 +1790,7 @@ public static class UiUtil
                 {
                     Setters =
                     {
-                        new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(UiUtil.GetDarkThemeBackgroundColor()))
+                        new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(bgColor))
                     }
                 },
 
@@ -1782,7 +1799,7 @@ public static class UiUtil
                 {
                     Setters =
                     {
-                        new Setter(DataGridColumnHeader.BackgroundProperty, new SolidColorBrush(UiUtil.GetDarkThemeBackgroundColor()))
+                        new Setter(DataGridColumnHeader.BackgroundProperty, new SolidColorBrush(bgColorLighter))
                     }
                 },
 
@@ -1791,7 +1808,7 @@ public static class UiUtil
                 {
                     Setters =
                     {
-                        new Setter(ButtonSpinner.BackgroundProperty, new SolidColorBrush(UiUtil.GetDarkThemeBackgroundColor()))
+                        new Setter(ButtonSpinner.BackgroundProperty, new SolidColorBrush(bgColor))
                     }
                 },
             };
@@ -1878,6 +1895,15 @@ public static class UiUtil
         stackPanel.Children.AddRange(controls);
 
         return stackPanel;
+    }
+
+    public static Color MakeColorLighter(Color color, byte adjustValue)
+    {
+        var r = (byte)Math.Min(255, color.R + adjustValue);
+        var g = (byte)Math.Min(255, color.G + adjustValue);
+        var b = (byte)Math.Min(255, color.B + adjustValue);
+
+        return Color.FromArgb(color.A, r, g, b);
     }
 
     internal static DataGridGridLinesVisibility GetGridLinesVisibility()
