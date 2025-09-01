@@ -1740,7 +1740,8 @@ public static class UiUtil
         if (_lighterDarkStyle == null)
         {
             var bgColor = UiUtil.GetDarkThemeBackgroundColor();
-            var bgColorLighter = MakeColorLighter(bgColor, 7);
+            var bgColorLighter = LightenColor(bgColor, 5);
+            var bgColorHeader = LightenColor(bgColor, 15);
 
             _lighterDarkStyle = new Styles
             {
@@ -1799,7 +1800,7 @@ public static class UiUtil
                 {
                     Setters =
                     {
-                        new Setter(DataGridColumnHeader.BackgroundProperty, new SolidColorBrush(bgColorLighter))
+                        new Setter(DataGridColumnHeader.BackgroundProperty, new SolidColorBrush(bgColorHeader))
                     }
                 },
 
@@ -1897,7 +1898,7 @@ public static class UiUtil
         return stackPanel;
     }
 
-    public static Color MakeColorLighter(Color color, byte adjustValue)
+    public static Color LightenColor(Color color, byte adjustValue)
     {
         var r = (byte)Math.Min(255, color.R + adjustValue);
         var g = (byte)Math.Min(255, color.G + adjustValue);
