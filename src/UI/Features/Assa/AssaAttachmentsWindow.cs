@@ -126,6 +126,29 @@ public class AssaAttachmentsWindow : Window
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedAttachment)) { Source = vm });
         dataGrid.SelectionChanged += vm.DataGridSelectionChanged;
+        dataGrid.KeyDown += vm.AttachmentsDataGridKeyDown;
+
+        var flyout = new MenuFlyout();
+        flyout.Opening += vm.AttachmentsContextMenuOpening;
+        dataGrid.ContextFlyout = flyout;
+
+        var menuItemDelete = new MenuItem
+        {
+            Header = Se.Language.General.Delete,
+            DataContext = vm,
+            Command = vm.AttachmentRemoveCommand,
+        };
+        menuItemDelete.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsDeleteVisible)) { Source = vm });
+        flyout.Items.Add(menuItemDelete);
+
+        var menuItemClear = new MenuItem
+        {
+            Header = Se.Language.General.Clear,
+            DataContext = vm,
+            Command = vm.AttachemntsRemoveAllCommand,
+        };
+        menuItemClear.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsDeleteAllVisible)) { Source = vm });
+        flyout.Items.Add(menuItemClear);
 
         grid.Add(dataGrid, 0);
 

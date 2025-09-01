@@ -433,7 +433,6 @@ public static class InitListViewAndEditBox
         vm.SubtitleGrid.AddHandler(InputElement.PointerPressedEvent, vm.SubtitleGrid_PointerPressed, RoutingStrategies.Tunnel);
         vm.SubtitleGrid.AddHandler(InputElement.PointerReleasedEvent, vm.SubtitleGrid_PointerReleased, RoutingStrategies.Tunnel);
 
-
         // Edit area - restructured with time controls on left, multiline text on right
         var editGrid = new Grid
         {

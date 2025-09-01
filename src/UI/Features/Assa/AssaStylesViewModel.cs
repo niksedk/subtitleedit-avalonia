@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
@@ -32,6 +33,8 @@ public partial class AssaStylesViewModel : ObservableObject
     [ObservableProperty] private string _currentTitle;
     [ObservableProperty] private bool _isFileStylesFocused;
     [ObservableProperty] private Bitmap? _imagePreview;
+    [ObservableProperty] private bool _isDeleteVisible;
+    [ObservableProperty] private bool _isDeleteAllVisible;
 
     public Window? Window { get; internal set; }
     public bool OkPressed { get; private set; }
@@ -114,31 +117,13 @@ public partial class AssaStylesViewModel : ObservableObject
     [RelayCommand]
     private void FileRemove()
     {
-        if (SelectedFileStyle != null && SelectedFileStyle.UsageCount == 0)
-        {
-            var idx = FileStyles.IndexOf(SelectedFileStyle);
-            FileStyles.Remove(SelectedFileStyle);
-            SelectedFileStyle = null;
-            CurrentStyle = null;
-
-            if (FileStyles.Count > 0)
-            {
-                if (idx >= FileStyles.Count)
-                {
-                    idx = FileStyles.Count - 1;
-                }
-                SelectedFileStyle = FileStyles[idx];
-                CurrentStyle = SelectedFileStyle;
-            }
-        }
-
-        UpdateUsages();
+        DeleteFileStyle(SelectedFileStyle);
     }
 
     [RelayCommand]
     private void FileRemoveAll()
     {
-        FileStyles.Clear();
+        FileStyles.Clear();        
     }
 
     [RelayCommand]
@@ -405,14 +390,6 @@ public partial class AssaStylesViewModel : ObservableObject
         ImagePreview = bitmap.ToAvaloniaBitmap();
     }
 
-    internal void KeyDown(object? sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Escape)
-        {
-            Close();
-        }
-    }
-
     internal void FileStylesChanged(object? sender, SelectionChangedEventArgs e)
     {
         var selectedStyle = SelectedFileStyle;
@@ -438,5 +415,71 @@ public partial class AssaStylesViewModel : ObservableObject
         }
 
         selectedStyle.BorderStyle = SelectedBorderType;
+    }
+
+    internal void FileStylesKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Delete)
+        {
+            var selectedStyle = SelectedFileStyle;
+            DeleteFileStyle(selectedStyle);
+            e.Handled = true;
+        }
+    }
+
+    private void DeleteFileStyle(StyleDisplay? selectedStyle)
+    {
+        if (selectedStyle == null)
+        {
+            return;
+        }
+
+        Dispatcher.UIThread.Post(async void () =>
+        {
+           var answer = await MessageBox.Show(
+           Window!,
+           "Delete style?",
+           $"Do you want to delete {selectedStyle.Name}?",
+           MessageBoxButtons.YesNoCancel,
+           MessageBoxIcon.Question);
+
+            if (answer != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            if (selectedStyle != null)
+            {
+                var idx = FileStyles.IndexOf(selectedStyle);
+                FileStyles.Remove(selectedStyle);
+                SelectedFileStyle = null;
+                CurrentStyle = null;
+                if (FileStyles.Count > 0)
+                {
+                    if (idx >= FileStyles.Count)
+                    {
+                        idx = FileStyles.Count - 1;
+                    }
+                    SelectedFileStyle = FileStyles[idx];
+                    CurrentStyle = SelectedFileStyle;
+                }
+
+                UpdateUsages();
+            }
+        });
+    }
+
+    internal void KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            Close();
+        }
+    }
+
+    internal void FilesContextMenuOpening(object? sender, EventArgs e)
+    {
+        IsDeleteAllVisible = FileStyles.Count > 0;
+        IsDeleteVisible = SelectedFileStyle != null;
     }
 }

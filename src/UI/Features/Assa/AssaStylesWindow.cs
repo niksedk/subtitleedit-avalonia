@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -151,6 +152,29 @@ public class AssaStylesWindow : Window
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedFileStyle)) { Source = vm });
         dataGrid.SelectionChanged += vm.FileStylesChanged;
+        dataGrid.KeyDown += vm.FileStylesKeyDown;
+
+        var flyout = new MenuFlyout();
+        flyout.Opening += vm.FilesContextMenuOpening;
+        dataGrid.ContextFlyout = flyout;
+
+        var menuItemDelete = new MenuItem
+        {
+            Header = Se.Language.General.Delete,
+            DataContext = vm,
+            Command = vm.FileRemoveCommand,
+        };
+        menuItemDelete.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsDeleteVisible)) { Source = vm });
+        flyout.Items.Add(menuItemDelete);
+
+        var menuItemClear = new MenuItem
+        {
+            Header = Se.Language.General.Clear,
+            DataContext = vm,
+            Command = vm.FileRemoveAllCommand,
+        };
+        menuItemClear.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsDeleteAllVisible)) { Source = vm });
+        flyout.Items.Add(menuItemClear);
 
         var buttonNew = UiUtil.MakeButton(vm.FileNewCommand, IconNames.MdiPlus, Se.Language.General.New);
         var buttonRemove = UiUtil.MakeButton(vm.FileRemoveCommand, IconNames.MdiTrash, Se.Language.General.Delete);

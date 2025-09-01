@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
@@ -27,6 +28,8 @@ public partial class AssaAttachmentsViewModel : ObservableObject
     [ObservableProperty] private AssaAttachmentItem? _selectedAttachment;
     [ObservableProperty] private string _previewTitle;
     [ObservableProperty] private Bitmap? _previewImage;
+    [ObservableProperty] private bool _isDeleteVisible;
+    [ObservableProperty] private bool _isDeleteAllVisible;
 
     public Window? Window { get; internal set; }
     public bool OkPressed { get; private set; }
@@ -96,6 +99,53 @@ public partial class AssaAttachmentsViewModel : ObservableObject
     private void FileExport()
     {
     }
+
+    [RelayCommand]
+    private void AttachmentRemove()
+    {
+        var selectedStyle = SelectedAttachment;
+        if (selectedStyle == null)
+        {
+            return;
+        }
+
+        Dispatcher.UIThread.Post(async void () =>
+        {
+            var answer = await MessageBox.Show(
+            Window!,
+            "Delete attachment?",
+            $"Do you want to delete {selectedStyle.FileName}?",
+            MessageBoxButtons.YesNoCancel,
+            MessageBoxIcon.Question);
+
+            if (answer != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            if (selectedStyle != null)
+            {
+                var idx = Attachments.IndexOf(selectedStyle);
+                Attachments.Remove(selectedStyle);
+                SelectedAttachment = null;
+                if (Attachments.Count > 0)
+                {
+                    if (idx >= Attachments.Count)
+                    {
+                        idx = Attachments.Count - 1;
+                    }
+                    SelectedAttachment = Attachments[idx];
+                }
+            }
+        });
+    }
+
+    [RelayCommand]
+    private void AttachemntsRemoveAll()
+    {
+        Attachments.Clear();
+    }
+
 
     private void Close()
     {
@@ -391,5 +441,20 @@ public partial class AssaAttachmentsViewModel : ObservableObject
     internal void DataGridSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         UpdatePreview();
+    }
+
+    internal void AttachmentsContextMenuOpening(object? sender, EventArgs e)
+    {
+        IsDeleteAllVisible = Attachments.Count > 0;
+        IsDeleteVisible = SelectedAttachment != null;
+    }
+
+    internal void AttachmentsDataGridKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Delete && SelectedAttachment != null)
+        {
+            AttachmentRemove();
+            e.Handled = true;
+        }
     }
 }
