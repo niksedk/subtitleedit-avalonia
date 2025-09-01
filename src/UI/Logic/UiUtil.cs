@@ -113,7 +113,7 @@ public static class UiUtil
         var app = Application.Current;
         if (app == null)
         {
-            new SolidColorBrush(Colors.Black);
+            return new SolidColorBrush(Colors.Black);
         }
 
         var theme = app!.ActualThemeVariant;
@@ -123,6 +123,30 @@ public static class UiUtil
         }
 
         return new SolidColorBrush(Colors.Black, 0.5);
+    }
+
+    public static Separator MakeVerticalSeperator(double height = 0.5, double opacity = 0.5, Thickness? margin = null, IBrush? backgroud = null)
+    {
+        return new Separator
+        {
+            Height = height,
+            Margin = margin ?? new Thickness(5, 1),
+            Background = backgroud ?? GetBorderColor(),
+            Opacity = opacity,
+        };
+    }
+
+    public static Border MakeHorizontalSeperator(double width = 2.5, double opacity = 0.5, Thickness? margin = null, IBrush? backgroud = null)
+    {
+        return new Border
+        {
+            Width = width,
+            Margin = margin ?? new Thickness(1, 5),
+            Background = backgroud ?? GetBorderColor(),
+            Opacity = opacity,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Center
+        };
     }
 
     public static Button MakeButton(string text, IRelayCommand? command)
@@ -1649,6 +1673,10 @@ public static class UiUtil
         {
             Application.Current!.RequestedThemeVariant = ThemeVariant.Light;
         }
+
+        Application.Current!.Resources["DataGridColumnHeaderBackgroundBrush"] = 
+            Application.Current!.ActualThemeVariant == ThemeVariant.Dark ?
+            new SolidColorBrush(new Color(255, 25, 25, 25)) : new SolidColorBrush(new Color(255, 249, 249, 249));
     }
 
     public static void SetFontName(string fontName)
