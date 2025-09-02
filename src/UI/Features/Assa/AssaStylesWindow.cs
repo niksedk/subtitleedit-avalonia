@@ -265,6 +265,7 @@ public class AssaStylesWindow : Window
         var buttonExport = UiUtil.MakeButton(vm.StorageExportCommand, IconNames.MdiExport, Se.Language.General.Export);
         var panelButtons = UiUtil.MakeButtonBar(
             buttonNew,
+            buttonDuplicate,
             buttonRemove,
             buttonImport,
             buttonExport

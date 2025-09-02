@@ -13,9 +13,11 @@ using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using SkiaSharp;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Assa;
 
@@ -40,11 +42,14 @@ public partial class AssaStylesViewModel : ObservableObject
     public bool OkPressed { get; private set; }
     public string Header { get; set; }
 
+    private readonly IFileHelper _fileHelper;
     private Subtitle _subtitle;
     private readonly System.Timers.Timer _timerUpdatePreview;
 
     public AssaStylesViewModel(IFileHelper fileHelper)
     {
+        _fileHelper = fileHelper;
+
         Title = string.Empty;
         FileStyles = new ObservableCollection<StyleDisplay>();
         StorageStyles = new ObservableCollection<StyleDisplay>();
@@ -151,8 +156,31 @@ public partial class AssaStylesViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void FileExport()
+    private async Task FileExport()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickSaveFile(Window, ".ass", "export-styles.ass", "Choose export file name");
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        var styles = new List<SsaStyle>();
+        foreach (var style in FileStyles)
+        {
+            styles.Add(style.ToSsaStyle());
+        }
+
+        var s = new Subtitle();
+        s.Header = AdvancedSubStationAlpha.GetHeaderAndStylesFromAdvancedSubStationAlpha(
+            AdvancedSubStationAlpha.DefaultHeader, 
+            styles);
+        var text = s.ToText(new AdvancedSubStationAlpha());
+        await System.IO.File.WriteAllTextAsync(fileName, text);
     }
 
     [RelayCommand]
@@ -197,6 +225,7 @@ public partial class AssaStylesViewModel : ObservableObject
                 {
                     idx = StorageStyles.Count - 1;
                 }
+
                 SelectedStorageStyle = StorageStyles[idx];
                 CurrentStyle = SelectedStorageStyle;
             }
@@ -212,19 +241,61 @@ public partial class AssaStylesViewModel : ObservableObject
     [RelayCommand]
     private void StorageCopy()
     {
+        var selectedStyle = SelectedStorageStyle;
+        if (selectedStyle == null)
+        {
+            return;
+        }
+
+        var name = selectedStyle.Name + " - " + Se.Language.General.Copy;
+        if (StorageStyles.Any(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+        {
+            var count = 2;
+            var doRepeat = true;
+            while (doRepeat)
+            {
+                name = selectedStyle.Name + " - " + Se.Language.General.Copy + count;
+                doRepeat = StorageStyles.Any(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+                count++;
+            }
+        }
+
+        var style = selectedStyle.ToSsaStyle();
+        style.Name = name;
+        StorageStyles.Add(new StyleDisplay(style));
     }
 
     [RelayCommand]
-    private void StorageExport()
+    private async Task StorageExport()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickSaveFile(Window, ".ass", "export-styles.ass", "Choose export file name");
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        var styles = new List<SsaStyle>();
+        foreach (var style in StorageStyles)
+        {
+            styles.Add(style.ToSsaStyle());
+        }
+
+        var s = new Subtitle();
+        s.Header = AdvancedSubStationAlpha.GetHeaderAndStylesFromAdvancedSubStationAlpha(
+            AdvancedSubStationAlpha.DefaultHeader, 
+            styles);
+        var text = s.ToText(new AdvancedSubStationAlpha());
+        await System.IO.File.WriteAllTextAsync(fileName, text);
     }
 
     private void Close()
     {
-        Dispatcher.UIThread.Post(() =>
-        {
-            Window?.Close();
-        });
+        Dispatcher.UIThread.Post(() => { Window?.Close(); });
     }
 
     public void Initialize(Subtitle subtitle, SubtitleFormat format, string fileName, string selectedStyleName)
@@ -236,7 +307,8 @@ public partial class AssaStylesViewModel : ObservableObject
         if (Header != null && Header.Contains("http://www.w3.org/ns/ttml"))
         {
             var s = new Subtitle { Header = Header };
-            AdvancedSubStationAlpha.LoadStylesFromTimedText10(s, string.Empty, Header, AdvancedSubStationAlpha.HeaderNoStyles, new StringBuilder());
+            AdvancedSubStationAlpha.LoadStylesFromTimedText10(s, string.Empty, Header,
+                AdvancedSubStationAlpha.HeaderNoStyles, new StringBuilder());
             Header = s.Header;
         }
         else if (Header != null && Header.StartsWith("WEBVTT", StringComparison.Ordinal))
@@ -266,7 +338,8 @@ public partial class AssaStylesViewModel : ObservableObject
 
         if (FileStyles.Count > 0)
         {
-            SelectedFileStyle = FileStyles.FirstOrDefault(p => p.Name.Equals(selectedStyleName, StringComparison.OrdinalIgnoreCase));
+            SelectedFileStyle =
+                FileStyles.FirstOrDefault(p => p.Name.Equals(selectedStyleName, StringComparison.OrdinalIgnoreCase));
             if (SelectedFileStyle == null)
             {
                 SelectedFileStyle = FileStyles[0];
@@ -283,7 +356,8 @@ public partial class AssaStylesViewModel : ObservableObject
     {
         foreach (var style in FileStyles)
         {
-            style.UsageCount = _subtitle.Paragraphs.Count(p => p.Extra.TrimStart('*').Equals(style.Name.TrimStart('*')));
+            style.UsageCount =
+                _subtitle.Paragraphs.Count(p => p.Extra.TrimStart('*').Equals(style.Name.TrimStart('*')));
         }
     }
 
@@ -353,7 +427,8 @@ public partial class AssaStylesViewModel : ObservableObject
 
             if (style.ShadowWidth > 0)
             {
-                bitmap = TextToImageGenerator.AddShadowToBitmap(bitmap, (int)Math.Round(style.ShadowWidth, MidpointRounding.AwayFromZero), style.ColorShadow.ToSKColor());
+                bitmap = TextToImageGenerator.AddShadowToBitmap(bitmap,
+                    (int)Math.Round(style.ShadowWidth, MidpointRounding.AwayFromZero), style.ColorShadow.ToSKColor());
             }
         }
         else if (style.BorderStyle.Style == BorderStyleType.OneBox)
@@ -437,11 +512,11 @@ public partial class AssaStylesViewModel : ObservableObject
         Dispatcher.UIThread.Post(async void () =>
         {
             var answer = await MessageBox.Show(
-            Window!,
-            "Delete style?",
-            $"Do you want to delete {selectedStyle.Name}?",
-            MessageBoxButtons.YesNoCancel,
-            MessageBoxIcon.Question);
+                Window!,
+                "Delete style?",
+                $"Do you want to delete {selectedStyle.Name}?",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question);
 
             if (answer != MessageBoxResult.Yes)
             {
@@ -460,6 +535,7 @@ public partial class AssaStylesViewModel : ObservableObject
                     {
                         idx = FileStyles.Count - 1;
                     }
+
                     SelectedFileStyle = FileStyles[idx];
                     CurrentStyle = SelectedFileStyle;
                 }

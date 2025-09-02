@@ -47,7 +47,7 @@ public class AssaAttachmentsWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        var labelFontsAndImages = UiUtil.MakeLabel(Se.Language.Assa.FontsAndImages);
+        var labelFontsAndImages = UiUtil.MakeLabel(Se.Language.Assa.FontsAndGraphics);
         var labelPreview = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.PreviewTitle));
 
         var buttonAttach = UiUtil.MakeButton(Se.Language.General.AttachDotDotDot, vm.FileAttachCommand);
@@ -101,14 +101,14 @@ public class AssaAttachmentsWindow : Window
             {
                 new DataGridTextColumn
                 {
-                    Header = Se.Language.General.NumberSymbol,
+                    Header = Se.Language.General.FileName,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(AssaAttachmentItem.FileName)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
-                    Header = Se.Language.General.Before,
+                    Header = Se.Language.General.Type,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(AssaAttachmentItem.Category)),
                     IsReadOnly = true,
@@ -116,7 +116,7 @@ public class AssaAttachmentsWindow : Window
                 },
                 new DataGridTextColumn
                 {
-                    Header = Se.Language.General.After,
+                    Header = Se.Language.General.Size,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(AssaAttachmentItem.Size)),
                     IsReadOnly = true,
