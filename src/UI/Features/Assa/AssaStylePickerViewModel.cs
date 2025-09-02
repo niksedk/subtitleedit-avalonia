@@ -1,0 +1,86 @@
+﻿using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Logic;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+
+namespace Nikse.SubtitleEdit.Features.Assa;
+
+public partial class AssaStylePickerViewModel : ObservableObject
+{
+    [ObservableProperty] private string _title;
+    [ObservableProperty] private ObservableCollection<StyleDisplay> _styles;
+    [ObservableProperty] private StyleDisplay? _selectedStyle;
+
+    public Window? Window { get; internal set; }
+    public bool OkPressed { get; private set; }
+
+    private Subtitle _subtitle;
+
+    public AssaStylePickerViewModel()
+    {
+        Title = string.Empty;
+        Styles = new ObservableCollection<StyleDisplay>();
+        _subtitle = new Subtitle();
+    }
+
+    [RelayCommand]
+    private void Ok()
+    {
+        OkPressed = true;
+        Close();
+    }
+
+    [RelayCommand]
+    private void Cancel()
+    {
+        Close();
+    }
+
+    private void Close()
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            Window?.Close();
+        });
+    }
+
+    public void Initialize(List<StyleDisplay> styles)
+    {
+        Styles.AddRange(styles);
+        
+        if (Styles.Count > 0)
+        {
+            SelectedStyle = Styles[0];
+        }
+        
+        UpdatePreview();
+    }
+    
+    private void UpdatePreview()
+    {
+        var selectedItem = SelectedStyle;
+        if (selectedItem == null)
+        {
+            //PreviewImage = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
+            return;
+        }
+    }
+
+    internal void KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            Close();
+        }
+    }
+
+    internal void DataGridSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        UpdatePreview();
+    }
+}

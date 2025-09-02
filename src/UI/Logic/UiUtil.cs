@@ -32,8 +32,9 @@ public static class UiUtil
 
     private static ControlTheme GetDataGridNoBorderCellTheme()
     {
-        var showVertical = Se.Settings.Appearance.GridLinesAppearance == DataGridGridLinesVisibility.Vertical.ToString() ||
-                           Se.Settings.Appearance.GridLinesAppearance == DataGridGridLinesVisibility.All.ToString();
+        var showVertical =
+            Se.Settings.Appearance.GridLinesAppearance == DataGridGridLinesVisibility.Vertical.ToString() ||
+            Se.Settings.Appearance.GridLinesAppearance == DataGridGridLinesVisibility.All.ToString();
 
         var compactMode = Se.Settings.Appearance.GridCompactMode;
 
@@ -45,7 +46,8 @@ public static class UiUtil
                 new Setter(DataGridCell.FocusAdornerProperty, null),
                 new Setter(DataGridCell.PaddingProperty, new Thickness(compactMode ? 0 : 4)),
                 new Setter(DataGridCell.BorderBrushProperty, GetBorderBrush()),
-                new Setter(DataGridCell.BorderThicknessProperty, new Thickness(0, 0, showVertical ? 1: 0, 0)), // 1px vertical line
+                new Setter(DataGridCell.BorderThicknessProperty,
+                    new Thickness(0, 0, showVertical ? 1 : 0, 0)), // 1px vertical line
             }
         };
     }
@@ -54,8 +56,9 @@ public static class UiUtil
 
     private static ControlTheme GetDataGridNoBorderNoPaddingCellTheme()
     {
-        var showVertical = Se.Settings.Appearance.GridLinesAppearance == DataGridGridLinesVisibility.Vertical.ToString() ||
-                           Se.Settings.Appearance.GridLinesAppearance == DataGridGridLinesVisibility.All.ToString();
+        var showVertical =
+            Se.Settings.Appearance.GridLinesAppearance == DataGridGridLinesVisibility.Vertical.ToString() ||
+            Se.Settings.Appearance.GridLinesAppearance == DataGridGridLinesVisibility.All.ToString();
 
         return new ControlTheme(typeof(DataGridCell))
         {
@@ -65,7 +68,8 @@ public static class UiUtil
                 new Setter(DataGridCell.FocusAdornerProperty, null),
                 new Setter(DataGridCell.PaddingProperty, new Thickness(0)),
                 new Setter(DataGridCell.BorderBrushProperty, GetBorderBrush()),
-                new Setter(DataGridCell.BorderThicknessProperty, new Thickness(0, 0, showVertical ? 1: 0, 0)), // 1px vertical line
+                new Setter(DataGridCell.BorderThicknessProperty,
+                    new Thickness(0, 0, showVertical ? 1 : 0, 0)), // 1px vertical line
             }
         };
     }
@@ -163,7 +167,8 @@ public static class UiUtil
         return new Color(128, color.R, color.G, color.B);
     }
 
-    public static Separator MakeVerticalSeperator(double height = 0.5, double opacity = 0.5, Thickness? margin = null, IBrush? backgroud = null)
+    public static Separator MakeVerticalSeperator(double height = 0.5, double opacity = 0.5, Thickness? margin = null,
+        IBrush? backgroud = null)
     {
         return new Separator
         {
@@ -174,7 +179,8 @@ public static class UiUtil
         };
     }
 
-    public static Border MakeHorizontalSeperator(double width = 2.5, double opacity = 0.5, Thickness? margin = null, IBrush? backgroud = null)
+    public static Border MakeHorizontalSeperator(double width = 2.5, double opacity = 0.5, Thickness? margin = null,
+        IBrush? backgroud = null)
     {
         return new Border
         {
@@ -1391,7 +1397,8 @@ public static class UiUtil
         return MakeRadioButton(text, viewModel, isCheckedPropertyPath, null);
     }
 
-    internal static RadioButton MakeRadioButton(string text, object viewModel, string isCheckedPropertyPath, string? groupName)
+    internal static RadioButton MakeRadioButton(string text, object viewModel, string isCheckedPropertyPath,
+        string? groupName)
     {
         var control = new RadioButton
         {
@@ -1733,92 +1740,95 @@ public static class UiUtil
         }
     }
 
-    public static void ApplyLighterDark()
+    private static void ApplyLighterDark()
     {
-        UpdateRegionColor();
-
-        if (_lighterDarkStyle == null)
+        if (Application.Current == null)
         {
-            var bgColor = UiUtil.GetDarkThemeBackgroundColor();
-            var bgColorLighter = LightenColor(bgColor, 5);
-            var bgColorHeader = LightenColor(bgColor, 15);
-
-            _lighterDarkStyle = new Styles
-            {
-                // TextBox
-                new Style(x => x.OfType<TextBox>())
-                {
-                    Setters =
-                    {
-                        new Setter(TextBox.BackgroundProperty, new SolidColorBrush(bgColor))
-                    }
-                },
-                new Style(x => x.OfType<TextBox>().Class(":focus").Template().OfType<Border>().Name("PART_BorderElement"))
-                {
-                    Setters =
-                    {
-                        new Setter(Border.BackgroundProperty, new SolidColorBrush(bgColor)) // focused color
-                    }
-                },
-                new Style(x => x.OfType<TextBox>().Class(":pointerover").Template().OfType<Border>().Name("PART_BorderElement"))
-                {
-                    Setters =
-                    {
-                        new Setter(Border.BackgroundProperty, new SolidColorBrush(bgColorLighter)) // mouse over color
-                    }
-                },
-
-                // NumericUpDown
-                new Style(x => x.OfType<NumericUpDown>())
-                {
-                    Setters =
-                    {
-                        new Setter(NumericUpDown.BackgroundProperty, new SolidColorBrush(bgColor))
-                    }
-                },
-
-                // Menu / ContextMenu
-                new Style(x => x.OfType<ContextMenu>())
-                {
-                    Setters =
-                    {
-                        new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(bgColor))
-                    }
-                },
-
-                // Flyout
-                new Style(x => x.OfType<FlyoutPresenter>())
-                {
-                    Setters =
-                    {
-                        new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(bgColor))
-                    }
-                },
-
-                // DataGrid header
-                new Style(x => x.OfType<DataGridColumnHeader>())
-                {
-                    Setters =
-                    {
-                        new Setter(DataGridColumnHeader.BackgroundProperty, new SolidColorBrush(bgColorHeader))
-                    }
-                },
-
-                // DataGrid header
-                new Style(x => x.OfType<ButtonSpinner>())
-                {
-                    Setters =
-                    {
-                        new Setter(ButtonSpinner.BackgroundProperty, new SolidColorBrush(bgColor))
-                    }
-                },
-            };
+            return;
         }
 
-        Application.Current!.Styles.Add(_lighterDarkStyle);
+        UpdateRegionColor();
+        
+        var bgColor = GetDarkThemeBackgroundColor();
+        var bgColorLighter = LightenColor(bgColor, 5);
+        var bgColorHeader = LightenColor(bgColor, 15);
+
+        _lighterDarkStyle = new Styles
+        {
+            // TextBox
+            new Style(x => x.OfType<TextBox>())
+            {
+                Setters =
+                {
+                    new Setter(TextBox.BackgroundProperty, new SolidColorBrush(bgColor))
+                }
+            },
+            new Style(x => x.OfType<TextBox>().Class(":focus").Template().OfType<Border>().Name("PART_BorderElement"))
+            {
+                Setters =
+                {
+                    new Setter(Border.BackgroundProperty, new SolidColorBrush(bgColor)) // focused color
+                }
+            },
+            new Style(x =>
+                x.OfType<TextBox>().Class(":pointerover").Template().OfType<Border>().Name("PART_BorderElement"))
+            {
+                Setters =
+                {
+                    new Setter(Border.BackgroundProperty, new SolidColorBrush(bgColorLighter)) // mouse over color
+                }
+            },
+
+            // NumericUpDown
+            new Style(x => x.OfType<NumericUpDown>())
+            {
+                Setters =
+                {
+                    new Setter(NumericUpDown.BackgroundProperty, new SolidColorBrush(bgColor))
+                }
+            },
+
+            // Menu / ContextMenu
+            new Style(x => x.OfType<ContextMenu>())
+            {
+                Setters =
+                {
+                    new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(bgColor))
+                }
+            },
+
+            // Flyout
+            new Style(x => x.OfType<FlyoutPresenter>())
+            {
+                Setters =
+                {
+                    new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(bgColor))
+                }
+            },
+
+            // DataGrid header
+            new Style(x => x.OfType<DataGridColumnHeader>())
+            {
+                Setters =
+                {
+                    new Setter(DataGridColumnHeader.BackgroundProperty, new SolidColorBrush(bgColorHeader))
+                }
+            },
+
+            // DataGrid header
+            new Style(x => x.OfType<ButtonSpinner>())
+            {
+                Setters =
+                {
+                    new Setter(ButtonSpinner.BackgroundProperty, new SolidColorBrush(bgColor))
+                }
+            },
+        };
+
+        Application.Current.Styles.Add(_lighterDarkStyle);
     }
 
-    public static void RemoveLighterDark()
+    private static void RemoveLighterDark()
     {
         if (_lighterDarkStyle != null)
         {
@@ -1837,49 +1847,49 @@ public static class UiUtil
         Application.Current.Styles.Add(new Style(x => x.OfType<TextBlock>())
         {
             Setters =
-                {
-                    new Setter(TextBlock.FontFamilyProperty, new FontFamily(fontName)),
-                }
+            {
+                new Setter(TextBlock.FontFamilyProperty, new FontFamily(fontName)),
+            }
         });
 
         Application.Current.Styles.Add(new Style(x => x.OfType<TextBox>())
         {
             Setters =
-                {
-                    new Setter(TextBox.FontFamilyProperty, new FontFamily(fontName)),
-                }
+            {
+                new Setter(TextBox.FontFamilyProperty, new FontFamily(fontName)),
+            }
         });
 
         Application.Current.Styles.Add(new Style(x => x.OfType<Button>())
         {
             Setters =
-                {
-                    new Setter(Button.FontFamilyProperty, new FontFamily(fontName)),
-                }
+            {
+                new Setter(Button.FontFamilyProperty, new FontFamily(fontName)),
+            }
         });
 
         Application.Current.Styles.Add(new Style(x => x.OfType<Avalonia.Controls.MenuItem>())
         {
             Setters =
-                {
-                    new Setter(Avalonia.Controls.MenuItem.FontFamilyProperty, new FontFamily(fontName)),
-                }
+            {
+                new Setter(Avalonia.Controls.MenuItem.FontFamilyProperty, new FontFamily(fontName)),
+            }
         });
 
         Application.Current.Styles.Add(new Style(x => x.OfType<Label>())
         {
             Setters =
-                {
-                    new Setter(Label.FontFamilyProperty, new FontFamily(fontName)),
-                }
+            {
+                new Setter(Label.FontFamilyProperty, new FontFamily(fontName)),
+            }
         });
 
         Application.Current.Styles.Add(new Style(x => x.OfType<ComboBox>())
         {
             Setters =
-                {
-                    new Setter(ComboBox.FontFamilyProperty, new FontFamily(fontName)),
-                }
+            {
+                new Setter(ComboBox.FontFamilyProperty, new FontFamily(fontName)),
+            }
         });
     }
 
