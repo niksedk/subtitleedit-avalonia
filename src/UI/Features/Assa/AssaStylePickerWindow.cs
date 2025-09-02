@@ -1,6 +1,11 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
+using Avalonia.Media;
+using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -91,6 +96,23 @@ public class AssaStylePickerWindow : Window
             ItemsSource = vm.Styles,
             Columns =
             {
+                new DataGridTemplateColumn
+               {
+                    Header = Se.Language.General.Enabled,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    CellTemplate = new FuncDataTemplate<FixRuleDisplayItem>((item, _) =>
+                    new Border
+                    {
+                        Background = Brushes.Transparent, // Prevents highlighting
+                        Padding = new Thickness(4),
+                        Child = new CheckBox
+                        {
+                            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(StyleDisplay.IsSelected)),
+                            HorizontalAlignment = HorizontalAlignment.Center
+                        }
+                    }),
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
+                },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Name,

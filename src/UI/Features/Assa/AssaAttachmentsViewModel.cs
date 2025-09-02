@@ -1,6 +1,5 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -15,6 +14,7 @@ using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -92,13 +92,42 @@ public partial class AssaAttachmentsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void FileImport()
+    private async Task FileImport()
     {
+        if (Window == null)
+        {
+            return;
+        }   
+
+        var fileName = await _fileHelper.PickOpenFile(Window, "Select import file", "Advanced Sub Station Alpha files","*.ass");
     }
 
     [RelayCommand]
-    private void FileExport()
+    private async Task FileExport()
     {
+        var selected = SelectedAttachment;
+        if (Window == null || selected == null)
+        {
+            return;
+        }
+
+        var ext = Path.GetExtension(selected.FileName);    
+        var suggestedFileName = Path.GetFileName(selected.FileName);
+        var fileName = await _fileHelper.PickSaveFile(Window, ext, suggestedFileName, "Export attachment");
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        var bytes = selected.Bytes;
+        try
+        {
+            File.WriteAllBytes(fileName, bytes);
+        }
+        catch (Exception exception)
+        {
+            await MessageBox.Show(Window, exception.Message, Se.Language.General.Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
     }
 
     [RelayCommand]
@@ -300,7 +329,14 @@ public partial class AssaAttachmentsViewModel : ObservableObject
         if (!string.IsNullOrWhiteSpace(attachmentFileName) && !string.IsNullOrEmpty(content))
         {
             var bytes = UUEncoding.UUDecode(content);
-            var attachment = new AssaAttachmentItem { FileName = attachmentFileName, Bytes = bytes, Category = category, Content = content };
+            var attachment = new AssaAttachmentItem 
+            { 
+                FileName = Path.GetFileName(attachmentFileName), 
+                Bytes = bytes, 
+                Category = category, 
+                Content = content,
+                Size = Utilities.FormatBytesToDisplayFileSize(bytes.Length),
+            };
             Attachments.Add(attachment);
         }
     }

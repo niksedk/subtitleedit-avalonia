@@ -43,6 +43,7 @@ public partial class StyleDisplay : ObservableObject
     [ObservableProperty] private int _marginRight;
     [ObservableProperty] private int _marginVertical;
     [ObservableProperty] private BorderStyleItem _borderStyle;
+    [ObservableProperty] private bool _isSelected;
 
     public string OriginalName { get; set; } = string.Empty;
 

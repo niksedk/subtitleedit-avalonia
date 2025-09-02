@@ -51,8 +51,8 @@ public class AssaAttachmentsWindow : Window
         var labelPreview = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.PreviewTitle));
 
         var buttonAttach = UiUtil.MakeButton(Se.Language.General.AttachDotDotDot, vm.FileAttachCommand);
-        var buttonImport = UiUtil.MakeButton(Se.Language.General.ImportDotDotDot, vm.FileAttachCommand);
-        var buttonExport = UiUtil.MakeButton(Se.Language.General.ExportDotDotDot, vm.FileAttachCommand);
+        var buttonImport = UiUtil.MakeButton(Se.Language.General.ImportDotDotDot, vm.FileImportCommand);
+        var buttonExport = UiUtil.MakeButton(Se.Language.General.ExportDotDotDot, vm.FileExportCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonAttach, buttonImport, buttonExport, buttonOk, buttonCancel);
