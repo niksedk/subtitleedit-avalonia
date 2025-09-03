@@ -5,7 +5,6 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
-using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -22,10 +21,10 @@ public class AssaStylePickerWindow : Window
             Mode = BindingMode.TwoWay,
         });
         CanResize = true;
-        Width = 1200;
-        Height = 850;
-        MinWidth = 1100;
-        MinHeight = 600;
+        Width = 800;
+        Height = 550;
+        MinWidth = 550;
+        MinHeight = 400;
 
         vm.Window = this;
         DataContext = vm;
@@ -40,7 +39,6 @@ public class AssaStylePickerWindow : Window
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
@@ -58,7 +56,7 @@ public class AssaStylePickerWindow : Window
 
         grid.Add(labelFontsAndImages, 0);
         grid.Add(MakeDataGrid(vm), 1);
-        grid.Add(panelButtons, 3, 0, 1, 2);
+        grid.Add(panelButtons, 2);
 
         Content = grid;
 
@@ -68,20 +66,6 @@ public class AssaStylePickerWindow : Window
 
     private static Border MakeDataGrid(AssaStylePickerViewModel vm)
     {
-        var grid = new Grid
-        {
-            RowDefinitions =
-            {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
-            },
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-            },
-            Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-        };
-
         var dataGrid = new DataGrid
         {
             AutoGenerateColumns = false,
@@ -100,7 +84,7 @@ public class AssaStylePickerWindow : Window
                {
                     Header = Se.Language.General.Enabled,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    CellTemplate = new FuncDataTemplate<FixRuleDisplayItem>((item, _) =>
+                    CellTemplate = new FuncDataTemplate<StyleDisplay>((item, _) =>
                     new Border
                     {
                         Background = Brushes.Transparent, // Prevents highlighting
@@ -139,8 +123,7 @@ public class AssaStylePickerWindow : Window
             },
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedStyle)) { Source = vm });
-        dataGrid.SelectionChanged += vm.DataGridSelectionChanged;
 
-        return UiUtil.MakeBorderForControl(grid);
+        return UiUtil.MakeBorderForControl(dataGrid);
     }
 }

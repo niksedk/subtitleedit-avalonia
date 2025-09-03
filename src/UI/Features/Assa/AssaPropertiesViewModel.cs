@@ -5,6 +5,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Video.BurnIn;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using System;
@@ -12,6 +14,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Assa;
 
@@ -28,6 +31,7 @@ public partial class AssaPropertiesViewModel : ObservableObject
     [ObservableProperty] private string _updateDetails;
     [ObservableProperty] private int _videoWidth;
     [ObservableProperty] private int _videoHeight;
+    [ObservableProperty] private bool _showGetResolutionFromCurrentVideo;
     [ObservableProperty] private ObservableCollection<WrapStyleItem> _wrapStyles;
     [ObservableProperty] private WrapStyleItem _selectedWrapStyle;
     [ObservableProperty] private ObservableCollection<BorderAndShadowScalingItem> _borderAndShadowScalingStyles;
@@ -38,12 +42,13 @@ public partial class AssaPropertiesViewModel : ObservableObject
     public string Header { get; set; }
 
     private readonly IFileHelper _fileHelper;
-    private string _fileName;
-    private Subtitle _subtitle;
+    private readonly IWindowService _windowService;
+    private string _videoFileName;
 
-    public AssaPropertiesViewModel(IFileHelper fileHelper)
+    public AssaPropertiesViewModel(IFileHelper fileHelper, IWindowService windowService)
     {
         _fileHelper = fileHelper;
+        _windowService = windowService;
 
         Title = string.Empty;
         ScriptTitle = string.Empty;
@@ -55,22 +60,18 @@ public partial class AssaPropertiesViewModel : ObservableObject
         UpdatedBy = string.Empty;
         UpdateDetails = string.Empty;
         WrapStyles = new ObservableCollection<WrapStyleItem>(WrapStyleItem.List());
-        SelectedWrapStyle = WrapStyles[0];
+        SelectedWrapStyle = WrapStyles[2];
         BorderAndShadowScalingStyles = new ObservableCollection<BorderAndShadowScalingItem>(BorderAndShadowScalingItem.List());
         SelectedBorderAndShadowScalingStyle = BorderAndShadowScalingStyles[2];
 
-        _fileName = string.Empty;
+        _videoFileName = string.Empty;
         Header = string.Empty;
-        _subtitle = new Subtitle();
-
-        LoadSettings();
     }
 
     [RelayCommand]
     private void Ok()
     {
         OkPressed = true;
-        SaveSettings();
         UpdateHeader();
         Close();
     }
@@ -152,20 +153,66 @@ public partial class AssaPropertiesViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void BrowseResolution()
+    private async Task BrowseResolution()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<BurnInResolutionPickerWindow, BurnInResolutionPickerViewModel>(Window, vm =>
+        {
+            vm.RemoveUseSourceResolution();
+        });
+
+        if (!result.OkPressed || result.SelectedResolution == null)
+        {
+            return;
+        }
+
+        if (result.SelectedResolution.ItemType == ResolutionItemType.PickResolution)
+        {
+            var videoFileName = await _fileHelper.PickOpenVideoFile(Window!, Se.Language.General.OpenVideoFileTitle);
+            if (string.IsNullOrWhiteSpace(videoFileName))
+            {
+                return;
+            }
+
+            var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
+            VideoWidth = mediaInfo.Dimension.Width;
+            VideoHeight = mediaInfo.Dimension.Height;
+        }
+        else if (result.SelectedResolution.ItemType == ResolutionItemType.Resolution)
+        {
+            VideoWidth = result.SelectedResolution.Width;
+            VideoHeight = result.SelectedResolution.Height;
+        }
     }
 
     [RelayCommand]
     private void GetResolutionFromCurrentVideo()
     {
+        _ = Task.Run(() =>
+        {
+            var mediaInfo = FfmpegMediaInfo.Parse(_videoFileName);
+            if (mediaInfo?.Dimension is { Width: > 0, Height: > 0 })
+            {
+                var resolutionItem = new ResolutionItem(string.Empty, mediaInfo.Dimension.Width, mediaInfo.Dimension.Height);
+                Dispatcher.UIThread.Post(() =>
+                {
+                    VideoWidth = mediaInfo.Dimension.Width;
+                    VideoHeight = mediaInfo.Dimension.Height;
+                });
+            }
+        });
     }
 
-    public void Initialize(Subtitle subtitle, SubtitleFormat format, string fileName)
+    public void Initialize(Subtitle subtitle, SubtitleFormat format, string fileName, string videoFileName)
     {
         Title = string.Format(Se.Language.Assa.PropertiesTitleX, fileName);
         Header = subtitle.Header;
-        _subtitle = subtitle;
+        _videoFileName = videoFileName;
+        ShowGetResolutionFromCurrentVideo = !string.IsNullOrWhiteSpace(videoFileName) && System.IO.File.Exists(videoFileName);
 
         if (Header == null || !Header.Contains("style:", StringComparison.OrdinalIgnoreCase))
         {
@@ -231,7 +278,7 @@ public partial class AssaPropertiesViewModel : ObservableObject
                 var scale = line.Trim().Remove(0, 22).Trim().ToLowerInvariant();
                 if (scale == "yes")
                 {
-                    SelectedBorderAndShadowScalingStyle = BorderAndShadowScalingStyles.First(p=>p.Style == BorderAndShadowScalingType.Yes);
+                    SelectedBorderAndShadowScalingStyle = BorderAndShadowScalingStyles.First(p => p.Style == BorderAndShadowScalingType.Yes);
                 }
                 else if (scale == "no")
                 {
@@ -274,15 +321,6 @@ public partial class AssaPropertiesViewModel : ObservableObject
             Window?.Close();
         });
     }
-
-    private void SaveSettings()
-    {
-    }
-
-    private void LoadSettings()
-    {
-    }
-
 
     internal void KeyDown(object? sender, KeyEventArgs e)
     {

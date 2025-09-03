@@ -1,5 +1,4 @@
-﻿using Avalonia;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -153,6 +152,7 @@ public class AssaStylesWindow : Window
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedFileStyle)) { Source = vm });
         dataGrid.SelectionChanged += vm.FileStylesChanged;
         dataGrid.KeyDown += vm.FileStylesKeyDown;
+        vm.FileStyleGrid = dataGrid;
 
         var flyout = new MenuFlyout();
         flyout.Opening += vm.FilesContextMenuOpening;
@@ -257,6 +257,7 @@ public class AssaStylesWindow : Window
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedStorageStyle)) { Source = vm });
         dataGrid.SelectionChanged += vm.StorageStylesChanged;
+        vm.StorageStyleGrid = dataGrid;
 
         var buttonNew = UiUtil.MakeButton(vm.StorageNewCommand, IconNames.MdiPlus, Se.Language.General.New);
         var buttonDuplicate = UiUtil.MakeButton(vm.StorageCopyCommand, IconNames.MdiDuplicate, Se.Language.General.Duplicate);

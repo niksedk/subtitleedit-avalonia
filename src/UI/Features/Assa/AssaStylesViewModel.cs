@@ -38,17 +38,21 @@ public partial class AssaStylesViewModel : ObservableObject
     [ObservableProperty] private bool _isDeleteVisible;
     [ObservableProperty] private bool _isDeleteAllVisible;
 
-    public Window? Window { get; internal set; }
+    public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
     public string Header { get; set; }
+    public DataGrid FileStyleGrid { get; set; }
+    public DataGrid StorageStyleGrid { get; set; }
 
     private readonly IFileHelper _fileHelper;
+    private readonly IWindowService _windowService;
     private Subtitle _subtitle;
     private readonly System.Timers.Timer _timerUpdatePreview;
 
-    public AssaStylesViewModel(IFileHelper fileHelper)
+    public AssaStylesViewModel(IFileHelper fileHelper, IWindowService windowService)
     {
         _fileHelper = fileHelper;
+        _windowService = windowService;
 
         Title = string.Empty;
         FileStyles = new ObservableCollection<StyleDisplay>();
@@ -57,6 +61,8 @@ public partial class AssaStylesViewModel : ObservableObject
         BorderTypes = new ObservableCollection<BorderStyleItem>(BorderStyleItem.List());
         SelectedBorderType = BorderTypes[0];
         CurrentTitle = string.Empty;
+        FileStyleGrid = new DataGrid();
+        StorageStyleGrid = new DataGrid();
 
         Header = string.Empty;
         _subtitle = new Subtitle();
@@ -88,9 +94,55 @@ public partial class AssaStylesViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void FileImport()
+    private async Task FileImport()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var format = new AdvancedSubStationAlpha();
+        var fileName = await _fileHelper.PickOpenFile(Window, "Open subtitle file to import styles from", format.Name, "*" + format.Extension);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        var s = Subtitle.Parse(fileName, format);
+        var ssaStyles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(s.Header);
+
+        var result = await _windowService.ShowDialogAsync<AssaStylePickerWindow, AssaStylePickerViewModel>(Window, vm =>
+        {
+            vm.Initialize(ssaStyles.Select(p => new StyleDisplay(p) { IsSelected = true, Name = MakeUniqueName(p.Name, FileStyles) }).ToList());
+        });
+
+        var selectedStyles = result.Styles.Where(p => p.IsSelected).ToList();
+        if (!result.OkPressed || selectedStyles.Count == 0)
+        {
+            return;
+        }
+
+        FileStyles.AddRange(selectedStyles);
+
         UpdateUsages();
+    }
+
+    private string MakeUniqueName(string name, ObservableCollection<StyleDisplay> styles)
+    {
+        var newName = name;
+        if (styles.Any(p => p.Name.Equals(newName, StringComparison.OrdinalIgnoreCase)))
+        {
+            var count = 2;
+            var doRepeat = true;
+            while (doRepeat)
+            {
+                newName = name + "_" + count;
+                doRepeat = styles.Any(p => p.Name.Equals(newName, StringComparison.OrdinalIgnoreCase));
+                count++;
+            }
+        }
+
+        return newName;
     }
 
     [RelayCommand]
@@ -177,15 +229,43 @@ public partial class AssaStylesViewModel : ObservableObject
 
         var s = new Subtitle();
         s.Header = AdvancedSubStationAlpha.GetHeaderAndStylesFromAdvancedSubStationAlpha(
-            AdvancedSubStationAlpha.DefaultHeader, 
+            AdvancedSubStationAlpha.DefaultHeader,
             styles);
         var text = s.ToText(new AdvancedSubStationAlpha());
         await System.IO.File.WriteAllTextAsync(fileName, text);
     }
 
     [RelayCommand]
-    private void StorageImport()
+    private async Task StorageImport()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var format = new AdvancedSubStationAlpha();
+        var fileName = await _fileHelper.PickOpenFile(Window, "Open subtitle file to import styles from", format.Name, "*" + format.Extension);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        var s = Subtitle.Parse(fileName, format);
+        var ssaStyles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(s.Header);
+
+        var result = await _windowService.ShowDialogAsync<AssaStylePickerWindow, AssaStylePickerViewModel>(Window, vm =>
+        {
+            vm.Initialize(ssaStyles.Select(p => new StyleDisplay(p) { IsSelected = true, Name = MakeUniqueName(p.Name, StorageStyles) }).ToList());
+        });
+
+        var selectedStyles = result.Styles.Where(p => p.IsSelected).ToList();
+        if (!result.OkPressed || selectedStyles.Count == 0)
+        {
+            return;
+        }
+
+        StorageStyles.AddRange(selectedStyles);
+
         UpdateUsages();
     }
 
@@ -212,24 +292,28 @@ public partial class AssaStylesViewModel : ObservableObject
     [RelayCommand]
     private void StorageRemove()
     {
-        if (SelectedStorageStyle != null)
+        if (SelectedStorageStyle == null)
         {
-            var idx = StorageStyles.IndexOf(SelectedStorageStyle);
-            StorageStyles.Remove(SelectedStorageStyle);
-            SelectedStorageStyle = null;
-            CurrentStyle = null;
-
-            if (StorageStyles.Count > 0)
-            {
-                if (idx >= StorageStyles.Count)
-                {
-                    idx = StorageStyles.Count - 1;
-                }
-
-                SelectedStorageStyle = StorageStyles[idx];
-                CurrentStyle = SelectedStorageStyle;
-            }
+            return;
         }
+
+        var idx = StorageStyles.IndexOf(SelectedStorageStyle);
+        StorageStyles.Remove(SelectedStorageStyle);
+        SelectedStorageStyle = null;
+        CurrentStyle = null;
+
+        if (StorageStyles.Count > 0)
+        {
+            if (idx >= StorageStyles.Count)
+            {
+                idx = StorageStyles.Count - 1;
+            }
+
+            SelectedStorageStyle = StorageStyles[idx];
+            CurrentStyle = SelectedStorageStyle;
+        }
+
+        StorageStyleGrid.Focus();
     }
 
     [RelayCommand]
@@ -287,7 +371,7 @@ public partial class AssaStylesViewModel : ObservableObject
 
         var s = new Subtitle();
         s.Header = AdvancedSubStationAlpha.GetHeaderAndStylesFromAdvancedSubStationAlpha(
-            AdvancedSubStationAlpha.DefaultHeader, 
+            AdvancedSubStationAlpha.DefaultHeader,
             styles);
         var text = s.ToText(new AdvancedSubStationAlpha());
         await System.IO.File.WriteAllTextAsync(fileName, text);
@@ -542,6 +626,8 @@ public partial class AssaStylesViewModel : ObservableObject
 
                 UpdateUsages();
             }
+
+            FileStyleGrid.Focus();
         });
     }
 

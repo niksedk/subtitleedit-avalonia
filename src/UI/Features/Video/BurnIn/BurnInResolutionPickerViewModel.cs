@@ -3,6 +3,7 @@ using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Video.BurnIn;
 
@@ -18,6 +19,11 @@ public partial class BurnInResolutionPickerViewModel : ObservableObject
     public BurnInResolutionPickerViewModel()
     {
         Resolutions = new ObservableCollection<ResolutionItem>(ResolutionItem.GetResolutions());
+    }
+
+    public void RemoveUseSourceResolution()
+    {
+        Resolutions.Remove(Resolutions.First(p => p.ItemType == ResolutionItemType.UseSource));
     }
 
     [RelayCommand]

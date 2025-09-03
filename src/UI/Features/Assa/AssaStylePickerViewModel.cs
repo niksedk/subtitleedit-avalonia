@@ -57,30 +57,13 @@ public partial class AssaStylePickerViewModel : ObservableObject
         {
             SelectedStyle = Styles[0];
         }
-        
-        UpdatePreview();
     }
     
-    private void UpdatePreview()
-    {
-        var selectedItem = SelectedStyle;
-        if (selectedItem == null)
-        {
-            //PreviewImage = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
-            return;
-        }
-    }
-
     internal void KeyDown(object? sender, KeyEventArgs e)
     {
         if (e.Key == Key.Escape)
         {
             Close();
         }
-    }
-
-    internal void DataGridSelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
-        UpdatePreview();
     }
 }

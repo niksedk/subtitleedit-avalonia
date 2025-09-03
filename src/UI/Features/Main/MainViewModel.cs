@@ -484,7 +484,7 @@ public partial class MainViewModel :
     {
         var result = await _windowService.ShowDialogAsync<AssaPropertiesWindow, AssaPropertiesViewModel>(Window!, vm =>
         {
-            vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
+            vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty, _videoFileName ?? string.Empty);
         });
 
         if (result.OkPressed)
@@ -2139,7 +2139,7 @@ public partial class MainViewModel :
 
             styles.Add(newStyle);
             header = AdvancedSubStationAlpha.GetHeaderAndStylesFromAdvancedSubStationAlpha(header, styles);
-            _subtitle.Header = header;
+            _subtitle!.Header = header;
 
             SetStyleForSelectedLines(newStyle.Name);
         }

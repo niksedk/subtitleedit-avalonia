@@ -80,6 +80,7 @@ public partial class VisualSyncViewModel : ObservableObject
             if (audioVisualizer != null)
             {
                 AudioVisualizerLeft.WavePeaks = audioVisualizer.WavePeaks;
+                AudioVisualizerRight.WavePeaks = audioVisualizer.WavePeaks;
                 IsAudioVisualizerVisible = true;
             }
             StartTitleTimer();

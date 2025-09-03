@@ -286,8 +286,10 @@ public partial class MultipleReplaceViewModel : ObservableObject
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!,
-            vm => { vm.Initialize(Se.Language.Edit.MultipleReplace.NewRule, node); });
+        var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!, vm => 
+        { 
+            vm.Initialize(Se.Language.Edit.MultipleReplace.NewRule, node); 
+        });
 
         if (result.OkPressed)
         {

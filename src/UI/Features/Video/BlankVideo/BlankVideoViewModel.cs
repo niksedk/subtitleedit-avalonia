@@ -357,9 +357,7 @@ public partial class BlankVideoViewModel : ObservableObject
     [RelayCommand]
     private async Task BrowseResolution()
     {
-        var result =
-            await _windowService
-                .ShowDialogAsync<BurnInResolutionPickerWindow, BurnInResolutionPickerViewModel>(Window!);
+        var result = await _windowService.ShowDialogAsync<BurnInResolutionPickerWindow, BurnInResolutionPickerViewModel>(Window!);
         if (!result.OkPressed || result.SelectedResolution == null)
         {
             return;

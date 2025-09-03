@@ -100,6 +100,24 @@ public partial class AssaAttachmentsViewModel : ObservableObject
         }   
 
         var fileName = await _fileHelper.PickOpenFile(Window, "Select import file", "Advanced Sub Station Alpha files","*.ass");
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        var subtitle = Subtitle.Parse(fileName, new AdvancedSubStationAlpha());
+        var attachments = ListAttachments(subtitle.Footer.SplitToLines() ?? []);
+        if (attachments.Count == 0)
+        {
+            await MessageBox.Show(Window, "No attachments found in file.", Se.Language.General.Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        Attachments.AddRange(attachments);
+        if (Attachments.Count > 0 && SelectedAttachment == null)
+        {
+            SelectedAttachment = Attachments.First();
+        }
     }
 
     [RelayCommand]
@@ -209,7 +227,7 @@ public partial class AssaAttachmentsViewModel : ObservableObject
             ResetHeader();
         }
 
-        ListAttachments(Footer.SplitToLines() ?? []);
+        Attachments.AddRange(ListAttachments(Footer.SplitToLines() ?? []));
 
         if (Attachments.Count > 0)
         {
@@ -233,34 +251,34 @@ public partial class AssaAttachmentsViewModel : ObservableObject
             {
                 if (s == "[V4+ Styles]" || s == "[V4 Styles]" || s == "[Events]")
                 {
-                    AddToListIfNotEmpty(attachmentContent.ToString(), attachmentFileName, category);
+                    AddToListIfNotEmpty(attachments, attachmentContent.ToString(), attachmentFileName, category);
                     attachmentOn = false;
                     attachmentContent = new StringBuilder();
                     attachmentFileName = string.Empty;
                 }
                 else if (s == string.Empty)
                 {
-                    AddToListIfNotEmpty(attachmentContent.ToString(), attachmentFileName, category);
+                    AddToListIfNotEmpty(attachments, attachmentContent.ToString(), attachmentFileName, category);
                     attachmentContent = new StringBuilder();
                     attachmentFileName = string.Empty;
                 }
                 else if (s.Equals("[Fonts]", StringComparison.OrdinalIgnoreCase))
                 {
-                    AddToListIfNotEmpty(attachmentContent.ToString(), attachmentFileName, category);
+                    AddToListIfNotEmpty(attachments, attachmentContent.ToString(), attachmentFileName, category);
                     attachmentContent = new StringBuilder();
                     attachmentFileName = string.Empty;
                     category = Se.Language.General.Fonts;
                 }
                 else if (s.Equals("[Graphics]", StringComparison.OrdinalIgnoreCase))
                 {
-                    AddToListIfNotEmpty(attachmentContent.ToString(), attachmentFileName, category);
+                    AddToListIfNotEmpty(attachments, attachmentContent.ToString(), attachmentFileName, category);
                     attachmentContent = new StringBuilder();
                     attachmentFileName = string.Empty;
                     category = Se.Language.Assa.Graphics;
                 }
                 else if (s.StartsWith("filename:") || s.StartsWith("fontname:"))
                 {
-                    AddToListIfNotEmpty(attachmentContent.ToString(), attachmentFileName, category);
+                    AddToListIfNotEmpty(attachments, attachmentContent.ToString(), attachmentFileName, category);
                     attachmentContent = new StringBuilder();
                     attachmentFileName = s.Remove(0, 9).Trim();
                 }
@@ -285,7 +303,7 @@ public partial class AssaAttachmentsViewModel : ObservableObject
             }
         }
 
-        AddToListIfNotEmpty(attachmentContent.ToString(), attachmentFileName, category);
+        AddToListIfNotEmpty(attachments, attachmentContent.ToString(), attachmentFileName, category);
         return attachments;
     }
 
@@ -323,7 +341,7 @@ public partial class AssaAttachmentsViewModel : ObservableObject
         return sb.ToString().TrimStart();
     }
 
-    private void AddToListIfNotEmpty(string attachmentContent, string attachmentFileName, string category)
+    private void AddToListIfNotEmpty(List<AssaAttachmentItem> attachments, string attachmentContent, string attachmentFileName, string category)
     {
         var content = attachmentContent.Trim();
         if (!string.IsNullOrWhiteSpace(attachmentFileName) && !string.IsNullOrEmpty(content))
@@ -337,7 +355,7 @@ public partial class AssaAttachmentsViewModel : ObservableObject
                 Content = content,
                 Size = Utilities.FormatBytesToDisplayFileSize(bytes.Length),
             };
-            Attachments.Add(attachment);
+            attachments.Add(attachment);
         }
     }
 

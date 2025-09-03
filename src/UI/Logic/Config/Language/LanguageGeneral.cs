@@ -298,6 +298,7 @@ public class LanguageGeneral
     public string UpdateDetails { get; set; }
     public string Script { get; set; }
     public string Font { get; set; }
+    public string PickResolutionFromCurrentVideo { get; set; }
 
     public LanguageGeneral()
     {
@@ -595,5 +596,6 @@ public class LanguageGeneral
         UpdateDetails = "Update details";
         Script = "Script";
         Font = "Font";
+        PickResolutionFromCurrentVideo = "Pick resolution from current video";
     }
 }
