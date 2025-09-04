@@ -299,6 +299,7 @@ public class LanguageGeneral
     public string Script { get; set; }
     public string Font { get; set; }
     public string PickResolutionFromCurrentVideo { get; set; }
+    public object IsDefault { get; set; }
 
     public LanguageGeneral()
     {
@@ -597,5 +598,6 @@ public class LanguageGeneral
         Script = "Script";
         Font = "Font";
         PickResolutionFromCurrentVideo = "Pick resolution from current video";
+        IsDefault = "Is default";
     }
 }

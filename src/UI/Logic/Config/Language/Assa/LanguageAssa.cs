@@ -17,6 +17,11 @@ public class LanguageAssa
     public string BorderAndShadowScaling { get; set; }
     public string OriginalScript { get; set; }
     public string Graphics { get; set; }
+    public string CopyToStorageStyles { get; set; }
+    public string CopyToFileStyles { get; set; }
+    public string SetStyleAsDefault { get; set; }
+    public object TakeUsagesFromDotDotDot { get; set; }
+    public string NoAttachmentsFound { get; set; }
 
     public LanguageAssa()
     {
@@ -35,5 +40,10 @@ public class LanguageAssa
         BorderAndShadowScaling = "Border and shadow scaling";
         OriginalScript = "Original script";
         Graphics = "Graphics";
+        CopyToStorageStyles = "Copy to storage styles";
+        CopyToFileStyles = "Copy to file styles";
+        SetStyleAsDefault = "Set style as default";
+        TakeUsagesFromDotDotDot = "Take usages from...";
+        NoAttachmentsFound = "No attachments found in selected ASSA file.";
     }
 }

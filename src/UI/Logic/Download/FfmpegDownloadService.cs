@@ -10,7 +10,7 @@ namespace Nikse.SubtitleEdit.Logic.Download;
 public class FfmpegDownloadService : IFfmpegDownloadService
 {
     private readonly HttpClient _httpClient;
-    private const string WindowsUrl = "https://github.com/SubtitleEdit/support-files/releases/download/ffmpeg-2025-03-31/ffmpeg-2025-03-31.zip";
+    private const string WindowsUrl = "https://github.com/SubtitleEdit/support-files/releases/download/ffmpeg-v8/ffmpeg.zip";
     private const string MacUrl = "https://github.com/SubtitleEdit/support-files/releases/download/ffmpeg-v7-1/ffmpeg-mac-7.1.1.zip";
     private const string MacUrlArm = "https://github.com/SubtitleEdit/support-files/releases/download/ffmpeg-v7-1/ffmpeg711arm.zip";
     

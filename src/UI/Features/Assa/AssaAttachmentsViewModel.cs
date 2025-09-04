@@ -109,7 +109,7 @@ public partial class AssaAttachmentsViewModel : ObservableObject
         var attachments = ListAttachments(subtitle.Footer.SplitToLines() ?? []);
         if (attachments.Count == 0)
         {
-            await MessageBox.Show(Window, "No attachments found in file.", Se.Language.General.Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            await MessageBox.Show(Window, Se.Language.General.Error, Se.Language.Assa.NoAttachmentsFound, MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
 

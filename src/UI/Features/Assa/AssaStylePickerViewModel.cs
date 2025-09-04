@@ -13,8 +13,10 @@ namespace Nikse.SubtitleEdit.Features.Assa;
 public partial class AssaStylePickerViewModel : ObservableObject
 {
     [ObservableProperty] private string _title;
+    [ObservableProperty] private string _buttonAcceptText;
     [ObservableProperty] private ObservableCollection<StyleDisplay> _styles;
     [ObservableProperty] private StyleDisplay? _selectedStyle;
+    [ObservableProperty] private bool _showUsageCount;
 
     public Window? Window { get; internal set; }
     public bool OkPressed { get; private set; }
@@ -25,6 +27,7 @@ public partial class AssaStylePickerViewModel : ObservableObject
     {
         Title = string.Empty;
         Styles = new ObservableCollection<StyleDisplay>();
+        ButtonAcceptText = string.Empty;
         _subtitle = new Subtitle();
     }
 
@@ -49,7 +52,7 @@ public partial class AssaStylePickerViewModel : ObservableObject
         });
     }
 
-    public void Initialize(List<StyleDisplay> styles)
+    public void Initialize(List<StyleDisplay> styles, string buttonAcceptText, bool showUsageCount)
     {
         Styles.AddRange(styles);
         
@@ -57,6 +60,9 @@ public partial class AssaStylePickerViewModel : ObservableObject
         {
             SelectedStyle = Styles[0];
         }
+
+        ButtonAcceptText = buttonAcceptText;
+        ShowUsageCount = showUsageCount;
     }
     
     internal void KeyDown(object? sender, KeyEventArgs e)

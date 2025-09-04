@@ -48,9 +48,9 @@ public class AssaStylePickerWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        var labelFontsAndImages = UiUtil.MakeLabel(Se.Language.Assa.FontsAndGraphics);
+        var labelFontsAndImages = UiUtil.MakeLabel(Se.Language.General.Styles);
 
-        var buttonImport = UiUtil.MakeButton(Se.Language.General.Import, vm.OkCommand);
+        var buttonImport = UiUtil.MakeButton(string.Empty, vm.OkCommand).WithBindContent(nameof(vm.ButtonAcceptText));
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonImport, buttonCancel);
 
@@ -66,6 +66,19 @@ public class AssaStylePickerWindow : Window
 
     private static Border MakeDataGrid(AssaStylePickerViewModel vm)
     {
+        var usagesColumn = new DataGridTextColumn
+        {
+            Header = Se.Language.General.Usages,
+            CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+            Binding = new Binding(nameof(StyleDisplay.FontSize)),
+            IsReadOnly = true,
+        };
+        usagesColumn.Bind(DataGridTextColumn.IsVisibleProperty, new Binding(nameof(vm.ShowUsageCount))
+        {
+            Mode = BindingMode.OneWay,
+            Source = vm,
+        });
+
         var dataGrid = new DataGrid
         {
             AutoGenerateColumns = false,
@@ -110,7 +123,6 @@ public class AssaStylePickerWindow : Window
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(StyleDisplay.FontName)),
                     IsReadOnly = true,
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
                 new DataGridTextColumn
                 {
@@ -118,8 +130,8 @@ public class AssaStylePickerWindow : Window
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(StyleDisplay.FontSize)),
                     IsReadOnly = true,
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
+                usagesColumn,
             },
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedStyle)) { Source = vm });

@@ -37,6 +37,8 @@ public partial class AssaStylesViewModel : ObservableObject
     [ObservableProperty] private Bitmap? _imagePreview;
     [ObservableProperty] private bool _isDeleteVisible;
     [ObservableProperty] private bool _isDeleteAllVisible;
+    [ObservableProperty] private bool _isFileStyleSelected;
+    [ObservableProperty] private bool _isStorageStyleSelected;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -113,7 +115,7 @@ public partial class AssaStylesViewModel : ObservableObject
 
         var result = await _windowService.ShowDialogAsync<AssaStylePickerWindow, AssaStylePickerViewModel>(Window, vm =>
         {
-            vm.Initialize(ssaStyles.Select(p => new StyleDisplay(p) { IsSelected = true, Name = MakeUniqueName(p.Name, FileStyles) }).ToList());
+            vm.Initialize(ssaStyles.Select(p => new StyleDisplay(p) { IsSelected = true, Name = MakeUniqueName(p.Name, FileStyles) }).ToList(), Se.Language.General.Import, false);
         });
 
         var selectedStyles = result.Styles.Where(p => p.IsSelected).ToList();
@@ -236,6 +238,58 @@ public partial class AssaStylesViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void FileCopyToStorage()
+    {
+        var selectedStyle = SelectedFileStyle;
+        if (Window == null || selectedStyle == null)
+        {
+            return;
+        }
+
+        var style = selectedStyle.ToSsaStyle();
+        style.Name = MakeUniqueName(style.Name, StorageStyles);
+        StorageStyles.Add(new StyleDisplay(style));
+    }
+
+    [RelayCommand]
+    private async Task FileTakeUsagesFrom()
+    {
+        var selectedStyle = SelectedFileStyle;
+        if (Window == null || selectedStyle == null)
+        {
+            return;
+        }
+
+        var ssaStyles = FileStyles.Where(p => p.UsageCount > 0 && p.Name != selectedStyle.Name).Select(p => p.ToSsaStyle()).ToList();
+        var result = await _windowService.ShowDialogAsync<AssaStylePickerWindow, AssaStylePickerViewModel>(Window, vm =>
+        {
+            var styles = ssaStyles.Select(p => new StyleDisplay(p)
+            {
+                Name = MakeUniqueName(p.Name, StorageStyles)
+            }).ToList();
+
+            vm.Initialize(styles, Se.Language.General.Ok, true);
+        });
+
+        var selectedStyles = result.Styles.Where(p => p.IsSelected).ToList();
+        if (!result.OkPressed || selectedStyles.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var paragraph in _subtitle.Paragraphs)
+        {
+            var style = selectedStyles.FirstOrDefault(p => p.Name.Equals(paragraph.Extra.TrimStart('*'), StringComparison.OrdinalIgnoreCase));
+            if (style != null)
+            {
+                paragraph.Extra = selectedStyle.Name;
+            }
+        }
+
+        UpdateUsages();
+    }
+
+    [RelayCommand]
     private async Task StorageImport()
     {
         if (Window == null)
@@ -255,7 +309,7 @@ public partial class AssaStylesViewModel : ObservableObject
 
         var result = await _windowService.ShowDialogAsync<AssaStylePickerWindow, AssaStylePickerViewModel>(Window, vm =>
         {
-            vm.Initialize(ssaStyles.Select(p => new StyleDisplay(p) { IsSelected = true, Name = MakeUniqueName(p.Name, StorageStyles) }).ToList());
+            vm.Initialize(ssaStyles.Select(p => new StyleDisplay(p) { IsSelected = true, Name = MakeUniqueName(p.Name, StorageStyles) }).ToList(), Se.Language.General.Import, false);
         });
 
         var selectedStyles = result.Styles.Where(p => p.IsSelected).ToList();
@@ -377,6 +431,37 @@ public partial class AssaStylesViewModel : ObservableObject
         await System.IO.File.WriteAllTextAsync(fileName, text);
     }
 
+    [RelayCommand]
+    private void StorageCopyToFiles()
+    {
+        var selectedStyle = SelectedStorageStyle;
+        if (Window == null || selectedStyle == null)
+        {
+            return;
+        }
+
+        var style = selectedStyle.ToSsaStyle();
+        style.Name = MakeUniqueName(style.Name, FileStyles);
+        FileStyles.Add(new StyleDisplay(style));
+    }
+
+    [RelayCommand]
+    private void StorageSetDefault()
+    {
+        var selectedStyle = SelectedStorageStyle;
+        if (Window == null || selectedStyle == null)
+        {
+            return;
+        }
+
+        foreach (var style in StorageStyles)
+        {
+            style.IsDefault = false;
+        }
+
+        selectedStyle.IsDefault = true;
+    }
+
     private void Close()
     {
         Dispatcher.UIThread.Post(() => { Window?.Close(); });
@@ -440,8 +525,7 @@ public partial class AssaStylesViewModel : ObservableObject
     {
         foreach (var style in FileStyles)
         {
-            style.UsageCount =
-                _subtitle.Paragraphs.Count(p => p.Extra.TrimStart('*').Equals(style.Name.TrimStart('*')));
+            style.UsageCount = _subtitle.Paragraphs.Count(p => p.Extra.TrimStart('*').Equals(style.Name.TrimStart('*')));
         }
     }
 
@@ -555,6 +639,7 @@ public partial class AssaStylesViewModel : ObservableObject
         CurrentStyle = selectedStyle;
         CurrentTitle = Se.Language.Assa.StylesInFile;
         SelectedBorderType = selectedStyle?.BorderStyle ?? BorderTypes[0];
+        IsFileStyleSelected = selectedStyle != null;
     }
 
     internal void StorageStylesChanged(object? sender, SelectionChangedEventArgs e)
@@ -563,6 +648,7 @@ public partial class AssaStylesViewModel : ObservableObject
         CurrentStyle = selectedStyle;
         CurrentTitle = Se.Language.Assa.StylesSaved;
         SelectedBorderType = selectedStyle?.BorderStyle ?? BorderTypes[0];
+        IsStorageStyleSelected = selectedStyle != null;
     }
 
     internal void BorderTypeChanged(object? sender, SelectionChangedEventArgs e)
@@ -640,6 +726,12 @@ public partial class AssaStylesViewModel : ObservableObject
     }
 
     internal void FilesContextMenuOpening(object? sender, EventArgs e)
+    {
+        IsDeleteAllVisible = FileStyles.Count > 0;
+        IsDeleteVisible = SelectedFileStyle != null;
+    }
+
+    internal void StoreContextMenuOpening(object? sender, EventArgs e)
     {
         IsDeleteAllVisible = FileStyles.Count > 0;
         IsDeleteVisible = SelectedFileStyle != null;

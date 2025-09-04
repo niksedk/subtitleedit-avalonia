@@ -176,17 +176,28 @@ public class AssaStylesWindow : Window
         menuItemClear.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsDeleteAllVisible)) { Source = vm });
         flyout.Items.Add(menuItemClear);
 
+        var menuItemTakeUsagesFrom = new MenuItem
+        {
+            Header = Se.Language.Assa.TakeUsagesFromDotDotDot,
+            DataContext = vm,
+            Command = vm.FileTakeUsagesFromCommand,
+        };
+        menuItemTakeUsagesFrom.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsDeleteVisible)) { Source = vm });
+        flyout.Items.Add(menuItemTakeUsagesFrom);
+
         var buttonNew = UiUtil.MakeButton(vm.FileNewCommand, IconNames.MdiPlus, Se.Language.General.New);
         var buttonRemove = UiUtil.MakeButton(vm.FileRemoveCommand, IconNames.MdiTrash, Se.Language.General.Delete);
         var buttonDuplicate = UiUtil.MakeButton(vm.FileCopyCommand, IconNames.MdiDuplicate, Se.Language.General.Duplicate);
         var buttonImport = UiUtil.MakeButton(vm.FileImportCommand, IconNames.MdiImport, Se.Language.General.Import);
         var buttonExport = UiUtil.MakeButton(vm.FileExportCommand, IconNames.MdiExport, Se.Language.General.Export);
+        var buttonCopyToStorage = UiUtil.MakeButton(Se.Language.Assa.CopyToStorageStyles, vm.FileCopyToStorageCommand).WithBindEnabled(nameof(vm.IsFileStyleSelected));
         var panelButtons = UiUtil.MakeButtonBar(
             buttonNew,
             buttonDuplicate,
             buttonRemove,
             buttonImport,
-            buttonExport
+            buttonExport,
+            buttonCopyToStorage
             ).WithAlignmentLeft();
 
         grid.Add(label, 0, 0);
@@ -243,13 +254,19 @@ public class AssaStylesWindow : Window
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(StyleDisplay.FontName)),
                     IsReadOnly = true,
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.FontSize,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(StyleDisplay.FontSize)),
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.IsDefault,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(StyleDisplay.IsDefault)),
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
@@ -259,17 +276,53 @@ public class AssaStylesWindow : Window
         dataGrid.SelectionChanged += vm.StorageStylesChanged;
         vm.StorageStyleGrid = dataGrid;
 
+        var flyout = new MenuFlyout();
+        flyout.Opening += vm.StoreContextMenuOpening;
+        dataGrid.ContextFlyout = flyout;
+
+        var menuItemDelete = new MenuItem
+        {
+            Header = Se.Language.General.Delete,
+            DataContext = vm,
+            Command = vm.StorageRemoveCommand,
+        };
+        menuItemDelete.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsDeleteVisible)) { Source = vm });
+        flyout.Items.Add(menuItemDelete);
+
+        var menuItemClear = new MenuItem
+        {
+            Header = Se.Language.General.Clear,
+            DataContext = vm,
+            Command = vm.StorageRemoveAllCommand,
+        };
+        menuItemClear.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsDeleteAllVisible)) { Source = vm });
+        flyout.Items.Add(menuItemClear);
+
+        var menuItemClearSetAsDefault = new MenuItem
+        {
+            Header = Se.Language.Assa.SetStyleAsDefault,
+            DataContext = vm,
+            Command = vm.StorageSetDefaultCommand,
+        };
+        menuItemClearSetAsDefault.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsDeleteVisible)) { Source = vm });
+        flyout.Items.Add(menuItemClearSetAsDefault);
+
+
         var buttonNew = UiUtil.MakeButton(vm.StorageNewCommand, IconNames.MdiPlus, Se.Language.General.New);
         var buttonDuplicate = UiUtil.MakeButton(vm.StorageCopyCommand, IconNames.MdiDuplicate, Se.Language.General.Duplicate);
         var buttonRemove = UiUtil.MakeButton(vm.StorageRemoveCommand, IconNames.MdiTrash, Se.Language.General.Delete);
         var buttonImport = UiUtil.MakeButton(vm.StorageImportCommand, IconNames.MdiImport, Se.Language.General.Import);
         var buttonExport = UiUtil.MakeButton(vm.StorageExportCommand, IconNames.MdiExport, Se.Language.General.Export);
+        var buttonSetDefault = UiUtil.MakeButton(vm.StorageSetDefaultCommand, IconNames.MdiCheck, Se.Language.Assa.SetStyleAsDefault);
+        var buttonCopyToFiles = UiUtil.MakeButton(Se.Language.Assa.CopyToFileStyles, vm.StorageCopyToFilesCommand).WithBindEnabled(nameof(vm.IsStorageStyleSelected));
         var panelButtons = UiUtil.MakeButtonBar(
             buttonNew,
             buttonDuplicate,
             buttonRemove,
             buttonImport,
-            buttonExport
+            buttonExport,
+            buttonSetDefault,
+            buttonCopyToFiles
             ).WithAlignmentLeft();
 
         grid.Add(label, 0, 0);

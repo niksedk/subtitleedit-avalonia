@@ -843,6 +843,17 @@ public static class UiUtil
         return control;
     }
 
+    public static Button WithBindContent(this Button control, string contentPropertyPath)
+    {
+        control.Bind(Button.ContentProperty, new Binding
+        {
+            Path = contentPropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
     public static CheckBox WithBindEnabled(this CheckBox control, string isEnabledPropertyPath)
     {
         control.Bind(CheckBox.IsEnabledProperty, new Binding

@@ -44,6 +44,7 @@ public partial class StyleDisplay : ObservableObject
     [ObservableProperty] private int _marginVertical;
     [ObservableProperty] private BorderStyleItem _borderStyle;
     [ObservableProperty] private bool _isSelected;
+    [ObservableProperty] private bool _isDefault;
 
     public string OriginalName { get; set; } = string.Empty;
 
@@ -197,6 +198,7 @@ public partial class StyleDisplay : ObservableObject
         MarginLeft = style.MarginLeft;
         MarginRight = style.MarginRight;
         MarginVertical = style.MarginVertical;
+        IsDefault = style.IsDefault;
 
         if (style.UseOpaqueBox)
         {
