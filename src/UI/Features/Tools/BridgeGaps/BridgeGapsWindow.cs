@@ -141,11 +141,8 @@ public class BridgeGapsWindow : Window
                 },
             },
         };
-        //dataGridSubtitle.Bind(DataGrid.SelectedItemProperty,
-        //    new Binding(nameof(vm.SelectedOcrSubtitleItem)) { Source = vm });
-        //vm.SubtitleGrid = dataGridSubtitle;
 
-        return UiUtil.MakeBorderForControl(dataGridSubtitle);
+        return UiUtil.MakeBorderForControlNoPadding(dataGridSubtitle);
     }
 
 

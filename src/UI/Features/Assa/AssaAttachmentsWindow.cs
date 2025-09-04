@@ -152,7 +152,7 @@ public class AssaAttachmentsWindow : Window
 
         grid.Add(dataGrid, 0);
 
-        return UiUtil.MakeBorderForControl(grid);
+        return UiUtil.MakeBorderForControlNoPadding(grid);
     }
 
     private static Border MakeRightView(AssaAttachmentsViewModel vm)

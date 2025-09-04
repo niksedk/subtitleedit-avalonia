@@ -141,9 +141,9 @@ public class BatchConvertWindow : Window
             Margin = new Thickness(0, 0, 0, 10),
             Children =
             {
-                UiUtil.MakeButton("Add", vm.AddFilesCommand),
-                UiUtil.MakeButton("Remove", vm.RemoveSelectedFilesCommand),
-                UiUtil.MakeButton("Clear", vm.ClearAllFilesCommand),
+                UiUtil.MakeButton(Se.Language.General.Add, vm.AddFilesCommand),
+                UiUtil.MakeButton(Se.Language.General.Remove, vm.RemoveSelectedFilesCommand),
+                UiUtil.MakeButton(Se.Language.General.Clear, vm.ClearAllFilesCommand),
                 UiUtil.MakeSeparatorForHorizontal(),
                 UiUtil.MakeLabel("Target format"),
                 UiUtil.MakeComboBox(vm.TargetFormats, vm, nameof(vm.SelectedTargetFormat)),
@@ -156,7 +156,7 @@ public class BatchConvertWindow : Window
         grid.Add(dataGrid, 0, 0);
         grid.Add(panelFileControls, 1, 0);
 
-        var border = UiUtil.MakeBorderForControl(grid);
+        var border = UiUtil.MakeBorderForControlNoPadding(grid);
         return border;  
     }
 

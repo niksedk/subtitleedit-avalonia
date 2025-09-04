@@ -1255,6 +1255,17 @@ public static class UiUtil
         };
     }
 
+    public static Border MakeBorderForControlNoPadding(Control control)
+    {
+        return new Border
+        {
+            Child = control,
+            BorderThickness = new Thickness(1),
+            BorderBrush = GetTextColor(0.3d),
+            CornerRadius = new CornerRadius(CornerRadius),
+        };
+    }
+
     public static T BindIsVisible<T>(this T control, object vm, string visibilityPropertyPath) where T : Visual
     {
         control.DataContext = vm;

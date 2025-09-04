@@ -305,14 +305,7 @@ public class FixCommonErrorsWindow : Window
         Grid.SetRow(buttonBarFixes, 1);
         Grid.SetColumn(buttonBarFixes, 0);
 
-        var borderFixes = new Border
-        {
-            BorderThickness = new Thickness(1),
-            BorderBrush = new SolidColorBrush(Colors.Gray),
-            Margin = new Thickness(0, 0, 0, 10),
-            Padding = new Thickness(5),
-            Child = gridFixes,
-        };
+        var borderFixes = UiUtil.MakeBorderForControlNoPadding(gridFixes).WithMarginBottom(5);
 
         // bottom
         var gridSubtitles = new Grid
@@ -414,14 +407,7 @@ public class FixCommonErrorsWindow : Window
         Grid.SetRow(gridCurrentSubtbtitle, 1);
         Grid.SetColumn(gridCurrentSubtbtitle, 0);
 
-        var borderSubtitles = new Border
-        {
-            BorderThickness = new Thickness(1),
-            BorderBrush = new SolidColorBrush(Colors.Gray),
-            Margin = new Thickness(0, 0, 0, 0),
-            Padding = new Thickness(5),
-            Child = gridSubtitles,
-        };
+        var borderSubtitles = UiUtil.MakeBorderForControlNoPadding(gridSubtitles);
 
         var grid = new Grid
         {

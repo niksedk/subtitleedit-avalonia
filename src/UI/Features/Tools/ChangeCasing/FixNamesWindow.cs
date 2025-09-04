@@ -124,7 +124,6 @@ public class FixNamesWindow : Window
             DataContext = vm,
         };
 
-
         dataGrid.Columns.Add(new DataGridTemplateColumn
         {
             Header = Se.Language.General.Enabled,
@@ -152,7 +151,7 @@ public class FixNamesWindow : Window
             IsReadOnly = true,
         });
 
-        var border = UiUtil.MakeBorderForControl(dataGrid);
+        var border = UiUtil.MakeBorderForControlNoPadding(dataGrid);
         return border;
     }
 
@@ -197,7 +196,7 @@ public class FixNamesWindow : Window
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
         });
 
-        var border = UiUtil.MakeBorderForControl(dataGrid);
+        var border = UiUtil.MakeBorderForControlNoPadding(dataGrid);
         return border;
     }
 

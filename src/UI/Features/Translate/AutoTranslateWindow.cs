@@ -92,7 +92,6 @@ public class AutoTranslateWindow : Window
         var dataGrid = new DataGrid
         {
             Height = double.NaN, // auto size inside scroll viewer
-            Margin = new Thickness(2),
             CanUserSortColumns = false,
             ContextFlyout = contextMenu,
             DataContext = vm,
@@ -104,31 +103,36 @@ public class AutoTranslateWindow : Window
                 {
                     Header = "#",
                     Binding = new Binding(nameof(TranslateRow.Number)),
-                    Width = new DataGridLength(50)
+                    Width = new DataGridLength(50),
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Show",
                     Binding = new Binding(nameof(TranslateRow.Show)),
-                    Width = new DataGridLength(100)
+                    Width = new DataGridLength(100),
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Duration",
                     Binding = new Binding(nameof(TranslateRow.Duration)),
-                    Width = new DataGridLength(80)
+                    Width = new DataGridLength(80),
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Text",
                     Binding = new Binding(nameof(TranslateRow.Text)),
-                    Width = new DataGridLength(200, DataGridLengthUnitType.Star)
+                    Width = new DataGridLength(200, DataGridLengthUnitType.Star),
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                 },
                 new DataGridTextColumn
                 {
                     Header = "Translated text",
                     Binding = new Binding(nameof(TranslateRow.TranslatedText)),
-                    Width = new DataGridLength(200, DataGridLengthUnitType.Star)
+                    Width = new DataGridLength(200, DataGridLengthUnitType.Star),
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                 }
             }
         };
@@ -136,7 +140,7 @@ public class AutoTranslateWindow : Window
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedTranslateRow)));
         vm.RowGrid = dataGrid;
 
-        var dataGridBorder = UiUtil.MakeBorderForControl(dataGrid);
+        var dataGridBorder = UiUtil.MakeBorderForControlNoPadding(dataGrid);
 
         StackPanel settingsBar = UiUtil.MakeControlBarLeft(
             UiUtil.MakeTextBlock("API key", vm, null, nameof(vm.ApiKeyIsVisible)).WithMarginRight(5),
