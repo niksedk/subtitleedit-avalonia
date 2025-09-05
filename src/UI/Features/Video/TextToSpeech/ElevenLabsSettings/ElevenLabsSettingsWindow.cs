@@ -32,7 +32,7 @@ public class ElevenLabsSettingsWindow : Window
             Margin = new Thickness(5, 0, 0, 0),
             [!Slider.ValueProperty] = new Binding(nameof(ElevenLabsSettingsViewModel.Stability)),
         };
-        var buttonStability = UiUtil.MakeButton(vm.ShowStabilityHelpCommand, IconNames.MdiHelp);
+        var buttonStability = UiUtil.MakeButton(vm.ShowStabilityHelpCommand, IconNames.Help);
 
         var labelSimilarity = UiUtil.MakeLabel("Similarity");
         var sliderSimilarity = new Slider
@@ -44,7 +44,7 @@ public class ElevenLabsSettingsWindow : Window
             Margin = new Thickness(5, 0, 0, 0),
             [!Slider.ValueProperty] = new Binding(nameof(ElevenLabsSettingsViewModel.Similarity)),
         };
-        var buttonSimilarity = UiUtil.MakeButton(vm.ShowSimilarityHelpCommand, IconNames.MdiHelp);
+        var buttonSimilarity = UiUtil.MakeButton(vm.ShowSimilarityHelpCommand, IconNames.Help);
 
         var labelSpeakerBoost = UiUtil.MakeLabel("Speaker Boost");
         var sliderSpeakerBoost = new Slider
@@ -56,9 +56,9 @@ public class ElevenLabsSettingsWindow : Window
             Margin = new Thickness(5, 0, 0, 0),
             [!Slider.ValueProperty] = new Binding(nameof(ElevenLabsSettingsViewModel.SpeakerBoost)),
         };
-        var buttonSpeakerBoost = UiUtil.MakeButton(vm.ShowSpeakerBoostHelpCommand, IconNames.MdiHelp);
+        var buttonSpeakerBoost = UiUtil.MakeButton(vm.ShowSpeakerBoostHelpCommand, IconNames.Help);
 
-        var buttonWeb = UiUtil.MakeButton("More info", vm.ShowMoreOnWebCommand).WithIconLeft(IconNames.MdiWeb);
+        var buttonWeb = UiUtil.MakeButton("More info", vm.ShowMoreOnWebCommand).WithIconLeft(IconNames.Web);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonWeb, buttonOk, buttonCancel);

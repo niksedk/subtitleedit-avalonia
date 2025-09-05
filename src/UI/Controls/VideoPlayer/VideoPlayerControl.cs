@@ -121,8 +121,8 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             get => _isFullScreen;
             set
             {
-                _fullScreenCollapseButton.IsVisible = value;
-                _fullScreenButton.IsVisible = !value;
+                _buttonFullScreenCollapse.IsVisible = value;
+                _buttonFullScreen.IsVisible = !value;
                 _isFullScreen = value;
             }
         }
@@ -133,10 +133,10 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
 
         double _positionIgnore = -1;
         double _volumeIgnore = -1;
-        private readonly Button _playButton;
-        private readonly Button _fullScreenButton;
-        private readonly Button _fullScreenCollapseButton;
-        private readonly Icon _volumeIcon;
+        private readonly Button _buttonPlay;
+        private readonly Button _buttonFullScreen;
+        private readonly Button _buttonFullScreenCollapse;
+        private readonly Icon _iconVolume;
         private DispatcherTimer? _positionTimer;
         IVideoPlayerInstance _videoPlayerInstance;
 
@@ -186,13 +186,13 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             Grid.SetRow(contentPresenter, 0);
 
             // Row with buttons + position slider + volume slider
-            var progressGrid = new Grid
+            var gridProgress = new Grid
             {
                 ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto,Auto"),
                 Margin = new Thickness(10, 4)
             };
-            Grid.SetRow(progressGrid, 1);
-            mainGrid.Children.Add(progressGrid);
+            Grid.SetRow(gridProgress, 1);
+            mainGrid.Children.Add(gridProgress);
 
 
             // Buttons
@@ -204,85 +204,85 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             };
 
             // Play
-            _playButton = new Button
+            _buttonPlay = new Button
             {
                 Margin = new Thickness(0, 0, 3, 0),
             };
-            Attached.SetIcon(_playButton, "fa-solid fa-play");
-            _playButton.Click += (_, _) =>
+            Attached.SetIcon(_buttonPlay, "fa-solid fa-play");
+            _buttonPlay.Click += (_, _) =>
             {
                 _videoPlayerInstance.PlayOrPause();
                 PlayPauseRequested?.Invoke();
             };
-            _playButton.Bind(Button.CommandProperty, new Binding
+            _buttonPlay.Bind(Button.CommandProperty, new Binding
             {
                 Path = nameof(PlayCommand),
                 Source = this
             });
 
-            stackPanel.Children.Add(_playButton);
+            stackPanel.Children.Add(_buttonPlay);
 
             // Stop
-            var stopButton = new Button
+            var buttonStop = new Button
             {
                 Margin = new Thickness(0, 0, 3, 0),
             };
-            stopButton.Bind(Button.IsVisibleProperty, new Binding
+            buttonStop.Bind(Button.IsVisibleProperty, new Binding
             {
                 Path = nameof(StopIsVisible),
                 Source = this
             });
-            Attached.SetIcon(stopButton, "fa-solid fa-stop");
-            stopButton.Click += (_, _) =>
+            Attached.SetIcon(buttonStop, "fa-solid fa-stop");
+            buttonStop.Click += (_, _) =>
             {
                 _videoPlayerInstance.Stop();
                 StopRequested?.Invoke();
             };
-            stackPanel.Children.Add(stopButton);
-            stopButton.Bind(Button.CommandProperty, new Binding
+            stackPanel.Children.Add(buttonStop);
+            buttonStop.Bind(Button.CommandProperty, new Binding
             {
                 Path = nameof(StopCommand),
                 Source = this
             });
 
             // Fullscreen
-            _fullScreenButton = new Button
+            _buttonFullScreen = new Button
             {
                 Margin = new Thickness(0, 0, 3, 0),
             };
-            _fullScreenButton.Bind(IsVisibleProperty, new Binding
+            _buttonFullScreen.Bind(IsVisibleProperty, new Binding
             {
                 Path = nameof(FullScreenIsVisible),
                 Source = this
             });
-            Attached.SetIcon(_fullScreenButton, "fa-solid fa-expand");
-            _fullScreenButton.Click += (_, _) => FullscreenRequested?.Invoke();
-            stackPanel.Children.Add(_fullScreenButton);
-            _fullScreenButton.Bind(Button.CommandProperty, new Binding
+            Attached.SetIcon(_buttonFullScreen, "fa-solid fa-expand");
+            _buttonFullScreen.Click += (_, _) => FullscreenRequested?.Invoke();
+            stackPanel.Children.Add(_buttonFullScreen);
+            _buttonFullScreen.Bind(Button.CommandProperty, new Binding
             {
                 Path = nameof(FullScreenCommand),
                 Source = this
             });
 
 
-            _fullScreenCollapseButton = new Button()
+            _buttonFullScreenCollapse = new Button()
             {
                 Margin = new Thickness(0, 0, 3, 0),
                 IsVisible = false,
             };
-            Attached.SetIcon(_fullScreenCollapseButton, "fa-solid fa-compress");
-            _fullScreenCollapseButton.Click += (_, _) => FullscreenCollapseRequested?.Invoke();
-            stackPanel.Children.Add(_fullScreenCollapseButton);
+            Attached.SetIcon(_buttonFullScreenCollapse, "fa-solid fa-compress");
+            _buttonFullScreenCollapse.Click += (_, _) => FullscreenCollapseRequested?.Invoke();
+            stackPanel.Children.Add(_buttonFullScreenCollapse);
 
-            progressGrid.Children.Add(stackPanel);
+            gridProgress.Children.Add(stackPanel);
             Grid.SetColumn(stackPanel, 0);
 
-            var positionSlider = new Slider
+            var sliderPosition = new Slider
             {
                 Minimum = 0,
                 Margin = new Thickness(2, 0, 0, 0),
             };
-            positionSlider.TemplateApplied += (s, e) =>
+            sliderPosition.TemplateApplied += (s, e) =>
             {
                 if (e.NameScope.Find<Thumb>("thumb") is Thumb thumb)
                 {
@@ -291,35 +291,35 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                 }
             };
 
-            positionSlider.Bind(RangeBase.MaximumProperty, this.GetObservable(DurationProperty));
-            positionSlider.Bind(RangeBase.ValueProperty, this.GetObservable(PositionProperty));
+            sliderPosition.Bind(RangeBase.MaximumProperty, this.GetObservable(DurationProperty));
+            sliderPosition.Bind(RangeBase.ValueProperty, this.GetObservable(PositionProperty));
 
             // Also ensure the control can receive keyboard focus
-            positionSlider.Focusable = true;
+            sliderPosition.Focusable = true;
 
             // For any direct value changes
-            positionSlider.ValueChanged += (s, e) => { NotifyPositionChanged(e.NewValue); };
+            sliderPosition.ValueChanged += (s, e) => { NotifyPositionChanged(e.NewValue); };
 
-            progressGrid.Children.Add(positionSlider);
-            Grid.SetColumn(positionSlider, 1);
+            gridProgress.Children.Add(sliderPosition);
+            Grid.SetColumn(sliderPosition, 1);
 
-            _volumeIcon = new Icon
+            _iconVolume = new Icon
             {
                 Value = "fa-solid fa-volume-up",
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(10, 0, 4, 0)
             };
-            progressGrid.Children.Add(_volumeIcon);
-            Grid.SetColumn(_volumeIcon, 2);
+            gridProgress.Children.Add(_iconVolume);
+            Grid.SetColumn(_iconVolume, 2);
 
-            var volumeSlider = new Slider
+            var sliderVolume = new Slider
             {
                 Minimum = 0,
                 Maximum = 100,
                 Width = 80,
                 VerticalAlignment = VerticalAlignment.Center
             };
-            volumeSlider.TemplateApplied += (s, e) =>
+            sliderVolume.TemplateApplied += (s, e) =>
             {
                 if (e.NameScope.Find<Thumb>("thumb") is Thumb thumb)
                 {
@@ -327,9 +327,9 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                     thumb.Height = 14;
                 }
             };
-            volumeSlider.Bind(RangeBase.ValueProperty, this.GetObservable(VolumeProperty));
+            sliderVolume.Bind(RangeBase.ValueProperty, this.GetObservable(VolumeProperty));
 
-            volumeSlider.ValueChanged += (s, e) =>
+            sliderVolume.ValueChanged += (s, e) =>
             {
                 if (_volumeIgnore == e.NewValue)
                 {
@@ -343,8 +343,8 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             };
 
 
-            progressGrid.Children.Add(volumeSlider);
-            Grid.SetColumn(volumeSlider, 3);
+            gridProgress.Children.Add(sliderVolume);
+            Grid.SetColumn(sliderVolume, 3);
 
 
             // ProgressText
@@ -356,7 +356,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                 FontWeight = FontWeight.Bold,
             };
             progressText.Bind(TextBlock.TextProperty, this.GetObservable(ProgressTextProperty));
-            progressGrid.Children.Add(progressText);
+            gridProgress.Children.Add(progressText);
             Grid.SetColumn(progressText, 1);
             ProgressText = string.Empty;
 
@@ -368,16 +368,16 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                 FontWeight = FontWeight.Bold,
                 Opacity = 0.4,
             };
-            progressGrid.Children.Add(_textBlockPlayerName);
+            gridProgress.Children.Add(_textBlockPlayerName);
             Grid.SetColumn(_textBlockPlayerName, 3);
 
             Content = mainGrid;
 
-            positionSlider.Maximum = 1;
-            positionSlider.Value = 0;
+            sliderPosition.Maximum = 1;
+            sliderPosition.Value = 0;
 
-            volumeSlider.Maximum = MpvApi.MaxVolume;
-            volumeSlider.Value = 50;
+            sliderVolume.Maximum = MpvApi.MaxVolume;
+            sliderVolume.Value = 50;
         }
 
         public event Action? PlayPauseRequested;
@@ -391,11 +391,11 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         {
             if (isPlaying)
             {
-                Attached.SetIcon(_playButton, "fa-solid fa-pause");
+                Attached.SetIcon(_buttonPlay, "fa-solid fa-pause");
             }
             else
             {
-                Attached.SetIcon(_playButton, "fa-solid fa-play");
+                Attached.SetIcon(_buttonPlay, "fa-solid fa-play");
             }
         }
 
@@ -403,7 +403,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         {
             Dispatcher.UIThread.Invoke(() =>
             {
-                _volumeIcon.Value = isMuted ? "fa-solid fa-volume-xmark" : "fa-solid fa-volume-up";
+                _iconVolume.Value = isMuted ? "fa-solid fa-volume-xmark" : "fa-solid fa-volume-up";
             });
         }
 

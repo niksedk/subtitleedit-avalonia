@@ -5,11 +5,9 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DynamicData;
 using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
-using Nikse.SubtitleEdit.Core.AudioToText;
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
@@ -132,6 +130,7 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _isFormatAssa;
     [ObservableProperty] private bool _hasFormatStyle;
     [ObservableProperty] private bool _areAssaContentMenuItemsVisible;
+    [ObservableProperty] private bool _selectCurrentSubtitleWhilePlaying;
 
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
@@ -189,6 +188,7 @@ public partial class MainViewModel :
     public StackPanel PanelSingleLineLenghtsOriginal { get; set; }
     public MenuItem MenuItemStyles { get; set; }
     public MenuItem MenuItemActors { get; set; }
+    public Button ButtonWaveformPlay { get; set; }
 
     public MainViewModel(
         IFileHelper fileHelper,
@@ -247,6 +247,7 @@ public partial class MainViewModel :
         MenuItemStyles = new MenuItem();
         MenuItemActors = new MenuItem();
         Toolbar = new Border();
+        ButtonWaveformPlay = new Button();
         _subtitle = new Subtitle();
         _videoFileName = string.Empty;
         _subtitleFileName = string.Empty;
@@ -268,6 +269,7 @@ public partial class MainViewModel :
         ShowColumnActor = Se.Settings.General.ShowColumnActor;
         ShowColumnCps = Se.Settings.General.ShowColumnCps;
         ShowColumnWpm = Se.Settings.General.ShowColumnWpm;
+        SelectCurrentSubtitleWhilePlaying = Se.Settings.General.SelectCurrentSubtitleWhilePlaying;
         EditTextBoxOriginal = new TextBox();
         EditTextCharactersPerSecondOriginal = string.Empty;
         EditTextCharactersPerSecondBackgroundOriginal = Brushes.Transparent;
@@ -3513,8 +3515,7 @@ public partial class MainViewModel :
     private void AddToRecentFiles(bool updateMenu)
     {
         var idx = SelectedSubtitleIndex ?? 0;
-        Se.Settings.File.AddToRecentFiles(_subtitleFileName ?? string.Empty, _videoFileName ?? string.Empty, idx,
-            SelectedEncoding.DisplayName);
+        Se.Settings.File.AddToRecentFiles(_subtitleFileName ?? string.Empty, _videoFileName ?? string.Empty, idx, SelectedEncoding.DisplayName);
         Se.SaveSettings();
 
         if (updateMenu)
@@ -3594,6 +3595,7 @@ public partial class MainViewModel :
             Se.Settings.General.ShowColumnActor = ShowColumnActor;
             Se.Settings.General.ShowColumnCps = ShowColumnCps;
             Se.Settings.General.ShowColumnWpm = ShowColumnWpm;
+            Se.Settings.General.SelectCurrentSubtitleWhilePlaying = SelectCurrentSubtitleWhilePlaying;
 
             Se.Settings.General.PositionIsFullScreen = Window.WindowState == WindowState.FullScreen;
             Se.Settings.General.PositionIsMaximized = Window.WindowState == WindowState.Maximized;
@@ -4605,6 +4607,32 @@ public partial class MainViewModel :
                 {
                     av.InvalidateVisual();
                     _updateAudioVisualizer = false;
+                }
+
+                if (isPlaying)
+                {
+                    Projektanker.Icons.Avalonia.Attached.SetIcon(ButtonWaveformPlay, IconNames.Pause);
+                    
+                    if (SelectCurrentSubtitleWhilePlaying)
+                    {
+                        var ss = SelectedSubtitle;
+                        if (ss == null || mediaPlayerSeconds < ss.StartTime.TotalSeconds || mediaPlayerSeconds > ss.EndTime.TotalSeconds)
+                        {
+                            for (var i = 0; i < subtitle.Count; i++)
+                            {
+                                var p = subtitle[i];
+                                if (mediaPlayerSeconds >= p.StartTime.TotalSeconds && mediaPlayerSeconds <= p.EndTime.TotalSeconds)
+                                {
+                                    SelectAndScrollToSubtitle(p);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    Projektanker.Icons.Avalonia.Attached.SetIcon(ButtonWaveformPlay, IconNames.Play);
                 }
             }
 

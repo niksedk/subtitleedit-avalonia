@@ -1,13 +1,14 @@
-﻿using System.Runtime.CompilerServices;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
+using Nikse.SubtitleEdit.Core.Settings;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
+using System;
 using MenuItem = Avalonia.Controls.MenuItem;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
@@ -16,6 +17,9 @@ public class InitWaveform
 {
     public static Grid MakeWaveform(MainViewModel vm)
     {
+        var languageHints = Se.Language.Main.Waveform;
+        var shortcuts = ShortcutsMain.GetUsedShortcuts(vm);
+
         // Create main layout grid
         var mainGrid = new Grid
         {
@@ -53,7 +57,7 @@ public class InitWaveform
             };
             flyout.Items.Add(insertSelectionMenuItem);
             vm.MenuItemAudioVisualizerInsertNewSelection = insertSelectionMenuItem;
-            
+
             var insertNewMenuItem = new MenuItem
             {
                 Header = Se.Language.General.InsertAtPosition,
@@ -61,7 +65,7 @@ public class InitWaveform
             };
             flyout.Items.Add(insertNewMenuItem);
             vm.MenuItemAudioVisualizerInsertAtPosition = insertNewMenuItem;
-            
+
             var deleteAtPositionMenuItem = new MenuItem
             {
                 Header = Se.Language.General.DeleteAtPosition,
@@ -69,7 +73,7 @@ public class InitWaveform
             };
             flyout.Items.Add(deleteAtPositionMenuItem);
             vm.MenuItemAudioVisualizerDeleteAtPosition = deleteAtPositionMenuItem;
-            
+
             // Add menu items with commands
             var deleteMenuItem = new MenuItem
             {
@@ -130,12 +134,62 @@ public class InitWaveform
         var buttonPlay = new Button
         {
             Margin = new Thickness(0, 0, 3, 0),
+            Command = vm.TogglePlayPauseCommand,
+            FontWeight = Avalonia.Media.FontWeight.Bold,
+            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.PlayPauseHint, shortcuts, nameof(vm.TogglePlayPauseCommand)),
         };
-        Attached.SetIcon(buttonPlay, "fa-solid fa-play");
+        Attached.SetIcon(buttonPlay, IconNames.Play);
+        vm.ButtonWaveformPlay = buttonPlay;
+
+        var buttonNew = new Button
+        {
+            Margin = new Thickness(0, 0, 3, 0),
+            Command = vm.WaveformInsertAtPositionCommand,
+            FontWeight = Avalonia.Media.FontWeight.Bold,
+            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.NewHint, shortcuts, nameof(vm.WaveformInsertAtPositionCommand)),
+        };
+        Attached.SetIcon(buttonNew, IconNames.Plus);
+
+        var buttonSetStartAndOffsetTheRest = new Button
+        {
+            Margin = new Thickness(0, 0, 3, 0),
+            Command = vm.WaveformSetStartAndOffsetTheRestCommand,
+            FontWeight = Avalonia.Media.FontWeight.Bold,
+            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.SetStartAndOffsetTheRestHint, shortcuts, nameof(vm.WaveformSetStartAndOffsetTheRestCommand)),
+        };
+        Attached.SetIcon(buttonSetStartAndOffsetTheRest, IconNames.ArrowExpandRight);
+
+        var buttonSetStart = new Button
+        {
+            Margin = new Thickness(0, 0, 3, 0),
+            Command = vm.WaveformSetStartCommand,
+            FontWeight = Avalonia.Media.FontWeight.Bold,
+            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.SetStartHint, shortcuts, nameof(vm.WaveformSetStartCommand)),
+        };
+        Attached.SetIcon(buttonSetStart, IconNames.RayStart);
+
+        var buttonSetEnd = new Button
+        {
+            Margin = new Thickness(0, 0, 3, 0),
+            Command = vm.WaveformSetEndCommand,
+            FontWeight = Avalonia.Media.FontWeight.Bold,
+            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.SetEndHint, shortcuts, nameof(vm.WaveformSetEndCommand)),
+        };
+        Attached.SetIcon(buttonSetEnd, IconNames.RayEnd);
+
+        var buttonRepeat = new Button
+        {
+            Margin = new Thickness(0, 0, 3, 0),
+            //Command = vm.WaveformSetStartAndOffsetTheRestCommand,
+            FontWeight = Avalonia.Media.FontWeight.Bold,
+            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.RepeatHint, shortcuts, nameof(vm.WaveformSetEndCommand)),
+        };
+        Attached.SetIcon(buttonRepeat, IconNames.Repeat);
+
 
         var iconHorizontal = new Icon
         {
-            Value = "fa-solid fa-arrows-left-right",
+            Value = IconNames.ArrowLeftRightBold, 
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(10, 0, 4, 0)
         };
@@ -143,9 +197,10 @@ public class InitWaveform
         var sliderHorizontalZoom = new Slider
         {
             Minimum = 0,
-            Maximum = 100,
+            Maximum = 200,
             Width = 80,
-            VerticalAlignment = VerticalAlignment.Center
+            VerticalAlignment = VerticalAlignment.Center,
+            Value = 100,
         };
         sliderHorizontalZoom.TemplateApplied += (s, e) =>
         {
@@ -155,10 +210,17 @@ public class InitWaveform
                 thumb.Height = 14;
             }
         };
+        sliderHorizontalZoom.ValueChanged += (s, e) =>
+        {
+            if (vm.AudioVisualizer != null)
+            {
+                vm.AudioVisualizer.ZoomFactor = Math.Max(0.01, sliderHorizontalZoom.Value / 100.0);
+            }
+        };
 
         var iconVertical = new Icon
         {
-            Value = "fa-solid fa-arrows-up-down",
+            Value = IconNames.ArrowUpDownBold,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(10, 0, 4, 0)
         };
@@ -168,7 +230,9 @@ public class InitWaveform
             Minimum = 0,
             Maximum = 100,
             Width = 80,
-            VerticalAlignment = VerticalAlignment.Center
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 10, 0),
+            Value = 0,
         };
         sliderVerticalZoom.TemplateApplied += (s, e) =>
         {
@@ -178,7 +242,16 @@ public class InitWaveform
                 thumb.Height = 14;
             }
         };
+        sliderVerticalZoom.ValueChanged += (s, e) =>
+        {
+            if (vm.AudioVisualizer != null)
+            {
+                vm.AudioVisualizer.VerticalZoomFactor = Math.Max(0.01, (1 - sliderVerticalZoom.Value / 100.0));
+            }
+        };
 
+        var labelAutoSelectOnPlay = UiUtil.MakeTextBlock(Se.Language.Main.SelectCurrentLineWhilePlaying).WithMarginRight(2);
+        var checkBoxAutoSelectOnPlay = UiUtil.MakeCheckBox(vm, nameof(vm.SelectCurrentSubtitleWhilePlaying)).WithMarginRight(10);
 
         var buttonMore = new Button
         {
@@ -186,11 +259,13 @@ public class InitWaveform
         };
         Attached.SetIcon(buttonMore, "fa-ellipsis-v");
 
-        var labelAutoSelectOnPlay = UiUtil.MakeTextBlock("Select current line when playing");
-        var checkBoxAutoSelectOnPlay = UiUtil.MakeCheckBox();
-
 
         controlsPanel.Children.Add(buttonPlay);
+        controlsPanel.Children.Add(buttonNew);
+        controlsPanel.Children.Add(buttonSetStartAndOffsetTheRest);
+        controlsPanel.Children.Add(buttonSetStart);
+        controlsPanel.Children.Add(buttonSetEnd);
+      //  controlsPanel.Children.Add(buttonRepeat);
         controlsPanel.Children.Add(UiUtil.MakeSeparatorForHorizontal());
         controlsPanel.Children.Add(iconHorizontal);
         controlsPanel.Children.Add(sliderHorizontalZoom);

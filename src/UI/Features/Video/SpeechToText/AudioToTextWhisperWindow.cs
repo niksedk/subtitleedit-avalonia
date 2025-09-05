@@ -85,7 +85,7 @@ public class AudioToTextWhisperWindow : Window
 
         var labelPostProcessing = UiUtil.MakeTextBlock(Se.Language.General.PostProcessing).WithMarginTop(15);
         var checkPostProcessing = UiUtil.MakeCheckBox(vm, nameof(vm.DoPostProcessing)).BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
-        var buttonPostProcessing = UiUtil.MakeButton(vm.ShowPostProcessingSettingsCommand, IconNames.MdiSettings)
+        var buttonPostProcessing = UiUtil.MakeButton(vm.ShowPostProcessingSettingsCommand, IconNames.Settings)
                     .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
 
         var panelPostProcessingControls = new StackPanel
@@ -103,7 +103,7 @@ public class AudioToTextWhisperWindow : Window
 
         var labelAdvancedSettings = UiUtil.MakeTextBlock(Se.Language.General.AdvancedSettings).WithMarginTop(15);
 
-        var buttonAdvancedSettings = UiUtil.MakeButton(vm.ShowAdvancedSettingsCommand, IconNames.MdiSettings)
+        var buttonAdvancedSettings = UiUtil.MakeButton(vm.ShowAdvancedSettingsCommand, IconNames.Settings)
                     .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled))
                     .WithMarginTop(15);
 

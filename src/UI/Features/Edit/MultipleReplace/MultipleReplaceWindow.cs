@@ -120,7 +120,7 @@ public class MultipleReplaceWindow : Window
                         Command = vm.NodeCategoryOpenContextMenuCommand,
                         CommandParameter = node,
                     };
-                    Attached.SetIcon(buttonCategoryActions, IconNames.MdiDotsVertical);
+                    Attached.SetIcon(buttonCategoryActions, IconNames.DotsVertical);
 
                     var gridCategory = new Grid
                     {
@@ -164,7 +164,7 @@ public class MultipleReplaceWindow : Window
 
                 var labelFind = UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.Find));
                 var labelSeparator = UiUtil.MakeLabel(string.Empty);
-                Attached.SetIcon(labelSeparator, IconNames.MdiArrowRightThick);
+                Attached.SetIcon(labelSeparator, IconNames.ArrowRightThick);
                 var labelReplaceWith = UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.ReplaceWith));
 
                 var labelIcon = new Label();
@@ -179,7 +179,7 @@ public class MultipleReplaceWindow : Window
                     Command = vm.NodeOpenContextMenuCommand,
                     CommandParameter = node,
                 };
-                Attached.SetIcon(buttonActions, IconNames.MdiDotsVertical);
+                Attached.SetIcon(buttonActions, IconNames.DotsVertical);
 
                 var panelFindAndReplaceWith = new StackPanel
                 {

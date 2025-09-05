@@ -72,17 +72,17 @@ public class SettingsPage : UserControl
             Margin = new Thickness(10, 10, 40, 10),
             Children =
             {
-                MakeMenuItem(Se.Language.General.Rules, vm.ScrollToSectionCommand, IconNames.MdiPoliceBadge),
-                MakeMenuItem(Se.Language.General.General, vm.ScrollToSectionCommand,  IconNames.MdiCogs),
-                MakeMenuItem(Se.Language.General.SubtitleFormats, vm.ScrollToSectionCommand, IconNames.MdiClosedCaption),
-                MakeMenuItem(Se.Language.Options.Settings.SyntaxColoring, vm.ScrollToSectionCommand, IconNames.MdiPalette),
-                MakeMenuItem(Se.Language.General.VideoPlayer, vm.ScrollToSectionCommand, IconNames.MdiPlayBox),
-                MakeMenuItem(Se.Language.Options.Settings.WaveformSpectrogram, vm.ScrollToSectionCommand,  IconNames.MdiWaveform),
-                MakeMenuItem(Se.Language.General.Tools, vm.ScrollToSectionCommand,  IconNames.MdiTools),
-                MakeMenuItem(Se.Language.General.Appearance, vm.ScrollToSectionCommand,  IconNames.MdiEyeSettings),
-                MakeMenuItem(Se.Language.General.Toolbar, vm.ScrollToSectionCommand,  IconNames.MdiDotsHorizontal),
-                MakeMenuItem(Se.Language.Options.Settings.Network, vm.ScrollToSectionCommand,  IconNames.MdiNetwork),
-                MakeMenuItem(Se.Language.Options.Settings.FileTypeAssociations, vm.ScrollToSectionCommand, IconNames.MdiFileCog),
+                MakeMenuItem(Se.Language.General.Rules, vm.ScrollToSectionCommand, IconNames.PoliceBadge),
+                MakeMenuItem(Se.Language.General.General, vm.ScrollToSectionCommand,  IconNames.Cogs),
+                MakeMenuItem(Se.Language.General.SubtitleFormats, vm.ScrollToSectionCommand, IconNames.ClosedCaption),
+                MakeMenuItem(Se.Language.Options.Settings.SyntaxColoring, vm.ScrollToSectionCommand, IconNames.Palette),
+                MakeMenuItem(Se.Language.General.VideoPlayer, vm.ScrollToSectionCommand, IconNames.PlayBox),
+                MakeMenuItem(Se.Language.Options.Settings.WaveformSpectrogram, vm.ScrollToSectionCommand,  IconNames.Waveform),
+                MakeMenuItem(Se.Language.General.Tools, vm.ScrollToSectionCommand,  IconNames.Tools),
+                MakeMenuItem(Se.Language.General.Appearance, vm.ScrollToSectionCommand,  IconNames.EyeSettings),
+                MakeMenuItem(Se.Language.General.Toolbar, vm.ScrollToSectionCommand,  IconNames.DotsHorizontal),
+                MakeMenuItem(Se.Language.Options.Settings.Network, vm.ScrollToSectionCommand,  IconNames.Network),
+                MakeMenuItem(Se.Language.Options.Settings.FileTypeAssociations, vm.ScrollToSectionCommand, IconNames.FileCog),
             }
         };
 

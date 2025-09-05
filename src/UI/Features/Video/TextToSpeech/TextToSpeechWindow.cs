@@ -109,7 +109,7 @@ public class TextToSpeechWindow : Window
                     MinWidth = labelMinWidth,
                 },
                 comboBoxEngines,
-                UiUtil.MakeButton(vm.ShowEngineSettingsCommand, IconNames.MdiSettings)
+                UiUtil.MakeButton(vm.ShowEngineSettingsCommand, IconNames.Settings)
                     .WithMarginLeft(5)
                     .WithBindIsVisible(nameof(vm.IsEngineSettingsVisible)),
             }
@@ -133,7 +133,7 @@ public class TextToSpeechWindow : Window
                     [!Label.ContentProperty] = new Binding(nameof(vm.VoiceCountInfo)) { Mode = BindingMode.TwoWay }
                 },
                 buttonTestVoice,
-                UiUtil.MakeButton(vm.ShowTestVoiceSettingsCommand, IconNames.MdiSettings),
+                UiUtil.MakeButton(vm.ShowTestVoiceSettingsCommand, IconNames.Settings),
             }
         };
 
@@ -290,7 +290,7 @@ public class TextToSpeechWindow : Window
             Children =
             {
                 checkBoxAddAudioToVideoFile,
-                UiUtil.MakeButton(vm.ShowEncodingSettingsCommand, IconNames.MdiSettings)
+                UiUtil.MakeButton(vm.ShowEncodingSettingsCommand, IconNames.Settings)
                       .WithMarginLeft(5).WithMarginTop(0).WithTopAlignment(),
             }
         };

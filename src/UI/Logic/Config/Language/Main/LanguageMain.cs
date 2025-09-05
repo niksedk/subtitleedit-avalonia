@@ -6,6 +6,7 @@ public class LanguageMain
 {
     public LanguageMainMenu Menu { get; set; } = new();
     public LanguageMainToolbar Toolbar { get; set; } = new();
+    public LanguageMainWaveform Waveform { get; set; } = new();
 
     public string CharactersPerSecond { get; set; }
     public string SingleLineLength { get; set; }
@@ -23,7 +24,8 @@ public class LanguageMain
     public string RedoPerformedXActionLeft { get; set; }
     public string UndoPerformedXActionLeft { get; set; }
     public string SaveXFileAs { get; set; }
-    public string SaveLanguageFile { get; internal set; }
+    public string SaveLanguageFile { get; set; }
+    public string SelectCurrentLineWhilePlaying { get; set; }
 
     public LanguageMain()
     {
@@ -44,5 +46,6 @@ public class LanguageMain
         UndoPerformedXActionLeft = "Undo performed (actions left: {0})";
         SaveXFileAs = "Save {0} file as";
         SaveLanguageFile = "Save language file";
+        SelectCurrentLineWhilePlaying = "Select current line while playing";
     }
 }

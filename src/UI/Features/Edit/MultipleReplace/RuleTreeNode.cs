@@ -51,15 +51,15 @@ public partial class RuleTreeNode : ObservableObject
     {
         if (Type == MultipleReplaceType.RegularExpression)
         {
-            IconName = IconNames.MdiRegex;
+            IconName = IconNames.Regex;
         }
         else if (Type == MultipleReplaceType.CaseInsensitive)
         {
-            IconName = IconNames.MdiFindReplace;
+            IconName = IconNames.FindReplace;
         }
         else if (Type == MultipleReplaceType.CaseSensitive)
         {
-            IconName =  IconNames.MdiCaseSensitiveAlt;
+            IconName =  IconNames.CaseSensitiveAlt;
         }
     }
 

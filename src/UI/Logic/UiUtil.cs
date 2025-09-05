@@ -309,7 +309,7 @@ public static class UiUtil
             });
         }
 
-        Attached.SetIcon(button, IconNames.MdiDotsHorizontal);
+        Attached.SetIcon(button, IconNames.DotsHorizontal);
 
         return button;
     }
@@ -2004,5 +2004,20 @@ public static class UiUtil
                 grid.Children[index] = replacement;
             }
         }
+    }
+
+    public static string? MakeToolTip(string hint, List<ShortCut> shortcuts, string shortcutName = "")
+    {
+        var shortcut = shortcuts.FirstOrDefault(s => s.Name == shortcutName);
+        var shortcutString = string.Empty;
+        if (shortcut != null && shortcut.Keys.Count > 0)
+        {
+            shortcutString = string.Join("+", shortcut.Keys.Select(k => k.ToString()));
+            shortcutString = $"({shortcutString})";
+        }
+
+        return Se.Settings.Appearance.ShowHints
+            ? string.Format(hint, shortcutString).Trim()
+            : null;
     }
 }

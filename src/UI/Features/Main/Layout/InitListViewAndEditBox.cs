@@ -276,7 +276,7 @@ public static class InitListViewAndEditBox
             DataContext = vm,
             Icon = new Icon
             {
-                Value = IconNames.MdiCheckBold,
+                Value = IconNames.CheckBold,
                 VerticalAlignment = VerticalAlignment.Center,
                 [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnEndTime)),
             }
@@ -291,7 +291,7 @@ public static class InitListViewAndEditBox
             DataContext = vm,
             Icon = new Icon
             {
-                Value = IconNames.MdiCheckBold,
+                Value = IconNames.CheckBold,
                 VerticalAlignment = VerticalAlignment.Center,
                 [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnDuration)),
             }
@@ -306,7 +306,7 @@ public static class InitListViewAndEditBox
             DataContext = vm,
             Icon = new Icon
             {
-                Value = IconNames.MdiCheckBold,
+                Value = IconNames.CheckBold,
                 VerticalAlignment = VerticalAlignment.Center,
                 [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnGap)),
             }
@@ -321,7 +321,7 @@ public static class InitListViewAndEditBox
             DataContext = vm,
             Icon = new Icon
             {
-                Value = IconNames.MdiCheckBold,
+                Value = IconNames.CheckBold,
                 VerticalAlignment = VerticalAlignment.Center,
                 [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnActor)),
             }
@@ -336,7 +336,7 @@ public static class InitListViewAndEditBox
             DataContext = vm,
             Icon = new Icon
             {
-                Value = IconNames.MdiCheckBold,
+                Value = IconNames.CheckBold,
                 VerticalAlignment = VerticalAlignment.Center,
                 [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnCps)),
             }
@@ -351,7 +351,7 @@ public static class InitListViewAndEditBox
             DataContext = vm,
             Icon = new Icon
             {
-                Value = IconNames.MdiCheckBold,
+                Value = IconNames.CheckBold,
                 VerticalAlignment = VerticalAlignment.Center,
                 [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnWpm)),
             }
@@ -746,11 +746,11 @@ public static class InitListViewAndEditBox
         };
 
         // Auto Break button
-        var autoBreakButton = UiUtil.MakeButton(vm.AutoBreakCommand, IconNames.MdiScaleBalance, 20);
+        var autoBreakButton = UiUtil.MakeButton(vm.AutoBreakCommand, IconNames.ScaleBalance, 20);
         buttonPanel.Children.Add(autoBreakButton);
 
         // Unbreak button
-        var unbreakButton = UiUtil.MakeButton(vm.UnbreakCommand, IconNames.MdiSetMerge, 20);
+        var unbreakButton = UiUtil.MakeButton(vm.UnbreakCommand, IconNames.SetMerge, 20);
         buttonPanel.Children.Add(unbreakButton);
 
         textEditGrid.Add(buttonPanel, 1, 2);

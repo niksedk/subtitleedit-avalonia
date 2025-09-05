@@ -274,7 +274,7 @@ public class ReviewSpeechWindow : Window
             Width = double.NaN,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 0, 5),
-        }.WithIconLeft(IconNames.MdiRecycle);
+        }.WithIconLeft(IconNames.Recycle);
 
         var buttonPlay = new Button
         {
@@ -283,7 +283,7 @@ public class ReviewSpeechWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
             Width = double.NaN,
             VerticalAlignment = VerticalAlignment.Center,
-        }.WithIconLeft(IconNames.MdiPlayCircle).WithBindIsVisible(nameof(vm.IsPlayVisible));
+        }.WithIconLeft(IconNames.PlayCircle).WithBindIsVisible(nameof(vm.IsPlayVisible));
 
         var buttonStop = new Button
         {
@@ -292,7 +292,7 @@ public class ReviewSpeechWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
             Width = double.NaN,
             VerticalAlignment = VerticalAlignment.Center,
-        }.WithIconLeft(IconNames.MdiStopCircle).WithBindIsVisible(nameof(vm.IsStopVisible));
+        }.WithIconLeft(IconNames.StopCircle).WithBindIsVisible(nameof(vm.IsStopVisible));
 
         var checkBoxAutoContinue = new CheckBox
         {
@@ -360,7 +360,7 @@ public class ReviewSpeechWindow : Window
             Width = 200,
             [!Slider.ValueProperty] = new Binding(nameof(vm.Stability)),
         };
-        var buttonStability = UiUtil.MakeButton(vm.ShowStabilityHelpCommand, IconNames.MdiHelp);
+        var buttonStability = UiUtil.MakeButton(vm.ShowStabilityHelpCommand, IconNames.Help);
 
         var labelSimilarity = UiUtil.MakeLabel("Similarity");
         var sliderSimilarity = new Slider
@@ -371,7 +371,7 @@ public class ReviewSpeechWindow : Window
             Width = 200,
             [!Slider.ValueProperty] = new Binding(nameof(vm.Similarity)),
         };
-        var buttonSimilarity = UiUtil.MakeButton(vm.ShowSimilarityHelpCommand, IconNames.MdiHelp);
+        var buttonSimilarity = UiUtil.MakeButton(vm.ShowSimilarityHelpCommand, IconNames.Help);
 
         var labelSpeakerBoost = UiUtil.MakeLabel("Speaker Boost");
         var sliderSpeakerBoost = new Slider
@@ -382,7 +382,7 @@ public class ReviewSpeechWindow : Window
             Width = 200,
             [!Slider.ValueProperty] = new Binding(nameof(vm.SpeakerBoost)),
         };
-        var buttonSpeakerBoost = UiUtil.MakeButton(vm.ShowSpeakerBoostHelpCommand, IconNames.MdiHelp);
+        var buttonSpeakerBoost = UiUtil.MakeButton(vm.ShowSpeakerBoostHelpCommand, IconNames.Help);
 
         var grid = new Grid
         {

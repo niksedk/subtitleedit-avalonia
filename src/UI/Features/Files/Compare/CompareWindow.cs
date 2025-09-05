@@ -94,12 +94,12 @@ public class CompareWindow : Window
         var checkBoxIngoreFormatting = UiUtil.MakeCheckBox(Se.Language.File.IgnoreFormatting, vm, nameof(vm.IgnoreFormatting))
             .WithMarginLeft(10).WithMarginRight(15);
         checkBoxIngoreFormatting.IsCheckedChanged += vm.CheckBoxChanged;
-        var buttonPreviousDifference = UiUtil.MakeButton(vm.PreviousDifferenceCommand, IconNames.MdiChevronLeft).WithBindIsVisible(nameof(vm.IsExportVisible));
+        var buttonPreviousDifference = UiUtil.MakeButton(vm.PreviousDifferenceCommand, IconNames.ChevronLeft).WithBindIsVisible(nameof(vm.IsExportVisible));
         if (Se.Settings.Appearance.ShowHints)
         {
             ToolTip.SetTip(buttonPreviousDifference, Se.Language.File.PreviousDifference);
         }
-        var buttonNextDifference = UiUtil.MakeButton(vm.NextDifferenceCommand, IconNames.MdiChevronRight).WithBindIsVisible(nameof(vm.IsExportVisible));
+        var buttonNextDifference = UiUtil.MakeButton(vm.NextDifferenceCommand, IconNames.ChevronRight).WithBindIsVisible(nameof(vm.IsExportVisible));
         if (Se.Settings.Appearance.ShowHints)
         {
             ToolTip.SetTip(buttonNextDifference, Se.Language.File.NextDifference);

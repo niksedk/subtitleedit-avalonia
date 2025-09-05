@@ -48,7 +48,7 @@ public static class InitFooter
             {
                 new Icon
                 {
-                    Value = IconNames.MdiLockClock,
+                    Value = IconNames.LockClock,
                     [!Visual.IsVisibleProperty] = new Binding(nameof(vm.LockTimeCodes)),
                     FontSize = 20,
                 },
