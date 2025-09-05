@@ -6,6 +6,7 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.SpellCheck;
 
@@ -16,9 +17,9 @@ public class SpellCheckWindow : Window
     public SpellCheckWindow(SpellCheckViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = "Spell check";
+        Title = Se.Language.SpellCheck.SpellCheck;
+        SizeToContent = SizeToContent.Height;
         Width = 700;
-        Height = 475;
         CanResize = false;
 
         _vm = vm;
@@ -52,14 +53,7 @@ public class SpellCheckWindow : Window
             Height = 85,
         };
 
-        var boderWholeText = new Border
-        {
-            BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetBorderBrush(),
-            Child = scrollViewerWholeText,
-            Padding = new Thickness(10, 0, 10, 0),
-            CornerRadius = new CornerRadius(5),
-        };
+        var boderWholeText = UiUtil.MakeBorderForControl(scrollViewerWholeText);
 
         var panelButtons = MakeWordNotFound(vm);
 
@@ -290,13 +284,7 @@ public class SpellCheckWindow : Window
             Height = 243,
         };
 
-        var borderSuggestions = new Border
-        {
-            BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetBorderBrush(),
-            CornerRadius = new CornerRadius(5),
-            Child = scrollViewSuggestions,
-        };
+        var borderSuggestions = UiUtil.MakeBorderForControl(scrollViewSuggestions);
 
         var buttonUseOnce = new Button
         {

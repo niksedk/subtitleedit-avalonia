@@ -7,13 +7,13 @@ using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
+namespace Nikse.SubtitleEdit.Features.Shared.Ocr.NOcr;
 
-public class NOcrCharacterAddWindow : Window
+public class NOcrCharacterHistoryWindow : Window
 {
-    private readonly NOcrCharacterAddViewModel _vm;
+    private readonly NOcrCharacterHistoryViewModel _vm;
 
-    public NOcrCharacterAddWindow(NOcrCharacterAddViewModel vm)
+    public NOcrCharacterHistoryWindow(NOcrCharacterHistoryViewModel vm)
     {
         _vm = vm;
         vm.Window = this;
@@ -31,12 +31,12 @@ public class NOcrCharacterAddWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Whole image for subtitle
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // Controls
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Buttons
             },
             ColumnDefinitions =
             {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
@@ -46,31 +46,19 @@ public class NOcrCharacterAddWindow : Window
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
         };
 
-        var image = new Image
-        {
-            Stretch = Stretch.Uniform,
-            Margin = new Thickness(0, 0, 0, 10),
-            MaxHeight = 350,
-        };
-        image.Bind(Image.SourceProperty, new Binding(nameof(vm.SentenceBitmap)));
-
-        var controlsView = MakeControlsView(vm);
+        var listView = MakeListView(vm);
+        var detailsView = MakeDetailsView(vm);
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
-        var buttonInspectAdditions = UiUtil.MakeButton(Se.Language.General.InspectAdditions, vm.InspectAdditionsCommand).WithBindIsVisible(nameof(vm.IsInspectAdditionsVisible));
-        var buttonUseOnce = UiUtil.MakeButton(Se.Language.General.UseOnce, vm.UseOnceCommand).WithBindIsVisible(nameof(vm.ShowUseOnce));
-        var buttonSkip = UiUtil.MakeButton(Se.Language.General.Skip, vm.SkipCommand).WithBindIsVisible(nameof(vm.ShowSkip));
-        var buttonAbort = UiUtil.MakeButton(Se.Language.General.Abort, vm.AbortCommand);
-        var buttonBar = UiUtil.MakeButtonBar(buttonOk, buttonInspectAdditions, buttonUseOnce, buttonSkip, buttonAbort);
+        var buttonBar = UiUtil.MakeButtonBar(buttonOk);
 
-        grid.Add(image, 0, 0);
-        grid.Add(controlsView, 1, 0);
-        grid.Add(buttonBar, 2, 0);
+        grid.Add(listView, 0, 0);
+        grid.Add(detailsView, 0, 1);
+        grid.Add(buttonBar, 1, 0, 1, 2);
 
         Content = grid;
 
         vm.TextBoxNew.KeyDown += vm.TextBoxNewOnKeyDown;
-        vm.TextBoxNew.KeyUp += vm.TextBoxNewOnKeyUp;
 
         Activated += delegate
         {
@@ -78,7 +66,20 @@ public class NOcrCharacterAddWindow : Window
         };
     }
 
-    private static Grid MakeControlsView(NOcrCharacterAddViewModel vm)
+    private static Border MakeListView(NOcrCharacterHistoryViewModel vm)
+    {
+        var listBoxCurrentItems = new ListBox
+        {
+            Margin = new Thickness(0, 5, 0, 0),
+        };
+        listBoxCurrentItems.Bind(Avalonia.Controls.Primitives.SelectingItemsControl.SelectedItemProperty, new Binding(nameof(vm.SelectedHistoryItem)));
+        listBoxCurrentItems.Bind(ItemsControl.ItemsSourceProperty, new Binding(nameof(vm.HistoryItems)));
+        listBoxCurrentItems.SelectionChanged += vm.HistoryItemChanged;
+
+        return UiUtil.MakeBorderForControl(listBoxCurrentItems);
+    }
+
+    private static Grid MakeDetailsView(NOcrCharacterHistoryViewModel vm)
     {
         var grid = new Grid
         {
@@ -88,7 +89,6 @@ public class NOcrCharacterAddWindow : Window
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
@@ -109,7 +109,6 @@ public class NOcrCharacterAddWindow : Window
         };
         image.Bind(Image.SourceProperty, new Binding(nameof(vm.CurrentBitmap)));
 
-
         var panelCurrentImage = new StackPanel
         {
             Background = new SolidColorBrush(Colors.LightGray),
@@ -121,8 +120,6 @@ public class NOcrCharacterAddWindow : Window
         var checkBoxItalic = UiUtil.MakeCheckBox(Se.Language.General.Italic, vm, nameof(vm.IsNewTextItalic));
         checkBoxItalic.IsCheckedChanged += vm.ItalicCheckChanged;
 
-        var checkBoAutoSubmitFirsChar = UiUtil.MakeCheckBox(Se.Language.Ocr.AutoSubmitFirstCharacter, vm, nameof(vm.SubmitOnFirstLetter));
-
         var panelCurrent = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Vertical,
@@ -130,26 +127,14 @@ public class NOcrCharacterAddWindow : Window
             {
                 UiUtil.MakeLabel(Se.Language.Ocr.CurrentImage).WithBold(),
                 UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.ResolutionAndTopMargin)),
+                UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.LineIndex)),
                 panelCurrentImage,
                 vm.TextBoxNew,
                 checkBoxItalic,
-                checkBoAutoSubmitFirsChar,
+                UiUtil.MakeButton(Se.Language.General.Update, vm.UpdateCommand).WithMarginTop(25).WithLeftAlignment(),
+                UiUtil.MakeButton(Se.Language.General.UpdateAndClose, vm.UpdateAndCloseCommand).WithMarginTop(25).WithLeftAlignment(),
+                UiUtil.MakeButton(Se.Language.General.Delete, vm.DeleteCommand).WithMarginTop(5).WithLeftAlignment(),
             },
-        };
-
-        var comboDrawModes = UiUtil.MakeComboBox(vm.DrawModes, vm, nameof(vm.SelectedDrawMode)).WithMarginLeft(5);
-        comboDrawModes.SelectionChanged += vm.DrawModeChanged;
-
-        var panelDrawControls = new StackPanel
-        {
-            Orientation = Avalonia.Layout.Orientation.Vertical,
-            Children =
-            {
-                UiUtil.MakeLabel(Se.Language.Ocr.LinesToDraw).WithBold(),
-                UiUtil.MakeComboBox(vm.NoOfLinesToAutoDrawList, vm, nameof(vm.SelectedNoOfLinesToAutoDraw)),
-                UiUtil.MakeButton(Se.Language.Ocr.AutoDrawAgain, vm.DrawAgainCommand).WithMinWidth(100).WithMarginTop(10).WithLeftAlignment(),
-                UiUtil.MakeButton(Se.Language.General.Clear, vm.ClearDrawCommand).WithMinWidth(100).WithMarginTop(5).WithLeftAlignment(),
-            }
         };
 
         vm.NOcrDrawingCanvas.SetStrokeWidth(1);
@@ -173,8 +158,6 @@ public class NOcrCharacterAddWindow : Window
                 UiUtil.MakeButton(vm.ZoomOutCommand, IconNames.Minus),
                 UiUtil.MakeButton(vm.ZoomInCommand, IconNames.Plus),
                 UiUtil.MakeLabel(string.Empty).WithMarginLeft(10).WithBindText(vm, nameof(vm.ZoomFactorInfo)),
-                UiUtil.MakeLabel(Se.Language.Ocr.DrawMode).WithMarginLeft(10),
-                comboDrawModes,
             }
         };
 
@@ -188,28 +171,8 @@ public class NOcrCharacterAddWindow : Window
             }
         };
 
-        var buttonShrink = UiUtil.MakeButton(Se.Language.General.Shrink, vm.ShrinkCommand)
-            .WithMinWidth(100).WithBindEnabled(nameof(vm.CanShrink));
-        var buttonExpand = UiUtil.MakeButton(Se.Language.General.Expand, vm.ExpandCommand)
-            .WithMinWidth(100).WithBindEnabled(nameof(vm.CanExpand));
-        var panelButtons = new StackPanel
-        {
-            Orientation = Avalonia.Layout.Orientation.Horizontal,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
-            Width = double.NaN,
-            Margin = new Thickness(0, 0, 0, 5),
-            Children =
-            {
-                buttonShrink,
-                buttonExpand,
-            }
-        };
-
         grid.Add(panelCurrent, 0, 0);
-        grid.Add(panelDrawControls, 0, 1);
-        grid.Add(panelImage, 0, 2);
-        grid.Add(panelButtons, 0, 2, 1, 2);
+        grid.Add(panelImage, 0, 1);
 
         return grid;
     }
@@ -218,12 +181,6 @@ public class NOcrCharacterAddWindow : Window
     {
         base.OnKeyDown(e);
         _vm.KeyDown(e);
-    }
-
-    protected override void OnKeyUp(KeyEventArgs e)
-    {
-        base.OnKeyUp(e);
-        _vm.KeyUp(e);
     }
 
     protected override void OnLoaded(RoutedEventArgs e)

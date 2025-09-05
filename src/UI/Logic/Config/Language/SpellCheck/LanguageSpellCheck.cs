@@ -2,9 +2,11 @@
 
 public class LanguageSpellCheck
 {
+    public string? SpellCheck { get; internal set; }
 
     public LanguageSpellCheck()
     {
+        SpellCheck = "Spell check";
 
     }
 }

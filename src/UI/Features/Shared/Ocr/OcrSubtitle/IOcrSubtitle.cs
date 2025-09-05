@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using SkiaSharp;
 
-namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
+namespace Nikse.SubtitleEdit.Features.Shared.Ocr.OcrSubtitle;
 
 public interface IOcrSubtitle
 {
@@ -11,4 +11,5 @@ public interface IOcrSubtitle
     TimeSpan GetStartTime(int index);
     TimeSpan GetEndTime(int index);
     List<OcrSubtitleItem> MakeOcrSubtitleItems();
+    void Delete(int index);
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Nikse.SubtitleEdit.Features.Shared.Ocr.OcrSubtitle;
 using Nikse.SubtitleEdit.Logic;
 using SkiaSharp;
 

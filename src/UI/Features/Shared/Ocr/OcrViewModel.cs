@@ -13,6 +13,9 @@ using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Core.VobSub;
 using Nikse.SubtitleEdit.Core.VobSub.Ocr.Service;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Shared.Ocr.Engines;
+using Nikse.SubtitleEdit.Features.Shared.Ocr.NOcr;
+using Nikse.SubtitleEdit.Features.Shared.Ocr.OcrSubtitle;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Ocr;
@@ -70,12 +73,14 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<OcrLanguage2> _paddleOcrLanguages;
     [ObservableProperty] private OcrLanguage2? _selectedPaddleOcrLanguage;
     [ObservableProperty] private bool _paddleUseGpu;
+    [ObservableProperty] private bool _showContextMenu;
 
     public Window? Window { get; set; }
     public DataGrid SubtitleGrid { get; set; }
     public MatroskaTrackInfo? SelectedMatroskaTrack { get; set; }
     public bool OkPressed { get; private set; }
     public string WindowTitle { get; private set; }
+
     public readonly List<SubtitleLineViewModel> OcredSubtitle;
 
     private IOcrSubtitle? _ocrSubtitle;
@@ -426,9 +431,62 @@ public partial class OcrViewModel : ObservableObject
         Close();
     }
 
+    [RelayCommand]
+    private void DeleteSelectedLines()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems;
+        if (selectedItems == null || selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        var selectedIndices = new List<int>();
+        foreach (var selectedItem in selectedItems)
+        {
+            if (selectedItem is OcrSubtitleItem item)
+            {
+                var idx = OcrSubtitleItems.IndexOf(item);
+                if (idx >= 0)
+                {
+                    selectedIndices.Add(idx);
+                }
+            }
+        }
+
+        foreach (var index in selectedIndices.OrderByDescending(p => p))
+        {
+            OcrSubtitleItems.RemoveAt(index);
+            _ocrSubtitle?.Delete(index);
+        }
+    }
 
     [RelayCommand]
-    private async Task StartOcr()
+    private async Task StartOcrSelectedLines()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems;
+        if (selectedItems == null || selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        var selectedIndices = new List<int>();
+        foreach (var selectedItem in selectedItems)
+        {
+            if (selectedItem is OcrSubtitleItem item)
+            {
+                var index = OcrSubtitleItems.IndexOf(item);
+                if (index >= 0 && !selectedIndices.Contains(index))
+                {
+                    selectedIndices.Add(index);
+                }
+            }
+        }
+
+        await StartOcr(selectedIndices);
+    }
+
+    [RelayCommand]
+    private async Task StartOcr(List<int>? selectedIndices)
     {
         if (IsOcrRunning)
         {
@@ -461,17 +519,27 @@ public partial class OcrViewModel : ObservableObject
         SaveSettings();
         _cancellationTokenSource = new CancellationTokenSource();
         IsOcrRunning = true;
+
         var startFromIndex = SelectedOcrSubtitleItem == null ? 0 : OcrSubtitleItems.IndexOf(SelectedOcrSubtitleItem);
+        if (selectedIndices == null)
+        {
+            selectedIndices = new List<int>();
+            for (var i = startFromIndex; i < OcrSubtitleItems.Count; i++)
+            {
+                selectedIndices.Add(i);
+            }
+        }
+
         ProgressText = Se.Language.Ocr.RunningOcrDotDotDot;
         ProgressValue = 0d;
 
         if (ocrEngine.EngineType == OcrEngineType.nOcr)
         {
-            RunNOcr(startFromIndex);
+            RunNOcr(selectedIndices);
         }
         else if (ocrEngine.EngineType == OcrEngineType.Tesseract)
         {
-            RunTesseractOcr(startFromIndex);
+            RunTesseractOcr(selectedIndices);
         }
         else if (ocrEngine.EngineType == OcrEngineType.PaddleOcrStandalone)
         {
@@ -515,7 +583,7 @@ public partial class OcrViewModel : ObservableObject
                 }
             }
 
-            RunPaddleOcr(startFromIndex, _ocrSubtitle!.Count - startFromIndex, ocrEngine.EngineType);
+            RunPaddleOcr(selectedIndices, ocrEngine.EngineType);
         }
         else if (ocrEngine.EngineType == OcrEngineType.PaddleOcrPython)
         {
@@ -533,11 +601,11 @@ public partial class OcrViewModel : ObservableObject
                 }
             }
 
-            RunPaddleOcr(startFromIndex, _ocrSubtitle!.Count - startFromIndex, ocrEngine.EngineType);
+            RunPaddleOcr(selectedIndices, ocrEngine.EngineType);
         }
         else if (ocrEngine.EngineType == OcrEngineType.Ollama)
         {
-            RunOllamaOcr();
+            RunOllamaOcr(selectedIndices);
         }
         else if (ocrEngine.EngineType == OcrEngineType.Mistral)
         {
@@ -553,7 +621,7 @@ public partial class OcrViewModel : ObservableObject
                 return;
             }
 
-            RunMistralOcr();
+            RunMistralOcr(selectedIndices);
         }
         else if (ocrEngine.EngineType == OcrEngineType.GoogleVision)
         {
@@ -563,24 +631,26 @@ public partial class OcrViewModel : ObservableObject
 
     private Lock BatchLock = new Lock();
 
-    private void RunPaddleOcr(int startFromIndex, int numberOfImages, OcrEngineType engineType)
+    private void RunPaddleOcr(List<int> selectedIndices, OcrEngineType engineType)
     {
+        var  numberOfImages = selectedIndices.Count;
         var ocrEngine = new PaddleOcr();
         var language = SelectedPaddleOcrLanguage?.Code ?? "en";
         var mode = Se.Settings.Ocr.PaddleOcrMode;
         Se.Settings.Ocr.PaddleOcrLastLanguage = language;
 
         var batchImages = new List<PaddleOcrBatchInput>(numberOfImages);
-        var max = startFromIndex + numberOfImages;
+        var count = 0;
         ProgressText = $"Initializing Paddle OCR...";
-        for (var i = startFromIndex; i < max; i++)
+        foreach (var i in selectedIndices)
         {
+            count++;
             var ocrItem = OcrSubtitleItems[i];
             batchImages.Add(new PaddleOcrBatchInput
             {
                 Bitmap = ocrItem.GetSkBitmap(),
                 Index = i,
-                Text = $"{i} / {max}: {ocrItem.StartTime} - {ocrItem.EndTime}"
+                Text = $"{count} / {numberOfImages}: {ocrItem.StartTime} - {ocrItem.EndTime}"
             });
 
             if (_cancellationTokenSource.Token.IsCancellationRequested)
@@ -600,7 +670,7 @@ public partial class OcrViewModel : ObservableObject
             lock (BatchLock)
             {
                 var number = p.Index;
-                if (number > max)
+                if (!selectedIndices.Contains(number))
                 {
                     return;
                 }
@@ -632,7 +702,7 @@ public partial class OcrViewModel : ObservableObject
         });
     }
 
-    private void RunNOcr(int startFromIndex)
+    private void RunNOcr(List<int> selectedIndices)
     {
         if (!InitNOcrDb())
         {
@@ -640,12 +710,12 @@ public partial class OcrViewModel : ObservableObject
         }
 
         _skipOnceChars.Clear();
-        _ = Task.Run(() => { RunNOcrLoop(startFromIndex); });
+        _ = Task.Run(() => { RunNOcrLoop(selectedIndices); });
     }
 
-    private void RunNOcrLoop(int startFromIndex)
+    private void RunNOcrLoop(List<int> selectedIndices)
     {
-        for (var i = startFromIndex; i < OcrSubtitleItems.Count; i++)
+        foreach (var i in selectedIndices)
         {
             if (_cancellationTokenSource.Token.IsCancellationRequested)
             {
@@ -721,7 +791,7 @@ public partial class OcrViewModel : ObservableObject
                                 IsInspectAdditionsVisible = true;
                                 _nOcrDb.Add(result.NOcrChar);
                                 _ = Task.Run(() => _nOcrDb.Save());
-                                _ = Task.Run(() => RunNOcrLoop(i));
+                                _ = Task.Run(() => RunNOcrLoop(selectedIndices.Where(p => p >= i).ToList()));
                             }
                             else if (result.AbortPressed)
                             {
@@ -730,12 +800,12 @@ public partial class OcrViewModel : ObservableObject
                             else if (result.UseOncePressed)
                             {
                                 _runOnceChars.Add(new SkipOnceChar(i, letterIndex, result.NewText));
-                                _ = Task.Run(() => RunNOcrLoop(i));
+                                _ = Task.Run(() => RunNOcrLoop(selectedIndices.Where(p => p >= i).ToList()));
                             }
                             else if (result.SkipPressed)
                             {
                                 _skipOnceChars.Add(new SkipOnceChar(i, letterIndex));
-                                _ = Task.Run(() => RunNOcrLoop(i));
+                                _ = Task.Run(() => RunNOcrLoop(selectedIndices.Where(p => p >= i).ToList()));
                             }
                             else if (result.InspectHistoryPressed)
                             {
@@ -792,14 +862,14 @@ public partial class OcrViewModel : ObservableObject
         return true;
     }
 
-    private void RunTesseractOcr(int startFromIndex)
+    private void RunTesseractOcr(List<int> selectedIndices)
     {
         var tesseractOcr = new TesseractOcr();
         var language = SelectedTesseractDictionaryItem?.Code ?? "eng";
 
         _ = Task.Run(async () =>
         {
-            for (var i = startFromIndex; i < OcrSubtitleItems.Count; i++)
+            foreach (var i in selectedIndices)
             {
                 if (_cancellationTokenSource.Token.IsCancellationRequested)
                 {
@@ -827,20 +897,13 @@ public partial class OcrViewModel : ObservableObject
         });
     }
 
-    private void RunOllamaOcr()
+    private void RunOllamaOcr(List<int> selectedIndices)
     {
-        var selectedOcrSubtitleItem = SelectedOcrSubtitleItem;
-        if (selectedOcrSubtitleItem == null)
-        {
-            return;
-        }
-
         var ollamaOcr = new OllamaOcr();
-        var startFromIndex = OcrSubtitleItems.IndexOf(selectedOcrSubtitleItem);
 
         _ = Task.Run(async () =>
         {
-            for (var i = startFromIndex; i < OcrSubtitleItems.Count; i++)
+            foreach (var i in selectedIndices)
             {
                 if (_cancellationTokenSource.Token.IsCancellationRequested)
                 {
@@ -869,20 +932,13 @@ public partial class OcrViewModel : ObservableObject
         });
     }
 
-    private void RunMistralOcr()
+    private void RunMistralOcr(List<int> selectedIndices)
     {
-        var selectedOcrSubtitleItem = SelectedOcrSubtitleItem;
-        if (selectedOcrSubtitleItem == null)
-        {
-            return;
-        }
-
         var mistralOcr = new MistralOcr(MistralApiKey);
-        var startFromIndex = OcrSubtitleItems.IndexOf(selectedOcrSubtitleItem);
 
         _ = Task.Run(async () =>
         {
-            for (var i = startFromIndex; i < OcrSubtitleItems.Count; i++)
+            foreach (var i in selectedIndices)
             {
                 if (_cancellationTokenSource.Token.IsCancellationRequested)
                 {
@@ -1147,6 +1203,11 @@ public partial class OcrViewModel : ObservableObject
 
     private void EngineSelectionChanged()
     {
+        if (SelectedOcrEngine == null)
+        {
+            SelectedOcrEngine = OcrEngines.FirstOrDefault();
+        }
+
         IsNOcrVisible = SelectedOcrEngine?.EngineType == OcrEngineType.nOcr;
         IsInspectLineVisible = SelectedOcrEngine?.EngineType == OcrEngineType.nOcr;
         IsOllamaVisible = SelectedOcrEngine?.EngineType == OcrEngineType.Ollama;
@@ -1206,5 +1267,10 @@ public partial class OcrViewModel : ObservableObject
     internal void OnClosing(WindowClosingEventArgs e)
     {
         SaveSettings();
+    }
+
+    internal void SubtitleGridContextOpening(object? sender, EventArgs e)
+    {
+        ShowContextMenu = OcrSubtitleItems.Count > 0;   
     }
 }

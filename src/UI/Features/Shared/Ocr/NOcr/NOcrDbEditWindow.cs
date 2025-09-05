@@ -7,7 +7,7 @@ using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
+namespace Nikse.SubtitleEdit.Features.Shared.Ocr.NOcr;
 
 public class NOcrDbEditWindow : Window
 {
@@ -91,8 +91,8 @@ public class NOcrDbEditWindow : Window
         {
             Margin = new Thickness(0, 5, 0, 0),
         };
-        listBoxCurrentItems.Bind(ListBox.SelectedItemProperty, new Binding(nameof(vm.SelectedCurrentCharacterItem)));
-        listBoxCurrentItems.Bind(ListBox.ItemsSourceProperty, new Binding(nameof(vm.CurrentCharacterItems)));
+        listBoxCurrentItems.Bind(Avalonia.Controls.Primitives.SelectingItemsControl.SelectedItemProperty, new Binding(nameof(vm.SelectedCurrentCharacterItem)));
+        listBoxCurrentItems.Bind(ItemsControl.ItemsSourceProperty, new Binding(nameof(vm.CurrentCharacterItems)));
         listBoxCurrentItems.SelectionChanged += vm.CurrentCharacterItemsChanged;
 
         grid.Add(labelCharacters, 0, 0);

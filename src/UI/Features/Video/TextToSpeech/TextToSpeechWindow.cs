@@ -253,16 +253,7 @@ public class TextToSpeechWindow : Window
         grid.Add(panelApiKey, 5, 0);
         grid.Add(panelKeyFile, 6, 0);
 
-        var boder = new Border
-        {
-            BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetBorderBrush(),
-            Child = grid,
-            Padding = new Thickness(10, 0, 10, 0),
-            CornerRadius = new CornerRadius(5),
-        };
-
-        return boder;
+        return UiUtil.MakeBorderForControl(grid);
     }
 
     private static Border MakeSettingsControls(TextToSpeechViewModel vm)
@@ -315,16 +306,7 @@ public class TextToSpeechWindow : Window
         grid.Add(checkBoxReviewAudioClips, 0, 0);
         grid.Add(panelAddAudioToVideoFile, 1, 0);
 
-        var boder = new Border
-        {
-            BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetBorderBrush(),
-            Child = grid,
-            Padding = new Thickness(10, 0, 10, 0),
-            CornerRadius = new CornerRadius(5),
-        };
-
-        return boder;
+        return UiUtil.MakeBorderForControl(grid);
     }
 
     private static Grid MakeProgressBarControls(TextToSpeechViewModel vm)

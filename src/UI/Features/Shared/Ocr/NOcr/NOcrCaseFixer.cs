@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Nikse.SubtitleEdit.Logic.Ocr;
 
-namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
+namespace Nikse.SubtitleEdit.Features.Shared.Ocr.NOcr;
 
 public class NOcrCaseFixer : INOcrCaseFixer
 {

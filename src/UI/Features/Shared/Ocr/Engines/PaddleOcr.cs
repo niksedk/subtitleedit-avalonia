@@ -1,4 +1,5 @@
-﻿using Nikse.SubtitleEdit.Logic.Config;
+﻿using Nikse.SubtitleEdit.Features.Shared.Ocr.Engines;
+using Nikse.SubtitleEdit.Logic.Config;
 using SkiaSharp;
 using System;
 using System.Collections.Concurrent;

@@ -5,7 +5,7 @@ using SkiaSharp;
 using System;
 using System.Collections.Generic;
 
-namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
+namespace Nikse.SubtitleEdit.Features.Shared.Ocr.OcrSubtitle;
 
 public class OcrSubtitleMkvDvb : IOcrSubtitle
 {
@@ -46,5 +46,10 @@ public class OcrSubtitleMkvDvb : IOcrSubtitle
         }
 
         return ocrSubtitleItems;
+    }
+
+    public void Delete(int index)
+    {
+        _subtitleImages.RemoveAt(index);
     }
 }

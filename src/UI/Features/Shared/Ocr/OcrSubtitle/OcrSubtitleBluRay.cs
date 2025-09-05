@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using SkiaSharp;
 
-namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
+namespace Nikse.SubtitleEdit.Features.Shared.Ocr.OcrSubtitle;
 
 public class OcrSubtitleBluRay : IOcrSubtitle
 {
@@ -41,5 +41,10 @@ public class OcrSubtitleBluRay : IOcrSubtitle
         }
 
         return ocrSubtitleItems;
+    }
+
+    public void Delete(int index)
+    {
+        _pcsDataList.RemoveAt(index);
     }
 }

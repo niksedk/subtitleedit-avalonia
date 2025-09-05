@@ -130,16 +130,7 @@ public class PickMp4TrackWindow : Window
         dataGridTracks.SelectionChanged += vm.DataGridTracksSelectionChanged;
         vm.TracksGrid = dataGridTracks; 
 
-        var border = new Border
-        {
-            Child = dataGridTracks,
-            BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetBorderBrush(),
-            Padding = new Thickness(10, 0, 10, 0),
-            CornerRadius = new CornerRadius(5),
-        };
-
-        return border;
+        return UiUtil.MakeBorderForControlNoPadding(dataGridTracks);
     }
 
     private Border MakeSubtitleView(PickMp4TrackViewModel vm)
@@ -224,16 +215,7 @@ public class PickMp4TrackWindow : Window
             },
         };
 
-        var border = new Border
-        {
-            Child = dataGridSubtitle,
-            BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetBorderBrush(),
-            Padding = new Thickness(10, 0, 10, 0),
-            CornerRadius = new CornerRadius(5),
-        };
-
-        return border;
+        return UiUtil.MakeBorderForControlNoPadding(dataGridSubtitle);
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

@@ -1,7 +1,7 @@
 ﻿using Nikse.SubtitleEdit.Logic.Ocr;
 using System;
 
-namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
+namespace Nikse.SubtitleEdit.Features.Shared.Ocr.NOcr;
 
 public class NOcrAddHistoryItem
 {

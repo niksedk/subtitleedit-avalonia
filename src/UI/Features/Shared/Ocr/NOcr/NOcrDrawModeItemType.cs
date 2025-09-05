@@ -1,4 +1,4 @@
-﻿namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
+﻿namespace Nikse.SubtitleEdit.Features.Shared.Ocr.NOcr;
 
 public enum NOcrDrawModeItemType
 { 

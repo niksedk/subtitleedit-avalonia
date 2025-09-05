@@ -1,17 +1,18 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
+namespace Nikse.SubtitleEdit.Features.Shared.Ocr.NOcr;
 
-public class NOcrSettingsWindow : Window
+public class NOcrDbNewWindow : Window
 {
-    private readonly NOcrSettingsViewModel _vm;
+    private readonly NOcrDbNewViewModel _vm;
 
-    public NOcrSettingsWindow(NOcrSettingsViewModel vm)
+    public NOcrDbNewWindow(NOcrDbNewViewModel vm)
     {
-        Title = Se.Language.Ocr.NOcrDatabase;
+        Title = "New/rename nOCR database";
         _vm = vm;
         vm.Window = this;
         Icon = UiUtil.GetSeIcon();
@@ -30,6 +31,7 @@ public class NOcrSettingsWindow : Window
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
@@ -38,29 +40,37 @@ public class NOcrSettingsWindow : Window
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
         };
 
-        var labelTitle = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.ActionText)).HorizontalContentAlignmentCenter();
+        var labelTitle = UiUtil.MakeLabel(Se.Language.Ocr.EditNOcrDatabase);
+        var textBoxDatabaseName = UiUtil.MakeTextBox(200, vm, nameof(vm.DatabaseName));
 
-        var buttonEdit = UiUtil.MakeButton(Se.Language.General.Edit, vm.EditCommand);
-        var buttonDelete = UiUtil.MakeButton(Se.Language.General.Delete, vm.DeleteCommand);
-        var buttonRename = UiUtil.MakeButton(Se.Language.General.Rename, vm.RenameCommand);
-        var buttonNew = UiUtil.MakeButton(Se.Language.General.New, vm.NewCommand);
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var buttonBar = UiUtil.MakeButtonBar(buttonEdit, buttonDelete, buttonRename, buttonNew, buttonCancel);
+        var buttonBar = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
         grid.Add(labelTitle, 0, 0);
-        grid.Add(buttonBar, 1, 0);
+        grid.Add(textBoxDatabaseName, 0, 1);
+        grid.Add(buttonBar, 1, 0, 1, 2);
 
         Content = grid;
 
         Activated += delegate
         {
-            buttonEdit.Focus(); // hack to make OnKeyDown work
+            textBoxDatabaseName.Focus(); // hack to make OnKeyDown work
         };
+
+        textBoxDatabaseName.KeyDown += vm.TextBoxDatabaseNameKeyDown;
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
         _vm.KeyDown(e);
+    }
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+            
+        base.OnLoaded(e);
+        Title = _vm.Title;
     }
 }

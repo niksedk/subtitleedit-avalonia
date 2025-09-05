@@ -16,7 +16,7 @@ using Nikse.SubtitleEdit.Core.VobSub.Ocr.Service;
 using Nikse.SubtitleEdit.Logic;
 using SkiaSharp;
 
-namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
+namespace Nikse.SubtitleEdit.Features.Shared.Ocr.Engines;
 
 /// <summary>
 /// OCR via Google Cloud Vision API - see https://cloud.google.com/vision/docs/ocr

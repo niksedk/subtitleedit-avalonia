@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Nikse.SubtitleEdit.Features.Shared.Ocr.Engines;
+using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
 

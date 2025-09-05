@@ -171,7 +171,7 @@ public class OcrWindow : Window
         var dataGridSubtitle = new DataGrid
         {
             AutoGenerateColumns = false,
-            SelectionMode = DataGridSelectionMode.Single,
+            SelectionMode = DataGridSelectionMode.Extended,
             CanUserResizeColumns = true,
             CanUserSortColumns = true,
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -241,20 +241,35 @@ public class OcrWindow : Window
                 },
             },
         };
-        dataGridSubtitle.Bind(DataGrid.SelectedItemProperty,
-            new Binding(nameof(vm.SelectedOcrSubtitleItem)) { Source = vm });
+        dataGridSubtitle.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedOcrSubtitleItem)) { Source = vm });
         vm.SubtitleGrid = dataGridSubtitle;
 
-        var border = new Border
-        {
-            Child = dataGridSubtitle,
-            BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetBorderBrush(),
-            Padding = new Thickness(10, 0, 10, 0),
-            CornerRadius = new CornerRadius(5),
-        };
+        // Create a Flyout for the DataGrid
+        var flyout = new MenuFlyout();
 
-        return border;
+        flyout.Opening += vm.SubtitleGridContextOpening;
+
+        var menuItemOcrSelectedLines = new MenuItem
+        {
+            Header = Se.Language.Ocr.OcrSelectedLines,
+            DataContext = vm,
+            Command = vm.StartOcrSelectedLinesCommand,
+        };
+        menuItemOcrSelectedLines.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
+        flyout.Items.Add(menuItemOcrSelectedLines);
+
+        var menuItemDelete = new MenuItem
+        {
+            Header = Se.Language.General.Delete,
+            DataContext = vm,
+            Command = vm.DeleteSelectedLinesCommand,
+        };
+        menuItemDelete.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
+        flyout.Items.Add(menuItemDelete);
+
+        vm.SubtitleGrid.ContextFlyout = flyout;
+
+        return UiUtil.MakeBorderForControlNoPadding(dataGridSubtitle).WithMarginBottom(5);
     }
 
     private static Border MakeEditView(OcrViewModel vm)
@@ -284,17 +299,8 @@ public class OcrWindow : Window
             }
         };
 
-        var border = new Border
-        {
-            Child = panel,
-            BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetBorderBrush(),
-            Padding = new Thickness(10, 0, 10, 0),
-            CornerRadius = new CornerRadius(5),
-            Margin = new Thickness(0, 10, 0, 10),
-        };
-        border.Bind(Border.IsVisibleProperty,
-            new Binding(nameof(vm.IsOcrRunning)) { Source = vm, Converter = new InverseBooleanConverter() });
+        var border = UiUtil.MakeBorderForControl(panel).WithMarginBottom(5);
+        border.Bind(Border.IsVisibleProperty, new Binding(nameof(vm.IsOcrRunning)) { Source = vm, Converter = new InverseBooleanConverter() });
 
         return border;
     }
@@ -384,7 +390,6 @@ public class OcrWindow : Window
 
         return grid;
     }
-
 
     protected override void OnLoaded(RoutedEventArgs e)
     {

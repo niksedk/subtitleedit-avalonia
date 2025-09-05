@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Nikse.SubtitleEdit.Features.Shared.Ocr;
+namespace Nikse.SubtitleEdit.Features.Shared.Ocr.OcrSubtitle;
 
 public class OcrSubtitleBdn : IOcrSubtitle
 {
@@ -294,5 +294,10 @@ public class OcrSubtitleBdn : IOcrSubtitle
         }
 
         return ocrSubtitleItems;
+    }
+
+    public void Delete(int index)
+    {
+        _bdnXmlSubtitle.Paragraphs.RemoveAt(index);
     }
 }

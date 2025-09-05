@@ -1770,7 +1770,7 @@ public static class UiUtil
         }
 
         UpdateRegionColor();
-        
+
         var bgColor = GetDarkThemeBackgroundColor();
         var bgColorLighter = LightenColor(bgColor, 5);
         var bgColorHeader = LightenColor(bgColor, 15);

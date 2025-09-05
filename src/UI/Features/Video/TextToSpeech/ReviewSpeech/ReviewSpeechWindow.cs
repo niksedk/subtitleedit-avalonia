@@ -160,17 +160,8 @@ public class ReviewSpeechWindow : Window
 
         grid.Add(dataGrid, 0, 0);
         grid.Add(textBox, 1, 0);
-
-        var border = new Border
-        {
-            Child = grid,
-            BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetBorderBrush(),
-            Padding = new Thickness(10, 0, 10, 0),
-            CornerRadius = new CornerRadius(5),
-        };
-
-        return border;
+       
+        return UiUtil.MakeBorderForControl(grid);
     }
 
     private static Border MakeControls(ReviewSpeechViewModel vm)
@@ -337,16 +328,7 @@ public class ReviewSpeechWindow : Window
         grid.Add(buttonStop, 8, 0);
         grid.Add(checkBoxAutoContinue, 9, 0);
 
-        var boder = new Border
-        {
-            BorderThickness = new Thickness(1),
-            BorderBrush = UiUtil.GetBorderBrush(),
-            Child = grid,
-            Padding = new Thickness(10, 0, 10, 0),
-            CornerRadius = new CornerRadius(5),
-        };
-
-        return boder;
+        return UiUtil.MakeBorderForControl(grid);
     }
 
     private static Grid MakeElevenLabsControls(ReviewSpeechViewModel vm)
