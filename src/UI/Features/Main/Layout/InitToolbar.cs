@@ -307,7 +307,7 @@ public static class InitToolbar
         {
             Text = Se.Language.General.SubtitleFormat,
             VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Avalonia.Thickness(5, 0, 0, 0),
+            Margin = new Thickness(5, 0, 0, 0),
         });
         var comboBoxSubtitleFormat = new ComboBox
         {
@@ -339,7 +339,7 @@ public static class InitToolbar
             {
                 Text = Se.Language.General.Encoding,
                 VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Avalonia.Thickness(5, 0, 0, 0),
+                Margin = new Thickness(5, 0, 0, 0),
             });
             var comboBoxEncoding = new ComboBox
             {
@@ -380,7 +380,7 @@ public static class InitToolbar
         {
             Width = 1,
             Background = Brushes.Gray,
-            Margin = new Avalonia.Thickness(5, 5, 5, 5),
+            Margin = new Thickness(5, 5, 5, 5),
         };
     }
 }

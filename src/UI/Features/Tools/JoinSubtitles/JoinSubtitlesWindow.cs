@@ -26,7 +26,7 @@ public class JoinSubtitlesWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        var buttonOk = UiUtil.MakeButton(Se.Language.Tools.JoinSubtitles.Join, vm.OkCommand);
+        var buttonOk = UiUtil.MakeButton(Se.Language.Tools.JoinSubtitles.Join, vm.OkCommand).WithBindEnabled(nameof(vm.IsJoinEnabled));
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
@@ -126,6 +126,20 @@ public class JoinSubtitlesWindow : Window
             },
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedJoinItem)) { Source = vm });
+        dataGrid.KeyDown += vm.DataGridKeyDown;
+
+        var flyout = new MenuFlyout();
+        flyout.Opening += vm.ItemsContextMenuOpening;
+        dataGrid.ContextFlyout = flyout;
+
+        var menuItemDelete = new MenuItem
+        {
+            Header = Se.Language.General.Delete,
+            DataContext = vm,
+            Command = vm.RemoveCommand,
+        };
+        menuItemDelete.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsDeleteVisible)) { Source = vm });
+        flyout.Items.Add(menuItemDelete);
 
         var buttonAdd = UiUtil.MakeButton(vm.AddCommand, IconNames.Plus, Se.Language.General.New);
         var buttonRemove = UiUtil.MakeButton(vm.RemoveCommand, IconNames.Trash, Se.Language.General.Remove);
@@ -145,7 +159,7 @@ public class JoinSubtitlesWindow : Window
         var radioAppendTimeCodes = UiUtil.MakeRadioButton(Se.Language.Tools.JoinSubtitles.AppendTimeCodes, vm, nameof(vm.AppendTimeCodes), "TimeCodes")
             .WithMarginRight(5);
         var labelAddMilliseconds = UiUtil.MakeLabel(Se.Language.Tools.JoinSubtitles.AddMsAfterEachFile);
-        var numericUpDownAppendMilliseconds = UiUtil.MakeNumericUpDownInt(0, 10000, 140, vm, nameof(vm.AppendTimeCodesAddMilliseconds));
+        var numericUpDownAppendMilliseconds = UiUtil.MakeNumericUpDownInt(0, 10000, 140, vm, nameof(vm.AppendTimeCodesAddMilliseconds)).WithBindEnabled(nameof(vm.AppendTimeCodes));
 
         var stackPanelAppend = new StackPanel
         {

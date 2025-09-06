@@ -9,10 +9,12 @@ public partial class JoinDisplayItem : ObservableObject
     [ObservableProperty] private TimeSpan _startTime;
     [ObservableProperty] private TimeSpan _endTime;
     [ObservableProperty] private string _fileName;
+    [ObservableProperty] private string _fullFileName;
 
     public JoinDisplayItem()
     {
-        string FileName = string.Empty;
+        FileName = string.Empty;
+        FullFileName = string.Empty;
     }
 }
 

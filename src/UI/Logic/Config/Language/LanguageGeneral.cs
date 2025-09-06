@@ -306,6 +306,7 @@ public class LanguageGeneral
     public string OpenOutputFolder { get; set; }
     public string Lines { get; set; }
     public string Characters { get; set; }
+    public string Untitled { get; set; }
 
     public LanguageGeneral()
     {
@@ -611,5 +612,6 @@ public class LanguageGeneral
         OpenOutputFolder = "Open output folder";
         Lines = "Lines";
         Characters = "Characters";
+        Untitled = "Untitled";
     }
 }

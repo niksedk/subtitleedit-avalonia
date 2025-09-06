@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config;
+﻿using Nikse.SubtitleEdit.Core.SubtitleFormats;
+
+namespace Nikse.SubtitleEdit.Logic.Config;
 
 public class SeTools
 {
@@ -16,6 +18,13 @@ public class SeTools
     public string OpenRouterPrompt { get; set; }
     public bool JoinKeepTimeCodes { get; set; }
     public int JoinAppendMilliseconds { get; set; }
+    public int SplitNumberOfEqualParts { get; internal set; }
+    public string SplitOutputFolder { get; internal set; }
+    public bool SplitByLines { get; internal set; }
+    public bool SplitByCharacters { get; internal set; }
+    public bool SplitByTime { get; internal set; }
+    public string SplitSubtitleFormat { get; internal set; }
+    public string? SplitSubtitleEncoding { get; internal set; }
 
     public SeTools()
     {
@@ -25,5 +34,9 @@ public class SeTools
         GroqPrompt = string.Empty;
         OpenRouterPrompt = string.Empty;
         JoinKeepTimeCodes = true;
+        SplitNumberOfEqualParts = 2;
+        SplitByLines = true;
+        SplitOutputFolder = string.Empty;
+        SplitSubtitleFormat = new SubRip().Name;
     }
 }

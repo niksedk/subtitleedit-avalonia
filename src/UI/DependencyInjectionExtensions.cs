@@ -170,6 +170,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<OcrViewModel>();
         collection.AddTransient<OllamaBrowseViewModel>();
         collection.AddTransient<OpenFromUrlViewModel>();
+        collection.AddTransient<PartsSavedViewModel>();
         collection.AddTransient<PickMatroskaTrackViewModel>();
         collection.AddTransient<PickMp4TrackViewModel>();
         collection.AddTransient<PromptTextBoxViewModel>();

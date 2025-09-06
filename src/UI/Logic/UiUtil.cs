@@ -843,6 +843,17 @@ public static class UiUtil
         return control;
     }
 
+    public static NumericUpDown WithBindEnabled(this NumericUpDown control, string isEnabledPropertyPath)
+    {
+        control.Bind(NumericUpDown.IsEnabledProperty, new Binding
+        {
+            Path = isEnabledPropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
     public static Button WithBindContent(this Button control, string contentPropertyPath)
     {
         control.Bind(Button.ContentProperty, new Binding

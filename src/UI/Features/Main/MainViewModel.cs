@@ -1056,8 +1056,18 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowToolsJoin()
     {
-        await _windowService.ShowDialogAsync<JoinSubtitlesWindow, JoinSubtitlesViewModel>(Window!, vm => { });
+        var result = await _windowService.ShowDialogAsync<JoinSubtitlesWindow, JoinSubtitlesViewModel>(Window!, vm => { });
         _shortcutManager.ClearKeys();
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        ResetSubtitle();
+        SetSubtitles(result.JoinedSubtitle);
+        SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p=>p.Name == result.JoinedFormat.Name) ?? SubtitleFormats[0];   
+        SelectAndScrollToRow(0);
+        ShowStatus($"Joined subtitle loaded");
     }
 
     [RelayCommand]
@@ -1070,7 +1080,28 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowToolsSplit()
     {
-        await _windowService.ShowDialogAsync<SplitSubtitleWindow, SplitSubtitleViewModel>(Window!, vm => { });
+        var s = GetUpdateSubtitle();
+        var fileName = _subtitleFileName;
+        if (s.Paragraphs.Count == 0)
+        {
+            fileName = await _fileHelper.PickOpenSubtitleFile(Window!, Se.Language.General.OpenSubtitleFileTitle, false);
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return;
+            }
+
+            s = Subtitle.Parse(fileName);
+        }   
+
+        if (s == null || s.Paragraphs.Count == 0)
+        {
+            return;
+        }
+
+        await _windowService.ShowDialogAsync<SplitSubtitleWindow, SplitSubtitleViewModel>(Window!, vm => 
+        { 
+            vm.Initialize(fileName ?? string.Empty, s);
+        });
         _shortcutManager.ClearKeys();
     }
 

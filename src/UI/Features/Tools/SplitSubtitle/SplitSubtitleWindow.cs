@@ -1,7 +1,9 @@
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -18,14 +20,14 @@ public class SplitSubtitleWindow : Window
         CanResize = true;
         Width = 900;
         Height = 700;
-        MinWidth = 600;
+        MinWidth = 650;
         MinHeight = 400;
 
         _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
-        var buttonOk = UiUtil.MakeButton(Se.Language.Tools.SplitSubtitle.Split, vm.OkCommand);
+        var buttonOk = UiUtil.MakeButton(Se.Language.Tools.SplitSubtitle.SaveSplitParts, vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
@@ -59,12 +61,12 @@ public class SplitSubtitleWindow : Window
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 
-    private Control MakeInputOutputView(SplitSubtitleViewModel vm)
+    private static Border MakeInputOutputView(SplitSubtitleViewModel vm)
     {
         var labelSubtitleInfo = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.SubtitleInfo));
 
         var labelOutputFolder = UiUtil.MakeLabel(Se.Language.General.OutputFolder).WithMinWidth(100);
-        var comboOutputFoler = UiUtil.MakeTextBox(200, vm, nameof(vm.OutputFolder));
+        var textBoxOutputFolder = UiUtil.MakeTextBox(450, vm, nameof(vm.OutputFolder));
         var buttonBrowse = UiUtil.MakeBrowseButton(vm.BrowseCommand);
         var buttonOpen = UiUtil.MakeButton(vm.OpenFolderCommand, IconNames.FolderOpen, Se.Language.General.OpenOutputFolder);
         var panelOutputFolder = new StackPanel
@@ -73,33 +75,56 @@ public class SplitSubtitleWindow : Window
             Children =
             {
                 labelOutputFolder,
-                comboOutputFoler,
+                textBoxOutputFolder,
                 buttonBrowse,
                 buttonOpen,
             }
         };
 
         var labelFormat = UiUtil.MakeLabel(Se.Language.General.Format).WithMinWidth(100);
-        var comboFormat = UiUtil.MakeComboBox(vm.Formats, vm, nameof(vm.Formats), nameof(vm.SelectedSubtitleFormat));
+
+        var comboBoxFormat = new ComboBox
+        {
+            Width = 200,
+            Height = 30,
+            [!ComboBox.ItemsSourceProperty] = new Binding(nameof(vm.Formats)),
+            [!ComboBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedSubtitleFormat)),
+            DataContext = vm,
+            ItemTemplate = new FuncDataTemplate<object>((item, _) =>
+                new TextBlock
+                {
+                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleFormat.Name)),
+                    Width = 150,
+                }, true)
+        };
+
         var panelFormat = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Children =
             {
                 labelFormat,
-                comboFormat,
+                comboBoxFormat,
             }
         };
 
         var labelEncoding = UiUtil.MakeLabel(Se.Language.General.Encoding).WithMinWidth(100);
-        var comboEncoding = UiUtil.MakeComboBox(vm.Encodings, vm, nameof(vm.Encodings), nameof(vm.SelectedEncoding));
+        var comboBoxEncoding = new ComboBox
+        {
+            Width = 200,
+            Height = 30,
+            [!ComboBox.ItemsSourceProperty] = new Binding(nameof(vm.Encodings)),
+            [!ComboBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedEncoding)),
+            DataContext = vm,
+        };
+
         var panelEncoding = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Children =
             {
                 labelEncoding,
-                comboEncoding,
+                comboBoxEncoding,
             }
         };
 
@@ -140,8 +165,11 @@ public class SplitSubtitleWindow : Window
         };
 
         var radioLines = UiUtil.MakeRadioButton(Se.Language.General.Lines, vm, nameof(vm.SplitByLines));
+        radioLines.IsCheckedChanged += (s, e) => vm.SetDirty();   
         var radioCharacters = UiUtil.MakeRadioButton(Se.Language.General.Characters, vm, nameof(vm.SplitByCharacters));
+        radioCharacters.IsCheckedChanged += (s, e) => vm.UpdateSplit();
         var radioTime = UiUtil.MakeRadioButton(Se.Language.General.Time, vm, nameof(vm.SplitByTime));
+        radioTime.IsCheckedChanged += (s, e) => vm.SetDirty();
         var panelSplitBy = new StackPanel()
         {
             Orientation = Orientation.Vertical,
@@ -150,7 +178,9 @@ public class SplitSubtitleWindow : Window
         };
 
         var labelParts = UiUtil.MakeLabel(Se.Language.Tools.SplitSubtitle.NumberOfEqualParts);
-        var numberUpDownParts = UiUtil.MakeNumericUpDownInt(1, vm.PartsMax, 110, nameof(vm.NumberOfEqualParts));
+        var numberUpDownParts = UiUtil.MakeNumericUpDownInt(1, vm.PartsMax, 110, vm, nameof(vm.NumberOfEqualParts));
+        numberUpDownParts.ValueChanged += (s, e) => vm.SetDirty();
+        numberUpDownParts.Bind(NumericUpDown.MaximumProperty, new Binding(nameof(vm.PartsMax)) { Source = vm, Mode = BindingMode.OneWay });
         var panelParts = new StackPanel()
         {
             Orientation = Orientation.Vertical,
