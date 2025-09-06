@@ -9,6 +9,7 @@ public class LanguageTools
     public LanguageJoinSubtitles JoinSubtitles { get; set; } = new();
     public LanguageSplitSubtitle SplitSubtitle { get; set; } = new();
     public LanguageMergeLineswithSameText MergeLineswithSameText { get; set; } = new();
+    public LanguageMergeLineswithSameTimeCodes MergeLineswithSameTimeCodes { get; set; } = new();
 
     public LanguageTools()
     {

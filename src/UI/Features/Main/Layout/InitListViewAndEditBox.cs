@@ -746,12 +746,31 @@ public static class InitListViewAndEditBox
         };
 
         // Auto Break button
-        var autoBreakButton = UiUtil.MakeButton(vm.AutoBreakCommand, IconNames.ScaleBalance, 20);
+        var autoBreakButton = UiUtil.MakeButton(vm.AutoBreakCommand, IconNames.ScaleBalance);
+        if (Se.Settings.Appearance.ShowHints)
+        {
+            ToolTip.SetTip(autoBreakButton, Se.Language.Main.AutoBreakHint);
+        }
         buttonPanel.Children.Add(autoBreakButton);
 
         // Unbreak button
-        var unbreakButton = UiUtil.MakeButton(vm.UnbreakCommand, IconNames.SetMerge, 20);
+        var unbreakButton = UiUtil.MakeButton(vm.UnbreakCommand, IconNames.SetMerge);
+        if (Se.Settings.Appearance.ShowHints)
+        {
+            ToolTip.SetTip(unbreakButton, Se.Language.Main.UnbreakHint);
+        }
         buttonPanel.Children.Add(unbreakButton);
+
+
+        //TODO: make this button customizable in the settings
+        // Unbreak button
+        var italicButton = UiUtil.MakeButton(vm.ToggleLinesItalicCommand, IconNames.Italic);
+        if (Se.Settings.Appearance.ShowHints)
+        {
+           ToolTip.SetTip(italicButton, Se.Language.Main.ItalicHint);
+        }
+        buttonPanel.Children.Add(italicButton);
+
 
         textEditGrid.Add(buttonPanel, 1, 2);
 

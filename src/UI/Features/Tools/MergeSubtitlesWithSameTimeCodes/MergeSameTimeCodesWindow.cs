@@ -5,16 +5,16 @@ using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameText;
+namespace Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameTimeCodes;
 
-public class MergeSameTextWindow : Window
+public class MergeSameTimeCodesWindow : Window
 {
-    private readonly MergeSameTextViewModel _vm;
+    private readonly MergeSameTimeCodesViewModel _vm;
 
-    public MergeSameTextWindow(MergeSameTextViewModel vm)
+    public MergeSameTimeCodesWindow(MergeSameTimeCodesViewModel vm)
     {
         Icon = UiUtil.GetSeIcon();
-        Title = Se.Language.Tools.MergeLineswithSameText.Title;
+        Title = Se.Language.Tools.MergeLineswithSameTimeCodes.Title;
         CanResize = true;
         Width = 900;
         Height = 800;

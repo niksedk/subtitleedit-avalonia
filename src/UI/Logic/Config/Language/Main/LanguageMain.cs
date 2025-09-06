@@ -26,6 +26,11 @@ public class LanguageMain
     public string SaveXFileAs { get; set; }
     public string SaveLanguageFile { get; set; }
     public string SelectCurrentLineWhilePlaying { get; set; }
+    public string JoinedSubtitleLoaded { get; set; }
+    public string CreatedEmptyTranslation { get; set; }
+    public string AutoBreakHint { get; set; }
+    public string UnbreakHint { get; set; }
+    public string ItalicHint { get; set; }
 
     public LanguageMain()
     {
@@ -47,5 +52,10 @@ public class LanguageMain
         SaveXFileAs = "Save {0} file as";
         SaveLanguageFile = "Save language file";
         SelectCurrentLineWhilePlaying = "Select current line while playing";
+        JoinedSubtitleLoaded = "Joined subtitle loaded";
+        CreatedEmptyTranslation = "Created empty translation from current subtitle";
+        AutoBreakHint = "Auto-break selected lines";
+        UnbreakHint = "Unbreak selected lines";
+        ItalicHint = "Italic selected text";
     }
 }

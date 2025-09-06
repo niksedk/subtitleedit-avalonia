@@ -55,6 +55,7 @@ using Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
 using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 using Nikse.SubtitleEdit.Features.Tools.JoinSubtitles;
 using Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameText;
+using Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameTimeCodes;
 using Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
 using Nikse.SubtitleEdit.Features.Tools.SplitSubtitle;
 using Nikse.SubtitleEdit.Features.Translate;
@@ -1065,9 +1066,9 @@ public partial class MainViewModel :
 
         ResetSubtitle();
         SetSubtitles(result.JoinedSubtitle);
-        SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p=>p.Name == result.JoinedFormat.Name) ?? SubtitleFormats[0];   
+        SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == result.JoinedFormat.Name) ?? SubtitleFormats[0];
         SelectAndScrollToRow(0);
-        ShowStatus($"Joined subtitle loaded");
+        ShowStatus(Se.Language.Main.JoinedSubtitleLoaded);
     }
 
     [RelayCommand]
@@ -1075,6 +1076,28 @@ public partial class MainViewModel :
     {
         await _windowService.ShowDialogAsync<MergeSameTextWindow, MergeSameTextViewModel>(Window!, vm => { });
         _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowToolsMergeLinesWithSameTimeCodes()
+    {
+        await _windowService.ShowDialogAsync<MergeSameTimeCodesWindow, MergeSameTimeCodesViewModel>(Window!, vm => { });
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private void ToolsMakeEmptyTranslationFromCurrentSubtitle()
+    {
+        foreach (var subtitle in Subtitles)
+        {
+            subtitle.OriginalText = subtitle.Text;
+            subtitle.Text = string.Empty;
+        }
+
+        _shortcutManager.ClearKeys();
+        ShowColumnOriginalText = true;
+        AutoFitColumns();
+        ShowStatus(Se.Language.Main.CreatedEmptyTranslation);
     }
 
     [RelayCommand]
@@ -1091,15 +1114,15 @@ public partial class MainViewModel :
             }
 
             s = Subtitle.Parse(fileName);
-        }   
+        }
 
         if (s == null || s.Paragraphs.Count == 0)
         {
             return;
         }
 
-        await _windowService.ShowDialogAsync<SplitSubtitleWindow, SplitSubtitleViewModel>(Window!, vm => 
-        { 
+        await _windowService.ShowDialogAsync<SplitSubtitleWindow, SplitSubtitleViewModel>(Window!, vm =>
+        {
             vm.Initialize(fileName ?? string.Empty, s);
         });
         _shortcutManager.ClearKeys();

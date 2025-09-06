@@ -237,6 +237,16 @@ public static class InitMenu
                 },
                 new MenuItem
                 {
+                    Header = l.MergeLinesWithSameTimeCodes,
+                    Command = vm.ShowToolsMergeLinesWithSameTimeCodesCommand,
+                },
+                new MenuItem
+                {
+                    Header = l.MakeEmptyTranslationFromCurrentSubtitle,
+                    Command = vm.ToolsMakeEmptyTranslationFromCurrentSubtitleCommand,
+                },
+                new MenuItem
+                {
                     Header = l.RemoveTextForHearingImpaired,
                     Command = vm.ShowToolsRemoveTextForHearingImpairedCommand,
                 },

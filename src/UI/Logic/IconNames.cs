@@ -72,4 +72,6 @@ internal class IconNames
     public const string ArrowExpandRight = "mdi-arrow-expand-right";
     public const string ArrowLeftRightBold = "mdi-arrow-left-right-bold";
     public const string ArrowUpDownBold = "mdi-arrow-up-down-bold";
+    public const string Italic = "mdi-format-italic";
+    public const string Bold = "mdi-format-bold";
 }

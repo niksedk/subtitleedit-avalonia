@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language;
+﻿using Nikse.SubtitleEdit.Core.Forms;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
 public class LanguageMainMenu
 {
@@ -35,7 +37,9 @@ public class LanguageMainMenu
     public string BridgeGaps { get; set; }
     public string ChangeCasing { get; set; }
     public string FixCommonErrors { get; set; }
+    public string MakeEmptyTranslationFromCurrentSubtitle { get; set; }
     public string MergeLinesWithSameText { get; set; }
+    public string MergeLinesWithSameTimeCodes { get; set; }
     public string RemoveTextForHearingImpaired { get; set; }
     public string JoinSubtitles { get; set; }
     public string SplitSubtitle { get; set; }
@@ -108,7 +112,9 @@ public class LanguageMainMenu
         Tools = "_Tools";
         AdjustDurations = "_Adjust durations...";
         FixCommonErrors = "_Fix common errors...";
+        MakeEmptyTranslationFromCurrentSubtitle = "Make new _empty translation from current subtitle";
         MergeLinesWithSameText = "_Merge lines with same text...";
+        MergeLinesWithSameTimeCodes = "Merge lines with same time codes...";
         RemoveTextForHearingImpaired = "_Remove text for hearing impaired...";
         ChangeCasing = "_Change casing...";
         BridgeGaps = "Bridge _gaps...";
@@ -145,7 +151,7 @@ public class LanguageMainMenu
 
         Translate = "Tr_anslate";
         AutoTranslate = "_Auto-translate...";
-        
+
         HelpTitle = "_Help";
         Help = "_Help...";
         About = "_About...";
