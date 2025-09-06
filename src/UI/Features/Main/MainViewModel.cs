@@ -53,7 +53,10 @@ using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 using Nikse.SubtitleEdit.Features.Tools.BridgeGaps;
 using Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
 using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
+using Nikse.SubtitleEdit.Features.Tools.JoinSubtitles;
+using Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameText;
 using Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
+using Nikse.SubtitleEdit.Features.Tools.SplitSubtitle;
 using Nikse.SubtitleEdit.Features.Translate;
 using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 using Nikse.SubtitleEdit.Features.Video.BlankVideo;
@@ -1047,6 +1050,27 @@ public partial class MainViewModel :
     private async Task ShowToolsBatchConvert()
     {
         await _windowService.ShowDialogAsync<BatchConvertWindow, BatchConvertViewModel>(Window!, vm => { });
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowToolsJoin()
+    {
+        await _windowService.ShowDialogAsync<JoinSubtitlesWindow, JoinSubtitlesViewModel>(Window!, vm => { });
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowToolsMergeLinesWithSameText()
+    {
+        await _windowService.ShowDialogAsync<MergeSameTextWindow, MergeSameTextViewModel>(Window!, vm => { });
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowToolsSplit()
+    {
+        await _windowService.ShowDialogAsync<SplitSubtitleWindow, SplitSubtitleViewModel>(Window!, vm => { });
         _shortcutManager.ClearKeys();
     }
 
@@ -4612,7 +4636,7 @@ public partial class MainViewModel :
                 if (isPlaying)
                 {
                     Projektanker.Icons.Avalonia.Attached.SetIcon(ButtonWaveformPlay, IconNames.Pause);
-                    
+
                     if (SelectCurrentSubtitleWhilePlaying)
                     {
                         var ss = SelectedSubtitle;

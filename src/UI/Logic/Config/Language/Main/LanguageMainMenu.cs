@@ -31,11 +31,15 @@ public class LanguageMainMenu
 
     public string Tools { get; set; }
     public string AdjustDurations { get; set; }
-    public string FixCommonErrors { get; set; }
-    public string RemoveTextForHearingImpaired { get; set; }
-    public string ChangeCasing { get; set; }
-    public string BridgeGaps { get; set; }
     public string BatchConvert { get; set; }
+    public string BridgeGaps { get; set; }
+    public string ChangeCasing { get; set; }
+    public string FixCommonErrors { get; set; }
+    public string MergeLinesWithSameText { get; set; }
+    public string RemoveTextForHearingImpaired { get; set; }
+    public string JoinSubtitles { get; set; }
+    public string SplitSubtitle { get; set; }
+
 
     public string SpellCheckTitle { get; set; }
     public string SpellCheck { get; set; }
@@ -104,10 +108,13 @@ public class LanguageMainMenu
         Tools = "_Tools";
         AdjustDurations = "_Adjust durations...";
         FixCommonErrors = "_Fix common errors...";
+        MergeLinesWithSameText = "_Merge lines with same text...";
         RemoveTextForHearingImpaired = "_Remove text for hearing impaired...";
         ChangeCasing = "_Change casing...";
         BridgeGaps = "Bridge _gaps...";
         BatchConvert = "_Batch convert...";
+        JoinSubtitles = "_Join subtitles...";
+        SplitSubtitle = "_Split subtitle...";
 
         SpellCheckTitle = "_Spell check";
         SpellCheck = "_Spell check...";

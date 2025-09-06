@@ -212,18 +212,8 @@ public static class InitMenu
                 },
                 new MenuItem
                 {
-                    Header = l.FixCommonErrors,
-                    Command = vm.ShowToolsFixCommonErrorsCommand,
-                },
-                new MenuItem
-                {
-                    Header = l.RemoveTextForHearingImpaired,
-                    Command = vm.ShowToolsRemoveTextForHearingImpairedCommand,
-                },
-                new MenuItem
-                {
-                    Header = l.ChangeCasing,
-                    Command = vm.ShowToolsChangeCasingCommand,
+                    Header = l.BatchConvert,
+                    Command = vm.ShowToolsBatchConvertCommand,
                 },
                 new MenuItem
                 {
@@ -232,8 +222,34 @@ public static class InitMenu
                 },
                 new MenuItem
                 {
-                    Header = l.BatchConvert,
-                    Command = vm.ShowToolsBatchConvertCommand,
+                    Header = l.ChangeCasing,
+                    Command = vm.ShowToolsChangeCasingCommand,
+                },
+                new MenuItem
+                {
+                    Header = l.FixCommonErrors,
+                    Command = vm.ShowToolsFixCommonErrorsCommand,
+                },
+                new MenuItem
+                {
+                    Header = l.MergeLinesWithSameText,
+                    Command = vm.ShowToolsMergeLinesWithSameTextCommand,
+                },
+                new MenuItem
+                {
+                    Header = l.RemoveTextForHearingImpaired,
+                    Command = vm.ShowToolsRemoveTextForHearingImpairedCommand,
+                },
+                new Separator(),
+                new MenuItem
+                {
+                    Header = l.JoinSubtitles,
+                    Command = vm.ShowToolsJoinCommand,
+                },
+                new MenuItem
+                {
+                    Header = l.SplitSubtitle,
+                    Command = vm.ShowToolsSplitCommand,
                 },
             }
         });
@@ -424,10 +440,11 @@ public static class InitMenu
 
     public static void UpdateRecentFiles(MainViewModel vm)
     {
+        var files = Se.Settings.File.RecentFiles.Where(p => !string.IsNullOrEmpty(p.SubtitleFileName) && System.IO.File.Exists(p.SubtitleFileName)).ToList();
         vm.MenuReopen.Items.Clear();
-        if (Se.Settings.File.RecentFiles.Count > 0)
+        if (files.Count > 0)
         {
-            foreach (var file in Se.Settings.File.RecentFiles.Where(p => !string.IsNullOrEmpty(p.SubtitleFileName) && System.IO.File.Exists(p.SubtitleFileName)))
+            foreach (var file in files)
             {
                 var item = new MenuItem
                 {

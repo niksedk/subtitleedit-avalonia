@@ -127,9 +127,9 @@ public class LanguageGeneral
     public string Encoding { get; set; }
     public string Refresh { get; set; }
     public string Enabled { get; set; }
-    public object FileName { get; set; }
-    public object Format { get; set; }
-    public object Status { get; set; }
+    public string FileName { get; set; }
+    public string Format { get; set; }
+    public string Status { get; set; }
     public string Done { get; set; }
     public string Language { get; set; }
     public string CopyTextToClipboard { get; set; }
@@ -299,7 +299,13 @@ public class LanguageGeneral
     public string Script { get; set; }
     public string Font { get; set; }
     public string PickResolutionFromCurrentVideo { get; set; }
-    public object IsDefault { get; set; }
+    public string IsDefault { get; set; }
+    public string NoSymbolLines { get; set; }
+    public string PickOutputFolder { get; set; }
+    public string OutputFolder { get; set; }
+    public string OpenOutputFolder { get; set; }
+    public string Lines { get; set; }
+    public string Characters { get; set; }
 
     public LanguageGeneral()
     {
@@ -599,5 +605,11 @@ public class LanguageGeneral
         Font = "Font";
         PickResolutionFromCurrentVideo = "Pick resolution from current video";
         IsDefault = "Is default";
+        NoSymbolLines = "#Lines";
+        PickOutputFolder = "Pick output folder";
+        OutputFolder = "Output folder";
+        OpenOutputFolder = "Open output folder";
+        Lines = "Lines";
+        Characters = "Characters";
     }
 }

@@ -14,6 +14,8 @@ public class SeTools
     public string AnthropicPrompt { get; set; }
     public string GroqPrompt { get; set; }
     public string OpenRouterPrompt { get; set; }
+    public bool JoinKeepTimeCodes { get; set; }
+    public int JoinAppendMilliseconds { get; set; }
 
     public SeTools()
     {
@@ -22,5 +24,6 @@ public class SeTools
         AnthropicPrompt = string.Empty;
         GroqPrompt = string.Empty;
         OpenRouterPrompt = string.Empty;
+        JoinKeepTimeCodes = true;
     }
 }
