@@ -767,7 +767,7 @@ public static class InitListViewAndEditBox
         var italicButton = UiUtil.MakeButton(vm.ToggleLinesItalicCommand, IconNames.Italic);
         if (Se.Settings.Appearance.ShowHints)
         {
-           ToolTip.SetTip(italicButton, Se.Language.Main.ItalicHint);
+            ToolTip.SetTip(italicButton, Se.Language.Main.ItalicHint);
         }
         buttonPanel.Children.Add(italicButton);
 

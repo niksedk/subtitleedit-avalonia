@@ -241,7 +241,7 @@ public class FixCommonErrorsWindow : Window
             {
                new DataGridTemplateColumn
                {
-                    Header = "Apply",
+                    Header = Se.Language.General.Apply,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     CellTemplate = new FuncDataTemplate<FixDisplayItem>((item, _) =>
                     new Border

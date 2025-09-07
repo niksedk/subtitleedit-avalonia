@@ -37,6 +37,9 @@ public partial class SubtitleLineViewModel : ObservableObject
     [ObservableProperty]
     private int _layer;
 
+    [ObservableProperty]
+    private double _gap;
+
     public Paragraph? Paragraph { get; set; }
     public string Extra { get; set; }
     public string Language { get; set; }
@@ -271,10 +274,5 @@ public partial class SubtitleLineViewModel : ObservableObject
 
         SetStartTimeOnly(TimeSpan.FromMilliseconds(StartTime.TotalMilliseconds * factor + adjustmentInSeconds * TimeCode.BaseUnit));
         EndTime = TimeSpan.FromMilliseconds(EndTime.TotalMilliseconds * factor + adjustmentInSeconds * TimeCode.BaseUnit);
-    }
-
-    internal static object Gap()
-    {
-        throw new NotImplementedException();
     }
 }

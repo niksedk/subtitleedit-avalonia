@@ -307,6 +307,7 @@ public class LanguageGeneral
     public string Lines { get; set; }
     public string Characters { get; set; }
     public string Untitled { get; set; }
+    public object Group { get; set; }
 
     public LanguageGeneral()
     {
@@ -613,5 +614,6 @@ public class LanguageGeneral
         Lines = "Lines";
         Characters = "Characters";
         Untitled = "Untitled";
+        Group = "Group";
     }
 }

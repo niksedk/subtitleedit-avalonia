@@ -1083,7 +1083,21 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowToolsMergeLinesWithSameText()
     {
-        await _windowService.ShowDialogAsync<MergeSameTextWindow, MergeSameTextViewModel>(Window!, vm => { });
+        var result = await _windowService.ShowDialogAsync<MergeSameTextWindow, MergeSameTextViewModel>(Window!, vm => 
+        { 
+            vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList());
+        });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        Subtitles.Clear();
+        Subtitles.AddRange(result.ResultSubtitles.Select(p => new SubtitleLineViewModel(p)));
+        Renumber();
+        SelectAndScrollToRow(0);
+
         _shortcutManager.ClearKeys();
     }
 
