@@ -11,7 +11,7 @@ public class ImageBasedPreviewWindow : Window
 
     public ImageBasedPreviewWindow(ImageBasedPreviewViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Bind(Window.TitleProperty, new Binding(nameof(vm.Title)) { Mode = BindingMode.TwoWay });
         Width = 1060;
         Height = 700;

@@ -15,7 +15,7 @@ public class ExportEbuStlWindow : Window
 
     public ExportEbuStlWindow(ExportEbuStlViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "Export EBU STL";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

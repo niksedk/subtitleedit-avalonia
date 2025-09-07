@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -49,6 +50,7 @@ using Nikse.SubtitleEdit.Features.Sync.ChangeFrameRate;
 using Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
 using Nikse.SubtitleEdit.Features.Sync.VisualSync;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
+using Nikse.SubtitleEdit.Features.Tools.ApplyDurationLimits;
 using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 using Nikse.SubtitleEdit.Features.Tools.BridgeGaps;
 using Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
@@ -135,6 +137,7 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _hasFormatStyle;
     [ObservableProperty] private bool _areAssaContentMenuItemsVisible;
     [ObservableProperty] private bool _selectCurrentSubtitleWhilePlaying;
+    [ObservableProperty] private bool _isRightToLeftEnabled;
 
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
@@ -1048,6 +1051,13 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private async Task ShowApplyDurationLimits()
+    {
+        await _windowService.ShowDialogAsync<ApplyDurationLimitsWindow, ApplyDurationLimitsViewModel>(Window!, vm => { });
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
     private async Task ShowToolsBatchConvert()
     {
         await _windowService.ShowDialogAsync<BatchConvertWindow, BatchConvertViewModel>(Window!, vm => { });
@@ -1823,6 +1833,37 @@ public partial class MainViewModel :
 
         _shortcutManager.ClearKeys();
     }
+
+    [RelayCommand]
+    private void RightToLeftToggle()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (Window.FlowDirection == FlowDirection.RightToLeft)
+        {
+            IsRightToLeftEnabled = false;
+            Se.Settings.Appearance.RightToLeft = false;
+            Window.FlowDirection = FlowDirection.LeftToRight;
+        }
+        else
+        {
+            IsRightToLeftEnabled = true;
+            Se.Settings.Appearance.RightToLeft = true;
+            Window.FlowDirection = FlowDirection.RightToLeft;
+        }
+
+        //if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        //{
+        //    var window = desktop.MainWindow;
+        //    window.FlowDirection = FlowDirection.RightToLeft;
+        //}
+
+        _shortcutManager.ClearKeys();
+    }
+
 
     [RelayCommand]
     private void SelectAllLines()

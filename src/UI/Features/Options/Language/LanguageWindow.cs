@@ -14,7 +14,7 @@ public class LanguageWindow : Window
     
     public LanguageWindow(LanguageViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = Se.Language.Options.ChooseLanguage.Title;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

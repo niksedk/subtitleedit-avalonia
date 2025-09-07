@@ -15,7 +15,7 @@ public class GoToVideoPositionWindow : Window
 
     public GoToVideoPositionWindow(GoToVideoPositionViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = Se.Language.Video.GoToVideoPosition;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

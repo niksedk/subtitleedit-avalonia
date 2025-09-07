@@ -19,7 +19,7 @@ public class DownloadWhisperModelsWindow : Window
     {
         _vm = vm;
         vm.Window = this;
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "Downloading Whisper model";
         Width = 400;
         Height = 220;

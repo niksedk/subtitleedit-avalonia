@@ -15,7 +15,7 @@ public class TranslateSettingsWindow : Window
     public TranslateSettingsWindow(TranslateSettingsViewModel vm)
     {
         _vm = vm;
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = Se.Language.General.Settings;
         Width = 750;
         MinWidth = 600;

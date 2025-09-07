@@ -15,7 +15,7 @@ public class GetDictionariesWindow : Window
 
     public GetDictionariesWindow(GetDictionariesViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "Spell check - get dictionaries";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

@@ -14,7 +14,7 @@ public class NOcrSettingsWindow : Window
         Title = Se.Language.Ocr.NOcrDatabase;
         _vm = vm;
         vm.Window = this;
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;

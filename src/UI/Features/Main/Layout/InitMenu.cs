@@ -1,6 +1,9 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
+using Avalonia.Layout;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 using System.Linq;
@@ -189,6 +192,18 @@ public static class InitMenu
                 new Separator(),
                 new MenuItem
                 {
+                    Header = l.RightToLeftMode,
+                    Command = vm.RightToLeftToggleCommand,
+                    Icon = new Projektanker.Icons.Avalonia.Icon
+                    {
+                        Value = IconNames.CheckBold,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsRightToLeftEnabled)),
+                    }
+                },
+                new Separator(),
+                new MenuItem
+                {
                     Header = Se.Language.General.SelectAll,
                     Command = vm.SelectAllLinesCommand,
                 },
@@ -209,6 +224,11 @@ public static class InitMenu
                 {
                     Header = l.AdjustDurations,
                     Command = vm.ShowToolsAdjustDurationsCommand,
+                },
+                new MenuItem
+                {
+                    Header = l.ApplyDurationLimits,
+                    Command = vm.ShowApplyDurationLimitsCommand,
                 },
                 new MenuItem
                 {

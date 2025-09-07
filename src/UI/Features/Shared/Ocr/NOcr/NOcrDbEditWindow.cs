@@ -18,7 +18,7 @@ public class NOcrDbEditWindow : Window
         Title = Se.Language.Ocr.EditNOcrDatabase;
         _vm = vm;
         vm.Window = this;
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         CanResize = false;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         DataContext = vm;

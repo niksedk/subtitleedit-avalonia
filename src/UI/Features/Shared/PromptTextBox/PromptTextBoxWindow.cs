@@ -14,7 +14,7 @@ public class PromptTextBoxWindow : Window
     
     public PromptTextBoxWindow(PromptTextBoxViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Bind(TitleProperty, new Binding(nameof(vm.Title)));
         SizeToContent = SizeToContent.WidthAndHeight;   
         CanResize = false;

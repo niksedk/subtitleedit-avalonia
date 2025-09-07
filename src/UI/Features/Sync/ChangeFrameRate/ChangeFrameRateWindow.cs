@@ -11,7 +11,7 @@ public class ChangeFrameRateWindow : Window
     
     public ChangeFrameRateWindow(ChangeFrameRateViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "Change frame rate";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

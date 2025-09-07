@@ -10,6 +10,7 @@ using Avalonia.Platform;
 using Avalonia.Styling;
 using Avalonia.Themes.Fluent;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Features.Translate;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 using SkiaSharp;
@@ -2030,5 +2031,14 @@ public static class UiUtil
         return Se.Settings.Appearance.ShowHints
             ? string.Format(hint, shortcutString).Trim()
             : null;
+    }
+
+    internal static void InitializeWindow(Window window)
+    {
+        window.Icon = GetSeIcon();
+        if (Se.Settings.Appearance.RightToLeft)
+        {
+            window.FlowDirection = FlowDirection.RightToLeft;
+        }
     }
 }

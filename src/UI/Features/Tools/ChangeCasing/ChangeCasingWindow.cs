@@ -14,7 +14,7 @@ public class ChangeCasingWindow : Window
 
     public ChangeCasingWindow(ChangeCasingViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = Se.Language.Tools.ChangeCasing.Title;
         SizeToContent = SizeToContent.WidthAndHeight;
         MinWidth = 300;

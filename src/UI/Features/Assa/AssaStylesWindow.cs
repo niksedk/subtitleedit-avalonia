@@ -11,7 +11,7 @@ public class AssaStylesWindow : Window
 {
     public AssaStylesWindow(AssaStylesViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Bind(Window.TitleProperty, new Binding(nameof(vm.Title))
         {
             Source = vm,

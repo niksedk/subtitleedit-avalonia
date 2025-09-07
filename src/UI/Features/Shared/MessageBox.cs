@@ -44,7 +44,7 @@ public class MessageBox : Window
 
     private MessageBox(string title, string message, MessageBoxButtons buttons, MessageBoxIcon icon)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Width = 400;
         Height = 180;
         Title = title;

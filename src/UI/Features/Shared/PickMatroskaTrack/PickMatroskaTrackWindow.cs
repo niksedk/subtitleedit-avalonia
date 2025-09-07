@@ -18,7 +18,7 @@ public class PickMatroskaTrackWindow : Window
     {
         _vm = vm;
         vm.Window = this;
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = vm.WindowTitle;
         Width = 1024;
         Height = 600;

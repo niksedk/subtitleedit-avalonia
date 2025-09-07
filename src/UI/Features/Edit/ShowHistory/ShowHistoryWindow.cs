@@ -14,7 +14,7 @@ public class ShowHistoryWindow : Window
 
     public ShowHistoryWindow(ShowHistoryViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = Se.Language.Edit.ShowHistory;
         Width = 810;
         Height = 640;

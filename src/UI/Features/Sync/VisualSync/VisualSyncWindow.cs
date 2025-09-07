@@ -15,7 +15,7 @@ public class VisualSyncWindow : Window
 
     public VisualSyncWindow(VisualSyncViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = Se.Language.Sync.VisualSync;
         CanResize = true;
         Width = 1000;

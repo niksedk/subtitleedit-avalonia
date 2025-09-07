@@ -12,7 +12,7 @@ public class ExportCavena890Window : Window
 
     public ExportCavena890Window(ExportCavena890ViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "Export Cavena 890";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

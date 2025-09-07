@@ -19,7 +19,7 @@ public class FindTextWindow : Window
     
     public FindTextWindow(FindTextViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Bind(TitleProperty, new Binding(nameof(vm.Title)));
         CanResize = true;
         Width = 900;

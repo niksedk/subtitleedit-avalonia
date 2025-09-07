@@ -33,6 +33,7 @@ public class LanguageMainMenu
 
     public string Tools { get; set; }
     public string AdjustDurations { get; set; }
+    public string ApplyDurationLimits { get; set; }
     public string BatchConvert { get; set; }
     public string BridgeGaps { get; set; }
     public string ChangeCasing { get; set; }
@@ -80,6 +81,7 @@ public class LanguageMainMenu
     public string HelpTitle { get; set; }
     public string Help { get; set; }
     public string About { get; set; }
+    public object RightToLeftMode { get; set; }
 
     public LanguageMainMenu()
     {
@@ -108,9 +110,11 @@ public class LanguageMainMenu
         Replace = "_Replace...";
         MultipleReplace = "_Multiple replace...";
         GoToLineNumber = "_Go to line number...";
+        RightToLeftMode = "R_ight-to-left mode";
 
         Tools = "_Tools";
         AdjustDurations = "_Adjust durations...";
+        ApplyDurationLimits = "Apply duration _limits...";
         FixCommonErrors = "_Fix common errors...";
         MakeEmptyTranslationFromCurrentSubtitle = "Make new _empty translation from current subtitle";
         MergeLinesWithSameText = "_Merge lines with same text...";

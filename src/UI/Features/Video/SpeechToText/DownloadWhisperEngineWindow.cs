@@ -18,7 +18,7 @@ public class DownloadWhisperEngineWindow : Window
     {
         _vm = vm;
         vm.Window = this;
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "Downloading Whisper engine";
         Width = 400;
         Height = 190;

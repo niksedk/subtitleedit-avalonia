@@ -13,7 +13,7 @@ public class MergeSameTimeCodesWindow : Window
 
     public MergeSameTimeCodesWindow(MergeSameTimeCodesViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = Se.Language.Tools.MergeLineswithSameTimeCodes.Title;
         CanResize = true;
         Width = 900;

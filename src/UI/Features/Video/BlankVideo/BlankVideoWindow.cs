@@ -17,7 +17,7 @@ public class BlankVideoWindow : Window
 
     public BlankVideoWindow(BlankVideoViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = Se.Language.Video.GenerateBlankVideoTitle;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

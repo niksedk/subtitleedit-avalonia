@@ -13,7 +13,7 @@ public class EditWholeTextWindow : Window
 
     public EditWholeTextWindow(EditWholeTextViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "Spell check - Edit whole text";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

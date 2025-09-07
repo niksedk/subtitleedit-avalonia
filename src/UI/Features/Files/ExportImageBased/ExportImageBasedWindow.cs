@@ -21,7 +21,7 @@ public class ExportImageBasedWindow : Window
 
     public ExportImageBasedWindow(ExportImageBasedViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Bind(TitleProperty, new Binding(nameof(vm.Title)));
         CanResize = true;
         Width = 1000;

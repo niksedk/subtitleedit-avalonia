@@ -20,7 +20,7 @@ public class BurnInWindow : Window
 
     public BurnInWindow(BurnInViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = Se.Language.Video.BurnIn.Title;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

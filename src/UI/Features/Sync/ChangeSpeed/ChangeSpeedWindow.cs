@@ -13,7 +13,7 @@ public class ChangeSpeedWindow : Window
     
     public ChangeSpeedWindow(ChangeSpeedViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "Change speed";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

@@ -12,7 +12,7 @@ public class OpenFromUrlWindow : Window
     
     public OpenFromUrlWindow(OpenFromUrlViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "Open video file from URL";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

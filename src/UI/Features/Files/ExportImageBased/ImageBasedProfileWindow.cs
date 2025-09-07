@@ -16,7 +16,7 @@ public class ImageBasedProfileWindow : Window
 
     public ImageBasedProfileWindow(ImageBasedProfileViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = Se.Language.File.Export.ExportImagesProfiles;
         Width = 800;
         Height = 440;

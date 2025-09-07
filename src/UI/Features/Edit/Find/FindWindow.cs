@@ -14,7 +14,7 @@ public class FindWindow : Window
     
     public FindWindow(FindViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = Se.Language.General.Find;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

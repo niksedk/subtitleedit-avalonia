@@ -15,7 +15,7 @@ public class AboutWindow : Window
 {
     public AboutWindow()
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "About Subtitle Edit";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

@@ -13,7 +13,7 @@ public class EditCategoryWindow : Window
     
     public EditCategoryWindow(EditCategoryViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 

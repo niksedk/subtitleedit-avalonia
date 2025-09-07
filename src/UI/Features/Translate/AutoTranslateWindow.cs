@@ -17,8 +17,8 @@ public class AutoTranslateWindow : Window
     private readonly AutoTranslateViewModel _vm;
 
     public AutoTranslateWindow(AutoTranslateViewModel vm)
-    {
-        Icon = UiUtil.GetSeIcon();
+    {        
+        UiUtil.InitializeWindow(this);
         Title = Se.Language.Translate.AutoTranslate.Title;
         Width = 950;
         MinWidth = 750;

@@ -13,7 +13,7 @@ public class GoToLineNumberWindow : Window
 
     public GoToLineNumberWindow(GoToLineNumberViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "Go to line number";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

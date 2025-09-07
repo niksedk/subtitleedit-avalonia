@@ -14,7 +14,7 @@ public class JoinSubtitlesWindow : Window
 
     public JoinSubtitlesWindow(JoinSubtitlesViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = Se.Language.Tools.JoinSubtitles.Title;
         CanResize = true;
         Width = 900;

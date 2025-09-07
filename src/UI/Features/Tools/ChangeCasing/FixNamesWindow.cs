@@ -18,7 +18,7 @@ public class FixNamesWindow : Window
     public FixNamesWindow(FixNamesViewModel vm)
     {
         var lang = Se.Language.Tools.ChangeCasing;
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = lang.Title;
         Width = 900;
         Height = 800;

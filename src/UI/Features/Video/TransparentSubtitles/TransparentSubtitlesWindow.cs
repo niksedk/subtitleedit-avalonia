@@ -20,7 +20,7 @@ public class TransparentSubtitlesWindow : Window
 
     public TransparentSubtitlesWindow(TransparentSubtitlesViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = Se.Language.Video.VideoTransparent.Title;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

@@ -12,7 +12,7 @@ public class OllamaBrowseWindow : Window
     
     public OllamaBrowseWindow(OllamaBrowseViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "Browse Ollama Models";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

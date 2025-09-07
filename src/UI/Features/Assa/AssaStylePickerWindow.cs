@@ -14,7 +14,7 @@ public class AssaStylePickerWindow : Window
 {
     public AssaStylePickerWindow(AssaStylePickerViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Bind(Window.TitleProperty, new Binding(nameof(vm.Title))
         {
             Source = vm,

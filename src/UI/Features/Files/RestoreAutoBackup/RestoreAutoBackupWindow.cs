@@ -12,7 +12,7 @@ public class RestoreAutoBackupWindow : Window
 
     public RestoreAutoBackupWindow(RestoreAutoBackupViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "Restore auto-backup...";
         Width = 810;
         Height = 640;

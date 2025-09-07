@@ -12,7 +12,7 @@ public class AssaAttachmentsWindow : Window
 {
     public AssaAttachmentsWindow(AssaAttachmentsViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Bind(Window.TitleProperty, new Binding(nameof(vm.Title))
         {
             Source = vm,

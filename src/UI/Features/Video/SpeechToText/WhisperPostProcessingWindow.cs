@@ -12,7 +12,7 @@ public class WhisperPostProcessingWindow : Window
 
     public WhisperPostProcessingWindow(WhisperPostProcessingViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "Whisper post-processing";
         Width = 350;
         Height = 350;

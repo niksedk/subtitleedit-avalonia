@@ -18,7 +18,7 @@ public class RemoveTextForHearingImpairedWindow : Window
 
     public RemoveTextForHearingImpairedWindow(RemoveTextForHearingImpairedViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "Remove text for hearing impaired";
         Width = 910;
         Height = 640;

@@ -14,7 +14,7 @@ public class SelectVideoPositionWindow : Window
 
     public SelectVideoPositionWindow(SelectVideoPositionViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = Se.Language.General.PickVideoPosition;
         Width = 1280;
         Height = 800;

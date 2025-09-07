@@ -11,7 +11,7 @@ public class AlignmentPickerWindow: Window
 
     public AlignmentPickerWindow(AlignmentPickerViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "Choose alignment";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

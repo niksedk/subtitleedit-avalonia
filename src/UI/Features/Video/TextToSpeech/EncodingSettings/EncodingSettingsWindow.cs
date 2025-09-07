@@ -12,7 +12,7 @@ public class EncodingSettingsWindow : Window
     
     public EncodingSettingsWindow(EncodingSettingsViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "TTS - Video encoding settings";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

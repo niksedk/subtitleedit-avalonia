@@ -12,7 +12,7 @@ public class TransparentSettingsWindow : Window
     
     public TransparentSettingsWindow(TransparentSettingsViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "Output settings";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

@@ -14,7 +14,7 @@ public class SourceViewWindow : Window
     
     public SourceViewWindow(SourceViewViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Bind(TitleProperty, new Binding(nameof(vm.Title)));
         Width = 1000;
         Height = 700;   

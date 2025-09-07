@@ -11,7 +11,7 @@ public class ExportPacWindow : Window
 
     public ExportPacWindow(ExportPacViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "Export Pac";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

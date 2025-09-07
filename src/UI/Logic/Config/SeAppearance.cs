@@ -30,6 +30,7 @@ public class SeAppearance
     public bool ToolbarShowLayout { get; set; }
     public bool ToolbarShowHelp { get; set; }
     public bool ToolbarShowEncoding { get; set; }
+    public bool RightToLeft { get; set; }
 
     public SeAppearance()
     {

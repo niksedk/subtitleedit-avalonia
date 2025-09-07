@@ -14,7 +14,7 @@ public sealed class DownloadTtsWindow : Window
 
     public DownloadTtsWindow(DownloadTtsViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "TTS - Download engine";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

@@ -17,7 +17,7 @@ public class NOcrInspectWindow : Window
     {
         _vm = vm;
         vm.Window = this;
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "nOCR inspect image matches";
         Width = 1200;
         Height = 700;

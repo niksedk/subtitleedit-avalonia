@@ -16,7 +16,7 @@ public class DownloadPaddleOcrWindow : Window
     {
         _vm = vm;
         vm.Window = this;
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "Downloading Paddle OCR";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

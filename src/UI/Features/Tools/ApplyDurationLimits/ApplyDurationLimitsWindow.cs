@@ -1,20 +1,25 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.VoiceSettings;
+namespace Nikse.SubtitleEdit.Features.Tools.ApplyDurationLimits;
 
-public class VoiceSettingsWindow : Window
+public class ApplyDurationLimitsWindow : Window
 {
-    private readonly VoiceSettingsViewModel _vm;
-    
-    public VoiceSettingsWindow(VoiceSettingsViewModel vm)
+    private readonly ApplyDurationLimitsViewModel _vm;
+
+    public ApplyDurationLimitsWindow(ApplyDurationLimitsViewModel vm)
     {
         UiUtil.InitializeWindow(this);
-        Title = "TTS - Voice settings";
-        SizeToContent = SizeToContent.WidthAndHeight;
-        CanResize = false;
+        Title = Se.Language.Tools.MergeLineswithSameText.Title;
+        CanResize = true;
+        Width = 900;
+        Height = 800;
+        MinWidth = 600;
+        MinHeight = 400;
 
         _vm = vm;
         vm.Window = this;
@@ -22,28 +27,28 @@ public class VoiceSettingsWindow : Window
 
         var label = new Label
         {
-            Content = "Voice sample text",
+            Content = Se.Language.Tools.AdjustDurations.AdjustVia,
             VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(10, 0, 0, 0),
         };
 
-        var textBox = UiUtil.MakeTextBox(250, vm, nameof(vm.VoiceTestText));
-
-        var buttonRefresh = UiUtil.MakeButton("Refresh voices", vm.RefreshVoiceListCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar(buttonRefresh, buttonOk, buttonCancel);
+        var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
         var grid = new Grid
         {
             RowDefinitions =
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
@@ -52,14 +57,14 @@ public class VoiceSettingsWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(label, 0, 0);
-        grid.Add(textBox, 1, 0);
-        grid.Add(panelButtons, 2, 0);
+        grid.Add(label, 0);
+        grid.Add(panelButtons, 3, 0, 1, 2);
 
         Content = grid;
-        
-        Activated += delegate { textBox.Focus(); }; // hack to make OnKeyDown work
+
+        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
+
 
     protected override void OnKeyDown(KeyEventArgs e)
     {

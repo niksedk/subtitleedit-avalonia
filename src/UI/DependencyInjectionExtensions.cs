@@ -34,6 +34,7 @@ using Nikse.SubtitleEdit.Features.Sync.ChangeFrameRate;
 using Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
 using Nikse.SubtitleEdit.Features.Sync.VisualSync;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
+using Nikse.SubtitleEdit.Features.Tools.ApplyDurationLimits;
 using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 using Nikse.SubtitleEdit.Features.Tools.BridgeGaps;
 using Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
@@ -105,6 +106,7 @@ public static class DependencyInjectionExtensions
         // Window view models
         collection.AddTransient<AdjustAllTimesViewModel>();
         collection.AddTransient<AdjustDurationViewModel>();
+        collection.AddTransient<ApplyDurationLimitsViewModel>();
         collection.AddTransient<AlignmentPickerViewModel>();
         collection.AddTransient<AssaAttachmentsViewModel>();
         collection.AddTransient<AssaPropertiesViewModel>();

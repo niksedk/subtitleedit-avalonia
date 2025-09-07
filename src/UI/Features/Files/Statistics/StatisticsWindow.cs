@@ -9,7 +9,7 @@ public class StatisticsWindow : Window
 {
     public StatisticsWindow(StatisticsViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Bind(Window.TitleProperty, new Binding(nameof(vm.Title))
         {
             Source = vm,

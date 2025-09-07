@@ -13,7 +13,7 @@ public class ReplaceWindow : Window
 
     public ReplaceWindow(ReplaceViewModel vm)
     {
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = "Replace";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

@@ -12,7 +12,7 @@ public class SettingsWindow : Window
     public SettingsWindow(SettingsViewModel vm)
     {
         _vm = vm;
-        Icon = UiUtil.GetSeIcon();
+        UiUtil.InitializeWindow(this);
         Title = Se.Language.General.Settings;
         Width = 900;
         Height = 700;
