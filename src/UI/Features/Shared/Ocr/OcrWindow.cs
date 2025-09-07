@@ -242,6 +242,7 @@ public class OcrWindow : Window
             },
         };
         dataGridSubtitle.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedOcrSubtitleItem)) { Source = vm });
+        dataGridSubtitle.KeyDown += vm.SubtitleGridKeyDown;
         vm.SubtitleGrid = dataGridSubtitle;
 
         // Create a Flyout for the DataGrid
@@ -266,6 +267,24 @@ public class OcrWindow : Window
         };
         menuItemDelete.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
         flyout.Items.Add(menuItemDelete);
+
+        var menuItemItalic = new MenuItem
+        {
+            Header = Se.Language.General.Italic,
+            DataContext = vm,
+            Command = vm.ToggleItalicCommand,
+        };
+        menuItemItalic.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
+        flyout.Items.Add(menuItemItalic);
+
+        var menuItemBold = new MenuItem
+        {
+            Header = Se.Language.General.Bold,
+            DataContext = vm,
+            Command = vm.ToggleBoldCommand,
+        };
+        menuItemBold.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
+        flyout.Items.Add(menuItemBold);
 
         vm.SubtitleGrid.ContextFlyout = flyout;
 

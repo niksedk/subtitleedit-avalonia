@@ -10,7 +10,6 @@ using Avalonia.Platform;
 using Avalonia.Styling;
 using Avalonia.Themes.Fluent;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Features.Translate;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 using SkiaSharp;

@@ -1,6 +1,4 @@
-﻿using Nikse.SubtitleEdit.Core.Forms;
-
-namespace Nikse.SubtitleEdit.Logic.Config.Language;
+﻿namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
 public class LanguageMainMenu
 {

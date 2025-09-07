@@ -403,6 +403,74 @@ public partial class OcrViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void ToggleItalic()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems;
+        if (selectedItems == null || selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        var first = true;
+        var makeItalic = true;
+        foreach (var item in selectedItems)
+        {
+            if (item is OcrSubtitleItem ocrItem)
+            {
+                if (first)
+                {
+                    first = false;
+                    makeItalic = !ocrItem.Text.Contains("<i>");
+                }
+
+                ocrItem.Text = ocrItem.Text.Replace("<i>", string.Empty).Replace("</i>", string.Empty);
+                ocrItem.Text = ocrItem.Text.Replace("<I>", string.Empty).Replace("</I>", string.Empty);
+                if (makeItalic)
+                {
+                    if (!string.IsNullOrEmpty(ocrItem.Text))
+                    {
+                        ocrItem.Text = $"<i>{ocrItem.Text}</i>";
+                    }
+                }
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void ToggleBold()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems;
+        if (selectedItems == null || selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        var first = true;
+        var makeBold = true;
+        foreach (var item in selectedItems)
+        {
+            if (item is OcrSubtitleItem ocrItem)
+            {
+                if (first)
+                {
+                    first = false;
+                    makeBold = !ocrItem.Text.Contains("<b>");
+                }
+
+                ocrItem.Text = ocrItem.Text.Replace("<b>", string.Empty).Replace("</b>", string.Empty);
+                ocrItem.Text = ocrItem.Text.Replace("<B>", string.Empty).Replace("</B>", string.Empty);
+                if (makeBold)
+                {
+                    if (!string.IsNullOrEmpty(ocrItem.Text))
+                    {
+                        ocrItem.Text = $"<b>{ocrItem.Text}</b>";
+                    }
+                }
+            }
+        }
+    }
+
+    [RelayCommand]
     private void Ok()
     {
         OkPressed = true;
@@ -633,7 +701,7 @@ public partial class OcrViewModel : ObservableObject
 
     private void RunPaddleOcr(List<int> selectedIndices, OcrEngineType engineType)
     {
-        var  numberOfImages = selectedIndices.Count;
+        var numberOfImages = selectedIndices.Count;
         var ocrEngine = new PaddleOcr();
         var language = SelectedPaddleOcrLanguage?.Code ?? "en";
         var mode = Se.Settings.Ocr.PaddleOcrMode;
@@ -1100,6 +1168,14 @@ public partial class OcrViewModel : ObservableObject
         TesseractDictionaryItems.AddRange(items.OrderBy(p => p.ToString()));
     }
 
+    internal void SubtitleGridKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.I && e.KeyModifiers.HasFlag(KeyModifiers.Control))
+        {
+            ToggleItalic();
+            e.Handled = true; // prevent further handling if needed
+        }
+    }
 
     internal void OnKeyDown(KeyEventArgs e)
     {
@@ -1271,6 +1347,6 @@ public partial class OcrViewModel : ObservableObject
 
     internal void SubtitleGridContextOpening(object? sender, EventArgs e)
     {
-        ShowContextMenu = OcrSubtitleItems.Count > 0;   
+        ShowContextMenu = OcrSubtitleItems.Count > 0;
     }
 }

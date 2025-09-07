@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -1842,24 +1841,22 @@ public partial class MainViewModel :
             return;
         }
 
-        if (Window.FlowDirection == FlowDirection.RightToLeft)
+        Dispatcher.UIThread.Post(() =>
         {
-            IsRightToLeftEnabled = false;
-            Se.Settings.Appearance.RightToLeft = false;
-            Window.FlowDirection = FlowDirection.LeftToRight;
-        }
-        else
-        {
-            IsRightToLeftEnabled = true;
-            Se.Settings.Appearance.RightToLeft = true;
-            Window.FlowDirection = FlowDirection.RightToLeft;
-        }
 
-        //if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        //{
-        //    var window = desktop.MainWindow;
-        //    window.FlowDirection = FlowDirection.RightToLeft;
-        //}
+            if (Window.FlowDirection == FlowDirection.RightToLeft)
+            {
+                IsRightToLeftEnabled = false;
+                Se.Settings.Appearance.RightToLeft = false;
+                Window.FlowDirection = FlowDirection.LeftToRight;
+            }
+            else
+            {
+                IsRightToLeftEnabled = true;
+                Se.Settings.Appearance.RightToLeft = true;
+                Window.FlowDirection = FlowDirection.RightToLeft;
+            }
+        });
 
         _shortcutManager.ClearKeys();
     }
@@ -3812,6 +3809,11 @@ public partial class MainViewModel :
             }
         }
 
+        if (Se.Settings.Appearance.RightToLeft)
+        {
+            RightToLeftToggle();
+        }
+
         Task.Run(async () =>
         {
             await Task.Delay(1000); // delay 1 second (off UI thread)
@@ -4210,13 +4212,29 @@ public partial class MainViewModel :
     private void ToggleItalic()
     {
         var selectedItems = _selectedSubtitles?.ToList() ?? new List<SubtitleLineViewModel>();
-        if (selectedItems.Any())
+        if (!selectedItems.Any())
         {
-            foreach (var item in selectedItems)
+            return;
+        }
+
+        var first = true;
+        var makeItalic = true;
+        foreach (var item in selectedItems)
+        {
+            if (first)
             {
-                item.Text = item.Text.Contains("<i>")
-                    ? item.Text.Replace("<i>", "").Replace("</i>", "")
-                    : $"<i>{item.Text}</i>";
+                first = false;
+                makeItalic = !item.Text.Contains("<i>");
+            }
+
+            item.Text = item.Text.Replace("<i>", string.Empty).Replace("</i>", string.Empty);
+            item.Text = item.Text.Replace("<I>", string.Empty).Replace("</I>", string.Empty);
+            if (makeItalic)
+            {
+                if (!string.IsNullOrEmpty(item.Text))
+                {
+                    item.Text = $"<i>{item.Text}</i>";
+                }
             }
         }
     }
@@ -4224,13 +4242,29 @@ public partial class MainViewModel :
     private void ToggleBold()
     {
         var selectedItems = _selectedSubtitles?.ToList() ?? new List<SubtitleLineViewModel>();
-        if (selectedItems.Any())
+        if (!selectedItems.Any())
         {
-            foreach (var item in selectedItems)
+            return;
+        }
+
+        var first = true;
+        var makeBold = true;
+        foreach (var item in selectedItems)
+        {
+            if (first)
             {
-                item.Text = item.Text.Contains("<b>")
-                    ? item.Text.Replace("<b>", "").Replace("</b>", "")
-                    : $"<b>{item.Text}</b>";
+                first = false;
+                makeBold = !item.Text.Contains("<b>");
+            }
+
+            item.Text = item.Text.Replace("<b>", string.Empty).Replace("</b>", string.Empty);
+            item.Text = item.Text.Replace("<B>", string.Empty).Replace("</B>", string.Empty);
+            if (makeBold)
+            {
+                if (!string.IsNullOrEmpty(item.Text))
+                {
+                    item.Text = $"<b>{item.Text}</b>";
+                }
             }
         }
     }

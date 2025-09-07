@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Nikse.SubtitleEdit.Core.AutoTranslate;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.Settings;
+using Nikse.SubtitleEdit.Core.Translate;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -6,10 +10,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Core.AutoTranslate;
-using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Core.Settings;
-using Nikse.SubtitleEdit.Core.Translate;
 
 namespace Nikse.SubtitleEdit.Features.Translate;
 
@@ -73,7 +73,7 @@ public static partial class MergeAndSplitHelper
         var mergedTranslation = await autoTranslator.Translate(text, source.Code, target.Code, cancellationToken);
 
         if (forceSingleLineMode || mergeCount == 1)
-        { 
+        {
             // Single line mode, so just reformat and return
             if (index < rows.Count && formattingList.Count > 0)
             {
