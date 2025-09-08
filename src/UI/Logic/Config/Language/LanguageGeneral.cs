@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls;
+using System;
 
 namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
@@ -310,6 +311,8 @@ public class LanguageGeneral
     public string Characters { get; set; }
     public string Untitled { get; set; }
     public object Group { get; set; }
+    public string SaveChangesToX { get; set; }
+    public string SaveChangesToXOriginal { get; set; }
 
     public LanguageGeneral()
     {
@@ -619,5 +622,7 @@ public class LanguageGeneral
         Characters = "Characters";
         Untitled = "Untitled";
         Group = "Group";
+        SaveChangesToX = "Do you want to save changes to \"{0}\"?";
+        SaveChangesToXOriginal = "Do you want to save changes to the original subtitle file \"{0}\"?";
     }
 }

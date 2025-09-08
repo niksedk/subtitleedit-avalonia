@@ -179,6 +179,7 @@ public partial class MainViewModel :
     private readonly IFindService _findService;
 
     private bool IsEmpty => Subtitles.Count == 0 || (Subtitles.Count == 1 && string.IsNullOrEmpty(Subtitles[0].Text));
+    private bool IsEmptyOriginal => Subtitles.Count == 0 || (Subtitles.Count == 1 && string.IsNullOrEmpty(Subtitles[0].OriginalText));
 
     public VideoPlayerControl? VideoPlayerControl { get; internal set; }
     public Menu Menu { get; internal set; }
@@ -260,9 +261,10 @@ public partial class MainViewModel :
         Toolbar = new Border();
         ButtonWaveformPlay = new Button();
         _subtitle = new Subtitle();
+        _subtitleOriginal = new Subtitle();
         _videoFileName = string.Empty;
         _subtitleFileName = string.Empty;
-        Subtitles = new ObservableCollection<SubtitleLineViewModel>();
+        Subtitles = [];
 
         SubtitleFormats = [.. SubtitleFormat.AllSubtitleFormats];
         var defaultFormat = SubtitleFormats.Where(f => f.FriendlyName == Se.Settings.General.DefaultSubtitleFormat).FirstOrDefault() ?? SubtitleFormats[0];
@@ -560,24 +562,10 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task CommandFileNew()
     {
-        if (HasChanges())
+        var doContinue = await HasChangesContinue();
+        if (!doContinue)
         {
-            var result = await MessageBox.Show(
-                Window!,
-                Se.Language.General.SaveChangesTitle,
-                Se.Language.General.SaveChangesMessage,
-                MessageBoxButtons.YesNoCancel,
-                MessageBoxIcon.Question);
-
-            if (result == MessageBoxResult.Cancel)
-            {
-                return;
-            }
-
-            if (result == MessageBoxResult.Yes)
-            {
-                await SaveSubtitle();
-            }
+            return;
         }
 
         ResetSubtitle();
@@ -697,6 +685,12 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task CommandFileOpen()
     {
+        var doContinue = await HasChangesContinue();
+        if (!doContinue)
+        {
+            return;
+        }
+
         var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, Se.Language.General.OpenSubtitleFileTitle);
         if (!string.IsNullOrEmpty(fileName))
         {
@@ -711,24 +705,10 @@ public partial class MainViewModel :
     {
         Dispatcher.UIThread.Post(async void () =>
         {
-            if (HasChanges())
+            var doContinue = await HasChangesContinue();
+            if (!doContinue)
             {
-                var result = await MessageBox.Show(
-                    Window!,
-                    Se.Language.General.SaveChangesTitle,
-                    Se.Language.General.SaveChangesMessage,
-                    MessageBoxButtons.YesNoCancel,
-                    MessageBoxIcon.Question);
-
-                if (result == MessageBoxResult.Cancel)
-                {
-                    return;
-                }
-
-                if (result == MessageBoxResult.Yes)
-                {
-                    await SaveSubtitle();
-                }
+                return;
             }
 
             await SubtitleOpen(recentFile.SubtitleFileName, recentFile.VideoFileName, recentFile.SelectedLine);
@@ -948,10 +928,7 @@ public partial class MainViewModel :
             return;
         }
 
-        if (Ebu.EbuUiHelper == null)
-        {
-            Ebu.EbuUiHelper = new UiEbuSaveHelper();
-        }
+        Ebu.EbuUiHelper ??= new UiEbuSaveHelper();
 
         var format = new Ebu();
 
@@ -1721,7 +1698,7 @@ public partial class MainViewModel :
     private void DuplicateSelectedLines()
     {
         var newSubtitles = new List<SubtitleLineViewModel>();
-        foreach (var selected in _selectedSubtitles ?? new List<SubtitleLineViewModel>())
+        foreach (var selected in _selectedSubtitles ?? [])
         {
             newSubtitles.Add(new SubtitleLineViewModel(selected));
         }
@@ -2178,7 +2155,7 @@ public partial class MainViewModel :
         for (var i = index; i < Subtitles.Count; i++)
         {
             var subtitle = Subtitles[i];
-            subtitle.StartTime = subtitle.StartTime + difference;
+            subtitle.StartTime += difference;
         }
 
         _updateAudioVisualizer = true;
@@ -2309,10 +2286,7 @@ public partial class MainViewModel :
 
         if (result.OkPressed && !string.IsNullOrWhiteSpace(result.Text))
         {
-            if (_subtitle == null)
-            {
-                _subtitle = new Subtitle();
-            }
+            _subtitle ??= new Subtitle();
 
             var header = _subtitle?.Header ?? string.Empty;
             if (header != null && header.Contains("http://www.w3.org/ns/ttml"))
@@ -2809,6 +2783,7 @@ public partial class MainViewModel :
             _subtitle = subtitle;
             _lastOpenSaveFormat = subtitle.OriginalFormat;
             SetSubtitles(_subtitle);
+            _changeSubtitleHash = GetFastHash();
             ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
 
             if (selectedSubtitleIndex != null)
@@ -2833,7 +2808,6 @@ public partial class MainViewModel :
             }
 
             AddToRecentFiles(true);
-            _changeSubtitleHash = GetFastHash();
         }
         finally
         {
@@ -2868,7 +2842,7 @@ public partial class MainViewModel :
 
     private void ImportAndInlineBase64(Subtitle subtitle, string fileName)
     {
-        IList<IBinaryParagraphWithPosition> list = new List<IBinaryParagraphWithPosition>();
+        IList<IBinaryParagraphWithPosition> list = [];
         foreach (var p in subtitle.Paragraphs)
         {
             var x = new TimedTextBase64Image.Base64PngImage()
@@ -2878,14 +2852,12 @@ public partial class MainViewModel :
                 EndTimeCode = p.EndTime,
             };
 
-            using (var bitmap = x.GetBitmap())
+            using var bitmap = x.GetBitmap();
+            var nikseBmp = new NikseBitmap(bitmap);
+            var nonTransparentHeight = nikseBmp.GetNonTransparentHeight();
+            if (nonTransparentHeight > 1)
             {
-                var nikseBmp = new NikseBitmap(bitmap);
-                var nonTransparentHeight = nikseBmp.GetNonTransparentHeight();
-                if (nonTransparentHeight > 1)
-                {
-                    list.Add(x);
-                }
+                list.Add(x);
             }
         }
 
@@ -3458,7 +3430,7 @@ public partial class MainViewModel :
         var sub = matroska.GetSubtitle(matroskaSubtitleInfo.TrackNumber, MatroskaProgress);
         _subtitle.Paragraphs.Clear();
 
-        List<VobSubMergedPack> mergedVobSubPacks = new List<VobSubMergedPack>();
+        List<VobSubMergedPack> mergedVobSubPacks = [];
         var idx = new Core.VobSub.Idx(matroskaSubtitleInfo.GetCodecPrivate().SplitToLines());
         foreach (var p in sub)
         {
@@ -3558,13 +3530,13 @@ public partial class MainViewModel :
                 languageStreamIds.Add(pack.StreamId);
             }
 
-            if (!streamIdDictionary.ContainsKey(pack.StreamId))
+            if (!streamIdDictionary.TryGetValue(pack.StreamId, out List<VobSubMergedPack>? value))
             {
                 streamIdDictionary.Add(pack.StreamId, new List<VobSubMergedPack>([pack]));
             }
             else
             {
-                streamIdDictionary[pack.StreamId].Add(pack);
+                value.Add(pack);
             }
         }
 
@@ -3633,7 +3605,98 @@ public partial class MainViewModel :
 
     public bool HasChanges()
     {
-        return !IsEmpty && _changeSubtitleHash != GetFastHash();
+        var hasChanges = !IsEmpty && _changeSubtitleHash != GetFastHash();
+        if (!hasChanges && ShowColumnOriginalText)
+        {
+            hasChanges = _changeSubtitleHashOriginal != GetFastHashOriginal();
+        }
+
+        return hasChanges;
+    }
+
+
+    /// <returns>True, if continue. False, if the use aborts the current action (keep current unchanged work)</returns>
+    private async Task<bool> HasChangesContinue()
+    {
+        var currentSubtitleHash = GetFastHash();
+        if (_changeSubtitleHash != currentSubtitleHash && !IsEmpty)
+        {
+            string promptText = string.Format(Se.Language.General.SaveChangesToX, Se.Language.General.Untitled);
+            if (!string.IsNullOrEmpty(_subtitleFileName))
+            {
+                promptText = string.Format(Se.Language.General.SaveChangesToX, _subtitleFileName);
+            }
+
+            var dr = await MessageBox.Show(Window!, Se.Language.General.SaveChangesTitle, promptText, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            if (dr == MessageBoxResult.Cancel)
+            {
+                return false;
+            }
+
+            if (dr == MessageBoxResult.No)
+            {
+                return true;
+            }
+
+            if (string.IsNullOrEmpty(_subtitleFileName))
+            {
+                var saved = await SaveSubtitleAs();
+                if (!saved)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                await SaveSubtitle();
+            }
+        }
+
+        return await ContinueNewOrExitOriginal();
+    }
+
+    private async Task<bool> ContinueNewOrExitOriginal()
+    {
+        if (!ShowColumnOriginalText)
+        {
+            return true;
+        }
+
+        var currentSubtitleHash = GetFastHash();
+        if (_changeSubtitleHashOriginal != currentSubtitleHash && !IsEmptyOriginal)
+        {
+            string promptText = string.Format(Se.Language.General.SaveChangesToXOriginal, Se.Language.General.Untitled);
+            if (!string.IsNullOrEmpty(_subtitleFileNameOriginal))
+            {
+                promptText = string.Format(Se.Language.General.SaveChangesToXOriginal, _subtitleFileNameOriginal);
+            }
+
+            var dr = await MessageBox.Show(Window!, Se.Language.General.SaveChangesTitle, promptText, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            if (dr == MessageBoxResult.Cancel)
+            {
+                return false;
+            }
+
+            if (dr == MessageBoxResult.No)
+            {
+                return true;
+            }
+
+            if (string.IsNullOrEmpty(_subtitleFileNameOriginal))
+            {
+                var saved = await SaveSubtitleOriginalAs();
+                if (!saved)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                await SaveSubtitleOriginal();
+            }
+        }
+
+        return true;
     }
 
     private async Task SaveSubtitle()
@@ -3719,15 +3782,9 @@ public partial class MainViewModel :
 
     public Subtitle GetUpdateSubtitleOriginal()
     {
-        if (_subtitleOriginal == null)
-        {
-            _subtitleOriginal = new Subtitle();
-        }
+        _subtitleOriginal ??= new Subtitle();
 
-        if (_subtitleOriginal.OriginalFormat == null)
-        {
-            _subtitleOriginal.OriginalFormat = SelectedSubtitleFormat;
-        }
+        _subtitleOriginal.OriginalFormat ??= SelectedSubtitleFormat;
 
         _subtitleOriginal.Paragraphs.Clear();
         foreach (var line in Subtitles)
@@ -3756,7 +3813,7 @@ public partial class MainViewModel :
         return _subtitleOriginal;
     }
 
-    private async Task SaveSubtitleAs()
+    private async Task<bool> SaveSubtitleAs()
     {
         var newFileName = "New" + SelectedSubtitleFormat.Extension;
         if (!string.IsNullOrEmpty(_subtitleFileName))
@@ -3780,17 +3837,20 @@ public partial class MainViewModel :
             newFileName,
             title);
 
-        if (!string.IsNullOrEmpty(fileName))
+        if (string.IsNullOrEmpty(fileName))
         {
-            _subtitleFileName = fileName;
-            _subtitle.FileName = fileName;
-            _lastOpenSaveFormat = SelectedSubtitleFormat;
-            await SaveSubtitle();
-            AddToRecentFiles(true);
+            return false;
         }
+
+        _subtitleFileName = fileName;
+        _subtitle.FileName = fileName;
+        _lastOpenSaveFormat = SelectedSubtitleFormat;
+        await SaveSubtitle();
+        AddToRecentFiles(true);
+        return true;
     }
 
-    private async Task SaveSubtitleOriginalAs()
+    private async Task<bool> SaveSubtitleOriginalAs()
     {
         var newFileName = "New" + SelectedSubtitleFormat.Extension;
         if (!string.IsNullOrEmpty(_subtitleFileNameOriginal))
@@ -3808,20 +3868,20 @@ public partial class MainViewModel :
             newFileName,
             Se.Language.General.SaveOriginalAsTitle);
 
-        if (!string.IsNullOrEmpty(fileName))
+        if (string.IsNullOrEmpty(fileName))
         {
-            _subtitleFileNameOriginal = fileName;
-
-            if (_subtitleOriginal == null)
-            {
-                _subtitleOriginal = new Subtitle();
-            }
-            _subtitleOriginal.FileName = fileName;
-
-            _lastOpenSaveFormat = SelectedSubtitleFormat;
-            await SaveSubtitleOriginal();
-            AddToRecentFiles(true);
+            return false;
         }
+
+        _subtitleFileNameOriginal = fileName;
+
+        _subtitleOriginal ??= new Subtitle();
+        _subtitleOriginal.FileName = fileName;
+
+        _lastOpenSaveFormat = SelectedSubtitleFormat;
+        await SaveSubtitleOriginal();
+        AddToRecentFiles(true);
+        return true;
     }
 
     private void AddToRecentFiles(bool updateMenu)
@@ -4148,9 +4208,7 @@ public partial class MainViewModel :
     private async Task ExtractWaveformAndSpectrogram(Process process, string tempWaveFileName,
         string peakWaveFileName)
     {
-#pragma warning disable CA1416 // Validate platform compatibility
         process.Start();
-#pragma warning restore CA1416 // Validate platform compatibility
 
         var token = new CancellationTokenSource().Token;
         while (!process.HasExited)
@@ -4261,10 +4319,7 @@ public partial class MainViewModel :
 
     public int GetFastHashOriginal()
     {
-        if (_subtitleOriginal == null)
-        {
-            _subtitleOriginal = new Subtitle();
-        }
+        _subtitleOriginal ??= new Subtitle();
 
         var pre = _subtitleFileNameOriginal + SelectedEncoding.DisplayName;
         unchecked // Overflow is fine, just wrap
@@ -4471,8 +4526,8 @@ public partial class MainViewModel :
 
     private void ToggleItalic()
     {
-        var selectedItems = _selectedSubtitles?.ToList() ?? new List<SubtitleLineViewModel>();
-        if (!selectedItems.Any())
+        var selectedItems = _selectedSubtitles?.ToList() ?? [];
+        if (selectedItems.Count == 0)
         {
             return;
         }
@@ -4501,8 +4556,8 @@ public partial class MainViewModel :
 
     private void ToggleBold()
     {
-        var selectedItems = _selectedSubtitles?.ToList() ?? new List<SubtitleLineViewModel>();
-        if (!selectedItems.Any())
+        var selectedItems = _selectedSubtitles?.ToList() ?? [];
+        if (selectedItems.Count == 0)
         {
             return;
         }
@@ -4556,7 +4611,7 @@ public partial class MainViewModel :
                         CommandParameter = style,
                     });
                 }
-                if (stylesToAdd.Count() > 0)
+                if (stylesToAdd.Any())
                 {
                     MenuItemStyles.Items.Add(new Separator());
                 }
@@ -4576,7 +4631,7 @@ public partial class MainViewModel :
                         CommandParameter = actor,
                     });
                 }
-                if (MenuItemActors.Items.Count() > 0)
+                if (MenuItemActors.Items.Count > 0)
                 {
                     MenuItemActors.Items.Add(new Separator());
                 }
@@ -4841,10 +4896,7 @@ public partial class MainViewModel :
 
     private void MakeSubtitleTextInfo(string text, SubtitleLineViewModel item)
     {
-        if (text == null)
-        {
-            text = string.Empty;
-        }
+        text ??= string.Empty;
 
         text = HtmlUtil.RemoveHtmlTags(text, true);
         var totalLength = text.CountCharacters(false);
@@ -4894,10 +4946,7 @@ public partial class MainViewModel :
 
     private void MakeSubtitleTextInfoOriginal(string text, SubtitleLineViewModel item)
     {
-        if (text == null)
-        {
-            text = string.Empty;
-        }
+        text ??= string.Empty;
 
         text = HtmlUtil.RemoveHtmlTags(text, true);
         var totalLength = text.CountCharacters(false);
@@ -4947,7 +4996,7 @@ public partial class MainViewModel :
             : new SolidColorBrush(Colors.Transparent);
     }
 
-    private DispatcherTimer _positionTimer = new DispatcherTimer();
+    private DispatcherTimer _positionTimer = new();
 
     private void StartTitleTimer()
     {
@@ -5023,18 +5072,18 @@ public partial class MainViewModel :
                     // calculate the center position based on the waveform width
                     var waveformHalfSeconds = (av.EndPositionSeconds - av.StartPositionSeconds) / 2.0;
                     av.SetPosition(Math.Max(0, mediaPlayerSeconds - waveformHalfSeconds), subtitle, mediaPlayerSeconds,
-                        firstSelectedIndex, _selectedSubtitles ?? new List<SubtitleLineViewModel>());
+                        firstSelectedIndex, _selectedSubtitles ?? []);
                 }
                 else if ((isPlaying || !av.IsScrolling) && (mediaPlayerSeconds > av.EndPositionSeconds ||
                                                             mediaPlayerSeconds < av.StartPositionSeconds))
                 {
                     av.SetPosition(startPos, subtitle, mediaPlayerSeconds, 0,
-                        _selectedSubtitles ?? new List<SubtitleLineViewModel>());
+                        _selectedSubtitles ?? []);
                 }
                 else
                 {
                     av.SetPosition(av.StartPositionSeconds, subtitle, mediaPlayerSeconds, firstSelectedIndex,
-                        _selectedSubtitles ?? new List<SubtitleLineViewModel>());
+                        _selectedSubtitles ?? []);
                 }
 
                 if (_updateAudioVisualizer)
@@ -5070,8 +5119,7 @@ public partial class MainViewModel :
                 }
             }
 
-            var mpv = VideoPlayerControl?.VideoPlayerInstance as VideoPlayerInstanceMpv;
-            if (mpv != null)
+            if (VideoPlayerControl?.VideoPlayerInstance is VideoPlayerInstanceMpv mpv)
             {
                 _mpvReloader.RefreshMpv(mpv.MpvContext!, GetUpdateSubtitle(), SelectedSubtitleFormat);
             }
