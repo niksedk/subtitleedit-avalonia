@@ -952,7 +952,28 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowImportSubtitleWithManuallyChosenEncoding()
     {
-        await _windowService.ShowDialogAsync<ManualChosenEncodingWindow, ManualChosenEncodingViewModel>(Window!, vm => { });
+        var doContinue = await HasChangesContinue();
+        if (!doContinue)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, Se.Language.General.OpenSubtitleFileTitle, false);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<ManualChosenEncodingWindow, ManualChosenEncodingViewModel>(Window!, vm =>
+        {
+            vm.Initialize(fileName);
+        });
+
+        if (result.OkPressed && result.SelectedEncoding != null)
+        {
+            await SubtitleOpen(fileName, null, null, result.SelectedEncoding);
+        }
+
         _shortcutManager.ClearKeys();
     }
 
@@ -2634,7 +2655,7 @@ public partial class MainViewModel :
         }, DispatcherPriority.Background);
     }
 
-    private async Task SubtitleOpen(string fileName, string? videoFileName = null, int? selectedSubtitleIndex = null)
+    private async Task SubtitleOpen(string fileName, string? videoFileName = null, int? selectedSubtitleIndex = null, TextEncoding? textEncoding = null)
     {
         if (string.IsNullOrEmpty(fileName))
         {
@@ -2754,7 +2775,7 @@ public partial class MainViewModel :
                 }
             }
 
-            var subtitle = Subtitle.Parse(fileName);
+            var subtitle = Subtitle.Parse(fileName, textEncoding?.Encoding);
             if (subtitle == null)
             {
                 foreach (var f in SubtitleFormat.GetBinaryFormats(false))

@@ -20,6 +20,7 @@ public partial class MergeSameTextViewModel : ObservableObject
     [ObservableProperty] private bool _includeIncrementingLines;
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _mergeSubtitles;
     [ObservableProperty] private MergeDisplayItem? _selectedMergeSubtitle;
+    [ObservableProperty] private bool _isOkEnabled;
 
     public Window? Window { get; set; }
 
@@ -159,6 +160,8 @@ public partial class MergeSameTextViewModel : ObservableObject
                 mergedIndexes.Clear();
             }
         }
+
+        IsOkEnabled = MergeItems.Count > 0;
     }
 
     private bool IsFixAllowed(Paragraph p)

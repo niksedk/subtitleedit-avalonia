@@ -22,6 +22,7 @@ public partial class MergeSameTimeCodesViewModel : ObservableObject
     [ObservableProperty] private bool _autoBreak;
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _mergeSubtitles;
     [ObservableProperty] private MergeDisplayItem? _selectedMergeSubtitle;
+    [ObservableProperty] private bool _isOkEnabled;
 
     public Window? Window { get; set; }
 
@@ -171,6 +172,8 @@ public partial class MergeSameTimeCodesViewModel : ObservableObject
             }
             MergeItems.Add(new MergeDisplayItem(true, singleMergeSubtitles, mergedText, group));
         }
+
+        IsOkEnabled = MergeItems.Count > 0;
     }
 
     private static string GetMergedLines(string line1, string line2, bool makeDialog)
