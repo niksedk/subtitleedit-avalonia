@@ -11,6 +11,7 @@ using Nikse.SubtitleEdit.Features.Files.Export.ExportEbuStl;
 using Nikse.SubtitleEdit.Features.Files.ExportCavena890;
 using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Files.ExportPac;
+using Nikse.SubtitleEdit.Features.Files.ManualChosenEncoding;
 using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 using Nikse.SubtitleEdit.Features.Files.Statistics;
 using Nikse.SubtitleEdit.Features.Main;
@@ -162,6 +163,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<LayoutViewModel>();
         collection.AddTransient<MainView>();
         collection.AddTransient<MainViewModel>();
+        collection.AddTransient<ManualChosenEncodingViewModel>();
         collection.AddTransient<MergeSameTextViewModel>();
         collection.AddTransient<MergeSameTimeCodesViewModel>();
         collection.AddTransient<MultipleReplaceViewModel>();

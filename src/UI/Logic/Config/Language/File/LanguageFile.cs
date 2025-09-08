@@ -4,8 +4,10 @@ public class LanguageFile
 {
 
     public LanguageEbuSaveOptions EbuSaveOptions { get; set; } = new();
+    public LanguageImport Import { get; set; } = new();
     public LanguageExport Export { get; set; } = new();
     public LanguageStatistics Statistics { get; set; } = new();
+    public LanguageManualChosenEncoding ManualChosenEncoding { get; set; } = new();
     public string Compare { get; set; }
     public string PreviousDifference { get; set; }
     public string NextDifference { get; set; }
@@ -23,7 +25,7 @@ public class LanguageFile
     public string ShowOnlyDifferencesInText { get; set; }
     public string LoadXFromFile { get; set; }
     public string SaveCompareHtmlTitle { get; internal set; }
-
+    
     public LanguageFile()
     {
         Compare = "Compare";

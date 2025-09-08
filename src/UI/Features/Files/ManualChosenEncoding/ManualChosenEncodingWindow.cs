@@ -5,16 +5,16 @@ using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Tools.ApplyDurationLimits;
+namespace Nikse.SubtitleEdit.Features.Files.ManualChosenEncoding;
 
-public class ApplyDurationLimitsWindow : Window
+public class ManualChosenEncodingWindow : Window
 {
-    private readonly ApplyDurationLimitsViewModel _vm;
+    private readonly ManualChosenEncodingViewModel _vm;
 
-    public ApplyDurationLimitsWindow(ApplyDurationLimitsViewModel vm)
+    public ManualChosenEncodingWindow(ManualChosenEncodingViewModel vm)
     {
         UiUtil.InitializeWindow(this);
-        Title = Se.Language.Tools.ApplyDurationLimits.Title;
+        Title = Se.Language.File.ManualChosenEncoding.Title;
         CanResize = true;
         Width = 900;
         Height = 800;

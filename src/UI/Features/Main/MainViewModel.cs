@@ -29,6 +29,7 @@ using Nikse.SubtitleEdit.Features.Files.ExportCavena890;
 using Nikse.SubtitleEdit.Features.Files.ExportEbuStl;
 using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Files.ExportPac;
+using Nikse.SubtitleEdit.Features.Files.ManualChosenEncoding;
 using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 using Nikse.SubtitleEdit.Features.Files.Statistics;
 using Nikse.SubtitleEdit.Features.Help;
@@ -154,12 +155,15 @@ public partial class MainViewModel :
     private string? _subtitleFileNameOriginal;
     private bool _converted;
     private Subtitle _subtitle;
+    private Subtitle _subtitleOriginal;
     private SubtitleFormat? _lastOpenSaveFormat;
     private string? _videoFileName;
     private CancellationTokenSource? _statusFadeCts;
     private int _changeSubtitleHash = -1;
+    private int _changeSubtitleHashOriginal = -1;
     private bool _subtitleGridSelectionChangedSkip;
     private long _lastKeyPressedTicks;
+    private bool _loading;
 
     private readonly IFileHelper _fileHelper;
     private readonly IFolderHelper _folderHelper;
@@ -227,6 +231,7 @@ public partial class MainViewModel :
         _mpvReloader = mpvReloader;
         _findService = findService;
 
+        _loading = true;
         EditText = string.Empty;
         EditTextCharactersPerSecond = string.Empty;
         EditTextCharactersPerSecondBackground = Brushes.Transparent;
@@ -383,7 +388,12 @@ public partial class MainViewModel :
     [RelayCommand]
     private void CommandExit()
     {
-        Environment.Exit(0);
+        if (Window == null)
+        {
+            return;
+        }
+
+        Window.Close();
     }
 
     [RelayCommand]
@@ -578,14 +588,19 @@ public partial class MainViewModel :
     private void ResetSubtitle()
     {
         ShowColumnOriginalText = false;
-        _subtitle.Paragraphs.Clear(); // TODO: remove variable?
+        _subtitle.Paragraphs.Clear();
         Subtitles.Clear();
         SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(f => f.FriendlyName == Se.Settings.General.DefaultSubtitleFormat) ?? SubtitleFormats[0];
         SelectedEncoding = Encodings.FirstOrDefault(p => p.DisplayName == Se.Settings.General.DefaultEncoding) ?? Encodings[0];
         _subtitleFileName = string.Empty;
-        _subtitleFileNameOriginal = string.Empty;
         _subtitle = new Subtitle();
         _changeSubtitleHash = GetFastHash();
+
+        _subtitleFileNameOriginal = string.Empty;
+        _subtitleOriginal = new Subtitle();
+        _changeSubtitleHashOriginal = GetFastHashOriginal();
+
+
         if (AudioVisualizer?.WavePeaks != null)
         {
             AudioVisualizer.WavePeaks = null;
@@ -601,13 +616,26 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task FileOpenOriginal()
     {
-        var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, "Open original subtitle file");
+        var selectedIndex = SelectedSubtitleIndex ?? 0;
+
+        var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, Se.Language.General.OpenOriginalSubtitleFileTitle);
         if (string.IsNullOrEmpty(fileName))
         {
             _shortcutManager.ClearKeys();
             return;
         }
 
+        bool flowControl = await SubtitleOpenOriginal(selectedIndex, fileName);
+        if (!flowControl)
+        {
+            return;
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+    private async Task<bool> SubtitleOpenOriginal(int selectedIndex, string fileName)
+    {
         var subtitle = Subtitle.Parse(fileName);
         if (subtitle == null)
         {
@@ -627,28 +655,35 @@ public partial class MainViewModel :
                 var message = Se.Language.General.UnknownSubtitleFormat;
                 await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 _shortcutManager.ClearKeys();
-                return;
+                return false;
             }
         }
 
         if (subtitle.Paragraphs.Count == Subtitles.Count)
         {
-            _subtitleFileName = fileName;
+            _subtitleOriginal = subtitle;
+            _subtitleFileNameOriginal = fileName;
             for (var i = 0; i < Subtitles.Count; i++)
             {
                 Subtitles[i].OriginalText = subtitle.Paragraphs[i].Text;
             }
 
+            _changeSubtitleHashOriginal = GetFastHashOriginal();
             ShowColumnOriginalText = true;
+
             AutoFitColumns();
+            SelectAndScrollToRow(selectedIndex);
+            AddToRecentFiles(true);
         }
         else
         {
-            var message = "The original subtitle does not have the same number of lines as the current subtitle.";
+            var message = "The original subtitle does not have the same number of lines as the current subtitle." + Environment.NewLine
+                            + "Original lines: " + subtitle.Paragraphs.Count + Environment.NewLine
+                            + "Current lines: " + Subtitles.Count;
             await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
-        _shortcutManager.ClearKeys();
+        return true;
     }
 
     [RelayCommand]
@@ -672,30 +707,40 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private async Task CommandFileReopen(RecentFile recentFile)
+    private void CommandFileReopen(RecentFile recentFile)
     {
-        if (HasChanges())
+        Dispatcher.UIThread.Post(async void () =>
         {
-            var result = await MessageBox.Show(
-                Window!,
-                Se.Language.General.SaveChangesTitle,
-                Se.Language.General.SaveChangesMessage,
-                MessageBoxButtons.YesNoCancel,
-                MessageBoxIcon.Question);
-
-            if (result == MessageBoxResult.Cancel)
+            if (HasChanges())
             {
-                return;
+                var result = await MessageBox.Show(
+                    Window!,
+                    Se.Language.General.SaveChangesTitle,
+                    Se.Language.General.SaveChangesMessage,
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Question);
+
+                if (result == MessageBoxResult.Cancel)
+                {
+                    return;
+                }
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    await SaveSubtitle();
+                }
             }
 
-            if (result == MessageBoxResult.Yes)
-            {
-                await SaveSubtitle();
-            }
-        }
+            await SubtitleOpen(recentFile.SubtitleFileName, recentFile.VideoFileName, recentFile.SelectedLine);
 
-        await SubtitleOpen(recentFile.SubtitleFileName, recentFile.VideoFileName, recentFile.SelectedLine);
-        _shortcutManager.ClearKeys();
+            if (!string.IsNullOrEmpty(recentFile.SubtitleFileNameOriginal) && File.Exists(recentFile.SubtitleFileNameOriginal))
+            {
+                var selectedIndex = recentFile.SelectedLine;
+                await SubtitleOpenOriginal(selectedIndex, recentFile.SubtitleFileNameOriginal);
+            }
+
+            _shortcutManager.ClearKeys();
+        });
     }
 
     [RelayCommand]
@@ -710,6 +755,12 @@ public partial class MainViewModel :
     private async Task CommandFileSave()
     {
         await SaveSubtitle();
+
+        if (ShowColumnOriginalText)
+        {
+            await SaveSubtitleOriginal();
+        }
+
         _shortcutManager.ClearKeys();
     }
 
@@ -921,6 +972,13 @@ public partial class MainViewModel :
         _shortcutManager.ClearKeys();
     }
 
+    [RelayCommand]
+    private async Task ShowImportSubtitleWithManuallyChosenEncoding()
+    {
+        await _windowService.ShowDialogAsync<ManualChosenEncodingWindow, ManualChosenEncodingViewModel>(Window!, vm => { });
+        _shortcutManager.ClearKeys();
+    }
+
     private string GetNewFileName()
     {
         if (!string.IsNullOrEmpty(_subtitleFileName))
@@ -1083,8 +1141,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowToolsMergeLinesWithSameText()
     {
-        var result = await _windowService.ShowDialogAsync<MergeSameTextWindow, MergeSameTextViewModel>(Window!, vm => 
-        { 
+        var result = await _windowService.ShowDialogAsync<MergeSameTextWindow, MergeSameTextViewModel>(Window!, vm =>
+        {
             vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList());
         });
 
@@ -1104,7 +1162,21 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowToolsMergeLinesWithSameTimeCodes()
     {
-        await _windowService.ShowDialogAsync<MergeSameTimeCodesWindow, MergeSameTimeCodesViewModel>(Window!, vm => { });
+        var result = await _windowService.ShowDialogAsync<MergeSameTimeCodesWindow, MergeSameTimeCodesViewModel>(Window!, vm =>
+        {
+            vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList(), GetUpdateSubtitle());
+        });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        Subtitles.Clear();
+        Subtitles.AddRange(result.ResultSubtitles.Select(p => new SubtitleLineViewModel(p)));
+        Renumber();
+        SelectAndScrollToRow(0);
+
         _shortcutManager.ClearKeys();
     }
 
@@ -1472,21 +1544,26 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task CommandShowAutoTranslate()
     {
-        var result = await _windowService.ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(Window!,
-            viewModel => { viewModel.Initialize(GetUpdateSubtitle()); });
-
-        if (result.OkPressed)
+        var result = await _windowService.ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(Window!, vm =>
         {
-            for (var i = 0; i < Subtitles.Count; i++)
-            {
-                if (result.Rows.Count <= i)
-                {
-                    break;
-                }
+            vm.Initialize(GetUpdateSubtitle());
+        });
 
-                Subtitles[i].OriginalText = Subtitles[i].Text;
-                Subtitles[i].Text = result.Rows[i].TranslatedText;
+        if (!result.OkPressed)
+        {
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        for (var i = 0; i < Subtitles.Count; i++)
+        {
+            if (result.Rows.Count <= i)
+            {
+                break;
             }
+
+            Subtitles[i].OriginalText = Subtitles[i].Text;
+            Subtitles[i].Text = result.Rows[i].TranslatedText;
         }
 
         _subtitleFileNameOriginal = _subtitleFileName;
@@ -2566,7 +2643,7 @@ public partial class MainViewModel :
         {
             SubtitleGrid.SelectedIndex = index;
             SubtitleGrid.ScrollIntoView(SubtitleGrid.SelectedItem, null);
-        }, DispatcherPriority.Background);
+        });
     }
 
     public void SelectAndScrollToSubtitle(SubtitleLineViewModel subtitle)
@@ -3585,6 +3662,32 @@ public partial class MainViewModel :
         _lastOpenSaveFormat = SelectedSubtitleFormat;
     }
 
+    private async Task SaveSubtitleOriginal()
+    {
+        if (Subtitles == null || !Subtitles.Any())
+        {
+            ShowStatus("Nothing to save (original)");
+            return;
+        }
+
+        if (string.IsNullOrEmpty(_subtitleFileNameOriginal) || _converted)
+        {
+            await SaveSubtitleOriginalAs();
+            return;
+        }
+
+        if (_lastOpenSaveFormat == null || _lastOpenSaveFormat.Name != SelectedSubtitleFormat.Name)
+        {
+            await SaveSubtitleOriginalAs();
+            return;
+        }
+
+        var text = GetUpdateSubtitleOriginal().ToText(SelectedSubtitleFormat);
+        await File.WriteAllTextAsync(_subtitleFileNameOriginal, text);
+        _changeSubtitleHashOriginal = GetFastHashOriginal();
+        _lastOpenSaveFormat = SelectedSubtitleFormat;
+    }
+
     public Subtitle GetUpdateSubtitle()
     {
         _subtitle.Paragraphs.Clear();
@@ -3614,6 +3717,45 @@ public partial class MainViewModel :
         return _subtitle;
     }
 
+    public Subtitle GetUpdateSubtitleOriginal()
+    {
+        if (_subtitleOriginal == null)
+        {
+            _subtitleOriginal = new Subtitle();
+        }
+
+        if (_subtitleOriginal.OriginalFormat == null)
+        {
+            _subtitleOriginal.OriginalFormat = SelectedSubtitleFormat;
+        }
+
+        _subtitleOriginal.Paragraphs.Clear();
+        foreach (var line in Subtitles)
+        {
+            var p = new Paragraph()
+            {
+                Number = line.Number,
+                StartTime = new TimeCode(line.StartTime),
+                EndTime = new TimeCode(line.EndTime),
+                Text = line.OriginalText,
+                Actor = line.Actor,
+                Style = line.Style,
+                Language = line.Language,
+                Region = line.Region,
+                Layer = line.Layer,
+            };
+
+            if (_subtitleOriginal.OriginalFormat.Name == AdvancedSubStationAlpha.NameOfFormat)
+            {
+                p.Extra = line.Style;
+            }
+
+            _subtitleOriginal.Paragraphs.Add(p);
+        }
+
+        return _subtitleOriginal;
+    }
+
     private async Task SaveSubtitleAs()
     {
         var newFileName = "New" + SelectedSubtitleFormat.Extension;
@@ -3626,11 +3768,17 @@ public partial class MainViewModel :
             newFileName = Path.GetFileNameWithoutExtension(_videoFileName) + SelectedSubtitleFormat.Extension;
         }
 
+        var title = Se.Language.General.SaveFileAsTitle;
+        if (ShowColumnOriginalText)
+        {
+            title = Se.Language.General.SaveTranslationAsTitle;
+        }
+
         var fileName = await _fileHelper.PickSaveSubtitleFile(
             Window!,
             SelectedSubtitleFormat,
             newFileName,
-            Se.Language.General.SaveFileAsTitle);
+            title);
 
         if (!string.IsNullOrEmpty(fileName))
         {
@@ -3642,10 +3790,49 @@ public partial class MainViewModel :
         }
     }
 
+    private async Task SaveSubtitleOriginalAs()
+    {
+        var newFileName = "New" + SelectedSubtitleFormat.Extension;
+        if (!string.IsNullOrEmpty(_subtitleFileNameOriginal))
+        {
+            newFileName = Path.GetFileNameWithoutExtension(_subtitleFileNameOriginal) + SelectedSubtitleFormat.Extension;
+        }
+        else if (!string.IsNullOrEmpty(_videoFileName))
+        {
+            newFileName = Path.GetFileNameWithoutExtension(_videoFileName) + SelectedSubtitleFormat.Extension;
+        }
+
+        var fileName = await _fileHelper.PickSaveSubtitleFile(
+            Window!,
+            SelectedSubtitleFormat,
+            newFileName,
+            Se.Language.General.SaveOriginalAsTitle);
+
+        if (!string.IsNullOrEmpty(fileName))
+        {
+            _subtitleFileNameOriginal = fileName;
+
+            if (_subtitleOriginal == null)
+            {
+                _subtitleOriginal = new Subtitle();
+            }
+            _subtitleOriginal.FileName = fileName;
+
+            _lastOpenSaveFormat = SelectedSubtitleFormat;
+            await SaveSubtitleOriginal();
+            AddToRecentFiles(true);
+        }
+    }
+
     private void AddToRecentFiles(bool updateMenu)
     {
+        if (_loading)
+        {
+            return;
+        }
+
         var idx = SelectedSubtitleIndex ?? 0;
-        Se.Settings.File.AddToRecentFiles(_subtitleFileName ?? string.Empty, _videoFileName ?? string.Empty, idx, SelectedEncoding.DisplayName);
+        Se.Settings.File.AddToRecentFiles(_subtitleFileName ?? string.Empty, _subtitleFileNameOriginal ?? string.Empty, _videoFileName ?? string.Empty, idx, SelectedEncoding.DisplayName);
         Se.SaveSettings();
 
         if (updateMenu)
@@ -3686,6 +3873,31 @@ public partial class MainViewModel :
 
     internal async void OnClosing(object? sender, WindowClosingEventArgs e)
     {
+        AddToRecentFiles(false);
+
+        if (Window != null)
+        {
+            Se.Settings.General.ShowColumnEndTime = ShowColumnEndTime;
+            Se.Settings.General.ShowColumnDuration = ShowColumnDuration;
+            Se.Settings.General.ShowColumnGap = ShowColumnGap;
+            Se.Settings.General.ShowColumnActor = ShowColumnActor;
+            Se.Settings.General.ShowColumnCps = ShowColumnCps;
+            Se.Settings.General.ShowColumnWpm = ShowColumnWpm;
+            Se.Settings.General.SelectCurrentSubtitleWhilePlaying = SelectCurrentSubtitleWhilePlaying;
+
+            Se.Settings.General.PositionIsFullScreen = Window.WindowState == WindowState.FullScreen;
+            Se.Settings.General.PositionIsMaximized = Window.WindowState == WindowState.Maximized;
+            if (Window.WindowState == WindowState.Normal)
+            {
+                Se.Settings.General.PositionX = Window.Position.X;
+                Se.Settings.General.PositionY = Window.Position.Y;
+                Se.Settings.General.PositionWidth = (int)Window.Width;
+                Se.Settings.General.PositionHeight = (int)Window.Height;
+            }
+        }
+
+        Se.SaveSettings();
+
         if (HasChanges() && Window != null)
         {
             // Cancel the closing to show the dialog
@@ -3714,31 +3926,6 @@ public partial class MainViewModel :
         }
 
         VideoPlayerControl?.VideoPlayerInstance.Close();
-
-        AddToRecentFiles(false);
-
-        if (Window != null)
-        {
-            Se.Settings.General.ShowColumnEndTime = ShowColumnEndTime;
-            Se.Settings.General.ShowColumnDuration = ShowColumnDuration;
-            Se.Settings.General.ShowColumnGap = ShowColumnGap;
-            Se.Settings.General.ShowColumnActor = ShowColumnActor;
-            Se.Settings.General.ShowColumnCps = ShowColumnCps;
-            Se.Settings.General.ShowColumnWpm = ShowColumnWpm;
-            Se.Settings.General.SelectCurrentSubtitleWhilePlaying = SelectCurrentSubtitleWhilePlaying;
-
-            Se.Settings.General.PositionIsFullScreen = Window.WindowState == WindowState.FullScreen;
-            Se.Settings.General.PositionIsMaximized = Window.WindowState == WindowState.Maximized;
-            if (Window.WindowState == WindowState.Normal)
-            {
-                Se.Settings.General.PositionX = Window.Position.X;
-                Se.Settings.General.PositionY = Window.Position.Y;
-                Se.Settings.General.PositionWidth = (int)Window.Width;
-                Se.Settings.General.PositionHeight = (int)Window.Height;
-            }
-        }
-
-        Se.SaveSettings();
     }
 
     internal void OnLoaded()
@@ -3832,6 +4019,7 @@ public partial class MainViewModel :
         {
             await Task.Delay(1000); // delay 1 second (off UI thread)
             _undoRedoManager.StartChangeDetection();
+            _loading = false;
         });
     }
 
@@ -4045,6 +4233,64 @@ public partial class MainViewModel :
                 hash = hash * 23 + p.EndTime.TotalMilliseconds.GetHashCode();
 
                 foreach (var line in p.Text.SplitToLines())
+                {
+                    hash = hash * 23 + line.GetHashCode();
+                }
+
+                if (p.Style != null)
+                {
+                    hash = hash * 23 + p.Style.GetHashCode();
+                }
+
+                if (p.Extra != null)
+                {
+                    hash = hash * 23 + p.Extra.GetHashCode();
+                }
+
+                if (p.Actor != null)
+                {
+                    hash = hash * 23 + p.Actor.GetHashCode();
+                }
+
+                hash = hash * 23 + p.Layer.GetHashCode();
+            }
+
+            return hash;
+        }
+    }
+
+    public int GetFastHashOriginal()
+    {
+        if (_subtitleOriginal == null)
+        {
+            _subtitleOriginal = new Subtitle();
+        }
+
+        var pre = _subtitleFileNameOriginal + SelectedEncoding.DisplayName;
+        unchecked // Overflow is fine, just wrap
+        {
+            var hash = 17;
+            hash = hash * 23 + pre.GetHashCode();
+
+            if (_subtitleOriginal.Header != null)
+            {
+                hash = hash * 23 + _subtitleOriginal.Header.Trim().GetHashCode();
+            }
+
+            if (_subtitleOriginal.Footer != null)
+            {
+                hash = hash * 23 + _subtitleOriginal.Footer.Trim().GetHashCode();
+            }
+
+            var max = Subtitles.Count;
+            for (var i = 0; i < max; i++)
+            {
+                var p = Subtitles[i];
+                hash = hash * 23 + p.Number.GetHashCode();
+                hash = hash * 23 + p.StartTime.TotalMilliseconds.GetHashCode();
+                hash = hash * 23 + p.EndTime.TotalMilliseconds.GetHashCode();
+
+                foreach (var line in p.OriginalText.SplitToLines())
                 {
                     hash = hash * 23 + line.GetHashCode();
                 }
@@ -4708,12 +4954,33 @@ public partial class MainViewModel :
         _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(150) };
         _positionTimer.Tick += (s, e) =>
         {
-            var text = "Untitled";
+            var text = Se.Language.General.Untitled;
             if (!string.IsNullOrEmpty(_subtitleFileName))
             {
                 text = Configuration.Settings.General.TitleBarFullFileName
                     ? _subtitleFileName
                     : Path.GetFileName(_subtitleFileName);
+            }
+
+            if (ShowColumnOriginalText)
+            {
+                text += " + ";
+
+                if (_changeSubtitleHashOriginal != GetFastHashOriginal())
+                {
+                    text += "*";
+                }
+
+                if (string.IsNullOrEmpty(_subtitleFileNameOriginal))
+                {
+                    text += Se.Language.General.Untitled;
+                }
+                else
+                {
+                    text += Configuration.Settings.General.TitleBarFullFileName
+                        ? _subtitleFileNameOriginal
+                        : Path.GetFileName(_subtitleFileNameOriginal);
+                }
             }
 
             text = text + " - " + Se.Language.Title;
@@ -4730,7 +4997,7 @@ public partial class MainViewModel :
             // update audio visualizer position if available
             var av = AudioVisualizer;
             var vp = VideoPlayerControl;
-            if (av != null && vp != null)
+            if (av != null && vp != null && !string.IsNullOrEmpty(_videoFileName))
             {
                 var subtitle = new ObservableCollection<SubtitleLineViewModel>();
                 var orderedList = Subtitles.OrderBy(p => p.StartTime.TotalMilliseconds).ToList();

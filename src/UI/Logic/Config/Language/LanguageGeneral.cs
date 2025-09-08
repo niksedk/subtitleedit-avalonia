@@ -277,6 +277,8 @@ public class LanguageGeneral
     public string SaveChangesMessage { get; set; }
     public string Export { get; set; }
     public string SaveFileAsTitle { get; set; }
+    public string SaveTranslationAsTitle { get; set; }
+    public string SaveOriginalAsTitle { get; set; }
     public string NoSubtitlesFound { get; set; }
     public object Usages { get; set; }
     public string Left { get; set; }
@@ -584,6 +586,8 @@ public class LanguageGeneral
         SaveChangesMessage = "Do you want to save changes to the current subtitle file?";
         Export = "Export";
         SaveFileAsTitle = "Save file as";
+        SaveTranslationAsTitle = "Save translation as";
+        SaveOriginalAsTitle = "Save original as";
         NoSubtitlesFound = "No subtitles found!";
         Usages = "Usages";
         Left = "Left";

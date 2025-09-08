@@ -60,6 +60,12 @@ public partial class MergeSameTextViewModel : ObservableObject
     public void Initialize(List<SubtitleLineViewModel> subtitles)
     {
         _subtitles = subtitles;
+
+        for (var i = 0; i < _subtitles.Count; i++)
+        {
+            _subtitles[i].Number = i + 1;
+        }
+
         _dirty = true;
         _timerUpdatePreview.Start();
     }
@@ -206,7 +212,7 @@ public partial class MergeSameTextViewModel : ObservableObject
                 merged.EndTime = match.LinesToMerge.Max(p => p.EndTime);
                 result.Add(merged);
 
-                skipCount += match.LinesToMerge.Count;
+                skipCount += match.LinesToMerge.Count - 1;
                 continue;
             }
 

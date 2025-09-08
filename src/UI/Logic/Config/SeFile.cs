@@ -9,10 +9,19 @@ public class SeFile
     public List<RecentFile> RecentFiles { get; set; } = new();
     public SeExportImages ExportImages { get; set; } = new();
 
-    public void AddToRecentFiles(string subtitleFileName, string videoFileName, int selectedLine, string encoding)
+    public void AddToRecentFiles(string subtitleFileName, string subtitleFileNameOriginal, string videoFileName, int selectedLine, string encoding)
     {
-        RecentFiles.RemoveAll(rf => rf.SubtitleFileName == subtitleFileName);
-        RecentFiles.Insert(0, new RecentFile { SubtitleFileName = subtitleFileName, VideoFileName = videoFileName, SelectedLine = selectedLine, Encoding = encoding });
+        RecentFiles.RemoveAll(rf => rf.SubtitleFileName == subtitleFileName && rf.SubtitleFileNameOriginal == subtitleFileNameOriginal);
+
+        RecentFiles.Insert(0, new RecentFile
+        {
+            SubtitleFileName = subtitleFileName,
+            SubtitleFileNameOriginal = subtitleFileNameOriginal,
+            VideoFileName = videoFileName,
+            SelectedLine = selectedLine,
+            Encoding = encoding,
+        });
+
         if (RecentFiles.Count > RecentFilesMaximum)
         {
             RecentFiles.RemoveAt(RecentFiles.Count - 1);

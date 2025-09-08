@@ -94,6 +94,18 @@ public static class InitMenu
                 new Separator(),
                 new MenuItem
                 {
+                    Header = l.Import,
+                    Items =
+                    {
+                        new MenuItem
+                        {
+                            Header = Se.Language.File.Import.ImportSubtitleWithManuallyChosenEncoding,
+                            Command = vm.ShowImportSubtitleWithManuallyChosenEncodingCommand,
+                        },
+                    }
+                },
+                new MenuItem
+                {
                     Header = l.Export,
                     Items =
                     {
@@ -476,9 +488,24 @@ public static class InitMenu
         {
             foreach (var file in files)
             {
+                var header = file.SubtitleFileName;
+
+                if (!string.IsNullOrEmpty(file.SubtitleFileNameOriginal) && System.IO.File.Exists(file.SubtitleFileNameOriginal))
+                {
+                    header += " + ";
+                    if (System.IO.Path.GetDirectoryName(file.SubtitleFileName) == System.IO.Path.GetDirectoryName(file.SubtitleFileNameOriginal))
+                    { 
+                        header += System.IO.Path.GetFileName(file.SubtitleFileNameOriginal);
+                    }
+                    else
+                    {
+                        header += file.SubtitleFileNameOriginal;
+                    }
+                }
+
                 var item = new MenuItem
                 {
-                    Header = file.SubtitleFileName,
+                    Header = header,
                     Command = vm.CommandFileReopenCommand,
                 };
                 item.CommandParameter = file;

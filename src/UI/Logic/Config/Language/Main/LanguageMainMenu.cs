@@ -15,6 +15,7 @@ public class LanguageMainMenu
     public string OpenContainingFolder { get; set; }
     public string Compare { get; set; }
     public string Statistics { get; set; }
+    public string Import { get; set; }
     public string Export { get; set; }
     public string Exit { get; set; }
 
@@ -96,6 +97,7 @@ public class LanguageMainMenu
         Compare = "Com_pare...";
         OpenContainingFolder = "Open containing _folder";
         Statistics = "Stat_istics...";
+        Import = "_Import";
         Export = "_Export";
         Exit = "E_xit";
 
