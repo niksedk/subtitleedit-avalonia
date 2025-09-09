@@ -11,9 +11,12 @@ public class LanguageTools
     public LanguageSplitSubtitle SplitSubtitle { get; set; } = new();
     public LanguageMergeLineswithSameText MergeLineswithSameText { get; set; } = new();
     public LanguageMergeLineswithSameTimeCodes MergeLineswithSameTimeCodes { get; set; } = new();
+    public string PickAlignmentTitle { get; set; }
+    public string PickFontNameTitle { get; set; }
 
     public LanguageTools()
     {
-
+        PickAlignmentTitle = "Choose alignment";
+        PickFontNameTitle = "Choose font name";
     }
 }

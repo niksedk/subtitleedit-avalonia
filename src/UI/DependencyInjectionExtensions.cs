@@ -23,6 +23,8 @@ using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.FindText;
 using Nikse.SubtitleEdit.Features.Shared.Ocr;
 using Nikse.SubtitleEdit.Features.Shared.Ocr.NOcr;
+using Nikse.SubtitleEdit.Features.Shared.PickAlignment;
+using Nikse.SubtitleEdit.Features.Shared.PickFontName;
 using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using Nikse.SubtitleEdit.Features.Shared.PickMp4Track;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
@@ -95,6 +97,8 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<IUndoRedoManager, UndoRedoManager>();
         collection.AddTransient<IWindowService, WindowService>();
         collection.AddTransient<IZipUnpacker, ZipUnpacker>();
+        collection.AddTransient<IColorService, ColorService>();
+        collection.AddTransient<IFontNameService, FontNameService>();
 
         // Download services
         collection.AddHttpClient<IFfmpegDownloadService, FfmpegDownloadService>();
@@ -177,6 +181,8 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<OllamaBrowseViewModel>();
         collection.AddTransient<OpenFromUrlViewModel>();
         collection.AddTransient<PartsSavedViewModel>();
+        collection.AddTransient<PickAlignmentViewModel>();
+        collection.AddTransient<PickFontNameViewModel>();
         collection.AddTransient<PickMatroskaTrackViewModel>();
         collection.AddTransient<PickMp4TrackViewModel>();
         collection.AddTransient<PromptTextBoxViewModel>();

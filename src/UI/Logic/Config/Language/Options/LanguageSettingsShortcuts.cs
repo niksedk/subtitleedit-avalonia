@@ -116,6 +116,7 @@ public class LanguageSettingsShortcuts
     public string Help { get; set; }
     public string DuplicateSelectedLines { get; set; }
     public string SourceView { get; set; }
+    public string ShowAlignmentPicker { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -237,5 +238,6 @@ public class LanguageSettingsShortcuts
         Help = "Help";
         DuplicateSelectedLines = "Duplicate selected lines";
         SourceView = "Source view";
+        ShowAlignmentPicker = "Alignment";
     }
 }

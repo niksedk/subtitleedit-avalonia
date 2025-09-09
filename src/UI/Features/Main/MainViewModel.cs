@@ -39,6 +39,8 @@ using Nikse.SubtitleEdit.Features.Options.Settings;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.Ocr;
+using Nikse.SubtitleEdit.Features.Shared.PickAlignment;
+using Nikse.SubtitleEdit.Features.Shared.PickFontName;
 using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using Nikse.SubtitleEdit.Features.Shared.PickMp4Track;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
@@ -177,6 +179,8 @@ public partial class MainViewModel :
     private readonly IBluRayHelper _bluRayHelper;
     private readonly IMpvReloader _mpvReloader;
     private readonly IFindService _findService;
+    private readonly IColorService _colorService;
+    private readonly IFontNameService _fontNameService;
 
     private bool IsEmpty => Subtitles.Count == 0 || (Subtitles.Count == 1 && string.IsNullOrEmpty(Subtitles[0].Text));
     private bool IsEmptyOriginal => Subtitles.Count == 0 || (Subtitles.Count == 1 && string.IsNullOrEmpty(Subtitles[0].OriginalText));
@@ -217,7 +221,9 @@ public partial class MainViewModel :
         IDictionaryInitializer dictionaryInitializer,
         ILanguageInitializer languageInitializer,
         IOcrInitializer ocrInitializer,
-        IThemeInitializer themeInitializer)
+        IThemeInitializer themeInitializer,
+        IColorService colorService,
+        IFontNameService fontNameService)
     {
         _fileHelper = fileHelper;
         _folderHelper = folderHelper;
@@ -231,6 +237,8 @@ public partial class MainViewModel :
         _bluRayHelper = bluRayHelper;
         _mpvReloader = mpvReloader;
         _findService = findService;
+        _colorService = colorService;
+        _fontNameService = fontNameService;
 
         _loading = true;
         EditText = string.Empty;
@@ -1795,6 +1803,200 @@ public partial class MainViewModel :
     private void ToggleLinesBold()
     {
         ToggleBold();
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowAlignmentPicker()
+    {
+        var selected = SelectedSubtitle;
+        if (selected == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<PickAlignmentWindow, PickAlignmentViewModel>(Window!, vm =>
+        {
+            vm.Initialize(selected, SubtitleGrid.SelectedItems.Count);
+        });
+
+        if (result.OkPressed)
+        {
+            SetAlignmentToSelected(result.Alignment);
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowFontNamePicker()
+    {
+        var selected = SelectedSubtitle;
+        if (selected == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<PickFontNameWindow, PickFontNameViewModel>(Window!, vm =>
+        {
+            vm.Initialize(selected, SubtitleGrid.SelectedItems.Count);
+        });
+
+        if (result.OkPressed)
+        {
+           // SetAlignmentToSelected(result.Alignment);
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowColorPicker()
+    {
+        var selected = SelectedSubtitle;
+        if (selected == null)
+        {
+            return;
+        }
+
+        //var result = await _windowService.ShowDialogAsync<PickFontNameWindow, PickFontNameViewModel>(Window!, vm =>
+        //{
+        //    vm.Initialize(selected, SubtitleGrid.SelectedItems.Count);
+        //});
+
+        //if (result.OkPressed)
+        //{
+        //    // SetAlignmentToSelected(result.Alignment);
+        //}
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private void RemoveFormattingAll()
+    {
+        var selectedItems = _selectedSubtitles?.ToList() ?? [];
+        if (selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var item in selectedItems)
+        {
+            item.Text = HtmlUtil.RemoveHtmlTags(item.Text, true);
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private void RemoveFormattingItalic()
+    {
+        var selectedItems = _selectedSubtitles?.ToList() ?? [];
+        if (selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var item in selectedItems)
+        {
+            item.Text = item.Text.Replace("{\\i1}", string.Empty);
+            item.Text = item.Text.Replace("{\\i0}", string.Empty);
+            item.Text = item.Text.Replace("\\i1", string.Empty);
+            item.Text = item.Text.Replace("\\i0", string.Empty);
+
+            item.Text = HtmlUtil.RemoveOpenCloseTags(item.Text, "i");
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private void RemoveFormattingBold()
+    {
+        var selectedItems = _selectedSubtitles?.ToList() ?? [];
+        if (selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var item in selectedItems)
+        {
+            item.Text = item.Text.Replace("{\\b1}", string.Empty);
+            item.Text = item.Text.Replace("{\\b0}", string.Empty);
+            item.Text = item.Text.Replace("\\b1", string.Empty);
+            item.Text = item.Text.Replace("\\b0", string.Empty);
+
+            item.Text = HtmlUtil.RemoveOpenCloseTags(item.Text, "b");
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private void RemoveFormattingUnderline()
+    {
+        var selectedItems = _selectedSubtitles?.ToList() ?? [];
+        if (selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var item in selectedItems)
+        {
+            item.Text = item.Text.Replace("{\\u1}", string.Empty);
+            item.Text = item.Text.Replace("{\\u0}", string.Empty);
+            item.Text = item.Text.Replace("\\u1", string.Empty);
+            item.Text = item.Text.Replace("\\u0", string.Empty);
+
+            item.Text = HtmlUtil.RemoveOpenCloseTags(item.Text, "u");
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private void RemoveFormattingColor()
+    {
+        var selectedItems = _selectedSubtitles?.ToList() ?? [];
+        if (selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        _colorService.RemoveColorTags(selectedItems);
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private void RemoveFormattingFontName()
+    {
+        var selectedItems = _selectedSubtitles?.ToList() ?? [];
+        if (selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        _fontNameService.RemoveFontNames(selectedItems, SelectedSubtitleFormat);
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private void RemoveFormattingAligment()
+    {
+        var selectedItems = _selectedSubtitles?.ToList() ?? [];
+        if (selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var item in selectedItems)
+        {
+            item.Text = HtmlUtil.RemoveAssAlignmentTags(item.Text);
+        }
+
         _shortcutManager.ClearKeys();
     }
 
@@ -4600,6 +4802,55 @@ public partial class MainViewModel :
                 if (!string.IsNullOrEmpty(item.Text))
                 {
                     item.Text = $"<b>{item.Text}</b>";
+                }
+            }
+        }
+    }
+
+    private void SetAlignmentToSelected(string alignment)
+    {
+        var selectedItems = _selectedSubtitles?.ToList() ?? [];
+        if (selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var item in selectedItems)
+        {
+            item.Text = item.Text
+                .Replace("{\\an1}", string.Empty)
+                .Replace("{\\an2}", string.Empty)
+                .Replace("{\\an3}", string.Empty)
+                .Replace("{\\an4}", string.Empty)
+                .Replace("{\\an5}", string.Empty)
+                .Replace("{\\an6}", string.Empty)
+                .Replace("{\\an7}", string.Empty)
+                .Replace("{\\an8}", string.Empty)
+                .Replace("{\\an9}", string.Empty)
+                .Replace("\\an1", string.Empty)
+                .Replace("\\an2", string.Empty)
+                .Replace("\\an3", string.Empty)
+                .Replace("\\an4", string.Empty)
+                .Replace("\\an5", string.Empty)
+                .Replace("\\an6", string.Empty)
+                .Replace("\\an7", string.Empty)
+                .Replace("\\an8", string.Empty)
+                .Replace("\\an9", string.Empty);
+
+            if (alignment == "an2" && Se.Settings.General.WriteAn2Tag == false)
+            {
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(item.Text))
+            {
+                if (item.Text.StartsWith("{\\"))
+                {
+                    item.Text = item.Text.Insert(2, alignment + "\\");
+                }
+                else
+                {
+                    item.Text = $"{{\\{alignment}}}{item.Text}";
                 }
             }
         }

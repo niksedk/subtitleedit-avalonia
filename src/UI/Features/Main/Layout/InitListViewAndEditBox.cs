@@ -410,6 +410,60 @@ public static class InitListViewAndEditBox
         sep2.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
         flyout.Items.Add(sep2);
 
+        var RemoveFormattingMenuItem = new MenuItem
+        {
+            Header = Se.Language.General.RemoveFormatting,
+            DataContext = vm,
+            Items =
+            {
+                new MenuItem
+                {
+                    Header = Se.Language.General.RemoveAllFormatting,
+                    Command = vm.RemoveFormattingAllCommand,
+                    DataContext = vm,
+                },
+                new MenuItem
+                {
+                    Header = Se.Language.General.RemoveBold,
+                    Command = vm.RemoveFormattingBoldCommand,
+                    DataContext = vm,
+                },
+                new MenuItem
+                {
+                    Header = Se.Language.General.RemoveItalic,
+                    Command = vm.RemoveFormattingItalicCommand,
+                    DataContext = vm,
+                },
+                new MenuItem
+                {
+                    Header = Se.Language.General.RemoveUnderline,
+                    Command = vm.RemoveFormattingUnderlineCommand,
+                    DataContext = vm,
+                },
+                new MenuItem
+                {
+                    Header = Se.Language.General.RemoveColor,
+                    Command = vm.RemoveFormattingColorCommand,
+                    DataContext = vm,
+                },
+                new MenuItem
+                {
+                    Header = Se.Language.General.RemoveFontName,
+                    Command = vm.RemoveFormattingFontNameCommand,
+                    DataContext = vm,
+                },
+                new MenuItem
+                {
+                    Header = Se.Language.General.RemoveAlignment,
+                    Command = vm.RemoveFormattingAligmentCommand,
+                    DataContext = vm,
+                },
+            }
+        };
+        RemoveFormattingMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        flyout.Items.Add(RemoveFormattingMenuItem);
+
+
         var italicMenuItem = new MenuItem
         {
             Header = Se.Language.General.Italic,
@@ -427,6 +481,34 @@ public static class InitListViewAndEditBox
         };
         boldMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
         flyout.Items.Add(boldMenuItem);
+
+        var colorMenuItem = new MenuItem
+        {
+            Header = Se.Language.General.FontColor,
+            Command = vm.ShowColorPickerCommand,
+            DataContext = vm,
+        };
+        colorMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        flyout.Items.Add(colorMenuItem);
+
+        var fontNameMenuItem = new MenuItem
+        {
+            Header = Se.Language.General.FontName,
+            Command = vm.ShowFontNamePickerCommand,
+            DataContext = vm,
+        };
+        fontNameMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        flyout.Items.Add(fontNameMenuItem);
+
+
+        var alignmentMenuItem = new MenuItem
+        {
+            Header = Se.Language.General.Alignment,
+            Command = vm.ShowAlignmentPickerCommand,
+            DataContext = vm,
+        };
+        alignmentMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        flyout.Items.Add(alignmentMenuItem);
 
         // Set the ContextFlyout property
         vm.SubtitleGrid.ContextFlyout = flyout;

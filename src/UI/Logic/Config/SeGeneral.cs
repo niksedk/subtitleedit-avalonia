@@ -65,6 +65,7 @@ public class SeGeneral
     public bool ShowColumnCps { get; set; }
     public bool ShowColumnWpm { get; set; }
     public bool SelectCurrentSubtitleWhilePlaying { get; set; }
+    public bool WriteAn2Tag { get; set; }
 
     public SeGeneral()
     {

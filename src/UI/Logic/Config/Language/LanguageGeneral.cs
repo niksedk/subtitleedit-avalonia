@@ -228,7 +228,7 @@ public class LanguageGeneral
     public string SavingDotDotDot { get; set; }
     public string GeneratingImageXofY { get; set; }
     public string Profile { get; set; }
-    public object VideoPosition { get; set; }
+    public string VideoPosition { get; set; }
     public string Padding { get; set; }
     public string SaveImageAs { get; set; }
     public string NewProfile { get; set; }
@@ -281,7 +281,7 @@ public class LanguageGeneral
     public string SaveTranslationAsTitle { get; set; }
     public string SaveOriginalAsTitle { get; set; }
     public string NoSubtitlesFound { get; set; }
-    public object Usages { get; set; }
+    public string Usages { get; set; }
     public string Left { get; set; }
     public string Right { get; set; }
     public string Outline { get; set; }
@@ -310,9 +310,26 @@ public class LanguageGeneral
     public string Lines { get; set; }
     public string Characters { get; set; }
     public string Untitled { get; set; }
-    public object Group { get; set; }
+    public string Group { get; set; }
     public string SaveChangesToX { get; set; }
     public string SaveChangesToXOriginal { get; set; }
+    public string TopLeft { get; set; }
+    public string TopCenter { get; set; }
+    public string TopRight { get; set; }
+    public string MiddleLeft { get; set; }
+    public string MiddleCenter { get; set; }
+    public string MiddleRight { get; set; }
+    public string BottomLeft { get; set; }
+    public string BottomCenter { get; set; }
+    public string BottomRight { get; set; }
+    public string RemoveFormatting { get; set; }
+    public string RemoveAllFormatting { get; set; }
+    public string RemoveBold { get; set; }
+    public string RemoveItalic { get; set; }
+    public string RemoveUnderline { get; set; }
+    public string RemoveColor { get; set; }
+    public string RemoveFontName { get; set; }
+    public string RemoveAlignment { get; set; }
 
     public LanguageGeneral()
     {
@@ -320,7 +337,7 @@ public class LanguageGeneral
         Actors = "Actors";
         Advanced = "Advanced";
         After = "After";
-        All = "All";    
+        All = "All";
         AllFiles = "All files";
         Apply = "Apply";
         ApplyTo = "Apply to";
@@ -539,7 +556,7 @@ public class LanguageGeneral
         SaveDotDotDot = "Save...";
         GeneratingImageXofY = "Generating image {0:#,##0} of {1:#,##0}...";
         VideoPosition = "Video position";
-        Profile =  "Profile";
+        Profile = "Profile";
         Padding = "Padding";
         SaveImageAs = "Save image as";
         NewProfile = "New profile";
@@ -556,7 +573,7 @@ public class LanguageGeneral
         SetStartAndOffsetTheRest = "Set start and offset the rest";
         Paste = "Paste";
         Cut = "Cut";
-        Copy = "Copy";  
+        Copy = "Copy";
         SplitLineAtTextBoxCursorPosition = "Split line at cursor position";
         SetStart = "Set start";
         SetEnd = "Set end";
@@ -624,5 +641,22 @@ public class LanguageGeneral
         Group = "Group";
         SaveChangesToX = "Do you want to save changes to \"{0}\"?";
         SaveChangesToXOriginal = "Do you want to save changes to the original subtitle file \"{0}\"?";
+        TopLeft = "Top-Left";
+        TopCenter = "Top-Center";
+        TopRight = "Top-Right";
+        MiddleLeft = "Middle-Left";
+        MiddleCenter = "Middle-Center";
+        MiddleRight = "Middle-Right";
+        BottomLeft = "Bottom-Left";
+        BottomCenter = "Bottom-Center";
+        BottomRight = "Bottom-Right";
+        RemoveFormatting = "Remove formatting";
+        RemoveAllFormatting = "Remove all formatting";
+        RemoveBold = "Remove bold";
+        RemoveItalic = "Remove italic";
+        RemoveUnderline = "Remove underline";
+        RemoveColor = "Remove color";
+        RemoveFontName = "Remove font name";
+        RemoveAlignment = "Remove alignment";
     }
 }

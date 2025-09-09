@@ -1210,6 +1210,18 @@ public static class UiUtil
         return control;
     }
 
+    public static Button WithMinHeight(this Button control, int height)
+    {
+        control.MinHeight = height;
+        return control;
+    }
+
+    public static Button WithParameter(this Button control, object parameter)
+    {
+        control.CommandParameter = parameter;
+        return control;
+    }
+
     public static ComboBox WithMinWidth(this ComboBox control, int width)
     {
         control.MinWidth = width;
