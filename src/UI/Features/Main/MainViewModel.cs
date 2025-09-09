@@ -2319,7 +2319,7 @@ public partial class MainViewModel :
         var tb = EditTextBox;
         ToggleTextBoxTag(tb, "b", "b1", "b0");
         _updateAudioVisualizer = true;
-    }   
+    }
 
     [RelayCommand]
     private void TextBoxItalic()
@@ -2338,15 +2338,91 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private void TextBoxColor()
+    private async Task TextBoxColor()
     {
+        var tb = EditTextBox;
+        if (tb == null || tb.Text == null)
+        {
+            return;
+        }
 
+        var selectionStart = Math.Min(tb.SelectionStart, tb.SelectionEnd);
+        var selectionEnd = Math.Max(tb.SelectionStart, tb.SelectionEnd);
+        var selectionLength = selectionEnd - selectionStart;
+
+        var result = await _windowService.ShowDialogAsync<PickColorWindow, PickColorViewModel>(Window!);
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        var isAssa = SelectedSubtitleFormat is AdvancedSubStationAlpha;
+        var isWebVtt = SelectedSubtitleFormat is WebVTT;
+        if (selectionLength == 0)
+        {
+            tb.Text = _colorService.SetColorTag(tb.Text, result.SelectedColor, isAssa, isWebVtt, GetUpdateSubtitle());
+        }
+        else
+        {
+            var selectedText = tb.Text.Substring(selectionStart, selectionLength);
+            selectedText = _colorService.SetColorTag(selectedText, result.SelectedColor, isAssa, isWebVtt, GetUpdateSubtitle());
+            tb.Text = tb.Text
+                .Remove(selectionStart, selectionLength)
+                .Insert(selectionStart, selectedText);
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                tb.Focus();
+                tb.SelectionStart = selectionStart;
+                tb.SelectionEnd = selectionStart + selectedText.Length;
+            });
+        }
     }
 
     [RelayCommand]
-    private void TextBoxFontName()
+    private async Task TextBoxFontName()
     {
+        var tb = EditTextBox;
+        if (tb == null || tb.Text == null)
+        {
+            return;
+        }
 
+        var selectionStart = Math.Min(tb.SelectionStart, tb.SelectionEnd);
+        var selectionEnd = Math.Max(tb.SelectionStart, tb.SelectionEnd);
+        var selectionLength = selectionEnd - selectionStart;
+
+        var result = await _windowService.ShowDialogAsync<PickFontNameWindow, PickFontNameViewModel>(Window!, vm =>
+        {
+            vm.Initialize();
+        });
+
+        if (!result.OkPressed || result.SelectedFontName == null)
+        {
+            return;
+        }
+
+        var isAssa = SelectedSubtitleFormat is AdvancedSubStationAlpha;
+        var isWebVtt = SelectedSubtitleFormat is WebVTT;
+        if (selectionLength == 0)
+        {
+            tb.Text = _fontNameService.SetFontName(tb.Text, result.SelectedFontName, isAssa);
+        }
+        else
+        {
+            var selectedText = tb.Text.Substring(selectionStart, selectionLength);
+            selectedText = _fontNameService.SetFontName(selectedText, result.SelectedFontName, isAssa);
+            tb.Text = tb.Text
+                .Remove(selectionStart, selectionLength)
+                .Insert(selectionStart, selectedText);
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                tb.Focus();
+                tb.SelectionStart = selectionStart;
+                tb.SelectionEnd = selectionStart + selectedText.Length;
+            });
+        }
     }
 
     [RelayCommand]

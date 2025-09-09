@@ -12,6 +12,7 @@ public interface IColorService
 {
     void RemoveColorTags(List<SubtitleLineViewModel> subtitles);
     void SetColor(List<SubtitleLineViewModel> subtitles, Color color, Subtitle subtitle, SubtitleFormat subtitleFormat);
+    string SetColorTag(string input, Color color, bool isAssa, bool isWebVtt, Subtitle subtitle);
 }
 
 public class ColorService : IColorService
@@ -45,30 +46,31 @@ public class ColorService : IColorService
         foreach (var p in subtitles)
         {
             RemoveColortags(p);
-            SetColorTag(p, color, isAssa, isWebVtt, subtitle);
+            p.Text = SetColorTag(p.Text, color, isAssa, isWebVtt, subtitle);
         }
     }
 
-    private void SetColorTag(SubtitleLineViewModel p, Color color, bool isAssa, bool isWebVtt, Subtitle subtitle)
+    public string SetColorTag(string input, Color color, bool isAssa, bool isWebVtt, Subtitle subtitle)
     {
-        if (string.IsNullOrWhiteSpace(p.Text))
+        if (string.IsNullOrWhiteSpace(input))
         {
-            return;
+            return input;
         }
 
+        var text = input;
         if (isAssa)
         {
             try
             {
-                p.Text = HtmlUtil.RemoveAssaColor(p.Text);
-                p.Text = "{\\" + AdvancedSubStationAlpha.GetSsaColorStringForEvent(color.ToSKColor()) + "&}" + p.Text;
+                text = HtmlUtil.RemoveAssaColor(text);
+                text = "{\\" + AdvancedSubStationAlpha.GetSsaColorStringForEvent(color.ToSKColor()) + "&}" + text;
             }
             catch
             {
                 // ignore
             }
 
-            return;
+            return text;
         }
 
         if (isWebVtt)
@@ -78,15 +80,15 @@ public class ColorService : IColorService
                 var existingStyle = WebVttHelper.GetOnlyColorStyle(color.ToSKColor(), subtitle.Header);
                 if (existingStyle != null)
                 {
-                    p.Text = WebVttHelper.AddStyleToText(p.Text, existingStyle, WebVttHelper.GetStyles(subtitle.Header));
-                    p.Text = WebVttHelper.RemoveUnusedColorStylesFromText(p.Text, subtitle.Header);
+                    text = WebVttHelper.AddStyleToText(text, existingStyle, WebVttHelper.GetStyles(subtitle.Header));
+                    text = WebVttHelper.RemoveUnusedColorStylesFromText(text, subtitle.Header);
                 }
                 else
                 {
                     var styleWithColor = WebVttHelper.AddStyleFromColor(color.ToSKColor());
                     subtitle.Header = WebVttHelper.AddStyleToHeader(subtitle.Header, styleWithColor);
-                    p.Text = WebVttHelper.AddStyleToText(p.Text, styleWithColor, WebVttHelper.GetStyles(subtitle.Header));
-                    p.Text = WebVttHelper.RemoveUnusedColorStylesFromText(p.Text, subtitle.Header);
+                    text = WebVttHelper.AddStyleToText(text, styleWithColor, WebVttHelper.GetStyles(subtitle.Header));
+                    text = WebVttHelper.RemoveUnusedColorStylesFromText(text, subtitle.Header);
                 }
             }
             catch
@@ -94,22 +96,22 @@ public class ColorService : IColorService
                 // ignore
             }
 
-            return;
+            return text;
         }
 
         string pre = string.Empty;
-        if (p.Text.StartsWith("{\\", StringComparison.Ordinal) && p.Text.IndexOf('}') >= 0)
+        if (text.StartsWith("{\\", StringComparison.Ordinal) && text.IndexOf('}') >= 0)
         {
-            int endIndex = p.Text.IndexOf('}') + 1;
-            pre = p.Text.Substring(0, endIndex);
-            p.Text = p.Text.Remove(0, endIndex);
+            int endIndex = text.IndexOf('}') + 1;
+            pre = text.Substring(0, endIndex);
+            text = text.Remove(0, endIndex);
         }
 
-        string s = p.Text;
+        string s = text;
         if (s.StartsWith("<font ", StringComparison.OrdinalIgnoreCase))
         {
             int end = s.IndexOf('>');
-            if (end > 0)
+            if (end > 0)    
             {
                 string f = s.Substring(0, end);
 
@@ -117,8 +119,8 @@ public class ColorService : IColorService
                 {
                     var start = s.IndexOf(" face=", StringComparison.OrdinalIgnoreCase);
                     s = s.Insert(start, string.Format(" color=\"{0}\"", color));
-                    p.Text = pre + s;
-                    return;
+                    text = pre + s;
+                    return text;
                 }
 
                 var colorStart = f.IndexOf(" color=", StringComparison.OrdinalIgnoreCase);
@@ -130,12 +132,12 @@ public class ColorService : IColorService
                     }
 
                     s = s.Substring(0, colorStart) + string.Format(" color=\"{0}", color) + s.Substring(end);
-                    p.Text = pre + s;
-                    return;
+                    text = pre + s;
+                    return text;
                 }
             }
         }
 
-        p.Text = $"{pre}<font color=\"{color}\">{p.Text}</font>";
+        return $"{pre}<font color=\"{color}\">{text}</font>";
     }
 }

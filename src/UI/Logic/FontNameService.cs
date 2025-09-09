@@ -12,7 +12,7 @@ public interface IFontNameService
     void RemoveFontNames(SubtitleLineViewModel p, bool isAssa);
     void RemoveFontNames(List<SubtitleLineViewModel> subtitles, SubtitleFormat subtitleFormat);
     void SetFontName(List<SubtitleLineViewModel> subtitles, string fontName, SubtitleFormat subtitleFormat);
-    void SetFontName(SubtitleLineViewModel p, string fontName, bool isAssa);
+    string SetFontName(string text, string fontName, bool isAssa);
 }
 
 public class FontNameService : IFontNameService
@@ -33,34 +33,35 @@ public class FontNameService : IFontNameService
 
         foreach (var p in subtitles)
         {
-            SetFontName(p, fontName, isAssa);
+            p.Text = SetFontName(p.Text, fontName, isAssa);
         }
     }
 
-    public void SetFontName(SubtitleLineViewModel p, string fontName, bool isAssa)
+    public string SetFontName(string input, string fontName, bool isAssa)
     {
-        if (string.IsNullOrWhiteSpace(p.Text))
+        if (string.IsNullOrWhiteSpace(input))
         {
-            return;
+            return input;
         }
 
+        var text = input;
         if (isAssa)
         {
-            p.Text = Regex.Replace(p.Text, "{\\\\fn[^\\\\]+}", string.Empty);
-            p.Text = Regex.Replace(p.Text, "\\\\fn[a-zA-Z \\d]+\\\\", string.Empty);
-            p.Text = "{\\fn" + fontName + "}" + p.Text;
-            return;
+            text = Regex.Replace(text, "{\\\\fn[^\\\\]+}", string.Empty);
+            text = Regex.Replace(text, "\\\\fn[a-zA-Z \\d]+\\\\", string.Empty);
+            text = "{\\fn" + fontName + "}" + text;
+            return text;
         }
 
         string pre = string.Empty;
-        if (p.Text.StartsWith("{\\", StringComparison.Ordinal) && p.Text.IndexOf('}') >= 0)
+        if (text.StartsWith("{\\", StringComparison.Ordinal) && text.IndexOf('}') >= 0)
         {
-            int endIndex = p.Text.IndexOf('}') + 1;
-            pre = p.Text.Substring(0, endIndex);
-            p.Text = p.Text.Remove(0, endIndex);
+            int endIndex = text.IndexOf('}') + 1;
+            pre = text.Substring(0, endIndex);
+            text = text.Remove(0, endIndex);
         }
 
-        string s = p.Text;
+        string s = text;
         if (s.StartsWith("<font ", StringComparison.OrdinalIgnoreCase))
         {
             var end = s.IndexOf('>');
@@ -71,8 +72,8 @@ public class FontNameService : IFontNameService
                 if (f.Contains(" color=", StringComparison.OrdinalIgnoreCase) && !f.Contains(" face=", StringComparison.OrdinalIgnoreCase))
                 {
                     var start = s.IndexOf(" color=", StringComparison.OrdinalIgnoreCase);
-                    p.Text = pre + s.Insert(start, string.Format(" face=\"{0}\"", fontName));
-                    return;
+                    text = pre + s.Insert(start, string.Format(" face=\"{0}\"", fontName));
+                    return text;
                 }
 
                 var faceStart = f.IndexOf(" face=", StringComparison.OrdinalIgnoreCase);
@@ -83,13 +84,13 @@ public class FontNameService : IFontNameService
                         end = s.IndexOf('"', faceStart + 7);
                     }
 
-                    p.Text = pre + s.Substring(0, faceStart) + string.Format(" face=\"{0}", fontName) + s.Substring(end);
-                    return;
+                    text = pre + s.Substring(0, faceStart) + string.Format(" face=\"{0}", fontName) + s.Substring(end);
+                    return text;
                 }
             }
         }
 
-        p.Text = $"{pre}<font face=\"{fontName}\">{s}</font>";
+        return $"{pre}<font face=\"{fontName}\">{s}</font>";
     }
 
     public void RemoveFontNames(SubtitleLineViewModel p, bool isAssa)

@@ -2,6 +2,7 @@
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Settings;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.IO;
 
@@ -75,17 +76,17 @@ public class MpvReloader : IMpvReloader
 
                     var oldSub = subtitle;
                     subtitle = new Subtitle(subtitle);
-                    //if (TextBox.RightToLeft == RightToLeft.Yes && LanguageAutoDetect.CouldBeRightToLeftLanguage(subtitle))
-                    //{
-                    //    for (var index = 0; index < subtitle.Paragraphs.Count; index++)
-                    //    {
-                    //        var paragraph = subtitle.Paragraphs[index];
-                    //        if (LanguageAutoDetect.ContainsRightToLeftLetter(paragraph.Text))
-                    //        {
-                    //            paragraph.Text = Utilities.FixRtlViaUnicodeChars(paragraph.Text);
-                    //        }
-                    //    }
-                    //}
+                    if (Se.Settings.Appearance.RightToLeft)
+                    {
+                        for (var index = 0; index < subtitle.Paragraphs.Count; index++)
+                        {
+                            var paragraph = subtitle.Paragraphs[index];
+                            if (LanguageAutoDetect.ContainsRightToLeftLetter(paragraph.Text))
+                            {
+                                paragraph.Text = Utilities.FixRtlViaUnicodeChars(paragraph.Text);
+                            }
+                        }
+                    }
 
                     if (subtitle.Header == null || !(subtitle.Header.Contains("[V4+ Styles]") && uiFormatType == typeof(SubStationAlpha)))
                     {
@@ -151,7 +152,7 @@ public class MpvReloader : IMpvReloader
             {
                 if (_retryCount >= 0 || string.IsNullOrEmpty(_mpvTextFileName) || _subtitlePrev == null || _subtitlePrev.FileName != subtitle.FileName || !_mpvTextFileName.EndsWith(format.Extension, StringComparison.Ordinal))
                 {
-                    mpvContext.SubRemove().Invoke(); 
+                    mpvContext.SubRemove().Invoke();
                     DeleteTempMpvFileName();
                     _mpvTextFileName = FileUtil.GetTempFileName(format.Extension);
                     File.WriteAllText(_mpvTextFileName, text);
@@ -168,9 +169,9 @@ public class MpvReloader : IMpvReloader
             }
             _subtitlePrev = subtitle;
         }
-        catch
+        catch (Exception exception)
         {
-            // ignored
+            Se.LogError(exception);
         }
     }
 
