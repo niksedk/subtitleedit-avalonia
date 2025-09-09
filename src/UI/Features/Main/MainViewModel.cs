@@ -1862,7 +1862,7 @@ public partial class MainViewModel :
 
         var result = await _windowService.ShowDialogAsync<PickColorWindow, PickColorViewModel>(Window!, vm =>
         {
-           // vm.Initialize();
+            // vm.Initialize();
         });
 
         if (result.OkPressed)
@@ -2280,6 +2280,73 @@ public partial class MainViewModel :
     private void SplitAtVideoPositionAndTextBoxCursorPosition()
     {
         SplitSelectedLine(true, true);
+    }
+
+    [RelayCommand]
+    private void TextBoxRemoveAllFormatting()
+    {
+        var tb = EditTextBox;
+        if (tb == null || tb.Text == null)
+        {
+            return;
+        }
+
+        var selectionStart = Math.Min(tb.SelectionStart, tb.SelectionEnd);
+        var selectionEnd = Math.Max(tb.SelectionStart, tb.SelectionEnd);
+        var selectionLength = selectionEnd - selectionStart;
+
+        if (selectionLength == 0)
+        {
+            tb.Text = HtmlUtil.RemoveHtmlTags(tb.Text, true);
+        }
+        else
+        {
+            var selectedText = tb.Text.Substring(selectionStart, selectionLength);
+            var newText = HtmlUtil.RemoveHtmlTags(selectedText, true);
+            tb.Text = tb.Text
+                .Remove(selectionStart, selectionLength)
+                .Insert(selectionStart, newText);
+            tb.SelectionStart = selectionStart;
+            tb.SelectionEnd = selectionStart + newText.Length;
+        }
+
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void TextBoxBold()
+    {
+        var tb = EditTextBox;
+        ToggleTextBoxTag(tb, "b", "b1", "b0");
+        _updateAudioVisualizer = true;
+    }   
+
+    [RelayCommand]
+    private void TextBoxItalic()
+    {
+        var tb = EditTextBox;
+        ToggleTextBoxTag(tb, "i", "i1", "i0");
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void TextBoxUnderline()
+    {
+        var tb = EditTextBox;
+        ToggleTextBoxTag(tb, "u", "u1", "u0");
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void TextBoxColor()
+    {
+
+    }
+
+    [RelayCommand]
+    private void TextBoxFontName()
+    {
+
     }
 
     [RelayCommand]
@@ -2856,6 +2923,85 @@ public partial class MainViewModel :
             SubtitleGrid.SelectedItem = subtitle;
             SubtitleGrid.ScrollIntoView(subtitle, null);
         }, DispatcherPriority.Background);
+    }
+
+    private bool ToggleTextBoxTag(TextBox tb, string htmlTag, string assaOn, string assaOff)
+    {
+        if (tb == null || tb.Text == null)
+        {
+            return false;
+        }
+
+        var selectionStart = Math.Min(tb.SelectionStart, tb.SelectionEnd);
+        var selectionEnd = Math.Max(tb.SelectionStart, tb.SelectionEnd);
+        var selectionLength = selectionEnd - selectionStart;
+
+        var isAssa = SelectedSubtitleFormat is AdvancedSubStationAlpha;
+        if (selectionLength == 0)
+        {
+            if (isAssa)
+            {
+                if (tb.Text.Contains("{\\" + assaOn + " }"))
+                {
+                    tb.Text = tb.Text.Replace("{\\" + assaOn + "}", string.Empty).Replace("{\\" + assaOff + "0}", string.Empty);
+                }
+                else
+                {
+                    tb.Text = "{\\" + assaOn + "}" + tb.Text + "{\\" + assaOff + "}";
+                }
+            }
+            else
+            {
+                if (tb.Text.Contains("<" + htmlTag + ">"))
+                {
+                    tb.Text = HtmlUtil.RemoveOpenCloseTags(tb.Text, htmlTag);
+                }
+                else
+                {
+                    tb.Text = "<" + htmlTag + ">" + tb.Text + "</" + htmlTag + ">";
+                }
+            }
+        }
+        else
+        {
+            var selectedText = tb.Text.Substring(selectionStart, selectionLength);
+
+            if (isAssa)
+            {
+                if (selectedText.Contains("{\\" + assaOn + "}"))
+                {
+                    selectedText = selectedText.Replace("{\\" + assaOn + "}", string.Empty).Replace("{\\" + assaOff + "}", string.Empty);
+                }
+                else
+                {
+                    selectedText = "{\\" + assaOn + "}" + selectedText + "{\\" + assaOff + "}";
+                }
+            }
+            else
+            {
+                if (selectedText.Contains("<" + htmlTag + ">"))
+                {
+                    selectedText = HtmlUtil.RemoveOpenCloseTags(selectedText, htmlTag);
+                }
+                else
+                {
+                    selectedText = "<" + htmlTag + ">" + selectedText + "</" + htmlTag + ">";
+                }
+            }
+
+            tb.Text = tb.Text
+                .Remove(selectionStart, selectionLength)
+                .Insert(selectionStart, selectedText);
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                tb.Focus();
+                tb.SelectionStart = selectionStart;
+                tb.SelectionEnd = selectionStart + selectedText.Length;
+            });
+        }
+
+        return true;
     }
 
     private async Task SubtitleOpen(string fileName, string? videoFileName = null, int? selectedSubtitleIndex = null, TextEncoding? textEncoding = null)

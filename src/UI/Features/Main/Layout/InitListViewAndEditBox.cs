@@ -484,7 +484,7 @@ public static class InitListViewAndEditBox
 
         var colorMenuItem = new MenuItem
         {
-            Header = Se.Language.General.Color,
+            Header = Se.Language.General.ColorDotDotDot,
             Command = vm.ShowColorPickerCommand,
             DataContext = vm,
         };
@@ -493,7 +493,7 @@ public static class InitListViewAndEditBox
 
         var fontNameMenuItem = new MenuItem
         {
-            Header = Se.Language.General.FontName,
+            Header = Se.Language.General.FontNameDotDotDot,
             Command = vm.ShowFontNamePickerCommand,
             DataContext = vm,
         };
@@ -503,7 +503,7 @@ public static class InitListViewAndEditBox
 
         var alignmentMenuItem = new MenuItem
         {
-            Header = Se.Language.General.Alignment,
+            Header = Se.Language.General.AlignmentDotDotDot,
             Command = vm.ShowAlignmentPickerCommand,
             DataContext = vm,
         };
@@ -697,9 +697,7 @@ public static class InitListViewAndEditBox
         pasteMenuItem.Command = vm.TextBoxPasteCommand;
         flyoutTextBox.Items.Add(pasteMenuItem);
 
-        var selectAllMenuItem = new MenuItem { Header = Se.Language.General.SelectAll };
-        selectAllMenuItem.Command = vm.TextBoxSelectAllCommand;
-        flyoutTextBox.Items.Add(selectAllMenuItem);
+        flyoutTextBox.Items.Add(new Separator());
 
         var menuItemTextBoxSplitAtCursor = new MenuItem { Header = Se.Language.General.SplitLineAtTextBoxCursorPosition };
         menuItemTextBoxSplitAtCursor.Command = vm.SplitAtTextBoxCursorPositionCommand;
@@ -708,6 +706,41 @@ public static class InitListViewAndEditBox
         var menuItemTextBoxSplitAtCursorAndVideoPosition = new MenuItem { Header = Se.Language.General.SplitLineAtVideoAndTextBoxPosition };
         menuItemTextBoxSplitAtCursorAndVideoPosition.Command = vm.SplitAtVideoPositionAndTextBoxCursorPositionCommand;
         flyoutTextBox.Items.Add(menuItemTextBoxSplitAtCursorAndVideoPosition);
+
+        flyoutTextBox.Items.Add(new Separator());
+
+        var menuItemTextBoxRemoveAllFormatting = new MenuItem { Header = Se.Language.General.RemoveAllFormatting };
+        menuItemTextBoxRemoveAllFormatting.Command = vm.TextBoxRemoveAllFormattingCommand;
+        flyoutTextBox.Items.Add(menuItemTextBoxRemoveAllFormatting);
+
+        var menuItemTextBoxBold = new MenuItem { Header = Se.Language.General.Bold };
+        menuItemTextBoxBold.Command = vm.TextBoxBoldCommand;
+        flyoutTextBox.Items.Add(menuItemTextBoxBold);
+
+        var menuItemTextBoxItalic = new MenuItem { Header = Se.Language.General.Italic };
+        menuItemTextBoxItalic.Command = vm.TextBoxItalicCommand;
+        flyoutTextBox.Items.Add(menuItemTextBoxItalic);
+
+        var menuItemTextBoxUnderline = new MenuItem { Header = Se.Language.General.Underline };
+        menuItemTextBoxUnderline.Command = vm.TextBoxUnderlineCommand;
+        flyoutTextBox.Items.Add(menuItemTextBoxUnderline);
+
+        var menuItemTextBoxFontName = new MenuItem { Header = Se.Language.General.FontNameDotDotDot };
+        menuItemTextBoxFontName.Command = vm.TextBoxFontNameCommand;
+        flyoutTextBox.Items.Add(menuItemTextBoxFontName);
+
+        var menuItemTextBoxColor = new MenuItem { Header = Se.Language.General.Color };
+        menuItemTextBoxColor.Command = vm.TextBoxColorCommand;
+        flyoutTextBox.Items.Add(menuItemTextBoxColor);
+
+
+
+
+        flyoutTextBox.Items.Add(new Separator());
+
+        var selectAllMenuItem = new MenuItem { Header = Se.Language.General.SelectAll };
+        selectAllMenuItem.Command = vm.TextBoxSelectAllCommand;
+        flyoutTextBox.Items.Add(selectAllMenuItem);
 
 
         // translation mode (original text)
