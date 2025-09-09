@@ -6,7 +6,7 @@ public class LanguageJoinSubtitles
     public string KeepTimeCodes { get; set; }
     public string AppendTimeCodes { get; set; }
     public string AddMsAfterEachFile { get; set; }
-    public string Join { get; internal set; }
+    public string Join { get; set; }
 
     public LanguageJoinSubtitles()
     {

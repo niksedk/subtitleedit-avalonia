@@ -13,10 +13,12 @@ public class LanguageTools
     public LanguageMergeLineswithSameTimeCodes MergeLineswithSameTimeCodes { get; set; } = new();
     public string PickAlignmentTitle { get; set; }
     public string PickFontNameTitle { get; set; }
+    public string ColorPickerTitle { get; set; }
 
     public LanguageTools()
     {
         PickAlignmentTitle = "Choose alignment";
         PickFontNameTitle = "Choose font name";
+        ColorPickerTitle = "Choose color";
     }
 }

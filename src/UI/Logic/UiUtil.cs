@@ -26,7 +26,7 @@ public static class UiUtil
     public const int CornerRadius = 4;
     public const int SplitterWidthOrHeight = 4;
     private static IStyle? _lighterDarkStyle;
-    public static FluentTheme? FluentTheme { get; internal set; }
+    public static FluentTheme? FluentTheme { get; set; }
 
     public static ControlTheme DataGridNoBorderCellTheme => GetDataGridNoBorderCellTheme();
 

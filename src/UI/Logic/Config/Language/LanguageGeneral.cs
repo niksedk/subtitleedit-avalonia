@@ -331,6 +331,7 @@ public class LanguageGeneral
     public string RemoveFontName { get; set; }
     public string RemoveAlignment { get; set; }
     public string SearchFontNames { get; set; }
+    public string Color { get; set; }
 
     public LanguageGeneral()
     {
@@ -660,5 +661,6 @@ public class LanguageGeneral
         RemoveFontName = "Remove font name";
         RemoveAlignment = "Remove alignment";
         SearchFontNames = "Search font names...";
+        Color = "Color";
     }
 }

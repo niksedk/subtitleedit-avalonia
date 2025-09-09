@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Nikse.SubtitleEdit.Logic.Config.Language;
+﻿namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
 public class LanguageSplitSubtitle
 {
@@ -8,7 +6,7 @@ public class LanguageSplitSubtitle
     public string NumberOfEqualParts { get; set; }
     public string SaveSplitParts { get; set; }
     public string SubtitleSplitIntoXParts { get; set; }
-    public string XPartsSavedInFormatYToFolder { get; internal set; }
+    public string XPartsSavedInFormatYToFolder { get; set; }
 
     public LanguageSplitSubtitle()
     {

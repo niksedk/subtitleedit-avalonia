@@ -22,13 +22,13 @@ public class SeTools
     public string OpenRouterPrompt { get; set; }
     public bool JoinKeepTimeCodes { get; set; }
     public int JoinAppendMilliseconds { get; set; }
-    public int SplitNumberOfEqualParts { get; internal set; }
-    public string SplitOutputFolder { get; internal set; }
-    public bool SplitByLines { get; internal set; }
-    public bool SplitByCharacters { get; internal set; }
-    public bool SplitByTime { get; internal set; }
-    public string SplitSubtitleFormat { get; internal set; }
-    public string? SplitSubtitleEncoding { get; internal set; }
+    public int SplitNumberOfEqualParts { get; set; }
+    public string SplitOutputFolder { get; set; }
+    public bool SplitByLines { get; set; }
+    public bool SplitByCharacters { get; set; }
+    public bool SplitByTime { get; set; }
+    public string SplitSubtitleFormat { get; set; }
+    public string? SplitSubtitleEncoding { get; set; }
 
     public SeTools()
     {

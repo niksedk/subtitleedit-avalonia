@@ -56,7 +56,7 @@ public partial class PickFontNameViewModel : ObservableObject
         };
     }
 
-    internal void Initialize(SubtitleLineViewModel? selectedSubtitle, int count)
+    internal void Initialize()
     {
         _timerUpdate.Start();
         _dirtyPreview = true;

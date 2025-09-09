@@ -7,7 +7,7 @@ public class LanguageMainWaveform
     public string RepeatHint { get; set; }
     public string SetStartHint { get; set; }
     public string SetEndHint { get; set; }
-    public string NewHint { get; internal set; }
+    public string NewHint { get; set; }
 
     public LanguageMainWaveform()
     {

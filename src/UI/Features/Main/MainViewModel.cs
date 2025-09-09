@@ -40,6 +40,7 @@ using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.Ocr;
 using Nikse.SubtitleEdit.Features.Shared.PickAlignment;
+using Nikse.SubtitleEdit.Features.Shared.PickColor;
 using Nikse.SubtitleEdit.Features.Shared.PickFontName;
 using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using Nikse.SubtitleEdit.Features.Shared.PickMp4Track;
@@ -1831,20 +1832,20 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowFontNamePicker()
     {
-        var selected = SelectedSubtitle;
-        if (selected == null)
+        var selectedItems = _selectedSubtitles?.ToList() ?? [];
+        if (selectedItems.Count == 0)
         {
             return;
         }
 
         var result = await _windowService.ShowDialogAsync<PickFontNameWindow, PickFontNameViewModel>(Window!, vm =>
         {
-            vm.Initialize(selected, SubtitleGrid.SelectedItems.Count);
+            vm.Initialize();
         });
 
-        if (result.OkPressed)
+        if (result.OkPressed && result.SelectedFontName != null)
         {
-            _fontNameService.SetFontName(selected, result.SelectedFontName, SelectedSubtitleFormat is AdvancedSubStationAlpha);
+            _fontNameService.SetFontName(selectedItems, result.SelectedFontName, SelectedSubtitleFormat);
         }
 
         _shortcutManager.ClearKeys();
@@ -1853,21 +1854,21 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowColorPicker()
     {
-        var selected = SelectedSubtitle;
-        if (selected == null)
+        var selectedItems = _selectedSubtitles?.ToList() ?? [];
+        if (selectedItems.Count == 0)
         {
             return;
         }
 
-        //var result = await _windowService.ShowDialogAsync<PickFontNameWindow, PickFontNameViewModel>(Window!, vm =>
-        //{
-        //    vm.Initialize(selected, SubtitleGrid.SelectedItems.Count);
-        //});
+        var result = await _windowService.ShowDialogAsync<PickColorWindow, PickColorViewModel>(Window!, vm =>
+        {
+           // vm.Initialize();
+        });
 
-        //if (result.OkPressed)
-        //{
-        //    // SetAlignmentToSelected(result.Alignment);
-        //}
+        if (result.OkPressed)
+        {
+            _colorService.SetColor(selectedItems, result.SelectedColor, GetUpdateSubtitle(), SelectedSubtitleFormat);
+        }
 
         _shortcutManager.ClearKeys();
     }

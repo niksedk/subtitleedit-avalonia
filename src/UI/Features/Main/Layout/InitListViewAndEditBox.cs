@@ -484,7 +484,7 @@ public static class InitListViewAndEditBox
 
         var colorMenuItem = new MenuItem
         {
-            Header = Se.Language.General.FontColor,
+            Header = Se.Language.General.Color,
             Command = vm.ShowColorPickerCommand,
             DataContext = vm,
         };

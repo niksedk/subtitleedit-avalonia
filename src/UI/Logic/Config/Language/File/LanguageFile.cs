@@ -2,7 +2,6 @@
 
 public class LanguageFile
 {
-
     public LanguageEbuSaveOptions EbuSaveOptions { get; set; } = new();
     public LanguageImport Import { get; set; } = new();
     public LanguageExport Export { get; set; } = new();
@@ -24,7 +23,7 @@ public class LanguageFile
     public string Statitics { get; set; }
     public string ShowOnlyDifferencesInText { get; set; }
     public string LoadXFromFile { get; set; }
-    public string SaveCompareHtmlTitle { get; internal set; }
+    public string SaveCompareHtmlTitle { get; set; }
     
     public LanguageFile()
     {

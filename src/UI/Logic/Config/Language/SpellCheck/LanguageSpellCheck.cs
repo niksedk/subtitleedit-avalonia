@@ -2,7 +2,7 @@
 
 public class LanguageSpellCheck
 {
-    public string? SpellCheck { get; internal set; }
+    public string SpellCheck { get; set; }
 
     public LanguageSpellCheck()
     {
