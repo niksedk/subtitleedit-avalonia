@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
-using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
+using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -30,10 +30,13 @@ public class PickFontNameWindow : Window
         var labelSearch = UiUtil.MakeLabel(Se.Language.General.Search);
         var textBoxSearch = new TextBox
         {
-            Width = 300,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Margin = new Thickness(0, 0, 0, 10),
+            Watermark = Se.Language.General.SearchFontNames,
+            Margin = new Thickness(10),
+            Width = 200,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
         };
+        textBoxSearch.Bind(TextBox.TextProperty, new Binding(nameof(vm.SearchText)) { Source = vm });
+        textBoxSearch.TextChanged += (s, e) => vm.SearchTextChanged();
         var panelSearch = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -46,9 +49,7 @@ public class PickFontNameWindow : Window
         };
 
         var fontsView = MakeFontsView(vm);
-
-        var imagePreview = new Image();
-        var borderPreview = UiUtil.MakeBorderForControl(imagePreview);
+        var previewView = MakePreviewView(vm);
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
@@ -59,7 +60,7 @@ public class PickFontNameWindow : Window
             RowDefinitions =
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(2, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
@@ -76,7 +77,7 @@ public class PickFontNameWindow : Window
 
         grid.Add(panelSearch, 0);
         grid.Add(fontsView, 1);
-        grid.Add(borderPreview, 2);
+        grid.Add(previewView, 2);
         grid.Add(buttonPanel, 3);
 
         Content = grid;
@@ -104,9 +105,9 @@ public class PickFontNameWindow : Window
                 {
                     Header = Se.Language.General.FontName,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(MatroskaTrackInfoDisplay.TrackNumber)),
+                    Binding = new Binding("."),
                     IsReadOnly = true,
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Star), 
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
             },
         };
@@ -114,6 +115,36 @@ public class PickFontNameWindow : Window
         dataGrid.SelectionChanged += vm.DataGridFontNameSelectionChanged;
 
         return UiUtil.MakeBorderForControlNoPadding(dataGrid);
+    }
+
+    private static Border MakePreviewView(PickFontNameViewModel vm)
+    {
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        var image = new Image
+        {
+            [!Image.SourceProperty] = new Binding(nameof(vm.ImagePreview)),
+            DataContext = vm,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Top,
+            Stretch = Stretch.Uniform,
+        };
+
+        grid.Add(image, 0);
+
+        return UiUtil.MakeBorderForControl(grid);
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

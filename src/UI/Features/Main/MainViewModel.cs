@@ -1844,7 +1844,7 @@ public partial class MainViewModel :
 
         if (result.OkPressed)
         {
-           // SetAlignmentToSelected(result.Alignment);
+            _fontNameService.SetFontName(selected, result.SelectedFontName, SelectedSubtitleFormat is AdvancedSubStationAlpha);
         }
 
         _shortcutManager.ClearKeys();
