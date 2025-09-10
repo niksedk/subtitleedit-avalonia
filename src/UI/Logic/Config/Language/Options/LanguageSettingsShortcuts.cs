@@ -117,6 +117,8 @@ public class LanguageSettingsShortcuts
     public string DuplicateSelectedLines { get; set; }
     public string SourceView { get; set; }
     public string ShowAlignmentPicker { get; set; }
+    public string AddOrEditBookmark { get; set; }
+    public string ListBookmarks { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -239,5 +241,7 @@ public class LanguageSettingsShortcuts
         DuplicateSelectedLines = "Duplicate selected lines";
         SourceView = "Source view";
         ShowAlignmentPicker = "Alignment";
+        AddOrEditBookmark = "Add or edit bookmark";
+        ListBookmarks = "List bookmarks";
     }
 }
