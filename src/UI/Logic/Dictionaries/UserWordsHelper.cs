@@ -83,7 +83,14 @@ public static class UserWordsHelper
     {
         words.Sort();
         var doc = new XmlDocument();
-        doc.Load(userWordFileName);
+        if (File.Exists(userWordFileName))
+        {
+            doc.Load(userWordFileName);
+        }
+        else
+        {
+            doc.LoadXml("<Words />");
+        }
 
         if (doc.DocumentElement == null)
         {
