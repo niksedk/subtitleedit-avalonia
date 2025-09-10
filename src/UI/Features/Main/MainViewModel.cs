@@ -1667,12 +1667,17 @@ public partial class MainViewModel :
             return;
         }
 
-        await _windowService.ShowDialogAsync<BookmarkEditWindow, BookmarkEditViewModel>(Window!, vm =>
+        var result = await _windowService.ShowDialogAsync<BookmarkEditWindow, BookmarkEditViewModel>(Window!, vm =>
         {
             var bookmark = selected.Bookmark;
             vm.Initialize(bookmark);
         });
-        ReloadShortcuts();
+
+        if (result.OkPressed)
+        {
+            selected.Bookmark = result.BookmarkText;
+        }   
+
         _shortcutManager.ClearKeys();
     }
 

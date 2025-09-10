@@ -335,6 +335,7 @@ public class LanguageGeneral
     public string ColorDotDotDot { get; set; }
     public string FontNameDotDotDot { get; set; }
     public string AlignmentDotDotDot { get; set; }
+    public string BookmarkDotDotDot { get; set; }
     public string BookmarkAdd { get; set; }
     public string BookmarkEdit { get; set; }
     public string BookmarksList { get; set; }
@@ -672,6 +673,7 @@ public class LanguageGeneral
         ColorDotDotDot = "Color...";
         FontNameDotDotDot = "Font name...";
         AlignmentDotDotDot = "Alignment...";
+        BookmarkDotDotDot = "Bookmark...";
         BookmarkAdd = "Add bookmark";
         BookmarkEdit = "Edit bookmark";
         BookmarksList = "List bookmarks";

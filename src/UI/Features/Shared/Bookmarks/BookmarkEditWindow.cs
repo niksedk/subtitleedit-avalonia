@@ -1,7 +1,9 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -14,24 +16,27 @@ public class BookmarkEditWindow : Window
     public BookmarkEditWindow(BookmarkEditViewModel vm)
     {
         UiUtil.InitializeWindow(this);
-        Title = Se.Language.Tools.ApplyDurationLimits.Title;
+        Bind(TitleProperty, new Avalonia.Data.Binding(nameof(vm.Title)));    
         CanResize = true;
-        Width = 900;
-        Height = 800;
-        MinWidth = 600;
-        MinHeight = 400;
+        Width = 600;
+        Height = 400;
+        MinWidth = 500;
+        MinHeight = 300;
 
         _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
-        var label = new Label
+        var textBox = new TextBox
         {
-            Content = Se.Language.Tools.AdjustDurations.AdjustVia,
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(10, 0, 0, 0),
+            VerticalAlignment = VerticalAlignment.Stretch,  
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            TextWrapping = TextWrapping.Wrap,
         };
+        textBox.Bind(TextBox.TextProperty, new Avalonia.Data.Binding(nameof(vm.BookmarkText)) { Mode = Avalonia.Data.BindingMode.TwoWay }); 
+        textBox.KeyDown += (sender, args) => vm.OnTextBoxKeyDown(args);
 
+        var buttonRemove = UiUtil.MakeButton(Se.Language.General.Remove, vm.DeleteCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
@@ -40,14 +45,11 @@ public class BookmarkEditWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
@@ -57,8 +59,8 @@ public class BookmarkEditWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(label, 0);
-        grid.Add(panelButtons, 3, 0, 1, 2);
+        grid.Add(textBox, 0);
+        grid.Add(panelButtons, 1);
 
         Content = grid;
 

@@ -2,19 +2,14 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Logic.Config;
-using System;
-using System.Collections.ObjectModel;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Bookmarks;
 
 public partial class BookmarkEditViewModel : ObservableObject
 {
     [ObservableProperty] private string _title;
-    [ObservableProperty] private string _bookmarkText;
-    [ObservableProperty] private ObservableCollection<AdjustDurationDisplay> _adjustTypes;
-    [ObservableProperty] private double _adjustRecalculateOptimalCharacterPerSecond;
+    [ObservableProperty] private string? _bookmarkText;
 
     public Window? Window { get; set; }
 
@@ -22,22 +17,21 @@ public partial class BookmarkEditViewModel : ObservableObject
 
     public BookmarkEditViewModel()
     {
-        LoadSettings();
-    }
-
-    private void LoadSettings()
-    {
-    }
-
-    private void SaveSettings()
-    {
-        Se.SaveSettings();
+        Title = string.Empty;
+        BookmarkText = string.Empty;
     }
 
     [RelayCommand]
     private void Ok()
     {
-        SaveSettings();
+        OkPressed = true;
+        Window?.Close();
+    }
+
+    [RelayCommand]
+    private void Delete()
+    {
+        BookmarkText = null;
         OkPressed = true;
         Window?.Close();
     }
@@ -61,5 +55,9 @@ public partial class BookmarkEditViewModel : ObservableObject
     {
         Title = bookmark == null ? Se.Language.General.BookmarkAdd : Se.Language.General.BookmarkEdit;
         BookmarkText = bookmark ?? string.Empty;
+    }
+
+    internal void OnTextBoxKeyDown(KeyEventArgs args)
+    {
     }
 }

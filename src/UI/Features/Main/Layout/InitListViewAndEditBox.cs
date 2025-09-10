@@ -510,6 +510,15 @@ public static class InitListViewAndEditBox
         alignmentMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
         flyout.Items.Add(alignmentMenuItem);
 
+        var bookmarkMenuItem = new MenuItem
+        {
+            Header = Se.Language.General.BookmarkDotDotDot,
+            Command = vm.AddOrEditBookmarkCommand,
+            DataContext = vm,
+        };
+        bookmarkMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        flyout.Items.Add(bookmarkMenuItem);
+
         // Set the ContextFlyout property
         vm.SubtitleGrid.ContextFlyout = flyout;
         vm.SubtitleGrid.AddHandler(InputElement.PointerPressedEvent, vm.SubtitleGrid_PointerPressed, RoutingStrategies.Tunnel);
@@ -732,9 +741,6 @@ public static class InitListViewAndEditBox
         var menuItemTextBoxColor = new MenuItem { Header = Se.Language.General.Color };
         menuItemTextBoxColor.Command = vm.TextBoxColorCommand;
         flyoutTextBox.Items.Add(menuItemTextBoxColor);
-
-
-
 
         flyoutTextBox.Items.Add(new Separator());
 
