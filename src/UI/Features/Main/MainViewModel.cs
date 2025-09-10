@@ -1676,7 +1676,46 @@ public partial class MainViewModel :
         if (result.OkPressed)
         {
             selected.Bookmark = result.BookmarkText;
-        }   
+            new BookmarkPersistence(GetUpdateSubtitle(), _subtitleFileName).Save();
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ListBookmarks()
+    {
+        var selected = SelectedSubtitle;
+        if (selected == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<BookmarksListWindow, BookmarksListViewModel>(Window!, vm =>
+        {
+            vm.Initialize(Subtitles.Where(p => p.Bookmark != null).ToList());
+        });
+
+        if (result.OkPressed)
+        {
+            //selected.Bookmark = result.BookmarkText;
+            //new BookmarkPersistence(GetUpdateSubtitle(), _subtitleFileName).Save();
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private void RemoveBookmark()
+    {
+        var selected = SelectedSubtitle;
+        if (selected == null)
+        {
+            return;
+        }
+
+        selected.Bookmark = null;
+        new BookmarkPersistence(GetUpdateSubtitle(), _subtitleFileName).Save();
 
         _shortcutManager.ClearKeys();
     }
@@ -3247,6 +3286,7 @@ public partial class MainViewModel :
                     Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
                     ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
                     SelectAndScrollToRow(0);
+                    LoadBookmarks();
                     _converted = true;
                     return;
                 }
@@ -3283,6 +3323,7 @@ public partial class MainViewModel :
             SetSubtitles(_subtitle);
             _changeSubtitleHash = GetFastHash();
             ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
+            LoadBookmarks();
 
             if (selectedSubtitleIndex != null)
             {
@@ -3312,6 +3353,16 @@ public partial class MainViewModel :
             _undoRedoManager.Do(MakeUndoRedoObject(string.Format(Se.Language.General.SubtitleLoadedX, fileName)));
             _undoRedoManager.StartChangeDetection();
             _opening = false;
+        }
+    }
+
+    private void LoadBookmarks()
+    {
+        var sub = GetUpdateSubtitle();
+        new BookmarkPersistence(sub, _subtitleFileName).Load();
+        for (var i = 0; i < Subtitles.Count && i < sub.Paragraphs.Count; i++)
+        {
+            Subtitles[i].Bookmark = sub.Paragraphs[i].Bookmark;
         }
     }
 
@@ -4266,6 +4317,7 @@ public partial class MainViewModel :
                 Language = line.Language,
                 Region = line.Region,
                 Layer = line.Layer,
+                Bookmark = line.Bookmark,
             };
 
             if (IsFormatAssa)

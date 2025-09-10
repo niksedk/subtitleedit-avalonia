@@ -2,16 +2,18 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
-using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Logic;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Bookmarks;
 
 public partial class BookmarksListViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<AdjustDurationDisplay> _adjustTypes;
-    [ObservableProperty] private double _adjustRecalculateOptimalCharacterPerSecond;
+    [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _subtitles;
+    [ObservableProperty] private SubtitleLineViewModel? _selectedSubtitle;
 
     public Window? Window { get; set; }
 
@@ -19,24 +21,19 @@ public partial class BookmarksListViewModel : ObservableObject
 
     public BookmarksListViewModel()
     {
-        LoadSettings();
-    }
-
-    private void LoadSettings()
-    {
-    }
-
-    private void SaveSettings()
-    {
-        Se.SaveSettings();
+        Subtitles = new ObservableCollection<SubtitleLineViewModel>();
     }
 
     [RelayCommand]
     private void Ok()
     {
-        SaveSettings();
         OkPressed = true;
         Window?.Close();
+    }
+
+    [RelayCommand]
+    private void DeleteSelectedLine()
+    {
     }
 
     [RelayCommand]
@@ -52,5 +49,18 @@ public partial class BookmarksListViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+    }
+
+    internal void Initialize(List<SubtitleLineViewModel> subtitleLineViewModels)
+    {
+        Subtitles.AddRange(subtitleLineViewModels);
+    }
+
+    internal void GridSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+    }
+
+    internal void OnBookmarksGridDoubleTapped(object? sender, TappedEventArgs e)
+    {
     }
 }

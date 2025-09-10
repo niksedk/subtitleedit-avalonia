@@ -74,4 +74,5 @@ internal class IconNames
     public const string ArrowUpDownBold = "mdi-arrow-up-down-bold";
     public const string Italic = "mdi-format-italic";
     public const string Bold = "mdi-format-bold";
+    public const string Bookmark = "mdi-bookmark";
 }

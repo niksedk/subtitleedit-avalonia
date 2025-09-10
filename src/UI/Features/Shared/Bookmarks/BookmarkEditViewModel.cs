@@ -10,6 +10,7 @@ public partial class BookmarkEditViewModel : ObservableObject
 {
     [ObservableProperty] private string _title;
     [ObservableProperty] private string? _bookmarkText;
+    [ObservableProperty] private bool _showRemoveButton;
 
     public Window? Window { get; set; }
 
@@ -55,9 +56,15 @@ public partial class BookmarkEditViewModel : ObservableObject
     {
         Title = bookmark == null ? Se.Language.General.BookmarkAdd : Se.Language.General.BookmarkEdit;
         BookmarkText = bookmark ?? string.Empty;
+        ShowRemoveButton = bookmark != null;
     }
 
     internal void OnTextBoxKeyDown(KeyEventArgs args)
     {
+        if (args.Key == Key.Enter)
+        {
+            args.Handled = true;
+            Ok();
+        }
     }
 }

@@ -36,10 +36,10 @@ public class BookmarkEditWindow : Window
         textBox.Bind(TextBox.TextProperty, new Avalonia.Data.Binding(nameof(vm.BookmarkText)) { Mode = Avalonia.Data.BindingMode.TwoWay }); 
         textBox.KeyDown += (sender, args) => vm.OnTextBoxKeyDown(args);
 
-        var buttonRemove = UiUtil.MakeButton(Se.Language.General.Remove, vm.DeleteCommand);
+        var buttonRemove = UiUtil.MakeButton(Se.Language.General.Remove, vm.DeleteCommand).WithBindIsVisible(nameof(vm.ShowRemoveButton));
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
+        var panelButtons = UiUtil.MakeButtonBar(buttonRemove, buttonOk, buttonCancel);
 
         var grid = new Grid
         {
@@ -64,9 +64,8 @@ public class BookmarkEditWindow : Window
 
         Content = grid;
 
-        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        Activated += delegate { textBox.Focus(); }; // hack to make OnKeyDown work
     }
-
 
     protected override void OnKeyDown(KeyEventArgs e)
     {

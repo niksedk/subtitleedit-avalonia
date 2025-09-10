@@ -440,7 +440,7 @@ public partial class WordListsViewModel : ObservableObject
         if (e.Key == Key.Enter)
         {
             e.Handled = true;
-            AddName();
+            using var _ = AddName();
         }
     }
 
@@ -449,8 +449,8 @@ public partial class WordListsViewModel : ObservableObject
         if (e.Key == Key.Enter)
         {
             e.Handled = true;
-            AddWord();
-            AddName();
+            using var _ = AddWord();
+            using var _1 = AddName();
         }
     }
 
@@ -459,7 +459,7 @@ public partial class WordListsViewModel : ObservableObject
         if (e.Key == Key.Enter)
         {
             e.Handled = true;
-            AddOcrFix();
+            using var _ = AddOcrFix();
         }
     }
 }

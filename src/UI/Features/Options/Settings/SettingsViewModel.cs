@@ -108,6 +108,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<GridLinesVisibilityDisplay> _gridLinesVisibilities;
     [ObservableProperty] private GridLinesVisibilityDisplay _selectedGridLinesVisibility;
     [ObservableProperty] private Color _darkModeBackgroundColor;
+    [ObservableProperty] private Color _bookmarkColor;
 
     public ObservableCollection<FileTypeAssociationViewModel> FileTypeAssociations { get; set; } = new()
     {
@@ -234,6 +235,7 @@ public partial class SettingsViewModel : ObservableObject
         ShowHorizontalLineBelowToolbar = appearance.ShowHorizontalLineBelowToolbar;
         SelectedGridLinesVisibility = GridLinesVisibilities.FirstOrDefault(p => p.Type.ToString() == appearance.GridLinesAppearance) ?? GridLinesVisibilities[0];
         DarkModeBackgroundColor = appearance.DarkModeBackgroundColor.FromHexToColor();
+        BookmarkColor = appearance.BookmarkColor.FromHexToColor();
 
         WaveformDrawGridLines = Se.Settings.Waveform.DrawGridLines;
         WaveformCenterVideoPosition = Se.Settings.Waveform.CenterVideoPosition;
@@ -313,6 +315,7 @@ public partial class SettingsViewModel : ObservableObject
         appearance.SubtitleTextBoxCenterText = TextBoxCenterText;
         appearance.ShowHints = ShowButtonHints;
         appearance.DarkModeBackgroundColor = DarkModeBackgroundColor.FromColorToHex();
+        appearance.BookmarkColor = BookmarkColor.FromColorToHex();
         appearance.GridCompactMode = GridCompactMode;
         appearance.GridLinesAppearance = SelectedGridLinesVisibility.Type.ToString();
         appearance.ShowHorizontalLineAboveToolbar = ShowHorizontalLineAboveToolbar;

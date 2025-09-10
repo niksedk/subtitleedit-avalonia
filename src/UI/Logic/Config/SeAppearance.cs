@@ -12,6 +12,7 @@ public class SeAppearance
     public bool SubtitleTextBoxCenterText { get; set; }
     public bool ShowHints { get; set; }
     public bool GridCompactMode { get; set; }
+    public string BookmarkColor { get; set; }
     public string DarkModeBackgroundColor { get; set; }
     public string GridLinesAppearance { get; set; }
     public bool ShowHorizontalLineAboveToolbar { get; set; }
@@ -42,6 +43,7 @@ public class SeAppearance
         SubtitleTextBoxCenterText = false;
         GridLinesAppearance = DataGridGridLinesVisibility.None.ToString();
         DarkModeBackgroundColor = new Color(255, 33, 33, 33).FromColorToHex();
+        BookmarkColor = Colors.Gold.FromColorToHex();
         GridCompactMode = true;
 
         ToolbarShowFileNew = true;

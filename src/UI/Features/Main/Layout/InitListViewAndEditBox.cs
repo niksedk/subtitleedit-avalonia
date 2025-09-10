@@ -47,14 +47,31 @@ public static class InitListViewAndEditBox
         var shortTimeConverter = new TimeSpanToDisplayShortConverter();
         var doubleRoundedConverter = new DoubleToOneDecimalConverter();
 
-        // Columns
-        vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
+        vm.SubtitleGrid.Columns.Add(new DataGridTemplateColumn
         {
             Header = Se.Language.General.NumberSymbol,
-            Binding = new Binding(nameof(SubtitleLineViewModel.Number)),
             Width = new DataGridLength(50),
-            CellTheme = UiUtil.DataGridNoBorderCellTheme,
+            CellTemplate = new FuncDataTemplate<SubtitleLineViewModel>((value, namescope) =>
+                new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Children =
+                    {
+                         new Icon
+                         {
+                            Value = IconNames.Bookmark,
+                            Foreground = new SolidColorBrush(Se.Settings.Appearance.BookmarkColor.FromHexToColor()), 
+                            VerticalAlignment = VerticalAlignment.Center,
+                            [!Visual.IsVisibleProperty] = new Binding(nameof(SubtitleLineViewModel.Bookmark)) { Converter = new NotNullConverter() },                            
+                         },
+                         UiUtil.MakeLabel().WithBindText(value, new Binding(nameof(SubtitleLineViewModel.Number)))
+                    }
+                })
         });
+
+
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
             Header = Se.Language.General.Show,

@@ -75,6 +75,7 @@ public class LanguageSettings
     public string ResetSettingsDetail { get; set; }
     public string ShowHorizontalLineAboveToolbar { get; set; }
     public string ShowHorizontalLineBelowToolbar { get; set; }
+    public string BookmarkColor { get; set; }
 
     public LanguageSettings()
     {
@@ -148,6 +149,7 @@ public class LanguageSettings
         ResetSettingsDetail = "This will reset all settings to their default values.\n\nContinue?";
         ShowHorizontalLineAboveToolbar = "Show horizontal line above toolbar";
         ShowHorizontalLineBelowToolbar = "Show horizontal line below toolbar";
+        BookmarkColor = "Bookmark color";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

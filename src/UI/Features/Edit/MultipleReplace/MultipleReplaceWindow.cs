@@ -91,9 +91,7 @@ public class MultipleReplaceWindow : Window
         treeView[!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.Nodes));
         treeView[!TreeView.SelectedItemProperty] = new Binding(nameof(vm.SelectedNode));
 
-        var factory = new FuncTreeDataTemplate<RuleTreeNode>(
-            _ => true,
-            (node, _) =>
+        var factory = new FuncTreeDataTemplate<RuleTreeNode>(_ => true, (node, _) =>
             {
                 var checkBox = new CheckBox
                 {
