@@ -3,10 +3,13 @@
 public class LanguageSpellCheck
 {
     public string SpellCheck { get; set; }
+    public string? GetDictionariesTitle { get; set; }
+    public object GetDictionaryInstructions { get; set; }
 
     public LanguageSpellCheck()
     {
         SpellCheck = "Spell check";
-
+        GetDictionariesTitle = "Spell check - get dictionaries";
+        GetDictionaryInstructions = "Choose your language and click download";
     }
 }

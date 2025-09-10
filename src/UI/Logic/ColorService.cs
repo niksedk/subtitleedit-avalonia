@@ -111,14 +111,14 @@ public class ColorService : IColorService
         if (s.StartsWith("<font ", StringComparison.OrdinalIgnoreCase))
         {
             int end = s.IndexOf('>');
-            if (end > 0)    
+            if (end > 0)
             {
                 string f = s.Substring(0, end);
 
                 if (f.Contains(" face=", StringComparison.OrdinalIgnoreCase) && !f.Contains(" color=", StringComparison.OrdinalIgnoreCase))
                 {
                     var start = s.IndexOf(" face=", StringComparison.OrdinalIgnoreCase);
-                    s = s.Insert(start, string.Format(" color=\"{0}\"", color));
+                    s = s.Insert(start, string.Format(" color=\"{0}\"", ToHex(color)));
                     text = pre + s;
                     return text;
                 }
@@ -131,13 +131,18 @@ public class ColorService : IColorService
                         end = s.IndexOf('"', colorStart + 8);
                     }
 
-                    s = s.Substring(0, colorStart) + string.Format(" color=\"{0}", color) + s.Substring(end);
+                    s = s.Substring(0, colorStart) + string.Format(" color=\"{0}", ToHex(color)) + s.Substring(end);
                     text = pre + s;
                     return text;
                 }
             }
         }
 
-        return $"{pre}<font color=\"{color}\">{text}</font>";
+        return $"{pre}<font color=\"{ToHex(color)}\">{text}</font>";
+    }
+
+    private string ToHex(Color color)
+    {
+        return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
     }
 }

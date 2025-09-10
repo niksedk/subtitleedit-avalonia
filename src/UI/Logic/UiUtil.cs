@@ -1041,6 +1041,12 @@ public static class UiUtil
         return control;
     }
 
+    public static StackPanel WithSpacing(this StackPanel control, int spacing)
+    {
+        control.Spacing = spacing;
+        return control;
+    }
+
     public static StackPanel WithAlignmentTop(this StackPanel control)
     {
         control.VerticalAlignment = VerticalAlignment.Top;

@@ -162,8 +162,9 @@ public class MpvReloader : IMpvReloader
                 }
                 else
                 {
+                    mpvContext.SubRemove().Invoke();
                     File.WriteAllText(_mpvTextFileName, text);
-                    mpvContext.SubReload().Invoke();
+                    mpvContext.SubAdd(_mpvTextFileName).Invoke();
                 }
                 _mpvTextOld = text;
             }

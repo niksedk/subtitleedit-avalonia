@@ -37,7 +37,9 @@ using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Features.Options.Language;
 using Nikse.SubtitleEdit.Features.Options.Settings;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
+using Nikse.SubtitleEdit.Features.Options.WordLists;
 using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Shared.Bookmarks;
 using Nikse.SubtitleEdit.Features.Shared.Ocr;
 using Nikse.SubtitleEdit.Features.Shared.PickAlignment;
 using Nikse.SubtitleEdit.Features.Shared.PickColor;
@@ -167,6 +169,7 @@ public partial class MainViewModel :
     private bool _subtitleGridSelectionChangedSkip;
     private long _lastKeyPressedTicks;
     private bool _loading;
+    private bool _opening;
 
     private readonly IFileHelper _fileHelper;
     private readonly IFolderHelper _folderHelper;
@@ -1640,8 +1643,35 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task CommandShowSettingsShortcuts()
     {
-        await _windowService.ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(Window!,
-            vm => { vm.LoadShortCuts(this); });
+        await _windowService.ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(Window!, vm =>
+        {
+            vm.LoadShortCuts(this);
+        });
+        ReloadShortcuts();
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowWordLists()
+    {
+        var result = await _windowService.ShowDialogAsync<WordListsWindow, WordListsViewModel>(Window!);
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task AddOrEditBookmark()
+    {
+        var selected = SelectedSubtitle;
+        if (selected == null)
+        {
+            return;
+        }
+
+        await _windowService.ShowDialogAsync<BookmarkEditWindow, BookmarkEditViewModel>(Window!, vm =>
+        {
+            var bookmark = selected.Bookmark;
+            vm.Initialize(bookmark);
+        });
         ReloadShortcuts();
         _shortcutManager.ClearKeys();
     }
@@ -2358,7 +2388,7 @@ public partial class MainViewModel :
 
         var isAssa = SelectedSubtitleFormat is AdvancedSubStationAlpha;
         var isWebVtt = SelectedSubtitleFormat is WebVTT;
-        if (selectionLength == 0)
+        if (selectionLength == 0 || selectionLength == tb.Text.Length)
         {
             tb.Text = _colorService.SetColorTag(tb.Text, result.SelectedColor, isAssa, isWebVtt, GetUpdateSubtitle());
         }
@@ -2366,6 +2396,21 @@ public partial class MainViewModel :
         {
             var selectedText = tb.Text.Substring(selectionStart, selectionLength);
             selectedText = _colorService.SetColorTag(selectedText, result.SelectedColor, isAssa, isWebVtt, GetUpdateSubtitle());
+
+            if (isAssa) // close color tag (display normal style color)
+            {
+                var closeTag = "{\\c&HFFFFFF&}"; // white color
+                var styleName = SelectedSubtitle?.Style;
+                if (_subtitle != null && _subtitle.Header != null && styleName != null)
+                {
+                    var style = AdvancedSubStationAlpha.GetSsaStyle(styleName, _subtitle.Header);
+                    var endColor = _colorService.SetColorTag("x", style.Primary.ToAvaloniaColor(), true, false, _subtitle);
+                    closeTag = endColor.TrimEnd('x');
+                }
+
+                selectedText += closeTag;
+            }
+
             tb.Text = tb.Text
                 .Remove(selectionStart, selectionLength)
                 .Insert(selectionStart, selectedText);
@@ -3108,6 +3153,8 @@ public partial class MainViewModel :
 
         try
         {
+            _opening = true;
+
             if (FileUtil.IsMatroskaFileFast(fileName) && FileUtil.IsMatroskaFile(fileName))
             {
                 await ImportSubtitleFromMatroskaFile(fileName, videoFileName);
@@ -3259,6 +3306,7 @@ public partial class MainViewModel :
         {
             _undoRedoManager.Do(MakeUndoRedoObject(string.Format(Se.Language.General.SubtitleLoadedX, fileName)));
             _undoRedoManager.StartChangeDetection();
+            _opening = false;
         }
     }
 
@@ -5918,5 +5966,54 @@ public partial class MainViewModel :
         IsFormatAssa = SelectedSubtitleFormat is AdvancedSubStationAlpha;
         HasFormatStyle = SelectedSubtitleFormat is AdvancedSubStationAlpha;
         AutoFitColumns();
+
+        if (!_opening && e.RemovedItems.Count == 1 && e.AddedItems.Count == 1)
+        {
+            var oldFormat = e.RemovedItems[0] as SubtitleFormat;
+            var format = e.AddedItems[0] as SubtitleFormat;
+
+            if (oldFormat != null && format != null)
+            {
+                _subtitle = GetUpdateSubtitle();
+
+                oldFormat.RemoveNativeFormatting(_subtitle, format);
+
+                if (format is AdvancedSubStationAlpha)
+                {
+                    if (oldFormat is WebVTT || oldFormat is WebVTTFileWithLineNumber)
+                    {
+                        //                        _subtitle = WebVttToAssa.Convert(_subtitle, new SsaStyle(), VideoPlayerControl?.VideoPlayerInstance?.Width ?? 0, VideoPlayerControl?.VideoPlayerInstance?.Height ?? 0);
+                    }
+
+                    foreach (var p in _subtitle.Paragraphs)
+                    {
+                        p.Text = AdvancedSubStationAlpha.FormatText(p.Text);
+                    }
+
+                    if (oldFormat is SubStationAlpha)
+                    {
+                        if (_subtitle.Header != null && !_subtitle.Header.Contains("[V4+ Styles]"))
+                        {
+                            _subtitle.Header = AdvancedSubStationAlpha.GetHeaderAndStylesFromSubStationAlpha(_subtitle.Header);
+                            foreach (var p in _subtitle.Paragraphs)
+                            {
+                                if (p.Extra != null)
+                                {
+                                    p.Extra = p.Extra.TrimStart('*');
+                                }
+                            }
+                        }
+                    }
+                    else if (oldFormat is AdvancedSubStationAlpha && string.IsNullOrEmpty(_subtitle.Header))
+                    {
+                        _subtitle.Header = AdvancedSubStationAlpha.DefaultHeader;
+                    }
+
+                    //SetAssaResolutionWithChecks();
+                }
+
+                SetSubtitles(_subtitle);
+            }
+        }
     }
 }

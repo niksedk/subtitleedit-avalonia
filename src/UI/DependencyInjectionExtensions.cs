@@ -19,7 +19,9 @@ using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Features.Options.Language;
 using Nikse.SubtitleEdit.Features.Options.Settings;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
+using Nikse.SubtitleEdit.Features.Options.WordLists;
 using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Shared.Bookmarks;
 using Nikse.SubtitleEdit.Features.Shared.FindText;
 using Nikse.SubtitleEdit.Features.Shared.Ocr;
 using Nikse.SubtitleEdit.Features.Shared.Ocr.NOcr;
@@ -124,6 +126,8 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<BatchConvertSettingsViewModel>();
         collection.AddTransient<BatchConvertViewModel>();
         collection.AddTransient<BlankVideoViewModel>();
+        collection.AddTransient<BookmarkEditViewModel>();
+        collection.AddTransient<BookmarksListViewModel>();
         collection.AddTransient<BridgeGapsViewModel>();
         collection.AddTransient<BurnInEffectViewModel>();
         collection.AddTransient<BurnInResolutionPickerViewModel>();
@@ -210,5 +214,6 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<VoiceSettingsViewModel>();
         collection.AddTransient<WhisperAdvancedViewModel>();
         collection.AddTransient<WhisperPostProcessingViewModel>();
+        collection.AddTransient<WordListsViewModel>();
     }
 }

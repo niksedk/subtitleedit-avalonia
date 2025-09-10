@@ -426,6 +426,19 @@ public static class InitMenu
 
         menu.Items.Add(new MenuItem
         {
+            Header = l.Translate,
+            Items =
+            {
+                new MenuItem
+                {
+                    Header = l.AutoTranslate,
+                    Command = vm.CommandShowAutoTranslateCommand,
+                },
+            }
+        });
+
+        menu.Items.Add(new MenuItem
+        {
             Header = l.Options,
             Items =
             {
@@ -441,24 +454,16 @@ public static class InitMenu
                 },
                 new MenuItem
                 {
+                    Header = l.WordLists,
+                    Command = vm.ShowWordListsCommand,
+                },
+                new MenuItem
+                {
                     Header = l.ChooseLanguage,
                     Command = vm.CommandShowSettingsLanguageCommand,
                 },
             },
-        });
-
-        menu.Items.Add(new MenuItem
-        {
-            Header = l.Translate,
-            Items =
-            {
-                new MenuItem
-                {
-                    Header = l.AutoTranslate,
-                    Command = vm.CommandShowAutoTranslateCommand,
-                },
-            }
-        });
+        });      
 
         menu.Items.Add(new MenuItem
         {

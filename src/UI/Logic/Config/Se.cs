@@ -20,6 +20,7 @@ public class Se
     public SeFile File { get; set; } = new();
     public SeEdit Edit { get; set; } = new();
     public SeTools Tools { get; set; } = new();
+    public SeOptions Options { get; set; } = new();
     public SeAutoTranslate AutoTranslate { get; set; } = new();
     public SeSync Synchronization { get; set; } = new();
     public SeSpellCheck SpellCheck { get; set; } = new();

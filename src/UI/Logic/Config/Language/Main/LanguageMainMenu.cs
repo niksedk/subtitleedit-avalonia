@@ -71,8 +71,8 @@ public class LanguageMainMenu
     public string Options { get; set; }
     public string Settings { get; set; }
     public string Shortcuts { get; set; }
-    public string ChooseLanguage { get; set; }
     public string WordLists { get; set; }
+    public string ChooseLanguage { get; set; }
 
     public string Translate { get; set; }
     public string AutoTranslate { get; set; }
@@ -150,8 +150,8 @@ public class LanguageMainMenu
         Options = "_Options";
         Settings = "_Settings...";
         Shortcuts = "S_hortcuts...";
-        ChooseLanguage = "_Choose language...";
         WordLists = "_Word lists...";
+        ChooseLanguage = "_Choose language...";
 
         Translate = "Tr_anslate";
         AutoTranslate = "_Auto-translate...";

@@ -335,6 +335,10 @@ public class LanguageGeneral
     public string ColorDotDotDot { get; set; }
     public string FontNameDotDotDot { get; set; }
     public string AlignmentDotDotDot { get; set; }
+    public string BookmarkAdd { get; set; }
+    public string BookmarkEdit { get; set; }
+    public string BookmarksList { get; set; }
+    public string OpenDictionaryFolder { get; set; }
 
     public LanguageGeneral()
     {
@@ -668,5 +672,9 @@ public class LanguageGeneral
         ColorDotDotDot = "Color...";
         FontNameDotDotDot = "Font name...";
         AlignmentDotDotDot = "Alignment...";
+        BookmarkAdd = "Add bookmark";
+        BookmarkEdit = "Edit bookmark";
+        BookmarksList = "List bookmarks";
+        OpenDictionaryFolder = "Open dictionary folder";
     }
 }

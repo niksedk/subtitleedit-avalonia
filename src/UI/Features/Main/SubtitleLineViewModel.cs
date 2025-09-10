@@ -14,6 +14,9 @@ public partial class SubtitleLineViewModel : ObservableObject
     private int _number;
 
     [ObservableProperty]
+    private string? _bookmark;
+
+    [ObservableProperty]
     private TimeSpan _startTime;
 
     [ObservableProperty]

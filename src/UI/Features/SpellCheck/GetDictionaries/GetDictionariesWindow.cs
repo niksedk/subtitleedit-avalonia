@@ -6,6 +6,7 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
 
@@ -16,7 +17,7 @@ public class GetDictionariesWindow : Window
     public GetDictionariesWindow(GetDictionariesViewModel vm)
     {
         UiUtil.InitializeWindow(this);
-        Title = "Spell check - get dictionaries";
+        Title = Se.Language.SpellCheck.GetDictionariesTitle;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 
@@ -26,7 +27,7 @@ public class GetDictionariesWindow : Window
 
         var label = new Label
         {
-            Content = "Choose your language and click download",
+            Content = Se.Language.SpellCheck.GetDictionaryInstructions,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 10, 0, 0),
         };
@@ -42,7 +43,7 @@ public class GetDictionariesWindow : Window
         };
 
         var buttonDownload = UiUtil
-            .MakeButton("Download", vm.DownloadCommand)
+            .MakeButton(Se.Language.General.Download, vm.DownloadCommand)
             .WithLeftAlignment()
             .WithMargin(0, 10, 10, 2)
             .WithBindEnabled(nameof(vm.IsDownloadEnabled));
@@ -104,7 +105,7 @@ public class GetDictionariesWindow : Window
             [!Label.IsVisibleProperty] = new Binding(nameof(vm.IsProgressVisible)),
         };
 
-        var linkOpenFolder = UiUtil.MakeLink("Open dictionary folder", vm.OpenFolderCommand);
+        var linkOpenFolder = UiUtil.MakeLink(Se.Language.General.OpenDictionaryFolder, vm.OpenFolderCommand);
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         buttonOk.WithBindIsVisible(nameof(vm.IsDownloadEnabled));
