@@ -637,22 +637,37 @@ public static class InitListViewAndEditBox
 
         var bookmarkIcon = new Icon
         {
+            DataContext = vm,
             Value = IconNames.Bookmark,
             Foreground = new SolidColorBrush(Se.Settings.Appearance.BookmarkColor.FromHexToColor()),
             VerticalAlignment = VerticalAlignment.Center,
-            [!Visual.IsVisibleProperty] = new Binding(nameof(SubtitleLineViewModel.Bookmark))
-                { Converter = new NotNullConverter() },
+            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.SelectedSubtitle) + "." + nameof(SubtitleLineViewModel.Bookmark)) { Converter = new NotNullConverter() },
+            Margin = new Thickness(6, 0, 0, 0),
         };
 
         var bookmarkLabel = new Label
         {
-            [!Label.ContentProperty] = new Binding(nameof(SubtitleLineViewModel.Bookmark))
-                { Converter = new NotNullConverter() },
-            [!Visual.IsVisibleProperty] = new Binding(nameof(SubtitleLineViewModel.Bookmark))
-                { Converter = new NotNullConverter() },
+            DataContext = vm,
+            Foreground = new SolidColorBrush(Se.Settings.Appearance.BookmarkColor.FromHexToColor()),
+            [!Label.ContentProperty] = new Binding(nameof(vm.SelectedSubtitle) + "." + nameof(SubtitleLineViewModel.Bookmark)) { Converter = new TextOneLineShortConverter() },
+            [!Label.IsVisibleProperty] = new Binding(nameof(vm.SelectedSubtitle) + "." + nameof(SubtitleLineViewModel.Bookmark)) { Converter = new NotNullConverter() },
         };
-        
-        textEditGrid.Children.Add(textLabel);
+
+        var panelForTextLabel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            Children =
+            {
+                textLabel,
+                bookmarkIcon,
+                bookmarkLabel,
+            }
+        };
+
+
+        textEditGrid.Children.Add(panelForTextLabel);
 
         var textCharsSecLabel = new TextBlock
         {
