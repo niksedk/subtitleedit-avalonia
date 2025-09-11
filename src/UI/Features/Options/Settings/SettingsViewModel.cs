@@ -54,6 +54,8 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<TextEncoding> _encodings;
     [ObservableProperty] private TextEncoding _defaultEncoding;
 
+    [ObservableProperty] private bool _goToLineNumberAlsoSetVideoPosition;
+
     [ObservableProperty] private bool _showToolbarNew;
     [ObservableProperty] private bool _showToolbarOpen;
     [ObservableProperty] private bool _showToolbarSave;
@@ -213,6 +215,8 @@ public partial class SettingsViewModel : ObservableObject
             SelectedDefaultSubtitleFormat = DefaultSubtitleFormats.FirstOrDefault() ?? string.Empty;
         }
 
+        GoToLineNumberAlsoSetVideoPosition = Se.Settings.Tools.GoToLineNumberAlsoSetVideoPosition;
+
         SelectedTheme = appearance.Theme;
         SelectedFontName = FontNames.FirstOrDefault(p => p == appearance.FontName) ?? FontNames.First();
         ShowToolbarNew = appearance.ToolbarShowFileNew;
@@ -294,6 +298,8 @@ public partial class SettingsViewModel : ObservableObject
         general.AutoBackupDeleteAfterMonths = AutoBackupDeleteAfterMonths;
         general.DefaultEncoding = DefaultEncoding?.DisplayName ?? Encodings.First().DisplayName;
         general.DefaultSubtitleFormat = SelectedDefaultSubtitleFormat;
+
+        Se.Settings.Tools.GoToLineNumberAlsoSetVideoPosition = GoToLineNumberAlsoSetVideoPosition;
 
         appearance.Theme = SelectedTheme;
         appearance.FontName = SelectedFontName == FontNames.First()

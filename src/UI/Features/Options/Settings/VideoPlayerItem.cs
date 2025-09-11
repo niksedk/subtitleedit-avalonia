@@ -24,10 +24,10 @@ public partial class VideoPlayerItem : ObservableObject
 
         list.Add(new VideoPlayerItem { Name = "mpv" });
 
-        if (OperatingSystem.IsWindows())
-        {
-            list.Add(new VideoPlayerItem { Name = "vlc" });
-        }
+        //if (OperatingSystem.IsWindows())
+        //{
+        //    list.Add(new VideoPlayerItem { Name = "vlc" });
+        //}
 
         return list;
     }

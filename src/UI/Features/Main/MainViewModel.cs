@@ -2236,9 +2236,19 @@ public partial class MainViewModel :
 
         var viewModel = await _windowService.ShowDialogAsync<GoToLineNumberWindow, GoToLineNumberViewModel>(Window!,
             vm => { vm.MaxLineNumber = Subtitles.Count; });
+
         if (viewModel is { OkPressed: true, LineNumber: >= 0 } && viewModel.LineNumber <= Subtitles.Count)
         {
             SelectAndScrollToRow(viewModel.LineNumber - 1);
+            if (Se.Settings.Tools.GoToLineNumberAlsoSetVideoPosition && !string.IsNullOrEmpty(_videoFileName) && VideoPlayerControl != null)
+            {
+                var s = Subtitles.GetOrNull(viewModel.LineNumber - 1);
+                if (s != null)
+                {
+                    VideoPlayerControl.Position = s.StartTime.TotalSeconds;
+                    _updateAudioVisualizer = true;
+                }
+            }
         }
 
         _shortcutManager.ClearKeys();

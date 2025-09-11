@@ -4,6 +4,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
 
@@ -14,7 +15,7 @@ public class GoToLineNumberWindow : Window
     public GoToLineNumberWindow(GoToLineNumberViewModel vm)
     {
         UiUtil.InitializeWindow(this);
-        Title = "Go to line number";
+        Title = Se.Language.General.GoToLineNumber;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 
@@ -39,6 +40,7 @@ public class GoToLineNumberWindow : Window
             Increment = 1,          // Only step in whole numbers
             FormatString = "F0",    // Show 0 decimal places
         };
+        vm.UpDown.KeyDown += (sender, args) => vm.OnKeyDown(args);  
 
         var panel = new StackPanel
         {
@@ -49,7 +51,7 @@ public class GoToLineNumberWindow : Window
             {
                 new Label
                 {
-                    Content = "Go to line number",
+                    Content = Se.Language.General.GoToLineNumber,
                     VerticalAlignment = VerticalAlignment.Center,
                 },
                 vm.UpDown,

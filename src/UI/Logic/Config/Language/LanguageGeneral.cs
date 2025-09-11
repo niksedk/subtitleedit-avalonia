@@ -5,6 +5,7 @@ namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
 public class LanguageGeneral
 {
+    
     public string Actor { get; set; }
     public string Actors { get; set; }
     public string Advanced { get; set; }
@@ -344,6 +345,7 @@ public class LanguageGeneral
     public string BookmarkDeleteSelectedQuestion { get; set; }
     public string BookmarkClearQuestion { get; set; }
     public string NothingFound { get; set; }
+    public string GoToLineNumber { get; set; }
 
     public LanguageGeneral()
     {
@@ -686,5 +688,6 @@ public class LanguageGeneral
         BookmarkDeleteSelectedQuestion= "Delete selected bookmark?";
         BookmarkClearQuestion = "Clear all bookmarks?";
         NothingFound = "Nothing found";
+        GoToLineNumber = "Go to line number";
     }
 }

@@ -29,6 +29,7 @@ public class SeTools
     public bool SplitByTime { get; set; }
     public string SplitSubtitleFormat { get; set; }
     public string? SplitSubtitleEncoding { get; set; }
+    public bool GoToLineNumberAlsoSetVideoPosition { get; set; }
 
     public SeTools()
     {
@@ -42,5 +43,6 @@ public class SeTools
         SplitByLines = true;
         SplitOutputFolder = string.Empty;
         SplitSubtitleFormat = new SubRip().Name;
+        GoToLineNumberAlsoSetVideoPosition = true;
     }
 }

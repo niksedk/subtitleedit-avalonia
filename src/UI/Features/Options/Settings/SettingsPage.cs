@@ -155,27 +155,27 @@ public class SettingsPage : UserControl
         {
             new SettingsSection(Se.Language.General.Rules,
             [
-                MakeNumericSettingInt("Single line max length", nameof(_vm.SingleLineMaxLength)),
-                MakeNumericSetting("Optimal chars/sec", nameof(_vm.OptimalCharsPerSec)),
-                MakeNumericSetting("Max chars/sec", nameof(_vm.MaxCharsPerSec)),
-                MakeNumericSetting("Max words/min", nameof(_vm.MaxWordsPerMin)),
-                MakeNumericSettingInt("Min duration (ms)", nameof(_vm.MinDurationMs)),
-                MakeNumericSettingInt("Max duration (ms)", nameof(_vm.MaxDurationMs)),
-                MakeNumericSettingInt("Min gap (ms)", nameof(_vm.MinGapMs)),
-                MakeNumericSettingInt("Max number of lines", nameof(_vm.MaxLines)),
+                MakeNumericSettingInt(Se.Language.Options.Settings.SingleLineMaxLength, nameof(_vm.SingleLineMaxLength)),
+                MakeNumericSetting(Se.Language.Options.Settings.OptimalCharsPerSec, nameof(_vm.OptimalCharsPerSec)),
+                MakeNumericSetting(Se.Language.Options.Settings.MaxCharsPerSec, nameof(_vm.MaxCharsPerSec)),
+                MakeNumericSetting(Se.Language.Options.Settings.MaxWordsPerMin, nameof(_vm.MaxWordsPerMin)),
+                MakeNumericSettingInt(Se.Language.Options.Settings.MinDurationMs, nameof(_vm.MinDurationMs)),
+                MakeNumericSettingInt(Se.Language.Options.Settings.MaxDurationMs, nameof(_vm.MaxDurationMs)),
+                MakeNumericSettingInt(Se.Language.Options.Settings.MinGapMs, nameof(_vm.MinGapMs)),
+                MakeNumericSettingInt(Se.Language.Options.Settings.MaxLines, nameof(_vm.MaxLines)),
             ]),
 
             new SettingsSection(Se.Language.General.General,
             [
-                MakeNumericSettingInt("Default new subtitle duration (ms)", nameof(_vm.NewEmptyDefaultMs)),
-                MakeCheckboxSetting("Prompt for delete lines", nameof(_vm.PromptDeleteLines)),
-                MakeCheckboxSetting("Lock time codes", nameof(_vm.LockTimeCodes)),
-                MakeCheckboxSetting("Remember window position and size", nameof(_vm.RememberPositionAndSize)),
+                MakeNumericSettingInt(Se.Language.Options.Settings.NewEmptyDefaultMs, nameof(_vm.NewEmptyDefaultMs)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.PromptDeleteLines, nameof(_vm.PromptDeleteLines)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.LockTimeCodes, nameof(_vm.LockTimeCodes)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.RememberPositionAndSize, nameof(_vm.RememberPositionAndSize)),
                 MakeSeparator(),
-                MakeCheckboxSetting("Auto-backup", nameof(_vm.AutoBackupOn)),
-                MakeNumericSettingInt("Auto-backup interval (minutes)", nameof(_vm.AutoBackupIntervalMinutes)),
-                MakeNumericSettingInt("Auto-backup retention (months)", nameof(_vm.AutoBackupDeleteAfterMonths)),
-                new SettingsItem("Default encoding", () => new ComboBox
+                MakeCheckboxSetting(Se.Language.Options.Settings.AutoBackupOn, nameof(_vm.AutoBackupOn)),
+                MakeNumericSettingInt(Se.Language.Options.Settings.AutoBackupIntervalMinutes, nameof(_vm.AutoBackupIntervalMinutes)),
+                MakeNumericSettingInt(Se.Language.Options.Settings.AutoBackupDeleteAfterMonths, nameof(_vm.AutoBackupDeleteAfterMonths)),
+                new SettingsItem(Se.Language.Options.Settings.DefaultEncoding, () => new ComboBox
                 {
                     Width = 200,
                     DataContext = _vm,
@@ -189,7 +189,7 @@ public class SettingsPage : UserControl
 
             new SettingsSection(Se.Language.General.SubtitleFormats,
             [
-                new SettingsItem("Default format", () => new ComboBox
+                new SettingsItem(Se.Language.Options.Settings.DefaultFormat, () => new ComboBox
                 {
                     Width = 200,
                     DataContext = _vm,
@@ -200,7 +200,7 @@ public class SettingsPage : UserControl
                         new TextBlock { Text = f?.Name }, true)
                 }),
 
-                new SettingsItem("Default save as format", () => new ComboBox
+                new SettingsItem(Se.Language.Options.Settings.DefaultSaveAsFormat, () => new ComboBox
                 {
                     Width = 200,
                     DataContext = _vm,
@@ -214,18 +214,18 @@ public class SettingsPage : UserControl
 
             new SettingsSection(Se.Language.Options.Settings.SyntaxColoring,
             [
-                MakeCheckboxSetting("Color duration if too short", nameof(_vm.ColorDurationTooShort)),
-                MakeCheckboxSetting("Color duration if too long", nameof(_vm.ColorDurationTooLong)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.ColorDurationTooShort, nameof(_vm.ColorDurationTooShort)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.ColorDurationTooLong, nameof(_vm.ColorDurationTooLong)),
                 MakeSeparator(),
-                MakeCheckboxSetting("Color text if too long", nameof(_vm.ColorTextTooLong)),
-                MakeCheckboxSetting("Color text if too wide (pixels)", nameof(_vm.ColorTextTooWide)),
-                MakeCheckboxSetting("Color text if more than 2 lines", nameof(_vm.ColorTextTooManyLines)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.ColorTextTooLong, nameof(_vm.ColorTextTooLong)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.ColorTextTooWide, nameof(_vm.ColorTextTooWide)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.ColorTextTooManyLines, nameof(_vm.ColorTextTooManyLines)),
                 MakeSeparator(),
-                MakeCheckboxSetting("Color time code overlap", nameof(_vm.ColorOverlap)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.ColorOverlap, nameof(_vm.ColorOverlap)),
                 MakeSeparator(),
-                MakeCheckboxSetting("Color if gap is too short", nameof(_vm.ColorGapTooShort)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.ColorGapTooShort, nameof(_vm.ColorGapTooShort)),
                 MakeSeparator(),
-                new SettingsItem("Error background color", () => new ColorPicker
+                new SettingsItem(Se.Language.Options.Settings.ErrorBackgroundColor, () => new ColorPicker()
                 {
                     Width = 200,
                     IsAlphaEnabled = true,
@@ -247,7 +247,7 @@ public class SettingsPage : UserControl
 
             new SettingsSection(Se.Language.General.VideoPlayer,
             [
-                new SettingsItem("Video player", () => new StackPanel
+                new SettingsItem(Se.Language.General.VideoPlayer, () => new StackPanel
                 {
                     Children =
                     {
@@ -268,10 +268,10 @@ public class SettingsPage : UserControl
                         }
                     }
                 }),
-                MakeCheckboxSetting("Show stop button", nameof(_vm.ShowStopButton)),
-                MakeCheckboxSetting("Show fullscreen button", nameof(_vm.ShowFullscreenButton)),
-                MakeCheckboxSetting("Auto-open video file when opening subtitle", nameof(_vm.AutoOpenVideoFile)),
-                new SettingsItem("Download mpv", () => new StackPanel
+                MakeCheckboxSetting(Se.Language.Options.Settings.ShowStopButton, nameof(_vm.ShowStopButton)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.ShowFullscreenButton, nameof(_vm.ShowFullscreenButton)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.AutoOpenVideoFile, nameof(_vm.AutoOpenVideoFile)),
+                new SettingsItem(Se.Language.Options.Settings.DownloadMpv, () => new StackPanel
                 {
                     Children =
                     {
@@ -281,7 +281,7 @@ public class SettingsPage : UserControl
                             Spacing = 10,
                             Children =
                             {
-                                UiUtil.MakeButton("Download", _vm.DownloadLibMpvCommand),
+                                UiUtil.MakeButton(Se.Language.General.Download, _vm.DownloadLibMpvCommand),
                                 new TextBlock
                                 {
                                     DataContext = _vm,
@@ -309,14 +309,14 @@ public class SettingsPage : UserControl
 
             new SettingsSection(Se.Language.Options.Settings.WaveformSpectrogram,
             [
-                MakeCheckboxSetting("Draw grid lines", nameof(_vm.WaveformDrawGridLines)),
-                MakeCheckboxSetting("Center video position", nameof(_vm.WaveformCenterVideoPosition)),
-                MakeCheckboxSetting("Show toolbar", nameof(_vm.WaveformShowToolbar)),
-                MakeCheckboxSetting("Focus text box after insert", nameof(_vm.WaveformFocusTextboxAfterInsertNew)),
-                MakeCheckboxSetting("Invert mouse-wheel", nameof(_vm.WaveformInvertMouseWheel)),
-                new SettingsItem("Waveform color", () => UiUtil.MakeColorPicker(_vm, nameof(_vm.WaveformColor))),
-                new SettingsItem("Waveform selected color", () => UiUtil.MakeColorPicker(_vm, nameof(_vm.WaveformSelectedColor))),
-                new SettingsItem("Download ffmpeg", () => new StackPanel
+                MakeCheckboxSetting(Se.Language.Options.Settings.WaveformDrawGridLines, nameof(_vm.WaveformDrawGridLines)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.WaveformCenterVideoPosition, nameof(_vm.WaveformCenterVideoPosition)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.WaveformShowToolbar, nameof(_vm.WaveformShowToolbar)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.WaveformFocusTextboxAfterInsertNew, nameof(_vm.WaveformFocusTextboxAfterInsertNew)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.WaveformInvertMouseWheel, nameof(_vm.WaveformInvertMouseWheel)),
+                new SettingsItem(Se.Language.Options.Settings.WaveformColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.WaveformColor))),
+                new SettingsItem(Se.Language.Options.Settings.WaveformSelectedColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.WaveformSelectedColor))),
+                new SettingsItem(Se.Language.Options.Settings.DownloadFfmpeg, () => new StackPanel
                 {
                     Children =
                     {
@@ -326,7 +326,7 @@ public class SettingsPage : UserControl
                             Spacing = 10,
                             Children =
                             {
-                                UiUtil.MakeButton("Download", _vm.DownloadFfmpegCommand),
+                                UiUtil.MakeButton(Se.Language.General.Download, _vm.DownloadFfmpegCommand),
                                 new TextBlock
                                 {
                                     DataContext = _vm,
@@ -352,7 +352,7 @@ public class SettingsPage : UserControl
 
             new SettingsSection(Se.Language.General.Tools,
             [
-                new SettingsItem("TODO", () => new CheckBox { IsChecked = false }),
+                MakeCheckboxSetting(Se.Language.Options.Settings.GoToLineNumberSetsVideoPosition, nameof(_vm.GoToLineNumberAlsoSetVideoPosition)),
             ]),
 
             new SettingsSection(Se.Language.General.Appearance,
@@ -371,31 +371,31 @@ public class SettingsPage : UserControl
                 MakeCheckboxSetting(Se.Language.Options.Settings.ShowHorizontalLineBelowToolbar, nameof(_vm.ShowHorizontalLineBelowToolbar)),
             ]),
 
-            new SettingsSection("Toolbar",
+           new SettingsSection(Se.Language.General.Toolbar,
             [
-                MakeCheckboxSetting("Show new icon", nameof(_vm.ShowToolbarNew)),
-                MakeCheckboxSetting("Show open icon", nameof(_vm.ShowToolbarOpen)),
-                MakeCheckboxSetting("Show save icon", nameof(_vm.ShowToolbarSave)),
-                MakeCheckboxSetting("Show save as icon", nameof(_vm.ShowToolbarSaveAs)),
-                MakeCheckboxSetting("Show find icon", nameof(_vm.ShowToolbarFind)),
-                MakeCheckboxSetting("Show replace icon", nameof(_vm.ShowToolbarReplace)),
-                MakeCheckboxSetting("Show spell check icon", nameof(_vm.ShowToolbarSpellCheck)),
-                MakeCheckboxSetting("Show settings icon", nameof(_vm.ShowToolbarSettings)),
-                MakeCheckboxSetting("Show layout icon", nameof(_vm.ShowToolbarLayout)),
-                MakeCheckboxSetting("Show help icon", nameof(_vm.ShowToolbarHelp)),
-                MakeCheckboxSetting("Show encoding", nameof(_vm.ShowToolbarEncoding)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarNew, nameof(_vm.ShowToolbarNew)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarOpen, nameof(_vm.ShowToolbarOpen)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarSave, nameof(_vm.ShowToolbarSave)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarSaveAs, nameof(_vm.ShowToolbarSaveAs)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarFind, nameof(_vm.ShowToolbarFind)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarReplace, nameof(_vm.ShowToolbarReplace)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarSpellCheck, nameof(_vm.ShowToolbarSpellCheck)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarSettings, nameof(_vm.ShowToolbarSettings)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarLayout, nameof(_vm.ShowToolbarLayout)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarHelp, nameof(_vm.ShowToolbarHelp)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarEncoding, nameof(_vm.ShowToolbarEncoding)),
             ]),
 
             new SettingsSection(Se.Language.Options.Settings.Network,
             [
-                new SettingsItem("Proxy address", () => new TextBox { Width = 250 }),
-                new SettingsItem("Username", () => new TextBox { Width = 250 }),
-                new SettingsItem("Password", () => new TextBox { Width = 250 }),
+                new SettingsItem(Se.Language.Options.Settings.ProxyAddress, () => new TextBox { Width = 250 }),
+                new SettingsItem(Se.Language.Options.Settings.Username, () => new TextBox { Width = 250 }),
+                new SettingsItem(Se.Language.Options.Settings.Password, () => new TextBox { Width = 250 }),
             ]),
 
             new SettingsSection(Se.Language.Options.Settings.FileTypeAssociations,
             [
-                new SettingsItem("Associate file types", () => new ItemsControl
+                new SettingsItem(string.Empty, () => new ItemsControl
                 {
                     DataContext = _vm,
                     [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.FileTypeAssociations)),
