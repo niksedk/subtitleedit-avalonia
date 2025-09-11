@@ -87,6 +87,7 @@ public class LanguageSettingsShortcuts
 
     public string EditFind { get; set; }
     public string EditFindNext { get; set; }
+    public string EditFindPrevious { get; set; }
     public string EditReplace { get; set; }
     public string EditMultipleReplace { get; set; }
     public string EditModifySelection { get; set; }
@@ -207,6 +208,7 @@ public class LanguageSettingsShortcuts
 
         EditFind = "Find";
         EditFindNext = "Find next";
+        EditFindPrevious = "Find previous";
         EditReplace = "Replace";
         EditMultipleReplace = "Multiple replace";
         EditModifySelection = "Modify selection";

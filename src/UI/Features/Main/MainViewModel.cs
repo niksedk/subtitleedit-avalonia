@@ -9,6 +9,7 @@ using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.BluRaySup;
+using Nikse.SubtitleEdit.Core.Cea708.Commands;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
@@ -90,6 +91,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static Nikse.SubtitleEdit.Logic.FindService;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -2165,20 +2167,55 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowFind()
     {
-        if (Subtitles.Count == 0)
+        var selectedSubtitle = SelectedSubtitle;
+        if (Subtitles.Count == 0 || selectedSubtitle == null)
         {
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<FindWindow, FindViewModel>(Window!, vm => { });
+        var subs = Subtitles.Select(p => p.Text).ToList();
+        var result = await _windowService.ShowDialogAsync<FindWindow, FindViewModel>(Window!, vm => 
+        {
+            vm.Initialize(_findService, subs);
+        });
 
         if (result.OkPressed && !string.IsNullOrEmpty(result.SearchText))
         {
-            _findService.Initialize(Subtitles.Select(p => p.Text).ToList(), SelectedSubtitleIndex ?? 0,
-                Se.Settings.Edit.Find.FindWholeWords, FindService.FindMode.CaseSensitive);
-            var idx = _findService.Find(result.SearchText);
-            SelectAndScrollToRow(idx);
-            ShowStatus($"'{_findService.SearchText}' found in line '{idx + 1}'");
+            var findMode = FindMode.CaseSensitive;
+            if (result.FindTypeCanseInsensitive)
+            {
+                findMode = FindMode.CaseInsensitive;
+            }
+            else if (result.FindTypeRegularExpression)
+            {
+                findMode = FindMode.RegularExpression;
+            }
+
+            var currentLineIndex = Subtitles.IndexOf(selectedSubtitle);
+            var currentCharIndex = EditTextBox.CaretIndex;
+            _findService.Initialize(subs, SelectedSubtitleIndex ?? 0, result.WholeWord, findMode);
+            var idx = _findService.Find(result.SearchText, subs, currentLineIndex, currentCharIndex);
+
+            if (idx < 0)
+            {
+                ShowStatus(Se.Language.General.NothingFound);
+                return;
+            }
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                SubtitleGrid.SelectedIndex = idx;
+                SubtitleGrid.ScrollIntoView(SubtitleGrid.SelectedItem, null);
+
+                ShowStatus(string.Format(Se.Language.General.FoundXInLineYZ, _findService.CurrentTextFound, _findService.CurrentLineNumber + 1, _findService.CurrentTextIndex + 1));
+
+                // wait for text box to update
+                Task.Delay(50);
+
+                EditTextBox.CaretIndex = _findService.CurrentTextIndex;
+                EditTextBox.SelectionStart = _findService.CurrentTextIndex;
+                EditTextBox.SelectionEnd = _findService.CurrentTextIndex + _findService.CurrentTextFound.Length;
+            });
         }
 
         _shortcutManager.ClearKeys();
@@ -2187,7 +2224,76 @@ public partial class MainViewModel :
     [RelayCommand]
     private void FindNext()
     {
+        var selectedSubtitle = SelectedSubtitle;
+        if (Subtitles.Count == 0 || selectedSubtitle == null)
+        {
+            return;
+        }
+
+        var subs = Subtitles.Select(p => p.Text).ToList();
+        var currentLineIndex = Subtitles.IndexOf(selectedSubtitle);
+        var currentCharIndex = EditTextBox.CaretIndex;
+        var idx = _findService.FindNext(_findService.SearchText, subs, currentLineIndex, currentCharIndex + 1);
+
+        if (idx < 0)
+        {
+            ShowStatus(Se.Language.General.NothingFound);
+            return;
+        }
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            SubtitleGrid.SelectedIndex = idx;
+            SubtitleGrid.ScrollIntoView(SubtitleGrid.SelectedItem, null);
+
+            ShowStatus(string.Format(Se.Language.General.FoundXInLineYZ, _findService.CurrentTextFound, _findService.CurrentLineNumber + 1, _findService.CurrentTextIndex + 1));
+
+            // wait for text box to update
+            Task.Delay(50);
+
+            EditTextBox.CaretIndex = _findService.CurrentTextIndex;
+            EditTextBox.SelectionStart = _findService.CurrentTextIndex;
+            EditTextBox.SelectionEnd = _findService.CurrentTextIndex + _findService.CurrentTextFound.Length;
+        });
+
+
         _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private void FindPrevious()
+    {
+        var selectedSubtitle = SelectedSubtitle;
+        if (Subtitles.Count == 0 || selectedSubtitle == null)
+        {
+            return;
+        }
+
+        var subs = Subtitles.Select(p => p.Text).ToList();
+        var currentLineIndex = Subtitles.IndexOf(selectedSubtitle);
+        var currentCharIndex = EditTextBox.CaretIndex;
+        var idx = _findService.FindPrevious(_findService.SearchText, subs, currentLineIndex, currentCharIndex - 1);
+
+        if (idx < 0)
+        {
+            ShowStatus(Se.Language.General.NothingFound);
+            return;
+        }
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            SubtitleGrid.SelectedIndex = idx;
+            SubtitleGrid.ScrollIntoView(SubtitleGrid.SelectedItem, null);
+
+            ShowStatus(string.Format(Se.Language.General.FoundXInLineYZ, _findService.CurrentTextFound, _findService.CurrentLineNumber + 1, _findService.CurrentTextIndex + 1));
+
+            // wait for text box to update
+            Task.Delay(50);
+
+            EditTextBox.CaretIndex = _findService.CurrentTextIndex;
+            EditTextBox.SelectionStart = _findService.CurrentTextIndex;
+            EditTextBox.SelectionEnd = _findService.CurrentTextIndex + _findService.CurrentTextFound.Length;
+        });
     }
 
     [RelayCommand]

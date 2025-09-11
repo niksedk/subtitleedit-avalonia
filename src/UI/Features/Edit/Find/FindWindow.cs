@@ -91,6 +91,13 @@ public class FindWindow : Window
             .WithMinWidth(150)
             .WithMargin(0, 0, 0, 10);
 
+        var textBlockCountResult = new TextBlock
+        {
+            [!TextBlock.TextProperty] = new Binding(nameof(vm.CountResult)) { Mode = BindingMode.OneWay },
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(10, 0, 0, 0)
+        };
+
         var panelButtons = new StackPanel
         {
             Orientation = Orientation.Vertical,
@@ -100,7 +107,8 @@ public class FindWindow : Window
             {
                 buttonFindPrevious,
                 buttonFindNext,
-                buttonCount
+                buttonCount,
+                textBlockCountResult
             }
         };  
 

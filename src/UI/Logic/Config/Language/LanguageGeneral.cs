@@ -5,7 +5,7 @@ namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
 public class LanguageGeneral
 {
-    
+
     public string Actor { get; set; }
     public string Actors { get; set; }
     public string Advanced { get; set; }
@@ -346,6 +346,10 @@ public class LanguageGeneral
     public string BookmarkClearQuestion { get; set; }
     public string NothingFound { get; set; }
     public string GoToLineNumber { get; set; }
+    public string FoundXInLineYZ { get; set; }
+    public string FoundXMatches { get; set; }
+    public string FoundOneMatch { get; set; }
+    public string FoundNoMatches { get; set; }
 
     public LanguageGeneral()
     {
@@ -685,9 +689,13 @@ public class LanguageGeneral
         BookmarksList = "List bookmarks";
         OpenDictionaryFolder = "Open dictionary folder";
         GoTo = "Go to";
-        BookmarkDeleteSelectedQuestion= "Delete selected bookmark?";
+        BookmarkDeleteSelectedQuestion = "Delete selected bookmark?";
         BookmarkClearQuestion = "Clear all bookmarks?";
         NothingFound = "Nothing found";
         GoToLineNumber = "Go to line number";
+        FoundXInLineYZ = "Found \"{0}\" in line {1}, position {2}";
+        FoundXMatches = "Found {0} matches";
+        FoundOneMatch = "Found one match";
+        FoundNoMatches = "Found no matches";
     }
 }
