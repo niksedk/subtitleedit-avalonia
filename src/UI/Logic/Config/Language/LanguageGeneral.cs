@@ -344,7 +344,7 @@ public class LanguageGeneral
     public string GoTo { get; set; }
     public string BookmarkDeleteSelectedQuestion { get; set; }
     public string BookmarkClearQuestion { get; set; }
-    public string NothingFound { get; set; }
+    public string XNotFound { get; set; }
     public string GoToLineNumber { get; set; }
     public string FoundXInLineYZ { get; set; }
     public string FoundXMatches { get; set; }
@@ -691,7 +691,7 @@ public class LanguageGeneral
         GoTo = "Go to";
         BookmarkDeleteSelectedQuestion = "Delete selected bookmark?";
         BookmarkClearQuestion = "Clear all bookmarks?";
-        NothingFound = "Nothing found";
+        XNotFound = "\"{0}\" not found";
         GoToLineNumber = "Go to line number";
         FoundXInLineYZ = "Found \"{0}\" in line {1}, position {2}";
         FoundXMatches = "Found {0} matches";

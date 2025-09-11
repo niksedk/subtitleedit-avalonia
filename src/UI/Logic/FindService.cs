@@ -28,26 +28,26 @@ public partial class FindService : IFindService
         ResetSearchState();
     }
 
-    public int Find(string searchText, List<string> textLines, int startLineIndex, int startTextIndex)
-    {
-        if (string.IsNullOrEmpty(searchText))
-        {
-            ResetSearchState();
-            return -1;
-        }
+    //public int Find(string searchText, List<string> textLines, int startLineIndex, int startTextIndex)
+    //{
+    //    if (string.IsNullOrEmpty(searchText))
+    //    {
+    //        ResetSearchState();
+    //        return -1;
+    //    }
 
-        _textLines = textLines;
-        SearchText = searchText;
-        AddToSearchHistory(searchText);
-        ResetSearchState();
+    //    _textLines = textLines;
+    //    SearchText = searchText;
+    //    AddToSearchHistory(searchText);
+    //    ResetSearchState();
 
-        var result = FindInList(searchText, startLineIndex, 0);
-        CurrentLineNumber = result.lineIndex;
-        CurrentTextIndex = result.textIndex;
-        CurrentTextFound = result.foundText;
+    //    var result = FindInList(searchText, startLineIndex, 0);
+    //    CurrentLineNumber = result.lineIndex;
+    //    CurrentTextIndex = result.textIndex;
+    //    CurrentTextFound = result.foundText;
 
-        return CurrentLineNumber;
-    }
+    //    return CurrentLineNumber;
+    //}
 
     public int FindNext(string searchText, List<string> textLines, int startLineIndex, int startTextIndex)
     {

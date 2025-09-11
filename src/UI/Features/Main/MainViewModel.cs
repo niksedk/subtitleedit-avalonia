@@ -1767,7 +1767,7 @@ public partial class MainViewModel :
             }
         }
 
-        ShowStatus(Se.Language.General.NothingFound);
+        ShowStatus(string.Format(Se.Language.General.XNotFound, _findService.SearchText));
     }
 
     [RelayCommand]
@@ -2174,12 +2174,23 @@ public partial class MainViewModel :
         }
 
         var subs = Subtitles.Select(p => p.Text).ToList();
-        var result = await _windowService.ShowDialogAsync<FindWindow, FindViewModel>(Window!, vm => 
+        var result = await _windowService.ShowDialogAsync<FindWindow, FindViewModel>(Window!, vm =>
         {
-            vm.Initialize(_findService, subs);
+            var selectedText = string.Empty;
+            if (EditTextBox != null && !string.IsNullOrEmpty(EditTextBox.SelectedText))
+            {
+                selectedText = EditTextBox.SelectedText;
+            }
+
+            if (string.IsNullOrEmpty(selectedText) && !string.IsNullOrEmpty(_findService.SearchText))
+            {
+                selectedText = _findService.SearchText;
+            }
+
+            vm.Initialize(_findService, subs, selectedText);
         });
 
-        if (result.OkPressed && !string.IsNullOrEmpty(result.SearchText))
+        if ((result.FindNextPressed || result.FindPreviousPressed) && !string.IsNullOrEmpty(result.SearchText))
         {
             var findMode = FindMode.CaseSensitive;
             if (result.FindTypeCanseInsensitive)
@@ -2194,11 +2205,20 @@ public partial class MainViewModel :
             var currentLineIndex = Subtitles.IndexOf(selectedSubtitle);
             var currentCharIndex = EditTextBox.CaretIndex;
             _findService.Initialize(subs, SelectedSubtitleIndex ?? 0, result.WholeWord, findMode);
-            var idx = _findService.Find(result.SearchText, subs, currentLineIndex, currentCharIndex);
+
+            var idx = -1;
+            if (result.FindNextPressed)
+            {
+                idx = _findService.FindNext(result.SearchText, subs, currentLineIndex, currentCharIndex);
+            }
+            else
+            { 
+                idx = _findService.FindPrevious(result.SearchText, subs, currentLineIndex, currentCharIndex);
+            }
 
             if (idx < 0)
             {
-                ShowStatus(Se.Language.General.NothingFound);
+                ShowStatus(string.Format(Se.Language.General.XNotFound, _findService.SearchText));
                 return;
             }
 
@@ -2237,7 +2257,7 @@ public partial class MainViewModel :
 
         if (idx < 0)
         {
-            ShowStatus(Se.Language.General.NothingFound);
+            ShowStatus(string.Format(Se.Language.General.XNotFound, _findService.SearchText));
             return;
         }
 
@@ -2276,7 +2296,7 @@ public partial class MainViewModel :
 
         if (idx < 0)
         {
-            ShowStatus(Se.Language.General.NothingFound);
+            ShowStatus(string.Format(Se.Language.General.XNotFound, _findService.SearchText));
             return;
         }
 

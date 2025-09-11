@@ -21,7 +21,8 @@ public partial class FindViewModel : ObservableObject
 
     public Window? Window { get; set; }
 
-    public bool OkPressed { get; private set; }
+    public bool FindNextPressed { get; private set; }
+    public bool FindPreviousPressed { get; private set; }
 
     private IFindService? _findService;
     private List<string> _subs = new List<string>();
@@ -61,7 +62,7 @@ public partial class FindViewModel : ObservableObject
     private void FindPrevious()
     {
         CountResult = string.Empty;
-        OkPressed = true;
+        FindPreviousPressed = true;
         SaveSettings();
         Window?.Close();
     }
@@ -70,7 +71,7 @@ public partial class FindViewModel : ObservableObject
     private void FindNext()
     {
         CountResult = string.Empty;
-        OkPressed = true;
+        FindNextPressed = true;
         SaveSettings();
         Window?.Close();
     }
@@ -126,9 +127,10 @@ public partial class FindViewModel : ObservableObject
         }
     }
 
-    internal void Initialize(IFindService findService, List<string> subs)
+    internal void Initialize(IFindService findService, List<string> subs, string selectedText)
     {
         _findService = findService;
         _subs = subs;
+        SearchText = selectedText.Trim();
     }
 }
