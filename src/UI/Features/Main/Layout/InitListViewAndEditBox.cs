@@ -634,6 +634,24 @@ public static class InitListViewAndEditBox
             Text = Se.Language.General.Text,
             FontWeight = FontWeight.Bold,
         };
+
+        var bookmarkIcon = new Icon
+        {
+            Value = IconNames.Bookmark,
+            Foreground = new SolidColorBrush(Se.Settings.Appearance.BookmarkColor.FromHexToColor()),
+            VerticalAlignment = VerticalAlignment.Center,
+            [!Visual.IsVisibleProperty] = new Binding(nameof(SubtitleLineViewModel.Bookmark))
+                { Converter = new NotNullConverter() },
+        };
+
+        var bookmarkLabel = new Label
+        {
+            [!Label.ContentProperty] = new Binding(nameof(SubtitleLineViewModel.Bookmark))
+                { Converter = new NotNullConverter() },
+            [!Visual.IsVisibleProperty] = new Binding(nameof(SubtitleLineViewModel.Bookmark))
+                { Converter = new NotNullConverter() },
+        };
+        
         textEditGrid.Children.Add(textLabel);
 
         var textCharsSecLabel = new TextBlock
