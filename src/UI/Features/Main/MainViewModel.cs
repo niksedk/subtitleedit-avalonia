@@ -187,7 +187,9 @@ public partial class MainViewModel :
     private readonly IFontNameService _fontNameService;
 
     private bool IsEmpty => Subtitles.Count == 0 || (Subtitles.Count == 1 && string.IsNullOrEmpty(Subtitles[0].Text));
-    private bool IsEmptyOriginal => Subtitles.Count == 0 || (Subtitles.Count == 1 && string.IsNullOrEmpty(Subtitles[0].OriginalText));
+
+    private bool IsEmptyOriginal => Subtitles.Count == 0 ||
+                                    (Subtitles.Count == 1 && string.IsNullOrEmpty(Subtitles[0].OriginalText));
 
     public VideoPlayerControl? VideoPlayerControl { get; internal set; }
     public Menu Menu { get; internal set; }
@@ -279,13 +281,16 @@ public partial class MainViewModel :
         Subtitles = [];
 
         SubtitleFormats = [.. SubtitleFormat.AllSubtitleFormats];
-        var defaultFormat = SubtitleFormats.Where(f => f.FriendlyName == Se.Settings.General.DefaultSubtitleFormat).FirstOrDefault() ?? SubtitleFormats[0];
+        var defaultFormat =
+            SubtitleFormats.Where(f => f.FriendlyName == Se.Settings.General.DefaultSubtitleFormat).FirstOrDefault() ??
+            SubtitleFormats[0];
         SubtitleFormats.Remove(defaultFormat);
         SubtitleFormats.Insert(0, defaultFormat);
 
         SelectedSubtitleFormat = SubtitleFormats[0];
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
-        SelectedEncoding = Encodings.FirstOrDefault(p => p.DisplayName == Se.Settings.General.DefaultEncoding) ?? Encodings[0];
+        SelectedEncoding = Encodings.FirstOrDefault(p => p.DisplayName == Se.Settings.General.DefaultEncoding) ??
+                           Encodings[0];
         StatusTextLeft = string.Empty;
         StatusTextRight = string.Empty;
         ShowColumnEndTime = Se.Settings.General.ShowColumnEndTime;
@@ -413,10 +418,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task CommandShowLayout()
     {
-        var vm = await _windowService.ShowDialogAsync<LayoutWindow, LayoutViewModel>(Window!, viewModel =>
-        {
-            viewModel.SelectedLayout = Se.Settings.General.LayoutNumber;
-        });
+        var vm = await _windowService.ShowDialogAsync<LayoutWindow, LayoutViewModel>(Window!,
+            viewModel => { viewModel.SelectedLayout = Se.Settings.General.LayoutNumber; });
 
         if (vm.OkPressed && vm.SelectedLayout != null && vm.SelectedLayout != Se.Settings.General.LayoutNumber)
         {
@@ -473,7 +476,10 @@ public partial class MainViewModel :
         var result = await _windowService.ShowDialogAsync<SourceViewWindow, SourceViewViewModel>(Window!, vm =>
         {
             var text = GetUpdateSubtitle().ToText(SelectedSubtitleFormat);
-            vm.Initialize("Source view - " + (string.IsNullOrEmpty(_subtitleFileName) ? "untitled" : Path.GetFileName(_subtitleFileName)), text);
+            vm.Initialize(
+                "Source view - " + (string.IsNullOrEmpty(_subtitleFileName)
+                    ? "untitled"
+                    : Path.GetFileName(_subtitleFileName)), text);
         });
 
         if (result.OkPressed)
@@ -488,10 +494,12 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowAssaStyles()
     {
-        var result = await _windowService.ShowDialogAsync<AssaStylesWindow, AssaStylesViewModel>(Window!, vm =>
-        {
-            vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty, SelectedSubtitle?.Style ?? string.Empty);
-        });
+        var result = await _windowService.ShowDialogAsync<AssaStylesWindow, AssaStylesViewModel>(Window!,
+            vm =>
+            {
+                vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty,
+                    SelectedSubtitle?.Style ?? string.Empty);
+            });
 
         if (result.OkPressed)
         {
@@ -514,10 +522,12 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowAssaProperties()
     {
-        var result = await _windowService.ShowDialogAsync<AssaPropertiesWindow, AssaPropertiesViewModel>(Window!, vm =>
-        {
-            vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty, _videoFileName ?? string.Empty);
-        });
+        var result = await _windowService.ShowDialogAsync<AssaPropertiesWindow, AssaPropertiesViewModel>(Window!,
+            vm =>
+            {
+                vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty,
+                    _videoFileName ?? string.Empty);
+            });
 
         if (result.OkPressed)
         {
@@ -531,10 +541,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowAssaAttachments()
     {
-        var result = await _windowService.ShowDialogAsync<AssaAttachmentsWindow, AssaAttachmentsViewModel>(Window!, vm =>
-        {
-            vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
-        });
+        var result = await _windowService.ShowDialogAsync<AssaAttachmentsWindow, AssaAttachmentsViewModel>(Window!,
+            vm => { vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty); });
 
         if (result.OkPressed)
         {
@@ -590,8 +598,11 @@ public partial class MainViewModel :
         ShowColumnOriginalText = false;
         _subtitle.Paragraphs.Clear();
         Subtitles.Clear();
-        SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(f => f.FriendlyName == Se.Settings.General.DefaultSubtitleFormat) ?? SubtitleFormats[0];
-        SelectedEncoding = Encodings.FirstOrDefault(p => p.DisplayName == Se.Settings.General.DefaultEncoding) ?? Encodings[0];
+        SelectedSubtitleFormat =
+            SubtitleFormats.FirstOrDefault(f => f.FriendlyName == Se.Settings.General.DefaultSubtitleFormat) ??
+            SubtitleFormats[0];
+        SelectedEncoding = Encodings.FirstOrDefault(p => p.DisplayName == Se.Settings.General.DefaultEncoding) ??
+                           Encodings[0];
         _subtitleFileName = string.Empty;
         _subtitle = new Subtitle();
         _changeSubtitleHash = GetFastHash();
@@ -618,7 +629,8 @@ public partial class MainViewModel :
     {
         var selectedIndex = SelectedSubtitleIndex ?? 0;
 
-        var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, Se.Language.General.OpenOriginalSubtitleFileTitle);
+        var fileName =
+            await _fileHelper.PickOpenSubtitleFile(Window!, Se.Language.General.OpenOriginalSubtitleFileTitle);
         if (string.IsNullOrEmpty(fileName))
         {
             _shortcutManager.ClearKeys();
@@ -653,7 +665,8 @@ public partial class MainViewModel :
             if (subtitle == null)
             {
                 var message = Se.Language.General.UnknownSubtitleFormat;
-                await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
                 _shortcutManager.ClearKeys();
                 return false;
             }
@@ -677,10 +690,12 @@ public partial class MainViewModel :
         }
         else
         {
-            var message = "The original subtitle does not have the same number of lines as the current subtitle." + Environment.NewLine
-                            + "Original lines: " + subtitle.Paragraphs.Count + Environment.NewLine
-                            + "Current lines: " + Subtitles.Count;
-            await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            var message = "The original subtitle does not have the same number of lines as the current subtitle." +
+                          Environment.NewLine
+                          + "Original lines: " + subtitle.Paragraphs.Count + Environment.NewLine
+                          + "Current lines: " + Subtitles.Count;
+            await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
         }
 
         return true;
@@ -725,7 +740,8 @@ public partial class MainViewModel :
 
             await SubtitleOpen(recentFile.SubtitleFileName, recentFile.VideoFileName, recentFile.SelectedLine);
 
-            if (!string.IsNullOrEmpty(recentFile.SubtitleFileNameOriginal) && File.Exists(recentFile.SubtitleFileNameOriginal))
+            if (!string.IsNullOrEmpty(recentFile.SubtitleFileNameOriginal) &&
+                File.Exists(recentFile.SubtitleFileNameOriginal))
             {
                 var selectedIndex = recentFile.SelectedLine;
                 await SubtitleOpenOriginal(selectedIndex, recentFile.SubtitleFileNameOriginal);
@@ -791,10 +807,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowStatistics()
     {
-        var result = await _windowService.ShowDialogAsync<StatisticsWindow, StatisticsViewModel>(Window!, vm =>
-        {
-            vm.Initialize(GetUpdateSubtitle(), SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
-        });
+        var result = await _windowService.ShowDialogAsync<StatisticsWindow, StatisticsViewModel>(Window!,
+            vm => { vm.Initialize(GetUpdateSubtitle(), SelectedSubtitleFormat, _subtitleFileName ?? string.Empty); });
 
         _shortcutManager.ClearKeys();
     }
@@ -970,16 +984,16 @@ public partial class MainViewModel :
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, Se.Language.General.OpenSubtitleFileTitle, false);
+        var fileName =
+            await _fileHelper.PickOpenSubtitleFile(Window!, Se.Language.General.OpenSubtitleFileTitle, false);
         if (string.IsNullOrEmpty(fileName))
         {
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<ManualChosenEncodingWindow, ManualChosenEncodingViewModel>(Window!, vm =>
-        {
-            vm.Initialize(fileName);
-        });
+        var result =
+            await _windowService.ShowDialogAsync<ManualChosenEncodingWindow, ManualChosenEncodingViewModel>(Window!,
+                vm => { vm.Initialize(fileName); });
 
         if (result.OkPressed && result.SelectedEncoding != null)
         {
@@ -1013,10 +1027,8 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<BlankVideoWindow, BlankVideoViewModel>(Window!, vm =>
-        {
-            vm.Initialize(_subtitleFileName ?? string.Empty, SelectedSubtitleFormat);
-        });
+        var result = await _windowService.ShowDialogAsync<BlankVideoWindow, BlankVideoViewModel>(Window!,
+            vm => { vm.Initialize(_subtitleFileName ?? string.Empty, SelectedSubtitleFormat); });
 
         if (!result.OkPressed)
         {
@@ -1045,10 +1057,8 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<CutVideoWindow, CutVideoViewModel>(Window!, vm =>
-        {
-            vm.Initialize(_videoFileName, AudioVisualizer?.WavePeaks, SelectedSubtitleFormat);
-        });
+        var result = await _windowService.ShowDialogAsync<CutVideoWindow, CutVideoViewModel>(Window!,
+            vm => { vm.Initialize(_videoFileName, AudioVisualizer?.WavePeaks, SelectedSubtitleFormat); });
 
         if (!result.OkPressed)
         {
@@ -1077,10 +1087,8 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<ReEncodeVideoWindow, ReEncodeVideoViewModel>(Window!, vm =>
-        {
-            vm.Initialize(_videoFileName, SelectedSubtitleFormat);
-        });
+        var result = await _windowService.ShowDialogAsync<ReEncodeVideoWindow, ReEncodeVideoViewModel>(Window!,
+            vm => { vm.Initialize(_videoFileName, SelectedSubtitleFormat); });
 
         if (!result.OkPressed)
         {
@@ -1120,7 +1128,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowApplyDurationLimits()
     {
-        await _windowService.ShowDialogAsync<ApplyDurationLimitsWindow, ApplyDurationLimitsViewModel>(Window!, vm => { });
+        await _windowService.ShowDialogAsync<ApplyDurationLimitsWindow, ApplyDurationLimitsViewModel>(Window!,
+            vm => { });
         _shortcutManager.ClearKeys();
     }
 
@@ -1134,7 +1143,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowToolsJoin()
     {
-        var result = await _windowService.ShowDialogAsync<JoinSubtitlesWindow, JoinSubtitlesViewModel>(Window!, vm => { });
+        var result =
+            await _windowService.ShowDialogAsync<JoinSubtitlesWindow, JoinSubtitlesViewModel>(Window!, vm => { });
         _shortcutManager.ClearKeys();
         if (!result.OkPressed)
         {
@@ -1143,7 +1153,8 @@ public partial class MainViewModel :
 
         ResetSubtitle();
         SetSubtitles(result.JoinedSubtitle);
-        SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == result.JoinedFormat.Name) ?? SubtitleFormats[0];
+        SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == result.JoinedFormat.Name) ??
+                                 SubtitleFormats[0];
         SelectAndScrollToRow(0);
         ShowStatus(Se.Language.Main.JoinedSubtitleLoaded);
     }
@@ -1151,10 +1162,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowToolsMergeLinesWithSameText()
     {
-        var result = await _windowService.ShowDialogAsync<MergeSameTextWindow, MergeSameTextViewModel>(Window!, vm =>
-        {
-            vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList());
-        });
+        var result = await _windowService.ShowDialogAsync<MergeSameTextWindow, MergeSameTextViewModel>(Window!,
+            vm => { vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList()); });
 
         if (!result.OkPressed)
         {
@@ -1172,10 +1181,12 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowToolsMergeLinesWithSameTimeCodes()
     {
-        var result = await _windowService.ShowDialogAsync<MergeSameTimeCodesWindow, MergeSameTimeCodesViewModel>(Window!, vm =>
-        {
-            vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList(), GetUpdateSubtitle());
-        });
+        var result = await _windowService.ShowDialogAsync<MergeSameTimeCodesWindow, MergeSameTimeCodesViewModel>(
+            Window!,
+            vm =>
+            {
+                vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList(), GetUpdateSubtitle());
+            });
 
         if (!result.OkPressed)
         {
@@ -1212,7 +1223,8 @@ public partial class MainViewModel :
         var fileName = _subtitleFileName;
         if (s.Paragraphs.Count == 0)
         {
-            fileName = await _fileHelper.PickOpenSubtitleFile(Window!, Se.Language.General.OpenSubtitleFileTitle, false);
+            fileName = await _fileHelper.PickOpenSubtitleFile(Window!, Se.Language.General.OpenSubtitleFileTitle,
+                false);
             if (string.IsNullOrEmpty(fileName))
             {
                 return;
@@ -1226,20 +1238,16 @@ public partial class MainViewModel :
             return;
         }
 
-        await _windowService.ShowDialogAsync<SplitSubtitleWindow, SplitSubtitleViewModel>(Window!, vm =>
-        {
-            vm.Initialize(fileName ?? string.Empty, s);
-        });
+        await _windowService.ShowDialogAsync<SplitSubtitleWindow, SplitSubtitleViewModel>(Window!,
+            vm => { vm.Initialize(fileName ?? string.Empty, s); });
         _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task ShowBridgeGaps()
     {
-        var result = await _windowService.ShowDialogAsync<BridgeGapsWindow, BridgeGapsViewModel>(Window!, vm =>
-        {
-            vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList());
-        });
+        var result = await _windowService.ShowDialogAsync<BridgeGapsWindow, BridgeGapsViewModel>(Window!,
+            vm => { vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList()); });
 
         if (result.OkPressed)
         {
@@ -1279,10 +1287,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowToolsFixCommonErrors()
     {
-        var viewModel = await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window!, vm =>
-        {
-            vm.Initialize(GetUpdateSubtitle(), SelectedSubtitleFormat);
-        });
+        var viewModel = await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window!,
+            vm => { vm.Initialize(GetUpdateSubtitle(), SelectedSubtitleFormat); });
 
         if (viewModel.OkPressed)
         {
@@ -1304,7 +1310,8 @@ public partial class MainViewModel :
         if (result.OkPressed)
         {
             Subtitles.Clear();
-            Subtitles.AddRange(result.FixedSubtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
+            Subtitles.AddRange(
+                result.FixedSubtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
             SelectAndScrollToRow(0);
         }
 
@@ -1386,19 +1393,14 @@ public partial class MainViewModel :
         VideoPlayerControl = null;
         InitLayout.MakeLayout(MainView!, this, Se.Settings.General.LayoutNumber);
 
-        Dispatcher.UIThread.Post(async void () =>
-        {
-            await VideoOpenFile(videoFileName);
-        });
+        Dispatcher.UIThread.Post(async void () => { await VideoOpenFile(videoFileName); });
     }
 
     [RelayCommand]
     private async Task ShowSpellCheck()
     {
-        var result = await _windowService.ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(Window!, vm =>
-        {
-            vm.Initialize(Subtitles, SelectedSubtitleIndex, this);
-        });
+        var result = await _windowService.ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(Window!,
+            vm => { vm.Initialize(Subtitles, SelectedSubtitleIndex, this); });
 
         if (result.OkPressed && result.TotalChangedWords > 0)
         {
@@ -1554,10 +1556,9 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task CommandShowAutoTranslate()
     {
-        var result = await _windowService.ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(Window!, vm =>
-        {
-            vm.Initialize(GetUpdateSubtitle());
-        });
+        var result =
+            await _windowService.ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(Window!,
+                vm => { vm.Initialize(GetUpdateSubtitle()); });
 
         if (!result.OkPressed)
         {
@@ -1643,10 +1644,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task CommandShowSettingsShortcuts()
     {
-        await _windowService.ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(Window!, vm =>
-        {
-            vm.LoadShortCuts(this);
-        });
+        await _windowService.ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(Window!,
+            vm => { vm.LoadShortCuts(this); });
         ReloadShortcuts();
         _shortcutManager.ClearKeys();
     }
@@ -1683,6 +1682,27 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void ToggleBookmarkSelectedLinesNoText()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        foreach (var item in selectedItems)
+        {
+            if (item.Bookmark == null)
+            {
+                item.Bookmark = string.Empty;
+            }
+            else
+            {
+                item.Bookmark = null;
+            }
+        }
+        
+        new BookmarkPersistence(GetUpdateSubtitle(), _subtitleFileName).Save();
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
     private async Task ListBookmarks()
     {
         var selected = SelectedSubtitle;
@@ -1691,10 +1711,8 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<BookmarksListWindow, BookmarksListViewModel>(Window!, vm =>
-        {
-            vm.Initialize(Subtitles.Where(p => p.Bookmark != null).ToList());
-        });
+        var result = await _windowService.ShowDialogAsync<BookmarksListWindow, BookmarksListViewModel>(Window!,
+            vm => { vm.Initialize(Subtitles.Where(p => p.Bookmark != null).ToList()); });
 
         if (result.OkPressed)
         {
@@ -1706,15 +1724,14 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private void RemoveBookmark()
+    private void RemoveBookmarkSelectedLines()
     {
-        var selected = SelectedSubtitle;
-        if (selected == null)
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        foreach (var item in selectedItems)
         {
-            return;
+            item.Bookmark = null;
         }
 
-        selected.Bookmark = null;
         new BookmarkPersistence(GetUpdateSubtitle(), _subtitleFileName).Save();
 
         _shortcutManager.ClearKeys();
@@ -1890,10 +1907,8 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<PickAlignmentWindow, PickAlignmentViewModel>(Window!, vm =>
-        {
-            vm.Initialize(selected, SubtitleGrid.SelectedItems.Count);
-        });
+        var result = await _windowService.ShowDialogAsync<PickAlignmentWindow, PickAlignmentViewModel>(Window!,
+            vm => { vm.Initialize(selected, SubtitleGrid.SelectedItems.Count); });
 
         if (result.OkPressed)
         {
@@ -1912,10 +1927,9 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<PickFontNameWindow, PickFontNameViewModel>(Window!, vm =>
-        {
-            vm.Initialize();
-        });
+        var result =
+            await _windowService.ShowDialogAsync<PickFontNameWindow, PickFontNameViewModel>(Window!,
+                vm => { vm.Initialize(); });
 
         if (result.OkPressed && result.SelectedFontName != null)
         {
@@ -2209,7 +2223,6 @@ public partial class MainViewModel :
 
         Dispatcher.UIThread.Post(() =>
         {
-
             if (Window.FlowDirection == FlowDirection.RightToLeft)
             {
                 IsRightToLeftEnabled = false;
@@ -2439,7 +2452,8 @@ public partial class MainViewModel :
         else
         {
             var selectedText = tb.Text.Substring(selectionStart, selectionLength);
-            selectedText = _colorService.SetColorTag(selectedText, result.SelectedColor, isAssa, isWebVtt, GetUpdateSubtitle());
+            selectedText = _colorService.SetColorTag(selectedText, result.SelectedColor, isAssa, isWebVtt,
+                GetUpdateSubtitle());
 
             if (isAssa) // close color tag (display normal style color)
             {
@@ -2448,7 +2462,8 @@ public partial class MainViewModel :
                 if (_subtitle != null && _subtitle.Header != null && styleName != null)
                 {
                     var style = AdvancedSubStationAlpha.GetSsaStyle(styleName, _subtitle.Header);
-                    var endColor = _colorService.SetColorTag("x", style.Primary.ToAvaloniaColor(), true, false, _subtitle);
+                    var endColor =
+                        _colorService.SetColorTag("x", style.Primary.ToAvaloniaColor(), true, false, _subtitle);
                     closeTag = endColor.TrimEnd('x');
                 }
 
@@ -2481,10 +2496,9 @@ public partial class MainViewModel :
         var selectionEnd = Math.Max(tb.SelectionStart, tb.SelectionEnd);
         var selectionLength = selectionEnd - selectionStart;
 
-        var result = await _windowService.ShowDialogAsync<PickFontNameWindow, PickFontNameViewModel>(Window!, vm =>
-        {
-            vm.Initialize();
-        });
+        var result =
+            await _windowService.ShowDialogAsync<PickFontNameWindow, PickFontNameViewModel>(Window!,
+                vm => { vm.Initialize(); });
 
         if (!result.OkPressed || result.SelectedFontName == null)
         {
@@ -2544,7 +2558,8 @@ public partial class MainViewModel :
 
         var startMs = VideoPlayerControl.Position * 1000.0;
         var endMs = startMs + Se.Settings.General.NewEmptyDefaultMs;
-        var newParagraph = new SubtitleLineViewModel(new Paragraph(string.Empty, startMs, endMs), SelectedSubtitleFormat);
+        var newParagraph =
+            new SubtitleLineViewModel(new Paragraph(string.Empty, startMs, endMs), SelectedSubtitleFormat);
         var idx = _insertService.InsertInCorrectPosition(Subtitles, newParagraph);
         var next = Subtitles.GetOrNull(idx + 1);
         if (next != null)
@@ -2735,10 +2750,11 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task SetNewStyleForSelectedLines(string styleName)
     {
-        var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!, vm =>
-        {
-            vm.Initialize(Se.Language.General.Style + " - " + Se.Language.General.New, string.Empty, 250, 20, true);
-        });
+        var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!,
+            vm =>
+            {
+                vm.Initialize(Se.Language.General.Style + " - " + Se.Language.General.New, string.Empty, 250, 20, true);
+            });
 
         if (result.OkPressed && !string.IsNullOrWhiteSpace(result.Text))
         {
@@ -2748,7 +2764,8 @@ public partial class MainViewModel :
             if (header != null && header.Contains("http://www.w3.org/ns/ttml"))
             {
                 var s = new Subtitle { Header = header };
-                AdvancedSubStationAlpha.LoadStylesFromTimedText10(s, string.Empty, header, AdvancedSubStationAlpha.HeaderNoStyles, new StringBuilder());
+                AdvancedSubStationAlpha.LoadStylesFromTimedText10(s, string.Empty, header,
+                    AdvancedSubStationAlpha.HeaderNoStyles, new StringBuilder());
                 header = s.Header;
             }
             else if (header != null && header.StartsWith("WEBVTT", StringComparison.Ordinal))
@@ -2811,10 +2828,11 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task SetNewActorForSelectedLines(string styleName)
     {
-        var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!, vm =>
-        {
-            vm.Initialize(Se.Language.General.Actor + " - " + Se.Language.General.New, string.Empty, 250, 20, true);
-        });
+        var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!,
+            vm =>
+            {
+                vm.Initialize(Se.Language.General.Actor + " - " + Se.Language.General.New, string.Empty, 250, 20, true);
+            });
 
         if (result.OkPressed && !string.IsNullOrWhiteSpace(result.Text))
         {
@@ -3108,7 +3126,8 @@ public partial class MainViewModel :
             {
                 if (tb.Text.Contains("{\\" + assaOn + " }"))
                 {
-                    tb.Text = tb.Text.Replace("{\\" + assaOn + "}", string.Empty).Replace("{\\" + assaOff + "0}", string.Empty);
+                    tb.Text = tb.Text.Replace("{\\" + assaOn + "}", string.Empty)
+                        .Replace("{\\" + assaOff + "0}", string.Empty);
                 }
                 else
                 {
@@ -3135,7 +3154,8 @@ public partial class MainViewModel :
             {
                 if (selectedText.Contains("{\\" + assaOn + "}"))
                 {
-                    selectedText = selectedText.Replace("{\\" + assaOn + "}", string.Empty).Replace("{\\" + assaOff + "}", string.Empty);
+                    selectedText = selectedText.Replace("{\\" + assaOn + "}", string.Empty)
+                        .Replace("{\\" + assaOff + "}", string.Empty);
                 }
                 else
                 {
@@ -3169,7 +3189,8 @@ public partial class MainViewModel :
         return true;
     }
 
-    private async Task SubtitleOpen(string fileName, string? videoFileName = null, int? selectedSubtitleIndex = null, TextEncoding? textEncoding = null)
+    private async Task SubtitleOpen(string fileName, string? videoFileName = null, int? selectedSubtitleIndex = null,
+        TextEncoding? textEncoding = null)
     {
         if (string.IsNullOrEmpty(fileName))
         {
@@ -3191,7 +3212,8 @@ public partial class MainViewModel :
         if (fileSize < 10)
         {
             var message = fileSize == 0 ? "File size is zero!" : $"File size too small - only {fileSize} bytes";
-            await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
             return;
         }
 
@@ -3213,10 +3235,8 @@ public partial class MainViewModel :
                 {
                     Dispatcher.UIThread.Post(async () =>
                     {
-                        var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm =>
-                        {
-                            vm.Initialize(subtitles, fileName);
-                        });
+                        var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!,
+                            vm => { vm.Initialize(subtitles, fileName); });
 
                         if (result.OkPressed)
                         {
@@ -3229,7 +3249,8 @@ public partial class MainViewModel :
                 }
             }
 
-            if ((ext == ".mp4" || ext == ".m4v" || ext == ".3gp" || ext == ".mov" || ext == ".cmaf") && fileSize > 2000 || ext == ".m4s")
+            if ((ext == ".mp4" || ext == ".m4v" || ext == ".3gp" || ext == ".mov" || ext == ".cmaf") &&
+                fileSize > 2000 || ext == ".m4s")
             {
                 if (!new IsmtDfxp().IsMine(null, fileName))
                 {
@@ -3238,8 +3259,9 @@ public partial class MainViewModel :
                 }
             }
 
-            if (((ext == ".m2ts" || ext == ".ts" || ext == ".tsv" || ext == ".tts" || ext == ".mts") && fileSize > 10000 && FileUtil.IsM2TransportStream(fileName)) ||
-                            (ext == ".textst" && FileUtil.IsMpeg2PrivateStream2(fileName)))
+            if (((ext == ".m2ts" || ext == ".ts" || ext == ".tsv" || ext == ".tts" || ext == ".mts") &&
+                 fileSize > 10000 && FileUtil.IsM2TransportStream(fileName)) ||
+                (ext == ".textst" && FileUtil.IsMpeg2PrivateStream2(fileName)))
             {
                 bool isTextSt = false;
                 if (fileSize < 2000000)
@@ -3261,7 +3283,8 @@ public partial class MainViewModel :
                 return;
             }
 
-            if (ext == ".ismt" || ext == ".mp4" || ext == ".m4v" || ext == ".mov" || ext == ".3gp" || ext == ".cmaf" || ext == ".m4s")
+            if (ext == ".ismt" || ext == ".mp4" || ext == ".m4v" || ext == ".mov" || ext == ".3gp" || ext == ".cmaf" ||
+                ext == ".m4s")
             {
                 var f = new IsmtDfxp();
                 if (f.IsMine(null, fileName))
@@ -3281,9 +3304,11 @@ public partial class MainViewModel :
                     }
 
                     ResetSubtitle();
-                    _subtitleFileName = Utilities.GetPathAndFileNameWithoutExtension(fileName) + SelectedSubtitleFormat.Extension;
+                    _subtitleFileName = Utilities.GetPathAndFileNameWithoutExtension(fileName) +
+                                        SelectedSubtitleFormat.Extension;
                     _subtitle.Renumber();
-                    Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
+                    Subtitles.AddRange(_subtitle.Paragraphs.Select(p =>
+                        new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
                     ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
                     SelectAndScrollToRow(0);
                     LoadBookmarks();
@@ -3309,7 +3334,8 @@ public partial class MainViewModel :
                 if (subtitle == null)
                 {
                     var message = Se.Language.General.UnknownSubtitleFormat;
-                    await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
                     return;
                 }
             }
@@ -3370,10 +3396,8 @@ public partial class MainViewModel :
     {
         Dispatcher.UIThread.Post(async () =>
         {
-            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm =>
-            {
-                vm.InitializeBdn(subtitle, fileName, false);
-            });
+            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!,
+                vm => { vm.InitializeBdn(subtitle, fileName, false); });
 
             if (result.OkPressed)
             {
@@ -3416,21 +3440,20 @@ public partial class MainViewModel :
             Dispatcher.UIThread.Post(async void () =>
             {
                 await MessageBox.Show(
-                   Window!,
-                   Se.Language.General.Error,
-                   Se.Language.General.NoSubtitlesFound,
-                   MessageBoxButtons.OK,
-                   MessageBoxIcon.Error);
+                    Window!,
+                    Se.Language.General.Error,
+                    Se.Language.General.NoSubtitlesFound,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             });
             return;
         }
 
         Dispatcher.UIThread.Post(async () =>
         {
-            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm =>
-            {
-                vm.Initialize(list, fileName);
-            });
+            var result =
+                await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!,
+                    vm => { vm.Initialize(list, fileName); });
 
             if (result.OkPressed)
             {
@@ -3451,17 +3474,22 @@ public partial class MainViewModel :
     {
         //ShowStatus(_language.ParsingTransportStream);
         var tsParser = new TransportStreamParser();
-        tsParser.Parse(fileName, (pos, total) => UpdateProgress(pos, total, string.Format("Parsing {0}", fileName))); // _language.ParsingTransportStreamFile););
+        tsParser.Parse(fileName,
+            (pos, total) =>
+                UpdateProgress(pos, total,
+                    string.Format("Parsing {0}", fileName))); // _language.ParsingTransportStreamFile););
         //ShowStatus(string.Empty);
         //TaskbarList.SetProgressState(Handle, TaskbarButtonProgressFlags.NoProgress);
 
         if (tsParser.SubtitlePacketIds.Count == 0 && tsParser.TeletextSubtitlesLookup.Count == 0)
         {
-            await MessageBox.Show(Window!, Se.Language.General.Error, Se.Language.General.NoSubtitlesFound, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            await MessageBox.Show(Window!, Se.Language.General.Error, Se.Language.General.NoSubtitlesFound,
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
 
-        if (tsParser.SubtitlePacketIds.Count == 0 && tsParser.TeletextSubtitlesLookup.Count == 1 && tsParser.TeletextSubtitlesLookup.First().Value.Count == 1)
+        if (tsParser.SubtitlePacketIds.Count == 0 && tsParser.TeletextSubtitlesLookup.Count == 1 &&
+            tsParser.TeletextSubtitlesLookup.First().Value.Count == 1)
         {
             ResetSubtitle();
             _subtitle = new Subtitle(tsParser.TeletextSubtitlesLookup.First().Value.First().Value);
@@ -3595,11 +3623,14 @@ public partial class MainViewModel :
             if (mp4Parser.VttcSubtitle?.Paragraphs.Count > 0)
             {
                 ResetSubtitle();
-                SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == new WebVTT().Name) ?? SelectedSubtitleFormat;
+                SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == new WebVTT().Name) ??
+                                         SelectedSubtitleFormat;
                 _subtitle = mp4Parser.VttcSubtitle;
                 _subtitle.Renumber();
-                _subtitleFileName = Utilities.GetPathAndFileNameWithoutExtension(fileName) + SelectedSubtitleFormat.Extension;
-                Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
+                _subtitleFileName = Utilities.GetPathAndFileNameWithoutExtension(fileName) +
+                                    SelectedSubtitleFormat.Extension;
+                Subtitles.AddRange(
+                    _subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
                 ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
                 SelectAndScrollToRow(0);
                 return;
@@ -3610,14 +3641,17 @@ public partial class MainViewModel :
                 ResetSubtitle();
                 _subtitle = mp4Parser.TrunCea608Subtitle;
                 _subtitle.Renumber();
-                _subtitleFileName = Utilities.GetPathAndFileNameWithoutExtension(fileName) + SelectedSubtitleFormat.Extension;
-                Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
+                _subtitleFileName = Utilities.GetPathAndFileNameWithoutExtension(fileName) +
+                                    SelectedSubtitleFormat.Extension;
+                Subtitles.AddRange(
+                    _subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
                 ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
                 SelectAndScrollToRow(0);
                 return;
             }
 
-            await MessageBox.Show(Window!, Se.Language.General.Error, Se.Language.General.NoSubtitlesFound, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            await MessageBox.Show(Window!, Se.Language.General.Error, Se.Language.General.NoSubtitlesFound,
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         else if (mp4SubtitleTracks.Count == 1)
         {
@@ -3625,10 +3659,9 @@ public partial class MainViewModel :
         }
         else
         {
-            var result = await _windowService.ShowDialogAsync<PickMp4TrackWindow, PickMp4TrackViewModel>(Window!, vm =>
-            {
-                vm.Initialize(mp4SubtitleTracks, fileName);
-            });
+            var result =
+                await _windowService.ShowDialogAsync<PickMp4TrackWindow, PickMp4TrackViewModel>(Window!,
+                    vm => { vm.Initialize(mp4SubtitleTracks, fileName); });
 
             if (result.OkPressed && result.SelectedTrack != null && result.SelectedTrack.Track != null)
             {
@@ -3644,10 +3677,8 @@ public partial class MainViewModel :
             Dispatcher.UIThread.Post(async () =>
             {
                 var paragraphs = mp4SubtitleTrack.Mdia.Minf.Stbl.GetParagraphs();
-                var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm =>
-                {
-                    vm.Initialize(mp4SubtitleTrack, paragraphs, fileName);
-                });
+                var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!,
+                    vm => { vm.Initialize(mp4SubtitleTrack, paragraphs, fileName); });
 
                 if (result.OkPressed)
                 {
@@ -3706,10 +3737,9 @@ public partial class MainViewModel :
         {
             Dispatcher.UIThread.Post(async void () =>
             {
-                var result = await _windowService.ShowDialogAsync<PickMatroskaTrackWindow, PickMatroskaTrackViewModel>(Window!, vm =>
-                {
-                    vm.Initialize(matroska, subtitleList, fileName);
-                });
+                var result =
+                    await _windowService.ShowDialogAsync<PickMatroskaTrackWindow, PickMatroskaTrackViewModel>(Window!,
+                        vm => { vm.Initialize(matroska, subtitleList, fileName); });
                 if (result.OkPressed && result.SelectedMatroskaTrack != null)
                 {
                     if (await LoadMatroskaSubtitle(result.SelectedMatroskaTrack, matroska, fileName))
@@ -3782,18 +3812,18 @@ public partial class MainViewModel :
         }
     }
 
-    private async Task<bool> LoadMatroskaSubtitle(MatroskaTrackInfo matroskaSubtitleInfo, MatroskaFile matroska, string fileName)
+    private async Task<bool> LoadMatroskaSubtitle(MatroskaTrackInfo matroskaSubtitleInfo, MatroskaFile matroska,
+        string fileName)
     {
         if (matroskaSubtitleInfo.CodecId.Equals("S_HDMV/PGS", StringComparison.OrdinalIgnoreCase))
         {
-            var pgsSubtitle = _bluRayHelper.LoadBluRaySubFromMatroska(matroskaSubtitleInfo, matroska, out var errorMessage);
+            var pgsSubtitle =
+                _bluRayHelper.LoadBluRaySubFromMatroska(matroskaSubtitleInfo, matroska, out var errorMessage);
 
             Dispatcher.UIThread.Post(async () =>
             {
-                var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm =>
-                {
-                    vm.Initialize(matroskaSubtitleInfo, pgsSubtitle, fileName);
-                });
+                var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!,
+                    vm => { vm.Initialize(matroskaSubtitleInfo, pgsSubtitle, fileName); });
 
                 if (result.OkPressed)
                 {
@@ -3948,10 +3978,8 @@ public partial class MainViewModel :
 
         Dispatcher.UIThread.Post(async () =>
         {
-            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm =>
-            {
-                vm.Initialize(matroskaSubtitleInfo, subtitle, subtitleImages, fileName);
-            });
+            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!,
+                vm => { vm.Initialize(matroskaSubtitleInfo, subtitle, subtitleImages, fileName); });
 
             if (result.OkPressed)
             {
@@ -3968,12 +3996,14 @@ public partial class MainViewModel :
         return true;
     }
 
-    private async Task<bool> LoadVobSubFromMatroska(MatroskaTrackInfo matroskaSubtitleInfo, MatroskaFile matroska, string fileName)
+    private async Task<bool> LoadVobSubFromMatroska(MatroskaTrackInfo matroskaSubtitleInfo, MatroskaFile matroska,
+        string fileName)
     {
         if (matroskaSubtitleInfo.ContentEncodingType == 1)
         {
             var message = "Encrypted VobSub subtitles are not supported.";
-            await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
             return false;
         }
 
@@ -3984,16 +4014,20 @@ public partial class MainViewModel :
         var idx = new Core.VobSub.Idx(matroskaSubtitleInfo.GetCodecPrivate().SplitToLines());
         foreach (var p in sub)
         {
-            mergedVobSubPacks.Add(new VobSubMergedPack(p.GetData(matroskaSubtitleInfo), TimeSpan.FromMilliseconds(p.Start), 32, null));
+            mergedVobSubPacks.Add(new VobSubMergedPack(p.GetData(matroskaSubtitleInfo),
+                TimeSpan.FromMilliseconds(p.Start), 32, null));
             if (mergedVobSubPacks.Count > 0)
             {
                 mergedVobSubPacks[mergedVobSubPacks.Count - 1].EndTime = TimeSpan.FromMilliseconds(p.End);
             }
 
             // fix overlapping (some versions of Handbrake makes overlapping time codes - thx Hawke)
-            if (mergedVobSubPacks.Count > 1 && mergedVobSubPacks[mergedVobSubPacks.Count - 2].EndTime > mergedVobSubPacks[mergedVobSubPacks.Count - 1].StartTime)
+            if (mergedVobSubPacks.Count > 1 && mergedVobSubPacks[mergedVobSubPacks.Count - 2].EndTime >
+                mergedVobSubPacks[mergedVobSubPacks.Count - 1].StartTime)
             {
-                mergedVobSubPacks[mergedVobSubPacks.Count - 2].EndTime = TimeSpan.FromMilliseconds(mergedVobSubPacks[mergedVobSubPacks.Count - 1].StartTime.TotalMilliseconds - 1);
+                mergedVobSubPacks[mergedVobSubPacks.Count - 2].EndTime =
+                    TimeSpan.FromMilliseconds(
+                        mergedVobSubPacks[mergedVobSubPacks.Count - 1].StartTime.TotalMilliseconds - 1);
             }
         }
 
@@ -4004,7 +4038,8 @@ public partial class MainViewModel :
             {
                 mergedVobSubPacks.RemoveAt(i);
             }
-            else if (mergedVobSubPacks[i].SubPicture.SubPictureDateSize <= 67 && mergedVobSubPacks[i].SubPicture.Delay.TotalMilliseconds < 35)
+            else if (mergedVobSubPacks[i].SubPicture.SubPictureDateSize <= 67 &&
+                     mergedVobSubPacks[i].SubPicture.Delay.TotalMilliseconds < 35)
             {
                 mergedVobSubPacks.RemoveAt(i);
             }
@@ -4012,10 +4047,8 @@ public partial class MainViewModel :
 
         Dispatcher.UIThread.Post(async () =>
         {
-            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm =>
-            {
-                vm.Initialize(mergedVobSubPacks, matroskaSubtitleInfo);
-            });
+            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!,
+                vm => { vm.Initialize(mergedVobSubPacks, matroskaSubtitleInfo); });
 
             if (result.OkPressed)
             {
@@ -4133,10 +4166,8 @@ public partial class MainViewModel :
         var streamId = languageStreamIds.First();
         Dispatcher.UIThread.Post(async () =>
         {
-            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm =>
-            {
-                vm.Initialize(streamIdDictionary[streamId], palette, vobSubFileName);
-            });
+            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!,
+                vm => { vm.Initialize(streamIdDictionary[streamId], palette, vobSubFileName); });
         });
 
         return false;
@@ -4177,7 +4208,8 @@ public partial class MainViewModel :
                 promptText = string.Format(Se.Language.General.SaveChangesToX, _subtitleFileName);
             }
 
-            var dr = await MessageBox.Show(Window!, Se.Language.General.SaveChangesTitle, promptText, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            var dr = await MessageBox.Show(Window!, Se.Language.General.SaveChangesTitle, promptText,
+                MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
             if (dr == MessageBoxResult.Cancel)
             {
                 return false;
@@ -4221,7 +4253,8 @@ public partial class MainViewModel :
                 promptText = string.Format(Se.Language.General.SaveChangesToXOriginal, _subtitleFileNameOriginal);
             }
 
-            var dr = await MessageBox.Show(Window!, Se.Language.General.SaveChangesTitle, promptText, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            var dr = await MessageBox.Show(Window!, Se.Language.General.SaveChangesTitle, promptText,
+                MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
             if (dr == MessageBoxResult.Cancel)
             {
                 return false;
@@ -4406,7 +4439,8 @@ public partial class MainViewModel :
         var newFileName = "New" + SelectedSubtitleFormat.Extension;
         if (!string.IsNullOrEmpty(_subtitleFileNameOriginal))
         {
-            newFileName = Path.GetFileNameWithoutExtension(_subtitleFileNameOriginal) + SelectedSubtitleFormat.Extension;
+            newFileName = Path.GetFileNameWithoutExtension(_subtitleFileNameOriginal) +
+                          SelectedSubtitleFormat.Extension;
         }
         else if (!string.IsNullOrEmpty(_videoFileName))
         {
@@ -4443,7 +4477,8 @@ public partial class MainViewModel :
         }
 
         var idx = SelectedSubtitleIndex ?? 0;
-        Se.Settings.File.AddToRecentFiles(_subtitleFileName ?? string.Empty, _subtitleFileNameOriginal ?? string.Empty, _videoFileName ?? string.Empty, idx, SelectedEncoding.DisplayName);
+        Se.Settings.File.AddToRecentFiles(_subtitleFileName ?? string.Empty, _subtitleFileNameOriginal ?? string.Empty,
+            _videoFileName ?? string.Empty, idx, SelectedEncoding.DisplayName);
         Se.SaveSettings();
 
         if (updateMenu)
@@ -4617,7 +4652,8 @@ public partial class MainViewModel :
             }
             else
             {
-                Se.Settings.File.RecentFiles = Se.Settings.File.RecentFiles.Where(p => File.Exists(p.SubtitleFileName)).ToList();
+                Se.Settings.File.RecentFiles =
+                    Se.Settings.File.RecentFiles.Where(p => File.Exists(p.SubtitleFileName)).ToList();
             }
         }
 
@@ -4664,7 +4700,6 @@ public partial class MainViewModel :
                 Window.Height = height;
                 Window.Position = new PixelPoint(settings.PositionX, settings.PositionY);
             }
-
         }
         catch (Exception ex)
         {
@@ -5201,7 +5236,8 @@ public partial class MainViewModel :
 
                 MenuItemStyles.Items.Clear();
                 var styles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(_subtitle.Header);
-                var stylesToAdd = styles.Select(p => p.Name).Where(p => !string.IsNullOrEmpty(p)).DistinctBy(p => p).OrderBy(p => p);
+                var stylesToAdd = styles.Select(p => p.Name).Where(p => !string.IsNullOrEmpty(p)).DistinctBy(p => p)
+                    .OrderBy(p => p);
                 foreach (var style in stylesToAdd)
                 {
                     MenuItemStyles.Items.Add(new MenuItem
@@ -5211,10 +5247,12 @@ public partial class MainViewModel :
                         CommandParameter = style,
                     });
                 }
+
                 if (stylesToAdd.Any())
                 {
                     MenuItemStyles.Items.Add(new Separator());
                 }
+
                 MenuItemStyles.Items.Add(new MenuItem
                 {
                     Header = Se.Language.General.NewDotDotDot,
@@ -5222,7 +5260,8 @@ public partial class MainViewModel :
                 });
 
                 MenuItemActors.Items.Clear();
-                foreach (var actor in Subtitles.Select(p => p.Actor).Where(p => !string.IsNullOrEmpty(p)).DistinctBy(p => p).OrderBy(p => p))
+                foreach (var actor in Subtitles.Select(p => p.Actor).Where(p => !string.IsNullOrEmpty(p))
+                             .DistinctBy(p => p).OrderBy(p => p))
                 {
                     MenuItemActors.Items.Add(new MenuItem
                     {
@@ -5231,10 +5270,12 @@ public partial class MainViewModel :
                         CommandParameter = actor,
                     });
                 }
+
                 if (MenuItemActors.Items.Count > 0)
                 {
                     MenuItemActors.Items.Add(new Separator());
                 }
+
                 MenuItemActors.Items.Add(new MenuItem
                 {
                     Header = Se.Language.General.NewDotDotDot,
@@ -5699,12 +5740,14 @@ public partial class MainViewModel :
                     if (SelectCurrentSubtitleWhilePlaying)
                     {
                         var ss = SelectedSubtitle;
-                        if (ss == null || mediaPlayerSeconds < ss.StartTime.TotalSeconds || mediaPlayerSeconds > ss.EndTime.TotalSeconds)
+                        if (ss == null || mediaPlayerSeconds < ss.StartTime.TotalSeconds ||
+                            mediaPlayerSeconds > ss.EndTime.TotalSeconds)
                         {
                             for (var i = 0; i < subtitle.Count; i++)
                             {
                                 var p = subtitle[i];
-                                if (mediaPlayerSeconds >= p.StartTime.TotalSeconds && mediaPlayerSeconds <= p.EndTime.TotalSeconds)
+                                if (mediaPlayerSeconds >= p.StartTime.TotalSeconds &&
+                                    mediaPlayerSeconds <= p.EndTime.TotalSeconds)
                                 {
                                     SelectAndScrollToSubtitle(p);
                                     break;
@@ -6051,7 +6094,8 @@ public partial class MainViewModel :
                     {
                         if (_subtitle.Header != null && !_subtitle.Header.Contains("[V4+ Styles]"))
                         {
-                            _subtitle.Header = AdvancedSubStationAlpha.GetHeaderAndStylesFromSubStationAlpha(_subtitle.Header);
+                            _subtitle.Header =
+                                AdvancedSubStationAlpha.GetHeaderAndStylesFromSubStationAlpha(_subtitle.Header);
                             foreach (var p in _subtitle.Paragraphs)
                             {
                                 if (p.Extra != null)

@@ -119,6 +119,7 @@ public class LanguageSettingsShortcuts
     public string ShowAlignmentPicker { get; set; }
     public string AddOrEditBookmark { get; set; }
     public string ListBookmarks { get; set; }
+    public string ToggleBookmark { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -243,5 +244,6 @@ public class LanguageSettingsShortcuts
         ShowAlignmentPicker = "Alignment";
         AddOrEditBookmark = "Add or edit bookmark";
         ListBookmarks = "List bookmarks";
+        ToggleBookmark = "Toggle bookmark (selected lines, no text)";
     }
 }
