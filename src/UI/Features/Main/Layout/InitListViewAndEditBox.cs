@@ -633,6 +633,7 @@ public static class InitListViewAndEditBox
         {
             Text = Se.Language.General.Text,
             FontWeight = FontWeight.Bold,
+            VerticalAlignment = VerticalAlignment.Center,
         };
 
         var bookmarkIcon = new Icon
@@ -640,17 +641,32 @@ public static class InitListViewAndEditBox
             DataContext = vm,
             Value = IconNames.Bookmark,
             Foreground = new SolidColorBrush(Se.Settings.Appearance.BookmarkColor.FromHexToColor()),
-            VerticalAlignment = VerticalAlignment.Center,
             [!Visual.IsVisibleProperty] = new Binding(nameof(vm.SelectedSubtitle) + "." + nameof(SubtitleLineViewModel.Bookmark)) { Converter = new NotNullConverter() },
-            Margin = new Thickness(6, 0, 0, 0),
+            Margin = new Thickness(6, 0, 0, 1),
+            VerticalAlignment =  VerticalAlignment.Center,
         };
-
+        bookmarkIcon.PointerPressed += (_, __) =>
+        {
+            if (vm.AddOrEditBookmarkCommand.CanExecute(null))
+            {
+                vm.AddOrEditBookmarkCommand.Execute(null);
+            }
+        };
         var bookmarkLabel = new Label
         {
+            FontSize = 10,
+            VerticalAlignment = VerticalAlignment.Center,
             DataContext = vm,
             Foreground = new SolidColorBrush(Se.Settings.Appearance.BookmarkColor.FromHexToColor()),
             [!Label.ContentProperty] = new Binding(nameof(vm.SelectedSubtitle) + "." + nameof(SubtitleLineViewModel.Bookmark)) { Converter = new TextOneLineShortConverter() },
             [!Label.IsVisibleProperty] = new Binding(nameof(vm.SelectedSubtitle) + "." + nameof(SubtitleLineViewModel.Bookmark)) { Converter = new NotNullConverter() },
+        };
+        bookmarkLabel.PointerPressed += (_, __) =>
+        {
+            if (vm.AddOrEditBookmarkCommand.CanExecute(null))
+            {
+                vm.AddOrEditBookmarkCommand.Execute(null);
+            }
         };
 
         var panelForTextLabel = new StackPanel
