@@ -1742,6 +1742,33 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void GoToNextBookmark()
+    {
+        var selected = SelectedSubtitle;
+        if (selected == null)
+        {
+            return;
+        }
+
+        var idx = Subtitles.IndexOf(selected);
+        if (idx < 0)
+        {
+            return;
+        }
+
+        for (var i = idx + 1; i < Subtitles.Count; i++)
+        {
+            if (Subtitles[i].Bookmark != null)
+            {
+                SelectAndScrollToSubtitle(Subtitles[i]);
+                return;
+            }
+        }
+
+        ShowStatus(Se.Language.General.NothingFound);
+    }
+
+    [RelayCommand]
     private async Task CommandShowSettingsLanguage()
     {
         var viewModel = await _windowService.ShowDialogAsync<LanguageWindow, LanguageViewModel>(Window!);

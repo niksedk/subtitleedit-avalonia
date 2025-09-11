@@ -120,6 +120,7 @@ public class LanguageSettingsShortcuts
     public string AddOrEditBookmark { get; set; }
     public string ListBookmarks { get; set; }
     public string ToggleBookmark { get; set; }
+    public string GoToNextBookmark { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -245,5 +246,6 @@ public class LanguageSettingsShortcuts
         AddOrEditBookmark = "Add or edit bookmark";
         ListBookmarks = "List bookmarks";
         ToggleBookmark = "Toggle bookmark (selected lines, no text)";
+        GoToNextBookmark = "Go to next bookmark";
     }
 }

@@ -343,6 +343,7 @@ public class LanguageGeneral
     public string GoTo { get; set; }
     public string BookmarkDeleteSelectedQuestion { get; set; }
     public string BookmarkClearQuestion { get; set; }
+    public string NothingFound { get; set; }
 
     public LanguageGeneral()
     {
@@ -684,5 +685,6 @@ public class LanguageGeneral
         GoTo = "Go to";
         BookmarkDeleteSelectedQuestion= "Delete selected bookmark?";
         BookmarkClearQuestion = "Clear all bookmarks?";
+        NothingFound = "Nothing found";
     }
 }
