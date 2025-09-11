@@ -11,10 +11,12 @@ public partial class BookmarkEditViewModel : ObservableObject
     [ObservableProperty] private string _title;
     [ObservableProperty] private string? _bookmarkText;
     [ObservableProperty] private bool _showRemoveButton;
+    [ObservableProperty] private bool _showListButton;
 
     public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
+    public bool ListPressed { get; private set; }
 
     public BookmarkEditViewModel()
     {
@@ -26,6 +28,13 @@ public partial class BookmarkEditViewModel : ObservableObject
     private void Ok()
     {
         OkPressed = true;
+        Window?.Close();
+    }
+
+    [RelayCommand]
+    private void List()
+    {
+        ListPressed = true;
         Window?.Close();
     }
 
@@ -52,11 +61,12 @@ public partial class BookmarkEditViewModel : ObservableObject
         }
     }
 
-    internal void Initialize(string? bookmark)
+    internal void Initialize(string? bookmark, System.Collections.Generic.List<Main.SubtitleLineViewModel> allBookmarks)
     {
         Title = bookmark == null ? Se.Language.General.BookmarkAdd : Se.Language.General.BookmarkEdit;
         BookmarkText = bookmark ?? string.Empty;
         ShowRemoveButton = bookmark != null;
+        ShowListButton = allBookmarks.Count > 1 && bookmark != null;
     }
 
     internal void OnTextBoxKeyDown(KeyEventArgs args)

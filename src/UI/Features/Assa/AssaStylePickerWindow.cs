@@ -94,7 +94,7 @@ public class AssaStylePickerWindow : Window
             Columns =
             {
                 new DataGridTemplateColumn
-               {
+                {
                     Header = Se.Language.General.Enabled,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     CellTemplate = new FuncDataTemplate<StyleDisplay>((item, _) =>

@@ -1669,13 +1669,18 @@ public partial class MainViewModel :
         var result = await _windowService.ShowDialogAsync<BookmarkEditWindow, BookmarkEditViewModel>(Window!, vm =>
         {
             var bookmark = selected.Bookmark;
-            vm.Initialize(bookmark);
+            var allBookmarks = Subtitles.Where(p => p.Bookmark != null).ToList();
+            vm.Initialize(bookmark, allBookmarks);
         });
 
         if (result.OkPressed)
         {
             selected.Bookmark = result.BookmarkText;
             new BookmarkPersistence(GetUpdateSubtitle(), _subtitleFileName).Save();
+        }
+        else if (result.ListPressed)
+        {
+            await ListBookmarks();
         }
 
         _shortcutManager.ClearKeys();
@@ -1696,7 +1701,7 @@ public partial class MainViewModel :
                 item.Bookmark = null;
             }
         }
-        
+
         new BookmarkPersistence(GetUpdateSubtitle(), _subtitleFileName).Save();
 
         _shortcutManager.ClearKeys();
@@ -1714,10 +1719,9 @@ public partial class MainViewModel :
         var result = await _windowService.ShowDialogAsync<BookmarksListWindow, BookmarksListViewModel>(Window!,
             vm => { vm.Initialize(Subtitles.Where(p => p.Bookmark != null).ToList()); });
 
-        if (result.OkPressed)
+        if (result.GoToPressed && result.SelectedSubtitle != null)
         {
-            //selected.Bookmark = result.BookmarkText;
-            //new BookmarkPersistence(GetUpdateSubtitle(), _subtitleFileName).Save();
+            SelectAndScrollToSubtitle(result.SelectedSubtitle);
         }
 
         _shortcutManager.ClearKeys();

@@ -668,6 +668,19 @@ public static class InitListViewAndEditBox
                 vm.AddOrEditBookmarkCommand.Execute(null);
             }
         };
+        var panelBookmark = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            [!Label.IsVisibleProperty] = new Binding(nameof(vm.SelectedSubtitle)) { Converter = new NotNullConverter() },
+            Children =
+            {
+                bookmarkIcon,
+                bookmarkLabel,
+            }
+        };  
+
 
         var panelForTextLabel = new StackPanel
         {
@@ -677,8 +690,7 @@ public static class InitListViewAndEditBox
             Children =
             {
                 textLabel,
-                bookmarkIcon,
-                bookmarkLabel,
+                panelBookmark,
             }
         };
 

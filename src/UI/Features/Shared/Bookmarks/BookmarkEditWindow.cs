@@ -36,10 +36,11 @@ public class BookmarkEditWindow : Window
         textBox.Bind(TextBox.TextProperty, new Avalonia.Data.Binding(nameof(vm.BookmarkText)) { Mode = Avalonia.Data.BindingMode.TwoWay }); 
         textBox.KeyDown += (sender, args) => vm.OnTextBoxKeyDown(args);
 
+        var buttonList = UiUtil.MakeButton(Se.Language.General.BookmarksList, vm.ListCommand).WithBindIsVisible(nameof(vm.ShowListButton));
         var buttonRemove = UiUtil.MakeButton(Se.Language.General.Remove, vm.DeleteCommand).WithBindIsVisible(nameof(vm.ShowRemoveButton));
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar(buttonRemove, buttonOk, buttonCancel);
+        var panelButtons = UiUtil.MakeButtonBar(buttonList, buttonRemove, buttonOk, buttonCancel);
 
         var grid = new Grid
         {

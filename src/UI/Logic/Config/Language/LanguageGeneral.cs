@@ -340,6 +340,9 @@ public class LanguageGeneral
     public string BookmarkEdit { get; set; }
     public string BookmarksList { get; set; }
     public string OpenDictionaryFolder { get; set; }
+    public string GoTo { get; set; }
+    public string BookmarkDeleteSelectedQuestion { get; set; }
+    public string BookmarkClearQuestion { get; set; }
 
     public LanguageGeneral()
     {
@@ -678,5 +681,8 @@ public class LanguageGeneral
         BookmarkEdit = "Edit bookmark";
         BookmarksList = "List bookmarks";
         OpenDictionaryFolder = "Open dictionary folder";
+        GoTo = "Go to";
+        BookmarkDeleteSelectedQuestion= "Delete selected bookmark?";
+        BookmarkClearQuestion = "Clear all bookmarks?";
     }
 }
