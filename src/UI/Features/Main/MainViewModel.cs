@@ -9,7 +9,6 @@ using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.BluRaySup;
-using Nikse.SubtitleEdit.Core.Cea708.Commands;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
@@ -144,6 +143,7 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _hasFormatStyle;
     [ObservableProperty] private bool _areAssaContentMenuItemsVisible;
     [ObservableProperty] private bool _selectCurrentSubtitleWhilePlaying;
+    [ObservableProperty] private bool _waveformCenter;
     [ObservableProperty] private bool _isRightToLeftEnabled;
 
     public DataGrid SubtitleGrid { get; set; }
@@ -302,6 +302,7 @@ public partial class MainViewModel :
         ShowColumnCps = Se.Settings.General.ShowColumnCps;
         ShowColumnWpm = Se.Settings.General.ShowColumnWpm;
         SelectCurrentSubtitleWhilePlaying = Se.Settings.General.SelectCurrentSubtitleWhilePlaying;
+        WaveformCenter = Se.Settings.Waveform.CenterVideoPosition;
         EditTextBoxOriginal = new TextBox();
         EditTextCharactersPerSecondOriginal = string.Empty;
         EditTextCharactersPerSecondBackgroundOriginal = Brushes.Transparent;
@@ -2223,7 +2224,7 @@ public partial class MainViewModel :
                 idx = _findService.FindNext(result.SearchText, subs, currentLineIndex, currentCharIndex);
             }
             else
-            { 
+            {
                 idx = _findService.FindPrevious(result.SearchText, subs, currentLineIndex, currentCharIndex);
             }
 
@@ -2500,27 +2501,36 @@ public partial class MainViewModel :
     [RelayCommand]
     private void Unbreak()
     {
-        var s = SelectedSubtitle;
-        if (s == null)
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (selectedItems.Count == 0)
         {
             return;
         }
 
-        s.Text = Utilities.UnbreakLine(s.Text);
-        _shortcutManager.ClearKeys();
+        foreach (var s in selectedItems)
+        {
+            s.Text = Utilities.UnbreakLine(s.Text);
+        }
+
+        _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
     private void AutoBreak()
     {
-        var s = SelectedSubtitle;
-        if (s == null)
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (selectedItems.Count == 0)
         {
             return;
         }
 
-        s.Text = Utilities.AutoBreakLine(s.Text);
-        _shortcutManager.ClearKeys();
+        foreach (var s in selectedItems)
+        {
+            s.Text = Utilities.AutoBreakLine(s.Text);
+
+        }
+
+        _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
@@ -5907,7 +5917,7 @@ public partial class MainViewModel :
                 av.CurrentVideoPositionSeconds = vp.Position;
                 var isPlaying = vp.IsPlaying;
 
-                if (Se.Settings.Waveform.CenterVideoPosition)
+                if (WaveformCenter)
                 {
                     // calculate the center position based on the waveform width
                     var waveformHalfSeconds = (av.EndPositionSeconds - av.StartPositionSeconds) / 2.0;
@@ -6315,5 +6325,23 @@ public partial class MainViewModel :
                 SetSubtitles(_subtitle);
             }
         }
+    }
+
+    internal void AutoSelectOnPlayCheckedChanged()
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            Task.Delay(50);
+            Se.Settings.General.SelectCurrentSubtitleWhilePlaying = SelectCurrentSubtitleWhilePlaying;
+        });
+    }
+
+    internal void WaveformCenterCheckedChanged()
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            Task.Delay(50);
+            Se.Settings.General.SelectCurrentSubtitleWhilePlaying = SelectCurrentSubtitleWhilePlaying;
+        });
     }
 }

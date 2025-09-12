@@ -77,4 +77,5 @@ internal class IconNames
     public const string Bookmark = "mdi-bookmark";
     public const string History = "mdi-history";
     public const string MenuDown = "mdi-menu-down";
+    public const string AnimationPlay = "mdi-animation-play";
 }

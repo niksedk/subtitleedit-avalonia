@@ -188,7 +188,7 @@ public class InitWaveform
 
         var iconHorizontal = new Icon
         {
-            Value = IconNames.ArrowLeftRightBold, 
+            Value = IconNames.ArrowLeftRightBold,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(10, 0, 4, 0)
         };
@@ -200,6 +200,7 @@ public class InitWaveform
             Width = 80,
             VerticalAlignment = VerticalAlignment.Center,
             Value = 100,
+            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.ZoomHorizontalHint, shortcuts),
         };
         sliderHorizontalZoom.TemplateApplied += (s, e) =>
         {
@@ -232,6 +233,7 @@ public class InitWaveform
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 10, 0),
             Value = 0,
+            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.ZoomVerticalHint, shortcuts),
         };
         sliderVerticalZoom.TemplateApplied += (s, e) =>
         {
@@ -249,30 +251,48 @@ public class InitWaveform
             }
         };
 
-        var labelAutoSelectOnPlay = UiUtil.MakeTextBlock(Se.Language.Main.SelectCurrentLineWhilePlaying).WithMarginRight(2);
-        var checkBoxAutoSelectOnPlay = UiUtil.MakeCheckBox(vm, nameof(vm.SelectCurrentSubtitleWhilePlaying)).WithMarginRight(10);
+        var toggleButtonAutoSelectOnPlay = new ToggleButton
+        {
+            DataContext = vm,
+            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(vm.SelectCurrentSubtitleWhilePlaying)) { Mode = BindingMode.TwoWay },
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(3, 0, 0, 0),
+            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.SelectCurrentLineWhilePlayingHint, shortcuts),
+        };
+        Attached.SetIcon(toggleButtonAutoSelectOnPlay, IconNames.AnimationPlay);
+        toggleButtonAutoSelectOnPlay.IsCheckedChanged += (s, e) => vm.AutoSelectOnPlayCheckedChanged();
+
+        var toggleButtonCenter = new ToggleButton
+        {
+            DataContext = vm,
+            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(vm.WaveformCenter)) { Mode = BindingMode.TwoWay },
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(3, 0, 0, 0),
+            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.CenterWaveformHint, shortcuts),
+        };
+        Attached.SetIcon(toggleButtonCenter, IconNames.AlignHorizontalCenter);
+        toggleButtonCenter.IsCheckedChanged += (s, e) => vm.WaveformCenterCheckedChanged();
 
         var buttonMore = new Button
         {
-            Margin = new Thickness(0, 0, 3, 0),
+            Margin = new Thickness(8, 0, 0, 0),
         };
         Attached.SetIcon(buttonMore, "fa-ellipsis-v");
-
 
         controlsPanel.Children.Add(buttonPlay);
         controlsPanel.Children.Add(buttonNew);
         controlsPanel.Children.Add(buttonSetStartAndOffsetTheRest);
         controlsPanel.Children.Add(buttonSetStart);
         controlsPanel.Children.Add(buttonSetEnd);
-      //  controlsPanel.Children.Add(buttonRepeat);
-        controlsPanel.Children.Add(UiUtil.MakeSeparatorForHorizontal());
+        //  controlsPanel.Children.Add(buttonRepeat);
+        //controlsPanel.Children.Add(UiUtil.MakeSeparatorForHorizontal());
         controlsPanel.Children.Add(iconHorizontal);
         controlsPanel.Children.Add(sliderHorizontalZoom);
         controlsPanel.Children.Add(iconVertical);
         controlsPanel.Children.Add(sliderVerticalZoom);
 
-        controlsPanel.Children.Add(labelAutoSelectOnPlay);
-        controlsPanel.Children.Add(checkBoxAutoSelectOnPlay);
+        controlsPanel.Children.Add(toggleButtonAutoSelectOnPlay);
+        controlsPanel.Children.Add(toggleButtonCenter);
 
         controlsPanel.Children.Add(buttonMore);
 

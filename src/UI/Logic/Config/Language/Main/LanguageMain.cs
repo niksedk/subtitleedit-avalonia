@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Nikse.SubtitleEdit.Logic.Config.Language.Main;
+﻿namespace Nikse.SubtitleEdit.Logic.Config.Language.Main;
 
 public class LanguageMain
 {
@@ -25,7 +23,6 @@ public class LanguageMain
     public string UndoPerformedXActionLeft { get; set; }
     public string SaveXFileAs { get; set; }
     public string SaveLanguageFile { get; set; }
-    public string SelectCurrentLineWhilePlaying { get; set; }
     public string JoinedSubtitleLoaded { get; set; }
     public string CreatedEmptyTranslation { get; set; }
     public string AutoBreakHint { get; set; }
@@ -51,7 +48,6 @@ public class LanguageMain
         UndoPerformedXActionLeft = "Undo performed (actions left: {0})";
         SaveXFileAs = "Save {0} file as";
         SaveLanguageFile = "Save language file";
-        SelectCurrentLineWhilePlaying = "Select current line while playing";
         JoinedSubtitleLoaded = "Joined subtitle loaded";
         CreatedEmptyTranslation = "Created empty translation from current subtitle";
         AutoBreakHint = "Auto-break selected lines";
