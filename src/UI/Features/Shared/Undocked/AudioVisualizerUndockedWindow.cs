@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Shared;
 
@@ -12,7 +13,7 @@ public class AudioVisualizerUndockedWindow : Window
         _vm = vm;
         vm.Window = this;
         UiUtil.InitializeWindow(this);
-        Title = "Audio visualizer";
+        Title = Se.Language.General.AudioVisualizer; 
         MinWidth = 400;
         MinHeight = 100;
         Width = 800;
@@ -23,5 +24,6 @@ public class AudioVisualizerUndockedWindow : Window
 
         Loaded += vm.Onloaded;
         KeyDown += vm.OnKeyDown;
+        Closing += vm.OnClosing;
     }
 }

@@ -4,6 +4,7 @@ using Avalonia.Interactivity;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Features.Main.Layout;
+using System;
 
 namespace Nikse.SubtitleEdit.Features.Shared;
 
@@ -18,12 +19,21 @@ public partial class AudioVisualizerUndockedViewModel : ObservableObject
     public int OriginalIndex { get; set; }
     public Grid? AudioVisualizer { get; set; }
     public Main.MainViewModel? MainViewModel { get; set; }
+    public bool AllowClose { get; set; }
 
     internal void Initialize(AudioVisualizer audioVisualizer, Main.MainViewModel mainViewModel)
     {
         AudioVisualizer = InitWaveform.MakeWaveform(mainViewModel);
         mainViewModel.AudioVisualizer!.WavePeaks = audioVisualizer.WavePeaks;
         MainViewModel = mainViewModel;
+    }
+
+    internal void OnClosing(object? sender, WindowClosingEventArgs e)
+    {
+        if (!AllowClose)
+        {
+            e.Cancel = true;
+        }
     }
 
     internal void OnKeyDown(object? sender, KeyEventArgs e)

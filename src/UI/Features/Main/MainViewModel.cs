@@ -1390,8 +1390,19 @@ public partial class MainViewModel :
         var videoFileName = _videoFileName ?? string.Empty;
         VideoCloseFile();
         VideoPlayerControl = InitVideoPlayer.MakeVideoPlayer();
-        _videoPlayerUndockedViewModel?.Window?.Close();
-        _audioVisualizerUndockedViewModel?.Window?.Close();
+
+        if (_videoPlayerUndockedViewModel != null)
+        {
+            _videoPlayerUndockedViewModel.AllowClose = true;
+            _videoPlayerUndockedViewModel.Window?.Close();
+        }
+
+        if (_audioVisualizerUndockedViewModel != null)
+        {
+            _audioVisualizerUndockedViewModel.AllowClose = true;
+            _audioVisualizerUndockedViewModel.Window?.Close();
+        }
+
         VideoPlayerControl = null;
         InitLayout.MakeLayout(MainView!, this, Se.Settings.General.LayoutNumber);
 
@@ -4734,8 +4745,29 @@ public partial class MainViewModel :
                 await SaveSubtitle();
             }
 
+            CleanUp();
+
             Window.Closing -= OnClosing;
             Window.Close();
+        }
+        else
+        {
+            CleanUp();
+        }
+    }
+
+    private void CleanUp()
+    {
+        if (_videoPlayerUndockedViewModel != null)
+        {
+            _videoPlayerUndockedViewModel.AllowClose = true;
+            _videoPlayerUndockedViewModel.Window?.Close();
+        }
+
+        if (_audioVisualizerUndockedViewModel != null)
+        {
+            _audioVisualizerUndockedViewModel.AllowClose = true;
+            _audioVisualizerUndockedViewModel.Window?.Close();
         }
 
         VideoPlayerControl?.VideoPlayerInstance.Close();

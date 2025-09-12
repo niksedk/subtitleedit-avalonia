@@ -350,6 +350,7 @@ public class LanguageGeneral
     public string FoundXMatches { get; set; }
     public string FoundOneMatch { get; set; }
     public string FoundNoMatches { get; set; }
+    public string? AudioVisualizer { get; set; }
 
     public LanguageGeneral()
     {
@@ -697,5 +698,6 @@ public class LanguageGeneral
         FoundXMatches = "Found {0} matches";
         FoundOneMatch = "Found one match";
         FoundNoMatches = "Found no matches";
+        AudioVisualizer = "Audio visualizer";
     }
 }
