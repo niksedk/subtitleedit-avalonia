@@ -14,7 +14,6 @@ public interface IFindService
     IReadOnlyList<string> SearchHistory { get; }
 
     void Initialize(List<string> textLines, int currentLineIndex, bool wholeWord, FindMode findMode);
-    //int Find(string searchText, List<string> textLines, int currentLineIndex, int startTextIndex);
     int FindNext(string searchText, List<string> textLines, int currentLineIndex, int startTextIndex);
     int FindPrevious(string searchText, List<string> textLines, int currentLineIndex, int startTextIndex);
     int Count(string searchText);

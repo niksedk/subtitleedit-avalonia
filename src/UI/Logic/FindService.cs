@@ -15,7 +15,7 @@ public partial class FindService : IFindService
 
     private List<string> _textLines = new List<string>();
     private readonly List<string> _searchHistory = new List<string>();
-    private const int MaxSearchHistoryItems = 20;
+    private const int MaxSearchHistoryItems = 10;
 
     public IReadOnlyList<string> SearchHistory => _searchHistory.AsReadOnly();
 
@@ -27,27 +27,6 @@ public partial class FindService : IFindService
         CurrentFindMode = findMode;
         ResetSearchState();
     }
-
-    //public int Find(string searchText, List<string> textLines, int startLineIndex, int startTextIndex)
-    //{
-    //    if (string.IsNullOrEmpty(searchText))
-    //    {
-    //        ResetSearchState();
-    //        return -1;
-    //    }
-
-    //    _textLines = textLines;
-    //    SearchText = searchText;
-    //    AddToSearchHistory(searchText);
-    //    ResetSearchState();
-
-    //    var result = FindInList(searchText, startLineIndex, 0);
-    //    CurrentLineNumber = result.lineIndex;
-    //    CurrentTextIndex = result.textIndex;
-    //    CurrentTextFound = result.foundText;
-
-    //    return CurrentLineNumber;
-    //}
 
     public int FindNext(string searchText, List<string> textLines, int startLineIndex, int startTextIndex)
     {

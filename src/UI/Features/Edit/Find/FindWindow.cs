@@ -11,7 +11,7 @@ namespace Nikse.SubtitleEdit.Features.Edit.Find;
 public class FindWindow : Window
 {
     private readonly FindViewModel _vm;
-    
+
     public FindWindow(FindViewModel vm)
     {
         UiUtil.InitializeWindow(this);
@@ -23,13 +23,16 @@ public class FindWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        var textBoxFind = new TextBox
+        var textBoxFind = new AutoCompleteBox
         {
+            DataContext = vm,
             VerticalAlignment = VerticalAlignment.Center,
-            MinWidth = 180,
+            MinWidth = 200,
             Margin = new Thickness(0, 0, 0, 3),
             Watermark = Se.Language.Edit.Find.SearchTextWatermark,
-            [!TextBox.TextProperty] = new Binding(nameof(vm.SearchText)) { Mode = BindingMode.TwoWay }   
+            ItemsSource = vm.SearchHistory,
+            [!AutoCompleteBox.TextProperty] = new Binding(nameof(vm.SearchText)),
+            MinimumPrefixLength = 0,
         };
         textBoxFind.KeyDown += vm.FindTextBoxKeyDown;
 
@@ -81,7 +84,7 @@ public class FindWindow : Window
         var buttonFindPrevious = UiUtil.MakeButton(Se.Language.Edit.Find.FindPrevious, vm.FindPreviousCommand)
             .WithLeftAlignment()
             .WithMinWidth(150)
-            .WithMargin(0,0,0, 10);
+            .WithMargin(0, 0, 0, 10);
         var buttonFindNext = UiUtil.MakeButton(Se.Language.Edit.Find.FindNext, vm.FindNextCommand)
             .WithLeftAlignment()
             .WithMinWidth(150)
@@ -110,7 +113,7 @@ public class FindWindow : Window
                 buttonCount,
                 textBlockCountResult
             }
-        };  
+        };
 
         var grid = new Grid
         {
@@ -137,7 +140,7 @@ public class FindWindow : Window
         grid.Add(panelButtons, 0, 1, 3, 1);
 
         Content = grid;
-        
+
         Activated += delegate { textBoxFind.Focus(); }; // hack to make OnKeyDown work
     }
 

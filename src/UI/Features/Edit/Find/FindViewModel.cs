@@ -4,14 +4,15 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using static Nikse.SubtitleEdit.Logic.FindService;
 
 namespace Nikse.SubtitleEdit.Features.Edit.Find;
 
 public partial class FindViewModel : ObservableObject
 {
+    [ObservableProperty] private ObservableCollection<string> _searchHistory;
     [ObservableProperty] private string _searchText;
     [ObservableProperty] private bool _wholeWord;
     [ObservableProperty] private bool _findTypeNormal;
@@ -29,6 +30,7 @@ public partial class FindViewModel : ObservableObject
 
     public FindViewModel()
     {
+        SearchHistory = new ObservableCollection<string>(new List<string>());
         SearchText = string.Empty;
         CountResult = string.Empty;
         LoadSettings();
@@ -56,6 +58,12 @@ public partial class FindViewModel : ObservableObject
     {
         Se.Settings.Edit.Find.FindWholeWords = WholeWord;
         Se.Settings.Edit.Find.FindSearchType.ToString();
+    }
+
+    [RelayCommand]
+    private void ShowHistory(string text)
+    {
+        SearchText = text;
     }
 
     [RelayCommand]
@@ -132,5 +140,11 @@ public partial class FindViewModel : ObservableObject
         _findService = findService;
         _subs = subs;
         SearchText = selectedText.Trim();
+
+        SearchHistory.Clear();
+        foreach (var item in findService.SearchHistory)
+        {
+            SearchHistory.Add(item);
+        }
     }
 }

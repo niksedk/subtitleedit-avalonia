@@ -75,4 +75,6 @@ internal class IconNames
     public const string Italic = "mdi-format-italic";
     public const string Bold = "mdi-format-bold";
     public const string Bookmark = "mdi-bookmark";
+    public const string History = "mdi-history";
+    public const string MenuDown = "mdi-menu-down";
 }

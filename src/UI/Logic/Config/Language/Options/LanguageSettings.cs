@@ -264,7 +264,7 @@ public class LanguageSettings
         ShowFullscreenButton = "Show fullscreen button";
         AutoOpenVideoFile = "Auto-open video file when opening subtitle";
         DownloadMpv = "Download mpv";
-        GoToLineNumberSetsVideoPosition = "Go to line number also sets video position";
+        GoToLineNumberSetsVideoPosition = "Go-to-line-number also sets video position";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)
