@@ -175,6 +175,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     private void SaveSettings()
     {
         Se.Settings.Tools.AudioToText.WhisperAutoAdjustTimings = DoAdjustTimings;
+        Se.Settings.Tools.AudioToText.PostProcessing = DoPostProcessing;
         Se.Settings.Tools.AudioToText.WhisperCustomCommandLineArguments = Parameters;
         Se.Settings.Tools.AudioToText.WhisperCustomCommandLineArgumentsPurfviewBlank = Parameters == "--standard";
         Se.Settings.Tools.AudioToText.WhisperChoice = SelectedEngine.Choice;
