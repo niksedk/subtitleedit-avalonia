@@ -33,6 +33,11 @@ public partial class AudioVisualizerUndockedViewModel : ObservableObject
         if (!AllowClose)
         {
             e.Cancel = true;
+
+            if (Window != null)
+            {
+                Window.WindowState = WindowState.Minimized;
+            }
         }
     }
 

@@ -27,6 +27,7 @@ public partial class FindViewModel : ObservableObject
 
     private IFindService? _findService;
     private List<string> _subs = new List<string>();
+    private IFindResult? _findResult;
 
     public FindViewModel()
     {
@@ -70,9 +71,10 @@ public partial class FindViewModel : ObservableObject
     private void FindPrevious()
     {
         CountResult = string.Empty;
+        FindNextPressed = false;
         FindPreviousPressed = true;
         SaveSettings();
-        Window?.Close();
+        _findResult?.HandleFindResult(this);
     }
 
     [RelayCommand]
@@ -80,13 +82,16 @@ public partial class FindViewModel : ObservableObject
     {
         CountResult = string.Empty;
         FindNextPressed = true;
+        FindPreviousPressed = false;
         SaveSettings();
-        Window?.Close();
+        _findResult?.HandleFindResult(this);
     }
 
     [RelayCommand]
     private void Count()
     {
+        _findResult?.RequestFindData();
+
         CountResult = string.Empty;
         if (_findService == null || string.IsNullOrEmpty(SearchText))
         {
@@ -113,8 +118,6 @@ public partial class FindViewModel : ObservableObject
         {
             CountResult = string.Format(Se.Language.General.FoundXMatches, count);
         }
-
-        SaveSettings();
     }
 
     internal void OnKeyDown(KeyEventArgs e)
@@ -135,11 +138,12 @@ public partial class FindViewModel : ObservableObject
         }
     }
 
-    internal void Initialize(IFindService findService, List<string> subs, string selectedText)
+    internal void InitializeFindData(IFindService findService, List<string> subs, string selectedText, IFindResult findResult)
     {
         _findService = findService;
         _subs = subs;
         SearchText = selectedText.Trim();
+        _findResult = findResult;
 
         SearchHistory.Clear();
         foreach (var item in findService.SearchHistory)

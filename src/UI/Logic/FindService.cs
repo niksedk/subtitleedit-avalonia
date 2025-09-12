@@ -164,6 +164,91 @@ public partial class FindService : IFindService
         return results;
     }
 
+    public int ReplaceNext(string searchText, string replaceText, List<string> textLines, int startLineIndex, int startTextIndex)
+    {
+        if (string.IsNullOrEmpty(searchText) || textLines == null || textLines.Count == 0)
+        {
+            ResetSearchState();
+            return -1;
+        }
+
+        SearchText = searchText;
+        _textLines = textLines;
+        AddToSearchHistory(searchText);
+
+        if (startLineIndex < 0)
+        {
+            startLineIndex = 0;
+            startTextIndex = 0;
+        }
+        else
+        {
+            if (startLineIndex >= _textLines.Count)
+            {
+                return NotFound();
+            }
+
+            // If we've reached the end of current line, move to next line
+            if (startTextIndex >= _textLines[startLineIndex].Length)
+            {
+                startLineIndex++;
+                startTextIndex = 0;
+            }
+
+            if (startLineIndex >= _textLines.Count)
+            {
+                return NotFound();
+            }
+        }
+
+        var result = FindInList(searchText, startLineIndex, startTextIndex);
+        if (result.lineIndex == -1)
+        {
+            return NotFound();
+        }
+
+        // Perform the replacement
+        var replacedText = ReplaceInLine(_textLines[result.lineIndex], searchText, replaceText, result.textIndex, 1);
+        if (replacedText.replaced)
+        {
+            _textLines[result.lineIndex] = replacedText.newText;
+            CurrentLineNumber = result.lineIndex;
+            CurrentTextIndex = result.textIndex;
+            CurrentTextFound = replaceText ?? string.Empty;
+            return result.lineIndex;
+        }
+
+        return NotFound();
+    }
+
+    public int ReplaceAll(string searchText, string replaceText)
+    {
+        if (string.IsNullOrEmpty(searchText) || _textLines.Count == 0)
+        {
+            return 0;
+        }
+
+        int totalReplacements = 0;
+
+        for (int lineIndex = 0; lineIndex < _textLines.Count; lineIndex++)
+        {
+            var replacedText = ReplaceInLine(_textLines[lineIndex], searchText, replaceText);
+            if (replacedText.replaced)
+            {
+                _textLines[lineIndex] = replacedText.newText;
+                totalReplacements += replacedText.replacementCount;
+            }
+        }
+
+        if (totalReplacements > 0)
+        {
+            AddToSearchHistory(searchText);
+            ResetSearchState();
+        }
+
+        return totalReplacements;
+    }
+
     public void Reset()
     {
         ResetSearchState();
@@ -286,6 +371,143 @@ public partial class FindService : IFindService
 
             default:
                 return (false, -1, string.Empty);
+        }
+    }
+
+    private (bool replaced, string newText, int replacementCount) ReplaceInLine(string line, string searchText, string replaceText, int startIndex = 0, int maxReplacements = -1)
+    {
+        if (string.IsNullOrEmpty(line))
+        {
+            return (false, line, 0);
+        }
+
+        replaceText = replaceText ?? string.Empty;
+
+        switch (CurrentFindMode)
+        {
+            case FindMode.RegularExpression:
+                return ReplaceWithRegex(line, searchText, replaceText, startIndex, maxReplacements);
+
+            default:
+                return ReplaceWithStringComparison(line, searchText, replaceText, startIndex, maxReplacements);
+        }
+    }
+
+    private (bool replaced, string newText, int replacementCount) ReplaceWithRegex(string line, string searchText, string replaceText, int startIndex, int maxReplacements)
+    {
+        try
+        {
+            var regex = new Regex(searchText);
+
+            if (startIndex > 0 && maxReplacements == 1)
+            {
+                // For single replacement starting at a specific index
+                var beforePart = line.Substring(0, startIndex);
+                var afterPart = line.Substring(startIndex);
+
+                var newAfterPart = regex.Replace(afterPart, replaceText, 1);
+                var totalReplacements = newAfterPart != afterPart ? 1 : 0;
+
+                return (totalReplacements > 0, beforePart + newAfterPart, totalReplacements);
+            }
+            else
+            {
+                // Replace all or limited occurrences
+                var newText = maxReplacements == -1
+                    ? regex.Replace(line, replaceText)
+                    : regex.Replace(line, replaceText, maxReplacements);
+
+                var totalReplacements = regex.Matches(line).Count;
+                if (maxReplacements != -1 && totalReplacements > maxReplacements)
+                {
+                    totalReplacements = maxReplacements;
+                }
+
+                return (newText != line, newText, totalReplacements);
+            }
+        }
+        catch (ArgumentException)
+        {
+            return (false, line, 0);
+        }
+    }
+
+    private (bool replaced, string newText, int replacementCount) ReplaceWithStringComparison(string line, string searchText, string replaceText, int startIndex, int maxReplacements)
+    {
+        var comparison = CurrentFindMode == FindMode.CaseSensitive
+            ? StringComparison.Ordinal
+            : StringComparison.OrdinalIgnoreCase;
+
+        if (WholeWord)
+        {
+            return ReplaceWholeWordWithStringComparison(line, searchText, replaceText, startIndex, maxReplacements, comparison);
+        }
+
+        string workingLine = line;
+        int totalReplacements = 0;
+        int currentIndex = startIndex;
+
+        while (currentIndex < workingLine.Length && (maxReplacements == -1 || totalReplacements < maxReplacements))
+        {
+            var index = workingLine.IndexOf(searchText, currentIndex, comparison);
+            if (index == -1)
+            {
+                break;
+            }
+
+            workingLine = workingLine.Substring(0, index) + replaceText + workingLine.Substring(index + searchText.Length);
+            totalReplacements++;
+            currentIndex = index + replaceText.Length;
+
+            // For single replacement, break after first replacement
+            if (maxReplacements == 1)
+            {
+                break;
+            }
+        }
+
+        return (totalReplacements > 0, workingLine, totalReplacements);
+    }
+
+    private (bool replaced, string newText, int replacementCount) ReplaceWholeWordWithStringComparison(string line, string searchText, string replaceText, int startIndex, int maxReplacements, StringComparison comparison)
+    {
+        var pattern = $@"\b{Regex.Escape(searchText)}\b";
+        var options = comparison == StringComparison.OrdinalIgnoreCase ? RegexOptions.IgnoreCase : RegexOptions.None;
+
+        try
+        {
+            var regex = new Regex(pattern, options);
+
+            if (startIndex > 0 && maxReplacements == 1)
+            {
+                // For single replacement starting at a specific index
+                var beforePart = line.Substring(0, startIndex);
+                var afterPart = line.Substring(startIndex);
+
+                var newAfterPart = regex.Replace(afterPart, replaceText, 1);
+                var totalReplacements = newAfterPart != afterPart ? 1 : 0;
+
+                return (totalReplacements > 0, beforePart + newAfterPart, totalReplacements);
+            }
+            else
+            {
+                // Replace all or limited occurrences
+                var newText = maxReplacements == -1
+                    ? regex.Replace(line, replaceText)
+                    : regex.Replace(line, replaceText, maxReplacements);
+
+                var totalReplacements = regex.Matches(line).Count;
+                if (maxReplacements != -1 && totalReplacements > maxReplacements)
+                {
+                    totalReplacements = maxReplacements;
+                }
+
+                return (newText != line, newText, totalReplacements);
+            }
+        }
+        catch (ArgumentException)
+        {
+            return (false, line, 0);
         }
     }
 

@@ -39,6 +39,11 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
         if (!AllowClose)
         {
             e.Cancel = true;
+
+            if (Window != null)
+            {
+                Window.WindowState = WindowState.Minimized;
+            }
         }
     }
 

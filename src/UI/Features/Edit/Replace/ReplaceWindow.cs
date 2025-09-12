@@ -4,6 +4,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Edit.Replace;
 
@@ -14,7 +15,7 @@ public class ReplaceWindow : Window
     public ReplaceWindow(ReplaceViewModel vm)
     {
         UiUtil.InitializeWindow(this);
-        Title = "Replace";
+        Title = Se.Language.Edit.Find.ReplaceTitle;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 
@@ -22,18 +23,22 @@ public class ReplaceWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        var textBoxFind = new TextBox
+        var textBoxFind = new AutoCompleteBox
         {
+            DataContext = vm,
             VerticalAlignment = VerticalAlignment.Center,
-            MinWidth = 180,
+            MinWidth = 200,
             Margin = new Thickness(0, 0, 0, 3),
-            Watermark = "Search text...",
-            [!TextBox.TextProperty] = new Binding(nameof(vm.SearchText)) { Mode = BindingMode.TwoWay }
+            Watermark = Se.Language.Edit.Find.SearchTextWatermark,
+            ItemsSource = vm.SearchHistory,
+            [!AutoCompleteBox.TextProperty] = new Binding(nameof(vm.SearchText)),
+            MinimumPrefixLength = 0,
         };
+        textBoxFind.KeyDown += vm.FindTextBoxKeyDown;
 
         var checkBoxWholeWord = new CheckBox
         {
-            Content = "Whole word",
+            Content = Se.Language.Edit.Find.WholeWord,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 0, 10),
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.WholeWord)) { Mode = BindingMode.TwoWay }
@@ -53,7 +58,7 @@ public class ReplaceWindow : Window
 
         var labelReplaceWith = new TextBlock
         {
-            Text = "Replace with:",
+            Text = Se.Language.Edit.Find.ReplaceWith,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 0, 3)
         };
@@ -63,7 +68,7 @@ public class ReplaceWindow : Window
             VerticalAlignment = VerticalAlignment.Center,
             MinWidth = 180,
             Margin = new Thickness(0, 0, 0, 3),
-            Watermark = "Replace text...",
+            Watermark = Se.Language.Edit.Find.ReplaceTextWatermark,
             [!TextBox.TextProperty] = new Binding(nameof(vm.ReplaceText)) { Mode = BindingMode.TwoWay }
         };
 
@@ -81,7 +86,7 @@ public class ReplaceWindow : Window
 
         var radioButtonNormal = new RadioButton
         {
-            Content = "Normal",
+            Content = Se.Language.Edit.Find.CaseSensitive,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(10, 0, 0, 3),
             [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.FindTypeNormal)) { Mode = BindingMode.TwoWay }
@@ -89,7 +94,7 @@ public class ReplaceWindow : Window
 
         var radioButtonCaseInsensitive = new RadioButton
         {
-            Content = "Case insensitive",
+            Content = Se.Language.Edit.Find.CaseInsensitive,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(10, 0, 0, 3),
             [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.FindTypeCanseInsensitive)) { Mode = BindingMode.TwoWay }
@@ -97,7 +102,7 @@ public class ReplaceWindow : Window
 
         var radioButtonRegularExpression = new RadioButton
         {
-            Content = "Regular expression",
+            Content = Se.Language.General.RegularExpression,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(10, 0, 0, 3),
             [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.FindTypeRegularExpression)) { Mode = BindingMode.TwoWay }
@@ -116,22 +121,28 @@ public class ReplaceWindow : Window
             }
         };
 
-        var buttonFindNext = UiUtil.MakeButton("Find Next", vm.FindNextCommand)
+        var buttonFindNext = UiUtil.MakeButton(Se.Language.Edit.Find.FindNext, vm.FindNextCommand)
             .WithLeftAlignment()
             .WithMinWidth(150)
             .WithMargin(0, 0, 0, 10);
-        var buttonReplaceNext = UiUtil.MakeButton("Replace next", vm.ReplaceCommand)
+        var buttonReplaceNext = UiUtil.MakeButton(Se.Language.Edit.Find.ReplaceNext, vm.ReplaceCommand)
             .WithLeftAlignment()
             .WithMinWidth(150)
             .WithMargin(0, 0, 0, 10);
-        var buttonReplaceAll = UiUtil.MakeButton("Replace all", vm.ReplaceAllCommand)
+        var buttonReplaceAll = UiUtil.MakeButton(Se.Language.Edit.Find.ReplaceAll, vm.ReplaceAllCommand)
             .WithLeftAlignment()
             .WithMinWidth(150)
             .WithMargin(0, 0, 0, 10);
-        var buttonCount = UiUtil.MakeButton("Count", vm.CountCommand)
+        var buttonCount = UiUtil.MakeButton(Se.Language.General.Count, vm.CountCommand)
             .WithLeftAlignment()
             .WithMinWidth(150)
             .WithMargin(0, 0, 0, 10);
+        var textBlockCountResult = new TextBlock
+        {
+            [!TextBlock.TextProperty] = new Binding(nameof(vm.CountResult)) { Mode = BindingMode.OneWay },
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(10, 0, 0, 0)
+        };
 
         var panelButtons = new StackPanel
         {
@@ -143,7 +154,8 @@ public class ReplaceWindow : Window
                 buttonFindNext,
                 buttonReplaceNext,
                 buttonReplaceAll,
-                buttonCount
+                buttonCount,
+                textBlockCountResult,
             }
         };
 

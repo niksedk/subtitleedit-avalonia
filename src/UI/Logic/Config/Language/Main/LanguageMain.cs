@@ -28,6 +28,8 @@ public class LanguageMain
     public string AutoBreakHint { get; set; }
     public string UnbreakHint { get; set; }
     public string ItalicHint { get; set; }
+    public string ReplacedXWithYCountZ { get; set; }
+    public string ReplacedXWithYInLineZ { get; set; }
 
     public LanguageMain()
     {
@@ -53,5 +55,7 @@ public class LanguageMain
         AutoBreakHint = "Auto-break selected lines";
         UnbreakHint = "Unbreak selected lines";
         ItalicHint = "Italic selected text";
+        ReplacedXWithYCountZ = "Replaced '{0}' with '{1}' ({2} occurrences)";
+        ReplacedXWithYInLineZ = "Replaced '{0}' with '{1}' in line {2}";
     }
 }

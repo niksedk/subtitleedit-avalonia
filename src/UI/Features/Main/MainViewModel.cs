@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
+using Nikse.SubtitleEdit.Core.AudioToText;
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
@@ -98,7 +99,8 @@ public partial class MainViewModel :
     ObservableObject,
     IAdjustCallback,
     IFocusSubtitleLine,
-    IUndoRedoClient
+    IUndoRedoClient,
+    IFindResult
 {
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _subtitles;
     [ObservableProperty] private SubtitleLineViewModel? _selectedSubtitle;
@@ -154,6 +156,11 @@ public partial class MainViewModel :
     public TextBlock StatusTextLeftLabel { get; set; }
     public MenuItem MenuReopen { get; set; }
     public AudioVisualizer? AudioVisualizer { get; set; }
+
+    VideoPlayerUndockedViewModel? _videoPlayerUndockedViewModel;
+    AudioVisualizerUndockedViewModel? _audioVisualizerUndockedViewModel;
+    FindViewModel? _findViewModel;
+    ReplaceViewModel? _replaceViewModel;
 
     private static Color _errorColor = Se.Settings.General.ErrorColor.FromHexToColor();
 
@@ -623,6 +630,18 @@ public partial class MainViewModel :
         AutoFitColumns();
 
         _mpvReloader.Reset();
+
+        if (_findViewModel != null)
+        {
+            _findViewModel.Window?.Close();
+            _findViewModel = null;
+        }
+
+        if (_replaceViewModel != null)
+        {
+            _replaceViewModel.Window?.Close();
+            _replaceViewModel = null;
+        }
 
         _shortcutManager.ClearKeys();
     }
@@ -1360,9 +1379,6 @@ public partial class MainViewModel :
 
         _shortcutManager.ClearKeys();
     }
-
-    VideoPlayerUndockedViewModel? _videoPlayerUndockedViewModel;
-    AudioVisualizerUndockedViewModel? _audioVisualizerUndockedViewModel;
 
     [RelayCommand]
     private void VideoUndockControls()
@@ -2177,7 +2193,7 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private async Task ShowFind()
+    private void ShowFind()
     {
         var selectedSubtitle = SelectedSubtitle;
         if (Subtitles.Count == 0 || selectedSubtitle == null)
@@ -2185,9 +2201,24 @@ public partial class MainViewModel :
             return;
         }
 
-        var subs = Subtitles.Select(p => p.Text).ToList();
-        var result = await _windowService.ShowDialogAsync<FindWindow, FindViewModel>(Window!, vm =>
+        if (_replaceViewModel != null)
         {
+            _replaceViewModel.Window?.Close();
+            _replaceViewModel = null;
+        }
+
+        if (_findViewModel != null && _findViewModel.Window != null && _findViewModel.Window.IsVisible)
+        {
+            _findViewModel.Window.Activate();
+            return;
+        }
+
+        var subs = Subtitles.Select(p => p.Text).ToList();
+        var result = _windowService.ShowWindow<FindWindow, FindViewModel>((window, vm) =>
+        {
+            window.Topmost = true;
+            _findViewModel = vm;
+
             var selectedText = string.Empty;
             if (EditTextBox != null && !string.IsNullOrEmpty(EditTextBox.SelectedText))
             {
@@ -2199,8 +2230,33 @@ public partial class MainViewModel :
                 selectedText = _findService.SearchText;
             }
 
-            vm.Initialize(_findService, subs, selectedText);
+            vm.InitializeFindData(_findService, subs, selectedText, this);
         });
+
+        _shortcutManager.ClearKeys();
+    }
+
+    public void RequestFindData()
+    {
+        var selectedSubtitle = SelectedSubtitle;
+        if (Subtitles.Count == 0 || selectedSubtitle == null || _findViewModel == null)
+        {
+            return;
+        }
+
+        var currentLineIndex = Subtitles.IndexOf(selectedSubtitle);
+        var currentCharIndex = EditTextBox.CaretIndex;
+        var subs = Subtitles.Select(p => p.Text).ToList();
+        _findViewModel.InitializeFindData(_findService, subs, _findService.SearchText, this);
+    }
+
+    public void HandleFindResult(FindViewModel result)
+    {
+        var selectedSubtitle = SelectedSubtitle;
+        if (Subtitles.Count == 0 || selectedSubtitle == null)
+        {
+            return;
+        }
 
         if ((result.FindNextPressed || result.FindPreviousPressed) && !string.IsNullOrEmpty(result.SearchText))
         {
@@ -2216,16 +2272,17 @@ public partial class MainViewModel :
 
             var currentLineIndex = Subtitles.IndexOf(selectedSubtitle);
             var currentCharIndex = EditTextBox.CaretIndex;
+            var subs = Subtitles.Select(p => p.Text).ToList();
             _findService.Initialize(subs, SelectedSubtitleIndex ?? 0, result.WholeWord, findMode);
 
             var idx = -1;
             if (result.FindNextPressed)
             {
-                idx = _findService.FindNext(result.SearchText, subs, currentLineIndex, currentCharIndex);
+                idx = _findService.FindNext(result.SearchText, subs, currentLineIndex, currentCharIndex + 1);
             }
             else
             {
-                idx = _findService.FindPrevious(result.SearchText, subs, currentLineIndex, currentCharIndex);
+                idx = _findService.FindPrevious(result.SearchText, subs, currentLineIndex, currentCharIndex - 1);
             }
 
             if (idx < 0)
@@ -2249,8 +2306,6 @@ public partial class MainViewModel :
                 EditTextBox.SelectionEnd = _findService.CurrentTextIndex + _findService.CurrentTextFound.Length;
             });
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -2329,16 +2384,149 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private async Task ShowReplace()
+    private void ShowReplace()
     {
         if (Subtitles.Count == 0)
         {
             return;
         }
 
-        var viewModel = await _windowService.ShowDialogAsync<ReplaceWindow, ReplaceViewModel>(Window!, vm => { });
+        if (_findViewModel != null)
+        {
+            _findViewModel.Window?.Close();
+            _findViewModel = null;
+        }
+
+        if (_replaceViewModel != null && _replaceViewModel.Window != null && _replaceViewModel.Window.IsVisible)
+        {
+            _replaceViewModel.Window.Activate();
+            return;
+        }
+
+        var subs = Subtitles.Select(p => p.Text).ToList();
+        var result = _windowService.ShowWindow<ReplaceWindow, ReplaceViewModel>((window, vm) =>
+        {
+            window.Topmost = true;
+            _replaceViewModel = vm;
+
+            var selectedText = string.Empty;
+            if (EditTextBox != null && !string.IsNullOrEmpty(EditTextBox.SelectedText))
+            {
+                selectedText = EditTextBox.SelectedText;
+            }
+
+            if (string.IsNullOrEmpty(selectedText) && !string.IsNullOrEmpty(_findService.SearchText))
+            {
+                selectedText = _findService.SearchText;
+            }
+
+            vm.InitializeFindData(_findService, subs, selectedText, this);
+        });
 
         _shortcutManager.ClearKeys();
+    }
+
+    public void HandleReplaceResult(ReplaceViewModel result)
+    {
+        var selectedSubtitle = SelectedSubtitle;
+        if (Subtitles.Count == 0 || selectedSubtitle == null)
+        {
+            return;
+        }
+
+        if ((result.FindNextPressed || result.ReplaceNextPressed || result.ReplaceAllPressed) && !string.IsNullOrEmpty(result.SearchText))
+        {
+            var findMode = FindMode.CaseSensitive;
+            if (result.FindTypeCanseInsensitive)
+            {
+                findMode = FindMode.CaseInsensitive;
+            }
+            else if (result.FindTypeRegularExpression)
+            {
+                findMode = FindMode.RegularExpression;
+            }
+
+            var currentLineIndex = Subtitles.IndexOf(selectedSubtitle);
+            var currentCharIndex = EditTextBox.CaretIndex;
+            var subs = Subtitles.Select(p => p.Text).ToList();
+            _findService.Initialize(subs, SelectedSubtitleIndex ?? 0, result.WholeWord, findMode);
+
+            var idx = -1;
+            if (result.FindNextPressed)
+            {
+                idx = _findService.FindNext(result.SearchText, subs, currentLineIndex, currentCharIndex + 1);
+            }
+            else if (result.ReplaceAllPressed)
+            {
+                var replaceCount = _findService.ReplaceAll(result.SearchText, result.ReplaceText);
+
+                for (var i = 0; i < Subtitles.Count && i < subs.Count; i++)
+                {
+                    var s = Subtitles[i];
+                    var newText = subs[i];
+                    if (newText != s.Text)
+                    {
+                        s.Text = newText;
+                    }
+                }
+
+                ShowStatus(string.Format(Se.Language.Main.ReplacedXWithYCountZ, result.SearchText, result.ReplaceText, replaceCount));
+                return;
+            }
+            else
+            {
+                idx = _findService.ReplaceNext(result.SearchText, result.ReplaceText, subs, currentLineIndex, currentCharIndex);
+                if (idx >= 0)
+                {
+                    var s = Subtitles[idx];
+                    var newText = subs[idx];
+                    if (newText != s.Text)
+                    {
+                        s.Text = newText;
+                        ShowStatus(string.Format(Se.Language.Main.ReplacedXWithYInLineZ, result.SearchText, result.ReplaceText, idx));
+                        Dispatcher.UIThread.Post(() =>
+                        {
+                            SubtitleGrid.SelectedIndex = idx;
+                            SubtitleGrid.ScrollIntoView(SubtitleGrid.SelectedItem, null);
+
+                            ShowStatus(string.Format(Se.Language.General.FoundXInLineYZ, _findService.CurrentTextFound, _findService.CurrentLineNumber + 1, _findService.CurrentTextIndex + 1));
+
+                            // wait for text box to update
+                            Task.Delay(50);
+
+                            EditTextBox.CaretIndex = _findService.CurrentTextIndex;
+                            EditTextBox.SelectionStart = _findService.CurrentTextIndex;
+                            EditTextBox.SelectionEnd = _findService.CurrentTextIndex + _findService.CurrentTextFound.Length;
+                        });
+                        return;
+                    }
+                }
+
+                ShowStatus(string.Format(Se.Language.General.XNotFound, _findService.SearchText));
+                return;
+            }
+
+            if (idx < 0)
+            {
+                ShowStatus(string.Format(Se.Language.General.XNotFound, _findService.SearchText));
+                return;
+            }
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                SubtitleGrid.SelectedIndex = idx;
+                SubtitleGrid.ScrollIntoView(SubtitleGrid.SelectedItem, null);
+
+                ShowStatus(string.Format(Se.Language.General.FoundXInLineYZ, _findService.CurrentTextFound, _findService.CurrentLineNumber + 1, _findService.CurrentTextIndex + 1));
+
+                // wait for text box to update
+                Task.Delay(50);
+
+                EditTextBox.CaretIndex = _findService.CurrentTextIndex;
+                EditTextBox.SelectionStart = _findService.CurrentTextIndex;
+                EditTextBox.SelectionEnd = _findService.CurrentTextIndex + _findService.CurrentTextFound.Length;
+            });
+        }
     }
 
     [RelayCommand]
@@ -4768,6 +4956,11 @@ public partial class MainViewModel :
 
     private void CleanUp()
     {
+        if (_findViewModel != null)
+        {
+            _findViewModel.Window?.Close();
+        }
+
         if (_videoPlayerUndockedViewModel != null)
         {
             _videoPlayerUndockedViewModel.AllowClose = true;
