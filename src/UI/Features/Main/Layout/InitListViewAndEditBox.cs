@@ -51,6 +51,7 @@ public static class InitListViewAndEditBox
         {
             Header = Se.Language.General.NumberSymbol,
             Width = new DataGridLength(50),
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
             CellTemplate = new FuncDataTemplate<SubtitleLineViewModel>((value, namescope) =>
                 new StackPanel
                 {
@@ -62,15 +63,14 @@ public static class InitListViewAndEditBox
                          new Icon
                          {
                             Value = IconNames.Bookmark,
-                            Foreground = new SolidColorBrush(Se.Settings.Appearance.BookmarkColor.FromHexToColor()), 
+                            Foreground = new SolidColorBrush(Se.Settings.Appearance.BookmarkColor.FromHexToColor()),
                             VerticalAlignment = VerticalAlignment.Center,
-                            [!Visual.IsVisibleProperty] = new Binding(nameof(SubtitleLineViewModel.Bookmark)) { Converter = new NotNullConverter() },                            
+                            [!Visual.IsVisibleProperty] = new Binding(nameof(SubtitleLineViewModel.Bookmark)) { Converter = new NotNullConverter() },
                          },
                          UiUtil.MakeLabel().WithBindText(value, new Binding(nameof(SubtitleLineViewModel.Number)))
                     }
                 })
         });
-
 
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
@@ -643,7 +643,7 @@ public static class InitListViewAndEditBox
             Foreground = new SolidColorBrush(Se.Settings.Appearance.BookmarkColor.FromHexToColor()),
             [!Visual.IsVisibleProperty] = new Binding(nameof(vm.SelectedSubtitle) + "." + nameof(SubtitleLineViewModel.Bookmark)) { Converter = new NotNullConverter() },
             Margin = new Thickness(6, 0, 0, 1),
-            VerticalAlignment =  VerticalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
         };
         bookmarkIcon.PointerPressed += (_, __) =>
         {
@@ -679,7 +679,7 @@ public static class InitListViewAndEditBox
                 bookmarkIcon,
                 bookmarkLabel,
             }
-        };  
+        };
 
 
         var panelForTextLabel = new StackPanel
