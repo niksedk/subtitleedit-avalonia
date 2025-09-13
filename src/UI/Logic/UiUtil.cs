@@ -2099,52 +2099,61 @@ public static class UiUtil
             return;
         }
 
-        if (existing.IsFullScreen)
+        // Reconstruct the last known rect
+        var desired = new PixelPoint(existing.X, existing.Y);
+        var windowRect = new PixelRect(desired, new PixelSize((int)existing.Width, (int)existing.Height));
+
+        var screens = window.Screens.All;
+        bool fits = screens.Any(s => s.Bounds.Intersects(windowRect));
+
+        if (!fits)
         {
-            window.WindowState = WindowState.FullScreen;
-            return;
-        }
-        else if (existing.IsMaximized)
-        {
-            window.WindowState = WindowState.Maximized;
-            return;
+            // fallback: check if the old screen bounds still exist
+            var targetScreen = screens.FirstOrDefault(s =>
+                s.Bounds.X == existing.ScreenX &&
+                s.Bounds.Y == existing.ScreenY &&
+                s.Bounds.Width == existing.ScreenWidth &&
+                s.Bounds.Height == existing.ScreenHeight);
+
+            if (targetScreen != null)
+            {
+                // center on that screen
+                var px = targetScreen.Bounds.X + (targetScreen.Bounds.Width - (int)existing.Width) / 2;
+                var py = targetScreen.Bounds.Y + (targetScreen.Bounds.Height - (int)existing.Height) / 2;
+                desired = new PixelPoint(px, py);
+            }
+            else
+            {
+                // ultimate fallback: center on primary screen
+                var primary = window.Screens.Primary;
+                if (primary != null)
+                {
+                    var px = primary.Bounds.X + (primary.Bounds.Width - (int)existing.Width) / 2;
+                    var py = primary.Bounds.Y + (primary.Bounds.Height - (int)existing.Height) / 2;
+                    desired = new PixelPoint(px, py);
+                }
+            }
         }
 
-        // Restore normal size & position
+        // Apply size & position before maximizing
         if (existing.Width > 0 && existing.Height > 0)
         {
             window.Width = existing.Width;
             window.Height = existing.Height;
         }
+        window.Position = desired;
 
-        var desired = new PixelPoint(existing.X, existing.Y);
-
-        // Get all screens
-        var screens = window.Screens.All;
-
-        // Check if the desired rect fits inside any screen
-        var windowRect = new PixelRect(desired, new PixelSize((int)window.Width, (int)window.Height));
-
-        bool fits = screens.Any(s => s.Bounds.Intersects(windowRect));
-
-        if (fits)
+        if (existing.IsFullScreen)
         {
-            window.Position = desired;
+            window.WindowState = WindowState.FullScreen;
+        }
+        else if (existing.IsMaximized)
+        {
+            window.WindowState = WindowState.Maximized;
         }
         else
         {
-            // Fallback: center on primary screen
-            var primary = window.Screens.Primary;
-            if (primary == null)
-            {
-                return;
-            }
-
-            var px = primary.Bounds.X + (primary.Bounds.Width - (int)window.Width) / 2;
-            var py = primary.Bounds.Y + (primary.Bounds.Height - (int)window.Height) / 2;
-            window.Position = new PixelPoint(px, py);
+            window.WindowState = WindowState.Normal;
         }
-
-        window.WindowState = WindowState.Normal;
     }
 }

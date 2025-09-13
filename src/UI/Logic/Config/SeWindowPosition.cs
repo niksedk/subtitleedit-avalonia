@@ -11,6 +11,10 @@ public class SeWindowPosition
     public int Y { get; set; }
     public int Width { get; set; }
     public int Height { get; set; }
+    public int ScreenX { get; set; }
+    public int ScreenY { get; set; }
+    public int ScreenWidth { get; set; }
+    public int ScreenHeight { get; set; }
 
     public SeWindowPosition()
     {
@@ -37,6 +41,8 @@ public class SeWindowPosition
             return new SeWindowPosition();
         }
 
+        var screen = window.Screens.ScreenFromWindow(window);
+
         var state = new SeWindowPosition
         {
             WindowName = window.Name,
@@ -45,33 +51,13 @@ public class SeWindowPosition
             X = window.Position.X,
             Y = window.Position.Y,
             Width = (int)window.Width,
-            Height = (int)window.Height
+            Height = (int)window.Height,
+            ScreenX = screen?.Bounds.X ?? 0,
+            ScreenY = screen?.Bounds.Y ?? 0,
+            ScreenWidth = screen?.Bounds.Width ?? 0,
+            ScreenHeight = screen?.Bounds.Height ?? 0,
         };
 
         return state;
     }
-
-    public void ApplyState(Window? window)
-    {
-        if (window == null)
-        {
-            return;
-        }
-        if (IsFullScreen)
-        {
-            window.WindowState = WindowState.FullScreen;
-        }
-        else if (IsMaximized)
-        {
-            window.WindowState = WindowState.Maximized;
-        }
-        else
-        {
-            window.WindowState = WindowState.Normal;
-            window.Position = new Avalonia.PixelPoint(X, Y);
-            window.Width = Width;
-            window.Height = Height;
-        }
-    }
-
 }
