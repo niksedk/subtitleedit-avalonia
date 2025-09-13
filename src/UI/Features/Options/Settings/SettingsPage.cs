@@ -9,6 +9,7 @@ using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Input;
+using DynamicData;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
@@ -151,68 +152,68 @@ public class SettingsPage : UserControl
 
     private List<SettingsSection> CreateSections()
     {
-        return new List<SettingsSection>
-        {
-            new SettingsSection(Se.Language.General.Rules,
-            [
-                MakeNumericSettingInt(Se.Language.Options.Settings.SingleLineMaxLength, nameof(_vm.SingleLineMaxLength)),
-                MakeNumericSetting(Se.Language.Options.Settings.OptimalCharsPerSec, nameof(_vm.OptimalCharsPerSec)),
-                MakeNumericSetting(Se.Language.Options.Settings.MaxCharsPerSec, nameof(_vm.MaxCharsPerSec)),
-                MakeNumericSetting(Se.Language.Options.Settings.MaxWordsPerMin, nameof(_vm.MaxWordsPerMin)),
-                MakeNumericSettingInt(Se.Language.Options.Settings.MinDurationMs, nameof(_vm.MinDurationMs)),
-                MakeNumericSettingInt(Se.Language.Options.Settings.MaxDurationMs, nameof(_vm.MaxDurationMs)),
-                MakeNumericSettingInt(Se.Language.Options.Settings.MinGapMs, nameof(_vm.MinGapMs)),
-                MakeNumericSettingInt(Se.Language.Options.Settings.MaxLines, nameof(_vm.MaxLines)),
-            ]),
+        var sections = new List<SettingsSection>();
 
-            new SettingsSection(Se.Language.General.General,
-            [
-                MakeNumericSettingInt(Se.Language.Options.Settings.NewEmptyDefaultMs, nameof(_vm.NewEmptyDefaultMs)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.PromptDeleteLines, nameof(_vm.PromptDeleteLines)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.LockTimeCodes, nameof(_vm.LockTimeCodes)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.RememberPositionAndSize, nameof(_vm.RememberPositionAndSize)),
-                MakeSeparator(),
-                MakeCheckboxSetting(Se.Language.Options.Settings.AutoBackupOn, nameof(_vm.AutoBackupOn)),
-                MakeNumericSettingInt(Se.Language.Options.Settings.AutoBackupIntervalMinutes, nameof(_vm.AutoBackupIntervalMinutes)),
-                MakeNumericSettingInt(Se.Language.Options.Settings.AutoBackupDeleteAfterMonths, nameof(_vm.AutoBackupDeleteAfterMonths)),
-                new SettingsItem(Se.Language.Options.Settings.DefaultEncoding, () => new ComboBox
-                {
-                    Width = 200,
-                    DataContext = _vm,
-                    [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.Encodings)),
-                    [!SelectingItemsControl.SelectedItemProperty] =
-                        new Binding(nameof(_vm.DefaultEncoding)) { Mode = BindingMode.TwoWay },
-                    ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
-                        new TextBlock { Text = f?.Name }, true)
-                }),
-            ]),
+        sections.Add(new SettingsSection(Se.Language.General.Rules,
+        [
+            MakeNumericSettingInt(Se.Language.Options.Settings.SingleLineMaxLength, nameof(_vm.SingleLineMaxLength)),
+            MakeNumericSetting(Se.Language.Options.Settings.OptimalCharsPerSec, nameof(_vm.OptimalCharsPerSec)),
+            MakeNumericSetting(Se.Language.Options.Settings.MaxCharsPerSec, nameof(_vm.MaxCharsPerSec)),
+            MakeNumericSetting(Se.Language.Options.Settings.MaxWordsPerMin, nameof(_vm.MaxWordsPerMin)),
+            MakeNumericSettingInt(Se.Language.Options.Settings.MinDurationMs, nameof(_vm.MinDurationMs)),
+            MakeNumericSettingInt(Se.Language.Options.Settings.MaxDurationMs, nameof(_vm.MaxDurationMs)),
+            MakeNumericSettingInt(Se.Language.Options.Settings.MinGapMs, nameof(_vm.MinGapMs)),
+            MakeNumericSettingInt(Se.Language.Options.Settings.MaxLines, nameof(_vm.MaxLines)),
+        ]));
 
-            new SettingsSection(Se.Language.General.SubtitleFormats,
-            [
-                new SettingsItem(Se.Language.Options.Settings.DefaultFormat, () => new ComboBox
-                {
-                    Width = 200,
-                    DataContext = _vm,
-                    [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.DefaultSubtitleFormats)),
-                    [!SelectingItemsControl.SelectedItemProperty] =
-                        new Binding(nameof(_vm.SelectedDefaultSubtitleFormat)) { Mode = BindingMode.TwoWay },
-                    ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
-                        new TextBlock { Text = f?.Name }, true)
-                }),
+        sections.Add(new SettingsSection(Se.Language.General.General,
+        [
+            MakeNumericSettingInt(Se.Language.Options.Settings.NewEmptyDefaultMs, nameof(_vm.NewEmptyDefaultMs)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.PromptDeleteLines, nameof(_vm.PromptDeleteLines)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.LockTimeCodes, nameof(_vm.LockTimeCodes)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.RememberPositionAndSize, nameof(_vm.RememberPositionAndSize)),
+            MakeSeparator(),
+            MakeCheckboxSetting(Se.Language.Options.Settings.AutoBackupOn, nameof(_vm.AutoBackupOn)),
+            MakeNumericSettingInt(Se.Language.Options.Settings.AutoBackupIntervalMinutes, nameof(_vm.AutoBackupIntervalMinutes)),
+            MakeNumericSettingInt(Se.Language.Options.Settings.AutoBackupDeleteAfterMonths, nameof(_vm.AutoBackupDeleteAfterMonths)),
+            new SettingsItem(Se.Language.Options.Settings.DefaultEncoding, () => new ComboBox
+            {
+                Width = 200,
+                DataContext = _vm,
+                [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.Encodings)),
+                [!SelectingItemsControl.SelectedItemProperty] =
+                    new Binding(nameof(_vm.DefaultEncoding)) { Mode = BindingMode.TwoWay },
+                ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
+                    new TextBlock { Text = f?.Name }, true)
+            }),
+        ]));
 
-                new SettingsItem(Se.Language.Options.Settings.DefaultSaveAsFormat, () => new ComboBox
-                {
-                    Width = 200,
-                    DataContext = _vm,
-                    [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.SaveSubtitleFormats)),
-                    [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedSaveSubtitleFormat))
-                        { Mode = BindingMode.TwoWay },
-                    ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
-                        new TextBlock { Text = f?.Name }, true)
-                }),
-            ]),
+        sections.Add(new SettingsSection(Se.Language.General.SubtitleFormats,
+        [
+            new SettingsItem(Se.Language.Options.Settings.DefaultFormat, () => new ComboBox
+            {
+                Width = 200,
+                DataContext = _vm,
+                [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.DefaultSubtitleFormats)),
+                [!SelectingItemsControl.SelectedItemProperty] =
+                    new Binding(nameof(_vm.SelectedDefaultSubtitleFormat)) { Mode = BindingMode.TwoWay },
+                ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
+                    new TextBlock { Text = f?.Name }, true)
+            }),
 
-            new SettingsSection(Se.Language.Options.Settings.SyntaxColoring,
+            new SettingsItem(Se.Language.Options.Settings.DefaultSaveAsFormat, () => new ComboBox
+            {
+                Width = 200,
+                DataContext = _vm,
+                [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.SaveSubtitleFormats)),
+                [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedSaveSubtitleFormat))
+                    { Mode = BindingMode.TwoWay },
+                ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
+                    new TextBlock { Text = f?.Name }, true)
+            }),
+        ]));
+
+        sections.Add(new SettingsSection(Se.Language.Options.Settings.SyntaxColoring,
             [
                 MakeCheckboxSetting(Se.Language.Options.Settings.ColorDurationTooShort, nameof(_vm.ColorDurationTooShort)),
                 MakeCheckboxSetting(Se.Language.Options.Settings.ColorDurationTooLong, nameof(_vm.ColorDurationTooLong)),
@@ -243,9 +244,9 @@ public class SettingsPage : UserControl
                         Mode = BindingMode.TwoWay
                     },
                 }),
-            ]),
+            ]));
 
-            new SettingsSection(Se.Language.General.VideoPlayer,
+        sections.Add(new SettingsSection(Se.Language.General.VideoPlayer,
             [
                 new SettingsItem(Se.Language.General.VideoPlayer, () => new StackPanel
                 {
@@ -305,13 +306,14 @@ public class SettingsPage : UserControl
                     [!StackPanel.IsVisibleProperty] = new Binding(nameof(_vm.IsLibMpvDownloadVisible)) { Source = _vm }
                 }),
 
-            ]),
+            ]));
 
-            new SettingsSection(Se.Language.Options.Settings.WaveformSpectrogram,
+        sections.Add(new SettingsSection(Se.Language.Options.Settings.WaveformSpectrogram,
             [
                 MakeCheckboxSetting(Se.Language.Options.Settings.WaveformDrawGridLines, nameof(_vm.WaveformDrawGridLines)),
                 MakeCheckboxSetting(Se.Language.Options.Settings.WaveformCenterVideoPosition, nameof(_vm.WaveformCenterVideoPosition)),
                 MakeCheckboxSetting(Se.Language.Options.Settings.WaveformShowToolbar, nameof(_vm.WaveformShowToolbar)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.WaveformAutoAddShotChanges, nameof(_vm.WaveformShowToolbar)),
                 MakeCheckboxSetting(Se.Language.Options.Settings.WaveformFocusTextboxAfterInsertNew, nameof(_vm.WaveformFocusTextboxAfterInsertNew)),
                 MakeCheckboxSetting(Se.Language.Options.Settings.WaveformInvertMouseWheel, nameof(_vm.WaveformInvertMouseWheel)),
                 new SettingsItem(Se.Language.Options.Settings.WaveformColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.WaveformColor))),
@@ -348,14 +350,15 @@ public class SettingsPage : UserControl
                         }
                     }
                 }),
-            ]),
+            ]));
 
-            new SettingsSection(Se.Language.General.Tools,
+        sections.Add(new SettingsSection(Se.Language.General.Tools,
             [
                 MakeCheckboxSetting(Se.Language.Options.Settings.GoToLineNumberSetsVideoPosition, nameof(_vm.GoToLineNumberAlsoSetVideoPosition)),
-            ]),
+            ]));
 
-            new SettingsSection(Se.Language.General.Appearance,
+
+        sections.Add(new SettingsSection(Se.Language.General.Appearance,
             [
                 new SettingsItem(Se.Language.Options.Settings.Theme, () => UiUtil.MakeComboBox(_vm.Themes, _vm, nameof(_vm.SelectedTheme))),
                 new SettingsItem(Se.Language.Options.Settings.DarkThemeBackgroundColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.DarkModeBackgroundColor))),
@@ -369,9 +372,9 @@ public class SettingsPage : UserControl
                 new SettingsItem(Se.Language.Options.Settings.BookmarkColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.BookmarkColor))),
                 MakeCheckboxSetting(Se.Language.Options.Settings.ShowHorizontalLineAboveToolbar, nameof(_vm.ShowHorizontalLineAboveToolbar)),
                 MakeCheckboxSetting(Se.Language.Options.Settings.ShowHorizontalLineBelowToolbar, nameof(_vm.ShowHorizontalLineBelowToolbar)),
-            ]),
+            ]));
 
-           new SettingsSection(Se.Language.General.Toolbar,
+        sections.Add(new SettingsSection(Se.Language.General.Toolbar,
             [
                 MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarNew, nameof(_vm.ShowToolbarNew)),
                 MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarOpen, nameof(_vm.ShowToolbarOpen)),
@@ -384,16 +387,16 @@ public class SettingsPage : UserControl
                 MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarLayout, nameof(_vm.ShowToolbarLayout)),
                 MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarHelp, nameof(_vm.ShowToolbarHelp)),
                 MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarEncoding, nameof(_vm.ShowToolbarEncoding)),
-            ]),
+            ]));
 
-            new SettingsSection(Se.Language.Options.Settings.Network,
+        sections.Add(new SettingsSection(Se.Language.Options.Settings.Network,
             [
                 new SettingsItem(Se.Language.Options.Settings.ProxyAddress, () => new TextBox { Width = 250 }),
                 new SettingsItem(Se.Language.Options.Settings.Username, () => new TextBox { Width = 250 }),
                 new SettingsItem(Se.Language.Options.Settings.Password, () => new TextBox { Width = 250 }),
-            ]),
+            ]));
 
-            new SettingsSection(Se.Language.Options.Settings.FileTypeAssociations,
+        sections.Add(new SettingsSection(Se.Language.Options.Settings.FileTypeAssociations,
             [
                 new SettingsItem(string.Empty, () => new ItemsControl
                 {
@@ -429,8 +432,9 @@ public class SettingsPage : UserControl
                             }
                         }, true)
                 })
-            ])
-        };
+            ]));
+
+        return sections;
     }
 
     private static SettingsItem MakeSeparator()

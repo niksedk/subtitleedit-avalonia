@@ -122,6 +122,7 @@ public class LanguageSettingsShortcuts
     public string ListBookmarks { get; set; }
     public string ToggleBookmark { get; set; }
     public string GoToNextBookmark { get; set; }
+    public string ToggleWaveformToolbar { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -249,5 +250,6 @@ public class LanguageSettingsShortcuts
         ListBookmarks = "List bookmarks";
         ToggleBookmark = "Toggle bookmark (selected lines, no text)";
         GoToNextBookmark = "Go to next bookmark";
+        ToggleWaveformToolbar = "Toggle waveform toolbar";
     }
 }

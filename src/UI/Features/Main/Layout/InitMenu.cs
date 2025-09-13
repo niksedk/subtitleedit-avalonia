@@ -367,6 +367,12 @@ public static class InitMenu
                 new Separator(),
                 new MenuItem
                 {
+                    Header = l.GenerateImportShotChanges,
+                    Command = vm.ShowShotChangesSubtitlesCommand,
+                },
+                new Separator(),
+                new MenuItem
+                {
                     Header = l.UndockVideoControls,
                     Command = vm.VideoUndockControlsCommand,
                     [!MenuItem.IsVisibleProperty] = new Binding(nameof(vm.AreVideoControlsUndocked)) {  Converter = new InverseBooleanConverter() },

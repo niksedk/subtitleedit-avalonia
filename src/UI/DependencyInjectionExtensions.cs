@@ -199,6 +199,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<ReviewSpeechViewModel>();
         collection.AddTransient<SelectVideoPositionViewModel>();
         collection.AddTransient<SettingsViewModel>();
+        collection.AddTransient<ShotChangesViewModel>();
         collection.AddTransient<ShortcutsViewModel>();
         collection.AddTransient<ShowHistoryViewModel>();
         collection.AddTransient<SourceViewViewModel>();

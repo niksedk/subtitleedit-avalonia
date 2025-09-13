@@ -352,6 +352,7 @@ public class LanguageGeneral
     public string FoundNoMatches { get; set; }
     public string AudioVisualizer { get; set; }
     public string SelectedLines { get; set; }
+    public string Sensitivity { get; set; }
 
     public LanguageGeneral()
     {
@@ -701,5 +702,6 @@ public class LanguageGeneral
         FoundNoMatches = "Found no matches";
         AudioVisualizer = "Audio visualizer";
         SelectedLines = "Selected lines";
+        Sensitivity = "Sensitivity";
     }
 }

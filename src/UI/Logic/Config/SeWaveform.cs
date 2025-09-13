@@ -11,6 +11,7 @@ public class SeWaveform
     public string WaveformColor { get; set; }
     public string WaveformSelectedColor { get; set; }
     public bool InvertMouseWheel { get; set; }
+    public double ShotChangesSensitivity { get; set; }
 
     public SeWaveform()
     {
@@ -18,5 +19,6 @@ public class SeWaveform
         FocusTextBoxAfterInsertNew = true;
         WaveformColor = Color.FromArgb(150, 100, 100, 100).FromColorToHex();
         WaveformSelectedColor = Color.FromArgb(150, 0, 120, 255).FromColorToHex();
+        ShotChangesSensitivity = 0.4;
     }
 }

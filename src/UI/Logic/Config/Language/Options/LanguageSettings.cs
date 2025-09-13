@@ -107,6 +107,7 @@ public class LanguageSettings
     public string WaveformInvertMouseWheel { get; set; }
     public string WaveformColor { get; set; }
     public string WaveformSelectedColor { get; set; }
+    public string WaveformAutoAddShotChanges { get; set; }
     public string DownloadFfmpeg { get; set; }
 
     // Toolbar
@@ -240,6 +241,7 @@ public class LanguageSettings
         WaveformInvertMouseWheel = "Invert mouse-wheel";
         WaveformColor = "Waveform color";
         WaveformSelectedColor = "Waveform selected color";
+        WaveformAutoAddShotChanges = "Auto-generate shot changes";
         DownloadFfmpeg = "Download ffmpeg";
 
         // Toolbar
@@ -265,6 +267,8 @@ public class LanguageSettings
         AutoOpenVideoFile = "Auto-open video file when opening subtitle";
         DownloadMpv = "Download mpv";
         GoToLineNumberSetsVideoPosition = "Go-to-line-number also sets video position";
+        DefaultFormat = "Default format";
+        DefaultSaveAsFormat = "Default 'Save as' format";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

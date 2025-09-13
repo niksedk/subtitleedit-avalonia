@@ -9,6 +9,7 @@ public class LanguageVideo
     public LanguageTransparentVideo VideoTransparent { get; set; } = new();
     public LanguageAudioToText AudioToText { get; set; } = new();
     public LanguageTextToSpeech TextToSpeech { get; set; } = new();
+    public LanguageShotChanges ShotChanges { get; set; } = new();
     public string GoToVideoPosition { get; set; }
     public string GenerateBlankVideoDotDotDot { get; set; }
     public string GenerateBlankVideoTitle { get; set; }

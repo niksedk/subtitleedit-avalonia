@@ -58,6 +58,7 @@ public class LanguageMainMenu
     public string TextToSpeech { get; set; }
     public string GenerateBurnIn { get; set; }
     public string GenerateTransparent { get; set; }
+    public string GenerateImportShotChanges { get; set; }
     public object UndockVideoControls { get; set; }
     public object DockVideoControls { get; set; }
 
@@ -140,6 +141,7 @@ public class LanguageMainMenu
         DockVideoControls = "_Dock video controls";
         GenerateBurnIn = "Generate video with _burned-in subtitles...";
         GenerateTransparent = "_Generate transparent video with subtitles...";
+        GenerateImportShotChanges = "Generate/import s_hot changes...";
 
         Synchronization = "S_ynchronization";
         AdjustAllTimes = "_Adjust all times...";

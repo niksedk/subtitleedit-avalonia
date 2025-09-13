@@ -1592,6 +1592,20 @@ public static class UiUtil
         return control;
     }
 
+    public static Label WithBindText(this Label control, object viewModel, string contentPropertyPath, IValueConverter valueConverter)
+    {
+        control.DataContext = viewModel;
+        control.Bind(Label.ContentProperty, new Binding
+        {
+            Path = contentPropertyPath,
+            Mode = BindingMode.TwoWay,           
+            Converter = valueConverter,
+        });
+
+        return control;
+    }
+
+
     public static Label WithBindText(this Label control, object viewModel, Binding binding)
     {
         control.DataContext = viewModel;

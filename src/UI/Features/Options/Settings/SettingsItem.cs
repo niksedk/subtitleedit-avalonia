@@ -19,7 +19,7 @@ public class SettingsItem
 
     public void Filter(string filter)
     {
-        IsVisible = string.IsNullOrWhiteSpace(filter) ||
+        IsVisible = string.IsNullOrWhiteSpace(filter) || _label != null &&
                     _label.Contains(filter, StringComparison.OrdinalIgnoreCase);
     }
 

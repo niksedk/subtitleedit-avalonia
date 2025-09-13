@@ -337,7 +337,6 @@ public partial class MainViewModel :
         InitializeLibMpv();
         InitializeFfmpeg();
         LoadShortcuts();
-        _isWaveformToolbarVisible = Se.Settings.Waveform.ShowToolbar;
 
         StartTitleTimer();
         _autoBackupService.StartAutoBackup(this);
@@ -1381,6 +1380,12 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void ToggleIsWaveformToolbarVisible()
+    {
+        IsWaveformToolbarVisible = !IsWaveformToolbarVisible;
+    }
+
+    [RelayCommand]
     private void VideoUndockControls()
     {
         AreVideoControlsUndocked = true;
@@ -1536,6 +1541,29 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private async Task ShowShotChangesSubtitles()
+    {
+        if (string.IsNullOrEmpty(_videoFileName) || VideoPlayerControl == null)
+        {
+            return;
+        }
+
+        var ffmpegOk = await RequireFfmpegOk();
+        if (!ffmpegOk)
+        {
+            return;
+        }
+
+        await _windowService.ShowDialogAsync<ShotChangesWindow, ShotChangesViewModel>(Window!, vm =>
+        {
+            vm.Initialize(_videoFileName, AudioVisualizer?.ShotChanges ?? new List<double>());
+        });
+
+        _shortcutManager.ClearKeys();
+    }
+
+
+    [RelayCommand]
     private async Task ShowSyncAdjustAllTimes()
     {
         var result = await _windowService.ShowDialogAsync<AdjustAllTimesWindow, AdjustAllTimesViewModel>(Window!, vm =>
@@ -1685,7 +1713,7 @@ public partial class MainViewModel :
             foreach (var line in selectedItems)
             {
                 var p = new Paragraph()
-                {                    
+                {
                     Number = line.Number,
                     StartTime = new TimeCode(line.StartTime),
                     EndTime = new TimeCode(line.EndTime),
@@ -1710,8 +1738,8 @@ public partial class MainViewModel :
         }
 
         for (var i = 0; i < result.Subtitle.Paragraphs.Count; i++)
-        { 
-            var text = result.Subtitle.Paragraphs[i].Text;  
+        {
+            var text = result.Subtitle.Paragraphs[i].Text;
             var id = selectedItems[i].Id;
             var p = Subtitles.FirstOrDefault(x => x.Id == id);
             if (p != null)
@@ -1906,7 +1934,6 @@ public partial class MainViewModel :
         if (AudioVisualizer != null)
         {
             AudioVisualizer.DrawGridLines = Se.Settings.Waveform.DrawGridLines;
-            IsWaveformToolbarVisible = Se.Settings.Waveform.ShowToolbar;
             AudioVisualizer.WaveformColor = Se.Settings.Waveform.WaveformColor.FromHexToColor();
             AudioVisualizer.WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor();
             AudioVisualizer.InvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel;
@@ -5158,6 +5185,7 @@ public partial class MainViewModel :
             Se.Settings.General.ShowColumnCps = ShowColumnCps;
             Se.Settings.General.ShowColumnWpm = ShowColumnWpm;
             Se.Settings.General.SelectCurrentSubtitleWhilePlaying = SelectCurrentSubtitleWhilePlaying;
+            Se.Settings.Waveform.ShowToolbar = IsWaveformToolbarVisible;
 
             UiUtil.SaveWindowPosition(Window);
 
