@@ -5745,6 +5745,19 @@ public partial class MainViewModel :
 
         if (SubtitleGrid.IsFocused)
         {
+            if (keyEventArgs.Key == Key.Home && keyEventArgs.KeyModifiers == KeyModifiers.None && Subtitles.Count > 0)
+            {
+                keyEventArgs.Handled = true;
+                SelectAndScrollToRow(0);
+                return;
+            }
+            else if (keyEventArgs.Key == Key.End && keyEventArgs.KeyModifiers == KeyModifiers.None && Subtitles.Count > 0)
+            {
+                keyEventArgs.Handled = true;
+                SelectAndScrollToRow(Subtitles.Count - 1);
+                return;
+            }
+
             var relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.SubtitleGrid.ToStringInvariant());
             if (relayCommand != null)
             {
