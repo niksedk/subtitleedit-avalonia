@@ -17,7 +17,7 @@ public class BatchConvertWindow : Window
     
     public BatchConvertWindow(BatchConvertViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = "Batch convert";
         Width = 1024;
         Height = 740;

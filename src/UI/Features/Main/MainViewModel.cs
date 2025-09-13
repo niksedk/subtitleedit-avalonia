@@ -4907,14 +4907,21 @@ public partial class MainViewModel :
             Se.Settings.General.ShowColumnWpm = ShowColumnWpm;
             Se.Settings.General.SelectCurrentSubtitleWhilePlaying = SelectCurrentSubtitleWhilePlaying;
 
-            Se.Settings.General.PositionIsFullScreen = Window.WindowState == WindowState.FullScreen;
-            Se.Settings.General.PositionIsMaximized = Window.WindowState == WindowState.Maximized;
-            if (Window.WindowState == WindowState.Normal)
+            UiUtil.SaveWindowPosition(Window);
+
+            if (_findViewModel != null)
             {
-                Se.Settings.General.PositionX = Window.Position.X;
-                Se.Settings.General.PositionY = Window.Position.Y;
-                Se.Settings.General.PositionWidth = (int)Window.Width;
-                Se.Settings.General.PositionHeight = (int)Window.Height;
+                UiUtil.SaveWindowPosition(_findViewModel.Window);
+            }
+
+            if (_videoPlayerUndockedViewModel != null)
+            {
+                UiUtil.SaveWindowPosition(_videoPlayerUndockedViewModel.Window);
+            }
+
+            if (_audioVisualizerUndockedViewModel != null)
+            {
+                UiUtil.SaveWindowPosition(_audioVisualizerUndockedViewModel.Window);
             }
         }
 
@@ -4978,8 +4985,6 @@ public partial class MainViewModel :
 
     internal void OnLoaded()
     {
-        RestoreWindowPositionAndSize();
-
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && string.IsNullOrEmpty(Se.Settings.General.LibMpvPath))
         {
             Dispatcher.UIThread.Post(async void () =>
@@ -5064,49 +5069,14 @@ public partial class MainViewModel :
             RightToLeftToggle();
         }
 
+        UiUtil.RestoreWindowPosition(Window);
+
         Task.Run(async () =>
-        {
-            await Task.Delay(1000); // delay 1 second (off UI thread)
-            _undoRedoManager.StartChangeDetection();
-            _loading = false;
-        });
-    }
-
-    private void RestoreWindowPositionAndSize()
-    {
-        if (!Se.Settings.General.RememberPositionAndSize ||
-            Se.Settings.General.PositionWidth <= 0 ||
-            Se.Settings.General.PositionHeight <= 0 ||
-            Window == null)
-        {
-            return;
-        }
-
-        try
-        {
-            var settings = Se.Settings.General;
-            var width = (int)Math.Max(Window.MinWidth, settings.PositionWidth);
-            var height = (int)Math.Max(Window.MinHeight, settings.PositionHeight);
-
-            if (settings.PositionIsFullScreen)
             {
-                Window.WindowState = WindowState.FullScreen;
-            }
-            else if (settings.PositionIsMaximized)
-            {
-                Window.WindowState = WindowState.Maximized;
-            }
-            else if (IsPositionOnAnyScreen(new PixelRect(settings.PositionX, settings.PositionY, width, height)))
-            {
-                Window.Width = width;
-                Window.Height = height;
-                Window.Position = new PixelPoint(settings.PositionX, settings.PositionY);
-            }
-        }
-        catch (Exception ex)
-        {
-            Se.LogError(ex);
-        }
+                await Task.Delay(1000); // delay 1 second (off UI thread)
+                _undoRedoManager.StartChangeDetection();
+                _loading = false;
+            });
     }
 
     private bool IsPositionOnAnyScreen(PixelRect windowBounds)

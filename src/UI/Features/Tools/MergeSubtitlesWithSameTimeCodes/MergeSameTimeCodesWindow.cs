@@ -19,7 +19,7 @@ public class MergeSameTimeCodesWindow : Window
 
     public MergeSameTimeCodesWindow(MergeSameTimeCodesViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Tools.MergeLineswithSameTimeCodes.Title;
         CanResize = true;
         Width = 900;

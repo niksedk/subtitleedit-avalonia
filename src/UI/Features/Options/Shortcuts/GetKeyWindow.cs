@@ -13,7 +13,7 @@ public class GetKeyWindow : Window
     
     public GetKeyWindow(GetKeyViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         SizeToContent = SizeToContent.WidthAndHeight;
         MinWidth = 300;
         CanResize = false;

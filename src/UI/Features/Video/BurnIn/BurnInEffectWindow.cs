@@ -15,7 +15,7 @@ public class BurnInEffectWindow : Window
 
     public BurnInEffectWindow(BurnInEffectViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.General.Effect;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

@@ -15,7 +15,7 @@ public class BridgeGapsWindow : Window
 
     public BridgeGapsWindow(BridgeGapsViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Tools.AdjustDurations.Title;
         CanResize = true;
         Width = 1000;

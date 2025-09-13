@@ -15,7 +15,7 @@ public class TranslateSettingsWindow : Window
     public TranslateSettingsWindow(TranslateSettingsViewModel vm)
     {
         _vm = vm;
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.General.Settings;
         Width = 750;
         MinWidth = 600;

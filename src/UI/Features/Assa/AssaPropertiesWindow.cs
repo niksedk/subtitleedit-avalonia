@@ -10,7 +10,7 @@ public class AssaPropertiesWindow : Window
 {
     public AssaPropertiesWindow(AssaPropertiesViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Bind(Window.TitleProperty, new Binding(nameof(vm.Title))
         {
             Source = vm,

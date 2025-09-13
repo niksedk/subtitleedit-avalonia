@@ -12,7 +12,7 @@ public class VideoPlayerUndockedWindow : Window
     {
         _vm = vm;
         vm.Window = this;
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.General.VideoPlayer;
         MinWidth = 400;
         MinHeight = 200;

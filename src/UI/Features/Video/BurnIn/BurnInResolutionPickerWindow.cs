@@ -15,7 +15,7 @@ public class BurnInResolutionPickerWindow : Window
 
     public BurnInResolutionPickerWindow(BurnInResolutionPickerViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = "Pick resolution";
         SizeToContent = SizeToContent.WidthAndHeight;
         MaxHeight = 900;

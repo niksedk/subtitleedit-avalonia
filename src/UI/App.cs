@@ -91,6 +91,7 @@ UiUtil.SetCurrentTheme();
 lifetime.MainWindow = new Window
 {
     Title = "Subtitle Edit",
+    Name = "MainWindow",
     Icon = UiUtil.GetSeIcon(),
     MinWidth = 800,
     MinHeight = 500,

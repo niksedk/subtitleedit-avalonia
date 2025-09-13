@@ -14,7 +14,7 @@ public class ReplaceWindow : Window
 
     public ReplaceWindow(ReplaceViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Edit.Find.ReplaceTitle;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

@@ -14,7 +14,7 @@ public class SelectVideoPositionWindow : Window
 
     public SelectVideoPositionWindow(SelectVideoPositionViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.General.PickVideoPosition;
         Width = 1280;
         Height = 800;

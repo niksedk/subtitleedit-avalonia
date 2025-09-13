@@ -15,7 +15,7 @@ public class ManualChosenEncodingWindow : Window
 
     public ManualChosenEncodingWindow(ManualChosenEncodingViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.File.ManualChosenEncoding.Title;
         CanResize = true;
         Width = 900;

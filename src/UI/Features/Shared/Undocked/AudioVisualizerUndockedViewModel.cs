@@ -4,6 +4,7 @@ using Avalonia.Interactivity;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Features.Main.Layout;
+using Nikse.SubtitleEdit.Logic;
 using System;
 
 namespace Nikse.SubtitleEdit.Features.Shared;
@@ -49,5 +50,6 @@ public partial class AudioVisualizerUndockedViewModel : ObservableObject
     internal void Onloaded(object? sender, RoutedEventArgs e)
     {
         Window!.Content = AudioVisualizer;
+        UiUtil.RestoreWindowPosition(Window);
     }
 }

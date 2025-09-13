@@ -12,7 +12,7 @@ public class BatchConvertSettingsWindow : Window
     
     public BatchConvertSettingsWindow(BatchConvertSettingsViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = "Batch convert - output settings";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

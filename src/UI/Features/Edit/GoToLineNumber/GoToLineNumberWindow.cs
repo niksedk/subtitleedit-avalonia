@@ -14,7 +14,7 @@ public class GoToLineNumberWindow : Window
 
     public GoToLineNumberWindow(GoToLineNumberViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.General.GoToLineNumber;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

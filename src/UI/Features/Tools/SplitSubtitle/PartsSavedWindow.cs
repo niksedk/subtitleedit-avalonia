@@ -12,7 +12,7 @@ public class PartsSavedWindow : Window
 
     public PartsSavedWindow(PartsSavedViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Tools.SplitSubtitle.Title;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

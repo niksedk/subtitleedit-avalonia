@@ -15,7 +15,7 @@ public class SplitSubtitleWindow : Window
 
     public SplitSubtitleWindow(SplitSubtitleViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Tools.SplitSubtitle.Title;
         CanResize = true;
         Width = 900;

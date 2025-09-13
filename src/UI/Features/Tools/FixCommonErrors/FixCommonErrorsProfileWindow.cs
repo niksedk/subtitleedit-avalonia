@@ -16,7 +16,7 @@ public class FixCommonErrorsProfileWindow : Window
 
     public FixCommonErrorsProfileWindow(FixCommonErrorsProfileViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Tools.FixCommonErrors.FixCommonErrorsProfiles;
         Width = 800;
         Height = 440;

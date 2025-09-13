@@ -17,7 +17,7 @@ public class NOcrCharacterHistoryWindow : Window
     {
         _vm = vm;
         vm.Window = this;
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = string.Empty;
         Width = 1200;
         Height = 700;

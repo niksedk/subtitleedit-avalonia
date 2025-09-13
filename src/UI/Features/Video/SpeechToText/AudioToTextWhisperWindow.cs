@@ -19,7 +19,7 @@ public class AudioToTextWhisperWindow : Window
 
     public AudioToTextWhisperWindow(AudioToTextWhisperViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Video.AudioToText.Title;
         Width = 950;
         Height = 660;

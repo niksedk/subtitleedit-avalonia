@@ -21,7 +21,7 @@ public class LayoutWindow : Window
 
     public LayoutWindow(LayoutViewModel viewViewModel)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         _vm = viewViewModel;
         Title = "Choose layout";
         Width = 925;

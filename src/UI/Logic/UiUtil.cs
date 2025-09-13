@@ -2058,12 +2058,93 @@ public static class UiUtil
             : null;
     }
 
-    internal static void InitializeWindow(Window window)
+    internal static void InitializeWindow(Window window, string name)
     {
         window.Icon = GetSeIcon();
+        window.Name = name;
         if (Se.Settings.Appearance.RightToLeft)
         {
             window.FlowDirection = FlowDirection.RightToLeft;
         }
+    }
+
+    public static void SaveWindowPosition(Window? window)
+    {
+        if (!Se.Settings.General.RememberPositionAndSize || window == null || window.Name == null)
+        {
+            return;
+        }
+
+        var state = SeWindowPosition.SaveState(window);
+
+        var existing = Se.Settings.General.WindowPositions.FirstOrDefault(wp => wp.WindowName == state.WindowName);
+        if (existing != null)
+        {
+            Se.Settings.General.WindowPositions.Remove(existing);
+        }
+
+        Se.Settings.General.WindowPositions.Add(state);
+    }
+
+    public static void RestoreWindowPosition(Window? window)
+    {
+        if (!Se.Settings.General.RememberPositionAndSize || window == null)
+        {
+            return;
+        }
+
+        var existing = Se.Settings.General.WindowPositions.FirstOrDefault(wp => wp.WindowName == window.Name);
+        if (existing == null)
+        {
+            return;
+        }
+
+        if (existing.IsFullScreen)
+        {
+            window.WindowState = WindowState.FullScreen;
+            return;
+        }
+        else if (existing.IsMaximized)
+        {
+            window.WindowState = WindowState.Maximized;
+            return;
+        }
+
+        // Restore normal size & position
+        if (existing.Width > 0 && existing.Height > 0)
+        {
+            window.Width = existing.Width;
+            window.Height = existing.Height;
+        }
+
+        var desired = new PixelPoint(existing.X, existing.Y);
+
+        // Get all screens
+        var screens = window.Screens.All;
+
+        // Check if the desired rect fits inside any screen
+        var windowRect = new PixelRect(desired, new PixelSize((int)window.Width, (int)window.Height));
+
+        bool fits = screens.Any(s => s.Bounds.Intersects(windowRect));
+
+        if (fits)
+        {
+            window.Position = desired;
+        }
+        else
+        {
+            // Fallback: center on primary screen
+            var primary = window.Screens.Primary;
+            if (primary == null)
+            {
+                return;
+            }
+
+            var px = primary.Bounds.X + (primary.Bounds.Width - (int)window.Width) / 2;
+            var py = primary.Bounds.Y + (primary.Bounds.Height - (int)window.Height) / 2;
+            window.Position = new PixelPoint(px, py);
+        }
+
+        window.WindowState = WindowState.Normal;
     }
 }

@@ -2,6 +2,7 @@
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Enums;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 
@@ -35,12 +36,7 @@ public class SeGeneral
     public bool PromptDeleteLines { get; set; }
     public bool LockTimeCodes { get; set; }
     public bool RememberPositionAndSize { get; set; }
-    public bool PositionIsFullScreen { get; set; }
-    public bool PositionIsMaximized { get; set; }
-    public int PositionX { get; set; }
-    public int PositionY { get; set; }
-    public int PositionWidth { get; set; }
-    public int PositionHeight { get; set; }
+    public List<SeWindowPosition> WindowPositions { get; set; } = new List<SeWindowPosition>();
     public bool AutoBackupOn { get; set; }
     public int AutoBackupIntervalMinutes { get; set; }
     public int AutoBackupDeleteAfterMonths { get; set; }
@@ -98,6 +94,7 @@ public class SeGeneral
         DefaultSaveAsFormat = "SubRip";
         FavoriteSubtitleFormats = "SubRip";
         CpsLineLengthStrategy = "";//TODO: Add default value
+        RememberPositionAndSize = true;
 
         ColorDurationTooShort = true;
         ColorDurationTooLong = true;

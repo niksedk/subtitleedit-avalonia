@@ -19,7 +19,7 @@ public class DownloadTesseractModelWindow : Window
     {
         _vm = vm;
         vm.Window = this;
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = "Downloading Tesseract model";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

@@ -15,7 +15,7 @@ public class PickColorWindow : Window
 
     public PickColorWindow(PickColorViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Tools.ColorPickerTitle;
         CanResize = false;
         SizeToContent = SizeToContent.WidthAndHeight;   

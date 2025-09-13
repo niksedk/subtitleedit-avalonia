@@ -21,7 +21,7 @@ public class CutVideoWindow : Window
 
     public CutVideoWindow(CutVideoViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Video.CutVideoTitle;
         CanResize = true;
         Width = 1000;

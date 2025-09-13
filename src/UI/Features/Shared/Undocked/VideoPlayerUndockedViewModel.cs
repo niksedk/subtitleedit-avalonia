@@ -4,7 +4,7 @@ using Avalonia.Interactivity;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Features.Main.Layout;
-using System;
+using Nikse.SubtitleEdit.Logic;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Shared;
@@ -74,5 +74,6 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
     internal void Onloaded(object? sender, RoutedEventArgs e)
     {
         Window!.Content = VideoPlayer;
+        UiUtil.RestoreWindowPosition(Window);
     }
 }

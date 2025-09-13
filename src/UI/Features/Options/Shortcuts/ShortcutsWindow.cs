@@ -18,7 +18,7 @@ public class ShortcutsWindow : Window
     public ShortcutsWindow(ShortcutsViewModel vm)
     {
         var language = Se.Language.Options.Shortcuts;
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = language.Title;
         Width = 750;
         Height = 650;

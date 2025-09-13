@@ -12,7 +12,7 @@ public class AudioVisualizerUndockedWindow : Window
     {
         _vm = vm;
         vm.Window = this;
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.General.AudioVisualizer; 
         MinWidth = 400;
         MinHeight = 100;

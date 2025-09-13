@@ -13,7 +13,7 @@ public class ApplyDurationLimitsWindow : Window
 
     public ApplyDurationLimitsWindow(ApplyDurationLimitsViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Tools.ApplyDurationLimits.Title;
         CanResize = true;
         Width = 900;

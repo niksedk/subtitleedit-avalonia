@@ -15,7 +15,7 @@ public class VisualSyncWindow : Window
 
     public VisualSyncWindow(VisualSyncViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Sync.VisualSync;
         CanResize = true;
         Width = 1000;

@@ -14,7 +14,7 @@ public class CompareWindow : Window
 {
     public CompareWindow(CompareViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.File.Compare;
         Width = 1200;
         Height = 600;

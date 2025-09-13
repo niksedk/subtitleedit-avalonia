@@ -12,7 +12,7 @@ public class OllamaBrowseWindow : Window
     
     public OllamaBrowseWindow(OllamaBrowseViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = "Browse Ollama Models";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

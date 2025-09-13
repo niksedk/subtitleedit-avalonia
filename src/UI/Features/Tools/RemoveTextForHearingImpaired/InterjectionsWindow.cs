@@ -11,7 +11,7 @@ public class InterjectionsWindow : Window
     
     public InterjectionsWindow(InterjectionsViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = "Interjections";
         CanResize = false;
         Width = 700;

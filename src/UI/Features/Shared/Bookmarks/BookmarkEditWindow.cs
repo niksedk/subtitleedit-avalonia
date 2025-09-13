@@ -15,7 +15,7 @@ public class BookmarkEditWindow : Window
 
     public BookmarkEditWindow(BookmarkEditViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Bind(TitleProperty, new Avalonia.Data.Binding(nameof(vm.Title)));    
         CanResize = true;
         Width = 600;

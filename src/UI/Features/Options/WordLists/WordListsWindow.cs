@@ -17,7 +17,7 @@ public class WordListsWindow : Window
 
     public WordListsWindow(WordListsViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Options.WordLists.Title;
         CanResize = true;
         Width = 900;

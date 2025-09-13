@@ -13,7 +13,7 @@ public class ElevenLabsSettingsWindow : Window
 
     public ElevenLabsSettingsWindow(ElevenLabsSettingsViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = "TTS - ElevenLabs settings";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;

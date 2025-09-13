@@ -19,7 +19,7 @@ public class FixCommonErrorsWindow : Window
 
     public FixCommonErrorsWindow(FixCommonErrorsViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = "Fix common errors";
         Width = 1024;
         Height = 720;

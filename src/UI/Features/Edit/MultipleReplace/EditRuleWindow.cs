@@ -13,7 +13,7 @@ public class EditRuleWindow : Window
     
     public EditRuleWindow(EditRuleViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 

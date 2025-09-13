@@ -16,7 +16,7 @@ public class ReviewSpeechWindow : Window
 
     public ReviewSpeechWindow(ReviewSpeechViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = "TTS - Review audio segments";
         Width = 1024;
         Height = 650;

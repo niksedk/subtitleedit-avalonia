@@ -17,7 +17,7 @@ public class ReEncodeVideoWindow : Window
 
     public ReEncodeVideoWindow(ReEncodeVideoViewModel vm)
     {
-        UiUtil.InitializeWindow(this);
+        UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Video.ReEncodeVideoForBetterSubtitlingTitle;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
