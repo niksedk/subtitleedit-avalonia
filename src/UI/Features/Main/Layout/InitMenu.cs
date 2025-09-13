@@ -1,11 +1,13 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
@@ -227,73 +229,78 @@ public static class InitMenu
             }
         });
 
-        menu.Items.Add(new MenuItem
+        var menuItemTools = new MenuItem
         {
             Header = l.Tools,
-            Items =
+        };
+        menu.Items.Add(menuItemTools);
+        var tools = new List<MenuItem>
+        {
+            new MenuItem
             {
-                new MenuItem
-                {
-                    Header = l.AdjustDurations,
-                    Command = vm.ShowToolsAdjustDurationsCommand,
-                },
-                new MenuItem
-                {
-                    Header = l.ApplyDurationLimits,
-                    Command = vm.ShowApplyDurationLimitsCommand,
-                },
-                new MenuItem
-                {
-                    Header = l.BatchConvert,
-                    Command = vm.ShowToolsBatchConvertCommand,
-                },
-                new MenuItem
-                {
-                    Header = l.BridgeGaps,
-                    Command = vm.ShowBridgeGapsCommand,
-                },
-                new MenuItem
-                {
-                    Header = l.ChangeCasing,
-                    Command = vm.ShowToolsChangeCasingCommand,
-                },
-                new MenuItem
-                {
-                    Header = l.FixCommonErrors,
-                    Command = vm.ShowToolsFixCommonErrorsCommand,
-                },
-                new MenuItem
-                {
-                    Header = l.MergeLinesWithSameText,
-                    Command = vm.ShowToolsMergeLinesWithSameTextCommand,
-                },
-                new MenuItem
-                {
-                    Header = l.MergeLinesWithSameTimeCodes,
-                    Command = vm.ShowToolsMergeLinesWithSameTimeCodesCommand,
-                },
-                new MenuItem
-                {
-                    Header = l.MakeEmptyTranslationFromCurrentSubtitle,
-                    Command = vm.ToolsMakeEmptyTranslationFromCurrentSubtitleCommand,
-                },
-                new MenuItem
-                {
-                    Header = l.RemoveTextForHearingImpaired,
-                    Command = vm.ShowToolsRemoveTextForHearingImpairedCommand,
-                },
-                new Separator(),
-                new MenuItem
-                {
-                    Header = l.JoinSubtitles,
-                    Command = vm.ShowToolsJoinCommand,
-                },
-                new MenuItem
-                {
-                    Header = l.SplitSubtitle,
-                    Command = vm.ShowToolsSplitCommand,
-                },
-            }
+                Header = l.AdjustDurations,
+                Command = vm.ShowToolsAdjustDurationsCommand,
+            },
+            new MenuItem
+            {
+                Header = l.ApplyDurationLimits,
+                Command = vm.ShowApplyDurationLimitsCommand,
+            },
+            new MenuItem
+            {
+                Header = l.BatchConvert,
+                Command = vm.ShowToolsBatchConvertCommand,
+            },
+            new MenuItem
+            {
+                Header = l.BridgeGaps,
+                Command = vm.ShowBridgeGapsCommand,
+            },
+            new MenuItem
+            {
+                Header = l.ChangeCasing,
+                Command = vm.ShowToolsChangeCasingCommand,
+            },
+            new MenuItem
+            {
+                Header = l.FixCommonErrors,
+                Command = vm.ShowToolsFixCommonErrorsCommand,
+            },
+            new MenuItem
+            {
+                Header = l.MakeEmptyTranslationFromCurrentSubtitle,
+                Command = vm.ToolsMakeEmptyTranslationFromCurrentSubtitleCommand,
+            },
+            new MenuItem
+            {
+                Header = l.MergeLinesWithSameText,
+                Command = vm.ShowToolsMergeLinesWithSameTextCommand,
+            },
+            new MenuItem
+            {
+                Header = l.MergeLinesWithSameTimeCodes,
+                Command = vm.ShowToolsMergeLinesWithSameTimeCodesCommand,
+            },
+            new MenuItem
+            {
+                Header = l.RemoveTextForHearingImpaired,
+                Command = vm.ShowToolsRemoveTextForHearingImpairedCommand,
+            },
+        };
+        foreach (var item in tools.OrderBy(p => p.Header?.ToString()?.TrimStart('_', ' ')))
+        {
+            menuItemTools.Items.Add(item);
+        }
+        menuItemTools.Items.Add(new Separator());
+        menuItemTools.Items.Add(new MenuItem
+        {
+            Header = l.JoinSubtitles,
+            Command = vm.ShowToolsJoinCommand,
+        });
+        menuItemTools.Items.Add(new MenuItem
+        {
+            Header = l.SplitSubtitle,
+            Command = vm.ShowToolsSplitCommand,
         });
 
         menu.Items.Add(new MenuItem
@@ -432,7 +439,7 @@ public static class InitMenu
                 new MenuItem
                 {
                     Header = l.AutoTranslate,
-                    Command = vm.CommandShowAutoTranslateCommand,
+                    Command = vm.ShowAutoTranslateCommand,
                 },
             }
         });
@@ -463,7 +470,7 @@ public static class InitMenu
                     Command = vm.CommandShowSettingsLanguageCommand,
                 },
             },
-        });      
+        });
 
         menu.Items.Add(new MenuItem
         {
@@ -499,7 +506,7 @@ public static class InitMenu
                 {
                     header += " + ";
                     if (System.IO.Path.GetDirectoryName(file.SubtitleFileName) == System.IO.Path.GetDirectoryName(file.SubtitleFileNameOriginal))
-                    { 
+                    {
                         header += System.IO.Path.GetFileName(file.SubtitleFileNameOriginal);
                     }
                     else

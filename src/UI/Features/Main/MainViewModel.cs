@@ -8,7 +8,6 @@ using CommunityToolkit.Mvvm.Input;
 using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
-using Nikse.SubtitleEdit.Core.AudioToText;
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
@@ -106,7 +105,6 @@ public partial class MainViewModel :
     [ObservableProperty] private SubtitleLineViewModel? _selectedSubtitle;
     private List<SubtitleLineViewModel>? _selectedSubtitles;
     [ObservableProperty] private int? _selectedSubtitleIndex;
-    [ObservableProperty] private bool _showColumnOriginalText;
 
     [ObservableProperty] private string _editText;
     [ObservableProperty] private string _editTextCharactersPerSecond;
@@ -133,6 +131,7 @@ public partial class MainViewModel :
 
     [ObservableProperty] private bool _isWaveformToolbarVisible;
     [ObservableProperty] private bool _isSubtitleGridFlyoutHeaderVisible;
+    [ObservableProperty] private bool _showColumnOriginalText;
     [ObservableProperty] private bool _showColumnEndTime;
     [ObservableProperty] private bool _showColumnGap;
     [ObservableProperty] private bool _showColumnDuration;
@@ -147,6 +146,7 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _selectCurrentSubtitleWhilePlaying;
     [ObservableProperty] private bool _waveformCenter;
     [ObservableProperty] private bool _isRightToLeftEnabled;
+    [ObservableProperty] private bool _showAutoTranslateSelectedLines;
 
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
@@ -1584,11 +1584,12 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private async Task CommandShowAutoTranslate()
+    private async Task ShowAutoTranslate()
     {
-        var result =
-            await _windowService.ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(Window!,
-                vm => { vm.Initialize(GetUpdateSubtitle()); });
+        var result = await _windowService.ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(Window!, vm =>
+        {
+            vm.Initialize(GetUpdateSubtitle());
+        });
 
         if (!result.OkPressed)
         {
@@ -1612,7 +1613,258 @@ public partial class MainViewModel :
         ShowColumnOriginalText = true;
         AutoFitColumns();
         _updateAudioVisualizer = true;
+        _shortcutManager.ClearKeys();
+    }
 
+    [RelayCommand]
+    private async Task AutoTranslateSelectedLines()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (selectedItems.Count == 0 || !ShowColumnOriginalText)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(Window!, vm =>
+        {
+            var sub = new Subtitle();
+            foreach (var line in selectedItems)
+            {
+                var p = new Paragraph()
+                {
+                    Number = line.Number,
+                    StartTime = new TimeCode(line.StartTime),
+                    EndTime = new TimeCode(line.EndTime),
+                    Text = line.OriginalText,
+                    Actor = line.Actor,
+                    Style = line.Style,
+                    Language = line.Language,
+                    Region = line.Region,
+                    Layer = line.Layer,
+                    Bookmark = line.Bookmark,
+                };
+                sub.Paragraphs.Add(p);
+            }
+
+            vm.Initialize(sub);
+        });
+
+        if (!result.OkPressed)
+        {
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        for (int i = 0; i < result.Rows.Count; i++)
+        {
+            var translatedText = result.Rows[i].TranslatedText;
+            var id = selectedItems[i].Id;
+            var p = Subtitles.FirstOrDefault(x => x.Id == id);
+            if (p != null && !string.IsNullOrEmpty(translatedText))
+            {
+                p.Text = translatedText;
+            }
+        }
+
+        _updateAudioVisualizer = true;
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ChangeCasingSelectedLines()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<ChangeCasingWindow, ChangeCasingViewModel>(Window!, vm =>
+        {
+            var sub = new Subtitle();
+            foreach (var line in selectedItems)
+            {
+                var p = new Paragraph()
+                {                    
+                    Number = line.Number,
+                    StartTime = new TimeCode(line.StartTime),
+                    EndTime = new TimeCode(line.EndTime),
+                    Text = line.Text,
+                    Actor = line.Actor,
+                    Style = line.Style,
+                    Language = line.Language,
+                    Region = line.Region,
+                    Layer = line.Layer,
+                    Bookmark = line.Bookmark,
+                };
+                sub.Paragraphs.Add(p);
+            }
+
+            vm.Initialize(sub);
+        });
+
+        if (!result.OkPressed)
+        {
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        for (var i = 0; i < result.Subtitle.Paragraphs.Count; i++)
+        { 
+            var text = result.Subtitle.Paragraphs[i].Text;  
+            var id = selectedItems[i].Id;
+            var p = Subtitles.FirstOrDefault(x => x.Id == id);
+            if (p != null)
+            {
+                p.Text = text;
+            }
+        }
+
+        _updateAudioVisualizer = true;
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task StatisticsSelectedLines()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<StatisticsWindow, StatisticsViewModel>(Window!, vm =>
+        {
+            var sub = new Subtitle();
+            foreach (var line in selectedItems)
+            {
+                var p = new Paragraph()
+                {
+                    Number = line.Number,
+                    StartTime = new TimeCode(line.StartTime),
+                    EndTime = new TimeCode(line.EndTime),
+                    Text = line.Text,
+                    Actor = line.Actor,
+                    Style = line.Style,
+                    Language = line.Language,
+                    Region = line.Region,
+                    Layer = line.Layer,
+                    Bookmark = line.Bookmark,
+                };
+                sub.Paragraphs.Add(p);
+            }
+
+            vm.Initialize(sub, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
+        });
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task MultipleReplaceSelectedLines()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<MultipleReplaceWindow, MultipleReplaceViewModel>(Window!, vm =>
+        {
+            var sub = new Subtitle();
+            foreach (var line in selectedItems)
+            {
+                var p = new Paragraph()
+                {
+                    Number = line.Number,
+                    StartTime = new TimeCode(line.StartTime),
+                    EndTime = new TimeCode(line.EndTime),
+                    Text = line.Text,
+                    Actor = line.Actor,
+                    Style = line.Style,
+                    Language = line.Language,
+                    Region = line.Region,
+                    Layer = line.Layer,
+                    Bookmark = line.Bookmark,
+                };
+                sub.Paragraphs.Add(p);
+            }
+
+            vm.Initialize(sub);
+        });
+
+        if (!result.OkPressed)
+        {
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        for (var i = 0; i < result.FixedSubtitle.Paragraphs.Count; i++)
+        {
+            var text = result.FixedSubtitle.Paragraphs[i].Text;
+            var id = selectedItems[i].Id;
+            var p = Subtitles.FirstOrDefault(x => x.Id == id);
+            if (p != null)
+            {
+                p.Text = text;
+            }
+        }
+
+        _updateAudioVisualizer = true;
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task FixCommonErrorsSelectedLines()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window!, vm =>
+        {
+            var sub = new Subtitle();
+            foreach (var line in selectedItems)
+            {
+                var p = new Paragraph()
+                {
+                    Number = line.Number,
+                    StartTime = new TimeCode(line.StartTime),
+                    EndTime = new TimeCode(line.EndTime),
+                    Text = line.Text,
+                    Actor = line.Actor,
+                    Style = line.Style,
+                    Language = line.Language,
+                    Region = line.Region,
+                    Layer = line.Layer,
+                    Bookmark = line.Bookmark,
+                };
+                sub.Paragraphs.Add(p);
+            }
+
+            vm.Initialize(sub, SelectedSubtitleFormat);
+        });
+
+        if (!result.OkPressed)
+        {
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        for (var i = 0; i < result.FixedSubtitle.Paragraphs.Count; i++)
+        {
+            var text = result.FixedSubtitle.Paragraphs[i].Text;
+            var id = selectedItems[i].Id;
+            var p = Subtitles.FirstOrDefault(x => x.Id == id);
+            if (p != null)
+            {
+                p.Text = text;
+            }
+        }
+
+        _updateAudioVisualizer = true;
         _shortcutManager.ClearKeys();
     }
 
@@ -5596,6 +5848,7 @@ public partial class MainViewModel :
         MenuItemMergeAsDialog.IsVisible = SubtitleGrid.SelectedItems.Count == 2;
         MenuItemMerge.IsVisible = SubtitleGrid.SelectedItems.Count > 1;
         AreAssaContentMenuItemsVisible = false;
+        ShowAutoTranslateSelectedLines = SubtitleGrid.SelectedItems.Count > 0 && ShowColumnOriginalText;
 
         if (IsSubtitleGridFlyoutHeaderVisible)
         {

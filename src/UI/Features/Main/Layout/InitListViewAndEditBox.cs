@@ -536,6 +536,48 @@ public static class InitListViewAndEditBox
         bookmarkMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
         flyout.Items.Add(bookmarkMenuItem);
 
+        var menuItemSelectedLines = new MenuItem
+        {
+            Header = Se.Language.General.SelectedLines,
+            DataContext = vm,
+            Items = {
+                new MenuItem
+                {
+                    Header = Se.Language.Main.Menu.AutoTranslate,
+                    Command = vm.AutoTranslateSelectedLinesCommand,
+                    DataContext = vm,
+                    [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowAutoTranslateSelectedLines)),
+                },
+                new MenuItem
+                {
+                    Header = Se.Language.Main.Menu.ChangeCasing,
+                    Command = vm.ChangeCasingSelectedLinesCommand,
+                    DataContext = vm,
+                },
+                new MenuItem
+                {
+                    Header = Se.Language.Main.Menu.FixCommonErrors,
+                    Command = vm.FixCommonErrorsSelectedLinesCommand,
+                    DataContext = vm,
+                },
+                new MenuItem
+                {
+                    Header = Se.Language.Main.Menu.MultipleReplace,
+                    Command = vm.MultipleReplaceSelectedLinesCommand,
+                    DataContext = vm,
+                },
+                new MenuItem
+                {
+                    Header = Se.Language.Main.Menu.Statistics,
+                    Command = vm.StatisticsSelectedLinesCommand,
+                    DataContext = vm,
+                },
+            }
+        };
+        menuItemSelectedLines.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        flyout.Items.Add(menuItemSelectedLines);
+
+
         // Set the ContextFlyout property
         vm.SubtitleGrid.ContextFlyout = flyout;
         vm.SubtitleGrid.AddHandler(InputElement.PointerPressedEvent, vm.SubtitleGrid_PointerPressed, RoutingStrategies.Tunnel);

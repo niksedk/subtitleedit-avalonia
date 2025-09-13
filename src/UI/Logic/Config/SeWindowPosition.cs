@@ -36,28 +36,35 @@ public class SeWindowPosition
 
     public static SeWindowPosition SaveState(Window? window)
     {
-        if (window == null || window.Name == null)
+        try
+        {
+            if (window == null || window.Name == null)
+            {
+                return new SeWindowPosition();
+            }
+
+            var screen = window.Screens.ScreenFromWindow(window);
+
+            var state = new SeWindowPosition
+            {
+                WindowName = window.Name,
+                IsFullScreen = window.WindowState == WindowState.FullScreen,
+                IsMaximized = window.WindowState == WindowState.Maximized,
+                X = window.Position.X,
+                Y = window.Position.Y,
+                Width = (int)window.Width,
+                Height = (int)window.Height,
+                ScreenX = screen?.Bounds.X ?? 0,
+                ScreenY = screen?.Bounds.Y ?? 0,
+                ScreenWidth = screen?.Bounds.Width ?? 0,
+                ScreenHeight = screen?.Bounds.Height ?? 0,
+            };
+
+            return state;
+        }
+        catch
         {
             return new SeWindowPosition();
         }
-
-        var screen = window.Screens.ScreenFromWindow(window);
-
-        var state = new SeWindowPosition
-        {
-            WindowName = window.Name,
-            IsFullScreen = window.WindowState == WindowState.FullScreen,
-            IsMaximized = window.WindowState == WindowState.Maximized,
-            X = window.Position.X,
-            Y = window.Position.Y,
-            Width = (int)window.Width,
-            Height = (int)window.Height,
-            ScreenX = screen?.Bounds.X ?? 0,
-            ScreenY = screen?.Bounds.Y ?? 0,
-            ScreenWidth = screen?.Bounds.Width ?? 0,
-            ScreenHeight = screen?.Bounds.Height ?? 0,
-        };
-
-        return state;
     }
 }
