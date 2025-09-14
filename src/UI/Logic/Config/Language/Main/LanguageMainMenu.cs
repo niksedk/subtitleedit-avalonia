@@ -28,6 +28,7 @@ public class LanguageMainMenu
     public string Replace { get; set; }
     public string MultipleReplace { get; set; }
     public string GoToLineNumber { get; set; }
+    public string RightToLeftMode { get; set; }
 
 
     public string Tools { get; set; }
@@ -59,6 +60,7 @@ public class LanguageMainMenu
     public string GenerateBurnIn { get; set; }
     public string GenerateTransparent { get; set; }
     public string GenerateImportShotChanges { get; set; }
+    public string ListShotChanges { get; set; }
     public object UndockVideoControls { get; set; }
     public object DockVideoControls { get; set; }
 
@@ -81,7 +83,6 @@ public class LanguageMainMenu
     public string HelpTitle { get; set; }
     public string Help { get; set; }
     public string About { get; set; }
-    public object RightToLeftMode { get; set; }
 
     public LanguageMainMenu()
     {
@@ -138,10 +139,11 @@ public class LanguageMainMenu
         SpeechToText = "_Speech to text...";
         TextToSpeech = "_Text to speech...";
         UndockVideoControls = "_Undock video controls";
+        ListShotChanges = "List s_hot changes...";
+        GenerateImportShotChanges = "Generate/import s_hot changes...";
         DockVideoControls = "_Dock video controls";
         GenerateBurnIn = "Generate video with _burned-in subtitles...";
         GenerateTransparent = "_Generate transparent video with subtitles...";
-        GenerateImportShotChanges = "Generate/import s_hot changes...";
 
         Synchronization = "S_ynchronization";
         AdjustAllTimes = "_Adjust all times...";

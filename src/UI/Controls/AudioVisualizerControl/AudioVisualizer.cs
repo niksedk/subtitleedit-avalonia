@@ -1378,4 +1378,35 @@ public class AudioVisualizer : Control
             }
         }
     }
+
+    internal int GetShotChangeIndex(double seconds)
+    {
+        if (ShotChanges == null)
+        {
+            return -1;
+        }
+
+        try
+        {
+            for (var index = 0; index < ShotChanges.Count; index++)
+            {
+                var shotChange = ShotChanges[index];
+                if (Math.Abs(shotChange - seconds) < 0.04)
+                {
+                    return index;
+                }
+            }
+        }
+        catch
+        {
+            // ignored
+        }
+
+        return -1;
+    }
+
+    internal void SetSpectrogram(SpectrogramData spectrogramData)
+    {
+        //TODO: implement spectrogram
+    }
 }

@@ -10,7 +10,7 @@ public partial class SplitDisplayItem : ObservableObject
 
     public SplitDisplayItem()
     {
-        string FileName = string.Empty;
+        FileName = string.Empty;
     }
 }
 

@@ -353,6 +353,13 @@ public class LanguageGeneral
     public string AudioVisualizer { get; set; }
     public string SelectedLines { get; set; }
     public string Sensitivity { get; set; }
+    public string TextFiles { get; set; }
+    public string StartingDotDotDot { get; set; }
+    public string Frames { get; set; }
+    public string Milliseconds { get; set; }
+    public string ToggleShotChangesAtVideoPosition { get; set; }
+    public string GenerateImportShotChanges { get; set; }
+    public string ShowShotChangesList { get; set; }
 
     public LanguageGeneral()
     {
@@ -703,5 +710,12 @@ public class LanguageGeneral
         AudioVisualizer = "Audio visualizer";
         SelectedLines = "Selected lines";
         Sensitivity = "Sensitivity";
+        TextFiles = "Text files";
+        StartingDotDotDot = "Starting...";
+        Frames = "Frames";
+        Milliseconds = "Milliseconds";
+        ToggleShotChangesAtVideoPosition = "Toggle shot changes at video position";
+        GenerateImportShotChanges = "Generate/import shot changes";
+        ShowShotChangesList = "Show shot changes list";
     }
 }

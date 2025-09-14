@@ -26,12 +26,19 @@ public static class UserWordsHelper
         if (File.Exists(userWordListXmlFileName))
         {
             userWordDictionary.Load(userWordListXmlFileName);
-            foreach (XmlNode node in userWordDictionary.DocumentElement.SelectNodes("word"))
+            if (userWordDictionary != null && userWordDictionary.DocumentElement != null)
             {
-                string s = node.InnerText.ToLowerInvariant();
-                if (!userWordList.Contains(s))
+                var nodes = userWordDictionary.DocumentElement.SelectNodes("word");
+                if (nodes != null)
                 {
-                    userWordList.Add(s);
+                    foreach (XmlNode node in nodes)
+                    {
+                        string s = node.InnerText.ToLowerInvariant();
+                        if (!userWordList.Contains(s))
+                        {
+                            userWordList.Add(s);
+                        }
+                    }
                 }
             }
         }

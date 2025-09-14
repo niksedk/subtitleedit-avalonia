@@ -5,12 +5,11 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Styling;
-using Nikse.SubtitleEdit.Features.Video.ShotChanges;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 
-namespace Nikse.SubtitleEdit.Features.Tools.ApplyDurationLimits;
+namespace Nikse.SubtitleEdit.Features.Video.ShotChanges;
 
 public class ShotChangesWindow : Window
 {
@@ -30,7 +29,7 @@ public class ShotChangesWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand).BindIsEnabled(vm, nameof(vm.IsGenerating));
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand).BindIsEnabled(vm, nameof(vm.IsGenerating), new InverseBooleanConverter());
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
@@ -69,7 +68,7 @@ public class ShotChangesWindow : Window
                     Content = MakeImportView(vm)
                 }
             }
-        };  
+        };
 
         grid.Add(tabControl, 0);
         grid.Add(panelButtons, 1);
@@ -123,23 +122,30 @@ public class ShotChangesWindow : Window
             Width = new DataGridLength(1, DataGridLengthUnitType.Star),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
         });
+        vm.DataGridFfmpegLines = dataGrid;
 
-        var labelSensitivity = UiUtil.MakeLabel(Se.Language.General.Sensitivity); 
+        var labelSensitivity = UiUtil.MakeLabel(Se.Language.General.Sensitivity);
         var sliderSensitivity = new Slider
         {
             Minimum = 0.1,
             Maximum = 0.9,
             Width = 200,
             HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,            
         };
         sliderSensitivity.Bind(Slider.ValueProperty, new Binding(nameof(ShotChangesViewModel.Sensitivity))
         {
             Source = vm,
             Mode = BindingMode.TwoWay,
         });
+        sliderSensitivity.Bind(Slider.IsEnabledProperty, new Binding(nameof(vm.IsGenerating))
+        {
+            Converter = new InverseBooleanConverter(),
+            Source = vm,
+            Mode = BindingMode.TwoWay,
+        });
         var labelSensitivityValue = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(ShotChangesViewModel.Sensitivity), new DoubleToTwoDecimalConverter());
-        var buttonGenerate = UiUtil.MakeButton(Se.Language.Video.ShotChanges.GenerateShotChangesWithFfmpeg, vm.GenerateShotChangesFfmpegCommand);
+        var buttonGenerate = UiUtil.MakeButton(Se.Language.Video.ShotChanges.GenerateShotChangesWithFfmpeg, vm.GenerateShotChangesFfmpegCommand).WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
         var panelSensitivity = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -174,31 +180,46 @@ public class ShotChangesWindow : Window
                 {
                     Setters =
                     {
-                        new Setter(Track.HeightProperty, 6.0)
+                        new Setter(Track.HeightProperty, 2.0)
                     }
                 },
             },
             [!Slider.ValueProperty] = new Binding(nameof(vm.ProgressValue)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
-            [!Slider.IsVisibleProperty] = new Binding(nameof(vm.IsGenerating)),
+            
         };
+        var progressText = UiUtil.MakeLabel().WithBindText(vm, nameof(ShotChangesViewModel.ProgressText)).WithAlignmentCenter().WithMarginTop(14); 
+        var gridProgress = new Grid
+        {
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+        };
+        gridProgress.Add(sliderProgress, 0);    
+        gridProgress.Add(progressText, 0);
 
         grid.Add(UiUtil.MakeBorderForControlNoPadding(dataGrid), 0);
         grid.Add(panelSensitivity, 1);
-        grid.Add(sliderProgress, 2);
+        grid.Add(gridProgress, 2);
 
         return grid;
     }
 
-    private Control MakeImportView(ShotChangesViewModel vm)
+    private static Grid MakeImportView(ShotChangesViewModel vm)
     {
         var grid = new Grid
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
@@ -210,9 +231,43 @@ public class ShotChangesWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(UiUtil.MakeLabel(Se.Language.Video.ShotChanges.ImportShotChanges), 0);
+        var buttonImport = UiUtil.MakeButton(Se.Language.Video.ShotChanges.ImportShotChangesFromFile, vm.ImportFromTextFileCommand).WithLeftAlignment();
 
-        return UiUtil.MakeBorderForControl(grid);
+        var labelTimeCodeFormat = UiUtil.MakeLabel(Se.Language.Video.ShotChanges.TimeCodeFormat);
+        var radioButtonFrames = UiUtil.MakeRadioButton(Se.Language.General.Frames, vm, nameof(ShotChangesViewModel.TimeCodeFrames), "TimeCode");
+        var radioButtonSeconds = UiUtil.MakeRadioButton(Se.Language.General.Seconds, vm, nameof(ShotChangesViewModel.TimeCodeSeconds), "TimeCode");
+        var radioButtonMilliseconds = UiUtil.MakeRadioButton(Se.Language.General.Milliseconds, vm, nameof(ShotChangesViewModel.TimeCodeMilliseconds), "TimeCode");
+        var radioButtonTHhMmSsMs = UiUtil.MakeRadioButton(Se.Language.General.Milliseconds, vm, nameof(ShotChangesViewModel.TimeCodeHhMmSsMs), "TimeCode");
+
+        var panelTimeCodeFormat = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Spacing = 10,
+            Children =
+            {
+                labelTimeCodeFormat,
+                radioButtonFrames,
+                radioButtonSeconds,
+                radioButtonMilliseconds,
+                radioButtonTHhMmSsMs,
+            }
+        };
+
+        var textBoxImport = new TextBox
+        {
+            Width = double.NaN,
+            Height = double.NaN,
+            IsReadOnly = true,
+        };
+        textBoxImport.Bind(TextBox.TextProperty, new Binding(nameof(ShotChangesViewModel.ImportText)) { Source = vm, Mode = BindingMode.TwoWay });
+
+        grid.Add(textBoxImport, 0);
+        grid.Add(panelTimeCodeFormat, 1);
+        grid.Add(buttonImport, 2);
+
+
+        return grid;
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

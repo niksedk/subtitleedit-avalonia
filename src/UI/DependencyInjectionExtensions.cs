@@ -57,6 +57,7 @@ using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Features.Video.CutVideo;
 using Nikse.SubtitleEdit.Features.Video.OpenFromUrl;
 using Nikse.SubtitleEdit.Features.Video.ReEncodeVideo;
+using Nikse.SubtitleEdit.Features.Video.ShotChanges;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.DownloadTts;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.ElevenLabsSettings;
@@ -199,6 +200,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<ReviewSpeechViewModel>();
         collection.AddTransient<SelectVideoPositionViewModel>();
         collection.AddTransient<SettingsViewModel>();
+        collection.AddTransient<ShotChangeListViewModel>();
         collection.AddTransient<ShotChangesViewModel>();
         collection.AddTransient<ShortcutsViewModel>();
         collection.AddTransient<ShowHistoryViewModel>();

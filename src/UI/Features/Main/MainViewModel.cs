@@ -72,6 +72,7 @@ using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Features.Video.CutVideo;
 using Nikse.SubtitleEdit.Features.Video.OpenFromUrl;
 using Nikse.SubtitleEdit.Features.Video.ReEncodeVideo;
+using Nikse.SubtitleEdit.Features.Video.ShotChanges;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech;
 using Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
 using Nikse.SubtitleEdit.Logic;
@@ -147,6 +148,7 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _waveformCenter;
     [ObservableProperty] private bool _isRightToLeftEnabled;
     [ObservableProperty] private bool _showAutoTranslateSelectedLines;
+    [ObservableProperty] private bool _showShotChangesListMenuItem;
 
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
@@ -1543,7 +1545,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowShotChangesSubtitles()
     {
-        if (string.IsNullOrEmpty(_videoFileName) || VideoPlayerControl == null)
+        if (string.IsNullOrEmpty(_videoFileName) || VideoPlayerControl == null || AudioVisualizer == null)
         {
             return;
         }
@@ -1554,14 +1556,78 @@ public partial class MainViewModel :
             return;
         }
 
-        await _windowService.ShowDialogAsync<ShotChangesWindow, ShotChangesViewModel>(Window!, vm =>
+        var result = await _windowService.ShowDialogAsync<ShotChangesWindow, ShotChangesViewModel>(Window!, vm =>
         {
-            vm.Initialize(_videoFileName, AudioVisualizer?.ShotChanges ?? new List<double>());
+            vm.Initialize(_videoFileName);
         });
+
+        if (result.OkPressed)
+        {
+            AudioVisualizer.ShotChanges = result.FfmpegLines.Select(p => p.Seconds).ToList();
+            ShowShotChangesListMenuItem = AudioVisualizer.ShotChanges.Count > 0;
+            _updateAudioVisualizer = true;
+            ShotChangeHelper.SaveShotChanges(_videoFileName, AudioVisualizer.ShotChanges);
+        }
 
         _shortcutManager.ClearKeys();
     }
 
+
+    [RelayCommand]
+    private async Task ShowShotChangesList()
+    {
+        var selected = SelectedSubtitle;
+        if (selected == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<ShotChangeListWindow, ShotChangeListViewModel>(Window!, vm =>
+        {
+            vm.Initialize(AudioVisualizer?.ShotChanges ?? new List<double>());
+        });
+
+        if (result.GoToPressed && result.SelectedShotChange != null)
+        {
+            VideoPlayerControl!.Position = result.SelectedShotChange.Seconds;
+        }
+
+        ShowShotChangesListMenuItem = AudioVisualizer?.ShotChanges.Count > 0;
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private void ToggleShotChangesAtVideoPosition()
+    {
+        if (string.IsNullOrEmpty(_videoFileName) || VideoPlayerControl == null || AudioVisualizer == null)
+        {
+            return;
+        }
+
+        var cp = AudioVisualizer.CurrentVideoPositionSeconds;
+        var idx = AudioVisualizer.GetShotChangeIndex(cp);
+        if (idx >= 0)
+        {
+            RemoveShotChange(idx);
+            if (AudioVisualizer.ShotChanges.Count == 0)
+            {
+                ShotChangeHelper.DeleteShotChanges(_videoFileName);
+            }
+        }
+        else
+        { // add shot change
+            var list = AudioVisualizer.ShotChanges.Where(p => p > 0).ToList();
+            list.Add(cp);
+            list.Sort();
+            AudioVisualizer.ShotChanges = list;
+            ShotChangeHelper.SaveShotChanges(_videoFileName, list);
+        }
+
+        ShowShotChangesListMenuItem = AudioVisualizer?.ShotChanges.Count > 0;
+
+        _shortcutManager.ClearKeys();
+    }
 
     [RelayCommand]
     private async Task ShowSyncAdjustAllTimes()
@@ -4125,6 +4191,22 @@ public partial class MainViewModel :
         });
     }
 
+    private void RemoveShotChange(int idx)
+    {
+        if (AudioVisualizer == null || AudioVisualizer.ShotChanges == null)
+        {
+            return;
+        }
+
+        if (idx >= 0 && idx < AudioVisualizer.ShotChanges.Count)
+        {
+            var temp = new List<double>(AudioVisualizer.ShotChanges);
+            temp.RemoveAt(idx);
+            AudioVisualizer.ShotChanges = temp;
+            ShotChangeHelper.SaveShotChanges(_videoFileName, temp);
+        }
+    }
+
     private async Task ImportSubtitleFromTransportStream(string fileName)
     {
         //ShowStatus(_language.ParsingTransportStream);
@@ -5397,7 +5479,7 @@ public partial class MainViewModel :
                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
     }
 
-    private async Task VideoOpenFile(string videoFileName)
+    private async Task VideoOpenFile(string videoFileName) // OpenVideoFile
     {
         if (VideoPlayerControl == null)
         {
@@ -5414,6 +5496,7 @@ public partial class MainViewModel :
         }
 
         var peakWaveFileName = WavePeakGenerator.GetPeakWaveFileName(videoFileName);
+        var spectrogramFolder = WavePeakGenerator.SpectrogramDrawer.GetSpectrogramFolder(videoFileName, 0);
         if (!File.Exists(peakWaveFileName))
         {
             if (FfmpegHelper.IsFfmpegInstalled())
@@ -5437,6 +5520,8 @@ public partial class MainViewModel :
             if (AudioVisualizer != null)
             {
                 AudioVisualizer.WavePeaks = wavePeaks;
+                AudioVisualizer.SetSpectrogram(SpectrogramData.FromDisk(spectrogramFolder));
+                AudioVisualizer.ShotChanges = ShotChangeHelper.FromDisk(videoFileName);
             }
         }
 

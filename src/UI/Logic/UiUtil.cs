@@ -10,6 +10,7 @@ using Avalonia.Platform;
 using Avalonia.Styling;
 using Avalonia.Themes.Fluent;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Features.Tools.ApplyDurationLimits;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 using SkiaSharp;
@@ -1062,6 +1063,12 @@ public static class UiUtil
     public static Label WithAlignmentRight(this Label control)
     {
         control.HorizontalAlignment = HorizontalAlignment.Right;
+        return control;
+    }
+
+    public static Label WithAlignmentCenter(this Label control)
+    {
+        control.HorizontalAlignment = HorizontalAlignment.Center;
         return control;
     }
 

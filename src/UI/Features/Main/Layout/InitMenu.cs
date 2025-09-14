@@ -370,6 +370,12 @@ public static class InitMenu
                     Header = l.GenerateImportShotChanges,
                     Command = vm.ShowShotChangesSubtitlesCommand,
                 },
+                new MenuItem
+                {
+                    Header = l.ListShotChanges,
+                    Command = vm.ShowShotChangesListCommand,
+                    [!MenuItem.IsVisibleProperty] = new Binding(nameof(vm.ShowShotChangesListMenuItem)),
+                },
                 new Separator(),
                 new MenuItem
                 {
