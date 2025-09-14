@@ -42,16 +42,15 @@ public partial class ShotChangesViewModel : ObservableObject
     public Window? Window { get; set; }
     public double LastSeconds { get; private set; }
     public bool OkPressed { get; private set; }
-
     private StringBuilder Log { get; set; } = new StringBuilder();
     public DataGrid DataGridFfmpegLines { get; set; }
+    public static readonly Regex TimeRegex = new Regex(@"pts_time:\d+[.,]*\d*", RegexOptions.Compiled);
 
     private string _videoFileName = string.Empty;
     private Process? _ffmpegProcess;
     private readonly System.Timers.Timer _timerGenerate;
     private bool _doAbort;
     private FfmpegMediaInfo? _mediaInfo;
-    private static readonly Regex TimeRegex = new Regex(@"pts_time:\d+[.,]*\d*", RegexOptions.Compiled);
     private Lock TimeCodesLock = new Lock();
     private TimeCode? _duration;
     private double _frameRate;

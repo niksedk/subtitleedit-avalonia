@@ -1,4 +1,4 @@
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
@@ -85,6 +85,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -181,6 +182,8 @@ public partial class MainViewModel :
     private long _lastKeyPressedTicks;
     private bool _loading;
     private bool _opening;
+    private DispatcherTimer _positionTimer = new();
+    private CancellationTokenSource _videoOpenTokenSource;
 
     private readonly IFileHelper _fileHelper;
     private readonly IFolderHelper _folderHelper;
@@ -321,6 +324,7 @@ public partial class MainViewModel :
         EditTextOriginal = string.Empty;
         PanelSingleLineLenghtsOriginal = new StackPanel();
         IsWaveformToolbarVisible = Se.Settings.Waveform.ShowToolbar;
+        _videoOpenTokenSource = new CancellationTokenSource();
 
         themeInitializer.UpdateThemesIfNeeded().ConfigureAwait(true);
         Dispatcher.UIThread.Post(async void () =>
@@ -606,6 +610,7 @@ public partial class MainViewModel :
 
     private void ResetSubtitle()
     {
+        _videoOpenTokenSource?.Cancel();
         ShowColumnOriginalText = false;
         _subtitle.Paragraphs.Clear();
         Subtitles.Clear();
@@ -1587,6 +1592,11 @@ public partial class MainViewModel :
         {
             vm.Initialize(AudioVisualizer?.ShotChanges ?? new List<double>());
         });
+
+        if (result.OKProssed && AudioVisualizer != null)
+        {
+            AudioVisualizer.ShotChanges = result.ShotChanges.Select(p => p.Seconds).ToList();
+        }
 
         if (result.GoToPressed && result.SelectedShotChange != null)
         {
@@ -5257,6 +5267,7 @@ public partial class MainViewModel :
 
     internal async void OnClosing(object? sender, WindowClosingEventArgs e)
     {
+        _videoOpenTokenSource?.Cancel();
         AddToRecentFiles(false);
 
         if (Window != null)
@@ -5269,6 +5280,7 @@ public partial class MainViewModel :
             Se.Settings.General.ShowColumnWpm = ShowColumnWpm;
             Se.Settings.General.SelectCurrentSubtitleWhilePlaying = SelectCurrentSubtitleWhilePlaying;
             Se.Settings.Waveform.ShowToolbar = IsWaveformToolbarVisible;
+            Se.Settings.Waveform.CenterVideoPosition = WaveformCenter;
 
             UiUtil.SaveWindowPosition(Window);
 
@@ -5487,6 +5499,7 @@ public partial class MainViewModel :
             return;
         }
 
+        _videoOpenTokenSource?.Cancel();
         await VideoPlayerControl.Open(videoFileName);
         _mpvReloader.Reset();
 
@@ -5509,7 +5522,7 @@ public partial class MainViewModel :
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 Task.Run(async () =>
                 {
-                    await ExtractWaveformAndSpectrogram(process, tempWaveFileName, peakWaveFileName);
+                    await ExtractWaveformAndSpectrogramAndShotChanges(process, tempWaveFileName, peakWaveFileName, videoFileName);
                 });
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
@@ -5523,26 +5536,39 @@ public partial class MainViewModel :
                 AudioVisualizer.WavePeaks = wavePeaks;
                 AudioVisualizer.SetSpectrogram(SpectrogramData.FromDisk(spectrogramFolder));
                 AudioVisualizer.ShotChanges = ShotChangeHelper.FromDisk(videoFileName);
+                if (AudioVisualizer.ShotChanges.Count == 0)
+                {
+                    ExtractShotChanges(videoFileName);
+                }
             }
         }
 
         _videoFileName = videoFileName;
     }
 
-    private async Task ExtractWaveformAndSpectrogram(Process process, string tempWaveFileName,
-        string peakWaveFileName)
+    private async Task ExtractWaveformAndSpectrogramAndShotChanges(
+        Process process,
+        string tempWaveFileName,
+        string peakWaveFileName,
+        string videoFileName)
     {
         process.Start();
 
-        var token = new CancellationTokenSource().Token;
+        _videoOpenTokenSource = new CancellationTokenSource();
         while (!process.HasExited)
         {
-            await Task.Delay(100, token);
+            await Task.Delay(100, _videoOpenTokenSource.Token);
         }
 
         if (process.ExitCode != 0)
         {
             ShowStatus(Se.Language.Main.FailedToExtractWaveInfo);
+            return;
+        }
+
+        if (_videoOpenTokenSource.IsCancellationRequested)
+        {
+            DeleteTempFile(tempWaveFileName);
             return;
         }
 
@@ -5552,6 +5578,12 @@ public partial class MainViewModel :
             waveFile.GeneratePeaks(0, peakWaveFileName);
 
             var wavePeaks = WavePeakData.FromDisk(peakWaveFileName);
+
+            if (_videoOpenTokenSource.IsCancellationRequested)
+            {
+                DeleteTempFile(tempWaveFileName);
+                return;
+            }
 
             Dispatcher.UIThread.Post(() =>
             {
@@ -5563,10 +5595,92 @@ public partial class MainViewModel :
                 _updateAudioVisualizer = true;
             }, DispatcherPriority.Background);
         }
+
+        ExtractShotChanges(videoFileName);
+    }
+
+    private void ExtractShotChanges(string videoFileName)
+    {
+        if (Se.Settings.Waveform.WaveformShotChangesAutoGenerate)
+        {
+            var threshold = Se.Settings.Waveform.ShotChangesSensitivity.ToString(CultureInfo.InvariantCulture);
+            var argumentsFormat = Se.Settings.Video.ShowChangesFFmpegArguments;
+            var arguments = string.Format(argumentsFormat, videoFileName, threshold);
+
+            var ffmpegProcess = FfmpegGenerator.GetProcess(arguments, OutputHandler);
+#pragma warning disable CA1416 // Validate platform compatibility
+            ffmpegProcess.Start();
+#pragma warning restore CA1416 // Validate platform compatibility
+            ffmpegProcess.BeginOutputReadLine();
+            ffmpegProcess.BeginErrorReadLine();
+
+            _ = Task.Run(() =>
+            {
+                while (!ffmpegProcess.HasExited)
+                {
+                    if (_videoOpenTokenSource.IsCancellationRequested)
+                    {
+                        try
+                        {
+                            ffmpegProcess.Kill(true);
+                        }
+                        catch
+                        {
+                            // ignore
+                        }
+                        break;
+                    }
+                    Task.Delay(100).Wait();
+                }
+
+                if (!_videoOpenTokenSource.IsCancellationRequested && AudioVisualizer != null && AudioVisualizer.ShotChanges != null)
+                {
+                    ShotChangeHelper.SaveShotChanges(videoFileName, AudioVisualizer.ShotChanges);
+                }
+            });
+        }
+    }
+
+    private Lock _addShotChangeLock = new Lock();
+    private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
+    {
+        if (string.IsNullOrWhiteSpace(outLine.Data))
+        {
+            return;
+        }
+
+        var match = ShotChangesViewModel.TimeRegex.Match(outLine.Data);
+        if (match.Success)
+        {
+            var timeCode = match.Value.Replace("pts_time:", string.Empty).Replace(",", ".").Replace("٫", ".").Replace("⠨", ".");
+            if (double.TryParse(timeCode, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var seconds) && seconds > 0.2)
+            {
+                lock (_addShotChangeLock)
+                {
+                    AudioVisualizer?.ShotChanges.Add(seconds);
+                }
+            }
+        }
+    }
+
+    private static void DeleteTempFile(string tempWaveFileName)
+    {
+        try
+        {
+            if (File.Exists(tempWaveFileName))
+            {
+                File.Delete(tempWaveFileName);
+            }
+        }
+        catch
+        {
+            // ignore
+        }
     }
 
     private void VideoCloseFile()
     {
+        _videoOpenTokenSource?.Cancel();
         VideoPlayerControl?.Close();
         _videoFileName = string.Empty;
     }
@@ -6389,8 +6503,6 @@ public partial class MainViewModel :
             : new SolidColorBrush(Colors.Transparent);
     }
 
-    private DispatcherTimer _positionTimer = new();
-
     private void StartTitleTimer()
     {
         _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(150) };
@@ -6460,7 +6572,7 @@ public partial class MainViewModel :
                 av.CurrentVideoPositionSeconds = vp.Position;
                 var isPlaying = vp.IsPlaying;
 
-                if (WaveformCenter)
+                if (WaveformCenter && isPlaying)
                 {
                     // calculate the center position based on the waveform width
                     var waveformHalfSeconds = (av.EndPositionSeconds - av.StartPositionSeconds) / 2.0;

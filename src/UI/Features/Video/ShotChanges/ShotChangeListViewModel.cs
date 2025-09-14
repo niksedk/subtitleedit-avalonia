@@ -20,6 +20,7 @@ public partial class ShotChangeListViewModel : ObservableObject
     public Window? Window { get; set; }
 
     public bool GoToPressed { get; private set; }
+    public bool OKProssed { get; private set; }
 
     public ShotChangeListViewModel()
     {
@@ -47,6 +48,7 @@ public partial class ShotChangeListViewModel : ObservableObject
         }
 
         ShotChanges.Clear();
+        OKProssed = true;
 
         Window?.Close();
     }
@@ -79,11 +81,13 @@ public partial class ShotChangeListViewModel : ObservableObject
         }
 
         ShotChanges.Remove(shotChange);
+        OKProssed = true;
     }
 
     [RelayCommand]
     private void Cancel()
     {
+        OKProssed = false;
         Window?.Close();
     }
 

@@ -109,7 +109,6 @@ public class LanguageSettings
     public string WaveformShotChangesAutoGenerate { get; set; }
     public string WaveformColor { get; set; }
     public string WaveformSelectedColor { get; set; }
-    public string WaveformAutoAddShotChanges { get; set; }
     public string DownloadFfmpeg { get; set; }
 
     // Toolbar
@@ -245,7 +244,6 @@ public class LanguageSettings
         WaveformShotChangesAutoGenerate = "Shot changes auto-generate";
         WaveformColor = "Waveform color";
         WaveformSelectedColor = "Waveform selected color";
-        WaveformAutoAddShotChanges = "Auto-generate shot changes";
         DownloadFfmpeg = "Download ffmpeg";
 
         // Toolbar
