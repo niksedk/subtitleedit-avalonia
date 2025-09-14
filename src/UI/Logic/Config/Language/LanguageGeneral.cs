@@ -360,6 +360,9 @@ public class LanguageGeneral
     public string ToggleShotChangesAtVideoPosition { get; set; }
     public string GenerateImportShotChanges { get; set; }
     public string ShowShotChangesList { get; set; }
+    public string Header { get; set; }
+    public string Footer { get; set; }
+    public string FileExtension { get; set; }
 
     public LanguageGeneral()
     {
@@ -717,5 +720,8 @@ public class LanguageGeneral
         ToggleShotChangesAtVideoPosition = "Toggle shot changes at video position";
         GenerateImportShotChanges = "Generate/import shot changes";
         ShowShotChangesList = "Show shot changes list";
+        Header = "Header";
+        Footer = "Footer";
+        FileExtension = "File extension";
     }
 }

@@ -8,6 +8,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportCustomTextFormat;
 
@@ -26,11 +27,14 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
     private string? _videoFileName;
 
     public Window? Window { get; set; }
-
     public bool OkPressed { get; private set; }
 
-    public ExportCustomTextFormatViewModel()
+    private IWindowService _windowService;
+
+    public ExportCustomTextFormatViewModel(IWindowService windowService)
     {
+        _windowService = windowService;
+
         CustomFormats = new ObservableCollection<CustomFormatItem>();
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         PreviewText = string.Empty;
@@ -48,8 +52,19 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void FormatEdit()
+    private async Task FormatEdit()
     {
+        var selected = SelectedCustomFormat;
+        if (selected == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<EditCustomTextFormatWindow, EditCustomTextFormatViewModel>(Window!, vm =>
+        {
+            vm.Initialize(selected, Se.Language.File.Export.EditCustomFormat);
+        });
+
     }
 
     [RelayCommand]
@@ -58,8 +73,18 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void FormatNew()
+    private async Task FormatNew()
     {
+        var selected = SelectedCustomFormat;
+        if (selected == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<EditCustomTextFormatWindow, EditCustomTextFormatViewModel>(Window!, vm =>
+        {
+            vm.Initialize(selected, Se.Language.File.Export.NewCustomFormat);
+        });
     }
 
     [RelayCommand]
@@ -100,5 +125,10 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
         _subtitles = subtitles;
         _subtitleFileNAme = subtitleFileName;
         _videoFileName = videoFileName;
+
+        foreach (var customFormat in Se.Settings.File.ExportCustomFormats)
+        {
+            CustomFormats.Add(new CustomFormatItem(customFormat));
+        }
     }
 }

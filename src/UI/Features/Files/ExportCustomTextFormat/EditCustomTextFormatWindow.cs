@@ -8,11 +8,11 @@ using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportCustomTextFormat;
 
-public class ExportCustomTextFormatWindow : Window
+public class EditCustomTextFormatWindow : Window
 {
-    private readonly ExportCustomTextFormatViewModel _vm;
+    private readonly EditCustomTextFormatViewModel _vm;
 
-    public ExportCustomTextFormatWindow(ExportCustomTextFormatViewModel vm)
+    public EditCustomTextFormatWindow(EditCustomTextFormatViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.File.Export.TitleExportCustomFormat;
@@ -21,7 +21,7 @@ public class ExportCustomTextFormatWindow : Window
         Height = 800;
         MinWidth = 600;
         MinHeight = 400;
-
+        Bind(Window.TitleProperty, new Binding(nameof(vm.Title)));  
         _vm = vm;
         vm.Window = this;
         DataContext = vm;
@@ -33,9 +33,9 @@ public class ExportCustomTextFormatWindow : Window
             Margin = new Thickness(10, 0, 0, 0),
         };
 
-        var buttonSaveAs = UiUtil.MakeButton(Se.Language.General.SaveDotDotDot, vm.SaveAsCommand);
+        var buttonOk = UiUtil.MakeButtonOk(vm.SaveAsCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar(buttonSaveAs, buttonCancel);
+        var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
         var grid = new Grid
         {
@@ -62,18 +62,23 @@ public class ExportCustomTextFormatWindow : Window
 
         Content = grid;
 
-        Activated += delegate { buttonSaveAs.Focus(); }; // hack to make OnKeyDown work
+        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 
-    private static Grid MakeFormatsView(ExportCustomTextFormatViewModel vm)
+    private static Grid MakeFormatsView(EditCustomTextFormatViewModel vm)
     {
         var grid = new Grid
         {
             RowDefinitions =
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
             },
             ColumnDefinitions =
             {
@@ -83,70 +88,41 @@ public class ExportCustomTextFormatWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(UiUtil.MakeLabel(Se.Language.File.Export.CustomTextFormatsDotDotDot), 0);
+        var labelName = UiUtil.MakeLabel(Se.Language.General.Name); 
+        var textBoxName = UiUtil.MakeTextBox(double.NaN, vm, nameof(vm.SelectedCustomFormat) + "." + nameof(CustomFormatItem.Name));
+        var panelName = UiUtil.MakeHorizontalPanel(labelName, textBoxName);
+        grid.Add(panelName, 0);
 
-        var dataGrid = new DataGrid
-        {
-            Height = double.NaN, // auto size inside scroll viewer
-            Margin = new Thickness(2),
-            ItemsSource = vm.CustomFormats, // Use ItemsSource instead of Items
-            CanUserSortColumns = false,
-            IsReadOnly = true,
-            SelectionMode = DataGridSelectionMode.Extended,
-            DataContext = vm,
-        };
+        var labelFileExtension = UiUtil.MakeLabel(Se.Language.General.FileExtension);
+        var textBoxFileExtension = UiUtil.MakeTextBox(double.NaN, vm, nameof(vm.SelectedCustomFormat) + "." + nameof(CustomFormatItem.Extension));
+        var panelFileExtension = UiUtil.MakeHorizontalPanel(labelFileExtension, textBoxFileExtension).WithMarginTop(5);
+        grid.Add(panelFileExtension, 1);
 
-        dataGrid.DoubleTapped += vm.OnCustomFormatGridDoubleTapped;
+        var labelHeader = UiUtil.MakeLabel(Se.Language.General.Header).WithMarginTop(5);
+        var textBoxHeader = UiUtil.MakeTextBox(double.NaN, vm, nameof(vm.SelectedCustomFormat) + "." + nameof(CustomFormatItem.FormatHeader));
+        textBoxHeader.HorizontalAlignment = HorizontalAlignment.Stretch;
+        textBoxHeader.VerticalAlignment = VerticalAlignment.Stretch;
+        grid.Add(labelHeader, 2);
+        grid.Add(textBoxHeader, 3);
 
-        // Columns
-        dataGrid.Columns.Add(new DataGridTextColumn
-        {
-            Header = Se.Language.General.Name,
-            Binding = new Binding(nameof(CustomFormatItem.Name)),
-            CellTheme = UiUtil.DataGridNoBorderCellTheme,
-        });
-        dataGrid.Columns.Add(new DataGridTextColumn
-        {
-            Header = Se.Language.General.Text,
-            Binding = new Binding(nameof(CustomFormatItem.FormatText)),
-            CellTheme = UiUtil.DataGridNoBorderCellTheme,
-            Width = new DataGridLength(1, DataGridLengthUnitType.Star) // star sizing to take all available space
-        });
-        dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedCustomFormat))
-        {
-            Source = vm,
-            Mode = BindingMode.TwoWay
-        });
-        dataGrid.SelectionChanged += vm.GridSelectionChanged;
-        dataGrid.DoubleTapped += (s, e) => vm.FormatEditCommand.Execute(null);
-        dataGrid.KeyDown += (s, e) => vm.GridKeyDown(e);
+        var labelText = UiUtil.MakeLabel(Se.Language.General.Text).WithMarginTop(5);
+        var textBoxText = UiUtil.MakeTextBox(double.NaN, vm, nameof(vm.SelectedCustomFormat) + "." + nameof(CustomFormatItem.FormatText));
+        textBoxText.HorizontalAlignment = HorizontalAlignment.Stretch;
+        textBoxText.VerticalAlignment = VerticalAlignment.Stretch;
+        grid.Add(labelText, 4);
+        grid.Add(textBoxText, 5);
 
-        var flyout = new MenuFlyout();
-        var deleteMenuItem = new MenuItem
-        {
-            Header = Se.Language.General.Delete,
-            Command = vm.FormatDeleteCommand,
-            [!MenuItem.CommandParameterProperty] = new Binding(nameof(vm.SelectedCustomFormat))
-            {
-                Source = vm
-            }
-        };
-        flyout.Items.Add(deleteMenuItem);
-        dataGrid.ContextFlyout = flyout;
-
-        grid.Add(UiUtil.MakeBorderForControlNoPadding(dataGrid), 1);
-
-        var buttonAdd = UiUtil.MakeButton(vm.FormatNewCommand, IconNames.Plus, Se.Language.General.New);
-        var buttonRemove = UiUtil.MakeButton(vm.FormatDeleteCommand, IconNames.Trash, Se.Language.General.Remove);
-        var buttonEdit = UiUtil.MakeButton(vm.FormatEditCommand, IconNames.Pencil, Se.Language.General.Edit);
-        var panelButtons = UiUtil.MakeButtonBar(buttonAdd, buttonEdit, buttonRemove).WithAlignmentLeft();
-
-        grid.Add(panelButtons, 2);
+        var labelFooter = UiUtil.MakeLabel(Se.Language.General.Footer).WithMarginTop(5);
+        var textBoxFooter = UiUtil.MakeTextBox(double.NaN, vm, nameof(vm.SelectedCustomFormat) + "." + nameof(CustomFormatItem.FormatFooter));
+        textBoxFooter.HorizontalAlignment = HorizontalAlignment.Stretch;
+        textBoxFooter.VerticalAlignment = VerticalAlignment.Stretch;
+        grid.Add(labelFooter, 6);
+        grid.Add(textBoxFooter, 7);
 
         return grid;
     }
 
-    private static Grid MakePreviewView(ExportCustomTextFormatViewModel vm)
+    private static Grid MakePreviewView(EditCustomTextFormatViewModel vm)
     {
         var grid = new Grid
         {

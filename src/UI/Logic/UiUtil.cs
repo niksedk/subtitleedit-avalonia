@@ -451,12 +451,12 @@ public static class UiUtil
         return MakeComboBox(sourceItems, viewModal, propertySelectedPath, null);
     }
 
-    public static TextBox MakeTextBox(int width, object viewModel, string propertyTextPath)
+    public static TextBox MakeTextBox(double width, object viewModel, string propertyTextPath)
     {
         return MakeTextBox(width, viewModel, propertyTextPath, null);
     }
 
-    public static TextBox MakeTextBox(int width, object viewModel, string? propertyTextPath,
+    public static TextBox MakeTextBox(double width, object viewModel, string? propertyTextPath,
         string? propertyIsVisiblePath)
     {
         var textBox = new TextBox
@@ -666,7 +666,7 @@ public static class UiUtil
         return control;
     }
 
-    public static TextBox WithHeight(this TextBox control, int height)
+    public static TextBox WithHeight(this TextBox control, double height)
     {
         var m = control.Margin;
         control.Height = height;
@@ -1978,6 +1978,21 @@ public static class UiUtil
         var stackPanel = new StackPanel
         {
             Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            Spacing = 5,
+        };
+
+        stackPanel.Children.AddRange(controls);
+
+        return stackPanel;
+    }
+
+    public static StackPanel MakeVerticalPanel(params Control[] controls)
+    {
+        var stackPanel = new StackPanel
+        {
+            Orientation = Orientation.Vertical,
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Center,
             Spacing = 5,

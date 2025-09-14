@@ -149,6 +149,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<DownloadWhisperEngineViewModel>();
         collection.AddTransient<DownloadWhisperModelsViewModel>();
         collection.AddTransient<EditCategoryViewModel>();
+        collection.AddTransient<EditCustomTextFormatViewModel>();
         collection.AddTransient<EditRuleViewModel>();
         collection.AddTransient<EditWholeTextViewModel>();
         collection.AddTransient<ElevenLabsSettingsViewModel>();
