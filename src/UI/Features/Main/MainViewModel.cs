@@ -1594,6 +1594,7 @@ public partial class MainViewModel :
         }
 
         ShowShotChangesListMenuItem = AudioVisualizer?.ShotChanges.Count > 0;
+        _updateAudioVisualizer = true;
 
         _shortcutManager.ClearKeys();
     }
@@ -1626,8 +1627,7 @@ public partial class MainViewModel :
         }
 
         ShowShotChangesListMenuItem = AudioVisualizer?.ShotChanges.Count > 0;
-
-        _shortcutManager.ClearKeys();
+        _updateAudioVisualizer = true;
     }
 
     [RelayCommand]

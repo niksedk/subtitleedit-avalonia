@@ -127,7 +127,9 @@ public class AudioVisualizer : Control
 
     public SubtitleLineViewModel? SelectedParagraph { get; set; }
 
-    public int ShotChangeSnapPixels { get; set; } = 8;
+    public double ShotChangeSnapSeconds { get; set; } = 0.05;
+
+    public bool SnapToShotChanges { get; set; } = true;
 
     private List<double> _shotChanges = new List<double>();
 
@@ -714,6 +716,19 @@ public class AudioVisualizer : Control
             case InteractionMode.ResizingLeft:
                 newStart = _originalStartSeconds + deltaSeconds - StartPositionSeconds;
 
+                if (SnapToShotChanges)
+                {
+                    var nearestShotChange = ShotChangeHelper.GetClosestShotChange(_shotChanges, TimeCode.FromSeconds(newStart));
+                    if (nearestShotChange != null)
+                    {
+                        var nearest = (double)nearestShotChange;
+                        if (nearest != newStart && Math.Abs(newStart - nearest) < ShotChangeSnapSeconds)
+                        {
+                            newStart = nearest;
+                        }
+                    }
+                }
+
                 if (previous != null && newStart < previous.EndTime.TotalSeconds)
                 {
                     newStart = previous.EndTime.TotalSeconds + 0.001;
@@ -727,6 +742,20 @@ public class AudioVisualizer : Control
                 break;
             case InteractionMode.ResizingRight:
                 newEnd = _originalEndSeconds + deltaSeconds - StartPositionSeconds;
+
+                if (SnapToShotChanges)
+                {
+                    var nearestShotChange = ShotChangeHelper.GetClosestShotChange(_shotChanges, TimeCode.FromSeconds(newEnd));
+                    if (nearestShotChange != null)
+                    {
+                        var nearest = (double)nearestShotChange;
+                        if (nearest != newEnd && Math.Abs(newEnd - nearest) < ShotChangeSnapSeconds)
+                        {
+                            var oneFrame = 42;// snap to frame before shot change - TODO: Correct? - TODO: get fps from video
+                            newEnd = nearest - oneFrame;
+                        }
+                    }
+                }
 
                 if (next != null && newEnd > next.StartTime.TotalSeconds)
                 {
@@ -1240,9 +1269,25 @@ public class AudioVisualizer : Control
         var currentPositionPos = SecondsToXPosition(CurrentVideoPositionSeconds - StartPositionSeconds);
         if (currentPositionPos > 0 && currentPositionPos < Bounds.Width)
         {
-            context.DrawLine(_paintCurrentPosition,
-                new Point(currentPositionPos, 0),
-                new Point(currentPositionPos, Bounds.Height));
+            var isOnShotChange = GetShotChangeIndex(CurrentVideoPositionSeconds) >= 0;
+
+            if (isOnShotChange)
+            {
+                var paintCurrentPositionOverlap = new Pen(Brushes.LightCyan, 1.5)
+                {
+                    DashStyle = DashStyle.Dash,
+                };
+
+                context.DrawLine(paintCurrentPositionOverlap,
+                    new Point(currentPositionPos, 0),
+                    new Point(currentPositionPos, Bounds.Height));
+            }
+            else
+            {
+                context.DrawLine(_paintCurrentPosition,
+                    new Point(currentPositionPos, 0),
+                    new Point(currentPositionPos, Bounds.Height));
+            }
         }
     }
 
