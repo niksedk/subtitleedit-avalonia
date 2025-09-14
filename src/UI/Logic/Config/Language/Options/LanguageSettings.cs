@@ -105,6 +105,8 @@ public class LanguageSettings
     public string WaveformShowToolbar { get; set; }
     public string WaveformFocusTextboxAfterInsertNew { get; set; }
     public string WaveformInvertMouseWheel { get; set; }
+    public string WaveformSnapToShotChanges { get; set; }
+    public string WaveformShotChangesAutoGenerate { get; set; }
     public string WaveformColor { get; set; }
     public string WaveformSelectedColor { get; set; }
     public string WaveformAutoAddShotChanges { get; set; }
@@ -239,6 +241,8 @@ public class LanguageSettings
         WaveformShowToolbar = "Show toolbar";
         WaveformFocusTextboxAfterInsertNew = "Focus text box after insert";
         WaveformInvertMouseWheel = "Invert mouse-wheel";
+        WaveformSnapToShotChanges = "Snap to shot changes";
+        WaveformShotChangesAutoGenerate = "Shot changes auto-generate";
         WaveformColor = "Waveform color";
         WaveformSelectedColor = "Waveform selected color";
         WaveformAutoAddShotChanges = "Auto-generate shot changes";

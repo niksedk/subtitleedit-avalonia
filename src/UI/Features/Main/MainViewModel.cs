@@ -1561,12 +1561,13 @@ public partial class MainViewModel :
             vm.Initialize(_videoFileName);
         });
 
-        if (result.OkPressed)
+        if (result.OkPressed && result.FfmpegLines.Count > 0)
         {
             AudioVisualizer.ShotChanges = result.FfmpegLines.Select(p => p.Seconds).ToList();
             ShowShotChangesListMenuItem = AudioVisualizer.ShotChanges.Count > 0;
             _updateAudioVisualizer = true;
             ShotChangeHelper.SaveShotChanges(_videoFileName, AudioVisualizer.ShotChanges);
+            ShowStatus(string.Format(Se.Language.Main.XShotChangedLoaded, AudioVisualizer.ShotChanges.Count));
         }
 
         _shortcutManager.ClearKeys();

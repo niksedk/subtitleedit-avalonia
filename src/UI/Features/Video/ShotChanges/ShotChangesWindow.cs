@@ -233,7 +233,7 @@ public class ShotChangesWindow : Window
 
         var buttonImport = UiUtil.MakeButton(Se.Language.Video.ShotChanges.ImportShotChangesFromFile, vm.ImportFromTextFileCommand).WithLeftAlignment();
 
-        var labelTimeCodeFormat = UiUtil.MakeLabel(Se.Language.Video.ShotChanges.TimeCodeFormat);
+        var labelTimeCodeFormat = UiUtil.MakeLabel(Se.Language.Video.ShotChanges.TimeCodeFormatColon);
         var radioButtonFrames = UiUtil.MakeRadioButton(Se.Language.General.Frames, vm, nameof(ShotChangesViewModel.TimeCodeFrames), "TimeCode");
         var radioButtonSeconds = UiUtil.MakeRadioButton(Se.Language.General.Seconds, vm, nameof(ShotChangesViewModel.TimeCodeSeconds), "TimeCode");
         var radioButtonMilliseconds = UiUtil.MakeRadioButton(Se.Language.General.Milliseconds, vm, nameof(ShotChangesViewModel.TimeCodeMilliseconds), "TimeCode");

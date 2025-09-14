@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language.Main;
+﻿using System;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language.Main;
 
 public class LanguageMain
 {
@@ -30,6 +32,7 @@ public class LanguageMain
     public string ItalicHint { get; set; }
     public string ReplacedXWithYCountZ { get; set; }
     public string ReplacedXWithYInLineZ { get; set; }
+    public string XShotChangedLoaded { get; set; }
 
     public LanguageMain()
     {
@@ -57,5 +60,6 @@ public class LanguageMain
         ItalicHint = "Italic selected text";
         ReplacedXWithYCountZ = "Replaced '{0}' with '{1}' ({2} occurrences)";
         ReplacedXWithYInLineZ = "Replaced '{0}' with '{1}' in line {2}";
+        XShotChangedLoaded = "{0} shot changes loaded";
     }
 }

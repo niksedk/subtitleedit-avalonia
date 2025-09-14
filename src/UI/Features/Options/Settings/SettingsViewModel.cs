@@ -95,6 +95,8 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private Color _waveformColor;
     [ObservableProperty] private Color _waveformSelectedColor;
     [ObservableProperty] private bool _waveformInvertMouseWheel;
+    [ObservableProperty] private bool _waveformSnapToShotChanges;
+    [ObservableProperty] private bool _waveformShotChangesAutoGenerate;
 
     [ObservableProperty] private ObservableCollection<string> _themes;
     [ObservableProperty] private string _selectedTheme;
@@ -248,6 +250,8 @@ public partial class SettingsViewModel : ObservableObject
         WaveformColor = Se.Settings.Waveform.WaveformColor.FromHexToColor();
         WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor();
         WaveformInvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel;
+        WaveformSnapToShotChanges = Se.Settings.Waveform.WaveformSnapToShotChanges;
+        WaveformShotChangesAutoGenerate = Se.Settings.Waveform.WaveformShotChangesAutoGenerate;
 
         ColorDurationTooLong = general.ColorDurationTooLong;
         ColorDurationTooShort = general.ColorDurationTooShort;
@@ -334,6 +338,8 @@ public partial class SettingsViewModel : ObservableObject
         Se.Settings.Waveform.WaveformColor = WaveformColor.FromColorToHex();
         Se.Settings.Waveform.WaveformSelectedColor = WaveformSelectedColor.FromColorToHex();
         Se.Settings.Waveform.InvertMouseWheel = WaveformInvertMouseWheel;
+        Se.Settings.Waveform.WaveformSnapToShotChanges = WaveformSnapToShotChanges;
+        Se.Settings.Waveform.WaveformShotChangesAutoGenerate = WaveformShotChangesAutoGenerate;
 
         general.ColorDurationTooLong = ColorDurationTooLong;
         general.ColorDurationTooShort = ColorDurationTooShort;

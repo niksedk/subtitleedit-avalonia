@@ -9,7 +9,7 @@ public class LanguageShotChanges
     public string ShotChangeTimeCode { get; set; }
     public string OpenShotChangesFile { get; set; }
     public string ImportShotChangesFromFile { get; set; }
-    public string TimeCodeFormat { get; set; }
+    public string TimeCodeFormatColon { get; set; }
     public string ShotChangesList { get; set; }
     public string ShotChangesClearQuestion { get; set; }
     public string DeleteSelectedShotChangeQuestion { get; set; }
@@ -23,7 +23,7 @@ public class LanguageShotChanges
         ShotChangeTimeCode = "Shot change time code";
         OpenShotChangesFile = "Open shot changes file";
         ImportShotChangesFromFile = "Import shot changes from file";
-        TimeCodeFormat = "Time code format";
+        TimeCodeFormatColon = "Time code format:";
         ShotChangesList = "Shot changes list";
         ShotChangesClearQuestion = "Are you sure you want to clear all shot changes?";
         DeleteSelectedShotChangeQuestion = "Are you sure you want to delete the selected shot change?";
