@@ -11,6 +11,8 @@ public class LanguageExport
     public string PaddingTopBottom { get; set; }
     public string PreviewTitle { get; set; }
     public string TitleExportVobSub { get; set; }
+    public string CustomTextFormatsDotDotDot { get; set; }
+    public string TitleExportCustomFormat { get; set; }
 
     public LanguageExport()
     {
@@ -23,5 +25,7 @@ public class LanguageExport
         PaddingTopBottom = "Padding top/bottom";
         PreviewTitle = "Preview - current size: {0}x{1}, target size: {2}x{3}, zoom: {4}%";
         TitleExportVobSub = "VobSub (sub/idx)";
+        CustomTextFormatsDotDotDot = "_Custom text formats...";
+        TitleExportCustomFormat = "Export custom text format";
     }
 }

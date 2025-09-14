@@ -26,6 +26,7 @@ using Nikse.SubtitleEdit.Features.Edit.ShowHistory;
 using Nikse.SubtitleEdit.Features.Files.Compare;
 using Nikse.SubtitleEdit.Features.Files.Export.ExportEbuStl;
 using Nikse.SubtitleEdit.Features.Files.ExportCavena890;
+using Nikse.SubtitleEdit.Features.Files.ExportCustomTextFormat;
 using Nikse.SubtitleEdit.Features.Files.ExportEbuStl;
 using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Files.ExportPac;
@@ -867,6 +868,17 @@ public partial class MainViewModel :
         {
             return;
         }
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowExportCustomTextFormat()
+    {
+        var result = await _windowService.ShowDialogAsync<ExportCustomTextFormatWindow, ExportCustomTextFormatViewModel>(Window!, vm => 
+        { 
+            vm.Initialize(Subtitles.ToList(), _subtitleFileName, _videoFileName); 
+        });
 
         _shortcutManager.ClearKeys();
     }

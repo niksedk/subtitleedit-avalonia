@@ -146,6 +146,12 @@ public static class InitMenu
                             Header = Se.Language.File.Export.TitleExportVobSub,
                             Command = vm.ExportVobSubCommand,
                         },
+                        new Separator(),
+                        new MenuItem
+                        {
+                            Header = Se.Language.File.Export.CustomTextFormatsDotDotDot,
+                            Command = vm.ShowExportCustomTextFormatCommand,
+                        },
                     }
                 },
                 new Separator(),
