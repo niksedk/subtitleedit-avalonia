@@ -6,8 +6,10 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportCustomTextFormat;
@@ -25,6 +27,7 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
     private List<SubtitleLineViewModel> _subtitles;
     private string? _subtitleFileNAme;
     private string? _videoFileName;
+    private string _title;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -34,7 +37,7 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
     public ExportCustomTextFormatViewModel(IWindowService windowService)
     {
         _windowService = windowService;
-
+        _title = string.Empty;  
         CustomFormats = new ObservableCollection<CustomFormatItem>();
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         PreviewText = string.Empty;
@@ -114,6 +117,51 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
 
     internal void GridSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
+        var selected = SelectedCustomFormat;
+        if (selected == null)
+        {
+            return;
+        }
+
+        GenerateText(selected);
+    }
+
+    private void GenerateText(CustomFormatItem customFormatItem)
+    {
+        var sb = new StringBuilder();
+        sb.Append(CustomTextFormatter.GetHeaderOrFooter(_title, _videoFileName ?? string.Empty, _subtitles, customFormatItem.FormatHeader));
+        var template = CustomTextFormatter.GetParagraphTemplate(customFormatItem.FormatText);
+        var isXml = customFormatItem.FormatText.Contains("<?xml version=", StringComparison.OrdinalIgnoreCase);
+        for (var i = 0; i < _subtitles.Count; i++)
+        {
+            var p = _subtitles[i];
+            var start = CustomTextFormatter.GetTimeCode(TimeCode.FromSeconds(p.StartTime.TotalSeconds), customFormatItem.FormatTimeCode);
+            var end = CustomTextFormatter.GetTimeCode(TimeCode.FromSeconds(p.EndTime.TotalSeconds), customFormatItem.FormatTimeCode);
+
+            var gap = string.Empty;
+            var next = _subtitles.GetOrNull(i + 1);
+            if (next != null)
+            {
+                gap = CustomTextFormatter.GetTimeCode(new TimeCode(next.StartTime.TotalMilliseconds - p.EndTime.TotalMilliseconds), customFormatItem.FormatTimeCode);
+            }
+
+            var text = p.Text;
+            if (isXml)
+            {
+                text = text.Replace("<", "&lt;")
+                           .Replace(">", "&gt;")
+                           .Replace("&", "&amp;");
+            }
+            text = CustomTextFormatter.GetText(text, customFormatItem.FormatNewLine);
+
+            var originalText = p.OriginalText;
+            var paragraph = CustomTextFormatter.GetParagraph(template, start, end, text, originalText, i, p.Actor, new TimeCode(p.Duration), gap, customFormatItem.FormatTimeCode, p, _videoFileName ?? string.Empty);
+            sb.Append(paragraph);
+        }
+        
+        sb.Append(CustomTextFormatter.GetHeaderOrFooter(_title, _videoFileName ?? string.Empty, _subtitles, customFormatItem.FormatFooter));
+     
+        PreviewText = sb.ToString();
     }
 
     internal void GridKeyDown(KeyEventArgs e)
@@ -125,6 +173,7 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
         _subtitles = subtitles;
         _subtitleFileNAme = subtitleFileName;
         _videoFileName = videoFileName;
+        _title = subtitleFileName != null ? System.IO.Path.GetFileNameWithoutExtension(subtitleFileName) : Se.Language.General.Untitled;    
 
         foreach (var customFormat in Se.Settings.File.ExportCustomFormats)
         {

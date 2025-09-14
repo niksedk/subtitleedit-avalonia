@@ -278,4 +278,14 @@ public partial class SubtitleLineViewModel : ObservableObject
         SetStartTimeOnly(TimeSpan.FromMilliseconds(StartTime.TotalMilliseconds * factor + adjustmentInSeconds * TimeCode.BaseUnit));
         EndTime = TimeSpan.FromMilliseconds(EndTime.TotalMilliseconds * factor + adjustmentInSeconds * TimeCode.BaseUnit);
     }
+
+    internal double GetCharactersPerSecond()
+    {
+        if (Duration.TotalMilliseconds < 1)
+        {
+            return 999;
+        }
+
+        return (double)Text.CountCharacters(true) / Duration.TotalSeconds;
+    }
 }

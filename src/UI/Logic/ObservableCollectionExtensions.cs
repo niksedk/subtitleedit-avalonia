@@ -26,6 +26,16 @@ public static class ObservableCollectionExtensions
         return (index >= 0 && index < collection.Count) ? collection[index] : null;
     }
 
+    public static SubtitleLineViewModel? GetOrNull(this List<SubtitleLineViewModel> collection, int index)
+    {
+        if (collection == null)
+        {
+            throw new ArgumentNullException(nameof(collection));
+        }
+
+        return (index >= 0 && index < collection.Count) ? collection[index] : null;
+    }
+
     public static void Renumber(this ObservableCollection<SubtitleLineViewModel> collection)
     {
         if (collection == null)
