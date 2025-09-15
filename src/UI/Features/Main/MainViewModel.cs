@@ -2019,6 +2019,7 @@ public partial class MainViewModel :
         }
 
         LockTimeCodes = Se.Settings.General.LockTimeCodes;
+        IsWaveformToolbarVisible = Se.Settings.Waveform.ShowToolbar;
 
         if (AudioVisualizer != null)
         {
