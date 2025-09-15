@@ -8,6 +8,7 @@ using Nikse.SubtitleEdit.Core.AutoTranslate;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Translate;
 using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Shared.Ocr;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
@@ -252,34 +253,17 @@ public partial class AutoTranslateViewModel : ObservableObject
     [RelayCommand]
     private async Task BrowseModel()
     {
-        var result = await _windowService.ShowDialogAsync<OllamaBrowseWindow, OllamaBrowseViewModel>(Window!, vm =>
+        var result = await _windowService.ShowDialogAsync<PickOllamaModelWindow, PickOllamaModelViewModel>(Window!, vm =>
         {
-            var baseUrl = GetBaseUrl(ApiUrlText);
-            _ = vm.InitializeAsync(baseUrl);
+            vm.Initialize(Se.Language.General.PickOllamaModel, ModelText, ApiUrlText);
         });
 
         if (result is { OkPressed: true, SelectedModel: not null })
         {
-            ModelText = result.SelectedModel.Model;
+            ModelText = result.SelectedModel;
             SaveSettings();
         }
-    }
-
-    public static string GetBaseUrl(string url)
-    {
-        if (string.IsNullOrEmpty(url))
-            return string.Empty;
-
-        try
-        {
-            var uri = new Uri(url);
-            return uri.GetLeftPart(UriPartial.Authority);
-        }
-        catch (UriFormatException)
-        {
-            return string.Empty;
-        }
-    }
+    }  
 
     private async Task<bool> DoTranslate()
     {

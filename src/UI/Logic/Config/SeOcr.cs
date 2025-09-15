@@ -12,6 +12,7 @@ public class SeOcr
     public bool NOcrDrawUnknownText { get; set; }
     public List<string> OllamaModels { get; set; }
     public string OllamaModel { get; set; }
+    public string OllamaUrl { get; set; }
     public string OllamaLanguage { get; set; }
     public string GoogleVisionApiKey { get; set; }
     public string GoogleVisionLanguage { get; set; }
@@ -35,6 +36,7 @@ public class SeOcr
         OllamaModels = new List<string> { "llama3.2-vision", "llava-phi3", "moondream", "minicpm-v" };
         OllamaLanguage = "English";
         OllamaModel = OllamaModels.First();
+        OllamaUrl = "http://localhost:11434/api/chat/";
 
         GoogleVisionApiKey = string.Empty;
         GoogleVisionLanguage = "en";

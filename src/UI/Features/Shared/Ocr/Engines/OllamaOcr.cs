@@ -25,7 +25,7 @@ public class OllamaOcr
         _httpClient.Timeout = TimeSpan.FromMinutes(25);
     }
 
-    public async Task<string> Ocr(SKBitmap bitmap, string model, string language, CancellationToken cancellationToken)
+    public async Task<string> Ocr(SKBitmap bitmap, string url, string model, string language, CancellationToken cancellationToken)
     {
         try
         {
@@ -35,7 +35,7 @@ public class OllamaOcr
             var input = "{ " + modelJson + "  \"messages\": [ { \"role\": \"user\", \"content\": \"" + prompt + "\", \"images\": [ \"" + bitmap.ToBase64String() + "\"] } ] }";
             var content = new StringContent(input, Encoding.UTF8);
             content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
-            var result = await _httpClient.PostAsync("http://localhost:11434/api/chat", content, cancellationToken);
+            var result = await _httpClient.PostAsync(url, content, cancellationToken);
             var bytes = await result.Content.ReadAsByteArrayAsync();
             var json = Encoding.UTF8.GetString(bytes).Trim();
             if (!result.IsSuccessStatusCode)

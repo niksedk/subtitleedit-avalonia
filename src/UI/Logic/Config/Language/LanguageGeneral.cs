@@ -113,6 +113,7 @@ public class LanguageGeneral
     public string Visible { get; set; }
     public string Warning { get; set; }
     public string WebServiceUrl { get; set; }
+    public string Url { get; set; }
     public string Width { get; set; }
     public string WordsPerMin { get; set; }
     public string XSeconds { get; set; }
@@ -232,6 +233,7 @@ public class LanguageGeneral
     public string VideoPosition { get; set; }
     public string Padding { get; set; }
     public string SaveImageAs { get; set; }
+    public string SaveImageAsDotDotDot { get; set; }
     public string NewProfile { get; set; }
     public string ProfileName { get; set; }
     public string EnterProfileName { get; set; }
@@ -363,6 +365,7 @@ public class LanguageGeneral
     public string Header { get; set; }
     public string Footer { get; set; }
     public string FileExtension { get; set; }
+    public string PickOllamaModel { get; set; }
 
     public LanguageGeneral()
     {
@@ -473,6 +476,7 @@ public class LanguageGeneral
         Visible = "Visible";
         Warning = "Warning";
         WebServiceUrl = "Webservice URL";
+        Url = "URL";
         Width = "Width";
         WordsPerMin = "Words/min";
         XSeconds = "{0:0.0##} seconds";
@@ -592,6 +596,7 @@ public class LanguageGeneral
         Profile = "Profile";
         Padding = "Padding";
         SaveImageAs = "Save image as";
+        SaveImageAsDotDotDot = "Save image as...";
         NewProfile = "New profile";
         ProfileName = "Profile name";
         EnterProfileName = "Enter profile name";
@@ -723,5 +728,6 @@ public class LanguageGeneral
         Header = "Header";
         Footer = "Footer";
         FileExtension = "File extension";
+        PickOllamaModel = "Pick Ollama model";
     }
 }

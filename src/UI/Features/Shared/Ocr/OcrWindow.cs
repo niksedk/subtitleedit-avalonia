@@ -126,10 +126,14 @@ public class OcrWindow : Window
                     .WithMarginRight(10)
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
                 UiUtil.MakeLabel(Se.Language.General.Model, nameof(vm.IsOllamaVisible)),
-                UiUtil.MakeTextBox(200, vm, nameof(vm.OllamaModel))
+                UiUtil.MakeTextBox(160, vm, nameof(vm.OllamaModel))
                     .BindIsVisible(vm, nameof(vm.IsOllamaVisible))
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
                 UiUtil.MakeBrowseButton(vm.PickOllamaModelCommand)
+                    .BindIsVisible(vm, nameof(vm.IsOllamaVisible))
+                    .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
+                UiUtil.MakeLabel(Se.Language.General.WebServiceUrl, nameof(vm.IsOllamaVisible)),
+                UiUtil.MakeTextBox(220, vm, nameof(vm.OllamaUrl))
                     .BindIsVisible(vm, nameof(vm.IsOllamaVisible))
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
 
@@ -259,6 +263,26 @@ public class OcrWindow : Window
         menuItemOcrSelectedLines.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
         flyout.Items.Add(menuItemOcrSelectedLines);
 
+        var menuItemShowImage = new MenuItem
+        {
+            Header = Se.Language.Ocr.ShowImage,
+            DataContext = vm,
+            Command = vm.ViewSelectedImageCommand,
+        };
+        menuItemShowImage.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
+        flyout.Items.Add(menuItemShowImage);
+
+        var menuItemSaveImage = new MenuItem
+        {
+            Header = Se.Language.General.SaveImageAsDotDotDot,
+            DataContext = vm,
+            Command = vm.SaveImageAsCommand,
+        };
+        menuItemSaveImage.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
+        flyout.Items.Add(menuItemSaveImage);
+
+        flyout.Items.Add(new Separator());
+
         var menuItemDelete = new MenuItem
         {
             Header = Se.Language.General.Delete,
@@ -267,6 +291,8 @@ public class OcrWindow : Window
         };
         menuItemDelete.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
         flyout.Items.Add(menuItemDelete);
+
+        flyout.Items.Add(new Separator());
 
         var menuItemItalic = new MenuItem
         {
@@ -285,15 +311,6 @@ public class OcrWindow : Window
         };
         menuItemBold.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
         flyout.Items.Add(menuItemBold);
-
-        var menuItemShowImage = new MenuItem
-        {
-            Header = Se.Language.Ocr.ShowImage,
-            DataContext = vm,
-            Command = vm.ViewSelectedImageCommand,
-        };
-        menuItemShowImage.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
-        flyout.Items.Add(menuItemShowImage);
 
         vm.SubtitleGrid.ContextFlyout = flyout;
 

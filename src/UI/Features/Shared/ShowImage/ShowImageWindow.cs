@@ -15,7 +15,7 @@ public class ShowImageWindow : Window
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Bind(TitleProperty, new Binding(nameof(vm.Title)));
-        Width = 900;
+        Width = 1000;
         Height = 760;
         MinWidth = 400;
         MinHeight = 300;

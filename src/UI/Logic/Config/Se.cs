@@ -323,8 +323,7 @@ public class Se
         Configuration.Settings.Tools.WhisperLocation = tts.WhisperLocation;
         Configuration.Settings.Tools.WhisperCtranslate2Location = tts.WhisperCtranslate2Location;
         Configuration.Settings.Tools.WhisperPurfviewFasterWhisperLocation = tts.WhisperPurfviewFasterWhisperLocation;
-        Configuration.Settings.Tools.WhisperPurfviewFasterWhisperDefaultCmd =
-            tts.WhisperPurfviewFasterWhisperDefaultCmd;
+        Configuration.Settings.Tools.WhisperPurfviewFasterWhisperDefaultCmd = tts.WhisperPurfviewFasterWhisperDefaultCmd;
         Configuration.Settings.Tools.WhisperXLocation = tts.WhisperXLocation;
         Configuration.Settings.Tools.WhisperStableTsLocation = tts.WhisperStableTsLocation;
         Configuration.Settings.Tools.WhisperCppModelLocation = tts.WhisperCppModelLocation;
@@ -341,12 +340,12 @@ public class Se
 
         Configuration.Settings.Tools.AutoTranslateLastName = Settings.AutoTranslate.AutoTranslateLastName;
     }
-    
+
     public static string GetErrorLogFilePath()
     {
         return Path.Combine(DataFolder, "error_log.txt");
     }
-    
+
     public static string GetWhisperLogFilePath()
     {
         return Path.Combine(DataFolder, "whisper_log.txt");
@@ -369,10 +368,15 @@ public class Se
             // ignore
         }
     }
-    
+
     public static void LogError(Exception exception)
     {
         LogError(exception.Message + Environment.NewLine + exception.StackTrace);
+    }
+
+    public static void LogError(Exception exception, string message)
+    {
+        LogError(exception.Message + Environment.NewLine + message + Environment.NewLine + exception.StackTrace);
     }
 
     public static void LogError(string error)

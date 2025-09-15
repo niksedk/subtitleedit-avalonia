@@ -1,3 +1,4 @@
+using Google.Api;
 using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Features.Edit.AlignmentPicker;
@@ -80,7 +81,7 @@ public static class DependencyInjectionExtensions
 {
     public static void AddSubtitleEditServices(this IServiceCollection collection)
     {
-        // Misc services
+        // Misc services        
         collection.AddSingleton<IFileHelper, FileHelper>();
         collection.AddSingleton<IFolderHelper, FolderHelper>();
         collection.AddTransient<IAutoBackupService, AutoBackupService>();
@@ -188,13 +189,13 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<NOcrInspectViewModel>();
         collection.AddTransient<NOcrSettingsViewModel>();
         collection.AddTransient<OcrViewModel>();
-        collection.AddTransient<OllamaBrowseViewModel>();
         collection.AddTransient<OpenFromUrlViewModel>();
         collection.AddTransient<PartsSavedViewModel>();
         collection.AddTransient<PickAlignmentViewModel>();
         collection.AddTransient<PickColorViewModel>();
         collection.AddTransient<PickFontNameViewModel>();
         collection.AddTransient<PickMatroskaTrackViewModel>();
+        collection.AddTransient<PickOllamaModelViewModel>();
         collection.AddTransient<PickMp4TrackViewModel>();
         collection.AddTransient<PromptTextBoxViewModel>();
         collection.AddTransient<ReEncodeVideoViewModel>();

@@ -19,6 +19,7 @@ using Nikse.SubtitleEdit.Features.Shared.Ocr.OcrSubtitle;
 using Nikse.SubtitleEdit.Features.Shared.ShowImage;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.Ocr;
 using SkiaSharp;
 using System;
@@ -52,6 +53,7 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<TesseractDictionary> _tesseractDictionaryItems;
     [ObservableProperty] private TesseractDictionary? _selectedTesseractDictionaryItem;
     [ObservableProperty] private string _ollamaModel;
+    [ObservableProperty] private string _ollamaUrl;
     [ObservableProperty] private string _progressText;
     [ObservableProperty] private double _progressValue;
     [ObservableProperty] private Bitmap? _currentImageSource;
@@ -87,16 +89,18 @@ public partial class OcrViewModel : ObservableObject
     private IOcrSubtitle? _ocrSubtitle;
     private readonly INOcrCaseFixer _nOcrCaseFixer;
     private readonly IWindowService _windowService;
+    private readonly IFileHelper _fileHelper;
     private CancellationTokenSource _cancellationTokenSource;
     private NOcrDb? _nOcrDb;
     private readonly List<SkipOnceChar> _runOnceChars;
     private readonly List<SkipOnceChar> _skipOnceChars;
     private readonly NOcrAddHistoryManager _nOcrAddHistoryManager;
 
-    public OcrViewModel(INOcrCaseFixer nOcrCaseFixer, IWindowService windowService)
+    public OcrViewModel(INOcrCaseFixer nOcrCaseFixer, IWindowService windowService, IFileHelper fileHelper)
     {
         _nOcrCaseFixer = nOcrCaseFixer;
         _windowService = windowService;
+        _fileHelper = fileHelper;
 
         OcrEngines = new ObservableCollection<OcrEngineItem>(OcrEngineItem.GetOcrEngines());
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>();
@@ -113,6 +117,7 @@ public partial class OcrViewModel : ObservableObject
         CurrentText = string.Empty;
         ProgressText = string.Empty;
         OllamaModel = string.Empty;
+        OllamaUrl = string.Empty;
         TesseractDictionaryItems = new ObservableCollection<TesseractDictionary>();
         GoogleVisionApiKey = string.Empty;
         MistralApiKey = string.Empty;
@@ -146,6 +151,7 @@ public partial class OcrViewModel : ObservableObject
             NOcrDrawUnknownText = ocr.NOcrDrawUnknownText;
             SelectedNOcrPixelsAreSpace = ocr.NOcrPixelsAreSpace;
             OllamaModel = ocr.OllamaModel;
+            OllamaUrl = ocr.OllamaUrl;
             SelectedOllamaLanguage = ocr.OllamaLanguage;
             GoogleVisionApiKey = ocr.GoogleVisionApiKey;
             MistralApiKey = ocr.MistralApiKey;
@@ -163,6 +169,7 @@ public partial class OcrViewModel : ObservableObject
         ocr.NOcrDrawUnknownText = NOcrDrawUnknownText;
         ocr.NOcrPixelsAreSpace = SelectedNOcrPixelsAreSpace;
         ocr.OllamaModel = OllamaModel;
+        ocr.OllamaUrl = OllamaUrl;
         ocr.OllamaLanguage = SelectedOllamaLanguage ?? "English";
         ocr.GoogleVisionApiKey = GoogleVisionApiKey;
         ocr.MistralApiKey = MistralApiKey;
@@ -289,8 +296,37 @@ public partial class OcrViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void PickOllamaModel()
+    private async Task SaveImageAs()
     {
+        var item = SelectedOcrSubtitleItem;
+        if (item == null)
+        {
+            return;
+        }
+
+        var imageIndex = OcrSubtitleItems.IndexOf(item) + 1;
+        var fileName = await _fileHelper.PickSaveSubtitleFile(Window!, ".png", $"image{imageIndex}", Se.Language.General.SaveImageAs);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        var bitmap = item.GetBitmap();
+        bitmap.Save(fileName, 100);
+    }
+
+    [RelayCommand]
+    private async Task PickOllamaModel()
+    {
+        var result = await _windowService.ShowDialogAsync<PickOllamaModelWindow, PickOllamaModelViewModel>(Window!, vm =>
+        {
+            vm.Initialize(Se.Language.General.PickOllamaModel, OllamaModel, OllamaUrl);
+        });
+
+        if (result.OkPressed && result.SelectedModel != null)
+        {
+            OllamaModel = result.SelectedModel;
+        }
     }
 
     [RelayCommand]
@@ -1002,8 +1038,7 @@ public partial class OcrViewModel : ObservableObject
 
                 SelectAndScrollToRow(i);
 
-                var text = await ollamaOcr.Ocr(bitmap, OllamaModel, SelectedOllamaLanguage ?? "English",
-                    _cancellationTokenSource.Token);
+                var text = await ollamaOcr.Ocr(bitmap, OllamaModel, OllamaUrl, SelectedOllamaLanguage ?? "English", _cancellationTokenSource.Token);
                 item.Text = text;
 
                 if (SelectedOcrSubtitleItem == item)
