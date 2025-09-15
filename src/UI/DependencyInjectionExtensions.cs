@@ -32,6 +32,7 @@ using Nikse.SubtitleEdit.Features.Shared.PickFontName;
 using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using Nikse.SubtitleEdit.Features.Shared.PickMp4Track;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
+using Nikse.SubtitleEdit.Features.Shared.ShowImage;
 using Nikse.SubtitleEdit.Features.Shared.SourceView;
 using Nikse.SubtitleEdit.Features.SpellCheck;
 using Nikse.SubtitleEdit.Features.SpellCheck.EditWholeText;
@@ -207,6 +208,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<ShotChangesViewModel>();
         collection.AddTransient<ShortcutsViewModel>();
         collection.AddTransient<ShowHistoryViewModel>();
+        collection.AddTransient<ShowImageViewModel>();
         collection.AddTransient<SourceViewViewModel>();
         collection.AddTransient<SpellCheckViewModel>();
         collection.AddTransient<SplitSubtitleViewModel>();

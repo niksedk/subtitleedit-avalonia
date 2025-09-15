@@ -45,5 +45,6 @@ public class OcrSubtitleIBinaryParagrap : IOcrSubtitle
     public void Delete(int index)
     {
         _list.RemoveAt(index);
+        Count = _list.Count;
     }
 }

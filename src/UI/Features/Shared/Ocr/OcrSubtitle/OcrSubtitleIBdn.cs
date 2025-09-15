@@ -1,4 +1,5 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -299,5 +300,6 @@ public class OcrSubtitleBdn : IOcrSubtitle
     public void Delete(int index)
     {
         _bdnXmlSubtitle.Paragraphs.RemoveAt(index);
+        Count = _bdnXmlSubtitle.Paragraphs.Count;
     }
 }

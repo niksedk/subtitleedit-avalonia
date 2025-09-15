@@ -45,16 +45,6 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         PreviewText = string.Empty;
         _subtitles = new List<SubtitleLineViewModel>();
-        LoadSettings();
-    }
-
-    private void LoadSettings()
-    {
-    }
-
-    private void SaveSettings()
-    {
-        Se.SaveSettings();
     }
 
     [RelayCommand]
@@ -71,6 +61,15 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
             vm.Initialize(selected, Se.Language.File.Export.EditCustomFormat, _subtitles);
         });
 
+        if (result.OkPressed && result.SelectedCustomFormat != null)
+        {
+            // refresh list
+            var idx = CustomFormats.IndexOf(selected);
+            CustomFormats.RemoveAt(idx);
+            CustomFormats.Insert(idx, result.SelectedCustomFormat);
+            SelectedCustomFormat = result.SelectedCustomFormat;
+            GenerateText(SelectedCustomFormat);
+        }
     }
 
     [RelayCommand]
@@ -94,7 +93,6 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
             return;
         }
 
-
         var idx = CustomFormats.IndexOf(selected);
         CustomFormats.Remove(selected);
         if (CustomFormats.Count > 0)
@@ -110,16 +108,28 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
     [RelayCommand]
     private async Task FormatNew()
     {
-        var selected = SelectedCustomFormat;
-        if (selected == null)
+        var selected = new CustomFormatItem
         {
-            return;
-        }
+            Name = string.Empty,
+            Extension = "txt",
+            FormatHeader = string.Empty,
+            FormatParagraph = "{start} - {{end}\r\n{text}\r\n\r\n",
+            FormatFooter = string.Empty,
+            FormatTimeCode = "hh:mm:ss,zzz",
+            FormatNewLine = "{newline}",
+        };
 
         var result = await _windowService.ShowDialogAsync<EditCustomTextFormatWindow, EditCustomTextFormatViewModel>(Window!, vm =>
         {
             vm.Initialize(selected, Se.Language.File.Export.NewCustomFormat, _subtitles);
         });
+
+        if (result.OkPressed && result.SelectedCustomFormat != null)
+        {
+            CustomFormats.Add(result.SelectedCustomFormat);
+            SelectedCustomFormat = result.SelectedCustomFormat;
+            GenerateText(SelectedCustomFormat);
+        }
     }
 
     [RelayCommand]

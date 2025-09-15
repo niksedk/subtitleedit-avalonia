@@ -286,6 +286,15 @@ public class OcrWindow : Window
         menuItemBold.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
         flyout.Items.Add(menuItemBold);
 
+        var menuItemShowImage = new MenuItem
+        {
+            Header = Se.Language.Ocr.ShowImage,
+            DataContext = vm,
+            Command = vm.ViewSelectedImageCommand,
+        };
+        menuItemShowImage.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
+        flyout.Items.Add(menuItemShowImage);
+
         vm.SubtitleGrid.ContextFlyout = flyout;
 
         return UiUtil.MakeBorderForControlNoPadding(dataGridSubtitle).WithMarginBottom(5);

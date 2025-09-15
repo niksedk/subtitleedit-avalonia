@@ -74,11 +74,13 @@ public class EditCustomTextFormatWindow : Window
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // header
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // text
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // footer
             },
             ColumnDefinitions =
             {
@@ -103,24 +105,102 @@ public class EditCustomTextFormatWindow : Window
         textBoxHeader.HorizontalAlignment = HorizontalAlignment.Stretch;
         textBoxHeader.VerticalAlignment = VerticalAlignment.Stretch;
         textBoxHeader.AcceptsReturn = true; 
+        vm.TextBoxHeader = textBoxHeader;
         grid.Add(labelHeader, 2);
         grid.Add(textBoxHeader, 3);
 
         var labelText = UiUtil.MakeLabel(Se.Language.General.Text).WithMarginTop(5);
-        var textBoxText = UiUtil.MakeTextBox(double.NaN, vm, nameof(vm.SelectedCustomFormat) + "." + nameof(CustomFormatItem.FormatParagraph));
-        textBoxText.HorizontalAlignment = HorizontalAlignment.Stretch;
-        textBoxText.VerticalAlignment = VerticalAlignment.Stretch;
-        textBoxText.AcceptsReturn = true;
+        var textBoxParagraph = UiUtil.MakeTextBox(double.NaN, vm, nameof(vm.SelectedCustomFormat) + "." + nameof(CustomFormatItem.FormatParagraph));
+        textBoxParagraph.HorizontalAlignment = HorizontalAlignment.Stretch;
+        textBoxParagraph.VerticalAlignment = VerticalAlignment.Stretch;
+        textBoxParagraph.AcceptsReturn = true;
+        vm.TextBoxParagraph = textBoxParagraph;
         grid.Add(labelText, 4);
-        grid.Add(textBoxText, 5);
+        grid.Add(textBoxParagraph, 5);
+
+        var labelTimeCodeFormat = UiUtil.MakeLabel(Se.Language.File.Export.TimeCodeFormat).WithMinWidth(120);    
+        var textBoxTimeCode = new AutoCompleteBox
+        {
+            DataContext = vm,
+            VerticalAlignment = VerticalAlignment.Center,
+            MinWidth = 200,
+            Margin = new Thickness(0, 0, 0, 3),
+            Watermark = Se.Language.File.Export.TimeCodeFormat,
+            ItemsSource = vm.TimeCodeList,
+            [!AutoCompleteBox.TextProperty] = new Binding(nameof(vm.SelectedCustomFormat) + "." + nameof(CustomFormatItem.FormatTimeCode)),
+            MinimumPrefixLength = 0,
+        };       
+
+        var panelTimeCode = UiUtil.MakeHorizontalPanel(labelTimeCodeFormat, textBoxTimeCode).WithMarginTop(4);
+        grid.Add(panelTimeCode, 6);
+
+        var labelNewLineFormat = UiUtil.MakeLabel(Se.Language.File.Export.NewLineFormat).WithMinWidth(120);
+        var textBoxNewLine = new AutoCompleteBox
+        {
+            DataContext = vm,
+            VerticalAlignment = VerticalAlignment.Center,
+            MinWidth = 200,
+            Margin = new Thickness(0, 0, 0, 3),
+            Watermark = Se.Language.File.Export.TimeCodeFormat,
+            ItemsSource = vm.NewLineList,
+            [!AutoCompleteBox.TextProperty] = new Binding(nameof(vm.SelectedCustomFormat) + "." + nameof(CustomFormatItem.FormatNewLine)),
+            MinimumPrefixLength = 0,
+        };
+
+        var panelNewLine = UiUtil.MakeHorizontalPanel(labelNewLineFormat, textBoxNewLine).WithMarginTop(4);
+        grid.Add(panelNewLine, 7);
 
         var labelFooter = UiUtil.MakeLabel(Se.Language.General.Footer).WithMarginTop(5);
         var textBoxFooter = UiUtil.MakeTextBox(double.NaN, vm, nameof(vm.SelectedCustomFormat) + "." + nameof(CustomFormatItem.FormatFooter));
         textBoxFooter.HorizontalAlignment = HorizontalAlignment.Stretch;
         textBoxFooter.VerticalAlignment = VerticalAlignment.Stretch;
         textBoxFooter.AcceptsReturn = true;
-        grid.Add(labelFooter, 6);
-        grid.Add(textBoxFooter, 7);
+        vm.TextBoxFooter = textBoxFooter;
+        grid.Add(labelFooter, 8);
+        grid.Add(textBoxFooter, 9);
+
+
+        var flyoutHeader = new MenuFlyout();
+        textBoxHeader.ContextFlyout = flyoutHeader;
+        foreach (var item in vm.HeaderFooterTags)
+        {
+            var menuItem = new MenuItem
+            {
+                Header = item,
+                DataContext = vm,
+                Command = vm.InsertHeaderTagCommand,
+                CommandParameter = item,
+            };
+            flyoutHeader.Items.Add(menuItem);
+        }
+
+        var flyoutParagraph = new MenuFlyout();
+        textBoxParagraph.ContextFlyout = flyoutParagraph;
+        foreach (var item in vm.ParagraphTags)
+        {
+            var menuItem = new MenuItem
+            {
+                Header = item,
+                DataContext = vm,
+                Command = vm.InsertParagraphTagCommand,
+                CommandParameter = item,
+            };
+            flyoutParagraph.Items.Add(menuItem);
+        }
+
+        var flyoutFooter = new MenuFlyout();
+        textBoxFooter.ContextFlyout = flyoutFooter;
+        foreach (var item in vm.HeaderFooterTags)
+        {
+            var menuItem = new MenuItem
+            {
+                Header = item,
+                DataContext = vm,
+                Command = vm.InsertFooterTagCommand,
+                CommandParameter = item,
+            };
+            flyoutFooter.Items.Add(menuItem);
+        }
 
         return grid;
     }

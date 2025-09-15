@@ -17,6 +17,9 @@ public class LanguageExport
     public string EditCustomFormat { get; set; }
     public string NewCustomFormat { get; set; }
     public string DeleteSelectedCustomTextFormatX { get; set; }
+    public string TimeCodeFormat { get; set; }
+    public string NewLineFormat { get; set; }
+    public string PleaseEnterNameForTheCustomFormat { get; set; }
 
     public LanguageExport()
     {
@@ -35,5 +38,8 @@ public class LanguageExport
         EditCustomFormat = "Edit custom text format";
         NewCustomFormat = "New custom text format";
         DeleteSelectedCustomTextFormatX = "Delete selected custom text format \"{0}\"?";
+        TimeCodeFormat = "Time code format";
+        NewLineFormat = "New line format";
+        PleaseEnterNameForTheCustomFormat = "Please enter name for the custom format";
     }
 }

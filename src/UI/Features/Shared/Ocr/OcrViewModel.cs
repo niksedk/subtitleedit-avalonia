@@ -16,6 +16,7 @@ using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Shared.Ocr.Engines;
 using Nikse.SubtitleEdit.Features.Shared.Ocr.NOcr;
 using Nikse.SubtitleEdit.Features.Shared.Ocr.OcrSubtitle;
+using Nikse.SubtitleEdit.Features.Shared.ShowImage;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Ocr;
@@ -270,6 +271,21 @@ public partial class OcrViewModel : ObservableObject
     {
         await _windowService.ShowDialogAsync<NOcrCharacterHistoryWindow, NOcrCharacterHistoryViewModel>(Window!,
             vm => { vm.Initialize(_nOcrDb!, _nOcrAddHistoryManager); });
+    }
+
+    [RelayCommand]
+    private async Task ViewSelectedImage()
+    {
+        var item = SelectedOcrSubtitleItem;
+        if (item == null)
+        {
+            return;
+        }
+
+        await _windowService.ShowDialogAsync<ShowImageWindow, ShowImageViewModel>(Window!, vm =>
+        {
+            vm.Initialize("OCR image", item.GetBitmap());
+        });
     }
 
     [RelayCommand]
@@ -1175,6 +1191,14 @@ public partial class OcrViewModel : ObservableObject
             ToggleItalic();
             e.Handled = true; // prevent further handling if needed
         }
+        else if (e.Key == Key.P && e.KeyModifiers.HasFlag(KeyModifiers.Control))
+        {
+            e.Handled = true; // prevent further handling if needed
+            Dispatcher.UIThread.Post(async void () =>
+            {
+                await ViewSelectedImage();
+            });
+        }
     }
 
     internal void OnKeyDown(KeyEventArgs e)
@@ -1269,6 +1293,12 @@ public partial class OcrViewModel : ObservableObject
     public void InitializeBdn(Subtitle subtitle, string fileName, bool isSon)
     {
         _ocrSubtitle = new OcrSubtitleBdn(subtitle, fileName, isSon);
+        OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
+    }
+
+    internal void Initialize(TransportStreamParser tsParser, List<TransportStreamSubtitle> subtitles, string fileName)
+    {
+        _ocrSubtitle = new OcrSubtitleTransportStream(tsParser, subtitles, fileName);
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
     }
 

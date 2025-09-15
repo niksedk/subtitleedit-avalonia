@@ -17,8 +17,7 @@ public class OcrSubtitleMp4VobSub : IOcrSubtitle
     {
         _mp4SubtitleTrack = mp4SubtitleTrack;
         _paragraphs = paragraphs;
-        Count = paragraphs.Count;
-
+        Count = _paragraphs.Count;
     }
 
     public SKBitmap GetBitmap(int index)
@@ -50,5 +49,6 @@ public class OcrSubtitleMp4VobSub : IOcrSubtitle
     public void Delete(int index)
     {
         _paragraphs.RemoveAt(index);
+        Count = _paragraphs.Count;
     }
 }

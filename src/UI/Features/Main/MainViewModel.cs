@@ -4003,6 +4003,12 @@ public partial class MainViewModel :
                 }
             }
 
+            if ((ext == ".ts" || ext == ".tsv" || ext == ".tts" || ext == ".rec" || ext == ".mpeg" || ext == ".mpg") && fileSize > 10000 && FileUtil.IsTransportStream(fileName))
+            {
+                await ImportSubtitleFromTransportStream(fileName);
+                return;
+            }
+
             if (((ext == ".m2ts" || ext == ".ts" || ext == ".tsv" || ext == ".tts" || ext == ".mts") &&
                  fileSize > 10000 && FileUtil.IsM2TransportStream(fileName)) ||
                 (ext == ".textst" && FileUtil.IsMpeg2PrivateStream2(fileName)))
@@ -4304,6 +4310,21 @@ public partial class MainViewModel :
 
 
         var subtitles = tsParser.GetDvbSubtitles(packetId);
+        Dispatcher.UIThread.Post(async () =>
+        {
+            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm => 
+            { 
+                vm.Initialize(tsParser, subtitles, fileName); 
+            });
+
+            if (result.OkPressed)
+            {
+                _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
+                Subtitles.Clear();
+                Subtitles.AddRange(result.OcredSubtitle);
+            }
+        });
+
         //using (var formSubOcr = new VobSubOcr())
         //{
         //    string language = null;

@@ -19,7 +19,7 @@ public class OcrSubtitleMkvDvb : IOcrSubtitle
         _matroskaSubtitleInfo = matroskaSubtitleInfo;
         _subtitle = subtitle;
         _subtitleImages = subtitleImages;
-        Count = subtitleImages.Count;
+        Count = _subtitleImages.Count;
     }
 
     public SKBitmap GetBitmap(int index)
@@ -51,5 +51,6 @@ public class OcrSubtitleMkvDvb : IOcrSubtitle
     public void Delete(int index)
     {
         _subtitleImages.RemoveAt(index);
+        Count = _subtitleImages.Count;
     }
 }

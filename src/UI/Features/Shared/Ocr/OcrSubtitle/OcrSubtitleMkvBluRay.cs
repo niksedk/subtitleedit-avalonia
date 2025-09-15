@@ -48,5 +48,6 @@ public class OcrSubtitleMkvBluRay : IOcrSubtitle
     public void Delete(int index)
     {
         _pcsDataList.RemoveAt(index);
+        Count = _pcsDataList.Count;
     }
 }

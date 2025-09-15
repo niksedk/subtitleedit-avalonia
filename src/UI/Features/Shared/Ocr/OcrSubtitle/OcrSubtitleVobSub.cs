@@ -14,7 +14,7 @@ public class OcrSubtitleVobSub : IOcrSubtitle
     public OcrSubtitleVobSub(List<VobSubMergedPack> vobSubMergedPack)
     {
         _vobSubMergedPack = vobSubMergedPack;
-        Count = vobSubMergedPack.Count;
+        Count = _vobSubMergedPack.Count;
     }
 
     public SKBitmap GetBitmap(int index)
@@ -46,5 +46,6 @@ public class OcrSubtitleVobSub : IOcrSubtitle
     public void Delete(int index)
     {
         _vobSubMergedPack.RemoveAt(index);
+        Count = _vobSubMergedPack.Count;
     }
 }
