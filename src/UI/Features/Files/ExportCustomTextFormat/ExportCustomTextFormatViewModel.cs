@@ -58,7 +58,7 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
 
         var result = await _windowService.ShowDialogAsync<EditCustomTextFormatWindow, EditCustomTextFormatViewModel>(Window!, vm =>
         {
-            vm.Initialize(selected, Se.Language.File.Export.EditCustomFormat, _subtitles);
+            vm.Initialize(selected, Se.Language.File.Export.EditCustomFormat, _subtitles, _videoFileName ?? string.Empty);
         });
 
         if (result.OkPressed && result.SelectedCustomFormat != null)
@@ -121,7 +121,7 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
 
         var result = await _windowService.ShowDialogAsync<EditCustomTextFormatWindow, EditCustomTextFormatViewModel>(Window!, vm =>
         {
-            vm.Initialize(selected, Se.Language.File.Export.NewCustomFormat, _subtitles);
+            vm.Initialize(selected, Se.Language.File.Export.NewCustomFormat, _subtitles, _videoFileName ?? string.Empty);
         });
 
         if (result.OkPressed && result.SelectedCustomFormat != null)

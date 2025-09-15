@@ -47,7 +47,6 @@ public partial class EditCustomTextFormatViewModel : ObservableObject
 
     private List<SubtitleLineViewModel> _subtitles;
     private string _subtitleTitle;
-    private string? _subtitleFileName;
     private string? _videoFileName;
     private readonly System.Timers.Timer _previewTimer;
 
@@ -154,11 +153,12 @@ public partial class EditCustomTextFormatViewModel : ObservableObject
         }
     }
 
-    internal void Initialize(CustomFormatItem selected, string title, List<SubtitleLineViewModel> subtitles)
+    internal void Initialize(CustomFormatItem selected, string title, List<SubtitleLineViewModel> subtitles, string videoFileName)
     {
         SelectedCustomFormat = selected;
         Title = title;
         _subtitles = subtitles.Take(50).ToList();
+        _videoFileName = videoFileName;
         _previewTimer.Start();
     }
 }
