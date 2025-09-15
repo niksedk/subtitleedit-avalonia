@@ -166,7 +166,7 @@ public partial class AutoTranslateViewModel : ObservableObject
         }
 
         SelectedTargetLanguage = null;
-        var targetLanguageIsoCode = EvaluateDefaultTargetLanguageCode(SelectedTargetLanguage?.Code ?? string.Empty);
+        var targetLanguageIsoCode = EvaluateDefaultTargetLanguageCode(SelectedTargetLanguage?.Code ?? string.Empty, SelectedSourceLanguage?.Code ?? string.Empty);
         if (!string.IsNullOrEmpty(targetLanguageIsoCode))
         {
             var lang = TargetLanguages.FirstOrDefault(p => p.Code == targetLanguageIsoCode);
@@ -188,6 +188,18 @@ public partial class AutoTranslateViewModel : ObservableObject
         if (SelectedTargetLanguage == null && TargetLanguages.Count > 0)
         {
             SelectedTargetLanguage = TargetLanguages[0];
+        }
+
+        if (SelectedSourceLanguage == SelectedTargetLanguage && TargetLanguages.Count > 1)
+        {
+            if (SelectedSourceLanguage?.Code == "en")
+            {
+                SelectedTargetLanguage = TargetLanguages.FirstOrDefault(p => p.Code == "de");
+            }
+            else
+            {
+                SelectedTargetLanguage = TargetLanguages.FirstOrDefault(p => p.Code == "en");
+            }
         }
     }
 
@@ -263,7 +275,7 @@ public partial class AutoTranslateViewModel : ObservableObject
             ModelText = result.SelectedModel;
             SaveSettings();
         }
-    }  
+    }
 
     private async Task<bool> DoTranslate()
     {
@@ -889,7 +901,7 @@ public partial class AutoTranslateViewModel : ObservableObject
         return defaultSourceLanguageCode;
     }
 
-    public static string EvaluateDefaultTargetLanguageCode(string defaultSourceLanguage)
+    public static string EvaluateDefaultTargetLanguageCode(string defaultSourceLanguage, string sourceLanguage)
     {
         var installedLanguages = new List<string>(); // Get installed languages
 
@@ -906,6 +918,11 @@ public partial class AutoTranslateViewModel : ObservableObject
         }
 
         var uiCultureTargetLanguage = Configuration.Settings.Tools.GoogleTranslateLastTargetLanguage;
+        if (uiCultureTargetLanguage == sourceLanguage && installedLanguages.Count > 0 && installedLanguages[0] != sourceLanguage)
+        {
+            return installedLanguages[0];
+        }
+
         if (uiCultureTargetLanguage == defaultSourceLanguage)
         {
             foreach (var s in Utilities.GetDictionaryLanguages())
