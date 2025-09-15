@@ -43,10 +43,27 @@ public class VisualSyncWindow : Window
         vm.VideoPlayerControlRight = InitVideoPlayer.MakeVideoPlayer();
         vm.VideoPlayerControlRight.FullScreenIsVisible = false;
 
-        vm.AudioVisualizerLeft = new AudioVisualizer { Height = 80, Width = double.NaN, IsReadOnly = true };
+        vm.AudioVisualizerLeft = new AudioVisualizer 
+        { 
+            Height = 80, Width = double.NaN, 
+            IsReadOnly = true ,
+            DrawGridLines = Se.Settings.Waveform.DrawGridLines,
+            WaveformColor = Se.Settings.Waveform.WaveformColor.FromHexToColor(),
+            WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor(),
+            InvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel,
+        };
         vm.AudioVisualizerLeft.OnVideoPositionChanged += vm.AudioVisualizerLeftPositionChanged;
 
-        vm.AudioVisualizerRight = new AudioVisualizer { Height = 80, Width = double.NaN, IsReadOnly = true };
+        vm.AudioVisualizerRight = new AudioVisualizer 
+        { 
+            Height = 80, 
+            Width = double.NaN, 
+            IsReadOnly = true,
+            DrawGridLines = Se.Settings.Waveform.DrawGridLines,
+            WaveformColor = Se.Settings.Waveform.WaveformColor.FromHexToColor(),
+            WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor(),
+            InvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel,
+        };
         vm.AudioVisualizerRight.OnVideoPositionChanged += vm.AudioVisualizerRightPositionChanged;
 
         var comboBoxLeft = UiUtil.MakeComboBoxBindText(vm.Paragraphs, vm, nameof(SubtitleDisplayItem.Text), nameof(vm.SelectedParagraphLeftIndex));
