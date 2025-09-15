@@ -62,7 +62,7 @@ public class MergeSameTimeCodesWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
-        KeyDown += _vm.OnKeyDown; 
+        KeyDown += _vm.OnKeyDown;
     }
 
     private static StackPanel MakeControlsView(MergeSameTimeCodesViewModel vm)

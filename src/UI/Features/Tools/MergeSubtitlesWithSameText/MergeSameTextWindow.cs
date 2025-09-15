@@ -3,14 +3,12 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
-using System;
 
 namespace Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameText;
 
@@ -72,7 +70,7 @@ public class MergeSameTextWindow : Window
         var labelGap = UiUtil.MakeLabel(Se.Language.Tools.MergeLineswithSameText.MaxMsBetweenLines);
         var numericUpDownGap = UiUtil.MakeNumericUpDownInt(0, 10000, 130, vm, nameof(vm.MaxMillisecondsBetweenLines));
         numericUpDownGap.ValueChanged += (s, e) => { vm.SetDirty(); };
-        var checkBoxIncludeIncrementText = UiUtil.MakeCheckBox( Se.Language.Tools.MergeLineswithSameText.IncludeIncrementingLines, vm, nameof(vm.IncludeIncrementingLines));
+        var checkBoxIncludeIncrementText = UiUtil.MakeCheckBox(Se.Language.Tools.MergeLineswithSameText.IncludeIncrementingLines, vm, nameof(vm.IncludeIncrementingLines));
         checkBoxIncludeIncrementText.IsCheckedChanged += (s, e) => { vm.SetDirty(); };
         var panelGap = UiUtil.MakeHorizontalPanel(labelGap, numericUpDownGap, checkBoxIncludeIncrementText);
 

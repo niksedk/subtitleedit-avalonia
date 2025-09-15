@@ -128,7 +128,7 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
         if (SelectedCustomFormat == null || Window == null)
         {
             return;
-        }   
+        }
 
         var fileName = await _fileHelper.PickSaveFile(Window, SelectedCustomFormat.Extension, _title, Se.Language.General.SaveFileAsTitle);
         if (string.IsNullOrWhiteSpace(fileName))
