@@ -16,6 +16,7 @@ public class LanguageExport
     public string TitleExportCustomFormat { get; set; }
     public string EditCustomFormat { get; set; }
     public string NewCustomFormat { get; set; }
+    public string DeleteSelectedCustomTextFormatX { get; set; }
 
     public LanguageExport()
     {
@@ -33,5 +34,6 @@ public class LanguageExport
         TitleExportCustomFormat = "Export custom text format";
         EditCustomFormat = "Edit custom text format";
         NewCustomFormat = "New custom text format";
+        DeleteSelectedCustomTextFormatX = "Delete selected custom text format \"{0}\"?";
     }
 }

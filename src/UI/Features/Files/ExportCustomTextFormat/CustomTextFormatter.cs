@@ -16,11 +16,13 @@ public static class CustomTextFormatter
     public const string EnglishDoNotModify = "[Do not modify]";
     private static readonly Regex CurlyCodePattern = new Regex("{\\d+[,:]*[A-Z\\d-]*}", RegexOptions.Compiled);
 
-    public static string GenerateCustomText(CustomFormatItem customFormat, List<SubtitleLineViewModel> subtitles, Subtitle original, string title, string videoFileName)
+    public static string GenerateCustomText(CustomFormatItem customFormat, List<SubtitleLineViewModel> subtitles, string title, string videoFileName)
     {
+        var formatNewLine = customFormat.FormatNewLine ?? Environment.NewLine;
+
         var sb = new StringBuilder();
         sb.Append(GetHeaderOrFooter(title, videoFileName, subtitles, customFormat.FormatHeader));
-        var template = GetParagraphTemplate(customFormat.FormatText);
+        var template = GetParagraphTemplate(customFormat.FormatParagraph);
         var isXml = customFormat.FormatHeader.Contains("<?xml version=", StringComparison.OrdinalIgnoreCase);
         for (var i = 0; i < subtitles.Count; i++)
         {
@@ -42,7 +44,7 @@ public static class CustomTextFormatter
                            .Replace(">", "&gt;")
                            .Replace("&", "&amp;");
             }
-            text = GetText(text, customFormat.FormatNewLine);
+            text = GetText(text, formatNewLine);
 
             var originalText = p.OriginalText;
             var paragraph = GetParagraph(template, start, end, text, originalText, i, p.Actor, new TimeCode(p.Duration), gap, customFormat.FormatTimeCode, p, videoFileName);

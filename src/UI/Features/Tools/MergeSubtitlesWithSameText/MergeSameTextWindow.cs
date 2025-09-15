@@ -64,6 +64,7 @@ public class MergeSameTextWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += vm.OnKeyDown;
     }
 
     private static StackPanel MakeControlsView(MergeSameTextViewModel vm)
@@ -203,11 +204,5 @@ public class MergeSameTextWindow : Window
         vm.SubtitleGrid = dataGrid;
 
         return UiUtil.MakeBorderForControlNoPadding(dataGrid);
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
     }
 }

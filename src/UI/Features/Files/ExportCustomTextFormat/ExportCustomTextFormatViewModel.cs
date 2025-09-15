@@ -4,12 +4,12 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using System;
+using Nikse.SubtitleEdit.Logic.Media;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportCustomTextFormat;
@@ -33,11 +33,14 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
     public bool OkPressed { get; private set; }
 
     private IWindowService _windowService;
+    private IFileHelper _fileHelper;
 
-    public ExportCustomTextFormatViewModel(IWindowService windowService)
+    public ExportCustomTextFormatViewModel(IWindowService windowService, IFileHelper fileHelper)
     {
         _windowService = windowService;
-        _title = string.Empty;  
+        _fileHelper = fileHelper;
+
+        _title = string.Empty;
         CustomFormats = new ObservableCollection<CustomFormatItem>();
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         PreviewText = string.Empty;
@@ -65,14 +68,43 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
 
         var result = await _windowService.ShowDialogAsync<EditCustomTextFormatWindow, EditCustomTextFormatViewModel>(Window!, vm =>
         {
-            vm.Initialize(selected, Se.Language.File.Export.EditCustomFormat);
+            vm.Initialize(selected, Se.Language.File.Export.EditCustomFormat, _subtitles);
         });
 
     }
 
     [RelayCommand]
-    private void FormatDelete()
+    private async Task FormatDelete()
     {
+        var selected = SelectedCustomFormat;
+        if (selected == null || Window == null)
+        {
+            return;
+        }
+
+        var result = await MessageBox.Show(
+                   Window,
+                   Se.Language.General.DeleteCurrentLine,
+                   string.Format(Se.Language.File.Export.DeleteSelectedCustomTextFormatX, selected.Name),
+                   MessageBoxButtons.YesNo,
+                   MessageBoxIcon.Question);
+
+        if (result != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+
+        var idx = CustomFormats.IndexOf(selected);
+        CustomFormats.Remove(selected);
+        if (CustomFormats.Count > 0)
+        {
+            if (idx >= CustomFormats.Count)
+            {
+                idx = CustomFormats.Count - 1;
+            }
+            SelectedCustomFormat = CustomFormats[idx];
+        }
     }
 
     [RelayCommand]
@@ -86,14 +118,38 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
 
         var result = await _windowService.ShowDialogAsync<EditCustomTextFormatWindow, EditCustomTextFormatViewModel>(Window!, vm =>
         {
-            vm.Initialize(selected, Se.Language.File.Export.NewCustomFormat);
+            vm.Initialize(selected, Se.Language.File.Export.NewCustomFormat, _subtitles);
         });
     }
 
     [RelayCommand]
-    private void SaveAs()
+    private async Task SaveAs()
     {
-        SaveSettings();
+        if (SelectedCustomFormat == null || Window == null)
+        {
+            return;
+        }   
+
+        var fileName = await _fileHelper.PickSaveFile(Window, SelectedCustomFormat.Extension, _title, Se.Language.General.SaveFileAsTitle);
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return;
+        }
+
+        System.IO.File.WriteAllText(fileName, PreviewText); // TODO: use default encoding
+    }
+
+    [RelayCommand]
+    private void Ok()
+    {
+        Se.Settings.File.ExportCustomFormats.Clear();
+        foreach (var item in CustomFormats)
+        {
+            Se.Settings.File.ExportCustomFormats.Add(item.ToCustomFormat());
+        }
+
+        OkPressed = true;
+        Window?.Close();
     }
 
     [RelayCommand]
@@ -113,6 +169,8 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
 
     internal void OnCustomFormatGridDoubleTapped(object? sender, TappedEventArgs e)
     {
+        e.Handled = true;
+        var _ = FormatEdit();
     }
 
     internal void GridSelectionChanged(object? sender, SelectionChangedEventArgs e)
@@ -123,49 +181,22 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
             return;
         }
 
+        e.Handled = true;
         GenerateText(selected);
     }
 
     private void GenerateText(CustomFormatItem customFormatItem)
     {
-        var sb = new StringBuilder();
-        sb.Append(CustomTextFormatter.GetHeaderOrFooter(_title, _videoFileName ?? string.Empty, _subtitles, customFormatItem.FormatHeader));
-        var template = CustomTextFormatter.GetParagraphTemplate(customFormatItem.FormatText);
-        var isXml = customFormatItem.FormatText.Contains("<?xml version=", StringComparison.OrdinalIgnoreCase);
-        for (var i = 0; i < _subtitles.Count; i++)
-        {
-            var p = _subtitles[i];
-            var start = CustomTextFormatter.GetTimeCode(TimeCode.FromSeconds(p.StartTime.TotalSeconds), customFormatItem.FormatTimeCode);
-            var end = CustomTextFormatter.GetTimeCode(TimeCode.FromSeconds(p.EndTime.TotalSeconds), customFormatItem.FormatTimeCode);
-
-            var gap = string.Empty;
-            var next = _subtitles.GetOrNull(i + 1);
-            if (next != null)
-            {
-                gap = CustomTextFormatter.GetTimeCode(new TimeCode(next.StartTime.TotalMilliseconds - p.EndTime.TotalMilliseconds), customFormatItem.FormatTimeCode);
-            }
-
-            var text = p.Text;
-            if (isXml)
-            {
-                text = text.Replace("<", "&lt;")
-                           .Replace(">", "&gt;")
-                           .Replace("&", "&amp;");
-            }
-            text = CustomTextFormatter.GetText(text, customFormatItem.FormatNewLine);
-
-            var originalText = p.OriginalText;
-            var paragraph = CustomTextFormatter.GetParagraph(template, start, end, text, originalText, i, p.Actor, new TimeCode(p.Duration), gap, customFormatItem.FormatTimeCode, p, _videoFileName ?? string.Empty);
-            sb.Append(paragraph);
-        }
-        
-        sb.Append(CustomTextFormatter.GetHeaderOrFooter(_title, _videoFileName ?? string.Empty, _subtitles, customFormatItem.FormatFooter));
-     
-        PreviewText = sb.ToString();
+        PreviewText = CustomTextFormatter.GenerateCustomText(customFormatItem, _subtitles, _title, _videoFileName ?? string.Empty);
     }
 
-    internal void GridKeyDown(KeyEventArgs e)
+    internal async Task GridKeyDown(KeyEventArgs e)
     {
+        if (e.Key == Key.Delete)
+        {
+            e.Handled = true;
+            await FormatDelete();
+        }
     }
 
     internal void Initialize(List<SubtitleLineViewModel> subtitles, string? subtitleFileName, string? videoFileName)
@@ -173,11 +204,17 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
         _subtitles = subtitles;
         _subtitleFileNAme = subtitleFileName;
         _videoFileName = videoFileName;
-        _title = subtitleFileName != null ? System.IO.Path.GetFileNameWithoutExtension(subtitleFileName) : Se.Language.General.Untitled;    
+        _title = subtitleFileName != null ? System.IO.Path.GetFileNameWithoutExtension(subtitleFileName) : Se.Language.General.Untitled;
 
         foreach (var customFormat in Se.Settings.File.ExportCustomFormats)
         {
             CustomFormats.Add(new CustomFormatItem(customFormat));
+        }
+
+        if (CustomFormats.Count > 0)
+        {
+            SelectedCustomFormat = CustomFormats[0];
+            GenerateText(SelectedCustomFormat);
         }
     }
 }

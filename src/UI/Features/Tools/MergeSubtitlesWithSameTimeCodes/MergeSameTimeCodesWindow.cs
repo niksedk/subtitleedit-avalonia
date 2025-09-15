@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Features.Main;
@@ -22,8 +21,8 @@ public class MergeSameTimeCodesWindow : Window
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Tools.MergeLineswithSameTimeCodes.Title;
         CanResize = true;
-        Width = 900;
-        Height = 800;
+        Width = 800;
+        Height = 750;
         MinWidth = 600;
         MinHeight = 400;
 
@@ -63,6 +62,7 @@ public class MergeSameTimeCodesWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += _vm.OnKeyDown; 
     }
 
     private static StackPanel MakeControlsView(MergeSameTimeCodesViewModel vm)
@@ -204,11 +204,5 @@ public class MergeSameTimeCodesWindow : Window
         vm.SubtitleGrid = dataGrid;
 
         return UiUtil.MakeBorderForControlNoPadding(dataGrid);
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
     }
 }

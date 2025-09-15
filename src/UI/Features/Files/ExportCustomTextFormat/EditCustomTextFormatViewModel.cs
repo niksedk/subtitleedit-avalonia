@@ -3,8 +3,8 @@ using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Main;
-using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportCustomTextFormat;
 
@@ -16,9 +16,10 @@ public partial class EditCustomTextFormatViewModel : ObservableObject
     [ObservableProperty] private string _title;
 
     private List<SubtitleLineViewModel> _subtitles;
-    private string? _subtitleFileNAme;
+    private string _subtitleTitle;
+    private string? _subtitleFileName;
     private string? _videoFileName;
-    private CustomFormatItem _customFormatItem;
+    private readonly System.Timers.Timer _previewTimer;
 
     public Window? Window { get; set; }
 
@@ -28,44 +29,33 @@ public partial class EditCustomTextFormatViewModel : ObservableObject
     {
         Title = string.Empty;
         PreviewText = string.Empty;
-        _customFormatItem = new CustomFormatItem();
         _subtitles = new List<SubtitleLineViewModel>();
-        LoadSettings();
-    }
+        _subtitleTitle = string.Empty;
 
-    private void LoadSettings()
-    {
-    }
+        _previewTimer = new System.Timers.Timer(500);
+        _previewTimer.Elapsed += (sender, args) =>
+        {
+            if (SelectedCustomFormat == null)
+            {
+                PreviewText = string.Empty;
+                return;
+            }
 
-    private void SaveSettings()
-    {
-        Se.SaveSettings();
-    }
-
-    [RelayCommand]
-    private void FormatEdit()
-    {
-    }
-
-    [RelayCommand]
-    private void FormatDelete()
-    {
+            PreviewText = CustomTextFormatter.GenerateCustomText(SelectedCustomFormat, _subtitles, _subtitleTitle, _videoFileName ?? string.Empty);
+        };
     }
 
     [RelayCommand]
-    private void FormatNew()
+    private void Ok()
     {
-    }
-
-    [RelayCommand]
-    private void SaveAs()
-    {
-        SaveSettings();
+        OkPressed = true;
+        Window?.Close();
     }
 
     [RelayCommand]
     private void Cancel()
     {
+        _previewTimer.Stop();
         Window?.Close();
     }
 
@@ -78,21 +68,11 @@ public partial class EditCustomTextFormatViewModel : ObservableObject
         }
     }
 
-    internal void OnCustomFormatGridDoubleTapped(object? sender, TappedEventArgs e)
-    {
-    }
-
-    internal void GridSelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
-    }
-
-    internal void GridKeyDown(KeyEventArgs e)
-    {
-    }
-
-    internal void Initialize(CustomFormatItem selected, string title)
+    internal void Initialize(CustomFormatItem selected, string title, List<SubtitleLineViewModel> subtitles)
     {
         SelectedCustomFormat = selected;
         Title = title;
+        _subtitles = subtitles.Take(50).ToList();
+        _previewTimer.Start();
     }
 }

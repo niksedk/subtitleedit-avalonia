@@ -288,15 +288,6 @@ public partial class MergeSameTimeCodesViewModel : ObservableObject
         Window?.Close();
     }
 
-    internal void OnKeyDown(KeyEventArgs e)
-    {
-        if (e.Key == Key.Escape)
-        {
-            e.Handled = true;
-            Window?.Close();
-        }
-    }
-
     internal void DataGridMergeItemChanged(object? sender, SelectionChangedEventArgs e)
     {
         var selected = SelectedMergeItem;
@@ -318,5 +309,14 @@ public partial class MergeSameTimeCodesViewModel : ObservableObject
     public void SetDirty()
     {
         _dirty = true;
+    }
+
+    internal void OnKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            Window?.Close();
+        }
     }
 }

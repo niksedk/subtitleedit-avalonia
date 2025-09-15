@@ -34,8 +34,9 @@ public class ExportCustomTextFormatWindow : Window
         };
 
         var buttonSaveAs = UiUtil.MakeButton(Se.Language.General.SaveDotDotDot, vm.SaveAsCommand);
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar(buttonSaveAs, buttonCancel);
+        var panelButtons = UiUtil.MakeButtonBar(buttonSaveAs, buttonOk, buttonCancel);
 
         var grid = new Grid
         {
@@ -83,7 +84,7 @@ public class ExportCustomTextFormatWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(UiUtil.MakeLabel(Se.Language.File.Export.CustomTextFormatsDotDotDot), 0);
+        grid.Add(UiUtil.MakeLabel(Se.Language.File.Export.CustomTextFormats), 0);
 
         var dataGrid = new DataGrid
         {
@@ -108,7 +109,7 @@ public class ExportCustomTextFormatWindow : Window
         dataGrid.Columns.Add(new DataGridTextColumn
         {
             Header = Se.Language.General.Text,
-            Binding = new Binding(nameof(CustomFormatItem.FormatText)),
+            Binding = new Binding(nameof(CustomFormatItem.FormatParagraph)),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
             Width = new DataGridLength(1, DataGridLengthUnitType.Star) // star sizing to take all available space
         });
@@ -119,7 +120,10 @@ public class ExportCustomTextFormatWindow : Window
         });
         dataGrid.SelectionChanged += vm.GridSelectionChanged;
         dataGrid.DoubleTapped += (s, e) => vm.FormatEditCommand.Execute(null);
-        dataGrid.KeyDown += (s, e) => vm.GridKeyDown(e);
+        dataGrid.KeyDown += (s, e) =>
+        {
+            var _ = vm.GridKeyDown(e);
+        };
 
         var flyout = new MenuFlyout();
         var deleteMenuItem = new MenuItem
@@ -139,7 +143,7 @@ public class ExportCustomTextFormatWindow : Window
         var buttonAdd = UiUtil.MakeButton(vm.FormatNewCommand, IconNames.Plus, Se.Language.General.New);
         var buttonRemove = UiUtil.MakeButton(vm.FormatDeleteCommand, IconNames.Trash, Se.Language.General.Remove);
         var buttonEdit = UiUtil.MakeButton(vm.FormatEditCommand, IconNames.Pencil, Se.Language.General.Edit);
-        var panelButtons = UiUtil.MakeButtonBar(buttonAdd, buttonEdit, buttonRemove).WithAlignmentLeft();
+        var panelButtons = UiUtil.MakeButtonBar(buttonAdd, buttonEdit, buttonRemove).WithAlignmentLeft().WithMarginTop(5);
 
         grid.Add(panelButtons, 2);
 

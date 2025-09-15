@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic.Config;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -241,15 +242,6 @@ public partial class MergeSameTextViewModel : ObservableObject
         Window?.Close();
     }
 
-    internal void OnKeyDown(KeyEventArgs e)
-    {
-        if (e.Key == Key.Escape)
-        {
-            e.Handled = true;
-            Window?.Close();
-        }
-    }
-
     internal void DataGridMergeItemChanged(object? sender, SelectionChangedEventArgs e)
     {
         var selected = SelectedMergeItem;
@@ -271,5 +263,14 @@ public partial class MergeSameTextViewModel : ObservableObject
     public void SetDirty()
     {
         _dirty = true;
+    }
+
+    internal void OnKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            Window?.Close();
+        }
     }
 }

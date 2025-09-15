@@ -19,17 +19,17 @@ public class SeFile
             Name = "SubRip",
             Extension = "srt",
             FormatHeader = string.Empty,
-            FormatText = "{number}" + Environment.NewLine + "{start} --> {end}" + Environment.NewLine + "{text}" + Environment.NewLine,
+            FormatParagraph = "{number}" + Environment.NewLine + "{start} --> {end}" + Environment.NewLine + "{text}" + Environment.NewLine + Environment.NewLine,
             FormatFooter = string.Empty,
             FormatTimeCode = "hh:mm:ss,zzz",
-            FormatNewLine = string.Empty,
+            FormatNewLine = null,
         });
         ExportCustomFormats.Add(new SeExportCustomFormatItem
         {
             Name = "MicroDVD",
             Extension = "sub",
             FormatHeader = string.Empty,
-            FormatText = "{{start}}{{end}}{text}",
+            FormatParagraph = "{{start}}{{end}}{text}" + Environment.NewLine,
             FormatFooter = string.Empty,
             FormatTimeCode = "ff",
             FormatNewLine = "||",

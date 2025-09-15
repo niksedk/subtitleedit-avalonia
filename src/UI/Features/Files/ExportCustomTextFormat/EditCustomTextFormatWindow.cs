@@ -19,8 +19,8 @@ public class EditCustomTextFormatWindow : Window
         CanResize = true;
         Width = 900;
         Height = 800;
-        MinWidth = 600;
-        MinHeight = 400;
+        MinWidth = 700;
+        MinHeight = 500;
         Bind(Window.TitleProperty, new Binding(nameof(vm.Title)));  
         _vm = vm;
         vm.Window = this;
@@ -33,7 +33,7 @@ public class EditCustomTextFormatWindow : Window
             Margin = new Thickness(10, 0, 0, 0),
         };
 
-        var buttonOk = UiUtil.MakeButtonOk(vm.SaveAsCommand);
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
@@ -88,13 +88,13 @@ public class EditCustomTextFormatWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        var labelName = UiUtil.MakeLabel(Se.Language.General.Name); 
-        var textBoxName = UiUtil.MakeTextBox(double.NaN, vm, nameof(vm.SelectedCustomFormat) + "." + nameof(CustomFormatItem.Name));
+        var labelName = UiUtil.MakeLabel(Se.Language.General.Name).WithMinWidth(100); 
+        var textBoxName = UiUtil.MakeTextBox(200, vm, nameof(vm.SelectedCustomFormat) + "." + nameof(CustomFormatItem.Name));
         var panelName = UiUtil.MakeHorizontalPanel(labelName, textBoxName);
         grid.Add(panelName, 0);
 
-        var labelFileExtension = UiUtil.MakeLabel(Se.Language.General.FileExtension);
-        var textBoxFileExtension = UiUtil.MakeTextBox(double.NaN, vm, nameof(vm.SelectedCustomFormat) + "." + nameof(CustomFormatItem.Extension));
+        var labelFileExtension = UiUtil.MakeLabel(Se.Language.General.FileExtension).WithMinWidth(100);
+        var textBoxFileExtension = UiUtil.MakeTextBox(200, vm, nameof(vm.SelectedCustomFormat) + "." + nameof(CustomFormatItem.Extension));
         var panelFileExtension = UiUtil.MakeHorizontalPanel(labelFileExtension, textBoxFileExtension).WithMarginTop(5);
         grid.Add(panelFileExtension, 1);
 
@@ -102,13 +102,15 @@ public class EditCustomTextFormatWindow : Window
         var textBoxHeader = UiUtil.MakeTextBox(double.NaN, vm, nameof(vm.SelectedCustomFormat) + "." + nameof(CustomFormatItem.FormatHeader));
         textBoxHeader.HorizontalAlignment = HorizontalAlignment.Stretch;
         textBoxHeader.VerticalAlignment = VerticalAlignment.Stretch;
+        textBoxHeader.AcceptsReturn = true; 
         grid.Add(labelHeader, 2);
         grid.Add(textBoxHeader, 3);
 
         var labelText = UiUtil.MakeLabel(Se.Language.General.Text).WithMarginTop(5);
-        var textBoxText = UiUtil.MakeTextBox(double.NaN, vm, nameof(vm.SelectedCustomFormat) + "." + nameof(CustomFormatItem.FormatText));
+        var textBoxText = UiUtil.MakeTextBox(double.NaN, vm, nameof(vm.SelectedCustomFormat) + "." + nameof(CustomFormatItem.FormatParagraph));
         textBoxText.HorizontalAlignment = HorizontalAlignment.Stretch;
         textBoxText.VerticalAlignment = VerticalAlignment.Stretch;
+        textBoxText.AcceptsReturn = true;
         grid.Add(labelText, 4);
         grid.Add(textBoxText, 5);
 
@@ -116,6 +118,7 @@ public class EditCustomTextFormatWindow : Window
         var textBoxFooter = UiUtil.MakeTextBox(double.NaN, vm, nameof(vm.SelectedCustomFormat) + "." + nameof(CustomFormatItem.FormatFooter));
         textBoxFooter.HorizontalAlignment = HorizontalAlignment.Stretch;
         textBoxFooter.VerticalAlignment = VerticalAlignment.Stretch;
+        textBoxFooter.AcceptsReturn = true;
         grid.Add(labelFooter, 6);
         grid.Add(textBoxFooter, 7);
 
