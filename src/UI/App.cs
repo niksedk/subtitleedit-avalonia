@@ -16,6 +16,12 @@ using Projektanker.Icons.Avalonia.MaterialDesign;
 using System;
 using System.Text;
 
+AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+{
+    var exception = e.ExceptionObject as Exception;
+    Se.LogError(exception ?? new Exception(), "Unhandled AppDomain Exception");
+};
+
 var lifetime = new ClassicDesktopStyleApplicationLifetime
 {
     Args = args,
@@ -88,6 +94,7 @@ Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 UiUtil.SetCurrentTheme();
 
 // Main window setup
+
 lifetime.MainWindow = new Window
 {
     Title = "Subtitle Edit",
@@ -103,6 +110,14 @@ lifetime.MainWindow.Content = new MainView();
 lifetime.MainWindow.AttachDevTools();
 #endif
 
-lifetime.Start(args);
+try
+{
+    lifetime.Start(args);
+}
+catch (Exception exception)
+{
+    Se.LogError(exception, "Critical error during application startup");
+    Environment.Exit(1);
+}
 
 
