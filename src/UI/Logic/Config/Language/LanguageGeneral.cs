@@ -367,6 +367,7 @@ public class LanguageGeneral
     public string FileExtension { get; set; }
     public string PickOllamaModel { get; set; }
     public string Dictionary { get; set; }
+    public string GoogleIt { get; set; }
 
     public LanguageGeneral()
     {
@@ -731,5 +732,6 @@ public class LanguageGeneral
         FileExtension = "File extension";
         PickOllamaModel = "Pick Ollama model";
         Dictionary = "Dictionary";
+        GoogleIt = "Google it ";
     }
 }

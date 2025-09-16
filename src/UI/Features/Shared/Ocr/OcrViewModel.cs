@@ -86,6 +86,8 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private bool _doTryToGuessUnknownWords;
     [ObservableProperty] private bool _doAutoBreak;
     [ObservableProperty] private bool _isDictionaryLoaded;
+    [ObservableProperty] private ObservableCollection<string> _unknownWords;
+    [ObservableProperty] private string? _selectedUnknownWord;
 
     public Window? Window { get; set; }
     public DataGrid SubtitleGrid { get; set; }
@@ -262,6 +264,11 @@ public partial class OcrViewModel : ObservableObject
     {
         IsOcrRunning = false;
         _cancellationTokenSource.Cancel();
+    }
+    
+    [RelayCommand]
+    private void GoogleUnknowWord()
+    {
     }
 
     [RelayCommand]
@@ -1477,5 +1484,10 @@ public partial class OcrViewModel : ObservableObject
     internal void SubtitleGridContextOpening(object? sender, EventArgs e)
     {
         ShowContextMenu = OcrSubtitleItems.Count > 0;
+    }
+    
+    public void DictionaryChanged()
+    {
+        IsDictionaryLoaded =  Dictionaries.IndexOf(SelectedDictionary ?? Dictionaries.First()) > 0;
     }
 }

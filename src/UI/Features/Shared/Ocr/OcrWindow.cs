@@ -366,6 +366,7 @@ public class OcrWindow : Window
         var comboBoxDictionary = UiUtil.MakeComboBox(vm.Dictionaries, vm, nameof(vm.SelectedDictionary))
             .WithWidth(175)
             .WithMarginRight(3);
+        comboBoxDictionary.SelectionChanged += (sender, args) => vm.DictionaryChanged();
         var buttonDictionaryBrowse = UiUtil.MakeBrowseButton(vm.PickDictionaryCommand);
         var panelDictionary = new StackPanel
         {
@@ -380,10 +381,14 @@ public class OcrWindow : Window
             }
         };
 
-        var checkBoxFixOcrErrors = UiUtil.MakeCheckBox(Se.Language.Ocr.FixOcrErrors, vm, nameof(vm.DoFixOcrErrors));   
-        var checkBoxPromptForUnknownWords = UiUtil.MakeCheckBox(Se.Language.Ocr.PromptForUknownWords, vm, nameof(vm.DoPromptForUnknownWords));
-        var checkBoxTryToGuessUnknownWords = UiUtil.MakeCheckBox(Se.Language.Ocr.TryToGuessUnknownWords, vm, nameof(vm.DoTryToGuessUnknownWords));
-        var checkBoxAutoBreak = UiUtil.MakeCheckBox(Se.Language.Ocr.AutoBreakIfMoreThanXLines, vm, nameof(vm.DoAutoBreak));
+        var checkBoxFixOcrErrors = UiUtil.MakeCheckBox(Se.Language.Ocr.FixOcrErrors, vm, nameof(vm.DoFixOcrErrors))
+            .WithBindIsVisible(nameof(vm.IsDictionaryLoaded));   
+        var checkBoxPromptForUnknownWords = UiUtil.MakeCheckBox(Se.Language.Ocr.PromptForUknownWords, vm, nameof(vm.DoPromptForUnknownWords))
+            .WithBindIsVisible(nameof(vm.IsDictionaryLoaded));
+        var checkBoxTryToGuessUnknownWords = UiUtil.MakeCheckBox(Se.Language.Ocr.TryToGuessUnknownWords, vm, nameof(vm.DoTryToGuessUnknownWords))
+            .WithBindIsVisible(nameof(vm.IsDictionaryLoaded));
+        var checkBoxAutoBreak = UiUtil.MakeCheckBox(Se.Language.Ocr.AutoBreakIfMoreThanXLines, vm, nameof(vm.DoAutoBreak))
+            .WithBindIsVisible(nameof(vm.IsDictionaryLoaded));
 
         var panelOptions = new StackPanel
         {
@@ -423,6 +428,7 @@ public class OcrWindow : Window
                 },
             }
         };
+        tabControl.Bind(TabControl.IsVisibleProperty, new Binding(nameof(vm.IsDictionaryLoaded)));
 
         grid.Add(panelText, 0, 0);
         grid.Add(panelOptions, 0, 1);
@@ -436,7 +442,38 @@ public class OcrWindow : Window
 
     private static object MakeUnknownWordsView(OcrViewModel vm)
     {
-        return UiUtil.MakeLabel("Not implemented yet");    
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+            },
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+        
+        var listBox = new ListBox
+        {
+            [!ListBox.ItemsSourceProperty] = new Binding(nameof(vm.UnknownWords), BindingMode.OneWay),
+            [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedUnknownWord), BindingMode.TwoWay),
+            Width = double.NaN,
+            Height = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,  
+        };
+
+        var buttonGoogleIt = UiUtil.MakeButton(Se.Language.General.GoogleIt, vm.GoogleUnknowWordCommand);
+        var panelButtons = UiUtil.MakeVerticalPanel(buttonGoogleIt);
+
+        grid.Add(listBox, 0, 0);
+        grid.Add(panelButtons, 0, 1);
+
+        return grid;
     }
 
     private static object MakeAllFixesView(OcrViewModel vm)
