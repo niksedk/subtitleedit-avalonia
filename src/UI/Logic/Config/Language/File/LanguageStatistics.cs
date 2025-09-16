@@ -10,6 +10,7 @@ public class LanguageStatistics
     public string MostUsedWords { get; set; }
     public string NothingFound { get; set; }
     public string NumberOfLinesX { get; set; }
+    public string NumberOfFilesX { get; set; }
     public string LengthInFormatXinCharactersY { get; set; }
     public string NumberOfCharactersInTextOnly { get; set; }
     public string TotalDuration { get; set; }
@@ -62,6 +63,7 @@ public class LanguageStatistics
         MostUsedWords = "Most used words";
         MostUsedLines = "Most used lines";
         NumberOfLinesX = "Number of subtitle lines: {0:#,##0}";
+        NumberOfFilesX = "Number of subtitle files: {0:#,##0}";
         LengthInFormatXinCharactersY = "Number of characters as {0}: {1:#,###,##0}";
         NumberOfCharactersInTextOnly = "Number of characters in text only: {0:#,###,##0}";
         NumberOfItalicTags = "Number of italic tags: {0:#,##0}";

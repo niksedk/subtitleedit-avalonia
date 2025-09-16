@@ -28,6 +28,7 @@ public class PromptTextBoxWindow : Window
             [!TextBox.WidthProperty] = new Binding(nameof(vm.TextBoxWidth)) { Mode = BindingMode.TwoWay },
             [!TextBox.HeightProperty] = new Binding(nameof(vm.TextBoxHeight)) { Mode = BindingMode.TwoWay },
             [!TextBox.TextProperty] = new Binding(nameof(vm.Text)) { Mode = BindingMode.TwoWay },
+            [!TextBox.IsReadOnlyProperty] = new Binding(nameof(vm.IsReadOnly)) { Mode = BindingMode.TwoWay },
             VerticalAlignment = VerticalAlignment.Center,
             TextWrapping = TextWrapping.Wrap,
         };

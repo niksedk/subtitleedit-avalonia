@@ -383,7 +383,7 @@ public class Se
     {
         try
         {
-            var filePath = GetWhisperLogFilePath();
+            var filePath = GetErrorLogFilePath();
             using var writer = new StreamWriter(filePath, true, Encoding.UTF8);
             writer.WriteLine("-----------------------------------------------------------------------------");
             writer.WriteLine($"Date: {DateTime.Now.ToString(CultureInfo.InvariantCulture)}");

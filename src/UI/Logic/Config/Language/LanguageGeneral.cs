@@ -368,6 +368,7 @@ public class LanguageGeneral
     public string PickOllamaModel { get; set; }
     public string Dictionary { get; set; }
     public string GoogleIt { get; set; }
+    public string Convert { get; set; }
 
     public LanguageGeneral()
     {
@@ -733,5 +734,6 @@ public class LanguageGeneral
         PickOllamaModel = "Pick Ollama model";
         Dictionary = "Dictionary";
         GoogleIt = "Google it ";
+        Convert = "Convert";
     }
 }

@@ -18,7 +18,7 @@ public class BatchConvertWindow : Window
     public BatchConvertWindow(BatchConvertViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = "Batch convert";
+        Title = Se.Language.Tools.BatchConvert.Title;
         Width = 1024;
         Height = 740;
         MinWidth = 900;
@@ -33,11 +33,13 @@ public class BatchConvertWindow : Window
         var functionsListView = MakeFunctionsListView(vm);
         var functionView = MakeFunctionView(vm);
 
-        var buttonConvert = UiUtil.MakeButton("Convert", vm.ConvertCommand);
+        var buttonConvert = UiUtil.MakeButton(Se.Language.General.Convert, vm.ConvertCommand);
+        var buttonStatistics = UiUtil.MakeButton(Se.Language.File.Statistics.Title, vm.StatisticsCommand);
         var buttonDone = UiUtil.MakeButtonDone(vm.DoneCommand);
         var buttonPanel = UiUtil.MakeButtonBar(
             buttonConvert,
-             buttonDone
+            buttonStatistics,
+            buttonDone
         );
         
         var grid = new Grid
@@ -70,7 +72,7 @@ public class BatchConvertWindow : Window
         Activated += delegate { buttonDone.Focus(); }; // hack to make OnKeyDown work
     }
 
-    private Border MakeFileView(BatchConvertViewModel vm)
+    private static Border MakeFileView(BatchConvertViewModel vm)
     {
         var grid = new Grid
         {

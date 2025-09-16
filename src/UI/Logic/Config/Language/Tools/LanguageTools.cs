@@ -6,6 +6,7 @@ public class LanguageTools
     public LanguageAdjustDisplayDurations AdjustDurations { get; set; } = new();
     public LanguageApplyDurationLimits ApplyDurationLimits { get; set; } = new();
     public LanguageBridgeGaps BridgeGaps { get; set; } = new();
+    public LanguageBatchConvert BatchConvert { get; set; } = new();
     public LanguageChangeCasing ChangeCasing { get; set; } = new();
     public LanguageJoinSubtitles JoinSubtitles { get; set; } = new();
     public LanguageSplitSubtitle SplitSubtitle { get; set; } = new();

@@ -11,6 +11,7 @@ public partial class PromptTextBoxViewModel : ObservableObject
     [ObservableProperty] private string _text;
     [ObservableProperty] private int _textBoxWidth;
     [ObservableProperty] private int _textBoxHeight;
+    [ObservableProperty] private bool _isReadOnly;
 
     private bool _returnSubmits;
 
@@ -24,12 +25,13 @@ public partial class PromptTextBoxViewModel : ObservableObject
         Text = string.Empty;
     }
 
-    internal void Initialize(string title, string text, int textBoxWidth, int textBoxHeight, bool returnSubmits = false)
+    internal void Initialize(string title, string text, int textBoxWidth, int textBoxHeight, bool returnSubmits = false, bool isReadOnly = false)
     {
         Title = title;
         Text = text;
         TextBoxWidth = textBoxWidth;
         TextBoxHeight = textBoxHeight;
+        IsReadOnly = isReadOnly;
         _returnSubmits = returnSubmits;
     }
 
