@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
-using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
@@ -289,7 +288,7 @@ public partial class BatchConvertViewModel : ObservableObject
         var stats = CalculateGeneralStatistics();
         var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!, vm =>
         {
-            vm.Initialize(Se.Language.File.Statistics.Title, stats, 1000, 600);
+            vm.Initialize(Se.Language.File.Statistics.Title, stats, 1000, 600, false, true);
         });
     }
 
