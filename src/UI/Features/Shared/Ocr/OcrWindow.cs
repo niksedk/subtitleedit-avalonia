@@ -132,7 +132,7 @@ public class OcrWindow : Window
                 UiUtil.MakeBrowseButton(vm.PickOllamaModelCommand)
                     .BindIsVisible(vm, nameof(vm.IsOllamaVisible))
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
-                UiUtil.MakeLabel(Se.Language.General.WebServiceUrl, nameof(vm.IsOllamaVisible)),
+                UiUtil.MakeLabel(Se.Language.General.Url, nameof(vm.IsOllamaVisible)),
                 UiUtil.MakeTextBox(220, vm, nameof(vm.OllamaUrl))
                     .BindIsVisible(vm, nameof(vm.IsOllamaVisible))
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
@@ -319,9 +319,25 @@ public class OcrWindow : Window
 
     private static Border MakeEditView(OcrViewModel vm)
     {
-        var panel = new StackPanel
+        var grid = new Grid
         {
-            Orientation = Orientation.Horizontal,
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        var panelText = new StackPanel
+        {
+            Orientation = Orientation.Vertical,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Top,
             Margin = new Thickness(10),
@@ -330,24 +346,107 @@ public class OcrWindow : Window
                 UiUtil.MakeLabel(Se.Language.General.Text).WithAlignmentTop(),
                 new TextBox
                 {
-                    Width = 300,
-                    Height = 60,
+                    Width = 320,
+                    Height = 80,
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                     VerticalAlignment = VerticalAlignment.Center,
                     AcceptsReturn = true,
                     TextWrapping = Avalonia.Media.TextWrapping.NoWrap,
                     Margin = new Thickness(0, 0, 10, 0),
-                    [!TextBox.TextProperty] =
-                        new Binding($"{nameof(vm.SelectedOcrSubtitleItem)}.{nameof(OcrSubtitleItem.Text)}")
-                            { Source = vm, Mode = BindingMode.TwoWay }
+                    [!TextBox.TextProperty] = new Binding($"{nameof(vm.SelectedOcrSubtitleItem)}.{nameof(OcrSubtitleItem.Text)}")
+                    { 
+                        Source = vm, 
+                        Mode = BindingMode.TwoWay 
+                    }
                 }
             }
         };
 
-        var border = UiUtil.MakeBorderForControl(panel).WithMarginBottom(5);
+        var labelDictionary = UiUtil.MakeLabel(Se.Language.General.Dictionary);
+        var comboBoxDictionary = UiUtil.MakeComboBox(vm.Dictionaries, vm, nameof(vm.SelectedDictionary))
+            .WithWidth(175)
+            .WithMarginRight(3);
+        var buttonDictionaryBrowse = UiUtil.MakeBrowseButton(vm.PickDictionaryCommand);
+        var panelDictionary = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            Children =
+            {
+                labelDictionary,
+                comboBoxDictionary,
+                buttonDictionaryBrowse,
+            }
+        };
+
+        var checkBoxFixOcrErrors = UiUtil.MakeCheckBox(Se.Language.Ocr.FixOcrErrors, vm, nameof(vm.DoFixOcrErrors));   
+        var checkBoxPromptForUnknownWords = UiUtil.MakeCheckBox(Se.Language.Ocr.PromptForUknownWords, vm, nameof(vm.DoPromptForUnknownWords));
+        var checkBoxTryToGuessUnknownWords = UiUtil.MakeCheckBox(Se.Language.Ocr.TryToGuessUnknownWords, vm, nameof(vm.DoTryToGuessUnknownWords));
+        var checkBoxAutoBreak = UiUtil.MakeCheckBox(Se.Language.Ocr.AutoBreakIfMoreThanXLines, vm, nameof(vm.DoAutoBreak));
+
+        var panelOptions = new StackPanel
+        {
+            Orientation = Orientation.Vertical,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            Children =
+            {
+                panelDictionary,
+                checkBoxFixOcrErrors,
+                checkBoxPromptForUnknownWords,
+                checkBoxTryToGuessUnknownWords,
+                checkBoxAutoBreak,
+            }
+        };
+
+        var tabControl = new TabControl
+        {
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Items =
+            {
+                new TabItem
+                {
+                    Header = Se.Language.Ocr.UnknownWords,
+                    Content = MakeUnknownWordsView(vm)
+                },
+                new TabItem
+                {
+                    Header = Se.Language.Ocr.AllFixes,
+                    Content = MakeAllFixesView(vm)
+                },
+                new TabItem
+                {
+                    Header = Se.Language.Ocr.GuessesUsed,
+                    Content = MakeGuessesUsedView(vm)
+                },
+            }
+        };
+
+        grid.Add(panelText, 0, 0);
+        grid.Add(panelOptions, 0, 1);
+        grid.Add(tabControl, 0, 2);
+
+        var border = UiUtil.MakeBorderForControl(grid).WithMarginBottom(5);
         border.Bind(Border.IsVisibleProperty, new Binding(nameof(vm.IsOcrRunning)) { Source = vm, Converter = new InverseBooleanConverter() });
 
         return border;
+    }
+
+    private static object MakeUnknownWordsView(OcrViewModel vm)
+    {
+        return UiUtil.MakeLabel("Not implemented yet");    
+    }
+
+    private static object MakeAllFixesView(OcrViewModel vm)
+    {
+        return UiUtil.MakeLabel("Not implemented yet");
+    }
+
+    private static object MakeGuessesUsedView(OcrViewModel vm)
+    {
+        return UiUtil.MakeLabel("Not implemented yet");
     }
 
     private static Grid MakeBottomView(OcrViewModel vm)

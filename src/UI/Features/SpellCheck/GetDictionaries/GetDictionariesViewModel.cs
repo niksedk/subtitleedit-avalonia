@@ -24,8 +24,8 @@ namespace Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
 
 public partial class GetDictionariesViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<SpellCheckDictionaryDisplay> _dictionaries;
-    [ObservableProperty] private SpellCheckDictionaryDisplay? selectedDictionary;
+    [ObservableProperty] private ObservableCollection<GetSpellCheckDictionaryDisplay> _dictionaries;
+    [ObservableProperty] private GetSpellCheckDictionaryDisplay? selectedDictionary;
     [ObservableProperty] private string _description;
     [ObservableProperty] private double _progress;
     [ObservableProperty] private string _statusText;
@@ -54,7 +54,7 @@ public partial class GetDictionariesViewModel : ObservableObject
         _zipUnpacker = zipUnpacker;
         _folderHelper = folderHelper;
 
-        Dictionaries = new ObservableCollection<SpellCheckDictionaryDisplay>();
+        Dictionaries = new ObservableCollection<GetSpellCheckDictionaryDisplay>();
         SelectedDictionary = null;
         Description = string.Empty;
         IsDownloadEnabled = true;
@@ -182,8 +182,8 @@ public partial class GetDictionariesViewModel : ObservableObject
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
 
-        var dictionaries = JsonSerializer.Deserialize<List<SpellCheckDictionaryDisplay>>(jsonContent, options);
-        foreach (var dictionary in dictionaries ?? new List<SpellCheckDictionaryDisplay>())
+        var dictionaries = JsonSerializer.Deserialize<List<GetSpellCheckDictionaryDisplay>>(jsonContent, options);
+        foreach (var dictionary in dictionaries ?? new List<GetSpellCheckDictionaryDisplay>())
         {
             Dictionaries.Add(dictionary);
         }

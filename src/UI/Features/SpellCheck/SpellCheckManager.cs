@@ -360,5 +360,4 @@ public class SpellCheckManager : ISpellCheckManager, IDoSpell
 
         return true;
     }
-
 }

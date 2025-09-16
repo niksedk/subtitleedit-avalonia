@@ -17,6 +17,8 @@ using Nikse.SubtitleEdit.Features.Shared.Ocr.Engines;
 using Nikse.SubtitleEdit.Features.Shared.Ocr.NOcr;
 using Nikse.SubtitleEdit.Features.Shared.Ocr.OcrSubtitle;
 using Nikse.SubtitleEdit.Features.Shared.ShowImage;
+using Nikse.SubtitleEdit.Features.SpellCheck;
+using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
@@ -77,6 +79,13 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private OcrLanguage2? _selectedPaddleOcrLanguage;
     [ObservableProperty] private bool _paddleUseGpu;
     [ObservableProperty] private bool _showContextMenu;
+    [ObservableProperty] private ObservableCollection<SpellCheckDictionaryDisplay> _dictionaries;
+    [ObservableProperty] private SpellCheckDictionaryDisplay? _selectedDictionary;
+    [ObservableProperty] private bool _doFixOcrErrors;
+    [ObservableProperty] private bool _doPromptForUnknownWords;
+    [ObservableProperty] private bool _doTryToGuessUnknownWords;
+    [ObservableProperty] private bool _doAutoBreak;
+    [ObservableProperty] private bool _isDictionaryLoaded;
 
     public Window? Window { get; set; }
     public DataGrid SubtitleGrid { get; set; }
@@ -90,17 +99,20 @@ public partial class OcrViewModel : ObservableObject
     private readonly INOcrCaseFixer _nOcrCaseFixer;
     private readonly IWindowService _windowService;
     private readonly IFileHelper _fileHelper;
+    private readonly ISpellCheckManager _spellCheckManager;
+
     private CancellationTokenSource _cancellationTokenSource;
     private NOcrDb? _nOcrDb;
     private readonly List<SkipOnceChar> _runOnceChars;
     private readonly List<SkipOnceChar> _skipOnceChars;
     private readonly NOcrAddHistoryManager _nOcrAddHistoryManager;
 
-    public OcrViewModel(INOcrCaseFixer nOcrCaseFixer, IWindowService windowService, IFileHelper fileHelper)
+    public OcrViewModel(INOcrCaseFixer nOcrCaseFixer, IWindowService windowService, IFileHelper fileHelper, ISpellCheckManager spellCheckManager)
     {
         _nOcrCaseFixer = nOcrCaseFixer;
         _windowService = windowService;
         _fileHelper = fileHelper;
+        _spellCheckManager = spellCheckManager;
 
         OcrEngines = new ObservableCollection<OcrEngineItem>(OcrEngineItem.GetOcrEngines());
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>();
@@ -123,13 +135,15 @@ public partial class OcrViewModel : ObservableObject
         MistralApiKey = string.Empty;
         GoogleVisionLanguages = new ObservableCollection<OcrLanguage>(GoogleVisionOcr.GetLanguages().OrderBy(p => p.ToString()));
         PaddleOcrLanguages = new ObservableCollection<OcrLanguage2>(PaddleOcr.GetLanguages().OrderBy(p => p.ToString()));
+        OcredSubtitle = new List<SubtitleLineViewModel>();
+        Dictionaries = new ObservableCollection<SpellCheck.SpellCheckDictionaryDisplay>();
         _runOnceChars = new List<SkipOnceChar>();
         _skipOnceChars = new List<SkipOnceChar>();
         _nOcrAddHistoryManager = new NOcrAddHistoryManager();
         _cancellationTokenSource = new CancellationTokenSource();
-        OcredSubtitle = new List<SubtitleLineViewModel>();
         LoadSettings();
         EngineSelectionChanged();
+        LoadDictionaries();
     }
 
     private void LoadSettings()
@@ -177,6 +191,33 @@ public partial class OcrViewModel : ObservableObject
         Se.SaveSettings();
     }
 
+    private void LoadDictionaries()
+    {
+        var spellCheckLanguages = _spellCheckManager.GetDictionaryLanguages(Se.DictionariesFolder);
+        Dictionaries.Clear();
+        Dictionaries.Add(new SpellCheckDictionaryDisplay
+        {
+            Name = "[" + Se.Language.General.None + "]",
+            DictionaryFileName = string.Empty,
+        });
+        Dictionaries.AddRange(spellCheckLanguages);
+        if (Dictionaries.Count > 0)
+        {
+            if (!string.IsNullOrEmpty(Se.Settings.SpellCheck.LastLanguageDictionaryFile))
+            {
+                SelectedDictionary = Dictionaries.FirstOrDefault(l => l.DictionaryFileName == Se.Settings.SpellCheck.LastLanguageDictionaryFile);
+            }
+
+            SelectedDictionary = Dictionaries.FirstOrDefault(l => l.Name.Contains("English", StringComparison.OrdinalIgnoreCase));
+            if (SelectedDictionary == null)
+            {
+                SelectedDictionary = Dictionaries[0];
+            }
+
+            _spellCheckManager.Initialize(SelectedDictionary.DictionaryFileName, SpellCheckDictionaryDisplay.GetTwoLetterLanguageCode(SelectedDictionary));
+        }
+    }
+
     private string? GetNOcrLanguageFileName()
     {
         if (SelectedNOcrDatabase == null)
@@ -192,6 +233,29 @@ public partial class OcrViewModel : ObservableObject
         Dispatcher.UIThread.Post(() => { Window?.Close(); });
     }
 
+    [RelayCommand]
+    private async Task PickDictionary()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<GetDictionariesWindow, GetDictionariesViewModel>(Window!);
+        if (result.OkPressed && result.SelectedDictionary != null)
+        {
+            LoadDictionaries();
+            SelectedDictionary = Dictionaries
+                .FirstOrDefault(d => 
+                    d.Name.Contains(result.SelectedDictionary.EnglishName, StringComparison.OrdinalIgnoreCase) ||
+                    d.Name.Contains(result.SelectedDictionary.NativeName, StringComparison.OrdinalIgnoreCase));
+
+            if (SelectedDictionary == null)
+            {
+                SelectedDictionary = Dictionaries.FirstOrDefault();
+            }
+        }
+    }
 
     [RelayCommand]
     private void PauseOcr()

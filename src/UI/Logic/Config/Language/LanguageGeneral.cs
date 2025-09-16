@@ -366,6 +366,7 @@ public class LanguageGeneral
     public string Footer { get; set; }
     public string FileExtension { get; set; }
     public string PickOllamaModel { get; set; }
+    public string Dictionary { get; set; }
 
     public LanguageGeneral()
     {
@@ -729,5 +730,6 @@ public class LanguageGeneral
         Footer = "Footer";
         FileExtension = "File extension";
         PickOllamaModel = "Pick Ollama model";
+        Dictionary = "Dictionary";
     }
 }

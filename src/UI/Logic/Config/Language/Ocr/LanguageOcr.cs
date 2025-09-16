@@ -4,7 +4,6 @@ namespace Nikse.SubtitleEdit.Logic.Config.Language.Translate;
 
 public class LanguageOcr
 {
-
     public string LinesToDraw { get; set; }
     public string CurrentImage { get; set; }
     public string AutoDrawAgain { get; set; }
@@ -33,6 +32,13 @@ public class LanguageOcr
     public string InspectNOcrAdditions { get; set; }
     public string OcrSelectedLines { get; set; }
     public string ShowImage { get; set; }
+    public string FixOcrErrors { get; set; }
+    public string PromptForUknownWords { get; set; }
+    public string TryToGuessUnknownWords { get; set; }
+    public string AutoBreakIfMoreThanXLines { get; set; }
+    public string UnknownWords { get; set; }
+    public string AllFixes { get; set; }
+    public string GuessesUsed { get; set; }
 
     public LanguageOcr()
     {
@@ -64,5 +70,12 @@ public class LanguageOcr
         InspectNOcrAdditions = "Inspect new nOCR additions";
         OcrSelectedLines = "OCR selected lines";
         ShowImage = "Show image";
+        FixOcrErrors = "Fix OCR errors";
+        PromptForUknownWords = "Prompt for unknown words";
+        TryToGuessUnknownWords = "Try to guess unknown words";
+        AutoBreakIfMoreThanXLines = "Auto break if more than {0} lines";
+        UnknownWords = "Unknown words";
+        AllFixes = "All fixes";
+        GuessesUsed = "Guesses used";
     }
 }

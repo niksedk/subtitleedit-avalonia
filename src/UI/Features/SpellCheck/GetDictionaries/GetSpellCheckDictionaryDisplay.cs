@@ -2,7 +2,7 @@
 
 namespace Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
 
-public partial class SpellCheckDictionaryDisplay : ObservableObject
+public partial class GetSpellCheckDictionaryDisplay : ObservableObject
 {
     [ObservableProperty] private string _englishName;
     [ObservableProperty] private string _nativeName;
@@ -11,7 +11,7 @@ public partial class SpellCheckDictionaryDisplay : ObservableObject
 
     public bool UseShortName { get; set; }
 
-    public SpellCheckDictionaryDisplay()
+    public GetSpellCheckDictionaryDisplay()
     {
         EnglishName = string.Empty;
         NativeName = string.Empty;
