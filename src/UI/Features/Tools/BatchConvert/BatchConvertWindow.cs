@@ -141,9 +141,9 @@ public class BatchConvertWindow : Window
             Margin = new Thickness(0, 0, 0, 10),
             Children =
             {
-                UiUtil.MakeButton(vm.AddFilesCommand, IconNames.Plus, Se.Language.General.Add),
-                UiUtil.MakeButton(vm.RemoveSelectedFilesCommand, IconNames.Trash, Se.Language.General.Remove),
-                UiUtil.MakeButton(vm.ClearAllFilesCommand, IconNames.Close, Se.Language.General.Clear),
+                UiUtil.MakeButton(vm.AddFilesCommand, IconNames.Plus, Se.Language.General.Add).WithMarginLeft(10),
+                UiUtil.MakeButton(vm.RemoveSelectedFilesCommand, IconNames.Trash, Se.Language.General.Remove).WithMarginLeft(5),
+                UiUtil.MakeButton(vm.ClearAllFilesCommand, IconNames.Close, Se.Language.General.Clear).WithMarginLeft(5),
                 UiUtil.MakeSeparatorForHorizontal(),
                 UiUtil.MakeLabel("Target format"),
                 UiUtil.MakeComboBox(vm.TargetFormats, vm, nameof(vm.SelectedTargetFormat)),
