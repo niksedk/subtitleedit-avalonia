@@ -28,7 +28,10 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
         if (mainViewModel.VideoPlayerControl is VideoPlayerControl videoPlayerControl)
         {
             videoPlayerControl.FullScreenIsVisible = false;
-            await videoPlayerControl.Open(originalVideoPlayerControl.VideoPlayerInstance.FileName);
+            if (!string.IsNullOrEmpty(originalVideoPlayerControl.VideoPlayerInstance.FileName))
+            {
+                await videoPlayerControl.Open(originalVideoPlayerControl.VideoPlayerInstance.FileName);
+            }
         }
 
         MainViewModel = mainViewModel;
