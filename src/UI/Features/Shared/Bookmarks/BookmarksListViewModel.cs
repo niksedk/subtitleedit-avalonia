@@ -71,16 +71,19 @@ public partial class BookmarksListViewModel : ObservableObject
             return;
         }
 
-        var result = await MessageBox.Show(
-            Window,
-            Se.Language.General.DeleteCurrentLine,
-            Se.Language.General.BookmarkDeleteSelectedQuestion,
-            MessageBoxButtons.YesNo,
-            MessageBoxIcon.Question);
-
-        if (result != MessageBoxResult.Yes)
+        if (Se.Settings.General.PromptDeleteLines)
         {
-            return;
+            var result = await MessageBox.Show(
+                Window,
+                Se.Language.General.DeleteCurrentLine,
+                Se.Language.General.BookmarkDeleteSelectedQuestion,
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (result != MessageBoxResult.Yes)
+            {
+                return;
+            }
         }
 
         subtitle.Bookmark = null;
@@ -92,6 +95,7 @@ public partial class BookmarksListViewModel : ObservableObject
             {
                 idx = Subtitles.Count - 1;
             }
+
             SelectedSubtitle = Subtitles[idx];
         }
     }
@@ -129,10 +133,7 @@ public partial class BookmarksListViewModel : ObservableObject
 
     internal void OnBookmarksGridDoubleTapped(object? sender, TappedEventArgs e)
     {
-        Dispatcher.UIThread.Invoke(() =>
-        {
-            GoTo();
-        });
+        Dispatcher.UIThread.Invoke(() => { GoTo(); });
     }
 
     internal void GridKeyDown(KeyEventArgs e)
@@ -142,10 +143,7 @@ public partial class BookmarksListViewModel : ObservableObject
             e.Handled = true;
             if (SelectedSubtitle != null)
             {
-                Dispatcher.UIThread.Invoke(async void() =>
-                {
-                    await DeleteSelectedLine(SelectedSubtitle);
-                });
+                Dispatcher.UIThread.Invoke(async void () => { await DeleteSelectedLine(SelectedSubtitle); });
             }
         }
     }

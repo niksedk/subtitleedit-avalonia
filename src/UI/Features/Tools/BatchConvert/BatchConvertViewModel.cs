@@ -19,6 +19,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Features.Shared;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -166,6 +167,7 @@ public partial class BatchConvertViewModel : ObservableObject
         {
             targetFormat = TargetFormats.First();
         }
+
         SelectedTargetFormat = targetFormat;
 
         UpdateOutputProperties();
@@ -286,10 +288,8 @@ public partial class BatchConvertViewModel : ObservableObject
         }
 
         var stats = CalculateGeneralStatistics();
-        var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!, vm =>
-        {
-            vm.Initialize(Se.Language.File.Statistics.Title, stats, 1000, 600, false, true);
-        });
+        var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!,
+            vm => { vm.Initialize(Se.Language.File.Statistics.Title, stats, 1000, 600, false, true); });
     }
 
     [RelayCommand]
@@ -322,12 +322,57 @@ public partial class BatchConvertViewModel : ObservableObject
 
     private void MakeBatchItemsInfo()
     {
-        BatchItemsInfo = $"{BatchItems.Count:#,###,##0} items";
+        if (BatchItems.Count == 0)
+        {
+            BatchItemsInfo = string.Empty;
+        }
+        else if (BatchItems.Count == 1)
+        {
+            BatchItemsInfo = Se.Language.General.OneFile;
+        }
+        else
+        {
+            BatchItemsInfo = string.Format(Se.Language.General.XFiles, BatchItems.Count);
+        }
     }
 
     [RelayCommand]
-    private void RemoveSelectedFiles()
+    private async Task RemoveSelectedFiles()
     {
+        var seleced = SelectedBatchItem;
+        if (seleced == null || Window == null)
+        {
+            return;
+        }
+
+        if (Se.Settings.General.PromptDeleteLines)
+        {
+            var result = await MessageBox.Show(
+                Window,
+                Se.Language.General.Remove,
+                Se.Language.General.RemoveSelectedFile,
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (result != MessageBoxResult.Yes)
+            {
+                return;
+            }
+        }
+
+        var idx = BatchItems.IndexOf(seleced);
+        BatchItems.Remove(seleced);
+        if (BatchItems.Count > 0)
+        {
+            if (idx >= BatchItems.Count)
+            {
+                idx = BatchItems.Count - 1;
+            }
+
+            SelectedBatchItem = BatchItems[idx];
+        }
+
+        MakeBatchItemsInfo();
     }
 
     [RelayCommand]
@@ -566,6 +611,7 @@ public partial class BatchConvertViewModel : ObservableObject
                 {
                     aboveOptimalCpsCount++;
                 }
+
                 if (cps > Configuration.Settings.General.SubtitleMaximumCharactersPerSeconds)
                 {
                     aboveMaximumCpsCount++;
@@ -580,6 +626,7 @@ public partial class BatchConvertViewModel : ObservableObject
                 {
                     belowMinimumDurationCount++;
                 }
+
                 if (p.DurationTotalMilliseconds > Configuration.Settings.General.SubtitleMaximumDisplayMilliseconds)
                 {
                     aboveMaximumDurationCount++;
@@ -595,8 +642,7 @@ public partial class BatchConvertViewModel : ObservableObject
         var sb = new StringBuilder();
         var _l = Se.Language.File.Statistics;
         var _format =
-
-        sb.AppendLine(string.Format(_l.NumberOfFilesX, totalSubtitleFiles));
+            sb.AppendLine(string.Format(_l.NumberOfFilesX, totalSubtitleFiles));
         sb.AppendLine(string.Format(_l.NumberOfLinesX, totalNumberOfLines));
         //sb.AppendLine(string.Format(_l.LengthInFormatXinCharactersY, _format.FriendlyName, sourceLength));
         sb.AppendLine(string.Format(_l.NumberOfCharactersInTextOnly, allText.ToString().CountCharacters(false)));
@@ -619,7 +665,8 @@ public partial class BatchConvertViewModel : ObservableObject
         sb.AppendLine(string.Format(_l.SingleLineLengthMaximum, maximumSingleLineLength) + " (" + GetIndicesWithSingleLineLength(allParagraphs, maximumSingleLineLength) + ")");
         sb.AppendLine(string.Format(_l.SingleLineLengthAverage, (double)totalSingleLineLength / totalSingleLines));
         sb.AppendLine();
-        sb.AppendLine(string.Format(_l.SingleLineLengthExceedingMaximum, Configuration.Settings.General.SubtitleLineMaximumLength, aboveMaximumLineLengthCount, ((double)aboveMaximumLineLengthCount / totalNumberOfLines) * 100.0));
+        sb.AppendLine(string.Format(_l.SingleLineLengthExceedingMaximum, Configuration.Settings.General.SubtitleLineMaximumLength, aboveMaximumLineLengthCount,
+            ((double)aboveMaximumLineLengthCount / totalNumberOfLines) * 100.0));
         sb.AppendLine();
 
         if (Configuration.Settings.Tools.ListViewSyntaxColorWideLines)
@@ -628,7 +675,8 @@ public partial class BatchConvertViewModel : ObservableObject
             sb.AppendLine(string.Format(_l.SingleLineWidthMaximum, maximumSingleLineWidth) + " (" + GetIndicesWithSingleLineWidth(allParagraphs, maximumSingleLineWidth) + ")");
             sb.AppendLine(string.Format(_l.SingleLineWidthAverage, (double)totalSingleLineWidth / totalSingleLines));
             sb.AppendLine();
-            sb.AppendLine(string.Format(_l.SingleLineWidthExceedingMaximum, Configuration.Settings.General.SubtitleLineMaximumPixelWidth, aboveMaximumLineWidthCount, ((double)aboveMaximumLineWidthCount / totalNumberOfLines) * 100.0));
+            sb.AppendLine(string.Format(_l.SingleLineWidthExceedingMaximum, Configuration.Settings.General.SubtitleLineMaximumPixelWidth, aboveMaximumLineWidthCount,
+                ((double)aboveMaximumLineWidthCount / totalNumberOfLines) * 100.0));
             sb.AppendLine();
         }
 
@@ -636,21 +684,26 @@ public partial class BatchConvertViewModel : ObservableObject
         sb.AppendLine(string.Format(_l.DurationMaximum, maximumDuration / TimeCode.BaseUnit) + " (" + GetIndicesWithDuration(allParagraphs, maximumDuration) + ")");
         sb.AppendLine(string.Format(_l.DurationAverage, totalDuration / totalNumberOfLines / TimeCode.BaseUnit));
         sb.AppendLine();
-        sb.AppendLine(string.Format(_l.DurationExceedingMinimum, Configuration.Settings.General.SubtitleMinimumDisplayMilliseconds / TimeCode.BaseUnit, belowMinimumDurationCount, ((double)belowMinimumDurationCount / totalNumberOfLines) * 100.0));
-        sb.AppendLine(string.Format(_l.DurationExceedingMaximum, Configuration.Settings.General.SubtitleMaximumDisplayMilliseconds / TimeCode.BaseUnit, aboveMaximumDurationCount, ((double)aboveMaximumDurationCount / totalNumberOfLines) * 100.0));
+        sb.AppendLine(string.Format(_l.DurationExceedingMinimum, Configuration.Settings.General.SubtitleMinimumDisplayMilliseconds / TimeCode.BaseUnit, belowMinimumDurationCount,
+            ((double)belowMinimumDurationCount / totalNumberOfLines) * 100.0));
+        sb.AppendLine(string.Format(_l.DurationExceedingMaximum, Configuration.Settings.General.SubtitleMaximumDisplayMilliseconds / TimeCode.BaseUnit, aboveMaximumDurationCount,
+            ((double)aboveMaximumDurationCount / totalNumberOfLines) * 100.0));
         sb.AppendLine();
         sb.AppendLine(string.Format(_l.CharactersPerSecondMinimum, minimumCharsSec) + " (" + GetIndicesWithCps(allParagraphs, minimumCharsSec) + ")");
         sb.AppendLine(string.Format(_l.CharactersPerSecondMaximum, maximumCharsSec) + " (" + GetIndicesWithCps(allParagraphs, maximumCharsSec) + ")");
         sb.AppendLine(string.Format(_l.CharactersPerSecondAverage, totalCharsSec / totalNumberOfLines));
         sb.AppendLine();
-        sb.AppendLine(string.Format(_l.CharactersPerSecondExceedingOptimal, Configuration.Settings.General.SubtitleOptimalCharactersPerSeconds, aboveOptimalCpsCount, ((double)aboveOptimalCpsCount / totalNumberOfLines) * 100.0));
-        sb.AppendLine(string.Format(_l.CharactersPerSecondExceedingMaximum, Configuration.Settings.General.SubtitleMaximumCharactersPerSeconds, aboveMaximumCpsCount, ((double)aboveMaximumCpsCount / totalNumberOfLines) * 100.0));
+        sb.AppendLine(string.Format(_l.CharactersPerSecondExceedingOptimal, Configuration.Settings.General.SubtitleOptimalCharactersPerSeconds, aboveOptimalCpsCount,
+            ((double)aboveOptimalCpsCount / totalNumberOfLines) * 100.0));
+        sb.AppendLine(string.Format(_l.CharactersPerSecondExceedingMaximum, Configuration.Settings.General.SubtitleMaximumCharactersPerSeconds, aboveMaximumCpsCount,
+            ((double)aboveMaximumCpsCount / totalNumberOfLines) * 100.0));
         sb.AppendLine();
         sb.AppendLine(string.Format(_l.WordsPerMinuteMinimum, minimumWpm) + " (" + GetIndicesWithWpm(allParagraphs, minimumWpm) + ")");
         sb.AppendLine(string.Format(_l.WordsPerMinuteMaximum, maximumWpm) + " (" + GetIndicesWithWpm(allParagraphs, maximumWpm) + ")");
         sb.AppendLine(string.Format(_l.WordsPerMinuteAverage, totalWpm / totalNumberOfLines));
         sb.AppendLine();
-        sb.AppendLine(string.Format(_l.WordsPerMinuteExceedingMaximum, Configuration.Settings.General.SubtitleMaximumWordsPerMinute, aboveMaximumWpmCount, ((double)aboveMaximumWpmCount / totalNumberOfLines) * 100.0));
+        sb.AppendLine(string.Format(_l.WordsPerMinuteExceedingMaximum, Configuration.Settings.General.SubtitleMaximumWordsPerMinute, aboveMaximumWpmCount,
+            ((double)aboveMaximumWpmCount / totalNumberOfLines) * 100.0));
         sb.AppendLine();
 
         if (totalNumberOfLines > 1)
@@ -659,7 +712,8 @@ public partial class BatchConvertViewModel : ObservableObject
             sb.AppendLine(string.Format(_l.GapMaximum, gapMaximum) + " (" + GetIndicesWithGap(allParagraphs, gapMaximum) + ")");
             sb.AppendLine(string.Format(_l.GapAverage, gapTotal / totalNumberOfLines - 1));
             sb.AppendLine();
-            sb.AppendLine(string.Format(_l.GapExceedingMinimum, Configuration.Settings.General.MinimumMillisecondsBetweenLines, belowMinimumGapCount, ((double)belowMinimumGapCount / totalNumberOfLines) * 100.0));
+            sb.AppendLine(string.Format(_l.GapExceedingMinimum, Configuration.Settings.General.MinimumMillisecondsBetweenLines, belowMinimumGapCount,
+                ((double)belowMinimumGapCount / totalNumberOfLines) * 100.0));
             sb.AppendLine();
         }
 
@@ -696,9 +750,11 @@ public partial class BatchConvertViewModel : ObservableObject
                     indices.Add("...");
                     break;
                 }
+
                 indices.Add("#" + (i + 1).ToString(CultureInfo.InvariantCulture));
             }
         }
+
         return string.Join(", ", indices);
     }
 
@@ -717,11 +773,13 @@ public partial class BatchConvertViewModel : ObservableObject
                         indices.Add("...");
                         return string.Join(", ", indices);
                     }
+
                     indices.Add("#" + (i + 1).ToString(CultureInfo.InvariantCulture));
                     break;
                 }
             }
         }
+
         return string.Join(", ", indices);
     }
 
@@ -740,11 +798,13 @@ public partial class BatchConvertViewModel : ObservableObject
                         indices.Add("...");
                         return string.Join(", ", indices);
                     }
+
                     indices.Add("#" + (i + 1).ToString(CultureInfo.InvariantCulture));
                     break;
                 }
             }
         }
+
         return string.Join(", ", indices);
     }
 
@@ -761,9 +821,11 @@ public partial class BatchConvertViewModel : ObservableObject
                     indices.Add("...");
                     break;
                 }
+
                 indices.Add("#" + (i + 1).ToString(CultureInfo.InvariantCulture));
             }
         }
+
         return string.Join(", ", indices);
     }
 
@@ -780,6 +842,7 @@ public partial class BatchConvertViewModel : ObservableObject
                     indices.Add("...");
                     break;
                 }
+
                 indices.Add("#" + (i + 1).ToString(CultureInfo.InvariantCulture));
             }
         }
@@ -800,6 +863,7 @@ public partial class BatchConvertViewModel : ObservableObject
                     indices.Add("...");
                     break;
                 }
+
                 indices.Add("#" + (i + 1).ToString(CultureInfo.InvariantCulture));
             }
         }
@@ -822,6 +886,7 @@ public partial class BatchConvertViewModel : ObservableObject
                     indices.Add("...");
                     break;
                 }
+
                 indices.Add("#" + (i + 1).ToString(CultureInfo.InvariantCulture));
             }
         }

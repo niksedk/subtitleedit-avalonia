@@ -1,5 +1,7 @@
 ﻿using Avalonia.Controls;
 using System;
+using System.Collections.ObjectModel;
+using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
 namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
@@ -369,6 +371,9 @@ public class LanguageGeneral
     public string Dictionary { get; set; }
     public string GoogleIt { get; set; }
     public string Convert { get; set; }
+    public string OneFile { get; set; }
+    public string XFiles { get; set; }
+    public string RemoveSelectedFile { get; set; }
 
     public LanguageGeneral()
     {
@@ -735,5 +740,8 @@ public class LanguageGeneral
         Dictionary = "Dictionary";
         GoogleIt = "Google it ";
         Convert = "Convert";
+        OneFile = "One file";
+        XFiles = "{0:#,###,##0} files";
+        RemoveSelectedFile = "Remove selected file?";
     }
 }

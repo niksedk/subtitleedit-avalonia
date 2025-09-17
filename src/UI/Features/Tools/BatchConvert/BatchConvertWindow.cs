@@ -155,7 +155,15 @@ public class BatchConvertWindow : Window
             }
         };
 
+        var labelBatchItemsInfo = UiUtil.MakeLabel()
+            .WithBindText(vm, nameof(vm.BatchItemsInfo))
+            .WithMarginTop(5)
+            .WithMarginRight(5)
+            .WithAlignmentTop()
+            .WithAlignmentRight();
+
         grid.Add(dataGrid, 0, 0);
+        grid.Add(labelBatchItemsInfo, 0);
         grid.Add(panelFileControls, 1, 0);
 
         var border = UiUtil.MakeBorderForControlNoPadding(grid);
