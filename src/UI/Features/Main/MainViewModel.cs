@@ -2982,6 +2982,19 @@ public partial class MainViewModel :
                 Se.Settings.Appearance.RightToLeft = true;
                 Window.FlowDirection = FlowDirection.RightToLeft;
             }
+
+            // Force UI to update layout
+            var content = Window.Content;
+            Window.Content = null;
+            Window.Content = content;
+            Task.Delay(50);
+            Window.InvalidateMeasure();
+            Window.InvalidateArrange();
+            Window.InvalidateVisual();
+            Task.Delay(50);
+            Window.Width += 0.1;
+            Task.Delay(50);
+            Window.Width -= 0.1;
         });
 
         _shortcutManager.ClearKeys();
