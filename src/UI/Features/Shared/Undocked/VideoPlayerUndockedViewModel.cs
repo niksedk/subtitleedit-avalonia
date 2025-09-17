@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Features.Main.Layout;
@@ -22,7 +23,7 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
     public Main.MainViewModel? MainViewModel { get; set; }
     public bool AllowClose { get; set; }
 
-    internal async Task Initialize(VideoPlayerControl originalVideoPlayerControl, Main.MainViewModel mainViewModel)
+    internal void Initialize(VideoPlayerControl originalVideoPlayerControl, Main.MainViewModel mainViewModel)
     {
         VideoPlayer = InitVideoPlayer.MakeLayoutVideoPlayer(mainViewModel);
         if (mainViewModel.VideoPlayerControl is VideoPlayerControl videoPlayerControl)
@@ -30,7 +31,11 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
             videoPlayerControl.FullScreenIsVisible = false;
             if (!string.IsNullOrEmpty(originalVideoPlayerControl.VideoPlayerInstance.FileName))
             {
-                await videoPlayerControl.Open(originalVideoPlayerControl.VideoPlayerInstance.FileName);
+                Dispatcher.UIThread.Post(async() =>
+                {
+                    Task.Delay(100).Wait();
+                    await videoPlayerControl.Open(originalVideoPlayerControl.VideoPlayerInstance.FileName);
+                });
             }
         }
 

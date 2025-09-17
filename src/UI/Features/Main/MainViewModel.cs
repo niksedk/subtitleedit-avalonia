@@ -1414,10 +1414,10 @@ public partial class MainViewModel :
 
         AreVideoControlsUndocked = true;
 
-        _windowService.ShowWindow<VideoPlayerUndockedWindow, VideoPlayerUndockedViewModel>(Window, async (window, vm) =>
+        _windowService.ShowWindow<VideoPlayerUndockedWindow, VideoPlayerUndockedViewModel>(Window, (window, vm) =>
         {
             _videoPlayerUndockedViewModel = vm;
-            await vm.Initialize(VideoPlayerControl!, this);
+            vm.Initialize(VideoPlayerControl!, this);
         });
 
         _windowService.ShowWindow<AudioVisualizerUndockedWindow, AudioVisualizerUndockedViewModel>(Window, (window, vm) =>
