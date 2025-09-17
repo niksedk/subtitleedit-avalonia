@@ -466,6 +466,8 @@ public partial class ReEncodeVideoViewModel : ObservableObject
             {
                 _ffmpegProcess.Kill(true);
             }
+
+            IsGenerating = false;
             return;
         }
 

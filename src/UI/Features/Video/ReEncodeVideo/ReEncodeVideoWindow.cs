@@ -30,27 +30,30 @@ public class ReEncodeVideoWindow : Window
 
         var videoSettingsView = MakeVideoSettingsView(vm);
         var progressView = MakeProgressView(vm);
+        var buttonGenerate = new SplitButton
+        {
+            Content = Se.Language.General.Generate,
+            Command = vm.GenerateCommand,
+            Flyout =  new MenuFlyout
+            {
+                Items =
+                {
+                    new MenuItem
+                    {
+                        Header = Se.Language.Video.PromptForFfmpegParamsAndGenerate,
+                        Command = vm.PromptFfmpegParametersAndGeenrateCommand,
+                    },
+                }
+            }
+        };
+        buttonGenerate.Bind(SplitButton.IsEnabledProperty, new Binding(nameof(vm.IsGenerating)) { Converter = new InverseBooleanConverter() });
 
-        var buttonGenerate = UiUtil.MakeButton(Se.Language.General.Generate, vm.GenerateCommand)
-            .WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
         var buttonDone = UiUtil.MakeButtonDone(vm.OkCommand).WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
         var buttonPanel = UiUtil.MakeButtonBar(
             buttonGenerate,
             buttonDone,
             UiUtil.MakeButtonCancel(vm.CancelCommand).WithBindIsVisible(nameof(vm.IsGenerating))
         );
-
-        buttonGenerate.ContextFlyout = new MenuFlyout
-        {
-            Items =
-            {
-                new MenuItem
-                {
-                    Header = Se.Language.Video.PromptForFfmpegParamsAndGenerate,
-                    Command = vm.PromptFfmpegParametersAndGeenrateCommand,
-                },
-            }
-        };
 
         var grid = new Grid
         {
