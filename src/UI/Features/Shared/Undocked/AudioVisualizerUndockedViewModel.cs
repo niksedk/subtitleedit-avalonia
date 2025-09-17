@@ -31,7 +31,7 @@ public partial class AudioVisualizerUndockedViewModel : ObservableObject
 
     internal void OnClosing(object? sender, WindowClosingEventArgs e)
     {
-        if (!AllowClose)
+        if (!AllowClose && e.CloseReason != WindowCloseReason.OwnerWindowClosing)
         {
             e.Cancel = true;
 

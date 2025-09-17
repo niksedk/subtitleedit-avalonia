@@ -19,6 +19,7 @@ public partial class ApplyDurationLimitsViewModel : ObservableObject
 
     public ApplyDurationLimitsViewModel()
     {
+        AdjustTypes = new ObservableCollection<AdjustDurationDisplay>();
         LoadSettings();
     }
 

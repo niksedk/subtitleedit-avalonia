@@ -16,7 +16,7 @@ namespace Nikse.SubtitleEdit.Logic
         /// <typeparam name="T">The type of window to show.</typeparam>
         /// <param name="configure">Optional action to configure the window before showing.</param>
         /// <returns>The created window instance.</returns>
-        T ShowWindow<T>(Action<T>? configure = null) where T : Window;
+        T ShowWindow<T>(Window owner, Action<T>? configure = null) where T : Window;
 
         /// <summary>
         /// Shows a window of type T with a specified ViewModel type.
@@ -25,7 +25,7 @@ namespace Nikse.SubtitleEdit.Logic
         /// <typeparam name="TViewModel">The type of ViewModel to associate with the window.</typeparam>
         /// <param name="configure">Optional action to configure the window and ViewModel before showing.</param>
         /// <returns>The created ViewModel instance.</returns>
-        TViewModel ShowWindow<T, TViewModel>(Action<T, TViewModel>? configure = null)
+        TViewModel ShowWindow<T, TViewModel>(Window owner, Action<T, TViewModel>? configure = null)
             where T : Window
             where TViewModel : class;
 
@@ -66,7 +66,7 @@ namespace Nikse.SubtitleEdit.Logic
         }
 
         /// <inheritdoc />
-        public T ShowWindow<T>(Action<T>? configure = null) where T : Window
+        public T ShowWindow<T>(Window owner, Action<T>? configure = null) where T : Window
         {
             var window = CreateWindow<T>();
 
@@ -78,7 +78,7 @@ namespace Nikse.SubtitleEdit.Logic
         }
 
         /// <inheritdoc />
-        public TViewModel ShowWindow<T, TViewModel>(Action<T, TViewModel>? configureViewModel = null)
+        public TViewModel ShowWindow<T, TViewModel>(Window owner, Action<T, TViewModel>? configureViewModel = null)
             where T : Window
             where TViewModel : class
         {
@@ -95,7 +95,7 @@ namespace Nikse.SubtitleEdit.Logic
             configureViewModel?.Invoke(window, viewModel);
 
             window.WindowStartupLocation = WindowStartupLocation.CenterOwner; //TODO: does this work on mac?
-            window.Show();
+            window.Show(owner);
             window.Focus();
 
             return viewModel;

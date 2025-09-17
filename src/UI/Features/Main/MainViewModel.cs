@@ -875,9 +875,9 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowExportCustomTextFormat()
     {
-        var result = await _windowService.ShowDialogAsync<ExportCustomTextFormatWindow, ExportCustomTextFormatViewModel>(Window!, vm => 
-        { 
-            vm.Initialize(Subtitles.ToList(), _subtitleFileName, _videoFileName); 
+        var result = await _windowService.ShowDialogAsync<ExportCustomTextFormatWindow, ExportCustomTextFormatViewModel>(Window!, vm =>
+        {
+            vm.Initialize(Subtitles.ToList(), _subtitleFileName, _videoFileName);
         });
 
         _shortcutManager.ClearKeys();
@@ -1407,15 +1407,20 @@ public partial class MainViewModel :
     [RelayCommand]
     private void VideoUndockControls()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
         AreVideoControlsUndocked = true;
 
-        _windowService.ShowWindow<VideoPlayerUndockedWindow, VideoPlayerUndockedViewModel>(async (window, vm) =>
+        _windowService.ShowWindow<VideoPlayerUndockedWindow, VideoPlayerUndockedViewModel>(Window, async (window, vm) =>
         {
             _videoPlayerUndockedViewModel = vm;
             await vm.Initialize(VideoPlayerControl!, this);
         });
 
-        _windowService.ShowWindow<AudioVisualizerUndockedWindow, AudioVisualizerUndockedViewModel>((window, vm) =>
+        _windowService.ShowWindow<AudioVisualizerUndockedWindow, AudioVisualizerUndockedViewModel>(Window, (window, vm) =>
         {
             _audioVisualizerUndockedViewModel = vm;
             vm.Initialize(AudioVisualizer!, this);
@@ -2565,7 +2570,7 @@ public partial class MainViewModel :
     private void ShowFind()
     {
         var selectedSubtitle = SelectedSubtitle;
-        if (Subtitles.Count == 0 || selectedSubtitle == null)
+        if (Subtitles.Count == 0 || selectedSubtitle == null || Window == null)
         {
             return;
         }
@@ -2583,7 +2588,7 @@ public partial class MainViewModel :
         }
 
         var subs = Subtitles.Select(p => p.Text).ToList();
-        var result = _windowService.ShowWindow<FindWindow, FindViewModel>((window, vm) =>
+        var result = _windowService.ShowWindow<FindWindow, FindViewModel>(Window!, (window, vm) =>
         {
             window.Topmost = true;
             _findViewModel = vm;
@@ -2755,7 +2760,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private void ShowReplace()
     {
-        if (Subtitles.Count == 0)
+        if (Subtitles.Count == 0 || Window == null)
         {
             return;
         }
@@ -2773,7 +2778,7 @@ public partial class MainViewModel :
         }
 
         var subs = Subtitles.Select(p => p.Text).ToList();
-        var result = _windowService.ShowWindow<ReplaceWindow, ReplaceViewModel>((window, vm) =>
+        var result = _windowService.ShowWindow<ReplaceWindow, ReplaceViewModel>(Window, (window, vm) =>
         {
             window.Topmost = true;
             _replaceViewModel = vm;
@@ -4313,9 +4318,9 @@ public partial class MainViewModel :
         var subtitles = tsParser.GetDvbSubtitles(packetId);
         Dispatcher.UIThread.Post(async () =>
         {
-            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm => 
-            { 
-                vm.Initialize(tsParser, subtitles, fileName); 
+            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm =>
+            {
+                vm.Initialize(tsParser, subtitles, fileName);
             });
 
             if (result.OkPressed)
