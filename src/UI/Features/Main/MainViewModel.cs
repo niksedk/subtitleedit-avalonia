@@ -5890,11 +5890,18 @@ public partial class MainViewModel :
             _shortcutManager.ClearKeys();
         }
 
+        var idx = Subtitles.IndexOf(selectedItems.First());
         _undoRedoManager.StopChangeDetection();
         foreach (var item in selectedItems)
         {
             Subtitles.Remove(item);
         }
+
+        if (idx >= Subtitles.Count)
+        {
+            idx = Subtitles.Count - 1;
+        }
+        SelectAndScrollToRow(idx);
 
         Renumber();
         _undoRedoManager.StartChangeDetection();
