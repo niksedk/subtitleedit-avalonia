@@ -36,6 +36,7 @@ public class SeGeneral
     public bool PromptDeleteLines { get; set; }
     public bool LockTimeCodes { get; set; }
     public bool RememberPositionAndSize { get; set; }
+    public bool UndockVideoControls { get; set; }
     public List<SeWindowPosition> WindowPositions { get; set; } = new List<SeWindowPosition>();
     public bool AutoBackupOn { get; set; }
     public int AutoBackupIntervalMinutes { get; set; }

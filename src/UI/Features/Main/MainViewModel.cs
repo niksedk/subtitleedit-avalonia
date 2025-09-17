@@ -5317,6 +5317,7 @@ public partial class MainViewModel :
             Se.Settings.Waveform.CenterVideoPosition = WaveformCenter;
 
             UiUtil.SaveWindowPosition(Window);
+            Se.Settings.General.UndockVideoControls = Se.Settings.General.RememberPositionAndSize && AreVideoControlsUndocked;
 
             if (_findViewModel != null)
             {
@@ -5479,6 +5480,10 @@ public partial class MainViewModel :
         }
 
         UiUtil.RestoreWindowPosition(Window);
+        if (Se.Settings.General.UndockVideoControls)
+        {
+            VideoUndockControls();
+        }
 
         Task.Run(async () =>
             {
