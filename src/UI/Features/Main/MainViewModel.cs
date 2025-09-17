@@ -1452,7 +1452,10 @@ public partial class MainViewModel :
         VideoPlayerControl = null;
         InitLayout.MakeLayout(MainView!, this, Se.Settings.General.LayoutNumber);
 
-        Dispatcher.UIThread.Post(async void () => { await VideoOpenFile(videoFileName); });
+        if (!string.IsNullOrEmpty(videoFileName))
+        {
+            Dispatcher.UIThread.Post(async void () => { await VideoOpenFile(videoFileName); });
+        }
     }
 
     [RelayCommand]
