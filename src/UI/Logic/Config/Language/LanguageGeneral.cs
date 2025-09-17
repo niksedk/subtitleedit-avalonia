@@ -343,6 +343,8 @@ public class LanguageGeneral
     public string BookmarkDotDotDot { get; set; }
     public string BookmarkAdd { get; set; }
     public string BookmarkEdit { get; set; }
+    public string BookmarkAddForSelectedLinesX { get; set; }
+    public string BookmarkEditForSelectedLinesX { get; set; }
     public string BookmarksList { get; set; }
     public string OpenDictionaryFolder { get; set; }
     public string GoTo { get; set; }
@@ -712,6 +714,8 @@ public class LanguageGeneral
         BookmarkDotDotDot = "Bookmark...";
         BookmarkAdd = "Add bookmark";
         BookmarkEdit = "Edit bookmark";
+        BookmarkAddForSelectedLinesX = "Add bookmark for {0} selected lines";
+        BookmarkEditForSelectedLinesX = "Edit bookmark for {0} selected lines";
         BookmarksList = "List bookmarks";
         OpenDictionaryFolder = "Open dictionary folder";
         GoTo = "Go to";

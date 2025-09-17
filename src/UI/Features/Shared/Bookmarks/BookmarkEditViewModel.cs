@@ -2,7 +2,12 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic.Config;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Nikse.SubtitleEdit.Features.Shared.Bookmarks;
 
@@ -18,10 +23,13 @@ public partial class BookmarkEditViewModel : ObservableObject
     public bool OkPressed { get; private set; }
     public bool ListPressed { get; private set; }
 
+    private List<SubtitleLineViewModel> _selectedItems;
+
     public BookmarkEditViewModel()
     {
         Title = string.Empty;
         BookmarkText = string.Empty;
+        _selectedItems = new List<SubtitleLineViewModel>();
     }
 
     [RelayCommand]
@@ -61,12 +69,33 @@ public partial class BookmarkEditViewModel : ObservableObject
         }
     }
 
-    internal void Initialize(string? bookmark, System.Collections.Generic.List<Main.SubtitleLineViewModel> allBookmarks)
+    internal void Initialize(List<SubtitleLineViewModel> selectedItems, List<SubtitleLineViewModel> allBookmarks)
     {
-        Title = bookmark == null ? Se.Language.General.BookmarkAdd : Se.Language.General.BookmarkEdit;
-        BookmarkText = bookmark ?? string.Empty;
-        ShowRemoveButton = bookmark != null;
-        ShowListButton = allBookmarks.Count > 1 && bookmark != null;
+        Title = selectedItems.All(p => p.Bookmark == null) ? GetAddLabel(selectedItems) : GetEditLabel(selectedItems);
+        BookmarkText = selectedItems.First().Bookmark ?? string.Empty;
+        ShowRemoveButton = !selectedItems.All(p => p.Bookmark == null);
+        ShowListButton = allBookmarks.Count > 1;
+        _selectedItems = selectedItems;
+    }
+
+    private string GetEditLabel(List<SubtitleLineViewModel> selectedItems)
+    {
+        if (selectedItems.Count > 1)
+        {
+            return string.Format(Se.Language.General.BookmarkEditForSelectedLinesX, selectedItems.Count);
+        }
+
+        return Se.Language.General.BookmarkEdit;
+    }
+
+    private string GetAddLabel(List<SubtitleLineViewModel> selectedItems)
+    {
+        if (selectedItems.Count > 1)
+        {
+            return string.Format(Se.Language.General.BookmarkAddForSelectedLinesX, selectedItems.Count);
+        }
+
+        return Se.Language.General.BookmarkAdd;
     }
 
     internal void OnTextBoxKeyDown(KeyEventArgs args)

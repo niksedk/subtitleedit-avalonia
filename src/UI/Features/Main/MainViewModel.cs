@@ -2067,22 +2067,24 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task AddOrEditBookmark()
     {
-        var selected = SelectedSubtitle;
-        if (selected == null)
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (selectedItems.Count == 0)
         {
             return;
         }
 
         var result = await _windowService.ShowDialogAsync<BookmarkEditWindow, BookmarkEditViewModel>(Window!, vm =>
         {
-            var bookmark = selected.Bookmark;
             var allBookmarks = Subtitles.Where(p => p.Bookmark != null).ToList();
-            vm.Initialize(bookmark, allBookmarks);
+            vm.Initialize(selectedItems, allBookmarks);
         });
 
         if (result.OkPressed)
         {
-            selected.Bookmark = result.BookmarkText;
+            foreach (var item in selectedItems)
+            {
+                item.Bookmark = result.BookmarkText;
+            }
             new BookmarkPersistence(GetUpdateSubtitle(), _subtitleFileName).Save();
         }
         else if (result.ListPressed)
@@ -2091,6 +2093,7 @@ public partial class MainViewModel :
         }
 
         _shortcutManager.ClearKeys();
+        _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
