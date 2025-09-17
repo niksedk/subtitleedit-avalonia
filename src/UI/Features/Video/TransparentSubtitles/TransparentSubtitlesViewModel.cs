@@ -78,6 +78,7 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
     [ObservableProperty] private Bitmap? _imagePreview;
     [ObservableProperty] private bool _useSourceResolution;
     [ObservableProperty] private string _displayEffect;
+    [ObservableProperty] private bool _promptForFfmpegParameters;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -595,6 +596,15 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
         // Clamp the font size between minSize and maxSize
         return Math.Clamp(fontSize, minSize, maxSize);
     }
+
+    [RelayCommand]
+    private async Task PromptFfmpegParametersAndGeenrate()
+    {
+        PromptForFfmpegParameters = true;
+        await Generate();
+        PromptForFfmpegParameters = false;
+    }
+
 
     [RelayCommand]
     private async Task Add()

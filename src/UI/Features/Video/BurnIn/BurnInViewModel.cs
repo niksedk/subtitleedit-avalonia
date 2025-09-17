@@ -10,6 +10,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
@@ -93,6 +94,7 @@ public partial class BurnInViewModel : ObservableObject
     [ObservableProperty] private bool _showAssaOnlyBox;
     [ObservableProperty] private string _targetVideoBitRateInfo;
     [ObservableProperty] private string _displayEffect;
+    [ObservableProperty] private bool _promptForFfmpegParameters;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -216,6 +218,7 @@ public partial class BurnInViewModel : ObservableObject
         _timerGenerate.Interval = 100;
 
         _timerAnalyze = new();
+        // Change the event handler assignment for _timerAnalyze.Elapsed to use a synchronous wrapper
         _timerAnalyze.Elapsed += TimerAnalyzeElapsed;
         _timerAnalyze.Interval = 100;
 
@@ -254,7 +257,7 @@ public partial class BurnInViewModel : ObservableObject
         }
     }
 
-    private void TimerAnalyzeElapsed(object? sender, ElapsedEventArgs e)
+    private async Task TimerAnalyzeElapsedAsync(object? sender, ElapsedEventArgs e)
     {
         if (_ffmpegProcess == null)
         {
@@ -298,7 +301,14 @@ public partial class BurnInViewModel : ObservableObject
         _timerAnalyze.Stop();
 
         var jobItem = JobItems[_jobItemIndex];
-        _ffmpegProcess = GetFfmpegProcess(jobItem, 2);
+        var process = await GetFfmpegProcess(jobItem, 2);
+        if (process == null)
+        {
+            IsGenerating = false;
+            return;
+        }
+
+        _ffmpegProcess = process;
 #pragma warning disable CA1416 // Validate platform compatibility
         _ffmpegProcess.Start();
 #pragma warning restore CA1416 // Validate platform compatibility
@@ -390,7 +400,7 @@ public partial class BurnInViewModel : ObservableObject
 
             if (_jobItemIndex < JobItems.Count - 1)
             {
-                InitAndStartJobItem(_jobItemIndex + 1);
+                await InitAndStartJobItem(_jobItemIndex + 1).ConfigureAwait(false);
                 return;
             }
 
@@ -416,7 +426,7 @@ public partial class BurnInViewModel : ObservableObject
         });
     }
 
-    private void InitAndStartJobItem(int index)
+    private async Task InitAndStartJobItem(int index)
     {
         _startTicks = DateTime.UtcNow.Ticks;
         _jobItemIndex = index;
@@ -446,7 +456,7 @@ public partial class BurnInViewModel : ObservableObject
         bool result;
         if (jobItem.UseTargetFileSize)
         {
-            result = RunTwoPassEncoding(jobItem);
+            result = await RunTwoPassEncoding(jobItem);
             if (result)
             {
                 _timerAnalyze.Start();
@@ -454,7 +464,7 @@ public partial class BurnInViewModel : ObservableObject
         }
         else
         {
-            result = RunOnePassEncoding(jobItem);
+            result = await RunOnePassEncoding(jobItem);
             if (result)
             {
                 _timerGenerate.Start();
@@ -462,14 +472,14 @@ public partial class BurnInViewModel : ObservableObject
         }
     }
 
-    private bool RunTwoPassEncoding(BurnInJobItem jobItem)
+    private async Task<bool> RunTwoPassEncoding(BurnInJobItem jobItem)
     {
         var bitRate = GetVideoBitRate(jobItem);
         jobItem.VideoBitRate = bitRate.ToString(CultureInfo.InvariantCulture) + "k";
 
         if (bitRate < 10)
         {
-            Dispatcher.UIThread.Invoke(async () =>
+            _ = Dispatcher.UIThread.Invoke(async () =>
             {
                 await MessageBox.Show(Window!,
                     "Unable to generate video",
@@ -479,8 +489,13 @@ public partial class BurnInViewModel : ObservableObject
             return false;
         }
 
-        _ffmpegProcess = GetFfmpegProcess(jobItem, 1);
+        var process = await GetFfmpegProcess(jobItem, 1);   
+        if (process == null)
+        {
+            return false;
+        }
 
+        _ffmpegProcess = process;
 #pragma warning disable CA1416 // Validate platform compatibility
         _ffmpegProcess.Start();
 #pragma warning restore CA1416 // Validate platform compatibility
@@ -555,9 +570,15 @@ public partial class BurnInViewModel : ObservableObject
         }
     }
 
-    private bool RunOnePassEncoding(BurnInJobItem jobItem)
+    private async Task<bool> RunOnePassEncoding(BurnInJobItem jobItem)
     {
-        _ffmpegProcess = GetFfmpegProcess(jobItem);
+        var process = await GetFfmpegProcess(jobItem);
+        if (process == null)
+        {
+            return false;
+        }
+
+        _ffmpegProcess = process;
 #pragma warning disable CA1416 // Validate platform compatibility
         _ffmpegProcess.Start();
 #pragma warning restore CA1416 // Validate platform compatibility
@@ -567,7 +588,7 @@ public partial class BurnInViewModel : ObservableObject
         return true;
     }
 
-    private Process GetFfmpegProcess(BurnInJobItem jobItem, int? passNumber = null, bool preview = false)
+    private async Task<Process?> GetFfmpegProcess(BurnInJobItem jobItem, int? passNumber = null, bool preview = false)
     {
         var audioCutTracks = string.Empty;
         //if (listViewAudioTracks.Visible)
@@ -599,6 +620,24 @@ public partial class BurnInViewModel : ObservableObject
             var duration = end - start;
             cutEnd = $"-t {duration.Hours:00}:{duration.Minutes:00}:{duration.Seconds:00}";
         }
+
+        var ffmpegParameters = string.Empty; //TODO: get from helper
+
+        if (PromptForFfmpegParameters)
+        {
+            var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!, vm =>
+            {
+                vm.Initialize("ffmpeg parameters", ffmpegParameters, 1000, 200);
+            });
+
+            if (!result.OkPressed || string.IsNullOrWhiteSpace(result.Text))
+            {
+                return null;
+            }
+
+            ffmpegParameters = result.Text.Trim();
+        }
+
 
         return FfmpegGenerator.GenerateHardcodedVideoFile(
             jobItem.InputVideoFileName,
@@ -802,6 +841,14 @@ public partial class BurnInViewModel : ObservableObject
 
         // Clamp the font size between minSize and maxSize
         return Math.Clamp(fontSize, minSize, maxSize);
+    }
+
+    [RelayCommand]
+    private async Task PromptFfmpegParametersAndGeenrate()
+    {
+        PromptForFfmpegParameters = true;
+        await Generate();
+        PromptForFfmpegParameters = false;
     }
 
     [RelayCommand]
@@ -1053,7 +1100,7 @@ public partial class BurnInViewModel : ObservableObject
         ProgressValue = 0;
         SaveSettings();
 
-        InitAndStartJobItem(0);
+        await InitAndStartJobItem(0);
     }
 
     private void LoadSettings()
@@ -1690,5 +1737,10 @@ public partial class BurnInViewModel : ObservableObject
     internal void CheckBoxTargetFileChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
         CalculateTargetFileBitRate();
+    }
+
+    private void TimerAnalyzeElapsed(object? sender, ElapsedEventArgs e)
+    {
+        _ = TimerAnalyzeElapsedAsync(sender, e);
     }
 }

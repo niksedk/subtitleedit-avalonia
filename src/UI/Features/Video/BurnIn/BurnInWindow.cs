@@ -39,8 +39,24 @@ public class BurnInWindow : Window
         var videoInfoView = MakeVideoInfoView(vm);
         var progressView = MakeProgressView(vm);
 
-        var buttonGenerate = UiUtil.MakeButton(Se.Language.General.Generate, vm.GenerateCommand)
-            .WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
+        var buttonGenerate = new SplitButton
+        {
+            Content = Se.Language.General.Generate,
+            Command = vm.GenerateCommand,
+            Flyout = new MenuFlyout
+            {
+                Items =
+                {
+                    new MenuItem
+                    {
+                        Header = Se.Language.Video.PromptForFfmpegParamsAndGenerate,
+                        Command = vm.PromptFfmpegParametersAndGeenrateCommand,
+                    },
+                }
+            }
+        };
+        buttonGenerate.Bind(SplitButton.IsEnabledProperty, new Binding(nameof(vm.IsGenerating)) { Converter = new InverseBooleanConverter() });
+
         var buttonBatchMode = UiUtil.MakeButton(Se.Language.General.BatchMode, vm.BatchModeCommand)
             .WithBindIsVisible(nameof(vm.IsBatchMode), new InverseBooleanConverter())
             .WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
