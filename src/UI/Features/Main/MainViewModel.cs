@@ -445,8 +445,28 @@ public partial class MainViewModel :
             }
 
             Se.Settings.General.LayoutNumber = InitLayout.MakeLayout(MainView!, this, vm.SelectedLayout.Value);
-        }
 
+            if (OperatingSystem.IsMacOS() && !string.IsNullOrEmpty(_videoFileName) && VideoPlayerControl != null)
+            { 
+                var videoFileName = _videoFileName; 
+                var position = VideoPlayerControl.Position;
+                VideoPlayerControl.Close();
+                Dispatcher.UIThread.Post(async void() =>
+                {
+                    try
+                    {
+                        Task.Delay(100).Wait();
+                        await VideoPlayerControl.Open(videoFileName);
+                        Task.Delay(100).Wait();
+                        VideoPlayerControl.Position = position;
+                    }
+                    catch (Exception e)
+                    {
+                        Se.LogError(e, "Failed to reload video");
+                    }
+                });
+            }
+        }
         _shortcutManager.ClearKeys();
     }
 
