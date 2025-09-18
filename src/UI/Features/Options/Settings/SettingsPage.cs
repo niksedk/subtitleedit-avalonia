@@ -83,9 +83,13 @@ public class SettingsPage : UserControl
                 MakeMenuItem(Se.Language.General.Appearance, vm.ScrollToSectionCommand,  IconNames.EyeSettings),
                 MakeMenuItem(Se.Language.General.Toolbar, vm.ScrollToSectionCommand,  IconNames.DotsHorizontal),
                 MakeMenuItem(Se.Language.Options.Settings.Network, vm.ScrollToSectionCommand,  IconNames.Network),
-                MakeMenuItem(Se.Language.Options.Settings.FileTypeAssociations, vm.ScrollToSectionCommand, IconNames.FileCog),
             }
         };
+
+        if (OperatingSystem.IsWindows())
+        { 
+            menu.Children.Add(MakeMenuItem(Se.Language.Options.Settings.FileTypeAssociations, vm.ScrollToSectionCommand, IconNames.FileCog));   
+        }
 
         grid.Children.Add(menu);
         Grid.SetRow(menu, 1);

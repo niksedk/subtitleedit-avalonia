@@ -4,6 +4,7 @@ using Avalonia.Animation.Easings;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
+using Avalonia.Platform;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -14,6 +15,7 @@ using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
+using Nikse.SubtitleEdit.Logic.Platform.Windows;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -276,6 +278,7 @@ public partial class SettingsViewModel : ObservableObject
         LibMpvPath = Se.Settings.General.LibMpvPath;
         SetFfmpegStatus();
         SetLibMpvStatus();
+        LoadFileTypeAssociations();
     }
 
     private void SaveSettings()
@@ -515,9 +518,82 @@ public partial class SettingsViewModel : ObservableObject
     private void CommandOk()
     {
         SaveSettings();
+        if (OperatingSystem.IsWindows())
+        {
+            SaveFileTypeAssociations();
+        }
 
         OkPressed = true;
         Window?.Close();
+    }
+
+    private void LoadFileTypeAssociations()
+    {
+        var folder = Path.Combine(Se.DataFolder, "FileTypes");
+        if (!Directory.Exists(folder))
+        {
+            Directory.CreateDirectory(folder);
+        }
+
+        var iconFileNames = Directory.GetFiles(folder, "*.ico");
+
+        foreach (var item in FileTypeAssociations)
+        {
+            item.IsAssociated = FileTypeAssociationsHelper.GetChecked(item.Extension, "SubtitleEdit5");
+        }
+    }   
+
+    private void SaveFileTypeAssociations()
+    {
+        var exeFileName = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;  
+        if (string.IsNullOrEmpty(exeFileName) || !File.Exists(exeFileName))
+        {
+            return;
+        }
+
+        foreach (var item in FileTypeAssociations)
+        {
+            var ext = item.Extension;
+            if (item.IsAssociated)
+            {
+                var avaResIconPath = item.IconPath;
+                var folder = Path.Combine(Se.DataFolder, "FileTypes");
+                if (!Directory.Exists(folder))
+                {
+                    Directory.CreateDirectory(folder);
+                }   
+
+                var iconFileName = Path.Combine(folder, ext.TrimStart('.') + ".ico");
+                if (!File.Exists(iconFileName))
+                {
+                    try
+                    {
+                        var uri = new Uri(avaResIconPath);
+                        using var stream = AssetLoader.Open(uri);
+                        if (stream != null)
+                        {
+                            // If the source is already an ICO file, just copy it
+                            if (avaResIconPath.EndsWith(".ico", StringComparison.OrdinalIgnoreCase))
+                            {
+                                using var fileStream = new FileStream(iconFileName, FileMode.Create, FileAccess.Write);
+                                stream.CopyTo(fileStream);
+                            }
+                        }
+                    }
+                    catch (Exception exception)
+                    {
+                        Se.LogError(exception, "SaveFileTypeAssociations");
+                    }
+                }
+                FileTypeAssociationsHelper.SetFileAssociationViaRegistry(ext, exeFileName, iconFileName, "SubtitleEdit5");
+            }
+            else
+            {
+                FileTypeAssociationsHelper.DeleteFileAssociationViaRegistry(ext, "SubtitleEdit5");
+            }
+        }
+
+        FileTypeAssociationsHelper.Refresh();
     }
 
     [RelayCommand]
