@@ -657,7 +657,8 @@ public partial class BurnInViewModel : ObservableObject
             ffmpegParameters = result.Text.Trim();
         }
         
-        return FfmpegGenerator.GetProcess(ffmpegParameters, OutputHandler);
+        var workingDirectory = Path.GetDirectoryName(jobItem.AssaSubtitleFileName) ?? string.Empty;
+        return FfmpegGenerator.GetProcess(ffmpegParameters, OutputHandler, workingDirectory);
     }
 
     private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
