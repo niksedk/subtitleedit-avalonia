@@ -621,25 +621,7 @@ public partial class BurnInViewModel : ObservableObject
             cutEnd = $"-t {duration.Hours:00}:{duration.Minutes:00}:{duration.Seconds:00}";
         }
 
-        var ffmpegParameters = string.Empty; //TODO: get from helper
-
-        if (PromptForFfmpegParameters)
-        {
-            var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!, vm =>
-            {
-                vm.Initialize("ffmpeg parameters", ffmpegParameters, 1000, 200);
-            });
-
-            if (!result.OkPressed || string.IsNullOrWhiteSpace(result.Text))
-            {
-                return null;
-            }
-
-            ffmpegParameters = result.Text.Trim();
-        }
-
-
-        return FfmpegGenerator.GenerateHardcodedVideoFile(
+        var ffmpegParameters = FfmpegGenerator.GenerateHardcodedVideoFile(
             jobItem.InputVideoFileName,
             jobItem.AssaSubtitleFileName,
             jobItem.OutputVideoFileName,
@@ -656,10 +638,26 @@ public partial class BurnInViewModel : ObservableObject
             SelectedAudioBitRate,
             pass,
             jobItem.VideoBitRate,
-            OutputHandler,
             cutStart,
             cutEnd,
             audioCutTracks);
+
+        if (PromptForFfmpegParameters)
+        {
+            var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!, vm =>
+            {
+                vm.Initialize("ffmpeg parameters", ffmpegParameters, 1000, 200);
+            });
+
+            if (!result.OkPressed || string.IsNullOrWhiteSpace(result.Text))
+            {
+                return null;
+            }
+
+            ffmpegParameters = result.Text.Trim();
+        }
+        
+        return FfmpegGenerator.GetProcess(ffmpegParameters, OutputHandler);
     }
 
     private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
