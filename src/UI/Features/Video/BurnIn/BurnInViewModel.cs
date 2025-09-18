@@ -215,7 +215,7 @@ public partial class BurnInViewModel : ObservableObject
 
         _timerGenerate = new();
         _timerGenerate.Elapsed += TimerGenerateElapsed;
-        _timerGenerate.Interval = 100;
+        _timerGenerate.Interval = 250;
 
         _timerAnalyze = new();
         // Change the event handler assignment for _timerAnalyze.Elapsed to use a synchronous wrapper
@@ -257,7 +257,7 @@ public partial class BurnInViewModel : ObservableObject
         }
     }
 
-    private async Task TimerAnalyzeElapsedAsync(object? sender, ElapsedEventArgs e)
+    private void TimerAnalyzeElapsed(object? sender, ElapsedEventArgs e)
     {
         if (_ffmpegProcess == null)
         {
@@ -300,22 +300,25 @@ public partial class BurnInViewModel : ObservableObject
 
         _timerAnalyze.Stop();
 
-        var jobItem = JobItems[_jobItemIndex];
-        var process = await GetFfmpegProcess(jobItem, 2);
-        if (process == null)
+        Dispatcher.UIThread.Invoke(async () =>
         {
-            IsGenerating = false;
-            return;
-        }
+            var jobItem = JobItems[_jobItemIndex];
+            var process = await GetFfmpegProcess(jobItem, 2);
+            if (process == null)
+            {
+                IsGenerating = false;
+                return;
+            }
 
-        _ffmpegProcess = process;
+            _ffmpegProcess = process;
 #pragma warning disable CA1416 // Validate platform compatibility
-        _ffmpegProcess.Start();
+            _ffmpegProcess.Start();
 #pragma warning restore CA1416 // Validate platform compatibility
-        _ffmpegProcess.BeginOutputReadLine();
-        _ffmpegProcess.BeginErrorReadLine();
+            _ffmpegProcess.BeginOutputReadLine();
+            _ffmpegProcess.BeginErrorReadLine();
 
-        _timerGenerate.Start();
+            _timerGenerate.Start();
+        });
     }
 
     private void TimerGenerateElapsed(object? sender, ElapsedEventArgs e)
@@ -440,7 +443,10 @@ public partial class BurnInViewModel : ObservableObject
         jobItem.TargetFileSize = UseTargetFileSize ? TargetFileSize : 0;
         jobItem.AssaSubtitleFileName = MakeAssa(jobItem.SubtitleFileName);
         jobItem.Status = Se.Language.General.Generating;
-        jobItem.OutputVideoFileName = MakeOutputFileName(jobItem.InputVideoFileName);
+        if (IsBatchMode)
+        {
+            jobItem.OutputVideoFileName = MakeOutputFileName(jobItem.InputVideoFileName);
+        }
 
         Dispatcher.UIThread.Post(() =>
         {
@@ -489,7 +495,7 @@ public partial class BurnInViewModel : ObservableObject
             return false;
         }
 
-        var process = await GetFfmpegProcess(jobItem, 1);   
+        var process = await GetFfmpegProcess(jobItem, 1);
         if (process == null)
         {
             return false;
@@ -656,7 +662,7 @@ public partial class BurnInViewModel : ObservableObject
 
             ffmpegParameters = result.Text.Trim();
         }
-        
+
         var workingDirectory = Path.GetDirectoryName(jobItem.AssaSubtitleFileName) ?? string.Empty;
         return FfmpegGenerator.GetProcess(ffmpegParameters, OutputHandler, workingDirectory);
     }
@@ -689,7 +695,7 @@ public partial class BurnInViewModel : ObservableObject
         }
     }
 
-    private ObservableCollection<BurnInJobItem> GetCurrentVideoAsJobItems()
+    private ObservableCollection<BurnInJobItem> GetCurrentVideoAsJobItems(string outputVideoFileName)
     {
         var subtitle = new Subtitle(_subtitle);
 
@@ -713,7 +719,7 @@ public partial class BurnInViewModel : ObservableObject
         var jobItem = new BurnInJobItem(VideoFileName, _mediaInfo.Dimension.Width, _mediaInfo.Dimension.Height)
         {
             InputVideoFileName = VideoFileName,
-            OutputVideoFileName = MakeOutputFileName(VideoFileName),
+            OutputVideoFileName = outputVideoFileName,
             UseTargetFileSize = UseTargetFileSize,
             TargetFileSize = TargetFileSize,
         };
@@ -817,7 +823,15 @@ public partial class BurnInViewModel : ObservableObject
         var i = 2;
         while (File.Exists(fileName))
         {
-            fileName = Path.Combine(Se.Settings.Video.BurnIn.OutputFolder, $"{nameNoExt}{suffix}_{i}{ext}");
+            if (Se.Settings.Video.BurnIn.UseOutputFolder && !string.IsNullOrEmpty(Se.Settings.Video.BurnIn.OutputFolder))
+            {
+                fileName = Path.Combine(Se.Settings.Video.BurnIn.OutputFolder, $"{nameNoExt}{suffix}_{i}{ext}");
+            }
+            else
+            {
+                fileName = Path.Combine(Path.GetDirectoryName(videoFileName) ?? Path.GetTempPath(), $"{nameNoExt}{suffix}_{i}{ext}");
+            }
+
             i++;
         }
 
@@ -1046,6 +1060,11 @@ public partial class BurnInViewModel : ObservableObject
     [RelayCommand]
     private async Task Generate()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
         if (IsCutActive && CutFrom >= CutTo)
         {
             await MessageBox.Show(Window!,
@@ -1059,7 +1078,39 @@ public partial class BurnInViewModel : ObservableObject
 
         if (!IsBatchMode)
         {
-            JobItems = GetCurrentVideoAsJobItems();
+            var nameNoExt = Path.GetFileNameWithoutExtension(VideoFileName);
+            var path = Path.GetDirectoryName(VideoFileName) ?? string.Empty;
+            var ext = Path.GetExtension(VideoFileName).ToLowerInvariant();
+            if (ext != ".mp4" && ext != ".mkv")
+            {
+                ext = ".mkv";
+            }
+
+            var suggestedFileName = Path.Combine(path, nameNoExt + ext);
+            var i = 2;
+            while (File.Exists(suggestedFileName))
+            {
+                suggestedFileName = Path.Combine(path, $"{nameNoExt}_{i}{ext}");
+                i++;
+            }
+
+            var outputVideoFileName = await _fileHelper.PickSaveFile(Window!, ext, suggestedFileName, Se.Language.General.SaveVideoAsVideoTitle);
+            if (string.IsNullOrEmpty(outputVideoFileName))
+            {
+                return;
+            }
+
+            if (VideoFileName.Equals(outputVideoFileName, StringComparison.OrdinalIgnoreCase))
+            {
+                await MessageBox.Show(Window!,
+                    "Output file error",
+                    "Output video file must be different from input video file",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                return;
+            }
+
+            JobItems = GetCurrentVideoAsJobItems(outputVideoFileName);
         }
 
         if (IsBatchMode && JobItems.Count == 0)
@@ -1736,10 +1787,5 @@ public partial class BurnInViewModel : ObservableObject
     internal void CheckBoxTargetFileChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
         CalculateTargetFileBitRate();
-    }
-
-    private void TimerAnalyzeElapsed(object? sender, ElapsedEventArgs e)
-    {
-        _ = TimerAnalyzeElapsedAsync(sender, e);
     }
 }

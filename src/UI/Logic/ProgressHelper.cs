@@ -15,6 +15,12 @@ namespace Nikse.SubtitleEdit.Logic
         public static string ToProgressTime(double estimatedTotalMs)
         {
             var totalSeconds = (int)Math.Round(estimatedTotalMs / 1000.0, MidpointRounding.AwayFromZero);
+            
+            if (totalSeconds > 20_000) // 5.5 hours
+            {
+                return "Time remaining: A long time";
+            }
+
             if (totalSeconds < 60)
             {
                 if (totalSeconds < 3)

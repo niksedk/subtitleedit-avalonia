@@ -376,6 +376,7 @@ public class LanguageGeneral
     public string OneFile { get; set; }
     public string XFiles { get; set; }
     public string RemoveSelectedFile { get; set; }
+    public string SaveVideoAsVideoTitle { get; set; }
 
     public LanguageGeneral()
     {
@@ -440,7 +441,7 @@ public class LanguageGeneral
         OpenSubtitle = "Open subtitle...";
         OpenSubtitles = "Open subtitles...";
         OpenVideoFile = "Open video file...";
-        OpenVideoFileTitle = "Open video file...";
+        OpenVideoFileTitle = "Open video file";
         OriginalText = "Original text";
         Overlap = "Overlap";
         OverlapNextX = "Overlap next ({0:#;##0.###})";
@@ -747,5 +748,6 @@ public class LanguageGeneral
         OneFile = "One file";
         XFiles = "{0:#,###,##0} files";
         RemoveSelectedFile = "Remove selected file?";
+        SaveVideoAsVideoTitle = "Save video as";
     }
 }
