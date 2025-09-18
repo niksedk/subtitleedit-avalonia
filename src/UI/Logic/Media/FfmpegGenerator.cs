@@ -678,7 +678,7 @@ public class FfmpegGenerator
         return processMakeVideo;
     }
 
-    public static Process GenerateTransparentVideoFile(string assaSubtitleFileName, string outputVideoFileName, int width, int height, string frameRate, string timeCode, DataReceivedEventHandler? dataReceivedHandler)
+    public static string GenerateTransparentVideoFile(string assaSubtitleFileName, string outputVideoFileName, int width, int height, string frameRate, string timeCode)
     {
         if (width % 2 == 1)
         {
@@ -692,21 +692,9 @@ public class FfmpegGenerator
 
         outputVideoFileName = $"\"{outputVideoFileName}\"";
 
-        var processMakeVideo = new Process
-        {
-            StartInfo =
-                {
-                    FileName = GetFfmpegLocation(),
-                    Arguments = $" -y -f lavfi -i \"color=c=black@0.0:s={width}x{height}:r={frameRate}:d={timeCode},format=rgba,subtitles=f={Path.GetFileName(assaSubtitleFileName)}:alpha=1\" -c:v prores_ks -profile:v 4444 -pix_fmt yuva444p10le {outputVideoFileName}".TrimStart(),
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    WorkingDirectory = Path.GetDirectoryName(assaSubtitleFileName) ?? string.Empty,
-                }
-        };
-
-        processMakeVideo.StartInfo.Arguments = processMakeVideo.StartInfo.Arguments.Trim();
-        SetupDataReceiveHandler(dataReceivedHandler, processMakeVideo);
-        return processMakeVideo;
+        return
+            $" -y -f lavfi -i \"color=c=black@0.0:s={width}x{height}:r={frameRate}:d={timeCode},format=rgba,subtitles=f={Path.GetFileName(assaSubtitleFileName)}:alpha=1\" -c:v prores_ks -profile:v 4444 -pix_fmt yuva444p10le {outputVideoFileName}"
+                .TrimStart();
     }
 
     public static Process GenerateVideoFile(string previewFileName, int seconds, int width, int height, Avalonia.Media.Color color, bool checkered, decimal frameRate, Bitmap? bitmap, DataReceivedEventHandler? dataReceivedHandler = null, bool addTimeCode = false, string addTimeColor = "white")

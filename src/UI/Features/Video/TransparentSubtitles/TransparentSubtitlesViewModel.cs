@@ -26,6 +26,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
+using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 
 namespace Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
 
@@ -245,15 +246,31 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
 
         _timerAnalyze.Stop();
 
-        var jobItem = JobItems[_jobItemIndex];
-        _ffmpegProcess = GetFfmpegProcess(jobItem);
-#pragma warning disable CA1416 // Validate platform compatibility
-        _ffmpegProcess.Start();
-#pragma warning restore CA1416 // Validate platform compatibility
-        _ffmpegProcess.BeginOutputReadLine();
-        _ffmpegProcess.BeginErrorReadLine();
+        Dispatcher.UIThread.Post(async void () =>
+        {
+            try
+            {
+                var jobItem = JobItems[_jobItemIndex];
+                var process = await GetFfmpegProcess(jobItem);
+                if (process == null)
+                {
+                    return;
+                }
 
-        _timerGenerate.Start();
+                _ffmpegProcess = process;
+#pragma warning disable CA1416 // Validate platform compatibility
+                _ffmpegProcess.Start();
+#pragma warning restore CA1416 // Validate platform compatibility
+                _ffmpegProcess.BeginOutputReadLine();
+                _ffmpegProcess.BeginErrorReadLine();
+
+                _timerGenerate.Start();
+            }
+            catch (Exception exception)
+            {
+                Se.LogError(exception);
+            }
+        });
     }
 
     private void TimerGenerateElapsed(object? sender, ElapsedEventArgs e)
@@ -363,7 +380,7 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
         });
     }
 
-    private void InitAndStartJobItem(int index)
+    private async Task InitAndStartJobItem(int index)
     {
         _startTicks = DateTime.UtcNow.Ticks;
         _jobItemIndex = index;
@@ -379,16 +396,22 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
         jobItem.Status = Se.Language.General.Generating;
         jobItem.OutputVideoFileName = MakeOutputFileName(jobItem.InputVideoFileName);
 
-        var result = RunEncoding(jobItem);
+        var result = await RunEncoding(jobItem);
         if (result)
         {
             _timerGenerate.Start();
         }
     }
 
-    private bool RunEncoding(BurnInJobItem jobItem)
+    private async Task <bool> RunEncoding(BurnInJobItem jobItem)
     {
-        _ffmpegProcess = GetFfmpegProcess(jobItem);
+        var process = await GetFfmpegProcess(jobItem);
+        if (process == null)
+        {
+            return false;
+        }
+
+        _ffmpegProcess = process;
 #pragma warning disable CA1416 // Validate platform compatibility
         _ffmpegProcess.Start();
 #pragma warning restore CA1416 // Validate platform compatibility
@@ -398,20 +421,36 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
         return true;
     }
 
-    private Process GetFfmpegProcess(BurnInJobItem jobItem)
+    private async Task<Process?> GetFfmpegProcess(BurnInJobItem jobItem)
     {
         var totalMs = _subtitle.Paragraphs.Max(p => p.EndTime.TotalMilliseconds);
         var ts = TimeSpan.FromMilliseconds(totalMs + 2000);
         var timeCode = string.Format($"{ts.Hours:00}\\\\:{ts.Minutes:00}\\\\:{ts.Seconds:00}");
 
-        return FfmpegGenerator.GenerateTransparentVideoFile(
+        var ffmpegParameters  =  FfmpegGenerator.GenerateTransparentVideoFile(
             jobItem.AssaSubtitleFileName,
             jobItem.OutputVideoFileName,
             jobItem.Width,
             jobItem.Height,
             SelectedFrameRate.ToString(CultureInfo.InvariantCulture),
-            timeCode,
-            OutputHandler);
+            timeCode);
+        
+        if (PromptForFfmpegParameters)
+        {
+            var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!, vm =>
+            {
+                vm.Initialize("ffmpeg parameters", ffmpegParameters, 1000, 200);
+            });
+
+            if (!result.OkPressed || string.IsNullOrWhiteSpace(result.Text))
+            {
+                return null;
+            }
+
+            ffmpegParameters = result.Text.Trim();
+        }
+
+        return FfmpegGenerator.GetProcess(ffmpegParameters, OutputHandler);
     }
 
     private Subtitle GetSubtitleBasedOnCut(Subtitle inputSubtitle)
