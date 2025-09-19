@@ -518,10 +518,7 @@ public partial class SettingsViewModel : ObservableObject
     private void CommandOk()
     {
         SaveSettings();
-        if (OperatingSystem.IsWindows())
-        {
-            SaveFileTypeAssociations();
-        }
+        SaveFileTypeAssociations();
 
         OkPressed = true;
         Window?.Close();
@@ -529,6 +526,11 @@ public partial class SettingsViewModel : ObservableObject
 
     private void LoadFileTypeAssociations()
     {
+        if (!OperatingSystem.IsWindows())
+        {
+            return;
+        } 
+        
         var folder = Path.Combine(Se.DataFolder, "FileTypes");
         if (!Directory.Exists(folder))
         {
@@ -545,6 +547,11 @@ public partial class SettingsViewModel : ObservableObject
 
     private void SaveFileTypeAssociations()
     {
+        if (!OperatingSystem.IsWindows())
+        {
+            return;
+        } 
+        
         var exeFileName = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;  
         if (string.IsNullOrEmpty(exeFileName) || !File.Exists(exeFileName))
         {
