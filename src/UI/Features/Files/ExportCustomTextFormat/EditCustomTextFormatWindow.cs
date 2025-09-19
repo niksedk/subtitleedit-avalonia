@@ -63,6 +63,7 @@ public class EditCustomTextFormatWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += vm.OnKeyDown;
     }
 
     private static Grid MakeFormatsView(EditCustomTextFormatViewModel vm)
@@ -236,11 +237,5 @@ public class EditCustomTextFormatWindow : Window
         grid.Add(textBox, 1);
 
         return grid;
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
     }
 }

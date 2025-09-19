@@ -568,7 +568,7 @@ public partial class ExportEbuStlViewModel : ObservableObject
         });
     }
 
-    internal void OnKeyDown(KeyEventArgs e)
+    internal void OnKeyDown(object? sender, KeyEventArgs e)
     {
         if (e.Key == Key.Escape)
         {

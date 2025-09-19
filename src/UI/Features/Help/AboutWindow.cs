@@ -16,7 +16,7 @@ public class AboutWindow : Window
     public AboutWindow()
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = "About Subtitle Edit";
+        Title = Se.Language.Help.AboutSubtitleEdit;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;

@@ -142,11 +142,6 @@ public class FindWindow : Window
         Content = grid;
 
         Activated += delegate { textBoxFind.Focus(); }; // hack to make OnKeyDown work
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        KeyDown += vm.OnKeyDown;
     }
 }

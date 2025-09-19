@@ -64,6 +64,7 @@ public class ExportCustomTextFormatWindow : Window
         Content = grid;
 
         Activated += delegate { buttonSaveAs.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += vm.OnKeyDown;
     }
 
     private static Grid MakeFormatsView(ExportCustomTextFormatViewModel vm)
@@ -181,11 +182,5 @@ public class ExportCustomTextFormatWindow : Window
         grid.Add(textBox, 1);
 
         return grid;
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
     }
 }

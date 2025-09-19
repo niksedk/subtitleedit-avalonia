@@ -52,7 +52,7 @@ public partial class ShowHistoryViewModel : ObservableObject
         Window?.Close();
     }
 
-    internal void OnKeyDown(KeyEventArgs e)
+    internal void OnKeyDown(object? sender, KeyEventArgs e)
     {
         if (e.Key == Key.Escape)
         {

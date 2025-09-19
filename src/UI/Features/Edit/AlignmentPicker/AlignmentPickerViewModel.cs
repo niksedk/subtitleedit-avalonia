@@ -87,12 +87,13 @@ public partial class AlignmentPickerViewModel : ObservableObject
         OkPressed = true;
         Window?.Close();
     }
-
-    public void OnKeyDown(KeyEventArgs keyEventArgs)
+    
+    public void KeyDown(object? sender, KeyEventArgs e)
     {
-        if (keyEventArgs.Key == Key.Escape)
+        if (e.Key == Key.Escape && Window is not null)
         {
-            Window!.Close();
+            e.Handled = true;   
+            Window.Close();
         }
     }
 }

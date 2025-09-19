@@ -74,6 +74,7 @@ public class ExportEbuStlWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += vm.OnKeyDown;
     }
 
     private Border MakeGeneralView(ExportEbuStlViewModel vm)
@@ -331,11 +332,5 @@ public class ExportEbuStlWindow : Window
     {
         var label = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.ErrorLog)).WithAlignmentTop();
         return UiUtil.MakeBorderForControl(label).WithMinWidth(944).WithMinHeight(465);
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
     }
 }

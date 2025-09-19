@@ -62,11 +62,6 @@ public class AlignmentPickerWindow: Window
         grid.Add(buttonAn9, 2, 2);
        
         Content = grid;
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        KeyDown += vm.KeyDown;
     }
 }

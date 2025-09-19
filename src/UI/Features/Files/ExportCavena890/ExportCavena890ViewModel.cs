@@ -54,7 +54,7 @@ public partial class ExportCavena890ViewModel : ObservableObject
         });
     }
 
-    internal void OnKeyDown(KeyEventArgs e)
+    internal void OnKeyDown(object? sender, KeyEventArgs e)
     {
         if (e.Key == Key.Escape)
         {

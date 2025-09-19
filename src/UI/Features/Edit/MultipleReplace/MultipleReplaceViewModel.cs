@@ -544,7 +544,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
         _dirty = true;
     }
 
-    internal void OnKeyDown(KeyEventArgs e)
+    internal void OnKeyDown(object? sender, KeyEventArgs e)
     {
         if (e.Key == Key.Escape)
         {

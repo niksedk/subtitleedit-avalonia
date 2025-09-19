@@ -87,17 +87,12 @@ public class EditRuleWindow : Window
         Content = grid;
         
         Activated += delegate { textBoxFindWhat.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += vm.OnKeyDown;
     }
 
     protected override void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
         Title = _vm.Title;
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
     }
 }

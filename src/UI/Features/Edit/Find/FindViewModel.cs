@@ -120,7 +120,7 @@ public partial class FindViewModel : ObservableObject
         }
     }
 
-    internal void OnKeyDown(KeyEventArgs e)
+    public void OnKeyDown(object? sender, KeyEventArgs e)
     {
         if (e.Key == Key.Escape)
         {
