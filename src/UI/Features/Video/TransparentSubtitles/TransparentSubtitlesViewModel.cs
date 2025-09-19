@@ -354,7 +354,7 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
 
             if (_jobItemIndex < JobItems.Count - 1)
             {
-                InitAndStartJobItem(_jobItemIndex + 1);
+                await InitAndStartJobItem(_jobItemIndex + 1);
                 return;
             }
 
@@ -833,7 +833,7 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
         ProgressValue = 0;
         SaveSettings();
 
-        InitAndStartJobItem(0);
+        await InitAndStartJobItem(0);
     }
 
     private void LoadSettings()

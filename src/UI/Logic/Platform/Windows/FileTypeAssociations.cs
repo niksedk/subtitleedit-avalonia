@@ -120,7 +120,17 @@ internal static class FileTypeAssociationsHelper
         const string defaultRegValueName = "";
         using (var registryKey = Registry.CurrentUser.OpenSubKey("Software\\Classes\\" + ext, true))
         {
-            var registryValue = registryKey?.GetValue(defaultRegValueName);
+            if (registryKey == null)
+            {
+                return;
+            }   
+
+            var registryValue = registryKey.GetValue(defaultRegValueName);
+            if (registryValue == null)
+            {
+                return;
+            }
+
             if (appExtensionRegKey.Equals((string)registryValue, StringComparison.Ordinal))
             {
                 registryKey.DeleteValue(defaultRegValueName);
