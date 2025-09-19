@@ -1,5 +1,4 @@
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 
@@ -7,16 +6,12 @@ namespace Nikse.SubtitleEdit.Features.Edit.AlignmentPicker;
 
 public class AlignmentPickerWindow: Window
 {
-    private readonly AlignmentPickerViewModel _vm;
-
     public AlignmentPickerWindow(AlignmentPickerViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = "Choose alignment";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
