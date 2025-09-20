@@ -15,6 +15,7 @@ using Nikse.SubtitleEdit.Core.VobSub.Ocr.Service;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Ocr.Download;
 using Nikse.SubtitleEdit.Features.Ocr.Engines;
+using Nikse.SubtitleEdit.Features.Ocr.FixEngine;
 using Nikse.SubtitleEdit.Features.Ocr.NOcr;
 using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
 using Nikse.SubtitleEdit.Features.Shared;
@@ -104,6 +105,7 @@ public partial class OcrViewModel : ObservableObject
     private readonly IWindowService _windowService;
     private readonly IFileHelper _fileHelper;
     private readonly ISpellCheckManager _spellCheckManager;
+    private readonly IOcrFixEngine2 _ocrFixEngine;
 
     private CancellationTokenSource _cancellationTokenSource;
     private NOcrDb? _nOcrDb;
@@ -111,12 +113,18 @@ public partial class OcrViewModel : ObservableObject
     private readonly List<SkipOnceChar> _skipOnceChars;
     private readonly NOcrAddHistoryManager _nOcrAddHistoryManager;
 
-    public OcrViewModel(INOcrCaseFixer nOcrCaseFixer, IWindowService windowService, IFileHelper fileHelper, ISpellCheckManager spellCheckManager)
+    public OcrViewModel(
+        INOcrCaseFixer nOcrCaseFixer,
+        IWindowService windowService,
+        IFileHelper fileHelper,
+        ISpellCheckManager spellCheckManager,
+        IOcrFixEngine2 ocrFixEngine)
     {
         _nOcrCaseFixer = nOcrCaseFixer;
         _windowService = windowService;
         _fileHelper = fileHelper;
         _spellCheckManager = spellCheckManager;
+        _ocrFixEngine = ocrFixEngine;
 
         OcrEngines = new ObservableCollection<OcrEngineItem>(OcrEngineItem.GetOcrEngines());
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>();
@@ -176,6 +184,10 @@ public partial class OcrViewModel : ObservableObject
             MistralApiKey = ocr.MistralApiKey;
             SelectedGoogleVisionLanguage = GoogleVisionLanguages.FirstOrDefault(p => p.Code == ocr.GoogleVisionLanguage);
             SelectedPaddleOcrLanguage = PaddleOcrLanguages.FirstOrDefault(p => p.Code == Se.Settings.Ocr.PaddleOcrLastLanguage) ?? PaddleOcrLanguages.First();
+            DoFixOcrErrors = ocr.DoFixOcrErrors;
+            DoPromptForUnknownWords = ocr.DoPromptForUnknownWords;
+            DoTryToGuessUnknownWords = ocr.DoTryToGuessUnknownWords;
+            DoAutoBreak = ocr.DoAutoBreak;
         });
     }
 
@@ -193,6 +205,11 @@ public partial class OcrViewModel : ObservableObject
         ocr.GoogleVisionApiKey = GoogleVisionApiKey;
         ocr.MistralApiKey = MistralApiKey;
         ocr.GoogleVisionLanguage = SelectedGoogleVisionLanguage?.Code ?? "en";
+        ocr.DoFixOcrErrors = DoFixOcrErrors;
+        ocr.DoPromptForUnknownWords = DoPromptForUnknownWords;
+        ocr.DoTryToGuessUnknownWords = DoTryToGuessUnknownWords;
+        ocr.DoAutoBreak = DoAutoBreak;
+
         Se.SaveSettings();
     }
 
@@ -558,6 +575,26 @@ public partial class OcrViewModel : ObservableObject
                         ocrItem.Text = $"<i>{ocrItem.Text}</i>";
                     }
                 }
+
+                var idx = OcrSubtitleItems.IndexOf(ocrItem);
+                if (_ocrFixEngine.IsLoaded())
+                {
+                    ocrItem.FixResult = new OcrFixLineResult
+                    {
+                        LineIndex = idx,
+
+                        // TODO: spell check
+                        Words = new List<OcrFixLinePartResult> { new() { Word = ocrItem.Text, IsSpellCheckedOk = null } },
+                    };
+                }
+                else
+                {
+                    ocrItem.FixResult = new OcrFixLineResult 
+                    { 
+                        LineIndex = idx,
+                        Words = new List<OcrFixLinePartResult> { new() { Word = ocrItem.Text, IsSpellCheckedOk = null } },
+                    };
+                }
             }
         }
     }
@@ -591,6 +628,25 @@ public partial class OcrViewModel : ObservableObject
                     {
                         ocrItem.Text = $"<b>{ocrItem.Text}</b>";
                     }
+                }
+
+                var idx = OcrSubtitleItems.IndexOf(ocrItem);
+                if (_ocrFixEngine.IsLoaded())
+                {
+                    ocrItem.FixResult = new OcrFixLineResult
+                    {
+                        LineIndex = idx,
+                        // TODO: spell check
+                        Words = new List<OcrFixLinePartResult> { new() { Word = ocrItem.Text, IsSpellCheckedOk = null } },
+                    };
+                }
+                else
+                {
+                    ocrItem.FixResult = new OcrFixLineResult
+                    {
+                        LineIndex = idx,
+                        Words = new List<OcrFixLinePartResult> { new() { Word = ocrItem.Text, IsSpellCheckedOk = null } },
+                    };
                 }
             }
         }
@@ -708,6 +764,16 @@ public partial class OcrViewModel : ObservableObject
                     return;
                 }
             }
+        }
+
+        if (SelectedDictionary != null && DoFixOcrErrors)
+        {
+            var threeLetterCode = "eng"; // TODO: fix
+            _ocrFixEngine.Initialize(OcrSubtitleItems.ToList(), threeLetterCode, SelectedDictionary);
+        }
+        else
+        {
+            _ocrFixEngine.Unload();
         }
 
         SaveSettings();
@@ -882,10 +948,7 @@ public partial class OcrViewModel : ObservableObject
                 }
 
                 item.Text = p.Text;
-                Dispatcher.UIThread.Post(() =>
-                {
-                    SelectAndScrollToRow(scrollToIndex);
-                });
+                OcrFixLineAndSetText(number, item);
             }
         });
 
@@ -1025,14 +1088,40 @@ public partial class OcrViewModel : ObservableObject
             }
 
             item.Text = sb.ToString().Trim();
-
-            SelectAndScrollToRow(i);
-
+            OcrFixLineAndSetText(i, item);
             _runOnceChars.Clear();
             _skipOnceChars.Clear();
         }
 
         IsOcrRunning = false;
+    }
+
+    private void OcrFixLineAndSetText(int i, OcrSubtitleItem item)
+    {
+        if (_ocrFixEngine.IsLoaded() && DoFixOcrErrors)
+        {
+            var result = _ocrFixEngine.FixOcrErrors(i);
+            var resultText = result.GetText();
+            Dispatcher.UIThread.Post(() =>
+            {
+                item.FixResult = result;
+                if (resultText != item.Text)
+                {
+                    item.Text = resultText;
+                }
+                CurrentText = item.Text;
+            });
+        }
+        else
+        {
+            item.FixResult = new OcrFixLineResult
+            {
+                LineIndex = i,
+                Words = new List<OcrFixLinePartResult> { new() { Word = item.Text, IsSpellCheckedOk = null } },
+            };
+        }
+
+        SelectAndScrollToRow(i);
     }
 
     private bool InitNOcrDb()
@@ -1076,10 +1165,10 @@ public partial class OcrViewModel : ObservableObject
                 var item = OcrSubtitleItems[i];
                 var bitmap = item.GetSkBitmap();
 
-                SelectAndScrollToRow(i);
-
                 var text = await tesseractOcr.Ocr(bitmap, language, _cancellationTokenSource.Token);
                 item.Text = text;
+
+                OcrFixLineAndSetText(i, item);
 
                 if (SelectedOcrSubtitleItem == item)
                 {
@@ -1492,5 +1581,10 @@ public partial class OcrViewModel : ObservableObject
     public void DictionaryChanged()
     {
         IsDictionaryLoaded = Dictionaries.IndexOf(SelectedDictionary ?? Dictionaries.First()) > 0;
+    }
+
+    internal void OnLoaded()
+    {
+        DictionaryChanged();
     }
 }

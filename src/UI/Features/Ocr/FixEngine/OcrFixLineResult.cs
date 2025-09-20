@@ -1,4 +1,6 @@
-﻿using Nikse.SubtitleEdit.Features.Main;
+﻿using Avalonia.Controls;
+using Avalonia.Controls.Documents;
+using Avalonia.Media;
 using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Features.Ocr.FixEngine;
@@ -7,5 +9,47 @@ public class OcrFixLineResult
 {
     public int LineIndex { get; set; }
     public List<OcrFixLinePartResult> Words { get; set; } = new();
-    public SubtitleLineViewModel Paragraph { get; set; } = new();
+
+    public string GetText()
+    {
+        var sb = new System.Text.StringBuilder();
+        foreach (var w in Words)
+        {
+            sb.Append(string.IsNullOrEmpty(w.FixedWord) ? w.Word : w.FixedWord);
+        }
+
+        return sb.ToString();
+    }
+
+    public TextBlock GetFormattedText(IBrush? errorBrush = null, IBrush? normalBrush = null)
+    {
+        var textBlock = new TextBlock();
+        var errorColor = errorBrush ?? Brushes.LightPink;
+        var normalColor = normalBrush ?? Brushes.LightGreen;
+
+        if (textBlock.Inlines != null)
+        {
+            foreach (var word in Words)
+            {
+                var displayText = string.IsNullOrEmpty(word.FixedWord) ? word.Word : word.FixedWord;
+
+                if (word.IsSpellCheckedOk == null)
+                {
+                    var run = new Run(displayText);
+                    textBlock.Inlines.Add(run);
+                }
+                else
+                {
+                    var run = new Run(displayText)
+                    {
+                        Foreground = (bool)word.IsSpellCheckedOk ? normalColor : errorColor
+                    };
+                    textBlock.Inlines.Add(run);
+                }
+
+            }
+        }
+
+        return textBlock;
+    }
 }

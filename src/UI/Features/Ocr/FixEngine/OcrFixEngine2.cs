@@ -1,7 +1,6 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Dictionaries;
 using Nikse.SubtitleEdit.Core.SpellCheck;
-using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.SpellCheck;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -10,12 +9,15 @@ namespace Nikse.SubtitleEdit.Features.Ocr.FixEngine;
 
 public interface IOcrFixEngine2
 {
-    void Initialize(string threeLetterIsoLanguageName, SpellCheckDictionaryDisplay spellCheckDictionary);
-    OcrFixLineResult FixOcrErrors(List<SubtitleLineViewModel> subtitles, int index);
+    void Initialize(List<OcrSubtitleItem> subtitles, string threeLetterIsoLanguageName, SpellCheckDictionaryDisplay spellCheckDictionary);
+    OcrFixLineResult FixOcrErrors(int index);
+    void Unload();
+    bool IsLoaded();
 }
 
 public partial class OcrFixEngine2 : IOcrFixEngine2
 {
+    private bool _isLoaded;
     private string _fiveLetterWordListLanguageName;
     private OcrFixReplaceList _ocrFixReplaceList;
     private NameList _nameListObj;
@@ -31,15 +33,17 @@ public partial class OcrFixEngine2 : IOcrFixEngine2
     private Dictionary<string, string> _changeAllDictionary;
     private SpellCheckWordLists _spellCheckWordLists;
     private string _spellCheckDictionaryName;
-    private readonly string _threeLetterIsoLanguageName;
+    private string _threeLetterIsoLanguageName;
+    private readonly HashSet<char> _expectedChars = new HashSet<char> { ' ', '¡', '¿', ',', '.', '!', '?', ':', ';', '(', ')', '[', ']', '{', '}', '+', '-', '£', '\\', '"', '”', '„', '“', '«', '»', '#', '&', '%', '\r', '\n', '؟' }; // removed $
+    private readonly HashSet<char> _expectedCharsNoComma = new HashSet<char> { ' ', '¡', '¿', '.', '!', '?', ':', ';', '(', ')', '[', ']', '{', '}', '+', '-', '£', '\\', '"', '”', '„', '“', '«', '»', '#', '&', '%', '\r', '\n', '؟' }; // removed $ + comma
+    private Subtitle _subtitle;
+    private List<OcrSubtitleItem> _subtitles;
 
     private static readonly Regex RegexAloneIasL = new Regex(@"\bl\b", RegexOptions.Compiled);
     private static readonly Regex RegexLowercaseL = new Regex("[A-ZÆØÅÄÖÉÈÀÙÂÊÎÔÛËÏ]l[A-ZÆØÅÄÖÉÈÀÙÂÊÎÔÛËÏ]", RegexOptions.Compiled);
     private static readonly Regex RegexUppercaseI = new Regex("[a-zæøåöääöéèàùâêîôûëï]I.", RegexOptions.Compiled);
     private static readonly Regex RegexNumber1 = new Regex(@"(?<=\d) 1(?!/\d)", RegexOptions.Compiled);
 
-    private readonly HashSet<char> _expectedChars = new HashSet<char> { ' ', '¡', '¿', ',', '.', '!', '?', ':', ';', '(', ')', '[', ']', '{', '}', '+', '-', '£', '\\', '"', '”', '„', '“', '«', '»', '#', '&', '%', '\r', '\n', '؟' }; // removed $
-    private readonly HashSet<char> _expectedCharsNoComma = new HashSet<char> { ' ', '¡', '¿', '.', '!', '?', ':', ';', '(', ')', '[', ']', '{', '}', '+', '-', '£', '\\', '"', '”', '„', '“', '«', '»', '#', '&', '%', '\r', '\n', '؟' }; // removed $ + comma
 
     private readonly ISpellCheckManager _spellCheckManager;
 
@@ -48,58 +52,66 @@ public partial class OcrFixEngine2 : IOcrFixEngine2
         _spellCheckManager = spellCheckManager;
     }
 
-    void IOcrFixEngine2.Initialize(string threeLetterIsoLanguageName, SpellCheckDictionaryDisplay spellCheckDictionary)
+    void IOcrFixEngine2.Initialize(List<OcrSubtitleItem> subtitles, string threeLetterIsoLanguageName, SpellCheckDictionaryDisplay spellCheckDictionary)
     {
+        _isLoaded = true;
         var twoLetterIsoLanguageName = Iso639Dash2LanguageCode.GetTwoLetterCodeFromThreeLetterCode(threeLetterIsoLanguageName);
         _spellCheckManager.Initialize(spellCheckDictionary.DictionaryFileName, threeLetterIsoLanguageName);
         _ocrFixReplaceList = OcrFixReplaceList.FromLanguageId(threeLetterIsoLanguageName);
+        _subtitles = subtitles;
+        _threeLetterIsoLanguageName = threeLetterIsoLanguageName;
+        _subtitle = GetSubtitle(subtitles);
     }
 
-    public OcrFixLineResult FixOcrErrors(List<SubtitleLineViewModel> subtitles, int index)
+    public OcrFixLineResult FixOcrErrors(int index)
     {
-        var p = subtitles[index];
+        var p = _subtitles[index];
 
-        var replacedLine = ReplaceLineFixes(p, subtitles, index);
+        var replacedLine = ReplaceLineFixes(index);
 
         var splitLine = SplitLine(replacedLine, p, index);
-        for (int i = 0; i < splitLine.Words.Count; i++)
+        for (var i = 0; i < splitLine.Words.Count; i++)
         {
             OcrFixLinePartResult? word = splitLine.Words[i];
             if (word.LinePartType != OcrFixLinePartType.Word)
             {
+                word.FixedWord = word.Word;
+                word.IsSpellCheckedOk = true;
                 continue;
             }
 
             CheckAndFixWord(word, splitLine, i);
+            word.IsSpellCheckedOk = _spellCheckManager.IsWordCorrect(word.FixedWord);
         }
 
         return splitLine;
     }
 
-    public static Subtitle GetSubtitle(List<SubtitleLineViewModel> subtitles)
+    public static Subtitle GetSubtitle(List<OcrSubtitleItem> subtitles)
     {
         var subtitle = new Subtitle();
         foreach (var line in subtitles)
         {
-            subtitle.Paragraphs.Add(line.ToParagraph());
+            var p = new Paragraph(new TimeCode(line.StartTime), new TimeCode(line.EndTime), line.Text);
+            subtitle.Paragraphs.Add(p);
         }
 
         return subtitle;
     }
 
-    private string ReplaceLineFixes(SubtitleLineViewModel line, List<SubtitleLineViewModel> subtitles, int index)
+    private string ReplaceLineFixes(int index)
     {
-        var subtitle = GetSubtitle(subtitles);
-        var replacedLine = _ocrFixReplaceList.FixOcrErrorViaLineReplaceList(line.Text, subtitle, index);
+        var line = _subtitles[index];
+        var replacedLine = _ocrFixReplaceList.FixOcrErrorViaLineReplaceList(line.Text, _subtitle, index);
         return replacedLine;
     }
 
-    private OcrFixLineResult SplitLine(string line, SubtitleLineViewModel p, int index)
+    private OcrFixLineResult SplitLine(string line, OcrSubtitleItem p, int index)
     {
         var result = new OcrFixLineResult
         {
             LineIndex = index,
-            Paragraph = p,
+            //   Paragraph = p,
         };
 
         if (string.IsNullOrEmpty(line))
@@ -251,7 +263,31 @@ public partial class OcrFixEngine2 : IOcrFixEngine2
             result = _ocrFixReplaceList.FixCommonWordErrors(word.Word);
         }
 
-        word.FixedWord = result;  
+        word.FixedWord = result;
+    }
+
+    public void Unload()
+    {
+        _wordSkipList.Clear();
+        _wordSpellOkList.Clear();
+        _changeAllDictionary = new Dictionary<string, string>();
+        _isLoaded = false;
+        _subtitle = new Subtitle();
+        _subtitles = new List<OcrSubtitleItem>();
+        _nameList = new HashSet<string>();
+        _nameListUppercase = new HashSet<string>();
+        _nameListWithApostrophe = new HashSet<string>();
+        _nameMultiWordList.Clear();
+        _nameMultiWordListAndWordsWithPeriods = new List<string>();
+        _abbreviationList = new HashSet<string>();
+        _spellCheckDictionaryName = string.Empty;
+        _threeLetterIsoLanguageName = string.Empty;
+        _fiveLetterWordListLanguageName = string.Empty;
+    }
+
+    public bool IsLoaded()
+    {
+        return _isLoaded;
     }
 }
 

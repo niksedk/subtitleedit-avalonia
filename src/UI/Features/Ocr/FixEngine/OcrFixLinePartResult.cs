@@ -10,6 +10,6 @@ public class OcrFixLinePartResult
     public int WordIndex { get; set; }
     public string Word { get; set; } = string.Empty;
     public string FixedWord { get; set; } = string.Empty;
-    public bool IsSpellCheckedOk { get; set; }
+    public bool? IsSpellCheckedOk { get; set; }
     public List<string> Suggestions { get; set; } = new();
 }

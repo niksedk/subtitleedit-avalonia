@@ -19,6 +19,7 @@ using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Features.Ocr;
 using Nikse.SubtitleEdit.Features.Ocr.Download;
+using Nikse.SubtitleEdit.Features.Ocr.FixEngine;
 using Nikse.SubtitleEdit.Features.Ocr.NOcr;
 using Nikse.SubtitleEdit.Features.Options.Language;
 using Nikse.SubtitleEdit.Features.Options.Settings;
@@ -107,6 +108,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<IZipUnpacker, ZipUnpacker>();
         collection.AddTransient<IColorService, ColorService>();
         collection.AddTransient<IFontNameService, FontNameService>();
+        collection.AddTransient<IOcrFixEngine2, OcrFixEngine2>();
 
         // Download services
         collection.AddHttpClient<IFfmpegDownloadService, FfmpegDownloadService>();

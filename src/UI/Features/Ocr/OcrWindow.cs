@@ -1,8 +1,10 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
+using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
@@ -241,7 +243,28 @@ public class OcrWindow : Window
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(OcrSubtitleItem.Text)),
                     IsReadOnly = true,
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
+                },
+                new DataGridTemplateColumn
+                {
+                    Header = Se.Language.General.Text,
+                    IsReadOnly = true,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    CellTemplate = new FuncDataTemplate<OcrSubtitleItem>((item, _) =>
+                    {
+                       var contentPresenter = new ContentPresenter();
+        
+                        // Bind to HasFormattedText to trigger updates when FixResult changes
+                        var binding = new Binding(nameof(OcrSubtitleItem.HasFormattedText))
+                        {
+                            Source = item,
+                            Converter = new FuncValueConverter<bool, TextBlock>(hasFormatted =>
+                                item.CreateFormattedText())
+                        };
+
+                        contentPresenter.Bind(ContentPresenter.ContentProperty, binding);
+                        return contentPresenter;
+                    })
                 },
             },
         };
@@ -354,9 +377,9 @@ public class OcrWindow : Window
                     TextWrapping = Avalonia.Media.TextWrapping.NoWrap,
                     Margin = new Thickness(0, 0, 10, 0),
                     [!TextBox.TextProperty] = new Binding($"{nameof(vm.SelectedOcrSubtitleItem)}.{nameof(OcrSubtitleItem.Text)}")
-                    { 
-                        Source = vm, 
-                        Mode = BindingMode.TwoWay 
+                    {
+                        Source = vm,
+                        Mode = BindingMode.TwoWay
                     }
                 }
             }
@@ -382,7 +405,7 @@ public class OcrWindow : Window
         };
 
         var checkBoxFixOcrErrors = UiUtil.MakeCheckBox(Se.Language.Ocr.FixOcrErrors, vm, nameof(vm.DoFixOcrErrors))
-            .WithBindIsVisible(nameof(vm.IsDictionaryLoaded));   
+            .WithBindIsVisible(nameof(vm.IsDictionaryLoaded));
         var checkBoxPromptForUnknownWords = UiUtil.MakeCheckBox(Se.Language.Ocr.PromptForUknownWords, vm, nameof(vm.DoPromptForUnknownWords))
             .WithBindIsVisible(nameof(vm.IsDictionaryLoaded));
         var checkBoxTryToGuessUnknownWords = UiUtil.MakeCheckBox(Se.Language.Ocr.TryToGuessUnknownWords, vm, nameof(vm.DoTryToGuessUnknownWords))
@@ -456,7 +479,7 @@ public class OcrWindow : Window
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
-        
+
         var listBox = new ListBox
         {
             [!ListBox.ItemsSourceProperty] = new Binding(nameof(vm.UnknownWords), BindingMode.OneWay),
@@ -464,7 +487,7 @@ public class OcrWindow : Window
             Width = double.NaN,
             Height = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Stretch,  
+            VerticalAlignment = VerticalAlignment.Stretch,
         };
 
         var buttonGoogleIt = UiUtil.MakeButton(Se.Language.General.GoogleIt, vm.GoogleUnknowWordCommand);
@@ -576,6 +599,7 @@ public class OcrWindow : Window
     {
         base.OnLoaded(e);
         _vm.SelectAndScrollToRow(0);
+        _vm.OnLoaded();
     }
 
     protected override void OnClosing(WindowClosingEventArgs e)

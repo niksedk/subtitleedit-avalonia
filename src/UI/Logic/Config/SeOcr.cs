@@ -22,10 +22,15 @@ public class SeOcr
     public int NOcrNoOfLinesToAutoDraw { get; set; }
     public string PaddleOcrMode { get; set; }
     public string PaddleOcrLastLanguage { get; set; }
+    public bool DoTryToGuessUnknownWords { get; set; }
+    public bool DoPromptForUnknownWords { get; set; }
+    public bool DoAutoBreak { get; set; }
+    public bool DoFixOcrErrors { get; set; }
 
     public SeOcr()
     {
         Engine = "nOCR";
+        DoFixOcrErrors = true;
 
         NOcrDatabase = "Latin";
         NOcrMaxWrongPixels = 25;
