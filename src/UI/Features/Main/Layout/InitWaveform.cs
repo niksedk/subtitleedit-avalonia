@@ -110,7 +110,17 @@ public class InitWaveform
             flyout.Items.Add(splitMenuItem);
             vm.MenuItemAudioVisualizerSplit = splitMenuItem;
 
-            //flyout.Items.Add(new Separator());
+            flyout.Items.Add(new Separator());
+
+            var menuItemFilterByLayer = new MenuItem
+            {
+                Header = Se.Language.General.FilterByLayer,
+                Command = vm.ShowPickLayerFilterCommand,
+            };
+            flyout.Items.Add(menuItemFilterByLayer);
+            vm.MenuItemAudioVisualizerFilterByLayer = menuItemFilterByLayer;
+
+
             vm.AudioVisualizer.MenuFlyout = flyout;
         }
         else

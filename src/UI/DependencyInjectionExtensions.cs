@@ -30,6 +30,7 @@ using Nikse.SubtitleEdit.Features.Shared.FindText;
 using Nikse.SubtitleEdit.Features.Shared.PickAlignment;
 using Nikse.SubtitleEdit.Features.Shared.PickColor;
 using Nikse.SubtitleEdit.Features.Shared.PickFontName;
+using Nikse.SubtitleEdit.Features.Shared.PickLayers;
 using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using Nikse.SubtitleEdit.Features.Shared.PickMp4Track;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
@@ -194,6 +195,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<PickAlignmentViewModel>();
         collection.AddTransient<PickColorViewModel>();
         collection.AddTransient<PickFontNameViewModel>();
+        collection.AddTransient<PickLayersViewModel>();
         collection.AddTransient<PickMatroskaTrackViewModel>();
         collection.AddTransient<PickOllamaModelViewModel>();
         collection.AddTransient<PickMp4TrackViewModel>();

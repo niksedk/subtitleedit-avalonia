@@ -45,6 +45,7 @@ using Nikse.SubtitleEdit.Features.Shared.Bookmarks;
 using Nikse.SubtitleEdit.Features.Shared.PickAlignment;
 using Nikse.SubtitleEdit.Features.Shared.PickColor;
 using Nikse.SubtitleEdit.Features.Shared.PickFontName;
+using Nikse.SubtitleEdit.Features.Shared.PickLayers;
 using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using Nikse.SubtitleEdit.Features.Shared.PickMp4Track;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
@@ -141,6 +142,8 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _showColumnActor;
     [ObservableProperty] private bool _showColumnCps;
     [ObservableProperty] private bool _showColumnWpm;
+    [ObservableProperty] private bool _showColumnLayer;
+    [ObservableProperty] private bool _isColumnLayerVisible;
     [ObservableProperty] private bool _lockTimeCodes;
     [ObservableProperty] private bool _areVideoControlsUndocked;
     [ObservableProperty] private bool _isFormatAssa;
@@ -151,6 +154,7 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _isRightToLeftEnabled;
     [ObservableProperty] private bool _showAutoTranslateSelectedLines;
     [ObservableProperty] private bool _showShotChangesListMenuItem;
+    [ObservableProperty] private bool _showLayer;
 
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
@@ -183,6 +187,7 @@ public partial class MainViewModel :
     private long _lastKeyPressedTicks;
     private bool _loading;
     private bool _opening;
+    private List<int>? _visibleLayers;
     private DispatcherTimer _positionTimer = new();
     private CancellationTokenSource _videoOpenTokenSource;
 
@@ -220,6 +225,7 @@ public partial class MainViewModel :
     public Separator MenuItemAudioVisualizerSeparator1 { get; set; }
     public MenuItem MenuItemAudioVisualizerInsertAtPosition { get; set; }
     public MenuItem MenuItemAudioVisualizerDeleteAtPosition { get; set; }
+    public MenuItem MenuItemAudioVisualizerFilterByLayer { get; set; }
     public TextBox EditTextBoxOriginal { get; set; }
     public StackPanel PanelSingleLineLenghtsOriginal { get; set; }
     public MenuItem MenuItemStyles { get; set; }
@@ -285,6 +291,7 @@ public partial class MainViewModel :
         MenuItemAudioVisualizerSeparator1 = new Separator();
         MenuItemAudioVisualizerInsertAtPosition = new MenuItem();
         MenuItemAudioVisualizerDeleteAtPosition = new MenuItem();
+        MenuItemAudioVisualizerFilterByLayer = new MenuItem();
         MenuItemStyles = new MenuItem();
         MenuItemActors = new MenuItem();
         Toolbar = new Border();
@@ -314,6 +321,7 @@ public partial class MainViewModel :
         ShowColumnActor = Se.Settings.General.ShowColumnActor;
         ShowColumnCps = Se.Settings.General.ShowColumnCps;
         ShowColumnWpm = Se.Settings.General.ShowColumnWpm;
+        ShowColumnLayer = Se.Settings.General.ShowColumnLayer;
         SelectCurrentSubtitleWhilePlaying = Se.Settings.General.SelectCurrentSubtitleWhilePlaying;
         WaveformCenter = Se.Settings.Waveform.CenterVideoPosition;
         EditTextBoxOriginal = new TextBox();
@@ -649,7 +657,7 @@ public partial class MainViewModel :
         _subtitleOriginal = new Subtitle();
         _changeSubtitleHashOriginal = GetFastHashOriginal();
 
-
+        _visibleLayers = null;
         if (AudioVisualizer?.WavePeaks != null)
         {
             AudioVisualizer.WavePeaks = null;
@@ -1063,6 +1071,33 @@ public partial class MainViewModel :
         {
             await SubtitleOpen(fileName, null, null, result.SelectedEncoding);
         }
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowPickLayerFilter()
+    {
+        if (Window == null || AudioVisualizer?.WavePeaks == null)
+        {
+            return;
+        }
+
+        var result = 
+            await _windowService.ShowDialogAsync<PickLayersWindow, PickLayersViewModel>(Window!, vm => 
+        { 
+            vm.Initialize(Subtitles.ToList(), _visibleLayers);
+        });
+
+        if (!result.OkPressed)
+        {
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        _visibleLayers = result.SelectedLayers;
+        AudioVisualizer.LayersFilter = _visibleLayers;
+        _updateAudioVisualizer = true;
 
         _shortcutManager.ClearKeys();
     }
@@ -2270,6 +2305,15 @@ public partial class MainViewModel :
         ShowColumnWpm = Se.Settings.General.ShowColumnWpm;
         AutoFitColumns();
     }
+
+    [RelayCommand]
+    private void ToggleShowColumnLayer()
+    {
+        Se.Settings.General.ShowColumnLayer = !Se.Settings.General.ShowColumnLayer;
+        ShowColumnLayer = Se.Settings.General.ShowColumnLayer;
+        AutoFitColumns();
+    }
+
 
     [RelayCommand]
     private void DuplicateSelectedLines()
@@ -6124,9 +6168,11 @@ public partial class MainViewModel :
         MenuItemMerge.IsVisible = SubtitleGrid.SelectedItems.Count > 1;
         AreAssaContentMenuItemsVisible = false;
         ShowAutoTranslateSelectedLines = SubtitleGrid.SelectedItems.Count > 0 && ShowColumnOriginalText;
+        IsColumnLayerVisible = IsFormatAssa;
 
         if (IsSubtitleGridFlyoutHeaderVisible)
         {
+            IsColumnLayerVisible = false;
         }
         else
         {
@@ -6916,6 +6962,7 @@ public partial class MainViewModel :
         MenuItemAudioVisualizerDelete.IsVisible = false;
         MenuItemAudioVisualizerDeleteAtPosition.IsVisible = false;
         MenuItemAudioVisualizerSplit.IsVisible = false;
+        MenuItemAudioVisualizerFilterByLayer.IsVisible = false;
 
         if (e.NewParagraph != null)
         {
@@ -6927,6 +6974,8 @@ public partial class MainViewModel :
         var subtitlesAtPosition = Subtitles
             .Where(p => p.StartTime.TotalSeconds < e.PositionInSeconds &&
                         p.EndTime.TotalSeconds > e.PositionInSeconds).ToList();
+
+        MenuItemAudioVisualizerFilterByLayer.IsVisible = true;
 
         if (selectedSubtitles?.Count == 1 &&
             subtitlesAtPosition.Count == 1 &&
@@ -6976,6 +7025,7 @@ public partial class MainViewModel :
     {
         IsFormatAssa = SelectedSubtitleFormat is AdvancedSubStationAlpha;
         HasFormatStyle = SelectedSubtitleFormat is AdvancedSubStationAlpha;
+        ShowLayer = IsFormatAssa && Se.Settings.Appearance.ShowLayer;
         AutoFitColumns();
 
         if (!_opening && e.RemovedItems.Count == 1 && e.AddedItems.Count == 1)

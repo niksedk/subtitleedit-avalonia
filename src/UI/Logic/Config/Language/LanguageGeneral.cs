@@ -268,6 +268,7 @@ public class LanguageGeneral
     public string ShowGapColumn { get; set; }
     public string ShowActorColumn { get; set; }
     public string ShowWpmColumn { get; set; }
+    public string ShowLayerColumn { get; set; }
     public string ShowCpsColumn { get; set; }
     public string ShowDurationColumn { get; set; }
     public string OpenSubtitleFileTitle { get; set; }
@@ -377,6 +378,7 @@ public class LanguageGeneral
     public string XFiles { get; set; }
     public string RemoveSelectedFile { get; set; }
     public string SaveVideoAsVideoTitle { get; set; }
+    public string FilterByLayer { get; set; }
 
     public LanguageGeneral()
     {
@@ -640,6 +642,7 @@ public class LanguageGeneral
         ShowGapColumn = "Show 'Gap' column";
         ShowActorColumn = "Show 'Actor' column";
         ShowWpmColumn = "Show 'Words/min' column";
+        ShowLayerColumn = "Show 'Layer' column";
         ShowCpsColumn = "Show 'Chars/sec' column";
         ShowDurationColumn = "Show 'Duration' column";
         OpenSubtitleFileTitle = "Open subtitle file";
@@ -749,5 +752,6 @@ public class LanguageGeneral
         XFiles = "{0:#,###,##0} files";
         RemoveSelectedFile = "Remove selected file?";
         SaveVideoAsVideoTitle = "Save video as";
+        FilterByLayer = "Filter by layer";
     }
 }

@@ -15,11 +15,13 @@ public class LanguageTools
     public string PickAlignmentTitle { get; set; }
     public string PickFontNameTitle { get; set; }
     public string ColorPickerTitle { get; set; }
+    public string PickLayersTitle { get; set; }
 
     public LanguageTools()
     {
         PickAlignmentTitle = "Choose alignment";
         PickFontNameTitle = "Choose font name";
         ColorPickerTitle = "Choose color";
+        PickLayersTitle = "Choose layers to display in audio waveform/specgtrogram";
     }
 }

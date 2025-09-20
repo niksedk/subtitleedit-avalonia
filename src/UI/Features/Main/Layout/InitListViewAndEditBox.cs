@@ -376,6 +376,21 @@ public static class InitListViewAndEditBox
         showWpmMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible), BindingMode.TwoWay));
         flyout.Items.Add(showWpmMenuItem);
 
+        var showLayerMenuItem = new MenuItem
+        {
+            Header = Se.Language.General.ShowLayerColumn,
+            Command = vm.ToggleShowColumnLayerCommand,
+            DataContext = vm,
+            Icon = new Icon
+            {
+                Value = IconNames.CheckBold,
+                VerticalAlignment = VerticalAlignment.Center,
+                [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnLayer)),
+            }
+        };
+        showLayerMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsColumnLayerVisible), BindingMode.TwoWay));
+        flyout.Items.Add(showLayerMenuItem);
+
 
         var deleteMenuItem = new MenuItem { Header = Se.Language.General.Delete, DataContext = vm };
         deleteMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
@@ -660,6 +675,42 @@ public static class InitListViewAndEditBox
 
         durationPanel.Children.Add(durationUpDown);
         timeControlsPanel.Children.Add(durationPanel);
+
+
+
+
+        // Layer display
+        var panelLayer = new StackPanel
+        {
+            Spacing = 0,
+            Orientation = Orientation.Vertical,
+            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowLayer)),
+        };
+
+        var labelLayer = new TextBlock
+        {
+            Text = Se.Language.General.Layer,
+            FontWeight = FontWeight.Bold,
+            Padding = new Thickness(2, 2, 2, 2)
+        };
+        panelLayer.Children.Add(labelLayer);
+
+        var upDownLayer = new NumericUpDown
+        {
+            DataContext = vm,
+            [!NumericUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.Layer)}")
+            {
+                Mode = BindingMode.TwoWay,
+            },
+            Minimum = int.MinValue,
+            Maximum = int.MaxValue,
+            Increment = 1,
+            FormatString = "F0",
+        };
+        panelLayer.Children.Add(upDownLayer);
+
+        timeControlsPanel.Children.Add(panelLayer);
+
 
         Grid.SetColumn(timeControlsPanel, 0);
         editGrid.Children.Add(timeControlsPanel);

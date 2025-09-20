@@ -32,6 +32,7 @@ public class SeAppearance
     public bool ToolbarShowHelp { get; set; }
     public bool ToolbarShowEncoding { get; set; }
     public bool RightToLeft { get; set; }
+    public bool ShowLayer { get; set; }
 
     public SeAppearance()
     {
@@ -45,6 +46,7 @@ public class SeAppearance
         DarkModeBackgroundColor = new Color(255, 33, 33, 33).FromColorToHex();
         BookmarkColor = Colors.Gold.FromColorToHex();
         GridCompactMode = true;
+        ShowLayer = true;
 
         ToolbarShowFileNew = true;
         ToolbarShowFileOpen = true;

@@ -109,6 +109,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _textBoxCenterText;
     [ObservableProperty] private bool _showButtonHints;
     [ObservableProperty] private bool _gridCompactMode;
+    [ObservableProperty] private bool _showAssaLayer;
     [ObservableProperty] private bool _showHorizontalLineAboveToolbar;
     [ObservableProperty] private bool _showHorizontalLineBelowToolbar;
     [ObservableProperty] private ObservableCollection<GridLinesVisibilityDisplay> _gridLinesVisibilities;
@@ -241,6 +242,7 @@ public partial class SettingsViewModel : ObservableObject
         TextBoxCenterText = appearance.SubtitleTextBoxCenterText;
         ShowButtonHints = appearance.ShowHints;
         GridCompactMode = appearance.GridCompactMode;
+        ShowAssaLayer = appearance.ShowLayer;
         ShowHorizontalLineAboveToolbar = appearance.ShowHorizontalLineAboveToolbar;
         ShowHorizontalLineBelowToolbar = appearance.ShowHorizontalLineBelowToolbar;
         SelectedGridLinesVisibility = GridLinesVisibilities.FirstOrDefault(p => p.Type.ToString() == appearance.GridLinesAppearance) ?? GridLinesVisibilities[0];
@@ -333,6 +335,7 @@ public partial class SettingsViewModel : ObservableObject
         appearance.BookmarkColor = BookmarkColor.FromColorToHex();
         appearance.GridCompactMode = GridCompactMode;
         appearance.GridLinesAppearance = SelectedGridLinesVisibility.Type.ToString();
+        appearance.ShowLayer = ShowAssaLayer;
         appearance.ShowHorizontalLineAboveToolbar = ShowHorizontalLineAboveToolbar;
         appearance.ShowHorizontalLineBelowToolbar = ShowHorizontalLineBelowToolbar;
 

@@ -63,7 +63,7 @@ public class LanguageSettings
     public string Network { get; set; }
     public string FileTypeAssociations { get; set; }
     public string TextBoxCenterText { get; set; }
-    public string TextBoxFontBold { get;  set; }
+    public string TextBoxFontBold { get; set; }
     public string TextBoxFontSize { get; set; }
     public string ShowButtonHints { get; set; }
     public string GridCompactMode { get; set; }
@@ -141,6 +141,7 @@ public class LanguageSettings
     public string ShowErrorLogFile { get; set; }
     public string ShowWhisperLogFile { get; set; }
     public string ShowSettingsFile { get; set; }
+    public string ShowAssaLayer { get; set; }
 
     public LanguageSettings()
     {
@@ -279,6 +280,7 @@ public class LanguageSettings
         ShowErrorLogFile = "Show error log file";
         ShowWhisperLogFile = "Show Whisper log file";
         ShowSettingsFile = "Show settings file";
+        ShowAssaLayer = "Show ASSA layer box";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)
