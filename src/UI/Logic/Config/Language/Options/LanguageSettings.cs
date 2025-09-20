@@ -137,6 +137,8 @@ public class LanguageSettings
     public string AutoOpenVideoFile { get; set; }
     public string DownloadMpv { get; set; }
     public string GoToLineNumberSetsVideoPosition { get; set; }
+    public string ShowLogFile { get; set; }
+    public string ShowSettingsFile { get; set; }
 
     public LanguageSettings()
     {
@@ -271,6 +273,8 @@ public class LanguageSettings
         GoToLineNumberSetsVideoPosition = "Go-to-line-number also sets video position";
         DefaultFormat = "Default format";
         DefaultSaveAsFormat = "Default 'Save as' format";
+        ShowLogFile = "Show log file";
+        ShowSettingsFile = "Show settings file";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

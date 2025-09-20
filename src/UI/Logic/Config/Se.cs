@@ -175,7 +175,7 @@ public class Se
 
     public static void SaveSettings()
     {
-        var settingsFileName = Path.Combine(DataFolder, "Settings.json");
+        var settingsFileName = GetSettingsFilePath();
         SaveSettings(settingsFileName);
     }
 
@@ -190,8 +190,13 @@ public class Se
 
     public static void LoadSettings()
     {
-        var settingsFileName = Path.Combine(DataFolder, "Settings.json");
+        var settingsFileName = GetSettingsFilePath();
         LoadSettings(settingsFileName);
+    }
+
+    internal static string GetSettingsFilePath()
+    {
+        return Path.Combine(DataFolder, "Settings.json");
     }
 
     public static void LoadSettings(string settingsFileName)

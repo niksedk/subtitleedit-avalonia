@@ -137,10 +137,12 @@ public partial class SettingsViewModel : ObservableObject
     public List<SettingsSection> Sections { get; internal set; }
 
     private readonly IWindowService _windowService;
+    private readonly IFolderHelper _folderHelper;
 
-    public SettingsViewModel(IWindowService windowService)
+    public SettingsViewModel(IWindowService windowService, IFolderHelper folderHelper)
     {
         _windowService = windowService;
+        _folderHelper = folderHelper;
 
         Themes = ["System", "Light", "Dark"];
         SelectedTheme = Themes[0];
@@ -522,6 +524,28 @@ public partial class SettingsViewModel : ObservableObject
 
         OkPressed = true;
         Window?.Close();
+    }
+
+    [RelayCommand]
+    private async Task ShowLogFile()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        await _folderHelper.OpenFolderWithFileSelected(Window!, Se.GetErrorLogFilePath());
+    }
+
+    [RelayCommand]
+    private async Task ShowSettingsFile()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        await _folderHelper.OpenFolderWithFileSelected(Window!, Se.GetSettingsFilePath());
     }
 
     private void LoadFileTypeAssociations()

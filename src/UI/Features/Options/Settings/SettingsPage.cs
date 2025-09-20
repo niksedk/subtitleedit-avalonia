@@ -9,7 +9,6 @@ using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Input;
-using DynamicData;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
@@ -100,9 +99,11 @@ public class SettingsPage : UserControl
         Grid.SetColumn(scrollViewer, 1);
 
         var buttonReset = UiUtil.MakeButton(Se.Language.General.Reset, vm.ResetAllSettingsCommand);
+        var buttonShowLogFile = UiUtil.MakeButton(Se.Language.Options.Settings.ShowLogFile, vm.ShowLogFileCommand);
+        var buttonShowSettingsFile = UiUtil.MakeButton(Se.Language.Options.Settings.ShowSettingsFile, vm.ShowSettingsFileCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.CommandOkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CommandCancelCommand);
-        var buttonBar = UiUtil.MakeButtonBar(buttonReset, buttonOk, buttonCancel);
+        var buttonBar = UiUtil.MakeButtonBar(buttonReset, buttonShowSettingsFile, buttonShowLogFile, buttonOk, buttonCancel);
         grid.Children.Add(buttonBar);
         Grid.SetRow(buttonBar, 2);
         Grid.SetColumn(buttonBar, 0);
