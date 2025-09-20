@@ -93,4 +93,9 @@ public class MainView : ViewBase
 
         return root;
     }
+
+    public void OpenFile(string eArg)
+    {
+        throw new NotImplementedException();
+    }
 }
