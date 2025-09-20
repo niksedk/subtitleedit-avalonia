@@ -78,4 +78,5 @@ internal class IconNames
     public const string History = "mdi-history";
     public const string MenuDown = "mdi-menu-down";
     public const string AnimationPlay = "mdi-animation-play";
+    public const string FileMultiple = "mdi-file-multiple";
 }

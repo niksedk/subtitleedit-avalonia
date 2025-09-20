@@ -86,9 +86,11 @@ public class SettingsPage : UserControl
         };
 
         if (OperatingSystem.IsWindows())
-        { 
-            menu.Children.Add(MakeMenuItem(Se.Language.Options.Settings.FileTypeAssociations, vm.ScrollToSectionCommand, IconNames.FileCog));   
+        {
+            menu.Children.Add(MakeMenuItem(Se.Language.Options.Settings.FileTypeAssociations, vm.ScrollToSectionCommand, IconNames.FileCog));
         }
+
+        menu.Children.Add(MakeMenuItem(Se.Language.Options.Settings.FilesAndLogs, vm.ScrollToSectionCommand, IconNames.FileMultiple));
 
         grid.Children.Add(menu);
         Grid.SetRow(menu, 1);
@@ -99,11 +101,9 @@ public class SettingsPage : UserControl
         Grid.SetColumn(scrollViewer, 1);
 
         var buttonReset = UiUtil.MakeButton(Se.Language.General.Reset, vm.ResetAllSettingsCommand);
-        var buttonShowLogFile = UiUtil.MakeButton(Se.Language.Options.Settings.ShowLogFile, vm.ShowLogFileCommand);
-        var buttonShowSettingsFile = UiUtil.MakeButton(Se.Language.Options.Settings.ShowSettingsFile, vm.ShowSettingsFileCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.CommandOkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CommandCancelCommand);
-        var buttonBar = UiUtil.MakeButtonBar(buttonReset, buttonShowSettingsFile, buttonShowLogFile, buttonOk, buttonCancel);
+        var buttonBar = UiUtil.MakeButtonBar(buttonReset, buttonOk, buttonCancel);
         grid.Children.Add(buttonBar);
         Grid.SetRow(buttonBar, 2);
         Grid.SetColumn(buttonBar, 0);
@@ -439,6 +439,14 @@ public class SettingsPage : UserControl
                         }, true)
                 })
             ]));
+
+        sections.Add(new SettingsSection(Se.Language.Options.Settings.FilesAndLogs,
+            [
+                new SettingsItem(Se.Language.Options.Settings.ShowErrorLogFile, () => UiUtil.MakeLink(Se.GetErrorLogFilePath(), _vm.ShowErrorLogFileCommand)),
+                new SettingsItem(Se.Language.Options.Settings.ShowWhisperLogFile, () => UiUtil.MakeLink(Se.GetWhisperLogFilePath(), _vm.ShowWhisperLogFileCommand)),
+                new SettingsItem(Se.Language.Options.Settings.ShowSettingsFile, () => UiUtil.MakeLink(Se.GetSettingsFilePath(), _vm.ShowSettingsFileCommand)),
+            ]));
+
 
         return sections;
     }

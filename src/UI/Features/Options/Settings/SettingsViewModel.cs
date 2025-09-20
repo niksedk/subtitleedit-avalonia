@@ -527,7 +527,18 @@ public partial class SettingsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task ShowLogFile()
+    private async Task ShowErrorLogFile()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        await _folderHelper.OpenFolderWithFileSelected(Window!, Se.GetErrorLogFilePath());
+    }
+
+    [RelayCommand]
+    private async Task ShowWhisperLogFile()
     {
         if (Window == null)
         {

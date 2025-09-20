@@ -137,7 +137,9 @@ public class LanguageSettings
     public string AutoOpenVideoFile { get; set; }
     public string DownloadMpv { get; set; }
     public string GoToLineNumberSetsVideoPosition { get; set; }
-    public string ShowLogFile { get; set; }
+    public string FilesAndLogs { get; set; }
+    public string ShowErrorLogFile { get; set; }
+    public string ShowWhisperLogFile { get; set; }
     public string ShowSettingsFile { get; set; }
 
     public LanguageSettings()
@@ -273,7 +275,9 @@ public class LanguageSettings
         GoToLineNumberSetsVideoPosition = "Go-to-line-number also sets video position";
         DefaultFormat = "Default format";
         DefaultSaveAsFormat = "Default 'Save as' format";
-        ShowLogFile = "Show log file";
+        FilesAndLogs = "Files and logs";
+        ShowErrorLogFile = "Show error log file";
+        ShowWhisperLogFile = "Show Whisper log file";
         ShowSettingsFile = "Show settings file";
     }
 
