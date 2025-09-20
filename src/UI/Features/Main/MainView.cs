@@ -10,6 +10,7 @@ using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Config.Language;
 using System;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -32,14 +33,20 @@ public class MainView : ViewBase
         _vm.MainView = this;
         DataContext = _vm;
 
-        _vm.Window = (Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow!;
-
-        _vm.Window.Closing += _vm.OnClosing;
-
-        _vm.Window.OnLoaded(e =>
+        if (Application.Current?.ApplicationLifetime is ClassicDesktopStyleApplicationLifetime desktop)
         {
-            _vm.OnLoaded();
-        });
+            _vm.Window = desktop.MainWindow;
+            if (_vm.Window == null)
+            {
+                throw new InvalidOperationException("Main window is not set in the application lifetime.");
+            }
+
+            _vm.Window.Closing += _vm.OnClosing;
+            _vm.Window.OnLoaded(e =>
+            {
+                _vm.OnLoaded();
+            });
+        }
 
         // load language
         Se.Settings.General.Language = Se.Settings.General.Language ?? "English"; // default to English if not set
@@ -94,8 +101,13 @@ public class MainView : ViewBase
         return root;
     }
 
-    public void OpenFile(string eArg)
+    internal async Task OpenFile(string fileName)
     {
-        throw new NotImplementedException();
+        if (_vm == null || !System.IO.File.Exists(fileName))
+        {
+            return;
+        }   
+
+        await _vm.SubtitleOpen(fileName);
     }
 }

@@ -4011,7 +4011,7 @@ public partial class MainViewModel :
         return true;
     }
 
-    private async Task SubtitleOpen(string fileName, string? videoFileName = null, int? selectedSubtitleIndex = null,
+    public async Task SubtitleOpen(string fileName, string? videoFileName = null, int? selectedSubtitleIndex = null,
         TextEncoding? textEncoding = null)
     {
         if (string.IsNullOrEmpty(fileName))
