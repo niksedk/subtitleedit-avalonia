@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
@@ -51,6 +52,14 @@ public static class InitFooter
                     Value = IconNames.LockClock,
                     [!Visual.IsVisibleProperty] = new Binding(nameof(vm.LockTimeCodes)),
                     FontSize = 20,
+                    [ToolTip.TipProperty] = Se.Language.General.LockTimeCodes,
+                },
+                new Icon
+                {
+                    Value = IconNames.Filter,
+                    [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowLayerFilterIcon)),
+                    FontSize = 20,
+                    [ToolTip.TipProperty] = Se.Language.General.LayerFilterOn,
                 },
                 right,
             },

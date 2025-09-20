@@ -17,7 +17,7 @@ public partial class PickLayersViewModel : ObservableObject
     public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
-    public List<int> SelectedLayers { get; private set; }
+    public List<int>? SelectedLayers { get; private set; }
 
     public PickLayersViewModel()
     {
@@ -33,6 +33,32 @@ public partial class PickLayersViewModel : ObservableObject
         {
             var item = new LayerItem(layer, visibleLayers.Contains(layer)); 
             Layers.Add(item);
+        }
+    }
+
+    [RelayCommand]
+    private void SelectAll()
+    {
+        foreach (var layer in Layers)
+        {
+            layer.IsSelected = true;
+        }
+    }
+
+    [RelayCommand]
+    private void RemoveFilter()
+    {
+        SelectedLayers = null;
+        OkPressed = true;
+        Window?.Close();
+    }
+
+    [RelayCommand]
+    private void InvertSelection()
+    {
+        foreach (var layer in Layers)
+        {
+            layer.IsSelected = !layer.IsSelected;
         }
     }
 

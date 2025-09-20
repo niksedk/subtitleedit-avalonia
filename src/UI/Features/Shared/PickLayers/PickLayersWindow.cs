@@ -5,7 +5,6 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
-using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -27,9 +26,14 @@ public class PickLayersWindow : Window
 
         var fontsView = MakeLayersView(vm);
 
+        var buttonRemoveFilter = UiUtil.MakeButton(Se.Language.General.RemoveFilter, vm.RemoveFilterCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
+        var buttonPanel = UiUtil.MakeButtonBar(buttonRemoveFilter, buttonOk, buttonCancel);
+
+        var buttonSelectAll = UiUtil.MakeButton(Se.Language.General.SelectAll, vm.SelectAllCommand);
+        var buttonInverseSelection = UiUtil.MakeButton(Se.Language.General.InvertSelection, vm.InvertSelectionCommand);
+        var panelButtonTools = UiUtil.MakeHorizontalPanel(buttonSelectAll, buttonInverseSelection);
 
         var grid = new Grid
         {
@@ -50,6 +54,7 @@ public class PickLayersWindow : Window
         };
 
         grid.Add(fontsView, 0);
+        grid.Add(panelButtonTools, 1);
         grid.Add(buttonPanel, 1);
 
         Content = grid;

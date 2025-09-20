@@ -155,6 +155,7 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _showAutoTranslateSelectedLines;
     [ObservableProperty] private bool _showShotChangesListMenuItem;
     [ObservableProperty] private bool _showLayer;
+    [ObservableProperty] private bool _showLayerFilterIcon;
 
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
@@ -658,6 +659,7 @@ public partial class MainViewModel :
         _changeSubtitleHashOriginal = GetFastHashOriginal();
 
         _visibleLayers = null;
+        ShowLayerFilterIcon = false;
         if (AudioVisualizer?.WavePeaks != null)
         {
             AudioVisualizer.WavePeaks = null;
@@ -1083,9 +1085,9 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = 
-            await _windowService.ShowDialogAsync<PickLayersWindow, PickLayersViewModel>(Window!, vm => 
-        { 
+        var result =
+            await _windowService.ShowDialogAsync<PickLayersWindow, PickLayersViewModel>(Window!, vm =>
+        {
             vm.Initialize(Subtitles.ToList(), _visibleLayers);
         });
 
@@ -1096,6 +1098,7 @@ public partial class MainViewModel :
         }
 
         _visibleLayers = result.SelectedLayers;
+        ShowLayerFilterIcon = IsFormatAssa && Se.Settings.Appearance.ShowLayer && _visibleLayers != null;
         AudioVisualizer.LayersFilter = _visibleLayers;
         _updateAudioVisualizer = true;
 
@@ -7026,6 +7029,7 @@ public partial class MainViewModel :
         IsFormatAssa = SelectedSubtitleFormat is AdvancedSubStationAlpha;
         HasFormatStyle = SelectedSubtitleFormat is AdvancedSubStationAlpha;
         ShowLayer = IsFormatAssa && Se.Settings.Appearance.ShowLayer;
+        ShowLayerFilterIcon = IsFormatAssa && Se.Settings.Appearance.ShowLayer && _visibleLayers != null;
         AutoFitColumns();
 
         if (!_opening && e.RemovedItems.Count == 1 && e.AddedItems.Count == 1)

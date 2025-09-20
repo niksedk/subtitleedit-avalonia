@@ -379,6 +379,10 @@ public class LanguageGeneral
     public string RemoveSelectedFile { get; set; }
     public string SaveVideoAsVideoTitle { get; set; }
     public string FilterByLayer { get; set; }
+    public string SelectNone { get; set; }
+    public string LockTimeCodes { get; set; }
+    public string LayerFilterOn { get; set; }
+    public string RemoveFilter { get; set; }
 
     public LanguageGeneral()
     {
@@ -753,5 +757,9 @@ public class LanguageGeneral
         RemoveSelectedFile = "Remove selected file?";
         SaveVideoAsVideoTitle = "Save video as";
         FilterByLayer = "Filter by layer";
+        SelectNone = "Select none";
+        LockTimeCodes = "Lock time codes";
+        LayerFilterOn = "Layer filter on";
+        RemoveFilter = "Remove filter";
     }
 }
