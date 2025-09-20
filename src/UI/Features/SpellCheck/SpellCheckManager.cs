@@ -243,15 +243,14 @@ public class SpellCheckManager : ISpellCheckManager, IDoSpell
         _spellCheckWordLists?.AddUserWord(word);
     }
 
+    public bool IsWordCorrect(string word)
+    {
+        return _hunspellWeCantSpell != null && _hunspellWeCantSpell.Check(word);
+    }
+
     public bool DoSpell(string word)
     {
-        var isCorrect = false;
-        if (_hunspellWeCantSpell != null)
-        {
-            isCorrect = _hunspellWeCantSpell.Check(word);
-        }
-
-        return isCorrect;
+        return _hunspellWeCantSpell != null && _hunspellWeCantSpell.Check(word);
     }
 
     private bool IsWordCorrect(SpellCheckWord spellCheckWord, SubtitleLineViewModel p, List<SpellCheckWord> words, int wordIndex)

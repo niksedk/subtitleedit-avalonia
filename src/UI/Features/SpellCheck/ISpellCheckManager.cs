@@ -8,6 +8,7 @@ namespace Nikse.SubtitleEdit.Features.SpellCheck;
 public interface ISpellCheckManager
 {
     event SpellCheckManager.SpellCheckWordChangedHandler? OnWordChanged;
+    bool IsWordCorrect(string word);
     List<SpellCheckResult> CheckSpelling(ObservableCollection<SubtitleLineViewModel> subtitles, SpellCheckResult? startFrom = null);
     int NoOfChangedWords { get; set; }
     int NoOfSkippedWords { get; set; }

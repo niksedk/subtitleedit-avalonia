@@ -1,3 +1,4 @@
+using Avalonia.Controls.Shapes;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Nikse.SubtitleEdit.Core.Common;
@@ -110,6 +111,54 @@ public partial class SubtitleLineViewModel : ObservableObject
         {
             Style = paragraph.Extra;
         }
+    }
+
+    public Paragraph ToParagraph(SubtitleFormat? subtitleFormat = null)
+    {
+        var p = new Paragraph()
+        {
+            Number = Number,
+            StartTime = new TimeCode(StartTime),
+            EndTime = new TimeCode(EndTime),
+            Text = Text,
+            Actor = Actor,
+            Style = Style,
+            Language = Language,
+            Region = Region,
+            Layer = Layer,
+            Bookmark = Bookmark,
+        };
+
+        if (subtitleFormat != null && subtitleFormat is AdvancedSubStationAlpha)
+        {
+            p.Extra = Style;
+        }
+
+        return p;
+    }
+
+    public Paragraph ToParagraphOriginal(SubtitleFormat? subtitleFormat = null)
+    {
+        var p = new Paragraph()
+        {
+            Number = Number,
+            StartTime = new TimeCode(StartTime),
+            EndTime = new TimeCode(EndTime),
+            Text = OriginalText,
+            Actor = Actor,
+            Style = Style,
+            Language = Language,
+            Region = Region,
+            Layer = Layer,
+            Bookmark = Bookmark,
+        };
+
+        if (subtitleFormat != null && subtitleFormat is AdvancedSubStationAlpha)
+        {
+            p.Extra = Style;
+        }
+
+        return p;
     }
 
     public double CharactersPerSecond

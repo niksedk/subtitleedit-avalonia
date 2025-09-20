@@ -5165,26 +5165,7 @@ public partial class MainViewModel :
         _subtitle.Paragraphs.Clear();
         foreach (var line in Subtitles)
         {
-            var p = new Paragraph()
-            {
-                Number = line.Number,
-                StartTime = new TimeCode(line.StartTime),
-                EndTime = new TimeCode(line.EndTime),
-                Text = line.Text,
-                Actor = line.Actor,
-                Style = line.Style,
-                Language = line.Language,
-                Region = line.Region,
-                Layer = line.Layer,
-                Bookmark = line.Bookmark,
-            };
-
-            if (IsFormatAssa)
-            {
-                p.Extra = line.Style;
-            }
-
-            _subtitle.Paragraphs.Add(p);
+            _subtitle.Paragraphs.Add(line.ToParagraph(SelectedSubtitleFormat));
         }
 
         return _subtitle;
@@ -5199,25 +5180,7 @@ public partial class MainViewModel :
         _subtitleOriginal.Paragraphs.Clear();
         foreach (var line in Subtitles)
         {
-            var p = new Paragraph()
-            {
-                Number = line.Number,
-                StartTime = new TimeCode(line.StartTime),
-                EndTime = new TimeCode(line.EndTime),
-                Text = line.OriginalText,
-                Actor = line.Actor,
-                Style = line.Style,
-                Language = line.Language,
-                Region = line.Region,
-                Layer = line.Layer,
-            };
-
-            if (_subtitleOriginal.OriginalFormat.Name == AdvancedSubStationAlpha.NameOfFormat)
-            {
-                p.Extra = line.Style;
-            }
-
-            _subtitleOriginal.Paragraphs.Add(p);
+            _subtitleOriginal.Paragraphs.Add(line.ToParagraphOriginal(SelectedSubtitleFormat));
         }
 
         return _subtitleOriginal;
