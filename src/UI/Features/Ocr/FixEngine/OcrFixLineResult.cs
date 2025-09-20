@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Media;
+using Avalonia.Styling;
 using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Features.Ocr.FixEngine;
@@ -9,6 +10,16 @@ public class OcrFixLineResult
 {
     public int LineIndex { get; set; }
     public List<OcrFixLinePartResult> Words { get; set; } = new();
+
+    public OcrFixLineResult()
+    {
+    }
+
+    public OcrFixLineResult(int index, string text)
+    {
+        LineIndex = index;
+        Words = new List<OcrFixLinePartResult> { new() { Word = text, IsSpellCheckedOk = null } };
+    }
 
     public string GetText()
     {

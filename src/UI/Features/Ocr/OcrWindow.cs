@@ -237,23 +237,25 @@ public class OcrWindow : Window
                         return stackPanel;
                     })
                 },
-                new DataGridTextColumn
-                {
-                    Header = Se.Language.General.Text,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(OcrSubtitleItem.Text)),
-                    IsReadOnly = true,
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
-                },
+                //new DataGridTextColumn
+                //{
+                //    Header = Se.Language.General.Text,
+                //    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                //    Binding = new Binding(nameof(OcrSubtitleItem.Text)),
+                //    IsReadOnly = true,
+                //    Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
+                //},
                 new DataGridTemplateColumn
                 {
                     Header = Se.Language.General.Text,
                     IsReadOnly = true,
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     CellTemplate = new FuncDataTemplate<OcrSubtitleItem>((item, _) =>
                     {
-                       var contentPresenter = new ContentPresenter();
-        
+                        var contentPresenter = new ContentPresenter();
+                        contentPresenter.Margin = new Thickness(3, 1, 3, 1);
+
                         // Bind to HasFormattedText to trigger updates when FixResult changes
                         var binding = new Binding(nameof(OcrSubtitleItem.HasFormattedText))
                         {
@@ -358,6 +360,22 @@ public class OcrWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
+        var textBoxText = new TextBox
+        {
+            Width = 320,
+            Height = 80,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            AcceptsReturn = true,
+            TextWrapping = Avalonia.Media.TextWrapping.NoWrap,
+            Margin = new Thickness(0, 0, 10, 0),
+            [!TextBox.TextProperty] = new Binding($"{nameof(vm.SelectedOcrSubtitleItem)}.{nameof(OcrSubtitleItem.Text)}")
+            {
+                Source = vm,
+                Mode = BindingMode.TwoWay
+            }
+        };
+        textBoxText.TextChanged += vm.TextBoxTextChanged;
         var panelText = new StackPanel
         {
             Orientation = Orientation.Vertical,
@@ -367,21 +385,7 @@ public class OcrWindow : Window
             Children =
             {
                 UiUtil.MakeLabel(Se.Language.General.Text).WithAlignmentTop(),
-                new TextBox
-                {
-                    Width = 320,
-                    Height = 80,
-                    HorizontalAlignment = HorizontalAlignment.Stretch,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    AcceptsReturn = true,
-                    TextWrapping = Avalonia.Media.TextWrapping.NoWrap,
-                    Margin = new Thickness(0, 0, 10, 0),
-                    [!TextBox.TextProperty] = new Binding($"{nameof(vm.SelectedOcrSubtitleItem)}.{nameof(OcrSubtitleItem.Text)}")
-                    {
-                        Source = vm,
-                        Mode = BindingMode.TwoWay
-                    }
-                }
+                textBoxText,
             }
         };
 

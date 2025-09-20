@@ -583,17 +583,13 @@ public partial class OcrViewModel : ObservableObject
                     {
                         LineIndex = idx,
 
-                        // TODO: spell check
+                        //TODO: spell check
                         Words = new List<OcrFixLinePartResult> { new() { Word = ocrItem.Text, IsSpellCheckedOk = null } },
                     };
                 }
                 else
                 {
-                    ocrItem.FixResult = new OcrFixLineResult 
-                    { 
-                        LineIndex = idx,
-                        Words = new List<OcrFixLinePartResult> { new() { Word = ocrItem.Text, IsSpellCheckedOk = null } },
-                    };
+                    ocrItem.FixResult = new OcrFixLineResult(idx, ocrItem.Text);    
                 }
             }
         }
@@ -642,11 +638,7 @@ public partial class OcrViewModel : ObservableObject
                 }
                 else
                 {
-                    ocrItem.FixResult = new OcrFixLineResult
-                    {
-                        LineIndex = idx,
-                        Words = new List<OcrFixLinePartResult> { new() { Word = ocrItem.Text, IsSpellCheckedOk = null } },
-                    };
+                    ocrItem.FixResult = new OcrFixLineResult(idx, ocrItem.Text);
                 }
             }
         }
@@ -1586,5 +1578,28 @@ public partial class OcrViewModel : ObservableObject
     internal void OnLoaded()
     {
         DictionaryChanged();
+    }
+
+    internal void TextBoxTextChanged(object? sender, TextChangedEventArgs e)
+    {
+        var selected = SelectedOcrSubtitleItem;
+        if (selected == null)
+        {
+            return;
+        }
+
+        if (selected.FixResult == null)
+        {
+            return;
+        }
+
+        if (selected.FixResult.GetText() == selected.Text)
+        {
+            return;
+        }
+
+        var idx = OcrSubtitleItems.IndexOf(selected);
+        selected.FixResult = new OcrFixLineResult(idx, selected.Text);
+        //TODO: spell check?
     }
 }
