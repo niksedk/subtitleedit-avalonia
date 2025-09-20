@@ -15,6 +15,7 @@ using Projektanker.Icons.Avalonia.FontAwesome;
 using Projektanker.Icons.Avalonia.MaterialDesign;
 using System;
 using System.Text;
+using Avalonia.Threading;
 
 AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
 {
@@ -104,7 +105,20 @@ lifetime.MainWindow = new Window
     MinHeight = 500,
 };
 
-lifetime.MainWindow.Content = new MainView();
+var mainView = new MainView();
+lifetime.MainWindow.Content = mainView;
+
+
+// Hook macOS/Windows/Linux file open events
+lifetime.Startup += (_, e) =>
+{
+    if (e.Args.Length > 0 && System.IO.File.Exists(e.Args[0]))
+    {
+        Se.LogError("lifetime.Startup " + e.Args[0]);
+        //Dispatcher.UIThread.Post(() => mainView.OpenFile(e.Args[0]));
+    }
+};
+
 
 #if DEBUG
 lifetime.MainWindow.AttachDevTools();

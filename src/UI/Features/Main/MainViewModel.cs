@@ -447,11 +447,11 @@ public partial class MainViewModel :
             Se.Settings.General.LayoutNumber = InitLayout.MakeLayout(MainView!, this, vm.SelectedLayout.Value);
 
             if (OperatingSystem.IsMacOS() && !string.IsNullOrEmpty(_videoFileName) && VideoPlayerControl != null)
-            { 
-                var videoFileName = _videoFileName; 
+            {
+                var videoFileName = _videoFileName;
                 var position = VideoPlayerControl.Position;
                 VideoPlayerControl.Close();
-                Dispatcher.UIThread.Post(async void() =>
+                Dispatcher.UIThread.Post(async void () =>
                 {
                     try
                     {
@@ -467,6 +467,7 @@ public partial class MainViewModel :
                 });
             }
         }
+
         _shortcutManager.ClearKeys();
     }
 
@@ -895,10 +896,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowExportCustomTextFormat()
     {
-        var result = await _windowService.ShowDialogAsync<ExportCustomTextFormatWindow, ExportCustomTextFormatViewModel>(Window!, vm =>
-        {
-            vm.Initialize(Subtitles.ToList(), _subtitleFileName, _videoFileName);
-        });
+        var result = await _windowService.ShowDialogAsync<ExportCustomTextFormatWindow, ExportCustomTextFormatViewModel>(Window!,
+            vm => { vm.Initialize(Subtitles.ToList(), _subtitleFileName, _videoFileName); });
 
         _shortcutManager.ClearKeys();
     }
@@ -955,7 +954,12 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ExportPac()
     {
-        var result = await _windowService.ShowDialogAsync<ExportPacWindow, ExportPacViewModel>(Window!);
+        if (Window == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<ExportPacWindow, ExportPacViewModel>(Window);
         if (!result.OkPressed || result.PacCodePage == null)
         {
             return;
@@ -1243,10 +1247,7 @@ public partial class MainViewModel :
     {
         var result = await _windowService.ShowDialogAsync<MergeSameTimeCodesWindow, MergeSameTimeCodesViewModel>(
             Window!,
-            vm =>
-            {
-                vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList(), GetUpdateSubtitle());
-            });
+            vm => { vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList(), GetUpdateSubtitle()); });
 
         if (!result.OkPressed)
         {
@@ -1601,10 +1602,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<ShotChangesWindow, ShotChangesViewModel>(Window!, vm =>
-        {
-            vm.Initialize(_videoFileName);
-        });
+        var result = await _windowService.ShowDialogAsync<ShotChangesWindow, ShotChangesViewModel>(Window!, vm => { vm.Initialize(_videoFileName); });
 
         if (result.OkPressed && result.FfmpegLines.Count > 0)
         {
@@ -1628,10 +1626,8 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<ShotChangeListWindow, ShotChangeListViewModel>(Window!, vm =>
-        {
-            vm.Initialize(AudioVisualizer?.ShotChanges ?? new List<double>());
-        });
+        var result = await _windowService.ShowDialogAsync<ShotChangeListWindow, ShotChangeListViewModel>(Window!,
+            vm => { vm.Initialize(AudioVisualizer?.ShotChanges ?? new List<double>()); });
 
         if (result.OKProssed && AudioVisualizer != null)
         {
@@ -1668,7 +1664,8 @@ public partial class MainViewModel :
             }
         }
         else
-        { // add shot change
+        {
+            // add shot change
             var list = AudioVisualizer.ShotChanges.Where(p => p > 0).ToList();
             list.Add(cp);
             list.Sort();
@@ -1731,10 +1728,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowAutoTranslate()
     {
-        var result = await _windowService.ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(Window!, vm =>
-        {
-            vm.Initialize(GetUpdateSubtitle());
-        });
+        var result = await _windowService.ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(Window!, vm => { vm.Initialize(GetUpdateSubtitle()); });
 
         if (!result.OkPressed)
         {
@@ -2105,6 +2099,7 @@ public partial class MainViewModel :
             {
                 item.Bookmark = result.BookmarkText;
             }
+
             new BookmarkPersistence(GetUpdateSubtitle(), _subtitleFileName).Save();
         }
         else if (result.ListPressed)
@@ -2889,7 +2884,8 @@ public partial class MainViewModel :
                             SubtitleGrid.SelectedIndex = idx;
                             SubtitleGrid.ScrollIntoView(SubtitleGrid.SelectedItem, null);
 
-                            ShowStatus(string.Format(Se.Language.General.FoundXInLineYZ, _findService.CurrentTextFound, _findService.CurrentLineNumber + 1, _findService.CurrentTextIndex + 1));
+                            ShowStatus(string.Format(Se.Language.General.FoundXInLineYZ, _findService.CurrentTextFound, _findService.CurrentLineNumber + 1,
+                                _findService.CurrentTextIndex + 1));
 
                             // wait for text box to update
                             Task.Delay(50);
@@ -3128,7 +3124,6 @@ public partial class MainViewModel :
         foreach (var s in selectedItems)
         {
             s.Text = Utilities.AutoBreakLine(s.Text);
-
         }
 
         _updateAudioVisualizer = true;
@@ -3540,10 +3535,7 @@ public partial class MainViewModel :
     private async Task SetNewStyleForSelectedLines(string styleName)
     {
         var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!,
-            vm =>
-            {
-                vm.Initialize(Se.Language.General.Style + " - " + Se.Language.General.New, string.Empty, 250, 20, true);
-            });
+            vm => { vm.Initialize(Se.Language.General.Style + " - " + Se.Language.General.New, string.Empty, 250, 20, true); });
 
         if (result.OkPressed && !string.IsNullOrWhiteSpace(result.Text))
         {
@@ -3618,10 +3610,7 @@ public partial class MainViewModel :
     private async Task SetNewActorForSelectedLines(string styleName)
     {
         var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!,
-            vm =>
-            {
-                vm.Initialize(Se.Language.General.Actor + " - " + Se.Language.General.New, string.Empty, 250, 20, true);
-            });
+            vm => { vm.Initialize(Se.Language.General.Actor + " - " + Se.Language.General.New, string.Empty, 250, 20, true); });
 
         if (result.OkPressed && !string.IsNullOrWhiteSpace(result.Text))
         {
@@ -4357,10 +4346,7 @@ public partial class MainViewModel :
         var subtitles = tsParser.GetDvbSubtitles(packetId);
         Dispatcher.UIThread.Post(async () =>
         {
-            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm =>
-            {
-                vm.Initialize(tsParser, subtitles, fileName);
-            });
+            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm => { vm.Initialize(tsParser, subtitles, fileName); });
 
             if (result.OkPressed)
             {
@@ -5434,6 +5420,13 @@ public partial class MainViewModel :
         var arguments = Environment.GetCommandLineArgs();
         if (arguments.Length > 1)
         {
+            var sb = new StringBuilder();
+            foreach (var arg in arguments)
+            {
+                sb.AppendLine(arg);
+            }
+            Se.LogError("OnLoaded Environment.GetCommandLineArgs: " + sb);
+
             var fileName = arguments[1];
             if (File.Exists(fileName))
             {
@@ -5493,11 +5486,11 @@ public partial class MainViewModel :
         }
 
         Task.Run(async () =>
-            {
-                await Task.Delay(1000); // delay 1 second (off UI thread)
-                _undoRedoManager.StartChangeDetection();
-                _loading = false;
-            });
+        {
+            await Task.Delay(1000); // delay 1 second (off UI thread)
+            _undoRedoManager.StartChangeDetection();
+            _loading = false;
+        });
     }
 
     private bool IsPositionOnAnyScreen(PixelRect windowBounds)
@@ -5566,10 +5559,7 @@ public partial class MainViewModel :
                     Configuration.Settings.General.VlcWaveTranscodeSettings, out _);
                 ShowStatus(Se.Language.Main.ExtractingWaveInfo);
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                Task.Run(async () =>
-                {
-                    await ExtractWaveformAndSpectrogramAndShotChanges(process, tempWaveFileName, peakWaveFileName, videoFileName);
-                });
+                Task.Run(async () => { await ExtractWaveformAndSpectrogramAndShotChanges(process, tempWaveFileName, peakWaveFileName, videoFileName); });
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
         }
@@ -5674,8 +5664,10 @@ public partial class MainViewModel :
                         {
                             // ignore
                         }
+
                         break;
                     }
+
                     Task.Delay(100).Wait();
                 }
 
@@ -5688,6 +5680,7 @@ public partial class MainViewModel :
     }
 
     private Lock _addShotChangeLock = new Lock();
+
     private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
     {
         if (string.IsNullOrWhiteSpace(outLine.Data))
@@ -5900,6 +5893,7 @@ public partial class MainViewModel :
         {
             idx = Subtitles.Count - 1;
         }
+
         SelectAndScrollToRow(idx);
 
         Renumber();
