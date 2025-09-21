@@ -6092,6 +6092,12 @@ public partial class MainViewModel :
         _videoOpenTokenSource?.Cancel();
         VideoPlayerControl?.Close();
         _videoFileName = string.Empty;
+
+        if (AudioVisualizer != null)
+        {
+            AudioVisualizer.WavePeaks = null;
+            AudioVisualizer.ShotChanges = new List<double>();
+        }
     }
 
     public bool IsTyping()
