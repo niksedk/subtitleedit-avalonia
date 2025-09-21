@@ -237,6 +237,20 @@ public static class InitListViewAndEditBox
             Source = vm,
         });
 
+        var layerColumn = new DataGridTextColumn
+        {
+            Header = Se.Language.General.Layer,
+            Binding = new Binding(nameof(SubtitleLineViewModel.Layer)),
+            Width = new DataGridLength(23),
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
+        };
+        vm.SubtitleGrid.Columns.Add(layerColumn);
+        layerColumn.Bind(DataGridColumn.IsVisibleProperty, new Binding(nameof(vm.ShowColumnLayer))
+        {
+            Mode = BindingMode.OneWay,
+            Source = vm,
+        });
+
         vm.SubtitleGrid.DataContext = vm.Subtitles;
         vm.SubtitleGrid.SelectionChanged += vm.SubtitleGrid_SelectionChanged;
 
@@ -388,7 +402,7 @@ public static class InitListViewAndEditBox
                 [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnLayer)),
             }
         };
-        showLayerMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsColumnLayerVisible), BindingMode.TwoWay));
+        showLayerMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowColumnLayerFlyoutMenuItem), BindingMode.TwoWay));
         flyout.Items.Add(showLayerMenuItem);
 
 

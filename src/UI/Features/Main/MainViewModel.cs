@@ -161,6 +161,8 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _showShotChangesListMenuItem;
     [ObservableProperty] private bool _showLayer;
     [ObservableProperty] private bool _showLayerFilterIcon;
+    [ObservableProperty] private bool _showColumnLayerFlyoutMenuItem;
+
 
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
@@ -2318,11 +2320,11 @@ public partial class MainViewModel :
     [RelayCommand]
     private void ToggleShowColumnLayer()
     {
-        Se.Settings.General.ShowColumnLayer = !Se.Settings.General.ShowColumnLayer;
+        ShowColumnLayer = !ShowColumnLayer;
+        Se.Settings.General.ShowColumnLayer = ShowColumnLayer;
         ShowColumnLayer = Se.Settings.General.ShowColumnLayer;
         AutoFitColumns();
     }
-
 
     [RelayCommand]
     private void DuplicateSelectedLines()
@@ -3664,7 +3666,7 @@ public partial class MainViewModel :
         {
             return;
         }
-        
+
         var lines = s.Text.SplitToLines();
         if (!string.IsNullOrWhiteSpace(s.Text) && lines.Count == 1)
         {
@@ -4071,9 +4073,9 @@ public partial class MainViewModel :
 
     public void AutoFitColumns()
     {
-        var columns = SubtitleGrid.Columns;
+        var columns = SubtitleGrid.Columns.Where(p => p.IsVisible).ToList();
 
-        for (var i = 0; i < columns.Count - 1; i++)
+        for (var i = 0; i < columns.Count; i++)
         {
             var column = columns[i];
 
@@ -4089,6 +4091,11 @@ public partial class MainViewModel :
             else
             {
                 column.Width = originalWidth;
+            }
+
+            if (i == columns.Count - 1)
+            {
+                column.Width = new DataGridLength(1, DataGridLengthUnitType.Auto);
             }
         }
 
@@ -5572,6 +5579,7 @@ public partial class MainViewModel :
             Se.Settings.General.ShowColumnActor = ShowColumnActor;
             Se.Settings.General.ShowColumnCps = ShowColumnCps;
             Se.Settings.General.ShowColumnWpm = ShowColumnWpm;
+            Se.Settings.General.ShowColumnLayer = ShowColumnLayer;
             Se.Settings.General.SelectCurrentSubtitleWhilePlaying = SelectCurrentSubtitleWhilePlaying;
             Se.Settings.Waveform.ShowToolbar = IsWaveformToolbarVisible;
             Se.Settings.Waveform.CenterVideoPosition = WaveformCenter;
@@ -6391,11 +6399,10 @@ public partial class MainViewModel :
         MenuItemMerge.IsVisible = SubtitleGrid.SelectedItems.Count > 1;
         AreAssaContentMenuItemsVisible = false;
         ShowAutoTranslateSelectedLines = SubtitleGrid.SelectedItems.Count > 0 && ShowColumnOriginalText;
-        IsColumnLayerVisible = IsFormatAssa;
+        ShowColumnLayerFlyoutMenuItem = IsFormatAssa;
 
         if (IsSubtitleGridFlyoutHeaderVisible)
         {
-            IsColumnLayerVisible = false;
         }
         else
         {
@@ -7250,6 +7257,13 @@ public partial class MainViewModel :
         HasFormatStyle = SelectedSubtitleFormat is AdvancedSubStationAlpha;
         ShowLayer = IsFormatAssa && Se.Settings.Appearance.ShowLayer;
         ShowLayerFilterIcon = IsFormatAssa && Se.Settings.Appearance.ShowLayer && _visibleLayers != null;
+
+        if (!IsFormatAssa)
+        {
+            ShowColumnLayer = false;
+            ShowColumnLayerFlyoutMenuItem = false;
+        }
+
         AutoFitColumns();
 
         if (!_opening && e.RemovedItems.Count == 1 && e.AddedItems.Count == 1)
