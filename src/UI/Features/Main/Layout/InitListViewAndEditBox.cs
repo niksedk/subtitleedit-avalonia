@@ -1107,5 +1107,5 @@ public static class InitListViewAndEditBox
         });
 
         return mainGrid;
-    }     
+    }
 }

@@ -133,6 +133,12 @@ public class LanguageSettingsShortcuts
     public string ToggleFocusTextBoxAndWaveform { get; set; }
     public string GoToPreviousLineAndSetVideoPosition { get; set; }
     public string GoToNextLineAndSetVideoPosition { get; set; }
+    public string TextBoxDeleteSelectionNoClipboard { get; set; }
+    public string TextBoxCut { get; set; }
+    public string TextBoxCut2 { get; set; }
+    public string TextBoxPaste { get; set; }
+    public string TextBoxCopy { get; set; }
+    public string TextBoxSelectAll { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -271,5 +277,11 @@ public class LanguageSettingsShortcuts
         ToggleFocusTextBoxAndWaveform = "Toggle focus between text box and waveform/spectrogram";
         GoToPreviousLineAndSetVideoPosition = "Go to previous line and set video position";
         GoToNextLineAndSetVideoPosition = "Go to next line and set video position";
+        TextBoxDeleteSelectionNoClipboard = "Text box: Delete selection (no clipboard)";
+        TextBoxCut = "Text box: Cut";
+        TextBoxCut2 = "Text box: Cut (alternative)";
+        TextBoxPaste = "Text box: Paste";
+        TextBoxCopy = "Text box: Copy";
+        TextBoxSelectAll = "Text box: Select all";
     }
 }

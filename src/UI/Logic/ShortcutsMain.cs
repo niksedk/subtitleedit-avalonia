@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.Settings;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -97,7 +98,15 @@ public static class ShortcutsMain
         { nameof(MainViewModel.AutoBreakCommand), Se.Language.General.AutoBreak },
         { nameof(MainViewModel.SplitCommand), Se.Language.General.SplitLine },
         { nameof(MainViewModel.SplitAtVideoPositionCommand), Se.Language.General.SplitLineAtVideoPosition },
+
         { nameof(MainViewModel.SplitAtVideoPositionAndTextBoxCursorPositionCommand), Se.Language.General.SplitLineAtVideoAndTextBoxPosition },
+        { nameof(MainViewModel.TextBoxDeleteSelectionCommand), Se.Language.Options.Shortcuts.TextBoxDeleteSelectionNoClipboard },
+        { nameof(MainViewModel.TextBoxCutCommand), Se.Language.Options.Shortcuts.TextBoxCut },
+        { nameof(MainViewModel.TextBoxCut2Command), Se.Language.Options.Shortcuts.TextBoxCut2 },
+        { nameof(MainViewModel.TextBoxPasteCommand), Se.Language.Options.Shortcuts.TextBoxPaste },
+        { nameof(MainViewModel.TextBoxCopyCommand), Se.Language.Options.Shortcuts.TextBoxCopy },
+        { nameof(MainViewModel.TextBoxSelectAllCommand), Se.Language.Options.Shortcuts.TextBoxSelectAll },
+
         { nameof(MainViewModel.WaveformOneSecondBackCommand), Se.Language.General.WaveformOneSecondBack },
         { nameof(MainViewModel.WaveformOneSecondForwardCommand),  Se.Language.General.WaveformOneSecondForward },
         { nameof(MainViewModel.WaveformSetStartAndOffsetTheRestCommand),  Se.Language.General.SetStartAndOffsetTheRest },
@@ -181,7 +190,15 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.AutoBreakCommand, nameof(vm.AutoBreakCommand), ShortcutCategory.SubtitleGridAndTextBox);
         AddShortcut(shortcuts, vm.SplitCommand, nameof(vm.SplitCommand), ShortcutCategory.SubtitleGridAndTextBox);
         AddShortcut(shortcuts, vm.SplitAtVideoPositionCommand, nameof(vm.SplitAtVideoPositionCommand), ShortcutCategory.SubtitleGridAndTextBox);
+        
         AddShortcut(shortcuts, vm.SplitAtVideoPositionAndTextBoxCursorPositionCommand, nameof(vm.SplitAtVideoPositionAndTextBoxCursorPositionCommand), ShortcutCategory.TextBox);
+        AddShortcut(shortcuts, vm.TextBoxDeleteSelectionCommand, nameof(vm.TextBoxDeleteSelectionCommand), ShortcutCategory.TextBox);
+        AddShortcut(shortcuts, vm.TextBoxCutCommand, nameof(vm.TextBoxCutCommand), ShortcutCategory.TextBox);
+        AddShortcut(shortcuts, vm.TextBoxCut2Command, nameof(vm.TextBoxCut2Command), ShortcutCategory.TextBox);
+        AddShortcut(shortcuts, vm.TextBoxPasteCommand, nameof(vm.TextBoxPasteCommand), ShortcutCategory.TextBox);
+        AddShortcut(shortcuts, vm.TextBoxCopyCommand, nameof(vm.TextBoxCopyCommand), ShortcutCategory.TextBox);
+        AddShortcut(shortcuts, vm.TextBoxSelectAllCommand, nameof(vm.TextBoxSelectAllCommand), ShortcutCategory.TextBox);
+
         AddShortcut(shortcuts, vm.WaveformOneSecondBackCommand, nameof(vm.WaveformOneSecondBackCommand), ShortcutCategory.Waveform);
         AddShortcut(shortcuts, vm.WaveformOneSecondForwardCommand, nameof(vm.WaveformOneSecondForwardCommand), ShortcutCategory.Waveform);
         AddShortcut(shortcuts, vm.WaveformSetStartAndOffsetTheRestCommand, nameof(vm.WaveformSetStartAndOffsetTheRestCommand), ShortcutCategory.Waveform);
@@ -242,7 +259,13 @@ public static class ShortcutsMain
             new(nameof(vm.WaveformOneSecondBackCommand), [nameof(Avalonia.Input.Key.Left)], ShortcutCategory.Waveform),
             new(nameof(vm.WaveformOneSecondForwardCommand), [nameof(Avalonia.Input.Key.Right)], ShortcutCategory.Waveform),
             new(nameof(vm.ShowHelpCommand), [nameof(Avalonia.Input.Key.F1)], ShortcutCategory.General),
-            new(nameof(vm.ShowSourceViewCommand), [nameof(Avalonia.Input.Key.F2)], ShortcutCategory.General)
+            new(nameof(vm.ShowSourceViewCommand), [nameof(Avalonia.Input.Key.F2)], ShortcutCategory.General),
+            new(nameof(vm.TextBoxDeleteSelectionCommand), ["Shift", nameof(Avalonia.Input.Key.Back)], ShortcutCategory.TextBox),
+            new(nameof(vm.TextBoxCutCommand), [GetCommandOrWin(), nameof(Avalonia.Input.Key.X)], ShortcutCategory.TextBox),
+            new(nameof(vm.TextBoxCut2Command), ["Shift", nameof(Avalonia.Input.Key.Delete) ], ShortcutCategory.TextBox),
+            new(nameof(vm.TextBoxPasteCommand), [GetCommandOrWin(), nameof(Avalonia.Input.Key.V)], ShortcutCategory.TextBox),
+            new(nameof(vm.TextBoxCopyCommand), [GetCommandOrWin(), nameof(Avalonia.Input.Key.C)], ShortcutCategory.TextBox),
+            new(nameof(vm.TextBoxSelectAllCommand), [GetCommandOrWin(), nameof(Avalonia.Input.Key.A)], ShortcutCategory.TextBox),
         ];
     }
 

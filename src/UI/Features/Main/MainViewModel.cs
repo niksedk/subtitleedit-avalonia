@@ -3817,6 +3817,13 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void TextBoxCut2()
+    {
+        EditTextBox.Cut();
+    }
+
+
+    [RelayCommand]
     private void TextBoxCopy()
     {
         EditTextBox.Copy();
@@ -3832,6 +3839,12 @@ public partial class MainViewModel :
     private void TextBoxSelectAll()
     {
         EditTextBox.SelectAll();
+    }
+
+    [RelayCommand]
+    private void TextBoxDeleteSelection()
+    {
+        EditTextBox.SelectedText = string.Empty;
     }
 
     [RelayCommand]
