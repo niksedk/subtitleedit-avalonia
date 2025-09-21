@@ -3122,6 +3122,39 @@ public partial class MainViewModel :
         SelectAndScrollToRow(idx);
     }
 
+    [RelayCommand]
+    private void GoToNextLineAndSetVideoPosition()
+    {
+        var idx = SelectedSubtitleIndex ?? -1;
+        if (Subtitles.Count == 0 || 
+            idx < 0 || idx -1 >= Subtitles.Count ||
+            string.IsNullOrEmpty(_videoFileName) ||
+            VideoPlayerControl == null)
+        {
+            return;
+        }
+
+        idx++;
+        VideoPlayerControl.Position = Subtitles[idx].StartTime.TotalSeconds;
+        SelectAndScrollToRow(idx);
+    }
+
+    [RelayCommand]
+    private void GoToPreviousLineAndSetVideoPosition()
+    {
+        var idx = SelectedSubtitleIndex ?? -1;
+        if (Subtitles.Count == 0 || 
+            idx <= 0 || idx >= Subtitles.Count || 
+            string.IsNullOrEmpty(_videoFileName) ||
+            VideoPlayerControl == null)
+        {
+            return;
+        }
+
+        VideoPlayerControl.Position = Subtitles[idx].StartTime.TotalSeconds;
+        SelectAndScrollToRow(idx);
+    }
+
     private Control? _fullscreenBeforeParent;
 
     [RelayCommand]

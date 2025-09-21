@@ -131,6 +131,8 @@ public class LanguageSettingsShortcuts
     public string MoveFirstWordFromNextLineUpCurrentSubtitle { get; set; }
     public string ToggleFocusGridAndWaveform { get; set; }
     public string ToggleFocusTextBoxAndWaveform { get; set; }
+    public string GoToPreviousLineAndSetVideoPosition { get; set; }
+    public string GoToNextLineAndSetVideoPosition { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -267,6 +269,7 @@ public class LanguageSettingsShortcuts
         MoveFirstWordFromNextLineUpCurrentSubtitle = "Move first word from next line up (current subtitle)";
         ToggleFocusGridAndWaveform = "Toggle focus between subtitle grid and waveform/spectrogram";
         ToggleFocusTextBoxAndWaveform = "Toggle focus between text box and waveform/spectrogram";
-
+        GoToPreviousLineAndSetVideoPosition = "Go to previous line and set video position";
+        GoToNextLineAndSetVideoPosition = "Go to next line and set video position";
     }
 }
