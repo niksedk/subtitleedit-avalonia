@@ -44,6 +44,7 @@ Because *Subtitle Edit* is not signed with an Apple developer certificate, macOS
    ```bash
    sudo xattr -rd com.apple.quarantine "/Applications/Subtitle Edit.app"
 
+
    ```bash
    sudo codesign --force --deep --sign - "/Applications/Subtitle Edit.app"
 
