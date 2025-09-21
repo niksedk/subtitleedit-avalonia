@@ -20,7 +20,7 @@ You can find the latest cross-platform builds here:
 ## 💻 System Requirements
 
 ### Windows
-- Minimum: Windows 7 SP1 or newer (recommended: Windows 10 or newer)
+- Minimum: Windows 10 or newer
 
 ### macOS
 
@@ -43,6 +43,8 @@ Because *Subtitle Edit* is not signed with an Apple developer certificate, macOS
 4. In Terminal, run the following command to remove macOS’s security quarantine flag and add adhoc code signature:
    ```bash
    sudo xattr -rd com.apple.quarantine "/Applications/Subtitle Edit.app"
+
+   ```bash
    sudo codesign --force --deep --sign - "/Applications/Subtitle Edit.app"
 
 
