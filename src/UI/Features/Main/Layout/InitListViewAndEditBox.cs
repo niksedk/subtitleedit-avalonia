@@ -23,7 +23,7 @@ public static class InitListViewAndEditBox
 
         var mainGrid = new Grid
         {
-            RowDefinitions = new RowDefinitions("*,Auto")
+            RowDefinitions = new RowDefinitions("*,Auto"),
         };
 
         vm.SubtitleGrid = new DataGrid
@@ -40,6 +40,16 @@ public static class InitListViewAndEditBox
             VerticalGridLinesBrush = UiUtil.GetBorderBrush(),
             HorizontalGridLinesBrush = UiUtil.GetBorderBrush(),
         };
+
+        // hack to make drag and drop work on the DataGrid - also on empty rows
+        var dropHost = new Border
+        {
+            Background = Brushes.Transparent,
+            Child = vm.SubtitleGrid
+        };
+        DragDrop.SetAllowDrop(dropHost, true);
+        dropHost.AddHandler(DragDrop.DragOverEvent, vm.SubtitleGridOnDragOver, RoutingStrategies.Bubble);
+        dropHost.AddHandler(DragDrop.DropEvent, vm.SubtitleGridOnDrop, RoutingStrategies.Bubble);
 
         vm.SubtitleGrid.DoubleTapped += vm.OnSubtitleGridDoubleTapped;
 
@@ -269,8 +279,10 @@ public static class InitListViewAndEditBox
             Source = vm,
         };
 
-        Grid.SetRow(vm.SubtitleGrid, 0);
-        mainGrid.Children.Add(vm.SubtitleGrid);
+        Grid.SetRow(dropHost, 0);
+        mainGrid.Children.Add(dropHost);
+        //Grid.SetRow(vm.SubtitleGrid, 0);
+        //mainGrid.Children.Add(vm.SubtitleGrid);
 
         // Create a Flyout for the DataGrid
         var flyout = new MenuFlyout();
@@ -1095,5 +1107,5 @@ public static class InitListViewAndEditBox
         });
 
         return mainGrid;
-    }
+    }     
 }

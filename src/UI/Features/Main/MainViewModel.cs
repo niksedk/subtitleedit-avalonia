@@ -9,6 +9,7 @@ using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.BluRaySup;
+using Nikse.SubtitleEdit.Core.Cea708.Commands;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
@@ -7366,5 +7367,47 @@ public partial class MainViewModel :
             Task.Delay(50);
             Se.Settings.General.SelectCurrentSubtitleWhilePlaying = SelectCurrentSubtitleWhilePlaying;
         });
+    }
+
+    internal void SubtitleGridOnDragOver(object? sender, DragEventArgs e)
+    {
+        if (e.Data.Contains(DataFormats.Files))
+        {
+            e.DragEffects = DragDropEffects.Copy; // show copy cursor
+        }
+        else
+        {
+            e.DragEffects = DragDropEffects.None;
+        }
+
+        e.Handled = true;
+    }
+
+    internal void SubtitleGridOnDrop(object? sender, DragEventArgs e)
+    {
+        if (e.Data.Contains(DataFormats.Files))
+        {
+            var files = e.Data.GetFiles(); 
+            if (files != null)
+            {
+                Dispatcher.UIThread.Post(async() =>
+                {
+                    var doContinue = await HasChangesContinue();
+                    if (!doContinue)
+                    {
+                        return;
+                    }
+
+                    foreach (var file in files)
+                    {
+                        var path = file.Path?.LocalPath;
+                        if (path != null && System.IO.File.Exists(path))
+                        {
+                            await SubtitleOpen(path);
+                        }
+                    }
+                });
+            }
+        }
     }
 }
