@@ -15,7 +15,7 @@ public class GetKeyWindow : Window
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         SizeToContent = SizeToContent.WidthAndHeight;
-        MinWidth = 300;
+        MinWidth = 400;
         CanResize = false;
         Title = Se.Language.Options.Shortcuts.DetectKey;
 
@@ -23,9 +23,15 @@ public class GetKeyWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        var labelKey = UiUtil.MakeLabel(Se.Language.Options.Shortcuts.PressAKey).WithBindText(vm, nameof(vm.InfoText));
+        var labelShortcutName = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.ShortCutName));
+        labelShortcutName.HorizontalAlignment = HorizontalAlignment.Center;
+        labelShortcutName.Margin = new Thickness(5, 10, 5, 10);
+
+        var labelKey = UiUtil.MakeLabel(Se.Language.Options.Shortcuts.PressAKey)
+            .WithBindText(vm, nameof(vm.InfoText))
+            .WithBold();
         labelKey.HorizontalAlignment = HorizontalAlignment.Center;
-        labelKey.Margin = new Thickness(5, 10, 5, 0);
+        labelKey.Margin = new Thickness(5, 10, 5, 10);
         
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
@@ -35,6 +41,7 @@ public class GetKeyWindow : Window
         {
             RowDefinitions =
             {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
@@ -49,8 +56,9 @@ public class GetKeyWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(labelKey, 0, 0);
-        grid.Add(buttonPanel, 1, 0);
+        grid.Add(labelShortcutName, 0);
+        grid.Add(labelKey, 1);
+        grid.Add(buttonPanel, 2);
 
         Content = grid;
         

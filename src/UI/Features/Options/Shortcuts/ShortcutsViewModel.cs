@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.LogicalTree;
+using Avalonia.Markup.Declarative;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -114,13 +115,13 @@ public partial class ShortcutsViewModel : ObservableObject
         }
     }
 
-    private static string MakeDisplayName(ShortCut x)
+    private static string MakeDisplayName(ShortCut x, bool includeShortCutKeys = true)
     {
         var name = ShortcutsMain.CommandTranslationLookup.TryGetValue(x.Name, out var displayName)
             ? displayName
             : x.Name;
 
-        if (x.Keys.Count > 0)
+        if (x.Keys.Count > 0 && includeShortCutKeys)
         {
             return name + " [" + string.Join("+", x.Keys) + "]";
         }
@@ -159,9 +160,18 @@ public partial class ShortcutsViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowGetKey()
     {
+        var node = SelectedNode;
+        if (node == null || node.ShortCut == null)
+        {
+            return;
+        }
+
         var result =
             await _windowService
-                .ShowDialogAsync<GetKeyWindow, GetKeyViewModel>(Window!);
+                .ShowDialogAsync<GetKeyWindow, GetKeyViewModel>(Window!, vm =>
+                {
+                    vm.Initialize(string.Format(Se.Language.Options.Shortcuts.SetShortcutForX, MakeDisplayName(node.ShortCut, false)));
+                });
 
         if (result.OkPressed && !string.IsNullOrEmpty(result.PressedKey))
         {

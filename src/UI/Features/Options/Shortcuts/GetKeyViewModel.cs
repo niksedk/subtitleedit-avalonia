@@ -8,6 +8,7 @@ namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
 public partial class GetKeyViewModel : ObservableObject
 {
+    [ObservableProperty] private string _shortCutName;
     [ObservableProperty] private string _infoText;
 
     public Window? Window { get; set; }
@@ -21,9 +22,15 @@ public partial class GetKeyViewModel : ObservableObject
 
     public GetKeyViewModel()
     {
+        ShortCutName = string.Empty;
         InfoText = Se.Language.Options.Shortcuts.PressAKey;
         PressedKey = string.Empty;
         PressedKeyOnly = string.Empty;
+    }
+
+    public void Initialize(string shortcutName)
+    {
+        ShortCutName = shortcutName;
     }
 
     [RelayCommand]

@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language.Options;
+﻿using System;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language.Options;
 
 public class LanguageSettingsShortcuts
 {
@@ -142,6 +144,7 @@ public class LanguageSettingsShortcuts
     public string SubtitleGridCut { get; set; }
     public string SubtitleGridCopy { get; set; }
     public string SubtitleGridPaste { get; set; }
+    public string SetShortcutForX { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -289,5 +292,6 @@ public class LanguageSettingsShortcuts
         SubtitleGridCut = "Subtitle grid: Cut";
         SubtitleGridCopy = "Subtitle grid: Copy";
         SubtitleGridPaste = "Subtitle grid: Paste";
+        SetShortcutForX = "Set shortcut for \"{0}\"";
     }
 }
