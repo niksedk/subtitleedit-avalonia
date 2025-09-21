@@ -4,7 +4,9 @@ public class LanguageMainMenu
 {
     public string File { get; set; }
     public string New { get; set; }
+    public string NewKeepVideo { get; set; }
     public string Open { get; set; }
+    public string OpenKeepVideo { get; set; }
     public string OpenOriginal { get; set; }
     public string CloseOriginal { get; set; }
     public string Reopen { get; set; }
@@ -88,7 +90,9 @@ public class LanguageMainMenu
     {
         File = "_File";
         New = "_New";
+        NewKeepVideo = "New (keep _video)";
         Open = "_Open...";
+        OpenKeepVideo = "Open (_keep video)...";
         OpenOriginal = "Open ori_ginal...";
         CloseOriginal = "_Close original";
         Reopen = "_Reopen...";

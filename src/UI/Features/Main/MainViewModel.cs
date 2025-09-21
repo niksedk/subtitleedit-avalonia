@@ -158,6 +158,7 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _showLayer;
     [ObservableProperty] private bool _showLayerFilterIcon;
     [ObservableProperty] private bool _showColumnLayerFlyoutMenuItem;
+    [ObservableProperty] private bool _isVideoLoaded;
 
 
     public DataGrid SubtitleGrid { get; set; }
@@ -644,6 +645,19 @@ public partial class MainViewModel :
         AddToRecentFiles(false);
     }
 
+    [RelayCommand]
+    private async Task CommandFileNewKeepVideo()
+    {
+        var doContinue = await HasChangesContinue();
+        if (!doContinue)
+        {
+            return;
+        }
+
+        ResetSubtitle();
+        AddToRecentFiles(false);
+    }
+
     private void ResetSubtitle()
     {
         _videoOpenTokenSource?.Cancel();
@@ -665,10 +679,6 @@ public partial class MainViewModel :
 
         _visibleLayers = null;
         ShowLayerFilterIcon = false;
-        if (AudioVisualizer?.WavePeaks != null)
-        {
-            AudioVisualizer.WavePeaks = null;
-        }
 
         AutoFitColumns();
 
@@ -786,11 +796,31 @@ public partial class MainViewModel :
         var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, Se.Language.General.OpenSubtitleFileTitle);
         if (!string.IsNullOrEmpty(fileName))
         {
+            VideoCloseFile();
             await SubtitleOpen(fileName);
         }
 
         _shortcutManager.ClearKeys();
     }
+
+    [RelayCommand]
+    private async Task CommandFileOpenKeepVideo()
+    {
+        var doContinue = await HasChangesContinue();
+        if (!doContinue)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, Se.Language.General.OpenSubtitleFileTitle);
+        if (!string.IsNullOrEmpty(fileName))
+        {
+            await SubtitleOpen(fileName);
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
 
     [RelayCommand]
     private void CommandFileReopen(RecentFile recentFile)
@@ -803,6 +833,7 @@ public partial class MainViewModel :
                 return;
             }
 
+            VideoCloseFile();
             await SubtitleOpen(recentFile.SubtitleFileName, recentFile.VideoFileName, recentFile.SelectedLine);
 
             if (!string.IsNullOrEmpty(recentFile.SubtitleFileNameOriginal) &&
@@ -1593,7 +1624,6 @@ public partial class MainViewModel :
             if (!string.IsNullOrEmpty(videoFileName))
             {
                 await VideoOpenFile(videoFileName);
-                _videoFileName = videoFileName;
             }
         }
 
@@ -5952,6 +5982,7 @@ public partial class MainViewModel :
         }
 
         _videoFileName = videoFileName;
+        IsVideoLoaded = true;   
     }
 
     private async Task ExtractWaveformAndSpectrogramAndShotChanges(
@@ -6094,6 +6125,7 @@ public partial class MainViewModel :
         _videoOpenTokenSource?.Cancel();
         VideoPlayerControl?.Close();
         _videoFileName = string.Empty;
+        IsVideoLoaded = false;
 
         if (AudioVisualizer != null)
         {
