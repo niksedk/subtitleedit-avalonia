@@ -96,6 +96,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _ffmpegStatus;
     [ObservableProperty] private Color _waveformColor;
     [ObservableProperty] private Color _waveformSelectedColor;
+    [ObservableProperty] private Color _waveformCursorColor;
     [ObservableProperty] private bool _waveformInvertMouseWheel;
     [ObservableProperty] private bool _waveformSnapToShotChanges;
     [ObservableProperty] private bool _waveformShotChangesAutoGenerate;
@@ -255,6 +256,7 @@ public partial class SettingsViewModel : ObservableObject
         WaveformFocusTextboxAfterInsertNew = Se.Settings.Waveform.FocusTextBoxAfterInsertNew;
         WaveformColor = Se.Settings.Waveform.WaveformColor.FromHexToColor();
         WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor();
+        WaveformCursorColor = Se.Settings.Waveform.WaveformCursorColor.FromHexToColor();
         WaveformInvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel;
         WaveformSnapToShotChanges = Se.Settings.Waveform.WaveformSnapToShotChanges;
         WaveformShotChangesAutoGenerate = Se.Settings.Waveform.WaveformShotChangesAutoGenerate;
@@ -345,6 +347,7 @@ public partial class SettingsViewModel : ObservableObject
         Se.Settings.Waveform.ShowToolbar = WaveformShowToolbar;
         Se.Settings.Waveform.WaveformColor = WaveformColor.FromColorToHex();
         Se.Settings.Waveform.WaveformSelectedColor = WaveformSelectedColor.FromColorToHex();
+        Se.Settings.Waveform.WaveformCursorColor = WaveformCursorColor.FromColorToHex();
         Se.Settings.Waveform.InvertMouseWheel = WaveformInvertMouseWheel;
         Se.Settings.Waveform.WaveformSnapToShotChanges = WaveformSnapToShotChanges;
         Se.Settings.Waveform.WaveformShotChangesAutoGenerate = WaveformShotChangesAutoGenerate;

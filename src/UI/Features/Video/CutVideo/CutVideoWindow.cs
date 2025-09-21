@@ -190,6 +190,9 @@ public class CutVideoWindow : Window
         vm.AudioVisualizer = new AudioVisualizer { Height = 80, Width = double.NaN, IsReadOnly = false };
         vm.AudioVisualizer.OnVideoPositionChanged += vm.AudioVisualizerPositionChanged;
         vm.AudioVisualizer.OnNewSelectionInsert += vm.AudioVisualizerOnNewSelectionInsert;
+        vm.AudioVisualizer.DrawGridLines = Se.Settings.Waveform.DrawGridLines;
+        vm.AudioVisualizer.WaveformColor = Se.Settings.Waveform.WaveformColor.FromHexToColor();
+        vm.AudioVisualizer.WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor();
 
         return UiUtil.MakeBorderForControl(vm.AudioVisualizer);
     }

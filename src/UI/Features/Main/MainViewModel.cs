@@ -2086,6 +2086,7 @@ public partial class MainViewModel :
             AudioVisualizer.DrawGridLines = Se.Settings.Waveform.DrawGridLines;
             AudioVisualizer.WaveformColor = Se.Settings.Waveform.WaveformColor.FromHexToColor();
             AudioVisualizer.WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor();
+            AudioVisualizer.WaveformCursorColor = Se.Settings.Waveform.WaveformCursorColor.FromHexToColor();
             AudioVisualizer.InvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel;
             AudioVisualizer.UpdateTheme();
             AudioVisualizer.IsReadOnly = LockTimeCodes;

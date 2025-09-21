@@ -10,6 +10,7 @@ public class SeWaveform
     public bool ShowToolbar { get; set; }
     public string WaveformColor { get; set; }
     public string WaveformSelectedColor { get; set; }
+    public string WaveformCursorColor { get; set; }
     public bool InvertMouseWheel { get; set; }
     public double ShotChangesSensitivity { get; set; }
     public string ShotChangesImportTimeCodeFormat { get; set; }
@@ -24,6 +25,7 @@ public class SeWaveform
         FocusTextBoxAfterInsertNew = true;
         WaveformColor = Color.FromArgb(150, 100, 100, 100).FromColorToHex();
         WaveformSelectedColor = Color.FromArgb(150, 0, 120, 255).FromColorToHex();
+        WaveformCursorColor = Colors.Cyan.FromColorToHex();
         ShotChangesSensitivity = 0.4;
         ShotChangesImportTimeCodeFormat = "Seconds";
         WaveformSnapToShotChangesPixels = 8;

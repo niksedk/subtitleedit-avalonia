@@ -34,6 +34,7 @@ public class InitWaveform
                 DrawGridLines = Se.Settings.Waveform.DrawGridLines,
                 WaveformColor = Se.Settings.Waveform.WaveformColor.FromHexToColor(),
                 WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor(),
+                WaveformCursorColor = Se.Settings.Waveform.WaveformCursorColor.FromHexToColor(),
                 InvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel,
             };
             vm.AudioVisualizer.OnNewSelectionInsert += vm.AudioVisualizerOnNewSelectionInsert;

@@ -50,6 +50,9 @@ public class AudioVisualizer : Control
     public static readonly StyledProperty<Color> WaveformSelectedColorProperty =
         AvaloniaProperty.Register<AudioVisualizer, Color>(nameof(WaveformSelectedColor));
 
+    public static readonly StyledProperty<Color> WaveformCursorColorProperty =
+        AvaloniaProperty.Register<AudioVisualizer, Color>(nameof(WaveformCursorColor));
+
     public WavePeakData? WavePeaks
     {
         get => GetValue(WavePeaksProperty);
@@ -124,6 +127,15 @@ public class AudioVisualizer : Control
         }
     }
 
+    public Color WaveformCursorColor
+    {
+        get => GetValue(WaveformCursorColorProperty);
+        set
+        {
+            _paintPenCursor = new Pen(new SolidColorBrush(value), 1);
+            SetValue(WaveformCursorColorProperty, value);
+        }
+    }
 
     public SubtitleLineViewModel? SelectedParagraph { get; set; }
 
@@ -149,8 +161,8 @@ public class AudioVisualizer : Control
     // Pens and brushes
     private Pen _paintWaveform = new Pen(new SolidColorBrush(Color.FromArgb(150, 144, 238, 144)), 1);
     private Pen _paintPenSelected = new Pen(new SolidColorBrush(Color.FromArgb(210, 254, 10, 10)), 1);
+    private Pen _paintPenCursor = new Pen(Brushes.Cyan, 1);
     private readonly Pen _paintGridLines = new Pen(Brushes.DarkGray, 0.2);
-    private readonly Pen _paintCurrentPosition = new Pen(Brushes.Cyan, 1);
     private readonly IBrush _mouseOverBrush = new SolidColorBrush(Color.FromArgb(50, 255, 255, 0));
 
     // Paragraph painting
@@ -1231,7 +1243,7 @@ public class AudioVisualizer : Control
                     // shot change and current pos are the same
                     var pen1 = new Pen(Brushes.AntiqueWhite, 2);
                     context.DrawLine(pen1, new Point(pos, 0), new Point(pos, Bounds.Height));
-                    context.DrawLine(_paintCurrentPosition, new Point(pos, 0), new Point(pos, Bounds.Height));
+                    context.DrawLine(_paintPenCursor, new Point(pos, 0), new Point(pos, Bounds.Height));
                 }
                 else if (paragraphStartList.Contains(pos))
                 {
@@ -1285,7 +1297,7 @@ public class AudioVisualizer : Control
             }
             else
             {
-                context.DrawLine(_paintCurrentPosition,
+                context.DrawLine(_paintPenCursor,
                     new Point(currentPositionPos, 0),
                     new Point(currentPositionPos, Bounds.Height));
             }

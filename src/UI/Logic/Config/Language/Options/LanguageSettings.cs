@@ -141,6 +141,7 @@ public class LanguageSettings
     public string ShowWhisperLogFile { get; set; }
     public string ShowSettingsFile { get; set; }
     public string ShowAssaLayer { get; set; }
+    public string WaveformCursorColor { get; set; }
 
     public LanguageSettings()
     {
@@ -279,6 +280,7 @@ public class LanguageSettings
         ShowWhisperLogFile = "Show Whisper log file";
         ShowSettingsFile = "Show settings file";
         ShowAssaLayer = "Show ASSA layer box";
+        WaveformCursorColor = "Waveform cursor/head color";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)
