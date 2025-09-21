@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
@@ -54,12 +55,22 @@ public static class InitFooter
                     FontSize = 20,
                     [ToolTip.TipProperty] = Se.Language.General.LockTimeCodes,
                 },
-                new Icon
+                new Button
                 {
-                    Value = IconNames.Filter,
+                    Content = new Icon
+                    {
+                        Value = IconNames.Filter,
+                        FontSize = 20,
+                        [ToolTip.TipProperty] = Se.Language.General.LayerFilterOn,
+                    },
                     [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowLayerFilterIcon)),
-                    FontSize = 20,
-                    [ToolTip.TipProperty] = Se.Language.General.LayerFilterOn,
+                    [!Button.CommandProperty] = new Binding(nameof(vm.ShowPickLayerFilterCommand)),
+
+                    // make it look like just an icon
+                    Background = null,
+                    BorderBrush = null,
+                    Padding = new Thickness(0),
+                    Margin = new Thickness(0),
                 },
                 right,
             },

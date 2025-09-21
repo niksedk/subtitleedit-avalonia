@@ -27,11 +27,14 @@ public partial class PickLayersViewModel : ObservableObject
 
     internal void Initialize(List<SubtitleLineViewModel> subtitleLineViewModels, List<int>? visibleLayers)
     {
-        visibleLayers ??= new List<int>();
-
-        foreach (var layer in subtitleLineViewModels.Select(p=>p.Layer).Distinct().OrderBy(p=>p))
+        if (visibleLayers == null)
         {
-            var item = new LayerItem(layer, visibleLayers.Contains(layer)); 
+            visibleLayers = subtitleLineViewModels.Select(p => p.Layer).Distinct().OrderBy(p => p).ToList();
+        }
+
+        foreach (var layer in subtitleLineViewModels.Select(p => p.Layer).Distinct().OrderBy(p => p))
+        {
+            var item = new LayerItem(layer, visibleLayers.Contains(layer));
             Layers.Add(item);
         }
     }
