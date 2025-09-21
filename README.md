@@ -41,13 +41,13 @@ Because *Subtitle Edit* is not signed with an Apple developer certificate, macOS
 2. In the window that appears, **drag `Subtitle Edit.app` into your `Applications` folder**.
 3. Open the **Terminal** app (you can find it via Spotlight or in `/Applications/Utilities/`).
 4. In Terminal, run the following command to remove macOS’s security quarantine flag and add adhoc code signature:
-   ```bash
+   ````bash
    sudo xattr -rd com.apple.quarantine "/Applications/Subtitle Edit.app"
+   ````
 
-
-   ```bash
+   ````bash
    sudo codesign --force --deep --sign - "/Applications/Subtitle Edit.app"
-
+   ````
 
 ### Linux
 - Requires **libmpv** (install via package manager, e.g. `sudo apt install mpv libmpv-dev`)
