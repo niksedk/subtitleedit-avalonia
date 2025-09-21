@@ -139,6 +139,9 @@ public class LanguageSettingsShortcuts
     public string TextBoxPaste { get; set; }
     public string TextBoxCopy { get; set; }
     public string TextBoxSelectAll { get; set; }
+    public string SubtitleGridCut { get; set; }
+    public string SubtitleGridCopy { get; set; }
+    public string SubtitleGridPaste { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -283,5 +286,8 @@ public class LanguageSettingsShortcuts
         TextBoxPaste = "Text box: Paste";
         TextBoxCopy = "Text box: Copy";
         TextBoxSelectAll = "Text box: Select all";
+        SubtitleGridCut = "Subtitle grid: Cut";
+        SubtitleGridCopy = "Subtitle grid: Copy";
+        SubtitleGridPaste = "Subtitle grid: Paste";
     }
 }

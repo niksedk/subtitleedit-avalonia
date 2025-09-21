@@ -9,7 +9,6 @@ using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.BluRaySup;
-using Nikse.SubtitleEdit.Core.Cea708.Commands;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
@@ -86,21 +85,17 @@ using Nikse.SubtitleEdit.Logic.Initializers;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Diagnostics.Metrics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using static Nikse.SubtitleEdit.Logic.FindService;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -3822,7 +3817,6 @@ public partial class MainViewModel :
         EditTextBox.Cut();
     }
 
-
     [RelayCommand]
     private void TextBoxCopy()
     {
@@ -3845,6 +3839,49 @@ public partial class MainViewModel :
     private void TextBoxDeleteSelection()
     {
         EditTextBox.SelectedText = string.Empty;
+    }
+
+    [RelayCommand]
+    private async Task SubtitleGridCut()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (selectedItems.Count == 0 || Window == null)
+        {
+            return;
+        }
+
+        await SubtitleGridCopyPasteHelper.Cut(Window, Subtitles, selectedItems, SelectedSubtitleFormat);
+        Renumber();
+        _updateAudioVisualizer = true;
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task SubtitleGridCopy()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (selectedItems.Count == 0 || Window == null)
+        {
+            return;
+        }
+
+        await SubtitleGridCopyPasteHelper.Copy(Window, selectedItems, SelectedSubtitleFormat);
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task SubtitleGridPaste()
+    {
+        var idx = SelectedSubtitleIndex ?? -1;
+        if (idx < 0 || Window == null)
+        {
+            return;
+        }
+
+        await SubtitleGridCopyPasteHelper.Paste(Window, Subtitles, idx, SelectedSubtitleFormat);
+        Renumber();
+        _updateAudioVisualizer = true;
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
