@@ -1,5 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Logic;
@@ -18,6 +20,11 @@ public static class InitVideoPlayer
             VerticalAlignment = VerticalAlignment.Stretch,
             Margin = new Thickness(0),
         };
+
+        DragDrop.SetAllowDrop(mainGrid, true);
+        mainGrid.AddHandler(DragDrop.DragOverEvent, vm.VideoOnDragOver, RoutingStrategies.Bubble);
+        mainGrid.AddHandler(DragDrop.DropEvent, vm.VideoOnDrop, RoutingStrategies.Bubble);
+
 
         if (vm.VideoPlayerControl == null)
         {

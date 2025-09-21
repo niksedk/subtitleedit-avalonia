@@ -7435,29 +7435,69 @@ public partial class MainViewModel :
 
     internal void SubtitleGridOnDrop(object? sender, DragEventArgs e)
     {
+        if (!e.Data.Contains(DataFormats.Files))
+        {
+            return;
+        }
+
+        var files = e.Data.GetFiles();
+        if (files != null)
+        {
+            Dispatcher.UIThread.Post(async () =>
+            {
+                var doContinue = await HasChangesContinue();
+                if (!doContinue)
+                {
+                    return;
+                }
+
+                foreach (var file in files)
+                {
+                    var path = file.Path?.LocalPath;
+                    if (path != null && File.Exists(path))
+                    {
+                        await SubtitleOpen(path);
+                    }
+                }
+            });
+        }
+    }
+
+    internal void VideoOnDragOver(object? sender, DragEventArgs e)
+    {
         if (e.Data.Contains(DataFormats.Files))
         {
-            var files = e.Data.GetFiles(); 
-            if (files != null)
-            {
-                Dispatcher.UIThread.Post(async() =>
-                {
-                    var doContinue = await HasChangesContinue();
-                    if (!doContinue)
-                    {
-                        return;
-                    }
+            e.DragEffects = DragDropEffects.Copy; // show copy cursor
+        }
+        else
+        {
+            e.DragEffects = DragDropEffects.None;
+        }
 
-                    foreach (var file in files)
+        e.Handled = true;
+    }
+
+    internal void VideoOnDrop(object? sender, DragEventArgs e)
+    {
+        if (!e.Data.Contains(DataFormats.Files))
+        {
+            return;
+        }
+
+        var files = e.Data.GetFiles();
+        if (files != null)
+        {
+            Dispatcher.UIThread.Post(async () =>
+            {
+                foreach (var file in files)
+                {
+                    var path = file.Path?.LocalPath;
+                    if (path != null && File.Exists(path))
                     {
-                        var path = file.Path?.LocalPath;
-                        if (path != null && System.IO.File.Exists(path))
-                        {
-                            await SubtitleOpen(path);
-                        }
+                        await VideoOpenFile(path);
                     }
-                });
-            }
+                }
+            });
         }
     }
 }
