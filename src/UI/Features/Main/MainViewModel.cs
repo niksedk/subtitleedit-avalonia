@@ -3122,8 +3122,8 @@ public partial class MainViewModel :
     private void GoToNextLineAndSetVideoPosition()
     {
         var idx = SelectedSubtitleIndex ?? -1;
-        if (Subtitles.Count == 0 || 
-            idx < 0 || idx -1 >= Subtitles.Count ||
+        if (Subtitles.Count == 0 ||
+            idx < 0 || idx - 1 >= Subtitles.Count ||
             string.IsNullOrEmpty(_videoFileName) ||
             VideoPlayerControl == null)
         {
@@ -3139,8 +3139,8 @@ public partial class MainViewModel :
     private void GoToPreviousLineAndSetVideoPosition()
     {
         var idx = SelectedSubtitleIndex ?? -1;
-        if (Subtitles.Count == 0 || 
-            idx <= 0 || idx >= Subtitles.Count || 
+        if (Subtitles.Count == 0 ||
+            idx <= 0 || idx >= Subtitles.Count ||
             string.IsNullOrEmpty(_videoFileName) ||
             VideoPlayerControl == null)
         {
@@ -7494,6 +7494,37 @@ public partial class MainViewModel :
                     var path = file.Path?.LocalPath;
                     if (path != null && File.Exists(path))
                     {
+                        var ext = Path.GetExtension(path).ToLowerInvariant();
+                        var subtitelExtensions = new List<string>
+                        {
+                            ".ass",
+                            ".cap",
+                            ".dfxp",
+                            ".pac",
+                            ".sami",
+                            ".smi",
+                            ".srt",
+                            ".ssa",
+                            ".stl",
+                            ".sub",
+                            ".sup",
+                            ".ttml",
+                            ".txt",
+                            ".vtt",
+                            ".xml",
+                        };
+
+                        if (subtitelExtensions.Contains(ext))
+                        {
+                            var doContinue = await HasChangesContinue();
+                            if (!doContinue)
+                            {
+                                return;
+                            }
+                            await SubtitleOpen(path);
+                            return;
+                        }
+
                         await VideoOpenFile(path);
                     }
                 }
