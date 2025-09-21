@@ -3123,7 +3123,7 @@ public partial class MainViewModel :
     {
         var idx = SelectedSubtitleIndex ?? -1;
         if (Subtitles.Count == 0 ||
-            idx < 0 || idx - 1 >= Subtitles.Count ||
+            idx < 0 || idx - 2 >= Subtitles.Count ||
             string.IsNullOrEmpty(_videoFileName) ||
             VideoPlayerControl == null)
         {
@@ -3131,8 +3131,13 @@ public partial class MainViewModel :
         }
 
         idx++;
-        VideoPlayerControl.Position = Subtitles[idx].StartTime.TotalSeconds;
+        if (idx >= Subtitles.Count)
+        {
+            return;
+        }
+
         SelectAndScrollToRow(idx);
+        VideoPlayerControl.Position = Subtitles[idx].StartTime.TotalSeconds;
     }
 
     [RelayCommand]
@@ -3143,6 +3148,12 @@ public partial class MainViewModel :
             idx <= 0 || idx >= Subtitles.Count ||
             string.IsNullOrEmpty(_videoFileName) ||
             VideoPlayerControl == null)
+        {
+            return;
+        }
+
+        idx--;
+        if (idx < 0)
         {
             return;
         }
