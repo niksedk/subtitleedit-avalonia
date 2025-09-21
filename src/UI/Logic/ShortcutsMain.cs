@@ -109,6 +109,20 @@ public static class ShortcutsMain
         { nameof(MainViewModel.ToggleLockTimeCodesCommand), Se.Language.Options.Shortcuts.ToggleLockTimeCodes },
         { nameof(MainViewModel.ShowHelpCommand), Se.Language.Options.Shortcuts.Help },
         { nameof(MainViewModel.ShowSourceViewCommand), Se.Language.Options.Shortcuts.SourceView },
+        { nameof(MainViewModel.MergeWithLineBeforeCommand), Se.Language.General.MergeWithLineBeforeAndAutoBreak },
+        { nameof(MainViewModel.MergeWithLineAfterCommand), Se.Language.General.MergeWithLineAfterAndAutoBreak },
+        { nameof(MainViewModel.MergeSelectedLinesCommand), Se.Language.General.MergeSelectedLines },
+        { nameof(MainViewModel.MergeSelectedLinesDialogCommand), Se.Language.General.MergeSelectedLinesDialog },
+        { nameof(MainViewModel.ShowBridgeGapsCommand), Se.Language.General.BridgeGaps },
+        { nameof(MainViewModel.ShowColorPickerCommand), Se.Language.General.ChooseColorDotDotDot },
+        { nameof(MainViewModel.WaveformSetEndAndStartOfNextAfterGapCommand), Se.Language.Options.Shortcuts.WaveformSetEndAndStartOfNextAfterGap },
+        { nameof(MainViewModel.WaveformSetStartAndSetEndOfPreviousMinusGapCommand), Se.Language.Options.Shortcuts.WaveformSetStartAndSetEndOfPreviousMinusGap },
+        { nameof(MainViewModel.FetchFirstWordForNextSubtitleCommand), Se.Language.Options.Shortcuts.FetchFirstWordForNextSubtitle },
+        { nameof(MainViewModel.MoveLastWordToNextSubtitleCommand), Se.Language.Options.Shortcuts.MoveLastWordToNextSubtitle },
+        { nameof(MainViewModel.MoveLastWordFromFirstLineDownCurrentSubtitleCommand), Se.Language.Options.Shortcuts.MoveLastWordFromFirstLineDownCurrentSubtitle },
+        { nameof(MainViewModel.MoveFirstWordFromNextLineUpCurrentSubtitleCommand), Se.Language.Options.Shortcuts.MoveFirstWordFromNextLineUpCurrentSubtitle },
+        { nameof(MainViewModel.ToggleFocusGridAndWaveformCommand), Se.Language.Options.Shortcuts.ToggleFocusGridAndWaveform },
+        { nameof(MainViewModel.ToggleFocusTextBoxAndWaveformCommand), Se.Language.Options.Shortcuts.ToggleFocusTextBoxAndWaveform },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -177,6 +191,20 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.ToggleLockTimeCodesCommand, nameof(vm.ToggleLockTimeCodesCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowHelpCommand, nameof(vm.ShowHelpCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowSourceViewCommand, nameof(vm.ShowSourceViewCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.MergeWithLineBeforeCommand, nameof(vm.MergeWithLineBeforeCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.MergeWithLineAfterCommand, nameof(vm.MergeWithLineAfterCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.MergeSelectedLinesCommand, nameof(vm.MergeSelectedLinesCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.MergeSelectedLinesDialogCommand, nameof(vm.MergeSelectedLinesDialogCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowBridgeGapsCommand, nameof(vm.ShowBridgeGapsCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowColorPickerCommand, nameof(vm.ShowColorPickerCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.WaveformSetEndAndStartOfNextAfterGapCommand, nameof(vm.WaveformSetEndAndStartOfNextAfterGapCommand), ShortcutCategory.Waveform);
+        AddShortcut(shortcuts, vm.WaveformSetStartAndSetEndOfPreviousMinusGapCommand, nameof(vm.WaveformSetStartAndSetEndOfPreviousMinusGapCommand), ShortcutCategory.Waveform);
+        AddShortcut(shortcuts, vm.FetchFirstWordForNextSubtitleCommand, nameof(vm.FetchFirstWordForNextSubtitleCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.MoveLastWordToNextSubtitleCommand, nameof(vm.MoveLastWordToNextSubtitleCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.MoveLastWordFromFirstLineDownCurrentSubtitleCommand, nameof(vm.MoveLastWordFromFirstLineDownCurrentSubtitleCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.MoveFirstWordFromNextLineUpCurrentSubtitleCommand, nameof(vm.MoveFirstWordFromNextLineUpCurrentSubtitleCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ToggleFocusGridAndWaveformCommand, nameof(vm.ToggleFocusGridAndWaveformCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ToggleFocusTextBoxAndWaveformCommand, nameof(vm.ToggleFocusTextBoxAndWaveformCommand), ShortcutCategory.General);
 
         return shortcuts;
     }

@@ -14,6 +14,7 @@ using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4.Boxes;
 using Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream;
+using Nikse.SubtitleEdit.Core.Forms;
 using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.VobSub;
@@ -84,17 +85,21 @@ using Nikse.SubtitleEdit.Logic.Initializers;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using static Nikse.SubtitleEdit.Logic.FindService;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -3482,6 +3487,7 @@ public partial class MainViewModel :
         }
 
         s.SetStartTimeOnly(TimeSpan.FromSeconds(videoPositionSeconds));
+        _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
@@ -3501,6 +3507,219 @@ public partial class MainViewModel :
         }
 
         s.EndTime = TimeSpan.FromSeconds(videoPositionSeconds);
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void WaveformSetEndAndStartOfNextAfterGap()
+    {
+        var s = SelectedSubtitle;
+        if (s == null || AudioVisualizer?.WavePeaks == null || VideoPlayerControl == null || LockTimeCodes)
+        {
+            return;
+        }
+
+        var idx = Subtitles.IndexOf(s);
+        var next = Subtitles.GetOrNull(idx + 1);
+        if (next == null)
+        {
+            return;
+        }
+
+        var videoPositionSeconds = VideoPlayerControl.Position;
+        var gapMs = Se.Settings.General.MinimumMillisecondsBetweenLines;
+        if (videoPositionSeconds < s.StartTime.TotalSeconds + 0.001)
+        {
+            return;
+        }
+
+        s.EndTime = TimeSpan.FromSeconds(videoPositionSeconds);
+        var nextStart = s.EndTime.TotalMilliseconds + gapMs;
+        next.StartTime = TimeSpan.FromMilliseconds(nextStart);
+
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void WaveformSetStartAndSetEndOfPreviousMinusGap()
+    {
+        var s = SelectedSubtitle;
+        if (s == null || AudioVisualizer?.WavePeaks == null || VideoPlayerControl == null || LockTimeCodes)
+        {
+            return;
+        }
+
+        var idx = Subtitles.IndexOf(s);
+        var previous = Subtitles.GetOrNull(idx - 1);
+        if (previous == null)
+        {
+            return;
+        }
+
+        var videoPositionSeconds = VideoPlayerControl.Position;
+        var gapMs = Se.Settings.General.MinimumMillisecondsBetweenLines;
+        if (videoPositionSeconds > s.EndTime.TotalSeconds - 0.001)
+        {
+            return;
+        }
+
+        s.SetStartTimeOnly(TimeSpan.FromSeconds(videoPositionSeconds));
+        var previousEnd = s.StartTime.TotalMilliseconds - gapMs;
+        previous.EndTime = TimeSpan.FromMilliseconds(previousEnd);
+
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void FetchFirstWordForNextSubtitle()
+    {
+        var s = SelectedSubtitle;
+        if (s == null)
+        {
+            return;
+        }
+
+        var idx = Subtitles.IndexOf(s);
+        var next = Subtitles.GetOrNull(idx + 1);
+        if (next == null)
+        {
+            return;
+        }
+
+        var currentText = s.Text.Trim();
+        var nextText = next.Text.Trim();
+
+        var upDown = new MoveWordUpDown(currentText, nextText);
+        upDown.MoveWordUp();
+
+        s.Text = upDown.S1;
+        next.Text = upDown.S2;
+
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void MoveLastWordToNextSubtitle()
+    {
+        var s = SelectedSubtitle;
+        if (s == null)
+        {
+            return;
+        }
+
+        var idx = Subtitles.IndexOf(s);
+        var next = Subtitles.GetOrNull(idx + 1);
+        if (next == null)
+        {
+            return;
+        }
+
+        var currentText = s.Text.Trim();
+        var nextText = next.Text.Trim();
+
+        var upDown = new MoveWordUpDown(currentText, nextText);
+        upDown.MoveWordDown();
+
+        s.Text = upDown.S1;
+        next.Text = upDown.S2;
+
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void MoveLastWordFromFirstLineDownCurrentSubtitle()
+    {
+        var s = SelectedSubtitle;
+        if (s == null)
+        {
+            return;
+        }
+
+        var lines = s.Text.SplitToLines();
+        if (!string.IsNullOrWhiteSpace(s.Text) && lines.Count == 1)
+        {
+            lines.Add(string.Empty);
+        }
+        if (lines.Count != 2)
+        {
+            return;
+        }
+
+        var currentText = lines[0].Trim();
+        var nextText = lines[1].Trim();
+
+        var upDown = new MoveWordUpDown(currentText, nextText);
+        upDown.MoveWordDown();
+
+        s.Text = upDown.S1 + Environment.NewLine + upDown.S2;
+
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void MoveFirstWordFromNextLineUpCurrentSubtitle()
+    {
+        var s = SelectedSubtitle;
+        if (s == null)
+        {
+            return;
+        }
+        
+        var lines = s.Text.SplitToLines();
+        if (!string.IsNullOrWhiteSpace(s.Text) && lines.Count == 1)
+        {
+            lines.Add(string.Empty);
+        }
+        if (lines.Count != 2)
+        {
+            return;
+        }
+
+        var currentText = lines[0].Trim();
+        var nextText = lines[1].Trim();
+
+        var upDown = new MoveWordUpDown(currentText, nextText);
+        upDown.MoveWordUp();
+
+        s.Text = upDown.S1 + Environment.NewLine + upDown.S2;
+
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void ToggleFocusGridAndWaveform()
+    {
+        if (AudioVisualizer == null)
+        {
+            return;
+        }
+
+        if (SubtitleGrid.IsFocused)
+        {
+            AudioVisualizer.Focus();
+        }
+        else
+        {
+            SubtitleGrid.Focus();
+        }
+    }
+
+    [RelayCommand]
+    private void ToggleFocusTextBoxAndWaveform()
+    {
+        if (AudioVisualizer == null)
+        {
+            return;
+        }
+
+        if (EditTextBox.IsFocused)
+        {
+            AudioVisualizer.Focus();
+        }
+        else
+        {
+            EditTextBox.Focus();
+        }
     }
 
     [RelayCommand]

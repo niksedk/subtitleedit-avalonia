@@ -123,6 +123,14 @@ public class LanguageSettingsShortcuts
     public string ToggleBookmark { get; set; }
     public string GoToNextBookmark { get; set; }
     public string ToggleWaveformToolbar { get; set; }
+    public string WaveformSetStartAndSetEndOfPreviousMinusGap { get; set; }
+    public string WaveformSetEndAndStartOfNextAfterGap { get; set; }
+    public string FetchFirstWordForNextSubtitle { get; set; }
+    public string MoveLastWordToNextSubtitle { get; set; }
+    public string MoveLastWordFromFirstLineDownCurrentSubtitle { get; set; }
+    public string MoveFirstWordFromNextLineUpCurrentSubtitle { get; set; }
+    public string ToggleFocusGridAndWaveform { get; set; }
+    public string ToggleFocusTextBoxAndWaveform { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -251,5 +259,14 @@ public class LanguageSettingsShortcuts
         ToggleBookmark = "Toggle bookmark (selected lines, no text)";
         GoToNextBookmark = "Go to next bookmark";
         ToggleWaveformToolbar = "Toggle waveform toolbar";
+        WaveformSetStartAndSetEndOfPreviousMinusGap = "Set start and set end of previous minus gap";
+        WaveformSetEndAndStartOfNextAfterGap = "Set end and start of next plus gap";
+        FetchFirstWordForNextSubtitle = "Fetch first word for next subtitle";
+        MoveLastWordToNextSubtitle = "Move last word to next subtitle";
+        MoveLastWordFromFirstLineDownCurrentSubtitle = "Move last word from first line down (current subtitle)";
+        MoveFirstWordFromNextLineUpCurrentSubtitle = "Move first word from next line up (current subtitle)";
+        ToggleFocusGridAndWaveform = "Toggle focus between subtitle grid and waveform/spectrogram";
+        ToggleFocusTextBoxAndWaveform = "Toggle focus between text box and waveform/spectrogram";
+
     }
 }

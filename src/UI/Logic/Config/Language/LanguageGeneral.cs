@@ -383,6 +383,12 @@ public class LanguageGeneral
     public string LockTimeCodes { get; set; }
     public string LayerFilterOn { get; set; }
     public string RemoveFilter { get; set; }
+    public string MergeWithLineBeforeAndAutoBreak { get; set; }
+    public string MergeWithLineAfterAndAutoBreak { get; set; }
+    public string MergeSelectedLines { get; set; }
+    public string MergeSelectedLinesDialog { get; set; }
+    public string BridgeGaps { get; set; }
+    public string ChooseColorDotDotDot { get; set; }
 
     public LanguageGeneral()
     {
@@ -761,5 +767,11 @@ public class LanguageGeneral
         LockTimeCodes = "Lock time codes";
         LayerFilterOn = "Layer filter on";
         RemoveFilter = "Remove filter";
+        MergeWithLineBeforeAndAutoBreak = "Merge with line before and auto-break";
+        MergeWithLineAfterAndAutoBreak = "Merge with line after and auto-break";
+        MergeSelectedLines = "Merge selected lines";
+        MergeSelectedLinesDialog = "Merge selected lines as dialog";
+        BridgeGaps = "Bridge gaps";
+        ChooseColorDotDotDot = "Choose color...";
     }
 }
