@@ -169,6 +169,7 @@ public partial class ShortcutsViewModel : ObservableObject
             CtrlIsSelected = result.IsControlPressed;
             AltIsSelected = result.IsAltPressed;
             ShiftIsSelected = result.IsShiftPressed;
+            UpdateShortcut();
         }
     }
 
