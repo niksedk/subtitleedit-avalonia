@@ -339,6 +339,8 @@ public partial class MainViewModel :
         IsWaveformToolbarVisible = Se.Settings.Waveform.ShowToolbar;
         _videoOpenTokenSource = new CancellationTokenSource();
 
+        Configuration.DataDirectoryOverride = Se.DataFolder;
+
         themeInitializer.UpdateThemesIfNeeded().ConfigureAwait(true);
         Dispatcher.UIThread.Post(async void () =>
         {

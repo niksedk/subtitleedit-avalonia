@@ -12,15 +12,15 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\build-all-platforms.yml = .github\workflows\build-all-platforms.yml
+		Languages\Danish.json = Languages\Danish.json
+		Languages\English.json = Languages\English.json
 		LICENSE = LICENSE
 		installer\LICENSE.rtf = installer\LICENSE.rtf
 		make-installer.bat = make-installer.bat
 		installer\Product.wxs = installer\Product.wxs
 		README.md = README.md
 		Dictionaries\version.txt = Dictionaries\version.txt
-		Languages\English.json = Languages\English.json
 		Languages\version.txt = Languages\version.txt
-		Languages\Danish.json = Languages\Danish.json
 		Ocr\version.txt = Ocr\version.txt
 		Themes\version.txt = Themes\version.txt
 	EndProjectSection
@@ -52,10 +52,10 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {27E960EC-896F-428C-95A2-C250321C16D5}
-	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{20ABFC11-A537-4519-BC53-961E337091C3} = {8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {27E960EC-896F-428C-95A2-C250321C16D5}
 	EndGlobalSection
 EndGlobal
