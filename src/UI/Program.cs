@@ -149,6 +149,44 @@ namespace Nikse.SubtitleEdit
 
             nativeMenu.Items.Add(aboutMenu);
             NativeMenu.SetMenu(app, nativeMenu);
+
+
+            // mac finder "Send to"
+            if (OperatingSystem.IsMacOS())
+            {
+                if (app.TryGetFeature(typeof(IActivatableLifetime)) is IActivatableLifetime activatable)
+                {
+                    activatable.Activated += (sender, e) =>
+                    {
+                        if (e is FileActivatedEventArgs args && args.Kind == ActivationKind.File)
+                        {
+                            Se.LogError($"App activated with {args.Files.Count} files");
+                    
+                            foreach (var storageItem in args.Files)
+                            {
+                                var filePath = storageItem.Path.LocalPath;
+                                if (System.IO.File.Exists(filePath))
+                                {
+                                    Se.LogError($"File opened via macOS activation: {filePath}");
+                                    if (lifetime.MainWindow?.Content is MainView mainView)
+                                    {
+                                        Dispatcher.UIThread.Post(async () =>
+                                        {
+                                            await mainView.OpenFile(filePath);
+                                        });
+                                    }
+
+                                    break;
+                                }
+                            }
+                        }
+                    };
+                }
+            }
+            
+            
+            
+            
         }
 
         private static void SetupDependencyInjection()
@@ -177,10 +215,7 @@ namespace Nikse.SubtitleEdit
                 if (e.Args.Length > 0 && System.IO.File.Exists(e.Args[0]))
                 {
                     Se.LogError("lifetime.Startup parameter: " + e.Args[0]);
-                    Dispatcher.UIThread.Post(async void () =>
-                    {
-                        await mainView.OpenFile(e.Args[0]);
-                    });
+                    Dispatcher.UIThread.Post(async void () => { await mainView.OpenFile(e.Args[0]); });
                 }
             };
         }
