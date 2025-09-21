@@ -288,6 +288,15 @@ public class OcrWindow : Window
         menuItemOcrSelectedLines.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
         flyout.Items.Add(menuItemOcrSelectedLines);
 
+        var menuItemInspectMatchesForLine = new MenuItem
+        {
+            Header = Se.Language.Ocr.InspectLine,
+            DataContext = vm,
+            Command = vm.InspectLineCommand,
+        };
+        menuItemInspectMatchesForLine.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsInspectLineVisible), BindingMode.TwoWay));
+        flyout.Items.Add(menuItemInspectMatchesForLine);
+
         var menuItemShowImage = new MenuItem
         {
             Header = Se.Language.Ocr.ShowImage,

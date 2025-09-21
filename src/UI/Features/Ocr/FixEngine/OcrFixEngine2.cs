@@ -1,7 +1,9 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Dictionaries;
+using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Core.SpellCheck;
 using Nikse.SubtitleEdit.Features.SpellCheck;
+using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -15,7 +17,7 @@ public interface IOcrFixEngine2
     bool IsLoaded();
 }
 
-public partial class OcrFixEngine2 : IOcrFixEngine2
+public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
 {
     private bool _isLoaded;
     private string _fiveLetterWordListLanguageName;
@@ -58,6 +60,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2
         var twoLetterIsoLanguageName = Iso639Dash2LanguageCode.GetTwoLetterCodeFromThreeLetterCode(threeLetterIsoLanguageName);
         _spellCheckManager.Initialize(spellCheckDictionary.DictionaryFileName, threeLetterIsoLanguageName);
         _ocrFixReplaceList = OcrFixReplaceList.FromLanguageId(threeLetterIsoLanguageName);
+        _spellCheckWordLists = new SpellCheckWordLists(Se.DictionariesFolder, twoLetterIsoLanguageName, this);
         _subtitles = subtitles;
         _threeLetterIsoLanguageName = threeLetterIsoLanguageName;
         _subtitle = GetSubtitle(subtitles);
@@ -261,6 +264,37 @@ public partial class OcrFixEngine2 : IOcrFixEngine2
         else
         {
             result = _ocrFixReplaceList.FixCommonWordErrors(word.Word);
+
+            var isWordCorrect = _spellCheckManager.IsWordCorrect(result);
+
+            if (!isWordCorrect && _wordSkipList.Contains(s))
+            {
+                isWordCorrect = true;
+            }
+
+            if (!isWordCorrect && _spellCheckWordLists.HasUserWord(result))
+            {
+                isWordCorrect = true;
+            }
+
+            if (!isWordCorrect && _spellCheckWordLists.HasName(result))
+            {
+                isWordCorrect = true;
+            }
+
+            if (!string.IsNullOrEmpty(result) && !isWordCorrect)
+            {
+                var guesses = _ocrFixReplaceList.CreateGuessesFromLetters(result, _threeLetterIsoLanguageName);
+                foreach (var g in guesses)
+                {
+                    if (_spellCheckManager.IsWordCorrect(g))
+                    {
+                        result = g;
+                        isWordCorrect = true;
+                        break;
+                    }
+                }
+            }
         }
 
         word.FixedWord = result;
@@ -288,6 +322,16 @@ public partial class OcrFixEngine2 : IOcrFixEngine2
     public bool IsLoaded()
     {
         return _isLoaded;
+    }
+
+    public bool DoSpell(string word)
+    {
+        if (IsLoaded())
+        {
+            return _spellCheckManager.IsWordCorrect(word);
+        }
+
+        return false;
     }
 }
 
