@@ -165,7 +165,10 @@ public partial class ShortcutsViewModel : ObservableObject
 
         if (result.OkPressed && !string.IsNullOrEmpty(result.PressedKey))
         {
-            SelectedShortcut = result.PressedKey;
+            SelectedShortcut = result.PressedKeyOnly;
+            CtrlIsSelected = result.IsControlPressed;
+            AltIsSelected = result.IsAltPressed;
+            ShiftIsSelected = result.IsShiftPressed;
         }
     }
 
@@ -182,7 +185,7 @@ public partial class ShortcutsViewModel : ObservableObject
         var keys = new List<string>();
         if (CtrlIsSelected)
         {
-            keys.Add("Control");
+            keys.Add("Ctrl");
         }
 
         if (AltIsSelected)
