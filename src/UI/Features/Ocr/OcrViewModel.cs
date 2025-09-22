@@ -212,6 +212,8 @@ public partial class OcrViewModel : ObservableObject
 
         Se.SaveSettings();
     }
+    
+    
 
     private void LoadDictionaries()
     {
@@ -219,7 +221,7 @@ public partial class OcrViewModel : ObservableObject
         Dictionaries.Clear();
         Dictionaries.Add(new SpellCheckDictionaryDisplay
         {
-            Name = "[" + Se.Language.General.None + "]",
+            Name = GetDictionaryNameNone(),
             DictionaryFileName = string.Empty,
         });
         Dictionaries.AddRange(spellCheckLanguages);
@@ -238,6 +240,11 @@ public partial class OcrViewModel : ObservableObject
 
             _spellCheckManager.Initialize(SelectedDictionary.DictionaryFileName, SpellCheckDictionaryDisplay.GetTwoLetterLanguageCode(SelectedDictionary));
         }
+    }
+
+    private static string GetDictionaryNameNone()
+    {
+        return "[" + Se.Language.General.None + "]";
     }
 
     private string? GetNOcrLanguageFileName()
@@ -758,7 +765,7 @@ public partial class OcrViewModel : ObservableObject
             }
         }
 
-        if (SelectedDictionary != null && DoFixOcrErrors)
+        if (SelectedDictionary != null && DoFixOcrErrors && SelectedDictionary.Name != GetDictionaryNameNone())
         {
             var threeLetterCode = "eng"; // TODO: fix
             _ocrFixEngine.Initialize(OcrSubtitleItems.ToList(), threeLetterCode, SelectedDictionary);
@@ -1090,7 +1097,9 @@ public partial class OcrViewModel : ObservableObject
 
     private void OcrFixLineAndSetText(int i, OcrSubtitleItem item)
     {
-        if (_ocrFixEngine.IsLoaded() && DoFixOcrErrors)
+        if (SelectedDictionary != null && 
+            SelectedDictionary.Name != GetDictionaryNameNone() && 
+            _ocrFixEngine.IsLoaded() && DoFixOcrErrors)
         {
             var result = _ocrFixEngine.FixOcrErrors(i);
             var resultText = result.GetText();

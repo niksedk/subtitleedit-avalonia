@@ -219,7 +219,8 @@ public class OcrWindow : Window
                         var stackPanel = new StackPanel
                         {
                             Orientation = Orientation.Vertical,
-                            Spacing = 5
+                            Spacing = 5,
+                            Margin = new Thickness(5),
                         };
                         var bitmap = item.GetBitmap();
                         if (bitmap != null)
@@ -253,7 +254,10 @@ public class OcrWindow : Window
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     CellTemplate = new FuncDataTemplate<OcrSubtitleItem>((item, _) =>
                     {
-                        var contentPresenter = new ContentPresenter();
+                        var contentPresenter = new ContentPresenter
+                        {
+                            VerticalAlignment = VerticalAlignment.Center
+                        };
                         contentPresenter.Margin = new Thickness(3, 1, 3, 1);
 
                         // Bind to HasFormattedText to trigger updates when FixResult changes
