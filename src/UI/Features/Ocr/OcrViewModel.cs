@@ -1101,6 +1101,14 @@ public partial class OcrViewModel : ObservableObject
 
                 CurrentText = item.Text;
             });
+
+            foreach (var word in result.Words)
+            {
+                if (word.IsSpellCheckedOk == false)
+                {
+                    UnknownWords.Add(word.Word);
+                }
+            }
         }
         else
         {
