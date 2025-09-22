@@ -60,7 +60,7 @@ public class DictionaryInitializer(IZipUnpacker zipUnpacker) : IDictionaryInitia
     }
 
     private async Task Unpack()
-    {    
+    {
         var zipUri = new Uri("avares://SubtitleEdit/Assets/Dictionaries.zip");
         await using var zipStream = AssetLoader.Open(zipUri);
         zipUnpacker.UnpackZipStream(zipStream, Se.DictionariesFolder);

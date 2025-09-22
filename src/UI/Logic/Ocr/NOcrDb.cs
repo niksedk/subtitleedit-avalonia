@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using Nikse.SubtitleEdit.Logic.Config;
 using System;
-using System.IO.Compression;
-using System.Text;
+using System.Collections.Generic;
 using System.IO;
-using Nikse.SubtitleEdit.Logic.Config;
+using System.IO.Compression;
 using System.Linq;
+using System.Text;
 using System.Threading;
 
 namespace Nikse.SubtitleEdit.Logic.Ocr;

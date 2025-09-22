@@ -373,14 +373,14 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
             }
 
             var p = subtitle.GetParagraphOrDefault(index);
-            var next = subtitle.GetParagraphOrDefault(index+1);
+            var next = subtitle.GetParagraphOrDefault(index + 1);
             if (p == null || next == null)
             {
                 return false;
             }
 
-            if (next.StartTime.TotalMilliseconds - p.EndTime.TotalMilliseconds > 600) 
-            { 
+            if (next.StartTime.TotalMilliseconds - p.EndTime.TotalMilliseconds > 600)
+            {
                 return false;
             }
 

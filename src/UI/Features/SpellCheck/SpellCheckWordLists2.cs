@@ -72,12 +72,12 @@ public class SpellCheckWordLists2
             }
         }
 
-        var paths = new[] 
-        { 
+        var paths = new[]
+        {
             Path.Combine(_dictionaryFolder, fiveLetterName + "_user.xml"),
             Path.Combine(_dictionaryFolder, fiveLetterName + "_se.xml"),
         };
-        
+
         var xmlDoc = new XmlDocument();
         foreach (var path in paths)
         {
@@ -488,7 +488,7 @@ public class SpellCheckWordLists2
 
     public bool HasNameExtended(string word, string text)
     {
-        return _namesListUppercase.Contains(word) || 
+        return _namesListUppercase.Contains(word) ||
                _namesListWithApostrophe.Contains(word) ||
                _nameList.IsInNamesMultiWordList(text, word) ||
                _namesListUppercase.Contains(word);
