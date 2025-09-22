@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using Nikse.SubtitleEdit.Core.Common;
 
 namespace Nikse.SubtitleEdit.Features.SpellCheck;
 
@@ -179,5 +180,12 @@ public class SpellCheckDictionaryDisplay
         }
 
         return "en";
+    }
+
+    public string GetThreeLetterCode()
+    {
+        var twoLetterCode = GetTwoLetterLanguageCode(this);
+        var threeLetterCode = Iso639Dash2LanguageCode.GetThreeLetterCodeFromTwoLetterCode(twoLetterCode);
+        return threeLetterCode ?? "eng";
     }
 }

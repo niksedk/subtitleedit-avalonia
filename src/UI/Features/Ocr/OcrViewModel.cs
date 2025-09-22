@@ -212,8 +212,7 @@ public partial class OcrViewModel : ObservableObject
 
         Se.SaveSettings();
     }
-    
-    
+
 
     private void LoadDictionaries()
     {
@@ -387,10 +386,7 @@ public partial class OcrViewModel : ObservableObject
             return;
         }
 
-        await _windowService.ShowDialogAsync<ShowImageWindow, ShowImageViewModel>(Window!, vm =>
-        {
-            vm.Initialize("OCR image", item.GetBitmap());
-        });
+        await _windowService.ShowDialogAsync<ShowImageWindow, ShowImageViewModel>(Window!, vm => { vm.Initialize("OCR image", item.GetBitmap()); });
     }
 
     [RelayCommand]
@@ -416,10 +412,8 @@ public partial class OcrViewModel : ObservableObject
     [RelayCommand]
     private async Task PickOllamaModel()
     {
-        var result = await _windowService.ShowDialogAsync<PickOllamaModelWindow, PickOllamaModelViewModel>(Window!, vm =>
-        {
-            vm.Initialize(Se.Language.General.PickOllamaModel, OllamaModel, OllamaUrl);
-        });
+        var result = await _windowService.ShowDialogAsync<PickOllamaModelWindow, PickOllamaModelViewModel>(Window!,
+            vm => { vm.Initialize(Se.Language.General.PickOllamaModel, OllamaModel, OllamaUrl); });
 
         if (result.OkPressed && result.SelectedModel != null)
         {
@@ -596,7 +590,7 @@ public partial class OcrViewModel : ObservableObject
                 }
                 else
                 {
-                    ocrItem.FixResult = new OcrFixLineResult(idx, ocrItem.Text);    
+                    ocrItem.FixResult = new OcrFixLineResult(idx, ocrItem.Text);
                 }
             }
         }
@@ -767,7 +761,7 @@ public partial class OcrViewModel : ObservableObject
 
         if (SelectedDictionary != null && DoFixOcrErrors && SelectedDictionary.Name != GetDictionaryNameNone())
         {
-            var threeLetterCode = "eng"; // TODO: fix
+            var threeLetterCode = SelectedDictionary.GetThreeLetterCode();
             _ocrFixEngine.Initialize(OcrSubtitleItems.ToList(), threeLetterCode, SelectedDictionary);
         }
         else
@@ -817,10 +811,8 @@ public partial class OcrViewModel : ObservableObject
                     return;
                 }
 
-                var result = await _windowService.ShowDialogAsync<DownloadPaddleOcrWindow, DownloadPaddleOcrViewModel>(Window!, vm =>
-                {
-                    vm.Initialize(PaddleOcrDownloadType.EngineCpu);
-                });
+                var result = await _windowService.ShowDialogAsync<DownloadPaddleOcrWindow, DownloadPaddleOcrViewModel>(Window!,
+                    vm => { vm.Initialize(PaddleOcrDownloadType.EngineCpu); });
                 if (!result.OkPressed)
                 {
                     PauseOcr();
@@ -831,10 +823,8 @@ public partial class OcrViewModel : ObservableObject
             var modelsDirectory = Se.PaddleOcrModelsFolder;
             if (!Directory.Exists(modelsDirectory))
             {
-                var result = await _windowService.ShowDialogAsync<DownloadPaddleOcrWindow, DownloadPaddleOcrViewModel>(Window!, vm =>
-                {
-                    vm.Initialize(PaddleOcrDownloadType.Models);
-                });
+                var result = await _windowService.ShowDialogAsync<DownloadPaddleOcrWindow, DownloadPaddleOcrViewModel>(Window!,
+                    vm => { vm.Initialize(PaddleOcrDownloadType.Models); });
                 if (!result.OkPressed)
                 {
                     PauseOcr();
@@ -849,10 +839,8 @@ public partial class OcrViewModel : ObservableObject
             var modelsDirectory = Se.PaddleOcrModelsFolder;
             if (!Directory.Exists(modelsDirectory))
             {
-                var result = await _windowService.ShowDialogAsync<DownloadPaddleOcrWindow, DownloadPaddleOcrViewModel>(Window!, vm =>
-                {
-                    vm.Initialize(PaddleOcrDownloadType.Models);
-                });
+                var result = await _windowService.ShowDialogAsync<DownloadPaddleOcrWindow, DownloadPaddleOcrViewModel>(Window!,
+                    vm => { vm.Initialize(PaddleOcrDownloadType.Models); });
                 if (!result.OkPressed)
                 {
                     PauseOcr();
@@ -1097,8 +1085,8 @@ public partial class OcrViewModel : ObservableObject
 
     private void OcrFixLineAndSetText(int i, OcrSubtitleItem item)
     {
-        if (SelectedDictionary != null && 
-            SelectedDictionary.Name != GetDictionaryNameNone() && 
+        if (SelectedDictionary != null &&
+            SelectedDictionary.Name != GetDictionaryNameNone() &&
             _ocrFixEngine.IsLoaded() && DoFixOcrErrors)
         {
             var result = _ocrFixEngine.FixOcrErrors(i);
@@ -1110,6 +1098,7 @@ public partial class OcrViewModel : ObservableObject
                 {
                     item.Text = resultText;
                 }
+
                 CurrentText = item.Text;
             });
         }
@@ -1393,10 +1382,7 @@ public partial class OcrViewModel : ObservableObject
         else if (e.Key == Key.P && e.KeyModifiers.HasFlag(KeyModifiers.Control))
         {
             e.Handled = true; // prevent further handling if needed
-            Dispatcher.UIThread.Post(async void () =>
-            {
-                await ViewSelectedImage();
-            });
+            Dispatcher.UIThread.Post(async void () => { await ViewSelectedImage(); });
         }
     }
 
@@ -1471,6 +1457,7 @@ public partial class OcrViewModel : ObservableObject
         _ocrSubtitle = new OcrSubtitleVobSub(mergedVobSubPacks);
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
     }
+
     public void Initialize(MatroskaTrackInfo matroskaSubtitleInfo, Subtitle subtitle, List<DvbSubPes> subtitleImages, string fileName)
     {
         _ocrSubtitle = new OcrSubtitleMkvDvb(matroskaSubtitleInfo, subtitle, subtitleImages);
