@@ -21,7 +21,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
 {
     private bool _isLoaded;
     private string _fiveLetterWordListLanguageName;
-    private OcrFixReplaceList _ocrFixReplaceList;
+    private OcrFixReplaceList2 _ocrFixReplaceList;
     private NameList _nameListObj;
     private HashSet<string> _nameList = new HashSet<string>();
     private HashSet<string> _nameListUppercase = new HashSet<string>();
@@ -33,7 +33,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
     private readonly HashSet<string> _wordSpellOkList = new HashSet<string>();
     private string[] _wordSplitList;
     private Dictionary<string, string> _changeAllDictionary;
-    private SpellCheckWordLists _spellCheckWordLists;
+    private SpellCheckWordLists2 _spellCheckWordLists;
     private string _spellCheckDictionaryName;
     private string _threeLetterIsoLanguageName;
     private readonly HashSet<char> _expectedChars = new HashSet<char> { ' ', '¡', '¿', ',', '.', '!', '?', ':', ';', '(', ')', '[', ']', '{', '}', '+', '-', '£', '\\', '"', '”', '„', '“', '«', '»', '#', '&', '%', '\r', '\n', '؟' }; // removed $
@@ -59,8 +59,8 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
         _isLoaded = true;
         var twoLetterIsoLanguageName = Iso639Dash2LanguageCode.GetTwoLetterCodeFromThreeLetterCode(threeLetterIsoLanguageName);
         _spellCheckManager.Initialize(spellCheckDictionary.DictionaryFileName, threeLetterIsoLanguageName);
-        _ocrFixReplaceList = OcrFixReplaceList.FromLanguageId(threeLetterIsoLanguageName);
-        _spellCheckWordLists = new SpellCheckWordLists(Se.DictionariesFolder, twoLetterIsoLanguageName, this);
+        _ocrFixReplaceList = OcrFixReplaceList2.FromLanguageId(threeLetterIsoLanguageName);
+        _spellCheckWordLists = new SpellCheckWordLists2(twoLetterIsoLanguageName, this);
         _subtitles = subtitles;
         _threeLetterIsoLanguageName = threeLetterIsoLanguageName;
         _subtitle = GetSubtitle(subtitles);
@@ -84,7 +84,6 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
             }
 
             CheckAndFixWord(word, splitLine, i);
-            word.IsSpellCheckedOk = _spellCheckManager.IsWordCorrect(word.FixedWord);
         }
 
         return splitLine;
@@ -256,16 +255,18 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
 
         //TODO: check for multi-word names here too (look ahead in splitLine.Words, with e.g. "-")
 
+        var isWordCorrect = false;
         var result = s;
         if (_changeAllDictionary != null && _changeAllDictionary.ContainsKey(s))
         {
             result = _changeAllDictionary[s];
+            isWordCorrect = true;
         }
         else
         {
             result = _ocrFixReplaceList.FixCommonWordErrors(word.Word);
 
-            var isWordCorrect = _spellCheckManager.IsWordCorrect(result);
+            isWordCorrect = _spellCheckManager.IsWordCorrect(result);
 
             if (!isWordCorrect && _wordSkipList.Contains(s))
             {
@@ -278,6 +279,26 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
             }
 
             if (!isWordCorrect && _spellCheckWordLists.HasName(result))
+            {
+                isWordCorrect = true;
+            }
+
+            var w = result.Trim('-');
+            if (!isWordCorrect && w != result && 
+                (_wordSkipList.Contains(w) ||
+                 _spellCheckManager.IsWordCorrect(w) ||
+                 _spellCheckWordLists.HasName(w) ||
+                 _spellCheckWordLists.HasName(w)))
+            {
+                isWordCorrect = true;
+            }
+
+            w = result.Trim('\'');
+            if (!isWordCorrect && w != result &&
+                (_wordSkipList.Contains(w) ||
+                 _spellCheckManager.IsWordCorrect(w) ||
+                 _spellCheckWordLists.HasName(w) ||
+                 _spellCheckWordLists.HasName(w)))
             {
                 isWordCorrect = true;
             }
@@ -298,6 +319,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
         }
 
         word.FixedWord = result;
+        word.IsSpellCheckedOk = isWordCorrect;
     }
 
     public void Unload()

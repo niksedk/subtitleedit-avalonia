@@ -41,7 +41,22 @@ public class DictionaryInitializer(IZipUnpacker zipUnpacker) : IDictionaryInitia
         var version = await File.ReadAllTextAsync(versionFileName);
         var themeNormalizedVersion = new SemanticVersion(version);
 
-        return themeNormalizedVersion.IsLessThan(currentNormalizedVersion);
+        if (themeNormalizedVersion.IsLessThan(currentNormalizedVersion))
+        {
+            try
+            {
+                File.Delete(versionFileName);
+                File.WriteAllText(versionFileName, Se.Version);
+            }
+            catch
+            {
+                Se.LogError($"Could not write version file in \"{outputDir}\" folder.");
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     private async Task Unpack()

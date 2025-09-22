@@ -350,7 +350,7 @@ public partial class WordListsViewModel : ObservableObject
     private bool SaveOcrFix(LanguageItem lang, string find, string replace)
     {
         var threeLetterCode = Iso639Dash2LanguageCode.GetThreeLetterCodeFromTwoLetterCode(lang.TwoLetterISOLanguageName);
-        var list = new OcrFixReplaceList(Path.Combine(Se.DictionariesFolder, threeLetterCode + "_OCRFixReplaceList.xml"));
+        var list = new OcrFixReplaceList2(Path.Combine(Se.DictionariesFolder, threeLetterCode + "_OCRFixReplaceList.xml"));
 
         return list.AddWordOrPartial(find, replace);
     }
@@ -358,7 +358,7 @@ public partial class WordListsViewModel : ObservableObject
     private bool RemoveOcrFix(LanguageItem lang, string find, string replace)
     {
         var threeLetterCode = Iso639Dash2LanguageCode.GetThreeLetterCodeFromTwoLetterCode(lang.TwoLetterISOLanguageName);
-        var list = new OcrFixReplaceList(Path.Combine(Se.DictionariesFolder, threeLetterCode + "_OCRFixReplaceList.xml"));
+        var list = new OcrFixReplaceList2(Path.Combine(Se.DictionariesFolder, threeLetterCode + "_OCRFixReplaceList.xml"));
 
         return list.RemoveWordOrPartial(find);
     }
@@ -408,7 +408,7 @@ public partial class WordListsViewModel : ObservableObject
     private List<OcrFixItem> LoadOcrFixList(LanguageItem lang)
     {
         var threeLetterCode = Iso639Dash2LanguageCode.GetThreeLetterCodeFromTwoLetterCode(lang.TwoLetterISOLanguageName);
-        var list = new OcrFixReplaceList(Path.Combine(Se.DictionariesFolder, threeLetterCode + "_OCRFixReplaceList.xml"));
+        var list = new OcrFixReplaceList2(Path.Combine(Se.DictionariesFolder, threeLetterCode + "_OCRFixReplaceList.xml"));
 
         var result = new List<OcrFixItem>();
         foreach (var item in list.WordReplaceList)

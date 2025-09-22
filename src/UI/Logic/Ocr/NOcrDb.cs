@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Linq;
+using System.Threading;
 
 namespace Nikse.SubtitleEdit.Logic.Ocr;
 
@@ -34,25 +35,29 @@ public class NOcrDb
 
     public List<NOcrChar> OcrCharactersCombined => OcrCharacters.Concat(OcrCharactersExpanded).ToList();
 
+    private Lock SaveLock = new();
     public void Save()
     {
-        if (File.Exists(FileName))
+        lock (SaveLock)
         {
-            File.Delete(FileName);
-        }
+            if (File.Exists(FileName))
+            {
+                File.Delete(FileName);
+            }
 
-        using Stream stream = new GZipStream(File.OpenWrite(FileName), CompressionMode.Compress);
-        var versionBuffer = Encoding.ASCII.GetBytes(Version);
-        stream.Write(versionBuffer, 0, versionBuffer.Length);
+            using Stream stream = new GZipStream(File.OpenWrite(FileName), CompressionMode.Compress);
+            var versionBuffer = Encoding.ASCII.GetBytes(Version);
+            stream.Write(versionBuffer, 0, versionBuffer.Length);
 
-        foreach (var ocrChar in OcrCharacters)
-        {
-            ocrChar.Save(stream);
-        }
+            foreach (var ocrChar in OcrCharacters)
+            {
+                ocrChar.Save(stream);
+            }
 
-        foreach (var ocrChar in OcrCharactersExpanded)
-        {
-            ocrChar.Save(stream);
+            foreach (var ocrChar in OcrCharactersExpanded)
+            {
+                ocrChar.Save(stream);
+            }
         }
     }
 
@@ -540,7 +545,7 @@ public class NOcrDb
         {
             return [];
         }
-        
+
         return Directory
             .GetFiles(Se.OcrFolder.TrimEnd(Path.DirectorySeparatorChar), "*.nocr")
             .Select(Path.GetFileNameWithoutExtension)
