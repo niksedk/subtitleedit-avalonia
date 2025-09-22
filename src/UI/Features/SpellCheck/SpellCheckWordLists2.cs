@@ -38,12 +38,12 @@ public class SpellCheckWordLists2
     private readonly string _languageName;
     private readonly IDoSpell _doSpell;
 
-    public SpellCheckWordLists2(string languageName, IDoSpell doSpell)
+    public SpellCheckWordLists2(string fiveLetterName, IDoSpell doSpell)
     {
         _dictionaryFolder = Se.DictionariesFolder;
-        _languageName = languageName ?? throw new NullReferenceException(nameof(languageName));
+        _languageName = fiveLetterName ?? throw new NullReferenceException(nameof(fiveLetterName));
         _doSpell = doSpell ?? throw new NullReferenceException(nameof(doSpell));
-        _nameList = new NameList(_dictionaryFolder, languageName, Configuration.Settings.WordLists.UseOnlineNames, Configuration.Settings.WordLists.NamesUrl);
+        _nameList = new NameList(_dictionaryFolder, fiveLetterName, Configuration.Settings.WordLists.UseOnlineNames, Configuration.Settings.WordLists.NamesUrl);
         _names = _nameList.GetNames();
         var namesMultiWordList = _nameList.GetMultiNames();
         if (Configuration.Settings.Tools.RememberUseAlwaysList)
@@ -56,7 +56,7 @@ public class SpellCheckWordLists2
             _namesListUppercase.Add(namesItem.ToUpperInvariant());
         }
 
-        if (languageName.StartsWith("en_", StringComparison.OrdinalIgnoreCase))
+        if (fiveLetterName.StartsWith("en_", StringComparison.OrdinalIgnoreCase))
         {
             foreach (var namesItem in _names)
             {
@@ -74,8 +74,8 @@ public class SpellCheckWordLists2
 
         var paths = new[] 
         { 
-            Path.Combine(_dictionaryFolder, languageName + "_user.xml"),
-            Path.Combine(_dictionaryFolder, languageName + "_se.xml"),
+            Path.Combine(_dictionaryFolder, fiveLetterName + "_user.xml"),
+            Path.Combine(_dictionaryFolder, fiveLetterName + "_se.xml"),
         };
         
         var xmlDoc = new XmlDocument();

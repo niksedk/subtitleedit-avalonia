@@ -5,6 +5,7 @@ using Nikse.SubtitleEdit.Core.SpellCheck;
 using Nikse.SubtitleEdit.Features.SpellCheck;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
 
 namespace Nikse.SubtitleEdit.Features.Ocr.FixEngine;
@@ -60,7 +61,10 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
         var twoLetterIsoLanguageName = Iso639Dash2LanguageCode.GetTwoLetterCodeFromThreeLetterCode(threeLetterIsoLanguageName);
         _spellCheckManager.Initialize(spellCheckDictionary.DictionaryFileName, threeLetterIsoLanguageName);
         _ocrFixReplaceList = OcrFixReplaceList2.FromLanguageId(threeLetterIsoLanguageName);
-        _spellCheckWordLists = new SpellCheckWordLists2(twoLetterIsoLanguageName, this);
+
+        var fiveLetterName = Path.GetFileNameWithoutExtension(spellCheckDictionary.DictionaryFileName);
+        _spellCheckWordLists = new SpellCheckWordLists2(fiveLetterName, this);
+
         _subtitles = subtitles;
         _threeLetterIsoLanguageName = threeLetterIsoLanguageName;
         _subtitle = GetSubtitle(subtitles);
