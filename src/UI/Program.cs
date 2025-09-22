@@ -150,43 +150,42 @@ namespace Nikse.SubtitleEdit
             nativeMenu.Items.Add(aboutMenu);
             NativeMenu.SetMenu(app, nativeMenu);
 
-
             // mac finder "Send to"
             if (OperatingSystem.IsMacOS())
             {
-                if (app.TryGetFeature(typeof(IActivatableLifetime)) is IActivatableLifetime activatable)
+                if (app.TryGetFeature(typeof(IActivatableLifetime)) is not IActivatableLifetime activatable)
                 {
-                    activatable.Activated += (sender, e) =>
-                    {
-                        if (e is FileActivatedEventArgs args && args.Kind == ActivationKind.File)
-                        {
-                            Se.LogError($"App activated with {args.Files.Count} files");
-                    
-                            foreach (var storageItem in args.Files)
-                            {
-                                var filePath = storageItem.Path.LocalPath;
-                                if (System.IO.File.Exists(filePath))
-                                {
-                                    Se.LogError($"File opened via macOS activation: {filePath}");
-                                    if (lifetime.MainWindow?.Content is MainView mainView)
-                                    {
-                                        Dispatcher.UIThread.Post(async () =>
-                                        {
-                                            await mainView.OpenFile(filePath);
-                                        });
-                                    }
-
-                                    break;
-                                }
-                            }
-                        }
-                    };
+                    return;
                 }
+
+                activatable.Activated += (sender, e) =>
+                {
+                    if (e is not FileActivatedEventArgs args || args.Kind != ActivationKind.File)
+                    {
+                        return;
+                    }
+
+                    Se.LogError($"App activated with {args.Files.Count} files");
+                    
+                    foreach (var storageItem in args.Files)
+                    {
+                        var filePath = storageItem.Path.LocalPath;
+                        if (System.IO.File.Exists(filePath))
+                        {
+                            Se.LogError($"File opened via macOS activation: {filePath}");
+                            if (lifetime.MainWindow?.Content is MainView mainView)
+                            {
+                                Dispatcher.UIThread.Post(async () =>
+                                {
+                                    await mainView.OpenFile(filePath);
+                                });
+                            }
+
+                            break;
+                        }
+                    }
+                };
             }
-            
-            
-            
-            
         }
 
         private static void SetupDependencyInjection()

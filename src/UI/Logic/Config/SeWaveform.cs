@@ -14,9 +14,10 @@ public class SeWaveform
     public bool InvertMouseWheel { get; set; }
     public double ShotChangesSensitivity { get; set; }
     public string ShotChangesImportTimeCodeFormat { get; set; }
-    public bool WaveformSnapToShotChanges { get; set; }
-    public bool WaveformShotChangesAutoGenerate { get; set; }
-    public int WaveformSnapToShotChangesPixels { get; set; }
+    public bool SnapToShotChanges { get; set; }
+    public bool ShotChangesAutoGenerate { get; set; }
+    public int SnapToShotChangesPixels { get; set; }
+    public bool FocusOnMouseOver { get; set; }
 
 
     public SeWaveform()
@@ -28,8 +29,8 @@ public class SeWaveform
         WaveformCursorColor = Colors.Cyan.FromColorToHex();
         ShotChangesSensitivity = 0.4;
         ShotChangesImportTimeCodeFormat = "Seconds";
-        WaveformSnapToShotChangesPixels = 8;
-        WaveformSnapToShotChanges = true;
-        WaveformShotChangesAutoGenerate = false;
+        SnapToShotChangesPixels = 8;
+        SnapToShotChanges = true;
+        ShotChangesAutoGenerate = false;
     }
 }

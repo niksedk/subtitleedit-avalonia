@@ -142,6 +142,7 @@ public class AudioVisualizer : Control
     public double ShotChangeSnapSeconds { get; set; } = 0.05;
 
     public bool SnapToShotChanges { get; set; } = true;
+    public bool FocusOnMouseOver { get; set; } = true;
 
     private List<double> _shotChanges = new List<double>();
 
@@ -593,6 +594,11 @@ public class AudioVisualizer : Control
     private void OnPointerEntered(object? sender, PointerEventArgs e)
     {
         base.OnPointerEntered(e);
+
+        if (!FocusOnMouseOver)
+        {
+            return;
+        }
 
         if (!IsFocused)
         {

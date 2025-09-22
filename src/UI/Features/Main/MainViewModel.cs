@@ -6040,7 +6040,7 @@ public partial class MainViewModel :
 
     private void ExtractShotChanges(string videoFileName)
     {
-        if (Se.Settings.Waveform.WaveformShotChangesAutoGenerate)
+        if (Se.Settings.Waveform.ShotChangesAutoGenerate)
         {
             var threshold = Se.Settings.Waveform.ShotChangesSensitivity.ToString(CultureInfo.InvariantCulture);
             var argumentsFormat = Se.Settings.Video.ShowChangesFFmpegArguments;

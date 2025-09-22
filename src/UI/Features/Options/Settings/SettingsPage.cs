@@ -315,13 +315,14 @@ public class SettingsPage : UserControl
 
         sections.Add(new SettingsSection(Se.Language.Options.Settings.WaveformSpectrogram,
             [
-                MakeCheckboxSetting(Se.Language.Options.Settings.WaveformDrawGridLines, nameof(_vm.WaveformDrawGridLines)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.WaveformFocusOnMouseOver, nameof(_vm.WaveformFocusOnMouseOver)),
                 MakeCheckboxSetting(Se.Language.Options.Settings.WaveformCenterVideoPosition, nameof(_vm.WaveformCenterVideoPosition)),
                 MakeCheckboxSetting(Se.Language.Options.Settings.WaveformShowToolbar, nameof(_vm.WaveformShowToolbar)),
                 MakeCheckboxSetting(Se.Language.Options.Settings.WaveformSnapToShotChanges, nameof(_vm.WaveformSnapToShotChanges)),
                 MakeCheckboxSetting(Se.Language.Options.Settings.WaveformShotChangesAutoGenerate, nameof(_vm.WaveformShotChangesAutoGenerate)),
                 MakeCheckboxSetting(Se.Language.Options.Settings.WaveformFocusTextboxAfterInsertNew, nameof(_vm.WaveformFocusTextboxAfterInsertNew)),
                 MakeCheckboxSetting(Se.Language.Options.Settings.WaveformInvertMouseWheel, nameof(_vm.WaveformInvertMouseWheel)),
+                MakeCheckboxSetting(Se.Language.Options.Settings.WaveformDrawGridLines, nameof(_vm.WaveformDrawGridLines)),
                 new SettingsItem(Se.Language.Options.Settings.WaveformColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.WaveformColor))),
                 new SettingsItem(Se.Language.Options.Settings.WaveformSelectedColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.WaveformSelectedColor))),
                 new SettingsItem(Se.Language.Options.Settings.WaveformCursorColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.WaveformCursorColor))),

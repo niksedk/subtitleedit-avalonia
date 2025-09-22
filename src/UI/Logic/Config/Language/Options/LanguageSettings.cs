@@ -142,6 +142,7 @@ public class LanguageSettings
     public string ShowSettingsFile { get; set; }
     public string ShowAssaLayer { get; set; }
     public string WaveformCursorColor { get; set; }
+    public string WaveformFocusOnMouseOver { get; set; }
 
     public LanguageSettings()
     {
@@ -240,6 +241,7 @@ public class LanguageSettings
         ColorGapTooShort = "Color if gap is too short";
         ErrorBackgroundColor = "Error background color";
         WaveformDrawGridLines = "Draw grid lines";
+        WaveformFocusOnMouseOver = "Focus on mouse over";
         WaveformCenterVideoPosition = "Center video position";
         WaveformShowToolbar = "Show toolbar";
         WaveformFocusTextboxAfterInsertNew = "Focus text box after insert";

@@ -86,6 +86,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _autoOpenVideoFile;
 
     [ObservableProperty] private bool _waveformDrawGridLines;
+    [ObservableProperty] private bool _waveformFocusOnMouseOver;
     [ObservableProperty] private bool _waveformCenterVideoPosition;
     [ObservableProperty] private bool _waveformShowToolbar;
     [ObservableProperty] private bool _waveformFocusTextboxAfterInsertNew;
@@ -251,6 +252,7 @@ public partial class SettingsViewModel : ObservableObject
         BookmarkColor = appearance.BookmarkColor.FromHexToColor();
 
         WaveformDrawGridLines = Se.Settings.Waveform.DrawGridLines;
+        WaveformFocusOnMouseOver = Se.Settings.Waveform.FocusOnMouseOver;
         WaveformCenterVideoPosition = Se.Settings.Waveform.CenterVideoPosition;
         WaveformShowToolbar = Se.Settings.Waveform.ShowToolbar;
         WaveformFocusTextboxAfterInsertNew = Se.Settings.Waveform.FocusTextBoxAfterInsertNew;
@@ -258,8 +260,8 @@ public partial class SettingsViewModel : ObservableObject
         WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor();
         WaveformCursorColor = Se.Settings.Waveform.WaveformCursorColor.FromHexToColor();
         WaveformInvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel;
-        WaveformSnapToShotChanges = Se.Settings.Waveform.WaveformSnapToShotChanges;
-        WaveformShotChangesAutoGenerate = Se.Settings.Waveform.WaveformShotChangesAutoGenerate;
+        WaveformSnapToShotChanges = Se.Settings.Waveform.SnapToShotChanges;
+        WaveformShotChangesAutoGenerate = Se.Settings.Waveform.ShotChangesAutoGenerate;
 
         ColorDurationTooLong = general.ColorDurationTooLong;
         ColorDurationTooShort = general.ColorDurationTooShort;
@@ -342,6 +344,7 @@ public partial class SettingsViewModel : ObservableObject
         appearance.ShowHorizontalLineBelowToolbar = ShowHorizontalLineBelowToolbar;
 
         Se.Settings.Waveform.DrawGridLines = WaveformDrawGridLines;
+        Se.Settings.Waveform.FocusOnMouseOver = WaveformFocusOnMouseOver;
         Se.Settings.Waveform.CenterVideoPosition = WaveformCenterVideoPosition;
         Se.Settings.Waveform.FocusTextBoxAfterInsertNew = WaveformFocusTextboxAfterInsertNew;
         Se.Settings.Waveform.ShowToolbar = WaveformShowToolbar;
@@ -349,8 +352,8 @@ public partial class SettingsViewModel : ObservableObject
         Se.Settings.Waveform.WaveformSelectedColor = WaveformSelectedColor.FromColorToHex();
         Se.Settings.Waveform.WaveformCursorColor = WaveformCursorColor.FromColorToHex();
         Se.Settings.Waveform.InvertMouseWheel = WaveformInvertMouseWheel;
-        Se.Settings.Waveform.WaveformSnapToShotChanges = WaveformSnapToShotChanges;
-        Se.Settings.Waveform.WaveformShotChangesAutoGenerate = WaveformShotChangesAutoGenerate;
+        Se.Settings.Waveform.SnapToShotChanges = WaveformSnapToShotChanges;
+        Se.Settings.Waveform.ShotChangesAutoGenerate = WaveformShotChangesAutoGenerate;
 
         general.ColorDurationTooLong = ColorDurationTooLong;
         general.ColorDurationTooShort = ColorDurationTooShort;
