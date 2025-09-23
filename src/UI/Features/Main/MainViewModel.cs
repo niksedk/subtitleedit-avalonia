@@ -3214,6 +3214,26 @@ public partial class MainViewModel :
             }
 
             control.IsFullScreen = false;
+            
+            if (OperatingSystem.IsMacOS() && !string.IsNullOrEmpty(_videoFileName) && VideoPlayerControl != null)
+            {
+                var position = VideoPlayerControl.Position;
+                VideoPlayerControl.Close();
+                Dispatcher.UIThread.Post(async void () =>
+                {
+                    try
+                    {
+                        Task.Delay(100).Wait();
+                        await VideoPlayerControl.Open(_videoFileName);
+                        Task.Delay(100).Wait();
+                        VideoPlayerControl.Position = position;
+                    }
+                    catch (Exception e)
+                    {
+                        Se.LogError(e, "Failed to reload video");
+                    }
+                });
+            }
         });
         fullscreenWindow.Show(Window!);
         _shortcutManager.ClearKeys();
