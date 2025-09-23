@@ -51,22 +51,7 @@ public class FullScreenVideoWindow : Window
 
             if (OperatingSystem.IsMacOS() && !string.IsNullOrEmpty(videoFileName))
             {
-                var position = videoPlayer.Position;
-                videoPlayer.Close();
-                Dispatcher.UIThread.Post(async void () =>
-                {
-                    try
-                    {
-                        Task.Delay(100).Wait();
-                        await videoPlayer.Open(videoFileName);
-                        Task.Delay(100).Wait();
-                        videoPlayer.Position = position;
-                    }
-                    catch (Exception e)
-                    {
-                        Se.LogError(e, "Failed to reload video");
-                    }
-                });
+                videoPlayer.Reload();
             }
         };
     }

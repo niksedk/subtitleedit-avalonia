@@ -12,6 +12,7 @@ using Projektanker.Icons.Avalonia;
 using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Controls.VideoPlayer
 {
@@ -138,7 +139,8 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         private readonly Button _buttonFullScreenCollapse;
         private readonly Icon _iconVolume;
         private DispatcherTimer? _positionTimer;
-        IVideoPlayerInstance _videoPlayerInstance;
+        private IVideoPlayerInstance _videoPlayerInstance;
+        private string  _videoFileName;
 
         private void NotifyPositionChanged(double newPosition)
         {
@@ -170,7 +172,8 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         public VideoPlayerControl(IVideoPlayerInstance videoPlayerInstance)
         {
             _videoPlayerInstance = videoPlayerInstance;
-
+            _videoFileName = string.Empty;
+            
             var mainGrid = new Grid
             {
                 RowDefinitions = new RowDefinitions("*,Auto") // video + controls
@@ -415,6 +418,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             StartPositionTimer();
             _videoPlayerInstance.Pause();
             _textBlockPlayerName.Text = _videoPlayerInstance.Name;
+            _videoFileName = videoFileName;
         }
 
         internal void Close()
@@ -422,6 +426,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             _positionTimer?.Stop();
             _videoPlayerInstance.Close();
             ProgressText = string.Empty;
+            _videoFileName = string.Empty;
         }
 
         internal void TogglePlayPause()
@@ -445,6 +450,27 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                 SetPlayPauseIcon(isPlaying);
             };
             _positionTimer.Start();
+        }
+
+        public void Reload()
+        {
+            var videoFileName = _videoFileName;
+            var position = Position;
+            Close();
+            Dispatcher.UIThread.Post(async void () =>
+            {
+                try
+                {
+                    Task.Delay(100).Wait();
+                    await Open(videoFileName);
+                    Task.Delay(100).Wait();
+                    Position = position;
+                }
+                catch (Exception e)
+                {
+                    Se.LogError(e, "Failed to reload video");
+                }
+            });
         }
     }
 }
