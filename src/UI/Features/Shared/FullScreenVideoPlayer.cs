@@ -36,21 +36,18 @@ public class FullScreenVideoWindow : Window
             }
         };
 
-        videoPlayer.FullscreenCollapseRequested += () =>
-        {
-            Close();
-        };
+        videoPlayer.FullscreenCollapseRequested += () => { Close(); };
 
         Closing += (_, _) =>
         {
             videoPlayer.FullscreenCollapseRequested -= () => Close();
             onClose?.Invoke();
         };
-        
+
         Activated += delegate { Focus(); }; // hack to make OnKeyDown work
         Loaded += (_, _) =>
         {
-                WindowState = WindowState.Maximized;
+            WindowState = WindowState.Maximized;
 
             if (OperatingSystem.IsMacOS() && !string.IsNullOrEmpty(videoFileName))
             {
