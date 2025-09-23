@@ -1122,10 +1122,7 @@ public partial class MainViewModel :
         }
 
         var result =
-            await _windowService.ShowDialogAsync<PickLayersWindow, PickLayersViewModel>(Window!, vm =>
-        {
-            vm.Initialize(Subtitles.ToList(), _visibleLayers);
-        });
+            await _windowService.ShowDialogAsync<PickLayersWindow, PickLayersViewModel>(Window!, vm => { vm.Initialize(Subtitles.ToList(), _visibleLayers); });
 
         if (!result.OkPressed)
         {
@@ -3200,7 +3197,7 @@ public partial class MainViewModel :
     private void VideoFullScreen()
     {
         var control = VideoPlayerControl;
-        if (control == null || control.IsFullScreen)
+        if (control == null || control.IsFullScreen || string.IsNullOrEmpty(_videoFileName))
         {
             return;
         }
@@ -3209,7 +3206,7 @@ public partial class MainViewModel :
         _fullscreenBeforeParent = parent;
         control.RemoveControlFromParent();
         control.IsFullScreen = true;
-        var fullscreenWindow = new FullScreenVideoWindow(control, () =>
+        var fullscreenWindow = new FullScreenVideoWindow(control, _videoFileName, () =>
         {
             if (_fullscreenBeforeParent != null)
             {
@@ -3714,6 +3711,7 @@ public partial class MainViewModel :
         {
             lines.Add(string.Empty);
         }
+
         if (lines.Count != 2)
         {
             return;
@@ -3744,6 +3742,7 @@ public partial class MainViewModel :
         {
             lines.Add(string.Empty);
         }
+
         if (lines.Count != 2)
         {
             return;
@@ -5827,6 +5826,7 @@ public partial class MainViewModel :
             {
                 sb.AppendLine(arg);
             }
+
             Se.LogError("OnLoaded Environment.GetCommandLineArgs: " + sb);
 
             var fileName = arguments[1];
@@ -5982,7 +5982,7 @@ public partial class MainViewModel :
         }
 
         _videoFileName = videoFileName;
-        IsVideoLoaded = true;   
+        IsVideoLoaded = true;
     }
 
     private async Task ExtractWaveformAndSpectrogramAndShotChanges(
@@ -7572,6 +7572,7 @@ public partial class MainViewModel :
                             {
                                 return;
                             }
+
                             await SubtitleOpen(path);
                             return;
                         }
