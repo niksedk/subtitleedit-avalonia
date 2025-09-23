@@ -2,6 +2,7 @@
 using Nikse.SubtitleEdit.Core.Dictionaries;
 using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Features.SpellCheck;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -286,7 +287,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
             }
 
             var w = result.Trim('-');
-            if (!isWordCorrect && w != result && 
+            if (!isWordCorrect && w != result &&
                 (_wordSkipList.Contains(w) ||
                  _spellCheckManager.IsWordCorrect(w) ||
                  _spellCheckWordLists.HasName(w) ||
@@ -310,9 +311,10 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
                 var guesses = _ocrFixReplaceList.CreateGuessesFromLetters(result, _threeLetterIsoLanguageName);
                 foreach (var g in guesses)
                 {
-                    if (_spellCheckManager.IsWordCorrect(g))
+                    if (IsSpelledCorrect(g))
                     {
                         result = g;
+                        word.GuessUsed = true;
                         isWordCorrect = true;
                         break;
                     }
@@ -322,6 +324,44 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
 
         word.FixedWord = result;
         word.IsSpellCheckedOk = isWordCorrect;
+    }
+
+    private bool IsSpelledCorrect(string s)
+    {
+        if (_spellCheckManager.IsWordCorrect(s))
+        {
+            return true;
+        }
+
+        if (s.Contains(' '))
+        {
+            var parts = s.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var part in parts)
+            {
+                if (!_spellCheckManager.IsWordCorrect(part))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        if (s.Contains("-"))
+        {
+            var parts = s.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var part in parts)
+            {
+                if (!_spellCheckManager.IsWordCorrect(part))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     public void Unload()

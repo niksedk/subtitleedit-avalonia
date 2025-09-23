@@ -12,4 +12,5 @@ public class OcrFixLinePartResult
     public string FixedWord { get; set; } = string.Empty;
     public bool? IsSpellCheckedOk { get; set; }
     public List<string> Suggestions { get; set; } = new();
+    public bool GuessUsed { get; internal set; }
 }
