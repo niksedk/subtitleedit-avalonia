@@ -480,7 +480,7 @@ public class OcrWindow : Window
         return border;
     }
 
-    private static object MakeUnknownWordsView(OcrViewModel vm)
+    private static Grid MakeUnknownWordsView(OcrViewModel vm)
     {
         var grid = new Grid
         {
@@ -503,6 +503,7 @@ public class OcrWindow : Window
             [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedUnknownWord), BindingMode.TwoWay),
             Width = double.NaN,
             Height = double.NaN,
+            MaxHeight = 130,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
         };
@@ -516,14 +517,68 @@ public class OcrWindow : Window
         return grid;
     }
 
-    private static object MakeAllFixesView(OcrViewModel vm)
+    private static Grid MakeAllFixesView(OcrViewModel vm)
     {
-        return UiUtil.MakeLabel("Not implemented yet");
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        var listBox = new ListBox
+        {
+            [!ListBox.ItemsSourceProperty] = new Binding(nameof(vm.AllFixes), BindingMode.OneWay),
+            [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedAllFix), BindingMode.TwoWay),
+            Width = double.NaN,
+            Height = double.NaN,
+            MaxHeight = 130,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+        };
+
+        grid.Add(listBox, 0, 0);
+
+        return grid;
     }
 
-    private static object MakeGuessesUsedView(OcrViewModel vm)
+    private static Grid MakeGuessesUsedView(OcrViewModel vm)
     {
-        return UiUtil.MakeLabel("Not implemented yet");
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        var listBox = new ListBox
+        {
+            [!ListBox.ItemsSourceProperty] = new Binding(nameof(vm.AllGuesses), BindingMode.OneWay),
+            [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedAllGuess), BindingMode.TwoWay),
+            Width = double.NaN,
+            Height = double.NaN,
+            MaxHeight = 130,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+        };
+
+        grid.Add(listBox, 0, 0);
+
+        return grid;
     }
 
     private static Grid MakeBottomView(OcrViewModel vm)

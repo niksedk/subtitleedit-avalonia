@@ -92,6 +92,10 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private bool _isDictionaryLoaded;
     [ObservableProperty] private ObservableCollection<string> _unknownWords;
     [ObservableProperty] private string? _selectedUnknownWord;
+    [ObservableProperty] private ObservableCollection<string> _allFixes;
+    [ObservableProperty] private string? _selectedAllFix;   
+    [ObservableProperty] private ObservableCollection<string> _allGuesses;
+    [ObservableProperty] private string? _selectedAllGuess;
 
     public Window? Window { get; set; }
     public DataGrid SubtitleGrid { get; set; }
