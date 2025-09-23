@@ -43,6 +43,7 @@ namespace Nikse.SubtitleEdit.Features.Ocr;
 
 public partial class OcrViewModel : ObservableObject
 {
+    [ObservableProperty] private string _title;
     [ObservableProperty] private ObservableCollection<OcrEngineItem> _ocrEngines;
     [ObservableProperty] private OcrEngineItem? _selectedOcrEngine;
     [ObservableProperty] private ObservableCollection<OcrSubtitleItem> _ocrSubtitleItems;
@@ -96,7 +97,6 @@ public partial class OcrViewModel : ObservableObject
     public DataGrid SubtitleGrid { get; set; }
     public MatroskaTrackInfo? SelectedMatroskaTrack { get; set; }
     public bool OkPressed { get; private set; }
-    public string WindowTitle { get; private set; }
 
     public readonly List<SubtitleLineViewModel> OcredSubtitle;
 
@@ -126,6 +126,7 @@ public partial class OcrViewModel : ObservableObject
         _spellCheckManager = spellCheckManager;
         _ocrFixEngine = ocrFixEngine;
 
+        Title = Se.Language.Ocr.Ocr;
         OcrEngines = new ObservableCollection<OcrEngineItem>(OcrEngineItem.GetOcrEngines());
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>();
         NOcrDatabases = new ObservableCollection<string>();
@@ -136,7 +137,6 @@ public partial class OcrViewModel : ObservableObject
             .OrderBy(p => p));
         SelectedOllamaLanguage = "English";
         SubtitleGrid = new DataGrid();
-        WindowTitle = string.Empty;
         CurrentBitmapInfo = string.Empty;
         CurrentText = string.Empty;
         ProgressText = string.Empty;
@@ -1444,54 +1444,63 @@ public partial class OcrViewModel : ObservableObject
 
     public void Initialize(List<BluRaySupParser.PcsData> subtitles, string fileName)
     {
+        Title = string.Format(Se.Language.Ocr.OcrX, fileName);
         _ocrSubtitle = new OcrSubtitleBluRay(subtitles);
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
     }
 
     public void Initialize(List<VobSubMergedPack> vobSubMergedPackList, List<SKColor> palette, string vobSubFileName)
     {
+        Title = string.Format(Se.Language.Ocr.OcrX, vobSubFileName);
         _ocrSubtitle = new OcrSubtitleVobSub(vobSubMergedPackList);
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
     }
 
     public void Initialize(Trak mp4SubtitleTrack, List<Paragraph> paragraphs, string fileName)
     {
+        Title = string.Format(Se.Language.Ocr.OcrX, fileName);
         _ocrSubtitle = new OcrSubtitleMp4VobSub(mp4SubtitleTrack, paragraphs);
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
     }
 
-    public void Initialize(List<VobSubMergedPack> mergedVobSubPacks, MatroskaTrackInfo matroskaSubtitleInfo)
+    public void Initialize(List<VobSubMergedPack> mergedVobSubPacks, MatroskaTrackInfo matroskaSubtitleInfo, string fileName)
     {
+        Title = string.Format(Se.Language.Ocr.OcrX, fileName);
         _ocrSubtitle = new OcrSubtitleVobSub(mergedVobSubPacks);
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
     }
 
     public void Initialize(MatroskaTrackInfo matroskaSubtitleInfo, Subtitle subtitle, List<DvbSubPes> subtitleImages, string fileName)
     {
+        Title = string.Format(Se.Language.Ocr.OcrX, fileName);
         _ocrSubtitle = new OcrSubtitleMkvDvb(matroskaSubtitleInfo, subtitle, subtitleImages);
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
     }
 
     public void Initialize(MatroskaTrackInfo matroskaSubtitleInfo, List<BluRaySupParser.PcsData> pcsDataList, string fileName)
     {
+        Title = string.Format(Se.Language.Ocr.OcrX, fileName);
         _ocrSubtitle = new OcrSubtitleMkvBluRay(matroskaSubtitleInfo, pcsDataList);
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
     }
 
     public void Initialize(IList<IBinaryParagraphWithPosition> list, string fileName)
     {
+        Title = string.Format(Se.Language.Ocr.OcrX, fileName);
         _ocrSubtitle = new OcrSubtitleIBinaryParagrap(list);
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
     }
 
     public void InitializeBdn(Subtitle subtitle, string fileName, bool isSon)
     {
+        Title = string.Format(Se.Language.Ocr.OcrX, fileName);
         _ocrSubtitle = new OcrSubtitleBdn(subtitle, fileName, isSon);
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
     }
 
     internal void Initialize(TransportStreamParser tsParser, List<TransportStreamSubtitle> subtitles, string fileName)
     {
+        Title = string.Format(Se.Language.Ocr.OcrX, fileName);
         _ocrSubtitle = new OcrSubtitleTransportStream(tsParser, subtitles, fileName);
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
     }

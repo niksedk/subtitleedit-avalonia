@@ -24,7 +24,7 @@ public class OcrWindow : Window
         _vm = vm;
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = vm.WindowTitle;
+        Title = vm.Title;
         Width = 1200;
         Height = 700;
         MinWidth = 900;

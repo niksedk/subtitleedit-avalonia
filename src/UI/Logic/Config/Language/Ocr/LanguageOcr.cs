@@ -39,6 +39,8 @@ public class LanguageOcr
     public string UnknownWords { get; set; }
     public string AllFixes { get; set; }
     public string GuessesUsed { get; set; }
+    public string Ocr { get; set; }
+    public string OcrX { get; set; }
 
     public LanguageOcr()
     {
@@ -77,5 +79,7 @@ public class LanguageOcr
         UnknownWords = "Unknown words";
         AllFixes = "All fixes";
         GuessesUsed = "Guesses used";
+        Ocr = "OCR";
+        OcrX = "OCR - {0}";
     }
 }

@@ -5261,7 +5261,7 @@ public partial class MainViewModel :
         Dispatcher.UIThread.Post(async () =>
         {
             var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!,
-                vm => { vm.Initialize(mergedVobSubPacks, matroskaSubtitleInfo); });
+                vm => { vm.Initialize(mergedVobSubPacks, matroskaSubtitleInfo, fileName); });
 
             if (result.OkPressed)
             {
