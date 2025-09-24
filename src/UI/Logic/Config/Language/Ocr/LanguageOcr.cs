@@ -41,6 +41,9 @@ public class LanguageOcr
     public string GuessesUsed { get; set; }
     public string Ocr { get; set; }
     public string OcrX { get; set; }
+    public string AddBetterMatch { get; set; }
+    public string NOcrInspectImageMatches { get; set; }
+    public string AddToOcrPair { get; set; }
 
     public LanguageOcr()
     {
@@ -81,5 +84,8 @@ public class LanguageOcr
         GuessesUsed = "Guesses used";
         Ocr = "OCR";
         OcrX = "OCR - {0}";
+        AddBetterMatch = "Add better match";
+        NOcrInspectImageMatches = "nOCR - Inspect image matches";
+        AddToOcrPair = "Add to OCR replace pairs";
     }
 }

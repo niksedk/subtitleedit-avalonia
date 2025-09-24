@@ -389,6 +389,9 @@ public class LanguageGeneral
     public string MergeSelectedLinesDialog { get; set; }
     public string BridgeGaps { get; set; }
     public string ChooseColorDotDotDot { get; set; }
+    public string Match { get; set; }
+    public string AddToNamesListCaseSensitive { get; set; }
+    public string AddToUserDictionary { get; set; }
 
     public LanguageGeneral()
     {
@@ -773,5 +776,8 @@ public class LanguageGeneral
         MergeSelectedLinesDialog = "Merge selected lines as dialog";
         BridgeGaps = "Bridge gaps";
         ChooseColorDotDotDot = "Choose color...";
+        Match = "Match";
+        AddToNamesListCaseSensitive = "Add to names list (case sensitive)";
+        AddToUserDictionary = "Add to user dictionary";
     }
 }

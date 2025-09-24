@@ -19,6 +19,11 @@ public class OcrSubtitleBluRay : IOcrSubtitle
 
     public SKBitmap GetBitmap(int index)
     {
+        if (index < 0 || index >= _pcsDataList.Count)
+        {
+            return new SKBitmap(1, 1);
+        }
+
         return _pcsDataList[index].GetBitmap();
     }
 

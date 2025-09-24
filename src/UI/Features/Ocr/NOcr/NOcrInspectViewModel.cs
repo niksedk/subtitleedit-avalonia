@@ -37,6 +37,7 @@ public partial class NOcrInspectViewModel : ObservableObject
     [ObservableProperty] private bool _isNewLinesBackgroundActive;
     [ObservableProperty] private string _newText;
     [ObservableProperty] private string _resolutionAndTopMargin;
+    [ObservableProperty] private string _matchResolutionAndTopMargin;
     [ObservableProperty] private string _zoomFactorInfo;
     [ObservableProperty] private bool _isNewTextItalic;
     [ObservableProperty] private bool _submitOnFirstLetter;
@@ -75,6 +76,7 @@ public partial class NOcrInspectViewModel : ObservableObject
         IsNewLinesBackgroundActive = false;
         NewText = string.Empty;
         ResolutionAndTopMargin = string.Empty;
+        MatchResolutionAndTopMargin = string.Empty;
         IsNewTextItalic = false;
         SubmitOnFirstLetter = false;
         _letters = new List<ImageSplitterItem2>();
@@ -335,6 +337,15 @@ public partial class NOcrInspectViewModel : ObservableObject
 
         IsEditControlsEnabled = match != null;
 
+        if (match != null)
+        {
+            MatchResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, match.Width, match.Height, match.MarginTop);
+        }
+        else
+        {
+            MatchResolutionAndTopMargin = string.Empty;
+        }
+
         if (_splitItem.NikseBitmap != null)
         {
             NOcrChar = match ?? new NOcrChar
@@ -346,7 +357,7 @@ public partial class NOcrInspectViewModel : ObservableObject
 
             NewText = match?.Text ?? string.Empty;
             IsNewTextItalic = match is { Italic: true };
-            ResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, NOcrChar.Width, NOcrChar.Height, NOcrChar.MarginTop);
+            ResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, _splitItem.NikseBitmap.Width, _splitItem.NikseBitmap.Height, _splitItem.Top);
 
             CurrentBitmap = _splitItem.NikseBitmap!.GetBitmap().ToAvaloniaBitmap();
             NOcrDrawingCanvas.BackgroundImage = CurrentBitmap;

@@ -18,7 +18,7 @@ public class NOcrInspectWindow : Window
         _vm = vm;
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = "nOCR inspect image matches";
+        Title = Se.Language.Ocr.NOcrInspectImageMatches;
         Width = 1200;
         Height = 700;
         MinWidth = 900;
@@ -128,12 +128,14 @@ public class NOcrInspectWindow : Window
             {
                 UiUtil.MakeLabel(Se.Language.Ocr.CurrentImage).WithBold(),
                 panelCurrentImage,
+                UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.ResolutionAndTopMargin)),
+                UiUtil.MakeLabel(Se.Language.General.Match).WithBold().WithMarginTop(15),
                 vm.TextBoxNew,
                 checkBoxItalic,
-                UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.ResolutionAndTopMargin)),
-                UiUtil.MakeButton("Update", vm.UpdateCommand).WithMarginTop(25).WithLeftAlignment().WithBindEnabled(nameof(vm.IsEditControlsEnabled)),
-                UiUtil.MakeButton("Delete", vm.DeleteCommand).WithMarginTop(5).WithLeftAlignment().WithBindEnabled(nameof(vm.IsEditControlsEnabled)),
-                UiUtil.MakeButton("Add better match", vm.AddBetterMatchCommand).WithMarginTop(5).WithLeftAlignment(),
+                UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.MatchResolutionAndTopMargin)),
+                UiUtil.MakeButton(Se.Language.General.Update, vm.UpdateCommand).WithMarginTop(25).WithLeftAlignment().WithBindEnabled(nameof(vm.IsEditControlsEnabled)),
+                UiUtil.MakeButton(Se.Language.General.Delete, vm.DeleteCommand).WithMarginTop(5).WithLeftAlignment().WithBindEnabled(nameof(vm.IsEditControlsEnabled)),
+                UiUtil.MakeButton(Se.Language.Ocr.AddBetterMatch, vm.AddBetterMatchCommand).WithMarginTop(5).WithLeftAlignment(),
             },
         };
 

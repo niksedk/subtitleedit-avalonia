@@ -193,10 +193,11 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
             }
 
             // Check for words (letters and digits)
-            if (char.IsLetterOrDigit(line[i]))
+            if (char.IsLetterOrDigit(line[i]) && line[i] != '"')
             {
                 var wordStart = i;
-                while (i < line.Length && (char.IsLetterOrDigit(line[i]) || line[i] == '\'' || line[i] == '-'))
+                while (i < line.Length && 
+                       (char.IsLetterOrDigit(line[i]) || line[i] == '\'' || line[i] == '-'))
                 {
                     i++;
                 }
@@ -314,12 +315,23 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
                 isWordCorrect = true;
             }
 
+            w = result.Trim('\'', '"', '-');
+            if (!isWordCorrect && w != result &&
+                (_wordSkipList.Contains(w) ||
+                 _spellCheckManager.IsWordCorrect(w) ||
+                 _spellCheckWordLists.HasName(w) ||
+                 _spellCheckWordLists.HasName(w)))
+            {
+                isWordCorrect = true;
+            }
+
             if (!string.IsNullOrEmpty(result) && !isWordCorrect && doTryToGuessUnknownWords)
             {
                 var guesses = _ocrFixReplaceList.CreateGuessesFromLetters(result, _threeLetterIsoLanguageName);
                 foreach (var g in guesses)
                 {
-                    if (IsSpelledCorrect(g))
+                    w = g.Trim('\'', '"', '-');
+                    if (IsSpelledCorrect(g) || IsSpelledCorrect(w))
                     {
                         result = g;
                         word.GuessUsed = true;

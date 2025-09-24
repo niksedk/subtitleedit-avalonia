@@ -4,6 +4,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
@@ -12,6 +13,7 @@ using Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream;
 using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Core.VobSub;
 using Nikse.SubtitleEdit.Core.VobSub.Ocr.Service;
+using Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Ocr.Download;
 using Nikse.SubtitleEdit.Features.Ocr.Engines;
@@ -299,9 +301,26 @@ public partial class OcrViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void AddUnknownWordToNames()
+    {
+    }
+
+    [RelayCommand]
+    private void AddUnknownWordToUserDictionary()
+    {
+    }
+
+
+    [RelayCommand]
+    private void AddUnknownWordToOcrPair()
+    {
+    }
+
+    [RelayCommand]
     private void GoogleUnknowWord()
     {
     }
+
 
     [RelayCommand]
     private void Export()
@@ -706,6 +725,16 @@ public partial class OcrViewModel : ObservableObject
         {
             OcrSubtitleItems.RemoveAt(index);
             _ocrSubtitle?.Delete(index);
+        }
+
+        Renumber();
+    }
+
+    private void Renumber()
+    {
+        for (var i = 0; i < OcrSubtitleItems.Count; i++)
+        {
+            OcrSubtitleItems[i].Number = i + 1;
         }
     }
 
@@ -1413,6 +1442,29 @@ public partial class OcrViewModel : ObservableObject
             e.Handled = true; // prevent further handling if needed
             Dispatcher.UIThread.Post(async void () => { await ViewSelectedImage(); });
         }
+        else if (e.Key == Key.Delete)
+        {
+            e.Handled = true; // prevent further handling if needed
+            DeleteSelectedLines();
+        }
+    }
+
+    internal void SubtitleGridDoubelTapped()
+    {
+        var engine = SelectedOcrEngine;
+        if (engine == null)
+        {
+            return;
+        }
+
+        if (engine != null && engine.EngineType == OcrEngineType.nOcr)
+        {
+            Dispatcher.UIThread.Post(async void () =>
+            {
+                await InspectAdditions();
+            });
+            return;
+        }
     }
 
     internal void OnKeyDown(KeyEventArgs e)
@@ -1420,6 +1472,11 @@ public partial class OcrViewModel : ObservableObject
         if (e.Key == Key.Escape)
         {
             Cancel();
+        }
+        else if (e.Key == Key.G && e.KeyModifiers.HasFlag(KeyModifiers.Control))
+        {
+            e.Handled = true; // prevent further handling if needed
+            Dispatcher.UIThread.Post(async void () => { await ShowGoToLine(); });
         }
     }
 
@@ -1636,4 +1693,21 @@ public partial class OcrViewModel : ObservableObject
         selected.FixResult = new OcrFixLineResult(idx, selected.Text);
         //TODO: spell check?
     }
+
+    private async Task ShowGoToLine()
+    {
+        if (OcrSubtitleItems.Count == 0)
+        {
+            return;
+        }
+
+        var viewModel = await _windowService.ShowDialogAsync<GoToLineNumberWindow, GoToLineNumberViewModel>(Window!,
+            vm => { vm.MaxLineNumber = OcrSubtitleItems.Count; });
+
+        if (viewModel is { OkPressed: true, LineNumber: >= 0 } && viewModel.LineNumber <= OcrSubtitleItems.Count)
+        {
+            SelectAndScrollToRow(viewModel.LineNumber - 1);
+        }
+    }
+
 }

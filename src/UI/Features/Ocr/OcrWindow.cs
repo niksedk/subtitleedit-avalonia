@@ -276,6 +276,7 @@ public class OcrWindow : Window
         };
         dataGridSubtitle.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedOcrSubtitleItem)) { Source = vm });
         dataGridSubtitle.KeyDown += vm.SubtitleGridKeyDown;
+        dataGridSubtitle.DoubleTapped += (s, e) => vm.SubtitleGridDoubelTapped();
         vm.SubtitleGrid = dataGridSubtitle;
 
         // Create a Flyout for the DataGrid
@@ -508,8 +509,17 @@ public class OcrWindow : Window
             VerticalAlignment = VerticalAlignment.Stretch,
         };
 
+        var buttonAddToNamesList = UiUtil.MakeButton(Se.Language.General.AddToNamesListCaseSensitive, vm.AddUnknownWordToNamesCommand);
+        var buttonAddToUserDictionary = UiUtil.MakeButton(Se.Language.General.AddToUserDictionary, vm.AddUnknownWordToUserDictionaryCommand);
+        var buttonAddToOcrPair = UiUtil.MakeButton(Se.Language.Ocr.AddToOcrPair, vm.AddUnknownWordToOcrPairCommand);
         var buttonGoogleIt = UiUtil.MakeButton(Se.Language.General.GoogleIt, vm.GoogleUnknowWordCommand);
-        var panelButtons = UiUtil.MakeVerticalPanel(buttonGoogleIt);
+        var panelButtons = UiUtil.MakeVerticalPanel
+        (
+            buttonAddToNamesList,
+            buttonAddToUserDictionary,
+            buttonAddToOcrPair,
+            buttonGoogleIt
+        );
 
         grid.Add(listBox, 0, 0);
         grid.Add(panelButtons, 0, 1);
