@@ -94,6 +94,7 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private bool _isDictionaryLoaded;
     [ObservableProperty] private ObservableCollection<string> _unknownWords;
     [ObservableProperty] private string? _selectedUnknownWord;
+    [ObservableProperty] private bool _isUnknownWordSelected;
     [ObservableProperty] private ObservableCollection<string> _allFixes;
     [ObservableProperty] private string? _selectedAllFix;   
     [ObservableProperty] private ObservableCollection<string> _allGuesses;
@@ -317,8 +318,15 @@ public partial class OcrViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void GoogleUnknowWord()
+    private async Task GoogleUnknowWord()
     {
+        var selectedWord = SelectedUnknownWord;
+        if (string.IsNullOrEmpty(selectedWord))
+        {
+            return;
+        }
+
+        await Window!.Launcher.LaunchUriAsync(new Uri("https://www.google.com/search?q=" + Utilities.UrlEncode(selectedWord)));
     }
 
 
@@ -1710,4 +1718,8 @@ public partial class OcrViewModel : ObservableObject
         }
     }
 
+    internal void UnknownWordSelectionChanged()
+    {
+        IsUnknownWordSelected = !string.IsNullOrEmpty(SelectedUnknownWord);
+    }
 }

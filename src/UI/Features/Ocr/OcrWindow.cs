@@ -508,11 +508,16 @@ public class OcrWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
         };
+        listBox.SelectionChanged += (s, e) => vm.UnknownWordSelectionChanged();
 
-        var buttonAddToNamesList = UiUtil.MakeButton(Se.Language.General.AddToNamesListCaseSensitive, vm.AddUnknownWordToNamesCommand);
-        var buttonAddToUserDictionary = UiUtil.MakeButton(Se.Language.General.AddToUserDictionary, vm.AddUnknownWordToUserDictionaryCommand);
-        var buttonAddToOcrPair = UiUtil.MakeButton(Se.Language.Ocr.AddToOcrPair, vm.AddUnknownWordToOcrPairCommand);
-        var buttonGoogleIt = UiUtil.MakeButton(Se.Language.General.GoogleIt, vm.GoogleUnknowWordCommand);
+        var buttonAddToNamesList = UiUtil.MakeButton(Se.Language.General.AddToNamesListCaseSensitive, vm.AddUnknownWordToNamesCommand)
+            .WithBindEnabled(nameof(vm.IsUnknownWordSelected));
+        var buttonAddToUserDictionary = UiUtil.MakeButton(Se.Language.General.AddToUserDictionary, vm.AddUnknownWordToUserDictionaryCommand)
+            .WithBindEnabled(nameof(vm.IsUnknownWordSelected));
+        var buttonAddToOcrPair = UiUtil.MakeButton(Se.Language.Ocr.AddToOcrPair, vm.AddUnknownWordToOcrPairCommand)
+            .WithBindEnabled(nameof(vm.IsUnknownWordSelected));
+        var buttonGoogleIt = UiUtil.MakeButton(Se.Language.General.GoogleIt, vm.GoogleUnknowWordCommand)
+            .WithBindEnabled(nameof(vm.IsUnknownWordSelected));
         var panelButtons = UiUtil.MakeVerticalPanel
         (
             buttonAddToNamesList,
