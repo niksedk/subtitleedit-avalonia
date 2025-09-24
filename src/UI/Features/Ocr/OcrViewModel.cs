@@ -4,7 +4,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Controls.VideoPlayer;
+using DynamicData;
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
@@ -92,11 +92,11 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private bool _doTryToGuessUnknownWords;
     [ObservableProperty] private bool _doAutoBreak;
     [ObservableProperty] private bool _isDictionaryLoaded;
-    [ObservableProperty] private ObservableCollection<string> _unknownWords;
-    [ObservableProperty] private string? _selectedUnknownWord;
+    [ObservableProperty] private ObservableCollection<UnknownWordItem> _unknownWords;
+    [ObservableProperty] private UnknownWordItem? _selectedUnknownWord;
     [ObservableProperty] private bool _isUnknownWordSelected;
     [ObservableProperty] private ObservableCollection<string> _allFixes;
-    [ObservableProperty] private string? _selectedAllFix;   
+    [ObservableProperty] private string? _selectedAllFix;
     [ObservableProperty] private ObservableCollection<string> _allGuesses;
     [ObservableProperty] private string? _selectedAllGuess;
 
@@ -156,7 +156,7 @@ public partial class OcrViewModel : ObservableObject
         PaddleOcrLanguages = new ObservableCollection<OcrLanguage2>(PaddleOcr.GetLanguages().OrderBy(p => p.ToString()));
         OcredSubtitle = new List<SubtitleLineViewModel>();
         Dictionaries = new ObservableCollection<SpellCheck.SpellCheckDictionaryDisplay>();
-        UnknownWords = new ObservableCollection<string>();
+        UnknownWords = new ObservableCollection<UnknownWordItem>();
         AllFixes = new ObservableCollection<string>();
         AllGuesses = new ObservableCollection<string>();
         _runOnceChars = new List<SkipOnceChar>();
@@ -321,12 +321,12 @@ public partial class OcrViewModel : ObservableObject
     private async Task GoogleUnknowWord()
     {
         var selectedWord = SelectedUnknownWord;
-        if (string.IsNullOrEmpty(selectedWord))
+        if (selectedWord == null)
         {
             return;
         }
 
-        await Window!.Launcher.LaunchUriAsync(new Uri("https://www.google.com/search?q=" + Utilities.UrlEncode(selectedWord)));
+        await Window!.Launcher.LaunchUriAsync(new Uri("https://www.google.com/search?q=" + Utilities.UrlEncode(selectedWord.ToString())));
     }
 
 
@@ -725,6 +725,12 @@ public partial class OcrViewModel : ObservableObject
                 if (idx >= 0)
                 {
                     selectedIndices.Add(idx);
+
+                    var remov = UnknownWords.Where(uw => uw.Item == item).ToList();
+                    foreach (var unknownWord in remov)
+                    {
+                        UnknownWords.Remove(unknownWord);
+                    }
                 }
             }
         }
@@ -736,6 +742,19 @@ public partial class OcrViewModel : ObservableObject
         }
 
         Renumber();
+
+        var toRemove = new List<UnknownWordItem>();
+        foreach (var unknownWord in UnknownWords)
+        {
+            if (!OcrSubtitleItems.Contains(unknownWord.Item))
+            {
+                toRemove.Add(unknownWord);
+            }
+        }
+        foreach (var item in toRemove)
+        {
+            UnknownWords.Remove(item);
+        }
     }
 
     private void Renumber()
@@ -1164,7 +1183,8 @@ public partial class OcrViewModel : ObservableObject
 
                 if (word.IsSpellCheckedOk == false)
                 {
-                    UnknownWords.Add(word.Word);
+                    var unknownWordItem = new UnknownWordItem(item, result, word);
+                    UnknownWords.Add(unknownWordItem);
                 }
             }
         }
@@ -1720,6 +1740,16 @@ public partial class OcrViewModel : ObservableObject
 
     internal void UnknownWordSelectionChanged()
     {
-        IsUnknownWordSelected = !string.IsNullOrEmpty(SelectedUnknownWord);
+        IsUnknownWordSelected = SelectedUnknownWord != null;
+    }
+
+    internal void UnknownWordSelectionTapped()
+    {
+        if (SelectedUnknownWord == null)
+        {
+            return;
+        }
+
+        SelectAndScrollToRow(OcrSubtitleItems.IndexOf(SelectedUnknownWord.Item));
     }
 }

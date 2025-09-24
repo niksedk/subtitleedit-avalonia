@@ -844,6 +844,12 @@ public static class UiUtil
         return control;
     }
 
+    public static Button WithHorizontalAlignmentStretch(this Button control)
+    {
+        control.HorizontalAlignment = HorizontalAlignment.Stretch;
+        return control;
+    }
+
     public static NumericUpDown WithBindEnabled(this NumericUpDown control, string isEnabledPropertyPath)
     {
         control.Bind(NumericUpDown.IsEnabledProperty, new Binding
