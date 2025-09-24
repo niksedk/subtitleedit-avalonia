@@ -154,6 +154,8 @@ public partial class OcrViewModel : ObservableObject
         OcredSubtitle = new List<SubtitleLineViewModel>();
         Dictionaries = new ObservableCollection<SpellCheck.SpellCheckDictionaryDisplay>();
         UnknownWords = new ObservableCollection<string>();
+        AllFixes = new ObservableCollection<string>();
+        AllGuesses = new ObservableCollection<string>();
         _runOnceChars = new List<SkipOnceChar>();
         _skipOnceChars = new List<SkipOnceChar>();
         _nOcrAddHistoryManager = new NOcrAddHistoryManager();
@@ -1093,7 +1095,7 @@ public partial class OcrViewModel : ObservableObject
             SelectedDictionary.Name != GetDictionaryNameNone() &&
             _ocrFixEngine.IsLoaded() && DoFixOcrErrors)
         {
-            var result = _ocrFixEngine.FixOcrErrors(i);
+            var result = _ocrFixEngine.FixOcrErrors(i, DoTryToGuessUnknownWords);
             var resultText = result.GetText();
             Dispatcher.UIThread.Post(() =>
             {
@@ -1106,8 +1108,23 @@ public partial class OcrViewModel : ObservableObject
                 CurrentText = item.Text;
             });
 
+            if (!string.IsNullOrEmpty(result.ReplacementUsed))
+            {
+                AllFixes.Add(result.ReplacementUsed);
+            }
+
             foreach (var word in result.Words)
             {
+                if (!string.IsNullOrEmpty(word.ReplacementUsed))
+                {
+                    AllFixes.Add(word.ReplacementUsed);
+                }
+
+                if (word.GuessUsed)
+                {
+                    AllGuesses.Add(string.Format("{0} -> {1}", word.Word, word.FixedWord));
+                }
+
                 if (word.IsSpellCheckedOk == false)
                 {
                     UnknownWords.Add(word.Word);

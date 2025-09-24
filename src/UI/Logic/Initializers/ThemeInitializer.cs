@@ -19,6 +19,27 @@ public class ThemeInitializer(IZipUnpacker zipUnpacker) : IThemeInitializer
         if (await NeedsUpdate())
         {
             await Unpack();
+            WriteNewVersionFile();
+        }
+    }
+
+    private static void WriteNewVersionFile()
+    {
+        string outputDir = Se.ThemesFolder;
+        try
+        {
+            if (!Directory.Exists(outputDir))
+            {
+                return;
+            }
+
+            var versionFileName = Path.Combine(outputDir, "version.txt");
+            File.Delete(versionFileName);
+            File.WriteAllText(versionFileName, Se.Version);
+        }
+        catch
+        {
+            Se.LogError($"Could not write version file in \"{outputDir}\" folder.");
         }
     }
 
@@ -39,20 +60,10 @@ public class ThemeInitializer(IZipUnpacker zipUnpacker) : IThemeInitializer
         var currentNormalizedVersion = new SemanticVersion(Se.Version);
 
         var version = await File.ReadAllTextAsync(versionFileName);
-        var themeNormalizedVersion = new SemanticVersion(version);
+        var normalizedVersion = new SemanticVersion(version);
 
-        if (themeNormalizedVersion.IsLessThan(currentNormalizedVersion))
-        {
-            try
-            {
-                File.Delete(versionFileName);
-                File.WriteAllText(versionFileName, Se.Version);
-            }
-            catch
-            {
-                Se.LogError($"Could not write version file in \"{outputDir}\" folder.");
-            }
-
+        if (normalizedVersion.IsLessThan(currentNormalizedVersion))
+        {         
             return true;
         }
 

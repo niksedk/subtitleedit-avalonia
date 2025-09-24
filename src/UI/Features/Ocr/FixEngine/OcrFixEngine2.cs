@@ -12,7 +12,7 @@ namespace Nikse.SubtitleEdit.Features.Ocr.FixEngine;
 public interface IOcrFixEngine2
 {
     void Initialize(List<OcrSubtitleItem> subtitles, string threeLetterIsoLanguageName, SpellCheckDictionaryDisplay spellCheckDictionary);
-    OcrFixLineResult FixOcrErrors(int index);
+    OcrFixLineResult FixOcrErrors(int index, bool doTryToGuessUnknownWords);
     void Unload();
     bool IsLoaded();
 }
@@ -69,13 +69,17 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
         _subtitle = GetSubtitle(subtitles);
     }
 
-    public OcrFixLineResult FixOcrErrors(int index)
+    public OcrFixLineResult FixOcrErrors(int index, bool doTryToGuessUnknownWords)
     {
         var p = _subtitles[index];
 
         var replacedLine = ReplaceLineFixes(index);
-
         var splitLine = SplitLine(replacedLine, p, index);
+        if (replacedLine != p.Text)
+        {
+            splitLine.ReplacementUsed = string.Format("{0} -> {1}", p.Text, replacedLine);
+        }
+
         for (var i = 0; i < splitLine.Words.Count; i++)
         {
             OcrFixLinePartResult? word = splitLine.Words[i];
@@ -86,7 +90,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
                 continue;
             }
 
-            CheckAndFixWord(word, splitLine, i);
+            CheckAndFixWord(word, splitLine, i, doTryToGuessUnknownWords);
         }
 
         return splitLine;
@@ -252,7 +256,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
         return startIndex; // No valid tag end found
     }
 
-    private void CheckAndFixWord(OcrFixLinePartResult word, OcrFixLineResult splitLine, int index)
+    private void CheckAndFixWord(OcrFixLinePartResult word, OcrFixLineResult splitLine, int index, bool doTryToGuessUnknownWords)
     {
         var s = word.Word;
 
@@ -268,6 +272,10 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
         else
         {
             result = _ocrFixReplaceList.FixCommonWordErrors(word.Word);
+            if (result != word.Word)
+            {
+                word.ReplacementUsed = string.Format("{0} -> {1}", word.Word, result);
+            }
 
             isWordCorrect = _spellCheckManager.IsWordCorrect(result);
 
@@ -306,7 +314,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
                 isWordCorrect = true;
             }
 
-            if (!string.IsNullOrEmpty(result) && !isWordCorrect)
+            if (!string.IsNullOrEmpty(result) && !isWordCorrect && doTryToGuessUnknownWords)
             {
                 var guesses = _ocrFixReplaceList.CreateGuessesFromLetters(result, _threeLetterIsoLanguageName);
                 foreach (var g in guesses)

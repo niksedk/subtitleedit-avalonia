@@ -10,6 +10,7 @@ public class OcrFixLineResult
 {
     public int LineIndex { get; set; }
     public List<OcrFixLinePartResult> Words { get; set; } = new();
+    public string ReplacementUsed { get; set; } = string.Empty;
 
     public OcrFixLineResult()
     {

@@ -13,4 +13,5 @@ public class OcrFixLinePartResult
     public bool? IsSpellCheckedOk { get; set; }
     public List<string> Suggestions { get; set; } = new();
     public bool GuessUsed { get; internal set; }
+    public string ReplacementUsed { get; internal set; }
 }
