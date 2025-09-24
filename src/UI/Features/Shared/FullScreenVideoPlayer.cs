@@ -48,6 +48,7 @@ public class FullScreenVideoWindow : Window
         Loaded += (_, _) =>
         {
             WindowState = WindowState.Maximized;
+            WindowState = WindowState.FullScreen;
 
             if (OperatingSystem.IsMacOS() && !string.IsNullOrEmpty(videoFileName))
             {
