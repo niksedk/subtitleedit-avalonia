@@ -95,8 +95,8 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<UnknownWordItem> _unknownWords;
     [ObservableProperty] private UnknownWordItem? _selectedUnknownWord;
     [ObservableProperty] private bool _isUnknownWordSelected;
-    [ObservableProperty] private ObservableCollection<string> _allFixes;
-    [ObservableProperty] private string? _selectedAllFix;
+    [ObservableProperty] private ObservableCollection<ReplacementUsedItem> _allFixes;
+    [ObservableProperty] private ReplacementUsedItem? _selectedAllFix;
     [ObservableProperty] private ObservableCollection<string> _allGuesses;
     [ObservableProperty] private string? _selectedAllGuess;
 
@@ -157,7 +157,7 @@ public partial class OcrViewModel : ObservableObject
         OcredSubtitle = new List<SubtitleLineViewModel>();
         Dictionaries = new ObservableCollection<SpellCheck.SpellCheckDictionaryDisplay>();
         UnknownWords = new ObservableCollection<UnknownWordItem>();
-        AllFixes = new ObservableCollection<string>();
+        AllFixes = new ObservableCollection<ReplacementUsedItem>();
         AllGuesses = new ObservableCollection<string>();
         _runOnceChars = new List<SkipOnceChar>();
         _skipOnceChars = new List<SkipOnceChar>();
@@ -1177,14 +1177,14 @@ public partial class OcrViewModel : ObservableObject
                 CurrentText = item.Text;
             });
 
-            if (!string.IsNullOrEmpty(result.ReplacementUsed))
+            if (!string.IsNullOrEmpty(result.ReplacementUsed.From))
             {
                 AllFixes.Add(result.ReplacementUsed);
             }
 
             foreach (var word in result.Words)
             {
-                if (!string.IsNullOrEmpty(word.ReplacementUsed))
+                if (!string.IsNullOrEmpty(word.ReplacementUsed.From))
                 {
                     AllFixes.Add(word.ReplacementUsed);
                 }

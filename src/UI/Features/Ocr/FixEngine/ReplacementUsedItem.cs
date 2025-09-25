@@ -1,0 +1,24 @@
+﻿namespace Nikse.SubtitleEdit.Features.Ocr.FixEngine;
+
+public class ReplacementUsedItem
+{
+    public string From { get; set; }
+    public string To { get; set; }
+    public int LineIndex { get; set; }
+
+    public ReplacementUsedItem()
+    {
+    }
+    
+    public ReplacementUsedItem(string from, string to, int lineLineIndex)
+    {
+        From = from;
+        To = to;
+        LineIndex = lineLineIndex;
+    }
+
+    public override string ToString()
+    {
+        return $"#{LineIndex}: {From} -> {To}";
+    }
+}
