@@ -26,6 +26,7 @@ public class SeOcr
     public bool DoPromptForUnknownWords { get; set; }
     public bool DoAutoBreak { get; set; }
     public bool DoFixOcrErrors { get; set; }
+    public string LastLanguageDictionaryFile { get; set; }
 
     public SeOcr()
     {
@@ -50,5 +51,7 @@ public class SeOcr
         PaddleOcrLastLanguage = "en";
 
         MistralApiKey = string.Empty;
+        
+        LastLanguageDictionaryFile = string.Empty;
     }
 }

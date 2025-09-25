@@ -218,11 +218,15 @@ public partial class OcrViewModel : ObservableObject
         ocr.DoPromptForUnknownWords = DoPromptForUnknownWords;
         ocr.DoTryToGuessUnknownWords = DoTryToGuessUnknownWords;
         ocr.DoAutoBreak = DoAutoBreak;
+        
+        if (SelectedDictionary != null)
+        {
+            Se.Settings.Ocr.LastLanguageDictionaryFile = SelectedDictionary.DictionaryFileName;
+        }
 
         Se.SaveSettings();
     }
-
-
+    
     private void LoadDictionaries()
     {
         var spellCheckLanguages = _spellCheckManager.GetDictionaryLanguages(Se.DictionariesFolder);
@@ -235,12 +239,21 @@ public partial class OcrViewModel : ObservableObject
         Dictionaries.AddRange(spellCheckLanguages);
         if (Dictionaries.Count > 0)
         {
-            if (!string.IsNullOrEmpty(Se.Settings.SpellCheck.LastLanguageDictionaryFile))
+            if (!string.IsNullOrEmpty(Se.Settings.Ocr.LastLanguageDictionaryFile))
+            {
+                SelectedDictionary = Dictionaries.FirstOrDefault(l => l.DictionaryFileName == Se.Settings.Ocr.LastLanguageDictionaryFile);
+            }
+            
+            if (SelectedDictionary == null && !string.IsNullOrEmpty(Se.Settings.SpellCheck.LastLanguageDictionaryFile))
             {
                 SelectedDictionary = Dictionaries.FirstOrDefault(l => l.DictionaryFileName == Se.Settings.SpellCheck.LastLanguageDictionaryFile);
             }
 
-            SelectedDictionary = Dictionaries.FirstOrDefault(l => l.Name.Contains("English", StringComparison.OrdinalIgnoreCase));
+            if (SelectedDictionary == null)
+            {
+                SelectedDictionary = Dictionaries.FirstOrDefault(l => l.Name.Contains("English", StringComparison.OrdinalIgnoreCase));
+            }
+
             if (SelectedDictionary == null)
             {
                 SelectedDictionary = Dictionaries[0];
