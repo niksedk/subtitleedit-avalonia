@@ -21,6 +21,9 @@ using Nikse.SubtitleEdit.Features.Ocr.FixEngine;
 using Nikse.SubtitleEdit.Features.Ocr.NOcr;
 using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
 using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Shared.AddToNamesList;
+using Nikse.SubtitleEdit.Features.Shared.AddToOcrReplaceList;
+using Nikse.SubtitleEdit.Features.Shared.AddToUserDictionary;
 using Nikse.SubtitleEdit.Features.Shared.ShowImage;
 using Nikse.SubtitleEdit.Features.SpellCheck;
 using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
@@ -302,19 +305,48 @@ public partial class OcrViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void AddUnknownWordToNames()
+    private async Task AddUnknownWordToNames()
     {
+        var selectedWord = SelectedUnknownWord;
+        if (selectedWord == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<AddToNamesListWindow, AddToNamesListViewModel>(Window!, vm =>
+        {
+            vm.Initialize(selectedWord.Word.Word, SelectedDictionary);
+        });
     }
 
     [RelayCommand]
-    private void AddUnknownWordToUserDictionary()
+    private async Task AddUnknownWordToUserDictionary()
     {
+        var selectedWord = SelectedUnknownWord;
+        if (selectedWord == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<AddToUserDictionaryWindow, AddToUserDictionaryViewModel>(Window!, vm =>
+        {
+            vm.Initialize(selectedWord.Word.Word, SelectedDictionary);
+        });
     }
 
-
     [RelayCommand]
-    private void AddUnknownWordToOcrPair()
+    private async Task AddUnknownWordToOcrPair()
     {
+        var selectedWord = SelectedUnknownWord;
+        if (selectedWord == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<AddToOcrReplaceListWindow, AddToOcrReplaceListViewModel>(Window!, vm =>
+        {
+            vm.Initialize(selectedWord.Word.Word, SelectedDictionary);
+        });
     }
 
     [RelayCommand]

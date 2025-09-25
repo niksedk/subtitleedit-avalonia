@@ -44,6 +44,7 @@ public class LanguageOcr
     public string AddBetterMatch { get; set; }
     public string NOcrInspectImageMatches { get; set; }
     public string AddToOcrPair { get; set; }
+    public string AddNameToOcrReplaceList { get; set; }
 
     public LanguageOcr()
     {
@@ -87,5 +88,6 @@ public class LanguageOcr
         AddBetterMatch = "Add better match";
         NOcrInspectImageMatches = "nOCR - Inspect image matches";
         AddToOcrPair = "Add to OCR replace pairs";
+        AddNameToOcrReplaceList = "Add name to OCR replace list";
     }
 }

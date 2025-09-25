@@ -26,6 +26,9 @@ using Nikse.SubtitleEdit.Features.Options.Settings;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Features.Options.WordLists;
 using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Shared.AddToNamesList;
+using Nikse.SubtitleEdit.Features.Shared.AddToOcrReplaceList;
+using Nikse.SubtitleEdit.Features.Shared.AddToUserDictionary;
 using Nikse.SubtitleEdit.Features.Shared.Bookmarks;
 using Nikse.SubtitleEdit.Features.Shared.FindText;
 using Nikse.SubtitleEdit.Features.Shared.PickAlignment;
@@ -119,6 +122,9 @@ public static class DependencyInjectionExtensions
         collection.AddHttpClient<IWhisperDownloadService, WhisperDownloadService>();
 
         // Window view models
+        collection.AddTransient<AddToNamesListViewModel>();
+        collection.AddTransient<AddToOcrReplaceListViewModel>();
+        collection.AddTransient<AddToUserDictionaryViewModel>();
         collection.AddTransient<AdjustAllTimesViewModel>();
         collection.AddTransient<AdjustDurationViewModel>();
         collection.AddTransient<ApplyDurationLimitsViewModel>();
