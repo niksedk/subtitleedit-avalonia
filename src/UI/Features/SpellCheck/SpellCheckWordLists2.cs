@@ -174,7 +174,7 @@ public class SpellCheckWordLists2
         SaveUseAlwaysList(null, null, key);
     }
 
-    private void SaveUseAlwaysList(string newKey = null, string newValue = null, string oldKey = null)
+    private void SaveUseAlwaysList(string? newKey = null, string? newValue = null, string? oldKey = null)
     {
         if (!Configuration.Settings.Tools.RememberUseAlwaysList)
         {

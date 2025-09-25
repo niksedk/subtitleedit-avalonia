@@ -77,7 +77,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
         var splitLine = SplitLine(replacedLine, p, index);
         if (replacedLine != p.Text)
         {
-            splitLine.ReplacementUsed = string.Format("{0} -> {1}", p.Text, replacedLine);
+            splitLine.ReplacementUsed = new ReplacementUsedItem(p.Text, replacedLine, index);
         }
 
         for (var i = 0; i < splitLine.Words.Count; i++)
@@ -275,7 +275,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
             result = _ocrFixReplaceList.FixCommonWordErrors(word.Word);
             if (result != word.Word)
             {
-                word.ReplacementUsed = string.Format("{0} -> {1}", word.Word, result);
+                word.ReplacementUsed = new ReplacementUsedItem(word.Word, result, splitLine.LineIndex);
             }
 
             isWordCorrect = _spellCheckManager.IsWordCorrect(result);

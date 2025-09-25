@@ -98,8 +98,8 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<UnknownWordItem> _unknownWords;
     [ObservableProperty] private UnknownWordItem? _selectedUnknownWord;
     [ObservableProperty] private bool _isUnknownWordSelected;
-    [ObservableProperty] private ObservableCollection<string> _allFixes;
-    [ObservableProperty] private string? _selectedAllFix;
+    [ObservableProperty] private ObservableCollection<ReplacementUsedItem> _allFixes;
+    [ObservableProperty] private ReplacementUsedItem? _selectedAllFix;
     [ObservableProperty] private ObservableCollection<string> _allGuesses;
     [ObservableProperty] private string? _selectedAllGuess;
 
@@ -160,7 +160,7 @@ public partial class OcrViewModel : ObservableObject
         OcredSubtitle = new List<SubtitleLineViewModel>();
         Dictionaries = new ObservableCollection<SpellCheck.SpellCheckDictionaryDisplay>();
         UnknownWords = new ObservableCollection<UnknownWordItem>();
-        AllFixes = new ObservableCollection<string>();
+        AllFixes = new ObservableCollection<ReplacementUsedItem>();
         AllGuesses = new ObservableCollection<string>();
         _runOnceChars = new List<SkipOnceChar>();
         _skipOnceChars = new List<SkipOnceChar>();
@@ -221,11 +221,15 @@ public partial class OcrViewModel : ObservableObject
         ocr.DoPromptForUnknownWords = DoPromptForUnknownWords;
         ocr.DoTryToGuessUnknownWords = DoTryToGuessUnknownWords;
         ocr.DoAutoBreak = DoAutoBreak;
+        
+        if (SelectedDictionary != null)
+        {
+            Se.Settings.Ocr.LastLanguageDictionaryFile = SelectedDictionary.DictionaryFileName;
+        }
 
         Se.SaveSettings();
     }
-
-
+    
     private void LoadDictionaries()
     {
         var spellCheckLanguages = _spellCheckManager.GetDictionaryLanguages(Se.DictionariesFolder);
@@ -238,12 +242,21 @@ public partial class OcrViewModel : ObservableObject
         Dictionaries.AddRange(spellCheckLanguages);
         if (Dictionaries.Count > 0)
         {
-            if (!string.IsNullOrEmpty(Se.Settings.SpellCheck.LastLanguageDictionaryFile))
+            if (!string.IsNullOrEmpty(Se.Settings.Ocr.LastLanguageDictionaryFile))
+            {
+                SelectedDictionary = Dictionaries.FirstOrDefault(l => l.DictionaryFileName == Se.Settings.Ocr.LastLanguageDictionaryFile);
+            }
+            
+            if (SelectedDictionary == null && !string.IsNullOrEmpty(Se.Settings.SpellCheck.LastLanguageDictionaryFile))
             {
                 SelectedDictionary = Dictionaries.FirstOrDefault(l => l.DictionaryFileName == Se.Settings.SpellCheck.LastLanguageDictionaryFile);
             }
 
-            SelectedDictionary = Dictionaries.FirstOrDefault(l => l.Name.Contains("English", StringComparison.OrdinalIgnoreCase));
+            if (SelectedDictionary == null)
+            {
+                SelectedDictionary = Dictionaries.FirstOrDefault(l => l.Name.Contains("English", StringComparison.OrdinalIgnoreCase));
+            }
+
             if (SelectedDictionary == null)
             {
                 SelectedDictionary = Dictionaries[0];
@@ -1196,21 +1209,21 @@ public partial class OcrViewModel : ObservableObject
                 CurrentText = item.Text;
             });
 
-            if (!string.IsNullOrEmpty(result.ReplacementUsed))
+            if (!string.IsNullOrEmpty(result.ReplacementUsed.From))
             {
                 AllFixes.Add(result.ReplacementUsed);
             }
 
             foreach (var word in result.Words)
             {
-                if (!string.IsNullOrEmpty(word.ReplacementUsed))
+                if (!string.IsNullOrEmpty(word.ReplacementUsed.From))
                 {
                     AllFixes.Add(word.ReplacementUsed);
                 }
 
                 if (word.GuessUsed)
                 {
-                    AllGuesses.Add(string.Format("{0} -> {1}", word.Word, word.FixedWord));
+                    AllGuesses.Add($"{word.Word} -> {word.FixedWord}");
                 }
 
                 if (word.IsSpellCheckedOk == false)
