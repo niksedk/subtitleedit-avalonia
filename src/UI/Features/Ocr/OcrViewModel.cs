@@ -1191,7 +1191,7 @@ public partial class OcrViewModel : ObservableObject
 
                 if (word.GuessUsed)
                 {
-                    AllGuesses.Add(string.Format("{0} -> {1}", word.Word, word.FixedWord));
+                    AllGuesses.Add($"{word.Word} -> {word.FixedWord}");
                 }
 
                 if (word.IsSpellCheckedOk == false)
