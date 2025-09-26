@@ -425,7 +425,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             ParagraphMaxChars = Configuration.Settings.General.SubtitleLineMaximumLength * 2,
         };
 
-        WavePeakData? wavePeaks = null;
+        WavePeakData2? wavePeaks = null;
         if (DoAdjustTimings)
         {
             wavePeaks = MakeWavePeaks();
@@ -434,7 +434,8 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         if (DoAdjustTimings && wavePeaks != null)
         {
             transcript = WhisperTimingFixer.ShortenLongDuration(transcript);
-            transcript = WhisperTimingFixer.ShortenViaWavePeaks(transcript, wavePeaks);
+            var wp = new WavePeakData(wavePeaks.SampleRate, wavePeaks.Peaks.Select(p => new WavePeak(p.Max, p.Min)).ToList());
+            transcript = WhisperTimingFixer.ShortenViaWavePeaks(transcript, wp);
         }
 
         var settings = Se.Settings.Tools.AudioToText;
@@ -451,7 +452,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         return transcript;
     }
 
-    private WavePeakData? MakeWavePeaks()
+    private WavePeakData2? MakeWavePeaks()
     {
         if (string.IsNullOrEmpty(_videoFileName) || !File.Exists(_videoFileName))
         {
@@ -523,11 +524,11 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
             if (File.Exists(targetFile))
             {
-                using var waveFile = new WavePeakGenerator(targetFile);
+                using var waveFile = new WavePeakGenerator2(targetFile);
                 if (!string.IsNullOrEmpty(_videoFileName) && File.Exists(_videoFileName))
                 {
                     return waveFile.GeneratePeaks(delayInMilliseconds,
-                        WavePeakGenerator.GetPeakWaveFileName(_videoFileName));
+                        WavePeakGenerator2.GetPeakWaveFileName(_videoFileName));
                 }
             }
         }

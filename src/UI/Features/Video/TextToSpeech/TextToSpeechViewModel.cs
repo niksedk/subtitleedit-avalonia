@@ -6,7 +6,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HanumanInstitute.LibMpv;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.DownloadTts;
+using Nikse.SubtitleEdit.Features.Video.TextToSpeech.ElevenLabsSettings;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Engines;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Voices;
@@ -24,8 +26,6 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
-using Nikse.SubtitleEdit.Features.Shared;
-using Nikse.SubtitleEdit.Features.Video.TextToSpeech.ElevenLabsSettings;
 using ElevenLabsSettingsViewModel = Nikse.SubtitleEdit.Features.Video.TextToSpeech.ElevenLabsSettings.ElevenLabsSettingsViewModel;
 using Timer = System.Timers.Timer;
 
@@ -73,7 +73,7 @@ public partial class TextToSpeechViewModel : ObservableObject
     private string _waveFolder;
     private CancellationTokenSource _cancellationTokenSource;
     private CancellationToken _cancellationToken;
-    private WavePeakData? _wavePeakData;
+    private WavePeakData2? _wavePeakData;
     private FfmpegMediaInfo? _mediaInfo;
     private string _videoFileName = string.Empty;
     private MpvContext? _mpvContext;
@@ -108,7 +108,7 @@ public partial class TextToSpeechViewModel : ObservableObject
         _timer = new Timer(100);
         _timer.Elapsed += OnTimerOnElapsed;
         _waveFolder = string.Empty;
-        _wavePeakData = new WavePeakData(1, new List<WavePeak>());
+        _wavePeakData = new WavePeakData2(1, new List<WavePeak2>());
         _mediaInfo = null;
 
         Engines =
@@ -211,7 +211,7 @@ public partial class TextToSpeechViewModel : ObservableObject
         Se.SaveSettings();
     }
 
-    public void Initialize(Subtitle subtitle, string videoFileName, WavePeakData? wavePeakData, string waveFolder)
+    public void Initialize(Subtitle subtitle, string videoFileName, WavePeakData2? wavePeakData, string waveFolder)
     {
         _subtitle = subtitle;
         _subtitle.RemoveEmptyLines();

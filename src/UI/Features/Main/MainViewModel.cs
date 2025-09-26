@@ -1663,7 +1663,7 @@ public partial class MainViewModel :
             AudioVisualizer.ShotChanges = result.FfmpegLines.Select(p => p.Seconds).ToList();
             ShowShotChangesListMenuItem = AudioVisualizer.ShotChanges.Count > 0;
             _updateAudioVisualizer = true;
-            ShotChangeHelper.SaveShotChanges(_videoFileName, AudioVisualizer.ShotChanges);
+            ShotChangesHelper.SaveShotChanges(_videoFileName, AudioVisualizer.ShotChanges);
             ShowStatus(string.Format(Se.Language.Main.XShotChangedLoaded, AudioVisualizer.ShotChanges.Count));
         }
 
@@ -1714,7 +1714,7 @@ public partial class MainViewModel :
             RemoveShotChange(idx);
             if (AudioVisualizer.ShotChanges.Count == 0)
             {
-                ShotChangeHelper.DeleteShotChanges(_videoFileName);
+                ShotChangesHelper.DeleteShotChanges(_videoFileName);
             }
         }
         else
@@ -1724,7 +1724,7 @@ public partial class MainViewModel :
             list.Add(cp);
             list.Sort();
             AudioVisualizer.ShotChanges = list;
-            ShotChangeHelper.SaveShotChanges(_videoFileName, list);
+            ShotChangesHelper.SaveShotChanges(_videoFileName, list);
         }
 
         ShowShotChangesListMenuItem = AudioVisualizer?.ShotChanges.Count > 0;
@@ -4655,7 +4655,7 @@ public partial class MainViewModel :
             var temp = new List<double>(AudioVisualizer.ShotChanges);
             temp.RemoveAt(idx);
             AudioVisualizer.ShotChanges = temp;
-            ShotChangeHelper.SaveShotChanges(_videoFileName, temp);
+            ShotChangesHelper.SaveShotChanges(_videoFileName, temp);
         }
     }
 
@@ -5957,12 +5957,12 @@ public partial class MainViewModel :
         else
         {
             ShowStatus(Se.Language.Main.LoadingWaveInfoFromCache);
-            var wavePeaks = WavePeakData.FromDisk(peakWaveFileName);
+            var wavePeaks = WavePeakData2.FromDisk(peakWaveFileName);
             if (AudioVisualizer != null)
             {
                 AudioVisualizer.WavePeaks = wavePeaks;
                 AudioVisualizer.SetSpectrogram(SpectrogramData.FromDisk(spectrogramFolder));
-                AudioVisualizer.ShotChanges = ShotChangeHelper.FromDisk(videoFileName);
+                AudioVisualizer.ShotChanges = ShotChangesHelper.FromDisk(videoFileName);
                 if (AudioVisualizer.ShotChanges.Count == 0)
                 {
                     ExtractShotChanges(videoFileName);
@@ -6005,7 +6005,7 @@ public partial class MainViewModel :
             using var waveFile = new WavePeakGenerator(tempWaveFileName);
             waveFile.GeneratePeaks(0, peakWaveFileName);
 
-            var wavePeaks = WavePeakData.FromDisk(peakWaveFileName);
+            var wavePeaks = WavePeakData2.FromDisk(peakWaveFileName);
 
             if (_videoOpenTokenSource.IsCancellationRequested)
             {
@@ -6065,7 +6065,7 @@ public partial class MainViewModel :
 
                 if (!_videoOpenTokenSource.IsCancellationRequested && AudioVisualizer != null && AudioVisualizer.ShotChanges != null)
                 {
-                    ShotChangeHelper.SaveShotChanges(videoFileName, AudioVisualizer.ShotChanges);
+                    ShotChangesHelper.SaveShotChanges(videoFileName, AudioVisualizer.ShotChanges);
                 }
             });
         }

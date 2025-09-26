@@ -122,7 +122,7 @@ public partial class CutVideoViewModel : ObservableObject
         LoadSettings();
     }
 
-    public void Initialize(string videoFileName, WavePeakData? wavePeakData, SubtitleFormat subtitleFormat)
+    public void Initialize(string videoFileName, WavePeakData2? wavePeakData, SubtitleFormat subtitleFormat)
     {
         VideoFileName = videoFileName;
         _inputVideoFileName = videoFileName;
@@ -642,7 +642,7 @@ public partial class CutVideoViewModel : ObservableObject
             Window?.Close();
         }
         else if (e.Key == Key.Space)
-        { 
+        {
             e.Handled = true;
             VideoPlayer.TogglePlayPause();
         }

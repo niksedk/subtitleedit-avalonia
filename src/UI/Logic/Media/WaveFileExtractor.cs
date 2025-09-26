@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Logic.Config;
+using System;
 using System.Diagnostics;
 using System.IO;
-using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Logic.Media;
 

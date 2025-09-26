@@ -5,6 +5,7 @@ using Avalonia.Media;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,8 +18,8 @@ namespace Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 
 public class AudioVisualizer : Control
 {
-    public static readonly StyledProperty<WavePeakData?> WavePeaksProperty =
-        AvaloniaProperty.Register<AudioVisualizer, WavePeakData?>(nameof(WavePeaks));
+    public static readonly StyledProperty<WavePeakData2?> WavePeaksProperty =
+        AvaloniaProperty.Register<AudioVisualizer, WavePeakData2?>(nameof(WavePeaks));
 
     public static readonly StyledProperty<double> StartPositionSecondsProperty =
         AvaloniaProperty.Register<AudioVisualizer, double>(nameof(StartPositionSeconds));
@@ -53,7 +54,7 @@ public class AudioVisualizer : Control
     public static readonly StyledProperty<Color> WaveformCursorColorProperty =
         AvaloniaProperty.Register<AudioVisualizer, Color>(nameof(WaveformCursorColor));
 
-    public WavePeakData? WavePeaks
+    public WavePeakData2? WavePeaks
     {
         get => GetValue(WavePeaksProperty);
         set => SetValue(WavePeaksProperty, value);
@@ -736,7 +737,7 @@ public class AudioVisualizer : Control
 
                 if (SnapToShotChanges)
                 {
-                    var nearestShotChange = ShotChangeHelper.GetClosestShotChange(_shotChanges, TimeCode.FromSeconds(newStart));
+                    var nearestShotChange = ShotChangesHelper.GetClosestShotChange(_shotChanges, TimeCode.FromSeconds(newStart));
                     if (nearestShotChange != null)
                     {
                         var nearest = (double)nearestShotChange;
@@ -763,7 +764,7 @@ public class AudioVisualizer : Control
 
                 if (SnapToShotChanges)
                 {
-                    var nearestShotChange = ShotChangeHelper.GetClosestShotChange(_shotChanges, TimeCode.FromSeconds(newEnd));
+                    var nearestShotChange = ShotChangesHelper.GetClosestShotChange(_shotChanges, TimeCode.FromSeconds(newEnd));
                     if (nearestShotChange != null)
                     {
                         var nearest = (double)nearestShotChange;

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Logic.Initializers;
 
-public interface  IThemeInitializer
+public interface IThemeInitializer
 {
     Task UpdateThemesIfNeeded();
 }
@@ -63,7 +63,7 @@ public class ThemeInitializer(IZipUnpacker zipUnpacker) : IThemeInitializer
         var normalizedVersion = new SemanticVersion(version);
 
         if (normalizedVersion.IsLessThan(currentNormalizedVersion))
-        {         
+        {
             return true;
         }
 

@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HanumanInstitute.LibMpv;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.DownloadTts;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Engines;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Voices;
@@ -12,6 +13,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
@@ -20,10 +22,8 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
-using Nikse.SubtitleEdit.Features.Shared;
 using ElevenLabsSettingsViewModel = Nikse.SubtitleEdit.Features.Video.TextToSpeech.ElevenLabsSettings.ElevenLabsSettingsViewModel;
 using Timer = System.Timers.Timer;
-using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.VoiceSettings;
 
@@ -169,7 +169,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
         TtsLanguage? language,
         string videoFileName,
         string waveFolder,
-        WavePeakData? wavePeakData)
+        WavePeakData2? wavePeakData)
     {
         foreach (var p in stepResults)
         {
@@ -421,10 +421,10 @@ public partial class ReviewSpeechViewModel : ObservableObject
         // set StepResults with the current lines
         var stepResults = new List<TtsStepResult>();
         foreach (var row in Lines)
-        { 
+        {
             var stepResult = row.StepResult;
             stepResult.Text = row.Text;
-            stepResults.Add(stepResult);    
+            stepResults.Add(stepResult);
         }
         StepResults = stepResults.ToArray();
 
