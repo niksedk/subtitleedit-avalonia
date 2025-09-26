@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
 using Nikse.SubtitleEdit.Core.Common;
 
 namespace Nikse.SubtitleEdit.Features.SpellCheck;
@@ -187,5 +188,38 @@ public class SpellCheckDictionaryDisplay
         var twoLetterCode = GetTwoLetterLanguageCode(this);
         var threeLetterCode = Iso639Dash2LanguageCode.GetThreeLetterCodeFromTwoLetterCode(twoLetterCode);
         return threeLetterCode ?? "eng";
+    }
+
+    internal string? GetFiveLetterLanguageName()
+    {
+        var fileName = Path.GetFileNameWithoutExtension(DictionaryFileName).Replace('-', '_');
+
+        if (fileName == "es_ANY")
+        {
+            fileName = "es_ES";
+        }
+
+        if (fileName == "fr_classique" || fileName == "fr_toutesvariantes")
+        {
+            fileName = "fr_FR";
+        }
+
+        if (fileName.Length == 2)
+        {
+            fileName = fileName.ToLowerInvariant() + "_" + fileName.ToUpperInvariant();
+        }
+
+        if (fileName.Length < 5)
+        {
+            return null;
+        }
+
+        var name = fileName.Substring(0, 2).ToLowerInvariant() + fileName.Substring(2, 1) + fileName.Substring(3, 2).ToUpperInvariant();
+        if (!fileName.Contains('_'))
+        {
+            return null;
+        }
+
+        return fileName;
     }
 }

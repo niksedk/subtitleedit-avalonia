@@ -18,7 +18,7 @@ public class AddToOcrReplaceListWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        var labelFromTo = UiUtil.MakeLabel("Change from/to");
+        var labelFromTo = UiUtil.MakeLabel(Se.Language.Ocr.ChangeWordFromTo);
         var textBoxFrom = UiUtil.MakeTextBox(200, vm, nameof(vm.From));
         var textBoxTo = UiUtil.MakeTextBox(200, vm, nameof(vm.To));
         var panelFromTo = new StackPanel
@@ -33,7 +33,7 @@ public class AddToOcrReplaceListWindow : Window
             }
         };  
 
-        var labelDictionary = UiUtil.MakeLabel(Se.Language.General.Dictionary);
+        var labelDictionary = UiUtil.MakeLabel(Se.Language.General.Dictionary).WithMarginTop(20);
         var comboBoxDictionaries = new ComboBox
         {
             Width = 200,
@@ -53,22 +53,24 @@ public class AddToOcrReplaceListWindow : Window
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
-            ColumnSpacing = 10,
-            RowSpacing = 10,
+            ColumnSpacing = 2,
+            RowSpacing = 2,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(panelFromTo, 0);
-        grid.Add(labelDictionary, 1);
-        grid.Add(comboBoxDictionaries, 2);
-        grid.Add(buttonPanel, 3);
+        grid.Add(labelFromTo, 0);
+        grid.Add(panelFromTo, 1);
+        grid.Add(labelDictionary, 2);
+        grid.Add(comboBoxDictionaries, 3);
+        grid.Add(buttonPanel, 4);
 
         Content = grid;
 

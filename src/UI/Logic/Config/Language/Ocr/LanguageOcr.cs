@@ -45,6 +45,9 @@ public class LanguageOcr
     public string NOcrInspectImageMatches { get; set; }
     public string AddToOcrPair { get; set; }
     public string AddNameToOcrReplaceList { get; set; }
+    public string WordToAdd { get; set; }
+    public string NameToAdd { get; set; }
+    public string ChangeWordFromTo { get; set; }
 
     public LanguageOcr()
     {
@@ -89,5 +92,8 @@ public class LanguageOcr
         NOcrInspectImageMatches = "nOCR - Inspect image matches";
         AddToOcrPair = "Add to OCR replace pairs";
         AddNameToOcrReplaceList = "Add name to OCR replace list";
+        WordToAdd = "Word to add";
+        NameToAdd = "Name to add";
+        ChangeWordFromTo = "Change word from/to";
     }
 }

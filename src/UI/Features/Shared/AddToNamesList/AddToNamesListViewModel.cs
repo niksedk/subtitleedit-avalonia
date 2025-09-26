@@ -2,8 +2,14 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.Dictionaries;
 using Nikse.SubtitleEdit.Features.SpellCheck;
+using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Dictionaries;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Shared.AddToNamesList;
 
@@ -25,14 +31,50 @@ public partial class AddToNamesListViewModel : ObservableObject
         Dictionaries = new ObservableCollection<SpellCheckDictionaryDisplay>();
     }
 
-    internal void Initialize(string name, SpellCheckDictionaryDisplay? dictionary = null)
+    internal void Initialize(
+        string name, 
+        List<SpellCheckDictionaryDisplay>? dictionaries = null, 
+        SpellCheckDictionaryDisplay? dictionary = null)
     {
         Name = name.Trim();
+        if (dictionaries != null)
+        {
+            Dictionaries = new ObservableCollection<SpellCheckDictionaryDisplay>(dictionaries);
+            SelectedDictionary = dictionary ?? (Dictionaries.Count > 0 ? Dictionaries[0] : null);
+        }
     }
 
     [RelayCommand]
-    private void Ok()
+    private async Task Ok()
     {
+        var dictionary = SelectedDictionary;
+        if (dictionary == null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(Name))
+        {
+            return;
+        }
+
+        var fiveLetterLanguageName = dictionary.GetFiveLetterLanguageName();
+        if (fiveLetterLanguageName == null)
+        {
+            var message = "Could not find language from file name: " + dictionary.DictionaryFileName;
+            await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        var nameList = new NameList(Se.DictionariesFolder, fiveLetterLanguageName, false, string.Empty);
+        var ok = nameList.Add(Name);
+        if (!ok)
+        {
+            var message = $"Could not add name \"{Name}\" to \"Name list\" - perhaps it already exists";
+            await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
         OkPressed = true;
         Window?.Close();
     }

@@ -328,7 +328,7 @@ public partial class OcrViewModel : ObservableObject
 
         var result = await _windowService.ShowDialogAsync<AddToNamesListWindow, AddToNamesListViewModel>(Window!, vm =>
         {
-            vm.Initialize(selectedWord.Word.Word, SelectedDictionary);
+            vm.Initialize(selectedWord.Word.Word, Dictionaries.ToList(), SelectedDictionary);
         });
     }
 
@@ -343,7 +343,7 @@ public partial class OcrViewModel : ObservableObject
 
         var result = await _windowService.ShowDialogAsync<AddToUserDictionaryWindow, AddToUserDictionaryViewModel>(Window!, vm =>
         {
-            vm.Initialize(selectedWord.Word.Word, SelectedDictionary);
+            vm.Initialize(selectedWord.Word.Word, Dictionaries.ToList(), SelectedDictionary);
         });
     }
 
@@ -358,7 +358,7 @@ public partial class OcrViewModel : ObservableObject
 
         var result = await _windowService.ShowDialogAsync<AddToOcrReplaceListWindow, AddToOcrReplaceListViewModel>(Window!, vm =>
         {
-            vm.Initialize(selectedWord.Word.Word, SelectedDictionary);
+            vm.Initialize(selectedWord.Word.Word, Dictionaries.ToList(), SelectedDictionary);
         });
     }
 

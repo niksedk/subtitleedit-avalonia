@@ -196,7 +196,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
             if (char.IsLetterOrDigit(line[i]) && line[i] != '"')
             {
                 var wordStart = i;
-                while (i < line.Length && 
+                while (i < line.Length &&
                        (char.IsLetterOrDigit(line[i]) || line[i] == '\'' || line[i] == '-'))
                 {
                     i++;
@@ -295,12 +295,13 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
                 isWordCorrect = true;
             }
 
+            var lineText = splitLine.GetText();
             var w = result.Trim('-');
             if (!isWordCorrect && w != result &&
                 (_wordSkipList.Contains(w) ||
                  _spellCheckManager.IsWordCorrect(w) ||
                  _spellCheckWordLists.HasName(w) ||
-                 _spellCheckWordLists.HasName(w)))
+                 _spellCheckWordLists.HasNameExtended(w, lineText)))
             {
                 isWordCorrect = true;
             }
@@ -310,7 +311,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
                 (_wordSkipList.Contains(w) ||
                  _spellCheckManager.IsWordCorrect(w) ||
                  _spellCheckWordLists.HasName(w) ||
-                 _spellCheckWordLists.HasName(w)))
+                 _spellCheckWordLists.HasNameExtended(w, lineText)))
             {
                 isWordCorrect = true;
             }
@@ -320,7 +321,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
                 (_wordSkipList.Contains(w) ||
                  _spellCheckManager.IsWordCorrect(w) ||
                  _spellCheckWordLists.HasName(w) ||
-                 _spellCheckWordLists.HasName(w)))
+                 _spellCheckWordLists.HasNameExtended(w, lineText)))
             {
                 isWordCorrect = true;
             }
@@ -331,7 +332,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
                 foreach (var g in guesses)
                 {
                     w = g.Trim('\'', '"', '-');
-                    if (IsSpelledCorrect(g) || IsSpelledCorrect(w))
+                    if (IsSpelledCorrect(g) || IsSpelledCorrect(w) || _spellCheckWordLists.HasName(w))
                     {
                         result = g;
                         word.GuessUsed = true;

@@ -18,10 +18,10 @@ public class AddToUserDictionaryWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        var labelWord = UiUtil.MakeLabel("Name to add");
+        var labelWord = UiUtil.MakeLabel(Se.Language.Ocr.WordToAdd);
         var textBoxWord = UiUtil.MakeTextBox(200, vm, nameof(vm.Word));
 
-        var labelDictionary = UiUtil.MakeLabel(Se.Language.General.Dictionary);
+        var labelDictionary = UiUtil.MakeLabel(Se.Language.General.Dictionary).WithMarginTop(20);
         var comboBoxDictionaries = new ComboBox
         {
             Width = 200,
@@ -48,8 +48,8 @@ public class AddToUserDictionaryWindow : Window
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
-            ColumnSpacing = 10,
-            RowSpacing = 10,
+            ColumnSpacing = 2,
+            RowSpacing = 2,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };

@@ -51,6 +51,12 @@ public class OcrInitializer(IZipUnpacker zipUnpacker) : IOcrInitializer
             return true;
         }
 
+        var latinNOcrFileName = Path.Combine(outputDir, "Latin.nocr");  
+        if (File.Exists(latinNOcrFileName) && new FileInfo(latinNOcrFileName).Length > 1_700_000)
+        {
+            return false;
+        }
+
         var versionFileName = Path.Combine(outputDir, "version.txt");
         if (!File.Exists(versionFileName))
         {

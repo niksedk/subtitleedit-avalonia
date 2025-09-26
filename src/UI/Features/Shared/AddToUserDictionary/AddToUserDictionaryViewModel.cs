@@ -3,7 +3,13 @@ using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.SpellCheck;
+using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Dictionaries;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
+using System.Xml.Linq;
+using Tmds.DBus.Protocol;
 
 namespace Nikse.SubtitleEdit.Features.Shared.AddToUserDictionary;
 
@@ -25,14 +31,51 @@ public partial class AddToUserDictionaryViewModel : ObservableObject
         Dictionaries = new ObservableCollection<SpellCheckDictionaryDisplay>();
     }
 
-    internal void Initialize(string word, SpellCheckDictionaryDisplay? dictionary = null)
+    internal void Initialize(
+        string word,
+        List<SpellCheckDictionaryDisplay>? dictionaries = null,
+        SpellCheckDictionaryDisplay? dictionary = null)
     {
-        Word = word.Trim();
+        Word = word.Trim().ToLowerInvariant();
+        if (dictionaries != null)
+        {
+            Dictionaries = new ObservableCollection<SpellCheckDictionaryDisplay>(dictionaries);
+            SelectedDictionary = dictionary ?? (Dictionaries.Count > 0 ? Dictionaries[0] : null);
+        }
     }
 
     [RelayCommand]
-    private void Ok()
+    private async Task Ok()
     {
+        var dictionary = SelectedDictionary;
+        if (dictionary == null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(Word))
+        {
+            return;
+        }
+
+        var fiveLetterLanguageName = dictionary.GetFiveLetterLanguageName();
+        if (fiveLetterLanguageName == null)
+        {
+            var message = "Could not find language from file name: " + dictionary.DictionaryFileName;
+            await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+            return;
+        }
+
+        var ok = UserWordsHelper.AddToUserDictionary(Word, fiveLetterLanguageName);
+        if (!ok)
+        {
+            var message = $"Could not add word \"{Word}\" to \"User dictionary\" - perhaps it already exists";
+            await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+            return;
+        }
+
         OkPressed = true;
         Window?.Close();
     }
