@@ -6,7 +6,7 @@ using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
+namespace Nikse.SubtitleEdit.Features.Shared.GoToLineNumber;
 
 public class GoToLineNumberWindow : Window
 {

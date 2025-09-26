@@ -20,7 +20,6 @@ using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.VobSub;
 using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Features.Edit.Find;
-using Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
 using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 using Nikse.SubtitleEdit.Features.Edit.Replace;
 using Nikse.SubtitleEdit.Features.Edit.ShowHistory;
@@ -43,6 +42,7 @@ using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Features.Options.WordLists;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.Bookmarks;
+using Nikse.SubtitleEdit.Features.Shared.GoToLineNumber;
 using Nikse.SubtitleEdit.Features.Shared.PickAlignment;
 using Nikse.SubtitleEdit.Features.Shared.PickColor;
 using Nikse.SubtitleEdit.Features.Shared.PickFontName;
@@ -73,6 +73,7 @@ using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 using Nikse.SubtitleEdit.Features.Video.BlankVideo;
 using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Features.Video.CutVideo;
+using Nikse.SubtitleEdit.Features.Video.GoToVideoPosition;
 using Nikse.SubtitleEdit.Features.Video.OpenFromUrl;
 using Nikse.SubtitleEdit.Features.Video.ReEncodeVideo;
 using Nikse.SubtitleEdit.Features.Video.ShotChanges;
@@ -1456,14 +1457,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowGoToVideoPosition()
     {
-        if (Subtitles.Count == 0 || string.IsNullOrEmpty(_videoFileName) || VideoPlayerControl == null)
+        if (Subtitles.Count == 0 || string.IsNullOrEmpty(_videoFileName) || VideoPlayerControl == null || Window == null)
         {
             return;
         }
 
-        var viewModel =
-            await _windowService.ShowDialogAsync<GoToVideoPositionWindow, GoToVideoPositionViewModel>(Window!,
-                vm => { vm.Time = TimeSpan.FromSeconds(VideoPlayerControl.Position); });
+        var viewModel = 
+            await _windowService.ShowDialogAsync<GoToVideoPositionWindow, GoToVideoPositionViewModel>(Window,
+                vm => 
+                { 
+                    vm.Time = TimeSpan.FromSeconds(VideoPlayerControl.Position); 
+                });
 
         if (viewModel is { OkPressed: true, Time.TotalMicroseconds: >= 0 })
         {
@@ -3020,15 +3024,24 @@ public partial class MainViewModel :
             return;
         }
 
-        var viewModel = await _windowService.ShowDialogAsync<GoToLineNumberWindow, GoToLineNumberViewModel>(Window!,
-            vm => { vm.MaxLineNumber = Subtitles.Count; });
+        var viewModel = await _windowService.ShowDialogAsync<GoToLineNumberWindow, GoToLineNumberViewModel>(Window!, vm => 
+        {
+            var idx = 1;
+            if (SelectedSubtitle != null)
+            {
+                idx = Subtitles.IndexOf(SelectedSubtitle) + 1;
+            }
+
+            vm.Initialize(idx, Subtitles.Count); 
+        });
 
         if (viewModel is { OkPressed: true, LineNumber: >= 0 } && viewModel.LineNumber <= Subtitles.Count)
         {
-            SelectAndScrollToRow(viewModel.LineNumber - 1);
+            var no = (int)viewModel.LineNumber;
+            SelectAndScrollToRow(no - 1);
             if (Se.Settings.Tools.GoToLineNumberAlsoSetVideoPosition && !string.IsNullOrEmpty(_videoFileName) && VideoPlayerControl != null)
             {
-                var s = Subtitles.GetOrNull(viewModel.LineNumber - 1);
+                var s = Subtitles.GetOrNull(no - 1);
                 if (s != null)
                 {
                     VideoPlayerControl.Position = s.StartTime.TotalSeconds;

@@ -8,7 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Controls;
 
-namespace Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
+namespace Nikse.SubtitleEdit.Features.Video.GoToVideoPosition;
 
 public partial class GoToVideoPositionViewModel : ObservableObject
 {

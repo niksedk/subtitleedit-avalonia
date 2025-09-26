@@ -13,7 +13,6 @@ using Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream;
 using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Core.VobSub;
 using Nikse.SubtitleEdit.Core.VobSub.Ocr.Service;
-using Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Ocr.Download;
 using Nikse.SubtitleEdit.Features.Ocr.Engines;
@@ -24,6 +23,7 @@ using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.AddToNamesList;
 using Nikse.SubtitleEdit.Features.Shared.AddToOcrReplaceList;
 using Nikse.SubtitleEdit.Features.Shared.AddToUserDictionary;
+using Nikse.SubtitleEdit.Features.Shared.GoToLineNumber;
 using Nikse.SubtitleEdit.Features.Shared.ShowImage;
 using Nikse.SubtitleEdit.Features.SpellCheck;
 using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
@@ -40,7 +40,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -1781,12 +1780,21 @@ public partial class OcrViewModel : ObservableObject
             return;
         }
 
-        var viewModel = await _windowService.ShowDialogAsync<GoToLineNumberWindow, GoToLineNumberViewModel>(Window!,
-            vm => { vm.MaxLineNumber = OcrSubtitleItems.Count; });
+        var viewModel = await _windowService.ShowDialogAsync<GoToLineNumberWindow, GoToLineNumberViewModel>(Window!, vm =>
+        {
+            var idx = 1;
+            if (SelectedOcrSubtitleItem != null)
+            {
+                idx = OcrSubtitleItems.IndexOf(SelectedOcrSubtitleItem) + 1;
+            }
+
+            vm.Initialize(idx, OcrSubtitleItems.Count);
+        });
 
         if (viewModel is { OkPressed: true, LineNumber: >= 0 } && viewModel.LineNumber <= OcrSubtitleItems.Count)
         {
-            SelectAndScrollToRow(viewModel.LineNumber - 1);
+            var no = (int)viewModel.LineNumber;
+            SelectAndScrollToRow(no - 1);
         }
     }
 

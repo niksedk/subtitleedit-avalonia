@@ -7,7 +7,7 @@ using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
+namespace Nikse.SubtitleEdit.Features.Video.GoToVideoPosition;
 
 public class GoToVideoPositionWindow : Window
 {

@@ -6,11 +6,11 @@ using Avalonia.VisualTree;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-namespace Nikse.SubtitleEdit.Features.Edit.GoToLineNumber;
+namespace Nikse.SubtitleEdit.Features.Shared.GoToLineNumber;
 
 public partial class GoToLineNumberViewModel : ObservableObject
 {
-    [ObservableProperty] private int _lineNumber;
+    [ObservableProperty] private int? _lineNumber;
     [ObservableProperty] private int _maxLineNumber;
     
     public Window? Window { get; set; }
@@ -24,11 +24,17 @@ public partial class GoToLineNumberViewModel : ObservableObject
         MaxLineNumber = 100;
         UpDown = new NumericUpDown();   
     }
-    
+
+    public void Initialize(int currentLineNumber, int maxLineNumber)
+    {
+        LineNumber = currentLineNumber > 0 && currentLineNumber <= maxLineNumber ? currentLineNumber : 1;
+        MaxLineNumber = maxLineNumber;
+    }
+
     [RelayCommand]                   
     private void Ok() 
     {
-        OkPressed = true;
+        OkPressed = LineNumber != null;
         Window?.Close();
     }
     
