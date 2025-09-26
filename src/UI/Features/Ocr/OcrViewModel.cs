@@ -221,7 +221,7 @@ public partial class OcrViewModel : ObservableObject
         ocr.DoPromptForUnknownWords = DoPromptForUnknownWords;
         ocr.DoTryToGuessUnknownWords = DoTryToGuessUnknownWords;
         ocr.DoAutoBreak = DoAutoBreak;
-        
+
         if (SelectedDictionary != null)
         {
             Se.Settings.Ocr.LastLanguageDictionaryFile = SelectedDictionary.DictionaryFileName;
@@ -229,7 +229,7 @@ public partial class OcrViewModel : ObservableObject
 
         Se.SaveSettings();
     }
-    
+
     private void LoadDictionaries()
     {
         var spellCheckLanguages = _spellCheckManager.GetDictionaryLanguages(Se.DictionariesFolder);
@@ -246,7 +246,7 @@ public partial class OcrViewModel : ObservableObject
             {
                 SelectedDictionary = Dictionaries.FirstOrDefault(l => l.DictionaryFileName == Se.Settings.Ocr.LastLanguageDictionaryFile);
             }
-            
+
             if (SelectedDictionary == null && !string.IsNullOrEmpty(Se.Settings.SpellCheck.LastLanguageDictionaryFile))
             {
                 SelectedDictionary = Dictionaries.FirstOrDefault(l => l.DictionaryFileName == Se.Settings.SpellCheck.LastLanguageDictionaryFile);
@@ -1084,9 +1084,9 @@ public partial class OcrViewModel : ObservableObject
             parentBitmap.CropTop(0, new SKColor(0, 0, 0, 0));
             var letters = NikseBitmapImageSplitter2.SplitBitmapToLettersNew(parentBitmap, SelectedNOcrPixelsAreSpace,
                 false, true, 20, true);
-            var sb = new StringBuilder();
             SelectedOcrSubtitleItem = item;
             int index = 0;
+            var matches = new List<NOcrChar>();
             while (index < letters.Count)
             {
                 var splitterItem = letters[index];
@@ -1094,7 +1094,7 @@ public partial class OcrViewModel : ObservableObject
                 {
                     if (splitterItem.SpecialCharacter != null)
                     {
-                        sb.Append(splitterItem.SpecialCharacter);
+                        matches.Add(new NOcrChar { Text = splitterItem.SpecialCharacter });
                     }
                 }
                 else
@@ -1108,7 +1108,7 @@ public partial class OcrViewModel : ObservableObject
 
                         if (_skipOnceChars.Any(p => p.LetterIndex == letterIndex && p.LineIndex == i))
                         {
-                            sb.Append("*");
+                            matches.Add(new NOcrChar { Text = "*" });
                             index++;
                             continue;
                         }
@@ -1117,7 +1117,7 @@ public partial class OcrViewModel : ObservableObject
                             _runOnceChars.FirstOrDefault(p => p.LetterIndex == letterIndex && p.LineIndex == i);
                         if (runOnceChar != null)
                         {
-                            sb.Append(runOnceChar.Text);
+                            matches.Add(new NOcrChar { Text = runOnceChar.Text });
                             _runOnceChars.Clear();
                             index++;
                             continue;
@@ -1175,13 +1175,20 @@ public partial class OcrViewModel : ObservableObject
                         index += match.ExpandCount - 1;
                     }
 
-                    sb.Append(match != null ? _nOcrCaseFixer.FixUppercaseLowercaseIssues(splitterItem, match) : "*");
+                    if (match == null)
+                    {
+                        matches.Add(new NOcrChar { Text = "*" });
+                    }
+                    else
+                    {
+                        matches.Add(new NOcrChar { Text = _nOcrCaseFixer.FixUppercaseLowercaseIssues(splitterItem, match), Italic = match.Italic });
+                    }
                 }
 
                 index++;
             }
 
-            item.Text = sb.ToString().Trim();
+            item.Text = ItalicTextMerger.MergeWithItalicTags(matches).Trim();
             OcrFixLineAndSetText(i, item);
             _runOnceChars.Clear();
             _skipOnceChars.Clear();
