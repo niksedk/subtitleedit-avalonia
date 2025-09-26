@@ -97,6 +97,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using static Nikse.SubtitleEdit.Logic.FindService;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -195,6 +196,7 @@ public partial class MainViewModel :
     private bool _opening;
     private List<int>? _visibleLayers;
     private DispatcherTimer _positionTimer = new();
+    private DispatcherTimer _slowTimer = new();
     private CancellationTokenSource _videoOpenTokenSource;
 
     private readonly IFileHelper _fileHelper;
@@ -1462,11 +1464,11 @@ public partial class MainViewModel :
             return;
         }
 
-        var viewModel = 
+        var viewModel =
             await _windowService.ShowDialogAsync<GoToVideoPositionWindow, GoToVideoPositionViewModel>(Window,
-                vm => 
-                { 
-                    vm.Time = TimeSpan.FromSeconds(VideoPlayerControl.Position); 
+                vm =>
+                {
+                    vm.Time = TimeSpan.FromSeconds(VideoPlayerControl.Position);
                 });
 
         if (viewModel is { OkPressed: true, Time.TotalMicroseconds: >= 0 })
@@ -3024,7 +3026,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var viewModel = await _windowService.ShowDialogAsync<GoToLineNumberWindow, GoToLineNumberViewModel>(Window!, vm => 
+        var viewModel = await _windowService.ShowDialogAsync<GoToLineNumberWindow, GoToLineNumberViewModel>(Window!, vm =>
         {
             var idx = 1;
             if (SelectedSubtitle != null)
@@ -3032,7 +3034,7 @@ public partial class MainViewModel :
                 idx = Subtitles.IndexOf(SelectedSubtitle) + 1;
             }
 
-            vm.Initialize(idx, Subtitles.Count); 
+            vm.Initialize(idx, Subtitles.Count);
         });
 
         if (viewModel is { OkPressed: true, LineNumber: >= 0 } && viewModel.LineNumber <= Subtitles.Count)
@@ -3211,7 +3213,7 @@ public partial class MainViewModel :
             }
 
             control.IsFullScreen = false;
-            
+
             if (OperatingSystem.IsMacOS() && !string.IsNullOrEmpty(_videoFileName) && VideoPlayerControl != null)
             {
                 VideoPlayerControl.Reload();
@@ -7092,6 +7094,22 @@ public partial class MainViewModel :
             }
         };
         _positionTimer.Start();
+
+
+        _slowTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
+        _slowTimer.Tick += (s, e) =>
+        {
+            // update gaps
+            for (var i = 0; i < Subtitles.Count - 1; i++)
+            {
+                var p = Subtitles[i];
+                var next = Subtitles[i + 1];
+                p.Gap = next.StartTime.TotalMilliseconds - p.EndTime.TotalMilliseconds;
+            }
+            Subtitles[Subtitles.Count - 1].Gap = double.NaN;
+        };
+        _slowTimer.Start();
+
     }
 
 
