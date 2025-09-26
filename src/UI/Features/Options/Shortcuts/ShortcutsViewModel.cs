@@ -133,14 +133,11 @@ public partial class ShortcutsViewModel : ObservableObject
     private void CommandOk()
     {
         var shortcuts = new List<SeShortCut>();
-        foreach (var node in Nodes.Where(p => p.SubNodes != null))
+        foreach (var shortcut in _allShortcuts)
         {
-            foreach (var child in node.SubNodes!)
+            if (shortcut != null)
             {
-                if (child.ShortCut != null)
-                {
-                    shortcuts.Add(new SeShortCut(child.ShortCut));
-                }
+                shortcuts.Add(new SeShortCut(shortcut));
             }
         }
 
