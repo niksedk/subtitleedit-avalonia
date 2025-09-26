@@ -1198,6 +1198,11 @@ public partial class OcrViewModel : ObservableObject
 
     private void OcrFixLineAndSetText(int i, OcrSubtitleItem item)
     {
+        if (DoAutoBreak)
+        {
+            item.Text = Utilities.AutoBreakLine(item.Text);
+        }
+
         if (SelectedDictionary != null &&
             SelectedDictionary.Name != GetDictionaryNameNone() &&
             _ocrFixEngine.IsLoaded() && DoFixOcrErrors)

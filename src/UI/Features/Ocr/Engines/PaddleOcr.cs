@@ -198,6 +198,11 @@ public partial class PaddleOcr
                 using var data = image.Encode(SKEncodedImageFormat.Png, 90);
                 await File.WriteAllBytesAsync(tempImage, data.ToArray(), ct);
             }
+            catch (TaskCanceledException exception)
+            {
+                // ignore
+                return;
+            }
             finally
             {
                 bitmap?.Dispose();

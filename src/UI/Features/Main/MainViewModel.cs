@@ -363,7 +363,7 @@ public partial class MainViewModel :
         InitializeFfmpeg();
         LoadShortcuts();
 
-        StartTitleTimer();
+        StartTimers();
         _autoBackupService.StartAutoBackup(this);
         _undoRedoManager.SetupChangeDetection(this, TimeSpan.FromSeconds(1));
         LockTimeCodes = Se.Settings.General.LockTimeCodes;
@@ -6965,7 +6965,7 @@ public partial class MainViewModel :
             : new SolidColorBrush(Colors.Transparent);
     }
 
-    private void StartTitleTimer()
+    private void StartTimers()
     {
         _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
         _positionTimer.Tick += (s, e) =>
@@ -7095,21 +7095,25 @@ public partial class MainViewModel :
         };
         _positionTimer.Start();
 
-
         _slowTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
         _slowTimer.Tick += (s, e) =>
         {
-            // update gaps
-            for (var i = 0; i < Subtitles.Count - 1; i++)
+            try
             {
-                var p = Subtitles[i];
-                var next = Subtitles[i + 1];
-                p.Gap = next.StartTime.TotalMilliseconds - p.EndTime.TotalMilliseconds;
+                for (var i = 0; i < Subtitles.Count - 1; i++)
+                {
+                    var p = Subtitles[i];
+                    var next = Subtitles[i + 1];
+                    p.Gap = next.StartTime.TotalMilliseconds - p.EndTime.TotalMilliseconds;
+                }
+                Subtitles[Subtitles.Count - 1].Gap = double.NaN;
             }
-            Subtitles[Subtitles.Count - 1].Gap = double.NaN;
+            catch
+            { 
+                // ignore
+            }
         };
         _slowTimer.Start();
-
     }
 
 
