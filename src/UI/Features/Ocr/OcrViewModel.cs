@@ -99,8 +99,8 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private bool _isUnknownWordSelected;
     [ObservableProperty] private ObservableCollection<ReplacementUsedItem> _allFixes;
     [ObservableProperty] private ReplacementUsedItem? _selectedAllFix;
-    [ObservableProperty] private ObservableCollection<string> _allGuesses;
-    [ObservableProperty] private string? _selectedAllGuess;
+    [ObservableProperty] private ObservableCollection<GuessUsedItem> _allGuesses;
+    [ObservableProperty] private GuessUsedItem? _selectedAllGuess;
 
     public Window? Window { get; set; }
     public DataGrid SubtitleGrid { get; set; }
@@ -157,10 +157,10 @@ public partial class OcrViewModel : ObservableObject
         GoogleVisionLanguages = new ObservableCollection<OcrLanguage>(GoogleVisionOcr.GetLanguages().OrderBy(p => p.ToString()));
         PaddleOcrLanguages = new ObservableCollection<OcrLanguage2>(PaddleOcr.GetLanguages().OrderBy(p => p.ToString()));
         OcredSubtitle = new List<SubtitleLineViewModel>();
-        Dictionaries = new ObservableCollection<SpellCheck.SpellCheckDictionaryDisplay>();
+        Dictionaries = new ObservableCollection<SpellCheckDictionaryDisplay>();
         UnknownWords = new ObservableCollection<UnknownWordItem>();
         AllFixes = new ObservableCollection<ReplacementUsedItem>();
-        AllGuesses = new ObservableCollection<string>();
+        AllGuesses = new ObservableCollection<GuessUsedItem>();
         _runOnceChars = new List<SkipOnceChar>();
         _skipOnceChars = new List<SkipOnceChar>();
         _nOcrAddHistoryManager = new NOcrAddHistoryManager();
@@ -1234,7 +1234,7 @@ public partial class OcrViewModel : ObservableObject
 
                 if (word.GuessUsed)
                 {
-                    AllGuesses.Add($"{word.Word} -> {word.FixedWord}");
+                    AllGuesses.Add(new GuessUsedItem(word.Word, word.FixedWord, i));
                 }
 
                 if (word.IsSpellCheckedOk == false)
@@ -1816,5 +1816,27 @@ public partial class OcrViewModel : ObservableObject
         }
 
         SelectAndScrollToRow(OcrSubtitleItems.IndexOf(SelectedUnknownWord.Item));
+    }
+
+    internal void AllFixesTapped()
+    {
+        var selection = SelectedAllFix;
+        if (selection == null)
+        {
+            return;
+        }
+
+        SelectAndScrollToRow(selection.LineIndex);
+    }
+
+    internal void GuessUsedTapped()
+    {
+        var selection = SelectedAllGuess;
+        if (selection == null)
+        {
+            return;
+        }
+
+        SelectAndScrollToRow(selection.LineIndex);
     }
 }

@@ -563,6 +563,7 @@ public class OcrWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
         };
+        listBox.Tapped += (s, e) => vm.AllFixesTapped();
 
         grid.Add(listBox, 0, 0);
 
@@ -595,6 +596,7 @@ public class OcrWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
         };
+        listBox.Tapped += (s, e) => vm.GuessUsedTapped();
 
         grid.Add(listBox, 0, 0);
 
