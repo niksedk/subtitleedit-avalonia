@@ -6965,7 +6965,7 @@ public partial class MainViewModel :
 
     private void StartTitleTimer()
     {
-        _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(150) };
+        _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
         _positionTimer.Tick += (s, e) =>
         {
             var text = Se.Language.General.Untitled;
