@@ -1533,7 +1533,7 @@ public partial class OcrViewModel : ObservableObject
         }
     }
 
-    internal void SubtitleGridDoubelTapped()
+    internal void SubtitleGridDoubleTapped()
     {
         var engine = SelectedOcrEngine;
         if (engine == null)
@@ -1545,9 +1545,8 @@ public partial class OcrViewModel : ObservableObject
         {
             Dispatcher.UIThread.Post(async void () =>
             {
-                await InspectAdditions();
+                await InspectLine();
             });
-            return;
         }
     }
 

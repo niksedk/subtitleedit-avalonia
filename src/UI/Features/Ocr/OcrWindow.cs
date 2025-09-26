@@ -276,7 +276,7 @@ public class OcrWindow : Window
         };
         dataGridSubtitle.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedOcrSubtitleItem)) { Source = vm });
         dataGridSubtitle.KeyDown += vm.SubtitleGridKeyDown;
-        dataGridSubtitle.DoubleTapped += (s, e) => vm.SubtitleGridDoubelTapped();
+        dataGridSubtitle.DoubleTapped += (s, e) => vm.SubtitleGridDoubleTapped();
         vm.SubtitleGrid = dataGridSubtitle;
 
         // Create a Flyout for the DataGrid
