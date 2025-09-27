@@ -30,22 +30,22 @@ namespace Nikse.SubtitleEdit.Features.Options.Settings;
 
 public partial class SettingsViewModel : ObservableObject
 {
-    [ObservableProperty] private int _singleLineMaxLength;
-    [ObservableProperty] private double _optimalCharsPerSec;
-    [ObservableProperty] private double _maxCharsPerSec;
-    [ObservableProperty] private double _maxWordsPerMin;
-    [ObservableProperty] private int _minDurationMs;
-    [ObservableProperty] private int _maxDurationMs;
-    [ObservableProperty] private int _minGapMs;
-    [ObservableProperty] private int _maxLines;
-    [ObservableProperty] private int _unbreakShorterThanMs;
-    [ObservableProperty] private int _newEmptyDefaultMs;
+    [ObservableProperty] private int? _singleLineMaxLength;
+    [ObservableProperty] private double? _optimalCharsPerSec;
+    [ObservableProperty] private double? _maxCharsPerSec;
+    [ObservableProperty] private double? _maxWordsPerMin;
+    [ObservableProperty] private int? _minDurationMs;
+    [ObservableProperty] private int? _maxDurationMs;
+    [ObservableProperty] private int? _minGapMs;
+    [ObservableProperty] private int? _maxLines;
+    [ObservableProperty] private int? _unbreakShorterThanMs;
+    [ObservableProperty] private int? _newEmptyDefaultMs;
     [ObservableProperty] private bool _promptDeleteLines;
     [ObservableProperty] private bool _lockTimeCodes;
     [ObservableProperty] private bool _rememberPositionAndSize;
     [ObservableProperty] private bool _autoBackupOn;
-    [ObservableProperty] private int _autoBackupIntervalMinutes;
-    [ObservableProperty] private int _autoBackupDeleteAfterMonths;
+    [ObservableProperty] private int? _autoBackupIntervalMinutes;
+    [ObservableProperty] private int? _autoBackupDeleteAfterMonths;
 
     [ObservableProperty] private ObservableCollection<string> _defaultSubtitleFormats;
     [ObservableProperty] private string _selectedDefaultSubtitleFormat;
@@ -295,22 +295,22 @@ public partial class SettingsViewModel : ObservableObject
         var appearance = Se.Settings.Appearance;
         var video = Se.Settings.Video;
 
-        general.SubtitleLineMaximumLength = SingleLineMaxLength;
-        general.SubtitleOptimalCharactersPerSeconds = OptimalCharsPerSec;
-        general.SubtitleMaximumCharactersPerSeconds = MaxCharsPerSec;
-        general.SubtitleMaximumWordsPerMinute = MaxWordsPerMin;
-        general.SubtitleMinimumDisplayMilliseconds = MinDurationMs;
-        general.SubtitleMaximumDisplayMilliseconds = MaxDurationMs;
-        general.MinimumMillisecondsBetweenLines = MinGapMs;
-        general.MaxNumberOfLines = MaxLines;
-        general.MergeLinesShorterThan = UnbreakShorterThanMs;
-        general.NewEmptyDefaultMs = NewEmptyDefaultMs;
+        general.SubtitleLineMaximumLength = SingleLineMaxLength ?? general.SubtitleLineMaximumLength;
+        general.SubtitleOptimalCharactersPerSeconds = OptimalCharsPerSec ?? general.SubtitleOptimalCharactersPerSeconds;
+        general.SubtitleMaximumCharactersPerSeconds = MaxCharsPerSec ?? general.SubtitleMaximumCharactersPerSeconds;
+        general.SubtitleMaximumWordsPerMinute = MaxWordsPerMin ?? general.SubtitleMaximumWordsPerMinute;
+        general.SubtitleMinimumDisplayMilliseconds = MinDurationMs ?? general.SubtitleMinimumDisplayMilliseconds;
+        general.SubtitleMaximumDisplayMilliseconds = MaxDurationMs ?? general.SubtitleMaximumDisplayMilliseconds;
+        general.MinimumMillisecondsBetweenLines = MinGapMs ?? general.MinimumMillisecondsBetweenLines;
+        general.MaxNumberOfLines = MaxLines ?? general.MaxNumberOfLines;
+        general.MergeLinesShorterThan = UnbreakShorterThanMs ?? general.MergeLinesShorterThan;
+        general.NewEmptyDefaultMs = NewEmptyDefaultMs ?? general.NewEmptyDefaultMs;
         general.PromptDeleteLines = PromptDeleteLines;
         general.LockTimeCodes = LockTimeCodes;
         general.RememberPositionAndSize = RememberPositionAndSize;
         general.AutoBackupOn = AutoBackupOn;
-        general.AutoBackupIntervalMinutes = AutoBackupIntervalMinutes;
-        general.AutoBackupDeleteAfterMonths = AutoBackupDeleteAfterMonths;
+        general.AutoBackupIntervalMinutes = AutoBackupIntervalMinutes ?? general.AutoBackupIntervalMinutes;
+        general.AutoBackupDeleteAfterMonths = AutoBackupDeleteAfterMonths ?? general.AutoBackupDeleteAfterMonths;
         general.DefaultEncoding = DefaultEncoding?.DisplayName ?? Encodings.First().DisplayName;
         general.DefaultSubtitleFormat = SelectedDefaultSubtitleFormat;
 
