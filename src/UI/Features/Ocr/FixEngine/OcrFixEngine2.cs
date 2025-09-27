@@ -120,7 +120,6 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
         var result = new OcrFixLineResult
         {
             LineIndex = index,
-            //   Paragraph = p,
         };
 
         if (string.IsNullOrEmpty(line))

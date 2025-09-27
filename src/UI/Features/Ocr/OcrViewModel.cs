@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Controls.Converters;
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
@@ -139,7 +140,7 @@ public partial class OcrViewModel : ObservableObject
         OcrEngines = new ObservableCollection<OcrEngineItem>(OcrEngineItem.GetOcrEngines());
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>();
         NOcrDatabases = new ObservableCollection<string>();
-        NOcrMaxWrongPixelsList = new ObservableCollection<int>(Enumerable.Range(1, 500));
+        NOcrMaxWrongPixelsList = new ObservableCollection<int>(Enumerable.Range(0, 500));
         NOcrPixelsAreSpaceList = new ObservableCollection<int>(Enumerable.Range(1, 50));
         OllamaLanguages = new ObservableCollection<string>(Iso639Dash2LanguageCode.List
             .Select(p => p.EnglishName)
@@ -1063,7 +1064,7 @@ public partial class OcrViewModel : ObservableObject
         _ = Task.Run(() => { RunNOcrLoop(selectedIndices); });
     }
 
-    private void RunNOcrLoop(List<int> selectedIndices)
+    private async Task RunNOcrLoop(List<int> selectedIndices)
     {
         foreach (var i in selectedIndices)
         {
@@ -1188,21 +1189,45 @@ public partial class OcrViewModel : ObservableObject
             }
 
             item.Text = ItalicTextMerger.MergeWithItalicTags(matches).Trim();
-            OcrFixLineAndSetText(i, item);
+            var unknownWords = OcrFixLineAndSetText(i, item);
+
             _runOnceChars.Clear();
             _skipOnceChars.Clear();
+
+            if (DoPromptForUnknownWords)
+            {
+                foreach (var unknownWord in unknownWords)
+                {
+                    var tcs = new TaskCompletionSource<bool>();
+                    Dispatcher.UIThread.Post(async () =>
+                    {
+                        await _windowService.ShowDialogAsync<PromptUnknownWordWindow, PromptUnknownWordViewModel>(Window!,
+                            vm =>
+                            {
+                                vm.Initialize(item.GetBitmap(), item.Text, unknownWord.Word.FixedWord);
+                            });
+                        tcs.SetResult(true);
+                    });
+                    await tcs.Task;
+                    if (!IsOcrRunning)
+                    {
+                        return;
+                    }
+                }
+            }
         }
 
         IsOcrRunning = false;
     }
 
-    private void OcrFixLineAndSetText(int i, OcrSubtitleItem item)
+    private List<UnknownWordItem> OcrFixLineAndSetText(int i, OcrSubtitleItem item)
     {
         if (DoAutoBreak)
         {
             item.Text = Utilities.AutoBreakLine(item.Text);
         }
 
+        var unknownWords = new List<UnknownWordItem>();
         if (SelectedDictionary != null &&
             SelectedDictionary.Name != GetDictionaryNameNone() &&
             _ocrFixEngine.IsLoaded() && DoFixOcrErrors)
@@ -1241,6 +1266,7 @@ public partial class OcrViewModel : ObservableObject
                 {
                     var unknownWordItem = new UnknownWordItem(item, result, word);
                     UnknownWords.Add(unknownWordItem);
+                    unknownWords.Add(unknownWordItem);
                 }
             }
         }
@@ -1254,6 +1280,7 @@ public partial class OcrViewModel : ObservableObject
         }
 
         SelectAndScrollToRow(i);
+        return unknownWords;
     }
 
     private bool InitNOcrDb()
@@ -1530,6 +1557,17 @@ public partial class OcrViewModel : ObservableObject
         {
             e.Handled = true; // prevent further handling if needed
             DeleteSelectedLines();
+        }
+        else if (e.Key == Key.Home)
+        {
+            e.Handled = true; // prevent further handling if needed
+            SelectAndScrollToRow(0);
+        }
+        else if (e.Key == Key.End)
+        {
+            e.Handled = true; // prevent further handling if needed
+            DeleteSelectedLines();
+            SelectAndScrollToRow(OcrSubtitleItems.Count - 1);
         }
     }
 

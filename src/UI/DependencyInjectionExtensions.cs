@@ -209,6 +209,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<PickOllamaModelViewModel>();
         collection.AddTransient<PickMp4TrackViewModel>();
         collection.AddTransient<PromptTextBoxViewModel>();
+        collection.AddTransient<PromptUnknownWordViewModel>();
         collection.AddTransient<ReEncodeVideoViewModel>();
         collection.AddTransient<RemoveTextForHearingImpairedViewModel>();
         collection.AddTransient<ReplaceViewModel>();
