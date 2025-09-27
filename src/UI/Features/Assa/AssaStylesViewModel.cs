@@ -111,6 +111,17 @@ public partial class AssaStylesViewModel : ObservableObject
         }
 
         var s = Subtitle.Parse(fileName, format);
+        if (s == null || string.IsNullOrEmpty(s.Header))
+        {
+            await MessageBox.Show(
+                Window,
+                Se.Language.General.Error,
+                "Nothing to import",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+            return;
+        }
+
         var ssaStyles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(s.Header);
 
         var result = await _windowService.ShowDialogAsync<AssaStylePickerWindow, AssaStylePickerViewModel>(Window, vm =>
@@ -171,7 +182,19 @@ public partial class AssaStylesViewModel : ObservableObject
     [RelayCommand]
     private void FileRemove()
     {
-        DeleteFileStyle(SelectedFileStyle);
+        var selectedItems = FileStyleGrid.SelectedItems.Cast<StyleDisplay>().ToList();
+        if (Window == null || selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        if (selectedItems.Count == 1)
+        {
+            DeleteFileStyle(selectedItems[0]);
+            return;
+        }
+
+        DeleteFileStyles(selectedItems);
     }
 
     [RelayCommand]
@@ -181,30 +204,34 @@ public partial class AssaStylesViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void FileCopy()
+    private void FilesDuplicate()
     {
-        var selectedStyle = SelectedFileStyle;
-        if (selectedStyle == null)
+        var selectedItems = FileStyleGrid.SelectedItems.Cast<StyleDisplay>().ToList();
+        if (Window == null || selectedItems.Count == 0)
         {
             return;
         }
 
-        var name = selectedStyle.Name + " - " + Se.Language.General.Copy;
-        if (FileStyles.Any(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+        foreach (var selectedStyle in selectedItems)
         {
-            var count = 2;
-            var doRepeat = true;
-            while (doRepeat)
-            {
-                name = selectedStyle.Name + " - " + Se.Language.General.Copy + count;
-                doRepeat = FileStyles.Any(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-                count++;
-            }
-        }
 
-        var style = selectedStyle.ToSsaStyle();
-        style.Name = name;
-        FileStyles.Add(new StyleDisplay(style));
+            var name = selectedStyle.Name + " - " + Se.Language.General.Copy;
+            if (FileStyles.Any(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+            {
+                var count = 2;
+                var doRepeat = true;
+                while (doRepeat)
+                {
+                    name = selectedStyle.Name + " - " + Se.Language.General.Copy + count;
+                    doRepeat = FileStyles.Any(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+                    count++;
+                }
+            }
+
+            var style = selectedStyle.ToSsaStyle();
+            style.Name = name;
+            FileStyles.Add(new StyleDisplay(style));
+        }
 
         UpdateUsages();
     }
@@ -240,15 +267,18 @@ public partial class AssaStylesViewModel : ObservableObject
     [RelayCommand]
     private void FileCopyToStorage()
     {
-        var selectedStyle = SelectedFileStyle;
-        if (Window == null || selectedStyle == null)
+        var selectedItems = FileStyleGrid.SelectedItems.Cast<StyleDisplay>().ToList();
+        if (Window == null || selectedItems.Count == 0)
         {
             return;
         }
 
-        var style = selectedStyle.ToSsaStyle();
-        style.Name = MakeUniqueName(style.Name, StorageStyles);
-        StorageStyles.Add(new StyleDisplay(style));
+        foreach (var item in selectedItems)
+        {
+            var style = item.ToSsaStyle();
+            style.Name = MakeUniqueName(style.Name, StorageStyles);
+            StorageStyles.Add(new StyleDisplay(style));
+        }
     }
 
     [RelayCommand]
@@ -346,28 +376,64 @@ public partial class AssaStylesViewModel : ObservableObject
     [RelayCommand]
     private void StorageRemove()
     {
-        if (SelectedStorageStyle == null)
+        var selectedItems = StorageStyleGrid.SelectedItems.Cast<StyleDisplay>().ToList();
+        if (Window == null || selectedItems.Count == 0)
         {
             return;
         }
 
-        var idx = StorageStyles.IndexOf(SelectedStorageStyle);
-        StorageStyles.Remove(SelectedStorageStyle);
-        SelectedStorageStyle = null;
-        CurrentStyle = null;
-
-        if (StorageStyles.Count > 0)
+        Dispatcher.UIThread.Post(async void () =>
         {
-            if (idx >= StorageStyles.Count)
+            var answer = MessageBoxResult.Yes;
+
+            if (Se.Settings.General.PromptDeleteLines)
             {
-                idx = StorageStyles.Count - 1;
+                if (selectedItems.Count == 1)
+                {
+                    answer = await MessageBox.Show(
+                        Window!,
+                        "Delete style?",
+                        $"Do you want to delete style \"{selectedItems[0].Name}\" from storage?",
+                        MessageBoxButtons.YesNoCancel,
+                        MessageBoxIcon.Question);
+                }
+                else
+                {
+                    answer = await MessageBox.Show(
+                        Window!,
+                        "Delete style?",
+                        $"Do you want to delete {selectedItems.Count} styles from storage?",
+                        MessageBoxButtons.YesNoCancel,
+                        MessageBoxIcon.Question);
+                }
             }
 
-            SelectedStorageStyle = StorageStyles[idx];
-            CurrentStyle = SelectedStorageStyle;
-        }
+            if (answer != MessageBoxResult.Yes)
+            {
+                return;
+            }
 
-        StorageStyleGrid.Focus();
+            foreach (var selectedStyle in selectedItems)
+            {
+                var idx = StorageStyles.IndexOf(selectedStyle);
+                StorageStyles.Remove(selectedStyle);
+                SelectedStorageStyle = null;
+                CurrentStyle = null;
+
+                if (StorageStyles.Count > 0)
+                {
+                    if (idx >= StorageStyles.Count)
+                    {
+                        idx = StorageStyles.Count - 1;
+                    }
+
+                    SelectedStorageStyle = StorageStyles[idx];
+                    CurrentStyle = SelectedStorageStyle;
+                }
+            }
+
+            StorageStyleGrid.Focus();
+        });
     }
 
     [RelayCommand]
@@ -377,30 +443,33 @@ public partial class AssaStylesViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void StorageCopy()
+    private void StorageDuplicate()
     {
-        var selectedStyle = SelectedStorageStyle;
-        if (selectedStyle == null)
+        var selectedItems = FileStyleGrid.SelectedItems.Cast<StyleDisplay>().ToList();
+        if (Window == null || selectedItems.Count == 0)
         {
             return;
         }
 
-        var name = selectedStyle.Name + " - " + Se.Language.General.Copy;
-        if (StorageStyles.Any(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+        foreach (var selectedStyle in selectedItems)
         {
-            var count = 2;
-            var doRepeat = true;
-            while (doRepeat)
+            var name = selectedStyle.Name + " - " + Se.Language.General.Copy;
+            if (StorageStyles.Any(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
             {
-                name = selectedStyle.Name + " - " + Se.Language.General.Copy + count;
-                doRepeat = StorageStyles.Any(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-                count++;
+                var count = 2;
+                var doRepeat = true;
+                while (doRepeat)
+                {
+                    name = selectedStyle.Name + " - " + Se.Language.General.Copy + count;
+                    doRepeat = StorageStyles.Any(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+                    count++;
+                }
             }
-        }
 
-        var style = selectedStyle.ToSsaStyle();
-        style.Name = name;
-        StorageStyles.Add(new StyleDisplay(style));
+            var style = selectedStyle.ToSsaStyle();
+            style.Name = name;
+            StorageStyles.Add(new StyleDisplay(style));
+        }
     }
 
     [RelayCommand]
@@ -681,12 +750,17 @@ public partial class AssaStylesViewModel : ObservableObject
 
         Dispatcher.UIThread.Post(async void () =>
         {
-            var answer = await MessageBox.Show(
-                Window!,
-                "Delete style?",
-                $"Do you want to delete {selectedStyle.Name}?",
-                MessageBoxButtons.YesNoCancel,
-                MessageBoxIcon.Question);
+            var answer = MessageBoxResult.Yes;
+
+            if (Se.Settings.General.PromptDeleteLines)
+            {
+                answer = await MessageBox.Show(
+                    Window!,
+                    "Delete style?",
+                    $"Do you want to delete style \"{selectedStyle.Name}\" from current file?",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Question);
+            }
 
             if (answer != MessageBoxResult.Yes)
             {
@@ -713,6 +787,56 @@ public partial class AssaStylesViewModel : ObservableObject
                 UpdateUsages();
             }
 
+            FileStyleGrid.Focus();
+        });
+    }
+
+    private void DeleteFileStyles(List<StyleDisplay> selectedStyles)
+    {
+        if (selectedStyles.Count == 0)
+        {
+            return;
+        }
+
+        Dispatcher.UIThread.Post(async void () =>
+        {
+            var answer = MessageBoxResult.Yes;
+
+            if (Se.Settings.General.PromptDeleteLines)
+            {
+                answer = await MessageBox.Show(
+                    Window!,
+                    "Delete style?",
+                    $"Do you want to delete {selectedStyles.Count} styles?",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Question);
+            }
+
+            if (answer != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            foreach (var selectedStyle in selectedStyles)
+            {
+                var idx = FileStyles.IndexOf(selectedStyle);
+                FileStyles.Remove(selectedStyle);
+                SelectedFileStyle = null;
+                CurrentStyle = null;
+                if (FileStyles.Count > 0)
+                {
+                    if (idx >= FileStyles.Count)
+                    {
+                        idx = FileStyles.Count - 1;
+                    }
+
+                    SelectedFileStyle = FileStyles[idx];
+                    CurrentStyle = SelectedFileStyle;
+                }
+
+            }
+
+            UpdateUsages();
             FileStyleGrid.Focus();
         });
     }

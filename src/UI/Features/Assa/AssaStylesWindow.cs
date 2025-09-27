@@ -89,7 +89,7 @@ public class AssaStylesWindow : Window
             RowDefinitions =
             {
                 new RowDefinition { Height = new GridLength(2, GridUnitType.Auto) }, // label
-                new RowDefinition { Height = new GridLength(2, GridUnitType.Star) }, // datagrid
+                new RowDefinition { Height = new GridLength(2, GridUnitType.Star) }, // data grid
                 new RowDefinition { Height = new GridLength(2, GridUnitType.Auto) }, // buttons
             },
             ColumnDefinitions =
@@ -105,7 +105,7 @@ public class AssaStylesWindow : Window
         var dataGrid = new DataGrid
         {
             AutoGenerateColumns = false,
-            SelectionMode = DataGridSelectionMode.Single,
+            SelectionMode = DataGridSelectionMode.Extended,
             CanUserResizeColumns = true,
             CanUserSortColumns = true,
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -187,7 +187,7 @@ public class AssaStylesWindow : Window
 
         var buttonNew = UiUtil.MakeButton(vm.FileNewCommand, IconNames.Plus, Se.Language.General.New);
         var buttonRemove = UiUtil.MakeButton(vm.FileRemoveCommand, IconNames.Trash, Se.Language.General.Delete);
-        var buttonDuplicate = UiUtil.MakeButton(vm.FileCopyCommand, IconNames.Duplicate, Se.Language.General.Duplicate);
+        var buttonDuplicate = UiUtil.MakeButton(vm.FilesDuplicateCommand, IconNames.Duplicate, Se.Language.General.Duplicate);
         var buttonImport = UiUtil.MakeButton(vm.FileImportCommand, IconNames.Import, Se.Language.General.Import);
         var buttonExport = UiUtil.MakeButton(vm.FileExportCommand, IconNames.Export, Se.Language.General.Export);
         var buttonCopyToStorage = UiUtil.MakeButton(Se.Language.Assa.CopyToStorageStyles, vm.FileCopyToStorageCommand).WithBindEnabled(nameof(vm.IsFileStyleSelected));
@@ -230,7 +230,7 @@ public class AssaStylesWindow : Window
         var dataGrid = new DataGrid
         {
             AutoGenerateColumns = false,
-            SelectionMode = DataGridSelectionMode.Single,
+            SelectionMode = DataGridSelectionMode.Extended,
             CanUserResizeColumns = true,
             CanUserSortColumns = true,
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -309,7 +309,7 @@ public class AssaStylesWindow : Window
 
 
         var buttonNew = UiUtil.MakeButton(vm.StorageNewCommand, IconNames.Plus, Se.Language.General.New);
-        var buttonDuplicate = UiUtil.MakeButton(vm.StorageCopyCommand, IconNames.Duplicate, Se.Language.General.Duplicate);
+        var buttonDuplicate = UiUtil.MakeButton(vm.StorageDuplicateCommand, IconNames.Duplicate, Se.Language.General.Duplicate);
         var buttonRemove = UiUtil.MakeButton(vm.StorageRemoveCommand, IconNames.Trash, Se.Language.General.Delete);
         var buttonImport = UiUtil.MakeButton(vm.StorageImportCommand, IconNames.Import, Se.Language.General.Import);
         var buttonExport = UiUtil.MakeButton(vm.StorageExportCommand, IconNames.Export, Se.Language.General.Export);

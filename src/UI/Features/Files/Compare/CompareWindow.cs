@@ -91,9 +91,9 @@ public class CompareWindow : Window
         CheckBox checkBoxIgnoreWhiteSpace = UiUtil.MakeCheckBox(Se.Language.File.IgnoreWhitespace, vm, nameof(vm.IgnoreWhiteSpace))
             .WithMarginLeft(10);
         checkBoxIgnoreWhiteSpace.IsCheckedChanged += vm.CheckBoxChanged;
-        var checkBoxIngoreFormatting = UiUtil.MakeCheckBox(Se.Language.File.IgnoreFormatting, vm, nameof(vm.IgnoreFormatting))
+        var checkBoxIgnoreFormatting = UiUtil.MakeCheckBox(Se.Language.File.IgnoreFormatting, vm, nameof(vm.IgnoreFormatting))
             .WithMarginLeft(10).WithMarginRight(15);
-        checkBoxIngoreFormatting.IsCheckedChanged += vm.CheckBoxChanged;
+        checkBoxIgnoreFormatting.IsCheckedChanged += vm.CheckBoxChanged;
         var buttonPreviousDifference = UiUtil.MakeButton(vm.PreviousDifferenceCommand, IconNames.ChevronLeft).WithBindIsVisible(nameof(vm.IsExportVisible));
         if (Se.Settings.Appearance.ShowHints)
         {
@@ -104,12 +104,12 @@ public class CompareWindow : Window
         {
             ToolTip.SetTip(buttonNextDifference, Se.Language.File.NextDifference);
         }
-        var buttonExport = UiUtil.MakeButton(Se.Language.General.Export, vm.ExportCommand);
+        var buttonExport = UiUtil.MakeButton(Se.Language.General.Export, vm.ExportCommand).WithMarginLeft(15);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(
             checkBoxIgnoreWhiteSpace, 
-            checkBoxIngoreFormatting, 
+            checkBoxIgnoreFormatting, 
             buttonPreviousDifference, 
             buttonNextDifference,
             buttonExport,
