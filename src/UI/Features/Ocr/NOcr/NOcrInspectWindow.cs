@@ -68,13 +68,41 @@ public class NOcrInspectWindow : Window
 
     private static Border MakeLinesView(NOcrInspectViewModel vm)
     {
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+            },
+            Width = double.NaN,
+            Height = double.NaN,
+        };
+
         vm.PanelLines = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Vertical,
             Margin = new Thickness(5),
         };
 
-        return UiUtil.MakeBorderForControl(vm.PanelLines).WithMarginBottom(10);
+        var image = new Image
+        {
+            [!Image.SourceProperty] = new Binding(nameof(vm.SentenceBitmap)),
+            Stretch = Stretch.Uniform,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            MaxWidth = 300,
+            MaxHeight = 200,
+        };
+
+        grid.Add(vm.PanelLines, 0);
+        grid.Add(image, 0, 1, 1);
+
+        return UiUtil.MakeBorderForControl(grid).WithMarginBottom(10);
     }
 
     private static Border MakeControlsView(NOcrInspectViewModel vm)

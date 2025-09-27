@@ -247,16 +247,6 @@ public partial class OcrViewModel : ObservableObject
                 SelectedDictionary = Dictionaries.FirstOrDefault(l => l.DictionaryFileName == Se.Settings.Ocr.LastLanguageDictionaryFile);
             }
 
-            if (SelectedDictionary == null && !string.IsNullOrEmpty(Se.Settings.SpellCheck.LastLanguageDictionaryFile))
-            {
-                SelectedDictionary = Dictionaries.FirstOrDefault(l => l.DictionaryFileName == Se.Settings.SpellCheck.LastLanguageDictionaryFile);
-            }
-
-            if (SelectedDictionary == null)
-            {
-                SelectedDictionary = Dictionaries.FirstOrDefault(l => l.Name.Contains("English", StringComparison.OrdinalIgnoreCase));
-            }
-
             if (SelectedDictionary == null)
             {
                 SelectedDictionary = Dictionaries[0];

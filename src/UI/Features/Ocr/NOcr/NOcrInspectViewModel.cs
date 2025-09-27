@@ -60,6 +60,7 @@ public partial class NOcrInspectViewModel : ObservableObject
     public bool AddBetterMatchPressed { get; set; }
     public int LetterIndex { get; internal set; }
 
+    private SKBitmap _sentenceBitmapOriginal;
     private NOcrDb _nOcrDb;
     private bool _isControlDown = false;
     private bool _isWinDown = false;
@@ -81,6 +82,7 @@ public partial class NOcrInspectViewModel : ObservableObject
         SubmitOnFirstLetter = false;
         _letters = new List<ImageSplitterItem2>();
         _matches = new List<NOcrChar?>();
+        _sentenceBitmapOriginal = new SKBitmap(1, 1, true);
         ZoomFactorInfo = string.Empty;
 
         const int maxLines = 500;
@@ -105,6 +107,7 @@ public partial class NOcrInspectViewModel : ObservableObject
         _letters = letters;
         _matches = matches;
         _nOcrDb = nOcrDb ?? new NOcrDb(string.Empty);
+        _sentenceBitmapOriginal = sKBitmap;
         NOcrDrawingCanvas.BackgroundImage = CurrentBitmap;
         NOcrDrawingCanvas.ZoomFactor = 4;
 
@@ -115,12 +118,13 @@ public partial class NOcrInspectViewModel : ObservableObject
 
         if (selectedOcrSubtitleItem != null)
         {
-            InitSentenceBitmap(selectedOcrSubtitleItem, sKBitmap);
+            InitSentenceBitmap();
         }
     }
 
-    private void InitSentenceBitmap(OcrSubtitleItem item, SKBitmap skBitmap)
+    private void InitSentenceBitmap()
     {
+        var skBitmap = _sentenceBitmapOriginal.Copy();
         if (_splitItem.NikseBitmap != null)
         {
             var rect = new SKRect(_splitItem.X, _splitItem.Y, _splitItem.X + _splitItem.NikseBitmap.Width, _splitItem.Y + _splitItem.NikseBitmap.Height);
@@ -397,6 +401,8 @@ public partial class NOcrInspectViewModel : ObservableObject
             NOcrDrawingCanvas.MissPaths.Clear();
             NOcrDrawingCanvas.InvalidateVisual();
         }
+
+        InitSentenceBitmap();
     }
 
     internal void DrawModeChanged(object? sender, SelectionChangedEventArgs e)
