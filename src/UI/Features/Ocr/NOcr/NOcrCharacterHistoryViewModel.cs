@@ -84,7 +84,7 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
     [RelayCommand]
     private void ZoomIn()
     {
-        if (NOcrDrawingCanvas.ZoomFactor < 10)
+        if (NOcrDrawingCanvas.ZoomFactor < 20)
         {
             NOcrDrawingCanvas.ZoomFactor++;
         }

@@ -49,6 +49,8 @@ public class Se
 
         IsPortable = !IsInstalledInProgramFiles;
 
+        LogError("Info: Subtitle Edit started. IsPortable: " + IsPortable + ", ExePath: " + ExePath);
+
         DataFolder = IsPortable
             ? ExePath
             : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Subtitle Edit");
