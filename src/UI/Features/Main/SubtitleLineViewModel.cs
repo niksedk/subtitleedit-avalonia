@@ -241,6 +241,58 @@ public partial class SubtitleLineViewModel : ObservableObject
         }
     }
 
+    public IBrush CpsBackgroundBrush
+    {
+        get
+        {
+            if (Se.Settings.General.ColorDurationTooLong &&
+                CharactersPerSecond > Se.Settings.General.SubtitleMaximumCharactersPerSeconds)
+            {
+                return new SolidColorBrush(_errorColor);
+            }
+
+            return new SolidColorBrush(Colors.Transparent);
+        }
+    }
+
+    public IBrush WpmBackgroundBrush
+    {
+        get
+        {
+            if (Se.Settings.General.ColorDurationTooLong &&
+                WordsPerMinute > Se.Settings.General.SubtitleMaximumWordsPerMinute)
+            {
+                return new SolidColorBrush(_errorColor);
+            }
+
+            return new SolidColorBrush(Colors.Transparent);
+        }
+    }
+
+    partial void OnGapChanged(double value)
+    {
+        if (_skipUpdate)
+        {
+            return;
+        }
+
+        OnPropertyChanged(nameof(GapBackgroundBrush));
+    }
+
+    public IBrush GapBackgroundBrush
+    {
+        get
+        {
+            if (Se.Settings.General.ColorGapTooShort &&
+                Gap < Se.Settings.General.MinimumMillisecondsBetweenLines)
+            {
+                return new SolidColorBrush(_errorColor);
+            }
+
+            return new SolidColorBrush(Colors.Transparent);
+        }
+    }
+
     partial void OnStartTimeChanged(TimeSpan value)
     {
         if (_skipUpdate)
@@ -268,6 +320,9 @@ public partial class SubtitleLineViewModel : ObservableObject
         OnPropertyChanged(nameof(CharactersPerSecond));
         OnPropertyChanged(nameof(TextBackgroundBrush));
         OnPropertyChanged(nameof(DurationBackgroundBrush));
+        OnPropertyChanged(nameof(CpsBackgroundBrush));
+        OnPropertyChanged(nameof(WordsPerMinute));
+        OnPropertyChanged(nameof(WpmBackgroundBrush));
     }
 
     partial void OnDurationChanged(TimeSpan value)
@@ -285,6 +340,9 @@ public partial class SubtitleLineViewModel : ObservableObject
             OnPropertyChanged(nameof(CharactersPerSecond));
             OnPropertyChanged(nameof(TextBackgroundBrush));
             OnPropertyChanged(nameof(DurationBackgroundBrush));
+            OnPropertyChanged(nameof(CpsBackgroundBrush));
+            OnPropertyChanged(nameof(WordsPerMinute));
+            OnPropertyChanged(nameof(WpmBackgroundBrush));
         }
     }
 
@@ -305,6 +363,9 @@ public partial class SubtitleLineViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(CharactersPerSecond));
         OnPropertyChanged(nameof(TextBackgroundBrush));
+        OnPropertyChanged(nameof(CpsBackgroundBrush));
+        OnPropertyChanged(nameof(WordsPerMinute));
+        OnPropertyChanged(nameof(WpmBackgroundBrush));
     }
 
     internal void SetStartTimeOnly(TimeSpan timeSpan)

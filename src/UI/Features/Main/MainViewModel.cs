@@ -5398,6 +5398,7 @@ public partial class MainViewModel :
         }
 
         Renumber();
+        UpdateGaps();
     }
 
     public bool HasChanges()
@@ -7098,24 +7099,28 @@ public partial class MainViewModel :
         _slowTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
         _slowTimer.Tick += (s, e) =>
         {
-            try
-            {
-                for (var i = 0; i < Subtitles.Count - 1; i++)
-                {
-                    var p = Subtitles[i];
-                    var next = Subtitles[i + 1];
-                    p.Gap = next.StartTime.TotalMilliseconds - p.EndTime.TotalMilliseconds;
-                }
-                Subtitles[Subtitles.Count - 1].Gap = double.NaN;
-            }
-            catch
-            { 
-                // ignore
-            }
+            UpdateGaps();
         };
         _slowTimer.Start();
     }
 
+    private void UpdateGaps()
+    {
+        try
+        {
+            for (var i = 0; i < Subtitles.Count - 1; i++)
+            {
+                var p = Subtitles[i];
+                var next = Subtitles[i + 1];
+                p.Gap = next.StartTime.TotalMilliseconds - p.EndTime.TotalMilliseconds;
+            }
+            Subtitles[Subtitles.Count - 1].Gap = double.MaxValue;
+        }
+        catch
+        {
+            // ignore
+        }
+    }
 
     public void SubtitleTextChanged(object? sender, TextChangedEventArgs e)
     {

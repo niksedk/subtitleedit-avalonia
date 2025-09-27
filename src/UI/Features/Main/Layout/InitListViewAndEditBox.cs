@@ -56,6 +56,7 @@ public static class InitListViewAndEditBox
         var fullTimeConverter = new TimeSpanToDisplayFullConverter();
         var shortTimeConverter = new TimeSpanToDisplayShortConverter();
         var doubleRoundedConverter = new DoubleToOneDecimalConverter();
+        var cpsWmpConverter = new DoubleToOneDecimalHideMaxConverter();
 
         vm.SubtitleGrid.Columns.Add(new DataGridTemplateColumn
         {
@@ -191,12 +192,29 @@ public static class InitListViewAndEditBox
         });
         vm.SubtitleGrid.Columns.Add(styleColumn);
 
-        var columnGap = new DataGridTextColumn
+        var columnGap = new DataGridTemplateColumn
         {
             Header = Se.Language.General.Gap,
-            Binding = new Binding(nameof(SubtitleLineViewModel.Gap)),
             Width = new DataGridLength(100),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
+            CellTemplate = new FuncDataTemplate<SubtitleLineViewModel>((value, nameScope) =>
+            {
+                var border = new Border
+                {
+                    Padding = new Thickness(4, 2),
+                    [!Border.BackgroundProperty] = new Binding(nameof(SubtitleLineViewModel.GapBackgroundBrush))
+                };
+
+                var textBlock = new TextBlock
+                {
+                    VerticalAlignment = VerticalAlignment.Center,
+                    TextWrapping = TextWrapping.Wrap,
+                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.Gap)) { Converter = new DoubleToNoDecimalHideMaxConverter() },
+                };
+
+                border.Child = textBlock;
+                return border;
+            })
         };
         columnGap.Bind(DataGridTextColumn.IsVisibleProperty, new Binding(nameof(vm.ShowColumnGap))
         {
@@ -219,12 +237,29 @@ public static class InitListViewAndEditBox
             Source = vm,
         });
 
-        var cpsColumn = new DataGridTextColumn
+        var cpsColumn = new DataGridTemplateColumn
         {
             Header = Se.Language.General.Cps,
-            Binding = new Binding(nameof(SubtitleLineViewModel.CharactersPerSecond)) { Converter = doubleRoundedConverter },
             Width = new DataGridLength(100),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
+            CellTemplate = new FuncDataTemplate<SubtitleLineViewModel>((value, nameScope) =>
+            {
+                var border = new Border
+                {
+                    Padding = new Thickness(4, 2),
+                    [!Border.BackgroundProperty] = new Binding(nameof(SubtitleLineViewModel.CpsBackgroundBrush))
+                };
+
+                var textBlock = new TextBlock
+                {
+                    VerticalAlignment = VerticalAlignment.Center,
+                    TextWrapping = TextWrapping.Wrap,
+                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.CharactersPerSecond)) { Converter = cpsWmpConverter },
+                };
+
+                border.Child = textBlock;
+                return border;
+            })
         };
         vm.SubtitleGrid.Columns.Add(cpsColumn);
         cpsColumn.Bind(DataGridColumn.IsVisibleProperty, new Binding(nameof(vm.ShowColumnCps))
@@ -233,12 +268,29 @@ public static class InitListViewAndEditBox
             Source = vm,
         });
 
-        var wpmColumn = new DataGridTextColumn
+        var wpmColumn = new DataGridTemplateColumn
         {
             Header = Se.Language.General.Wpm,
-            Binding = new Binding(nameof(SubtitleLineViewModel.WordsPerMinute)) { Converter = doubleRoundedConverter },
             Width = new DataGridLength(100),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
+            CellTemplate = new FuncDataTemplate<SubtitleLineViewModel>((value, nameScope) =>
+            {
+                var border = new Border
+                {
+                    Padding = new Thickness(4, 2),
+                    [!Border.BackgroundProperty] = new Binding(nameof(SubtitleLineViewModel.WpmBackgroundBrush))
+                };
+
+                var textBlock = new TextBlock
+                {
+                    VerticalAlignment = VerticalAlignment.Center,
+                    TextWrapping = TextWrapping.Wrap,
+                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.WordsPerMinute)) { Converter = cpsWmpConverter },
+                };
+
+                border.Child = textBlock;
+                return border;
+            })
         };
         vm.SubtitleGrid.Columns.Add(wpmColumn);
         wpmColumn.Bind(DataGridColumn.IsVisibleProperty, new Binding(nameof(vm.ShowColumnWpm))
