@@ -328,7 +328,7 @@ public partial class AssaStylesViewModel : ObservableObject
         }
 
         var format = new AdvancedSubStationAlpha();
-        var fileName = await _fileHelper.PickOpenFile(Window, "Open subtitle file to import styles from", format.Name, "*" + format.Extension);
+        var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.Assa.OpenStyleImportFile, format.Name, "*" + format.Extension);
         if (string.IsNullOrEmpty(fileName))
         {
             return;
@@ -392,7 +392,7 @@ public partial class AssaStylesViewModel : ObservableObject
                 {
                     answer = await MessageBox.Show(
                         Window!,
-                        "Delete style?",
+                        Se.Language.Assa.DeleteStyleQuestion,
                         $"Do you want to delete style \"{selectedItems[0].Name}\" from storage?",
                         MessageBoxButtons.YesNoCancel,
                         MessageBoxIcon.Question);
@@ -401,7 +401,7 @@ public partial class AssaStylesViewModel : ObservableObject
                 {
                     answer = await MessageBox.Show(
                         Window!,
-                        "Delete style?",
+                        Se.Language.Assa.DeleteStylesQuestion,
                         $"Do you want to delete {selectedItems.Count} styles from storage?",
                         MessageBoxButtons.YesNoCancel,
                         MessageBoxIcon.Question);
@@ -756,7 +756,7 @@ public partial class AssaStylesViewModel : ObservableObject
             {
                 answer = await MessageBox.Show(
                     Window!,
-                    "Delete style?",
+                    Se.Language.Assa.DeleteStyleQuestion,
                     $"Do you want to delete style \"{selectedStyle.Name}\" from current file?",
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question);
@@ -806,7 +806,7 @@ public partial class AssaStylesViewModel : ObservableObject
             {
                 answer = await MessageBox.Show(
                     Window!,
-                    "Delete style?",
+                    Se.Language.Assa.DeleteStylesQuestion,
                     $"Do you want to delete {selectedStyles.Count} styles?",
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question);

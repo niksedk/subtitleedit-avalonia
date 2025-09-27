@@ -22,6 +22,9 @@ public class LanguageAssa
     public string SetStyleAsDefault { get; set; }
     public object TakeUsagesFromDotDotDot { get; set; }
     public string NoAttachmentsFound { get; set; }
+    public string DeleteStyleQuestion { get; set; }
+    public string DeleteStylesQuestion { get; set; }
+    public string OpenStyleImportFile { get; set; }
 
     public LanguageAssa()
     {
@@ -45,5 +48,8 @@ public class LanguageAssa
         SetStyleAsDefault = "Set style as default";
         TakeUsagesFromDotDotDot = "Take usages from...";
         NoAttachmentsFound = "No attachments found in selected ASSA file.";
+        DeleteStyleQuestion = "Delete style?";
+        DeleteStylesQuestion = "Delete styles?";
+        OpenStyleImportFile = "Open subtitle file to import styles from";
     }
 }
