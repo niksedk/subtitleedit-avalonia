@@ -28,8 +28,6 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     [ObservableProperty] private NOcrLine? _selectedLineForeground;
     [ObservableProperty] private ObservableCollection<NOcrLine> _linesBackground;
     [ObservableProperty] private NOcrLine? _selectedLineBackground;
-    [ObservableProperty] private ObservableCollection<NOcrDrawModeItem> _drawModes;
-    [ObservableProperty] private NOcrDrawModeItem _selectedDrawMode;
     [ObservableProperty] private bool _isNewLinesForegroundActive;
     [ObservableProperty] private bool _isNewLinesBackgroundActive;
     [ObservableProperty] private string _newText;
@@ -73,8 +71,6 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         Title = Se.Language.Ocr.AddNewCharcter;
         LinesForeground = new ObservableCollection<NOcrLine>();
         LinesBackground = new ObservableCollection<NOcrLine>();
-        DrawModes = new ObservableCollection<NOcrDrawModeItem>(NOcrDrawModeItem.Items);
-        SelectedDrawMode = DrawModes.First();
         IsNewLinesForegroundActive = true;
         IsNewLinesBackgroundActive = false;
         NewText = string.Empty;
@@ -138,7 +134,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         _item = item;
         ShowSkip = showSkip;
         ShowUseOnce = showUseOnce;
-        NOcrDrawingCanvas.ZoomFactor = 4;
+        NOcrDrawingCanvas.ZoomFactor = Se.Settings.Ocr.NOcrZoomX;
         if (i >= 0 && i < letters.Count)
         {
             _splitItem = letters[i];
@@ -374,6 +370,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
 
     private void Close()
     {
+        Se.Settings.Ocr.NOcrZoomX = (int)NOcrDrawingCanvas.ZoomFactor;
         Dispatcher.UIThread.Post(() => { Window?.Close(); });
     }
 
@@ -490,6 +487,24 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
 
     internal void DrawModeChanged(object? sender, SelectionChangedEventArgs e)
     {
-        NOcrDrawingCanvas.NewLinesAreHits = SelectedDrawMode.Type == NOcrDrawModeItemType.Foreground;
+        NOcrDrawingCanvas.NewLinesAreHits = IsNewLinesForegroundActive;
+    }
+
+    internal void DrawModeForegroundChanged(object? sender, RoutedEventArgs e)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            NOcrDrawingCanvas.NewLinesAreHits = IsNewLinesForegroundActive;
+            IsNewLinesBackgroundActive = !IsNewLinesForegroundActive;
+        });
+    }
+
+    internal void DrawModeBackgroundChanged(object? sender, RoutedEventArgs e)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            IsNewLinesForegroundActive = !IsNewLinesBackgroundActive;
+            NOcrDrawingCanvas.NewLinesAreHits = IsNewLinesForegroundActive;
+        });
     }
 }

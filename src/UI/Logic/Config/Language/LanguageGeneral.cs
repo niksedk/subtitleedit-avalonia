@@ -392,6 +392,7 @@ public class LanguageGeneral
     public string Match { get; set; }
     public string AddToNamesListCaseSensitive { get; set; }
     public string AddToUserDictionary { get; set; }
+    public string Foreground { get; set; }
 
     public LanguageGeneral()
     {
@@ -779,5 +780,6 @@ public class LanguageGeneral
         Match = "Match";
         AddToNamesListCaseSensitive = "Add to names list (case sensitive)";
         AddToUserDictionary = "Add to user dictionary";
+        Foreground = "Foreground";
     }
 }

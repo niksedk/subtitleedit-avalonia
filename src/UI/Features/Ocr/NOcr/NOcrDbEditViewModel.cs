@@ -1,10 +1,10 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HanumanInstitute.Validators;
-using Nikse.SubtitleEdit.Features.Ocr.NOcr;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -22,8 +22,8 @@ public partial class NOcrDbEditViewModel : ObservableObject
     [ObservableProperty] private string? _selectedCharacter;
     [ObservableProperty] private ObservableCollection<NOcrChar> _currentCharacterItems;
     [ObservableProperty] private NOcrChar? _selectedCurrentCharacterItem;
-    [ObservableProperty] private ObservableCollection<NOcrDrawModeItem> _drawModes;
-    [ObservableProperty] private NOcrDrawModeItem _selectedDrawMode;
+    [ObservableProperty] private bool _isNewLinesForegroundActive;
+    [ObservableProperty] private bool _isNewLinesBackgroundActive;
     [ObservableProperty] private string _itemText;
     [ObservableProperty] private bool _isItemItalic;
     [ObservableProperty] private string _databaseName;
@@ -41,8 +41,8 @@ public partial class NOcrDbEditViewModel : ObservableObject
 
     public NOcrDbEditViewModel()
     {
-        DrawModes = new ObservableCollection<NOcrDrawModeItem>(NOcrDrawModeItem.Items);
-        SelectedDrawMode = DrawModes.First();
+        IsNewLinesForegroundActive = true;
+        IsNewLinesBackgroundActive = false;
         DatabaseName = string.Empty;
         Characters = new ObservableCollection<string>();
         CurrentCharacterItems = new ObservableCollection<NOcrChar>();
@@ -54,7 +54,7 @@ public partial class NOcrDbEditViewModel : ObservableObject
         ResolutionAndTopMargin = string.Empty;
         ZoomFactorInfo = string.Empty;
         ExpandInfo = string.Empty;
-        NOcrDrawingCanvas.ZoomFactor = 4;
+        NOcrDrawingCanvas.ZoomFactor = Se.Settings.Ocr.NOcrZoomX;
         Title = string.Empty;
     }
 
@@ -157,6 +157,8 @@ public partial class NOcrDbEditViewModel : ObservableObject
 
     private void Close()
     {
+        Se.Settings.Ocr.NOcrZoomX = (int)NOcrDrawingCanvas.ZoomFactor;
+
         Dispatcher.UIThread.Post(() =>
         {
             Window?.Close();
@@ -258,6 +260,24 @@ public partial class NOcrDbEditViewModel : ObservableObject
 
     internal void DrawModeChanged(object? sender, SelectionChangedEventArgs e)
     {
-        NOcrDrawingCanvas.NewLinesAreHits = SelectedDrawMode.Type == NOcrDrawModeItemType.Foreground;
+        NOcrDrawingCanvas.NewLinesAreHits = IsNewLinesForegroundActive;
+    }
+
+    internal void DrawModeForegroundChanged(object? sender, RoutedEventArgs e)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            NOcrDrawingCanvas.NewLinesAreHits = IsNewLinesForegroundActive;
+            IsNewLinesBackgroundActive = !IsNewLinesForegroundActive;
+        });
+    }
+
+    internal void DrawModeBackgroundChanged(object? sender, RoutedEventArgs e)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            IsNewLinesForegroundActive = !IsNewLinesBackgroundActive;
+            NOcrDrawingCanvas.NewLinesAreHits = IsNewLinesForegroundActive;
+        });
     }
 }

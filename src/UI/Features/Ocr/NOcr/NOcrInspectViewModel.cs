@@ -31,8 +31,6 @@ public partial class NOcrInspectViewModel : ObservableObject
     [ObservableProperty] private NOcrLine? _selectedLineForeground;
     [ObservableProperty] private ObservableCollection<NOcrLine> _linesBackground;
     [ObservableProperty] private NOcrLine? _selectedLineBackground;
-    [ObservableProperty] private ObservableCollection<NOcrDrawModeItem> _drawModes;
-    [ObservableProperty] private NOcrDrawModeItem _selectedDrawMode;
     [ObservableProperty] private bool _isNewLinesForegroundActive;
     [ObservableProperty] private bool _isNewLinesBackgroundActive;
     [ObservableProperty] private string _newText;
@@ -70,8 +68,6 @@ public partial class NOcrInspectViewModel : ObservableObject
         Title = Se.Language.Ocr.InspectImageMatches;
         LinesForeground = new ObservableCollection<NOcrLine>();
         LinesBackground = new ObservableCollection<NOcrLine>();
-        DrawModes = new ObservableCollection<NOcrDrawModeItem>(NOcrDrawModeItem.Items);
-        SelectedDrawMode = DrawModes.First();
         PanelLines = new StackPanel();
         IsNewLinesForegroundActive = true;
         IsNewLinesBackgroundActive = false;
@@ -109,7 +105,7 @@ public partial class NOcrInspectViewModel : ObservableObject
         _nOcrDb = nOcrDb ?? new NOcrDb(string.Empty);
         _sentenceBitmapOriginal = sKBitmap;
         NOcrDrawingCanvas.BackgroundImage = CurrentBitmap;
-        NOcrDrawingCanvas.ZoomFactor = 4;
+        NOcrDrawingCanvas.ZoomFactor = Se.Settings.Ocr.NOcrZoomX;
 
         if (letters.Count > 0)
         {
@@ -254,6 +250,7 @@ public partial class NOcrInspectViewModel : ObservableObject
 
     private void Close()
     {
+        Se.Settings.Ocr.NOcrZoomX = (int)NOcrDrawingCanvas.ZoomFactor;
         Dispatcher.UIThread.Post(() =>
         {
             Window?.Close();
@@ -392,7 +389,7 @@ public partial class NOcrInspectViewModel : ObservableObject
             }
 
             NOcrDrawingCanvas.InvalidateVisual();
-            NOcrDrawingCanvas.ZoomFactor = 4;
+            NOcrDrawingCanvas.ZoomFactor = Se.Settings.Ocr.NOcrZoomX;
             ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
         }
         else
@@ -403,11 +400,6 @@ public partial class NOcrInspectViewModel : ObservableObject
         }
 
         InitSentenceBitmap();
-    }
-
-    internal void DrawModeChanged(object? sender, SelectionChangedEventArgs e)
-    {
-        NOcrDrawingCanvas.NewLinesAreHits = SelectedDrawMode.Type == NOcrDrawModeItemType.Foreground;
     }
 
     public void KeyDown(KeyEventArgs e)
@@ -469,6 +461,24 @@ public partial class NOcrInspectViewModel : ObservableObject
         Dispatcher.UIThread.Post(() =>
         {
             TextBoxNew.FontStyle = IsNewTextItalic ? FontStyle.Italic : FontStyle.Normal;
+        });
+    }    
+
+    internal void DrawModeForegroundChanged(object? sender, RoutedEventArgs e)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            NOcrDrawingCanvas.NewLinesAreHits = IsNewLinesForegroundActive;
+            IsNewLinesBackgroundActive = !IsNewLinesForegroundActive;
+        });
+    }
+
+    internal void DrawModeBackgroundChanged(object? sender, RoutedEventArgs e)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            IsNewLinesForegroundActive = !IsNewLinesBackgroundActive;   
+            NOcrDrawingCanvas.NewLinesAreHits = IsNewLinesForegroundActive;
         });
     }
 }

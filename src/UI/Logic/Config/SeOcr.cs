@@ -20,6 +20,7 @@ public class SeOcr
     public bool IsNewLetterItalic { get; set; }
     public bool SubmitOnFirstLetter { get; set; }
     public int NOcrNoOfLinesToAutoDraw { get; set; }
+    public int NOcrZoomX { get; set; }
     public string PaddleOcrMode { get; set; }
     public string PaddleOcrLastLanguage { get; set; }
     public bool DoTryToGuessUnknownWords { get; set; }
@@ -38,6 +39,7 @@ public class SeOcr
         NOcrPixelsAreSpace = 12;
         NOcrDrawUnknownText = true;
         NOcrNoOfLinesToAutoDraw = 60;
+        NOcrZoomX = 4;
 
         OllamaModels = new List<string> { "llama3.2-vision", "llava-phi3", "moondream", "minicpm-v" };
         OllamaLanguage = "English";

@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -137,9 +138,39 @@ public class NOcrCharacterAddWindow : Window
             },
         };
 
-        var comboDrawModes = UiUtil.MakeComboBox(vm.DrawModes, vm, nameof(vm.SelectedDrawMode)).WithMarginLeft(5);
-        comboDrawModes.SelectionChanged += vm.DrawModeChanged;
+        var toggleButtonForeground = new ToggleButton
+        {
+            Content = Se.Language.General.Foreground,
+            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(vm.IsNewLinesForegroundActive))
+            {
+                Source = vm,
+            },
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 5, 0),
+        };
+        toggleButtonForeground.IsCheckedChanged += vm.DrawModeForegroundChanged;
+        var toggleButtonBackground = new ToggleButton
+        {
+            Content = Se.Language.General.Background,
+            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(vm.IsNewLinesBackgroundActive))
+            {
+                Source = vm,
+            },
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+        };
+        toggleButtonBackground.IsCheckedChanged += vm.DrawModeBackgroundChanged;
 
+        var panelDrawMode = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            Children =
+            {
+                toggleButtonForeground,
+                toggleButtonBackground,
+            }
+        };
         var panelDrawControls = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Vertical,
@@ -174,7 +205,7 @@ public class NOcrCharacterAddWindow : Window
                 UiUtil.MakeButton(vm.ZoomInCommand, IconNames.Plus),
                 UiUtil.MakeLabel(string.Empty).WithMarginLeft(10).WithBindText(vm, nameof(vm.ZoomFactorInfo)),
                 UiUtil.MakeLabel(Se.Language.Ocr.DrawMode).WithMarginLeft(10),
-                comboDrawModes,
+                panelDrawMode,
             }
         };
 

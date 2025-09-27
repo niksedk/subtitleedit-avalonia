@@ -58,7 +58,7 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
     public void Initialize(NOcrDb nOcrDb, NOcrAddHistoryManager nOcrAddHistoryManager)
     {
         _nOcrDb = nOcrDb;
-        NOcrDrawingCanvas.ZoomFactor = 4;
+        NOcrDrawingCanvas.ZoomFactor = Se.Settings.Ocr.NOcrZoomX;
         nOcrAddHistoryManager.ClearNotInOcrDb(nOcrDb);
         foreach (var historyItem in nOcrAddHistoryManager.Items.OrderByDescending(p=>p.DateTime))
         {
@@ -158,6 +158,7 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
 
     private void Close()
     {
+        Se.Settings.Ocr.NOcrZoomX = (int)NOcrDrawingCanvas.ZoomFactor;
         Dispatcher.UIThread.Post(() => { Window?.Close(); });
     }
     
