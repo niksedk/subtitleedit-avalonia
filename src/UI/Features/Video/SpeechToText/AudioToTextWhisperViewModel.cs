@@ -1364,7 +1364,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         {
             try
             {
-                using var waveFile = new WavePeakGenerator(videoFileName);
+                using var waveFile = new WavePeakGenerator2(videoFileName);
                 if (waveFile.Header != null && waveFile.Header.SampleRate == 16000)
                 {
                     _videoFileName = videoFileName;

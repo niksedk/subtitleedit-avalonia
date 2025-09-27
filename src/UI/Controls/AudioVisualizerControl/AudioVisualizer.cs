@@ -1475,7 +1475,7 @@ public class AudioVisualizer : Control
         return -1;
     }
 
-    internal void SetSpectrogram(SpectrogramData spectrogramData)
+    internal void SetSpectrogram(SpectrogramData2 spectrogramData)
     {
         //TODO: implement spectrogram
     }

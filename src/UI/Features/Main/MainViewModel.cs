@@ -5955,8 +5955,8 @@ public partial class MainViewModel :
             return;
         }
 
-        var peakWaveFileName = WavePeakGenerator.GetPeakWaveFileName(videoFileName);
-        var spectrogramFolder = WavePeakGenerator.SpectrogramDrawer.GetSpectrogramFolder(videoFileName, 0);
+        var peakWaveFileName = WavePeakGenerator2.GetPeakWaveFileName(videoFileName);
+        var spectrogramFolder = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(videoFileName, 0);
         if (!File.Exists(peakWaveFileName))
         {
             if (FfmpegHelper.IsFfmpegInstalled())
@@ -5977,7 +5977,7 @@ public partial class MainViewModel :
             if (AudioVisualizer != null)
             {
                 AudioVisualizer.WavePeaks = wavePeaks;
-                AudioVisualizer.SetSpectrogram(SpectrogramData.FromDisk(spectrogramFolder));
+                AudioVisualizer.SetSpectrogram(SpectrogramData2.FromDisk(spectrogramFolder));
                 AudioVisualizer.ShotChanges = ShotChangesHelper.FromDisk(videoFileName);
                 if (AudioVisualizer.ShotChanges.Count == 0)
                 {
@@ -6018,7 +6018,7 @@ public partial class MainViewModel :
 
         if (File.Exists(tempWaveFileName))
         {
-            using var waveFile = new WavePeakGenerator(tempWaveFileName);
+            using var waveFile = new WavePeakGenerator2(tempWaveFileName);
             waveFile.GeneratePeaks(0, peakWaveFileName);
 
             var wavePeaks = WavePeakData2.FromDisk(peakWaveFileName);
