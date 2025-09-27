@@ -37,6 +37,7 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
     public TextBox TextBoxNew { get; set; }
     public bool OkPressed { get; set; }
     private NOcrDb _nOcrDb;
+    private bool _isControlDown;
 
     public NOcrCharacterHistoryViewModel()
     {
@@ -191,8 +192,22 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
             e.Handled = true;
             Abort();
         }
+        else if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
+        {
+            _isControlDown = true;
+            NOcrDrawingCanvas.IsControlDown = _isControlDown;
+        }
     }
-    
+
+    public void KeyUp(KeyEventArgs e)
+    {
+        if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
+        {
+            _isControlDown = false;
+            NOcrDrawingCanvas.IsControlDown = _isControlDown;
+        }
+    }
+
     public void ItalicCheckChanged(object? sender, RoutedEventArgs e)
     {
         Dispatcher.UIThread.Post(() =>

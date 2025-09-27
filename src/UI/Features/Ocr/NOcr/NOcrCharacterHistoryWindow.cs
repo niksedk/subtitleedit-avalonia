@@ -183,6 +183,12 @@ public class NOcrCharacterHistoryWindow : Window
         _vm.KeyDown(e);
     }
 
+    protected override void OnKeyUp(KeyEventArgs e)
+    {
+        base.OnKeyUp(e);
+        _vm.KeyUp(e);
+    }
+
     protected override void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);

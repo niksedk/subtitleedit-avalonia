@@ -11,6 +11,7 @@ public class NOcrDrawingCanvasView : Control
 {
     public List<NOcrLine> HitPaths { get; set; }
     public List<NOcrLine> MissPaths { get; set; }
+    public bool IsControlDown { get; set; }
 
     public float ZoomFactor
     {
@@ -106,6 +107,15 @@ public class NOcrDrawingCanvasView : Control
 
         e.Pointer.Capture(null);
         e.Handled = true;
+
+        if (IsControlDown)
+        {
+            _isDrawing = true;
+            var pos = e.GetPosition(this);
+
+            _mouseMoveStartX = (int)Math.Round(pos.X / ZoomFactor, MidpointRounding.AwayFromZero);
+            _mouseMoveStartY = (int)Math.Round(pos.Y / ZoomFactor, MidpointRounding.AwayFromZero);
+        }
     }
 
     public override void Render(DrawingContext context)

@@ -222,6 +222,12 @@ public class NOcrDbEditWindow : Window
         _vm.KeyDown(e);
     }
 
+    protected override void OnKeyUp(KeyEventArgs e)
+    {
+        base.OnKeyUp(e);
+        _vm.KeyUp(e);
+    }
+
     protected override void OnLoaded(RoutedEventArgs e)
     {
             

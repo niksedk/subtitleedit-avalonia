@@ -454,10 +454,11 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
                 e.Handled = true;
                 SubmitOnFirstLetter = !SubmitOnFirstLetter;
             }
-        }
+        }        
         else if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
         {
             _isControlDown = true;
+            NOcrDrawingCanvas.IsControlDown = _isControlDown;
         }
         else if (e.Key == Key.LWin || e.Key == Key.RWin)
         {
@@ -470,6 +471,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
         {
             _isControlDown = false;
+            NOcrDrawingCanvas.IsControlDown = _isControlDown;
         }
         else if (e.Key == Key.LWin || e.Key == Key.RWin)
         {

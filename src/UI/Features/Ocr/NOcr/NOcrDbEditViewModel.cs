@@ -38,6 +38,7 @@ public partial class NOcrDbEditViewModel : ObservableObject
 
     public bool OkPressed { get; set; }
     private NOcrDb _nOcrDb;
+    private bool _isControlDown;
 
     public NOcrDbEditViewModel()
     {
@@ -170,6 +171,20 @@ public partial class NOcrDbEditViewModel : ObservableObject
         if (e.Key == Key.Escape)
         {
             Close();
+        }
+        else if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
+        {
+            _isControlDown = true;
+            NOcrDrawingCanvas.IsControlDown = _isControlDown;
+        }
+    }
+
+    public void KeyUp(KeyEventArgs e)
+    {
+        if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
+        {
+            _isControlDown = false;
+            NOcrDrawingCanvas.IsControlDown = _isControlDown;
         }
     }
 
