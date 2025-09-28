@@ -4,7 +4,6 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using System;
 using System.Collections.Generic;
@@ -67,7 +66,7 @@ public partial class ManualChosenEncodingViewModel : ObservableObject
 
         Encodings.Clear();
         if (string.IsNullOrWhiteSpace(SearchText))
-        { 
+        {
             Encodings.AddRange(_allEncodings);
             return;
         }
@@ -75,7 +74,7 @@ public partial class ManualChosenEncodingViewModel : ObservableObject
         foreach (var encoding in _allEncodings)
         {
             if (encoding.DisplayName.Contains(SearchText, StringComparison.InvariantCultureIgnoreCase))
-            { 
+            {
                 Encodings.Add(encoding);
             }
         }
@@ -128,13 +127,25 @@ public partial class ManualChosenEncodingViewModel : ObservableObject
         if (_fileBuffer.Length > 10 && _fileBuffer[0] == 0xef && _fileBuffer[1] == 0xbb && _fileBuffer[2] == 0xbf) // UTF-8 BOM
         {
             SelectedEncoding = Encodings.FirstOrDefault(e => e.DisplayName == TextEncoding.Utf8WithBom);
+
+            _timerSearch.Start();
+
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                EncodingChanged();
+            });
+
             return;
         }
 
         encoding = LanguageAutoDetect.GetEncodingFromFile(fileName);
         SelectedEncoding = Encodings.FirstOrDefault(e => e.Encoding.CodePage == encoding.CodePage && e.DisplayName != TextEncoding.Utf8WithBom);
-        EncodingChanged();
         _timerSearch.Start();
+
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            EncodingChanged();
+        });
     }
 
     internal void EncodingChanged(object? sender, SelectionChangedEventArgs e)

@@ -8,11 +8,11 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using HanumanInstitute.LibMpv.Core;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Controls.VideoPlayer
 {

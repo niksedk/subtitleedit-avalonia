@@ -116,7 +116,7 @@ public partial class NOcrDbEditViewModel : ObservableObject
         // Validate the item text
         if (string.IsNullOrWhiteSpace(ItemText))
         {
-            await MessageBox.Show(Window!,  "Validation Error", "Item text cannot be empty.", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            await MessageBox.Show(Window!, "Validation Error", "Item text cannot be empty.", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
 

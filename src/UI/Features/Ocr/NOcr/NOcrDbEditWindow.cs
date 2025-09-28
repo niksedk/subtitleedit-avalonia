@@ -230,8 +230,8 @@ public class NOcrDbEditWindow : Window
 
     protected override void OnLoaded(RoutedEventArgs e)
     {
-            
+
         base.OnLoaded(e);
-        Title = _vm.Title;  
+        Title = _vm.Title;
     }
 }

@@ -15,7 +15,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Ocr;
 
@@ -454,7 +453,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
                 e.Handled = true;
                 SubmitOnFirstLetter = !SubmitOnFirstLetter;
             }
-        }        
+        }
         else if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
         {
             _isControlDown = true;

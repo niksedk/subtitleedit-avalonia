@@ -17,7 +17,6 @@ using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Ocr;
@@ -464,7 +463,7 @@ public partial class NOcrInspectViewModel : ObservableObject
         {
             TextBoxNew.FontStyle = IsNewTextItalic ? FontStyle.Italic : FontStyle.Normal;
         });
-    }    
+    }
 
     internal void DrawModeForegroundChanged(object? sender, RoutedEventArgs e)
     {
@@ -479,7 +478,7 @@ public partial class NOcrInspectViewModel : ObservableObject
     {
         Dispatcher.UIThread.Post(() =>
         {
-            IsNewLinesForegroundActive = !IsNewLinesBackgroundActive;   
+            IsNewLinesForegroundActive = !IsNewLinesBackgroundActive;
             NOcrDrawingCanvas.NewLinesAreHits = IsNewLinesForegroundActive;
         });
     }

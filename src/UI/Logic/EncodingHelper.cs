@@ -11,9 +11,10 @@ public static class EncodingHelper
         var encodingList = new List<TextEncoding>();
         encodingList.Insert(TextEncoding.Utf8WithBomIndex, new TextEncoding(Encoding.UTF8, TextEncoding.Utf8WithBom));
         encodingList.Insert(TextEncoding.Utf8WithoutBomIndex, new TextEncoding(Encoding.UTF8, TextEncoding.Utf8WithoutBom));
-        foreach (var encoding in Configuration.AvailableEncodings)
+        foreach (var encodingInfo in Encoding.GetEncodings())
         {
-            if (encoding.CodePage >= 874 && !encoding.IsEbcdic()&& !encoding.CodePage.Equals(Encoding.UTF8.CodePage))
+            var encoding = encodingInfo.GetEncoding();
+            if (encoding.CodePage >= 874 && !encoding.IsEbcdic() && !encoding.CodePage.Equals(Encoding.UTF8.CodePage))
             {
                 var item = new TextEncoding(encoding, null);
                 encodingList.Add(item);

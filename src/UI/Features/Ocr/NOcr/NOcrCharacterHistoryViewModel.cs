@@ -61,7 +61,7 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
         _nOcrDb = nOcrDb;
         NOcrDrawingCanvas.ZoomFactor = Se.Settings.Ocr.NOcrZoomX;
         nOcrAddHistoryManager.ClearNotInOcrDb(nOcrDb);
-        foreach (var historyItem in nOcrAddHistoryManager.Items.OrderByDescending(p=>p.DateTime))
+        foreach (var historyItem in nOcrAddHistoryManager.Items.OrderByDescending(p => p.DateTime))
         {
             HistoryItems.Add(historyItem);
         }
@@ -75,13 +75,13 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
         OkPressed = true;
         Close();
     }
-    
+
     [RelayCommand]
     private void Abort()
     {
         Close();
     }
-    
+
     [RelayCommand]
     private void ZoomIn()
     {
@@ -103,7 +103,7 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
 
         ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
     }
-    
+
     [RelayCommand]
     private void Update()
     {
@@ -117,7 +117,7 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
         item.Italic = IsNewTextItalic;
         _nOcrDb.Save();
     }
-    
+
     [RelayCommand]
     private void UpdateAndClose()
     {
@@ -162,7 +162,7 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
         Se.Settings.Ocr.NOcrZoomX = (int)NOcrDrawingCanvas.ZoomFactor;
         Dispatcher.UIThread.Post(() => { Window?.Close(); });
     }
-    
+
     private void ShowOcrPoints()
     {
         NOcrDrawingCanvas.MissPaths.Clear();
@@ -184,7 +184,7 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
             Abort();
         }
     }
-    
+
     public void KeyDown(KeyEventArgs e)
     {
         if (e.Key == Key.Escape)
@@ -237,9 +237,9 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
         NOcrChar = selectedItem.NOcrChar;
         IsNewTextItalic = NOcrChar.Italic;
         NewText = NOcrChar.Text;
-        LineIndex = string.Format(Se.Language.Ocr.LineIndexX,  selectedItem.LineIndex + 1);
+        LineIndex = string.Format(Se.Language.Ocr.LineIndexX, selectedItem.LineIndex + 1);
         ResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, NOcrChar.Width, NOcrChar.Height, NOcrChar.MarginTop);
-        
+
         NOcrDrawingCanvas.BackgroundImage = CurrentBitmap;
         NOcrDrawingCanvas.ZoomFactor = NOcrDrawingCanvas.ZoomFactor;
         ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
