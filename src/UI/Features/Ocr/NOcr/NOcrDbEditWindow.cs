@@ -23,7 +23,7 @@ public class NOcrDbEditWindow : Window
         CanResize = false;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         DataContext = vm;
-        Width = 900;
+        Width = 945;
         Height = 800;
         MinWidth = 600;
         MinHeight = 500;

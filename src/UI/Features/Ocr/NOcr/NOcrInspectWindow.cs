@@ -237,7 +237,6 @@ public class NOcrInspectWindow : Window
             _ = vm.ShowDrawingTips();
         };
         ToolTip.SetTip(iconInfo, Se.Language.Ocr.NOcrDrawHelp);
-
         var panelLinesToDraw = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Horizontal,

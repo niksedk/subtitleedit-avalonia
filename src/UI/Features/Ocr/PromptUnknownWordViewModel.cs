@@ -1,8 +1,11 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Logic;
+using System;
 using System.Collections.ObjectModel;
 
 namespace Nikse.SubtitleEdit.Features.Ocr;
@@ -120,5 +123,15 @@ public partial class PromptUnknownWordViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+    }
+
+    internal void Onloaded(object? sender, RoutedEventArgs e)
+    {
+        UiUtil.RestoreWindowPosition(Window);
+    }
+
+    internal void OnClosing(object? sender, WindowClosingEventArgs e)
+    {
+        UiUtil.SaveWindowPosition(Window);
     }
 }

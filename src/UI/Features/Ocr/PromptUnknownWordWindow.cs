@@ -64,6 +64,8 @@ public class PromptUnknownWordWindow : Window
 
         Activated += delegate { buttonCancel.Focus(); }; // hack to make OnKeyDown work
         KeyDown += (_, e) => vm.OnKeyDown(e);
+        Loaded += vm.Onloaded;
+        Closing += vm.OnClosing;
     }
 
     private Control MakeWordSuggestionsView(PromptUnknownWordViewModel vm)

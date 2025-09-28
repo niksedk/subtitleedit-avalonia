@@ -665,6 +665,13 @@ public static class UiUtil
         return control;
     }
 
+    public static SplitButton WithMarginLeft(this SplitButton control, int marginLeft)
+    {
+        var m = control.Margin;
+        control.Margin = new Thickness(marginLeft, m.Top, m.Right, m.Bottom);
+        return control;
+    }
+
     public static TextBox WithHeight(this TextBox control, double height)
     {
         var m = control.Margin;

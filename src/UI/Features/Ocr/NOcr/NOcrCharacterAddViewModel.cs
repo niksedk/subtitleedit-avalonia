@@ -7,6 +7,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Ocr.NOcr;
+using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Ocr;
@@ -15,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Ocr;
 
@@ -263,6 +265,16 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         return newBitmap;
     }
 
+    public async Task ShowDrawingTips()
+    {
+        await MessageBox.Show(
+            Window!,
+            Se.Language.General.Help,
+            Se.Language.Ocr.NOcrDrawHelp,
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
+    }
+
     [RelayCommand]
     private void Shrink()
     {
@@ -346,6 +358,20 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void ClearDrawForeGround()
+    {
+        NOcrChar.LinesForeground.Clear();
+        ShowOcrPoints();
+    }
+
+    [RelayCommand]
+    private void ClearDrawBackground()
+    {
+        NOcrChar.LinesBackground.Clear();
+        ShowOcrPoints();
+    }
+
+    [RelayCommand]
     private void ZoomIn()
     {
         if (NOcrDrawingCanvas.ZoomFactor < 20)
@@ -400,11 +426,8 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     {
         if (e.Key == Key.Enter && !string.IsNullOrWhiteSpace(TextBoxNew.Text))
         {
+            e.Handled = true;
             Ok();
-        }
-        else if (e.Key == Key.Escape)
-        {
-            Abort();
         }
     }
 
@@ -412,6 +435,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     {
         if (SubmitOnFirstLetter && NewText.Length >= 1)
         {
+            e.Handled = true;
             Ok();
         }
     }
@@ -421,7 +445,15 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         if (e.Key == Key.Escape)
         {
             e.Handled = true;
-            Abort();
+
+            if (NOcrDrawingCanvas.IsDrawing)
+            {
+                NOcrDrawingCanvas.AbortDraw();
+            }
+            else
+            {
+                Abort();
+            }
         }
         else if (e.Key == Key.Left)
         {
@@ -453,6 +485,22 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
             {
                 e.Handled = true;
                 SubmitOnFirstLetter = !SubmitOnFirstLetter;
+            }
+        }
+        else if (e.Key == Key.Z)
+        {
+            if (_isControlDown || _isWinDown)
+            {
+                e.Handled = true;
+                NOcrDrawingCanvas.UndoLastPath();
+            }
+        }
+        else if (e.Key == Key.Y)
+        {
+            if (_isControlDown || _isWinDown)
+            {
+                e.Handled = true;
+                NOcrDrawingCanvas.ReDoLastPath();
             }
         }
         else if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
@@ -508,5 +556,15 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
             IsNewLinesForegroundActive = !IsNewLinesBackgroundActive;
             NOcrDrawingCanvas.NewLinesAreHits = IsNewLinesForegroundActive;
         });
+    }
+
+    internal void Onloaded(object? sender, RoutedEventArgs e)
+    {
+        UiUtil.RestoreWindowPosition(Window);
+    }
+
+    internal void OnClosing(object? sender, WindowClosingEventArgs e)
+    {
+        UiUtil.SaveWindowPosition(Window);
     }
 }

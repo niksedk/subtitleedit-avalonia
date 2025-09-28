@@ -77,6 +77,8 @@ public class NOcrCharacterAddWindow : Window
         {
             vm.TextBoxNew.Focus(); // hack to make OnKeyDown work
         };
+        Loaded += vm.Onloaded;
+        Closing += vm.OnClosing;    
     }
 
     private static Grid MakeControlsView(NOcrCharacterAddViewModel vm)
@@ -171,15 +173,61 @@ public class NOcrCharacterAddWindow : Window
                 toggleButtonBackground,
             }
         };
+
+        var comboBoxLinesToAutoDraw = UiUtil.MakeComboBox(vm.NoOfLinesToAutoDrawList, vm, nameof(vm.SelectedNoOfLinesToAutoDraw));
+        var iconInfo = new Projektanker.Icons.Avalonia.Icon
+        {
+            Value = IconNames.Information,
+            Margin = new Thickness(5, 0, 0, 0),
+        };
+        iconInfo.PointerPressed += (sender, args) =>
+        {
+            _ = vm.ShowDrawingTips();
+        };
+        ToolTip.SetTip(iconInfo, Se.Language.Ocr.NOcrDrawHelp);
+        var panelLinesToDraw = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            Children =
+            {
+                comboBoxLinesToAutoDraw,
+                iconInfo,
+            }
+        };
+
+        var buttonClear = new SplitButton
+        {
+            Content = Se.Language.General.Clear,
+            Command = vm.ClearDrawCommand,
+            Flyout = new MenuFlyout
+            {
+                Items =
+                {
+                    new MenuItem
+                    {
+                        Header = Se.Language.Ocr.ClearForeground,
+                        Command = vm.ClearDrawForeGroundCommand,
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.Ocr.ClearBackground,
+                        Command = vm.ClearDrawBackgroundCommand,
+                    },
+                }
+            }
+        };
+
         var panelDrawControls = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Vertical,
             Children =
             {
                 UiUtil.MakeLabel(Se.Language.Ocr.LinesToDraw).WithBold(),
-                UiUtil.MakeComboBox(vm.NoOfLinesToAutoDrawList, vm, nameof(vm.SelectedNoOfLinesToAutoDraw)),
-                UiUtil.MakeButton(Se.Language.Ocr.AutoDrawAgain, vm.DrawAgainCommand).WithMinWidth(100).WithMarginTop(10).WithLeftAlignment(),
-                UiUtil.MakeButton(Se.Language.General.Clear, vm.ClearDrawCommand).WithMinWidth(100).WithMarginTop(5).WithLeftAlignment(),
+                panelLinesToDraw,
+                UiUtil.MakeButton(Se.Language.Ocr.AutoDrawAgain, vm.DrawAgainCommand).WithMinWidth(100).WithMarginTop(10).WithLeftAlignment().WithMarginLeft(0),
+                buttonClear.WithMinWidth(100).WithMarginTop(5).WithLeftAlignment().WithMarginLeft(0),
             }
         };
 
