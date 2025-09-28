@@ -422,7 +422,11 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
 
             if (suggestions.Count> 0 && HasMostlyUppercaseLetters(word))
             {
-                suggestions.Insert(0, suggestions[0].ToUpperInvariant());
+                var uc = suggestions[0].ToUpperInvariant();
+                if (!suggestions.Contains(uc))
+                {
+                    suggestions.Insert(0, uc);
+                }
             }
 
             return suggestions;
