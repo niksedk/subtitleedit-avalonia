@@ -7,6 +7,7 @@ using Nikse.SubtitleEdit.Features.SpellCheck;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Nikse.SubtitleEdit.Features.Ocr.FixEngine;
@@ -417,10 +418,35 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
     {
         if (_isLoaded)
         {
-            return _spellCheckManager.GetSuggestions(word);
+            var suggestions = _spellCheckManager.GetSuggestions(word);
+
+            if (suggestions.Count> 0 && HasMostlyUppercaseLetters(word))
+            {
+                suggestions.Insert(0, suggestions[0].ToUpperInvariant());
+            }
+
+            return suggestions;
         }
 
         return [];
+    }
+
+    private static bool HasMostlyUppercaseLetters(string word)
+    {
+        if (string.IsNullOrEmpty(word))
+        {
+            return false;
+        }
+
+        var letters = word.Where(char.IsLetter).ToArray();
+        if (letters.Length == 0)
+        {
+            return false;
+        }
+
+        var uppercaseCount = letters.Count(char.IsUpper);
+
+        return uppercaseCount > letters.Length / 2.0;
     }
 
     public void ChangeAll(string from, string to)
