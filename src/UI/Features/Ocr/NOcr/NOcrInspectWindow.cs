@@ -7,8 +7,6 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using Nikse.SubtitleEdit.Logic.ValueConverters;
-using System;
 
 namespace Nikse.SubtitleEdit.Features.Ocr.NOcr;
 
@@ -202,7 +200,29 @@ public class NOcrInspectWindow : Window
                 toggleButtonForeground,
                 toggleButtonBackground,
             }
-        };  
+        };
+
+        var buttonClear = new SplitButton
+        {
+            Content = Se.Language.General.Clear,
+            Command = vm.ClearDrawCommand,
+            Flyout = new MenuFlyout
+            {
+                Items =
+                {
+                    new MenuItem
+                    {
+                        Header = Se.Language.Ocr.ClearForeground,
+                        Command = vm.ClearDrawForeGroundCommand,
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.Ocr.ClearBackground,
+                        Command = vm.ClearDrawBackgroundCommand,
+                    },
+                }
+            }
+        };
 
         var panelDrawControls = new StackPanel
         {
@@ -210,19 +230,21 @@ public class NOcrInspectWindow : Window
             Children =
             {
                 UiUtil.MakeLabel(Se.Language.Ocr.LinesToDraw).WithBold(),
-                UiUtil.MakeComboBox(vm.NoOfLinesToAutoDrawList, vm, nameof(vm.SelectedNoOfLinesToAutoDraw)),
+                UiUtil.MakeComboBox(vm.NoOfLinesToAutoDrawList, vm, nameof(vm.SelectedNoOfLinesToAutoDraw))
+                    .WithBindEnabled(nameof(vm.IsEditControlsEnabled)),
                 UiUtil.MakeButton(Se.Language.Ocr.AutoDrawAgain, vm.DrawAgainCommand)
+                    .WithMarginLeft(0)
                     .WithMinWidth(100)
                     .WithMarginTop(10)
                     .WithLeftAlignment()
                     .WithBindEnabled(nameof(vm.IsEditControlsEnabled)),
-                UiUtil.MakeButton(Se.Language.General.Clear, vm.ClearDrawCommand)
+                buttonClear
                     .WithMinWidth(100)
                     .WithMarginTop(5)
                     .WithLeftAlignment()
                     .WithBindEnabled(nameof(vm.IsEditControlsEnabled)),
             }
-        };
+        }.WithBindVisible(vm, nameof(vm.IsEditControlsEnabled));
 
         vm.NOcrDrawingCanvas.SetStrokeWidth(1);
         var borderDrawingCanvas = new Border
@@ -242,8 +264,8 @@ public class NOcrInspectWindow : Window
             Margin = new Thickness(0, 0, 0, 5),
             Children =
             {
-                UiUtil.MakeButton(vm.ZoomOutCommand, IconNames.Minus).WithFontSize(20),
-                UiUtil.MakeButton(vm.ZoomInCommand, IconNames.Plus).WithFontSize(20),
+                UiUtil.MakeButton(vm.ZoomOutCommand, IconNames.Minus).WithFontSize(20).WithBindEnabled(nameof(vm.IsEditControlsEnabled)),
+                UiUtil.MakeButton(vm.ZoomInCommand, IconNames.Plus).WithFontSize(20).WithBindEnabled(nameof(vm.IsEditControlsEnabled)),
                 UiUtil.MakeLabel(string.Empty).WithMarginLeft(10).WithBindText(vm, nameof(vm.ZoomFactorInfo)),
                 UiUtil.MakeLabel(Se.Language.Ocr.DrawMode).WithMarginLeft(10),
                 panelDrawMode,
@@ -258,7 +280,7 @@ public class NOcrInspectWindow : Window
                 panelZoom,
                 borderDrawingCanvas,
             }
-        };
+        }.WithBindVisible(vm, nameof(vm.IsEditControlsEnabled));
 
         grid.Add(panelCurrent, 0, 0);
         grid.Add(panelDrawControls, 0, 1);

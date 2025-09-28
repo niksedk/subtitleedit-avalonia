@@ -48,6 +48,8 @@ public class LanguageOcr
     public string WordToAdd { get; set; }
     public string NameToAdd { get; set; }
     public string ChangeWordFromTo { get; set; }
+    public string ClearBackground { get; set; }
+    public string ClearForeground { get; set; }
 
     public LanguageOcr()
     {
@@ -95,5 +97,7 @@ public class LanguageOcr
         WordToAdd = "Word to add";
         NameToAdd = "Name to add";
         ChangeWordFromTo = "Change word from/to";
+        ClearBackground = "Clear background";
+        ClearForeground = "Clear foreground";
     }
 }

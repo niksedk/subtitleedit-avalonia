@@ -765,6 +765,12 @@ public static class UiUtil
         return control;
     }
 
+    public static SplitButton WithLeftAlignment(this SplitButton control)
+    {
+        control.HorizontalAlignment = HorizontalAlignment.Left;
+        return control;
+    }
+
     public static Button WithRightAlignment(this Button control)
     {
         control.HorizontalAlignment = HorizontalAlignment.Right;
@@ -836,6 +842,28 @@ public static class UiUtil
     public static Button WithBindEnabled(this Button control, string isEnabledPropertyPath)
     {
         control.Bind(Button.IsEnabledProperty, new Binding
+        {
+            Path = isEnabledPropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
+    public static SplitButton WithBindEnabled(this SplitButton control, string isEnabledPropertyPath)
+    {
+        control.Bind(SplitButton.IsEnabledProperty, new Binding
+        {
+            Path = isEnabledPropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
+    public static ComboBox WithBindEnabled(this ComboBox control, string isEnabledPropertyPath)
+    {
+        control.Bind(ComboBox.IsEnabledProperty, new Binding
         {
             Path = isEnabledPropertyPath,
             Mode = BindingMode.TwoWay,
@@ -1151,6 +1179,13 @@ public static class UiUtil
         return control;
     }
 
+    public static SplitButton WithMarginTop(this SplitButton control, int marginTop)
+    {
+        var m = control.Margin;
+        control.Margin = new Thickness(m.Left, marginTop, m.Right, m.Bottom);
+        return control;
+    }
+
     public static Button WithFontSize(this Button control, double fontSize)
     {
         control.FontSize = fontSize;
@@ -1224,6 +1259,12 @@ public static class UiUtil
     }
 
     public static Button WithMinWidth(this Button control, int width)
+    {
+        control.MinWidth = width;
+        return control;
+    }
+
+    public static SplitButton WithMinWidth(this SplitButton control, int width)
     {
         control.MinWidth = width;
         return control;

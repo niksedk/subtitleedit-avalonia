@@ -225,6 +225,20 @@ public partial class NOcrInspectViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void ClearDrawForeGround()
+    {
+        NOcrChar.LinesForeground.Clear();
+        ShowOcrPoints();
+    }
+
+    [RelayCommand]
+    private void ClearDrawBackground()
+    {
+        NOcrChar.LinesBackground.Clear();
+        ShowOcrPoints();
+    }
+
+    [RelayCommand]
     private void ZoomIn()
     {
         if (NOcrDrawingCanvas.ZoomFactor < 20)

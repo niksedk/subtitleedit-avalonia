@@ -6,7 +6,6 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Ocr;
-using System;
 using System.IO;
 using System.Threading.Tasks;
 
