@@ -51,6 +51,8 @@ public class LanguageOcr
     public string ClearBackground { get; set; }
     public string ClearForeground { get; set; }
     public string NOcrDrawHelp { get; set; }
+    public string EditWholeText { get; set; }
+    public string EditWordOnly { get; set; }
 
     public LanguageOcr()
     {
@@ -101,5 +103,7 @@ public class LanguageOcr
         ClearBackground = "Clear background";
         ClearForeground = "Clear foreground";
         NOcrDrawHelp = "Tips for drawing\r\n────────────────────\r\n• Hold Ctrl down to continue line\r\n• Ctrl+z=undo, Ctrl+y=redo";
+        EditWholeText = "Edit whole text";
+        EditWordOnly = "Edit word only";
     }
 }

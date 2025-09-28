@@ -1188,14 +1188,42 @@ public partial class OcrViewModel : ObservableObject
             {
                 foreach (var unknownWord in unknownWords)
                 {
+                    var suggestions = _ocrFixEngine.GetSpellCheckSuggestions(unknownWord.Word.FixedWord);
                     var tcs = new TaskCompletionSource<bool>();
                     Dispatcher.UIThread.Post(async () =>
                     {
-                        await _windowService.ShowDialogAsync<PromptUnknownWordWindow, PromptUnknownWordViewModel>(Window!,
+                        var result = await _windowService.ShowDialogAsync<PromptUnknownWordWindow, PromptUnknownWordViewModel>(Window!,
                             vm =>
                             {
-                                vm.Initialize(item.GetBitmap(), item.Text, unknownWord.Word.FixedWord);
+                                vm.Initialize(item.GetBitmap(), item.Text, unknownWord, suggestions);
                             });
+
+                        if (result.ChangeOncePressed)
+                        {
+                        }
+                        else if (result.ChangeAllPressed)
+                        {
+                        }
+                        else if (result.SkipOncePressed)
+                        {
+                        }
+                        else if (result.SkipAllPressed)
+                        {
+                        }
+                        else if (result.AddToNamesListPressed)
+                        {
+                        }
+                        else if (result.AddToUserDictionaryPressed)
+                        {
+                        }
+                        else
+                        {
+                            _cancellationTokenSource.Cancel();
+                            IsOcrRunning = false;
+                            tcs.SetResult(true);
+                            return;
+                        }
+
                         tcs.SetResult(true);
                     });
                     await tcs.Task;

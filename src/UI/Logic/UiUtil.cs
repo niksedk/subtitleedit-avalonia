@@ -665,6 +665,12 @@ public static class UiUtil
         return control;
     }
 
+    public static TextBox WithMargin(this TextBox control, int margin)
+    {
+        control.Margin = new Thickness(margin);
+        return control;
+    }
+
     public static SplitButton WithMarginLeft(this SplitButton control, int marginLeft)
     {
         var m = control.Margin;
@@ -879,6 +885,12 @@ public static class UiUtil
     }
 
     public static Button WithHorizontalAlignmentStretch(this Button control)
+    {
+        control.HorizontalAlignment = HorizontalAlignment.Stretch;
+        return control;
+    }
+
+    public static TextBox WithHorizontalAlignmentStretch(this TextBox control)
     {
         control.HorizontalAlignment = HorizontalAlignment.Stretch;
         return control;

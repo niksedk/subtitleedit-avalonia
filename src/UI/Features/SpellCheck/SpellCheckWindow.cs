@@ -53,7 +53,7 @@ public class SpellCheckWindow : Window
             Height = 85,
         };
 
-        var boderWholeText = UiUtil.MakeBorderForControl(scrollViewerWholeText);
+        var borderWholeText = UiUtil.MakeBorderForControl(scrollViewerWholeText);
 
         var panelButtons = MakeWordNotFound(vm);
 
@@ -91,7 +91,7 @@ public class SpellCheckWindow : Window
 
 
         grid.Add(labelLine, 0, 0);
-        grid.Add(boderWholeText, 1, 0);
+        grid.Add(borderWholeText, 1, 0);
         grid.Add(panelButtons, 2, 0);
         grid.Add(buttonEditWholeText, 2, 0);
         grid.Add(panelButtonsOk, 3, 1);

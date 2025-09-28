@@ -393,6 +393,11 @@ public class LanguageGeneral
     public string AddToNamesListCaseSensitive { get; set; }
     public string AddToUserDictionary { get; set; }
     public string Foreground { get; set; }
+    public string ChangeAll { get; set; }
+    public string ChangeOnce { get; set; }
+    public string SkipOnce { get; set; }
+    public string SkipAll { get; set; }
+    public string Suggestions { get; set; }
 
     public LanguageGeneral()
     {
@@ -781,5 +786,10 @@ public class LanguageGeneral
         AddToNamesListCaseSensitive = "Add to names list (case sensitive)";
         AddToUserDictionary = "Add to user dictionary";
         Foreground = "Foreground";
+        ChangeAll = "Change all";
+        ChangeOnce = "Change once";
+        SkipOnce = "Skip once";
+        SkipAll = "Skip all";
+        Suggestions = "Suggestions";
     }
 }

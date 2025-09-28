@@ -15,6 +15,7 @@ public interface IOcrFixEngine2
     OcrFixLineResult FixOcrErrors(int index, bool doTryToGuessUnknownWords);
     void Unload();
     bool IsLoaded();
+    List<string> GetSpellCheckSuggestions(string word);
 }
 
 public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
@@ -121,15 +122,11 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
         {
             LineIndex = index,
         };
-
         if (string.IsNullOrEmpty(line))
         {
             return result;
         }
-
         int i = 0;
-        int wordIndex = 0;
-
         while (i < line.Length)
         {
             // Check for HTML tags starting with "<" and ending with "/>" or ">"
@@ -137,41 +134,37 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
             {
                 var tagStart = i;
                 var tagEnd = FindTagEnd(line, i);
-
                 if (tagEnd > tagStart)
                 {
                     var tag = line.Substring(tagStart, tagEnd - tagStart + 1);
                     result.Words.Add(new OcrFixLinePartResult
                     {
                         LinePartType = OcrFixLinePartType.Tag,
-                        WordIndex = wordIndex++,
+                        WordIndex = tagStart,
                         Word = tag
                     });
                     i = tagEnd + 1;
                     continue;
                 }
             }
-
             // Check for tags starting with "{\" and ending with "}"
             if (i < line.Length - 1 && line[i] == '{' && line[i + 1] == '\\')
             {
                 var tagStart = i;
                 var tagEnd = line.IndexOf('}', i);
-
                 if (tagEnd > tagStart)
                 {
                     var tag = line.Substring(tagStart, tagEnd - tagStart + 1);
                     result.Words.Add(new OcrFixLinePartResult
                     {
                         LinePartType = OcrFixLinePartType.Tag,
-                        WordIndex = wordIndex++,
+                        WordIndex = tagStart,
                         Word = tag
                     });
                     i = tagEnd + 1;
                     continue;
                 }
             }
-
             // Check for whitespace
             if (char.IsWhiteSpace(line[i]))
             {
@@ -180,17 +173,15 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
                 {
                     i++;
                 }
-
                 var whitespace = line.Substring(whitespaceStart, i - whitespaceStart);
                 result.Words.Add(new OcrFixLinePartResult
                 {
                     LinePartType = OcrFixLinePartType.Whitespace,
-                    WordIndex = wordIndex++,
+                    WordIndex = whitespaceStart,
                     Word = whitespace
                 });
                 continue;
             }
-
             // Check for words (letters and digits)
             if (char.IsLetterOrDigit(line[i]) && line[i] != '"')
             {
@@ -200,17 +191,15 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
                 {
                     i++;
                 }
-
                 var word = line.Substring(wordStart, i - wordStart);
                 result.Words.Add(new OcrFixLinePartResult
                 {
                     LinePartType = OcrFixLinePartType.Word,
-                    WordIndex = wordIndex++,
+                    WordIndex = wordStart,
                     Word = word
                 });
                 continue;
             }
-
             // Everything else is special characters
             var specialCharStart = i;
             while (i < line.Length &&
@@ -221,12 +210,11 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
             {
                 i++;
             }
-
             var specialChars = line.Substring(specialCharStart, i - specialCharStart);
             result.Words.Add(new OcrFixLinePartResult
             {
                 LinePartType = OcrFixLinePartType.SpecialCharacters,
-                WordIndex = wordIndex++,
+                WordIndex = specialCharStart,
                 Word = specialChars
             });
         }
@@ -416,6 +404,16 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
         }
 
         return false;
+    }
+
+    public List<string> GetSpellCheckSuggestions(string word)
+    {
+        if (IsLoaded())
+        {
+            return _spellCheckManager.GetSuggestions(word);
+        }
+
+        return new List<string>();
     }
 }
 
