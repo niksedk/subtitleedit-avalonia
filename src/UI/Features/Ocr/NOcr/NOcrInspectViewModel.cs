@@ -432,6 +432,22 @@ public partial class NOcrInspectViewModel : ObservableObject
                 IsNewTextItalic = !IsNewTextItalic;
             }
         }
+        else if (e.Key == Key.Z)
+        {
+            if (_isControlDown || _isWinDown)
+            {
+                e.Handled = true;
+                NOcrDrawingCanvas.UndoLastPath();
+            }
+        }
+        else if (e.Key == Key.Y)
+        {
+            if (_isControlDown || _isWinDown)
+            {
+                e.Handled = true;
+                NOcrDrawingCanvas.ReDoLastPath();
+            }
+        }
         else if (e.Key == Key.F)
         {
             if (_isControlDown || _isWinDown)

@@ -19,21 +19,6 @@ public class NOcrDrawingCanvasView : Control
     public IBrush MissColor { get; set; } = new SolidColorBrush(Colors.Red);
     public Bitmap? BackgroundImage { get; set; }
 
-    public float ZoomFactor
-    {
-        get => _zoomFactor;
-        set
-        {
-            _zoomFactor = value;
-            if (BackgroundImage != null)
-            {
-                Width = BackgroundImage.PixelSize.Width * _zoomFactor;
-                Height = BackgroundImage.PixelSize.Height * _zoomFactor;
-            }
-            InvalidateVisual();
-        }
-    }
-
     private NOcrLine _currentPath;
     private int _mouseMoveStartX = -1;
     private int _mouseMoveStartY = -1;
@@ -54,11 +39,86 @@ public class NOcrDrawingCanvasView : Control
         Height = 100;
     }
 
+    public float ZoomFactor
+    {
+        get => _zoomFactor;
+        set
+        {
+            _zoomFactor = value;
+            if (BackgroundImage != null)
+            {
+                Width = BackgroundImage.PixelSize.Width * _zoomFactor;
+                Height = BackgroundImage.PixelSize.Height * _zoomFactor;
+            }
+            InvalidateVisual();
+        }
+    }
+
+    public void AbortDraw()
+    {
+        _abort = true;
+        _currentPath = new NOcrLine();
+        _mouseMoveStartX = -1;
+        _mouseMoveStartY = -1;
+        IsDrawing = false;
+        InvalidateVisual();
+    }
+
+    private List<NOcrLine> ReDoPathsHits = new List<NOcrLine>();
+    private List<NOcrLine> ReDoPathsMisses = new List<NOcrLine>();
+
+    public void ReDoLastPath()
+    {
+        if (NewLinesAreHits)
+        {
+            if (ReDoPathsHits.Count > 0)
+            {
+                HitPaths.Add(ReDoPathsHits[ReDoPathsHits.Count - 1]);
+                ReDoPathsHits.RemoveAt(ReDoPathsHits.Count - 1);
+                InvalidateVisual();
+            }
+        }
+        else
+        {
+            if (ReDoPathsMisses.Count > 0)
+            {
+                MissPaths.Add(ReDoPathsMisses[ReDoPathsMisses.Count - 1]);
+                ReDoPathsMisses.RemoveAt(ReDoPathsMisses.Count - 1);
+                InvalidateVisual();
+            }
+        }
+    }
+
+    public void UndoLastPath()
+    {
+        if (NewLinesAreHits)
+        {
+            if (HitPaths.Count > 0)
+            {
+                ReDoPathsHits.Add(HitPaths[HitPaths.Count - 1]);
+                HitPaths.RemoveAt(HitPaths.Count - 1);
+                InvalidateVisual();
+            }
+        }
+        else
+        {
+            if (MissPaths.Count > 0)
+            {
+                ReDoPathsMisses.Add(MissPaths[MissPaths.Count - 1]);
+                MissPaths.RemoveAt(MissPaths.Count - 1);
+                InvalidateVisual();
+            }
+        }
+    }
+
     protected override void OnPointerPressed(PointerPressedEventArgs e)
     {
         base.OnPointerPressed(e);
 
         _abort = false;
+        ReDoPathsHits = new List<NOcrLine>();
+        ReDoPathsMisses = new List<NOcrLine>();
+
         IsDrawing = true;
         var pos = e.GetPosition(this);
 
@@ -196,16 +256,6 @@ public class NOcrDrawingCanvasView : Control
             Width = bitmap.PixelSize.Width * ZoomFactor;
             Height = bitmap.PixelSize.Height * ZoomFactor;
         }
-        InvalidateVisual();
-    }
-
-    internal void AbortDraw()
-    {
-        _abort = true;
-        _currentPath = new NOcrLine();
-        _mouseMoveStartX = -1;
-        _mouseMoveStartY = -1;
-        IsDrawing = false;
         InvalidateVisual();
     }
 }
