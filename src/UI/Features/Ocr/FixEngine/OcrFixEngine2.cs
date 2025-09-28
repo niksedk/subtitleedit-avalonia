@@ -1,6 +1,8 @@
-﻿using Nikse.SubtitleEdit.Core.Common;
+﻿using Nikse.SubtitleEdit.Core.Cea708.Commands;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Dictionaries;
 using Nikse.SubtitleEdit.Core.Interfaces;
+using Nikse.SubtitleEdit.Core.SpellCheck;
 using Nikse.SubtitleEdit.Features.SpellCheck;
 using System;
 using System.Collections.Generic;
@@ -16,6 +18,9 @@ public interface IOcrFixEngine2
     void Unload();
     bool IsLoaded();
     List<string> GetSpellCheckSuggestions(string word);
+    void ChangeAll(string from, string to);
+    void SkipAll(string word);
+    void AddName(string name);
 }
 
 public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
@@ -30,10 +35,8 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
     private HashSet<string> _nameMultiWordList = new HashSet<string>(); // case sensitive phrases
     private List<string> _nameMultiWordListAndWordsWithPeriods;
     private HashSet<string> _abbreviationList;
-    private HashSet<string> _wordSkipList = new HashSet<string>();
     private readonly HashSet<string> _wordSpellOkList = new HashSet<string>();
     private string[] _wordSplitList;
-    private Dictionary<string, string> _changeAllDictionary;
     private SpellCheckWordLists2 _spellCheckWordLists;
     private string _spellCheckDictionaryName;
     private string _threeLetterIsoLanguageName;
@@ -41,6 +44,8 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
     private readonly HashSet<char> _expectedCharsNoComma = new HashSet<char> { ' ', '¡', '¿', '.', '!', '?', ':', ';', '(', ')', '[', ']', '{', '}', '+', '-', '£', '\\', '"', '”', '„', '“', '«', '»', '#', '&', '%', '\r', '\n', '؟' }; // removed $ + comma
     private Subtitle _subtitle;
     private List<OcrSubtitleItem> _subtitles;
+    private HashSet<string> _wordSkipList = new HashSet<string>();
+    private Dictionary<string, string> _changeAllDictionary;
 
     private static readonly Regex RegexAloneIasL = new Regex(@"\bl\b", RegexOptions.Compiled);
     private static readonly Regex RegexLowercaseL = new Regex("[A-ZÆØÅÄÖÉÈÀÙÂÊÎÔÛËÏ]l[A-ZÆØÅÄÖÉÈÀÙÂÊÎÔÛËÏ]", RegexOptions.Compiled);
@@ -53,6 +58,8 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
     public OcrFixEngine2(ISpellCheckManager spellCheckManager)
     {
         _spellCheckManager = spellCheckManager;
+        _wordSkipList = new HashSet<string>();  
+        _changeAllDictionary = new Dictionary<string, string>();        
     }
 
     void IOcrFixEngine2.Initialize(List<OcrSubtitleItem> subtitles, string threeLetterIsoLanguageName, SpellCheckDictionaryDisplay spellCheckDictionary)
@@ -252,7 +259,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
 
         var isWordCorrect = false;
         var result = s;
-        if (_changeAllDictionary != null && _changeAllDictionary.ContainsKey(s))
+        if (_changeAllDictionary.ContainsKey(s))
         {
             result = _changeAllDictionary[s];
             isWordCorrect = true;
@@ -398,7 +405,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
 
     public bool DoSpell(string word)
     {
-        if (IsLoaded())
+        if (_isLoaded)
         {
             return _spellCheckManager.IsWordCorrect(word);
         }
@@ -408,12 +415,38 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
 
     public List<string> GetSpellCheckSuggestions(string word)
     {
-        if (IsLoaded())
+        if (_isLoaded)
         {
             return _spellCheckManager.GetSuggestions(word);
         }
 
-        return new List<string>();
+        return [];
+    }
+
+    public void ChangeAll(string from, string to)
+    {
+        if (!_changeAllDictionary.ContainsKey(from))
+        {
+            _changeAllDictionary[from] = to;
+        }   
+    }
+
+    public void SkipAll(string word)
+    {
+        if (!_wordSkipList.Contains(word))
+        {
+            _wordSkipList.Add(word);
+        }
+    }
+
+    public void AddName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name) || !_isLoaded)
+        {
+            return;
+        }
+
+        _spellCheckWordLists.AddName(name);
     }
 }
 

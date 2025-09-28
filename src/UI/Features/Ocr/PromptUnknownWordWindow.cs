@@ -212,21 +212,21 @@ public class PromptUnknownWordWindow : Window
 
         var buttonUseOnce = new Button
         {
-            Content = "Use once",
-            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.SuggestionUseOnceCommand), BindingMode.OneWay),
+            Content = Se.Language.General.UseOnce,
+            Command = vm.SuggestionUseCommand,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,
-        };
+        }.WithBindEnabled(nameof(vm.AreSuggestionsEnabled));
 
         var buttonUseAlways = new Button
         {
-            Content = "Use always",
-            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.SuggestionUseAlwaysCommand), BindingMode.OneWay),
+            Content = Se.Language.General.UseAlways,
+            Command = vm.SuggestionUseAlwaysCommand,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,
-        };
+        }.WithBindEnabled(nameof(vm.AreSuggestionsEnabled));
 
         var panelButtons = new StackPanel
         {
@@ -252,6 +252,7 @@ public class PromptUnknownWordWindow : Window
             Background = new SolidColorBrush(Colors.Transparent),
         };
         listBoxSuggestions.DoubleTapped += vm.ListBoxSuggestionsDoubleTapped;
+        listBoxSuggestions.SelectionChanged += vm.ListBoxSuggestionsSelectionChanged;
 
         var scrollViewSuggestions = new ScrollViewer
         {

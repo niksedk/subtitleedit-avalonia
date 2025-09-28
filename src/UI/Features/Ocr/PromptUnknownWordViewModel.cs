@@ -23,6 +23,7 @@ public partial class PromptUnknownWordViewModel : ObservableObject
     [ObservableProperty] private string _wholeText;
     [ObservableProperty] private string _word;
     [ObservableProperty] private bool _doEditWholeText;
+    [ObservableProperty] private bool _areSuggestionsEnabled;
 
     public StackPanel PanelWholeText { get; set; }
     public TextBox TextBoxWholeText { get; set; }
@@ -37,6 +38,7 @@ public partial class PromptUnknownWordViewModel : ObservableObject
     public bool GoogleItPressed { get; private set; }
     public bool AddToNamesListPressed { get; private set; }
     public bool AddToUserDictionaryPressed { get; private set; }
+    public bool ChangeWholeTextPressed { get; private set; }
 
     public PromptUnknownWordViewModel()
     {
@@ -146,7 +148,15 @@ public partial class PromptUnknownWordViewModel : ObservableObject
     [RelayCommand]
     private void ChangeOnce()
     {
-        ChangeOncePressed = true;
+        if (DoEditWholeText)
+        {
+            ChangeWholeTextPressed = true;
+        }
+        else
+        {
+            ChangeOncePressed = true;
+        }
+
         Window?.Close();
     }
 
@@ -227,6 +237,13 @@ public partial class PromptUnknownWordViewModel : ObservableObject
             {
                 TextBoxWord.Focus();
             }
+
+            AreSuggestionsEnabled = SelectedSuggestion != null && !DoEditWholeText;
         });
+    }
+
+    internal void ListBoxSuggestionsSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        AreSuggestionsEnabled = SelectedSuggestion != null && !DoEditWholeText;
     }
 }

@@ -398,6 +398,7 @@ public class LanguageGeneral
     public string SkipOnce { get; set; }
     public string SkipAll { get; set; }
     public string Suggestions { get; set; }
+    public object UseAlways { get; set; }
 
     public LanguageGeneral()
     {
@@ -791,5 +792,6 @@ public class LanguageGeneral
         SkipOnce = "Skip once";
         SkipAll = "Skip all";
         Suggestions = "Suggestions";
+        UseAlways = "Use always";
     }
 }

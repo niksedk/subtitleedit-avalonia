@@ -1,5 +1,4 @@
 using Avalonia.Controls;
-using Avalonia.Controls.Converters;
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
@@ -30,6 +29,7 @@ using Nikse.SubtitleEdit.Features.SpellCheck;
 using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Dictionaries;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.Ocr;
 using SkiaSharp;
@@ -1184,58 +1184,84 @@ public partial class OcrViewModel : ObservableObject
             _runOnceChars.Clear();
             _skipOnceChars.Clear();
 
-            if (DoPromptForUnknownWords)
+            if (DoPromptForUnknownWords && unknownWords.Count > 0)
             {
-                foreach (var unknownWord in unknownWords)
+                var tcs = new TaskCompletionSource<bool>();
+                Dispatcher.UIThread.Post(async () =>
                 {
-                    var suggestions = _ocrFixEngine.GetSpellCheckSuggestions(unknownWord.Word.FixedWord);
-                    var tcs = new TaskCompletionSource<bool>();
-                    Dispatcher.UIThread.Post(async () =>
+                    foreach (var unknownWord in unknownWords)
                     {
+                        var suggestions = _ocrFixEngine.GetSpellCheckSuggestions(unknownWord.Word.FixedWord);
                         var result = await _windowService.ShowDialogAsync<PromptUnknownWordWindow, PromptUnknownWordViewModel>(Window!,
                             vm =>
                             {
                                 vm.Initialize(item.GetBitmap(), item.Text, unknownWord, suggestions);
                             });
 
-                        if (result.ChangeOncePressed)
+                        if (result.ChangeWholeTextPressed)
                         {
+                            item.Text = result.WholeText;
+                            break;
+                        }
+                        else if (result.ChangeOncePressed)
+                        {
+                            ChangeWord(item, unknownWord, result.Word);
                         }
                         else if (result.ChangeAllPressed)
                         {
+                            _ocrFixEngine.ChangeAll(unknownWord.Word.Word, result.Word);
                         }
                         else if (result.SkipOncePressed)
                         {
+                            // do nothing
                         }
                         else if (result.SkipAllPressed)
                         {
+                            _ocrFixEngine.SkipAll(unknownWord.Word.Word);
                         }
                         else if (result.AddToNamesListPressed)
                         {
+                            _ocrFixEngine.AddName(unknownWord.Word.Word);
                         }
                         else if (result.AddToUserDictionaryPressed)
                         {
+                            if (SelectedDictionary != null)
+                            {
+                                UserWordsHelper.AddToUserDictionary(unknownWord.Word.Word, SelectedDictionary.GetFiveLetterLanguageName() ?? "en_US");
+                            }
                         }
                         else
                         {
                             _cancellationTokenSource.Cancel();
                             IsOcrRunning = false;
-                            tcs.SetResult(true);
-                            return;
+                            break;
                         }
-
-                        tcs.SetResult(true);
-                    });
-                    await tcs.Task;
-                    if (!IsOcrRunning)
-                    {
-                        return;
                     }
+                    tcs.SetResult(true);
+                });
+                await tcs.Task;
+                if (!IsOcrRunning)
+                {
+                    return;
                 }
             }
         }
 
         IsOcrRunning = false;
+    }
+
+    private void ChangeWord(OcrSubtitleItem item, UnknownWordItem unknownWord, string word)
+    {
+        if (unknownWord.Word.FixedWord == word)
+        {
+            return;
+        }
+
+        var idx = unknownWord.Word.WordIndex;
+        if (item.Text.Substring(idx).StartsWith(unknownWord.Word.FixedWord))
+        {
+            item.Text = item.Text.Remove(idx, unknownWord.Word.FixedWord.Length).Insert(idx, word);
+        }
     }
 
     private List<UnknownWordItem> OcrFixLineAndSetText(int i, OcrSubtitleItem item)
