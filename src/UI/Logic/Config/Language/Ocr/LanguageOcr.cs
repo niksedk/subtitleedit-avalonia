@@ -50,6 +50,7 @@ public class LanguageOcr
     public string ChangeWordFromTo { get; set; }
     public string ClearBackground { get; set; }
     public string ClearForeground { get; set; }
+    public string NOcrDrawHelp { get; set; }
 
     public LanguageOcr()
     {
@@ -99,5 +100,6 @@ public class LanguageOcr
         ChangeWordFromTo = "Change word from/to";
         ClearBackground = "Clear background";
         ClearForeground = "Clear foreground";
+        NOcrDrawHelp = "Tips for drawing\r\n────────────────────\r\n• Hold Ctrl down to continue line\r\n• Ctrl+z=undo, Ctrl+y=redo";
     }
 }

@@ -224,14 +224,39 @@ public class NOcrInspectWindow : Window
             }
         };
 
+        var comboBoxLinesToAutoDraw = UiUtil.MakeComboBox(vm.NoOfLinesToAutoDrawList, vm, nameof(vm.SelectedNoOfLinesToAutoDraw))
+            .WithBindEnabled(nameof(vm.IsEditControlsEnabled));
+
+        var iconInfo = new Projektanker.Icons.Avalonia.Icon
+        {
+            Value = IconNames.Information,
+            Margin = new Thickness(5, 0, 0, 0),
+        };
+        iconInfo.PointerPressed += (sender, args) =>
+        {
+            _ = vm.ShowDrawingTips();
+        };
+        ToolTip.SetTip(iconInfo, Se.Language.Ocr.NOcrDrawHelp);
+
+        var panelLinesToDraw = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            Children =
+            {
+                comboBoxLinesToAutoDraw,
+                iconInfo,
+            }
+        };
+
         var panelDrawControls = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Vertical,
             Children =
             {
                 UiUtil.MakeLabel(Se.Language.Ocr.LinesToDraw).WithBold(),
-                UiUtil.MakeComboBox(vm.NoOfLinesToAutoDrawList, vm, nameof(vm.SelectedNoOfLinesToAutoDraw))
-                    .WithBindEnabled(nameof(vm.IsEditControlsEnabled)),
+                panelLinesToDraw,
                 UiUtil.MakeButton(Se.Language.Ocr.AutoDrawAgain, vm.DrawAgainCommand)
                     .WithMarginLeft(0)
                     .WithMinWidth(100)

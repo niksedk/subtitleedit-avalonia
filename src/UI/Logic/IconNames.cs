@@ -80,4 +80,5 @@ internal class IconNames
     public const string AnimationPlay = "mdi-animation-play";
     public const string FileMultiple = "mdi-file-multiple";
     public const string Filter = "mdi-filter";
+    public const string Information = "mdi-information";
 }

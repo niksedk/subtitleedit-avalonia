@@ -155,6 +155,16 @@ public partial class NOcrInspectViewModel : ObservableObject
         Close();
     }
 
+    public async Task ShowDrawingTips()
+    {
+        await MessageBox.Show(
+            Window!,
+            Se.Language.General.Help,
+            Se.Language.Ocr.NOcrDrawHelp,
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
+    }
+
     [RelayCommand]
     private void Update()
     {
