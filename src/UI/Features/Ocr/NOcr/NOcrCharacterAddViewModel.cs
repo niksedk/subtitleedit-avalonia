@@ -133,7 +133,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         _item = item;
         ShowSkip = showSkip;
         ShowUseOnce = showUseOnce;
-        NOcrDrawingCanvas.ZoomFactor = Se.Settings.Ocr.NOcrZoomX;
+        NOcrDrawingCanvas.ZoomFactor = Se.Settings.Ocr.NOcrZoomFactor;
         if (i >= 0 && i < letters.Count)
         {
             _splitItem = letters[i];
@@ -351,6 +351,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         if (NOcrDrawingCanvas.ZoomFactor < 20)
         {
             NOcrDrawingCanvas.ZoomFactor++;
+            Se.Settings.Ocr.NOcrZoomFactor = (int)NOcrDrawingCanvas.ZoomFactor;
         }
 
         ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
@@ -362,14 +363,14 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         if (NOcrDrawingCanvas.ZoomFactor > 1)
         {
             NOcrDrawingCanvas.ZoomFactor--;
+            Se.Settings.Ocr.NOcrZoomFactor = (int)NOcrDrawingCanvas.ZoomFactor;
         }
 
         ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
     }
 
     private void Close()
-    {
-        Se.Settings.Ocr.NOcrZoomX = (int)NOcrDrawingCanvas.ZoomFactor;
+    {        
         Dispatcher.UIThread.Post(() => { Window?.Close(); });
     }
 

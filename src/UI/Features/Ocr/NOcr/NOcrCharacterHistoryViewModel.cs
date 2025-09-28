@@ -59,7 +59,7 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
     public void Initialize(NOcrDb nOcrDb, NOcrAddHistoryManager nOcrAddHistoryManager)
     {
         _nOcrDb = nOcrDb;
-        NOcrDrawingCanvas.ZoomFactor = Se.Settings.Ocr.NOcrZoomX;
+        NOcrDrawingCanvas.ZoomFactor = Se.Settings.Ocr.NOcrZoomFactor;
         nOcrAddHistoryManager.ClearNotInOcrDb(nOcrDb);
         foreach (var historyItem in nOcrAddHistoryManager.Items.OrderByDescending(p => p.DateTime))
         {
@@ -88,6 +88,7 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
         if (NOcrDrawingCanvas.ZoomFactor < 20)
         {
             NOcrDrawingCanvas.ZoomFactor++;
+            Se.Settings.Ocr.NOcrZoomFactor = (int)NOcrDrawingCanvas.ZoomFactor;
         }
 
         ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
@@ -99,6 +100,7 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
         if (NOcrDrawingCanvas.ZoomFactor > 1)
         {
             NOcrDrawingCanvas.ZoomFactor--;
+            Se.Settings.Ocr.NOcrZoomFactor = (int)NOcrDrawingCanvas.ZoomFactor;
         }
 
         ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
@@ -159,7 +161,6 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
 
     private void Close()
     {
-        Se.Settings.Ocr.NOcrZoomX = (int)NOcrDrawingCanvas.ZoomFactor;
         Dispatcher.UIThread.Post(() => { Window?.Close(); });
     }
 

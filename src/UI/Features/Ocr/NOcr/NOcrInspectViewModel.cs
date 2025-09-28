@@ -104,7 +104,7 @@ public partial class NOcrInspectViewModel : ObservableObject
         _nOcrDb = nOcrDb ?? new NOcrDb(string.Empty);
         _sentenceBitmapOriginal = sKBitmap;
         NOcrDrawingCanvas.BackgroundImage = CurrentBitmap;
-        NOcrDrawingCanvas.ZoomFactor = Se.Settings.Ocr.NOcrZoomX;
+        NOcrDrawingCanvas.ZoomFactor = Se.Settings.Ocr.NOcrZoomFactor;
 
         if (letters.Count > 0)
         {
@@ -144,7 +144,6 @@ public partial class NOcrInspectViewModel : ObservableObject
     [RelayCommand]
     private void Ok()
     {
-        Se.Settings.Ocr.NOcrNoOfLinesToAutoDraw = SelectedNoOfLinesToAutoDraw;
         NOcrChar.Text = NewText;
         OkPressed = true;
         Close();
@@ -231,6 +230,7 @@ public partial class NOcrInspectViewModel : ObservableObject
         if (NOcrDrawingCanvas.ZoomFactor < 20)
         {
             NOcrDrawingCanvas.ZoomFactor++;
+            Se.Settings.Ocr.NOcrZoomFactor = (int)NOcrDrawingCanvas.ZoomFactor;
         }
 
         ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
@@ -242,6 +242,7 @@ public partial class NOcrInspectViewModel : ObservableObject
         if (NOcrDrawingCanvas.ZoomFactor > 1)
         {
             NOcrDrawingCanvas.ZoomFactor--;
+            Se.Settings.Ocr.NOcrZoomFactor = (int)NOcrDrawingCanvas.ZoomFactor;
         }
 
         ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
@@ -249,7 +250,6 @@ public partial class NOcrInspectViewModel : ObservableObject
 
     private void Close()
     {
-        Se.Settings.Ocr.NOcrZoomX = (int)NOcrDrawingCanvas.ZoomFactor;
         Dispatcher.UIThread.Post(() =>
         {
             Window?.Close();
@@ -268,7 +268,7 @@ public partial class NOcrInspectViewModel : ObservableObject
 
     internal void TextBoxNewOnKeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Escape)
+        if (e.Key == Key.Enter)
         {
             Ok();
         }
@@ -388,7 +388,7 @@ public partial class NOcrInspectViewModel : ObservableObject
             }
 
             NOcrDrawingCanvas.InvalidateVisual();
-            NOcrDrawingCanvas.ZoomFactor = Se.Settings.Ocr.NOcrZoomX;
+            NOcrDrawingCanvas.ZoomFactor = Se.Settings.Ocr.NOcrZoomFactor; 
             ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
         }
         else
@@ -406,8 +406,15 @@ public partial class NOcrInspectViewModel : ObservableObject
         if (e.Key == Key.Escape)
         {
             e.Handled = true;
-            Cancel();
-            e.Handled = true;
+
+            if (NOcrDrawingCanvas.IsDrawing)
+            {
+                NOcrDrawingCanvas.AbortDraw();
+            }
+            else
+            {
+                Cancel();
+            }
         }
         else if (e.Key == Key.Left)
         {

@@ -12,6 +12,12 @@ public class NOcrDrawingCanvasView : Control
     public List<NOcrLine> HitPaths { get; set; }
     public List<NOcrLine> MissPaths { get; set; }
     public bool IsControlDown { get; set; }
+    public bool IsDrawing { get; private set; }
+    public bool NewLinesAreHits { get; set; } = true;
+    public IBrush CanvasColor { get; set; } = new SolidColorBrush(Colors.DarkGray);
+    public IBrush HitColor { get; set; } = new SolidColorBrush(Colors.Green);
+    public IBrush MissColor { get; set; } = new SolidColorBrush(Colors.Red);
+    public Bitmap? BackgroundImage { get; set; }
 
     public float ZoomFactor
     {
@@ -29,19 +35,11 @@ public class NOcrDrawingCanvasView : Control
     }
 
     private NOcrLine _currentPath;
-    private bool _isDrawing = false;
     private int _mouseMoveStartX = -1;
     private int _mouseMoveStartY = -1;
-
     private float _zoomFactor = 1.0f;
     private float _strokeWidth = 3.0f;
-
-    public bool NewLinesAreHits { get; set; } = true;
-
-    public IBrush CanvasColor { get; set; } = new SolidColorBrush(Colors.DarkGray);
-    public IBrush HitColor { get; set; } = new SolidColorBrush(Colors.Green);
-    public IBrush MissColor { get; set; } = new SolidColorBrush(Colors.Red);
-    public Bitmap? BackgroundImage { get; set; }
+    private bool _abort;    
 
     public NOcrDrawingCanvasView()
     {
@@ -60,7 +58,8 @@ public class NOcrDrawingCanvasView : Control
     {
         base.OnPointerPressed(e);
 
-        _isDrawing = true;
+        _abort = false;
+        IsDrawing = true;
         var pos = e.GetPosition(this);
 
         _mouseMoveStartX = (int)Math.Round(pos.X / ZoomFactor, MidpointRounding.AwayFromZero);
@@ -78,7 +77,7 @@ public class NOcrDrawingCanvasView : Control
         var x = (int)Math.Round(pos.X / ZoomFactor, MidpointRounding.AwayFromZero);
         var y = (int)Math.Round(pos.Y / ZoomFactor, MidpointRounding.AwayFromZero);
 
-        if (_isDrawing)
+        if (IsDrawing)
         {
             _currentPath = new NOcrLine(new OcrPoint(_mouseMoveStartX, _mouseMoveStartY), new OcrPoint(x, y));
             InvalidateVisual();
@@ -91,7 +90,15 @@ public class NOcrDrawingCanvasView : Control
     {
         base.OnPointerReleased(e);
 
-        _isDrawing = false;
+        if (_abort)
+        {
+            _abort = false;
+            e.Pointer.Capture(null);
+            e.Handled = true;
+            return;
+        }
+
+        IsDrawing = false;
         if (!_currentPath.IsEmpty)
         {
             if (NewLinesAreHits)
@@ -110,7 +117,7 @@ public class NOcrDrawingCanvasView : Control
 
         if (IsControlDown)
         {
-            _isDrawing = true;
+            IsDrawing = true;
             var pos = e.GetPosition(this);
 
             _mouseMoveStartX = (int)Math.Round(pos.X / ZoomFactor, MidpointRounding.AwayFromZero);
@@ -153,7 +160,7 @@ public class NOcrDrawingCanvasView : Control
         }
 
         // Draw the current path if drawing
-        if (_isDrawing && !_currentPath.IsEmpty)
+        if (IsDrawing && !_currentPath.IsEmpty)
         {
             var currentPen = NewLinesAreHits ? hitPen : missPen;
             DrawLine(context, _currentPath, currentPen);
@@ -189,6 +196,16 @@ public class NOcrDrawingCanvasView : Control
             Width = bitmap.PixelSize.Width * ZoomFactor;
             Height = bitmap.PixelSize.Height * ZoomFactor;
         }
+        InvalidateVisual();
+    }
+
+    internal void AbortDraw()
+    {
+        _abort = true;
+        _currentPath = new NOcrLine();
+        _mouseMoveStartX = -1;
+        _mouseMoveStartY = -1;
+        IsDrawing = false;
         InvalidateVisual();
     }
 }

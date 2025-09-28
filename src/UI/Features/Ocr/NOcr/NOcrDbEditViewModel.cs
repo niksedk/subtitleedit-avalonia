@@ -55,7 +55,7 @@ public partial class NOcrDbEditViewModel : ObservableObject
         ResolutionAndTopMargin = string.Empty;
         ZoomFactorInfo = string.Empty;
         ExpandInfo = string.Empty;
-        NOcrDrawingCanvas.ZoomFactor = Se.Settings.Ocr.NOcrZoomX;
+        NOcrDrawingCanvas.ZoomFactor = Se.Settings.Ocr.NOcrZoomFactor;
         Title = string.Empty;
     }
 
@@ -88,6 +88,7 @@ public partial class NOcrDbEditViewModel : ObservableObject
         if (NOcrDrawingCanvas.ZoomFactor < 20)
         {
             NOcrDrawingCanvas.ZoomFactor++;
+            Se.Settings.Ocr.NOcrZoomFactor = (int)NOcrDrawingCanvas.ZoomFactor;
         }
 
         ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
@@ -99,6 +100,7 @@ public partial class NOcrDbEditViewModel : ObservableObject
         if (NOcrDrawingCanvas.ZoomFactor > 1)
         {
             NOcrDrawingCanvas.ZoomFactor--;
+            Se.Settings.Ocr.NOcrZoomFactor = (int)NOcrDrawingCanvas.ZoomFactor;
         }
 
         ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
@@ -158,8 +160,6 @@ public partial class NOcrDbEditViewModel : ObservableObject
 
     private void Close()
     {
-        Se.Settings.Ocr.NOcrZoomX = (int)NOcrDrawingCanvas.ZoomFactor;
-
         Dispatcher.UIThread.Post(() =>
         {
             Window?.Close();
