@@ -11,6 +11,7 @@ using Nikse.SubtitleEdit.Logic;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Ocr;
 
@@ -21,10 +22,11 @@ public partial class PromptUnknownWordViewModel : ObservableObject
     [ObservableProperty] private string? _text;
     [ObservableProperty] private string _wholeText;
     [ObservableProperty] private string _word;
-    [ObservableProperty] private bool _doEditWord;
     [ObservableProperty] private bool _doEditWholeText;
 
     public StackPanel PanelWholeText { get; set; }
+    public TextBox TextBoxWholeText { get; set; }
+    public TextBox TextBoxWord { get; set; }
     public Bitmap? Bitmap { get; set; }
     public Window? Window { get; set; }
 
@@ -40,11 +42,12 @@ public partial class PromptUnknownWordViewModel : ObservableObject
     {
         Suggestions = new ObservableCollection<string>();
         PanelWholeText = new StackPanel();
+        TextBoxWholeText = new TextBox();
+        TextBoxWord = new TextBox();
         SelectedSuggestion = string.Empty;
         Text = string.Empty;
         WholeText = string.Empty;
         Word = string.Empty;
-        DoEditWord = true;
     }
 
     public void Initialize(Bitmap bitmap, string wholeText, UnknownWordItem word, List<string> suggestions)
@@ -209,5 +212,21 @@ public partial class PromptUnknownWordViewModel : ObservableObject
     internal void ListBoxSuggestionsDoubleTapped(object? sender, TappedEventArgs e)
     {
         SuggestionUse();
+    }
+
+    internal void OnEditWholeTextClicked()
+    {
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            Task.Delay(50).Wait();
+            if (DoEditWholeText)
+            {
+                TextBoxWholeText.Focus();
+            }
+            else
+            {
+                TextBoxWord.Focus();
+            }
+        });
     }
 }

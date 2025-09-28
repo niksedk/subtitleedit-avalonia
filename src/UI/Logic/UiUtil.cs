@@ -940,6 +940,18 @@ public static class UiUtil
         return control;
     }
 
+    public static TextBox WithBindEnabled(this TextBox control, string isEnabledPropertyPath, IValueConverter converter)
+    {
+        control.Bind(TextBox.IsEnabledProperty, new Binding
+        {
+            Converter = converter,
+            Path = isEnabledPropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
     public static Button WithBindEnabled(this Button control, string isEnabledPropertyPath, IValueConverter converter)
     {
         control.Bind(Button.IsEnabledProperty, new Binding

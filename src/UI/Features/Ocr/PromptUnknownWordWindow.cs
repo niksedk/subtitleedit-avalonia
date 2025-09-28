@@ -7,6 +7,7 @@ using Avalonia.Media;
 using Nikse.SubtitleEdit.Features.SpellCheck;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
 
 namespace Nikse.SubtitleEdit.Features.Ocr;
 
@@ -50,7 +51,7 @@ public class PromptUnknownWordWindow : Window
 
         var image = new Image
         {
-            Stretch = Avalonia.Media.Stretch.Uniform,
+            Stretch = Stretch.Uniform,
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center,
             MaxHeight = 200,
@@ -66,7 +67,7 @@ public class PromptUnknownWordWindow : Window
 
         Content = grid;
 
-        Activated += delegate { buttonCancel.Focus(); }; // hack to make OnKeyDown work
+        Activated += delegate { vm.TextBoxWord.Focus(); }; // hack to make OnKeyDown work
         KeyDown += (_, e) => vm.OnKeyDown(e);
         Loaded += vm.Onloaded;
         Closing += vm.OnClosing;
@@ -90,15 +91,17 @@ public class PromptUnknownWordWindow : Window
             Width = double.NaN,
         };
 
-        var textBoxWholeText = UiUtil.MakeTextBox(double.NaN, vm, nameof(vm.WholeText))
+        vm.TextBoxWholeText.Bind(TextBox.TextProperty, new Binding(nameof(vm.WholeText)) { Mode = BindingMode.TwoWay });
+        vm.TextBoxWholeText
             .WithHorizontalAlignmentStretch()
-            .WithHeight(90);
+            .WithHeight(88)
+            .WithBindIsVisible(nameof(vm.DoEditWholeText));
 
         vm.PanelWholeText.Width = double.NaN;
         vm.PanelWholeText.HorizontalAlignment = HorizontalAlignment.Left;
         vm.PanelWholeText.VerticalAlignment = VerticalAlignment.Top;
         vm.PanelWholeText.Orientation = Orientation.Horizontal;
-        vm.PanelWholeText.Margin = new Thickness(10);
+        vm.PanelWholeText.Margin = new Thickness(10, 6, 10, 6);
         var scrollViewerWholeText = new ScrollViewer
         {
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
@@ -108,17 +111,29 @@ public class PromptUnknownWordWindow : Window
         };
         var scrollViewerWholeTextBorder = new Border
         {
-            BorderThickness = new Avalonia.Thickness(1),
+            BorderThickness = new Thickness(1),
             BorderBrush = UiUtil.GetBorderBrush(),
             Child = scrollViewerWholeText,
         };
+        scrollViewerWholeText.Bind(Border.IsVisibleProperty, new Binding(nameof(vm.DoEditWholeText))
+        {
+            Converter = new InverseBooleanConverter(),
+        });
 
-        var buttonEditWholeText = UiUtil.MakeButton(Se.Language.Ocr.EditWholeText);
-        var buttonEditWordOnly = UiUtil.MakeButton(Se.Language.Ocr.EditWordOnly);
-        var panelButtons = UiUtil.MakeVerticalPanel(buttonEditWholeText, buttonEditWordOnly);
+        var buttonEditWholeText = new ToggleButton
+        {
+            Content = Se.Language.Ocr.EditWholeText,
+            DataContext = vm,
+            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(vm.DoEditWholeText)) { Mode = BindingMode.TwoWay },
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(3, 0, 0, 0),
+        };
+        buttonEditWholeText.Click += (_, _) => vm.OnEditWholeTextClicked();
+
+        var panelButtons = UiUtil.MakeVerticalPanel(buttonEditWholeText);
 
         grid.Add(scrollViewerWholeTextBorder, 0);
-        //        grid.Add(textBoxWholeText, 0);
+        grid.Add(vm.TextBoxWholeText, 0);
         grid.Add(panelButtons, 0, 1);
 
         return grid;
@@ -149,16 +164,32 @@ public class PromptUnknownWordWindow : Window
             ColumnSpacing = 5,
         };
 
-        var textBoxWord = UiUtil.MakeTextBox(double.NaN, vm, nameof(vm.Word)).WithHorizontalAlignmentStretch();
-        var buttonChangeAll = UiUtil.MakeButton(Se.Language.General.ChangeAll, vm.ChangeAllCommand).WithHorizontalAlignmentStretch();
-        var buttonChangeOnce = UiUtil.MakeButton(Se.Language.General.ChangeOnce, vm.ChangeOnceCommand).WithHorizontalAlignmentStretch();
-        var buttonSkipOne = UiUtil.MakeButton(Se.Language.General.SkipOnce, vm.SkipOnceCommand).WithHorizontalAlignmentStretch();
-        var buttonGoogleIt = UiUtil.MakeButton(Se.Language.General.GoogleIt, vm.GoogleItCommand).WithHorizontalAlignmentStretch();
-        var buttonSkipAll = UiUtil.MakeButton(Se.Language.General.SkipAll, vm.SkipAllCommand).WithHorizontalAlignmentStretch();
-        var buttonAddToNameList = UiUtil.MakeButton(Se.Language.General.AddToNamesListCaseSensitive, vm.AddToNamesListCommand).WithHorizontalAlignmentStretch();
-        var buttonAddToUserDictionary = UiUtil.MakeButton(Se.Language.General.AddToUserDictionary, vm.AddToUserDictionaryCommand).WithHorizontalAlignmentStretch();
+        vm.TextBoxWord
+            .WithHorizontalAlignmentStretch()
+            .WithBindEnabled(nameof(vm.DoEditWholeText), new InverseBooleanConverter())
+            .Bind(TextBox.TextProperty, new Binding(nameof(vm.Word)) { Mode = BindingMode.TwoWay });
+        var buttonChangeAll = UiUtil.MakeButton(Se.Language.General.ChangeAll, vm.ChangeAllCommand)
+            .WithHorizontalAlignmentStretch()
+            .WithBindEnabled(nameof(vm.DoEditWholeText), new InverseBooleanConverter());
+        var buttonChangeOnce = UiUtil.MakeButton(Se.Language.General.ChangeOnce, vm.ChangeOnceCommand)
+            .WithHorizontalAlignmentStretch();
+        var buttonSkipOne = UiUtil.MakeButton(Se.Language.General.SkipOnce, vm.SkipOnceCommand)
+            .WithHorizontalAlignmentStretch()
+            .WithBindEnabled(nameof(vm.DoEditWholeText), new InverseBooleanConverter());
+        var buttonGoogleIt = UiUtil.MakeButton(Se.Language.General.GoogleIt, vm.GoogleItCommand)
+            .WithHorizontalAlignmentStretch()
+            .WithBindEnabled(nameof(vm.DoEditWholeText), new InverseBooleanConverter());
+        var buttonSkipAll = UiUtil.MakeButton(Se.Language.General.SkipAll, vm.SkipAllCommand)
+            .WithHorizontalAlignmentStretch()
+            .WithBindEnabled(nameof(vm.DoEditWholeText), new InverseBooleanConverter());
+        var buttonAddToNameList = UiUtil.MakeButton(Se.Language.General.AddToNamesListCaseSensitive, vm.AddToNamesListCommand)
+            .WithHorizontalAlignmentStretch()
+            .WithBindEnabled(nameof(vm.DoEditWholeText), new InverseBooleanConverter());
+        var buttonAddToUserDictionary = UiUtil.MakeButton(Se.Language.General.AddToUserDictionary, vm.AddToUserDictionaryCommand)
+            .WithHorizontalAlignmentStretch()
+            .WithBindEnabled(nameof(vm.DoEditWholeText), new InverseBooleanConverter());
 
-        grid.Add(textBoxWord, 0, 0, 1, 2);
+        grid.Add(vm.TextBoxWord, 0, 0, 1, 2);
         grid.Add(buttonChangeAll, 1, 0, 1, 2);
         grid.Add(buttonChangeOnce, 2, 0);
         grid.Add(buttonSkipOne, 2, 1);
