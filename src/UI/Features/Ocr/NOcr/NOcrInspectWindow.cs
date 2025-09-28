@@ -183,7 +183,7 @@ public class NOcrInspectWindow : Window
         var toggleButtonBackground = new ToggleButton
         {
             Content = Se.Language.General.Background,
-            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(vm.IsNewLinesBackgroundActive)) 
+            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(vm.IsNewLinesBackgroundActive))
             {
                 Source = vm,
             },

@@ -10,7 +10,6 @@ using Avalonia.Platform;
 using Avalonia.Styling;
 using Avalonia.Themes.Fluent;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Features.Tools.ApplyDurationLimits;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 using SkiaSharp;
@@ -1652,7 +1651,7 @@ public static class UiUtil
         control.Bind(Label.ContentProperty, new Binding
         {
             Path = contentPropertyPath,
-            Mode = BindingMode.TwoWay,           
+            Mode = BindingMode.TwoWay,
             Converter = valueConverter,
         });
 
