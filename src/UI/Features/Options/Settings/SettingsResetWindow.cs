@@ -1,0 +1,103 @@
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Data;
+using Avalonia.Layout;
+using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
+
+namespace Nikse.SubtitleEdit.Features.Options.Settings;
+
+public class SettingsResetWindow : Window
+{
+    public SettingsResetWindow(SettingsResetViewModel vm)
+    {
+        UiUtil.InitializeWindow(this, GetType().Name);
+        Title = Se.Language.Options.Settings.ResetSettingsTitle;
+        CanResize = false;
+        SizeToContent = SizeToContent.WidthAndHeight;
+        vm.Window = this;
+        DataContext = vm;
+
+        var checkBoxResetAll = new CheckBox
+        {
+            Content = Se.Language.Options.Settings.ResetAllSettings,            
+            Margin = new Thickness(0, 0, 55, 0),
+            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ResetAll)) { Mode = BindingMode.TwoWay },              
+        };
+
+        var checkBoxResetShortcuts = new CheckBox
+        {
+            Content = Se.Language.Options.Settings.ResetShortcuts,
+            Margin = new Thickness(20, 0, 55, 0),
+            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ResetShortcuts)) { Mode = BindingMode.TwoWay },
+        }.WithBindEnabled(nameof(vm.ResetAll), new InverseBooleanConverter());
+
+        var checkBoxResetRecentFiles = new CheckBox
+        {
+            Content = Se.Language.Options.Settings.ResetRecentFiles,
+            Margin = new Thickness(20, 0, 55, 0),
+            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ResetRecentFiles)) { Mode = BindingMode.TwoWay },
+        }.WithBindEnabled(nameof(vm.ResetAll), new InverseBooleanConverter());
+
+        //var radioResetMultipleReplaceRules = new CheckBox
+        //{
+        //    Content = Se.Language.Options.Settings.ResetMultipleReplaceRules,
+        //    Margin = new Thickness(20, 0, 55, 0),
+        //    [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ResetMultipleReplaceRules)) { Mode = BindingMode.TwoWay },
+        //}.WithBindEnabled(nameof(vm.ResetAll), new InverseBooleanConverter());
+
+        var checkBoxResetAutoTranslate = new CheckBox
+        {
+            Content = Se.Language.Options.Settings.ResetAutoTranslate,
+            Margin = new Thickness(20, 0, 55, 0),
+            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ResetAutoTranslate)) { Mode = BindingMode.TwoWay },
+        }.WithBindEnabled(nameof(vm.ResetAll), new InverseBooleanConverter());
+
+        var checkBoxResetAppearance = new CheckBox
+        {
+            Content = Se.Language.Options.Settings.ResetAppearance,
+            Margin = new Thickness(20, 0, 55, 0),
+            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ResetAppearance)) { Mode = BindingMode.TwoWay },
+        }.WithBindEnabled(nameof(vm.ResetAll), new InverseBooleanConverter());
+
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
+        var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
+
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Margin = UiUtil.MakeWindowMargin(),
+            ColumnSpacing = 10,
+            RowSpacing = 10,
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        grid.Add(checkBoxResetAll, 0);
+        grid.Add(checkBoxResetShortcuts, 1);
+        grid.Add(checkBoxResetRecentFiles, 2);
+        //grid.Add(radioResetMultipleReplaceRules, 3);
+        grid.Add(checkBoxResetAutoTranslate, 3);
+        grid.Add(checkBoxResetAppearance, 4);
+        grid.Add(panelButtons, 5);
+
+        Content = grid;
+
+        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += vm.KeyDown;
+    }
+}

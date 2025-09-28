@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -9,8 +8,6 @@ namespace Nikse.SubtitleEdit.Features.Tools.ApplyDurationLimits;
 
 public class ApplyDurationLimitsWindow : Window
 {
-    private readonly ApplyDurationLimitsViewModel _vm;
-
     public ApplyDurationLimitsWindow(ApplyDurationLimitsViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -20,8 +17,6 @@ public class ApplyDurationLimitsWindow : Window
         Height = 800;
         MinWidth = 600;
         MinHeight = 400;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -63,12 +58,6 @@ public class ApplyDurationLimitsWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
-    }
-
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        KeyDown += vm.KeyDown;
     }
 }

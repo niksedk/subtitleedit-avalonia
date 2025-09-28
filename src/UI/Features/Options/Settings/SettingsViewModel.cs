@@ -507,19 +507,44 @@ public partial class SettingsViewModel : ObservableObject
             return;
         }
 
-        var answer = await MessageBox.Show(
-                  Window,
-                  Se.Language.Options.Settings.ResetSettings,
-                  Se.Language.Options.Settings.ResetSettingsDetail,
-                  MessageBoxButtons.YesNoCancel,
-                  MessageBoxIcon.Question);
-
-        if (answer != MessageBoxResult.Yes)
+        var result = await _windowService.ShowDialogAsync<SettingsResetWindow, SettingsResetViewModel>(Window!);
+        if (!result.OkPressed)
         {
             return;
         }
 
-        Se.Settings = new Se();
+        if (result.ResetAll)
+        {
+            Se.Settings = new Se();
+        }
+        else
+        { 
+            if (result.ResetRecentFiles)
+            {
+                Se.Settings.File.RecentFiles = new List<RecentFile>();
+            }
+            if (result.ResetShortcuts)
+            {
+                Se.Settings.Shortcuts = new List<SeShortCut>();
+            }
+            if (result.ResetMultipleReplaceRules)
+            {
+                Se.Settings.Edit.MultipleReplace = new SeEditMultipleReplace();
+            }
+            if (result.ResetRules)
+            {
+                //Se.Settings.Tools.ReplaceRules = new List<Logic.Config.ReplaceRule>();
+            }
+            if (result.ResetAppearance)
+            {
+                Se.Settings.Appearance = new SeAppearance();
+            }
+            if (result.ResetAutoTranslate)
+            {
+                Se.Settings.AutoTranslate = new SeAutoTranslate();
+            }
+        }
+
         Se.SaveSettings();
         OkPressed = true;
         Window?.Close();

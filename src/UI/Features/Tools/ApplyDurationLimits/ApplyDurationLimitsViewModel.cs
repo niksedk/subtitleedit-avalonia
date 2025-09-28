@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Logic.Config;
+using System;
 using System.Collections.ObjectModel;
 
 namespace Nikse.SubtitleEdit.Features.Tools.ApplyDurationLimits;
@@ -46,7 +47,7 @@ public partial class ApplyDurationLimitsViewModel : ObservableObject
         Window?.Close();
     }
 
-    internal void OnKeyDown(KeyEventArgs e)
+    internal void KeyDown(object? sender, KeyEventArgs e)
     {
         if (e.Key == Key.Escape)
         {

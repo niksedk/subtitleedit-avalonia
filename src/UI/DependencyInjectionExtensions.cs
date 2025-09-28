@@ -216,6 +216,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<RestoreAutoBackupViewModel>();
         collection.AddTransient<ReviewSpeechViewModel>();
         collection.AddTransient<SelectVideoPositionViewModel>();
+        collection.AddTransient<SettingsResetViewModel>();
         collection.AddTransient<SettingsViewModel>();
         collection.AddTransient<ShotChangeListViewModel>();
         collection.AddTransient<ShotChangesViewModel>();

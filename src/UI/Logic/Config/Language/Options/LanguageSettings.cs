@@ -144,6 +144,14 @@ public class LanguageSettings
     public string WaveformCursorColor { get; set; }
     public string WaveformFocusOnMouseOver { get; set; }
 
+    public string ResetAllSettings { get; set; }
+    public string ResetShortcuts { get; set; }
+    public string ResetRecentFiles { get; set; }
+    public string ResetMultipleReplaceRules { get; set; }
+    public string ResetAppearance { get; set; }
+    public string ResetAutoTranslate { get; set; }
+    public string ResetSettingsTitle { get; set; }
+
     public LanguageSettings()
     {
         DialogStyle = "Dialog style";
@@ -271,7 +279,7 @@ public class LanguageSettings
         Password = "Password";
 
         ShowStopButton = "Show stop button";
-        ShowFullscreenButton = "Show fullscreen button";
+        ShowFullscreenButton = "Show full-screen button";
         AutoOpenVideoFile = "Auto-open video file when opening subtitle";
         DownloadMpv = "Download mpv";
         GoToLineNumberSetsVideoPosition = "Go-to-line-number also sets video position";
@@ -283,6 +291,14 @@ public class LanguageSettings
         ShowSettingsFile = "Show settings file";
         ShowAssaLayer = "Show ASSA layer box";
         WaveformCursorColor = "Waveform cursor/head color";
+
+        ResetAllSettings = "Reset all settings";
+        ResetShortcuts = "Reset shortcuts";
+        ResetRecentFiles = "Reset recent files";
+        ResetMultipleReplaceRules = "Reset multiple replace rules";
+        ResetAppearance = "Reset appearance";
+        ResetAutoTranslate = "Reset auto-translate";
+        ResetSettingsTitle = "Reset settings";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)
