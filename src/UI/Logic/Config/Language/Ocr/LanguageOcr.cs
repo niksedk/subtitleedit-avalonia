@@ -53,6 +53,7 @@ public class LanguageOcr
     public string NOcrDrawHelp { get; set; }
     public string EditWholeText { get; set; }
     public string EditWordOnly { get; set; }
+    public string ImagePreProcessing { get; set; }
 
     public LanguageOcr()
     {
@@ -105,5 +106,6 @@ public class LanguageOcr
         NOcrDrawHelp = "Tips for drawing\r\n────────────────────\r\n• Hold Ctrl down to continue line\r\n• Ctrl+z=undo, Ctrl+y=redo";
         EditWholeText = "Edit whole text";
         EditWordOnly = "Edit word only";
+        ImagePreProcessing = "Image pre-processing";
     }
 }

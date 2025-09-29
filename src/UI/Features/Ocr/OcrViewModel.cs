@@ -664,6 +664,15 @@ public partial class OcrViewModel : ObservableObject
         }
     }
 
+
+    [RelayCommand]
+    private async Task ShowPreProcessing()
+    {
+        var result = await _windowService
+            .ShowDialogAsync<PreProcessingWindow, PreProcessingViewModel>(Window!);
+
+    }
+
     [RelayCommand]
     private void ToggleBold()
     {

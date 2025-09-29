@@ -70,8 +70,26 @@ public class OcrWindow : Window
         };
     }
 
-    private static StackPanel MakeTopControlsView(OcrViewModel vm)
+    private static Grid MakeTopControlsView(OcrViewModel vm)
     {
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        var buttonPreProcessing = UiUtil.MakeButton(vm.ShowPreProcessingCommand, IconNames.Image)
+            .WithRightAlignment();
+        ToolTip.SetTip(buttonPreProcessing, Se.Language.Ocr.ImagePreProcessing); 
+
         var comboBoxEngines = UiUtil.MakeComboBox(vm.OcrEngines, vm, nameof(vm.SelectedOcrEngine))
             .WithMarginRight(10)
             .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter());
@@ -167,7 +185,10 @@ public class OcrWindow : Window
             }
         };
 
-        return panel;
+        grid.Add(panel, 0);
+        grid.Add(buttonPreProcessing, 0);
+
+        return grid;
     }
 
     private static Border MakeSubtitleView(OcrViewModel vm)

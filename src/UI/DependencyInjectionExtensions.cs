@@ -208,6 +208,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<PickMatroskaTrackViewModel>();
         collection.AddTransient<PickOllamaModelViewModel>();
         collection.AddTransient<PickMp4TrackViewModel>();
+        collection.AddTransient<PreProcessingViewModel>();
         collection.AddTransient<PromptTextBoxViewModel>();
         collection.AddTransient<PromptUnknownWordViewModel>();
         collection.AddTransient<ReEncodeVideoViewModel>();

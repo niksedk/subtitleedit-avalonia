@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Mvvm.Input;
-
-namespace Nikse.SubtitleEdit.Logic;
+﻿namespace Nikse.SubtitleEdit.Logic;
 
 internal class IconNames
 {
@@ -81,4 +79,6 @@ internal class IconNames
     public const string FileMultiple = "mdi-file-multiple";
     public const string Filter = "mdi-filter";
     public const string Information = "mdi-information";
+    public const string Image = "mdi-image";
+    public const string ImageCheck = "mdi-image-check";
 }
