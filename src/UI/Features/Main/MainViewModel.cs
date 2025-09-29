@@ -650,16 +650,11 @@ public partial class MainViewModel :
         AddToRecentFiles(false);
     }
 
-    private void ResetSubtitle(SubtitleFormat? format = null, bool keepSubtitleParagraphs = false)
+    private void ResetSubtitle(SubtitleFormat? format = null)
     {
         _videoOpenTokenSource?.Cancel();
         ShowColumnOriginalText = false;
-
-        if (!keepSubtitleParagraphs)
-        {
-            _subtitle.Paragraphs.Clear();
-        }
-
+        _subtitle.Paragraphs.Clear();
         Subtitles.Clear();
 
         if (format != null)
