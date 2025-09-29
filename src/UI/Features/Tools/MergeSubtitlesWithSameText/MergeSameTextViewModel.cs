@@ -42,7 +42,7 @@ public partial class MergeSameTextViewModel : ObservableObject
         LoadSettings();
 
         _subtitles = new List<SubtitleLineViewModel>();
-        _timerUpdatePreview = new System.Timers.Timer(500);
+        _timerUpdatePreview = new System.Timers.Timer(250);
         _timerUpdatePreview.Elapsed += (s, e) =>
         {
             _timerUpdatePreview.Stop();
@@ -112,6 +112,7 @@ public partial class MergeSameTextViewModel : ObservableObject
                 if ((MergeLinesSameTextUtils.QualifiesForMerge(p, next, maxMsBetween) || fixIncrementing && MergeLinesSameTextUtils.QualifiesForMergeIncrement(p, next, maxMsBetween, out incrementText)) && IsFixAllowed(p))
                 {
                     p.Text = next.Text;
+                    p.EndTime.TotalMilliseconds = next.EndTime.TotalMilliseconds;
                     if (!string.IsNullOrEmpty(incrementText))
                     {
                         p.Text = incrementText;
@@ -138,6 +139,10 @@ public partial class MergeSameTextViewModel : ObservableObject
                     {
                         mergedIndexes.Add(i - 1);
                     }
+                }
+                else
+                {
+                    break;
                 }
             }
 
