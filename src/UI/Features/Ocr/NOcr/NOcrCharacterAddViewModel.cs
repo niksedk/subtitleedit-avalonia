@@ -567,4 +567,21 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     {
         UiUtil.SaveWindowPosition(Window);
     }
+
+    internal void PointerWheelChanged(object? sender, PointerWheelEventArgs e)
+    {
+        if (_isControlDown || _isWinDown)
+        {
+            if (e.Delta.Y > 0)
+            {
+                ZoomIn();
+                e.Handled = true;
+            }
+            else if (e.Delta.Y < 0)
+            {
+                ZoomOut();
+                e.Handled = true;
+            }
+        }
+    }
 }

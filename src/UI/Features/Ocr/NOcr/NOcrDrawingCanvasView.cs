@@ -3,9 +3,11 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Logic.Ocr;
 using System;
 using System.Collections.Generic;
+using static Nikse.SubtitleEdit.Controls.AudioVisualizerControl.AudioVisualizer;
 
 public class NOcrDrawingCanvasView : Control
 {
@@ -24,7 +26,7 @@ public class NOcrDrawingCanvasView : Control
     private int _mouseMoveStartY = -1;
     private float _zoomFactor = 1.0f;
     private float _strokeWidth = 3.0f;
-    private bool _abort;    
+    private bool _abort;
 
     public NOcrDrawingCanvasView()
     {

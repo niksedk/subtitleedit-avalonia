@@ -12,6 +12,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Ocr;
 using SkiaSharp;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -246,5 +247,22 @@ public partial class NOcrCharacterHistoryViewModel : ObservableObject
         ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
 
         ShowOcrPoints();
+    }
+
+    internal void PointerWheelChanged(object? sender, PointerWheelEventArgs e)
+    {
+        if (_isControlDown)
+        {
+            if (e.Delta.Y > 0)
+            {
+                ZoomIn();
+                e.Handled = true;
+            }
+            else if (e.Delta.Y < 0)
+            {
+                ZoomOut();
+                e.Handled = true;
+            }
+        }
     }
 }

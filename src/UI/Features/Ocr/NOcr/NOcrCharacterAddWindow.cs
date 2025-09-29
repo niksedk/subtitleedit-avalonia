@@ -78,7 +78,8 @@ public class NOcrCharacterAddWindow : Window
             vm.TextBoxNew.Focus(); // hack to make OnKeyDown work
         };
         Loaded += vm.Onloaded;
-        Closing += vm.OnClosing;    
+        Closing += vm.OnClosing;
+        PointerWheelChanged += vm.PointerWheelChanged;
     }
 
     private static Grid MakeControlsView(NOcrCharacterAddViewModel vm)

@@ -65,6 +65,8 @@ public class NOcrInspectWindow : Window
         {
             vm.TextBoxNew.Focus(); // hack to make OnKeyDown work
         };
+
+        PointerWheelChanged += vm.PointerWheelChanged;
     }
 
     private static Border MakeLinesView(NOcrInspectViewModel vm)
@@ -278,7 +280,7 @@ public class NOcrInspectWindow : Window
             Child = vm.NOcrDrawingCanvas,
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
-        };
+        };        
 
         var panelZoom = new StackPanel
         {

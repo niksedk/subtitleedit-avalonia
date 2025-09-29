@@ -20,13 +20,13 @@ public class NOcrDbEditWindow : Window
         _vm = vm;
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
-        CanResize = false;
+        CanResize = true;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         DataContext = vm;
-        Width = 945;
+        Width = 955;
         Height = 800;
-        MinWidth = 600;
-        MinHeight = 500;
+        MinWidth = 950;
+        MinHeight = 600;
 
         var grid = new Grid
         {
@@ -64,6 +64,7 @@ public class NOcrDbEditWindow : Window
         {
             buttonOk.Focus(); // hack to make OnKeyDown work
         };
+        PointerWheelChanged += vm.PointerWheelChanged;
     }
 
     private static Border MakeCharacterControlsView(NOcrDbEditViewModel vm)

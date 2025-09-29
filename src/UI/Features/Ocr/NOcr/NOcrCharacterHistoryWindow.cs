@@ -64,6 +64,7 @@ public class NOcrCharacterHistoryWindow : Window
         {
             vm.TextBoxNew.Focus(); // hack to make OnKeyDown work
         };
+        PointerWheelChanged += vm.PointerWheelChanged;
     }
 
     private static Border MakeListView(NOcrCharacterHistoryViewModel vm)
