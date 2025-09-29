@@ -14,6 +14,7 @@ public class SeVideo
     public bool AutoOpen { get; set; }
     public string CutType { get; set; }
     public string ShowChangesFFmpegArguments { get; set; }
+    public bool VideoPlayerDisplayTimeLeft { get; set; }
 
     public SeVideo()
     {

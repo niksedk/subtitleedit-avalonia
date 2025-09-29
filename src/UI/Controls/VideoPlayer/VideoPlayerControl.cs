@@ -131,6 +131,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         public bool IsPlaying => _videoPlayerInstance.IsPlaying;
 
         public IVideoPlayerInstance VideoPlayerInstance => _videoPlayerInstance;
+        public bool VideoPlayerDisplayTimeLeft { get; set; }
 
         double _positionIgnore = -1;
         double _volumeIgnore = -1;
@@ -362,6 +363,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             gridProgress.Children.Add(progressText);
             Grid.SetColumn(progressText, 1);
             ProgressText = string.Empty;
+            progressText.PointerPressed += (_, _) => ToggleDisplayProgressTextModeRequested?.Invoke();
 
             _textBlockPlayerName = new TextBlock
             {
@@ -389,6 +391,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         public event Action? FullscreenCollapseRequested;
         public event Action<double>? PositionChanged;
         public event Action<double>? VolumeChanged;
+        public event Action? ToggleDisplayProgressTextModeRequested;
 
         public void SetPlayPauseIcon(bool isPlaying)
         {
@@ -441,8 +444,27 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             {
                 var pos = _videoPlayerInstance.Position;
                 SetPositionDisplayOnly(pos);
-                ProgressText =
-                    $"{TimeCode.FromSeconds(pos).ToShortDisplayString()} / {TimeCode.FromSeconds(Duration).ToShortDisplayString()}";
+
+                if (VideoPlayerDisplayTimeLeft)
+                {
+                    var left = Duration - pos;
+                    if (left > 0.001)
+                    {
+                        ProgressText =
+                            $"-{TimeCode.FromSeconds(left).ToShortDisplayString()}";
+                    }
+                    else
+                    {
+                        ProgressText =
+                            $"{TimeCode.FromSeconds(0).ToShortDisplayString()}";
+                    }
+                }
+                else
+                {
+                    ProgressText =
+                        $"{TimeCode.FromSeconds(pos).ToShortDisplayString()} / {TimeCode.FromSeconds(Duration).ToShortDisplayString()}";
+                }
+
 
                 //TODO: move to a slower timer or events
                 Duration = _videoPlayerInstance.Duration;

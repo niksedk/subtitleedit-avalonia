@@ -43,7 +43,6 @@ public class InitWaveform
             //vm.AudioVisualizer.OnStatus += vm.AudioVisualizerOnStatus;
             vm.AudioVisualizer.OnParagraphDoubleTapped += vm.OnWaveformDoubleTapped;
 
-
             // Create a Flyout for the DataGrid
             var flyout = new MenuFlyout();
 

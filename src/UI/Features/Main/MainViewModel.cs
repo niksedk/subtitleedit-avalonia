@@ -3222,7 +3222,18 @@ public partial class MainViewModel :
         fullscreenWindow.Show(Window!);
         _shortcutManager.ClearKeys();
     }
-
+    
+    [RelayCommand]
+    private void ToggleVideoPlayerDisplayTimeLeft()
+    {
+        Se.Settings.Video.VideoPlayerDisplayTimeLeft = !Se.Settings.Video.VideoPlayerDisplayTimeLeft;
+        
+        if (VideoPlayerControl != null)
+        {
+            VideoPlayerControl.VideoPlayerDisplayTimeLeft = Se.Settings.Video.VideoPlayerDisplayTimeLeft;
+        }
+    }
+        
     [RelayCommand]
     private void Unbreak()
     {

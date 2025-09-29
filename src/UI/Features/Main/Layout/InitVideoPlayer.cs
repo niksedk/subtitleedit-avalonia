@@ -32,9 +32,14 @@ public static class InitVideoPlayer
             control.FullScreenCommand = vm.VideoFullScreenCommand;
             vm.VideoPlayerControl = control;
             vm.VideoPlayerControl.Volume = Se.Settings.Video.Volume;
+            vm.VideoPlayerControl.VideoPlayerDisplayTimeLeft = Se.Settings.Video.VideoPlayerDisplayTimeLeft;
             vm.VideoPlayerControl.VolumeChanged += (double v) =>
             {
                 Se.Settings.Video.Volume = v;
+            };
+            vm.VideoPlayerControl.ToggleDisplayProgressTextModeRequested += () =>
+            {
+                vm.ToggleVideoPlayerDisplayTimeLeftCommand.Execute(null);
             };
 
             Grid.SetRow(control, 0);
