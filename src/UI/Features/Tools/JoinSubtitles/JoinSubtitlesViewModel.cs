@@ -393,15 +393,6 @@ public partial class JoinSubtitlesViewModel : ObservableObject
         await MessageBox.Show(Window, "", message);
     }
 
-    internal void OnKeyDown(KeyEventArgs e)
-    {
-        if (e.Key == Key.Escape)
-        {
-            e.Handled = true;
-            Window?.Close();
-        }
-    }
-
     internal void DataGridKeyDown(object? sender, KeyEventArgs e)
     {
         if (e.Key == Key.Delete && SelectedJoinItem != null)
@@ -414,5 +405,14 @@ public partial class JoinSubtitlesViewModel : ObservableObject
     internal void ItemsContextMenuOpening(object? sender, EventArgs e)
     {
         IsDeleteVisible = SelectedJoinItem != null;
+    }
+
+    internal void KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            Window?.Close();
+        }
     }
 }

@@ -1,7 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic;
@@ -11,8 +10,6 @@ namespace Nikse.SubtitleEdit.Features.Tools.SplitSubtitle;
 
 public class SplitSubtitleWindow : Window
 {
-    private readonly SplitSubtitleViewModel _vm;
-
     public SplitSubtitleWindow(SplitSubtitleViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -22,8 +19,6 @@ public class SplitSubtitleWindow : Window
         Height = 700;
         MinWidth = 650;
         MinHeight = 400;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -59,6 +54,7 @@ public class SplitSubtitleWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += vm.KeyDown;
     }
 
     private static Border MakeInputOutputView(SplitSubtitleViewModel vm)
@@ -236,11 +232,5 @@ public class SplitSubtitleWindow : Window
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedSpiltItem)) { Source = vm });
 
         return UiUtil.MakeBorderForControlNoPadding(dataGrid);
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
     }
 }

@@ -1,6 +1,5 @@
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -10,8 +9,6 @@ namespace Nikse.SubtitleEdit.Features.Tools.JoinSubtitles;
 
 public class JoinSubtitlesWindow : Window
 {
-    private readonly JoinSubtitlesViewModel _vm;
-
     public JoinSubtitlesWindow(JoinSubtitlesViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -21,8 +18,6 @@ public class JoinSubtitlesWindow : Window
         Height = 700;
         MinWidth = 600;
         MinHeight = 400;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -56,6 +51,7 @@ public class JoinSubtitlesWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += vm.KeyDown;
     }
 
     private static Border MakeFilesView(JoinSubtitlesViewModel vm)
@@ -184,11 +180,5 @@ public class JoinSubtitlesWindow : Window
         };
 
         return stackPanel;
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
     }
 }
