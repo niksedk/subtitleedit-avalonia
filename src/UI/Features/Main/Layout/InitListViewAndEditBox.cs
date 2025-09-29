@@ -633,7 +633,8 @@ public static class InitListViewAndEditBox
         {
             Header = Se.Language.General.SelectedLines,
             DataContext = vm,
-            Items = {
+            Items = 
+            {
                 new MenuItem
                 {
                     Header = Se.Language.Main.Menu.AutoTranslate,
@@ -688,24 +689,22 @@ public static class InitListViewAndEditBox
         var timeControlsPanel = new StackPanel
         {
             Spacing = 0,
-            Width = 180,
-            Margin = new Thickness(0, 0, 10, 0)
+            Margin = new Thickness(0, 0, 0, 0),
         };
 
         // Start Time controls
         var startTimePanel = new StackPanel
         {
             Spacing = 0,
-            Orientation = Orientation.Vertical
-        };
-
+            Orientation = Orientation.Vertical,
+            Margin = new Thickness(0, 0, 10, 0),
+        }.WithBindVisible(vm, nameof(vm.ShowUpDownStartTime));
         var startTimeLabel = new TextBlock
         {
             Text = Se.Language.General.Show,
             FontWeight = FontWeight.Bold
         };
         startTimePanel.Children.Add(startTimeLabel);
-
         var timeCodeUpDown = new TimeCodeUpDown
         {
             DataContext = vm,
@@ -719,13 +718,41 @@ public static class InitListViewAndEditBox
         timeCodeUpDown.ValueChanged += vm.StartTimeChanged;
         timeControlsPanel.Children.Add(startTimePanel);
 
+
+        // End Time controls
+        var endTimePanel = new StackPanel
+        {
+            Spacing = 0,
+            Orientation = Orientation.Vertical,
+            Margin = new Thickness(0, 0, 10, 0),
+        }.WithBindVisible(vm, nameof(vm.ShowUpDownEndTime));
+        var endTimeLabel = new TextBlock
+        {
+            Text = Se.Language.General.Hide,
+            FontWeight = FontWeight.Bold
+        };
+        endTimePanel.Children.Add(endTimeLabel);
+        var endCodeUpDown = new TimeCodeUpDown
+        {
+            DataContext = vm,
+            [!TimeCodeUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.EndTime)}")
+            {
+                Mode = BindingMode.TwoWay,
+            }
+        };
+        endCodeUpDown.Bind(TimeCodeUpDown.IsEnabledProperty, new Binding(nameof(vm.LockTimeCodes)) { Mode = BindingMode.TwoWay, Converter = new InverseBooleanConverter() });
+        endTimePanel.Children.Add(endCodeUpDown);
+        endCodeUpDown.ValueChanged += vm.EndTimeChanged;
+        timeControlsPanel.Children.Add(endTimePanel);
+
+
         // Duration display
         var durationPanel = new StackPanel
         {
             Spacing = 0,
-            Orientation = Orientation.Vertical
-        };
-
+            Orientation = Orientation.Vertical,
+            Margin = new Thickness(0, 0, 10, 0),
+        }.WithBindVisible(vm, nameof(vm.ShowUpDownDuration));
         var durationLabel = new TextBlock
         {
             Text = Se.Language.General.Duration,
@@ -733,7 +760,6 @@ public static class InitListViewAndEditBox
             Padding = new Thickness(2, 2, 2, 2)
         };
         durationPanel.Children.Add(durationLabel);
-
         var durationUpDown = new NumericUpDown
         {
             DataContext = vm,
@@ -750,11 +776,8 @@ public static class InitListViewAndEditBox
         };
         durationUpDown.Bind(NumericUpDown.IsEnabledProperty, new Binding(nameof(vm.LockTimeCodes)) { Mode = BindingMode.TwoWay, Converter = new InverseBooleanConverter() });
         durationUpDown.ValueChanged += vm.DurationChanged;
-
         durationPanel.Children.Add(durationUpDown);
         timeControlsPanel.Children.Add(durationPanel);
-
-
 
 
         // Layer display

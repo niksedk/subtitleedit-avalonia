@@ -58,6 +58,10 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty] private bool _goToLineNumberAlsoSetVideoPosition;
 
+    [ObservableProperty] private bool _showUpDownStartTime;
+    [ObservableProperty] private bool _showUpDownEndTime;
+    [ObservableProperty] private bool _showUpDownDuration;
+
     [ObservableProperty] private bool _showToolbarNew;
     [ObservableProperty] private bool _showToolbarOpen;
     [ObservableProperty] private bool _showToolbarSave;
@@ -250,6 +254,9 @@ public partial class SettingsViewModel : ObservableObject
         SelectedGridLinesVisibility = GridLinesVisibilities.FirstOrDefault(p => p.Type.ToString() == appearance.GridLinesAppearance) ?? GridLinesVisibilities[0];
         DarkModeBackgroundColor = appearance.DarkModeBackgroundColor.FromHexToColor();
         BookmarkColor = appearance.BookmarkColor.FromHexToColor();
+        ShowUpDownStartTime = appearance.ShowUpDownStartTime;
+        ShowUpDownEndTime = appearance.ShowUpDownEndTime;
+        ShowUpDownDuration = appearance.ShowUpDownDuration;
 
         WaveformDrawGridLines = Se.Settings.Waveform.DrawGridLines;
         WaveformFocusOnMouseOver = Se.Settings.Waveform.FocusOnMouseOver;
@@ -337,6 +344,9 @@ public partial class SettingsViewModel : ObservableObject
         appearance.ShowHints = ShowButtonHints;
         appearance.DarkModeBackgroundColor = DarkModeBackgroundColor.FromColorToHex();
         appearance.BookmarkColor = BookmarkColor.FromColorToHex();
+        appearance.ShowUpDownStartTime = ShowUpDownStartTime;
+        appearance.ShowUpDownEndTime = ShowUpDownEndTime;
+        appearance.ShowUpDownDuration = ShowUpDownDuration;
         appearance.GridCompactMode = GridCompactMode;
         appearance.GridLinesAppearance = SelectedGridLinesVisibility.Type.ToString();
         appearance.ShowLayer = ShowAssaLayer;

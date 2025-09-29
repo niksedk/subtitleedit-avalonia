@@ -33,6 +33,9 @@ public class SeAppearance
     public bool ToolbarShowEncoding { get; set; }
     public bool RightToLeft { get; set; }
     public bool ShowLayer { get; set; }
+    public bool ShowUpDownStartTime { get; set; }
+    public bool ShowUpDownEndTime { get; set; }
+    public bool ShowUpDownDuration { get; set; }
 
     public SeAppearance()
     {
@@ -47,6 +50,9 @@ public class SeAppearance
         BookmarkColor = Colors.Gold.FromColorToHex();
         GridCompactMode = true;
         ShowLayer = true;
+        ShowUpDownStartTime = true;
+        ShowUpDownEndTime = false;
+        ShowUpDownDuration = true;
 
         ToolbarShowFileNew = true;
         ToolbarShowFileOpen = true;

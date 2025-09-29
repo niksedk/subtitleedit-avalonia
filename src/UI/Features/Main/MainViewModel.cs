@@ -146,6 +146,9 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _showColumnCps;
     [ObservableProperty] private bool _showColumnWpm;
     [ObservableProperty] private bool _showColumnLayer;
+    [ObservableProperty] private bool _showUpDownStartTime;
+    [ObservableProperty] private bool _showUpDownEndTime;
+    [ObservableProperty] private bool _showUpDownDuration;
     [ObservableProperty] private bool _isColumnLayerVisible;
     [ObservableProperty] private bool _lockTimeCodes;
     [ObservableProperty] private bool _areVideoControlsUndocked;
@@ -330,6 +333,9 @@ public partial class MainViewModel :
         ShowColumnCps = Se.Settings.General.ShowColumnCps;
         ShowColumnWpm = Se.Settings.General.ShowColumnWpm;
         ShowColumnLayer = Se.Settings.General.ShowColumnLayer;
+        ShowUpDownStartTime = Se.Settings.Appearance.ShowUpDownStartTime;
+        ShowUpDownEndTime = Se.Settings.Appearance.ShowUpDownEndTime;
+        ShowUpDownDuration = Se.Settings.Appearance.ShowUpDownDuration;
         SelectCurrentSubtitleWhilePlaying = Se.Settings.General.SelectCurrentSubtitleWhilePlaying;
         WaveformCenter = Se.Settings.Waveform.CenterVideoPosition;
         EditTextBoxOriginal = new TextBox();
@@ -2113,6 +2119,10 @@ public partial class MainViewModel :
             AudioVisualizer.UpdateTheme();
             AudioVisualizer.IsReadOnly = LockTimeCodes;
         }
+
+        ShowUpDownStartTime = Se.Settings.Appearance.ShowUpDownStartTime;
+        ShowUpDownEndTime = Se.Settings.Appearance.ShowUpDownEndTime;
+        ShowUpDownDuration = Se.Settings.Appearance.ShowUpDownDuration;
 
         _errorColor = Se.Settings.General.ErrorColor.FromHexToColor();
 
@@ -7302,6 +7312,23 @@ public partial class MainViewModel :
     }
 
     internal void StartTimeChanged(object? sender, TimeSpan e)
+    {
+        _updateAudioVisualizer = true;
+
+        var selectedSubtitle = SelectedSubtitle;
+        if (selectedSubtitle == null)
+        {
+            return;
+        }
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            MakeSubtitleTextInfo(selectedSubtitle.Text, selectedSubtitle);
+            MakeSubtitleTextInfoOriginal(selectedSubtitle.OriginalText, selectedSubtitle);
+        });
+    }
+
+    internal void EndTimeChanged(object? sender, TimeSpan e)
     {
         _updateAudioVisualizer = true;
 

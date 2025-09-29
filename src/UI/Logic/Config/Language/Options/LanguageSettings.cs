@@ -65,6 +65,9 @@ public class LanguageSettings
     public string TextBoxCenterText { get; set; }
     public string TextBoxFontBold { get; set; }
     public string TextBoxFontSize { get; set; }
+    public string ShowUpDownStartTime { get; set; }
+    public string ShowUpDownEndTime { get; set; }
+    public string ShowUpDownDuration { get; set; }
     public string ShowButtonHints { get; set; }
     public string GridCompactMode { get; set; }
     public string UiFont { get; set; }
@@ -214,6 +217,9 @@ public class LanguageSettings
         TextBoxCenterText = "Center text in subtitle text box";
         TextBoxFontBold = "Bold text in subtitle text box";
         TextBoxFontSize = "Font size in subtitle text box";
+        ShowUpDownStartTime = "Show up/down control for \"Show\"";
+        ShowUpDownEndTime = "Show up/down control for \"Hide\"";
+        ShowUpDownDuration = "Show up/down control for \"Duration\"";
         ShowButtonHints = "Show button hints";
         GridCompactMode = "Use compact mode for grids";
         UiFont = "UI font";
