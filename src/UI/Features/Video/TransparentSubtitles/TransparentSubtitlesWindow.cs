@@ -514,7 +514,7 @@ public class TransparentSubtitlesWindow : Window
                 buttonAdd,
                 buttonRemove,
                 buttonClear,
-                UiUtil.MakeSeparatorForHorizontal(),
+                UiUtil.MakeSeparatorForHorizontal(vm),
                 buttonPickSubtitle,
             }
         };

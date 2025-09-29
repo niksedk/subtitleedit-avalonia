@@ -636,7 +636,7 @@ public class BurnInWindow : Window
                 buttonAdd,
                 buttonRemove,
                 buttonClear,
-                UiUtil.MakeSeparatorForHorizontal(),
+                UiUtil.MakeSeparatorForHorizontal(vm),
                 buttonPickSubtitle,
             }
         };

@@ -1356,10 +1356,11 @@ public static class UiUtil
         return stackPanel;
     }
 
-    public static Border MakeSeparatorForHorizontal()
+    public static Border MakeSeparatorForHorizontal(object vm)
     {
         return new Border
         {
+            DataContext = vm,   
             Width = 1,
             Background = GetBorderBrush(),
             Margin = new Thickness(5, 5, 5, 5),

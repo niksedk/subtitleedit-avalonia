@@ -68,7 +68,7 @@ public class AutoTranslateWindow : Window
             {
                 UiUtil.MakeTextBlock("Engine:"),
                 engineCombo,
-                UiUtil.MakeSeparatorForHorizontal(),
+                UiUtil.MakeSeparatorForHorizontal(vm),
                 UiUtil.MakeTextBlock("From:"),
                 sourceLangCombo,
                 UiUtil.MakeTextBlock("To:"),
@@ -101,35 +101,35 @@ public class AutoTranslateWindow : Window
             {
                 new DataGridTextColumn
                 {
-                    Header = "#",
+                    Header = Se.Language.General.NumberSymbol,
                     Binding = new Binding(nameof(TranslateRow.Number)),
                     Width = new DataGridLength(50),
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Show",
+                    Header = Se.Language.General.Show,
                     Binding = new Binding(nameof(TranslateRow.Show)),
                     Width = new DataGridLength(100),
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Duration",
+                    Header = Se.Language.General.Duration,
                     Binding = new Binding(nameof(TranslateRow.Duration)),
                     Width = new DataGridLength(80),
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Text",
+                    Header = Se.Language.General.Text,
                     Binding = new Binding(nameof(TranslateRow.Text)),
                     Width = new DataGridLength(200, DataGridLengthUnitType.Star),
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Translated text",
+                    Header = Se.Language.General.Translation,
                     Binding = new Binding(nameof(TranslateRow.TranslatedText)),
                     Width = new DataGridLength(200, DataGridLengthUnitType.Star),
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
@@ -143,18 +143,16 @@ public class AutoTranslateWindow : Window
         var dataGridBorder = UiUtil.MakeBorderForControlNoPadding(dataGrid);
 
         StackPanel settingsBar = UiUtil.MakeControlBarLeft(
-            UiUtil.MakeTextBlock("API key", vm, null, nameof(vm.ApiKeyIsVisible)).WithMarginRight(5),
-            UiUtil.MakeTextBox(150, vm, nameof(vm.ApiKeyText), nameof(vm.ApiKeyIsVisible)),
-            UiUtil.MakeSeparatorForHorizontal(),
-            UiUtil.MakeTextBlock("API url", vm, null, nameof(vm.ApiUrlIsVisible)).WithMarginRight(5),
-            UiUtil.MakeTextBox(150, vm, nameof(vm.ApiUrlText), nameof(vm.ApiUrlIsVisible)),
-            UiUtil.MakeSeparatorForHorizontal(),
-            UiUtil.MakeTextBlock("Model", vm, null, nameof(vm.ModelIsVisible)).WithMarginRight(5),
+            UiUtil.MakeTextBlock(Se.Language.General.ApiKey, vm, null, nameof(vm.ApiKeyIsVisible)).WithMarginRight(5),
+            UiUtil.MakeTextBox(150, vm, nameof(vm.ApiKeyText), nameof(vm.ApiKeyIsVisible)).WithMarginRight(15),
+            UiUtil.MakeTextBlock(Se.Language.General.Url, vm, null, nameof(vm.ApiUrlIsVisible)).WithMarginRight(5),
+            UiUtil.MakeTextBox(200, vm, nameof(vm.ApiUrlText), nameof(vm.ApiUrlIsVisible)).WithMarginRight(15),
+            UiUtil.MakeTextBlock(Se.Language.General.Model, vm, null, nameof(vm.ModelIsVisible)).WithMarginRight(5),
             UiUtil.MakeTextBox(150, vm, nameof(vm.ModelText), nameof(vm.ModelIsVisible)),
             UiUtil.MakeButtonBrowse(vm.BrowseModelCommand, nameof(vm.ModelBrowseIsVisible))
         );
 
-        var settingsLink = UiUtil.MakeLink("Settings", vm.OpenSettingsCommand).WithMarginRight(10);
+        var settingsLink = UiUtil.MakeLink(Se.Language.General.Settings, vm.OpenSettingsCommand).WithMarginRight(10);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         buttonOk.Bind(Button.IsEnabledProperty, new Binding(nameof(vm.IsTranslateEnabled)));
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
