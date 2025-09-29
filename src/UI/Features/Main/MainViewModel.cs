@@ -4392,7 +4392,10 @@ public partial class MainViewModel :
         return true;
     }
 
-    public async Task SubtitleOpen(string fileName, string? videoFileName = null, int? selectedSubtitleIndex = null,
+    public async Task SubtitleOpen(
+        string fileName, 
+        string? videoFileName = null, 
+        int? selectedSubtitleIndex = null,
         TextEncoding? textEncoding = null)
     {
         if (string.IsNullOrEmpty(fileName))
@@ -4560,7 +4563,7 @@ public partial class MainViewModel :
             ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
             LoadBookmarks();
 
-            if (selectedSubtitleIndex != null)
+            if (selectedSubtitleIndex != null && selectedSubtitleIndex >= 0 && selectedSubtitleIndex < Subtitles.Count)
             {
                 SelectAndScrollToRow(selectedSubtitleIndex.Value);
             }
