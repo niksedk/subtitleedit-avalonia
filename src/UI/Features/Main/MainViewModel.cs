@@ -4236,6 +4236,7 @@ public partial class MainViewModel :
     {
         var columns = SubtitleGrid.Columns.Where(p => p.IsVisible).ToList();
 
+        var numberOfStarColumns = 0;
         for (var i = 0; i < columns.Count; i++)
         {
             var column = columns[i];
@@ -4248,6 +4249,7 @@ public partial class MainViewModel :
                 column.Header.ToString() == Se.Language.General.Text)
             {
                 column.Width = new DataGridLength(1, DataGridLengthUnitType.Star);
+                numberOfStarColumns++;
             }
             else
             {
@@ -4256,7 +4258,17 @@ public partial class MainViewModel :
 
             if (i == columns.Count - 1)
             {
-                column.Width = new DataGridLength(1, DataGridLengthUnitType.Auto);
+                if (numberOfStarColumns == 0)
+                {
+                    column.Width = new DataGridLength(1, DataGridLengthUnitType.Star);
+                }
+                else if (numberOfStarColumns == 1 && column.Width.IsStar)
+                {
+                }
+                else
+                {
+                    column.Width = new DataGridLength(1, DataGridLengthUnitType.Auto);
+                }
             }
         }
 
