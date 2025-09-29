@@ -1,9 +1,4 @@
-﻿using Avalonia.Controls;
-using System;
-using System.Collections.ObjectModel;
-using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
-
-namespace Nikse.SubtitleEdit.Logic.Config.Language;
+﻿namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
 public class LanguageGeneral
 {
@@ -127,7 +122,6 @@ public class LanguageGeneral
     public string MergeAfter { get; set; }
     public string MergeSelected { get; set; }
     public string MergeSelectedAsDialog { get; set; }
-    public string SubtitleFormat { get; set; }
     public string SubtitleFormats { get; set; }
     public string Encoding { get; set; }
     public string Refresh { get; set; }
@@ -524,7 +518,6 @@ public class LanguageGeneral
         MergeAfter = "Merge with line after";
         MergeSelected = "Merge selected";
         MergeSelectedAsDialog = "Merge selected as dialog";
-        SubtitleFormat = "Subtitle format";
         SubtitleFormats = "Subtitle formats";
         Encoding = "Encoding";
         Refresh = "Refresh";

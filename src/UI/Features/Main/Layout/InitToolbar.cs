@@ -305,7 +305,7 @@ public static class InitToolbar
         // subtitle formats
         stackPanelRight.Children.Add(new TextBlock
         {
-            Text = Se.Language.General.SubtitleFormat,
+            Text = Se.Language.General.Format,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(5, 0, 0, 0),
         });
