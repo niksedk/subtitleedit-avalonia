@@ -36,6 +36,7 @@ public class SeAppearance
     public bool ShowUpDownStartTime { get; set; }
     public bool ShowUpDownEndTime { get; set; }
     public bool ShowUpDownDuration { get; set; }
+    public bool ShowUpDownLabels { get; set; }
 
     public SeAppearance()
     {
@@ -53,6 +54,7 @@ public class SeAppearance
         ShowUpDownStartTime = true;
         ShowUpDownEndTime = false;
         ShowUpDownDuration = true;
+        ShowUpDownLabels = true;
 
         ToolbarShowFileNew = true;
         ToolbarShowFileOpen = true;

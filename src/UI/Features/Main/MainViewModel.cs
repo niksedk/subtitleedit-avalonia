@@ -148,6 +148,7 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _showUpDownStartTime;
     [ObservableProperty] private bool _showUpDownEndTime;
     [ObservableProperty] private bool _showUpDownDuration;
+    [ObservableProperty] private bool _showUpDownLabels;
     [ObservableProperty] private bool _isColumnLayerVisible;
     [ObservableProperty] private bool _lockTimeCodes;
     [ObservableProperty] private bool _areVideoControlsUndocked;
@@ -335,6 +336,7 @@ public partial class MainViewModel :
         ShowUpDownStartTime = Se.Settings.Appearance.ShowUpDownStartTime;
         ShowUpDownEndTime = Se.Settings.Appearance.ShowUpDownEndTime;
         ShowUpDownDuration = Se.Settings.Appearance.ShowUpDownDuration;
+        ShowUpDownLabels = Se.Settings.Appearance.ShowUpDownLabels;
         SelectCurrentSubtitleWhilePlaying = Se.Settings.General.SelectCurrentSubtitleWhilePlaying;
         WaveformCenter = Se.Settings.Waveform.CenterVideoPosition;
         EditTextBoxOriginal = new TextBox();
@@ -2133,6 +2135,7 @@ public partial class MainViewModel :
         ShowUpDownStartTime = Se.Settings.Appearance.ShowUpDownStartTime;
         ShowUpDownEndTime = Se.Settings.Appearance.ShowUpDownEndTime;
         ShowUpDownDuration = Se.Settings.Appearance.ShowUpDownDuration;
+        ShowUpDownLabels = Se.Settings.Appearance.ShowUpDownLabels;
 
         _errorColor = Se.Settings.General.ErrorColor.FromHexToColor();
 

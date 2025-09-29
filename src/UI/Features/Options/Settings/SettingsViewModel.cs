@@ -61,6 +61,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _showUpDownStartTime;
     [ObservableProperty] private bool _showUpDownEndTime;
     [ObservableProperty] private bool _showUpDownDuration;
+    [ObservableProperty] private bool _showUpDownLabels;
 
     [ObservableProperty] private bool _showToolbarNew;
     [ObservableProperty] private bool _showToolbarOpen;
@@ -257,6 +258,7 @@ public partial class SettingsViewModel : ObservableObject
         ShowUpDownStartTime = appearance.ShowUpDownStartTime;
         ShowUpDownEndTime = appearance.ShowUpDownEndTime;
         ShowUpDownDuration = appearance.ShowUpDownDuration;
+        ShowUpDownLabels = appearance.ShowUpDownLabels;
 
         WaveformDrawGridLines = Se.Settings.Waveform.DrawGridLines;
         WaveformFocusOnMouseOver = Se.Settings.Waveform.FocusOnMouseOver;
@@ -347,6 +349,7 @@ public partial class SettingsViewModel : ObservableObject
         appearance.ShowUpDownStartTime = ShowUpDownStartTime;
         appearance.ShowUpDownEndTime = ShowUpDownEndTime;
         appearance.ShowUpDownDuration = ShowUpDownDuration;
+        appearance.ShowUpDownLabels = ShowUpDownLabels;
         appearance.GridCompactMode = GridCompactMode;
         appearance.GridLinesAppearance = SelectedGridLinesVisibility.Type.ToString();
         appearance.ShowLayer = ShowAssaLayer;

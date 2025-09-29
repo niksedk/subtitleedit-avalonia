@@ -68,6 +68,7 @@ public class LanguageSettings
     public string ShowUpDownStartTime { get; set; }
     public string ShowUpDownEndTime { get; set; }
     public string ShowUpDownDuration { get; set; }
+    public string ShowUpDownLabels { get; set; }
     public string ShowButtonHints { get; set; }
     public string GridCompactMode { get; set; }
     public string UiFont { get; set; }
@@ -220,6 +221,7 @@ public class LanguageSettings
         ShowUpDownStartTime = "Show up/down control for \"Show\"";
         ShowUpDownEndTime = "Show up/down control for \"Hide\"";
         ShowUpDownDuration = "Show up/down control for \"Duration\"";
+        ShowUpDownLabels = "Show labels for up/down controls (Show/Hide/Duration)";
         ShowButtonHints = "Show button hints";
         GridCompactMode = "Use compact mode for grids";
         UiFont = "UI font";

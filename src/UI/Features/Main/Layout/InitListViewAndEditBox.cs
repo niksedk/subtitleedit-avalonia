@@ -690,6 +690,7 @@ public static class InitListViewAndEditBox
         {
             Spacing = 0,
             Margin = new Thickness(0, 0, 0, 0),
+            VerticalAlignment = VerticalAlignment.Center,
         };
 
         // Start Time controls
@@ -703,7 +704,7 @@ public static class InitListViewAndEditBox
         {
             Text = Se.Language.General.Show,
             FontWeight = FontWeight.Bold
-        };
+        }.WithBindVisible(vm, nameof(vm.ShowUpDownLabels));
         startTimePanel.Children.Add(startTimeLabel);
         var timeCodeUpDown = new TimeCodeUpDown
         {
@@ -713,6 +714,10 @@ public static class InitListViewAndEditBox
                 Mode = BindingMode.TwoWay,
             }
         };
+        if (!vm.ShowUpDownLabels && Se.Settings.Appearance.ShowHints)
+        { 
+            ToolTip.SetTip(timeCodeUpDown, Se.Language.General.Show);
+        }
         timeCodeUpDown.Bind(TimeCodeUpDown.IsEnabledProperty, new Binding(nameof(vm.LockTimeCodes)) { Mode = BindingMode.TwoWay, Converter = new InverseBooleanConverter() });
         startTimePanel.Children.Add(timeCodeUpDown);
         timeCodeUpDown.ValueChanged += vm.StartTimeChanged;
@@ -730,7 +735,7 @@ public static class InitListViewAndEditBox
         {
             Text = Se.Language.General.Hide,
             FontWeight = FontWeight.Bold
-        };
+        }.WithBindVisible(vm, nameof(vm.ShowUpDownLabels));
         endTimePanel.Children.Add(endTimeLabel);
         var endCodeUpDown = new TimeCodeUpDown
         {
@@ -740,11 +745,14 @@ public static class InitListViewAndEditBox
                 Mode = BindingMode.TwoWay,
             }
         };
+        if (!vm.ShowUpDownLabels && Se.Settings.Appearance.ShowHints)
+        {
+            ToolTip.SetTip(endCodeUpDown, Se.Language.General.Hide);
+        }
         endCodeUpDown.Bind(TimeCodeUpDown.IsEnabledProperty, new Binding(nameof(vm.LockTimeCodes)) { Mode = BindingMode.TwoWay, Converter = new InverseBooleanConverter() });
         endTimePanel.Children.Add(endCodeUpDown);
         endCodeUpDown.ValueChanged += vm.EndTimeChanged;
         timeControlsPanel.Children.Add(endTimePanel);
-
 
         // Duration display
         var durationPanel = new StackPanel
@@ -757,8 +765,7 @@ public static class InitListViewAndEditBox
         {
             Text = Se.Language.General.Duration,
             FontWeight = FontWeight.Bold,
-            Padding = new Thickness(2, 2, 2, 2)
-        };
+        }.WithBindVisible(vm, nameof(vm.ShowUpDownLabels));
         durationPanel.Children.Add(durationLabel);
         var durationUpDown = new NumericUpDown
         {
@@ -774,6 +781,10 @@ public static class InitListViewAndEditBox
                 Converter = DurationToBackgroundConverter.Instance,
             },
         };
+        if (!vm.ShowUpDownLabels && Se.Settings.Appearance.ShowHints)
+        {
+            ToolTip.SetTip(durationUpDown, Se.Language.General.Duration);
+        }
         durationUpDown.Bind(NumericUpDown.IsEnabledProperty, new Binding(nameof(vm.LockTimeCodes)) { Mode = BindingMode.TwoWay, Converter = new InverseBooleanConverter() });
         durationUpDown.ValueChanged += vm.DurationChanged;
         durationPanel.Children.Add(durationUpDown);
@@ -786,16 +797,14 @@ public static class InitListViewAndEditBox
             Spacing = 0,
             Orientation = Orientation.Vertical,
             [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowLayer)),
+            Margin = new Thickness(0, 0, 10, 0),
         };
-
         var labelLayer = new TextBlock
         {
             Text = Se.Language.General.Layer,
             FontWeight = FontWeight.Bold,
-            Padding = new Thickness(2, 2, 2, 2)
-        };
+        }.WithBindVisible(vm, nameof(vm.ShowUpDownLabels));
         panelLayer.Children.Add(labelLayer);
-
         var upDownLayer = new NumericUpDown
         {
             DataContext = vm,
@@ -808,8 +817,11 @@ public static class InitListViewAndEditBox
             Increment = 1,
             FormatString = "F0",
         };
+        if (!vm.ShowUpDownLabels && Se.Settings.Appearance.ShowHints)
+        {
+            ToolTip.SetTip(upDownLayer, Se.Language.General.Layer);
+        }
         panelLayer.Children.Add(upDownLayer);
-
         timeControlsPanel.Children.Add(panelLayer);
 
 
