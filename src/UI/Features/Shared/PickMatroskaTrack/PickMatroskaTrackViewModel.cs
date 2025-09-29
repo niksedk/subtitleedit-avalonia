@@ -8,6 +8,7 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.Generic;
@@ -43,7 +44,7 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
     {
         _matroskaFile = matroskaFile;
         _matroskaTracks = matroskaTracks;
-        WindowTitle = $"Pick Matroska track - {fileName}";
+        WindowTitle = string.Format(Se.Language.File.PickMatroskaTrackX, fileName);
         foreach (var track in _matroskaTracks)
         {
             var display = new MatroskaTrackInfoDisplay
@@ -113,23 +114,23 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
         }
 
         Rows.Clear();
-        var trackinfo = selectedTrack.MatroskaTrackInfo!;
-        var subtitles = _matroskaFile?.GetSubtitle(trackinfo.TrackNumber, null);
-        if (trackinfo.CodecId == MatroskaTrackType.SubRip && subtitles != null)
+        var trackInfo = selectedTrack.MatroskaTrackInfo!;
+        var subtitles = _matroskaFile?.GetSubtitle(trackInfo.TrackNumber, null);
+        if (trackInfo.CodecId == MatroskaTrackType.SubRip && subtitles != null)
         {
-            AddTextContent(trackinfo, subtitles, new SubRip());
+            AddTextContent(trackInfo, subtitles, new SubRip());
         }
-        else if (trackinfo.CodecId is MatroskaTrackType.SubStationAlpha or MatroskaTrackType.SubStationAlpha2 && subtitles != null)
+        else if (trackInfo.CodecId is MatroskaTrackType.SubStationAlpha or MatroskaTrackType.SubStationAlpha2 && subtitles != null)
         {
-            AddTextContent(trackinfo, subtitles, new SubStationAlpha());
+            AddTextContent(trackInfo, subtitles, new SubStationAlpha());
         }
-        else if (trackinfo.CodecId is MatroskaTrackType.AdvancedSubStationAlpha or MatroskaTrackType.AdvancedSubStationAlpha2 && subtitles != null)
+        else if (trackInfo.CodecId is MatroskaTrackType.AdvancedSubStationAlpha or MatroskaTrackType.AdvancedSubStationAlpha2 && subtitles != null)
         {
-            AddTextContent(trackinfo, subtitles, new AdvancedSubStationAlpha());
+            AddTextContent(trackInfo, subtitles, new AdvancedSubStationAlpha());
         }
-        else if (trackinfo.CodecId == MatroskaTrackType.BluRay && subtitles != null && _matroskaFile != null)
+        else if (trackInfo.CodecId == MatroskaTrackType.BluRay && subtitles != null && _matroskaFile != null)
         {
-            var pcsData = BluRaySupParser.ParseBluRaySupFromMatroska(trackinfo, _matroskaFile);
+            var pcsData = BluRaySupParser.ParseBluRaySupFromMatroska(trackInfo, _matroskaFile);
             for (var i = 0; i < 20 && i < pcsData.Count; i++)
             {
                 var item = pcsData[i];
@@ -145,12 +146,12 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
                 Rows.Add(cue);
             }
         }
-        else if (trackinfo.CodecId == MatroskaTrackType.TextSt && subtitles != null && _matroskaFile != null)
+        else if (trackInfo.CodecId == MatroskaTrackType.TextSt && subtitles != null && _matroskaFile != null)
         {
             var subtitle = new Subtitle();
-            var sub = _matroskaFile.GetSubtitle(trackinfo.TrackNumber, null);
-            Utilities.LoadMatroskaTextSubtitle(trackinfo, _matroskaFile, sub, subtitle);
-            Utilities.ParseMatroskaTextSt(trackinfo, sub, subtitle);
+            var sub = _matroskaFile.GetSubtitle(trackInfo.TrackNumber, null);
+            Utilities.LoadMatroskaTextSubtitle(trackInfo, _matroskaFile, sub, subtitle);
+            Utilities.ParseMatroskaTextSt(trackInfo, sub, subtitle);
 
             for (var i = 0; i < 20 && i < subtitle.Paragraphs.Count; i++)
             {

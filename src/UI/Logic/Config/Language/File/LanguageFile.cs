@@ -20,15 +20,15 @@ public class LanguageFile
     public string IgnoreFormatting { get; set; }
     public string OnlyLookForDifferencesInText { get; set; }
     public string CannotCompareWithImageBasedSubtitles { get; set; }
-    public string Statitics { get; set; }
+    public string StatisticsTitle { get; set; }
     public string ShowOnlyDifferencesInText { get; set; }
     public string LoadXFromFile { get; set; }
     public string SaveCompareHtmlTitle { get; set; }
-    
+    public string PickMatroskaTrackX { get; set; }
+
     public LanguageFile()
     {
         Compare = "Compare";
-        Statitics = "Statitics";
         PreviousDifference = "Previous difference";
         NextDifference = "Next difference";
         SubtitlesNotAlike = "Subtitles have no similarities";
@@ -44,5 +44,6 @@ public class LanguageFile
         CannotCompareWithImageBasedSubtitles = "Cannot compare with image-based subtitles";
         LoadXFromFile = "Load \"{0}\" from file";
         SaveCompareHtmlTitle = "Save compare HTML file";
+        PickMatroskaTrackX = "Pick Matroska track - {0}";
     }
 }

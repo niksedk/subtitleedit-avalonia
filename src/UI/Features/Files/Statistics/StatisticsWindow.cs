@@ -15,7 +15,7 @@ public class StatisticsWindow : Window
             Source = vm,
             Mode = BindingMode.TwoWay,
         });
-        Title = Se.Language.File.Statitics;
+        Title = Se.Language.File.Statistics.Title;
         CanResize = true;
         Width = 950;
         Height = 850;

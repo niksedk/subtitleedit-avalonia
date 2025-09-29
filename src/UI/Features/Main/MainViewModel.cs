@@ -97,7 +97,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using static Nikse.SubtitleEdit.Logic.FindService;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -651,15 +650,31 @@ public partial class MainViewModel :
         AddToRecentFiles(false);
     }
 
-    private void ResetSubtitle()
+    private void ResetSubtitle(SubtitleFormat? format = null, bool keepSubtitleParagraphs = false)
     {
         _videoOpenTokenSource?.Cancel();
         ShowColumnOriginalText = false;
-        _subtitle.Paragraphs.Clear();
+
+        if (!keepSubtitleParagraphs)
+        {
+            _subtitle.Paragraphs.Clear();
+        }
+
         Subtitles.Clear();
-        SelectedSubtitleFormat =
-            SubtitleFormats.FirstOrDefault(f => f.FriendlyName == Se.Settings.General.DefaultSubtitleFormat) ??
-            SubtitleFormats[0];
+
+        if (format != null)
+        {
+            SelectedSubtitleFormat =
+                SubtitleFormats.FirstOrDefault(f => f.FriendlyName == format.FriendlyName) ??
+                SubtitleFormats[0];
+        }
+        else
+        {
+            SelectedSubtitleFormat =
+                SubtitleFormats.FirstOrDefault(f => f.FriendlyName == Se.Settings.General.DefaultSubtitleFormat) ??
+                SubtitleFormats[0];
+        }
+
         SelectedEncoding = Encodings.FirstOrDefault(p => p.DisplayName == Se.Settings.General.DefaultEncoding) ??
                            Encodings[0];
         _subtitleFileName = string.Empty;
@@ -3232,18 +3247,18 @@ public partial class MainViewModel :
         fullscreenWindow.Show(Window!);
         _shortcutManager.ClearKeys();
     }
-    
+
     [RelayCommand]
     private void ToggleVideoPlayerDisplayTimeLeft()
     {
         Se.Settings.Video.VideoPlayerDisplayTimeLeft = !Se.Settings.Video.VideoPlayerDisplayTimeLeft;
-        
+
         if (VideoPlayerControl != null)
         {
             VideoPlayerControl.VideoPlayerDisplayTimeLeft = Se.Settings.Video.VideoPlayerDisplayTimeLeft;
         }
     }
-        
+
     [RelayCommand]
     private void Unbreak()
     {
@@ -4393,8 +4408,8 @@ public partial class MainViewModel :
     }
 
     public async Task SubtitleOpen(
-        string fileName, 
-        string? videoFileName = null, 
+        string fileName,
+        string? videoFileName = null,
         int? selectedSubtitleIndex = null,
         TextEncoding? textEncoding = null)
     {
@@ -5052,7 +5067,9 @@ public partial class MainViewModel :
         }
     }
 
-    private async Task<bool> LoadMatroskaSubtitle(MatroskaTrackInfo matroskaSubtitleInfo, MatroskaFile matroska,
+    private async Task<bool> LoadMatroskaSubtitle(
+        MatroskaTrackInfo matroskaSubtitleInfo,
+        MatroskaFile matroska,
         string fileName)
     {
         if (matroskaSubtitleInfo.CodecId.Equals("S_HDMV/PGS", StringComparison.OrdinalIgnoreCase))
@@ -5070,6 +5087,7 @@ public partial class MainViewModel :
                     _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
                     Subtitles.Clear();
                     Subtitles.AddRange(result.OcredSubtitle);
+                    Renumber();
                 }
             });
 
@@ -5094,37 +5112,12 @@ public partial class MainViewModel :
         var sub = matroska.GetSubtitle(matroskaSubtitleInfo.TrackNumber, null);
         var subtitle = new Subtitle();
         var format = Utilities.LoadMatroskaTextSubtitle(matroskaSubtitleInfo, matroska, sub, subtitle);
-
-        ResetSubtitle();
-        subtitle.Renumber();
+        ResetSubtitle(format);
+        _subtitle = subtitle;
+        _subtitle.Renumber();
         Subtitles.Clear();
-        Subtitles.AddRange(subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
-
-
-        //        Paragraphs = new ObservableCollection<DisplayParagraph>(subtitle.Paragraphs.Select(p => new DisplayParagraph(p)));
-        //SelectedSubtitleFormat = format.Name;
-
-        //        ShowStatus(_language.SubtitleImportedFromMatroskaFile);
-        //_subtitle.Renumber();
-        //if (matroska.Path.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase) || matroska.Path.EndsWith(".mks", StringComparison.OrdinalIgnoreCase))
-        //{
-        //    _fileName = matroska.Path.Remove(matroska.Path.Length - 4) + format.Extension;
-        //}
-
-        //SetTitle();
-        //_fileDateTime = new DateTime();
-        //_converted = true;
-
-        //if (batchMode)
-        //{
-        //    return true;
-        //}
-
-        //_subtitleListViewIndex = -1;
-        //UpdateSourceView();
-        //SubtitleListview1.Fill(_subtitle, _subtitleOriginal);
-        //SubtitleListview1.SelectIndexAndEnsureVisible(0, true);
-        //RefreshSelectedParagraph();
+        Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
+        _converted = true;
 
         return true;
     }

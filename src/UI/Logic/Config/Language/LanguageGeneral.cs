@@ -398,7 +398,10 @@ public class LanguageGeneral
     public string SkipOnce { get; set; }
     public string SkipAll { get; set; }
     public string Suggestions { get; set; }
-    public object UseAlways { get; set; }
+    public string UseAlways { get; set; }
+    public string Codec { get; set; }
+    public string Forced { get; set; }
+    public string TextOrImage { get; set; }
 
     public LanguageGeneral()
     {
@@ -793,5 +796,8 @@ public class LanguageGeneral
         SkipAll = "Skip all";
         Suggestions = "Suggestions";
         UseAlways = "Use always";
+        Codec = "Codec";
+        Forced = "Forced";
+        TextOrImage = "Text/image";
     }
 }

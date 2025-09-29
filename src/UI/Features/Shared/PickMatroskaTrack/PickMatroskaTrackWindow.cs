@@ -1,4 +1,3 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
@@ -6,6 +5,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 
 namespace Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
@@ -31,7 +31,7 @@ public class PickMatroskaTrackWindow : Window
         var tracksView = MakeTracksView(vm);
         var subtitleView = MakeSubtitleView(vm);
 
-        var buttonExport = UiUtil.MakeButton("Export...", vm.ExportCommand);
+        var buttonExport = UiUtil.MakeButton(Se.Language.General.ExportDotDotDot, vm.ExportCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonExport, buttonOk, buttonCancel);
@@ -91,42 +91,42 @@ public class PickMatroskaTrackWindow : Window
             {
                 new DataGridTextColumn
                 {
-                    Header = "#",
+                    Header = Se.Language.General.NumberSymbol,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(MatroskaTrackInfoDisplay.TrackNumber)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Name",
+                    Header = Se.Language.General.Name ,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(MatroskaTrackInfoDisplay.Name)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Language",
+                    Header = Se.Language.General.Language,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(MatroskaTrackInfoDisplay.Language)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Codec",
+                    Header = Se.Language.General.Codec,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(MatroskaTrackInfoDisplay.Codec)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Default",
+                    Header = Se.Language.General.Default,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(MatroskaTrackInfoDisplay.IsDefault)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Forced",
+                    Header = Se.Language.General.Forced,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(MatroskaTrackInfoDisplay.IsForced)),
                     IsReadOnly = true,
@@ -135,7 +135,8 @@ public class PickMatroskaTrackWindow : Window
         };
         dataGridTracks.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(_vm.SelectedTrack)));
         dataGridTracks.SelectionChanged += vm.DataGridTracksSelectionChanged;
-        vm.TracksGrid = dataGridTracks; 
+        dataGridTracks.DoubleTapped += (s, e) => vm.OkCommand.Execute(null);
+        vm.TracksGrid = dataGridTracks;
 
         return UiUtil.MakeBorderForControlNoPadding(dataGridTracks);
     }
@@ -160,28 +161,28 @@ public class PickMatroskaTrackWindow : Window
             {
                 new DataGridTextColumn
                 {
-                    Header = "#",
+                    Header = Se.Language.General.NumberSymbol,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(MatroskaSubtitleCueDisplay.Number)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Show",
+                    Header = Se.Language.General.Show,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(MatroskaSubtitleCueDisplay.Show)) { Converter = fullTimeConverter },
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Duration",
+                    Header = Se.Language.General.Duration,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(MatroskaSubtitleCueDisplay.Duration)) { Converter = shortTimeConverter },
                     IsReadOnly = true,
                 },
                 new DataGridTemplateColumn
                 {
-                    Header = "Text/Image",
+                    Header = Se.Language.General.TextOrImage,
                     IsReadOnly = true,
                     CellTemplate = new FuncDataTemplate<MatroskaSubtitleCueDisplay>((item, _) =>
                     {
