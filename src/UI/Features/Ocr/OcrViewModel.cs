@@ -116,6 +116,7 @@ public partial class OcrViewModel : ObservableObject
     private readonly IFileHelper _fileHelper;
     private readonly ISpellCheckManager _spellCheckManager;
     private readonly IOcrFixEngine2 _ocrFixEngine;
+    private PreProcessingSettings? _preProcessingSettings;
 
     private CancellationTokenSource _cancellationTokenSource;
     private NOcrDb? _nOcrDb;
@@ -668,9 +669,29 @@ public partial class OcrViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowPreProcessing()
     {
-        var result = await _windowService
-            .ShowDialogAsync<PreProcessingWindow, PreProcessingViewModel>(Window!);
+        if (Window == null)
+        {
+            return;
+        }
 
+        var result = await _windowService
+            .ShowDialogAsync<PreProcessingWindow, PreProcessingViewModel>(Window, vm =>
+            {
+                var item = SelectedOcrSubtitleItem;
+                if (item != null)
+                {
+                    vm.Initialize(_preProcessingSettings, item.GetSkBitmap());
+                }
+            });
+
+        if (result.OkPressed)
+        {
+            _preProcessingSettings = result.PreProcessingSettings;
+            foreach (var item in OcrSubtitleItems)
+            {
+                item.PreProcessingSettings = _preProcessingSettings;
+            }
+        }
     }
 
     [RelayCommand]
@@ -1704,7 +1725,7 @@ public partial class OcrViewModel : ObservableObject
     public void Initialize(List<VobSubMergedPack> vobSubMergedPackList, List<SKColor> palette, string vobSubFileName)
     {
         Title = string.Format(Se.Language.Ocr.OcrX, vobSubFileName);
-        _ocrSubtitle = new OcrSubtitleVobSub(vobSubMergedPackList);
+        _ocrSubtitle = new OcrSubtitleVobSub(vobSubMergedPackList, palette);
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
     }
 

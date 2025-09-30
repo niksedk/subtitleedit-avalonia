@@ -10,15 +10,22 @@ public class OcrSubtitleVobSub : IOcrSubtitle
     public int Count { get; private set; }
 
     private readonly List<VobSubMergedPack> _vobSubMergedPack;
+    private List<SKColor>? _palette;
 
-    public OcrSubtitleVobSub(List<VobSubMergedPack> vobSubMergedPack)
+    public OcrSubtitleVobSub(List<VobSubMergedPack> vobSubMergedPack, List<SKColor>? palette = null)
     {
         _vobSubMergedPack = vobSubMergedPack;
+        _palette = palette;
         Count = _vobSubMergedPack.Count;
     }
 
     public SKBitmap GetBitmap(int index)
     {
+        if (_palette != null)
+        {
+            _vobSubMergedPack[index].Palette = _palette;
+        }
+
         return _vobSubMergedPack[index].GetBitmap();
     }
 

@@ -54,6 +54,12 @@ public class LanguageOcr
     public string EditWholeText { get; set; }
     public string EditWordOnly { get; set; }
     public string ImagePreProcessing { get; set; }
+    public string PreProcessingTitle { get; set; }
+    public string CropTransparent { get; set; }
+    public string InverseColors { get; set; }
+    public string RemoveBorders { get; set; }
+    public string Binarize { get; set; }
+    public string BorderSize { get; set; }
 
     public LanguageOcr()
     {
@@ -107,5 +113,11 @@ public class LanguageOcr
         EditWholeText = "Edit whole text";
         EditWordOnly = "Edit word only";
         ImagePreProcessing = "Image pre-processing";
+        PreProcessingTitle = "Pre-processing";
+        CropTransparent = "Crop transparent colors";
+        InverseColors = "Inverse colors";
+        RemoveBorders = "Remove borders";
+        Binarize = "Binarize";
+        BorderSize = "Border size";
     }
 }

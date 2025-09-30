@@ -11,6 +11,29 @@ namespace Nikse.SubtitleEdit.Features.Ocr;
 
 public partial class OcrSubtitleItem : ObservableObject
 {
+    [ObservableProperty] private string _text;
+
+    public int Number { get; set; }
+    public TimeSpan StartTime { get; set; }
+    public TimeSpan EndTime { get; set; }
+    public TimeSpan Duration { get; set; }
+    public bool HasFormattedText => FixResult != null;
+
+    private readonly IOcrSubtitle _ocrSubtitle;
+    private readonly int _index;
+    private SKBitmap? _bitmap;
+
+    private PreProcessingSettings? _preProcessingSettings;
+    public PreProcessingSettings? PreProcessingSettings
+    {
+        get => _preProcessingSettings;
+        set
+        {
+            _preProcessingSettings = value;
+            _bitmap = null;
+        }
+    }
+
     public SKBitmap GetSkBitmap()
     {
         if (_bitmap == null)
@@ -25,13 +48,6 @@ public partial class OcrSubtitleItem : ObservableObject
     {
         return GetSkBitmap().ToAvaloniaBitmap();
     }
-    
-    public int Number { get; set; }
-
-    public TimeSpan StartTime { get; set; }
-
-    public TimeSpan EndTime { get; set; }
-    public TimeSpan Duration { get; set; }
 
     private OcrFixLineResult? _fixResult;
     public OcrFixLineResult? FixResult
@@ -46,19 +62,10 @@ public partial class OcrSubtitleItem : ObservableObject
         }
     }
 
-    public bool HasFormattedText => FixResult != null;
-
     public TextBlock CreateFormattedText()
     {
         return FixResult?.GetFormattedText() ?? new TextBlock { Text = Text };
     }
-
-    [ObservableProperty] private string _text;
-
-    private readonly IOcrSubtitle _ocrSubtitle;
-    private readonly int _index;
-    private SKBitmap? _bitmap;
-    private OcrFixLineResult? fixResult;
 
     public OcrSubtitleItem(IOcrSubtitle ocrSubtitle, int index)
     {
