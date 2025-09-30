@@ -39,7 +39,7 @@ public class ShotChangesHelper
     /// <returns>Return file name of existing shot changes, or null</returns>
     private static string FindShotChangesFileName(string videoFileName)
     {
-        var dir = Configuration.ShotChangesDirectory.TrimEnd(Path.DirectorySeparatorChar);
+        var dir = Se.ShotChangesFolder;
         if (!Directory.Exists(dir))
         {
             Directory.CreateDirectory(dir);
