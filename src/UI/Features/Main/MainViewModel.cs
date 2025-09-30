@@ -2139,6 +2139,8 @@ public partial class MainViewModel :
 
         _errorColor = Se.Settings.General.ErrorColor.FromHexToColor();
 
+        InitLayout.MakeLayout(MainView!, this, Se.Settings.General.LayoutNumber);
+
         _autoBackupService.StopAutobackup();
         _autoBackupService.StartAutoBackup(this);
 

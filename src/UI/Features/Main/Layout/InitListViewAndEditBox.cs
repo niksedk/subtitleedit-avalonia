@@ -698,7 +698,7 @@ public static class InitListViewAndEditBox
         {
             Spacing = 0,
             Orientation = Orientation.Vertical,
-            Margin = new Thickness(0, 0, 10, 0),
+            Margin = new Thickness(0, 0, 10, vm.ShowUpDownLabels ? 0 : 2),
         }.WithBindVisible(vm, nameof(vm.ShowUpDownStartTime));
         var startTimeLabel = new TextBlock
         {
@@ -729,7 +729,7 @@ public static class InitListViewAndEditBox
         {
             Spacing = 0,
             Orientation = Orientation.Vertical,
-            Margin = new Thickness(0, 0, 10, 0),
+            Margin = new Thickness(0, 0, 10, vm.ShowUpDownLabels ? 0 : 2),
         }.WithBindVisible(vm, nameof(vm.ShowUpDownEndTime));
         var endTimeLabel = new TextBlock
         {
@@ -759,7 +759,7 @@ public static class InitListViewAndEditBox
         {
             Spacing = 0,
             Orientation = Orientation.Vertical,
-            Margin = new Thickness(0, 0, 10, 0),
+            Margin = new Thickness(0, 0, 10, vm.ShowUpDownLabels ? 0 : 2),
         }.WithBindVisible(vm, nameof(vm.ShowUpDownDuration));
         var durationLabel = new TextBlock
         {
