@@ -87,8 +87,13 @@ public class OcrWindow : Window
         };
 
         var buttonPreProcessing = UiUtil.MakeButton(vm.ShowPreProcessingCommand, IconNames.Image)
-            .WithRightAlignment();
-        ToolTip.SetTip(buttonPreProcessing, Se.Language.Ocr.ImagePreProcessing); 
+            .WithRightAlignment()
+            .WithBindIsVisible(nameof(vm.HasPreProcessingSettings), new InverseBooleanConverter());
+        ToolTip.SetTip(buttonPreProcessing, Se.Language.Ocr.ImagePreProcessing);
+        var buttonPreProcessingActive = UiUtil.MakeButton(vm.ShowPreProcessingCommand, IconNames.ImageCheck)
+            .WithRightAlignment()
+            .WithBindIsVisible(nameof(vm.HasPreProcessingSettings));
+        ToolTip.SetTip(buttonPreProcessingActive, Se.Language.Ocr.ImagePreProcessing); 
 
         var comboBoxEngines = UiUtil.MakeComboBox(vm.OcrEngines, vm, nameof(vm.SelectedOcrEngine))
             .WithMarginRight(10)
@@ -187,6 +192,7 @@ public class OcrWindow : Window
 
         grid.Add(panel, 0);
         grid.Add(buttonPreProcessing, 0);
+        grid.Add(buttonPreProcessingActive, 0);
 
         return grid;
     }

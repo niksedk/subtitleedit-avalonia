@@ -39,6 +39,15 @@ public partial class OcrSubtitleItem : ObservableObject
         if (_bitmap == null)
         {
             _bitmap = _ocrSubtitle.GetBitmap(_index);
+            if (_bitmap != null && PreProcessingSettings != null)
+            {
+                _bitmap = PreProcessingSettings.PreProcess(_bitmap);
+            }
+
+            if (_bitmap == null)
+            {
+                _bitmap = new SKBitmap(1, 1);
+            }
         }
 
         return _bitmap;

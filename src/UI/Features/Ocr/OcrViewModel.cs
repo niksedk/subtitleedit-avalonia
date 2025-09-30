@@ -102,6 +102,7 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private ReplacementUsedItem? _selectedAllFix;
     [ObservableProperty] private ObservableCollection<GuessUsedItem> _allGuesses;
     [ObservableProperty] private GuessUsedItem? _selectedAllGuess;
+    [ObservableProperty] private bool _hasPreProcessingSettings;
 
     public Window? Window { get; set; }
     public DataGrid SubtitleGrid { get; set; }
@@ -691,6 +692,12 @@ public partial class OcrViewModel : ObservableObject
             {
                 item.PreProcessingSettings = _preProcessingSettings;
             }
+
+            HasPreProcessingSettings = 
+                _preProcessingSettings.CropTransparentColors || 
+                _preProcessingSettings.InverseColors || 
+                _preProcessingSettings.Binarize || 
+                _preProcessingSettings.RemoveBorders;
         }
     }
 

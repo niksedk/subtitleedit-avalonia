@@ -5,7 +5,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic;
 using SkiaSharp;
-using System;
 
 namespace Nikse.SubtitleEdit.Features.Ocr;
 
