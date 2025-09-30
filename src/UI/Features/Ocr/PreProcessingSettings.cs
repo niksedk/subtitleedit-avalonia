@@ -21,7 +21,7 @@ public class PreProcessingSettings
 
         if (RemoveBorders)
         {
-            bmp = RemoveBorder(bmp);
+            bmp = RemoveBorder(bmp, BorderSize);
 
             if (CropTransparentColors)
             {
@@ -42,20 +42,26 @@ public class PreProcessingSettings
         return bmp;
     }
 
-    private SKBitmap CropTransparent(SKBitmap bitmap)
+    private static unsafe SKBitmap CropTransparent(SKBitmap bitmap)
     {
         var left = bitmap.Width;
         var top = bitmap.Height;
         var right = 0;
         var bottom = 0;
 
+        var pixels = (uint*)bitmap.GetPixels().ToPointer();
+        var width = bitmap.Width;
+        var height = bitmap.Height;
+
         // Find the bounding box of non-transparent pixels
-        for (int y = 0; y < bitmap.Height; y++)
+        for (int y = 0; y < height; y++)
         {
-            for (int x = 0; x < bitmap.Width; x++)
+            for (int x = 0; x < width; x++)
             {
-                var pixel = bitmap.GetPixel(x, y);
-                if (pixel.Alpha > 0) // Non-transparent pixel
+                var pixel = pixels[y * width + x];
+                var alpha = (pixel >> 24) & 0xFF;
+
+                if (alpha > 0) // Non-transparent pixel
                 {
                     if (x < left) left = x;
                     if (x > right) right = x;
@@ -72,94 +78,101 @@ public class PreProcessingSettings
         }
 
         // Calculate cropped dimensions
-        int width = right - left + 1;
-        int height = bottom - top + 1;
+        int cropWidth = right - left + 1;
+        int cropHeight = bottom - top + 1;
 
         // Create new cropped bitmap
-        var cropped = new SKBitmap(width, height);
+        var cropped = new SKBitmap(cropWidth, cropHeight);
         using (var canvas = new SKCanvas(cropped))
         {
             var srcRect = new SKRect(left, top, right + 1, bottom + 1);
-            var destRect = new SKRect(0, 0, width, height);
-            canvas.DrawBitmap(bitmap, srcRect, destRect);
+            var destinationRect = new SKRect(0, 0, cropWidth, cropHeight);
+            canvas.DrawBitmap(bitmap, srcRect, destinationRect);
         }
 
         return cropped;
     }
 
-    private SKBitmap InvertColors(SKBitmap bitmap)
+    private static unsafe SKBitmap InvertColors(SKBitmap bitmap)
     {
         var inverted = new SKBitmap(bitmap.Width, bitmap.Height);
 
-        for (var y = 0; y < bitmap.Height; y++)
+        var srcPixels = (uint*)bitmap.GetPixels().ToPointer();
+        var dstPixels = (uint*)inverted.GetPixels().ToPointer();
+        var totalPixels = bitmap.Width * bitmap.Height;
+
+        for (var i = 0; i < totalPixels; i++)
         {
-            for (var x = 0; x < bitmap.Width; x++)
-            {
-                var pixel = bitmap.GetPixel(x, y);
+            var pixel = srcPixels[i];
 
-                // Invert RGB channels, preserve alpha
-                var invertedPixel = new SKColor(
-                    (byte)(255 - pixel.Red),
-                    (byte)(255 - pixel.Green),
-                    (byte)(255 - pixel.Blue),
-                    pixel.Alpha
-                );
+            // Extract ARGB components
+            var a = (pixel >> 24) & 0xFF;
+            var r = (pixel >> 16) & 0xFF;
+            var g = (pixel >> 8) & 0xFF;
+            var b = pixel & 0xFF;
 
-                inverted.SetPixel(x, y, invertedPixel);
-            }
+            // Invert RGB, preserve alpha
+            r = 255 - r;
+            g = 255 - g;
+            b = 255 - b;
+
+            // Pack back into uint
+            dstPixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
         }
 
         return inverted;
     }
 
-    private SKBitmap RemoveBorder(SKBitmap bitmap)
+    private static SKBitmap RemoveBorder(SKBitmap bitmap, int borderSize)
     {
-        if (BorderSize <= 0 || BorderSize * 2 >= bitmap.Width || BorderSize * 2 >= bitmap.Height)
+        if (borderSize <= 0 || borderSize * 2 >= bitmap.Width || borderSize * 2 >= bitmap.Height)
         {
             return bitmap;
         }
 
-        var width = bitmap.Width - (BorderSize * 2);
-        var height = bitmap.Height - (BorderSize * 2);
+        var width = bitmap.Width - (borderSize * 2);
+        var height = bitmap.Height - (borderSize * 2);
 
         var cropped = new SKBitmap(width, height);
         using (var canvas = new SKCanvas(cropped))
         {
-            var srcRect = new SKRect(BorderSize, BorderSize, bitmap.Width - BorderSize, bitmap.Height - BorderSize);
-            var destRect = new SKRect(0, 0, width, height);
-            canvas.DrawBitmap(bitmap, srcRect, destRect);
+            var srcRect = new SKRect(borderSize, borderSize, bitmap.Width - borderSize, bitmap.Height - borderSize);
+            var destinationRect = new SKRect(0, 0, width, height);
+            canvas.DrawBitmap(bitmap, srcRect, destinationRect);
         }
 
         return cropped;
     }
 
-    private SKBitmap BinarizeOtsu(SKBitmap bitmap)
+    private static unsafe SKBitmap BinarizeOtsu(SKBitmap bitmap)
     {
-        // Convert to grayscale first
-        var grayscale = new SKBitmap(bitmap.Width, bitmap.Height);
-        for (var y = 0; y < bitmap.Height; y++)
-        {
-            for (var x = 0; x < bitmap.Width; x++)
-            {
-                var pixel = bitmap.GetPixel(x, y);
-                byte gray = (byte)(0.299 * pixel.Red + 0.587 * pixel.Green + 0.114 * pixel.Blue);
-                grayscale.SetPixel(x, y, new SKColor(gray, gray, gray, pixel.Alpha));
-            }
-        }
+        var width = bitmap.Width;
+        var height = bitmap.Height;
+        var totalPixels = width * height;
 
-        // Calculate histogram
+        // Convert to grayscale and build histogram in one pass
+        var grayscale = new SKBitmap(width, height);
+        var srcPixels = (uint*)bitmap.GetPixels().ToPointer();
+        var grayPixels = (uint*)grayscale.GetPixels().ToPointer();
         var histogram = new int[256];
-        for (var y = 0; y < grayscale.Height; y++)
+
+        for (var i = 0; i < totalPixels; i++)
         {
-            for (var x = 0; x < grayscale.Width; x++)
-            {
-                var pixel = grayscale.GetPixel(x, y);
-                histogram[pixel.Red]++;
-            }
+            var pixel = srcPixels[i];
+
+            var a = (pixel >> 24) & 0xFF;
+            var r = (pixel >> 16) & 0xFF;
+            var g = (pixel >> 8) & 0xFF;
+            var b = pixel & 0xFF;
+
+            // Convert to grayscale using standard luminance formula
+            var gray = (byte)(0.299 * r + 0.587 * g + 0.114 * b);
+
+            grayPixels[i] =(uint)( (a << 24) | (gray << 16) | (gray << 8) | gray);
+            histogram[gray]++;
         }
 
         // Calculate Otsu's threshold
-        int total = grayscale.Width * grayscale.Height;
         float sum = 0;
         for (var i = 0; i < 256; i++)
         {
@@ -168,7 +181,7 @@ public class PreProcessingSettings
 
         float sumB = 0;
         int wB = 0;
-        int wF = 0;
+        int wF;
         float maxVariance = 0;
         int threshold = 0;
 
@@ -177,7 +190,7 @@ public class PreProcessingSettings
             wB += histogram[i];
             if (wB == 0) continue;
 
-            wF = total - wB;
+            wF = totalPixels - wB;
             if (wF == 0) break;
 
             sumB += i * histogram[i];
@@ -194,15 +207,17 @@ public class PreProcessingSettings
         }
 
         // Apply threshold
-        var binarized = new SKBitmap(grayscale.Width, grayscale.Height);
-        for (var y = 0; y < grayscale.Height; y++)
+        var binarized = new SKBitmap(width, height);
+        var binPixels = (uint*)binarized.GetPixels().ToPointer();
+
+        for (var i = 0; i < totalPixels; i++)
         {
-            for (var x = 0; x < grayscale.Width; x++)
-            {
-                var pixel = grayscale.GetPixel(x, y);
-                byte value = pixel.Red >= threshold ? (byte)255 : (byte)0;
-                binarized.SetPixel(x, y, new SKColor(value, value, value, pixel.Alpha));
-            }
+            var pixel = grayPixels[i];
+            var gray = (pixel >> 16) & 0xFF;
+            var a = (pixel >> 24) & 0xFF;
+
+            var value = gray >= threshold ? 255u : 0u;
+            binPixels[i] = (a << 24) | (value << 16) | (value << 8) | value;
         }
 
         return binarized;

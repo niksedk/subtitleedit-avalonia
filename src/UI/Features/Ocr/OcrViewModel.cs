@@ -675,14 +675,16 @@ public partial class OcrViewModel : ObservableObject
             return;
         }
 
+        var selectedItem = SelectedOcrSubtitleItem;
+        if (selectedItem == null)
+        {
+            return;
+        }
+
         var result = await _windowService
             .ShowDialogAsync<PreProcessingWindow, PreProcessingViewModel>(Window, vm =>
             {
-                var item = SelectedOcrSubtitleItem;
-                if (item != null)
-                {
-                    vm.Initialize(_preProcessingSettings, item.GetSkBitmap());
-                }
+                vm.Initialize(_preProcessingSettings, selectedItem.GetSkBitmapClean());
             });
 
         if (result.OkPressed)
@@ -693,11 +695,17 @@ public partial class OcrViewModel : ObservableObject
                 item.PreProcessingSettings = _preProcessingSettings;
             }
 
-            HasPreProcessingSettings = 
-                _preProcessingSettings.CropTransparentColors || 
-                _preProcessingSettings.InverseColors || 
-                _preProcessingSettings.Binarize || 
+            HasPreProcessingSettings =
+                _preProcessingSettings.CropTransparentColors ||
+                _preProcessingSettings.InverseColors ||
+                _preProcessingSettings.Binarize ||
                 _preProcessingSettings.RemoveBorders;
+
+            var tempIdx = OcrSubtitleItems.IndexOf(selectedItem);
+            var temp = OcrSubtitleItems.ToList();
+            OcrSubtitleItems.Clear();
+            OcrSubtitleItems.AddRange(temp);
+            SelectAndScrollToRow(tempIdx);
         }
     }
 
