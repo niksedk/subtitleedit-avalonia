@@ -716,10 +716,7 @@ public partial class OcrViewModel : ObservableObject
     private void UpdateImagePreProcessingStatus()
     {
         Dispatcher.UIThread.Post(() =>
-        {
-            // Delay 50 ms  
-            Task.Delay(150).Wait();
-            
+        {           
             if (_preProcessingSettings == null)
             {
                 HasPreProcessingSettings = false;

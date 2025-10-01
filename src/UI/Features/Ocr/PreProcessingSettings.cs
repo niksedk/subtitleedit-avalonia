@@ -5,10 +5,16 @@ namespace Nikse.SubtitleEdit.Features.Ocr;
 public class PreProcessingSettings
 {
     public bool CropTransparentColors { get; set; }
+    
     public bool InverseColors { get; set; }
+    
     public bool Binarize { get; set; }
+    
     public bool RemoveBorders { get; set; }
     public int BorderSize { get; set; } = 2;
+
+    public bool ToOneColor { get; set; }
+    public int OneColorDarknessThreshold { get; set; } = 128; // 0-255, pixels darker than this become transparent
 
     public SKBitmap PreProcess(SKBitmap bitmap)
     {
@@ -32,6 +38,11 @@ public class PreProcessingSettings
         if (InverseColors)
         {
             bmp = InvertColors(bmp);
+        }
+
+        if (ToOneColor)
+        {
+            bmp = ConvertToOneColor(bmp, OneColorDarknessThreshold);
         }
 
         if (Binarize)
@@ -121,6 +132,40 @@ public class PreProcessingSettings
         }
 
         return inverted;
+    }
+
+    private static unsafe SKBitmap ConvertToOneColor(SKBitmap bitmap, int threshold)
+    {
+        var result = new SKBitmap(bitmap.Width, bitmap.Height);
+
+        var srcPixels = (uint*)bitmap.GetPixels().ToPointer();
+        var dstPixels = (uint*)result.GetPixels().ToPointer();
+        var totalPixels = bitmap.Width * bitmap.Height;
+
+        for (int i = 0; i < totalPixels; i++)
+        {
+            var pixel = srcPixels[i];
+
+            // Extract RGB components
+            var r = (pixel >> 16) & 0xFF;
+            var g = (pixel >> 8) & 0xFF;
+            var b = pixel & 0xFF;
+
+            // Calculate brightness (same formula as grayscale conversion)
+            var brightness = (byte)(0.299 * r + 0.587 * g + 0.114 * b);
+
+            // If brightness is above threshold, make it white; otherwise transparent
+            if (brightness > threshold)
+            {
+                dstPixels[i] = 0xFFFFFFFF; // White with full alpha
+            }
+            else
+            {
+                dstPixels[i] = 0x00000000; // Transparent
+            }
+        }
+
+        return result;
     }
 
     private static SKBitmap RemoveBorder(SKBitmap bitmap, int borderSize)

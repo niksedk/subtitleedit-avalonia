@@ -15,6 +15,8 @@ public partial class PreProcessingViewModel : ObservableObject
     [ObservableProperty] private bool _binarize;
     [ObservableProperty] private bool _removeBorders;
     [ObservableProperty] private int _borderSize = 2;
+    [ObservableProperty] private bool _toOneColor;
+    [ObservableProperty] private int _oneColorDarknessThreshold = 128;
 
     [ObservableProperty] private Bitmap _previewImage;
 
@@ -47,6 +49,8 @@ public partial class PreProcessingViewModel : ObservableObject
         Binarize = preProcessingSettings.Binarize;
         RemoveBorders = preProcessingSettings.RemoveBorders;
         BorderSize = preProcessingSettings.BorderSize;
+        ToOneColor = preProcessingSettings.ToOneColor;
+        OneColorDarknessThreshold = preProcessingSettings.OneColorDarknessThreshold;
 
         SourceBitmap = sourceBitmap.ToAvaloniaBitmap();
         
@@ -89,7 +93,9 @@ public partial class PreProcessingViewModel : ObservableObject
             InverseColors = InverseColors,
             Binarize = Binarize,
             RemoveBorders = RemoveBorders,
-            BorderSize = BorderSize
+            BorderSize = BorderSize,
+            ToOneColor = ToOneColor,
+            OneColorDarknessThreshold = OneColorDarknessThreshold,
         };
     }
 
