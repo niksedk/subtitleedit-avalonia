@@ -1,55 +1,53 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
+using Avalonia.Input;
 
 namespace Nikse.SubtitleEdit.Features.Help;
 
 public class AboutWindow : Window
 {
-    public AboutWindow()
+    public AboutWindow(AboutViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Help.AboutSubtitleEdit;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
+        vm.Window = this;
+        DataContext = vm;
 
         var titleText = new TextBlock
         {
-            Text = $"Subtitle Edit {Se.Version}", 
+            Text = vm.TitleText,
             FontSize = 20,
             FontWeight = FontWeight.Bold,
         };
 
         var licenseText = new TextBlock
         {
-            Text = "Subtitle Edit is free software under the MIT license.",
+            Text = vm.LicenseText,
         };
-        
+
         var uri = new Uri("avares://SubtitleEdit/Assets/about.png");
         var imageAbout = new Image
         {
             Source = new Bitmap(AssetLoader.Open(uri)),
             Stretch = Stretch.Uniform,
-            Margin = new Thickness(10), 
+            Margin = new Thickness(10),
             Width = 128,
             Height = 128,
         };
 
         var descriptionText = new TextBlock
         {
-            Text = "Subtitle Edit 5 previews are early versions of the next major release." + Environment.NewLine +
-           "Some features may be missing, incomplete or experimental." + Environment.NewLine +
-           "We welcome your feedback to help improve the final version." + Environment.NewLine +
-           Environment.NewLine +
-           "Thank you for testing and supporting Subtitle Edit :)",
+            Text = vm.DescriptionText,
             Margin = new Thickness(0, 10, 0, 10)
         };
 
@@ -59,10 +57,7 @@ public class AboutWindow : Window
             Foreground = UiUtil.MakeLinkForeground(),
             Cursor = new Cursor(StandardCursorType.Hand),
         };
-        githubLink.PointerPressed += async (_, _) =>
-        {
-            await Launcher.LaunchUriAsync(new Uri("https://github.com/niksedk/subtitleedit-avalonia"));
-        };
+        githubLink.PointerPressed += (_, _) => vm.OpenGithubCommand.Execute(null);
 
         var panelGithub = new StackPanel
         {
@@ -80,10 +75,7 @@ public class AboutWindow : Window
             Foreground = UiUtil.MakeLinkForeground(),
             Cursor = new Cursor(StandardCursorType.Hand),
         };
-        paypalLink.PointerPressed += async (_, _) =>
-        {
-            await Launcher.LaunchUriAsync(new Uri("https://www.paypal.com/donate/?hosted_button_id=4XEHVLANCQBCU"));
-        };
+        paypalLink.PointerPressed += (_, _) => vm.OpenPaypalCommand.Execute(null);
 
         var githubSponsorLink = new TextBlock
         {
@@ -91,11 +83,7 @@ public class AboutWindow : Window
             Foreground = UiUtil.MakeLinkForeground(),
             Cursor = new Cursor(StandardCursorType.Hand),
         };
-        githubSponsorLink.PointerPressed += async (_, _) =>
-        {
-            await Launcher.LaunchUriAsync(new Uri("https://github.com/sponsors/niksedk"));
-        };      
-
+        githubSponsorLink.PointerPressed += (_, _) => vm.OpenGithubSponsorCommand.Execute(null);
 
         var panelDonate = new StackPanel
         {
@@ -109,8 +97,7 @@ public class AboutWindow : Window
             }
         };
 
-        var buttonOk = UiUtil.MakeButtonOk(null);
-        buttonOk.Click += (_, _) => Close();
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonOk);
 
         Content = new StackPanel
@@ -130,13 +117,6 @@ public class AboutWindow : Window
         };
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
-        KeyDown += (_, e) => 
-        {
-            if (e.Key == Key.Escape)
-            {
-                e.Handled = true;
-                Close();
-            }
-        };
+        KeyDown += vm.OnKeyDown;
     }
 }

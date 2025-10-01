@@ -140,7 +140,7 @@ namespace Nikse.SubtitleEdit
 
             aboutMenu.Click += async (sender, e) =>
             {
-                var aboutWindow = new AboutWindow();
+                var aboutWindow = new AboutWindow(new AboutViewModel());
                 if (lifetime.MainWindow != null)
                 {
                     await aboutWindow.ShowDialog(lifetime.MainWindow);

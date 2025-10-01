@@ -620,7 +620,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowAbout()
     {
-        var newWindow = new AboutWindow();
+        var newWindow = new AboutWindow(new AboutViewModel());
         await newWindow.ShowDialog(Window!);
         _shortcutManager.ClearKeys();
     }
