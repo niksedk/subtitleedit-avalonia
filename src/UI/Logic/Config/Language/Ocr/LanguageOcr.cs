@@ -60,6 +60,7 @@ public class LanguageOcr
     public string RemoveBorders { get; set; }
     public string Binarize { get; set; }
     public string BorderSize { get; set; }
+    public string CaptureTopAlign { get; set; }
 
     public LanguageOcr()
     {
@@ -119,5 +120,6 @@ public class LanguageOcr
         RemoveBorders = "Remove borders";
         Binarize = "Binarize";
         BorderSize = "Border size";
+        CaptureTopAlign = "Capture top align";
     }
 }

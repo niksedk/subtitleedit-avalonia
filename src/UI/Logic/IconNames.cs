@@ -81,4 +81,5 @@ internal class IconNames
     public const string Information = "mdi-information";
     public const string Image = "mdi-image";
     public const string ImageCheck = "mdi-image-check";
+    public const string DockTop = "mdi-dock-top";
 }

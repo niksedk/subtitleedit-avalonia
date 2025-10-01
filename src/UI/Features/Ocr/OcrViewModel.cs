@@ -103,6 +103,7 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<GuessUsedItem> _allGuesses;
     [ObservableProperty] private GuessUsedItem? _selectedAllGuess;
     [ObservableProperty] private bool _hasPreProcessingSettings;
+    [ObservableProperty] private bool _hasCaptureTopAlign;
 
     public Window? Window { get; set; }
     public DataGrid SubtitleGrid { get; set; }
@@ -666,18 +667,25 @@ public partial class OcrViewModel : ObservableObject
         }
     }
 
+    [RelayCommand]
+    private void ToggleTopAlign()
+    {
+        HasCaptureTopAlign = !HasCaptureTopAlign;
+    }
 
     [RelayCommand]
     private async Task ShowPreProcessing()
     {
         if (Window == null)
         {
+            UpdateImagePreProcessingStatus();
             return;
         }
 
         var selectedItem = SelectedOcrSubtitleItem;
         if (selectedItem == null)
         {
+            UpdateImagePreProcessingStatus();
             return;
         }
 
@@ -694,19 +702,36 @@ public partial class OcrViewModel : ObservableObject
             {
                 item.PreProcessingSettings = _preProcessingSettings;
             }
-
-            HasPreProcessingSettings =
-                _preProcessingSettings.CropTransparentColors ||
-                _preProcessingSettings.InverseColors ||
-                _preProcessingSettings.Binarize ||
-                _preProcessingSettings.RemoveBorders;
-
+            
             var tempIdx = OcrSubtitleItems.IndexOf(selectedItem);
             var temp = OcrSubtitleItems.ToList();
             OcrSubtitleItems.Clear();
             OcrSubtitleItems.AddRange(temp);
             SelectAndScrollToRow(tempIdx);
         }
+        
+        UpdateImagePreProcessingStatus();
+    }
+
+    private void UpdateImagePreProcessingStatus()
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            // Delay 50 ms  
+            Task.Delay(150).Wait();
+            
+            if (_preProcessingSettings == null)
+            {
+                HasPreProcessingSettings = false;
+                return;
+            }
+
+            HasPreProcessingSettings =
+                _preProcessingSettings.CropTransparentColors ||
+                _preProcessingSettings.InverseColors ||
+                _preProcessingSettings.Binarize ||
+                _preProcessingSettings.RemoveBorders;
+        });
     }
 
     [RelayCommand]

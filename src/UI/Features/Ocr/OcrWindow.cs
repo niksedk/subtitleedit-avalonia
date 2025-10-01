@@ -12,6 +12,8 @@ using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
+using Projektanker.Icons.Avalonia;
+using MenuItem = Avalonia.Controls.MenuItem;
 
 namespace Nikse.SubtitleEdit.Features.Ocr;
 
@@ -86,14 +88,29 @@ public class OcrWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        var buttonPreProcessing = UiUtil.MakeButton(vm.ShowPreProcessingCommand, IconNames.Image)
-            .WithRightAlignment()
-            .WithBindIsVisible(nameof(vm.HasPreProcessingSettings), new InverseBooleanConverter());
-        ToolTip.SetTip(buttonPreProcessing, Se.Language.Ocr.ImagePreProcessing);
-        var buttonPreProcessingActive = UiUtil.MakeButton(vm.ShowPreProcessingCommand, IconNames.ImageCheck)
-            .WithRightAlignment()
-            .WithBindIsVisible(nameof(vm.HasPreProcessingSettings));
-        ToolTip.SetTip(buttonPreProcessingActive, Se.Language.Ocr.ImagePreProcessing); 
+        var toggleButtonCaptureTopAlign = new ToggleButton
+        {
+            Command = vm.ToggleTopAlignCommand,
+        };
+        Attached.SetIcon(toggleButtonCaptureTopAlign, IconNames.DockTop);
+        ToolTip.SetTip(toggleButtonCaptureTopAlign, Se.Language.Ocr.CaptureTopAlign);
+        var toggleButtonPreProcessing = new ToggleButton
+        {
+            Command = vm.ShowPreProcessingCommand,
+        };
+        toggleButtonPreProcessing.Bind(ToggleButton.IsCheckedProperty, new Binding(nameof(vm.HasPreProcessingSettings)));
+        Attached.SetIcon(toggleButtonPreProcessing, IconNames.Image);
+        ToolTip.SetTip(toggleButtonPreProcessing, Se.Language.Ocr.ImagePreProcessing);
+        var panelRight = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Children =
+            {
+                toggleButtonCaptureTopAlign,
+                toggleButtonPreProcessing,                
+            }
+        };
 
         var comboBoxEngines = UiUtil.MakeComboBox(vm.OcrEngines, vm, nameof(vm.SelectedOcrEngine))
             .WithMarginRight(10)
@@ -191,8 +208,7 @@ public class OcrWindow : Window
         };
 
         grid.Add(panel, 0);
-        grid.Add(buttonPreProcessing, 0);
-        grid.Add(buttonPreProcessingActive, 0);
+        grid.Add(panelRight, 0);
 
         return grid;
     }
