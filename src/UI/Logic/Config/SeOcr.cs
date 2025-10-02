@@ -33,6 +33,7 @@ public class SeOcr
     {
         Engine = "nOCR";
         DoFixOcrErrors = true;
+        DoTryToGuessUnknownWords = true;
 
         NOcrDatabase = "Latin";
         NOcrMaxWrongPixels = 25;
