@@ -429,8 +429,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
         var subtitle = Subtitles[i];
         var imageParameter = new ImageParameter
         {
-            Alignment = SelectedAlignment.Alignment,
-            ContentAlignment = SelectedContentAlignment.ContentAlignment,
+            Alignment = GetContentAlignment(subtitle.Text,SelectedAlignment.Alignment),
+            ContentAlignment =  SelectedContentAlignment.ContentAlignment,
             PaddingLeftRight = SelectedPaddingLeftRight,
             PaddingTopBottom = SelectedPaddingTopBottom,
             Index = i,
@@ -455,6 +455,57 @@ public partial class ExportImageBasedViewModel : ObservableObject
         };
 
         return imageParameter;
+    }
+
+    private ExportAlignment GetContentAlignment(string text, ExportAlignment alignment)
+    {
+        var s = text.Trim();
+        if (s.StartsWith("{\\an1"))
+        {
+            return ExportAlignment.BottomLeft;
+        }
+
+        if (s.StartsWith("{\\an2"))
+        {
+            return ExportAlignment.BottomCenter;
+        }
+
+        if (s.StartsWith("{\\an3"))
+        {
+            return ExportAlignment.BottomRight;
+        }
+
+        if (s.StartsWith("{\\an4"))
+        {
+            return ExportAlignment.MiddleLeft;
+        }
+
+        if (s.StartsWith("{\\an5"))
+        {
+            return ExportAlignment.MiddleCenter;
+        }
+
+        if (s.StartsWith("{\\an6"))
+        {
+            return ExportAlignment.MiddleRight;
+        }
+
+        if (s.StartsWith("{\\an7"))
+        {
+            return ExportAlignment.TopLeft;
+        }
+
+        if (s.StartsWith("{\\an8"))
+        {
+            return ExportAlignment.TopCenter;
+        }
+
+        if (s.StartsWith("{\\an9"))
+        {
+            return ExportAlignment.TopRight;
+        }
+
+        return alignment;
     }
 
     [RelayCommand]
