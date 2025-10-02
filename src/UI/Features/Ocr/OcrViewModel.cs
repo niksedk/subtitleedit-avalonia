@@ -1346,22 +1346,18 @@ public partial class OcrViewModel : ObservableObject
             _ocrFixEngine.IsLoaded() && DoFixOcrErrors)
         {
             var result = _ocrFixEngine.FixOcrErrors(i, DoTryToGuessUnknownWords);
+            var alignment = GetAlignment(item);
+            if (!string.IsNullOrEmpty(alignment))
+            {
+                result.Words.Insert(0, new OcrFixLinePartResult { Word = alignment, IsSpellCheckedOk = null });
+            }
             var resultText = result.GetText();
+
             Dispatcher.UIThread.Post(() =>
             {
+                CurrentText = resultText;
+                item.Text = resultText;
                 item.FixResult = result;
-                if (resultText != item.Text)
-                {
-                    item.Text = resultText;
-                }
-
-                var itemText = SetAlignment(item);
-                if (itemText != item.Text)
-                {
-                    item.Text = itemText;
-                }
-
-                CurrentText = item.Text;
             });
 
             if (!string.IsNullOrEmpty(result.ReplacementUsed.From))
@@ -1391,28 +1387,24 @@ public partial class OcrViewModel : ObservableObject
         }
         else
         {
-            item.FixResult = new OcrFixLineResult
+            var alignment = GetAlignment(item);
+            Dispatcher.UIThread.Post(() =>
             {
-                LineIndex = i,
-                Words = new List<OcrFixLinePartResult> { new() { Word = item.Text, IsSpellCheckedOk = null } },
-            };
-
-            var itemText = SetAlignment(item);
-            if (itemText != item.Text)
-            {
-                Dispatcher.UIThread.Post(() =>
+                item.Text = alignment + item.Text;
+                CurrentText = item.Text;
+                item.FixResult = new OcrFixLineResult
                 {
-                    item.Text = itemText;
-                    CurrentText = item.Text;
-                });
-            }
+                    LineIndex = i,
+                    Words = new List<OcrFixLinePartResult> { new() { Word = item.Text, IsSpellCheckedOk = null } },
+                };
+            });
         }
 
         SelectAndScrollToRow(i);
         return unknownWords;
     }
 
-    private string SetAlignment(OcrSubtitleItem item)
+    private string GetAlignment(OcrSubtitleItem item)
     {
         if (HasCaptureTopAlign)
         {
@@ -1422,11 +1414,11 @@ public partial class OcrViewModel : ObservableObject
             var screenHeight = item.GetScreenSize().Height;
             if (top < screenHeight * 0.4)
             {
-                return "{\\an8}" + item.Text;
+                return "{\\an8}";
             }
         }
 
-        return item.Text;
+        return string.Empty;
     }
 
     private bool InitNOcrDb()
