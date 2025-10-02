@@ -62,6 +62,8 @@ public class LanguageOcr
     public string BorderSize { get; set; }
     public string CaptureTopAlign { get; set; }
     public string OcrImage { get; set; }
+    public string OneColor { get; set; }
+    public string DarknessThreshold { get; set; }
 
     public LanguageOcr()
     {
@@ -123,5 +125,7 @@ public class LanguageOcr
         BorderSize = "Border size";
         CaptureTopAlign = "Capture top align";
         OcrImage = "OCR image";
+        OneColor = "One color (white)";
+        DarknessThreshold = "Darkness threshold";
     }
 }

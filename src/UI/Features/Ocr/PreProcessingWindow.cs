@@ -46,6 +46,28 @@ public class PreProcessingWindow : Window
         };
         checkBoxBinarize.IsCheckedChanged += (s, e) => vm.RequestPreviewUpdate();
 
+        var checkBoxOneColor = new CheckBox
+        {
+            Content = Se.Language.Ocr.OneColor,
+            Margin = new Thickness(0, 0, 55, 0),
+            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ToOneColor)) { Mode = BindingMode.TwoWay },
+        };
+        checkBoxOneColor.IsCheckedChanged += (s, e) => vm.RequestPreviewUpdate(); 
+        var labelOneColorThreshold = UiUtil.MakeLabel(Se.Language.Ocr.DarknessThreshold);
+        var numericUpDownOneColorThreshold = UiUtil.MakeNumericUpDownInt(1, 255, 200, vm, nameof(vm.OneColorDarknessThreshold))
+            .WithBindEnabled(nameof(vm.ToOneColor));
+        numericUpDownOneColorThreshold.PropertyChanged += (s, e) => vm.RequestPreviewUpdate();
+        var panelOneColorThreshold = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 5,
+            Children =
+            {
+                labelOneColorThreshold,
+                numericUpDownOneColorThreshold,
+            }
+        };
+
         var checkBoxRemoveBorders = new CheckBox
         {
             Content = Se.Language.Ocr.RemoveBorders,
@@ -57,13 +79,12 @@ public class PreProcessingWindow : Window
         var numericUpDownBorderSize = UiUtil.MakeNumericUpDownInt(1, 20, 200, vm, nameof(vm.BorderSize))
             .WithBindEnabled(nameof(vm.RemoveBorders));
         numericUpDownBorderSize.PropertyChanged += (s, e) => vm.RequestPreviewUpdate();
-        var panelRemoveBorder = new StackPanel
+        var panelRemoveBorderSize = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Spacing = 5,
             Children =
             {
-                checkBoxRemoveBorders,
                 labelBorderSize,
                 numericUpDownBorderSize
             }
@@ -80,13 +101,14 @@ public class PreProcessingWindow : Window
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
@@ -97,12 +119,18 @@ public class PreProcessingWindow : Window
         };
 
         grid.Add(checkBoxCropTransparent, 0);
-        grid.Add(checkBoxInverseColors, 1);
-        grid.Add(checkBoxBinarize, 2);
-        grid.Add(panelRemoveBorder, 3);
-        grid.Add(MakeOriginalImageView(vm), 4);
-        grid.Add(MakePostProcessedImageView(vm), 5);
-        grid.Add(panelButtons, 6);
+        grid.Add(checkBoxInverseColors, 0,1);
+        grid.Add(checkBoxBinarize, 0,2);
+        
+        grid.Add(checkBoxOneColor, 1);
+        grid.Add(panelOneColorThreshold, 1,1, 1, 2);
+        
+        grid.Add(checkBoxRemoveBorders, 2);
+        grid.Add(panelRemoveBorderSize, 2,1, 1, 2);
+        
+        grid.Add(MakeOriginalImageView(vm), 3, 0,1, 3 );
+        grid.Add(MakePostProcessedImageView(vm), 4, 0, 1, 3);
+        grid.Add(panelButtons, 5, 0,1,3);
 
         Content = grid;
 
@@ -125,7 +153,7 @@ public class PreProcessingWindow : Window
         return UiUtil.MakeBorderForControl(image);
     }
 
-    private static Control MakePostProcessedImageView(PreProcessingViewModel vm)
+    private static Border MakePostProcessedImageView(PreProcessingViewModel vm)
     {
         var image = new Image
         {
