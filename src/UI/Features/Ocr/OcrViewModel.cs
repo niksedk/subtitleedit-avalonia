@@ -5,7 +5,9 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DynamicData;
+using Nikse.SubtitleEdit.Core.AudioToText;
 using Nikse.SubtitleEdit.Core.BluRaySup;
+using Nikse.SubtitleEdit.Core.Cea708.Commands;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4.Boxes;
@@ -702,21 +704,21 @@ public partial class OcrViewModel : ObservableObject
             {
                 item.PreProcessingSettings = _preProcessingSettings;
             }
-            
+
             var tempIdx = OcrSubtitleItems.IndexOf(selectedItem);
             var temp = OcrSubtitleItems.ToList();
             OcrSubtitleItems.Clear();
             OcrSubtitleItems.AddRange(temp);
             SelectAndScrollToRow(tempIdx);
         }
-        
+
         UpdateImagePreProcessingStatus();
     }
 
     private void UpdateImagePreProcessingStatus()
     {
         Dispatcher.UIThread.Post(() =>
-        {           
+        {
             if (_preProcessingSettings == null)
             {
                 HasPreProcessingSettings = false;
@@ -1353,6 +1355,12 @@ public partial class OcrViewModel : ObservableObject
                     item.Text = resultText;
                 }
 
+                var itemText = SetAlignment(item);
+                if (itemText != item.Text)
+                {
+                    item.Text = itemText;
+                }
+
                 CurrentText = item.Text;
             });
 
@@ -1388,10 +1396,37 @@ public partial class OcrViewModel : ObservableObject
                 LineIndex = i,
                 Words = new List<OcrFixLinePartResult> { new() { Word = item.Text, IsSpellCheckedOk = null } },
             };
+
+            var itemText = SetAlignment(item);
+            if (itemText != item.Text)
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    item.Text = itemText;
+                    CurrentText = item.Text;
+                });
+            }
         }
 
         SelectAndScrollToRow(i);
         return unknownWords;
+    }
+
+    private string SetAlignment(OcrSubtitleItem item)
+    {
+        if (HasCaptureTopAlign)
+        {
+            var bitmap = item.GetSkBitmap();
+            var height = bitmap.Height;
+            var top = item.GetPosition().Y + height / 2;
+            var screenHeight = item.GetScreenSize().Height;
+            if (top < screenHeight * 0.4)
+            {
+                return "{\\an8}" + item.Text;
+            }
+        }
+
+        return item.Text;
     }
 
     private bool InitNOcrDb()

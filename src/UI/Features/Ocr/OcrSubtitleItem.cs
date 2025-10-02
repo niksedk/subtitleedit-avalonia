@@ -69,6 +69,16 @@ public partial class OcrSubtitleItem : ObservableObject
         return GetSkBitmap().ToAvaloniaBitmap();
     }
 
+    public SKPointI GetPosition()
+    {
+        return _ocrSubtitle.GetPosition(_index);
+    }
+
+    public SKSizeI GetScreenSize()
+    {
+        return _ocrSubtitle.GetScreenSize(_index);
+    }
+
     private OcrFixLineResult? _fixResult;
     public OcrFixLineResult? FixResult
     {
