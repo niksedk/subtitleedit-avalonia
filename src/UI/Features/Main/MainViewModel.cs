@@ -3215,7 +3215,7 @@ public partial class MainViewModel :
         SelectAndScrollToRow(idx);
     }
 
-    private Control? _fullscreenBeforeParent;
+    private Control? _fullScreenBeforeParent;
 
     [RelayCommand]
     private void VideoFullScreen()
@@ -3227,14 +3227,14 @@ public partial class MainViewModel :
         }
 
         var parent = (Control)control.Parent!;
-        _fullscreenBeforeParent = parent;
+        _fullScreenBeforeParent = parent;
         control.RemoveControlFromParent();
         control.IsFullScreen = true;
-        var fullscreenWindow = new FullScreenVideoWindow(control, _videoFileName, () =>
+        var fullScreenWindow = new FullScreenVideoWindow(control, _videoFileName, () =>
         {
-            if (_fullscreenBeforeParent != null)
+            if (_fullScreenBeforeParent != null)
             {
-                control.RemoveControlFromParent().AddControlToParent(_fullscreenBeforeParent);
+                control.RemoveControlFromParent().AddControlToParent(_fullScreenBeforeParent);
             }
 
             control.IsFullScreen = false;
@@ -3244,7 +3244,7 @@ public partial class MainViewModel :
                 VideoPlayerControl.Reload();
             }
         });
-        fullscreenWindow.Show(Window!);
+        fullScreenWindow.Show(Window!);
         _shortcutManager.ClearKeys();
     }
 

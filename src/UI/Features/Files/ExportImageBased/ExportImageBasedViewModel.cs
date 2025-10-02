@@ -434,7 +434,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
             PaddingLeftRight = SelectedPaddingLeftRight,
             PaddingTopBottom = SelectedPaddingTopBottom,
             Index = i,
-            Text = subtitle.Text,
+            Text = HtmlUtil.RemoveAssAlignmentTags(subtitle.Text),
             StartTime = subtitle.StartTime,
             EndTime = subtitle.EndTime,
             FontColor = FontColor.ToSKColor(),
