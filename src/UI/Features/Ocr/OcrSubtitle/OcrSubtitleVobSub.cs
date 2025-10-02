@@ -58,11 +58,13 @@ public class OcrSubtitleVobSub : IOcrSubtitle
 
     public SKPointI GetPosition(int index)
     {
-        return new SKPointI(-1, -1);
+        var position = _vobSubMergedPack[index].GetPosition();  
+        return new SKPointI(position.Left, position.Top);
     }
 
     public SKSizeI GetScreenSize(int index)
     {
-        return new SKSizeI(-1, -1);
+        var screenSize = _vobSubMergedPack[index].GetScreenSize();  
+        return new SKSizeI((int)screenSize.Width, (int)screenSize.Height);
     }
 }

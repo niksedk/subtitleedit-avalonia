@@ -17,29 +17,6 @@ public class OcrSubtitleBluRay : IOcrSubtitle
         Count = pcsDataList.Count;
     }
 
-    public SKPointI GetPosition(int index)
-    {
-        if (index < 0 || index >= _pcsDataList.Count)
-        {
-            return new SKPointI(-1, -1);
-        }
-
-        var position = _pcsDataList[index].GetPosition();   
-        return new SKPointI(position.Left, position.Top);
-    }
-
-    public SKSizeI GetScreenSize(int index)
-    {
-        if (index < 0 || index >= _pcsDataList.Count)
-        {
-            return new SKSizeI(-1, -1);
-        }
-
-        var size = _pcsDataList[index].GetScreenSize();
-        return new SKSizeI((int)size.Width, (int)size.Height);
-    }
-
-
     public SKBitmap GetBitmap(int index)
     {
         if (index < 0 || index >= _pcsDataList.Count)
@@ -75,5 +52,27 @@ public class OcrSubtitleBluRay : IOcrSubtitle
     {
         _pcsDataList.RemoveAt(index);
         Count = _pcsDataList.Count;
+    }
+
+    public SKPointI GetPosition(int index)
+    {
+        if (index < 0 || index >= _pcsDataList.Count)
+        {
+            return new SKPointI(-1, -1);
+        }
+
+        var position = _pcsDataList[index].GetPosition();
+        return new SKPointI(position.Left, position.Top);
+    }
+
+    public SKSizeI GetScreenSize(int index)
+    {
+        if (index < 0 || index >= _pcsDataList.Count)
+        {
+            return new SKSizeI(-1, -1);
+        }
+
+        var size = _pcsDataList[index].GetScreenSize();
+        return new SKSizeI((int)size.Width, (int)size.Height);
     }
 }

@@ -4,6 +4,7 @@ using Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
 
@@ -56,11 +57,13 @@ public class OcrSubtitleMkvDvb : IOcrSubtitle
 
     public SKPointI GetPosition(int index)
     {
-        return new SKPointI(-1, -1);
+        var position = _subtitleImages[index].GetPosition();    
+        return new SKPointI(position.Left, position.Top);
     }
 
     public SKSizeI GetScreenSize(int index)
     {
-        return new SKSizeI(-1, -1);
+        var screenSize = _subtitleImages[index].GetScreenSize();
+        return new SKSizeI((int)screenSize.Width, (int)screenSize.Height);
     }
 }
