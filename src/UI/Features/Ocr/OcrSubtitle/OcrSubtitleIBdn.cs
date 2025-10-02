@@ -302,4 +302,14 @@ public class OcrSubtitleBdn : IOcrSubtitle
         _bdnXmlSubtitle.Paragraphs.RemoveAt(index);
         Count = _bdnXmlSubtitle.Paragraphs.Count;
     }
+
+    public SKPointI GetPosition(int index)
+    {
+        return new SKPointI(-1, -1);
+    }
+
+    public SKSizeI GetScreenSize(int index)
+    {
+        return new SKSizeI(-1, -1);
+    }
 }

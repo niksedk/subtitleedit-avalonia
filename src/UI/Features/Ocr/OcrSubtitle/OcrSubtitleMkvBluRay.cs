@@ -50,4 +50,14 @@ public class OcrSubtitleMkvBluRay : IOcrSubtitle
         _pcsDataList.RemoveAt(index);
         Count = _pcsDataList.Count;
     }
+
+    public SKPointI GetPosition(int index)
+    {
+        return new SKPointI(-1, -1);
+    }
+
+    public SKSizeI GetScreenSize(int index)
+    {
+        return new SKSizeI(-1, -1);
+    }
 }

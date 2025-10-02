@@ -55,4 +55,14 @@ public class OcrSubtitleVobSub : IOcrSubtitle
         _vobSubMergedPack.RemoveAt(index);
         Count = _vobSubMergedPack.Count;
     }
+
+    public SKPointI GetPosition(int index)
+    {
+        return new SKPointI(-1, -1);
+    }
+
+    public SKSizeI GetScreenSize(int index)
+    {
+        return new SKSizeI(-1, -1);
+    }
 }

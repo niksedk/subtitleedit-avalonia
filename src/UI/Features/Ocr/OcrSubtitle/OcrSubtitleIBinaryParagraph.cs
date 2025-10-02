@@ -5,12 +5,12 @@ using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
 
-public class OcrSubtitleIBinaryParagrap : IOcrSubtitle
+public class OcrSubtitleIBinaryParagraph : IOcrSubtitle
 {
     public int Count { get; private set; }
     private readonly IList<IBinaryParagraphWithPosition> _list;
 
-    public OcrSubtitleIBinaryParagrap(IList<IBinaryParagraphWithPosition> list)
+    public OcrSubtitleIBinaryParagraph(IList<IBinaryParagraphWithPosition> list)
     {
         _list = list;
         Count = _list.Count;
@@ -46,5 +46,15 @@ public class OcrSubtitleIBinaryParagrap : IOcrSubtitle
     {
         _list.RemoveAt(index);
         Count = _list.Count;
+    }
+
+    public SKPointI GetPosition(int index)
+    {
+        return new SKPointI(-1, -1);
+    }
+
+    public SKSizeI GetScreenSize(int index)
+    {
+        return new SKSizeI(-1, -1);
     }
 }

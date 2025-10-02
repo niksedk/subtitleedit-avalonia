@@ -51,4 +51,14 @@ public class OcrSubtitleMp4VobSub : IOcrSubtitle
         _paragraphs.RemoveAt(index);
         Count = _paragraphs.Count;
     }
+
+    public SKPointI GetPosition(int index)
+    {
+        return new SKPointI(-1, -1);
+    }
+
+    public SKSizeI GetScreenSize(int index)
+    {
+        return new SKSizeI(-1, -1);
+    }
 }

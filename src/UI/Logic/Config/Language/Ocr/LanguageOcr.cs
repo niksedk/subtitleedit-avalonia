@@ -61,6 +61,7 @@ public class LanguageOcr
     public string Binarize { get; set; }
     public string BorderSize { get; set; }
     public string CaptureTopAlign { get; set; }
+    public string OcrImage { get; set; }
 
     public LanguageOcr()
     {
@@ -121,5 +122,6 @@ public class LanguageOcr
         Binarize = "Binarize";
         BorderSize = "Border size";
         CaptureTopAlign = "Capture top align";
+        OcrImage = "OCR image";
     }
 }

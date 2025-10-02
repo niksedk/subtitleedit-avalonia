@@ -53,4 +53,14 @@ public class OcrSubtitleMkvDvb : IOcrSubtitle
         _subtitleImages.RemoveAt(index);
         Count = _subtitleImages.Count;
     }
+
+    public SKPointI GetPosition(int index)
+    {
+        return new SKPointI(-1, -1);
+    }
+
+    public SKSizeI GetScreenSize(int index)
+    {
+        return new SKSizeI(-1, -1);
+    }
 }

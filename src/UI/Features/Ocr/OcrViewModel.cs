@@ -457,7 +457,7 @@ public partial class OcrViewModel : ObservableObject
             return;
         }
 
-        await _windowService.ShowDialogAsync<ShowImageWindow, ShowImageViewModel>(Window!, vm => { vm.Initialize("OCR image", item.GetBitmap()); });
+        await _windowService.ShowDialogAsync<ShowImageWindow, ShowImageViewModel>(Window!, vm => { vm.Initialize(Se.Language.Ocr.OcrImage, item.GetBitmap()); });
     }
 
     [RelayCommand]
@@ -1797,7 +1797,7 @@ public partial class OcrViewModel : ObservableObject
     public void Initialize(IList<IBinaryParagraphWithPosition> list, string fileName)
     {
         Title = string.Format(Se.Language.Ocr.OcrX, fileName);
-        _ocrSubtitle = new OcrSubtitleIBinaryParagrap(list);
+        _ocrSubtitle = new OcrSubtitleIBinaryParagraph(list);
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
     }
 

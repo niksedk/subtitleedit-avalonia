@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using Nikse.SubtitleEdit.Core.BluRaySup;
+﻿using Nikse.SubtitleEdit.Core.BluRaySup;
 using SkiaSharp;
+using System;
+using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
 
@@ -16,6 +16,29 @@ public class OcrSubtitleBluRay : IOcrSubtitle
         _pcsDataList = pcsDataList;
         Count = pcsDataList.Count;
     }
+
+    public SKPointI GetPosition(int index)
+    {
+        if (index < 0 || index >= _pcsDataList.Count)
+        {
+            return new SKPointI(-1, -1);
+        }
+
+        var position = _pcsDataList[index].GetPosition();   
+        return new SKPointI(position.Left, position.Top);
+    }
+
+    public SKSizeI GetScreenSize(int index)
+    {
+        if (index < 0 || index >= _pcsDataList.Count)
+        {
+            return new SKSizeI(-1, -1);
+        }
+
+        var size = _pcsDataList[index].GetScreenSize();
+        return new SKSizeI((int)size.Width, (int)size.Height);
+    }
+
 
     public SKBitmap GetBitmap(int index)
     {
