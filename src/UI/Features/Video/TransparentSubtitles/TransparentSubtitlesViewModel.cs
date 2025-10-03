@@ -483,12 +483,7 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
             return "Window is null";
         }
 
-        if (FontFactor == null)
-        {
-            return string.Format(Se.Language.General.PleaseEnterAValidValueForX, "Font factor");
-        }
-
-        if (FontFactor < 0.1)
+        if (FontFactor == null  || FontFactor < 0.1)
         {
             return string.Format(Se.Language.General.PleaseEnterAValidValueForX, "Font factor");
         }

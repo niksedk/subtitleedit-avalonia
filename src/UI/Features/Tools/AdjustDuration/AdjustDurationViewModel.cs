@@ -3,11 +3,13 @@ using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 
@@ -176,8 +178,15 @@ public partial class AdjustDurationViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Ok()
+    private async Task Ok()
     {
+        var msg = GetValidationError();
+        if (!string.IsNullOrEmpty(msg))
+        {
+            await MessageBox.Show(Window!, Se.Language.General.Error, msg, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
         SaveSettings();
         OkPressed = true;
         Window?.Close();
@@ -187,6 +196,46 @@ public partial class AdjustDurationViewModel : ObservableObject
     private void Cancel()
     {
         Window?.Close();
+    }
+
+    private string GetValidationError()
+    {
+        if (Window == null)
+        {
+            return "Window is null";
+        }
+
+        if (SelectedAdjustType.Type == AdjustDurationType.Seconds)
+        {
+        }
+        else if (SelectedAdjustType.Type == AdjustDurationType.Percent)
+        {
+            if (AdjustPercent <= 0)
+            {
+                return string.Format(Se.Language.General.PleaseEnterAValidValueForX, "Percent");
+            }
+        }
+        else if (SelectedAdjustType.Type == AdjustDurationType.Fixed)
+        {
+            if (AdjustFixed <= 0)
+            {
+                return string.Format(Se.Language.General.PleaseEnterAValidValueForX, "Fixed value");
+            }
+        }
+        else if (SelectedAdjustType.Type == AdjustDurationType.Recalculate)
+        {
+            if (AdjustRecalculateMaxCharacterPerSecond <= 1)
+            {
+                return string.Format(Se.Language.General.PleaseEnterAValidValueForX, "Max character per second");
+            }
+
+            if (AdjustRecalculateOptimalCharacterPerSecond <= 1)
+            {
+                return string.Format(Se.Language.General.PleaseEnterAValidValueForX, "Optimal character per second");
+            }
+        }
+
+        return string.Empty;
     }
 
     internal void OnKeyDown(KeyEventArgs e)
