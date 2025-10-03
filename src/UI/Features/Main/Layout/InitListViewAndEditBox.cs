@@ -39,6 +39,7 @@ public static class InitListViewAndEditBox
             GridLinesVisibility = UiUtil.GetGridLinesVisibility(),
             VerticalGridLinesBrush = UiUtil.GetBorderBrush(),
             HorizontalGridLinesBrush = UiUtil.GetBorderBrush(),
+            FontSize = Se.Settings.Appearance.SubtitleGridFontSize,
         };
 
         // hack to make drag and drop work on the DataGrid - also on empty rows

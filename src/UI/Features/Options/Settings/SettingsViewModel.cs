@@ -111,6 +111,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _selectedTheme;
     [ObservableProperty] private ObservableCollection<string> _fontNames;
     [ObservableProperty] private string _selectedFontName;
+    [ObservableProperty] private double _subtitleGridFontSize;
     [ObservableProperty] private double _textBoxFontSize;
     [ObservableProperty] private bool _textBoxFontBold;
     [ObservableProperty] private bool _textBoxCenterText;
@@ -244,6 +245,7 @@ public partial class SettingsViewModel : ObservableObject
         ShowToolbarLayout = appearance.ToolbarShowLayout;
         ShowToolbarHelp = appearance.ToolbarShowHelp;
         ShowToolbarEncoding = appearance.ToolbarShowEncoding;
+        SubtitleGridFontSize = appearance.SubtitleGridFontSize;
         TextBoxFontSize = appearance.SubtitleTextBoxFontSize;
         TextBoxFontBold = appearance.SubtitleTextBoxFontBold;
         TextBoxCenterText = appearance.SubtitleTextBoxCenterText;
@@ -340,6 +342,7 @@ public partial class SettingsViewModel : ObservableObject
         appearance.ToolbarShowLayout = ShowToolbarLayout;
         appearance.ToolbarShowHelp = ShowToolbarHelp;
         appearance.ToolbarShowEncoding = ShowToolbarEncoding;
+        appearance.SubtitleGridFontSize = SubtitleGridFontSize;
         appearance.SubtitleTextBoxFontSize = TextBoxFontSize;
         appearance.SubtitleTextBoxFontBold = TextBoxFontBold;
         appearance.SubtitleTextBoxCenterText = TextBoxCenterText;
