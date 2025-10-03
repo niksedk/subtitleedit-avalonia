@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language;
+﻿using System;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
 public class LanguageGeneral
 {
@@ -396,6 +398,7 @@ public class LanguageGeneral
     public string Codec { get; set; }
     public string Forced { get; set; }
     public string TextOrImage { get; set; }
+    public string PleaseEnterAValidValueForX { get; internal set; }
 
     public LanguageGeneral()
     {
@@ -792,5 +795,6 @@ public class LanguageGeneral
         Codec = "Codec";
         Forced = "Forced";
         TextOrImage = "Text/image";
+        PleaseEnterAValidValueForX = "Please enter a valid value for \"{0}\"";
     }
 }

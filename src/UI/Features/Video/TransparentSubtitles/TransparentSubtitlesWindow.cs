@@ -138,8 +138,8 @@ public class TransparentSubtitlesWindow : Window
 
         var labelOutline = UiUtil.MakeLabel(string.Empty)
             .WithBindText(vm, nameof(vm.FontOutlineText));
-        var textBoxBoxWidth = UiUtil.MakeTextBox(50, vm, nameof(vm.SelectedFontOutline));
-        textBoxBoxWidth.TextChanged += vm.TextBoxChanged;
+        var textBoxBoxWidth = UiUtil.MakeNumericUpDownOneDecimal(0, 50, 130, vm, nameof(vm.SelectedFontOutline));
+        textBoxBoxWidth.ValueChanged += vm.NumericUpDownChanged;
         var colorPickerBoxColor = UiUtil.MakeColorPicker(vm, nameof(vm.FontOutlineColor));
         colorPickerBoxColor.ColorChanged += vm.ColorChanged;
         var panelBox = new StackPanel
@@ -157,8 +157,8 @@ public class TransparentSubtitlesWindow : Window
 
         var labelShadow = UiUtil.MakeLabel(Se.Language.General.Shadow)
             .WithBindText(vm, nameof(vm.FontShadowText));
-        var textBoxShadowWidth = UiUtil.MakeTextBox(50, vm, nameof(vm.SelectedFontShadowWidth));
-        textBoxShadowWidth.TextChanged += vm.TextBoxChanged;
+        var textBoxShadowWidth = UiUtil.MakeNumericUpDownOneDecimal(0, 50, 130, vm, nameof(vm.SelectedFontShadowWidth));
+        textBoxShadowWidth.ValueChanged += vm.NumericUpDownChanged;
         var colorPickerShadowColor = UiUtil.MakeColorPicker(vm, nameof(vm.FontShadowColor));
         colorPickerShadowColor.ColorChanged += vm.ColorChanged;
         var panelShadow = new StackPanel
@@ -184,11 +184,11 @@ public class TransparentSubtitlesWindow : Window
 
         var labelMargin = UiUtil.MakeLabel(Se.Language.General.Margin);
         var labelMarginHorizontal = UiUtil.MakeLabel(Se.Language.General.Horizontal);
-        var textBoxMarginHorizontal = UiUtil.MakeTextBox(50, vm, nameof(vm.FontMarginHorizontal));
-        textBoxMarginHorizontal.TextChanged += vm.TextBoxChanged;
+        var textBoxMarginHorizontal = UiUtil.MakeNumericUpDownInt(0, 50, 0, 130, vm, nameof(vm.FontMarginHorizontal));
+        textBoxMarginHorizontal.ValueChanged += vm.NumericUpDownChanged;
         var labelMarginVertical = UiUtil.MakeLabel(Se.Language.General.Vertical).WithMarginLeft(5);
-        var textBoxMarginVertical = UiUtil.MakeTextBox(50, vm, nameof(vm.FontMarginVertical));
-        textBoxMarginVertical.TextChanged += vm.TextBoxChanged;
+        var textBoxMarginVertical = UiUtil.MakeNumericUpDownInt(0, 50, 0, 130, vm, nameof(vm.FontMarginVertical));
+        textBoxMarginVertical.ValueChanged += vm.NumericUpDownChanged;
         var panelMargin = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -279,9 +279,9 @@ public class TransparentSubtitlesWindow : Window
     private static Border MakeVideoSettingsView(TransparentSubtitlesViewModel vm)
     {
         var labelResolution = UiUtil.MakeLabel(Se.Language.General.Resolution);
-        var textBoxWidth = UiUtil.MakeTextBox(100, vm, nameof(vm.VideoWidth));
+        var textBoxWidth = UiUtil.MakeNumericUpDownInt(0, 10_000, 0, 130, vm, nameof(vm.VideoWidth));
         var labelX = UiUtil.MakeLabel("x");
-        var textBoxHeight = UiUtil.MakeTextBox(100, vm, nameof(vm.VideoHeight));
+        var textBoxHeight = UiUtil.MakeNumericUpDownInt(0, 10_000, 0, 130, vm, nameof(vm.VideoHeight));
         var buttonResolution = UiUtil.MakeButtonBrowse(vm.BrowseResolutionCommand);
         var panelResolution = new StackPanel
         {

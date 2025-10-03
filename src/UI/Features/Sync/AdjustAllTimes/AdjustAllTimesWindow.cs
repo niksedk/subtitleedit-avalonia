@@ -75,7 +75,7 @@ public class AdjustAllTimesWindow : Window
             },
         };
 
-        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
+        var buttonOk = UiUtil.MakeButtonDone(vm.OkCommand);
         var buttonPanel = UiUtil.MakeButtonBar(buttonOk);
         var grid = new Grid
         {

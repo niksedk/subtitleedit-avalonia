@@ -20,6 +20,16 @@ public class NullableIntConverter : IValueConverter
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
+        if (value is decimal decimalValue)
+        {
+            return (int)decimalValue;
+        }
+
+        if (value is double doubleValue)
+        {
+            return (int)doubleValue;
+        }
+
         if (value is int intValue)
         {
             return intValue;

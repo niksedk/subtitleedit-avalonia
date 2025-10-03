@@ -35,12 +35,12 @@ public partial class BurnInViewModel : ObservableObject
     [ObservableProperty] private string _videoFileSize;
     [ObservableProperty] private ObservableCollection<string> _fontNames;
     [ObservableProperty] private string _selectedFontName;
-    [ObservableProperty] private double _fontFactor;
+    [ObservableProperty] private double? _fontFactor;
     [ObservableProperty] private string _fontFactorText;
     [ObservableProperty] private bool _fontIsBold;
-    [ObservableProperty] private decimal _selectedFontOutline;
+    [ObservableProperty] private decimal? _selectedFontOutline;
     [ObservableProperty] private string _fontOutlineText;
-    [ObservableProperty] private decimal _selectedFontShadowWidth;
+    [ObservableProperty] private decimal? _selectedFontShadowWidth;
     [ObservableProperty] private string _fontShadowText;
     [ObservableProperty] private ObservableCollection<FontBoxItem> _fontBoxTypes;
     [ObservableProperty] private FontBoxItem _selectedFontBoxType;
@@ -48,14 +48,14 @@ public partial class BurnInViewModel : ObservableObject
     [ObservableProperty] private Color _fontBoxColor;
     [ObservableProperty] private Color _fontOutlineColor;
     [ObservableProperty] private Color _fontShadowColor;
-    [ObservableProperty] private int _fontMarginHorizontal;
-    [ObservableProperty] private int _fontMarginVertical;
+    [ObservableProperty] private int? _fontMarginHorizontal;
+    [ObservableProperty] private int? _fontMarginVertical;
     [ObservableProperty] private bool _fontFixRtl;
     [ObservableProperty] private ObservableCollection<AlignmentItem> _fontAlignments;
     [ObservableProperty] private AlignmentItem _selectedFontAlignment;
     [ObservableProperty] private string _fontAssaInfo;
-    [ObservableProperty] private int _videoWidth;
-    [ObservableProperty] private int _videoHeight;
+    [ObservableProperty] private int? _videoWidth;
+    [ObservableProperty] private int? _videoHeight;
     [ObservableProperty] private ObservableCollection<VideoEncodingItem> _videoEncodings;
     [ObservableProperty] private VideoEncodingItem _selectedVideoEncoding;
     [ObservableProperty] private ObservableCollection<PixelFormatItem> _videoPixelFormats;
@@ -82,7 +82,7 @@ public partial class BurnInViewModel : ObservableObject
     [ObservableProperty] private TimeSpan _cutFrom;
     [ObservableProperty] private TimeSpan _cutTo;
     [ObservableProperty] private bool _useTargetFileSize;
-    [ObservableProperty] private int _targetFileSize;
+    [ObservableProperty] private int? _targetFileSize;
     [ObservableProperty] private string _progressText;
     [ObservableProperty] private double _progressValue;
     [ObservableProperty] private ObservableCollection<BurnInJobItem> _jobItems;
@@ -440,7 +440,7 @@ public partial class BurnInViewModel : ObservableObject
         jobItem.Width = mediaInfo.Dimension.Width;
         jobItem.Height = mediaInfo.Dimension.Height;
         jobItem.UseTargetFileSize = UseTargetFileSize;
-        jobItem.TargetFileSize = UseTargetFileSize ? TargetFileSize : 0;
+        jobItem.TargetFileSize = UseTargetFileSize ? TargetFileSize ?? 0 : 0;
         jobItem.AssaSubtitleFileName = MakeAssa(jobItem.SubtitleFileName);
         jobItem.Status = Se.Language.General.Generating;
         if (IsBatchMode)
@@ -721,7 +721,7 @@ public partial class BurnInViewModel : ObservableObject
             InputVideoFileName = VideoFileName,
             OutputVideoFileName = outputVideoFileName,
             UseTargetFileSize = UseTargetFileSize,
-            TargetFileSize = TargetFileSize,
+            TargetFileSize = TargetFileSize ?? 0,
         };
         jobItem.AddSubtitleFileName(subtitleFileName);
 
@@ -748,9 +748,9 @@ public partial class BurnInViewModel : ObservableObject
             {
                 foreach (var effect in _selectedEffects)
                 {
-                    var fontSize = CalculateFontSize(jobItem.Width, jobItem.Height, FontFactor);
+                    var fontSize = CalculateFontSize(jobItem.Width, jobItem.Height, FontFactor ?? 0);
                     var durationMs = (int)(s.Duration.TotalMilliseconds);
-                    s.Text = effect.ApplyEffect(s.Text, VideoWidth, VideoHeight, fontSize, durationMs);
+                    s.Text = effect.ApplyEffect(s.Text, VideoWidth ?? 0, VideoHeight ?? 0, fontSize, durationMs);
                 }
             }
 
@@ -767,18 +767,18 @@ public partial class BurnInViewModel : ObservableObject
     {
         sub.Header = AdvancedSubStationAlpha.DefaultHeader;
         var style = AdvancedSubStationAlpha.GetSsaStyle("Default", sub.Header);
-        style.FontSize = CalculateFontSize(JobItems[_jobItemIndex].Width, JobItems[_jobItemIndex].Height, FontFactor);
+        style.FontSize = CalculateFontSize(JobItems[_jobItemIndex].Width, JobItems[_jobItemIndex].Height, FontFactor ?? 0);
         style.Bold = FontIsBold;
         style.FontName = SelectedFontName;
         style.Background = FontShadowColor.ToSKColor();
         style.Primary = FontTextColor.ToSKColor();
         style.Outline = FontOutlineColor.ToSKColor();
-        style.OutlineWidth = SelectedFontOutline;
-        style.ShadowWidth = SelectedFontShadowWidth;
+        style.OutlineWidth = SelectedFontOutline ?? 0;
+        style.ShadowWidth = SelectedFontShadowWidth ?? 0;
         style.Alignment = SelectedFontAlignment.Code;
-        style.MarginLeft = FontMarginHorizontal;
-        style.MarginRight = FontMarginHorizontal;
-        style.MarginVertical = FontMarginVertical;
+        style.MarginLeft = FontMarginHorizontal ?? 0;
+        style.MarginRight = FontMarginHorizontal ?? 0;
+        style.MarginVertical = FontMarginVertical ?? 0;
 
         if (SelectedFontBoxType.BoxType == FontBoxType.None)
         {
@@ -857,8 +857,20 @@ public partial class BurnInViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task PromptFfmpegParametersAndGeenrate()
+    private async Task PromptFfmpegParametersAndGenerate()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var msg = GetValidationError();
+        if (!string.IsNullOrEmpty(msg))
+        {
+            await MessageBox.Show(Window!, Se.Language.General.Error, msg, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
         PromptForFfmpegParameters = true;
         await Generate();
         PromptForFfmpegParameters = false;
@@ -1065,6 +1077,13 @@ public partial class BurnInViewModel : ObservableObject
             return;
         }
 
+        var msg = GetValidationError();
+        if (!string.IsNullOrEmpty(msg))
+        {
+            await MessageBox.Show(Window!, Se.Language.General.Error, msg, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
         if (IsCutActive && CutFrom >= CutTo)
         {
             await MessageBox.Show(Window!,
@@ -1180,10 +1199,10 @@ public partial class BurnInViewModel : ObservableObject
     private void SaveSettings()
     {
         var settings = Se.Settings.Video.BurnIn;
-        settings.FontFactor = FontFactor;
+        settings.FontFactor = FontFactor ?? 0;
         settings.FontBold = FontIsBold;
-        settings.OutlineWidth = SelectedFontOutline;
-        settings.ShadowWidth = SelectedFontShadowWidth;
+        settings.OutlineWidth = SelectedFontOutline ?? 0;
+        settings.ShadowWidth = SelectedFontShadowWidth ?? 0;
         settings.FontName = SelectedFontName;
         settings.NonAssaTextColor = FontTextColor.FromColorToHex();
         settings.NonAssaOutlineColor = FontOutlineColor.FromColorToHex();
@@ -1250,6 +1269,65 @@ public partial class BurnInViewModel : ObservableObject
 
         _selectedEffects = result.SelectedEffects.ToList();
         DisplayEffect = string.Join(", ", _selectedEffects.Select(p => p.Name));
+    }
+
+    private string GetValidationError()
+    {
+        if (Window == null)
+        {
+            return "Window is null";
+        }
+
+        if (FontFactor == null)
+        {
+            return string.Format(Se.Language.General.PleaseEnterAValidValueForX, "Font factor");
+        }
+
+        if (FontFactor < 0.1)
+        {
+            return string.Format(Se.Language.General.PleaseEnterAValidValueForX, "Font factor");
+        }
+
+        if (SelectedFontOutline == null)
+        {
+            return string.Format(Se.Language.General.PleaseEnterAValidValueForX, "Font outline width");
+        }
+
+
+        if (SelectedFontShadowWidth == null)
+        {
+            return string.Format(Se.Language.General.PleaseEnterAValidValueForX, "Font shadow width");
+        }
+
+        if (FontMarginHorizontal == null)
+        {
+            return string.Format(Se.Language.General.PleaseEnterAValidValueForX, "Font margin horizontal");
+        }
+
+        if (FontMarginVertical == null)
+        {
+            return string.Format(Se.Language.General.PleaseEnterAValidValueForX, "Font margin vertical");
+        }
+
+        if (VideoWidth == null || VideoWidth <= 1)
+        {
+            return string.Format(Se.Language.General.PleaseEnterAValidValueForX, "Video width");
+        }
+
+        if (VideoHeight == null || VideoHeight <= 1)
+        {
+            return string.Format(Se.Language.General.PleaseEnterAValidValueForX, "Video height");
+        }
+
+        if (UseTargetFileSize)
+        {
+            if (TargetFileSize == null || TargetFileSize < 1)
+            {
+                return string.Format(Se.Language.General.PleaseEnterAValidValueForX, "Target file size");
+            }
+        }
+
+        return string.Empty;
     }
 
     internal void OnKeyDown(KeyEventArgs e)
@@ -1575,10 +1653,10 @@ public partial class BurnInViewModel : ObservableObject
 
     private void UpdateNonAssaPreview()
     {
-        if (_loading)
+        if (_loading || !string.IsNullOrEmpty(GetValidationError()))
         {
             return;
-        }
+        }        
 
         var text = "This is a test";
 
@@ -1589,7 +1667,7 @@ public partial class BurnInViewModel : ObservableObject
         }
 
 
-        var fontSize = (float)CalculateFontSize(VideoWidth, VideoHeight, FontFactor);
+        var fontSize = (float)CalculateFontSize(VideoWidth ?? 0, VideoHeight ?? 0, FontFactor ?? 0);
         SKBitmap bitmap;
 
         if (SelectedFontBoxType.BoxType == FontBoxType.BoxPerLine)
@@ -1608,7 +1686,7 @@ public partial class BurnInViewModel : ObservableObject
 
             if (SelectedFontShadowWidth > 0)
             {
-                bitmap = TextToImageGenerator.AddShadowToBitmap(bitmap, (int)Math.Round(SelectedFontShadowWidth, MidpointRounding.AwayFromZero), FontShadowColor.ToSKColor());
+                bitmap = TextToImageGenerator.AddShadowToBitmap(bitmap, (int)Math.Round(SelectedFontShadowWidth ?? 0, MidpointRounding.AwayFromZero), FontShadowColor.ToSKColor());
             }
         }
         else if (SelectedFontBoxType.BoxType == FontBoxType.OneBox)
@@ -1625,7 +1703,7 @@ public partial class BurnInViewModel : ObservableObject
                 (float)SelectedFontOutline,
                 0,
                 1.0f,
-                (int)Math.Round(SelectedFontShadowWidth));
+                (int)Math.Round(SelectedFontShadowWidth ?? 0));
         }
         else // FontBoxType.None
         {
@@ -1741,7 +1819,7 @@ public partial class BurnInViewModel : ObservableObject
     {
         TargetVideoBitRateInfo = string.Empty;
 
-        if (!UseTargetFileSize || _mediaInfo == null)
+        if (!UseTargetFileSize || _mediaInfo == null || TargetFileSize == null || TargetFileSize < 1)
         {
             return;
         }
