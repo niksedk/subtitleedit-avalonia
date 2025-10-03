@@ -1750,6 +1750,18 @@ public static class UiUtil
         return control;
     }
 
+    public static TextBlock WithBindEnabed(this TextBlock control, object viewModel, string visiblePropertyPath)
+    {
+        control.DataContext = viewModel;
+        control.Bind(TextBlock.IsEnabledProperty, new Binding
+        {
+            Path = visiblePropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
     public static Label WithBindVisible(this Label control, object viewModel, string visiblePropertyPath,
         IValueConverter converter)
     {

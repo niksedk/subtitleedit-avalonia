@@ -125,6 +125,10 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private Color _darkModeBackgroundColor;
     [ObservableProperty] private Color _bookmarkColor;
 
+    [ObservableProperty] private bool _existsErrorLogFile;
+    [ObservableProperty] private bool _existsWhisperLogFile;
+    [ObservableProperty] private bool _existsSettingsFile;
+
     public ObservableCollection<FileTypeAssociationViewModel> FileTypeAssociations { get; set; } = new()
     {
         new() { Extension = ".ass", IconPath = "avares://SubtitleEdit/Assets/FileTypes/ass.ico" },
@@ -298,6 +302,10 @@ public partial class SettingsViewModel : ObservableObject
         SetFfmpegStatus();
         SetLibMpvStatus();
         LoadFileTypeAssociations();
+
+        ExistsErrorLogFile = File.Exists(Se.GetErrorLogFilePath());
+        ExistsWhisperLogFile = File.Exists(Se.GetWhisperLogFilePath());
+        ExistsSettingsFile = File.Exists(Se.GetSettingsFilePath());
     }
 
     private void SaveSettings()
@@ -534,7 +542,7 @@ public partial class SettingsViewModel : ObservableObject
             Se.Settings = new Se();
         }
         else
-        { 
+        {
             if (result.ResetRecentFiles)
             {
                 Se.Settings.File.RecentFiles = new List<RecentFile>();
@@ -579,7 +587,7 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowErrorLogFile()
     {
-        if (Window == null)
+        if (Window == null || !File.Exists(Se.GetErrorLogFilePath()))
         {
             return;
         }
@@ -590,18 +598,18 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowWhisperLogFile()
     {
-        if (Window == null)
+        if (Window == null || !File.Exists(Se.GetWhisperLogFilePath()))
         {
             return;
         }
 
-        await _folderHelper.OpenFolderWithFileSelected(Window!, Se.GetErrorLogFilePath());
+        await _folderHelper.OpenFolderWithFileSelected(Window!, Se.GetWhisperLogFilePath());
     }
 
     [RelayCommand]
     private async Task ShowSettingsFile()
     {
-        if (Window == null)
+        if (Window == null || !File.Exists(Se.GetSettingsFilePath()))
         {
             return;
         }
@@ -614,8 +622,8 @@ public partial class SettingsViewModel : ObservableObject
         if (!OperatingSystem.IsWindows())
         {
             return;
-        } 
-        
+        }
+
         var folder = Path.Combine(Se.DataFolder, "FileTypes");
         if (!Directory.Exists(folder))
         {
@@ -628,16 +636,16 @@ public partial class SettingsViewModel : ObservableObject
         {
             item.IsAssociated = FileTypeAssociationsHelper.GetChecked(item.Extension, "SubtitleEdit5");
         }
-    }   
+    }
 
     private void SaveFileTypeAssociations()
     {
         if (!OperatingSystem.IsWindows())
         {
             return;
-        } 
-        
-        var exeFileName = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;  
+        }
+
+        var exeFileName = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
         if (string.IsNullOrEmpty(exeFileName) || !File.Exists(exeFileName))
         {
             return;
@@ -653,7 +661,7 @@ public partial class SettingsViewModel : ObservableObject
                 if (!Directory.Exists(folder))
                 {
                     Directory.CreateDirectory(folder);
-                }   
+                }
 
                 var iconFileName = Path.Combine(folder, ext.TrimStart('.') + ".ico");
                 if (!File.Exists(iconFileName))

@@ -450,9 +450,9 @@ public class SettingsPage : UserControl
 
         sections.Add(new SettingsSection(Se.Language.Options.Settings.FilesAndLogs,
             [
-                new SettingsItem(Se.Language.Options.Settings.ShowErrorLogFile, () => UiUtil.MakeLink(Se.GetErrorLogFilePath(), _vm.ShowErrorLogFileCommand)),
-                new SettingsItem(Se.Language.Options.Settings.ShowWhisperLogFile, () => UiUtil.MakeLink(Se.GetWhisperLogFilePath(), _vm.ShowWhisperLogFileCommand)),
-                new SettingsItem(Se.Language.Options.Settings.ShowSettingsFile, () => UiUtil.MakeLink(Se.GetSettingsFilePath(), _vm.ShowSettingsFileCommand)),
+                new SettingsItem(Se.Language.Options.Settings.ShowErrorLogFile, () => UiUtil.MakeLink(Se.GetErrorLogFilePath(), _vm.ShowErrorLogFileCommand).WithBindEnabed(_vm, nameof(_vm.ExistsErrorLogFile))),
+                new SettingsItem(Se.Language.Options.Settings.ShowWhisperLogFile, () => UiUtil.MakeLink(Se.GetWhisperLogFilePath(), _vm.ShowWhisperLogFileCommand).WithBindEnabed(_vm, nameof(_vm.ExistsWhisperLogFile))),
+                new SettingsItem(Se.Language.Options.Settings.ShowSettingsFile, () => UiUtil.MakeLink(Se.GetSettingsFilePath(), _vm.ShowSettingsFileCommand).WithBindEnabed(_vm, nameof(_vm.ExistsSettingsFile))),
             ]));
 
 
