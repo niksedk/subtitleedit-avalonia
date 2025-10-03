@@ -174,7 +174,7 @@ public class SplitSubtitleWindow : Window
         };
 
         var labelParts = UiUtil.MakeLabel(Se.Language.Tools.SplitSubtitle.NumberOfEqualParts);
-        var numberUpDownParts = UiUtil.MakeNumericUpDownInt(1, vm.PartsMax, 110, vm, nameof(vm.NumberOfEqualParts));
+        var numberUpDownParts = UiUtil.MakeNumericUpDownInt(1, vm.PartsMax, 1, 110, vm, nameof(vm.NumberOfEqualParts));
         numberUpDownParts.ValueChanged += (s, e) => vm.SetDirty();
         numberUpDownParts.Bind(NumericUpDown.MaximumProperty, new Binding(nameof(vm.PartsMax)) { Source = vm, Mode = BindingMode.OneWay });
         var panelParts = new StackPanel()

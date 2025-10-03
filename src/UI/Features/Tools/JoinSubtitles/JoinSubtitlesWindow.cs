@@ -155,7 +155,7 @@ public class JoinSubtitlesWindow : Window
         var radioAppendTimeCodes = UiUtil.MakeRadioButton(Se.Language.Tools.JoinSubtitles.AppendTimeCodes, vm, nameof(vm.AppendTimeCodes), "TimeCodes")
             .WithMarginRight(5);
         var labelAddMilliseconds = UiUtil.MakeLabel(Se.Language.Tools.JoinSubtitles.AddMsAfterEachFile);
-        var numericUpDownAppendMilliseconds = UiUtil.MakeNumericUpDownInt(0, 10000, 140, vm, nameof(vm.AppendTimeCodesAddMilliseconds)).WithBindEnabled(nameof(vm.AppendTimeCodes));
+        var numericUpDownAppendMilliseconds = UiUtil.MakeNumericUpDownInt(0, 10000, 0, 140, vm, nameof(vm.AppendTimeCodesAddMilliseconds)).WithBindEnabled(nameof(vm.AppendTimeCodes));
 
         var stackPanelAppend = new StackPanel
         {

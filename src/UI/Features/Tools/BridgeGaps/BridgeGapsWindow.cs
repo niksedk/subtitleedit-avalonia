@@ -28,15 +28,15 @@ public class BridgeGapsWindow : Window
         DataContext = vm;
 
         var labelBridgeGapSmallerThan = UiUtil.MakeLabel(Se.Language.Tools.BridgeGaps.BridgeGapsSmallerThan);
-        var numericUpDownBridgeGapSmallerThan = UiUtil.MakeNumericUpDownInt(1, 10000, 130, vm, nameof(vm.BridgeGapsSmallerThanMs));
+        var numericUpDownBridgeGapSmallerThan = UiUtil.MakeNumericUpDownInt(1, 10000, Se.Settings.Tools.BridgeGaps.BridgeGapsSmallerThanMs, 130, vm, nameof(vm.BridgeGapsSmallerThanMs));
         numericUpDownBridgeGapSmallerThan.ValueChanged += vm.ValueChanged;
 
         var labelMinGap = UiUtil.MakeLabel(Se.Language.Tools.BridgeGaps.MinGap);
-        var numericUpDownMinGap = UiUtil.MakeNumericUpDownInt(0, 1000, 130, vm, nameof(vm.MinGapMs));
+        var numericUpDownMinGap = UiUtil.MakeNumericUpDownInt(0, 1000, Se.Settings.Tools.BridgeGaps.MinGapMs, 130, vm, nameof(vm.MinGapMs));
         numericUpDownMinGap.ValueChanged += vm.ValueChanged;
 
         var labelPercentForLeft = UiUtil.MakeLabel(Se.Language.Tools.BridgeGaps.PercentFoPrevious);
-        var numericUpDownPercentForLeft = UiUtil.MakeNumericUpDownInt(0, 100, 130, vm, nameof(vm.PercentForLeft));
+        var numericUpDownPercentForLeft = UiUtil.MakeNumericUpDownInt(0, 100, Se.Settings.Tools.BridgeGaps.PercentForLeft, 130, vm, nameof(vm.PercentForLeft));
         numericUpDownPercentForLeft.ValueChanged += vm.ValueChanged;
 
         var panelControls = UiUtil.MakeHorizontalPanel(

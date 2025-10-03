@@ -71,7 +71,7 @@ public class BlankVideoWindow : Window
     private static Border MakeVideoSettingsView(BlankVideoViewModel vm)
     {
         var labelDuration = UiUtil.MakeLabel(Se.Language.General.DurationMinutes);
-        var numericUpDownDuration = UiUtil.MakeNumericUpDownInt(0, 10000, 120, vm, nameof(vm.DurationMinutes));
+        var numericUpDownDuration = UiUtil.MakeNumericUpDownInt(0, 10000, 0, 120, vm, nameof(vm.DurationMinutes));
 
         var labelResolution = UiUtil.MakeLabel(Se.Language.General.Resolution);
         var textBoxWidth = UiUtil.MakeTextBox(100, vm, nameof(vm.VideoWidth));

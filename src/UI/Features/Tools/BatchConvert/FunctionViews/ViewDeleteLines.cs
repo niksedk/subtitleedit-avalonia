@@ -11,7 +11,7 @@ public static class ViewDeleteLines
         {
             Content = "Delete lines",
             FontWeight = Avalonia.Media.FontWeight.Bold,
-            Margin = new Avalonia.Thickness(0,0,0, 10),
+            Margin = new Avalonia.Thickness(0, 0, 0, 10),
         };
 
         var labelDeleteContains = UiUtil.MakeLabel("Delete lines containing text");
@@ -21,10 +21,10 @@ public static class ViewDeleteLines
             Orientation = Avalonia.Layout.Orientation.Horizontal,
             Children = { labelDeleteContains, textBoxDeleteContains },
             Margin = new Avalonia.Thickness(0, 0, 0, 10),
-        };  
+        };
 
         var labelDeleteFirstLines = UiUtil.MakeLabel("Delete first lines");
-        var numericUpDownDeleteFirstLines = UiUtil.MakeNumericUpDownInt(0, 100, 150, vm, nameof(vm.DeleteXFirstLines));
+        var numericUpDownDeleteFirstLines = UiUtil.MakeNumericUpDownInt(0, 100, 0, 150, vm, nameof(vm.DeleteXFirstLines));
         var panelDeleteFirstLines = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Horizontal,
@@ -33,7 +33,7 @@ public static class ViewDeleteLines
         };
 
         var labelDeleteLastLines = UiUtil.MakeLabel("Delete last lines");
-        var numericUpDownDeleteLastLines = UiUtil.MakeNumericUpDownInt(0, 100, 150, vm, nameof(vm.DeleteXLastLines));
+        var numericUpDownDeleteLastLines = UiUtil.MakeNumericUpDownInt(0, 100, 0, 150, vm, nameof(vm.DeleteXLastLines));
         var panelDeleteLastLines = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Horizontal,
@@ -44,8 +44,8 @@ public static class ViewDeleteLines
         var panel = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Vertical,
-            Children = 
-            { 
+            Children =
+            {
                 labelHeader,
                 panelDeleteContains,
                 panelDeleteFirstLines,

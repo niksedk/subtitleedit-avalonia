@@ -694,7 +694,7 @@ public class BurnInWindow : Window
         checkBoxUseTargetFileSize.PropertyChanged += vm.CheckBoxTargetFileChanged;
 
         var labelTargetFileSize = UiUtil.MakeLabel(Se.Language.Video.BurnIn.FileSizeMb);
-        var numericUpDownTargetFileSize = UiUtil.MakeNumericUpDownInt(1, 1000_000_000, 150, vm, nameof(vm.TargetFileSize));
+        var numericUpDownTargetFileSize = UiUtil.MakeNumericUpDownInt(1, 1000_000_000, 0, 150, vm, nameof(vm.TargetFileSize));
         numericUpDownTargetFileSize.ValueChanged += vm.NumericUpDownTargetFileSizeChanged;
         var labelVideoBitRate = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.TargetVideoBitRateInfo));
         labelVideoBitRate.FontSize = 10;

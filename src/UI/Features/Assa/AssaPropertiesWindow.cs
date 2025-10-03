@@ -157,9 +157,9 @@ public class AssaPropertiesWindow : Window
         var label = UiUtil.MakeLabel(Se.Language.General.Resolution).WithBold().WithMarginBottom(10);
 
         var labelVideoResolution = UiUtil.MakeLabel(Se.Language.General.VideoResolution);
-        var numericUpDownWidth = UiUtil.MakeNumericUpDownInt(0, 10000, 120, vm, nameof(vm.VideoWidth));
+        var numericUpDownWidth = UiUtil.MakeNumericUpDownInt(0, 10000, 1920, 120, vm, nameof(vm.VideoWidth));
         var labelX = UiUtil.MakeLabel("x");
-        var numericUpDownHeight = UiUtil.MakeNumericUpDownInt(0, 10000, 120, vm, nameof(vm.VideoHeight));
+        var numericUpDownHeight = UiUtil.MakeNumericUpDownInt(0, 10000, 1080, 120, vm, nameof(vm.VideoHeight));
         var buttonBrowseResolution = UiUtil.MakeButtonBrowse(vm.BrowseResolutionCommand);
         var buttonFromCurrentVideo = UiUtil.MakeButton(Se.Language.General.PickResolutionFromCurrentVideo, vm.GetResolutionFromCurrentVideoCommand);
 

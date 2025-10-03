@@ -68,7 +68,7 @@ public class MergeSameTextWindow : Window
     private static StackPanel MakeControlsView(MergeSameTextViewModel vm)
     {
         var labelGap = UiUtil.MakeLabel(Se.Language.Tools.MergeLineswithSameText.MaxMsBetweenLines);
-        var numericUpDownGap = UiUtil.MakeNumericUpDownInt(0, 10000, 130, vm, nameof(vm.MaxMillisecondsBetweenLines));
+        var numericUpDownGap = UiUtil.MakeNumericUpDownInt(0, 10000, Se.Settings.Tools.MergeSameText.MaxMillisecondsBetweenLines, 130, vm, nameof(vm.MaxMillisecondsBetweenLines));
         numericUpDownGap.ValueChanged += (s, e) => { vm.SetDirty(); };
         var checkBoxIncludeIncrementText = UiUtil.MakeCheckBox(Se.Language.Tools.MergeLineswithSameText.IncludeIncrementingLines, vm, nameof(vm.IncludeIncrementingLines));
         checkBoxIncludeIncrementText.IsCheckedChanged += (s, e) => { vm.SetDirty(); };

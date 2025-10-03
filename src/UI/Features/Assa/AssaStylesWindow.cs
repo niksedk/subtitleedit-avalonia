@@ -389,7 +389,7 @@ public class AssaStylesWindow : Window
         var labelFontName = UiUtil.MakeLabel(Se.Language.General.FontName);
         var comboBoxFontName = UiUtil.MakeComboBox(vm.Fonts, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.FontName)).WithMinWidth(150);
         var labelFontSize = UiUtil.MakeLabel(Se.Language.General.FontSize);
-        var numericUpDownFontSize = UiUtil.MakeNumericUpDownInt(1, 1000, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.FontSize));
+        var numericUpDownFontSize = UiUtil.MakeNumericUpDownInt(1, 1000, 35, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.FontSize));
         var panelFont = UiUtil.MakeHorizontalPanel(labelFontName, comboBoxFontName, labelFontSize, numericUpDownFontSize);
 
         var checkBoxBold = UiUtil.MakeCheckBox(Se.Language.General.Bold, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.Bold));
@@ -512,17 +512,17 @@ public class AssaStylesWindow : Window
         grid.Add(label, 0);
 
         var labelMarginLeft = UiUtil.MakeLabel(Se.Language.General.Left);
-        var numericUpDownMarginLeft = UiUtil.MakeNumericUpDownInt(0, 1000, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.MarginLeft));
+        var numericUpDownMarginLeft = UiUtil.MakeNumericUpDownInt(0, 1000, 10, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.MarginLeft));
         grid.Add(labelMarginLeft, 1, 0);
         grid.Add(numericUpDownMarginLeft, 1, 1);
 
         var labelMarginRight = UiUtil.MakeLabel(Se.Language.General.Right);
-        var numericUpDownMarginRight = UiUtil.MakeNumericUpDownInt(0, 1000, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.MarginRight));
+        var numericUpDownMarginRight = UiUtil.MakeNumericUpDownInt(0, 1000, 10, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.MarginRight));
         grid.Add(labelMarginRight, 2, 0);
         grid.Add(numericUpDownMarginRight, 2, 1);
 
         var labelMarginVertical = UiUtil.MakeLabel(Se.Language.General.Vertical);
-        var numericUpDownMarginVertical = UiUtil.MakeNumericUpDownInt(0, 1000, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.MarginVertical));
+        var numericUpDownMarginVertical = UiUtil.MakeNumericUpDownInt(0, 1000, 10, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.MarginVertical));
         grid.Add(labelMarginVertical, 3, 0);
         grid.Add(numericUpDownMarginVertical, 3, 1);
 

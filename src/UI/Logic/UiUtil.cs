@@ -11,6 +11,7 @@ using Avalonia.Styling;
 using Avalonia.Themes.Fluent;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
 using Projektanker.Icons.Avalonia;
 using SkiaSharp;
 using System;
@@ -1557,7 +1558,7 @@ public static class UiUtil
         return control;
     }
 
-    public static NumericUpDown MakeNumericUpDownInt(int min, int max, double width, object viewModel,
+    public static NumericUpDown MakeNumericUpDownInt(int min, int max, int defaultValue, double width, object viewModel,
         string? propertyValuePath = null, string? propertyIsVisiblePath = null)
     {
         var control = new NumericUpDown
@@ -1578,6 +1579,7 @@ public static class UiUtil
             {
                 Path = propertyValuePath,
                 Mode = BindingMode.TwoWay,
+                Converter = new NullableIntConverter { DefaultValue = defaultValue },
             });
         }
 
@@ -1592,6 +1594,7 @@ public static class UiUtil
 
         return control;
     }
+
 
     public static NumericUpDown MakeNumericUpDownTwoDecimals(decimal min, decimal max, double width, object viewModel,
         string? propertyValuePath = null, string? propertyIsVisiblePath = null)

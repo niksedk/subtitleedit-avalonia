@@ -68,7 +68,7 @@ public class MergeSameTimeCodesWindow : Window
     private static StackPanel MakeControlsView(MergeSameTimeCodesViewModel vm)
     {
         var labelMaxDiff = UiUtil.MakeLabel(Se.Language.Tools.MergeLineswithSameTimeCodes.MaxMsDifference);
-        var numericUpDownMaxDiff = UiUtil.MakeNumericUpDownInt(0, 10000, 130, vm, nameof(vm.MaxMillisecondsDifference));
+        var numericUpDownMaxDiff = UiUtil.MakeNumericUpDownInt(0, 10000, Se.Settings.Tools.MergeSameTimeCode.MaxMillisecondsDifference, 130, vm, nameof(vm.MaxMillisecondsDifference));
         numericUpDownMaxDiff.ValueChanged += (s, e) => { vm.SetDirty(); };
         var checkBoxMergeAsDialog = UiUtil.MakeCheckBox(Se.Language.Tools.MergeLineswithSameTimeCodes.MakeDialog, vm, nameof(vm.MergeDialog));
         checkBoxMergeAsDialog.IsCheckedChanged += (s, e) => { vm.SetDirty(); };
