@@ -4,18 +4,18 @@ using System.Globalization;
 
 namespace Nikse.SubtitleEdit.Logic.ValueConverters;
 
-public class DoubleToOneDecimalConverter : IValueConverter
+public class DoubleToThreeDecimalConverter : IValueConverter
 {
-    public static readonly DoubleToOneDecimalConverter Instance = new();
+    public static readonly DoubleToThreeDecimalConverter Instance = new();
 
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is double d)
         {
-            return d.ToString("0.0", culture); // rounded automatically
+            return d.ToString("0.000", culture); // rounded automatically
         }
 
-        return "0";
+        return "0.000";
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

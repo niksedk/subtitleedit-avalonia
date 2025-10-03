@@ -4,9 +4,9 @@ using System.Globalization;
 
 namespace Nikse.SubtitleEdit.Logic.ValueConverters;
 
-public class NumberToStringWithThousandSeperator : IValueConverter
+public class NumberToStringWithThousandSeparator : IValueConverter
 {
-    public static readonly NumberToStringWithThousandSeperator Instance = new();
+    public static readonly NumberToStringWithThousandSeparator Instance = new();
 
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {

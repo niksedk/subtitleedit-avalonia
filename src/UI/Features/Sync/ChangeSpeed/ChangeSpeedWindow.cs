@@ -4,6 +4,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
 
 namespace Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
 
@@ -35,7 +36,12 @@ public class ChangeSpeedWindow : Window
             Minimum = 0,
             Maximum = 1000,
             Increment = 0.1m,
-            [!NumericUpDown.ValueProperty] = new Binding(nameof(ChangeSpeedViewModel.SpeedPercent)) { Mode = BindingMode.TwoWay },
+            DataContext = vm,
+            [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.SpeedPercent)) 
+            { 
+                Mode = BindingMode.TwoWay,
+                Converter = new DoubleToFourDecimalConverter(),
+            },
         };
 
         var buttonFromDropFrame = UiUtil.MakeButton("From drop frame value", vm.SetFromDropFrameValueCommand);

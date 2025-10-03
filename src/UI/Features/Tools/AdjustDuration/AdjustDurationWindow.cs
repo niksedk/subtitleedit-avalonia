@@ -6,6 +6,8 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
+using System;
 
 namespace Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 
@@ -115,13 +117,14 @@ public class AdjustDurationWindow : Window
             Minimum = -1000000,
             Maximum = 1000000,
             Width = NumericUpDownWidth,
-            VerticalAlignment = VerticalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,            
         };
         numericUpDownSeconds.Bind(NumericUpDown.ValueProperty, new Binding
         {
             Path = nameof(vm.AdjustSeconds),
             Mode = BindingMode.TwoWay,
             Source = vm,
+            Converter = new DoubleToThreeDecimalConverter(),
         });
 
         var panel = new StackPanel
@@ -165,6 +168,7 @@ public class AdjustDurationWindow : Window
             Path = nameof(vm.AdjustPercent),
             Mode = BindingMode.TwoWay,
             Source = vm,
+            Converter = new NullableIntConverter(),
         });
 
         var panel = new StackPanel
@@ -209,6 +213,7 @@ public class AdjustDurationWindow : Window
             Mode = BindingMode.TwoWay,
             Source = vm,
             Path = nameof(vm.AdjustFixed),
+            Converter = new DoubleToThreeDecimalConverter(),
         });
 
         var panel = new StackPanel
@@ -251,6 +256,7 @@ public class AdjustDurationWindow : Window
             Path = nameof(vm.AdjustRecalculateMaxCharacterPerSecond),
             Mode = BindingMode.TwoWay,
             Source = vm,
+            Converter = new DoubleToOneDecimalConverter(),
         });
 
         var textBlockOptimal = new TextBlock
@@ -271,6 +277,7 @@ public class AdjustDurationWindow : Window
             Path = nameof(vm.AdjustRecalculateOptimalCharacterPerSecond),
             Mode = BindingMode.TwoWay,
             Source = vm,
+            Converter = new DoubleToOneDecimalConverter(),
         });
 
         var grid = new Grid

@@ -87,7 +87,7 @@ public class WordListsWindow : Window
             VerticalAlignment = VerticalAlignment.Center,
             Child = new TextBlock
             {
-                [!TextBlock.TextProperty] = new Binding(nameof(vm.Names) + ".Count", BindingMode.OneWay) { Converter = new NumberToStringWithThousandSeperator() },
+                [!TextBlock.TextProperty] = new Binding(nameof(vm.Names) + ".Count", BindingMode.OneWay) { Converter = new NumberToStringWithThousandSeparator() },
                 FontSize = 10,
                 VerticalAlignment = VerticalAlignment.Center,
                 Foreground = Brushes.WhiteSmoke,
@@ -161,7 +161,7 @@ public class WordListsWindow : Window
             VerticalAlignment = VerticalAlignment.Center,
             Child = new TextBlock
             {
-                [!TextBlock.TextProperty] = new Binding(nameof(vm.UserWords) + ".Count", BindingMode.OneWay) { Converter = new NumberToStringWithThousandSeperator() },
+                [!TextBlock.TextProperty] = new Binding(nameof(vm.UserWords) + ".Count", BindingMode.OneWay) { Converter = new NumberToStringWithThousandSeparator() },
                 FontSize = 10,
                 VerticalAlignment = VerticalAlignment.Center,
                 Foreground = Brushes.WhiteSmoke,
@@ -223,7 +223,7 @@ public class WordListsWindow : Window
             VerticalAlignment = VerticalAlignment.Center,
             Child = new TextBlock
             {
-                [!TextBlock.TextProperty] = new Binding(nameof(vm.OcrFixes) + ".Count", BindingMode.OneWay) { Converter = new NumberToStringWithThousandSeperator() },
+                [!TextBlock.TextProperty] = new Binding(nameof(vm.OcrFixes) + ".Count", BindingMode.OneWay) { Converter = new NumberToStringWithThousandSeparator() },
                 FontSize = 10,
                 VerticalAlignment = VerticalAlignment.Center,
                 Foreground = Brushes.WhiteSmoke,

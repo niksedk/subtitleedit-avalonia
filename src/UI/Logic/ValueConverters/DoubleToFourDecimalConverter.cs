@@ -4,18 +4,18 @@ using System.Globalization;
 
 namespace Nikse.SubtitleEdit.Logic.ValueConverters;
 
-public class DoubleToOneDecimalConverter : IValueConverter
+public class DoubleToFourDecimalConverter : IValueConverter
 {
-    public static readonly DoubleToOneDecimalConverter Instance = new();
+    public static readonly DoubleToFourDecimalConverter Instance = new();
 
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is double d)
         {
-            return d.ToString("0.0", culture); // rounded automatically
+            return d.ToString("0.0000", culture); // rounded automatically
         }
 
-        return "0";
+        return "0.0000";
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
@@ -35,7 +35,7 @@ public class DoubleToOneDecimalConverter : IValueConverter
             return (double)dec;
         }
 
-        if (value is string s && double.TryParse(s, NumberStyles.Float, culture, out var result))
+        if (value is string s2 && double.TryParse(s2, NumberStyles.Float, culture, out var result))
         {
             return result;
         }

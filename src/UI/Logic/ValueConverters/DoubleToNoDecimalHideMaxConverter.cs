@@ -6,7 +6,7 @@ namespace Nikse.SubtitleEdit.Logic.ValueConverters;
 
 public class DoubleToNoDecimalHideMaxConverter : IValueConverter
 {
-    public static readonly DoubleToOneDecimalConverter Instance = new();
+    public static readonly DoubleToNoDecimalHideMaxConverter Instance = new();
 
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
