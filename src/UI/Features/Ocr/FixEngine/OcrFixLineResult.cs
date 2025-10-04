@@ -1,7 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Media;
-using Avalonia.Styling;
+using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Features.Ocr.FixEngine;
@@ -36,6 +36,11 @@ public class OcrFixLineResult
     public TextBlock GetFormattedText(IBrush? errorBrush = null, IBrush? normalBrush = null)
     {
         var textBlock = new TextBlock();
+        if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
+        {
+            textBlock.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
+        }
+
         var errorColor = errorBrush ?? Brushes.LightPink;
         var normalColor = normalBrush ?? Brushes.LightGreen;
 
@@ -48,6 +53,10 @@ public class OcrFixLineResult
                 if (word.IsSpellCheckedOk == null)
                 {
                     var run = new Run(displayText);
+                    if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
+                    {
+                        run.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
+                    }
                     textBlock.Inlines.Add(run);
                 }
                 else
@@ -56,6 +65,10 @@ public class OcrFixLineResult
                     {
                         Foreground = (bool)word.IsSpellCheckedOk ? normalColor : errorColor
                     };
+                    if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
+                    {
+                        run.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
+                    }
                     textBlock.Inlines.Add(run);
                 }
 

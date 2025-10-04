@@ -9,6 +9,7 @@ public class SeAppearance
     public string FontName { get; set; }
     public double SubtitleGridFontSize { get; set; }
     public double SubtitleTextBoxFontSize { get; set; }
+    public string SubtitleTextBoxAndGridFontName { get; set; }
     public bool SubtitleTextBoxFontBold { get; set; }
     public bool SubtitleTextBoxCenterText { get; set; }
     public bool ShowHints { get; set; }
@@ -42,7 +43,8 @@ public class SeAppearance
     public SeAppearance()
     {
         Theme = "System";
-        FontName = string.Empty;
+        FontName = "Default";
+        SubtitleTextBoxAndGridFontName = "Default";
         SubtitleGridFontSize = 13d;
         SubtitleTextBoxFontSize = 15d;
         SubtitleTextBoxFontBold = true;

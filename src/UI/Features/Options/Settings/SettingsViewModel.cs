@@ -13,6 +13,7 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Common.TextLengthCalculator;
 using Nikse.SubtitleEdit.Core.Enums;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -121,6 +122,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<string> _fontNames;
     [ObservableProperty] private string _selectedFontName;
     [ObservableProperty] private double _subtitleGridFontSize;
+    [ObservableProperty] private string _subtitleTextBoxAndGridFontName;
     [ObservableProperty] private double _textBoxFontSize;
     [ObservableProperty] private bool _textBoxFontBold;
     [ObservableProperty] private bool _textBoxCenterText;
@@ -160,12 +162,17 @@ public partial class SettingsViewModel : ObservableObject
 
     private readonly IWindowService _windowService;
     private readonly IFolderHelper _folderHelper;
+    private MainViewModel? _mainViewModel;
 
     public SettingsViewModel(IWindowService windowService, IFolderHelper folderHelper)
     {
         _windowService = windowService;
         _folderHelper = folderHelper;
 
+        DialogStyles = new ObservableCollection<DialogType>(Enum.GetValues<DialogType>());  
+        ContinuationStyles = new ObservableCollection<ContinuationStyle>(Enum.GetValues<ContinuationStyle>());  
+        CpsLineLengthStrategies = new ObservableCollection<string>(new[] { nameof(CalcAll) });
+        SubtitleTextBoxAndGridFontName = "Default";
         DialogStyle = DialogType.DashBothLinesWithSpace;
         ContinuationStyle = ContinuationStyle.NoneLeadingTrailingDots;
         CpsLineLengthStrategy = nameof(CalcAll);
@@ -273,6 +280,7 @@ public partial class SettingsViewModel : ObservableObject
         ShowToolbarHelp = appearance.ToolbarShowHelp;
         ShowToolbarEncoding = appearance.ToolbarShowEncoding;
         SubtitleGridFontSize = appearance.SubtitleGridFontSize;
+        SubtitleTextBoxAndGridFontName = appearance.SubtitleTextBoxAndGridFontName;
         TextBoxFontSize = appearance.SubtitleTextBoxFontSize;
         TextBoxFontBold = appearance.SubtitleTextBoxFontBold;
         TextBoxCenterText = appearance.SubtitleTextBoxCenterText;
@@ -377,6 +385,7 @@ public partial class SettingsViewModel : ObservableObject
         appearance.ToolbarShowHelp = ShowToolbarHelp;
         appearance.ToolbarShowEncoding = ShowToolbarEncoding;
         appearance.SubtitleGridFontSize = SubtitleGridFontSize;
+        appearance.SubtitleTextBoxAndGridFontName = string.IsNullOrEmpty(SubtitleTextBoxAndGridFontName) ? new Label().FontFamily.Name : SubtitleTextBoxAndGridFontName;
         appearance.SubtitleTextBoxFontSize = TextBoxFontSize;
         appearance.SubtitleTextBoxFontBold = TextBoxFontBold;
         appearance.SubtitleTextBoxCenterText = TextBoxCenterText;
@@ -611,6 +620,14 @@ public partial class SettingsViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void Apply()
+    {
+        SaveSettings();
+        SaveFileTypeAssociations();
+        _mainViewModel?.ApplySettings();
+    }
+
+    [RelayCommand]
     private async Task ShowErrorLogFile()
     {
         if (Window == null || !File.Exists(Se.GetErrorLogFilePath()))
@@ -735,5 +752,10 @@ public partial class SettingsViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+    }
+
+    internal void Initialize(MainViewModel mainViewModel)
+    {
+        _mainViewModel = mainViewModel;
     }
 }

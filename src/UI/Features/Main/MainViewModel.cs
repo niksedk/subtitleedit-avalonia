@@ -2085,14 +2085,21 @@ public partial class MainViewModel :
         _shortcutManager.ClearKeys();
     }
 
+
+    private DataGrid _oldSubtitleGrid = new DataGrid();
+    private TextBox _oldEditTextBox = new TextBox();
+
     [RelayCommand]
     private async Task CommandShowSettings()
     {
-        var oldTheme = Se.Settings.Appearance.Theme;
-        var oldSubtitleGrid = SubtitleGrid;
-        var oldEditTextBox = EditTextBox;
+        _oldSubtitleGrid = SubtitleGrid;
+        _oldEditTextBox = EditTextBox;
 
-        var viewModel = await _windowService.ShowDialogAsync<SettingsWindow, SettingsViewModel>(Window!);
+        var viewModel = await _windowService
+            .ShowDialogAsync<SettingsWindow, SettingsViewModel>(Window!, vm =>
+            {
+                vm.Initialize(this);
+            });
 
         if (!viewModel.OkPressed)
         {
@@ -2100,12 +2107,19 @@ public partial class MainViewModel :
             return;
         }
 
+        ApplySettings();
+
+        _shortcutManager.ClearKeys();
+    }
+
+    public void ApplySettings()
+    {
         UiUtil.SetFontName(Se.Settings.Appearance.FontName);
         UiUtil.SetCurrentTheme();
 
         InitListViewAndEditBox.MakeLayoutListViewAndEditBox(MainView!, this);
-        UiUtil.ReplaceControl(oldSubtitleGrid, SubtitleGrid);
-        UiUtil.ReplaceControl(oldEditTextBox, EditTextBox);
+        UiUtil.ReplaceControl(_oldSubtitleGrid, SubtitleGrid);
+        UiUtil.ReplaceControl(_oldEditTextBox, EditTextBox);
 
         if (Toolbar is Border toolbarBorder)
         {
@@ -2145,7 +2159,9 @@ public partial class MainViewModel :
         _autoBackupService.StartAutoBackup(this);
 
         _updateAudioVisualizer = true;
-        _shortcutManager.ClearKeys();
+
+        _oldSubtitleGrid = SubtitleGrid;
+        _oldEditTextBox = EditTextBox;
     }
 
     [RelayCommand]

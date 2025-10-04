@@ -8,6 +8,7 @@ using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -281,14 +282,6 @@ public class OcrWindow : Window
                         return stackPanel;
                     })
                 },
-                //new DataGridTextColumn
-                //{
-                //    Header = Se.Language.General.Text,
-                //    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                //    Binding = new Binding(nameof(OcrSubtitleItem.Text)),
-                //    IsReadOnly = true,
-                //    Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
-                //},
                 new DataGridTemplateColumn
                 {
                     Header = Se.Language.General.Text,
@@ -432,6 +425,10 @@ public class OcrWindow : Window
                 Mode = BindingMode.TwoWay
             }
         };
+        if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
+        {
+            textBoxText.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
+        }
         textBoxText.TextChanged += vm.TextBoxTextChanged;
         var panelText = new StackPanel
         {

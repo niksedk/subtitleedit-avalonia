@@ -41,6 +41,10 @@ public static class InitListViewAndEditBox
             HorizontalGridLinesBrush = UiUtil.GetBorderBrush(),
             FontSize = Se.Settings.Appearance.SubtitleGridFontSize,
         };
+        if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
+        {
+            vm.SubtitleGrid.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
+        }
 
         // hack to make drag and drop work on the DataGrid - also on empty rows
         var dropHost = new Border
@@ -158,6 +162,11 @@ public static class InitListViewAndEditBox
                     [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.Text))
                 };
 
+                if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
+                {
+                    textBlock.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
+                }
+
                 border.Child = textBlock;
                 return border;
             })
@@ -176,8 +185,11 @@ public static class InitListViewAndEditBox
             Mode = BindingMode.OneWay,
             Source = vm
         });
+        if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
+        {
+            originalColumn.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
+        }
         vm.SubtitleGrid.Columns.Add(originalColumn);
-
 
         var styleColumn = new DataGridTextColumn
         {
@@ -939,6 +951,10 @@ public static class InitListViewAndEditBox
         {
             textBox.TextAlignment = TextAlignment.Center;
         }
+        if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
+        {
+            textBox.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
+        }
         vm.EditTextBox = textBox;
         textEditGrid.Children.Add(textBox);
         textBox.TextChanged += vm.SubtitleTextChanged;
@@ -1088,6 +1104,10 @@ public static class InitListViewAndEditBox
         if (Se.Settings.Appearance.SubtitleTextBoxCenterText)
         {
             textBoxOriginal.TextAlignment = TextAlignment.Center;
+        }
+        if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
+        {
+            textBoxOriginal.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
         }
         vm.EditTextBoxOriginal = textBoxOriginal;
         textEditGrid.Add(textBoxOriginal, 1, 1);

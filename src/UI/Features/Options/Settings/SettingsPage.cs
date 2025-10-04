@@ -101,9 +101,10 @@ public class SettingsPage : UserControl
         Grid.SetColumn(scrollViewer, 1);
 
         var buttonReset = UiUtil.MakeButton(Se.Language.General.Reset, vm.ResetAllSettingsCommand);
+        var buttonApply = UiUtil.MakeButton(Se.Language.General.Apply, vm.ApplyCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.CommandOkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CommandCancelCommand);
-        var buttonBar = UiUtil.MakeButtonBar(buttonReset, buttonOk, buttonCancel);
+        var buttonBar = UiUtil.MakeButtonBar(buttonReset, buttonApply, buttonOk, buttonCancel);
         grid.Children.Add(buttonBar);
         Grid.SetRow(buttonBar, 2);
         Grid.SetColumn(buttonBar, 0);
@@ -398,12 +399,12 @@ public class SettingsPage : UserControl
                 MakeCheckboxSetting(Se.Language.Options.Settings.GoToLineNumberSetsVideoPosition, nameof(_vm.GoToLineNumberAlsoSetVideoPosition)),
             ]));
 
-
         sections.Add(new SettingsSection(Se.Language.General.Appearance,
             [
                 new SettingsItem(Se.Language.Options.Settings.Theme, () => UiUtil.MakeComboBox(_vm.Themes, _vm, nameof(_vm.SelectedTheme))),
                 new SettingsItem(Se.Language.Options.Settings.DarkThemeBackgroundColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.DarkModeBackgroundColor))),
                 new SettingsItem(Se.Language.Options.Settings.UiFont, () => UiUtil.MakeComboBox(_vm.FontNames, _vm, nameof(_vm.SelectedFontName))),
+                new SettingsItem(Se.Language.Options.Settings.SubtitleTextBoxAndGridFontName, () => UiUtil.MakeComboBox(_vm.FontNames, _vm, nameof(_vm.SubtitleTextBoxAndGridFontName))),
                 MakeNumericSetting(Se.Language.Options.Settings.SubtitleGridFontSize, nameof(_vm.SubtitleGridFontSize)),
                 MakeNumericSetting(Se.Language.Options.Settings.TextBoxFontSize, nameof(_vm.TextBoxFontSize)),
                 MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxFontBold, nameof(_vm.TextBoxFontBold)),

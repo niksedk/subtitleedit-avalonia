@@ -65,6 +65,7 @@ public class LanguageSettings
     public string TextBoxCenterText { get; set; }
     public string TextBoxFontBold { get; set; }
     public string TextBoxFontSize { get; set; }
+    public string SubtitleTextBoxAndGridFontName { get; internal set; }
     public string SubtitleGridFontSize { get; set; }
     public string ShowUpDownStartTime { get; set; }
     public string ShowUpDownEndTime { get; set; }
@@ -220,6 +221,7 @@ public class LanguageSettings
         TextBoxCenterText = "Center text in subtitle text box";
         TextBoxFontBold = "Bold text in subtitle text box";
         TextBoxFontSize = "Font size in subtitle text box";
+        SubtitleTextBoxAndGridFontName = "UI font in subtitle text box and grid";
         SubtitleGridFontSize = "Font size in subtitle grid"; 
         ShowUpDownStartTime = "Show up/down control for \"Show\"";
         ShowUpDownEndTime = "Show up/down control for \"Hide\"";
