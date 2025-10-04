@@ -3,6 +3,7 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Common.TextLengthCalculator;
 using Nikse.SubtitleEdit.Core.Enums;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using System;
 using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
@@ -22,8 +23,8 @@ public class SeGeneral
     public double SubtitleOptimalCharactersPerSeconds { get; set; }
     public double SubtitleMaximumWordsPerMinute { get; set; }
     public int UnbreakLinesShorterThan { get; set; }
-    public DialogType DialogStyle { get; set; }
-    public ContinuationStyle ContinuationStyle { get; set; }
+    public string DialogStyle { get; set; }
+    public string ContinuationStyle { get; set; }
     public string CpsLineLengthStrategy { get; set; }
 
     public int ContinuationPause { get; set; }
@@ -97,10 +98,10 @@ public class SeGeneral
         Version = Se.Version;
         Language = "English";
         LayoutNumber = 0;
-        DialogStyle = DialogType.DashBothLinesWithSpace;
+        DialogStyle = DialogType.DashBothLinesWithSpace.ToString();
         CpsLineLengthStrategy = nameof(CalcAll);
-        DialogStyle = DialogType.DashBothLinesWithSpace;
-        ContinuationStyle = ContinuationStyle.None;
+        DialogStyle = DialogType.DashBothLinesWithSpace.ToString();
+        ContinuationStyle = Core.Enums.ContinuationStyle.None.ToString();
         ContinuationPause = 300;
         CustomContinuationStyleSuffix = "";
         CustomContinuationStyleSuffixApplyIfComma = false;
@@ -136,8 +137,8 @@ public class SeGeneral
             SubtitleMaximumWordsPerMinute = (decimal)SubtitleMaximumWordsPerMinute,
             CpsLineLengthStrategy = CpsLineLengthStrategy,
             MinimumMillisecondsBetweenLines = MinimumMillisecondsBetweenLines,
-            DialogStyle = DialogStyle,
-            ContinuationStyle = ContinuationStyle
+            DialogStyle = Enum.Parse<DialogType>(DialogStyle),
+            ContinuationStyle = Enum.Parse<ContinuationStyle>(ContinuationStyle),
         });
         AddExtraProfiles(Profiles);
 
@@ -203,7 +204,7 @@ public class SeGeneral
             CpsLineLengthStrategy = string.Empty,
             MinimumMillisecondsBetweenLines = 83, // 2 frames for 23.976 fps videos
             DialogStyle = DialogType.DashBothLinesWithoutSpace,
-            ContinuationStyle = ContinuationStyle.NoneLeadingTrailingEllipsis
+            ContinuationStyle = Core.Enums.ContinuationStyle.NoneLeadingTrailingEllipsis
         });
         profiles.Add(new RulesProfile
         {
@@ -219,7 +220,7 @@ public class SeGeneral
             CpsLineLengthStrategy = string.Empty,
             MinimumMillisecondsBetweenLines = 83, // 2 frames for 23.976 fps videos
             DialogStyle = DialogType.DashBothLinesWithSpace,
-            ContinuationStyle = ContinuationStyle.NoneLeadingTrailingEllipsis
+            ContinuationStyle = Core.Enums.ContinuationStyle.NoneLeadingTrailingEllipsis
         });
         profiles.Add(new RulesProfile
         {
@@ -235,7 +236,7 @@ public class SeGeneral
             CpsLineLengthStrategy = string.Empty,
             MinimumMillisecondsBetweenLines = 83, // 2 frames for 23.976 fps videos
             DialogStyle = DialogType.DashSecondLineWithoutSpace,
-            ContinuationStyle = ContinuationStyle.LeadingTrailingEllipsis
+            ContinuationStyle = Core.Enums.ContinuationStyle.LeadingTrailingEllipsis
         });
         profiles.Add(new RulesProfile
         {
@@ -251,7 +252,7 @@ public class SeGeneral
             CpsLineLengthStrategy = "CalcAll",
             MinimumMillisecondsBetweenLines = 83, // 2 frames for 23.976 fps videos
             DialogStyle = DialogType.DashBothLinesWithoutSpace,
-            ContinuationStyle = ContinuationStyle.LeadingTrailingEllipsis
+            ContinuationStyle = Core.Enums.ContinuationStyle.LeadingTrailingEllipsis
         });
         profiles.Add(new RulesProfile
         {
@@ -267,7 +268,7 @@ public class SeGeneral
             CpsLineLengthStrategy = string.Empty,
             MinimumMillisecondsBetweenLines = 83, // 2 frames for 23.976 fps videos
             DialogStyle = DialogType.DashBothLinesWithSpace,
-            ContinuationStyle = ContinuationStyle.NoneLeadingTrailingEllipsis,
+            ContinuationStyle = Core.Enums.ContinuationStyle.NoneLeadingTrailingEllipsis,
         });
         profiles.Add(new RulesProfile
         {
@@ -283,7 +284,7 @@ public class SeGeneral
             CpsLineLengthStrategy = typeof(CalcAll).Name,
             MinimumMillisecondsBetweenLines = 83, // 2 frames for 23.976 fps videos
             DialogStyle = DialogType.DashBothLinesWithSpace,
-            ContinuationStyle = ContinuationStyle.NoneLeadingTrailingEllipsis,
+            ContinuationStyle = Core.Enums.ContinuationStyle.NoneLeadingTrailingEllipsis,
         });
         profiles.Add(new RulesProfile
         {
@@ -299,7 +300,7 @@ public class SeGeneral
             CpsLineLengthStrategy = string.Empty,
             MinimumMillisecondsBetweenLines = 83, // 2 frames for 23.976 fps videos
             DialogStyle = DialogType.DashBothLinesWithoutSpace,
-            ContinuationStyle = ContinuationStyle.NoneLeadingTrailingEllipsis,
+            ContinuationStyle = Core.Enums.ContinuationStyle.NoneLeadingTrailingEllipsis,
         });
         profiles.Add(new RulesProfile
         {
@@ -315,7 +316,7 @@ public class SeGeneral
             CpsLineLengthStrategy = string.Empty,
             MinimumMillisecondsBetweenLines = 83, // 2 frames for 23.976 fps videos
             DialogStyle = DialogType.DashSecondLineWithoutSpace,
-            ContinuationStyle = ContinuationStyle.OnlyTrailingEllipsis,
+            ContinuationStyle = Core.Enums.ContinuationStyle.OnlyTrailingEllipsis,
         });
         profiles.Add(new RulesProfile
         {
@@ -331,7 +332,7 @@ public class SeGeneral
             CpsLineLengthStrategy = string.Empty,
             MinimumMillisecondsBetweenLines = 0,
             DialogStyle = DialogType.DashBothLinesWithSpace,
-            ContinuationStyle = ContinuationStyle.None
+            ContinuationStyle = Core.Enums.ContinuationStyle.None
         });
         profiles.Add(new RulesProfile
         {
@@ -347,7 +348,7 @@ public class SeGeneral
             CpsLineLengthStrategy = string.Empty,
             MinimumMillisecondsBetweenLines = 200, // 5 frames for 25 fps videos
             DialogStyle = DialogType.DashBothLinesWithSpace,
-            ContinuationStyle = ContinuationStyle.None
+            ContinuationStyle = Core.Enums.ContinuationStyle.None
         });
         profiles.Add(new RulesProfile
         {
@@ -363,7 +364,7 @@ public class SeGeneral
             CpsLineLengthStrategy = string.Empty,
             MinimumMillisecondsBetweenLines = 125,
             DialogStyle = DialogType.DashSecondLineWithoutSpace,
-            ContinuationStyle = ContinuationStyle.OnlyTrailingDots
+            ContinuationStyle = Core.Enums.ContinuationStyle.OnlyTrailingDots
         });
         profiles.Add(new RulesProfile
         {
@@ -379,7 +380,7 @@ public class SeGeneral
             CpsLineLengthStrategy = string.Empty,
             MinimumMillisecondsBetweenLines = 120,
             DialogStyle = DialogType.DashSecondLineWithoutSpace,
-            ContinuationStyle = ContinuationStyle.OnlyTrailingDots
+            ContinuationStyle = Core.Enums.ContinuationStyle.OnlyTrailingDots
         });
         profiles.Add(new RulesProfile
         {
@@ -395,7 +396,7 @@ public class SeGeneral
             CpsLineLengthStrategy = string.Empty,
             MinimumMillisecondsBetweenLines = 125,
             DialogStyle = DialogType.DashSecondLineWithSpace,
-            ContinuationStyle = ContinuationStyle.OnlyTrailingDots
+            ContinuationStyle = Core.Enums.ContinuationStyle.OnlyTrailingDots
         });
         profiles.Add(new RulesProfile
         {
@@ -411,7 +412,7 @@ public class SeGeneral
             CpsLineLengthStrategy = string.Empty,
             MinimumMillisecondsBetweenLines = 120,
             DialogStyle = DialogType.DashSecondLineWithSpace,
-            ContinuationStyle = ContinuationStyle.OnlyTrailingDots
+            ContinuationStyle = Core.Enums.ContinuationStyle.OnlyTrailingDots
         });
         profiles.Add(new RulesProfile
         {
@@ -427,7 +428,7 @@ public class SeGeneral
             CpsLineLengthStrategy = string.Empty,
             MinimumMillisecondsBetweenLines = 125,
             DialogStyle = DialogType.DashBothLinesWithSpace,
-            ContinuationStyle = ContinuationStyle.LeadingTrailingDashDots
+            ContinuationStyle = Core.Enums.ContinuationStyle.LeadingTrailingDashDots
         });
         profiles.Add(new RulesProfile
         {
@@ -443,7 +444,7 @@ public class SeGeneral
             CpsLineLengthStrategy = string.Empty,
             MinimumMillisecondsBetweenLines = 120,
             DialogStyle = DialogType.DashBothLinesWithSpace,
-            ContinuationStyle = ContinuationStyle.LeadingTrailingDashDots
+            ContinuationStyle = Core.Enums.ContinuationStyle.LeadingTrailingDashDots
         });
         profiles.Add(new RulesProfile
         {
@@ -459,7 +460,7 @@ public class SeGeneral
             CpsLineLengthStrategy = string.Empty,
             MinimumMillisecondsBetweenLines = 160,
             DialogStyle = DialogType.DashSecondLineWithoutSpace,
-            ContinuationStyle = ContinuationStyle.OnlyTrailingDots
+            ContinuationStyle = Core.Enums.ContinuationStyle.OnlyTrailingDots
         });
         profiles.Add(new RulesProfile
         {
@@ -475,7 +476,7 @@ public class SeGeneral
             CpsLineLengthStrategy = string.Empty,
             MinimumMillisecondsBetweenLines = 125,
             DialogStyle = DialogType.DashBothLinesWithSpace,
-            ContinuationStyle = ContinuationStyle.None
+            ContinuationStyle = Core.Enums.ContinuationStyle.None
         });
         profiles.Add(new RulesProfile
         {
@@ -491,7 +492,7 @@ public class SeGeneral
             CpsLineLengthStrategy = string.Empty,
             MinimumMillisecondsBetweenLines = 120,
             DialogStyle = DialogType.DashBothLinesWithSpace,
-            ContinuationStyle = ContinuationStyle.None
+            ContinuationStyle = Core.Enums.ContinuationStyle.None
         });
         profiles.Add(new RulesProfile
         {
@@ -507,7 +508,7 @@ public class SeGeneral
             CpsLineLengthStrategy = string.Empty,
             MinimumMillisecondsBetweenLines = 167,
             DialogStyle = DialogType.DashBothLinesWithSpace,
-            ContinuationStyle = ContinuationStyle.None
+            ContinuationStyle = Core.Enums.ContinuationStyle.None
         });
         profiles.Add(new RulesProfile
         {
@@ -523,7 +524,7 @@ public class SeGeneral
             CpsLineLengthStrategy = string.Empty,
             MinimumMillisecondsBetweenLines = 160,
             DialogStyle = DialogType.DashBothLinesWithSpace,
-            ContinuationStyle = ContinuationStyle.None
+            ContinuationStyle = Core.Enums.ContinuationStyle.None
         });
         profiles.Add(new RulesProfile
         {
@@ -539,7 +540,7 @@ public class SeGeneral
             CpsLineLengthStrategy = string.Empty,
             MinimumMillisecondsBetweenLines = 250,
             DialogStyle = DialogType.DashBothLinesWithSpace,
-            ContinuationStyle = ContinuationStyle.None
+            ContinuationStyle = Core.Enums.ContinuationStyle.None
         });
         profiles.Add(new RulesProfile
         {
@@ -555,7 +556,7 @@ public class SeGeneral
             CpsLineLengthStrategy = string.Empty,
             MinimumMillisecondsBetweenLines = 240,
             DialogStyle = DialogType.DashBothLinesWithSpace,
-            ContinuationStyle = ContinuationStyle.None
+            ContinuationStyle = Core.Enums.ContinuationStyle.None
         });
     }
 }

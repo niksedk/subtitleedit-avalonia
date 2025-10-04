@@ -42,12 +42,12 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private int? _minGapMs;
     [ObservableProperty] private int? _maxLines;
     [ObservableProperty] private int? _unbreakLinesShorterThan;
-    [ObservableProperty] private ObservableCollection<DialogType> _dialogStyles;
-    [ObservableProperty] private DialogType _dialogStyle;
-    [ObservableProperty] private ObservableCollection<ContinuationStyle> _continuationStyles;
-    [ObservableProperty] private ContinuationStyle _continuationStyle;
-    [ObservableProperty] private ObservableCollection<string> _cpsLineLengthStrategies;
-    [ObservableProperty] private string _cpsLineLengthStrategy;
+    [ObservableProperty] private ObservableCollection<DialogStyleDisplay> _dialogStyles;
+    [ObservableProperty] private DialogStyleDisplay _dialogStyle;
+    [ObservableProperty] private ObservableCollection<ContinuationStyleDisplay> _continuationStyles;
+    [ObservableProperty] private ContinuationStyleDisplay _continuationStyle;
+    [ObservableProperty] private ObservableCollection<CpsLineLengthStrategyDisplay> _cpsLineLengthStrategies;
+    [ObservableProperty] private CpsLineLengthStrategyDisplay _cpsLineLengthStrategy;
 
     [ObservableProperty] private int? _newEmptyDefaultMs;
     [ObservableProperty] private bool _promptDeleteLines;
@@ -169,13 +169,13 @@ public partial class SettingsViewModel : ObservableObject
         _windowService = windowService;
         _folderHelper = folderHelper;
 
-        DialogStyles = new ObservableCollection<DialogType>(Enum.GetValues<DialogType>());  
-        ContinuationStyles = new ObservableCollection<ContinuationStyle>(Enum.GetValues<ContinuationStyle>());  
-        CpsLineLengthStrategies = new ObservableCollection<string>(new[] { nameof(CalcAll) });
+        DialogStyles = new ObservableCollection<DialogStyleDisplay>(DialogStyleDisplay.List());
+        ContinuationStyles = new ObservableCollection<ContinuationStyleDisplay>(ContinuationStyleDisplay.List());
+        CpsLineLengthStrategies = new ObservableCollection<CpsLineLengthStrategyDisplay>(CpsLineLengthStrategyDisplay.List());
         SubtitleTextBoxAndGridFontName = "Default";
-        DialogStyle = DialogType.DashBothLinesWithSpace;
-        ContinuationStyle = ContinuationStyle.NoneLeadingTrailingDots;
-        CpsLineLengthStrategy = nameof(CalcAll);
+        DialogStyle = DialogStyles.First();
+        ContinuationStyle = ContinuationStyles.First();
+        CpsLineLengthStrategy = CpsLineLengthStrategies.First();
 
         Themes = [Se.Language.General.System, Se.Language.General.Light, Se.Language.General.Dark];
         SelectedTheme = Themes[0];
@@ -239,15 +239,9 @@ public partial class SettingsViewModel : ObservableObject
         MinGapMs = general.MinimumMillisecondsBetweenLines;
         MaxLines = general.MaxNumberOfLines;
         UnbreakLinesShorterThan = general.UnbreakLinesShorterThan;
-        DialogStyle = general.DialogStyle;
-        ContinuationStyle = general.ContinuationStyle;
-        CpsLineLengthStrategy = general.CpsLineLengthStrategy;
-        ContinuationStyles = new ObservableCollection<ContinuationStyle>(Enum.GetValues<ContinuationStyle>());
-        ContinuationStyle = ContinuationStyles.First();
-        DialogStyles = new ObservableCollection<DialogType>(Enum.GetValues<DialogType>());
-        DialogStyle = DialogStyles.First();
-        CpsLineLengthStrategies = new ObservableCollection<string>(new[] { nameof(CalcAll) });
-        CpsLineLengthStrategy = CpsLineLengthStrategies.First();
+        DialogStyle = DialogStyles.FirstOrDefault(p => p.Code == general.DialogStyle) ?? DialogStyles.First();
+        ContinuationStyle = ContinuationStyles.FirstOrDefault(p => p.Code == general.ContinuationStyle) ?? ContinuationStyles.First();
+        CpsLineLengthStrategy = CpsLineLengthStrategies.FirstOrDefault(p => p.Code == general.CpsLineLengthStrategy) ?? CpsLineLengthStrategies.First();
 
         NewEmptyDefaultMs = general.NewEmptyDefaultMs;
         PromptDeleteLines = general.PromptDeleteLines;
@@ -354,9 +348,9 @@ public partial class SettingsViewModel : ObservableObject
         general.MinimumMillisecondsBetweenLines = MinGapMs ?? general.MinimumMillisecondsBetweenLines;
         general.MaxNumberOfLines = MaxLines ?? general.MaxNumberOfLines;
         general.UnbreakLinesShorterThan = UnbreakLinesShorterThan ?? general.UnbreakLinesShorterThan;
-        general.DialogStyle = DialogStyle;
-        general.ContinuationStyle = ContinuationStyle;
-        general.CpsLineLengthStrategy = CpsLineLengthStrategy;
+        general.DialogStyle = DialogStyle.Code;
+        general.ContinuationStyle = ContinuationStyle.Code;
+        general.CpsLineLengthStrategy = CpsLineLengthStrategy.Code;
         general.NewEmptyDefaultMs = NewEmptyDefaultMs ?? general.NewEmptyDefaultMs;
         general.PromptDeleteLines = PromptDeleteLines;
         general.LockTimeCodes = LockTimeCodes;

@@ -35,6 +35,8 @@ public class LanguageSettings
     public string CpsLineLengthStyleCalcIncludeCompositionCharactersNotSpace { get; set; }
     public string CpsLineLengthStyleCalcNoSpaceOrPunctuation { get; set; }
     public string CpsLineLengthStyleCalcNoSpaceOrPunctuationCpsOnly { get; set; }
+    public string CpsLineLengthStyleCalcIgnoreArabicDiacritics { get; set; }
+    public string CpsLineLengthStyleCalcIgnoreArabicDiacriticsNoSpace { get; set; }
 
     public string TimeCodeModeHhMmSsMs { get; set; }
     public string TimeCodeModeHhMmSsFf { get; set; }
@@ -191,6 +193,8 @@ public class LanguageSettings
         CpsLineLengthStyleCalcIncludeCompositionCharactersNotSpace = "Include composition characters, not space";
         CpsLineLengthStyleCalcNoSpaceOrPunctuation = "No space or punctuation ()[]-:;,.!?";
         CpsLineLengthStyleCalcNoSpaceOrPunctuationCpsOnly = "No space or punctuation, CPS only";
+        CpsLineLengthStyleCalcIgnoreArabicDiacritics = "Ignore Arabic diacritics";
+        CpsLineLengthStyleCalcIgnoreArabicDiacriticsNoSpace = "Ignore Arabic diacritics, no space";
 
         TimeCodeModeHhMmSsMs = "HH:MM:SS:MS";
         TimeCodeModeHhMmSsFf = "HH:MM:SS:FF";

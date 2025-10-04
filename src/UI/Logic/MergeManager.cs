@@ -249,7 +249,7 @@ namespace Nikse.SubtitleEdit.Logic
             var subtitle = new Subtitle();
             subtitle.Paragraphs.Add(subtitles.Select(p=>new Paragraph(p.Text, p.StartTime.TotalMilliseconds, p.EndTime.TotalMilliseconds)));
             var language = LanguageAutoDetect.AutoDetectGoogleLanguage(subtitle);
-            var dialogHelper = new DialogSplitMerge { DialogStyle = Se.Settings.General.DialogStyle, TwoLetterLanguageCode = language };
+            var dialogHelper = new DialogSplitMerge { DialogStyle = Enum.Parse<DialogType>(Se.Settings.General.DialogStyle), TwoLetterLanguageCode = language };
             var dialogText = dialogHelper.FixDashes("- " + currentText.TrimStart(' ', '-') + Environment.NewLine + "- " + nextText.TrimStart(' ', '-'));
             currentParagraph.Text = dialogText;
 
