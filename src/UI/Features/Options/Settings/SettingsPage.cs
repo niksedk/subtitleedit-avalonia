@@ -169,6 +169,39 @@ public class SettingsPage : UserControl
             MakeNumericSettingInt(Se.Language.Options.Settings.MaxDurationMs, nameof(_vm.MaxDurationMs)),
             MakeNumericSettingInt(Se.Language.Options.Settings.MinGapMs, nameof(_vm.MinGapMs)),
             MakeNumericSettingInt(Se.Language.Options.Settings.MaxLines, nameof(_vm.MaxLines)),
+
+            MakeNumericSettingInt(Se.Language.Options.Settings.UnbreakSubtitlesShortThan, nameof(_vm.MaxLines)),
+
+            new SettingsItem(Se.Language.Options.Settings.DialogStyle, () => new ComboBox
+            {
+                Width = 250,
+                DataContext = _vm,
+                [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.DialogStyles)),
+                [!SelectingItemsControl.SelectedItemProperty] =
+                    new Binding(nameof(_vm.DialogStyle)) { Mode = BindingMode.TwoWay },
+                ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
+                    new TextBlock { Text = f?.Name }, true)
+            }),
+            new SettingsItem(Se.Language.Options.Settings.ContinuationStyle, () => new ComboBox
+            {
+                Width = 250,
+                DataContext = _vm,
+                [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.ContinuationStyles)),
+                [!SelectingItemsControl.SelectedItemProperty] =
+                    new Binding(nameof(_vm.ContinuationStyle)) { Mode = BindingMode.TwoWay },
+                ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
+                    new TextBlock { Text = f?.Name }, true)
+            }),
+            new SettingsItem(Se.Language.Options.Settings.CpsLineLengthStyle, () => new ComboBox
+            {
+                Width = 250,
+                DataContext = _vm,
+                [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.CpsLineLengthStrategies)),
+                [!SelectingItemsControl.SelectedItemProperty] =
+                    new Binding(nameof(_vm.CpsLineLengthStrategy)) { Mode = BindingMode.TwoWay },
+                ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
+                    new TextBlock { Text = f?.Name }, true)
+            }),
         ]));
 
         sections.Add(new SettingsSection(Se.Language.General.General,
@@ -371,7 +404,7 @@ public class SettingsPage : UserControl
                 new SettingsItem(Se.Language.Options.Settings.Theme, () => UiUtil.MakeComboBox(_vm.Themes, _vm, nameof(_vm.SelectedTheme))),
                 new SettingsItem(Se.Language.Options.Settings.DarkThemeBackgroundColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.DarkModeBackgroundColor))),
                 new SettingsItem(Se.Language.Options.Settings.UiFont, () => UiUtil.MakeComboBox(_vm.FontNames, _vm, nameof(_vm.SelectedFontName))),
-                MakeNumericSetting(Se.Language.Options.Settings.SubtiteGridFontSize, nameof(_vm.SubtitleGridFontSize)),
+                MakeNumericSetting(Se.Language.Options.Settings.SubtitleGridFontSize, nameof(_vm.SubtitleGridFontSize)),
                 MakeNumericSetting(Se.Language.Options.Settings.TextBoxFontSize, nameof(_vm.TextBoxFontSize)),
                 MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxFontBold, nameof(_vm.TextBoxFontBold)),
                 MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxCenterText, nameof(_vm.TextBoxCenterText)),

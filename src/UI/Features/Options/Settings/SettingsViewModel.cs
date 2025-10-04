@@ -10,6 +10,8 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.Common.TextLengthCalculator;
+using Nikse.SubtitleEdit.Core.Enums;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
@@ -38,7 +40,14 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private int? _maxDurationMs;
     [ObservableProperty] private int? _minGapMs;
     [ObservableProperty] private int? _maxLines;
-    [ObservableProperty] private int? _unbreakShorterThanMs;
+    [ObservableProperty] private int? _unbreakLinesShorterThan;
+    [ObservableProperty] private ObservableCollection<DialogType> _dialogStyles;
+    [ObservableProperty] private DialogType _dialogStyle;
+    [ObservableProperty] private ObservableCollection<ContinuationStyle> _continuationStyles;
+    [ObservableProperty] private ContinuationStyle _continuationStyle;
+    [ObservableProperty] private ObservableCollection<string> _cpsLineLengthStrategies;
+    [ObservableProperty] private string _cpsLineLengthStrategy;
+
     [ObservableProperty] private int? _newEmptyDefaultMs;
     [ObservableProperty] private bool _promptDeleteLines;
     [ObservableProperty] private bool _lockTimeCodes;
@@ -157,7 +166,11 @@ public partial class SettingsViewModel : ObservableObject
         _windowService = windowService;
         _folderHelper = folderHelper;
 
-        Themes = ["System", "Light", "Dark"];
+        DialogStyle = DialogType.DashBothLinesWithSpace;
+        ContinuationStyle = ContinuationStyle.NoneLeadingTrailingDots;
+        CpsLineLengthStrategy = nameof(CalcAll);
+
+        Themes = [Se.Language.General.System, Se.Language.General.Light, Se.Language.General.Dark];
         SelectedTheme = Themes[0];
 
         FontNames = new ObservableCollection<string>(FontHelper.GetSystemFonts());
@@ -218,7 +231,17 @@ public partial class SettingsViewModel : ObservableObject
         MaxDurationMs = general.SubtitleMaximumDisplayMilliseconds;
         MinGapMs = general.MinimumMillisecondsBetweenLines;
         MaxLines = general.MaxNumberOfLines;
-        UnbreakShorterThanMs = general.MergeLinesShorterThan;
+        UnbreakLinesShorterThan = general.UnbreakLinesShorterThan;
+        DialogStyle = general.DialogStyle;
+        ContinuationStyle = general.ContinuationStyle;
+        CpsLineLengthStrategy = general.CpsLineLengthStrategy;
+        ContinuationStyles = new ObservableCollection<ContinuationStyle>(Enum.GetValues<ContinuationStyle>());
+        ContinuationStyle = ContinuationStyles.First();
+        DialogStyles = new ObservableCollection<DialogType>(Enum.GetValues<DialogType>());
+        DialogStyle = DialogStyles.First();
+        CpsLineLengthStrategies = new ObservableCollection<string>(new[] { nameof(CalcAll) });
+        CpsLineLengthStrategy = CpsLineLengthStrategies.First();
+
         NewEmptyDefaultMs = general.NewEmptyDefaultMs;
         PromptDeleteLines = general.PromptDeleteLines;
         LockTimeCodes = general.LockTimeCodes;
@@ -322,7 +345,10 @@ public partial class SettingsViewModel : ObservableObject
         general.SubtitleMaximumDisplayMilliseconds = MaxDurationMs ?? general.SubtitleMaximumDisplayMilliseconds;
         general.MinimumMillisecondsBetweenLines = MinGapMs ?? general.MinimumMillisecondsBetweenLines;
         general.MaxNumberOfLines = MaxLines ?? general.MaxNumberOfLines;
-        general.MergeLinesShorterThan = UnbreakShorterThanMs ?? general.MergeLinesShorterThan;
+        general.UnbreakLinesShorterThan = UnbreakLinesShorterThan ?? general.UnbreakLinesShorterThan;
+        general.DialogStyle = DialogStyle;
+        general.ContinuationStyle = ContinuationStyle;
+        general.CpsLineLengthStrategy = CpsLineLengthStrategy;
         general.NewEmptyDefaultMs = NewEmptyDefaultMs ?? general.NewEmptyDefaultMs;
         general.PromptDeleteLines = PromptDeleteLines;
         general.LockTimeCodes = LockTimeCodes;

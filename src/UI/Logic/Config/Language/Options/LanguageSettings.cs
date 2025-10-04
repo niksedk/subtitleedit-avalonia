@@ -65,7 +65,7 @@ public class LanguageSettings
     public string TextBoxCenterText { get; set; }
     public string TextBoxFontBold { get; set; }
     public string TextBoxFontSize { get; set; }
-    public string SubtiteGridFontSize { get; set; }
+    public string SubtitleGridFontSize { get; set; }
     public string ShowUpDownStartTime { get; set; }
     public string ShowUpDownEndTime { get; set; }
     public string ShowUpDownDuration { get; set; }
@@ -89,6 +89,7 @@ public class LanguageSettings
     public string MaxDurationMs { get; set; }
     public string MinGapMs { get; set; }
     public string MaxLines { get; set; }
+    public string UnbreakSubtitlesShortThan { get; internal set; }
     public string NewEmptyDefaultMs { get; set; }
     public string PromptDeleteLines { get; set; }
     public string RememberPositionAndSize { get; set; }
@@ -219,7 +220,7 @@ public class LanguageSettings
         TextBoxCenterText = "Center text in subtitle text box";
         TextBoxFontBold = "Bold text in subtitle text box";
         TextBoxFontSize = "Font size in subtitle text box";
-        SubtiteGridFontSize = "Font size in subtitle grid"; 
+        SubtitleGridFontSize = "Font size in subtitle grid"; 
         ShowUpDownStartTime = "Show up/down control for \"Show\"";
         ShowUpDownEndTime = "Show up/down control for \"Hide\"";
         ShowUpDownDuration = "Show up/down control for \"Duration\"";
@@ -243,6 +244,7 @@ public class LanguageSettings
         MaxDurationMs = "Max duration (ms)";
         MinGapMs = "Min gap (ms)";
         MaxLines = "Max number of lines";
+        UnbreakSubtitlesShortThan = "Unbreak subtitles shorter than";
         NewEmptyDefaultMs = "Default new subtitle duration (ms)";
         PromptDeleteLines = "Prompt for delete lines";
         RememberPositionAndSize = "Remember window position and size";

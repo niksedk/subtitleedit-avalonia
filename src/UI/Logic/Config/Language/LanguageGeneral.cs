@@ -399,6 +399,9 @@ public class LanguageGeneral
     public string Forced { get; set; }
     public string TextOrImage { get; set; }
     public string PleaseEnterAValidValueForX { get; internal set; }
+    public string System { get; set; }
+    public string Light { get; set; }
+    public string Dark { get; set; }
 
     public LanguageGeneral()
     {
@@ -796,5 +799,8 @@ public class LanguageGeneral
         Forced = "Forced";
         TextOrImage = "Text/image";
         PleaseEnterAValidValueForX = "Please enter a valid value for \"{0}\"";
+        System = "System";
+        Light = "Light";
+        Dark = "Dark";
     }
 }
