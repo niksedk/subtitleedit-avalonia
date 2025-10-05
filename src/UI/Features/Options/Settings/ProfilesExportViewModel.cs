@@ -2,10 +2,12 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using HanumanInstitute.Validators;
+using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
 
@@ -23,20 +25,35 @@ public partial class ProfilesExportViewModel : ObservableObject
         Profiles = new ObservableCollection<ProfileDisplay>();
     }
 
-    public void Initialize(List<ProfileDisplay> profiles, string profileName)
+    public void Initialize(List<ProfileDisplay> profiles)
     {
         Profiles.Clear();
         foreach (var profile in profiles)
         {
             Profiles.Add(new ProfileDisplay(profile));
         }
-
-        SelectedProfile = Profiles.FirstOrDefault(p => p.Name == profileName);
     }
 
     [RelayCommand]
-    private void Ok()
+    private async Task Ok()
     {
+        if (Window == null)
+        {
+            return;
+        }   
+
+        if (Profiles.Where(p=>p.IsSelected).Count() == 0)
+        {
+            await MessageBox.Show(
+                Window!,
+                Se.Language.General.Error,
+                $"No profile selected for export",
+                MessageBoxButtons.OK, 
+                MessageBoxIcon.Error);
+
+            return;
+        }   
+
         OkPressed = true;
         Window?.Close();
     }

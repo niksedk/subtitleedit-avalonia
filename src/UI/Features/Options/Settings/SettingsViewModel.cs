@@ -240,7 +240,6 @@ public partial class SettingsViewModel : ObservableObject
             var pd = new ProfileDisplay
             {
                 Name = profile.Name,
-                SelectedProfile = profile.Name,
                 SingleLineMaxLength = profile.SubtitleLineMaximumLength,
                 OptimalCharsPerSec = (double)profile.SubtitleOptimalCharactersPerSeconds,
                 MaxCharsPerSec = (double)profile.SubtitleMaximumCharactersPerSeconds,
@@ -725,6 +724,29 @@ public partial class SettingsViewModel : ObservableObject
 
         var oldProfileName = SelectedProfile;
         _profilesForEdit = result.Profiles.ToList();
+
+        if (_profilesForEdit.Count == 0)
+        {
+            var g = new SeGeneral();
+            var pd = new ProfileDisplay
+            {
+                Name = "Default",
+                SingleLineMaxLength = g.SubtitleLineMaximumLength,
+                OptimalCharsPerSec = (double)g.SubtitleOptimalCharactersPerSeconds,
+                MaxCharsPerSec = (double)g.SubtitleMaximumCharactersPerSeconds,
+                MaxWordsPerMin = (double)g.SubtitleMaximumWordsPerMinute,
+                MinDurationMs = g.SubtitleMinimumDisplayMilliseconds,
+                MaxDurationMs = g.SubtitleMaximumDisplayMilliseconds,
+                MinGapMs = g.MinimumMillisecondsBetweenLines,
+                MaxLines = g.MaxNumberOfLines,
+                UnbreakLinesShorterThan = g.UnbreakLinesShorterThan,
+                DialogStyle = DialogStyles.FirstOrDefault(p => p.Code == g.DialogStyle) ?? DialogStyles.First(),
+                ContinuationStyle = ContinuationStyles.FirstOrDefault(p => p.Code == g.ContinuationStyle) ?? ContinuationStyles.First(),
+                CpsLineLengthStrategy = CpsLineLengthStrategies.FirstOrDefault(p => p.Code == g.CpsLineLengthStrategy) ?? CpsLineLengthStrategies.First()
+            };
+            _profilesForEdit.Add(pd);
+        }
+
         Profiles.Clear();
         foreach (var profile in _profilesForEdit)
         {

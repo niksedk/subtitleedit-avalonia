@@ -1,4 +1,5 @@
 ﻿using Nikse.SubtitleEdit.Core.Enums;
+using System;
 
 namespace Nikse.SubtitleEdit.Logic.Config.Language.Options;
 
@@ -162,6 +163,10 @@ public class LanguageSettings
     public string ResetAutoTranslate { get; set; }
     public string ResetSettingsTitle { get; set; }
     public string OpenRuleFile { get; set; }
+    public string ExportProfiles { get; set; }
+    public string SaveRuleProfilesFile { get; set; }
+    public string RuleProfilesExportedX { get; set; }
+    public string RuleProfilesImportedX { get; set; }
 
     public LanguageSettings()
     {
@@ -321,6 +326,10 @@ public class LanguageSettings
         ResetAutoTranslate = "Reset auto-translate";
         ResetSettingsTitle = "Reset settings";
         OpenRuleFile = "Open rule file";
+        ExportProfiles = "Export profiles";
+        SaveRuleProfilesFile = "Save rule profiles file";
+        RuleProfilesExportedX = "{0} rule profiles exported";
+        RuleProfilesImportedX = "{0} rule profiles imported";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

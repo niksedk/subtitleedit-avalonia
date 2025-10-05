@@ -1,7 +1,10 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
+using Avalonia.Media;
+using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -12,7 +15,7 @@ public class ProfilesExportWindow : Window
     public ProfilesExportWindow(ProfilesExportViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = Se.Language.General.Profiles;
+        Title = Se.Language.Options.Settings.ExportProfiles;
         CanResize = true;
         Width = 1100;
         Height = 750;
@@ -91,27 +94,29 @@ public class ProfilesExportWindow : Window
             DataContext = vm,
             Columns =
             {
+                new DataGridTemplateColumn
+                {
+                    Header = Se.Language.General.Enabled,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    CellTemplate = new FuncDataTemplate<ProfileDisplay>((item, _) =>
+                    new Border
+                    {
+                        Background = Brushes.Transparent, // Prevents highlighting
+                        Padding = new Thickness(4),
+                        Child = new CheckBox
+                        {
+                            [!CheckBox.IsCheckedProperty] = new Binding(nameof(ProfileDisplay.IsSelected)),
+                            HorizontalAlignment = HorizontalAlignment.Center
+                        }
+                    }),
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
+                },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Name,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(ProfileDisplay.Name)),
                     IsReadOnly = true,
-                },
-                new DataGridTextColumn
-                {
-                    Header = Se.Language.Options.Settings.SingleLineMaxLength,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(ProfileDisplay.SingleLineMaxLength)),
-                    IsReadOnly = true,
-                },
-                new DataGridTextColumn
-                {
-                    Header = Se.Language.General.MaxCharactersPerSecond,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(ProfileDisplay.MaxCharsPerSec)),
-                    IsReadOnly = true,
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
             },
         };

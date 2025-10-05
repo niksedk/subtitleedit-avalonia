@@ -2,12 +2,15 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
@@ -54,14 +57,35 @@ public partial class ProfilesViewModel : ObservableObject
         var result = await _windowService
             .ShowDialogAsync<ProfilesExportWindow, ProfilesExportViewModel>(Window, vm =>
             {
-                //vm.Initialize(_profilesForEdit, SelectedProfile);
+                vm.Initialize(Profiles.ToList());
             });
-
 
         if (!result.OkPressed)
         {
             return;
         }
+
+        var fileName = await _fileHelper.PickSaveFile(Window, ".profile", "SE_Rules_profile",  Se.Language.Options.Settings.SaveRuleProfilesFile);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        var toExport = result.Profiles.Where(p => p.IsSelected).ToList();
+        if (toExport.Count == 0)
+        {
+            return;
+        }
+
+        var json = JsonSerializer.Serialize(toExport);
+        System.IO.File.WriteAllText(fileName, json);
+
+        await MessageBox.Show(
+            Window!,
+            Se.Language.General.Information,
+            string.Format(Se.Language.Options.Settings.RuleProfilesExportedX, toExport.Count),
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
     }
 
     [RelayCommand]
@@ -77,6 +101,61 @@ public partial class ProfilesViewModel : ObservableObject
         {
             return;
         }
+
+        // import from json
+        List<ProfileDisplay>? imported = null;
+        try
+        {
+            var json = System.IO.File.ReadAllText(fileName);
+            imported = JsonSerializer.Deserialize<List<ProfileDisplay>>(json);
+        }
+        catch (Exception exception)
+        {
+            await MessageBox.Show(
+                Window!,
+                Se.Language.General.Error,
+                "Unable to import profiles: " + exception.Message,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+
+            return;
+        }
+
+        if (imported == null || imported.Count == 0)
+        {
+            await MessageBox.Show(
+                Window!,
+                Se.Language.General.Error,
+                "No profiles found in file",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+            return;
+        }
+
+        foreach (var profile in imported)
+        {
+            var exists = Profiles.FirstOrDefault(p => p.Name.Equals(profile.Name, StringComparison.OrdinalIgnoreCase));
+            if (exists != null)
+            {
+                // rename
+                var idx = 2;
+                var newName = profile.Name + " " + idx;
+                while (Profiles.Any(p => p.Name.Equals(newName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    idx++;
+                    newName = profile.Name + " " + idx;
+                }
+                profile.Name = newName;
+            }
+            Profiles.Add(profile);
+        }
+
+        await MessageBox.Show(
+            Window!,
+            Se.Language.General.Information,
+            string.Format(Se.Language.Options.Settings.RuleProfilesImportedX, imported.Count),
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
     }
 
     [RelayCommand]

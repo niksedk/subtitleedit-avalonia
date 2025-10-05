@@ -6,7 +6,6 @@ namespace Nikse.SubtitleEdit.Features.Options.Settings;
 public partial class ProfileDisplay : ObservableObject
 {
     [ObservableProperty] private string _name;
-    [ObservableProperty] private string _selectedProfile;
     [ObservableProperty] private int? _singleLineMaxLength;
     [ObservableProperty] private double? _optimalCharsPerSec;
     [ObservableProperty] private double? _maxCharsPerSec;
@@ -22,11 +21,11 @@ public partial class ProfileDisplay : ObservableObject
     [ObservableProperty] private ContinuationStyleDisplay _continuationStyle;
     [ObservableProperty] private ObservableCollection<CpsLineLengthStrategyDisplay> _cpsLineLengthStrategies;
     [ObservableProperty] private CpsLineLengthStrategyDisplay _cpsLineLengthStrategy;
+    [ObservableProperty] private bool _isSelected;
 
     public ProfileDisplay()
     {
         Name = string.Empty;
-        SelectedProfile = string.Empty;
         SingleLineMaxLength = null;
         OptimalCharsPerSec = null;
         MaxCharsPerSec = null;
@@ -47,7 +46,6 @@ public partial class ProfileDisplay : ObservableObject
     public ProfileDisplay(ProfileDisplay other)
     {
         Name = other.Name;
-        SelectedProfile = other.SelectedProfile;
         SingleLineMaxLength = other.SingleLineMaxLength;
         OptimalCharsPerSec = other.OptimalCharsPerSec;
         MaxCharsPerSec = other.MaxCharsPerSec;
