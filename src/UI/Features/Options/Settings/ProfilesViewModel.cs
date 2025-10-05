@@ -2,10 +2,13 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using HanumanInstitute.Validators;
+using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
 
@@ -18,8 +21,14 @@ public partial class ProfilesViewModel : ObservableObject
 
     public bool OkPressed { get; private set; }
 
-    public ProfilesViewModel()
+    private readonly IWindowService _windowService;
+    private readonly IFileHelper _fileHelper;
+
+    public ProfilesViewModel(IWindowService windowService, IFileHelper fileHelper)
     {
+        _windowService = windowService;
+        _fileHelper = fileHelper;
+
         Profiles = new ObservableCollection<ProfileDisplay>();
     }
 
@@ -32,6 +41,87 @@ public partial class ProfilesViewModel : ObservableObject
         }
 
         SelectedProfile = Profiles.FirstOrDefault(p => p.Name == profileName);
+    }
+
+    [RelayCommand]
+    private async Task Export()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var result = await _windowService
+            .ShowDialogAsync<ProfilesExportWindow, ProfilesExportViewModel>(Window, vm =>
+            {
+                //vm.Initialize(_profilesForEdit, SelectedProfile);
+            });
+
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+    }
+
+    [RelayCommand]
+    private async Task Import()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.Options.Settings.OpenRuleFile, "Rule profile", ".profile");
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+    }
+
+    [RelayCommand]
+    private void Copy()
+    {
+        if (SelectedProfile == null)
+        {
+            return;
+        }
+
+        var newProfile = new ProfileDisplay(SelectedProfile);
+        var idx = Profiles.IndexOf(SelectedProfile);
+
+        newProfile.Name = SelectedProfile.Name + " 2";
+        Profiles.Insert(idx + 1, newProfile);
+    }
+
+    [RelayCommand]
+    private void Delete()
+    {
+        if (SelectedProfile == null)
+        {
+            return;
+        }
+
+        var idx = Profiles.IndexOf(SelectedProfile);
+        Profiles.Remove(SelectedProfile);
+        if (Profiles.Count == 0)
+        {
+            SelectedProfile = null;
+        }
+        else if (idx >= Profiles.Count)
+        {
+            SelectedProfile = Profiles[Profiles.Count - 1];
+        }
+        else
+        {
+            SelectedProfile = Profiles[idx];
+        }
+    }
+
+    [RelayCommand]
+    private void Clear()
+    {
+        Profiles.Clear();
     }
 
     [RelayCommand]

@@ -161,6 +161,7 @@ public class LanguageSettings
     public string ResetAppearance { get; set; }
     public string ResetAutoTranslate { get; set; }
     public string ResetSettingsTitle { get; set; }
+    public string OpenRuleFile { get; set; }
 
     public LanguageSettings()
     {
@@ -319,6 +320,7 @@ public class LanguageSettings
         ResetAppearance = "Reset appearance";
         ResetAutoTranslate = "Reset auto-translate";
         ResetSettingsTitle = "Reset settings";
+        OpenRuleFile = "Open rule file";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

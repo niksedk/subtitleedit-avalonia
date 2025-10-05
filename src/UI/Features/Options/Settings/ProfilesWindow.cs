@@ -121,11 +121,11 @@ public class ProfilesWindow : Window
         dataGrid.Bind(DataGrid.ItemsSourceProperty, new Binding(nameof(vm.Profiles)) { Source = vm });
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedProfile)) { Source = vm });
 
-        var buttonExport = UiUtil.MakeButton(vm.OkCommand, IconNames.Export, Se.Language.General.ExportDotDotDot);
-        var buttonImport = UiUtil.MakeButton(vm.OkCommand, IconNames.Import, Se.Language.General.ImportDotDotDot);
-        var buttonCopy = UiUtil.MakeButton(vm.OkCommand, IconNames.Copy, Se.Language.General.Copy);
-        var buttonDelete = UiUtil.MakeButton(vm.OkCommand, IconNames.Trash, Se.Language.General.Delete);
-        var buttonClear = UiUtil.MakeButton(vm.OkCommand, IconNames.Close, Se.Language.General.Clear);
+        var buttonExport = UiUtil.MakeButton(vm.ExportCommand, IconNames.Export, Se.Language.General.ExportDotDotDot);
+        var buttonImport = UiUtil.MakeButton(vm.ImportCommand, IconNames.Import, Se.Language.General.ImportDotDotDot);
+        var buttonCopy = UiUtil.MakeButton(vm.CopyCommand, IconNames.Copy, Se.Language.General.Copy);
+        var buttonDelete = UiUtil.MakeButton(vm.DeleteCommand, IconNames.Trash, Se.Language.General.Delete);
+        var buttonClear = UiUtil.MakeButton(vm.ClearCommand, IconNames.Close, Se.Language.General.Clear);
         var panelButtons = UiUtil.MakeButtonBar(
             buttonExport,
             buttonImport,
