@@ -162,6 +162,23 @@ public class SettingsPage : UserControl
 
         sections.Add(new SettingsSection(Se.Language.General.Rules,
         [
+            new SettingsItem(Se.Language.Options.Settings.Profiles, () => new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Spacing = 10,
+                Children =
+                {
+                    new ComboBox
+                    {
+                        Width = 250,
+                        DataContext = _vm,
+                        [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.Profiles)),
+                        [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedProfile)) { Mode = BindingMode.TwoWay }
+                    },
+                    UiUtil.MakeButtonBrowse(_vm.EditProfilesCommand),
+                }
+            }),
+
             MakeNumericSettingInt(Se.Language.Options.Settings.SingleLineMaxLength, nameof(_vm.SingleLineMaxLength)),
             MakeNumericSetting(Se.Language.Options.Settings.OptimalCharsPerSec, nameof(_vm.OptimalCharsPerSec)),
             MakeNumericSetting(Se.Language.Options.Settings.MaxCharsPerSec, nameof(_vm.MaxCharsPerSec)),

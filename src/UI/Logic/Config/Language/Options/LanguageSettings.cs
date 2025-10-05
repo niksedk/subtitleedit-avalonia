@@ -58,6 +58,7 @@ public class LanguageSettings
     public string AutoBackupEveryMinute { get; set; }
     public string AutoBackupEveryXthMinute { get; set; }
 
+    public string Profiles { get; set; }
     public string AutoBackupDeleteAfterXMonths { get; set; }
     public string SearchSettingsDotDoDot { get; set; }
     public string SyntaxColoring { get; set; }
@@ -217,6 +218,7 @@ public class LanguageSettings
         AutoBackupEveryXthMinute = "Every {0}th minute";
         AutoBackupDeleteAfterXMonths = "Delete auto-backups after {0} months";
 
+        Profiles = "Profiles";
         SearchSettingsDotDoDot = "Search for settings...";
         SyntaxColoring = "Syntax coloring";
         WaveformSpectrogram = "Waveform/spectrogram";

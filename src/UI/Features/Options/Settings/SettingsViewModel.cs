@@ -10,8 +10,6 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Core.Common.TextLengthCalculator;
-using Nikse.SubtitleEdit.Core.Enums;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Shared;
@@ -33,6 +31,8 @@ namespace Nikse.SubtitleEdit.Features.Options.Settings;
 
 public partial class SettingsViewModel : ObservableObject
 {
+    [ObservableProperty] private ObservableCollection<string> _profiles;
+    [ObservableProperty] private string _selectedProfile;
     [ObservableProperty] private int? _singleLineMaxLength;
     [ObservableProperty] private double? _optimalCharsPerSec;
     [ObservableProperty] private double? _maxCharsPerSec;
@@ -163,12 +163,15 @@ public partial class SettingsViewModel : ObservableObject
     private readonly IWindowService _windowService;
     private readonly IFolderHelper _folderHelper;
     private MainViewModel? _mainViewModel;
+    private List<ProfileDisplay> _profilesForEdit;
 
     public SettingsViewModel(IWindowService windowService, IFolderHelper folderHelper)
     {
         _windowService = windowService;
         _folderHelper = folderHelper;
 
+        Profiles = new ObservableCollection<string>();
+        SelectedProfile = "Default";
         DialogStyles = new ObservableCollection<DialogStyleDisplay>(DialogStyleDisplay.List());
         ContinuationStyles = new ObservableCollection<ContinuationStyleDisplay>(ContinuationStyleDisplay.List());
         CpsLineLengthStrategies = new ObservableCollection<CpsLineLengthStrategyDisplay>(CpsLineLengthStrategyDisplay.List());
@@ -223,12 +226,24 @@ public partial class SettingsViewModel : ObservableObject
         IsLibMpvDownloadVisible = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
         LoadSettings();
+
+        _profilesForEdit = new List<ProfileDisplay>();
     }
 
     private void LoadSettings()
     {
         var general = Se.Settings.General;
         var appearance = Se.Settings.Appearance;
+
+        Profiles.Clear();
+        foreach (var profile in Se.Settings.General.Profiles)
+        {
+            Profiles.Add(profile.Name);
+        }
+        if (Profiles.Count == 0)
+        {
+            Profiles.Add("Default");
+        }
 
         SingleLineMaxLength = general.SubtitleLineMaximumLength;
         OptimalCharsPerSec = general.SubtitleOptimalCharactersPerSeconds;
@@ -619,6 +634,45 @@ public partial class SettingsViewModel : ObservableObject
         SaveSettings();
         SaveFileTypeAssociations();
         _mainViewModel?.ApplySettings();
+    }
+
+    [RelayCommand]
+    private async Task EditProfiles()
+    {
+        _profilesForEdit.Clear();
+        foreach (var profile in Se.Settings.General.Profiles)
+        {
+            var pd = new ProfileDisplay
+            {
+                Name = profile.Name,
+                SelectedProfile = profile.Name,
+                SingleLineMaxLength = profile.SubtitleLineMaximumLength,
+                OptimalCharsPerSec = (double)profile.SubtitleOptimalCharactersPerSeconds,
+                MaxCharsPerSec = (double)profile.SubtitleMaximumCharactersPerSeconds,
+                MaxWordsPerMin = (double)profile.SubtitleMaximumWordsPerMinute,
+                MinDurationMs = profile.SubtitleMinimumDisplayMilliseconds,
+                MaxDurationMs = profile.SubtitleMaximumDisplayMilliseconds,
+                MinGapMs = profile.MinimumMillisecondsBetweenLines,
+                MaxLines = profile.MaxNumberOfLines,
+                UnbreakLinesShorterThan = profile.MergeLinesShorterThan,
+                // DialogStyle = DialogStyles.FirstOrDefault(p => p.Code == profile.DialogStyle) ?? DialogStyles.First(),
+                // ContinuationStyle = ContinuationStyles.FirstOrDefault(p => p.Code == profile.ContinuationStyle) ?? ContinuationStyles.First(),
+                CpsLineLengthStrategy = CpsLineLengthStrategies.FirstOrDefault(p => p.Code == profile.CpsLineLengthStrategy) ?? CpsLineLengthStrategies.First()
+            };
+            _profilesForEdit.Add(pd);
+        }
+
+        var result = await _windowService
+            .ShowDialogAsync<ProfilesWindow, ProfilesViewModel>(Window!, vm =>
+            {
+                vm.Initialize(_profilesForEdit, SelectedProfile);
+            });
+    
+            
+        if (!result.OkPressed)
+        {
+            return;
+        }
     }
 
     [RelayCommand]

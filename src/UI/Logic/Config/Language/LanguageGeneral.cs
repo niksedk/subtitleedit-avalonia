@@ -402,6 +402,7 @@ public class LanguageGeneral
     public string System { get; set; }
     public string Light { get; set; }
     public string Dark { get; set; }
+    public string Profiles { get; set; }
 
     public LanguageGeneral()
     {
@@ -802,5 +803,6 @@ public class LanguageGeneral
         System = "System";
         Light = "Light";
         Dark = "Dark";
+        Profiles = "Profiles";
     }
 }
