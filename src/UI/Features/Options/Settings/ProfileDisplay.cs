@@ -1,5 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
 
@@ -15,11 +15,8 @@ public partial class ProfileDisplay : ObservableObject
     [ObservableProperty] private int? _minGapMs;
     [ObservableProperty] private int? _maxLines;
     [ObservableProperty] private int? _unbreakLinesShorterThan;
-    [ObservableProperty] private ObservableCollection<DialogStyleDisplay> _dialogStyles;
     [ObservableProperty] private DialogStyleDisplay _dialogStyle;
-    [ObservableProperty] private ObservableCollection<ContinuationStyleDisplay> _continuationStyles;
     [ObservableProperty] private ContinuationStyleDisplay _continuationStyle;
-    [ObservableProperty] private ObservableCollection<CpsLineLengthStrategyDisplay> _cpsLineLengthStrategies;
     [ObservableProperty] private CpsLineLengthStrategyDisplay _cpsLineLengthStrategy;
     [ObservableProperty] private bool _isSelected;
 
@@ -35,12 +32,9 @@ public partial class ProfileDisplay : ObservableObject
         MinGapMs = null;
         MaxLines = null;
         UnbreakLinesShorterThan = null;
-        DialogStyles = new(DialogStyleDisplay.List());
-        DialogStyle = DialogStyles.Count > 0 ? DialogStyles[0] : null!;
-        ContinuationStyles = new(ContinuationStyleDisplay.List());
-        ContinuationStyle = ContinuationStyles.Count > 0 ? ContinuationStyles[0] : null!;
-        CpsLineLengthStrategies = new(CpsLineLengthStrategyDisplay.List());
-        CpsLineLengthStrategy = CpsLineLengthStrategies.Count > 0 ? CpsLineLengthStrategies[0] : null!;
+        DialogStyle = DialogStyleDisplay.List().First();
+        ContinuationStyle = ContinuationStyleDisplay.List().First();
+        CpsLineLengthStrategy = CpsLineLengthStrategyDisplay.List().First();
     }
 
     public ProfileDisplay(ProfileDisplay other)
@@ -55,11 +49,8 @@ public partial class ProfileDisplay : ObservableObject
         MinGapMs = other.MinGapMs;
         MaxLines = other.MaxLines;
         UnbreakLinesShorterThan = other.UnbreakLinesShorterThan;
-        DialogStyles = new(other.DialogStyles);
         DialogStyle = other.DialogStyle;
-        ContinuationStyles = new(other.ContinuationStyles);
         ContinuationStyle = other.ContinuationStyle;
-        CpsLineLengthStrategies = new(other.CpsLineLengthStrategies);
         CpsLineLengthStrategy = other.CpsLineLengthStrategy;
     }
 

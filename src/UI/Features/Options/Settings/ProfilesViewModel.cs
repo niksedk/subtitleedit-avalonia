@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.Enums;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -19,6 +20,9 @@ public partial class ProfilesViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<ProfileDisplay> _profiles;
     [ObservableProperty] private ProfileDisplay? _selectedProfile;
+    [ObservableProperty] private ObservableCollection<DialogStyleDisplay> _dialogStyles;
+    [ObservableProperty] private ObservableCollection<ContinuationStyleDisplay> _continuationStyles;
+    [ObservableProperty] private ObservableCollection<CpsLineLengthStrategyDisplay> _cpsLineLengthStrategies;
 
     public Window? Window { get; set; }
 
@@ -33,6 +37,9 @@ public partial class ProfilesViewModel : ObservableObject
         _fileHelper = fileHelper;
 
         Profiles = new ObservableCollection<ProfileDisplay>();
+        DialogStyles = new ObservableCollection<DialogStyleDisplay>(DialogStyleDisplay.List());
+        ContinuationStyles = new ObservableCollection<ContinuationStyleDisplay>(ContinuationStyleDisplay.List());
+        CpsLineLengthStrategies = new ObservableCollection<CpsLineLengthStrategyDisplay>(CpsLineLengthStrategyDisplay.List());
     }
 
     public void Initialize(List<ProfileDisplay> profiles, string profileName)
@@ -40,6 +47,9 @@ public partial class ProfilesViewModel : ObservableObject
         Profiles.Clear();
         foreach (var profile in profiles)
         {
+            profile.DialogStyle = DialogStyles.FirstOrDefault(d => d.Code == profile.DialogStyle.Code) ?? DialogStyles.First();   
+            profile.ContinuationStyle = ContinuationStyles.FirstOrDefault(c => c.Code == profile.ContinuationStyle.Code) ?? ContinuationStyles.First();
+            profile.CpsLineLengthStrategy = CpsLineLengthStrategies.FirstOrDefault(c => c.Code == profile.CpsLineLengthStrategy.Code) ?? CpsLineLengthStrategies.First();
             Profiles.Add(new ProfileDisplay(profile));
         }
 

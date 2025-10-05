@@ -748,10 +748,17 @@ public partial class SettingsViewModel : ObservableObject
         }
 
         Profiles.Clear();
+        var profilesForEdit = new List<ProfileDisplay>();
         foreach (var profile in _profilesForEdit)
         {
+            var pd = new ProfileDisplay(profile);
+            pd.DialogStyle = DialogStyles.FirstOrDefault(p => p.Code == profile.DialogStyle.Code) ?? DialogStyles.First();
+            pd.ContinuationStyle = ContinuationStyles.FirstOrDefault(p => p.Code == profile.ContinuationStyle.Code) ?? ContinuationStyles.First();
+            pd.CpsLineLengthStrategy = CpsLineLengthStrategies.FirstOrDefault(p => p.Code == profile.CpsLineLengthStrategy.Code) ?? CpsLineLengthStrategies.First();
+            profilesForEdit.Add(pd);    
             Profiles.Add(profile.Name);
         }
+        _profilesForEdit = profilesForEdit; 
 
         SelectedProfile = Profiles.FirstOrDefault(p => p == oldProfileName) ?? Profiles.First();
     }

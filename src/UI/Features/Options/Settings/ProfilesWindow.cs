@@ -206,10 +206,10 @@ public class ProfilesWindow : Window
         var comboBoxDialogStyle = new ComboBox
         {
             Width = 250,
-            DataContext = vm.SelectedProfile,
-            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.SelectedProfile.DialogStyles)),
+            DataContext = vm,
+            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.DialogStyles)),
             [!SelectingItemsControl.SelectedItemProperty] =
-                new Binding(nameof(vm.SelectedProfile.DialogStyle)) { Mode = BindingMode.TwoWay },
+                new Binding(nameof(vm.SelectedProfile) + "." + nameof(ProfileDisplay.DialogStyle)) { Mode = BindingMode.TwoWay },
             ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
                 new TextBlock { Text = f?.Name }, true)
         };
@@ -218,10 +218,10 @@ public class ProfilesWindow : Window
         var comboBoxContinuationStyle = new ComboBox
         {
             Width = 250,
-            DataContext = vm.SelectedProfile,
-            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.SelectedProfile.ContinuationStyles)),
+            DataContext = vm,
+            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.ContinuationStyles)),
             [!SelectingItemsControl.SelectedItemProperty] =
-                new Binding(nameof(vm.SelectedProfile.ContinuationStyle)) { Mode = BindingMode.TwoWay },
+                new Binding(nameof(vm.SelectedProfile) + "." + nameof(ProfileDisplay.ContinuationStyle)) { Mode = BindingMode.TwoWay },
             ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
                 new TextBlock { Text = f?.Name }, true)
         };
@@ -230,10 +230,10 @@ public class ProfilesWindow : Window
         var comboBoxCpsLineLengthStyle = new ComboBox
         {
             Width = 250,
-            DataContext = vm.SelectedProfile,
-            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.SelectedProfile.CpsLineLengthStrategies)),
+            DataContext = vm,
+            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.CpsLineLengthStrategies)),
             [!SelectingItemsControl.SelectedItemProperty] =
-                new Binding(nameof(vm.SelectedProfile.CpsLineLengthStrategy)) { Mode = BindingMode.TwoWay },
+                new Binding(nameof(vm.SelectedProfile) + "." + nameof(ProfileDisplay.CpsLineLengthStrategy)) { Mode = BindingMode.TwoWay },
             ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
                 new TextBlock { Text = f?.Name }, true)
         };
