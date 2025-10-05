@@ -9,6 +9,7 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.Cea708.Commands;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Enums;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
@@ -136,11 +137,13 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private GridLinesVisibilityDisplay _selectedGridLinesVisibility;
     [ObservableProperty] private Color _darkModeBackgroundColor;
     [ObservableProperty] private Color _bookmarkColor;
+    [ObservableProperty] private bool _isEditCustomContinuationStyleVisible;
 
     [ObservableProperty] private bool _existsErrorLogFile;
     [ObservableProperty] private bool _existsWhisperLogFile;
     [ObservableProperty] private bool _existsSettingsFile;
 
+    
     public ObservableCollection<FileTypeAssociationViewModel> FileTypeAssociations { get; set; } = new()
     {
         new() { Extension = ".ass", IconPath = "avares://SubtitleEdit/Assets/FileTypes/ass.ico" },
@@ -796,6 +799,27 @@ public partial class SettingsViewModel : ObservableObject
         await _folderHelper.OpenFolderWithFileSelected(Window!, Se.GetSettingsFilePath());
     }
 
+    [RelayCommand]
+    private async Task ShowEditCustomContinuationStyle()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+       var result = await _windowService
+            .ShowDialogAsync<CustomContinuationStyleWindow, CustomContinuationStyleViewModel>(Window, vm =>
+            {
+                vm.Initialize();
+            });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+    }
+
+
     private void LoadFileTypeAssociations()
     {
         if (!OperatingSystem.IsWindows())
@@ -937,5 +961,10 @@ public partial class SettingsViewModel : ObservableObject
         profileItem.DialogStyle = DialogStyle;
         profileItem.ContinuationStyle = ContinuationStyle;
         profileItem.CpsLineLengthStrategy = CpsLineLengthStrategy;
+    }
+
+    internal void ContinuationStyleChanged()
+    {
+        IsEditCustomContinuationStyleVisible = ContinuationStyle.Code == Core.Enums.ContinuationStyle.Custom.ToString();
     }
 }

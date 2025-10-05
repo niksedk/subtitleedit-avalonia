@@ -1,0 +1,157 @@
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Layout;
+using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
+
+namespace Nikse.SubtitleEdit.Features.Options.Settings;
+
+public class CustomContinuationStyleWindow : Window
+{
+    public CustomContinuationStyleWindow(CustomContinuationStyleViewModel vm)
+    {
+        UiUtil.InitializeWindow(this, GetType().Name);
+        Title = Se.Language.Options.Settings.ContinuationStyleCustom;
+        CanResize = true;
+        Width = 1100;
+        Height = 750;
+        MinWidth = 800;
+        MinHeight = 700;
+        vm.Window = this;
+        DataContext = vm;
+
+        var label = new Label
+        {
+            Content = Se.Language.Tools.AdjustDurations.AdjustVia,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(10, 0, 0, 0),
+        };
+
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
+        var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
+
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+            },
+            Margin = UiUtil.MakeWindowMargin(),
+            ColumnSpacing = 10,
+            RowSpacing = 10,
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        grid.Add(MakeControlsGrid(vm), 0, 0);
+        grid.Add(MakePreviewView(vm), 0, 1);
+        grid.Add(panelButtons, 1, 0, 1, 2);
+
+        Content = grid;
+
+        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += vm.KeyDown;
+    }
+
+    private static Border MakeControlsGrid(CustomContinuationStyleViewModel vm)
+    {
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Margin = new Thickness(0),
+            ColumnSpacing = 5,
+            RowSpacing = 5,
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        var labelPrefix = UiUtil.MakeLabel(Se.Language.General.Prefix);
+        var comboBoxPrefix = UiUtil.MakeComboBox(vm.PreAndSuffixes, vm, nameof(vm.SelectedPrefix));
+        var checkBoxPrefixAddSpace = UiUtil.MakeCheckBox(Se.Language.Options.Settings.AddSpace, vm, nameof(vm.SelectedPrefixAddSpace));
+
+        var labelSuffix = UiUtil.MakeLabel(Se.Language.General.Suffix);
+        var comboBoxSuffix = UiUtil.MakeComboBox(vm.PreAndSuffixes, vm, nameof(vm.SelectedSuffixes));
+        var checkBoxSuffixProcessIfEndWithComma = UiUtil.MakeCheckBox(Se.Language.Options.Settings.ProcessIfEndsWithComma, vm, nameof(vm.SelectedSuffixesProcessIfEndWithComma));
+        var checkBoxSuffixAddSpace = UiUtil.MakeCheckBox(Se.Language.Options.Settings.AddSpace, vm, nameof(vm.SelectedSuffixesAddSpace));
+        var checkBoxSuffixRemoveComma = UiUtil.MakeCheckBox(Se.Language.Options.Settings.RemoveComma, vm, nameof(vm.SelectedSuffixesRemoveComma));
+
+        var checkBoxUseSpecialStyleAfterLongGaps = UiUtil.MakeCheckBox(Se.Language.Options.Settings.UseSpecialStyleAfterLongGaps, vm, nameof(vm.UseSpecialStyleAfterLongGaps));
+        var labelLongPrefix = UiUtil.MakeLabel(Se.Language.General.Prefix);
+        var comboBoxLongPrefix = UiUtil.MakeComboBox(vm.PreAndSuffixes, vm, nameof(vm.SelectedLongGapPrefix));
+
+        var labelLongSuffix = UiUtil.MakeLabel(Se.Language.General.Suffix);
+        var comboBoxLongSuffix = UiUtil.MakeComboBox(vm.PreAndSuffixes, vm, nameof(vm.SelectedLongGapSuffixes));
+
+        grid.Add(labelPrefix, 0);
+        grid.Add(comboBoxPrefix, 0, 1);
+
+        grid.Add(checkBoxPrefixAddSpace, 1, 1);
+        grid.Add(labelSuffix, 2, 0);
+        grid.Add(comboBoxSuffix, 2, 1);
+        grid.Add(checkBoxSuffixProcessIfEndWithComma, 3, 1);
+        grid.Add(checkBoxSuffixAddSpace, 4, 1);
+        grid.Add(checkBoxSuffixRemoveComma, 5, 1);
+
+        grid.Add(checkBoxUseSpecialStyleAfterLongGaps, 6, 0, 2, 1);
+        grid.Add(labelLongPrefix, 7, 0);
+        grid.Add(comboBoxLongPrefix, 7, 1);
+        grid.Add(labelLongSuffix, 8, 0);
+        grid.Add(comboBoxLongSuffix, 8, 1);
+
+        return UiUtil.MakeBorderForControl(grid);
+    }
+
+    private static Border MakePreviewView(CustomContinuationStyleViewModel vm)
+    {
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Width = double.NaN,
+        };
+
+        var labelPreview = UiUtil.MakeLabel(Se.Language.General.Preview);
+        var labelPreviewContent = UiUtil.MakeLabel();
+
+        grid.Add(labelPreview, 0);
+        grid.Add(labelPreviewContent, 1);
+
+        return UiUtil.MakeBorderForControl(grid);
+    }
+}

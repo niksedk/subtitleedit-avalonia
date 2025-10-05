@@ -1000,6 +1000,18 @@ public static class UiUtil
         return control;
     }
 
+    public static Button WithBindIsVisible(this Button control, object viewModel, string isVisiblePropertyPath)
+    {
+        control.DataContext = viewModel;
+        control.Bind(Button.IsVisibleProperty, new Binding
+        {           
+            Path = isVisiblePropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
     public static Button WithBindIsVisible(this Button control, string isVisiblePropertyPath, IValueConverter converter)
     {
         control.Bind(Button.IsVisibleProperty, new Binding

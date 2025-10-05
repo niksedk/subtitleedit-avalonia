@@ -167,6 +167,10 @@ public class LanguageSettings
     public string SaveRuleProfilesFile { get; set; }
     public string RuleProfilesExportedX { get; set; }
     public string RuleProfilesImportedX { get; set; }
+    public string UseSpecialStyleAfterLongGaps { get; set; }
+    public string AddSpace { get; set; }
+    public string ProcessIfEndsWithComma { get; set; }
+    public string RemoveComma { get; set; }
 
     public LanguageSettings()
     {
@@ -330,6 +334,10 @@ public class LanguageSettings
         SaveRuleProfilesFile = "Save rule profiles file";
         RuleProfilesExportedX = "{0} rule profiles exported";
         RuleProfilesImportedX = "{0} rule profiles imported";
+        UseSpecialStyleAfterLongGaps = "Use special style after long gaps";
+        AddSpace = "Add space";
+        ProcessIfEndsWithComma = "Process if ends with comma";
+        RemoveComma = "Remove comma";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

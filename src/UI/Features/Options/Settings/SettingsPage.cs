@@ -196,11 +196,23 @@ public class SettingsPage : UserControl
         var numericUpDownUnbreakSubtitlesShortThan = MakeNumericUpDownInt(nameof(_vm.UnbreakLinesShorterThan));
         numericUpDownUnbreakSubtitlesShortThan.PropertyChanged += (s, e) => _vm.RuleValueChanged();
 
+        var comboBoxContinuationStyle = new ComboBox
+        {
+            Width = 250,
+            DataContext = _vm,
+            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.ContinuationStyles)),
+            [!SelectingItemsControl.SelectedItemProperty] =
+                new Binding(nameof(_vm.ContinuationStyle)) { Mode = BindingMode.TwoWay },
+            ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
+                new TextBlock { Text = f?.Name }, true)
+        };
+        comboBoxContinuationStyle.PropertyChanged += (s, e) => _vm.ContinuationStyleChanged();
 
         sections.Add(new SettingsSection(Se.Language.General.Rules,
         [
             new SettingsItem(Se.Language.Options.Settings.Profiles, () => new StackPanel
             {
+                DataContext = _vm,
                 Orientation = Orientation.Horizontal,
                 Spacing = 10,
                 Children =
@@ -230,15 +242,16 @@ public class SettingsPage : UserControl
                 ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
                     new TextBlock { Text = f?.Name }, true)
             }),
-            new SettingsItem(Se.Language.Options.Settings.ContinuationStyle, () => new ComboBox
+            new SettingsItem(Se.Language.Options.Settings.ContinuationStyle, () => new StackPanel
             {
-                Width = 250,
-                DataContext = _vm,
-                [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.ContinuationStyles)),
-                [!SelectingItemsControl.SelectedItemProperty] =
-                    new Binding(nameof(_vm.ContinuationStyle)) { Mode = BindingMode.TwoWay },
-                ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
-                    new TextBlock { Text = f?.Name }, true)
+                Orientation = Orientation.Horizontal,
+                Spacing = 5,
+                Children =
+                {
+                    comboBoxContinuationStyle,
+                    UiUtil.MakeButtonBrowse(_vm.ShowEditCustomContinuationStyleCommand)
+                        .WithBindIsVisible(_vm, nameof(_vm.IsEditCustomContinuationStyleVisible))
+                }
             }),
             new SettingsItem(Se.Language.Options.Settings.CpsLineLengthStyle, () => new ComboBox
             {

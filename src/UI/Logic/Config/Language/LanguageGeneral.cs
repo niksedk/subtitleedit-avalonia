@@ -404,6 +404,8 @@ public class LanguageGeneral
     public string Dark { get; set; }
     public string Profiles { get; set; }
     public string Information { get; set; }
+    public string Prefix { get; set; }
+    public string Suffix { get; set; }
 
     public LanguageGeneral()
     {
@@ -806,5 +808,7 @@ public class LanguageGeneral
         Dark = "Dark";
         Profiles = "Profiles";
         Information = "Information";
+        Prefix = "Prefix";
+        Suffix = "Suffix";
     }
 }
