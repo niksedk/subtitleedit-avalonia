@@ -2,7 +2,6 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DynamicData;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -28,7 +27,7 @@ public partial class ProfilesViewModel : ObservableObject
         Profiles.Clear();
         foreach (var profile in profiles)
         {
-            Profiles.Add(profiles);
+            Profiles.Add(profile);
         }
         SelectedProfile = Profiles.FirstOrDefault(p => p.Name == profileName);
     }

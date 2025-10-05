@@ -14,8 +14,8 @@ public class ProfilesWindow : Window
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.General.Profiles;
         CanResize = true;
-        Width = 1000;
-        Height = 800;
+        Width = 1100;
+        Height = 750;
         MinWidth = 800;
         MinHeight = 700;
         vm.Window = this;
@@ -96,6 +96,7 @@ public class ProfilesWindow : Window
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(ProfileDisplay.MaxCharsPerSec)),
                     IsReadOnly = true,
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
             },
         };
