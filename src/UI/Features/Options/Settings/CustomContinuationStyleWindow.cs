@@ -41,7 +41,7 @@ public class CustomContinuationStyleWindow : Window
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
@@ -66,7 +66,6 @@ public class CustomContinuationStyleWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
@@ -108,6 +107,9 @@ public class CustomContinuationStyleWindow : Window
 
         var labelLongSuffix = UiUtil.MakeLabel(Se.Language.General.Suffix);
         var comboBoxLongSuffix = UiUtil.MakeComboBox(vm.PreAndSuffixes, vm, nameof(vm.SelectedLongGapSuffixes));
+        var checkBoxLongSuffixProcessIfEndWithComma = UiUtil.MakeCheckBox(Se.Language.Options.Settings.ProcessIfEndsWithComma, vm, nameof(vm.SelectedLongGapSuffixesProcessIfEndWithComma));
+        var checkBoxLongSuffixAddSpace = UiUtil.MakeCheckBox(Se.Language.Options.Settings.AddSpace, vm, nameof(vm.SelectedLongGapSuffixesAddSpace));
+        var checkBoxLongSuffixRemoveComma = UiUtil.MakeCheckBox(Se.Language.Options.Settings.RemoveComma, vm, nameof(vm.SelectedLongGapSuffixesRemoveComma));
 
         grid.Add(labelPrefix, 0);
         grid.Add(comboBoxPrefix, 0, 1);
@@ -119,11 +121,14 @@ public class CustomContinuationStyleWindow : Window
         grid.Add(checkBoxSuffixAddSpace, 4, 1);
         grid.Add(checkBoxSuffixRemoveComma, 5, 1);
 
-        grid.Add(checkBoxUseSpecialStyleAfterLongGaps, 6, 0, 2, 1);
+        grid.Add(checkBoxUseSpecialStyleAfterLongGaps, 6, 0, 1, 2);
         grid.Add(labelLongPrefix, 7, 0);
         grid.Add(comboBoxLongPrefix, 7, 1);
         grid.Add(labelLongSuffix, 8, 0);
         grid.Add(comboBoxLongSuffix, 8, 1);
+        grid.Add(checkBoxLongSuffixProcessIfEndWithComma, 9, 1);
+        grid.Add(checkBoxLongSuffixAddSpace, 10, 1);
+        grid.Add(checkBoxLongSuffixRemoveComma, 11, 1);
 
         return UiUtil.MakeBorderForControl(grid);
     }
