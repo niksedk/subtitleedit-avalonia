@@ -17,7 +17,7 @@ public class SeGeneral
     public string CurrentProfile { get; set; }
     public List<RulesProfile> Profiles { get; set; }
     public int SubtitleLineMaximumPixelWidth { get; set; }
-    public int SubtitleLineMaximumLength { get; set; }
+    public int SubtitleLineMaximumLength { get; set; } = 43;
     public int MaxNumberOfLines { get; set; }
     public double SubtitleMaximumCharactersPerSeconds { get; set; }
     public double SubtitleOptimalCharactersPerSeconds { get; set; }
@@ -98,9 +98,18 @@ public class SeGeneral
         Version = Se.Version;
         Language = "English";
         LayoutNumber = 0;
+        SubtitleLineMaximumLength = 43;
+        MaxNumberOfLines = 2;
+        MaxNumberOfLinesPlusAbort = 1;
+        UnbreakLinesShorterThan = 33;
+        SubtitleMinimumDisplayMilliseconds = 1000;
+        SubtitleMaximumDisplayMilliseconds = 8 * 1000;
+        MinimumMillisecondsBetweenLines = 24;
+        SubtitleMaximumCharactersPerSeconds = 25.0;
+        SubtitleOptimalCharactersPerSeconds = 15.0;
+        SubtitleMaximumWordsPerMinute = 400;
         DialogStyle = DialogType.DashBothLinesWithSpace.ToString();
         CpsLineLengthStrategy = nameof(CalcAll);
-        DialogStyle = DialogType.DashBothLinesWithSpace.ToString();
         ContinuationStyle = Core.Enums.ContinuationStyle.None.ToString();
         ContinuationPause = 300;
         CustomContinuationStyleSuffix = "";
@@ -150,16 +159,6 @@ public class SeGeneral
         DefaultEncoding = TextEncoding.Utf8WithBom;
         AutoConvertToUtf8 = false;
         AutoGuessAnsiEncoding = true;
-        SubtitleLineMaximumLength = 43;
-        MaxNumberOfLines = 2;
-        MaxNumberOfLinesPlusAbort = 1;
-        UnbreakLinesShorterThan = 33;
-        SubtitleMinimumDisplayMilliseconds = 1000;
-        SubtitleMaximumDisplayMilliseconds = 8 * 1000;
-        MinimumMillisecondsBetweenLines = 24;
-        SubtitleMaximumCharactersPerSeconds = 25.0;
-        SubtitleOptimalCharactersPerSeconds = 15.0;
-        SubtitleMaximumWordsPerMinute = 400;
         NewEmptyDefaultMs = 2000;
         PromptDeleteLines = true;
         AutoBackupOn = true;

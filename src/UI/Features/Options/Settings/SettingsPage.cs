@@ -160,7 +160,6 @@ public class SettingsPage : UserControl
     {
         var sections = new List<SettingsSection>();
 
-
         var comboBoxProfile = new ComboBox
         {
             Width = 250,
@@ -169,6 +168,33 @@ public class SettingsPage : UserControl
             [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedProfile)) { Mode = BindingMode.TwoWay }
         };
         comboBoxProfile.PropertyChanged += (s, e) => _vm.ProfileChanged();
+
+        var numericUpDownSingleLineMaxLength = MakeNumericUpDownInt(nameof(_vm.SingleLineMaxLength));   
+        numericUpDownSingleLineMaxLength.PropertyChanged += (s, e) => _vm.RuleValueChanged();
+
+        var numericUpDownOptimalCharsPerSec = MakeNumericUpDown(nameof(_vm.OptimalCharsPerSec));
+        numericUpDownOptimalCharsPerSec.PropertyChanged += (s, e) => _vm.RuleValueChanged();
+
+        var numericUpDownMaxCharsPerSec = MakeNumericUpDown(nameof(_vm.MaxCharsPerSec));
+        numericUpDownMaxCharsPerSec.PropertyChanged += (s, e) => _vm.RuleValueChanged();
+
+        var numericUpDownMaxWordsPerMin = MakeNumericUpDown(nameof(_vm.MaxWordsPerMin));
+        numericUpDownMaxWordsPerMin.PropertyChanged += (s, e) => _vm.RuleValueChanged();
+
+        var numericUpDownMinDurationMs = MakeNumericUpDownInt(nameof(_vm.MinDurationMs));
+        numericUpDownMinDurationMs.PropertyChanged += (s, e) => _vm.RuleValueChanged();
+
+        var numericUpDownMaxDurationMs = MakeNumericUpDownInt(nameof(_vm.MaxDurationMs));
+        numericUpDownMaxDurationMs.PropertyChanged += (s, e) => _vm.RuleValueChanged();
+
+        var numericUpDownMinGapMs = MakeNumericUpDownInt(nameof(_vm.MinGapMs));
+        numericUpDownMinGapMs.PropertyChanged += (s, e) => _vm.RuleValueChanged();
+
+        var numericUpDownMaxLines = MakeNumericUpDownInt(nameof(_vm.MaxLines));
+        numericUpDownMaxLines.PropertyChanged += (s, e) => _vm.RuleValueChanged();
+
+        var numericUpDownUnbreakSubtitlesShortThan = MakeNumericUpDownInt(nameof(_vm.UnbreakLinesShorterThan));
+        numericUpDownUnbreakSubtitlesShortThan.PropertyChanged += (s, e) => _vm.RuleValueChanged();
 
 
         sections.Add(new SettingsSection(Se.Language.General.Rules,
@@ -184,15 +210,16 @@ public class SettingsPage : UserControl
                 }
             }),
 
-            MakeNumericSettingInt(Se.Language.Options.Settings.SingleLineMaxLength, nameof(_vm.SingleLineMaxLength)),
-            MakeNumericSetting(Se.Language.Options.Settings.OptimalCharsPerSec, nameof(_vm.OptimalCharsPerSec)),
-            MakeNumericSetting(Se.Language.Options.Settings.MaxCharsPerSec, nameof(_vm.MaxCharsPerSec)),
-            MakeNumericSetting(Se.Language.Options.Settings.MaxWordsPerMin, nameof(_vm.MaxWordsPerMin)),
-            MakeNumericSettingInt(Se.Language.Options.Settings.MinDurationMs, nameof(_vm.MinDurationMs)),
-            MakeNumericSettingInt(Se.Language.Options.Settings.MaxDurationMs, nameof(_vm.MaxDurationMs)),
-            MakeNumericSettingInt(Se.Language.Options.Settings.MinGapMs, nameof(_vm.MinGapMs)),
-            MakeNumericSettingInt(Se.Language.Options.Settings.MaxLines, nameof(_vm.MaxLines)),
-            MakeNumericSettingInt(Se.Language.Options.Settings.UnbreakSubtitlesShortThan, nameof(_vm.MaxLines)),
+            new SettingsItem(Se.Language.Options.Settings.SingleLineMaxLength, () => numericUpDownSingleLineMaxLength),
+            new SettingsItem(Se.Language.Options.Settings.OptimalCharsPerSec, () => numericUpDownOptimalCharsPerSec),
+            new SettingsItem(Se.Language.Options.Settings.MaxCharsPerSec, () => numericUpDownMaxCharsPerSec),
+            new SettingsItem(Se.Language.Options.Settings.MaxWordsPerMin, () => numericUpDownMaxWordsPerMin),
+            new SettingsItem(Se.Language.Options.Settings.MinDurationMs, () => numericUpDownMinDurationMs),
+            new SettingsItem(Se.Language.Options.Settings.MaxDurationMs, () => numericUpDownMaxDurationMs),
+            new SettingsItem(Se.Language.Options.Settings.MinGapMs, () => numericUpDownMinGapMs),
+            new SettingsItem(Se.Language.Options.Settings.MaxLines, () => numericUpDownMaxLines),
+            new SettingsItem(Se.Language.Options.Settings.UnbreakSubtitlesShortThan, () => numericUpDownUnbreakSubtitlesShortThan),
+
             new SettingsItem(Se.Language.Options.Settings.DialogStyle, () => new ComboBox
             {
                 Width = 250,
@@ -520,21 +547,31 @@ public class SettingsPage : UserControl
 
     private SettingsItem MakeNumericSetting(string label, string bindingProperty)
     {
-        return new SettingsItem(label, () => new NumericUpDown
+        return new SettingsItem(label, () => MakeNumericUpDown(bindingProperty));
+    }
+
+    private NumericUpDown MakeNumericUpDown(string bindingProperty)
+    {
+        return new NumericUpDown
         {
             Width = 150,
             [!NumericUpDown.ValueProperty] = new Binding(bindingProperty) { Source = _vm, Mode = BindingMode.TwoWay },
-        });
+        };
     }
 
     private SettingsItem MakeNumericSettingInt(string label, string bindingProperty)
     {
-        return new SettingsItem(label, () => new NumericUpDown
+        return new SettingsItem(label, () => MakeNumericUpDownInt(bindingProperty));
+    }
+
+    private NumericUpDown MakeNumericUpDownInt(string bindingProperty)
+    {
+        return new NumericUpDown
         {
             Width = 150,
             FormatString = "F0",
             [!NumericUpDown.ValueProperty] = new Binding(bindingProperty) { Source = _vm, Mode = BindingMode.TwoWay },
-        });
+        };
     }
 
     private SettingsItem MakeCheckboxSetting(string label, string bindingProperty)

@@ -65,6 +65,22 @@ public class ProfilesWindow : Window
 
     private static Border MakeDataGrid(ProfilesViewModel vm)
     {
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Width = double.NaN,
+        };
+
         var dataGrid = new DataGrid
         {
             AutoGenerateColumns = false,
@@ -105,7 +121,23 @@ public class ProfilesWindow : Window
         dataGrid.Bind(DataGrid.ItemsSourceProperty, new Binding(nameof(vm.Profiles)) { Source = vm });
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedProfile)) { Source = vm });
 
-        return UiUtil.MakeBorderForControl(dataGrid);
+        var buttonExport = UiUtil.MakeButton(vm.OkCommand, IconNames.Export, Se.Language.General.ExportDotDotDot);
+        var buttonImport = UiUtil.MakeButton(vm.OkCommand, IconNames.Import, Se.Language.General.ImportDotDotDot);
+        var buttonCopy = UiUtil.MakeButton(vm.OkCommand, IconNames.Copy, Se.Language.General.Copy);
+        var buttonDelete = UiUtil.MakeButton(vm.OkCommand, IconNames.Trash, Se.Language.General.Delete);
+        var buttonClear = UiUtil.MakeButton(vm.OkCommand, IconNames.Close, Se.Language.General.Clear);
+        var panelButtons = UiUtil.MakeButtonBar(
+            buttonExport,
+            buttonImport,
+            buttonCopy,
+            buttonDelete,
+            buttonClear
+            ).WithAlignmentLeft();
+
+        grid.Add(dataGrid, 0);
+        grid.Add(panelButtons, 1);
+
+        return UiUtil.MakeBorderForControlNoPadding(grid);
     }
 
     private static Grid MakeControlsGrid(ProfilesViewModel vm)

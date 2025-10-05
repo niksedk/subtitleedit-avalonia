@@ -10,6 +10,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.Enums;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Shared;
@@ -225,10 +226,16 @@ public partial class SettingsViewModel : ObservableObject
         LibMpvPath = string.Empty;
         IsLibMpvDownloadVisible = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
-        LoadSettings();
-
         _profilesForEdit = new List<ProfileDisplay>();
-        foreach (var profile in Se.Settings.General.Profiles)
+        LoadSettings();
+    }
+
+    private void LoadSettings()
+    {
+        var general = Se.Settings.General;
+        var appearance = Se.Settings.Appearance;
+
+        foreach (var profile in general.Profiles)
         {
             var pd = new ProfileDisplay
             {
@@ -249,12 +256,6 @@ public partial class SettingsViewModel : ObservableObject
             };
             _profilesForEdit.Add(pd);
         }
-    }
-
-    private void LoadSettings()
-    {
-        var general = Se.Settings.General;
-        var appearance = Se.Settings.Appearance;
 
         Profiles.Clear();
         foreach (var profile in Se.Settings.General.Profiles)
@@ -264,6 +265,11 @@ public partial class SettingsViewModel : ObservableObject
         if (Profiles.Count == 0)
         {
             Profiles.Add("Default");
+        }
+        SelectedProfile = general.CurrentProfile;
+        if (!Profiles.Contains(SelectedProfile))
+        {
+            SelectedProfile = Profiles.First();
         }
 
         SingleLineMaxLength = general.SubtitleLineMaximumLength;
@@ -460,6 +466,29 @@ public partial class SettingsViewModel : ObservableObject
 
         general.FfmpegPath = FfmpegPath;
         general.LibMpvPath = LibMpvPath;
+
+        general.CurrentProfile = SelectedProfile;
+        general.Profiles.Clear();
+        foreach (var profile in _profilesForEdit)
+        {
+            var p = new RulesProfile
+            {
+                Name = profile.Name,
+                SubtitleLineMaximumLength = profile.SingleLineMaxLength ?? general.SubtitleLineMaximumLength,
+                SubtitleOptimalCharactersPerSeconds = (decimal?)profile.OptimalCharsPerSec ?? (decimal)general.SubtitleOptimalCharactersPerSeconds,
+                SubtitleMaximumCharactersPerSeconds = (decimal?)profile.MaxCharsPerSec ?? (decimal)general.SubtitleMaximumCharactersPerSeconds,
+                SubtitleMaximumWordsPerMinute = (decimal?)profile.MaxWordsPerMin ?? (decimal)general.SubtitleMaximumWordsPerMinute,
+                SubtitleMinimumDisplayMilliseconds = profile.MinDurationMs ?? general.SubtitleMinimumDisplayMilliseconds,
+                SubtitleMaximumDisplayMilliseconds = profile.MaxDurationMs ?? general.SubtitleMaximumDisplayMilliseconds,
+                MinimumMillisecondsBetweenLines = profile.MinGapMs ?? general.MinimumMillisecondsBetweenLines,
+                MaxNumberOfLines = profile.MaxLines ?? general.MaxNumberOfLines,
+                MergeLinesShorterThan = profile.UnbreakLinesShorterThan ?? general.UnbreakLinesShorterThan,
+                DialogStyle = Enum.Parse<DialogType>(profile.DialogStyle.Code),
+                ContinuationStyle = Enum.TryParse<ContinuationStyle>(profile.ContinuationStyle.Code, out var cs) ? cs : Core.Enums.ContinuationStyle.None,
+                CpsLineLengthStrategy = profile.CpsLineLengthStrategy.Code
+            };
+            general.Profiles.Add(p);
+        }
 
         Se.SaveSettings();
     }
@@ -857,5 +886,27 @@ public partial class SettingsViewModel : ObservableObject
         DialogStyle = profile.DialogStyle;
         ContinuationStyle = profile.ContinuationStyle;
         CpsLineLengthStrategy = profile.CpsLineLengthStrategy;
+    }
+
+    internal void RuleValueChanged()
+    {
+        var profileItem = _profilesForEdit.FirstOrDefault(p => p.Name == SelectedProfile);
+        if (profileItem == null)
+        {
+            return;
+        }
+
+        profileItem.SingleLineMaxLength = SingleLineMaxLength;
+        profileItem.OptimalCharsPerSec = OptimalCharsPerSec;
+        profileItem.MaxCharsPerSec = MaxCharsPerSec;
+        profileItem.MaxWordsPerMin = MaxWordsPerMin;
+        profileItem.MinDurationMs = MinDurationMs;
+        profileItem.MaxDurationMs = MaxDurationMs;
+        profileItem.MinGapMs = MinGapMs;
+        profileItem.MaxLines = MaxLines;
+        profileItem.UnbreakLinesShorterThan = UnbreakLinesShorterThan;
+        profileItem.DialogStyle = DialogStyle;
+        profileItem.ContinuationStyle = ContinuationStyle;
+        profileItem.CpsLineLengthStrategy = CpsLineLengthStrategy;
     }
 }
