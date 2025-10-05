@@ -1,5 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
@@ -121,6 +123,10 @@ public class ProfilesWindow : Window
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
@@ -128,8 +134,8 @@ public class ProfilesWindow : Window
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = new Thickness(0),
-            ColumnSpacing = 0,
-            RowSpacing = 0,
+            ColumnSpacing = 5,
+            RowSpacing = 5,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
@@ -137,8 +143,107 @@ public class ProfilesWindow : Window
         var labelName = UiUtil.MakeLabel(Se.Language.General.Name);
         var textBoxName = UiUtil.MakeTextBox(250, vm, nameof(vm.SelectedProfile) + "." + nameof(ProfileDisplay.Name));
 
+        var labelSingleLineMaxLength = UiUtil.MakeLabel(Se.Language.Options.Settings.SingleLineMaxLength);
+        var numericUpDownSingleLineMaxLength = UiUtil.MakeNumericUpDownInt(0, 1000, 43, 150, vm, nameof(vm.SelectedProfile) + "." + nameof(ProfileDisplay.SingleLineMaxLength));
+
+        var labelOptimalCharsPerSec = UiUtil.MakeLabel(Se.Language.Options.Settings.OptimalCharsPerSec);
+        var numericUpDownOptimalCharsPerSec = UiUtil.MakeNumericUpDownInt(0, 1000, 43, 150, vm, nameof(vm.SelectedProfile) + "." + nameof(ProfileDisplay.OptimalCharsPerSec));
+
+        var labelMaxCharsPerSec = UiUtil.MakeLabel(Se.Language.General.MaxCharactersPerSecond);
+        var numericUpDownMaxCharsPerSec = UiUtil.MakeNumericUpDownInt(0, 1000, 43, 150, vm, nameof(vm.SelectedProfile) + "." + nameof(ProfileDisplay.MaxCharsPerSec));
+
+        var labelMaxWordsPerMin = UiUtil.MakeLabel(Se.Language.Options.Settings.MaxWordsPerMin);
+        var numericUpDownMaxWordsPerMin = UiUtil.MakeNumericUpDownInt(0, 1000, 43, 150, vm, nameof(vm.SelectedProfile) + "." + nameof(ProfileDisplay.MaxWordsPerMin));
+
+        var labelMinDurationMs = UiUtil.MakeLabel(Se.Language.Options.Settings.MinDurationMs);
+        var numericUpDownMinDurationMs = UiUtil.MakeNumericUpDownInt(0, 10000, 43, 150, vm, nameof(vm.SelectedProfile) + "." + nameof(ProfileDisplay.MinDurationMs));
+
+        var labelMaxDurationMs = UiUtil.MakeLabel(Se.Language.Options.Settings.MaxDurationMs);
+        var numericUpDownMaxDurationMs = UiUtil.MakeNumericUpDownInt(0, 10000, 43, 150, vm, nameof(vm.SelectedProfile) + "." + nameof(ProfileDisplay.MaxDurationMs));
+
+        var labelMinGapMs = UiUtil.MakeLabel(Se.Language.Options.Settings.MinGapMs);
+        var numericUpDownMinGapMs = UiUtil.MakeNumericUpDownInt(0, 10000, 43, 150, vm, nameof(vm.SelectedProfile) + "." + nameof(ProfileDisplay.MinGapMs));
+
+        var labelMaxLines = UiUtil.MakeLabel(Se.Language.Options.Settings.MaxLines);
+        var numericUpDownMaxLines = UiUtil.MakeNumericUpDownInt(1, 10, 43, 150, vm, nameof(vm.SelectedProfile) + "." + nameof(ProfileDisplay.MaxLines));
+
+        var labelUnbreakLinesShorterThan = UiUtil.MakeLabel(Se.Language.Options.Settings.UnbreakSubtitlesShortThan);
+        var numericUpDownUnbreakLinesShorterThan = UiUtil.MakeNumericUpDownInt(0, 1000, 43, 150, vm, nameof(vm.SelectedProfile) + "." + nameof(ProfileDisplay.UnbreakLinesShorterThan));
+
+        var labelDialogStyle = UiUtil.MakeLabel(Se.Language.Options.Settings.DialogStyle);
+        var comboBoxDialogStyle = new ComboBox
+        {
+            Width = 250,
+            DataContext = vm.SelectedProfile,
+            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.SelectedProfile.DialogStyles)),
+            [!SelectingItemsControl.SelectedItemProperty] =
+                new Binding(nameof(vm.SelectedProfile.DialogStyle)) { Mode = BindingMode.TwoWay },
+            ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
+                new TextBlock { Text = f?.Name }, true)
+        };
+
+        var labelContinuationStyle = UiUtil.MakeLabel(Se.Language.Options.Settings.ContinuationStyle);
+        var comboBoxContinuationStyle = new ComboBox
+        {
+            Width = 250,
+            DataContext = vm.SelectedProfile,
+            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.SelectedProfile.ContinuationStyles)),
+            [!SelectingItemsControl.SelectedItemProperty] =
+                new Binding(nameof(vm.SelectedProfile.ContinuationStyle)) { Mode = BindingMode.TwoWay },
+            ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
+                new TextBlock { Text = f?.Name }, true)
+        };
+
+        var labelCpsLineLengthStyle = UiUtil.MakeLabel(Se.Language.Options.Settings.CpsLineLengthStyle);
+        var comboBoxCpsLineLengthStyle = new ComboBox
+        {
+            Width = 250,
+            DataContext = vm.SelectedProfile,
+            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.SelectedProfile.CpsLineLengthStrategies)),
+            [!SelectingItemsControl.SelectedItemProperty] =
+                new Binding(nameof(vm.SelectedProfile.CpsLineLengthStrategy)) { Mode = BindingMode.TwoWay },
+            ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
+                new TextBlock { Text = f?.Name }, true)
+        };
+
         grid.Add(labelName, 0, 0);
         grid.Add(textBoxName, 0, 1);
+
+        grid.Add(labelSingleLineMaxLength, 1, 0);
+        grid.Add(numericUpDownSingleLineMaxLength, 1, 1);
+
+        grid.Add(labelOptimalCharsPerSec, 2, 0);
+        grid.Add(numericUpDownOptimalCharsPerSec, 2, 1);
+
+        grid.Add(labelMaxCharsPerSec, 3, 0);
+        grid.Add(numericUpDownMaxCharsPerSec, 3, 1);
+
+        grid.Add(labelMaxWordsPerMin, 4, 0);
+        grid.Add(numericUpDownMaxWordsPerMin, 4, 1);
+
+        grid.Add(labelMinDurationMs, 5, 0);
+        grid.Add(numericUpDownMinDurationMs, 5, 1);
+
+        grid.Add(labelMaxDurationMs, 6, 0);
+        grid.Add(numericUpDownMaxDurationMs, 6, 1);
+
+        grid.Add(labelMinGapMs, 7, 0);
+        grid.Add(numericUpDownMinGapMs, 7, 1);
+
+        grid.Add(labelMaxLines, 8, 0);
+        grid.Add(numericUpDownMaxLines, 8, 1);
+
+        grid.Add(labelUnbreakLinesShorterThan, 9, 0);
+        grid.Add(numericUpDownUnbreakLinesShorterThan, 9, 1);
+
+        grid.Add(labelDialogStyle, 10, 0);
+        grid.Add(comboBoxDialogStyle, 10, 1);
+
+        grid.Add(labelContinuationStyle, 11, 0);
+        grid.Add(comboBoxContinuationStyle, 11, 1);
+
+        grid.Add(labelCpsLineLengthStyle, 12, 0);
+        grid.Add(comboBoxCpsLineLengthStyle, 12, 1);
 
         return grid;
     }

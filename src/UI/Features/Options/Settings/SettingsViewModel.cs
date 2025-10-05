@@ -228,6 +228,27 @@ public partial class SettingsViewModel : ObservableObject
         LoadSettings();
 
         _profilesForEdit = new List<ProfileDisplay>();
+        foreach (var profile in Se.Settings.General.Profiles)
+        {
+            var pd = new ProfileDisplay
+            {
+                Name = profile.Name,
+                SelectedProfile = profile.Name,
+                SingleLineMaxLength = profile.SubtitleLineMaximumLength,
+                OptimalCharsPerSec = (double)profile.SubtitleOptimalCharactersPerSeconds,
+                MaxCharsPerSec = (double)profile.SubtitleMaximumCharactersPerSeconds,
+                MaxWordsPerMin = (double)profile.SubtitleMaximumWordsPerMinute,
+                MinDurationMs = profile.SubtitleMinimumDisplayMilliseconds,
+                MaxDurationMs = profile.SubtitleMaximumDisplayMilliseconds,
+                MinGapMs = profile.MinimumMillisecondsBetweenLines,
+                MaxLines = profile.MaxNumberOfLines,
+                UnbreakLinesShorterThan = profile.MergeLinesShorterThan,
+                DialogStyle = DialogStyles.FirstOrDefault(p => p.Code == profile.DialogStyle.ToString()) ?? DialogStyles.First(),
+                ContinuationStyle = ContinuationStyles.FirstOrDefault(p => p.Code == profile.ContinuationStyle.ToString()) ?? ContinuationStyles.First(),
+                CpsLineLengthStrategy = CpsLineLengthStrategies.FirstOrDefault(p => p.Code == profile.CpsLineLengthStrategy) ?? CpsLineLengthStrategies.First()
+            };
+            _profilesForEdit.Add(pd);
+        }
     }
 
     private void LoadSettings()
@@ -639,40 +660,49 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private async Task EditProfiles()
     {
-        _profilesForEdit.Clear();
-        foreach (var profile in Se.Settings.General.Profiles)
+        if (Window == null)
         {
-            var pd = new ProfileDisplay
-            {
-                Name = profile.Name,
-                SelectedProfile = profile.Name,
-                SingleLineMaxLength = profile.SubtitleLineMaximumLength,
-                OptimalCharsPerSec = (double)profile.SubtitleOptimalCharactersPerSeconds,
-                MaxCharsPerSec = (double)profile.SubtitleMaximumCharactersPerSeconds,
-                MaxWordsPerMin = (double)profile.SubtitleMaximumWordsPerMinute,
-                MinDurationMs = profile.SubtitleMinimumDisplayMilliseconds,
-                MaxDurationMs = profile.SubtitleMaximumDisplayMilliseconds,
-                MinGapMs = profile.MinimumMillisecondsBetweenLines,
-                MaxLines = profile.MaxNumberOfLines,
-                UnbreakLinesShorterThan = profile.MergeLinesShorterThan,
-                // DialogStyle = DialogStyles.FirstOrDefault(p => p.Code == profile.DialogStyle) ?? DialogStyles.First(),
-                // ContinuationStyle = ContinuationStyles.FirstOrDefault(p => p.Code == profile.ContinuationStyle) ?? ContinuationStyles.First(),
-                CpsLineLengthStrategy = CpsLineLengthStrategies.FirstOrDefault(p => p.Code == profile.CpsLineLengthStrategy) ?? CpsLineLengthStrategies.First()
-            };
-            _profilesForEdit.Add(pd);
+            return;
+        }
+
+        var currentProfile = _profilesForEdit.FirstOrDefault(p => p.Name == SelectedProfile);
+        if (currentProfile != null)
+        {
+            currentProfile.SingleLineMaxLength = SingleLineMaxLength;
+            currentProfile.OptimalCharsPerSec = OptimalCharsPerSec;
+            currentProfile.MaxCharsPerSec = MaxCharsPerSec;
+            currentProfile.MaxWordsPerMin = MaxWordsPerMin;
+            currentProfile.MinDurationMs = MinDurationMs;
+            currentProfile.MaxDurationMs = MaxDurationMs;
+            currentProfile.MinGapMs = MinGapMs;
+            currentProfile.MaxLines = MaxLines;
+            currentProfile.UnbreakLinesShorterThan = UnbreakLinesShorterThan;
+            currentProfile.DialogStyle = DialogStyle;
+            currentProfile.ContinuationStyle = ContinuationStyle;
+            currentProfile.CpsLineLengthStrategy = CpsLineLengthStrategy;
         }
 
         var result = await _windowService
-            .ShowDialogAsync<ProfilesWindow, ProfilesViewModel>(Window!, vm =>
+            .ShowDialogAsync<ProfilesWindow, ProfilesViewModel>(Window, vm =>
             {
                 vm.Initialize(_profilesForEdit, SelectedProfile);
             });
-    
-            
+
+
         if (!result.OkPressed)
         {
             return;
         }
+
+        var oldProfileName = SelectedProfile;
+        _profilesForEdit = result.Profiles.ToList();
+        Profiles.Clear();
+        foreach (var profile in _profilesForEdit)
+        {
+            Profiles.Add(profile.Name);
+        }
+
+        SelectedProfile = Profiles.FirstOrDefault(p => p == oldProfileName) ?? Profiles.First();
     }
 
     [RelayCommand]
@@ -805,5 +835,27 @@ public partial class SettingsViewModel : ObservableObject
     internal void Initialize(MainViewModel mainViewModel)
     {
         _mainViewModel = mainViewModel;
+    }
+
+    internal void ProfileChanged()
+    {
+        var profile = _profilesForEdit.FirstOrDefault(p => p.Name == SelectedProfile);
+        if (profile == null)
+        {
+            return;
+        }
+
+        SingleLineMaxLength = profile.SingleLineMaxLength;
+        OptimalCharsPerSec = profile.OptimalCharsPerSec;
+        MaxCharsPerSec = profile.MaxCharsPerSec;
+        MaxWordsPerMin = profile.MaxWordsPerMin;
+        MinDurationMs = profile.MinDurationMs;
+        MaxDurationMs = profile.MaxDurationMs;
+        MinGapMs = profile.MinGapMs;
+        MaxLines = profile.MaxLines;
+        UnbreakLinesShorterThan = profile.UnbreakLinesShorterThan;
+        DialogStyle = profile.DialogStyle;
+        ContinuationStyle = profile.ContinuationStyle;
+        CpsLineLengthStrategy = profile.CpsLineLengthStrategy;
     }
 }

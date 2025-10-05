@@ -42,7 +42,27 @@ public partial class ProfileDisplay : ObservableObject
         ContinuationStyle = ContinuationStyles.Count > 0 ? ContinuationStyles[0] : null!;
         CpsLineLengthStrategies = new(CpsLineLengthStrategyDisplay.List());
         CpsLineLengthStrategy = CpsLineLengthStrategies.Count > 0 ? CpsLineLengthStrategies[0] : null!;
+    }
 
+    public ProfileDisplay(ProfileDisplay other)
+    {
+        Name = other.Name;
+        SelectedProfile = other.SelectedProfile;
+        SingleLineMaxLength = other.SingleLineMaxLength;
+        OptimalCharsPerSec = other.OptimalCharsPerSec;
+        MaxCharsPerSec = other.MaxCharsPerSec;
+        MaxWordsPerMin = other.MaxWordsPerMin;
+        MinDurationMs = other.MinDurationMs;
+        MaxDurationMs = other.MaxDurationMs;
+        MinGapMs = other.MinGapMs;
+        MaxLines = other.MaxLines;
+        UnbreakLinesShorterThan = other.UnbreakLinesShorterThan;
+        DialogStyles = new(other.DialogStyles);
+        DialogStyle = other.DialogStyle;
+        ContinuationStyles = new(other.ContinuationStyles);
+        ContinuationStyle = other.ContinuationStyle;
+        CpsLineLengthStrategies = new(other.CpsLineLengthStrategies);
+        CpsLineLengthStrategy = other.CpsLineLengthStrategy;
     }
 
     override public string ToString()

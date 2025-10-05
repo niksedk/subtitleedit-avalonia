@@ -160,6 +160,17 @@ public class SettingsPage : UserControl
     {
         var sections = new List<SettingsSection>();
 
+
+        var comboBoxProfile = new ComboBox
+        {
+            Width = 250,
+            DataContext = _vm,
+            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.Profiles)),
+            [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedProfile)) { Mode = BindingMode.TwoWay }
+        };
+        comboBoxProfile.PropertyChanged += (s, e) => _vm.ProfileChanged();
+
+
         sections.Add(new SettingsSection(Se.Language.General.Rules,
         [
             new SettingsItem(Se.Language.Options.Settings.Profiles, () => new StackPanel
@@ -168,13 +179,7 @@ public class SettingsPage : UserControl
                 Spacing = 10,
                 Children =
                 {
-                    new ComboBox
-                    {
-                        Width = 250,
-                        DataContext = _vm,
-                        [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.Profiles)),
-                        [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedProfile)) { Mode = BindingMode.TwoWay }
-                    },
+                    comboBoxProfile,
                     UiUtil.MakeButtonBrowse(_vm.EditProfilesCommand),
                 }
             }),
@@ -187,9 +192,7 @@ public class SettingsPage : UserControl
             MakeNumericSettingInt(Se.Language.Options.Settings.MaxDurationMs, nameof(_vm.MaxDurationMs)),
             MakeNumericSettingInt(Se.Language.Options.Settings.MinGapMs, nameof(_vm.MinGapMs)),
             MakeNumericSettingInt(Se.Language.Options.Settings.MaxLines, nameof(_vm.MaxLines)),
-
             MakeNumericSettingInt(Se.Language.Options.Settings.UnbreakSubtitlesShortThan, nameof(_vm.MaxLines)),
-
             new SettingsItem(Se.Language.Options.Settings.DialogStyle, () => new ComboBox
             {
                 Width = 250,
@@ -508,11 +511,6 @@ public class SettingsPage : UserControl
 
 
         return sections;
-    }
-
-    private object MakeCheckboxSetting(object showUpDownDuration, string v)
-    {
-        throw new NotImplementedException();
     }
 
     private static SettingsItem MakeSeparator()

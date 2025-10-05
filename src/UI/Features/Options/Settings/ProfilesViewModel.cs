@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using HanumanInstitute.Validators;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -27,8 +28,9 @@ public partial class ProfilesViewModel : ObservableObject
         Profiles.Clear();
         foreach (var profile in profiles)
         {
-            Profiles.Add(profile);
+            Profiles.Add(new ProfileDisplay(profile));
         }
+
         SelectedProfile = Profiles.FirstOrDefault(p => p.Name == profileName);
     }
 
