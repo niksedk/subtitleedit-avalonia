@@ -504,7 +504,9 @@ public class SettingsPage : UserControl
                 new SettingsItem(Se.Language.Options.Settings.Password, () => new TextBox { Width = 250 }),
             ]));
 
-        sections.Add(new SettingsSection(Se.Language.Options.Settings.FileTypeAssociations,
+        if (OperatingSystem.IsWindows())
+        {
+            sections.Add(new SettingsSection(Se.Language.Options.Settings.FileTypeAssociations,
             [
                 new SettingsItem(string.Empty, () => new ItemsControl
                 {
@@ -541,6 +543,7 @@ public class SettingsPage : UserControl
                         }, true)
                 })
             ]));
+        }
 
         sections.Add(new SettingsSection(Se.Language.Options.Settings.FilesAndLogs,
             [
