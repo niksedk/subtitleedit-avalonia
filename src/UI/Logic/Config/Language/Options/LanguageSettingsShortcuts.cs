@@ -183,13 +183,13 @@ public class LanguageSettingsShortcuts
         GeneralGoToNextSubtitle = "Go to next subtitle";
         GeneralGoToNextSubtitlePlayTranslate = "Go to next subtitle (play translate)";
         GeneralGoToNextSubtitleCursorAtEnd = "Go to next subtitle (cursor at end)";
-        GeneralGoToPrevSubtitle = "Go to prev subtitle";
-        GeneralGoToPrevSubtitlePlayTranslate = "Go to prev subtitle (play translate)";
+        GeneralGoToPrevSubtitle = "Go to previous subtitle";
+        GeneralGoToPrevSubtitlePlayTranslate = "Go to previous subtitle (play translate)";
         GeneralGoToStartOfCurrentSubtitle = "Go to start of current subtitle";
         GeneralGoToEndOfCurrentSubtitle = "Go to end of current subtitle";
         GeneralGoToPreviousSubtitleAndFocusVideo = "Go to previous subtitle and focus video";
         GeneralGoToNextSubtitleAndFocusVideo = "Go to next subtitle and focus video";
-        GeneralGoToPrevSubtitleAndPlay = "Go to prev subtitle and play";
+        GeneralGoToPrevSubtitleAndPlay = "Go to previous subtitle and play";
         GeneralGoToNextSubtitleAndPlay = "Go to next subtitle and play";
         GeneralGoToPreviousSubtitleAndFocusWaveform = "Go to previous subtitle and focus waveform";
         GeneralGoToNextSubtitleAndFocusWaveform = "Go to next subtitle and focus waveform";
@@ -281,8 +281,8 @@ public class LanguageSettingsShortcuts
         MoveFirstWordFromNextLineUpCurrentSubtitle = "Move first word from next line up (current subtitle)";
         ToggleFocusGridAndWaveform = "Toggle focus between subtitle grid and waveform/spectrogram";
         ToggleFocusTextBoxAndWaveform = "Toggle focus between text box and waveform/spectrogram";
-        GoToPreviousLineAndSetVideoPosition = "Go to previous line and set video position";
-        GoToNextLineAndSetVideoPosition = "Go to next line and set video position";
+        GoToPreviousLineAndSetVideoPosition = "Go to previous subtitle and set video position";
+        GoToNextLineAndSetVideoPosition = "Go to next subtitle and set video position";
         TextBoxDeleteSelectionNoClipboard = "Text box: Delete selection (no clipboard)";
         TextBoxCut = "Text box: Cut";
         TextBoxCut2 = "Text box: Cut (alternative)";
