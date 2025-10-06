@@ -1000,5 +1000,6 @@ public partial class SettingsViewModel : ObservableObject
         }
 
         IsEditCustomContinuationStyleVisible = ContinuationStyle.Code == Core.Enums.ContinuationStyle.Custom.ToString();
+        RuleValueChanged();
     }
 }

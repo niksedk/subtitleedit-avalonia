@@ -196,6 +196,18 @@ public class SettingsPage : UserControl
         var numericUpDownUnbreakSubtitlesShortThan = MakeNumericUpDownInt(nameof(_vm.UnbreakLinesShorterThan));
         numericUpDownUnbreakSubtitlesShortThan.PropertyChanged += (s, e) => _vm.RuleValueChanged();
 
+        var comboBoxDialogStyle = new ComboBox
+        {
+            Width = 250,
+            DataContext = _vm,
+            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.DialogStyles)),
+            [!SelectingItemsControl.SelectedItemProperty] =
+                    new Binding(nameof(_vm.DialogStyle)) { Mode = BindingMode.TwoWay },
+            ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
+                new TextBlock { Text = f?.Name }, true)
+        };
+        comboBoxDialogStyle.PropertyChanged += (s, e) => _vm.RuleValueChanged();  
+
         var comboBoxContinuationStyle = new ComboBox
         {
             Width = 250,
@@ -207,6 +219,18 @@ public class SettingsPage : UserControl
                 new TextBlock { Text = f?.Name }, true)
         };
         comboBoxContinuationStyle.PropertyChanged += (s, e) => _vm.ContinuationStyleChanged();
+
+        var comboBoxCpsLineLengthStyle = new ComboBox
+        {
+            Width = 250,
+            DataContext = _vm,
+            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.CpsLineLengthStrategies)),
+            [!SelectingItemsControl.SelectedItemProperty] =
+                    new Binding(nameof(_vm.CpsLineLengthStrategy)) { Mode = BindingMode.TwoWay },
+            ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
+                new TextBlock { Text = f?.Name }, true)
+        };  
+        comboBoxCpsLineLengthStyle.PropertyChanged += (s, e) => _vm.RuleValueChanged();
 
         sections.Add(new SettingsSection(Se.Language.General.Rules,
         [
@@ -232,16 +256,7 @@ public class SettingsPage : UserControl
             new SettingsItem(Se.Language.Options.Settings.MaxLines, () => numericUpDownMaxLines),
             new SettingsItem(Se.Language.Options.Settings.UnbreakSubtitlesShortThan, () => numericUpDownUnbreakSubtitlesShortThan),
 
-            new SettingsItem(Se.Language.Options.Settings.DialogStyle, () => new ComboBox
-            {
-                Width = 250,
-                DataContext = _vm,
-                [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.DialogStyles)),
-                [!SelectingItemsControl.SelectedItemProperty] =
-                    new Binding(nameof(_vm.DialogStyle)) { Mode = BindingMode.TwoWay },
-                ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
-                    new TextBlock { Text = f?.Name }, true)
-            }),
+            new SettingsItem(Se.Language.Options.Settings.DialogStyle, () => comboBoxDialogStyle),
             new SettingsItem(Se.Language.Options.Settings.ContinuationStyle, () => new StackPanel
             {
                 Orientation = Orientation.Horizontal,
@@ -253,16 +268,7 @@ public class SettingsPage : UserControl
                         .WithBindIsVisible(_vm, nameof(_vm.IsEditCustomContinuationStyleVisible))
                 }
             }),
-            new SettingsItem(Se.Language.Options.Settings.CpsLineLengthStyle, () => new ComboBox
-            {
-                Width = 250,
-                DataContext = _vm,
-                [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.CpsLineLengthStrategies)),
-                [!SelectingItemsControl.SelectedItemProperty] =
-                    new Binding(nameof(_vm.CpsLineLengthStrategy)) { Mode = BindingMode.TwoWay },
-                ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
-                    new TextBlock { Text = f?.Name }, true)
-            }),
+            new SettingsItem(Se.Language.Options.Settings.CpsLineLengthStyle, () => comboBoxCpsLineLengthStyle),
         ]));
 
         sections.Add(new SettingsSection(Se.Language.General.General,
