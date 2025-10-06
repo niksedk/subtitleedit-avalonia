@@ -171,6 +171,7 @@ public class LanguageSettings
     public string AddSpace { get; set; }
     public string ProcessIfEndsWithComma { get; set; }
     public string RemoveComma { get; set; }
+    public string EditContinuationStyleCustom { get; set; }
 
     public LanguageSettings()
     {
@@ -338,6 +339,7 @@ public class LanguageSettings
         AddSpace = "Add space";
         ProcessIfEndsWithComma = "Process if ends with comma";
         RemoveComma = "Remove comma";
+        EditContinuationStyleCustom = "Edit custom continuation style";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

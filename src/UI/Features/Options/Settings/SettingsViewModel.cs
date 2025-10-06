@@ -9,7 +9,6 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Core.Cea708.Commands;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Enums;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
@@ -143,7 +142,22 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _existsWhisperLogFile;
     [ObservableProperty] private bool _existsSettingsFile;
 
-    
+    private int _continuationPause;
+    private string _customContinuationStyleSuffix;
+    private bool _customContinuationStyleSuffixApplyIfComma;
+    private bool _customContinuationStyleSuffixAddSpace;
+    private bool _customContinuationStyleSuffixReplaceComma;
+    private string _customContinuationStylePrefix;
+    private bool _customContinuationStylePrefixAddSpace;
+    private bool _customContinuationStyleUseDifferentStyleGap;
+    private string _customContinuationStyleGapSuffix;
+    private bool _customContinuationStyleGapSuffixApplyIfComma;
+    private bool _customContinuationStyleGapSuffixAddSpace;
+    private bool _customContinuationStyleGapSuffixReplaceComma;
+    private string _customContinuationStyleGapPrefix;
+    private bool _customContinuationStyleGapPrefixAddSpace;
+
+
     public ObservableCollection<FileTypeAssociationViewModel> FileTypeAssociations { get; set; } = new()
     {
         new() { Extension = ".ass", IconPath = "avares://SubtitleEdit/Assets/FileTypes/ass.ico" },
@@ -758,10 +772,10 @@ public partial class SettingsViewModel : ObservableObject
             pd.DialogStyle = DialogStyles.FirstOrDefault(p => p.Code == profile.DialogStyle.Code) ?? DialogStyles.First();
             pd.ContinuationStyle = ContinuationStyles.FirstOrDefault(p => p.Code == profile.ContinuationStyle.Code) ?? ContinuationStyles.First();
             pd.CpsLineLengthStrategy = CpsLineLengthStrategies.FirstOrDefault(p => p.Code == profile.CpsLineLengthStrategy.Code) ?? CpsLineLengthStrategies.First();
-            profilesForEdit.Add(pd);    
+            profilesForEdit.Add(pd);
             Profiles.Add(profile.Name);
         }
-        _profilesForEdit = profilesForEdit; 
+        _profilesForEdit = profilesForEdit;
 
         SelectedProfile = Profiles.FirstOrDefault(p => p == oldProfileName) ?? Profiles.First();
     }
@@ -807,11 +821,25 @@ public partial class SettingsViewModel : ObservableObject
             return;
         }
 
-       var result = await _windowService
-            .ShowDialogAsync<CustomContinuationStyleWindow, CustomContinuationStyleViewModel>(Window, vm =>
-            {
-                vm.Initialize();
-            });
+        var result = await _windowService
+             .ShowDialogAsync<CustomContinuationStyleWindow, CustomContinuationStyleViewModel>(Window, vm =>
+             {
+                 vm.Initialize(
+                    _continuationPause,
+                    _customContinuationStyleSuffix,
+                    _customContinuationStyleSuffixApplyIfComma,
+                    _customContinuationStyleSuffixAddSpace,
+                    _customContinuationStyleSuffixReplaceComma,
+                    _customContinuationStylePrefix,
+                    _customContinuationStylePrefixAddSpace,
+                    _customContinuationStyleUseDifferentStyleGap,
+                    _customContinuationStyleGapSuffix,
+                    _customContinuationStyleGapSuffixApplyIfComma,
+                    _customContinuationStyleGapSuffixAddSpace,
+                    _customContinuationStyleGapSuffixReplaceComma,
+                    _customContinuationStyleGapPrefix,
+                    _customContinuationStyleGapPrefixAddSpace);
+             });
 
         if (!result.OkPressed)
         {
@@ -965,6 +993,12 @@ public partial class SettingsViewModel : ObservableObject
 
     internal void ContinuationStyleChanged()
     {
+        if (ContinuationStyle == null)
+        {
+            IsEditCustomContinuationStyleVisible = false;
+            return;
+        }
+
         IsEditCustomContinuationStyleVisible = ContinuationStyle.Code == Core.Enums.ContinuationStyle.Custom.ToString();
     }
 }

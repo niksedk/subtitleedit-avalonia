@@ -11,7 +11,7 @@ public class CustomContinuationStyleWindow : Window
     public CustomContinuationStyleWindow(CustomContinuationStyleViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = Se.Language.Options.Settings.ContinuationStyleCustom;
+        Title = Se.Language.Options.Settings.EditContinuationStyleCustom;
         CanResize = true;
         Width = 1100;
         Height = 750;
@@ -78,13 +78,14 @@ public class CustomContinuationStyleWindow : Window
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
             },
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
-            Margin = new Thickness(0),
+            Margin = new Thickness(0, 10, 0, 0),
             ColumnSpacing = 5,
             RowSpacing = 5,
             Width = double.NaN,
@@ -96,7 +97,7 @@ public class CustomContinuationStyleWindow : Window
         var checkBoxPrefixAddSpace = UiUtil.MakeCheckBox(Se.Language.Options.Settings.AddSpace, vm, nameof(vm.SelectedPrefixAddSpace));
 
         var labelSuffix = UiUtil.MakeLabel(Se.Language.General.Suffix);
-        var comboBoxSuffix = UiUtil.MakeComboBox(vm.PreAndSuffixes, vm, nameof(vm.SelectedSuffixes));
+        var comboBoxSuffix = UiUtil.MakeComboBox(vm.PreAndSuffixes, vm, nameof(vm.SelectedSuffix));
         var checkBoxSuffixProcessIfEndWithComma = UiUtil.MakeCheckBox(Se.Language.Options.Settings.ProcessIfEndsWithComma, vm, nameof(vm.SelectedSuffixesProcessIfEndWithComma));
         var checkBoxSuffixAddSpace = UiUtil.MakeCheckBox(Se.Language.Options.Settings.AddSpace, vm, nameof(vm.SelectedSuffixesAddSpace));
         var checkBoxSuffixRemoveComma = UiUtil.MakeCheckBox(Se.Language.Options.Settings.RemoveComma, vm, nameof(vm.SelectedSuffixesRemoveComma));
@@ -106,10 +107,77 @@ public class CustomContinuationStyleWindow : Window
         var comboBoxLongPrefix = UiUtil.MakeComboBox(vm.PreAndSuffixes, vm, nameof(vm.SelectedLongGapPrefix));
 
         var labelLongSuffix = UiUtil.MakeLabel(Se.Language.General.Suffix);
-        var comboBoxLongSuffix = UiUtil.MakeComboBox(vm.PreAndSuffixes, vm, nameof(vm.SelectedLongGapSuffixes));
+        var comboBoxLongSuffix = UiUtil.MakeComboBox(vm.PreAndSuffixes, vm, nameof(vm.SelectedLongGapSuffix));
         var checkBoxLongSuffixProcessIfEndWithComma = UiUtil.MakeCheckBox(Se.Language.Options.Settings.ProcessIfEndsWithComma, vm, nameof(vm.SelectedLongGapSuffixesProcessIfEndWithComma));
         var checkBoxLongSuffixAddSpace = UiUtil.MakeCheckBox(Se.Language.Options.Settings.AddSpace, vm, nameof(vm.SelectedLongGapSuffixesAddSpace));
         var checkBoxLongSuffixRemoveComma = UiUtil.MakeCheckBox(Se.Language.Options.Settings.RemoveComma, vm, nameof(vm.SelectedLongGapSuffixesRemoveComma));
+
+        var splitButtonLoad = new SplitButton
+        {
+            VerticalAlignment = VerticalAlignment.Bottom,
+            Content = Se.Language.General.LoadDefaults,
+            Flyout = new MenuFlyout
+            {
+                Items =
+                {
+                    new MenuItem
+                    {
+                        Header = Se.Language.General.None,
+                        Command = vm.LoadContinuationStyleNoneCommand,
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.Options.Settings.ContinuationStyleNoneTrailingDots,
+                        Command = vm.LoadContinuationStyleNoneTrailingDotsCommand,
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.Options.Settings.ContinuationStyleNoneLeadingTrailingDots,
+                        Command = vm.LoadContinuationStyleNoneLeadingTrailingDotsCommand,
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.Options.Settings.ContinuationStyleNoneTrailingEllipsis,
+                        Command = vm.LoadContinuationStyleNoneTrailingEllipsisCommand,
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.Options.Settings.ContinuationStyleNoneLeadingTrailingEllipsis,
+                        Command = vm.LoadContinuationStyleNoneLeadingTrailingEllipsisCommand,
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.Options.Settings.ContinuationStyleOnlyTrailingDots,
+                        Command = vm.LoadContinuationStyleOnlyTrailingDotsCommand,
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.Options.Settings.ContinuationStyleLeadingTrailingDots,
+                        Command = vm.LoadContinuationStyleLeadingTrailingDotsCommand,
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.Options.Settings.ContinuationStyleOnlyTrailingEllipsis,
+                        Command = vm.LoadContinuationStyleOnlyTrailingEllipsisCommand,
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.Options.Settings.ContinuationStyleLeadingTrailingEllipsis,
+                        Command = vm.LoadContinuationStyleLeadingTrailingEllipsisCommand,
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.Options.Settings.ContinuationStyleLeadingTrailingDash,
+                        Command = vm.LoadContinuationStyleLeadingTrailingDashCommand
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.Options.Settings.ContinuationStyleLeadingTrailingDashDots,
+                        Command = vm.LoadContinuationStyleLeadingTrailingDashDotsCommand
+                    },
+                 }
+            }
+        };
 
         grid.Add(labelPrefix, 0);
         grid.Add(comboBoxPrefix, 0, 1);
@@ -130,6 +198,8 @@ public class CustomContinuationStyleWindow : Window
         grid.Add(checkBoxLongSuffixAddSpace, 10, 1);
         grid.Add(checkBoxLongSuffixRemoveComma, 11, 1);
 
+        grid.Add(splitButtonLoad, 12, 0);
+
         return UiUtil.MakeBorderForControl(grid);
     }
 
@@ -149,6 +219,7 @@ public class CustomContinuationStyleWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
             Width = double.NaN,
+            Margin = new Thickness(0, 10, 0, 0),
         };
 
         var labelPreview = UiUtil.MakeLabel(Se.Language.General.Preview);
