@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Enums;
+using System;
 using System.Collections.ObjectModel;
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
@@ -32,6 +33,9 @@ public partial class CustomContinuationStyleViewModel : ObservableObject
 
     public bool OkPressed { get; private set; }
 
+    private bool _isDirty;
+    private readonly System.Timers.Timer _previewTimer;
+
     public CustomContinuationStyleViewModel()
     {
         PreAndSuffixes = new ObservableCollection<string>(new[]
@@ -48,6 +52,21 @@ public partial class CustomContinuationStyleViewModel : ObservableObject
         SelectedLongGapPrefix = string.Empty;
         SelectedLongGapSuffix = string.Empty;
         LongGapMs = 300;
+
+        _previewTimer = new System.Timers.Timer(500);
+        _previewTimer.Elapsed += (sender, args) =>
+        {
+            _previewTimer.Stop();
+
+            if (_isDirty)
+            {
+                Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(UpdatePreview);
+                _isDirty = false;
+            }
+
+            _previewTimer.Start();            
+        };
+
     }
 
     public void Initialize(
@@ -180,6 +199,39 @@ public partial class CustomContinuationStyleViewModel : ObservableObject
         SelectedLongGapSuffixesRemoveComma = settings.GapSuffixReplaceComma;
     }
 
+    private void UpdatePreview()
+    {
+        // Update preview
+        var profile = CreateContinuationProfile();
+        var preview = ContinuationUtilities.GetContinuationStylePreview(profile);
+        var previewSplit = preview.Split(new[] { "\n\n" }, StringSplitOptions.None);
+
+        //labelPreviewLine1.Text = previewSplit[0];
+        //labelPreviewLine2.Text = previewSplit[1];
+        //labelPreviewLine3.Text = previewSplit[2];
+        //labelPreviewLine4.Text = previewSplit[4];
+    }
+
+    private ContinuationUtilities.ContinuationProfile CreateContinuationProfile()
+    {
+        return new ContinuationUtilities.ContinuationProfile
+        {
+            Suffix = SelectedSuffix,
+            SuffixApplyIfComma = SelectedSuffixesProcessIfEndWithComma,
+            SuffixAddSpace = SelectedSuffixesAddSpace,
+            SuffixReplaceComma = SelectedSuffixesRemoveComma,
+            Prefix = SelectedPrefix,
+            PrefixAddSpace = SelectedPrefixAddSpace,
+            UseDifferentStyleGap = UseSpecialStyleAfterLongGaps,
+            GapSuffix = SelectedLongGapSuffix,
+            GapSuffixApplyIfComma = SelectedLongGapSuffixesProcessIfEndWithComma,
+            GapSuffixAddSpace = SelectedLongGapSuffixesAddSpace,
+            GapSuffixReplaceComma = SelectedLongGapSuffixesRemoveComma,
+            GapPrefix = SelectedLongGapPrefix,
+            GapPrefixAddSpace = SelectedLongGapPrefixAddSpace,
+        };
+    }
+
     internal void KeyDown(object? sender, KeyEventArgs e)
     {
         if (e.Key == Key.Escape)
@@ -187,5 +239,10 @@ public partial class CustomContinuationStyleViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+    }
+
+    internal void StyleChanged()
+    {
+        _isDirty = true;
     }
 }

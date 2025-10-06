@@ -94,23 +94,35 @@ public class CustomContinuationStyleWindow : Window
 
         var labelPrefix = UiUtil.MakeLabel(Se.Language.General.Prefix);
         var comboBoxPrefix = UiUtil.MakeComboBox(vm.PreAndSuffixes, vm, nameof(vm.SelectedPrefix));
+        comboBoxPrefix.PropertyChanged += (s, e) => vm.StyleChanged();
         var checkBoxPrefixAddSpace = UiUtil.MakeCheckBox(Se.Language.Options.Settings.AddSpace, vm, nameof(vm.SelectedPrefixAddSpace));
+        checkBoxPrefixAddSpace.PropertyChanged += (s, e) => vm.StyleChanged();
 
         var labelSuffix = UiUtil.MakeLabel(Se.Language.General.Suffix);
         var comboBoxSuffix = UiUtil.MakeComboBox(vm.PreAndSuffixes, vm, nameof(vm.SelectedSuffix));
+        comboBoxSuffix.PropertyChanged += (s, e) => vm.StyleChanged();
         var checkBoxSuffixProcessIfEndWithComma = UiUtil.MakeCheckBox(Se.Language.Options.Settings.ProcessIfEndsWithComma, vm, nameof(vm.SelectedSuffixesProcessIfEndWithComma));
+        checkBoxSuffixProcessIfEndWithComma.PropertyChanged += (s, e) => vm.StyleChanged();
         var checkBoxSuffixAddSpace = UiUtil.MakeCheckBox(Se.Language.Options.Settings.AddSpace, vm, nameof(vm.SelectedSuffixesAddSpace));
+        checkBoxSuffixAddSpace.PropertyChanged += (s, e) => vm.StyleChanged();
         var checkBoxSuffixRemoveComma = UiUtil.MakeCheckBox(Se.Language.Options.Settings.RemoveComma, vm, nameof(vm.SelectedSuffixesRemoveComma));
+        checkBoxSuffixRemoveComma.PropertyChanged += (s, e) => vm.StyleChanged();
 
         var checkBoxUseSpecialStyleAfterLongGaps = UiUtil.MakeCheckBox(Se.Language.Options.Settings.UseSpecialStyleAfterLongGaps, vm, nameof(vm.UseSpecialStyleAfterLongGaps));
+        checkBoxUseSpecialStyleAfterLongGaps.PropertyChanged += (s, e) => vm.StyleChanged();
         var labelLongPrefix = UiUtil.MakeLabel(Se.Language.General.Prefix);
         var comboBoxLongPrefix = UiUtil.MakeComboBox(vm.PreAndSuffixes, vm, nameof(vm.SelectedLongGapPrefix));
+        comboBoxLongPrefix.PropertyChanged += (s, e) => vm.StyleChanged();  
 
         var labelLongSuffix = UiUtil.MakeLabel(Se.Language.General.Suffix);
         var comboBoxLongSuffix = UiUtil.MakeComboBox(vm.PreAndSuffixes, vm, nameof(vm.SelectedLongGapSuffix));
+        comboBoxLongSuffix.PropertyChanged += (s, e) => vm.StyleChanged();
         var checkBoxLongSuffixProcessIfEndWithComma = UiUtil.MakeCheckBox(Se.Language.Options.Settings.ProcessIfEndsWithComma, vm, nameof(vm.SelectedLongGapSuffixesProcessIfEndWithComma));
+        checkBoxLongSuffixProcessIfEndWithComma.PropertyChanged += (s, e) => vm.StyleChanged();
         var checkBoxLongSuffixAddSpace = UiUtil.MakeCheckBox(Se.Language.Options.Settings.AddSpace, vm, nameof(vm.SelectedLongGapSuffixesAddSpace));
+        checkBoxLongSuffixAddSpace.PropertyChanged += (s, e) => vm.StyleChanged();
         var checkBoxLongSuffixRemoveComma = UiUtil.MakeCheckBox(Se.Language.Options.Settings.RemoveComma, vm, nameof(vm.SelectedLongGapSuffixesRemoveComma));
+        checkBoxLongSuffixRemoveComma.PropertyChanged += (s, e) => vm.StyleChanged();
 
         var splitButtonLoad = new SplitButton
         {
