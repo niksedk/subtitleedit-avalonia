@@ -1484,10 +1484,7 @@ public partial class MainViewModel :
 
         var viewModel =
             await _windowService.ShowDialogAsync<GoToVideoPositionWindow, GoToVideoPositionViewModel>(Window,
-                vm =>
-                {
-                    vm.Time = TimeSpan.FromSeconds(VideoPlayerControl.Position);
-                });
+                vm => { vm.Time = TimeSpan.FromSeconds(VideoPlayerControl.Position); });
 
         if (viewModel is { OkPressed: true, Time.TotalMicroseconds: >= 0 })
         {
@@ -2096,10 +2093,7 @@ public partial class MainViewModel :
         _oldEditTextBox = EditTextBox;
 
         var viewModel = await _windowService
-            .ShowDialogAsync<SettingsWindow, SettingsViewModel>(Window!, vm =>
-            {
-                vm.Initialize(this);
-            });
+            .ShowDialogAsync<SettingsWindow, SettingsViewModel>(Window!, vm => { vm.Initialize(this); });
 
         if (!viewModel.OkPressed)
         {
@@ -6664,115 +6658,125 @@ public partial class MainViewModel :
                typeName.Contains("TextInput");
     }
 
+    private readonly Lock _onKeyDownHandlerLock = new();
+
     internal void OnKeyDownHandler(object? sender, KeyEventArgs keyEventArgs)
     {
-        var ticks = Stopwatch.GetTimestamp();
-        var timeSpan = TimeSpan.FromTicks(ticks - _lastKeyPressedTicks);
-        if (timeSpan.Seconds > 5)
+        lock (_onKeyDownHandlerLock)
         {
-            _shortcutManager.ClearKeys(); // reset shortcuts if no key pressed for 5 seconds
-        }
-
-        _lastKeyPressedTicks = ticks;
-
-        _shortcutManager.OnKeyPressed(this, keyEventArgs);
-
-        if (IsTextInputFocused())
-        {
-            var currentKeys = _shortcutManager.GetActiveKeys();
-            if (currentKeys.Count == 1)
+            var ticks = DateTime.UtcNow.Ticks; // Stopwatch.GetTimestamp();
+            var timeSpan = TimeSpan.FromTicks(ticks - _lastKeyPressedTicks);
+            var k = keyEventArgs.Key;
+            if (timeSpan.Seconds > 5)
             {
-                var key = currentKeys.First();
-                var allowedSingleKeyShortcuts = new HashSet<Key>
-                {
-                    Key.Escape,
-                    Key.Tab,
-                    Key.PageUp,
-                    Key.PageDown,
-                    Key.BrowserBack,
-                    Key.BrowserForward,
-                    Key.BrowserFavorites,
-                    Key.BrowserHome,
-                    Key.Execute,
-                    Key.ExSel,
-                    Key.LaunchApplication1,
-                    Key.LaunchApplication2,
-                    Key.LaunchMail,
-                    Key.Insert,
-                    Key.F1,
-                    Key.F2,
-                    Key.F3,
-                    Key.F4,
-                    Key.F5,
-                    Key.F6,
-                    Key.F7,
-                    Key.F8,
-                    Key.F9,
-                    Key.F10,
-                    Key.F11,
-                    Key.F12,
-                    Key.F13,
-                    Key.F14,
-                    Key.F15,
-                    Key.F16,
-                    Key.F17,
-                    Key.F18,
-                    Key.F19,
-                    Key.F20,
-                    Key.F21,
-                    Key.F22,
-                    Key.F23,
-                    Key.F24,
-                };
+                _shortcutManager.ClearKeys(); // reset shortcuts if no key pressed for 5 seconds
+            }
 
-                if (!allowedSingleKeyShortcuts.Contains(key))
+            _lastKeyPressedTicks = ticks;
+
+            _shortcutManager.OnKeyPressed(this, keyEventArgs);
+
+            if (IsTextInputFocused())
+            {
+                var currentKeys = _shortcutManager.GetActiveKeys();
+                if (currentKeys.Count == 1)
                 {
+                    var key = currentKeys.First();
+                    var allowedSingleKeyShortcuts = new HashSet<Key>
+                    {
+                        Key.Escape,
+                        Key.Tab,
+                        Key.PageUp,
+                        Key.PageDown,
+                        Key.BrowserBack,
+                        Key.BrowserForward,
+                        Key.BrowserFavorites,
+                        Key.BrowserHome,
+                        Key.Execute,
+                        Key.ExSel,
+                        Key.LaunchApplication1,
+                        Key.LaunchApplication2,
+                        Key.LaunchMail,
+                        Key.Insert,
+                        Key.F1,
+                        Key.F2,
+                        Key.F3,
+                        Key.F4,
+                        Key.F5,
+                        Key.F6,
+                        Key.F7,
+                        Key.F8,
+                        Key.F9,
+                        Key.F10,
+                        Key.F11,
+                        Key.F12,
+                        Key.F13,
+                        Key.F14,
+                        Key.F15,
+                        Key.F16,
+                        Key.F17,
+                        Key.F18,
+                        Key.F19,
+                        Key.F20,
+                        Key.F21,
+                        Key.F22,
+                        Key.F23,
+                        Key.F24,
+                    };
+
+                    if (!allowedSingleKeyShortcuts.Contains(key))
+                    {
+                        return;
+                    }
+                }
+            }
+
+            if (SubtitleGrid.IsFocused)
+            {
+                if (keyEventArgs.Key == Key.Home && keyEventArgs.KeyModifiers == KeyModifiers.None && Subtitles.Count > 0)
+                {
+                    keyEventArgs.Handled = true;
+                    SelectAndScrollToRow(0);
+                    return;
+                }
+                else if (keyEventArgs.Key == Key.End && keyEventArgs.KeyModifiers == KeyModifiers.None && Subtitles.Count > 0)
+                {
+                    keyEventArgs.Handled = true;
+                    SelectAndScrollToRow(Subtitles.Count - 1);
+                    return;
+                }
+
+                var relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.SubtitleGrid.ToStringInvariant());
+                if (relayCommand != null)
+                {
+                    keyEventArgs.Handled = true;
+                    relayCommand.Execute(null);
                     return;
                 }
             }
-        }
 
-        if (SubtitleGrid.IsFocused)
-        {
-            if (keyEventArgs.Key == Key.Home && keyEventArgs.KeyModifiers == KeyModifiers.None && Subtitles.Count > 0)
+            if (AudioVisualizer != null && AudioVisualizer.IsFocused)
             {
-                keyEventArgs.Handled = true;
-                SelectAndScrollToRow(0);
-                return;
-            }
-            else if (keyEventArgs.Key == Key.End && keyEventArgs.KeyModifiers == KeyModifiers.None && Subtitles.Count > 0)
-            {
-                keyEventArgs.Handled = true;
-                SelectAndScrollToRow(Subtitles.Count - 1);
-                return;
+                var relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.Waveform.ToStringInvariant());
+                if (relayCommand != null)
+                {
+                    keyEventArgs.Handled = true;
+                    relayCommand.Execute(null);
+                    return;
+                }
             }
 
-            var relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.SubtitleGrid.ToStringInvariant());
-            if (relayCommand != null)
+            var keys = _shortcutManager.GetActiveKeys().Select(p => p.ToString()).ToList();
+            var hashCode = ShortCut.CalculateHash(keys, ShortcutCategory.General.ToStringInvariant());
+
+            Se.LogError(hashCode);
+            var rc = _shortcutManager.CheckShortcuts(ShortcutCategory.General.ToStringInvariant().ToLowerInvariant());
+            if (rc != null)
             {
                 keyEventArgs.Handled = true;
-                relayCommand.Execute(null);
+                rc.Execute(null);
                 return;
             }
-        }
-
-        if (AudioVisualizer != null && AudioVisualizer.IsFocused)
-        {
-            var relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.Waveform.ToStringInvariant());
-            if (relayCommand != null)
-            {
-                keyEventArgs.Handled = true;
-                relayCommand.Execute(null);
-                return;
-            }
-        }
-
-        var rc = _shortcutManager.CheckShortcuts(ShortcutCategory.General.ToStringInvariant());
-        if (rc != null)
-        {
-            keyEventArgs.Handled = true;
-            rc.Execute(null);
-            return;
         }
     }
 
@@ -7142,10 +7146,7 @@ public partial class MainViewModel :
         _positionTimer.Start();
 
         _slowTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
-        _slowTimer.Tick += (s, e) =>
-        {
-            UpdateGaps();
-        };
+        _slowTimer.Tick += (s, e) => { UpdateGaps(); };
         _slowTimer.Start();
     }
 
@@ -7159,6 +7160,7 @@ public partial class MainViewModel :
                 var next = Subtitles[i + 1];
                 p.Gap = next.StartTime.TotalMilliseconds - p.EndTime.TotalMilliseconds;
             }
+
             Subtitles[Subtitles.Count - 1].Gap = double.MaxValue;
         }
         catch
