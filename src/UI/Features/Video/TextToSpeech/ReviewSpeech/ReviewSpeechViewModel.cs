@@ -116,7 +116,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
             var paused = _mpvContext.Pause.Get() ?? false;
 
             var line = SelectedLine;
-            var timeSinceStart = TimeSpan.FromTicks(System.Diagnostics.Stopwatch.GetTimestamp() - _startPlayTicks);
+            var timeSinceStart = TimeSpan.FromTicks(DateTime.UtcNow.Ticks - _startPlayTicks);
             if (paused && AutoContinue && !_skipAutoContinue && line != null && timeSinceStart.TotalMilliseconds > 500)
             {
                 Dispatcher.UIThread.Invoke(async () =>
@@ -397,7 +397,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
         _cancellationTokenSource = new CancellationTokenSource();
         _cancellationToken = _cancellationTokenSource.Token;
         _skipAutoContinue = false;
-        _startPlayTicks = System.Diagnostics.Stopwatch.GetTimestamp();
+        _startPlayTicks = DateTime.UtcNow.Ticks; 
         await PlayAudio(line.StepResult.CurrentFileName);
     }
 

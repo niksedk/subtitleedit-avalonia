@@ -240,7 +240,7 @@ public partial class BatchConvertViewModel : ObservableObject
 
         var config = MakeBatchConvertConfig();
         _batchConverter.Initialize(config);
-        var start = System.Diagnostics.Stopwatch.GetTimestamp();
+        var start = DateTime.UtcNow.Ticks;
 
         IsProgressVisible = true;
         IsConverting = true;
@@ -267,7 +267,7 @@ public partial class BatchConvertViewModel : ObservableObject
             IsConverting = false;
             AreControlsEnabled = true;
 
-            var end = System.Diagnostics.Stopwatch.GetTimestamp();
+            var end = DateTime.UtcNow.Ticks;
             var message =
                 $"{BatchItems.Count:#,###,##0} files converted in {ProgressHelper.ToTimeResult(new TimeSpan(end - start).TotalMilliseconds)}";
             if (_cancellationToken.IsCancellationRequested)

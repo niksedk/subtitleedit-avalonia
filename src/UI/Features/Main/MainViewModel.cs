@@ -4882,12 +4882,6 @@ public partial class MainViewModel :
         }
 
         ShowStatus(string.Format("{0}, {1:0}%", statusMessage, _lastProgressPercent));
-        //TaskbarList.SetProgressValue(Handle, percent, 100);
-        //if (Stopwatch.GetTimestamp() % 10 == 0)
-        //{
-        //    Application.DoEvents();
-        //}
-
         _lastProgressPercent = percent;
     }
 
@@ -6185,7 +6179,7 @@ public partial class MainViewModel :
             return false;
         }
 
-        var ticks = Stopwatch.GetTimestamp();
+        var ticks = DateTime.UtcNow.Ticks;
         var timeSpan = TimeSpan.FromTicks(ticks - _lastKeyPressedTicks);
         if (timeSpan.Milliseconds < 500)
         {

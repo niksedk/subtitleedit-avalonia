@@ -399,7 +399,7 @@ public class AudioVisualizer : Control
             newStart = 0;
         }
 
-        _audioVisualizerLastScroll = Stopwatch.GetTimestamp(); // Update the last scroll time
+        _audioVisualizerLastScroll = DateTime.UtcNow.Ticks; // Update the last scroll time
         StartPositionSeconds = newStart;
         if (OnHorizontalScroll != null)
         {
@@ -463,7 +463,7 @@ public class AudioVisualizer : Control
 
         if (_interactionMode == InteractionMode.Moving)
         { // click on paragraph, but with no move
-            var ts = TimeSpan.FromTicks(Stopwatch.GetTimestamp() - _lastPointerPressed);
+            var ts = TimeSpan.FromTicks(DateTime.UtcNow.Ticks - _lastPointerPressed);
             if (ts.TotalMilliseconds < 100 ||
                 (
                     _activeParagraph != null &&
@@ -494,7 +494,7 @@ public class AudioVisualizer : Control
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        _lastPointerPressed = Stopwatch.GetTimestamp();
+        _lastPointerPressed = DateTime.UtcNow.Ticks;
         e.Handled = true;
         var point = e.GetPosition(this);
         _startPointerPosition = point;
