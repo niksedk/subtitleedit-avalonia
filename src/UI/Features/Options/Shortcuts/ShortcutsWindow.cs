@@ -1,3 +1,4 @@
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -148,29 +149,36 @@ public class ShortcutsWindow : Window
             Margin = new Thickness(10),
         };
 
+        // Get platform-specific labels
+        var isMac = OperatingSystem.IsMacOS() ;
+        var ctrlLabel = isMac ? Se.Language.Options.Shortcuts.ControlMac : Se.Language.Options.Shortcuts.Control;
+        var altLabel = isMac ? Se.Language.Options.Shortcuts.AltMac : Se.Language.Options.Shortcuts.Alt;
+        var shiftLabel = isMac ? Se.Language.Options.Shortcuts.ShiftMac : Se.Language.Options.Shortcuts.Shift;
+        var winLabel = isMac ? Se.Language.Options.Shortcuts.WinMac : Se.Language.Options.Shortcuts.Win;
+
         // Control checkbox and label
-        editPanel.Children.Add(UiUtil.MakeTextBlock(Se.Language.Options.Shortcuts.Control).WithMarginRight(3));
+        editPanel.Children.Add(UiUtil.MakeTextBlock(ctrlLabel).WithMarginRight(3));
         var controlCheckBox = UiUtil.MakeCheckBox(vm, nameof(vm.CtrlIsSelected));
         controlCheckBox.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);
         controlCheckBox.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(controlCheckBox);
 
         // Alt checkbox and label
-        editPanel.Children.Add(UiUtil.MakeTextBlock(Se.Language.Options.Shortcuts.Alt).WithMarginRight(3));
+        editPanel.Children.Add(UiUtil.MakeTextBlock(altLabel).WithMarginRight(3));
         var checkBoxAlt = UiUtil.MakeCheckBox(vm, nameof(vm.AltIsSelected));
         checkBoxAlt.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);       
         checkBoxAlt.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(checkBoxAlt);
         
         // Shift checkbox and label
-        editPanel.Children.Add(UiUtil.MakeTextBlock(Se.Language.Options.Shortcuts.Shift).WithMarginRight(3));
+        editPanel.Children.Add(UiUtil.MakeTextBlock(shiftLabel).WithMarginRight(3));
         var checkBoxShift = UiUtil.MakeCheckBox(vm, nameof(vm.ShiftIsSelected));
         checkBoxShift.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);      
         checkBoxShift.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(checkBoxShift);
 
         // Win key checkbox and label
-        editPanel.Children.Add(UiUtil.MakeTextBlock(Se.Language.Options.Shortcuts.Win).WithMarginRight(3));
+        editPanel.Children.Add(UiUtil.MakeTextBlock(winLabel).WithMarginRight(3));
         var checkBoxWin = UiUtil.MakeCheckBox(vm, nameof(vm.WinIsSelected));
         checkBoxWin.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);      
         checkBoxWin.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });

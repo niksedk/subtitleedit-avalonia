@@ -124,10 +124,28 @@ public partial class ShortcutsViewModel : ObservableObject
 
         if (x.Keys.Count > 0 && includeShortCutKeys)
         {
-            return name + " [" + string.Join("+", x.Keys) + "]";
+            var keys = x.Keys.Select(k => GetKeyDisplayName(k)).ToList();
+            return name + " [" + string.Join(OperatingSystem.IsMacOS() ? "" : "+", keys) + "]";
         }
 
         return name;
+    }
+
+    private static string GetKeyDisplayName(string key)
+    {
+        if (!OperatingSystem.IsMacOS())
+        {
+            return key;
+        }
+
+        return key switch
+        {
+            "Ctrl" or "Control" => "⌃",
+            "Alt" => "⌥",
+            "Shift" => "⇧",
+            "Cmd" or "Command" => "⌘",
+            _ => key
+        };
     }
 
     [RelayCommand]

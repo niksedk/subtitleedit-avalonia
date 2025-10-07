@@ -112,6 +112,11 @@ public class LanguageSettingsShortcuts
     public string Alt { get; set; }
     public string Win { get; set; }
     public string Shift { get; set; }
+    public string ControlMac { get; set; }
+    public string AltMac { get; set; }
+    public string WinMac { get; set; }
+    public string ShiftMac { get; set; }
+    
     public string ResetShortcuts { get; set; }
     public string ResetShortcutsDetail { get; set; }
     public string TogglePlayPause { get; set; }
@@ -260,6 +265,11 @@ public class LanguageSettingsShortcuts
         Alt = "Alt";
         Win = "Win";
         Shift = "Shift";
+
+        ControlMac = "⌃ Control";
+        AltMac = "⌥ Alt";
+        ShiftMac = "⇧ Shift";
+        WinMac = "⌘ Cmd";
 
         ResetShortcuts = "Reset shortcuts";
         ResetShortcutsDetail = "Do you want to reset all shortcuts to default values?";
