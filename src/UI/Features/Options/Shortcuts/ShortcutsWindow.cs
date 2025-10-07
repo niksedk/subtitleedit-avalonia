@@ -151,24 +151,28 @@ public class ShortcutsWindow : Window
         // Control checkbox and label
         editPanel.Children.Add(UiUtil.MakeTextBlock(Se.Language.Options.Shortcuts.Control).WithMarginRight(3));
         var controlCheckBox = UiUtil.MakeCheckBox(vm, nameof(vm.CtrlIsSelected));
+        controlCheckBox.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);
         controlCheckBox.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(controlCheckBox);
 
         // Alt checkbox and label
         editPanel.Children.Add(UiUtil.MakeTextBlock(Se.Language.Options.Shortcuts.Alt).WithMarginRight(3));
         var checkBoxAlt = UiUtil.MakeCheckBox(vm, nameof(vm.AltIsSelected));
+        checkBoxAlt.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);       
         checkBoxAlt.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(checkBoxAlt);
         
         // Shift checkbox and label
         editPanel.Children.Add(UiUtil.MakeTextBlock(Se.Language.Options.Shortcuts.Shift).WithMarginRight(3));
         var checkBoxShift = UiUtil.MakeCheckBox(vm, nameof(vm.ShiftIsSelected));
+        checkBoxShift.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);      
         checkBoxShift.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(checkBoxShift);
 
         // Win key checkbox and label
         editPanel.Children.Add(UiUtil.MakeTextBlock(Se.Language.Options.Shortcuts.Win).WithMarginRight(3));
         var checkBoxWin = UiUtil.MakeCheckBox(vm, nameof(vm.WinIsSelected));
+        checkBoxWin.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);      
         checkBoxWin.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(checkBoxWin);
 
@@ -182,6 +186,7 @@ public class ShortcutsWindow : Window
         comboBoxKeys.Bind(ComboBox.SelectedItemProperty, new Binding(nameof(vm.SelectedShortcut)) { Source = vm });
         comboBoxKeys.Bind(ComboBox.IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(comboBoxKeys);
+        comboBoxKeys.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);      
         
         // browse button
         var buttonBrowse = UiUtil.MakeButtonBrowse(vm.ShowGetKeyCommand);
@@ -189,11 +194,6 @@ public class ShortcutsWindow : Window
         buttonBrowse.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         buttonBrowse.Margin = new Thickness(0,0,10,0);  
         
-        // Update button
-        var buttonUpdate = UiUtil.MakeButton(Se.Language.General.Update, vm.UpdateShortcutCommand);
-        editPanel.Children.Add(buttonUpdate);
-        buttonUpdate.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
-
         // Reset button
         var buttonReset = UiUtil.MakeButton(Se.Language.General.Reset, vm.ResetShortcutCommand);
         editPanel.Children.Add(buttonReset);

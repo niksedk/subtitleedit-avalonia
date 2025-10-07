@@ -1,7 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.LogicalTree;
-using Avalonia.Markup.Declarative;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -39,8 +38,10 @@ public partial class ShortcutsViewModel : ObservableObject
     public TreeView ShortcutsTreeView { get; internal set; }
 
     private List<ShortCut> _allShortcuts;
-
     private readonly IWindowService _windowService;
+    
+    // Add this flag to prevent updates during selection changes
+    private bool _isLoadingSelection = false;
 
     public ShortcutsViewModel(IWindowService windowService)
     {
@@ -183,9 +184,15 @@ public partial class ShortcutsViewModel : ObservableObject
     [RelayCommand]
     private void UpdateShortcut()
     {
+        // Don't update if we're loading a new selection
+        if (_isLoadingSelection)
+        {
+            return;
+        }
+
         var shortcut = SelectedShortcut;
         var node = SelectedNode;
-        if (string.IsNullOrEmpty(shortcut) || node?.ShortCut is null)
+        if (node == null || node.ShortCut is null)
         {
             return;
         }
@@ -206,7 +213,11 @@ public partial class ShortcutsViewModel : ObservableObject
             keys.Add("Shift");
         }
 
-        keys.Add(shortcut);
+        if (!string.IsNullOrEmpty(shortcut))
+        {
+            keys.Add(shortcut);
+        }
+
         node.ShortCut.Keys = keys;
         node.Title = MakeDisplayName(node.ShortCut!);
     }
@@ -227,6 +238,7 @@ public partial class ShortcutsViewModel : ObservableObject
         AltIsSelected = false;
         ShiftIsSelected = false;
         SelectedShortcut = null;
+        UpdateShortcut();
     }
 
     [RelayCommand]
@@ -295,43 +307,55 @@ public partial class ShortcutsViewModel : ObservableObject
             return;
         }
 
-        IsControlsEnabled = true;
-        CtrlIsSelected = node.ShortCut!.Keys.Contains("Ctrl") ||
-                         node.ShortCut!.Keys.Contains("Control") ||
-                         node.ShortCut!.Keys.Contains(Key.LeftCtrl.ToStringInvariant()) ||
-                         node.ShortCut!.Keys.Contains(Key.RightCtrl.ToStringInvariant());
-        AltIsSelected = node.ShortCut!.Keys.Contains("Alt") ||
-                        node.ShortCut!.Keys.Contains(Key.LeftAlt.ToStringInvariant()) ||
-                        node.ShortCut!.Keys.Contains(Key.RightAlt.ToStringInvariant());
-        ShiftIsSelected = node.ShortCut!.Keys.Contains("Shift") ||
-                          node.ShortCut!.Keys.Contains(Key.LeftShift.ToStringInvariant()) ||
-                          node.ShortCut!.Keys.Contains(Key.RightShift.ToStringInvariant());
+        // Set flag to prevent UpdateShortcut from running during selection load
+        _isLoadingSelection = true;
 
-        var modifiers = new List<string>()
+        try
         {
-            "Control",
-            "Ctrl",
-            "Alt",
-            "Shift",
-            Key.LeftCtrl.ToStringInvariant(),
-            Key.RightCtrl.ToStringInvariant(),
-            Key.LeftAlt.ToStringInvariant(),
-            Key.RightAlt.ToStringInvariant(),
-            Key.LeftShift.ToStringInvariant(),
-            Key.RightShift.ToStringInvariant(),
-        };
-        foreach (var key in node.ShortCut.Keys)
-        {
-            if (modifiers.Contains(key))
+            IsControlsEnabled = true;
+            CtrlIsSelected = node.ShortCut!.Keys.Contains("Ctrl") ||
+                             node.ShortCut!.Keys.Contains("Control") ||
+                             node.ShortCut!.Keys.Contains(Key.LeftCtrl.ToStringInvariant()) ||
+                             node.ShortCut!.Keys.Contains(Key.RightCtrl.ToStringInvariant());
+            AltIsSelected = node.ShortCut!.Keys.Contains("Alt") ||
+                            node.ShortCut!.Keys.Contains(Key.LeftAlt.ToStringInvariant()) ||
+                            node.ShortCut!.Keys.Contains(Key.RightAlt.ToStringInvariant());
+            ShiftIsSelected = node.ShortCut!.Keys.Contains("Shift") ||
+                              node.ShortCut!.Keys.Contains(Key.LeftShift.ToStringInvariant()) ||
+                              node.ShortCut!.Keys.Contains(Key.RightShift.ToStringInvariant());
+
+            var modifiers = new List<string>()
             {
-                continue;
+                "Control",
+                "Ctrl",
+                "Alt",
+                "Shift",
+                Key.LeftCtrl.ToStringInvariant(),
+                Key.RightCtrl.ToStringInvariant(),
+                Key.LeftAlt.ToStringInvariant(),
+                Key.RightAlt.ToStringInvariant(),
+                Key.LeftShift.ToStringInvariant(),
+                Key.RightShift.ToStringInvariant(),
+            };
+            
+            foreach (var key in node.ShortCut.Keys)
+            {
+                if (modifiers.Contains(key))
+                {
+                    continue;
+                }
+
+                SelectedShortcut = key;
+                return;
             }
 
-            SelectedShortcut = key;
-            return;
+            SelectedShortcut = null;
         }
-
-        SelectedShortcut = null;
+        finally
+        {
+            // Always reset the flag, even if an exception occurs
+            _isLoadingSelection = false;
+        }
     }
 
     public void ExpandAll()
