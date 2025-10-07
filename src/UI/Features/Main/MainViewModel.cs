@@ -6664,7 +6664,7 @@ public partial class MainViewModel :
     {
         lock (_onKeyDownHandlerLock)
         {
-            var ticks = DateTime.UtcNow.Ticks; // Stopwatch.GetTimestamp();
+            var ticks = DateTime.UtcNow.Ticks; // Stopwatch.GetTimestamp(); GetTimestamp does not work on mac!?
             var timeSpan = TimeSpan.FromTicks(ticks - _lastKeyPressedTicks);
             var k = keyEventArgs.Key;
             if (timeSpan.Seconds > 5)
