@@ -845,8 +845,23 @@ public partial class SettingsViewModel : ObservableObject
         {
             return;
         }
-    }
 
+        _customContinuationStyleSuffix = result.SelectedSuffix;
+        _customContinuationStyleSuffixApplyIfComma = result.SelectedSuffixesProcessIfEndWithComma;
+        _customContinuationStyleSuffixAddSpace = result.SelectedSuffixesAddSpace;
+        _customContinuationStyleSuffixReplaceComma = result.SelectedSuffixesRemoveComma;
+        _customContinuationStylePrefix = result.SelectedPrefix;
+        _customContinuationStylePrefixAddSpace = result.SelectedPrefixAddSpace;
+        _customContinuationStyleUseDifferentStyleGap = result.UseSpecialStyleAfterLongGaps;
+        _continuationPause = result.LongGapMs;
+        _customContinuationStyleGapSuffix = result.SelectedLongGapSuffix;
+        _customContinuationStyleGapSuffixApplyIfComma = result.SelectedLongGapSuffixesProcessIfEndWithComma;
+        _customContinuationStyleGapSuffixAddSpace = result.SelectedLongGapSuffixesAddSpace;
+        _customContinuationStyleGapSuffixReplaceComma = result.SelectedLongGapSuffixesRemoveComma;
+        _customContinuationStyleGapPrefix = result.SelectedLongGapPrefix;
+        _customContinuationStyleGapPrefixAddSpace = result.SelectedLongGapPrefixAddSpace;
+        RuleValueChanged();
+    }
 
     private void LoadFileTypeAssociations()
     {

@@ -109,10 +109,12 @@ public class CustomContinuationStyleWindow : Window
         var checkBoxSuffixRemoveComma = UiUtil.MakeCheckBox(Se.Language.Options.Settings.RemoveComma, vm, nameof(vm.SelectedSuffixesRemoveComma));
         checkBoxSuffixRemoveComma.PropertyChanged += (s, e) => vm.StyleChanged();
 
-        var checkBoxUseSpecialStyleAfterLongGaps = UiUtil.MakeCheckBox(Se.Language.Options.Settings.UseSpecialStyleAfterLongGaps, vm, nameof(vm.UseSpecialStyleAfterLongGaps));
+        var checkBoxUseSpecialStyleAfterLongGaps = UiUtil.MakeCheckBox(Se.Language.Options.Settings.UseSpecialStyleAfterLongGaps, vm, nameof(vm.UseSpecialStyleAfterLongGaps))
+            .WithMarginTop(10);
         checkBoxUseSpecialStyleAfterLongGaps.PropertyChanged += (s, e) => vm.StyleChanged();
         var labelLongGapThreshold = UiUtil.MakeLabel(Se.Language.Options.Settings.LongGapThreshold);
-        var numericUpDownLongGapThreshold = UiUtil.MakeNumericUpDownInt(0, 10_000, 300, 140, vm, nameof(vm.LongGapMs));
+        var numericUpDownLongGapThreshold = UiUtil.MakeNumericUpDownInt(0, 10_000, 300, 140, vm, nameof(vm.LongGapMs))
+            .WithBindEnabled(nameof(vm.UseSpecialStyleAfterLongGaps));
         var panelLongGapThreshold = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -124,16 +126,21 @@ public class CustomContinuationStyleWindow : Window
             }
         };
         var labelLongPrefix = UiUtil.MakeLabel(Se.Language.General.Prefix);
-        var comboBoxLongPrefix = UiUtil.MakeComboBox(vm.PreAndSuffixes, vm, nameof(vm.SelectedLongGapPrefix));
-        comboBoxLongPrefix.PropertyChanged += (s, e) => vm.StyleChanged();  
+        var comboBoxLongPrefix = UiUtil.MakeComboBox(vm.PreAndSuffixes, vm, nameof(vm.SelectedLongGapPrefix))
+            .WithBindEnabled(nameof(vm.UseSpecialStyleAfterLongGaps));
+        comboBoxLongPrefix.PropertyChanged += (s, e) => vm.StyleChanged();
         var labelLongSuffix = UiUtil.MakeLabel(Se.Language.General.Suffix);
-        var comboBoxLongSuffix = UiUtil.MakeComboBox(vm.PreAndSuffixes, vm, nameof(vm.SelectedLongGapSuffix));
+        var comboBoxLongSuffix = UiUtil.MakeComboBox(vm.PreAndSuffixes, vm, nameof(vm.SelectedLongGapSuffix))
+            .WithBindEnabled(nameof(vm.UseSpecialStyleAfterLongGaps));
         comboBoxLongSuffix.PropertyChanged += (s, e) => vm.StyleChanged();
-        var checkBoxLongSuffixProcessIfEndWithComma = UiUtil.MakeCheckBox(Se.Language.Options.Settings.ProcessIfEndsWithComma, vm, nameof(vm.SelectedLongGapSuffixesProcessIfEndWithComma));
+        var checkBoxLongSuffixProcessIfEndWithComma = UiUtil.MakeCheckBox(Se.Language.Options.Settings.ProcessIfEndsWithComma, vm, nameof(vm.SelectedLongGapSuffixesProcessIfEndWithComma))
+            .WithBindEnabled(nameof(vm.UseSpecialStyleAfterLongGaps));
         checkBoxLongSuffixProcessIfEndWithComma.PropertyChanged += (s, e) => vm.StyleChanged();
-        var checkBoxLongSuffixAddSpace = UiUtil.MakeCheckBox(Se.Language.Options.Settings.AddSpace, vm, nameof(vm.SelectedLongGapSuffixesAddSpace));
+        var checkBoxLongSuffixAddSpace = UiUtil.MakeCheckBox(Se.Language.Options.Settings.AddSpace, vm, nameof(vm.SelectedLongGapSuffixesAddSpace))
+            .WithBindEnabled(nameof(vm.UseSpecialStyleAfterLongGaps));
         checkBoxLongSuffixAddSpace.PropertyChanged += (s, e) => vm.StyleChanged();
-        var checkBoxLongSuffixRemoveComma = UiUtil.MakeCheckBox(Se.Language.Options.Settings.RemoveComma, vm, nameof(vm.SelectedLongGapSuffixesRemoveComma));
+        var checkBoxLongSuffixRemoveComma = UiUtil.MakeCheckBox(Se.Language.Options.Settings.RemoveComma, vm, nameof(vm.SelectedLongGapSuffixesRemoveComma))
+            .WithBindEnabled(nameof(vm.UseSpecialStyleAfterLongGaps));
         checkBoxLongSuffixRemoveComma.PropertyChanged += (s, e) => vm.StyleChanged();
 
         var splitButtonLoad = new SplitButton
