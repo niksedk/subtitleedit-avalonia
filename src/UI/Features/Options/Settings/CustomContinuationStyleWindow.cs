@@ -78,6 +78,7 @@ public class CustomContinuationStyleWindow : Window
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
             },
             ColumnDefinitions =
@@ -85,7 +86,7 @@ public class CustomContinuationStyleWindow : Window
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
-            Margin = new Thickness(0, 10, 0, 0),
+            Margin = new Thickness(10),
             ColumnSpacing = 5,
             RowSpacing = 5,
             Width = double.NaN,
@@ -110,10 +111,21 @@ public class CustomContinuationStyleWindow : Window
 
         var checkBoxUseSpecialStyleAfterLongGaps = UiUtil.MakeCheckBox(Se.Language.Options.Settings.UseSpecialStyleAfterLongGaps, vm, nameof(vm.UseSpecialStyleAfterLongGaps));
         checkBoxUseSpecialStyleAfterLongGaps.PropertyChanged += (s, e) => vm.StyleChanged();
+        var labelLongGapThreshold = UiUtil.MakeLabel(Se.Language.Options.Settings.LongGapThreshold);
+        var numericUpDownLongGapThreshold = UiUtil.MakeNumericUpDownInt(0, 10_000, 300, 140, vm, nameof(vm.LongGapMs));
+        var panelLongGapThreshold = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Children =
+            {
+                labelLongGapThreshold,
+                numericUpDownLongGapThreshold,
+            }
+        };
         var labelLongPrefix = UiUtil.MakeLabel(Se.Language.General.Prefix);
         var comboBoxLongPrefix = UiUtil.MakeComboBox(vm.PreAndSuffixes, vm, nameof(vm.SelectedLongGapPrefix));
         comboBoxLongPrefix.PropertyChanged += (s, e) => vm.StyleChanged();  
-
         var labelLongSuffix = UiUtil.MakeLabel(Se.Language.General.Suffix);
         var comboBoxLongSuffix = UiUtil.MakeComboBox(vm.PreAndSuffixes, vm, nameof(vm.SelectedLongGapSuffix));
         comboBoxLongSuffix.PropertyChanged += (s, e) => vm.StyleChanged();
@@ -202,15 +214,16 @@ public class CustomContinuationStyleWindow : Window
         grid.Add(checkBoxSuffixRemoveComma, 5, 1);
 
         grid.Add(checkBoxUseSpecialStyleAfterLongGaps, 6, 0, 1, 2);
-        grid.Add(labelLongPrefix, 7, 0);
-        grid.Add(comboBoxLongPrefix, 7, 1);
-        grid.Add(labelLongSuffix, 8, 0);
-        grid.Add(comboBoxLongSuffix, 8, 1);
-        grid.Add(checkBoxLongSuffixProcessIfEndWithComma, 9, 1);
-        grid.Add(checkBoxLongSuffixAddSpace, 10, 1);
-        grid.Add(checkBoxLongSuffixRemoveComma, 11, 1);
+        grid.Add(panelLongGapThreshold, 7, 1);
+        grid.Add(labelLongPrefix, 8, 0);
+        grid.Add(comboBoxLongPrefix, 8, 1);
+        grid.Add(labelLongSuffix, 9, 0);
+        grid.Add(comboBoxLongSuffix, 9, 1);
+        grid.Add(checkBoxLongSuffixProcessIfEndWithComma, 10, 1);
+        grid.Add(checkBoxLongSuffixAddSpace, 11, 1);
+        grid.Add(checkBoxLongSuffixRemoveComma, 12, 1);
 
-        grid.Add(splitButtonLoad, 12, 0);
+        grid.Add(splitButtonLoad, 13, 0);
 
         return UiUtil.MakeBorderForControl(grid);
     }
@@ -231,14 +244,13 @@ public class CustomContinuationStyleWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
             Width = double.NaN,
-            Margin = new Thickness(0, 10, 0, 0),
+            Margin = new Thickness(10),
         };
 
         var labelPreview = UiUtil.MakeLabel(Se.Language.General.Preview);
-        var labelPreviewContent = UiUtil.MakeLabel();
 
         grid.Add(labelPreview, 0);
-        grid.Add(labelPreviewContent, 1);
+        grid.Add(vm.PanelPreview, 1);
 
         return UiUtil.MakeBorderForControl(grid);
     }

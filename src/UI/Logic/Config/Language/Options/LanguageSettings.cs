@@ -172,6 +172,7 @@ public class LanguageSettings
     public string ProcessIfEndsWithComma { get; set; }
     public string RemoveComma { get; set; }
     public string EditContinuationStyleCustom { get; set; }
+    public string LongGapThreshold { get; set; }
 
     public LanguageSettings()
     {
@@ -340,6 +341,7 @@ public class LanguageSettings
         ProcessIfEndsWithComma = "Process if ends with comma";
         RemoveComma = "Remove comma";
         EditContinuationStyleCustom = "Edit custom continuation style";
+        LongGapThreshold = "Long gap threshold (ms)";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

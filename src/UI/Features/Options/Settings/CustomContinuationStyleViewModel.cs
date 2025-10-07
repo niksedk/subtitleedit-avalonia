@@ -6,6 +6,7 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Enums;
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
 
@@ -32,6 +33,7 @@ public partial class CustomContinuationStyleViewModel : ObservableObject
     public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
+    public StackPanel PanelPreview { get; internal set; }
 
     private bool _isDirty;
     private readonly System.Timers.Timer _previewTimer;
@@ -47,11 +49,17 @@ public partial class CustomContinuationStyleViewModel : ObservableObject
             "–",
         });
 
-        SelectedPrefix = string.Empty;
-        SelectedSuffix = string.Empty;
-        SelectedLongGapPrefix = string.Empty;
-        SelectedLongGapSuffix = string.Empty;
+        SelectedPrefix = PreAndSuffixes.First();
+        SelectedSuffix = PreAndSuffixes.First();
+        SelectedLongGapPrefix = PreAndSuffixes.First();
+        SelectedLongGapSuffix = PreAndSuffixes.First();
         LongGapMs = 300;
+
+        PanelPreview = new StackPanel()
+        {
+            Margin = new Avalonia.Thickness(10),
+            Orientation = Avalonia.Layout.Orientation.Vertical
+        };
 
         _previewTimer = new System.Timers.Timer(500);
         _previewTimer.Elapsed += (sender, args) =>
@@ -64,7 +72,7 @@ public partial class CustomContinuationStyleViewModel : ObservableObject
                 _isDirty = false;
             }
 
-            _previewTimer.Start();            
+            _previewTimer.Start();
         };
 
     }
@@ -100,72 +108,85 @@ public partial class CustomContinuationStyleViewModel : ObservableObject
         SelectedLongGapSuffixesProcessIfEndWithComma = customContinuationStyleGapSuffixApplyIfComma;
         SelectedLongGapSuffixesAddSpace = customContinuationStyleGapSuffixAddSpace;
         SelectedLongGapSuffixesRemoveComma = customContinuationStyleGapSuffixReplaceComma;
+
+        _previewTimer.Start();
     }
 
     [RelayCommand]
     private void LoadContinuationStyleNone()
     {
-        LoadSettings(ContinuationStyle.None);   
+        LoadSettings(ContinuationStyle.None);
+        _isDirty = true;
     }
 
     [RelayCommand]
     private void LoadContinuationStyleNoneTrailingDots()
     {
         LoadSettings(ContinuationStyle.NoneTrailingDots);
+        _isDirty = true;
     }
 
     [RelayCommand]
     private void LoadContinuationStyleNoneLeadingTrailingDots()
     {
         LoadSettings(ContinuationStyle.NoneLeadingTrailingDots);
+        _isDirty = true;
     }
 
     [RelayCommand]
     private void LoadContinuationStyleNoneTrailingEllipsis()
     {
         LoadSettings(ContinuationStyle.NoneTrailingEllipsis);
+        _isDirty = true;
     }
 
     [RelayCommand]
     private void LoadContinuationStyleNoneLeadingTrailingEllipsis()
     {
         LoadSettings(ContinuationStyle.NoneLeadingTrailingEllipsis);
+        _isDirty = true;
     }
 
     [RelayCommand]
     private void LoadContinuationStyleOnlyTrailingDots()
     {
         LoadSettings(ContinuationStyle.OnlyTrailingDots);
+        _isDirty = true;
     }
 
     [RelayCommand]
     private void LoadContinuationStyleLeadingTrailingDots()
     {
         LoadSettings(ContinuationStyle.LeadingTrailingDots);
+        _isDirty = true;
     }
 
     [RelayCommand]
     private void LoadContinuationStyleOnlyTrailingEllipsis()
     {
         LoadSettings(ContinuationStyle.OnlyTrailingEllipsis);
+        _isDirty = true;
     }
 
     [RelayCommand]
     private void LoadContinuationStyleLeadingTrailingEllipsis()
     {
         LoadSettings(ContinuationStyle.LeadingTrailingEllipsis);
+        _isDirty = true;
     }
 
     [RelayCommand]
     private void LoadContinuationStyleLeadingTrailingDash()
     {
         LoadSettings(ContinuationStyle.LeadingTrailingDash);
+        _isDirty = true;
     }
 
     [RelayCommand]
     private void LoadContinuationStyleLeadingTrailingDashDots()
     {
         LoadSettings(ContinuationStyle.LeadingTrailingDashDots);
+        _isDirty = true;
     }
 
     [RelayCommand]
@@ -201,33 +222,62 @@ public partial class CustomContinuationStyleViewModel : ObservableObject
 
     private void UpdatePreview()
     {
-        // Update preview
         var profile = CreateContinuationProfile();
         var preview = ContinuationUtilities.GetContinuationStylePreview(profile);
-        var previewSplit = preview.Split(new[] { "\n\n" }, StringSplitOptions.None);
+        var previewSplit = preview.SplitToLines();
 
-        //labelPreviewLine1.Text = previewSplit[0];
-        //labelPreviewLine2.Text = previewSplit[1];
-        //labelPreviewLine3.Text = previewSplit[2];
-        //labelPreviewLine4.Text = previewSplit[4];
+        PanelPreview.Children.Clear();
+        PanelPreview.Children.Add(new TextBlock 
+        { 
+            Text = previewSplit[0], TextWrapping = Avalonia.Media.TextWrapping.Wrap ,
+            Margin = new Avalonia.Thickness(20, 20, 20, 3),
+        });
+
+        PanelPreview.Children.Add(new TextBlock
+        {
+            Text = previewSplit[1],
+            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+            Margin = new Avalonia.Thickness(20, 3, 20, 20),
+        });
+
+        PanelPreview.Children.Add(new TextBlock
+        {
+            Text = previewSplit[2],
+            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+            Margin = new Avalonia.Thickness(20),
+        });
+
+        PanelPreview.Children.Add(new TextBlock
+        {
+            Text = previewSplit[3],
+            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+            Margin = new Avalonia.Thickness(20, 20, 20, 3),
+        });
+
+        PanelPreview.Children.Add(new TextBlock
+        {
+            Text = previewSplit[4],
+            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+            Margin = new Avalonia.Thickness(20, 3, 20, 20),
+        });
     }
 
     private ContinuationUtilities.ContinuationProfile CreateContinuationProfile()
     {
         return new ContinuationUtilities.ContinuationProfile
         {
-            Suffix = SelectedSuffix,
+            Suffix = SelectedSuffix ?? string.Empty,
             SuffixApplyIfComma = SelectedSuffixesProcessIfEndWithComma,
             SuffixAddSpace = SelectedSuffixesAddSpace,
             SuffixReplaceComma = SelectedSuffixesRemoveComma,
-            Prefix = SelectedPrefix,
+            Prefix = SelectedPrefix ?? string.Empty,
             PrefixAddSpace = SelectedPrefixAddSpace,
             UseDifferentStyleGap = UseSpecialStyleAfterLongGaps,
-            GapSuffix = SelectedLongGapSuffix,
+            GapSuffix = SelectedLongGapSuffix ?? string.Empty,
             GapSuffixApplyIfComma = SelectedLongGapSuffixesProcessIfEndWithComma,
             GapSuffixAddSpace = SelectedLongGapSuffixesAddSpace,
             GapSuffixReplaceComma = SelectedLongGapSuffixesRemoveComma,
-            GapPrefix = SelectedLongGapPrefix,
+            GapPrefix = SelectedLongGapPrefix ?? string.Empty,
             GapPrefixAddSpace = SelectedLongGapPrefixAddSpace,
         };
     }
