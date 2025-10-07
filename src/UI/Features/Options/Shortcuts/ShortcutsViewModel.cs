@@ -125,7 +125,7 @@ public partial class ShortcutsViewModel : ObservableObject
         if (x.Keys.Count > 0 && includeShortCutKeys)
         {
             var keys = x.Keys.Select(k => GetKeyDisplayName(k)).ToList();
-            return name + " [" + string.Join(OperatingSystem.IsMacOS() ? "" : "+", keys) + "]";
+            return name + " [" + string.Join("+", keys) + "]";
         }
 
         return name;
@@ -140,10 +140,10 @@ public partial class ShortcutsViewModel : ObservableObject
 
         return key switch
         {
-            "Ctrl" or "Control" => "⌃",
-            "Alt" => "⌥",
-            "Shift" => "⇧",
-            "Cmd" or "Command" => "⌘",
+            "Ctrl" or "Control" => Se.Language.Options.Shortcuts.ControlMac,
+            "Alt" => Se.Language.Options.Shortcuts.AltMac,
+            "Shift" => Se.Language.Options.Shortcuts.ShiftMac,
+            "Cmd" or "Command" => Se.Language.Options.Shortcuts.WinMac,
             _ => key
         };
     }

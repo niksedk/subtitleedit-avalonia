@@ -1,3 +1,4 @@
+using System;
 using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -52,37 +53,41 @@ public partial class GetKeyViewModel : ObservableObject
         {
             e.Handled = true;
             Window?.Close();
+            return;
         }
-        else
+
+        var infoText = string.Empty;
+        var isMac = OperatingSystem.IsMacOS();
+        PressedKey = e.Key.ToString();
+        PressedKeyOnly = PressedKey;
+        IsControlPressed = e.KeyModifiers.HasFlag(KeyModifiers.Control);
+        IsAltPressed = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
+        IsShiftPressed = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+
+        if (e.KeyModifiers.HasFlag(KeyModifiers.Control) &&
+            PressedKey != Key.LeftCtrl.ToString() &&
+            PressedKey != Key.RightCtrl.ToString())
         {
-            PressedKey = e.Key.ToString();
-            PressedKeyOnly = PressedKey;
-            IsControlPressed = e.KeyModifiers.HasFlag(KeyModifiers.Control);
-            IsAltPressed = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
-            IsShiftPressed = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
-
-            if (e.KeyModifiers.HasFlag(KeyModifiers.Control) &&
-                PressedKey != Key.LeftCtrl.ToString() &&
-                PressedKey != Key.RightCtrl.ToString())
-            {
-                PressedKey = "Ctrl + " + PressedKey;
-            }
-
-            if (e.KeyModifiers.HasFlag(KeyModifiers.Alt) &&
-                 PressedKey != Key.LeftAlt.ToString() &&
-                 PressedKey != Key.RightAlt.ToString())
-            {
-                PressedKey = "Alt + " + PressedKey;
-            }
-
-            if (e.KeyModifiers.HasFlag(KeyModifiers.Shift) &&
-                 PressedKey != Key.LeftShift.ToString() &&
-                 PressedKey != Key.RightShift.ToString())
-            {
-                PressedKey = "Shift + " + PressedKey;
-            }
-
-            InfoText = string.Format(Se.Language.Options.Shortcuts.PressedKeyX, PressedKey);
+            PressedKey = "Ctrl + " + PressedKey;
+            infoText = isMac ? Se.Language.Options.Shortcuts.ControlMac : Se.Language.Options.Shortcuts.Control;
         }
+
+        if (e.KeyModifiers.HasFlag(KeyModifiers.Alt) &&
+            PressedKey != Key.LeftAlt.ToString() &&
+            PressedKey != Key.RightAlt.ToString())
+        {
+            PressedKey = "Alt + " + PressedKey;
+            infoText = isMac ? Se.Language.Options.Shortcuts.AltMac : Se.Language.Options.Shortcuts.Alt;       
+        }
+
+        if (e.KeyModifiers.HasFlag(KeyModifiers.Shift) &&
+            PressedKey != Key.LeftShift.ToString() &&
+            PressedKey != Key.RightShift.ToString())
+        {
+            PressedKey = "Shift + " + PressedKey;
+            infoText = Se.Language.Options.Shortcuts.Shift;       
+        }
+
+        InfoText = string.Format(Se.Language.Options.Shortcuts.PressedKeyX, infoText);
     }
 }
