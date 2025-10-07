@@ -46,7 +46,7 @@ public partial class CustomContinuationStyleViewModel : ObservableObject
             "...",
             "…",
             "..",
-            "–",
+            "-",
         });
 
         SelectedPrefix = PreAndSuffixes.First();

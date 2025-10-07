@@ -9,6 +9,7 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.Cea708.Commands;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Enums;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
@@ -370,6 +371,21 @@ public partial class SettingsViewModel : ObservableObject
         ColorGapTooShort = general.ColorGapTooShort;
         ErrorColor = general.ErrorColor.FromHexToColor();
 
+        _customContinuationStyleSuffix = general.CustomContinuationStyleSuffix;
+        _customContinuationStyleSuffixApplyIfComma = general.CustomContinuationStyleSuffixApplyIfComma;
+        _customContinuationStyleSuffixAddSpace = general.CustomContinuationStyleSuffixAddSpace;
+        _customContinuationStyleSuffixReplaceComma = general.CustomContinuationStyleSuffixReplaceComma;
+        _customContinuationStylePrefix = general.CustomContinuationStylePrefix;
+        _customContinuationStylePrefixAddSpace = general.CustomContinuationStylePrefixAddSpace;
+        _customContinuationStyleUseDifferentStyleGap = general.CustomContinuationStyleUseDifferentStyleGap;
+        _continuationPause = general.ContinuationPause;
+        _customContinuationStyleGapSuffix = general.CustomContinuationStyleGapSuffix;
+        _customContinuationStyleGapSuffixApplyIfComma = general.CustomContinuationStyleGapSuffixApplyIfComma;
+        _customContinuationStyleGapSuffixAddSpace = general.CustomContinuationStyleGapSuffixAddSpace;
+        _customContinuationStyleGapSuffixReplaceComma = general.CustomContinuationStyleGapSuffixReplaceComma;
+        _customContinuationStyleGapPrefix = general.CustomContinuationStyleGapPrefix;
+        _customContinuationStyleGapPrefixAddSpace = general.CustomContinuationStyleGapPrefixAddSpace;
+
         var video = Se.Settings.Video;
         var videoPlayer = VideoPlayers.FirstOrDefault(p => p.Name == video.VideoPlayer);
         if (videoPlayer != null)
@@ -474,6 +490,21 @@ public partial class SettingsViewModel : ObservableObject
         general.ColorTimeCodeOverlap = ColorOverlap;
         general.ColorGapTooShort = ColorGapTooShort;
         general.ErrorColor = ErrorColor.FromColorToHex();
+
+        general.CustomContinuationStyleSuffix = _customContinuationStyleSuffix;
+        general.CustomContinuationStyleSuffixApplyIfComma = _customContinuationStyleSuffixApplyIfComma;
+        general.CustomContinuationStyleSuffixAddSpace = _customContinuationStyleSuffixAddSpace;
+        general.CustomContinuationStyleSuffixReplaceComma = _customContinuationStyleSuffixReplaceComma;
+        general.CustomContinuationStylePrefix = _customContinuationStylePrefix;
+        general.CustomContinuationStylePrefixAddSpace = _customContinuationStylePrefixAddSpace;
+        general.CustomContinuationStyleUseDifferentStyleGap = _customContinuationStyleUseDifferentStyleGap;
+        general.ContinuationPause = _continuationPause;
+        general.CustomContinuationStyleGapSuffix = _customContinuationStyleGapSuffix;
+        general.CustomContinuationStyleGapSuffixApplyIfComma = _customContinuationStyleGapSuffixApplyIfComma;
+        general.CustomContinuationStyleGapSuffixAddSpace = _customContinuationStyleGapSuffixAddSpace;
+        general.CustomContinuationStyleGapSuffixReplaceComma = _customContinuationStyleGapSuffixReplaceComma;
+        general.CustomContinuationStyleGapPrefix = _customContinuationStyleGapPrefix;
+        general.CustomContinuationStyleGapPrefixAddSpace = _customContinuationStyleGapPrefixAddSpace;
 
         video.VideoPlayer = SelectedVideoPlayer.Name;
         video.ShowStopButton = ShowStopButton;
@@ -860,6 +891,7 @@ public partial class SettingsViewModel : ObservableObject
         _customContinuationStyleGapSuffixReplaceComma = result.SelectedLongGapSuffixesRemoveComma;
         _customContinuationStyleGapPrefix = result.SelectedLongGapPrefix;
         _customContinuationStyleGapPrefixAddSpace = result.SelectedLongGapPrefixAddSpace;
+
         RuleValueChanged();
     }
 
