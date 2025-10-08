@@ -644,9 +644,9 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
             AdvancedSubStationAlpha.GetHeaderAndStylesFromAdvancedSubStationAlpha(sub.Header,
                 new List<SsaStyle> { style });
         sub.Header = AdvancedSubStationAlpha.AddTagToHeader("PlayResX",
-            "PlayResX: " + ((int)VideoWidth).ToString(CultureInfo.InvariantCulture), "[Script Info]", sub.Header);
+            "PlayResX: " + (VideoWidth ?? 1920).ToString(CultureInfo.InvariantCulture), "[Script Info]", sub.Header);
         sub.Header = AdvancedSubStationAlpha.AddTagToHeader("PlayResY",
-            "PlayResY: " + ((int)VideoHeight).ToString(CultureInfo.InvariantCulture), "[Script Info]", sub.Header);
+            "PlayResY: " + (VideoHeight ?? 1920).ToString(CultureInfo.InvariantCulture), "[Script Info]", sub.Header);
     }
 
     private string MakeOutputFileName(string videoFileName)
@@ -1125,7 +1125,7 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
                 FontOutlineColor.ToSKColor(),
                 FontOutlineColor.ToSKColor(),
                 0,
-                (float)SelectedFontShadowWidth);
+                (float)(SelectedFontShadowWidth ?? 0));
 
             if (SelectedFontShadowWidth > 0)
             {
@@ -1145,7 +1145,7 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
                 FontOutlineColor.ToSKColor(),
                 SKColors.Red,
                 FontShadowColor.ToSKColor(),
-                (float)SelectedFontOutline,
+                (float)(SelectedFontOutline ?? 0),
                 0,
                 1.0f,
                 (int)Math.Round(SelectedFontShadowWidth ?? 0));
@@ -1161,8 +1161,8 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
                 FontOutlineColor.ToSKColor(),
                 FontShadowColor.ToSKColor(),
                 SKColors.Transparent,
-                (float)SelectedFontOutline,
-                (float)SelectedFontShadowWidth);
+                (float)(SelectedFontOutline ?? 0),
+                (float)(SelectedFontShadowWidth ?? 0));
         }
 
         ImagePreview = bitmap.ToAvaloniaBitmap();

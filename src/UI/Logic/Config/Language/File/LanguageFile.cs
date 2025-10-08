@@ -28,6 +28,7 @@ public class LanguageFile
 
     public LanguageFile()
     {
+        StatisticsTitle = "Statistics"; 
         Compare = "Compare";
         PreviousDifference = "Previous difference";
         NextDifference = "Next difference";

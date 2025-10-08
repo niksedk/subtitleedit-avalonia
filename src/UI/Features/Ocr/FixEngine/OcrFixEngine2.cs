@@ -27,31 +27,23 @@ public interface IOcrFixEngine2
 public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
 {
     private bool _isLoaded;
-    private string _fiveLetterWordListLanguageName;
     private OcrFixReplaceList2 _ocrFixReplaceList;
-    private NameList _nameListObj;
-    private HashSet<string> _nameList = new HashSet<string>();
-    private HashSet<string> _nameListUppercase = new HashSet<string>();
-    private HashSet<string> _nameListWithApostrophe = new HashSet<string>();
-    private HashSet<string> _nameMultiWordList = new HashSet<string>(); // case sensitive phrases
-    private List<string> _nameMultiWordListAndWordsWithPeriods;
-    private HashSet<string> _abbreviationList;
     private readonly HashSet<string> _wordSpellOkList = new HashSet<string>();
-    private string[] _wordSplitList;
+    //private string[] _wordSplitList;
     private SpellCheckWordLists2 _spellCheckWordLists;
-    private string _spellCheckDictionaryName;
+    //private string _spellCheckDictionaryName;
     private string _threeLetterIsoLanguageName;
-    private readonly HashSet<char> _expectedChars = new HashSet<char> { ' ', '¡', '¿', ',', '.', '!', '?', ':', ';', '(', ')', '[', ']', '{', '}', '+', '-', '£', '\\', '"', '”', '„', '“', '«', '»', '#', '&', '%', '\r', '\n', '؟' }; // removed $
-    private readonly HashSet<char> _expectedCharsNoComma = new HashSet<char> { ' ', '¡', '¿', '.', '!', '?', ':', ';', '(', ')', '[', ']', '{', '}', '+', '-', '£', '\\', '"', '”', '„', '“', '«', '»', '#', '&', '%', '\r', '\n', '؟' }; // removed $ + comma
+    //private readonly HashSet<char> _expectedChars = new HashSet<char> { ' ', '¡', '¿', ',', '.', '!', '?', ':', ';', '(', ')', '[', ']', '{', '}', '+', '-', '£', '\\', '"', '”', '„', '“', '«', '»', '#', '&', '%', '\r', '\n', '؟' }; // removed $
+    //private readonly HashSet<char> _expectedCharsNoComma = new HashSet<char> { ' ', '¡', '¿', '.', '!', '?', ':', ';', '(', ')', '[', ']', '{', '}', '+', '-', '£', '\\', '"', '”', '„', '“', '«', '»', '#', '&', '%', '\r', '\n', '؟' }; // removed $ + comma
     private Subtitle _subtitle;
     private List<OcrSubtitleItem> _subtitles;
     private HashSet<string> _wordSkipList = new HashSet<string>();
     private Dictionary<string, string> _changeAllDictionary;
 
-    private static readonly Regex RegexAloneIasL = new Regex(@"\bl\b", RegexOptions.Compiled);
-    private static readonly Regex RegexLowercaseL = new Regex("[A-ZÆØÅÄÖÉÈÀÙÂÊÎÔÛËÏ]l[A-ZÆØÅÄÖÉÈÀÙÂÊÎÔÛËÏ]", RegexOptions.Compiled);
-    private static readonly Regex RegexUppercaseI = new Regex("[a-zæøåöääöéèàùâêîôûëï]I.", RegexOptions.Compiled);
-    private static readonly Regex RegexNumber1 = new Regex(@"(?<=\d) 1(?!/\d)", RegexOptions.Compiled);
+    //private static readonly Regex RegexAloneIasL = new Regex(@"\bl\b", RegexOptions.Compiled);
+    //private static readonly Regex RegexLowercaseL = new Regex("[A-ZÆØÅÄÖÉÈÀÙÂÊÎÔÛËÏ]l[A-ZÆØÅÄÖÉÈÀÙÂÊÎÔÛËÏ]", RegexOptions.Compiled);
+    //private static readonly Regex RegexUppercaseI = new Regex("[a-zæøåöääöéèàùâêîôûëï]I.", RegexOptions.Compiled);
+    //private static readonly Regex RegexNumber1 = new Regex(@"(?<=\d) 1(?!/\d)", RegexOptions.Compiled);
 
 
     private readonly ISpellCheckManager _spellCheckManager;
@@ -60,7 +52,13 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
     {
         _spellCheckManager = spellCheckManager;
         _wordSkipList = new HashSet<string>();  
-        _changeAllDictionary = new Dictionary<string, string>();        
+        _changeAllDictionary = new Dictionary<string, string>();    
+        _subtitle = new Subtitle();
+        _subtitles = new List<OcrSubtitleItem>();
+        _threeLetterIsoLanguageName = string.Empty;
+        _isLoaded = false;
+        _ocrFixReplaceList = new OcrFixReplaceList2(string.Empty);
+        _spellCheckWordLists = new SpellCheckWordLists2(string.Empty, this);
     }
 
     void IOcrFixEngine2.Initialize(List<OcrSubtitleItem> subtitles, string threeLetterIsoLanguageName, SpellCheckDictionaryDisplay spellCheckDictionary)
@@ -388,15 +386,8 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
         _isLoaded = false;
         _subtitle = new Subtitle();
         _subtitles = new List<OcrSubtitleItem>();
-        _nameList = new HashSet<string>();
-        _nameListUppercase = new HashSet<string>();
-        _nameListWithApostrophe = new HashSet<string>();
-        _nameMultiWordList.Clear();
-        _nameMultiWordListAndWordsWithPeriods = new List<string>();
-        _abbreviationList = new HashSet<string>();
-        _spellCheckDictionaryName = string.Empty;
+        //_spellCheckDictionaryName = string.Empty;
         _threeLetterIsoLanguageName = string.Empty;
-        _fiveLetterWordListLanguageName = string.Empty;
     }
 
     public bool IsLoaded()

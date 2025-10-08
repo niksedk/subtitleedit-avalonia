@@ -213,7 +213,7 @@ public class PreProcessingSettings
             // Convert to grayscale using standard luminance formula
             var gray = (byte)(0.299 * r + 0.587 * g + 0.114 * b);
 
-            grayPixels[i] =(uint)( (a << 24) | (gray << 16) | (gray << 8) | gray);
+            grayPixels[i] = a << 24 | (uint)(gray << 16) | (uint)(gray << 8) | gray;
             histogram[gray]++;
         }
 

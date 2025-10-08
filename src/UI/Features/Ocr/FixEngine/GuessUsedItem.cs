@@ -8,6 +8,9 @@ public class GuessUsedItem
 
     public GuessUsedItem()
     {
+        From = string.Empty;
+        To = string.Empty;
+        LineIndex = -1;
     }
     
     public GuessUsedItem(string from, string to, int lineLineIndex)

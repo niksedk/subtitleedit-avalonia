@@ -8,6 +8,9 @@ public class ReplacementUsedItem
 
     public ReplacementUsedItem()
     {
+        From = string.Empty;
+        To = string.Empty;
+        LineIndex = -1;
     }
     
     public ReplacementUsedItem(string from, string to, int lineLineIndex)

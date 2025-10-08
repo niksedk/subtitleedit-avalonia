@@ -68,7 +68,7 @@ public class ShotChangesHelper
             return files[0];
         }
 
-        return null;
+        return string.Empty;
     }
 
     /// <summary>

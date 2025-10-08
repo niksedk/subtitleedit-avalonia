@@ -4789,7 +4789,11 @@ public partial class MainViewModel :
             var temp = new List<double>(AudioVisualizer.ShotChanges);
             temp.RemoveAt(idx);
             AudioVisualizer.ShotChanges = temp;
-            ShotChangesHelper.SaveShotChanges(_videoFileName, temp);
+
+            if (!string.IsNullOrEmpty(_videoFileName))
+            {
+                ShotChangesHelper.SaveShotChanges(_videoFileName, temp);
+            }
         }
     }
 
@@ -7629,7 +7633,7 @@ public partial class MainViewModel :
 
     internal void SubtitleGridOnDragOver(object? sender, DragEventArgs e)
     {
-        if (e.Data.Contains(DataFormats.Files))
+        if (e.DataTransfer.Contains(DataFormat.File))
         {
             e.DragEffects = DragDropEffects.Copy; // show copy cursor
         }
@@ -7643,12 +7647,12 @@ public partial class MainViewModel :
 
     internal void SubtitleGridOnDrop(object? sender, DragEventArgs e)
     {
-        if (!e.Data.Contains(DataFormats.Files))
+        if (!e.DataTransfer.Contains(DataFormat.File))
         {
             return;
         }
 
-        var files = e.Data.GetFiles();
+        var files = e.DataTransfer.TryGetFiles();
         if (files != null)
         {
             Dispatcher.UIThread.Post(async () =>
@@ -7673,7 +7677,7 @@ public partial class MainViewModel :
 
     internal void VideoOnDragOver(object? sender, DragEventArgs e)
     {
-        if (e.Data.Contains(DataFormats.Files))
+        if (e.DataTransfer.Contains(DataFormat.File))
         {
             e.DragEffects = DragDropEffects.Copy; // show copy cursor
         }
@@ -7687,12 +7691,12 @@ public partial class MainViewModel :
 
     internal void VideoOnDrop(object? sender, DragEventArgs e)
     {
-        if (!e.Data.Contains(DataFormats.Files))
+        if (!e.DataTransfer.Contains(DataFormat.File))
         {
             return;
         }
 
-        var files = e.Data.GetFiles();
+        var files = e.DataTransfer.TryGetFiles();
         if (files != null)
         {
             Dispatcher.UIThread.Post(async () =>

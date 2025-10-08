@@ -1120,7 +1120,7 @@ public partial class OcrViewModel : ObservableObject
         }
 
         _skipOnceChars.Clear();
-        _ = Task.Run(() => { RunNOcrLoop(selectedIndices); });
+        _ = Task.Run(() => { using var _ = RunNOcrLoop(selectedIndices); });
     }
 
     private async Task RunNOcrLoop(List<int> selectedIndices)

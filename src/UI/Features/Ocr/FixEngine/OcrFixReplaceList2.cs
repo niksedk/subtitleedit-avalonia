@@ -175,9 +175,9 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
                         continue;
                     }
 
-                    var to = item.Attributes["to"].Value;
-                    var from = item.Attributes["from"].Value;
-                    if (!list.ContainsKey(from))
+                    var to = item.Attributes["to"]?.Value;
+                    var from = item.Attributes["from"]?.Value;
+                    if (to != null && from != null && !list.ContainsKey(from))
                     {
                         list.Add(from, to);
                     }
@@ -205,9 +205,9 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
                         continue;
                     }
 
-                    var to = item.Attributes["replaceWith"].Value;
-                    var from = item.Attributes["find"].Value;
-                    if (!list.ContainsKey(from))
+                    var to = item.Attributes["replaceWith"]?.Value;
+                    var from = item.Attributes["find"]?.Value;
+                    if (to != null && from != null && !list.ContainsKey(from))
                     {
                         list.Add(from, to);
                     }
@@ -233,16 +233,28 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
             {
                 if (node.Attributes["find"] != null && node.Attributes["replaceWith"] != null)
                 {
-                    return RegexUtils.IsValidRegex(node.Attributes["find"].Value);
+                    var find = node.Attributes["find"]?.Value;
+                    if (string.IsNullOrEmpty(find))
+                    {
+                        return false;
+                    }
+
+                    return RegexUtils.IsValidRegex(find);
                 }
             }
             else
             {
                 if (node.Attributes["from"] != null && node.Attributes["to"] != null)
                 {
-                    return (node.Attributes["from"].Value != node.Attributes["to"].Value);
+                    var from = node.Attributes["from"]?.Value;
+                    var to = node.Attributes["to"]?.Value;
+                    if (from != null && to != null)
+                    {
+                        return (from != to);
+                    }
                 }
             }
+
             return false;
         }
 
@@ -661,7 +673,7 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
                     return true;
                 }
 
-                result = null;
+                result = string.Empty;
                 return false;
             }
 
@@ -689,7 +701,7 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
                 return true;
             }
 
-            result = null;
+            result = string.Empty;
             return false;
         }
 
@@ -986,7 +998,7 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
             if (userDictionary.ContainsKey(word))
             {
                 userDictionary.Remove(word);
-                XmlNode wholeWordsNode = userDoc.DocumentElement?.SelectSingleNode(replaceListName);
+                XmlNode? wholeWordsNode = userDoc.DocumentElement?.SelectSingleNode(replaceListName);
                 if (wholeWordsNode != null)
                 {
                     wholeWordsNode.RemoveAll();
@@ -1010,7 +1022,7 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
             }
             if (dictionary.ContainsKey(word))
             {
-                XmlNode wholeWordsNode = userDoc.DocumentElement?.SelectSingleNode("Removed" + replaceListName);
+                XmlNode? wholeWordsNode = userDoc.DocumentElement?.SelectSingleNode("Removed" + replaceListName);
                 if (wholeWordsNode != null)
                 {
                     XmlNode newNode = userDoc.CreateNode(XmlNodeType.Element, elementName, null);
@@ -1139,7 +1151,7 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
             }
 
             userDictionary.Add(fromWord, toWord);
-            XmlNode wholeWordsNode = userDoc.DocumentElement?.SelectSingleNode(replaceListName);
+            XmlNode? wholeWordsNode = userDoc.DocumentElement?.SelectSingleNode(replaceListName);
 
             if (wholeWordsNode == null)
             {
@@ -1170,7 +1182,7 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
             {
                 _wholeLineReplaceList.Add(fromLine, toLine);
             }
-            XmlNode wholeWordsNode = userDocument.DocumentElement?.SelectSingleNode("WholeLines");
+            XmlNode? wholeWordsNode = userDocument.DocumentElement?.SelectSingleNode("WholeLines");
             if (wholeWordsNode != null)
             {
                 XmlNode newNode = userDocument.CreateNode(XmlNodeType.Element, "Line", null);

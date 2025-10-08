@@ -245,6 +245,20 @@ public partial class SettingsViewModel : ObservableObject
         IsLibMpvDownloadVisible = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
         _profilesForEdit = new List<ProfileDisplay>();
+
+        _customContinuationStyleGapPrefix = string.Empty;
+        _customContinuationStyleGapPrefixAddSpace = false;
+        _customContinuationStyleGapSuffix = string.Empty;
+        _customContinuationStyleGapSuffixAddSpace = false;
+        _customContinuationStyleGapSuffixApplyIfComma = false;
+        _customContinuationStyleGapSuffixReplaceComma = false;
+        _customContinuationStylePrefix = string.Empty;
+        _customContinuationStylePrefixAddSpace = false;
+        _customContinuationStyleSuffix = string.Empty;
+        _customContinuationStyleSuffixAddSpace = false;
+        _customContinuationStyleSuffixApplyIfComma = false;
+        _customContinuationStyleSuffixReplaceComma = false;
+
         LoadSettings();
     }
 

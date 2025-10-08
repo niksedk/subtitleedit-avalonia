@@ -96,7 +96,7 @@ public partial class AddToUserDictionaryViewModel : ObservableObject
         else if (e.Key == Key.Enter)
         {
             e.Handled = true;
-            Ok();
+            using var _ = Ok();
         }
     }
 }

@@ -82,7 +82,7 @@ public class WaveHeader2
 
         // fmt data
         buffer = new byte[FmtChunkSize];
-        stream.Read(buffer, 0, buffer.Length);
+        _ = stream.Read(buffer, 0, buffer.Length);
         AudioFormat = BitConverter.ToInt16(buffer, 0); // PCM = 1
         NumberOfChannels = BitConverter.ToInt16(buffer, 2);
         SampleRate = BitConverter.ToInt32(buffer, 4); // 8000, 44100, etc.
@@ -93,7 +93,7 @@ public class WaveHeader2
         // data
         buffer = new byte[8];
         stream.Position = ConstantHeaderSize + FmtChunkSize;
-        stream.Read(buffer, 0, buffer.Length);
+        _ = stream.Read(buffer, 0, buffer.Length);
         DataId = Encoding.UTF8.GetString(buffer, 0, 4);
         DataChunkSize = BitConverter.ToUInt32(buffer, 4);
         DataStartPosition = ConstantHeaderSize + FmtChunkSize + 8;
@@ -104,7 +104,7 @@ public class WaveHeader2
         {
             oldPos = oldPos + DataChunkSize + 8;
             stream.Position = oldPos;
-            stream.Read(buffer, 0, buffer.Length);
+            _ = stream.Read(buffer, 0, buffer.Length);
             DataId = Encoding.UTF8.GetString(buffer, 0, 4);
             DataChunkSize = BitConverter.ToUInt32(buffer, 4);
             DataStartPosition = (int)oldPos + 8;
@@ -257,7 +257,7 @@ public class WavePeakData2
 
 public class SpectrogramData2 : IDisposable
 {
-    private string _loadFromDirectory;
+    private string? _loadFromDirectory;
 
     public SpectrogramData2(int fftSize, int imageWidth, double sampleDuration, IList<SKBitmap> images)
     {
@@ -307,9 +307,9 @@ public class SpectrogramData2 : IDisposable
             var doc = new XmlDocument();
             var culture = CultureInfo.InvariantCulture;
             doc.Load(xmlInfoFileName);
-            FftSize = Convert.ToInt32(doc.DocumentElement.SelectSingleNode("NFFT").InnerText, culture);
-            ImageWidth = Convert.ToInt32(doc.DocumentElement.SelectSingleNode("ImageWidth").InnerText, culture);
-            SampleDuration = Convert.ToDouble(doc.DocumentElement.SelectSingleNode("SampleDuration").InnerText, culture);
+            FftSize = Convert.ToInt32(doc.DocumentElement?.SelectSingleNode("NFFT")?.InnerText, culture);
+            ImageWidth = Convert.ToInt32(doc.DocumentElement?.SelectSingleNode("ImageWidth")?.InnerText, culture);
+            SampleDuration = Convert.ToDouble(doc.DocumentElement?.SelectSingleNode("SampleDuration")?.InnerText, culture);
 
             var images = new List<SKBitmap>();
             var fileNames = Enumerable.Range(0, int.MaxValue)
@@ -502,7 +502,7 @@ public class WavePeakGenerator2 : IDisposable
             if (fileReadSampleCount > 0)
             {
                 int fileReadByteCount = fileReadSampleCount * Header.BlockAlign;
-                _stream.Read(data, 0, fileReadByteCount);
+                _ = _stream.Read(data, 0, fileReadByteCount);
                 fileSampleOffset += fileReadSampleCount;
 
                 int chunkSampleOffset = 0;
@@ -637,7 +637,7 @@ public class WavePeakGenerator2 : IDisposable
         // load data
         byte[] data = new byte[Header.DataChunkSize];
         _stream.Position = Header.DataStartPosition;
-        _stream.Read(data, 0, data.Length);
+        _ = _stream.Read(data, 0, data.Length);
 
         // read peak values
         WavePeak2[] peaks = new WavePeak2[Header.LengthInSamples + 5];
@@ -808,7 +808,7 @@ public class WavePeakGenerator2 : IDisposable
         var images = new List<SKBitmap>();
         var drawer = new SpectrogramDrawer(fftSize);
         var readSampleDataValue = GetSampleDataReader();
-        Task saveImageTask = null;
+        Task? saveImageTask = null;
         double sampleAndChannelScale = GetSampleAndChannelScale();
         long fileSampleCount = Header.LengthInSamples;
         long fileSampleOffset = -delaySampleCount;
@@ -857,7 +857,7 @@ public class WavePeakGenerator2 : IDisposable
             if (fileReadSampleCount > 0)
             {
                 int fileReadByteCount = fileReadSampleCount * Header.BlockAlign;
-                _stream.Read(data, 0, fileReadByteCount);
+                _ = _stream.Read(data, 0, fileReadByteCount);
                 fileSampleOffset += fileReadSampleCount;
 
                 int dataByteOffset = 0;
@@ -905,10 +905,13 @@ public class WavePeakGenerator2 : IDisposable
         var culture = CultureInfo.InvariantCulture;
         double sampleDuration = (double)fftSize / Header.SampleRate;
         doc.LoadXml("<SpectrogramInfo><SampleDuration/><NFFT/><ImageWidth/><SecondsPerImage/></SpectrogramInfo>");
-        doc.DocumentElement.SelectSingleNode("SampleDuration").InnerText = sampleDuration.ToString(culture);
-        doc.DocumentElement.SelectSingleNode("NFFT").InnerText = fftSize.ToString(culture);
-        doc.DocumentElement.SelectSingleNode("ImageWidth").InnerText = imageWidth.ToString(culture);
-        doc.DocumentElement.SelectSingleNode("SecondsPerImage").InnerText = ((double)chunkSampleCount / Header.SampleRate).ToString(culture); // currently unused; for backwards compatibility
+        if (doc.DocumentElement != null)
+        {
+            doc.DocumentElement.SelectSingleNode("SampleDuration")!.InnerText = sampleDuration.ToString(culture);
+            doc.DocumentElement.SelectSingleNode("NFFT")!.InnerText = fftSize.ToString(culture);
+            doc.DocumentElement.SelectSingleNode("ImageWidth")!.InnerText = imageWidth.ToString(culture);
+            doc.DocumentElement.SelectSingleNode("SecondsPerImage")!.InnerText = ((double)chunkSampleCount / Header.SampleRate).ToString(culture); // currently unused; for backwards compatibility
+        }
         doc.Save(Path.Combine(spectrogramDirectory, "Info.xml"));
 
         return new SpectrogramData(fftSize, imageWidth, sampleDuration, images);

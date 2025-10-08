@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Input.Platform;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Logic;
@@ -38,14 +39,14 @@ public static class ClipboardHelper
         {
             try
             {
-                return await clipboard.GetTextAsync();
+                return await ClipboardExtensions.TryGetTextAsync(clipboard);
             }
             catch
             {
                 await Task.Delay(50);
                 try
                 {
-                    return await clipboard.GetTextAsync();
+                    return await ClipboardExtensions.TryGetTextAsync(clipboard);
                 }
                 catch
                 {

@@ -147,9 +147,9 @@ public class SpellCheckWordLists2
                 {
                     if (item.Attributes?["from"] != null && item.Attributes["to"] != null)
                     {
-                        var to = item.Attributes["to"].Value;
-                        var from = item.Attributes["from"].Value;
-                        if (!_useAlwaysList.ContainsKey(from))
+                        var to = item.Attributes["to"]?.Value;
+                        var from = item.Attributes["from"]?.Value;
+                        if (to != null && from != null && !_useAlwaysList.ContainsKey(from))
                         {
                             _useAlwaysList.Add(from, to);
                         }

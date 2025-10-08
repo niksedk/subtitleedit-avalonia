@@ -95,7 +95,7 @@ public partial class AddToNamesListViewModel : ObservableObject
         else if (e.Key == Key.Enter)
         {
             e.Handled = true;
-            Ok();
+            using var _ = Ok();
         }
     }
 }
