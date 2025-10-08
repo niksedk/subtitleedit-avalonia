@@ -160,78 +160,6 @@ public class SettingsPage : UserControl
     {
         var sections = new List<SettingsSection>();
 
-        var comboBoxProfile = new ComboBox
-        {
-            Width = 250,
-            DataContext = _vm,
-            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.Profiles)),
-            [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedProfile)) { Mode = BindingMode.TwoWay }
-        };
-        comboBoxProfile.PropertyChanged += (s, e) => _vm.ProfileChanged();
-
-        var numericUpDownSingleLineMaxLength = MakeNumericUpDownInt(nameof(_vm.SingleLineMaxLength));   
-        numericUpDownSingleLineMaxLength.PropertyChanged += (s, e) => _vm.RuleValueChanged();
-
-        var numericUpDownOptimalCharsPerSec = MakeNumericUpDown(nameof(_vm.OptimalCharsPerSec));
-        numericUpDownOptimalCharsPerSec.PropertyChanged += (s, e) => _vm.RuleValueChanged();
-
-        var numericUpDownMaxCharsPerSec = MakeNumericUpDown(nameof(_vm.MaxCharsPerSec));
-        numericUpDownMaxCharsPerSec.PropertyChanged += (s, e) => _vm.RuleValueChanged();
-
-        var numericUpDownMaxWordsPerMin = MakeNumericUpDown(nameof(_vm.MaxWordsPerMin));
-        numericUpDownMaxWordsPerMin.PropertyChanged += (s, e) => _vm.RuleValueChanged();
-
-        var numericUpDownMinDurationMs = MakeNumericUpDownInt(nameof(_vm.MinDurationMs));
-        numericUpDownMinDurationMs.PropertyChanged += (s, e) => _vm.RuleValueChanged();
-
-        var numericUpDownMaxDurationMs = MakeNumericUpDownInt(nameof(_vm.MaxDurationMs));
-        numericUpDownMaxDurationMs.PropertyChanged += (s, e) => _vm.RuleValueChanged();
-
-        var numericUpDownMinGapMs = MakeNumericUpDownInt(nameof(_vm.MinGapMs));
-        numericUpDownMinGapMs.PropertyChanged += (s, e) => _vm.RuleValueChanged();
-
-        var numericUpDownMaxLines = MakeNumericUpDownInt(nameof(_vm.MaxLines));
-        numericUpDownMaxLines.PropertyChanged += (s, e) => _vm.RuleValueChanged();
-
-        var numericUpDownUnbreakSubtitlesShortThan = MakeNumericUpDownInt(nameof(_vm.UnbreakLinesShorterThan));
-        numericUpDownUnbreakSubtitlesShortThan.PropertyChanged += (s, e) => _vm.RuleValueChanged();
-
-        var comboBoxDialogStyle = new ComboBox
-        {
-            Width = 250,
-            DataContext = _vm,
-            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.DialogStyles)),
-            [!SelectingItemsControl.SelectedItemProperty] =
-                    new Binding(nameof(_vm.DialogStyle)) { Mode = BindingMode.TwoWay },
-            ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
-                new TextBlock { Text = f?.Name }, true)
-        };
-        comboBoxDialogStyle.PropertyChanged += (s, e) => _vm.RuleValueChanged();  
-
-        var comboBoxContinuationStyle = new ComboBox
-        {
-            Width = 250,
-            DataContext = _vm,
-            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.ContinuationStyles)),
-            [!SelectingItemsControl.SelectedItemProperty] =
-                new Binding(nameof(_vm.ContinuationStyle)) { Mode = BindingMode.TwoWay },
-            ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
-                new TextBlock { Text = f?.Name }, true)
-        };
-        comboBoxContinuationStyle.PropertyChanged += (s, e) => _vm.ContinuationStyleChanged();
-
-        var comboBoxCpsLineLengthStyle = new ComboBox
-        {
-            Width = 250,
-            DataContext = _vm,
-            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.CpsLineLengthStrategies)),
-            [!SelectingItemsControl.SelectedItemProperty] =
-                    new Binding(nameof(_vm.CpsLineLengthStrategy)) { Mode = BindingMode.TwoWay },
-            ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
-                new TextBlock { Text = f?.Name }, true)
-        };  
-        comboBoxCpsLineLengthStyle.PropertyChanged += (s, e) => _vm.RuleValueChanged();
-
         sections.Add(new SettingsSection(Se.Language.General.Rules,
         [
             new SettingsItem(Se.Language.Options.Settings.Profiles, () => new StackPanel
@@ -241,34 +169,34 @@ public class SettingsPage : UserControl
                 Spacing = 10,
                 Children =
                 {
-                    comboBoxProfile,
+                    MakeProfileComboBox(),
                     UiUtil.MakeButtonBrowse(_vm.EditProfilesCommand),
                 }
             }),
 
-            new SettingsItem(Se.Language.Options.Settings.SingleLineMaxLength, () => numericUpDownSingleLineMaxLength),
-            new SettingsItem(Se.Language.Options.Settings.OptimalCharsPerSec, () => numericUpDownOptimalCharsPerSec),
-            new SettingsItem(Se.Language.Options.Settings.MaxCharsPerSec, () => numericUpDownMaxCharsPerSec),
-            new SettingsItem(Se.Language.Options.Settings.MaxWordsPerMin, () => numericUpDownMaxWordsPerMin),
-            new SettingsItem(Se.Language.Options.Settings.MinDurationMs, () => numericUpDownMinDurationMs),
-            new SettingsItem(Se.Language.Options.Settings.MaxDurationMs, () => numericUpDownMaxDurationMs),
-            new SettingsItem(Se.Language.Options.Settings.MinGapMs, () => numericUpDownMinGapMs),
-            new SettingsItem(Se.Language.Options.Settings.MaxLines, () => numericUpDownMaxLines),
-            new SettingsItem(Se.Language.Options.Settings.UnbreakSubtitlesShortThan, () => numericUpDownUnbreakSubtitlesShortThan),
+            new SettingsItem(Se.Language.Options.Settings.SingleLineMaxLength, () => MakeNumericUpDownInt(nameof(_vm.SingleLineMaxLength), _vm.RuleValueChanged)),
+            new SettingsItem(Se.Language.Options.Settings.OptimalCharsPerSec, () => MakeNumericUpDown(nameof(_vm.OptimalCharsPerSec), _vm.RuleValueChanged)),
+            new SettingsItem(Se.Language.Options.Settings.MaxCharsPerSec, () => MakeNumericUpDown(nameof(_vm.MaxCharsPerSec), _vm.RuleValueChanged)),
+            new SettingsItem(Se.Language.Options.Settings.MaxWordsPerMin, () => MakeNumericUpDown(nameof(_vm.MaxWordsPerMin), _vm.RuleValueChanged)),
+            new SettingsItem(Se.Language.Options.Settings.MinDurationMs, () => MakeNumericUpDownInt(nameof(_vm.MinDurationMs), _vm.RuleValueChanged)),
+            new SettingsItem(Se.Language.Options.Settings.MaxDurationMs, () => MakeNumericUpDownInt(nameof(_vm.MaxDurationMs), _vm.RuleValueChanged)),
+            new SettingsItem(Se.Language.Options.Settings.MinGapMs, () => MakeNumericUpDownInt(nameof(_vm.MinGapMs), _vm.RuleValueChanged)),
+            new SettingsItem(Se.Language.Options.Settings.MaxLines, () => MakeNumericUpDownInt(nameof(_vm.MaxLines), _vm.RuleValueChanged)),
+            new SettingsItem(Se.Language.Options.Settings.UnbreakSubtitlesShortThan, () => MakeNumericUpDownInt(nameof(_vm.UnbreakLinesShorterThan), _vm.RuleValueChanged)),
 
-            new SettingsItem(Se.Language.Options.Settings.DialogStyle, () => comboBoxDialogStyle),
+            new SettingsItem(Se.Language.Options.Settings.DialogStyle, () => MakeComboBoxDialogStyle()),
             new SettingsItem(Se.Language.Options.Settings.ContinuationStyle, () => new StackPanel
             {
                 Orientation = Orientation.Horizontal,
                 Spacing = 5,
                 Children =
                 {
-                    comboBoxContinuationStyle,
+                    MakComboBoxContinuationStyleComboBox(),
                     UiUtil.MakeButtonBrowse(_vm.ShowEditCustomContinuationStyleCommand)
                         .WithBindIsVisible(_vm, nameof(_vm.IsEditCustomContinuationStyleVisible))
                 }
             }),
-            new SettingsItem(Se.Language.Options.Settings.CpsLineLengthStyle, () => comboBoxCpsLineLengthStyle),
+            new SettingsItem(Se.Language.Options.Settings.CpsLineLengthStyle, () => MakeComboBoxCpsLineLengthStyle()),
         ]));
 
         sections.Add(new SettingsSection(Se.Language.General.General,
@@ -562,6 +490,68 @@ public class SettingsPage : UserControl
         return sections;
     }
 
+    private ComboBox MakeComboBoxCpsLineLengthStyle()
+    {
+        var comboBoxCpsLineLengthStyle = new ComboBox
+        {
+            Width = 250,
+            DataContext = _vm,
+            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.CpsLineLengthStrategies)),
+            [!SelectingItemsControl.SelectedItemProperty] =
+                    new Binding(nameof(_vm.CpsLineLengthStrategy)) { Mode = BindingMode.TwoWay },
+            ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
+                new TextBlock { Text = f?.Name }, true)
+        };
+        comboBoxCpsLineLengthStyle.PropertyChanged += (s, e) => _vm.RuleValueChanged();
+        return comboBoxCpsLineLengthStyle;
+    }
+
+    private ComboBox MakeComboBoxDialogStyle()
+    {
+        var comboBoxDialogStyle = new ComboBox
+        {
+            Width = 250,
+            DataContext = _vm,
+            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.DialogStyles)),
+            [!SelectingItemsControl.SelectedItemProperty] =
+                    new Binding(nameof(_vm.DialogStyle)) { Mode = BindingMode.TwoWay },
+            ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
+                new TextBlock { Text = f?.Name }, true)
+        };
+        comboBoxDialogStyle.PropertyChanged += (s, e) => _vm.RuleValueChanged();
+        return comboBoxDialogStyle;
+    }
+
+    private ComboBox MakeProfileComboBox()
+    {
+        var comboBoxProfile = new ComboBox
+        {
+            Width = 250,
+            DataContext = _vm,
+            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.Profiles)),
+            [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedProfile)) { Mode = BindingMode.TwoWay }
+        };
+        comboBoxProfile.PropertyChanged += (s, e) => _vm.ProfileChanged();
+        return comboBoxProfile;
+    }
+
+    private ComboBox MakComboBoxContinuationStyleComboBox()
+    {
+        var comboBoxContinuationStyle = new ComboBox
+        {
+            Width = 250,
+            DataContext = _vm,
+            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.ContinuationStyles)),
+            [!SelectingItemsControl.SelectedItemProperty] =
+                new Binding(nameof(_vm.ContinuationStyle)) { Mode = BindingMode.TwoWay },
+            ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
+                new TextBlock { Text = f?.Name }, true)
+        };
+        comboBoxContinuationStyle.PropertyChanged += (s, e) => _vm.ContinuationStyleChanged();
+
+        return comboBoxContinuationStyle;
+    }
+
     private static SettingsItem MakeSeparator()
     {
         return new SettingsItem(string.Empty, () => new Label());
@@ -594,6 +584,31 @@ public class SettingsPage : UserControl
             FormatString = "F0",
             [!NumericUpDown.ValueProperty] = new Binding(bindingProperty) { Source = _vm, Mode = BindingMode.TwoWay },
         };
+    }
+
+    private NumericUpDown MakeNumericUpDownInt(string bindingProperty, Action valueChanged)
+    {
+        var numericUpDown = new NumericUpDown
+        {
+            Width = 150,
+            FormatString = "F0",
+            [!NumericUpDown.ValueProperty] = new Binding(bindingProperty) { Source = _vm, Mode = BindingMode.TwoWay },
+        };
+
+        numericUpDown.PropertyChanged += (s, e) => valueChanged.Invoke();
+        return numericUpDown;
+    }
+
+    private NumericUpDown MakeNumericUpDown(string bindingProperty, Action valueChanged)
+    {
+        var numericUpDown = new NumericUpDown
+        {
+            Width = 150,
+            [!NumericUpDown.ValueProperty] = new Binding(bindingProperty) { Source = _vm, Mode = BindingMode.TwoWay },
+        };
+
+        numericUpDown.PropertyChanged += (s, e) => valueChanged.Invoke();
+        return numericUpDown;
     }
 
     private SettingsItem MakeCheckboxSetting(string label, string bindingProperty)
