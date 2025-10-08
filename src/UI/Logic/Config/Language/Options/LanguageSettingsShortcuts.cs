@@ -267,7 +267,7 @@ public class LanguageSettingsShortcuts
         Shift = "Shift";
 
         ControlMac = "⌃ Control";
-        AltMac = "⌥ Alt";
+        AltMac = "⌥ Option";
         ShiftMac = "⇧ Shift";
         WinMac = "⌘ Cmd";
 

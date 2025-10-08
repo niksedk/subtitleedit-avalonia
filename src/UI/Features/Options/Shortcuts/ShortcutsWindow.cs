@@ -156,6 +156,13 @@ public class ShortcutsWindow : Window
         var shiftLabel = isMac ? Se.Language.Options.Shortcuts.ShiftMac : Se.Language.Options.Shortcuts.Shift;
         var winLabel = isMac ? Se.Language.Options.Shortcuts.WinMac : Se.Language.Options.Shortcuts.Win;
 
+        // Shift checkbox and label
+        editPanel.Children.Add(UiUtil.MakeTextBlock(shiftLabel).WithMarginRight(3));
+        var checkBoxShift = UiUtil.MakeCheckBox(vm, nameof(vm.ShiftIsSelected));
+        checkBoxShift.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);      
+        checkBoxShift.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
+        editPanel.Children.Add(checkBoxShift);
+        
         // Control checkbox and label
         editPanel.Children.Add(UiUtil.MakeTextBlock(ctrlLabel).WithMarginRight(3));
         var controlCheckBox = UiUtil.MakeCheckBox(vm, nameof(vm.CtrlIsSelected));
@@ -169,13 +176,6 @@ public class ShortcutsWindow : Window
         checkBoxAlt.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);       
         checkBoxAlt.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(checkBoxAlt);
-        
-        // Shift checkbox and label
-        editPanel.Children.Add(UiUtil.MakeTextBlock(shiftLabel).WithMarginRight(3));
-        var checkBoxShift = UiUtil.MakeCheckBox(vm, nameof(vm.ShiftIsSelected));
-        checkBoxShift.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);      
-        checkBoxShift.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
-        editPanel.Children.Add(checkBoxShift);
 
         // Win key checkbox and label
         editPanel.Children.Add(UiUtil.MakeTextBlock(winLabel).WithMarginRight(3));

@@ -63,6 +63,7 @@ public class GetKeyWindow : Window
         Content = grid;
         
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        KeyUp += vm.KeyUp;
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
