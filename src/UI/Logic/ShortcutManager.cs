@@ -67,7 +67,7 @@ public class ShortcutManager : IShortcutManager
         var keys = new List<string>();
         foreach (var key in inputKeys)
         {
-            if (key is "LeftCtrl" or "RightCtrl" or "LWin" or "Ctrl")
+            if (key is "LeftCtrl" or "RightCtrl" or "Ctrl")
             {
                 keys.Add("Control");
             }
