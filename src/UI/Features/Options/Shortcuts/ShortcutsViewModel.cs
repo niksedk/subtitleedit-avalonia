@@ -39,7 +39,7 @@ public partial class ShortcutsViewModel : ObservableObject
 
     private List<ShortCut> _allShortcuts;
     private readonly IWindowService _windowService;
-    
+
     // Add this flag to prevent updates during selection changes
     private bool _isLoadingSelection = false;
 
@@ -161,7 +161,7 @@ public partial class ShortcutsViewModel : ObservableObject
         var shortcuts = new List<SeShortCut>();
         foreach (var shortcut in _allShortcuts)
         {
-            if (shortcut != null)
+            if (shortcut != null && !IsEmpty(shortcut))
             {
                 shortcuts.Add(new SeShortCut(shortcut));
             }
@@ -172,6 +172,33 @@ public partial class ShortcutsViewModel : ObservableObject
 
         OkPressed = true;
         Window?.Close();
+    }
+
+    private static bool IsEmpty(ShortCut shortcut)
+    {
+        var modifiers = new List<string>()
+        {
+            "Control",
+            "Ctrl",
+            "Alt",
+            "Shift",
+            "Win",
+            Key.LeftCtrl.ToStringInvariant(),
+            Key.RightCtrl.ToStringInvariant(),
+            Key.LeftAlt.ToStringInvariant(),
+            Key.RightAlt.ToStringInvariant(),
+            Key.LeftShift.ToStringInvariant(),
+            Key.RightShift.ToStringInvariant(),
+            Key.LWin.ToStringInvariant(),
+            Key.RWin.ToStringInvariant()
+        };
+
+        if (shortcut.Keys.Any(k => !modifiers.Contains(k)))
+        {
+            return false;
+        }
+
+        return true;
     }
 
     [RelayCommand]
@@ -224,12 +251,12 @@ public partial class ShortcutsViewModel : ObservableObject
         }
 
         var keys = new List<string>();
-        
+
         if (ShiftIsSelected)
         {
             keys.Add("Shift");
         }
-        
+
         if (CtrlIsSelected)
         {
             keys.Add("Ctrl");
@@ -239,7 +266,7 @@ public partial class ShortcutsViewModel : ObservableObject
         {
             keys.Add("Alt");
         }
-        
+
         if (WinIsSelected)
         {
             keys.Add("Win");
@@ -373,10 +400,10 @@ public partial class ShortcutsViewModel : ObservableObject
                 Key.RightAlt.ToStringInvariant(),
                 Key.LeftShift.ToStringInvariant(),
                 Key.RightShift.ToStringInvariant(),
-                Key.LWin.ToStringInvariant(),   
+                Key.LWin.ToStringInvariant(),
                 Key.RWin.ToStringInvariant()
             };
-            
+
             foreach (var key in node.ShortCut.Keys)
             {
                 if (modifiers.Contains(key))
