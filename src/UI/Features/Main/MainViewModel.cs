@@ -6763,13 +6763,11 @@ public partial class MainViewModel :
             var keys = _shortcutManager.GetActiveKeys().Select(p => p.ToString()).ToList();
             var hashCode = ShortCut.CalculateHash(keys, ShortcutCategory.General.ToStringInvariant());
 
-            Se.LogError(hashCode);
             var rc = _shortcutManager.CheckShortcuts(ShortcutCategory.General.ToStringInvariant().ToLowerInvariant());
             if (rc != null)
             {
                 keyEventArgs.Handled = true;
                 rc.Execute(null);
-                return;
             }
         }
     }
