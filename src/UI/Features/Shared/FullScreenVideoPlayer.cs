@@ -1,11 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Declarative;
-using Avalonia.Threading;
-using Nikse.SubtitleEdit.Controls.VideoPlayer;
-using Nikse.SubtitleEdit.Logic.Config;
+using System;
 
 namespace Nikse.SubtitleEdit.Features.Shared;
 
