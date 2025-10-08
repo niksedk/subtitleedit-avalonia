@@ -399,7 +399,7 @@ public class LanguageGeneral
     public string Codec { get; set; }
     public string Forced { get; set; }
     public string TextOrImage { get; set; }
-    public string PleaseEnterAValidValueForX { get; internal set; }
+    public string PleaseEnterAValidValueForX { get; set; }
     public string System { get; set; }
     public string Light { get; set; }
     public string Dark { get; set; }
@@ -408,6 +408,7 @@ public class LanguageGeneral
     public string Prefix { get; set; }
     public string Suffix { get; set; }
     public string LoadDefaults { get; set; }
+    public string CouldNotSaveFileXErrorY { get; set; }
 
     public LanguageGeneral()
     {
@@ -814,5 +815,6 @@ public class LanguageGeneral
         Prefix = "Prefix";
         Suffix = "Suffix";
         LoadDefaults = "Load defaults";
+        CouldNotSaveFileXErrorY = "Could not save file \"{0}\". Error: {1}";
     }
 }

@@ -5590,30 +5590,44 @@ public partial class MainViewModel :
         return true;
     }
 
-    private async Task SaveSubtitle()
+    private async Task<bool> SaveSubtitle()
     {
         if (Subtitles == null || !Subtitles.Any())
         {
             ShowStatus("Nothing to save");
-            return;
+            return false;
         }
 
         if (string.IsNullOrEmpty(_subtitleFileName) || _converted)
         {
-            await SaveSubtitleAs();
-            return;
+            var result = await SaveSubtitleAs();
+            return result;
         }
 
         if (_lastOpenSaveFormat == null || _lastOpenSaveFormat.Name != SelectedSubtitleFormat.Name)
         {
-            await SaveSubtitleAs();
-            return;
+            var result = await SaveSubtitleAs();
+            return result;
         }
 
         var text = GetUpdateSubtitle().ToText(SelectedSubtitleFormat);
-        await File.WriteAllTextAsync(_subtitleFileName, text);
+
+        try
+        {
+            await File.WriteAllTextAsync(_subtitleFileName, text);
+        }
+        catch (Exception ex)
+        {
+            var message = string.Format(Se.Language.General.CouldNotSaveFileXErrorY, _subtitleFileName, ex.Message);
+            await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+            return false;
+        }
+
         _changeSubtitleHash = GetFastHash();
         _lastOpenSaveFormat = SelectedSubtitleFormat;
+
+        return true;
     }
 
     private async Task SaveSubtitleOriginal()
@@ -5700,9 +5714,9 @@ public partial class MainViewModel :
         _subtitleFileName = fileName;
         _subtitle.FileName = fileName;
         _lastOpenSaveFormat = SelectedSubtitleFormat;
-        await SaveSubtitle();
+        var result = await SaveSubtitle();
         AddToRecentFiles(true);
-        return true;
+        return result;
     }
 
     private async Task<bool> SaveSubtitleOriginalAs()

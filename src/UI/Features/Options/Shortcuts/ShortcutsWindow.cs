@@ -21,9 +21,9 @@ public class ShortcutsWindow : Window
         var language = Se.Language.Options.Shortcuts;
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = language.Title;
-        Width = 750;
+        Width = 760;
         Height = 650;
-        MinWidth = 725;
+        MinWidth = 740;
         MinHeight = 500;
         CanResize = true;
 
