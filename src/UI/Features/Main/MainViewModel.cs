@@ -238,7 +238,7 @@ public partial class MainViewModel :
     public MenuItem MenuItemAudioVisualizerDeleteAtPosition { get; set; }
     public MenuItem MenuItemAudioVisualizerFilterByLayer { get; set; }
     public TextBox EditTextBoxOriginal { get; set; }
-    public StackPanel PanelSingleLineLenghtsOriginal { get; set; }
+    public StackPanel PanelSingleLineLengthsOriginal { get; set; }
     public MenuItem MenuItemStyles { get; set; }
     public MenuItem MenuItemActors { get; set; }
     public Button ButtonWaveformPlay { get; set; }
@@ -346,7 +346,7 @@ public partial class MainViewModel :
         EditTextTotalLengthBackgroundOriginal = Brushes.Transparent;
         EditTextLineLengthsOriginal = string.Empty;
         EditTextOriginal = string.Empty;
-        PanelSingleLineLenghtsOriginal = new StackPanel();
+        PanelSingleLineLengthsOriginal = new StackPanel();
         IsWaveformToolbarVisible = Se.Settings.Waveform.ShowToolbar;
         _videoOpenTokenSource = new CancellationTokenSource();
 
@@ -876,6 +876,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task CommandFileSaveAs()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         await SaveSubtitleAs();
         _shortcutManager.ClearKeys();
     }
@@ -908,6 +919,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowStatistics()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var result = await _windowService.ShowDialogAsync<StatisticsWindow, StatisticsViewModel>(Window!,
             vm => { vm.Initialize(GetUpdateSubtitle(), SelectedSubtitleFormat, _subtitleFileName ?? string.Empty); });
 
@@ -917,6 +939,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ExportBluRaySup()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         IExportHandler exportHandler = new ExportHandlerBluRaySup();
         var result = await _windowService.ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(Window!,
             vm => { vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName); });
@@ -932,6 +965,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ExportVobSub()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         IExportHandler exportHandler = new ExportHandlerVobSub();
         var result = await _windowService.ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(Window!,
             vm => { vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName); });
@@ -947,6 +991,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowExportCustomTextFormat()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var result = await _windowService.ShowDialogAsync<ExportCustomTextFormatWindow, ExportCustomTextFormatViewModel>(Window!,
             vm => { vm.Initialize(Subtitles.ToList(), _subtitleFileName, _videoFileName); });
 
@@ -956,6 +1011,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ExportCapMakerPlus()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var format = new CapMakerPlus();
         using var ms = new MemoryStream();
         format.Save(_subtitleFileName, ms, GetUpdateSubtitle(), false);
@@ -976,6 +1042,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ExportCavena890()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var result = await _windowService.ShowDialogAsync<ExportCavena890Window, ExportCavena890ViewModel>(Window!);
         if (!result.OkPressed)
         {
@@ -1010,6 +1087,12 @@ public partial class MainViewModel :
             return;
         }
 
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var result = await _windowService.ShowDialogAsync<ExportPacWindow, ExportPacViewModel>(Window);
         if (!result.OkPressed || result.PacCodePage == null)
         {
@@ -1038,6 +1121,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ExportPacUnicode()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var format = new PacUnicode();
         using var ms = new MemoryStream();
         format.Save(_subtitleFileName, ms, GetUpdateSubtitle());
@@ -1060,6 +1154,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ExportEbuStl()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var result =
             await _windowService.ShowDialogAsync<ExportEbuStlWindow, ExportEbuStlViewModel>(Window!,
                 vm => { vm.Initialize(GetUpdateSubtitle()); });
@@ -1096,6 +1201,12 @@ public partial class MainViewModel :
     {
         if (Window == null)
         {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
             return;
         }
 
@@ -1311,6 +1422,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowToolsAdjustDurations()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var result =
             await _windowService.ShowDialogAsync<AdjustDurationWindow, AdjustDurationViewModel>(Window!, vm => { });
 
@@ -1326,6 +1448,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowApplyDurationLimits()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         await _windowService.ShowDialogAsync<ApplyDurationLimitsWindow, ApplyDurationLimitsViewModel>(Window!,
             vm => { });
         _shortcutManager.ClearKeys();
@@ -1360,6 +1493,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowToolsMergeLinesWithSameText()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var result = await _windowService.ShowDialogAsync<MergeSameTextWindow, MergeSameTextViewModel>(Window!,
             vm => { vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList()); });
 
@@ -1379,6 +1523,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowToolsMergeLinesWithSameTimeCodes()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var result = await _windowService.ShowDialogAsync<MergeSameTimeCodesWindow, MergeSameTimeCodesViewModel>(
             Window!,
             vm => { vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList(), GetUpdateSubtitle()); });
@@ -1399,6 +1554,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private void ToolsMakeEmptyTranslationFromCurrentSubtitle()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         foreach (var subtitle in Subtitles)
         {
             subtitle.OriginalText = subtitle.Text;
@@ -1414,6 +1580,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowToolsSplit()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var s = GetUpdateSubtitle();
         var fileName = _subtitleFileName;
         if (s.Paragraphs.Count == 0)
@@ -1441,6 +1618,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowBridgeGaps()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var result = await _windowService.ShowDialogAsync<BridgeGapsWindow, BridgeGapsViewModel>(Window!,
             vm => { vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList()); });
 
@@ -1457,6 +1645,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowToolsChangeCasing()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var result =
             await _windowService.ShowDialogAsync<ChangeCasingWindow, ChangeCasingViewModel>(Window!,
                 vm => { vm.Initialize(GetUpdateSubtitle()); });
@@ -1482,6 +1681,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowToolsFixCommonErrors()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var viewModel = await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window!,
             vm => { vm.Initialize(GetUpdateSubtitle(), SelectedSubtitleFormat); });
 
@@ -1495,9 +1705,33 @@ public partial class MainViewModel :
         _shortcutManager.ClearKeys();
     }
 
+    private void ShowSubtitleNotLoadedMessage()
+    {
+        Dispatcher.UIThread.Post(async void () =>
+        {
+            await MessageBox.Show(
+                Window!,
+                Se.Language.General.Error,
+                Se.Language.General.NoSubtitleLoaded,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+        });
+    }
+
     [RelayCommand]
     private async Task ShowToolsRemoveTextForHearingImpaired()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var result = await _windowService
             .ShowDialogAsync<RemoveTextForHearingImpairedWindow, RemoveTextForHearingImpairedViewModel>(
                 Window!, vm => { vm.Initialize(GetUpdateSubtitle()); });
@@ -1616,6 +1850,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowSpellCheck()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var result = await _windowService.ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(Window!,
             vm => { vm.Initialize(Subtitles, SelectedSubtitleIndex, this); });
 
@@ -1693,6 +1938,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowVideoTextToSpeech()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var ffmpegOk = await RequireFfmpegOk();
         if (!ffmpegOk)
         {
@@ -1710,6 +1966,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowVideoTransparentSubtitles()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var ffmpegOk = await RequireFfmpegOk();
         if (!ffmpegOk)
         {
@@ -1813,6 +2080,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowSyncAdjustAllTimes()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var result = await _windowService.ShowDialogAsync<AdjustAllTimesWindow, AdjustAllTimesViewModel>(Window!, vm =>
         {
             vm.Initialize(this); // uses call from IAdjustCallback: Adjust
@@ -1824,6 +2102,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowVisualSync()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var result = await _windowService.ShowDialogAsync<VisualSyncWindow, VisualSyncViewModel>(Window!, vm =>
         {
             var paragraphs = Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList();
@@ -1847,6 +2136,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowSyncChangeFrameRate()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         await _windowService.ShowDialogAsync<ChangeFrameRateWindow, ChangeFrameRateViewModel>(Window!, vm => { });
         _shortcutManager.ClearKeys();
     }
@@ -1854,6 +2154,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowSyncChangeSpeed()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         await _windowService.ShowDialogAsync<ChangeSpeedWindow, ChangeSpeedViewModel>(Window!, vm => { });
         _shortcutManager.ClearKeys();
     }
@@ -1861,6 +2172,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowAutoTranslate()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var result = await _windowService.ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(Window!, vm => { vm.Initialize(GetUpdateSubtitle()); });
 
         if (!result.OkPressed)
@@ -2235,6 +2557,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task AddOrEditBookmark()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
         if (selectedItems.Count == 0)
         {
@@ -2289,6 +2622,17 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ListBookmarks()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
         var selected = SelectedSubtitle;
         if (selected == null)
         {
@@ -2509,6 +2853,26 @@ public partial class MainViewModel :
         ToggleItalic();
         _shortcutManager.ClearKeys();
     }
+
+    [RelayCommand]
+    private void ToggleLinesItalicOrSelectedText()
+    {
+        var selectedItems = _selectedSubtitles?.ToList() ?? [];
+        if (selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        if (selectedItems.Count == 1 && EditTextBox.SelectedText.Length > 0)
+        {
+            TextBoxItalic();
+            return;
+        }
+
+        ToggleItalic();
+        _shortcutManager.ClearKeys();
+    }
+
 
     [RelayCommand]
     private void ToggleLinesBold()
@@ -6918,6 +7282,8 @@ public partial class MainViewModel :
     private void SubtitleGridSelectionChanged()
     {
         var selectedItems = SubtitleGrid.SelectedItems;
+        EditTextBox.ClearSelection();
+        EditTextBoxOriginal.ClearSelection();
 
         if (selectedItems == null)
         {
@@ -7042,8 +7408,8 @@ public partial class MainViewModel :
 
         var lines = text.SplitToLines();
         var lineLenghts = new List<string>(lines);
-        PanelSingleLineLenghtsOriginal.Children.Clear();
-        PanelSingleLineLenghtsOriginal.Children.Add(UiUtil.MakeTextBlock(Se.Language.Main.SingleLineLength)
+        PanelSingleLineLengthsOriginal.Children.Clear();
+        PanelSingleLineLengthsOriginal.Children.Add(UiUtil.MakeTextBlock(Se.Language.Main.SingleLineLength)
             .WithFontSize(12)
             .WithPadding(2));
         var first = true;
@@ -7055,7 +7421,7 @@ public partial class MainViewModel :
             }
             else
             {
-                PanelSingleLineLenghtsOriginal.Children.Add(UiUtil.MakeTextBlock("/").WithFontSize(12).WithPadding(2));
+                PanelSingleLineLengthsOriginal.Children.Add(UiUtil.MakeTextBlock("/").WithFontSize(12).WithPadding(2));
             }
 
             var tb = UiUtil.MakeTextBlock(lineLenghts[i].Length.ToStringInvariant()).WithFontSize(12).WithPadding(2);
@@ -7065,7 +7431,7 @@ public partial class MainViewModel :
                 tb.Background = new SolidColorBrush(_errorColor);
             }
 
-            PanelSingleLineLenghtsOriginal.Children.Add(tb);
+            PanelSingleLineLengthsOriginal.Children.Add(tb);
         }
 
         EditTextCharactersPerSecondOriginal = string.Format(Se.Language.Main.CharactersPerSecond, $"{cps:0.0}");

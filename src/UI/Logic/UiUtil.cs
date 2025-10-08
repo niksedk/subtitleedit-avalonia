@@ -1738,6 +1738,14 @@ public static class UiUtil
         return control;
     }
 
+    public static Label WithBorderColorAsColor(this Label control)
+    {
+        control.Foreground = GetBorderBrush();
+
+        return control;
+    }
+
+
     public static Grid WithBindVisible(this Grid control, object viewModel, string visiblePropertyPath)
     {
         control.DataContext = viewModel;

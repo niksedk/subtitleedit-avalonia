@@ -646,7 +646,7 @@ public static class InitListViewAndEditBox
         {
             Header = Se.Language.General.SelectedLines,
             DataContext = vm,
-            Items = 
+            Items =
             {
                 new MenuItem
                 {
@@ -728,7 +728,7 @@ public static class InitListViewAndEditBox
             }
         };
         if (!vm.ShowUpDownLabels && Se.Settings.Appearance.ShowHints)
-        { 
+        {
             ToolTip.SetTip(timeCodeUpDown, Se.Language.General.Show);
         }
         timeCodeUpDown.Bind(TimeCodeUpDown.IsEnabledProperty, new Binding(nameof(vm.LockTimeCodes)) { Mode = BindingMode.TwoWay, Converter = new InverseBooleanConverter() });
@@ -946,6 +946,7 @@ public static class InitListViewAndEditBox
             FontSize = Se.Settings.Appearance.SubtitleTextBoxFontSize,
             FontWeight = Se.Settings.Appearance.SubtitleTextBoxFontBold ? FontWeight.Bold : FontWeight.Normal,
             IsUndoEnabled = false,
+            ClearSelectionOnLostFocus = false,
         };
         if (Se.Settings.Appearance.SubtitleTextBoxCenterText)
         {
@@ -1100,6 +1101,7 @@ public static class InitListViewAndEditBox
             FontWeight = Se.Settings.Appearance.SubtitleTextBoxFontBold ? FontWeight.Bold : FontWeight.Normal,
             IsUndoEnabled = false,
             Margin = new Thickness(3, 0, 0, 0),
+            ClearSelectionOnLostFocus = false,
         };
         if (Se.Settings.Appearance.SubtitleTextBoxCenterText)
         {
@@ -1147,7 +1149,7 @@ public static class InitListViewAndEditBox
             VerticalAlignment = VerticalAlignment.Top,
             Orientation = Orientation.Horizontal,
         };
-        vm.PanelSingleLineLenghtsOriginal = panelSingleLineLengthsOriginal;
+        vm.PanelSingleLineLengthsOriginal = panelSingleLineLengthsOriginal;
         textEditGrid.Add(panelSingleLineLengthsOriginal, 2, 1);
         panelSingleLineLengthsOriginal.DataContext = vm;
         panelSingleLineLengthsOriginal.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowColumnOriginalText))
@@ -1188,9 +1190,7 @@ public static class InitListViewAndEditBox
         buttonPanel.Children.Add(unbreakButton);
 
 
-        //TODO: make this button customizable in the settings
-        // Unbreak button
-        var italicButton = UiUtil.MakeButton(vm.ToggleLinesItalicCommand, IconNames.Italic);
+        var italicButton = UiUtil.MakeButton(vm.ToggleLinesItalicOrSelectedTextCommand, IconNames.Italic);
         if (Se.Settings.Appearance.ShowHints)
         {
             ToolTip.SetTip(italicButton, Se.Language.Main.ItalicHint);

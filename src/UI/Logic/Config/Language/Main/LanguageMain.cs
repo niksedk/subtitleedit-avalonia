@@ -57,7 +57,7 @@ public class LanguageMain
         CreatedEmptyTranslation = "Created empty translation from current subtitle";
         AutoBreakHint = "Auto-break selected lines";
         UnbreakHint = "Unbreak selected lines";
-        ItalicHint = "Italic selected text";
+        ItalicHint = "Italic selected lines/text";
         ReplacedXWithYCountZ = "Replaced '{0}' with '{1}' ({2} occurrences)";
         ReplacedXWithYInLineZ = "Replaced '{0}' with '{1}' in line {2}";
         XShotChangedLoaded = "{0} shot changes loaded";

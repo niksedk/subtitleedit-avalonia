@@ -86,7 +86,7 @@ public class ShotChangesHelper
         }
 
         var shotChangesFileName = FindShotChangesFileName(videoFileName);
-        if (shotChangesFileName == null)
+        if (string.IsNullOrEmpty(shotChangesFileName))
         {
             return list;
         }

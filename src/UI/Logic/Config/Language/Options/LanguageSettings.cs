@@ -173,6 +173,7 @@ public class LanguageSettings
     public string RemoveComma { get; set; }
     public string EditContinuationStyleCustom { get; set; }
     public string LongGapThreshold { get; set; }
+    public string AfterLongGap { get; set; }
 
     public LanguageSettings()
     {
@@ -342,6 +343,7 @@ public class LanguageSettings
         RemoveComma = "Remove comma";
         EditContinuationStyleCustom = "Edit custom continuation style";
         LongGapThreshold = "Long gap threshold (ms)";
+        AfterLongGap = "After long gap:";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

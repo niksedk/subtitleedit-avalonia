@@ -55,7 +55,6 @@ public class LanguageGeneral
     public string Name { get; set; }
     public string Negative { get; set; }
     public string No { get; set; }
-    public string NoSubtitleLoaded { get; set; }
     public string NoVideoLoaded { get; set; }
     public string None { get; set; }
     public string NotAvailable { get; set; }
@@ -409,6 +408,7 @@ public class LanguageGeneral
     public string Suffix { get; set; }
     public string LoadDefaults { get; set; }
     public string CouldNotSaveFileXErrorY { get; set; }
+    public string NoSubtitleLoaded { get; set; }
 
     public LanguageGeneral()
     {
@@ -462,7 +462,6 @@ public class LanguageGeneral
         Name = "Name";
         Negative = "Negative";
         No = "No";
-        NoSubtitleLoaded = "No subtitle loaded";
         NoVideoLoaded = "No video loaded";
         None = "None";
         NotAvailable = "N/A";
@@ -816,5 +815,6 @@ public class LanguageGeneral
         Suffix = "Suffix";
         LoadDefaults = "Load defaults";
         CouldNotSaveFileXErrorY = "Could not save file \"{0}\". Error: {1}";
+        NoSubtitleLoaded = "No subtitle loaded";
     }
 }

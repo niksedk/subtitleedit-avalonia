@@ -4,7 +4,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Enums;
-using System;
+using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -227,39 +228,34 @@ public partial class CustomContinuationStyleViewModel : ObservableObject
         var previewSplit = preview.SplitToLines();
 
         PanelPreview.Children.Clear();
-        PanelPreview.Children.Add(new TextBlock 
-        { 
-            Text = previewSplit[0], TextWrapping = Avalonia.Media.TextWrapping.Wrap ,
-            Margin = new Avalonia.Thickness(20, 20, 20, 3),
-        });
 
-        PanelPreview.Children.Add(new TextBlock
+        foreach (var line in previewSplit)
         {
-            Text = previewSplit[1],
-            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-            Margin = new Avalonia.Thickness(20, 3, 20, 20),
-        });
+            if (line == "(...)")
+            { 
+                if (!UseSpecialStyleAfterLongGaps)
+                {
+                    break;
+                }
 
-        PanelPreview.Children.Add(new TextBlock
-        {
-            Text = previewSplit[2],
-            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-            Margin = new Avalonia.Thickness(20),
-        });
+                PanelPreview.Children.Add(new TextBlock
+                {
+                    Text = Se.Language.Options.Settings.AfterLongGap,
+                    TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                    Margin = new Avalonia.Thickness(20, 15, 5, 5),
+                    Foreground = UiUtil.GetBorderBrush(),
+                });
 
-        PanelPreview.Children.Add(new TextBlock
-        {
-            Text = previewSplit[3],
-            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-            Margin = new Avalonia.Thickness(20, 20, 20, 3),
-        });
+                continue;
+            }
 
-        PanelPreview.Children.Add(new TextBlock
-        {
-            Text = previewSplit[4],
-            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-            Margin = new Avalonia.Thickness(20, 3, 20, 20),
-        });
+            PanelPreview.Children.Add(new TextBlock
+            {
+                Text = line,
+                TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                Margin = new Avalonia.Thickness(20, 5, 5, 5),
+            });
+        }
     }
 
     private ContinuationUtilities.ContinuationProfile CreateContinuationProfile()
@@ -272,13 +268,14 @@ public partial class CustomContinuationStyleViewModel : ObservableObject
             SuffixReplaceComma = SelectedSuffixesRemoveComma,
             Prefix = SelectedPrefix ?? string.Empty,
             PrefixAddSpace = SelectedPrefixAddSpace,
-            UseDifferentStyleGap = UseSpecialStyleAfterLongGaps,
             GapSuffix = SelectedLongGapSuffix ?? string.Empty,
             GapSuffixApplyIfComma = SelectedLongGapSuffixesProcessIfEndWithComma,
             GapSuffixAddSpace = SelectedLongGapSuffixesAddSpace,
             GapSuffixReplaceComma = SelectedLongGapSuffixesRemoveComma,
             GapPrefix = SelectedLongGapPrefix ?? string.Empty,
             GapPrefixAddSpace = SelectedLongGapPrefixAddSpace,
+
+            UseDifferentStyleGap = UseSpecialStyleAfterLongGaps,
         };
     }
 
