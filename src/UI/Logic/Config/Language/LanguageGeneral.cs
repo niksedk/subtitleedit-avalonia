@@ -55,6 +55,7 @@ public class LanguageGeneral
     public string Name { get; set; }
     public string Negative { get; set; }
     public string No { get; set; }
+    public string NoSubtitleLoaded { get; set; }
     public string NoVideoLoaded { get; set; }
     public string None { get; set; }
     public string NotAvailable { get; set; }
@@ -460,6 +461,7 @@ public class LanguageGeneral
         Name = "Name";
         Negative = "Negative";
         No = "No";
+        NoSubtitleLoaded = "No subtitle loaded";
         NoVideoLoaded = "No video loaded";
         None = "None";
         NotAvailable = "N/A";

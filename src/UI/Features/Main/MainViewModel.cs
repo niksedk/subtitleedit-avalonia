@@ -1085,9 +1085,67 @@ public partial class MainViewModel :
         }
 
         format.Save(fileName, result.Subtitle);
-        ShowStatus($"File exported in format {format.Name} to {fileName}");
+        ShowStatus($"File exported in format \"{format.Name}\" to file \"{fileName}\"");
 
         _shortcutManager.ClearKeys();
+    }
+
+
+    [RelayCommand]
+    private async Task ImportTimeCodes()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (Subtitles.Count == 0)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, Se.Language.General.NoVideoLoaded,
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        var fileName = await _fileHelper.PickOpenSubtitleFile(Window, Se.Language.General.OpenSubtitleFileTitle, false);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        var subtitle = Subtitle.Parse(fileName);
+        if (subtitle == null)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, Se.Language.General.UnknownSubtitleFormat,
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        if (subtitle.Paragraphs.Count != Subtitles.Count)
+        {
+            var message = "The time code import subtitle does not have the same number of lines as the current subtitle." + Environment.NewLine
+                          + "Imported lines: " + subtitle.Paragraphs.Count + Environment.NewLine
+                          + "Current lines: " + Subtitles.Count + Environment.NewLine
+                          + Environment.NewLine +
+                          "Do you want to continue anyway?";
+
+            var answer = await MessageBox.Show(Window, Se.Language.General.Import, message, MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Error);
+
+            if (answer != MessageBoxResult.Yes)
+            {
+                _shortcutManager.ClearKeys();
+                return;
+            }
+        }
+
+        for (var i = 0; i < Subtitles.Count && i < subtitle.Paragraphs.Count; i++)
+        {
+            Subtitles[i].SetStartTimeOnly(subtitle.Paragraphs[i].StartTime.TimeSpan);
+            Subtitles[i].EndTime = subtitle.Paragraphs[i].EndTime.TimeSpan;
+        }
     }
 
     [RelayCommand]
