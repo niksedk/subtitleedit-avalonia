@@ -994,7 +994,7 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
                 throw new ArgumentNullException(nameof(userDictionary));
             }
 
-            bool removed = false;
+            var removed = false;
             if (userDictionary.ContainsKey(word))
             {
                 userDictionary.Remove(word);
@@ -1047,7 +1047,7 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
         {
             const string xmlText = "<ReplaceList><WholeWords/><PartialLines/><BeginLines/><EndLines/><WholeLines/><RegularExpressions/></ReplaceList>";
             var doc = new XmlDocument();
-            if (File.Exists(_replaceListXmlFileName))
+            if (!string.IsNullOrEmpty(_replaceListXmlFileName) && File.Exists(_replaceListXmlFileName))
             {
                 try
                 {
@@ -1072,7 +1072,7 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
         {
             const string xmlText = "<ReplaceList><WholeWords/><PartialLines/><BeginLines/><EndLines/><WholeLines/><RegularExpressions/><RemovedWholeWords/><RemovedPartialLines/><RemovedBeginLines/><RemovedEndLines/><RemovedWholeLines/><RemovedRegularExpressions/></ReplaceList>";
             var doc = new XmlDocument();
-            if (File.Exists(ReplaceListXmlFileNameUser))
+            if (!string.IsNullOrEmpty(_replaceListXmlFileName) && File.Exists(ReplaceListXmlFileNameUser))
             {
                 try
                 {
