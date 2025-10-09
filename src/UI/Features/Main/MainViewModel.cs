@@ -236,7 +236,6 @@ public partial class MainViewModel :
     public Separator MenuItemAudioVisualizerSeparator1 { get; set; }
     public MenuItem MenuItemAudioVisualizerInsertAtPosition { get; set; }
     public MenuItem MenuItemAudioVisualizerDeleteAtPosition { get; set; }
-    public MenuItem MenuItemAudioVisualizerFilterByLayer { get; set; }
     public TextBox EditTextBoxOriginal { get; set; }
     public StackPanel PanelSingleLineLengthsOriginal { get; set; }
     public MenuItem MenuItemStyles { get; set; }
@@ -302,7 +301,6 @@ public partial class MainViewModel :
         MenuItemAudioVisualizerSeparator1 = new Separator();
         MenuItemAudioVisualizerInsertAtPosition = new MenuItem();
         MenuItemAudioVisualizerDeleteAtPosition = new MenuItem();
-        MenuItemAudioVisualizerFilterByLayer = new MenuItem();
         MenuItemStyles = new MenuItem();
         MenuItemActors = new MenuItem();
         Toolbar = new Border();
@@ -7854,7 +7852,6 @@ public partial class MainViewModel :
         MenuItemAudioVisualizerDelete.IsVisible = false;
         MenuItemAudioVisualizerDeleteAtPosition.IsVisible = false;
         MenuItemAudioVisualizerSplit.IsVisible = false;
-        MenuItemAudioVisualizerFilterByLayer.IsVisible = false;
 
         if (e.NewParagraph != null)
         {
@@ -7866,8 +7863,6 @@ public partial class MainViewModel :
         var subtitlesAtPosition = Subtitles
             .Where(p => p.StartTime.TotalSeconds < e.PositionInSeconds &&
                         p.EndTime.TotalSeconds > e.PositionInSeconds).ToList();
-
-        MenuItemAudioVisualizerFilterByLayer.IsVisible = true;
 
         if (selectedSubtitles?.Count == 1 &&
             subtitlesAtPosition.Count == 1 &&
