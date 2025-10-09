@@ -81,6 +81,7 @@ public class LanguageMainMenu
 
     public string Translate { get; set; }
     public string AutoTranslate { get; set; }
+    public string TranslateViaCopyPaste { get; set; }
 
     public string HelpTitle { get; set; }
     public string Help { get; set; }
@@ -163,6 +164,7 @@ public class LanguageMainMenu
 
         Translate = "Tr_anslate";
         AutoTranslate = "_Auto-translate...";
+        TranslateViaCopyPaste = "Translate via _copy-paste...";
 
         HelpTitle = "_Help";
         Help = "_Help...";

@@ -19,7 +19,7 @@ public class AutoTranslateWindow : Window
     public AutoTranslateWindow(AutoTranslateViewModel vm)
     {        
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = Se.Language.Translate.AutoTranslate.Title;
+        Title = Se.Language.Translate.Title;
         Width = 950;
         MinWidth = 750;
         Height = 700;

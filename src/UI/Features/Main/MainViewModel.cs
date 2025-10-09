@@ -2263,6 +2263,51 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private async Task ShowTranslateViaCopyPaste()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<CopyPasteTranslateWindow, CopyPasteTranslateViewModel>(Window!, vm => 
+        { 
+            vm.Initialize(GetUpdateSubtitle()); 
+        });
+
+        if (!result.OkPressed)
+        {
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        //for (var i = 0; i < Subtitles.Count; i++)
+        //{
+        //    if (result.Rows.Count <= i)
+        //    {
+        //        break;
+        //    }
+
+        //    Subtitles[i].OriginalText = Subtitles[i].Text;
+        //    Subtitles[i].Text = result.Rows[i].TranslatedText;
+        //}
+
+        _subtitleFileNameOriginal = _subtitleFileName;
+        _subtitleFileName = string.Empty;
+        ShowColumnOriginalText = true;
+        AutoFitColumns();
+        _updateAudioVisualizer = true;
+        _shortcutManager.ClearKeys();
+        _converted = true;
+    }
+
+    [RelayCommand]
     private async Task ChangeCasingSelectedLines()
     {
         var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();

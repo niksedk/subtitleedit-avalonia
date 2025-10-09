@@ -2,10 +2,12 @@
 
 public class LanguageTranslate
 {
-    public LanguageAutoTranslate AutoTranslate { get; set; } = new();
+    public string Title { get; set; }
+    public string TranslateViaCopyPaste { get; set; }
 
     public LanguageTranslate()
     {
-
+        Title = "Auto-translate";
+        TranslateViaCopyPaste = "Translate via copy/paste";
     }
 }
