@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
+using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -125,6 +126,17 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                 _buttonFullScreenCollapse.IsVisible = value;
                 _buttonFullScreen.IsVisible = !value;
                 _isFullScreen = value;
+
+                // Start or stop the auto-hide mechanism based on full screen state
+                if (value)
+                {
+                    StartAutoHideControls();
+                }
+                else
+                {
+                    StopAutoHideControls();
+                    ShowControls();
+                }
             }
         }
 
@@ -141,11 +153,14 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         private readonly Icon _iconVolume;
         private DispatcherTimer? _positionTimer;
         private IVideoPlayerInstance _videoPlayerInstance;
-        private string  _videoFileName;
+        private string _videoFileName;
+        private readonly Grid _gridProgress; // Reference to the controls grid
+        private DispatcherTimer? _autoHideTimer;
+        private DateTime _lastActivityTime;
 
         private void NotifyPositionChanged(double newPosition)
         {
-            if (_positionIgnore == newPosition)
+            if (Math.Abs(_positionIgnore - newPosition) < 0.001)
             {
                 return;
             }
@@ -174,10 +189,12 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         {
             _videoPlayerInstance = videoPlayerInstance;
             _videoFileName = string.Empty;
+            _lastActivityTime = DateTime.UtcNow;
             
             var mainGrid = new Grid
             {
-                RowDefinitions = new RowDefinitions("*,Auto") // video + controls
+                RowDefinitions = new RowDefinitions("*,Auto"), // video + controls
+                Background = Brushes.Transparent // Enable hit testing for pointer events
             };
 
             // PlayerContent
@@ -190,14 +207,16 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             Grid.SetRow(contentPresenter, 0);
 
             // Row with buttons + position slider + volume slider
-            var gridProgress = new Grid
+            _gridProgress = new Grid
             {
                 ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto,Auto"),
                 Margin = new Thickness(10, 4)
             };
-            Grid.SetRow(gridProgress, 1);
-            mainGrid.Children.Add(gridProgress);
+            Grid.SetRow(_gridProgress, 1);
+            mainGrid.Children.Add(_gridProgress);
 
+            // Attach pointer moved handler to the main grid to capture all mouse movements
+            mainGrid.PointerMoved += OnPointerMoved;
 
             // Buttons
             var stackPanel = new StackPanel
@@ -278,7 +297,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             _buttonFullScreenCollapse.Click += (_, _) => FullscreenCollapseRequested?.Invoke();
             stackPanel.Children.Add(_buttonFullScreenCollapse);
 
-            gridProgress.Children.Add(stackPanel);
+            _gridProgress.Children.Add(stackPanel);
             Grid.SetColumn(stackPanel, 0);
 
             var sliderPosition = new Slider
@@ -304,7 +323,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             // For any direct value changes
             sliderPosition.ValueChanged += (s, e) => { NotifyPositionChanged(e.NewValue); };
 
-            gridProgress.Children.Add(sliderPosition);
+            _gridProgress.Children.Add(sliderPosition);
             Grid.SetColumn(sliderPosition, 1);
 
             _iconVolume = new Icon
@@ -313,7 +332,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(10, 0, 4, 0)
             };
-            gridProgress.Children.Add(_iconVolume);
+            _gridProgress.Children.Add(_iconVolume);
             Grid.SetColumn(_iconVolume, 2);
 
             var sliderVolume = new Slider
@@ -347,7 +366,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             };
 
 
-            gridProgress.Children.Add(sliderVolume);
+            _gridProgress.Children.Add(sliderVolume);
             Grid.SetColumn(sliderVolume, 3);
 
 
@@ -360,7 +379,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                 FontWeight = FontWeight.Bold,
             };
             progressText.Bind(TextBlock.TextProperty, this.GetObservable(ProgressTextProperty));
-            gridProgress.Children.Add(progressText);
+            _gridProgress.Children.Add(progressText);
             Grid.SetColumn(progressText, 1);
             ProgressText = string.Empty;
             progressText.PointerPressed += (_, _) => ToggleDisplayProgressTextModeRequested?.Invoke();
@@ -373,7 +392,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                 FontWeight = FontWeight.Bold,
                 Opacity = 0.4,
             };
-            gridProgress.Children.Add(_textBlockPlayerName);
+            _gridProgress.Children.Add(_textBlockPlayerName);
             Grid.SetColumn(_textBlockPlayerName, 3);
 
             Content = mainGrid;
@@ -383,6 +402,9 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
 
             sliderVolume.Maximum = MpvApi.MaxVolume;
             sliderVolume.Value = 50;
+            
+            // Attach keyboard event handler to detect keyboard activity
+            this.KeyDown += OnKeyDown;
         }
 
         public event Action? PlayPauseRequested;
@@ -407,10 +429,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
 
         public void SetVolumeIcon(bool isMuted)
         {
-            Dispatcher.UIThread.Invoke(() =>
-            {
-                _iconVolume.Value = isMuted ? "fa-solid fa-volume-xmark" : "fa-solid fa-volume-up";
-            });
+            Dispatcher.UIThread.Invoke(() => { _iconVolume.Value = isMuted ? "fa-solid fa-volume-xmark" : "fa-solid fa-volume-up"; });
         }
 
         internal async Task Open(string videoFileName)
@@ -427,6 +446,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         internal void Close()
         {
             _positionTimer?.Stop();
+            StopAutoHideControls();
             _videoPlayerInstance.Close();
             ProgressText = string.Empty;
             _videoFileName = string.Empty;
@@ -474,6 +494,61 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             _positionTimer.Start();
         }
 
+        private void StartAutoHideControls()
+        {
+            _lastActivityTime = DateTime.UtcNow;
+            
+            // Show controls initially when entering full screen
+            ShowControls();
+            
+            // Timer to hide controls after 3 seconds of inactivity
+            _autoHideTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+            _autoHideTimer.Tick += (s, e) =>
+            {
+                if (IsFullScreen && (DateTime.UtcNow - _lastActivityTime).TotalSeconds >= 3)
+                {
+                    HideControls();
+                }
+            };
+            _autoHideTimer.Start();
+        }
+
+        private void StopAutoHideControls()
+        {
+            _autoHideTimer?.Stop();
+            _autoHideTimer = null;
+        }
+
+        private void OnUserActivity()
+        {
+            _lastActivityTime = DateTime.UtcNow;
+            if (IsFullScreen)
+            {
+                ShowControls();
+            }
+        }
+
+        public void NotifyUserActivity()
+        {
+            OnUserActivity();
+        }
+
+        private void OnKeyDown(object? sender, KeyEventArgs e)
+        {
+            if (IsFullScreen)
+            {
+                OnUserActivity();
+            }
+        }
+
+        private void OnPointerMoved(object? sender, Avalonia.Input.PointerEventArgs e)
+        {
+            if (IsFullScreen)
+            {
+                OnUserActivity();
+            }
+        }
+
         public void Reload()
         {
             var videoFileName = _videoFileName;
@@ -494,5 +569,16 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                 }
             });
         }
+
+        private void ShowControls()
+        {
+            Dispatcher.UIThread.Post(() => { _gridProgress.IsVisible = true; });
+        }
+
+        private void HideControls()
+        {
+            Dispatcher.UIThread.Post(() => { _gridProgress.IsVisible = false; });
+        }
     }
 }
+
