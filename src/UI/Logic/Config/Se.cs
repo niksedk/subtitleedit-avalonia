@@ -10,6 +10,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 
@@ -212,6 +213,15 @@ public class Se
 
             try
             {
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    ReadCommentHandling = JsonCommentHandling.Skip,
+                    AllowTrailingCommas = true
+                };
+                
+                options.GetType().GetProperty("IgnoreUnknownProperties")?.SetValue(options, true);
+                
                 Settings = JsonSerializer.Deserialize<Se>(json)!;
             }
             catch (Exception exception)

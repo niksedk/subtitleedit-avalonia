@@ -79,7 +79,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
         _oldSelectedLanguage = new LanguageDisplayItem(new CultureInfo("en"), "English");
         _subtitleFormat = new SubRip(); 
         Profiles = new ObservableCollection<ProfileDisplayItem>();
-        Step2Title = "Fix common errors, step 2";
+        Step2Title = Se.Language.Tools.FixCommonErrors.FixCommonOcrErrorsStep2;
     }
 
     public void Initialize(Subtitle subtitle, SubtitleFormat subtitleFormat)
@@ -316,13 +316,16 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
 
         Paragraphs.Clear();
         Paragraphs.AddRange(FixedSubtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, _subtitleFormat)));
-
-        Step2Title = $"Fix common errors, step 2      Fixes found: {Fixes.Count}";
+        
+        Step2Title = string.Format(Se.Language.Tools.FixCommonErrors.FixCommonOcrErrorsStep2FixesFoundX, Fixes.Count);
     }
 
     private void InitStep1(string languageCode, Subtitle subtitle)
     {
         FixedSubtitle = new Subtitle(subtitle, false);
+        
+        Configuration.Settings.General.ContinuationStyle = 
+            Enum.Parse<ContinuationStyle>(Se.Settings.General.ContinuationStyle);
 
         _allFixRules = new List<FixRuleDisplayItem>
         {
@@ -353,7 +356,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
             new (_language.Fix3PlusLines, "Foo</br>bar</br>baz! -> Foo bar baz!", 1, true, nameof(Fix3PlusLines)),
             new (_language.FixDoubleDash, _language.FixDoubleDashExample, 1, true, nameof(FixDoubleDash)),
             new (_language.FixDoubleGreaterThan, _language.FixDoubleGreaterThanExample, 1, true, nameof(FixDoubleGreaterThan)),
-            new ( string.Format(_language.FixContinuationStyleX, Se.Language.Options.Settings.GetContinuationStyleName(Configuration.Settings.General.ContinuationStyle)), string.Empty, 1, true, nameof(FixContinuationStyle)),
+            new ( string.Format(_language.FixContinuationStyleX, Se.Language.Options.Settings.GetContinuationStyleName(Enum.Parse<ContinuationStyle>(Se.Settings.General.ContinuationStyle))), string.Empty, 1, true, nameof(FixContinuationStyle)),
             new (_language.FixMissingOpenBracket, _language.FixMissingOpenBracketExample, 1, true, nameof(FixMissingOpenBracket)),
             //new (_language.FixCommonOcrErrors, _language.FixOcrErrorExample, 1, true, () => FixOcrErrorsViaReplaceList(threeLetterIsoLanguageName), ce.FixOcrErrorsViaReplaceListTicked),
             new (_language.FixUppercaseIInsideLowercaseWords, _language.FixUppercaseIInsideLowercaseWordsExample, 1, true, nameof(FixUppercaseIInsideWords)),

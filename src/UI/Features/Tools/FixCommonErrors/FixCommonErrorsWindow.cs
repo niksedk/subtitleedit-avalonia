@@ -20,7 +20,7 @@ public class FixCommonErrorsWindow : Window
     public FixCommonErrorsWindow(FixCommonErrorsViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = "Fix common errors";
+        Title = Se.Language.Tools.FixCommonErrors.Title;
         Width = 1024;
         Height = 720;
         MinWidth = 800;
@@ -33,7 +33,7 @@ public class FixCommonErrorsWindow : Window
 
         var labelStep1 = new Label
         {
-            Content = "Fix common errors, step 1",
+            Content = Se.Language.Tools.FixCommonErrors.FixCommonOcrErrorsStep1,
             VerticalAlignment = VerticalAlignment.Center,
         };
         labelStep1.Bind(IsVisibleProperty, new Binding(nameof(vm.Step1IsVisible)));
@@ -46,7 +46,7 @@ public class FixCommonErrorsWindow : Window
         labelStep2.Bind(IsVisibleProperty, new Binding(nameof(vm.Step2IsVisible)));
 
         var textBoxSearch = UiUtil.MakeTextBox(250, vm, nameof(vm.SearchText)).WithMarginRight(25);
-        textBoxSearch.Watermark = "Search rules...";
+        textBoxSearch.Watermark = Se.Language.Tools.FixCommonErrors.SearchRulesDotDotDot;
         textBoxSearch.Bind(IsVisibleProperty, new Binding(nameof(vm.Step1IsVisible)));
         textBoxSearch.TextChanged += vm.TextBoxSearch_TextChanged;
         var panelTopRight = new StackPanel
@@ -56,7 +56,7 @@ public class FixCommonErrorsWindow : Window
             HorizontalAlignment = HorizontalAlignment.Right,
             Children =
             {
-                UiUtil.MakeTextBlock("Language").WithMarginRight(5),
+                UiUtil.MakeTextBlock(Se.Language.General.Language).WithMarginRight(5),
                 UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage)),
             },
         };
@@ -75,21 +75,21 @@ public class FixCommonErrorsWindow : Window
             IsReadOnly = false,
             Columns =
             {
-               new DataGridTemplateColumn
-               {
+                new DataGridTemplateColumn
+                {
                     Header = Se.Language.General.Enabled,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     CellTemplate = new FuncDataTemplate<FixRuleDisplayItem>((item, _) =>
-                    new Border
-                    {
-                        Background = Brushes.Transparent, // Prevents highlighting
-                        Padding = new Thickness(4),
-                        Child = new CheckBox
+                        new Border
                         {
-                            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(FixRuleDisplayItem.IsSelected)),
-                            HorizontalAlignment = HorizontalAlignment.Center
-                        }
-                    }),
+                            Background = Brushes.Transparent, // Prevents highlighting
+                            Padding = new Thickness(4),
+                            Child = new CheckBox
+                            {
+                                [!ToggleButton.IsCheckedProperty] = new Binding(nameof(FixRuleDisplayItem.IsSelected)),
+                                HorizontalAlignment = HorizontalAlignment.Center
+                            }
+                        }),
                     Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
                 },
                 new DataGridTextColumn
@@ -101,10 +101,11 @@ public class FixCommonErrorsWindow : Window
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Example",
+                    Header = Se.Language.General.Example,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(FixRuleDisplayItem.Example)),
                     IsReadOnly = true,
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star)
                 },
             },
         };
@@ -121,30 +122,30 @@ public class FixCommonErrorsWindow : Window
         step2Grid.Bind(IsVisibleProperty, new Binding(nameof(_vm.Step2IsVisible)));
         var comboProfile = UiUtil.MakeComboBox(vm.Profiles, vm, nameof(vm.SelectedProfile));
         var buttonPanelRules = UiUtil.MakeButtonBar(
-            UiUtil.MakeButton("Select all", vm.RulesSelectAllCommand),
-            UiUtil.MakeButton("Inverse selection", vm.RulesInverseSelectedCommand),
-            UiUtil.MakeTextBlock("Profile").WithMarginLeft(25).WithMarginRight(10),
+            UiUtil.MakeButton(Se.Language.General.SelectAll, vm.RulesSelectAllCommand),
+            UiUtil.MakeButton(Se.Language.General.InvertSelection, vm.RulesInverseSelectedCommand),
+            UiUtil.MakeTextBlock(Se.Language.General.Profile).WithMarginLeft(25).WithMarginRight(10),
             comboProfile,
             UiUtil.MakeButton("...", vm.ShowProfileCommand).Compact()
         );
         buttonPanelRules.Bind(IsVisibleProperty, new Binding(nameof(vm.Step1IsVisible)));
 
-        var buttonToApplyFixes = UiUtil.MakeButton("To apply fixes", vm.ToApplyFixesCommand)
+        var buttonToApplyFixes = UiUtil.MakeButton(Se.Language.Tools.FixCommonErrors.GoToApplyFixes, vm.ToApplyFixesCommand)
             .WithIconRight("fa-solid fa-arrow-right")
             .BindIsVisible(vm, nameof(vm.Step1IsVisible));
 
-        var buttonBackToFixList = UiUtil.MakeButton("Back to fix list", vm.BackToFixListCommand)
+        var buttonBackToFixList = UiUtil.MakeButton(Se.Language.Tools.FixCommonErrors.BackToFixList, vm.BackToFixListCommand)
             .WithIconLeft("fa-solid fa-arrow-left")
             .BindIsVisible(vm, nameof(vm.Step2IsVisible));
 
-        var buttonApplyFixes = UiUtil.MakeButton("Apply selected fixes & close", vm.OkCommand)
+        var buttonApplyFixes = UiUtil.MakeButton(Se.Language.Tools.FixCommonErrors.ApplyFixesAndClose, vm.OkCommand)
             .BindIsVisible(vm, nameof(vm.Step2IsVisible));
 
         var buttonPanelRight = UiUtil.MakeButtonBar(
             buttonBackToFixList,
             buttonToApplyFixes,
             buttonApplyFixes,
-            UiUtil.MakeButton("Cancel", vm.CancelCommand)
+            UiUtil.MakeButtonCancel(vm.CancelCommand)
         );
 
         var grid = new Grid
@@ -239,21 +240,21 @@ public class FixCommonErrorsWindow : Window
             ItemsSource = _vm.Fixes,
             Columns =
             {
-               new DataGridTemplateColumn
-               {
+                new DataGridTemplateColumn
+                {
                     Header = Se.Language.General.Apply,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     CellTemplate = new FuncDataTemplate<FixDisplayItem>((item, _) =>
-                    new Border
-                    {
-                        Background = Brushes.Transparent, // Prevents highlighting
-                        Padding = new Thickness(4),
-                        Child = new CheckBox
+                        new Border
                         {
-                            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(FixDisplayItem.IsSelected)),
-                            HorizontalAlignment = HorizontalAlignment.Center
-                        }
-                    }),
+                            Background = Brushes.Transparent, // Prevents highlighting
+                            Padding = new Thickness(4),
+                            Child = new CheckBox
+                            {
+                                [!ToggleButton.IsCheckedProperty] = new Binding(nameof(FixDisplayItem.IsSelected)),
+                                HorizontalAlignment = HorizontalAlignment.Center
+                            }
+                        }),
                     Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
                 },
                 new DataGridTextColumn
@@ -343,35 +344,35 @@ public class FixCommonErrorsWindow : Window
             {
                 new DataGridTextColumn
                 {
-                    Header = "#",
+                    Header = Se.Language.General.NumberSymbol,
                     Binding = new Binding(nameof(SubtitleLineViewModel.Number)),
                     IsReadOnly = true,
                     CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Show",
+                    Header = Se.Language.General.Show,
                     Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)) { Converter = fullTimeConverter },
                     IsReadOnly = true,
                     CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Hide",
+                    Header = Se.Language.General.Hide,
                     Binding = new Binding(nameof(SubtitleLineViewModel.EndTime)) { Converter = fullTimeConverter },
                     IsReadOnly = true,
                     CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Duration",
+                    Header = Se.Language.General.Duration,
                     Binding = new Binding(nameof(SubtitleLineViewModel.Duration)) { Converter = shortTimeConverter },
                     IsReadOnly = true,
                     CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Text",
+                    Header = Se.Language.General.Text,
                     Binding = new Binding(nameof(SubtitleLineViewModel.Text)),
                     IsReadOnly = true,
                     CellTheme = UiUtil.DataGridNoBorderCellTheme,

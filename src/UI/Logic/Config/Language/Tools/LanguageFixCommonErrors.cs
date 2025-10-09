@@ -113,6 +113,13 @@ public class LanguageFixCommonErrors
     public string FixContinuationStyleX { get; set; }
     public string FixUnnecessaryLeadingDots { get; set; }
     public string FixCommonErrorsProfiles { get; set; }
+    public string FixCommonOcrErrorsStep1 { get; set; }
+    public string SearchRulesDotDotDot { get; set; }
+    public string GoToApplyFixes { get; set; }
+    public string BackToFixList { get; set; }
+    public string ApplyFixesAndClose { get; set; }
+    public string FixCommonOcrErrorsStep2 { get; set; }
+    public string FixCommonOcrErrorsStep2FixesFoundX { get; set; }
 
     public LanguageFixCommonErrors()
     {
@@ -227,5 +234,12 @@ public class LanguageFixCommonErrors
         FixContinuationStyleX = "Fix continuation style: {0}";
         FixUnnecessaryLeadingDots = "Remove unnecessary leading dots";
         FixCommonErrorsProfiles = "Fix common errors profiles";
+        FixCommonOcrErrorsStep1 = "Fix common errors, step 1 (choose fixes)";
+        FixCommonOcrErrorsStep2 = "Fix common errors, step 2 (apply fixes)";
+        SearchRulesDotDotDot = "Search rules...";
+        GoToApplyFixes = "Go to apply fixes";
+        BackToFixList =  "Back to fix list";
+        ApplyFixes = "Apply selected fixes & close";
+        FixCommonOcrErrorsStep2FixesFoundX =  "Fix common errors, step 2 - Fixes found: {0}";
     }
 }

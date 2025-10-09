@@ -409,6 +409,7 @@ public class LanguageGeneral
     public string LoadDefaults { get; set; }
     public string CouldNotSaveFileXErrorY { get; set; }
     public string NoSubtitleLoaded { get; set; }
+    public string Example { get; set; }
 
     public LanguageGeneral()
     {
@@ -816,5 +817,6 @@ public class LanguageGeneral
         LoadDefaults = "Load defaults";
         CouldNotSaveFileXErrorY = "Could not save file \"{0}\". Error: {1}";
         NoSubtitleLoaded = "No subtitle loaded";
+        Example =  "Example";
     }
 }
