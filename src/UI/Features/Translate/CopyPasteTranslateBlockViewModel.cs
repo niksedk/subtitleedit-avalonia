@@ -1,75 +1,79 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
+using Avalonia.Interactivity;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic.Config;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Translate;
 
 public partial class CopyPasteTranslateBlockViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _subtitles;
-    [ObservableProperty] private SubtitleLineViewModel? _selectedSubtitle;
-    [ObservableProperty] private int? _maxBlockSize;
-    [ObservableProperty] private string _lineSeparator;
+
+    [ObservableProperty] private string _windowTitle;
 
     public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
-    public DataGrid SubtitleGrid { get; internal set; }
+    public string TranslatedText { get; private set; }
+
+    private string _sourceText;
 
     public CopyPasteTranslateBlockViewModel()
     {
-        SubtitleGrid = new DataGrid();
-        Subtitles = new ObservableCollection<SubtitleLineViewModel>();
-        MaxBlockSize = Se.Settings.AutoTranslate.CopyPasteMaxBlockSize;
-        LineSeparator = Se.Settings.AutoTranslate.CopyPasteLineSeparator;
+        WindowTitle = string.Empty;
+        _sourceText = string.Empty;
+        TranslatedText = string.Empty;
     }
 
-    private void SaveSettings()
+    internal void Initialize(int blockNumber, int totalBlockNumbers, string text)
     {
-        if (MaxBlockSize.HasValue)
-        {
-            Se.Settings.AutoTranslate.CopyPasteMaxBlockSize = MaxBlockSize.Value;
-        }
-
-        Se.Settings.AutoTranslate.CopyPasteLineSeparator = LineSeparator ?? ".";
-
-        Se.SaveSettings();
-    }
-
-    internal void Initialize(List<SubtitleLineViewModel> subtitles)
-    {
-        Subtitles.Clear();
-        
-        foreach (var s in subtitles)
-        {
-            var s2 = new SubtitleLineViewModel(s);
-            s2.OriginalText = s.Text;
-            s2.Text = s.OriginalText;
-            Subtitles.Add(s2);
-        }
-
-        if (Subtitles.Count > 0)
-        {
-            SelectedSubtitle = Subtitles[0];
-        }
+        _sourceText = text;
+        WindowTitle = string.Format(Se.Language.Translate.BlockXOfY, blockNumber, totalBlockNumbers);
     }
 
     [RelayCommand]
-    private void Translate()
+    private async Task CopyFromClipboard()
     {
-    }
+        if (Window == null || Window.Clipboard == null)
+        {
+            return;
+        }
 
-    [RelayCommand]
-    private void Ok()
-    {
-        SaveSettings();
+        TranslatedText = await Window.Clipboard.TryGetTextAsync() ?? string.Empty;
+
+        if (TranslatedText == string.Empty)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, Se.Language.Translate.NoTextInClipboard,
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+            return;
+        }
+
+        if (TranslatedText == _sourceText)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, Se.Language.Translate.TextInClipboardIsSameAsSourceText,
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+            return;
+        }
+
         OkPressed = true;
         Window?.Close();
+    }
+
+    [RelayCommand]
+    private async Task CopyToClipboard()
+    {
+        if (Window == null || Window.Clipboard == null)
+        {
+            return;
+        }
+
+        await Window.Clipboard.SetTextAsync(_sourceText);
     }
 
     [RelayCommand]
@@ -85,5 +89,10 @@ public partial class CopyPasteTranslateBlockViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+    }
+
+    internal void Loaded(object? sender, RoutedEventArgs e)
+    {
+        _ = CopyToClipboard();
     }
 }

@@ -28,6 +28,6 @@ public class SeAutoTranslate
         OpenRouterPrompt = Configuration.Settings.Tools.OpenRouterPrompt;
         RequestMaxBytes = 1000;
         CopyPasteMaxBlockSize = 5000;
-        CopyPasteLineSeparator = ".";
+        CopyPasteLineSeparator = "(...)";
     }
 }

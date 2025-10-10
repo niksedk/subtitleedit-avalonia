@@ -2,11 +2,14 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.Translate;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Translate;
@@ -50,7 +53,7 @@ public partial class CopyPasteTranslateViewModel : ObservableObject
     internal void Initialize(List<SubtitleLineViewModel> subtitles)
     {
         Subtitles.Clear();
-        
+
         foreach (var s in subtitles)
         {
             var s2 = new SubtitleLineViewModel(s);
@@ -73,9 +76,67 @@ public partial class CopyPasteTranslateViewModel : ObservableObject
             return;
         }
 
-        await _windowService.ShowDialogAsync<CopyPasteTranslateBlockWindow, CopyPasteTranslateBlockViewModel>(Window!, vm =>
+        try
         {
-        });
+            var log = new StringBuilder();
+            var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+            var startIndex = selectedItems.Count <= 0 ? 0 : Subtitles.IndexOf(selectedItems[0]);
+            var start = startIndex;
+            var index = startIndex;
+
+            List<Core.Common.Paragraph> paragraphs = new List<Core.Common.Paragraph>();
+            for (var i = startIndex; i < Subtitles.Count; i++)
+            {
+                var item = Subtitles[i];
+                var p = new Core.Common.Paragraph
+                {
+                    Text = item.OriginalText,
+                    StartTime = new Core.Common.TimeCode(item.StartTime),
+                    EndTime = new Core.Common.TimeCode(item.EndTime),
+                };
+                paragraphs.Add(p);
+            }
+
+
+            var translator = new CopyPasteTranslator(paragraphs, LineSeparator);
+
+            var blocks = translator.BuildBlocks(MaxBlockSize ?? 5000, string.Empty, startIndex);
+            for (var i = 0; i < blocks.Count; i++)
+            {
+                var block = blocks[i];
+                var result = await _windowService.ShowDialogAsync<CopyPasteTranslateBlockWindow, CopyPasteTranslateBlockViewModel>(Window!, vm =>
+                {
+                    vm.Initialize(i + 1, blocks.Count, block.TargetText);
+                });
+
+                if (!result.OkPressed)
+                {
+                    return;
+                }
+
+                var translatedLines = translator.GetTranslationResult(string.Empty, result.TranslatedText, block);
+                FillTranslatedText(translatedLines, start, index);
+                index += block.Paragraphs.Count;
+                start = index;
+            }
+        }
+        finally
+        {
+        }
+    }
+
+    private void FillTranslatedText(List<string> translatedLines, int start, int end)
+    {
+        var index = start;
+        foreach (string s in translatedLines)
+        {
+            if (index < Subtitles.Count)
+            {
+                var item = Subtitles[index];
+                item.Text = s;
+            }
+            index++;
+        }
     }
 
     [RelayCommand]
