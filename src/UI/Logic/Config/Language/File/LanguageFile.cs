@@ -7,6 +7,7 @@ public class LanguageFile
     public LanguageExport Export { get; set; } = new();
     public LanguageStatistics Statistics { get; set; } = new();
     public LanguageManualChosenEncoding ManualChosenEncoding { get; set; } = new();
+    public LanguageRestoreAutoBackup RestoreAutoBackup { get; set; } = new();
     public string Compare { get; set; }
     public string PreviousDifference { get; set; }
     public string NextDifference { get; set; }

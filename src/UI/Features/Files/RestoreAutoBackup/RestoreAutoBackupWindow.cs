@@ -3,6 +3,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 
@@ -13,7 +14,7 @@ public class RestoreAutoBackupWindow : Window
     public RestoreAutoBackupWindow(RestoreAutoBackupViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = "Restore auto-backup...";
+        Title = Se.Language.File.RestoreAutoBackup.Title;
         Width = 810;
         Height = 640;
         MinWidth = 800;
@@ -38,22 +39,22 @@ public class RestoreAutoBackupWindow : Window
             {
                 new DataGridTextColumn
                 {
-                    Header = "Date and Time",
+                    Header = Se.Language.General.DateAndTime,
                     Binding = new Binding(nameof(DisplayFile.DateAndTime))
                 },
                 new DataGridTextColumn
                 {
-                    Header = "File Name",
+                    Header = Se.Language.General.FileName,
                     Binding = new Binding(nameof(DisplayFile.FileName))
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Extension",
+                    Header = Se.Language.General.FileExtension,
                     Binding = new Binding(nameof(DisplayFile.Extension))
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Size",
+                    Header = Se.Language.General.Size,
                     Binding = new Binding(nameof(DisplayFile.Size))
                 }
             }
@@ -61,9 +62,9 @@ public class RestoreAutoBackupWindow : Window
 
         dataGrid.SelectionChanged += vm.DataGridSelectionChanged;
 
-        var linkOpenFolder = UiUtil.MakeLink("Open auto-backup folder", vm.OpenFolderCommand);
+        var linkOpenFolder = UiUtil.MakeLink(Se.Language.File.RestoreAutoBackup.OpenAutoBackupFolder, vm.OpenFolderCommand);
 
-        var buttonRestore = UiUtil.MakeButton("Restore auto-backup file", vm.RestoreFileCommand);
+        var buttonRestore = UiUtil.MakeButton(Se.Language.File.RestoreAutoBackup.RestoreAutoBackupFile, vm.RestoreFileCommand);
         buttonRestore.BindIsEnabled(vm, nameof(vm.IsOkButtonEnabled));
         var buttonOk = UiUtil.MakeButtonOk(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonRestore, buttonOk);

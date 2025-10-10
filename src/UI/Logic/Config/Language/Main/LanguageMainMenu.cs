@@ -164,7 +164,7 @@ public class LanguageMainMenu
 
         Translate = "Tr_anslate";
         AutoTranslate = "_Auto-translate...";
-        TranslateViaCopyPaste = "Translate via _copy-paste...";
+        TranslateViaCopyPaste = "Auto-translate via _copy-paste...";
 
         HelpTitle = "_Help";
         Help = "_Help...";

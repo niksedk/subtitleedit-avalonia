@@ -15,6 +15,8 @@ public class SeAutoTranslate
     public string OpenRouterPrompt { get; set; }
     public decimal RequestMaxBytes { get; set; }
     public decimal RequestDelaySeconds { get; set; }
+    public int CopyPasteMaxBlockSize { get; set; }
+    public string CopyPasteLineSeparator { get; set; }
 
     public SeAutoTranslate()
     {
@@ -25,5 +27,7 @@ public class SeAutoTranslate
         GroqPrompt = Configuration.Settings.Tools.GroqPrompt;
         OpenRouterPrompt = Configuration.Settings.Tools.OpenRouterPrompt;
         RequestMaxBytes = 1000;
+        CopyPasteMaxBlockSize = 5000;
+        CopyPasteLineSeparator = ".";
     }
 }

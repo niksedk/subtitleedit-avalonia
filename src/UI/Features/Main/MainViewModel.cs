@@ -2278,7 +2278,7 @@ public partial class MainViewModel :
 
         var result = await _windowService.ShowDialogAsync<CopyPasteTranslateWindow, CopyPasteTranslateViewModel>(Window!, vm => 
         { 
-            vm.Initialize(GetUpdateSubtitle()); 
+            vm.Initialize(Subtitles.ToList()); 
         });
 
         if (!result.OkPressed)

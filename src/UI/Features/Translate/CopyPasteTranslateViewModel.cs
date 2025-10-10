@@ -2,38 +2,65 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
+using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic.Config;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace Nikse.SubtitleEdit.Features.Translate;
 
 public partial class CopyPasteTranslateViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<AdjustDurationDisplay> _adjustTypes;
-    [ObservableProperty] private double _adjustRecalculateOptimalCharacterPerSecond;
+    [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _subtitles;
+    [ObservableProperty] private SubtitleLineViewModel? _selectedSubtitle;
+    [ObservableProperty] private int? _maxBlockSize;
+    [ObservableProperty] private string _lineSeparator;
 
     public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
+    public DataGrid SubtitleGrid { get; internal set; }
 
     public CopyPasteTranslateViewModel()
     {
-        AdjustTypes = new ObservableCollection<AdjustDurationDisplay>();
-        LoadSettings();
-    }
-
-    private void LoadSettings()
-    {
+        SubtitleGrid = new DataGrid();
+        Subtitles = new ObservableCollection<SubtitleLineViewModel>();
+        MaxBlockSize = Se.Settings.AutoTranslate.CopyPasteMaxBlockSize;
+        LineSeparator = Se.Settings.AutoTranslate.CopyPasteLineSeparator;
     }
 
     private void SaveSettings()
     {
+        if (MaxBlockSize.HasValue)
+        {
+            Se.Settings.AutoTranslate.CopyPasteMaxBlockSize = MaxBlockSize.Value;
+        }
+
+        Se.Settings.AutoTranslate.CopyPasteLineSeparator = LineSeparator ?? ".";
+
         Se.SaveSettings();
     }
 
-    internal void Initialize(Subtitle subtitle)
+    internal void Initialize(List<SubtitleLineViewModel> subtitles)
+    {
+        Subtitles.Clear();
+        
+        foreach (var s in subtitles)
+        {
+            var s2 = new SubtitleLineViewModel(s);
+            s2.OriginalText = s.Text;
+            s2.Text = s.OriginalText;
+            Subtitles.Add(s2);
+        }
+
+        if (Subtitles.Count > 0)
+        {
+            SelectedSubtitle = Subtitles[0];
+        }
+    }
+
+    [RelayCommand]
+    private void Translate()
     {
     }
 

@@ -4,10 +4,14 @@ public class LanguageTranslate
 {
     public string Title { get; set; }
     public string TranslateViaCopyPaste { get; set; }
+    public string MaxBlockSize { get; set; }
+    public string LineSeparator { get; set; }
 
     public LanguageTranslate()
     {
         Title = "Auto-translate";
-        TranslateViaCopyPaste = "Translate via copy/paste";
+        TranslateViaCopyPaste = "Auto-translate via copy/paste";
+        MaxBlockSize = "Max block size";
+        LineSeparator = "Line separator";
     }
 }
