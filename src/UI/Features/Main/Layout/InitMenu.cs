@@ -475,6 +475,11 @@ public static class InitMenu
                     Header = l.AutoTranslate,
                     Command = vm.ShowAutoTranslateCommand,
                 },
+                new MenuItem
+                {
+                    Header = l.TranslateViaCopyPaste,
+                    Command = vm.ShowTranslateViaCopyPasteCommand,
+                },
             }
         });
 

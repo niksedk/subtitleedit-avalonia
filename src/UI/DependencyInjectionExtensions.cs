@@ -151,6 +151,8 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<ChangeFrameRateViewModel>();
         collection.AddTransient<ChangeSpeedViewModel>();
         collection.AddTransient<CompareViewModel>();
+        collection.AddTransient<CopyPasteTranslateBlockViewModel>();
+        collection.AddTransient<CopyPasteTranslateViewModel>();
         collection.AddTransient<CustomContinuationStyleViewModel>();
         collection.AddTransient<CutVideoViewModel>();
         collection.AddTransient<DownloadFfmpegViewModel>();

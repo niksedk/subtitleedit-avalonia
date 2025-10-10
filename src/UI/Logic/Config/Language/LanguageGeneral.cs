@@ -410,6 +410,8 @@ public class LanguageGeneral
     public string CouldNotSaveFileXErrorY { get; set; }
     public string NoSubtitleLoaded { get; set; }
     public string Example { get; set; }
+    public string DateAndTime { get; set; }
+    public string Translate { get; set; }
 
     public LanguageGeneral()
     {
@@ -818,5 +820,7 @@ public class LanguageGeneral
         CouldNotSaveFileXErrorY = "Could not save file \"{0}\". Error: {1}";
         NoSubtitleLoaded = "No subtitle loaded";
         Example =  "Example";
+        DateAndTime = "Date and time";
+        Translate = "Translate";
     }
 }
