@@ -3,15 +3,13 @@ using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Main;
-using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Translate;
 
-public partial class CopyPasteTranslateViewModel : ObservableObject
+public partial class CopyPasteTranslateBlockViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _subtitles;
     [ObservableProperty] private SubtitleLineViewModel? _selectedSubtitle;
@@ -23,12 +21,8 @@ public partial class CopyPasteTranslateViewModel : ObservableObject
     public bool OkPressed { get; private set; }
     public DataGrid SubtitleGrid { get; internal set; }
 
-    private readonly IWindowService _windowService;
-
-    public CopyPasteTranslateViewModel(IWindowService windowService)
+    public CopyPasteTranslateBlockViewModel()
     {
-        _windowService = windowService;
-
         SubtitleGrid = new DataGrid();
         Subtitles = new ObservableCollection<SubtitleLineViewModel>();
         MaxBlockSize = Se.Settings.AutoTranslate.CopyPasteMaxBlockSize;
@@ -66,16 +60,8 @@ public partial class CopyPasteTranslateViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task Translate()
+    private void Translate()
     {
-        if (Window == null)
-        {
-            return;
-        }
-
-        await _windowService.ShowDialogAsync<CopyPasteTranslateBlockWindow, CopyPasteTranslateBlockViewModel>(Window!, vm =>
-        {
-        });
     }
 
     [RelayCommand]
