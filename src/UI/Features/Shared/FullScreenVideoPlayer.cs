@@ -13,6 +13,7 @@ public class FullScreenVideoWindow : Window
 {
     private DispatcherTimer? _mouseMoveDetectionTimer;
     private (int X, int Y) _lastCursorPosition;
+    private (int X, int Y) _lastPoiterMovedCursorPosition;
 
     // Windows API for getting cursor position
     [DllImport("user32.dll")]
@@ -29,10 +30,10 @@ public class FullScreenVideoWindow : Window
     private const string CoreGraphicsLib = "/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics";
     private const string ApplicationServicesLib = "/System/Library/Frameworks/ApplicationServices.framework/ApplicationServices";
 
-    
+
     [DllImport(CoreGraphicsLib)]
     private static extern CGPoint CGEventSourceGetCursorPosition(uint source);
-    
+
     [DllImport(CoreGraphicsLib)]
     private static extern IntPtr CGEventCreate(IntPtr source);
 
@@ -41,7 +42,7 @@ public class FullScreenVideoWindow : Window
 
     [DllImport(CoreGraphicsLib)]
     private static extern void CFRelease(IntPtr cf);
-    
+
     [StructLayout(LayoutKind.Sequential)]
     private struct CGPoint
     {
@@ -126,6 +127,8 @@ public class FullScreenVideoWindow : Window
         // Initialize cursor position tracking
         _lastCursorPosition = (-1, -1);
 
+        const int mouseMovementMinPixels = 20;
+
         // Poll for actual cursor position using platform APIs
         // This works regardless of Avalonia event handling or MPV
         _mouseMoveDetectionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
@@ -136,8 +139,8 @@ public class FullScreenVideoWindow : Window
                 var cursorPos = GetCursorPosition();
                 if (cursorPos.HasValue)
                 {
-                    if (Math.Abs(cursorPos.Value.X - _lastCursorPosition.X) > 10 ||
-                        Math.Abs(cursorPos.Value.Y - _lastCursorPosition.Y)  > 10)
+                    if (Math.Abs(cursorPos.Value.X - _lastCursorPosition.X) > mouseMovementMinPixels ||
+                        Math.Abs(cursorPos.Value.Y - _lastCursorPosition.Y) > mouseMovementMinPixels)
                     {
                         _lastCursorPosition = cursorPos.Value;
                         videoPlayer.NotifyUserActivity();
@@ -151,9 +154,18 @@ public class FullScreenVideoWindow : Window
         };
 
         // Keep these handlers as fallback if native APIs fail
-        grid.PointerMoved += (_, e) => { videoPlayer.NotifyUserActivity(); };
+        grid.PointerMoved += (_, e) =>
+        {
+            var pos = e.GetCurrentPoint(this);
+            if (Math.Abs(pos.Position.X - _lastPoiterMovedCursorPosition.X) > mouseMovementMinPixels ||
+                Math.Abs(pos.Position.Y - _lastPoiterMovedCursorPosition.Y) > mouseMovementMinPixels)
+            {
+                videoPlayer.NotifyUserActivity();
+                _lastPoiterMovedCursorPosition = ((int)pos.Position.X, (int)pos.Position.Y);
+            }
 
-        PointerMoved += (_, e) => { videoPlayer.NotifyUserActivity(); };
+            videoPlayer.IsFullScreen = true;
+        };
 
         KeyDown += (_, e) =>
         {

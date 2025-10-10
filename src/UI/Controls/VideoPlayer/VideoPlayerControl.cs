@@ -216,7 +216,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             mainGrid.Children.Add(_gridProgress);
 
             // Attach pointer moved handler to the main grid to capture all mouse movements
-            mainGrid.PointerMoved += OnPointerMoved;
+            //mainGrid.PointerMoved += OnPointerMoved;
 
             // Buttons
             var stackPanel = new StackPanel
@@ -525,6 +525,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             if (IsFullScreen)
             {
                 ShowControls();
+                _autoHideTimer?.Start();
             }
         }
 
@@ -539,15 +540,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             {
                 OnUserActivity();
             }
-        }
-
-        private void OnPointerMoved(object? sender, Avalonia.Input.PointerEventArgs e)
-        {
-            if (IsFullScreen)
-            {
-                OnUserActivity();
-            }
-        }
+        } 
 
         public void Reload()
         {
