@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Translate;
@@ -76,54 +77,64 @@ public partial class CopyPasteTranslateViewModel : ObservableObject
             return;
         }
 
-        try
+        var log = new StringBuilder();
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        var startIndex = selectedItems.Count <= 0 ? 0 : Subtitles.IndexOf(selectedItems[0]);
+        var start = startIndex;
+        var index = startIndex;
+
+        List<Core.Common.Paragraph> paragraphs = new List<Core.Common.Paragraph>();
+        for (var i = startIndex; i < Subtitles.Count; i++)
         {
-            var log = new StringBuilder();
-            var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
-            var startIndex = selectedItems.Count <= 0 ? 0 : Subtitles.IndexOf(selectedItems[0]);
-            var start = startIndex;
-            var index = startIndex;
-
-            List<Core.Common.Paragraph> paragraphs = new List<Core.Common.Paragraph>();
-            for (var i = startIndex; i < Subtitles.Count; i++)
+            var item = Subtitles[i];
+            var p = new Core.Common.Paragraph
             {
-                var item = Subtitles[i];
-                var p = new Core.Common.Paragraph
-                {
-                    Text = item.OriginalText,
-                    StartTime = new Core.Common.TimeCode(item.StartTime),
-                    EndTime = new Core.Common.TimeCode(item.EndTime),
-                };
-                paragraphs.Add(p);
-            }
-
-
-            var translator = new CopyPasteTranslator(paragraphs, LineSeparator);
-
-            var blocks = translator.BuildBlocks(MaxBlockSize ?? 5000, string.Empty, startIndex);
-            for (var i = 0; i < blocks.Count; i++)
-            {
-                var block = blocks[i];
-                var result = await _windowService.ShowDialogAsync<CopyPasteTranslateBlockWindow, CopyPasteTranslateBlockViewModel>(Window!, vm =>
-                {
-                    vm.Initialize(i + 1, blocks.Count, block.TargetText);
-                });
-
-                if (!result.OkPressed)
-                {
-                    return;
-                }
-
-                var translatedLines = translator.GetTranslationResult(string.Empty, result.TranslatedText, block);
-                FillTranslatedText(translatedLines, start, index);
-                index += block.Paragraphs.Count;
-                start = index;
-            }
+                Text = item.OriginalText,
+                StartTime = new Core.Common.TimeCode(item.StartTime),
+                EndTime = new Core.Common.TimeCode(item.EndTime),
+            };
+            paragraphs.Add(p);
         }
-        finally
+
+
+        var translator = new CopyPasteTranslator(paragraphs, LineSeparator);
+
+        var blocks = translator.BuildBlocks(MaxBlockSize ?? 5000, string.Empty, startIndex);
+        for (var i = 0; i < blocks.Count; i++)
         {
+            var block = blocks[i];
+            var result = await _windowService.ShowDialogAsync<CopyPasteTranslateBlockWindow, CopyPasteTranslateBlockViewModel>(Window!, vm =>
+            {
+                vm.Initialize(i + 1, blocks.Count, block.TargetText);
+            });
+
+            if (!result.OkPressed)
+            {
+                return;
+            }
+
+            var translatedLines = translator.GetTranslationResult(string.Empty, result.TranslatedText, block);
+            FillTranslatedText(translatedLines, start, index);
+            index += block.Paragraphs.Count;
+            start = index;
+            SelectAndScrollToRow(index);
         }
     }
+
+    private void SelectAndScrollToRow(int index)
+    {
+        if (index < 0 || index >= Subtitles.Count)
+        {
+            return;
+        }
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            SubtitleGrid.SelectedIndex = index;
+            SubtitleGrid.ScrollIntoView(SubtitleGrid.SelectedItem, null);
+        });
+    }
+
 
     private void FillTranslatedText(List<string> translatedLines, int start, int end)
     {
