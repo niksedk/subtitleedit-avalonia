@@ -13,7 +13,7 @@ public class FullScreenVideoWindow : Window
     private DispatcherTimer? _mouseMoveDetectionTimer;
     private (int X, int Y) _lastCursorPosition;
     private (int X, int Y) _lastPointerMovedCursorPosition;
-   
+
     public FullScreenVideoWindow(Controls.VideoPlayer.VideoPlayerControl videoPlayer, string videoFileName, Action onClose)
     {
         WindowState = WindowState.FullScreen;
@@ -70,15 +70,38 @@ public class FullScreenVideoWindow : Window
         {
             if (e.Key == Key.Escape)
             {
+                e.Handled = true;
                 Close();
             }
             else if (e.Key == Key.F11)
             {
+                e.Handled = true;
                 Close();
             }
             else if (e.Key == Key.Space)
             {
+                e.Handled = true;
                 videoPlayer.TogglePlayPause();
+            }
+            else if (e.Key == Key.Right)
+            {
+                e.Handled = true;
+                videoPlayer.Position += 2;
+            }
+            else if (e.Key == Key.Left)
+            {
+                e.Handled = true;
+                videoPlayer.Position -= 2;
+            }
+            else if (e.Key == Key.Up && e.KeyModifiers == KeyModifiers.None)
+            {
+                e.Handled = true;
+                videoPlayer.Volume += 2;
+            }
+            else if (e.Key == Key.Down && e.KeyModifiers == KeyModifiers.None)
+            {
+                e.Handled = true;
+                videoPlayer.Volume -= 2;
             }
 
             // Also notify on any key press

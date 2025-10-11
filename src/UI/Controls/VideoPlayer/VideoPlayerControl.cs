@@ -25,6 +25,9 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         public static readonly StyledProperty<double> VolumeProperty =
             AvaloniaProperty.Register<VideoPlayerControl, double>(nameof(Volume), 100);
 
+        /// <summary>
+        /// Video position in seconds.
+        /// </summary>
         public static readonly StyledProperty<double> PositionProperty =
             AvaloniaProperty.Register<VideoPlayerControl, double>(nameof(Position));
 
@@ -61,11 +64,23 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             get => GetValue(VolumeProperty);
             set
             {
+                if (value < 0)
+                {
+                    value = 0;
+                }
+                else if (value > _videoPlayerInstance.VolumeMaximum)
+                {
+                    value = _videoPlayerInstance.VolumeMaximum;
+                }
+
                 SetValue(VolumeProperty, value);
                 _videoPlayerInstance.Volume = value;
             }
         }
 
+        /// <summary>
+        /// Video position in seconds.
+        /// </summary>
         public double Position
         {
             get => GetValue(PositionProperty);
@@ -190,7 +205,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             _videoPlayerInstance = videoPlayerInstance;
             _videoFileName = string.Empty;
             _lastActivityTime = DateTime.UtcNow;
-            
+
             var mainGrid = new Grid
             {
                 RowDefinitions = new RowDefinitions("*,Auto"), // video + controls
@@ -402,7 +417,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
 
             sliderVolume.Maximum = MpvApi.MaxVolume;
             sliderVolume.Value = 50;
-            
+
             // Attach keyboard event handler to detect keyboard activity
             this.KeyDown += OnKeyDown;
         }
@@ -497,10 +512,10 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         private void StartAutoHideControls()
         {
             _lastActivityTime = DateTime.UtcNow;
-            
+
             // Show controls initially when entering full screen
             ShowControls();
-            
+
             // Timer to hide controls after 3 seconds of inactivity
             _autoHideTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
             _autoHideTimer.Tick += (s, e) =>
@@ -540,7 +555,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             {
                 OnUserActivity();
             }
-        } 
+        }
 
         public void Reload()
         {

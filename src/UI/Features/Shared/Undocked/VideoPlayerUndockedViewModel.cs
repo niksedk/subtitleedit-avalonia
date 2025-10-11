@@ -127,23 +127,67 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
             return;
         }
 
-        if (e.Key == Key.Escape && Window is { } && Window.WindowState == WindowState.FullScreen)
+        if (_videoPlayer != null)
         {
-            Window.WindowState = WindowState.Normal;
-            e.Handled = true;
-            _videoPlayer?.NotifyUserActivity();
-            return;
+            if (e.Key == Key.Escape && Window is { } && Window.WindowState == WindowState.FullScreen)
+            {
+                Window.WindowState = WindowState.Normal;
+                e.Handled = true;
+                _videoPlayer.NotifyUserActivity();
+                return;
+            }
+
+            if (e.Key == Key.Space)
+            {
+                _videoPlayer.TogglePlayPause();
+                e.Handled = true;
+                _videoPlayer.NotifyUserActivity();
+                return;
+            }
+
+            if (e.Key == Key.Space)
+            {
+                e.Handled = true;
+                _videoPlayer.TogglePlayPause();
+                _videoPlayer.NotifyUserActivity();
+                return;
+            }
+
+            if (e.Key == Key.Right)
+            {
+                e.Handled = true;
+                _videoPlayer.Position += 2;
+                _videoPlayer.NotifyUserActivity();
+                return;
+            }
+
+            if (e.Key == Key.Left)
+            {
+                e.Handled = true;
+                _videoPlayer.Position -= 2;
+                _videoPlayer.NotifyUserActivity();
+                return;
+            }
+
+            if (e.Key == Key.Up && e.KeyModifiers == KeyModifiers.None)
+            {
+                e.Handled = true;
+                _videoPlayer.Volume += 2;
+                _videoPlayer.NotifyUserActivity();
+                return;
+            }
+
+            if (e.Key == Key.Down && e.KeyModifiers == KeyModifiers.None)
+            {
+                e.Handled = true;
+                _videoPlayer.Volume -= 2;
+                _videoPlayer.NotifyUserActivity();
+                return;
+            }
+
+            _videoPlayer.NotifyUserActivity();
         }
 
-        if (e.Key == Key.Space && _videoPlayer != null)
-        {
-            _videoPlayer.TogglePlayPause();
-            e.Handled = true;
-            _videoPlayer?.NotifyUserActivity();
-            return;
-        }
-
-        _videoPlayer?.NotifyUserActivity();
         MainViewModel?.OnKeyDownHandler(sender, e);
     }
 

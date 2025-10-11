@@ -5,7 +5,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Logic;
-using System;
 
 namespace Nikse.SubtitleEdit.Features.Shared;
 
@@ -44,6 +43,42 @@ public partial class AudioVisualizerUndockedViewModel : ObservableObject
 
     internal void OnKeyDown(object? sender, KeyEventArgs e)
     {
+        var videoPlayer = MainViewModel?.VideoPlayerControl;
+
+        if (videoPlayer != null)
+        {
+            if (e.Key == Key.Space)
+            {
+                e.Handled = true;
+                videoPlayer.TogglePlayPause();
+                return;
+            }
+            else if (e.Key == Key.Right)
+            {
+                e.Handled = true;
+                videoPlayer.Position += 2;
+                return;
+            }
+            else if (e.Key == Key.Left)
+            {
+                e.Handled = true;
+                videoPlayer.Position -= 2;
+                return;
+            }
+            else if (e.Key == Key.Up && e.KeyModifiers == KeyModifiers.None)
+            {
+                e.Handled = true;
+                videoPlayer.Volume += 2;
+                return;
+            }
+            else if (e.Key == Key.Down && e.KeyModifiers == KeyModifiers.None)
+            {
+                e.Handled = true;
+                videoPlayer.Volume -= 2;
+                return;
+            }
+        }
+
         MainViewModel?.OnKeyDownHandler(sender, e);
     }
 
