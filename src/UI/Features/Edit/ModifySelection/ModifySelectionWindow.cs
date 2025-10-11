@@ -129,7 +129,7 @@ public class ModifySelectionWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(UiUtil.MakeRadioButton(Se.Language.Edit.ModifySelection.SelectionAdd, vm, nameof(vm.SelectionNew), "selection"), 0);
+        grid.Add(UiUtil.MakeRadioButton(Se.Language.Edit.ModifySelection.SelectionNew, vm, nameof(vm.SelectionNew), "selection"), 0);
         grid.Add(UiUtil.MakeRadioButton(Se.Language.Edit.ModifySelection.SelectionAdd, vm, nameof(vm.SelectionAdd), "selection"), 1);
         grid.Add(UiUtil.MakeRadioButton(Se.Language.Edit.ModifySelection.SelectionSubtract, vm, nameof(vm.SelectionSubtract), "selection"), 2);
         grid.Add(UiUtil.MakeRadioButton(Se.Language.Edit.ModifySelection.SelectionIntersect, vm, nameof(vm.SelectionIntersect), "selection"), 3);

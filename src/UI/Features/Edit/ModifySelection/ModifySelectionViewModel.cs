@@ -1,11 +1,10 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic.Config;
-using SharpCompress.Compressors.RLE90;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -67,15 +66,18 @@ public partial class ModifySelectionViewModel : ObservableObject
             return;
         }
 
-        Subtitles.Clear();
-        foreach (var item in _allSubtitles)
+        Dispatcher.UIThread.Post(() =>
         {
-            if (rule.IsMatch(item))
+            Subtitles.Clear();
+            foreach (var item in _allSubtitles)
             {
-                var previewItem = new PreviewItem(item.Number, true, item.Text, item);
-                Subtitles.Add(previewItem);
+                if (rule.IsMatch(item))
+                {
+                    var previewItem = new PreviewItem(item.Number, true, item.Text, item);
+                    Subtitles.Add(previewItem);
+                }
             }
-        }
+        });
     }
 
     private void LoadSettings()
@@ -113,6 +115,7 @@ public partial class ModifySelectionViewModel : ObservableObject
     internal void Initialize(List<SubtitleLineViewModel> subtitleLineViewModels, List<SubtitleLineViewModel> selectedItems)
     {
         _allSubtitles = subtitleLineViewModels;
+        _previewTimer.Start();
     }
 
     internal void OnRuleChanged()
