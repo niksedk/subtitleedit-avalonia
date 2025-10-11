@@ -61,7 +61,7 @@ public class MergeSameTextWindow : Window
 
         Content = grid;
 
-        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        Activated += delegate { buttonCancel.Focus(); }; // hack to make OnKeyDown work
         KeyDown += vm.OnKeyDown;
     }
 
