@@ -39,6 +39,7 @@ public partial class AssaStylesViewModel : ObservableObject
     [ObservableProperty] private bool _isDeleteAllVisible;
     [ObservableProperty] private bool _isFileStyleSelected;
     [ObservableProperty] private bool _isStorageStyleSelected;
+    [ObservableProperty] private bool _isTakeUsagesFromVisible;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -587,6 +588,9 @@ public partial class AssaStylesViewModel : ObservableObject
             CurrentTitle = Se.Language.Assa.StylesInFile;
         }
 
+        IsFileStyleSelected = SelectedFileStyle != null;
+        IsTakeUsagesFromVisible = FileStyleGrid.SelectedItems.Count == 1;
+
         _timerUpdatePreview.Start();
     }
 
@@ -709,6 +713,7 @@ public partial class AssaStylesViewModel : ObservableObject
         CurrentTitle = Se.Language.Assa.StylesInFile;
         SelectedBorderType = selectedStyle?.BorderStyle ?? BorderTypes[0];
         IsFileStyleSelected = selectedStyle != null;
+        IsTakeUsagesFromVisible = FileStyleGrid.SelectedItems.Count == 1;
     }
 
     internal void StorageStylesChanged(object? sender, SelectionChangedEventArgs e)
