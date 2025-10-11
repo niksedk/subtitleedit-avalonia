@@ -40,6 +40,8 @@ public partial class AssaStylesViewModel : ObservableObject
     [ObservableProperty] private bool _isFileStyleSelected;
     [ObservableProperty] private bool _isStorageStyleSelected;
     [ObservableProperty] private bool _isTakeUsagesFromVisible;
+    [ObservableProperty] private bool _isSetStyleAsDefaultVisible;
+    [ObservableProperty] private bool _isCopyToFileStylesVisible;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -723,6 +725,8 @@ public partial class AssaStylesViewModel : ObservableObject
         CurrentTitle = Se.Language.Assa.StylesSaved;
         SelectedBorderType = selectedStyle?.BorderStyle ?? BorderTypes[0];
         IsStorageStyleSelected = selectedStyle != null;
+        IsSetStyleAsDefaultVisible = StorageStyleGrid.SelectedItems.Count == 1;
+        IsCopyToFileStylesVisible = StorageStyleGrid.SelectedItems.Count > 0;
     }
 
     internal void BorderTypeChanged(object? sender, SelectionChangedEventArgs e)

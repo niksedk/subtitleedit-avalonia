@@ -289,6 +289,15 @@ public class AssaStylesWindow : Window
         flyout.Opening += vm.StoreContextMenuOpening;
         dataGrid.ContextFlyout = flyout;
 
+        var menuItemCopyToFileStyles = new MenuItem
+        {
+            Header = Se.Language.Assa.CopyToFileStyles,
+            DataContext = vm,
+            Command = vm.StorageCopyToFilesCommand,
+        };
+        menuItemCopyToFileStyles.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsCopyToFileStylesVisible)) { Source = vm });
+        flyout.Items.Add(menuItemCopyToFileStyles);
+
         var menuItemDelete = new MenuItem
         {
             Header = Se.Language.General.Delete,
@@ -313,9 +322,8 @@ public class AssaStylesWindow : Window
             DataContext = vm,
             Command = vm.StorageSetDefaultCommand,
         };
-        menuItemClearSetAsDefault.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsDeleteVisible)) { Source = vm });
+        menuItemClearSetAsDefault.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsSetStyleAsDefaultVisible)) { Source = vm });
         flyout.Items.Add(menuItemClearSetAsDefault);
-
 
         var buttonNew = UiUtil.MakeButton(vm.StorageNewCommand, IconNames.Plus, Se.Language.General.New);
         var buttonDuplicate = UiUtil.MakeButton(vm.StorageDuplicateCommand, IconNames.Duplicate, Se.Language.General.Duplicate);
