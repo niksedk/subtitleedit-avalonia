@@ -15,6 +15,7 @@ public class SeVideo
     public string CutType { get; set; }
     public string ShowChangesFFmpegArguments { get; set; }
     public bool VideoPlayerDisplayTimeLeft { get; set; }
+    public string CutDefaultVideoExtension { get; set; }
 
     public SeVideo()
     {
@@ -27,6 +28,7 @@ public class SeVideo
         ShowFullscreenButton = true;
         AutoOpen = true;
         CutType = Features.Video.CutVideo.CutType.MergeSegments.ToString();
+        CutDefaultVideoExtension = ".mkv";
         ShowChangesFFmpegArguments = "-i \"{0}\" -vf \"select=gt(scene\\,{1}),showinfo\" -threads 0 -vsync vfr -f null -";
     }
 }

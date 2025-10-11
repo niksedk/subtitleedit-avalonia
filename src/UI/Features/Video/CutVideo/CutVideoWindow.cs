@@ -42,14 +42,27 @@ public class CutVideoWindow : Window
             vm.CutTypes,
             vm,
             nameof(vm.SelectedCutType)
-        );
+        ).WithMarginRight(10);
+
+
+        var labelVideoExtension = UiUtil.MakeLabel(Se.Language.General.VideoExtension);
+
+        var comboBoxVideoExtension = UiUtil.MakeComboBox<string>(
+            vm.VideoExtensions,
+            vm,
+            nameof(vm.SelectedVideoExtension)
+        ).WithMarginRight(10);
+
         var buttonGenerate = UiUtil.MakeButton(Se.Language.General.Generate, vm.GenerateCommand)
             .WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
-        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand).WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
+        var buttonConfig = UiUtil.MakeButton(vm.OkCommand, IconNames.Settings)
+            .WithMarginRight(5)
+            .WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
         var buttonPanel = UiUtil.MakeButtonBar(
             comboBoxCutType,
+            labelVideoExtension,
+            comboBoxVideoExtension,
             buttonGenerate,
-            buttonOk,
             UiUtil.MakeButtonCancel(vm.CancelCommand)
         );
 
@@ -57,7 +70,7 @@ public class CutVideoWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // segmenst and video player
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // segments and video player
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // audio visualizer
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // progress bar
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // buttons
@@ -82,7 +95,7 @@ public class CutVideoWindow : Window
 
         Content = grid;
 
-        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        Activated += delegate { buttonGenerate.Focus(); }; // hack to make OnKeyDown work
     }
 
     private static Border MakeSegmentsView(CutVideoViewModel vm)

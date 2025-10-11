@@ -31,6 +31,7 @@ public class LanguageMainMenu
     public string MultipleReplace { get; set; }
     public string GoToLineNumber { get; set; }
     public string RightToLeftMode { get; set; }
+    public string ModifySelectionDotDotDot { get; set; }
 
 
     public string Tools { get; set; }
@@ -118,6 +119,7 @@ public class LanguageMainMenu
         MultipleReplace = "_Multiple replace...";
         GoToLineNumber = "_Go to line number...";
         RightToLeftMode = "R_ight-to-left mode";
+        ModifySelectionDotDotDot = "Modify _selection...";
 
         Tools = "_Tools";
         AdjustDurations = "_Adjust durations...";

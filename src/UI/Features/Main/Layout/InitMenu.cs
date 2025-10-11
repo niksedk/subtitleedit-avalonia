@@ -240,13 +240,18 @@ public static class InitMenu
                 new Separator(),
                 new MenuItem
                 {
-                    Header = Se.Language.General.SelectAll,
-                    Command = vm.SelectAllLinesCommand,
+                    Header = l.ModifySelectionDotDotDot,
+                    Command = vm.ShowModifySelectionCommand,
                 },
                 new MenuItem
                 {
                     Header = Se.Language.General.InvertSelection,
                     Command = vm.InverseSelectionCommand,
+                },
+                new MenuItem
+                {
+                    Header = Se.Language.General.SelectAll,
+                    Command = vm.SelectAllLinesCommand,
                 },
             }
         });

@@ -960,8 +960,8 @@ public class FfmpegGenerator
         // Keep the remainder after the last segment
         string inputDuration = $"$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 \"{inputVideoFileName}\")";
         filterParts.Add(
-            $"[0:v]trim=start={lastEnd},setpts=PTS-STARTPTS[v{keepIndex}]; " +
-            $"[0:a]atrim=start={lastEnd},asetpts=PTS-STARTPTS[a{keepIndex}]"
+            $"[0:v]trim=start={lastEnd.ToString(CultureInfo.InvariantCulture)},setpts=PTS-STARTPTS[v{keepIndex}]; " +
+            $"[0:a]atrim=start={lastEnd.ToString(CultureInfo.InvariantCulture)},asetpts=PTS-STARTPTS[a{keepIndex}]"
         );
         concatInputs.Add($"[v{keepIndex}][a{keepIndex}]");
 

@@ -578,7 +578,7 @@ public partial class CutVideoViewModel : ObservableObject
             return;
         }
 
-        var outputVideoFileName = Path.ChangeExtension(VideoFileName, SelectedVideoExtension);
+        var outputVideoFileName = MakeOutputFileName(VideoFileName);
         outputVideoFileName = await _fileHelper.PickSaveFile(Window!, SelectedVideoExtension, outputVideoFileName, Se.Language.Video.SaveVideoAsTitle);
         if (string.IsNullOrEmpty(outputVideoFileName))
         {
@@ -606,12 +606,16 @@ public partial class CutVideoViewModel : ObservableObject
     {
         var settings = Se.Settings.Video;
         SelectedCutType = CutTypes.FirstOrDefault(ct => ct.CutType.ToString() == settings.CutType) ?? CutTypes[0];
+        SelectedVideoExtension = VideoExtensions.Contains(settings.CutDefaultVideoExtension)
+            ? settings.CutDefaultVideoExtension
+            : VideoExtensions[0];
     }
 
     private void SaveSettings()
     {
         var settings = Se.Settings.Video;
         settings.CutType = SelectedCutType.CutType.ToString();
+        settings.CutDefaultVideoExtension = SelectedVideoExtension;
         Se.SaveSettings();
     }
 
@@ -628,6 +632,7 @@ public partial class CutVideoViewModel : ObservableObject
         if (IsGenerating)
         {
             _doAbort = true;
+            IsGenerating = false;
             return;
         }
 
@@ -671,6 +676,8 @@ public partial class CutVideoViewModel : ObservableObject
                 // ignore
             }
         }
+
+        SaveSettings();
     }
 
     internal void OnLoaded()

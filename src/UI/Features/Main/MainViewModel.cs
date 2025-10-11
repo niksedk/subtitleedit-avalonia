@@ -20,6 +20,7 @@ using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.VobSub;
 using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Features.Edit.Find;
+using Nikse.SubtitleEdit.Features.Edit.ModifySelection;
 using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 using Nikse.SubtitleEdit.Features.Edit.Replace;
 using Nikse.SubtitleEdit.Features.Edit.ShowHistory;
@@ -3595,11 +3596,15 @@ public partial class MainViewModel :
         _shortcutManager.ClearKeys();
     }
 
-
     [RelayCommand]
-    private void SelectAllLines()
+    private async Task ShowModifySelection()
     {
-        SelectAllRows();
+        var result = await _windowService.ShowDialogAsync<ModifySelectionWindow, ModifySelectionViewModel>(Window!, vm =>
+        {
+            var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+            vm.Initialize(Subtitles.ToList(), selectedItems);
+        });
+
         _shortcutManager.ClearKeys();
     }
 
@@ -3607,6 +3612,13 @@ public partial class MainViewModel :
     private void InverseSelection()
     {
         InverseRowSelection();
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private void SelectAllLines()
+    {
+        SelectAllRows();
         _shortcutManager.ClearKeys();
     }
 

@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Features.Edit.AlignmentPicker;
 using Nikse.SubtitleEdit.Features.Edit.Find;
+using Nikse.SubtitleEdit.Features.Edit.ModifySelection;
 using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 using Nikse.SubtitleEdit.Features.Edit.Replace;
 using Nikse.SubtitleEdit.Features.Edit.ShowHistory;
@@ -194,6 +195,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<ManualChosenEncodingViewModel>();
         collection.AddTransient<MergeSameTextViewModel>();
         collection.AddTransient<MergeSameTimeCodesViewModel>();
+        collection.AddTransient<ModifySelectionViewModel>();
         collection.AddTransient<MultipleReplaceViewModel>();
         collection.AddTransient<NOcrCharacterAddViewModel>();
         collection.AddTransient<NOcrCharacterHistoryViewModel>();
