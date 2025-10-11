@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Logic;
+using System;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Shared;
@@ -23,20 +24,69 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
     public Main.MainViewModel? MainViewModel { get; set; }
     public bool AllowClose { get; set; }
 
+    private VideoPlayerControl? _videoPlayer;
+    private DispatcherTimer? _mouseMoveDetectionTimer;
+    private (int X, int Y) _lastCursorPosition;
+    private (int X, int Y) _lastPointerMovedCursorPosition;
+
     internal void Initialize(VideoPlayerControl originalVideoPlayerControl, Main.MainViewModel mainViewModel)
     {
         VideoPlayer = InitVideoPlayer.MakeLayoutVideoPlayer(mainViewModel);
         if (mainViewModel.VideoPlayerControl is VideoPlayerControl videoPlayerControl)
         {
-            videoPlayerControl.FullScreenIsVisible = false;
+            _videoPlayer = videoPlayerControl;
             if (!string.IsNullOrEmpty(originalVideoPlayerControl.VideoPlayerInstance.FileName))
             {
-                Dispatcher.UIThread.Post(async() =>
+                Dispatcher.UIThread.Post(async () =>
                 {
                     Task.Delay(100).Wait();
                     await videoPlayerControl.Open(originalVideoPlayerControl.VideoPlayerInstance.FileName);
                 });
             }
+
+
+            const int mouseMovementMinPixels = 20;
+
+            // Poll for actual cursor position using platform APIs
+            // This works regardless of Avalonia event handling or MPV
+            _mouseMoveDetectionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+            _mouseMoveDetectionTimer.Tick += (s, e) =>
+            {
+                try
+                {
+                    var cursorPos = CursorPositionHelper.GetCursorPosition();
+                    if (cursorPos.HasValue)
+                    {
+                        if (Math.Abs(cursorPos.Value.X - _lastCursorPosition.X) > mouseMovementMinPixels ||
+                            Math.Abs(cursorPos.Value.Y - _lastCursorPosition.Y) > mouseMovementMinPixels)
+                        {
+                            _lastCursorPosition = cursorPos.Value;
+                            _videoPlayer.NotifyUserActivity();
+                        }
+                    }
+                }
+                catch
+                {
+                    // Ignore errors
+                }
+            };
+
+            // Keep these handlers as fallback if native APIs fail
+            originalVideoPlayerControl.PointerMoved += (_, e) =>
+            {
+                var pos = e.GetCurrentPoint(originalVideoPlayerControl);
+                if (Math.Abs(pos.Position.X - _lastPointerMovedCursorPosition.X) > mouseMovementMinPixels ||
+                    Math.Abs(pos.Position.Y - _lastPointerMovedCursorPosition.Y) > mouseMovementMinPixels)
+                {
+                    _videoPlayer.NotifyUserActivity();
+                    _lastPointerMovedCursorPosition = ((int)pos.Position.X, (int)pos.Position.Y);
+                }
+
+                if (Window != null)
+                {
+                    _videoPlayer.IsFullScreen = Window.WindowState == WindowState.FullScreen;
+                }
+            };
         }
 
         MainViewModel = mainViewModel;
@@ -73,9 +123,27 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
                 }
             }
 
+            _videoPlayer?.NotifyUserActivity();
             return;
         }
 
+        if (e.Key == Key.Escape && Window is { } && Window.WindowState == WindowState.FullScreen)
+        {
+            Window.WindowState = WindowState.Normal;
+            e.Handled = true;
+            _videoPlayer?.NotifyUserActivity();
+            return;
+        }
+
+        if (e.Key == Key.Space && _videoPlayer != null)
+        {
+            _videoPlayer.TogglePlayPause();
+            e.Handled = true;
+            _videoPlayer?.NotifyUserActivity();
+            return;
+        }
+
+        _videoPlayer?.NotifyUserActivity();
         MainViewModel?.OnKeyDownHandler(sender, e);
     }
 
