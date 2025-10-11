@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic.Config;
+using SharpCompress.Compressors.RLE90;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -28,6 +29,10 @@ public partial class ModifySelectionViewModel : ObservableObject
 
     public bool OkPressed { get; private set; }
 
+    private List<SubtitleLineViewModel> _allSubtitles;  
+    private readonly System.Timers.Timer _previewTimer;
+    private bool _isDirty;
+
     public ModifySelectionViewModel()
     {
         Rules = new ObservableCollection<ModifySelectionRule>(ModifySelectionRule.List());
@@ -35,7 +40,42 @@ public partial class ModifySelectionViewModel : ObservableObject
 
         Subtitles = new ObservableCollection<PreviewItem>();
 
+        _allSubtitles = new List<SubtitleLineViewModel>();
+
         LoadSettings();
+
+        _previewTimer = new System.Timers.Timer(500);
+        _previewTimer.Elapsed += (sender, args) =>
+        {
+            _previewTimer.Stop();
+
+            if (_isDirty)
+            {
+                _isDirty = false;
+                UpdatePreview();
+            }
+
+            _previewTimer.Start();
+        };
+    }
+
+    private void UpdatePreview()
+    {
+        var rule = SelectedRule;
+        if (rule == null || _allSubtitles.Count == 0)
+        {
+            return;
+        }
+
+        Subtitles.Clear();
+        foreach (var item in _allSubtitles)
+        {
+            if (rule.IsMatch(item))
+            {
+                var previewItem = new PreviewItem(item.Number, true, item.Text, item);
+                Subtitles.Add(previewItem);
+            }
+        }
     }
 
     private void LoadSettings()
@@ -72,10 +112,6 @@ public partial class ModifySelectionViewModel : ObservableObject
 
     internal void Initialize(List<SubtitleLineViewModel> subtitleLineViewModels, List<SubtitleLineViewModel> selectedItems)
     {
-        foreach (var item in subtitleLineViewModels)
-        {
-            var previewItem = new PreviewItem(item.Number, true, item.Text, item);
-            Subtitles.Add(previewItem);
-        }
+        _allSubtitles = subtitleLineViewModels;
     }
 }

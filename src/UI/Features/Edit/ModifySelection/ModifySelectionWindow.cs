@@ -15,7 +15,7 @@ public class ModifySelectionWindow : Window
         CanResize = true;
         Width = 800;
         Height = 500;
-        MinWidth = 600;
+        MinWidth = 725;
         MinHeight = 400;
         vm.Window = this;
         DataContext = vm;
@@ -55,7 +55,7 @@ public class ModifySelectionWindow : Window
         KeyDown += vm.KeyDown;
     }
 
-    private Control MakeRulesView(ModifySelectionViewModel vm)
+    private static Border MakeRulesView(ModifySelectionViewModel vm)
     {
         var grid = new Grid
         {
@@ -66,27 +66,45 @@ public class ModifySelectionWindow : Window
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnSpacing = 10,
             RowSpacing = 10,
             Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Top,
         };
 
-        var comboBoxRules = UiUtil.MakeComboBox(vm.Rules, vm, nameof(vm.SelectedRule));
-        var textBoxRuleText = UiUtil.MakeTextBox(200, vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.Text));
-        var checkBoxRuleCaseSensitive = UiUtil.MakeCheckBox(Se.Language.General.CaseSensitive, vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.MatchCase));
+        var comboBoxRules = UiUtil.MakeComboBox(vm.Rules, vm, nameof(vm.SelectedRule)).WithWidth(175);
+        
+        var textBoxRuleText = UiUtil.MakeTextBox(150, vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.Text));
+        textBoxRuleText.BindIsVisible(vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.HasText));
 
-        grid.Add(comboBoxRules, 0, 0);
-        grid.Add(textBoxRuleText, 0, 1);
-        grid.Add(checkBoxRuleCaseSensitive, 1, 0, 1, 2);
+        var numericUpDownRuleNumber = UiUtil.MakeNumericUpDownInt(0, 1000, 100, 150, vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.Number));
+        numericUpDownRuleNumber.BindIsVisible(vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.HasNumber));
+
+        var panelRule = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 10,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Children =
+            {
+                comboBoxRules,
+                textBoxRuleText,
+                numericUpDownRuleNumber,
+            },
+        };
+        
+        var checkBoxRuleCaseSensitive = UiUtil.MakeCheckBox(Se.Language.General.CaseSensitive, vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.MatchCase));
+        checkBoxRuleCaseSensitive.BindIsVisible(vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.HasMatchCase));
+
+        grid.Add(panelRule, 0);
+        grid.Add(checkBoxRuleCaseSensitive, 1);
 
         return UiUtil.MakeBorderForControl(grid);
     }
 
-    private Control MakeSelectionView(ModifySelectionViewModel vm)
+    private static Border MakeSelectionView(ModifySelectionViewModel vm)
     {
         var grid = new Grid
         {
@@ -101,8 +119,8 @@ public class ModifySelectionWindow : Window
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
-            ColumnSpacing = 10,
-            RowSpacing = 10,
+            ColumnSpacing = 5,
+            RowSpacing = 5,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
@@ -115,7 +133,7 @@ public class ModifySelectionWindow : Window
         return UiUtil.MakeBorderForControl(grid);
     }
 
-    private Control MakeSubtitleView(ModifySelectionViewModel vm)
+    private static Border MakeSubtitleView(ModifySelectionViewModel vm)
     {
         var dataGrid = new DataGrid
         {

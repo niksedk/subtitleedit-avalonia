@@ -1,4 +1,6 @@
-﻿using Nikse.SubtitleEdit.Logic.Config;
+﻿using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Logic.Config;
+using System;
 using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Features.Edit.ModifySelection;
@@ -10,6 +12,7 @@ public class ModifySelectionRule
 
     public string Text { get; set; }
     public bool HasText { get; set; }
+    public bool HasMatchCase { get; set; }
     public bool MatchCase { get; set; }
 
     public double Number { get; set; }
@@ -25,6 +28,7 @@ public class ModifySelectionRule
         Text = string.Empty;
         HasText = false;
         MatchCase = false;
+        HasMatchCase = false;
         Number = 0;
         HasNumber = false;
         NumberDecimals = false;
@@ -69,5 +73,10 @@ public class ModifySelectionRule
             new() { RuleType = RuleType.Actor,               Name = g.Actor, HasText = true },
 
         };
+    }
+
+    internal bool IsMatch(SubtitleLineViewModel item)
+    {
+        
     }
 }
