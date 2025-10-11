@@ -412,6 +412,7 @@ public class LanguageGeneral
     public string Example { get; set; }
     public string DateAndTime { get; set; }
     public string Translate { get; set; }
+    public string CopyImageToClipboard { get; set; }
 
     public LanguageGeneral()
     {
@@ -822,5 +823,6 @@ public class LanguageGeneral
         Example =  "Example";
         DateAndTime = "Date and time";
         Translate = "Translate";
+        CopyImageToClipboard = "Copy image to clipboard";
     }
 }

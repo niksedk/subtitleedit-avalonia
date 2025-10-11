@@ -4,6 +4,7 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Shared.ShowImage;
 
@@ -33,6 +34,26 @@ public class ShowImageWindow : Window
             VerticalAlignment = VerticalAlignment.Top,
             Stretch = Stretch.Uniform,
         };
+
+        var flyout = new MenuFlyout();
+        image.ContextFlyout = flyout;
+
+        var menuItemDelete = new MenuItem
+        {
+            Header = Se.Language.General.CopyImageToClipboard,
+            DataContext = vm,
+            Command = vm.CopyImageToClipboardCommand,
+        };
+        flyout.Items.Add(menuItemDelete);
+
+        var menuItemClear = new MenuItem
+        {
+            Header = Se.Language.General.SaveImageAsDotDotDot,
+            DataContext = vm,
+            Command = vm.SaveImageAsCommand,
+        };
+        flyout.Items.Add(menuItemClear);
+
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonPanel = UiUtil.MakeButtonBar(buttonOk);
