@@ -8,7 +8,7 @@ public class LanguageManualChosenEncoding
 
     public LanguageManualChosenEncoding()
     {
-        Title = "Import subitle with manually chosen encoding";
+        Title = "Import subtitle with manually chosen encoding";
         SearchEncodings = "Search encodings";
         CodePage = "Code page";
     }

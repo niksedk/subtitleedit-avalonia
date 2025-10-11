@@ -601,6 +601,11 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task SaveLanguageFile()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
         var json = System.Text.Json.JsonSerializer.Serialize(Se.Language, new System.Text.Json.JsonSerializerOptions
         {
             WriteIndented = true,
@@ -611,7 +616,7 @@ public partial class MainViewModel :
         var fileName = Path.Combine(currentDirectory, "English.json");
         await File.WriteAllTextAsync(fileName, json, Encoding.UTF8);
         ShowStatus($"Language file saved to {fileName}");
-        await _folderHelper.OpenFolder(Window!, currentDirectory);
+        await _folderHelper.OpenFolderWithFileSelected(Window, fileName);
 
         _shortcutManager.ClearKeys();
     }

@@ -24,7 +24,7 @@ public class LanguageExport
     public LanguageExport()
     {
         ExportImagesProfiles = "Export images profiles";
-        LeftRightMargin = "Lefr/right margin";
+        LeftRightMargin = "Left/right margin";
         TopBottomMargin = "Top/bottom margin";
         TitleExportBluRaySup = "Export Blu-ray (sup)";
         LineSpacingPercent = "Line spacing %";
