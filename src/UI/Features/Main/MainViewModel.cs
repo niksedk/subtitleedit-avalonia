@@ -3610,10 +3610,9 @@ public partial class MainViewModel :
             if (result.SelectionNew)
             {
                 SubtitleGrid.SelectedItems.Clear();
-                var newSelectedItems = result.Subtitles.Select(p => p.Subtitle).ToList();
                 foreach (var item in Subtitles)
                 {
-                    if (newSelectedItems.Contains(item))
+                    if (result.Selection.Contains(item))
                     {
                         SubtitleGrid.SelectedItems.Add(item);
                     }
@@ -3621,10 +3620,9 @@ public partial class MainViewModel :
             }
             else if (result.SelectionAdd)
             {
-                var newSelectedItems = result.Subtitles.Select(p => p.Subtitle).ToList();
                 foreach (var item in Subtitles)
                 {
-                    if (newSelectedItems.Contains(item) && !SubtitleGrid.SelectedItems.Contains(item))
+                    if (result.Selection.Contains(item) && !SubtitleGrid.SelectedItems.Contains(item))
                     {
                         SubtitleGrid.SelectedItems.Add(item);
                     }
@@ -3632,10 +3630,9 @@ public partial class MainViewModel :
             }
             else if (result.SelectionSubtract)
             {
-                var removeSelectedItems = result.Subtitles.Select(p => p.Subtitle).ToList();
                 foreach (var item in Subtitles)
                 {
-                    if (removeSelectedItems.Contains(item) && SubtitleGrid.SelectedItems.Contains(item))
+                    if (result.Selection.Contains(item) && SubtitleGrid.SelectedItems.Contains(item))
                     {
                         SubtitleGrid.SelectedItems.Remove(item);
                     }
@@ -3643,12 +3640,11 @@ public partial class MainViewModel :
             }
             else if (result.SelectionIntersect)
             {
-                var intersectSelectedItems = result.Subtitles.Select(p => p.Subtitle).ToList();
                 var oldSelectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
                 SubtitleGrid.SelectedItems.Clear();
                 foreach (var item in Subtitles)
                 {
-                    if (intersectSelectedItems.Contains(item) && oldSelectedItems.Contains(item))
+                    if (result.Selection.Contains(item) && oldSelectedItems.Contains(item))
                     {
                         SubtitleGrid.SelectedItems.Add(item);
                     }

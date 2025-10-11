@@ -25,10 +25,11 @@ public partial class ModifySelectionViewModel : ObservableObject
     [ObservableProperty] private bool _selectionIntersect;
 
     public Window? Window { get; set; }
+    public List<SubtitleLineViewModel> Selection;
 
     public bool OkPressed { get; private set; }
 
-    private List<SubtitleLineViewModel> _allSubtitles;  
+    private List<SubtitleLineViewModel> _allSubtitles;
     private readonly System.Timers.Timer _previewTimer;
     private bool _isDirty;
 
@@ -36,14 +37,14 @@ public partial class ModifySelectionViewModel : ObservableObject
     {
         Rules = new ObservableCollection<ModifySelectionRule>(ModifySelectionRule.List());
         SelectedRule = Rules.First();
-
         Subtitles = new ObservableCollection<PreviewItem>();
+        Selection = new List<SubtitleLineViewModel>();
 
         _allSubtitles = new List<SubtitleLineViewModel>();
 
         LoadSettings();
 
-        _previewTimer = new System.Timers.Timer(500);
+        _previewTimer = new System.Timers.Timer(250);
         _previewTimer.Elapsed += (sender, args) =>
         {
             _previewTimer.Stop();
@@ -73,7 +74,7 @@ public partial class ModifySelectionViewModel : ObservableObject
             {
                 if (rule.IsMatch(item))
                 {
-                    var previewItem = new PreviewItem(item.Number, true, item.Text, item);
+                    var previewItem = new PreviewItem(item.Number, true, item.StartTime, item.Duration, item.Text, item);
                     Subtitles.Add(previewItem);
                 }
             }
@@ -134,6 +135,14 @@ public partial class ModifySelectionViewModel : ObservableObject
     [RelayCommand]
     private void Ok()
     {
+        foreach (var s in Subtitles)
+        {
+            if (s.Apply)
+            {
+                Selection.Add(s.Subtitle);
+            }
+        }
+
         SaveSettings();
         OkPressed = true;
         Window?.Close();
@@ -162,6 +171,6 @@ public partial class ModifySelectionViewModel : ObservableObject
 
     internal void OnRuleChanged()
     {
-        _isDirty = true;    
+        _isDirty = true;
     }
 }

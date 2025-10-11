@@ -1,8 +1,14 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
+using Avalonia.Media;
+using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
 
 namespace Nikse.SubtitleEdit.Features.Edit.ModifySelection;
 
@@ -14,9 +20,9 @@ public class ModifySelectionWindow : Window
         Title = Se.Language.Edit.ModifySelection.Title;
         CanResize = true;
         Width = 800;
-        Height = 500;
+        Height = 700;
         MinWidth = 725;
-        MinHeight = 400;
+        MinHeight = 450;
         vm.Window = this;
         DataContext = vm;
 
@@ -97,7 +103,7 @@ public class ModifySelectionWindow : Window
                 numericUpDownRuleNumber,
             },
         };
-        
+
         var checkBoxRuleCaseSensitive = UiUtil.MakeCheckBox(Se.Language.General.CaseSensitive, vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.MatchCase));
         checkBoxRuleCaseSensitive.BindIsVisible(vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.HasMatchCase));
         checkBoxRuleCaseSensitive.IsCheckedChanged += (sender, args) => vm.OnRuleChanged();
@@ -139,6 +145,9 @@ public class ModifySelectionWindow : Window
 
     private static Border MakeSubtitleView(ModifySelectionViewModel vm)
     {
+        var fullTimeConverter = new TimeSpanToDisplayFullConverter();
+        var shortTimeConverter = new TimeSpanToDisplayShortConverter();
+
         var dataGrid = new DataGrid
         {
             AutoGenerateColumns = false,
@@ -153,12 +162,43 @@ public class ModifySelectionWindow : Window
             ItemsSource = vm.Subtitles,
             Columns =
             {
+                new DataGridTemplateColumn
+                {
+                    Header = Se.Language.General.Apply,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    CellTemplate = new FuncDataTemplate<PreviewItem>((item, _) =>
+                        new Border
+                        {
+                            Background = Brushes.Transparent, // Prevents highlighting
+                            Padding = new Thickness(4),
+                            Child = new CheckBox
+                            {
+                                [!ToggleButton.IsCheckedProperty] = new Binding(nameof(PreviewItem.Apply)),
+                                HorizontalAlignment = HorizontalAlignment.Center
+                            }
+                        }),
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
+                },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.NumberSymbol,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(PreviewItem.Number)),
                     IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Show,
+                    Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)) { Converter = fullTimeConverter },
+                    Width = new DataGridLength(120),
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Duration,
+                    Binding = new Binding(nameof(SubtitleLineViewModel.Duration)) { Converter = shortTimeConverter },
+                    Width = new DataGridLength(120),
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {

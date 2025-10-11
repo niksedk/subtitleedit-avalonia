@@ -54,46 +54,50 @@ public class ModifySelectionRule
             {
                 RuleType = RuleType.Contains,
                 Name = l.Contains,
-                HasText = true
+                HasText = true,
+                HasMatchCase = true,
             },
             new()
             {
                 RuleType = RuleType.StartsWith,
                 Name = l.StartsWith,
-                HasText = true
+                HasText = true,
+                HasMatchCase = true,
             },
             new()
             {
                 RuleType = RuleType.EndsWith,
                 Name = l.EndsWith,
-                HasText = true
+                HasText = true,
+                HasMatchCase = true,
             },
             new()
             {
                 RuleType = RuleType.NotContains,
                 Name = l.NotContains,
-                HasText = true
+                HasText = true,
+                HasMatchCase = true,
             },
             new()
             {
                 RuleType = RuleType.AllUppercase,
-                Name = l.AllUppercase
+                Name = l.AllUppercase,
             },
             new()
             {
                 RuleType = RuleType.RegEx,
                 Name = g.RegularExpression,
-                HasText = true
+                HasText = true,
             },
             new()
             {
                 RuleType = RuleType.Odd,
-                Name = l.Odd
+                Name = l.Odd,
             },
             new()
             {
                 RuleType = RuleType.Even,
-                Name = l.Even
+                Name = l.Even,
             },
             new()
             {
@@ -103,7 +107,7 @@ public class ModifySelectionRule
                 NumberDecimals = true,
                 NumberMinValue = 0,
                 NumberMaxValue = 60,
-                DefaultValue = 2.0
+                DefaultValue = 2.0,
             },
             new()
             {
@@ -113,7 +117,7 @@ public class ModifySelectionRule
                 NumberDecimals = true,
                 NumberMinValue = 0,
                 NumberMaxValue = 60,
-                DefaultValue = 2.0
+                DefaultValue = 2.0,
             },
             new()
             {
@@ -123,7 +127,7 @@ public class ModifySelectionRule
                 NumberDecimals = true,
                 NumberMinValue = 0,
                 NumberMaxValue = 99,
-                DefaultValue = 15
+                DefaultValue = 15,
             },
             new()
             {
@@ -133,7 +137,7 @@ public class ModifySelectionRule
                 NumberDecimals = true,
                 NumberMinValue = 0,
                 NumberMaxValue = 99,
-                DefaultValue = 20
+                DefaultValue = 20,
             },
             new()
             {
@@ -142,7 +146,7 @@ public class ModifySelectionRule
                 HasNumber = true,
                 NumberMinValue = 0,
                 NumberMaxValue = 200,
-                DefaultValue = 42
+                DefaultValue = 42,
             },
             new()
             {
@@ -151,50 +155,53 @@ public class ModifySelectionRule
                 HasNumber = true,
                 NumberMinValue = 0,
                 NumberMaxValue = 200,
-                DefaultValue = 42
+                DefaultValue = 42,
             },
             new()
             {
                 RuleType = RuleType.ExactlyOneLine,
-                Name = l.ExactlyOneLine
+                Name = l.ExactlyOneLine,
             },
             new()
             {
                 RuleType = RuleType.ExactlyTwoLines,
-                Name = l.ExactlyTwoLines
+                Name = l.ExactlyTwoLines,
             },
             new()
             {
                 RuleType = RuleType.MoreThanTwoLines,
-                Name = l.MoreThanTwoLines
+                Name = l.MoreThanTwoLines,
             },
             new()
             {
                 RuleType = RuleType.Bookmarked,
-                Name = l.Bookmarked
+                Name = l.Bookmarked,
             },
             new()
             {
                 RuleType = RuleType.BookmarkContains,
                 Name = l.BookmarkContains,
-                HasText = true
+                HasText = true,
+                HasMatchCase = true,
             },
             new()
             {
                 RuleType = RuleType.BlankLines,
-                Name = l.BlankLines
+                Name = l.BlankLines,
             },
             new()
             {
                 RuleType = RuleType.Style,
                 Name = g.Style,
-                HasText = true
+                HasText = true,
+                HasMatchCase = true,
             },
             new()
             {
                 RuleType = RuleType.Actor,
                 Name = g.Actor,
-                HasText = true
+                HasText = true,
+                HasMatchCase = true,
             }
         };
 
