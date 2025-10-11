@@ -1,10 +1,10 @@
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Threading.Tasks;
 
@@ -43,7 +43,7 @@ public partial class CopyPasteTranslateBlockViewModel : ObservableObject
             return;
         }
 
-        TranslatedText = await Window.Clipboard.TryGetTextAsync() ?? string.Empty;
+        TranslatedText = await ClipboardHelper.GetTextAsync(Window) ?? string.Empty;
 
         if (TranslatedText == string.Empty)
         {
@@ -73,7 +73,7 @@ public partial class CopyPasteTranslateBlockViewModel : ObservableObject
             return;
         }
 
-        await Window.Clipboard.SetTextAsync(_sourceText);
+        await ClipboardHelper.SetTextAsync(Window, _sourceText);
     }
 
     [RelayCommand]

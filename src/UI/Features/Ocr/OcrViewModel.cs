@@ -5,9 +5,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DynamicData;
-using Nikse.SubtitleEdit.Core.AudioToText;
 using Nikse.SubtitleEdit.Core.BluRaySup;
-using Nikse.SubtitleEdit.Core.Cea708.Commands;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4.Boxes;
@@ -480,6 +478,18 @@ public partial class OcrViewModel : ObservableObject
 
         var bitmap = item.GetBitmap();
         bitmap.Save(fileName, 100);
+    }
+
+    [RelayCommand]
+    private async Task CopyImageToClipboard()
+    {
+        var item = SelectedOcrSubtitleItem;
+        if (item == null || Window == null || Window.Clipboard == null)
+        {
+            return;
+        }
+
+        await ClipboardHelper.CopyImageToClipboard(item.GetBitmap());
     }
 
     [RelayCommand]

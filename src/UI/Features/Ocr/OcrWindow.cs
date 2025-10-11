@@ -109,7 +109,7 @@ public class OcrWindow : Window
             Children =
             {
                 toggleButtonCaptureTopAlign,
-                toggleButtonPreProcessing,                
+                toggleButtonPreProcessing,
             }
         };
 
@@ -356,6 +356,15 @@ public class OcrWindow : Window
         menuItemSaveImage.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
         flyout.Items.Add(menuItemSaveImage);
 
+        var menuItemCopyImageToClipboard = new MenuItem
+        {
+            Header = Se.Language.General.CopyImageToClipboard,
+            DataContext = vm,
+            Command = vm.CopyImageToClipboardCommand,
+        };
+        menuItemCopyImageToClipboard.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
+        flyout.Items.Add(menuItemCopyImageToClipboard);
+
         flyout.Items.Add(new Separator());
 
         var menuItemDelete = new MenuItem
@@ -468,7 +477,7 @@ public class OcrWindow : Window
             .WithBindIsVisible(nameof(vm.IsDictionaryLoaded));
         var checkBoxTryToGuessUnknownWords = UiUtil.MakeCheckBox(Se.Language.Ocr.TryToGuessUnknownWords, vm, nameof(vm.DoTryToGuessUnknownWords))
             .WithBindIsVisible(nameof(vm.IsDictionaryLoaded));
-        var checkBoxAutoBreak = UiUtil.MakeCheckBox(string.Format(Se.Language.Ocr.AutoBreakIfMoreThanXLines, Se.Settings.General.MaxNumberOfLines) , vm, nameof(vm.DoAutoBreak))
+        var checkBoxAutoBreak = UiUtil.MakeCheckBox(string.Format(Se.Language.Ocr.AutoBreakIfMoreThanXLines, Se.Settings.General.MaxNumberOfLines), vm, nameof(vm.DoAutoBreak))
             .WithBindIsVisible(nameof(vm.IsDictionaryLoaded));
 
         var panelOptions = new StackPanel
