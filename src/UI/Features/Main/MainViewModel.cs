@@ -1634,8 +1634,9 @@ public partial class MainViewModel :
         if (result.OkPressed)
         {
             Subtitles.Clear();
-            Subtitles.AddRange(result.AllSubtitles.Select(p => new SubtitleLineViewModel(p)));
+            Subtitles.AddRange(result.Subtitles.Select(p => new SubtitleLineViewModel(p.SubtitleLineViewModel)));
             SelectAndScrollToRow(0);
+            _updateAudioVisualizer = true;
         }
 
         _shortcutManager.ClearKeys();
