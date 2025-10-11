@@ -82,10 +82,52 @@ public partial class ModifySelectionViewModel : ObservableObject
 
     private void LoadSettings()
     {
+        var selectionMode = Se.Settings.Edit.ModifySelectionMode.ToLowerInvariant();
+        if (selectionMode == "new")
+        {
+            SelectionNew = true;
+        }
+        else if (selectionMode == "add")
+        {
+            SelectionAdd = true;
+        }
+        else if (selectionMode == "subtract")
+        {
+            SelectionSubtract = true;
+        }
+        else if (selectionMode == "intersect")
+        {
+            SelectionIntersect = true;
+        }
+        else
+        {
+            SelectionNew = true;
+        }
     }
 
     private void SaveSettings()
     {
+        if (SelectionNew)
+        {
+            Se.Settings.Edit.ModifySelectionMode = "new";
+        }
+        else if (SelectionAdd)
+        {
+            Se.Settings.Edit.ModifySelectionMode = "add";
+        }
+        else if (SelectionSubtract)
+        {
+            Se.Settings.Edit.ModifySelectionMode = "subtract";
+        }
+        else if (SelectionIntersect)
+        {
+            Se.Settings.Edit.ModifySelectionMode = "intersect";
+        }
+        else
+        {
+            Se.Settings.Edit.ModifySelectionMode = "new";
+        }
+
         Se.SaveSettings();
     }
 

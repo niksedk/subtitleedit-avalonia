@@ -2277,9 +2277,9 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<CopyPasteTranslateWindow, CopyPasteTranslateViewModel>(Window!, vm => 
-        { 
-            vm.Initialize(Subtitles.ToList()); 
+        var result = await _windowService.ShowDialogAsync<CopyPasteTranslateWindow, CopyPasteTranslateViewModel>(Window!, vm =>
+        {
+            vm.Initialize(Subtitles.ToList());
         });
 
         if (!result.OkPressed)
@@ -3604,6 +3604,57 @@ public partial class MainViewModel :
             var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
             vm.Initialize(Subtitles.ToList(), selectedItems);
         });
+
+        if (result.OkPressed && result.Subtitles.Count > 0)
+        {
+            if (result.SelectionNew)
+            {
+                SubtitleGrid.SelectedItems.Clear();
+                var newSelectedItems = result.Subtitles.Select(p => p.Subtitle).ToList();
+                foreach (var item in Subtitles)
+                {
+                    if (newSelectedItems.Contains(item))
+                    {
+                        SubtitleGrid.SelectedItems.Add(item);
+                    }
+                }
+            }
+            else if (result.SelectionAdd)
+            {
+                var newSelectedItems = result.Subtitles.Select(p => p.Subtitle).ToList();
+                foreach (var item in Subtitles)
+                {
+                    if (newSelectedItems.Contains(item) && !SubtitleGrid.SelectedItems.Contains(item))
+                    {
+                        SubtitleGrid.SelectedItems.Add(item);
+                    }
+                }
+            }
+            else if (result.SelectionSubtract)
+            {
+                var removeSelectedItems = result.Subtitles.Select(p => p.Subtitle).ToList();
+                foreach (var item in Subtitles)
+                {
+                    if (removeSelectedItems.Contains(item) && SubtitleGrid.SelectedItems.Contains(item))
+                    {
+                        SubtitleGrid.SelectedItems.Remove(item);
+                    }
+                }
+            }
+            else if (result.SelectionIntersect)
+            {
+                var intersectSelectedItems = result.Subtitles.Select(p => p.Subtitle).ToList();
+                var oldSelectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+                SubtitleGrid.SelectedItems.Clear();
+                foreach (var item in Subtitles)
+                {
+                    if (intersectSelectedItems.Contains(item) && oldSelectedItems.Contains(item))
+                    {
+                        SubtitleGrid.SelectedItems.Add(item);
+                    }
+                }
+            }
+        }
 
         _shortcutManager.ClearKeys();
     }
