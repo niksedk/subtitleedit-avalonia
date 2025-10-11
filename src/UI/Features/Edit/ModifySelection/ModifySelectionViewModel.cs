@@ -114,4 +114,9 @@ public partial class ModifySelectionViewModel : ObservableObject
     {
         _allSubtitles = subtitleLineViewModels;
     }
+
+    internal void OnRuleChanged()
+    {
+        _isDirty = true;    
+    }
 }

@@ -2,6 +2,7 @@
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Nikse.SubtitleEdit.Features.Edit.ModifySelection;
 
@@ -47,36 +48,294 @@ public class ModifySelectionRule
         var l = Se.Language.Edit.ModifySelection;
         var g = Se.Language.General;
 
-        return new List<ModifySelectionRule>
+        var list = new List<ModifySelectionRule>
         {
-            new() { RuleType = RuleType.Contains,            Name = l.Contains, HasText = true },
-            new() { RuleType = RuleType.StartsWith,          Name = l.StartsWith, HasText = true },
-            new() { RuleType = RuleType.EndsWith,            Name = l.EndsWith, HasText = true },
-            new() { RuleType = RuleType.NotContains,         Name = l.NotContains, HasText = true },
-            new() { RuleType = RuleType.AllUppercase,        Name = l.AllUppercase },
-            new() { RuleType = RuleType.RegEx,               Name = g.RegularExpression, HasText = true },
-            new() { RuleType = RuleType.Odd,                 Name = l.Odd },
-            new() { RuleType = RuleType.Even,                Name = l.Even },
-            new() { RuleType = RuleType.DurationLessThan,    Name = l.DurationLessThan, HasNumber = true, NumberDecimals = true, NumberMinValue = 0, NumberMaxValue = 60, DefaultValue = 2.0 },
-            new() { RuleType = RuleType.DurationGreaterThan, Name = l.DurationGreaterThan, HasNumber = true, NumberDecimals = true, NumberMinValue = 0, NumberMaxValue = 60, DefaultValue = 2.0 },
-            new() { RuleType = RuleType.CpsLessThan,         Name = l.CpsLessThan, HasNumber = true, NumberDecimals = true, NumberMinValue = 0, NumberMaxValue = 99, DefaultValue = 15 },
-            new() { RuleType = RuleType.CpsGreaterThan,      Name = l.CpsGreaterThan, HasNumber = true, NumberDecimals = true, NumberMinValue = 0, NumberMaxValue = 99, DefaultValue = 20 },
-            new() { RuleType = RuleType.LengthLessThan,      Name = l.LengthLessThan, HasNumber = true, NumberMinValue = 0, NumberMaxValue = 200, DefaultValue = 42 },
-            new() { RuleType = RuleType.LengthGreaterThan,   Name = l.LengthGreaterThan, HasNumber = true, NumberMinValue = 0, NumberMaxValue = 200, DefaultValue = 42 },
-            new() { RuleType = RuleType.ExactlyOneLine,      Name = l.ExactlyOneLine },
-            new() { RuleType = RuleType.ExactlyTwoLines,     Name = l.ExactlyTwoLines },
-            new() { RuleType = RuleType.MoreThanTwoLines,    Name = l.MoreThanTwoLines },
-            new() { RuleType = RuleType.Bookmarked,          Name = l.Bookmarked },
-            new() { RuleType = RuleType.BookmarkContains,    Name = l.BookmarkContains, HasText = true },
-            new() { RuleType = RuleType.BlankLines,          Name = l.BlankLines },
-            new() { RuleType = RuleType.Style,               Name = g.Style, HasText = true },
-            new() { RuleType = RuleType.Actor,               Name = g.Actor, HasText = true },
-
+            new()
+            {
+                RuleType = RuleType.Contains,
+                Name = l.Contains,
+                HasText = true
+            },
+            new()
+            {
+                RuleType = RuleType.StartsWith,
+                Name = l.StartsWith,
+                HasText = true
+            },
+            new()
+            {
+                RuleType = RuleType.EndsWith,
+                Name = l.EndsWith,
+                HasText = true
+            },
+            new()
+            {
+                RuleType = RuleType.NotContains,
+                Name = l.NotContains,
+                HasText = true
+            },
+            new()
+            {
+                RuleType = RuleType.AllUppercase,
+                Name = l.AllUppercase
+            },
+            new()
+            {
+                RuleType = RuleType.RegEx,
+                Name = g.RegularExpression,
+                HasText = true
+            },
+            new()
+            {
+                RuleType = RuleType.Odd,
+                Name = l.Odd
+            },
+            new()
+            {
+                RuleType = RuleType.Even,
+                Name = l.Even
+            },
+            new()
+            {
+                RuleType = RuleType.DurationLessThan,
+                Name = l.DurationLessThan,
+                HasNumber = true,
+                NumberDecimals = true,
+                NumberMinValue = 0,
+                NumberMaxValue = 60,
+                DefaultValue = 2.0
+            },
+            new()
+            {
+                RuleType = RuleType.DurationGreaterThan,
+                Name = l.DurationGreaterThan,
+                HasNumber = true,
+                NumberDecimals = true,
+                NumberMinValue = 0,
+                NumberMaxValue = 60,
+                DefaultValue = 2.0
+            },
+            new()
+            {
+                RuleType = RuleType.CpsLessThan,
+                Name = l.CpsLessThan,
+                HasNumber = true,
+                NumberDecimals = true,
+                NumberMinValue = 0,
+                NumberMaxValue = 99,
+                DefaultValue = 15
+            },
+            new()
+            {
+                RuleType = RuleType.CpsGreaterThan,
+                Name = l.CpsGreaterThan,
+                HasNumber = true,
+                NumberDecimals = true,
+                NumberMinValue = 0,
+                NumberMaxValue = 99,
+                DefaultValue = 20
+            },
+            new()
+            {
+                RuleType = RuleType.LengthLessThan,
+                Name = l.LengthLessThan,
+                HasNumber = true,
+                NumberMinValue = 0,
+                NumberMaxValue = 200,
+                DefaultValue = 42
+            },
+            new()
+            {
+                RuleType = RuleType.LengthGreaterThan,
+                Name = l.LengthGreaterThan,
+                HasNumber = true,
+                NumberMinValue = 0,
+                NumberMaxValue = 200,
+                DefaultValue = 42
+            },
+            new()
+            {
+                RuleType = RuleType.ExactlyOneLine,
+                Name = l.ExactlyOneLine
+            },
+            new()
+            {
+                RuleType = RuleType.ExactlyTwoLines,
+                Name = l.ExactlyTwoLines
+            },
+            new()
+            {
+                RuleType = RuleType.MoreThanTwoLines,
+                Name = l.MoreThanTwoLines
+            },
+            new()
+            {
+                RuleType = RuleType.Bookmarked,
+                Name = l.Bookmarked
+            },
+            new()
+            {
+                RuleType = RuleType.BookmarkContains,
+                Name = l.BookmarkContains,
+                HasText = true
+            },
+            new()
+            {
+                RuleType = RuleType.BlankLines,
+                Name = l.BlankLines
+            },
+            new()
+            {
+                RuleType = RuleType.Style,
+                Name = g.Style,
+                HasText = true
+            },
+            new()
+            {
+                RuleType = RuleType.Actor,
+                Name = g.Actor,
+                HasText = true
+            }
         };
+
+        return list;
     }
 
     internal bool IsMatch(SubtitleLineViewModel item)
     {
-        
+        // Evaluate based on RuleType
+        var text = item.Text ?? string.Empty;
+
+        switch (RuleType)
+        {
+            case RuleType.Contains:
+                if (string.IsNullOrEmpty(Text))
+                {
+                    return false;
+                }
+
+                return HasMatchCase && MatchCase ? text.Contains(Text) : text.IndexOf(Text, StringComparison.OrdinalIgnoreCase) >= 0;
+
+            case RuleType.StartsWith:
+                if (string.IsNullOrEmpty(Text))
+                {
+                    return false;
+                }
+
+                return HasMatchCase && MatchCase ? text.StartsWith(Text) : text.StartsWith(Text, StringComparison.OrdinalIgnoreCase);
+
+            case RuleType.EndsWith:
+                if (string.IsNullOrEmpty(Text))
+                {
+                    return false;
+                }
+
+                return HasMatchCase && MatchCase ? text.EndsWith(Text) : text.EndsWith(Text, StringComparison.OrdinalIgnoreCase);
+
+            case RuleType.NotContains:
+                if (string.IsNullOrEmpty(Text))
+                {
+                    return false;
+                }
+
+                return HasMatchCase && MatchCase ? !text.Contains(Text) : text.IndexOf(Text, StringComparison.OrdinalIgnoreCase) < 0;
+
+            case RuleType.AllUppercase:
+                var hasLetter = false;
+                foreach (var c in text)
+                {
+                    if (char.IsLetter(c))
+                    {
+                        hasLetter = true;
+                        if (char.IsLower(c))
+                        {
+                            return false;
+                        }
+                    }
+                }
+                return hasLetter;
+
+            case RuleType.RegEx:
+                if (string.IsNullOrEmpty(Text))
+                {
+                    return false;
+                }
+
+                try
+                {
+                    var options = HasMatchCase && MatchCase ? RegexOptions.None : RegexOptions.IgnoreCase;
+                    return Regex.IsMatch(text, Text, options);
+                }
+                catch
+                {
+                    return false;
+                }
+
+            case RuleType.Odd:
+                return (item.Number % 2) == 1;
+
+            case RuleType.Even:
+                return (item.Number % 2) == 0;
+
+            case RuleType.DurationLessThan:
+                return item.Duration.TotalSeconds < Number;
+
+            case RuleType.DurationGreaterThan:
+                return item.Duration.TotalSeconds > Number;
+
+            case RuleType.CpsLessThan:
+                return item.CharactersPerSecond < Number;
+
+            case RuleType.CpsGreaterThan:
+                return item.CharactersPerSecond > Number;
+
+            case RuleType.LengthLessThan:
+                return (text?.Length ?? 0) < (int)Number;
+
+            case RuleType.LengthGreaterThan:
+                return (text?.Length ?? 0) > (int)Number;
+
+            case RuleType.ExactlyOneLine:
+                return (text?.Split('\n').Length ?? 0) == 1;
+
+            case RuleType.ExactlyTwoLines:
+                return (text?.Split('\n').Length ?? 0) == 2;
+
+            case RuleType.MoreThanTwoLines:
+                return (text?.Split('\n').Length ?? 0) > 2;
+
+            case RuleType.Bookmarked:
+                return !string.IsNullOrEmpty(item.Bookmark);
+
+            case RuleType.BookmarkContains:
+                if (string.IsNullOrEmpty(Text) || string.IsNullOrEmpty(item.Bookmark))
+                {
+                    return false;
+                }
+
+                return HasMatchCase && MatchCase ? item.Bookmark.Contains(Text) : item.Bookmark.IndexOf(Text, StringComparison.OrdinalIgnoreCase) >= 0;
+
+            case RuleType.BlankLines:
+                return string.IsNullOrWhiteSpace(text);
+
+            case RuleType.Style:
+                if (string.IsNullOrEmpty(Text) || string.IsNullOrEmpty(item.Style))
+                {
+                    return false;
+                }
+
+                return HasMatchCase && MatchCase ? item.Style.Equals(Text) : item.Style.Equals(Text, StringComparison.OrdinalIgnoreCase);
+
+            case RuleType.Actor:
+                if (string.IsNullOrEmpty(Text) || string.IsNullOrEmpty(item.Actor))
+                {
+                    return false;
+                }
+
+                return HasMatchCase && MatchCase ? item.Actor.Equals(Text) : item.Actor.Equals(Text, StringComparison.OrdinalIgnoreCase);
+
+            default:
+                return false;
+        }
     }
 }

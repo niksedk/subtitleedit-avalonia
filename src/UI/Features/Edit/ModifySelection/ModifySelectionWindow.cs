@@ -75,12 +75,15 @@ public class ModifySelectionWindow : Window
         };
 
         var comboBoxRules = UiUtil.MakeComboBox(vm.Rules, vm, nameof(vm.SelectedRule)).WithWidth(175);
-        
+        comboBoxRules.SelectionChanged += (sender, args) => vm.OnRuleChanged();
+
         var textBoxRuleText = UiUtil.MakeTextBox(150, vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.Text));
         textBoxRuleText.BindIsVisible(vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.HasText));
+        textBoxRuleText.TextChanged += (sender, args) => vm.OnRuleChanged();
 
         var numericUpDownRuleNumber = UiUtil.MakeNumericUpDownInt(0, 1000, 100, 150, vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.Number));
         numericUpDownRuleNumber.BindIsVisible(vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.HasNumber));
+        numericUpDownRuleNumber.ValueChanged += (sender, args) => vm.OnRuleChanged();
 
         var panelRule = new StackPanel
         {
@@ -97,6 +100,7 @@ public class ModifySelectionWindow : Window
         
         var checkBoxRuleCaseSensitive = UiUtil.MakeCheckBox(Se.Language.General.CaseSensitive, vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.MatchCase));
         checkBoxRuleCaseSensitive.BindIsVisible(vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.HasMatchCase));
+        checkBoxRuleCaseSensitive.IsCheckedChanged += (sender, args) => vm.OnRuleChanged();
 
         grid.Add(panelRule, 0);
         grid.Add(checkBoxRuleCaseSensitive, 1);
