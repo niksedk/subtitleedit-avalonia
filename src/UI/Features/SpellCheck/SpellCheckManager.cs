@@ -280,6 +280,11 @@ public class SpellCheckManager : ISpellCheckManager, IDoSpell
             return true;
         }
 
+        if (IsPartOfHtmlOrAssaTag(spellCheckWord, text))
+        {
+            return true;
+        }
+
         if (_spellCheckWordLists != null && _spellCheckWordLists.HasUserWord(word))
         {
             return true;
@@ -309,6 +314,45 @@ public class SpellCheckManager : ISpellCheckManager, IDoSpell
         }
 
         return isCorrect;
+    }
+
+    private static bool IsPartOfHtmlOrAssaTag(SpellCheckWord spellCheckWord, string text)
+    {
+        if (text.Contains('<') || text.Contains('{'))
+        {
+            var index = spellCheckWord.Index;
+            while (index >= 0)
+            {
+                var c = text[index];
+                if (c == '<')
+                {
+                    var nextIdx = text.IndexOf('>', index);
+                    if (nextIdx > index)
+                    {
+                        return true;
+                    }
+                    break;
+                }
+                else if (c == '{')
+                {
+                    var nextIdx = text.IndexOf('}', index);
+                    if (nextIdx > index)
+                    {
+                        return true;
+                    }
+                    break;
+                }
+
+                if (c == '>' || c == '}')
+                {
+                    break;
+                }
+
+                index--;
+            }
+        }
+
+        return false;
     }
 
     private static bool IsEmailUrlOrHashTag(string word)
