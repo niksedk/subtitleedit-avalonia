@@ -10,8 +10,9 @@ public class LanguageWaveform
     public string SeekSilence { get; set; }
     public string MinSilenceDurationSeconds { get; set; }
     public string MaxSilenceVolume { get; set; }
-    public object GuessTimeCodesDotDotDot { get; internal set; }
-    public object SeekSilenceDotDotDot { get; internal set; }
+    public string GuessTimeCodesDotDotDot { get; set; }
+    public string SeekSilenceDotDotDot { get; set; }
+    public string ToggleShotChange { get; set; }
 
     public LanguageWaveform()
     {
@@ -26,5 +27,6 @@ public class LanguageWaveform
         SeekSilenceDotDotDot = "Seek silence...";
         MinSilenceDurationSeconds = "Min. silence duration (seconds):";
         MaxSilenceVolume = "Max. silence volume (0.0 - 1.0):";
+        ToggleShotChange = "Toggle shot change";
     }
 }

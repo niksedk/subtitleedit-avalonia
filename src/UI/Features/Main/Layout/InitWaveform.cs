@@ -126,6 +126,14 @@ public class InitWaveform
             };
             flyout.Items.Add(menuItemGuessTimeCodes);
 
+            var menuItemAddShotChange = new MenuItem
+            {
+                Header = Se.Language.Waveform.ToggleShotChange,
+                Command = vm.ToggleShotChangesAtVideoPositionCommand,
+            };
+            flyout.Items.Add(menuItemAddShotChange);
+
+
             var menuItemSeekSilence = new MenuItem
             {
                 Header = Se.Language.Waveform.SeekSilenceDotDotDot,
