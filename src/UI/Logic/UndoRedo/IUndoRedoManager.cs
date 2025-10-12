@@ -22,4 +22,5 @@ public interface IUndoRedoManager : IDisposable
     void StopChangeDetection();
     void SetupChangeDetection(IUndoRedoClient hashProvider, TimeSpan? interval = null);
     void CheckForChanges(object? state);
+    void Reset();
 }

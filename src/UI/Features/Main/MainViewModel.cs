@@ -707,6 +707,7 @@ public partial class MainViewModel :
             _replaceViewModel = null;
         }
 
+        _undoRedoManager.Reset();
         _shortcutManager.ClearKeys();
     }
 
@@ -826,7 +827,7 @@ public partial class MainViewModel :
         var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, Se.Language.General.OpenSubtitleFileTitle);
         if (!string.IsNullOrEmpty(fileName))
         {
-            await SubtitleOpen(fileName);
+            await SubtitleOpen(fileName, skipLoadVideo: true);
         }
 
         _shortcutManager.ClearKeys();
@@ -5045,7 +5046,8 @@ public partial class MainViewModel :
         string fileName,
         string? videoFileName = null,
         int? selectedSubtitleIndex = null,
-        TextEncoding? textEncoding = null)
+        TextEncoding? textEncoding = null,
+        bool skipLoadVideo = false)
     {
         if (string.IsNullOrEmpty(fileName))
         {
@@ -5204,6 +5206,7 @@ public partial class MainViewModel :
             SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == subtitle.OriginalFormat.Name) ??
                                      SelectedSubtitleFormat;
 
+            ResetSubtitle();
             _subtitleFileName = fileName;
             _subtitle = subtitle;
             _lastOpenSaveFormat = subtitle.OriginalFormat;
@@ -5221,7 +5224,7 @@ public partial class MainViewModel :
                 SelectAndScrollToRow(0);
             }
 
-            if (Se.Settings.Video.AutoOpen)
+            if (Se.Settings.Video.AutoOpen && skipLoadVideo == false)
             {
                 if (!string.IsNullOrEmpty(videoFileName) && File.Exists(videoFileName))
                 {

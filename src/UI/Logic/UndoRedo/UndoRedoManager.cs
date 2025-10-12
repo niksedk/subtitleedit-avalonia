@@ -1,5 +1,4 @@
-﻿using Nikse.SubtitleEdit.Features.Main;
-using Nikse.SubtitleEdit.Logic.Config;
+﻿using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
 using System;
 using System.Collections.Generic;
@@ -469,4 +468,18 @@ public class UndoRedoManager : IUndoRedoManager
         _changeDetectionTimer?.Dispose();
         _disposed = true;
     }
+
+    public void Reset()
+    {
+        lock (_lock)
+        {
+            StopChangeDetection();
+
+            _undoList.Clear();
+            _redoList.Clear();
+
+            StartChangeDetection();
+        }
+    }
+
 }
