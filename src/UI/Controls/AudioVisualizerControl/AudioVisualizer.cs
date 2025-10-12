@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
@@ -1372,6 +1373,29 @@ public class AudioVisualizer : Control
         return (int)Math.Round(seconds * WavePeaks.SampleRate * ZoomFactor, MidpointRounding.AwayFromZero);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int SecondsToSampleIndex(double seconds)
+    {
+        if (WavePeaks == null)
+        {
+            return 0;
+        }
+
+        return (int)Math.Round(seconds * WavePeaks.SampleRate, MidpointRounding.AwayFromZero);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private double SampleIndexToSeconds(int index)
+    {
+        if (WavePeaks == null)
+        {
+            return 0;
+        }
+
+        return (double)index / WavePeaks.SampleRate;
+    }
+
+
     public void SetPosition(double startPositionSeconds, ObservableCollection<SubtitleLineViewModel> subtitle, double currentVideoPositionSeconds, int subtitleIndex, List<SubtitleLineViewModel> selectedIndexes)
     {
         if (TimeSpan.FromTicks(DateTime.UtcNow.Ticks - _lastMouseWheelScroll).TotalSeconds > 0.25)
@@ -1494,8 +1518,8 @@ public class AudioVisualizer : Control
             return -1;
         }
 
-        var begin = SecondsToXPosition(CurrentVideoPositionSeconds + 1);
-        var length = SecondsToXPosition(durationInSeconds);
+        var begin = SecondsToSampleIndex(CurrentVideoPositionSeconds + 1);
+        var length = SecondsToSampleIndex(durationInSeconds);
         var threshold = thresholdPercent / 100.0 * WavePeaks.HighestPeak;
         var hitCount = 0;
         for (var i = Math.Max(0, begin); i < WavePeaks.Peaks.Count; i++)
@@ -1536,8 +1560,8 @@ public class AudioVisualizer : Control
             return -1;
         }
 
-        var begin = SecondsToXPosition(CurrentVideoPositionSeconds - 1);
-        var length = SecondsToXPosition(durationInSeconds);
+        var begin = SecondsToSampleIndex(CurrentVideoPositionSeconds - 1);
+        var length = SecondsToSampleIndex(durationInSeconds);
         var threshold = thresholdPercent / 100.0 * WavePeaks.HighestPeak;
         var hitCount = 0;
         for (var i = begin; i > 0; i--)
@@ -1584,10 +1608,10 @@ public class AudioVisualizer : Control
             return -1;
         }
 
-        var min = Math.Max(0, SecondsToXPosition(startSeconds - 1));
-        var maxShort = Math.Min(WavePeaks.Peaks.Count, SecondsToXPosition(startSeconds + durationInSeconds + 0.01));
-        var max = Math.Min(WavePeaks.Peaks.Count, SecondsToXPosition(startSeconds + durationInSeconds + 0.8));
-        var length = SecondsToXPosition(durationInSeconds);
+        var min = Math.Max(0, SecondsToSampleIndex(startSeconds - 1));
+        var maxShort = Math.Min(WavePeaks.Peaks.Count, SecondsToSampleIndex(startSeconds + durationInSeconds + 0.01));
+        var max = Math.Min(WavePeaks.Peaks.Count, SecondsToSampleIndex(startSeconds + durationInSeconds + 0.8));
+        var length = SecondsToSampleIndex(durationInSeconds);
         var threshold = thresholdPercent / 100.0 * WavePeaks.HighestPeak;
 
         var minMax = GetMinAndMax(min, max);
@@ -1598,7 +1622,7 @@ public class AudioVisualizer : Control
         }
 
         // look for start silence in the beginning of subtitle
-        min = SecondsToXPosition(startSeconds);
+        min = SecondsToSampleIndex(startSeconds);
         var hitCount = 0;
         int index;
         for (index = min; index < max; index++)
@@ -1610,7 +1634,7 @@ public class AudioVisualizer : Control
             else
             {
                 minMax = GetMinAndMax(min, index);
-                var currentMinMax = GetMinAndMax(SecondsToXPosition(startSeconds), SecondsToXPosition(startSeconds + 0.8));
+                var currentMinMax = GetMinAndMax(SecondsToSampleIndex(startSeconds), SecondsToSampleIndex(startSeconds + 0.8));
                 if (currentMinMax.Avg > minMax.Avg + 300 || currentMinMax.Avg < 1000 && minMax.Avg < 1000 && Math.Abs(currentMinMax.Avg - minMax.Avg) < 500)
                 {
                     break;
@@ -1622,15 +1646,15 @@ public class AudioVisualizer : Control
         if (hitCount > length)
         {
             minMax = GetMinAndMax(min, index);
-            var currentMinMax = GetMinAndMax(SecondsToXPosition(startSeconds), SecondsToXPosition(startSeconds + 0.8));
+            var currentMinMax = GetMinAndMax(SecondsToSampleIndex(startSeconds), SecondsToSampleIndex(startSeconds + 0.8));
             if (currentMinMax.Avg > minMax.Avg + 300 || currentMinMax.Avg < 1000 && minMax.Avg < 1000 && Math.Abs(currentMinMax.Avg - minMax.Avg) < 500)
             {
-                return Math.Max(0, RelativeXPositionToSeconds(index - 1) - 0.01);
+                return Math.Max(0, SampleIndexToSeconds(index - 1) - 0.01);
             }
         }
 
         // move start left?
-        min = SecondsToXPosition(startSeconds - 1);
+        min = SecondsToSampleIndex(startSeconds - 1);
         hitCount = 0;
         for (index = maxShort; index > min; index--)
         {
@@ -1639,7 +1663,7 @@ public class AudioVisualizer : Control
                 hitCount++;
                 if (hitCount > length)
                 {
-                    return Math.Max(0, RelativeXPositionToSeconds(index + length) - 0.01);
+                    return Math.Max(0, SampleIndexToSeconds(index + length) - 0.01);
                 }
             }
             else
@@ -1685,7 +1709,7 @@ public class AudioVisualizer : Control
             return;
         }
 
-        var begin = SecondsToXPosition(startFromSeconds);
+        var begin = SecondsToSampleIndex(startFromSeconds);
 
         double average = 0;
         for (int k = begin; k < WavePeaks.Peaks.Count; k++)
@@ -1698,16 +1722,16 @@ public class AudioVisualizer : Control
         var maxThreshold = (int)(WavePeaks.HighestPeak * (maximumVolumePercent / 100.0));
         var silenceThreshold = (int)(average * (minimumVolumePercent / 100.0));
 
-        int length50Ms = SecondsToXPosition(0.050);
+        int length50Ms = SecondsToSampleIndex(0.050);
         double secondsPerParagraph = defaultMilliseconds / TimeCode.BaseUnit;
-        int minBetween = SecondsToXPosition(Configuration.Settings.General.MinimumMillisecondsBetweenLines / TimeCode.BaseUnit);
+        int minBetween = SecondsToSampleIndex(Configuration.Settings.General.MinimumMillisecondsBetweenLines / TimeCode.BaseUnit);
         bool subtitleOn = false;
         int i = begin;
         while (i < WavePeaks.Peaks.Count)
         {
             if (subtitleOn)
             {
-                var currentLengthInSeconds = SecondsToXPosition(i - begin);
+                var currentLengthInSeconds = SampleIndexToSeconds(i - begin);
                 if (currentLengthInSeconds > 1.0)
                 {
                     subtitleOn = EndParagraphDueToLowVolume(subtitle, blockSizeMilliseconds, silenceThreshold, begin, true, i);
@@ -1733,7 +1757,7 @@ public class AudioVisualizer : Control
 
                     if (subtitleOn) // force break
                     {
-                        var p = new Paragraph(string.Empty, RelativeXPositionToSeconds(begin) * TimeCode.BaseUnit, RelativeXPositionToSeconds(i) * TimeCode.BaseUnit);
+                        var p = new Paragraph(string.Empty, SampleIndexToSeconds(begin) * TimeCode.BaseUnit, SampleIndexToSeconds(i) * TimeCode.BaseUnit);
                         subtitle.Paragraphs.Add(p);
                         begin = i + minBetween;
                         i = begin;
@@ -1760,7 +1784,7 @@ public class AudioVisualizer : Control
         var avgVol = GetAverageVolumeForNextMilliseconds(i, blockSizeMilliseconds);
         if (avgVol < silenceThreshold)
         {
-            var p = new Paragraph(string.Empty, RelativeXPositionToSeconds(begin) * TimeCode.BaseUnit, RelativeXPositionToSeconds(i) * TimeCode.BaseUnit);
+            var p = new Paragraph(string.Empty, SampleIndexToSeconds(begin) * TimeCode.BaseUnit, SampleIndexToSeconds(i) * TimeCode.BaseUnit);
             subtitle.Paragraphs.Add(p);
             subtitleOn = false;
         }
@@ -1776,7 +1800,7 @@ public class AudioVisualizer : Control
         }
 
         // length cannot be less than 9
-        var length = Math.Max(SecondsToXPosition(milliseconds / TimeCode.BaseUnit), 9);
+        var length = Math.Max(SecondsToSampleIndex(milliseconds / TimeCode.BaseUnit), 9);
         var max = Math.Min(sampleIndex + length, WavePeaks.Peaks.Count);
         var from = Math.Max(sampleIndex, 1);
 

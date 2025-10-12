@@ -94,7 +94,7 @@ public class ModifySelectionWindow : Window
         textBoxRuleText.BindIsVisible(vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.HasText));
         textBoxRuleText.TextChanged += (sender, args) => vm.OnRuleChanged();
 
-        var numericUpDownRuleNumber = UiUtil.MakeNumericUpDownInt(0, 1000, 100, 150, vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.Number));
+        var numericUpDownRuleNumber = UiUtil.MakeNumericUpDownInt(0, 10000, 100, 150, vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.Number));
         numericUpDownRuleNumber.BindIsVisible(vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.HasNumber));
         numericUpDownRuleNumber.ValueChanged += (sender, args) => vm.OnRuleChanged();
 
@@ -196,14 +196,14 @@ public class ModifySelectionWindow : Window
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Show,
-                    Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)) { Converter = fullTimeConverter },
+                    Binding = new Binding(nameof(PreviewItem.Show)) { Converter = fullTimeConverter },
                     Width = new DataGridLength(120),
                     CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Duration,
-                    Binding = new Binding(nameof(SubtitleLineViewModel.Duration)) { Converter = shortTimeConverter },
+                    Binding = new Binding(nameof(PreviewItem.Duration)) { Converter = shortTimeConverter },
                     Width = new DataGridLength(120),
                     CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },

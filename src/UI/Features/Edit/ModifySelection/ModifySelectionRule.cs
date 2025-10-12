@@ -106,7 +106,7 @@ public class ModifySelectionRule
                 HasNumber = true,
                 NumberDecimals = true,
                 NumberMinValue = 0,
-                NumberMaxValue = 60,
+                NumberMaxValue = 10000,
                 DefaultValue = 2.0,
             },
             new()
@@ -116,7 +116,7 @@ public class ModifySelectionRule
                 HasNumber = true,
                 NumberDecimals = true,
                 NumberMinValue = 0,
-                NumberMaxValue = 60,
+                NumberMaxValue = 10000,
                 DefaultValue = 2.0,
             },
             new()
@@ -285,10 +285,10 @@ public class ModifySelectionRule
                 return (item.Number % 2) == 0;
 
             case RuleType.DurationLessThan:
-                return item.Duration.TotalSeconds < Number;
+                return item.Duration.TotalMilliseconds < Number;
 
             case RuleType.DurationGreaterThan:
-                return item.Duration.TotalSeconds > Number;
+                return item.Duration.TotalMilliseconds > Number;
 
             case RuleType.CpsLessThan:
                 return item.CharactersPerSecond < Number;

@@ -40,8 +40,8 @@ public class LanguageModifySelection
         AllUppercase = "All uppercase";
         Odd = "Odd number";
         Even = "Even number";
-        DurationLessThan = "Duration <";
-        DurationGreaterThan = "Duration >";
+        DurationLessThan = "Duration in ms <";
+        DurationGreaterThan = "Duration in ms >";
         CpsLessThan = "CPS <";
         CpsGreaterThan = "CPS >";
         LengthLessThan = "Length <";
