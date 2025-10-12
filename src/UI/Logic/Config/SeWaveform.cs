@@ -18,7 +18,14 @@ public class SeWaveform
     public bool ShotChangesAutoGenerate { get; set; }
     public int SnapToShotChangesPixels { get; set; }
     public bool FocusOnMouseOver { get; set; }
-
+    public bool GuessTimeCodeStartFromBeginning { get; set; }
+    public int GuessTimeCodeScanBlockSize { get; set; }
+    public int GuessTimeCodeScanBlockAverageMin { get; set; }
+    public int GuessTimeCodeScanBlockAverageMax { get; set; }
+    public int GuessTimeCodeSplitLongSubtitlesAtMs { get; set; }
+    public double SeekSilenceMinDurationSeconds { get; set; }
+    public double SeekSilenceMaxVolume { get; set; }
+    public bool SeekSilenceSeekForward { get; set; }
 
     public SeWaveform()
     {
@@ -32,5 +39,15 @@ public class SeWaveform
         SnapToShotChangesPixels = 8;
         SnapToShotChanges = true;
         ShotChangesAutoGenerate = false;
+
+        GuessTimeCodeStartFromBeginning = false;
+        GuessTimeCodeScanBlockSize = 100;
+        GuessTimeCodeScanBlockAverageMin = 35;
+        GuessTimeCodeScanBlockAverageMax = 70;
+        GuessTimeCodeSplitLongSubtitlesAtMs = 3500;
+
+        SeekSilenceSeekForward = true;
+        SeekSilenceMinDurationSeconds = 0.3;
+        SeekSilenceMaxVolume = 0.1;
     }
 }

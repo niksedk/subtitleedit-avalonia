@@ -110,7 +110,7 @@ public class InitWaveform
             flyout.Items.Add(splitMenuItem);
             vm.MenuItemAudioVisualizerSplit = splitMenuItem;
 
-            flyout.Items.Add(new Separator().BindIsVisible(vm, nameof(vm.IsFormatAssa)));
+            flyout.Items.Add(new Separator()); //.BindIsVisible(vm, nameof(vm.IsFormatAssa)));
 
             var menuItemFilterByLayer = new MenuItem
             {
@@ -118,6 +118,20 @@ public class InitWaveform
                 Command = vm.ShowPickLayerFilterCommand,
             }.BindIsVisible(vm, nameof(vm.IsFormatAssa));
             flyout.Items.Add(menuItemFilterByLayer);
+
+            var menuItemGuessTimeCodes = new MenuItem
+            {
+                Header = Se.Language.Waveform.GuessTimeCodesDotDotDot,
+                Command = vm.ShowWaveformGuessTimeCodesCommand,
+            };
+            flyout.Items.Add(menuItemGuessTimeCodes);
+
+            var menuItemSeekSilence = new MenuItem
+            {
+                Header = Se.Language.Waveform.SeekSilenceDotDotDot,
+                Command = vm.ShowWaveformSeekSilenceCommand,
+            };
+            flyout.Items.Add(menuItemSeekSilence);
 
             vm.AudioVisualizer.MenuFlyout = flyout;
         }

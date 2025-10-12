@@ -1,7 +1,4 @@
-﻿using Nikse.SubtitleEdit.Features.Video.CutVideo;
-using System.Collections.ObjectModel;
-
-namespace Nikse.SubtitleEdit.Logic.Config.Language.Tools;
+﻿namespace Nikse.SubtitleEdit.Logic.Config.Language.Tools;
 
 public class LanguageVideo
 {

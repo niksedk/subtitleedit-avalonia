@@ -413,6 +413,14 @@ public class LanguageGeneral
     public string DateAndTime { get; set; }
     public string Translate { get; set; }
     public string CopyImageToClipboard { get; set; }
+    public string CurrentVideoPosition { get; set; }
+    public string Beginning { get; set; }
+    public string StartFrom { get; set; }
+    public string DeleteLines { get; set; }
+    public string FromCurrentVideoPosition { get; set; }
+    public string SearchDirection { get; set; }
+    public string Forward { get; set; }
+    public string Backward { get; set; }
 
     public LanguageGeneral()
     {
@@ -666,8 +674,8 @@ public class LanguageGeneral
         DeleteLineXPrompt = "Delete line number {0}?";
         DeleteXLinesPrompt = "Delete {0} lines?";
         InsertNewSelection = "Insert new selection";
-        InsertAtPosition = "Insert at video position";
-        DeleteAtPosition = "Delete at video position";
+        InsertAtPosition = "Insert subtitle at video position";
+        DeleteAtPosition = "Delete subtitle at video position";
         FileNameX = "File name: {0}";
         FindTextX = "Find text - {0}";
         FindNext = "Find next";
@@ -824,5 +832,13 @@ public class LanguageGeneral
         DateAndTime = "Date and time";
         Translate = "Translate";
         CopyImageToClipboard = "Copy image to clipboard";
+        CurrentVideoPosition = "Current video position";
+        Beginning = "Beginning";
+        StartFrom = "Start from";
+        DeleteLines = "Delete lines";
+        FromCurrentVideoPosition = "from current video position";
+        SearchDirection = "Search direction";
+        Forward = "Forward";
+        Backward = "Backward";
     }
 }

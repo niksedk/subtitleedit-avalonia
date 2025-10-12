@@ -52,6 +52,8 @@ using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using Nikse.SubtitleEdit.Features.Shared.PickMp4Track;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 using Nikse.SubtitleEdit.Features.Shared.SourceView;
+using Nikse.SubtitleEdit.Features.Shared.WaveformGuessTimeCodes;
+using Nikse.SubtitleEdit.Features.Shared.WaveformSeekSilence;
 using Nikse.SubtitleEdit.Features.SpellCheck;
 using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
 using Nikse.SubtitleEdit.Features.Sync.AdjustAllTimes;
@@ -1288,6 +1290,79 @@ public partial class MainViewModel :
             await SubtitleOpen(fileName, null, null, result.SelectedEncoding);
         }
 
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowWaveformSeekSilence()
+    {
+        if (Window == null || AudioVisualizer?.WavePeaks == null || VideoPlayerControl == null)
+        {
+            return;
+        }
+
+        var result =
+            await _windowService.ShowDialogAsync<WaveformSeekSilenceWindow, WaveformSeekSilenceViewModel>(Window!, vm =>
+            {
+                vm.Initialize(AudioVisualizer.WavePeaks);
+            });
+
+        if (!result.OkPressed || !result.SilenceMaxVolume.HasValue || !result.SilenceMinDuration.HasValue)
+        {
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        var seconds = VideoPlayerControl.Position;
+        if (result.SeekForward)
+        {
+            seconds = AudioVisualizer.FindDataBelowThreshold(result.SilenceMaxVolume.Value, result.SilenceMinDuration.Value);
+        }
+        else
+        {
+            seconds = AudioVisualizer.FindDataBelowThresholdBack(result.SilenceMaxVolume.Value, result.SilenceMinDuration.Value);
+        }
+
+        if (seconds >= 0)
+        {
+            VideoPlayerControl.Position = seconds;
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowWaveformGuessTimeCodes()
+    {
+        if (Window == null || AudioVisualizer?.WavePeaks == null || VideoPlayerControl == null)
+        {
+            return;
+        }
+
+        var result =
+            await _windowService.ShowDialogAsync<WaveformGuessTimeCodesWindow, WaveformGuessTimeCodesViewModel>(Window!, vm =>
+            {
+                //vm.Initialize(Subtitles.ToList(), _visibleLayers); 
+            });
+
+        if (!result.OkPressed ||
+            !result.ScanBlockSize.HasValue ||
+            !result.ScanBlockAverageMin.HasValue ||
+            !result.ScanBlockAverageMax.HasValue ||
+            !result.SplitLongSubtitlesAtMs.HasValue)
+        {
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        double startFromSeconds = 0;
+        if (result.StartFromVideoPosition)
+        {
+            startFromSeconds = VideoPlayerControl.Position;
+        }
+
+        AudioVisualizer.GenerateTimeCodes(_subtitle, startFromSeconds, result.ScanBlockSize.Value, result.ScanBlockAverageMin.Value, result.ScanBlockAverageMax.Value, result.SplitLongSubtitlesAtMs.Value);
+        SetSubtitles(_subtitle);
         _shortcutManager.ClearKeys();
     }
 
@@ -5966,6 +6041,7 @@ public partial class MainViewModel :
 
         Renumber();
         UpdateGaps();
+        _updateAudioVisualizer = true;
     }
 
     public bool HasChanges()

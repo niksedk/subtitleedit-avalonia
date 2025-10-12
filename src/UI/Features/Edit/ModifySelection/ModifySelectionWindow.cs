@@ -50,18 +50,25 @@ public class ModifySelectionWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(MakeRulesView(vm), 0);
+        grid.Add(MakeRulesView(vm, out TextBox textbox), 0);
         grid.Add(MakeSelectionView(vm), 0, 1);
         grid.Add(MakeSubtitleView(vm), 1, 0, 1, 2);
         grid.Add(panelButtons, 3, 0, 1, 2);
 
         Content = grid;
 
-        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        Activated += delegate
+        {
+            buttonOk.Focus();
+            if (textbox.IsVisible)
+            {
+                textbox.Focus();
+            }
+        };
         KeyDown += vm.KeyDown;
     }
 
-    private static Border MakeRulesView(ModifySelectionViewModel vm)
+    private static Border MakeRulesView(ModifySelectionViewModel vm, out TextBox textBoxRuleText)
     {
         var grid = new Grid
         {
@@ -83,7 +90,7 @@ public class ModifySelectionWindow : Window
         var comboBoxRules = UiUtil.MakeComboBox(vm.Rules, vm, nameof(vm.SelectedRule)).WithWidth(175);
         comboBoxRules.SelectionChanged += (sender, args) => vm.OnRuleChanged();
 
-        var textBoxRuleText = UiUtil.MakeTextBox(150, vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.Text));
+        textBoxRuleText = UiUtil.MakeTextBox(150, vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.Text));
         textBoxRuleText.BindIsVisible(vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.HasText));
         textBoxRuleText.TextChanged += (sender, args) => vm.OnRuleChanged();
 

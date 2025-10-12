@@ -6,6 +6,7 @@ using Nikse.SubtitleEdit.Logic.Config.Language.Options;
 using Nikse.SubtitleEdit.Logic.Config.Language.Sync;
 using Nikse.SubtitleEdit.Logic.Config.Language.Tools;
 using Nikse.SubtitleEdit.Logic.Config.Language.Translate;
+using Nikse.SubtitleEdit.Logic.Config.Language.Waveform;
 
 namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
@@ -23,6 +24,7 @@ public class SeLanguage
     public LanguageTools Tools { get; set; } = new();
     public LanguageSpellCheck SpellCheck { get; set; } = new();
     public LanguageVideo Video { get; set; } = new();
+    public LanguageWaveform Waveform { get; set; } = new();
     public LanguageSync Sync { get; set; } = new();
     public LanguageTranslate Translate { get; set; } = new();
     public LanguageOptions Options { get; set; } = new();

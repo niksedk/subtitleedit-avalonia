@@ -41,6 +41,8 @@ using Nikse.SubtitleEdit.Features.Shared.PickMp4Track;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 using Nikse.SubtitleEdit.Features.Shared.ShowImage;
 using Nikse.SubtitleEdit.Features.Shared.SourceView;
+using Nikse.SubtitleEdit.Features.Shared.WaveformGuessTimeCodes;
+using Nikse.SubtitleEdit.Features.Shared.WaveformSeekSilence;
 using Nikse.SubtitleEdit.Features.SpellCheck;
 using Nikse.SubtitleEdit.Features.SpellCheck.EditWholeText;
 using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
@@ -242,6 +244,8 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<VideoPlayerUndockedViewModel>();
         collection.AddTransient<VisualSyncViewModel>();
         collection.AddTransient<VoiceSettingsViewModel>();
+        collection.AddTransient<WaveformGuessTimeCodesViewModel>();
+        collection.AddTransient<WaveformSeekSilenceViewModel>();
         collection.AddTransient<WhisperAdvancedViewModel>();
         collection.AddTransient<WhisperPostProcessingViewModel>();
         collection.AddTransient<WordListsViewModel>();

@@ -40,7 +40,7 @@ Because *Subtitle Edit* is not signed with an Apple developer certificate, macOS
 1. **Download** and **double-click** the `.dmg` file to mount it.
 2. In the window that appears, **drag `Subtitle Edit.app` into your `Applications` folder**.
 3. Open the **Terminal** app (you can find it via Spotlight or in `/Applications/Utilities/`).
-4. In Terminal, run the following command to remove macOS’s security quarantine flag and add adhoc code signature:
+4. In Terminal, run the following commands to remove macOS’s security quarantine flag and add adhoc code signature:
    ````bash
    sudo xattr -rd com.apple.quarantine "/Applications/Subtitle Edit.app"
    ````

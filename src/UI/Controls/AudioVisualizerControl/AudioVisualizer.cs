@@ -9,12 +9,19 @@ using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
 
 namespace Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
+
+public class MinMax
+{
+    public double Min { get; set; }
+    public double Max { get; set; }
+    public double Avg { get; set; }
+}
+
 
 public class AudioVisualizer : Control
 {
@@ -1478,5 +1485,312 @@ public class AudioVisualizer : Control
     internal void SetSpectrogram(SpectrogramData2 spectrogramData)
     {
         //TODO: implement spectrogram
+    }
+
+    public double FindDataBelowThreshold(double thresholdPercent, double durationInSeconds)
+    {
+        if (WavePeaks == null || WavePeaks.Peaks.Count == 0)
+        {
+            return -1;
+        }
+
+        var begin = SecondsToXPosition(CurrentVideoPositionSeconds + 1);
+        var length = SecondsToXPosition(durationInSeconds);
+        var threshold = thresholdPercent / 100.0 * WavePeaks.HighestPeak;
+        var hitCount = 0;
+        for (var i = Math.Max(0, begin); i < WavePeaks.Peaks.Count; i++)
+        {
+            if (WavePeaks.Peaks[i].Abs <= threshold)
+            {
+                hitCount++;
+            }
+            else
+            {
+                hitCount = 0;
+            }
+
+            if (hitCount > length)
+            {
+                var seconds = RelativeXPositionToSeconds(i - (length / 2));
+                if (seconds >= 0)
+                {
+                    StartPositionSeconds = seconds;
+                    if (StartPositionSeconds > 1)
+                    {
+                        StartPositionSeconds -= 1;
+                    }
+                }
+
+                return seconds;
+            }
+        }
+
+        return -1;
+    }
+
+    /// <returns>video position in seconds, -1 if not found</returns>
+    public double FindDataBelowThresholdBack(double thresholdPercent, double durationInSeconds)
+    {
+        if (WavePeaks == null || WavePeaks.Peaks.Count == 0)
+        {
+            return -1;
+        }
+
+        var begin = SecondsToXPosition(CurrentVideoPositionSeconds - 1);
+        var length = SecondsToXPosition(durationInSeconds);
+        var threshold = thresholdPercent / 100.0 * WavePeaks.HighestPeak;
+        var hitCount = 0;
+        for (var i = begin; i > 0; i--)
+        {
+            if (i < WavePeaks.Peaks.Count && WavePeaks.Peaks[i].Abs <= threshold)
+            {
+                hitCount++;
+                if (hitCount > length)
+                {
+                    var seconds = RelativeXPositionToSeconds(i + length / 2);
+                    if (seconds >= 0)
+                    {
+                        StartPositionSeconds = seconds;
+                        if (StartPositionSeconds > 1)
+                        {
+                            StartPositionSeconds -= 1;
+                        }
+                        else
+                        {
+                            StartPositionSeconds = 0;
+                        }
+                    }
+
+                    return seconds;
+                }
+            }
+            else
+            {
+                hitCount = 0;
+            }
+        }
+
+        return -1;
+    }
+
+    /// <summary>
+    /// Seeks silence in volume
+    /// </summary>
+    /// <returns>video position in seconds, -1 if not found</returns>
+    public double FindDataBelowThresholdBackForStart(double thresholdPercent, double durationInSeconds, double startSeconds)
+    {
+        if (WavePeaks == null || WavePeaks.Peaks.Count == 0)
+        {
+            return -1;
+        }
+
+        var min = Math.Max(0, SecondsToXPosition(startSeconds - 1));
+        var maxShort = Math.Min(WavePeaks.Peaks.Count, SecondsToXPosition(startSeconds + durationInSeconds + 0.01));
+        var max = Math.Min(WavePeaks.Peaks.Count, SecondsToXPosition(startSeconds + durationInSeconds + 0.8));
+        var length = SecondsToXPosition(durationInSeconds);
+        var threshold = thresholdPercent / 100.0 * WavePeaks.HighestPeak;
+
+        var minMax = GetMinAndMax(min, max);
+        const int lowPeakDifference = 4_000;
+        if (minMax.Max - minMax.Min < lowPeakDifference)
+        {
+            return -1; // all audio about the same
+        }
+
+        // look for start silence in the beginning of subtitle
+        min = SecondsToXPosition(startSeconds);
+        var hitCount = 0;
+        int index;
+        for (index = min; index < max; index++)
+        {
+            if (index > 0 && index < WavePeaks.Peaks.Count && WavePeaks.Peaks[index].Abs <= threshold)
+            {
+                hitCount++;
+            }
+            else
+            {
+                minMax = GetMinAndMax(min, index);
+                var currentMinMax = GetMinAndMax(SecondsToXPosition(startSeconds), SecondsToXPosition(startSeconds + 0.8));
+                if (currentMinMax.Avg > minMax.Avg + 300 || currentMinMax.Avg < 1000 && minMax.Avg < 1000 && Math.Abs(currentMinMax.Avg - minMax.Avg) < 500)
+                {
+                    break;
+                }
+                hitCount = length / 2;
+            }
+        }
+
+        if (hitCount > length)
+        {
+            minMax = GetMinAndMax(min, index);
+            var currentMinMax = GetMinAndMax(SecondsToXPosition(startSeconds), SecondsToXPosition(startSeconds + 0.8));
+            if (currentMinMax.Avg > minMax.Avg + 300 || currentMinMax.Avg < 1000 && minMax.Avg < 1000 && Math.Abs(currentMinMax.Avg - minMax.Avg) < 500)
+            {
+                return Math.Max(0, RelativeXPositionToSeconds(index - 1) - 0.01);
+            }
+        }
+
+        // move start left?
+        min = SecondsToXPosition(startSeconds - 1);
+        hitCount = 0;
+        for (index = maxShort; index > min; index--)
+        {
+            if (index > 0 && index < WavePeaks.Peaks.Count && WavePeaks.Peaks[index].Abs <= threshold)
+            {
+                hitCount++;
+                if (hitCount > length)
+                {
+                    return Math.Max(0, RelativeXPositionToSeconds(index + length) - 0.01);
+                }
+            }
+            else
+            {
+                hitCount = 0;
+            }
+        }
+
+        return -1;
+    }
+
+    private MinMax GetMinAndMax(int startIndex, int endIndex)
+    {
+        if (WavePeaks == null || WavePeaks.Peaks.Count == 0)
+        {
+            return new MinMax { Min = 0, Max = 0, Avg = 0 };
+        }
+
+        var minPeak = int.MaxValue;
+        var maxPeak = int.MinValue;
+        double total = 0;
+        for (var i = startIndex; i < endIndex; i++)
+        {
+            var v = WavePeaks.Peaks[i].Abs;
+            total += v;
+            if (v < minPeak)
+            {
+                minPeak = v;
+            }
+            if (v > maxPeak)
+            {
+                maxPeak = v;
+            }
+        }
+
+        return new MinMax { Min = minPeak, Max = maxPeak, Avg = total / (endIndex - startIndex) };
+    }
+
+    internal void GenerateTimeCodes(Subtitle subtitle, double startFromSeconds, int blockSizeMilliseconds, int minimumVolumePercent, int maximumVolumePercent, int defaultMilliseconds)
+    {
+        if (WavePeaks == null || WavePeaks.Peaks.Count == 0)
+        {
+            return;
+        }
+
+        var begin = SecondsToXPosition(startFromSeconds);
+
+        double average = 0;
+        for (int k = begin; k < WavePeaks.Peaks.Count; k++)
+        {
+            average += WavePeaks.Peaks[k].Abs;
+        }
+
+        average /= WavePeaks.Peaks.Count - begin;
+
+        var maxThreshold = (int)(WavePeaks.HighestPeak * (maximumVolumePercent / 100.0));
+        var silenceThreshold = (int)(average * (minimumVolumePercent / 100.0));
+
+        int length50Ms = SecondsToXPosition(0.050);
+        double secondsPerParagraph = defaultMilliseconds / TimeCode.BaseUnit;
+        int minBetween = SecondsToXPosition(Configuration.Settings.General.MinimumMillisecondsBetweenLines / TimeCode.BaseUnit);
+        bool subtitleOn = false;
+        int i = begin;
+        while (i < WavePeaks.Peaks.Count)
+        {
+            if (subtitleOn)
+            {
+                var currentLengthInSeconds = SecondsToXPosition(i - begin);
+                if (currentLengthInSeconds > 1.0)
+                {
+                    subtitleOn = EndParagraphDueToLowVolume(subtitle, blockSizeMilliseconds, silenceThreshold, begin, true, i);
+                    if (!subtitleOn)
+                    {
+                        begin = i + minBetween;
+                        i = begin;
+                    }
+                }
+                if (subtitleOn && currentLengthInSeconds >= secondsPerParagraph)
+                {
+                    for (int j = 0; j < 20; j++)
+                    {
+                        subtitleOn = EndParagraphDueToLowVolume(subtitle, blockSizeMilliseconds, silenceThreshold, begin, true, i + (j * length50Ms));
+                        if (!subtitleOn)
+                        {
+                            i += (j * length50Ms);
+                            begin = i + minBetween;
+                            i = begin;
+                            break;
+                        }
+                    }
+
+                    if (subtitleOn) // force break
+                    {
+                        var p = new Paragraph(string.Empty, RelativeXPositionToSeconds(begin) * TimeCode.BaseUnit, RelativeXPositionToSeconds(i) * TimeCode.BaseUnit);
+                        subtitle.Paragraphs.Add(p);
+                        begin = i + minBetween;
+                        i = begin;
+                    }
+                }
+            }
+            else
+            {
+                double avgVol = GetAverageVolumeForNextMilliseconds(i, blockSizeMilliseconds);
+                if (avgVol > silenceThreshold && avgVol < maxThreshold)
+                {
+                    subtitleOn = true;
+                    begin = i;
+                }
+            }
+            i++;
+        }
+
+        subtitle.Renumber();
+    }
+
+    private bool EndParagraphDueToLowVolume(Subtitle subtitle, int blockSizeMilliseconds, double silenceThreshold, int begin, bool subtitleOn, int i)
+    {
+        var avgVol = GetAverageVolumeForNextMilliseconds(i, blockSizeMilliseconds);
+        if (avgVol < silenceThreshold)
+        {
+            var p = new Paragraph(string.Empty, RelativeXPositionToSeconds(begin) * TimeCode.BaseUnit, RelativeXPositionToSeconds(i) * TimeCode.BaseUnit);
+            subtitle.Paragraphs.Add(p);
+            subtitleOn = false;
+        }
+
+        return subtitleOn;
+    }
+
+    private double GetAverageVolumeForNextMilliseconds(int sampleIndex, int milliseconds)
+    {
+        if (WavePeaks == null)
+        {
+            return 0;
+        }
+
+        // length cannot be less than 9
+        var length = Math.Max(SecondsToXPosition(milliseconds / TimeCode.BaseUnit), 9);
+        var max = Math.Min(sampleIndex + length, WavePeaks.Peaks.Count);
+        var from = Math.Max(sampleIndex, 1);
+
+        if (from >= max)
+        {
+            return 0;
+        }
+
+        double v = 0;
+        for (var i = from; i < max; i++)
+        {
+            v += WavePeaks.Peaks[i].Abs;
+        }
+
+        return v / (max - from);
     }
 }
