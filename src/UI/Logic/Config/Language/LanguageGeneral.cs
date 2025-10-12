@@ -421,6 +421,7 @@ public class LanguageGeneral
     public string SearchDirection { get; set; }
     public string Forward { get; set; }
     public string Backward { get; set; }
+    public string Speed { get; set; }
 
     public LanguageGeneral()
     {
@@ -840,5 +841,6 @@ public class LanguageGeneral
         SearchDirection = "Search direction";
         Forward = "Forward";
         Backward = "Backward";
+        Speed = "Speed";
     }
 }

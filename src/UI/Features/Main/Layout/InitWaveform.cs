@@ -8,6 +8,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 using System;
+using System.Globalization;
 using MenuItem = Avalonia.Controls.MenuItem;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
@@ -281,6 +282,34 @@ public class InitWaveform
             }
         };
 
+        var labelSpeed = UiUtil.MakeLabel(Se.Language.General.Speed);
+        var comboBoxSpeed = new ComboBox
+        {
+            VerticalAlignment = VerticalAlignment.Center,
+            ItemsSource = new[] { "0.5x", "0.75x", "1.0x", "1.25x", "1.5x", "1.75x", "2.0x", "3.0x" },
+            SelectedItem = "1.0x",
+            Margin = new Thickness(0, 0, 10, 0),
+        };
+        comboBoxSpeed.SelectionChanged += (s, e) =>
+        {
+            if (vm.AudioVisualizer != null && comboBoxSpeed.SelectedItem is string s1 && s1.EndsWith("x") &&
+                double.TryParse(s1.Trim('x'), NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out double speed))
+            {
+                vm.VideoPlayerControl?.SetSpeed(speed);
+            }
+        };
+        var panelSpeed = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 10, 0),
+            Children =
+            {
+                labelSpeed,
+                comboBoxSpeed
+            }
+        };
+
         var toggleButtonAutoSelectOnPlay = new ToggleButton
         {
             DataContext = vm,
@@ -320,6 +349,7 @@ public class InitWaveform
         controlsPanel.Children.Add(sliderHorizontalZoom);
         controlsPanel.Children.Add(iconVertical);
         controlsPanel.Children.Add(sliderVerticalZoom);
+        controlsPanel.Children.Add(panelSpeed);
 
         controlsPanel.Children.Add(toggleButtonAutoSelectOnPlay);
         controlsPanel.Children.Add(toggleButtonCenter);

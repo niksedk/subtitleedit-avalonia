@@ -32,6 +32,14 @@ public class VideoPlayerInstanceNone : IVideoPlayerInstance
         }
     }
 
+    public double Speed 
+    {
+        get => 0;
+        set
+        {
+        }
+    }
+
     public void Close()
     {
         _fileName = string.Empty;

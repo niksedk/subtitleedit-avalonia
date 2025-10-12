@@ -58,7 +58,16 @@ public class VideoPlayerInstanceMpv : IVideoPlayerInstance
         {
             MpvContext?.Volume.Set(value);
         }
-    }   
+    }
+
+    public double Speed
+    {
+        get => MpvContext?.Speed.Get() ?? 0;
+        set
+        {
+            MpvContext?.Speed.Set(value);
+        }
+    }
 
     public MpvContext? MpvContext { get; set; }
     public MpvView MpvView { get; set; }

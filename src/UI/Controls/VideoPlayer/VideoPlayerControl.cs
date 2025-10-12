@@ -587,6 +587,11 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         {
             Dispatcher.UIThread.Post(() => { _gridProgress.IsVisible = false; });
         }
+
+        internal void SetSpeed(double speed)
+        {
+            _videoPlayerInstance.Speed = speed;
+        }
     }
 }
 

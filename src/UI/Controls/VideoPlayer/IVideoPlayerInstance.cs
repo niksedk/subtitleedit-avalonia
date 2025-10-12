@@ -23,4 +23,6 @@ public interface IVideoPlayerInstance
 
     int VolumeMaximum { get; }
     double Volume { get; set; }
+
+    double Speed { get; set; }
 }
