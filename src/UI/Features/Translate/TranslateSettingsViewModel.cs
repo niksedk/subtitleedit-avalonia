@@ -73,7 +73,7 @@ public partial class TranslateSettingsViewModel : ObservableObject
 
         Se.Settings.AutoTranslate.RequestDelaySeconds = ServerDelaySeconds ?? 0;
         Se.Settings.AutoTranslate.RequestMaxBytes = MaxBytesRequest ?? 0;
-        var translate = AutoTranslator as SeAutoTranslate;
+        var translate = AutoTranslator as IAutoTranslator;
         if (translate != null)
         {
             var engineType = AutoTranslator.GetType();

@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.AutoTranslate;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.Translate;
 using Nikse.SubtitleEdit.Features.Ocr;
 using Nikse.SubtitleEdit.Features.Shared;
@@ -16,6 +17,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -468,7 +470,28 @@ public partial class AutoTranslateViewModel : ObservableObject
         {
             _ = Dispatcher.UIThread.Invoke(async () =>
             {
-                await MessageBox.Show(Window!, ex.Message, ex.StackTrace ?? "An error occurred", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                var error = string.Empty;
+
+                try
+                {
+                    var json = translator.Error;
+                    var seParser = new SeJsonParser();
+                    error = seParser.GetFirstObject(json, "error");
+                    if (!string.IsNullOrEmpty(error))
+                    {
+                        error = "Error: " + Json.DecodeJsonText(error) + Environment.NewLine + Environment.NewLine;
+                    }
+                    else if (!string.IsNullOrEmpty(json))   
+                    {
+                        error = "Error: " + json + Environment.NewLine + Environment.NewLine;
+                    }
+                }
+                catch 
+                { 
+                    // ignore
+                }
+
+                await MessageBox.Show(Window!, ex.Message,  error + (ex.StackTrace ?? "An error occurred"), MessageBoxButtons.OK, MessageBoxIcon.Error);
             });
         }
         finally
