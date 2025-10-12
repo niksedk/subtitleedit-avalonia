@@ -1339,11 +1339,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result =
-            await _windowService.ShowDialogAsync<WaveformGuessTimeCodesWindow, WaveformGuessTimeCodesViewModel>(Window!, vm =>
-            {
-                //vm.Initialize(Subtitles.ToList(), _visibleLayers); 
-            });
+        var result = await _windowService.ShowDialogAsync<WaveformGuessTimeCodesWindow, WaveformGuessTimeCodesViewModel>(Window!);
 
         if (!result.OkPressed ||
             !result.ScanBlockSize.HasValue ||
@@ -1359,6 +1355,17 @@ public partial class MainViewModel :
         if (result.StartFromVideoPosition)
         {
             startFromSeconds = VideoPlayerControl.Position;
+        }
+
+        if (result.DeleteLinesAll)
+        {
+            _subtitle.Paragraphs.Clear();
+        }
+        else if (result.DeleteLinesFromVideoPosition)
+        {
+            var subsToKeep = Subtitles.Where(p => p.StartTime.TotalSeconds >= VideoPlayerControl.Position).ToList();
+            _subtitle.Paragraphs.Clear();
+            _subtitle.Paragraphs.AddRange(subsToKeep.Select(p => p.ToParagraph()));
         }
 
         AudioVisualizer.GenerateTimeCodes(_subtitle, startFromSeconds, result.ScanBlockSize.Value, result.ScanBlockAverageMin.Value, result.ScanBlockAverageMax.Value, result.SplitLongSubtitlesAtMs.Value);
