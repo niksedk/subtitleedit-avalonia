@@ -223,8 +223,7 @@ public class InitWaveform
             Value = IconNames.ArrowLeftRightBold,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(10, 0, 4, 0)
-        };
-
+        }.BindIsVisible(vm, nameof(vm.ShowWaveformHorizontalZoom));
         var sliderHorizontalZoom = new Slider
         {
             Minimum = 0.1,
@@ -233,7 +232,7 @@ public class InitWaveform
             VerticalAlignment = VerticalAlignment.Center,
             Value = 1,
             [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.ZoomHorizontalHint, shortcuts),
-        };
+        }.BindIsVisible(vm, nameof(vm.ShowWaveformHorizontalZoom)); 
         sliderHorizontalZoom.TemplateApplied += (s, e) =>
         {
             if (e.NameScope.Find<Thumb>("thumb") is Thumb thumb)
@@ -249,8 +248,7 @@ public class InitWaveform
             Value = IconNames.ArrowUpDownBold,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(10, 0, 4, 0)
-        };
-
+        }.BindIsVisible(vm, nameof(vm.ShowWaveformVerticalZoom));
         var sliderVerticalZoom = new Slider
         {
             Minimum = 0.1,
@@ -260,7 +258,7 @@ public class InitWaveform
             Margin = new Thickness(0, 0, 10, 0),
             Value = 1,
             [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.ZoomVerticalHint, shortcuts),
-        };
+        }.BindIsVisible(vm, nameof(vm.ShowWaveformVerticalZoom)); 
         sliderVerticalZoom.TemplateApplied += (s, e) =>
         {
             if (e.NameScope.Find<Thumb>("thumb") is Thumb thumb)
@@ -280,7 +278,7 @@ public class InitWaveform
             Margin = new Thickness(0, 0, 10, 0),
             Focusable = true,
             [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.VideoPosition, shortcuts),
-        };
+        }.BindIsVisible(vm, nameof(vm.ShowWaveformVideoPositionSlider)); 
         sliderPosition.TemplateApplied += (s, e) =>
         {
             if (e.NameScope.Find<Thumb>("thumb") is Thumb thumb)
@@ -292,7 +290,7 @@ public class InitWaveform
         sliderPosition.Bind(RangeBase.MaximumProperty, new Binding(nameof(vm.VideoPlayerControl) + "." + nameof(vm.VideoPlayerControl.Duration)));
         sliderPosition.Bind(RangeBase.ValueProperty, new Binding(nameof(vm.VideoPlayerControl) + "." + nameof(vm.VideoPlayerControl.Position)));
 
-        var labelSpeed = UiUtil.MakeLabel(Se.Language.General.Speed);
+        var labelSpeed = UiUtil.MakeLabel(Se.Language.General.Speed).BindIsVisible(vm, nameof(vm.ShowWaveformPlaybackSpeed));
         var comboBoxSpeed = new ComboBox
         {
             VerticalAlignment = VerticalAlignment.Center,
@@ -303,7 +301,7 @@ public class InitWaveform
             Padding = new Thickness(2, 2, 0, 2),
             Background = Brushes.Transparent,
             BorderThickness = new Thickness(0),
-        };
+        }.BindIsVisible(vm, nameof(vm.ShowWaveformPlaybackSpeed)); 
         comboBoxSpeed.Bind(ItemsControl.ItemsSourceProperty, new Binding(nameof(vm.Speeds)));
         comboBoxSpeed.Bind(SelectingItemsControl.SelectedItemProperty, new Binding(nameof(vm.SelectedSpeed)) { Mode = BindingMode.TwoWay });
         comboBoxSpeed.SelectionChanged += (s, e) =>

@@ -1,4 +1,5 @@
 ﻿using Avalonia.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 
@@ -8,6 +9,10 @@ public class SeWaveform
     public bool DrawGridLines { get; set; }
     public bool FocusTextBoxAfterInsertNew { get; set; }
     public bool ShowToolbar { get; set; }
+    public bool ShowWaveformVerticalZoom { get; set; }
+    public bool ShowWaveformHorizontalZoom { get; set; }
+    public bool ShowWaveformVideoPositionSlider { get; set; }
+    public bool ShowWaveformPlaybackSpeed { get; set; }
     public string WaveformColor { get; set; }
     public string WaveformSelectedColor { get; set; }
     public string WaveformCursorColor { get; set; }
@@ -39,6 +44,10 @@ public class SeWaveform
         SnapToShotChangesPixels = 8;
         SnapToShotChanges = true;
         ShotChangesAutoGenerate = false;
+        ShowWaveformVerticalZoom = true;
+        ShowWaveformHorizontalZoom = true;
+        ShowWaveformVideoPositionSlider = true;
+        ShowWaveformPlaybackSpeed = true;
 
         GuessTimeCodeStartFromBeginning = false;
         GuessTimeCodeScanBlockSize = 100;

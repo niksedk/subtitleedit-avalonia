@@ -113,6 +113,10 @@ public class LanguageSettings
     public string WaveformDrawGridLines { get; set; }
     public string WaveformCenterVideoPosition { get; set; }
     public string WaveformShowToolbar { get; set; }
+    public string ShowWaveformHorizontalZoom { get; set; }
+    public string ShowWaveformVerticalZoom { get; set; }
+    public string ShowWaveformVideoPositionSlider { get; set; }
+    public string ShowWaveformPlaybackSpeed { get; set; }
     public string WaveformFocusTextboxAfterInsertNew { get; set; }
     public string WaveformInvertMouseWheel { get; set; }
     public string WaveformSnapToShotChanges { get; set; }
@@ -285,6 +289,10 @@ public class LanguageSettings
         WaveformFocusOnMouseOver = "Focus on mouse over";
         WaveformCenterVideoPosition = "Center video position";
         WaveformShowToolbar = "Show toolbar";
+        ShowWaveformHorizontalZoom = "Toolbar: show horizontal zoom slider";
+        ShowWaveformVerticalZoom = "Toolbar: show vertical zoom slider";
+        ShowWaveformVideoPositionSlider = "Toolbar: show video position slider";
+        ShowWaveformPlaybackSpeed = "Toolbar: show playback speed";
         WaveformFocusTextboxAfterInsertNew = "Focus text box after insert";
         WaveformInvertMouseWheel = "Invert mouse-wheel";
         WaveformSnapToShotChanges = "Snap to shot changes";

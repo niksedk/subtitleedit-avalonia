@@ -106,6 +106,10 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _waveformFocusOnMouseOver;
     [ObservableProperty] private bool _waveformCenterVideoPosition;
     [ObservableProperty] private bool _waveformShowToolbar;
+    [ObservableProperty] private bool _showWaveformVerticalZoom;
+    [ObservableProperty] private bool _showWaveformHorizontalZoom;
+    [ObservableProperty] private bool _showWaveformVideoPositionSlider;
+    [ObservableProperty] private bool _showWaveformPlaybackSpeed;
     [ObservableProperty] private bool _waveformFocusTextboxAfterInsertNew;
     [ObservableProperty] private string _libMpvPath;
     [ObservableProperty] private string _libMpvStatus;
@@ -118,6 +122,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _waveformInvertMouseWheel;
     [ObservableProperty] private bool _waveformSnapToShotChanges;
     [ObservableProperty] private bool _waveformShotChangesAutoGenerate;
+
 
     [ObservableProperty] private ObservableCollection<string> _themes;
     [ObservableProperty] private string _selectedTheme;
@@ -368,6 +373,10 @@ public partial class SettingsViewModel : ObservableObject
         WaveformFocusOnMouseOver = Se.Settings.Waveform.FocusOnMouseOver;
         WaveformCenterVideoPosition = Se.Settings.Waveform.CenterVideoPosition;
         WaveformShowToolbar = Se.Settings.Waveform.ShowToolbar;
+        ShowWaveformVerticalZoom = Se.Settings.Waveform.ShowWaveformVerticalZoom;
+        ShowWaveformHorizontalZoom = Se.Settings.Waveform.ShowWaveformHorizontalZoom;
+        ShowWaveformVideoPositionSlider = Se.Settings.Waveform.ShowWaveformVideoPositionSlider;
+        ShowWaveformPlaybackSpeed = Se.Settings.Waveform.ShowWaveformPlaybackSpeed;
         WaveformFocusTextboxAfterInsertNew = Se.Settings.Waveform.FocusTextBoxAfterInsertNew;
         WaveformColor = Se.Settings.Waveform.WaveformColor.FromHexToColor();
         WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor();
@@ -489,6 +498,10 @@ public partial class SettingsViewModel : ObservableObject
         Se.Settings.Waveform.CenterVideoPosition = WaveformCenterVideoPosition;
         Se.Settings.Waveform.FocusTextBoxAfterInsertNew = WaveformFocusTextboxAfterInsertNew;
         Se.Settings.Waveform.ShowToolbar = WaveformShowToolbar;
+        Se.Settings.Waveform.ShowWaveformVerticalZoom = ShowWaveformVerticalZoom;
+        Se.Settings.Waveform.ShowWaveformHorizontalZoom = ShowWaveformHorizontalZoom;
+        Se.Settings.Waveform.ShowWaveformVideoPositionSlider = ShowWaveformVideoPositionSlider;
+        Se.Settings.Waveform.ShowWaveformPlaybackSpeed = ShowWaveformPlaybackSpeed;
         Se.Settings.Waveform.WaveformColor = WaveformColor.FromColorToHex();
         Se.Settings.Waveform.WaveformSelectedColor = WaveformSelectedColor.FromColorToHex();
         Se.Settings.Waveform.WaveformCursorColor = WaveformCursorColor.FromColorToHex();

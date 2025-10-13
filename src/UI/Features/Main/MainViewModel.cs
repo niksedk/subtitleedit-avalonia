@@ -160,6 +160,10 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _areAssaContentMenuItemsVisible;
     [ObservableProperty] private bool _selectCurrentSubtitleWhilePlaying;
     [ObservableProperty] private bool _waveformCenter;
+    [ObservableProperty] private bool _showWaveformVerticalZoom;
+    [ObservableProperty] private bool _showWaveformHorizontalZoom;
+    [ObservableProperty] private bool _showWaveformVideoPositionSlider;
+    [ObservableProperty] private bool _showWaveformPlaybackSpeed;
     [ObservableProperty] private bool _isRightToLeftEnabled;
     [ObservableProperty] private bool _showAutoTranslateSelectedLines;
     [ObservableProperty] private bool _showShotChangesListMenuItem;
@@ -342,6 +346,10 @@ public partial class MainViewModel :
         ShowUpDownLabels = Se.Settings.Appearance.ShowUpDownLabels;
         SelectCurrentSubtitleWhilePlaying = Se.Settings.General.SelectCurrentSubtitleWhilePlaying;
         WaveformCenter = Se.Settings.Waveform.CenterVideoPosition;
+        ShowWaveformVerticalZoom = Se.Settings.Waveform.ShowWaveformVerticalZoom;
+        ShowWaveformHorizontalZoom = Se.Settings.Waveform.ShowWaveformHorizontalZoom;
+        ShowWaveformVideoPositionSlider = Se.Settings.Waveform.ShowWaveformVideoPositionSlider;
+        ShowWaveformPlaybackSpeed = Se.Settings.Waveform.ShowWaveformPlaybackSpeed;
         EditTextBoxOriginal = new TextBox();
         EditTextCharactersPerSecondOriginal = string.Empty;
         EditTextCharactersPerSecondBackgroundOriginal = Brushes.Transparent;
@@ -2661,6 +2669,11 @@ public partial class MainViewModel :
         ShowUpDownEndTime = Se.Settings.Appearance.ShowUpDownEndTime;
         ShowUpDownDuration = Se.Settings.Appearance.ShowUpDownDuration;
         ShowUpDownLabels = Se.Settings.Appearance.ShowUpDownLabels;
+
+        ShowWaveformVerticalZoom = Se.Settings.Waveform.ShowWaveformVerticalZoom;
+        ShowWaveformHorizontalZoom = Se.Settings.Waveform.ShowWaveformHorizontalZoom;
+        ShowWaveformVideoPositionSlider = Se.Settings.Waveform.ShowWaveformVideoPositionSlider;
+        ShowWaveformPlaybackSpeed = Se.Settings.Waveform.ShowWaveformPlaybackSpeed;
 
         _errorColor = Se.Settings.General.ErrorColor.FromHexToColor();
 
