@@ -21,7 +21,7 @@ public class LanguageMainWaveform
         SetStartHint = "Set start of current subtitle {0}";
         SetEndHint = "Set end of current subtitle {0}";
         NewHint = "Insert new subtitle at video position {0}";
-        CenterWaveformHint = "Center waveform on current video position {0}";
+        CenterWaveformHint = "Center waveform on current video position while playing {0}";
         ZoomHorizontalHint = "Zoom horizontal {0}";
         ZoomVerticalHint = "Zoom vertical {0}";
         SelectCurrentLineWhilePlayingHint = "Select current subtitle while playing {0}";
