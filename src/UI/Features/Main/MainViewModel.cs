@@ -4305,6 +4305,26 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void HideWaveformToolbar()
+    {
+        IsWaveformToolbarVisible = false;
+    }
+
+
+    [RelayCommand]
+    private void ResetWaveformZoom()
+    {
+        if (AudioVisualizer == null || VideoPlayerControl == null)
+        {
+            return;
+        }
+
+        VideoPlayerControl.SetSpeed(1.0);
+        AudioVisualizer.ZoomFactor = 1.0;
+        AudioVisualizer.VerticalZoomFactor = 1.0;
+    }
+
+    [RelayCommand]
     private void FetchFirstWordForNextSubtitle()
     {
         var s = SelectedSubtitle;

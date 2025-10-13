@@ -112,7 +112,7 @@ public class InitWaveform
             flyout.Items.Add(splitMenuItem);
             vm.MenuItemAudioVisualizerSplit = splitMenuItem;
 
-            flyout.Items.Add(new Separator()); //.BindIsVisible(vm, nameof(vm.IsFormatAssa)));
+            flyout.Items.Add(new Separator());
 
             var menuItemFilterByLayer = new MenuItem
             {
@@ -259,12 +259,12 @@ public class InitWaveform
 
         var sliderVerticalZoom = new Slider
         {
-            Minimum = 0,
-            Maximum = 100,
+            Minimum = 0.1,
+            Maximum = 20.0,
             Width = 80,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 10, 0),
-            Value = 0,
+            Value = 1,
             [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.ZoomVerticalHint, shortcuts),
         };
         sliderVerticalZoom.TemplateApplied += (s, e) =>
@@ -275,14 +275,7 @@ public class InitWaveform
                 thumb.Height = 14;
             }
         };
-        sliderVerticalZoom.ValueChanged += (s, e) =>
-        {
-            if (vm.AudioVisualizer != null)
-            {
-                vm.AudioVisualizer.VerticalZoomFactor = Math.Max(0.01, (1 - sliderVerticalZoom.Value / 100.0));
-            }
-        };
-
+        sliderVerticalZoom.Bind(RangeBase.ValueProperty, new Binding(nameof(vm.AudioVisualizer) + "." + nameof(vm.AudioVisualizer.VerticalZoomFactor)));
 
         var sliderPosition = new Slider
         {
@@ -290,6 +283,7 @@ public class InitWaveform
             Width = 160,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 10, 0),
+            Focusable = true,
             [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.VideoPosition, shortcuts),
         };
         sliderPosition.TemplateApplied += (s, e) =>
@@ -300,17 +294,8 @@ public class InitWaveform
                 thumb.Height = 14;
             }
         };
-
         sliderPosition.Bind(RangeBase.MaximumProperty, new Binding(nameof(vm.VideoPlayerControl) + "." + nameof(vm.VideoPlayerControl.Duration)));
         sliderPosition.Bind(RangeBase.ValueProperty, new Binding(nameof(vm.VideoPlayerControl) + "." + nameof(vm.VideoPlayerControl.Position)));
-
-        // Also ensure the control can receive keyboard focus
-        sliderPosition.Focusable = true;
-
-        // For any direct value changes
-        //sliderPosition.ValueChanged += (s, e) => { NotifyPositionChanged(e.NewValue); };
-
-
 
         var labelSpeed = UiUtil.MakeLabel(Se.Language.General.Speed);
         var comboBoxSpeed = new ComboBox
@@ -373,6 +358,22 @@ public class InitWaveform
             Margin = new Thickness(8, 0, 0, 0),
         };
         Attached.SetIcon(buttonMore, "fa-ellipsis-v");
+
+        var flyoutMore = new MenuFlyout();
+        buttonMore.Flyout = flyoutMore;
+        buttonMore.Click += (s, e) => flyoutMore.ShowAt(buttonMore, true);
+        var menuItemHideControls = new MenuItem
+        {
+            Header = string.Format(languageHints.HideWaveformToolbar, string.Empty),
+            Command = vm.HideWaveformToolbarCommand,
+        };
+        flyoutMore.Items.Add(menuItemHideControls);
+        var menuItemResetZoom = new MenuItem
+        {
+            Header = string.Format(languageHints.ResetZoom, string.Empty),
+            Command = vm.ResetWaveformZoomCommand,
+        };
+        flyoutMore.Items.Add(menuItemResetZoom);
 
         controlsPanel.Children.Add(buttonPlay);
         controlsPanel.Children.Add(buttonNew);

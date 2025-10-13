@@ -1345,7 +1345,7 @@ public class AudioVisualizer : Control
         }
 
         // Normalize the value to the control's height
-        var normalizedValue = value / WavePeaks.HighestPeak / VerticalZoomFactor;
+        var normalizedValue = value / WavePeaks.HighestPeak * VerticalZoomFactor;
         var yOffset = normalizedValue * halfWaveformHeight;
 
         // Ensure Y stays within bounds
