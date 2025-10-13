@@ -227,11 +227,11 @@ public class InitWaveform
 
         var sliderHorizontalZoom = new Slider
         {
-            Minimum = 0,
-            Maximum = 200,
+            Minimum = 0.1,
+            Maximum = 20.0,
             Width = 80,
             VerticalAlignment = VerticalAlignment.Center,
-            Value = 100,
+            Value = 1,
             [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.ZoomHorizontalHint, shortcuts),
         };
         sliderHorizontalZoom.TemplateApplied += (s, e) =>
@@ -242,13 +242,7 @@ public class InitWaveform
                 thumb.Height = 14;
             }
         };
-        sliderHorizontalZoom.ValueChanged += (s, e) =>
-        {
-            if (vm.AudioVisualizer != null)
-            {
-                vm.AudioVisualizer.ZoomFactor = Math.Max(0.01, sliderHorizontalZoom.Value / 100.0);
-            }
-        };
+        sliderHorizontalZoom.Bind(RangeBase.ValueProperty, new Binding(nameof(vm.AudioVisualizer) + "." + nameof(vm.AudioVisualizer.ZoomFactor)));
 
         var iconVertical = new Icon
         {
