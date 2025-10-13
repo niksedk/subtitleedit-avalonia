@@ -14,7 +14,7 @@ public class LanguageMainWaveform
     public string SelectCurrentLineWhilePlayingHint { get; set; }
     public string VideoPosition { get; set; }
     public string HideWaveformToolbar { get; set; }
-    public string ResetZoom { get; set; }
+    public string ResetZoomAndSpeed { get; set; }
 
     public LanguageMainWaveform()
     {
@@ -30,6 +30,6 @@ public class LanguageMainWaveform
         SelectCurrentLineWhilePlayingHint = "Select current subtitle while playing {0}";
         VideoPosition = "Video position {0}";
         HideWaveformToolbar = "Hide toolbar {0}";
-        ResetZoom = "Reset zoom {0}";
+        ResetZoomAndSpeed = "Reset zoom & playback speed {0}";
     }
 }

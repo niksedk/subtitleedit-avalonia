@@ -168,6 +168,9 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _showColumnLayerFlyoutMenuItem;
     [ObservableProperty] private bool _isVideoLoaded;
 
+    [ObservableProperty] private ObservableCollection<string> _speeds;
+    [ObservableProperty] private string _selectedSpeed;
+
 
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
@@ -320,7 +323,6 @@ public partial class MainViewModel :
             SubtitleFormats[0];
         SubtitleFormats.Remove(defaultFormat);
         SubtitleFormats.Insert(0, defaultFormat);
-
         SelectedSubtitleFormat = SubtitleFormats[0];
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         SelectedEncoding = Encodings.FirstOrDefault(p => p.DisplayName == Se.Settings.General.DefaultEncoding) ??
@@ -350,6 +352,8 @@ public partial class MainViewModel :
         PanelSingleLineLengthsOriginal = new StackPanel();
         IsWaveformToolbarVisible = Se.Settings.Waveform.ShowToolbar;
         _videoOpenTokenSource = new CancellationTokenSource();
+        Speeds = new ObservableCollection<string>(new[] { "0.5x", "0.75x", "1.0x", "1.25x", "1.5x", "1.75x", "2.0x", "3.0x" });
+        SelectedSpeed = "1.0x";
 
         Configuration.DataDirectoryOverride = Se.DataFolder;
 
@@ -4308,11 +4312,12 @@ public partial class MainViewModel :
     private void HideWaveformToolbar()
     {
         IsWaveformToolbarVisible = false;
+        Se.Settings.Waveform.ShowToolbar = false;
     }
 
 
     [RelayCommand]
-    private void ResetWaveformZoom()
+    private void ResetWaveformZoomAndSpeed()
     {
         if (AudioVisualizer == null || VideoPlayerControl == null)
         {
@@ -4320,6 +4325,7 @@ public partial class MainViewModel :
         }
 
         VideoPlayerControl.SetSpeed(1.0);
+        SelectedSpeed = Speeds.FirstOrDefault(p => p == "1.0x") ?? Speeds[2];
         AudioVisualizer.ZoomFactor = 1.0;
         AudioVisualizer.VerticalZoomFactor = 1.0;
     }

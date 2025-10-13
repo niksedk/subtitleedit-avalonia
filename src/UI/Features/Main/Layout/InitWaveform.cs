@@ -275,6 +275,7 @@ public class InitWaveform
         {
             Minimum = 0,
             Width = 160,
+            Value = 0,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 10, 0),
             Focusable = true,
@@ -295,8 +296,6 @@ public class InitWaveform
         var comboBoxSpeed = new ComboBox
         {
             VerticalAlignment = VerticalAlignment.Center,
-            ItemsSource = new[] { "0.5x", "0.75x", "1.0x", "1.25x", "1.5x", "1.75x", "2.0x", "3.0x" },
-            SelectedItem = "1.0x",
             Margin = new Thickness(0, 0, 10, 0),
             FontSize = 12,
             MaxHeight = 22,
@@ -305,6 +304,8 @@ public class InitWaveform
             Background = Brushes.Transparent,
             BorderThickness = new Thickness(0),
         };
+        comboBoxSpeed.Bind(ItemsControl.ItemsSourceProperty, new Binding(nameof(vm.Speeds)));
+        comboBoxSpeed.Bind(SelectingItemsControl.SelectedItemProperty, new Binding(nameof(vm.SelectedSpeed)) { Mode = BindingMode.TwoWay });
         comboBoxSpeed.SelectionChanged += (s, e) =>
         {
             if (vm.AudioVisualizer != null && comboBoxSpeed.SelectedItem is string s1 && s1.EndsWith("x") &&
@@ -364,8 +365,8 @@ public class InitWaveform
         flyoutMore.Items.Add(menuItemHideControls);
         var menuItemResetZoom = new MenuItem
         {
-            Header = string.Format(languageHints.ResetZoom, string.Empty),
-            Command = vm.ResetWaveformZoomCommand,
+            Header = string.Format(languageHints.ResetZoomAndSpeed, string.Empty),
+            Command = vm.ResetWaveformZoomAndSpeedCommand,
         };
         flyoutMore.Items.Add(menuItemResetZoom);
 
