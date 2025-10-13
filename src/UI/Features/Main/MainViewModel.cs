@@ -31,6 +31,7 @@ using Nikse.SubtitleEdit.Features.Files.ExportCustomTextFormat;
 using Nikse.SubtitleEdit.Features.Files.ExportEbuStl;
 using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Files.ExportPac;
+using Nikse.SubtitleEdit.Features.Files.ExportPlainText;
 using Nikse.SubtitleEdit.Features.Files.ManualChosenEncoding;
 using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 using Nikse.SubtitleEdit.Features.Files.Statistics;
@@ -1022,6 +1023,26 @@ public partial class MainViewModel :
         }
 
         var result = await _windowService.ShowDialogAsync<ExportCustomTextFormatWindow, ExportCustomTextFormatViewModel>(Window!,
+            vm => { vm.Initialize(Subtitles.ToList(), _subtitleFileName, _videoFileName); });
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowExportPlainText()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<ExportPlainTextWindow, ExportPlainTextViewModel>(Window!,
             vm => { vm.Initialize(Subtitles.ToList(), _subtitleFileName, _videoFileName); });
 
         _shortcutManager.ClearKeys();

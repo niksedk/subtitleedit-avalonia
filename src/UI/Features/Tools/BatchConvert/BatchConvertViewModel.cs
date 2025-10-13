@@ -919,7 +919,7 @@ public partial class BatchConvertViewModel : ObservableObject
         var files = e.DataTransfer.TryGetFiles();
         if (files != null)
         {
-            Dispatcher.UIThread.Post(async () =>
+            Dispatcher.UIThread.Post(() =>
             {
                 foreach (var file in files)
                 {

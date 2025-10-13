@@ -168,6 +168,11 @@ public static class InitMenu
                             Header = Se.Language.File.Export.CustomTextFormatsDotDotDot,
                             Command = vm.ShowExportCustomTextFormatCommand,
                         },
+                        new MenuItem
+                        {
+                            Header = Se.Language.File.Export.PlainTextDotDotDot,
+                            Command = vm.ShowExportPlainTextCommand,
+                        },
                     }
                 },
                 new Separator(),

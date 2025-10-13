@@ -1,5 +1,4 @@
 ﻿using Avalonia.Media;
-using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 

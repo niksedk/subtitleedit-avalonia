@@ -241,5 +241,6 @@ public class LanguageFixCommonErrors
         BackToFixList =  "Back to fix list";
         ApplyFixes = "Apply selected fixes & close";
         FixCommonOcrErrorsStep2FixesFoundX =  "Fix common errors, step 2 - Fixes found: {0}";
+        ApplyFixesAndClose = "Apply fixes & close";   
     }
 }

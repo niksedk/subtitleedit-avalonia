@@ -12,6 +12,7 @@ public class LanguageExport
     public string PreviewTitle { get; set; }
     public string TitleExportVobSub { get; set; }
     public string CustomTextFormatsDotDotDot { get; set; }
+    public string PlainTextDotDotDot { get; set; }
     public string CustomTextFormats { get; set; }
     public string TitleExportCustomFormat { get; set; }
     public string EditCustomFormat { get; set; }
@@ -20,6 +21,7 @@ public class LanguageExport
     public string TimeCodeFormat { get; set; }
     public string NewLineFormat { get; set; }
     public string PleaseEnterNameForTheCustomFormat { get; set; }
+    public string TitleExportPlainText { get; set; }
 
     public LanguageExport()
     {
@@ -33,6 +35,7 @@ public class LanguageExport
         PreviewTitle = "Preview - current size: {0}x{1}, target size: {2}x{3}, zoom: {4}%";
         TitleExportVobSub = "VobSub (sub/idx)";
         CustomTextFormatsDotDotDot = "_Custom text formats...";
+        PlainTextDotDotDot = "_Plain text...";
         CustomTextFormats = "Custom text formats";
         TitleExportCustomFormat = "Export custom text format";
         EditCustomFormat = "Edit custom text format";
@@ -41,5 +44,6 @@ public class LanguageExport
         TimeCodeFormat = "Time code format";
         NewLineFormat = "New line format";
         PleaseEnterNameForTheCustomFormat = "Please enter name for the custom format";
+        TitleExportPlainText = "Export plain text";
     }
 }

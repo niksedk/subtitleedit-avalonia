@@ -8,7 +8,6 @@ using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
-using System;
 using System.Globalization;
 using MenuItem = Avalonia.Controls.MenuItem;
 
