@@ -3,11 +3,8 @@ using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Features.Files.ExportCustomTextFormat;
 using Nikse.SubtitleEdit.Features.Main;
-using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
-using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,10 +14,11 @@ namespace Nikse.SubtitleEdit.Features.Files.ExportPlainText;
 
 public partial class ExportPlainTextViewModel : ObservableObject
 {
+    // settings controls
     [ObservableProperty] private bool _formatTextNone;
     [ObservableProperty] private bool _formatTextMerge;
     [ObservableProperty] private bool _formatTextUnbreak;
-    [ObservableProperty] private bool _formatTextRemoveStyling;
+    [ObservableProperty] private bool _textRemoveStyling;
     [ObservableProperty] private bool _showLineNumbers;
     [ObservableProperty] private bool _addNewLineAfterLineNumber;
     [ObservableProperty] private bool _showTimeCodes;

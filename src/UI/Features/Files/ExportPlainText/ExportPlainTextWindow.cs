@@ -68,8 +68,94 @@ public class ExportPlainTextWindow : Window
 
     private static Border MakeSettingsView(ExportPlainTextViewModel vm)
     {
+        // Line numbers section
+        var labelLineNumbers = UiUtil.MakeLabel("Line numbers").WithBold().WithMarginTop(10);
+        var checkBoxShowLineNumbers = UiUtil.MakeCheckBox("Show line numbers", vm, nameof(vm.ShowLineNumbers));
+        var checkBoxAddNewLineAfterLineNumber = UiUtil.MakeCheckBox("Add new line after line number", vm, nameof(vm.AddNewLineAfterLineNumber))
+            .WithBindEnabled(nameof(vm.ShowLineNumbers));
+
+        // Time codes section
+        var labelTimeCodes = UiUtil.MakeLabel("Time codes").WithBold().WithMarginTop(10);
+        var checkBoxShowTimeCodes = UiUtil.MakeCheckBox("Show time codes", vm, nameof(vm.ShowTimeCodes));
+        var labelTimeCodeFormat = UiUtil.MakeLabel("Format:");
+        var comboBoxTimeCodeFormat = UiUtil.MakeComboBox(vm.TimeCodeFormats, vm, nameof(vm.SelectedTimeCodeFormats))
+            .BindIsEnabled(vm, nameof(vm.ShowTimeCodes));
+        var panelTimeCodeFormat = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 5,
+            Children =
+            {
+                labelTimeCodeFormat,
+                comboBoxTimeCodeFormat,
+            }
+        };
+        var labelTimeCodeSeparator = UiUtil.MakeLabel("Separator:");
+        var comboBoxTimeCodeSeparator = UiUtil.MakeComboBox(vm.TimeCodeSeparators, vm, nameof(vm.SelectedTimeCodeSeparator))
+            .BindIsEnabled(vm, nameof(vm.ShowTimeCodes));
+        var panelTimeCodeSeparator = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 5,
+            Children =
+            {
+                labelTimeCodeSeparator,
+                comboBoxTimeCodeSeparator,
+            }
+        };
+        var checkBoxAddNewLineAfterTimeCode = UiUtil.MakeCheckBox("Add new line after time code", vm, nameof(vm.AddNewLineAfterTimeCode))
+            .WithBindEnabled(nameof(vm.ShowTimeCodes));
+
+        // Format text section
+        var labelFormatText = UiUtil.MakeLabel(Se.Language.General.Text).WithBold().WithMarginTop(10);
+        var radioButtonFormatTextNone = UiUtil.MakeRadioButton(Se.Language.General.None, vm, nameof(vm.FormatTextNone), "formatText");
+        var radioButtonFormatTextMerge = UiUtil.MakeRadioButton("Merge lines", vm, nameof(vm.FormatTextMerge), "formatText");
+        var radioButtonFormatTextUnbreak = UiUtil.MakeRadioButton("Unbreak lines", vm, nameof(vm.FormatTextUnbreak), "formatText");
+        var checkBoxRemoveStyling = UiUtil.MakeCheckBox("Remove styling", vm, nameof(vm.TextRemoveStyling));
+
+        // Spacing section
+        var labelSpacing = UiUtil.MakeLabel("Spacing").WithBold().WithMarginTop(10);
+        var checkBoxAddLineAfterText = UiUtil.MakeCheckBox("Add new line after text", vm, nameof(vm.AddLineAfterText));
+        var checkBoxAddLineBetweenSubtitles = UiUtil.MakeCheckBox("Add line between subtitles", vm, nameof(vm.AddLineBetweenSubtitles));
+
+        // Encoding section
+        var labelEncoding = UiUtil.MakeLabel(Se.Language.General.Encoding).WithBold().WithMarginTop(10);
+        var comboBoxEncoding = UiUtil.MakeComboBox(vm.Encodings, vm, nameof(vm.SelectedEncoding)).WithMinWidth(180);
+
         var stackPanel = new StackPanel
         {
+            Orientation = Orientation.Vertical,
+            Spacing = 5,
+            Children =
+            {
+                // line numbers
+                labelLineNumbers,
+                checkBoxShowLineNumbers,
+                checkBoxAddNewLineAfterLineNumber,
+
+                // time codes
+                labelTimeCodes,
+                checkBoxShowTimeCodes,
+                panelTimeCodeFormat,
+                panelTimeCodeSeparator,
+                checkBoxAddNewLineAfterTimeCode,
+
+                // format text
+                labelFormatText,
+                radioButtonFormatTextNone,
+                radioButtonFormatTextMerge,
+                radioButtonFormatTextUnbreak,
+                checkBoxRemoveStyling,
+                checkBoxAddLineAfterText,
+
+                // spacing
+                labelSpacing,
+                checkBoxAddLineBetweenSubtitles,
+
+                // encoding
+                labelEncoding,
+                comboBoxEncoding,
+            },
         };
 
         return UiUtil.MakeBorderForControl(stackPanel);
