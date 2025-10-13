@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -289,6 +290,12 @@ public class InitWaveform
             ItemsSource = new[] { "0.5x", "0.75x", "1.0x", "1.25x", "1.5x", "1.75x", "2.0x", "3.0x" },
             SelectedItem = "1.0x",
             Margin = new Thickness(0, 0, 10, 0),
+            FontSize = 12,
+            MaxHeight = 22,
+            MinHeight = 22,
+            Padding = new Thickness(2, 2, 0, 2),
+            Background = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
         };
         comboBoxSpeed.SelectionChanged += (s, e) =>
         {
