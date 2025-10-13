@@ -1,6 +1,9 @@
 using Avalonia.Controls;
 using Avalonia.Data;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
@@ -142,7 +145,17 @@ public class JoinSubtitlesWindow : Window
         var buttonClear = UiUtil.MakeButton(vm.ClearCommand, IconNames.Close, Se.Language.General.Clear);
         var panelButtons = UiUtil.MakeButtonBar(buttonAdd, buttonRemove, buttonClear).WithAlignmentLeft();
 
-        grid.Add(dataGrid, 0);
+        // hack to make drag and drop work on the DataGrid - also on empty rows
+        var dropHost = new Border
+        {
+            Background = Brushes.Transparent,
+            Child = dataGrid,
+        };
+        DragDrop.SetAllowDrop(dropHost, true);
+        dropHost.AddHandler(DragDrop.DragOverEvent, vm.FileGridOnDragOver, RoutingStrategies.Bubble);
+        dropHost.AddHandler(DragDrop.DropEvent, vm.FileGridOnDrop, RoutingStrategies.Bubble);
+
+        grid.Add(dropHost, 0);
         grid.Add(panelButtons, 1);
 
         return UiUtil.MakeBorderForControlNoPadding(grid);

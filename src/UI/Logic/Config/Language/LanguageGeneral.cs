@@ -422,6 +422,7 @@ public class LanguageGeneral
     public string Forward { get; set; }
     public string Backward { get; set; }
     public string Speed { get; set; }
+    public string Unknown { get; set; }
 
     public LanguageGeneral()
     {
@@ -842,5 +843,6 @@ public class LanguageGeneral
         Forward = "Forward";
         Backward = "Backward";
         Speed = "Speed";
+        Unknown = "Unknown";
     }
 }

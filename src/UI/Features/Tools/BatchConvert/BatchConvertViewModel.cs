@@ -1,9 +1,11 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
@@ -19,7 +21,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Features.Shared;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -313,7 +314,7 @@ public partial class BatchConvertViewModel : ObservableObject
             var fileInfo = new FileInfo(fileName);
             var subtitle = Subtitle.Parse(fileName);
             var batchItem = new BatchConvertItem(fileName, fileInfo.Length,
-                subtitle != null ? subtitle.OriginalFormat.Name : "Unknown", subtitle);
+                subtitle != null ? subtitle.OriginalFormat.Name : Se.Language.General.Unknown, subtitle);
             BatchItems.Add(batchItem);
         }
 
@@ -892,5 +893,47 @@ public partial class BatchConvertViewModel : ObservableObject
         }
 
         return string.Join(", ", indices);
+    }
+
+    internal void FileGridOnDragOver(object? sender, DragEventArgs e)
+    {
+        if (e.DataTransfer.Contains(DataFormat.File))
+        {
+            e.DragEffects = DragDropEffects.Copy; // show copy cursor
+        }
+        else
+        {
+            e.DragEffects = DragDropEffects.None;
+        }
+
+        e.Handled = true;
+    }
+
+    internal void FileGridOnDrop(object? sender, DragEventArgs e)
+    {
+        if (!e.DataTransfer.Contains(DataFormat.File))
+        {
+            return;
+        }
+
+        var files = e.DataTransfer.TryGetFiles();
+        if (files != null)
+        {
+            Dispatcher.UIThread.Post(async () =>
+            {
+                foreach (var file in files)
+                {
+                    var path = file.Path?.LocalPath;
+                    if (path != null && File.Exists(path))
+                    {
+                        var fileInfo = new FileInfo(path);
+                        var subtitle = Subtitle.Parse(path);
+                        var batchItem = new BatchConvertItem(path, fileInfo.Length,
+                            subtitle != null ? subtitle.OriginalFormat.Name : Se.Language.General.Unknown, subtitle);
+                        BatchItems.Add(batchItem);
+                    }
+                }
+            });
+        }
     }
 }

@@ -4,6 +4,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
@@ -162,7 +163,17 @@ public class BatchConvertWindow : Window
             .WithAlignmentTop()
             .WithAlignmentRight();
 
-        grid.Add(dataGrid, 0, 0);
+        // hack to make drag and drop work on the DataGrid - also on empty rows
+        var dropHost = new Border
+        {
+            Background = Brushes.Transparent,
+            Child = dataGrid,
+        };
+        DragDrop.SetAllowDrop(dropHost, true);
+        dropHost.AddHandler(DragDrop.DragOverEvent, vm.FileGridOnDragOver, RoutingStrategies.Bubble);
+        dropHost.AddHandler(DragDrop.DropEvent, vm.FileGridOnDrop, RoutingStrategies.Bubble);
+
+        grid.Add(dropHost, 0, 0);
         grid.Add(labelBatchItemsInfo, 0);
         grid.Add(panelFileControls, 1, 0);
 

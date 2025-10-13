@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
@@ -73,38 +74,11 @@ public partial class JoinSubtitlesViewModel : ObservableObject
 
         foreach (var fileName in fileNames)
         {
-            var subtitle = Subtitle.Parse(fileName);
-            if (subtitle == null)
+            bool flowControl = await AddFile(fileName);
+            if (!flowControl)
             {
-                if (fileName.EndsWith(".ismt", StringComparison.InvariantCultureIgnoreCase) ||
-                                   fileName.EndsWith(".mp4", StringComparison.InvariantCultureIgnoreCase) ||
-                                   fileName.EndsWith(".m4v", StringComparison.InvariantCultureIgnoreCase) ||
-                                   fileName.EndsWith(".3gp", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    var format = new IsmtDfxp();
-                    if (format.IsMine(null, fileName))
-                    {
-                        subtitle = new Subtitle();
-                        format.LoadSubtitle(subtitle, null, fileName);
-                    }
-                }
-            }
-
-            if (subtitle == null || subtitle.Paragraphs.Count == 0)
-            {
-                await MessageBox.Show(Window, Se.Language.General.Error, "Unable to read subtitle from file: " + fileName);
                 continue;
             }
-
-            var item = new JoinDisplayItem
-            {
-                FileName = System.IO.Path.GetFileName(fileName),
-                FullFileName = fileName,
-                StartTime = subtitle.Paragraphs.Min(p => p.StartTime.TimeSpan),
-                EndTime = subtitle.Paragraphs.Max(p => p.EndTime.TimeSpan),
-                Lines = subtitle.Paragraphs.Count,
-            };
-            JoinItems.Add(item);
         }
 
         var items = JoinItems.ToList();
@@ -117,6 +91,48 @@ public partial class JoinSubtitlesViewModel : ObservableObject
         await SortAndLoad();
 
         IsJoinEnabled = JoinItems.Count > 1;
+    }
+
+    private async Task<bool> AddFile(string fileName)
+    {
+        if (Window == null)
+        {
+            return false;
+        }
+
+        var subtitle = Subtitle.Parse(fileName);
+        if (subtitle == null)
+        {
+            if (fileName.EndsWith(".ismt", StringComparison.InvariantCultureIgnoreCase) ||
+                               fileName.EndsWith(".mp4", StringComparison.InvariantCultureIgnoreCase) ||
+                               fileName.EndsWith(".m4v", StringComparison.InvariantCultureIgnoreCase) ||
+                               fileName.EndsWith(".3gp", StringComparison.InvariantCultureIgnoreCase))
+            {
+                var format = new IsmtDfxp();
+                if (format.IsMine(null, fileName))
+                {
+                    subtitle = new Subtitle();
+                    format.LoadSubtitle(subtitle, null, fileName);
+                }
+            }
+        }
+
+        if (subtitle == null || subtitle.Paragraphs.Count == 0)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, "Unable to read subtitle from file: " + fileName);
+            return false;
+        }
+
+        var item = new JoinDisplayItem
+        {
+            FileName = System.IO.Path.GetFileName(fileName),
+            FullFileName = fileName,
+            StartTime = subtitle.Paragraphs.Min(p => p.StartTime.TimeSpan),
+            EndTime = subtitle.Paragraphs.Max(p => p.EndTime.TimeSpan),
+            Lines = subtitle.Paragraphs.Count,
+        };
+        JoinItems.Add(item);
+        return true;
     }
 
     [RelayCommand]
@@ -413,6 +429,59 @@ public partial class JoinSubtitlesViewModel : ObservableObject
         {
             e.Handled = true;
             Window?.Close();
+        }
+    }
+
+    internal void FileGridOnDragOver(object? sender, DragEventArgs e)
+    {
+        if (e.DataTransfer.Contains(DataFormat.File))
+        {
+            e.DragEffects = DragDropEffects.Copy; // show copy cursor
+        }
+        else
+        {
+            e.DragEffects = DragDropEffects.None;
+        }
+
+        e.Handled = true;
+    }
+
+    internal void FileGridOnDrop(object? sender, DragEventArgs e)
+    {
+        if (!e.DataTransfer.Contains(DataFormat.File))
+        {
+            return;
+        }
+
+        var files = e.DataTransfer.TryGetFiles();
+        if (files != null)
+        {
+            Dispatcher.UIThread.Post(async () =>
+            {
+                foreach (var file in files)
+                {
+                    var path = file.Path?.LocalPath;
+                    if (path != null && System.IO.File.Exists(path))
+                    {
+                        bool flowControl = await AddFile(path);
+                        if (!flowControl)
+                        {
+                            continue;
+                        }
+                    }
+                }
+
+                var items = JoinItems.ToList();
+                JoinItems.Clear();
+                foreach (var item in items.OrderBy(p => p.StartTime))
+                {
+                    JoinItems.Add(item);
+                }
+
+                await SortAndLoad();
+
+                IsJoinEnabled = JoinItems.Count > 1;
+            });
         }
     }
 }

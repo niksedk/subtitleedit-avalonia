@@ -2,12 +2,16 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Avalonia.Threading;
 using Nikse.SubtitleEdit.Features.Files.Compare;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
+using System;
 using System.Collections.ObjectModel;
 
 public class CompareWindow : Window
@@ -65,11 +69,11 @@ public class CompareWindow : Window
         grid.Add(panelRightBrowse, 0, 1);
 
         // left subtitle view (original)
-        var leftView = MakeSubtitlesView(vm.LeftSubtitles, nameof(vm.SelectedLeft));
+        var leftView = MakeSubtitlesView(vm.LeftSubtitles, nameof(vm.SelectedLeft), vm.FileGridOnDragOver, vm.FileGridOnDropLeft);
         grid.Add(leftView, 1);
 
         // right subtitle view (modified)
-        var rightView = MakeSubtitlesView(vm.RightSubtitles, nameof(vm.SelectedRight));
+        var rightView = MakeSubtitlesView(vm.RightSubtitles, nameof(vm.SelectedRight), vm.FileGridOnDragOver, vm.FileGridOnDropRight);
         grid.Add(rightView, 1, 1);
 
         // status text
@@ -77,14 +81,14 @@ public class CompareWindow : Window
         grid.Add(statusText, 2, 0, 1, 2);
 
         // display type combo box
-        var labelDisplayType = UiUtil.MakeLabel(Se.Language.General.Show).WithMarginRight(5);  
+        var labelDisplayType = UiUtil.MakeLabel(Se.Language.General.Show).WithMarginRight(5);
         var comboBoxCompareVisual = UiUtil.MakeComboBox(vm.CompareVisuals, vm, nameof(vm.SelectedCompareVisual));
         comboBoxCompareVisual.SelectionChanged += vm.ComboBoxCompareVisualSelectionChanged;
         var panelDisplayType = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Children = { labelDisplayType, comboBoxCompareVisual }
-        };  
+        };
         grid.Add(panelDisplayType, 3, 0, 1, 2);
 
         // buttons
@@ -108,9 +112,9 @@ public class CompareWindow : Window
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(
-            checkBoxIgnoreWhiteSpace, 
-            checkBoxIgnoreFormatting, 
-            buttonPreviousDifference, 
+            checkBoxIgnoreWhiteSpace,
+            checkBoxIgnoreFormatting,
+            buttonPreviousDifference,
             buttonNextDifference,
             buttonExport,
             buttonOk
@@ -132,7 +136,12 @@ public class CompareWindow : Window
         }
     }
 
-    private static Border MakeSubtitlesView(ObservableCollection<CompareItem> items, string selectedBinding)
+    private Control MakeSubtitlesView(ObservableCollection<CompareItem> leftSubtitles, string v, object fileGridOnDragOverLeft, object fileGridOnDropLeft)
+    {
+        throw new NotImplementedException();
+    }
+
+    private static Border MakeSubtitlesView(ObservableCollection<CompareItem> items, string selectedBinding, Delegate fileGridOnDragOver, Delegate fileGridOnDrop)
     {
         var dg = new DataGrid
         {
@@ -252,6 +261,16 @@ public class CompareWindow : Window
             Mode = BindingMode.TwoWay
         });
 
-        return UiUtil.MakeBorderForControl(dg);
+        // hack to make drag and drop work on the DataGrid - also on empty rows
+        var dropHost = new Border
+        {
+            Background = Brushes.Transparent,
+            Child = dg,
+        };
+        DragDrop.SetAllowDrop(dropHost, true);
+        dropHost.AddHandler(DragDrop.DragOverEvent, fileGridOnDragOver, RoutingStrategies.Bubble);
+        dropHost.AddHandler(DragDrop.DropEvent, fileGridOnDrop, RoutingStrategies.Bubble);
+
+        return UiUtil.MakeBorderForControl(dropHost);
     }
 }

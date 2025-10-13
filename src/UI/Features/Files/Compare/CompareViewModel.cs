@@ -861,4 +861,91 @@ public partial class CompareViewModel : ObservableObject
             Dispatcher.UIThread.Post(Compare);
         });
     }
+
+    internal void FileGridOnDragOver(object? sender, DragEventArgs e)
+    {
+        if (e.DataTransfer.Contains(DataFormat.File))
+        {
+            e.DragEffects = DragDropEffects.Copy; // show copy cursor
+        }
+        else
+        {
+            e.DragEffects = DragDropEffects.None;
+        }
+
+        e.Handled = true;
+    }
+
+    internal void FileGridOnDropLeft(object? sender, DragEventArgs e)
+    {
+        if (!e.DataTransfer.Contains(DataFormat.File))
+        {
+            return;
+        }
+
+        var files = e.DataTransfer.TryGetFiles();
+        if (files != null)
+        {
+            Dispatcher.UIThread.Post(async () =>
+            {
+                foreach (var file in files)
+                {
+                    var path = file.Path?.LocalPath;
+                    var subtitle = Subtitle.Parse(path);
+                    if (subtitle == null || path == null)
+                    {
+                        return;
+                    }
+
+                    _leftLines.Clear();
+                    foreach (var line in subtitle.Paragraphs)
+                    {
+                        _leftLines.Add(new SubtitleLineViewModel(line, subtitle.OriginalFormat));
+                    }
+
+                    LeftFileNameHasChanges = false;
+                    LeftFileName = path;
+
+                    Dispatcher.UIThread.Post(Compare);
+                    break;
+                }
+            });
+        }
+    }
+
+    internal void FileGridOnDropRight(object? sender, DragEventArgs e)
+    {
+        if (!e.DataTransfer.Contains(DataFormat.File))
+        {
+            return;
+        }
+
+        var files = e.DataTransfer.TryGetFiles();
+        if (files != null)
+        {
+            Dispatcher.UIThread.Post(async () =>
+            {
+                foreach (var file in files)
+                {
+                    var path = file.Path?.LocalPath;
+                    var subtitle = Subtitle.Parse(path);
+                    if (subtitle == null || path == null)
+                    {
+                        return;
+                    }
+
+                    _rightLines.Clear();
+                    foreach (var line in subtitle.Paragraphs)
+                    {
+                        _rightLines.Add(new SubtitleLineViewModel(line, subtitle.OriginalFormat));
+                    }
+
+                    RightFileName = path;
+
+                    Dispatcher.UIThread.Post(Compare);
+                    break;
+                }
+            });
+        }
+    }
 }
