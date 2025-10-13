@@ -12,6 +12,7 @@ public class LanguageMainWaveform
     public string ZoomHorizontalHint { get; set; }
     public string ZoomVerticalHint { get; set; }
     public string SelectCurrentLineWhilePlayingHint { get; set; }
+    public string VideoPosition { get; set; }
 
     public LanguageMainWaveform()
     {
@@ -25,5 +26,6 @@ public class LanguageMainWaveform
         ZoomHorizontalHint = "Zoom horizontal {0}";
         ZoomVerticalHint = "Zoom vertical {0}";
         SelectCurrentLineWhilePlayingHint = "Select current subtitle while playing {0}";
+        VideoPosition = "Video position {0}";
     }
 }

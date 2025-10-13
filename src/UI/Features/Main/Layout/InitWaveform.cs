@@ -283,6 +283,35 @@ public class InitWaveform
             }
         };
 
+
+        var sliderPosition = new Slider
+        {
+            Minimum = 0,
+            Width = 160,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 10, 0),
+            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.VideoPosition, shortcuts),
+        };
+        sliderPosition.TemplateApplied += (s, e) =>
+        {
+            if (e.NameScope.Find<Thumb>("thumb") is Thumb thumb)
+            {
+                thumb.Width = 14;
+                thumb.Height = 14;
+            }
+        };
+
+        sliderPosition.Bind(RangeBase.MaximumProperty, new Binding(nameof(vm.VideoPlayerControl) + "." + nameof(vm.VideoPlayerControl.Duration)));
+        sliderPosition.Bind(RangeBase.ValueProperty, new Binding(nameof(vm.VideoPlayerControl) + "." + nameof(vm.VideoPlayerControl.Position)));
+
+        // Also ensure the control can receive keyboard focus
+        sliderPosition.Focusable = true;
+
+        // For any direct value changes
+        //sliderPosition.ValueChanged += (s, e) => { NotifyPositionChanged(e.NewValue); };
+
+
+
         var labelSpeed = UiUtil.MakeLabel(Se.Language.General.Speed);
         var comboBoxSpeed = new ComboBox
         {
@@ -356,6 +385,7 @@ public class InitWaveform
         controlsPanel.Children.Add(sliderHorizontalZoom);
         controlsPanel.Children.Add(iconVertical);
         controlsPanel.Children.Add(sliderVerticalZoom);
+        controlsPanel.Children.Add(sliderPosition);
         controlsPanel.Children.Add(panelSpeed);
 
         controlsPanel.Children.Add(toggleButtonAutoSelectOnPlay);
