@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
+using Avalonia.Markup.Declarative;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -88,14 +89,16 @@ public class ExportPlainTextWindow : Window
         checkBoxShowLineNumbers.PropertyChanged += (s, e) => vm.SetDirty();
         var checkBoxAddNewLineAfterLineNumber = UiUtil.MakeCheckBox("Add new line after line number", vm, nameof(vm.AddNewLineAfterLineNumber))
             .WithBindEnabled(nameof(vm.ShowLineNumbers));
-        checkBoxShowLineNumbers.PropertyChanged += (s, e) => vm.SetDirty();
+        checkBoxAddNewLineAfterLineNumber.PropertyChanged += (s, e) => vm.SetDirty();
 
         // Time codes section
         var labelTimeCodes = UiUtil.MakeLabel("Time codes").WithBold().WithMarginTop(10);
         var checkBoxShowTimeCodes = UiUtil.MakeCheckBox("Show time codes", vm, nameof(vm.ShowTimeCodes));
+        checkBoxShowTimeCodes.PropertyChanged += (s, e) => vm.SetDirty();
         var labelTimeCodeFormat = UiUtil.MakeLabel("Format:");
         var comboBoxTimeCodeFormat = UiUtil.MakeComboBox(vm.TimeCodeFormats, vm, nameof(vm.SelectedTimeCodeFormats))
             .BindIsEnabled(vm, nameof(vm.ShowTimeCodes));
+        comboBoxTimeCodeFormat.PropertyChanged += (_,_) => vm.SetDirty();
         var panelTimeCodeFormat = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -109,6 +112,7 @@ public class ExportPlainTextWindow : Window
         var labelTimeCodeSeparator = UiUtil.MakeLabel("Separator:");
         var comboBoxTimeCodeSeparator = UiUtil.MakeComboBox(vm.TimeCodeSeparators, vm, nameof(vm.SelectedTimeCodeSeparator))
             .BindIsEnabled(vm, nameof(vm.ShowTimeCodes));
+        comboBoxTimeCodeSeparator.PropertyChanged += (sender, args) => vm.SetDirty();
         var panelTimeCodeSeparator = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -121,18 +125,25 @@ public class ExportPlainTextWindow : Window
         };
         var checkBoxAddNewLineAfterTimeCode = UiUtil.MakeCheckBox("Add new line after time code", vm, nameof(vm.AddNewLineAfterTimeCode))
             .WithBindEnabled(nameof(vm.ShowTimeCodes));
+        checkBoxAddNewLineAfterTimeCode.PropertyChanged += (sender, args) => vm.SetDirty(); 
 
         // Format text section
         var labelFormatText = UiUtil.MakeLabel(Se.Language.General.Text).WithBold().WithMarginTop(10);
         var radioButtonFormatTextNone = UiUtil.MakeRadioButton(Se.Language.General.None, vm, nameof(vm.FormatTextNone), "formatText");
+        radioButtonFormatTextNone.PropertyChanged += (sender, args) => vm.SetDirty();
         var radioButtonFormatTextMerge = UiUtil.MakeRadioButton("Merge lines", vm, nameof(vm.FormatTextMerge), "formatText");
+        radioButtonFormatTextMerge.PropertyChanged += (sender, args) => vm.SetDirty();
         var radioButtonFormatTextUnbreak = UiUtil.MakeRadioButton("Unbreak lines", vm, nameof(vm.FormatTextUnbreak), "formatText");
+        radioButtonFormatTextUnbreak.PropertyChanged += (sender, args) => vm.SetDirty();
         var checkBoxRemoveStyling = UiUtil.MakeCheckBox("Remove styling", vm, nameof(vm.TextRemoveStyling));
+        checkBoxRemoveStyling.PropertyChanged += (sender, args) => vm.SetDirty();
 
         // Spacing section
         var labelSpacing = UiUtil.MakeLabel("Spacing").WithBold().WithMarginTop(10);
         var checkBoxAddLineAfterText = UiUtil.MakeCheckBox("Add new line after text", vm, nameof(vm.AddLineAfterText));
+        checkBoxAddLineAfterText.PropertyChanged += (sender, args) => vm.SetDirty();
         var checkBoxAddLineBetweenSubtitles = UiUtil.MakeCheckBox("Add line between subtitles", vm, nameof(vm.AddLineBetweenSubtitles));
+        checkBoxAddLineBetweenSubtitles.PropertyChanged += (sender, args) => vm.SetDirty();
         
         var stackPanel = new StackPanel
         {

@@ -97,6 +97,48 @@ public partial class ExportPlainTextViewModel : ObservableObject
         _timerUpdatePreview = new System.Timers.Timer();
         _timerUpdatePreview.Interval = 250;
         _timerUpdatePreview.Elapsed += TimerUpdatePreviewElapsed;
+
+        FormatTextNone = false;
+        FormatTextNone = false;
+        FormatTextUnbreak = false;
+        if (Se.Settings.File.ExportPlainText.TextProcessing == "Merge")
+        {
+            FormatTextMerge = true;
+        }
+        else if (Se.Settings.File.ExportPlainText.TextProcessing == "Unbreak")
+        {
+            FormatTextUnbreak = true;
+        }
+        else
+        {
+            FormatTextNone = true;
+        }
+
+        TextRemoveStyling = Se.Settings.File.ExportPlainText.TextRemoveStyling;
+        ShowLineNumbers = Se.Settings.File.ExportPlainText.ShowLineNumbers;
+        AddNewLineAfterLineNumber = Se.Settings.File.ExportPlainText.AddNewLineAfterLineNumber;
+        ShowTimeCodes = Se.Settings.File.ExportPlainText.ShowTimeCodes;
+        AddNewLineAfterTimeCode = Se.Settings.File.ExportPlainText.AddNewLineAfterTimeCode;
+        SelectedTimeCodeFormats = Se.Settings.File.ExportPlainText.SelectedTimeCodeFormats;
+        SelectedTimeCodeSeparator = Se.Settings.File.ExportPlainText.SelectedTimeCodeSeparator;
+        AddLineAfterText = Se.Settings.File.ExportPlainText.AddLineAfterText;
+        AddLineBetweenSubtitles = Se.Settings.File.ExportPlainText.AddLineBetweenSubtitles;
+    }
+
+    private void SaveSettings()
+    {
+        Se.Settings.File.ExportPlainText.TextRemoveStyling = TextRemoveStyling;
+        Se.Settings.File.ExportPlainText.TextRemoveStyling = TextRemoveStyling;
+        Se.Settings.File.ExportPlainText.ShowLineNumbers = ShowLineNumbers;
+        Se.Settings.File.ExportPlainText.AddNewLineAfterLineNumber = AddNewLineAfterLineNumber;
+        Se.Settings.File.ExportPlainText.ShowTimeCodes = ShowTimeCodes;
+        Se.Settings.File.ExportPlainText.AddNewLineAfterTimeCode = AddNewLineAfterTimeCode;
+        Se.Settings.File.ExportPlainText.SelectedTimeCodeFormats = SelectedTimeCodeFormats;
+        Se.Settings.File.ExportPlainText.SelectedTimeCodeSeparator = SelectedTimeCodeSeparator;
+        Se.Settings.File.ExportPlainText.AddLineAfterText = AddLineAfterText;
+        Se.Settings.File.ExportPlainText.AddLineBetweenSubtitles = AddLineBetweenSubtitles;
+
+        Se.SaveSettings();
     }
 
     private void TimerUpdatePreviewElapsed(object? sender, ElapsedEventArgs e)
@@ -122,7 +164,9 @@ public partial class ExportPlainTextViewModel : ObservableObject
 
             // Remove styling tags if requested
             if (TextRemoveStyling)
+            {
                 text = HtmlUtil.RemoveHtmlTags(text, true);
+            }
 
             // Handle text formatting modes
             if (FormatTextMerge)
@@ -140,9 +184,13 @@ public partial class ExportPlainTextViewModel : ObservableObject
             {
                 sb.Append(subtitleLine.Number);
                 if (AddNewLineAfterLineNumber)
+                {
                     sb.AppendLine();
+                }
                 else
+                {
                     sb.Append(' ');
+                }
             }
 
             // Time codes
@@ -154,9 +202,13 @@ public partial class ExportPlainTextViewModel : ObservableObject
                 sb.Append(SelectedTimeCodeSeparator);
                 sb.Append(end);
                 if (AddNewLineAfterTimeCode)
+                {
                     sb.AppendLine();
+                }
                 else
+                {
                     sb.Append(' ');
+                }
             }
 
             // Subtitle text
@@ -164,9 +216,14 @@ public partial class ExportPlainTextViewModel : ObservableObject
 
             // Add optional blank line(s)
             if (AddLineAfterText)
+            {
                 sb.AppendLine();
+            }
+
             if (AddLineBetweenSubtitles)
+            {
                 sb.AppendLine();
+            }
         }
 
         return sb.ToString().TrimEnd();
@@ -186,7 +243,7 @@ public partial class ExportPlainTextViewModel : ObservableObject
             //"mm:ss:ff" => $"{tc.Minutes:00}:{tc.Seconds:00}:{tc.Frames:00}",
             "ss,zzz" => $"{tc.TotalSeconds:0.000}".Replace('.', ','),
             "ss.zzz" => $"{tc.TotalSeconds:0.000}",
-          //  "ss:ff" => $"{(int)tc.TotalSeconds}:{tc.Frames:00}",
+            //  "ss:ff" => $"{(int)tc.TotalSeconds}:{tc.Frames:00}",
             _ => tc.ToString()
         };
     }
@@ -208,18 +265,14 @@ public partial class ExportPlainTextViewModel : ObservableObject
             return;
         }
 
-        System.IO.File.WriteAllText(fileName, text);
+        await System.IO.File.WriteAllTextAsync(fileName, text);
+        SaveSettings();
     }
 
     [RelayCommand]
     private void Ok()
     {
-        //Se.Settings.File.ExportCustomFormats.Clear();
-        //foreach (var item in CustomFormats)
-        //{
-        //    Se.Settings.File.ExportCustomFormats.Add(item.ToCustomFormat());
-        //}
-
+        SaveSettings();
         OkPressed = true;
         Window?.Close();
     }
@@ -227,6 +280,7 @@ public partial class ExportPlainTextViewModel : ObservableObject
     [RelayCommand]
     private void Cancel()
     {
+        SaveSettings();
         Window?.Close();
     }
 
@@ -244,6 +298,7 @@ public partial class ExportPlainTextViewModel : ObservableObject
         _subtitles = subtitles;
         _subtitleFileName = subtitleFileName;
         _videoFileName = videoFileName;
+        _timerUpdatePreview.Start();
         _dirty = true;
     }
 

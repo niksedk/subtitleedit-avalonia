@@ -11,6 +11,7 @@ public class SeFile
     public List<RecentFile> RecentFiles { get; set; } = new();
     public List<SeExportCustomFormatItem> ExportCustomFormats { get; set; } = new();
     public SeExportImages ExportImages { get; set; } = new();
+    public SeExportPlainText ExportPlainText { get; set; } = new();
 
     public SeFile()
     {
