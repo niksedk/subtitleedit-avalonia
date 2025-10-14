@@ -4,7 +4,7 @@ public class LanguageManualChosenEncoding
 {
     public string Title { get; set; }
     public string SearchEncodings { get; set; }
-    public object CodePage { get; set; }
+    public string CodePage { get; set; }
 
     public LanguageManualChosenEncoding()
     {

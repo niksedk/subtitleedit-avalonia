@@ -64,8 +64,8 @@ public class LanguageMainMenu
     public string GenerateTransparent { get; set; }
     public string GenerateImportShotChanges { get; set; }
     public string ListShotChanges { get; set; }
-    public object UndockVideoControls { get; set; }
-    public object DockVideoControls { get; set; }
+    public string UndockVideoControls { get; set; }
+    public string DockVideoControls { get; set; }
 
     public string Synchronization { get; set; }
     public string AdjustAllTimes { get; set; }

@@ -1,8 +1,15 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
+using Avalonia.Data;
 using Avalonia.Layout;
+using Avalonia.Media;
+using Nikse.SubtitleEdit.Features.Edit.ModifySelection;
+using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
 
 namespace Nikse.SubtitleEdit.Features.Tools.ApplyDurationLimits;
 
@@ -19,13 +26,6 @@ public class ApplyDurationLimitsWindow : Window
         MinHeight = 400;
         vm.Window = this;
         DataContext = vm;
-
-        var label = new Label
-        {
-            Content = Se.Language.Tools.AdjustDurations.AdjustVia,
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(10, 0, 0, 0),
-        };
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
@@ -51,10 +51,9 @@ public class ApplyDurationLimitsWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(label, 0);
-        grid.Add(MakeControlsView(vm), 1);
+        grid.Add(MakeControlsView(vm), 0);
         grid.Add(MakeFixesView(vm), 1);
-        grid.Add(MakeCannotFixView(vm), 1);
+        grid.Add(MakeCannotFixView(vm), 2);
         grid.Add(panelButtons, 3);
 
         Content = grid;
@@ -82,6 +81,20 @@ public class ApplyDurationLimitsWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
+        var checkBoxFixMinDuration = UiUtil.MakeCheckBox(Se.Language.Tools.ApplyDurationLimits.FixMinDurationMs, vm, nameof(vm.FixMinDurationMs));
+        var numericUpDownMinDuration = UiUtil.MakeNumericUpDownInt(1, 10000, 1000, 150, vm, nameof(vm.MinDurationMs));
+        var checkBoxDoNotGoPastShotChange = UiUtil.MakeCheckBox(Se.Language.Tools.ApplyDurationLimits.DoNotGoPastShotChange, vm, nameof(vm.DoNotGoPastShotChange));
+        var panelMin = UiUtil.MakeHorizontalPanel(numericUpDownMinDuration, checkBoxDoNotGoPastShotChange);
+
+        var checkBoxFixMaxDuration = UiUtil.MakeCheckBox(Se.Language.Tools.ApplyDurationLimits.FixMaxDurationMs, vm, nameof(vm.FixMaxDurationMs));
+        var numericUpDownMaxDuration = UiUtil.MakeNumericUpDownInt(1, 10000, 1000, 150, vm, nameof(vm.MaxDurationMs));
+
+        grid.Add(checkBoxFixMinDuration, 0, 0);
+        grid.Add(panelMin, 0, 1);
+
+        grid.Add(checkBoxFixMaxDuration, 1, 0);
+        grid.Add(numericUpDownMaxDuration, 1, 1);
+
         return grid;
     }
 
@@ -105,12 +118,63 @@ public class ApplyDurationLimitsWindow : Window
 
         var labelFixesAvailable = UiUtil.MakeLabel("Fixes available: 1");
 
-        var dataGridFixes = new DataGrid
+        var dataGrid = new DataGrid
         {
+            AutoGenerateColumns = false,
+            SelectionMode = DataGridSelectionMode.Single,
+            CanUserResizeColumns = true,
+            CanUserSortColumns = true,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Width = double.NaN,
+            Height = double.NaN,
+            DataContext = vm,
+            ItemsSource = vm.Fixes,
+            Columns =
+            {
+                new DataGridTemplateColumn
+                {
+                    Header = Se.Language.General.Apply,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    CellTemplate = new FuncDataTemplate<ApplyDurationLimitItem>((item, _) =>
+                        new Border
+                        {
+                            Background = Brushes.Transparent, // Prevents highlighting
+                            Padding = new Thickness(4),
+                            Child = new CheckBox
+                            {
+                                [!ToggleButton.IsCheckedProperty] = new Binding(nameof(ApplyDurationLimitItem.Apply)),
+                                HorizontalAlignment = HorizontalAlignment.Center
+                            }
+                        }),
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.NumberSymbol,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(ApplyDurationLimitItem.Number)),
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Before,
+                    Binding = new Binding(nameof(ApplyDurationLimitItem.Before)),
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.After,
+                    Binding = new Binding(nameof(ApplyDurationLimitItem.After)),
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
+                },
+            },
         };
 
         grid.Add(labelFixesAvailable, 0);
-        grid.Add(dataGridFixes, 1);
+        grid.Add(dataGrid, 1);
 
         return UiUtil.MakeBorderForControl(grid);
     }
@@ -135,12 +199,57 @@ public class ApplyDurationLimitsWindow : Window
 
         var labelFixesAvailable = UiUtil.MakeLabel("Unable to fixes: 2");
 
-        var dataGridFixes = new DataGrid
+        var fullTimeConverter = new TimeSpanToDisplayFullConverter();
+        var shortTimeConverter = new TimeSpanToDisplayShortConverter();
+
+        var dataGrid = new DataGrid
         {
+            AutoGenerateColumns = false,
+            SelectionMode = DataGridSelectionMode.Single,
+            CanUserResizeColumns = true,
+            CanUserSortColumns = true,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Width = double.NaN,
+            Height = double.NaN,
+            DataContext = vm,
+            ItemsSource = vm.Subtitles,
+            Columns =
+            {
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.NumberSymbol,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(SubtitleLineViewModel.Number)),
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Show,
+                    Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)) { Converter = fullTimeConverter },
+                    Width = new DataGridLength(120),
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Duration,
+                    Binding = new Binding(nameof(SubtitleLineViewModel.Duration)) { Converter = shortTimeConverter },
+                    Width = new DataGridLength(120),
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Text,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(SubtitleLineViewModel.Text)),
+                    IsReadOnly = true,
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                },
+            },
         };
 
         grid.Add(labelFixesAvailable, 0);
-        grid.Add(dataGridFixes, 1);
+        grid.Add(dataGrid, 1);
 
         return UiUtil.MakeBorderForControl(grid);
     }

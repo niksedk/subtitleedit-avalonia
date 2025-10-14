@@ -209,7 +209,7 @@ public class ModifySelectionWindow : Window
                 },
                 new DataGridTextColumn
                 {
-                    Header = Se.Language.General.Show,
+                    Header = Se.Language.General.Text,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(PreviewItem.Text)),
                     IsReadOnly = true,

@@ -4,7 +4,7 @@ public class LanguageSpellCheck
 {
     public string SpellCheck { get; set; }
     public string GetDictionariesTitle { get; set; }
-    public object GetDictionaryInstructions { get; set; }
+    public string GetDictionaryInstructions { get; set; }
     public string AddNameToUserDictionary { get; set; }
     public string AddNameToNamesList { get; set; }
 

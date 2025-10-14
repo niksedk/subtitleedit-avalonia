@@ -68,7 +68,7 @@ public class LanguageSettings
     public string TextBoxCenterText { get; set; }
     public string TextBoxFontBold { get; set; }
     public string TextBoxFontSize { get; set; }
-    public string SubtitleTextBoxAndGridFontName { get; internal set; }
+    public string SubtitleTextBoxAndGridFontName { get; set; }
     public string SubtitleGridFontSize { get; set; }
     public string ShowUpDownStartTime { get; set; }
     public string ShowUpDownEndTime { get; set; }
@@ -93,7 +93,7 @@ public class LanguageSettings
     public string MaxDurationMs { get; set; }
     public string MinGapMs { get; set; }
     public string MaxLines { get; set; }
-    public string UnbreakSubtitlesShortThan { get; internal set; }
+    public string UnbreakSubtitlesShortThan { get; set; }
     public string NewEmptyDefaultMs { get; set; }
     public string PromptDeleteLines { get; set; }
     public string RememberPositionAndSize { get; set; }

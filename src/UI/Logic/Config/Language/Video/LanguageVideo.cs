@@ -17,7 +17,7 @@ public class LanguageVideo
     public string GenerateTimeCodes { get; set; }
     public string CheckeredImage { get; set; }
     public string SaveVideoAsTitle { get; set; }
-    public object PromptForFfmpegParamsAndGenerate { get; set; }
+    public string PromptForFfmpegParamsAndGenerate { get; set; }
     public string CutVideoCutSegments { get; set; }
     public string CutVideoMergeSegments { get; set; }
     public string CutVideoSplitSegments { get; set; }

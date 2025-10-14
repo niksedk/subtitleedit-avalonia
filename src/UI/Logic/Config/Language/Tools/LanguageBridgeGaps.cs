@@ -7,7 +7,7 @@ public class LanguageBridgeGaps
     public string MinGap { get; set; }
     public string NumberOfSmallGapsBridgedX { get; set; }
     public string PercentFoPrevious { get; set; }
-    public object GapChange { get; set; }
+    public string GapChange { get; set; }
 
     public LanguageBridgeGaps()
     {

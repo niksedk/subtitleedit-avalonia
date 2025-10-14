@@ -20,7 +20,7 @@ public class LanguageAssa
     public string CopyToStorageStyles { get; set; }
     public string CopyToFileStyles { get; set; }
     public string SetStyleAsDefault { get; set; }
-    public object TakeUsagesFromDotDotDot { get; set; }
+    public string TakeUsagesFromDotDotDot { get; set; }
     public string NoAttachmentsFound { get; set; }
     public string DeleteStyleQuestion { get; set; }
     public string DeleteStylesQuestion { get; set; }

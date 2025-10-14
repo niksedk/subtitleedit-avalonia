@@ -2,30 +2,50 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
+using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic.Config;
-using System;
 using System.Collections.ObjectModel;
 
 namespace Nikse.SubtitleEdit.Features.Tools.ApplyDurationLimits;
 
 public partial class ApplyDurationLimitsViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<AdjustDurationDisplay> _adjustTypes;
-    [ObservableProperty] private double _adjustRecalculateOptimalCharacterPerSecond;
+    [ObservableProperty] private ObservableCollection<ApplyDurationLimitItem> _fixes;
+    [ObservableProperty] private ApplyDurationLimitItem? _selectedFix;
+
+    [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _subtitles;
+    [ObservableProperty] private SubtitleLineViewModel? _selectedSubtitle;
+
+    [ObservableProperty] private int _minDurationMs;
+    [ObservableProperty] private bool _fixMinDurationMs;
+
+    [ObservableProperty] private int _maxDurationMs;
+    [ObservableProperty] private bool _fixMaxDurationMs;
+
+    [ObservableProperty] private bool _doNotGoPastShotChange;
 
     public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
 
+    private bool _dirty { get; set; }
+
     public ApplyDurationLimitsViewModel()
     {
-        AdjustTypes = new ObservableCollection<AdjustDurationDisplay>();
+        Fixes = new ObservableCollection<ApplyDurationLimitItem>();
+        Subtitles = new ObservableCollection<SubtitleLineViewModel>();
         LoadSettings();
     }
 
     private void LoadSettings()
     {
+        FixMinDurationMs = true;
+        MinDurationMs = Se.Settings.General.SubtitleMinimumDisplayMilliseconds;
+
+        FixMaxDurationMs = true;
+        MaxDurationMs = Se.Settings.General.SubtitleMaximumDisplayMilliseconds;
+
+        DoNotGoPastShotChange = true;
     }
 
     private void SaveSettings()

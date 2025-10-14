@@ -3,7 +3,7 @@
 public class LanguageImport
 {
     public string ImportSubtitleWithManuallyChosenEncoding { get; set; }
-    public object ImportTimeCodes { get; internal set; }
+    public string ImportTimeCodes { get; set; }
 
     public LanguageImport()
     {
