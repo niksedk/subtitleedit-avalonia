@@ -9,6 +9,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Media;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
@@ -91,6 +92,8 @@ public partial class ExportPlainTextViewModel : ObservableObject
         SelectedTimeCodeSeparator = TimeCodeSeparators[0];
 
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
+        SelectedEncoding = Encodings.FirstOrDefault(p => p.DisplayName == Se.Settings.General.DefaultEncoding) ??
+                           Encodings[0];
         PreviewText = string.Empty;
         _subtitles = new List<SubtitleLineViewModel>();
 
@@ -265,7 +268,7 @@ public partial class ExportPlainTextViewModel : ObservableObject
             return;
         }
 
-        await System.IO.File.WriteAllTextAsync(fileName, text);
+        await System.IO.File.WriteAllTextAsync(fileName, text, SelectedEncoding?.Encoding ?? Encoding.UTF8);
         SaveSettings();
     }
 
