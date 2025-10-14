@@ -10,8 +10,8 @@ public class SeExportPlainText
     public bool AddNewLineAfterLineNumber { get; set; }
     public bool ShowTimeCodes { get; set; }
     public bool AddNewLineAfterTimeCode { get; set; }
-    public string SelectedTimeCodeFormats { get; set; }
-    public string SelectedTimeCodeSeparator { get; set; }
+    public string TimeCodeFormat { get; set; }
+    public string TimeCodeSeparator { get; set; }
     public bool AddLineAfterText { get; set; }
     public bool AddLineBetweenSubtitles { get; set; }
 
@@ -23,8 +23,8 @@ public class SeExportPlainText
         AddNewLineAfterLineNumber = true;
         ShowTimeCodes = false;
         AddNewLineAfterTimeCode = true;
-        SelectedTimeCodeFormats = "hh:mm:ss,ms";
-        SelectedTimeCodeSeparator = " --> ";
+        TimeCodeFormat = "hh:mm:ss,zzz";
+        TimeCodeSeparator = " --> ";
         AddLineAfterText = true;
         AddLineBetweenSubtitles = true;
     }

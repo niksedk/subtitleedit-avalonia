@@ -22,6 +22,12 @@ public class LanguageExport
     public string NewLineFormat { get; set; }
     public string PleaseEnterNameForTheCustomFormat { get; set; }
     public string TitleExportPlainText { get; set; }
+    public string LineNumbers { get; set; }
+    public string ShowLineNumbers { get; set; }
+    public string AddNewLineAfterLineNumber { get; set; }
+    public string AddNewLineAfterTimeCode { get; set; }
+    public string AddNewLineAfterText { get; set; }
+    public string AddLineBetweenSubtitles { get; set; }
 
     public LanguageExport()
     {
@@ -45,5 +51,11 @@ public class LanguageExport
         NewLineFormat = "New line format";
         PleaseEnterNameForTheCustomFormat = "Please enter name for the custom format";
         TitleExportPlainText = "Export plain text";
+        LineNumbers = "Line numbers";   
+        ShowLineNumbers = "Show line numbers";
+        AddNewLineAfterLineNumber = "Add new line after line number";
+        AddNewLineAfterTimeCode = "Add new line after time code";
+        AddNewLineAfterText = "Add new line after text";
+        AddLineBetweenSubtitles = "Add line between subtitles";
     }
 }

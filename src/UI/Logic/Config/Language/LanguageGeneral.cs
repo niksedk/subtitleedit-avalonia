@@ -423,6 +423,14 @@ public class LanguageGeneral
     public string Backward { get; set; }
     public string Speed { get; set; }
     public string Unknown { get; set; }
+    public string DoNoChange { get; set; }
+    public string TimeCodes { get; set; }
+    public string ShowTimeCodes { get; set; }
+    public string Separator { get; set; }
+    public string MergeLines { get; set; }
+    public string UnbreakLines { get; set; }
+    public string RemoveStyling { get; set; }
+    public string Spacing { get; set; }
 
     public LanguageGeneral()
     {
@@ -844,5 +852,13 @@ public class LanguageGeneral
         Backward = "Backward";
         Speed = "Speed";
         Unknown = "Unknown";
+        DoNoChange =  "Do not change";
+        TimeCodes = "Time codes";
+        ShowTimeCodes = "Show time codes";
+        Separator = "Separator";
+        MergeLines = "Merge lines";
+        UnbreakLines = "Unbreak lines";
+        RemoveStyling = "Remove styling";
+        Spacing = "Spacing";
     }
 }

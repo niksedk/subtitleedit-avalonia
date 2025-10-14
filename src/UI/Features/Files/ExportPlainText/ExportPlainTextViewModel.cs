@@ -1,4 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Timers;
 using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -6,14 +12,8 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
-using Nikse.SubtitleEdit.Logic.Media;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Timers;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportPlainText;
 
@@ -29,7 +29,7 @@ public partial class ExportPlainTextViewModel : ObservableObject
     [ObservableProperty] private bool _showTimeCodes;
     [ObservableProperty] private bool _addNewLineAfterTimeCode;
     [ObservableProperty] private ObservableCollection<string> _timeCodeFormats;
-    [ObservableProperty] private string _selectedTimeCodeFormats;
+    [ObservableProperty] private string _selectedTimeCodeFormat;
     [ObservableProperty] private ObservableCollection<string> _timeCodeSeparators;
     [ObservableProperty] private string _selectedTimeCodeSeparator;
     [ObservableProperty] private bool _addLineAfterText;
@@ -67,14 +67,9 @@ public partial class ExportPlainTextViewModel : ObservableObject
             "hh:mm:ss,zzz",
             "hh:mm:ss.zzz",
             "hh:mm:ss:ff",
-            "mm:ss,zzz",
-            "mm:ss.zzz",
-            "mm:ss:ff",
-            "ss,zzz",
-            "ss.zzz",
-            "ss:ff"
+            Se.Language.General.Seconds,
         };
-        SelectedTimeCodeFormats = TimeCodeFormats[0];
+        SelectedTimeCodeFormat = TimeCodeFormats[0];
 
         TimeCodeSeparators = new ObservableCollection<string>
         {
@@ -122,8 +117,8 @@ public partial class ExportPlainTextViewModel : ObservableObject
         AddNewLineAfterLineNumber = Se.Settings.File.ExportPlainText.AddNewLineAfterLineNumber;
         ShowTimeCodes = Se.Settings.File.ExportPlainText.ShowTimeCodes;
         AddNewLineAfterTimeCode = Se.Settings.File.ExportPlainText.AddNewLineAfterTimeCode;
-        SelectedTimeCodeFormats = Se.Settings.File.ExportPlainText.SelectedTimeCodeFormats;
-        SelectedTimeCodeSeparator = Se.Settings.File.ExportPlainText.SelectedTimeCodeSeparator;
+        SelectedTimeCodeFormat = TimeCodeFormats.FirstOrDefault(p=>p == Se.Settings.File.ExportPlainText.TimeCodeFormat) ?? TimeCodeFormats.First();
+        SelectedTimeCodeSeparator = TimeCodeSeparators.FirstOrDefault(p => p == Se.Settings.File.ExportPlainText.TimeCodeSeparator) ?? TimeCodeSeparators.First();
         AddLineAfterText = Se.Settings.File.ExportPlainText.AddLineAfterText;
         AddLineBetweenSubtitles = Se.Settings.File.ExportPlainText.AddLineBetweenSubtitles;
     }
@@ -136,8 +131,8 @@ public partial class ExportPlainTextViewModel : ObservableObject
         Se.Settings.File.ExportPlainText.AddNewLineAfterLineNumber = AddNewLineAfterLineNumber;
         Se.Settings.File.ExportPlainText.ShowTimeCodes = ShowTimeCodes;
         Se.Settings.File.ExportPlainText.AddNewLineAfterTimeCode = AddNewLineAfterTimeCode;
-        Se.Settings.File.ExportPlainText.SelectedTimeCodeFormats = SelectedTimeCodeFormats;
-        Se.Settings.File.ExportPlainText.SelectedTimeCodeSeparator = SelectedTimeCodeSeparator;
+        Se.Settings.File.ExportPlainText.TimeCodeFormat = SelectedTimeCodeFormat;
+        Se.Settings.File.ExportPlainText.TimeCodeSeparator = SelectedTimeCodeSeparator;
         Se.Settings.File.ExportPlainText.AddLineAfterText = AddLineAfterText;
         Se.Settings.File.ExportPlainText.AddLineBetweenSubtitles = AddLineBetweenSubtitles;
 
@@ -236,21 +231,19 @@ public partial class ExportPlainTextViewModel : ObservableObject
     {
         var tc = new TimeCode(totalMilliseconds);
 
-        return SelectedTimeCodeFormats switch
+        if (SelectedTimeCodeFormat == Se.Language.General.Seconds)
         {
-            //"hh:mm:ss,zzz" => tc.ToString(true, false, false),
+            return $"{tc.TotalSeconds:0.000}";
+        }
+
+        return SelectedTimeCodeFormat switch
+        {
+            "hh:mm:ss,zzz" => tc.ToString(false),
             "hh:mm:ss.zzz" => tc.ToString().Replace(',', '.'),
-            //"hh:mm:ss:ff" => tc.ToShortString(TimeCodeFormat.Frame),
-            "mm:ss,zzz" => $"{tc.Minutes:00}:{tc.Seconds:00},{tc.Milliseconds:000}",
-            "mm:ss.zzz" => $"{tc.Minutes:00}:{tc.Seconds:00}.{tc.Milliseconds:000}",
-            //"mm:ss:ff" => $"{tc.Minutes:00}:{tc.Seconds:00}:{tc.Frames:00}",
-            "ss,zzz" => $"{tc.TotalSeconds:0.000}".Replace('.', ','),
-            "ss.zzz" => $"{tc.TotalSeconds:0.000}",
-            //  "ss:ff" => $"{(int)tc.TotalSeconds}:{tc.Frames:00}",
+            "hh:mm:ss:ff" => tc.ToHHMMSSFF(),
             _ => tc.ToString()
         };
     }
-
 
     [RelayCommand]
     private async Task SaveAs()
