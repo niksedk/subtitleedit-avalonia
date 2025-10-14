@@ -13,6 +13,7 @@ public class LanguageWaveform
     public string GuessTimeCodesDotDotDot { get; set; }
     public string SeekSilenceDotDotDot { get; set; }
     public string ToggleShotChange { get; set; }
+    public string ResetWaveformZoomAndSpeed { get; set; }
 
     public LanguageWaveform()
     {
@@ -28,5 +29,6 @@ public class LanguageWaveform
         MinSilenceDurationSeconds = "Min. silence duration (seconds):";
         MaxSilenceVolume = "Max. silence volume (0.0 - 1.0):";
         ToggleShotChange = "Toggle shot change";
+        ResetWaveformZoomAndSpeed = "Reset waveform zoom & speed";
     }
 }

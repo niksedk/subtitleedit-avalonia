@@ -362,7 +362,7 @@ public class InitWaveform
         flyoutMore.Items.Add(menuItemHideControls);
         var menuItemResetZoom = new MenuItem
         {
-            Header = string.Format(languageHints.ResetZoomAndSpeed, string.Empty),
+            Header = string.Format(languageHints.ResetZoomAndSpeed, UiUtil.MakeShortcutsString(shortcuts, nameof(vm.ResetWaveformZoomAndSpeedCommand))),
             Command = vm.ResetWaveformZoomAndSpeedCommand,
         };
         flyoutMore.Items.Add(menuItemResetZoom);

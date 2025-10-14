@@ -2230,6 +2230,15 @@ public static class UiUtil
 
     public static string? MakeToolTip(string hint, List<ShortCut> shortcuts, string shortcutName = "")
     {
+        string shortcutString = MakeShortcutsString(shortcuts, shortcutName);
+
+        return Se.Settings.Appearance.ShowHints
+            ? string.Format(hint, shortcutString).Trim()
+            : null;
+    }
+
+    public static string MakeShortcutsString(List<ShortCut> shortcuts, string shortcutName)
+    {
         var shortcut = shortcuts.FirstOrDefault(s => s.Name == shortcutName);
         var shortcutString = string.Empty;
         if (shortcut != null && shortcut.Keys.Count > 0)
@@ -2238,9 +2247,7 @@ public static class UiUtil
             shortcutString = $"({shortcutString})";
         }
 
-        return Se.Settings.Appearance.ShowHints
-            ? string.Format(hint, shortcutString).Trim()
-            : null;
+        return shortcutString;
     }
 
     internal static void InitializeWindow(Window window, string name)
