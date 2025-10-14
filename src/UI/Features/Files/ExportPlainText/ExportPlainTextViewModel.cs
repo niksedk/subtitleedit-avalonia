@@ -1,3 +1,4 @@
+using System;
 using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -8,7 +9,10 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Media;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportPlainText;
 
@@ -35,16 +39,20 @@ public partial class ExportPlainTextViewModel : ObservableObject
 
     [ObservableProperty] private string _previewText;
 
-    private List<SubtitleLineViewModel> _subtitles;
-    private string? _subtitleFileNAme;
-    private string? _videoFileName;
-    private string _title;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
 
     private IWindowService _windowService;
     private IFileHelper _fileHelper;
+
+    private List<SubtitleLineViewModel> _subtitles;
+    private string? _subtitleFileNAme;
+    private string? _videoFileName;
+    private string _title;
+    private readonly System.Timers.Timer _timerUpdatePreview;
+    private bool _dirty;
+    private string? _subtitleFileName;
 
     public ExportPlainTextViewModel(IWindowService windowService, IFileHelper fileHelper)
     {
@@ -69,43 +77,138 @@ public partial class ExportPlainTextViewModel : ObservableObject
 
         TimeCodeSeparators = new ObservableCollection<string>
         {
-            " - ",
             " --> ",
+            " - ",
+            "-",
             " > ",
             " ~ ",
             " | ",
             " / ",
             " \\ ",
-            ": ",
-            " -",
-            "- ",
-            "-",
+            " : ",
             " "
         };
         SelectedTimeCodeSeparator = TimeCodeSeparators[0];
 
-
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         PreviewText = string.Empty;
         _subtitles = new List<SubtitleLineViewModel>();
+
+        _timerUpdatePreview = new System.Timers.Timer();
+        _timerUpdatePreview.Interval = 250;
+        _timerUpdatePreview.Elapsed += TimerUpdatePreviewElapsed;
+    }
+
+    private void TimerUpdatePreviewElapsed(object? sender, ElapsedEventArgs e)
+    {
+        _timerUpdatePreview.Stop();
+
+        if (_dirty)
+        {
+            _dirty = false;
+            PreviewText = GetExportText();
+        }
+
+        _timerUpdatePreview.Start();
+    }
+
+    private string GetExportText()
+    {
+        var sb = new StringBuilder();
+
+        foreach (var subtitleLine in _subtitles)
+        {
+            var text = subtitleLine.Text ?? string.Empty;
+
+            // Remove styling tags if requested
+            if (TextRemoveStyling)
+                text = HtmlUtil.RemoveHtmlTags(text, true);
+
+            // Handle text formatting modes
+            if (FormatTextMerge)
+            {
+                text = text.Replace(Environment.NewLine, " ");
+            }
+            else if (FormatTextUnbreak)
+            {
+                text = text.Replace(Environment.NewLine, " ");
+                text = Utilities.UnbreakLine(text);
+            }
+
+            // Line number
+            if (ShowLineNumbers)
+            {
+                sb.Append(subtitleLine.Number);
+                if (AddNewLineAfterLineNumber)
+                    sb.AppendLine();
+                else
+                    sb.Append(' ');
+            }
+
+            // Time codes
+            if (ShowTimeCodes)
+            {
+                var start = FormatTimeCode(subtitleLine.StartTime.TotalMilliseconds);
+                var end = FormatTimeCode(subtitleLine.EndTime.TotalMilliseconds);
+                sb.Append(start);
+                sb.Append(SelectedTimeCodeSeparator);
+                sb.Append(end);
+                if (AddNewLineAfterTimeCode)
+                    sb.AppendLine();
+                else
+                    sb.Append(' ');
+            }
+
+            // Subtitle text
+            sb.AppendLine(text.Trim());
+
+            // Add optional blank line(s)
+            if (AddLineAfterText)
+                sb.AppendLine();
+            if (AddLineBetweenSubtitles)
+                sb.AppendLine();
+        }
+
+        return sb.ToString().TrimEnd();
+    }
+
+    private string FormatTimeCode(double totalMilliseconds)
+    {
+        var tc = new TimeCode(totalMilliseconds);
+
+        return SelectedTimeCodeFormats switch
+        {
+            //"hh:mm:ss,zzz" => tc.ToString(true, false, false),
+            "hh:mm:ss.zzz" => tc.ToString().Replace(',', '.'),
+            //"hh:mm:ss:ff" => tc.ToShortString(TimeCodeFormat.Frame),
+            "mm:ss,zzz" => $"{tc.Minutes:00}:{tc.Seconds:00},{tc.Milliseconds:000}",
+            "mm:ss.zzz" => $"{tc.Minutes:00}:{tc.Seconds:00}.{tc.Milliseconds:000}",
+            //"mm:ss:ff" => $"{tc.Minutes:00}:{tc.Seconds:00}:{tc.Frames:00}",
+            "ss,zzz" => $"{tc.TotalSeconds:0.000}".Replace('.', ','),
+            "ss.zzz" => $"{tc.TotalSeconds:0.000}",
+          //  "ss:ff" => $"{(int)tc.TotalSeconds}:{tc.Frames:00}",
+            _ => tc.ToString()
+        };
     }
 
 
     [RelayCommand]
     private async Task SaveAs()
     {
-        //if (SelectedCustomFormat == null || Window == null)
-        //{
-        //    return;
-        //}
+        if (Window == null)
+        {
+            return;
+        }
 
-        //var fileName = await _fileHelper.PickSaveFile(Window, SelectedCustomFormat.Extension, _title, Se.Language.General.SaveFileAsTitle);
-        //if (string.IsNullOrWhiteSpace(fileName))
-        //{
-        //    return;
-        //}
+        var text = GetExportText();
 
-        //System.IO.File.WriteAllText(fileName, PreviewText); // TODO: use default encoding
+        var fileName = await _fileHelper.PickSaveFile(Window, ".txt", _title, Se.Language.General.SaveFileAsTitle);
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return;
+        }
+
+        System.IO.File.WriteAllText(fileName, text);
     }
 
     [RelayCommand]
@@ -136,9 +239,16 @@ public partial class ExportPlainTextViewModel : ObservableObject
         }
     }
 
-  
-
     internal void Initialize(List<SubtitleLineViewModel> subtitles, string? subtitleFileName, string? videoFileName)
     {
+        _subtitles = subtitles;
+        _subtitleFileName = subtitleFileName;
+        _videoFileName = videoFileName;
+        _dirty = true;
+    }
+
+    public void SetDirty()
+    {
+        _dirty = true;
     }
 }

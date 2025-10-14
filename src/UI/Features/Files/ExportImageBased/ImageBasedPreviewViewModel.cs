@@ -20,7 +20,7 @@ public partial class ImageBasedPreviewViewModel : ObservableObject
     public Window? Window { get; set; }
     public Image ImagePreview { get; internal set; }
 
-    private Timer _timerUpdatePreview;
+    private readonly Timer _timerUpdatePreview;
 
     public ImageBasedPreviewViewModel()
     {

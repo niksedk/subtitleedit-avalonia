@@ -2,7 +2,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
-using Nikse.SubtitleEdit.Features.Files.ExportCustomTextFormat;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -26,16 +25,14 @@ public class ExportPlainTextWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        var label = new Label
-        {
-            Content = Se.Language.Tools.AdjustDurations.AdjustVia,
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(10, 0, 0, 0),
-        };
-
+        // Encoding section + buttons
+        var labelEncoding = UiUtil.MakeLabel(Se.Language.General.Encoding).WithBold().WithMarginTop(10);
+        var comboBoxEncoding = UiUtil.MakeComboBox(vm.Encodings, vm, nameof(vm.SelectedEncoding))
+            .WithMinWidth(180)
+            .WithMarginRight(10);
         var buttonSaveAs = UiUtil.MakeButton(Se.Language.General.SaveDotDotDot, vm.SaveAsCommand);
         var buttonDone = UiUtil.MakeButtonDone(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar(buttonSaveAs, buttonDone);
+        var panelButtons = UiUtil.MakeButtonBar( labelEncoding, comboBoxEncoding, buttonSaveAs, buttonDone);
 
         var grid = new Grid
         {
@@ -66,13 +63,32 @@ public class ExportPlainTextWindow : Window
         KeyDown += vm.OnKeyDown;
     }
 
-    private static Border MakeSettingsView(ExportPlainTextViewModel vm)
+    private static Grid MakeSettingsView(ExportPlainTextViewModel vm)
     {
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+        
+        grid.Add(UiUtil.MakeLabel(Se.Language.General.Settings), 0);
+
         // Line numbers section
         var labelLineNumbers = UiUtil.MakeLabel("Line numbers").WithBold().WithMarginTop(10);
         var checkBoxShowLineNumbers = UiUtil.MakeCheckBox("Show line numbers", vm, nameof(vm.ShowLineNumbers));
+        checkBoxShowLineNumbers.PropertyChanged += (s, e) => vm.SetDirty();
         var checkBoxAddNewLineAfterLineNumber = UiUtil.MakeCheckBox("Add new line after line number", vm, nameof(vm.AddNewLineAfterLineNumber))
             .WithBindEnabled(nameof(vm.ShowLineNumbers));
+        checkBoxShowLineNumbers.PropertyChanged += (s, e) => vm.SetDirty();
 
         // Time codes section
         var labelTimeCodes = UiUtil.MakeLabel("Time codes").WithBold().WithMarginTop(10);
@@ -117,11 +133,7 @@ public class ExportPlainTextWindow : Window
         var labelSpacing = UiUtil.MakeLabel("Spacing").WithBold().WithMarginTop(10);
         var checkBoxAddLineAfterText = UiUtil.MakeCheckBox("Add new line after text", vm, nameof(vm.AddLineAfterText));
         var checkBoxAddLineBetweenSubtitles = UiUtil.MakeCheckBox("Add line between subtitles", vm, nameof(vm.AddLineBetweenSubtitles));
-
-        // Encoding section
-        var labelEncoding = UiUtil.MakeLabel(Se.Language.General.Encoding).WithBold().WithMarginTop(10);
-        var comboBoxEncoding = UiUtil.MakeComboBox(vm.Encodings, vm, nameof(vm.SelectedEncoding)).WithMinWidth(180);
-
+        
         var stackPanel = new StackPanel
         {
             Orientation = Orientation.Vertical,
@@ -151,14 +163,12 @@ public class ExportPlainTextWindow : Window
                 // spacing
                 labelSpacing,
                 checkBoxAddLineBetweenSubtitles,
-
-                // encoding
-                labelEncoding,
-                comboBoxEncoding,
             },
         };
 
-        return UiUtil.MakeBorderForControl(stackPanel);
+        grid.Add(UiUtil.MakeBorderForControl(stackPanel), 1);
+        
+        return grid;
     }
 
     private static Grid MakePreviewView(ExportPlainTextViewModel vm)
