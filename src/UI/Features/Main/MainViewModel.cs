@@ -5102,6 +5102,10 @@ public partial class MainViewModel :
         return true;
     }
 
+
+    /// <summary>
+    /// OpenSubtitle - open subtitle file, video file is optional.
+    /// </summary>
     public async Task SubtitleOpen(
         string fileName,
         string? videoFileName = null,
@@ -5263,10 +5267,9 @@ public partial class MainViewModel :
                 }
             }
 
+            ResetSubtitle();
             SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == subtitle.OriginalFormat.Name) ??
                                      SelectedSubtitleFormat;
-
-            ResetSubtitle();
             _subtitleFileName = fileName;
             _subtitle = subtitle;
             _lastOpenSaveFormat = subtitle.OriginalFormat;

@@ -600,7 +600,7 @@ public partial class AssaStylesViewModel : ObservableObject
     {
         foreach (var style in FileStyles)
         {
-            style.UsageCount = _subtitle.Paragraphs.Count(p => p.Extra.TrimStart('*').Equals(style.Name.TrimStart('*')));
+            style.UsageCount = _subtitle.Paragraphs.Count(p => p.Extra != null && p.Extra.TrimStart('*').Equals(style.Name.TrimStart('*')));
         }
     }
 

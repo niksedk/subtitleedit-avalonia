@@ -36,13 +36,12 @@ public class ApplyDurationLimitsWindow : Window
             RowDefinitions =
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(2, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
@@ -53,11 +52,96 @@ public class ApplyDurationLimitsWindow : Window
         };
 
         grid.Add(label, 0);
-        grid.Add(panelButtons, 3, 0, 1, 2);
+        grid.Add(MakeControlsView(vm), 1);
+        grid.Add(MakeFixesView(vm), 1);
+        grid.Add(MakeCannotFixView(vm), 1);
+        grid.Add(panelButtons, 3);
 
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
         KeyDown += vm.KeyDown;
+    }
+
+    private static Grid MakeControlsView(ApplyDurationLimitsViewModel vm)
+    {
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnSpacing = 10,
+            RowSpacing = 10,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        return grid;
+    }
+
+    private static Border MakeFixesView(ApplyDurationLimitsViewModel vm)
+    {
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnSpacing = 10,
+            RowSpacing = 10,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        var labelFixesAvailable = UiUtil.MakeLabel("Fixes available: 1");
+
+        var dataGridFixes = new DataGrid
+        {
+        };
+
+        grid.Add(labelFixesAvailable, 0);
+        grid.Add(dataGridFixes, 1);
+
+        return UiUtil.MakeBorderForControl(grid);
+    }
+
+    private static Border MakeCannotFixView(ApplyDurationLimitsViewModel vm)
+    {
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnSpacing = 10,
+            RowSpacing = 10,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        var labelFixesAvailable = UiUtil.MakeLabel("Unable to fixes: 2");
+
+        var dataGridFixes = new DataGrid
+        {
+        };
+
+        grid.Add(labelFixesAvailable, 0);
+        grid.Add(dataGridFixes, 1);
+
+        return UiUtil.MakeBorderForControl(grid);
     }
 }
