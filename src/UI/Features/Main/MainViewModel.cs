@@ -1579,8 +1579,22 @@ public partial class MainViewModel :
             return;
         }
 
-        await _windowService.ShowDialogAsync<ApplyDurationLimitsWindow, ApplyDurationLimitsViewModel>(Window!,
-            vm => { });
+        var result = await _windowService.ShowDialogAsync<ApplyDurationLimitsWindow, ApplyDurationLimitsViewModel>(Window!,
+        vm =>
+        {
+            var shotChanges = AudioVisualizer?.ShotChanges ?? new List<double>();
+            vm.Initialize(Subtitles.ToList(), shotChanges);
+        });
+
+        if (result.OkPressed)
+        {
+            var idx = SelectedSubtitleIndex;
+            Subtitles.Clear();
+            Subtitles.AddRange(result.AllSubtitlesFixed);
+            SelectAndScrollToRow(idx ?? 0);
+            _updateAudioVisualizer = true;
+        }
+
         _shortcutManager.ClearKeys();
     }
 

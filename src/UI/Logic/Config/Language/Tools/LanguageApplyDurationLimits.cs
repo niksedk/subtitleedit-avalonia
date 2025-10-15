@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language.Tools;
+﻿using System;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language.Tools;
 
 public class LanguageApplyDurationLimits
 {
@@ -6,12 +8,18 @@ public class LanguageApplyDurationLimits
     public string FixMinDurationMs { get; set; }
     public string DoNotGoPastShotChange { get; set; }
     public string FixMaxDurationMs { get; set; }
+    public string MaxDurationShouldBeHigherThanMinDuration { get; set; }
+    public string ChangedDurationFromXToYCommentZ { get; set; }
+    public string OnlyPartialFixed { get; set; }
 
     public LanguageApplyDurationLimits()
     {
         Title = "Apply duration limits";
-        FixMinDurationMs = "Fix minimum duration (ms):";
+        FixMinDurationMs = "Fix minimum duration (ms)";
         DoNotGoPastShotChange = "Do not go past shot change";
-        FixMaxDurationMs = "Fix maximum duration (ms):";
+        FixMaxDurationMs = "Fix maximum duration (ms)";
+        MaxDurationShouldBeHigherThanMinDuration = "Maximum duration should be higher than minimum duration";
+        ChangedDurationFromXToYCommentZ =  "Changed duration from {0} to {1} {2}";
+        OnlyPartialFixed = "(only partial fix)";
     }
 }

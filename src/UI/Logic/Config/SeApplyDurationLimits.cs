@@ -2,9 +2,10 @@
 
 public class SeApplyDurationLimits
 {
-
+    public bool DoNotExtendPastShotChange { get; set; }
+    
     public SeApplyDurationLimits()
     {
-
+        DoNotExtendPastShotChange = true;
     }
 }

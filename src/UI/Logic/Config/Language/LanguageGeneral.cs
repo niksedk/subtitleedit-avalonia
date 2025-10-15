@@ -431,6 +431,7 @@ public class LanguageGeneral
     public string UnbreakLines { get; set; }
     public string RemoveStyling { get; set; }
     public string Spacing { get; set; }
+    public string Fix { get; set; }
 
     public LanguageGeneral()
     {
@@ -860,5 +861,6 @@ public class LanguageGeneral
         UnbreakLines = "Unbreak lines";
         RemoveStyling = "Remove styling";
         Spacing = "Spacing";
+        Fix = "Fix";
     }
 }

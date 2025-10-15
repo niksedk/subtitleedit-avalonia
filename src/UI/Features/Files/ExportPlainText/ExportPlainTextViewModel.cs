@@ -48,7 +48,6 @@ public partial class ExportPlainTextViewModel : ObservableObject
     private IFileHelper _fileHelper;
 
     private List<SubtitleLineViewModel> _subtitles;
-    private string? _subtitleFileNAme;
     private string? _videoFileName;
     private string _title;
     private readonly System.Timers.Timer _timerUpdatePreview;
