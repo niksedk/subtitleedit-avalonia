@@ -30,7 +30,6 @@ public partial class ShortcutsViewModel : ObservableObject
     [ObservableProperty] private bool _winIsSelected;
     [ObservableProperty] private ShortcutTreeNode? _selectedNode;
 
-    public ObservableCollection<ShortcutTreeNode> Nodes { get; }
     public bool OkPressed { get; set; }
     public Window? Window { get; set; }
     public MainViewModel? MainViewModel { get; set; }
@@ -54,7 +53,6 @@ public partial class ShortcutsViewModel : ObservableObject
             Se.Language.Options.Shortcuts.Unassigned,
         };
         SelectedFilter = _filters[0];
-        Nodes = new ObservableCollection<ShortcutTreeNode>();
         ShortcutsTreeView = new TreeView();
         _allShortcuts = new List<ShortCut>();
     }
@@ -91,7 +89,6 @@ public partial class ShortcutsViewModel : ObservableObject
 
     internal void UpdateVisibleShortcuts(string searchText)
     {
-        Nodes.Clear();
         FlatNodes.Clear();
         AddShortcuts(ShortcutCategory.General, Se.Language.Options.Shortcuts.CategoryGeneral, searchText);
         AddShortcuts(ShortcutCategory.SubtitleGridAndTextBox,
@@ -115,7 +112,6 @@ public partial class ShortcutsViewModel : ObservableObject
         if (children.Count > 0)
         {
             var node = new ShortcutTreeNode(categoryName, categoryName, children);
-            Nodes.Add(node);
         }
     }
 
