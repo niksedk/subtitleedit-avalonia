@@ -432,6 +432,7 @@ public class LanguageGeneral
     public string RemoveStyling { get; set; }
     public string Spacing { get; set; }
     public string Fix { get; set; }
+    public string Category { get; set; }
 
     public LanguageGeneral()
     {
@@ -862,5 +863,6 @@ public class LanguageGeneral
         RemoveStyling = "Remove styling";
         Spacing = "Spacing";
         Fix = "Fix";
+        Category = "Category";
     }
 }

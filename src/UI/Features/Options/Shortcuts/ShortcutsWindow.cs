@@ -1,13 +1,12 @@
-using System;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
-using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
+using System;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
@@ -88,41 +87,48 @@ public class ShortcutsWindow : Window
         Grid.SetRow(buttonCollapse, 0);
         Grid.SetColumn(buttonCollapse, 4);
 
-        var treeView = new TreeView
+        var dataGrid = new DataGrid
         {
-            Margin = new Thickness(10),
-            SelectionMode = SelectionMode.Single,
+            AutoGenerateColumns = false,
+            SelectionMode = DataGridSelectionMode.Single,
+            CanUserResizeColumns = true,
+            CanUserSortColumns = true,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            Width = double.NaN,
+            Height = double.NaN,
             DataContext = vm,
-        };
-        treeView[!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.Nodes));
-        treeView[!TreeView.SelectedItemProperty] = new Binding(nameof(vm.SelectedNode));
-
-        var factory = new FuncTreeDataTemplate<ShortcutTreeNode>(
-            node => true,
-            (node, _) =>
+            ItemsSource = vm.FlatNodes,
+            Columns =
             {
-                var textBlock = new TextBlock();
-                textBlock.DataContext = node;
-                textBlock.Bind(TextBlock.TextProperty, new Binding(nameof(ShortcutTreeNode.Title))
+                new DataGridTextColumn
                 {
-                    Mode = BindingMode.TwoWay,
-                    Source = node,
-                });
-
-                return textBlock;
+                    Header = Se.Language.General.Category,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(ShortcutTreeNode.Category)),
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Name,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(ShortcutTreeNode.Title)),
+                    IsReadOnly = true,
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                },
+                //new DataGridTextColumn
+                //{
+                //    Header = Se.Language.General.Size,
+                //    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                //    Binding = new Binding(nameof(ShortcutTreeNode.Size)),
+                //    IsReadOnly = true,
+                //    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                //},
             },
-            node => node.SubNodes ?? []
-        );
-
-        treeView.ItemTemplate = factory;
-        vm.ShortcutsTreeView = treeView;
-        treeView.SelectionChanged += vm.ShortcutsTreeView_SelectionChanged;
-
-        var scrollViewer = new ScrollViewer
-        {
-            Content = treeView,
-            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
         };
+        dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedNode)) { Source = vm });
+
+        dataGrid.SelectionChanged += vm.ShortcutsTreeView_SelectionChanged;
 
         var buttonOk = UiUtil.MakeButtonOk(vm.CommandOkCommand);
         var buttonResetAllShortcuts = UiUtil.MakeButton(Se.Language.General.Reset, vm.ResetAllShortcutsCommand);
@@ -139,9 +145,9 @@ public class ShortcutsWindow : Window
         Grid.SetRow(topGrid, 0);
         Grid.SetColumn(topGrid, 0);
 
-        grid.Children.Add(scrollViewer);
-        Grid.SetRow(scrollViewer, 1);
-        Grid.SetColumn(scrollViewer, 0);
+        grid.Children.Add(dataGrid);
+        Grid.SetRow(dataGrid, 1);
+        Grid.SetColumn(dataGrid, 0);
 
         var editPanel = new StackPanel
         {

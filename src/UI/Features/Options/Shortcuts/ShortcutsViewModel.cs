@@ -19,6 +19,7 @@ namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
 public partial class ShortcutsViewModel : ObservableObject
 {
+    public ObservableCollection<ShortcutTreeNode> FlatNodes { get; } = new();
     [ObservableProperty] private ObservableCollection<string> _shortcuts;
     [ObservableProperty] private string? _selectedShortcut;
     [ObservableProperty] private ObservableCollection<string> _filters;
@@ -93,25 +94,30 @@ public partial class ShortcutsViewModel : ObservableObject
     internal void UpdateVisibleShortcuts(string searchText)
     {
         Nodes.Clear();
+        FlatNodes.Clear();
         AddShortcuts(ShortcutCategory.General, Se.Language.Options.Shortcuts.CategoryGeneral, searchText);
         AddShortcuts(ShortcutCategory.SubtitleGridAndTextBox,
             Se.Language.Options.Shortcuts.CategorySubtitleGridAndTextBox, searchText);
         AddShortcuts(ShortcutCategory.SubtitleGrid, Se.Language.Options.Shortcuts.CategorySubtitleGrid, searchText);
         AddShortcuts(ShortcutCategory.Waveform, Se.Language.Options.Shortcuts.CategoryWaveform, searchText);
-        ExpandAll();
+        // Expand/collapse no longer relevant when using a flat list
     }
 
     private void AddShortcuts(ShortcutCategory category, string categoryName, string searchText)
     {
         var shortcuts = _allShortcuts.Where(p => p.Category == category && Search(searchText, p)).ToList();
 
-        var children = new ObservableCollection<ShortcutTreeNode>(
-            shortcuts.Select(x => new ShortcutTreeNode(MakeDisplayName(x), x))
-        );
+        var children = new ObservableCollection<ShortcutTreeNode>();
+        foreach (var x in shortcuts)
+        {
+            var leaf = new ShortcutTreeNode(categoryName, MakeDisplayName(x), x);
+            children.Add(leaf);
+            FlatNodes.Add(leaf);
+        }
 
         if (children.Count > 0)
         {
-            var node = new ShortcutTreeNode(categoryName, children);
+            var node = new ShortcutTreeNode(categoryName, categoryName, children);
             Nodes.Add(node);
         }
     }
