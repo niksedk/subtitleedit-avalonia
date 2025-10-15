@@ -93,8 +93,8 @@ public class ShortcutsWindow : Window
             },
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedNode)) { Source = vm });
-
         dataGrid.SelectionChanged += vm.ShortcutsDataGrid_SelectionChanged;
+        var borderDataGrid = UiUtil.MakeBorderForControlNoPadding(dataGrid).WithMarginBottom(5);
 
         var buttonOk = UiUtil.MakeButtonOk(vm.CommandOkCommand);
         var buttonResetAllShortcuts = UiUtil.MakeButton(Se.Language.General.Reset, vm.ResetAllShortcutsCommand);
@@ -107,13 +107,8 @@ public class ShortcutsWindow : Window
             ColumnDefinitions = new ColumnDefinitions("*"),
             Margin = new Thickness(UiUtil.WindowMarginWidth),
         };
-        grid.Children.Add(topGrid);
-        Grid.SetRow(topGrid, 0);
-        Grid.SetColumn(topGrid, 0);
-
-        grid.Children.Add(dataGrid);
-        Grid.SetRow(dataGrid, 1);
-        Grid.SetColumn(dataGrid, 0);
+        grid.Add(topGrid, 0);
+        grid.Add(borderDataGrid, 1);
 
         var editPanel = new StackPanel
         {
@@ -122,7 +117,7 @@ public class ShortcutsWindow : Window
         };
 
         // Get platform-specific labels
-        var isMac = OperatingSystem.IsMacOS() ;
+        var isMac = OperatingSystem.IsMacOS();
         var ctrlLabel = isMac ? Se.Language.Options.Shortcuts.ControlMac : Se.Language.Options.Shortcuts.Control;
         var altLabel = isMac ? Se.Language.Options.Shortcuts.AltMac : Se.Language.Options.Shortcuts.Alt;
         var shiftLabel = isMac ? Se.Language.Options.Shortcuts.ShiftMac : Se.Language.Options.Shortcuts.Shift;
@@ -131,10 +126,10 @@ public class ShortcutsWindow : Window
         // Shift checkbox and label
         editPanel.Children.Add(UiUtil.MakeTextBlock(shiftLabel).WithMarginRight(3));
         var checkBoxShift = UiUtil.MakeCheckBox(vm, nameof(vm.ShiftIsSelected));
-        checkBoxShift.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);      
+        checkBoxShift.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);
         checkBoxShift.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(checkBoxShift);
-        
+
         // Control checkbox and label
         editPanel.Children.Add(UiUtil.MakeTextBlock(ctrlLabel).WithMarginRight(3));
         var controlCheckBox = UiUtil.MakeCheckBox(vm, nameof(vm.CtrlIsSelected));
@@ -145,14 +140,14 @@ public class ShortcutsWindow : Window
         // Alt checkbox and label
         editPanel.Children.Add(UiUtil.MakeTextBlock(altLabel).WithMarginRight(3));
         var checkBoxAlt = UiUtil.MakeCheckBox(vm, nameof(vm.AltIsSelected));
-        checkBoxAlt.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);       
+        checkBoxAlt.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);
         checkBoxAlt.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(checkBoxAlt);
 
         // Win key checkbox and label
         editPanel.Children.Add(UiUtil.MakeTextBlock(winLabel).WithMarginRight(3));
         var checkBoxWin = UiUtil.MakeCheckBox(vm, nameof(vm.WinIsSelected));
-        checkBoxWin.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);      
+        checkBoxWin.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);
         checkBoxWin.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(checkBoxWin);
 
@@ -166,32 +161,26 @@ public class ShortcutsWindow : Window
         comboBoxKeys.Bind(ComboBox.SelectedItemProperty, new Binding(nameof(vm.SelectedShortcut)) { Source = vm });
         comboBoxKeys.Bind(ComboBox.IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(comboBoxKeys);
-        comboBoxKeys.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);      
-        
+        comboBoxKeys.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);
+
         // browse button
         var buttonBrowse = UiUtil.MakeButtonBrowse(vm.ShowGetKeyCommand);
         editPanel.Children.Add(buttonBrowse);
         buttonBrowse.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
-        buttonBrowse.Margin = new Thickness(0,0,10,0);  
-        
+        buttonBrowse.Margin = new Thickness(0, 0, 10, 0);
+
         // Reset button
         var buttonReset = UiUtil.MakeButton(Se.Language.General.Reset, vm.ResetShortcutCommand);
         editPanel.Children.Add(buttonReset);
         buttonReset.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
 
         var editGridBorder = UiUtil.MakeBorderForControl(editPanel);
-        grid.Children.Add(editGridBorder);
-        Grid.SetRow(editGridBorder, 2);
-        Grid.SetColumn(editGridBorder, 0);
-
-        grid.Children.Add(buttonPanel);
-        Grid.SetRow(buttonPanel, 3);
-        Grid.SetColumn(buttonPanel, 0);
+        grid.Add(editGridBorder, 2);
+        grid.Add(buttonPanel, 3);
 
         Content = grid;
 
         _searchBox.TextChanged += (s, e) => vm.UpdateVisibleShortcuts(_searchBox.Text ?? string.Empty);
-
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 
