@@ -1,7 +1,5 @@
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.LogicalTree;
-using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HanumanInstitute.Validators;
@@ -100,7 +98,6 @@ public partial class ShortcutsViewModel : ObservableObject
             Se.Language.Options.Shortcuts.CategorySubtitleGridAndTextBox, searchText);
         AddShortcuts(ShortcutCategory.SubtitleGrid, Se.Language.Options.Shortcuts.CategorySubtitleGrid, searchText);
         AddShortcuts(ShortcutCategory.Waveform, Se.Language.Options.Shortcuts.CategoryWaveform, searchText);
-        // Expand/collapse no longer relevant when using a flat list
     }
 
     private void AddShortcuts(ShortcutCategory category, string categoryName, string searchText)
@@ -333,18 +330,6 @@ public partial class ShortcutsViewModel : ObservableObject
         UpdateVisibleShortcuts(string.Empty);
     }
 
-    [RelayCommand]
-    private void Expand()
-    {
-        ExpandAll();
-    }
-
-    [RelayCommand]
-    private void Collapse()
-    {
-        CollapseAll();
-    }
-
     private bool Search(string searchText, ShortCut p)
     {
         var filterOk = SelectedFilter == Se.Language.General.All ||
@@ -364,7 +349,7 @@ public partial class ShortcutsViewModel : ObservableObject
         return title.Contains(searchText, StringComparison.InvariantCultureIgnoreCase);
     }
 
-    internal void ShortcutsTreeView_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    internal void ShortcutsDataGrid_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (e.AddedItems == null || e.AddedItems.Count == 0 || e.AddedItems[0] is not ShortcutTreeNode node ||
             node.ShortCut == null)
@@ -428,49 +413,6 @@ public partial class ShortcutsViewModel : ObservableObject
             // Always reset the flag, even if an exception occurs
             _isLoadingSelection = false;
         }
-    }
-
-    public void ExpandAll()
-    {
-        Dispatcher.UIThread.Post(() =>
-        {
-            var allTreeViewItems = FindAllTreeViewItems(ShortcutsTreeView);
-            foreach (var item in allTreeViewItems)
-            {
-                item.IsExpanded = true;
-            }
-        }, DispatcherPriority.Background);
-    }
-
-    public void CollapseAll()
-    {
-        Dispatcher.UIThread.Post(() =>
-        {
-            var allTreeViewItems = FindAllTreeViewItems(ShortcutsTreeView);
-            foreach (var item in allTreeViewItems)
-            {
-                item.IsExpanded = false;
-            }
-        }, DispatcherPriority.Background);
-    }
-
-    private IEnumerable<TreeViewItem> FindAllTreeViewItems(Control parent)
-    {
-        var result = new List<TreeViewItem>();
-        if (parent is TreeViewItem tvi)
-        {
-            result.Add(tvi);
-        }
-
-        foreach (var child in parent.GetLogicalDescendants())
-        {
-            if (child is TreeViewItem treeViewItem)
-            {
-                result.Add(treeViewItem);
-            }
-        }
-
-        return result;
     }
 
     internal void OnKeyDown(KeyEventArgs e)

@@ -2,10 +2,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
-using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using Projektanker.Icons.Avalonia;
 using System;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
@@ -45,22 +43,6 @@ public class ShortcutsWindow : Window
             .WithMargin(5, 0, 10, 0);
         comboBoxFilter.SelectionChanged += vm.ComboBoxFilter_SelectionChanged;
 
-        var buttonExpand = new Button
-        {
-            Margin = new Thickness(0, 10, 0, 10),
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
-            Command = vm.ExpandCommand,
-        };
-        Attached.SetIcon(buttonExpand, "fa-solid fa-plus");
-
-        var buttonCollapse = new Button
-        {
-            Margin = new Thickness(5, 10, 0, 10),
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
-            Command = vm.CollapseCommand,
-        };
-        Attached.SetIcon(buttonCollapse, "fa-solid fa-minus");
-
         var topGrid = new Grid
         {
             RowDefinitions = new RowDefinitions("Auto"),
@@ -78,14 +60,6 @@ public class ShortcutsWindow : Window
         topGrid.Children.Add(comboBoxFilter);
         Grid.SetRow(comboBoxFilter, 0);
         Grid.SetColumn(comboBoxFilter, 2);
-
-        topGrid.Children.Add(buttonExpand);
-        Grid.SetRow(buttonExpand, 0);
-        Grid.SetColumn(buttonExpand, 3);
-
-        topGrid.Children.Add(buttonCollapse);
-        Grid.SetRow(buttonCollapse, 0);
-        Grid.SetColumn(buttonCollapse, 4);
 
         var dataGrid = new DataGrid
         {
@@ -116,19 +90,11 @@ public class ShortcutsWindow : Window
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
-                //new DataGridTextColumn
-                //{
-                //    Header = Se.Language.General.Size,
-                //    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                //    Binding = new Binding(nameof(ShortcutTreeNode.Size)),
-                //    IsReadOnly = true,
-                //    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
-                //},
             },
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedNode)) { Source = vm });
 
-        dataGrid.SelectionChanged += vm.ShortcutsTreeView_SelectionChanged;
+        dataGrid.SelectionChanged += vm.ShortcutsDataGrid_SelectionChanged;
 
         var buttonOk = UiUtil.MakeButtonOk(vm.CommandOkCommand);
         var buttonResetAllShortcuts = UiUtil.MakeButton(Se.Language.General.Reset, vm.ResetAllShortcutsCommand);
