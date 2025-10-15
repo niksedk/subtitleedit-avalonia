@@ -2,21 +2,20 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
-using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 
-namespace Nikse.SubtitleEdit.Features.Tools.BridgeGaps;
+namespace Nikse.SubtitleEdit.Features.Tools.ApplyMinGap;
 
-public class BridgeGapsWindow : Window
+public class ApplyMinGapWindow : Window
 {
-    private readonly BridgeGapsViewModel _vm;
+    private readonly ApplyMinGapViewModel _vm;
 
-    public BridgeGapsWindow(BridgeGapsViewModel vm)
+    public ApplyMinGapWindow(ApplyMinGapViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = Se.Language.Tools.BridgeGaps.Title;
+        Title = Se.Language.Tools.ApplyMinGaps.Title;
         CanResize = true;
         Width = 1000;
         Height = 800;
@@ -84,7 +83,7 @@ public class BridgeGapsWindow : Window
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 
-    private Border MakeSubtitleView(BridgeGapsViewModel vm)
+    private Border MakeSubtitleView(ApplyMinGapViewModel vm)
     {
         var fullTimeConverter = new TimeSpanToDisplayFullConverter();
         var shortTimeConverter = new TimeSpanToDisplayShortConverter();
@@ -106,28 +105,28 @@ public class BridgeGapsWindow : Window
                 {
                     Header = Se.Language.General.NumberSymbol,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(BridgeGapDisplayItem.Number)),
+                    Binding = new Binding(nameof(ApplyMinGapItem.Number)),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Show,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(BridgeGapDisplayItem.StartTime)) { Converter = fullTimeConverter },
+                    Binding = new Binding(nameof(ApplyMinGapItem.StartTime)) { Converter = fullTimeConverter },
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Duration,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(BridgeGapDisplayItem.Duration)) { Converter = shortTimeConverter },
+                    Binding = new Binding(nameof(ApplyMinGapItem.Duration)) { Converter = shortTimeConverter },
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Text,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(BridgeGapDisplayItem.Text)),
+                    Binding = new Binding(nameof(ApplyMinGapItem.Text)),
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
@@ -135,7 +134,7 @@ public class BridgeGapsWindow : Window
                 {
                     Header = Se.Language.Tools.BridgeGaps.GapChange,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(BridgeGapDisplayItem.InfoText)),
+                    Binding = new Binding(nameof(ApplyMinGapItem.InfoText)),
                     IsReadOnly = true,
                     Width = new DataGridLength(120),
                 },

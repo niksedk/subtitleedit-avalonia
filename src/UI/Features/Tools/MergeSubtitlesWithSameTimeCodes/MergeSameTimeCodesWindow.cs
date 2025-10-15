@@ -19,7 +19,7 @@ public class MergeSameTimeCodesWindow : Window
     public MergeSameTimeCodesWindow(MergeSameTimeCodesViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = Se.Language.Tools.MergeLineswithSameTimeCodes.Title;
+        Title = Se.Language.Tools.MergeLinesWithSameTimeCodes.Title;
         CanResize = true;
         Width = 800;
         Height = 750;
@@ -67,10 +67,10 @@ public class MergeSameTimeCodesWindow : Window
 
     private static StackPanel MakeControlsView(MergeSameTimeCodesViewModel vm)
     {
-        var labelMaxDiff = UiUtil.MakeLabel(Se.Language.Tools.MergeLineswithSameTimeCodes.MaxMsDifference);
+        var labelMaxDiff = UiUtil.MakeLabel(Se.Language.Tools.MergeLinesWithSameTimeCodes.MaxMsDifference);
         var numericUpDownMaxDiff = UiUtil.MakeNumericUpDownInt(0, 10000, Se.Settings.Tools.MergeSameTimeCode.MaxMillisecondsDifference, 130, vm, nameof(vm.MaxMillisecondsDifference));
         numericUpDownMaxDiff.ValueChanged += (s, e) => { vm.SetDirty(); };
-        var checkBoxMergeAsDialog = UiUtil.MakeCheckBox(Se.Language.Tools.MergeLineswithSameTimeCodes.MakeDialog, vm, nameof(vm.MergeDialog));
+        var checkBoxMergeAsDialog = UiUtil.MakeCheckBox(Se.Language.Tools.MergeLinesWithSameTimeCodes.MakeDialog, vm, nameof(vm.MergeDialog));
         checkBoxMergeAsDialog.IsCheckedChanged += (s, e) => { vm.SetDirty(); };
         var checkBoxAutoBreak = UiUtil.MakeCheckBox(Se.Language.General.AutoBreak, vm, nameof(vm.AutoBreak));
         checkBoxAutoBreak.IsCheckedChanged += (s, e) => { vm.SetDirty(); };

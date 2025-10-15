@@ -107,7 +107,7 @@ public class ApplyDurationLimitsWindow : Window
         return grid;
     }
 
-    private static Border MakeFixesView(ApplyDurationLimitsViewModel vm)
+    private static Grid MakeFixesView(ApplyDurationLimitsViewModel vm)
     {
         var grid = new Grid
         {
@@ -164,8 +164,8 @@ public class ApplyDurationLimitsWindow : Window
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.NumberSymbol,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(ApplyDurationLimitItem.Number)),
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
@@ -174,17 +174,18 @@ public class ApplyDurationLimitsWindow : Window
                     Binding = new Binding(nameof(ApplyDurationLimitItem.Fix)),
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                     CellTheme = UiUtil.DataGridNoBorderCellTheme,
+                    IsReadOnly = true,
                 },
             },
         };
 
         grid.Add(labelFixesAvailable, 0);
-        grid.Add(dataGrid, 1);
+        grid.Add(UiUtil.MakeBorderForControlNoPadding(dataGrid), 1);
 
-        return UiUtil.MakeBorderForControlNoPadding(grid);
+        return grid;
     }
 
-    private static Border MakeCannotFixView(ApplyDurationLimitsViewModel vm)
+    private static Grid MakeCannotFixView(ApplyDurationLimitsViewModel vm)
     {
         var grid = new Grid
         {
@@ -227,8 +228,8 @@ public class ApplyDurationLimitsWindow : Window
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.NumberSymbol,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(SubtitleLineViewModel.Number)),
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
@@ -237,6 +238,7 @@ public class ApplyDurationLimitsWindow : Window
                     Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)) { Converter = fullTimeConverter },
                     Width = new DataGridLength(120),
                     CellTheme = UiUtil.DataGridNoBorderCellTheme,
+                    IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
@@ -244,21 +246,22 @@ public class ApplyDurationLimitsWindow : Window
                     Binding = new Binding(nameof(SubtitleLineViewModel.Duration)) { Converter = shortTimeConverter },
                     Width = new DataGridLength(120),
                     CellTheme = UiUtil.DataGridNoBorderCellTheme,
+                    IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Text,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(SubtitleLineViewModel.Text)),
-                    IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
+                    IsReadOnly = true,
                 },
             },
         };
 
         grid.Add(labelFixesAvailable, 0);
-        grid.Add(dataGrid, 1);
+        grid.Add(UiUtil.MakeBorderForControlNoPadding(dataGrid), 1);
 
-        return UiUtil.MakeBorderForControlNoPadding(grid);
+        return grid;
     }
 }

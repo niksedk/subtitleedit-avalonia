@@ -91,6 +91,9 @@ public partial class ApplyDurationLimitsViewModel : ObservableObject
 
             var minMs = MinDurationMs.Value;
             var maxMs = MaxDurationMs.Value;
+            var fixCount = 0;
+            var improveCount = 0;
+            var skipCount = 0;
 
             for (var index = 0; index < _allSubtitles.Count; index++)
             {
@@ -105,12 +108,14 @@ public partial class ApplyDurationLimitsViewModel : ObservableObject
                     {
                         var newEndTime = TimeSpan.FromMilliseconds(item.StartTime.TotalMilliseconds + maxMs);
                         Update(item, newEndTime);
+                        fixCount++;
                     }
 
                     if (item.Duration.TotalMilliseconds < minMs && FixMinDurationMs)
                     {
                         var newEndTime = TimeSpan.FromMilliseconds(item.EndTime.TotalMilliseconds + minMs);
                         Update(item, newEndTime);
+                        fixCount++;
                     }
                 }
                 else
@@ -119,32 +124,55 @@ public partial class ApplyDurationLimitsViewModel : ObservableObject
                     {
                         var newEndTime = TimeSpan.FromMilliseconds(item.StartTime.TotalMilliseconds + maxMs);
                         Update(item, newEndTime);
+                        fixCount++;
                     }
 
                     if (item.Duration.TotalMilliseconds < minMs && FixMinDurationMs)
                     {
                         var newEndTime = TimeSpan.FromMilliseconds(item.StartTime.TotalMilliseconds + minMs);
-                        if (newEndTime < next.StartTime)
+                        if (newEndTime > next.StartTime)
                         {
                             var cappedEndTime = TimeSpan.FromMilliseconds(next.StartTime.TotalMilliseconds - Se.Settings.General.MinimumMillisecondsBetweenLines);
                             if (cappedEndTime > item.EndTime)
                             {
                                 // improved, but not fixed
                                 Update(item, cappedEndTime,  Se.Language.Tools.ApplyDurationLimits.OnlyPartialFixed);
+                                improveCount++;
                             }
                             else
                             {
                                 // unfixable
                                 Subtitles.Add(item);
+                                skipCount++;
                             }
                         }
                         else
                         {
                             Update(item, newEndTime);
+                            fixCount++;
                         }
                     }
                 }
             }
+
+            if (fixCount == 0 && improveCount == 0 && skipCount == 0)
+            {
+                FixesInfo = Se.Language.Tools.ApplyDurationLimits.NoChangesNeeded;
+                FixesSkippedInfo = string.Empty;
+                return;
+            }
+
+            if (improveCount == 0)
+            {
+                FixesInfo = string.Format(Se.Language.Tools.ApplyDurationLimits.FixedX, fixCount);
+            }
+            else
+            {
+                FixesInfo = string.Format(Se.Language.Tools.ApplyDurationLimits.FixedXImprovedY, fixCount, improveCount);
+            }
+
+
+            FixesSkippedInfo = skipCount > 0 ? string.Format(Se.Language.Tools.ApplyDurationLimits.UnfixableX, skipCount) : string.Empty;
         });
     }
 

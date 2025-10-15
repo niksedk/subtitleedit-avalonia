@@ -26,6 +26,13 @@ public class SettingsResetWindow : Window
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ResetAll)) { Mode = BindingMode.TwoWay },              
         };
 
+        var checkBoxResetRules = new CheckBox
+        {
+            Content = Se.Language.Options.Settings.ResetRules,
+            Margin = new Thickness(20, 0, 55, 0),
+            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ResetRules)) { Mode = BindingMode.TwoWay },
+        }.WithBindEnabled(nameof(vm.ResetAll), new InverseBooleanConverter());
+
         var checkBoxResetShortcuts = new CheckBox
         {
             Content = Se.Language.Options.Settings.ResetShortcuts,
@@ -40,13 +47,6 @@ public class SettingsResetWindow : Window
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ResetRecentFiles)) { Mode = BindingMode.TwoWay },
         }.WithBindEnabled(nameof(vm.ResetAll), new InverseBooleanConverter());
 
-        //var radioResetMultipleReplaceRules = new CheckBox
-        //{
-        //    Content = Se.Language.Options.Settings.ResetMultipleReplaceRules,
-        //    Margin = new Thickness(20, 0, 55, 0),
-        //    [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ResetMultipleReplaceRules)) { Mode = BindingMode.TwoWay },
-        //}.WithBindEnabled(nameof(vm.ResetAll), new InverseBooleanConverter());
-
         var checkBoxResetAutoTranslate = new CheckBox
         {
             Content = Se.Language.Options.Settings.ResetAutoTranslate,
@@ -60,6 +60,21 @@ public class SettingsResetWindow : Window
             Margin = new Thickness(20, 0, 55, 0),
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ResetAppearance)) { Mode = BindingMode.TwoWay },
         }.WithBindEnabled(nameof(vm.ResetAll), new InverseBooleanConverter());
+
+        var checkBoxResetWaveform = new CheckBox
+        {
+            Content = Se.Language.Options.Settings.ResetWaveform,
+            Margin = new Thickness(20, 0, 55, 0),
+            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ResetWaveform)) { Mode = BindingMode.TwoWay },
+        }.WithBindEnabled(nameof(vm.ResetAll), new InverseBooleanConverter());
+
+        var checkBoxResetSyntaxColoring = new CheckBox
+        {
+            Content = Se.Language.Options.Settings.ResetSyntaxColoring,
+            Margin = new Thickness(20, 0, 55, 0),
+            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ResetSyntaxColoring)) { Mode = BindingMode.TwoWay },
+        }.WithBindEnabled(nameof(vm.ResetAll), new InverseBooleanConverter());
+
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);

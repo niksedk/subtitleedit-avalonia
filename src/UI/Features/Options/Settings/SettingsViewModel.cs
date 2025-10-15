@@ -725,7 +725,21 @@ public partial class SettingsViewModel : ObservableObject
             }
             if (result.ResetRules)
             {
-                //Se.Settings.Tools.ReplaceRules = new List<Logic.Config.ReplaceRule>();
+                var g = new SeGeneral();
+                Se.Settings.General.Profiles = g.Profiles;
+                Se.Settings.General.CurrentProfile = g.CurrentProfile;
+                Se.Settings.General.SubtitleLineMaximumLength = g.SubtitleLineMaximumLength;
+                Se.Settings.General.SubtitleOptimalCharactersPerSeconds = g.SubtitleOptimalCharactersPerSeconds;
+                Se.Settings.General.SubtitleMaximumCharactersPerSeconds = g.SubtitleMaximumCharactersPerSeconds;
+                Se.Settings.General.SubtitleMaximumWordsPerMinute = g.SubtitleMaximumWordsPerMinute;
+                Se.Settings.General.SubtitleMinimumDisplayMilliseconds = g.SubtitleMinimumDisplayMilliseconds;
+                Se.Settings.General.SubtitleMaximumDisplayMilliseconds = g.SubtitleMaximumDisplayMilliseconds;
+                Se.Settings.General.MinimumMillisecondsBetweenLines = g.MinimumMillisecondsBetweenLines;
+                Se.Settings.General.MaxNumberOfLines = g.MaxNumberOfLines;
+                Se.Settings.General.UnbreakLinesShorterThan = g.UnbreakLinesShorterThan;
+                Se.Settings.General.DialogStyle = g.DialogStyle;
+                Se.Settings.General.ContinuationStyle = g.ContinuationStyle;
+                Se.Settings.General.CpsLineLengthStrategy = g.CpsLineLengthStrategy;
             }
             if (result.ResetAppearance)
             {
@@ -734,6 +748,23 @@ public partial class SettingsViewModel : ObservableObject
             if (result.ResetAutoTranslate)
             {
                 Se.Settings.AutoTranslate = new SeAutoTranslate();
+            }
+            if (result.ResetWaveform)
+            {
+                Se.Settings.Waveform = new SeWaveform();
+            }
+            if (result.ResetSyntaxColoring)
+            {
+                var g = new SeGeneral();
+
+                Se.Settings.General.ColorDurationTooLong = Se.Settings.General.ColorDurationTooLong;
+                Se.Settings.General.ColorDurationTooShort = g.ColorDurationTooShort;
+                Se.Settings.General.ColorTextTooLong = g.ColorTextTooLong;
+                Se.Settings.General.ColorTextTooWide = g.ColorTextTooWide;
+                Se.Settings.General.ColorTextTooManyLines = g.ColorTextTooManyLines;
+                Se.Settings.General.ColorTimeCodeOverlap = g.ColorTimeCodeOverlap;
+                Se.Settings.General.ColorGapTooShort = g.ColorGapTooShort;
+                Se.Settings.General.ErrorColor = g.ErrorColor;
             }
         }
 

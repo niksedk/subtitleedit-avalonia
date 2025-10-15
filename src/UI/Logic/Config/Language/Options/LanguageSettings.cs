@@ -177,6 +177,9 @@ public class LanguageSettings
     public string EditContinuationStyleCustom { get; set; }
     public string LongGapThreshold { get; set; }
     public string AfterLongGap { get; set; }
+    public string ResetSyntaxColoring { get; set; }
+    public string ResetWaveform { get; set; }
+    public string ResetRules { get; set; }
 
     public LanguageSettings()
     {
@@ -351,6 +354,9 @@ public class LanguageSettings
         EditContinuationStyleCustom = "Edit custom continuation style";
         LongGapThreshold = "Long gap threshold (ms)";
         AfterLongGap = "After long gap:";
+        ResetSyntaxColoring = "Reset syntax coloring";
+        ResetWaveform = "Reset waveform";
+        ResetRules = "Reset rules";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

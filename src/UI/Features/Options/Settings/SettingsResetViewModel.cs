@@ -14,6 +14,8 @@ public partial class SettingsResetViewModel : ObservableObject
     [ObservableProperty] private bool _resetRules;
     [ObservableProperty] private bool _resetAppearance;
     [ObservableProperty] private bool _resetAutoTranslate;
+    [ObservableProperty] private bool _resetWaveform;
+    [ObservableProperty] private bool _resetSyntaxColoring;
 
     public Window? Window { get; set; }
 

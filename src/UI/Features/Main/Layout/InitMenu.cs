@@ -290,6 +290,11 @@ public static class InitMenu
             },
             new MenuItem
             {
+                Header = l.ApplyMinGap,
+                Command = vm.ShowApplyMinGapCommand,
+            },
+            new MenuItem
+            {
                 Header = l.ChangeCasing,
                 Command = vm.ShowToolsChangeCasingCommand,
             },

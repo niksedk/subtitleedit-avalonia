@@ -11,6 +11,10 @@ public class LanguageApplyDurationLimits
     public string MaxDurationShouldBeHigherThanMinDuration { get; set; }
     public string ChangedDurationFromXToYCommentZ { get; set; }
     public string OnlyPartialFixed { get; set; }
+    public string UnfixableX { get; set; }
+    public string FixedX { get; set; }
+    public string FixedXImprovedY { get; set; }
+    public string NoChangesNeeded { get; set; }
 
     public LanguageApplyDurationLimits()
     {
@@ -21,5 +25,9 @@ public class LanguageApplyDurationLimits
         MaxDurationShouldBeHigherThanMinDuration = "Maximum duration should be higher than minimum duration";
         ChangedDurationFromXToYCommentZ =  "Changed duration from {0} to {1} {2}";
         OnlyPartialFixed = "(only partial fix)";
+        UnfixableX = "Unfixable: {0}";
+        FixedXImprovedY = "Fixes: {0}, Improvements: {1}";
+        FixedX = "Fixed: {0}";
+        NoChangesNeeded = "No changes needed";
     }
 }

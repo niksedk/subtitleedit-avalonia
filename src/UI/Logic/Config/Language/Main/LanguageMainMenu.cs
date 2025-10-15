@@ -39,6 +39,7 @@ public class LanguageMainMenu
     public string ApplyDurationLimits { get; set; }
     public string BatchConvert { get; set; }
     public string BridgeGaps { get; set; }
+    public string ApplyMinGap { get; set; }
     public string ChangeCasing { get; set; }
     public string FixCommonErrors { get; set; }
     public string MakeEmptyTranslationFromCurrentSubtitle { get; set; }
@@ -131,6 +132,7 @@ public class LanguageMainMenu
         RemoveTextForHearingImpaired = "_Remove text for hearing impaired...";
         ChangeCasing = "_Change casing...";
         BridgeGaps = "Bridge _gaps...";
+        ApplyMinGap = "Apply min. gap between subtitles...";
         BatchConvert = "_Batch convert...";
         JoinSubtitles = "_Join subtitles...";
         SplitSubtitle = "_Split subtitle...";

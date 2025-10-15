@@ -63,6 +63,7 @@ using Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
 using Nikse.SubtitleEdit.Features.Sync.VisualSync;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Features.Tools.ApplyDurationLimits;
+using Nikse.SubtitleEdit.Features.Tools.ApplyMinGap;
 using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 using Nikse.SubtitleEdit.Features.Tools.BridgeGaps;
 using Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
@@ -1764,6 +1765,35 @@ public partial class MainViewModel :
         }
 
         var result = await _windowService.ShowDialogAsync<BridgeGapsWindow, BridgeGapsViewModel>(Window!,
+            vm => { vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList()); });
+
+        if (result.OkPressed)
+        {
+            Subtitles.Clear();
+            Subtitles.AddRange(result.Subtitles.Select(p => new SubtitleLineViewModel(p.SubtitleLineViewModel)));
+            SelectAndScrollToRow(0);
+            _updateAudioVisualizer = true;
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+
+    [RelayCommand]
+    private async Task ShowApplyMinGap()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<ApplyMinGapWindow , ApplyMinGapViewModel>(Window!,
             vm => { vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList()); });
 
         if (result.OkPressed)
