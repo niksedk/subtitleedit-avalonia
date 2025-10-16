@@ -48,7 +48,7 @@ public class SeGeneral
     public bool FixContinuationStyleIgnoreLyrics { get; set; }
 
 
-    public bool UseTimeFormatHhMmSsFf { get; set; } = false;
+    public bool UseFrameMode { get; set; } = false;
     public double DefaultFrameRate { get; set; }
     public double CurrentFrameRate { get; set; }
     public string DefaultSubtitleFormat { get; set; }
@@ -151,7 +151,7 @@ public class SeGeneral
         });
         AddExtraProfiles(Profiles);
 
-        UseTimeFormatHhMmSsFf = false;
+        UseFrameMode = false;
         DefaultFrameRate = 23.976;
         CurrentFrameRate = DefaultFrameRate;
         SubtitleLineMaximumPixelWidth = 576;

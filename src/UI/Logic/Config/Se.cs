@@ -332,7 +332,7 @@ public class Se
     {
         Configuration.Settings.General.FFmpegLocation = Settings.General.FfmpegPath;
         Configuration.Settings.General.UseDarkTheme = Settings.Appearance.Theme == "Dark";
-        Configuration.Settings.General.UseTimeFormatHHMMSSFF = Settings.General.UseTimeFormatHhMmSsFf;
+        Configuration.Settings.General.UseTimeFormatHHMMSSFF = Settings.General.UseFrameMode;
 
         var tts = Settings.Tools.AudioToText;
         Configuration.Settings.Tools.WhisperChoice = tts.WhisperChoice;

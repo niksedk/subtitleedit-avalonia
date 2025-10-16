@@ -62,7 +62,6 @@ public class SettingsPage : UserControl
         Grid.SetColumn(_searchBox, 1);
         Grid.SetColumnSpan(_searchBox, 2);
 
-
         Content = grid;
 
         var menu = new StackPanel
@@ -73,15 +72,15 @@ public class SettingsPage : UserControl
             Children =
             {
                 MakeMenuItem(Se.Language.General.Rules, vm.ScrollToSectionCommand, IconNames.PoliceBadge),
-                MakeMenuItem(Se.Language.General.General, vm.ScrollToSectionCommand,  IconNames.Cogs),
+                MakeMenuItem(Se.Language.General.General, vm.ScrollToSectionCommand, IconNames.Cogs),
                 MakeMenuItem(Se.Language.General.SubtitleFormats, vm.ScrollToSectionCommand, IconNames.ClosedCaption),
                 MakeMenuItem(Se.Language.Options.Settings.SyntaxColoring, vm.ScrollToSectionCommand, IconNames.Palette),
                 MakeMenuItem(Se.Language.General.VideoPlayer, vm.ScrollToSectionCommand, IconNames.PlayBox),
-                MakeMenuItem(Se.Language.Options.Settings.WaveformSpectrogram, vm.ScrollToSectionCommand,  IconNames.Waveform),
-                MakeMenuItem(Se.Language.General.Tools, vm.ScrollToSectionCommand,  IconNames.Tools),
-                MakeMenuItem(Se.Language.General.Appearance, vm.ScrollToSectionCommand,  IconNames.EyeSettings),
-                MakeMenuItem(Se.Language.General.Toolbar, vm.ScrollToSectionCommand,  IconNames.DotsHorizontal),
-                MakeMenuItem(Se.Language.Options.Settings.Network, vm.ScrollToSectionCommand,  IconNames.Network),
+                MakeMenuItem(Se.Language.Options.Settings.WaveformSpectrogram, vm.ScrollToSectionCommand, IconNames.Waveform),
+                MakeMenuItem(Se.Language.General.Tools, vm.ScrollToSectionCommand, IconNames.Tools),
+                MakeMenuItem(Se.Language.General.Appearance, vm.ScrollToSectionCommand, IconNames.EyeSettings),
+                MakeMenuItem(Se.Language.General.Toolbar, vm.ScrollToSectionCommand, IconNames.DotsHorizontal),
+                MakeMenuItem(Se.Language.Options.Settings.Network, vm.ScrollToSectionCommand, IconNames.Network),
             }
         };
 
@@ -201,6 +200,7 @@ public class SettingsPage : UserControl
 
         sections.Add(new SettingsSection(Se.Language.General.General,
         [
+            MakeCheckboxSetting(Se.Language.Options.Settings.UseFrameMode, nameof(_vm.UseFrameMode)),
             MakeNumericSettingInt(Se.Language.Options.Settings.NewEmptyDefaultMs, nameof(_vm.NewEmptyDefaultMs)),
             MakeCheckboxSetting(Se.Language.Options.Settings.PromptDeleteLines, nameof(_vm.PromptDeleteLines)),
             MakeCheckboxSetting(Se.Language.General.LockTimeCodes, nameof(_vm.LockTimeCodes)),
@@ -247,200 +247,200 @@ public class SettingsPage : UserControl
         ]));
 
         sections.Add(new SettingsSection(Se.Language.Options.Settings.SyntaxColoring,
-            [
-                MakeCheckboxSetting(Se.Language.Options.Settings.ColorDurationTooShort, nameof(_vm.ColorDurationTooShort)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ColorDurationTooLong, nameof(_vm.ColorDurationTooLong)),
-                MakeSeparator(),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ColorTextTooLong, nameof(_vm.ColorTextTooLong)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ColorTextTooWide, nameof(_vm.ColorTextTooWide)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ColorTextTooManyLines, nameof(_vm.ColorTextTooManyLines)),
-                MakeSeparator(),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ColorOverlap, nameof(_vm.ColorOverlap)),
-                MakeSeparator(),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ColorGapTooShort, nameof(_vm.ColorGapTooShort)),
-                MakeSeparator(),
-                new SettingsItem(Se.Language.Options.Settings.ErrorBackgroundColor, () => new ColorPicker()
+        [
+            MakeCheckboxSetting(Se.Language.Options.Settings.ColorDurationTooShort, nameof(_vm.ColorDurationTooShort)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ColorDurationTooLong, nameof(_vm.ColorDurationTooLong)),
+            MakeSeparator(),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ColorTextTooLong, nameof(_vm.ColorTextTooLong)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ColorTextTooWide, nameof(_vm.ColorTextTooWide)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ColorTextTooManyLines, nameof(_vm.ColorTextTooManyLines)),
+            MakeSeparator(),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ColorOverlap, nameof(_vm.ColorOverlap)),
+            MakeSeparator(),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ColorGapTooShort, nameof(_vm.ColorGapTooShort)),
+            MakeSeparator(),
+            new SettingsItem(Se.Language.Options.Settings.ErrorBackgroundColor, () => new ColorPicker()
+            {
+                Width = 200,
+                IsAlphaEnabled = true,
+                IsAlphaVisible = true,
+                IsColorSpectrumSliderVisible = false,
+                IsColorComponentsVisible = true,
+                IsColorModelVisible = false,
+                IsColorPaletteVisible = false,
+                IsAccentColorsVisible = false,
+                IsColorSpectrumVisible = true,
+                IsComponentTextInputVisible = true,
+                [!ColorPicker.ColorProperty] = new Binding(nameof(_vm.ErrorColor))
                 {
-                    Width = 200,
-                    IsAlphaEnabled = true,
-                    IsAlphaVisible = true,
-                    IsColorSpectrumSliderVisible = false,
-                    IsColorComponentsVisible = true,
-                    IsColorModelVisible = false,
-                    IsColorPaletteVisible = false,
-                    IsAccentColorsVisible = false,
-                    IsColorSpectrumVisible = true,
-                    IsComponentTextInputVisible = true,
-                    [!ColorPicker.ColorProperty] = new Binding(nameof(_vm.ErrorColor))
-                    {
-                        Source = _vm,
-                        Mode = BindingMode.TwoWay
-                    },
-                }),
-            ]));
+                    Source = _vm,
+                    Mode = BindingMode.TwoWay
+                },
+            }),
+        ]));
 
         sections.Add(new SettingsSection(Se.Language.General.VideoPlayer,
-            [
-                new SettingsItem(Se.Language.General.VideoPlayer, () => new StackPanel
+        [
+            new SettingsItem(Se.Language.General.VideoPlayer, () => new StackPanel
+            {
+                Children =
                 {
-                    Children =
+                    new ComboBox
                     {
-                        new ComboBox
-                        {
-                            Width = 200,
-                            Height = 30,
-                            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.VideoPlayers)),
-                            [!SelectingItemsControl.SelectedItemProperty] =
-                                new Binding(nameof(_vm.SelectedVideoPlayer)),
-                            DataContext = _vm,
-                            ItemTemplate = new FuncDataTemplate<object>((item, _) =>
-                                new TextBlock
-                                {
-                                    [!TextBlock.TextProperty] = new Binding(nameof(VideoPlayerItem.Name)),
-                                    Width = 150,
-                                }, true)
-                        }
-                    }
-                }),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowStopButton, nameof(_vm.ShowStopButton)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowFullscreenButton, nameof(_vm.ShowFullscreenButton)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.AutoOpenVideoFile, nameof(_vm.AutoOpenVideoFile)),
-                new SettingsItem(Se.Language.Options.Settings.DownloadMpv, () => new StackPanel
-                {
-                    Children =
-                    {
-                        new StackPanel
-                        {
-                            Orientation = Orientation.Horizontal,
-                            Spacing = 10,
-                            Children =
+                        Width = 200,
+                        Height = 30,
+                        [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.VideoPlayers)),
+                        [!SelectingItemsControl.SelectedItemProperty] =
+                            new Binding(nameof(_vm.SelectedVideoPlayer)),
+                        DataContext = _vm,
+                        ItemTemplate = new FuncDataTemplate<object>((item, _) =>
+                            new TextBlock
                             {
-                                UiUtil.MakeButton(Se.Language.General.Download, _vm.DownloadLibMpvCommand),
-                                new TextBlock
-                                {
-                                    DataContext = _vm,
-                                    [!TextBlock.TextProperty] = new Binding(nameof(_vm.LibMpvStatus)),
-                                    Margin = new Thickness(0, 0, 0, 0),
-                                    VerticalAlignment = VerticalAlignment.Center,
-                                    HorizontalAlignment = HorizontalAlignment.Left,
-                                }
-                            }
-                        },
-                        new TextBlock
+                                [!TextBlock.TextProperty] = new Binding(nameof(VideoPlayerItem.Name)),
+                                Width = 150,
+                            }, true)
+                    }
+                }
+            }),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowStopButton, nameof(_vm.ShowStopButton)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowFullscreenButton, nameof(_vm.ShowFullscreenButton)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.AutoOpenVideoFile, nameof(_vm.AutoOpenVideoFile)),
+            new SettingsItem(Se.Language.Options.Settings.DownloadMpv, () => new StackPanel
+            {
+                Children =
+                {
+                    new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Spacing = 10,
+                        Children =
                         {
-                            DataContext = _vm,
-                            [!TextBlock.TextProperty] = new Binding(nameof(_vm.LibMpvPath)),
-                            Margin = new Thickness(10, 0, 0, 0),
-                            VerticalAlignment = VerticalAlignment.Center,
-                            Opacity = 0.5,
-                            FontSize = 10,
+                            UiUtil.MakeButton(Se.Language.General.Download, _vm.DownloadLibMpvCommand),
+                            new TextBlock
+                            {
+                                DataContext = _vm,
+                                [!TextBlock.TextProperty] = new Binding(nameof(_vm.LibMpvStatus)),
+                                Margin = new Thickness(0, 0, 0, 0),
+                                VerticalAlignment = VerticalAlignment.Center,
+                                HorizontalAlignment = HorizontalAlignment.Left,
+                            }
                         }
                     },
-                    [!StackPanel.IsVisibleProperty] = new Binding(nameof(_vm.IsLibMpvDownloadVisible)) { Source = _vm }
-                }),
-
-            ]));
+                    new TextBlock
+                    {
+                        DataContext = _vm,
+                        [!TextBlock.TextProperty] = new Binding(nameof(_vm.LibMpvPath)),
+                        Margin = new Thickness(10, 0, 0, 0),
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Opacity = 0.5,
+                        FontSize = 10,
+                    }
+                },
+                [!StackPanel.IsVisibleProperty] = new Binding(nameof(_vm.IsLibMpvDownloadVisible)) { Source = _vm }
+            }),
+        ]));
 
         sections.Add(new SettingsSection(Se.Language.Options.Settings.WaveformSpectrogram,
-            [
-                MakeCheckboxSetting(Se.Language.Options.Settings.WaveformFocusOnMouseOver, nameof(_vm.WaveformFocusOnMouseOver)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.WaveformCenterVideoPosition, nameof(_vm.WaveformCenterVideoPosition)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.WaveformShowToolbar, nameof(_vm.WaveformShowToolbar)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformHorizontalZoom, nameof(_vm.ShowWaveformHorizontalZoom)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformVerticalZoom, nameof(_vm.ShowWaveformVerticalZoom)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformVideoPositionSlider, nameof(_vm.ShowWaveformVideoPositionSlider)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformPlaybackSpeed, nameof(_vm.ShowWaveformPlaybackSpeed)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.WaveformSnapToShotChanges, nameof(_vm.WaveformSnapToShotChanges)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.WaveformShotChangesAutoGenerate, nameof(_vm.WaveformShotChangesAutoGenerate)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.WaveformFocusTextboxAfterInsertNew, nameof(_vm.WaveformFocusTextboxAfterInsertNew)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.WaveformInvertMouseWheel, nameof(_vm.WaveformInvertMouseWheel)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.WaveformDrawGridLines, nameof(_vm.WaveformDrawGridLines)),
-                new SettingsItem(Se.Language.Options.Settings.WaveformColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.WaveformColor))),
-                new SettingsItem(Se.Language.Options.Settings.WaveformSelectedColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.WaveformSelectedColor))),
-                new SettingsItem(Se.Language.Options.Settings.WaveformCursorColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.WaveformCursorColor))),
-                new SettingsItem(Se.Language.Options.Settings.DownloadFfmpeg, () => new StackPanel
+        [
+            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformFocusOnMouseOver, nameof(_vm.WaveformFocusOnMouseOver)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformCenterVideoPosition, nameof(_vm.WaveformCenterVideoPosition)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformShowToolbar, nameof(_vm.WaveformShowToolbar)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformHorizontalZoom, nameof(_vm.ShowWaveformHorizontalZoom)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformVerticalZoom, nameof(_vm.ShowWaveformVerticalZoom)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformVideoPositionSlider, nameof(_vm.ShowWaveformVideoPositionSlider)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformPlaybackSpeed, nameof(_vm.ShowWaveformPlaybackSpeed)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformSnapToShotChanges, nameof(_vm.WaveformSnapToShotChanges)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformShotChangesAutoGenerate, nameof(_vm.WaveformShotChangesAutoGenerate)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformFocusTextboxAfterInsertNew, nameof(_vm.WaveformFocusTextboxAfterInsertNew)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformInvertMouseWheel, nameof(_vm.WaveformInvertMouseWheel)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformDrawGridLines, nameof(_vm.WaveformDrawGridLines)),
+            new SettingsItem(Se.Language.Options.Settings.WaveformColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.WaveformColor))),
+            new SettingsItem(Se.Language.Options.Settings.WaveformSelectedColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.WaveformSelectedColor))),
+            new SettingsItem(Se.Language.Options.Settings.WaveformCursorColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.WaveformCursorColor))),
+            new SettingsItem(Se.Language.Options.Settings.DownloadFfmpeg, () => new StackPanel
+            {
+                Children =
                 {
-                    Children =
+                    new StackPanel
                     {
-                        new StackPanel
+                        Orientation = Orientation.Horizontal,
+                        Spacing = 10,
+                        Children =
                         {
-                            Orientation = Orientation.Horizontal,
-                            Spacing = 10,
-                            Children =
+                            UiUtil.MakeButton(Se.Language.General.Download, _vm.DownloadFfmpegCommand),
+                            new TextBlock
                             {
-                                UiUtil.MakeButton(Se.Language.General.Download, _vm.DownloadFfmpegCommand),
-                                new TextBlock
-                                {
-                                    DataContext = _vm,
-                                    [!TextBlock.TextProperty] = new Binding(nameof(_vm.FfmpegStatus)),
-                                    Margin = new Thickness(0, 0, 0, 0),
-                                    VerticalAlignment = VerticalAlignment.Center,
-                                    HorizontalAlignment = HorizontalAlignment.Left,
-                                }
+                                DataContext = _vm,
+                                [!TextBlock.TextProperty] = new Binding(nameof(_vm.FfmpegStatus)),
+                                Margin = new Thickness(0, 0, 0, 0),
+                                VerticalAlignment = VerticalAlignment.Center,
+                                HorizontalAlignment = HorizontalAlignment.Left,
                             }
-                        },
-                        new TextBlock
-                        {
-                            DataContext = _vm,
-                            [!TextBlock.TextProperty] = new Binding(nameof(_vm.FfmpegPath)),
-                            Margin = new Thickness(10, 0, 0, 0),
-                            VerticalAlignment = VerticalAlignment.Center,
-                            Opacity = 0.5,
-                            FontSize = 10,
                         }
+                    },
+                    new TextBlock
+                    {
+                        DataContext = _vm,
+                        [!TextBlock.TextProperty] = new Binding(nameof(_vm.FfmpegPath)),
+                        Margin = new Thickness(10, 0, 0, 0),
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Opacity = 0.5,
+                        FontSize = 10,
                     }
-                }),
-            ]));
+                }
+            }),
+        ]));
 
         sections.Add(new SettingsSection(Se.Language.General.Tools,
-            [
-                MakeCheckboxSetting(Se.Language.Options.Settings.GoToLineNumberSetsVideoPosition, nameof(_vm.GoToLineNumberAlsoSetVideoPosition)),
-            ]));
+        [
+            MakeCheckboxSetting(Se.Language.Options.Settings.GoToLineNumberSetsVideoPosition, nameof(_vm.GoToLineNumberAlsoSetVideoPosition)),
+        ]));
 
         sections.Add(new SettingsSection(Se.Language.General.Appearance,
-            [
-                new SettingsItem(Se.Language.Options.Settings.Theme, () => UiUtil.MakeComboBox(_vm.Themes, _vm, nameof(_vm.SelectedTheme))),
-                new SettingsItem(Se.Language.Options.Settings.DarkThemeBackgroundColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.DarkModeBackgroundColor))),
-                new SettingsItem(Se.Language.Options.Settings.UiFont, () => UiUtil.MakeComboBox(_vm.FontNames, _vm, nameof(_vm.SelectedFontName))),
-                new SettingsItem(Se.Language.Options.Settings.SubtitleTextBoxAndGridFontName, () => UiUtil.MakeComboBox(_vm.FontNames, _vm, nameof(_vm.SubtitleTextBoxAndGridFontName))),
-                MakeNumericSetting(Se.Language.Options.Settings.SubtitleGridFontSize, nameof(_vm.SubtitleGridFontSize)),
-                MakeNumericSetting(Se.Language.Options.Settings.TextBoxFontSize, nameof(_vm.TextBoxFontSize)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxFontBold, nameof(_vm.TextBoxFontBold)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxCenterText, nameof(_vm.TextBoxCenterText)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowUpDownStartTime, nameof(_vm.ShowUpDownStartTime)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowUpDownEndTime, nameof(_vm.ShowUpDownEndTime)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowUpDownDuration, nameof(_vm.ShowUpDownDuration)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowUpDownLabels, nameof(_vm.ShowUpDownLabels)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowButtonHints, nameof(_vm.ShowButtonHints)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.GridCompactMode, nameof(_vm.GridCompactMode)),
-                new SettingsItem(Se.Language.Options.Settings.ShowGridLines, () => UiUtil.MakeComboBox(_vm.GridLinesVisibilities, _vm, nameof(_vm.SelectedGridLinesVisibility))),
-                new SettingsItem(Se.Language.Options.Settings.BookmarkColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.BookmarkColor))),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowAssaLayer, nameof(_vm.ShowAssaLayer)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowHorizontalLineAboveToolbar, nameof(_vm.ShowHorizontalLineAboveToolbar)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowHorizontalLineBelowToolbar, nameof(_vm.ShowHorizontalLineBelowToolbar)),
-            ]));
+        [
+            new SettingsItem(Se.Language.Options.Settings.Theme, () => UiUtil.MakeComboBox(_vm.Themes, _vm, nameof(_vm.SelectedTheme))),
+            new SettingsItem(Se.Language.Options.Settings.DarkThemeBackgroundColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.DarkModeBackgroundColor))),
+            new SettingsItem(Se.Language.Options.Settings.UiFont, () => UiUtil.MakeComboBox(_vm.FontNames, _vm, nameof(_vm.SelectedFontName))),
+            new SettingsItem(Se.Language.Options.Settings.SubtitleTextBoxAndGridFontName,
+                () => UiUtil.MakeComboBox(_vm.FontNames, _vm, nameof(_vm.SubtitleTextBoxAndGridFontName))),
+            MakeNumericSetting(Se.Language.Options.Settings.SubtitleGridFontSize, nameof(_vm.SubtitleGridFontSize)),
+            MakeNumericSetting(Se.Language.Options.Settings.TextBoxFontSize, nameof(_vm.TextBoxFontSize)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxFontBold, nameof(_vm.TextBoxFontBold)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxCenterText, nameof(_vm.TextBoxCenterText)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowUpDownStartTime, nameof(_vm.ShowUpDownStartTime)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowUpDownEndTime, nameof(_vm.ShowUpDownEndTime)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowUpDownDuration, nameof(_vm.ShowUpDownDuration)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowUpDownLabels, nameof(_vm.ShowUpDownLabels)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowButtonHints, nameof(_vm.ShowButtonHints)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.GridCompactMode, nameof(_vm.GridCompactMode)),
+            new SettingsItem(Se.Language.Options.Settings.ShowGridLines, () => UiUtil.MakeComboBox(_vm.GridLinesVisibilities, _vm, nameof(_vm.SelectedGridLinesVisibility))),
+            new SettingsItem(Se.Language.Options.Settings.BookmarkColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.BookmarkColor))),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowAssaLayer, nameof(_vm.ShowAssaLayer)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowHorizontalLineAboveToolbar, nameof(_vm.ShowHorizontalLineAboveToolbar)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowHorizontalLineBelowToolbar, nameof(_vm.ShowHorizontalLineBelowToolbar)),
+        ]));
 
         sections.Add(new SettingsSection(Se.Language.General.Toolbar,
-            [
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarNew, nameof(_vm.ShowToolbarNew)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarOpen, nameof(_vm.ShowToolbarOpen)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarSave, nameof(_vm.ShowToolbarSave)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarSaveAs, nameof(_vm.ShowToolbarSaveAs)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarFind, nameof(_vm.ShowToolbarFind)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarReplace, nameof(_vm.ShowToolbarReplace)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarSpellCheck, nameof(_vm.ShowToolbarSpellCheck)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarSettings, nameof(_vm.ShowToolbarSettings)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarLayout, nameof(_vm.ShowToolbarLayout)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarHelp, nameof(_vm.ShowToolbarHelp)),
-                MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarEncoding, nameof(_vm.ShowToolbarEncoding)),
-            ]));
+        [
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarNew, nameof(_vm.ShowToolbarNew)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarOpen, nameof(_vm.ShowToolbarOpen)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarSave, nameof(_vm.ShowToolbarSave)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarSaveAs, nameof(_vm.ShowToolbarSaveAs)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarFind, nameof(_vm.ShowToolbarFind)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarReplace, nameof(_vm.ShowToolbarReplace)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarSpellCheck, nameof(_vm.ShowToolbarSpellCheck)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarSettings, nameof(_vm.ShowToolbarSettings)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarLayout, nameof(_vm.ShowToolbarLayout)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarHelp, nameof(_vm.ShowToolbarHelp)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowToolbarEncoding, nameof(_vm.ShowToolbarEncoding)),
+        ]));
 
         sections.Add(new SettingsSection(Se.Language.Options.Settings.Network,
-            [
-                new SettingsItem(Se.Language.Options.Settings.ProxyAddress, () => new TextBox { Width = 250 }),
-                new SettingsItem(Se.Language.Options.Settings.Username, () => new TextBox { Width = 250 }),
-                new SettingsItem(Se.Language.Options.Settings.Password, () => new TextBox { Width = 250 }),
-            ]));
+        [
+            new SettingsItem(Se.Language.Options.Settings.ProxyAddress, () => new TextBox { Width = 250 }),
+            new SettingsItem(Se.Language.Options.Settings.Username, () => new TextBox { Width = 250 }),
+            new SettingsItem(Se.Language.Options.Settings.Password, () => new TextBox { Width = 250 }),
+        ]));
 
         if (OperatingSystem.IsWindows())
         {
@@ -459,7 +459,7 @@ public class SettingsPage : UserControl
                             {
                                 new CheckBox
                                 {
-                                    [!ToggleButton.IsCheckedProperty] =new Binding(nameof(FileTypeAssociationViewModel.IsAssociated))
+                                    [!ToggleButton.IsCheckedProperty] = new Binding(nameof(FileTypeAssociationViewModel.IsAssociated))
                                     {
                                         Source = fileType, Mode = BindingMode.TwoWay
                                     },
@@ -484,11 +484,14 @@ public class SettingsPage : UserControl
         }
 
         sections.Add(new SettingsSection(Se.Language.Options.Settings.FilesAndLogs,
-            [
-                new SettingsItem(Se.Language.Options.Settings.ShowErrorLogFile, () => UiUtil.MakeLink(Se.GetErrorLogFilePath(), _vm.ShowErrorLogFileCommand).WithBindEnabed(_vm, nameof(_vm.ExistsErrorLogFile))),
-                new SettingsItem(Se.Language.Options.Settings.ShowWhisperLogFile, () => UiUtil.MakeLink(Se.GetWhisperLogFilePath(), _vm.ShowWhisperLogFileCommand).WithBindEnabed(_vm, nameof(_vm.ExistsWhisperLogFile))),
-                new SettingsItem(Se.Language.Options.Settings.ShowSettingsFile, () => UiUtil.MakeLink(Se.GetSettingsFilePath(), _vm.ShowSettingsFileCommand).WithBindEnabed(_vm, nameof(_vm.ExistsSettingsFile))),
-            ]));
+        [
+            new SettingsItem(Se.Language.Options.Settings.ShowErrorLogFile,
+                () => UiUtil.MakeLink(Se.GetErrorLogFilePath(), _vm.ShowErrorLogFileCommand).WithBindEnabed(_vm, nameof(_vm.ExistsErrorLogFile))),
+            new SettingsItem(Se.Language.Options.Settings.ShowWhisperLogFile,
+                () => UiUtil.MakeLink(Se.GetWhisperLogFilePath(), _vm.ShowWhisperLogFileCommand).WithBindEnabed(_vm, nameof(_vm.ExistsWhisperLogFile))),
+            new SettingsItem(Se.Language.Options.Settings.ShowSettingsFile,
+                () => UiUtil.MakeLink(Se.GetSettingsFilePath(), _vm.ShowSettingsFileCommand).WithBindEnabed(_vm, nameof(_vm.ExistsSettingsFile))),
+        ]));
 
 
         return sections;
@@ -502,7 +505,7 @@ public class SettingsPage : UserControl
             DataContext = _vm,
             [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.CpsLineLengthStrategies)),
             [!SelectingItemsControl.SelectedItemProperty] =
-                    new Binding(nameof(_vm.CpsLineLengthStrategy)) { Mode = BindingMode.TwoWay },
+                new Binding(nameof(_vm.CpsLineLengthStrategy)) { Mode = BindingMode.TwoWay },
             ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
                 new TextBlock { Text = f?.Name }, true)
         };
@@ -518,7 +521,7 @@ public class SettingsPage : UserControl
             DataContext = _vm,
             [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.DialogStyles)),
             [!SelectingItemsControl.SelectedItemProperty] =
-                    new Binding(nameof(_vm.DialogStyle)) { Mode = BindingMode.TwoWay },
+                new Binding(nameof(_vm.DialogStyle)) { Mode = BindingMode.TwoWay },
             ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
                 new TextBlock { Text = f?.Name }, true)
         };

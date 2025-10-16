@@ -180,6 +180,7 @@ public class LanguageSettings
     public string ResetSyntaxColoring { get; set; }
     public string ResetWaveform { get; set; }
     public string ResetRules { get; set; }
+    public string UseFrameMode { get; set; }
 
     public LanguageSettings()
     {
@@ -357,6 +358,7 @@ public class LanguageSettings
         ResetSyntaxColoring = "Reset syntax coloring";
         ResetWaveform = "Reset waveform";
         ResetRules = "Reset rules";
+        UseFrameMode = "Use frame mode (HH.MM.SS.FF)";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)
