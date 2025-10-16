@@ -65,6 +65,7 @@ public class SecondsUpDown : TemplatedControl
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 Width = double.NaN,
                 BorderBrush = Brushes.Transparent,
+                Background = Brushes.Transparent,
             };
 
             var grid = new Grid
@@ -88,6 +89,13 @@ public class SecondsUpDown : TemplatedControl
                 Margin = new Thickness(0),
                 Padding = new Thickness(0),
             };
+
+            // Bind spinner background to templated parent's Background so external bindings (e.g. duration color) work
+            spinner.Bind(ButtonSpinner.BackgroundProperty, new Avalonia.Data.Binding
+            {
+                RelativeSource = new Avalonia.Data.RelativeSource(Avalonia.Data.RelativeSourceMode.TemplatedParent),
+                Path = nameof(TemplatedControl.Background)
+            });
 
             scope.Register("PART_Spinner", spinner);
             scope.Register("PART_TextBox", textBox);
