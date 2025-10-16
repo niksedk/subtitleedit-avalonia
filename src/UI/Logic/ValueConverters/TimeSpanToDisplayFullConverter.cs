@@ -21,7 +21,7 @@ public class TimeSpanToDisplayFullConverter : IValueConverter
                 return resultFrames;
             }
 
-            var result = new TimeCode(ts).ToDisplayString();
+            var result = new TimeCode(ts).ToString();
             return result;
         }
 
@@ -37,7 +37,7 @@ public class TimeSpanToDisplayFullConverter : IValueConverter
     {
         if (value is string s)
         {
-            var parts = s.Split('.', ':', ';');
+            var parts = s.Split('.', ':', ';', ',');
             if (Se.Settings.General.UseFrameMode)
             {
                 if (parts.Length == 4 &&
@@ -46,7 +46,7 @@ public class TimeSpanToDisplayFullConverter : IValueConverter
                     int.TryParse(parts[2], out int seconds) &&
                     int.TryParse(parts[3], out int frames))
                 {
-                    var result = new TimeCode(hours, minutes, seconds, SubtitleFormat.FramesToMillisecondsMax999(frames)).ToHHMMSSFF();
+                    var result = new TimeSpan(0, hours, minutes, seconds, SubtitleFormat.FramesToMillisecondsMax999(frames));
                     return result;
                 }
             }
@@ -58,10 +58,9 @@ public class TimeSpanToDisplayFullConverter : IValueConverter
                     int.TryParse(parts[2], out int seconds) &&
                     int.TryParse(parts[3], out int ms))
                 {
-                    var result = new TimeCode(hours, minutes, seconds, ms).ToDisplayString();
+                    var result = new TimeSpan(0, hours, minutes, seconds, ms);
                     return result;
                 }
-
             }
         }
 

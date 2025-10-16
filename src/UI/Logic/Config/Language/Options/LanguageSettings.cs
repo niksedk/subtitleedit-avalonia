@@ -358,7 +358,7 @@ public class LanguageSettings
         ResetSyntaxColoring = "Reset syntax coloring";
         ResetWaveform = "Reset waveform";
         ResetRules = "Reset rules";
-        UseFrameMode = "Use frame mode (HH.MM.SS.FF)";
+        UseFrameMode = "Use frame mode (hh.mm.ss.ff)";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)
