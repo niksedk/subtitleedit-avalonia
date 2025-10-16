@@ -786,7 +786,6 @@ public static class InitListViewAndEditBox
             [!SecondsUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.Duration)}")
             {
                 Mode = BindingMode.TwoWay,
-                Converter = TimeSpanToSecondsConverter.Instance,
             },
             // Add a binding for the background property
             [!SecondsUpDown.BackgroundProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.Duration)}")

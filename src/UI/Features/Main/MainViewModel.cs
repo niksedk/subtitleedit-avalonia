@@ -1793,7 +1793,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<ApplyMinGapWindow , ApplyMinGapViewModel>(Window!,
+        var result = await _windowService.ShowDialogAsync<ApplyMinGapWindow, ApplyMinGapViewModel>(Window!,
             vm => { vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList()); });
 
         if (result.OkPressed)
@@ -7636,13 +7636,13 @@ public partial class MainViewModel :
             return;
         }
 
-        SelectedSubtitle = item;
-        SelectedSubtitleIndex = Subtitles.IndexOf(item);
-        StatusTextRight = $"{Subtitles.IndexOf(item) + 1}/{Subtitles.Count}";
-
         _updateAudioVisualizer = true;
         Dispatcher.UIThread.Post(() =>
         {
+            SelectedSubtitle = item;
+            SelectedSubtitleIndex = Subtitles.IndexOf(item);
+            StatusTextRight = $"{Subtitles.IndexOf(item) + 1}/{Subtitles.Count}";
+
             MakeSubtitleTextInfo(item.Text, item);
             MakeSubtitleTextInfoOriginal(item.OriginalText, item);
         });

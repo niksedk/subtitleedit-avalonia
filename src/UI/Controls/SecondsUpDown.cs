@@ -20,7 +20,8 @@ public class SecondsUpDown : TemplatedControl
     public static readonly StyledProperty<TimeSpan> ValueProperty =
                AvaloniaProperty.Register<SecondsUpDown, TimeSpan>(
                    nameof(Value),
-                   defaultValue: TimeSpan.Zero);
+                   defaultValue: TimeSpan.Zero,
+                   defaultBindingMode: Avalonia.Data.BindingMode.TwoWay);
 
     public TimeSpan Value
     {
@@ -45,7 +46,6 @@ public class SecondsUpDown : TemplatedControl
 
     public SecondsUpDown()
     {
-        // Provide a default template so the control renders without requiring XAML styles
         Template = CreateTemplate();
         this.GetObservable(ValueProperty).Subscribe(_ => UpdateText());
     }
@@ -104,7 +104,9 @@ public class SecondsUpDown : TemplatedControl
         _spinner = e.NameScope.Find<ButtonSpinner>("PART_Spinner");
 
         if (_spinner != null)
+        {
             _spinner.Spin += OnSpin;
+        }
 
         if (_textBox != null)
         {
@@ -146,7 +148,9 @@ public class SecondsUpDown : TemplatedControl
     private void ParseAndUpdate()
     {
         if (_textBox == null)
+        {
             return;
+        }
 
         var parsed = ParseTime(_textBox.Text ?? string.Empty);
         if (parsed != Value)
@@ -209,8 +213,8 @@ public class SecondsUpDown : TemplatedControl
         }
         else
         {
-            // Expect "seconds.ms"
-            if (double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var seconds))
+            // Expect "seconds.ms" or "seconds,ms"
+            if (double.TryParse(text.Replace(',', '.') , NumberStyles.Float, CultureInfo.InvariantCulture, out var seconds))
             {
                 return TimeSpan.FromSeconds(seconds);
             }
@@ -228,6 +232,6 @@ public class SecondsUpDown : TemplatedControl
             return $"{seconds:0}:{frames:00}";
         }
 
-        return ts.TotalSeconds.ToString("0.000", CultureInfo.InvariantCulture);
+        return ts.TotalSeconds.ToString("0.000");
     }
 }
