@@ -780,16 +780,16 @@ public static class InitListViewAndEditBox
             FontWeight = FontWeight.Bold,
         }.WithBindVisible(vm, nameof(vm.ShowUpDownLabels));
         durationPanel.Children.Add(durationLabel);
-        var durationUpDown = new NumericUpDown
+        var durationUpDown = new SecondsUpDown
         {
             DataContext = vm,
-            [!NumericUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.Duration)}")
+            [!SecondsUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.Duration)}")
             {
                 Mode = BindingMode.TwoWay,
                 Converter = TimeSpanToSecondsConverter.Instance,
             },
             // Add a binding for the background property
-            [!NumericUpDown.BackgroundProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.Duration)}")
+            [!SecondsUpDown.BackgroundProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.Duration)}")
             {
                 Converter = DurationToBackgroundConverter.Instance,
             },
@@ -799,7 +799,7 @@ public static class InitListViewAndEditBox
             ToolTip.SetTip(durationUpDown, Se.Language.General.Duration);
         }
         durationUpDown.Bind(NumericUpDown.IsEnabledProperty, new Binding(nameof(vm.LockTimeCodes)) { Mode = BindingMode.TwoWay, Converter = new InverseBooleanConverter() });
-        durationUpDown.ValueChanged += vm.DurationChanged;
+        durationUpDown.PropertyChanged += vm.DurationChanged2;
         durationPanel.Children.Add(durationUpDown);
         timeControlsPanel.Children.Add(durationPanel);
 

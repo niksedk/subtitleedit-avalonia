@@ -8055,7 +8055,8 @@ public partial class MainViewModel :
         _updateAudioVisualizer = true;
     }
 
-    internal void DurationChanged(object? sender, NumericUpDownValueChangedEventArgs e)
+
+    internal void DurationChanged2(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
         _updateAudioVisualizer = true;
 
