@@ -4,10 +4,11 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Input;
 using Avalonia.Layout;
-using System;
-using System.Globalization;
+using Avalonia.Media;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic.Config;
+using System;
+using System.Globalization;
 
 namespace Nikse.SubtitleEdit.Controls;
 
@@ -17,15 +18,27 @@ public class SecondsUpDown : TemplatedControl
     private ButtonSpinner? _spinner;
 
     public static readonly StyledProperty<TimeSpan> ValueProperty =
-        AvaloniaProperty.Register<SecondsUpDown, TimeSpan>(
-            nameof(Value),
-            defaultValue: TimeSpan.Zero,
-            defaultBindingMode: Avalonia.Data.BindingMode.TwoWay);
+               AvaloniaProperty.Register<SecondsUpDown, TimeSpan>(
+                   nameof(Value),
+                   defaultValue: TimeSpan.Zero);
 
     public TimeSpan Value
     {
         get => GetValue(ValueProperty);
-        set => SetValue(ValueProperty, Clamp(value));
+        set
+        {
+            var oldValue = GetValue(ValueProperty);
+            var newValue = Clamp(value);
+
+            SetValue(ValueProperty, newValue);
+            UpdateText();
+
+            // Fire the event if the value actually changed
+            if (oldValue != newValue)
+            {
+                ValueChanged?.Invoke(this, newValue);
+            }
+        }
     }
 
     public event EventHandler<TimeSpan>? ValueChanged;
@@ -51,6 +64,7 @@ public class SecondsUpDown : TemplatedControl
                 HorizontalContentAlignment = HorizontalAlignment.Left,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 Width = double.NaN,
+                BorderBrush = Brushes.Transparent,
             };
 
             var grid = new Grid
