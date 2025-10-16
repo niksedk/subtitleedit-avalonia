@@ -58,6 +58,18 @@ public class ElevenLabsSettingsWindow : Window
         };
         var buttonSpeakerBoost = UiUtil.MakeButton(vm.ShowSpeakerBoostHelpCommand, IconNames.Help);
 
+        var labelSpeed = UiUtil.MakeLabel("Speed");
+        var sliderSpeed = new Slider
+        {
+            Minimum = 0.7,
+            Maximum = 1.2,
+            Value = vm.Speed,
+            Width = 200,
+            Margin = new Thickness(5, 0, 0, 0),
+            [!Slider.ValueProperty] = new Binding(nameof(ElevenLabsSettingsViewModel.Speed)),
+        };
+        var buttonSpeed = UiUtil.MakeButton(vm.ShowSpeedHelpCommand, IconNames.Help);
+
         var buttonWeb = UiUtil.MakeButton("More info", vm.ShowMoreOnWebCommand).WithIconLeft(IconNames.Web);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
@@ -67,6 +79,7 @@ public class ElevenLabsSettingsWindow : Window
         {
             RowDefinitions =
             {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
@@ -97,7 +110,11 @@ public class ElevenLabsSettingsWindow : Window
         grid.Add(sliderSpeakerBoost, 2, 1);
         grid.Add(buttonSpeakerBoost, 2, 2);
 
-        grid.Add(panelButtons, 3, 0, 1, 3);
+        grid.Add(labelSpeed, 3, 0);
+        grid.Add(sliderSpeed, 3, 1);
+        grid.Add(buttonSpeed, 3, 2);
+
+        grid.Add(panelButtons, 4, 0, 1, 3);
 
         Content = grid;
 

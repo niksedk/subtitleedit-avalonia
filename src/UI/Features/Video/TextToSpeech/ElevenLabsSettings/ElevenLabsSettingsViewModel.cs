@@ -14,6 +14,7 @@ public partial class ElevenLabsSettingsViewModel : ObservableObject
     [ObservableProperty] private double _stability;
     [ObservableProperty] private double _similarity;
     [ObservableProperty] private double _speakerBoost;
+    [ObservableProperty] private double _speed;
 
     public Window? Window { get; set; }
 
@@ -24,6 +25,7 @@ public partial class ElevenLabsSettingsViewModel : ObservableObject
         Stability = 0.5;
         Similarity = 0.5;
         SpeakerBoost = 0;
+        Speed = 1.0;
 
         LoadSettings();
     }
@@ -33,6 +35,7 @@ public partial class ElevenLabsSettingsViewModel : ObservableObject
         Stability = Se.Settings.Video.TextToSpeech.ElevenLabsStability;
         Similarity = Se.Settings.Video.TextToSpeech.ElevenLabsSimilarity;
         SpeakerBoost = Se.Settings.Video.TextToSpeech.ElevenLabsSpeakerBoost;
+        Speed = Se.Settings.Video.TextToSpeech.ElevenLabsSpeed;
     }
 
     public void SaveSettings()
@@ -40,6 +43,7 @@ public partial class ElevenLabsSettingsViewModel : ObservableObject
         Se.Settings.Video.TextToSpeech.ElevenLabsStability = Stability;
         Se.Settings.Video.TextToSpeech.ElevenLabsSimilarity = Similarity;
         Se.Settings.Video.TextToSpeech.ElevenLabsSpeakerBoost = SpeakerBoost;
+        Se.Settings.Video.TextToSpeech.ElevenLabsSpeed = Speed;
         Se.SaveSettings();
     }
 
@@ -59,6 +63,12 @@ public partial class ElevenLabsSettingsViewModel : ObservableObject
     private async Task ShowSpeakerBoostHelp()
     {
         await ShowSpeakerBoostHelp(Window!);
+    }
+
+    [RelayCommand]
+    private async Task ShowSpeedHelp()
+    {
+        await ShowSpeedHelp(Window!);
     }
 
     [RelayCommand]
@@ -94,6 +104,10 @@ public partial class ElevenLabsSettingsViewModel : ObservableObject
     public static async Task ShowSpeakerBoostHelp(Window window)
     {
         await MessageBox.Show(window, "Info", "Boosts the similarity to the original speaker. However, using this setting requires a slightly higher computational load, which in turn increases latency. The differences introduced by this setting are generally rather subtle.", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
+    public static async Task ShowSpeedHelp(Window window)
+    {
+        await MessageBox.Show(window, "Info", "Adjusts the speed of the generated speech. A value of 1.0 represents the normal speed. Values greater than 1.0 will make the speech faster, while values less than 1.0 will slow it down. Values from 0.7 to 1.2 are allowed.", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
     internal void OnKeyDown(KeyEventArgs e)

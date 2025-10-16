@@ -164,7 +164,7 @@ public class ReviewSpeechWindow : Window
 
         grid.Add(dataGrid, 0, 0);
         grid.Add(textBox, 1, 0);
-       
+
         return UiUtil.MakeBorderForControl(grid);
     }
 
@@ -388,7 +388,7 @@ public class ReviewSpeechWindow : Window
             ColumnSpacing = 10,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
-            [!Grid.IsVisibleProperty] = new Binding(nameof(vm.IsElevelLabsControlsVisible)) { Mode = BindingMode.OneWay },
+            [!Grid.IsVisibleProperty] = new Binding(nameof(vm.IsElevenLabsControlsVisible)) { Mode = BindingMode.OneWay },
         };
 
         grid.Add(labelStability, 0, 0);
@@ -411,7 +411,7 @@ public class ReviewSpeechWindow : Window
         return new Border
         {
             Margin = new Thickness(2),
-//          Child = new TextBlock { Text = "Waveform placeholder" } // Placeholder for waveform control
+            //          Child = new TextBlock { Text = "Waveform placeholder" } // Placeholder for waveform control
         };
     }
 

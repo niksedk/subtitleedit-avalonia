@@ -44,13 +44,14 @@ public partial class ReviewSpeechViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<ReviewRow> _lines;
     [ObservableProperty] private ReviewRow? _selectedLine;
     [ObservableProperty] private bool _isRegenerateEnabled;
-    [ObservableProperty] private bool _isElevelLabsControlsVisible;
+    [ObservableProperty] private bool _isElevenLabsControlsVisible;
     [ObservableProperty] private bool _autoContinue;
     [ObservableProperty] private bool _isPlayVisible;
     [ObservableProperty] private bool _isStopVisible;
     [ObservableProperty] private double _stability;
     [ObservableProperty] private double _similarity;
     [ObservableProperty] private double _speakerBoost;
+    [ObservableProperty] private double _speed;
 
     public Window? Window { get; set; }
     public DataGrid LineGrid { get; internal set; }
@@ -89,6 +90,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
         Stability = Se.Settings.Video.TextToSpeech.ElevenLabsStability;
         Similarity = Se.Settings.Video.TextToSpeech.ElevenLabsSimilarity;
         SpeakerBoost = Se.Settings.Video.TextToSpeech.ElevenLabsSpeakerBoost;
+        Speed = Se.Settings.Video.TextToSpeech.ElevenLabsSpeed;
 
         IsPlayVisible = true;
         _videoFileName = string.Empty;
@@ -318,6 +320,13 @@ public partial class ReviewSpeechViewModel : ObservableObject
     {
         await ElevenLabsSettingsViewModel.ShowSpeakerBoostHelp(Window!);
     }
+
+    [RelayCommand]
+    private async Task ShowSpeedHelp()
+    {
+        await ElevenLabsSettingsViewModel.ShowSpeedHelp(Window!);
+    }
+
 
     [RelayCommand]
     private async Task RegenerateAudio()
@@ -609,7 +618,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
                 SelectedModel = Models.FirstOrDefault();
             }
 
-            IsElevelLabsControlsVisible = false;
+            IsElevenLabsControlsVisible = false;
             if (engine is AzureSpeech)
             {
                 SelectedRegion = Se.Settings.Video.TextToSpeech.AzureRegion;
@@ -620,7 +629,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
             }
             else if (engine is ElevenLabs)
             {
-                IsElevelLabsControlsVisible = true;
+                IsElevenLabsControlsVisible = true;
                 SelectedModel = Se.Settings.Video.TextToSpeech.ElevenLabsModel;
                 if (string.IsNullOrEmpty(SelectedModel))
                 {
