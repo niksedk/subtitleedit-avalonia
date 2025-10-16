@@ -7,6 +7,9 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using System;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Controls
 {
@@ -243,7 +246,16 @@ namespace Nikse.SubtitleEdit.Controls
             }
             else
             {
-                newVal = newVal.Add(TimeSpan.FromMilliseconds(delta));
+                if (Se.Settings.General.UseFrameMode)
+                {
+                    //TODO: align to nearest frame before adjusting?
+                    var ms = SubtitleFormat.FramesToMilliseconds(delta);
+                    newVal = newVal.Add(TimeSpan.FromMilliseconds(ms));
+                }
+                else
+                {
+                    newVal = newVal.Add(TimeSpan.FromMilliseconds(delta));
+                }
             }
 
             Value = newVal;
@@ -260,17 +272,22 @@ namespace Nikse.SubtitleEdit.Controls
 
         private string FormatTime(TimeSpan time)
         {
-            var hours = time.TotalHours;
-            if (hours > 99)
+            TimeCode tc;
+            if (time.TotalHours > 99)
             {
-                hours = 99;
+                tc = new TimeCode(99, time.Minutes, time.Seconds, time.Milliseconds);
             }
             else
             {
-                hours = time.Hours;
+                tc = new TimeCode(time.Hours, time.Minutes, time.Seconds, time.Milliseconds);
             }
 
-            return $"{hours:00}:{time.Minutes:00}:{time.Seconds:00}:{time.Milliseconds:000}";
+            if (Se.Settings.General.UseFrameMode)
+            {
+                return tc.ToHHMMSSFF();
+            }
+
+            return tc.ToString();
         }
 
         private TimeSpan Clamp(TimeSpan time)
