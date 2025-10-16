@@ -8,6 +8,8 @@ public class LanguageBridgeGaps
     public string NumberOfSmallGapsBridgedX { get; set; }
     public string PercentFoPrevious { get; set; }
     public string GapChange { get; set; }
+    public string MinFramesBetweenLines { get; set; }
+    public string MinMsBetweenLines { get; set; }
 
     public LanguageBridgeGaps()
     {
@@ -17,5 +19,7 @@ public class LanguageBridgeGaps
         NumberOfSmallGapsBridgedX = "Number of small gaps bridged: {0}";
         PercentFoPrevious = "Gap for previous (%)";
         GapChange = "Gap change";
+        MinFramesBetweenLines = "Minimum frames between lines";
+        MinMsBetweenLines = "Minimum milliseconds between lines";
     }
 }

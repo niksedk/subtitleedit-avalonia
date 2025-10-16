@@ -18,6 +18,7 @@ public partial class ApplyMinGapViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<ApplyMinGapItem> _subtitles;
     [ObservableProperty] private ApplyMinGapItem? _selectedSubtitle;
+    [ObservableProperty] private string _minXBetweenLines;
     [ObservableProperty] private int _bridgeGapsSmallerThanMs;
     [ObservableProperty] private int _minGapMs;
     [ObservableProperty] private int _percentForLeft;
@@ -41,6 +42,15 @@ public partial class ApplyMinGapViewModel : ObservableObject
         MinGapMs = 10;
         StatusText = string.Empty;
         _dic = new Dictionary<string, string>();
+
+        if (Se.Settings.General.UseFrameMode)
+        {
+            MinXBetweenLines = Se.Language.Tools.BridgeGaps.MinFramesBetweenLines;
+        }
+        else
+        {
+            MinXBetweenLines = Se.Language.Tools.BridgeGaps.MinMsBetweenLines;
+        }
 
         LoadSettings();
 
