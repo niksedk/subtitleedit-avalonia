@@ -27,7 +27,7 @@ public class ApplyMinGapWindow : Window
         DataContext = vm;
 
         var labelMinXBetweenLines = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.MinXBetweenLines));
-        var numericUpDownMinGap = UiUtil.MakeNumericUpDownInt(0, 1000, Se.Settings.Tools.BridgeGaps.MinGapMs, 130, vm, nameof(vm.MinGapMs));
+        var numericUpDownMinGap = UiUtil.MakeNumericUpDownInt(0, 1000, Se.Settings.Tools.BridgeGaps.MinGapMs, 130, vm, nameof(vm.MinGapMsOrFrames));
         numericUpDownMinGap.ValueChanged += vm.ValueChanged;
 
         var panelControls = UiUtil.MakeHorizontalPanel(labelMinXBetweenLines, numericUpDownMinGap);
@@ -44,7 +44,7 @@ public class ApplyMinGapWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Bridge gap smaller than
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Min gap
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // Subtitle view
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Buttons
             },
@@ -69,7 +69,7 @@ public class ApplyMinGapWindow : Window
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 
-    private Border MakeSubtitleView(ApplyMinGapViewModel vm)
+    private static Border MakeSubtitleView(ApplyMinGapViewModel vm)
     {
         var fullTimeConverter = new TimeSpanToDisplayFullConverter();
         var shortTimeConverter = new TimeSpanToDisplayShortConverter();
@@ -122,14 +122,13 @@ public class ApplyMinGapWindow : Window
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(ApplyMinGapItem.InfoText)),
                     IsReadOnly = true,
-                    Width = new DataGridLength(120),
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
             },
         };
 
         return UiUtil.MakeBorderForControlNoPadding(dataGridSubtitle);
     }
-
 
     protected override void OnKeyDown(KeyEventArgs e)
     {

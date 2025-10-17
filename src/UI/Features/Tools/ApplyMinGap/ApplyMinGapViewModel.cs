@@ -1,3 +1,4 @@
+using System;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
@@ -19,7 +20,7 @@ public partial class ApplyMinGapViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<ApplyMinGapItem> _subtitles;
     [ObservableProperty] private ApplyMinGapItem? _selectedSubtitle;
     [ObservableProperty] private string _minXBetweenLines;
-    [ObservableProperty] private int _minGapMs;
+    [ObservableProperty] private int _minGapMsOrFrames;
     [ObservableProperty] private string _statusText;
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _allSubtitles;
 
@@ -29,15 +30,13 @@ public partial class ApplyMinGapViewModel : ObservableObject
 
     private readonly System.Timers.Timer _timerUpdatePreview;
     private bool _dirty;
-    private Dictionary<string, string> _dic;
 
     public ApplyMinGapViewModel()
     {
         Subtitles = new ObservableCollection<ApplyMinGapItem>();
         AllSubtitles = new ObservableCollection<SubtitleLineViewModel>();
-        MinGapMs = 10;
+        MinGapMsOrFrames = 10;
         StatusText = string.Empty;
-        _dic = new Dictionary<string, string>();
 
         if (Se.Settings.General.UseFrameMode)
         {
@@ -65,48 +64,42 @@ public partial class ApplyMinGapViewModel : ObservableObject
 
     private void UpdatePreview()
     {
-        _dic = new Dictionary<string, string>();
-        var fixedIndexes = new List<int>(Subtitles.Count);
-        var minMsBetweenLines = MinGapMs;
+        var minMsBetweenLines = MinGapMsOrFrames;
         if (Configuration.Settings.General.UseTimeFormatHHMMSSFF)
         {
             minMsBetweenLines = SubtitleFormat.FramesToMilliseconds(minMsBetweenLines);
         }
 
         var allSubtitles = new ObservableCollection<SubtitleLineViewModel>(AllSubtitles.Select(p => new SubtitleLineViewModel(p)));
-        var fixedCount = 0;
 
         Dispatcher.UIThread.Post(() =>
         {
             Subtitles.Clear();
-            foreach (var v in allSubtitles)
+            var fixedCount = 0;
+            for (var index = 0; index < allSubtitles.Count-1; index++)
             {
-                var vm = new ApplyMinGapItem(v);
-                Subtitles.Add(vm);
-            }
-
-            for (var i = 0; i < Subtitles.Count - 1; i++)
-            {
-                var cur = Subtitles[i];
-                if (_dic.ContainsKey(cur.SubtitleLineViewModel.Id.ToString()))
+                var current = allSubtitles[index];
+                var next = allSubtitles[index + 1];
+                var gapMs = next.StartTime.TotalMilliseconds - current.EndTime.TotalMilliseconds;
+                if (gapMs < minMsBetweenLines)
                 {
-                    cur.InfoText = _dic[cur.SubtitleLineViewModel.Id.ToString()];
-                }
-                else
-                {
-                    var info = string.Empty;
-                    var next = Subtitles[i + 1];
-                    if (next != null)
-                    {
-                        var gap = next.StartTime.TotalMilliseconds - cur.EndTime.TotalMilliseconds;
-                        info = $"{gap / TimeCode.BaseUnit:0.000}";
-                        if (Configuration.Settings.General.UseTimeFormatHHMMSSFF)
-                        {
-                            info = $"{SubtitleFormat.MillisecondsToFrames(gap)}";
-                        }
-                    }
-                }
+                    fixedCount++;
+                    var vm = new ApplyMinGapItem(current);
+                    
+                    var before = new TimeCode(gapMs).ToShortDisplayString();
+                    
+                    var newEndStartMs = current.EndTime.TotalMilliseconds - minMsBetweenLines;
+                    next.StartTime = TimeSpan.FromMilliseconds(newNextStartMs);
+                    var newGapMs = next.StartTime.TotalMilliseconds - current.EndTime.TotalMilliseconds;
 
+                    var after = new TimeCode(newGapMs).ToShortDisplayString();
+                    var fixFormat = Se.Language.Tools.ApplyMinGaps.ChangedGapFromXToYCommentZ;
+                    var comment = string.Empty;
+                    var info = string.Format(fixFormat, before, after, comment);
+
+                    vm.InfoText = info; 
+                    Subtitles.Add(vm);
+                }
             }
 
             StatusText = string.Format(Se.Language.Tools.ApplyMinGaps.NumberOfGapsFixedX, fixedCount);
@@ -123,7 +116,14 @@ public partial class ApplyMinGapViewModel : ObservableObject
 
     private void LoadSettings()
     {
-        MinGapMs = Se.Settings.General.MinimumMillisecondsBetweenLines;
+        if (Se.Settings.General.UseFrameMode)
+        {
+            MinGapMsOrFrames = SubtitleFormat.MillisecondsToFrames(Se.Settings.General.MinimumMillisecondsBetweenLines);
+        }
+        else
+        {
+            MinGapMsOrFrames = Se.Settings.General.MinimumMillisecondsBetweenLines;
+        }
     }
 
     private void SaveSettings()

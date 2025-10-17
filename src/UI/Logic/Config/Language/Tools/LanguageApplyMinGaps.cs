@@ -8,6 +8,7 @@ public class LanguageApplyMinGaps
     public string NumberOfGapsFixedX { get; set; }
     public string MinFramesBetweenLines { get; set; }
     public string MinMsBetweenLines { get; set; }
+    public string ChangedGapFromXToYCommentZ { get; set; }
 
     public LanguageApplyMinGaps()
     {
@@ -15,5 +16,6 @@ public class LanguageApplyMinGaps
         NumberOfGapsFixedX = "Number of minimum gaps applied: {0}";
         MinFramesBetweenLines = "Minimum frames between lines";
         MinMsBetweenLines = "Minimum milliseconds between lines";
+        ChangedGapFromXToYCommentZ = "Changed gap from {0} to {1} {2}";
     }
 }
