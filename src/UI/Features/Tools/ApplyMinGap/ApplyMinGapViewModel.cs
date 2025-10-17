@@ -19,9 +19,7 @@ public partial class ApplyMinGapViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<ApplyMinGapItem> _subtitles;
     [ObservableProperty] private ApplyMinGapItem? _selectedSubtitle;
     [ObservableProperty] private string _minXBetweenLines;
-    [ObservableProperty] private int _bridgeGapsSmallerThanMs;
     [ObservableProperty] private int _minGapMs;
-    [ObservableProperty] private int _percentForLeft;
     [ObservableProperty] private string _statusText;
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _allSubtitles;
 
@@ -33,23 +31,21 @@ public partial class ApplyMinGapViewModel : ObservableObject
     private bool _dirty;
     private Dictionary<string, string> _dic;
 
-
     public ApplyMinGapViewModel()
     {
         Subtitles = new ObservableCollection<ApplyMinGapItem>();
         AllSubtitles = new ObservableCollection<SubtitleLineViewModel>();
-        BridgeGapsSmallerThanMs = 500;
         MinGapMs = 10;
         StatusText = string.Empty;
         _dic = new Dictionary<string, string>();
 
         if (Se.Settings.General.UseFrameMode)
         {
-            MinXBetweenLines = Se.Language.Tools.BridgeGaps.MinFramesBetweenLines;
+            MinXBetweenLines = Se.Language.Tools.ApplyMinGaps.MinFramesBetweenLines;
         }
         else
         {
-            MinXBetweenLines = Se.Language.Tools.BridgeGaps.MinMsBetweenLines;
+            MinXBetweenLines = Se.Language.Tools.ApplyMinGaps.MinMsBetweenLines;
         }
 
         LoadSettings();
@@ -72,15 +68,13 @@ public partial class ApplyMinGapViewModel : ObservableObject
         _dic = new Dictionary<string, string>();
         var fixedIndexes = new List<int>(Subtitles.Count);
         var minMsBetweenLines = MinGapMs;
-        var maxMs = BridgeGapsSmallerThanMs;
         if (Configuration.Settings.General.UseTimeFormatHHMMSSFF)
         {
             minMsBetweenLines = SubtitleFormat.FramesToMilliseconds(minMsBetweenLines);
-            maxMs = SubtitleFormat.FramesToMilliseconds(maxMs);
         }
 
         var allSubtitles = new ObservableCollection<SubtitleLineViewModel>(AllSubtitles.Select(p => new SubtitleLineViewModel(p)));
-        var fixedCount = DurationsBridgeGaps2.BridgeGaps(allSubtitles, minMsBetweenLines, PercentForLeft, maxMs, fixedIndexes, _dic, Configuration.Settings.General.UseTimeFormatHHMMSSFF);
+        var fixedCount = 0;
 
         Dispatcher.UIThread.Post(() =>
         {
@@ -115,7 +109,7 @@ public partial class ApplyMinGapViewModel : ObservableObject
 
             }
 
-            StatusText = string.Format(Se.Language.Tools.BridgeGaps.NumberOfSmallGapsBridgedX, fixedCount);
+            StatusText = string.Format(Se.Language.Tools.ApplyMinGaps.NumberOfGapsFixedX, fixedCount);
         });
     }
 
@@ -129,17 +123,11 @@ public partial class ApplyMinGapViewModel : ObservableObject
 
     private void LoadSettings()
     {
-        BridgeGapsSmallerThanMs = Se.Settings.Tools.BridgeGaps.BridgeGapsSmallerThanMs;
-        MinGapMs = Se.Settings.Tools.BridgeGaps.MinGapMs;
-        PercentForLeft = Se.Settings.Tools.BridgeGaps.PercentForLeft;
+        MinGapMs = Se.Settings.General.MinimumMillisecondsBetweenLines;
     }
 
     private void SaveSettings()
     {
-        Se.Settings.Tools.BridgeGaps.BridgeGapsSmallerThanMs = BridgeGapsSmallerThanMs;
-        Se.Settings.Tools.BridgeGaps.MinGapMs = MinGapMs;
-        Se.Settings.Tools.BridgeGaps.PercentForLeft = PercentForLeft;
-
         Se.SaveSettings();
     }
 
