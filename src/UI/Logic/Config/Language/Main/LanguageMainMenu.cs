@@ -45,6 +45,7 @@ public class LanguageMainMenu
     public string MakeEmptyTranslationFromCurrentSubtitle { get; set; }
     public string MergeLinesWithSameText { get; set; }
     public string MergeLinesWithSameTimeCodes { get; set; }
+    public string SplitBreakLongLines { get; set; }
     public string RemoveTextForHearingImpaired { get; set; }
     public string JoinSubtitles { get; set; }
     public string SplitSubtitle { get; set; }
@@ -129,6 +130,7 @@ public class LanguageMainMenu
         MakeEmptyTranslationFromCurrentSubtitle = "Make new _empty translation from current subtitle";
         MergeLinesWithSameText = "_Merge lines with same text...";
         MergeLinesWithSameTimeCodes = "Merge lines with same time codes...";
+        SplitBreakLongLines = "Split/rebalance long lines...";
         RemoveTextForHearingImpaired = "_Remove text for hearing impaired...";
         ChangeCasing = "_Change casing...";
         BridgeGaps = "Bridge _gaps...";

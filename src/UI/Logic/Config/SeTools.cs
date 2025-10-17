@@ -30,6 +30,8 @@ public class SeTools
     public string SplitSubtitleFormat { get; set; }
     public string? SplitSubtitleEncoding { get; set; }
     public bool GoToLineNumberAlsoSetVideoPosition { get; set; }
+    public bool SplitRebalanceLongLinesSplit { get; set; }
+    public bool SplitRebalanceLongLinesRebalance { get; set; }
 
     public SeTools()
     {
@@ -44,5 +46,7 @@ public class SeTools
         SplitOutputFolder = string.Empty;
         SplitSubtitleFormat = new SubRip().Name;
         GoToLineNumberAlsoSetVideoPosition = true;
+        SplitRebalanceLongLinesSplit = true;
+        SplitRebalanceLongLinesRebalance = true;
     }
 }

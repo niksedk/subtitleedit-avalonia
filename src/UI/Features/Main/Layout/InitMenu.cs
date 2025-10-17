@@ -320,6 +320,11 @@ public static class InitMenu
             },
             new MenuItem
             {
+                Header = l.SplitBreakLongLines,
+                Command = vm.ShowToolsSplitBreakLongLinesCommand,
+            },
+            new MenuItem
+            {
                 Header = l.RemoveTextForHearingImpaired,
                 Command = vm.ShowToolsRemoveTextForHearingImpairedCommand,
             },

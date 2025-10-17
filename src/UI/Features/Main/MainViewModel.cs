@@ -72,6 +72,7 @@ using Nikse.SubtitleEdit.Features.Tools.JoinSubtitles;
 using Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameText;
 using Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameTimeCodes;
 using Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
+using Nikse.SubtitleEdit.Features.Tools.SplitBreakLongLines;
 using Nikse.SubtitleEdit.Features.Tools.SplitSubtitle;
 using Nikse.SubtitleEdit.Features.Translate;
 using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
@@ -1881,6 +1882,38 @@ public partial class MainViewModel :
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         });
+    }
+
+    
+ [RelayCommand]
+    private async Task ShowToolsSplitBreakLongLines()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
+        var result = await _windowService
+            .ShowDialogAsync<SplitBreakLongLinesWindow, SplitBreakLongLinesViewModel>(
+                Window!, vm => 
+                { 
+                    vm.Initialize(Subtitles.ToList(), AudioVisualizer?.ShotChanges ?? new List<double>());
+                });
+
+        if (result.OkPressed)
+        {
+            Subtitles.Clear();
+            Subtitles.AddRange(result.AllSubtitlesFixed);
+            SelectAndScrollToRow(0);
+        }
+
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
