@@ -69,6 +69,7 @@ using Nikse.SubtitleEdit.Features.Tools.BridgeGaps;
 using Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
 using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 using Nikse.SubtitleEdit.Features.Tools.JoinSubtitles;
+using Nikse.SubtitleEdit.Features.Tools.MergeShortLines;
 using Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameText;
 using Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameTimeCodes;
 using Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
@@ -1884,8 +1885,8 @@ public partial class MainViewModel :
         });
     }
 
-    
- [RelayCommand]
+
+    [RelayCommand]
     private async Task ShowToolsSplitBreakLongLines()
     {
         if (Window == null)
@@ -1901,8 +1902,41 @@ public partial class MainViewModel :
 
         var result = await _windowService
             .ShowDialogAsync<SplitBreakLongLinesWindow, SplitBreakLongLinesViewModel>(
-                Window!, vm => 
-                { 
+                Window!, vm =>
+                {
+                    vm.Initialize(Subtitles.ToList(), AudioVisualizer?.ShotChanges ?? new List<double>());
+                });
+
+        if (result.OkPressed)
+        {
+            Subtitles.Clear();
+            Subtitles.AddRange(result.AllSubtitlesFixed);
+            SelectAndScrollToRow(0);
+            _updateAudioVisualizer = true;
+            _mpvReloader.Reset();
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowToolsMergeShortLines()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
+        var result = await _windowService
+            .ShowDialogAsync<MergeShortLinesWindow, MergeShortLinesViewModel>(
+                Window!, vm =>
+                {
                     vm.Initialize(Subtitles.ToList(), AudioVisualizer?.ShotChanges ?? new List<double>());
                 });
 

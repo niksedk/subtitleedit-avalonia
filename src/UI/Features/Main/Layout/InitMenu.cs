@@ -325,6 +325,11 @@ public static class InitMenu
             },
             new MenuItem
             {
+                Header = l.MergeShortLines,
+                Command = vm.ShowToolsMergeShortLinesCommand,
+            },
+            new MenuItem
+            {
                 Header = l.RemoveTextForHearingImpaired,
                 Command = vm.ShowToolsRemoveTextForHearingImpairedCommand,
             },

@@ -59,6 +59,7 @@ using Nikse.SubtitleEdit.Features.Tools.BridgeGaps;
 using Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
 using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 using Nikse.SubtitleEdit.Features.Tools.JoinSubtitles;
+using Nikse.SubtitleEdit.Features.Tools.MergeShortLines;
 using Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameText;
 using Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameTimeCodes;
 using Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
@@ -203,6 +204,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<ManualChosenEncodingViewModel>();
         collection.AddTransient<MergeSameTextViewModel>();
         collection.AddTransient<MergeSameTimeCodesViewModel>();
+        collection.AddTransient<MergeShortLinesViewModel>();
         collection.AddTransient<ModifySelectionViewModel>();
         collection.AddTransient<MultipleReplaceViewModel>();
         collection.AddTransient<NOcrCharacterAddViewModel>();

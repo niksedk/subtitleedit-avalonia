@@ -46,6 +46,7 @@ public class LanguageMainMenu
     public string MergeLinesWithSameText { get; set; }
     public string MergeLinesWithSameTimeCodes { get; set; }
     public string SplitBreakLongLines { get; set; }
+    public string MergeShortLines { get; internal set; }
     public string RemoveTextForHearingImpaired { get; set; }
     public string JoinSubtitles { get; set; }
     public string SplitSubtitle { get; set; }
@@ -131,6 +132,7 @@ public class LanguageMainMenu
         MergeLinesWithSameText = "_Merge lines with same text...";
         MergeLinesWithSameTimeCodes = "Merge lines with same time codes...";
         SplitBreakLongLines = "Split/rebalance long lines...";
+        MergeShortLines = "Merge short lines...";
         RemoveTextForHearingImpaired = "_Remove text for hearing impaired...";
         ChangeCasing = "_Change casing...";
         BridgeGaps = "Bridge _gaps...";

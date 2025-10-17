@@ -12,6 +12,7 @@ public class LanguageTools
     public LanguageJoinSubtitles JoinSubtitles { get; set; } = new();
     public LanguageSplitSubtitle SplitSubtitle { get; set; } = new();
     public LanguageSplitBreakLongLines SplitBreakLongLines { get; set; } = new();
+    public LanguageMergeShortLines MergeShortLines { get; set; } = new();
     public LanguageMergeLineswithSameText MergeLinesWithSameText { get; set; } = new();
     public LanguageMergeLineswithSameTimeCodes MergeLinesWithSameTimeCodes { get; set; } = new();
     public string PickAlignmentTitle { get; set; }
