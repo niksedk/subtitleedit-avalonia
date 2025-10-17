@@ -5,10 +5,11 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Engines;
+using Nikse.SubtitleEdit.Features.Video.TextToSpeech.VoiceSettings;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.VoiceSettings;
+namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.ReviewSpeech;
 
 public class ReviewSpeechWindow : Window
 {
@@ -65,6 +66,7 @@ public class ReviewSpeechWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        Loaded += delegate { vm.SelectedEngineChanged(); };
     }
 
     private Border MakeDataGrid(ReviewSpeechViewModel vm)
@@ -85,42 +87,42 @@ public class ReviewSpeechWindow : Window
             {
                 new DataGridCheckBoxColumn
                 {
-                    Header = "Include",
+                    Header = Se.Language.General.Include,
                     Binding = new Binding(nameof(ReviewRow.Include)),
                     Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
                     CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "#",
+                    Header = Se.Language.General.NumberSymbol,
                     Binding = new Binding(nameof(ReviewRow.Number)),
                     Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
                     CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Voice",
+                    Header = Se.Language.General.Voice,
                     Binding = new Binding(nameof(ReviewRow.Voice)),
                     Width = new DataGridLength(3, DataGridLengthUnitType.Auto),
                     CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Char/sec",
+                    Header = Se.Language.General.CharsPerSec,
                     Binding = new Binding(nameof(ReviewRow.Cps)),
                     Width = new DataGridLength(3, DataGridLengthUnitType.Auto),
                     CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Speed",
+                    Header = Se.Language.General.Speed,
                     Binding = new Binding(nameof(ReviewRow.Speed)),
                     Width = new DataGridLength(3, DataGridLengthUnitType.Auto),
                     CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {
-                    Header = "Text",
+                    Header = Se.Language.General.Text,
                     Binding = new Binding(nameof(ReviewRow.Text)),
                     Width = new DataGridLength(3, DataGridLengthUnitType.Auto),
                     CellTheme = UiUtil.DataGridNoBorderCellTheme,
@@ -184,7 +186,7 @@ public class ReviewSpeechWindow : Window
             {
                 new Label
                 {
-                    Content = "Engine",
+                    Content = Se.Language.General.Engine,
                     MinWidth = labelMinWidth,
                 },
                 comboBoxEngines,
@@ -199,7 +201,7 @@ public class ReviewSpeechWindow : Window
             {
                 new Label
                 {
-                    Content = "Voice",
+                    Content = Se.Language.General.Voice,
                     MinWidth = labelMinWidth,
                 },
                 UiUtil.MakeComboBox(vm.Voices, vm, nameof(vm.SelectedVoice)).WithWidth(controlMinWidth),
@@ -215,7 +217,7 @@ public class ReviewSpeechWindow : Window
             {
                 new Label
                 {
-                    Content = "Model",
+                    Content = Se.Language.General.Model,
                     MinWidth = labelMinWidth,
                 },
                 comboBoxModels,
@@ -232,7 +234,7 @@ public class ReviewSpeechWindow : Window
             {
                 new Label
                 {
-                    Content = "Region",
+                    Content = Se.Language.General.Region,
                     MinWidth = labelMinWidth,
                 },
                 UiUtil.MakeComboBox(vm.Regions, vm, nameof(vm.SelectedRegion)).WithWidth(controlMinWidth),
@@ -249,7 +251,7 @@ public class ReviewSpeechWindow : Window
             {
                 new Label
                 {
-                    Content = "Language",
+                    Content = Se.Language.General.Language,
                     MinWidth = labelMinWidth,
                 },
                 comboBoxLanguages,
@@ -282,7 +284,7 @@ public class ReviewSpeechWindow : Window
 
         var buttonStop = new Button
         {
-            Content = "Stop",
+            Content = Se.Language.General.Stop,
             Command = vm.StopCommand,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             Width = double.NaN,
@@ -370,10 +372,22 @@ public class ReviewSpeechWindow : Window
         };
         var buttonSpeakerBoost = UiUtil.MakeButton(vm.ShowSpeakerBoostHelpCommand, IconNames.Help);
 
+        var labelSpeed = UiUtil.MakeLabel(Se.Language.General.Speed);
+        var sliderSpeed = new Slider
+        {
+            Minimum = 0.7,
+            Maximum = 1.2,
+            Value = vm.Speed,
+            Width = 200,
+            [!Slider.ValueProperty] = new Binding(nameof(vm.Speed)),
+        };
+        var buttonSpeed = UiUtil.MakeButton(vm.ShowSpeedHelpCommand, IconNames.Help);
+
         var grid = new Grid
         {
             RowDefinitions =
             {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
@@ -402,6 +416,10 @@ public class ReviewSpeechWindow : Window
         grid.Add(labelSpeakerBoost, 2, 0);
         grid.Add(sliderSpeakerBoost, 2, 1);
         grid.Add(buttonSpeakerBoost, 2, 2);
+
+        grid.Add(labelSpeed, 3, 0);
+        grid.Add(sliderSpeed, 3, 1);
+        grid.Add(buttonSpeed, 3, 2);
 
         return grid;
     }

@@ -433,6 +433,9 @@ public class LanguageGeneral
     public string Spacing { get; set; }
     public string Fix { get; set; }
     public string Category { get; set; }
+    public string Include { get; set; }
+    public string Voice { get; set; }
+    public string Stop { get; set; }
 
     public LanguageGeneral()
     {
@@ -864,5 +867,8 @@ public class LanguageGeneral
         Spacing = "Spacing";
         Fix = "Fix";
         Category = "Category";
+        Include = "Include";
+        Voice =  "Voice";
+        Stop = "Stop";
     }
 }

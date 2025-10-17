@@ -1,7 +1,7 @@
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech;
+namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.ReviewSpeech;
 
 public partial class ReviewRow : ObservableObject
 {

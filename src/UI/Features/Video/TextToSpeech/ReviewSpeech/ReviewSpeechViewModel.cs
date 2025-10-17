@@ -1,3 +1,13 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Timers;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
@@ -12,20 +22,10 @@ using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Voices;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Timers;
 using ElevenLabsSettingsViewModel = Nikse.SubtitleEdit.Features.Video.TextToSpeech.ElevenLabsSettings.ElevenLabsSettingsViewModel;
 using Timer = System.Timers.Timer;
 
-namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.VoiceSettings;
+namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.ReviewSpeech;
 
 public partial class ReviewSpeechViewModel : ObservableObject
 {
@@ -121,7 +121,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
             var timeSinceStart = TimeSpan.FromTicks(DateTime.UtcNow.Ticks - _startPlayTicks);
             if (paused && AutoContinue && !_skipAutoContinue && line != null && timeSinceStart.TotalMilliseconds > 500)
             {
-                Dispatcher.UIThread.Invoke(async () =>
+                Dispatcher.UIThread.Invoke<Task>(async () =>
                 {
                     var index = Lines.IndexOf(line);
                     if (index < Lines.Count - 1)
@@ -187,13 +187,13 @@ public partial class ReviewSpeechViewModel : ObservableObject
             });
         }
 
-        Engines.AddRange(engines);
+        ObservableCollectionExtensions.AddRange(Engines, engines);
         SelectedEngine = engine;
 
-        Voices.AddRange(voices);
+        ObservableCollectionExtensions.AddRange(Voices, voices);
         SelectedVoice = voice;
 
-        Languages.AddRange(languages);
+        ObservableCollectionExtensions.AddRange(Languages, languages);
         SelectedLanguage = language;
 
         _videoFileName = videoFileName;
@@ -261,7 +261,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
         {
             index++;
             var sourceFileName = line.StepResult.CurrentFileName;
-            var targetFileName = Path.Combine(folder, index.ToString().PadLeft(4, '0') + Path.GetExtension(sourceFileName));
+            var targetFileName = Path.Combine(folder, index.ToString().PadLeft(4, '0') + Path.GetExtension((string?)sourceFileName));
 
             if (File.Exists(targetFileName))
             {
@@ -286,8 +286,8 @@ public partial class ReviewSpeechViewModel : ObservableObject
             exportFormat.Items.Add(new TtsImportExportItem
             {
                 AudioFileName = targetFileName,
-                StartMs = (long)Math.Round(line.StepResult.Paragraph.StartTime.TotalMilliseconds, MidpointRounding.AwayFromZero),
-                EndMs = (long)Math.Round(line.StepResult.Paragraph.EndTime.TotalMilliseconds, MidpointRounding.AwayFromZero),
+                StartMs = (long)Math.Round((double)line.StepResult.Paragraph.StartTime.TotalMilliseconds, MidpointRounding.AwayFromZero),
+                EndMs = (long)Math.Round((double)line.StepResult.Paragraph.EndTime.TotalMilliseconds, MidpointRounding.AwayFromZero),
                 VoiceName = line.StepResult.Voice?.Name ?? string.Empty,
                 EngineName = SelectedEngine != null ? SelectedEngine.ToString() : string.Empty,
                 SpeedFactor = line.StepResult.SpeedFactor,
@@ -451,7 +451,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
             });
         }
 
-        StepResults = Lines.Where(p => p.Include).Select(p => p.StepResult).ToArray();
+        StepResults = Enumerable.Where<ReviewRow>(Lines, p => p.Include).Select(p => p.StepResult).ToArray();
 
 
         Se.SaveSettings();
@@ -559,12 +559,16 @@ public partial class ReviewSpeechViewModel : ObservableObject
 
     internal void SelectedEngineChanged(object? sender, SelectionChangedEventArgs e)
     {
+        SelectedEngineChanged();
+    }
+
+    public void SelectedEngineChanged()
+    {
         var engine = SelectedEngine;
         if (engine == null)
         {
             return;
         }
-
         Dispatcher.UIThread.Post(async () =>
         {
             var voices = await engine.GetVoices(SelectedLanguage?.Code ?? string.Empty);
@@ -574,13 +578,13 @@ public partial class ReviewSpeechViewModel : ObservableObject
                 Voices.Add(vo);
             }
 
-            var lastVoice = Voices.FirstOrDefault(v => v.Name == Se.Settings.Video.TextToSpeech.Voice);
+            var lastVoice = Enumerable.FirstOrDefault<Voice>(Voices, v => v.Name == Se.Settings.Video.TextToSpeech.Voice);
             if (lastVoice == null)
             {
-                lastVoice = Voices.FirstOrDefault(p => p.Name.StartsWith("en", StringComparison.OrdinalIgnoreCase) ||
-                                                       p.Name.Contains("English", StringComparison.OrdinalIgnoreCase));
+                lastVoice = Enumerable.FirstOrDefault<Voice>(Voices, p => p.Name.StartsWith("en", StringComparison.OrdinalIgnoreCase) ||
+                                                                          p.Name.Contains("English", StringComparison.OrdinalIgnoreCase));
             }
-            SelectedVoice = lastVoice ?? Voices.First();
+            SelectedVoice = lastVoice ?? Enumerable.First<Voice>(Voices);
 
             if (engine.HasLanguageParameter)
             {
@@ -591,7 +595,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
                     Languages.Add(language);
                 }
 
-                SelectedLanguage = Languages.FirstOrDefault();
+                SelectedLanguage = Enumerable.FirstOrDefault<TtsLanguage>(Languages);
             }
 
             if (engine.HasRegion)
@@ -603,7 +607,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
                     Regions.Add(region);
                 }
 
-                SelectedRegion = Regions.FirstOrDefault();
+                SelectedRegion = Enumerable.FirstOrDefault<string>(Regions);
             }
 
             if (engine.HasModel)
@@ -615,7 +619,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
                     Models.Add(model);
                 }
 
-                SelectedModel = Models.FirstOrDefault();
+                SelectedModel = Enumerable.FirstOrDefault<string>(Models);
             }
 
             IsElevenLabsControlsVisible = false;
@@ -633,7 +637,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
                 SelectedModel = Se.Settings.Video.TextToSpeech.ElevenLabsModel;
                 if (string.IsNullOrEmpty(SelectedModel))
                 {
-                    SelectedModel = Models.First();
+                    SelectedModel = Enumerable.First<string>(Models);
                 }
             }
         });
@@ -653,15 +657,15 @@ public partial class ReviewSpeechViewModel : ObservableObject
             {
                 var voices = await murf.GetVoices(SelectedLanguage?.Code ?? string.Empty);
                 Voices.Clear();
-                Voices.AddRange(voices);
+                ObservableCollectionExtensions.AddRange(Voices, voices);
 
-                var lastVoice = Voices.FirstOrDefault(v => v.Name == Se.Settings.Video.TextToSpeech.Voice);
+                var lastVoice = Enumerable.FirstOrDefault<Voice>(Voices, v => v.Name == Se.Settings.Video.TextToSpeech.Voice);
                 if (lastVoice == null)
                 {
-                    lastVoice = Voices.FirstOrDefault(p => p.Name.StartsWith("en", StringComparison.OrdinalIgnoreCase) ||
-                                                           p.Name.Contains("English", StringComparison.OrdinalIgnoreCase));
+                    lastVoice = Enumerable.FirstOrDefault<Voice>(Voices, p => p.Name.StartsWith("en", StringComparison.OrdinalIgnoreCase) ||
+                                                                              p.Name.Contains("English", StringComparison.OrdinalIgnoreCase));
                 }
-                SelectedVoice = lastVoice ?? Voices.First();
+                SelectedVoice = lastVoice ?? Enumerable.First<Voice>(Voices);
             });
         }
     }
@@ -687,10 +691,10 @@ public partial class ReviewSpeechViewModel : ObservableObject
                     Languages.Add(language);
                 }
 
-                SelectedLanguage = Languages.FirstOrDefault(p => p.Name == Se.Settings.Video.TextToSpeech.ElevenLabsLanguage);
+                SelectedLanguage = Enumerable.FirstOrDefault<TtsLanguage>(Languages, p => p.Name == Se.Settings.Video.TextToSpeech.ElevenLabsLanguage);
                 if (SelectedLanguage == null)
                 {
-                    SelectedLanguage = Languages.FirstOrDefault(p => p.Code == "en");
+                    SelectedLanguage = Enumerable.FirstOrDefault<TtsLanguage>(Languages, p => p.Code == "en");
                 }
             }
         });
