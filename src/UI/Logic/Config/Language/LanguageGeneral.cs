@@ -436,6 +436,8 @@ public class LanguageGeneral
     public string Include { get; set; }
     public string Voice { get; set; }
     public string Stop { get; set; }
+    public string Cancelled { get; set; }
+    public string VideoFileGeneratedX { get; set; }
 
     public LanguageGeneral()
     {
@@ -870,5 +872,7 @@ public class LanguageGeneral
         Include = "Include";
         Voice =  "Voice";
         Stop = "Stop";
+        Cancelled = "Cancelled";
+        VideoFileGeneratedX = "Video file generated: {0}";
     }
 }

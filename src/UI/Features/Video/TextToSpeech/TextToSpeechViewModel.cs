@@ -170,7 +170,6 @@ public partial class TextToSpeechViewModel : ObservableObject
         else if (SelectedEngine is ElevenLabs)
         {
             ApiKey = Se.Settings.Video.TextToSpeech.ElevenLabsApiKey;
-            SelectedModel = Se.Settings.Video.TextToSpeech.ElevenLabsModel;
         }
         else if (SelectedEngine is Murf)
         {
@@ -535,7 +534,7 @@ public partial class TextToSpeechViewModel : ObservableObject
         {
             var answer = await MessageBox.Show(
                 Window,
-                "AllTalk not started?",
+                Se.Language.General.Error,
                 $"\"AllTalk\" text to speech requires a running local AllTalk web server.{Environment.NewLine}{Environment.NewLine}Read more?",
                 MessageBoxButtons.YesNoCancel,
                 MessageBoxIcon.Question);
@@ -556,7 +555,7 @@ public partial class TextToSpeechViewModel : ObservableObject
             {
                 await MessageBox.Show(
                 Window,
-                "Key file required?",
+                Se.Language.General.Error,
                 $"\"{engine.Name}\" requires a key file",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
@@ -573,7 +572,7 @@ public partial class TextToSpeechViewModel : ObservableObject
             {
                 await MessageBox.Show(
                 Window,
-                "API key required?",
+                Se.Language.General.Error,
                 $"\"{engine.Name}\" requires an API key",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
@@ -631,8 +630,8 @@ public partial class TextToSpeechViewModel : ObservableObject
             {
                 await MessageBox.Show(
                     Window,
-                    "Text to speech",
-                    $"Video file generated: {outputFileName}",
+                    Se.Language.Video.TextToSpeech.Title,
+                    string.Format(Se.Language.General.VideoFileGeneratedX, outputFileName),
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
 
@@ -725,7 +724,7 @@ public partial class TextToSpeechViewModel : ObservableObject
         }
         catch (OperationCanceledException)
         {
-            ProgressText = "Cancelled";
+            ProgressText = Se.Language.General.Cancelled; ;
             return null;
         }
     }
@@ -1069,7 +1068,7 @@ public partial class TextToSpeechViewModel : ObservableObject
             else if (SelectedEngine is ElevenLabs)
             {
                 ApiKey = Se.Settings.Video.TextToSpeech.ElevenLabsApiKey;
-                SelectedModel = Models.FirstOrDefault(p=>p == Se.Settings.Video.TextToSpeech.ElevenLabsModel);
+                SelectedModel = Models.FirstOrDefault(p => p == Se.Settings.Video.TextToSpeech.ElevenLabsModel);
                 if (string.IsNullOrEmpty(SelectedModel))
                 {
                     SelectedModel = Models.First();
