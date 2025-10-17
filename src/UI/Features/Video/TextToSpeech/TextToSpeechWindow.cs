@@ -105,7 +105,7 @@ public class TextToSpeechWindow : Window
             {
                 new Label
                 {
-                    Content = "Engine",
+                    Content = Se.Language.General.Engine,
                     MinWidth = labelMinWidth,
                 },
                 comboBoxEngines,
@@ -124,7 +124,7 @@ public class TextToSpeechWindow : Window
             {
                 new Label
                 {
-                    Content = "Voice",
+                    Content = Se.Language.General.Voice,
                     MinWidth = labelMinWidth,
                 },
                 UiUtil.MakeComboBox(vm.Voices, vm, nameof(vm.SelectedVoice)).WithWidth(controlMinWidth),
@@ -146,7 +146,7 @@ public class TextToSpeechWindow : Window
             {
                 new Label
                 {
-                    Content = "Model",
+                    Content = Se.Language.General.Model,
                     MinWidth = labelMinWidth,
                 },
                 comboBoxModels,
@@ -163,7 +163,7 @@ public class TextToSpeechWindow : Window
             {
                 new Label
                 {
-                    Content = "Region",
+                    Content = Se.Language.General.Region,
                     MinWidth = labelMinWidth,
                 },
                 UiUtil.MakeComboBox(vm.Regions, vm, nameof(vm.SelectedRegion)).WithWidth(controlMinWidth),
@@ -180,7 +180,7 @@ public class TextToSpeechWindow : Window
             {
                 new Label
                 {
-                    Content = "Language",
+                    Content = Se.Language.General.Language,
                     MinWidth = labelMinWidth,
                 },
                 comboBoxLanguages,

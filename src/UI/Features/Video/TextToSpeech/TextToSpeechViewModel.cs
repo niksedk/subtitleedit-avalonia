@@ -587,14 +587,13 @@ public partial class TextToSpeechViewModel : ObservableObject
         return false;
     }
 
-
     private async Task MergeAndAddToVideo(TtsStepResult[] fixSpeedResult)
     {
         // Merge audio paragraphs
         var mergedAudioFileName = await MergeAudioParagraphs(fixSpeedResult, _cancellationToken);
         if (string.IsNullOrEmpty(mergedAudioFileName))
         {
-            DoneOrCancelText = "Done";
+            DoneOrCancelText = Se.Language.General.Done;
             IsGenerating = false;
             IsNotGenerating = true;
             ProgressOpacity = 0;
@@ -604,7 +603,7 @@ public partial class TextToSpeechViewModel : ObservableObject
         var result = await _folderHelper.PickFolderAsync(Window!, "Select a folder to save to");
         if (string.IsNullOrEmpty(result))
         {
-            DoneOrCancelText = "Done";
+            DoneOrCancelText = Se.Language.General.Done;
             IsGenerating = false;
             IsNotGenerating = true;
             ProgressOpacity = 0;
@@ -617,7 +616,7 @@ public partial class TextToSpeechViewModel : ObservableObject
 
         await HandleAddToVideo(audioFileName, outputFolder, _cancellationToken);
 
-        DoneOrCancelText = "Done";
+        DoneOrCancelText = Se.Language.General.Done;
         IsGenerating = false;
         IsNotGenerating = true;
         ProgressOpacity = 0;
@@ -1070,7 +1069,7 @@ public partial class TextToSpeechViewModel : ObservableObject
             else if (SelectedEngine is ElevenLabs)
             {
                 ApiKey = Se.Settings.Video.TextToSpeech.ElevenLabsApiKey;
-                SelectedModel = Se.Settings.Video.TextToSpeech.ElevenLabsModel;
+                SelectedModel = Models.FirstOrDefault(p=>p == Se.Settings.Video.TextToSpeech.ElevenLabsModel);
                 if (string.IsNullOrEmpty(SelectedModel))
                 {
                     SelectedModel = Models.First();
