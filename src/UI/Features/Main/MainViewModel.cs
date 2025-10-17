@@ -1799,7 +1799,7 @@ public partial class MainViewModel :
         if (result.OkPressed)
         {
             Subtitles.Clear();
-            Subtitles.AddRange(result.Subtitles.Select(p => new SubtitleLineViewModel(p.SubtitleLineViewModel)));
+            Subtitles.AddRange(result.FixedSubtitles);
             SelectAndScrollToRow(0);
             _updateAudioVisualizer = true;
         }
