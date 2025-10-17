@@ -7071,6 +7071,7 @@ public partial class MainViewModel :
             _shortcutManager.ClearKeys();
         }
 
+        _subtitleGridSelectionChangedSkip = true;
         var idx = Subtitles.IndexOf(selectedItems.First());
         _undoRedoManager.StopChangeDetection();
         foreach (var item in selectedItems)
@@ -7083,9 +7084,10 @@ public partial class MainViewModel :
             idx = Subtitles.Count - 1;
         }
 
+        Renumber();
+        _subtitleGridSelectionChangedSkip = false;
         SelectAndScrollToRow(idx);
 
-        Renumber();
         _undoRedoManager.StartChangeDetection();
     }
 
