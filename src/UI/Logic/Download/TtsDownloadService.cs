@@ -163,11 +163,16 @@ public class TtsDownloadService : ITtsDownloadService
         IProgress<float>? progress,
         CancellationToken cancellationToken)
     {
+        if (model == "eleven_v3")
+        {
+            return await DownloadElevenLabsVoiceSpeak3(inputText, voice, model, apiKey, languageCode, stream, progress, cancellationToken);
+        }
+
         var url = "https://api.elevenlabs.io/v1/text-to-speech/" + voice.VoiceId;
         var text = Utilities.UnbreakLine(inputText);
 
         var language = string.Empty;
-        if (model == "eleven_turbo_v2_5")
+        if (model is "eleven_turbo_v2_5")
         {
             language = $", \"language_code\": \"{languageCode}\"";
         }
@@ -189,6 +194,49 @@ public class TtsDownloadService : ITtsDownloadService
         {
             var error = Encoding.UTF8.GetString(stream.ToArray()).Trim();
             SeLogger.Error($"ElevenLabs TTS failed calling API as base address {_httpClient.BaseAddress} : Status code={result.StatusCode} {error}" + Environment.NewLine + "Data=" + data);
+            return false;
+        }
+
+        return true;
+    }
+
+    private async Task<bool> DownloadElevenLabsVoiceSpeak3(
+        string inputText, 
+        ElevenLabVoice voice, 
+        string model, 
+        string apiKey, 
+        string languageCode, 
+        MemoryStream stream, 
+        IProgress<float>? progress, 
+        CancellationToken cancellationToken)
+    {
+        var url = "https://api.elevenlabs.io/v1/text-to-dialogue";
+        var text = Utilities.UnbreakLine(inputText);
+
+        var stability = Se.Settings.Video.TextToSpeech.ElevenLabsStability.ToString(CultureInfo.InvariantCulture);
+        var speed = Se.Settings.Video.TextToSpeech.ElevenLabsSpeed.ToString(CultureInfo.InvariantCulture);
+    
+        var data = "{ \"inputs\": [{ " +
+                   "\"text\": \"" + Json.EncodeJsonText(text) + "\", " +
+                   "\"voice_id\": \"" + voice.VoiceId + "\", " +
+                   "\"language_code\": \"" + languageCode + "\", " +
+                   "\"stability\": " + stability + ", " +
+                   "\"speed\": " + speed + 
+                   " }] }";
+
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
+        requestMessage.Content = new StringContent(data, Encoding.UTF8);
+        requestMessage.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+        requestMessage.Headers.TryAddWithoutValidation("Content-Type", "application/json");
+        requestMessage.Headers.TryAddWithoutValidation("xi-api-key", apiKey.Trim());
+
+        var result = await _httpClient.SendAsync(requestMessage, cancellationToken);
+        await result.Content.CopyToAsync(stream, cancellationToken);
+    
+        if (!result.IsSuccessStatusCode)
+        {
+            var error = Encoding.UTF8.GetString(stream.ToArray()).Trim();
+            SeLogger.Error($"ElevenLabs TTS v3 failed calling API as base address {_httpClient.BaseAddress} : Status code={result.StatusCode} {error}" + Environment.NewLine + "Data=" + data);
             return false;
         }
 

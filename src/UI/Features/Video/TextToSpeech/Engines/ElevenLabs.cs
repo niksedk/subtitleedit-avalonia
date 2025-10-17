@@ -81,7 +81,7 @@ public class ElevenLabs : ITtsEngine
         return result.ToArray();
     }
 
-    public static string GetSetElevenLabsFolder()
+    private static string GetSetElevenLabsFolder()
     {
         if (!Directory.Exists(Se.TtsFolder))
         {
@@ -107,6 +107,87 @@ public class ElevenLabs : ITtsEngine
         // see https://help.elevenlabs.io/hc/en-us/articles/17883183930129-What-models-do-you-offer-and-what-is-the-difference-between-them
 
         var languages = new List<TtsLanguage>();
+
+        if (model == "eleven_v3")
+        {
+            languages = new List<TtsLanguage>
+            {
+                new("Afrikaans", "af"),
+                new("Arabic", "ar"),
+                new("Armenian", "hy"),
+                new("Assamese", "as"),
+                new("Azerbaijani", "az"),
+                new("Belarusian", "be"),
+                new("Bengali", "bn"),
+                new("Bosnian", "bs"),
+                new("Bulgarian", "bg"),
+                new("Catalan", "ca"),
+                new("Cebuano", "ceb"),
+                new("Chichewa", "ny"),
+                new("Croatian", "hr"),
+                new("Czech", "cs"),
+                new("Danish", "da"),
+                new("Dutch", "nl"),
+                new("English", "en"),
+                new("Estonian", "et"),
+                new("Filipino", "fil"),
+                new("Finnish", "fi"),
+                new("French", "fr"),
+                new("Galician", "gl"),
+                new("Georgian", "ka"),
+                new("German", "de"),
+                new("Greek", "el"),
+                new("Gujarati", "gu"),
+                new("Hausa", "ha"),
+                new("Hebrew", "he"),
+                new("Hindi", "hi"),
+                new("Hungarian", "hu"),
+                new("Icelandic", "is"),
+                new("Indonesian", "id"),
+                new("Irish", "ga"),
+                new("Italian", "it"),
+                new("Japanese", "ja"),
+                new("Javanese", "jv"),
+                new("Kannada", "kn"),
+                new("Kazakh", "kk"),
+                new("Kyrgyz", "ky"),
+                new("Korean", "ko"),
+                new("Latvian", "lv"),
+                new("Lingala", "ln"),
+                new("Lithuanian", "lt"),
+                new("Luxembourgish", "lb"),
+                new("Macedonian", "mk"),
+                new("Malay", "ms"),
+                new("Malayalam", "ml"),
+                new("Mandarin Chinese", "zh"),
+                new("Marathi", "mr"),
+                new("Nepali", "ne"),
+                new("Norwegian", "no"),
+                new("Pashto", "ps"),
+                new("Persian", "fa"),
+                new("Polish", "pl"),
+                new("Portuguese", "pt"),
+                new("Punjabi", "pa"),
+                new("Romanian", "ro"),
+                new("Russian", "ru"),
+                new("Serbian", "sr"),
+                new("Sindhi", "sd"),
+                new("Slovak", "sk"),
+                new("Slovenian", "sl"),
+                new("Somali", "so"),
+                new("Spanish", "es"),
+                new("Swahili", "sw"),
+                new("Swedish", "sv"),
+                new("Tamil", "ta"),
+                new("Telugu", "te"),
+                new("Thai", "th"),
+                new("Turkish", "tr"),
+                new("Ukrainian", "uk"),
+                new("Urdu", "ur"),
+                new("Vietnamese", "vi"),
+                new("Welsh", "cy"),
+            };
+        }
 
         if (model is "eleven_multilingual_v2" or "eleven_turbo_v2_5")
         {
@@ -156,7 +237,7 @@ public class ElevenLabs : ITtsEngine
         {
             languages = new List<TtsLanguage>
             {
-                new ("English", "en"),
+                new("English", "en"),
             };
         }
 
@@ -164,14 +245,14 @@ public class ElevenLabs : ITtsEngine
         {
             languages = new List<TtsLanguage>
             {
-                new ("English", "en"),
-                new ("German", "de"),
-                new ("Polish", "pl"),
-                new ("Spanish", "es"),
-                new ("Italian", "it"),
-                new ("French", "fr"),
-                new ("Hindi", "hi"),
-                new ("Portuguese", "pt"),
+                new("English", "en"),
+                new("German", "de"),
+                new("Polish", "pl"),
+                new("Spanish", "es"),
+                new("Italian", "it"),
+                new("French", "fr"),
+                new("Hindi", "hi"),
+                new("Portuguese", "pt"),
             };
         }
 
@@ -224,6 +305,11 @@ public class ElevenLabs : ITtsEngine
 
     public Task<string[]> GetModels()
     {
-        return Task.FromResult(new[] { "eleven_turbo_v2_5", "eleven_multilingual_v2" });
+        return Task.FromResult(new[]
+        {
+            "eleven_turbo_v2_5",
+            "eleven_v3",
+            "eleven_multilingual_v2"
+        });
     }
 }
