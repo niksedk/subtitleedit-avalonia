@@ -1911,6 +1911,8 @@ public partial class MainViewModel :
             Subtitles.Clear();
             Subtitles.AddRange(result.AllSubtitlesFixed);
             SelectAndScrollToRow(0);
+            _updateAudioVisualizer = true;
+            _mpvReloader.Reset();
         }
 
         _shortcutManager.ClearKeys();

@@ -1,4 +1,4 @@
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -195,7 +195,11 @@ public partial class SplitBreakLongLinesViewModel : ObservableObject
         foreach (var seg in segments)
         {
             var cnt = HtmlUtil.RemoveHtmlTags(seg, true).Replace("\r\n", " ").Replace('\n', ' ').Length;
-            if (cnt <= 0) cnt = 1; // avoid zero to ensure some time
+            if (cnt <= 0)
+            {
+                cnt = 1; // avoid zero to ensure some time
+            }
+
             charCounts.Add(cnt);
             totalChars += cnt;
         }
@@ -203,7 +207,10 @@ public partial class SplitBreakLongLinesViewModel : ObservableObject
         {
             totalChars = segments.Count;
             charCounts.Clear();
-            for (var i = 0; i < segments.Count; i++) charCounts.Add(1);
+            for (var i = 0; i < segments.Count; i++)
+            {
+                charCounts.Add(1);
+            }
         }
 
         // Build new subtitle lines
@@ -254,7 +261,10 @@ public partial class SplitBreakLongLinesViewModel : ObservableObject
         // Local helper: find the best split index near a target index (raw length based)
         static int FindBestSplitIndex(string text, int targetIndex)
         {
-            if (string.IsNullOrEmpty(text)) return 0;
+            if (string.IsNullOrEmpty(text))
+            {
+                return 0;
+            }
 
             // Prefer line breaks if present before target
             var lbBefore = text.LastIndexOf('\n', Math.Min(targetIndex, text.Length - 1));
@@ -264,28 +274,49 @@ public partial class SplitBreakLongLinesViewModel : ObservableObject
             }
 
             // Search backwards from target for strong punctuation, then commas/spaces
-            var strongPunct = new HashSet<char> { '.', '!', '?', '�', '?', '?', '?' };
-            var weakPunct = new HashSet<char> { ';', ':', ',', '?', '?', '?' };
+            var strongPunctuation = new HashSet<char> { '.', '!', '?', '…', '。', '！', '？' };
+            var weakPunctuation = new HashSet<char> { ';', ':', ',', '，', '；', '：' };
 
             for (var i = Math.Min(targetIndex, text.Length - 1); i >= 0 && i >= targetIndex - 40; i--)
             {
                 var ch = text[i];
-                if (strongPunct.Contains(ch)) return i;
+                if (strongPunctuation.Contains(ch))
+                {
+                    return i;
+                }
             }
             for (var i = Math.Min(targetIndex, text.Length - 1); i >= 0 && i >= targetIndex - 30; i--)
             {
                 var ch = text[i];
-                if (weakPunct.Contains(ch)) return i;
-                if (char.IsWhiteSpace(ch)) return i;
-                if (ch == '-' && i + 1 < text.Length && text[i + 1] == ' ') return i; // split at "- "
+                if (weakPunctuation.Contains(ch))
+                {
+                    return i;
+                }
+
+                if (char.IsWhiteSpace(ch))
+                {
+                    return i;
+                }
+
+                if (ch == '-' && i + 1 < text.Length && text[i + 1] == ' ')
+                {
+                    return i; // split at "- "
+                }
             }
 
             // If none found backwards, try small lookahead window
             for (var i = Math.Min(targetIndex + 1, text.Length - 1); i < text.Length && i <= targetIndex + 30; i++)
             {
                 var ch = text[i];
-                if (strongPunct.Contains(ch) || weakPunct.Contains(ch) || char.IsWhiteSpace(ch)) return i;
-                if (ch == '-' && i + 1 < text.Length && text[i + 1] == ' ') return i;
+                if (strongPunctuation.Contains(ch) || weakPunctuation.Contains(ch) || char.IsWhiteSpace(ch))
+                {
+                    return i;
+                }
+
+                if (ch == '-' && i + 1 < text.Length && text[i + 1] == ' ')
+                {
+                    return i;
+                }
             }
 
             // Default to target index
@@ -295,16 +326,21 @@ public partial class SplitBreakLongLinesViewModel : ObservableObject
         // Local helper: find split index ensuring plain (html-stripped) length <= maxPlainLen
         static int FindBestSplitIndexByPlainLength(string text, int maxPlainLen)
         {
-            if (string.IsNullOrEmpty(text)) return 0;
+            if (string.IsNullOrEmpty(text))
+            {
+                return 0;
+            }
 
-            var strongPunct = new HashSet<char> { '.', '!', '?', '�', '?', '?', '?' };
-            var weakPunct = new HashSet<char> { ';', ':', ',', '?', '?', '?' };
+            var strongPunctuation = new HashSet<char> { '.', '!', '?', '…', '。', '！', '？' };
+            var weakPunctuation = new HashSet<char> { ';', ':', ',', '，', '；', '：' };
 
             var plainLen = 0;
             var inTag = false;
             var lastVisibleIdx = -1; // last non-tag index
-            var bestIdx = -1;        // best candidate index under the limit
-            var bestPlainLen = -1;   // plain length at bestIdx
+            var bestIdx = -1;             // best candidate index under the limit (any)
+            var bestPlainLen = -1;        // plain length at bestIdx
+            var bestAcceptableIdx = -1;   // best acceptable candidate index under the limit (no orphan small words)
+            var bestAcceptablePlain = -1; // plain length at bestAcceptableIdx
 
             for (var i = 0; i < text.Length; i++)
             {
@@ -331,7 +367,7 @@ public partial class SplitBreakLongLinesViewModel : ObservableObject
                     }
 
                     // Any break candidate we see under or equal to the limit can be considered
-                    var isBreak = strongPunct.Contains(ch) || weakPunct.Contains(ch) || char.IsWhiteSpace(ch) || (ch == '-' && i + 1 < text.Length && text[i + 1] == ' ');
+                    var isBreak = strongPunctuation.Contains(ch) || weakPunctuation.Contains(ch) || char.IsWhiteSpace(ch) || (ch == '-' && i + 1 < text.Length && text[i + 1] == ' ');
                     if (isBreak && plainLen <= maxPlainLen)
                     {
                         if (plainLen >= bestPlainLen)
@@ -339,12 +375,29 @@ public partial class SplitBreakLongLinesViewModel : ObservableObject
                             bestPlainLen = plainLen;
                             bestIdx = i;
                         }
+
+                        // Prefer breakpoints that do not orphan one or two small words around strong punctuation
+                        var acceptable = !CausesOrphanSmallWords(text, i, strongPunctuation);
+                        if (acceptable && plainLen >= bestAcceptablePlain)
+                        {
+                            bestAcceptablePlain = plainLen;
+                            bestAcceptableIdx = i;
+                        }
                     }
 
                     if (plainLen > maxPlainLen)
                     {
-                        // Prefer the candidate closest to the limit
-                        if (bestIdx >= 0) return bestIdx;
+                        // Prefer the acceptable candidate closest to the limit
+                        if (bestAcceptableIdx >= 0)
+                        {
+                            return bestAcceptableIdx;
+                        }
+
+                        if (bestIdx >= 0)
+                        {
+                            return bestIdx;
+                        }
+
                         return lastVisibleIdx >= 0 ? lastVisibleIdx : Math.Min(text.Length - 1, maxPlainLen);
                     }
                 }
@@ -357,6 +410,137 @@ public partial class SplitBreakLongLinesViewModel : ObservableObject
 
             // Entire text within limit
             return text.Length - 1;
+
+            // Local: Avoid breakpoints that leave one or two small words alone around sentence-ending punctuation
+            static bool CausesOrphanSmallWords(string s, int breakIdx, HashSet<char> strong)
+            {
+                if (breakIdx < 0 || breakIdx >= s.Length)
+                {
+                    return false;
+                }
+
+                var ch = s[breakIdx];
+
+                // Helper to get up to two word lengths backward from index-1
+                static List<int> GetPrevWordLens(string str, int idx)
+                {
+                    var res = new List<int>(2);
+                    var i = Math.Min(idx, str.Length - 1);
+                    // skip spaces and closing quotes/parens
+                    var closingSkip = new HashSet<char>(new[] { ')', '’', '”', '\'', '»', ']', '}', '"' });
+                    while (i >= 0 && (char.IsWhiteSpace(str[i]) || closingSkip.Contains(str[i])))
+                    {
+                        i--;
+                    }
+
+                    for (int w = 0; w < 2 && i >= 0; w++)
+                    {
+                        var length = 0;
+                        while (i >= 0 && char.IsLetterOrDigit(str[i])) { length++; i--; }
+                        if (length > 0)
+                        {
+                            res.Add(length);
+                        }
+                        // skip separators before next word
+                        while (i >= 0 && !char.IsLetterOrDigit(str[i]))
+                        {
+                            i--;
+                        }
+                    }
+                    return res;
+                }
+
+                // Helper to get up to two word lengths forward from index+1
+                static List<int> GetNextWordLens(string str, int idx)
+                {
+                    var res = new List<int>(2);
+                    var i = Math.Min(idx + 1, str.Length - 1);
+                    // skip spaces and opening quotes/parens
+                    var openingSkip = new HashSet<char>(new[] { '(', '“', '‘', '\'', '«', '[', '{', '"' });
+                    while (i < str.Length && (char.IsWhiteSpace(str[i]) || openingSkip.Contains(str[i])))
+                    {
+                        i++;
+                    }
+
+                    for (int w = 0; w < 2 && i < str.Length; w++)
+                    {
+                        var length = 0;
+                        while (i < str.Length && char.IsLetterOrDigit(str[i])) { length++; i++; }
+                        if (length > 0)
+                        {
+                            res.Add(length);
+                        }
+                        // skip separators before next word
+                        while (i < str.Length && !char.IsLetterOrDigit(str[i]))
+                        {
+                            i++;
+                        }
+                    }
+                    return res;
+                }
+
+                // If candidate itself is a strong punctuation, avoid tiny words just before or just after it
+                if (strong.Contains(ch))
+                {
+                    var prevLensStrong = GetPrevWordLens(s, breakIdx - 1);
+                    var prevTinyStrong = prevLensStrong.Count > 0 && prevLensStrong.Count <= 2 && prevLensStrong.TrueForAll(l => l <= 2);
+
+                    var nextLensStrong = GetNextWordLens(s, breakIdx);
+                    var nextTinyStrong = nextLensStrong.Count > 0 && nextLensStrong.Count <= 2 && nextLensStrong.TrueForAll(l => l <= 2);
+
+                    if (prevTinyStrong || nextTinyStrong)
+                    {
+                        return true;
+                    }
+                }
+
+                // If candidate is NOT strong, check whether we are breaking shortly AFTER a strong punctuation
+                // and the words since that strong punctuation are tiny (one or two words of length <= 2), e.g. "... overtime. So,"
+                int j = breakIdx - 1;
+                while (j >= 0 && !strong.Contains(s[j]))
+                {
+                    j--;
+                }
+
+                if (j >= 0)
+                {
+                    // We found previous strong punctuation at index j
+                    // Count up to 2 word lengths between (j, breakIdx)
+                    var tinyBetween = false;
+                    {
+                        int i = j + 1;
+                        // skip whitespace and opening quotes/parens
+                        var openingSkip = new HashSet<char>(new[] { '(', '“', '‘', '\'', '«', '[', '{', '"' });
+                        while (i < breakIdx && (char.IsWhiteSpace(s[i]) || openingSkip.Contains(s[i])))
+                        {
+                            i++;
+                        }
+
+                        var lens = new List<int>(2);
+                        for (int w = 0; w < 2 && i < breakIdx; w++)
+                        {
+                            int len = 0;
+                            while (i < breakIdx && char.IsLetterOrDigit(s[i])) { len++; i++; }
+                            if (len > 0)
+                            {
+                                lens.Add(len);
+                            }
+
+                            while (i < breakIdx && !char.IsLetterOrDigit(s[i]))
+                            {
+                                i++;
+                            }
+                        }
+                        tinyBetween = lens.Count > 0 && lens.Count <= 2 && lens.TrueForAll(l => l <= 2);
+                    }
+                    if (tinyBetween)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
         }
     }
 
