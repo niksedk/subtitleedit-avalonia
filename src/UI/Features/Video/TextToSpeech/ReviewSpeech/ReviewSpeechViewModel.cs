@@ -48,6 +48,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
     [ObservableProperty] private bool _autoContinue;
     [ObservableProperty] private bool _isPlayVisible;
     [ObservableProperty] private bool _isStopVisible;
+    [ObservableProperty] private bool _islevenLabsEngineV3Selected;
     [ObservableProperty] private double _stability;
     [ObservableProperty] private double _similarity;
     [ObservableProperty] private double _speakerBoost;
@@ -301,6 +302,17 @@ public partial class ReviewSpeechViewModel : ObservableObject
         await File.WriteAllTextAsync(jsonFileName, json);
 
         await _folderHelper.OpenFolder(Window!, folder);
+    }
+
+    [RelayCommand]
+    private async Task ShowElevenLabsEngineV3Help()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        await Window.Launcher.LaunchUriAsync(new Uri("https://elevenlabs.io/blog/eleven-v3-audio-tags-expressing-emotional-context-in-speech"));
     }
 
     [RelayCommand]
@@ -675,6 +687,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
         var engine = SelectedEngine;
         var voice = SelectedVoice;
         var model = SelectedModel;
+        IslevenLabsEngineV3Selected = false;
         if (engine == null || voice == null || model == null)
         {
             return;
@@ -682,6 +695,11 @@ public partial class ReviewSpeechViewModel : ObservableObject
 
         Dispatcher.UIThread.Post(async () =>
         {
+            if (engine is ElevenLabs && model == "eleven_v3")
+            {
+                IslevenLabsEngineV3Selected = true;
+            }   
+
             if (engine.HasLanguageParameter)
             {
                 var languages = await engine.GetLanguages(voice, model);

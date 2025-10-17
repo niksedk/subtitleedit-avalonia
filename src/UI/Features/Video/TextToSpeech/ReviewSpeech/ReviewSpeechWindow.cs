@@ -221,6 +221,9 @@ public class ReviewSpeechWindow : Window
                     MinWidth = labelMinWidth,
                 },
                 comboBoxModels,
+                UiUtil.MakeButton(vm.ShowElevenLabsEngineV3HelpCommand, IconNames.Help)
+                    .WithBindIsVisible(nameof(vm.IslevenLabsEngineV3Selected))
+                    .WithMarginLeft(5),
             },
             [!StackPanel.IsVisibleProperty] = new Binding(nameof(vm.SelectedEngine) + "." + nameof(ITtsEngine.HasModel)) { Mode = BindingMode.OneWay },
         };
