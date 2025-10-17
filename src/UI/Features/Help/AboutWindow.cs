@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
@@ -7,7 +8,6 @@ using Avalonia.Platform;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
-using Avalonia.Input;
 
 namespace Nikse.SubtitleEdit.Features.Help;
 
@@ -57,7 +57,7 @@ public class AboutWindow : Window
             Foreground = UiUtil.MakeLinkForeground(),
             Cursor = new Cursor(StandardCursorType.Hand),
         };
-        githubLink.PointerPressed += (_, _) => vm.OpenGithubCommand.Execute(null);
+        githubLink.PointerPressed += (_, _) => vm.OpenGitHubCommand.Execute(null);
 
         var panelGithub = new StackPanel
         {
@@ -75,7 +75,7 @@ public class AboutWindow : Window
             Foreground = UiUtil.MakeLinkForeground(),
             Cursor = new Cursor(StandardCursorType.Hand),
         };
-        paypalLink.PointerPressed += (_, _) => vm.OpenPaypalCommand.Execute(null);
+        paypalLink.PointerPressed += (_, _) => vm.OpenPayPalCommand.Execute(null);
 
         var githubSponsorLink = new TextBlock
         {
@@ -83,7 +83,7 @@ public class AboutWindow : Window
             Foreground = UiUtil.MakeLinkForeground(),
             Cursor = new Cursor(StandardCursorType.Hand),
         };
-        githubSponsorLink.PointerPressed += (_, _) => vm.OpenGithubSponsorCommand.Execute(null);
+        githubSponsorLink.PointerPressed += (_, _) => vm.OpenGitHubSponsorCommand.Execute(null);
 
         var panelDonate = new StackPanel
         {

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Avalonia.Controls;
+using System;
+using System.Runtime.Intrinsics.Arm;
 
 namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
@@ -438,6 +440,12 @@ public class LanguageGeneral
     public string Stop { get; set; }
     public string Cancelled { get; set; }
     public string VideoFileGeneratedX { get; set; }
+    public string PlaySelectedLine { get; set; }
+    public string SelectSaveFolder { get; set; }
+    public string OverwriteQuestion { get; set; }
+    public string OverwriteFilesInFolderX { get; set; }
+    public string KeyFile { get; set; }
+    public string Stereo { get; set; }
 
     public LanguageGeneral()
     {
@@ -873,6 +881,12 @@ public class LanguageGeneral
         Voice =  "Voice";
         Stop = "Stop";
         Cancelled = "Cancelled";
-        VideoFileGeneratedX = "Video file generated: {0}";
+        VideoFileGeneratedX = "Video file generated: \"{0}\"";
+        PlaySelectedLine = "Play selected line";
+        SelectSaveFolder = "Select a folder to save to";
+        OverwriteQuestion = "Overwrite?";
+        OverwriteFilesInFolderX = "Overwrite files in folder: \"{0}\"";
+        KeyFile = "Key file";
+        Stereo = "Stereo";
     }
 }

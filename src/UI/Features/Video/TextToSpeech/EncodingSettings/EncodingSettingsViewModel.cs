@@ -14,9 +14,9 @@ public partial class EncodingSettingsViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<EncodingDisplayItem> _encodings;
     [ObservableProperty] private EncodingDisplayItem? _selectedEncoding;
     [ObservableProperty] private bool _isStereo;
-    
+
     public Window? Window { get; set; }
-    
+
     public bool OkPressed { get; private set; }
 
     public EncodingSettingsViewModel()
@@ -52,9 +52,9 @@ public partial class EncodingSettingsViewModel : ObservableObject
         OkPressed = true;
         Window?.Close();
     }
-    
-    [RelayCommand]                   
-    private void Cancel() 
+
+    [RelayCommand]
+    private void Cancel()
     {
         Window?.Close();
     }

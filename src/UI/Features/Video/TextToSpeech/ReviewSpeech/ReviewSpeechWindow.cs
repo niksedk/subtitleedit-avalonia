@@ -5,7 +5,6 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Engines;
-using Nikse.SubtitleEdit.Features.Video.TextToSpeech.VoiceSettings;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -18,7 +17,7 @@ public class ReviewSpeechWindow : Window
     public ReviewSpeechWindow(ReviewSpeechViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = "TTS - Review audio segments";
+        Title = Se.Language.Video.TextToSpeech.ReviewAudioSegments;
         Width = 1024;
         Height = 650;
         MinWidth = 700;
@@ -33,7 +32,7 @@ public class ReviewSpeechWindow : Window
         var dataGrid = MakeDataGrid(vm);
         var waveform = MakeWaveform(vm);
 
-        var buttonExport = UiUtil.MakeButton("Export...", vm.ExportCommand);
+        var buttonExport = UiUtil.MakeButton(Se.Language.General.ExportDotDotDot, vm.ExportCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonExport, buttonOk, buttonCancel);
@@ -222,7 +221,7 @@ public class ReviewSpeechWindow : Window
                 },
                 comboBoxModels,
                 UiUtil.MakeButton(vm.ShowElevenLabsEngineV3HelpCommand, IconNames.Help)
-                    .WithBindIsVisible(nameof(vm.IslevenLabsEngineV3Selected))
+                    .WithBindIsVisible(nameof(vm.IsElevenLabsEngineV3Selected))
                     .WithMarginLeft(5),
             },
             [!StackPanel.IsVisibleProperty] = new Binding(nameof(vm.SelectedEngine) + "." + nameof(ITtsEngine.HasModel)) { Mode = BindingMode.OneWay },
@@ -268,7 +267,7 @@ public class ReviewSpeechWindow : Window
 
         var buttonRegenerateAudio = new Button
         {
-            Content = "Regenerate audio for selected line",
+            Content = Se.Language.Video.TextToSpeech.RegenerateAudioSelectedLine,
             Command = vm.RegenerateAudioCommand,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             Width = double.NaN,
@@ -278,7 +277,7 @@ public class ReviewSpeechWindow : Window
 
         var buttonPlay = new Button
         {
-            Content = "Play selected line",
+            Content = Se.Language.General.PlaySelectedLine,
             Command = vm.PlayCommand,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             Width = double.NaN,
@@ -342,7 +341,7 @@ public class ReviewSpeechWindow : Window
 
     private static Grid MakeElevenLabsControls(ReviewSpeechViewModel vm)
     {
-        var labelStability = UiUtil.MakeLabel("Stability");
+        var labelStability = UiUtil.MakeLabel(Se.Language.Video.TextToSpeech.Stability);
         var sliderStability = new Slider
         {
             Minimum = 0,
@@ -353,7 +352,7 @@ public class ReviewSpeechWindow : Window
         };
         var buttonStability = UiUtil.MakeButton(vm.ShowStabilityHelpCommand, IconNames.Help);
 
-        var labelSimilarity = UiUtil.MakeLabel("Similarity");
+        var labelSimilarity = UiUtil.MakeLabel(Se.Language.Video.TextToSpeech.Similarity);
         var sliderSimilarity = new Slider
         {
             Minimum = 0,
@@ -364,7 +363,7 @@ public class ReviewSpeechWindow : Window
         };
         var buttonSimilarity = UiUtil.MakeButton(vm.ShowSimilarityHelpCommand, IconNames.Help);
 
-        var labelSpeakerBoost = UiUtil.MakeLabel("Speaker Boost");
+        var labelSpeakerBoost = UiUtil.MakeLabel(Se.Language.Video.TextToSpeech.SpeakerBoost);
         var sliderSpeakerBoost = new Slider
         {
             Minimum = 0,

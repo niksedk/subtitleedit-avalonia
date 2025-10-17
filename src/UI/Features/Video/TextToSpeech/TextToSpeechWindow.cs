@@ -34,7 +34,7 @@ public class TextToSpeechWindow : Window
 
         var labelSettings = new Label
         {
-            Content = "Settings",
+            Content = Se.Language.General.Settings,
             VerticalAlignment = VerticalAlignment.Bottom,
         };
 
@@ -47,8 +47,8 @@ public class TextToSpeechWindow : Window
         var buttonDone = UiUtil.MakeButtonDone(vm.DoneCommand).WithBindIsVisible(nameof(vm.IsNotGenerating));
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand).WithBindIsVisible(nameof(vm.IsGenerating));
         var buttonPanel = UiUtil.MakeButtonBar(
-            UiUtil.MakeButton("Generate speech from text", vm.GenerateTtsCommand).WithBindIsEnabled(nameof(vm.IsNotGenerating)),
-            UiUtil.MakeButton("Import...", vm.ImportCommand).WithBindIsEnabled(nameof(vm.IsNotGenerating)),
+            UiUtil.MakeButton(Se.Language.Video.TextToSpeech.GenerateSpeechFromText, vm.GenerateTtsCommand).WithBindIsEnabled(nameof(vm.IsNotGenerating)),
+            UiUtil.MakeButton(Se.Language.General.ImportDotDotDot, vm.ImportCommand).WithBindIsEnabled(nameof(vm.IsNotGenerating)),
             buttonCancel,
             buttonDone
         ).WithMarginTop(0);
@@ -115,7 +115,7 @@ public class TextToSpeechWindow : Window
             }
         };
 
-        var buttonTestVoice = UiUtil.MakeButton("Test voice", vm.TestVoiceCommand).WithBindIsEnabled(nameof(vm.IsVoiceTestEnabled));
+        var buttonTestVoice = UiUtil.MakeButton(Se.Language.Video.TextToSpeech.TestVoice, vm.TestVoiceCommand).WithBindIsEnabled(nameof(vm.IsVoiceTestEnabled));
         var panelVoice = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -197,7 +197,7 @@ public class TextToSpeechWindow : Window
             {
                 new Label
                 {
-                    Content = "API key",
+                    Content = Se.Language.General.ApiKey,
                     MinWidth = labelMinWidth,
                 },
                 UiUtil.MakeTextBox(325, vm, nameof(vm.ApiKey)),
@@ -213,7 +213,7 @@ public class TextToSpeechWindow : Window
             {
                 new Label
                 {
-                    Content = "Key file",
+                    Content = Se.Language.General.KeyFile,
                     MinWidth = labelMinWidth,
                 },
                 UiUtil.MakeTextBox(325, vm, nameof(vm.KeyFile)).WithMarginRight(4),
@@ -260,7 +260,7 @@ public class TextToSpeechWindow : Window
     {
         var checkBoxReviewAudioClips = new CheckBox
         {
-            Content = "Review audio segments",
+            Content = Se.Language.Video.TextToSpeech.ReviewAudioSegments,
             VerticalAlignment = VerticalAlignment.Top,
             Margin = new Thickness(0, 10, 0, 10),
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.DoReviewAudioClips)) { Mode = BindingMode.TwoWay }
@@ -268,7 +268,7 @@ public class TextToSpeechWindow : Window
 
         var checkBoxAddAudioToVideoFile = new CheckBox
         {
-            Content = "Add audio to video file",
+            Content = Se.Language.Video.TextToSpeech.AddAudioToVideoFile,
             VerticalAlignment = VerticalAlignment.Top,
             Margin = new Thickness(0, 0, 0, 10),
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.DoGenerateVideoFile)) { Mode = BindingMode.TwoWay }

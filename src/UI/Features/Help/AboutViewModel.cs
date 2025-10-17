@@ -2,9 +2,9 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Help;
 
@@ -22,7 +22,7 @@ public partial class AboutViewModel : ObservableObject
         "Thank you for testing and supporting Subtitle Edit :)";
 
     [RelayCommand]
-    private async Task OpenGithub()
+    private async Task OpenGitHub()
     {
         if (Window == null)
         {
@@ -33,7 +33,7 @@ public partial class AboutViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task OpenPaypal()
+    private async Task OpenPayPal()
     {
         if (Window == null)
         {
@@ -44,7 +44,7 @@ public partial class AboutViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task OpenGithubSponsor()
+    private async Task OpenGitHubSponsor()
     {
         if (Window == null)
         {

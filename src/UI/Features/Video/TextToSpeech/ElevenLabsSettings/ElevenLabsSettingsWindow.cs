@@ -4,6 +4,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.ElevenLabsSettings;
 
@@ -14,7 +15,7 @@ public class ElevenLabsSettingsWindow : Window
     public ElevenLabsSettingsWindow(ElevenLabsSettingsViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = "TTS - ElevenLabs settings";
+        Title = Se.Language.Video.TextToSpeech.ElevenLabsSettings;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 
@@ -22,7 +23,7 @@ public class ElevenLabsSettingsWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        var labelStability = UiUtil.MakeLabel("Stability");
+        var labelStability = UiUtil.MakeLabel(Se.Language.Video.TextToSpeech.Stability);
         var sliderStability = new Slider
         {
             Minimum = 0,
@@ -34,7 +35,7 @@ public class ElevenLabsSettingsWindow : Window
         };
         var buttonStability = UiUtil.MakeButton(vm.ShowStabilityHelpCommand, IconNames.Help);
 
-        var labelSimilarity = UiUtil.MakeLabel("Similarity");
+        var labelSimilarity = UiUtil.MakeLabel(Se.Language.Video.TextToSpeech.Similarity);
         var sliderSimilarity = new Slider
         {
             Minimum = 0,
@@ -46,7 +47,7 @@ public class ElevenLabsSettingsWindow : Window
         };
         var buttonSimilarity = UiUtil.MakeButton(vm.ShowSimilarityHelpCommand, IconNames.Help);
 
-        var labelSpeakerBoost = UiUtil.MakeLabel("Speaker Boost");
+        var labelSpeakerBoost = UiUtil.MakeLabel(Se.Language.Video.TextToSpeech.SpeakerBoost);
         var sliderSpeakerBoost = new Slider
         {
             Minimum = 0,
@@ -58,7 +59,7 @@ public class ElevenLabsSettingsWindow : Window
         };
         var buttonSpeakerBoost = UiUtil.MakeButton(vm.ShowSpeakerBoostHelpCommand, IconNames.Help);
 
-        var labelSpeed = UiUtil.MakeLabel("Speed");
+        var labelSpeed = UiUtil.MakeLabel(Se.Language.General.Speed);
         var sliderSpeed = new Slider
         {
             Minimum = 0.7,
@@ -70,7 +71,7 @@ public class ElevenLabsSettingsWindow : Window
         };
         var buttonSpeed = UiUtil.MakeButton(vm.ShowSpeedHelpCommand, IconNames.Help);
 
-        var buttonWeb = UiUtil.MakeButton("More info", vm.ShowMoreOnWebCommand).WithIconLeft(IconNames.Web);
+        var buttonWeb = UiUtil.MakeButton(Se.Language.General.MoreInfo, vm.ShowMoreOnWebCommand).WithIconLeft(IconNames.Web);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonWeb, buttonOk, buttonCancel);

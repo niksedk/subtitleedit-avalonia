@@ -1,13 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Timers;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
@@ -22,6 +12,16 @@ using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Voices;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Timers;
 using ElevenLabsSettingsViewModel = Nikse.SubtitleEdit.Features.Video.TextToSpeech.ElevenLabsSettings.ElevenLabsSettingsViewModel;
 using Timer = System.Timers.Timer;
 
@@ -48,7 +48,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
     [ObservableProperty] private bool _autoContinue;
     [ObservableProperty] private bool _isPlayVisible;
     [ObservableProperty] private bool _isStopVisible;
-    [ObservableProperty] private bool _islevenLabsEngineV3Selected;
+    [ObservableProperty] private bool _isElevenLabsEngineV3Selected;
     [ObservableProperty] private double _stability;
     [ObservableProperty] private double _similarity;
     [ObservableProperty] private double _speakerBoost;
@@ -216,7 +216,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
             return;
         }
 
-        var folder = await _folderHelper.PickFolderAsync(Window!, "Select a folder to save to");
+        var folder = await _folderHelper.PickFolderAsync(Window!, Se.Language.General.SelectSaveFolder);
         if (string.IsNullOrEmpty(folder))
         {
             return;
@@ -229,10 +229,10 @@ public partial class ReviewSpeechViewModel : ObservableObject
         {
             var answer = await MessageBox.Show(
                 Window,
-                "Overwrite?",
-                $"Do you want overwrite files in \"{folder}?",
-                 MessageBoxButtons.YesNo,
-                 MessageBoxIcon.Question);
+                Se.Language.General.OverwriteQuestion,
+                string.Format(Se.Language.General.OverwriteFilesInFolderX, folder),
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
 
             if (answer != MessageBoxResult.Yes)
             {
@@ -247,7 +247,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
             {
                 await MessageBox.Show(
                     Window,
-                    "Overwrite failed",
+                    Se.Language.General.Error,
                     $"Could not overwrite the file \"{jsonFileName}" + Environment.NewLine + e.Message,
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
@@ -274,7 +274,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
                 {
                     await MessageBox.Show(
                         Window,
-                        "Overwrite failed",
+                        Se.Language.General.Error,
                         $"Could not overwrite the file \"{targetFileName}" + Environment.NewLine + e.Message,
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
@@ -418,7 +418,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
         _cancellationTokenSource = new CancellationTokenSource();
         _cancellationToken = _cancellationTokenSource.Token;
         _skipAutoContinue = false;
-        _startPlayTicks = DateTime.UtcNow.Ticks; 
+        _startPlayTicks = DateTime.UtcNow.Ticks;
         await PlayAudio(line.StepResult.CurrentFileName);
     }
 
@@ -687,7 +687,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
         var engine = SelectedEngine;
         var voice = SelectedVoice;
         var model = SelectedModel;
-        IslevenLabsEngineV3Selected = false;
+        IsElevenLabsEngineV3Selected = false;
         if (engine == null || voice == null || model == null)
         {
             return;
@@ -697,8 +697,8 @@ public partial class ReviewSpeechViewModel : ObservableObject
         {
             if (engine is ElevenLabs && model == "eleven_v3")
             {
-                IslevenLabsEngineV3Selected = true;
-            }   
+                IsElevenLabsEngineV3Selected = true;
+            }
 
             if (engine.HasLanguageParameter)
             {

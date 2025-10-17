@@ -9,9 +9,9 @@ namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.VoiceSettings;
 public partial class VoiceSettingsViewModel : ObservableObject
 {
     [ObservableProperty] private string _voiceTestText;
-    
+
     public Window? Window { get; set; }
-    
+
     public bool OkPressed { get; private set; }
     public bool RefreshVoices { get; private set; }
 
@@ -19,9 +19,9 @@ public partial class VoiceSettingsViewModel : ObservableObject
     {
         VoiceTestText = Se.Settings.Video.TextToSpeech.VoiceTestText;
     }
-    
-    [RelayCommand]                   
-    private void Ok() 
+
+    [RelayCommand]
+    private void Ok()
     {
         Se.Settings.Video.TextToSpeech.VoiceTestText = VoiceTestText;
         Se.SaveSettings();
@@ -39,8 +39,8 @@ public partial class VoiceSettingsViewModel : ObservableObject
         Window?.Close();
     }
 
-    [RelayCommand]                   
-    private void Cancel() 
+    [RelayCommand]
+    private void Cancel()
     {
         Window?.Close();
     }
