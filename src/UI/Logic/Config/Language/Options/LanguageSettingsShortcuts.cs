@@ -197,9 +197,9 @@ public class LanguageSettingsShortcuts
     public string ChangeFrameRate { get; set; }
     public string ChangeSpeed { get; set; }
     public string TranslateViaCopyPaste { get; set; }
-    public string Shortcuts { get; internal set; }
-    public string WordLists { get; internal set; }
-    public string ChooseLanguage { get; internal set; }
+    public string Shortcuts { get; set; }
+    public string WordLists { get; set; }
+    public string ChooseLanguage { get; set; }
 
     public LanguageSettingsShortcuts()
     {
