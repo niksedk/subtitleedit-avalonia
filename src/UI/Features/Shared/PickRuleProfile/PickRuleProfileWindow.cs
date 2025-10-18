@@ -106,7 +106,7 @@ public class PickRuleProfileWindow : Window
         dataGrid.Bind(DataGrid.ItemsSourceProperty, new Binding(nameof(vm.Profiles)) { Source = vm });
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedProfile)) { Source = vm });
         dataGrid.AddHandler(KeyDownEvent, vm.DataGridDown, RoutingStrategies.Tunnel);
-
+        dataGrid.DoubleTapped += vm.DataGridDoubleTapped;
         _profileDataGrid = dataGrid;
 
         return UiUtil.MakeBorderForControlNoPadding(dataGrid);

@@ -33,6 +33,7 @@ public class LanguageMain
     public string ReplacedXWithYCountZ { get; set; }
     public string ReplacedXWithYInLineZ { get; set; }
     public string XShotChangedLoaded { get; set; }
+    public string RuleProfileIsX { get; set; }
 
     public LanguageMain()
     {
@@ -61,5 +62,6 @@ public class LanguageMain
         ReplacedXWithYCountZ = "Replaced '{0}' with '{1}' ({2} occurrences)";
         ReplacedXWithYInLineZ = "Replaced '{0}' with '{1}' in line {2}";
         XShotChangedLoaded = "{0} shot changes loaded";
+        RuleProfileIsX = "Rule profile is now '{0}'";
     }
 }

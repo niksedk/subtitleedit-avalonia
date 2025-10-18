@@ -79,4 +79,13 @@ public partial class PickRuleProfileViewModel : ObservableObject
             Ok();
         }
     }
+
+    public void DataGridDoubleTapped(object? sender, TappedEventArgs e)
+    {
+        if (SelectedProfile != null)
+        {
+            e.Handled = true;
+            Ok();
+        }
+    }
 }
