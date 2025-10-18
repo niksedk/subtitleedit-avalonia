@@ -1476,7 +1476,43 @@ public partial class MainViewModel :
             return;
         }
 
-        //TODO: implement
+        // Build selection mask
+        var total = Subtitles.Count;
+        var isSelected = new bool[total];
+        for (int i = 0; i < total; i++)
+        {
+            isSelected[i] = false;
+        }
+
+        foreach (var item in selectedItems)
+        {
+            var idx = Subtitles.IndexOf(item);
+            if (idx >= 0 && idx < total)
+            {
+                isSelected[idx] = true;
+            }
+        }
+
+        // Remove selected cells (texts) and shift remaining up
+        var newTexts = new List<string>(total);
+        for (int i = 0; i < total; i++)
+        {
+            if (!isSelected[i])
+            {
+                newTexts.Add(Subtitles[i].Text);
+            }
+        }
+
+        // Pad with empty strings at the end to keep row count
+        while (newTexts.Count < total)
+        {
+            newTexts.Add(string.Empty);
+        }
+
+        for (int i = 0; i < total; i++)
+        {
+            Subtitles[i].Text = newTexts[i];
+        }
 
         _shortcutManager.ClearKeys();
     }
@@ -1491,7 +1527,45 @@ public partial class MainViewModel :
             return;
         }
 
-        //TODO: implement
+        var total = Subtitles.Count;
+        var texts = Subtitles.Select(p => p.Text).ToList();
+
+        // Insert empty cells at the original selection indices and shift down
+        // Use delta to keep correct original target positions
+        var indices = selectedItems
+            .Select(x => Subtitles.IndexOf(x))
+            .Where(i => i >= 0 && i < total)
+            .Distinct()
+            .OrderBy(i => i)
+            .ToList();
+
+        int delta = 0;
+        foreach (var idx in indices)
+        {
+            var insertAt = idx + delta;
+            if (insertAt < 0) insertAt = 0;
+            if (insertAt > texts.Count) insertAt = texts.Count;
+            texts.Insert(insertAt, string.Empty);
+            delta++;
+        }
+
+        // Trim overflow to match row count
+        if (texts.Count > total)
+        {
+            texts.RemoveRange(total, texts.Count - total);
+        }
+        else
+        {
+            while (texts.Count < total)
+            {
+                texts.Add(string.Empty);
+            }
+        }
+
+        for (int i = 0; i < total; i++)
+        {
+            Subtitles[i].Text = texts[i];
+        }
 
         _shortcutManager.ClearKeys();
     }
@@ -1532,7 +1606,54 @@ public partial class MainViewModel :
             return;
         }
 
-        //TODO: implement
+        var total = Subtitles.Count;
+        var sel = selectedItems
+            .Select(x => Subtitles.IndexOf(x))
+            .Where(i => i >= 0 && i < total)
+            .Distinct()
+            .OrderBy(i => i)
+            .ToList();
+
+        if (sel.Count == 0)
+        {
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        // Build contiguous blocks of selected indices
+        List<(int start, int end)> blocks = new();
+        int pos = 0;
+        while (pos < sel.Count)
+        {
+            int start = sel[pos];
+            int end = start;
+            while (pos + 1 < sel.Count && sel[pos + 1] == end + 1)
+            {
+                pos++;
+                end = sel[pos];
+            }
+            blocks.Add((start, end));
+            pos++;
+        }
+
+        // Move each block up by one by rotating:
+        // [above][selected block] -> [selected block shifts up][above moves to last selected]
+        foreach (var (start, end) in blocks)
+        {
+            if (start <= 0)
+            {
+                // cannot move topmost line up
+                continue;
+            }
+
+            var temp = Subtitles[start - 1].Text;
+            // shift up
+            for (int i = start - 1; i < end; i++)
+            {
+                Subtitles[i].Text = Subtitles[i + 1].Text;
+            }
+            Subtitles[end].Text = temp;
+        }
 
         _shortcutManager.ClearKeys();
     }
@@ -1547,7 +1668,54 @@ public partial class MainViewModel :
             return;
         }
 
-        //TODO: implement
+        var total = Subtitles.Count;
+        var sel = selectedItems
+            .Select(x => Subtitles.IndexOf(x))
+            .Where(i => i >= 0 && i < total)
+            .Distinct()
+            .OrderBy(i => i)
+            .ToList();
+
+        if (sel.Count == 0)
+        {
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        // Build contiguous blocks of selected indices
+        List<(int start, int end)> blocks = new();
+        int pos = 0;
+        while (pos < sel.Count)
+        {
+            int start = sel[pos];
+            int end = start;
+            while (pos + 1 < sel.Count && sel[pos + 1] == end + 1)
+            {
+                pos++;
+                end = sel[pos];
+            }
+            blocks.Add((start, end));
+            pos++;
+        }
+
+        // Process from bottommost block to top to avoid interference
+        for (int b = blocks.Count - 1; b >= 0; b--)
+        {
+            var (start, end) = blocks[b];
+            if (end >= total - 1)
+            {
+                // cannot move bottommost line down
+                continue;
+            }
+
+            var temp = Subtitles[end + 1].Text;
+            // shift down
+            for (int i = end + 1; i > start; i--)
+            {
+                Subtitles[i].Text = Subtitles[i - 1].Text;
+            }
+            Subtitles[start].Text = temp;
+        }
 
         _shortcutManager.ClearKeys();
     }

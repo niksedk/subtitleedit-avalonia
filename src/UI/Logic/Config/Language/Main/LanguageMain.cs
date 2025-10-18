@@ -38,9 +38,16 @@ public class LanguageMain
     public string OneLineCopiedFromOriginal { get; set; }
     public string XLinesSwitched { get; set; }
     public string OneLineSwitched { get; set; }
-    public string XLinesMerged{ get; set; }
+    public string XLinesMerged { get; set; }
     public string OneLineMerged { get; set; }
     public string SpeedIsNowX { get; set; }
+    public string DeleteText { get; set; }
+    public string DeleteTextAndShiftCellsUp { get; set; }
+    public string InsertEmptyTextAndShiftCellsDown { get; set; }
+    public string InsertTextFromSubtitleDotDotDot { get; set; }
+    public string PasteFromClipboardDotDotDot { get; set; }
+    public string TextUp { get; set; }
+    public string TextDown { get; set; }
 
     public LanguageMain()
     {
@@ -77,5 +84,12 @@ public class LanguageMain
         XLinesMerged = "X lines merged";
         OneLineMerged = "One line merged";
         SpeedIsNowX = "Speed is now '{0}'";
+        DeleteText = "Delete text";
+        DeleteTextAndShiftCellsUp = "Delete text and shift cells up";
+        InsertEmptyTextAndShiftCellsDown = "Insert empty text and shift cells down";
+        InsertTextFromSubtitleDotDotDot = "Insert text from subtitle...";
+        PasteFromClipboardDotDotDot = "Paste from clipboard...";
+        TextUp = "Text up";
+        TextDown = "Text down";
     }
 }

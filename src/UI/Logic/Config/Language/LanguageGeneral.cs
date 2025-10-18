@@ -457,6 +457,7 @@ public class LanguageGeneral
     public string MergeWithLineAfterKeepBreaks { get; set; }
     public string SplitAtTextBoxCursorPosition { get; set; }
     public string Shortcut { get; set; }
+    public string Column { get; set; }
 
     public LanguageGeneral()
     {
@@ -910,5 +911,6 @@ public class LanguageGeneral
         MergeWithLineAfterKeepBreaks = "Merge with line after (keep breaks)";
         SplitAtTextBoxCursorPosition = "Split at text cursor position";
         Shortcut = "Shortcut";
+        Column = "Column";  
     }
 }

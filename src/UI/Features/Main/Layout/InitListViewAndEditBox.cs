@@ -498,6 +498,24 @@ public static class InitListViewAndEditBox
         insertAfterMenuItem.Command = vm.InsertLineAfterCommand;
         flyout.Items.Add(insertAfterMenuItem);
 
+        var columnMenuItem = new MenuItem
+        {
+            Header = Se.Language.General.Column,
+            DataContext = vm,
+            Items =
+            {
+                new MenuItem { Header = Se.Language.Main.DeleteText, Command = vm.ColumnDeleteTextCommand },
+                new MenuItem { Header = Se.Language.Main.DeleteTextAndShiftCellsUp, Command = vm.ColumnDeleteTextAndShiftCellsUpCommand},
+                new MenuItem { Header = Se.Language.Main.InsertEmptyTextAndShiftCellsDown, Command = vm.ColumnInsertEmptyTextAndShiftCellsDownCommand },
+                new MenuItem { Header = Se.Language.Main.InsertTextFromSubtitleDotDotDot, Command = vm.ColumnInsertTextFromSubtitleCommand },
+                new MenuItem { Header = Se.Language.Main.PasteFromClipboardDotDotDot, Command = vm.ColumnPasteFromClipboardCommand},
+                new MenuItem { Header = Se.Language.Main.TextUp, Command = vm.ColumnTextUpCommand },
+                new MenuItem { Header = Se.Language.Main.TextDown, Command = vm.ColumnTextDownCommand },
+            }
+        };
+        columnMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        flyout.Items.Add(columnMenuItem);
+
         var sep1 = new Separator { DataContext = vm };
         sep1.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
         flyout.Items.Add(sep1);
