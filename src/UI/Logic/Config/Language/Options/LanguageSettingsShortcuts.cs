@@ -400,5 +400,8 @@ public class LanguageSettingsShortcuts
         ChangeFrameRate = "Change frame rate";
         ChangeSpeed = "Change speed";
         TranslateViaCopyPaste = "Translate via copy-paste";
+        Shortcuts = "Shortcuts";
+        WordLists = "Word lists";
+        ChooseLanguage = "Choose language";
     }
 }
