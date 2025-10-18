@@ -4524,7 +4524,7 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private void WaveformSetEndAngGoToNext()
+    private void WaveformSetEndAndGoToNext()
     {
         var s = SelectedSubtitle;
         if (s == null || VideoPlayerControl == null || LockTimeCodes)
@@ -4579,6 +4579,38 @@ public partial class MainViewModel :
         s.EndTime = TimeSpan.FromSeconds(videoPositionSeconds);
         var nextStart = s.EndTime.TotalMilliseconds + gapMs;
         next.StartTime = TimeSpan.FromMilliseconds(nextStart);
+
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void WaveformSetEndAndStartOfNextAfterGapAndGoToNext()
+    {
+        var s = SelectedSubtitle;
+        if (s == null || AudioVisualizer?.WavePeaks == null || VideoPlayerControl == null || LockTimeCodes)
+        {
+            return;
+        }
+
+        var idx = Subtitles.IndexOf(s);
+        var next = Subtitles.GetOrNull(idx + 1);
+        if (next == null)
+        {
+            return;
+        }
+
+        var videoPositionSeconds = VideoPlayerControl.Position;
+        var gapMs = Se.Settings.General.MinimumMillisecondsBetweenLines;
+        if (videoPositionSeconds < s.StartTime.TotalSeconds + 0.001)
+        {
+            return;
+        }
+
+        s.EndTime = TimeSpan.FromSeconds(videoPositionSeconds);
+        var nextStart = s.EndTime.TotalMilliseconds + gapMs;
+        next.StartTime = TimeSpan.FromMilliseconds(nextStart);
+
+        SelectAndScrollToRow(idx + 1);
 
         _updateAudioVisualizer = true;
     }
@@ -4658,7 +4690,7 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private void FetchFirstWordForNextSubtitle()
+    private void FetchFirstWordFromNextSubtitle()
     {
         var s = SelectedSubtitle;
         if (s == null)
@@ -4808,6 +4840,19 @@ public partial class MainViewModel :
         else
         {
             EditTextBox.Focus();
+        }
+    }
+
+    [RelayCommand]
+    private void ToggleFocusTextBoxAndSubtitleGrid()
+    {
+        if (SubtitleGrid.IsFocused)
+        {
+            EditTextBox.Focus();
+        }
+        else
+        {
+            SubtitleGrid.Focus();
         }
     }
 
