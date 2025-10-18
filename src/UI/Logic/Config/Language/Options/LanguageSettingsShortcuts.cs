@@ -150,6 +150,56 @@ public class LanguageSettingsShortcuts
     public string SubtitleGridCopy { get; set; }
     public string SubtitleGridPaste { get; set; }
     public string SetShortcutForX { get; set; }
+    public string CommandFileNewKeepVideo { get; set; }
+    public string FileOpenOriginal { get; set; }
+    public string FileCloseOriginal { get; set; }
+    public string RestoreAutoBackup { get; set; }
+    public string OpenContainingFolder { get; set; }
+    public string ImportTimeCodes { get; set; }
+    public string ImportSubtitleWithManuallyChosenEncoding { get; set; }
+    public string ExportBluRaySup { get; set; }
+    public string ExportCustomTextFormat { get; set; }
+    public string ExportPlainText { get; set; }
+    public string ShowHistory { get; set; }
+    public string ToggleRightToLeft { get; set; }
+    public string ModifySelection { get; set; }
+    public string AdjustDurations { get; set; }
+    public string ApplyDurationLimits { get; set; }
+    public string BatchConvert { get; set; }
+    public string BridgeGaps { get; set; }
+    public string ApplyMinGap { get; set; }
+    public string ChangeCasing { get; set; }
+    public string FixCommonErrors { get; set; }
+    public string MakeEmptyTranslationFromCurrentSubtitle { get; set; }
+    public string MergeLinesWithSameText { get; set; }
+    public string MergeLinesWithSameTimeCodes { get; set; }
+    public string SplitBreakLongLines { get; set; }
+    public string MergeShortLines { get; set; }
+    public string RemoveTextForHearingImpaired { get; set; }
+    public string JoinSubtitles { get; set; }
+    public string SplitSubtitle { get; set; }
+    public string SpellCheck { get;  set; }
+    public string SpellCheckGetDictionary { get;  set; }
+    public string OpenVideo { get;  set; }
+    public string OpenVideoFromUrl { get;  set; }
+    public string CloseVideo { get;  set; }
+    public string AudioToText { get;  set; }
+    public string TextToSpeech { get;  set; }
+    public string BurnIn { get;  set; }
+    public string GenerateTransparent { get;  set; }
+    public string UndockVideoControls { get; set; }
+    public string RedockVideoControls { get; set; }
+    public string GenerateBlankVideo { get; set; }
+    public string ReencodeVideo { get; set; }
+    public string CutVideo { get; set; }
+    public string AdjustAllTimes { get; set; }
+    public string VisualSync { get; set; }
+    public string ChangeFrameRate { get; set; }
+    public string ChangeSpeed { get; set; }
+    public string TranslateViaCopyPaste { get; set; }
+    public string Shortcuts { get; set; }
+    public string WordLists { get; set; }
+    public string ChooseLanguage { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -303,5 +353,55 @@ public class LanguageSettingsShortcuts
         SubtitleGridCopy = "Subtitle grid: Copy";
         SubtitleGridPaste = "Subtitle grid: Paste";
         SetShortcutForX = "Set shortcut for \"{0}\"";
+        CommandFileNewKeepVideo = "New (keep video)";
+        FileOpenOriginal = "Open original";
+        FileCloseOriginal = "Close original";
+        RestoreAutoBackup = "Restore auto-backup";
+        OpenContainingFolder = "Open containing folder";
+        ImportTimeCodes = "Import time codes";
+        ImportSubtitleWithManuallyChosenEncoding = "Import subtitle with manually chosen encoding";
+        ExportBluRaySup = "Export Blu-ray SUP";
+        ExportCustomTextFormat = "Export custom text format";
+        ExportPlainText = "Export plain text";
+        ShowHistory = "Show history";
+        ToggleRightToLeft = "Toggle right-to-left";
+        ModifySelection = "Modify selection";
+        AdjustDurations = "Adjust durations";
+        ApplyDurationLimits = "Apply duration limits";
+        BatchConvert = "Batch convert";
+        BridgeGaps = "Bridge gaps";
+        ApplyMinGap = "Apply min gap";
+        ChangeCasing = "Change casing";
+        FixCommonErrors = "Fix common errors";
+        MakeEmptyTranslationFromCurrentSubtitle = "Make empty translation from current subtitle";
+        MergeLinesWithSameText = "Merge lines with same text";
+        MergeLinesWithSameTimeCodes = "Merge lines with same time codes";
+        SplitBreakLongLines = "Split/rebalance long lines";
+        MergeShortLines = "Merge short lines";
+        RemoveTextForHearingImpaired = "Remove text for hearing impaired";
+        JoinSubtitles = "Join subtitles";
+        SplitSubtitle = "Split subtitle";
+        SpellCheck = "Spell check";
+        SpellCheckGetDictionary = "Get spell check dictionary";
+        OpenVideo = "Open video";
+        OpenVideoFromUrl = "Open video from URL";
+        CloseVideo = "Close video";
+        AudioToText = "Audio to text";
+        TextToSpeech = "Text to speech";
+        BurnIn = "Generate video with burned-in subtitles";
+        GenerateTransparent = "Generate transparent video with subtitles";
+        UndockVideoControls = "Un-dock video controls";
+        RedockVideoControls = "Re-dock video controls";
+        GenerateBlankVideo = "Generate blank video";
+        ReencodeVideo = "Re-encode video";
+        CutVideo = "Cut video";
+        AdjustAllTimes = "Adjust all times";
+        VisualSync = "Visual sync";
+        ChangeFrameRate = "Change frame rate";
+        ChangeSpeed = "Change speed";
+        TranslateViaCopyPaste = "Translate via copy-paste";
+        Shortcuts = "Shortcuts";
+        WordLists = "Word lists";
+        ChooseLanguage = "Choose language";
     }
 }
