@@ -4573,7 +4573,7 @@ public partial class MainViewModel :
             idx = 0;
         }
         
-        SelectedSpeed = Speeds [idx];
+        SelectedSpeed = Speeds[idx];
         ShowStatus(string.Format(Se.Language.Main.SpeedIsNowX, SelectedSpeed));
     }
 
