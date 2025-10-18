@@ -108,11 +108,6 @@ public partial class ShortcutsViewModel : ObservableObject
             children.Add(leaf);
             FlatNodes.Add(leaf);
         }
-
-        if (children.Count > 0)
-        {
-            var node = new ShortcutTreeNode(categoryName, categoryName, children);
-        }
     }
 
     private static string MakeDisplayName(ShortCut x, bool includeShortCutKeys = true)

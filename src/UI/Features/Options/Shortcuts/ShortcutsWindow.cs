@@ -2,8 +2,11 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Media;
+using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
 using System;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
@@ -33,7 +36,7 @@ public class ShortcutsWindow : Window
             Watermark = language.SearchShortcuts,
             Margin = new Thickness(10),
             Width = double.NaN,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
         };
         _searchBox.Bind(TextBox.TextProperty, new Binding(nameof(vm.SearchText)) { Source = vm });
 
@@ -67,8 +70,8 @@ public class ShortcutsWindow : Window
             SelectionMode = DataGridSelectionMode.Single,
             CanUserResizeColumns = true,
             CanUserSortColumns = true,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
             Width = double.NaN,
             Height = double.NaN,
             DataContext = vm,
@@ -110,9 +113,29 @@ public class ShortcutsWindow : Window
         grid.Add(topGrid, 0);
         grid.Add(borderDataGrid, 1);
 
+
+        var labelBadgeCount = new Border
+        {
+            Background = UiUtil.GetBorderBrush(),     // badge background
+            CornerRadius = new CornerRadius(10),      // makes it pill-like
+            Padding = new Thickness(6, 0, 6, 0),      // spacing around text
+            Margin = new Thickness(8),
+            VerticalAlignment = VerticalAlignment.Top,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Child = new TextBlock
+            {
+                [!TextBlock.TextProperty] = new Binding(nameof(vm.FlatNodes) + ".Count", BindingMode.OneWay) { Converter = new NumberToStringWithThousandSeparator() },
+                FontSize = 10,
+                VerticalAlignment = VerticalAlignment.Center,
+                Foreground = Brushes.WhiteSmoke,
+                HorizontalAlignment = HorizontalAlignment.Center
+            }
+        };
+        grid.Add(labelBadgeCount, 1);
+
         var editPanel = new StackPanel
         {
-            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            Orientation = Orientation.Horizontal,
             Margin = new Thickness(10),
         };
 
@@ -157,9 +180,9 @@ public class ShortcutsWindow : Window
             Width = 200,
             Margin = new Thickness(10, 0, 5, 0),
         };
-        comboBoxKeys.Bind(ComboBox.ItemsSourceProperty, new Binding(nameof(vm.Shortcuts)) { Source = vm });
-        comboBoxKeys.Bind(ComboBox.SelectedItemProperty, new Binding(nameof(vm.SelectedShortcut)) { Source = vm });
-        comboBoxKeys.Bind(ComboBox.IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
+        comboBoxKeys.Bind(ItemsControl.ItemsSourceProperty, new Binding(nameof(vm.Shortcuts)) { Source = vm });
+        comboBoxKeys.Bind(Avalonia.Controls.Primitives.SelectingItemsControl.SelectedItemProperty, new Binding(nameof(vm.SelectedShortcut)) { Source = vm });
+        comboBoxKeys.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(comboBoxKeys);
         comboBoxKeys.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);
 

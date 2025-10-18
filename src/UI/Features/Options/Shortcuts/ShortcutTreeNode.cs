@@ -1,6 +1,6 @@
-using Nikse.SubtitleEdit.Logic;
-using System.Collections.ObjectModel;
+using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
@@ -8,7 +8,8 @@ public partial class ShortcutTreeNode : ObservableObject
 {
     [ObservableProperty] private string _category;
     [ObservableProperty] private string _title;
-    public ObservableCollection<ShortcutTreeNode>? SubNodes { get; }
+    [ObservableProperty] private StackPanel _textPanel;
+
     public ShortCut? ShortCut { get; set; }
 
     public ShortcutTreeNode(string category, string title, ShortCut shortcut)
@@ -16,12 +17,8 @@ public partial class ShortcutTreeNode : ObservableObject
         Category = category;
         Title = title;
         ShortCut = shortcut;
-    }
 
-    public ShortcutTreeNode(string category, string title, ObservableCollection<ShortcutTreeNode> subNodes)
-    {
-        Category = category;
-        Title = title;
-        SubNodes = subNodes;
+        TextPanel = new StackPanel();
+
     }
 }

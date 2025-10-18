@@ -442,7 +442,6 @@ public partial class CompareViewModel : ObservableObject
         return null;
     }
 
-
     private int GetColumnsEqualExceptNumberAndDuration(CompareItem p1, CompareItem p2)
     {
         if (p1 == null || p2 == null)
