@@ -914,7 +914,7 @@ public partial class MainViewModel :
         await SaveSubtitleAs();
         _shortcutManager.ClearKeys();
     }
-    
+
     [RelayCommand]
     private async Task OpenContainingFolder()
     {
@@ -1281,10 +1281,10 @@ public partial class MainViewModel :
         if (subtitle.Paragraphs.Count != Subtitles.Count)
         {
             var message = "The time code import subtitle does not have the same number of lines as the current subtitle." + Environment.NewLine
-                          + "Imported lines: " + subtitle.Paragraphs.Count + Environment.NewLine
-                          + "Current lines: " + Subtitles.Count + Environment.NewLine
-                          + Environment.NewLine +
-                          "Do you want to continue anyway?";
+                + "Imported lines: " + subtitle.Paragraphs.Count + Environment.NewLine
+                + "Current lines: " + Subtitles.Count + Environment.NewLine
+                + Environment.NewLine +
+                "Do you want to continue anyway?";
 
             var answer = await MessageBox.Show(Window, Se.Language.General.Import, message, MessageBoxButtons.YesNoCancel,
                 MessageBoxIcon.Error);
@@ -1340,10 +1340,7 @@ public partial class MainViewModel :
         }
 
         var result =
-            await _windowService.ShowDialogAsync<WaveformSeekSilenceWindow, WaveformSeekSilenceViewModel>(Window!, vm =>
-            {
-                vm.Initialize(AudioVisualizer.WavePeaks);
-            });
+            await _windowService.ShowDialogAsync<WaveformSeekSilenceWindow, WaveformSeekSilenceViewModel>(Window!, vm => { vm.Initialize(AudioVisualizer.WavePeaks); });
 
         if (!result.OkPressed || !result.SilenceMaxVolume.HasValue || !result.SilenceMinDuration.HasValue)
         {
@@ -1406,7 +1403,8 @@ public partial class MainViewModel :
             _subtitle.Paragraphs.AddRange(subsToKeep.Select(p => p.ToParagraph()));
         }
 
-        AudioVisualizer.GenerateTimeCodes(_subtitle, startFromSeconds, result.ScanBlockSize.Value, result.ScanBlockAverageMin.Value, result.ScanBlockAverageMax.Value, result.SplitLongSubtitlesAtMs.Value);
+        AudioVisualizer.GenerateTimeCodes(_subtitle, startFromSeconds, result.ScanBlockSize.Value, result.ScanBlockAverageMin.Value, result.ScanBlockAverageMax.Value,
+            result.SplitLongSubtitlesAtMs.Value);
         SetSubtitles(_subtitle);
         _shortcutManager.ClearKeys();
     }
@@ -1584,11 +1582,11 @@ public partial class MainViewModel :
         }
 
         var result = await _windowService.ShowDialogAsync<ApplyDurationLimitsWindow, ApplyDurationLimitsViewModel>(Window!,
-        vm =>
-        {
-            var shotChanges = AudioVisualizer?.ShotChanges ?? new List<double>();
-            vm.Initialize(Subtitles.ToList(), shotChanges);
-        });
+            vm =>
+            {
+                var shotChanges = AudioVisualizer?.ShotChanges ?? new List<double>();
+                vm.Initialize(Subtitles.ToList(), shotChanges);
+            });
 
         if (result.OkPressed)
         {
@@ -1714,7 +1712,7 @@ public partial class MainViewModel :
         AutoFitColumns();
         ShowStatus(Se.Language.Main.CreatedEmptyTranslation);
     }
-    
+
     [RelayCommand]
     private void CopyTextFromOriginalToTranslation()
     {
@@ -1734,7 +1732,7 @@ public partial class MainViewModel :
         {
             subtitle.Text = subtitle.OriginalText;
         }
-        
+
         _shortcutManager.ClearKeys();
         var msg = string.Format(Se.Language.Main.XLinesCopiedFromOriginal, selectedItems.Count);
         if (selectedItems.Count == 1)
@@ -1744,7 +1742,7 @@ public partial class MainViewModel :
 
         ShowStatus(msg);
     }
-    
+
     [RelayCommand]
     private void SwitchOriginalAndTranslationTextSelectedLines()
     {
@@ -1764,7 +1762,7 @@ public partial class MainViewModel :
         {
             (subtitle.Text, subtitle.OriginalText) = (subtitle.OriginalText, subtitle.Text);
         }
-        
+
         _shortcutManager.ClearKeys();
         var msg = string.Format(Se.Language.Main.XLinesSwitched, selectedItems.Count);
         if (selectedItems.Count == 1)
@@ -1774,7 +1772,7 @@ public partial class MainViewModel :
 
         ShowStatus(msg);
     }
-    
+
     [RelayCommand]
     private void MergeOriginalIntoTranslationSelectedLines()
     {
@@ -1794,7 +1792,7 @@ public partial class MainViewModel :
         {
             subtitle.Text = subtitle.Text + Environment.NewLine + subtitle.OriginalText;
         }
-        
+
         _shortcutManager.ClearKeys();
         var msg = string.Format(Se.Language.Main.XLinesMerged, selectedItems.Count);
         if (selectedItems.Count == 1)
@@ -1993,10 +1991,7 @@ public partial class MainViewModel :
 
         var result = await _windowService
             .ShowDialogAsync<SplitBreakLongLinesWindow, SplitBreakLongLinesViewModel>(
-                Window!, vm =>
-                {
-                    vm.Initialize(Subtitles.ToList(), AudioVisualizer?.ShotChanges ?? new List<double>());
-                });
+                Window!, vm => { vm.Initialize(Subtitles.ToList(), AudioVisualizer?.ShotChanges ?? new List<double>()); });
 
         if (result.OkPressed)
         {
@@ -2026,10 +2021,7 @@ public partial class MainViewModel :
 
         var result = await _windowService
             .ShowDialogAsync<MergeShortLinesWindow, MergeShortLinesViewModel>(
-                Window!, vm =>
-                {
-                    vm.Initialize(Subtitles.ToList(), AudioVisualizer?.ShotChanges ?? new List<double>());
-                });
+                Window!, vm => { vm.Initialize(Subtitles.ToList(), AudioVisualizer?.ShotChanges ?? new List<double>()); });
 
         if (result.OkPressed)
         {
@@ -2232,6 +2224,7 @@ public partial class MainViewModel :
 
             ShowStatus(string.Format(Se.Language.Main.RuleProfileIsX, p.Name));
         }
+
         _shortcutManager.ClearKeys();
     }
 
@@ -2634,10 +2627,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<CopyPasteTranslateWindow, CopyPasteTranslateViewModel>(Window!, vm =>
-        {
-            vm.Initialize(Subtitles.ToList());
-        });
+        var result = await _windowService.ShowDialogAsync<CopyPasteTranslateWindow, CopyPasteTranslateViewModel>(Window!, vm => { vm.Initialize(Subtitles.ToList()); });
 
         if (!result.OkPressed)
         {
@@ -4534,6 +4524,36 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void WaveformSetEndAngGoToNext()
+    {
+        var s = SelectedSubtitle;
+        if (s == null || VideoPlayerControl == null || LockTimeCodes)
+        {
+            return;
+        }
+
+        var idx = Subtitles.IndexOf(s);
+        if (idx < 0)
+        {
+            return;
+        }
+
+        var videoPositionSeconds = VideoPlayerControl.Position;
+        var gap = Se.Settings.General.MinimumMillisecondsBetweenLines / 1000.0;
+        if (videoPositionSeconds < s.StartTime.TotalSeconds + gap)
+        {
+            return;
+        }
+
+        s.EndTime = TimeSpan.FromSeconds(videoPositionSeconds);
+
+        SelectAndScrollToRow(idx + 1);
+        
+        _updateAudioVisualizer = true;
+    }
+
+
+    [RelayCommand]
     private void WaveformSetEndAndStartOfNextAfterGap()
     {
         var s = SelectedSubtitle;
@@ -4632,7 +4652,7 @@ public partial class MainViewModel :
         {
             idx = 0;
         }
-        
+
         SelectedSpeed = Speeds[idx];
         ShowStatus(string.Format(Se.Language.Main.SpeedIsNowX, SelectedSpeed));
     }
@@ -4802,7 +4822,7 @@ public partial class MainViewModel :
     {
         MoveVideoPositionMs(1000);
     }
-    
+
     [RelayCommand]
     private void Video500MsBack()
     {
@@ -4826,7 +4846,7 @@ public partial class MainViewModel :
     {
         MoveVideoPositionMs(100);
     }
-    
+
     [RelayCommand]
     private void VideoOneFrameBack()
     {

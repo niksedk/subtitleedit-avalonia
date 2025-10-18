@@ -258,6 +258,7 @@ public class LanguageGeneral
     public string Copy { get; set; }
     public string SetStart { get; set; }
     public string SetEnd { get; set; }
+    public string SetEndAndGoToNext { get; set; }
     public string ExtendSelectedToPrevious { get; set; }
     public string ExtendSelectedToNext { get; set; }
     public string DeleteLineXPrompt { get; set; }
@@ -709,6 +710,7 @@ public class LanguageGeneral
         SplitLineAtTextBoxCursorPosition = "Split line at cursor position";
         SetStart = "Set start";
         SetEnd = "Set end";
+        SetEndAndGoToNext = "Set end and go to next";
         ExtendSelectedToPrevious = "Extend selected to previous";
         ExtendSelectedToNext = "Extend selected to next";
         DeleteLineXPrompt = "Delete line number {0}?";
