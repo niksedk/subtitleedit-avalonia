@@ -1,4 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.Enums;
+using Nikse.SubtitleEdit.Logic.Config;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
@@ -52,6 +57,48 @@ public partial class ProfileDisplay : ObservableObject
         DialogStyle = other.DialogStyle;
         ContinuationStyle = other.ContinuationStyle;
         CpsLineLengthStrategy = other.CpsLineLengthStrategy;
+    }
+
+    public ProfileDisplay(
+        RulesProfile other, 
+        List<DialogStyleDisplay> dialogStyles,
+        List<ContinuationStyleDisplay> continuationStyles,
+        List<CpsLineLengthStrategyDisplay> cpsLineLengthStrategies)
+    {
+        Name = other.Name;
+        SingleLineMaxLength = other.SubtitleLineMaximumLength;
+        OptimalCharsPerSec = (double)other.SubtitleOptimalCharactersPerSeconds;
+        MaxCharsPerSec = (double)other.SubtitleMaximumCharactersPerSeconds;
+        MaxWordsPerMin = (double) other.SubtitleMaximumWordsPerMinute;
+        MinDurationMs = other.SubtitleMinimumDisplayMilliseconds;
+        MaxDurationMs = other.SubtitleMaximumDisplayMilliseconds;
+        MinGapMs = other.MinimumMillisecondsBetweenLines;
+        MaxLines = other.MaxNumberOfLines;
+        UnbreakLinesShorterThan = other.MergeLinesShorterThan;
+        DialogStyle = dialogStyles.FirstOrDefault(p=>p.Code == other.DialogStyle.ToString()) ?? dialogStyles.First();
+        ContinuationStyle = continuationStyles.FirstOrDefault(p=>p.Code == other.ContinuationStyle.ToString()) ?? continuationStyles.First();
+        CpsLineLengthStrategy = cpsLineLengthStrategies.FirstOrDefault(p=>p.Code == other.CpsLineLengthStrategy.ToString()) ?? cpsLineLengthStrategies.First();
+    }
+
+    public RulesProfile ToRulesProfile()
+    {
+        var s = new SeGeneral();
+        return new RulesProfile
+        {
+            Name = Name,
+            SubtitleLineMaximumLength = SingleLineMaxLength ?? s.SubtitleLineMaximumLength,
+            SubtitleOptimalCharactersPerSeconds = (decimal)(OptimalCharsPerSec ?? s.SubtitleOptimalCharactersPerSeconds),
+            SubtitleMaximumCharactersPerSeconds = (decimal)(MaxCharsPerSec ?? s.SubtitleMaximumCharactersPerSeconds),
+            SubtitleMaximumWordsPerMinute = (decimal)(MaxWordsPerMin ?? s.SubtitleMaximumWordsPerMinute),
+            SubtitleMinimumDisplayMilliseconds = MinDurationMs ?? s.SubtitleMinimumDisplayMilliseconds,
+            SubtitleMaximumDisplayMilliseconds = MaxDurationMs ?? s.SubtitleMaximumDisplayMilliseconds,
+            MinimumMillisecondsBetweenLines = MinGapMs ?? s.MinimumMillisecondsBetweenLines,
+            MaxNumberOfLines = MaxLines ?? s.MaxNumberOfLines,
+            MergeLinesShorterThan = UnbreakLinesShorterThan ?? s.UnbreakLinesShorterThan,
+            DialogStyle = Enum.Parse<DialogType>(DialogStyle.Code),
+            ContinuationStyle = Enum.Parse<ContinuationStyle>(ContinuationStyle.Code),
+            CpsLineLengthStrategy = CpsLineLengthStrategy.Code,
+        };
     }
 
     override public string ToString()

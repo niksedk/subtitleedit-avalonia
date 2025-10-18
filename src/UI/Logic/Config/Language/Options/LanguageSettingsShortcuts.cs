@@ -200,6 +200,7 @@ public class LanguageSettingsShortcuts
     public string Shortcuts { get; set; }
     public string WordLists { get; set; }
     public string ChooseLanguage { get; set; }
+    public string ChooseRuleProfile { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -403,5 +404,6 @@ public class LanguageSettingsShortcuts
         Shortcuts = "Shortcuts";
         WordLists = "Word lists";
         ChooseLanguage = "Choose language";
+        ChooseRuleProfile = "Choose rule profile";
     }
 }

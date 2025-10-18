@@ -446,6 +446,8 @@ public class LanguageGeneral
     public string OverwriteFilesInFolderX { get; set; }
     public string KeyFile { get; set; }
     public string Stereo { get; set; }
+    public string MergeWithLineBeforeKeepBreaks { get; set; }
+    public string MergeWithLineAfterKeepBreaks { get; set; }
 
     public LanguageGeneral()
     {
@@ -888,5 +890,7 @@ public class LanguageGeneral
         OverwriteFilesInFolderX = "Overwrite files in folder: \"{0}\"";
         KeyFile = "Key file";
         Stereo = "Stereo";
+        MergeWithLineBeforeKeepBreaks = "Merge with line before (keep breaks)";
+        MergeWithLineAfterKeepBreaks = "Merge with line after (keep breaks)";
     }
 }

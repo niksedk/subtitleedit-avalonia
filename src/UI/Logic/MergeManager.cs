@@ -18,7 +18,8 @@ namespace Nikse.SubtitleEdit.Logic
             AutoBreak,
             Normal,
             Unbreak,
-            UnbreakNoSpace
+            UnbreakNoSpace,
+            KeepBreaks
         }
 
         public Subtitle MergeSelectedLines(Subtitle inputSubtitle, int[] selectedIndices, BreakMode breakMode = BreakMode.Normal)
@@ -209,7 +210,7 @@ namespace Nikse.SubtitleEdit.Logic
                     .Replace(" " + Environment.NewLine, string.Empty)
                     .Replace(Environment.NewLine, string.Empty);
             }
-            else
+            else if (breakMode == BreakMode.KeepBreaks)
             {
                 text = Utilities.AutoBreakLine(text, inputSubtitle.AutoDetectGoogleLanguage());
             }

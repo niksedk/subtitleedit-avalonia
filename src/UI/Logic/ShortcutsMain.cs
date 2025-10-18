@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.Settings;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -188,6 +189,8 @@ public static class ShortcutsMain
         { nameof(MainViewModel.ShowSourceViewCommand), Se.Language.Options.Shortcuts.SourceView },
         { nameof(MainViewModel.MergeWithLineBeforeCommand), Se.Language.General.MergeWithLineBeforeAndAutoBreak },
         { nameof(MainViewModel.MergeWithLineAfterCommand), Se.Language.General.MergeWithLineAfterAndAutoBreak },
+        { nameof(MainViewModel.MergeWithLineBeforeKeepBreaksCommand), Se.Language.General.MergeWithLineBeforeKeepBreaks },
+        { nameof(MainViewModel.MergeWithLineAfterKeepBreaksCommand), Se.Language.General.MergeWithLineAfterKeepBreaks },
         { nameof(MainViewModel.MergeSelectedLinesCommand), Se.Language.General.MergeSelectedLines },
         { nameof(MainViewModel.MergeSelectedLinesDialogCommand), Se.Language.General.MergeSelectedLinesDialog },
         { nameof(MainViewModel.ShowColorPickerCommand), Se.Language.General.ChooseColorDotDotDot },
@@ -202,6 +205,7 @@ public static class ShortcutsMain
         { nameof(MainViewModel.SubtitleGridCutCommand), Se.Language.Options.Shortcuts.SubtitleGridCut },
         { nameof(MainViewModel.SubtitleGridCopyCommand), Se.Language.Options.Shortcuts.SubtitleGridCopy },
         { nameof(MainViewModel.SubtitleGridPasteCommand), Se.Language.Options.Shortcuts.SubtitleGridPaste },
+        { nameof(MainViewModel.ShowChooseProfileCommand), Se.Language.Options.Shortcuts.ChooseRuleProfile },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -337,6 +341,9 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.MergeWithLineBeforeCommand, nameof(vm.MergeWithLineBeforeCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.MergeWithLineAfterCommand, nameof(vm.MergeWithLineAfterCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.MergeSelectedLinesCommand, nameof(vm.MergeSelectedLinesCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.MergeWithLineBeforeKeepBreaksCommand, nameof(vm.MergeWithLineBeforeKeepBreaksCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.MergeWithLineAfterKeepBreaksCommand, nameof(vm.MergeWithLineAfterKeepBreaksCommand), ShortcutCategory.General);
+
         AddShortcut(shortcuts, vm.MergeSelectedLinesDialogCommand, nameof(vm.MergeSelectedLinesDialogCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowColorPickerCommand, nameof(vm.ShowColorPickerCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.WaveformSetEndAndStartOfNextAfterGapCommand, nameof(vm.WaveformSetEndAndStartOfNextAfterGapCommand), ShortcutCategory.Waveform);
@@ -350,6 +357,7 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.SubtitleGridCutCommand, nameof(vm.SubtitleGridCutCommand), ShortcutCategory.SubtitleGrid);
         AddShortcut(shortcuts, vm.SubtitleGridCopyCommand, nameof(vm.SubtitleGridCopyCommand), ShortcutCategory.SubtitleGrid);
         AddShortcut(shortcuts, vm.SubtitleGridPasteCommand, nameof(vm.SubtitleGridPasteCommand), ShortcutCategory.SubtitleGrid);
+        AddShortcut(shortcuts, vm.ShowChooseProfileCommand, nameof(vm.ShowChooseProfileCommand), ShortcutCategory.SubtitleGrid);
 
         return shortcuts;
     }

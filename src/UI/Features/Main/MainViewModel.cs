@@ -51,6 +51,7 @@ using Nikse.SubtitleEdit.Features.Shared.PickFontName;
 using Nikse.SubtitleEdit.Features.Shared.PickLayers;
 using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using Nikse.SubtitleEdit.Features.Shared.PickMp4Track;
+using Nikse.SubtitleEdit.Features.Shared.PickRuleProfile;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 using Nikse.SubtitleEdit.Features.Shared.SourceView;
 using Nikse.SubtitleEdit.Features.Shared.WaveformGuessTimeCodes;
@@ -2115,6 +2116,29 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private async Task ShowChooseProfile()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<PickRuleProfileWindow, PickRuleProfileViewModel>(Window!,
+            vm => 
+            {
+
+            });
+
+        if (result.OkPressed && result.SelectedProfile != null)
+        {
+            //ShowStatus(StatusTextRight = $"{result.TotalChangedWords} words corrected in spell check");
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+
+    [RelayCommand]
     private async Task ShowVideoAudioToTextWhisper()
     {
         var ffmpegOk = await RequireFfmpegOk();
@@ -3116,6 +3140,22 @@ public partial class MainViewModel :
     {
         _undoRedoManager.StopChangeDetection();
         MergeLineAfter();
+        _undoRedoManager.StartChangeDetection();
+    }
+
+    [RelayCommand]
+    private void MergeWithLineBeforeKeepBreaks()
+    {
+        _undoRedoManager.StopChangeDetection();
+        MergeLineBeforeKeepBreaks();
+        _undoRedoManager.StartChangeDetection();
+    }
+
+    [RelayCommand]
+    private void MergeWithLineAfterKeepBreaks()
+    {
+        _undoRedoManager.StopChangeDetection();
+        MergeLineAfterKeepBreaks();
         _undoRedoManager.StartChangeDetection();
     }
 
@@ -7210,7 +7250,31 @@ public partial class MainViewModel :
                 previous,
                 selectedItem,
             };
-            _mergeManager.MergeSelectedLines(Subtitles, list);
+            _mergeManager.MergeSelectedLines(Subtitles, list, breakMode: MergeManager.BreakMode.Normal);
+            Renumber();
+            SelectAndScrollToRow(index - 1);
+        }
+    }
+
+    private void MergeLineBeforeKeepBreaks()
+    {
+        var selectedItem = SelectedSubtitle;
+        if (selectedItem != null)
+        {
+            var index = Subtitles.IndexOf(selectedItem);
+            var previous = Subtitles.GetOrNull(index - 1);
+
+            if (previous == null)
+            {
+                return; // no next item to merge with
+            }
+
+            var list = new List<SubtitleLineViewModel>()
+            {
+                previous,
+                selectedItem,
+            };
+            _mergeManager.MergeSelectedLines(Subtitles, list, breakMode: MergeManager.BreakMode.KeepBreaks);
             Renumber();
             SelectAndScrollToRow(index - 1);
         }
@@ -7234,7 +7298,31 @@ public partial class MainViewModel :
                 selectedItem,
                 next
             };
-            _mergeManager.MergeSelectedLines(Subtitles, list);
+            _mergeManager.MergeSelectedLines(Subtitles, list, breakMode: MergeManager.BreakMode.Normal);
+            Renumber();
+            SelectAndScrollToRow(index);
+        }
+    }
+
+    private void MergeLineAfterKeepBreaks()
+    {
+        var selectedItem = SelectedSubtitle;
+        if (selectedItem != null)
+        {
+            var index = Subtitles.IndexOf(selectedItem);
+            var next = Subtitles.GetOrNull(index + 1);
+
+            if (next == null)
+            {
+                return; // no next item to merge with
+            }
+
+            var list = new List<SubtitleLineViewModel>()
+            {
+                selectedItem,
+                next
+            };
+            _mergeManager.MergeSelectedLines(Subtitles, list, breakMode: MergeManager.BreakMode.KeepBreaks);
             Renumber();
             SelectAndScrollToRow(index);
         }
