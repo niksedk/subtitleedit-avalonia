@@ -72,9 +72,10 @@ public class ElevenLabsSettingsWindow : Window
         var buttonSpeed = UiUtil.MakeButton(vm.ShowSpeedHelpCommand, IconNames.Help);
 
         var buttonWeb = UiUtil.MakeButton(Se.Language.General.MoreInfo, vm.ShowMoreOnWebCommand).WithIconLeft(IconNames.Web);
+        var buttonReset = UiUtil.MakeButton(Se.Language.General.Reset, vm.ResetCommand).WithIconLeft(IconNames.Repeat);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar(buttonWeb, buttonOk, buttonCancel);
+        var panelButtons = UiUtil.MakeButtonBar(buttonWeb, buttonReset, buttonOk, buttonCancel);
 
         var grid = new Grid
         {

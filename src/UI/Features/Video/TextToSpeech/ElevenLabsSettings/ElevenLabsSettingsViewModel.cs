@@ -78,6 +78,16 @@ public partial class ElevenLabsSettingsViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void Reset()
+    {
+        var settings = new SeVideoTextToSpeech();
+        Stability = settings.ElevenLabsStability;
+        Similarity = settings.ElevenLabsSimilarity;
+        SpeakerBoost = settings.ElevenLabsSpeakerBoost;
+        Speed = settings.ElevenLabsSpeed;
+    }
+
+    [RelayCommand]
     private void Ok()
     {
         OkPressed = true;

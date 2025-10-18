@@ -18,7 +18,7 @@ public class ReviewSpeechWindow : Window
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Video.TextToSpeech.ReviewAudioSegments;
-        Width = 1024;
+        Width = 1100;
         Height = 650;
         MinWidth = 700;
         MinHeight = 500;
@@ -123,7 +123,7 @@ public class ReviewSpeechWindow : Window
                 {
                     Header = Se.Language.General.Text,
                     Binding = new Binding(nameof(ReviewRow.Text)),
-                    Width = new DataGridLength(3, DataGridLengthUnitType.Auto),
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                     CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
             },
