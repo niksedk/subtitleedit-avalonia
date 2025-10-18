@@ -1450,6 +1450,109 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private async Task ColumnDeleteText()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (Window == null || selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var item in selectedItems)
+        {
+            item.Text = string.Empty;
+        }
+
+        _updateAudioVisualizer = true;
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ColumnDeleteTextAndShiftCellsUp()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (Window == null || selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        //TODO: implement
+
+        _shortcutManager.ClearKeys();
+    }
+
+
+    [RelayCommand]
+    private async Task ColumnInsertEmptyTextAndShiftCellsDown()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (Window == null || selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        //TODO: implement
+
+        _shortcutManager.ClearKeys();
+    }
+
+
+    [RelayCommand]
+    private async Task ColumnInsertTextFromSubtitle()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (Window == null || selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+
+    [RelayCommand]
+    private async Task ColumnPasteFromClipboard()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (Window == null || selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+
+    [RelayCommand]
+    private async Task ColumnTextUp()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (Window == null || selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        //TODO: implement
+
+        _shortcutManager.ClearKeys();
+    }
+
+
+    [RelayCommand]
+    private async Task ColumnTextDown()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (Window == null || selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        //TODO: implement
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
     private async Task VideoGenerateBlank()
     {
         var ffmpegOk = await RequireFfmpegOk();

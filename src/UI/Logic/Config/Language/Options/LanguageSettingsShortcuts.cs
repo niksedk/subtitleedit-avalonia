@@ -211,6 +211,7 @@ public class LanguageSettingsShortcuts
     public string TogglePlaybackSpeed { get; set; }
     public string SwitchOriginalAndTranslationSelectedLines { get; set; }
     public string MergeOriginalIntoTranslationSelectedLines { get; set; }
+    public string SeekSilence { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -425,5 +426,6 @@ public class LanguageSettingsShortcuts
         TogglePlaybackSpeed = "Toggle playback speed";
         SwitchOriginalAndTranslationSelectedLines = "Switch original and translation (selected lines)";
         MergeOriginalIntoTranslationSelectedLines = "Merge original and translation (selected lines)";
+        SeekSilence = "Seek silence";
     }
 }

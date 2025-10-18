@@ -188,6 +188,7 @@ public static class ShortcutsMain
         { nameof(MainViewModel.WaveformSetEndCommand),  Se.Language.General.SetEnd },
         { nameof(MainViewModel.WaveformSetEndAndGoToNextCommand),  Se.Language.General.SetEndAndGoToNext },
         { nameof(MainViewModel.ToggleShotChangesAtVideoPositionCommand),  Se.Language.General.ToggleShotChangesAtVideoPosition },
+        { nameof(MainViewModel.ShowWaveformSeekSilenceCommand),  Se.Language.Options.Shortcuts.SeekSilence },        
         { nameof(MainViewModel.ShowShotChangesListCommand),  Se.Language.General.ShowShotChangesList },
         { nameof(MainViewModel.VideoUndockControlsCommand),  Se.Language.Options.Shortcuts.UndockVideoControls },
         { nameof(MainViewModel.VideoRedockControlsCommand),  Se.Language.Options.Shortcuts.RedockVideoControls },
@@ -365,6 +366,7 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.WaveformSetEndAndStartOfNextAfterGapAndGoToNextCommand, nameof(vm.WaveformSetEndAndStartOfNextAfterGapAndGoToNextCommand), ShortcutCategory.Waveform);
         AddShortcut(shortcuts, vm.WaveformSetStartAndSetEndOfPreviousMinusGapCommand, nameof(vm.WaveformSetStartAndSetEndOfPreviousMinusGapCommand), ShortcutCategory.Waveform);
         AddShortcut(shortcuts, vm.ToggleShotChangesAtVideoPositionCommand, nameof(vm.ToggleShotChangesAtVideoPositionCommand), ShortcutCategory.Waveform);
+        AddShortcut(shortcuts, vm.ShowWaveformSeekSilenceCommand, nameof(vm.ShowWaveformSeekSilenceCommand), ShortcutCategory.Waveform);
 
         AddShortcut(shortcuts, vm.ResetWaveformZoomAndSpeedCommand, nameof(vm.ResetWaveformZoomAndSpeedCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ExtendSelectedToPreviousCommand, nameof(vm.ExtendSelectedToPreviousCommand), ShortcutCategory.General);
