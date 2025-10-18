@@ -201,6 +201,12 @@ public class LanguageSettingsShortcuts
     public string WordLists { get; set; }
     public string ChooseLanguage { get; set; }
     public string ChooseRuleProfile { get; set; }
+    public string VideoFullScreen { get; set; }
+    public string CopyTextFromOriginalSelectedLines { get; set; }
+    public string TextBoxRemoveAllFormatting { get; set; }
+    public string TextBoxItalic { get; set; }
+    public string ResetWaveformZoomAndSpeed { get; set; }
+    public string TogglePlaybackSpeed { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -405,5 +411,11 @@ public class LanguageSettingsShortcuts
         WordLists = "Word lists";
         ChooseLanguage = "Choose language";
         ChooseRuleProfile = "Choose rule profile";
+        VideoFullScreen = "Video full screen";
+        CopyTextFromOriginalSelectedLines = "Copy text from original (selected lines)";
+        TextBoxRemoveAllFormatting = "Text box, remove all formatting";
+        TextBoxItalic = "Text box italic";
+        ResetWaveformZoomAndSpeed = "Reset waveform zoom and playback speed";
+        TogglePlaybackSpeed = "Toggle playback speed";
     }
 }

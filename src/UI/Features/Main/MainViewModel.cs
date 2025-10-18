@@ -914,7 +914,7 @@ public partial class MainViewModel :
         await SaveSubtitleAs();
         _shortcutManager.ClearKeys();
     }
-
+    
     [RelayCommand]
     private async Task OpenContainingFolder()
     {
@@ -1713,6 +1713,36 @@ public partial class MainViewModel :
         ShowColumnOriginalText = true;
         AutoFitColumns();
         ShowStatus(Se.Language.Main.CreatedEmptyTranslation);
+    }
+    
+    [RelayCommand]
+    private void CopyTextFromOriginalToTranslation()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (Window == null  || selectedItems.Count == 0 || !ShowColumnOriginalText )
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
+        foreach (var subtitle in selectedItems)
+        {
+            subtitle.Text = subtitle.OriginalText;
+        }
+        
+        _shortcutManager.ClearKeys();
+        var msg = string.Format(Se.Language.Main.XTextsCopiedFromOriginal, selectedItems.Count);
+        if (selectedItems.Count == 1)
+        {
+            msg = Se.Language.Main.OneTextCopiedFromOriginal;
+        }
+
+        ShowStatus(msg);
     }
 
     [RelayCommand]
@@ -4526,6 +4556,28 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void TogglePlaybackSpeed()
+    {
+        if (AudioVisualizer == null || VideoPlayerControl == null)
+        {
+            return;
+        }
+
+        var idx = Speeds.IndexOf(SelectedSpeed);
+        if (idx < Speeds.Count - 1)
+        {
+            idx++;
+        }
+        else
+        {
+            idx = 0;
+        }
+        
+        SelectedSpeed = Speeds [idx];
+        ShowStatus(string.Format(Se.Language.Main.SpeedIsNowX, SelectedSpeed));
+    }
+
+    [RelayCommand]
     private void FetchFirstWordForNextSubtitle()
     {
         var s = SelectedSubtitle;
@@ -4680,15 +4732,51 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private void WaveformOneSecondBack()
+    private void VideoOneSecondBack()
     {
         MoveVideoPositionMs(-1000);
     }
 
     [RelayCommand]
-    private void WaveformOneSecondForward()
+    private void VideoOneSecondForward()
     {
         MoveVideoPositionMs(1000);
+    }
+    
+    [RelayCommand]
+    private void Video500MsBack()
+    {
+        MoveVideoPositionMs(-500);
+    }
+
+    [RelayCommand]
+    private void Video500MsForward()
+    {
+        MoveVideoPositionMs(500);
+    }
+
+    [RelayCommand]
+    private void Video100MsBack()
+    {
+        MoveVideoPositionMs(-100);
+    }
+
+    [RelayCommand]
+    private void Video100MsForward()
+    {
+        MoveVideoPositionMs(100);
+    }
+    
+    [RelayCommand]
+    private void VideoOneFrameBack()
+    {
+        MoveVideoPositionMs(-40);
+    }
+
+    [RelayCommand]
+    private void VideoOneFrameForward()
+    {
+        MoveVideoPositionMs(40);
     }
 
     [RelayCommand]

@@ -34,6 +34,9 @@ public class LanguageMain
     public string ReplacedXWithYInLineZ { get; set; }
     public string XShotChangedLoaded { get; set; }
     public string RuleProfileIsX { get; set; }
+    public string XTextsCopiedFromOriginal { get; set; }
+    public string OneTextCopiedFromOriginal { get; set; }
+    public string SpeedIsNowX { get; set; }
 
     public LanguageMain()
     {
@@ -63,5 +66,8 @@ public class LanguageMain
         ReplacedXWithYInLineZ = "Replaced '{0}' with '{1}' in line {2}";
         XShotChangedLoaded = "{0} shot changes loaded";
         RuleProfileIsX = "Rule profile is now '{0}'";
+        XTextsCopiedFromOriginal = "{0} texts copied from original subtitle";
+        OneTextCopiedFromOriginal = "One text copied from original subtitle";
+        SpeedIsNowX = "Speed is now '{0}'";
     }
 }
