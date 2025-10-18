@@ -1736,10 +1736,70 @@ public partial class MainViewModel :
         }
         
         _shortcutManager.ClearKeys();
-        var msg = string.Format(Se.Language.Main.XTextsCopiedFromOriginal, selectedItems.Count);
+        var msg = string.Format(Se.Language.Main.XLinesCopiedFromOriginal, selectedItems.Count);
         if (selectedItems.Count == 1)
         {
-            msg = Se.Language.Main.OneTextCopiedFromOriginal;
+            msg = Se.Language.Main.OneLineCopiedFromOriginal;
+        }
+
+        ShowStatus(msg);
+    }
+    
+    [RelayCommand]
+    private void SwitchOriginalAndTranslationTextSelectedLines()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (Window == null || selectedItems.Count == 0 || !ShowColumnOriginalText)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
+        foreach (var subtitle in selectedItems)
+        {
+            (subtitle.Text, subtitle.OriginalText) = (subtitle.OriginalText, subtitle.Text);
+        }
+        
+        _shortcutManager.ClearKeys();
+        var msg = string.Format(Se.Language.Main.XLinesSwitched, selectedItems.Count);
+        if (selectedItems.Count == 1)
+        {
+            msg = Se.Language.Main.OneLineSwitched;
+        }
+
+        ShowStatus(msg);
+    }
+    
+    [RelayCommand]
+    private void MergeOriginalIntoTranslationSelectedLines()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (Window == null || selectedItems.Count == 0 || !ShowColumnOriginalText)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
+        foreach (var subtitle in selectedItems)
+        {
+            subtitle.Text = subtitle.Text + Environment.NewLine + subtitle.OriginalText;
+        }
+        
+        _shortcutManager.ClearKeys();
+        var msg = string.Format(Se.Language.Main.XLinesMerged, selectedItems.Count);
+        if (selectedItems.Count == 1)
+        {
+            msg = Se.Language.Main.OneLineMerged;
         }
 
         ShowStatus(msg);

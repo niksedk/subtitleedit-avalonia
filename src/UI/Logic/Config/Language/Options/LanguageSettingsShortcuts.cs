@@ -207,6 +207,8 @@ public class LanguageSettingsShortcuts
     public string TextBoxItalic { get; set; }
     public string ResetWaveformZoomAndSpeed { get; set; }
     public string TogglePlaybackSpeed { get; set; }
+    public string SwitchOriginalAndTranslationSelectedLines { get; set; }
+    public string MergeOriginalIntoTranslationSelectedLines { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -417,5 +419,7 @@ public class LanguageSettingsShortcuts
         TextBoxItalic = "Text box italic";
         ResetWaveformZoomAndSpeed = "Reset waveform zoom and playback speed";
         TogglePlaybackSpeed = "Toggle playback speed";
+        SwitchOriginalAndTranslationSelectedLines = "Switch original and translation (selected lines)";
+        MergeOriginalIntoTranslationSelectedLines = "Merge original and translation (selected lines)";
     }
 }
