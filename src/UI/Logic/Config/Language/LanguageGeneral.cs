@@ -243,8 +243,14 @@ public class LanguageGeneral
     public string AutoBreak { get; set; }
     public string SplitLineAtVideoPosition { get; set; }
     public string SplitLineAtVideoAndTextBoxPosition { get; set; }
-    public string WaveformOneSecondBack { get; set; }
-    public string WaveformOneSecondForward { get; set; }
+    public string VideoOneFrameBack { get; set; }
+    public string VideoOneFrameForward { get; set; }
+    public string Video100MsBack { get; set; }
+    public string Video100MsForward { get; set; }
+    public string Video500MsBack { get; set; }
+    public string Video500MsForward { get; set; }
+    public string VideoOneSecondBack { get; set; }
+    public string VideoOneSecondForward { get; set; }
     public string SetStartAndOffsetTheRest { get; set; }
     public string Paste { get; set; }
     public string Cut { get; set; }
@@ -448,6 +454,7 @@ public class LanguageGeneral
     public string Stereo { get; set; }
     public string MergeWithLineBeforeKeepBreaks { get; set; }
     public string MergeWithLineAfterKeepBreaks { get; set; }
+    public string SplitAtTextBoxCursorPosition { get; set; }
 
     public LanguageGeneral()
     {
@@ -687,8 +694,14 @@ public class LanguageGeneral
         AutoBreak = "Auto-break text";
         SplitLineAtVideoPosition = "Split line at video position";
         SplitLineAtVideoAndTextBoxPosition = "Split line at video and text box position";
-        WaveformOneSecondBack = "Waveform, one second back";
-        WaveformOneSecondForward = "Waveform, one second forward";
+        VideoOneFrameBack = "Video, one frame back";
+        VideoOneFrameForward = "Video, one frame forward";
+        Video100MsBack = "Video, 100 milliseconds back";
+        Video100MsForward = "Video, 100 milliseconds forward";
+        Video500MsBack = "Video, 500 milliseconds back";
+        Video500MsForward = "Video, 500 milliseconds forward";
+        VideoOneSecondBack = "Video, one second back";
+        VideoOneSecondForward = "Video, one second forward";
         SetStartAndOffsetTheRest = "Set start and offset the rest";
         Paste = "Paste";
         Cut = "Cut";
@@ -892,5 +905,6 @@ public class LanguageGeneral
         Stereo = "Stereo";
         MergeWithLineBeforeKeepBreaks = "Merge with line before (keep breaks)";
         MergeWithLineAfterKeepBreaks = "Merge with line after (keep breaks)";
+        SplitAtTextBoxCursorPosition = "Split at text cursor position";
     }
 }
