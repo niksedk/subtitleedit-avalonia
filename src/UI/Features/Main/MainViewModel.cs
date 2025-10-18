@@ -1719,7 +1719,7 @@ public partial class MainViewModel :
     private void CopyTextFromOriginalToTranslation()
     {
         var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
-        if (Window == null  || selectedItems.Count == 0 || !ShowColumnOriginalText )
+        if (Window == null || selectedItems.Count == 0 || !ShowColumnOriginalText)
         {
             return;
         }
