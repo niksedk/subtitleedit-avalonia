@@ -230,7 +230,6 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.ShowStatisticsCommand, nameof(vm.ShowStatisticsCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowCompareCommand, nameof(vm.ShowCompareCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowRestoreAutoBackupCommand, nameof(vm.ShowRestoreAutoBackupCommand), ShortcutCategory.General);
-        AddShortcut(shortcuts, vm.ShowStatisticsCommand, nameof(vm.ShowStatisticsCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.OpenContainingFolderCommand, nameof(vm.OpenContainingFolderCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ImportTimeCodesCommand, nameof(vm.ImportTimeCodesCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowImportSubtitleWithManuallyChosenEncodingCommand, nameof(vm.ShowImportSubtitleWithManuallyChosenEncodingCommand), ShortcutCategory.General);
