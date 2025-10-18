@@ -179,7 +179,7 @@ public static class ShortcutsMain
         { nameof(MainViewModel.Video100MsForwardCommand),  Se.Language.General.Video100MsForward },
         { nameof(MainViewModel.Video500MsBackCommand), Se.Language.General.Video500MsBack },
         { nameof(MainViewModel.Video500MsForwardCommand),  Se.Language.General.Video500MsForward },
-        { nameof(MainViewModel.VideoOneSecondBackCommand), Se.Language.General.VideoOneFrameBack },
+        { nameof(MainViewModel.VideoOneSecondBackCommand), Se.Language.General.VideoOneSecondBack },
         { nameof(MainViewModel.VideoOneSecondForwardCommand),  Se.Language.General.VideoOneSecondForward },
         
         { nameof(MainViewModel.WaveformSetStartAndOffsetTheRestCommand),  Se.Language.General.SetStartAndOffsetTheRest },
