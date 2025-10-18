@@ -1,9 +1,11 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
-using Avalonia.Media;
 using Avalonia.Layout;
+using Avalonia.Media;
+using Nikse.SubtitleEdit.Features.Files.Compare;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
@@ -92,6 +94,14 @@ public class ShortcutsWindow : Window
                     Binding = new Binding(nameof(ShortcutTreeNode.Title)),
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Shortcut,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(ShortcutTreeNode.DisplayShortcut)),
+                    IsReadOnly = true,
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
                 },
             },
         };

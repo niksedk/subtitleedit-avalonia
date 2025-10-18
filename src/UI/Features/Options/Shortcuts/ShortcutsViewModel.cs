@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
@@ -104,7 +105,7 @@ public partial class ShortcutsViewModel : ObservableObject
         var children = new ObservableCollection<ShortcutTreeNode>();
         foreach (var x in shortcuts)
         {
-            var leaf = new ShortcutTreeNode(categoryName, MakeDisplayName(x), x);
+            var leaf = new ShortcutTreeNode(categoryName, MakeDisplayName(x, false), MakeDisplayShortCut(x), x);
             children.Add(leaf);
             FlatNodes.Add(leaf);
         }
@@ -116,13 +117,23 @@ public partial class ShortcutsViewModel : ObservableObject
             ? displayName
             : x.Name;
 
-        if (x.Keys.Count > 0 && includeShortCutKeys)
+        if (includeShortCutKeys)
         {
-            var keys = x.Keys.Select(k => GetKeyDisplayName(k)).ToList();
-            return name + " [" + string.Join(" + ", keys) + "]";
+            return name + " " + MakeDisplayShortCut(x);
         }
 
         return name;
+    }
+
+    private static string MakeDisplayShortCut(ShortCut shortCut)
+    {
+        if (shortCut.Keys.Count > 0)
+        {
+            var keys = shortCut.Keys.Select(k => GetKeyDisplayName(k)).ToList();
+            return "[" + string.Join(" + ", keys) + "]";
+        }
+
+        return string.Empty;
     }
 
     private static string GetKeyDisplayName(string key)
