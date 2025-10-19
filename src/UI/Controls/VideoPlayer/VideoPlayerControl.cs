@@ -472,6 +472,11 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             _videoPlayerInstance.PlayOrPause();
         }
 
+        internal string ToggleAudioTrack()
+        {
+            return _videoPlayerInstance.ToggleAudioTrack();
+        }
+
         private void StartPositionTimer()
         {
             _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };

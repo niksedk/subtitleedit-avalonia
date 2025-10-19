@@ -66,4 +66,9 @@ public class VideoPlayerInstanceNone : IVideoPlayerInstance
     public void Stop()
     {
     }
+
+    public string ToggleAudioTrack()
+    {
+        return string.Empty;
+    }
 }

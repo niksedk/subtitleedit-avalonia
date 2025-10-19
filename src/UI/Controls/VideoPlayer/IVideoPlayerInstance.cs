@@ -14,6 +14,7 @@ public interface IVideoPlayerInstance
     void PlayOrPause();
     void Pause();
     void Stop();
+    string ToggleAudioTrack();
 
     bool IsPlaying { get; }
     bool IsPaused { get; }

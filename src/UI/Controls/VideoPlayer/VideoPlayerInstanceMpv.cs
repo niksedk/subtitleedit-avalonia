@@ -139,10 +139,25 @@ public class VideoPlayerInstanceMpv : IVideoPlayerInstance
         }
     }
 
-
     public void Stop()
     {
         MpvContext?.Pause.Set(true);
         MpvContext?.TimePos.Set(0);
+    }
+
+    /// <summary>
+    /// Go to next audio track and return its language code or track number. After last track, goes back to first track.
+    /// </summary>
+    public string ToggleAudioTrack()
+    {
+        if (MpvContext == null)
+        {
+            return string.Empty;
+        }
+
+        //TODO : Implement cycling through audio tracks
+
+
+        return string.Empty;
     }
 }

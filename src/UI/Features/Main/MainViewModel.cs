@@ -518,6 +518,24 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void ToggleAudioTracks()
+    {
+        var control = VideoPlayerControl;
+        if (control == null)
+        {
+            return;
+        }
+
+        var track = control.ToggleAudioTrack();
+        if (string.IsNullOrEmpty(track))
+        {
+            return;
+        }
+
+        ShowStatus(string.Format(Se.Language.Main.AudioTrackIsNowX, track));
+    }
+
+    [RelayCommand]
     private void ToggleLockTimeCodes()
     {
         LockTimeCodes = !LockTimeCodes;

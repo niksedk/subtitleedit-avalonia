@@ -51,12 +51,13 @@ public class LanguageMain
     public string InsertedXTextsFromSubtitleY { get; set; }
     public string ColumnPaste { get; set; }
     public string ChooseColumn { get; set; }
-    public string TimeCodesOnly { get; internal set; }
-    public string TextOnly { get; internal set; }
+    public string TimeCodesOnly { get; set; }
+    public string TextOnly { get; set; }
     public string OverwriteOrShiftCellsDown { get; set; }
     public string OverwriteExistingCells { get; set; }
     public string ShiftTextCellsDown { get; set; }
     public string NoTextInClipboard { get; set; }
+    public string AudioTrackIsNowX { get; set; }
 
     public LanguageMain()
     {
@@ -109,5 +110,6 @@ public class LanguageMain
         OverwriteExistingCells = "Overwrite existing cells";
         ShiftTextCellsDown = "Shift text cells down";
         NoTextInClipboard = "No text in clipboard";
+        AudioTrackIsNowX = "Audio track is now \"{0}\"";
     }
 }
