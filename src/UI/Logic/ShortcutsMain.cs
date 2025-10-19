@@ -188,7 +188,7 @@ public static class ShortcutsMain
         { nameof(MainViewModel.WaveformSetEndCommand),  Se.Language.General.SetEnd },
         { nameof(MainViewModel.WaveformSetEndAndGoToNextCommand),  Se.Language.General.SetEndAndGoToNext },
         { nameof(MainViewModel.ToggleShotChangesAtVideoPositionCommand),  Se.Language.General.ToggleShotChangesAtVideoPosition },
-        { nameof(MainViewModel.ShowWaveformSeekSilenceCommand),  Se.Language.Options.Shortcuts.SeekSilence },        
+        { nameof(MainViewModel.ShowWaveformSeekSilenceCommand),  Se.Language.Options.Shortcuts.SeekSilence },
         { nameof(MainViewModel.ShowShotChangesListCommand),  Se.Language.General.ShowShotChangesList },
         { nameof(MainViewModel.VideoUndockControlsCommand),  Se.Language.Options.Shortcuts.UndockVideoControls },
         { nameof(MainViewModel.VideoRedockControlsCommand),  Se.Language.Options.Shortcuts.RedockVideoControls },
