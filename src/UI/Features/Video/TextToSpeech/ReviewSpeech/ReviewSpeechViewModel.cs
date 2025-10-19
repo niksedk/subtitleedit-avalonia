@@ -53,7 +53,8 @@ public partial class ReviewSpeechViewModel : ObservableObject
     [ObservableProperty] private double _similarity;
     [ObservableProperty] private double _speakerBoost;
     [ObservableProperty] private double _speed;
-
+    [ObservableProperty] private double _styleExaggeration;
+    
     public Window? Window { get; set; }
     public DataGrid LineGrid { get; internal set; }
     public TtsStepResult[] StepResults { get; set; }
@@ -92,6 +93,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
         Similarity = Se.Settings.Video.TextToSpeech.ElevenLabsSimilarity;
         SpeakerBoost = Se.Settings.Video.TextToSpeech.ElevenLabsSpeakerBoost;
         Speed = Se.Settings.Video.TextToSpeech.ElevenLabsSpeed;
+        StyleExaggeration = Se.Settings.Video.TextToSpeech.ElevenLabsStyleeExaggeration;
 
         IsPlayVisible = true;
         _videoFileName = string.Empty;
@@ -188,7 +190,31 @@ public partial class ReviewSpeechViewModel : ObservableObject
             });
         }
 
-        ObservableCollectionExtensions.AddRange(Engines, engines);
+        foreach (var engineItem in engines)
+        {
+            if (engineItem is ElevenLabs && string.IsNullOrWhiteSpace(Se.Settings.Video.TextToSpeech.ElevenLabsApiKey))
+            {
+                continue;
+            }
+
+            if (engineItem is Murf && string.IsNullOrWhiteSpace(Se.Settings.Video.TextToSpeech.MurfApiKey))
+            {
+                continue;
+            }
+
+            if (engineItem is AzureSpeech && string.IsNullOrWhiteSpace(Se.Settings.Video.TextToSpeech.AzureApiKey))
+            {
+                continue;
+            }
+
+            if (engineItem is GoogleSpeech && string.IsNullOrWhiteSpace(Se.Settings.Video.TextToSpeech.GoogleKeyFile))
+            {
+                continue;
+            }
+
+            Engines.Add(engineItem);
+        }
+
         SelectedEngine = engine;
 
         ObservableCollectionExtensions.AddRange(Voices, voices);
@@ -305,6 +331,17 @@ public partial class ReviewSpeechViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void ElevenLabsReset()
+    {
+        var settings = new SeVideoTextToSpeech();
+        Stability = settings.ElevenLabsStability;
+        Similarity = settings.ElevenLabsSimilarity;
+        SpeakerBoost = settings.ElevenLabsSpeakerBoost;
+        Speed = settings.ElevenLabsSpeed;
+        StyleExaggeration = settings.ElevenLabsStyleeExaggeration;
+    }
+
+    [RelayCommand]
     private async Task ShowElevenLabsEngineV3Help()
     {
         if (Window == null)
@@ -339,6 +376,11 @@ public partial class ReviewSpeechViewModel : ObservableObject
         await ElevenLabsSettingsViewModel.ShowSpeedHelp(Window!);
     }
 
+    [RelayCommand]
+    private async Task ShowStyleExaggerationHelp()
+    {
+        await ElevenLabsSettingsViewModel.ShowStyleExaggerationHelp(Window!);
+    }
 
     [RelayCommand]
     private async Task RegenerateAudio()

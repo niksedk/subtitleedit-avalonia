@@ -15,6 +15,7 @@ public partial class ElevenLabsSettingsViewModel : ObservableObject
     [ObservableProperty] private double _similarity;
     [ObservableProperty] private double _speakerBoost;
     [ObservableProperty] private double _speed;
+    [ObservableProperty] private double _styleExaggeration;
 
     public Window? Window { get; set; }
 
@@ -26,6 +27,7 @@ public partial class ElevenLabsSettingsViewModel : ObservableObject
         Similarity = 0.5;
         SpeakerBoost = 0;
         Speed = 1.0;
+        StyleExaggeration = 0;
 
         LoadSettings();
     }
@@ -36,6 +38,7 @@ public partial class ElevenLabsSettingsViewModel : ObservableObject
         Similarity = Se.Settings.Video.TextToSpeech.ElevenLabsSimilarity;
         SpeakerBoost = Se.Settings.Video.TextToSpeech.ElevenLabsSpeakerBoost;
         Speed = Se.Settings.Video.TextToSpeech.ElevenLabsSpeed;
+        StyleExaggeration = Se.Settings.Video.TextToSpeech.ElevenLabsStyleeExaggeration;
     }
 
     public void SaveSettings()
@@ -44,6 +47,7 @@ public partial class ElevenLabsSettingsViewModel : ObservableObject
         Se.Settings.Video.TextToSpeech.ElevenLabsSimilarity = Similarity;
         Se.Settings.Video.TextToSpeech.ElevenLabsSpeakerBoost = SpeakerBoost;
         Se.Settings.Video.TextToSpeech.ElevenLabsSpeed = Speed;
+        Se.Settings.Video.TextToSpeech.ElevenLabsStyleeExaggeration = StyleExaggeration;
         Se.SaveSettings();
     }
 
@@ -72,6 +76,12 @@ public partial class ElevenLabsSettingsViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task ShowStyleExaggerationHelp()
+    {
+        await ShowStyleExaggerationHelp(Window!);
+    }
+
+    [RelayCommand]
     private async Task ShowMoreOnWeb()
     {
         await Window!.Launcher.LaunchUriAsync(new Uri("https://elevenlabs.io/docs/capabilities/text-to-speech"));
@@ -85,6 +95,7 @@ public partial class ElevenLabsSettingsViewModel : ObservableObject
         Similarity = settings.ElevenLabsSimilarity;
         SpeakerBoost = settings.ElevenLabsSpeakerBoost;
         Speed = settings.ElevenLabsSpeed;
+        StyleExaggeration = settings.ElevenLabsStyleeExaggeration;
     }
 
     [RelayCommand]
@@ -118,6 +129,10 @@ public partial class ElevenLabsSettingsViewModel : ObservableObject
     public static async Task ShowSpeedHelp(Window window)
     {
         await MessageBox.Show(window, "Info", "Adjusts the speed of the generated speech. A value of 1.0 represents the normal speed. Values greater than 1.0 will make the speech faster, while values less than 1.0 will slow it down. Values from 0.7 to 1.2 are allowed.", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
+    public static async Task ShowStyleExaggerationHelp(Window window)
+    {
+        await MessageBox.Show(window, "Info", "Determines the style exaggeration of the voice. This setting attempts to amplify the style of the original speaker. It does consume additional computational resources and might increase latency if set to anything other than 0. Values from 0 to 1 are allowed.", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
     internal void OnKeyDown(KeyEventArgs e)

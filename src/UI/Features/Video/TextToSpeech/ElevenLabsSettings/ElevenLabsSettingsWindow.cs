@@ -71,6 +71,18 @@ public class ElevenLabsSettingsWindow : Window
         };
         var buttonSpeed = UiUtil.MakeButton(vm.ShowSpeedHelpCommand, IconNames.Help);
 
+        var labelStyleExaggeration = UiUtil.MakeLabel(Se.Language.General.StyleExaggeration);
+        var sliderStyleExaggeration = new Slider
+        {
+            Minimum = 0.0,
+            Maximum = 1.0,
+            Value = vm.StyleExaggeration,
+            Width = 200,
+            Margin = new Thickness(5, 0, 0, 0),
+            [!Slider.ValueProperty] = new Binding(nameof(ElevenLabsSettingsViewModel.StyleExaggeration)),
+        };
+        var buttonStyleExaggeration = UiUtil.MakeButton(vm.ShowStyleExaggerationHelpCommand, IconNames.Help);
+
         var buttonWeb = UiUtil.MakeButton(Se.Language.General.MoreInfo, vm.ShowMoreOnWebCommand).WithIconLeft(IconNames.Web);
         var buttonReset = UiUtil.MakeButton(Se.Language.General.Reset, vm.ResetCommand).WithIconLeft(IconNames.Repeat);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
@@ -81,6 +93,7 @@ public class ElevenLabsSettingsWindow : Window
         {
             RowDefinitions =
             {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
@@ -116,7 +129,11 @@ public class ElevenLabsSettingsWindow : Window
         grid.Add(sliderSpeed, 3, 1);
         grid.Add(buttonSpeed, 3, 2);
 
-        grid.Add(panelButtons, 4, 0, 1, 3);
+        grid.Add(labelStyleExaggeration, 4, 0);
+        grid.Add(sliderStyleExaggeration, 4, 1);
+        grid.Add(buttonStyleExaggeration, 4, 2);
+
+        grid.Add(panelButtons, 5, 0, 1, 3);
 
         Content = grid;
 

@@ -458,6 +458,8 @@ public class LanguageGeneral
     public string SplitAtTextBoxCursorPosition { get; set; }
     public string Shortcut { get; set; }
     public string Column { get; set; }
+    public string StyleExaggeration { get; set; }
+    public object AutoContinue { get; set; }
 
     public LanguageGeneral()
     {
@@ -912,5 +914,7 @@ public class LanguageGeneral
         SplitAtTextBoxCursorPosition = "Split at text cursor position";
         Shortcut = "Shortcut";
         Column = "Column";  
+        StyleExaggeration = "Style exaggeration";
+        AutoContinue = "Auto-continue";
     }
 }

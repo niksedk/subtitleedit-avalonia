@@ -4,6 +4,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Nikse.SubtitleEdit.Features.Video.TextToSpeech.ElevenLabsSettings;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Engines;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -19,9 +20,9 @@ public class ReviewSpeechWindow : Window
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Video.TextToSpeech.ReviewAudioSegments;
         Width = 1100;
-        Height = 650;
+        Height = 700;
         MinWidth = 700;
-        MinHeight = 500;
+        MinHeight = 690;
         CanResize = true;
 
         _vm = vm;
@@ -68,7 +69,7 @@ public class ReviewSpeechWindow : Window
         Loaded += delegate { vm.SelectedEngineChanged(); };
     }
 
-    private Border MakeDataGrid(ReviewSpeechViewModel vm)
+    private static Border MakeDataGrid(ReviewSpeechViewModel vm)
     {
         var dataGrid = new DataGrid
         {
@@ -176,6 +177,15 @@ public class ReviewSpeechWindow : Window
 
         var comboBoxEngines = UiUtil.MakeComboBox(vm.Engines, vm, nameof(vm.SelectedEngine)).WithMinWidth(controlMinWidth);
         comboBoxEngines.SelectionChanged += vm.SelectedEngineChanged;
+        var buttonElevenLabsRest = UiUtil.MakeButton(Se.Language.General.Reset, vm.ElevenLabsResetCommand)
+            .WithIconLeft(IconNames.Repeat)
+            .WithBindIsVisible(nameof(vm.IsElevenLabsControlsVisible));
+        if (Se.Settings.Appearance.ShowHints)
+        {
+            ToolTip.SetTip(buttonElevenLabsRest, Se.Language.Video.TextToSpeech.ElevenLabsSettingsResetHint);
+        }
+
+
 
         var panelEngine = new StackPanel
         {
@@ -189,6 +199,7 @@ public class ReviewSpeechWindow : Window
                     MinWidth = labelMinWidth,
                 },
                 comboBoxEngines,
+                buttonElevenLabsRest,
             }
         };
 
@@ -295,7 +306,7 @@ public class ReviewSpeechWindow : Window
 
         var checkBoxAutoContinue = new CheckBox
         {
-            Content = "Auto continue",
+            Content = Se.Language.General.AutoContinue,
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.AutoContinue)) { Mode = BindingMode.TwoWay },
         };
 
@@ -385,10 +396,24 @@ public class ReviewSpeechWindow : Window
         };
         var buttonSpeed = UiUtil.MakeButton(vm.ShowSpeedHelpCommand, IconNames.Help);
 
+        var labelStyleExaggeration = UiUtil.MakeLabel(Se.Language.General.StyleExaggeration);
+        var sliderStyleExaggeration = new Slider
+        {
+            Minimum = 0.0,
+            Maximum = 1.0,
+            Value = vm.StyleExaggeration,
+            Width = 200,
+            Margin = new Thickness(5, 0, 0, 0),
+            [!Slider.ValueProperty] = new Binding(nameof(ElevenLabsSettingsViewModel.StyleExaggeration)),
+        };
+        var buttonStyleExaggeration = UiUtil.MakeButton(vm.ShowStyleExaggerationHelpCommand, IconNames.Help);
+
+
         var grid = new Grid
         {
             RowDefinitions =
             {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
@@ -422,6 +447,10 @@ public class ReviewSpeechWindow : Window
         grid.Add(labelSpeed, 3, 0);
         grid.Add(sliderSpeed, 3, 1);
         grid.Add(buttonSpeed, 3, 2);
+
+        grid.Add(labelStyleExaggeration, 4, 0);
+        grid.Add(sliderStyleExaggeration, 4, 1);
+        grid.Add(buttonStyleExaggeration, 4, 2);
 
         return grid;
     }

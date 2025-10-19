@@ -8,6 +8,7 @@ public class LanguageTextToSpeech
     public string Stability { get; set; }
     public string Similarity { get; set; }
     public string SpeakerBoost { get; set; }
+    public string StyleeExaggeration { get; set; }
     public string RegenerateAudioSelectedLine { get; set; }
     public string GenerateSpeechFromText { get; set; }
     public string TestVoice { get; set; }
@@ -17,6 +18,7 @@ public class LanguageTextToSpeech
     public string RefreshVoices { get; set; }
     public string VideoEncodingSettings { get; set; }
     public string ElevenLabsSettings { get; set; }
+    public string ElevenLabsSettingsResetHint { get; set; }
 
     public LanguageTextToSpeech()
     {
@@ -26,6 +28,7 @@ public class LanguageTextToSpeech
         Stability = "Stability";
         Similarity = "Similarity";
         SpeakerBoost = "Speaker boost";
+        StyleeExaggeration = "Style exaggeration";
         RegenerateAudioSelectedLine = "Regenerate audio for selected line";
         GenerateSpeechFromText = "Generate speech from text";
         TestVoice = "Test voice";
@@ -35,5 +38,6 @@ public class LanguageTextToSpeech
         RefreshVoices = "Refresh voices";
         VideoEncodingSettings = "TTS - Video encoding settings";
         ElevenLabsSettings = "TTS - ElevenLabs settings";
+        ElevenLabsSettingsResetHint = "Reset ElevenLabs settings to default values";
     }
 }

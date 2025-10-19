@@ -20,6 +20,7 @@ public class SeVideoTextToSpeech
     public double ElevenLabsSimilarity { get; set; }
     public double ElevenLabsSpeakerBoost { get; set; }
     public double ElevenLabsSpeed { get; set; }
+    public double ElevenLabsStyleeExaggeration { get; set; }
     public string MurfApiKey { get; set; }
     public string MurfStyle { get; set; }
     public string GoogleApiKey { get; set; }
@@ -37,6 +38,7 @@ public class SeVideoTextToSpeech
         ElevenLabsStability = 0.5;
         ElevenLabsSimilarity = 0.5;
         ElevenLabsSpeakerBoost = 0;
+        ElevenLabsStyleeExaggeration = 0;
         ElevenLabsSpeed = 1.0;
         ReviewAudioClips = true;
         CustomAudio = false;

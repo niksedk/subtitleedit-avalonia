@@ -45,7 +45,7 @@ public class GoogleSpeech : ITtsEngine
         var googleFolder = GetSetGoogleFolder();
 
         var voiceFileName = Path.Combine(googleFolder, JsonFileName);
-        if (!File.Exists(voiceFileName))
+        if (!File.Exists(voiceFileName) || new FileInfo(voiceFileName).Length < 100)
         {
             var uri = new Uri("avares://SubtitleEdit/Assets/TextToSpeech/GoogleVoices.json");
             using var stream = AssetLoader.Open(uri);
