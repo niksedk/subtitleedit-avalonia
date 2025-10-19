@@ -36,6 +36,7 @@ using Nikse.SubtitleEdit.Features.Files.ManualChosenEncoding;
 using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 using Nikse.SubtitleEdit.Features.Files.Statistics;
 using Nikse.SubtitleEdit.Features.Help;
+using Nikse.SubtitleEdit.Features.Main.ColumnPaste;
 using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Features.Ocr;
 using Nikse.SubtitleEdit.Features.Options.Language;
@@ -1450,7 +1451,7 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private async Task ColumnDeleteText()
+    private void ColumnDeleteText()
     {
         var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
         if (Window == null || selectedItems.Count == 0)
@@ -1468,7 +1469,7 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private async Task ColumnDeleteTextAndShiftCellsUp()
+    private void ColumnDeleteTextAndShiftCellsUp()
     {
         var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
         if (Window == null || selectedItems.Count == 0)
@@ -1519,7 +1520,7 @@ public partial class MainViewModel :
 
 
     [RelayCommand]
-    private async Task ColumnInsertEmptyTextAndShiftCellsDown()
+    private void ColumnInsertEmptyTextAndShiftCellsDown()
     {
         var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
         if (Window == null || selectedItems.Count == 0)
@@ -1574,11 +1575,41 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ColumnInsertTextFromSubtitle()
     {
-        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
-        if (Window == null || selectedItems.Count == 0)
+        var idx = Subtitles.IndexOf(SelectedSubtitle);
+        if (Window == null || idx < 0)
         {
             return;
         }
+
+        var fileName =
+            await _fileHelper.PickOpenSubtitleFile(Window!, Se.Language.General.OpenSubtitleFileTitle, false);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        var subtitle = Subtitle.Parse(fileName);
+        if (subtitle == null)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, Se.Language.General.UnknownSubtitleFormat,
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        var count = 0;
+        for (var i = 0; i < subtitle.Paragraphs.Count; i++)
+        {
+            if (idx + i >= Subtitles.Count)
+            {
+                break;
+            }
+
+            Subtitles[idx + i].Text = subtitle.Paragraphs[i].Text;
+            count++;
+        }
+
+        ShowStatus(string.Format(Se.Language.Main.InsertedXTextsFromSubtitleY, count, Path.GetFileName(fileName)));
 
         _shortcutManager.ClearKeys();
     }
@@ -1593,12 +1624,46 @@ public partial class MainViewModel :
             return;
         }
 
+        var text = await ClipboardHelper.GetTextAsync(Window);
+        if (string.IsNullOrEmpty(text))
+        {
+            _shortcutManager.ClearKeys();
+            ShowStatus(Se.Language.Main.NoTextInClipboard);
+            return;
+        }
+
+        var lines = text.SplitToLines();
+        SubtitleFormat? detectedFormat = null;
+        foreach (var format in SubtitleFormats)
+        {
+            if (format.IsMine(lines, string.Empty))
+            {
+                detectedFormat = format;
+                break;
+            }
+        }
+
+        if (detectedFormat == null)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, Se.Language.General.UnknownSubtitleFormat,
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<ColumnPasteWindow, ColumnPasteViewModel>(Window);
+        if (!result.OkPressed)
+        {
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
         _shortcutManager.ClearKeys();
     }
 
 
     [RelayCommand]
-    private async Task ColumnTextUp()
+    private void ColumnTextUp()
     {
         var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
         if (Window == null || selectedItems.Count == 0)
@@ -1660,7 +1725,7 @@ public partial class MainViewModel :
 
 
     [RelayCommand]
-    private async Task ColumnTextDown()
+    private void ColumnTextDown()
     {
         var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
         if (Window == null || selectedItems.Count == 0)
@@ -4819,7 +4884,7 @@ public partial class MainViewModel :
         s.EndTime = TimeSpan.FromSeconds(videoPositionSeconds);
 
         SelectAndScrollToRow(idx + 1);
-        
+
         _updateAudioVisualizer = true;
     }
 

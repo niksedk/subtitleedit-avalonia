@@ -17,6 +17,7 @@ using Nikse.SubtitleEdit.Features.Files.ManualChosenEncoding;
 using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 using Nikse.SubtitleEdit.Features.Files.Statistics;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Main.ColumnPaste;
 using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Features.Ocr;
 using Nikse.SubtitleEdit.Features.Ocr.Download;
@@ -160,6 +161,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<ChangeCasingViewModel>();
         collection.AddTransient<ChangeFrameRateViewModel>();
         collection.AddTransient<ChangeSpeedViewModel>();
+        collection.AddTransient<ColumnPasteViewModel>();
         collection.AddTransient<CompareViewModel>();
         collection.AddTransient<CopyPasteTranslateBlockViewModel>();
         collection.AddTransient<CopyPasteTranslateViewModel>();

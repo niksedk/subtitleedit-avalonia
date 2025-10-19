@@ -48,6 +48,15 @@ public class LanguageMain
     public string PasteFromClipboardDotDotDot { get; set; }
     public string TextUp { get; set; }
     public string TextDown { get; set; }
+    public string InsertedXTextsFromSubtitleY { get; set; }
+    public string ColumnPaste { get; set; }
+    public string ChooseColumn { get; set; }
+    public string TimeCodesOnly { get; internal set; }
+    public string TextOnly { get; internal set; }
+    public string OverwriteOrShiftCellsDown { get; set; }
+    public string OverwriteExistingCells { get; set; }
+    public string ShiftTextCellsDown { get; set; }
+    public string NoTextInClipboard { get; set; }
 
     public LanguageMain()
     {
@@ -60,7 +69,7 @@ public class LanguageMain
         ParsingMatroskaFile = "Parsing Matroska file...";
         SubtitleImportedFromMatroskaFile = "Subtitle imported from Matroska file";
         LineXTextAndTimingChanged = "Line {0}: Text and timing changed";
-        LineXTextChangedFromYToZ = "Line {0}: Text changed from '{1}' to '{2}'";
+        LineXTextChangedFromYToZ = "Line {0}: Text changed from \"{1}\" to \"{2}\"";
         LineXTimingChanged = "Line {0}: Timing changed";
         UndoPerformed = "Undo performed";
         RedoPerformed = "Redo performed";
@@ -73,17 +82,17 @@ public class LanguageMain
         AutoBreakHint = "Auto-break selected lines";
         UnbreakHint = "Unbreak selected lines";
         ItalicHint = "Italic selected lines/text";
-        ReplacedXWithYCountZ = "Replaced '{0}' with '{1}' ({2} occurrences)";
-        ReplacedXWithYInLineZ = "Replaced '{0}' with '{1}' in line {2}";
+        ReplacedXWithYCountZ = "Replaced \"{0}\" with \"{1}\" ({2} occurrences)";
+        ReplacedXWithYInLineZ = "Replaced \"{0}\" with \"{1}\" in line {2}";
         XShotChangedLoaded = "{0} shot changes loaded";
-        RuleProfileIsX = "Rule profile is now '{0}'";
+        RuleProfileIsX = "Rule profile is now \"{0}\"";
         XLinesCopiedFromOriginal = "{0} lines copied from original subtitle";
         OneLineCopiedFromOriginal = "One line copied from original subtitle";
         XLinesSwitched = "{0} lines switched";
         OneLineSwitched = "One line switched";
         XLinesMerged = "X lines merged";
         OneLineMerged = "One line merged";
-        SpeedIsNowX = "Speed is now '{0}'";
+        SpeedIsNowX = "Speed is now \"{0}\"";
         DeleteText = "Delete text";
         DeleteTextAndShiftCellsUp = "Delete text and shift cells up";
         InsertEmptyTextAndShiftCellsDown = "Insert empty text and shift cells down";
@@ -91,5 +100,14 @@ public class LanguageMain
         PasteFromClipboardDotDotDot = "Paste from clipboard...";
         TextUp = "Text up";
         TextDown = "Text down";
+        InsertedXTextsFromSubtitleY = "Inserted {0} texts from subtitle file \"{1}\"";
+        ColumnPaste = "Column paste";
+        ChooseColumn = "Choose column";
+        TimeCodesOnly = "Time codes only";
+        TextOnly = "Text only";
+        OverwriteOrShiftCellsDown = "Overwrite/shift cells down";
+        OverwriteExistingCells = "Overwrite existing cells";
+        ShiftTextCellsDown = "Shift text cells down";
+        NoTextInClipboard = "No text in clipboard";
     }
 }
