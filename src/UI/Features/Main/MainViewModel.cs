@@ -4775,6 +4775,32 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void VideoSetPositionCurrentSubtitleStart()
+    {
+        var s = SelectedSubtitle;
+        if (s == null || VideoPlayerControl == null)
+        {
+            return;
+        }
+
+        VideoPlayerControl.Position = s.StartTime.TotalSeconds;
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void VideoSetPositionCurrentSubtitleEnd()
+    {
+        var s = SelectedSubtitle;
+        if (s == null || VideoPlayerControl == null)
+        {
+            return;
+        }
+
+        VideoPlayerControl.Position = s.EndTime.TotalSeconds;
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
     private void WaveformInsertNewSelection()
     {
         if (VideoPlayerControl == null ||

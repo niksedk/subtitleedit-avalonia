@@ -212,6 +212,8 @@ public class LanguageSettingsShortcuts
     public string SwitchOriginalAndTranslationSelectedLines { get; set; }
     public string MergeOriginalIntoTranslationSelectedLines { get; set; }
     public string SeekSilence { get; set; }
+    public string SetVideoPositionCurrentSubtitleStart { get; set; }
+    public string SetVideoPositionCurrentSubtitleEnd { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -427,5 +429,7 @@ public class LanguageSettingsShortcuts
         SwitchOriginalAndTranslationSelectedLines = "Switch original and translation (selected lines)";
         MergeOriginalIntoTranslationSelectedLines = "Merge original and translation (selected lines)";
         SeekSilence = "Seek silence";
+        SetVideoPositionCurrentSubtitleStart = "Set video position to current line start";
+        SetVideoPositionCurrentSubtitleEnd = "Set video position to current line end";
     }
 }
