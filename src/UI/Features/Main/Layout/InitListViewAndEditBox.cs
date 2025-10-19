@@ -1032,6 +1032,7 @@ public static class InitListViewAndEditBox
         flyoutTextBox.Items.Add(menuItemTextBoxSplitAtCursor);
 
         var menuItemTextBoxSplitAtCursorAndVideoPosition = new MenuItem { Header = Se.Language.General.SplitLineAtVideoAndTextBoxPosition };
+        menuItemTextBoxSplitAtCursorAndVideoPosition.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsTextBoxSplitAtCursorAndVideoPositionVisible)));
         menuItemTextBoxSplitAtCursorAndVideoPosition.Command = vm.SplitAtVideoPositionAndTextBoxCursorPositionCommand;
         flyoutTextBox.Items.Add(menuItemTextBoxSplitAtCursorAndVideoPosition);
 

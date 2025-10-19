@@ -177,6 +177,7 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _showLayerFilterIcon;
     [ObservableProperty] private bool _showColumnLayerFlyoutMenuItem;
     [ObservableProperty] private bool _isVideoLoaded;
+    [ObservableProperty] private bool _isTextBoxSplitAtCursorAndVideoPositionVisible;
 
     [ObservableProperty] private ObservableCollection<string> _speeds;
     [ObservableProperty] private string _selectedSpeed;
@@ -8934,6 +8935,17 @@ public partial class MainViewModel :
 
     internal void TextBoxContextOpening(object? sender, EventArgs e)
     {
+        IsTextBoxSplitAtCursorAndVideoPositionVisible = false;
+
+        var s = SelectedSubtitle;
+        if (VideoPlayerControl != null && !string.IsNullOrEmpty(_videoFileName) && s != null)
+        {
+            if (s.StartTime.TotalSeconds < VideoPlayerControl.Position &&
+                VideoPlayerControl.Position < s.EndTime.TotalSeconds)
+            {
+                IsTextBoxSplitAtCursorAndVideoPositionVisible = true;
+            }
+        }   
     }
 
     private async void OnWindowClosing(object? sender, WindowClosingEventArgs e)
