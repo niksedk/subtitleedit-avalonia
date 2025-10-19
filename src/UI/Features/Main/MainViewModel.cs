@@ -1575,8 +1575,13 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ColumnInsertTextFromSubtitle()
     {
+        if (Window == null || SelectedSubtitle == null)
+        {
+            return;
+        }
+
         var idx = Subtitles.IndexOf(SelectedSubtitle);
-        if (Window == null || idx < 0)
+        if (idx < 0)
         {
             return;
         }
@@ -1618,8 +1623,13 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ColumnPasteFromClipboard()
     {
-        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
-        if (Window == null || selectedItems.Count == 0)
+        if (Window == null || SelectedSubtitle == null)
+        {
+            return;
+        }
+
+        var idx = Subtitles.IndexOf(SelectedSubtitle);
+        if (idx < 0)
         {
             return;
         }
@@ -1651,11 +1661,61 @@ public partial class MainViewModel :
             return;
         }
 
+        var subtitle = new Subtitle();
+        detectedFormat.LoadSubtitle(subtitle, lines, null);
+
         var result = await _windowService.ShowDialogAsync<ColumnPasteWindow, ColumnPasteViewModel>(Window);
         if (!result.OkPressed)
         {
             _shortcutManager.ClearKeys();
             return;
+        }
+
+        var count = 0;
+        var total = Subtitles.Count;
+        var overWrite = result.ModeOverwrite; // either overwrite or insert mode (shift texts down)
+        for (var i = 0; i < subtitle.Paragraphs.Count && idx < Subtitles.Count; i++)
+        {
+            if (overWrite == false)
+            {
+                for (int j = total - 1; j > idx; j--)
+                {
+                    if (result.ColumnsAll)
+                    {
+                        Subtitles[j].SetStartTimeOnly(Subtitles[j - 1].StartTime);
+                        Subtitles[j].EndTime = Subtitles[j - 1].EndTime;
+                        Subtitles[j].Text = Subtitles[j - 1].Text;
+                    }
+                    else if (result.ColumnsTextOnly)
+                    {
+                        Subtitles[j].Text = Subtitles[j - 1].Text;
+                    }
+                    else if (result.ColumnsTimeCodesOnly)
+                    {
+                        Subtitles[j].SetStartTimeOnly(Subtitles[j - 1].StartTime);
+                        Subtitles[j].EndTime = Subtitles[j - 1].EndTime;
+                    }
+                }
+            }
+
+            if (result.ColumnsAll)
+            {
+                Subtitles[idx].SetStartTimeOnly(subtitle.Paragraphs[i].StartTime.TimeSpan);
+                Subtitles[idx].EndTime = subtitle.Paragraphs[i].EndTime.TimeSpan;
+                Subtitles[idx].Text = subtitle.Paragraphs[i].Text;
+            }
+            else if (result.ColumnsTextOnly)
+            {
+                Subtitles[idx].Text = subtitle.Paragraphs[i].Text;
+            }
+            else if (result.ColumnsTimeCodesOnly)
+            {
+                Subtitles[idx].SetStartTimeOnly(subtitle.Paragraphs[i].StartTime.TimeSpan);
+                Subtitles[idx].EndTime = subtitle.Paragraphs[i].EndTime.TimeSpan;
+            }
+
+            count++;
+            idx++;
         }
 
         _shortcutManager.ClearKeys();
