@@ -214,6 +214,7 @@ public class LanguageSettingsShortcuts
     public string SeekSilence { get; set; }
     public string SetVideoPositionCurrentSubtitleStart { get; set; }
     public string SetVideoPositionCurrentSubtitleEnd { get; set; }
+    public string ToggleAudioTracks { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -431,5 +432,6 @@ public class LanguageSettingsShortcuts
         SeekSilence = "Seek silence";
         SetVideoPositionCurrentSubtitleStart = "Set video position to current line start";
         SetVideoPositionCurrentSubtitleEnd = "Set video position to current line end";
+        ToggleAudioTracks = "Toggle audio tracks";
     }
 }

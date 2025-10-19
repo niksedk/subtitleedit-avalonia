@@ -4,6 +4,8 @@ using Avalonia.Layout;
 using HanumanInstitute.LibMpv;
 using HanumanInstitute.LibMpv.Avalonia;
 using HanumanInstitute.LibMpv.Core;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Controls.VideoPlayer;
@@ -155,9 +157,54 @@ public class VideoPlayerInstanceMpv : IVideoPlayerInstance
             return string.Empty;
         }
 
-        //TODO : Implement cycling through audio tracks
+        try
+        {
+            var count = MpvContext.TrackListCount.Get();
+            if (count <= 0)
+            {
+                return string.Empty;
+            }
 
+            var audioTracks = new List<(int listIndex, int id, string? lang, bool selected)>();
+            for (int i = 0; i < count; i++)
+            {
+                var type = MpvContext.TrackListType[i].Get();
+                if (string.Equals(type, "audio", System.StringComparison.OrdinalIgnoreCase))
+                {
+                    var id = MpvContext.TrackListId[i].Get() ?? -1;
+                    if (id < 0)
+                    {
+                        continue;
+                    }
+                    var lang = MpvContext.TrackListLanguage[i].Get();
+                    var selected = MpvContext.TrackListIsSelected[i].Get() ?? false;
+                    audioTracks.Add((i, id, lang, selected));
+                }
+            }
 
-        return string.Empty;
+            if (audioTracks.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            var currentIdx = audioTracks.FindIndex(t => t.selected);
+            var nextIdx = currentIdx >= 0 ? (currentIdx + 1) % audioTracks.Count : 0;
+            var next = audioTracks[nextIdx];
+
+            // Switch to the next audio track by ID
+            MpvContext.AudioId.Set(next.id);
+
+            // Prefer language code if available, otherwise return the track ID
+            if (!string.IsNullOrWhiteSpace(next.lang))
+            {
+                return next.lang!;
+            }
+
+            return next.id.ToString(CultureInfo.InvariantCulture);
+        }
+        catch
+        {
+            return string.Empty;
+        }
     }
 }
