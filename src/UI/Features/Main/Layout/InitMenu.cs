@@ -1,11 +1,14 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
+using Avalonia.Input;
 using Avalonia.Layout;
+using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -26,10 +29,10 @@ public static class InitMenu
         UpdateRecentFiles(vm);
 
         var menu = vm.Menu;
-
         menu.Height = 30;
         menu.DataContext = vm;
         menu.Items.Clear();
+        menu.Opened += (s, e) => DisplayShortcuts(menu, vm);
 
         menu.Items.Add(new MenuItem
         {
@@ -39,7 +42,7 @@ public static class InitMenu
                 new MenuItem
                 {
                     Header = l.New,
-                    Command = vm.CommandFileNewCommand,
+                    Command = vm.CommandFileNewCommand,                                      
                 },
                 new MenuItem
                 {
@@ -603,5 +606,97 @@ public static class InitMenu
         {
             vm.MenuReopen.IsVisible = false;
         }
+    }
+
+    private static void DisplayShortcuts(Menu menu, MainViewModel vm)
+    {
+        List<ShortCut> availableShortcuts = ShortcutsMain.GetUsedShortcuts(vm);
+
+        foreach (var item in menu.Items.OfType<MenuItem>())
+        {
+            item.InputGesture = GetKeyGesture(availableShortcuts, item.Command);
+
+            foreach (var subItem in item.Items.OfType<MenuItem>())
+            {
+                subItem.InputGesture = GetKeyGesture(availableShortcuts, subItem.Command);
+            }
+        }
+    }
+
+    private static KeyGesture? GetKeyGesture(List<ShortCut> availableShortcuts, System.Windows.Input.ICommand? command)
+    {
+        if (command is IRelayCommand relay)
+        {
+            foreach (var shortcut in availableShortcuts)
+            {
+                if (ReferenceEquals(shortcut.Action, relay))
+                {
+                    return ToKeyGesture(shortcut);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static KeyGesture? ToKeyGesture(ShortCut shortcut)
+    {
+        if (shortcut.Keys == null || shortcut.Keys.Count == 0)
+        {
+            return null;
+        }
+
+        var modifiers = KeyModifiers.None;
+        Key? keyValue = null;
+
+        foreach (var key in shortcut.Keys)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                continue;
+            }
+
+            var k = key.Trim();
+            var kLower = k.ToLowerInvariant();
+
+            // Support combined tokens like "CtrlShift"
+            if (kLower.Contains("ctrl") || kLower.Contains("control"))
+            {
+                modifiers |= KeyModifiers.Control;
+            }
+            if (kLower.Contains("shift"))
+            {
+                modifiers |= KeyModifiers.Shift;
+            }
+            if (kLower.Contains("alt"))
+            {
+                modifiers |= KeyModifiers.Alt;
+            }
+            if (kLower.Contains("win") || kLower.Contains("meta"))
+            {
+                // Map Win/Command to Meta so it renders appropriately across platforms
+                modifiers |= KeyModifiers.Meta;
+            }
+
+            // If the whole token is not just a modifier, try parse as a key
+            var isModifierOnly =
+                kLower is "ctrl" or "control" or "shift" or "alt" or "win" or "meta" ||
+                kLower == "ctrlshift" || kLower == "ctrlalt" || kLower == "shiftalt" ||
+                kLower == "ctrlshiftalt" || kLower == "winshift" || kLower == "winctrl" ||
+                kLower == "winalt" || kLower == "winctrlshift" || kLower == "metashift" ||
+                kLower == "metactrl" || kLower == "metaalt" || kLower == "metactrlshift";
+
+            if (!isModifierOnly && Enum.TryParse<Key>(k, ignoreCase: true, out var parsedKey))
+            {
+                keyValue = parsedKey;
+            }
+        }
+
+        if (keyValue == null)
+        {
+            return null;
+        }
+
+        return new KeyGesture(keyValue.Value, modifiers);
     }
 }
