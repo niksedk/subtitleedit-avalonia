@@ -1,5 +1,6 @@
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.ReviewSpeech;
 
@@ -12,8 +13,10 @@ public partial class ReviewRow : ObservableObject
     [ObservableProperty] private string _speed;
     [ObservableProperty] private Color _speedBackgroundColor;
     [ObservableProperty] private string _text;
+    [ObservableProperty] private bool _hasHistory;
 
     public TtsStepResult StepResult { get; set; }
+    public List<ReviewHistoryRow> HistoryItems { get; set; }
 
     public ReviewRow()
     {
@@ -25,5 +28,29 @@ public partial class ReviewRow : ObservableObject
         SpeedBackgroundColor = Colors.AliceBlue; //TODO: (Color)Application.Current!.Resources[ThemeNames.BackgroundColor];
         Text = string.Empty;
         StepResult = new TtsStepResult();
+        HistoryItems = new List<ReviewHistoryRow>();
+        HasHistory = false;
+    }
+
+    internal void StartHistory()
+    {
+        HistoryItems.Add(new ReviewHistoryRow
+        {
+            Number = 1,
+            FileName = StepResult.CurrentFileName,
+            Voice = StepResult.Voice?.Name ?? string.Empty,
+        });
+    }
+
+    internal void AddHistory(Voices.Voice voice, TtsResult speakResult)
+    {
+        HistoryItems.Add(new ReviewHistoryRow 
+        { 
+            Number = HistoryItems.Count + 1,
+            FileName = speakResult.FileName, 
+            Voice = voice.Name,
+        });
+
+        HasHistory = true;
     }
 }

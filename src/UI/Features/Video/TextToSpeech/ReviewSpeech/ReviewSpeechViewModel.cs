@@ -7,6 +7,7 @@ using HanumanInstitute.LibMpv;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.DownloadTts;
+using Nikse.SubtitleEdit.Features.Video.TextToSpeech.ElevenLabsSettings;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Engines;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Voices;
 using Nikse.SubtitleEdit.Logic;
@@ -178,7 +179,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
     {
         foreach (var p in stepResults)
         {
-            Lines.Add(new ReviewRow
+            var row = new ReviewRow
             {
                 Include = true,
                 Number = p.Paragraph.Number,
@@ -186,8 +187,10 @@ public partial class ReviewSpeechViewModel : ObservableObject
                 Voice = p.Voice == null ? string.Empty : p.Voice.ToString(),
                 Speed = Math.Round(p.SpeedFactor, 2).ToString(CultureInfo.CurrentCulture),
                 Cps = Math.Round(p.Paragraph.GetCharactersPerSecond(), 2).ToString(CultureInfo.CurrentCulture),
-                StepResult = p
-            });
+                StepResult = p,
+            };
+            row.StartHistory();
+            Lines.Add(row);
         }
 
         foreach (var engineItem in engines)
@@ -342,6 +345,24 @@ public partial class ReviewSpeechViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task ShowHistory()
+    {
+        var line = SelectedLine;
+        if (Window == null || line == null)
+        {
+            return;
+        }
+
+        var result = 
+            await _windowService.ShowDialogAsync<ReviewSpeechHistoryWindow, ReviewSpeechHistoryViewModel>(Window!, 
+            vm => vm.Initialize(line));
+        if (!result.OkPressed)
+        {
+            return;
+        }
+    }
+
+    [RelayCommand]
     private async Task ShowElevenLabsEngineV3Help()
     {
         if (Window == null)
@@ -438,7 +459,11 @@ public partial class ReviewSpeechViewModel : ObservableObject
             Se.Settings.Video.TextToSpeech.MurfStyle = SelectedStyle;
         }
 
+
         var speakResult = await engine.Speak(line.Text, _waveFolder, voice, SelectedLanguage, SelectedRegion, SelectedModel, _cancellationToken);
+
+        line.AddHistory(voice, speakResult);
+
         line.StepResult.CurrentFileName = speakResult.FileName;
         line.StepResult.Voice = voice;
 

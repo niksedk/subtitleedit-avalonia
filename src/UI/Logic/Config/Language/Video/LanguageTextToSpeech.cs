@@ -5,10 +5,11 @@ public class LanguageTextToSpeech
     public string Title { get; set; }
     public string TextToSpeechEngine { get; set; }
     public string ReviewAudioSegments { get; set; }
+    public string ReviewAudioSegmentsHistory { get; set; }
     public string Stability { get; set; }
     public string Similarity { get; set; }
     public string SpeakerBoost { get; set; }
-    public string StyleeExaggeration { get; set; }
+    public string StyleExaggeration { get; set; }
     public string RegenerateAudioSelectedLine { get; set; }
     public string GenerateSpeechFromText { get; set; }
     public string TestVoice { get; set; }
@@ -25,10 +26,11 @@ public class LanguageTextToSpeech
         Title = "Text to speech";
         TextToSpeechEngine = "Text to speech engine";
         ReviewAudioSegments = "TTS - Review audio segments";
+        ReviewAudioSegmentsHistory = "TTS - Review audio history";
         Stability = "Stability";
         Similarity = "Similarity";
         SpeakerBoost = "Speaker boost";
-        StyleeExaggeration = "Style exaggeration";
+        StyleExaggeration = "Style exaggeration";
         RegenerateAudioSelectedLine = "Regenerate audio for selected line";
         GenerateSpeechFromText = "Generate speech from text";
         TestVoice = "Test voice";

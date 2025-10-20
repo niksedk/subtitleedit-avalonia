@@ -461,6 +461,8 @@ public class LanguageGeneral
     public string StyleExaggeration { get; set; }
     public string AutoContinue { get; set; }
     public string ListErrors { get; set; }
+    public string History { get; set; }
+    public string Play { get; set; }
 
     public LanguageGeneral()
     {
@@ -918,5 +920,7 @@ public class LanguageGeneral
         StyleExaggeration = "Style exaggeration";
         AutoContinue = "Auto-continue";
         ListErrors = "List errors";
+        History = "History";
+        Play = "Play";
     }
 }

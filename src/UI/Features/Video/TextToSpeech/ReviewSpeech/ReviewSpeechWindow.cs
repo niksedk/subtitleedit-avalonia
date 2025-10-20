@@ -1,5 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
@@ -86,12 +88,22 @@ public class ReviewSpeechWindow : Window
             VerticalAlignment = VerticalAlignment.Stretch,
             Columns =
             {
-                new DataGridCheckBoxColumn
+                new DataGridTemplateColumn
                 {
-                    Header = Se.Language.General.Include,
-                    Binding = new Binding(nameof(ReviewRow.Include)),
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
-                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
+                    Header = Se.Language.General.Enabled,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    CellTemplate = new FuncDataTemplate<ReviewRow>((item, _) =>
+                        new Border
+                        {
+                            Background = Brushes.Transparent, // Prevents highlighting
+                            Padding = new Thickness(4),
+                            Child = new CheckBox
+                            {
+                                [!ToggleButton.IsCheckedProperty] = new Binding(nameof(ReviewRow.Include)),
+                                HorizontalAlignment = HorizontalAlignment.Center
+                            }
+                        }),
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
                 },
                 new DataGridTextColumn
                 {
@@ -127,6 +139,14 @@ public class ReviewSpeechWindow : Window
                     Binding = new Binding(nameof(ReviewRow.Text)),
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                     CellTheme = UiUtil.DataGridNoBorderCellTheme,
+                },
+                new DataGridTemplateColumn
+                {
+                    Header = Se.Language.General.History,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    CellTemplate = new FuncDataTemplate<ReviewRow>((item, _) =>
+                        UiUtil.MakeBrowseButton(vm.ShowHistoryCommand).WithBindIsVisible(nameof(ReviewRow.HasHistory))),
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
                 },
             },
         };
@@ -362,8 +382,8 @@ public class ReviewSpeechWindow : Window
             Width = 200,
             [!Slider.ValueProperty] = new Binding(nameof(vm.Stability)),
         };
-        
-        var labelStabilityValue = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.Stability), new DoubleToTwoDecimalConverter());    
+
+        var labelStabilityValue = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.Stability), new DoubleToTwoDecimalConverter());
         var buttonStability = UiUtil.MakeButton(vm.ShowStabilityHelpCommand, IconNames.Help);
 
         var labelSimilarity = UiUtil.MakeLabel(Se.Language.Video.TextToSpeech.Similarity);

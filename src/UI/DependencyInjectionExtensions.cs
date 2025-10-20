@@ -238,6 +238,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<RemoveTextForHearingImpairedViewModel>();
         collection.AddTransient<ReplaceViewModel>();
         collection.AddTransient<RestoreAutoBackupViewModel>();
+        collection.AddTransient<ReviewSpeechHistoryViewModel>();
         collection.AddTransient<ReviewSpeechViewModel>();
         collection.AddTransient<SelectVideoPositionViewModel>();
         collection.AddTransient<SettingsResetViewModel>();
