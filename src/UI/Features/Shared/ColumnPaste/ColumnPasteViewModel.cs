@@ -4,7 +4,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-namespace Nikse.SubtitleEdit.Features.Main.ColumnPaste;
+namespace Nikse.SubtitleEdit.Features.Shared.ColumnPaste;
 
 public partial class ColumnPasteViewModel : ObservableObject
 {

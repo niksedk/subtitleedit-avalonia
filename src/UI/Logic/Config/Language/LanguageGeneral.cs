@@ -459,7 +459,8 @@ public class LanguageGeneral
     public string Shortcut { get; set; }
     public string Column { get; set; }
     public string StyleExaggeration { get; set; }
-    public object AutoContinue { get; set; }
+    public string AutoContinue { get; set; }
+    public string ListErrors { get; set; }
 
     public LanguageGeneral()
     {
@@ -916,5 +917,6 @@ public class LanguageGeneral
         Column = "Column";  
         StyleExaggeration = "Style exaggeration";
         AutoContinue = "Auto-continue";
+        ListErrors = "List errors";
     }
 }

@@ -1,9 +1,8 @@
 ﻿using Avalonia.Controls;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using System;
 
-namespace Nikse.SubtitleEdit.Features.Main.ColumnPaste;
+namespace Nikse.SubtitleEdit.Features.Shared.ColumnPaste;
 
 public class ColumnPasteWindow : Window
 {
@@ -36,7 +35,7 @@ public class ColumnPasteWindow : Window
         };
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
-        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);   
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
         grid.Add(MakeChooseColumnView(vm), 0);

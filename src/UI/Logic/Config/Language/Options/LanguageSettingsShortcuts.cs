@@ -215,6 +215,8 @@ public class LanguageSettingsShortcuts
     public string SetVideoPositionCurrentSubtitleStart { get; set; }
     public string SetVideoPositionCurrentSubtitleEnd { get; set; }
     public string ToggleAudioTracks { get; set; }
+    public string ListErrors { get; internal set; }
+    public string GoToNextError { get; internal set; }
 
     public LanguageSettingsShortcuts()
     {

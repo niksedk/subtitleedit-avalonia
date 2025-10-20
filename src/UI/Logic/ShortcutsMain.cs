@@ -226,6 +226,8 @@ public static class ShortcutsMain
         { nameof(MainViewModel.VideoSetPositionCurrentSubtitleStartCommand), Se.Language.Options.Shortcuts.SetVideoPositionCurrentSubtitleStart },
         { nameof(MainViewModel.VideoSetPositionCurrentSubtitleEndCommand), Se.Language.Options.Shortcuts.SetVideoPositionCurrentSubtitleEnd },
         { nameof(MainViewModel.ToggleAudioTracksCommand), Se.Language.Options.Shortcuts.ToggleAudioTracks },
+        { nameof(MainViewModel.ListErrorsCommand), Se.Language.Options.Shortcuts.ListErrors },
+        { nameof(MainViewModel.GoToNextErrorCommand), Se.Language.Options.Shortcuts.GoToNextError },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -400,6 +402,8 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.VideoSetPositionCurrentSubtitleStartCommand, nameof(vm.VideoSetPositionCurrentSubtitleStartCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.VideoSetPositionCurrentSubtitleEndCommand, nameof(vm.VideoSetPositionCurrentSubtitleEndCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ToggleAudioTracksCommand, nameof(vm.ToggleAudioTracksCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ListErrorsCommand, nameof(vm.ListErrorsCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.GoToNextErrorCommand, nameof(vm.GoToNextErrorCommand), ShortcutCategory.General);
 
         return shortcuts;
     }
@@ -443,6 +447,8 @@ public static class ShortcutsMain
             new(nameof(vm.SubtitleGridCutCommand), [GetCommandOrWin(), nameof(Avalonia.Input.Key.X)], ShortcutCategory.SubtitleGrid),
             new(nameof(vm.SubtitleGridPasteCommand), [GetCommandOrWin(), nameof(Avalonia.Input.Key.V)], ShortcutCategory.SubtitleGrid),
             new(nameof(vm.SubtitleGridCopyCommand), [GetCommandOrWin(), nameof(Avalonia.Input.Key.C)], ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.ListErrorsCommand), [GetCommandOrWin(), nameof(Avalonia.Input.Key.F8)], ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.GoToNextErrorCommand), [nameof(Avalonia.Input.Key.F8)], ShortcutCategory.SubtitleGrid),
         ];
     }
 

@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -36,7 +37,6 @@ using Nikse.SubtitleEdit.Features.Files.ManualChosenEncoding;
 using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 using Nikse.SubtitleEdit.Features.Files.Statistics;
 using Nikse.SubtitleEdit.Features.Help;
-using Nikse.SubtitleEdit.Features.Main.ColumnPaste;
 using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Features.Ocr;
 using Nikse.SubtitleEdit.Features.Options.Language;
@@ -45,6 +45,8 @@ using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Features.Options.WordLists;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.Bookmarks;
+using Nikse.SubtitleEdit.Features.Shared.ColumnPaste;
+using Nikse.SubtitleEdit.Features.Shared.ErrorList;
 using Nikse.SubtitleEdit.Features.Shared.GoToLineNumber;
 using Nikse.SubtitleEdit.Features.Shared.PickAlignment;
 using Nikse.SubtitleEdit.Features.Shared.PickColor;
@@ -3500,6 +3502,55 @@ public partial class MainViewModel :
         }
 
         ShowStatus(string.Format(Se.Language.General.XNotFound, _findService.SearchText));
+    }
+
+    [RelayCommand]
+    private async Task ListErrors()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<ErrorListWindow, ErrorListViewModel>(Window!,
+            vm => { vm.Initialize(Subtitles.ToList()); });
+
+        if (result.GoToPressed && result.SelectedSubtitle != null)
+        {
+            SelectAndScrollToSubtitle(result.SelectedSubtitle);
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private void GoToNextError()
+    {
+        if (Window == null || IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
+        var selected = SelectedSubtitle;
+        if (selected == null)
+        {
+            return;
+        }
+
+        var idx = Subtitles.IndexOf(selected);
+        if (idx < 0)
+        {
+            return;
+        }
+
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -8945,7 +8996,7 @@ public partial class MainViewModel :
             {
                 IsTextBoxSplitAtCursorAndVideoPositionVisible = true;
             }
-        }   
+        }
     }
 
     private async void OnWindowClosing(object? sender, WindowClosingEventArgs e)
