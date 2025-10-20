@@ -391,6 +391,17 @@ public partial class ReviewSpeechViewModel : ObservableObject
             return;
         }
 
+        if (engine is ElevenLabs)
+        {
+            var settings = Se.Settings.Video.TextToSpeech;
+
+            settings.ElevenLabsStability = Stability;
+            settings.ElevenLabsSimilarity = Similarity;
+            settings.ElevenLabsSpeakerBoost = SpeakerBoost;
+            settings.ElevenLabsSpeed = Speed;
+            settings.ElevenLabsStyleeExaggeration = StyleExaggeration;
+        }
+
         var voice = SelectedVoice;
         var line = SelectedLine;
         if (engine == null || voice == null || line == null)

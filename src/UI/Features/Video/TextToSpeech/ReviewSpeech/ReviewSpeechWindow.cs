@@ -8,6 +8,7 @@ using Nikse.SubtitleEdit.Features.Video.TextToSpeech.ElevenLabsSettings;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Engines;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.ReviewSpeech;
 
@@ -361,6 +362,8 @@ public class ReviewSpeechWindow : Window
             Width = 200,
             [!Slider.ValueProperty] = new Binding(nameof(vm.Stability)),
         };
+        
+        var labelStabilityValue = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.Stability), new DoubleToTwoDecimalConverter());    
         var buttonStability = UiUtil.MakeButton(vm.ShowStabilityHelpCommand, IconNames.Help);
 
         var labelSimilarity = UiUtil.MakeLabel(Se.Language.Video.TextToSpeech.Similarity);
@@ -372,6 +375,7 @@ public class ReviewSpeechWindow : Window
             Width = 200,
             [!Slider.ValueProperty] = new Binding(nameof(vm.Similarity)),
         };
+        var labelSimilarityValue = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.Similarity), new DoubleToTwoDecimalConverter());
         var buttonSimilarity = UiUtil.MakeButton(vm.ShowSimilarityHelpCommand, IconNames.Help);
 
         var labelSpeakerBoost = UiUtil.MakeLabel(Se.Language.Video.TextToSpeech.SpeakerBoost);
@@ -383,6 +387,7 @@ public class ReviewSpeechWindow : Window
             Width = 200,
             [!Slider.ValueProperty] = new Binding(nameof(vm.SpeakerBoost)),
         };
+        var labelSpeakerBoostValue = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.SpeakerBoost), new DoubleToTwoDecimalConverter());
         var buttonSpeakerBoost = UiUtil.MakeButton(vm.ShowSpeakerBoostHelpCommand, IconNames.Help);
 
         var labelSpeed = UiUtil.MakeLabel(Se.Language.General.Speed);
@@ -394,6 +399,7 @@ public class ReviewSpeechWindow : Window
             Width = 200,
             [!Slider.ValueProperty] = new Binding(nameof(vm.Speed)),
         };
+        var labelSpeedValue = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.Speed), new DoubleToTwoDecimalConverter());
         var buttonSpeed = UiUtil.MakeButton(vm.ShowSpeedHelpCommand, IconNames.Help);
 
         var labelStyleExaggeration = UiUtil.MakeLabel(Se.Language.General.StyleExaggeration);
@@ -406,6 +412,7 @@ public class ReviewSpeechWindow : Window
             Margin = new Thickness(5, 0, 0, 0),
             [!Slider.ValueProperty] = new Binding(nameof(ElevenLabsSettingsViewModel.StyleExaggeration)),
         };
+        var labelStyleExaggerationValue = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.StyleExaggeration), new DoubleToTwoDecimalConverter());
         var buttonStyleExaggeration = UiUtil.MakeButton(vm.ShowStyleExaggerationHelpCommand, IconNames.Help);
 
 
@@ -424,9 +431,10 @@ public class ReviewSpeechWindow : Window
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
             },
             Margin = UiUtil.MakeWindowMargin(),
-            ColumnSpacing = 10,
+            ColumnSpacing = 5,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             [!Grid.IsVisibleProperty] = new Binding(nameof(vm.IsElevenLabsControlsVisible)) { Mode = BindingMode.OneWay },
@@ -434,23 +442,28 @@ public class ReviewSpeechWindow : Window
 
         grid.Add(labelStability, 0, 0);
         grid.Add(sliderStability, 0, 1);
-        grid.Add(buttonStability, 0, 2);
+        grid.Add(labelStabilityValue, 0, 2);
+        grid.Add(buttonStability, 0, 3);
 
         grid.Add(labelSimilarity, 1, 0);
         grid.Add(sliderSimilarity, 1, 1);
-        grid.Add(buttonSimilarity, 1, 2);
+        grid.Add(labelSimilarityValue, 1, 2);
+        grid.Add(buttonSimilarity, 1, 3);
 
         grid.Add(labelSpeakerBoost, 2, 0);
         grid.Add(sliderSpeakerBoost, 2, 1);
-        grid.Add(buttonSpeakerBoost, 2, 2);
+        grid.Add(labelSpeakerBoostValue, 2, 2);
+        grid.Add(buttonSpeakerBoost, 2, 3);
 
         grid.Add(labelSpeed, 3, 0);
         grid.Add(sliderSpeed, 3, 1);
-        grid.Add(buttonSpeed, 3, 2);
+        grid.Add(labelSpeedValue, 3, 2);
+        grid.Add(buttonSpeed, 3, 3);
 
         grid.Add(labelStyleExaggeration, 4, 0);
         grid.Add(sliderStyleExaggeration, 4, 1);
-        grid.Add(buttonStyleExaggeration, 4, 2);
+        grid.Add(labelStyleExaggerationValue, 4, 2);
+        grid.Add(buttonStyleExaggeration, 4, 3);
 
         return grid;
     }
