@@ -77,14 +77,14 @@ public partial class ReviewSpeechHistoryViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task Play()
+    private async Task Play(ReviewHistoryRow? item)
     {
-        var item = SelectedHistoryItem;
         if (item == null)
         {
             return;
         }
 
+        item.IsPlaying = true;
         await PlayAudio(item.FileName);
     }
 

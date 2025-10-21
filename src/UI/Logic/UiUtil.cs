@@ -194,7 +194,7 @@ public static class UiUtil
         };
     }
 
-    public static Button MakeButton(string text, IRelayCommand? command, object parameter = null)
+    public static Button MakeButton(string text, IRelayCommand? command, object? parameter = null)
     {
         return new Button
         {

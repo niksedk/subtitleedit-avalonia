@@ -6,6 +6,7 @@ using Avalonia.Layout;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.ReviewSpeech;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.ElevenLabsSettings;
 
@@ -89,7 +90,14 @@ public class ReviewSpeechHistoryWindow : Window
                     Header = Se.Language.General.History,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     CellTemplate = new FuncDataTemplate<ReviewHistoryRow>((item, _) =>
-                        UiUtil.MakeButton(Se.Language.General.Play, vm.PlayCommand)),
+                    {
+                        var buttonPlay = UiUtil.MakeButton(vm.PlayCommand,"fa-solid fa-play")
+                            .WithBindIsVisible(nameof(item.IsPlaying), new InverseBooleanConverter());
+                        //buttonPlay.DataContext = ".";
+                        buttonPlay.CommandParameter = item;
+                        
+                        return buttonPlay;
+                    }),
                     Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
                 },
             },
