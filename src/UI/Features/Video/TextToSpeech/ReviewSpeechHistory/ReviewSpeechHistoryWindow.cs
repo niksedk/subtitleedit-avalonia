@@ -91,12 +91,15 @@ public class ReviewSpeechHistoryWindow : Window
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     CellTemplate = new FuncDataTemplate<ReviewHistoryRow>((item, _) =>
                     {
-                        var buttonPlay = UiUtil.MakeButton(vm.PlayCommand,"fa-solid fa-play")
+                        var buttonPlay = UiUtil.MakeButton(vm.PlayItemCommand,"fa-solid fa-play")
                             .WithBindIsVisible(nameof(item.IsPlaying), new InverseBooleanConverter());
-                        //buttonPlay.DataContext = ".";
                         buttonPlay.CommandParameter = item;
                         
-                        return buttonPlay;
+                        var buttonStop = UiUtil.MakeButton(vm.StopItemCommand,"fa-solid fa-stop")
+                            .WithBindIsVisible(nameof(item.IsPlaying));
+                        buttonStop.CommandParameter = item;
+
+                        return UiUtil.MakeHorizontalPanel(buttonPlay, buttonStop);
                     }),
                     Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
                 },

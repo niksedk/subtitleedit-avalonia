@@ -77,7 +77,7 @@ public partial class ReviewSpeechHistoryViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task Play(ReviewHistoryRow? item)
+    private async Task PlayItem(ReviewHistoryRow? item)
     {
         if (item == null)
         {
@@ -87,6 +87,19 @@ public partial class ReviewSpeechHistoryViewModel : ObservableObject
         item.IsPlaying = true;
         await PlayAudio(item.FileName);
     }
+    
+    [RelayCommand]
+    private async Task StopItem(ReviewHistoryRow? item)
+    {
+        if (item == null)
+        {
+            return;
+        }
+
+        item.IsPlaying = false;
+        //await PlayAudio(item.FileName);
+    }
+
 
     internal void OnKeyDown(KeyEventArgs e)
     {
