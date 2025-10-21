@@ -67,9 +67,17 @@ public class MpvView : Control
 #if ANDROID
         return new NativeView();
 #endif
-        return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
-            new NativeView() :
-            new OpenGlView();
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return new NativeView();
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            return new SoftwareView();
+        }
+
+        return new OpenGlView();
     }
 
     private void StopRenderer()
