@@ -117,9 +117,8 @@ public class ReviewSpeechWindow : Window
                     CellTemplate = new FuncDataTemplate<ReviewRow>((item, _) =>
                     {
                         var buttonRegenerate = UiUtil.MakeButton(vm.RegenerateAudioCommand, IconNames.Recycle)
-                        .WithBindEnabled(nameof(vm.IsPlayVisible));
+                        .WithBindEnabled(nameof(item.IsPlayingEnabled));
                         buttonRegenerate.CommandParameter = item;
-                        buttonRegenerate.DataContext = vm;
                         if (Se.Settings.Appearance.ShowHints)
                         {
                             ToolTip.SetTip(buttonRegenerate, Se.Language.Video.TextToSpeech.RegenerateAudio);
@@ -133,14 +132,13 @@ public class ReviewSpeechWindow : Window
                         }
 
                         var buttonPlay = UiUtil.MakeButton(vm.PlayRowCommand,"fa-solid fa-play")
-                        .WithBindIsVisible(nameof(vm.IsPlayVisible));
+                        .WithBindIsVisible(nameof(item.IsPlaying), new InverseBooleanConverter())
+                        .WithBindEnabled(nameof(item.IsPlayingEnabled));
                         buttonPlay.CommandParameter = item;
-                        buttonPlay.DataContext = vm;
 
                         var buttonStop = UiUtil.MakeButton(vm.StopCommand, "fa-solid fa-stop")
-                        .WithBindIsVisible(nameof(vm.IsStopVisible));
+                        .WithBindIsVisible(nameof(item.IsPlaying));
                         buttonStop.CommandParameter = item;
-                        buttonStop.DataContext = vm;
 
                         return new StackPanel
                         {

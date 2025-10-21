@@ -116,6 +116,12 @@ public partial class ReviewSpeechViewModel : ObservableObject
         {
             IsPlayVisible = true;
             IsStopVisible = false;
+            foreach (var l in Lines)
+            {
+                l.IsPlaying = false;
+                l.IsPlayingEnabled = true;
+            }
+
             return;
         }
 
@@ -129,10 +135,12 @@ public partial class ReviewSpeechViewModel : ObservableObject
             {
                 Dispatcher.UIThread.Invoke<Task>(async () =>
                 {
+                    line.IsPlaying = false;
                     var index = Lines.IndexOf(line);
                     if (index < Lines.Count - 1)
                     {
                         var nextLine = Lines[index + 1];
+                        nextLine.IsPlaying = true;
                         SelectedLine = nextLine;
                         LineGrid.ScrollIntoView(nextLine, null);
                         await PlayAudio(nextLine.StepResult.CurrentFileName);
@@ -140,8 +148,14 @@ public partial class ReviewSpeechViewModel : ObservableObject
                     else
                     {
                         _skipAutoContinue = true; // no more lines to play
+
                         IsPlayVisible = true;
                         IsStopVisible = false;
+                        foreach (var l in Lines)
+                        {
+                            l.IsPlaying = false;
+                            l.IsPlayingEnabled = true;
+                        }
                     }
                 });
 
@@ -150,6 +164,16 @@ public partial class ReviewSpeechViewModel : ObservableObject
 
             IsPlayVisible = paused;
             IsStopVisible = !paused;
+
+            if (paused)
+            {
+                foreach (var l in Lines)
+                {
+                    l.IsPlaying = false;
+                    l.IsPlayingEnabled = true;
+                }
+                return;
+            }
         }
 
         _timer.Start();
@@ -502,6 +526,13 @@ public partial class ReviewSpeechViewModel : ObservableObject
         _cancellationToken = _cancellationTokenSource.Token;
         _skipAutoContinue = false;
         _startPlayTicks = DateTime.UtcNow.Ticks;
+
+        line.IsPlaying = true;
+        foreach (var l in Lines)
+        {
+            l.IsPlayingEnabled = false;
+        }
+
         await PlayAudio(line.StepResult.CurrentFileName);
     }
 
