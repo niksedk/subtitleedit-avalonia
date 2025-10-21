@@ -411,7 +411,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task RegenerateAudio()
+    private async Task RegenerateAudio(ReviewRow? row)
     {
         var engine = SelectedEngine;
         if (engine == null)
@@ -431,7 +431,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
         }
 
         var voice = SelectedVoice;
-        var line = SelectedLine;
+        var line = row ?? SelectedLine;
         if (engine == null || voice == null || line == null)
         {
             return;

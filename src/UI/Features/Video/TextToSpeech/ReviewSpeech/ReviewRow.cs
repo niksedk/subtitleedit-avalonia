@@ -14,6 +14,7 @@ public partial class ReviewRow : ObservableObject
     [ObservableProperty] private Color _speedBackgroundColor;
     [ObservableProperty] private string _text;
     [ObservableProperty] private bool _hasHistory;
+    [ObservableProperty] private bool _isPlaying;
 
     public TtsStepResult StepResult { get; set; }
     public List<ReviewHistoryRow> HistoryItems { get; set; }

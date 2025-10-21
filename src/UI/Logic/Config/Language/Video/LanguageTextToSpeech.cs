@@ -20,6 +20,7 @@ public class LanguageTextToSpeech
     public string VideoEncodingSettings { get; set; }
     public string ElevenLabsSettings { get; set; }
     public string ElevenLabsSettingsResetHint { get; set; }
+    public string RegenerateAudio { get; set; }
 
     public LanguageTextToSpeech()
     {
@@ -41,5 +42,6 @@ public class LanguageTextToSpeech
         VideoEncodingSettings = "TTS - Video encoding settings";
         ElevenLabsSettings = "TTS - ElevenLabs settings";
         ElevenLabsSettingsResetHint = "Reset ElevenLabs settings to default values";
+        RegenerateAudio = "Regenerate audio";
     }
 }

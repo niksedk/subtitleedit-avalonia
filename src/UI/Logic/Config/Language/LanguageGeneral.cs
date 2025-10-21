@@ -463,6 +463,7 @@ public class LanguageGeneral
     public string ListErrors { get; set; }
     public string History { get; set; }
     public string Play { get; set; }
+    public string ShowHistory { get; set; }
 
     public LanguageGeneral()
     {
@@ -922,5 +923,6 @@ public class LanguageGeneral
         ListErrors = "List errors";
         History = "History";
         Play = "Play";
+        ShowHistory = "Show history";
     }
 }

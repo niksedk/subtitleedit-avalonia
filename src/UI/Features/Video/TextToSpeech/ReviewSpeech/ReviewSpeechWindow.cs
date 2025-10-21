@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
@@ -95,22 +94,69 @@ public class ReviewSpeechWindow : Window
             VerticalAlignment = VerticalAlignment.Stretch,
             Columns =
             {
+                //new DataGridTemplateColumn
+                //{
+                //    Header = Se.Language.General.Enabled,
+                //    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                //    CellTemplate = new FuncDataTemplate<ReviewRow>((item, _) =>
+                //        new Border
+                //        {
+                //            Background = Brushes.Transparent, // Prevents highlighting
+                //            Padding = new Thickness(4),
+                //            Child = new CheckBox
+                //            {
+                //                [!ToggleButton.IsCheckedProperty] = new Binding(nameof(ReviewRow.Include)),
+                //                HorizontalAlignment = HorizontalAlignment.Center
+                //            }
+                //        }),
+                //    Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
+                //},
                 new DataGridTemplateColumn
                 {
-                    Header = Se.Language.General.Enabled,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     CellTemplate = new FuncDataTemplate<ReviewRow>((item, _) =>
-                        new Border
+                    {
+                        var buttonRegenerate = UiUtil.MakeButton(vm.RegenerateAudioCommand, IconNames.Recycle)
+                        .WithBindEnabled(nameof(vm.IsPlayVisible));
+                        buttonRegenerate.CommandParameter = item;
+                        buttonRegenerate.DataContext = vm;
+                        if (Se.Settings.Appearance.ShowHints)
                         {
-                            Background = Brushes.Transparent, // Prevents highlighting
-                            Padding = new Thickness(4),
-                            Child = new CheckBox
+                            ToolTip.SetTip(buttonRegenerate, Se.Language.Video.TextToSpeech.RegenerateAudio);
+                        }
+
+                        var buttonHistory = UiUtil.MakeButton(vm.ShowHistoryCommand, IconNames.DotsVertical).WithBindEnabled(nameof(ReviewRow.HasHistory));
+                        buttonHistory.CommandParameter = item;
+                        if (Se.Settings.Appearance.ShowHints)
+                        {
+                            ToolTip.SetTip(buttonHistory, Se.Language.General.ShowHistory);
+                        }
+
+                        var buttonPlay = UiUtil.MakeButton(vm.PlayRowCommand,"fa-solid fa-play")
+                        .WithBindIsVisible(nameof(vm.IsPlayVisible));
+                        buttonPlay.CommandParameter = item;
+                        buttonPlay.DataContext = vm;
+
+                        var buttonStop = UiUtil.MakeButton(vm.StopCommand, "fa-solid fa-stop")
+                        .WithBindIsVisible(nameof(vm.IsStopVisible));
+                        buttonStop.CommandParameter = item;
+                        buttonStop.DataContext = vm;
+
+                        return new StackPanel
+                        {
+                            Orientation = Orientation.Horizontal,
+                            HorizontalAlignment = HorizontalAlignment.Center,
+                            Spacing = 5,
+                            Children =
                             {
-                                [!ToggleButton.IsCheckedProperty] = new Binding(nameof(ReviewRow.Include)),
-                                HorizontalAlignment = HorizontalAlignment.Center
+                                buttonRegenerate,
+                                buttonHistory,
+                                buttonPlay,
+                                buttonStop,
                             }
-                        }),
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
+                        };
+                    }),
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
                 },
                 new DataGridTextColumn
                 {
@@ -146,39 +192,6 @@ public class ReviewSpeechWindow : Window
                     Binding = new Binding(nameof(ReviewRow.Text)),
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                     CellTheme = UiUtil.DataGridNoBorderCellTheme,
-                },
-                new DataGridTemplateColumn
-                {
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    CellTemplate = new FuncDataTemplate<ReviewRow>((item, _) =>
-                    {
-                        var buttonPlay = UiUtil.MakeButton(vm.PlayRowCommand,"fa-solid fa-play")
-                        .WithBindIsVisible(nameof(vm.IsPlayVisible));
-                        buttonPlay.CommandParameter = item;
-                        buttonPlay.DataContext = vm;
-
-                        var buttonStop = UiUtil.MakeButton(vm.StopCommand, "fa-solid fa-stop")
-                        .WithBindIsVisible(nameof(vm.IsStopVisible));
-                        buttonStop.CommandParameter = item;
-                        buttonStop.DataContext = vm;
-
-                        var buttonHistory = UiUtil.MakeButton(vm.ShowHistoryCommand, IconNames.DotsVertical).WithBindEnabled(nameof(ReviewRow.HasHistory));
-                        buttonHistory.CommandParameter = item;
-
-                        return new StackPanel
-                        {
-                            Orientation = Orientation.Horizontal,
-                            HorizontalAlignment = HorizontalAlignment.Center,
-                            Spacing = 5,
-                            Children =
-                            {
-                                buttonPlay,
-                                buttonStop,
-                                buttonHistory,
-                            }
-                        };
-                    }),
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
                 },
             },
         };
@@ -237,8 +250,6 @@ public class ReviewSpeechWindow : Window
         {
             ToolTip.SetTip(buttonElevenLabsRest, Se.Language.Video.TextToSpeech.ElevenLabsSettingsResetHint);
         }
-
-
 
         var panelEngine = new StackPanel
         {
@@ -395,23 +406,25 @@ public class ReviewSpeechWindow : Window
         grid.Add(panelLanguage, 4, 0);
         grid.Add(elevenLabsControls, 5, 0);
         // 6 is filler
-        grid.Add(buttonRegenerateAudio, 7, 0);
+        //grid.Add(buttonRegenerateAudio, 7, 0);
         //grid.Add(buttonPlay, 8, 0);
-       // grid.Add(buttonStop, 8, 0);
-      //  grid.Add(checkBoxAutoContinue, 9, 0);
+        // grid.Add(buttonStop, 8, 0);
+        //  grid.Add(checkBoxAutoContinue, 9, 0);
 
         return UiUtil.MakeBorderForControl(grid);
     }
 
     private static Grid MakeElevenLabsControls(ReviewSpeechViewModel vm)
     {
+        var sliderWidth = 150;
+
         var labelStability = UiUtil.MakeLabel(Se.Language.Video.TextToSpeech.Stability);
         var sliderStability = new Slider
         {
             Minimum = 0,
             Maximum = 1,
             Value = vm.Stability,
-            Width = 200,
+            Width = sliderWidth,
             [!Slider.ValueProperty] = new Binding(nameof(vm.Stability)),
         };
 
@@ -424,7 +437,7 @@ public class ReviewSpeechWindow : Window
             Minimum = 0,
             Maximum = 1,
             Value = vm.Similarity,
-            Width = 200,
+            Width = sliderWidth,
             [!Slider.ValueProperty] = new Binding(nameof(vm.Similarity)),
         };
         var labelSimilarityValue = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.Similarity), new DoubleToTwoDecimalConverter());
@@ -436,7 +449,7 @@ public class ReviewSpeechWindow : Window
             Minimum = 0,
             Maximum = 100,
             Value = vm.SpeakerBoost,
-            Width = 200,
+            Width = sliderWidth,
             [!Slider.ValueProperty] = new Binding(nameof(vm.SpeakerBoost)),
         };
         var labelSpeakerBoostValue = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.SpeakerBoost), new DoubleToTwoDecimalConverter());
@@ -448,7 +461,7 @@ public class ReviewSpeechWindow : Window
             Minimum = 0.7,
             Maximum = 1.2,
             Value = vm.Speed,
-            Width = 200,
+            Width = sliderWidth,
             [!Slider.ValueProperty] = new Binding(nameof(vm.Speed)),
         };
         var labelSpeedValue = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.Speed), new DoubleToTwoDecimalConverter());
@@ -460,7 +473,7 @@ public class ReviewSpeechWindow : Window
             Minimum = 0.0,
             Maximum = 1.0,
             Value = vm.StyleExaggeration,
-            Width = 200,
+            Width = sliderWidth,
             Margin = new Thickness(5, 0, 0, 0),
             [!Slider.ValueProperty] = new Binding(nameof(ElevenLabsSettingsViewModel.StyleExaggeration)),
         };
