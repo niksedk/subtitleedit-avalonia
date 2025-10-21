@@ -55,7 +55,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
     [ObservableProperty] private double _speakerBoost;
     [ObservableProperty] private double _speed;
     [ObservableProperty] private double _styleExaggeration;
-    
+
     public Window? Window { get; set; }
     public DataGrid LineGrid { get; internal set; }
     public TtsStepResult[] StepResults { get; set; }
@@ -112,12 +112,14 @@ public partial class ReviewSpeechViewModel : ObservableObject
     {
         _timer.Stop();
 
-        if (_mpvContext == null)
+        if (_cancellationTokenSource.IsCancellationRequested || _mpvContext == null)
         {
             IsPlayVisible = true;
             IsStopVisible = false;
+            return;
         }
-        else
+
+        lock (_playLock)
         {
             var paused = _mpvContext.Pause.Get() ?? false;
 
@@ -161,7 +163,9 @@ public partial class ReviewSpeechViewModel : ObservableObject
             _mpvContext?.Dispose();
             _mpvContext = new MpvContext();
         }
+
         await _mpvContext.LoadFile(fileName).InvokeAsync();
+        
         _timer.Start();
     }
 
@@ -352,9 +356,9 @@ public partial class ReviewSpeechViewModel : ObservableObject
             return;
         }
 
-        var result = 
-            await _windowService.ShowDialogAsync<ReviewSpeechHistoryWindow, ReviewSpeechHistoryViewModel>(Window!, 
-            vm => vm.Initialize(line));
+        var result =
+            await _windowService.ShowDialogAsync<ReviewSpeechHistoryWindow, ReviewSpeechHistoryViewModel>(Window!,
+                vm => vm.Initialize(line));
         if (!result.OkPressed || result.SelectedHistoryItem == null)
         {
             return;
@@ -362,7 +366,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
 
         line.Voice = result.SelectedHistoryItem?.Voice?.Name ?? string.Empty;
         line.StepResult.CurrentFileName = result.SelectedHistoryItem?.FileName ?? string.Empty;
-        line.StepResult.Voice = result.SelectedHistoryItem?.Voice;  
+        line.StepResult.Voice = result.SelectedHistoryItem?.Voice;
     }
 
     [RelayCommand]
@@ -462,7 +466,6 @@ public partial class ReviewSpeechViewModel : ObservableObject
             Se.Settings.Video.TextToSpeech.MurfStyle = SelectedStyle;
         }
 
-
         var speakResult = await engine.Speak(line.Text, _waveFolder, voice, SelectedLanguage, SelectedRegion, SelectedModel, _cancellationToken);
 
         line.AddHistory(voice, speakResult);
@@ -523,7 +526,6 @@ public partial class ReviewSpeechViewModel : ObservableObject
     private void Stop()
     {
         _skipAutoContinue = true;
-        _timer.Stop();
         _cancellationTokenSource.Cancel();
         lock (_playLock)
         {
@@ -547,6 +549,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
             stepResult.Text = row.Text;
             stepResults.Add(stepResult);
         }
+
         StepResults = stepResults.ToArray();
 
         foreach (var p in stepResults)
@@ -579,10 +582,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
 
     private void Close()
     {
-        Dispatcher.UIThread.Invoke(() =>
-        {
-            Window?.Close();
-        });
+        Dispatcher.UIThread.Invoke(() => { Window?.Close(); });
     }
 
     private async Task<TtsStepResult> TrimAndAdjustSpeed(ReviewRow row)
@@ -681,6 +681,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
         {
             return;
         }
+
         Dispatcher.UIThread.Post(async () =>
         {
             var voices = await engine.GetVoices(SelectedLanguage?.Code ?? string.Empty);
@@ -696,6 +697,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
                 lastVoice = Enumerable.FirstOrDefault<Voice>(Voices, p => p.Name.StartsWith("en", StringComparison.OrdinalIgnoreCase) ||
                                                                           p.Name.Contains("English", StringComparison.OrdinalIgnoreCase));
             }
+
             SelectedVoice = lastVoice ?? Enumerable.First<Voice>(Voices);
 
             if (engine.HasLanguageParameter)
@@ -777,6 +779,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
                     lastVoice = Enumerable.FirstOrDefault<Voice>(Voices, p => p.Name.StartsWith("en", StringComparison.OrdinalIgnoreCase) ||
                                                                               p.Name.Contains("English", StringComparison.OrdinalIgnoreCase));
                 }
+
                 SelectedVoice = lastVoice ?? Enumerable.First<Voice>(Voices);
             });
         }

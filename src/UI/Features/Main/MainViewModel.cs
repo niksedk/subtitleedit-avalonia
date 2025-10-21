@@ -3532,12 +3532,46 @@ public partial class MainViewModel :
 
         if (result.GoToPressed && result.SelectedSubtitle != null)
         {
-            SelectAndScrollToSubtitle(result.SelectedSubtitle);
+            SelectAndScrollToSubtitle(result.SelectedSubtitle.Subtitle);
         }
 
         _shortcutManager.ClearKeys();
     }
 
+    [RelayCommand]
+    private void GoToPreviousError()
+    {
+        if (Window == null || IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
+        var selected = SelectedSubtitle;
+        if (selected == null)
+        {
+            return;
+        }
+
+        var idx = Subtitles.IndexOf(selected);
+        if (idx < 0)
+        {
+            return;
+        }
+
+        for (var i = idx - 1; i >= 0; i--)
+        {
+            var s = Subtitles[i];
+            if (!string.IsNullOrEmpty(s.GetErrors()))
+            {
+                SelectAndScrollToRow(i);
+                break;
+            }
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+    
     [RelayCommand]
     private void GoToNextError()
     {
@@ -3559,8 +3593,19 @@ public partial class MainViewModel :
             return;
         }
 
+        for (var i = idx + 1; i < Subtitles.Count; i++)
+        {
+            var s = Subtitles[i];
+            if (!string.IsNullOrEmpty(s.GetErrors()))
+            {
+                SelectAndScrollToRow(i);
+                break;
+            }
+        }
+
         _shortcutManager.ClearKeys();
     }
+
 
     [RelayCommand]
     private async Task CommandShowSettingsLanguage()

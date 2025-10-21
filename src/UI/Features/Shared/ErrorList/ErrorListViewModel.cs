@@ -16,8 +16,8 @@ namespace Nikse.SubtitleEdit.Features.Shared.ErrorList;
 public partial class ErrorListViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<ErrorListItem> _subtitles;
-    [ObservableProperty] private SubtitleLineViewModel? _selectedSubtitle;
-    [ObservableProperty] private bool _hasBookmarks;
+    [ObservableProperty] private ErrorListItem? _selectedSubtitle;
+    [ObservableProperty] private bool _hasErrors;
 
     public Window? Window { get; set; }
 
@@ -56,21 +56,26 @@ public partial class ErrorListViewModel : ObservableObject
         {
             Subtitles.Add(new ErrorListItem(subtitleLine));
         }
-
-        HasBookmarks = SelectedSubtitle != null;
+        
+        HasErrors = SelectedSubtitle != null;
     }
 
     internal void GridSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        HasBookmarks = SelectedSubtitle != null;
+        HasErrors = SelectedSubtitle != null;
     }
 
     internal void OnBookmarksGridDoubleTapped(object? sender, TappedEventArgs e)
     {
-        Dispatcher.UIThread.Invoke(() => { GoTo(); });
+        Dispatcher.UIThread.Invoke(GoTo);
     }
 
     internal void GridKeyDown(KeyEventArgs e)
     {
+        if (e.Key == Key.Enter)
+        {
+            e.Handled = true;
+            GoTo();
+        }
     }
 }

@@ -24,7 +24,7 @@ public class ErrorListWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        var buttonGoTo = UiUtil.MakeButton(Se.Language.General.GoTo, vm.GoToCommand).WithBindIsEnabled(nameof(vm.HasBookmarks));
+        var buttonGoTo = UiUtil.MakeButton(Se.Language.General.GoTo, vm.GoToCommand).WithBindIsEnabled(nameof(vm.HasErrors));
         var buttonCancel = UiUtil.MakeButtonDone(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonGoTo, buttonCancel);
 
