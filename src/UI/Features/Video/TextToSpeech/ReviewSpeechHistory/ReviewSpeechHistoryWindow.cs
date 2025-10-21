@@ -56,7 +56,7 @@ public class ReviewSpeechHistoryWindow : Window
         Closing += (s, e) => vm.OnWindowClosing(e); 
     }
 
-    private Control MakeHistoryGrid(ReviewSpeechHistoryViewModel vm)
+    private static Border MakeHistoryGrid(ReviewSpeechHistoryViewModel vm)
     {
         var dataGrid = new DataGrid
         {
@@ -93,7 +93,8 @@ public class ReviewSpeechHistoryWindow : Window
                     CellTemplate = new FuncDataTemplate<ReviewHistoryRow>((item, _) =>
                     {
                         var buttonPlay = UiUtil.MakeButton(vm.PlayItemCommand,"fa-solid fa-play")
-                            .WithBindIsVisible(nameof(item.IsPlaying), new InverseBooleanConverter());
+                            .WithBindIsVisible(nameof(item.IsPlaying), new InverseBooleanConverter())
+                            .WithBindEnabled(nameof(item.IsPlayingEnabled));
                         buttonPlay.CommandParameter = item;
                         
                         var buttonStop = UiUtil.MakeButton(vm.StopItemCommand,"fa-solid fa-stop")

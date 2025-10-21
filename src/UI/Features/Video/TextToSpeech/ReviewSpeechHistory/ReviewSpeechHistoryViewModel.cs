@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HanumanInstitute.LibMpv;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.ReviewSpeech;
-using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,7 +29,6 @@ public partial class ReviewSpeechHistoryViewModel : ObservableObject
     public ReviewSpeechHistoryViewModel()
     {
         HistoryItems = new ObservableCollection<ReviewHistoryRow>();
-        LoadSettings();
 
         _cancellationTokenSource = new CancellationTokenSource();
         _cancellationToken = _cancellationTokenSource.Token;
@@ -76,6 +74,7 @@ public partial class ReviewSpeechHistoryViewModel : ObservableObject
         foreach (ReviewHistoryRow row in HistoryItems)
         {
             row.IsPlaying = false;
+            row.IsPlayingEnabled = true;
         }
     }
 
@@ -87,24 +86,21 @@ public partial class ReviewSpeechHistoryViewModel : ObservableObject
             _mpvContext?.Dispose();
             _mpvContext = new MpvContext();
         }
+        
         await _mpvContext.LoadFile(fileName).InvokeAsync();
+
+        foreach (var row in HistoryItems)
+        {
+            row.IsPlayingEnabled = false;
+        }
+
         _timer.Start();
-    }
-
-    private void LoadSettings()
-    {
-    }
-
-    public void SaveSettings()
-    {
-        Se.SaveSettings();
     }
 
     [RelayCommand]
     private void Ok()
     {
         OkPressed = true;
-        SaveSettings();
         Window?.Close();
     }
 
@@ -127,7 +123,7 @@ public partial class ReviewSpeechHistoryViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task StopItem(ReviewHistoryRow? item)
+    private void StopItem(ReviewHistoryRow? item)
     {
         if (item == null)
         {
@@ -137,7 +133,6 @@ public partial class ReviewSpeechHistoryViewModel : ObservableObject
         item.IsPlaying = false;
         _cancellationTokenSource.Cancel();
     }
-
 
     internal void OnKeyDown(KeyEventArgs e)
     {
