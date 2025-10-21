@@ -80,7 +80,7 @@ public class ReviewSpeechHistoryWindow : Window
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Voice,
-                    Binding = new Binding(nameof(ReviewHistoryRow.Voice)),
+                    Binding = new Binding(nameof(ReviewHistoryRow.VoiceName)),
                     Width = new DataGridLength(3, DataGridLengthUnitType.Star),
                     CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },

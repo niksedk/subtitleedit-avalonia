@@ -38,7 +38,8 @@ public partial class ReviewRow : ObservableObject
         {
             Number = 1,
             FileName = StepResult.CurrentFileName,
-            Voice = StepResult.Voice?.Name ?? string.Empty,
+            VoiceName = StepResult.Voice?.Name ?? string.Empty,
+            Voice = StepResult.Voice,
         });
     }
 
@@ -48,7 +49,8 @@ public partial class ReviewRow : ObservableObject
         { 
             Number = HistoryItems.Count + 1,
             FileName = speakResult.FileName, 
-            Voice = voice.Name,
+            VoiceName = voice.Name,
+            Voice = voice,
         });
 
         HasHistory = true;

@@ -194,7 +194,7 @@ public static class UiUtil
         };
     }
 
-    public static Button MakeButton(string text, IRelayCommand? command)
+    public static Button MakeButton(string text, IRelayCommand? command, object parameter = null)
     {
         return new Button
         {
@@ -207,6 +207,7 @@ public static class UiUtil
             HorizontalContentAlignment = HorizontalAlignment.Center,
             VerticalContentAlignment = VerticalAlignment.Center,
             Command = command,
+            CommandParameter = parameter
         };
     }
 

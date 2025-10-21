@@ -345,9 +345,8 @@ public partial class ReviewSpeechViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task ShowHistory()
+    private async Task ShowHistory(ReviewRow? line)
     {
-        var line = SelectedLine;
         if (Window == null || line == null)
         {
             return;
@@ -356,10 +355,14 @@ public partial class ReviewSpeechViewModel : ObservableObject
         var result = 
             await _windowService.ShowDialogAsync<ReviewSpeechHistoryWindow, ReviewSpeechHistoryViewModel>(Window!, 
             vm => vm.Initialize(line));
-        if (!result.OkPressed)
+        if (!result.OkPressed || result.SelectedHistoryItem == null)
         {
             return;
         }
+
+        line.Voice = result.SelectedHistoryItem?.Voice?.Name ?? string.Empty;
+        line.StepResult.CurrentFileName = result.SelectedHistoryItem?.FileName ?? string.Empty;
+        line.StepResult.Voice = result.SelectedHistoryItem?.Voice;  
     }
 
     [RelayCommand]
@@ -485,6 +488,22 @@ public partial class ReviewSpeechViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task PlayRow(ReviewRow? line)
+    {
+        if (line == null)
+        {
+            return;
+        }
+
+        _cancellationTokenSource = new CancellationTokenSource();
+        _cancellationToken = _cancellationTokenSource.Token;
+        _skipAutoContinue = false;
+        _startPlayTicks = DateTime.UtcNow.Ticks;
+        await PlayAudio(line.StepResult.CurrentFileName);
+    }
+
+
+    [RelayCommand]
     private async Task Play()
     {
         var line = SelectedLine;
@@ -512,6 +531,9 @@ public partial class ReviewSpeechViewModel : ObservableObject
             _mpvContext?.Dispose();
             _mpvContext = null;
         }
+
+        IsPlayVisible = true;
+        IsStopVisible = false;
     }
 
     [RelayCommand]

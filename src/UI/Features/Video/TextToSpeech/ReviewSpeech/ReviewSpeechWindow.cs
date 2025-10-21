@@ -61,10 +61,17 @@ public class ReviewSpeechWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
+        var checkBoxAutoContinue = new CheckBox
+        {
+            Content = Se.Language.General.AutoContinue,
+            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.AutoContinue)) { Mode = BindingMode.TwoWay },
+        };
+
         grid.Add(controls, 0, 0);
         grid.Add(dataGrid, 0, 1);
         grid.Add(waveform, 1, 0, 1, 2);
         grid.Add(panelButtons, 2, 0, 1, 2);
+        grid.Add(checkBoxAutoContinue, 2, 0);
 
         Content = grid;
 
@@ -142,10 +149,35 @@ public class ReviewSpeechWindow : Window
                 },
                 new DataGridTemplateColumn
                 {
-                    Header = Se.Language.General.History,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     CellTemplate = new FuncDataTemplate<ReviewRow>((item, _) =>
-                        UiUtil.MakeBrowseButton(vm.ShowHistoryCommand).WithBindIsVisible(nameof(ReviewRow.HasHistory))),
+                    {
+                        var buttonPlay = UiUtil.MakeButton(vm.PlayRowCommand,"fa-solid fa-play")
+                        .WithBindIsVisible(nameof(vm.IsPlayVisible));
+                        buttonPlay.CommandParameter = item;
+                        buttonPlay.DataContext = vm;
+
+                        var buttonStop = UiUtil.MakeButton(vm.StopCommand, "fa-solid fa-stop")
+                        .WithBindIsVisible(nameof(vm.IsStopVisible));
+                        buttonStop.CommandParameter = item;
+                        buttonStop.DataContext = vm;
+
+                        var buttonHistory = UiUtil.MakeButton(vm.ShowHistoryCommand, IconNames.DotsVertical).WithBindEnabled(nameof(ReviewRow.HasHistory));
+                        buttonHistory.CommandParameter = item;
+
+                        return new StackPanel
+                        {
+                            Orientation = Orientation.Horizontal,
+                            HorizontalAlignment = HorizontalAlignment.Center,
+                            Spacing = 5,
+                            Children =
+                            {
+                                buttonPlay,
+                                buttonStop,
+                                buttonHistory,
+                            }
+                        };
+                    }),
                     Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
                 },
             },
@@ -307,14 +339,14 @@ public class ReviewSpeechWindow : Window
             Margin = new Thickness(0, 0, 0, 5),
         }.WithIconLeft(IconNames.Recycle);
 
-        var buttonPlay = new Button
-        {
-            Content = Se.Language.General.PlaySelectedLine,
-            Command = vm.PlayCommand,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            Width = double.NaN,
-            VerticalAlignment = VerticalAlignment.Center,
-        }.WithIconLeft(IconNames.PlayCircle).WithBindIsVisible(nameof(vm.IsPlayVisible));
+        //var buttonPlay = new Button
+        //{
+        //    Content = Se.Language.General.PlaySelectedLine,
+        //    Command = vm.PlayCommand,
+        //    HorizontalAlignment = HorizontalAlignment.Stretch,
+        //    Width = double.NaN,
+        //    VerticalAlignment = VerticalAlignment.Center,
+        //}.WithIconLeft(IconNames.PlayCircle).WithBindIsVisible(nameof(vm.IsPlayVisible));
 
         var buttonStop = new Button
         {
@@ -325,11 +357,11 @@ public class ReviewSpeechWindow : Window
             VerticalAlignment = VerticalAlignment.Center,
         }.WithIconLeft(IconNames.StopCircle).WithBindIsVisible(nameof(vm.IsStopVisible));
 
-        var checkBoxAutoContinue = new CheckBox
-        {
-            Content = Se.Language.General.AutoContinue,
-            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.AutoContinue)) { Mode = BindingMode.TwoWay },
-        };
+        //var checkBoxAutoContinue = new CheckBox
+        //{
+        //    Content = Se.Language.General.AutoContinue,
+        //    [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.AutoContinue)) { Mode = BindingMode.TwoWay },
+        //};
 
         var grid = new Grid
         {
@@ -364,9 +396,9 @@ public class ReviewSpeechWindow : Window
         grid.Add(elevenLabsControls, 5, 0);
         // 6 is filler
         grid.Add(buttonRegenerateAudio, 7, 0);
-        grid.Add(buttonPlay, 8, 0);
-        grid.Add(buttonStop, 8, 0);
-        grid.Add(checkBoxAutoContinue, 9, 0);
+        //grid.Add(buttonPlay, 8, 0);
+       // grid.Add(buttonStop, 8, 0);
+      //  grid.Add(checkBoxAutoContinue, 9, 0);
 
         return UiUtil.MakeBorderForControl(grid);
     }
