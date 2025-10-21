@@ -5,6 +5,7 @@ using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
+using System.Text;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -396,5 +397,37 @@ public partial class SubtitleLineViewModel : ObservableObject
         }
 
         return (double)Text.CountCharacters(true) / Duration.TotalSeconds;
+    }
+
+    public string GetErrors()
+    {
+        var errors = new StringBuilder(); 
+        
+        var general = Se.Settings.General;
+        var lines = Text.SplitToLines();
+        var lineCount = lines.Count;
+
+        if (lineCount > general.MaxNumberOfLines)
+        {
+            errors.AppendLine("Max lines: " + lineCount + " >" + general.MaxNumberOfLines);
+        }
+
+        var cps = CharactersPerSecond;
+        if (cps > general.SubtitleMaximumCharactersPerSeconds)
+        {
+            errors.AppendLine("Cps: " + cps + " > " + general.SubtitleMaximumCharactersPerSeconds);
+        }
+
+        var durMs = Duration.TotalMilliseconds;
+        if (durMs < general.SubtitleMinimumDisplayMilliseconds)
+        {
+            errors.AppendLine("Min duration: " + durMs + " < " + general.SubtitleMinimumDisplayMilliseconds);
+        }
+        if (durMs > general.SubtitleMaximumDisplayMilliseconds)
+        {
+            errors.AppendLine("Max duration: " + durMs + " > " + general.SubtitleMaximumDisplayMilliseconds);
+        }
+
+        return errors.ToString();
     }
 }

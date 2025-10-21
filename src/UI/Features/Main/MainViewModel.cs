@@ -3517,9 +3517,18 @@ public partial class MainViewModel :
             ShowSubtitleNotLoadedMessage();
             return;
         }
+        
+        var list = new List<SubtitleLineViewModel>();
+        foreach (var s in Subtitles)
+        {
+            if (!string.IsNullOrEmpty(s.GetErrors()))
+            {
+                list.Add(s);
+            }
+        }
 
         var result = await _windowService.ShowDialogAsync<ErrorListWindow, ErrorListViewModel>(Window!,
-            vm => { vm.Initialize(Subtitles.ToList()); });
+            vm => { vm.Initialize(list.ToList()); });
 
         if (result.GoToPressed && result.SelectedSubtitle != null)
         {

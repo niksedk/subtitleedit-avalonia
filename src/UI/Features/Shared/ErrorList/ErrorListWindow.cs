@@ -25,9 +25,8 @@ public class ErrorListWindow : Window
         DataContext = vm;
 
         var buttonGoTo = UiUtil.MakeButton(Se.Language.General.GoTo, vm.GoToCommand).WithBindIsEnabled(nameof(vm.HasBookmarks));
-        var buttonClear = UiUtil.MakeButton(Se.Language.General.Clear, vm.ClearCommand).WithBindIsEnabled(nameof(vm.HasBookmarks));
         var buttonCancel = UiUtil.MakeButtonDone(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar(buttonGoTo, buttonClear, buttonCancel);
+        var panelButtons = UiUtil.MakeButtonBar(buttonGoTo, buttonCancel);
 
         var grid = new Grid
         {
@@ -47,7 +46,7 @@ public class ErrorListWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(MakeBookmarkGridView(vm), 0);
+        grid.Add(MakeErrorsGridView(vm), 0);
         grid.Add(panelButtons, 1);
 
         Content = grid;
@@ -57,7 +56,7 @@ public class ErrorListWindow : Window
         KeyDown += (s, e) => vm.OnKeyDown(e);
     }
 
-    private static Border MakeBookmarkGridView(ErrorListViewModel vm)
+    private static Border MakeErrorsGridView(ErrorListViewModel vm)
     {
         var dataGrid = new DataGrid
         {
@@ -79,33 +78,22 @@ public class ErrorListWindow : Window
         dataGrid.Columns.Add(new DataGridTextColumn
         {
             Header = Se.Language.General.NumberSymbol,
-            Binding = new Binding(nameof(SubtitleLineViewModel.Number)),
+            Binding = new Binding(nameof(ErrorListItem.Number)),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
         });
         dataGrid.Columns.Add(new DataGridTextColumn
         {
             Header = Se.Language.General.Text,
-            Binding = new Binding(nameof(SubtitleLineViewModel.Bookmark)),
+            Binding = new Binding(nameof(ErrorListItem.Text)),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
             Width = new DataGridLength(1, DataGridLengthUnitType.Star) // star sizing to take all available space
         });
-        dataGrid.Columns.Add(new DataGridTemplateColumn
+        dataGrid.Columns.Add(new DataGridTextColumn
         {
-            Header = Se.Language.General.Delete,
-            CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-            CellTemplate = new FuncDataTemplate<SubtitleLineViewModel>((item, _) =>
-            {
-                var deleteButton = new Button
-                {
-                    Command = vm.DeleteSelectedLineCommand,
-                    CommandParameter = item,
-                    DataContext = vm,
-                    Margin = new Thickness(2),
-                };
-                Projektanker.Icons.Avalonia.Attached.SetIcon(deleteButton, IconNames.Trash);
-                return deleteButton;
-            }),
-            Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
+            Header = Se.Language.General.Error,
+            Binding = new Binding(nameof(ErrorListItem.Error)),
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
+            Width = new DataGridLength(1, DataGridLengthUnitType.Star) // star sizing to take all available space
         });
 
         dataGrid.DataContext = vm.Subtitles;
@@ -118,19 +106,6 @@ public class ErrorListWindow : Window
         dataGrid.DoubleTapped += (s, e) => vm.GoToCommand.Execute(null);    
         dataGrid.KeyDown += (s, e) => vm.GridKeyDown(e);  
 
-        var flyout = new MenuFlyout();
-        var deleteMenuItem = new MenuItem 
-        { 
-            Header = Se.Language.General.Delete,
-            Command = vm.DeleteSelectedLineCommand,
-            [!MenuItem.CommandParameterProperty] = new Binding(nameof(vm.SelectedSubtitle))
-            {
-                Source = vm
-            }
-        };
-        flyout.Items.Add(deleteMenuItem);
-        dataGrid.ContextFlyout = flyout;
-
-        return UiUtil.MakeBorderForControl(dataGrid);
+        return UiUtil.MakeBorderForControlNoPadding(dataGrid);
     }
 }

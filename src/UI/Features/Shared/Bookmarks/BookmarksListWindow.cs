@@ -134,7 +134,7 @@ public class BookmarksListWindow : Window
         flyout.Items.Add(deleteMenuItem);
         dataGrid.ContextFlyout = flyout;
 
-        return UiUtil.MakeBorderForControl(dataGrid);
+        return UiUtil.MakeBorderForControlNoPadding(dataGrid);
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
