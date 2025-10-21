@@ -264,14 +264,14 @@ public partial class TextToSpeechViewModel : ObservableObject
         IsGenerating = true;
         IsNotGenerating = false;
         ProgressOpacity = 1.0;
-        DoneOrCancelText = "Cancel";
+        DoneOrCancelText = Se.Language.General.Cancel;
         SaveSettings();
 
         // Generate
         var generateSpeechResult = await GenerateSpeech(_cancellationToken);
         if (generateSpeechResult == null)
         {
-            DoneOrCancelText = "Done";
+            DoneOrCancelText = Se.Language.General.Done;
             IsGenerating = false;
             IsNotGenerating = true;
             ProgressOpacity = 0;
@@ -282,7 +282,7 @@ public partial class TextToSpeechViewModel : ObservableObject
         var fixSpeedResult = await FixSpeed(generateSpeechResult, _cancellationToken);
         if (fixSpeedResult == null)
         {
-            DoneOrCancelText = "Done";
+            DoneOrCancelText = Se.Language.General.Done;
             IsGenerating = false;
             IsNotGenerating = true;
             ProgressOpacity = 0;
@@ -295,7 +295,7 @@ public partial class TextToSpeechViewModel : ObservableObject
             var reviewAudioClipsResult = await ReviewAudioClips(fixSpeedResult);
             if (reviewAudioClipsResult == null)
             {
-                DoneOrCancelText = "Done";
+                DoneOrCancelText = Se.Language.General.Done;
                 IsGenerating = false;
                 IsNotGenerating = true;
                 ProgressOpacity = 0;
@@ -612,7 +612,7 @@ public partial class TextToSpeechViewModel : ObservableObject
             return;
         }
 
-        var result = await _folderHelper.PickFolderAsync(Window!, "Select a folder to save to");
+        var result = await _folderHelper.PickFolderAsync(Window!, Se.Language.General.SelectedAFolderToSaveTo);
         if (string.IsNullOrEmpty(result))
         {
             DoneOrCancelText = Se.Language.General.Done;
@@ -666,7 +666,7 @@ public partial class TextToSpeechViewModel : ObservableObject
             videoExt = ".mp4";
         }
 
-        ProgressText = "Adding audio to video file...";
+        ProgressText = Se.Language.Video.TextToSpeech.AddingAudioToVideoFileDotDotDot;
         var outputFileName = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(audioFileName) + videoExt);
 
         var useCustomAudioEncoding = !string.IsNullOrEmpty(Se.Settings.Video.TextToSpeech.CustomAudioEncoding);
@@ -756,7 +756,7 @@ public partial class TextToSpeechViewModel : ObservableObject
 
     private async Task<string> GenerateSilenceWaveFile(CancellationToken cancellationToken)
     {
-        ProgressText = "Preparing merge...";
+        ProgressText = Se.Language.Video.TextToSpeech.PreparingMergeDotDotDot;
         ProgressValue = 0;
         var silenceFileName = Path.Combine(_waveFolder, "silence.wav");
         var silenceIdx = 0;

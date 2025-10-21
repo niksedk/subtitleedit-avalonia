@@ -452,6 +452,7 @@ public static class ShortcutsMain
             new(nameof(vm.ListErrorsCommand), [GetCommandOrWin(), nameof(Avalonia.Input.Key.F8)], ShortcutCategory.SubtitleGrid),
             new(nameof(vm.GoToPreviousErrorCommand), ["Shift", nameof(Avalonia.Input.Key.F8)], ShortcutCategory.SubtitleGrid),
             new(nameof(vm.GoToNextErrorCommand), [nameof(Avalonia.Input.Key.F8)], ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.ShowSpellCheckCommand), ["Alt", nameof(Avalonia.Input.Key.F7)], ShortcutCategory.SubtitleGrid),
         ];
     }
 

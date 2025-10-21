@@ -464,6 +464,7 @@ public class LanguageGeneral
     public string History { get; set; }
     public string Play { get; set; }
     public string ShowHistory { get; set; }
+    public string SelectedAFolderToSaveTo { get; set; }
 
     public LanguageGeneral()
     {
@@ -924,5 +925,6 @@ public class LanguageGeneral
         History = "History";
         Play = "Play";
         ShowHistory = "Show history";
+        SelectedAFolderToSaveTo = "Selected a folder to save to";
     }
 }
