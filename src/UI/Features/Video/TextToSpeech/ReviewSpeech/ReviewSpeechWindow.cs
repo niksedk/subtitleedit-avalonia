@@ -62,7 +62,7 @@ public class ReviewSpeechWindow : Window
 
         var checkBoxAutoContinue = new CheckBox
         {
-            Content = Se.Language.General.AutoContinue,
+            Content = Se.Language.Video.TextToSpeech.AutoContinuePlaying,
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.AutoContinue)) { Mode = BindingMode.TwoWay },
         };
 
@@ -193,6 +193,7 @@ public class ReviewSpeechWindow : Window
                 },
             },
         };
+        dataGrid.DoubleTapped += (s, e) => vm.DataGridDoubleClicked();
         vm.LineGrid = dataGrid;
 
         var textBox = new TextBox
@@ -477,7 +478,6 @@ public class ReviewSpeechWindow : Window
         };
         var labelStyleExaggerationValue = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.StyleExaggeration), new DoubleToTwoDecimalConverter());
         var buttonStyleExaggeration = UiUtil.MakeButton(vm.ShowStyleExaggerationHelpCommand, IconNames.Help);
-
 
         var grid = new Grid
         {

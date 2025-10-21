@@ -12,7 +12,8 @@ public partial class ReviewHistoryRow : ObservableObject
     public string FileName { get; set; }
     public string VoiceName { get; set; }
     public Voice? Voice { get; set; }
-    
+    public float Speed { get; set; }
+
     public ReviewHistoryRow()
     {
         FileName = string.Empty;

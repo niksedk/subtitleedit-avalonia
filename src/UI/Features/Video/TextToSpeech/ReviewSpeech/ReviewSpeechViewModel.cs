@@ -125,55 +125,52 @@ public partial class ReviewSpeechViewModel : ObservableObject
             return;
         }
 
-        lock (_playLock)
+        var paused = _mpvContext.Pause.Get() ?? false;
+
+        var line = SelectedLine;
+        var timeSinceStart = TimeSpan.FromTicks(DateTime.UtcNow.Ticks - _startPlayTicks);
+        if (paused && AutoContinue && !_skipAutoContinue && line != null && timeSinceStart.TotalMilliseconds > 500)
         {
-            var paused = _mpvContext.Pause.Get() ?? false;
-
-            var line = SelectedLine;
-            var timeSinceStart = TimeSpan.FromTicks(DateTime.UtcNow.Ticks - _startPlayTicks);
-            if (paused && AutoContinue && !_skipAutoContinue && line != null && timeSinceStart.TotalMilliseconds > 500)
+            Dispatcher.UIThread.Invoke<Task>(async () =>
             {
-                Dispatcher.UIThread.Invoke<Task>(async () =>
+                line.IsPlaying = false;
+                var index = Lines.IndexOf(line);
+                if (index < Lines.Count - 1)
                 {
-                    line.IsPlaying = false;
-                    var index = Lines.IndexOf(line);
-                    if (index < Lines.Count - 1)
-                    {
-                        var nextLine = Lines[index + 1];
-                        nextLine.IsPlaying = true;
-                        SelectedLine = nextLine;
-                        LineGrid.ScrollIntoView(nextLine, null);
-                        await PlayAudio(nextLine.StepResult.CurrentFileName);
-                    }
-                    else
-                    {
-                        _skipAutoContinue = true; // no more lines to play
-
-                        IsPlayVisible = true;
-                        IsStopVisible = false;
-                        foreach (var l in Lines)
-                        {
-                            l.IsPlaying = false;
-                            l.IsPlayingEnabled = true;
-                        }
-                    }
-                });
-
-                return;
-            }
-
-            IsPlayVisible = paused;
-            IsStopVisible = !paused;
-
-            if (paused)
-            {
-                foreach (var l in Lines)
-                {
-                    l.IsPlaying = false;
-                    l.IsPlayingEnabled = true;
+                    var nextLine = Lines[index + 1];
+                    nextLine.IsPlaying = true;
+                    SelectedLine = nextLine;
+                    LineGrid.ScrollIntoView(nextLine, null);
+                    await PlayAudio(nextLine.StepResult.CurrentFileName);
                 }
-                return;
+                else
+                {
+                    _skipAutoContinue = true; // no more lines to play
+
+                    IsPlayVisible = true;
+                    IsStopVisible = false;
+                    foreach (var l in Lines)
+                    {
+                        l.IsPlaying = false;
+                        l.IsPlayingEnabled = true;
+                    }
+                }
+            });
+
+            return;
+        }
+
+        IsPlayVisible = paused;
+        IsStopVisible = !paused;
+
+        if (paused)
+        {
+            foreach (var l in Lines)
+            {
+                l.IsPlaying = false;
+                l.IsPlayingEnabled = true;
             }
+            return;
         }
 
         _timer.Start();
@@ -189,7 +186,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
         }
 
         await _mpvContext.LoadFile(fileName).InvokeAsync();
-        
+
         _timer.Start();
     }
 
@@ -391,6 +388,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
         line.Voice = result.SelectedHistoryItem?.Voice?.Name ?? string.Empty;
         line.StepResult.CurrentFileName = result.SelectedHistoryItem?.FileName ?? string.Empty;
         line.StepResult.Voice = result.SelectedHistoryItem?.Voice;
+        line.Speed = Math.Round(result.SelectedHistoryItem?.Speed ?? 1.0f, 2).ToString(CultureInfo.CurrentCulture);
     }
 
     [RelayCommand]
@@ -479,6 +477,8 @@ public partial class ReviewSpeechViewModel : ObservableObject
                 var dlResult = await _windowService.ShowDialogAsync<DownloadTtsWindow, DownloadTtsViewModel>(Window!, vm => vm.StartDownloadPiperVoice(piperVoice));
                 if (!dlResult.OkPressed)
                 {
+                    SafeDelete(modelFileName);
+                    SafeDelete(configFileName);
                     return;
                 }
             }
@@ -511,6 +511,18 @@ public partial class ReviewSpeechViewModel : ObservableObject
         if (engine is Murf && oldStyle != null)
         {
             Se.Settings.Video.TextToSpeech.MurfStyle = oldStyle;
+        }
+    }
+
+    private static void SafeDelete(string fileName)
+    {
+        try
+        {
+            File.Delete(fileName);
+        }
+        catch
+        {
+            // ignore
         }
     }
 
@@ -698,6 +710,17 @@ public partial class ReviewSpeechViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.R && e.KeyModifiers == KeyModifiers.Control)
+        {
+            e.Handled = true;
+            var line = SelectedLine;
+            if (line == null || line.IsPlaying || !line.IsPlayingEnabled)
+            {
+                return;
+            }
+
+            RegenerateAudio(SelectedLine).ConfigureAwait(false);
+        }
     }
 
     internal void SelectedEngineChanged(object? sender, SelectionChangedEventArgs e)
@@ -862,5 +885,16 @@ public partial class ReviewSpeechViewModel : ObservableObject
             _mpvContext?.Dispose();
             _mpvContext = null;
         }
+    }
+
+    internal void DataGridDoubleClicked()
+    {
+        var line = SelectedLine;
+        if (line == null || line.IsPlaying || !line.IsPlayingEnabled)
+        {
+            return;
+        }
+
+        _ = PlayRow(line);
     }
 }

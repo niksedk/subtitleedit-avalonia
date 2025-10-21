@@ -42,17 +42,19 @@ public partial class ReviewRow : ObservableObject
             FileName = StepResult.CurrentFileName,
             VoiceName = StepResult.Voice?.Name ?? string.Empty,
             Voice = StepResult.Voice,
+            Speed = StepResult.SpeedFactor,
         });
     }
 
     internal void AddHistory(Voices.Voice voice, TtsResult speakResult)
     {
-        HistoryItems.Add(new ReviewHistoryRow 
-        { 
+        HistoryItems.Add(new ReviewHistoryRow
+        {
             Number = HistoryItems.Count + 1,
-            FileName = speakResult.FileName, 
+            FileName = speakResult.FileName,
             VoiceName = voice.Name,
             Voice = voice,
+            Speed = StepResult.SpeedFactor,
         });
 
         HasHistory = true;

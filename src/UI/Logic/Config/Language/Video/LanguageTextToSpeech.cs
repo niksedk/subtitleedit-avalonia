@@ -21,6 +21,7 @@ public class LanguageTextToSpeech
     public string ElevenLabsSettings { get; set; }
     public string ElevenLabsSettingsResetHint { get; set; }
     public string RegenerateAudio { get; set; }
+    public string AutoContinuePlaying { get; set; }
 
     public LanguageTextToSpeech()
     {
@@ -43,5 +44,6 @@ public class LanguageTextToSpeech
         ElevenLabsSettings = "TTS - ElevenLabs settings";
         ElevenLabsSettingsResetHint = "Reset ElevenLabs settings to default values";
         RegenerateAudio = "Regenerate audio";
+        AutoContinuePlaying = "Auto-continue playing";
     }
 }
