@@ -26,6 +26,7 @@ public class SoftwareView : Control, IVideoView
     protected override void OnInitialized()
     {
         MpvContext.StartSoftwareRendering(this.UpdateVideoView);
+        MpvContext.SetOptionString("vo", "libmpv");
         base.OnInitialized();
     }
 
@@ -54,6 +55,7 @@ public class SoftwareView : Control, IVideoView
 #endif
             MpvContext.SoftwareRender(lockedBitmap.Size.Width, lockedBitmap.Size.Height, lockedBitmap.Address, pix);
         }
+
         context.DrawImage(this._renderTarget, new Rect(0, 0, _renderTarget.PixelSize.Width, _renderTarget.PixelSize.Height));
     }
 
