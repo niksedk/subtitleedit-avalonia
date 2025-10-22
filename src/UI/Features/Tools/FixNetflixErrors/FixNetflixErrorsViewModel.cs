@@ -89,9 +89,6 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
     {
         _subtitle = subtitle;
         LoadSettings();
-        _removeTextForHiLib = new RemoveTextForHI(GetSettings(_subtitle));
-
-        // Populate Netflix checks
         LoadChecks();
     }
 
@@ -207,42 +204,6 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
     private void GeneratePreview()
     {
         //TODO: Implement preview generation logic via the selected checks for NetFix errors and populate Fixes collection
-
-
-    }
-
-    public RemoveTextForHISettings GetSettings(Subtitle subtitle)
-    {
-        var textContainsList = TextContains.Split([',', ';'], StringSplitOptions.RemoveEmptyEntries)
-            .Select(p => p.Trim()).ToList();
-
-        var settings = new RemoveTextForHISettings(subtitle)
-        {
-            OnlyIfInSeparateLine = IsOnlySeparateLine,
-            RemoveIfAllUppercase = IsRemoveTextUppercaseLineOn,
-            RemoveTextBeforeColon = IsRemoveTextBeforeColonOn,
-            RemoveTextBeforeColonOnlyUppercase = IsRemoveTextBeforeColonUppercaseOn,
-            ColonSeparateLine = IsRemoveTextBeforeColonSeparateLineOn,
-            RemoveWhereContains = IsRemoveTextContainsOn,
-            RemoveIfTextContains = textContainsList,
-            RemoveTextBetweenCustomTags = IsRemoveCustomOn,
-            RemoveInterjections = IsRemoveInterjectionsOn,
-            RemoveInterjectionsOnlySeparateLine = IsRemoveInterjectionsOn && IsInterjectionsSeparateLineOn,
-            RemoveTextBetweenSquares = IsRemoveBracketsOn,
-            RemoveTextBetweenBrackets = IsRemoveCurlyBracketsOn,
-            RemoveTextBetweenQuestionMarks = false,
-            RemoveTextBetweenParentheses = IsRemoveParenthesesOn,
-            RemoveIfOnlyMusicSymbols = IsRemoveOnlyMusicSymbolsOn,
-            CustomStart = CustomStart,
-            CustomEnd = CustomEnd,
-        };
-
-        foreach (var item in TextContains.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries))
-        {
-            settings.RemoveIfTextContains.Add(item.Trim());
-        }
-
-        return settings;
     }
 
     internal void OnKeyDown(KeyEventArgs e)
