@@ -47,22 +47,6 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
         }
     }
 
-    [ObservableProperty] private bool _isRemoveBracketsOn;
-    [ObservableProperty] private bool _isRemoveCurlyBracketsOn;
-    [ObservableProperty] private bool _isRemoveParenthesesOn;
-    [ObservableProperty] private bool _isRemoveCustomOn;
-    [ObservableProperty] private string _customStart;
-    [ObservableProperty] private string _customEnd;
-    [ObservableProperty] private bool _isOnlySeparateLine;
-    [ObservableProperty] private bool _isRemoveTextBeforeColonOn;
-    [ObservableProperty] private bool _isRemoveTextBeforeColonUppercaseOn;
-    [ObservableProperty] private bool _isRemoveTextBeforeColonSeparateLineOn;
-    [ObservableProperty] private bool _isRemoveTextUppercaseLineOn;
-    [ObservableProperty] private bool _isRemoveTextContainsOn;
-    [ObservableProperty] private string _textContains;
-    [ObservableProperty] private bool _isRemoveOnlyMusicSymbolsOn;
-    [ObservableProperty] private bool _isRemoveInterjectionsOn;
-    [ObservableProperty] private bool _isInterjectionsSeparateLineOn;
     [ObservableProperty] private DisplayFile? _selectedFile;
     [ObservableProperty] private ObservableCollection<LanguageItem> _languages;
     [ObservableProperty] private LanguageItem? _selectedLanguage;
@@ -82,6 +66,7 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
     private Subtitle _subtitle;
     private RemoveTextForHI? _removeTextForHiLib;
     private readonly Timer _timer;
+    private bool _dirty;
     private readonly List<Paragraph> _edited;
 
     private readonly IWindowService _windowService;
@@ -90,9 +75,6 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
     {
         _windowService = windowService;
 
-        CustomStart = "?";
-        CustomEnd = "?";
-        TextContains = string.Empty;
         Languages = new ObservableCollection<LanguageItem>(LanguageItem.GetAll());
         Fixes = new ObservableCollection<FixNetflixErrorsItem>();
         FixText = string.Empty;
@@ -147,57 +129,10 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
 
     private void LoadSettings()
     {
-        var settings = Se.Settings.Tools.RemoveTextForHi;
-
-        IsRemoveBracketsOn = settings.IsRemoveBracketsOn;
-        IsRemoveCurlyBracketsOn = settings.IsRemoveCurlyBracketsOn;
-        IsRemoveParenthesesOn = settings.IsRemoveParenthesesOn;
-        IsRemoveCustomOn = settings.IsRemoveCustomOn;
-        CustomStart = settings.CustomStart;
-        CustomEnd = settings.CustomEnd;
-        IsOnlySeparateLine = settings.IsOnlySeparateLine;
-
-        IsRemoveTextBeforeColonOn = settings.IsRemoveTextBeforeColonOn;
-        IsRemoveTextBeforeColonUppercaseOn = settings.IsRemoveTextBeforeColonUppercaseOn;
-        IsRemoveTextBeforeColonSeparateLineOn = settings.IsRemoveTextBeforeColonSeparateLineOn;
-
-        IsRemoveTextUppercaseLineOn = settings.IsRemoveTextUppercaseLineOn;
-
-        IsRemoveTextContainsOn = settings.IsRemoveTextContainsOn;
-        TextContains = settings.TextContains;
-
-        IsRemoveOnlyMusicSymbolsOn = settings.IsRemoveOnlyMusicSymbolsOn;
-
-        IsRemoveInterjectionsOn = settings.IsRemoveInterjectionsOn;
-        IsInterjectionsSeparateLineOn = settings.IsInterjectionsSeparateLineOn;
     }
 
     private void SaveSettings()
     {
-        var settings = Se.Settings.Tools.RemoveTextForHi;
-
-        settings.IsRemoveBracketsOn = IsRemoveBracketsOn;
-        settings.IsRemoveCurlyBracketsOn = IsRemoveCurlyBracketsOn;
-        settings.IsRemoveParenthesesOn = IsRemoveParenthesesOn;
-        settings.IsRemoveCustomOn = IsRemoveCustomOn;
-        settings.CustomStart = CustomStart;
-        settings.CustomEnd = CustomEnd;
-        settings.IsOnlySeparateLine = IsOnlySeparateLine;
-
-        settings.IsRemoveTextBeforeColonOn = IsRemoveTextBeforeColonOn;
-        settings.IsRemoveTextBeforeColonUppercaseOn = IsRemoveTextBeforeColonUppercaseOn;
-        settings.IsRemoveTextBeforeColonSeparateLineOn = IsRemoveTextBeforeColonSeparateLineOn;
-
-        settings.IsRemoveTextUppercaseLineOn = IsRemoveTextUppercaseLineOn;
-
-        settings.IsRemoveTextContainsOn = IsRemoveTextContainsOn;
-        settings.TextContains = TextContains;
-
-        settings.IsRemoveOnlyMusicSymbolsOn = IsRemoveOnlyMusicSymbolsOn;
-
-        settings.IsRemoveInterjectionsOn = IsRemoveInterjectionsOn;
-        settings.IsInterjectionsSeparateLineOn = IsInterjectionsSeparateLineOn;
-
         Se.SaveSettings();
     }
 
@@ -232,12 +167,6 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task EditInterjections()
-    {
-    }
-
-    // New: select-all/invert commands for checks
-    [RelayCommand]
     private void ChecksSelectAll()
     {
         foreach (var c in Checks)
@@ -261,7 +190,11 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
 
         try
         {
-            Dispatcher.UIThread.Invoke(GeneratePreview);
+            if (_dirty)
+            {
+                _dirty = false;
+                Dispatcher.UIThread.Invoke(GeneratePreview);
+            }
         }
         catch
         {
@@ -273,82 +206,9 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
 
     private void GeneratePreview()
     {
-        if (_removeTextForHiLib == null)
-        {
-            return;
-        }
+        //TODO: Implement preview generation logic via the selected checks for NetFix errors and populate Fixes collection
 
-        _removeTextForHiLib.Settings = GetSettings(_subtitle);
-        _removeTextForHiLib.Warnings = [];
 
-        _removeTextForHiLib.ReloadInterjection(SelectedLanguage?.Code ?? "en");
-
-        var count = 0;
-        var newFixes = new List<FixNetflixErrorsItem>();
-        for (var index = 0; index < _subtitle.Paragraphs.Count; index++)
-        {
-            var p = _subtitle.Paragraphs[index];
-            _removeTextForHiLib.WarningIndex = index - 1;
-            if (_edited.Contains(p))
-            {
-                var editedParagraph = _edited.First(x => x.Id == p.Id);
-                var newText = editedParagraph.Text;
-
-                var apply = true;
-                var oldItem = Fixes.FirstOrDefault(f => f.Index == index);
-                if (oldItem != null)
-                {
-                    apply = oldItem.Apply;
-                }
-
-                var item = new FixNetflixErrorsItem(apply, index, p.Text, newText, p);
-                newFixes.Add(item);
-                count++;
-            }
-            else
-            {
-                var newText = _removeTextForHiLib.RemoveTextFromHearImpaired(p.Text, _subtitle, index,
-                    SelectedLanguage == null ? "en" : SelectedLanguage.Code);
-                if (p.Text.RemoveChar(' ') != newText.RemoveChar(' '))
-                {
-                    var apply = true;
-                    var oldItem = Fixes.FirstOrDefault(f => f.Index == index);
-                    if (oldItem != null)
-                    {
-                        apply = oldItem.Apply;
-                    }
-
-                    var item = new FixNetflixErrorsItem(apply, index, p.Text, newText, p);
-                    newFixes.Add(item);
-                    count++;
-                }
-            }
-        }
-
-        if (newFixes.Count == Fixes.Count)
-        {
-            var same = true;
-            for (var i = 0; i < newFixes.Count; i++)
-            {
-                if (newFixes[i].Index != Fixes[i].Index ||
-                    newFixes[i].Before != Fixes[i].Before ||
-                    newFixes[i].After != Fixes[i].After)
-                {
-                    same = false;
-                    break;
-                }
-            }
-
-            if (same)
-            {
-                return; // no changes
-            }
-        }
-
-        Fixes.Clear();
-        ListEx.AddRange(Fixes, newFixes);
-
-        //groupBoxLinesFound.Text = string.Format(_language.LinesFoundX, count);
     }
 
     public RemoveTextForHISettings GetSettings(Subtitle subtitle)
@@ -406,5 +266,10 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
         {
             LoadChecks();
         }
+    }
+
+    public void SetDirty()
+    {
+        _dirty = true;
     }
 }

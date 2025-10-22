@@ -2395,6 +2395,7 @@ public partial class MainViewModel :
         var viewModel = await _windowService.ShowDialogAsync<FixNetflixErrorsWindow, FixNetflixErrorsViewModel>(Window!,
             vm => 
             { 
+                vm.Initialize(GetUpdateSubtitle());
             });
 
         if (viewModel.OkPressed)
