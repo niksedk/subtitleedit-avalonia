@@ -2,6 +2,8 @@
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 // ReSharper disable MemberCanBePrivate.Global
 
+using HanumanInstitute.LibMpv.Extensions;
+
 namespace HanumanInstitute.LibMpv.Core;
 
 /// <summary>(see mpv_node)</summary>

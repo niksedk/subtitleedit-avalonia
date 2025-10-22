@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.Input;
-using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
@@ -47,7 +46,7 @@ public class ShortCut
         Action = shortcut.RelayCommand;
         Category = shortcut.Category;
         Name = shortcut.Name;
-        Control = shortcut.Category.ToStringInvariant();
+        Control = shortcut.Category.ToString();
         HashCode = CalculateHash(Keys, Control);
         NormalizedHashCode = ShortcutManager.CalculateNormalizedHash(Keys, Control);
     }

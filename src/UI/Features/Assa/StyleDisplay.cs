@@ -1,7 +1,6 @@
 ﻿using Avalonia.Media;
 using Avalonia.Skia;
 using CommunityToolkit.Mvvm.ComponentModel;
-using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -255,7 +254,7 @@ public partial class StyleDisplay : ObservableObject
             Outline = ColorOutline.ToSKColor(),
             OutlineWidth = OutlineWidth,
             ShadowWidth = ShadowWidth,
-            BorderStyle = ((int)BorderStyle.Style).ToStringInvariant(),
+            BorderStyle = ((int)BorderStyle.Style).ToString(),
         };
     }
 }

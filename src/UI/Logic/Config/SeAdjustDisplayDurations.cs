@@ -1,5 +1,4 @@
-﻿using HanumanInstitute.Validators;
-using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
+﻿using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 
@@ -22,6 +21,6 @@ public class SeAdjustDisplayDurations
         AdjustDurationPercent = 120;
         AdjustDurationOptimalCps = 17;
         AdjustDurationMaximumCps = 25;
-        AdjustDurationLast = AdjustDurationType.Seconds.ToStringInvariant();
+        AdjustDurationLast = AdjustDurationType.Seconds.ToString();
     }
 }

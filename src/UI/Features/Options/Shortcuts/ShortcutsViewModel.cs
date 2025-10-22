@@ -2,7 +2,6 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
@@ -64,13 +63,13 @@ public partial class ShortcutsViewModel : ObservableObject
         var all = Enum.GetValues(typeof(Key)).Cast<Key>().Select(p => p.ToString()).Distinct();
         foreach (var key in all)
         {
-            if (key == Key.None.ToStringInvariant() ||
-                key == Key.LeftCtrl.ToStringInvariant() ||
-                key == Key.RightCtrl.ToStringInvariant() ||
-                key == Key.LeftAlt.ToStringInvariant() ||
-                key == Key.RightAlt.ToStringInvariant() ||
-                key == Key.LeftShift.ToStringInvariant() ||
-                key == Key.RightShift.ToStringInvariant())
+            if (key == Key.None.ToString() ||
+                key == Key.LeftCtrl.ToString() ||
+                key == Key.RightCtrl.ToString() ||
+                key == Key.LeftAlt.ToString() ||
+                key == Key.RightAlt.ToString() ||
+                key == Key.LeftShift.ToString() ||
+                key == Key.RightShift.ToString())
             {
                 continue;
             }
@@ -188,14 +187,14 @@ public partial class ShortcutsViewModel : ObservableObject
             "Alt",
             "Shift",
             "Win",
-            Key.LeftCtrl.ToStringInvariant(),
-            Key.RightCtrl.ToStringInvariant(),
-            Key.LeftAlt.ToStringInvariant(),
-            Key.RightAlt.ToStringInvariant(),
-            Key.LeftShift.ToStringInvariant(),
-            Key.RightShift.ToStringInvariant(),
-            Key.LWin.ToStringInvariant(),
-            Key.RWin.ToStringInvariant()
+            Key.LeftCtrl.ToString(),
+            Key.RightCtrl.ToString(),
+            Key.LeftAlt.ToString(),
+            Key.RightAlt.ToString(),
+            Key.LeftShift.ToString(),
+            Key.RightShift.ToString(),
+            Key.LWin.ToString(),
+            Key.RWin.ToString()
         };
 
         if (shortcut.Keys.Any(k => !modifiers.Contains(k)))
@@ -368,17 +367,17 @@ public partial class ShortcutsViewModel : ObservableObject
             IsControlsEnabled = true;
             CtrlIsSelected = node.ShortCut.Keys.Contains("Ctrl") ||
                              node.ShortCut.Keys.Contains("Control") ||
-                             node.ShortCut.Keys.Contains(Key.LeftCtrl.ToStringInvariant()) ||
-                             node.ShortCut.Keys.Contains(Key.RightCtrl.ToStringInvariant());
+                             node.ShortCut.Keys.Contains(Key.LeftCtrl.ToString()) ||
+                             node.ShortCut.Keys.Contains(Key.RightCtrl.ToString());
             AltIsSelected = node.ShortCut.Keys.Contains("Alt") ||
-                            node.ShortCut.Keys.Contains(Key.LeftAlt.ToStringInvariant()) ||
-                            node.ShortCut.Keys.Contains(Key.RightAlt.ToStringInvariant());
+                            node.ShortCut.Keys.Contains(Key.LeftAlt.ToString()) ||
+                            node.ShortCut.Keys.Contains(Key.RightAlt.ToString());
             ShiftIsSelected = node.ShortCut.Keys.Contains("Shift") ||
-                              node.ShortCut.Keys.Contains(Key.LeftShift.ToStringInvariant()) ||
-                              node.ShortCut.Keys.Contains(Key.RightShift.ToStringInvariant());
+                              node.ShortCut.Keys.Contains(Key.LeftShift.ToString()) ||
+                              node.ShortCut.Keys.Contains(Key.RightShift.ToString());
             WinIsSelected = node.ShortCut.Keys.Contains("Win") ||
-                              node.ShortCut.Keys.Contains(Key.LWin.ToStringInvariant()) ||
-                              node.ShortCut.Keys.Contains(Key.RWin.ToStringInvariant());
+                              node.ShortCut.Keys.Contains(Key.LWin.ToString()) ||
+                              node.ShortCut.Keys.Contains(Key.RWin.ToString());
 
             var modifiers = new List<string>()
             {
@@ -387,14 +386,14 @@ public partial class ShortcutsViewModel : ObservableObject
                 "Alt",
                 "Shift",
                 "Win",
-                Key.LeftCtrl.ToStringInvariant(),
-                Key.RightCtrl.ToStringInvariant(),
-                Key.LeftAlt.ToStringInvariant(),
-                Key.RightAlt.ToStringInvariant(),
-                Key.LeftShift.ToStringInvariant(),
-                Key.RightShift.ToStringInvariant(),
-                Key.LWin.ToStringInvariant(),
-                Key.RWin.ToStringInvariant()
+                Key.LeftCtrl.ToString(),
+                Key.RightCtrl.ToString(),
+                Key.LeftAlt.ToString(),
+                Key.RightAlt.ToString(),
+                Key.LeftShift.ToString(),
+                Key.RightShift.ToString(),
+                Key.LWin.ToString(),
+                Key.RWin.ToString()
             };
 
             foreach (var key in node.ShortCut.Keys)

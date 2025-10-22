@@ -1,5 +1,7 @@
 ﻿// ReSharper disable PossibleMultipleEnumeration
 
+using HanumanInstitute.LibMpv.Extensions;
+
 namespace HanumanInstitute.LibMpv;
 
 public partial class MpvContext

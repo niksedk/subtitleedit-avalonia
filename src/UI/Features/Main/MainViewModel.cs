@@ -6,7 +6,6 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using HanumanInstitute.Validators;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.BluRaySup;
@@ -8407,7 +8406,7 @@ public partial class MainViewModel :
                     return;
                 }
 
-                var relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.SubtitleGrid.ToStringInvariant());
+                var relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.SubtitleGrid.ToString());
                 if (relayCommand != null)
                 {
                     keyEventArgs.Handled = true;
@@ -8418,7 +8417,7 @@ public partial class MainViewModel :
 
             if (AudioVisualizer != null && AudioVisualizer.IsFocused)
             {
-                var relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.Waveform.ToStringInvariant());
+                var relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.Waveform.ToString());
                 if (relayCommand != null)
                 {
                     keyEventArgs.Handled = true;
@@ -8428,9 +8427,9 @@ public partial class MainViewModel :
             }
 
             var keys = _shortcutManager.GetActiveKeys().Select(p => p.ToString()).ToList();
-            var hashCode = ShortCut.CalculateHash(keys, ShortcutCategory.General.ToStringInvariant());
+            var hashCode = ShortCut.CalculateHash(keys, ShortcutCategory.General.ToString());
 
-            var rc = _shortcutManager.CheckShortcuts(ShortcutCategory.General.ToStringInvariant().ToLowerInvariant());
+            var rc = _shortcutManager.CheckShortcuts(ShortcutCategory.General.ToString().ToLowerInvariant());
             if (rc != null)
             {
                 keyEventArgs.Handled = true;
@@ -8600,7 +8599,7 @@ public partial class MainViewModel :
                 PanelSingleLineLenghts.Children.Add(UiUtil.MakeTextBlock("/").WithFontSize(12).WithPadding(2));
             }
 
-            var tb = UiUtil.MakeTextBlock(lineLenghts[i].Length.ToStringInvariant()).WithFontSize(12).WithPadding(2);
+            var tb = UiUtil.MakeTextBlock(lineLenghts[i].Length.ToString(CultureInfo.InvariantCulture)).WithFontSize(12).WithPadding(2);
             if (Se.Settings.General.ColorTextTooLong &&
                 lineLenghts[i].Length > Se.Settings.General.SubtitleLineMaximumLength)
             {
@@ -8651,7 +8650,7 @@ public partial class MainViewModel :
                 PanelSingleLineLengthsOriginal.Children.Add(UiUtil.MakeTextBlock("/").WithFontSize(12).WithPadding(2));
             }
 
-            var tb = UiUtil.MakeTextBlock(lineLenghts[i].Length.ToStringInvariant()).WithFontSize(12).WithPadding(2);
+            var tb = UiUtil.MakeTextBlock(lineLenghts[i].Length.ToString(CultureInfo.InvariantCulture)).WithFontSize(12).WithPadding(2);
             if (Se.Settings.General.ColorTextTooLong &&
                 lineLenghts[i].Length > Se.Settings.General.SubtitleLineMaximumLength)
             {

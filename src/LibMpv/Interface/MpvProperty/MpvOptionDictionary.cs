@@ -1,4 +1,6 @@
-﻿namespace HanumanInstitute.LibMpv;
+﻿using HanumanInstitute.LibMpv.Extensions;
+
+namespace HanumanInstitute.LibMpv;
 
 /// <summary>
 /// Represents a comma-delimited option list of key-value pairs. ex: Val1=a,Val2=b

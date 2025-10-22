@@ -1,4 +1,6 @@
-﻿namespace HanumanInstitute.LibMpv;
+﻿using HanumanInstitute.LibMpv.Extensions;
+
+namespace HanumanInstitute.LibMpv;
 
 /// <summary>
 /// Represents a key in the script-opts option dictionary.
