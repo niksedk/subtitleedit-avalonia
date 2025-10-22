@@ -1,42 +1,58 @@
-﻿using Nikse.SubtitleEdit.Core.Common;
+﻿using Avalonia.Platform;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Logic.Compression;
+using Nikse.SubtitleEdit.Logic.Config;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Logic.NetflixQualityCheck;
 
 public class NetflixCheckGlyph : INetflixQualityChecker
 {
+    private static HashSet<int>? _netflixGlyphs = null;
+
     private static HashSet<int> LoadNetflixGlyphs()
     {
-        return new HashSet<int>();
+        if (_netflixGlyphs != null)
+        {
+            return _netflixGlyphs;
+        }
 
-        //TODO: fix
-        //using (var ms = new MemoryStream(Properties.Resources.netflix_glyphs2_gz))
-        //{
-        //    using (var zip = new GZipStream(ms, CompressionMode.Decompress))
-        //    using (var unzip = new StreamReader(zip))
-        //    {
-        //        var lines = unzip.ReadToEnd().SplitToLines();
-        //        var list = new List<int>(lines.Count);
-        //        foreach (var line in lines)
-        //        {
-        //            list.Add(int.Parse(line, System.Globalization.NumberStyles.HexNumber));
-        //        }
+        var glyphFileName = Path.Combine(Se.DataFolder, "netflix_glyphs.txt");
+        if (!File.Exists(glyphFileName))
+        {
+            using var _ = Unpack();
+        }
 
-        //        if (!list.Contains(10))
-        //        {
-        //            list.Add(10);
-        //        }
+        var lines = File.ReadAllText(glyphFileName).SplitToLines();
+        var list = new List<int>(lines.Count);
+        foreach (var line in lines)
+        {
+            list.Add(int.Parse(line, System.Globalization.NumberStyles.HexNumber));
+        }
 
-        //        if (!list.Contains(13))
-        //        {
-        //            list.Add(13);
-        //        }
+        if (!list.Contains(10))
+        {
+            list.Add(10);
+        }
 
-        //        return new HashSet<int>(list);
-        //    }
-        //}
+        if (!list.Contains(13))
+        {
+            list.Add(13);
+        }
+
+        _netflixGlyphs = new HashSet<int>(list);
+        return _netflixGlyphs;
+    }
+
+    private static async Task Unpack()
+    {
+        var zipUri = new Uri("avares://SubtitleEdit/Assets/NetflixGlyphs.zip");
+        await using var zipStream = AssetLoader.Open(zipUri);
+        var zipUnpacker = new ZipUnpacker();
+        zipUnpacker.UnpackZipStream(zipStream, Se.DataFolder);
     }
 
     public void Check(Subtitle subtitle, NetflixQualityController controller)

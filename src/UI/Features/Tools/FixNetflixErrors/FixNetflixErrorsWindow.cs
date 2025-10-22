@@ -1,14 +1,15 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Layout;
-using Nikse.SubtitleEdit.Logic;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
+using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Layout;
 using Avalonia.Media;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Projektanker.Icons.Avalonia;
 
 namespace Nikse.SubtitleEdit.Features.Tools.FixNetflixErrors;
 
@@ -20,10 +21,10 @@ public class FixNetflixErrorsWindow : Window
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Tools.NetflixCheckAndFix.Title;
-        Width = 910;
-        Height = 640;
-        MinWidth = 800;
-        MinHeight = 620;
+        Width = 1100;
+        Height = 680;
+        MinWidth = 900;
+        MinHeight = 640;
         CanResize = true;
 
         _vm = vm;
@@ -33,13 +34,20 @@ public class FixNetflixErrorsWindow : Window
         var settingsView = MakeSettingsView(vm);
         var fixesView = MakeFixesView(vm);
 
-        var buttonGenerateReport = UiUtil.MakeButton(Se.Language.Tools.NetflixCheckAndFix.GenerateReport, vm.GenerateReportCommand);    
+        var buttonGenerateReport = UiUtil.MakeButton(Se.Language.Tools.NetflixCheckAndFix.GenerateReport, vm.GenerateReportCommand)
+            .WithIconLeft(IconNames.Netflix);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var panelButtons = UiUtil.MakeButtonBar(
             buttonGenerateReport,
             buttonOk,
             UiUtil.MakeButtonCancel(vm.CancelCommand)
         );
+
+        var buttonSelectPanel = UiUtil.MakeButtonBar(
+            UiUtil.MakeButton(Se.Language.General.SelectAll, vm.ChecksSelectAllCommand),
+            UiUtil.MakeButton(Se.Language.General.InvertSelection, vm.ChecksInverseSelectionCommand)
+        ).WithAlignmentLeft().WithAlignmentTop();
+
 
         var grid = new Grid
         {
@@ -50,7 +58,7 @@ public class FixNetflixErrorsWindow : Window
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(310, GridUnitType.Pixel) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
@@ -62,6 +70,7 @@ public class FixNetflixErrorsWindow : Window
 
         grid.Add(settingsView, 0, 0);
         grid.Add(fixesView, 0, 1);
+        grid.Add(buttonSelectPanel, 1);
         grid.Add(panelButtons, 1, 0, 1, 2);
 
         Content = grid;
@@ -69,14 +78,14 @@ public class FixNetflixErrorsWindow : Window
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 
-    private Control MakeSettingsView(FixNetflixErrorsViewModel vm)
+    private static Border MakeSettingsView(FixNetflixErrorsViewModel vm)
     {
-        // Top: language selection
         var panelTop = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             VerticalAlignment = VerticalAlignment.Center,
             HorizontalAlignment = HorizontalAlignment.Left,
+            Margin = new Thickness(8),
             Children =
             {
                 UiUtil.MakeTextBlock(Se.Language.General.Language).WithMarginRight(5),
@@ -92,9 +101,7 @@ public class FixNetflixErrorsWindow : Window
             CanUserResizeColumns = true,
             CanUserSortColumns = true,
             HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            Width = double.NaN,
-            Height = double.NaN,
+            VerticalAlignment = VerticalAlignment.Top,
             [!DataGrid.ItemsSourceProperty] = new Binding(nameof(vm.Checks))
         };
 
@@ -113,7 +120,7 @@ public class FixNetflixErrorsWindow : Window
                 return new Border
                 {
                     Background = Brushes.Transparent,
-                    Padding = new Thickness(4),
+                    Padding = new Thickness(1),
                     Child = cb
                 };
             }),
@@ -126,13 +133,8 @@ public class FixNetflixErrorsWindow : Window
             CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
             Binding = new Binding(nameof(NetflixCheckDisplayItem.Name)),
             IsReadOnly = true,
-            Width = new DataGridLength(1, DataGridLengthUnitType.Star)
+            Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
         });
-
-        var buttonPanel = UiUtil.MakeButtonBar(
-            UiUtil.MakeButton(Se.Language.General.SelectAll, vm.ChecksSelectAllCommand),
-            UiUtil.MakeButton(Se.Language.General.InvertSelection, vm.ChecksInverseSelectionCommand)
-        );
 
         var grid = new Grid
         {
@@ -140,16 +142,17 @@ public class FixNetflixErrorsWindow : Window
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
-            ColumnDefinitions = { new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) } },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(306, GridUnitType.Pixel) },
+            },
         };
 
         grid.Add(panelTop, 0, 0);
         grid.Add(dataGrid, 1, 0);
-        grid.Add(buttonPanel, 2, 0);
 
-        return UiUtil.MakeBorderForControl(grid);
+        return UiUtil.MakeBorderForControlNoPadding(grid);
     }
 
     private Border MakeFixesView(FixNetflixErrorsViewModel vm)
@@ -198,6 +201,7 @@ public class FixNetflixErrorsWindow : Window
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(FixNetflixErrorsItem.Before)),
                     IsReadOnly = true,
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
                 new DataGridTextColumn
                 {
@@ -212,7 +216,7 @@ public class FixNetflixErrorsWindow : Window
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(_vm.SelectedFix)));
         //dataGridTracks.SelectionChanged += vm.DataGridTracksSelectionChanged;
 
-        return UiUtil.MakeBorderForControl(dataGrid);
+        return UiUtil.MakeBorderForControlNoPadding(dataGrid);
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
