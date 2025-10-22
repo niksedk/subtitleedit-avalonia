@@ -285,23 +285,30 @@ public class SettingsPage : UserControl
             {
                 Children =
                 {
+                    MakeVideoPlayerComboBox()
+                }
+            }),
+            new SettingsItem(Se.Language.Options.Settings.MpvVideoOutput, () => new StackPanel
+            {
+                Children =
+                {
                     new ComboBox
                     {
                         Width = 200,
                         Height = 30,
-                        [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.VideoPlayers)),
+                        [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.VideoPlayerMpvRenders)),
                         [!SelectingItemsControl.SelectedItemProperty] =
-                            new Binding(nameof(_vm.SelectedVideoPlayer)),
+                            new Binding(nameof(_vm.SelectedVideoPlayerMpvRender)),
                         DataContext = _vm,
                         ItemTemplate = new FuncDataTemplate<object>((item, _) =>
                             new TextBlock
                             {
-                                [!TextBlock.TextProperty] = new Binding(nameof(VideoPlayerItem.Name)),
+                                [!TextBlock.TextProperty] = new Binding(nameof(VideoPlayerMpvRenderItem.Name)),
                                 Width = 150,
                             }, true)
                     }
                 }
-            }),
+            }, nameof(_vm.IsMpvChosen)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowStopButton, nameof(_vm.ShowStopButton)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowFullscreenButton, nameof(_vm.ShowFullscreenButton)),
             MakeCheckboxSetting(Se.Language.Options.Settings.AutoOpenVideoFile, nameof(_vm.AutoOpenVideoFile)),
@@ -495,6 +502,29 @@ public class SettingsPage : UserControl
 
 
         return sections;
+    }
+
+    private ComboBox MakeVideoPlayerComboBox()
+    {
+        var cb = new ComboBox
+        {
+            Width = 200,
+            Height = 30,
+            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.VideoPlayers)),
+            [!SelectingItemsControl.SelectedItemProperty] =
+                new Binding(nameof(_vm.SelectedVideoPlayer)),
+            DataContext = _vm,
+            ItemTemplate = new FuncDataTemplate<object>((item, _) =>
+                new TextBlock
+                {
+                    [!TextBlock.TextProperty] = new Binding(nameof(VideoPlayerItem.Name)),
+                    Width = 150,
+                }, true)
+        };
+
+        cb.PropertyChanged += (s, e) => _vm.VideoPlayerChanged();    
+        
+        return cb;
     }
 
     private ComboBox MakeComboBoxCpsLineLengthStyle()

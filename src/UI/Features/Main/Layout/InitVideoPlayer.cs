@@ -1,8 +1,10 @@
-﻿using Avalonia;
+﻿using System;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
+using HanumanInstitute.LibMpv.Avalonia;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -25,15 +27,14 @@ public static class InitVideoPlayer
         mainGrid.AddHandler(DragDrop.DragOverEvent, vm.VideoOnDragOver, RoutingStrategies.Bubble);
         mainGrid.AddHandler(DragDrop.DropEvent, vm.VideoOnDrop, RoutingStrategies.Bubble);
 
-
         if (vm.VideoPlayerControl == null)
         {
-            VideoPlayerControl control = MakeVideoPlayer();
+            var control = MakeVideoPlayer();
             control.FullScreenCommand = vm.VideoFullScreenCommand;
             vm.VideoPlayerControl = control;
             vm.VideoPlayerControl.Volume = Se.Settings.Video.Volume;
             vm.VideoPlayerControl.VideoPlayerDisplayTimeLeft = Se.Settings.Video.VideoPlayerDisplayTimeLeft;
-            vm.VideoPlayerControl.VolumeChanged += (double v) =>
+            vm.VideoPlayerControl.VolumeChanged += v =>
             {
                 Se.Settings.Video.Volume = v;
             };
@@ -74,7 +75,12 @@ public static class InitVideoPlayer
         {
             try
             {
-                var videoPlayerInstanceMpv = new VideoPlayerInstanceMpv();
+                if (!Enum.TryParse<VideoRenderer>(Se.Settings.Video.VideoPlayerMpvRender, true, out var render))
+                {
+                    render = VideoRenderer.Auto; 
+                }
+                
+                var videoPlayerInstanceMpv = new VideoPlayerInstanceMpv(render);
                 control = new VideoPlayerControl(videoPlayerInstanceMpv)
                 {
                     PlayerContent = videoPlayerInstanceMpv.MpvView,

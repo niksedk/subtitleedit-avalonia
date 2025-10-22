@@ -74,7 +74,7 @@ public class VideoPlayerInstanceMpv : IVideoPlayerInstance
     public MpvContext? MpvContext { get; set; }
     public MpvView MpvView { get; set; }
 
-    public VideoPlayerInstanceMpv()
+    public VideoPlayerInstanceMpv(VideoRenderer renderer)
     {
         MpvContext = new MpvContext();
         MpvView = new MpvView
@@ -82,6 +82,7 @@ public class VideoPlayerInstanceMpv : IVideoPlayerInstance
             Margin = new Thickness(0),
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
+            Renderer = renderer,  
         };
 
         MpvView.DataContext = this;

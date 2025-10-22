@@ -99,6 +99,8 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty] private ObservableCollection<VideoPlayerItem> _videoPlayers;
     [ObservableProperty] private VideoPlayerItem _selectedVideoPlayer;
+    [ObservableProperty] private ObservableCollection<VideoPlayerMpvRenderItem> _videoPlayerMpvRenders;
+    [ObservableProperty] private VideoPlayerMpvRenderItem _selectedVideoPlayerMpvRender;
     [ObservableProperty] private bool _showStopButton;
     [ObservableProperty] private bool _showFullscreenButton;
     [ObservableProperty] private bool _autoOpenVideoFile;
@@ -144,6 +146,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private Color _darkModeBackgroundColor;
     [ObservableProperty] private Color _bookmarkColor;
     [ObservableProperty] private bool _isEditCustomContinuationStyleVisible;
+    [ObservableProperty] private bool _isMpvChosen;
 
     [ObservableProperty] private bool _existsErrorLogFile;
     [ObservableProperty] private bool _existsWhisperLogFile;
@@ -217,6 +220,9 @@ public partial class SettingsViewModel : ObservableObject
 
         VideoPlayers = new ObservableCollection<VideoPlayerItem>(VideoPlayerItem.ListVideoPlayerItem());
         SelectedVideoPlayer = VideoPlayers[0];
+        
+        VideoPlayerMpvRenders = new ObservableCollection<VideoPlayerMpvRenderItem>(VideoPlayerMpvRenderItem.ListVideoPlayerMpvRenderItems());
+        SelectedVideoPlayerMpvRender = VideoPlayerMpvRenders[0];
 
         var subtitleFormats = SubtitleFormat.AllSubtitleFormats;
         var defaultSubtitleFormats = new List<string>();
@@ -237,6 +243,7 @@ public partial class SettingsViewModel : ObservableObject
         SelectedSaveSubtitleFormat = SaveSubtitleFormats.First();
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         DefaultEncoding = Encodings.First();
+        IsMpvChosen = true; 
 
         GridLinesVisibilities = new ObservableCollection<GridLinesVisibilityDisplay>(GridLinesVisibilityDisplay.GetAll());
         SelectedGridLinesVisibility = GridLinesVisibilities[0];
@@ -417,6 +424,11 @@ public partial class SettingsViewModel : ObservableObject
         {
             SelectedVideoPlayer = videoPlayer;
         }
+        var mpvRender = VideoPlayerMpvRenders.FirstOrDefault(p=>p.Code == video.VideoPlayerMpvRender);
+        if (mpvRender != null)
+        {
+            SelectedVideoPlayerMpvRender = mpvRender;            
+        }
         ShowStopButton = video.ShowStopButton;
         ShowFullscreenButton = video.ShowFullscreenButton;
         AutoOpenVideoFile = video.AutoOpen;
@@ -538,6 +550,7 @@ public partial class SettingsViewModel : ObservableObject
         general.CustomContinuationStyleGapPrefixAddSpace = _customContinuationStyleGapPrefixAddSpace;
 
         video.VideoPlayer = SelectedVideoPlayer.Name;
+        video.VideoPlayerMpvRender = SelectedVideoPlayerMpvRender.Code;
         video.ShowStopButton = ShowStopButton;
         video.ShowFullscreenButton = ShowFullscreenButton;
         video.AutoOpen = AutoOpenVideoFile;
@@ -1108,7 +1121,12 @@ public partial class SettingsViewModel : ObservableObject
             return;
         }
 
-        IsEditCustomContinuationStyleVisible = ContinuationStyle.Code == Core.Enums.ContinuationStyle.Custom.ToString();
+        IsEditCustomContinuationStyleVisible = ContinuationStyle.Code == nameof(Core.Enums.ContinuationStyle.Custom);
         RuleValueChanged();
+    }
+
+    public void VideoPlayerChanged()
+    {
+        IsMpvChosen = SelectedVideoPlayer.Name == "mpv";
     }
 }

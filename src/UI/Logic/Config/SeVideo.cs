@@ -8,6 +8,7 @@ public class SeVideo
     public SeVideoTransparent Transparent { get; set; } 
     public SeVideoTextToSpeech TextToSpeech { get; set; }
     public string VideoPlayer { get; set; }
+    public string VideoPlayerMpvRender { get; set; }
     public double Volume { get; set; }
     public bool ShowStopButton { get; set; }
     public bool ShowFullscreenButton { get; set; }
@@ -23,6 +24,7 @@ public class SeVideo
         Transparent = new();
         TextToSpeech = new();
         VideoPlayer = "mpv";
+        VideoPlayerMpvRender = "auto";
         Volume = 60;
         ShowStopButton = true;
         ShowFullscreenButton = true;

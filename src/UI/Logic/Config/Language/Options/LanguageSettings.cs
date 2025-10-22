@@ -181,6 +181,7 @@ public class LanguageSettings
     public string ResetWaveform { get; set; }
     public string ResetRules { get; set; }
     public string UseFrameMode { get; set; }
+    public string MpvVideoOutput { get; set; }
 
     public LanguageSettings()
     {
@@ -359,6 +360,7 @@ public class LanguageSettings
         ResetWaveform = "Reset waveform";
         ResetRules = "Reset rules";
         UseFrameMode = "Use frame mode (hh.mm.ss.ff)";
+        MpvVideoOutput = "Video output  (mpv)";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

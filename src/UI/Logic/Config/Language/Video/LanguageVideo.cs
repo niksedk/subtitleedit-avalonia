@@ -22,6 +22,10 @@ public class LanguageVideo
     public string CutVideoMergeSegments { get; set; }
     public string CutVideoSplitSegments { get; set; }
     public string CutVideoType { get; set; }
+    public string MpvRenderAuto { get; set; }
+    public string MpvRenderNative { get; set; }
+    public string MpvRenderOpenGl { get; set; }
+    public string MpvRenderSoftware { get; set; }
 
     public LanguageVideo()
     {
@@ -41,5 +45,9 @@ public class LanguageVideo
         CutVideoMergeSegments = "Merge segments";
         CutVideoSplitSegments = "Save segments individually";
         CutVideoType = "Cut type";
+        MpvRenderAuto = "Auto";
+        MpvRenderNative = "Native";
+        MpvRenderOpenGl = "OpenGL";
+        MpvRenderSoftware = "Software (slow)";
     }
 }

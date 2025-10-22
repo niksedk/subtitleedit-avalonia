@@ -2,13 +2,13 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Threading;
 
 namespace HanumanInstitute.LibMpv.Avalonia;
 
 public class MpvView : Control
 {
     private IVideoView? _view;
+    
     // MpvContext property
     public static readonly DirectProperty<MpvView, MpvContext?> MpvContextProperty =
         AvaloniaProperty.RegisterDirect<MpvView, MpvContext?>(nameof(MpvContext), o =>
