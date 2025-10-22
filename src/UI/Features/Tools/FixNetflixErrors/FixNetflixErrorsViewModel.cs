@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
+using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
@@ -14,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -145,9 +147,31 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
             return;
         }
 
-        var _frameRate = 23.976;    //TODO: fix
-        var netflixQualityController = new NetflixQualityController { Language = SelectedLanguage.Code, VideoFileName = _videoFileName, FrameRate = _frameRate };
+        if (Fixes.Count == 0)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, "Nothing to export", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        var csvBuilder = new StringBuilder();
+
+        // Header
+        csvBuilder.AppendLine("LineNumber,TimeCode,Context,Comment");
+
+        // Rows
+        foreach (var fix in Fixes)
+        {
+            csvBuilder.AppendLine(fix.Record.ToCsvRow());
+        }
+
         var fileName = await _fileHelper.PickSaveFile(Window, ".csv", "netflix_report.csv", "Save Netflix quality report");
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return;
+        }
+
+        System.IO.File.WriteAllText(fileName, csvBuilder.ToString());
+        //TODO: Show message "Report saved" with link to open file
     }
 
     [RelayCommand]
@@ -240,7 +264,7 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
         controller.RunChecks(_subtitle, selectedChecks);
 
         // Map paragraph to proposed text changes (ignore pure timing-only changes for now)
-        var fixMap = new Dictionary<int, (string Before, string After, Paragraph P)>();
+        var fixMap = new Dictionary<int, (string Before, string After, Paragraph P, NetflixQualityController.Record)>();
         foreach (var r in controller.Records)
         {
             if (r.OriginalParagraph == null)
@@ -259,7 +283,7 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
             if (!string.IsNullOrEmpty(after) && !string.Equals(before, after, StringComparison.Ordinal))
             {
                 // If multiple fixes affect the same paragraph, keep last suggestion
-                fixMap[idx] = (before, after, r.OriginalParagraph);
+                fixMap[idx] = (before, after, r.OriginalParagraph, r);
             }
         }
 
@@ -271,8 +295,8 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
         foreach (var kvp in fixMap.OrderBy(k => k.Key))
         {
             var index = kvp.Key;
-            var (before, after, p) = kvp.Value;
-            var item = new FixNetflixErrorsItem(true, index, before, after, p);
+            var (before, after, p, r) = kvp.Value;
+            var item = new FixNetflixErrorsItem(true, index, before, after, p, r);
             Fixes.Add(item);
         }
     }
@@ -296,7 +320,7 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
         var languageCode = LanguageAutoDetect.AutoDetectGoogleLanguageOrNull(_subtitle) ?? "en";
         SelectedLanguage = Languages.FirstOrDefault(l => l.Code == languageCode) ??
             Languages.FirstOrDefault(l => l.Code == "en");
-        
+
         _timer.Start();
 
         if (Checks.Count == 0)
