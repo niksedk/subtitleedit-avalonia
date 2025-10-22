@@ -308,6 +308,11 @@ public static class InitMenu
             },
             new MenuItem
             {
+                Header = l.CheckAndFixNetflixErrors,
+                Command = vm.ShowToolsFixNetflixErrorsCommand,
+            },
+            new MenuItem
+            {
                 Header = l.MakeEmptyTranslationFromCurrentSubtitle,
                 Command = vm.ToolsMakeEmptyTranslationFromCurrentSubtitleCommand,
             },

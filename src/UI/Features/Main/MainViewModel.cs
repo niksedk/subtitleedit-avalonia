@@ -71,6 +71,7 @@ using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 using Nikse.SubtitleEdit.Features.Tools.BridgeGaps;
 using Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
 using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
+using Nikse.SubtitleEdit.Features.Tools.FixNetflixErrors;
 using Nikse.SubtitleEdit.Features.Tools.JoinSubtitles;
 using Nikse.SubtitleEdit.Features.Tools.MergeShortLines;
 using Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameText;
@@ -2366,6 +2367,35 @@ public partial class MainViewModel :
 
         var viewModel = await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window!,
             vm => { vm.Initialize(GetUpdateSubtitle(), SelectedSubtitleFormat); });
+
+        if (viewModel.OkPressed)
+        {
+            SetSubtitles(viewModel.FixedSubtitle);
+            SelectAndScrollToRow(0);
+            ShowStatus($"Fixed {viewModel.FixedSubtitle.Paragraphs.Count} lines");
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowToolsFixNetflixErrors()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
+        var viewModel = await _windowService.ShowDialogAsync<FixNetflixErrorsWindow, FixNetflixErrorsViewModel>(Window!,
+            vm => 
+            { 
+            });
 
         if (viewModel.OkPressed)
         {

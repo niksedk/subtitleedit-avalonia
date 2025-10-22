@@ -15,6 +15,7 @@ public class LanguageTools
     public LanguageMergeShortLines MergeShortLines { get; set; } = new();
     public LanguageMergeLineswithSameText MergeLinesWithSameText { get; set; } = new();
     public LanguageMergeLineswithSameTimeCodes MergeLinesWithSameTimeCodes { get; set; } = new();
+    public LanguageNetflixCheckAndFix NetflixCheckAndFix { get; set; } = new();
     public string PickAlignmentTitle { get; set; }
     public string PickFontNameTitle { get; set; }
     public string ColorPickerTitle { get; set; }

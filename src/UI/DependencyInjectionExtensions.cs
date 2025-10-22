@@ -61,6 +61,7 @@ using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 using Nikse.SubtitleEdit.Features.Tools.BridgeGaps;
 using Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
 using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
+using Nikse.SubtitleEdit.Features.Tools.FixNetflixErrors;
 using Nikse.SubtitleEdit.Features.Tools.JoinSubtitles;
 using Nikse.SubtitleEdit.Features.Tools.MergeShortLines;
 using Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameText;
@@ -194,6 +195,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<FixCommonErrorsProfileViewModel>();
         collection.AddTransient<FixCommonErrorsViewModel>();
         collection.AddTransient<FixNamesViewModel>();
+        collection.AddTransient<FixNetflixErrorsViewModel>();
         collection.AddTransient<GetDictionariesViewModel>();
         collection.AddTransient<GetKeyViewModel>();
         collection.AddTransient<GoToLineNumberViewModel>();
