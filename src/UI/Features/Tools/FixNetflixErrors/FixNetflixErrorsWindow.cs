@@ -9,7 +9,6 @@ using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic.Config;
-using Nikse.SubtitleEdit.Logic.NetflixQualityCheck;
 
 namespace Nikse.SubtitleEdit.Features.Tools.FixNetflixErrors;
 
@@ -49,7 +48,6 @@ public class FixNetflixErrorsWindow : Window
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
@@ -71,6 +69,19 @@ public class FixNetflixErrorsWindow : Window
 
     private Control MakeSettingsView(FixNetflixErrorsViewModel vm)
     {
+        // Top: language selection
+        var panelTop = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Children =
+            {
+                UiUtil.MakeTextBlock(Se.Language.General.Language).WithMarginRight(5),
+                UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage))
+            }
+        };
+
         // Grid with list of checks
         var dataGrid = new DataGrid
         {
@@ -78,7 +89,7 @@ public class FixNetflixErrorsWindow : Window
             SelectionMode = DataGridSelectionMode.Single,
             CanUserResizeColumns = true,
             CanUserSortColumns = true,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Stretch,
             Width = double.NaN,
             Height = double.NaN,
@@ -121,14 +132,16 @@ public class FixNetflixErrorsWindow : Window
         {
             RowDefinitions =
             {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
-            ColumnDefinitions = { new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) } },
+            ColumnDefinitions = { new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) } },
         };
 
-        grid.Add(dataGrid, 0, 0);
-        grid.Add(buttonPanel, 1, 0);
+        grid.Add(panelTop, 0, 0);
+        grid.Add(dataGrid, 1, 0);
+        grid.Add(buttonPanel, 2, 0);
 
         return UiUtil.MakeBorderForControl(grid);
     }

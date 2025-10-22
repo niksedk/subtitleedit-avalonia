@@ -4,9 +4,7 @@ using Avalonia.Interactivity;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DynamicData;
 using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Core.Forms;
 using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -14,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Timers;
 using Nikse.SubtitleEdit.Logic.NetflixQualityCheck;
 
@@ -64,7 +61,6 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
     public Subtitle FixedSubtitle { get; private set; }
 
     private Subtitle _subtitle;
-    private RemoveTextForHI? _removeTextForHiLib;
     private readonly Timer _timer;
     private bool _dirty;
     private readonly List<Paragraph> _edited;
@@ -90,6 +86,7 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
         _subtitle = subtitle;
         LoadSettings();
         LoadChecks();
+        SetDirty();
     }
 
     private void LoadChecks()
@@ -170,6 +167,7 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
         {
             c.IsSelected = true;
         }
+        SetDirty();
     }
 
     [RelayCommand]
@@ -179,6 +177,7 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
         {
             c.IsSelected = !c.IsSelected;
         }
+        SetDirty();
     }
 
     private void TimerElapsed(object? sender, ElapsedEventArgs e)
@@ -203,7 +202,64 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
 
     private void GeneratePreview()
     {
-        //TODO: Implement preview generation logic via the selected checks for NetFix errors and populate Fixes collection
+        // Build selected checks list
+        var selectedChecks = Checks.Where(c => c.IsSelected).Select(c => c.Checker).ToList();
+        Fixes.Clear();
+
+        if (_subtitle.Paragraphs.Count == 0 || selectedChecks.Count == 0)
+        {
+            return;
+        }
+
+        var controller = new NetflixQualityController
+        {
+            Language = SelectedLanguage?.Code ?? "en",
+            FrameRate = Configuration.Settings.General.CurrentFrameRate,
+        };
+
+        controller.RunChecks(_subtitle, selectedChecks);
+
+        // Map paragraph to proposed text changes (ignore pure timing-only changes for now)
+        var fixMap = new Dictionary<int, (string Before, string After, Paragraph P)>();
+        foreach (var r in controller.Records)
+        {
+            if (r.OriginalParagraph == null)
+            {
+                continue;
+            }
+
+            var idx = _subtitle.Paragraphs.IndexOf(r.OriginalParagraph);
+            if (idx < 0)
+            {
+                continue;
+            }
+
+            var before = r.OriginalParagraph.Text;
+            var after = r.FixedParagraph?.Text;
+            if (!string.IsNullOrEmpty(after) && !string.Equals(before, after, StringComparison.Ordinal))
+            {
+                // If multiple fixes affect the same paragraph, keep last suggestion
+                fixMap[idx] = (before, after, r.OriginalParagraph);
+            }
+        }
+
+        if (fixMap.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var kvp in fixMap.OrderBy(k => k.Key))
+        {
+            var index = kvp.Key;
+            var (before, after, p) = kvp.Value;
+            var item = new FixNetflixErrorsItem(true, index, before, after, p);
+            Fixes.Add(item);
+        }
+    }
+
+    partial void OnSelectedLanguageChanged(LanguageItem? value)
+    {
+        SetDirty();
     }
 
     internal void OnKeyDown(KeyEventArgs e)
@@ -227,6 +283,8 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
         {
             LoadChecks();
         }
+
+        SetDirty();
     }
 
     public void SetDirty()
