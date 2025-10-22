@@ -101,16 +101,20 @@ public class FixNetflixErrorsWindow : Window
             Header = Se.Language.General.Enabled,
             CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
             CellTemplate = new FuncDataTemplate<NetflixCheckDisplayItem>((item, _) =>
-                new Border
+            {
+                var cb = new CheckBox
+                {
+                    [!ToggleButton.IsCheckedProperty] = new Binding(nameof(NetflixCheckDisplayItem.IsSelected)) { Mode = BindingMode.TwoWay },
+                    HorizontalAlignment = HorizontalAlignment.Center
+                };
+                cb.IsCheckedChanged += (_, __) => vm.SetDirty();
+                return new Border
                 {
                     Background = Brushes.Transparent,
                     Padding = new Thickness(4),
-                    Child = new CheckBox
-                    {
-                        [!ToggleButton.IsCheckedProperty] = new Binding(nameof(NetflixCheckDisplayItem.IsSelected)) { Mode = BindingMode.TwoWay },
-                        HorizontalAlignment = HorizontalAlignment.Center
-                    }
-                }),
+                    Child = cb
+                };
+            }),
             Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
         });
 
