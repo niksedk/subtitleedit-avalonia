@@ -8,12 +8,14 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media;
+using Nikse.SubtitleEdit.Logic.NetflixQualityCheck;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Timers;
-using Nikse.SubtitleEdit.Logic.NetflixQualityCheck;
 
 namespace Nikse.SubtitleEdit.Features.Tools.FixNetflixErrors;
 
@@ -61,15 +63,18 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
     public Subtitle FixedSubtitle { get; private set; }
 
     private Subtitle _subtitle;
+    private string _videoFileName;
     private readonly Timer _timer;
     private bool _dirty;
     private readonly List<Paragraph> _edited;
 
     private readonly IWindowService _windowService;
+    private readonly IFileHelper _fileHelper;
 
-    public FixNetflixErrorsViewModel(IWindowService windowService)
+    public FixNetflixErrorsViewModel(IWindowService windowService, IFileHelper fileHelper)
     {
         _windowService = windowService;
+        _fileHelper = fileHelper;
 
         Languages = new ObservableCollection<LanguageItem>(LanguageItem.GetAll());
         Fixes = new ObservableCollection<FixNetflixErrorsItem>();
@@ -79,11 +84,13 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
         _timer.Elapsed += TimerElapsed;
         FixedSubtitle = new Subtitle();
         _subtitle = new Subtitle();
+        _videoFileName = string.Empty;
     }
 
-    public void Initialize(Subtitle subtitle)
+    public void Initialize(Subtitle subtitle, string videoFileName)
     {
         _subtitle = subtitle;
+        _videoFileName = videoFileName;
         LoadSettings();
         LoadChecks();
         SetDirty();
@@ -128,6 +135,19 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
     private void SaveSettings()
     {
         Se.SaveSettings();
+    }
+
+    [RelayCommand]
+    private async Task GenerateReport()
+    {
+        if (Window == null || SelectedLanguage == null)
+        {
+            return;
+        }
+
+        var _frameRate = 23.976;    //TODO: fix
+        var netflixQualityController = new NetflixQualityController { Language = SelectedLanguage.Code, VideoFileName = _videoFileName, FrameRate = _frameRate };
+        var fileName = await _fileHelper.PickSaveFile(Window, ".csv", "netflix_report.csv", "Save Netflix quality report");
     }
 
     [RelayCommand]

@@ -33,8 +33,10 @@ public class FixNetflixErrorsWindow : Window
         var settingsView = MakeSettingsView(vm);
         var fixesView = MakeFixesView(vm);
 
+        var buttonGenerateReport = UiUtil.MakeButton(Se.Language.Tools.NetflixCheckAndFix.GenerateReport, vm.GenerateReportCommand);    
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var panelButtons = UiUtil.MakeButtonBar(
+            buttonGenerateReport,
             buttonOk,
             UiUtil.MakeButtonCancel(vm.CancelCommand)
         );
