@@ -218,6 +218,8 @@ public class LanguageSettingsShortcuts
     public string ListErrors { get; set; }
     public string GoToNextError { get;set; }
     public string GoToPreviousError { get; set; }
+    public string AddNameToNameList { get; set; }
+    public string FindDoubleWords { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -439,5 +441,7 @@ public class LanguageSettingsShortcuts
         ListErrors = "List errors";
         GoToPreviousError = "GoTo previous error";
         GoToNextError = "GoTo next error";
+        AddNameToNameList = "Add name to name list";
+        FindDoubleWords = "Find double words";
     }
 }

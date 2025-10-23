@@ -229,6 +229,8 @@ public static class ShortcutsMain
         { nameof(MainViewModel.ListErrorsCommand), Se.Language.Options.Shortcuts.ListErrors },
         { nameof(MainViewModel.GoToPreviousErrorCommand), Se.Language.Options.Shortcuts.GoToPreviousError },
         { nameof(MainViewModel.GoToNextErrorCommand), Se.Language.Options.Shortcuts.GoToNextError },
+        { nameof(MainViewModel.ShowAddToNameListCommand), Se.Language.Options.Shortcuts.AddNameToNameList },
+        { nameof(MainViewModel.ShowFindDoubleWordsCommand), Se.Language.Options.Shortcuts.FindDoubleWords },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -406,6 +408,8 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.ListErrorsCommand, nameof(vm.ListErrorsCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.GoToPreviousErrorCommand, nameof(vm.GoToPreviousErrorCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.GoToNextErrorCommand, nameof(vm.GoToNextErrorCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowAddToNameListCommand, nameof(vm.ShowAddToNameListCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowFindDoubleWordsCommand, nameof(vm.ShowFindDoubleWordsCommand), ShortcutCategory.General);
 
         return shortcuts;
     }

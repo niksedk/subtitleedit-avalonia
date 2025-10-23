@@ -77,15 +77,12 @@ public partial class FindDoubleWordsViewModel : ObservableObject
         var separators = new[] { ' ', '\t', '\r', '\n' };
         var words = text.Split(separators, StringSplitOptions.RemoveEmptyEntries);
 
+        var list = new List<string>();
+
         string? prev = null;
         for (var i = 0; i < words.Length; i++)
         {
             var word = words[i];
-            if (!IsAllLetters(word))
-            {
-                prev = word;
-                continue;
-            }
 
             if (string.IsNullOrWhiteSpace(word))
             {
@@ -93,12 +90,24 @@ public partial class FindDoubleWordsViewModel : ObservableObject
                 continue;
             }
 
-            if (prev != null && string.Equals(prev, word, StringComparison.OrdinalIgnoreCase))
+            if (prev != null && !IsAllLetters(prev))
             {
-                return word;
+                prev = word;
+                continue;
+            }
+
+            var trimmedWord = word.TrimEnd('.', ',', '!', '?');
+            if (prev != null && string.Equals(prev, trimmedWord, StringComparison.OrdinalIgnoreCase))
+            {
+                list.Add(trimmedWord);
             }
 
             prev = word;
+        }
+
+        if (list.Count > 0)
+        {
+            return string.Join(", ", list);
         }
 
         return string.Empty;
