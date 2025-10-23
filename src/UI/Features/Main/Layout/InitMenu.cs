@@ -368,7 +368,17 @@ public static class InitMenu
                     Header = l.SpellCheck,
                     Command = vm.ShowSpellCheckCommand,
                 },
+                new MenuItem
+                {
+                    Header = l.FindDoubleWords,
+                    Command = vm.ShowFindDoubleWordsCommand,
+                },
                 new Separator(),
+                new MenuItem
+                {
+                    Header = l.AddNameToNamesList,
+                    Command = vm.ShowAddToNameListCommand,
+                },
                 new MenuItem
                 {
                     Header = l.GetDictionaries,

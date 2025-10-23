@@ -107,6 +107,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Features.Shared.AddToNamesList;
+using Nikse.SubtitleEdit.Features.SpellCheck.FindDoubleWords;
 using static Nikse.SubtitleEdit.Logic.FindService;
 
 namespace Nikse.SubtitleEdit.Features.Main;
@@ -235,6 +237,7 @@ public partial class MainViewModel :
     private readonly IFindService _findService;
     private readonly IColorService _colorService;
     private readonly IFontNameService _fontNameService;
+    private readonly ISpellCheckManager _spellCheckManager;
 
     private bool IsEmpty => Subtitles.Count == 0 || (Subtitles.Count == 1 && string.IsNullOrEmpty(Subtitles[0].Text));
 
@@ -279,7 +282,7 @@ public partial class MainViewModel :
         IOcrInitializer ocrInitializer,
         IThemeInitializer themeInitializer,
         IColorService colorService,
-        IFontNameService fontNameService)
+        IFontNameService fontNameService, ISpellCheckManager spellCheckManager)
     {
         _fileHelper = fileHelper;
         _folderHelper = folderHelper;
@@ -295,6 +298,7 @@ public partial class MainViewModel :
         _findService = findService;
         _colorService = colorService;
         _fontNameService = fontNameService;
+        _spellCheckManager = spellCheckManager;
 
         _loading = true;
         EditText = string.Empty;
@@ -2636,7 +2640,42 @@ public partial class MainViewModel :
         _shortcutManager.ClearKeys();
     }
 
+    [RelayCommand]
+    private async Task ShowAddToNameList()
+    {
+        if (Window == null)
+        {
+            return;
+        }
 
+        var word = EditTextBox.SelectedText;
+        var dictionaries = _spellCheckManager.GetDictionaryLanguages(Se.DictionariesFolder);
+        var language = LanguageAutoDetect.AutoDetectGoogleLanguage(GetUpdateSubtitle());
+        var selectedDictionary = dictionaries.FirstOrDefault(p => p.GetFiveLetterLanguageName().Contains(language)); 
+        
+        var result = await _windowService.ShowDialogAsync<AddToNamesListWindow, AddToNamesListViewModel>(Window, vm =>
+        {
+            vm.Initialize(word, dictionaries, selectedDictionary);
+        });
+
+        _shortcutManager.ClearKeys();
+    }
+    
+    [RelayCommand]
+    private async Task ShowFindDoubleWords()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<FindDoubleWordsWindow, FindDoubleWordsViewModel>(Window, vm =>
+        {
+        });
+
+        _shortcutManager.ClearKeys();
+    }
+    
     [RelayCommand]
     private async Task ShowSpellCheckDictionaries()
     {

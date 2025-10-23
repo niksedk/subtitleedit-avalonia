@@ -313,13 +313,18 @@ public partial class OcrViewModel : ObservableObject
     [RelayCommand]
     private async Task AddUnknownWordToNames()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
         var selectedWord = SelectedUnknownWord;
         if (selectedWord == null)
         {
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<AddToNamesListWindow, AddToNamesListViewModel>(Window!, vm =>
+        var result = await _windowService.ShowDialogAsync<AddToNamesListWindow, AddToNamesListViewModel>(Window, vm =>
         {
             vm.Initialize(selectedWord.Word.Word, Dictionaries.ToList(), SelectedDictionary);
         });

@@ -55,6 +55,8 @@ public class LanguageMainMenu
 
     public string SpellCheckTitle { get; set; }
     public string SpellCheck { get; set; }
+    public string FindDoubleWords { get; set; }
+    public string AddNameToNamesList { get; set; }
     public string GetDictionaries { get; set; }
 
 
@@ -144,6 +146,8 @@ public class LanguageMainMenu
         SplitSubtitle = "_Split subtitle...";
 
         SpellCheckTitle = "_Spell check";
+        FindDoubleWords = "_Find double words...";
+        AddNameToNamesList = "_Add name to names list...";
         SpellCheck = "_Spell check...";
         GetDictionaries = "_Get dictionaries...";
 
