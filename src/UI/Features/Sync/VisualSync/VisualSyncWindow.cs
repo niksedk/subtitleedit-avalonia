@@ -18,10 +18,10 @@ public class VisualSyncWindow : Window
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Sync.VisualSync;
         CanResize = true;
-        Width = 1000;
+        Width = 1100;
         Height = 700;
-        MinWidth = 600;
-        MinHeight = 550;
+        MinWidth = 900;
+        MinHeight = 650;
 
         _vm = vm;
         vm.Window = this;
@@ -43,10 +43,11 @@ public class VisualSyncWindow : Window
         vm.VideoPlayerControlRight = InitVideoPlayer.MakeVideoPlayer();
         vm.VideoPlayerControlRight.FullScreenIsVisible = false;
 
-        vm.AudioVisualizerLeft = new AudioVisualizer 
-        { 
-            Height = 80, Width = double.NaN, 
-            IsReadOnly = true ,
+        vm.AudioVisualizerLeft = new AudioVisualizer
+        {
+            Height = 80,
+            Width = double.NaN,
+            IsReadOnly = true,
             DrawGridLines = Se.Settings.Waveform.DrawGridLines,
             WaveformColor = Se.Settings.Waveform.WaveformColor.FromHexToColor(),
             WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor(),
@@ -54,10 +55,10 @@ public class VisualSyncWindow : Window
         };
         vm.AudioVisualizerLeft.OnVideoPositionChanged += vm.AudioVisualizerLeftPositionChanged;
 
-        vm.AudioVisualizerRight = new AudioVisualizer 
-        { 
-            Height = 80, 
-            Width = double.NaN, 
+        vm.AudioVisualizerRight = new AudioVisualizer
+        {
+            Height = 80,
+            Width = double.NaN,
             IsReadOnly = true,
             DrawGridLines = Se.Settings.Waveform.DrawGridLines,
             WaveformColor = Se.Settings.Waveform.WaveformColor.FromHexToColor(),
@@ -70,14 +71,17 @@ public class VisualSyncWindow : Window
         comboBoxLeft.Width = double.NaN;
         comboBoxLeft.MinHeight = 50;
         comboBoxLeft.HorizontalAlignment = HorizontalAlignment.Stretch;
-        comboBoxLeft.SelectionChanged += vm.ComboBoxLeftChanged;
+        vm.ComboBoxLeft = comboBoxLeft;
 
         var panelLeftButtons = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Children =
             {
+                UiUtil.MakeButton(vm.LeftOneSecondBackCommand, IconNames.ArrowLeftThick, Se.Language.General.OneSecondBack),
                 UiUtil.MakeButton(Se.Language.Sync.PlayTwoSecondsAndBack, vm.PlayTwoSecondsAndBackLeftCommand),
+                UiUtil.MakeButton(vm.LeftOneSecondForwardCommand, IconNames.ArrowRightThick, Se.Language.General.OneSecondForward),
+                UiUtil.MakeButton(Se.Language.Sync.GoToSubPos, vm.GoToLeftSubtitleCommand),
                 UiUtil.MakeButton(Se.Language.Sync.FindText, vm.FindTextLeftCommand),
             }
         };
@@ -86,14 +90,17 @@ public class VisualSyncWindow : Window
         comboBoxRight.Width = double.NaN;
         comboBoxRight.MinHeight = 50;
         comboBoxRight.HorizontalAlignment = HorizontalAlignment.Stretch;
-        comboBoxRight.SelectionChanged += vm.ComboBoxRightChanged;
+        vm.ComboBoxRight = comboBoxRight;
 
         var panelRightButtons = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Children =
             {
+                UiUtil.MakeButton(vm.RightOneSecondBackCommand, IconNames.ArrowLeftThick, Se.Language.General.OneSecondBack),
                 UiUtil.MakeButton(Se.Language.Sync.PlayTwoSecondsAndBack, vm.PlayTwoSecondsAndBackRightCommand),
+                UiUtil.MakeButton(vm.RightOneSecondForwardCommand, IconNames.ArrowRightThick, Se.Language.General.OneSecondForward),
+                UiUtil.MakeButton(Se.Language.Sync.GoToSubPos, vm.GoToRightSubtitleCommand),
                 UiUtil.MakeButton(Se.Language.Sync.FindText, vm.FindTextRightCommand),
             }
         };
@@ -184,12 +191,8 @@ public class VisualSyncWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
-    }
 
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        AddHandler(KeyDownEvent, _vm.OnKeyDownHandler, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: false);
     }
 
     protected override void OnLoaded(RoutedEventArgs e)

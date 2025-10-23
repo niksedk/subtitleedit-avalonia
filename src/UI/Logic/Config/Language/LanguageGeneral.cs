@@ -466,6 +466,8 @@ public class LanguageGeneral
     public string ShowHistory { get; set; }
     public string SelectedAFolderToSaveTo { get; set; }
     public string DoubleWords { get; set; }
+    public string OneSecondBack { get; set; }
+    public string OneSecondForward { get; set; }
 
     public LanguageGeneral()
     {
@@ -928,5 +930,7 @@ public class LanguageGeneral
         ShowHistory = "Show history";
         SelectedAFolderToSaveTo = "Selected a folder to save to";
         DoubleWords = "Double words";
+        OneSecondBack = "One second back";
+        OneSecondForward = "One second";
     }
 }

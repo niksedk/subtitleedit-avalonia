@@ -35,6 +35,8 @@ public partial class VisualSyncViewModel : ObservableObject
     public VideoPlayerControl VideoPlayerControlRight { get; set; }
     public AudioVisualizer AudioVisualizerLeft { get; set; }
     public AudioVisualizer AudioVisualizerRight { get; set; }
+    public ComboBox ComboBoxLeft { get; set; }
+    public ComboBox ComboBoxRight { get; set; }
 
     private readonly IWindowService _windowService;
 
@@ -55,6 +57,8 @@ public partial class VisualSyncViewModel : ObservableObject
         VideoPlayerControlRight = new VideoPlayerControl(new VideoPlayerInstanceNone());
         AudioVisualizerLeft = new AudioVisualizer();
         AudioVisualizerRight = new AudioVisualizer();
+        ComboBoxLeft = new ComboBox();
+        ComboBoxRight = new ComboBox();
         Paragraphs = new ObservableCollection<SubtitleDisplayItem>();
     }
 
@@ -184,15 +188,78 @@ public partial class VisualSyncViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void LeftOneSecondBack()
+    {
+        VideoPlayerControlLeft.Position = Math.Max(0, VideoPlayerControlLeft.Position - 1);
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void LeftOneSecondForward()
+    {
+        VideoPlayerControlLeft.Position = Math.Max(0, VideoPlayerControlLeft.Position + 1);
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void RightOneSecondBack()
+    {
+        VideoPlayerControlRight.Position = Math.Min(VideoPlayerControlRight.Duration, VideoPlayerControlRight.Position - 1);
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void RightOneSecondForward()
+    {
+        VideoPlayerControlRight.Position = Math.Min(VideoPlayerControlRight.Duration, VideoPlayerControlRight.Position + 1);
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void LeftHalfSecondBack()
+    {
+        VideoPlayerControlLeft.Position = Math.Max(0, VideoPlayerControlLeft.Position - 0.5);
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void LeftHalfSecondForward()
+    {
+        VideoPlayerControlLeft.Position = Math.Max(0, VideoPlayerControlLeft.Position + 0.5);
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void RightHalfSecondBack()
+    {
+        VideoPlayerControlRight.Position = Math.Min(VideoPlayerControlRight.Duration, VideoPlayerControlRight.Position - 0.5);
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void RightHalfSecondForward()
+    {
+        VideoPlayerControlRight.Position = Math.Min(VideoPlayerControlRight.Duration, VideoPlayerControlRight.Position + 0.5);
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
     private async Task PlayTwoSecondsAndBackLeft()
     {
         await PlayAndBack(VideoPlayerControlLeft, 2000);
+        _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
     private async Task PlayTwoSecondsAndBackRight()
     {
         await PlayAndBack(VideoPlayerControlRight, 2000);
+        _updateAudioVisualizer = true;
+    }
+
+    private void CenterWaveform(VideoPlayerControl videoPlayerControl, AudioVisualizer audioVisualizer)
+    {
+        audioVisualizer.StartPositionSeconds = Math.Max(0, videoPlayerControl.Position - 0.5);
     }
 
     [RelayCommand]
@@ -216,6 +283,7 @@ public partial class VisualSyncViewModel : ObservableObject
 
         SelectedParagraphLeftIndex = Paragraphs.IndexOf(s);
         VideoPlayerControlLeft.Position = s.Subtitle.StartTime.TotalSeconds;
+        CenterWaveform(VideoPlayerControlLeft, AudioVisualizerLeft);
         _updateAudioVisualizer = true;
     }
 
@@ -240,6 +308,7 @@ public partial class VisualSyncViewModel : ObservableObject
 
         SelectedParagraphRightIndex = Paragraphs.IndexOf(s);
         VideoPlayerControlRight.Position = s.Subtitle.StartTime.TotalSeconds;
+        CenterWaveform(VideoPlayerControlRight, AudioVisualizerRight);
         _updateAudioVisualizer = true;
     }
 
@@ -354,13 +423,17 @@ public partial class VisualSyncViewModel : ObservableObject
         videoPlayer.Position = originalPosition;
     }
 
-    internal void OnKeyDown(KeyEventArgs e)
+    private bool IsLeftFocused()
     {
-        if (e.Key == Key.Escape)
-        {
-            e.Handled = true;
-            Window?.Close();
-        }
+        return AudioVisualizerLeft.IsFocused ||
+               VideoPlayerControlLeft.IsFocused ||
+               ComboBoxLeft.IsFocused;
+    }
+    private bool IsRightFocused()
+    {
+        return AudioVisualizerRight.IsFocused ||
+               VideoPlayerControlRight.IsFocused ||
+               ComboBoxRight.IsFocused;
     }
 
     public void AudioVisualizerLeftPositionChanged(object sender, AudioVisualizer.PositionEventArgs e)
@@ -382,7 +455,8 @@ public partial class VisualSyncViewModel : ObservableObject
         VideoPlayerControlRight.VideoPlayerInstance.Close();
     }
 
-    internal void ComboBoxLeftChanged(object? sender, SelectionChangedEventArgs e)
+    [RelayCommand]
+    private void GoToLeftSubtitle()
     {
         var selectedIndex = SelectedParagraphLeftIndex;
         if (selectedIndex < 0)
@@ -393,10 +467,12 @@ public partial class VisualSyncViewModel : ObservableObject
         var selected = Paragraphs[selectedIndex];
         VideoPlayerControlLeft.Position = selected.Subtitle.StartTime.TotalSeconds;
         AudioVisualizerLeft.CurrentVideoPositionSeconds = selected.Subtitle.StartTime.TotalSeconds;
+        CenterWaveform(VideoPlayerControlLeft, AudioVisualizerLeft);
         _updateAudioVisualizer = true;
     }
 
-    internal void ComboBoxRightChanged(object? sender, SelectionChangedEventArgs e)
+    [RelayCommand]
+    private void GoToRightSubtitle()
     {
         var selectedIndex = SelectedParagraphRightIndex;
         if (selectedIndex < 0)
@@ -407,42 +483,126 @@ public partial class VisualSyncViewModel : ObservableObject
         var selected = Paragraphs[selectedIndex];
         VideoPlayerControlRight.Position = selected.Subtitle.StartTime.TotalSeconds;
         AudioVisualizerRight.CurrentVideoPositionSeconds = selected.Subtitle.StartTime.TotalSeconds;
+        CenterWaveform(VideoPlayerControlRight, AudioVisualizerRight);
         _updateAudioVisualizer = true;
     }
 
-    internal void OnLoaded()
+    private async Task WaitForPlayersReadyAsync(int timeoutMs = 2500)
+    {
+        var end = DateTime.UtcNow.AddMilliseconds(timeoutMs);
+        while (DateTime.UtcNow < end)
+        {
+            // Consider player ready when Duration is known (> 0)
+            var leftReady = VideoPlayerControlLeft.Duration > 0.001;
+            var rightReady = VideoPlayerControlRight.Duration > 0.001;
+
+            if (leftReady && rightReady)
+            {
+                break;
+            }
+
+            await Task.Delay(100);
+        }
+
+        // Small extra delay to ensure seeking is reliable
+        await Task.Delay(100);
+    }
+
+    internal async void OnLoaded()
     {
         if (string.IsNullOrEmpty(_videoFileName))
         {
             return;
         }
 
-        SelectedParagraphLeftIndex = 0;
-        SelectedParagraphRightIndex = Paragraphs.Count - 1;
+        // Wait a bit for video players to finish opening the file (or until they report a duration)
+        await WaitForPlayersReadyAsync();
 
-        var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
-        timer.Tick += (s, e) =>
+        Dispatcher.UIThread.Post(() =>
         {
-            var left = Paragraphs[SelectedParagraphLeftIndex];
-            if (VideoPlayerControlLeft.Position < left.Subtitle.StartTime.TotalSeconds - 0.1)
+            if (Paragraphs.Count == 0)
             {
-                VideoPlayerControlLeft.Position = left.Subtitle.StartTime.TotalSeconds;
-                AudioVisualizerLeft.CurrentVideoPositionSeconds = left.Subtitle.StartTime.TotalSeconds;
-                _updateAudioVisualizer = true;
                 return;
             }
 
-            var right = Paragraphs[SelectedParagraphRightIndex];
-            if (VideoPlayerControlRight.Position < right.Subtitle.StartTime.TotalSeconds - 0.1)
-            {
-                VideoPlayerControlRight.Position = right.Subtitle.StartTime.TotalSeconds;
-                AudioVisualizerRight.CurrentVideoPositionSeconds = right.Subtitle.StartTime.TotalSeconds;
-                _updateAudioVisualizer = true;
-                return;
-            }
+            SelectedParagraphLeftIndex = 0;
+            SelectedParagraphRightIndex = Paragraphs.Count - 1;
+            GoToLeftSubtitle();
+            GoToRightSubtitle();
+        });
+    }
 
-            timer.Stop();
-        };
-        timer.Start();
+    internal void OnKeyDownHandler(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            Window?.Close();
+        }
+
+        if (IsLeftFocused())
+        {
+            if (e.Key == Key.Space || (e.Key == Key.P && e.KeyModifiers.HasFlag(KeyModifiers.Control)))
+            {
+                e.Handled = true;
+                VideoPlayerControlLeft.TogglePlayPause();
+            }
+            else if (e.Key == Key.Left && e.KeyModifiers.HasFlag(KeyModifiers.Control))
+            {
+                e.Handled = true;
+                VideoPlayerControlLeft.Position = Math.Max(0, VideoPlayerControlLeft.Position - 1);
+                _updateAudioVisualizer = true;
+            }
+            else if (e.Key == Key.Right && e.KeyModifiers.HasFlag(KeyModifiers.Control))
+            {
+                e.Handled = true;
+                VideoPlayerControlLeft.Position += 1;
+                _updateAudioVisualizer = true;
+            }
+            else if (e.Key == Key.Left && e.KeyModifiers.HasFlag(KeyModifiers.Alt))
+            {
+                e.Handled = true;
+                VideoPlayerControlLeft.Position = Math.Max(0, VideoPlayerControlLeft.Position - 0.5);
+                _updateAudioVisualizer = true;
+            }
+            else if (e.Key == Key.Right && e.KeyModifiers.HasFlag(KeyModifiers.Alt))
+            {
+                e.Handled = true;
+                VideoPlayerControlLeft.Position += 0.5;
+                _updateAudioVisualizer = true;
+            }
+        }
+        else if (IsRightFocused())
+        {
+            if (e.Key == Key.Space || (e.Key == Key.P && e.KeyModifiers.HasFlag(KeyModifiers.Control)))
+            {
+                e.Handled = true;
+                VideoPlayerControlLeft.TogglePlayPause();
+            }
+            else if (e.Key == Key.Left && e.KeyModifiers.HasFlag(KeyModifiers.Control))
+            {
+                e.Handled = true;
+                VideoPlayerControlRight.Position = Math.Max(0, VideoPlayerControlRight.Position - 1);
+                _updateAudioVisualizer = true;
+            }
+            else if (e.Key == Key.Right && e.KeyModifiers.HasFlag(KeyModifiers.Control))
+            {
+                e.Handled = true;
+                VideoPlayerControlRight.Position += 1;
+                _updateAudioVisualizer = true;
+            }
+            else if (e.Key == Key.Left && e.KeyModifiers.HasFlag(KeyModifiers.Alt))
+            {
+                e.Handled = true;
+                VideoPlayerControlRight.Position = Math.Max(0, VideoPlayerControlRight.Position - 0.5);
+                _updateAudioVisualizer = true;
+            }
+            else if (e.Key == Key.Right && e.KeyModifiers.HasFlag(KeyModifiers.Alt))
+            {
+                e.Handled = true;
+                VideoPlayerControlRight.Position += 0.5;
+                _updateAudioVisualizer = true;
+            }
+        }
     }
 }

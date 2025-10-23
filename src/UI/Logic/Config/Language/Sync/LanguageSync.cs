@@ -10,6 +10,7 @@ public class LanguageSync
     public string FindText { get; set; }
     public string ResolutionXDurationYFrameRateZ { get; set; }
     public string StartSceneMustComeBeforeEndScene { get; set; }
+    public string GoToSubPos { get; set; }
 
     public LanguageSync()
     {
@@ -21,5 +22,6 @@ public class LanguageSync
         FindText = "Find text";
         ResolutionXDurationYFrameRateZ = "Resolution: {0}, duration: {1}, frame rate: {2}";
         StartSceneMustComeBeforeEndScene = "Start scene must come before end scene";
+        GoToSubPos = "Go to sub pos";
     }
 }
