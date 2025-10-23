@@ -16,6 +16,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
 using Avalonia;
+using System.Collections;
 
 namespace Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 
@@ -26,6 +27,13 @@ public partial class MultipleReplaceViewModel : ObservableObject
     [ObservableProperty] private MultipleReplaceFix? _selectedFix;
     [ObservableProperty] private RuleTreeNode? _selectedNode;
     [ObservableProperty] private bool _isEditPanelVisible;
+
+    // Expose a dedicated list property for the ComboBox ItemsSource
+    public ObservableCollection<MultipleReplaceTypeItem> RuleTypes { get; }
+
+    // Selected rule type for the ComboBox (two-way bound)
+    [ObservableProperty] private MultipleReplaceTypeItem? _selectedRuleType;
+
     public ObservableCollection<RuleTreeNode> Nodes { get; }
     public TreeView RulesTreeView { get; internal set; }
     public Window? Window { get; set; }
@@ -63,6 +71,40 @@ public partial class MultipleReplaceViewModel : ObservableObject
             new MultipleReplaceTypeItem(Se.Language.General.CaseSensitive, MultipleReplaceType.CaseSensitive),
             new MultipleReplaceTypeItem(Se.Language.General.RegularExpression, MultipleReplaceType.RegularExpression)
         ];
+        RuleTypes = ReplaceTypes; // bridge for ItemsSource expected by view
+    }
+
+    // Keep SelectedRuleType in sync with SelectedNode
+    partial void OnSelectedNodeChanged(RuleTreeNode? value)
+    {
+        if (value == null || value.IsCategory)
+        {
+            SelectedRuleType = null;
+            return;
+        }
+
+        var item = ReplaceTypes.FirstOrDefault(t => t.Type == value.Type);
+        SelectedRuleType = item;
+    }
+
+    partial void OnSelectedRuleTypeChanged(MultipleReplaceTypeItem? value)
+    {
+        if (value == null)
+        {
+            return;
+        }
+
+        var node = SelectedNode;
+        if (node == null || node.IsCategory)
+        {
+            return;
+        }
+
+        if (node.Type != value.Type)
+        {
+            node.Type = value.Type;
+            _dirty = true;
+        }
     }
 
     private void TimerReplaceElapsed(object? sender, ElapsedEventArgs e)

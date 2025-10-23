@@ -15,7 +15,21 @@ public partial class RuleTreeNode : ObservableObject
     [ObservableProperty] private bool _isCategory = false;
     [ObservableProperty] private string _iconName;
 
-    public MultipleReplaceType Type { get; set; }
+    private MultipleReplaceType _type;
+    public MultipleReplaceType Type
+    {
+        get => _type;
+        set
+        {
+            if (_type != value)
+            {
+                _type = value;
+                UpdateIconName();
+                OnPropertyChanged(nameof(Type));
+                OnPropertyChanged(nameof(SearchType));
+            }
+        }
+    }
 
     public RuleTreeNode? Parent { get; set; }
     
@@ -41,7 +55,7 @@ public partial class RuleTreeNode : ObservableObject
         Description = rule.Description;
         IsActive = rule.Active;
         IsCategory = false;
-        Type = rule.Type;
+        _type = rule.Type;
         IconName = string.Empty;
         Parent = parent;
         UpdateIconName();

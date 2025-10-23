@@ -277,9 +277,10 @@ public class MultipleReplaceWindow : Window
             Width = 200,
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Center,
-            [!ComboBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedNode)+ "." + nameof(RuleTreeNode.Type)) { Source = vm }
+            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.RuleTypes)) { Source = vm },
+            [!ComboBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedRuleType)) { Source = vm, Mode = BindingMode.TwoWay },
         };
-        comboBoxType.PropertyChanged += vm.RuleComboBoxChanged;
+        // no event handler needed; binding to SelectedRuleType updates RuleTreeNode.Type
         
         editGrid.Add(labelFind, 0, 0);
         editGrid.Add(textBoxFind, 1, 0);
