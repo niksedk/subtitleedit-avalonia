@@ -1,5 +1,5 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Core.NetflixQualityCheck;
+using Nikse.SubtitleEdit.Logic.NetflixQualityCheck;
 
 namespace Nikse.SubtitleEdit.Features.Tools.FixNetflixErrors;
 
