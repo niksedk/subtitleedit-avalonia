@@ -60,6 +60,10 @@ public partial class VisualSyncViewModel : ObservableObject
         ComboBoxLeft = new ComboBox();
         ComboBoxRight = new ComboBox();
         Paragraphs = new ObservableCollection<SubtitleDisplayItem>();
+
+        // Toggle play/pause on surface click
+        VideoPlayerControlLeft.SurfacePointerPressed += (_, __) => VideoPlayerControlLeft.TogglePlayPause();
+        VideoPlayerControlRight.SurfacePointerPressed += (_, __) => VideoPlayerControlRight.TogglePlayPause();
     }
 
     public void Initialize(
@@ -577,7 +581,7 @@ public partial class VisualSyncViewModel : ObservableObject
             if (e.Key == Key.Space || (e.Key == Key.P && e.KeyModifiers.HasFlag(KeyModifiers.Control)))
             {
                 e.Handled = true;
-                VideoPlayerControlLeft.TogglePlayPause();
+                VideoPlayerControlRight.TogglePlayPause();
             }
             else if (e.Key == Key.Left && e.KeyModifiers.HasFlag(KeyModifiers.Control))
             {

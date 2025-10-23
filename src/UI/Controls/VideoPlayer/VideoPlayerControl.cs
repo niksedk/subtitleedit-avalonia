@@ -4,6 +4,7 @@ using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -230,8 +231,8 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             Grid.SetRow(_gridProgress, 1);
             mainGrid.Children.Add(_gridProgress);
 
-            // Attach pointer moved handler to the main grid to capture all mouse movements
-            //mainGrid.PointerMoved += OnPointerMoved;
+            // Attach a tunnel handler so we see clicks even if child handles them.
+            mainGrid.AddHandler(InputElement.PointerPressedEvent, OnMainGridPointerPressed, RoutingStrategies.Tunnel, handledEventsToo: true);
 
             // Buttons
             var stackPanel = new StackPanel
@@ -420,6 +421,58 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
 
             // Attach keyboard event handler to detect keyboard activity
             this.KeyDown += OnKeyDown;
+        }
+
+        // Raised when the user clicks the video surface (row 0), not the controls row.
+        public event EventHandler<PointerPressedEventArgs>? SurfacePointerPressed;
+
+        // Enable/disable click-to-toggle behavior (default on)
+        public bool ClickToTogglePlay { get; set; } = true;
+
+        private void OnMainGridPointerPressed(object? sender, PointerPressedEventArgs e)
+        {
+            // Only act on left button presses
+            var props = e.GetCurrentPoint(this).Properties;
+            if (!props.IsLeftButtonPressed)
+            {
+                return;
+            }
+
+            // If the click is inside the controls row (_gridProgress), ignore it
+            var inControls = false;
+            try
+            {
+                var ptInControls = e.GetPosition(_gridProgress);
+                inControls =
+                    ptInControls.X >= 0 && ptInControls.Y >= 0 &&
+                    ptInControls.X <= _gridProgress.Bounds.Width &&
+                    ptInControls.Y <= _gridProgress.Bounds.Height;
+            }
+            catch
+            {
+                // ignore
+            }
+
+            if (inControls)
+            {
+                return;
+            }
+
+            // This is a click on the video surface
+            SurfacePointerPressed?.Invoke(this, e);
+
+            if (ClickToTogglePlay)
+            {
+                _videoPlayerInstance.PlayOrPause();
+                PlayPauseRequested?.Invoke();
+                e.Handled = true;
+            }
+
+            if (IsFullScreen)
+            {
+                // Consider this user activity for the auto-hide logic
+                OnUserActivity();
+            }
         }
 
         public event Action? PlayPauseRequested;
