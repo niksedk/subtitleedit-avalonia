@@ -1,284 +1,43 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Timers;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Platform;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Logic;
-using Nikse.SubtitleEdit.Logic.Compression;
-using Nikse.SubtitleEdit.Logic.Config;
-using Nikse.SubtitleEdit.Logic.Download;
-using Nikse.SubtitleEdit.Logic.Media;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.Forms.FixCommonErrors;
+using Nikse.SubtitleEdit.Features.Main;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Nikse.SubtitleEdit.Features.SpellCheck.FindDoubleWords;
 
 public partial class FindDoubleWordsViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<GetSpellCheckDictionaryDisplay> _dictionaries;
-    [ObservableProperty] private GetSpellCheckDictionaryDisplay? selectedDictionary;
-    [ObservableProperty] private string _description;
-    [ObservableProperty] private double _progress;
-    [ObservableProperty] private string _statusText;
-    [ObservableProperty] private bool _isDownloadEnabled;
-    [ObservableProperty] private bool _isProgressVisible;
-    [ObservableProperty] private double _progressOpacity;
+    [ObservableProperty] private ObservableCollection<DoubleWordItem> _subtitles;
+    [ObservableProperty] private DoubleWordItem? _selectedSubtitle;
+    [ObservableProperty] private bool _hasDoubleWords;
 
     public Window? Window { get; set; }
 
-    public bool OkPressed { get; private set; }
-    public string? DictionaryFileName { get; private set; }
+    public bool GoToPressed { get; private set; }
 
-    private Task? _downloadTask;
-    private bool _done;
-    private readonly System.Timers.Timer _timer;
-    private readonly CancellationTokenSource _cancellationTokenSource;
-    private readonly MemoryStream _downloadStream;
-
-    private readonly ISpellCheckDictionaryDownloadService _spellCheckDictionaryDownloadService;
-    private readonly IZipUnpacker _zipUnpacker;
-    private readonly IFolderHelper _folderHelper;
-
-    public FindDoubleWordsViewModel(ISpellCheckDictionaryDownloadService spellCheckDictionaryDownloadService, IZipUnpacker zipUnpacker, IFolderHelper folderHelper)
+    public FindDoubleWordsViewModel()
     {
-        _spellCheckDictionaryDownloadService = spellCheckDictionaryDownloadService;
-        _zipUnpacker = zipUnpacker;
-        _folderHelper = folderHelper;
-
-        Dictionaries = new ObservableCollection<GetSpellCheckDictionaryDisplay>();
-        SelectedDictionary = null;
-        Description = string.Empty;
-        IsDownloadEnabled = true;
-        IsProgressVisible = false;
-        StatusText = string.Empty;
-        DictionaryFileName = string.Empty;
-
-        _cancellationTokenSource = new CancellationTokenSource();
-        _downloadStream = new MemoryStream();
-        _progressOpacity = 0;
-
-        LoadDictionaries();
-        _timer = new System.Timers.Timer(500);
-        _timer.Elapsed += OnTimerOnElapsed;
-        _timer.Start();
-    }
-
-    private readonly Lock _lockObj = new();
-
-    private void OnTimerOnElapsed(object? sender, ElapsedEventArgs args)
-    {
-        lock (_lockObj)
-        {
-            if (_done)
-            {
-                return;
-            }
-
-            if (_downloadTask is { IsCompleted: true })
-            {
-                _timer.Stop();
-                _done = true;
-
-                if (_downloadStream.Length == 0)
-                {
-                    StatusText = "Download failed";
-                    return;
-                }
-
-                DictionaryFileName = UnpackDictionary();
-                OkPressed = true;
-                Close();
-            }
-            else if (_downloadTask is { IsFaulted: true })
-            {
-                _timer.Stop();
-                _done = true;
-                var ex = _downloadTask.Exception?.InnerException ?? _downloadTask.Exception;
-                if (ex is OperationCanceledException)
-                {
-                    StatusText = "Download canceled";
-                    Close();
-                }
-                else
-                {
-                    StatusText = "Download failed";
-                }
-            }
-        }
-    }
-
-    private void Close()
-    {
-        Dispatcher.UIThread.Post(() =>
-        {
-            Window?.Close();
-        });
-    }
-
-    private string? UnpackDictionary()
-    {
-        var folder = Se.DictionariesFolder;
-
-        if (!Directory.Exists(folder))
-        {
-            Directory.CreateDirectory(folder);
-        }
-
-        var outputFileNames = new List<string>();
-
-        _downloadStream.Position = 0;
-        _zipUnpacker.UnpackZipStream(
-            _downloadStream,
-            folder,
-            string.Empty,
-            true,
-            new List<string> { ".dic", ".aff" },
-            outputFileNames);
-
-        _downloadStream.Dispose();
-        
-        var dicFiles = outputFileNames.Where(p=>p.EndsWith(".dic")).ToList();
-        if (dicFiles.Count == 0)
-        {
-            return string.Empty;
-        }
-
-        var largestFileSize = (long)-1;
-        var largestFileName = string.Empty;
-
-        foreach (var file in dicFiles)
-        {
-            var fi = new FileInfo(file);
-            if (fi.Length > largestFileSize)
-            {
-                largestFileSize = fi.Length;
-                largestFileName = file;
-            }
-        }
-
-        return largestFileName;
-    }
-
-    private void LoadDictionaries()
-    {
-        var uri = new Uri("avares://SubtitleEdit/Assets/HunspellDictionaries.json");
-        using var stream = AssetLoader.Open(uri);
-        using var reader = new StreamReader(stream);
-
-        var jsonContent = reader.ReadToEndAsync().Result;
-
-        var options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
-
-        var dictionaries = JsonSerializer.Deserialize<List<GetSpellCheckDictionaryDisplay>>(jsonContent, options);
-        foreach (var dictionary in dictionaries ?? new List<GetSpellCheckDictionaryDisplay>())
-        {
-            Dictionaries.Add(dictionary);
-        }
-
-        var englishName = CultureInfo.CurrentCulture.EnglishName;
-        if (englishName.Contains('(') && englishName.Contains(')'))
-        {
-            var start = englishName.IndexOf('(') + 1;
-            var end = englishName.IndexOf(')');
-            englishName = englishName.Substring(start, end - start).Trim();
-        }
-
-        var selected = Dictionaries.FirstOrDefault(d => d.EnglishName.Contains(englishName, StringComparison.OrdinalIgnoreCase) ||
-                                                        d.NativeName.Contains(englishName, StringComparison.OrdinalIgnoreCase));
-        if (selected == null)
-        {
-            if (LanguageHelper.CountryToLanguage.TryGetValue(englishName.ToLower(), out var languageName))
-            {
-                selected = Dictionaries.FirstOrDefault(d => d.EnglishName.Equals(languageName, StringComparison.OrdinalIgnoreCase) ||
-                                                            d.NativeName.Equals(languageName, StringComparison.OrdinalIgnoreCase));
-            }
-        }
-
-        if (selected != null)
-        {
-            SelectedDictionary = selected;
-            Description = selected.Description;
-        }
-        else
-        {
-            SelectedDictionary = Dictionaries.FirstOrDefault();
-            Description = string.Empty;
-        }
+        Subtitles = new ObservableCollection<DoubleWordItem>();
     }
 
     [RelayCommand]
-    private void Download()
+    private void GoTo()
     {
-        var selected = SelectedDictionary;
-        if (selected == null)
-        {
-            return;
-        }
-
-        ProgressOpacity = 1.0;
-        IsDownloadEnabled = false;
-        IsProgressVisible = true;
-        Progress = 0;
-
-        var downloadProgress = new Progress<float>(number =>
-        {
-            var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
-            var pctString = percentage.ToString(CultureInfo.InvariantCulture);
-            Progress = percentage;
-            StatusText = $"Downloading... {pctString}%";
-        });
-
-        var folder = Se.FfmpegFolder;
-        if (!Directory.Exists(folder))
-        {
-            Directory.CreateDirectory(folder);
-        }
-
-        _downloadTask = _spellCheckDictionaryDownloadService.DownloadDictionary(
-            _downloadStream,
-            selected.DownloadLink,
-            downloadProgress,
-            _cancellationTokenSource.Token);
-    }
-
-    [RelayCommand]
-    private async Task OpenFolder()
-    {
-        if (!Directory.Exists(Se.DictionariesFolder))
-        {
-            Directory.CreateDirectory(Se.DictionariesFolder);
-        }
-
-        await _folderHelper.OpenFolder(Window!, Se.DictionariesFolder);
-    }
-
-    [RelayCommand]
-    private void Ok()
-    {
-        _timer.Stop();
-        Close();
+        GoToPressed = true;
+        Window?.Close();
     }
 
     [RelayCommand]
     private void Cancel()
     {
-        _cancellationTokenSource.Cancel();
-        _timer.Stop();
-        _done = true;
-        Close();
+        Window?.Close();
     }
 
     internal void OnKeyDown(KeyEventArgs e)
@@ -286,7 +45,94 @@ public partial class FindDoubleWordsViewModel : ObservableObject
         if (e.Key == Key.Escape)
         {
             e.Handled = true;
-            Close();
+            Window?.Close();
+        }
+    }
+
+    internal void Initialize(List<SubtitleLineViewModel> subtitleLineViewModels)
+    {
+        foreach (var subtitleLine in subtitleLineViewModels)
+        {
+            var doubleWord = GetDoubleWordMatch(subtitleLine.Text);
+            if (!string.IsNullOrEmpty(doubleWord))
+            {
+                Subtitles.Add(new DoubleWordItem(subtitleLine, doubleWord));
+            }
+        }
+
+        HasDoubleWords = SelectedSubtitle != null;
+    }
+
+    private string GetDoubleWordMatch(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            return string.Empty;
+        }
+
+        // Remove HTML/ASSA formatting
+        var text = HtmlUtil.RemoveHtmlTags(input, true);
+
+        // Split into words
+        var separators = new[] { ' ', '\t', '\r', '\n' };
+        var words = text.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+
+        string? prev = null;
+        for (var i = 0; i < words.Length; i++)
+        {
+            var word = words[i];
+            if (!IsAllLetters(word))
+            {
+                prev = word;
+                continue;
+            }
+
+            if (string.IsNullOrWhiteSpace(word))
+            {
+                prev = word;
+                continue;
+            }
+
+            if (prev != null && string.Equals(prev, word, StringComparison.OrdinalIgnoreCase))
+            {
+                return word;
+            }
+
+            prev = word;
+        }
+
+        return string.Empty;
+    }
+
+    private static bool IsAllLetters(string word)
+    {
+        foreach (var c in word)
+        {
+            if (!char.IsLetter(c))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    internal void GridSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        HasDoubleWords = SelectedSubtitle != null;
+    }
+
+    internal void OnBookmarksGridDoubleTapped(object? sender, TappedEventArgs e)
+    {
+        Dispatcher.UIThread.Invoke(GoTo);
+    }
+
+    internal void GridKeyDown(KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            e.Handled = true;
+            GoTo();
         }
     }
 }

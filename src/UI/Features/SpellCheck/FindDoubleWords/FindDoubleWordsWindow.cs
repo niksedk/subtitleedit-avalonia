@@ -1,153 +1,109 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
-using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
 
 namespace Nikse.SubtitleEdit.Features.SpellCheck.FindDoubleWords;
 
 public class FindDoubleWordsWindow : Window
 {
-    private readonly FindDoubleWordsViewModel _vm;
-
     public FindDoubleWordsWindow(FindDoubleWordsViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = Se.Language.SpellCheck.GetDictionariesTitle;
-        SizeToContent = SizeToContent.WidthAndHeight;
-        CanResize = false;
-
-        _vm = vm;
+        Title = Se.Language.General.DoubleWords;
+        CanResize = true;
+        Width = 600;
+        Height = 700;
+        MinWidth = 600;
+        MinHeight = 400;
         vm.Window = this;
         DataContext = vm;
 
-        var label = new Label
-        {
-            Content = Se.Language.SpellCheck.GetDictionaryInstructions,
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(0, 10, 0, 0),
-        };
-
-        var combo = new ComboBox
-        {
-            ItemsSource = vm.Dictionaries,
-            VerticalAlignment = VerticalAlignment.Center,
-            MinWidth = 180,
-            Margin = new Thickness(0, 10, 10, 2),
-            [!ComboBox.IsEnabledProperty] = new Binding(nameof(vm.IsDownloadEnabled)),
-            [!ComboBox.SelectedValueProperty] = new Binding(nameof(vm.SelectedDictionary)),
-        };
-
-        var buttonDownload = UiUtil
-            .MakeButton(Se.Language.General.Download, vm.DownloadCommand)
-            .WithLeftAlignment()
-            .WithMargin(0, 10, 10, 2)
-            .WithBindEnabled(nameof(vm.IsDownloadEnabled));
-
-        var panelDownload = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            VerticalAlignment = VerticalAlignment.Center,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Children =
-            {
-                combo,
-                buttonDownload
-            }
-        };
-
-        var labelDescription = new Label
-        {
-            Content = "Description:",
-            VerticalAlignment = VerticalAlignment.Center,
-            [!Label.ContentProperty] = new Binding(nameof(vm.SelectedDictionary) + "." + nameof(vm.Description)),
-        };
-
-        var sliderProgress = new Slider
-        {
-            Minimum = 0,
-            Maximum = 100,
-            IsHitTestVisible = false,
-            Focusable = false,
-            MinWidth = 400,
-            Styles =
-            {
-                new Style(x => x.OfType<Thumb>())
-                {
-                    Setters =
-                    {
-                        new Setter(Thumb.IsVisibleProperty, false)
-                    }
-                },
-                new Style(x => x.OfType<Track>())
-                {
-                    Setters =
-                    {
-                        new Setter(Track.HeightProperty, 6.0)
-                    }
-                },
-            },
-            [!Slider.OpacityProperty] = new Binding(nameof(vm.ProgressOpacity)),
-            [!Slider.ValueProperty] = new Binding(nameof(vm.Progress)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
-        };
-
-        var labelDownloadStatus = new Label
-        {
-            VerticalAlignment = VerticalAlignment.Center,
-            HorizontalAlignment = HorizontalAlignment.Center,
-            Width = double.NaN,
-            Margin = new Thickness(0, 20, 0, 20),
-            [!Label.ContentProperty] = new Binding(nameof(vm.StatusText)),
-            [!Label.IsVisibleProperty] = new Binding(nameof(vm.IsProgressVisible)),
-        };
-
-        var linkOpenFolder = UiUtil.MakeLink(Se.Language.General.OpenDictionaryFolder, vm.OpenFolderCommand);
-
-        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
-        buttonOk.WithBindIsVisible(nameof(vm.IsDownloadEnabled));
-        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        buttonCancel.WithBindIsVisible(nameof(vm.IsProgressVisible));
-        var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
+        var buttonGoTo = UiUtil.MakeButton(Se.Language.General.GoTo, vm.GoToCommand).WithBindIsEnabled(nameof(vm.HasDoubleWords));
+        var buttonCancel = UiUtil.MakeButtonDone(vm.CancelCommand);
+        var panelButtons = UiUtil.MakeButtonBar(buttonGoTo, buttonCancel);
 
         var grid = new Grid
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
+            ColumnSpacing = 10,
+            RowSpacing = 10,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(label, 0, 0);
-        grid.Add(panelDownload, 1, 0);
-        grid.Add(labelDescription, 2, 0);
-        grid.Add(sliderProgress, 3, 0);
-        grid.Add(labelDownloadStatus, 3, 0);
-        grid.Add(linkOpenFolder, 4, 0);
-        grid.Add(panelButtons, 4, 0);
+        grid.Add(MakeGridView(vm), 0);
+        grid.Add(panelButtons, 1);
 
         Content = grid;
 
-        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        Activated += delegate { buttonCancel.Focus(); }; // hack to make OnKeyDown work
+
+        KeyDown += (s, e) => vm.OnKeyDown(e);
     }
 
-    protected override void OnKeyDown(KeyEventArgs e)
+    private static Border MakeGridView(FindDoubleWordsViewModel vm)
     {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        var dataGrid = new DataGrid
+        {
+            Height = double.NaN, // auto size inside scroll viewer
+            Margin = new Thickness(2),
+            ItemsSource = vm.Subtitles, // Use ItemsSource instead of Items
+            CanUserSortColumns = false,
+            IsReadOnly = true,
+            SelectionMode = DataGridSelectionMode.Extended,
+            DataContext = vm.Subtitles,
+        };
+
+        dataGrid.DoubleTapped += vm.OnBookmarksGridDoubleTapped;
+
+        var fullTimeConverter = new TimeSpanToDisplayFullConverter();
+        var shortTimeConverter = new TimeSpanToDisplayShortConverter();
+
+        // Columns
+        dataGrid.Columns.Add(new DataGridTextColumn
+        {
+            Header = Se.Language.General.NumberSymbol,
+            Binding = new Binding(nameof(DoubleWordItem.Number)),
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
+        });
+        dataGrid.Columns.Add(new DataGridTextColumn
+        {
+            Header = Se.Language.General.Text,
+            Binding = new Binding(nameof(DoubleWordItem.Text)),
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
+            Width = new DataGridLength(1, DataGridLengthUnitType.Star) // star sizing to take all available space
+        });
+        dataGrid.Columns.Add(new DataGridTextColumn
+        {
+            Header = Se.Language.General.DoubleWords,
+            Binding = new Binding(nameof(DoubleWordItem.Hit)),
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
+            Width = new DataGridLength(1, DataGridLengthUnitType.Star) // star sizing to take all available space
+        });
+
+        dataGrid.DataContext = vm.Subtitles;
+        dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedSubtitle))
+        {
+            Source = vm,
+            Mode = BindingMode.TwoWay
+        });
+        dataGrid.SelectionChanged += vm.GridSelectionChanged;
+        dataGrid.DoubleTapped += (s, e) => vm.GoToCommand.Execute(null);
+        dataGrid.KeyDown += (s, e) => vm.GridKeyDown(e);
+
+        return UiUtil.MakeBorderForControlNoPadding(dataGrid);
     }
 }

@@ -2397,8 +2397,8 @@ public partial class MainViewModel :
         }
 
         var viewModel = await _windowService.ShowDialogAsync<FixNetflixErrorsWindow, FixNetflixErrorsViewModel>(Window!,
-            vm => 
-            { 
+            vm =>
+            {
                 vm.Initialize(GetUpdateSubtitle(), _videoFileName ?? string.Empty);
             });
 
@@ -2651,8 +2651,8 @@ public partial class MainViewModel :
         var word = EditTextBox.SelectedText;
         var dictionaries = _spellCheckManager.GetDictionaryLanguages(Se.DictionariesFolder);
         var language = LanguageAutoDetect.AutoDetectGoogleLanguage(GetUpdateSubtitle());
-        var selectedDictionary = dictionaries.FirstOrDefault(p => p.GetFiveLetterLanguageName().Contains(language)); 
-        
+        var selectedDictionary = dictionaries.FirstOrDefault(p => p.GetFiveLetterLanguageName().Contains(language));
+
         var result = await _windowService.ShowDialogAsync<AddToNamesListWindow, AddToNamesListViewModel>(Window, vm =>
         {
             vm.Initialize(word, dictionaries, selectedDictionary);
@@ -2660,7 +2660,7 @@ public partial class MainViewModel :
 
         _shortcutManager.ClearKeys();
     }
-    
+
     [RelayCommand]
     private async Task ShowFindDoubleWords()
     {
@@ -2671,11 +2671,14 @@ public partial class MainViewModel :
 
         var result = await _windowService.ShowDialogAsync<FindDoubleWordsWindow, FindDoubleWordsViewModel>(Window, vm =>
         {
+            vm.Initialize(Subtitles.ToList());
         });
+
+        
 
         _shortcutManager.ClearKeys();
     }
-    
+
     [RelayCommand]
     private async Task ShowSpellCheckDictionaries()
     {
@@ -3586,7 +3589,7 @@ public partial class MainViewModel :
             ShowSubtitleNotLoadedMessage();
             return;
         }
-        
+
         var list = new List<SubtitleLineViewModel>();
         foreach (var s in Subtitles)
         {
@@ -3640,7 +3643,7 @@ public partial class MainViewModel :
 
         _shortcutManager.ClearKeys();
     }
-    
+
     [RelayCommand]
     private void GoToNextError()
     {

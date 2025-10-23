@@ -465,6 +465,7 @@ public class LanguageGeneral
     public string Play { get; set; }
     public string ShowHistory { get; set; }
     public string SelectedAFolderToSaveTo { get; set; }
+    public string DoubleWords { get; set; }
 
     public LanguageGeneral()
     {
@@ -926,5 +927,6 @@ public class LanguageGeneral
         Play = "Play";
         ShowHistory = "Show history";
         SelectedAFolderToSaveTo = "Selected a folder to save to";
+        DoubleWords = "Double words";
     }
 }
