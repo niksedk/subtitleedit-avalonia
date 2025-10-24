@@ -72,6 +72,7 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
 
     private readonly IWindowService _windowService;
     private readonly IFileHelper _fileHelper;
+    private FfmpegMediaInfo2? _mediaInfo;
 
     public FixNetflixErrorsViewModel(IWindowService windowService, IFileHelper fileHelper)
     {
@@ -93,6 +94,12 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
     {
         _subtitle = subtitle;
         _videoFileName = videoFileName;
+
+        _ = Task.Run(() =>
+        {
+            _mediaInfo = FfmpegMediaInfo2.Parse(videoFileName);
+        });
+
         LoadSettings();
         LoadChecks();
         SetDirty();
@@ -258,7 +265,7 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
         var controller = new NetflixQualityController
         {
             Language = SelectedLanguage?.Code ?? "en",
-            FrameRate = Configuration.Settings.General.CurrentFrameRate,
+            FrameRate = (double)(_mediaInfo?.FramesRate ?? (decimal)Configuration.Settings.General.CurrentFrameRate),
         };
 
         controller.RunChecks(_subtitle, selectedChecks);

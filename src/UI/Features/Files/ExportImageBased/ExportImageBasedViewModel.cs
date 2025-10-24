@@ -569,7 +569,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         {
             _ = Task.Run(() =>
             {
-                var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
+                var mediaInfo = FfmpegMediaInfo2.Parse(videoFileName);
                 if (mediaInfo?.Dimension is { Width: > 0, Height: > 0 })
                 {
                     var resolutionItem = new ResolutionItem(string.Empty, mediaInfo.Dimension.Width,
@@ -1238,7 +1238,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
 
                 _ = Task.Run(() =>
                 {
-                    var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
+                    var mediaInfo = FfmpegMediaInfo2.Parse(videoFileName);
                     if (mediaInfo?.Dimension is { Width: > 0, Height: > 0 })
                     {
                         var resolutionItem = new ResolutionItem(string.Empty, mediaInfo.Dimension.Width,

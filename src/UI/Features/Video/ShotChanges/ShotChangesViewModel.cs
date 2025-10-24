@@ -50,7 +50,7 @@ public partial class ShotChangesViewModel : ObservableObject
     private Process? _ffmpegProcess;
     private readonly System.Timers.Timer _timerGenerate;
     private bool _doAbort;
-    private FfmpegMediaInfo? _mediaInfo;
+    private FfmpegMediaInfo2? _mediaInfo;
     private Lock TimeCodesLock = new Lock();
     private TimeCode? _duration;
     private double _frameRate;
@@ -508,7 +508,7 @@ public partial class ShotChangesViewModel : ObservableObject
 
         _ = Task.Run(() =>
         {
-            _mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
+            _mediaInfo = FfmpegMediaInfo2.Parse(videoFileName);
             Dispatcher.UIThread.Post(() =>
             {
                 _duration = _mediaInfo.Duration;

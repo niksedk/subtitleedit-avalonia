@@ -27,7 +27,7 @@ public class NetflixCheckMinDuration : INetflixQualityChecker
             var next = subtitle.GetParagraphOrDefault(index + 1);
             if (p.DurationTotalMilliseconds < 833 && !p.StartTime.IsMaxTime)
             {
-                Paragraph fixedParagraph = null;
+                Paragraph? fixedParagraph = null;
                 if (next == null || next.StartTime.TotalMilliseconds > p.StartTime.TotalMilliseconds + 834)
                 {
                     // we can fix duration

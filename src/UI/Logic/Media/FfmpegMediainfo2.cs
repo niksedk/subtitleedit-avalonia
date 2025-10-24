@@ -1,4 +1,5 @@
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -32,16 +33,15 @@ public class FfmpegMediaInfo2
     {
         if (Configuration.IsRunningOnWindows)
         {
-            if (string.IsNullOrEmpty(Configuration.Settings.General.FFmpegLocation) ||
-                !File.Exists(Configuration.Settings.General.FFmpegLocation))
+            if (string.IsNullOrEmpty(Se.Settings.General.FfmpegPath) ||
+                !File.Exists(Se.Settings.General.FfmpegPath))
             {
                 return new FfmpegMediaInfo2();
             }
         }
 
         var log = GetFfmpegLog(videoFileName);
-        
-        
+
         return ParseLog(log);
     }
 
@@ -163,7 +163,9 @@ public class FfmpegMediaInfo2
         foreach (var known in knownRates)
         {
             if (Math.Abs(frameRate - known) < tolerance)
+            {
                 return (decimal)known;
+            }
         }
 
         // Not close to any known frame rate, return as-is

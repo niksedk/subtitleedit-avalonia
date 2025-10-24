@@ -178,7 +178,7 @@ public partial class AssaPropertiesViewModel : ObservableObject
                 return;
             }
 
-            var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
+            var mediaInfo = FfmpegMediaInfo2.Parse(videoFileName);
             VideoWidth = mediaInfo.Dimension.Width;
             VideoHeight = mediaInfo.Dimension.Height;
         }
@@ -194,7 +194,7 @@ public partial class AssaPropertiesViewModel : ObservableObject
     {
         _ = Task.Run(() =>
         {
-            var mediaInfo = FfmpegMediaInfo.Parse(_videoFileName);
+            var mediaInfo = FfmpegMediaInfo2.Parse(_videoFileName);
             if (mediaInfo?.Dimension is { Width: > 0, Height: > 0 })
             {
                 var resolutionItem = new ResolutionItem(string.Empty, mediaInfo.Dimension.Width, mediaInfo.Dimension.Height);
