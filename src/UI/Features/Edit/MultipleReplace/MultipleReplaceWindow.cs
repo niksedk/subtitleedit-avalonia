@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -109,7 +108,7 @@ public class MultipleReplaceWindow : Window
                 {
                     var label = UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.CategoryName));
                     label.FontWeight = FontWeight.Bold;
-                    
+
                     var buttonCategoryActions = new Button
                     {
                         HorizontalAlignment = HorizontalAlignment.Left,
@@ -136,11 +135,11 @@ public class MultipleReplaceWindow : Window
                         Width = double.NaN,
                         HorizontalAlignment = HorizontalAlignment.Stretch,
                     };
-                    
-                    gridCategory.Add(checkBox, 0,0);
-                    gridCategory.Add(label, 0, 1);                    
-                    gridCategory.Add(buttonCategoryActions, 0, 2);                    
-                    
+
+                    gridCategory.Add(checkBox, 0, 0);
+                    gridCategory.Add(label, 0, 1);
+                    gridCategory.Add(buttonCategoryActions, 0, 2);
+
                     return gridCategory;
                 }
 
@@ -260,17 +259,17 @@ public class MultipleReplaceWindow : Window
             [!TextBox.TextProperty] = new Binding(nameof(vm.SelectedNode) + "." + nameof(RuleTreeNode.Find)) { Source = vm }
         };
         textBoxFind.TextChanged += vm.RuleTextChanged;
-        
+
         var labelReplaceWith = UiUtil.MakeLabel(Se.Language.General.ReplaceWith);
         var textBoxReplaceWith = new TextBox
         {
             Width = 200,
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Center,
-            [!TextBox.TextProperty] = new Binding(nameof(vm.SelectedNode)+ "." + nameof(RuleTreeNode.ReplaceWith)) { Source = vm }
+            [!TextBox.TextProperty] = new Binding(nameof(vm.SelectedNode) + "." + nameof(RuleTreeNode.ReplaceWith)) { Source = vm }
         };
         textBoxReplaceWith.TextChanged += vm.RuleTextChanged;
-        
+
         var labelType = UiUtil.MakeLabel(Se.Language.General.Type);
         var comboBoxType = new ComboBox
         {
@@ -281,16 +280,16 @@ public class MultipleReplaceWindow : Window
             [!ComboBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedRuleType)) { Source = vm, Mode = BindingMode.TwoWay },
         };
         // no event handler needed; binding to SelectedRuleType updates RuleTreeNode.Type
-        
+
         editGrid.Add(labelFind, 0, 0);
         editGrid.Add(textBoxFind, 1, 0);
-        
+
         editGrid.Add(labelReplaceWith, 0, 2);
         editGrid.Add(textBoxReplaceWith, 1, 2);
-        
+
         editGrid.Add(labelType, 0, 3);
         editGrid.Add(comboBoxType, 1, 4);
-        
+
         var dataGrid = new DataGrid
         {
             AutoGenerateColumns = false,
@@ -348,7 +347,7 @@ public class MultipleReplaceWindow : Window
             },
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedFix)) { Source = vm });
-        
+
         var gridFixes = new Grid
         {
             RowDefinitions =
@@ -361,9 +360,9 @@ public class MultipleReplaceWindow : Window
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
         };
-        gridFixes.Add(editGrid,0,0);
-        gridFixes.Add(dataGrid,1,0);
-        
+        gridFixes.Add(editGrid, 0, 0);
+        gridFixes.Add(dataGrid, 1, 0);
+
         var border = new Border
         {
             BorderThickness = new Thickness(1),

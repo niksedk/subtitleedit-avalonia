@@ -207,8 +207,8 @@ public class NetflixQualityController
         public string TimeCode { get; set; }
         public string Context { get; set; }
         public string Comment { get; set; }
-        public Paragraph OriginalParagraph { get; set; }
-        public Paragraph FixedParagraph { get; set; }
+        public Paragraph? OriginalParagraph { get; set; }
+        public Paragraph? FixedParagraph { get; set; }
 
         public Record()
         {
@@ -245,24 +245,15 @@ public class NetflixQualityController
     public NetflixQualityController()
     {
         Records = new List<Record>();
+        VideoFileName = string.Empty;
     }
 
-    public void AddRecord(Paragraph originalParagraph, string timeCode, string context, string comment)
+    public void AddRecord(Paragraph? originalParagraph, string timeCode, string context, string comment)
     {
-        Records.Add(new Record(originalParagraph?.Number.ToString(CultureInfo.InvariantCulture), timeCode, context, comment) { OriginalParagraph = originalParagraph });
+        Records.Add(new Record(originalParagraph?.Number.ToString(CultureInfo.InvariantCulture) ?? string.Empty, timeCode, context, comment) { OriginalParagraph = originalParagraph });
     }
 
-    public void AddRecord(Paragraph originalParagraph, string comment)
-    {
-        Records.Add(new Record
-        {
-            LineNumber = originalParagraph?.Number.ToString(CultureInfo.InvariantCulture),
-            Comment = comment,
-            OriginalParagraph = originalParagraph,
-            TimeCode = originalParagraph.StartTime.ToDisplayString()
-        });
-    }
-    public void AddRecord(Paragraph originalParagraph, Paragraph fixedParagraph, string comment, string context = "")
+    public void AddRecord(Paragraph? originalParagraph, Paragraph? fixedParagraph, string comment, string context = "")
     {
         Records.Add(new Record
         {
@@ -270,8 +261,8 @@ public class NetflixQualityController
             Context = context,
             OriginalParagraph = originalParagraph,
             FixedParagraph = fixedParagraph,
-            LineNumber = originalParagraph?.Number.ToString(CultureInfo.InvariantCulture),
-            TimeCode = originalParagraph?.StartTime.ToDisplayString()
+            LineNumber = originalParagraph?.Number.ToString(CultureInfo.InvariantCulture) ?? string.Empty,
+            TimeCode = originalParagraph?.StartTime.ToDisplayString() ?? string.Empty,
         });
     }
 

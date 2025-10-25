@@ -112,7 +112,7 @@ public partial class ReEncodeVideoViewModel : ObservableObject
             VideoFileSize = Utilities.FormatBytesToDisplayFileSize(new FileInfo(videoFileName).Length);
             _ = Task.Run(() =>
             {
-                var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
+                var mediaInfo = FfmpegMediaInfo2.Parse(videoFileName);
                 Dispatcher.UIThread.Post(() =>
                 {
 #pragma warning disable CS8073 // The result of the expression is always the same since a value of this type is never equal to 'null'
@@ -377,7 +377,7 @@ public partial class ReEncodeVideoViewModel : ObservableObject
                 return;
             }
 
-            var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
+            var mediaInfo = FfmpegMediaInfo2.Parse(videoFileName);
             VideoWidth = mediaInfo.Dimension.Width;
             VideoHeight = mediaInfo.Dimension.Height;
             UseSourceResolution = false;

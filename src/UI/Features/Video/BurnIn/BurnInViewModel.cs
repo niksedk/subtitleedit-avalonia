@@ -111,7 +111,7 @@ public partial class BurnInViewModel : ObservableObject
     private readonly Timer _timerGenerate;
     private bool _doAbort;
     private int _jobItemIndex = -1;
-    private FfmpegMediaInfo? _mediaInfo;
+    private FfmpegMediaInfo2? _mediaInfo;
     private SubtitleFormat? _subtitleFormat;
     private string _inputVideoFileName;
     private List<BurnInEffectItem> _selectedEffects;
@@ -242,7 +242,7 @@ public partial class BurnInViewModel : ObservableObject
             VideoFileSize = Utilities.FormatBytesToDisplayFileSize(new FileInfo(videoFileName).Length);
             _ = Task.Run(() =>
             {
-                _mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
+                _mediaInfo = FfmpegMediaInfo2.Parse(videoFileName);
                 Dispatcher.UIThread.Post(() =>
                 {
                     VideoWidth = _mediaInfo.Dimension.Width;
@@ -717,7 +717,7 @@ public partial class BurnInViewModel : ObservableObject
             File.WriteAllText(subtitleFileName, srt.ToText(subtitle, string.Empty));
         }
 
-        _mediaInfo = FfmpegMediaInfo.Parse(VideoFileName);
+        _mediaInfo = FfmpegMediaInfo2.Parse(VideoFileName);
         VideoWidth = _mediaInfo.Dimension.Width;
         VideoHeight = _mediaInfo.Dimension.Height;
 
@@ -1023,7 +1023,7 @@ public partial class BurnInViewModel : ObservableObject
                 return;
             }
 
-            var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
+            var mediaInfo = FfmpegMediaInfo2.Parse(videoFileName);
             VideoWidth = mediaInfo.Dimension.Width;
             VideoHeight = mediaInfo.Dimension.Height;
             UseSourceResolution = false;

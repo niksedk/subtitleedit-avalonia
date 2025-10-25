@@ -468,6 +468,8 @@ public class LanguageGeneral
     public string DoubleWords { get; set; }
     public string OneSecondBack { get; set; }
     public string OneSecondForward { get; set; }
+    public string SetVideoOffset { get; set; }
+    public string VideoOffset { get; set; }
 
     public LanguageGeneral()
     {
@@ -932,5 +934,7 @@ public class LanguageGeneral
         DoubleWords = "Double words";
         OneSecondBack = "One second back";
         OneSecondForward = "One second";
+        SetVideoOffset =  "Set video offset";
+        VideoOffset =  "Video offset";
     }
 }

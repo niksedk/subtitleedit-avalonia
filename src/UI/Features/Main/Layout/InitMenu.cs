@@ -475,6 +475,11 @@ public static class InitMenu
                             Header = Se.Language.Video.CutVideoDotDotDot,
                             Command = vm.VideoCutCommand,
                         },
+                        new MenuItem
+                        {
+                            Header = l.SetVideoOffset,
+                            Command = vm.ShowVideoSetOffsetCommand,
+                        },
                     }
                 },
             },

@@ -93,6 +93,7 @@ using Nikse.SubtitleEdit.Logic.Initializers;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
 using ReviewSpeechViewModel = Nikse.SubtitleEdit.Features.Video.TextToSpeech.ReviewSpeech.ReviewSpeechViewModel;
+using SetVideoOffsetViewModel = Nikse.SubtitleEdit.Features.Shared.SetVideoOffset.SetVideoOffsetViewModel;
 
 namespace Nikse.SubtitleEdit;
 
@@ -247,6 +248,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<SelectVideoPositionViewModel>();
         collection.AddTransient<SettingsResetViewModel>();
         collection.AddTransient<SettingsViewModel>();
+        collection.AddTransient<SetVideoOffsetViewModel>();
         collection.AddTransient<ShotChangeListViewModel>();
         collection.AddTransient<ShotChangesViewModel>();
         collection.AddTransient<ShortcutsViewModel>();

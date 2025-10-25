@@ -66,6 +66,7 @@ public class LanguageMainMenu
     public string CloseVideoFile { get; set; }
     public string SpeechToText { get; set; }
     public string TextToSpeech { get; set; }
+    public string SetVideoOffset { get; set; }
     public string GenerateBurnIn { get; set; }
     public string GenerateTransparent { get; set; }
     public string GenerateImportShotChanges { get; set; }
@@ -161,6 +162,7 @@ public class LanguageMainMenu
         ListShotChanges = "List s_hot changes...";
         GenerateImportShotChanges = "Generate/import s_hot changes...";
         DockVideoControls = "_Dock video controls";
+        SetVideoOffset = "Set video offset...";
         GenerateBurnIn = "Generate video with _burned-in subtitles...";
         GenerateTransparent = "_Generate transparent video with subtitles...";
 

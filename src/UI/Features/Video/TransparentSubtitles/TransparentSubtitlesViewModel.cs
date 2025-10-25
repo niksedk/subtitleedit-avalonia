@@ -188,7 +188,7 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
             VideoFileSize = Utilities.FormatBytesToDisplayFileSize(new FileInfo(videoFileName).Length);
             _ = Task.Run(() =>
             {
-                var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
+                var mediaInfo = FfmpegMediaInfo2.Parse(videoFileName);
                 Dispatcher.UIThread.Post(() =>
                 {
                     VideoWidth = mediaInfo.Dimension.Width;
@@ -483,7 +483,7 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
             return "Window is null";
         }
 
-        if (FontFactor == null  || FontFactor < 0.1)
+        if (FontFactor == null || FontFactor < 0.1)
         {
             return string.Format(Se.Language.General.PleaseEnterAValidValueForX, "Font factor");
         }
@@ -794,7 +794,7 @@ public partial class TransparentSubtitlesViewModel : ObservableObject
                 return;
             }
 
-            var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
+            var mediaInfo = FfmpegMediaInfo2.Parse(videoFileName);
             VideoWidth = mediaInfo.Dimension.Width;
             VideoHeight = mediaInfo.Dimension.Height;
             UseSourceResolution = false;

@@ -108,8 +108,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Nikse.SubtitleEdit.Features.Shared.AddToNamesList;
+using Nikse.SubtitleEdit.Features.Shared.SetVideoOffset;
 using Nikse.SubtitleEdit.Features.SpellCheck.FindDoubleWords;
 using static Nikse.SubtitleEdit.Logic.FindService;
+using SetVideoOffsetViewModel = Nikse.SubtitleEdit.Features.Shared.SetVideoOffset.SetVideoOffsetViewModel;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -2716,8 +2718,7 @@ public partial class MainViewModel :
 
         _shortcutManager.ClearKeys();
     }
-
-
+    
     [RelayCommand]
     private async Task ShowVideoAudioToTextWhisper()
     {
@@ -2768,6 +2769,18 @@ public partial class MainViewModel :
             {
                 await VideoOpenFile(videoFileName);
             }
+        }
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task ShowVideoSetOffset()
+    {
+        var result = await _windowService.ShowDialogAsync<SetVideoOffsetWindow, SetVideoOffsetViewModel >(Window!);
+
+        if (result.OkPressed)
+        {
         }
 
         _shortcutManager.ClearKeys();
