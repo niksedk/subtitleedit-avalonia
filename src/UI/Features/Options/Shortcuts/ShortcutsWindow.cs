@@ -107,6 +107,7 @@ public class ShortcutsWindow : Window
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedNode)) { Source = vm });
         dataGrid.SelectionChanged += vm.ShortcutsDataGrid_SelectionChanged;
+        dataGrid.DoubleTapped += vm.ShortcutsDataGridDoubleTapped;
         var borderDataGrid = UiUtil.MakeBorderForControlNoPadding(dataGrid).WithMarginBottom(5);
 
         var buttonOk = UiUtil.MakeButtonOk(vm.CommandOkCommand);

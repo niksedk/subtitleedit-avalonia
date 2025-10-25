@@ -282,7 +282,7 @@ public partial class ShortcutsViewModel : ObservableObject
         }
 
         node.ShortCut.Keys = keys;
-        node.Title = MakeDisplayName(node.ShortCut!);
+        node.DisplayShortcut = MakeDisplayShortCut(node.ShortCut);
     }
 
     [RelayCommand]
@@ -428,5 +428,10 @@ public partial class ShortcutsViewModel : ObservableObject
     internal void ComboBoxFilter_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         UpdateVisibleShortcuts(SearchText);
+    }
+
+    internal void ShortcutsDataGridDoubleTapped(object? sender, TappedEventArgs e)
+    {
+        _ = ShowGetKey();
     }
 }
