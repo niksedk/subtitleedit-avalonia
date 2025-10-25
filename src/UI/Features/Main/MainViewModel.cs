@@ -249,7 +249,7 @@ public partial class MainViewModel :
     public VideoPlayerControl? VideoPlayerControl { get; internal set; }
     public Menu Menu { get; internal set; }
     public Border Toolbar { get; internal set; }
-    public StackPanel PanelSingleLineLenghts { get; internal set; }
+    public StackPanel PanelSingleLineLengths { get; internal set; }
     public MenuItem MenuItemMergeAsDialog { get; internal set; }
     public MenuItem MenuItemMerge { get; internal set; }
     public MenuItem MenuItemAudioVisualizerInsertNewSelection { get; set; }
@@ -315,7 +315,7 @@ public partial class MainViewModel :
         ContentGrid = new Grid();
         MenuReopen = new MenuItem();
         Menu = new Menu();
-        PanelSingleLineLenghts = new StackPanel();
+        PanelSingleLineLengths = new StackPanel();
         MenuItemMergeAsDialog = new MenuItem();
         MenuItemMerge = new MenuItem();
         MenuItemAudioVisualizerInsertNewSelection = new MenuItem();
@@ -8670,8 +8670,8 @@ public partial class MainViewModel :
 
         var lines = text.SplitToLines();
         var lineLenghts = new List<string>(lines);
-        PanelSingleLineLenghts.Children.Clear();
-        PanelSingleLineLenghts.Children.Add(UiUtil.MakeTextBlock(Se.Language.Main.SingleLineLength).WithFontSize(12)
+        PanelSingleLineLengths.Children.Clear();
+        PanelSingleLineLengths.Children.Add(UiUtil.MakeTextBlock(Se.Language.Main.SingleLineLength).WithFontSize(12)
             .WithPadding(2));
         var first = true;
         for (var i = 0; i < lines.Count; i++)
@@ -8682,7 +8682,7 @@ public partial class MainViewModel :
             }
             else
             {
-                PanelSingleLineLenghts.Children.Add(UiUtil.MakeTextBlock("/").WithFontSize(12).WithPadding(2));
+                PanelSingleLineLengths.Children.Add(UiUtil.MakeTextBlock("/").WithFontSize(12).WithPadding(2));
             }
 
             var tb = UiUtil.MakeTextBlock(lineLenghts[i].Length.ToString(CultureInfo.InvariantCulture)).WithFontSize(12).WithPadding(2);
@@ -8692,7 +8692,7 @@ public partial class MainViewModel :
                 tb.Background = new SolidColorBrush(_errorColor);
             }
 
-            PanelSingleLineLenghts.Children.Add(tb);
+            PanelSingleLineLengths.Children.Add(tb);
         }
 
         EditTextCharactersPerSecond = string.Format(Se.Language.Main.CharactersPerSecond, $"{cps:0.0}");

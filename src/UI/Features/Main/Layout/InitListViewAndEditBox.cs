@@ -1004,7 +1004,7 @@ public static class InitListViewAndEditBox
             VerticalAlignment = VerticalAlignment.Top,
             Orientation = Orientation.Horizontal,
         };
-        vm.PanelSingleLineLenghts = panelSingleLineLengths;
+        vm.PanelSingleLineLengths = panelSingleLineLengths;
         textEditGrid.Children.Add(panelSingleLineLengths);
         Grid.SetRow(panelSingleLineLengths, 2);
 

@@ -77,12 +77,10 @@ public class MultipleReplaceWindow : Window
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
         KeyDown += vm.OnKeyDown;
     }
-
     private static Border MakeRulesView(MultipleReplaceViewModel vm)
     {
         var treeView = new TreeView
         {
-            Margin = new Thickness(5),
             SelectionMode = SelectionMode.Single,
             DataContext = vm,
             MinWidth = 300,
@@ -92,63 +90,48 @@ public class MultipleReplaceWindow : Window
         treeView[!TreeView.SelectedItemProperty] = new Binding(nameof(vm.SelectedNode));
 
         var factory = new FuncTreeDataTemplate<RuleTreeNode>(_ => true, (node, _) =>
+        {
+            var checkBox = new CheckBox
             {
-                var checkBox = new CheckBox
+                DataContext = node,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(0),
+                Padding = new Thickness(0)
+            };
+            checkBox.Bind(CheckBox.IsCheckedProperty, new Binding(nameof(RuleTreeNode.IsActive))
+            {
+                Mode = BindingMode.TwoWay,
+                Source = node,
+            });
+            checkBox.IsCheckedChanged += vm.OnActiveChanged;
+
+            if (node.IsCategory)
+            {
+                var label = UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.CategoryName));
+                label.FontWeight = FontWeight.Bold;
+                label.VerticalAlignment = VerticalAlignment.Center;
+                label.VerticalContentAlignment = VerticalAlignment.Center;
+                label.Margin = new Thickness(5, 0, 0, 0);
+                label.Padding = new Thickness(0);
+
+                var buttonCategoryActions = new Button
                 {
-                    DataContext = node
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalContentAlignment = HorizontalAlignment.Center,
+                    VerticalContentAlignment = VerticalAlignment.Center,
+                    Command = vm.NodeCategoryOpenContextMenuCommand,
+                    CommandParameter = node,
+                    Margin = new Thickness(0),
+                    Padding = new Thickness(4)
                 };
-                checkBox.Bind(CheckBox.IsCheckedProperty, new Binding(nameof(RuleTreeNode.IsActive))
-                {
-                    Mode = BindingMode.TwoWay,
-                    Source = node,
-                });
-                checkBox.IsCheckedChanged += vm.OnActiveChanged;
+                Attached.SetIcon(buttonCategoryActions, IconNames.DotsVertical);
 
-                if (node.IsCategory)
-                {
-                    var label = UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.CategoryName));
-                    label.FontWeight = FontWeight.Bold;
-
-                    var buttonCategoryActions = new Button
-                    {
-                        HorizontalAlignment = HorizontalAlignment.Left,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        HorizontalContentAlignment = HorizontalAlignment.Center,
-                        VerticalContentAlignment = VerticalAlignment.Center,
-                        Command = vm.NodeCategoryOpenContextMenuCommand,
-                        CommandParameter = node,
-                    };
-                    Attached.SetIcon(buttonCategoryActions, IconNames.DotsVertical);
-
-                    var gridCategory = new Grid
-                    {
-                        RowDefinitions =
-                        {
-                            new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                        },
-                        ColumnDefinitions =
-                        {
-                            new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                            new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-                            new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                        },
-                        Width = double.NaN,
-                        HorizontalAlignment = HorizontalAlignment.Stretch,
-                    };
-
-                    gridCategory.Add(checkBox, 0, 0);
-                    gridCategory.Add(label, 0, 1);
-                    gridCategory.Add(buttonCategoryActions, 0, 2);
-
-                    return gridCategory;
-                }
-
-                var grid = new Grid
+                var gridCategory = new Grid
                 {
                     RowDefinitions =
                     {
-                        new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                        new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                        new RowDefinition { Height = new GridLength(1, GridUnitType.Auto), MinHeight = 0 },
                     },
                     ColumnDefinitions =
                     {
@@ -158,50 +141,106 @@ public class MultipleReplaceWindow : Window
                     },
                     Width = double.NaN,
                     HorizontalAlignment = HorizontalAlignment.Stretch,
+                    Margin = new Thickness(0),
+                    RowSpacing = 0,
+                    ColumnSpacing = 0,
                 };
 
-                var labelFind = UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.Find));
-                var labelSeparator = UiUtil.MakeLabel(string.Empty);
-                Attached.SetIcon(labelSeparator, IconNames.ArrowRightThick);
-                var labelReplaceWith = UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.ReplaceWith));
+                gridCategory.Add(checkBox, 0, 0);
+                gridCategory.Add(label, 0, 1);
+                gridCategory.Add(buttonCategoryActions, 0, 2);
 
-                var labelIcon = new Label();
-                Attached.SetIcon(labelIcon, node.IconName);
+                return gridCategory;
+            }
 
-                var buttonActions = new Button
+            var grid = new Grid
+            {
+                RowDefinitions =
                 {
-                    HorizontalAlignment = HorizontalAlignment.Left,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    HorizontalContentAlignment = HorizontalAlignment.Center,
-                    VerticalContentAlignment = VerticalAlignment.Center,
-                    Command = vm.NodeOpenContextMenuCommand,
-                    CommandParameter = node,
-                };
-                Attached.SetIcon(buttonActions, IconNames.DotsVertical);
-
-                var panelFindAndReplaceWith = new StackPanel
+                    new RowDefinition { Height = new GridLength(1, GridUnitType.Auto), MinHeight = 0 },
+                },
+                ColumnDefinitions =
                 {
-                    Orientation = Orientation.Horizontal,
-                    Children =
-                    {
-                        labelIcon,
-                        labelFind,
-                        labelSeparator,
-                        labelReplaceWith,
-                    }
-                };
+                    new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                    new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                    new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                },
+                Width = double.NaN,
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                Margin = new Thickness(0),
+                RowSpacing = 0,
+                ColumnSpacing = 0,
+            };
 
-                var labelDescription = UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.Description));
-                labelDescription.Opacity = 0.7;
-                labelDescription.FontStyle = FontStyle.Italic;
+            var labelFind = UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.Find));
+            labelFind.VerticalAlignment = VerticalAlignment.Center;
+            labelFind.VerticalContentAlignment = VerticalAlignment.Center;
+            labelFind.Margin = new Thickness(0);
+            labelFind.Padding = new Thickness(0);
 
-                grid.Add(checkBox, 0, 0, 2, 1);
-                grid.Add(panelFindAndReplaceWith, 0, 1);
-                grid.Add(labelDescription, 1, 1);
-                grid.Add(buttonActions, 0, 2, 2, 1);
+            var labelSeparator = UiUtil.MakeLabel(string.Empty);
+            Attached.SetIcon(labelSeparator, IconNames.ArrowRightThick);
+            labelSeparator.VerticalAlignment = VerticalAlignment.Center;
+            labelSeparator.VerticalContentAlignment = VerticalAlignment.Center;
+            labelSeparator.Margin = new Thickness(2, 0, 2, 0);
+            labelSeparator.Padding = new Thickness(0);
 
-                return grid;
-            },
+            var labelReplaceWith = UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.ReplaceWith));
+            labelReplaceWith.VerticalAlignment = VerticalAlignment.Center;
+            labelReplaceWith.VerticalContentAlignment = VerticalAlignment.Center;
+            labelReplaceWith.Margin = new Thickness(0);
+            labelReplaceWith.Padding = new Thickness(0);
+
+            var labelIcon = new Label();
+            Attached.SetIcon(labelIcon, node.IconName);
+            labelIcon.VerticalAlignment = VerticalAlignment.Center;
+            labelIcon.VerticalContentAlignment = VerticalAlignment.Center;
+            labelIcon.Margin = new Thickness(5, 0, 2, 0);
+            labelIcon.Padding = new Thickness(0);
+
+            var buttonActions = new Button
+            {
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalContentAlignment = HorizontalAlignment.Center,
+                VerticalContentAlignment = VerticalAlignment.Center,
+                Command = vm.NodeOpenContextMenuCommand,
+                CommandParameter = node,
+                Margin = new Thickness(0),
+                Padding = new Thickness(4)
+            };
+            Attached.SetIcon(buttonActions, IconNames.DotsVertical);
+
+            var panelFindAndReplaceWith = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(0, 0, 0, 0),
+                Children =
+                {
+                    labelIcon,
+                    labelFind,
+                    labelSeparator,
+                    labelReplaceWith,
+                }
+            };
+
+            var labelDescription = UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.Description));
+            labelDescription.Opacity = 0.7;
+            labelDescription.FontStyle = FontStyle.Italic;
+            labelDescription.VerticalAlignment = VerticalAlignment.Center;
+            labelDescription.VerticalContentAlignment = VerticalAlignment.Center;
+            labelDescription.Margin = new Thickness(5, 0, 0, 0);
+            labelDescription.Padding = new Thickness(0);
+
+            grid.Add(checkBox, 0);
+            grid.Add(panelFindAndReplaceWith, 0,1);
+            //grid.Add(labelDescription, 1, 1);
+            grid.Add(buttonActions, 0,2);
+
+            return grid;
+        },
             node => node.SubNodes ?? []
         );
 
