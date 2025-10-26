@@ -209,6 +209,7 @@ public class NetflixQualityController
         public string Comment { get; set; }
         public Paragraph? OriginalParagraph { get; set; }
         public Paragraph? FixedParagraph { get; set; }
+        public bool CanBeFixed { get; set; }
 
         public Record()
         {
@@ -248,12 +249,12 @@ public class NetflixQualityController
         VideoFileName = string.Empty;
     }
 
-    public void AddRecord(Paragraph? originalParagraph, string timeCode, string context, string comment)
+    public void AddRecord(Paragraph? originalParagraph, string timeCode, string context, string comment, bool canBeFixed = false)
     {
         Records.Add(new Record(originalParagraph?.Number.ToString(CultureInfo.InvariantCulture) ?? string.Empty, timeCode, context, comment) { OriginalParagraph = originalParagraph });
     }
 
-    public void AddRecord(Paragraph? originalParagraph, Paragraph? fixedParagraph, string comment, string context = "")
+    public void AddRecord(Paragraph? originalParagraph, Paragraph? fixedParagraph, string comment, string context = "", bool canBeFixed = false)
     {
         Records.Add(new Record
         {
@@ -263,6 +264,7 @@ public class NetflixQualityController
             FixedParagraph = fixedParagraph,
             LineNumber = originalParagraph?.Number.ToString(CultureInfo.InvariantCulture) ?? string.Empty,
             TimeCode = originalParagraph?.StartTime.ToDisplayString() ?? string.Empty,
+            CanBeFixed = canBeFixed,
         });
     }
 

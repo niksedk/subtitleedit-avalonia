@@ -35,7 +35,7 @@ public class NetflixCheckBridgeGaps : INetflixQualityChecker
             {
                 var fixedParagraph = new Paragraph(p, false) { EndTime = { TotalMilliseconds = next.StartTime.TotalMilliseconds - twoFramesGap } };
                 string comment = $"3-{halfSecGap - 1} frames gap => 2 frames gap";
-                controller.AddRecord(p, fixedParagraph, comment);
+                controller.AddRecord(p, fixedParagraph, comment, string.Empty, true);
             }
         }
     }

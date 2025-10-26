@@ -16,7 +16,7 @@ public class NetflixCheckEllipsesNotThreeDots : INetflixQualityChecker
             if (paragraph.Text.Contains("..."))
             {
                 var fixedParagraph = new Paragraph(paragraph, false) { Text = paragraph.Text.Replace("...", "…") };
-                controller.AddRecord(paragraph, fixedParagraph, comment);
+                controller.AddRecord(paragraph, fixedParagraph, comment, string.Empty, true);
             }
         }
     }

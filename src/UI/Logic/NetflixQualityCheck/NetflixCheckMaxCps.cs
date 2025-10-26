@@ -40,7 +40,7 @@ public class NetflixCheckMaxCps : INetflixQualityChecker
                     fixedParagraph.EndTime.TotalMilliseconds = p.StartTime.TotalMilliseconds + maxDurationMilliseconds;
                 }
 
-                controller.AddRecord(p, fixedParagraph, comment, FormattableString.Invariant($"CPS={charactersPerSeconds:0.##}"));
+                controller.AddRecord(p, fixedParagraph, comment, FormattableString.Invariant($"CPS={charactersPerSeconds:0.##}"), true);
             }
         }
     }

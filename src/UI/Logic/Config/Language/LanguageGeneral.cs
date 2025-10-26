@@ -470,6 +470,9 @@ public class LanguageGeneral
     public string OneSecondForward { get; set; }
     public string SetVideoOffset { get; set; }
     public string VideoOffset { get; set; }
+    public string Reason { get; set; }
+    public string OpenContainingFolder { get; set; }
+    public string OpenFile { get; set; }
 
     public LanguageGeneral()
     {
@@ -936,5 +939,8 @@ public class LanguageGeneral
         OneSecondForward = "One second";
         SetVideoOffset =  "Set video offset";
         VideoOffset =  "Video offset";
+        Reason = "Reason";
+        OpenContainingFolder = "Open containing folder";
+        OpenFile = "Open file";
     }
 }

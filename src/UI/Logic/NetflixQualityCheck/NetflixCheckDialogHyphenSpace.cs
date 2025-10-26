@@ -38,7 +38,7 @@ public class NetflixCheckDialogHyphenSpace : INetflixQualityChecker
             if (newText != oldText)
             {
                 var fixedParagraph = new Paragraph(p, false) { Text = newText };
-                controller.AddRecord(p, fixedParagraph, comment);
+                controller.AddRecord(p, fixedParagraph, comment, string.Empty, true);
             }
         }
     }

@@ -44,7 +44,7 @@ public class NetflixCheckTextForHiUseBrackets : INetflixQualityChecker
             {
                 var fixedParagraph = new Paragraph(p, false) { Text = newText };
                 string comment = "Use brackets [ ] to enclose speaker IDs or sound effects";
-                controller.AddRecord(p, fixedParagraph, comment);
+                controller.AddRecord(p, fixedParagraph, comment, string.Empty, true);
             }
         }
     }

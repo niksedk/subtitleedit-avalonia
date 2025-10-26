@@ -31,7 +31,7 @@ public class NetflixCheckNumberOfLines : INetflixQualityChecker
                 var fixedParagraph = new Paragraph(p, false);
                 fixedParagraph.Text = Utilities.AutoBreakLine(fixedParagraph.Text, controller.SingleLineMaxLength, controller.SingleLineMaxLength + 1, controller.Language);
                 var comment = "Text can fit on one line";
-                controller.AddRecord(p, fixedParagraph, comment);
+                controller.AddRecord(p, fixedParagraph, comment, string.Empty, true);
             }
         }
     }

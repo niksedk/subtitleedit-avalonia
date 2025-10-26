@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Shared.PromptFileSaved;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
@@ -156,7 +157,7 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
 
         if (Fixes.Count == 0)
         {
-            await MessageBox.Show(Window, Se.Language.General.Error, "Nothing to export", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            await MessageBox.Show(Window, Se.Language.General.Error, Se.Language.Tools.NetflixCheckAndFix.NothingToReport, MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
 
@@ -171,14 +172,18 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
             csvBuilder.AppendLine(fix.Record.ToCsvRow());
         }
 
-        var fileName = await _fileHelper.PickSaveFile(Window, ".csv", "netflix_report.csv", "Save Netflix quality report");
+        var fileName = await _fileHelper.PickSaveFile(Window, ".csv", "netflix_report.csv", Se.Language.Tools.NetflixCheckAndFix.SaveNetflixQualityReport);
         if (string.IsNullOrWhiteSpace(fileName))
         {
             return;
         }
 
         System.IO.File.WriteAllText(fileName, csvBuilder.ToString());
-        //TODO: Show message "Report saved" with link to open file
+
+        _ = await _windowService.ShowDialogAsync<PromptFileSavedWindow, PromptFileSavedViewModel>(Window, vm =>
+        {
+            vm.Initialize(Se.Language.Tools.NetflixCheckAndFix.NetflixReportSaved, string.Format(Se.Language.Tools.NetflixCheckAndFix.NetFlixQualityReportSavedToX,  fileName), fileName, true, true);
+        });
     }
 
     [RelayCommand]
@@ -303,7 +308,7 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
         {
             var index = kvp.Key;
             var (before, after, p, r) = kvp.Value;
-            var item = new FixNetflixErrorsItem(true, index, before, after, p, r);
+            var item = new FixNetflixErrorsItem(r.CanBeFixed, index, before, after, p, r);
             Fixes.Add(item);
         }
     }

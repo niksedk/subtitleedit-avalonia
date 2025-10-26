@@ -46,7 +46,7 @@ public class NetflixCheckStartNumberSpellOut : INetflixQualityChecker
             {
                 var fixedParagraph = new Paragraph(p, false) { Text = newText };
                 var comment = "When a number begins a sentence, it should always be spelled out";
-                controller.AddRecord(p, fixedParagraph, comment);
+                controller.AddRecord(p, fixedParagraph, comment, string.Empty, true);
             }
         }
     }

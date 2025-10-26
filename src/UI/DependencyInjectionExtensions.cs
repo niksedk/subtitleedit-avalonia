@@ -42,6 +42,7 @@ using Nikse.SubtitleEdit.Features.Shared.PickLayers;
 using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using Nikse.SubtitleEdit.Features.Shared.PickMp4Track;
 using Nikse.SubtitleEdit.Features.Shared.PickRuleProfile;
+using Nikse.SubtitleEdit.Features.Shared.PromptFileSaved;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 using Nikse.SubtitleEdit.Features.Shared.ShowImage;
 using Nikse.SubtitleEdit.Features.Shared.SourceView;
@@ -237,6 +238,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<PreProcessingViewModel>();
         collection.AddTransient<ProfilesExportViewModel>();
         collection.AddTransient<ProfilesViewModel>();
+        collection.AddTransient<PromptFileSavedViewModel>();
         collection.AddTransient<PromptTextBoxViewModel>();
         collection.AddTransient<PromptUnknownWordViewModel>();
         collection.AddTransient<ReEncodeVideoViewModel>();

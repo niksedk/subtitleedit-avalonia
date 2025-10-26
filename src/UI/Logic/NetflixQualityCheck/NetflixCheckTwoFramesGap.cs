@@ -35,7 +35,7 @@ public class NetflixCheckTwoFramesGap : INetflixQualityChecker
                     comment = "Minimum two frames gap";
                 }
 
-                controller.AddRecord(p, fixedParagraph, comment);
+                controller.AddRecord(p, fixedParagraph, comment, string.Empty, true);
             }
         }
     }

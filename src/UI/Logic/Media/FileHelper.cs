@@ -1,10 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Logic.Media
 {
@@ -386,6 +390,60 @@ namespace Nikse.SubtitleEdit.Logic.Media
             };
 
             return fileTypes;
+        }
+
+        public void OpenFileWithDefaultProgram(Window window, string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                throw new ArgumentException("File path cannot be null or empty", nameof(filePath));
+            }
+
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException("File not found", filePath);
+            }
+
+            try
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // Windows: use explorer with the file path
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = filePath,
+                        UseShellExecute = true
+                    });
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    // macOS: use 'open' command
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "open",
+                        Arguments = $"\"{filePath}\"",
+                        UseShellExecute = false
+                    });
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    // Linux: use 'xdg-open' command
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "xdg-open",
+                        Arguments = $"\"{filePath}\"",
+                        UseShellExecute = false
+                    });
+                }
+                else
+                {
+                    throw new PlatformNotSupportedException("Unsupported operating system");
+                }
+            }
+            catch (Exception ex) when (ex is not FileNotFoundException && ex is not ArgumentException)
+            {
+                throw new InvalidOperationException($"Failed to open file: {filePath}", ex);
+            }
         }
     }
 }

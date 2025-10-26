@@ -28,14 +28,16 @@ public class NetflixCheckMinDuration : INetflixQualityChecker
             if (p.DurationTotalMilliseconds < 833 && !p.StartTime.IsMaxTime)
             {
                 Paragraph? fixedParagraph = null;
+                var canBeFixed = false;
                 if (next == null || next.StartTime.TotalMilliseconds > p.StartTime.TotalMilliseconds + 834)
                 {
                     // we can fix duration
                     fixedParagraph = new Paragraph(p, false);
                     fixedParagraph.EndTime.TotalMilliseconds = fixedParagraph.StartTime.TotalMilliseconds + 834;
+                    canBeFixed = true;
                 }
                 string comment = "Minimum duration: 5/6 second (833 ms)";
-                controller.AddRecord(p, fixedParagraph, comment);
+                controller.AddRecord(p, fixedParagraph, comment, string.Empty, canBeFixed);
             }
         }
     }

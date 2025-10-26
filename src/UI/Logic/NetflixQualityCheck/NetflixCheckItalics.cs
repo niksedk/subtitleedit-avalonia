@@ -29,7 +29,7 @@ public class NetflixCheckItalics : INetflixQualityChecker
                     if (fixedParagraph.Text != p.Text)
                     {
                         string comment = "Italics not allowed";
-                        controller.AddRecord(p, fixedParagraph, comment);
+                        controller.AddRecord(p, fixedParagraph, comment, string.Empty, true);
                     }
                 }
             }

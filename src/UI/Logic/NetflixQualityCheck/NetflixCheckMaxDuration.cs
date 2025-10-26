@@ -16,7 +16,7 @@ public class NetflixCheckMaxDuration : INetflixQualityChecker
                 var fixedParagraph = new Paragraph(p, false);
                 fixedParagraph.EndTime.TotalMilliseconds = fixedParagraph.StartTime.TotalMilliseconds + 7000;
                 string comment = "Maximum duration: 7 seconds per subtitle event";
-                controller.AddRecord(p, fixedParagraph, comment);
+                controller.AddRecord(p, fixedParagraph, comment, string.Empty, true);
             }
         }
     }

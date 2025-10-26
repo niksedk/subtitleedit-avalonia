@@ -9,7 +9,6 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using Projektanker.Icons.Avalonia;
 
 namespace Nikse.SubtitleEdit.Features.Tools.FixNetflixErrors;
 
@@ -114,7 +113,7 @@ public class FixNetflixErrorsWindow : Window
                 var cb = new CheckBox
                 {
                     [!ToggleButton.IsCheckedProperty] = new Binding(nameof(NetflixCheckDisplayItem.IsSelected)) { Mode = BindingMode.TwoWay },
-                    HorizontalAlignment = HorizontalAlignment.Center
+                    HorizontalAlignment = HorizontalAlignment.Center,
                 };
                 cb.IsCheckedChanged += (_, __) => vm.SetDirty();
                 return new Border
@@ -176,16 +175,21 @@ public class FixNetflixErrorsWindow : Window
                     Header = Se.Language.General.Apply,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     CellTemplate = new FuncDataTemplate<FixNetflixErrorsItem>((item, _) =>
-                        new Border
+                    {
+                        var cb = new CheckBox
+                        {
+                            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(FixNetflixErrorsItem.Apply)) { Mode = BindingMode.TwoWay },
+                            HorizontalAlignment = HorizontalAlignment.Center,
+                        };
+                        cb.IsEnabled = item.CanBeFixed;
+
+                        return new Border
                         {
                             Background = Brushes.Transparent, // Prevents highlighting
                             Padding = new Thickness(4),
-                            Child = new CheckBox
-                            {
-                                [!ToggleButton.IsCheckedProperty] = new Binding(nameof(FixNetflixErrorsItem.Apply)),
-                                HorizontalAlignment = HorizontalAlignment.Center
-                            }
-                        }),
+                            Child = cb,
+                        };
+                    }),
                     Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
                 },
                 new DataGridTextColumn
@@ -211,10 +215,17 @@ public class FixNetflixErrorsWindow : Window
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Reason,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(FixNetflixErrorsItem.Reason)),
+                    IsReadOnly = true,
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                },
             },
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(_vm.SelectedFix)));
-        //dataGridTracks.SelectionChanged += vm.DataGridTracksSelectionChanged;
 
         return UiUtil.MakeBorderForControlNoPadding(dataGrid);
     }

@@ -27,7 +27,7 @@ public class NetflixCheckMaxLineLength : INetflixQualityChecker
                         if (CalculateJapaneseLength(text) > 11)
                         {
                             var comment = "Single vertical line length > 11";
-                            controller.AddRecord(p, p.StartTime.ToHHMMSSFF(), line.Length.ToString(CultureInfo.InvariantCulture), comment);
+                            controller.AddRecord(p, p.StartTime.ToHHMMSSFF(), line.Length.ToString(CultureInfo.InvariantCulture), comment, false);
                         }
                     }
                     else // Horizontal subtitles - Maximum 13 full-width characters per line
@@ -44,14 +44,14 @@ public class NetflixCheckMaxLineLength : INetflixQualityChecker
                     var fixedParagraph = new Paragraph(p, false);
                     fixedParagraph.Text = Utilities.AutoBreakLine(fixedParagraph.Text, controller.SingleLineMaxLength, controller.SingleLineMaxLength - 3, controller.Language);
                     var comment = "Single line length > " + controller.SingleLineMaxLength;
-                    controller.AddRecord(p, fixedParagraph, comment, line.CountCharacters(nameof(CalcCjk), false).ToString(CultureInfo.InvariantCulture));
+                    controller.AddRecord(p, fixedParagraph, comment, line.CountCharacters(nameof(CalcCjk), false).ToString(CultureInfo.InvariantCulture), true);
                 }
                 else if (line.CountCharacters(false) > controller.SingleLineMaxLength)
                 {
                     var fixedParagraph = new Paragraph(p, false);
                     fixedParagraph.Text = Utilities.AutoBreakLine(fixedParagraph.Text, controller.SingleLineMaxLength, controller.SingleLineMaxLength - 3, controller.Language);
                     var comment = "Single line length > " + controller.SingleLineMaxLength;
-                    controller.AddRecord(p, fixedParagraph, comment, line.Length.ToString(CultureInfo.InvariantCulture));
+                    controller.AddRecord(p, fixedParagraph, comment, line.Length.ToString(CultureInfo.InvariantCulture), true   );
                 }
             }
         }

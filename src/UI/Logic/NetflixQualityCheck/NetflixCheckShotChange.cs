@@ -52,7 +52,7 @@ public class NetflixCheckShotChange : INetflixQualityChecker
                 {
                     fixedParagraph.StartTime.TotalMilliseconds = nearestStartPrevShotChange * 1000;
                     comment = $"The in-cue is within {halfSecGapInFrames} frames after the shot change, snap the in-cue to the shot-change";
-                    controller.AddRecord(p, fixedParagraph, comment);
+                    controller.AddRecord(p, fixedParagraph, comment, string.Empty, true);
                 }
             }
 
@@ -63,10 +63,12 @@ public class NetflixCheckShotChange : INetflixQualityChecker
                 var threshold = (int)Math.Round(halfSecGapInFrames * 0.75, MidpointRounding.AwayFromZero);
                 if (gapToShotChange != 0 && gapToShotChange < halfSecGapInFrames)
                 {
+                    var canBeFixed = false;  
                     if (gapToShotChange < threshold)
                     {
                         fixedParagraph.StartTime.TotalMilliseconds = nearestStartNextShotChange * 1000;
                         comment = $"The in-cue is 1-{threshold - 1} frames before the shot change, snap the in-cue to the shot change";
+                        canBeFixed = true;
                     }
                     else
                     {
@@ -74,7 +76,7 @@ public class NetflixCheckShotChange : INetflixQualityChecker
                         comment = $"The in-cue is {threshold}-{halfSecGapInFrames - 1} frames before the shot change, pull the in-cue to half a second ({halfSecGapInFrames} frames) before the shot-change";
                     }
 
-                    controller.AddRecord(p, fixedParagraph, comment);
+                    controller.AddRecord(p, fixedParagraph, comment, string.Empty, canBeFixed);
                 }
             }
 
@@ -85,7 +87,7 @@ public class NetflixCheckShotChange : INetflixQualityChecker
                 {
                     fixedParagraph.EndTime.TotalMilliseconds = nearestEndPrevShotChange * 1000 - twoFramesGap;
                     comment = $"The out-cue is within {halfSecGapInFrames} frames after the shot change";
-                    controller.AddRecord(p, fixedParagraph, comment);
+                    controller.AddRecord(p, fixedParagraph, comment, string.Empty, true);
                 }
             }
 
@@ -97,7 +99,7 @@ public class NetflixCheckShotChange : INetflixQualityChecker
                 {
                     fixedParagraph.EndTime.TotalMilliseconds = nearestEndNextShotChange * 1000 - twoFramesGap;
                     comment = $"The out-cue is within {halfSecGapInFrames} frames of the shot change";
-                    controller.AddRecord(p, fixedParagraph, comment);
+                    controller.AddRecord(p, fixedParagraph, comment, string.Empty, true);
                 }
             }
 
@@ -105,7 +107,7 @@ public class NetflixCheckShotChange : INetflixQualityChecker
             {
                 fixedParagraph.EndTime.TotalMilliseconds = onShotChange * 1000 - twoFramesGap;
                 comment = "The out-cue is on the shot change, respect the two-frame gap";
-                controller.AddRecord(p, fixedParagraph, comment);
+                controller.AddRecord(p, fixedParagraph, comment, string.Empty, true);
             }
         }
     }
