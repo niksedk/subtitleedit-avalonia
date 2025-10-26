@@ -2677,7 +2677,7 @@ public partial class MainViewModel :
             vm.Initialize(Subtitles.ToList());
         });
 
-        
+
 
         _shortcutManager.ClearKeys();
     }
@@ -2719,10 +2719,15 @@ public partial class MainViewModel :
 
         _shortcutManager.ClearKeys();
     }
-    
+
     [RelayCommand]
     private async Task ShowVideoAudioToTextWhisper()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
         var ffmpegOk = await RequireFfmpegOk();
         if (!ffmpegOk)
         {
@@ -2730,7 +2735,7 @@ public partial class MainViewModel :
         }
 
         var result =
-            await _windowService.ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(Window!,
+            await _windowService.ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(Window,
                 vm => { vm.Initialize(_videoFileName); });
 
         if (result.OkPressed && !result.IsBatchMode)
@@ -2747,13 +2752,18 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowVideoBurnIn()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
         var ffmpegOk = await RequireFfmpegOk();
         if (!ffmpegOk)
         {
             return;
         }
 
-        await _windowService.ShowDialogAsync<BurnInWindow, BurnInViewModel>(Window!,
+        await _windowService.ShowDialogAsync<BurnInWindow, BurnInViewModel>(Window,
             vm => { vm.Initialize(_videoFileName ?? string.Empty, GetUpdateSubtitle(), SelectedSubtitleFormat); });
         _shortcutManager.ClearKeys();
     }
@@ -2761,7 +2771,12 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowVideoOpenFromUrl()
     {
-        var result = await _windowService.ShowDialogAsync<OpenFromUrlWindow, OpenFromUrlViewModel>(Window!);
+        if (Window == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<OpenFromUrlWindow, OpenFromUrlViewModel>(Window);
 
         if (result.OkPressed)
         {
@@ -2778,14 +2793,30 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowVideoSetOffset()
     {
-        var result = await _windowService.ShowDialogAsync<SetVideoOffsetWindow, SetVideoOffsetViewModel>(Window!);
+        if (Window == null)
+        {
+            return;
+        }   
+
+        var result = await _windowService.ShowDialogAsync<SetVideoOffsetWindow, SetVideoOffsetViewModel>(Window);
 
         if (result.OkPressed && result.TimeOffset.HasValue)
         {
             var offset = result.TimeOffset.Value;
-            foreach (var s in Subtitles)
+            if (result.RelativeToCurrentVideoPosition)
             {
-                s.StartTime = s.StartTime + offset;
+                if (VideoPlayerControl != null)
+                {
+                    offset = offset + TimeSpan.FromSeconds(VideoPlayerControl.Position);
+                }
+            }
+
+            if (!result.KeepTimeCodes)
+            {
+                foreach (var s in Subtitles)
+                {
+                    s.StartTime = s.StartTime + offset;
+                }
             }
         }
 
@@ -2848,6 +2879,11 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowShotChangesSubtitles()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
         if (string.IsNullOrEmpty(_videoFileName) || VideoPlayerControl == null || AudioVisualizer == null)
         {
             return;
@@ -2859,7 +2895,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<ShotChangesWindow, ShotChangesViewModel>(Window!, vm => { vm.Initialize(_videoFileName); });
+        var result = await _windowService.ShowDialogAsync<ShotChangesWindow, ShotChangesViewModel>(Window, vm => { vm.Initialize(_videoFileName); });
 
         if (result.OkPressed && result.FfmpegLines.Count > 0)
         {
@@ -2877,13 +2913,18 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowShotChangesList()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
         var selected = SelectedSubtitle;
         if (selected == null)
         {
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<ShotChangeListWindow, ShotChangeListViewModel>(Window!,
+        var result = await _windowService.ShowDialogAsync<ShotChangeListWindow, ShotChangeListViewModel>(Window,
             vm => { vm.Initialize(AudioVisualizer?.ShotChanges ?? new List<double>()); });
 
         if (result.OKProssed && AudioVisualizer != null)
@@ -8836,6 +8877,14 @@ public partial class MainViewModel :
                 for (var i = 0; i < orderedList.Count; i++)
                 {
                     var dp = orderedList[i];
+
+                    if (Se.Settings.General.CurrentVideoOffsetInMs != 0)
+                    {
+                        var offset = TimeSpan.FromMilliseconds(Se.Settings.General.CurrentVideoOffsetInMs);
+                        dp = new SubtitleLineViewModel(dp);
+                        dp.StartTime = dp.StartTime - offset;
+                    }
+
                     subtitle.Add(dp);
                 }
 
