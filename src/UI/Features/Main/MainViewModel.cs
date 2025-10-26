@@ -8718,14 +8718,8 @@ public partial class MainViewModel :
             }
 
             var keys = _shortcutManager.GetActiveKeys().Select(p => p.ToString()).ToList();
-            if (keys.Count == 1 && keys[0] == "LeftCtrl")
-            {
-                return;
-            }
-
             var hashCode = ShortCut.CalculateHash(keys, ShortcutCategory.General.ToString());
 
-            ShowStatus(hashCode);
             var rc = _shortcutManager.CheckShortcuts(ShortcutCategory.General.ToString().ToLowerInvariant());
             if (rc != null)
             {
@@ -8737,7 +8731,6 @@ public partial class MainViewModel :
 
     public void OnKeyUpHandler(object? sender, KeyEventArgs e)
     {
-        ShowStatus("KeyUp: " + e.Key);
         _shortcutManager.OnKeyReleased(this, e);
     }
 
