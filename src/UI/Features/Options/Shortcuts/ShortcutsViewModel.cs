@@ -1,9 +1,11 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Shared.PickColor;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
@@ -11,7 +13,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts;
 
@@ -28,6 +29,7 @@ public partial class ShortcutsViewModel : ObservableObject
     [ObservableProperty] private bool _altIsSelected;
     [ObservableProperty] private bool _shiftIsSelected;
     [ObservableProperty] private bool _winIsSelected;
+    [ObservableProperty] private bool _isConfigureVisible;
     [ObservableProperty] private ShortcutTreeNode? _selectedNode;
 
     public bool OkPressed { get; set; }
@@ -37,6 +39,17 @@ public partial class ShortcutsViewModel : ObservableObject
 
     private List<ShortCut> _allShortcuts;
     private readonly IWindowService _windowService;
+    private List<IRelayCommand> _configurableCommands;
+    private Color _color1;
+    private Color _color2;
+    private Color _color3;
+    private Color _color4;
+    private Color _color5;
+    private Color _color6;
+    private Color _color7;
+    private Color _color8;
+    private string _surround1Left;
+    private string _surround1Right;
 
     // Add this flag to prevent updates during selection changes
     private bool _isLoadingSelection = false;
@@ -55,6 +68,17 @@ public partial class ShortcutsViewModel : ObservableObject
         SelectedFilter = _filters[0];
         ShortcutsTreeView = new TreeView();
         _allShortcuts = new List<ShortCut>();
+        _configurableCommands = new List<IRelayCommand>();
+        _color1 = Se.Settings.Color1.FromHexToColor();
+        _color2 = Se.Settings.Color2.FromHexToColor();
+        _color3 = Se.Settings.Color3.FromHexToColor();
+        _color4 = Se.Settings.Color4.FromHexToColor();
+        _color5 = Se.Settings.Color5.FromHexToColor();
+        _color6 = Se.Settings.Color6.FromHexToColor();
+        _color7 = Se.Settings.Color7.FromHexToColor();
+        _color8 = Se.Settings.Color8.FromHexToColor();
+        _surround1Left = Se.Settings.Surround1Left;
+        _surround1Right = Se.Settings.Surround1Right;
     }
 
     private static IEnumerable<string> GetShortcutKeys()
@@ -85,6 +109,15 @@ public partial class ShortcutsViewModel : ObservableObject
         MainViewModel = vm;
         _allShortcuts = ShortcutsMain.GetAllShortcuts(vm);
         UpdateVisibleShortcuts(string.Empty);
+
+        _configurableCommands.Add(vm.SetColor1Command);
+        _configurableCommands.Add(vm.SetColor2Command);
+        _configurableCommands.Add(vm.SetColor3Command);
+        _configurableCommands.Add(vm.SetColor4Command);
+        _configurableCommands.Add(vm.SetColor5Command);
+        _configurableCommands.Add(vm.SetColor6Command);
+        _configurableCommands.Add(vm.SetColor7Command);
+        _configurableCommands.Add(vm.SetColor8Command);
     }
 
     internal void UpdateVisibleShortcuts(string searchText)
@@ -172,10 +205,121 @@ public partial class ShortcutsViewModel : ObservableObject
         }
 
         Se.Settings.Shortcuts = shortcuts;
+
+        Se.Settings.Color1 = _color1.FromColorToHex();
+        Se.Settings.Color2 = _color2.FromColorToHex();
+        Se.Settings.Color3 = _color3.FromColorToHex();
+        Se.Settings.Color4 = _color4.FromColorToHex();
+        Se.Settings.Color5 = _color5.FromColorToHex();
+        Se.Settings.Color6 = _color6.FromColorToHex();
+        Se.Settings.Color7 = _color7.FromColorToHex();
+        Se.Settings.Color8 = _color8.FromColorToHex();
+        Se.Settings.Surround1Left = _surround1Left;
+        Se.Settings.Surround1Right = _surround1Right;
+
         Se.SaveSettings();
 
         OkPressed = true;
         Window?.Close();
+    }
+
+    [RelayCommand]
+    private async Task Configure()
+    {
+        var node = SelectedNode;
+        if (Window == null || MainViewModel == null || node?.ShortCut == null)
+        {
+            return;
+        }
+
+        if (node.ShortCut.Action == MainViewModel.SetColor1Command)
+        {
+            var result = await _windowService.ShowDialogAsync<PickColorWindow, PickColorViewModel>(Window, vm =>
+            {
+                vm.Initialize(_color1);
+            });
+            if (result.OkPressed)
+            {
+                _color1 = result.SelectedColor;
+            }
+        }
+        else if (node.ShortCut.Action == MainViewModel.SetColor2Command)
+        {
+            var result = await _windowService.ShowDialogAsync<PickColorWindow, PickColorViewModel>(Window, vm =>
+            {
+                vm.Initialize(_color2);
+            });
+            if (result.OkPressed)
+            {
+                _color2 = result.SelectedColor;
+            }
+        }
+        else if (node.ShortCut.Action == MainViewModel.SetColor3Command)
+        {
+            var result = await _windowService.ShowDialogAsync<PickColorWindow, PickColorViewModel>(Window, vm =>
+            {
+                vm.Initialize(_color3);
+            });
+            if (result.OkPressed)
+            {
+                _color3 = result.SelectedColor;
+            }
+        }
+        else if (node.ShortCut.Action == MainViewModel.SetColor4Command)
+        {
+            var result = await _windowService.ShowDialogAsync<PickColorWindow, PickColorViewModel>(Window, vm =>
+            {
+                vm.Initialize(_color4);
+            });
+            if (result.OkPressed)
+            {
+                _color4 = result.SelectedColor;
+            }
+        }
+        else if (node.ShortCut.Action == MainViewModel.SetColor5Command)
+        {
+            var result = await _windowService.ShowDialogAsync<PickColorWindow, PickColorViewModel>(Window, vm =>
+            {
+                vm.Initialize(_color5);
+            });
+            if (result.OkPressed)
+            {
+                _color5 = result.SelectedColor;
+            }
+        }
+        else if (node.ShortCut.Action == MainViewModel.SetColor6Command)
+        {
+            var result = await _windowService.ShowDialogAsync<PickColorWindow, PickColorViewModel>(Window, vm =>
+            {
+                vm.Initialize(_color6);
+            });
+            if (result.OkPressed)
+            {
+                _color6 = result.SelectedColor;
+            }
+        }
+        else if (node.ShortCut.Action == MainViewModel.SetColor7Command)
+        {
+            var result = await _windowService.ShowDialogAsync<PickColorWindow, PickColorViewModel>(Window, vm =>
+            {
+                vm.Initialize(_color7);
+            });
+            if (result.OkPressed)
+            {
+                _color7 = result.SelectedColor;
+            }
+        }
+        else if (node.ShortCut.Action == MainViewModel.SetColor8Command)
+        {
+            var result = await _windowService.ShowDialogAsync<PickColorWindow, PickColorViewModel>(Window, vm =>
+            {
+                vm.Initialize(_color8);
+            });
+            if (result.OkPressed)
+            {
+                _color8 = result.SelectedColor;
+            }
+        }
     }
 
     private static bool IsEmpty(ShortCut shortcut)
@@ -356,8 +500,11 @@ public partial class ShortcutsViewModel : ObservableObject
             node.ShortCut == null)
         {
             IsControlsEnabled = false;
+            IsConfigureVisible = false;
             return;
         }
+
+        IsConfigureVisible = _configurableCommands.Contains(node.ShortCut.Action);
 
         // Set flag to prevent UpdateShortcut from running during selection load
         _isLoadingSelection = true;

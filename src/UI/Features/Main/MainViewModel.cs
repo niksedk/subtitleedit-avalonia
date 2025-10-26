@@ -4008,6 +4008,69 @@ public partial class MainViewModel :
         _shortcutManager.ClearKeys();
     }
 
+    private void ToggleColor(Color color)
+    {
+        var selectedItems = _selectedSubtitles?.ToList() ?? [];
+        if (selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        //TODO: toggle
+        _colorService.RemoveColorTags(selectedItems);
+        _colorService.SetColor(selectedItems, color, GetUpdateSubtitle(), SelectedSubtitleFormat);
+
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private void SetColor1()
+    {
+        ToggleColor(Se.Settings.Color1.FromHexToColor());
+    }
+
+    [RelayCommand]
+    private void SetColor2()
+    {
+        ToggleColor(Se.Settings.Color2.FromHexToColor());
+    }
+
+    [RelayCommand]
+    private void SetColor3()
+    {
+        ToggleColor(Se.Settings.Color3.FromHexToColor());
+    }
+
+    [RelayCommand]
+    private void SetColor4()
+    {
+        ToggleColor(Se.Settings.Color4.FromHexToColor());
+    }
+
+    [RelayCommand]
+    private void SetColor5()
+    {
+        ToggleColor(Se.Settings.Color5.FromHexToColor());
+    }
+
+    [RelayCommand]
+    private void SetColor6()
+    {
+        ToggleColor(Se.Settings.Color6.FromHexToColor());
+    }
+
+    [RelayCommand]
+    private void SetColor7()
+    {
+        ToggleColor(Se.Settings.Color7.FromHexToColor());
+    }
+
+    [RelayCommand]
+    private void SetColor8()
+    {
+        ToggleColor(Se.Settings.Color8.FromHexToColor());
+    }
+
     [RelayCommand]
     private void RemoveFormattingAll()
     {
@@ -8553,6 +8616,10 @@ public partial class MainViewModel :
                 }
 
                 var relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.SubtitleGrid.ToString());
+                if (relayCommand == null)
+                {
+                    relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.SubtitleGridAndTextBox.ToString());
+                }
                 if (relayCommand != null)
                 {
                     keyEventArgs.Handled = true;
@@ -8564,6 +8631,17 @@ public partial class MainViewModel :
             if (AudioVisualizer != null && AudioVisualizer.IsFocused)
             {
                 var relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.Waveform.ToString());
+                if (relayCommand != null)
+                {
+                    keyEventArgs.Handled = true;
+                    relayCommand.Execute(null);
+                    return;
+                }
+            }
+
+            if (EditTextBox.IsFocused)
+            {
+                var relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.SubtitleGridAndTextBox.ToString());
                 if (relayCommand != null)
                 {
                     keyEventArgs.Handled = true;

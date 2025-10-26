@@ -231,6 +231,14 @@ public static class ShortcutsMain
         { nameof(MainViewModel.GoToNextErrorCommand), Se.Language.Options.Shortcuts.GoToNextError },
         { nameof(MainViewModel.ShowAddToNameListCommand), Se.Language.Options.Shortcuts.AddNameToNameList },
         { nameof(MainViewModel.ShowFindDoubleWordsCommand), Se.Language.Options.Shortcuts.FindDoubleWords },
+        { nameof(MainViewModel.SetColor1Command), string.Format(Se.Language.Options.Shortcuts.ColorX, "1") },
+        { nameof(MainViewModel.SetColor2Command), string.Format(Se.Language.Options.Shortcuts.ColorX, "2") },
+        { nameof(MainViewModel.SetColor3Command), string.Format(Se.Language.Options.Shortcuts.ColorX, "3") },
+        { nameof(MainViewModel.SetColor4Command), string.Format(Se.Language.Options.Shortcuts.ColorX, "4") },
+        { nameof(MainViewModel.SetColor5Command), string.Format(Se.Language.Options.Shortcuts.ColorX, "5") },
+        { nameof(MainViewModel.SetColor6Command), string.Format(Se.Language.Options.Shortcuts.ColorX, "6") },
+        { nameof(MainViewModel.SetColor7Command), string.Format(Se.Language.Options.Shortcuts.ColorX, "7") },
+        { nameof(MainViewModel.SetColor8Command), string.Format(Se.Language.Options.Shortcuts.ColorX, "8") },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -410,6 +418,14 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.GoToNextErrorCommand, nameof(vm.GoToNextErrorCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowAddToNameListCommand, nameof(vm.ShowAddToNameListCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowFindDoubleWordsCommand, nameof(vm.ShowFindDoubleWordsCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.SetColor1Command, nameof(vm.SetColor1Command), ShortcutCategory.SubtitleGridAndTextBox);
+        AddShortcut(shortcuts, vm.SetColor2Command, nameof(vm.SetColor2Command), ShortcutCategory.SubtitleGridAndTextBox);
+        AddShortcut(shortcuts, vm.SetColor3Command, nameof(vm.SetColor3Command), ShortcutCategory.SubtitleGridAndTextBox);
+        AddShortcut(shortcuts, vm.SetColor4Command, nameof(vm.SetColor4Command), ShortcutCategory.SubtitleGridAndTextBox);
+        AddShortcut(shortcuts, vm.SetColor5Command, nameof(vm.SetColor5Command), ShortcutCategory.SubtitleGridAndTextBox);
+        AddShortcut(shortcuts, vm.SetColor6Command, nameof(vm.SetColor6Command), ShortcutCategory.SubtitleGridAndTextBox);
+        AddShortcut(shortcuts, vm.SetColor7Command, nameof(vm.SetColor7Command), ShortcutCategory.SubtitleGridAndTextBox);
+        AddShortcut(shortcuts, vm.SetColor8Command, nameof(vm.SetColor8Command), ShortcutCategory.SubtitleGridAndTextBox);
 
         return shortcuts;
     }

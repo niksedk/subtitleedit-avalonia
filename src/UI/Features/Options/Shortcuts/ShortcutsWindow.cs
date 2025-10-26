@@ -201,7 +201,14 @@ public class ShortcutsWindow : Window
         var buttonBrowse = UiUtil.MakeButtonBrowse(vm.ShowGetKeyCommand);
         editPanel.Children.Add(buttonBrowse);
         buttonBrowse.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
-        buttonBrowse.Margin = new Thickness(0, 0, 10, 0);
+        buttonBrowse.Margin = new Thickness(0, 0, 9, 0);
+
+        // configure button
+        var buttonConfig = UiUtil.MakeButton(vm.ConfigureCommand, IconNames.Settings);
+        editPanel.Children.Add(buttonConfig);
+        buttonConfig.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
+        buttonConfig.Bind(IsVisibleProperty, new Binding(nameof(vm.IsConfigureVisible)) { Source = vm });
+        buttonConfig.Margin = new Thickness(0, 0, 10, 0);
 
         // Reset button
         var buttonReset = UiUtil.MakeButton(Se.Language.General.Reset, vm.ResetShortcutCommand);

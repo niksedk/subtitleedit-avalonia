@@ -25,6 +25,7 @@ using Nikse.SubtitleEdit.Features.Ocr.NOcr;
 using Nikse.SubtitleEdit.Features.Options.Language;
 using Nikse.SubtitleEdit.Features.Options.Settings;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
+using Nikse.SubtitleEdit.Features.Options.Shortcuts.SurroundWith;
 using Nikse.SubtitleEdit.Features.Options.WordLists;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.AddToNamesList;
@@ -261,6 +262,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<SplitBreakLongLinesViewModel>();
         collection.AddTransient<SplitSubtitleViewModel>();
         collection.AddTransient<StatisticsViewModel>();
+        collection.AddTransient<SurroundWithViewModel>();
         collection.AddTransient<TextToSpeechViewModel>();
         collection.AddTransient<TranslateSettingsViewModel>();
         collection.AddTransient<TransparentSettingsViewModel>();

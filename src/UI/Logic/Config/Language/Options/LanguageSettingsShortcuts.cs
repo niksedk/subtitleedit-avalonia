@@ -220,6 +220,7 @@ public class LanguageSettingsShortcuts
     public string GoToPreviousError { get; set; }
     public string AddNameToNameList { get; set; }
     public string FindDoubleWords { get; set; }
+    public string ColorX { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -443,5 +444,6 @@ public class LanguageSettingsShortcuts
         GoToNextError = "GoTo next error";
         AddNameToNameList = "Add name to name list";
         FindDoubleWords = "Find double words";
+        ColorX = "Color {0}";
     }
 }

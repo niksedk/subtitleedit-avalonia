@@ -10,7 +10,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 
@@ -18,6 +17,20 @@ public class Se
 {
     public SeGeneral General { get; set; } = new();
     public List<SeShortCut> Shortcuts { get; set; }
+    public string Color1 { get; set; } = "#ffff00ff";
+    public string Color2 { get; set; } = "#ff0000ff";
+    public string Color3 { get; set; } = "#00ff00ff";
+    public string Color4 { get; set; } = "#00ffffff";
+    public string Color5 { get; set; } = "#000000ff";
+    public string Color6 { get; set; } = "#ffffffff";
+    public string Color7 { get; set; } = "#ffa500ff";
+    public string Color8 { get; set; } = "#ffc0cbff";
+    public string Surround1Right { get; set; } = "♪";
+    public string Surround1Left { get; set; } = "♪";
+    public string Surround2Left { get; set; } = "🎵";
+    public string Surround2Right { get; set; } = "🎵";
+    public string Surround3Left { get; set; } = "♫";
+    public string Surround3Right { get; set; } = "♫";
     public SeFile File { get; set; } = new();
     public SeEdit Edit { get; set; } = new();
     public SeTools Tools { get; set; } = new();
@@ -219,9 +232,9 @@ public class Se
                     ReadCommentHandling = JsonCommentHandling.Skip,
                     AllowTrailingCommas = true
                 };
-                
+
                 options.GetType().GetProperty("IgnoreUnknownProperties")?.SetValue(options, true);
-                
+
                 Settings = JsonSerializer.Deserialize<Se>(json)!;
             }
             catch (Exception exception)
