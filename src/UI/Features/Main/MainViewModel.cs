@@ -111,7 +111,6 @@ using Nikse.SubtitleEdit.Features.Shared.AddToNamesList;
 using Nikse.SubtitleEdit.Features.Shared.SetVideoOffset;
 using Nikse.SubtitleEdit.Features.SpellCheck.FindDoubleWords;
 using static Nikse.SubtitleEdit.Logic.FindService;
-using SetVideoOffsetViewModel = Nikse.SubtitleEdit.Features.Shared.SetVideoOffset.SetVideoOffsetViewModel;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -2779,10 +2778,15 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowVideoSetOffset()
     {
-        var result = await _windowService.ShowDialogAsync<SetVideoOffsetWindow, SetVideoOffsetViewModel >(Window!);
+        var result = await _windowService.ShowDialogAsync<SetVideoOffsetWindow, SetVideoOffsetViewModel>(Window!);
 
-        if (result.OkPressed)
+        if (result.OkPressed && result.TimeOffset.HasValue)
         {
+            var offset = result.TimeOffset.Value;
+            foreach (var s in Subtitles)
+            {
+                s.StartTime = s.StartTime + offset;
+            }
         }
 
         _shortcutManager.ClearKeys();
@@ -7242,7 +7246,7 @@ public partial class MainViewModel :
             return result;
         }
 
-        var text = GetUpdateSubtitle().ToText(SelectedSubtitleFormat);
+        var text = GetUpdateSubtitle(true).ToText(SelectedSubtitleFormat);
 
         try
         {
@@ -7282,33 +7286,46 @@ public partial class MainViewModel :
             return;
         }
 
-        var text = GetUpdateSubtitleOriginal().ToText(SelectedSubtitleFormat);
+        var text = GetUpdateSubtitleOriginal(true).ToText(SelectedSubtitleFormat);
         await File.WriteAllTextAsync(_subtitleFileNameOriginal, text);
         _changeSubtitleHashOriginal = GetFastHashOriginal();
         _lastOpenSaveFormat = SelectedSubtitleFormat;
     }
 
-    public Subtitle GetUpdateSubtitle()
+    public Subtitle GetUpdateSubtitle(bool subtractVideoOffset = false)
     {
+        var videoOffsetMs = Se.Settings.General.CurrentVideoOffsetInMs;
         _subtitle.Paragraphs.Clear();
         foreach (var line in Subtitles)
         {
-            _subtitle.Paragraphs.Add(line.ToParagraph(SelectedSubtitleFormat));
+            var p = line.ToParagraph(SelectedSubtitleFormat);
+            if (subtractVideoOffset && videoOffsetMs != 0)
+            {
+                p.StartTime.TotalMilliseconds -= videoOffsetMs;
+                p.EndTime.TotalMilliseconds -= videoOffsetMs;
+            }
+            _subtitle.Paragraphs.Add(p);
         }
 
         return _subtitle;
     }
 
-    public Subtitle GetUpdateSubtitleOriginal()
+    public Subtitle GetUpdateSubtitleOriginal(bool subtractVideoOffset = false)
     {
+        var videoOffsetMs = Se.Settings.General.CurrentVideoOffsetInMs;
         _subtitleOriginal ??= new Subtitle();
-
         _subtitleOriginal.OriginalFormat ??= SelectedSubtitleFormat;
 
         _subtitleOriginal.Paragraphs.Clear();
         foreach (var line in Subtitles)
         {
-            _subtitleOriginal.Paragraphs.Add(line.ToParagraphOriginal(SelectedSubtitleFormat));
+            var p = line.ToParagraphOriginal(SelectedSubtitleFormat);
+            if (subtractVideoOffset && videoOffsetMs != 0)
+            {
+                p.StartTime.TotalMilliseconds -= videoOffsetMs;
+                p.EndTime.TotalMilliseconds -= videoOffsetMs;
+            }
+            _subtitleOriginal.Paragraphs.Add(p);
         }
 
         return _subtitleOriginal;

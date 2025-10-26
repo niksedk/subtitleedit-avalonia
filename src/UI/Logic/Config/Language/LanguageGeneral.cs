@@ -1,8 +1,4 @@
-﻿using Avalonia.Controls;
-using System;
-using System.Runtime.Intrinsics.Arm;
-
-namespace Nikse.SubtitleEdit.Logic.Config.Language;
+﻿namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
 public class LanguageGeneral
 {
@@ -473,6 +469,9 @@ public class LanguageGeneral
     public string Reason { get; set; }
     public string OpenContainingFolder { get; set; }
     public string OpenFile { get; set; }
+    public string RelativeToCurrentVideoPosition { get; set; }
+    public string KeepExistingTimeCodes { get; set; }
+    public string TenHours { get; set; }
 
     public LanguageGeneral()
     {
@@ -942,5 +941,8 @@ public class LanguageGeneral
         Reason = "Reason";
         OpenContainingFolder = "Open containing folder";
         OpenFile = "Open file";
+        RelativeToCurrentVideoPosition = "Relative to current video position";
+        KeepExistingTimeCodes = "Keep existing time codes (do not add video offset)";
+        TenHours = "10 hours";
     }
 }

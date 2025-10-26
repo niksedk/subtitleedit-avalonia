@@ -47,7 +47,7 @@ public class LanguageMainMenu
     public string MergeLinesWithSameText { get; set; }
     public string MergeLinesWithSameTimeCodes { get; set; }
     public string SplitBreakLongLines { get; set; }
-    public string MergeShortLines { get; internal set; }
+    public string MergeShortLines { get; set; }
     public string RemoveTextForHearingImpaired { get; set; }
     public string JoinSubtitles { get; set; }
     public string SplitSubtitle { get; set; }

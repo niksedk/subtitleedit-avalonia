@@ -31,6 +31,11 @@ public class MpvReloader : IMpvReloader
         try
         {
             subtitle = new Subtitle(subtitle, false);
+            if (Se.Settings.General.CurrentVideoOffsetInMs != 0)
+            {
+                subtitle.AddTimeToAllParagraphs(TimeSpan.FromMilliseconds(-Se.Settings.General.CurrentVideoOffsetInMs));
+            }
+
             if (SmpteMode)
             {
                 foreach (var paragraph in subtitle.Paragraphs)

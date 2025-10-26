@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Shared.SetVideoOffset;
 
@@ -19,6 +20,7 @@ public partial class SetVideoOffsetViewModel : ObservableObject
 
     public SetVideoOffsetViewModel()
     {
+        TimeOffset = TimeSpan.FromMilliseconds(Se.Settings.General.CurrentVideoOffsetInMs);
     }
 
     public void Initialize()
@@ -26,8 +28,21 @@ public partial class SetVideoOffsetViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void SetTenHours()
+    {
+        TimeOffset = TimeSpan.FromHours(10);
+    }
+
+    [RelayCommand]
     private void Ok()
     {
+        if (TimeOffset == null)
+        {
+            Cancel();
+            return;
+        }
+
+        Se.Settings.General.CurrentVideoOffsetInMs = TimeOffset.Value.TotalMilliseconds;
         OkPressed = true;
         Window?.Close();
     }

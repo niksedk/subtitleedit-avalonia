@@ -10,7 +10,7 @@ namespace Nikse.SubtitleEdit.Features.Shared.SetVideoOffset;
 
 public class SetVideoOffsetWindow : Window
 {
-    public SetVideoOffsetWindow(SetVideoOffset.SetVideoOffsetViewModel vm)
+    public SetVideoOffsetWindow(SetVideoOffsetViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.General.SetVideoOffset;
@@ -28,25 +28,30 @@ public class SetVideoOffsetWindow : Window
             }
         };
 
-        var panel = new StackPanel
+        var panelTimeCode = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Spacing = 15,
             Margin = new Thickness(10, 20, 10, 10),
             Children =
             {
-                new Label
-                {
-                    Content = Se.Language.General.VideoOffset,
-                    VerticalAlignment = VerticalAlignment.Center,
-                },
+                UiUtil.MakeLabel(Se.Language.General.VideoOffset),
                 timeCodeUpDownOffset,
+                UiUtil.MakeButton(Se.Language.General.TenHours, vm.SetTenHoursCommand).WithFontSize(10),
             }
         };
 
+        var checkBoxRelativeToCurrentVideoPosition = UiUtil.MakeCheckBox(Se.Language.General.RelativeToCurrentVideoPosition,
+            vm,
+            nameof(vm.RelativeToCurrentVideoPosition));
+
+        var checkBoxKeepTimeCodes = UiUtil.MakeCheckBox(Se.Language.General.KeepExistingTimeCodes,
+            vm,
+            nameof(vm.KeepTimeCodes));
+
         var buttonPanel = UiUtil.MakeButtonBar(
-            UiUtil.MakeButtonOk(vm.OkCommand), 
-            UiUtil.MakeButton(Se.Language.General.Reset, vm.ResetCommand), 
+            UiUtil.MakeButtonOk(vm.OkCommand),
+            UiUtil.MakeButton(Se.Language.General.Reset, vm.ResetCommand),
             UiUtil.MakeButtonCancel(vm.CancelCommand));
 
         var contentPanel = new StackPanel
@@ -56,7 +61,9 @@ public class SetVideoOffsetWindow : Window
             Margin = UiUtil.MakeWindowMargin(),
             Children =
             {
-                panel,
+                panelTimeCode,
+                checkBoxRelativeToCurrentVideoPosition,
+                checkBoxKeepTimeCodes,
                 buttonPanel,
             }
         };

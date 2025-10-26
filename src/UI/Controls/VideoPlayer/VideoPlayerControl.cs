@@ -555,7 +555,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                 else
                 {
                     ProgressText =
-                        $"{TimeCode.FromSeconds(pos).ToShortDisplayString()} / {TimeCode.FromSeconds(Duration).ToShortDisplayString()}";
+                        $"{TimeCode.FromSeconds(pos + Se.Settings.General.CurrentVideoOffsetInMs / 1000.0).ToShortDisplayString()} / {TimeCode.FromSeconds(Duration + Se.Settings.General.CurrentVideoOffsetInMs / 1000.0).ToShortDisplayString()}";
                 }
 
 
