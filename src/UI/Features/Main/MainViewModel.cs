@@ -2796,7 +2796,7 @@ public partial class MainViewModel :
         if (Window == null)
         {
             return;
-        }   
+        }
 
         var result = await _windowService.ShowDialogAsync<SetVideoOffsetWindow, SetVideoOffsetViewModel>(Window);
 
@@ -4016,11 +4016,17 @@ public partial class MainViewModel :
             return;
         }
 
-        //TODO: toggle
-        _colorService.RemoveColorTags(selectedItems);
-        _colorService.SetColor(selectedItems, color, GetUpdateSubtitle(), SelectedSubtitleFormat);
+        if (_colorService.ContainsColor(color, selectedItems.First(), SelectedSubtitleFormat))
+        {
+            _colorService.RemoveColorTags(selectedItems);
+        }
+        else
+        {
+            _colorService.RemoveColorTags(selectedItems);
+            _colorService.SetColor(selectedItems, color, GetUpdateSubtitle(), SelectedSubtitleFormat);
+        }
 
-        _shortcutManager.ClearKeys();
+        _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
@@ -4069,6 +4075,67 @@ public partial class MainViewModel :
     private void SetColor8()
     {
         ToggleColor(Se.Settings.Color8.FromHexToColor());
+    }
+
+    [RelayCommand]
+    private void RemoveColor()
+    {
+        var selectedItems = _selectedSubtitles?.ToList() ?? [];
+        if (selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        _colorService.RemoveColorTags(selectedItems);
+    }
+
+    private void SurroundWith(string surround1Left, string surround1Right)
+    {
+        var selectedItems = _selectedSubtitles?.ToList() ?? [];
+        if (selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        var first = selectedItems.First();
+        var haveSurround = first.Text.StartsWith(surround1Left) && first.Text.EndsWith(surround1Right);
+
+        // add toggle functionality
+        foreach (var item in selectedItems)
+        {
+            if (haveSurround)
+            {
+                if (item.Text.StartsWith(surround1Left) && item.Text.EndsWith(surround1Right))
+                {
+                    item.Text = item.Text.Substring(surround1Left.Length,
+                        item.Text.Length - surround1Left.Length - surround1Right.Length);
+                }
+            }
+            else
+            {
+                item.Text = surround1Left + item.Text + surround1Right;
+            }
+        }
+
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void SurroundWith1()
+    {
+        SurroundWith(Se.Settings.Surround1Left, Se.Settings.Surround1Right);
+    }
+
+    [RelayCommand]
+    private void SurroundWith2()
+    {
+        SurroundWith(Se.Settings.Surround2Left, Se.Settings.Surround2Right);
+    }
+
+    [RelayCommand]
+    private void SurroundWith3()
+    {
+        SurroundWith(Se.Settings.Surround3Left, Se.Settings.Surround3Right);
     }
 
     [RelayCommand]

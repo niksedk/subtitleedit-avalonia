@@ -4,6 +4,7 @@ using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Options.Shortcuts.SurroundWith;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.PickColor;
 using Nikse.SubtitleEdit.Logic;
@@ -50,6 +51,10 @@ public partial class ShortcutsViewModel : ObservableObject
     private Color _color8;
     private string _surround1Left;
     private string _surround1Right;
+    private string _surround2Left;
+    private string _surround2Right;
+    private string _surround3Left;
+    private string _surround3Right;
 
     // Add this flag to prevent updates during selection changes
     private bool _isLoadingSelection = false;
@@ -79,6 +84,11 @@ public partial class ShortcutsViewModel : ObservableObject
         _color8 = Se.Settings.Color8.FromHexToColor();
         _surround1Left = Se.Settings.Surround1Left;
         _surround1Right = Se.Settings.Surround1Right;
+        _surround2Left = Se.Settings.Surround2Left;
+        _surround2Right = Se.Settings.Surround2Right;
+        _surround3Left = Se.Settings.Surround3Left;
+        _surround3Right = Se.Settings.Surround3Right;
+
     }
 
     private static IEnumerable<string> GetShortcutKeys()
@@ -118,6 +128,9 @@ public partial class ShortcutsViewModel : ObservableObject
         _configurableCommands.Add(vm.SetColor6Command);
         _configurableCommands.Add(vm.SetColor7Command);
         _configurableCommands.Add(vm.SetColor8Command);
+        _configurableCommands.Add(vm.SurroundWith1Command);
+        _configurableCommands.Add(vm.SurroundWith2Command);
+        _configurableCommands.Add(vm.SurroundWith3Command);
     }
 
     internal void UpdateVisibleShortcuts(string searchText)
@@ -216,6 +229,10 @@ public partial class ShortcutsViewModel : ObservableObject
         Se.Settings.Color8 = _color8.FromColorToHex();
         Se.Settings.Surround1Left = _surround1Left;
         Se.Settings.Surround1Right = _surround1Right;
+        Se.Settings.Surround2Left = _surround2Left;
+        Se.Settings.Surround2Right = _surround2Right;
+        Se.Settings.Surround3Left = _surround3Left;
+        Se.Settings.Surround3Right = _surround3Right;
 
         Se.SaveSettings();
 
@@ -318,6 +335,42 @@ public partial class ShortcutsViewModel : ObservableObject
             if (result.OkPressed)
             {
                 _color8 = result.SelectedColor;
+            }
+        }
+        else if (node.ShortCut.Action == MainViewModel.SurroundWith1Command)
+        {
+            var result = await _windowService.ShowDialogAsync<SurroundWithWindow, SurroundWithViewModel>(Window, vm =>
+            {
+                vm.Initialize(_surround1Left, _surround1Right);
+            });
+            if (result.OkPressed)
+            {
+                _surround1Left = result.Before;
+                _surround1Right = result.After;
+            }
+        }
+        else if (node.ShortCut.Action == MainViewModel.SurroundWith2Command)
+        {
+            var result = await _windowService.ShowDialogAsync<SurroundWithWindow, SurroundWithViewModel>(Window, vm =>
+            {
+                vm.Initialize(_surround2Left, _surround2Right);
+            });
+            if (result.OkPressed)
+            {
+                _surround2Left = result.Before;
+                _surround2Right = result.After;
+            }
+        }
+        else if (node.ShortCut.Action == MainViewModel.SurroundWith3Command)
+        {
+            var result = await _windowService.ShowDialogAsync<SurroundWithWindow, SurroundWithViewModel>(Window, vm =>
+            {
+                vm.Initialize(_surround3Left, _surround3Right);
+            });
+            if (result.OkPressed)
+            {
+                _surround3Left = result.Before;
+                _surround3Right = result.After;
             }
         }
     }

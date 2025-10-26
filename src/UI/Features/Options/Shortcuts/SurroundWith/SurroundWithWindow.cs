@@ -1,4 +1,3 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
@@ -14,20 +13,16 @@ public class SurroundWithWindow : Window
         SizeToContent = SizeToContent.WidthAndHeight;
         MinWidth = 400;
         CanResize = false;
-        Title = Se.Language.Options.Shortcuts.DetectKey;
+        Title = Se.Language.Options.Shortcuts.SurroundWith;
         vm.Window = this;
         DataContext = vm;
 
-        var labelShortcutName = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.ShortCutName));
-        labelShortcutName.HorizontalAlignment = HorizontalAlignment.Center;
-        labelShortcutName.Margin = new Thickness(5, 10, 5, 10);
+        var labelBefore = UiUtil.MakeLabel(Se.Language.General.Before);
+        var textBoxBefore = UiUtil.MakeTextBox(200, vm, nameof(vm.Before)); 
 
-        var labelKey = UiUtil.MakeLabel(Se.Language.Options.Shortcuts.PressAKey)
-            .WithBindText(vm, nameof(vm.InfoText))
-            .WithBold();
-        labelKey.HorizontalAlignment = HorizontalAlignment.Center;
-        labelKey.Margin = new Thickness(5, 10, 5, 10);
-        
+        var labelAfter = UiUtil.MakeLabel(Se.Language.General.After);   
+        var textBoxAfter = UiUtil.MakeTextBox(200, vm, nameof(vm.After));
+
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
@@ -42,7 +37,8 @@ public class SurroundWithWindow : Window
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
@@ -51,14 +47,15 @@ public class SurroundWithWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(labelShortcutName, 0);
-        grid.Add(labelKey, 1);
-        grid.Add(buttonPanel, 2);
+        grid.Add(labelBefore, 0);
+        grid.Add(textBoxBefore, 0, 1);
+        grid.Add(labelAfter, 1);
+        grid.Add(textBoxAfter, 1, 1);
+        grid.Add(buttonPanel, 2, 0, 1, 2);
 
         Content = grid;
         
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
-        KeyUp += vm.KeyUp;
         KeyDown += (s, e) => vm.OnKeyDown(e);   
     }
 }

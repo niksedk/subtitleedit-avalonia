@@ -221,6 +221,9 @@ public class LanguageSettingsShortcuts
     public string AddNameToNameList { get; set; }
     public string FindDoubleWords { get; set; }
     public string ColorX { get; set; }
+    public string RemoveColor { get; set; }
+    public string SurroundWith { get; set; }
+    public string SurroundWithX { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -445,5 +448,8 @@ public class LanguageSettingsShortcuts
         AddNameToNameList = "Add name to name list";
         FindDoubleWords = "Find double words";
         ColorX = "Color {0}";
+        RemoveColor = "Remove color";
+        SurroundWith = "Surround with...";
+        SurroundWithX = "Surround with \"{0}\"";
     }
 }
