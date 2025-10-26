@@ -709,6 +709,8 @@ public partial class MainViewModel :
         ShowColumnOriginalText = false;
         _subtitle.Paragraphs.Clear();
         Subtitles.Clear();
+        Se.Settings.General.CurrentVideoIsSmpte = false;
+        Se.Settings.General.CurrentVideoOffsetInMs = 0;
 
         if (format != null)
         {

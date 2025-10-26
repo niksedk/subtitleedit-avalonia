@@ -50,7 +50,7 @@ public class PromptFileSavedWindow : Window
 
         Content = grid;
         
-        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        Activated += delegate { buttonDone.Focus(); }; // hack to make OnKeyDown work
         KeyDown += (s, e) => vm.OnKeyDown(e);  
     }
 }

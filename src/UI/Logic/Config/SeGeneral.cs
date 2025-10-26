@@ -93,6 +93,9 @@ public class SeGeneral
     public bool SelectCurrentSubtitleWhilePlaying { get; set; }
     public bool WriteAn2Tag { get; set; }
 
+    public double CurrentVideoOffsetInMs = 0;
+    public bool CurrentVideoIsSmpte = false;
+
     public SeGeneral()
     {
         Version = Se.Version;

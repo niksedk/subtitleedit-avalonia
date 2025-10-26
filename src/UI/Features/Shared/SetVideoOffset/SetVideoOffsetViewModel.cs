@@ -9,10 +9,13 @@ namespace Nikse.SubtitleEdit.Features.Shared.SetVideoOffset;
 public partial class SetVideoOffsetViewModel : ObservableObject
 {
     [ObservableProperty] private TimeSpan? _timeOffset;
-    
+    [ObservableProperty] private bool _relativeToCurrentVideoPosition;
+    [ObservableProperty] private bool _keepTimeCodes;
+
     public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
+    public bool ResetPressed { get; private set; }
 
     public SetVideoOffsetViewModel()
     {
@@ -22,15 +25,22 @@ public partial class SetVideoOffsetViewModel : ObservableObject
     {
     }
 
-    [RelayCommand]                   
-    private void Ok() 
+    [RelayCommand]
+    private void Ok()
     {
         OkPressed = true;
         Window?.Close();
     }
-    
-    [RelayCommand]                   
-    private void Cancel() 
+
+    [RelayCommand]
+    private void Reset()
+    {
+        ResetPressed = true;
+        Window?.Close();
+    }
+
+    [RelayCommand]
+    private void Cancel()
     {
         Window?.Close();
     }

@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Logic;
@@ -11,16 +10,12 @@ namespace Nikse.SubtitleEdit.Features.Shared.SetVideoOffset;
 
 public class SetVideoOffsetWindow : Window
 {
-    private readonly SetVideoOffset.SetVideoOffsetViewModel _vm;
-
     public SetVideoOffsetWindow(SetVideoOffset.SetVideoOffsetViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.General.SetVideoOffset;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -51,6 +46,7 @@ public class SetVideoOffsetWindow : Window
 
         var buttonPanel = UiUtil.MakeButtonBar(
             UiUtil.MakeButtonOk(vm.OkCommand), 
+            UiUtil.MakeButton(Se.Language.General.Reset, vm.ResetCommand), 
             UiUtil.MakeButtonCancel(vm.CancelCommand));
 
         var contentPanel = new StackPanel
