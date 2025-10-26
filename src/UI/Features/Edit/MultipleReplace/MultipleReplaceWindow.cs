@@ -212,6 +212,14 @@ public class MultipleReplaceWindow : Window
             };
             Attached.SetIcon(buttonActions, IconNames.DotsVertical);
 
+            var labelDescription = UiUtil.MakeLabel().WithBindText(node, nameof(RuleTreeNode.Description));
+            labelDescription.Opacity = 0.6;
+            labelDescription.FontStyle = FontStyle.Italic;
+            labelDescription.VerticalAlignment = VerticalAlignment.Center;
+            labelDescription.VerticalContentAlignment = VerticalAlignment.Center;
+            labelDescription.Margin = new Thickness(7, 0, 0, 0);
+            labelDescription.Padding = new Thickness(0);
+
             var panelFindAndReplaceWith = new StackPanel
             {
                 Orientation = Orientation.Horizontal,
@@ -223,21 +231,13 @@ public class MultipleReplaceWindow : Window
                     labelFind,
                     labelSeparator,
                     labelReplaceWith,
+                    labelDescription,
                 }
             };
 
-            var labelDescription = UiUtil.MakeLabel(string.Empty).WithBindText(node, nameof(RuleTreeNode.Description));
-            labelDescription.Opacity = 0.7;
-            labelDescription.FontStyle = FontStyle.Italic;
-            labelDescription.VerticalAlignment = VerticalAlignment.Center;
-            labelDescription.VerticalContentAlignment = VerticalAlignment.Center;
-            labelDescription.Margin = new Thickness(5, 0, 0, 0);
-            labelDescription.Padding = new Thickness(0);
-
             grid.Add(checkBox, 0);
-            grid.Add(panelFindAndReplaceWith, 0,1);
-            //grid.Add(labelDescription, 1, 1);
-            grid.Add(buttonActions, 0,2);
+            grid.Add(panelFindAndReplaceWith, 0, 1);
+            grid.Add(buttonActions, 0, 2);
 
             return grid;
         },
