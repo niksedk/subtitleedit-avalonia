@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Logic;
+using System;
 
 namespace Nikse.SubtitleEdit.Features.Shared;
 
@@ -79,6 +80,11 @@ public partial class AudioVisualizerUndockedViewModel : ObservableObject
             }
         }
 
+        MainViewModel?.OnKeyDownHandler(sender, e);
+    }
+
+    internal void OnKeyUp(object? sender, KeyEventArgs e)
+    {
         MainViewModel?.OnKeyDownHandler(sender, e);
     }
 

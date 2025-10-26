@@ -24,6 +24,7 @@ public class AudioVisualizerUndockedWindow : Window
 
         Loaded += vm.Onloaded;
         KeyDown += vm.OnKeyDown;
+        KeyUp += vm.OnKeyUp;
         Closing += vm.OnClosing;
     }
 }

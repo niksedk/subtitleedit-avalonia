@@ -24,6 +24,7 @@ public class VideoPlayerUndockedWindow : Window
 
         Loaded += vm.Onloaded;
         KeyDown += vm.OnKeyDown;
+        KeyUp += vm.OnKeyUp;    
         Closing += vm.OnClosing;
     }
 }

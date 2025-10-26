@@ -196,4 +196,9 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
         Window!.Content = VideoPlayer;
         UiUtil.RestoreWindowPosition(Window);
     }
+
+    internal void OnKeyUp(object? sender, KeyEventArgs e)
+    {
+        MainViewModel?.OnKeyUpHandler(sender, e);
+    }
 }
