@@ -21,6 +21,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Core.AutoTranslate;
+using Nikse.SubtitleEdit.Core.Translate;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -94,6 +96,14 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private bool _fixNamesOnly;
     [ObservableProperty] private bool _allUppercase;
     [ObservableProperty] private bool _allLowercase;
+    
+    // Auto translate
+    [ObservableProperty] private ObservableCollection<IAutoTranslator> _autoTranslators;
+    [ObservableProperty] private IAutoTranslator _selectedAutoTranslator;
+    [ObservableProperty] private ObservableCollection<TranslationPair> _sourceLanguages = new();
+    [ObservableProperty] private TranslationPair? _selectedSourceLanguage;
+    [ObservableProperty] private ObservableCollection<TranslationPair> _targetLanguages = new();
+    [ObservableProperty] private TranslationPair? _selectedTargetLanguage;
 
     public Window? Window { get; set; }
 
@@ -158,6 +168,16 @@ public partial class BatchConvertViewModel : ObservableObject
 
         _encodings = EncodingHelper.GetEncodings().Select(p => p.DisplayName).ToList();
 
+        AutoTranslators = new ObservableCollection<IAutoTranslator>
+        {
+            new OllamaTranslate(),
+            new LibreTranslate(),
+            new LmStudioTranslate(),
+            new NoLanguageLeftBehindServe(),
+            new NoLanguageLeftBehindApi(),
+        };
+        SelectedAutoTranslator = AutoTranslators[0];
+        
         LoadSettings();
     }
 

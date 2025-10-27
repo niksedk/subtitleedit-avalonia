@@ -66,12 +66,12 @@ public class AutoTranslateWindow : Window
             Spacing = 10,
             Children =
             {
-                UiUtil.MakeTextBlock("Engine:"),
+                UiUtil.MakeTextBlock(Se.Language.General.Engine),
                 engineCombo,
                 UiUtil.MakeSeparatorForHorizontal(vm),
-                UiUtil.MakeTextBlock("From:"),
+                UiUtil.MakeTextBlock(Se.Language.General.From),
                 sourceLangCombo,
-                UiUtil.MakeTextBlock("To:"),
+                UiUtil.MakeTextBlock(Se.Language.General.To),
                 targetLangCombo,
                 buttonTranslate,
             }

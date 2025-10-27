@@ -472,6 +472,8 @@ public class LanguageGeneral
     public string RelativeToCurrentVideoPosition { get; set; }
     public string KeepExistingTimeCodes { get; set; }
     public string TenHours { get; set; }
+    public string From { get; set; }
+    public string To { get; set; }
 
     public LanguageGeneral()
     {
@@ -944,5 +946,7 @@ public class LanguageGeneral
         RelativeToCurrentVideoPosition = "Relative to current video position";
         KeepExistingTimeCodes = "Keep existing time codes (do not add video offset)";
         TenHours = "10 hours";
+        From = "From";
+        To = "To";
     }
 }
