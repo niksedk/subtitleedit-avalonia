@@ -1089,40 +1089,72 @@ public class AudioVisualizer : Control
             return;
         }
 
-        var showWaveform = true;
-        if (!showWaveform)
-        {
-            return;
-        }
-
         var waveformHeight = Bounds.Height;
         var isSelectedHelper = new IsSelectedHelper(AllSelectedParagraphs, WavePeaks.SampleRate);
         var halfWaveformHeight = waveformHeight / 2;
         var div = WavePeaks.SampleRate * ZoomFactor;
-
         if (div <= 0)
         {
             return;
         }
 
+        var selectedColorRHigh = (byte)Math.Min(255, WaveformSelectedColor.R + 25);
+        var selectedColorGHigh = (byte)Math.Min(255, WaveformSelectedColor.G + 25);
+        var selectedColorBHigh = (byte)Math.Min(255, WaveformSelectedColor.B + 25);
+
+        var colorRHigh = (byte)Math.Min(255, WaveformColor.R + 25);
+        var colorGHigh = (byte)Math.Min(255, WaveformColor.G + 25);
+        var colorBHigh = (byte)Math.Min(255, WaveformColor.B + 25);
+
+        // Create gradient brushes for a more beautiful waveform
+        var normalGradient = new LinearGradientBrush
+        {
+            StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
+            EndPoint = new RelativePoint(0, 1, RelativeUnit.Relative),
+            GradientStops = new GradientStops
+            {
+                new GradientStop(Color.FromArgb(180+30, WaveformColor.R, WaveformColor.G, WaveformColor.B), 0.0),    // Top: bright blue
+                new GradientStop(Color.FromArgb(200+55, colorRHigh, colorGHigh, colorBHigh), 0.5),   // Middle: vibrant blue
+                new GradientStop(Color.FromArgb(180+30, WaveformColor.R, WaveformColor.G, WaveformColor.B), 1.0)     // Bottom: bright blue
+            }
+        };
+
+        var selectedGradient = new LinearGradientBrush
+        {
+            StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
+            EndPoint = new RelativePoint(0, 1, RelativeUnit.Relative),
+            GradientStops = new GradientStops
+        {
+            new GradientStop(Color.FromArgb(200+30, WaveformSelectedColor.R, WaveformSelectedColor.G, WaveformSelectedColor.B), 0.0),    // Top: bright orange
+            new GradientStop(Color.FromArgb(220+30, selectedColorRHigh, selectedColorGHigh, selectedColorBHigh), 0.5),   // Middle: vivid orange
+            new GradientStop(Color.FromArgb(200+30, WaveformSelectedColor.R, WaveformSelectedColor.G, WaveformSelectedColor.B), 1.0)     // Bottom: bright orange
+        }
+        };
+
+        // Create pens with the gradient brushes
+        var normalPen = new Pen(normalGradient, 1.5);
+        var selectedPen = new Pen(selectedGradient, 2.0);
+
+        // Optional: Draw a subtle center line
+        var centerLinePen = new Pen(new SolidColorBrush(Color.FromArgb(40, 255, 255, 255)), 1);
+        context.DrawLine(centerLinePen, new Point(0, halfWaveformHeight), new Point(Bounds.Width, halfWaveformHeight));
+
+        // Draw waveform with smoothing
         for (var x = 0; x < Bounds.Width; x++)
         {
             var pos = (StartPositionSeconds + x / div) * WavePeaks.SampleRate;
             var pos0 = (int)pos;
             var pos1 = pos0 + 1;
-
             if (pos1 >= WavePeaks.Peaks.Count || pos0 > WavePeaks.Peaks.Count)
             {
                 break;
             }
-
             var pos1Weight = pos - pos0;
             var pos0Weight = 1.0 - pos1Weight;
             var peak0 = WavePeaks.Peaks[pos0];
             var peak1 = WavePeaks.Peaks[pos1];
             var max = peak0.Max * pos0Weight + peak1.Max * pos1Weight;
             var min = peak0.Min * pos0Weight + peak1.Min * pos1Weight;
-
             var yMax = CalculateY(max, 0, halfWaveformHeight);
             var yMin = CalculateY(min, 0, halfWaveformHeight);
 
@@ -1138,8 +1170,18 @@ public class AudioVisualizer : Control
                 yMin = yMax + 1;
             }
 
-            var pen = isSelectedHelper.IsSelected(pos0) ? _paintPenSelected : _paintWaveform;
+            var isSelected = isSelectedHelper.IsSelected(pos0);
+            var pen = isSelected ? selectedPen : normalPen;
+
+            // Draw the main waveform line
             context.DrawLine(pen, new Point(x, yMax), new Point(x, yMin));
+
+            // Optional: Add a subtle glow effect for selected regions
+            if (isSelected)
+            {
+                var glowPen = new Pen(new SolidColorBrush(Color.FromArgb(60, 255, 200, 100)), 4);
+                context.DrawLine(glowPen, new Point(x, yMax), new Point(x, yMin));
+            }
         }
     }
 
