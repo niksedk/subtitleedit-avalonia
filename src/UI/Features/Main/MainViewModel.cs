@@ -2653,8 +2653,26 @@ public partial class MainViewModel :
 
         var word = EditTextBox.SelectedText;
         var dictionaries = _spellCheckManager.GetDictionaryLanguages(Se.DictionariesFolder);
+        if (dictionaries.Count == 0)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, Se.Language.SpellCheck.NoDictionariesFound,
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
         var language = LanguageAutoDetect.AutoDetectGoogleLanguage(GetUpdateSubtitle());
-        var selectedDictionary = dictionaries.FirstOrDefault(p => p.GetFiveLetterLanguageName().Contains(language));
+        var selectedDictionary = dictionaries.First();
+
+        foreach (var dict in dictionaries)
+        {
+            var fiveLetterName = dict.GetFiveLetterLanguageName();
+            if (fiveLetterName != null && fiveLetterName.Contains(language))
+            {
+                selectedDictionary = dict;
+                break;
+            }
+        }   
 
         var result = await _windowService.ShowDialogAsync<AddToNamesListWindow, AddToNamesListViewModel>(Window, vm =>
         {
@@ -9188,14 +9206,16 @@ public partial class MainViewModel :
 
     internal void OnSubtitleGridDoubleTapped(object? sender, TappedEventArgs e)
     {
-        if (sender is DataGrid grid && grid.SelectedItem != null)
+        if (sender is not DataGrid grid || grid.SelectedItem == null)
         {
-            if (grid.SelectedItem is SubtitleLineViewModel selectedItem)
+            return;
+        }
+
+        if (grid.SelectedItem is SubtitleLineViewModel selectedItem)
+        {
+            if (!string.IsNullOrEmpty(_videoFileName) && VideoPlayerControl != null)
             {
-                if (!string.IsNullOrEmpty(_videoFileName) && VideoPlayerControl != null)
-                {
-                    VideoPlayerControl.Position = selectedItem.StartTime.TotalSeconds;
-                }
+                VideoPlayerControl.Position = selectedItem.StartTime.TotalSeconds;
             }
         }
     }
