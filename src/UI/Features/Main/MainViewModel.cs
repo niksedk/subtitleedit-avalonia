@@ -2672,7 +2672,7 @@ public partial class MainViewModel :
                 selectedDictionary = dict;
                 break;
             }
-        }   
+        }
 
         var result = await _windowService.ShowDialogAsync<AddToNamesListWindow, AddToNamesListViewModel>(Window, vm =>
         {
@@ -9034,22 +9034,16 @@ public partial class MainViewModel :
             var vp = VideoPlayerControl;
             if (av != null && vp != null && !string.IsNullOrEmpty(_videoFileName))
             {
-                var subtitle = new ObservableCollection<SubtitleLineViewModel>();
-                var orderedList = Subtitles.OrderBy(p => p.StartTime.TotalMilliseconds).ToList();
-                var firstSelectedIndex = -1;
-                for (var i = 0; i < orderedList.Count; i++)
-                {
-                    var dp = orderedList[i];
+                var offset = TimeSpan.FromMilliseconds(Se.Settings.General.CurrentVideoOffsetInMs);
+                var hasOffset = Se.Settings.General.CurrentVideoOffsetInMs != 0;
 
-                    if (Se.Settings.General.CurrentVideoOffsetInMs != 0)
-                    {
-                        var offset = TimeSpan.FromMilliseconds(Se.Settings.General.CurrentVideoOffsetInMs);
-                        dp = new SubtitleLineViewModel(dp);
-                        dp.StartTime = dp.StartTime - offset;
-                    }
-
-                    subtitle.Add(dp);
-                }
+                var subtitle = new ObservableCollection<SubtitleLineViewModel>(
+                    Subtitles
+                        .OrderBy(p => p.StartTime.TotalMilliseconds)
+                        .Select(dp => hasOffset
+                            ? new SubtitleLineViewModel(dp) { StartTime = dp.StartTime - offset }
+                            : dp)
+                );
 
                 var mediaPlayerSeconds = vp.Position;
                 var startPos = mediaPlayerSeconds - 0.01;
@@ -9060,6 +9054,7 @@ public partial class MainViewModel :
 
                 av.CurrentVideoPositionSeconds = vp.Position;
                 var isPlaying = vp.IsPlaying;
+                var firstSelectedIndex = -1;
 
                 if (WaveformCenter && isPlaying)
                 {
