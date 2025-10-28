@@ -2,7 +2,6 @@
 
 public class LanguageGeneral
 {
-
     public string Actor { get; set; }
     public string Actors { get; set; }
     public string Advanced { get; set; }
@@ -474,6 +473,7 @@ public class LanguageGeneral
     public string TenHours { get; set; }
     public string From { get; set; }
     public string To { get; set; }
+    public string Autodetect { get; set; }
 
     public LanguageGeneral()
     {
@@ -888,7 +888,7 @@ public class LanguageGeneral
         LoadDefaults = "Load defaults";
         CouldNotSaveFileXErrorY = "Could not save file \"{0}\". Error: {1}";
         NoSubtitleLoaded = "No subtitle loaded";
-        Example =  "Example";
+        Example = "Example";
         DateAndTime = "Date and time";
         Translate = "Translate";
         CopyImageToClipboard = "Copy image to clipboard";
@@ -902,7 +902,7 @@ public class LanguageGeneral
         Backward = "Backward";
         Speed = "Speed";
         Unknown = "Unknown";
-        DoNoChange =  "Do not change";
+        DoNoChange = "Do not change";
         TimeCodes = "Time codes";
         ShowTimeCodes = "Show time codes";
         Separator = "Separator";
@@ -913,7 +913,7 @@ public class LanguageGeneral
         Fix = "Fix";
         Category = "Category";
         Include = "Include";
-        Voice =  "Voice";
+        Voice = "Voice";
         Stop = "Stop";
         Cancelled = "Cancelled";
         VideoFileGeneratedX = "Video file generated: \"{0}\"";
@@ -927,7 +927,7 @@ public class LanguageGeneral
         MergeWithLineAfterKeepBreaks = "Merge with line after (keep breaks)";
         SplitAtTextBoxCursorPosition = "Split at text cursor position";
         Shortcut = "Shortcut";
-        Column = "Column";  
+        Column = "Column";
         StyleExaggeration = "Style exaggeration";
         AutoContinue = "Auto-continue";
         ListErrors = "List errors";
@@ -938,8 +938,8 @@ public class LanguageGeneral
         DoubleWords = "Double words";
         OneSecondBack = "One second back";
         OneSecondForward = "One second";
-        SetVideoOffset =  "Set video offset";
-        VideoOffset =  "Video offset";
+        SetVideoOffset = "Set video offset";
+        VideoOffset = "Video offset";
         Reason = "Reason";
         OpenContainingFolder = "Open containing folder";
         OpenFile = "Open file";
@@ -948,5 +948,6 @@ public class LanguageGeneral
         TenHours = "10 hours";
         From = "From";
         To = "To";
+        Autodetect = "Autodetect";
     }
 }

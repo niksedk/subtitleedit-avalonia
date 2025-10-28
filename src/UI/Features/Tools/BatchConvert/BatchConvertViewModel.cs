@@ -23,6 +23,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nikse.SubtitleEdit.Core.AutoTranslate;
 using Nikse.SubtitleEdit.Core.Translate;
+using ReactiveUI;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -168,17 +169,34 @@ public partial class BatchConvertViewModel : ObservableObject
 
         _encodings = EncodingHelper.GetEncodings().Select(p => p.DisplayName).ToList();
 
-        AutoTranslators = new ObservableCollection<IAutoTranslator>
-        {
+        AutoTranslators =
+        [
             new OllamaTranslate(),
             new LibreTranslate(),
             new LmStudioTranslate(),
             new NoLanguageLeftBehindServe(),
-            new NoLanguageLeftBehindApi(),
-        };
+            new NoLanguageLeftBehindApi()
+        ];
         SelectedAutoTranslator = AutoTranslators[0];
-        
+        UpdateAutoTranslateLanguages();
+
         LoadSettings();
+    }
+
+    private void UpdateAutoTranslateLanguages()
+    {
+        SourceLanguages.Clear();
+        SourceLanguages.Add(new TranslationPair( " - " + Se.Language.General.Autodetect + " - ", "auto"));
+        foreach (var language in SelectedAutoTranslator.GetSupportedSourceLanguages())
+        {
+            SourceLanguages.Add(language);
+        }
+
+        TargetLanguages.Clear();
+        foreach (var language in SelectedAutoTranslator.GetSupportedTargetLanguages())
+        {
+            TargetLanguages.Add(language);
+        }
     }
 
     private void LoadSettings()
@@ -190,6 +208,22 @@ public partial class BatchConvertViewModel : ObservableObject
         }
 
         SelectedTargetFormat = targetFormat;
+        
+        var translator = AutoTranslators.FirstOrDefault(p=>p.Name == Se.Settings.Tools.BatchConvert.AutoTranslateEngine);
+        if (translator != null)
+        {
+            SelectedAutoTranslator = translator;
+        }
+        var sourceLanguage = SourceLanguages.FirstOrDefault(p=>p.Code ==  Se.Settings.Tools.BatchConvert.AutoTranslateSourceLanguage);
+        if (sourceLanguage != null)
+        {
+            SelectedSourceLanguage = sourceLanguage;
+        }
+        var targetLanguage = TargetLanguages.FirstOrDefault(p=>p.Code == Se.Settings.Tools.BatchConvert.AutoTranslateTargetLanguage);
+        if (targetLanguage != null)
+        {
+            SelectedTargetLanguage = targetLanguage;
+        }
 
         UpdateOutputProperties();
     }

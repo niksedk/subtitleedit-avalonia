@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config;
+﻿using Nikse.SubtitleEdit.Core.AutoTranslate;
+
+namespace Nikse.SubtitleEdit.Logic.Config;
 
 public class SeBatchConvert
 {
@@ -29,6 +31,10 @@ public class SeBatchConvert
     public double ChangeFrameRateFrom { get; set; }
     public double ChangeFrameRateTo { get; set; }
     public bool SaveInSourceFolder { get; set; }
+    
+    public string AutoTranslateEngine { get; set; }
+    public string AutoTranslateSourceLanguage { get; set; }
+    public string AutoTranslateTargetLanguage { get; set; }
 
     public SeBatchConvert()
     {
@@ -43,5 +49,8 @@ public class SeBatchConvert
         AdjustDurationFixedMilliseconds = 3000;
         ChangeFrameRateFrom = 23.976;
         ChangeFrameRateTo = 24;
+        AutoTranslateEngine = new OllamaTranslate().Name;
+        AutoTranslateSourceLanguage = "auto";
+        AutoTranslateTargetLanguage = "en";
     }
 }
