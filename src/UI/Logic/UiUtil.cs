@@ -2242,9 +2242,9 @@ public static class UiUtil
     {
         var shortcut = shortcuts.FirstOrDefault(s => s.Name == shortcutName);
         var shortcutString = string.Empty;
-        if (shortcut != null && shortcut.Keys.Count > 0)
+        if (shortcut is { Keys.Count: > 0 })
         {
-            shortcutString = string.Join("+", shortcut.Keys.Select(k => k.ToString()));
+            shortcutString = string.Join("+",  shortcut.Keys.Select(k => ShortcutManager.GetKeyDisplayName(k.ToString())));
             shortcutString = $"({shortcutString})";
         }
 

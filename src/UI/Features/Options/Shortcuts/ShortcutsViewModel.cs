@@ -174,37 +174,13 @@ public partial class ShortcutsViewModel : ObservableObject
     {
         if (shortCut.Keys.Count > 0)
         {
-            var keys = shortCut.Keys.Select(k => GetKeyDisplayName(k)).ToList();
+            var keys = shortCut.Keys.Select(k => ShortcutManager.GetKeyDisplayName(k)).ToList();
             return "[" + string.Join(" + ", keys) + "]";
         }
 
         return string.Empty;
     }
-
-    private static string GetKeyDisplayName(string key)
-    {
-        if (OperatingSystem.IsMacOS())
-        {
-            return key switch
-            {
-                "Ctrl" or "Control" => Se.Language.Options.Shortcuts.ControlMac,
-                "Alt" => Se.Language.Options.Shortcuts.AltMac,
-                "Shift" => Se.Language.Options.Shortcuts.ShiftMac,
-                "Win" or "Cmd" => Se.Language.Options.Shortcuts.WinMac,
-                _ => key
-            };
-        }
-
-        return key switch
-        {
-            "Ctrl" or "Control" => Se.Language.Options.Shortcuts.Control,
-            "Alt" => Se.Language.Options.Shortcuts.Alt,
-            "Shift" => Se.Language.Options.Shortcuts.Shift,
-            "Win" => Se.Language.Options.Shortcuts.Win,
-            _ => key
-        };
-    }
-
+    
     [RelayCommand]
     private void CommandOk()
     {

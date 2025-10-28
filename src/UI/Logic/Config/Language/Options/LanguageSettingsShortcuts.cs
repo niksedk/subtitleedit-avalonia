@@ -340,10 +340,10 @@ public class LanguageSettingsShortcuts
         Win = "Win";
         Shift = "Shift";
 
-        ControlMac = "⌃ Control";
-        AltMac = "⌥ Option";
-        ShiftMac = "⇧ Shift";
-        WinMac = "⌘ Cmd";
+        ControlMac = "⌃";
+        AltMac = "⌥";
+        ShiftMac = "⇧";
+        WinMac = "⌘";
 
         ResetShortcuts = "Reset shortcuts";
         ResetShortcutsDetail = "Do you want to reset all shortcuts to default values?";

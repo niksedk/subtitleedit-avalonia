@@ -1,7 +1,9 @@
-﻿using Avalonia.Input;
+﻿using System;
+using Avalonia.Input;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
 using System.Linq;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Logic;
 
@@ -9,6 +11,30 @@ public class ShortcutManager : IShortcutManager
 {
     private readonly HashSet<Key> _activeKeys = [];
     private readonly List<ShortCut> _shortcuts = [];
+    
+    public static string GetKeyDisplayName(string key)
+    {
+        if (OperatingSystem.IsMacOS())
+        {
+            return key switch
+            {
+                "Ctrl" or "Control" => Se.Language.Options.Shortcuts.ControlMac,
+                "Alt" => Se.Language.Options.Shortcuts.AltMac,
+                "Shift" => Se.Language.Options.Shortcuts.ShiftMac,
+                "Win" or "Cmd" => Se.Language.Options.Shortcuts.WinMac,
+                _ => key
+            };
+        }
+
+        return key switch
+        {
+            "Ctrl" or "Control" => Se.Language.Options.Shortcuts.Control,
+            "Alt" => Se.Language.Options.Shortcuts.Alt,
+            "Shift" => Se.Language.Options.Shortcuts.Shift,
+            "Win" => Se.Language.Options.Shortcuts.Win,
+            _ => key
+        };
+    }
 
     public void OnKeyPressed(object? sender, KeyEventArgs e)
     {
