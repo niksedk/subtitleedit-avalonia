@@ -41,7 +41,25 @@ public class ShortcutsWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
         _searchBox.Bind(TextBox.TextProperty, new Binding(nameof(vm.SearchText)) { Source = vm });
-
+        
+        var labelBadgeCount = new Border
+        {
+            Background = UiUtil.GetBorderBrush(),     // badge background
+            CornerRadius = new CornerRadius(10),      // makes it pill-like
+            Padding = new Thickness(6, 3, 6, 2),      // spacing around text
+            Margin = new Thickness(0,0,12, 0),
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Child = new TextBlock
+            {
+                [!TextBlock.TextProperty] = new Binding(nameof(vm.FlatNodes) + ".Count", BindingMode.OneWay) { Converter = new NumberToStringWithThousandSeparator() },
+                FontSize = 10,
+                VerticalAlignment = VerticalAlignment.Center,
+                Foreground = Brushes.WhiteSmoke,
+                HorizontalAlignment = HorizontalAlignment.Center
+            }
+        };
+        
         var labelFilter = UiUtil.MakeTextBlock(language.Filter);
         var comboBoxFilter = UiUtil.MakeComboBox(vm.Filters, vm, nameof(vm.SelectedFilter))
             .WithMinWidth(120)
@@ -58,13 +76,17 @@ public class ShortcutsWindow : Window
         Grid.SetRow(_searchBox, 0);
         Grid.SetColumn(_searchBox, 0);
 
+        topGrid.Children.Add(labelBadgeCount);
+        Grid.SetRow(labelBadgeCount, 0);
+        Grid.SetColumn(labelBadgeCount, 1);
+
         topGrid.Children.Add(labelFilter);
         Grid.SetRow(labelFilter, 0);
-        Grid.SetColumn(labelFilter, 1);
+        Grid.SetColumn(labelFilter, 2);
 
         topGrid.Children.Add(comboBoxFilter);
         Grid.SetRow(comboBoxFilter, 0);
-        Grid.SetColumn(comboBoxFilter, 2);
+        Grid.SetColumn(comboBoxFilter, 3);
 
         var dataGrid = new DataGrid
         {
@@ -123,27 +145,7 @@ public class ShortcutsWindow : Window
         };
         grid.Add(topGrid, 0);
         grid.Add(borderDataGrid, 1);
-
-
-        var labelBadgeCount = new Border
-        {
-            Background = UiUtil.GetBorderBrush(),     // badge background
-            CornerRadius = new CornerRadius(10),      // makes it pill-like
-            Padding = new Thickness(6, 0, 6, 0),      // spacing around text
-            Margin = new Thickness(8),
-            VerticalAlignment = VerticalAlignment.Top,
-            HorizontalAlignment = HorizontalAlignment.Right,
-            Child = new TextBlock
-            {
-                [!TextBlock.TextProperty] = new Binding(nameof(vm.FlatNodes) + ".Count", BindingMode.OneWay) { Converter = new NumberToStringWithThousandSeparator() },
-                FontSize = 10,
-                VerticalAlignment = VerticalAlignment.Center,
-                Foreground = Brushes.WhiteSmoke,
-                HorizontalAlignment = HorizontalAlignment.Center
-            }
-        };
-        grid.Add(labelBadgeCount, 1);
-
+        
         var editPanel = new StackPanel
         {
             Orientation = Orientation.Horizontal,
