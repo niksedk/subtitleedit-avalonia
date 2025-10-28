@@ -24,7 +24,7 @@ You can find the latest cross-platform builds here:
 
 ### macOS
 
-- **Minimum macOS version**: 10.15 (Catalina) or newer
+- **Minimum macOS version**: 12 (Monterey) or newer
 - **Dependencies for Intel macs** (install via [MacPorts](https://www.macports.org/)):
     - `mpv`
         - MacPorts: `sudo port install mpv`
