@@ -68,8 +68,20 @@ public class ShortcutsWindow : Window
 
         var topGrid = new Grid
         {
-            RowDefinitions = new RowDefinitions("Auto"),
-            ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto,Auto,Auto"),
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(2, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+             cccc
+            //RowDefinitions = new RowDefinitions("Auto"),
+            //ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto,Auto,Auto"),
+            //Colu
             Margin = new Thickness(10),
         };
         topGrid.Children.Add(_searchBox);
