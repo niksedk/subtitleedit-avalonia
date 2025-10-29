@@ -120,7 +120,7 @@ public static class ShortcutsMain
         { nameof(MainViewModel.CommandVideoOpenCommand), Se.Language.Options.Shortcuts.OpenVideo },
         { nameof(MainViewModel.ShowVideoOpenFromUrlCommand), Se.Language.Options.Shortcuts.OpenVideoFromUrl },
         { nameof(MainViewModel.CommandVideoCloseCommand), Se.Language.Options.Shortcuts.CloseVideo },
-        { nameof(MainViewModel.ShowVideoAudioToTextWhisperCommand), Se.Language.Options.Shortcuts.AudioToText },
+        { nameof(MainViewModel.ShowVideoAudioToTextWhisperCommand), Se.Language.Options.Shortcuts.SpeechToText },
         { nameof(MainViewModel.ShowVideoTextToSpeechCommand), Se.Language.Options.Shortcuts.TextToSpeech },
         { nameof(MainViewModel.ShowVideoBurnInCommand), Se.Language.Options.Shortcuts.BurnIn },
         { nameof(MainViewModel.ShowVideoTransparentSubtitlesCommand), Se.Language.Options.Shortcuts.GenerateTransparent },

@@ -38,6 +38,10 @@ public class SoftwareView : Control, IVideoView
         }
 
         var bitmapSize = GetPixelSize();
+        if (bitmapSize.Width <= 0 || bitmapSize.Height <= 0)
+        {
+            return;
+        }
 
         if (_renderTarget == null ||
             _renderTarget.PixelSize.Width != bitmapSize.Width ||

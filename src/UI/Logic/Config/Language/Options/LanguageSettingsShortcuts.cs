@@ -185,7 +185,7 @@ public class LanguageSettingsShortcuts
     public string OpenVideo { get;  set; }
     public string OpenVideoFromUrl { get;  set; }
     public string CloseVideo { get;  set; }
-    public string AudioToText { get;  set; }
+    public string SpeechToText { get;  set; }
     public string TextToSpeech { get;  set; }
     public string BurnIn { get;  set; }
     public string GenerateTransparent { get;  set; }
@@ -415,7 +415,7 @@ public class LanguageSettingsShortcuts
         OpenVideo = "Open video";
         OpenVideoFromUrl = "Open video from URL";
         CloseVideo = "Close video";
-        AudioToText = "Audio to text";
+        SpeechToText = "Speech to text (Whisper)";
         TextToSpeech = "Text to speech";
         BurnIn = "Generate video with burned-in subtitles";
         GenerateTransparent = "Generate transparent video with subtitles";
