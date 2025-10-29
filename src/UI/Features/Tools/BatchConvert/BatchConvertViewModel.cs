@@ -23,7 +23,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nikse.SubtitleEdit.Core.AutoTranslate;
 using Nikse.SubtitleEdit.Core.Translate;
-using ReactiveUI;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 

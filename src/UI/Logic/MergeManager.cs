@@ -1,5 +1,4 @@
-﻿using DynamicData;
-using Nikse.SubtitleEdit.Core.Common;
+﻿using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Enums;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -248,7 +247,7 @@ namespace Nikse.SubtitleEdit.Logic
             var nextText = Utilities.UnbreakLine(nextParagraph.Text);
 
             var subtitle = new Subtitle();
-            subtitle.Paragraphs.Add(subtitles.Select(p=>new Paragraph(p.Text, p.StartTime.TotalMilliseconds, p.EndTime.TotalMilliseconds)));
+            subtitle.Paragraphs.AddRange(subtitles.Select(p=>new Paragraph(p.Text, p.StartTime.TotalMilliseconds, p.EndTime.TotalMilliseconds)));
             var language = LanguageAutoDetect.AutoDetectGoogleLanguage(subtitle);
             var dialogHelper = new DialogSplitMerge { DialogStyle = Enum.Parse<DialogType>(Se.Settings.General.DialogStyle), TwoLetterLanguageCode = language };
             var dialogText = dialogHelper.FixDashes("- " + currentText.TrimStart(' ', '-') + Environment.NewLine + "- " + nextText.TrimStart(' ', '-'));

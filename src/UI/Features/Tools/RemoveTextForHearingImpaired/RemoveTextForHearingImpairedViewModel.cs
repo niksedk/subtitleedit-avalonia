@@ -4,7 +4,6 @@ using Avalonia.Interactivity;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DynamicData;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Forms;
 using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
@@ -290,7 +289,7 @@ public partial class RemoveTextForHearingImpairedViewModel : ObservableObject
         }
 
         Fixes.Clear();
-        ListEx.AddRange(Fixes, newFixes);
+        Fixes.AddRange(newFixes);
 
         //groupBoxLinesFound.Text = string.Format(_language.LinesFoundX, count);
     }
