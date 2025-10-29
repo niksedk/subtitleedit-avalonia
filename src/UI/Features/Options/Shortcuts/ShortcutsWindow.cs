@@ -39,13 +39,13 @@ public class ShortcutsWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
         _searchBox.Bind(TextBox.TextProperty, new Binding(nameof(vm.SearchText)) { Source = vm });
-        
+
         var labelBadgeCount = new Border
         {
             Background = UiUtil.GetBorderBrush(),     // badge background
             CornerRadius = new CornerRadius(10),      // makes it pill-like
             Padding = new Thickness(6, 3, 6, 2),      // spacing around text
-            Margin = new Thickness(0,0,12, 0),
+            Margin = new Thickness(0, 0, 12, 0),
             VerticalAlignment = VerticalAlignment.Center,
             HorizontalAlignment = HorizontalAlignment.Left,
             Child = new TextBlock
@@ -57,7 +57,7 @@ public class ShortcutsWindow : Window
                 HorizontalAlignment = HorizontalAlignment.Center
             }
         };
-        
+
         var labelFilter = UiUtil.MakeTextBlock(language.Filter);
         var comboBoxFilter = UiUtil.MakeComboBox(vm.Filters, vm, nameof(vm.SelectedFilter))
             .WithMinWidth(120)
@@ -150,7 +150,7 @@ public class ShortcutsWindow : Window
         };
         grid.Add(topGrid, 0);
         grid.Add(borderDataGrid, 1);
-        
+
         var editPanel = new StackPanel
         {
             Orientation = Orientation.Horizontal,

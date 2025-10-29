@@ -1036,7 +1036,6 @@ public class AudioVisualizer : Control
     }
 
     public MenuFlyout MenuFlyout { get; set; }
-    public List<int>? LayersFilter { get; set; }
 
     private void DrawAllGridLines(DrawingContext context)
     {
@@ -1470,11 +1469,6 @@ public class AudioVisualizer : Control
                 var p = subtitle[i];
 
                 if (p.StartTime.TotalMilliseconds >= TimeCode.MaxTimeTotalMilliseconds)
-                {
-                    continue;
-                }
-
-                if (LayersFilter != null && !LayersFilter.Contains(p.Layer))
                 {
                     continue;
                 }

@@ -1457,7 +1457,6 @@ public partial class MainViewModel :
 
         _visibleLayers = result.SelectedLayers;
         ShowLayerFilterIcon = IsFormatAssa && Se.Settings.Appearance.ShowLayer && _visibleLayers != null;
-        AudioVisualizer.LayersFilter = _visibleLayers;
         _updateAudioVisualizer = true;
 
         _shortcutManager.ClearKeys();
@@ -9038,11 +9037,12 @@ public partial class MainViewModel :
                 var hasOffset = Se.Settings.General.CurrentVideoOffsetInMs != 0;
 
                 var subtitle = new ObservableCollection<SubtitleLineViewModel>(
-                    Subtitles
-                        .OrderBy(p => p.StartTime.TotalMilliseconds)
-                        .Select(dp => hasOffset
-                            ? new SubtitleLineViewModel(dp) { StartTime = dp.StartTime - offset }
-                            : dp)
+                     Subtitles
+                         .OrderBy(p => p.StartTime.TotalMilliseconds)
+                         .Select(dp => hasOffset
+                             ? new SubtitleLineViewModel(dp) { StartTime = dp.StartTime - offset }
+                             : dp)
+                         .Where(p => _visibleLayers == null || _visibleLayers.Contains(p.Layer))
                 );
 
                 var mediaPlayerSeconds = vp.Position;
@@ -9089,17 +9089,32 @@ public partial class MainViewModel :
                     {
                         var ss = SelectedSubtitle;
                         if (ss == null || mediaPlayerSeconds < ss.StartTime.TotalSeconds ||
-                            mediaPlayerSeconds > ss.EndTime.TotalSeconds)
+                            mediaPlayerSeconds > ss.EndTime.TotalSeconds || ss.Duration.TotalSeconds > 20)
                         {
+                            SubtitleLineViewModel? firstMatch = null;
+                            var matchFound = false;
                             for (var i = 0; i < subtitle.Count; i++)
                             {
                                 var p = subtitle[i];
                                 if (mediaPlayerSeconds >= p.StartTime.TotalSeconds &&
                                     mediaPlayerSeconds <= p.EndTime.TotalSeconds)
                                 {
-                                    SelectAndScrollToSubtitle(p);
-                                    break;
+                                    if (firstMatch == null)
+                                    {
+                                        firstMatch = p;
+                                    }
+
+                                    if (p.Duration.TotalSeconds < 20)
+                                    {
+                                        matchFound = true;
+                                        SelectAndScrollToSubtitle(p);
+                                        break;
+                                    }
                                 }
+                            }
+                            if (!matchFound && firstMatch != null)
+                            {
+                                SelectAndScrollToSubtitle(firstMatch);
                             }
                         }
                     }
@@ -9114,7 +9129,8 @@ public partial class MainViewModel :
             {
                 _mpvReloader.RefreshMpv(mpv.MpvContext!, GetUpdateSubtitle(), SelectedSubtitleFormat);
             }
-        };
+        }
+            ;
         _positionTimer.Start();
 
         _slowTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
