@@ -474,6 +474,14 @@ public class LanguageGeneral
     public string From { get; set; }
     public string To { get; set; }
     public string Autodetect { get; set; }
+    public string OffsetTimeCodes { get; set; }
+    public string AdjustDisplayDuration { get; set; }
+    public string ChangeFrameRate { get; set; }
+    public string ChangeSpeed { get; set; }
+    public string ChangeCasing { get; set; }
+    public string FixCommonErrors { get; set; }
+    public string MultipleReplace { get; set; }
+    public string AutoTranslate { get; set; }
 
     public LanguageGeneral()
     {
@@ -949,5 +957,13 @@ public class LanguageGeneral
         From = "From";
         To = "To";
         Autodetect = "Autodetect";
+        OffsetTimeCodes = "Offset time codes";
+        AdjustDisplayDuration = "Adjust display duration";
+        ChangeFrameRate = "Change frame rate";
+        ChangeSpeed = "Change speed";
+        ChangeCasing = "Change casing";
+        FixCommonErrors = "Fix common errors";
+        MultipleReplace = "Multiple replace";
+        AutoTranslate = "Auto-translate";
     }
 }

@@ -13,7 +13,7 @@ public static class ViewAutoTranslate
     {
         var labelHeader = new Label
         {
-            Content = Se.Language.Translate.Title,
+            Content = Se.Language.General.AutoTranslate,
             VerticalAlignment = VerticalAlignment.Center,
         };
 

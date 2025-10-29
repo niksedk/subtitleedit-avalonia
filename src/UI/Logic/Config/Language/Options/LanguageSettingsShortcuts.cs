@@ -100,8 +100,6 @@ public class LanguageSettingsShortcuts
     public string ListInverseSelection { get; set; }
     public string ListDeleteSelection { get; set; }
 
-    public string AutoTranslate { get; set; }
-
     public string Settings { get; set; }
     public string Assigned { get; set; }
     public string Unassigned { get; set; }
@@ -323,8 +321,6 @@ public class LanguageSettingsShortcuts
         ListSelectLast = "Select last";
         ListInverseSelection = "Inverse selection";
         ListDeleteSelection = "Delete selection";
-
-        AutoTranslate = "Auto-translate";
 
         TogglePlayPause = "Toggle play/pause";
 

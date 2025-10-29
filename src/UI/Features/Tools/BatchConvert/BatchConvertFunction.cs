@@ -32,16 +32,16 @@ public class BatchConvertFunction
         var activeFunctions = Se.Settings.Tools.BatchConvert.ActiveFunctions;
         return new List<BatchConvertFunction>()
         {
-            MakeFunction(BatchConvertFunctionType.RemoveFormatting, "Remove formatting", ViewRemoveFormatting.Make(vm) , activeFunctions),
-            MakeFunction(BatchConvertFunctionType.OffsetTimeCodes, "Offset time codes", ViewOffsetTimeCodes.Make(vm), activeFunctions),
-            MakeFunction(BatchConvertFunctionType.AdjustDisplayDuration, "Adjust display duration", ViewAdjustDuration.Make(vm), activeFunctions),
-            MakeFunction(BatchConvertFunctionType.DeleteLines, "Delete lines", ViewDeleteLines.Make(vm), activeFunctions),
-            MakeFunction(BatchConvertFunctionType.ChangeFrameRate, "Change frame rate", ViewChangeFrameRate.Make(vm), activeFunctions),
-            MakeFunction(BatchConvertFunctionType.ChangeSpeed, "Change speed", ViewChangeSpeed.Make(vm), activeFunctions),
-            MakeFunction(BatchConvertFunctionType.ChangeCasing, "Change casing", ViewChangeCasing.Make(vm), activeFunctions),
-            MakeFunction(BatchConvertFunctionType.FixCommonErrors, "Fix common errors", ViewFixCommonErrors.Make(vm), activeFunctions),
-            MakeFunction(BatchConvertFunctionType.MultipleReplace, "Multiple replace", ViewMultipleReplace.Make(vm), activeFunctions),
-            MakeFunction(BatchConvertFunctionType.AutoTranslate, "Auto-translate", ViewAutoTranslate.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.RemoveFormatting, Se.Language.General.RemoveFormatting, ViewRemoveFormatting.Make(vm) , activeFunctions),
+            MakeFunction(BatchConvertFunctionType.OffsetTimeCodes,  Se.Language.General.OffsetTimeCodes, ViewOffsetTimeCodes.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.AdjustDisplayDuration, Se.Language.General.AdjustDisplayDuration, ViewAdjustDuration.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.DeleteLines, Se.Language.General.DeleteLines, ViewDeleteLines.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.ChangeFrameRate, Se.Language.General.ChangeFrameRate, ViewChangeFrameRate.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.ChangeSpeed, Se.Language.General.ChangeSpeed, ViewChangeSpeed.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.ChangeCasing, Se.Language.General.ChangeCasing, ViewChangeCasing.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.FixCommonErrors, Se.Language.General.FixCommonErrors, ViewFixCommonErrors.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.MultipleReplace, Se.Language.General.MultipleReplace, ViewMultipleReplace.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.AutoTranslate, Se.Language.General.AutoTranslate, ViewAutoTranslate.Make(vm), activeFunctions),
         }.ToArray();
     }
 

@@ -134,7 +134,7 @@ public static class ShortcutsMain
         { nameof(MainViewModel.ShowSyncChangeSpeedCommand),  Se.Language.Options.Shortcuts.ChangeSpeed },
 
         // Translate
-        { nameof(MainViewModel.ShowAutoTranslateCommand), Se.Language.Options.Shortcuts.AutoTranslate },
+        { nameof(MainViewModel.ShowAutoTranslateCommand), Se.Language.General.AutoTranslate },
         { nameof(MainViewModel.ShowTranslateViaCopyPasteCommand), Se.Language.Options.Shortcuts.TranslateViaCopyPaste },
 
         // Options
