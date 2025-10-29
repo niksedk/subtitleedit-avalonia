@@ -171,6 +171,17 @@ public class InitWaveform
         Attached.SetIcon(buttonPlay, IconNames.Play);
         vm.ButtonWaveformPlay = buttonPlay;
 
+        var toggleButtonRepeat = new ToggleButton
+        {
+            DataContext = vm,
+            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(vm.IsRepeatOn)) { Mode = BindingMode.TwoWay },
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 3, 0),
+            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.RepeatHint, shortcuts, nameof(vm.RepeatLineToggleCommand)),
+        };
+        Attached.SetIcon(toggleButtonRepeat, IconNames.Refresh);
+        toggleButtonRepeat.IsCheckedChanged += (s, e) => vm.RepeatLineToggleCommand.Execute(null);
+
         var buttonNew = new Button
         {
             Margin = new Thickness(0, 0, 3, 0),
@@ -206,17 +217,6 @@ public class InitWaveform
             [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.SetEndHint, shortcuts, nameof(vm.WaveformSetEndCommand)),
         };
         Attached.SetIcon(buttonSetEnd, IconNames.RayEnd);
-
-        var toggleButtonRepeat = new ToggleButton
-        {
-            DataContext = vm,
-            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(vm.IsRepeatOn)) { Mode = BindingMode.TwoWay },
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(3, 0, 0, 0),
-            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.RepeatHint, shortcuts, nameof(vm.RepeatLineToggleCommand)),
-        };
-        Attached.SetIcon(toggleButtonRepeat, IconNames.AnimationPlay);
-        toggleButtonRepeat.IsCheckedChanged += (s, e) => vm.RepeatLineToggleCommand.Execute(null);
 
         var iconHorizontal = new Icon
         {
@@ -369,11 +369,11 @@ public class InitWaveform
         flyoutMore.Items.Add(menuItemResetZoom);
 
         controlsPanel.Children.Add(buttonPlay);
+        controlsPanel.Children.Add(toggleButtonRepeat);
         controlsPanel.Children.Add(buttonNew);
         controlsPanel.Children.Add(buttonSetStartAndOffsetTheRest);
         controlsPanel.Children.Add(buttonSetStart);
         controlsPanel.Children.Add(buttonSetEnd);
-        controlsPanel.Children.Add(toggleButtonRepeat);
         controlsPanel.Children.Add(iconHorizontal);
         controlsPanel.Children.Add(sliderHorizontalZoom);
         controlsPanel.Children.Add(iconVertical);
