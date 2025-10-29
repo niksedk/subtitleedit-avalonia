@@ -1,11 +1,9 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
-using Nikse.SubtitleEdit.Features.Files.Compare;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
@@ -70,35 +68,21 @@ public class ShortcutsWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(2, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(60, GridUnitType.Pixel) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
             },
-             cccc
-            //RowDefinitions = new RowDefinitions("Auto"),
-            //ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto,Auto,Auto"),
-            //Colu
             Margin = new Thickness(10),
         };
-        topGrid.Children.Add(_searchBox);
-        Grid.SetRow(_searchBox, 0);
-        Grid.SetColumn(_searchBox, 0);
-
-        topGrid.Children.Add(labelBadgeCount);
-        Grid.SetRow(labelBadgeCount, 0);
-        Grid.SetColumn(labelBadgeCount, 1);
-
-        topGrid.Children.Add(labelFilter);
-        Grid.SetRow(labelFilter, 0);
-        Grid.SetColumn(labelFilter, 2);
-
-        topGrid.Children.Add(comboBoxFilter);
-        Grid.SetRow(comboBoxFilter, 0);
-        Grid.SetColumn(comboBoxFilter, 3);
+        topGrid.Add(_searchBox, 0);
+        topGrid.Add(labelBadgeCount, 0, 1);
+        topGrid.Add(labelFilter, 0, 2);
+        topGrid.Add(comboBoxFilter, 0, 3);
 
         var dataGrid = new DataGrid
         {
@@ -151,8 +135,17 @@ public class ShortcutsWindow : Window
 
         var grid = new Grid
         {
-            RowDefinitions = new RowDefinitions("Auto,*,Auto,Auto"),
-            ColumnDefinitions = new ColumnDefinitions("*"),
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
             Margin = new Thickness(UiUtil.WindowMarginWidth),
         };
         grid.Add(topGrid, 0);
