@@ -20,7 +20,7 @@ public class LanguageMainWaveform
     {
         PlayPauseHint = "Play / Pause {0}";
         SetStartAndOffsetTheRestHint = "Set start of current subtitle and offset the rest {0}";
-        RepeatHint = "Repeat playing current selection {0}";
+        RepeatHint = "Repeat playing current subtitle {0}";
         SetStartHint = "Set start of current subtitle {0}";
         SetEndHint = "Set end of current subtitle {0}";
         NewHint = "Insert new subtitle at video position {0}";

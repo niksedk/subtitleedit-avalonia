@@ -182,7 +182,7 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _showColumnLayerFlyoutMenuItem;
     [ObservableProperty] private bool _isVideoLoaded;
     [ObservableProperty] private bool _isTextBoxSplitAtCursorAndVideoPositionVisible;
-
+    [ObservableProperty] private bool _isRepeatOn;
     [ObservableProperty] private ObservableCollection<string> _speeds;
     [ObservableProperty] private string _selectedSpeed;
 
@@ -222,6 +222,7 @@ public partial class MainViewModel :
     private DispatcherTimer _positionTimer = new();
     private DispatcherTimer _slowTimer = new();
     private CancellationTokenSource _videoOpenTokenSource;
+    private SubtitleLineViewModel? _repeatSubtitle;
 
     private readonly IFileHelper _fileHelper;
     private readonly IFolderHelper _folderHelper;
@@ -4836,6 +4837,110 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void RepeatLineToggle()
+    {
+        if (_repeatSubtitle != null)
+        {
+            _repeatSubtitle = null;
+            IsRepeatOn = false;
+            return;
+        }
+
+        var selectedSubtitle = SelectedSubtitle;
+        _repeatSubtitle = null;
+        var vp = VideoPlayerControl;
+        if (selectedSubtitle == null || vp == null || string.IsNullOrEmpty(_videoFileName))
+        {
+            IsRepeatOn = false;
+            return;
+        }
+
+        _repeatSubtitle = selectedSubtitle;
+        IsRepeatOn = true;
+        vp.Position = selectedSubtitle.StartTime.TotalSeconds;
+        if (!vp.IsPlaying)
+        {
+            vp.TogglePlayPause();
+        }
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void RepeatPreviousLine()
+    {
+        var idx = SelectedSubtitleIndex ?? -1;
+        var vp = VideoPlayerControl;
+        _repeatSubtitle = null;
+        if (Subtitles.Count == 0 || idx <= 0 || idx >= Subtitles.Count || vp == null || string.IsNullOrEmpty(_videoFileName))
+        {
+            if (vp != null && vp.IsPlaying)
+            {
+                vp.TogglePlayPause();
+            }
+
+            IsRepeatOn = false;
+            return;
+        }
+
+        idx--;
+        if (idx >= Subtitles.Count)
+        {
+            if (vp.IsPlaying)
+            {
+                vp.TogglePlayPause();
+            }
+
+            IsRepeatOn = false;
+            return;
+        }
+
+        SelectAndScrollToRow(idx);
+        _repeatSubtitle = Subtitles[idx];
+        IsRepeatOn = true;
+        vp.Position = _repeatSubtitle.StartTime.TotalSeconds;
+        if (!vp.IsPlaying)
+        {
+            vp.TogglePlayPause();
+        }
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void RepeatNextLine()
+    {
+        var idx = SelectedSubtitleIndex ?? -1;
+        var vp = VideoPlayerControl;
+        _repeatSubtitle = null;
+        if (Subtitles.Count == 0 || idx < 0 || idx >= Subtitles.Count || vp == null || string.IsNullOrEmpty(_videoFileName))
+        {
+            IsRepeatOn = false;
+            return;
+        }
+
+        idx++;
+        if (idx >= Subtitles.Count)
+        {
+            if (vp.IsPlaying)
+            {
+                vp.TogglePlayPause();
+            }
+
+            IsRepeatOn = false;
+            return;
+        }
+
+        SelectAndScrollToRow(idx);
+        _repeatSubtitle = Subtitles[idx];
+        IsRepeatOn = true;
+        vp.Position = _repeatSubtitle.StartTime.TotalSeconds;
+        if (!vp.IsPlaying)
+        {
+            vp.TogglePlayPause();
+        }
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
     private void GoToNextLine()
     {
         var idx = SelectedSubtitleIndex ?? -1;
@@ -8616,6 +8721,12 @@ public partial class MainViewModel :
     {
         lock (_onKeyDownHandlerLock)
         {
+            if (_repeatSubtitle != null)
+            {
+                IsRepeatOn = false;
+                _repeatSubtitle = null;
+            }
+
             var ticks = DateTime.UtcNow.Ticks; // Stopwatch.GetTimestamp(); GetTimestamp does not work on mac!?
             var timeSpan = TimeSpan.FromTicks(ticks - _lastKeyPressedTicks);
             var k = keyEventArgs.Key;
@@ -9083,8 +9194,20 @@ public partial class MainViewModel :
                 if (isPlaying)
                 {
                     Projektanker.Icons.Avalonia.Attached.SetIcon(ButtonWaveformPlay, IconNames.Pause);
-
-                    if (SelectCurrentSubtitleWhilePlaying)
+                    var rs = _repeatSubtitle;
+                    if (rs != null)
+                    {
+                        if (mediaPlayerSeconds >= rs.StartTime.TotalSeconds &&
+                            mediaPlayerSeconds <= rs.EndTime.TotalSeconds)
+                        {
+                            // do nothing, still in repeat range
+                        }
+                        else
+                        {
+                            vp.Position = rs.StartTime.TotalSeconds;
+                        }
+                    }
+                    else if (SelectCurrentSubtitleWhilePlaying)
                     {
                         var ss = SelectedSubtitle;
                         if (ss == null || mediaPlayerSeconds < ss.StartTime.TotalSeconds ||

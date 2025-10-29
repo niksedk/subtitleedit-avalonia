@@ -207,15 +207,16 @@ public class InitWaveform
         };
         Attached.SetIcon(buttonSetEnd, IconNames.RayEnd);
 
-        var buttonRepeat = new Button
+        var toggleButtonRepeat = new ToggleButton
         {
-            Margin = new Thickness(0, 0, 3, 0),
-            //Command = vm.WaveformSetStartAndOffsetTheRestCommand,
-            FontWeight = Avalonia.Media.FontWeight.Bold,
-            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.RepeatHint, shortcuts, nameof(vm.WaveformSetEndCommand)),
+            DataContext = vm,
+            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(vm.IsRepeatOn)) { Mode = BindingMode.TwoWay },
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(3, 0, 0, 0),
+            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.RepeatHint, shortcuts, nameof(vm.RepeatLineToggleCommand)),
         };
-        Attached.SetIcon(buttonRepeat, IconNames.Repeat);
-
+        Attached.SetIcon(toggleButtonRepeat, IconNames.AnimationPlay);
+        toggleButtonRepeat.IsCheckedChanged += (s, e) => vm.RepeatLineToggleCommand.Execute(null);
 
         var iconHorizontal = new Icon
         {
@@ -231,7 +232,7 @@ public class InitWaveform
             VerticalAlignment = VerticalAlignment.Center,
             Value = 1,
             [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.ZoomHorizontalHint, shortcuts),
-        }.BindIsVisible(vm, nameof(vm.ShowWaveformHorizontalZoom)); 
+        }.BindIsVisible(vm, nameof(vm.ShowWaveformHorizontalZoom));
         sliderHorizontalZoom.TemplateApplied += (s, e) =>
         {
             if (e.NameScope.Find<Thumb>("thumb") is Thumb thumb)
@@ -257,7 +258,7 @@ public class InitWaveform
             Margin = new Thickness(0, 0, 10, 0),
             Value = 1,
             [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.ZoomVerticalHint, shortcuts),
-        }.BindIsVisible(vm, nameof(vm.ShowWaveformVerticalZoom)); 
+        }.BindIsVisible(vm, nameof(vm.ShowWaveformVerticalZoom));
         sliderVerticalZoom.TemplateApplied += (s, e) =>
         {
             if (e.NameScope.Find<Thumb>("thumb") is Thumb thumb)
@@ -277,7 +278,7 @@ public class InitWaveform
             Margin = new Thickness(0, 0, 10, 0),
             Focusable = true,
             [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.VideoPosition, shortcuts),
-        }.BindIsVisible(vm, nameof(vm.ShowWaveformVideoPositionSlider)); 
+        }.BindIsVisible(vm, nameof(vm.ShowWaveformVideoPositionSlider));
         sliderPosition.TemplateApplied += (s, e) =>
         {
             if (e.NameScope.Find<Thumb>("thumb") is Thumb thumb)
@@ -300,7 +301,7 @@ public class InitWaveform
             Padding = new Thickness(2, 2, 0, 2),
             Background = Brushes.Transparent,
             BorderThickness = new Thickness(0),
-        }.BindIsVisible(vm, nameof(vm.ShowWaveformPlaybackSpeed)); 
+        }.BindIsVisible(vm, nameof(vm.ShowWaveformPlaybackSpeed));
         comboBoxSpeed.Bind(ItemsControl.ItemsSourceProperty, new Binding(nameof(vm.Speeds)));
         comboBoxSpeed.Bind(SelectingItemsControl.SelectedItemProperty, new Binding(nameof(vm.SelectedSpeed)) { Mode = BindingMode.TwoWay });
         comboBoxSpeed.SelectionChanged += (s, e) =>
@@ -372,8 +373,7 @@ public class InitWaveform
         controlsPanel.Children.Add(buttonSetStartAndOffsetTheRest);
         controlsPanel.Children.Add(buttonSetStart);
         controlsPanel.Children.Add(buttonSetEnd);
-        //  controlsPanel.Children.Add(buttonRepeat);
-        //controlsPanel.Children.Add(UiUtil.MakeSeparatorForHorizontal());
+        controlsPanel.Children.Add(toggleButtonRepeat);
         controlsPanel.Children.Add(iconHorizontal);
         controlsPanel.Children.Add(sliderHorizontalZoom);
         controlsPanel.Children.Add(iconVertical);

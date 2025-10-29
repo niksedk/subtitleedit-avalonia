@@ -224,6 +224,9 @@ public class LanguageSettingsShortcuts
     public string RemoveColor { get; set; }
     public string SurroundWith { get; set; }
     public string SurroundWithX { get; set; }
+    public string RepeatLine { get; set; }
+    public string RepeatPreviousLine { get; set; }
+    public string RepeatNextLine { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -451,5 +454,8 @@ public class LanguageSettingsShortcuts
         RemoveColor = "Remove color";
         SurroundWith = "Surround with...";
         SurroundWithX = "Surround with \"{0}\"";
+        RepeatLine = "Repeat line";
+        RepeatPreviousLine = "Repeat previous line";
+        RepeatNextLine = "Repeat next line";
     }
 }

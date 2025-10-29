@@ -243,6 +243,9 @@ public static class ShortcutsMain
         { nameof(MainViewModel.SurroundWith1Command), string.Format(Se.Language.Options.Shortcuts.SurroundWithX, "1") },
         { nameof(MainViewModel.SurroundWith2Command), string.Format(Se.Language.Options.Shortcuts.SurroundWithX, "2") },
         { nameof(MainViewModel.SurroundWith3Command), string.Format(Se.Language.Options.Shortcuts.SurroundWithX, "3") },
+        { nameof(MainViewModel.RepeatLineToggleCommand), Se.Language.Options.Shortcuts.RepeatLine },
+        { nameof(MainViewModel.RepeatPreviousLineCommand), Se.Language.Options.Shortcuts.RepeatPreviousLine },
+        { nameof(MainViewModel.RepeatNextLineCommand), Se.Language.Options.Shortcuts.RepeatNextLine },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -434,6 +437,9 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.SurroundWith1Command, nameof(vm.SurroundWith1Command), ShortcutCategory.SubtitleGridAndTextBox);
         AddShortcut(shortcuts, vm.SurroundWith2Command, nameof(vm.SurroundWith2Command), ShortcutCategory.SubtitleGridAndTextBox);
         AddShortcut(shortcuts, vm.SurroundWith3Command, nameof(vm.SurroundWith3Command), ShortcutCategory.SubtitleGridAndTextBox);
+        AddShortcut(shortcuts, vm.RepeatLineToggleCommand, nameof(vm.RepeatLineToggleCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.RepeatPreviousLineCommand, nameof(vm.RepeatPreviousLineCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.RepeatNextLineCommand, nameof(vm.RepeatNextLineCommand), ShortcutCategory.General);
 
         return shortcuts;
     }
