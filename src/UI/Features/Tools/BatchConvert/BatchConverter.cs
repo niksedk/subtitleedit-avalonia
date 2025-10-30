@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -37,18 +38,18 @@ public class BatchConverter : IBatchConverter
         {
             if (format.Name == _config.TargetFormatName && item.Subtitle != null)
             {
-                item.Status = "Converting...";
+                item.Status = Se.Language.General.ConvertingDotDotDot;;
                 try
                 {
                     var processedSubtitle = RunConvertFunctions(item);
                     var converted = format.ToText(processedSubtitle, _config.TargetEncoding);
                     var path = MakeOutputFileName(item, format);
                     await File.WriteAllTextAsync(path, converted);
-                    item.Status = "Converted";
+                    item.Status = Se.Language.General.Converted;
                 }
                 catch (Exception exception)
                 {
-                    item.Status = "Error: " + exception.Message;
+                    item.Status = string.Format(Se.Language.General.ErrorX,  exception.Message);
                 }
 
                 break;
@@ -65,6 +66,7 @@ public class BatchConverter : IBatchConverter
         s = RemoveLineBreaks(s);
         s = DeleteLines(s);
         s = AdjustDisplayDuration(s);
+        s = AutoTranslate(s);
 
         return s;
     }
@@ -182,7 +184,7 @@ public class BatchConverter : IBatchConverter
         return subtitle;
     }
 
-    public Subtitle DeleteLines(Subtitle subtitle)
+    private Subtitle DeleteLines(Subtitle subtitle)
     {
         if (!_config.DeleteLines.IsActive)
         {
@@ -209,7 +211,7 @@ public class BatchConverter : IBatchConverter
         return subtitle;
     }
 
-    public Subtitle AdjustDisplayDuration(Subtitle subtitle)
+    private Subtitle AdjustDisplayDuration(Subtitle subtitle)
     {
         if (!_config.AdjustDuration.IsActive)
         {
@@ -234,6 +236,18 @@ public class BatchConverter : IBatchConverter
         {
             subtitle.AdjustDisplayTimeUsingSeconds(c.Seconds, null, shotChanges, true);
         }
+
+        return subtitle;
+    }
+
+    private Subtitle AutoTranslate(Subtitle subtitle)
+    {
+        if (!_config.AdjustDuration.IsActive)
+        {
+            return subtitle;
+        }
+        
+        
 
         return subtitle;
     }

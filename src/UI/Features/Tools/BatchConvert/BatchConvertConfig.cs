@@ -18,6 +18,7 @@ public class BatchConvertConfig
     public ChangeFrameRateSettings ChangeFrameRate { get; set; }
     public RemoveLineBreaksSettings RemoveLineBreaks { get; set; }
     public DeleteLinesSettings DeleteLines { get; set; }
+    public AutoTranslateSettings AutoTranslate { get; set; }
 
     public BatchConvertConfig()
     {
@@ -31,6 +32,7 @@ public class BatchConvertConfig
         RemoveLineBreaks = new RemoveLineBreaksSettings();
         ChangeFrameRate = new ChangeFrameRateSettings();
         DeleteLines = new DeleteLinesSettings();
+        AutoTranslate = new AutoTranslateSettings();
     }
 
     public class RemoveFormattingSettings
@@ -92,6 +94,15 @@ public class BatchConvertConfig
         public DeleteLinesSettings()
         {
             DeleteContains = string.Empty;
+        }
+    }
+    
+    public class AutoTranslateSettings
+    {
+        public bool IsActive { get; set; }
+
+        public AutoTranslateSettings()
+        {
         }
     }
 }

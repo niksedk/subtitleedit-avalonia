@@ -263,12 +263,18 @@ public partial class BatchConvertViewModel : ObservableObject
     private void SaveSettings()
     {
         Se.Settings.Tools.BatchConvert.TargetFormat = SelectedTargetFormat ?? TargetFormats.First();
+
+        Se.Settings.Tools.BatchConvert.AutoTranslateEngine = SelectedAutoTranslator.Name;
+        Se.Settings.Tools.BatchConvert.AutoTranslateSourceLanguage = SelectedSourceLanguage?.Code ?? "en";
+        Se.Settings.Tools.BatchConvert.AutoTranslateTargetLanguage = SelectedTargetLanguage?.Code ?? "es";
+        
         Se.SaveSettings();
     }
 
     [RelayCommand]
     private void Done()
     {
+        SaveSettings();
         OkPressed = true;
         Window?.Close();
     }

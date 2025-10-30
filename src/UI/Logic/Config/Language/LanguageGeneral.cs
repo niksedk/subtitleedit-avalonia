@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language;
+﻿using System;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
 public class LanguageGeneral
 {
@@ -482,6 +484,8 @@ public class LanguageGeneral
     public string FixCommonErrors { get; set; }
     public string MultipleReplace { get; set; }
     public string AutoTranslate { get; set; }
+    public string ConvertingDotDotDot { get; set; }
+    public string ErrorX { get; set; }
 
     public LanguageGeneral()
     {
@@ -965,5 +969,7 @@ public class LanguageGeneral
         FixCommonErrors = "Fix common errors";
         MultipleReplace = "Multiple replace";
         AutoTranslate = "Auto-translate";
+        ConvertingDotDotDot = "Converting...";
+        ErrorX = "Error; {0}";
     }
 }
