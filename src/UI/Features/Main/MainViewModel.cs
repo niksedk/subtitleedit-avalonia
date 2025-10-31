@@ -486,8 +486,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task CommandShowLayout()
     {
-        var vm = await _windowService.ShowDialogAsync<LayoutWindow, LayoutViewModel>(Window!,
-            viewModel => { viewModel.SelectedLayout = Se.Settings.General.LayoutNumber; });
+        var vm = await ShowDialogAsync<LayoutWindow, LayoutViewModel>(viewModel => { viewModel.SelectedLayout = Se.Settings.General.LayoutNumber; });
 
         if (vm.OkPressed && vm.SelectedLayout != null && vm.SelectedLayout != Se.Settings.General.LayoutNumber)
         {
@@ -503,8 +502,6 @@ public partial class MainViewModel :
                 VideoPlayerControl.Reload();
             }
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -564,7 +561,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowSourceView()
     {
-        var result = await _windowService.ShowDialogAsync<SourceViewWindow, SourceViewViewModel>(Window!, vm =>
+        var result = await ShowDialogAsync<SourceViewWindow, SourceViewViewModel>(vm =>
         {
             var text = GetUpdateSubtitle().ToText(SelectedSubtitleFormat);
             vm.Initialize(
@@ -577,15 +574,13 @@ public partial class MainViewModel :
         {
             //_subtitle.Header = result.Header;
         }
-
-        _shortcutManager.ClearKeys();
     }
 
 
     [RelayCommand]
     private async Task ShowAssaStyles()
     {
-        var result = await _windowService.ShowDialogAsync<AssaStylesWindow, AssaStylesViewModel>(Window!,
+        var result = await ShowDialogAsync<AssaStylesWindow, AssaStylesViewModel>(
             vm =>
             {
                 vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty,
@@ -606,14 +601,12 @@ public partial class MainViewModel :
                 }
             }
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task ShowAssaProperties()
     {
-        var result = await _windowService.ShowDialogAsync<AssaPropertiesWindow, AssaPropertiesViewModel>(Window!,
+        var result = await ShowDialogAsync<AssaPropertiesWindow, AssaPropertiesViewModel>(
             vm =>
             {
                 vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty,
@@ -624,15 +617,13 @@ public partial class MainViewModel :
         {
             _subtitle.Header = result.Header;
         }
-
-        _shortcutManager.ClearKeys();
     }
 
 
     [RelayCommand]
     private async Task ShowAssaAttachments()
     {
-        var result = await _windowService.ShowDialogAsync<AssaAttachmentsWindow, AssaAttachmentsViewModel>(Window!,
+        var result = await ShowDialogAsync<AssaAttachmentsWindow, AssaAttachmentsViewModel>(
             vm => { vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty); });
 
         if (result.OkPressed)
@@ -640,8 +631,6 @@ public partial class MainViewModel :
             _subtitle.Header = result.Header;
             _subtitle.Footer = result.Footer;
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -960,13 +949,11 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowCompare()
     {
-        var result = await _windowService.ShowDialogAsync<CompareWindow, CompareViewModel>(Window!, vm =>
+        var result = await ShowDialogAsync<CompareWindow, CompareViewModel>(vm =>
         {
             var right = new ObservableCollection<SubtitleLineViewModel>();
             vm.Initialize(Subtitles, _subtitleFileName ?? string.Empty, right, string.Empty, HasChanges());
         });
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -983,10 +970,8 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<StatisticsWindow, StatisticsViewModel>(Window!,
+        var result = await ShowDialogAsync<StatisticsWindow, StatisticsViewModel>(
             vm => { vm.Initialize(GetUpdateSubtitle(), SelectedSubtitleFormat, _subtitleFileName ?? string.Empty); });
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -1004,15 +989,13 @@ public partial class MainViewModel :
         }
 
         IExportHandler exportHandler = new ExportHandlerBluRaySup();
-        var result = await _windowService.ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(Window!,
+        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(
             vm => { vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName); });
 
         if (!result.OkPressed)
         {
             return;
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -1030,15 +1013,13 @@ public partial class MainViewModel :
         }
 
         IExportHandler exportHandler = new ExportHandlerVobSub();
-        var result = await _windowService.ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(Window!,
+        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(
             vm => { vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName); });
 
         if (!result.OkPressed)
         {
             return;
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -1055,10 +1036,8 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<ExportCustomTextFormatWindow, ExportCustomTextFormatViewModel>(Window!,
+        var result = await ShowDialogAsync<ExportCustomTextFormatWindow, ExportCustomTextFormatViewModel>(
             vm => { vm.Initialize(Subtitles.ToList(), _subtitleFileName, _videoFileName); });
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -1075,10 +1054,8 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<ExportPlainTextWindow, ExportPlainTextViewModel>(Window!,
+        var result = await ShowDialogAsync<ExportPlainTextWindow, ExportPlainTextViewModel>(
             vm => { vm.Initialize(Subtitles.ToList(), _subtitleFileName, _videoFileName); });
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -1126,7 +1103,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<ExportCavena890Window, ExportCavena890ViewModel>(Window!);
+        var result = await ShowDialogAsync<ExportCavena890Window, ExportCavena890ViewModel>();
         if (!result.OkPressed)
         {
             return;
@@ -1148,8 +1125,6 @@ public partial class MainViewModel :
         }
 
         ShowStatus($"File exported in format {cavena.Name} to {fileName}");
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -1166,7 +1141,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<ExportPacWindow, ExportPacViewModel>(Window);
+        var result = await ShowDialogAsync<ExportPacWindow, ExportPacViewModel>();
         if (!result.OkPressed || result.PacCodePage == null)
         {
             return;
@@ -1187,8 +1162,6 @@ public partial class MainViewModel :
         await File.WriteAllBytesAsync(fileName, ms.ToArray());
 
         ShowStatus($"File exported in format {pac.Name} to {fileName}");
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -1239,7 +1212,7 @@ public partial class MainViewModel :
         }
 
         var result =
-            await _windowService.ShowDialogAsync<ExportEbuStlWindow, ExportEbuStlViewModel>(Window!,
+            await ShowDialogAsync<ExportEbuStlWindow, ExportEbuStlViewModel>(
                 vm => { vm.Initialize(GetUpdateSubtitle()); });
 
         if (!result.OkPressed)
@@ -1264,8 +1237,6 @@ public partial class MainViewModel :
 
         format.Save(fileName, result.Subtitle);
         ShowStatus($"File exported in format \"{format.Name}\" to file \"{fileName}\"");
-
-        _shortcutManager.ClearKeys();
     }
 
 
@@ -1349,15 +1320,13 @@ public partial class MainViewModel :
         }
 
         var result =
-            await _windowService.ShowDialogAsync<ManualChosenEncodingWindow, ManualChosenEncodingViewModel>(Window!,
+            await ShowDialogAsync<ManualChosenEncodingWindow, ManualChosenEncodingViewModel>(
                 vm => { vm.Initialize(fileName); });
 
         if (result.OkPressed && result.SelectedEncoding != null)
         {
             await SubtitleOpen(fileName, null, null, result.SelectedEncoding);
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -1369,11 +1338,10 @@ public partial class MainViewModel :
         }
 
         var result =
-            await _windowService.ShowDialogAsync<WaveformSeekSilenceWindow, WaveformSeekSilenceViewModel>(Window!, vm => { vm.Initialize(AudioVisualizer.WavePeaks); });
+            await ShowDialogAsync<WaveformSeekSilenceWindow, WaveformSeekSilenceViewModel>(vm => { vm.Initialize(AudioVisualizer.WavePeaks); });
 
         if (!result.OkPressed || !result.SilenceMaxVolume.HasValue || !result.SilenceMinDuration.HasValue)
         {
-            _shortcutManager.ClearKeys();
             return;
         }
 
@@ -1391,8 +1359,6 @@ public partial class MainViewModel :
         {
             VideoPlayerControl.Position = seconds;
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -1403,7 +1369,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<WaveformGuessTimeCodesWindow, WaveformGuessTimeCodesViewModel>(Window!);
+        var result = await ShowDialogAsync<WaveformGuessTimeCodesWindow, WaveformGuessTimeCodesViewModel>();
 
         if (!result.OkPressed ||
             !result.ScanBlockSize.HasValue ||
@@ -1435,7 +1401,6 @@ public partial class MainViewModel :
         AudioVisualizer.GenerateTimeCodes(_subtitle, startFromSeconds, result.ScanBlockSize.Value, result.ScanBlockAverageMin.Value, result.ScanBlockAverageMax.Value,
             result.SplitLongSubtitlesAtMs.Value);
         SetSubtitles(_subtitle);
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -1447,19 +1412,16 @@ public partial class MainViewModel :
         }
 
         var result =
-            await _windowService.ShowDialogAsync<PickLayersWindow, PickLayersViewModel>(Window!, vm => { vm.Initialize(Subtitles.ToList(), _visibleLayers); });
+            await ShowDialogAsync<PickLayersWindow, PickLayersViewModel>(vm => { vm.Initialize(Subtitles.ToList(), _visibleLayers); });
 
         if (!result.OkPressed)
         {
-            _shortcutManager.ClearKeys();
             return;
         }
 
         _visibleLayers = result.SelectedLayers;
         ShowLayerFilterIcon = IsFormatAssa && Se.Settings.Appearance.ShowLayer && _visibleLayers != null;
         _updateAudioVisualizer = true;
-
-        _shortcutManager.ClearKeys();
     }
 
     private string GetNewFileName()
@@ -1691,10 +1653,9 @@ public partial class MainViewModel :
         var subtitle = new Subtitle();
         detectedFormat.LoadSubtitle(subtitle, lines, null);
 
-        var result = await _windowService.ShowDialogAsync<ColumnPasteWindow, ColumnPasteViewModel>(Window);
+        var result = await ShowDialogAsync<ColumnPasteWindow, ColumnPasteViewModel>();
         if (!result.OkPressed)
         {
-            _shortcutManager.ClearKeys();
             return;
         }
 
@@ -1744,8 +1705,6 @@ public partial class MainViewModel :
             count++;
             idx++;
         }
-
-        _shortcutManager.ClearKeys();
     }
 
 
@@ -1881,15 +1840,13 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<BlankVideoWindow, BlankVideoViewModel>(Window!,
+        var result = await ShowDialogAsync<BlankVideoWindow, BlankVideoViewModel>(
             vm => { vm.Initialize(_subtitleFileName ?? string.Empty, SelectedSubtitleFormat); });
 
         if (!result.OkPressed)
         {
             return;
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -1911,15 +1868,13 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<CutVideoWindow, CutVideoViewModel>(Window!,
+        var result = await ShowDialogAsync<CutVideoWindow, CutVideoViewModel>(
             vm => { vm.Initialize(_videoFileName, AudioVisualizer?.WavePeaks, SelectedSubtitleFormat); });
 
         if (!result.OkPressed)
         {
             return;
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -1941,15 +1896,13 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<ReEncodeVideoWindow, ReEncodeVideoViewModel>(Window!,
+        var result = await ShowDialogAsync<ReEncodeVideoWindow, ReEncodeVideoViewModel>(
             vm => { vm.Initialize(_videoFileName, SelectedSubtitleFormat); });
 
         if (!result.OkPressed)
         {
             return;
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -1979,15 +1932,13 @@ public partial class MainViewModel :
         }
 
         var result =
-            await _windowService.ShowDialogAsync<AdjustDurationWindow, AdjustDurationViewModel>(Window!, vm => { });
+            await ShowDialogAsync<AdjustDurationWindow, AdjustDurationViewModel>();
 
         if (result.OkPressed)
         {
             result.AdjustDuration(Subtitles);
             _updateAudioVisualizer = true;
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -2004,7 +1955,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<ApplyDurationLimitsWindow, ApplyDurationLimitsViewModel>(Window!,
+        var result = await ShowDialogAsync<ApplyDurationLimitsWindow, ApplyDurationLimitsViewModel>(
             vm =>
             {
                 var shotChanges = AudioVisualizer?.ShotChanges ?? new List<double>();
@@ -2019,23 +1970,19 @@ public partial class MainViewModel :
             SelectAndScrollToRow(idx ?? 0);
             _updateAudioVisualizer = true;
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task ShowToolsBatchConvert()
     {
-        await _windowService.ShowDialogAsync<BatchConvertWindow, BatchConvertViewModel>(Window!, vm => { });
-        _shortcutManager.ClearKeys();
+        await ShowDialogAsync<BatchConvertWindow, BatchConvertViewModel>();
     }
 
     [RelayCommand]
     private async Task ShowToolsJoin()
     {
         var result =
-            await _windowService.ShowDialogAsync<JoinSubtitlesWindow, JoinSubtitlesViewModel>(Window!, vm => { });
-        _shortcutManager.ClearKeys();
+            await ShowDialogAsync<JoinSubtitlesWindow, JoinSubtitlesViewModel>();
         if (!result.OkPressed)
         {
             return;
@@ -2063,7 +2010,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<MergeSameTextWindow, MergeSameTextViewModel>(Window!,
+        var result = await ShowDialogAsync<MergeSameTextWindow, MergeSameTextViewModel>(
             vm => { vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList()); });
 
         if (!result.OkPressed)
@@ -2075,8 +2022,6 @@ public partial class MainViewModel :
         Subtitles.AddRange(result.ResultSubtitles.Select(p => new SubtitleLineViewModel(p)));
         Renumber();
         SelectAndScrollToRow(0);
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -2093,8 +2038,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<MergeSameTimeCodesWindow, MergeSameTimeCodesViewModel>(
-            Window!,
+        var result = await ShowDialogAsync<MergeSameTimeCodesWindow, MergeSameTimeCodesViewModel>(
             vm => { vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList(), GetUpdateSubtitle()); });
 
         if (!result.OkPressed)
@@ -2106,8 +2050,6 @@ public partial class MainViewModel :
         Subtitles.AddRange(result.ResultSubtitles.Select(p => new SubtitleLineViewModel(p)));
         Renumber();
         SelectAndScrollToRow(0);
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -2259,9 +2201,8 @@ public partial class MainViewModel :
             return;
         }
 
-        await _windowService.ShowDialogAsync<SplitSubtitleWindow, SplitSubtitleViewModel>(Window!,
+        await ShowDialogAsync<SplitSubtitleWindow, SplitSubtitleViewModel>(
             vm => { vm.Initialize(fileName ?? string.Empty, s); });
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -2278,7 +2219,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<BridgeGapsWindow, BridgeGapsViewModel>(Window!,
+        var result = await ShowDialogAsync<BridgeGapsWindow, BridgeGapsViewModel>(
             vm => { vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList()); });
 
         if (result.OkPressed)
@@ -2288,8 +2229,6 @@ public partial class MainViewModel :
             SelectAndScrollToRow(0);
             _updateAudioVisualizer = true;
         }
-
-        _shortcutManager.ClearKeys();
     }
 
 
@@ -2307,7 +2246,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<ApplyMinGapWindow, ApplyMinGapViewModel>(Window!,
+        var result = await ShowDialogAsync<ApplyMinGapWindow, ApplyMinGapViewModel>(
             vm => { vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList()); });
 
         if (result.OkPressed)
@@ -2317,8 +2256,6 @@ public partial class MainViewModel :
             SelectAndScrollToRow(0);
             _updateAudioVisualizer = true;
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -2336,7 +2273,7 @@ public partial class MainViewModel :
         }
 
         var result =
-            await _windowService.ShowDialogAsync<ChangeCasingWindow, ChangeCasingViewModel>(Window!,
+            await ShowDialogAsync<ChangeCasingWindow, ChangeCasingViewModel>(
                 vm => { vm.Initialize(GetUpdateSubtitle()); });
 
         if (result.OkPressed)
@@ -2353,8 +2290,6 @@ public partial class MainViewModel :
 
             ShowStatus(result.Info);
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -2371,7 +2306,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var viewModel = await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window!,
+        var viewModel = await ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(
             vm => { vm.Initialize(GetUpdateSubtitle(), SelectedSubtitleFormat); });
 
         if (viewModel.OkPressed)
@@ -2380,8 +2315,6 @@ public partial class MainViewModel :
             SelectAndScrollToRow(0);
             ShowStatus($"Fixed {viewModel.FixedSubtitle.Paragraphs.Count} lines");
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -2398,7 +2331,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var viewModel = await _windowService.ShowDialogAsync<FixNetflixErrorsWindow, FixNetflixErrorsViewModel>(Window!,
+        var viewModel = await ShowDialogAsync<FixNetflixErrorsWindow, FixNetflixErrorsViewModel>(
             vm =>
             {
                 vm.Initialize(GetUpdateSubtitle(), _videoFileName ?? string.Empty);
@@ -2410,8 +2343,6 @@ public partial class MainViewModel :
             SelectAndScrollToRow(0);
             ShowStatus($"Fixed {viewModel.FixedSubtitle.Paragraphs.Count} lines");
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     private void ShowSubtitleNotLoadedMessage()
@@ -2454,8 +2385,6 @@ public partial class MainViewModel :
             _updateAudioVisualizer = true;
             _mpvReloader.Reset();
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -2484,8 +2413,6 @@ public partial class MainViewModel :
             _updateAudioVisualizer = true;
             _mpvReloader.Reset();
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -2513,8 +2440,6 @@ public partial class MainViewModel :
                 result.FixedSubtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
             SelectAndScrollToRow(0);
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -2545,7 +2470,7 @@ public partial class MainViewModel :
         }
 
         var viewModel =
-            await _windowService.ShowDialogAsync<GoToVideoPositionWindow, GoToVideoPositionViewModel>(Window,
+            await ShowDialogAsync<GoToVideoPositionWindow, GoToVideoPositionViewModel>(
                 vm => { vm.Time = TimeSpan.FromSeconds(VideoPlayerControl.Position); });
 
         if (viewModel is { OkPressed: true, Time.TotalMicroseconds: >= 0 })
@@ -2553,8 +2478,6 @@ public partial class MainViewModel :
             VideoPlayerControl.Position = viewModel.Time.TotalSeconds;
             _updateAudioVisualizer = true;
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -2631,15 +2554,13 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(Window!,
+        var result = await ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(
             vm => { vm.Initialize(Subtitles, SelectedSubtitleIndex, this); });
 
         if (result.OkPressed && result.TotalChangedWords > 0)
         {
             ShowStatus(StatusTextRight = $"{result.TotalChangedWords} words corrected in spell check");
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -2673,12 +2594,10 @@ public partial class MainViewModel :
             }
         }
 
-        var result = await _windowService.ShowDialogAsync<AddToNamesListWindow, AddToNamesListViewModel>(Window, vm =>
+        var result = await ShowDialogAsync<AddToNamesListWindow, AddToNamesListViewModel>(vm =>
         {
             vm.Initialize(word, dictionaries, selectedDictionary);
         });
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -2689,21 +2608,16 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<FindDoubleWordsWindow, FindDoubleWordsViewModel>(Window, vm =>
+        var result = await ShowDialogAsync<FindDoubleWordsWindow, FindDoubleWordsViewModel>(vm =>
         {
             vm.Initialize(Subtitles.ToList());
         });
-
-
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task ShowSpellCheckDictionaries()
     {
-        await _windowService.ShowDialogAsync<GetDictionariesWindow, GetDictionariesViewModel>(Window!, vm => { });
-        _shortcutManager.ClearKeys();
+        await ShowDialogAsync<GetDictionariesWindow, GetDictionariesViewModel>();
     }
 
     [RelayCommand]
@@ -2714,7 +2628,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<PickRuleProfileWindow, PickRuleProfileViewModel>(Window);
+        var result = await ShowDialogAsync<PickRuleProfileWindow, PickRuleProfileViewModel>();
 
         if (result is { OkPressed: true, SelectedProfile: not null })
         {
@@ -2733,8 +2647,6 @@ public partial class MainViewModel :
 
             ShowStatus(string.Format(Se.Language.Main.RuleProfileIsX, p.Name));
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -2752,7 +2664,7 @@ public partial class MainViewModel :
         }
 
         var result =
-            await _windowService.ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(Window,
+            await ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(
                 vm => { vm.Initialize(_videoFileName); });
 
         if (result.OkPressed && !result.IsBatchMode)
@@ -2762,8 +2674,6 @@ public partial class MainViewModel :
             SelectAndScrollToRow(0);
             ShowStatus($"Transcription completed with {result.TranscribedSubtitle.Paragraphs.Count} lines");
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -2780,9 +2690,8 @@ public partial class MainViewModel :
             return;
         }
 
-        await _windowService.ShowDialogAsync<BurnInWindow, BurnInViewModel>(Window,
+        await ShowDialogAsync<BurnInWindow, BurnInViewModel>(
             vm => { vm.Initialize(_videoFileName ?? string.Empty, GetUpdateSubtitle(), SelectedSubtitleFormat); });
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -2793,7 +2702,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<OpenFromUrlWindow, OpenFromUrlViewModel>(Window);
+        var result = await ShowDialogAsync<OpenFromUrlWindow, OpenFromUrlViewModel>();
 
         if (result.OkPressed)
         {
@@ -2803,8 +2712,6 @@ public partial class MainViewModel :
                 await VideoOpenFile(videoFileName);
             }
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -2815,7 +2722,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<SetVideoOffsetWindow, SetVideoOffsetViewModel>(Window);
+        var result = await ShowDialogAsync<SetVideoOffsetWindow, SetVideoOffsetViewModel>();
 
         if (result.OkPressed && result.TimeOffset.HasValue)
         {
@@ -2836,8 +2743,6 @@ public partial class MainViewModel :
                 }
             }
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -2860,12 +2765,11 @@ public partial class MainViewModel :
             return;
         }
 
-        await _windowService.ShowDialogAsync<TextToSpeechWindow, TextToSpeechViewModel>(Window!, vm =>
+        await ShowDialogAsync<TextToSpeechWindow, TextToSpeechViewModel>(vm =>
         {
             vm.Initialize(GetUpdateSubtitle(), _videoFileName ?? string.Empty, AudioVisualizer?.WavePeaks,
                 Path.GetTempPath());
         });
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -2888,9 +2792,8 @@ public partial class MainViewModel :
             return;
         }
 
-        await _windowService.ShowDialogAsync<TransparentSubtitlesWindow, TransparentSubtitlesViewModel>(Window!,
+        await ShowDialogAsync<TransparentSubtitlesWindow, TransparentSubtitlesViewModel>(
             vm => { vm.Initialize(_videoFileName ?? string.Empty, GetUpdateSubtitle(), SelectedSubtitleFormat); });
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -2912,7 +2815,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<ShotChangesWindow, ShotChangesViewModel>(Window, vm => { vm.Initialize(_videoFileName); });
+        var result = await ShowDialogAsync<ShotChangesWindow, ShotChangesViewModel>(vm => { vm.Initialize(_videoFileName); });
 
         if (result.OkPressed && result.FfmpegLines.Count > 0)
         {
@@ -2922,8 +2825,6 @@ public partial class MainViewModel :
             ShotChangesHelper.SaveShotChanges(_videoFileName, AudioVisualizer.ShotChanges);
             ShowStatus(string.Format(Se.Language.Main.XShotChangedLoaded, AudioVisualizer.ShotChanges.Count));
         }
-
-        _shortcutManager.ClearKeys();
     }
 
 
@@ -2941,7 +2842,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<ShotChangeListWindow, ShotChangeListViewModel>(Window,
+        var result = await ShowDialogAsync<ShotChangeListWindow, ShotChangeListViewModel>(
             vm => { vm.Initialize(AudioVisualizer?.ShotChanges ?? new List<double>()); });
 
         if (result.OKProssed && AudioVisualizer != null)
@@ -2956,8 +2857,6 @@ public partial class MainViewModel :
 
         ShowShotChangesListMenuItem = AudioVisualizer?.ShotChanges.Count > 0;
         _updateAudioVisualizer = true;
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -3006,12 +2905,10 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<AdjustAllTimesWindow, AdjustAllTimesViewModel>(Window!, vm =>
+        var result = await ShowDialogAsync<AdjustAllTimesWindow, AdjustAllTimesViewModel>(vm =>
         {
             vm.Initialize(this); // uses call from IAdjustCallback: Adjust
         });
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -3028,7 +2925,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<VisualSyncWindow, VisualSyncViewModel>(Window!, vm =>
+        var result = await ShowDialogAsync<VisualSyncWindow, VisualSyncViewModel>(vm =>
         {
             var paragraphs = Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList();
             vm.Initialize(paragraphs, _videoFileName, _subtitleFileName, AudioVisualizer);
@@ -3044,8 +2941,6 @@ public partial class MainViewModel :
 
             SelectAndScrollToRow(0);
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -3062,8 +2957,7 @@ public partial class MainViewModel :
             return;
         }
 
-        await _windowService.ShowDialogAsync<ChangeFrameRateWindow, ChangeFrameRateViewModel>(Window!, vm => { });
-        _shortcutManager.ClearKeys();
+        await ShowDialogAsync<ChangeFrameRateWindow, ChangeFrameRateViewModel>();
     }
 
     [RelayCommand]
@@ -3080,8 +2974,7 @@ public partial class MainViewModel :
             return;
         }
 
-        await _windowService.ShowDialogAsync<ChangeSpeedWindow, ChangeSpeedViewModel>(Window!, vm => { });
-        _shortcutManager.ClearKeys();
+        await ShowDialogAsync<ChangeSpeedWindow, ChangeSpeedViewModel>();
     }
 
     [RelayCommand]
@@ -3098,11 +2991,10 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(Window!, vm => { vm.Initialize(GetUpdateSubtitle()); });
+        var result = await ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(vm => { vm.Initialize(GetUpdateSubtitle()); });
 
         if (!result.OkPressed)
         {
-            _shortcutManager.ClearKeys();
             return;
         }
 
@@ -3122,7 +3014,6 @@ public partial class MainViewModel :
         ShowColumnOriginalText = true;
         AutoFitColumns();
         _updateAudioVisualizer = true;
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -3134,7 +3025,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(Window!, vm =>
+        var result = await ShowDialogAsync<AutoTranslateWindow, AutoTranslateViewModel>(vm =>
         {
             var sub = new Subtitle();
             foreach (var line in selectedItems)
@@ -3176,7 +3067,6 @@ public partial class MainViewModel :
         }
 
         _updateAudioVisualizer = true;
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -3193,11 +3083,10 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<CopyPasteTranslateWindow, CopyPasteTranslateViewModel>(Window!, vm => { vm.Initialize(Subtitles.ToList()); });
+        var result = await ShowDialogAsync<CopyPasteTranslateWindow, CopyPasteTranslateViewModel>(vm => { vm.Initialize(Subtitles.ToList()); });
 
         if (!result.OkPressed)
         {
-            _shortcutManager.ClearKeys();
             return;
         }
 
@@ -3217,7 +3106,6 @@ public partial class MainViewModel :
         ShowColumnOriginalText = true;
         AutoFitColumns();
         _updateAudioVisualizer = true;
-        _shortcutManager.ClearKeys();
         _converted = true;
     }
 
@@ -3230,7 +3118,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<ChangeCasingWindow, ChangeCasingViewModel>(Window!, vm =>
+        var result = await ShowDialogAsync<ChangeCasingWindow, ChangeCasingViewModel>(vm =>
         {
             var sub = new Subtitle();
             foreach (var line in selectedItems)
@@ -3272,7 +3160,6 @@ public partial class MainViewModel :
         }
 
         _updateAudioVisualizer = true;
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -3284,7 +3171,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<StatisticsWindow, StatisticsViewModel>(Window!, vm =>
+        var result = await ShowDialogAsync<StatisticsWindow, StatisticsViewModel>(vm =>
         {
             var sub = new Subtitle();
             foreach (var line in selectedItems)
@@ -3307,8 +3194,6 @@ public partial class MainViewModel :
 
             vm.Initialize(sub, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
         });
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -3320,7 +3205,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<MultipleReplaceWindow, MultipleReplaceViewModel>(Window!, vm =>
+        var result = await ShowDialogAsync<MultipleReplaceWindow, MultipleReplaceViewModel>(vm =>
         {
             var sub = new Subtitle();
             foreach (var line in selectedItems)
@@ -3362,7 +3247,6 @@ public partial class MainViewModel :
         }
 
         _updateAudioVisualizer = true;
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -3374,7 +3258,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(Window!, vm =>
+        var result = await ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(vm =>
         {
             var sub = new Subtitle();
             foreach (var line in selectedItems)
@@ -3416,7 +3300,6 @@ public partial class MainViewModel :
         }
 
         _updateAudioVisualizer = true;
-        _shortcutManager.ClearKeys();
     }
 
 
@@ -3439,8 +3322,6 @@ public partial class MainViewModel :
         }
 
         ApplySettings();
-
-        _shortcutManager.ClearKeys();
     }
 
     public void ApplySettings()
@@ -3503,17 +3384,15 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task CommandShowSettingsShortcuts()
     {
-        await _windowService.ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(Window!,
+        await ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(
             vm => { vm.LoadShortCuts(this); });
         ReloadShortcuts();
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task ShowWordLists()
     {
-        var result = await _windowService.ShowDialogAsync<WordListsWindow, WordListsViewModel>(Window!);
-        _shortcutManager.ClearKeys();
+        var result = await ShowDialogAsync<WordListsWindow, WordListsViewModel>();
     }
 
     [RelayCommand]
@@ -3536,7 +3415,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<BookmarkEditWindow, BookmarkEditViewModel>(Window!, vm =>
+        var result = await ShowDialogAsync<BookmarkEditWindow, BookmarkEditViewModel>(vm =>
         {
             var allBookmarks = Subtitles.Where(p => p.Bookmark != null).ToList();
             vm.Initialize(selectedItems, allBookmarks);
@@ -3556,7 +3435,6 @@ public partial class MainViewModel :
             await ListBookmarks();
         }
 
-        _shortcutManager.ClearKeys();
         _updateAudioVisualizer = true;
     }
 
@@ -3601,15 +3479,13 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<BookmarksListWindow, BookmarksListViewModel>(Window!,
+        var result = await ShowDialogAsync<BookmarksListWindow, BookmarksListViewModel>(
             vm => { vm.Initialize(Subtitles.Where(p => p.Bookmark != null).ToList()); });
 
         if (result.GoToPressed && result.SelectedSubtitle != null)
         {
             SelectAndScrollToSubtitle(result.SelectedSubtitle);
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -3676,15 +3552,13 @@ public partial class MainViewModel :
             }
         }
 
-        var result = await _windowService.ShowDialogAsync<ErrorListWindow, ErrorListViewModel>(Window!,
+        var result = await ShowDialogAsync<ErrorListWindow, ErrorListViewModel>(
             vm => { vm.Initialize(list.ToList()); });
 
         if (result.GoToPressed && result.SelectedSubtitle != null)
         {
             SelectAndScrollToSubtitle(result.SelectedSubtitle.Subtitle);
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -3759,7 +3633,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task CommandShowSettingsLanguage()
     {
-        var viewModel = await _windowService.ShowDialogAsync<LanguageWindow, LanguageViewModel>(Window!);
+        var viewModel = await ShowDialogAsync<LanguageWindow, LanguageViewModel>();
         if (viewModel.OkPressed && viewModel.SelectedLanguage != null)
         {
             var jsonFileName = viewModel.SelectedLanguage.FileName;
@@ -3776,8 +3650,6 @@ public partial class MainViewModel :
             InitMenu.Make(this);
             InitLayout.MakeLayout(MainView!, this, Se.Settings.General.LayoutNumber);
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -3971,15 +3843,13 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<PickAlignmentWindow, PickAlignmentViewModel>(Window!,
+        var result = await ShowDialogAsync<PickAlignmentWindow, PickAlignmentViewModel>(
             vm => { vm.Initialize(selected, SubtitleGrid.SelectedItems.Count); });
 
         if (result.OkPressed)
         {
             SetAlignmentToSelected(result.Alignment);
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -3992,15 +3862,13 @@ public partial class MainViewModel :
         }
 
         var result =
-            await _windowService.ShowDialogAsync<PickFontNameWindow, PickFontNameViewModel>(Window!,
+            await ShowDialogAsync<PickFontNameWindow, PickFontNameViewModel>(
                 vm => { vm.Initialize(); });
 
         if (result.OkPressed && result.SelectedFontName != null)
         {
             _fontNameService.SetFontName(selectedItems, result.SelectedFontName, SelectedSubtitleFormat);
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -4012,7 +3880,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<PickColorWindow, PickColorViewModel>(Window!, vm =>
+        var result = await ShowDialogAsync<PickColorWindow, PickColorViewModel>(vm =>
         {
             // vm.Initialize();
         });
@@ -4021,8 +3889,6 @@ public partial class MainViewModel :
         {
             _colorService.SetColor(selectedItems, result.SelectedColor, GetUpdateSubtitle(), SelectedSubtitleFormat);
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     private void ToggleColor(Color color)
@@ -4293,8 +4159,6 @@ public partial class MainViewModel :
         {
             await SubtitleOpen(viewModel.RestoreFileName);
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -4304,7 +4168,7 @@ public partial class MainViewModel :
         _undoRedoManager.StopChangeDetection();
 
         var result =
-            await _windowService.ShowDialogAsync<ShowHistoryWindow, ShowHistoryViewModel>(Window!,
+            await ShowDialogAsync<ShowHistoryWindow, ShowHistoryViewModel>(
                 vm => { vm.Initialize(_undoRedoManager); });
 
         if (result.OkPressed && result.SelectedHistoryItem != null)
@@ -4322,7 +4186,6 @@ public partial class MainViewModel :
         }
 
         _undoRedoManager.StartChangeDetection();
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -4672,7 +4535,7 @@ public partial class MainViewModel :
         }
 
         var result =
-            await _windowService.ShowDialogAsync<MultipleReplaceWindow, MultipleReplaceViewModel>(Window!,
+            await ShowDialogAsync<MultipleReplaceWindow, MultipleReplaceViewModel>(
                 vm => { vm.Initialize(GetUpdateSubtitle()); });
 
         if (result.OkPressed)
@@ -4681,8 +4544,6 @@ public partial class MainViewModel :
             SelectAndScrollToRow(0);
             ShowStatus($"Replaced {result.TotalReplaced} occurrences");
         }
-
-        _shortcutManager.ClearKeys();
     }
 
 
@@ -4694,7 +4555,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var viewModel = await _windowService.ShowDialogAsync<GoToLineNumberWindow, GoToLineNumberViewModel>(Window!, vm =>
+        var viewModel = await ShowDialogAsync<GoToLineNumberWindow, GoToLineNumberViewModel>(vm =>
         {
             var idx = 1;
             if (SelectedSubtitle != null)
@@ -4719,8 +4580,6 @@ public partial class MainViewModel :
                 }
             }
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -4766,7 +4625,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowModifySelection()
     {
-        var result = await _windowService.ShowDialogAsync<ModifySelectionWindow, ModifySelectionViewModel>(Window!, vm =>
+        var result = await ShowDialogAsync<ModifySelectionWindow, ModifySelectionViewModel>(vm =>
         {
             var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
             vm.Initialize(Subtitles.ToList(), selectedItems);
@@ -4818,8 +4677,6 @@ public partial class MainViewModel :
                 }
             }
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -5190,7 +5047,7 @@ public partial class MainViewModel :
         var selectionEnd = Math.Max(tb.SelectionStart, tb.SelectionEnd);
         var selectionLength = selectionEnd - selectionStart;
 
-        var result = await _windowService.ShowDialogAsync<PickColorWindow, PickColorViewModel>(Window!);
+        var result = await ShowDialogAsync<PickColorWindow, PickColorViewModel>();
         if (!result.OkPressed)
         {
             return;
@@ -5250,7 +5107,7 @@ public partial class MainViewModel :
         var selectionLength = selectionEnd - selectionStart;
 
         var result =
-            await _windowService.ShowDialogAsync<PickFontNameWindow, PickFontNameViewModel>(Window!,
+            await ShowDialogAsync<PickFontNameWindow, PickFontNameViewModel>(
                 vm => { vm.Initialize(); });
 
         if (!result.OkPressed || result.SelectedFontName == null)
@@ -5955,7 +5812,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task SetNewStyleForSelectedLines(string styleName)
     {
-        var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!,
+        var result = await ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(
             vm => { vm.Initialize(Se.Language.General.Style + " - " + Se.Language.General.New, string.Empty, 250, 20, true); });
 
         if (result.OkPressed && !string.IsNullOrWhiteSpace(result.Text))
@@ -6030,7 +5887,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task SetNewActorForSelectedLines(string styleName)
     {
-        var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!,
+        var result = await ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(
             vm => { vm.Initialize(Se.Language.General.Actor + " - " + Se.Language.General.New, string.Empty, 250, 20, true); });
 
         if (result.OkPressed && !string.IsNullOrWhiteSpace(result.Text))
@@ -6051,6 +5908,17 @@ public partial class MainViewModel :
                 p.Actor = actorName;
             }
         });
+    }
+
+    private async Task<TViewModel> ShowDialogAsync<TWindow, TViewModel>(
+         Action<TViewModel>? configureViewModel = null, Action<TWindow>? configureWindow = null)
+         where TWindow : Window
+         where TViewModel : class
+    {
+        VideoPlayerControl?.VideoPlayerInstance.Pause();
+        var result = await _windowService.ShowDialogAsync<TWindow, TViewModel>(Window!, configureViewModel, configureWindow);
+        _shortcutManager.ClearKeys();
+        return result;
     }
 
     private void SplitSelectedLine(bool atVideoPosition, bool atTextBoxPosition)
@@ -6133,7 +6001,7 @@ public partial class MainViewModel :
                 return false;
             }
 
-            var result = await _windowService.ShowDialogAsync<DownloadFfmpegWindow, DownloadFfmpegViewModel>(Window!);
+            var result = await ShowDialogAsync<DownloadFfmpegWindow, DownloadFfmpegViewModel>();
             if (!string.IsNullOrEmpty(result.FfmpegFileName))
             {
                 Se.Settings.General.FfmpegPath = result.FfmpegFileName;
@@ -6459,7 +6327,7 @@ public partial class MainViewModel :
                 {
                     Dispatcher.UIThread.Post(async () =>
                     {
-                        var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!,
+                        var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(
                             vm => { vm.Initialize(subtitles, fileName); });
 
                         if (result.OkPressed)
@@ -6626,7 +6494,7 @@ public partial class MainViewModel :
     {
         Dispatcher.UIThread.Post(async () =>
         {
-            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!,
+            var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(
                 vm => { vm.InitializeBdn(subtitle, fileName, false); });
 
             if (result.OkPressed)
@@ -6682,7 +6550,7 @@ public partial class MainViewModel :
         Dispatcher.UIThread.Post(async () =>
         {
             var result =
-                await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!,
+                await ShowDialogAsync<OcrWindow, OcrViewModel>(
                     vm => { vm.Initialize(list, fileName); });
 
             if (result.OkPressed)
@@ -6796,7 +6664,7 @@ public partial class MainViewModel :
         var subtitles = tsParser.GetDvbSubtitles(packetId);
         Dispatcher.UIThread.Post(async () =>
         {
-            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!, vm => { vm.Initialize(tsParser, subtitles, fileName); });
+            var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(vm => { vm.Initialize(tsParser, subtitles, fileName); });
 
             if (result.OkPressed)
             {
@@ -6916,7 +6784,7 @@ public partial class MainViewModel :
         else
         {
             var result =
-                await _windowService.ShowDialogAsync<PickMp4TrackWindow, PickMp4TrackViewModel>(Window!,
+                await ShowDialogAsync<PickMp4TrackWindow, PickMp4TrackViewModel>(
                     vm => { vm.Initialize(mp4SubtitleTracks, fileName); });
 
             if (result.OkPressed && result.SelectedTrack != null && result.SelectedTrack.Track != null)
@@ -6933,7 +6801,7 @@ public partial class MainViewModel :
             Dispatcher.UIThread.Post(async () =>
             {
                 var paragraphs = mp4SubtitleTrack.Mdia.Minf.Stbl.GetParagraphs();
-                var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!,
+                var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(
                     vm => { vm.Initialize(mp4SubtitleTrack, paragraphs, fileName); });
 
                 if (result.OkPressed)
@@ -6994,7 +6862,7 @@ public partial class MainViewModel :
             Dispatcher.UIThread.Post(async void () =>
             {
                 var result =
-                    await _windowService.ShowDialogAsync<PickMatroskaTrackWindow, PickMatroskaTrackViewModel>(Window!,
+                    await ShowDialogAsync<PickMatroskaTrackWindow, PickMatroskaTrackViewModel>(
                         vm => { vm.Initialize(matroska, subtitleList, fileName); });
                 if (result.OkPressed && result.SelectedMatroskaTrack != null)
                 {
@@ -7080,7 +6948,7 @@ public partial class MainViewModel :
 
             Dispatcher.UIThread.Post(async () =>
             {
-                var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!,
+                var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(
                     vm => { vm.Initialize(matroskaSubtitleInfo, pgsSubtitle, fileName); });
 
                 if (result.OkPressed)
@@ -7212,7 +7080,7 @@ public partial class MainViewModel :
 
         Dispatcher.UIThread.Post(async () =>
         {
-            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!,
+            var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(
                 vm => { vm.Initialize(matroskaSubtitleInfo, subtitle, subtitleImages, fileName); });
 
             if (result.OkPressed)
@@ -7281,7 +7149,7 @@ public partial class MainViewModel :
 
         Dispatcher.UIThread.Post(async () =>
         {
-            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!,
+            var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(
                 vm => { vm.Initialize(mergedVobSubPacks, matroskaSubtitleInfo, fileName); });
 
             if (result.OkPressed)
@@ -7400,7 +7268,7 @@ public partial class MainViewModel :
         var streamId = languageStreamIds.First();
         Dispatcher.UIThread.Post(async () =>
         {
-            var result = await _windowService.ShowDialogAsync<OcrWindow, OcrViewModel>(Window!,
+            var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(
                 vm => { vm.Initialize(streamIdDictionary[streamId], palette, vobSubFileName); });
         });
 
@@ -7859,7 +7727,7 @@ public partial class MainViewModel :
                     }
 
                     var result =
-                        await _windowService.ShowDialogAsync<DownloadLibMpvWindow, DownloadLibMpvViewModel>(Window!);
+                        await ShowDialogAsync<DownloadLibMpvWindow, DownloadLibMpvViewModel>();
                 }
                 catch (Exception e)
                 {
