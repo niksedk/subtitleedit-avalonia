@@ -486,6 +486,9 @@ public class LanguageGeneral
     public string AutoTranslate { get; set; }
     public string ConvertingDotDotDot { get; set; }
     public string ErrorX { get; set; }
+    public string RemoveTextForHearingImpaired { get; set; }
+    public string MergeLinesWithSameText { get; set; }
+    public string MergeLinesWithSameTimeCodes { get; set; }
 
     public LanguageGeneral()
     {
@@ -971,5 +974,8 @@ public class LanguageGeneral
         AutoTranslate = "Auto-translate";
         ConvertingDotDotDot = "Converting...";
         ErrorX = "Error; {0}";
+        RemoveTextForHearingImpaired = "Remove text for hearing impaired";
+        MergeLinesWithSameText = "Merge lines with same text";
+        MergeLinesWithSameTimeCodes = "Merge lines with same time codes";
     }
 }

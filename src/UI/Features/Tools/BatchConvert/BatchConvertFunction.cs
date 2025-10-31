@@ -42,7 +42,10 @@ public class BatchConvertFunction
             MakeFunction(BatchConvertFunctionType.FixCommonErrors, Se.Language.General.FixCommonErrors, ViewFixCommonErrors.Make(vm), activeFunctions),
             MakeFunction(BatchConvertFunctionType.MultipleReplace, Se.Language.General.MultipleReplace, ViewMultipleReplace.Make(vm), activeFunctions),
             MakeFunction(BatchConvertFunctionType.AutoTranslate, Se.Language.General.AutoTranslate, ViewAutoTranslate.Make(vm), activeFunctions),
-        }.ToArray();
+            MakeFunction(BatchConvertFunctionType.RemoveTextForHearingImpaired, Se.Language.General.RemoveTextForHearingImpaired, ViewRemoveTextForHearingImpaired.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.MergeLinesWithSameText, Se.Language.General.MergeLinesWithSameText, ViewMergeLinesWithSameText.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.MergeLinesWithSameTimeCodes, Se.Language.General.MergeLinesWithSameTimeCodes, ViewMergeLinesWithSameTimeCodes.Make(vm), activeFunctions),
+        }.OrderBy(p=>p.Name).ToArray();
     }
 
     private static BatchConvertFunction MakeFunction(BatchConvertFunctionType functionType, string name, Control view, string[] activeFunctions)

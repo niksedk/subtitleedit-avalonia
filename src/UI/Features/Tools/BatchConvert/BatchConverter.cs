@@ -38,7 +38,7 @@ public class BatchConverter : IBatchConverter
         {
             if (format.Name == _config.TargetFormatName && item.Subtitle != null)
             {
-                item.Status = Se.Language.General.ConvertingDotDotDot;;
+                item.Status = Se.Language.General.ConvertingDotDotDot; ;
                 try
                 {
                     var processedSubtitle = RunConvertFunctions(item);
@@ -49,7 +49,7 @@ public class BatchConverter : IBatchConverter
                 }
                 catch (Exception exception)
                 {
-                    item.Status = string.Format(Se.Language.General.ErrorX,  exception.Message);
+                    item.Status = string.Format(Se.Language.General.ErrorX, exception.Message);
                 }
 
                 break;
@@ -63,10 +63,16 @@ public class BatchConverter : IBatchConverter
         s = RemoveFormatting(s);
         s = OffsetTimeCodes(s);
         s = ChangeFrameRate(s);
+        s = ChangeSpeed(s);
+        s = ChangeCasing(s);
+        s = FixCommonErrors(s);
         s = RemoveLineBreaks(s);
         s = DeleteLines(s);
         s = AdjustDisplayDuration(s);
         s = AutoTranslate(s);
+        s = RemoveTextForHearingImpaired(s);
+        s = MergeLinesWithSameText(s);
+        s = MergeLinesWithSameTimeCodes(s);
 
         return s;
     }
@@ -169,6 +175,39 @@ public class BatchConverter : IBatchConverter
         return subtitle;
     }
 
+    private Subtitle ChangeSpeed(Subtitle subtitle)
+    {
+        if (!_config.ChangeSpeed.IsActive)
+        {
+            return subtitle;
+        }
+
+        subtitle.ChangeFrameRate(_config.ChangeFrameRate.FromFrameRate, _config.ChangeFrameRate.ToFrameRate);
+
+        return subtitle;
+    }
+
+
+    private Subtitle ChangeCasing(Subtitle subtitle)
+    {
+        if (!_config.ChangeCasing.IsActive)
+        {
+            return subtitle;
+        }
+
+        return subtitle;
+    }
+
+    private Subtitle FixCommonErrors(Subtitle subtitle)
+    {
+        if (!_config.FixCommonErrors.IsActive)
+        {
+            return subtitle;
+        }
+
+        return subtitle;
+    }
+
     private Subtitle RemoveLineBreaks(Subtitle subtitle)
     {
         if (!_config.OffsetTimeCodes.IsActive)
@@ -246,11 +285,41 @@ public class BatchConverter : IBatchConverter
         {
             return subtitle;
         }
-        
-        
 
         return subtitle;
     }
+
+    private Subtitle RemoveTextForHearingImpaired(Subtitle subtitle)
+    {
+        if (!_config.RemoveTextForHearingImpaired.IsActive)
+        {
+            return subtitle;
+        }
+
+        return subtitle;
+    }
+
+    private Subtitle MergeLinesWithSameTimeCodes(Subtitle subtitle)
+    {
+        if (!_config.RemoveTextForHearingImpaired.IsActive)
+        {
+            return subtitle;
+        }
+
+        return subtitle;
+    }
+
+
+    private Subtitle MergeLinesWithSameText(Subtitle subtitle)
+    {
+        if (!_config.RemoveTextForHearingImpaired.IsActive)
+        {
+            return subtitle;
+        }
+
+        return subtitle;
+    }
+
 
     private string MakeOutputFileName(BatchConvertItem item, SubtitleFormat format)
     {

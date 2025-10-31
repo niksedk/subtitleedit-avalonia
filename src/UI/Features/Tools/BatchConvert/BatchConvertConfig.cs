@@ -11,14 +11,20 @@ public class BatchConvertConfig
     public bool Overwrite { get; set; }
     public string TargetFormatName { get; set; }
     public string TargetEncoding { get; set; }
-    
+
     public RemoveFormattingSettings RemoveFormatting { get; set; }
     public OffsetTimeCodesSettings OffsetTimeCodes { get; set; }
     public AdjustDurationSettings AdjustDuration { get; set; }
     public ChangeFrameRateSettings ChangeFrameRate { get; set; }
+    public ChangeSpeedSettings ChangeSpeed { get; set; }
+    public ChangeCasingSettings ChangeCasing { get; set; }
+    public FixCommonErrorsSettings2 FixCommonErrors { get; set; }
     public RemoveLineBreaksSettings RemoveLineBreaks { get; set; }
     public DeleteLinesSettings DeleteLines { get; set; }
     public AutoTranslateSettings AutoTranslate { get; set; }
+    public RemoveTextForHearingImpairedSettings RemoveTextForHearingImpaired { get; set; }
+    public MergeLinesWithSameTimeCodesSettings MergeLinesWithSameTimeCodes { get; set; }
+    public MergeLinesWithSameTextsSettings MergeLinesWithSameTexts { get; set; }
 
     public BatchConvertConfig()
     {
@@ -31,8 +37,14 @@ public class BatchConvertConfig
         AdjustDuration = new AdjustDurationSettings();
         RemoveLineBreaks = new RemoveLineBreaksSettings();
         ChangeFrameRate = new ChangeFrameRateSettings();
+        ChangeSpeed = new ChangeSpeedSettings();
+        FixCommonErrors = new FixCommonErrorsSettings2();
+        ChangeCasing = new ChangeCasingSettings();
         DeleteLines = new DeleteLinesSettings();
         AutoTranslate = new AutoTranslateSettings();
+        RemoveTextForHearingImpaired = new RemoveTextForHearingImpairedSettings();
+        MergeLinesWithSameTimeCodes = new MergeLinesWithSameTimeCodesSettings();
+        MergeLinesWithSameTexts = new MergeLinesWithSameTextsSettings();
     }
 
     public class RemoveFormattingSettings
@@ -79,6 +91,21 @@ public class BatchConvertConfig
         public double ToFrameRate { get; set; }
     }
 
+    public class ChangeSpeedSettings
+    {
+        public bool IsActive { get; set; }
+    }
+
+    public class ChangeCasingSettings
+    {
+        public bool IsActive { get; set; }
+    }
+
+    public class FixCommonErrorsSettings2
+    {
+        public bool IsActive { get; set; }
+    }
+
     public class RemoveLineBreaksSettings
     {
         public bool IsActive { get; set; }
@@ -96,12 +123,39 @@ public class BatchConvertConfig
             DeleteContains = string.Empty;
         }
     }
-    
+
     public class AutoTranslateSettings
     {
         public bool IsActive { get; set; }
 
         public AutoTranslateSettings()
+        {
+        }
+    }
+
+    public class RemoveTextForHearingImpairedSettings
+    {
+        public bool IsActive { get; set; }
+
+        public RemoveTextForHearingImpairedSettings()
+        {
+        }
+    }
+
+    public class MergeLinesWithSameTimeCodesSettings
+    {
+        public bool IsActive { get; set; }
+
+        public MergeLinesWithSameTimeCodesSettings()
+        {
+        }
+    }
+
+    public class MergeLinesWithSameTextsSettings
+    {
+        public bool IsActive { get; set; }
+
+        public MergeLinesWithSameTextsSettings()
         {
         }
     }

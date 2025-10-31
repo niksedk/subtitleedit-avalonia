@@ -12,4 +12,7 @@ public enum BatchConvertFunctionType
     FixCommonErrors,
     MultipleReplace,
     AutoTranslate,
+    RemoveTextForHearingImpaired,
+    MergeLinesWithSameTimeCodes,
+    MergeLinesWithSameText, 
 }

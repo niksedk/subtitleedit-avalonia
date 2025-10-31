@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert.FunctionViews;
 
@@ -9,7 +10,7 @@ public static class ViewRemoveFormatting
     {
         var labelHeader = new Label
         {
-            Content = "Remove formatting",
+            Content = Se.Language.General.RemoveFormatting,
             FontWeight = Avalonia.Media.FontWeight.Bold,
             Margin = new Avalonia.Thickness(0,0,0, 10),
         };
