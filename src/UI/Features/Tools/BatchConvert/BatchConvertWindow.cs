@@ -9,6 +9,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -115,7 +116,7 @@ public class BatchConvertWindow : Window
                 {
                     Header = Se.Language.General.Size,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(BatchConvertItem.Size)),
+                    Binding = new Binding(nameof(BatchConvertItem.Size)) { Converter = new FileSizeConverter(), Mode = BindingMode.OneWay },
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
@@ -148,10 +149,10 @@ public class BatchConvertWindow : Window
                 UiUtil.MakeButton(vm.RemoveSelectedFilesCommand, IconNames.Trash, Se.Language.General.Remove).WithMarginLeft(5),
                 UiUtil.MakeButton(vm.ClearAllFilesCommand, IconNames.Close, Se.Language.General.Clear).WithMarginLeft(5),
                 UiUtil.MakeSeparatorForHorizontal(vm),
-                UiUtil.MakeLabel("Target format"),
+                UiUtil.MakeLabel(Se.Language.General.TargetFormat),
                 UiUtil.MakeComboBox(vm.TargetFormats, vm, nameof(vm.SelectedTargetFormat)),
                 UiUtil.MakeSeparatorForHorizontal(vm),
-                UiUtil.MakeButton("Output properties", vm.ShowOutputPropertiesCommand),
+                UiUtil.MakeButton(Se.Language.General.OutputProperties, vm.ShowOutputPropertiesCommand),
                 UiUtil.MakeLabel(new Binding(nameof(vm.OutputPropertiesText))),
             }
         };
@@ -206,7 +207,7 @@ public class BatchConvertWindow : Window
                     new Border
                     {
                         Background = Brushes.Transparent, // Prevents highlighting
-                        Padding = new Thickness(4),
+                        Padding = new Thickness(0),
                         Child = new CheckBox
                         {
                             [!ToggleButton.IsCheckedProperty] = new Binding(nameof(BatchConvertFunction.IsSelected)),

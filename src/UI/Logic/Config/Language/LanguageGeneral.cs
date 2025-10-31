@@ -489,6 +489,8 @@ public class LanguageGeneral
     public string RemoveTextForHearingImpaired { get; set; }
     public string MergeLinesWithSameText { get; set; }
     public string MergeLinesWithSameTimeCodes { get; set; }
+    public string TargetFormat { get; set; }
+    public string OutputProperties { get; set; }
 
     public LanguageGeneral()
     {
@@ -977,5 +979,7 @@ public class LanguageGeneral
         RemoveTextForHearingImpaired = "Remove text for hearing impaired";
         MergeLinesWithSameText = "Merge lines with same text";
         MergeLinesWithSameTimeCodes = "Merge lines with same time codes";
+        TargetFormat = "Target format";
+        OutputProperties = "Output properties";
     }
 }
