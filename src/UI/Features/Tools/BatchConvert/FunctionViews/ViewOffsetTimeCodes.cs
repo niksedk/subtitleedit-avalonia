@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert.FunctionViews;
 
@@ -10,14 +11,14 @@ public static class ViewOffsetTimeCodes
     {
         var labelHeader = new Label
         {
-            Content = "Offset time codes",
+            Content = Se.Language.General.OffsetTimeCodes,
             FontWeight = Avalonia.Media.FontWeight.Bold,
             Margin = new Avalonia.Thickness(0,0,0, 10),
         };
 
         var labelTimeCodeFormat = new Label
         {
-            Content = "Offset",
+            Content = Se.Language.General.Offset,
         };
 
         var timeUpDown = new TimeCodeUpDown()
@@ -36,8 +37,8 @@ public static class ViewOffsetTimeCodes
         };
 
 
-        var radioForward = UiUtil.MakeRadioButton("Forward", vm, nameof(vm.OffsetTimeCodesForward));
-        var radioBackward = UiUtil.MakeRadioButton("Backward", vm, nameof(vm.OffsetTimeCodesBack));
+        var radioForward = UiUtil.MakeRadioButton(Se.Language.General.Forward, vm, nameof(vm.OffsetTimeCodesForward));
+        var radioBackward = UiUtil.MakeRadioButton(Se.Language.General.Backward, vm, nameof(vm.OffsetTimeCodesBack));
 
         var panel = new StackPanel
         {

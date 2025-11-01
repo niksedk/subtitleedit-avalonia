@@ -15,13 +15,13 @@ public static class ViewRemoveFormatting
             Margin = new Avalonia.Thickness(0,0,0, 10),
         };
 
-        var checkBoxRemoveAll = UiUtil.MakeCheckBox("Remove all", vm, nameof(vm.FormattingRemoveAll));
-        var checkBoxRemoveItalic = UiUtil.MakeCheckBox("Remove italic", vm, nameof(vm.FormattingRemoveItalic));
-        var checkBoxRemoveBold = UiUtil.MakeCheckBox("Remove bold", vm, nameof(vm.FormattingRemoveBold));
-        var checkBoxRemoveUnderline = UiUtil.MakeCheckBox("Remove underline", vm, nameof(vm.FormattingRemoveUnderline));
-        var checkBoxRemoveFontTags = UiUtil.MakeCheckBox("Remove font tags", vm, nameof(vm.FormattingRemoveFontTags));
-        var checkBoxRemoveAlignmentTags = UiUtil.MakeCheckBox("Remove alignment tags", vm, nameof(vm.FormattingRemoveAlignmentTags));
-        var checkBoxRemoveColors = UiUtil.MakeCheckBox("Remove color tags", vm, nameof(vm.FormattingRemoveColors));
+        var checkBoxRemoveAll = UiUtil.MakeCheckBox(Se.Language.General.RemoveAllFormatting, vm, nameof(vm.FormattingRemoveAll));
+        var checkBoxRemoveItalic = UiUtil.MakeCheckBox(Se.Language.General.RemoveItalic, vm, nameof(vm.FormattingRemoveItalic));
+        var checkBoxRemoveBold = UiUtil.MakeCheckBox(Se.Language.General.RemoveBold, vm, nameof(vm.FormattingRemoveBold));
+        var checkBoxRemoveUnderline = UiUtil.MakeCheckBox(Se.Language.General.RemoveUnderline, vm, nameof(vm.FormattingRemoveUnderline));
+        var checkBoxRemoveFontTags = UiUtil.MakeCheckBox(Se.Language.General.RemoveFontName, vm, nameof(vm.FormattingRemoveFontTags));
+        var checkBoxRemoveAlignmentTags = UiUtil.MakeCheckBox(Se.Language.General.RemoveAlignment, vm, nameof(vm.FormattingRemoveAlignmentTags));
+        var checkBoxRemoveColors = UiUtil.MakeCheckBox(Se.Language.General.RemoveColor, vm, nameof(vm.FormattingRemoveColors));
 
         var panel = new StackPanel
         {

@@ -177,14 +177,14 @@ public partial class BatchConvertViewModel : ObservableObject
 
         _encodings = EncodingHelper.GetEncodings().Select(p => p.DisplayName).ToList();
 
-        AutoTranslators =
-        [
+        AutoTranslators = new ObservableCollection<IAutoTranslator>
+        {
             new OllamaTranslate(),
             new LibreTranslate(),
             new LmStudioTranslate(),
             new NoLanguageLeftBehindServe(),
-            new NoLanguageLeftBehindApi()
-        ];
+            new NoLanguageLeftBehindApi(),
+        };
         SelectedAutoTranslator = AutoTranslators[0];
         UpdateAutoTranslateLanguages();
 

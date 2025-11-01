@@ -1,6 +1,4 @@
-﻿using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Data;
+﻿using Avalonia.Controls;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -19,6 +17,11 @@ public static class ViewAutoTranslate
 
         var labelEngine = UiUtil.MakeLabel(Se.Language.General.Engine);
         var comboBoxEngine = UiUtil.MakeComboBox(vm.AutoTranslators, vm, nameof(vm.SelectedAutoTranslator));
+        comboBoxEngine.MaxDropDownHeight = 240;
+        comboBoxEngine.DropDownOpened   += delegate
+        {
+          
+        };
 
         var labelSourceLanguage = UiUtil.MakeLabel(Se.Language.General.From);
         var sourceLangCombo = UiUtil.MakeComboBox(vm.SourceLanguages, vm, nameof(vm.SelectedSourceLanguage));

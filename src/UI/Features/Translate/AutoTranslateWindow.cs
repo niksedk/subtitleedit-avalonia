@@ -55,7 +55,7 @@ public class AutoTranslateWindow : Window
 
         var sourceLangCombo = UiUtil.MakeComboBox(vm.SourceLanguages!, vm, nameof(vm.SelectedSourceLanguage));
         var targetLangCombo = UiUtil.MakeComboBox(vm.TargetLanguages!, vm, nameof(vm.SelectedTargetLanguage));
-        var buttonTranslate = UiUtil.MakeButton("Translate", vm.TranslateCommand);
+        var buttonTranslate = UiUtil.MakeButton(Se.Language.General.Translate, vm.TranslateCommand);
         buttonTranslate.Bind(Button.IsEnabledProperty, new Binding(nameof(vm.IsTranslateEnabled)));
 
         var topBar = new StackPanel
@@ -83,7 +83,7 @@ public class AutoTranslateWindow : Window
             {
                 new MenuItem
                 {
-                    Header = "Translate row",
+                    Header = Se.Language.General.TranslateRow,
                     Command = vm.TranslateRowCommand,
                 },
             }

@@ -491,6 +491,8 @@ public class LanguageGeneral
     public string MergeLinesWithSameTimeCodes { get; set; }
     public string TargetFormat { get; set; }
     public string OutputProperties { get; set; }
+    public string TranslateRow { get; set; }
+    public string Offset { get; set; }
 
     public LanguageGeneral()
     {
@@ -981,5 +983,7 @@ public class LanguageGeneral
         MergeLinesWithSameTimeCodes = "Merge lines with same time codes";
         TargetFormat = "Target format";
         OutputProperties = "Output properties";
+        TranslateRow = "Translate row";
+        Offset = "Offset";
     }
 }
