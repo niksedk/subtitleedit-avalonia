@@ -694,6 +694,18 @@ public static class UiUtil
         return control;
     }
 
+    public static TextBlock WithAlignmentLeft(this TextBlock control)
+    {
+        control.HorizontalAlignment = HorizontalAlignment.Left;
+        return control;
+    }
+
+    public static TextBlock WithAlignmentTop(this TextBlock control)
+    {
+        control.VerticalAlignment = VerticalAlignment.Top;
+        return control;
+    }
+
     public static TextBlock WithMarginBottom(this TextBlock control, int marginBottom)
     {
         var m = control.Margin;
@@ -1530,7 +1542,7 @@ public static class UiUtil
         return label;
     }
 
-    internal static Control MakeLabel(Binding binding)
+    internal static Label MakeLabel(Binding binding)
     {
         var label = new Label
         {

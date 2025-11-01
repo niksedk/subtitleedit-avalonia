@@ -1,10 +1,13 @@
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.AutoTranslate;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Core.Translate;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
@@ -21,8 +24,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Core.AutoTranslate;
-using Nikse.SubtitleEdit.Core.Translate;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -38,11 +39,14 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private bool _isProgressVisible;
     [ObservableProperty] private bool _isConverting;
     [ObservableProperty] private bool _areControlsEnabled;
-    [ObservableProperty] private string _outputPropertiesText;
+    [ObservableProperty] private string _outputFolderLabel;
+    [ObservableProperty] private string _outputFolderLinkLabel;
+    [ObservableProperty] private string _outputEncodingLabel;
     [ObservableProperty] private string _statusText;
     [ObservableProperty] private string _progressText;
     [ObservableProperty] private double _progressValue;
     [ObservableProperty] private double _progressMaxValue;
+    [ObservableProperty] private string _actionsSelected;
 
     // Remove formatting
     [ObservableProperty] private bool _formattingRemoveAll;
@@ -96,9 +100,9 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private bool _fixNamesOnly;
     [ObservableProperty] private bool _allUppercase;
     [ObservableProperty] private bool _allLowercase;
-    
+
     // Auto translate
-    [ObservableProperty] private ObservableCollection<IAutoTranslator> _autoTranslators;
+    public ObservableCollection<IAutoTranslator> AutoTranslators { get; set; }
     [ObservableProperty] private IAutoTranslator _selectedAutoTranslator;
     [ObservableProperty] private ObservableCollection<TranslationPair> _sourceLanguages = new();
     [ObservableProperty] private TranslationPair? _selectedSourceLanguage;
@@ -112,17 +116,19 @@ public partial class BatchConvertViewModel : ObservableObject
 
     private readonly IWindowService _windowService;
     private readonly IFileHelper _fileHelper;
+    private readonly IFolderHelper _folderHelper;  
     private readonly IBatchConverter _batchConverter;
     private CancellationToken _cancellationToken;
     private CancellationTokenSource _cancellationTokenSource;
     private List<string> _encodings;
     private const int StatisticsNumberOfLinesToShow = 10;
 
-    public BatchConvertViewModel(IWindowService windowService, IFileHelper fileHelper, IBatchConverter batchConverter)
+    public BatchConvertViewModel(IWindowService windowService, IFileHelper fileHelper, IBatchConverter batchConverter, IFolderHelper folderHelper)
     {
         _windowService = windowService;
         _fileHelper = fileHelper;
         _batchConverter = batchConverter;
+        _folderHelper = folderHelper;
 
         BatchItems = new ObservableCollection<BatchConvertItem>();
         BatchFunctions = new ObservableCollection<BatchConvertFunction>();
@@ -130,8 +136,11 @@ public partial class BatchConvertViewModel : ObservableObject
         DeleteLineNumbers = new ObservableCollection<int>();
         BatchItemsInfo = string.Empty;
         ProgressText = string.Empty;
+        ActionsSelected = string.Empty;
         DeleteLinesContains = string.Empty;
-        OutputPropertiesText = string.Empty;
+        OutputFolderLabel = string.Empty;
+        OutputFolderLinkLabel = string.Empty;
+        OutputEncodingLabel = string.Empty; 
         StatusText = string.Empty;
         FunctionContainer = new ScrollViewer();
         FromFrameRates = new ObservableCollection<double>
@@ -185,7 +194,7 @@ public partial class BatchConvertViewModel : ObservableObject
     private void UpdateAutoTranslateLanguages()
     {
         SourceLanguages.Clear();
-        SourceLanguages.Add(new TranslationPair( " - " + Se.Language.General.Autodetect + " - ", "auto"));
+        SourceLanguages.Add(new TranslationPair(" - " + Se.Language.General.Autodetect + " - ", "auto"));
         foreach (var language in SelectedAutoTranslator.GetSupportedSourceLanguages())
         {
             SourceLanguages.Add(language);
@@ -198,6 +207,24 @@ public partial class BatchConvertViewModel : ObservableObject
         }
     }
 
+    private void SaveSettings()
+    {
+        Se.Settings.Tools.BatchConvert.TargetFormat = SelectedTargetFormat ?? TargetFormats.First();
+
+        Se.Settings.Tools.BatchConvert.AdjustVia = SelectedAdjustType.Name;
+        Se.Settings.Tools.BatchConvert.AdjustMaxCps = AdjustRecalculateMaxCharacterPerSecond;
+        Se.Settings.Tools.BatchConvert.AdjustOptimalCps = AdjustRecalculateOptimalCharacterPerSecond;
+        Se.Settings.Tools.BatchConvert.AdjustDurationFixedMilliseconds = (int)AdjustFixed;
+        Se.Settings.Tools.BatchConvert.AdjustDurationSeconds = AdjustSeconds;
+        Se.Settings.Tools.BatchConvert.AdjustDurationPercentage = AdjustPercent;
+
+        Se.Settings.Tools.BatchConvert.AutoTranslateEngine = SelectedAutoTranslator.Name;
+        Se.Settings.Tools.BatchConvert.AutoTranslateSourceLanguage = SelectedSourceLanguage?.Code ?? "en";
+        Se.Settings.Tools.BatchConvert.AutoTranslateTargetLanguage = SelectedTargetLanguage?.Code ?? "es";
+
+        Se.SaveSettings();
+    }
+
     private void LoadSettings()
     {
         var targetFormat = TargetFormats.FirstOrDefault(p => p == Se.Settings.Tools.BatchConvert.TargetFormat);
@@ -205,20 +232,35 @@ public partial class BatchConvertViewModel : ObservableObject
         {
             targetFormat = TargetFormats.First();
         }
-
         SelectedTargetFormat = targetFormat;
-        
-        var translator = AutoTranslators.FirstOrDefault(p=>p.Name == Se.Settings.Tools.BatchConvert.AutoTranslateEngine);
+
+        SelectedAdjustType = AdjustTypes.First();
+        foreach (var adjustType in AdjustTypes)
+        {
+            if (adjustType.Name == Se.Settings.Tools.BatchConvert.AdjustVia)
+            {
+                SelectedAdjustType = adjustType;
+                break;
+            }
+        }
+
+        AdjustRecalculateMaxCharacterPerSecond = Se.Settings.Tools.BatchConvert.AdjustMaxCps;
+        AdjustRecalculateOptimalCharacterPerSecond = Se.Settings.Tools.BatchConvert.AdjustOptimalCps;
+        AdjustFixed = Se.Settings.Tools.BatchConvert.AdjustDurationFixedMilliseconds;
+        AdjustSeconds = Se.Settings.Tools.BatchConvert.AdjustDurationSeconds;
+        AdjustPercent = Se.Settings.Tools.BatchConvert.AdjustDurationPercentage;
+
+        var translator = AutoTranslators.FirstOrDefault(p => p.Name == Se.Settings.Tools.BatchConvert.AutoTranslateEngine);
         if (translator != null)
         {
             SelectedAutoTranslator = translator;
         }
-        var sourceLanguage = SourceLanguages.FirstOrDefault(p=>p.Code ==  Se.Settings.Tools.BatchConvert.AutoTranslateSourceLanguage);
+        var sourceLanguage = SourceLanguages.FirstOrDefault(p => p.Code == Se.Settings.Tools.BatchConvert.AutoTranslateSourceLanguage);
         if (sourceLanguage != null)
         {
             SelectedSourceLanguage = sourceLanguage;
         }
-        var targetLanguage = TargetLanguages.FirstOrDefault(p=>p.Code == Se.Settings.Tools.BatchConvert.AutoTranslateTargetLanguage);
+        var targetLanguage = TargetLanguages.FirstOrDefault(p => p.Code == Se.Settings.Tools.BatchConvert.AutoTranslateTargetLanguage);
         if (targetLanguage != null)
         {
             SelectedTargetLanguage = targetLanguage;
@@ -243,32 +285,19 @@ public partial class BatchConvertViewModel : ObservableObject
             Se.Settings.Tools.BatchConvert.SaveInSourceFolder = true;
         }
 
-        string text;
         if (Se.Settings.Tools.BatchConvert.SaveInSourceFolder)
         {
-            text = string.Format("Outputfolder: {0}", "Source folder");
+            OutputFolderLinkLabel = string.Empty;
+            OutputFolderLabel = "Output folder: Source folder";
         }
         else
         {
-            text = string.Format("Outputfolder: {0}", Se.Settings.Tools.BatchConvert.OutputFolder);
+            OutputFolderLinkLabel = string.Format("Output folder: {0}", Se.Settings.Tools.BatchConvert.OutputFolder);
+            OutputFolderLabel = string.Empty;
         }
 
-        text += Environment.NewLine +
-                "Encoding: " + Se.Settings.Tools.BatchConvert.TargetEncoding + ", overwrite: " +
+        OutputEncodingLabel = "Encoding: " + Se.Settings.Tools.BatchConvert.TargetEncoding + ", overwrite: " +
                 Se.Settings.Tools.BatchConvert.Overwrite;
-
-        OutputPropertiesText = text;
-    }
-
-    private void SaveSettings()
-    {
-        Se.Settings.Tools.BatchConvert.TargetFormat = SelectedTargetFormat ?? TargetFormats.First();
-
-        Se.Settings.Tools.BatchConvert.AutoTranslateEngine = SelectedAutoTranslator.Name;
-        Se.Settings.Tools.BatchConvert.AutoTranslateSourceLanguage = SelectedSourceLanguage?.Code ?? "en";
-        Se.Settings.Tools.BatchConvert.AutoTranslateTargetLanguage = SelectedTargetLanguage?.Code ?? "es";
-        
-        Se.SaveSettings();
     }
 
     [RelayCommand]
@@ -357,6 +386,12 @@ public partial class BatchConvertViewModel : ObservableObject
     {
         _cancellationTokenSource.Cancel();
         IsConverting = false;
+    }
+
+    [RelayCommand]
+    private async Task OpenOutputFolder()
+    {
+        await _folderHelper.OpenFolder(Window!, Se.Settings.Tools.BatchConvert.OutputFolder);
     }
 
     [RelayCommand]
@@ -497,6 +532,7 @@ public partial class BatchConvertViewModel : ObservableObject
                 FixedMilliseconds = (int)AdjustFixed,
                 MaxCharsPerSecond = (double)AdjustRecalculateMaxCharacterPerSecond,
                 OptimalCharsPerSecond = (double)AdjustRecalculateOptimalCharacterPerSecond,
+                Seconds = (double)AdjustSeconds,
             },
 
             DeleteLines = new BatchConvertConfig.DeleteLinesSettings
@@ -517,15 +553,38 @@ public partial class BatchConvertViewModel : ObservableObject
     }
 
 
-    internal void SelectedFunctionChanged(object? sender, SelectionChangedEventArgs e)
+    internal void SelectedFunctionChanged()
     {
         var selectedFunction = SelectedBatchFunction;
-        if (selectedFunction == null)
+        if (selectedFunction != null)
         {
-            return;
+            FunctionContainer.Content = selectedFunction.View;
         }
 
-        FunctionContainer.Content = selectedFunction.View;
+        Dispatcher.UIThread.Post(() =>
+        {
+            var totalFunctionsSelected = 0;
+            foreach (var function in BatchFunctions)
+            {
+                if (function.IsSelected)
+                {
+                    totalFunctionsSelected++;
+                }
+            }
+
+            if (totalFunctionsSelected == 0)
+            {
+                ActionsSelected = string.Empty;
+            }
+            else if (totalFunctionsSelected == 1)
+            {
+                ActionsSelected = Se.Language.Tools.BatchConvert.OneActionsSelected;
+            }
+            else
+            {
+                ActionsSelected = string.Format(Se.Language.Tools.BatchConvert.XActionsSelected, totalFunctionsSelected);
+            }
+        });
     }
 
     private async Task ShowStatus(string statusText)

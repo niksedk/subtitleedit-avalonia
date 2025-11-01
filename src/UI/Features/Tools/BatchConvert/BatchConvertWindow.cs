@@ -16,7 +16,7 @@ namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 public class BatchConvertWindow : Window
 {
     private readonly BatchConvertViewModel _vm;
-    
+
     public BatchConvertWindow(BatchConvertViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -35,6 +35,9 @@ public class BatchConvertWindow : Window
         var functionsListView = MakeFunctionsListView(vm);
         var functionView = MakeFunctionView(vm);
 
+        var labelFunctionsSelected = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.ActionsSelected))
+            .WithAlignmentTop();
+
         var buttonConvert = UiUtil.MakeButton(Se.Language.General.Convert, vm.ConvertCommand);
         var buttonStatistics = UiUtil.MakeButton(Se.Language.File.Statistics.Title, vm.StatisticsCommand);
         var buttonDone = UiUtil.MakeButtonDone(vm.DoneCommand);
@@ -43,7 +46,7 @@ public class BatchConvertWindow : Window
             buttonStatistics,
             buttonDone
         );
-        
+
         var grid = new Grid
         {
             RowDefinitions =
@@ -59,7 +62,7 @@ public class BatchConvertWindow : Window
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
-            RowSpacing = 10,
+            RowSpacing = 5,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
@@ -67,10 +70,11 @@ public class BatchConvertWindow : Window
         grid.Add(fileView, 0, 0, 1, 2);
         grid.Add(functionsListView, 1, 0);
         grid.Add(functionView, 1, 1);
+        grid.Add(labelFunctionsSelected, 2, 0);
         grid.Add(buttonPanel, 2, 0, 1, 2);
 
         Content = grid;
-        
+
         Activated += delegate { buttonDone.Focus(); }; // hack to make OnKeyDown work
     }
 
@@ -138,7 +142,7 @@ public class BatchConvertWindow : Window
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedBatchItem)) { Source = vm });
 
         var panelFileControls = new StackPanel
-            {
+        {
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center,
@@ -153,7 +157,7 @@ public class BatchConvertWindow : Window
                 UiUtil.MakeComboBox(vm.TargetFormats, vm, nameof(vm.SelectedTargetFormat)),
                 UiUtil.MakeSeparatorForHorizontal(vm),
                 UiUtil.MakeButton(Se.Language.General.OutputProperties, vm.ShowOutputPropertiesCommand),
-                UiUtil.MakeLabel(new Binding(nameof(vm.OutputPropertiesText))),
+                MakeOutputPropertiesGrid(vm),
             }
         };
 
@@ -179,7 +183,36 @@ public class BatchConvertWindow : Window
         grid.Add(panelFileControls, 1, 0);
 
         var border = UiUtil.MakeBorderForControlNoPadding(grid);
-        return border;  
+        return border;
+    }
+
+    private static Grid MakeOutputPropertiesGrid(BatchConvertViewModel vm)
+    {
+        var grid = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+            },
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnSpacing = 0,
+            RowSpacing = 0,
+        };
+
+        var labelOutputSourceFolder = UiUtil.MakeLabel(new Binding(nameof(vm.OutputFolderLabel)));
+        var linkLabelOutputFolder = UiUtil.MakeLink(string.Empty, vm.OpenOutputFolderCommand, vm, nameof(vm.OutputFolderLinkLabel))
+                            .WithAlignmentLeft();
+        var labelOutputEncoding = UiUtil.MakeLabel(new Binding(nameof(vm.OutputEncodingLabel))).WithAlignmentTop();
+
+        grid.Add(labelOutputSourceFolder, 0);
+        grid.Add(linkLabelOutputFolder, 0);
+        grid.Add(labelOutputEncoding, 1);
+
+        return grid;
     }
 
     private Border MakeFunctionsListView(BatchConvertViewModel vm)
@@ -208,11 +241,7 @@ public class BatchConvertWindow : Window
                     {
                         Background = Brushes.Transparent, // Prevents highlighting
                         Padding = new Thickness(0),
-                        Child = new CheckBox
-                        {
-                            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(BatchConvertFunction.IsSelected)),
-                            HorizontalAlignment = HorizontalAlignment.Center
-                        }
+                        Child = MakeSelectedCheckBox(vm)
                     }),
                     Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
                 },
@@ -225,12 +254,26 @@ public class BatchConvertWindow : Window
             },
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedBatchFunction)) { Source = vm });
-        dataGrid.SelectionChanged += vm.SelectedFunctionChanged;
+        dataGrid.SelectionChanged += (_, _) => vm.SelectedFunctionChanged();
 
         return UiUtil.MakeBorderForControl(dataGrid);
     }
 
-    private Border MakeFunctionView(BatchConvertViewModel vm)
+    private static CheckBox MakeSelectedCheckBox(BatchConvertViewModel vm)
+    {
+        var checkBox = new CheckBox
+        {
+            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(BatchConvertFunction.IsSelected)),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(5, 0, 0, 0),
+        };
+
+        checkBox.IsCheckedChanged += (_, _) => vm.SelectedFunctionChanged();
+
+        return checkBox;
+    }
+
+    private static Border MakeFunctionView(BatchConvertViewModel vm)
     {
         var scrollViewer = new ScrollViewer
         {
@@ -239,7 +282,7 @@ public class BatchConvertWindow : Window
             Padding = new Thickness(10, 15, 10, 10),
             Width = double.NaN,
             Height = 300,
-        };  
+        };
 
         var border = new Border
         {
@@ -247,7 +290,6 @@ public class BatchConvertWindow : Window
             BorderBrush = UiUtil.GetBorderBrush(),
             Margin = new Thickness(0, 0, 0, 10),
             Padding = new Thickness(5),
-            Child = UiUtil.MakeLabel("function options"),
         };
         vm.FunctionContainer = scrollViewer;
 

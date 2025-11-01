@@ -1,4 +1,6 @@
 ﻿using Nikse.SubtitleEdit.Core.AutoTranslate;
+using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 
@@ -43,7 +45,7 @@ public class SeBatchConvert
         TargetFormat = string.Empty;
         TargetEncoding = string.Empty;
         OffsetTimeCodesForward = true;
-        AdjustVia = "Seconds"; //AdjustDurationType.Seconds.ToString();
+        AdjustVia = "Seconds"; 
         AdjustDurationSeconds = 0.1;
         AdjustDurationPercentage = 100;
         AdjustDurationFixedMilliseconds = 3000;

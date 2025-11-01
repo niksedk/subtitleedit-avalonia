@@ -60,20 +60,19 @@ public class BatchConverter : IBatchConverter
     private Subtitle RunConvertFunctions(BatchConvertItem item)
     {
         var s = new Subtitle(item.Subtitle, false);
-        s = RemoveFormatting(s);
-        s = OffsetTimeCodes(s);
-        s = ChangeFrameRate(s);
-        s = ChangeSpeed(s);
-        s = ChangeCasing(s);
-        s = FixCommonErrors(s);
-        s = RemoveLineBreaks(s);
-        s = DeleteLines(s);
         s = AdjustDisplayDuration(s);
         s = AutoTranslate(s);
-        s = RemoveTextForHearingImpaired(s);
+        s = ChangeCasing(s);
+        s = ChangeFrameRate(s);
+        s = ChangeSpeed(s);
+        s = DeleteLines(s);
+        s = FixCommonErrors(s);
         s = MergeLinesWithSameText(s);
         s = MergeLinesWithSameTimeCodes(s);
-
+        s = OffsetTimeCodes(s);
+        s = RemoveFormatting(s);
+        s = RemoveLineBreaks(s);
+        s = RemoveTextForHearingImpaired(s);
         return s;
     }
 
@@ -269,7 +268,7 @@ public class BatchConverter : IBatchConverter
         }
         else if (c.AdjustmentType == AdjustDurationType.Fixed)
         {
-            subtitle.SetFixedDuration(null, c.FixedMilliseconds);
+            subtitle.SetFixedDuration(null, c.FixedMilliseconds * 1000.0);
         }
         else if (c.AdjustmentType == AdjustDurationType.Seconds)
         {
