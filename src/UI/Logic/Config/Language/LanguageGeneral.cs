@@ -498,6 +498,7 @@ public class LanguageGeneral
     public string ConversionCancelledByUser { get; set; }
     public string SelectFilesToConvert { get; set; }
     public string XFilesConvertedInY { get; set; }
+    public string XRequiresAnApiKey { get; set; }
 
     public LanguageGeneral()
     {
@@ -995,5 +996,6 @@ public class LanguageGeneral
         ConversionCancelledByUser = "Conversion cancelled by user";
         SelectFilesToConvert = "Select files to convert";
         XFilesConvertedInY = "{0:#,###,##0} files converted in {1}";
+        XRequiresAnApiKey = "{0} requires an API key";
     }
 }

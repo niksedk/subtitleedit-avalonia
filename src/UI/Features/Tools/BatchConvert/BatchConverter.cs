@@ -1,12 +1,16 @@
-﻿using Nikse.SubtitleEdit.Core.Common;
+﻿using Nikse.SubtitleEdit.Core.AutoTranslate;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Core.Translate;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
+using Nikse.SubtitleEdit.Features.Tools.BatchConvert.FunctionViews;
+using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -27,7 +31,7 @@ public class BatchConverter : IBatchConverter
         _subtitleFormats = SubtitleFormat.AllSubtitleFormats.ToList();
     }
 
-    public async Task Convert(BatchConvertItem item)
+    public async Task Convert(BatchConvertItem item, System.Threading.CancellationToken cancellationToken)
     {
         if (_subtitleFormats.Count == 0)
         {
@@ -41,7 +45,7 @@ public class BatchConverter : IBatchConverter
                 item.Status = Se.Language.General.ConvertingDotDotDot; ;
                 try
                 {
-                    var processedSubtitle = RunConvertFunctions(item);
+                    var processedSubtitle = await RunConvertFunctions(item, cancellationToken);
                     var converted = format.ToText(processedSubtitle, _config.TargetEncoding);
                     var path = MakeOutputFileName(item, format);
                     await File.WriteAllTextAsync(path, converted);
@@ -57,11 +61,11 @@ public class BatchConverter : IBatchConverter
         }
     }
 
-    private Subtitle RunConvertFunctions(BatchConvertItem item)
+    private async Task<Subtitle> RunConvertFunctions(BatchConvertItem item, System.Threading.CancellationToken cancellationToken)
     {
         var s = new Subtitle(item.Subtitle, false);
         s = AdjustDisplayDuration(s);
-        s = AutoTranslate(s);
+        s = await AutoTranslate(s, cancellationToken);
         s = ChangeCasing(s);
         s = ChangeFrameRate(s);
         s = ChangeSpeed(s);
@@ -278,11 +282,22 @@ public class BatchConverter : IBatchConverter
         return subtitle;
     }
 
-    private Subtitle AutoTranslate(Subtitle subtitle)
+    private async Task<Subtitle> AutoTranslate(Subtitle subtitle, CancellationToken cancellationToken)
     {
-        if (!_config.AdjustDuration.IsActive)
+        if (!_config.AutoTranslate.IsActive)
         {
             return subtitle;
+        }
+
+        Configuration.Settings.Tools.OllamaPrompt = Se.Settings.AutoTranslate.OllamaPrompt;
+        Configuration.Settings.Tools.OllamaApiUrl = Se.Settings.AutoTranslate.OllamaUrl;
+        Configuration.Settings.Tools.OllamaModel = Se.Settings.AutoTranslate.OllamaModel;
+        var doAutoTranslate = new DoAutoTranslate();
+        var translatedSubtitle = await doAutoTranslate.DoTranslate(subtitle, _config.AutoTranslate.SourceLanguage, _config.AutoTranslate.TargetLanguage, _config.AutoTranslate.Translator, default);
+
+        for (var i = 0; i < subtitle.Paragraphs.Count && i <translatedSubtitle.Count; i++)
+        {
+            subtitle.Paragraphs[i].Text = translatedSubtitle[i].TranslatedText;
         }
 
         return subtitle;

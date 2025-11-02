@@ -9,6 +9,8 @@ public class SeAutoTranslate
     public string AutoTranslateLastTarget { get; set; } = string.Empty;
     public string ChatGptPrompt { get; set; }
     public string OllamaPrompt { get; set; }
+    public string OllamaModel { get; set; }
+    public string OllamaUrl { get; set; }
     public string LmStudioPrompt { get; set; }
     public string AnthropicPrompt { get; set; }
     public string GroqPrompt { get; set; }

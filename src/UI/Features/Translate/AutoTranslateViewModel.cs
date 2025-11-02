@@ -4,6 +4,7 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Newtonsoft.Json.Linq;
 using Nikse.SubtitleEdit.Core.AutoTranslate;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
@@ -17,7 +18,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -108,6 +108,14 @@ public partial class AutoTranslateViewModel : ObservableObject
     public void Initialize(Subtitle subtitle)
     {
         _subtitle = new Subtitle(subtitle, false);
+        LoadSettings();
+    }
+
+    private void LoadSettings()
+    {
+        Configuration.Settings.Tools.OllamaApiUrl = Se.Settings.AutoTranslate.OllamaUrl;
+        Configuration.Settings.Tools.OllamaModel = Se.Settings.AutoTranslate.OllamaUrl;
+        Configuration.Settings.Tools.OllamaPrompt = Se.Settings.AutoTranslate.OllamaPrompt;
     }
 
     private void UpdateSourceLanguages(IAutoTranslator autoTranslator)
@@ -303,8 +311,8 @@ public partial class AutoTranslateViewModel : ObservableObject
         {
             await MessageBox.Show(
                 Window!,
-                "API key required",
-                string.Format("{0} requires an API key.", translator.Name),
+                Se.Language.General.Error,
+                string.Format(Se.Language.General.XRequiresAnApiKey, translator.Name),
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
             return false;
@@ -313,11 +321,11 @@ public partial class AutoTranslateViewModel : ObservableObject
         if (ApiUrlIsVisible && string.IsNullOrWhiteSpace(ApiUrlText))
         {
             await MessageBox.Show(
-               Window!,
-               "URL key required",
-               string.Format("{0} requires an URL.", translator.Name),
-               MessageBoxButtons.OK,
-               MessageBoxIcon.Error);
+                Window!,
+                Se.Language.General.Error,
+                string.Format(Se.Language.General.XRequiresAnApiKey, translator.Name),
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
             return false;
         }
 
@@ -481,17 +489,17 @@ public partial class AutoTranslateViewModel : ObservableObject
                     {
                         error = "Error: " + Json.DecodeJsonText(error) + Environment.NewLine + Environment.NewLine;
                     }
-                    else if (!string.IsNullOrEmpty(json))   
+                    else if (!string.IsNullOrEmpty(json))
                     {
                         error = "Error: " + json + Environment.NewLine + Environment.NewLine;
                     }
                 }
-                catch 
-                { 
+                catch
+                {
                     // ignore
                 }
 
-                await MessageBox.Show(Window!, ex.Message,  error + (ex.StackTrace ?? "An error occurred"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                await MessageBox.Show(Window!, ex.Message, error + (ex.StackTrace ?? "An error occurred"), MessageBoxButtons.OK, MessageBoxIcon.Error);
             });
         }
         finally
@@ -587,6 +595,8 @@ public partial class AutoTranslateViewModel : ObservableObject
         {
             Configuration.Settings.Tools.OllamaApiUrl = apiUrl.Trim();
             Configuration.Settings.Tools.OllamaModel = apiModel.Trim();
+            Se.Settings.AutoTranslate.OllamaUrl = apiUrl.Trim();
+            Se.Settings.AutoTranslate.OllamaModel = apiModel.Trim();
         }
 
         if (engineType == typeof(AnthropicTranslate))
@@ -808,22 +818,20 @@ public partial class AutoTranslateViewModel : ObservableObject
         {
             ModelBrowseIsVisible = true;
 
-            if (Configuration.Settings.Tools.OllamaApiUrl == null)
+            if (string.IsNullOrEmpty(Se.Settings.AutoTranslate.OllamaUrl))
             {
-                Configuration.Settings.Tools.OllamaApiUrl = "http://localhost:11434/api/generate";
+                Se.Settings.AutoTranslate.OllamaUrl = "http://localhost:11434/api/generate";
             }
 
             FillUrls(new List<string>
             {
-                Configuration.Settings.Tools.OllamaApiUrl.TrimEnd('/'),
+                Se.Settings.AutoTranslate.OllamaUrl.TrimEnd('/'),
             });
 
             _apiModels = Configuration.Settings.Tools.OllamaModels.Split(',').ToList();
             ModelIsVisible = true;
             ButtonModelIsVisible = true;
-            ModelText = Configuration.Settings.Tools.OllamaModel;
-
-            //comboBoxFormality.ContextMenuStrip = contextMenuStripOlamaModels;
+            ModelText = Se.Settings.AutoTranslate.OllamaModel;
 
             return;
         }

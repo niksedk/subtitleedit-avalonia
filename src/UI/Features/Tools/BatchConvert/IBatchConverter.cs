@@ -5,5 +5,5 @@ namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 public interface IBatchConverter
 {
     void Initialize(BatchConvertConfig config); 
-    Task Convert(BatchConvertItem item);
+    Task Convert(BatchConvertItem item, System.Threading.CancellationToken cancellationToken);
 }

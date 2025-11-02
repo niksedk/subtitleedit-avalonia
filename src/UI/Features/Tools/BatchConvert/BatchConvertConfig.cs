@@ -1,5 +1,7 @@
-﻿using Nikse.SubtitleEdit.Core.Common;
+﻿using Nikse.SubtitleEdit.Core.AutoTranslate;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Core.Translate;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
@@ -127,6 +129,9 @@ public class BatchConvertConfig
     public class AutoTranslateSettings
     {
         public bool IsActive { get; set; }
+        public TranslationPair SourceLanguage { get; internal set; }
+        public TranslationPair TargetLanguage { get; internal set; }
+        public IAutoTranslator Translator { get; internal set; }
 
         public AutoTranslateSettings()
         {

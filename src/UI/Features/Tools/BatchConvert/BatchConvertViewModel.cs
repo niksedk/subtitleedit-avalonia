@@ -346,7 +346,7 @@ public partial class BatchConvertViewModel : ObservableObject
                 var countDisplay = count;
                 ProgressText = string.Format(Se.Language.General.ConvertingXofY, countDisplay, BatchItems.Count);
                 ProgressValue = countDisplay / (double)BatchItems.Count;
-                await _batchConverter.Convert(batchItem);
+                await _batchConverter.Convert(batchItem, _cancellationToken);
                 count++;
 
                 if (_cancellationToken.IsCancellationRequested)
@@ -508,25 +508,6 @@ public partial class BatchConvertViewModel : ObservableObject
             TargetFormatName = SelectedTargetFormat ?? string.Empty,
             TargetEncoding = Se.Settings.Tools.BatchConvert.TargetEncoding,
 
-            RemoveFormatting = new BatchConvertConfig.RemoveFormattingSettings
-            {
-                IsActive = activeFunctions.Contains(BatchConvertFunctionType.RemoveFormatting),
-                RemoveAll = FormattingRemoveAll,
-                RemoveItalic = FormattingRemoveItalic,
-                RemoveBold = FormattingRemoveBold,
-                RemoveUnderline = FormattingRemoveUnderline,
-                RemoveColor = FormattingRemoveColors,
-                RemoveFontName = FormattingRemoveFontTags,
-                RemoveAlignment = FormattingRemoveAlignmentTags,
-            },
-
-            OffsetTimeCodes = new BatchConvertConfig.OffsetTimeCodesSettings
-            {
-                IsActive = activeFunctions.Contains(BatchConvertFunctionType.OffsetTimeCodes),
-                Forward = OffsetTimeCodesForward,
-                Milliseconds = (long)OffsetTimeCodesTime.TotalMilliseconds,
-            },
-
             AdjustDuration = new BatchConvertConfig.AdjustDurationSettings
             {
                 IsActive = activeFunctions.Contains(BatchConvertFunctionType.AdjustDisplayDuration),
@@ -538,6 +519,21 @@ public partial class BatchConvertViewModel : ObservableObject
                 Seconds = (double)AdjustSeconds,
             },
 
+            AutoTranslate = new BatchConvertConfig.AutoTranslateSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.AutoTranslate),
+                Translator = SelectedAutoTranslator,
+                SourceLanguage = SelectedSourceLanguage ?? SourceLanguages.First(),
+                TargetLanguage = SelectedTargetLanguage ?? TargetLanguages.First(),
+            },
+
+            ChangeFrameRate = new BatchConvertConfig.ChangeFrameRateSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.ChangeFrameRate),
+                FromFrameRate = SelectedFromFrameRate,
+                ToFrameRate = SelectedToFrameRate,
+            },
+
             DeleteLines = new BatchConvertConfig.DeleteLinesSettings
             {
                 IsActive = activeFunctions.Contains(BatchConvertFunctionType.DeleteLines),
@@ -546,11 +542,23 @@ public partial class BatchConvertViewModel : ObservableObject
                 DeleteContains = DeleteLinesContains,
             },
 
-            ChangeFrameRate = new BatchConvertConfig.ChangeFrameRateSettings
+            OffsetTimeCodes = new BatchConvertConfig.OffsetTimeCodesSettings
             {
-                IsActive = activeFunctions.Contains(BatchConvertFunctionType.ChangeFrameRate),
-                FromFrameRate = SelectedFromFrameRate,
-                ToFrameRate = SelectedToFrameRate,
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.OffsetTimeCodes),
+                Forward = OffsetTimeCodesForward,
+                Milliseconds = (long)OffsetTimeCodesTime.TotalMilliseconds,
+            },
+
+            RemoveFormatting = new BatchConvertConfig.RemoveFormattingSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.RemoveFormatting),
+                RemoveAll = FormattingRemoveAll,
+                RemoveItalic = FormattingRemoveItalic,
+                RemoveBold = FormattingRemoveBold,
+                RemoveUnderline = FormattingRemoveUnderline,
+                RemoveColor = FormattingRemoveColors,
+                RemoveFontName = FormattingRemoveFontTags,
+                RemoveAlignment = FormattingRemoveAlignmentTags,
             },
         };
     }

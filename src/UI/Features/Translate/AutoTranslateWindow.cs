@@ -149,7 +149,7 @@ public class AutoTranslateWindow : Window
             UiUtil.MakeTextBox(200, vm, nameof(vm.ApiUrlText), nameof(vm.ApiUrlIsVisible)).WithMarginRight(15),
             UiUtil.MakeTextBlock(Se.Language.General.Model, vm, null, nameof(vm.ModelIsVisible)).WithMarginRight(5),
             UiUtil.MakeTextBox(150, vm, nameof(vm.ModelText), nameof(vm.ModelIsVisible)),
-            UiUtil.MakeButtonBrowse(vm.BrowseModelCommand, nameof(vm.ModelBrowseIsVisible))
+            UiUtil.MakeButtonBrowse(vm.BrowseModelCommand, nameof(vm.ModelBrowseIsVisible)).WithMarginLeft(5)
         );
 
         var settingsLink = UiUtil.MakeLink(Se.Language.General.Settings, vm.OpenSettingsCommand).WithMarginRight(10);
