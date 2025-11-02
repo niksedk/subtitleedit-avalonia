@@ -7,6 +7,7 @@ using Nikse.SubtitleEdit.Core.AutoTranslate;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.Translate;
+using Nikse.SubtitleEdit.Features.Ocr;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
@@ -108,6 +109,9 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private TranslationPair? _selectedSourceLanguage;
     [ObservableProperty] private ObservableCollection<TranslationPair> _targetLanguages = new();
     [ObservableProperty] private TranslationPair? _selectedTargetLanguage;
+    [ObservableProperty] private string _autoTranslateModelText;
+    [ObservableProperty] private bool _autoTranslateModelIsVisible;
+    [ObservableProperty] private bool _autoTranslateModelBrowseIsVisible;
 
     public Window? Window { get; set; }
 
@@ -186,6 +190,7 @@ public partial class BatchConvertViewModel : ObservableObject
             new NoLanguageLeftBehindApi(),
         };
         SelectedAutoTranslator = AutoTranslators[0];
+        OnAutoTranslatorChanged();
         UpdateAutoTranslateLanguages();
 
         LoadSettings();
@@ -431,6 +436,21 @@ public partial class BatchConvertViewModel : ObservableObject
         else
         {
             BatchItemsInfo = string.Format(Se.Language.General.XFiles, BatchItems.Count);
+        }
+    }
+
+    [RelayCommand]
+    private async Task AutoTranslateBrowseModel()
+    {
+        var result = await _windowService.ShowDialogAsync<PickOllamaModelWindow, PickOllamaModelViewModel>(Window!, vm =>
+        {
+            vm.Initialize(Se.Language.General.PickOllamaModel, Se.Settings.AutoTranslate.OllamaModel, Se.Settings.AutoTranslate.OllamaUrl);
+        });
+
+        if (result is { OkPressed: true, SelectedModel: not null })
+        {
+            Se.Settings.AutoTranslate.OllamaModel = result.SelectedModel;
+            SaveSettings();
         }
     }
 
@@ -1063,6 +1083,26 @@ public partial class BatchConvertViewModel : ObservableObject
                     }
                 }
             });
+        }
+    }
+
+    internal void OnAutoTranslatorChanged()
+    {
+        var engine = SelectedAutoTranslator;
+
+        AutoTranslateModelIsVisible = engine is OllamaTranslate;
+
+        if (engine is OllamaTranslate)
+        {
+            AutoTranslateModelText = Se.Settings.AutoTranslate.OllamaModel;
+            AutoTranslateModelBrowseIsVisible = true;
+            AutoTranslateModelIsVisible = true;
+        }
+        else
+        {
+            AutoTranslateModelText = string.Empty;
+            AutoTranslateModelBrowseIsVisible = false;
+            AutoTranslateModelIsVisible = false;
         }
     }
 }

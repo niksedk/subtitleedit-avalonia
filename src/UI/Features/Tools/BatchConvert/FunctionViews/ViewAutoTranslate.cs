@@ -17,11 +17,16 @@ public static class ViewAutoTranslate
 
         var labelEngine = UiUtil.MakeLabel(Se.Language.General.Engine);
         var comboBoxEngine = UiUtil.MakeComboBox(vm.AutoTranslators, vm, nameof(vm.SelectedAutoTranslator));
-        comboBoxEngine.MaxDropDownHeight = 240;
-        comboBoxEngine.DropDownOpened   += delegate
-        {
-          
-        };
+        comboBoxEngine.SelectionChanged += (s, e) => vm.OnAutoTranslatorChanged();  
+        var labelModel = UiUtil.MakeLabel(Se.Language.General.Model).WithBindVisible(vm, nameof(vm.AutoTranslateModelIsVisible)).WithMarginLeft(10).WithMarginRight(3);
+        var textBoxModel =  UiUtil.MakeTextBox(150, vm, nameof(vm.AutoTranslateModelText), nameof(vm.AutoTranslateModelIsVisible));
+        var buttonModel = UiUtil.MakeButtonBrowse(vm.AutoTranslateBrowseModelCommand, nameof(vm.AutoTranslateModelBrowseIsVisible)).WithMarginLeft(3);
+        var panelEngineControls = UiUtil.MakeHorizontalPanel(
+            comboBoxEngine,
+            labelModel, 
+            textBoxModel,
+            buttonModel
+            );
 
         var labelSourceLanguage = UiUtil.MakeLabel(Se.Language.General.From);
         var sourceLangCombo = UiUtil.MakeComboBox(vm.SourceLanguages, vm, nameof(vm.SelectedSourceLanguage));
@@ -52,7 +57,7 @@ public static class ViewAutoTranslate
         grid.Add(labelHeader, 0, 0);
         
         grid.Add(labelEngine, 1, 0);
-        grid.Add(comboBoxEngine, 1, 1);
+        grid.Add(panelEngineControls, 1, 1);
         
         grid.Add(labelSourceLanguage, 2, 0);
         grid.Add(sourceLangCombo, 2, 1);
