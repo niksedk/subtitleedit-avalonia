@@ -1,5 +1,4 @@
 using Avalonia.Controls;
-using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -11,6 +10,7 @@ using Nikse.SubtitleEdit.Core.Translate;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
+using Nikse.SubtitleEdit.Features.Translate;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -116,7 +116,7 @@ public partial class BatchConvertViewModel : ObservableObject
 
     private readonly IWindowService _windowService;
     private readonly IFileHelper _fileHelper;
-    private readonly IFolderHelper _folderHelper;  
+    private readonly IFolderHelper _folderHelper;
     private readonly IBatchConverter _batchConverter;
     private CancellationToken _cancellationToken;
     private CancellationTokenSource _cancellationTokenSource;
@@ -140,7 +140,7 @@ public partial class BatchConvertViewModel : ObservableObject
         DeleteLinesContains = string.Empty;
         OutputFolderLabel = string.Empty;
         OutputFolderLinkLabel = string.Empty;
-        OutputEncodingLabel = string.Empty; 
+        OutputEncodingLabel = string.Empty;
         StatusText = string.Empty;
         FunctionContainer = new ScrollViewer();
         FromFrameRates = new ObservableCollection<double>
@@ -219,8 +219,8 @@ public partial class BatchConvertViewModel : ObservableObject
         Se.Settings.Tools.BatchConvert.AdjustDurationPercentage = AdjustPercent;
 
         Se.Settings.Tools.BatchConvert.AutoTranslateEngine = SelectedAutoTranslator.Name;
-        Se.Settings.Tools.BatchConvert.AutoTranslateSourceLanguage = SelectedSourceLanguage?.Code ?? "en";
-        Se.Settings.Tools.BatchConvert.AutoTranslateTargetLanguage = SelectedTargetLanguage?.Code ?? "es";
+        Se.Settings.Tools.BatchConvert.AutoTranslateSourceLanguage = SelectedSourceLanguage?.TwoLetterIsoLanguageName ?? "auto";
+        Se.Settings.Tools.BatchConvert.AutoTranslateTargetLanguage = SelectedTargetLanguage?.TwoLetterIsoLanguageName ?? "en";
 
         Se.SaveSettings();
     }
@@ -255,12 +255,14 @@ public partial class BatchConvertViewModel : ObservableObject
         {
             SelectedAutoTranslator = translator;
         }
-        var sourceLanguage = SourceLanguages.FirstOrDefault(p => p.Code == Se.Settings.Tools.BatchConvert.AutoTranslateSourceLanguage);
+        var sourceLanguage = SourceLanguages.FirstOrDefault(p => p.TwoLetterIsoLanguageName == Se.Settings.Tools.BatchConvert.AutoTranslateSourceLanguage);
         if (sourceLanguage != null)
         {
             SelectedSourceLanguage = sourceLanguage;
         }
-        var targetLanguage = TargetLanguages.FirstOrDefault(p => p.Code == Se.Settings.Tools.BatchConvert.AutoTranslateTargetLanguage);
+        var defaultTarget = AutoTranslateViewModel.EvaluateDefaultTargetLanguageCode(string.Empty, SelectedSourceLanguage?.Code ?? string.Empty);
+        SelectedTargetLanguage = TargetLanguages.FirstOrDefault(p => p.TwoLetterIsoLanguageName == defaultTarget);
+        var targetLanguage = TargetLanguages.FirstOrDefault(p => p.TwoLetterIsoLanguageName == Se.Settings.Tools.BatchConvert.AutoTranslateTargetLanguage);
         if (targetLanguage != null)
         {
             SelectedTargetLanguage = targetLanguage;
@@ -288,16 +290,17 @@ public partial class BatchConvertViewModel : ObservableObject
         if (Se.Settings.Tools.BatchConvert.SaveInSourceFolder)
         {
             OutputFolderLinkLabel = string.Empty;
-            OutputFolderLabel = "Output folder: Source folder";
+            OutputFolderLabel = Se.Language.Tools.BatchConvert.OutputFolderSource;
         }
         else
         {
-            OutputFolderLinkLabel = string.Format("Output folder: {0}", Se.Settings.Tools.BatchConvert.OutputFolder);
+            OutputFolderLinkLabel = string.Format(Se.Language.Tools.BatchConvert.OutputFolderX, Se.Settings.Tools.BatchConvert.OutputFolder);
             OutputFolderLabel = string.Empty;
         }
 
-        OutputEncodingLabel = "Encoding: " + Se.Settings.Tools.BatchConvert.TargetEncoding + ", overwrite: " +
-                Se.Settings.Tools.BatchConvert.Overwrite;
+        OutputEncodingLabel = string.Format(Se.Language.Tools.BatchConvert.EncodingXOverwriteY,
+            Se.Settings.Tools.BatchConvert.TargetEncoding,
+            Se.Settings.Tools.BatchConvert.Overwrite);
     }
 
     [RelayCommand]
@@ -313,7 +316,7 @@ public partial class BatchConvertViewModel : ObservableObject
     {
         if (BatchItems.Count == 0)
         {
-            await ShowStatus("No files to convert");
+            await ShowStatus(Se.Language.General.NoFilesToConvert);
             return;
         }
 
@@ -341,7 +344,7 @@ public partial class BatchConvertViewModel : ObservableObject
             foreach (var batchItem in BatchItems)
             {
                 var countDisplay = count;
-                ProgressText = $"Converting {countDisplay:#,###,##0}/{BatchItems.Count:#,###,##0}";
+                ProgressText = string.Format(Se.Language.General.ConvertingXofY, countDisplay, BatchItems.Count);
                 ProgressValue = countDisplay / (double)BatchItems.Count;
                 await _batchConverter.Convert(batchItem);
                 count++;
@@ -357,11 +360,11 @@ public partial class BatchConvertViewModel : ObservableObject
             AreControlsEnabled = true;
 
             var end = DateTime.UtcNow.Ticks;
-            var message =
-                $"{BatchItems.Count:#,###,##0} files converted in {ProgressHelper.ToTimeResult(new TimeSpan(end - start).TotalMilliseconds)}";
+            var elapsed = new TimeSpan(end - start).TotalMilliseconds;
+            var message = string.Format(Se.Language.General.XFilesConvertedInY, BatchItems.Count, elapsed);
             if (_cancellationToken.IsCancellationRequested)
             {
-                message += " - conversion cancelled by user";
+                message += Environment.NewLine + Se.Language.General.ConversionCancelledByUser;
             }
 
             await ShowStatus(message);
@@ -397,7 +400,7 @@ public partial class BatchConvertViewModel : ObservableObject
     [RelayCommand]
     private async Task AddFiles()
     {
-        var fileNames = await _fileHelper.PickOpenSubtitleFiles(Window!, "Select files to convert");
+        var fileNames = await _fileHelper.PickOpenSubtitleFiles(Window!, Se.Language.General.SelectFilesToConvert);
         if (fileNames.Length == 0)
         {
             return;
@@ -434,8 +437,8 @@ public partial class BatchConvertViewModel : ObservableObject
     [RelayCommand]
     private async Task RemoveSelectedFiles()
     {
-        var seleced = SelectedBatchItem;
-        if (seleced == null || Window == null)
+        var selected = SelectedBatchItem;
+        if (selected == null || Window == null)
         {
             return;
         }
@@ -455,8 +458,8 @@ public partial class BatchConvertViewModel : ObservableObject
             }
         }
 
-        var idx = BatchItems.IndexOf(seleced);
-        BatchItems.Remove(seleced);
+        var idx = BatchItems.IndexOf(selected);
+        BatchItems.Remove(selected);
         if (BatchItems.Count > 0)
         {
             if (idx >= BatchItems.Count)

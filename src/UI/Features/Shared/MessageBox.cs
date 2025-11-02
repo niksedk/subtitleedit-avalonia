@@ -41,6 +41,7 @@ public class MessageBox : Window
 {
     private MessageBoxResult _result = MessageBoxResult.None;
     private readonly bool _hasCancel;
+    private readonly bool _hasOnlyOk;
 
     private MessageBox(string title, string message, MessageBoxButtons buttons, MessageBoxIcon icon)
     {
@@ -78,7 +79,7 @@ public class MessageBox : Window
 
         if (icon != MessageBoxIcon.None)
         {
-            var iconPath = $"Assets/Themes/Dark/{icon}.png"; 
+            var iconPath = $"Assets/Themes/Dark/{icon}.png";
             try
             {
                 iconImage.Source = new Bitmap(iconPath);
@@ -151,6 +152,7 @@ public class MessageBox : Window
         {
             case MessageBoxButtons.OK:
                 AddButton(Se.Language.General.Ok, MessageBoxResult.OK);
+                _hasOnlyOk = true;
                 break;
             case MessageBoxButtons.OKCancel:
                 AddButton(Se.Language.General.Ok, MessageBoxResult.OK);
@@ -213,6 +215,12 @@ public class MessageBox : Window
         if (e.Key == Key.Escape && _hasCancel)
         {
             _result = MessageBoxResult.Cancel;
+            Close(_result);
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Escape && _hasOnlyOk)
+        {
+            _result = MessageBoxResult.OK;
             Close(_result);
             e.Handled = true;
         }

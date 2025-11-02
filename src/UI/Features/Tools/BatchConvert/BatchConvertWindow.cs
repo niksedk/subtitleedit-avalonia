@@ -152,11 +152,9 @@ public class BatchConvertWindow : Window
                 UiUtil.MakeButton(vm.AddFilesCommand, IconNames.Plus, Se.Language.General.Add).WithMarginLeft(10),
                 UiUtil.MakeButton(vm.RemoveSelectedFilesCommand, IconNames.Trash, Se.Language.General.Remove).WithMarginLeft(5),
                 UiUtil.MakeButton(vm.ClearAllFilesCommand, IconNames.Close, Se.Language.General.Clear).WithMarginLeft(5),
-                UiUtil.MakeSeparatorForHorizontal(vm),
-                UiUtil.MakeLabel(Se.Language.General.TargetFormat),
+                UiUtil.MakeLabel(Se.Language.General.TargetFormat).WithMarginLeft(15),
                 UiUtil.MakeComboBox(vm.TargetFormats, vm, nameof(vm.SelectedTargetFormat)),
-                UiUtil.MakeSeparatorForHorizontal(vm),
-                UiUtil.MakeButton(Se.Language.General.OutputProperties, vm.ShowOutputPropertiesCommand),
+                UiUtil.MakeButton(Se.Language.General.OutputProperties, vm.ShowOutputPropertiesCommand).WithMarginLeft(18),
                 MakeOutputPropertiesGrid(vm),
             }
         };
