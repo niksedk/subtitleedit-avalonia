@@ -61,7 +61,7 @@ public class BatchConverter : IBatchConverter
         }
     }
 
-    private async Task<Subtitle> RunConvertFunctions(BatchConvertItem item, System.Threading.CancellationToken cancellationToken)
+    private async Task<Subtitle> RunConvertFunctions(BatchConvertItem item, CancellationToken cancellationToken)
     {
         var s = new Subtitle(item.Subtitle, false);
         s = AdjustDisplayDuration(s);
@@ -198,6 +198,19 @@ public class BatchConverter : IBatchConverter
             return subtitle;
         }
 
+        var language = LanguageAutoDetect.AutoDetectGoogleLanguage(subtitle);
+        var fixCasing = new FixCasing(language)
+        {
+            FixNormal = _config.ChangeCasing.NormalCasing,
+            FixNormalOnlyAllUppercase = _config.ChangeCasing.NormalCasingOnlyUpper,
+            FixMakeUppercase = _config.ChangeCasing.AllUppercase,
+            FixMakeLowercase = _config.ChangeCasing.AllLowercase,
+            FixMakeProperCase = false,
+            FixProperCaseOnlyAllUppercase = false,
+            Format = subtitle.OriginalFormat,
+        };
+        fixCasing.Fix(subtitle);
+
         return subtitle;
     }
 
@@ -295,7 +308,7 @@ public class BatchConverter : IBatchConverter
         var doAutoTranslate = new DoAutoTranslate();
         var translatedSubtitle = await doAutoTranslate.DoTranslate(subtitle, _config.AutoTranslate.SourceLanguage, _config.AutoTranslate.TargetLanguage, _config.AutoTranslate.Translator, default);
 
-        for (var i = 0; i < subtitle.Paragraphs.Count && i <translatedSubtitle.Count; i++)
+        for (var i = 0; i < subtitle.Paragraphs.Count && i < translatedSubtitle.Count; i++)
         {
             subtitle.Paragraphs[i].Text = translatedSubtitle[i].TranslatedText;
         }

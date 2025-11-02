@@ -181,6 +181,7 @@ public partial class BatchConvertViewModel : ObservableObject
 
         _encodings = EncodingHelper.GetEncodings().Select(p => p.DisplayName).ToList();
 
+        AutoTranslateModelText = string.Empty;
         AutoTranslators = new ObservableCollection<IAutoTranslator>
         {
             new OllamaTranslate(),
@@ -227,6 +228,24 @@ public partial class BatchConvertViewModel : ObservableObject
         Se.Settings.Tools.BatchConvert.AutoTranslateSourceLanguage = SelectedSourceLanguage?.TwoLetterIsoLanguageName ?? "auto";
         Se.Settings.Tools.BatchConvert.AutoTranslateTargetLanguage = SelectedTargetLanguage?.TwoLetterIsoLanguageName ?? "en";
 
+        // Change casing
+        if (NormalCasing)
+        {
+            Se.Settings.Tools.BatchConvert.ChangeCasingType = "Normal";
+        }
+        else if (FixNamesOnly)
+        {
+            Se.Settings.Tools.BatchConvert.ChangeCasingType = "FixNamesOnly";
+        }
+        else if (AllUppercase)
+        {
+            Se.Settings.Tools.BatchConvert.ChangeCasingType = "AllUppercase";
+        }
+        else if (AllLowercase)
+        {
+            Se.Settings.Tools.BatchConvert.ChangeCasingType = "AllLowercase";
+        }
+
         Se.SaveSettings();
     }
 
@@ -272,6 +291,27 @@ public partial class BatchConvertViewModel : ObservableObject
         {
             SelectedTargetLanguage = targetLanguage;
         }
+
+        // Change casing
+        if (Se.Settings.Tools.BatchConvert.ChangeCasingType == "Normal")
+        {
+            NormalCasing = true;
+        }
+        else if (Se.Settings.Tools.BatchConvert.ChangeCasingType == "FixNamesOnly")
+        {
+            FixNamesOnly = true;
+        }
+        else if (Se.Settings.Tools.BatchConvert.ChangeCasingType == "AllUppercase")
+        {
+            AllUppercase = true;
+        }
+        else if (Se.Settings.Tools.BatchConvert.ChangeCasingType == "AllLowercase")
+        {
+            AllLowercase = true;
+        }
+
+        NormalCasingFixNames = Se.Settings.Tools.BatchConvert.NormalCasingFixNames;
+        NormalCasingOnlyUpper = Se.Settings.Tools.BatchConvert.NormalCasingOnlyUpper;
 
         UpdateOutputProperties();
     }
@@ -545,6 +585,18 @@ public partial class BatchConvertViewModel : ObservableObject
                 Translator = SelectedAutoTranslator,
                 SourceLanguage = SelectedSourceLanguage ?? SourceLanguages.First(),
                 TargetLanguage = SelectedTargetLanguage ?? TargetLanguages.First(),
+            },
+
+            ChangeCasing = new BatchConvertConfig.ChangeCasingSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.ChangeCasing),
+
+                NormalCasing = NormalCasing,
+                NormalCasingOnlyUpper = NormalCasingOnlyUpper,
+                NormalCasingFixNames = NormalCasingFixNames,
+                FixNamesOnly = FixNamesOnly,
+                AllLowercase = AllLowercase,    
+                AllUppercase = AllUppercase,
             },
 
             ChangeFrameRate = new BatchConvertConfig.ChangeFrameRateSettings

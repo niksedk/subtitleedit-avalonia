@@ -101,6 +101,12 @@ public class BatchConvertConfig
     public class ChangeCasingSettings
     {
         public bool IsActive { get; set; }
+        public bool NormalCasing { get; set; }
+        public bool NormalCasingFixNames { get; set; }
+        public bool NormalCasingOnlyUpper { get; set; }
+        public bool FixNamesOnly { get; set; }
+        public bool AllUppercase { get; set; }
+        public bool AllLowercase { get; set; }
     }
 
     public class FixCommonErrorsSettings2

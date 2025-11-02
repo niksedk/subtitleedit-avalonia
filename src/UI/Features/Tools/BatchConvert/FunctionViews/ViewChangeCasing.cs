@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert.FunctionViews;
 
@@ -12,29 +13,30 @@ public static class ViewChangeCasing
     {
         var labelHeader = new Label
         {
-            Content = "Change casing",
+            Content = Se.Language.General.ChangeCasing,
             VerticalAlignment = VerticalAlignment.Center,
         };
-        
-         var checkBoxNormalCasing = new RadioButton
+
+        var checkBoxNormalCasing = new RadioButton
         {
-            Content = "Normal casing",
+            Content = Se.Language.General.NormalCasing,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 0, 5),
             [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.NormalCasing)) { Mode = BindingMode.TwoWay },
+            GroupName = "ChangeCasingType",
         };
 
         var checkBoxNormalCasingFixNames = new CheckBox
         {
-            Content = "Fix names",
+            Content = Se.Language.Tools.ChangeCasing.FixNames,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(15, 0, 0, 5),
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.NormalCasingFixNames)) { Mode = BindingMode.TwoWay },
         };
 
-         var checkBoxNormalCasingOnlyUpper = new CheckBox
+        var checkBoxNormalCasingOnlyUpper = new CheckBox
         {
-            Content = "Only fix all uppercase lines)",
+            Content = Se.Language.Tools.ChangeCasing.OnlyFixUppercaseLines,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(15, 0, 0, 15),
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.NormalCasingOnlyUpper)) { Mode = BindingMode.TwoWay },
@@ -42,26 +44,29 @@ public static class ViewChangeCasing
 
         var checkBoxFixNamesOnly = new RadioButton
         {
-            Content = "Fix names only",
+            Content = Se.Language.Tools.ChangeCasing.FixNamesOnly,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 0, 15),
             [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.FixNamesOnly)) { Mode = BindingMode.TwoWay },
+            GroupName = "ChangeCasingType",
         };
 
         var checkBoxAllUppercase = new RadioButton
         {
-            Content = "All uppercase",
+            Content = Se.Language.Tools.ChangeCasing.AllUppercase,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 0, 15),
             [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AllUppercase)) { Mode = BindingMode.TwoWay },
+            GroupName = "ChangeCasingType",
         };
 
         var checkBoxAllLowercase = new RadioButton
         {
-            Content = "All lowercase",
+            Content = Se.Language.Tools.ChangeCasing.AllLowercase,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 0, 15),
             [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AllLowercase)) { Mode = BindingMode.TwoWay },
+            GroupName = "ChangeCasingType",
         };
 
         var grid = new Grid
@@ -91,7 +96,7 @@ public static class ViewChangeCasing
         grid.Add(checkBoxFixNamesOnly, 4, 0);
         grid.Add(checkBoxAllUppercase, 5, 0);
         grid.Add(checkBoxAllLowercase, 6, 0);
-        
+
         return grid;
     }
 }

@@ -26,7 +26,7 @@ public class ChangeCasingWindow : Window
 
         var checkBoxNormalCasing = new RadioButton
         {
-            Content = "Normal casing",
+            Content = Se.Language.General.NormalCasing,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 0, 5),
             [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.NormalCasing)) { Mode = BindingMode.TwoWay },
@@ -34,7 +34,7 @@ public class ChangeCasingWindow : Window
 
         var checkBoxNormalCasingFixNames = new CheckBox
         {
-            Content = "Fix names",
+            Content = Se.Language.Tools.ChangeCasing.FixNames,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(15, 0, 0, 5),
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.NormalCasingFixNames)) { Mode = BindingMode.TwoWay },
@@ -42,7 +42,7 @@ public class ChangeCasingWindow : Window
 
         var checkBoxNormalCasingOnlyUpper = new CheckBox
         {
-            Content = "Only fix all uppercase lines)",
+            Content = Se.Language.Tools.ChangeCasing.OnlyFixUppercaseLines,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(15, 0, 0, 15),
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.NormalCasingOnlyUpper)) { Mode = BindingMode.TwoWay },
@@ -50,7 +50,7 @@ public class ChangeCasingWindow : Window
 
         var checkBoxFixNamesOnly = new RadioButton
         {
-            Content = "Fix names only",
+            Content = Se.Language.Tools.ChangeCasing.FixNamesOnly,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 0, 15),
             [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.FixNamesOnly)) { Mode = BindingMode.TwoWay },
@@ -58,7 +58,7 @@ public class ChangeCasingWindow : Window
 
         var checkBoxAllUppercase = new RadioButton
         {
-            Content = "All uppercase",
+            Content = Se.Language.Tools.ChangeCasing.AllUppercase,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 0, 15),
             [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AllUppercase)) { Mode = BindingMode.TwoWay },
@@ -66,7 +66,7 @@ public class ChangeCasingWindow : Window
 
         var checkBoxAllLowercase = new RadioButton
         {
-            Content = "All lowercase",
+            Content = Se.Language.Tools.ChangeCasing.AllLowercase,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 0, 15),
             [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AllLowercase)) { Mode = BindingMode.TwoWay },

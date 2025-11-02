@@ -37,6 +37,9 @@ public class SeBatchConvert
     public string AutoTranslateEngine { get; set; }
     public string AutoTranslateSourceLanguage { get; set; }
     public string AutoTranslateTargetLanguage { get; set; }
+    public string ChangeCasingType { get; set; }
+    public bool NormalCasingFixNames { get; set; }
+    public bool NormalCasingOnlyUpper { get;  set; }
 
     public SeBatchConvert()
     {
@@ -54,5 +57,7 @@ public class SeBatchConvert
         AutoTranslateEngine = new OllamaTranslate().Name;
         AutoTranslateSourceLanguage = "auto";
         AutoTranslateTargetLanguage = "en";
+        ChangeCasingType = "Normal";
+        NormalCasingFixNames = true;
     }
 }
