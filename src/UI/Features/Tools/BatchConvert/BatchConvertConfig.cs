@@ -96,6 +96,7 @@ public class BatchConvertConfig
     public class ChangeSpeedSettings
     {
         public bool IsActive { get; set; }
+        public double SpeedPercent { get; set; }
     }
 
     public class ChangeCasingSettings

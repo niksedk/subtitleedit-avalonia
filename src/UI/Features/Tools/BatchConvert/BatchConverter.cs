@@ -185,7 +185,11 @@ public class BatchConverter : IBatchConverter
             return subtitle;
         }
 
-        subtitle.ChangeFrameRate(_config.ChangeFrameRate.FromFrameRate, _config.ChangeFrameRate.ToFrameRate);
+        foreach (var p in subtitle.Paragraphs)
+        {
+            p.StartTime.TotalMilliseconds = TimeSpan.FromMilliseconds(p.StartTime.TotalMilliseconds * (100.0 / _config.ChangeSpeed.SpeedPercent)).TotalMilliseconds;
+            p.EndTime.TotalMilliseconds = TimeSpan.FromMilliseconds(p.EndTime.TotalMilliseconds * (100.0 / _config.ChangeSpeed.SpeedPercent)).TotalMilliseconds;
+        }
 
         return subtitle;
     }

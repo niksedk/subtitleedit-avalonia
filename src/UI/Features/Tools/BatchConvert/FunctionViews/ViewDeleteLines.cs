@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert.FunctionViews;
 
@@ -9,12 +10,12 @@ public static class ViewDeleteLines
     {
         var labelHeader = new Label
         {
-            Content = "Delete lines",
+            Content = Se.Language.General.DeleteLines,
             FontWeight = Avalonia.Media.FontWeight.Bold,
             Margin = new Avalonia.Thickness(0, 0, 0, 10),
         };
 
-        var labelDeleteContains = UiUtil.MakeLabel("Delete lines containing text");
+        var labelDeleteContains = UiUtil.MakeLabel(Se.Language.General.DeleteLinesContainingText);
         var textBoxDeleteContains = UiUtil.MakeTextBox(400, vm, nameof(vm.DeleteLinesContains));
         var panelDeleteContains = new StackPanel
         {
@@ -23,7 +24,7 @@ public static class ViewDeleteLines
             Margin = new Avalonia.Thickness(0, 0, 0, 10),
         };
 
-        var labelDeleteFirstLines = UiUtil.MakeLabel("Delete first lines");
+        var labelDeleteFirstLines = UiUtil.MakeLabel(Se.Language.General.DeleteFirstLines);
         var numericUpDownDeleteFirstLines = UiUtil.MakeNumericUpDownInt(0, 100, 0, 150, vm, nameof(vm.DeleteXFirstLines));
         var panelDeleteFirstLines = new StackPanel
         {
@@ -32,7 +33,7 @@ public static class ViewDeleteLines
             Margin = new Avalonia.Thickness(0, 0, 0, 10),
         };
 
-        var labelDeleteLastLines = UiUtil.MakeLabel("Delete last lines");
+        var labelDeleteLastLines = UiUtil.MakeLabel(Se.Language.General.DeleteLastLines);
         var numericUpDownDeleteLastLines = UiUtil.MakeNumericUpDownInt(0, 100, 0, 150, vm, nameof(vm.DeleteXLastLines));
         var panelDeleteLastLines = new StackPanel
         {

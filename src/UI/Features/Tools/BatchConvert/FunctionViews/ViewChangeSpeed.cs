@@ -4,6 +4,7 @@ using Avalonia.Data;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert.FunctionViews;
 
@@ -13,13 +14,13 @@ public static class ViewChangeSpeed
     {
         var labelHeader = new Label
         {
-            Content = "Change speed",
+            Content = Se.Language.General.ChangeSpeed,
             VerticalAlignment = VerticalAlignment.Center,
         };
         
         var label = new Label
         {
-            Content = "Speed in %",
+            Content = Se.Language.Sync.SpeedInPercentage,
             VerticalAlignment = VerticalAlignment.Center,
         };
 
@@ -30,11 +31,11 @@ public static class ViewChangeSpeed
             Minimum = 0,
             Maximum = 1000,
             Increment = 0.1m,
-            [!NumericUpDown.ValueProperty] = new Binding(nameof(ChangeSpeedViewModel.SpeedPercent)) { Mode = BindingMode.TwoWay },
+            [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.ChangeSpeedPercent)) { Mode = BindingMode.TwoWay },
         };
 
-    //    var buttonFromDropFrame = UiUtil.MakeButton("From drop frame value", vm.SetFromDropFrameValueCommand);
-     //   var buttonToDropFrame = UiUtil.MakeButton("To drop frame value", vm.SetToDropFrameValueCommand);
+        var buttonFromDropFrame = UiUtil.MakeButton(Se.Language.Sync.FromDropFrameValue, vm.ChangeSpeedSetFromDropFrameValueCommand);
+        var buttonToDropFrame = UiUtil.MakeButton(Se.Language.Sync.ToDropFrameValue, vm.ChangeSpeedSetToDropFrameValueCommand);
 
         var panelSpeed = new StackPanel
         {
@@ -46,8 +47,8 @@ public static class ViewChangeSpeed
             {
                 label,
                 numericUpDownSpeed,
-          //      buttonFromDropFrame,
-          //    buttonToDropFrame
+                buttonFromDropFrame,
+                buttonToDropFrame,
             }
         };
 

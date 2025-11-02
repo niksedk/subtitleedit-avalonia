@@ -2974,7 +2974,12 @@ public partial class MainViewModel :
             return;
         }
 
-        await ShowDialogAsync<ChangeSpeedWindow, ChangeSpeedViewModel>();
+        var result = await ShowDialogAsync<ChangeSpeedWindow, ChangeSpeedViewModel>();
+        if (result.OkPressed)
+        {
+            ChangeSpeedViewModel.ChangeSpeed(Subtitles, result.SpeedPercent);
+            _updateAudioVisualizer = true;
+        }
     }
 
     [RelayCommand]

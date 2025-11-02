@@ -90,9 +90,6 @@ public partial class BatchConvertViewModel : ObservableObject
 
     // Change speed
     [ObservableProperty] private double _changeSpeedPercent;
-    [ObservableProperty] private bool _changeSpeedAdjustAll;
-    [ObservableProperty] private bool _changeSpeedAdjustSelectedLines;
-    [ObservableProperty] private bool _changeSpeedAdjustSelectedLinesAndForward;
 
     // Change casing
     [ObservableProperty] private bool _normalCasing;
@@ -193,6 +190,11 @@ public partial class BatchConvertViewModel : ObservableObject
         SelectedAutoTranslator = AutoTranslators[0];
         OnAutoTranslatorChanged();
         UpdateAutoTranslateLanguages();
+
+        SelectedFromFrameRate = FromFrameRates[0];
+        SelectedToFrameRate = ToFrameRates[1];
+
+        ChangeSpeedPercent = 100;
 
         LoadSettings();
     }
@@ -417,6 +419,18 @@ public partial class BatchConvertViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void ChangeSpeedSetFromDropFrameValue()
+    {
+        ChangeSpeedPercent = 100.1001;
+    }
+
+    [RelayCommand]
+    private void ChangeSpeedSetToDropFrameValue()
+    {
+        ChangeSpeedPercent = 99.9889;
+    }
+
+    [RelayCommand]
     private async Task Statistics()
     {
         if (Window == null)
@@ -597,6 +611,12 @@ public partial class BatchConvertViewModel : ObservableObject
                 FixNamesOnly = FixNamesOnly,
                 AllLowercase = AllLowercase,    
                 AllUppercase = AllUppercase,
+            },
+
+            ChangeSpeed = new BatchConvertConfig.ChangeSpeedSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.ChangeSpeed),
+                SpeedPercent = ChangeSpeedPercent,
             },
 
             ChangeFrameRate = new BatchConvertConfig.ChangeFrameRateSettings

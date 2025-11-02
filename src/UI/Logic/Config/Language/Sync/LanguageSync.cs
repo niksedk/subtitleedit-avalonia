@@ -11,6 +11,14 @@ public class LanguageSync
     public string ResolutionXDurationYFrameRateZ { get; set; }
     public string StartSceneMustComeBeforeEndScene { get; set; }
     public string GoToSubPos { get; set; }
+    public string SpeedInPercentage { get; set; }
+    public string FromDropFrameValue { get; set; }
+    public string ToDropFrameValue { get; set; }
+    public string AdjustAll { get; set; }
+    public string AdjustSelectedLines { get; set; }
+    public string AdjustSelectedLinesAndForward { get; set; }
+    public string ToFrameRate { get;  set; }
+    public string FromFrameRate { get;  set; }
 
     public LanguageSync()
     {
@@ -23,5 +31,13 @@ public class LanguageSync
         ResolutionXDurationYFrameRateZ = "Resolution: {0}, duration: {1}, frame rate: {2}";
         StartSceneMustComeBeforeEndScene = "Start scene must come before end scene";
         GoToSubPos = "Go to sub pos";
+        SpeedInPercentage = "Speed in %";
+        FromDropFrameValue = "From drop-frame value";
+        ToDropFrameValue = "To drop-frame value";
+        AdjustAll = "Adjust all";
+        AdjustSelectedLines = "Adjust selected lines";
+        AdjustSelectedLinesAndForward = "Adjust selected lines and forward";
+        ToFrameRate = "To frame rate";
+        FromFrameRate = "From frame rate";
     }
 }

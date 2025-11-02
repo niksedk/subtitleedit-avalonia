@@ -4,6 +4,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 
 namespace Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
@@ -15,7 +16,7 @@ public class ChangeSpeedWindow : Window
     public ChangeSpeedWindow(ChangeSpeedViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = "Change speed";
+        Title = Se.Language.General.ChangeSpeed;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 
@@ -25,7 +26,7 @@ public class ChangeSpeedWindow : Window
 
         var label = new Label
         {
-            Content = "Speed in %",
+            Content = Se.Language.Sync.SpeedInPercentage,
             VerticalAlignment = VerticalAlignment.Center,
         };
 
@@ -44,8 +45,8 @@ public class ChangeSpeedWindow : Window
             },
         };
 
-        var buttonFromDropFrame = UiUtil.MakeButton("From drop frame value", vm.SetFromDropFrameValueCommand);
-        var buttonToDropFrame = UiUtil.MakeButton("To drop frame value", vm.SetToDropFrameValueCommand);
+        var buttonFromDropFrame = UiUtil.MakeButton(Se.Language.Sync.FromDropFrameValue, vm.SetFromDropFrameValueCommand);
+        var buttonToDropFrame = UiUtil.MakeButton(Se.Language.Sync.ToDropFrameValue, vm.SetToDropFrameValueCommand);
 
         var panelSpeed = new StackPanel
         {
@@ -70,17 +71,17 @@ public class ChangeSpeedWindow : Window
             {
                 new RadioButton
                 {
-                    Content = "Adjust all",
+                    Content = Se.Language.Sync.AdjustAll,
                     [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustAll))
                 },
                 new RadioButton
                 {
-                    Content = "Adjust selected lines",
+                    Content = Se.Language.Sync.AdjustSelectedLines,
                     [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustSelectedLines))
                 },
                 new RadioButton
                 {
-                    Content = "Adjust selected lines and forward",
+                    Content = Se.Language.Sync.AdjustSelectedLinesAndForward,
                     [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustSelectedLinesAndForward))
                 }
             },

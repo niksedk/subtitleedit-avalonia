@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert.FunctionViews;
 
@@ -10,14 +11,14 @@ public static class ViewChangeFrameRate
     {
         var labelHeader = new Label
         {
-            Content = "Change frame rate",
+            Content = Se.Language.General.ChangeFrameRate,
             FontWeight = Avalonia.Media.FontWeight.Bold,
             Margin = new Avalonia.Thickness(0,0,0, 10),
         };
 
         var labelFromFrameRate = new Label
         {
-            Content = "From frame rate",
+            Content = Se.Language.Sync.FromFrameRate,
             VerticalAlignment = VerticalAlignment.Center,
         };
 
@@ -35,7 +36,7 @@ public static class ViewChangeFrameRate
 
         var labelToFrameRate = new Label
         {
-            Content = "To frame rate",
+            Content = Se.Language.Sync.ToFrameRate,
             VerticalAlignment = VerticalAlignment.Center,
         };
 

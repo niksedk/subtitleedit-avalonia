@@ -500,6 +500,9 @@ public class LanguageGeneral
     public string XFilesConvertedInY { get; set; }
     public string XRequiresAnApiKey { get; set; }
     public object NormalCasing { get; set; }
+    public string DeleteLinesContainingText { get; set; }
+    public string DeleteFirstLines { get; internal set; }
+    public string DeleteLastLines { get; internal set; }
 
     public LanguageGeneral()
     {
@@ -999,5 +1002,8 @@ public class LanguageGeneral
         XFilesConvertedInY = "{0:#,###,##0} files converted in {1}";
         XRequiresAnApiKey = "{0} requires an API key";
         NormalCasing = "Normal casing";
+        DeleteLinesContainingText = "Delete lines containing text";
+        DeleteFirstLines = "Delete first lines";
+        DeleteLastLines = "Delete last lines";
     }
 }
