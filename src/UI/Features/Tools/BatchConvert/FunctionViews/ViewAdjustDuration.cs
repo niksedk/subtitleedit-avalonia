@@ -4,6 +4,7 @@ using Avalonia.Data;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert.FunctionViews;
 
@@ -19,6 +20,7 @@ public static class ViewAdjustDuration
             Content = "Adjust duration by",
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(10, 0, 0, 0),
+            FontWeight = Avalonia.Media.FontWeight.Bold
         };
 
         var combo = new ComboBox
@@ -44,7 +46,7 @@ public static class ViewAdjustDuration
             VerticalAlignment = VerticalAlignment.Bottom,
             HorizontalAlignment = HorizontalAlignment.Left,
             Text = "Note: Adjustments will not cause overlap",
-            Margin = new Thickness(10, 25, 10, 15),
+            Margin = new Thickness(10, 20, 10, 15),
         };
 
         var grid = new Grid
@@ -81,7 +83,7 @@ public static class ViewAdjustDuration
     {
         var textBlockSeconds = new TextBlock
         {
-            Text = "Seconds",
+            Text = Se.Language.General.Seconds,
             VerticalAlignment = VerticalAlignment.Center,
             MinWidth = LabelMinWidth,
         };
@@ -103,7 +105,7 @@ public static class ViewAdjustDuration
         {
             Orientation = Orientation.Horizontal,
             VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(10, 25, 0, 0),
+            Margin = new Thickness(10, 15, 0, 0),
             Children =
             {
                 textBlockSeconds,
@@ -124,7 +126,7 @@ public static class ViewAdjustDuration
     {
         var textBlockSeconds = new TextBlock
         {
-            Text = "Percent",
+            Text = Se.Language.General.Percent,
             VerticalAlignment = VerticalAlignment.Center,
             MinWidth = LabelMinWidth,
         };
@@ -146,7 +148,7 @@ public static class ViewAdjustDuration
         {
             Orientation = Orientation.Horizontal,
             VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(10, 25, 0, 0),
+            Margin = new Thickness(10, 15, 0, 0),
             Children =
             {
                 textBlockSeconds,
@@ -190,7 +192,7 @@ public static class ViewAdjustDuration
         {
             Orientation = Orientation.Horizontal,
             VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(10, 25, 0, 0),
+            Margin = new Thickness(10, 15, 0, 0),
             Children =
             {
                 textBlockSeconds,
@@ -210,7 +212,7 @@ public static class ViewAdjustDuration
     {
         var textBlockMax = new TextBlock
         {
-            Text = "Max characters per second",
+            Text = Se.Language.General.MaxCharactersPerSecond,
             VerticalAlignment = VerticalAlignment.Center,
         };
         var numericUpDownMax = new NumericUpDown
@@ -230,7 +232,7 @@ public static class ViewAdjustDuration
 
         var textBlockOptimal = new TextBlock
         {
-            Text = "Optimal characters per second",
+            Text = Se.Language.General.OptimalCharactersPerSecond,
             VerticalAlignment = VerticalAlignment.Center,
         };
         var numericUpDownOptimal = new NumericUpDown
@@ -263,7 +265,7 @@ public static class ViewAdjustDuration
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center,
             RowSpacing = 10,
-            Margin = new Thickness(10, 25, 0, 0),
+            Margin = new Thickness(10, 15, 0, 0),
         };
 
         grid.Children.Add(textBlockMax);

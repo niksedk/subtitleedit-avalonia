@@ -13,6 +13,7 @@ public static class ViewAutoTranslate
         {
             Content = Se.Language.General.AutoTranslate,
             VerticalAlignment = VerticalAlignment.Center,
+            FontWeight = Avalonia.Media.FontWeight.Bold
         };
 
         var labelEngine = UiUtil.MakeLabel(Se.Language.General.Engine);

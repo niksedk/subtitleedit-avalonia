@@ -15,6 +15,7 @@ public static class ViewChangeCasing
         {
             Content = Se.Language.General.ChangeCasing,
             VerticalAlignment = VerticalAlignment.Center,
+            FontWeight = Avalonia.Media.FontWeight.Bold
         };
 
         var checkBoxNormalCasing = new RadioButton

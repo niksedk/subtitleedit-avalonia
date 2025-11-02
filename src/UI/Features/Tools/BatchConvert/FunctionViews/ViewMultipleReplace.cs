@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert.FunctionViews;
 
@@ -12,8 +13,9 @@ public static class ViewMultipleReplace
     {
         var labelHeader = new Label
         {
-            Content = "Multiple replace",
+            Content = Se.Language.General.MultipleReplace,
             VerticalAlignment = VerticalAlignment.Center,
+            FontWeight = Avalonia.Media.FontWeight.Bold,
         };
         
          var checkBoxNormalCasing = new RadioButton

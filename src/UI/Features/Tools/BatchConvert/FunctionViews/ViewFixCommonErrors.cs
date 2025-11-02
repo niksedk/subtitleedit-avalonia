@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert.FunctionViews;
 
@@ -12,8 +13,9 @@ public static class ViewFixCommonErrors
     {
         var labelHeader = new Label
         {
-            Content = "Fix common errors",
+            Content = Se.Language.General.FixCommonErrors,
             VerticalAlignment = VerticalAlignment.Center,
+            FontWeight = Avalonia.Media.FontWeight.Bold
         };
         
          var checkBoxNormalCasing = new RadioButton
