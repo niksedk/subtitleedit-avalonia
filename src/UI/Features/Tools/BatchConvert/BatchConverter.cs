@@ -1,23 +1,29 @@
-﻿using Nikse.SubtitleEdit.Core.AutoTranslate;
-using Nikse.SubtitleEdit.Core.Common;
+﻿using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.ContainerFormats;
+using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
-using Nikse.SubtitleEdit.Core.Translate;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
-using Nikse.SubtitleEdit.Features.Tools.BatchConvert.FunctionViews;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
-public class BatchConverter : IBatchConverter
+public class BatchConverter : IBatchConverter, IFixCallbacks
 {
     private BatchConvertConfig _config;
     private List<SubtitleFormat> _subtitleFormats;
+
+    public SubtitleFormat Format { get; set; } = new SubRip();
+
+    public Encoding Encoding { get; set; } = Encoding.UTF8;
+
+    public string Language { get; set; } = "en";
 
     public BatchConverter()
     {
@@ -31,7 +37,7 @@ public class BatchConverter : IBatchConverter
         _subtitleFormats = SubtitleFormat.AllSubtitleFormats.ToList();
     }
 
-    public async Task Convert(BatchConvertItem item, System.Threading.CancellationToken cancellationToken)
+    public async Task Convert(BatchConvertItem item, CancellationToken cancellationToken)
     {
         if (_subtitleFormats.Count == 0)
         {
@@ -64,6 +70,7 @@ public class BatchConverter : IBatchConverter
     private async Task<Subtitle> RunConvertFunctions(BatchConvertItem item, CancellationToken cancellationToken)
     {
         var s = new Subtitle(item.Subtitle, false);
+        Language = LanguageAutoDetect.AutoDetectGoogleLanguageOrNull(s) ?? "en";
         s = AdjustDisplayDuration(s);
         s = await AutoTranslate(s, cancellationToken);
         s = ChangeCasing(s);
@@ -220,9 +227,18 @@ public class BatchConverter : IBatchConverter
 
     private Subtitle FixCommonErrors(Subtitle subtitle)
     {
-        if (!_config.FixCommonErrors.IsActive)
+        if (!_config.FixCommonErrors.IsActive || _config.FixCommonErrors.Profile == null)
         {
             return subtitle;
+        }
+
+        foreach (var fix in _config.FixCommonErrors.Profile.FixRules)
+        {
+            if (fix.IsSelected)
+            {
+                var fixCommonError = fix.GetFixCommonErrorFunction();
+                fixCommonError.Fix(subtitle, this);
+            }
         }
 
         return subtitle;
@@ -385,5 +401,49 @@ public class BatchConverter : IBatchConverter
         }
 
         return outputFileName;
+    }
+
+    public bool AllowFix(Paragraph p, string action)
+    {
+        return true;
+    }
+
+    public void AddFixToListView(Paragraph p, string action, string before, string after)
+    {
+
+    }
+
+    public void AddFixToListView(Paragraph p, string action, string before, string after, bool isChecked)
+    {
+    }
+
+    public void LogStatus(string sender, string message)
+    {
+    }
+
+    public void LogStatus(string sender, string message, bool isImportant)
+    {
+    }
+
+    public void UpdateFixStatus(int fixes, string message)
+    {
+    }
+
+    public bool IsName(string candidate)
+    {
+        return false; //TODO: fix name checking
+    }
+
+    public HashSet<string> GetAbbreviations()
+    {
+        return new HashSet<string>(); //TODO: fix abbreviation checking
+    }
+
+    public void AddToTotalErrors(int count)
+    {
+    }
+
+    public void AddToDeleteIndices(int index)
+    {
     }
 }

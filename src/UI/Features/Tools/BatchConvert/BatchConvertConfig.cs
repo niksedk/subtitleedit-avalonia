@@ -1,4 +1,5 @@
-﻿using Nikse.SubtitleEdit.Core.AutoTranslate;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Nikse.SubtitleEdit.Core.AutoTranslate;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.Translate;
@@ -113,6 +114,7 @@ public class BatchConvertConfig
     public class FixCommonErrorsSettings2
     {
         public bool IsActive { get; set; }
+        public FixCommonErrors.ProfileDisplayItem? Profile { get; set; }
     }
 
     public class RemoveLineBreaksSettings

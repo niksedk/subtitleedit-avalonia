@@ -683,6 +683,12 @@ public partial class BatchConvertViewModel : ObservableObject
                 DeleteContains = DeleteLinesContains,
             },
 
+            FixCommonErrors = new BatchConvertConfig.FixCommonErrorsSettings2
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.FixCommonErrors),
+                Profile = FixCommonErrorsProfile,
+            },
+
             OffsetTimeCodes = new BatchConvertConfig.OffsetTimeCodesSettings
             {
                 IsActive = activeFunctions.Contains(BatchConvertFunctionType.OffsetTimeCodes),
