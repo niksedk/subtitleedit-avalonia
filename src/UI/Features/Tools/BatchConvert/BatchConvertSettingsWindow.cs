@@ -4,13 +4,13 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 
-namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
+namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
 public class BatchConvertSettingsWindow : Window
 {
-    private readonly BatchConvertSettingsViewModel _vm;
+    private readonly Tools.BatchConvert.BatchConvertSettingsViewModel _vm;
     
-    public BatchConvertSettingsWindow(BatchConvertSettingsViewModel vm)
+    public BatchConvertSettingsWindow(Tools.BatchConvert.BatchConvertSettingsViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = "Batch convert - output settings";

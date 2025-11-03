@@ -327,43 +327,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
         Configuration.Settings.General.ContinuationStyle = 
             Enum.Parse<ContinuationStyle>(Se.Settings.General.ContinuationStyle);
 
-        _allFixRules = new List<FixRuleDisplayItem>
-        {
-            new (_language.RemovedEmptyLinesUnusedLineBreaks, "Has only one valid line!</br><i> -> Has only one valid line!", 1, true, nameof(FixEmptyLines)),
-            new (_language.FixOverlappingDisplayTimes, string.Empty, 1, true, nameof(FixOverlappingDisplayTimes)),
-            new (_language.FixShortDisplayTimes, string.Empty, 1, true, nameof(FixShortDisplayTimes)),
-            new (_language.FixLongDisplayTimes, string.Empty, 1, true, nameof(FixLongDisplayTimes)),
-            new (_language.FixShortGaps, string.Empty, 1, true, nameof(FixShortGaps)),
-            new (_language.FixInvalidItalicTags, _language.FixInvalidItalicTagsExample, 1, true, nameof(FixInvalidItalicTags)),
-            new (_language.RemoveUnneededSpaces, _language.RemoveUnneededSpacesExample,1, true, nameof(FixUnneededSpaces)),
-            new (_language.FixMissingSpaces, _language.FixMissingSpacesExample, 1, true, nameof(FixMissingSpaces)),
-            new (_language.RemoveUnneededPeriods, _language.RemoveUnneededPeriodsExample, 1, true, nameof(FixUnneededPeriods)),
-            new (_language.FixCommas, ",, -> ,", 1, true, nameof(FixCommas)),
-            new (_language.BreakLongLines, string.Empty, 1, true, nameof(FixLongLines)),
-            new (_language.RemoveLineBreaks, "Foo</br>bar! -> Foo bar!", 1, true, nameof(FixShortLines)),
-            new (_language.RemoveLineBreaksAll, string.Empty, 1, true, nameof(FixShortLinesAll)),
-            new (_language.RemoveLineBreaksPixelWidth, string.Empty, 1, true, nameof(FixShortLinesPixelWidth)),
-            new (_language.FixDoubleApostrophes, "''Has double single quotes'' -> \"Has single double quote\"", 1, true, nameof(FixDoubleApostrophes)),
-            new (_language.FixMusicNotation, _language.FixMusicNotationExample, 1, true, nameof(FixMusicNotation)),
-            new (_language.AddPeriods, "Hello world -> Hello world.", 1, true, nameof(FixMissingPeriodsAtEndOfLine)),
-            new (_language.StartWithUppercaseLetterAfterParagraph, "p1: Foobar! || p2: foobar! -> p1: Foobar! || p2: Foobar!", 1, true, nameof(FixStartWithUppercaseLetterAfterParagraph)),
-            new (_language.StartWithUppercaseLetterAfterPeriodInsideParagraph, "Hello there! how are you?  -> Hello there! How are you?", 1, true, nameof(FixStartWithUppercaseLetterAfterPeriodInsideParagraph)),
-            new (_language.StartWithUppercaseLetterAfterColon, "Speaker: hello world! -> Speaker: Hello world!", 1, true, nameof(FixStartWithUppercaseLetterAfterColon)),
-            new (_language.AddMissingQuotes, _language.AddMissingQuotesExample, 1, true, nameof(AddMissingQuotes)),
-            new (_language.BreakDialogsOnOneLine, _language.FixDialogsOneLineExample, 1, true, nameof(FixDialogsOnOneLine)),
-            new ( string.Format(_language.FixHyphensInDialogs, GetDialogStyle(Configuration.Settings.General.DialogStyle)), string.Empty, 1, true, nameof(FixHyphensInDialog)),
-            new ( _language.RemoveHyphensSingleLine, "- Foobar. -> Foobar.", 1, true, nameof(FixHyphensRemoveDashSingleLine)),
-            new (_language.Fix3PlusLines, "Foo</br>bar</br>baz! -> Foo bar baz!", 1, true, nameof(Fix3PlusLines)),
-            new (_language.FixDoubleDash, _language.FixDoubleDashExample, 1, true, nameof(FixDoubleDash)),
-            new (_language.FixDoubleGreaterThan, _language.FixDoubleGreaterThanExample, 1, true, nameof(FixDoubleGreaterThan)),
-            new ( string.Format(_language.FixContinuationStyleX, Se.Language.Options.Settings.GetContinuationStyleName(Enum.Parse<ContinuationStyle>(Se.Settings.General.ContinuationStyle))), string.Empty, 1, true, nameof(FixContinuationStyle)),
-            new (_language.FixMissingOpenBracket, _language.FixMissingOpenBracketExample, 1, true, nameof(FixMissingOpenBracket)),
-            //new (_language.FixCommonOcrErrors, _language.FixOcrErrorExample, 1, true, () => FixOcrErrorsViaReplaceList(threeLetterIsoLanguageName), ce.FixOcrErrorsViaReplaceListTicked),
-            new (_language.FixUppercaseIInsideLowercaseWords, _language.FixUppercaseIInsideLowercaseWordsExample, 1, true, nameof(FixUppercaseIInsideWords)),
-            new (_language.RemoveSpaceBetweenNumber, _language.FixSpaceBetweenNumbersExample, 1, true, nameof(RemoveSpaceBetweenNumbers)),
-            new (_language.RemoveDialogFirstInNonDialogs, _language.RemoveDialogFirstInNonDialogsExample, 1, true, nameof(RemoveDialogFirstLineInNonDialogs)),
-            new (_language.NormalizeStrings, string.Empty, 1, true, nameof(NormalizeStrings)),
-        };
+        _allFixRules = MakeDefaultRules();
 
         if (Configuration.Settings.General.ContinuationStyle == ContinuationStyle.None)
         {
@@ -396,6 +360,48 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
                 "Hablas bien castellano? -> ¿Hablas bien castellano?", 1, true,
                 nameof(FixSpanishInvertedQuestionAndExclamationMarks)));
         }
+    }
+
+    public static List<FixRuleDisplayItem> MakeDefaultRules()
+    {
+        var language = Se.Language.Tools.FixCommonErrors;
+        return new List<FixRuleDisplayItem>
+        {
+            new (language.RemovedEmptyLinesUnusedLineBreaks, "Has only one valid line!</br><i> -> Has only one valid line!", 1, true, nameof(FixEmptyLines)),
+            new (language.FixOverlappingDisplayTimes, string.Empty, 1, true, nameof(FixOverlappingDisplayTimes)),
+            new (language.FixShortDisplayTimes, string.Empty, 1, true, nameof(FixShortDisplayTimes)),
+            new (language.FixLongDisplayTimes, string.Empty, 1, true, nameof(FixLongDisplayTimes)),
+            new (language.FixShortGaps, string.Empty, 1, true, nameof(FixShortGaps)),
+            new (language.FixInvalidItalicTags, language.FixInvalidItalicTagsExample, 1, true, nameof(FixInvalidItalicTags)),
+            new (language.RemoveUnneededSpaces, language.RemoveUnneededSpacesExample,1, true, nameof(FixUnneededSpaces)),
+            new (language.FixMissingSpaces, language.FixMissingSpacesExample, 1, true, nameof(FixMissingSpaces)),
+            new (language.RemoveUnneededPeriods, language.RemoveUnneededPeriodsExample, 1, true, nameof(FixUnneededPeriods)),
+            new (language.FixCommas, ",, -> ,", 1, true, nameof(FixCommas)),
+            new (language.BreakLongLines, string.Empty, 1, true, nameof(FixLongLines)),
+            new (language.RemoveLineBreaks, "Foo</br>bar! -> Foo bar!", 1, true, nameof(FixShortLines)),
+            new (language.RemoveLineBreaksAll, string.Empty, 1, true, nameof(FixShortLinesAll)),
+            new (language.RemoveLineBreaksPixelWidth, string.Empty, 1, true, nameof(FixShortLinesPixelWidth)),
+            new (language.FixDoubleApostrophes, "''Has double single quotes'' -> \"Has single double quote\"", 1, true, nameof(FixDoubleApostrophes)),
+            new (language.FixMusicNotation, language.FixMusicNotationExample, 1, true, nameof(FixMusicNotation)),
+            new (language.AddPeriods, "Hello world -> Hello world.", 1, true, nameof(FixMissingPeriodsAtEndOfLine)),
+            new (language.StartWithUppercaseLetterAfterParagraph, "p1: Foobar! || p2: foobar! -> p1: Foobar! || p2: Foobar!", 1, true, nameof(FixStartWithUppercaseLetterAfterParagraph)),
+            new (language.StartWithUppercaseLetterAfterPeriodInsideParagraph, "Hello there! how are you?  -> Hello there! How are you?", 1, true, nameof(FixStartWithUppercaseLetterAfterPeriodInsideParagraph)),
+            new (language.StartWithUppercaseLetterAfterColon, "Speaker: hello world! -> Speaker: Hello world!", 1, true, nameof(FixStartWithUppercaseLetterAfterColon)),
+            new (language.AddMissingQuotes, language.AddMissingQuotesExample, 1, true, nameof(AddMissingQuotes)),
+            new (language.BreakDialogsOnOneLine, language.FixDialogsOneLineExample, 1, true, nameof(FixDialogsOnOneLine)),
+            new ( string.Format(language.FixHyphensInDialogs, GetDialogStyle(Configuration.Settings.General.DialogStyle)), string.Empty, 1, true, nameof(FixHyphensInDialog)),
+            new ( language.RemoveHyphensSingleLine, "- Foobar. -> Foobar.", 1, true, nameof(FixHyphensRemoveDashSingleLine)),
+            new (language.Fix3PlusLines, "Foo</br>bar</br>baz! -> Foo bar baz!", 1, true, nameof(Fix3PlusLines)),
+            new (language.FixDoubleDash, language.FixDoubleDashExample, 1, true, nameof(FixDoubleDash)),
+            new (language.FixDoubleGreaterThan, language.FixDoubleGreaterThanExample, 1, true, nameof(FixDoubleGreaterThan)),
+            new ( string.Format(language.FixContinuationStyleX, Se.Language.Options.Settings.GetContinuationStyleName(Enum.Parse<ContinuationStyle>(Se.Settings.General.ContinuationStyle))), string.Empty, 1, true, nameof(FixContinuationStyle)),
+            new (language.FixMissingOpenBracket, language.FixMissingOpenBracketExample, 1, true, nameof(FixMissingOpenBracket)),
+            //new (_language.FixCommonOcrErrors, _language.FixOcrErrorExample, 1, true, () => FixOcrErrorsViaReplaceList(threeLetterIsoLanguageName), ce.FixOcrErrorsViaReplaceListTicked),
+            new (language.FixUppercaseIInsideLowercaseWords, language.FixUppercaseIInsideLowercaseWordsExample, 1, true, nameof(FixUppercaseIInsideWords)),
+            new (language.RemoveSpaceBetweenNumber, language.FixSpaceBetweenNumbersExample, 1, true, nameof(RemoveSpaceBetweenNumbers)),
+            new (language.RemoveDialogFirstInNonDialogs, language.RemoveDialogFirstInNonDialogsExample, 1, true, nameof(RemoveDialogFirstLineInNonDialogs)),
+            new (language.NormalizeStrings, string.Empty, 1, true, nameof(NormalizeStrings)),
+        };
     }
 
     private static string GetDialogStyle(DialogType dialogStyle)

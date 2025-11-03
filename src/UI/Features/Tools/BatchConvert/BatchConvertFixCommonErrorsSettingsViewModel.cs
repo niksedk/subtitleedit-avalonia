@@ -1,6 +1,3 @@
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -9,10 +6,13 @@ using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
+namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
 
-public partial class BatchConvertSettingsViewModel : ObservableObject
+public partial class BatchConvertFixCommonErrorsSettingsViewModel : ObservableObject
 {
     [ObservableProperty] private bool _useSourceFolder;
     [ObservableProperty] private bool _useOutputFolder;
@@ -28,7 +28,7 @@ public partial class BatchConvertSettingsViewModel : ObservableObject
 
     private readonly IFolderHelper _folderHelper;
 
-    public BatchConvertSettingsViewModel(IFolderHelper folderHelper)
+    public BatchConvertFixCommonErrorsSettingsViewModel(IFolderHelper folderHelper)
     {
         TargetEncodings =
             new ObservableCollection<string>(EncodingHelper.GetEncodings().Select(p => p.DisplayName).ToList());

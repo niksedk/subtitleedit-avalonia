@@ -25,6 +25,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
+using ProfileDisplayItem = Nikse.SubtitleEdit.Features.Files.ExportImageBased.ProfileDisplayItem;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -109,6 +111,9 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private string _autoTranslateModelText;
     [ObservableProperty] private bool _autoTranslateModelIsVisible;
     [ObservableProperty] private bool _autoTranslateModelBrowseIsVisible;
+    
+    // Fix common errors
+    [ObservableProperty] private FixCommonErrors.ProfileDisplayItem? _fixCommonErrorsProfile;
 
     public Window? Window { get; set; }
 
@@ -195,8 +200,39 @@ public partial class BatchConvertViewModel : ObservableObject
         SelectedToFrameRate = ToFrameRates[1];
 
         ChangeSpeedPercent = 100;
+        
+        FixCommonErrorsProfile  = LoadDefaultProfile();
 
         LoadSettings();
+    }
+
+    private static FixCommonErrors.ProfileDisplayItem LoadDefaultProfile()
+    {
+        var profiles = Se.Settings.Tools.FixCommonErrors.Profiles;
+        var displayProfiles = new List<FixCommonErrors.ProfileDisplayItem>();
+        var defaultName = Se.Settings.Tools.FixCommonErrors.LastProfileName;
+        List<FixRuleDisplayItem> allFixRules = FixCommonErrorsViewModel.MakeDefaultRules();
+
+        foreach (var setting in profiles)
+        {
+            var profile = new FixCommonErrors.ProfileDisplayItem
+            {
+                Name = setting.ProfileName,
+                FixRules = new ObservableCollection<FixRuleDisplayItem>(allFixRules.Select(rule => new FixRuleDisplayItem(rule)
+                {
+                    IsSelected = setting.SelectedRules.Contains(rule.FixCommonErrorFunctionName)
+                }))
+            };
+
+            if (defaultName == profile.Name)
+            {
+                return profile;
+            }
+
+            displayProfiles.Add(profile);
+        }
+        
+        return displayProfiles.First();
     }
 
     private void UpdateAutoTranslateLanguages()
