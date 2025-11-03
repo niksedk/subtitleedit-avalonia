@@ -20,9 +20,11 @@ public class BatchConvertFixCommonErrorsSettingsWindow : Window
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = "Fix common error settings";
-        SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
-
+        Width = 1000;
+        Height = 800;
+        MinWidth = 600;
+        MinHeight = 400;
         _vm = vm;
         vm.Window = this;
         DataContext = vm;
