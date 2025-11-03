@@ -431,6 +431,12 @@ public partial class BatchConvertViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void ShowFixCommonRules()
+    {
+        
+    }
+
+    [RelayCommand]
     private async Task Statistics()
     {
         if (Window == null)

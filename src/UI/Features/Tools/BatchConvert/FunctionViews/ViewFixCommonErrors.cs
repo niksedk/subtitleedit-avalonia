@@ -11,34 +11,13 @@ public static class ViewFixCommonErrors
 {
     public static Control Make(BatchConvertViewModel vm)
     {
-        var labelHeader = new Label
-        {
-            Content = Se.Language.General.FixCommonErrors,
-            VerticalAlignment = VerticalAlignment.Center,
-            FontWeight = Avalonia.Media.FontWeight.Bold
-        };
-        
-         var checkBoxNormalCasing = new RadioButton
-        {
-            Content = "Normal casing",
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(0, 0, 0, 5),
-            [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.NormalCasing)) { Mode = BindingMode.TwoWay },
-        };
-
-        var checkBoxNormalCasingFixNames = new CheckBox
-        {
-            Content = "Fix names",
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(15, 0, 0, 5),
-            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.NormalCasingFixNames)) { Mode = BindingMode.TwoWay },
-        };
+        var labelHeader = UiUtil.MakeLabel(Se.Language.General.FixCommonErrors).WithBold();
+        var buttonShowFixCommonErrorsSettings = UiUtil.MakeButton(vm.ShowFixCommonRulesCommand, IconNames.Settings);
 
         var grid = new Grid
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
@@ -53,8 +32,7 @@ public static class ViewFixCommonErrors
         };
 
         grid.Add(labelHeader, 0, 0);
-        grid.Add(checkBoxNormalCasing, 1, 0);
-        grid.Add(checkBoxNormalCasingFixNames, 2, 0);
+        grid.Add(buttonShowFixCommonErrorsSettings, 1, 0);
 
         return grid;
     }
