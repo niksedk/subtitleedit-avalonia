@@ -44,7 +44,7 @@ public class BatchConvertFixCommonErrorsSettingsWindow : Window
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
@@ -61,7 +61,7 @@ public class BatchConvertFixCommonErrorsSettingsWindow : Window
         KeyDown += (s, e) => vm.OnKeyDown(e);
     }
 
-    private Control MakeRulesView(BatchConvertFixCommonErrorsSettingsViewModel vm)
+    private static Border MakeRulesView(BatchConvertFixCommonErrorsSettingsViewModel vm)
     {
         var rulesGrid = new DataGrid
         {
@@ -119,6 +119,6 @@ public class BatchConvertFixCommonErrorsSettingsWindow : Window
             }
         };
         
-        return rulesGrid;
+        return UiUtil.MakeBorderForControl(rulesGrid);
     }
 }
