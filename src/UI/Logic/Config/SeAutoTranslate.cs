@@ -31,5 +31,7 @@ public class SeAutoTranslate
         RequestMaxBytes = 1000;
         CopyPasteMaxBlockSize = 5000;
         CopyPasteLineSeparator = "(...)";
+        OllamaModel = string.Empty;
+        OllamaUrl = string.Empty;
     }
 }

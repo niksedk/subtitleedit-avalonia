@@ -142,6 +142,9 @@ public class BatchConvertConfig
 
         public AutoTranslateSettings()
         {
+            SourceLanguage = new TranslationPair("English", "en");
+            TargetLanguage = new TranslationPair("Spanish", "es");
+            Translator = new OllamaTranslate();
         }
     }
 

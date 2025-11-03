@@ -56,6 +56,7 @@ public class BatchConvertFixCommonErrorsSettingsWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += (s, e) => vm.OnKeyDown(e);
     }
 
     private Control MakeRulesView(BatchConvertFixCommonErrorsSettingsViewModel vm)

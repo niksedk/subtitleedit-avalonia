@@ -26,7 +26,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
-using ProfileDisplayItem = Nikse.SubtitleEdit.Features.Files.ExportImageBased.ProfileDisplayItem;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -467,9 +466,17 @@ public partial class BatchConvertViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ShowFixCommonRules()
+    private async Task ShowFixCommonRules()
     {
-        
+        if (Window == null || FixCommonErrorsProfile == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<BatchConvertFixCommonErrorsSettingsWindow, BatchConvertFixCommonErrorsSettingsViewModel>(Window!, vm => 
+        { 
+            vm.Initialize(FixCommonErrorsProfile); 
+        });
     }
 
     [RelayCommand]
