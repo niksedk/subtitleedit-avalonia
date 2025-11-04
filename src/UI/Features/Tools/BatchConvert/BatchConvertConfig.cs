@@ -162,9 +162,13 @@ public class BatchConvertConfig
     public class MergeLinesWithSameTimeCodesSettings
     {
         public bool IsActive { get; set; }
-
+        public int MaxMillisecondsDifference { get; set; }
+        public bool MergeDialog { get; set; }
+        public bool AutoBreak { get; set; }                               
+        
         public MergeLinesWithSameTimeCodesSettings()
         {
+            MaxMillisecondsDifference = 250;
         }
     }
 

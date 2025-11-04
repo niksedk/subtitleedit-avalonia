@@ -116,6 +116,11 @@ public partial class BatchConvertViewModel : ObservableObject
     // Merge lines with same text
     [ObservableProperty] private int _mergeSameTextMaxMillisecondsBetweenLines;
     [ObservableProperty] private bool _mergeSameTextIncludeIncrementingLines;
+    
+    // Merge lines with same time codes
+    [ObservableProperty] private int _mergeSameTimeMaxMillisecondsDifference;
+    [ObservableProperty] private bool _mergeSameTimeMergeDialog;
+    [ObservableProperty] private bool _mergeSameTimeAutoBreak;
 
     public Window? Window { get; set; }
 
@@ -360,6 +365,10 @@ public partial class BatchConvertViewModel : ObservableObject
 
         MergeSameTextMaxMillisecondsBetweenLines = Se.Settings.Tools.MergeSameText.MaxMillisecondsBetweenLines;
         MergeSameTextIncludeIncrementingLines = Se.Settings.Tools.MergeSameText.IncludeIncrementingLines;
+
+        MergeSameTimeMaxMillisecondsDifference = Se.Settings.Tools.MergeSameTimeCode.MaxMillisecondsDifference;
+        MergeSameTimeMergeDialog = Se.Settings.Tools.MergeSameTimeCode.MergeDialog;
+        MergeSameTimeAutoBreak =  Se.Settings.Tools.MergeSameTimeCode.AutoBreak;
     }
 
     private void UpdateOutputProperties()
@@ -705,6 +714,14 @@ public partial class BatchConvertViewModel : ObservableObject
                 IncludeIncrementingLines = MergeSameTextIncludeIncrementingLines,
                 MaxMillisecondsBetweenLines = MergeSameTextMaxMillisecondsBetweenLines,
             },
+            
+            MergeLinesWithSameTimeCodes = new BatchConvertConfig.MergeLinesWithSameTimeCodesSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.MergeLinesWithSameTimeCodes),
+                MaxMillisecondsDifference = MergeSameTextMaxMillisecondsBetweenLines,
+                MergeDialog = MergeSameTimeMergeDialog,
+                AutoBreak = MergeSameTimeAutoBreak,
+            } ,
 
             OffsetTimeCodes = new BatchConvertConfig.OffsetTimeCodesSettings
             {
@@ -726,7 +743,6 @@ public partial class BatchConvertViewModel : ObservableObject
             },
         };
     }
-
 
     internal void SelectedFunctionChanged()
     {

@@ -356,7 +356,6 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         return subtitle;
     }
 
-
     private Subtitle MergeLinesWithSameText(Subtitle subtitle)
     {
         if (!_config.MergeLinesWithSameTexts.IsActive)
