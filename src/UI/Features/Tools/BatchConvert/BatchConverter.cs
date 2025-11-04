@@ -1,9 +1,11 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.Forms;
 using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameTimeCodes;
+using Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Collections.Generic;
@@ -85,7 +87,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         s = OffsetTimeCodes(s);
         s = RemoveFormatting(s);
         s = RemoveLineBreaks(s);
-        s = RemoveTextForHearingImpaired(s);
+        s = RemoveTextForHearingImpaired(s, Language);
         return s;
     }
 
@@ -338,11 +340,52 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         return subtitle;
     }
 
-    private Subtitle RemoveTextForHearingImpaired(Subtitle subtitle)
+    private Subtitle RemoveTextForHearingImpaired(Subtitle subtitle, string language)
     {
         if (!_config.RemoveTextForHearingImpaired.IsActive)
         {
             return subtitle;
+        }
+
+        var s = Se.Settings.Tools.RemoveTextForHi;
+        var settings = new RemoveTextForHISettings(subtitle)
+        {
+            OnlyIfInSeparateLine = s.IsOnlySeparateLine,
+            RemoveIfAllUppercase = s.IsRemoveTextUppercaseLineOn,
+            RemoveTextBeforeColon = s.IsRemoveTextBeforeColonOn,
+            RemoveTextBeforeColonOnlyUppercase = s.IsRemoveTextBeforeColonUppercaseOn,
+            ColonSeparateLine = s.IsRemoveTextBeforeColonSeparateLineOn,
+            RemoveWhereContains = s.IsRemoveTextContainsOn,
+            RemoveIfTextContains = new List<string>(),
+            RemoveTextBetweenCustomTags = s.IsRemoveCustomOn,
+            RemoveInterjections = s.IsRemoveInterjectionsOn,
+            RemoveInterjectionsOnlySeparateLine = s.IsRemoveInterjectionsOn && s.IsInterjectionsSeparateLineOn,
+            RemoveTextBetweenSquares = s.IsRemoveBracketsOn,
+            RemoveTextBetweenBrackets = s.IsRemoveCurlyBracketsOn,
+            RemoveTextBetweenQuestionMarks = false,
+            RemoveTextBetweenParentheses = s.IsRemoveParenthesesOn,
+            RemoveIfOnlyMusicSymbols = s.IsRemoveOnlyMusicSymbolsOn,
+            CustomStart = s.CustomStart,
+            CustomEnd = s.CustomEnd,
+        };
+
+        foreach (var item in s.TextContains.Split([',', ';'], StringSplitOptions.RemoveEmptyEntries))
+        {
+            settings.RemoveIfTextContains.Add(item.Trim());
+        }
+
+        var removeTextForHiLib = new RemoveTextForHI(settings);
+        removeTextForHiLib.Warnings = [];
+        removeTextForHiLib.ReloadInterjection(language);
+
+        for (var index = 0; index < subtitle.Paragraphs.Count; index++)
+        {
+            var p = subtitle.Paragraphs[index];
+            var newText = removeTextForHiLib.RemoveTextFromHearImpaired(p.Text, subtitle, index, language);
+            if (p.Text.RemoveChar(' ') != newText.RemoveChar(' '))
+            {
+                p.Text = newText;
+            }
         }
 
         return subtitle;
@@ -365,7 +408,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             var p = subtitle.Paragraphs[i - 1];
 
             var next = subtitle.Paragraphs[i];
-            if (MergeSameTimeCodesViewModel.QualifiesForMerge(new SubtitleLineViewModel(p), next, _config.MergeLinesWithSameTimeCodes.MaxMillisecondsDifference))
+            if (MergeSameTimeCodesViewModel.QualifiesForMerge(new SubtitleLineViewModel(p, subtitle.OriginalFormat), new SubtitleLineViewModel(next, subtitle.OriginalFormat), _config.MergeLinesWithSameTimeCodes.MaxMillisecondsDifference))
             {
                 if (!singleMergeSubtitles.Contains(p))
                 {
