@@ -13,6 +13,7 @@ public class SeVideo
     public bool ShowStopButton { get; set; }
     public bool ShowFullscreenButton { get; set; }
     public bool AutoOpen { get; set; }
+    public bool OpenSearchParentFolder { get; set; }
     public string CutType { get; set; }
     public string ShowChangesFFmpegArguments { get; set; }
     public bool VideoPlayerDisplayTimeLeft { get; set; }
@@ -29,6 +30,7 @@ public class SeVideo
         ShowStopButton = true;
         ShowFullscreenButton = true;
         AutoOpen = true;
+        OpenSearchParentFolder = true;
         CutType = Features.Video.CutVideo.CutType.MergeSegments.ToString();
         CutDefaultVideoExtension = ".mkv";
         ShowChangesFFmpegArguments = "-i \"{0}\" -vf \"select=gt(scene\\,{1}),showinfo\" -threads 0 -vsync vfr -f null -";

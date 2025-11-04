@@ -1,4 +1,5 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,7 +11,24 @@ public static class FindVideoFileName
 {
     public static bool TryFindVideoFileName(string inputFileName, out string videoFileName)
     {
-        return TryFindVideoFileNameInner(inputFileName, out videoFileName, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+        var result = TryFindVideoFileNameInner(inputFileName, out videoFileName, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+
+        if (result == false && Se.Settings.Video.OpenSearchParentFolder)
+        { 
+            // try again with the folder, one folder up (if any)
+            var directory = Path.GetDirectoryName(inputFileName);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                var parentDirectory = Path.GetDirectoryName(directory);
+                if (!string.IsNullOrEmpty(parentDirectory))
+                {
+                    var newInputFileName = Path.Combine(parentDirectory, Path.GetFileName(inputFileName));
+                    result = TryFindVideoFileNameInner(newInputFileName, out videoFileName, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+                }
+            }
+        }
+
+        return result;
     }
 
     public static bool TryFindVideoFileNameInner(string inputFileName, out string videoFileName, HashSet<string> videoFileNamesTried)
