@@ -1,7 +1,9 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
+using Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameTimeCodes;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Collections.Generic;
@@ -79,7 +81,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         s = DeleteLines(s);
         s = FixCommonErrors(s);
         s = MergeLinesWithSameText(s);
-        s = MergeLinesWithSameTimeCodes(s);
+        s = MergeLinesWithSameTimeCodes(s, Language);
         s = OffsetTimeCodes(s);
         s = RemoveFormatting(s);
         s = RemoveLineBreaks(s);
@@ -346,11 +348,69 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         return subtitle;
     }
 
-    private Subtitle MergeLinesWithSameTimeCodes(Subtitle subtitle)
+    private Subtitle MergeLinesWithSameTimeCodes(Subtitle subtitle, string language)
     {
         if (!_config.MergeLinesWithSameTimeCodes.IsActive)
         {
             return subtitle;
+        }
+
+        var reBreak = _config.MergeLinesWithSameTimeCodes.AutoBreak;
+        var makeDialog = _config.MergeLinesWithSameTimeCodes.MergeDialog;
+        var singleMergeSubtitles = new List<Paragraph>();
+        var mergedText = string.Empty;
+
+        for (var i = 1; i < subtitle.Paragraphs.Count; i++)
+        {
+            var p = subtitle.Paragraphs[i - 1];
+
+            var next = subtitle.Paragraphs[i];
+            if (MergeSameTimeCodesViewModel.QualifiesForMerge(new SubtitleLineViewModel(p), next, _config.MergeLinesWithSameTimeCodes.MaxMillisecondsDifference))
+            {
+                if (!singleMergeSubtitles.Contains(p))
+                {
+                    singleMergeSubtitles.Add(p);
+                }
+
+                if (!singleMergeSubtitles.Contains(next))
+                {
+                    singleMergeSubtitles.Add(next);
+                }
+
+                var nextText = next.Text
+                    .Replace("{\\an1}", string.Empty)
+                    .Replace("{\\an2}", string.Empty)
+                    .Replace("{\\an3}", string.Empty)
+                    .Replace("{\\an4}", string.Empty)
+                    .Replace("{\\an5}", string.Empty)
+                    .Replace("{\\an6}", string.Empty)
+                    .Replace("{\\an7}", string.Empty)
+                    .Replace("{\\an8}", string.Empty)
+                    .Replace("{\\an9}", string.Empty);
+
+                mergedText = p.Text;
+                if (mergedText.StartsWith("<i>", StringComparison.Ordinal) && mergedText.EndsWith("</i>", StringComparison.Ordinal) && nextText.StartsWith("<i>", StringComparison.Ordinal) && nextText.EndsWith("</i>", StringComparison.Ordinal))
+                {
+                    mergedText = MergeSameTimeCodesViewModel.GetMergedLines(mergedText.Remove(mergedText.Length - 4), nextText.Remove(0, 3), makeDialog);
+                }
+                else
+                {
+                    mergedText = MergeSameTimeCodesViewModel.GetMergedLines(mergedText, nextText, makeDialog);
+                }
+
+                if (reBreak)
+                {
+                    mergedText = Utilities.AutoBreakLine(mergedText, language);
+                }
+            }
+            else
+            {
+                if (singleMergeSubtitles.Count > 0)
+                {
+                    singleMergeSubtitles.Clear();
+                    mergedText = string.Empty;
+                }
+            }
         }
 
         return subtitle;
@@ -386,7 +446,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                     continue;
                 }
 
-                var next= subtitle.Paragraphs[j];
+                var next = subtitle.Paragraphs[j];
                 var incrementText = string.Empty;
                 if ((MergeLinesSameTextUtils.QualifiesForMerge(p, next, maxMsBetween) ||
                      fixIncrementing && MergeLinesSameTextUtils.QualifiesForMergeIncrement(p, next, maxMsBetween, out incrementText)))

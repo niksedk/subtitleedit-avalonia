@@ -176,7 +176,7 @@ public partial class MergeSameTimeCodesViewModel : ObservableObject
         IsOkEnabled = MergeItems.Count > 0;
     }
 
-    private static string GetMergedLines(string line1, string line2, bool makeDialog)
+    public static string GetMergedLines(string line1, string line2, bool makeDialog)
     {
         if (makeDialog)
         {
@@ -198,7 +198,7 @@ public partial class MergeSameTimeCodesViewModel : ObservableObject
         }
     }
 
-    private static bool QualifiesForMerge(SubtitleLineViewModel p, SubtitleLineViewModel next, int maxMsBetween)
+    public static bool QualifiesForMerge(SubtitleLineViewModel p, SubtitleLineViewModel next, int maxMsBetween)
     {
         if (p == null || next == null)
         {
