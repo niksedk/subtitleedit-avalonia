@@ -171,10 +171,12 @@ public class BatchConvertConfig
     public class MergeLinesWithSameTextsSettings
     {
         public bool IsActive { get; set; }
+        public int MaxMillisecondsBetweenLines { get; set; }
+        public bool IncludeIncrementingLines { get; set; }
 
         public MergeLinesWithSameTextsSettings()
         {
+            MaxMillisecondsBetweenLines = 100;
         }
     }
 }
-

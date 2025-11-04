@@ -14,8 +14,6 @@ namespace Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameText;
 
 public class MergeSameTextWindow : Window
 {
-    private readonly MergeSameTextViewModel _vm;
-
     public MergeSameTextWindow(MergeSameTextViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -25,8 +23,6 @@ public class MergeSameTextWindow : Window
         Height = 800;
         MinWidth = 600;
         MinHeight = 400;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 

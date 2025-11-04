@@ -47,7 +47,8 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         {
             if (format.Name == _config.TargetFormatName && item.Subtitle != null)
             {
-                item.Status = Se.Language.General.ConvertingDotDotDot; ;
+                item.Status = Se.Language.General.ConvertingDotDotDot;
+                ;
                 try
                 {
                     var processedSubtitle = await RunConvertFunctions(item, cancellationToken);
@@ -324,7 +325,8 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         Configuration.Settings.Tools.OllamaApiUrl = Se.Settings.AutoTranslate.OllamaUrl;
         Configuration.Settings.Tools.OllamaModel = Se.Settings.AutoTranslate.OllamaModel;
         var doAutoTranslate = new DoAutoTranslate();
-        var translatedSubtitle = await doAutoTranslate.DoTranslate(subtitle, _config.AutoTranslate.SourceLanguage, _config.AutoTranslate.TargetLanguage, _config.AutoTranslate.Translator, default);
+        var translatedSubtitle = await doAutoTranslate.DoTranslate(subtitle, _config.AutoTranslate.SourceLanguage, _config.AutoTranslate.TargetLanguage,
+            _config.AutoTranslate.Translator, default);
 
         for (var i = 0; i < subtitle.Paragraphs.Count && i < translatedSubtitle.Count; i++)
         {
@@ -346,7 +348,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
 
     private Subtitle MergeLinesWithSameTimeCodes(Subtitle subtitle)
     {
-        if (!_config.RemoveTextForHearingImpaired.IsActive)
+        if (!_config.MergeLinesWithSameTimeCodes.IsActive)
         {
             return subtitle;
         }
@@ -357,20 +359,83 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
 
     private Subtitle MergeLinesWithSameText(Subtitle subtitle)
     {
-        if (!_config.RemoveTextForHearingImpaired.IsActive)
+        if (!_config.MergeLinesWithSameTexts.IsActive)
         {
             return subtitle;
+        }
+
+        var mergedIndexes = new List<int>();
+        var removed = new HashSet<int>();
+        var maxMsBetween = _config.MergeLinesWithSameTexts.MaxMillisecondsBetweenLines;
+        var fixIncrementing = _config.MergeLinesWithSameTexts.IncludeIncrementingLines;
+        var numberOfMerges = 0;
+        Paragraph? p = null;
+        var lineNumbers = new List<int>();
+        for (var i = 1; i < subtitle.Paragraphs.Count; i++)
+        {
+            if (removed.Contains(i - 1))
+            {
+                continue;
+            }
+
+            p = subtitle.Paragraphs[i - 1];
+
+            for (var j = i; j < subtitle.Paragraphs.Count; j++)
+            {
+                if (removed.Contains(j))
+                {
+                    continue;
+                }
+
+                var next= subtitle.Paragraphs[j];
+                var incrementText = string.Empty;
+                if ((MergeLinesSameTextUtils.QualifiesForMerge(p, next, maxMsBetween) ||
+                     fixIncrementing && MergeLinesSameTextUtils.QualifiesForMergeIncrement(p, next, maxMsBetween, out incrementText)))
+                {
+                    p.Text = next.Text;
+                    p.EndTime.TotalMilliseconds = next.EndTime.TotalMilliseconds;
+                    if (!string.IsNullOrEmpty(incrementText))
+                    {
+                        p.Text = incrementText;
+                    }
+
+                    if (lineNumbers.Count > 0)
+                    {
+                        lineNumbers.Add(next.Number);
+                    }
+                    else
+                    {
+                        lineNumbers.Add(p.Number);
+                        lineNumbers.Add(next.Number);
+                    }
+
+                    removed.Add(j);
+                    numberOfMerges++;
+                    if (!mergedIndexes.Contains(j))
+                    {
+                        mergedIndexes.Add(j);
+                    }
+
+                    if (!mergedIndexes.Contains(i - 1))
+                    {
+                        mergedIndexes.Add(i - 1);
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
         }
 
         return subtitle;
     }
 
-
     private string MakeOutputFileName(BatchConvertItem item, SubtitleFormat format)
     {
         var outputFolder = _config.SaveInSourceFolder || string.IsNullOrEmpty(_config.OutputFolder)
-                ? Path.GetDirectoryName(item.FileName)
-                : _config.OutputFolder;
+            ? Path.GetDirectoryName(item.FileName)
+            : _config.OutputFolder;
         if (string.IsNullOrEmpty(outputFolder))
         {
             throw new InvalidOperationException("Output folder is not set");
@@ -408,7 +473,6 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
 
     public void AddFixToListView(Paragraph p, string action, string before, string after)
     {
-
     }
 
     public void AddFixToListView(Paragraph p, string action, string before, string after, bool isChecked)

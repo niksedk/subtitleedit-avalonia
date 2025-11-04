@@ -12,7 +12,6 @@ using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Features.Translate;
-using Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
@@ -25,7 +24,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Core.AudioToText;
 using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
@@ -111,9 +109,13 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private string _autoTranslateModelText;
     [ObservableProperty] private bool _autoTranslateModelIsVisible;
     [ObservableProperty] private bool _autoTranslateModelBrowseIsVisible;
-    
+
     // Fix common errors
     [ObservableProperty] private FixCommonErrors.ProfileDisplayItem? _fixCommonErrorsProfile;
+
+    // Merge lines with same text
+    [ObservableProperty] private int _mergeSameTextMaxMillisecondsBetweenLines;
+    [ObservableProperty] private bool _mergeSameTextIncludeIncrementingLines;
 
     public Window? Window { get; set; }
 
@@ -200,8 +202,8 @@ public partial class BatchConvertViewModel : ObservableObject
         SelectedToFrameRate = ToFrameRates[1];
 
         ChangeSpeedPercent = 100;
-        
-        FixCommonErrorsProfile  = LoadDefaultProfile();
+
+        FixCommonErrorsProfile = LoadDefaultProfile();
 
         LoadSettings();
     }
@@ -231,7 +233,7 @@ public partial class BatchConvertViewModel : ObservableObject
 
             displayProfiles.Add(profile);
         }
-        
+
         return displayProfiles.First();
     }
 
@@ -294,6 +296,7 @@ public partial class BatchConvertViewModel : ObservableObject
         {
             targetFormat = TargetFormats.First();
         }
+
         SelectedTargetFormat = targetFormat;
 
         SelectedAdjustType = AdjustTypes.First();
@@ -317,11 +320,13 @@ public partial class BatchConvertViewModel : ObservableObject
         {
             SelectedAutoTranslator = translator;
         }
+
         var sourceLanguage = SourceLanguages.FirstOrDefault(p => p.TwoLetterIsoLanguageName == Se.Settings.Tools.BatchConvert.AutoTranslateSourceLanguage);
         if (sourceLanguage != null)
         {
             SelectedSourceLanguage = sourceLanguage;
         }
+
         var defaultTarget = AutoTranslateViewModel.EvaluateDefaultTargetLanguageCode(string.Empty, SelectedSourceLanguage?.Code ?? string.Empty);
         SelectedTargetLanguage = TargetLanguages.FirstOrDefault(p => p.TwoLetterIsoLanguageName == defaultTarget);
         var targetLanguage = TargetLanguages.FirstOrDefault(p => p.TwoLetterIsoLanguageName == Se.Settings.Tools.BatchConvert.AutoTranslateTargetLanguage);
@@ -352,6 +357,9 @@ public partial class BatchConvertViewModel : ObservableObject
         NormalCasingOnlyUpper = Se.Settings.Tools.BatchConvert.NormalCasingOnlyUpper;
 
         UpdateOutputProperties();
+
+        MergeSameTextMaxMillisecondsBetweenLines = Se.Settings.Tools.MergeSameText.MaxMillisecondsBetweenLines;
+        MergeSameTextIncludeIncrementingLines = Se.Settings.Tools.MergeSameText.IncludeIncrementingLines;
     }
 
     private void UpdateOutputProperties()
@@ -474,10 +482,8 @@ public partial class BatchConvertViewModel : ObservableObject
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<BatchConvertFixCommonErrorsSettingsWindow, BatchConvertFixCommonErrorsSettingsViewModel>(Window!, vm => 
-        { 
-            vm.Initialize(FixCommonErrorsProfile); 
-        });
+        var result = await _windowService.ShowDialogAsync<BatchConvertFixCommonErrorsSettingsWindow, BatchConvertFixCommonErrorsSettingsViewModel>(Window!,
+            vm => { vm.Initialize(FixCommonErrorsProfile); });
 
         if (result.OkPressed && result.SelectedProfile != null)
         {
@@ -551,10 +557,8 @@ public partial class BatchConvertViewModel : ObservableObject
     [RelayCommand]
     private async Task AutoTranslateBrowseModel()
     {
-        var result = await _windowService.ShowDialogAsync<PickOllamaModelWindow, PickOllamaModelViewModel>(Window!, vm =>
-        {
-            vm.Initialize(Se.Language.General.PickOllamaModel, Se.Settings.AutoTranslate.OllamaModel, Se.Settings.AutoTranslate.OllamaUrl);
-        });
+        var result = await _windowService.ShowDialogAsync<PickOllamaModelWindow, PickOllamaModelViewModel>(Window!,
+            vm => { vm.Initialize(Se.Language.General.PickOllamaModel, Se.Settings.AutoTranslate.OllamaModel, Se.Settings.AutoTranslate.OllamaUrl); });
 
         if (result is { OkPressed: true, SelectedModel: not null })
         {
@@ -664,7 +668,7 @@ public partial class BatchConvertViewModel : ObservableObject
                 NormalCasingOnlyUpper = NormalCasingOnlyUpper,
                 NormalCasingFixNames = NormalCasingFixNames,
                 FixNamesOnly = FixNamesOnly,
-                AllLowercase = AllLowercase,    
+                AllLowercase = AllLowercase,
                 AllUppercase = AllUppercase,
             },
 
@@ -693,6 +697,13 @@ public partial class BatchConvertViewModel : ObservableObject
             {
                 IsActive = activeFunctions.Contains(BatchConvertFunctionType.FixCommonErrors),
                 Profile = FixCommonErrorsProfile,
+            },
+
+            MergeLinesWithSameTexts = new BatchConvertConfig.MergeLinesWithSameTextsSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.MergeLinesWithSameText), 
+                IncludeIncrementingLines = MergeSameTextIncludeIncrementingLines,
+                MaxMillisecondsBetweenLines = MergeSameTextMaxMillisecondsBetweenLines,
             },
 
             OffsetTimeCodes = new BatchConvertConfig.OffsetTimeCodesSettings

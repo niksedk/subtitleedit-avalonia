@@ -187,7 +187,6 @@ public partial class MergeSameTextViewModel : ObservableObject
 
     private void LoadSettings()
     {
-
         MaxMillisecondsBetweenLines = Se.Settings.Tools.MergeSameText.MaxMillisecondsBetweenLines;
         IncludeIncrementingLines = Se.Settings.Tools.MergeSameText.IncludeIncrementingLines;
     }
