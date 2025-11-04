@@ -25,6 +25,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Core.AudioToText;
 using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
@@ -210,7 +211,7 @@ public partial class BatchConvertViewModel : ObservableObject
         var profiles = Se.Settings.Tools.FixCommonErrors.Profiles;
         var displayProfiles = new List<FixCommonErrors.ProfileDisplayItem>();
         var defaultName = Se.Settings.Tools.FixCommonErrors.LastProfileName;
-        List<FixRuleDisplayItem> allFixRules = FixCommonErrorsViewModel.MakeDefaultRules();
+        var allFixRules = FixCommonErrorsViewModel.MakeDefaultRules();
 
         foreach (var setting in profiles)
         {
@@ -477,6 +478,11 @@ public partial class BatchConvertViewModel : ObservableObject
         { 
             vm.Initialize(FixCommonErrorsProfile); 
         });
+
+        if (result.OkPressed && result.SelectedProfile != null)
+        {
+            FixCommonErrorsProfile = result.SelectedProfile;
+        }
     }
 
     [RelayCommand]

@@ -6,7 +6,6 @@ using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
-using Nikse.SubtitleEdit.Features.Video.TextToSpeech.EncodingSettings;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -14,8 +13,6 @@ namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
 public class BatchConvertFixCommonErrorsSettingsWindow : Window
 {
-    private readonly BatchConvertFixCommonErrorsSettingsViewModel _vm;
-
     public BatchConvertFixCommonErrorsSettingsWindow(BatchConvertFixCommonErrorsSettingsViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -25,7 +22,6 @@ public class BatchConvertFixCommonErrorsSettingsWindow : Window
         Height = 800;
         MinWidth = 600;
         MinHeight = 400;
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -33,6 +29,7 @@ public class BatchConvertFixCommonErrorsSettingsWindow : Window
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
+        var comboProfile = UiUtil.MakeComboBox(vm.Profiles, vm, nameof(vm.SelectedProfile));
         var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
         var grid = new Grid
@@ -54,6 +51,7 @@ public class BatchConvertFixCommonErrorsSettingsWindow : Window
         };
 
         grid.Add(rulesView, 0, 0);
+        grid.Add(comboProfile, 1, 0);   
         grid.Add(panelButtons, 1, 0);
         Content = grid;
 
@@ -73,7 +71,7 @@ public class BatchConvertFixCommonErrorsSettingsWindow : Window
             VerticalAlignment = VerticalAlignment.Stretch,
             Width = double.NaN,
             Height = double.NaN,
-            [!DataGrid.ItemsSourceProperty] = new Binding($"{nameof(vm.FixCommonErrorsProfile)}.{nameof(ProfileDisplayItem.FixRules)}"),
+            [!DataGrid.ItemsSourceProperty] = new Binding($"{nameof(vm.SelectedProfile)}.{nameof(ProfileDisplayItem.FixRules)}"),
             IsReadOnly = false,
             Columns =
             {

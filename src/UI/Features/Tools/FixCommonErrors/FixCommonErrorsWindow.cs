@@ -194,11 +194,9 @@ public class FixCommonErrorsWindow : Window
         Grid.SetRow(buttonPanelRules, 2);
         Grid.SetColumn(buttonPanelRules, 0);
 
-
         grid.Children.Add(buttonPanelRight);
         Grid.SetRow(buttonPanelRight, 2);
         Grid.SetColumn(buttonPanelRight, 1);
-
 
         Content = grid;
 

@@ -1,5 +1,4 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Core.ContainerFormats;
 using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
@@ -73,7 +72,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         Language = LanguageAutoDetect.AutoDetectGoogleLanguageOrNull(s) ?? "en";
         s = AdjustDisplayDuration(s);
         s = await AutoTranslate(s, cancellationToken);
-        s = ChangeCasing(s);
+        s = ChangeCasing(s, Language);
         s = ChangeFrameRate(s);
         s = ChangeSpeed(s);
         s = DeleteLines(s);
@@ -202,14 +201,13 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
     }
 
 
-    private Subtitle ChangeCasing(Subtitle subtitle)
+    private Subtitle ChangeCasing(Subtitle subtitle, string language)
     {
         if (!_config.ChangeCasing.IsActive)
         {
             return subtitle;
         }
 
-        var language = LanguageAutoDetect.AutoDetectGoogleLanguage(subtitle);
         var fixCasing = new FixCasing(language)
         {
             FixNormal = _config.ChangeCasing.NormalCasing,
