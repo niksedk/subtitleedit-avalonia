@@ -150,11 +150,11 @@ public class CutVideoWindow : Window
         dataGridSubtitle.SelectionChanged += vm.SegmentsGridChanged;
         vm.SegmentGrid = dataGridSubtitle;
 
-
         var buttonAdd = UiUtil.MakeButton(Se.Language.General.Add, vm.AddCommand);
         var buttonSetStart = UiUtil.MakeButton(Se.Language.General.SetStart, vm.SetStartCommand).WithBindIsEnabled(nameof(vm.IsSetStartEnabled));
         var buttonSetEnd = UiUtil.MakeButton(Se.Language.General.SetEnd, vm.SetEndCommand).WithBindIsEnabled(nameof(vm.IsSetEndEnabled));
         var buttonDelete = UiUtil.MakeButton(Se.Language.General.Delete, vm.DeleteCommand).WithBindIsEnabled(nameof(vm.IsDeleteEnabled));
+        var buttonImport = UiUtil.MakeButton(Se.Language.General.ImportDotDotDot, vm.ImportCommand);
 
         var panelButtons = new StackPanel
         {
@@ -165,6 +165,7 @@ public class CutVideoWindow : Window
                 buttonSetStart,
                 buttonSetEnd,
                 buttonDelete,
+                buttonImport,
             },
         };
 

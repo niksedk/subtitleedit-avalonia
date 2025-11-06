@@ -504,6 +504,39 @@ public partial class CutVideoViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task Import()
+    {
+        var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, Se.Language.General.OpenSubtitleFileTitle);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        var subtitle = Subtitle.Parse(fileName);
+        if (subtitle == null || subtitle.Paragraphs.Count == 0)
+        {
+            await MessageBox.Show(
+                Window!,
+                Se.Language.General.Error,
+                "The selected subtitle file contains no subtitles.",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+            return;
+        }
+
+        foreach (var p in subtitle.Paragraphs)
+        {
+            var segment = new SubtitleLineViewModel(p, _subtitleFormat ?? new SubRip());
+            _insertService.InsertInCorrectPosition(Segments, segment);
+        }
+
+        Renumber();
+        SelectAndScrollToRow(0);
+        _updateAudioVisualizer = true;
+    }
+
+
+    [RelayCommand]
     private void Delete()
     {
         var segment = SelectedSegment;
