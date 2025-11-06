@@ -28,6 +28,7 @@ public class BatchConvertConfig
     public RemoveTextForHearingImpairedSettings RemoveTextForHearingImpaired { get; set; }
     public MergeLinesWithSameTimeCodesSettings MergeLinesWithSameTimeCodes { get; set; }
     public MergeLinesWithSameTextsSettings MergeLinesWithSameTexts { get; set; }
+    public MultipleReplaceSettings MultipleReplace { get; set; }
 
     public BatchConvertConfig()
     {
@@ -164,8 +165,8 @@ public class BatchConvertConfig
         public bool IsActive { get; set; }
         public int MaxMillisecondsDifference { get; set; }
         public bool MergeDialog { get; set; }
-        public bool AutoBreak { get; set; }                               
-        
+        public bool AutoBreak { get; set; }
+
         public MergeLinesWithSameTimeCodesSettings()
         {
             MaxMillisecondsDifference = 250;
@@ -182,5 +183,10 @@ public class BatchConvertConfig
         {
             MaxMillisecondsBetweenLines = 100;
         }
+    }
+
+    public class MultipleReplaceSettings
+    {
+        public bool IsActive { get; set; }
     }
 }

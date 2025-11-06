@@ -38,12 +38,27 @@ public class BatchConvertWindow : Window
         var labelFunctionsSelected = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.ActionsSelected))
             .WithAlignmentTop();
 
-        var buttonConvert = UiUtil.MakeButton(Se.Language.General.Convert, vm.ConvertCommand);
-        var buttonStatistics = UiUtil.MakeButton(Se.Language.File.Statistics.Title, vm.StatisticsCommand);
+        var buttonConvert = new SplitButton
+        {
+            Content = Se.Language.General.Convert,
+            Command = vm.ConvertCommand,
+            Flyout = new MenuFlyout
+            {
+                Items =
+                {
+                    new MenuItem
+                    {
+                        Header = Se.Language.File.Statistics.Title,
+                        Command = vm.StatisticsCommand,
+                    },
+                }
+            }
+        };
+        buttonConvert.Bind(SplitButton.IsEnabledProperty, new Binding(nameof(vm.IsConverting)) { Converter = new InverseBooleanConverter() });
+
         var buttonDone = UiUtil.MakeButtonDone(vm.DoneCommand);
         var buttonPanel = UiUtil.MakeButtonBar(
             buttonConvert,
-            buttonStatistics,
             buttonDone
         );
 

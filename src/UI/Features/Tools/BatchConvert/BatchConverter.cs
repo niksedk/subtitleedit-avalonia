@@ -5,7 +5,6 @@ using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameTimeCodes;
-using Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Collections.Generic;
@@ -52,13 +51,12 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             if (format.Name == _config.TargetFormatName && item.Subtitle != null)
             {
                 item.Status = Se.Language.General.ConvertingDotDotDot;
-                ;
                 try
                 {
                     var processedSubtitle = await RunConvertFunctions(item, cancellationToken);
                     var converted = format.ToText(processedSubtitle, _config.TargetEncoding);
                     var path = MakeOutputFileName(item, format);
-                    await File.WriteAllTextAsync(path, converted);
+                    await File.WriteAllTextAsync(path, converted, cancellationToken);
                     item.Status = Se.Language.General.Converted;
                 }
                 catch (Exception exception)
@@ -84,11 +82,22 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         s = FixCommonErrors(s);
         s = MergeLinesWithSameText(s);
         s = MergeLinesWithSameTimeCodes(s, Language);
+        s = MultipleReplace(s);
         s = OffsetTimeCodes(s);
         s = RemoveFormatting(s);
         s = RemoveLineBreaks(s);
         s = RemoveTextForHearingImpaired(s, Language);
         return s;
+    }
+
+    private Subtitle MultipleReplace(Subtitle subtitle)
+    {
+        if (!_config.MultipleReplace.IsActive)
+        {
+            return subtitle;
+        }
+        
+        return subtitle;    
     }
 
     private Subtitle RemoveFormatting(Subtitle subtitle)

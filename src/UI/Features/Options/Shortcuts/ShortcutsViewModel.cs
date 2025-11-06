@@ -175,7 +175,7 @@ public partial class ShortcutsViewModel : ObservableObject
         if (shortCut.Keys.Count > 0)
         {
             var keys = shortCut.Keys.Select(k => ShortcutManager.GetKeyDisplayName(k)).ToList();
-            return "[" + string.Join(" + ", keys) + "]";
+            return string.Join(" + ", keys);
         }
 
         return string.Empty;
