@@ -72,6 +72,7 @@ public partial class CutVideoViewModel : ObservableObject
     private string _inputVideoFileName;
     private bool _updateAudioVisualizer;
     private DispatcherTimer _positionTimer = new DispatcherTimer();
+    private string _importFileName;
 
     private readonly IWindowService _windowService;
     private readonly IFolderHelper _folderHelper;
@@ -116,7 +117,7 @@ public partial class CutVideoViewModel : ObservableObject
         _timerGenerate = new();
         _timerGenerate.Elapsed += TimerGenerateElapsed;
         _timerGenerate.Interval = 100;
-
+        _importFileName = string.Empty; 
         _inputVideoFileName = string.Empty;
         UpdateSelection();
         LoadSettings();
@@ -524,6 +525,7 @@ public partial class CutVideoViewModel : ObservableObject
             return;
         }
 
+        _importFileName = fileName;
         foreach (var p in subtitle.Paragraphs)
         {
             var segment = new SubtitleLineViewModel(p, _subtitleFormat ?? new SubRip());
