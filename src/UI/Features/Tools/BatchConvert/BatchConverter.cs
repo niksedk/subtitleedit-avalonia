@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -27,10 +28,13 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
 
     public string Language { get; set; } = "en";
 
+    private readonly Dictionary<string, Regex> _compiledRegExList;
+
     public BatchConverter()
     {
         _config = new BatchConvertConfig();
         _subtitleFormats = new List<SubtitleFormat>();
+        _compiledRegExList = new Dictionary<string, Regex>();
     }
 
     public void Initialize(BatchConvertConfig config)
@@ -96,8 +100,82 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         {
             return subtitle;
         }
-        
-        return subtitle;    
+
+        var replaceExpressions = BuildReplaceExpressions();
+        for (var i = 0; i < subtitle.Paragraphs.Count; i++)
+        {
+            var p = subtitle.Paragraphs[i];
+            var hit = false;
+            var newText = p.Text;
+            var ruleInfo = string.Empty;
+            foreach (var item in replaceExpressions)
+            {
+                if (item.SearchType == ReplaceExpression.SearchCaseSensitive)
+                {
+                    if (newText.Contains(item.FindWhat))
+                    {
+                        hit = true;
+                        ruleInfo = string.IsNullOrEmpty(ruleInfo) ? item.RuleInfo : $"{ruleInfo} + {item.RuleInfo}";
+                        newText = newText.Replace(item.FindWhat, item.ReplaceWith);
+                    }
+                }
+                else if (item.SearchType == ReplaceExpression.SearchRegEx)
+                {
+                    var r = _compiledRegExList[item.FindWhat];
+                    if (r.IsMatch(newText))
+                    {
+                        hit = true;
+                        ruleInfo = string.IsNullOrEmpty(ruleInfo) ? item.RuleInfo : $"{ruleInfo} + {item.RuleInfo}";
+                        newText = RegexUtils.ReplaceNewLineSafe(r, newText, item.ReplaceWith);
+                    }
+                }
+                else
+                {
+                    var index = newText.IndexOf(item.FindWhat, StringComparison.OrdinalIgnoreCase);
+                    if (index >= 0)
+                    {
+                        hit = true;
+                        ruleInfo = string.IsNullOrEmpty(ruleInfo) ? item.RuleInfo : $"{ruleInfo} + {item.RuleInfo}";
+                        do
+                        {
+                            newText = newText.Remove(index, item.FindWhat.Length).Insert(index, item.ReplaceWith);
+                            index = newText.IndexOf(item.FindWhat, index + item.ReplaceWith.Length,
+                                StringComparison.OrdinalIgnoreCase);
+                        } while (index >= 0);
+                    }
+                }
+            }
+
+            if (hit && newText != p.Text)
+            {
+                p.Text = newText;
+            }
+        }
+
+        return subtitle;
+    }
+
+    private HashSet<ReplaceExpression> BuildReplaceExpressions()
+    {
+        var replaceExpressions = new HashSet<ReplaceExpression>();
+        foreach (var category in Se.Settings.Edit.MultipleReplace.Categories.Where(p => p.IsActive))
+        {
+            foreach (var rule in category.Rules.Where(p => p.Active && !string.IsNullOrEmpty(p.Find)))
+            {
+                var findWhat = RegexUtils.FixNewLine(rule.Find);
+                var replaceWith = RegexUtils.FixNewLine(rule.ReplaceWith);
+
+                var mpi = new ReplaceExpression(findWhat, replaceWith, rule.Type.ToString(), category.Name + ": " + rule.Description);
+                replaceExpressions.Add(mpi);
+                if (mpi.SearchType == ReplaceExpression.SearchRegEx && !_compiledRegExList.ContainsKey(findWhat))
+                {
+                    _compiledRegExList.Add(findWhat,
+                        new Regex(findWhat, RegexOptions.Compiled | RegexOptions.Multiline));
+                }
+            }
+        }
+
+        return replaceExpressions;
     }
 
     private Subtitle RemoveFormatting(Subtitle subtitle)
@@ -417,7 +495,8 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             var p = subtitle.Paragraphs[i - 1];
 
             var next = subtitle.Paragraphs[i];
-            if (MergeSameTimeCodesViewModel.QualifiesForMerge(new SubtitleLineViewModel(p, subtitle.OriginalFormat), new SubtitleLineViewModel(next, subtitle.OriginalFormat), _config.MergeLinesWithSameTimeCodes.MaxMillisecondsDifference))
+            if (MergeSameTimeCodesViewModel.QualifiesForMerge(new SubtitleLineViewModel(p, subtitle.OriginalFormat), new SubtitleLineViewModel(next, subtitle.OriginalFormat),
+                    _config.MergeLinesWithSameTimeCodes.MaxMillisecondsDifference))
             {
                 if (!singleMergeSubtitles.Contains(p))
                 {
@@ -441,7 +520,8 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                     .Replace("{\\an9}", string.Empty);
 
                 mergedText = p.Text;
-                if (mergedText.StartsWith("<i>", StringComparison.Ordinal) && mergedText.EndsWith("</i>", StringComparison.Ordinal) && nextText.StartsWith("<i>", StringComparison.Ordinal) && nextText.EndsWith("</i>", StringComparison.Ordinal))
+                if (mergedText.StartsWith("<i>", StringComparison.Ordinal) && mergedText.EndsWith("</i>", StringComparison.Ordinal) &&
+                    nextText.StartsWith("<i>", StringComparison.Ordinal) && nextText.EndsWith("</i>", StringComparison.Ordinal))
                 {
                     mergedText = MergeSameTimeCodesViewModel.GetMergedLines(mergedText.Remove(mergedText.Length - 4), nextText.Remove(0, 3), makeDialog);
                 }
