@@ -31,6 +31,7 @@ public class SourceViewWindow : Window
             [!TextBox.TextProperty] = new Binding(nameof(vm.Text)) { Mode = BindingMode.TwoWay },
             VerticalAlignment = VerticalAlignment.Stretch,
             HorizontalAlignment = HorizontalAlignment.Stretch,
+            AcceptsReturn = true,
         };
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
