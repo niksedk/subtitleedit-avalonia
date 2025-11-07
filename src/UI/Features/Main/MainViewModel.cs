@@ -1869,7 +1869,7 @@ public partial class MainViewModel :
         }
 
         var result = await ShowDialogAsync<CutVideoWindow, CutVideoViewModel>(
-            vm => { vm.Initialize(_videoFileName, AudioVisualizer?.WavePeaks, SelectedSubtitleFormat); });
+            vm => { vm.Initialize(_videoFileName, AudioVisualizer?.WavePeaks, GetUpdateSubtitle(), SelectedSubtitleFormat); });
 
         if (!result.OkPressed)
         {

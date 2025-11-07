@@ -154,7 +154,22 @@ public class CutVideoWindow : Window
         var buttonSetStart = UiUtil.MakeButton(Se.Language.General.SetStart, vm.SetStartCommand).WithBindIsEnabled(nameof(vm.IsSetStartEnabled));
         var buttonSetEnd = UiUtil.MakeButton(Se.Language.General.SetEnd, vm.SetEndCommand).WithBindIsEnabled(nameof(vm.IsSetEndEnabled));
         var buttonDelete = UiUtil.MakeButton(Se.Language.General.Delete, vm.DeleteCommand).WithBindIsEnabled(nameof(vm.IsDeleteEnabled));
-        var buttonImport = UiUtil.MakeButton(Se.Language.General.ImportDotDotDot, vm.ImportCommand);
+        var buttonImport = new SplitButton
+        {
+            Content = Se.Language.General.ImportDotDotDot,
+            Command = vm.ImportCommand,
+            Flyout = new MenuFlyout
+            {
+                Items =
+                {
+                    new MenuItem
+                    {
+                        Header = Se.Language.Video.ImportCurrentSubtitle,
+                        Command = vm.ImportCurrentCommand,
+                    },
+                }
+            }
+        };
 
         var panelButtons = new StackPanel
         {

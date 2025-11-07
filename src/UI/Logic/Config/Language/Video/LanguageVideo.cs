@@ -26,6 +26,7 @@ public class LanguageVideo
     public string MpvRenderNative { get; set; }
     public string MpvRenderOpenGl { get; set; }
     public string MpvRenderSoftware { get; set; }
+    public string ImportCurrentSubtitle { get; set; }
 
     public LanguageVideo()
     {
@@ -49,5 +50,6 @@ public class LanguageVideo
         MpvRenderNative = "Native";
         MpvRenderOpenGl = "OpenGL";
         MpvRenderSoftware = "Software (slow)";
+        ImportCurrentSubtitle = "Import current subtitle";
     }
 }

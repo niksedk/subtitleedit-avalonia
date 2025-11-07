@@ -44,7 +44,7 @@ public partial class CutVideoViewModel : ObservableObject
     [ObservableProperty] private bool _isGenerating;
     [ObservableProperty] private bool _isAudioVisualizerVisible;
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _segments;
-    [ObservableProperty] private SubtitleLineViewModel _selectedSegment;
+    [ObservableProperty] private SubtitleLineViewModel? _selectedSegment;
     [ObservableProperty] private int _selectedSegmentIndex;
     [ObservableProperty] private ObservableCollection<CutTypeDisplay> _cutTypes;
     [ObservableProperty] private CutTypeDisplay _selectedCutType;
@@ -73,6 +73,7 @@ public partial class CutVideoViewModel : ObservableObject
     private bool _updateAudioVisualizer;
     private DispatcherTimer _positionTimer = new DispatcherTimer();
     private string _importFileName;
+    private Subtitle _currentSubtitle;
 
     private readonly IWindowService _windowService;
     private readonly IFolderHelper _folderHelper;
@@ -111,22 +112,23 @@ public partial class CutVideoViewModel : ObservableObject
         VideoFileName = string.Empty;
         VideoFileSize = string.Empty;
         ProgressText = string.Empty;
-        SelectedSegment = new SubtitleLineViewModel();
 
         _log = new StringBuilder();
         _timerGenerate = new();
         _timerGenerate.Elapsed += TimerGenerateElapsed;
         _timerGenerate.Interval = 100;
-        _importFileName = string.Empty; 
+        _importFileName = string.Empty;
         _inputVideoFileName = string.Empty;
+        _currentSubtitle = new Subtitle();
         UpdateSelection();
         LoadSettings();
     }
 
-    public void Initialize(string videoFileName, WavePeakData2? wavePeakData, SubtitleFormat subtitleFormat)
+    public void Initialize(string videoFileName, WavePeakData2? wavePeakData, Subtitle subtitle, SubtitleFormat subtitleFormat)
     {
         VideoFileName = videoFileName;
         _inputVideoFileName = videoFileName;
+        _currentSubtitle = subtitle;
         _subtitleFormat = subtitleFormat;
 
         _ffmpegListKeyFramesProcess = FfmpegGenerator.ListKeyFrames(videoFileName, OutputHandlerKeyFrames);
@@ -537,12 +539,25 @@ public partial class CutVideoViewModel : ObservableObject
         _updateAudioVisualizer = true;
     }
 
+    [RelayCommand]
+    private void ImportCurrent()
+    {
+        foreach (var p in _currentSubtitle.Paragraphs)
+        {
+            var segment = new SubtitleLineViewModel(p, _subtitleFormat ?? new SubRip());
+            _insertService.InsertInCorrectPosition(Segments, segment);
+        }
+
+        Renumber();
+        SelectAndScrollToRow(0);
+        _updateAudioVisualizer = true;
+    }
 
     [RelayCommand]
     private void Delete()
     {
         var segment = SelectedSegment;
-        if (segment == null)
+        if (segment == null || Segments.Count == 0)
         {
             return;
         }
@@ -573,7 +588,7 @@ public partial class CutVideoViewModel : ObservableObject
     private void SetStart()
     {
         var segment = SelectedSegment;
-        if (segment == null)
+        if (segment == null || Segments.Count == 0)
         {
             return;
         }
@@ -588,7 +603,7 @@ public partial class CutVideoViewModel : ObservableObject
     private void SetEnd()
     {
         var segment = SelectedSegment;
-        if (segment == null)
+        if (segment == null || Segments.Count == 0)
         {
             return;
         }
