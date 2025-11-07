@@ -503,6 +503,8 @@ public class LanguageGeneral
     public string DeleteLinesContainingText { get; set; }
     public string DeleteFirstLines { get; internal set; }
     public string DeleteLastLines { get; internal set; }
+    public string SourceViewX { get; set; }
+    public string LineXColumnY { get; set; }
 
     public LanguageGeneral()
     {
@@ -1005,5 +1007,7 @@ public class LanguageGeneral
         DeleteLinesContainingText = "Delete lines containing text";
         DeleteFirstLines = "Delete first lines";
         DeleteLastLines = "Delete last lines";
+        SourceViewX = "Source view - {0}";
+        LineXColumnY = "Line {0}, Column {1}";
     }
 }

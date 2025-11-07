@@ -33,11 +33,14 @@ public class SourceViewWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
             AcceptsReturn = true,
         };
+        vm.SourceViewTextBox = textBox;
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);   
         var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
-        
+
+        var labelCursorPosition = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.LineAndColumnInfo)).WithAlignmentTop();
+
         var grid = new Grid
         {
             RowDefinitions =
@@ -51,13 +54,14 @@ public class SourceViewWindow : Window
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
-            RowSpacing = 10,
+            RowSpacing = 0,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
         grid.Add(textBox, 0);
-        grid.Add(buttonPanel, 2);
+        grid.Add(labelCursorPosition, 1);
+        grid.Add(buttonPanel, 1);
 
         Content = grid;
         

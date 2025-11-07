@@ -564,18 +564,17 @@ public partial class MainViewModel :
         var result = await ShowDialogAsync<SourceViewWindow, SourceViewViewModel>(vm =>
         {
             var text = GetUpdateSubtitle().ToText(SelectedSubtitleFormat);
-            vm.Initialize(
-                "Source view - " + (string.IsNullOrEmpty(_subtitleFileName)
-                    ? "untitled"
-                    : Path.GetFileName(_subtitleFileName)), text);
+            var title = string.Format(Se.Language.General.SourceViewX, (string.IsNullOrEmpty(_subtitleFileName)
+                    ? Se.Language.General.Untitled
+                    : Path.GetFileName(_subtitleFileName)));
+            vm.Initialize(title, text, SelectedSubtitleFormat);
         });
 
         if (result.OkPressed)
         {
-            //_subtitle.Header = result.Header;
+            SetSubtitles(result.Subtitle);
         }
     }
-
 
     [RelayCommand]
     private async Task ShowAssaStyles()
