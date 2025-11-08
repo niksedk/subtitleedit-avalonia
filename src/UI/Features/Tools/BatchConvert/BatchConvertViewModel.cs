@@ -136,6 +136,19 @@ public partial class BatchConvertViewModel : ObservableObject
     private List<string> _encodings;
     private const int StatisticsNumberOfLinesToShow = 10;
 
+    private const string TargetFormatAyato = "Ayato";
+    private const string TargetFormatBdnXml = "BDN-XML";
+    private const string TargetFormatBluRaySup = "Blu-ray sup";
+    private const string TargetFormatCavena890 = "Cavena 890";
+    private const string TargetFormatCustomTextFormat = "Custom text format";
+    private const string TargetFormatDostImage = "Dost-image";
+    private const string TargetFormatFcpImage = "FCP-image";
+    private const string TargetFormatImagesWithTimeCodesInFileName = "Images with time codes in file name";
+    private const string TargetFormatPac = "PAC";
+    private const string TargetFormatPlainText = "Plain text";
+    private const string TargetFormatVobSub = "VobSub";
+
+
     public BatchConvertViewModel(IWindowService windowService, IFileHelper fileHelper, IBatchConverter batchConverter, IFolderHelper folderHelper)
     {
         _windowService = windowService;
@@ -145,7 +158,20 @@ public partial class BatchConvertViewModel : ObservableObject
 
         BatchItems = new ObservableCollection<BatchConvertItem>();
         BatchFunctions = new ObservableCollection<BatchConvertFunction>();
+        
         TargetFormats = new ObservableCollection<string>(SubtitleFormat.AllSubtitleFormats.Select(p => p.Name));
+        TargetFormats.Add(TargetFormatAyato);
+        TargetFormats.Add(TargetFormatBdnXml);
+        TargetFormats.Add(TargetFormatBluRaySup);
+        TargetFormats.Add(TargetFormatCavena890);
+        TargetFormats.Add(TargetFormatCustomTextFormat);
+        TargetFormats.Add(TargetFormatDostImage);
+        TargetFormats.Add(TargetFormatFcpImage);
+        TargetFormats.Add(TargetFormatImagesWithTimeCodesInFileName);
+        TargetFormats.Add(TargetFormatPac);
+        TargetFormats.Add(TargetFormatPlainText);
+        TargetFormats.Add(TargetFormatVobSub);
+
         DeleteLineNumbers = new ObservableCollection<int>();
         BatchItemsInfo = string.Empty;
         ProgressText = string.Empty;

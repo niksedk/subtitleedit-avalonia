@@ -156,6 +156,9 @@ public class BatchConvertWindow : Window
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedBatchItem)) { Source = vm });
 
+        var comboBoxSubtitleFormat = UiUtil.MakeComboBox(vm.TargetFormats, vm, nameof(vm.SelectedTargetFormat));
+        comboBoxSubtitleFormat.Width = 240;
+
         var panelFileControls = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -168,8 +171,8 @@ public class BatchConvertWindow : Window
                 UiUtil.MakeButton(vm.RemoveSelectedFilesCommand, IconNames.Trash, Se.Language.General.Remove).WithMarginLeft(5),
                 UiUtil.MakeButton(vm.ClearAllFilesCommand, IconNames.Close, Se.Language.General.Clear).WithMarginLeft(5),
                 UiUtil.MakeLabel(Se.Language.General.TargetFormat).WithMarginLeft(15),
-                UiUtil.MakeComboBox(vm.TargetFormats, vm, nameof(vm.SelectedTargetFormat)),
-                UiUtil.MakeButton(Se.Language.General.OutputProperties, vm.ShowOutputPropertiesCommand).WithMarginLeft(18),
+                comboBoxSubtitleFormat,
+                UiUtil.MakeButton(vm.ShowOutputPropertiesCommand, IconNames.Settings).WithMarginLeft(18).WithMarginRight(5),
                 MakeOutputPropertiesGrid(vm),
             }
         };
