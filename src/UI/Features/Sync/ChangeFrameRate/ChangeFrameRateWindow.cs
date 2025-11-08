@@ -1,7 +1,10 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
+using System.Collections.ObjectModel;
 
 namespace Nikse.SubtitleEdit.Features.Sync.ChangeFrameRate;
 
@@ -12,7 +15,7 @@ public class ChangeFrameRateWindow : Window
     public ChangeFrameRateWindow(ChangeFrameRateViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = "Change frame rate";
+        Title = Se.Language.Sync.ChangeFrameRate;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 
@@ -22,7 +25,7 @@ public class ChangeFrameRateWindow : Window
 
         var labelFromFrameRate = new Label
         {
-            Content = "From frame rate",
+            Content = Se.Language.Sync.FromFrameRate,
             VerticalAlignment = VerticalAlignment.Center,
         };
 
@@ -40,7 +43,7 @@ public class ChangeFrameRateWindow : Window
 
         var labelToFrameRate = new Label
         {
-            Content = "To frame rate",
+            Content = Se.Language.Sync.ToFrameRate,
             VerticalAlignment = VerticalAlignment.Center,
         };
 

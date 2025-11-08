@@ -18,29 +18,18 @@ namespace Nikse.SubtitleEdit.Controls
         private TextBox? _textBox;
         private ButtonSpinner? _spinner;
         private string _textBuffer = "00:00:00:000";
+        private bool _isUpdatingFromValue = false;
 
         public static readonly StyledProperty<TimeSpan> ValueProperty =
             AvaloniaProperty.Register<TimeCodeUpDown, TimeSpan>(
                 nameof(Value),
-                defaultValue: TimeSpan.Zero);
+                defaultValue: TimeSpan.Zero,
+                defaultBindingMode: Avalonia.Data.BindingMode.TwoWay);
 
         public TimeSpan Value
         {
             get => GetValue(ValueProperty);
-            set
-            {
-                var oldValue = GetValue(ValueProperty);
-                var newValue = Clamp(value);
-
-                SetValue(ValueProperty, newValue);
-                UpdateText();
-
-                // Fire the event if the value actually changed
-                if (oldValue != newValue)
-                {
-                    ValueChanged?.Invoke(this, newValue);
-                }
-            }
+            set => SetValue(ValueProperty, value);
         }
 
         public event EventHandler<TimeSpan>? ValueChanged;
@@ -49,15 +38,32 @@ namespace Nikse.SubtitleEdit.Controls
         {
             Template = CreateTemplate();
             _textBuffer = FormatTime(Value);
+        }
 
-            this.GetObservable(ValueProperty).Subscribe(newValue =>
+        protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+        {
+            base.OnPropertyChanged(change);
+
+            if (change.Property == ValueProperty)
             {
-                if (_textBox != null)
+                var newValue = (TimeSpan)change.NewValue!;
+                var clampedValue = Clamp(newValue);
+
+                if (newValue != clampedValue)
                 {
-                    _textBuffer = FormatTime(newValue);
-                    _textBox.Text = _textBuffer;
+                    SetValue(ValueProperty, clampedValue);
+                    return;
                 }
-            });
+
+                if (!_isUpdatingFromValue)
+                {
+                    _isUpdatingFromValue = true;
+                    UpdateText();
+                    _isUpdatingFromValue = false;
+                }
+
+                ValueChanged?.Invoke(this, clampedValue);
+            }
         }
 
         private static FuncControlTemplate<TimeCodeUpDown> CreateTemplate()
@@ -75,7 +81,7 @@ namespace Nikse.SubtitleEdit.Controls
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                     Width = double.NaN,
                     BorderBrush = Brushes.Transparent,
-                    CaretIndex = 7,
+                    CaretIndex = 0,
                 };
 
                 var grid = new Grid
@@ -112,6 +118,19 @@ namespace Nikse.SubtitleEdit.Controls
         {
             base.OnApplyTemplate(e);
 
+            // Unsubscribe from old events
+            if (_spinner != null)
+            {
+                _spinner.Spin -= OnSpin;
+            }
+
+            if (_textBox != null)
+            {
+                _textBox.RemoveHandler(TextInputEvent, OnTextInput);
+                _textBox.RemoveHandler(KeyDownEvent, OnTextBoxKeyDown);
+                _textBox.GotFocus -= OnTextBoxGotFocus;
+            }
+
             _textBox = e.NameScope.Find<TextBox>("PART_TextBox");
             _spinner = e.NameScope.Find<ButtonSpinner>("PART_Spinner");
 
@@ -122,12 +141,21 @@ namespace Nikse.SubtitleEdit.Controls
 
             if (_textBox != null)
             {
-                _textBox.Text = FormatTime(Value);
+                _textBuffer = FormatTime(Value);
+                _textBox.Text = _textBuffer;
 
                 _textBox.AddHandler(TextInputEvent, OnTextInput, RoutingStrategies.Tunnel);
-                _textBox.KeyDown += OnTextBoxKeyDown;
+                _textBox.AddHandler(KeyDownEvent, OnTextBoxKeyDown, RoutingStrategies.Tunnel);
+                _textBox.GotFocus += OnTextBoxGotFocus;
+            }
+        }
 
-                _textBox.IsReadOnly = true;
+        private void OnTextBoxGotFocus(object? sender, GotFocusEventArgs e)
+        {
+            if (_textBox != null)
+            {
+                // Select the first digit position
+                _textBox.CaretIndex = 0;
             }
         }
 
@@ -146,58 +174,68 @@ namespace Nikse.SubtitleEdit.Controls
             }
 
             var caret = _textBox.CaretIndex;
-            var pos = GetEditableIndex(caret);
-            if (pos < 0 || pos >= _textBuffer.Length)
+
+            // Skip colons
+            while (caret < _textBuffer.Length && _textBuffer[caret] == ':')
+            {
+                caret++;
+            }
+
+            if (caret >= _textBuffer.Length)
             {
                 e.Handled = true;
                 return;
             }
 
+            // Overwrite character at current position
             var chars = _textBuffer.ToCharArray();
-            chars[pos] = c;
+            chars[caret] = c;
             _textBuffer = new string(chars);
+
             _textBox.Text = _textBuffer;
-            _textBox.CaretIndex = GetNextEditableIndex(pos + 1);
 
-            // Store old value to compare
-            var oldValue = Value;
-            var newValue = ParseTime(_textBuffer);
-
-            if (oldValue != newValue)
+            // Move to next editable position
+            var nextPos = caret + 1;
+            while (nextPos < _textBuffer.Length && _textBuffer[nextPos] == ':')
             {
-                SetValue(ValueProperty, newValue);
-                ValueChanged?.Invoke(this, newValue);
+                nextPos++;
             }
+            _textBox.CaretIndex = Math.Min(nextPos, _textBuffer.Length);
+
+            // Update the bound value
+            var newValue = ParseTime(_textBuffer);
+            _isUpdatingFromValue = true;
+            SetValue(ValueProperty, newValue);
+            _isUpdatingFromValue = false;
 
             e.Handled = true;
         }
 
-        private int GetEditableIndex(int caret)
-        {
-            // Skip colons
-            if (caret == 2 || caret == 5 || caret == 8)
-            {
-                return caret + 1;
-            }
-
-            return caret;
-        }
-
-        private int GetNextEditableIndex(int caret)
-        {
-            if (caret == 2 || caret == 5 || caret == 8)
-            {
-                return caret + 1;
-            }
-
-            return caret;
-        }
-
         private TimeSpan ParseTime(string text)
         {
+            // Try parsing with milliseconds format (00:00:00:000 or 00:00:00.000)
             if (TimeSpan.TryParseExact(text, @"hh\:mm\:ss\:fff", null, out var result))
             {
                 return result;
+            }
+
+            // Try parsing with dot separator for milliseconds
+            if (TimeSpan.TryParseExact(text, @"hh\:mm\:ss\.fff", null, out result))
+            {
+                return result;
+            }
+
+            // Manual parsing as fallback
+            var parts = text.Split(':', ',', '.');
+            if (parts.Length == 4)
+            {
+                if (int.TryParse(parts[0], out var hours) &&
+                    int.TryParse(parts[1], out var minutes) &&
+                    int.TryParse(parts[2], out var seconds) &&
+                    int.TryParse(parts[3], out var milliseconds))
+                {
+                    return new TimeSpan(0, hours, minutes, seconds, milliseconds);
+                }
             }
 
             return TimeSpan.Zero;
@@ -210,6 +248,11 @@ namespace Nikse.SubtitleEdit.Controls
 
         private void OnTextBoxKeyDown(object? sender, KeyEventArgs e)
         {
+            if (_textBox == null)
+            {
+                return;
+            }
+
             if (e.Key == Key.Up)
             {
                 ChangeValue(+1);
@@ -218,6 +261,37 @@ namespace Nikse.SubtitleEdit.Controls
             else if (e.Key == Key.Down)
             {
                 ChangeValue(-1);
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Left)
+            {
+                var newPos = _textBox.CaretIndex - 1;
+                while (newPos >= 0 && _textBuffer[newPos] == ':')
+                {
+                    newPos--;
+                }
+                if (newPos >= 0)
+                {
+                    _textBox.CaretIndex = newPos;
+                }
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Right)
+            {
+                var newPos = _textBox.CaretIndex + 1;
+                while (newPos < _textBuffer.Length && _textBuffer[newPos] == ':')
+                {
+                    newPos++;
+                }
+                if (newPos < _textBuffer.Length)
+                {
+                    _textBox.CaretIndex = newPos;
+                }
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Back || e.Key == Key.Delete)
+            {
+                // Prevent deletion
                 e.Handled = true;
             }
         }
@@ -258,7 +332,9 @@ namespace Nikse.SubtitleEdit.Controls
                 }
             }
 
-            Value = newVal;
+            _isUpdatingFromValue = true;
+            SetValue(ValueProperty, newVal);
+            _isUpdatingFromValue = false;
         }
 
         private void UpdateText()
@@ -266,7 +342,9 @@ namespace Nikse.SubtitleEdit.Controls
             _textBuffer = FormatTime(Value);
             if (_textBox != null)
             {
+                var oldCaret = _textBox.CaretIndex;
                 _textBox.Text = _textBuffer;
+                _textBox.CaretIndex = Math.Min(oldCaret, _textBuffer.Length);
             }
         }
 

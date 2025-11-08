@@ -22,6 +22,7 @@ public class LanguageSync
     public string AdjustAllTimes { get; set; }
     public string ShowEarlier { get; set; }
     public string ShowLater { get; set; }
+    public string ChangeFrameRate { get; set; }
 
     public LanguageSync()
     {
@@ -45,6 +46,7 @@ public class LanguageSync
         AdjustAllTimes = "Adjust all times (show earlier/later)";
         ShowEarlier = "Show earlier";
         ShowLater = "Show later";
+        ChangeFrameRate = "Change frame rate";
 
     }
 }

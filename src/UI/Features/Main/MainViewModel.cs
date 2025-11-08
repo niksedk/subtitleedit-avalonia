@@ -2956,7 +2956,12 @@ public partial class MainViewModel :
             return;
         }
 
-        await ShowDialogAsync<ChangeFrameRateWindow, ChangeFrameRateViewModel>();
+        var result = await ShowDialogAsync<ChangeFrameRateWindow, ChangeFrameRateViewModel>();
+        if (result.OkPressed)
+        {
+            ChangeFrameRateViewModel.ChangeFrameRate(Subtitles, result.SelectedFromFrameRate, result.SelectedToFrameRate);
+            _updateAudioVisualizer = true;
+        }
     }
 
     [RelayCommand]
