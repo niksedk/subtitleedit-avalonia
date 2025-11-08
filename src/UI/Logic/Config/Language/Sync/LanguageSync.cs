@@ -19,6 +19,9 @@ public class LanguageSync
     public string AdjustSelectedLinesAndForward { get; set; }
     public string ToFrameRate { get;  set; }
     public string FromFrameRate { get;  set; }
+    public string AdjustAllTimes { get; set; }
+    public string ShowEarlier { get; set; }
+    public string ShowLater { get; set; }
 
     public LanguageSync()
     {
@@ -39,5 +42,9 @@ public class LanguageSync
         AdjustSelectedLinesAndForward = "Adjust selected lines and forward";
         ToFrameRate = "To frame rate";
         FromFrameRate = "From frame rate";
+        AdjustAllTimes = "Adjust all times (show earlier/later)";
+        ShowEarlier = "Show earlier";
+        ShowLater = "Show later";
+
     }
 }

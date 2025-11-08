@@ -505,6 +505,7 @@ public class LanguageGeneral
     public string DeleteLastLines { get; internal set; }
     public string SourceViewX { get; set; }
     public string LineXColumnY { get; set; }
+    public string Adjustment { get; set; }
 
     public LanguageGeneral()
     {
@@ -1009,5 +1010,6 @@ public class LanguageGeneral
         DeleteLastLines = "Delete last lines";
         SourceViewX = "Source view - {0}";
         LineXColumnY = "Line {0}, Column {1}";
+        Adjustment = "Adjustment";
     }
 }

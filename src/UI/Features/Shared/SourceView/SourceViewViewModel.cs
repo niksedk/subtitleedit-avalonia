@@ -44,7 +44,7 @@ public partial class SourceViewViewModel : ObservableObject
                 return;
             }
 
-            Dispatcher.UIThread.Post(async void () =>
+            Dispatcher.UIThread.Post(() =>
             {
                 var caretIndex = SourceViewTextBox.CaretIndex;
                 var text = SourceViewTextBox.Text ?? string.Empty;

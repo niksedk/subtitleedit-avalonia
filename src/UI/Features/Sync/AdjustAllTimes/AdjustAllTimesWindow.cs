@@ -5,6 +5,7 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Sync.AdjustAllTimes;
 
@@ -15,7 +16,7 @@ public class AdjustAllTimesWindow : Window
     public AdjustAllTimesWindow(AdjustAllTimesViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = "Adjust all times (show earlier/later)";
+        Title = Se.Language.Sync.AdjustAllTimes;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 
@@ -25,7 +26,7 @@ public class AdjustAllTimesWindow : Window
 
         var label = new Label
         {
-            Content = "Adjustment",
+            Content = Se.Language.General.Adjustment,
             VerticalAlignment = VerticalAlignment.Center,
         };
 
@@ -46,8 +47,8 @@ public class AdjustAllTimesWindow : Window
             {
                 label,
                 timeCodeUpDown,
-                UiUtil.MakeButton("Show earlier", vm.ShowEarlierCommand).WithMarginLeft(15),
-                UiUtil.MakeButton("Show later", vm.ShowLaterCommand),
+                UiUtil.MakeButton(Se.Language.Sync.ShowEarlier, vm.ShowEarlierCommand).WithMarginLeft(15),
+                UiUtil.MakeButton(Se.Language.Sync.ShowLater, vm.ShowLaterCommand),
             },
         };
 
@@ -59,17 +60,17 @@ public class AdjustAllTimesWindow : Window
             {
                 new RadioButton
                 {
-                    Content = "Adjust all",
+                    Content = Se.Language.Sync.AdjustAll,
                     [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustAll))
                 },
                 new RadioButton
                 {
-                    Content = "Adjust selected lines",
+                    Content = Se.Language.Sync.AdjustSelectedLines,
                     [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustSelectedLines))
                 },
                 new RadioButton
                 {
-                    Content = "Adjust selected lines and forward",
+                    Content = Se.Language.Sync.AdjustSelectedLinesAndForward,
                     [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustSelectedLinesAndForward))
                 }
             },

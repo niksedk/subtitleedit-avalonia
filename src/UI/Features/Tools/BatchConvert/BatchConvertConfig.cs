@@ -49,6 +49,7 @@ public class BatchConvertConfig
         RemoveTextForHearingImpaired = new RemoveTextForHearingImpairedSettings();
         MergeLinesWithSameTimeCodes = new MergeLinesWithSameTimeCodesSettings();
         MergeLinesWithSameTexts = new MergeLinesWithSameTextsSettings();
+        MultipleReplace = new MultipleReplaceSettings();
     }
 
     public class RemoveFormattingSettings
