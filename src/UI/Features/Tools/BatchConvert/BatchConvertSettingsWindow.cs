@@ -3,6 +3,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -21,7 +22,7 @@ public class BatchConvertSettingsWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        var labelTargetEncoding = UiUtil.MakeLabel("Target encoding").WithMarginLeft(5);
+        var labelTargetEncoding = UiUtil.MakeLabel(Se.Language.General.TargetEncoding).WithMarginLeft(5);
         var comboBoxTargetEncoding = UiUtil.MakeComboBox(vm.TargetEncodings, vm, nameof(vm.SelectedTargetEncoding));
         var panelTargetEncoding = new StackPanel
         {
@@ -31,7 +32,7 @@ public class BatchConvertSettingsWindow : Window
 
         var checkBoxOverwrite = new CheckBox
         {
-            Content = "Overwrite existing files",
+            Content = Se.Language.General.OverwriteExistingFiles,
             IsChecked = vm.Overwrite,
             VerticalAlignment = VerticalAlignment.Center,
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.Overwrite)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
@@ -39,7 +40,7 @@ public class BatchConvertSettingsWindow : Window
 
         var checkBoxUseSourceFolder = new RadioButton
         {
-            Content = "Use source folder",
+            Content = Se.Language.General.UseSourceFolder,
             IsChecked = vm.UseSourceFolder,
             VerticalAlignment = VerticalAlignment.Center,
             [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.UseSourceFolder)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },  
@@ -47,7 +48,7 @@ public class BatchConvertSettingsWindow : Window
 
         var checkBoxUseOutputFolder = new RadioButton
         {
-            Content = "Use output folder",
+            Content = Se.Language.General.UseOutputFolder,
             IsChecked = vm.UseOutputFolder,
             VerticalAlignment = VerticalAlignment.Center,
             [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.UseOutputFolder)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },  

@@ -501,12 +501,16 @@ public class LanguageGeneral
     public string XRequiresAnApiKey { get; set; }
     public object NormalCasing { get; set; }
     public string DeleteLinesContainingText { get; set; }
-    public string DeleteFirstLines { get; internal set; }
-    public string DeleteLastLines { get; internal set; }
+    public string DeleteFirstLines { get; set; }
+    public string DeleteLastLines { get; set; }
     public string SourceViewX { get; set; }
     public string LineXColumnY { get; set; }
     public string Adjustment { get; set; }
     public string ParsingXDotDotDot { get; set; }
+    public string UseSourceFolder { get; set; }
+    public string UseOutputFolder { get; set; }
+    public string OverwriteExistingFiles { get; set; }
+    public string TargetEncoding { get; set; }
 
     public LanguageGeneral()
     {
@@ -1013,5 +1017,9 @@ public class LanguageGeneral
         LineXColumnY = "Line {0}, Column {1}";
         Adjustment = "Adjustment";
         ParsingXDotDotDot = "Parsing {0}...";
+        UseSourceFolder = "Use source folder";
+        UseOutputFolder = "Use output folder";
+        OverwriteExistingFiles = "Overwrite existing files";
+        TargetEncoding = "Target encoding";
     }
 }

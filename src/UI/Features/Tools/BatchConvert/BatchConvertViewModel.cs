@@ -116,7 +116,7 @@ public partial class BatchConvertViewModel : ObservableObject
     // Merge lines with same text
     [ObservableProperty] private int _mergeSameTextMaxMillisecondsBetweenLines;
     [ObservableProperty] private bool _mergeSameTextIncludeIncrementingLines;
-    
+
     // Merge lines with same time codes
     [ObservableProperty] private int _mergeSameTimeMaxMillisecondsDifference;
     [ObservableProperty] private bool _mergeSameTimeMergeDialog;
@@ -158,7 +158,7 @@ public partial class BatchConvertViewModel : ObservableObject
 
         BatchItems = new ObservableCollection<BatchConvertItem>();
         BatchFunctions = new ObservableCollection<BatchConvertFunction>();
-        
+
         TargetFormats = new ObservableCollection<string>(SubtitleFormat.AllSubtitleFormats.Select(p => p.Name));
         TargetFormats.Add(TargetFormatAyato);
         TargetFormats.Add(TargetFormatBdnXml);
@@ -394,7 +394,7 @@ public partial class BatchConvertViewModel : ObservableObject
 
         MergeSameTimeMaxMillisecondsDifference = Se.Settings.Tools.MergeSameTimeCode.MaxMillisecondsDifference;
         MergeSameTimeMergeDialog = Se.Settings.Tools.MergeSameTimeCode.MergeDialog;
-        MergeSameTimeAutoBreak =  Se.Settings.Tools.MergeSameTimeCode.AutoBreak;
+        MergeSameTimeAutoBreak = Se.Settings.Tools.MergeSameTimeCode.AutoBreak;
     }
 
     private void UpdateOutputProperties()
@@ -563,10 +563,69 @@ public partial class BatchConvertViewModel : ObservableObject
 
         foreach (var fileName in fileNames)
         {
+            var ext = Path.GetExtension(fileName).ToLowerInvariant();
             var fileInfo = new FileInfo(fileName);
-            var subtitle = Subtitle.Parse(fileName);
-            var batchItem = new BatchConvertItem(fileName, fileInfo.Length,
-                subtitle != null ? subtitle.OriginalFormat.Name : Se.Language.General.Unknown, subtitle);
+
+            Subtitle? subtitle = null;
+            var format = Se.Language.General.Unknown;
+            if (ext == ".sup" && FileUtil.IsBluRaySup(fileName))
+            {
+                format = TargetFormatBluRaySup;
+            }
+
+            if (ext == ".sub" && FileUtil.IsVobSub(fileName))
+            {
+                format = TargetFormatVobSub;
+            }
+
+            if (format == Se.Language.General.Unknown && fileInfo.Length < 200_000)
+            {
+                subtitle = Subtitle.Parse(fileName);
+                if (subtitle != null)
+                {
+                    format = subtitle.OriginalFormat.Name;
+                }
+            }
+
+            if (format == Se.Language.General.Unknown)
+            {
+                var lines = FileUtil.ReadAllLinesShared(fileName, LanguageAutoDetect.GetEncodingFromFile(fileName));
+                if (ext == ".pac" && new Pac().IsMine(lines, fileName))
+                {
+                    format = TargetFormatPac;
+                }
+
+                if (ext == ".890" && new Cavena890().IsMine(lines, fileName))
+                {
+                    format = TargetFormatCavena890;
+                }
+
+                if (ext == ".xml" && new BdnXml().IsMine(lines, fileName))
+                {
+                    format = TargetFormatBdnXml;
+                }
+
+                if (ext == ".dost" && new Dost().IsMine(lines, fileName))
+                {
+                    format = TargetFormatDostImage;
+                }
+
+                if (ext == ".aya" && new Ayato().IsMine(lines, fileName))
+                {
+                    format = TargetFormatAyato;
+                }
+            }
+
+            if (format == Se.Language.General.Unknown)
+            {
+                subtitle = Subtitle.Parse(fileName);
+                if (subtitle != null)
+                {
+                    format = subtitle.OriginalFormat.Name;
+                }
+            }
+
+            var batchItem = new BatchConvertItem(fileName, fileInfo.Length, format, subtitle);
             BatchItems.Add(batchItem);
         }
 
@@ -736,18 +795,18 @@ public partial class BatchConvertViewModel : ObservableObject
 
             MergeLinesWithSameTexts = new BatchConvertConfig.MergeLinesWithSameTextsSettings
             {
-                IsActive = activeFunctions.Contains(BatchConvertFunctionType.MergeLinesWithSameText), 
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.MergeLinesWithSameText),
                 IncludeIncrementingLines = MergeSameTextIncludeIncrementingLines,
                 MaxMillisecondsBetweenLines = MergeSameTextMaxMillisecondsBetweenLines,
             },
-            
+
             MergeLinesWithSameTimeCodes = new BatchConvertConfig.MergeLinesWithSameTimeCodesSettings
             {
                 IsActive = activeFunctions.Contains(BatchConvertFunctionType.MergeLinesWithSameTimeCodes),
                 MaxMillisecondsDifference = MergeSameTextMaxMillisecondsBetweenLines,
                 MergeDialog = MergeSameTimeMergeDialog,
                 AutoBreak = MergeSameTimeAutoBreak,
-            } ,
+            },
 
             OffsetTimeCodes = new BatchConvertConfig.OffsetTimeCodesSettings
             {
