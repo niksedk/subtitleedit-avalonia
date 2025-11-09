@@ -230,6 +230,8 @@ public class ShortcutsWindow : Window
 
         _searchBox.TextChanged += (s, e) => vm.UpdateVisibleShortcuts(_searchBox.Text ?? string.Empty);
         Activated += delegate { _searchBox.Focus(); }; // hack to make OnKeyDown work
+        Loaded += vm.Onloaded;
+        Closing += vm.OnClosing;
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

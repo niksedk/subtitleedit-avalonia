@@ -53,7 +53,7 @@ public class PreProcessingSettings
         return bmp;
     }
 
-    private static unsafe SKBitmap CropTransparent(SKBitmap bitmap)
+    public static unsafe SKBitmap CropTransparent(SKBitmap bitmap)
     {
         var left = bitmap.Width;
         var top = bitmap.Height;

@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream;
+using Nikse.SubtitleEdit.Features.Ocr;
 using Nikse.SubtitleEdit.Logic;
 using System;
 using System.Collections.ObjectModel;
@@ -142,7 +143,7 @@ public partial class PickTsTrackViewModel : ObservableObject
                 Show = TimeSpan.FromMilliseconds(item.StartMilliseconds),
                 Hide = TimeSpan.FromMilliseconds(item.EndMilliseconds),
                 Duration = TimeSpan.FromMilliseconds(item.EndMilliseconds - item.StartMilliseconds),
-                Image = new Image { Source = item.GetBitmap().ToAvaloniaBitmap() },
+                Image = new Image { Source = PreProcessingSettings.CropTransparent(item.GetBitmap()).ToAvaloniaBitmap() },
             };
             Rows.Add(cue);
         }

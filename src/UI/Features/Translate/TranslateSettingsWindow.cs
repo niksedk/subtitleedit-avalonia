@@ -143,6 +143,8 @@ public class TranslateSettingsWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        Loaded += vm.Onloaded;
+        Closing += vm.OnClosing;
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

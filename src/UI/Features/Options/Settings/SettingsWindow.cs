@@ -22,6 +22,8 @@ public class SettingsWindow : Window
 
         vm.Window = this;
         Content = new SettingsPage(vm);
+        Loaded += vm.Onloaded;
+        Closing += vm.OnClosing;
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
