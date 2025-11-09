@@ -50,6 +50,6 @@ public class SettingsItem
             stackPanel.Bind(Visual.IsVisibleProperty, new Binding(nameof(IsVisibleBinding)));
         }
 
-        return stackPanel;      
+        return stackPanel;
     }
 }

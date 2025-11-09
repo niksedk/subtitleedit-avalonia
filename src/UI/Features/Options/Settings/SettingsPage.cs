@@ -349,13 +349,13 @@ public class SettingsPage : UserControl
 
         sections.Add(new SettingsSection(Se.Language.Options.Settings.WaveformSpectrogram,
         [
-            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformFocusOnMouseOver, nameof(_vm.WaveformFocusOnMouseOver)),
-            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformCenterVideoPosition, nameof(_vm.WaveformCenterVideoPosition)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformShowToolbar, nameof(_vm.WaveformShowToolbar)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformHorizontalZoom, nameof(_vm.ShowWaveformHorizontalZoom)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformVerticalZoom, nameof(_vm.ShowWaveformVerticalZoom)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformVideoPositionSlider, nameof(_vm.ShowWaveformVideoPositionSlider)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformPlaybackSpeed, nameof(_vm.ShowWaveformPlaybackSpeed)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformFocusOnMouseOver, nameof(_vm.WaveformFocusOnMouseOver)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformCenterVideoPosition, nameof(_vm.WaveformCenterVideoPosition)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformSnapToShotChanges, nameof(_vm.WaveformSnapToShotChanges)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformShotChangesAutoGenerate, nameof(_vm.WaveformShotChangesAutoGenerate)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformFocusTextboxAfterInsertNew, nameof(_vm.WaveformFocusTextboxAfterInsertNew)),
@@ -522,8 +522,8 @@ public class SettingsPage : UserControl
                 }, true)
         };
 
-        cb.PropertyChanged += (s, e) => _vm.VideoPlayerChanged();    
-        
+        cb.PropertyChanged += (s, e) => _vm.VideoPlayerChanged();
+
         return cb;
     }
 

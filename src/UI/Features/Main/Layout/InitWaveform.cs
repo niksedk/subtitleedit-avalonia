@@ -355,18 +355,18 @@ public class InitWaveform
         var flyoutMore = new MenuFlyout();
         buttonMore.Flyout = flyoutMore;
         buttonMore.Click += (s, e) => flyoutMore.ShowAt(buttonMore, true);
-        var menuItemHideControls = new MenuItem
-        {
-            Header = string.Format(languageHints.HideWaveformToolbar, string.Empty),
-            Command = vm.HideWaveformToolbarCommand,
-        };
-        flyoutMore.Items.Add(menuItemHideControls);
         var menuItemResetZoom = new MenuItem
         {
             Header = string.Format(languageHints.ResetZoomAndSpeed, UiUtil.MakeShortcutsString(shortcuts, nameof(vm.ResetWaveformZoomAndSpeedCommand))),
             Command = vm.ResetWaveformZoomAndSpeedCommand,
         };
         flyoutMore.Items.Add(menuItemResetZoom);
+        var menuItemHideControls = new MenuItem
+        {
+            Header = string.Format(languageHints.HideWaveformToolbar, string.Empty),
+            Command = vm.HideWaveformToolbarCommand,
+        };
+        flyoutMore.Items.Add(menuItemHideControls);
 
         controlsPanel.Children.Add(buttonPlay);
         controlsPanel.Children.Add(toggleButtonRepeat);

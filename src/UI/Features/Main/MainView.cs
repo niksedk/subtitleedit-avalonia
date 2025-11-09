@@ -106,7 +106,7 @@ public class MainView : ViewBase
         if (_vm == null || !System.IO.File.Exists(fileName))
         {
             return;
-        }   
+        }
 
         await _vm.SubtitleOpen(fileName);
     }

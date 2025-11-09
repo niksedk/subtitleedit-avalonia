@@ -4,10 +4,10 @@ namespace Nikse.SubtitleEdit.Logic.Config;
 
 public class SeWaveform
 {
+    public bool ShowToolbar { get; set; }
     public bool CenterVideoPosition { get; set; }
     public bool DrawGridLines { get; set; }
     public bool FocusTextBoxAfterInsertNew { get; set; }
-    public bool ShowToolbar { get; set; }
     public bool ShowWaveformVerticalZoom { get; set; }
     public bool ShowWaveformHorizontalZoom { get; set; }
     public bool ShowWaveformVideoPositionSlider { get; set; }
@@ -33,6 +33,7 @@ public class SeWaveform
 
     public SeWaveform()
     {
+        ShowToolbar = true;
         DrawGridLines = true;
         FocusTextBoxAfterInsertNew = true;
         WaveformColor = Color.FromArgb(150, 100, 100, 100).FromColorToHex();

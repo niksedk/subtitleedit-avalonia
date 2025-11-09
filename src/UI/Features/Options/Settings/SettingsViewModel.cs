@@ -220,7 +220,7 @@ public partial class SettingsViewModel : ObservableObject
 
         VideoPlayers = new ObservableCollection<VideoPlayerItem>(VideoPlayerItem.ListVideoPlayerItem());
         SelectedVideoPlayer = VideoPlayers[0];
-        
+
         VideoPlayerMpvRenders = new ObservableCollection<VideoPlayerMpvRenderItem>(VideoPlayerMpvRenderItem.ListVideoPlayerMpvRenderItems());
         SelectedVideoPlayerMpvRender = VideoPlayerMpvRenders[0];
 
@@ -243,7 +243,7 @@ public partial class SettingsViewModel : ObservableObject
         SelectedSaveSubtitleFormat = SaveSubtitleFormats.First();
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         DefaultEncoding = Encodings.First();
-        IsMpvChosen = true; 
+        IsMpvChosen = true;
 
         GridLinesVisibilities = new ObservableCollection<GridLinesVisibilityDisplay>(GridLinesVisibilityDisplay.GetAll());
         SelectedGridLinesVisibility = GridLinesVisibilities[0];
@@ -424,10 +424,10 @@ public partial class SettingsViewModel : ObservableObject
         {
             SelectedVideoPlayer = videoPlayer;
         }
-        var mpvRender = VideoPlayerMpvRenders.FirstOrDefault(p=>p.Code == video.VideoPlayerMpvRender);
+        var mpvRender = VideoPlayerMpvRenders.FirstOrDefault(p => p.Code == video.VideoPlayerMpvRender);
         if (mpvRender != null)
         {
-            SelectedVideoPlayerMpvRender = mpvRender;            
+            SelectedVideoPlayerMpvRender = mpvRender;
         }
         ShowStopButton = video.ShowStopButton;
         ShowFullscreenButton = video.ShowFullscreenButton;
