@@ -54,6 +54,7 @@ using Nikse.SubtitleEdit.Features.Shared.PickLayers;
 using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using Nikse.SubtitleEdit.Features.Shared.PickMp4Track;
 using Nikse.SubtitleEdit.Features.Shared.PickRuleProfile;
+using Nikse.SubtitleEdit.Features.Shared.PickTsTrack;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 using Nikse.SubtitleEdit.Features.Shared.SetVideoOffset;
 using Nikse.SubtitleEdit.Features.Shared.SourceView;
@@ -6550,8 +6551,10 @@ public partial class MainViewModel :
     {
         Dispatcher.UIThread.Post(async () =>
         {
-            var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(
-                vm => { vm.InitializeBdn(subtitle, fileName, false); });
+            var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(vm =>
+            {
+                vm.InitializeBdn(subtitle, fileName, false);
+            });
 
             if (result.OkPressed)
             {
@@ -6605,9 +6608,10 @@ public partial class MainViewModel :
 
         Dispatcher.UIThread.Post(async () =>
         {
-            var result =
-                await ShowDialogAsync<OcrWindow, OcrViewModel>(
-                    vm => { vm.Initialize(list, fileName); });
+            var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(vm =>
+            {
+                vm.Initialize(list, fileName);
+            });
 
             if (result.OkPressed)
             {
@@ -6670,10 +6674,10 @@ public partial class MainViewModel :
             _subtitle.Renumber();
             Subtitles.AddRange(_subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
             SelectAndScrollToRow(0);
-            //if (!Configuration.Settings.General.DisableVideoAutoLoading)
-            //{
-            //    OpenVideo(fileName);
-            //}
+            if (Se.Settings.General.AutoOpenVideo)
+            {
+                await VideoOpenFile(fileName);
+            }
 
             _subtitleFileName = Path.GetFileNameWithoutExtension(fileName) + SelectedSubtitleFormat.Extension;
             _converted = true;
@@ -6683,39 +6687,34 @@ public partial class MainViewModel :
         int packetId = 0;
         if (tsParser.SubtitlePacketIds.Count + tsParser.TeletextSubtitlesLookup.Sum(p => p.Value.Count) > 1)
         {
-            //using (var subChooser = new TransportStreamSubtitleChooser())
-            //{
-            //    subChooser.Initialize(tsParser, fileName);
-            //    if (subChooser.ShowDialog(this) == DialogResult.Cancel)
-            //    {
-            //        return false;
-            //    }
+            var result = await ShowDialogAsync<PickTsTrackWindow, PickTsTrackViewModel>(vm =>
+            {
+                vm.Initialize(tsParser, fileName);
+            });
 
-            //    if (subChooser.IsTeletext)
-            //    {
-            //        new SubRip().LoadSubtitle(_subtitle, subChooser.Srt.SplitToLines(), null);
-            //        _subtitle.Renumber();
-            //        SubtitleListview1.Fill(_subtitle);
-            //        SubtitleListview1.SelectIndexAndEnsureVisible(0);
-            //        if (!Configuration.Settings.General.DisableVideoAutoLoading)
-            //        {
-            //            OpenVideo(fileName);
-            //        }
+            if (result.OkPressed && result.IsTeletext)
+            {
+                ResetSubtitle();
+                SelectAndScrollToRow(0);
+                if (Se.Settings.General.AutoOpenVideo)
+                {
+                    await VideoOpenFile(fileName);
+                }
 
-            //        _fileName = Path.GetFileNameWithoutExtension(fileName) + GetCurrentSubtitleFormat().Extension;
-            //        _converted = true;
-            //        SetTitle();
-            //        return true;
-            //    }
+                _subtitleFileName = Path.GetFileNameWithoutExtension(fileName) + SelectedSubtitleFormat.Extension;
+                _converted = true;
+            }
+            else if (!result.OkPressed || result.SelectedTrack == null)
+            {
+                return;
+            }
 
-            //    packetId = tsParser.SubtitlePacketIds[subChooser.SelectedIndex];
-            //}
+            packetId = result.SelectedTrack!.TrackNumber;
         }
         else
         {
             packetId = tsParser.SubtitlePacketIds[0];
         }
-
 
         var subtitles = tsParser.GetDvbSubtitles(packetId);
         Dispatcher.UIThread.Post(async () =>
@@ -6729,53 +6728,6 @@ public partial class MainViewModel :
                 Subtitles.AddRange(result.OcredSubtitle);
             }
         });
-
-        //using (var formSubOcr = new VobSubOcr())
-        //{
-        //    string language = null;
-        //    var programMapTableParser = new ProgramMapTableParser();
-        //    programMapTableParser.Parse(fileName); // get languages
-        //    if (programMapTableParser.GetSubtitlePacketIds().Count > 0)
-        //    {
-        //        language = programMapTableParser.GetSubtitleLanguage(packetId);
-        //    }
-
-        //    formSubOcr.Initialize(subtitles, Configuration.Settings.VobSubOcr, fileName, language);
-        //    if (formSubOcr.ShowDialog(this) == DialogResult.OK)
-        //    {
-        //        MakeHistoryForUndo(_language.BeforeImportingDvdSubtitle);
-
-        //        _subtitle.Paragraphs.Clear();
-        //        SetCurrentFormat(Configuration.Settings.General.DefaultSubtitleFormat);
-        //        foreach (var p in formSubOcr.SubtitleFromOcr.Paragraphs)
-        //        {
-        //            _subtitle.Paragraphs.Add(p);
-        //        }
-
-        //        UpdateSourceView();
-        //        SubtitleListview1.Fill(_subtitle, _subtitleOriginal);
-        //        _subtitleListViewIndex = -1;
-        //        SubtitleListview1.FirstVisibleIndex = -1;
-        //        SubtitleListview1.SelectIndexAndEnsureVisible(0, true);
-
-        //        _fileName = string.Empty;
-        //        if (!string.IsNullOrEmpty(formSubOcr.FileName))
-        //        {
-        //            var currentFormat = GetCurrentSubtitleFormat();
-        //            _fileName = Utilities.GetPathAndFileNameWithoutExtension(formSubOcr.FileName) + currentFormat.Extension;
-        //            if (!Configuration.Settings.General.DisableVideoAutoLoading)
-        //            {
-        //                OpenVideo(fileName);
-        //            }
-
-        //            _converted = true;
-        //        }
-
-        //        SetTitle();
-        //        Configuration.Settings.Save();
-        //        return true;
-        //    }
-        //}
 
         return;
     }
