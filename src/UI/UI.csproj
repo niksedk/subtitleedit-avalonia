@@ -35,7 +35,7 @@
 			<PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
 		</PackageReference>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-		<PackageReference Include="Google.Cloud.TextToSpeech.V1" Version="3.16.0" />
+		<PackageReference Include="Google.Cloud.TextToSpeech.V1" Version="3.17.0" />
 		<PackageReference Include="libse" Version="4.1.0-alpha7" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.10" />
