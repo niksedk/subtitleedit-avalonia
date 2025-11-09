@@ -506,6 +506,7 @@ public class LanguageGeneral
     public string SourceViewX { get; set; }
     public string LineXColumnY { get; set; }
     public string Adjustment { get; set; }
+    public string ParsingXDotDotDot { get; set; }
 
     public LanguageGeneral()
     {
@@ -1011,5 +1012,6 @@ public class LanguageGeneral
         SourceViewX = "Source view - {0}";
         LineXColumnY = "Line {0}, Column {1}";
         Adjustment = "Adjustment";
+        ParsingXDotDotDot = "Parsing {0}...";
     }
 }

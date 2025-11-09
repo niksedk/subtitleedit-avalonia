@@ -1,4 +1,6 @@
-﻿using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
+﻿using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
+using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Features.Shared.PickTsTrack;
 
@@ -10,13 +12,14 @@ public class TsTrackInfoDisplay
     public string Codec { get; set; }
     public string Language { get; set; }
     public string Name { get; set; }
-    public MatroskaTrackInfo MatroskaTrackInfo { get; set; }
+    public bool IsTeletext { get; set; }
+    public List<Paragraph> Teletext { get; set; }
 
     public TsTrackInfoDisplay()
     {
         Codec = string.Empty;
         Language = string.Empty;
         Name = string.Empty;
-        MatroskaTrackInfo = new MatroskaTrackInfo();
+        Teletext = new List<Paragraph>();
     }
 }

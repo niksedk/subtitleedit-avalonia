@@ -3,7 +3,7 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream;
 using Nikse.SubtitleEdit.Features.Ocr;
 using Nikse.SubtitleEdit.Logic;
@@ -21,10 +21,9 @@ public partial class PickTsTrackViewModel : ObservableObject
 
     public Window? Window { get; set; }
     public DataGrid TracksGrid { get; set; }
-    public MatroskaTrackInfo? SelectedMatroskaTrack { get; set; }
     public bool OkPressed { get; private set; }
     public string WindowTitle { get; private set; }
-    public bool IsTeletext { get; private set; }
+    public Subtitle TeletextSubtitle { get; private set; }
 
     private string _fileName = string.Empty;
     private TransportStreamParser? _tsParser;
@@ -35,6 +34,7 @@ public partial class PickTsTrackViewModel : ObservableObject
         TracksGrid = new DataGrid();
         WindowTitle = string.Empty;
         Rows = new ObservableCollection<TsSubtitleCueDisplay>();
+        TeletextSubtitle = new Subtitle();
     }
 
     internal void Initialize(TransportStreamParser tsParser, string fileName)
@@ -60,21 +60,23 @@ public partial class PickTsTrackViewModel : ObservableObject
                 IsDefault = false,
                 IsForced = false,
                 Language = language,
-                MatroskaTrackInfo = null!,
+                IsTeletext = false,
             };
             Tracks.Add(display);
         }
 
-        for (var i = 0; i < tsParser.TeletextSubtitlesLookup.Count; i++)
+
+        foreach (var i in tsParser.TeletextSubtitlesLookup.Keys)
         {
             var pid = tsParser.TeletextSubtitlesLookup[i];
             var display = new TsTrackInfoDisplay
             {
-                TrackNumber = pid.First().Key,
+                TrackNumber = i,
+                Teletext = pid.Values.First(),
                 IsDefault = false,
                 IsForced = false,
                 Codec = "Teletext",
-                MatroskaTrackInfo = null!,
+                IsTeletext = true,
             };
             Tracks.Add(display);
         }
@@ -96,7 +98,6 @@ public partial class PickTsTrackViewModel : ObservableObject
     [RelayCommand]
     private void Ok()
     {
-        SelectedMatroskaTrack = SelectedTrack?.MatroskaTrackInfo;
         OkPressed = true;
         Close();
     }
@@ -133,6 +134,28 @@ public partial class PickTsTrackViewModel : ObservableObject
         }
 
         Rows.Clear();
+
+        if (selectedTrack.IsTeletext)
+        {
+           var subtitle = new Subtitle(selectedTrack.Teletext);          
+            subtitle.Renumber();
+            TeletextSubtitle = subtitle;
+            foreach (var p in subtitle.Paragraphs.Take(20))
+            {
+                var cue = new TsSubtitleCueDisplay()
+                {
+                    Number = p.Number,
+                    Show = p.StartTime.TimeSpan,
+                    Hide = p.EndTime.TimeSpan,
+                    Duration = p.Duration.TimeSpan,
+                    Text = p.Text,
+                };
+                Rows.Add(cue);
+            }
+
+            return true;
+        }
+
         var subtitles = _tsParser.GetDvbSubtitles(selectedTrack.TrackNumber);
         for (var i = 0; i < 20 && i < subtitles.Count; i++)
         {

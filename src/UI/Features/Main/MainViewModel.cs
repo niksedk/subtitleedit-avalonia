@@ -6650,14 +6650,16 @@ public partial class MainViewModel :
 
     private async Task ImportSubtitleFromTransportStream(string fileName)
     {
-        //ShowStatus(_language.ParsingTransportStream);
+        ShowStatus(string.Format(Se.Language.General.ParsingXDotDotDot, fileName));
         var tsParser = new TransportStreamParser();
-        tsParser.Parse(fileName,
-            (pos, total) =>
-                UpdateProgress(pos, total,
-                    string.Format("Parsing {0}", fileName))); // _language.ParsingTransportStreamFile););
-        //ShowStatus(string.Empty);
-        //TaskbarList.SetProgressState(Handle, TaskbarButtonProgressFlags.NoProgress);
+
+        await Task.Run(() =>
+        {
+            tsParser.Parse(fileName,
+                (pos, total) =>
+                    UpdateProgress(pos, total, string.Format(string.Format(Se.Language.General.ParsingXDotDotDot, fileName), fileName)));
+        });
+        ShowStatus(string.Empty);
 
         if (tsParser.SubtitlePacketIds.Count == 0 && tsParser.TeletextSubtitlesLookup.Count == 0)
         {
@@ -6692,17 +6694,18 @@ public partial class MainViewModel :
                 vm.Initialize(tsParser, fileName);
             });
 
-            if (result.OkPressed && result.IsTeletext)
+            if (result.OkPressed && result.SelectedTrack != null && result.SelectedTrack.IsTeletext)
             {
                 ResetSubtitle();
                 SelectAndScrollToRow(0);
+                SetSubtitles(result.TeletextSubtitle);
+                _subtitleFileName = Path.GetFileNameWithoutExtension(fileName) + SelectedSubtitleFormat.Extension;
+                _converted = true;
                 if (Se.Settings.General.AutoOpenVideo)
                 {
                     await VideoOpenFile(fileName);
                 }
-
-                _subtitleFileName = Path.GetFileNameWithoutExtension(fileName) + SelectedSubtitleFormat.Extension;
-                _converted = true;
+                return;
             }
             else if (!result.OkPressed || result.SelectedTrack == null)
             {
@@ -7606,7 +7609,7 @@ public partial class MainViewModel :
             StatusTextLeft = message;
             StatusTextLeftLabel.Opacity = 1;
             StatusTextLeftLabel.IsVisible = true;
-        }, DispatcherPriority.Background);
+        }, DispatcherPriority.MaxValue);
 
         try
         {
