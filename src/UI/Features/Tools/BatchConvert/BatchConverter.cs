@@ -7,11 +7,15 @@ using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.VobSub;
 using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Ocr;
+using Nikse.SubtitleEdit.Features.Ocr.NOcr;
 using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameTimeCodes;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Ocr;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,27 +24,22 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Avalonia.Controls;
-using Avalonia.Threading;
-using Nikse.SubtitleEdit.Features.Ocr;
-using Nikse.SubtitleEdit.Features.Ocr.NOcr;
-using Nikse.SubtitleEdit.Logic.Ocr;
-using SkiaSharp;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
 public class BatchConverter : IBatchConverter, IFixCallbacks
 {
-    public const string FormatEbuStl = "EBU stl";
     public const string FormatAyato = "Ayato";
     public const string FormatBdnXml = "BDN-XML";
     public const string FormatBluRaySup = "Blu-ray sup";
     public const string FormatCavena890 = "Cavena 890";
     public const string FormatCustomTextFormat = "Custom text format";
     public const string FormatDostImage = "Dost-image";
+    public const string FormatEbuStl = "EBU stl";
     public const string FormatFcpImage = "FCP-image";
     public const string FormatImagesWithTimeCodesInFileName = "Images with time codes in file name";
     public const string FormatPac = "PAC";
+    public const string FormatPacUnicode = "PAC Unicode";
     public const string FormatPlainText = "Plain text";
     public const string FormatVobSub = "VobSub";
 
@@ -54,7 +53,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
     public string Language { get; set; } = "en";
 
     private readonly Dictionary<string, Regex> _compiledRegExList;
-    
+
     private readonly INOcrCaseFixer _nOcrCaseFixer;
 
     public BatchConverter(INOcrCaseFixer nOcrCaseFixer)
@@ -104,7 +103,14 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         if (imageSubtitle != null && !_config.IsTargetFormatImageBased)
         {
             item.Status = Se.Language.General.OcrDotDotDot;
-            await RunOcrTesseract(imageSubtitle, item, cancellationToken);
+            if (Se.Settings.Ocr.Engine == "nOCR")
+            {
+                RunNOcr(imageSubtitle, item, cancellationToken);
+            }
+            else
+            {
+                await RunOcrTesseract(imageSubtitle, item, cancellationToken);
+            }
         }
 
         // Run actions
@@ -128,6 +134,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         var binaryFormats = new Dictionary<string, SubtitleFormat>
         {
             { FormatPac, new Pac() },
+            { FormatPacUnicode, new PacUnicode() },
             { FormatCavena890, new Cavena890() },
             { FormatAyato, new Ayato() },
             { FormatEbuStl, new Ebu() },
@@ -146,7 +153,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             imageSubtitle = CreateImageSubtitles(item); // text to image (create bitmaps from text)
         }
 
-        await WriteToImageBasedFormat(item, imageSubtitle, cancellationToken);
+        WriteToImageBasedFormat(item, imageSubtitle, cancellationToken);
     }
 
     private static async Task RunOcrTesseract(IOcrSubtitle imageSubtitles, BatchConvertItem item, CancellationToken cancellationToken)
@@ -156,6 +163,8 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         item.Subtitle = new Subtitle();
         for (var i = 0; i < imageSubtitles.Count; i++)
         {
+            var pct = (i + 1) * 100 / imageSubtitles.Count;
+            item.Status = string.Format(Se.Language.General.OcrPercentX, pct);
             var bitmap = imageSubtitles.GetBitmap(i);
             var text = await tesseractOcr.Ocr(bitmap, language, cancellationToken);
             var p = new Paragraph(text, imageSubtitles.GetStartTime(i).TotalMilliseconds, imageSubtitles.GetEndTime(i).TotalMilliseconds);
@@ -165,9 +174,12 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
 
     private void RunNOcr(IOcrSubtitle imageSubtitles, BatchConvertItem item, CancellationToken cancellationToken)
     {
+        var fileName = Path.Combine(Se.OcrFolder, Se.Settings.Ocr.NOcrDatabase);
+        var nOcrDb = new NOcrDb(string.Empty);
         item.Subtitle = new Subtitle();
         for (var i = 0; i < imageSubtitles.Count; i++)
         {
+            var pct = (i + 1) * 100 / imageSubtitles.Count;
             var bitmap = imageSubtitles.GetBitmap(i);
             var parentBitmap = new NikseBitmap2(bitmap);
             parentBitmap.MakeTwoColor(200);
@@ -188,8 +200,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                 }
                 else
                 {
-                    var match = _nOcrDb!.GetMatch(parentBitmap, letters, splitterItem, splitterItem.Top, true,
-                        100);
+                    var match = nOcrDb!.GetMatch(parentBitmap, letters, splitterItem, splitterItem.Top, true, 100);
                     if (match is { ExpandCount: > 0 })
                     {
                         index += match.ExpandCount - 1;
@@ -214,28 +225,85 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         }
     }
 
-
-    private async Task WriteToImageBasedFormat(BatchConvertItem item, IOcrSubtitle? imageSubtitle, CancellationToken cancellationToken)
+    private void WriteToImageBasedFormat(BatchConvertItem item, IOcrSubtitle? imageSubtitle, CancellationToken cancellationToken)
     {
+        var imageParameters = new List<ImageParameter>();
+        for (var i = 0; i < imageSubtitle.Count; i++)
+        {
+            var param = new ImageParameter
+            {
+                Alignment = ExportAlignment.BottomCenter,
+                ContentAlignment = ExportContentAlignment.Center,
+                PaddingLeftRight = 0,
+                PaddingTopBottom = 0,
+                Index = i,
+                Text = string.Empty,
+                StartTime = imageSubtitle.GetStartTime(i),
+                EndTime = imageSubtitle.GetEndTime(i),
+                FontColor = SKColors.White,
+                FontName = "Arial",
+                FontSize = 24,
+                IsBold = false,
+                OutlineColor = SKColors.Black,
+                OutlineWidth = 2,
+                ShadowColor = SKColors.Black,
+                ShadowWidth = 2,
+                BackgroundColor = SKColors.Transparent,
+                BackgroundCornerRadius = 0,
+                ScreenWidth = imageSubtitle.GetScreenSize(i).Width,
+                ScreenHeight = imageSubtitle.GetScreenSize(i).Height,
+                BottomTopMargin = 0,
+                LeftRightMargin = 0,
+                Bitmap = imageSubtitle.GetBitmap(i),
+            };
+            var position = imageSubtitle.GetPosition(i);
+            if (position.X >= 0 && position.Y >= 0)
+            {
+                param.OverridePosition = position;
+            }
+            imageParameters.Add(param);
+        }
+
+
         IExportHandler? exportHandler = null;
+        string extension = string.Empty;
         if (_config.TargetFormatName == FormatBluRaySup)
         {
             exportHandler = new ExportHandlerBluRaySup();
+            extension = ".sup";
         }
 
         if (_config.TargetFormatName == FormatBdnXml)
         {
             //exportHandler = new ExportHandlerBdnXml();
+            extension = ".xml";
         }
 
         if (_config.TargetFormatName == FormatVobSub)
         {
             exportHandler = new ExportHandlerVobSub();
+            extension = ".sub";
+
         }
 
         if (_config.TargetFormatName == FormatDostImage)
         {
+            extension = ".dost";
         }
+
+        if (exportHandler == null || imageParameters.Count == 0)
+        {
+            item.Status = string.Format(Se.Language.General.ErrorX, Se.Language.General.Error);
+            return;
+        }
+
+        var path = MakeOutputFileName(item, extension);
+        exportHandler.WriteHeader(path, imageParameters[0]);
+        for (var i = 0; i < imageParameters.Count; i++)
+        {
+            exportHandler.WriteParagraph(imageParameters[i]);
+        }
+        exportHandler.WriteFooter();
     }
 
     private async Task SaveSubtitleFormat(BatchConvertItem item, SubtitleFormat format, CancellationToken cancellationToken)
@@ -243,7 +311,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         try
         {
             var converted = format.ToText(item.Subtitle, _config.TargetEncoding);
-            var path = MakeOutputFileName(item, format);
+            var path = MakeOutputFileName(item, format.Extension);
             await File.WriteAllTextAsync(path, converted, cancellationToken);
             item.Status = Se.Language.General.Converted;
         }
@@ -871,7 +939,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         return subtitle;
     }
 
-    private string MakeOutputFileName(BatchConvertItem item, SubtitleFormat format)
+    private string MakeOutputFileName(BatchConvertItem item, string extension)
     {
         var outputFolder = _config.SaveInSourceFolder || string.IsNullOrEmpty(_config.OutputFolder)
             ? Path.GetDirectoryName(item.FileName)
@@ -882,7 +950,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         }
 
         var fileName = Path.GetFileNameWithoutExtension(item.FileName);
-        var targetExtension = format.Extension;
+        var targetExtension = extension;
         var outputFileName = Path.Combine(outputFolder, fileName + targetExtension);
         if (!File.Exists(outputFileName))
         {

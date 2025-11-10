@@ -512,6 +512,7 @@ public class LanguageGeneral
     public string OverwriteExistingFiles { get; set; }
     public string TargetEncoding { get; set; }
     public string OcrDotDotDot { get; set; }
+    public string OcrPercentX { get; set; }
 
     public LanguageGeneral()
     {
@@ -1023,5 +1024,6 @@ public class LanguageGeneral
         OverwriteExistingFiles = "Overwrite existing files";
         TargetEncoding = "Target encoding";
         OcrDotDotDot = "OCR...";
+        OcrPercentX = "OCR: {0}%";
     }
 }
