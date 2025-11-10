@@ -20,12 +20,17 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Controls;
+using Avalonia.Threading;
+using Nikse.SubtitleEdit.Features.Ocr;
+using Nikse.SubtitleEdit.Features.Ocr.NOcr;
+using Nikse.SubtitleEdit.Logic.Ocr;
+using SkiaSharp;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
 public class BatchConverter : IBatchConverter, IFixCallbacks
 {
-
     public const string FormatEbuStl = "EBU stl";
     public const string FormatAyato = "Ayato";
     public const string FormatBdnXml = "BDN-XML";
@@ -49,9 +54,12 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
     public string Language { get; set; } = "en";
 
     private readonly Dictionary<string, Regex> _compiledRegExList;
+    
+    private readonly INOcrCaseFixer _nOcrCaseFixer;
 
-    public BatchConverter()
+    public BatchConverter(INOcrCaseFixer nOcrCaseFixer)
     {
+        _nOcrCaseFixer = nOcrCaseFixer;
         _config = new BatchConvertConfig();
         _subtitleFormats = new List<SubtitleFormat>();
         _compiledRegExList = new Dictionary<string, Regex>();
@@ -96,7 +104,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         if (imageSubtitle != null && !_config.IsTargetFormatImageBased)
         {
             item.Status = Se.Language.General.OcrDotDotDot;
-            //TODO: OCR
+            await RunOcrTesseract(imageSubtitle, item, cancellationToken);
         }
 
         // Run actions
@@ -141,6 +149,72 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         await WriteToImageBasedFormat(item, imageSubtitle, cancellationToken);
     }
 
+    private static async Task RunOcrTesseract(IOcrSubtitle imageSubtitles, BatchConvertItem item, CancellationToken cancellationToken)
+    {
+        var tesseractOcr = new TesseractOcr();
+        var language = "eng";
+        item.Subtitle = new Subtitle();
+        for (var i = 0; i < imageSubtitles.Count; i++)
+        {
+            var bitmap = imageSubtitles.GetBitmap(i);
+            var text = await tesseractOcr.Ocr(bitmap, language, cancellationToken);
+            var p = new Paragraph(text, imageSubtitles.GetStartTime(i).TotalMilliseconds, imageSubtitles.GetEndTime(i).TotalMilliseconds);
+            item.Subtitle.Paragraphs.Add(p);
+        }
+    }
+
+    private void RunNOcr(IOcrSubtitle imageSubtitles, BatchConvertItem item, CancellationToken cancellationToken)
+    {
+        item.Subtitle = new Subtitle();
+        for (var i = 0; i < imageSubtitles.Count; i++)
+        {
+            var bitmap = imageSubtitles.GetBitmap(i);
+            var parentBitmap = new NikseBitmap2(bitmap);
+            parentBitmap.MakeTwoColor(200);
+            parentBitmap.CropTop(0, new SKColor(0, 0, 0, 0));
+            var letters = NikseBitmapImageSplitter2.SplitBitmapToLettersNew(parentBitmap, 12,
+                false, true, 20, true);
+            int index = 0;
+            var matches = new List<NOcrChar>();
+            while (index < letters.Count)
+            {
+                var splitterItem = letters[index];
+                if (splitterItem.NikseBitmap == null)
+                {
+                    if (splitterItem.SpecialCharacter != null)
+                    {
+                        matches.Add(new NOcrChar { Text = splitterItem.SpecialCharacter });
+                    }
+                }
+                else
+                {
+                    var match = _nOcrDb!.GetMatch(parentBitmap, letters, splitterItem, splitterItem.Top, true,
+                        100);
+                    if (match is { ExpandCount: > 0 })
+                    {
+                        index += match.ExpandCount - 1;
+                    }
+
+                    if (match == null)
+                    {
+                        matches.Add(new NOcrChar { Text = "*" });
+                    }
+                    else
+                    {
+                        matches.Add(new NOcrChar { Text = _nOcrCaseFixer.FixUppercaseLowercaseIssues(splitterItem, match), Italic = match.Italic });
+                    }
+                }
+
+                index++;
+            }
+
+            var text = ItalicTextMerger.MergeWithItalicTags(matches).Trim();
+            var p = new Paragraph(text, imageSubtitles.GetStartTime(i).TotalMilliseconds, imageSubtitles.GetEndTime(i).TotalMilliseconds);
+            item.Subtitle.Paragraphs.Add(p);
+        }
+    }
+
+
     private async Task WriteToImageBasedFormat(BatchConvertItem item, IOcrSubtitle? imageSubtitle, CancellationToken cancellationToken)
     {
         IExportHandler? exportHandler = null;
@@ -161,7 +235,6 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
 
         if (_config.TargetFormatName == FormatDostImage)
         {
-
         }
     }
 
@@ -187,6 +260,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         {
             profile = Se.Settings.File.ExportImages.Profiles.FirstOrDefault();
         }
+
         if (profile == null)
         {
             profile = new SeExportImagesProfile();
