@@ -147,17 +147,17 @@ public partial class BatchConvertViewModel : ObservableObject
         BatchFunctions = new ObservableCollection<BatchConvertFunction>();
 
         TargetFormats = new ObservableCollection<string>(SubtitleFormat.AllSubtitleFormats.Select(p => p.Name));
-        TargetFormats.Add(BatchConverter.TargetFormatAyato);
-        TargetFormats.Add(BatchConverter.TargetFormatBdnXml);
-        TargetFormats.Add(BatchConverter.TargetFormatBluRaySup);
-        TargetFormats.Add(BatchConverter.TargetFormatCavena890);
-        TargetFormats.Add(BatchConverter.TargetFormatCustomTextFormat);
-        TargetFormats.Add(BatchConverter.TargetFormatDostImage);
-        TargetFormats.Add(BatchConverter.TargetFormatFcpImage);
-        TargetFormats.Add(BatchConverter.TargetFormatImagesWithTimeCodesInFileName);
-        TargetFormats.Add(BatchConverter.TargetFormatPac);
-        TargetFormats.Add(BatchConverter.TargetFormatPlainText);
-        TargetFormats.Add(BatchConverter.TargetFormatVobSub);
+        TargetFormats.Add(BatchConverter.FormatAyato);
+        TargetFormats.Add(BatchConverter.FormatBdnXml);
+        TargetFormats.Add(BatchConverter.FormatBluRaySup);
+        TargetFormats.Add(BatchConverter.FormatCavena890);
+        TargetFormats.Add(BatchConverter.FormatCustomTextFormat);
+        TargetFormats.Add(BatchConverter.FormatDostImage);
+        TargetFormats.Add(BatchConverter.FormatFcpImage);
+        TargetFormats.Add(BatchConverter.FormatImagesWithTimeCodesInFileName);
+        TargetFormats.Add(BatchConverter.FormatPac);
+        TargetFormats.Add(BatchConverter.FormatPlainText);
+        TargetFormats.Add(BatchConverter.FormatVobSub);
 
         DeleteLineNumbers = new ObservableCollection<int>();
         BatchItemsInfo = string.Empty;
@@ -557,12 +557,12 @@ public partial class BatchConvertViewModel : ObservableObject
             var format = Se.Language.General.Unknown;
             if (ext == ".sup" && FileUtil.IsBluRaySup(fileName))
             {
-                format = BatchConverter.TargetFormatBluRaySup;
+                format = BatchConverter.FormatBluRaySup;
             }
 
             if (ext == ".sub" && FileUtil.IsVobSub(fileName))
             {
-                format = BatchConverter.TargetFormatVobSub;
+                format = BatchConverter.FormatVobSub;
             }
 
             if (format == Se.Language.General.Unknown && fileInfo.Length < 200_000)
@@ -579,27 +579,27 @@ public partial class BatchConvertViewModel : ObservableObject
                 var lines = FileUtil.ReadAllLinesShared(fileName, LanguageAutoDetect.GetEncodingFromFile(fileName));
                 if (ext == ".pac" && new Pac().IsMine(lines, fileName))
                 {
-                    format = BatchConverter.TargetFormatPac;
+                    format = BatchConverter.FormatPac;
                 }
 
                 if (ext == ".890" && new Cavena890().IsMine(lines, fileName))
                 {
-                    format = BatchConverter.TargetFormatCavena890;
+                    format = BatchConverter.FormatCavena890;
                 }
 
                 if (ext == ".xml" && new BdnXml().IsMine(lines, fileName))
                 {
-                    format = BatchConverter.TargetFormatBdnXml;
+                    format = BatchConverter.FormatBdnXml;
                 }
 
                 if (ext == ".dost" && new Dost().IsMine(lines, fileName))
                 {
-                    format = BatchConverter.TargetFormatDostImage;
+                    format = BatchConverter.FormatDostImage;
                 }
 
                 if (ext == ".aya" && new Ayato().IsMine(lines, fileName))
                 {
-                    format = BatchConverter.TargetFormatAyato;
+                    format = BatchConverter.FormatAyato;
                 }
             }
 

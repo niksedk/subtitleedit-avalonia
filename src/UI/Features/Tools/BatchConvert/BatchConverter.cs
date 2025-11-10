@@ -26,17 +26,18 @@ namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 public class BatchConverter : IBatchConverter, IFixCallbacks
 {
 
-    public const string TargetFormatAyato = "Ayato";
-    public const string TargetFormatBdnXml = "BDN-XML";
-    public const string TargetFormatBluRaySup = "Blu-ray sup";
-    public const string TargetFormatCavena890 = "Cavena 890";
-    public const string TargetFormatCustomTextFormat = "Custom text format";
-    public const string TargetFormatDostImage = "Dost-image";
-    public const string TargetFormatFcpImage = "FCP-image";
-    public const string TargetFormatImagesWithTimeCodesInFileName = "Images with time codes in file name";
-    public const string TargetFormatPac = "PAC";
-    public const string TargetFormatPlainText = "Plain text";
-    public const string TargetFormatVobSub = "VobSub";
+    public const string FormatEbuStl = "EBU stl";
+    public const string FormatAyato = "Ayato";
+    public const string FormatBdnXml = "BDN-XML";
+    public const string FormatBluRaySup = "Blu-ray sup";
+    public const string FormatCavena890 = "Cavena 890";
+    public const string FormatCustomTextFormat = "Custom text format";
+    public const string FormatDostImage = "Dost-image";
+    public const string FormatFcpImage = "FCP-image";
+    public const string FormatImagesWithTimeCodesInFileName = "Images with time codes in file name";
+    public const string FormatPac = "PAC";
+    public const string FormatPlainText = "Plain text";
+    public const string FormatVobSub = "VobSub";
 
     private BatchConvertConfig _config;
     private List<SubtitleFormat> _subtitleFormats;
@@ -70,17 +71,17 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         }
 
         IOcrSubtitle? imageSubtitle = null;
-        if (item.Format == TargetFormatBluRaySup)
+        if (item.Format == FormatBluRaySup)
         {
             var log = new StringBuilder();
             var pcsData = BluRaySupParser.ParseBluRaySup(item.FileName, log);
             imageSubtitle = new OcrSubtitleBluRay(pcsData);
         }
-        else if (item.Format == TargetFormatBdnXml && item.Subtitle != null)
+        else if (item.Format == FormatBdnXml && item.Subtitle != null)
         {
             imageSubtitle = new OcrSubtitleBdn(item.Subtitle, item.FileName, false);
         }
-        else if (item.Format == TargetFormatVobSub)
+        else if (item.Format == FormatVobSub)
         {
             var vobSubParser = new VobSubParser(true);
             string idxFileName = Path.ChangeExtension(item.FileName, ".idx");
@@ -92,73 +93,100 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             //TODO: multi track
         }
 
+        if (imageSubtitle != null && !_config.IsTargetFormatImageBased)
+        {
+            item.Status = Se.Language.General.OcrDotDotDot;
+            //TODO: OCR
+        }
+
+        // Run actions
+        var imageToImage = _config.IsTargetFormatImageBased && imageSubtitle != null;
+        if (item.Subtitle != null)
+        {
+            item.Subtitle = await RunConvertFunctions(item, cancellationToken, imageToImage);
+        }
+
+        // Save text based formats
         foreach (var format in _subtitleFormats)
         {
             if (format.Name == _config.TargetFormatName && item.Subtitle != null)
             {
-                item.Status = Se.Language.General.ConvertingDotDotDot;
-                try
-                {
-                    var processedSubtitle = await RunConvertFunctions(item, cancellationToken);
-                    var converted = format.ToText(processedSubtitle, _config.TargetEncoding);
-                    var path = MakeOutputFileName(item, format);
-                    await File.WriteAllTextAsync(path, converted, cancellationToken);
-                    item.Status = Se.Language.General.Converted;
-                }
-                catch (Exception exception)
-                {
-                    item.Status = string.Format(Se.Language.General.ErrorX, exception.Message);
-                }
+                await SaveSubtitleFormat(item, format, cancellationToken);
+                return;
+            }
+        }
 
+        // Save binary formats
+        var binaryFormats = new Dictionary<string, SubtitleFormat>
+        {
+            { FormatPac, new Pac() },
+            { FormatCavena890, new Cavena890() },
+            { FormatAyato, new Ayato() },
+            { FormatEbuStl, new Ebu() },
+        };
+        foreach (var format in binaryFormats.Values)
+        {
+            if (format.Name == _config.TargetFormatName && item.Subtitle != null)
+            {
+                await SaveSubtitleFormat(item, format, cancellationToken);
                 return;
             }
         }
 
         if (_config.IsTargetFormatImageBased && imageSubtitle == null)
         {
-            imageSubtitle = CreateImageSubtitles(item);
+            imageSubtitle = CreateImageSubtitles(item); // text to image (create bitmaps from text)
         }
 
+        await WriteToImageBasedFormat(item, imageSubtitle, cancellationToken);
+    }
+
+    private async Task WriteToImageBasedFormat(BatchConvertItem item, IOcrSubtitle? imageSubtitle, CancellationToken cancellationToken)
+    {
         IExportHandler? exportHandler = null;
-        if (_config.TargetFormatName == TargetFormatBluRaySup)
+        if (_config.TargetFormatName == FormatBluRaySup)
         {
             exportHandler = new ExportHandlerBluRaySup();
         }
 
-        if (_config.TargetFormatName == TargetFormatBdnXml)
+        if (_config.TargetFormatName == FormatBdnXml)
         {
             //exportHandler = new ExportHandlerBdnXml();
         }
 
-        if (_config.TargetFormatName == TargetFormatVobSub)
+        if (_config.TargetFormatName == FormatVobSub)
         {
             exportHandler = new ExportHandlerVobSub();
         }
 
-        if (_config.TargetFormatName == TargetFormatPac)
-        {
-
-        }
-
-        if (_config.TargetFormatName == TargetFormatCavena890)
-        {
-
-        }
-
-        if (_config.TargetFormatName == TargetFormatAyato)
-        {
-
-        }
-
-        if (_config.TargetFormatName == TargetFormatDostImage)
+        if (_config.TargetFormatName == FormatDostImage)
         {
 
         }
     }
 
+    private async Task SaveSubtitleFormat(BatchConvertItem item, SubtitleFormat format, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var converted = format.ToText(item.Subtitle, _config.TargetEncoding);
+            var path = MakeOutputFileName(item, format);
+            await File.WriteAllTextAsync(path, converted, cancellationToken);
+            item.Status = Se.Language.General.Converted;
+        }
+        catch (Exception exception)
+        {
+            item.Status = string.Format(Se.Language.General.ErrorX, exception.Message);
+        }
+    }
+
     private IOcrSubtitle? CreateImageSubtitles(BatchConvertItem item)
     {
-        var profile = Se.Settings.File.ExportImages.Profiles.FirstOrDefault();
+        var profile = Se.Settings.File.ExportImages.Profiles.FirstOrDefault(p => p.ProfileName == Se.Settings.File.ExportImages.LastProfileName);
+        if (profile == null)
+        {
+            profile = Se.Settings.File.ExportImages.Profiles.FirstOrDefault();
+        }
         if (profile == null)
         {
             profile = new SeExportImagesProfile();
@@ -207,24 +235,37 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         return new OcrSubtitleImageParameter(imageParameters);
     }
 
-    private async Task<Subtitle> RunConvertFunctions(BatchConvertItem item, CancellationToken cancellationToken)
+    private async Task<Subtitle> RunConvertFunctions(BatchConvertItem item, CancellationToken cancellationToken, bool imageToImage)
     {
         var s = new Subtitle(item.Subtitle, false);
         Language = LanguageAutoDetect.AutoDetectGoogleLanguageOrNull(s) ?? "en";
-        s = AdjustDisplayDuration(s);
-        s = await AutoTranslate(s, cancellationToken);
-        s = ChangeCasing(s, Language);
-        s = ChangeFrameRate(s);
-        s = ChangeSpeed(s);
-        s = DeleteLines(s);
-        s = FixCommonErrors(s);
-        s = MergeLinesWithSameText(s);
-        s = MergeLinesWithSameTimeCodes(s, Language);
-        s = MultipleReplace(s);
-        s = OffsetTimeCodes(s);
-        s = RemoveFormatting(s);
-        s = RemoveLineBreaks(s);
-        s = RemoveTextForHearingImpaired(s, Language);
+
+        if (imageToImage)
+        {
+            s = AdjustDisplayDuration(s);
+            s = ChangeFrameRate(s);
+            s = ChangeSpeed(s);
+            s = DeleteLines(s);
+            s = OffsetTimeCodes(s);
+        }
+        else
+        {
+            s = AdjustDisplayDuration(s);
+            s = await AutoTranslate(s, cancellationToken);
+            s = ChangeCasing(s, Language);
+            s = ChangeFrameRate(s);
+            s = ChangeSpeed(s);
+            s = DeleteLines(s);
+            s = FixCommonErrors(s);
+            s = MergeLinesWithSameText(s);
+            s = MergeLinesWithSameTimeCodes(s, Language);
+            s = MultipleReplace(s);
+            s = OffsetTimeCodes(s);
+            s = RemoveFormatting(s);
+            s = RemoveLineBreaks(s);
+            s = RemoveTextForHearingImpaired(s, Language);
+        }
+
         return s;
     }
 

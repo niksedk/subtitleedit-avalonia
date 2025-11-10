@@ -511,6 +511,7 @@ public class LanguageGeneral
     public string UseOutputFolder { get; set; }
     public string OverwriteExistingFiles { get; set; }
     public string TargetEncoding { get; set; }
+    public string OcrDotDotDot { get; set; }
 
     public LanguageGeneral()
     {
@@ -1021,5 +1022,6 @@ public class LanguageGeneral
         UseOutputFolder = "Use output folder";
         OverwriteExistingFiles = "Overwrite existing files";
         TargetEncoding = "Target encoding";
+        OcrDotDotDot = "OCR...";
     }
 }

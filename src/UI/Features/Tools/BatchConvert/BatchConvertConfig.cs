@@ -54,12 +54,12 @@ public class BatchConvertConfig
 
     public bool IsTargetFormatImageBased =>
         TargetFormatName is 
-            BatchConverter.TargetFormatBluRaySup or 
-            BatchConverter.TargetFormatVobSub or 
-            BatchConverter.TargetFormatDostImage or 
-            BatchConverter.TargetFormatBdnXml or 
-            BatchConverter.TargetFormatFcpImage or 
-            BatchConverter.TargetFormatImagesWithTimeCodesInFileName;
+            BatchConverter.FormatBluRaySup or 
+            BatchConverter.FormatVobSub or 
+            BatchConverter.FormatDostImage or 
+            BatchConverter.FormatBdnXml or 
+            BatchConverter.FormatFcpImage or 
+            BatchConverter.FormatImagesWithTimeCodesInFileName;
 
     public class RemoveFormattingSettings
     {
