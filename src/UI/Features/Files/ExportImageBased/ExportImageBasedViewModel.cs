@@ -654,17 +654,17 @@ public partial class ExportImageBasedViewModel : ObservableObject
         return new SKPointI(x, y);
     }
 
-    private SKBitmap GenerateBitmap(ImageParameter ip)
+    public static SKBitmap GenerateBitmap(ImageParameter ip)
     {
         var fontName = ip.FontName;
         var fontSize = ip.FontSize;
         var fontColor = ip.FontColor;
 
-        var outlineColor = OutlineColor.ToSKColor();
-        var outlineWidth = SelectedOutlineWidth;
+        var outlineColor = ip.OutlineColor;
+        var outlineWidth = ip.OutlineWidth;
 
-        var shadowColor = ShadowColor.ToSKColor();
-        var shadowWidth = SelectedShadowWidth;
+        var shadowColor = ip.ShadowColor;
+        var shadowWidth = ip.ShadowWidth;
 
         // Parse text and create text segments with styling
         var segments = ParseTextWithStyling(ip.Text, fontColor);
@@ -755,7 +755,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         // Set up paint
         using var paint = new SKPaint
         {
-            Color = BoxColor.ToSKColor(),
+            Color = ip.BackgroundColor,
             IsAntialias = true,
         };
 
@@ -767,7 +767,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
             width - effectsPadding,
             height - effectsPadding
         );
-        float cornerRadius = (float)SelectedBoxCornerRadius;
+        float cornerRadius = (float)ip.BackgroundCornerRadius;
 
         // Draw the rounded rectangle
         canvas.DrawRoundRect(boxRect, cornerRadius, cornerRadius, paint);

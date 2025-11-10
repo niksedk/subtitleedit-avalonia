@@ -1,10 +1,16 @@
-﻿using Nikse.SubtitleEdit.Core.Common;
+﻿using Avalonia.Skia;
+using Nikse.SubtitleEdit.Core.BluRaySup;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Forms;
 using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Core.VobSub;
+using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameTimeCodes;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Collections.Generic;
@@ -14,15 +20,13 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Core.BluRaySup;
-using Nikse.SubtitleEdit.Core.VobSub;
-using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
+using static Avalonia.Controls.FlatColorPalette;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
 public class BatchConverter : IBatchConverter, IFixCallbacks
 {
-    
+
     public const string TargetFormatAyato = "Ayato";
     public const string TargetFormatBdnXml = "BDN-XML";
     public const string TargetFormatBluRaySup = "Blu-ray sup";
@@ -34,7 +38,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
     public const string TargetFormatPac = "PAC";
     public const string TargetFormatPlainText = "Plain text";
     public const string TargetFormatVobSub = "VobSub";
-    
+
     private BatchConvertConfig _config;
     private List<SubtitleFormat> _subtitleFormats;
 
@@ -71,9 +75,9 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         {
             var log = new StringBuilder();
             var pcsData = BluRaySupParser.ParseBluRaySup(item.FileName, log);
-            imageSubtitle =  new OcrSubtitleBluRay(pcsData);
+            imageSubtitle = new OcrSubtitleBluRay(pcsData);
         }
-        else if (item.Format == TargetFormatBdnXml)
+        else if (item.Format == TargetFormatBdnXml && item.Subtitle != null)
         {
             imageSubtitle = new OcrSubtitleBdn(item.Subtitle, item.FileName, false);
         }
@@ -113,7 +117,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
 
         if (_config.IsTargetFormatImageBased && imageSubtitle == null)
         {
-            // create images
+            imageSubtitle = CreateImageSubtitles(item);
         }
 
         if (_config.TargetFormatName == TargetFormatBluRaySup)
@@ -123,33 +127,84 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
 
         if (_config.TargetFormatName == TargetFormatBdnXml)
         {
-            
+
         }
-        
+
         if (_config.TargetFormatName == TargetFormatVobSub)
         {
-            
+
         }
 
         if (_config.TargetFormatName == TargetFormatPac)
         {
-            
+
         }
-        
+
         if (_config.TargetFormatName == TargetFormatCavena890)
         {
-            
+
         }
 
         if (_config.TargetFormatName == TargetFormatAyato)
         {
-            
+
         }
 
         if (_config.TargetFormatName == TargetFormatDostImage)
         {
-            
+
         }
+    }
+
+    private IOcrSubtitle? CreateImageSubtitles(BatchConvertItem item)
+    {
+        var profile = Se.Settings.File.ExportImages.Profiles.FirstOrDefault();
+        if (profile == null)
+        {
+            profile = new SeExportImagesProfile();
+        }
+
+        if (item.Subtitle == null)
+        {
+            return null;
+        }
+
+        var imageParameters = new List<ImageParameter>();
+        for (var i = 0; i < item.Subtitle.Paragraphs.Count; i++)
+        {
+            Paragraph? subtitle = item.Subtitle.Paragraphs[i];
+            var imageParameter = new ImageParameter
+            {
+                Alignment = ExportAlignment.BottomCenter,
+                ContentAlignment = ExportContentAlignment.Center,
+                PaddingLeftRight = profile.PaddingLeftRight,
+                PaddingTopBottom = profile.PaddingTopBottom,
+                Index = i,
+                Text = HtmlUtil.RemoveAssAlignmentTags(subtitle.Text),
+                StartTime = subtitle.StartTime.TimeSpan,
+                EndTime = subtitle.EndTime.TimeSpan,
+                FontColor = profile.FontColor.FromHexToColor().ToSKColor(),
+                FontName = profile.FontName,
+                FontSize = profile.FontSize,
+                IsBold = profile.IsBold,
+                LineSpacingPercent = profile.LineSpacingPercent,
+                OutlineColor = profile.OutlineColor.FromHexToColor().ToSKColor(),
+                OutlineWidth = profile.OutlineWidth,
+                ShadowColor = profile.ShadowColor.FromHexToColor().ToSKColor(),
+                ShadowWidth = profile.ShadowWidth,
+                BackgroundColor = profile.BackgroundColor.FromHexToColor().ToSKColor(),
+                BackgroundCornerRadius = profile.BackgroundCornerRadius,
+                ScreenWidth = profile.ScreenWidth,
+                ScreenHeight = profile.ScreenHeight,
+                BottomTopMargin = profile.BottomTopMargin,
+                LeftRightMargin = profile.LeftRightMargin,
+            };
+
+            imageParameter.Bitmap = ExportImageBasedViewModel.GenerateBitmap(imageParameter);
+            imageParameters.Add(imageParameter);
+        }
+
+        return new OcrSubtitleImageParameter(imageParameters);
     }
 
     private async Task<Subtitle> RunConvertFunctions(BatchConvertItem item, CancellationToken cancellationToken)
