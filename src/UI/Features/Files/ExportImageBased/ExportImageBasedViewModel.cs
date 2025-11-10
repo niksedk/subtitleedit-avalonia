@@ -429,8 +429,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
         var subtitle = Subtitles[i];
         var imageParameter = new ImageParameter
         {
-            Alignment = GetContentAlignment(subtitle.Text,SelectedAlignment.Alignment),
-            ContentAlignment =  SelectedContentAlignment.ContentAlignment,
+            Alignment = GetContentAlignment(subtitle.Text, SelectedAlignment.Alignment),
+            ContentAlignment = SelectedContentAlignment.ContentAlignment,
             PaddingLeftRight = SelectedPaddingLeftRight,
             PaddingTopBottom = SelectedPaddingTopBottom,
             Index = i,

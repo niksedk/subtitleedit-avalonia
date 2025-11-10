@@ -20,7 +20,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using static Avalonia.Controls.FlatColorPalette;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -120,19 +119,20 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             imageSubtitle = CreateImageSubtitles(item);
         }
 
+        IExportHandler? exportHandler = null;
         if (_config.TargetFormatName == TargetFormatBluRaySup)
         {
-            return;
+            exportHandler = new ExportHandlerBluRaySup();
         }
 
         if (_config.TargetFormatName == TargetFormatBdnXml)
         {
-
+            //exportHandler = new ExportHandlerBdnXml();
         }
 
         if (_config.TargetFormatName == TargetFormatVobSub)
         {
-
+            exportHandler = new ExportHandlerVobSub();
         }
 
         if (_config.TargetFormatName == TargetFormatPac)

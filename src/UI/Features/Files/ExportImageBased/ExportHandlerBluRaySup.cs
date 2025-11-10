@@ -9,7 +9,7 @@ public class ExportHandlerBluRaySup : IExportHandler
 {
     public ExportImageType ExportImageType => ExportImageType.BluRaySup;
     public string Extension => ".sup";
-    public bool UseFileName => true;    
+    public bool UseFileName => true;
     public string Title => "Export to Blu-ray sup";
 
     private int _width;
@@ -31,7 +31,7 @@ public class ExportHandlerBluRaySup : IExportHandler
 
     public void WriteParagraph(ImageParameter param)
     {
-        _fileStream!.Write(param.Buffer, 0, param.Buffer.Length);    
+        _fileStream!.Write(param.Buffer, 0, param.Buffer.Length);
     }
 
     public void WriteFooter()
@@ -48,7 +48,7 @@ public class ExportHandlerBluRaySup : IExportHandler
             Width = param.ScreenWidth,
             Height = param.ScreenHeight,
             IsForced = param.IsForced,
-            CompositionNumber = (param.Index+1) * 2,
+            CompositionNumber = (param.Index + 1) * 2,
         };
         if (param.IsFullFrame)
         {
@@ -114,12 +114,12 @@ public class ExportHandlerBluRaySup : IExportHandler
             var margin = param.LeftRightMargin;
 
             param.Buffer = BluRaySupPicture.CreateSupFrame(
-                brSub, 
-                param.Bitmap, 
-                param.FramesPerSecond, 
-                param.BottomTopMargin, 
-                margin, 
-                param.BluRayContentAlignment, 
+                brSub,
+                param.Bitmap,
+                param.FramesPerSecond,
+                param.BottomTopMargin,
+                margin,
+                param.BluRayContentAlignment,
                 param.OverridePosition.HasValue ? new BluRayPoint(param.OverridePosition.Value.X, param.OverridePosition.Value.Y) : null);
         }
     }

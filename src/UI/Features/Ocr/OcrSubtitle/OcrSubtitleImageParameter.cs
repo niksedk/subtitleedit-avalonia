@@ -61,8 +61,38 @@ public class OcrSubtitleImageParameter : IOcrSubtitle
             return new SKPointI(-1, -1);
         }
 
-        //TODO: use with/height and alignments
-        return new SKPointI(0, 0);
+        var left = 0;
+        var top = 0;
+        var param = _imageParameterList[index];
+
+        if (param.Alignment == ExportAlignment.BottomLeft || param.Alignment == ExportAlignment.MiddleLeft || param.Alignment == ExportAlignment.TopLeft)
+        {
+            left = param.LeftRightMargin;
+        }
+        else if (param.Alignment == ExportAlignment.BottomRight || param.Alignment == ExportAlignment.MiddleRight || param.Alignment == ExportAlignment.TopRight)
+        {
+            left = param.ScreenWidth - param.Bitmap.Width - param.LeftRightMargin;
+        }
+
+        if (param.Alignment == ExportAlignment.TopLeft || param.Alignment == ExportAlignment.TopCenter || param.Alignment == ExportAlignment.TopRight)
+        {
+            top = param.BottomTopMargin;
+        }
+
+        if (param.Alignment == ExportAlignment.MiddleLeft || param.Alignment == ExportAlignment.MiddleCenter || param.Alignment == ExportAlignment.MiddleRight)
+        {
+            top = param.ScreenHeight - (param.Bitmap.Height / 2);
+        }
+
+        if (param.OverridePosition != null &&
+            param.OverridePosition.Value.X >= 0 && param.OverridePosition.Value.X < param.ScreenWidth &&
+            param.OverridePosition.Value.Y >= 0 && param.OverridePosition.Value.Y < param.ScreenHeight)
+        {
+            left = param.OverridePosition.Value.X;
+            top = param.OverridePosition.Value.Y;
+        }
+
+        return new SKPointI(left, top);
     }
 
     public SKSizeI GetScreenSize(int index)
@@ -71,7 +101,7 @@ public class OcrSubtitleImageParameter : IOcrSubtitle
         {
             return new SKSizeI(-1, -1);
         }
-        
+
         return new SKSizeI(_imageParameterList[index].ScreenWidth, _imageParameterList[index].ScreenHeight);
     }
 }
