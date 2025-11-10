@@ -14,11 +14,27 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Core.BluRaySup;
+using Nikse.SubtitleEdit.Core.VobSub;
+using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
 public class BatchConverter : IBatchConverter, IFixCallbacks
 {
+    
+    public const string TargetFormatAyato = "Ayato";
+    public const string TargetFormatBdnXml = "BDN-XML";
+    public const string TargetFormatBluRaySup = "Blu-ray sup";
+    public const string TargetFormatCavena890 = "Cavena 890";
+    public const string TargetFormatCustomTextFormat = "Custom text format";
+    public const string TargetFormatDostImage = "Dost-image";
+    public const string TargetFormatFcpImage = "FCP-image";
+    public const string TargetFormatImagesWithTimeCodesInFileName = "Images with time codes in file name";
+    public const string TargetFormatPac = "PAC";
+    public const string TargetFormatPlainText = "Plain text";
+    public const string TargetFormatVobSub = "VobSub";
+    
     private BatchConvertConfig _config;
     private List<SubtitleFormat> _subtitleFormats;
 
@@ -50,6 +66,29 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             throw new InvalidOperationException("Initialize not called?");
         }
 
+        IOcrSubtitle? imageSubtitle = null;
+        if (item.Format == TargetFormatBluRaySup)
+        {
+            var log = new StringBuilder();
+            var pcsData = BluRaySupParser.ParseBluRaySup(item.FileName, log);
+            imageSubtitle =  new OcrSubtitleBluRay(pcsData);
+        }
+        else if (item.Format == TargetFormatBdnXml)
+        {
+            imageSubtitle = new OcrSubtitleBdn(item.Subtitle, item.FileName, false);
+        }
+        else if (item.Format == TargetFormatVobSub)
+        {
+            var vobSubParser = new VobSubParser(true);
+            string idxFileName = Path.ChangeExtension(item.FileName, ".idx");
+            vobSubParser.OpenSubIdx(item.FileName, idxFileName);
+            var vobSubMergedPackList = vobSubParser.MergeVobSubPacks();
+            var palette = vobSubParser.IdxPalette;
+            vobSubParser.VobSubPacks.Clear();
+            imageSubtitle = new OcrSubtitleVobSub(vobSubMergedPackList, palette);
+            //TODO: multi track
+        }
+
         foreach (var format in _subtitleFormats)
         {
             if (format.Name == _config.TargetFormatName && item.Subtitle != null)
@@ -68,8 +107,48 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                     item.Status = string.Format(Se.Language.General.ErrorX, exception.Message);
                 }
 
-                break;
+                return;
             }
+        }
+
+        if (_config.IsTargetFormatImageBased && imageSubtitle == null)
+        {
+            // create images
+        }
+
+        if (_config.TargetFormatName == TargetFormatBluRaySup)
+        {
+            return;
+        }
+
+        if (_config.TargetFormatName == TargetFormatBdnXml)
+        {
+            
+        }
+        
+        if (_config.TargetFormatName == TargetFormatVobSub)
+        {
+            
+        }
+
+        if (_config.TargetFormatName == TargetFormatPac)
+        {
+            
+        }
+        
+        if (_config.TargetFormatName == TargetFormatCavena890)
+        {
+            
+        }
+
+        if (_config.TargetFormatName == TargetFormatAyato)
+        {
+            
+        }
+
+        if (_config.TargetFormatName == TargetFormatDostImage)
+        {
+            
         }
     }
 

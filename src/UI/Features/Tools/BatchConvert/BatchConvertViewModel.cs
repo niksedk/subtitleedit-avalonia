@@ -136,19 +136,6 @@ public partial class BatchConvertViewModel : ObservableObject
     private List<string> _encodings;
     private const int StatisticsNumberOfLinesToShow = 10;
 
-    private const string TargetFormatAyato = "Ayato";
-    private const string TargetFormatBdnXml = "BDN-XML";
-    private const string TargetFormatBluRaySup = "Blu-ray sup";
-    private const string TargetFormatCavena890 = "Cavena 890";
-    private const string TargetFormatCustomTextFormat = "Custom text format";
-    private const string TargetFormatDostImage = "Dost-image";
-    private const string TargetFormatFcpImage = "FCP-image";
-    private const string TargetFormatImagesWithTimeCodesInFileName = "Images with time codes in file name";
-    private const string TargetFormatPac = "PAC";
-    private const string TargetFormatPlainText = "Plain text";
-    private const string TargetFormatVobSub = "VobSub";
-
-
     public BatchConvertViewModel(IWindowService windowService, IFileHelper fileHelper, IBatchConverter batchConverter, IFolderHelper folderHelper)
     {
         _windowService = windowService;
@@ -160,17 +147,17 @@ public partial class BatchConvertViewModel : ObservableObject
         BatchFunctions = new ObservableCollection<BatchConvertFunction>();
 
         TargetFormats = new ObservableCollection<string>(SubtitleFormat.AllSubtitleFormats.Select(p => p.Name));
-        TargetFormats.Add(TargetFormatAyato);
-        TargetFormats.Add(TargetFormatBdnXml);
-        TargetFormats.Add(TargetFormatBluRaySup);
-        TargetFormats.Add(TargetFormatCavena890);
-        TargetFormats.Add(TargetFormatCustomTextFormat);
-        TargetFormats.Add(TargetFormatDostImage);
-        TargetFormats.Add(TargetFormatFcpImage);
-        TargetFormats.Add(TargetFormatImagesWithTimeCodesInFileName);
-        TargetFormats.Add(TargetFormatPac);
-        TargetFormats.Add(TargetFormatPlainText);
-        TargetFormats.Add(TargetFormatVobSub);
+        TargetFormats.Add(BatchConverter.TargetFormatAyato);
+        TargetFormats.Add(BatchConverter.TargetFormatBdnXml);
+        TargetFormats.Add(BatchConverter.TargetFormatBluRaySup);
+        TargetFormats.Add(BatchConverter.TargetFormatCavena890);
+        TargetFormats.Add(BatchConverter.TargetFormatCustomTextFormat);
+        TargetFormats.Add(BatchConverter.TargetFormatDostImage);
+        TargetFormats.Add(BatchConverter.TargetFormatFcpImage);
+        TargetFormats.Add(BatchConverter.TargetFormatImagesWithTimeCodesInFileName);
+        TargetFormats.Add(BatchConverter.TargetFormatPac);
+        TargetFormats.Add(BatchConverter.TargetFormatPlainText);
+        TargetFormats.Add(BatchConverter.TargetFormatVobSub);
 
         DeleteLineNumbers = new ObservableCollection<int>();
         BatchItemsInfo = string.Empty;
@@ -570,12 +557,12 @@ public partial class BatchConvertViewModel : ObservableObject
             var format = Se.Language.General.Unknown;
             if (ext == ".sup" && FileUtil.IsBluRaySup(fileName))
             {
-                format = TargetFormatBluRaySup;
+                format = BatchConverter.TargetFormatBluRaySup;
             }
 
             if (ext == ".sub" && FileUtil.IsVobSub(fileName))
             {
-                format = TargetFormatVobSub;
+                format = BatchConverter.TargetFormatVobSub;
             }
 
             if (format == Se.Language.General.Unknown && fileInfo.Length < 200_000)
@@ -592,27 +579,27 @@ public partial class BatchConvertViewModel : ObservableObject
                 var lines = FileUtil.ReadAllLinesShared(fileName, LanguageAutoDetect.GetEncodingFromFile(fileName));
                 if (ext == ".pac" && new Pac().IsMine(lines, fileName))
                 {
-                    format = TargetFormatPac;
+                    format = BatchConverter.TargetFormatPac;
                 }
 
                 if (ext == ".890" && new Cavena890().IsMine(lines, fileName))
                 {
-                    format = TargetFormatCavena890;
+                    format = BatchConverter.TargetFormatCavena890;
                 }
 
                 if (ext == ".xml" && new BdnXml().IsMine(lines, fileName))
                 {
-                    format = TargetFormatBdnXml;
+                    format = BatchConverter.TargetFormatBdnXml;
                 }
 
                 if (ext == ".dost" && new Dost().IsMine(lines, fileName))
                 {
-                    format = TargetFormatDostImage;
+                    format = BatchConverter.TargetFormatDostImage;
                 }
 
                 if (ext == ".aya" && new Ayato().IsMine(lines, fileName))
                 {
-                    format = TargetFormatAyato;
+                    format = BatchConverter.TargetFormatAyato;
                 }
             }
 

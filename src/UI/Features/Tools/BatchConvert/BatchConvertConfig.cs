@@ -52,6 +52,15 @@ public class BatchConvertConfig
         MultipleReplace = new MultipleReplaceSettings();
     }
 
+    public bool IsTargetFormatImageBased =>
+        TargetFormatName is 
+            BatchConverter.TargetFormatBluRaySup or 
+            BatchConverter.TargetFormatVobSub or 
+            BatchConverter.TargetFormatDostImage or 
+            BatchConverter.TargetFormatBdnXml or 
+            BatchConverter.TargetFormatFcpImage or 
+            BatchConverter.TargetFormatImagesWithTimeCodesInFileName;
+
     public class RemoveFormattingSettings
     {
         public bool IsActive { get; set; }
