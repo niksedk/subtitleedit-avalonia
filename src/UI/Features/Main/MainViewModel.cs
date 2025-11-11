@@ -971,8 +971,10 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<StatisticsWindow, StatisticsViewModel>(
-            vm => { vm.Initialize(GetUpdateSubtitle(), SelectedSubtitleFormat, _subtitleFileName ?? string.Empty); });
+        var result = await ShowDialogAsync<StatisticsWindow, StatisticsViewModel>(vm => 
+        { 
+            vm.Initialize(GetUpdateSubtitle(), SelectedSubtitleFormat, _subtitleFileName ?? string.Empty); 
+        });
     }
 
     [RelayCommand]
@@ -990,8 +992,10 @@ public partial class MainViewModel :
         }
 
         IExportHandler exportHandler = new ExportHandlerBluRaySup();
-        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(
-            vm => { vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName); });
+        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(vm => 
+        { 
+            vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName); 
+        });
 
         if (!result.OkPressed)
         {

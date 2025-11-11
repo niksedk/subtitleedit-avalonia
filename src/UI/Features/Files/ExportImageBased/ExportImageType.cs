@@ -4,5 +4,8 @@ public enum ExportImageType
 {
     BdnXml,
     BluRaySup,
+    Dost,
+    Fcp,
+    ImagesWithTimeCode,
     VobSub,
 }

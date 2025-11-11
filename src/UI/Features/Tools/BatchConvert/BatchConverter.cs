@@ -113,7 +113,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             }
         }
 
-        // Run actions
+        // Run convert functions (remove formatting, etc.)
         var imageToImage = _config.IsTargetFormatImageBased && imageSubtitle != null;
         if (item.Subtitle != null)
         {
@@ -227,6 +227,12 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
 
     private void WriteToImageBasedFormat(BatchConvertItem item, IOcrSubtitle? imageSubtitle, CancellationToken cancellationToken)
     {
+        if (imageSubtitle == null)
+        {
+            item.Status = string.Format(Se.Language.General.ErrorX, Se.Language.General.Error);
+            return;
+        }
+
         var imageParameters = new List<ImageParameter>();
         for (var i = 0; i < imageSubtitle.Count; i++)
         {
@@ -275,20 +281,26 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
 
         if (_config.TargetFormatName == FormatBdnXml)
         {
-            //exportHandler = new ExportHandlerBdnXml();
-            extension = ".xml";
+            exportHandler = new ExportHandlerBdnXml();
+            extension = string.Empty; // folder
         }
 
         if (_config.TargetFormatName == FormatVobSub)
         {
             exportHandler = new ExportHandlerVobSub();
             extension = ".sub";
+        }
 
+        if (_config.TargetFormatName == FormatImagesWithTimeCodesInFileName)
+        {
+            exportHandler = new ExportHandlerImagesWithTimeCode();
+            extension = string.Empty; // folder
         }
 
         if (_config.TargetFormatName == FormatDostImage)
         {
-            extension = ".dost";
+            exportHandler = new ExportHandlerDost();
+            extension = string.Empty; // folder
         }
 
         if (exportHandler == null || imageParameters.Count == 0)
@@ -957,12 +969,12 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         var fileName = Path.GetFileNameWithoutExtension(item.FileName);
         var targetExtension = extension;
         var outputFileName = Path.Combine(outputFolder, fileName + targetExtension);
-        if (!File.Exists(outputFileName))
+        if (!File.Exists(outputFileName) && !Directory.Exists(outputFolder))
         {
             return outputFileName;
         }
 
-        if (_config.Overwrite)
+        if (_config.Overwrite && File.Exists(outputFolder))
         {
             File.Delete(outputFileName);
         }
@@ -973,7 +985,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             {
                 outputFileName = Path.Combine(outputFolder, fileName + $"_{counter}" + targetExtension);
                 counter++;
-            } while (File.Exists(outputFileName));
+            } while (File.Exists(outputFileName) || Directory.Exists(outputFileName));
         }
 
         return outputFileName;
