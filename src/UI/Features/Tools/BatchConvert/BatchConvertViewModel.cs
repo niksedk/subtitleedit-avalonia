@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -675,6 +676,9 @@ public partial class BatchConvertViewModel : ObservableObject
             else if ((ext == ".ts" || ext == ".m2ts" || ext == ".mts" || ext == ".mpg" || ext == ".mpeg") &&
                      (FileUtil.IsTransportStream(fileName) || FileUtil.IsM2TransportStream(fileName)))
             {
+                format = "Transport Stream";
+                var tsBatchItem = new BatchConvertItem(fileName, fileInfo.Length, format, subtitle);
+                BatchItems.Add(tsBatchItem);
                 continue;
             }
 
@@ -1454,5 +1458,15 @@ public partial class BatchConvertViewModel : ObservableObject
             AutoTranslateModelBrowseIsVisible = false;
             AutoTranslateModelIsVisible = false;
         }
+    }
+
+    internal void Onloaded(object? sender, RoutedEventArgs e)
+    {
+        UiUtil.RestoreWindowPosition(Window);
+    }
+
+    internal void OnClosing(object? sender, WindowClosingEventArgs e)
+    {
+        UiUtil.SaveWindowPosition(Window);
     }
 }
