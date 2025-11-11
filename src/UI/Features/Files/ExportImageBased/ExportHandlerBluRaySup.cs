@@ -16,7 +16,6 @@ public class ExportHandlerBluRaySup : IExportHandler
     private int _height;
     private FileStream? _fileStream;
 
-
     public void WriteHeader(string fileOrFolderName, ImageParameter imageParameter)
     {
         _width = imageParameter.ScreenWidth;

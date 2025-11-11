@@ -330,6 +330,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         exportHandler.WriteHeader(path, imageParameters[0]);
         for (var i = 0; i < imageParameters.Count; i++)
         {
+            exportHandler.CreateParagraph(imageParameters[i]);
             exportHandler.WriteParagraph(imageParameters[i]);
         }
         exportHandler.WriteFooter();
