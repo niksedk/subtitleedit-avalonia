@@ -310,6 +310,11 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
     {
         try
         {
+            if (item.Subtitle != null && item.Subtitle.OriginalFormat.Name != format.Name)
+            {
+                item.Subtitle.OriginalFormat.RemoveNativeFormatting(item.Subtitle, format);
+            }
+
             var converted = format.ToText(item.Subtitle, _config.TargetEncoding);
             var path = MakeOutputFileName(item, format.Extension);
             await File.WriteAllTextAsync(path, converted, cancellationToken);
