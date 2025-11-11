@@ -1000,6 +1000,30 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private async Task ExportBdnXml()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
+        IExportHandler exportHandler = new ExportHandlerBdnXml();
+        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(
+            vm => { vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName); });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+    }
+
+    [RelayCommand]
     private async Task ExportVobSub()
     {
         if (Window == null)
