@@ -5,6 +5,7 @@ using Nikse.SubtitleEdit.Core.Forms;
 using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.VobSub;
+using Nikse.SubtitleEdit.Features.Files.ExportCustomTextFormat;
 using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Ocr;
@@ -24,6 +25,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using static Google.Api.FieldInfo.Types;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -161,12 +163,65 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             }
         }
 
+        if (_config.TargetFormatName == FormatPlainText && item.Subtitle != null)
+        {
+            var path = MakeOutputFileName(item, ".txt");
+            var sb = new StringBuilder();
+            foreach (var p in item.Subtitle.Paragraphs)
+            {
+                sb.AppendLine(HtmlUtil.RemoveHtmlTags(p.Text, true));
+            }
+
+            await File.WriteAllTextAsync(path, sb.ToString(), cancellationToken);
+            return;
+        }
+
+        //TODO: fix
+        if (_config.TargetFormatName == FormatCustomTextFormat && item.Subtitle != null)
+        {
+            SaveCustomSubtitleFormat(item, cancellationToken)
+            return;
+        }
+
         if (_config.IsTargetFormatImageBased && imageSubtitle == null)
         {
             imageSubtitle = CreateImageSubtitles(item); // text to image (create bitmaps from text)
         }
 
         WriteToImageBasedFormat(item, imageSubtitle, cancellationToken);
+    }
+
+    private async Task SaveCustomSubtitleFormat(BatchConvertItem item, CancellationToken cancellationToken)
+    {
+        if (item.Subtitle == null)
+        {
+            item.Status = string.Format(Se.Language.General.ErrorX, Se.Language.General.Error);
+            return;
+        }
+
+        var customFormats = new List<CustomFormatItem>();
+        foreach (var customFormat in Se.Settings.File.ExportCustomFormats)
+        {
+            customFormats.Add(new CustomFormatItem(customFormat));
+        }
+
+        var subtitles = new List<SubtitleLineViewModel>();
+        foreach (var p in item.Subtitle.Paragraphs)
+        {
+            var sv = new SubtitleLineViewModel(p, new SubRip());
+            subtitles.Add(sv);
+        }
+
+        var selectedCustomFormat = customFormats.FirstOrDefault();
+        if (selectedCustomFormat == null)
+        {
+            item.Status = string.Format(Se.Language.General.ErrorX, Se.Language.General.Error);
+            return;
+        }
+
+        var text = CustomTextFormatter.GenerateCustomText(selectedCustomFormat, subtitles, item.FileName, string.Empty);
+        var path = MakeOutputFileName(item, selectedCustomFormat.Extension);
+        await File.WriteAllTextAsync(path, text, cancellationToken);
     }
 
     private static async Task RunOcrTesseract(IOcrSubtitle imageSubtitles, BatchConvertItem item, CancellationToken cancellationToken)
