@@ -1,4 +1,3 @@
-using Avalonia.Controls;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic;
 using System;
@@ -21,7 +20,7 @@ public class ExportHandlerBdnXml : IExportHandler
     private StringBuilder _sb = new StringBuilder();
     private Paragraph? _first;
     private Paragraph? _last;
-    private string _fileOrFolderName = string.Empty; 
+    private string _folderName = string.Empty;
     private int _imagesSavedCount = 0;
     private double _frameRate = 23.976;
 
@@ -29,7 +28,13 @@ public class ExportHandlerBdnXml : IExportHandler
     {
         _width = imageParameter.ScreenWidth;
         _height = imageParameter.ScreenHeight;
-        _fileOrFolderName = fileOrFolderName;
+
+        _folderName = fileOrFolderName;
+        if (!Directory.Exists(_folderName))
+        {
+            Directory.CreateDirectory(_folderName);
+        }
+
         _sb.Clear();
         _imagesSavedCount = 0;
     }
@@ -48,8 +53,8 @@ public class ExportHandlerBdnXml : IExportHandler
         _last = new Paragraph(param.Text, param.StartTime.TotalMilliseconds, param.EndTime.TotalMilliseconds);
         _imagesSavedCount++;
 
-        var numberString = $"{(_imagesSavedCount+1):0000}";
-        var fileName = Path.Combine(_fileOrFolderName, numberString + ".png");
+        var numberString = $"{_imagesSavedCount:0000}";
+        var fileName = Path.Combine(_folderName, numberString + ".png");
 
         File.WriteAllBytes(fileName, param.Bitmap.ToPngArray());
 
@@ -131,13 +136,13 @@ public class ExportHandlerBdnXml : IExportHandler
 
         if (_first == null)
         {
-            _first = new Paragraph(string.Empty, 0, 0); 
+            _first = new Paragraph(string.Empty, 0, 0);
         }
 
         if (_last == null)
         {
             _last = new Paragraph(string.Empty, 0, 0);
-        }   
+        }
 
         var doc = new XmlDocument();
         doc.LoadXml("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + Environment.NewLine +
@@ -154,7 +159,7 @@ public class ExportHandlerBdnXml : IExportHandler
         XmlNode events = doc.DocumentElement.SelectSingleNode("Events");
         doc.PreserveWhitespace = true;
         events.InnerXml = _sb.ToString();
-        FileUtil.WriteAllTextWithDefaultUtf8(_fileOrFolderName, FormatUtf8Xml(doc));
+        FileUtil.WriteAllTextWithDefaultUtf8(Path.Combine(_folderName, "index.xml"), FormatUtf8Xml(doc));
     }
 
     private static string FormatUtf8Xml(XmlDocument doc)
