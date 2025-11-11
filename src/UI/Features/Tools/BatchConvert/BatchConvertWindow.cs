@@ -184,6 +184,21 @@ public class BatchConvertWindow : Window
             }
         };
 
+        var flyout = new MenuFlyout();
+        dataGrid.ContextFlyout = flyout;
+        var menuItemRemove = new MenuItem
+        {
+            Header = Se.Language.General.Remove,
+            DataContext = vm,
+            Command = vm.RemoveSelectedFilesCommand,
+        };
+        menuItemRemove.Bind(MenuItem.IsEnabledProperty, new Binding(nameof(vm.IsConverting))
+        {
+            Converter = new InverseBooleanConverter(),
+            Source = vm,
+        });
+        flyout.Items.Add(menuItemRemove);
+
         var labelBatchItemsInfo = UiUtil.MakeLabel()
             .WithBindText(vm, nameof(vm.BatchItemsInfo))
             .WithMarginTop(5)
