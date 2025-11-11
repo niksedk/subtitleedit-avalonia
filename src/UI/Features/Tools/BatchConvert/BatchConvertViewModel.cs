@@ -3,8 +3,11 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Google.Protobuf.Collections;
 using Nikse.SubtitleEdit.Core.AutoTranslate;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
+using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.Translate;
 using Nikse.SubtitleEdit.Features.Ocr;
@@ -15,6 +18,7 @@ using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 using Nikse.SubtitleEdit.Features.Translate;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Config.Language.Options;
 using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.Generic;
@@ -584,6 +588,96 @@ public partial class BatchConvertViewModel : ObservableObject
                 format = BatchConverter.FormatVobSub;
             }
 
+            if (ext == ".mkv" || ext == ".mks")
+            {
+                using (var matroska = new MatroskaFile(fileName))
+                {
+                    if (matroska.IsValid)
+                    {
+                        var codecToFormat = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                        {
+                            { "S_VOBSUB", "VobSub" },
+                            { "S_HDMV/PGS", "PGS" },
+                            { "S_TEXT/UTF8", "SRT" },
+                            { "S_TEXT/SSA", "SSA" },
+                            { "S_TEXT/ASS", "ASS" },
+                            { "S_DVBSUB", "DvdSub" },
+                            { "S_HDMV/TEXTST", "TextST" }
+                        };
+
+                        var tracksByFormat = new Dictionary<string, List<string>>();
+
+                        foreach (var track in matroska.GetTracks(true))
+                        {
+                            if (codecToFormat.TryGetValue(track.CodecId, out var formatName))
+                            {
+                                if (!tracksByFormat.ContainsKey(formatName))
+                                {
+                                    tracksByFormat[formatName] = new List<string>();
+                                }
+                                tracksByFormat[formatName].Add(MakeMkvTrackInfoString(track));
+                            }
+                        }
+
+                        if (tracksByFormat.Count == 0)
+                        {
+                            format = "No subtitle tracks";
+                        }
+                        else
+                        {
+                            foreach (var kvp in tracksByFormat)
+                            {
+                                foreach (var lang in kvp.Value)
+                                {
+                                    format = $"Matroska/{kvp.Key} - {lang}";
+                                    var matroskaBatchItem = new BatchConvertItem(fileName, fileInfo.Length, format, subtitle);
+                                    BatchItems.Add(matroskaBatchItem);
+                                }
+                            }
+                        }
+                        continue;
+                    }
+                }
+            }
+            else if (ext == ".mp4" || ext == ".m4v" || ext == ".m4s")
+            {
+                var mp4Files = new List<string>();
+                var mp4Parser = new MP4Parser(fileName);
+                var mp4SubtitleTracks = mp4Parser.GetSubtitleTracks();
+                if (mp4Parser.VttcSubtitle?.Paragraphs.Count > 0)
+                {
+                    mp4Files.Add("MP4/WebVTT - " + mp4Parser.VttcLanguage);
+                }
+
+                foreach (var track in mp4SubtitleTracks)
+                {
+                    if (track.Mdia.IsTextSubtitle || track.Mdia.IsClosedCaption)
+                    {
+                        mp4Files.Add($"MP4/#{mp4SubtitleTracks.IndexOf(track)} {track.Mdia.HandlerType} - {track.Mdia.Mdhd.Iso639ThreeLetterCode ?? track.Mdia.Mdhd.LanguageString}");
+                    }
+                }
+
+                if (mp4Files.Count <= 0)
+                {
+                    format = "No subtitle tracks";
+                }
+                else
+                {
+                    foreach (var name in mp4Files)
+                    {
+                        var mp4BatchItem = new BatchConvertItem(fileName, fileInfo.Length, name, subtitle);
+                        BatchItems.Add(mp4BatchItem);
+                    }
+                }
+
+                continue;
+            }
+            else if ((ext == ".ts" || ext == ".m2ts" || ext == ".mts" || ext == ".mpg" || ext == ".mpeg") &&
+                     (FileUtil.IsTransportStream(fileName) || FileUtil.IsM2TransportStream(fileName)))
+            {
+                continue;
+            }
+
             if (format == Se.Language.General.Unknown && fileInfo.Length < 200_000)
             {
                 subtitle = Subtitle.Parse(fileName);
@@ -622,7 +716,7 @@ public partial class BatchConvertViewModel : ObservableObject
                 }
             }
 
-            if (format == Se.Language.General.Unknown)
+            if (format == Se.Language.General.Unknown && fileInfo.Length < 200_000)
             {
                 subtitle = Subtitle.Parse(fileName);
                 if (subtitle != null)
@@ -636,6 +730,11 @@ public partial class BatchConvertViewModel : ObservableObject
         }
 
         MakeBatchItemsInfo();
+    }
+
+    private static string MakeMkvTrackInfoString(MatroskaTrackInfo track)
+    {
+        return (track.Language ?? "undefined") + (track.IsForced ? " (forced)" : string.Empty) + " #" + track.TrackNumber;
     }
 
     private void MakeBatchItemsInfo()

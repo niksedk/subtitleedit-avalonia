@@ -38,6 +38,21 @@ public class BatchConvertWindow : Window
         var labelFunctionsSelected = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.ActionsSelected))
             .WithAlignmentTop();
 
+        var labelBatchItemsInfo = UiUtil.MakeLabel()
+            .WithBindText(vm, nameof(vm.BatchItemsInfo))
+            .WithAlignmentTop();
+
+        var panelInfo = new StackPanel
+        {
+            Orientation = Orientation.Vertical,
+            Children =
+            {
+                labelFunctionsSelected,
+                labelBatchItemsInfo,
+            }
+        };
+        panelInfo.WithBindVisible(vm, nameof(vm.IsConverting), new InverseBooleanConverter());
+
         var buttonConvert = new SplitButton
         {
             Content = Se.Language.General.Convert,
@@ -91,7 +106,7 @@ public class BatchConvertWindow : Window
         grid.Add(fileView, 0, 0, 1, 2);
         grid.Add(functionsListView, 1, 0);
         grid.Add(functionView, 1, 1);
-        grid.Add(labelFunctionsSelected, 2, 0);
+        grid.Add(panelInfo, 2, 0);
         grid.Add(progressText, 2, 0);
         grid.Add(buttonPanel, 2, 0, 1, 2);
 
@@ -158,6 +173,7 @@ public class BatchConvertWindow : Window
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(BatchConvertItem.Status)),
                     IsReadOnly = true,
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
             },
         };
@@ -199,12 +215,6 @@ public class BatchConvertWindow : Window
         });
         flyout.Items.Add(menuItemRemove);
 
-        var labelBatchItemsInfo = UiUtil.MakeLabel()
-            .WithBindText(vm, nameof(vm.BatchItemsInfo))
-            .WithMarginTop(5)
-            .WithMarginRight(5)
-            .WithAlignmentTop()
-            .WithAlignmentRight();
 
         // hack to make drag and drop work on the DataGrid - also on empty rows
         var dropHost = new Border
@@ -217,7 +227,6 @@ public class BatchConvertWindow : Window
         dropHost.AddHandler(DragDrop.DropEvent, vm.FileGridOnDrop, RoutingStrategies.Bubble);
 
         grid.Add(dropHost, 0, 0);
-        grid.Add(labelBatchItemsInfo, 0);
         grid.Add(panelFileControls, 1, 0);
 
         var border = UiUtil.MakeBorderForControlNoPadding(grid);
