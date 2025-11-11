@@ -56,9 +56,11 @@ public class BatchConvertWindow : Window
         };
         buttonConvert.Bind(SplitButton.IsEnabledProperty, new Binding(nameof(vm.IsConverting)) { Converter = new InverseBooleanConverter() });
 
-        var buttonDone = UiUtil.MakeButtonDone(vm.DoneCommand);
+        var buttonDone = UiUtil.MakeButtonDone(vm.DoneCommand).WithBindIsVisible(nameof(vm.IsConverting), new InverseBooleanConverter());
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand).WithBindIsVisible(vm, nameof(vm.IsConverting));
         var buttonPanel = UiUtil.MakeButtonBar(
             buttonConvert,
+            buttonCancel,
             buttonDone
         );
 

@@ -169,6 +169,12 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             var text = await tesseractOcr.Ocr(bitmap, language, cancellationToken);
             var p = new Paragraph(text, imageSubtitles.GetStartTime(i).TotalMilliseconds, imageSubtitles.GetEndTime(i).TotalMilliseconds);
             item.Subtitle.Paragraphs.Add(p);
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                item.Status = Se.Language.General.Cancelled;
+                break;
+            }
         }
     }
 
@@ -222,6 +228,12 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             var text = ItalicTextMerger.MergeWithItalicTags(matches).Trim();
             var p = new Paragraph(text, imageSubtitles.GetStartTime(i).TotalMilliseconds, imageSubtitles.GetEndTime(i).TotalMilliseconds);
             item.Subtitle.Paragraphs.Add(p);
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                item.Status = Se.Language.General.Cancelled;
+                break;
+            }
         }
     }
 
@@ -268,8 +280,13 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                 param.OverridePosition = position;
             }
             imageParameters.Add(param);
-        }
 
+            if (cancellationToken.IsCancellationRequested)
+            {
+                item.Status = Se.Language.General.Cancelled;
+                break;
+            }
+        }
 
         IExportHandler? exportHandler = null;
         string extension = string.Empty;
@@ -316,13 +333,14 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             exportHandler.WriteParagraph(imageParameters[i]);
         }
         exportHandler.WriteFooter();
+        item.Status = Se.Language.General.Converted;
     }
 
     private async Task SaveSubtitleFormat(BatchConvertItem item, SubtitleFormat format, CancellationToken cancellationToken)
     {
         try
         {
-            if (item.Subtitle != null && item.Subtitle.OriginalFormat.Name != format.Name)
+            if (item.Subtitle != null && item.Subtitle.OriginalFormat != null && item.Subtitle.OriginalFormat.Name != format.Name)
             {
                 item.Subtitle.OriginalFormat.RemoveNativeFormatting(item.Subtitle, format);
             }

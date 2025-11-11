@@ -11,6 +11,7 @@ using Nikse.SubtitleEdit.Features.Ocr;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
+using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 using Nikse.SubtitleEdit.Features.Translate;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -24,7 +25,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -422,6 +422,22 @@ public partial class BatchConvertViewModel : ObservableObject
         SaveSettings();
         OkPressed = true;
         Window?.Close();
+    }
+
+    [RelayCommand]
+    private void Cancel()
+    {
+        _cancellationTokenSource.Cancel();
+        IsConverting = false;
+        foreach (var batchItem in BatchItems)
+        {
+            if (batchItem.Status != "-" &&
+                batchItem.Status != Se.Language.General.Converted &&
+                batchItem.Status != Se.Language.General.Error)
+            {
+                batchItem.Status = Se.Language.General.Cancelled;
+            }
+        }
     }
 
     [RelayCommand]
