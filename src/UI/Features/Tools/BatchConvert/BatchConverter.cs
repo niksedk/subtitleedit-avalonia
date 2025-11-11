@@ -333,6 +333,12 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             extension = string.Empty; // folder
         }
 
+        if (_config.TargetFormatName == FormatFcpImage)
+        {
+            exportHandler = new ExportHandlerFcp();
+            extension = string.Empty; // folder
+        }
+
         if (exportHandler == null || imageParameters.Count == 0)
         {
             item.Status = string.Format(Se.Language.General.ErrorX, Se.Language.General.Error);
@@ -1021,12 +1027,17 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         var fileName = Path.GetFileNameWithoutExtension(item.FileName);
         var targetExtension = extension;
         var outputFileName = Path.Combine(outputFolder, fileName + targetExtension);
-        if (!File.Exists(outputFileName) && Directory.Exists(outputFolder))
+        if (targetExtension != string.Empty && !File.Exists(outputFileName) && Directory.Exists(outputFolder))
         {
             return outputFileName;
         }
 
-        if (_config.Overwrite && File.Exists(outputFileName))
+        if (targetExtension == string.Empty && Directory.Exists(outputFileName))
+        {
+            return outputFileName;
+        }
+
+        if (targetExtension != string.Empty && _config.Overwrite && File.Exists(outputFileName))
         {
             File.Delete(outputFileName);
         }
