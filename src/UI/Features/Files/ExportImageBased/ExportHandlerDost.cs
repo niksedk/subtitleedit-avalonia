@@ -1,5 +1,6 @@
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Globalization;
 using System.IO;
@@ -12,7 +13,7 @@ public class ExportHandlerDost : IExportHandler
     public ExportImageType ExportImageType => ExportImageType.Dost;
     public string Extension => "";
     public bool UseFileName => false;
-    public string Title => "Export to Dost/image";
+    public string Title => string.Format(Se.Language.General.ExportToX, "Dost/image");
     public double FrameRate { get; set; } = 23.976;
 
     private string _folderName = string.Empty; 

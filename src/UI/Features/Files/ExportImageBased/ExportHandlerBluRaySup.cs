@@ -1,5 +1,6 @@
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.IO;
 
@@ -10,7 +11,7 @@ public class ExportHandlerBluRaySup : IExportHandler
     public ExportImageType ExportImageType => ExportImageType.BluRaySup;
     public string Extension => ".sup";
     public bool UseFileName => true;
-    public string Title => "Export to Blu-ray sup";
+    public string Title => string.Format(Se.Language.General.ExportToX, "Blu-ray sup");
 
     private int _width;
     private int _height;

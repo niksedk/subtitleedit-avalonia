@@ -1,4 +1,5 @@
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 using System.IO;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
@@ -8,7 +9,7 @@ public class ExportHandlerImagesWithTimeCode : IExportHandler
     public ExportImageType ExportImageType => ExportImageType.ImagesWithTimeCode;
     public string Extension => "";
     public bool UseFileName => false;
-    public string Title => "Export to images with time code in file name";
+    public string Title => string.Format(Se.Language.General.ExportToX, "images with time code in file name");
 
     private string _folderName = string.Empty;
     private int _count = 0;

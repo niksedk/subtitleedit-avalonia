@@ -1,5 +1,6 @@
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Globalization;
 using System.IO;
@@ -13,7 +14,7 @@ public class ExportHandlerBdnXml : IExportHandler
     public ExportImageType ExportImageType => ExportImageType.BdnXml;
     public string Extension => "";
     public bool UseFileName => false;
-    public string Title => "Export to BDN XML";
+    public string Title => string.Format(Se.Language.General.ExportToX, "BDN XML");
 
     private int _width;
     private int _height;

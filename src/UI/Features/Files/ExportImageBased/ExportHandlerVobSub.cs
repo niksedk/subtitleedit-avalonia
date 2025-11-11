@@ -1,7 +1,7 @@
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.VobSub;
-using SkiaSharp;
+using Nikse.SubtitleEdit.Logic.Config;
 using System;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
@@ -11,7 +11,7 @@ public class ExportHandlerVobSub : IExportHandler
     public ExportImageType ExportImageType => ExportImageType.VobSub;
     public string Extension => ".sub";
     public bool UseFileName => true;    
-    public string Title => "Export to VobSub/idx";
+    public string Title => string.Format(Se.Language.General.ExportToX, "VobSub/idx");
 
     private int _width;
     private int _height;

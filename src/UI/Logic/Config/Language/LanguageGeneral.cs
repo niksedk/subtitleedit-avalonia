@@ -513,6 +513,7 @@ public class LanguageGeneral
     public string TargetEncoding { get; set; }
     public string OcrDotDotDot { get; set; }
     public string OcrPercentX { get; set; }
+    public string ExportToX { get; set; }
 
     public LanguageGeneral()
     {
@@ -1025,5 +1026,6 @@ public class LanguageGeneral
         TargetEncoding = "Target encoding";
         OcrDotDotDot = "OCR...";
         OcrPercentX = "OCR: {0}%";
+        ExportToX = "Export to {0}";
     }
 }
