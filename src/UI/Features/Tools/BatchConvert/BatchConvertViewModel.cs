@@ -438,6 +438,7 @@ public partial class BatchConvertViewModel : ObservableObject
                 batchItem.Status = Se.Language.General.Cancelled;
             }
         }
+        ProgressText = string.Empty;
     }
 
     [RelayCommand]
@@ -473,13 +474,14 @@ public partial class BatchConvertViewModel : ObservableObject
             foreach (var batchItem in BatchItems)
             {
                 var countDisplay = count;
-                ProgressText = string.Format(Se.Language.General.ConvertingXofY, countDisplay, BatchItems.Count);
+                ProgressText = string.Format(Se.Language.General.ConvertingXofYDotDoDot, countDisplay, BatchItems.Count);
                 ProgressValue = countDisplay / (double)BatchItems.Count;
                 await _batchConverter.Convert(batchItem, _cancellationToken);
                 count++;
 
                 if (_cancellationToken.IsCancellationRequested)
                 {
+                    ProgressText = string.Empty;
                     break;
                 }
             }
@@ -487,6 +489,7 @@ public partial class BatchConvertViewModel : ObservableObject
             IsProgressVisible = false;
             IsConverting = false;
             AreControlsEnabled = true;
+            ProgressText = string.Empty;
 
             var end = DateTime.UtcNow.Ticks;
             var elapsed = new TimeSpan(end - start).TotalMilliseconds;

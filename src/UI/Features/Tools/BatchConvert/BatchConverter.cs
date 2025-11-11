@@ -29,17 +29,17 @@ namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
 public class BatchConverter : IBatchConverter, IFixCallbacks
 {
-    public const string FormatAyato = "Ayato";
+    public static string FormatAyato = new Ayato().Name;
     public const string FormatBdnXml = "BDN-XML";
     public const string FormatBluRaySup = "Blu-ray sup";
-    public const string FormatCavena890 = "Cavena 890";
+    public static string FormatCavena890 = new Cavena890().Name;
     public const string FormatCustomTextFormat = "Custom text format";
-    public const string FormatDostImage = "Dost-image";
-    public const string FormatEbuStl = "EBU stl";
-    public const string FormatFcpImage = "FCP-image";
+    public static string FormatDostImage = "DOST/image";
+    public static string FormatEbuStl = new Ebu().Name;
+    public const string FormatFcpImage = "FCP/image";
     public const string FormatImagesWithTimeCodesInFileName = "Images with time codes in file name";
-    public const string FormatPac = "PAC";
-    public const string FormatPacUnicode = "PAC Unicode";
+    public static string FormatPac = new Pac().Name;
+    public static string FormatPacUnicode = new PacUnicode().Name;
     public const string FormatPlainText = "Plain text";
     public const string FormatVobSub = "VobSub";
 
@@ -136,13 +136,26 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             { FormatPac, new Pac() },
             { FormatPacUnicode, new PacUnicode() },
             { FormatCavena890, new Cavena890() },
-            { FormatAyato, new Ayato() },
             { FormatEbuStl, new Ebu() },
+            { FormatAyato, new Ayato() },
         };
-        foreach (var format in binaryFormats.Values)
+        foreach (var kvp in binaryFormats)
         {
-            if (format.Name == _config.TargetFormatName && item.Subtitle != null)
+            if (kvp.Key == _config.TargetFormatName && item.Subtitle != null)
             {
+                var format = kvp.Value;
+                if (format is IBinaryPersistableSubtitle binaryPersistableSubtitle)
+                {
+                    SaveSubtitleFormat(item, binaryPersistableSubtitle, format, cancellationToken);
+                    return;
+                }
+                else if (format is Ayato ayato) //TODO: make Ayato implement IBinaryPersistableSubtitle
+                {
+                    var path = MakeOutputFileName(item, format.Extension);
+                    ayato.Save(path, string.Empty, item.Subtitle);
+                    return;
+                }
+
                 await SaveSubtitleFormat(item, format, cancellationToken);
                 return;
             }
@@ -349,6 +362,26 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             var converted = format.ToText(item.Subtitle, _config.TargetEncoding);
             var path = MakeOutputFileName(item, format.Extension);
             await File.WriteAllTextAsync(path, converted, cancellationToken);
+            item.Status = Se.Language.General.Converted;
+        }
+        catch (Exception exception)
+        {
+            item.Status = string.Format(Se.Language.General.ErrorX, exception.Message);
+        }
+    }
+
+    private void SaveSubtitleFormat(BatchConvertItem item, IBinaryPersistableSubtitle format, SubtitleFormat f, CancellationToken cancellationToken)
+    {
+        try
+        {
+            if (item.Subtitle != null && item.Subtitle.OriginalFormat != null && item.Subtitle.OriginalFormat.Name != f.Name)
+            {
+                item.Subtitle.OriginalFormat.RemoveNativeFormatting(item.Subtitle, f);
+            }
+
+            var path = MakeOutputFileName(item, f.Extension);
+            var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write);
+            format.Save(path, fileStream, item.Subtitle, true);
             item.Status = Se.Language.General.Converted;
         }
         catch (Exception exception)
@@ -988,12 +1021,12 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         var fileName = Path.GetFileNameWithoutExtension(item.FileName);
         var targetExtension = extension;
         var outputFileName = Path.Combine(outputFolder, fileName + targetExtension);
-        if (!File.Exists(outputFileName) && !Directory.Exists(outputFolder))
+        if (!File.Exists(outputFileName) && Directory.Exists(outputFolder))
         {
             return outputFileName;
         }
 
-        if (_config.Overwrite && File.Exists(outputFolder))
+        if (_config.Overwrite && File.Exists(outputFileName))
         {
             File.Delete(outputFileName);
         }

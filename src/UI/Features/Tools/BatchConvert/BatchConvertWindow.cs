@@ -64,6 +64,10 @@ public class BatchConvertWindow : Window
             buttonDone
         );
 
+        var progressText = UiUtil.MakeLabel()
+            .WithBindText(vm, nameof(vm.ProgressText))
+            .WithAlignmentTop();
+
         var grid = new Grid
         {
             RowDefinitions =
@@ -88,6 +92,7 @@ public class BatchConvertWindow : Window
         grid.Add(functionsListView, 1, 0);
         grid.Add(functionView, 1, 1);
         grid.Add(labelFunctionsSelected, 2, 0);
+        grid.Add(progressText, 2, 0);
         grid.Add(buttonPanel, 2, 0, 1, 2);
 
         Content = grid;

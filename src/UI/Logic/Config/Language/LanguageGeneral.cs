@@ -494,7 +494,7 @@ public class LanguageGeneral
     public string TranslateRow { get; set; }
     public string Offset { get; set; }
     public string NoFilesToConvert { get; set; }
-    public string ConvertingXofY { get; set; }
+    public string ConvertingXofYDotDoDot { get; set; }
     public string ConversionCancelledByUser { get; set; }
     public string SelectFilesToConvert { get; set; }
     public string XFilesConvertedInY { get; set; }
@@ -1007,7 +1007,7 @@ public class LanguageGeneral
         TranslateRow = "Translate row";
         Offset = "Offset";
         NoFilesToConvert = "No files to convert";
-        ConvertingXofY = "Converting {0:#,###,##0}/{1:#,###,##0}";
+        ConvertingXofYDotDoDot = "Converting {0:#,###,##0}/{1:#,###,##0}...";
         ConversionCancelledByUser = "Conversion cancelled by user";
         SelectFilesToConvert = "Select files to convert";
         XFilesConvertedInY = "{0:#,###,##0} files converted in {1}";

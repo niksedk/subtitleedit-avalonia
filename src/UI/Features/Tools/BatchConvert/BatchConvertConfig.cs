@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Nikse.SubtitleEdit.Core.AutoTranslate;
+﻿using Nikse.SubtitleEdit.Core.AutoTranslate;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.Translate;
@@ -53,13 +52,12 @@ public class BatchConvertConfig
     }
 
     public bool IsTargetFormatImageBased =>
-        TargetFormatName is 
-            BatchConverter.FormatBluRaySup or 
-            BatchConverter.FormatVobSub or 
-            BatchConverter.FormatDostImage or 
-            BatchConverter.FormatBdnXml or 
-            BatchConverter.FormatFcpImage or 
-            BatchConverter.FormatImagesWithTimeCodesInFileName;
+        TargetFormatName == BatchConverter.FormatBluRaySup ||
+        TargetFormatName == BatchConverter.FormatVobSub ||
+        TargetFormatName == BatchConverter.FormatDostImage ||
+        TargetFormatName == BatchConverter.FormatBdnXml ||
+        TargetFormatName == BatchConverter.FormatFcpImage ||
+        TargetFormatName == BatchConverter.FormatImagesWithTimeCodesInFileName;
 
     public class RemoveFormattingSettings
     {
