@@ -176,10 +176,9 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             return;
         }
 
-        //TODO: fix
         if (_config.TargetFormatName == FormatCustomTextFormat && item.Subtitle != null)
         {
-            SaveCustomSubtitleFormat(item, cancellationToken)
+            await SaveCustomSubtitleFormat(item, cancellationToken);
             return;
         }
 
