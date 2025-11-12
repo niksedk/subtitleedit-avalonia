@@ -54,6 +54,7 @@ public class ReviewSpeechHistoryWindow : Window
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
         KeyDown += (s, e) => vm.OnKeyDown(e);
         Closing += (s, e) => vm.OnWindowClosing(e); 
+        Loaded += (s, e) => vm.OnWindowLoaded();
     }
 
     private static Border MakeHistoryGrid(ReviewSpeechHistoryViewModel vm)

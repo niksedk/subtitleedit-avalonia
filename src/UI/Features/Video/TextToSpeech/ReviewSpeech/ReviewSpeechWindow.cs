@@ -75,7 +75,11 @@ public class ReviewSpeechWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
-        Loaded += delegate { vm.SelectedEngineChanged(); };
+        Loaded += delegate 
+        {
+            vm.Loaded();
+            vm.SelectedEngineChanged(); 
+        };
     }
 
     private static Border MakeDataGrid(ReviewSpeechViewModel vm)

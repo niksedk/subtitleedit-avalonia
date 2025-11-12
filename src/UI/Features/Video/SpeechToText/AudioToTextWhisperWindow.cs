@@ -384,6 +384,8 @@ public class AudioToTextWhisperWindow : Window
         Content = grid;
 
         Activated += delegate { Focus(); }; // hack to make OnKeyDown work
+        Loaded += (s, e) => vm.OnWindowLoaded();
+        Closing += (s, e) => vm.OnWindowClosing(e);
     }
 
     private static Grid MakeConsoleLogAndBatchView(AudioToTextWhisperViewModel vm)

@@ -885,6 +885,8 @@ public partial class ReviewSpeechViewModel : ObservableObject
             _mpvContext?.Dispose();
             _mpvContext = null;
         }
+
+        UiUtil.SaveWindowPosition(Window);
     }
 
     internal void DataGridDoubleClicked()
@@ -896,5 +898,10 @@ public partial class ReviewSpeechViewModel : ObservableObject
         }
 
         _ = PlayRow(line);
+    }
+
+    internal void Loaded()
+    {
+        UiUtil.RestoreWindowPosition(Window);
     }
 }

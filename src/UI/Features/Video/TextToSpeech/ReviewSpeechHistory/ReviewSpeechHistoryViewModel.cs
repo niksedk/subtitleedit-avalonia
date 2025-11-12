@@ -4,6 +4,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HanumanInstitute.LibMpv;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.ReviewSpeech;
+using Nikse.SubtitleEdit.Logic;
+using System;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
@@ -166,5 +168,12 @@ public partial class ReviewSpeechHistoryViewModel : ObservableObject
             _mpvContext?.Dispose();
             _mpvContext = null;
         }
+
+        UiUtil.SaveWindowPosition(Window);
+    }
+
+    internal void OnWindowLoaded()
+    {
+        UiUtil.RestoreWindowPosition(Window);
     }
 }

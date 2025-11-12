@@ -1107,10 +1107,12 @@ public partial class TextToSpeechViewModel : ObservableObject
             _mpvContext?.Dispose();
             _mpvContext = null;
         }
+        UiUtil.SaveWindowPosition(Window);
     }
 
     internal void OnLoaded(RoutedEventArgs e)
     {
+        UiUtil.RestoreWindowPosition(Window);
         LoadSettings();
         _timer.Start();
     }

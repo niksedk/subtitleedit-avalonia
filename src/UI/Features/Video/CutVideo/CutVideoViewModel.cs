@@ -728,12 +728,14 @@ public partial class CutVideoViewModel : ObservableObject
         }
 
         SaveSettings();
+        UiUtil.SaveWindowPosition(Window);
     }
 
     internal void OnLoaded()
     {
         StartTitleTimer();
         _updateAudioVisualizer = true;
+        UiUtil.RestoreWindowPosition(Window);
     }
 
     internal void AudioVisualizerOnNewSelectionInsert(object sender, ParagraphEventArgs e)

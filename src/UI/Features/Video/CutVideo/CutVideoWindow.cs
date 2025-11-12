@@ -96,6 +96,8 @@ public class CutVideoWindow : Window
         Content = grid;
 
         Activated += delegate { buttonGenerate.Focus(); }; // hack to make OnKeyDown work
+        Loaded += (s, e) => vm.OnLoaded();
+        Closing += (s, e) => vm.OnClosing();
     }
 
     private static Border MakeSegmentsView(CutVideoViewModel vm)
@@ -286,17 +288,5 @@ public class CutVideoWindow : Window
     {
         base.OnKeyDown(e);
         _vm.OnKeyDown(e);
-    }
-
-    protected override void OnLoaded(RoutedEventArgs e)
-    {
-        base.OnLoaded(e);
-        _vm.OnLoaded();
-    }
-
-    protected override void OnClosing(WindowClosingEventArgs e)
-    {
-        base.OnClosing(e);
-        _vm.OnClosing();
-    }
+    }    
 }

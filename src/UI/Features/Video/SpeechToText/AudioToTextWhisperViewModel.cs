@@ -1696,4 +1696,14 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             IsBatchMode = false;
         }
     }
+
+    internal void OnWindowLoaded()
+    {
+        UiUtil.RestoreWindowPosition(Window);
+    }
+
+    internal void OnWindowClosing(WindowClosingEventArgs e)
+    {
+        UiUtil.SaveWindowPosition(Window);
+    }
 }
