@@ -2,6 +2,7 @@
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
+using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
 using Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream;
 using Nikse.SubtitleEdit.Core.Forms;
 using Nikse.SubtitleEdit.Core.Interfaces;
@@ -145,7 +146,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                             {
                                 var sub = new Subtitle();
                                 var binaryParagraphs = LoadDvbFromMatroska(track, matroska, ref sub);
-                                imageSubtitle = new OcrSubtitleIBinaryParagraph(binaryParagraphs); 
+                                imageSubtitle = new OcrSubtitleIBinaryParagraph(binaryParagraphs);
                                 var fileName = Path.GetFileName(item.FileName);
                                 item.OutputFileName = fileName.Substring(0, fileName.LastIndexOf('.')) + "." + GetMkvLanguage(track.Language).Replace("undefined.", string.Empty).TrimEnd('.') + ".mkv";
                                 break;
@@ -207,7 +208,57 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         else if (item.Format == "MP4" &&
                  (item.FileName.EndsWith(".mp4") || item.FileName.EndsWith(".m4v") || item.FileName.EndsWith(".m4s")))
         {
-            imageSubtitle = LoadMp4Subtitle(item, cancellationToken);
+            var mp4Files = new List<string>();
+            var mp4Parser = new MP4Parser(item.FileName);
+            var mp4SubtitleTracks = mp4Parser.GetSubtitleTracks();
+            if (mp4Parser.VttcSubtitle?.Paragraphs.Count > 0)
+            {
+                mp4Files.Add("MP4/WebVTT - " + mp4Parser.VttcLanguage);
+            }
+
+            foreach (var track in mp4SubtitleTracks)
+            {
+                if (track.Mdia.IsTextSubtitle || track.Mdia.IsClosedCaption)
+                {
+                    mp4Files.Add($"MP4/#{mp4SubtitleTracks.IndexOf(track)} {track.Mdia.HandlerType} - {track.Mdia.Mdhd.Iso639ThreeLetterCode ?? track.Mdia.Mdhd.LanguageString}");
+                }
+            }
+
+            if (mp4Files.Count <= 0)
+            {
+                item.Status = Se.Language.General.NoSubtitlesFound;
+            }
+            else
+            {
+                var mp4Found = false;
+                var trackId = item.Format;
+                if (mp4Parser.VttcSubtitle?.Paragraphs.Count > 0 && trackId == "MP4/WebVTT - " + mp4Parser.VttcLanguage)
+                {
+                    item.Subtitle = mp4Parser.VttcSubtitle;
+                    mp4Found = true;
+                    var fileName = Path.GetFileName(item.FileName);
+                    item.OutputFileName = fileName.Substring(0, fileName.LastIndexOf('.')) + "." + GetMp4Language(mp4Parser.VttcLanguage) + "mp4";
+                }
+                else
+                {
+                    foreach (var track in mp4SubtitleTracks)
+                    {
+                        if (track.Mdia.IsTextSubtitle || track.Mdia.IsClosedCaption)
+                        {
+                            var language = track.Mdia.Mdhd.Iso639ThreeLetterCode ?? track.Mdia.Mdhd.LanguageString;
+                            if (trackId == $"MP4/#{mp4SubtitleTracks.IndexOf(track)} {track.Mdia.HandlerType} - {language}")
+                            {
+                                item.Subtitle = new Subtitle();
+                                item.Subtitle.Paragraphs.AddRange(track.Mdia.Minf.Stbl.GetParagraphs());
+                                mp4Found = true;
+                                var fileName = Path.GetFileName(item.FileName);
+                                item.OutputFileName = fileName.Substring(0, fileName.LastIndexOf('.')) + "." + GetMp4Language(language) + "mp4";
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         if (imageSubtitle != null && !_config.IsTargetFormatImageBased)
@@ -297,13 +348,13 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
 
         WriteToImageBasedFormat(item, imageSubtitle, cancellationToken);
     }
-    
-    private IOcrSubtitle? LoadTransportStream(BatchConvertItem item, CancellationToken cancellationToken)
+
+    private string GetMp4Language(string vttcLanguage)
     {
-        return null;      
+        return string.Empty;
     }
-    
-    private IOcrSubtitle? LoadMp4Subtitle(BatchConvertItem item, CancellationToken cancellationToken)
+
+    private IOcrSubtitle? LoadTransportStream(BatchConvertItem item, CancellationToken cancellationToken)
     {
         return null;
     }
