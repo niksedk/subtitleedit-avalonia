@@ -14,5 +14,6 @@ public enum BatchConvertFunctionType
     AutoTranslate,
     RemoveTextForHearingImpaired,
     MergeLinesWithSameTimeCodes,
-    MergeLinesWithSameText, 
+    MergeLinesWithSameText,
+    FixRightToLeft,
 }

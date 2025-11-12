@@ -514,6 +514,10 @@ public class LanguageGeneral
     public string OcrDotDotDot { get; set; }
     public string OcrPercentX { get; set; }
     public string ExportToX { get; set; }
+    public string FixRightToLeft { get; set; }
+    public string FixRightToLeftViaUnicodeTags { get; set; }
+    public string RemoveRightToLeftUnicodeTags { get; set; }
+    public string ReverseRightToLeftStartEnd { get; set; }
 
     public LanguageGeneral()
     {
@@ -1027,5 +1031,9 @@ public class LanguageGeneral
         OcrDotDotDot = "OCR...";
         OcrPercentX = "OCR: {0}%";
         ExportToX = "Export to {0}";
+        FixRightToLeft = "Fix right-to-left";
+        FixRightToLeftViaUnicodeTags = "Fix RTL via Unicode tags";
+        RemoveRightToLeftUnicodeTags = "Remove RTL Unicode tags";
+        ReverseRightToLeftStartEnd = "Reverse RTL start/end";
     }
 }

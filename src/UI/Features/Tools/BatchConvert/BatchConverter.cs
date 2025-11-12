@@ -900,6 +900,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             s = RemoveFormatting(s);
             s = RemoveLineBreaks(s);
             s = RemoveTextForHearingImpaired(s, Language);
+            s = FixRightToLeft(s);
         }
 
         return s;
@@ -1283,6 +1284,38 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             if (p.Text.RemoveChar(' ') != newText.RemoveChar(' '))
             {
                 p.Text = newText;
+            }
+        }
+
+        return subtitle;
+    }
+
+    private Subtitle FixRightToLeft(Subtitle subtitle)
+    {
+        if (!_config.RightToLeft.IsActive)
+        {
+            return subtitle;
+        }
+
+        if (_config.RightToLeft.FixViaUnicode)
+        {
+            foreach (var p in subtitle.Paragraphs)
+            {
+                p.Text = Utilities.FixRtlViaUnicodeChars(p.Text);
+            }
+        }
+        else if (_config.RightToLeft.RemoveUnicode)
+        {
+            foreach (var p in subtitle.Paragraphs)
+            {
+                p.Text = Utilities.RemoveUnicodeControlChars(p.Text);
+            }
+        }
+        else if (_config.RightToLeft.ReverseStartEnd)
+        {
+            foreach (var p in subtitle.Paragraphs)
+            {
+                p.Text = Utilities.ReverseStartAndEndingForRightToLeft(p.Text);
             }
         }
 

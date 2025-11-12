@@ -45,6 +45,7 @@ public class BatchConvertFunction
             MakeFunction(BatchConvertFunctionType.RemoveTextForHearingImpaired, Se.Language.General.RemoveTextForHearingImpaired, ViewRemoveTextForHearingImpaired.Make(vm), activeFunctions),
             MakeFunction(BatchConvertFunctionType.MergeLinesWithSameText, Se.Language.General.MergeLinesWithSameText, ViewMergeLinesWithSameText.Make(vm), activeFunctions),
             MakeFunction(BatchConvertFunctionType.MergeLinesWithSameTimeCodes, Se.Language.General.MergeLinesWithSameTimeCodes, ViewMergeLinesWithSameTimeCodes.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.FixRightToLeft, Se.Language.General.FixRightToLeft, ViewFixRightToLeft.Make(vm), activeFunctions),
         }.OrderBy(p=>p.Name).ToArray();
     }
 

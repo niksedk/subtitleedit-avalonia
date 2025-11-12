@@ -126,6 +126,11 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private bool _mergeSameTimeMergeDialog;
     [ObservableProperty] private bool _mergeSameTimeAutoBreak;
 
+    // Fix right-to-left
+    [ObservableProperty] private bool _rtlFixViaUniCode;
+    [ObservableProperty] private bool _rtlRemoveUniCode;
+    [ObservableProperty] private bool _rtlReverseStartEnd;
+
     public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
@@ -151,18 +156,20 @@ public partial class BatchConvertViewModel : ObservableObject
         BatchItems = new ObservableCollection<BatchConvertItem>();
         BatchFunctions = new ObservableCollection<BatchConvertFunction>();
 
-        TargetFormats = new ObservableCollection<string>(SubtitleFormat.AllSubtitleFormats.Select(p => p.Name));
-        TargetFormats.Add(BatchConverter.FormatAyato);
-        TargetFormats.Add(BatchConverter.FormatBdnXml);
-        TargetFormats.Add(BatchConverter.FormatBluRaySup);
-        TargetFormats.Add(BatchConverter.FormatCavena890);
-        TargetFormats.Add(BatchConverter.FormatCustomTextFormat);
-        TargetFormats.Add(BatchConverter.FormatDostImage);
-        TargetFormats.Add(BatchConverter.FormatFcpImage);
-        TargetFormats.Add(BatchConverter.FormatImagesWithTimeCodesInFileName);
-        TargetFormats.Add(BatchConverter.FormatPac);
-        TargetFormats.Add(BatchConverter.FormatPlainText);
-        TargetFormats.Add(BatchConverter.FormatVobSub);
+        TargetFormats = new ObservableCollection<string>(SubtitleFormat.AllSubtitleFormats.Select(p => p.Name))
+        {
+            BatchConverter.FormatAyato,
+            BatchConverter.FormatBdnXml,
+            BatchConverter.FormatBluRaySup,
+            BatchConverter.FormatCavena890,
+            BatchConverter.FormatCustomTextFormat,
+            BatchConverter.FormatDostImage,
+            BatchConverter.FormatFcpImage,
+            BatchConverter.FormatImagesWithTimeCodesInFileName,
+            BatchConverter.FormatPac,
+            BatchConverter.FormatPlainText,
+            BatchConverter.FormatVobSub
+        };
 
         DeleteLineNumbers = new ObservableCollection<int>();
         BatchItemsInfo = string.Empty;
@@ -321,6 +328,20 @@ public partial class BatchConvertViewModel : ObservableObject
             Se.Settings.Tools.BatchConvert.ChangeCasingType = "AllLowercase";
         }
 
+        // Fix right-to-left
+        if (RtlFixViaUniCode)
+        {
+            Se.Settings.Tools.BatchConvert.FixRtlMode = "FixViaUnicode";
+        }
+        else if (RtlRemoveUniCode)
+        {
+            Se.Settings.Tools.BatchConvert.FixRtlMode = "RemoveUnicode";
+        }
+        else
+        {
+            Se.Settings.Tools.BatchConvert.FixRtlMode = "ReverseStartEnd";
+        }
+
         Se.SaveSettings();
     }
 
@@ -399,6 +420,19 @@ public partial class BatchConvertViewModel : ObservableObject
         MergeSameTimeMaxMillisecondsDifference = Se.Settings.Tools.MergeSameTimeCode.MaxMillisecondsDifference;
         MergeSameTimeMergeDialog = Se.Settings.Tools.MergeSameTimeCode.MergeDialog;
         MergeSameTimeAutoBreak = Se.Settings.Tools.MergeSameTimeCode.AutoBreak;
+
+        if (Se.Settings.Tools.BatchConvert.FixRtlMode == "FixViaUnicode")
+        {
+            RtlFixViaUniCode = true;
+        }
+        else if (Se.Settings.Tools.BatchConvert.FixRtlMode == "RemoveUnicode")
+        {
+            RtlRemoveUniCode = true;
+        }
+        else
+        {
+            RtlReverseStartEnd = true;
+        }
     }
 
     private void UpdateOutputProperties()
@@ -838,7 +872,7 @@ public partial class BatchConvertViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowTargetFormatSettings()
     {
-        
+
     }
 
     internal void OnKeyDown(KeyEventArgs e)
@@ -952,6 +986,14 @@ public partial class BatchConvertViewModel : ObservableObject
                 RemoveColor = FormattingRemoveColors,
                 RemoveFontName = FormattingRemoveFontTags,
                 RemoveAlignment = FormattingRemoveAlignmentTags,
+            },
+
+            RightToLeft = new BatchConvertConfig.RightToLeftSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.FixRightToLeft),
+                FixViaUnicode = RtlFixViaUniCode,
+                RemoveUnicode = RtlRemoveUniCode,
+                ReverseStartEnd = RtlReverseStartEnd,
             },
         };
     }

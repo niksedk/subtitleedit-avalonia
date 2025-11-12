@@ -28,6 +28,7 @@ public class BatchConvertConfig
     public MergeLinesWithSameTimeCodesSettings MergeLinesWithSameTimeCodes { get; set; }
     public MergeLinesWithSameTextsSettings MergeLinesWithSameTexts { get; set; }
     public MultipleReplaceSettings MultipleReplace { get; set; }
+    public RightToLeftSettings RightToLeft { get; set; }
 
     public BatchConvertConfig()
     {
@@ -49,6 +50,7 @@ public class BatchConvertConfig
         MergeLinesWithSameTimeCodes = new MergeLinesWithSameTimeCodesSettings();
         MergeLinesWithSameTexts = new MergeLinesWithSameTextsSettings();
         MultipleReplace = new MultipleReplaceSettings();
+        RightToLeft = new RightToLeftSettings();
     }
 
     public bool IsTargetFormatImageBased =>
@@ -196,5 +198,13 @@ public class BatchConvertConfig
     public class MultipleReplaceSettings
     {
         public bool IsActive { get; set; }
+    }
+
+    public class RightToLeftSettings
+    {
+        public bool IsActive { get; set; }
+        public bool FixViaUnicode { get; internal set; }
+        public bool RemoveUnicode { get; internal set; }
+        public bool ReverseStartEnd { get; internal set; }
     }
 }
