@@ -182,8 +182,19 @@ public class BatchConvertWindow : Window
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedBatchItem)) { Source = vm });
 
         var comboBoxSubtitleFormat = UiUtil.MakeComboBox(vm.TargetFormats, vm, nameof(vm.SelectedTargetFormat));
-        comboBoxSubtitleFormat.PropertyChanged += ComboBoxSubtitleFormat_PropertyChanged;
+        comboBoxSubtitleFormat.PropertyChanged += (_,_) => vm.ComboBoxSubtitleFormatChanged();
         comboBoxSubtitleFormat.Width = 240;
+
+        var buttonTargetFormatSettings = UiUtil.MakeButton(vm.ShowTargetFormatSettingsCommand, IconNames.Settings)
+            .WithMarginLeft(5)
+            .WithMarginRight(5);
+        buttonTargetFormatSettings.WithBindIsVisible(vm, nameof(vm.IsTargetFormatSettingsVisible));
+        var buttonSettings = UiUtil.MakeButton(vm.ShowOutputPropertiesCommand, IconNames.Settings).WithMarginLeft(15).WithMarginRight(5);
+        if (Se.Settings.Appearance.ShowHints)
+        {
+            ToolTip.SetTip(buttonTargetFormatSettings, Se.Language.Tools.BatchConvert.TargetFormatSettings);
+            ToolTip.SetTip(buttonSettings, Se.Language.General.Settings);
+        }
 
         var panelFileControls = new StackPanel
         {
@@ -198,7 +209,8 @@ public class BatchConvertWindow : Window
                 UiUtil.MakeButton(vm.ClearAllFilesCommand, IconNames.Close, Se.Language.General.Clear).WithMarginLeft(5),
                 UiUtil.MakeLabel(Se.Language.General.TargetFormat).WithMarginLeft(15),
                 comboBoxSubtitleFormat,
-                UiUtil.MakeButton(vm.ShowOutputPropertiesCommand, IconNames.Settings).WithMarginLeft(18).WithMarginRight(5),
+                buttonTargetFormatSettings,
+                buttonSettings,
                 MakeOutputPropertiesGrid(vm),
             }
         };
@@ -234,11 +246,6 @@ public class BatchConvertWindow : Window
 
         var border = UiUtil.MakeBorderForControlNoPadding(grid);
         return border;
-    }
-
-    private static void ComboBoxSubtitleFormat_PropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
-    {
-        throw new System.NotImplementedException();
     }
 
     private static Grid MakeOutputPropertiesGrid(BatchConvertViewModel vm)

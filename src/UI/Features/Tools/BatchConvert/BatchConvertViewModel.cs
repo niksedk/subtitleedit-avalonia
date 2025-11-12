@@ -4,7 +4,6 @@ using Avalonia.Interactivity;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Google.Protobuf.Collections;
 using Nikse.SubtitleEdit.Core.AutoTranslate;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
@@ -19,7 +18,6 @@ using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 using Nikse.SubtitleEdit.Features.Translate;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using Nikse.SubtitleEdit.Logic.Config.Language.Options;
 using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.Generic;
@@ -837,6 +835,12 @@ public partial class BatchConvertViewModel : ObservableObject
         UpdateOutputProperties();
     }
 
+    [RelayCommand]
+    private async Task ShowTargetFormatSettings()
+    {
+        
+    }
+
     internal void OnKeyDown(KeyEventArgs e)
     {
         if (e.Key == Key.Escape)
@@ -1482,5 +1486,11 @@ public partial class BatchConvertViewModel : ObservableObject
     internal void OnClosing(object? sender, WindowClosingEventArgs e)
     {
         UiUtil.SaveWindowPosition(Window);
+    }
+
+    internal void ComboBoxSubtitleFormatChanged()
+    {
+        var selectedFormat = SelectedTargetFormat ?? string.Empty;
+        IsTargetFormatSettingsVisible = _targetFormatsWithSettings.Contains(selectedFormat);
     }
 }

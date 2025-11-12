@@ -10,6 +10,7 @@ public class LanguageBatchConvert
     public string OutputFolderSource { get; set; }
     public string OutputFolderX { get; set; }
     public string EncodingXOverwriteY { get; set; }
+    public string TargetFormatSettings { get; set; }
 
     public LanguageBatchConvert()
     {
@@ -19,5 +20,6 @@ public class LanguageBatchConvert
         OutputFolderSource = " Output folder: Source folder";
         OutputFolderX = " Output folder: {0}";
         EncodingXOverwriteY = "Encoding: {0}, overwrite existing files: {1}";
+        TargetFormatSettings = "Target format settings";
     }
 }
