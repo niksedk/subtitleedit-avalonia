@@ -20,28 +20,30 @@ using Nikse.SubtitleEdit.Logic.Ocr;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Logic.Config.Language.Options;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
 public class BatchConverter : IBatchConverter, IFixCallbacks
 {
-    public static string FormatAyato = new Ayato().Name;
+    public static readonly string FormatAyato = new Ayato().Name;
     public const string FormatBdnXml = "BDN-XML";
     public const string FormatBluRaySup = "Blu-ray sup";
-    public static string FormatCavena890 = new Cavena890().Name;
+    public static readonly string FormatCavena890 = new Cavena890().Name;
     public const string FormatCustomTextFormat = "Custom text format";
-    public static string FormatDostImage = "DOST/image";
-    public static string FormatEbuStl = new Ebu().Name;
+    public static readonly string FormatDostImage = "DOST/image";
+    public static readonly string FormatEbuStl = new Ebu().Name;
     public const string FormatFcpImage = "FCP/image";
     public const string FormatImagesWithTimeCodesInFileName = "Images with time codes in file name";
-    public static string FormatPac = new Pac().Name;
-    public static string FormatPacUnicode = new PacUnicode().Name;
+    public static readonly string FormatPac = new Pac().Name;
+    public static readonly string FormatPacUnicode = new PacUnicode().Name;
     public const string FormatPlainText = "Plain text";
     public const string FormatVobSub = "VobSub";
 
@@ -107,41 +109,41 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             {
                 if (matroska.IsValid)
                 {
-                    var trackId = item.SubItems[2].Text;
-                    if (trackId.Contains("#"))
+                    var trackId = item.Format;
+                    if (trackId.Contains('#'))
                     {
-                        trackId = trackId.Remove(0, trackId.IndexOf("#", StringComparison.Ordinal) + 1);
+                        trackId = trackId.Remove(0, trackId.IndexOf('#') + 1);
                     }
-
+                    
                     foreach (var track in matroska.GetTracks(true))
                     {
                         if (track.CodecId.Equals("S_VOBSUB", StringComparison.OrdinalIgnoreCase))
                         {
                             if (trackId == track.TrackNumber.ToString(CultureInfo.InvariantCulture))
                             {
-                                var vobSubs = LoadVobSubFromMatroska(track, matroska, out var idx);
-                                if (vobSubs.Count > 0)
-                                {
-                                    item.SubItems[3].Text = LanguageSettings.Current.BatchConvert.Ocr;
-                                    using (var vobSubOcr = new VobSubOcr())
-                                    {
-                                        vobSubOcr.ProgressCallback = progress =>
-                                        {
-                                            item.SubItems[3].Text = LanguageSettings.Current.BatchConvert.Ocr + "  " + progress;
-                                        };
-                                        vobSubOcr.FileName = Path.GetFileName(fileName);
-                                        vobSubOcr.InitializeBatch(vobSubs, idx.Palette, Configuration.Settings.VobSubOcr, fileName, false, track.Language, _ocrEngine, _cancellationTokenSource.Token);
-                                        sub = vobSubOcr.SubtitleFromOcr;
-                                    }
-                                }
-
-                                fileName = fileName.Substring(0, fileName.LastIndexOf('.')) + "." + GetMkvLanguage(track.Language).Replace("undefined.", string.Empty) + "mkv";
-                                if (mkvFileNames.Contains(fileName))
-                                {
-                                    fileName = fileName.Substring(0, fileName.LastIndexOf('.')) + ".#" + trackId + "." + GetMkvLanguage(track.Language) + "mkv";
-                                }
-                                mkvFileNames.Add(fileName);
-
+                                // var vobSubs = LoadVobSubFromMatroska(track, matroska, out var idx);
+                                // if (vobSubs.Count > 0)
+                                // {
+                                //     item.SubItems[3].Text = LanguageSettings.Current.BatchConvert.Ocr;
+                                //     using (var vobSubOcr = new VobSubOcr())
+                                //     {
+                                //         vobSubOcr.ProgressCallback = progress =>
+                                //         {
+                                //             item.SubItems[3].Text = LanguageSettings.Current.BatchConvert.Ocr + "  " + progress;
+                                //         };
+                                //         vobSubOcr.FileName = Path.GetFileName(fileName);
+                                //         vobSubOcr.InitializeBatch(vobSubs, idx.Palette, Configuration.Settings.VobSubOcr, fileName, false, track.Language, _ocrEngine, _cancellationTokenSource.Token);
+                                //         sub = vobSubOcr.SubtitleFromOcr;
+                                //     }
+                                // }
+                                //
+                                // fileName = fileName.Substring(0, fileName.LastIndexOf('.')) + "." + GetMkvLanguage(track.Language).Replace("undefined.", string.Empty) + "mkv";
+                                // if (mkvFileNames.Contains(fileName))
+                                // {
+                                //     fileName = fileName.Substring(0, fileName.LastIndexOf('.')) + ".#" + trackId + "." + GetMkvLanguage(track.Language) + "mkv";
+                                // }
+                                // mkvFileNames.Add(fileName);
+                    
                                 break;
                             }
                         }
@@ -149,45 +151,45 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                         {
                             if (trackId == track.TrackNumber.ToString(CultureInfo.InvariantCulture))
                             {
-                                bluRaySubtitles = LoadBluRaySupFromMatroska(track, matroska, Handle);
-
-                                fileName = fileName.Substring(0, fileName.LastIndexOf('.')) + "." + GetMkvLanguage(track.Language).Replace("undefined.", string.Empty) + "mkv";
-                                if (mkvFileNames.Contains(fileName))
-                                {
-                                    fileName = fileName.Substring(0, fileName.LastIndexOf('.')) + ".#" + trackId + "." + GetMkvLanguage(track.Language) + "mkv";
-                                }
-                                mkvFileNames.Add(fileName);
-
-                                if ((toFormat == BdnXmlSubtitle || toFormat == BluRaySubtitle ||
-                                     toFormat == VobSubSubtitle || toFormat == DostImageSubtitle) &&
-                                    AllowImageToImage())
-                                {
-                                    foreach (var b in bluRaySubtitles)
-                                    {
-                                        sub.Paragraphs.Add(new Paragraph(b.StartTimeCode, b.EndTimeCode, string.Empty));
-                                    }
-                                    if (!_bdLookup.ContainsKey(fileName))
-                                    {
-                                        _bdLookup.Add(fileName, bluRaySubtitles);
-                                    }
-                                }
-                                else
-                                {
-                                    if (bluRaySubtitles.Count > 0)
-                                    {
-                                        item.SubItems[3].Text = LanguageSettings.Current.BatchConvert.Ocr;
-                                        using (var vobSubOcr = new VobSubOcr())
-                                        {
-                                            vobSubOcr.ProgressCallback = progress =>
-                                            {
-                                                item.SubItems[3].Text = LanguageSettings.Current.BatchConvert.Ocr + "  " + progress;
-                                            };
-                                            vobSubOcr.FileName = Path.GetFileName(fileName);
-                                            vobSubOcr.InitializeBatch(bluRaySubtitles, Configuration.Settings.VobSubOcr, fileName, false, track.Language, _ocrEngine, _cancellationTokenSource.Token);
-                                            sub = vobSubOcr.SubtitleFromOcr;
-                                        }
-                                    }
-                                }
+                                // bluRaySubtitles = LoadBluRaySupFromMatroska(track, matroska, Handle);
+                                //
+                                // fileName = fileName.Substring(0, fileName.LastIndexOf('.')) + "." + GetMkvLanguage(track.Language).Replace("undefined.", string.Empty) + "mkv";
+                                // if (mkvFileNames.Contains(fileName))
+                                // {
+                                //     fileName = fileName.Substring(0, fileName.LastIndexOf('.')) + ".#" + trackId + "." + GetMkvLanguage(track.Language) + "mkv";
+                                // }
+                                // mkvFileNames.Add(fileName);
+                                //
+                                // if ((toFormat == BdnXmlSubtitle || toFormat == BluRaySubtitle ||
+                                //      toFormat == VobSubSubtitle || toFormat == DostImageSubtitle) &&
+                                //     AllowImageToImage())
+                                // {
+                                //     foreach (var b in bluRaySubtitles)
+                                //     {
+                                //         sub.Paragraphs.Add(new Paragraph(b.StartTimeCode, b.EndTimeCode, string.Empty));
+                                //     }
+                                //     if (!_bdLookup.ContainsKey(fileName))
+                                //     {
+                                //         _bdLookup.Add(fileName, bluRaySubtitles);
+                                //     }
+                                // }
+                                // else
+                                // {
+                                //     if (bluRaySubtitles.Count > 0)
+                                //     {
+                                //         item.SubItems[3].Text = LanguageSettings.Current.BatchConvert.Ocr;
+                                //         using (var vobSubOcr = new VobSubOcr())
+                                //         {
+                                //             vobSubOcr.ProgressCallback = progress =>
+                                //             {
+                                //                 item.SubItems[3].Text = LanguageSettings.Current.BatchConvert.Ocr + "  " + progress;
+                                //             };
+                                //             vobSubOcr.FileName = Path.GetFileName(fileName);
+                                //             vobSubOcr.InitializeBatch(bluRaySubtitles, Configuration.Settings.VobSubOcr, fileName, false, track.Language, _ocrEngine, _cancellationTokenSource.Token);
+                                //             sub = vobSubOcr.SubtitleFromOcr;
+                                //         }
+                                //     }
+                                // }
                                 break;
                             }
                         }
@@ -195,43 +197,43 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                         {
                             if (trackId == track.TrackNumber.ToString(CultureInfo.InvariantCulture))
                             {
-                                binaryParagraphs = LoadDvbFromMatroska(track, matroska, ref sub);
-
-                                fileName = fileName.Substring(0, fileName.LastIndexOf('.')) + "." + GetMkvLanguage(track.Language).Replace("undefined.", string.Empty) + "mkv";
-                                if (mkvFileNames.Contains(fileName))
-                                {
-                                    fileName = fileName.Substring(0, fileName.LastIndexOf('.')) + ".#" + trackId + "." + GetMkvLanguage(track.Language) + "mkv";
-                                }
-                                mkvFileNames.Add(fileName);
-
-                                if ((toFormat == BdnXmlSubtitle || toFormat == BluRaySubtitle ||
-                                     toFormat == VobSubSubtitle || toFormat == DostImageSubtitle) &&
-                                    AllowImageToImage())
-                                {
-                                    if (!_binaryParagraphLookup.ContainsKey(fileName))
-                                    {
-                                        _binaryParagraphLookup.Add(fileName, binaryParagraphs);
-                                    }
-                                }
-                                else
-                                {
-                                    if (binaryParagraphs.Count > 0)
-                                    {
-                                        item.SubItems[3].Text = LanguageSettings.Current.BatchConvert.Ocr;
-                                        using (var vobSubOcr = new VobSubOcr())
-                                        {
-                                            vobSubOcr.ProgressCallback = progress =>
-                                            {
-                                                item.SubItems[3].Text = LanguageSettings.Current.BatchConvert.Ocr + "  " + progress;
-                                            };
-                                            vobSubOcr.FileName = Path.GetFileName(fileName);
-
-                                            //TODO: fix
-                                            vobSubOcr.InitializeBatch(binaryParagraphs.Cast<IBinaryParagraph>().ToList(), Configuration.Settings.VobSubOcr, fileName, false, track.Language, _ocrEngine, _cancellationTokenSource.Token);
-                                            sub = vobSubOcr.SubtitleFromOcr;
-                                        }
-                                    }
-                                }
+                                // binaryParagraphs = LoadDvbFromMatroska(track, matroska, ref sub);
+                                //
+                                // fileName = fileName.Substring(0, fileName.LastIndexOf('.')) + "." + GetMkvLanguage(track.Language).Replace("undefined.", string.Empty) + "mkv";
+                                // if (mkvFileNames.Contains(fileName))
+                                // {
+                                //     fileName = fileName.Substring(0, fileName.LastIndexOf('.')) + ".#" + trackId + "." + GetMkvLanguage(track.Language) + "mkv";
+                                // }
+                                // mkvFileNames.Add(fileName);
+                                //
+                                // if ((toFormat == BdnXmlSubtitle || toFormat == BluRaySubtitle ||
+                                //      toFormat == VobSubSubtitle || toFormat == DostImageSubtitle) &&
+                                //     AllowImageToImage())
+                                // {
+                                //     if (!_binaryParagraphLookup.ContainsKey(fileName))
+                                //     {
+                                //         _binaryParagraphLookup.Add(fileName, binaryParagraphs);
+                                //     }
+                                // }
+                                // else
+                                // {
+                                //     if (binaryParagraphs.Count > 0)
+                                //     {
+                                //         item.SubItems[3].Text = LanguageSettings.Current.BatchConvert.Ocr;
+                                //         using (var vobSubOcr = new VobSubOcr())
+                                //         {
+                                //             vobSubOcr.ProgressCallback = progress =>
+                                //             {
+                                //                 item.SubItems[3].Text = LanguageSettings.Current.BatchConvert.Ocr + "  " + progress;
+                                //             };
+                                //             vobSubOcr.FileName = Path.GetFileName(fileName);
+                                //
+                                //             //TODO: fix
+                                //             vobSubOcr.InitializeBatch(binaryParagraphs.Cast<IBinaryParagraph>().ToList(), Configuration.Settings.VobSubOcr, fileName, false, track.Language, _ocrEngine, _cancellationTokenSource.Token);
+                                //             sub = vobSubOcr.SubtitleFromOcr;
+                                //         }
+                                //     }
+                                // }
                                 break;
                             }
                         }
@@ -240,27 +242,24 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                             if (trackId == track.TrackNumber.ToString(CultureInfo.InvariantCulture))
                             {
                                 var mkvSub = matroska.GetSubtitle(track.TrackNumber, null);
-                                Utilities.LoadMatroskaTextSubtitle(track, matroska, mkvSub, sub);
-                                fileName = fileName.Substring(0, fileName.LastIndexOf('.')) + "." + GetMkvLanguage(track.Language).Replace("undefined.", string.Empty) + "mkv";
-                                if (mkvFileNames.Contains(fileName))
-                                {
-                                    fileName = fileName.Substring(0, fileName.LastIndexOf('.')) + ".#" + trackId + "." + GetMkvLanguage(track.Language) + "mkv";
-                                }
-
+                                item.Subtitle = new Subtitle();
+                                Utilities.LoadMatroskaTextSubtitle(track, matroska, mkvSub, item.Subtitle);
+                                var fileName = Path.GetFileName(item.FileName);
+                                item.OutputFileName = fileName.Substring(0, fileName.LastIndexOf('.')) + "." + GetMkvLanguage(track.Language).Replace("undefined.", string.Empty).TrimEnd('.') + ".mkv";
+                                
                                 if (track.CodecId.Equals("S_TEXT/UTF8", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    fromFormat = new SubRip();
+                                    item.Subtitle.OriginalFormat = new SubRip();
                                 }
                                 else if (track.CodecId.Equals("S_TEXT/SSA", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    fromFormat = new SubStationAlpha();
+                                    item.Subtitle.OriginalFormat = new  SubStationAlpha();
                                 }
                                 else if (track.CodecId.Equals("S_TEXT/ASS", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    fromFormat = new AdvancedSubStationAlpha();
+                                    item.Subtitle.OriginalFormat = new AdvancedSubStationAlpha();
                                 }
-
-                                mkvFileNames.Add(fileName);
+                                
                                 break;
                             }
                         }
@@ -269,18 +268,18 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                             if (trackId == track.TrackNumber.ToString(CultureInfo.InvariantCulture))
                             {
                                 var mkvSub = matroska.GetSubtitle(track.TrackNumber, null);
-                                Utilities.LoadMatroskaTextSubtitle(track, matroska, mkvSub, sub);
-                                Utilities.ParseMatroskaTextSt(track, mkvSub, sub);
-
-                                fileName = fileName.Substring(0, fileName.LastIndexOf('.')) + "." + GetMkvLanguage(track.Language).Replace("undefined.", string.Empty) + "mkv";
-                                if (mkvFileNames.Contains(fileName))
-                                {
-                                    fileName = fileName.Substring(0, fileName.LastIndexOf('.')) + ".#" + trackId + "." + GetMkvLanguage(track.Language) + "mkv";
-                                }
-
-                                fromFormat = new SubRip();
-
-                                mkvFileNames.Add(fileName);
+                                //Utilities.LoadMatroskaTextSubtitle(track, matroska, mkvSub, sub);
+                                //Utilities.ParseMatroskaTextSt(track, mkvSub, sub);
+                    
+                                // fileName = fileName.Substring(0, fileName.LastIndexOf('.')) + "." + GetMkvLanguage(track.Language).Replace("undefined.", string.Empty) + "mkv";
+                                // if (mkvFileNames.Contains(fileName))
+                                // {
+                                //     fileName = fileName.Substring(0, fileName.LastIndexOf('.')) + ".#" + trackId + "." + GetMkvLanguage(track.Language) + "mkv";
+                                // }
+                                //
+                                // fromFormat = new SubRip();
+                                //
+                                // mkvFileNames.Add(fileName);
                                 break;
                             }
                         }
@@ -389,6 +388,11 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         }
 
         WriteToImageBasedFormat(item, imageSubtitle, cancellationToken);
+    }
+
+    private string GetMkvLanguage(string trackLanguage)
+    {
+        return trackLanguage;
     }
 
     private async Task SaveCustomSubtitleFormat(BatchConvertItem item, CancellationToken cancellationToken)
@@ -1280,6 +1284,11 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         }
 
         var fileName = Path.GetFileNameWithoutExtension(item.FileName);
+        if (!string.IsNullOrEmpty(item.OutputFileName))
+        {
+            fileName = Path.GetFileNameWithoutExtension(item.OutputFileName);
+        }
+
         var targetExtension = extension;
         var outputFileName = Path.Combine(outputFolder, fileName + targetExtension);
         if (targetExtension != string.Empty && !File.Exists(outputFileName) && Directory.Exists(outputFolder))
