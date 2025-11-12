@@ -53,6 +53,7 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private double _progressValue;
     [ObservableProperty] private double _progressMaxValue;
     [ObservableProperty] private string _actionsSelected;
+    [ObservableProperty] private bool _isTargetFormatSettingsVisible;
 
     // Remove formatting
     [ObservableProperty] private bool _formattingRemoveAll;
@@ -140,6 +141,7 @@ public partial class BatchConvertViewModel : ObservableObject
     private CancellationTokenSource _cancellationTokenSource;
     private List<string> _encodings;
     private const int StatisticsNumberOfLinesToShow = 10;
+    private List<string> _targetFormatsWithSettings;
 
     public BatchConvertViewModel(IWindowService windowService, IFileHelper fileHelper, IBatchConverter batchConverter, IFolderHelper folderHelper)
     {
@@ -227,6 +229,18 @@ public partial class BatchConvertViewModel : ObservableObject
         ChangeSpeedPercent = 100;
 
         FixCommonErrorsProfile = LoadDefaultProfile();
+
+        _targetFormatsWithSettings = new List<string>
+        {
+            BatchConverter.FormatBdnXml,
+            BatchConverter.FormatBluRaySup,
+            BatchConverter.FormatCustomTextFormat,
+            BatchConverter.FormatDostImage,
+            BatchConverter.FormatFcpImage,
+            BatchConverter.FormatImagesWithTimeCodesInFileName,
+            BatchConverter.FormatVobSub,
+            new AdvancedSubStationAlpha().Name,
+        };
 
         LoadSettings();
     }

@@ -148,44 +148,6 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                                 imageSubtitle = new OcrSubtitleIBinaryParagraph(binaryParagraphs); 
                                 var fileName = Path.GetFileName(item.FileName);
                                 item.OutputFileName = fileName.Substring(0, fileName.LastIndexOf('.')) + "." + GetMkvLanguage(track.Language).Replace("undefined.", string.Empty).TrimEnd('.') + ".mkv";
-
-
-                                //
-                                // fileName = fileName.Substring(0, fileName.LastIndexOf('.')) + "." + GetMkvLanguage(track.Language).Replace("undefined.", string.Empty) + "mkv";
-                                // if (mkvFileNames.Contains(fileName))
-                                // {
-                                //     fileName = fileName.Substring(0, fileName.LastIndexOf('.')) + ".#" + trackId + "." + GetMkvLanguage(track.Language) + "mkv";
-                                // }
-                                // mkvFileNames.Add(fileName);
-                                //
-                                // if ((toFormat == BdnXmlSubtitle || toFormat == BluRaySubtitle ||
-                                //      toFormat == VobSubSubtitle || toFormat == DostImageSubtitle) &&
-                                //     AllowImageToImage())
-                                // {
-                                //     if (!_binaryParagraphLookup.ContainsKey(fileName))
-                                //     {
-                                //         _binaryParagraphLookup.Add(fileName, binaryParagraphs);
-                                //     }
-                                // }
-                                // else
-                                // {
-                                //     if (binaryParagraphs.Count > 0)
-                                //     {
-                                //         item.SubItems[3].Text = LanguageSettings.Current.BatchConvert.Ocr;
-                                //         using (var vobSubOcr = new VobSubOcr())
-                                //         {
-                                //             vobSubOcr.ProgressCallback = progress =>
-                                //             {
-                                //                 item.SubItems[3].Text = LanguageSettings.Current.BatchConvert.Ocr + "  " + progress;
-                                //             };
-                                //             vobSubOcr.FileName = Path.GetFileName(fileName);
-                                //
-                                //             //TODO: fix
-                                //             vobSubOcr.InitializeBatch(binaryParagraphs.Cast<IBinaryParagraph>().ToList(), Configuration.Settings.VobSubOcr, fileName, false, track.Language, _ocrEngine, _cancellationTokenSource.Token);
-                                //             sub = vobSubOcr.SubtitleFromOcr;
-                                //         }
-                                //     }
-                                // }
                                 break;
                             }
                         }
@@ -240,12 +202,12 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                   item.FileName.EndsWith(".mpeg", StringComparison.OrdinalIgnoreCase)) &&
                   item.Format!.StartsWith("Transport Stream", StringComparison.Ordinal))
         {
-
+            imageSubtitle = LoadTransportStream(item, cancellationToken);
         }
         else if (item.Format == "MP4" &&
                  (item.FileName.EndsWith(".mp4") || item.FileName.EndsWith(".m4v") || item.FileName.EndsWith(".m4s")))
         {
-
+            imageSubtitle = LoadMp4Subtitle(item, cancellationToken);
         }
 
         if (imageSubtitle != null && !_config.IsTargetFormatImageBased)
@@ -334,6 +296,16 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         }
 
         WriteToImageBasedFormat(item, imageSubtitle, cancellationToken);
+    }
+    
+    private IOcrSubtitle? LoadTransportStream(BatchConvertItem item, CancellationToken cancellationToken)
+    {
+        return null;      
+    }
+    
+    private IOcrSubtitle? LoadMp4Subtitle(BatchConvertItem item, CancellationToken cancellationToken)
+    {
+        return null;
     }
 
     public static List<IBinaryParagraphWithPosition> LoadDvbFromMatroska(MatroskaTrackInfo track, MatroskaFile matroska, ref Subtitle subtitle)

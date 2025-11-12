@@ -182,6 +182,7 @@ public class BatchConvertWindow : Window
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedBatchItem)) { Source = vm });
 
         var comboBoxSubtitleFormat = UiUtil.MakeComboBox(vm.TargetFormats, vm, nameof(vm.SelectedTargetFormat));
+        comboBoxSubtitleFormat.PropertyChanged += ComboBoxSubtitleFormat_PropertyChanged;
         comboBoxSubtitleFormat.Width = 240;
 
         var panelFileControls = new StackPanel
@@ -233,6 +234,11 @@ public class BatchConvertWindow : Window
 
         var border = UiUtil.MakeBorderForControlNoPadding(grid);
         return border;
+    }
+
+    private static void ComboBoxSubtitleFormat_PropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        throw new System.NotImplementedException();
     }
 
     private static Grid MakeOutputPropertiesGrid(BatchConvertViewModel vm)
