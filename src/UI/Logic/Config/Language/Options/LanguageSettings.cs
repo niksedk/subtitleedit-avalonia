@@ -164,6 +164,7 @@ public class LanguageSettings
     public string ResetMultipleReplaceRules { get; set; }
     public string ResetAppearance { get; set; }
     public string ResetAutoTranslate { get; set; }
+    public string ResetWindowPositionAndSize { get; set; }
     public string ResetSettingsTitle { get; set; }
     public string OpenRuleFile { get; set; }
     public string ExportProfiles { get; set; }
@@ -249,7 +250,7 @@ public class LanguageSettings
         TextBoxFontBold = "Bold text in subtitle text box";
         TextBoxFontSize = "Font size in subtitle text box";
         SubtitleTextBoxAndGridFontName = "UI font in subtitle text box and grid";
-        SubtitleGridFontSize = "Font size in subtitle grid"; 
+        SubtitleGridFontSize = "Font size in subtitle grid";
         ShowUpDownStartTime = "Show up/down control for \"Show\"";
         ShowUpDownEndTime = "Show up/down control for \"Hide\"";
         ShowUpDownDuration = "Show up/down control for \"Duration\"";
@@ -343,6 +344,7 @@ public class LanguageSettings
         ResetMultipleReplaceRules = "Reset multiple replace rules";
         ResetAppearance = "Reset appearance";
         ResetAutoTranslate = "Reset auto-translate";
+        ResetWindowPositionAndSize = "Reset window position and size";
         ResetSettingsTitle = "Reset settings";
         OpenRuleFile = "Open rule file";
         ExportProfiles = "Export profiles";

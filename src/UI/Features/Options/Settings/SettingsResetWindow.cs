@@ -21,9 +21,9 @@ public class SettingsResetWindow : Window
 
         var checkBoxResetAll = new CheckBox
         {
-            Content = Se.Language.Options.Settings.ResetAllSettings,            
+            Content = Se.Language.Options.Settings.ResetAllSettings,
             Margin = new Thickness(0, 0, 55, 0),
-            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ResetAll)) { Mode = BindingMode.TwoWay },              
+            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ResetAll)) { Mode = BindingMode.TwoWay },
         };
 
         var checkBoxResetRules = new CheckBox
@@ -75,6 +75,13 @@ public class SettingsResetWindow : Window
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ResetSyntaxColoring)) { Mode = BindingMode.TwoWay },
         }.WithBindEnabled(nameof(vm.ResetAll), new InverseBooleanConverter());
 
+        var checkBoxResetWindowPositionAndSize = new CheckBox
+        {
+            Content = Se.Language.Options.Settings.ResetWindowPositionAndSize,
+            Margin = new Thickness(20, 0, 55, 0),
+            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ResetWindowPositionAndSize)) { Mode = BindingMode.TwoWay },
+        }.WithBindEnabled(nameof(vm.ResetAll), new InverseBooleanConverter());
+
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
@@ -90,6 +97,10 @@ public class SettingsResetWindow : Window
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
@@ -97,18 +108,21 @@ public class SettingsResetWindow : Window
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
-            RowSpacing = 10,
+            RowSpacing = 5,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
         grid.Add(checkBoxResetAll, 0);
-        grid.Add(checkBoxResetShortcuts, 1);
-        grid.Add(checkBoxResetRecentFiles, 2);
-        //grid.Add(radioResetMultipleReplaceRules, 3);
-        grid.Add(checkBoxResetAutoTranslate, 3);
-        grid.Add(checkBoxResetAppearance, 4);
-        grid.Add(panelButtons, 5);
+        grid.Add(checkBoxResetRules, 1);
+        grid.Add(checkBoxResetAppearance, 2);
+        grid.Add(checkBoxResetWaveform, 3);
+        grid.Add(checkBoxResetWindowPositionAndSize, 4);
+        grid.Add(checkBoxResetSyntaxColoring, 5);
+        grid.Add(checkBoxResetShortcuts, 6);
+        grid.Add(checkBoxResetRecentFiles, 7);
+        grid.Add(checkBoxResetAutoTranslate, 8);
+        grid.Add(panelButtons, 9);
 
         Content = grid;
 

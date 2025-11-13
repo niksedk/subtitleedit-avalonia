@@ -10,7 +10,6 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Core.Cea708.Commands;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Enums;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
@@ -732,6 +731,10 @@ public partial class SettingsViewModel : ObservableObject
             if (result.ResetRecentFiles)
             {
                 Se.Settings.File.RecentFiles = new List<RecentFile>();
+            }
+            if (result.ResetWindowPositionAndSize)
+            {
+                Se.Settings.General.WindowPositions = new List<SeWindowPosition>();
             }
             if (result.ResetShortcuts)
             {
