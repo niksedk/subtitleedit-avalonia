@@ -89,7 +89,6 @@ public partial class ShortcutsViewModel : ObservableObject
         _surround2Right = Se.Settings.Surround2Right;
         _surround3Left = Se.Settings.Surround3Left;
         _surround3Right = Se.Settings.Surround3Right;
-
     }
 
     private static IEnumerable<string> GetShortcutKeys()
@@ -132,6 +131,10 @@ public partial class ShortcutsViewModel : ObservableObject
         _configurableCommands.Add(vm.SurroundWith1Command);
         _configurableCommands.Add(vm.SurroundWith2Command);
         _configurableCommands.Add(vm.SurroundWith3Command);
+        _configurableCommands.Add(vm.VideoMoveCustom1BackCommand);
+        _configurableCommands.Add(vm.VideoMoveCustom1ForwardCommand);
+        _configurableCommands.Add(vm.VideoMoveCustom2BackCommand);
+        _configurableCommands.Add(vm.VideoMoveCustom2ForwardCommand);
     }
 
     internal void UpdateVisibleShortcuts(string searchText)
@@ -349,6 +352,11 @@ public partial class ShortcutsViewModel : ObservableObject
                 _surround3Left = result.Before;
                 _surround3Right = result.After;
             }
+        }
+
+        else if (node.ShortCut.Action == MainViewModel.VideoMoveCustom1BackCommand)
+        {
+            ...
         }
     }
 

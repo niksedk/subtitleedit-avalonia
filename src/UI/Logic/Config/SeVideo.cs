@@ -18,6 +18,8 @@ public class SeVideo
     public string ShowChangesFFmpegArguments { get; set; }
     public bool VideoPlayerDisplayTimeLeft { get; set; }
     public string CutDefaultVideoExtension { get; set; }
+    public int MoveVideoPositionCustom1 { get; set; }
+    public int MoveVideoPositionCustom2 { get; set; }
 
     public SeVideo()
     {
@@ -34,5 +36,7 @@ public class SeVideo
         CutType = Features.Video.CutVideo.CutType.MergeSegments.ToString();
         CutDefaultVideoExtension = ".mkv";
         ShowChangesFFmpegArguments = "-i \"{0}\" -vf \"select=gt(scene\\,{1}),showinfo\" -threads 0 -vsync vfr -f null -";
+        MoveVideoPositionCustom1 = 5000; // 5 seconds
+        MoveVideoPositionCustom2 = 10_000; // 10 seconds
     }
 }

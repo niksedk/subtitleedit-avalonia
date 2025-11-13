@@ -518,6 +518,10 @@ public class LanguageGeneral
     public string FixRightToLeftViaUnicodeTags { get; set; }
     public string RemoveRightToLeftUnicodeTags { get; set; }
     public string ReverseRightToLeftStartEnd { get; set; }
+    public string VideoOneCustom1Back { get; set; }
+    public string VideoOneCustom1Forward { get; set; }
+    public string VideoOneCustom2Back { get; set; }
+    public string VideoOneCustom2Forward { get; set; }
 
     public LanguageGeneral()
     {
@@ -1035,5 +1039,9 @@ public class LanguageGeneral
         FixRightToLeftViaUnicodeTags = "Fix RTL via Unicode tags";
         RemoveRightToLeftUnicodeTags = "Remove RTL Unicode tags";
         ReverseRightToLeftStartEnd = "Reverse RTL start/end";
+        VideoOneCustom1Back = "Video, custom milliseconds back, 1";
+        VideoOneCustom1Forward = "Video, custom milliseconds forward, 1";
+        VideoOneCustom2Back = "Video, custom milliseconds back, 2";
+        VideoOneCustom2Forward = "Video, custom milliseconds forward, 2";
     }
 }

@@ -182,6 +182,10 @@ public static class ShortcutsMain
         { nameof(MainViewModel.Video500MsForwardCommand),  Se.Language.General.Video500MsForward },
         { nameof(MainViewModel.VideoOneSecondBackCommand), Se.Language.General.VideoOneSecondBack },
         { nameof(MainViewModel.VideoOneSecondForwardCommand),  Se.Language.General.VideoOneSecondForward },
+        { nameof(MainViewModel.VideoMoveCustom1BackCommand),  Se.Language.General.VideoOneCustom1Back },
+        { nameof(MainViewModel.VideoMoveCustom1ForwardCommand),  Se.Language.General.VideoOneCustom1Forward },
+        { nameof(MainViewModel.VideoMoveCustom2BackCommand),  Se.Language.General.VideoOneCustom2Back },
+        { nameof(MainViewModel.VideoMoveCustom2ForwardCommand),  Se.Language.General.VideoOneCustom2Forward },
 
         { nameof(MainViewModel.WaveformSetStartAndOffsetTheRestCommand),  Se.Language.General.SetStartAndOffsetTheRest },
         { nameof(MainViewModel.WaveformSetStartCommand),  Se.Language.General.SetStart },
@@ -380,6 +384,10 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.Video500MsForwardCommand, nameof(vm.Video500MsForwardCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.VideoOneSecondBackCommand, nameof(vm.VideoOneSecondBackCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.VideoOneSecondForwardCommand, nameof(vm.VideoOneSecondForwardCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.VideoMoveCustom1BackCommand, nameof(vm.VideoMoveCustom1BackCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.VideoMoveCustom1ForwardCommand, nameof(vm.VideoMoveCustom1ForwardCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.VideoMoveCustom2BackCommand, nameof(vm.VideoMoveCustom2BackCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.VideoMoveCustom2ForwardCommand, nameof(vm.VideoMoveCustom2ForwardCommand), ShortcutCategory.General);
 
         AddShortcut(shortcuts, vm.WaveformSetStartAndOffsetTheRestCommand, nameof(vm.WaveformSetStartAndOffsetTheRestCommand), ShortcutCategory.Waveform);
         AddShortcut(shortcuts, vm.WaveformSetStartCommand, nameof(vm.WaveformSetStartCommand), ShortcutCategory.Waveform);

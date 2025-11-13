@@ -5815,6 +5815,30 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void VideoMoveCustom1Back()
+    {
+        MoveVideoPositionMs(-Se.Settings.Video.MoveVideoPositionCustom1);
+    }
+
+    [RelayCommand]
+    private void VideoMoveCustom1Forward()
+    {
+        MoveVideoPositionMs(Se.Settings.Video.MoveVideoPositionCustom1);
+    }
+
+    [RelayCommand]
+    private void VideoMoveCustom2Back()
+    {
+        MoveVideoPositionMs(-Se.Settings.Video.MoveVideoPositionCustom2);
+    }
+
+    [RelayCommand]
+    private void VideoMoveCustom2Forward()
+    {
+        MoveVideoPositionMs(Se.Settings.Video.MoveVideoPositionCustom2);
+    }
+
+    [RelayCommand]
     private void ExtendSelectedToPrevious()
     {
         var s = SelectedSubtitle;
