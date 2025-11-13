@@ -971,9 +971,9 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<StatisticsWindow, StatisticsViewModel>(vm => 
-        { 
-            vm.Initialize(GetUpdateSubtitle(), SelectedSubtitleFormat, _subtitleFileName ?? string.Empty); 
+        var result = await ShowDialogAsync<StatisticsWindow, StatisticsViewModel>(vm =>
+        {
+            vm.Initialize(GetUpdateSubtitle(), SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
         });
     }
 
@@ -992,9 +992,9 @@ public partial class MainViewModel :
         }
 
         IExportHandler exportHandler = new ExportHandlerBluRaySup();
-        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(vm => 
-        { 
-            vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName); 
+        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(vm =>
+        {
+            vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName);
         });
 
         if (!result.OkPressed)
@@ -4659,6 +4659,45 @@ public partial class MainViewModel :
         });
 
         _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private void FixRightToLeftViaUnicodeControlCharacters()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+
+        foreach (var item in selectedItems)
+        {
+            item.Text = Utilities.FixRtlViaUnicodeChars(item.Text);
+        }
+
+        ShowStatus(string.Format(Se.Language.Main.FixedRightToLeftUsingUnicodeControlCharactersX, selectedItems.Count));
+    }
+
+    [RelayCommand]
+    private void RemoveUnicodeControlCharacters()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+
+        foreach (var item in selectedItems)
+        {
+            item.Text = Utilities.RemoveUnicodeControlChars(item.Text);
+        }
+
+        ShowStatus(string.Format(Se.Language.Main.RemovedUnicodeControlCharactersX, selectedItems.Count));
+    }
+
+    [RelayCommand]
+    private void ReverseRightToLeftStartEnd()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+
+        foreach (var item in selectedItems)
+        {
+            item.Text = Utilities.ReverseStartAndEndingForRightToLeft(item.Text);
+        }
+
+        ShowStatus(string.Format(Se.Language.Main.ReversedStartAndEndingsForRightToLeftX, selectedItems.Count));
     }
 
     [RelayCommand]

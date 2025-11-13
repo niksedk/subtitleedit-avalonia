@@ -245,6 +245,21 @@ public static class InitMenu
                         [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsRightToLeftEnabled)),
                     }
                 },
+                new MenuItem
+                {
+                    Header = l.FixRightToLeftViaUnicodeControlCharacters,
+                    Command = vm.FixRightToLeftViaUnicodeControlCharactersCommand,
+                },
+                new MenuItem
+                {
+                    Header = l.RemoveUnicodeControlCharacters,
+                    Command = vm.RemoveUnicodeControlCharactersCommand,
+                },
+                new MenuItem
+                {
+                    Header = l.ReverseRightToLeftStartEnd,
+                    Command = vm.ReverseRightToLeftStartEndCommand,
+                },
                 new Separator(),
                 new MenuItem
                 {

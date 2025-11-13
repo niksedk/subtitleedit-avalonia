@@ -58,6 +58,9 @@ public class LanguageMain
     public string ShiftTextCellsDown { get; set; }
     public string NoTextInClipboard { get; set; }
     public string AudioTrackIsNowX { get; set; }
+    public string FixedRightToLeftUsingUnicodeControlCharactersX { get; set; }
+    public string RemovedUnicodeControlCharactersX { get; set; }
+    public string ReversedStartAndEndingsForRightToLeftX { get; set; }
 
     public LanguageMain()
     {
@@ -111,5 +114,8 @@ public class LanguageMain
         ShiftTextCellsDown = "Shift text cells down";
         NoTextInClipboard = "No text in clipboard";
         AudioTrackIsNowX = "Audio track is now \"{0}\"";
+        FixedRightToLeftUsingUnicodeControlCharactersX = "Fixed right-to-left using Unicode control characters in {0} lines";
+        RemovedUnicodeControlCharactersX = "Removed Unicode control characters from {0} lines";
+        ReversedStartAndEndingsForRightToLeftX = "Reversed start and endings for right-to-left in {0} lines";
     }
 }

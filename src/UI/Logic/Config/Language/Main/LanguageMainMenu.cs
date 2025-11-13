@@ -94,6 +94,9 @@ public class LanguageMainMenu
     public string HelpTitle { get; set; }
     public string Help { get; set; }
     public string About { get; set; }
+    public string FixRightToLeftViaUnicodeControlCharacters { get; set; }
+    public string RemoveUnicodeControlCharacters { get; set; }
+    public string ReverseRightToLeftStartEnd { get; set; }
 
     public LanguageMainMenu()
     {
@@ -185,5 +188,9 @@ public class LanguageMainMenu
         HelpTitle = "_Help";
         Help = "_Help...";
         About = "_About...";
+
+        FixRightToLeftViaUnicodeControlCharacters = "Fix RTL via Unicode control chars (selected lines)";
+        RemoveUnicodeControlCharacters = "Remove Unicode control chars (selected lines)";
+        ReverseRightToLeftStartEnd = "Reverse RTL start/end (selected lines)";
     }
 }
