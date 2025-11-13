@@ -59,7 +59,7 @@ public class LanguageExport
         AddNewLineAfterTimeCode = "Add new line after time code";
         AddNewLineAfterText = "Add new line after text";
         AddLineBetweenSubtitles = "Add line between subtitles";
-        TitleExportDCinemaInteropPng = "D-Cinema interop/PNG";
-        TitleExportDCinemaSmpte2014Png = "D-Cinema SMPTE 2014/PNG";
+        TitleExportDCinemaInteropPng = "D-Cinema interop/png";
+        TitleExportDCinemaSmpte2014Png = "D-Cinema SMPTE 2014/png";
     }
 }
