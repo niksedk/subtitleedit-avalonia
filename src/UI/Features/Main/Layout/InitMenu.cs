@@ -147,6 +147,11 @@ public static class InitMenu
                         },
                         new MenuItem
                         {
+                            Header = Se.Language.File.Export.TitleExportDCinemaPng,
+                            Command = vm.ExportDCinemaPngCommand,
+                        },
+                        new MenuItem
+                        {
                             Header = Ebu.NameOfFormat,
                             Command = vm.ExportEbuStlCommand,
                         },

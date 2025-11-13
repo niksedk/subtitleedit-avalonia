@@ -28,6 +28,7 @@ public class LanguageExport
     public string AddNewLineAfterTimeCode { get; set; }
     public string AddNewLineAfterText { get; set; }
     public string AddLineBetweenSubtitles { get; set; }
+    public string TitleExportDCinemaPng { get; set; }
 
     public LanguageExport()
     {
@@ -57,5 +58,6 @@ public class LanguageExport
         AddNewLineAfterTimeCode = "Add new line after time code";
         AddNewLineAfterText = "Add new line after text";
         AddLineBetweenSubtitles = "Add line between subtitles";
+        TitleExportDCinemaPng = "Export DCinema/PNG";
     }
 }
