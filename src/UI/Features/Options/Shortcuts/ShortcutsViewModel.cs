@@ -364,6 +364,30 @@ public partial class ShortcutsViewModel : ObservableObject
             if (result.OkPressed)
             {
                 Se.Settings.Video.MoveVideoPositionCustom1 = result.Milliseconds;
+                
+                var flatNodeBack = FlatNodes.FirstOrDefault(n => n?.ShortCut?.Action == MainViewModel.VideoMoveCustom1BackCommand);
+                if (flatNodeBack != null)
+                {
+                    flatNodeBack.Title = string.Format(Se.Language.General.VideoCustom1BackX, Se.Settings.Video.MoveVideoPositionCustom1);
+                }
+                
+                var flatNodeForward = FlatNodes.FirstOrDefault(n => n?.ShortCut?.Action == MainViewModel.VideoMoveCustom1ForwardCommand);                           
+                if (flatNodeForward != null)                                                                                                                     
+                {                                                                                                                                             
+                    flatNodeForward.Title = string.Format(Se.Language.General.VideoCustom1BackX, Se.Settings.Video.MoveVideoPositionCustom1);                    
+                }                                                                                                                                             
+
+                var nodeBack = _allShortcuts.FirstOrDefault(p=>p.Action == MainViewModel.VideoMoveCustom1BackCommand);
+                if (nodeBack != null)
+                {
+                    nodeBack.Name = string.Format(Se.Language.General.VideoCustom1ForwardX, Se.Settings.Video.MoveVideoPositionCustom1);
+                }
+
+                var nodeForward = _allShortcuts.FirstOrDefault(p=>p.Action == MainViewModel.VideoMoveCustom1ForwardCommand);
+                if (nodeForward != null)
+                {
+                    nodeForward.Name = string.Format(Se.Language.General.VideoCustom1ForwardX, Se.Settings.Video.MoveVideoPositionCustom1);
+                }
             }
         }
         else if (node.ShortCut.Action == MainViewModel.VideoMoveCustom2BackCommand || node.ShortCut.Action == MainViewModel.VideoMoveCustom2ForwardCommand)
@@ -375,6 +399,30 @@ public partial class ShortcutsViewModel : ObservableObject
             if (result.OkPressed)
             {
                 Se.Settings.Video.MoveVideoPositionCustom2 = result.Milliseconds;
+                
+                var flatNodeBack = FlatNodes.FirstOrDefault(n => n?.ShortCut?.Action == MainViewModel.VideoMoveCustom2BackCommand);
+                if (flatNodeBack != null)
+                {
+                    flatNodeBack.Title = string.Format(Se.Language.General.VideoCustom2BackX, Se.Settings.Video.MoveVideoPositionCustom2);
+                }
+                
+                var flatNodeForward = FlatNodes.FirstOrDefault(n => n?.ShortCut?.Action == MainViewModel.VideoMoveCustom2ForwardCommand);                           
+                if (flatNodeForward != null)                                                                                                                     
+                {                                                                                                                                             
+                    flatNodeForward.Title = string.Format(Se.Language.General.VideoCustom2BackX, Se.Settings.Video.MoveVideoPositionCustom2);                    
+                }                                                                                                                                             
+
+                var nodeBack = _allShortcuts.FirstOrDefault(p=>p.Action == MainViewModel.VideoMoveCustom2BackCommand);
+                if (nodeBack != null)
+                {
+                    nodeBack.Name = string.Format(Se.Language.General.VideoCustom2ForwardX, Se.Settings.Video.MoveVideoPositionCustom2);
+                }
+
+                var nodeForward = _allShortcuts.FirstOrDefault(p=>p.Action == MainViewModel.VideoMoveCustom2ForwardCommand);
+                if (nodeForward != null)
+                {
+                    nodeForward.Name = string.Format(Se.Language.General.VideoCustom2ForwardX, Se.Settings.Video.MoveVideoPositionCustom2);
+                }
             }
         }
     }
