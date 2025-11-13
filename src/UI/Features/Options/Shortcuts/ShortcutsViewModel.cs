@@ -4,7 +4,9 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.Cea708.Commands;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Options.Shortcuts.PickMilliseconds;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts.SurroundWith;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.PickColor;
@@ -184,7 +186,7 @@ public partial class ShortcutsViewModel : ObservableObject
 
         return string.Empty;
     }
-    
+
     [RelayCommand]
     private void CommandOk()
     {
@@ -353,10 +355,27 @@ public partial class ShortcutsViewModel : ObservableObject
                 _surround3Right = result.After;
             }
         }
-
-        else if (node.ShortCut.Action == MainViewModel.VideoMoveCustom1BackCommand)
+        else if (node.ShortCut.Action == MainViewModel.VideoMoveCustom1BackCommand || node.ShortCut.Action == MainViewModel.VideoMoveCustom1ForwardCommand)
         {
-            ...
+            var result = await _windowService.ShowDialogAsync<PickMillisecondsWindow, PickMillisecondsViewModel>(Window, vm =>
+            {
+                vm.Initialize(Se.Settings.Video.MoveVideoPositionCustom1);
+            });
+            if (result.OkPressed)
+            {
+                Se.Settings.Video.MoveVideoPositionCustom1 = result.Milliseconds;
+            }
+        }
+        else if (node.ShortCut.Action == MainViewModel.VideoMoveCustom2BackCommand || node.ShortCut.Action == MainViewModel.VideoMoveCustom2ForwardCommand)
+        {
+            var result = await _windowService.ShowDialogAsync<PickMillisecondsWindow, PickMillisecondsViewModel>(Window, vm =>
+            {
+                vm.Initialize(Se.Settings.Video.MoveVideoPositionCustom2);
+            });
+            if (result.OkPressed)
+            {
+                Se.Settings.Video.MoveVideoPositionCustom2 = result.Milliseconds;
+            }
         }
     }
 

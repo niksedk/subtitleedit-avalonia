@@ -25,6 +25,7 @@ using Nikse.SubtitleEdit.Features.Ocr.NOcr;
 using Nikse.SubtitleEdit.Features.Options.Language;
 using Nikse.SubtitleEdit.Features.Options.Settings;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
+using Nikse.SubtitleEdit.Features.Options.Shortcuts.PickMilliseconds;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts.SurroundWith;
 using Nikse.SubtitleEdit.Features.Options.WordLists;
 using Nikse.SubtitleEdit.Features.Shared;
@@ -237,6 +238,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<PickFontNameViewModel>();
         collection.AddTransient<PickLayersViewModel>();
         collection.AddTransient<PickMatroskaTrackViewModel>();
+        collection.AddTransient<PickMillisecondsViewModel>();
         collection.AddTransient<PickOllamaModelViewModel>();
         collection.AddTransient<PickMp4TrackViewModel>();
         collection.AddTransient<PickRuleProfileViewModel>();

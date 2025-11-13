@@ -225,6 +225,7 @@ public class LanguageSettingsShortcuts
     public string RepeatLine { get; set; }
     public string RepeatPreviousLine { get; set; }
     public string RepeatNextLine { get; set; }
+    public string MoveVideoPositionMilliseconds { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -453,5 +454,6 @@ public class LanguageSettingsShortcuts
         RepeatLine = "Repeat line";
         RepeatPreviousLine = "Repeat previous line";
         RepeatNextLine = "Repeat next line";
+        MoveVideoPositionMilliseconds = "Move video position in milliseconds";
     }
 }
