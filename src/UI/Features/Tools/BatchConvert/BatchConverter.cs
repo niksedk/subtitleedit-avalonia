@@ -264,7 +264,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         if (imageSubtitle != null && !_config.IsTargetFormatImageBased)
         {
             item.Status = Se.Language.General.OcrDotDotDot;
-            if (Se.Settings.Ocr.Engine == "nOCR")
+            if (Se.Settings.Ocr.Engine.Equals("nOcr", StringComparison.OrdinalIgnoreCase))
             {
                 RunNOcr(imageSubtitle, item, cancellationToken);
             }
@@ -612,12 +612,13 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
 
     private void RunNOcr(IOcrSubtitle imageSubtitles, BatchConvertItem item, CancellationToken cancellationToken)
     {
-        var fileName = Path.Combine(Se.OcrFolder, Se.Settings.Ocr.NOcrDatabase);
-        var nOcrDb = new NOcrDb(string.Empty);
+        var fileName = Path.Combine(Se.OcrFolder, Se.Settings.Ocr.NOcrDatabase + ".nocr");
+        var nOcrDb = new NOcrDb(fileName);
         item.Subtitle = new Subtitle();
         for (var i = 0; i < imageSubtitles.Count; i++)
         {
             var pct = (i + 1) * 100 / imageSubtitles.Count;
+            item.Status = string.Format(Se.Language.General.OcrPercentX, pct);
             var bitmap = imageSubtitles.GetBitmap(i);
             var parentBitmap = new NikseBitmap2(bitmap);
             parentBitmap.MakeTwoColor(200);
