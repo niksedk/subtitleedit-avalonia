@@ -163,6 +163,8 @@ public partial class BatchConvertViewModel : ObservableObject
             BatchConverter.FormatBluRaySup,
             BatchConverter.FormatCavena890,
             BatchConverter.FormatCustomTextFormat,
+            BatchConverter.FormatDCinemaInterop,
+            BatchConverter.FormatDCinemaSmpte2014,
             BatchConverter.FormatDostImage,
             BatchConverter.FormatFcpImage,
             BatchConverter.FormatImagesWithTimeCodesInFileName,

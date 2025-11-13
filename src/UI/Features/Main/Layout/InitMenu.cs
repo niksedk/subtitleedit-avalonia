@@ -147,13 +147,33 @@ public static class InitMenu
                         },
                         new MenuItem
                         {
-                            Header = Se.Language.File.Export.TitleExportDCinemaPng,
-                            Command = vm.ExportDCinemaPngCommand,
+                            Header = Se.Language.File.Export.TitleExportDCinemaInteropPng,
+                            Command = vm.ExportDCinemaInteropPngCommand,
+                        },
+                        new MenuItem
+                        {
+                            Header = Se.Language.File.Export.TitleExportDCinemaSmpte2014Png,
+                            Command = vm.ExportDCinemaSmpte2014PngCommand,
                         },
                         new MenuItem
                         {
                             Header = Ebu.NameOfFormat,
                             Command = vm.ExportEbuStlCommand,
+                        },
+                        new MenuItem
+                        {
+                            Header = new Dost().Name,
+                            Command = vm.ExportDostPngCommand,
+                        },
+                        new MenuItem
+                        {
+                            Header = "FCP/png",
+                            Command = vm.ExportFcpPngCommand,
+                        },
+                        new MenuItem
+                        {
+                            Header = Se.Language.General.ImagesWithTimeCode,
+                            Command = vm.ExportImagesWithTimeCodeCommand,
                         },
                         new MenuItem
                         {

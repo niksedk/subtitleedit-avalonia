@@ -38,6 +38,8 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
     public const string FormatBdnXml = "BDN-XML";
     public const string FormatBluRaySup = "Blu-ray sup";
     public static readonly string FormatCavena890 = new Cavena890().Name;
+    public const string FormatDCinemaInterop = "D-Cinema interop/png";
+    public const string FormatDCinemaSmpte2014 = "D-Cinema SMPTE 2014/png";
     public const string FormatCustomTextFormat = "Custom text format";
     public static readonly string FormatDostImage = "DOST/image";
     public static readonly string FormatEbuStl = new Ebu().Name;
@@ -756,6 +758,18 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         if (_config.TargetFormatName == FormatFcpImage)
         {
             exportHandler = new ExportHandlerFcp();
+            extension = string.Empty; // folder
+        }
+        
+        if (_config.TargetFormatName == FormatDCinemaInterop)
+        {
+            exportHandler = new ExportHandlerDCinemaInteropPng();
+            extension = string.Empty; // folder
+        }
+        
+        if (_config.TargetFormatName == FormatDCinemaSmpte2014)
+        {
+            exportHandler = new ExportHandlerDCinemaSmpte2014Png();
             extension = string.Empty; // folder
         }
 
