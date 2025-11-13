@@ -489,6 +489,7 @@ public partial class BatchConvertViewModel : ObservableObject
                 batchItem.Status = Se.Language.General.Cancelled;
             }
         }
+
         ProgressText = string.Empty;
     }
 
@@ -662,6 +663,7 @@ public partial class BatchConvertViewModel : ObservableObject
                                 {
                                     tracksByFormat[formatName] = new List<string>();
                                 }
+
                                 tracksByFormat[formatName].Add(MakeMkvTrackInfoString(track));
                             }
                         }
@@ -682,6 +684,7 @@ public partial class BatchConvertViewModel : ObservableObject
                                 }
                             }
                         }
+
                         continue;
                     }
                 }
@@ -700,7 +703,8 @@ public partial class BatchConvertViewModel : ObservableObject
                 {
                     if (track.Mdia.IsTextSubtitle || track.Mdia.IsClosedCaption)
                     {
-                        mp4Files.Add($"MP4/#{mp4SubtitleTracks.IndexOf(track)} {track.Mdia.HandlerType} - {track.Mdia.Mdhd.Iso639ThreeLetterCode ?? track.Mdia.Mdhd.LanguageString}");
+                        mp4Files.Add(
+                            $"MP4/#{mp4SubtitleTracks.IndexOf(track)} {track.Mdia.HandlerType} - {track.Mdia.Mdhd.Iso639ThreeLetterCode ?? track.Mdia.Mdhd.LanguageString}");
                     }
                 }
 
@@ -739,34 +743,20 @@ public partial class BatchConvertViewModel : ObservableObject
 
             if (format == Se.Language.General.Unknown)
             {
-                var lines = FileUtil.ReadAllLinesShared(fileName, LanguageAutoDetect.GetEncodingFromFile(fileName));
-                if (ext == ".pac" && new Pac().IsMine(lines, fileName))
+                foreach (var f in SubtitleFormat.GetBinaryFormats(false))
                 {
-                    format = BatchConverter.FormatPac;
-                }
-
-                if (ext == ".890" && new Cavena890().IsMine(lines, fileName))
-                {
-                    format = BatchConverter.FormatCavena890;
-                }
-
-                if (ext == ".xml" && new BdnXml().IsMine(lines, fileName))
-                {
-                    format = BatchConverter.FormatBdnXml;
-                }
-
-                if (ext == ".dost" && new Dost().IsMine(lines, fileName))
-                {
-                    format = BatchConverter.FormatDostImage;
-                }
-
-                if (ext == ".aya" && new Ayato().IsMine(lines, fileName))
-                {
-                    format = BatchConverter.FormatAyato;
+                    if (f.IsMine(null, fileName))
+                    {
+                        subtitle = new Subtitle();
+                        f.LoadSubtitle(subtitle, null, fileName);
+                        subtitle.OriginalFormat = f;
+                        format = f.Name;
+                        break; // format found, exit the loop
+                    }
                 }
             }
 
-            if (format == Se.Language.General.Unknown && fileInfo.Length < 200_000)
+            if (format == Se.Language.General.Unknown && fileInfo.Length < 300_000)
             {
                 subtitle = Subtitle.Parse(fileName);
                 if (subtitle != null)
@@ -872,7 +862,6 @@ public partial class BatchConvertViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowTargetFormatSettings()
     {
-
     }
 
     internal void OnKeyDown(KeyEventArgs e)
