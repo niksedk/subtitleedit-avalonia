@@ -23,6 +23,8 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
     [ObservableProperty] private TextEncoding? _selectedEncoding;
 
     [ObservableProperty] private string _previewText;
+    
+    [ObservableProperty] private bool _isSaveButtonVisible;
 
     private List<SubtitleLineViewModel> _subtitles;
     private string? _subtitleFileNAme;
@@ -209,13 +211,14 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
         }
     }
 
-    internal void Initialize(List<SubtitleLineViewModel> subtitles, string? subtitleFileName, string? videoFileName)
+    internal void Initialize(List<SubtitleLineViewModel> subtitles, string? subtitleFileName, string? videoFileName, bool hideSaveButton = false)
     {
         _subtitles = subtitles;
         _subtitleFileNAme = subtitleFileName;
         _videoFileName = videoFileName;
         _title = subtitleFileName != null ? System.IO.Path.GetFileNameWithoutExtension(subtitleFileName) : Se.Language.General.Untitled;
-
+        IsSaveButtonVisible = !hideSaveButton;
+        
         foreach (var customFormat in Se.Settings.File.ExportCustomFormats)
         {
             CustomFormats.Add(new CustomFormatItem(customFormat));

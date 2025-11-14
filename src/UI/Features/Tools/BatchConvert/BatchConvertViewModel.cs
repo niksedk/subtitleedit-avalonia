@@ -28,6 +28,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Features.Files.ExportCustomTextFormat;
 using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Main;
 
@@ -628,11 +629,21 @@ public partial class BatchConvertViewModel : ObservableObject
             return;
         }
 
-        IExportHandler? exportHandler = null;
+        if (targetFormat == BatchConverter.FormatCustomTextFormat)
+        {
+            var subtitles = new List<SubtitleLineViewModel>();                                   
+            var p = new Paragraph("This is a sample text", 0, 1000);                                             
+            subtitles.Add(new SubtitleLineViewModel(p, new SubRip()));                                           
+            
+            var result = await _windowService.ShowDialogAsync<ExportCustomTextFormatWindow, ExportCustomTextFormatViewModel>(Window,
+                vm =>
+                {
+                    vm.Initialize(subtitles, string.Empty, string.Empty, true);
+                });
+            return;
+        }
 
-        //BatchConverter.FormatCustomTextFormat,                   
-        //BatchConverter.FormatImagesWithTimeCodesInFileName,      
-        //BatchConverter.FormatVobSub,                             
+        IExportHandler? exportHandler = null;
 
         if (targetFormat == BatchConverter.FormatBdnXml)
         {

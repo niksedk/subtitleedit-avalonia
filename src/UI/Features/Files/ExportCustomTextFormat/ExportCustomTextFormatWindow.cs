@@ -33,7 +33,9 @@ public class ExportCustomTextFormatWindow : Window
             Margin = new Thickness(10, 0, 0, 0),
         };
 
-        var buttonSaveAs = UiUtil.MakeButton(Se.Language.General.SaveDotDotDot, vm.SaveAsCommand);
+        var buttonSaveAs = UiUtil.MakeButton(Se.Language.General.SaveDotDotDot, vm.SaveAsCommand)
+            .WithBindIsVisible(vm, nameof(vm.IsSaveButtonVisible));
+        
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonSaveAs, buttonOk, buttonCancel);
