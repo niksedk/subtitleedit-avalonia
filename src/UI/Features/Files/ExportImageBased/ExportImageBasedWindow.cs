@@ -59,7 +59,8 @@ public class ExportImageBasedWindow : Window
         var previewView = MakePreviewView(vm);
         var progressView = MakeProgressView(vm);
 
-        var buttonExport = UiUtil.MakeButton(Se.Language.General.ExportDotDotDot, vm.ExportCommand);
+        var buttonExport = UiUtil.MakeButton(Se.Language.General.ExportDotDotDot, vm.ExportCommand)
+            .WithBindIsVisible(vm, nameof(vm.IsExportButtonVisible));
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand).WithBindIsVisible(nameof(vm.IsGenerating));
         var buttonDone = UiUtil.MakeButtonDone(vm.CancelCommand).WithBindIsVisible(nameof(vm.IsGenerating), new InverseBooleanConverter());
         var panelButtons = UiUtil.MakeButtonBar(buttonExport, buttonDone, buttonCancel);

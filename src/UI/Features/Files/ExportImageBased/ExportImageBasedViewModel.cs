@@ -56,6 +56,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
     [ObservableProperty] private string _progressText;
     [ObservableProperty] private double _progressValue;
     [ObservableProperty] private bool _isGenerating;
+    [ObservableProperty] private bool _isExportButtonVisible;
     [ObservableProperty] private ObservableCollection<ExportAlignmentDisplay> _alignments;
     [ObservableProperty] ExportAlignmentDisplay _selectedAlignment;
     [ObservableProperty] private ObservableCollection<ExportContentAlignmentDisplay> _contentAlignments;
@@ -577,11 +578,12 @@ public partial class ExportImageBasedViewModel : ObservableObject
         IExportHandler exportHandler,
         ObservableCollection<SubtitleLineViewModel> subtitles,
         string? subtitleFileName,
-        string? videoFileName)
+        string? videoFileName,
+        bool hideExportButton = false)
     {
         Subtitles.Clear();
         Subtitles.AddRange(subtitles);
-
+        IsExportButtonVisible = !hideExportButton;
         _exportImageHandler = exportHandler;
         Title = exportHandler.Title;
 

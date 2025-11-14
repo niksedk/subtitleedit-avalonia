@@ -28,6 +28,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
+using Nikse.SubtitleEdit.Features.Main;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -613,6 +615,64 @@ public partial class BatchConvertViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task ShowTargetFormatSettings()
+    {
+        var targetFormat = SelectedTargetFormat;
+        if (targetFormat == null)
+        {
+            return;
+        }
+
+        if (Window == null)
+        {
+            return;
+        }
+
+        IExportHandler? exportHandler = null;
+
+        //BatchConverter.FormatCustomTextFormat,                   
+        //BatchConverter.FormatImagesWithTimeCodesInFileName,      
+        //BatchConverter.FormatVobSub,                             
+
+        if (targetFormat == BatchConverter.FormatBdnXml)
+        {
+            exportHandler = new ExportHandlerBdnXml();
+        }
+        else if (targetFormat == BatchConverter.FormatBluRaySup)
+        {
+            exportHandler = new ExportHandlerBluRaySup();
+        }
+        else if (targetFormat == BatchConverter.FormatDostImage)
+        {
+            exportHandler = new ExportHandlerDost();
+        }
+        else if (targetFormat == BatchConverter.FormatFcpImage)
+        {
+            exportHandler = new ExportHandlerFcp();
+        }
+        else if (targetFormat == BatchConverter.FormatImagesWithTimeCodesInFileName)
+        {
+            exportHandler = new ExportHandlerImagesWithTimeCode();
+        }
+        else if (targetFormat == BatchConverter.FormatVobSub)           
+        {                                                                                      
+            exportHandler = new ExportHandlerVobSub();                             
+        }                                                                                      
+        
+        if (exportHandler != null)
+        {
+            var result = await _windowService.ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(Window, vm =>
+            {
+                var subtitles = new ObservableCollection<SubtitleLineViewModel>();
+                var p = new Paragraph("This is a sample text", 0, 1000);
+                subtitles.Add(new SubtitleLineViewModel(p, new SubRip()));
+                vm.Initialize(exportHandler, subtitles, string.Empty, string.Empty, true);
+            });
+            return;
+        }
+    }
+
+    [RelayCommand]
     private async Task AddFiles()
     {
         var fileNames = await _fileHelper.PickOpenSubtitleFiles(Window!, Se.Language.General.SelectFilesToConvert);
@@ -859,11 +919,6 @@ public partial class BatchConvertViewModel : ObservableObject
     {
         await _windowService.ShowDialogAsync<BatchConvertSettingsWindow, BatchConvertSettingsViewModel>(Window!);
         UpdateOutputProperties();
-    }
-
-    [RelayCommand]
-    private async Task ShowTargetFormatSettings()
-    {
     }
 
     internal void OnKeyDown(KeyEventArgs e)
