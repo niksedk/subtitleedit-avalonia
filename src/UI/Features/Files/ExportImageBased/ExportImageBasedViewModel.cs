@@ -45,6 +45,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<double> _shadowWidths;
     [ObservableProperty] double _selectedShadowWidth;
     [ObservableProperty] private bool _isBold;
+    [ObservableProperty] private bool _isRightToLeft;
     [ObservableProperty] private Color _fontColor;
     [ObservableProperty] private Color _shadowColor;
     [ObservableProperty] private Bitmap _bitmapPreview;
@@ -475,6 +476,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
             ScreenHeight = SelectedResolution?.Height ?? 1080,
             BottomTopMargin = SelectedTopBottomMargin,
             LeftRightMargin = SelectedLeftRightMargin,
+            IsRightToLeft = IsRightToLeft,
         };
 
         return imageParameter;
@@ -699,9 +701,9 @@ public partial class ExportImageBasedViewModel : ObservableObject
         using var italicTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.Italic);
         using var boldItalicTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.BoldItalic);
 
-        using var regularFont = new SKFont(regularTypeface, fontSize);
+        using var regularFont = new SKFont(ip.IsBold ? boldTypeface : regularTypeface, fontSize);
         using var boldFont = new SKFont(boldTypeface, fontSize);
-        using var italicFont = new SKFont(italicTypeface, fontSize);
+        using var italicFont = new SKFont(ip.IsBold ? boldItalicTypeface : italicTypeface, fontSize);
         using var boldItalicFont = new SKFont(boldItalicTypeface, fontSize);
 
         // Split segments into lines and measure dimensions
@@ -806,29 +808,55 @@ public partial class ExportImageBasedViewModel : ObservableObject
 
         foreach (var line in lines)
         {
-            var currentX = textStartX;
+            // Reverse segments for RTL languages
+            var segmentsToRender = ip.IsRightToLeft ? line.AsEnumerable().Reverse().ToList() : line;
 
             // Calculate line width for alignment
-            var lineWidth = line.Sum(segment =>
+            var lineWidth = segmentsToRender.Sum(segment =>
                 GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont).MeasureText(segment.Text));
 
-            // Adjust X position based on content alignment
-            if (ip.ContentAlignment == ExportContentAlignment.Center)
+            float currentX;
+
+            // For RTL, default alignment should be from the right
+            if (ip.IsRightToLeft)
             {
-                // Center within the content area (not the entire bitmap)
+                // RTL: Start from the right side of content area
                 var contentAreaWidth = contentWidth - (paddingLeftRight * 2);
-                currentX += (contentAreaWidth - lineWidth) / 2;
+
+                if (ip.ContentAlignment == ExportContentAlignment.Center)
+                {
+                    currentX = textStartX + (contentAreaWidth - lineWidth) / 2;
+                }
+                else if (ip.ContentAlignment == ExportContentAlignment.Left)
+                {
+                    // In RTL mode, "Left" alignment means align to the left edge (unusual for RTL)
+                    currentX = textStartX;
+                }
+                else // Right or default for RTL
+                {
+                    currentX = textStartX + contentAreaWidth - lineWidth;
+                }
             }
-            else if (ip.ContentAlignment == ExportContentAlignment.Right)
+            else
             {
-                // Align right within the content area
-                var contentAreaWidth = contentWidth - (paddingLeftRight * 2);
-                currentX += contentAreaWidth - lineWidth;
+                // LTR: Start from the left side
+                currentX = textStartX;
+
+                if (ip.ContentAlignment == ExportContentAlignment.Center)
+                {
+                    var contentAreaWidth = contentWidth - (paddingLeftRight * 2);
+                    currentX += (contentAreaWidth - lineWidth) / 2;
+                }
+                else if (ip.ContentAlignment == ExportContentAlignment.Right)
+                {
+                    var contentAreaWidth = contentWidth - (paddingLeftRight * 2);
+                    currentX += contentAreaWidth - lineWidth;
+                }
             }
 
-            for (var i = 0; i < line.Count; i++)
+            for (var i = 0; i < segmentsToRender.Count; i++)
             {
-                var segment = line[i];
+                var segment = segmentsToRender[i];
                 var currentFont = GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont);
 
                 // Draw shadow first (if shadow width > 0)
@@ -890,7 +918,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                 currentX += currentFont.MeasureText(segment.Text);
 
                 // Add small spacing after styled segments to prevent crowding
-                if ((segment.IsItalic || segment.IsBold) && i < line.Count - 1)
+                if ((segment.IsItalic || segment.IsBold) && i < segmentsToRender.Count - 1)
                 {
                     currentX += fontSize * 0.17f;
                 }

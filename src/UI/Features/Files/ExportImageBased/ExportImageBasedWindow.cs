@@ -279,8 +279,6 @@ public class ExportImageBasedWindow : Window
         var labelFontSize = UiUtil.MakeLabel(Se.Language.General.FontSize);
         var comboBoxFontSize = UiUtil.MakeComboBox(vm.FontSizes, vm, nameof(vm.SelectedFontSize));
         comboBoxFontSize.SelectionChanged += vm.ComboChanged;
-        var checkBoxBold = UiUtil.MakeCheckBox(Se.Language.General.Bold, vm, nameof(vm.IsBold));
-        checkBoxBold.IsCheckedChanged += vm.CheckBoxChanged;
         var panelFontSizeAndBold = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -288,7 +286,6 @@ public class ExportImageBasedWindow : Window
             Children =
             {
                 comboBoxFontSize,
-//                checkBoxBold
             }
         };
 
@@ -446,7 +443,10 @@ public class ExportImageBasedWindow : Window
 
 
         // column 3
-
+        var checkBoxBold = UiUtil.MakeCheckBox(Se.Language.General.Bold, vm, nameof(vm.IsBold));
+        checkBoxBold.IsCheckedChanged += vm.CheckBoxChanged;
+        grid.Add(checkBoxBold, 0, 5);
+        
         var labelOutlineWidth = UiUtil.MakeLabel(Se.Language.General.OutlineWidth);
         var comboBoxOutlineWidth = UiUtil.MakeComboBox(vm.OutlineWidths, vm, nameof(vm.SelectedOutlineWidth));
         comboBoxOutlineWidth.SelectionChanged += vm.ComboChanged;
@@ -464,6 +464,10 @@ public class ExportImageBasedWindow : Window
         comboBoxBoxCornerRadius.SelectionChanged += vm.ComboChanged;
         grid.Add(labelBoxCornerRadius, 3, 4);
         grid.Add(comboBoxBoxCornerRadius, 3, 5);
+        
+        var checkBoxRightToLeft = UiUtil.MakeCheckBox(Se.Language.General.RightToLeft, vm, nameof(vm.IsRightToLeft));
+        checkBoxRightToLeft.IsCheckedChanged += vm.CheckBoxChanged;
+        grid.Add(checkBoxRightToLeft, 6, 5);
 
         return UiUtil.MakeBorderForControl(grid);
     }

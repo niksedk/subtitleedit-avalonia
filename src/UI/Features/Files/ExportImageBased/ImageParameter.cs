@@ -36,6 +36,7 @@ public class ImageParameter
     public bool IsForced { get; set; }
     public bool IsFullFrame { get; set; }
     public double FramesPerSecond { get; set; }
+    public bool IsRightToLeft { get; set; } = false;
 
     public ImageParameter()
     {
