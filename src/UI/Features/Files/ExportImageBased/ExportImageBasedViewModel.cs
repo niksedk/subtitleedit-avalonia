@@ -18,9 +18,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using HarfBuzzSharp;
 using Nikse.SubtitleEdit.Features.Shared.PromptFileSaved;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
@@ -680,222 +682,211 @@ public partial class ExportImageBasedViewModel : ObservableObject
         return new SKPointI(x, y);
     }
 
-    public static SKBitmap GenerateBitmap(ImageParameter ip)
+    
+    
+    
+
+public static SKBitmap GenerateBitmap(ImageParameter ip)
+{
+    var fontName = ip.FontName;
+    var fontSize = ip.FontSize;
+    var fontColor = ip.FontColor;
+
+    var outlineColor = ip.OutlineColor;
+    var outlineWidth = ip.OutlineWidth;
+
+    var shadowColor = ip.ShadowColor;
+    var shadowWidth = ip.ShadowWidth;
+
+    // Parse text and create text segments with styling
+    var segments = ParseTextWithStyling(ip.Text, fontColor);
+
+    // Create fonts
+    using var regularTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.Normal);
+    using var boldTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.Bold);
+    using var italicTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.Italic);
+    using var boldItalicTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.BoldItalic);
+
+    using var regularFont = new SKFont(ip.IsBold ? boldTypeface : regularTypeface, fontSize);
+    using var boldFont = new SKFont(boldTypeface, fontSize);
+    using var italicFont = new SKFont(ip.IsBold ? boldItalicTypeface : italicTypeface, fontSize);
+    using var boldItalicFont = new SKFont(boldItalicTypeface, fontSize);
+
+    // Split segments into lines and measure dimensions
+    var lines = SplitIntoLines(segments);
+    var fontMetrics = regularFont.Metrics;
+
+    // Measure actual text bounds
+    float maxWidth = 0;
+    var minY = float.MaxValue;
+    var maxY = float.MinValue;
+
+    // Calculate line spacing once
+    var baseLineHeight = Math.Abs(fontMetrics.Ascent) + Math.Abs(fontMetrics.Descent);
+    var lineSpacing = (float)(baseLineHeight * ip.LineSpacingPercent / 100.0);
+
+    float currentY = 0;
+
+    foreach (var line in lines)
     {
-        var fontName = ip.FontName;
-        var fontSize = ip.FontSize;
-        var fontColor = ip.FontColor;
+        float lineWidth = 0;
+        var lineMinY = float.MaxValue;
+        var lineMaxY = float.MinValue;
 
-        var outlineColor = ip.OutlineColor;
-        var outlineWidth = ip.OutlineWidth;
-
-        var shadowColor = ip.ShadowColor;
-        var shadowWidth = ip.ShadowWidth;
-
-        // Parse text and create text segments with styling
-        var segments = ParseTextWithStyling(ip.Text, fontColor);
-
-        // Create fonts
-        using var regularTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.Normal);
-        using var boldTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.Bold);
-        using var italicTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.Italic);
-        using var boldItalicTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.BoldItalic);
-
-        using var regularFont = new SKFont(ip.IsBold ? boldTypeface : regularTypeface, fontSize);
-        using var boldFont = new SKFont(boldTypeface, fontSize);
-        using var italicFont = new SKFont(ip.IsBold ? boldItalicTypeface : italicTypeface, fontSize);
-        using var boldItalicFont = new SKFont(boldItalicTypeface, fontSize);
-
-        // Split segments into lines and measure dimensions
-        var lines = SplitIntoLines(segments);
-        var fontMetrics = regularFont.Metrics;
-
-        // Measure actual text bounds instead of using font metrics
-        float maxWidth = 0;
-        var minY = float.MaxValue; // Highest point of any text
-        var maxY = float.MinValue; // Lowest point of any text
-
-        // Calculate line spacing once
-        var baseLineHeight = Math.Abs(fontMetrics.Ascent) + Math.Abs(fontMetrics.Descent);
-        var lineSpacing = (float)(baseLineHeight * ip.LineSpacingPercent / 100.0);
-
-        float currentY = 0; // Start measuring from 0
-
-        foreach (var line in lines)
+        foreach (var segment in line)
         {
-            float lineWidth = 0;
-            var lineMinY = float.MaxValue;
-            var lineMaxY = float.MinValue;
+            var currentFont = GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont);
 
-            foreach (var segment in line)
-            {
-                var currentFont = GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont);
-
-                // Use SKFont.MeasureText for width measurement
-                lineWidth += currentFont.MeasureText(segment.Text);
-
-                // Get actual text bounds for this segment
-                var textBounds = new SKRect();
-                currentFont.MeasureText(segment.Text, out textBounds);
-
-                // Adjust bounds to current Y position
-                var segmentMinY = currentY + textBounds.Top;
-                var segmentMaxY = currentY + textBounds.Bottom;
-
-                lineMinY = Math.Min(lineMinY, segmentMinY);
-                lineMaxY = Math.Max(lineMaxY, segmentMaxY);
-            }
-
-            maxWidth = Math.Max(maxWidth, lineWidth);
-            minY = Math.Min(minY, lineMinY);
-            maxY = Math.Max(maxY, lineMaxY);
-
-            // Move to next line position
-            currentY += baseLineHeight + lineSpacing;
-        }
-
-        // Calculate actual text height from measured bounds
-        var actualTextHeight = lines.Count > 0 ? maxY - minY : 0;
-
-        // Calculate precise content area and effects padding
-        var effectsPadding = (float)Math.Max(outlineWidth, shadowWidth);
-        var paddingLeftRight = (float)ip.PaddingLeftRight;
-        var paddingTopBottom = (float)ip.PaddingTopBottom;
-
-        // Content area (text + specified padding)
-        var contentWidth = maxWidth + (paddingLeftRight * 2);
-        var contentHeight = actualTextHeight + (paddingTopBottom * 2);
-
-        // Total bitmap size (content + effects padding)
-        var width = (int)Math.Ceiling(contentWidth + (effectsPadding * 2));
-        var height = (int)Math.Ceiling(contentHeight + (effectsPadding * 2));
-
-        // Ensure minimum size
-        width = Math.Max(width, 1);
-        height = Math.Max(height, 1);
-
-        // Create bitmap and canvas
-        var bitmap = new SKBitmap(width, height, true);
-        using var canvas = new SKCanvas(bitmap);
-
-        // Set up paint
-        using var paint = new SKPaint
-        {
-            Color = ip.BackgroundColor,
-            IsAntialias = true,
-        };
-
-        // Define the rounded rectangle with proper bounds
-        // The background box should cover the content area, positioned to account for effects
-        var boxRect = new SKRect(
-            effectsPadding,
-            effectsPadding,
-            width - effectsPadding,
-            height - effectsPadding
-        );
-        var cornerRadius = (float)ip.BackgroundCornerRadius;
-
-        // Draw the rounded rectangle
-        canvas.DrawRoundRect(boxRect, cornerRadius, cornerRadius, paint);
-
-        // Calculate precise text positioning
-        // Start position accounts for effects padding + specified padding
-        var textStartX = effectsPadding + paddingLeftRight;
-        // Position text baseline to account for the measured minY offset
-        var textStartY = effectsPadding + paddingTopBottom - minY;
-
-        currentY = 0; // Reset for actual drawing
-
-        foreach (var line in lines)
-        {
-            // Reverse segments for RTL languages
-            var segmentsToRender = ip.IsRightToLeft ? line.AsEnumerable().Reverse().ToList() : line;
-
-            // Calculate line width for alignment
-            var lineWidth = segmentsToRender.Sum(segment =>
-                GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont).MeasureText(segment.Text));
-
-            float currentX;
-
-            // For RTL, default alignment should be from the right
+            // Measure width
+            float segmentWidth;
             if (ip.IsRightToLeft)
             {
-                // RTL: Start from the right side of content area
-                var contentAreaWidth = contentWidth - (paddingLeftRight * 2);
-
-                if (ip.ContentAlignment == ExportContentAlignment.Center)
-                {
-                    currentX = textStartX + (contentAreaWidth - lineWidth) / 2;
-                }
-                else if (ip.ContentAlignment == ExportContentAlignment.Left)
-                {
-                    // In RTL mode, "Left" alignment means align to the left edge (unusual for RTL)
-                    currentX = textStartX;
-                }
-                else // Right or default for RTL
-                {
-                    currentX = textStartX + contentAreaWidth - lineWidth;
-                }
+                segmentWidth = MeasureTextWithShaping(segment.Text, currentFont);
             }
             else
             {
-                // LTR: Start from the left side
-                currentX = textStartX;
-
-                if (ip.ContentAlignment == ExportContentAlignment.Center)
-                {
-                    var contentAreaWidth = contentWidth - (paddingLeftRight * 2);
-                    currentX += (contentAreaWidth - lineWidth) / 2;
-                }
-                else if (ip.ContentAlignment == ExportContentAlignment.Right)
-                {
-                    var contentAreaWidth = contentWidth - (paddingLeftRight * 2);
-                    currentX += contentAreaWidth - lineWidth;
-                }
+                segmentWidth = currentFont.MeasureText(segment.Text);
             }
 
-            for (var i = 0; i < segmentsToRender.Count; i++)
+            lineWidth += segmentWidth;
+
+            // Get actual text bounds for this segment
+            var textBounds = new SKRect();
+            currentFont.MeasureText(segment.Text, out textBounds);
+
+            var segmentMinY = currentY + textBounds.Top;
+            var segmentMaxY = currentY + textBounds.Bottom;
+
+            lineMinY = Math.Min(lineMinY, segmentMinY);
+            lineMaxY = Math.Max(lineMaxY, segmentMaxY);
+        }
+
+        maxWidth = Math.Max(maxWidth, lineWidth);
+        minY = Math.Min(minY, lineMinY);
+        maxY = Math.Max(maxY, lineMaxY);
+
+        currentY += baseLineHeight + lineSpacing;
+    }
+
+    // Calculate actual text height from measured bounds
+    var actualTextHeight = lines.Count > 0 ? maxY - minY : 0;
+
+    // Calculate precise content area and effects padding
+    var effectsPadding = (float)Math.Max(outlineWidth, shadowWidth);
+    var paddingLeftRight = (float)ip.PaddingLeftRight;
+    var paddingTopBottom = (float)ip.PaddingTopBottom;
+
+    // Content area (text + specified padding)
+    var contentWidth = maxWidth + (paddingLeftRight * 2);
+    var contentHeight = actualTextHeight + (paddingTopBottom * 2);
+
+    // Total bitmap size (content + effects padding)
+    var width = (int)Math.Ceiling(contentWidth + (effectsPadding * 2));
+    var height = (int)Math.Ceiling(contentHeight + (effectsPadding * 2));
+
+    // Ensure minimum size
+    width = Math.Max(width, 1);
+    height = Math.Max(height, 1);
+
+    // Create bitmap and canvas
+    var bitmap = new SKBitmap(width, height, true);
+    using var canvas = new SKCanvas(bitmap);
+
+    // Set up paint for background
+    using var paint = new SKPaint
+    {
+        Color = ip.BackgroundColor,
+        IsAntialias = true,
+    };
+
+    // Draw the rounded rectangle background
+    var boxRect = new SKRect(
+        effectsPadding,
+        effectsPadding,
+        width - effectsPadding,
+        height - effectsPadding
+    );
+    var cornerRadius = (float)ip.BackgroundCornerRadius;
+    canvas.DrawRoundRect(boxRect, cornerRadius, cornerRadius, paint);
+
+    // Calculate precise text positioning
+    var textStartX = effectsPadding + paddingLeftRight;
+    var textStartY = effectsPadding + paddingTopBottom - minY;
+
+    currentY = 0;
+
+    foreach (var line in lines)
+    {
+        // Reverse segments for RTL languages
+        var segmentsToRender = ip.IsRightToLeft ? line.AsEnumerable().Reverse().ToList() : line;
+
+        // Calculate line width for alignment
+        float lineWidth = 0;
+        foreach (var seg in segmentsToRender)
+        {
+            var font = GetFont(seg, regularFont, boldFont, italicFont, boldItalicFont);
+            if (ip.IsRightToLeft)
             {
-                var segment = segmentsToRender[i];
-                var currentFont = GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont);
+                lineWidth += MeasureTextWithShaping(seg.Text, font);
+            }
+            else
+            {
+                lineWidth += font.MeasureText(seg.Text);
+            }
+        }
 
-                // Draw shadow first (if shadow width > 0)
-                if (shadowWidth > 0)
-                {
-                    var shadowOffsetX = currentX + (float)shadowWidth;
-                    var shadowOffsetY = textStartY + currentY + (float)shadowWidth;
+        float currentX;
 
-                    if (outlineWidth > 0)
-                    {
-                        using var shadowOutlinePaint = new SKPaint
-                        {
-                            Color = shadowColor,
-                            IsAntialias = true,
-                            Style = SKPaintStyle.Stroke,
-                            StrokeWidth = (float)outlineWidth,
-                            StrokeJoin = SKStrokeJoin.Round,
-                            StrokeCap = SKStrokeCap.Round,
-                        };
+        // Calculate X position based on alignment
+        if (ip.IsRightToLeft)
+        {
+            var contentAreaWidth = contentWidth - (paddingLeftRight * 2);
 
-                        canvas.DrawText(segment.Text, shadowOffsetX, shadowOffsetY, currentFont, shadowOutlinePaint);
-                    }
+            if (ip.ContentAlignment == ExportContentAlignment.Center)
+            {
+                currentX = textStartX + (contentAreaWidth - lineWidth) / 2;
+            }
+            else if (ip.ContentAlignment == ExportContentAlignment.Left)
+            {
+                currentX = textStartX;
+            }
+            else // Right or default for RTL
+            {
+                currentX = textStartX + contentAreaWidth - lineWidth;
+            }
+        }
+        else
+        {
+            currentX = textStartX;
 
-                    using var shadowTextPaint = new SKPaint
-                    {
-                        Color = shadowColor,
-                        IsAntialias = true,
-                        Style = SKPaintStyle.Fill,
-                    };
+            if (ip.ContentAlignment == ExportContentAlignment.Center)
+            {
+                var contentAreaWidth = contentWidth - (paddingLeftRight * 2);
+                currentX += (contentAreaWidth - lineWidth) / 2;
+            }
+            else if (ip.ContentAlignment == ExportContentAlignment.Right)
+            {
+                var contentAreaWidth = contentWidth - (paddingLeftRight * 2);
+                currentX += contentAreaWidth - lineWidth;
+            }
+        }
 
-                    canvas.DrawText(segment.Text, shadowOffsetX, shadowOffsetY, currentFont, shadowTextPaint);
-                }
+        for (var i = 0; i < segmentsToRender.Count; i++)
+        {
+            var segment = segmentsToRender[i];
+            var currentFont = GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont);
 
-                // Draw outline second (if outline width > 0)
+            // Draw shadow first (if shadow width > 0)
+            if (shadowWidth > 0)
+            {
+                var shadowOffsetX = currentX + (float)shadowWidth;
+                var shadowOffsetY = textStartY + currentY + (float)shadowWidth;
+
                 if (outlineWidth > 0)
                 {
-                    using var outlinePaint = new SKPaint
+                    using var shadowOutlinePaint = new SKPaint
                     {
-                        Color = outlineColor,
+                        Color = shadowColor,
                         IsAntialias = true,
                         Style = SKPaintStyle.Stroke,
                         StrokeWidth = (float)outlineWidth,
@@ -903,33 +894,211 @@ public partial class ExportImageBasedViewModel : ObservableObject
                         StrokeCap = SKStrokeCap.Round,
                     };
 
-                    canvas.DrawText(segment.Text, currentX, textStartY + currentY, currentFont, outlinePaint);
+                    if (ip.IsRightToLeft)
+                    {
+                        DrawShapedText(canvas, segment.Text, shadowOffsetX, shadowOffsetY, currentFont, shadowOutlinePaint);
+                    }
+                    else
+                    {
+                        canvas.DrawText(segment.Text, shadowOffsetX, shadowOffsetY, currentFont, shadowOutlinePaint);
+                    }
                 }
 
-                // Draw the main text on top
-                using var textPaint = new SKPaint
+                using var shadowTextPaint = new SKPaint
                 {
-                    Color = segment.Color,
+                    Color = shadowColor,
                     IsAntialias = true,
                     Style = SKPaintStyle.Fill,
                 };
 
-                canvas.DrawText(segment.Text, currentX, textStartY + currentY, currentFont, textPaint);
-                currentX += currentFont.MeasureText(segment.Text);
-
-                // Add small spacing after styled segments to prevent crowding
-                if ((segment.IsItalic || segment.IsBold) && i < segmentsToRender.Count - 1)
+                if (ip.IsRightToLeft)
                 {
-                    currentX += fontSize * 0.17f;
+                    DrawShapedText(canvas, segment.Text, shadowOffsetX, shadowOffsetY, currentFont, shadowTextPaint);
+                }
+                else
+                {
+                    canvas.DrawText(segment.Text, shadowOffsetX, shadowOffsetY, currentFont, shadowTextPaint);
                 }
             }
 
-            // Move to next line
-            currentY += baseLineHeight + lineSpacing;
+            // Draw outline second (if outline width > 0)
+            if (outlineWidth > 0)
+            {
+                using var outlinePaint = new SKPaint
+                {
+                    Color = outlineColor,
+                    IsAntialias = true,
+                    Style = SKPaintStyle.Stroke,
+                    StrokeWidth = (float)outlineWidth,
+                    StrokeJoin = SKStrokeJoin.Round,
+                    StrokeCap = SKStrokeCap.Round,
+                };
+
+                if (ip.IsRightToLeft)
+                {
+                    DrawShapedText(canvas, segment.Text, currentX, textStartY + currentY, currentFont, outlinePaint);
+                }
+                else
+                {
+                    canvas.DrawText(segment.Text, currentX, textStartY + currentY, currentFont, outlinePaint);
+                }
+            }
+
+            // Draw the main text on top
+            using var textPaint = new SKPaint
+            {
+                Color = segment.Color,
+                IsAntialias = true,
+                Style = SKPaintStyle.Fill,
+            };
+
+            if (ip.IsRightToLeft)
+            {
+                DrawShapedText(canvas, segment.Text, currentX, textStartY + currentY, currentFont, textPaint);
+            }
+            else
+            {
+                canvas.DrawText(segment.Text, currentX, textStartY + currentY, currentFont, textPaint);
+            }
+
+            // Update X position for next segment
+            if (ip.IsRightToLeft)
+            {
+                currentX += MeasureTextWithShaping(segment.Text, currentFont);
+            }
+            else
+            {
+                currentX += currentFont.MeasureText(segment.Text);
+            }
+
+            // Add small spacing after styled segments to prevent crowding
+            if ((segment.IsItalic || segment.IsBold) && i < segmentsToRender.Count - 1)
+            {
+                currentX += fontSize * 0.17f;
+            }
         }
 
-        return bitmap;
+        // Move to next line
+        currentY += baseLineHeight + lineSpacing;
     }
+
+    return bitmap;
+}
+
+// Helper method to measure text with HarfBuzz shaping
+private static float MeasureTextWithShaping(string text, SKFont font)
+{
+    // Get font data
+    using var skStream = font.Typeface.OpenStream(out var ttcIndex);
+    var fontData = new byte[skStream.Length];
+    skStream.Read(fontData, fontData.Length);
+    
+    // Pin the data and create HarfBuzz objects
+    var handle = GCHandle.Alloc(fontData, GCHandleType.Pinned);
+    try
+    {
+        var blob = new Blob(handle.AddrOfPinnedObject(), fontData.Length, MemoryMode.ReadOnly, () => handle.Free());
+        using var face = new Face(blob, (uint)ttcIndex);
+        using var hbFont = new HarfBuzzSharp.Font(face);
+        
+        hbFont.SetFunctionsOpenType();
+        
+        using var buffer = new HarfBuzzSharp.Buffer();
+        buffer.AddUtf16(text);
+        buffer.Direction = Direction.RightToLeft;
+        buffer.GuessSegmentProperties();
+        
+        hbFont.Shape(buffer);
+        
+        var glyphPositions = buffer.GlyphPositions;
+        
+        int totalAdvance = 0;
+        for (int i = 0; i < glyphPositions.Length; i++)
+        {
+            totalAdvance += glyphPositions[i].XAdvance;
+        }
+        
+        // Convert from font units to pixels
+        return totalAdvance * font.Size / face.UnitsPerEm;
+    }
+    catch
+    {
+        handle.Free();
+        throw;
+    }
+}
+
+// Helper method to draw shaped text
+private static void DrawShapedText(SKCanvas canvas, string text, float x, float y, SKFont font, SKPaint paint)
+{
+    // Get font data
+    using var skStream = font.Typeface.OpenStream(out var ttcIndex);
+    var fontData = new byte[skStream.Length];
+    skStream.Read(fontData, fontData.Length);
+    
+    // Pin the data and create HarfBuzz objects
+    var handle = GCHandle.Alloc(fontData, GCHandleType.Pinned);
+    try
+    {
+        var blob = new Blob(handle.AddrOfPinnedObject(), fontData.Length, MemoryMode.ReadOnly, () => handle.Free());
+        using var face = new Face(blob, (uint)ttcIndex);
+        using var hbFont = new HarfBuzzSharp.Font(face);
+        
+        hbFont.SetFunctionsOpenType();
+        
+        using var buffer = new HarfBuzzSharp.Buffer();
+        buffer.AddUtf16(text);
+        buffer.Direction = Direction.RightToLeft;
+        buffer.GuessSegmentProperties();
+        
+        hbFont.Shape(buffer);
+        
+        var glyphInfos = buffer.GlyphInfos;
+        var glyphPositions = buffer.GlyphPositions;
+        
+        // Create arrays for SKTextBlob
+        var glyphIds = new ushort[glyphInfos.Length];
+        var positions = new SKPoint[glyphInfos.Length];
+        
+        int currentAdvance = 0;
+        for (int i = 0; i < glyphInfos.Length; i++)
+        {
+            glyphIds[i] = (ushort)glyphInfos[i].Codepoint;
+            
+            // Convert from font units to pixels
+            var xPos = (currentAdvance + glyphPositions[i].XOffset) * font.Size / face.UnitsPerEm;
+            var yPos = glyphPositions[i].YOffset * font.Size / face.UnitsPerEm;
+            
+            positions[i] = new SKPoint(xPos, yPos);
+            currentAdvance += glyphPositions[i].XAdvance;
+        }
+        
+        // Create SKTextBlob using builder
+        using var builder = new SKTextBlobBuilder();
+        var run = builder.AllocatePositionedRun(font, glyphIds.Length);
+        
+        // Copy glyphs and positions
+        var glyphSpan = run.GetGlyphSpan();
+        var posSpan = run.GetPositionSpan();
+        for (int i = 0; i < glyphIds.Length; i++)
+        {
+            glyphSpan[i] = glyphIds[i];
+            posSpan[i] = positions[i];
+        }
+        
+        using var textBlob = builder.Build();
+        canvas.DrawText(textBlob, x, y, paint);
+    }
+    catch
+    {
+        handle.Free();
+        throw;
+    }
+}
+    
+    
+    
+    
 
     private static SKFont GetFont(TextSegment segment, SKFont regular, SKFont bold, SKFont italic, SKFont boldItalic)
     {
