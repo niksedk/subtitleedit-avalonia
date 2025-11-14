@@ -15,14 +15,12 @@ public class ExportHandlerDCinemaSmpte2014Png : IExportHandler
     public ExportImageType ExportImageType => ExportImageType.DCinemaPng;
     public string Extension => "";
     public bool UseFileName => false;
-    public string Title => string.Format(Se.Language.General.ExportToX, "DCinema SMPTE 2014 / png");
+    public string Title => string.Format(Se.Language.General.ExportToX, "DCinema SMPTE 2014/png");
     public double FrameRate { get; set; } = 23.976;
 
     private int _width;
     private int _height;
     private StringBuilder _sb = new StringBuilder();
-    private Paragraph? _first;
-    private Paragraph? _last;
     private string _folderName = string.Empty;
     private int _imagesSavedCount = 0;
 

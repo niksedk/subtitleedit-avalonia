@@ -15,7 +15,7 @@ public class ExportHandlerDCinemaInteropPng : IExportHandler
     public ExportImageType ExportImageType => ExportImageType.DCinemaPng;
     public string Extension => "";
     public bool UseFileName => false;
-    public string Title => string.Format(Se.Language.General.ExportToX, "DCinema interop / png");
+    public string Title => string.Format(Se.Language.General.ExportToX, "DCinema interop/png");
 
     private int _width;
     private int _height;
@@ -131,7 +131,7 @@ public class ExportHandlerDCinemaInteropPng : IExportHandler
                     "<Language>English</Language>" + Environment.NewLine +
                     _sb +
                     "</DCSubtitle>");
-        string fName = Path.Combine(_folderName, "index.html");
+        string fName = Path.Combine(_folderName, "index.xml");
 
         File.WriteAllText(fName, SubtitleFormat.ToUtf8XmlString(doc));
     }

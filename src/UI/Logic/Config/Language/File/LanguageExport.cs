@@ -30,6 +30,7 @@ public class LanguageExport
     public string AddLineBetweenSubtitles { get; set; }
     public string TitleExportDCinemaInteropPng { get; set; }
     public string TitleExportDCinemaSmpte2014Png { get; set; }
+    public string ImageBasedSubtitleSaved { get; set; }
 
     public LanguageExport()
     {
@@ -61,5 +62,6 @@ public class LanguageExport
         AddLineBetweenSubtitles = "Add line between subtitles";
         TitleExportDCinemaInteropPng = "D-Cinema interop/png";
         TitleExportDCinemaSmpte2014Png = "D-Cinema SMPTE 2014/png";
+        ImageBasedSubtitleSaved = "Image-based subtitle saved";
     }
 }

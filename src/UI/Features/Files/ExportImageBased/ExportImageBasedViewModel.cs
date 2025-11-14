@@ -21,6 +21,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using Nikse.SubtitleEdit.Features.Shared.PromptFileSaved;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 
@@ -273,7 +274,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
     private async Task DeleteSelectedLines()
     {
         var selectedItems = _selectedSubtitles?.ToList() ?? new List<SubtitleLineViewModel>();
-        if (selectedItems == null || !selectedItems.Any())
+        if (Window == null || selectedItems.Count == 0)
         {
             return;
         }
@@ -281,7 +282,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         if (Se.Settings.General.PromptDeleteLines)
         {
             var answer = await MessageBox.Show(
-                Window!,
+                Window,
                 "Delete lines?",
                 $"Do you want to delete {selectedItems.Count} lines?",
                 MessageBoxButtons.YesNoCancel,
@@ -343,8 +344,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
             imageParameters.Add(imageParameter);
         }
 
-        int total = Subtitles.Count;
-        int completed = 0;
+        var total = Subtitles.Count;
+        var completed = 0;
         await Task.Run(() =>
         {
             Parallel.For(0, total, i =>
@@ -388,6 +389,27 @@ public partial class ExportImageBasedViewModel : ObservableObject
 
             _exportImageHandler.WriteFooter();
             IsGenerating = false;
+
+            if (!_cancellationTokenSource.IsCancellationRequested && Window != null)
+            {
+                Dispatcher.UIThread.Post(async void () =>
+                {
+                    try
+                    {
+                        _ = await _windowService.ShowDialogAsync<PromptFileSavedWindow, PromptFileSavedViewModel>(Window,
+                            vm =>
+                            {
+                                vm.Initialize(Se.Language.File.Export.ImageBasedSubtitleSaved,
+                                    string.Format(Se.Language.Tools.NetflixCheckAndFix.NetFlixQualityReportSavedToX, fileOrFolderName), fileOrFolderName, true,
+                                    _exportImageHandler.UseFileName);
+                            });
+                    }
+                    catch (Exception e)
+                    {
+                        Se.LogError(e);
+                    }
+                });
+            }
         });
     }
 
@@ -686,8 +708,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
 
         // Measure actual text bounds instead of using font metrics
         float maxWidth = 0;
-        float minY = float.MaxValue; // Highest point of any text
-        float maxY = float.MinValue; // Lowest point of any text
+        var minY = float.MaxValue; // Highest point of any text
+        var maxY = float.MinValue; // Lowest point of any text
 
         // Calculate line spacing once
         var baseLineHeight = Math.Abs(fontMetrics.Ascent) + Math.Abs(fontMetrics.Descent);
@@ -698,8 +720,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
         foreach (var line in lines)
         {
             float lineWidth = 0;
-            float lineMinY = float.MaxValue;
-            float lineMaxY = float.MinValue;
+            var lineMinY = float.MaxValue;
+            var lineMaxY = float.MinValue;
 
             foreach (var segment in line)
             {
@@ -767,7 +789,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
             width - effectsPadding,
             height - effectsPadding
         );
-        float cornerRadius = (float)ip.BackgroundCornerRadius;
+        var cornerRadius = (float)ip.BackgroundCornerRadius;
 
         // Draw the rounded rectangle
         canvas.DrawRoundRect(boxRect, cornerRadius, cornerRadius, paint);
@@ -782,7 +804,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
 
         foreach (var line in lines)
         {
-            float currentX = textStartX;
+            var currentX = textStartX;
 
             // Calculate line width for alignment
             var lineWidth = line.Sum(segment =>
@@ -802,7 +824,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                 currentX += contentAreaWidth - lineWidth;
             }
 
-            for (int i = 0; i < line.Count; i++)
+            for (var i = 0; i < line.Count; i++)
             {
                 var segment = line[i];
                 var currentFont = GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont);
@@ -909,7 +931,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
             var text = segment.Text;
             var parts = text.SplitToLines();
 
-            for (int i = 0; i < parts.Count; i++)
+            for (var i = 0; i < parts.Count; i++)
             {
                 var part = parts[i];
 

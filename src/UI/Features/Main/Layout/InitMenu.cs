@@ -162,7 +162,7 @@ public static class InitMenu
                         },
                         new MenuItem
                         {
-                            Header = new Dost().Name,
+                            Header = "DOST/png",
                             Command = vm.ExportDostPngCommand,
                         },
                         new MenuItem
