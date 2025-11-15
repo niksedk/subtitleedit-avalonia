@@ -709,7 +709,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         using var boldItalicFont = new SKFont(boldItalicTypeface, fontSize);
 
         // Split segments into lines and measure dimensions
-        var lines = SplitIntoLines(segments);
+        var lines = SplitIntoSegments(segments);
         var fontMetrics = regularFont.Metrics;
 
         // Measure actual text bounds
@@ -1112,7 +1112,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         return regular;
     }
 
-    static List<List<TextSegment>> SplitIntoLines(List<TextSegment> segments)
+    private static List<List<TextSegment>> SplitIntoSegments(List<TextSegment> segments)
     {
         var lines = new List<List<TextSegment>>();
         var currentLine = new List<TextSegment>();
@@ -1163,12 +1163,12 @@ public partial class ExportImageBasedViewModel : ObservableObject
         return lines;
     }
 
-    static List<TextSegment> ParseTextWithStyling(string text, SKColor defaultFontColor)
+    private static List<TextSegment> ParseTextWithStyling(string text, SKColor defaultFontColor)
     {
         var segments = new List<TextSegment>();
         var currentPos = 0;
         var styleStack = new Stack<TextStyle>();
-        var currentStyle = new TextStyle() { Color = defaultFontColor };
+        var currentStyle = new TextStyle { Color = defaultFontColor };
 
         while (currentPos < text.Length)
         {
