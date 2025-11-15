@@ -719,6 +719,12 @@ public class AudioVisualizer : Control
                     newStart = newEnd - (_originalEndSeconds - _originalStartSeconds);
                 }
 
+                if (newStart < 0)
+                {
+                    newStart = 0;
+                    newEnd = _activeParagraph.Duration.TotalSeconds;
+                }
+
                 _activeParagraph.StartTime = TimeSpan.FromSeconds(newStart);
                 _activeParagraph.EndTime = TimeSpan.FromSeconds(newEnd);
                 break;
@@ -742,6 +748,11 @@ public class AudioVisualizer : Control
                 break;
             case InteractionMode.ResizingLeft:
                 newStart = _originalStartSeconds + deltaSeconds - StartPositionSeconds;
+
+                if (newStart < 0)
+                {
+                    newStart = 0;
+                }
 
                 if (SnapToShotChanges)
                 {
