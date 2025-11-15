@@ -814,14 +814,15 @@ public partial class ExportImageBasedViewModel : ObservableObject
         foreach (var line in lines)
         {
             // Reverse segments for RTL languages
-            var segmentsToRender = ip.IsRightToLeft ? line.AsEnumerable().Reverse().ToList() : line;
-
+            //var segmentsToRender = ip.IsRightToLeft ? line.AsEnumerable().Reverse().ToList() : line;
+            var segmentsToRender = RtlTextProcessor.ProcessRtlSegments(line, ip.IsRightToLeft);
+            
             // Calculate line width for alignment
             float lineWidth = 0;
             foreach (var seg in segmentsToRender)
             {
                 var font = GetFont(seg, regularFont, boldFont, italicFont, boldItalicFont);
-                if (ip.IsRightToLeft)
+                if (seg.IsRightToLeft)
                 {
                     lineWidth += MeasureTextWithShaping(seg.Text, font);
                 }
@@ -890,7 +891,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                             StrokeCap = SKStrokeCap.Round,
                         };
 
-                        if (ip.IsRightToLeft)
+                        if (segment.IsRightToLeft)
                         {
                             DrawShapedText(canvas, segment.Text, shadowOffsetX, shadowOffsetY, currentFont, shadowOutlinePaint);
                         }
@@ -907,7 +908,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                         Style = SKPaintStyle.Fill,
                     };
 
-                    if (ip.IsRightToLeft)
+                    if (segment.IsRightToLeft)
                     {
                         DrawShapedText(canvas, segment.Text, shadowOffsetX, shadowOffsetY, currentFont, shadowTextPaint);
                     }
@@ -930,7 +931,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                         StrokeCap = SKStrokeCap.Round,
                     };
 
-                    if (ip.IsRightToLeft)
+                    if (segment.IsRightToLeft)
                     {
                         DrawShapedText(canvas, segment.Text, currentX, textStartY + currentY, currentFont, outlinePaint);
                     }
@@ -948,7 +949,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                     Style = SKPaintStyle.Fill,
                 };
 
-                if (ip.IsRightToLeft)
+                if (segment.IsRightToLeft)
                 {
                     DrawShapedText(canvas, segment.Text, currentX, textStartY + currentY, currentFont, textPaint);
                 }
@@ -958,7 +959,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                 }
 
                 // Update X position for next segment
-                if (ip.IsRightToLeft)
+                if (segment.IsRightToLeft)
                 {
                     currentX += MeasureTextWithShaping(segment.Text, currentFont);
                 }
@@ -1128,7 +1129,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
 
                 if (!string.IsNullOrEmpty(part))
                 {
-                    currentLine.Add(new TextSegment(part, segment.IsItalic, segment.IsBold, segment.Color));
+                    currentLine.Add(new TextSegment(part, segment.IsItalic, segment.IsBold, segment.Color, false));
                 }
 
                 // Add line break (except for the last part)
@@ -1183,7 +1184,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                     if (!string.IsNullOrEmpty(remainingText))
                     {
                         segments.Add(new TextSegment(remainingText, currentStyle.IsItalic, currentStyle.IsBold,
-                            currentStyle.Color));
+                            currentStyle.Color, false));
                     }
                 }
 
@@ -1197,7 +1198,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                 if (!string.IsNullOrEmpty(beforeTag))
                 {
                     segments.Add(new TextSegment(beforeTag, currentStyle.IsItalic, currentStyle.IsBold,
-                        currentStyle.Color));
+                        currentStyle.Color, false));
                 }
             }
 
@@ -1374,16 +1375,14 @@ public partial class ExportImageBasedViewModel : ObservableObject
         return defaultFontColor;
     }
 
-    record TextSegment(string Text, bool IsItalic, bool IsBold, SKColor Color);
-
-    record TextStyle(bool IsItalic = false, bool IsBold = false, SKColor Color = default)
+    public record TextStyle(bool IsItalic = false, bool IsBold = false, SKColor Color = default)
     {
         public SKColor Color { get; init; } = Color == default ? SKColors.Black : Color;
     }
 
-    record TagInfo(TagType TagType, int EndPosition, SKColor? Color = null);
+    public record TagInfo(TagType TagType, int EndPosition, SKColor? Color = null);
 
-    enum TagType
+    public enum TagType
     {
         ItalicOpen,
         ItalicClose,
