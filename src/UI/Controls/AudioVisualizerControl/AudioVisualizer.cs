@@ -705,28 +705,26 @@ public class AudioVisualizer : Control
             case InteractionMode.Moving:
                 newStart = _originalStartSeconds + deltaSeconds - StartPositionSeconds;
                 newEnd = _originalEndSeconds + deltaSeconds - StartPositionSeconds;
+                var durationMs = _activeParagraph.Duration.TotalMilliseconds;
 
                 // Clamp so it doesn't overlap previous or next
                 if (previous != null && newStart < previous.EndTime.TotalSeconds + 0.001)
                 {
                     newStart = previous.EndTime.TotalSeconds + 0.001;
-                    newEnd = newStart + (_originalEndSeconds - _originalStartSeconds);
                 }
 
                 if (next != null && newEnd > next.StartTime.TotalSeconds - 0.001)
                 {
-                    newEnd = next.StartTime.TotalSeconds - 0.001;
-                    newStart = newEnd - (_originalEndSeconds - _originalStartSeconds);
+                    newStart = (next.StartTime.TotalSeconds - 0.001) - (_originalEndSeconds - _originalStartSeconds);
                 }
 
                 if (newStart < 0)
                 {
                     newStart = 0;
-                    newEnd = _activeParagraph.Duration.TotalSeconds;
                 }
 
                 _activeParagraph.StartTime = TimeSpan.FromSeconds(newStart);
-                _activeParagraph.EndTime = TimeSpan.FromSeconds(newEnd);
+                _activeParagraph.EndTime = TimeSpan.FromMilliseconds(newStart * 1000.0 + durationMs);
                 break;
             case InteractionMode.ResizeLeftAnd:
                 newStart = _originalStartSeconds + deltaSeconds - StartPositionSeconds;
