@@ -207,7 +207,7 @@ public class AssaStylesWindow : Window
             buttonImport,
             buttonExport,
             buttonCopyToStorage
-            ).WithAlignmentLeft();
+        ).WithAlignmentLeft();
 
         grid.Add(label, 0, 0);
         grid.Add(dataGrid, 1, 0);
@@ -340,7 +340,7 @@ public class AssaStylesWindow : Window
             buttonExport,
             buttonSetDefault,
             buttonCopyToFiles
-            ).WithAlignmentLeft();
+        ).WithAlignmentLeft();
 
         grid.Add(label, 0, 0);
         grid.Add(dataGrid, 1, 0);
@@ -406,7 +406,8 @@ public class AssaStylesWindow : Window
         var labelFontName = UiUtil.MakeLabel(Se.Language.General.FontName);
         var comboBoxFontName = UiUtil.MakeComboBox(vm.Fonts, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.FontName)).WithMinWidth(150);
         var labelFontSize = UiUtil.MakeLabel(Se.Language.General.FontSize);
-        var numericUpDownFontSize = UiUtil.MakeNumericUpDownInt(1, 1000, 35, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.FontSize));
+        var numericUpDownFontSize = UiUtil.MakeNumericUpDownOneDecimal(1, 1000, 130, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.FontSize));
+        numericUpDownFontSize.Increment = 1;
         var panelFont = UiUtil.MakeHorizontalPanel(labelFontName, comboBoxFontName, labelFontSize, numericUpDownFontSize);
 
         var checkBoxBold = UiUtil.MakeCheckBox(Se.Language.General.Bold, vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.Bold));
@@ -448,7 +449,7 @@ public class AssaStylesWindow : Window
             colorPickerShadow,
             labelColorSecondary,
             colorPickerSecondary
-            ).WithMarginBottom(10);
+        ).WithMarginBottom(10);
 
         var alignmentView = MakeAlignmentView(vm);
         var marginView = MakeMarginView(vm);

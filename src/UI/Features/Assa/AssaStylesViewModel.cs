@@ -217,7 +217,6 @@ public partial class AssaStylesViewModel : ObservableObject
 
         foreach (var selectedStyle in selectedItems)
         {
-
             var name = selectedStyle.Name + " - " + Se.Language.General.Copy;
             if (FileStyles.Any(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
             {

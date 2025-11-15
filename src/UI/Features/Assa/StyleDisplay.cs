@@ -237,6 +237,7 @@ public partial class StyleDisplay : ObservableObject
             Name = Name,
             Alignment = GetAlignment(),
             Angle = Angle,
+            Spacing = Spacing,
             ScaleX = ScaleX,
             ScaleY = ScaleY,
             MarginLeft = MarginLeft,
