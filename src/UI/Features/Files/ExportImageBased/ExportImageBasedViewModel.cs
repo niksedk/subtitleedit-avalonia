@@ -695,7 +695,9 @@ public partial class ExportImageBasedViewModel : ObservableObject
         var shadowWidth = ip.ShadowWidth;
 
         // Parse text and create text segments with styling
-        var segments = ParseTextWithStyling(ip.Text, fontColor);
+        var text = ReverseNumberAndLatinOnly(ip.Text, ip.IsRightToLeft);    
+
+        var segments = ParseTextWithStyling(text, fontColor);
 
         // Create fonts
         using var regularTypeface = SKTypeface.FromFamilyName(fontName, SKFontStyle.Normal);
@@ -1372,6 +1374,104 @@ public partial class ExportImageBasedViewModel : ObservableObject
         }
 
         return defaultFontColor;
+    }
+
+    // Pre-handler: reverse only Latin letters and ASCII digits in RTL mode, leave tags/entities untouched
+    private static string ReverseNumberAndLatinOnly(string input, bool isRightToLeft)
+    {
+        if (!isRightToLeft || string.IsNullOrEmpty(input))
+        {
+            return input;
+        }
+
+        var sb = new System.Text.StringBuilder(input.Length);
+        int i = 0;
+        while (i < input.Length)
+        {
+            var c = input[i];
+
+            // Preserve HTML-like tags: <...>
+            if (c == '<')
+            {
+                int end = input.IndexOf('>', i);
+                if (end == -1)
+                {
+                    sb.Append(input.AsSpan(i));
+                    break;
+                }
+                sb.Append(input.AsSpan(i, end - i + 1));
+                i = end + 1;
+                continue;
+            }
+
+            // Preserve ASS/SSA override blocks: {\...}
+            if (c == '{')
+            {
+                int end = input.IndexOf('}', i);
+                if (end == -1)
+                {
+                    sb.Append(input.AsSpan(i));
+                    break;
+                }
+                sb.Append(input.AsSpan(i, end - i + 1));
+                i = end + 1;
+                continue;
+            }
+
+            // Preserve HTML entities: &...;
+            if (c == '&')
+            {
+                int end = input.IndexOf(';', i);
+                if (end > i)
+                {
+                    sb.Append(input.AsSpan(i, end - i + 1));
+                    i = end + 1;
+                    continue;
+                }
+            }
+
+            if (IsLatinLetterOrAsciiDigit(c))
+            {
+                int start = i;
+                int j = i;
+                while (j < input.Length && IsLatinLetterOrAsciiDigit(input[j]))
+                {
+                    j++;
+                }
+                // reverse slice [start, j)
+                for (int k = j - 1; k >= start; k--)
+                {
+                    sb.Append(input[k]);
+                }
+                i = j;
+                continue;
+            }
+
+            sb.Append(c);
+            i++;
+        }
+
+        return sb.ToString();
+    }
+
+    private static bool IsLatinLetterOrAsciiDigit(char c)
+    {
+        if (c >= '0' && c <= '9')
+        {
+            return true; // ASCII digits only
+        }
+
+        if (!char.IsLetter(c))
+        {
+            return false;
+        }
+
+        // Basic Latin and Latin-1 Supplement and Latin Extended-A/B
+        var code = (int)c;
+        return (code >= 0x0041 && code <= 0x005A) || // A-Z
+               (code >= 0x0061 && code <= 0x007A) || // a-z
+               (code >= 0x00C0 && code <= 0x00FF) || // Latin-1 letters
+               (code >= 0x0100 && code <= 0x024F);   // Latin Extended-A/B
     }
 
     record TextSegment(string Text, bool IsItalic, bool IsBold, SKColor Color);
