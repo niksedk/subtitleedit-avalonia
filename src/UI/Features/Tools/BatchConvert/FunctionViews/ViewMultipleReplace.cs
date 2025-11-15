@@ -1,6 +1,4 @@
-﻿using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Data;
+﻿using Avalonia.Controls;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -16,22 +14,6 @@ public static class ViewMultipleReplace
             Content = Se.Language.General.MultipleReplace,
             VerticalAlignment = VerticalAlignment.Center,
             FontWeight = Avalonia.Media.FontWeight.Bold,
-        };
-        
-         var checkBoxNormalCasing = new RadioButton
-        {
-            Content = "Normal casing",
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(0, 0, 0, 5),
-            [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.NormalCasing)) { Mode = BindingMode.TwoWay },
-        };
-
-        var checkBoxNormalCasingFixNames = new CheckBox
-        {
-            Content = "Fix names",
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(15, 0, 0, 5),
-            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.NormalCasingFixNames)) { Mode = BindingMode.TwoWay },
         };
 
         var grid = new Grid
@@ -53,8 +35,6 @@ public static class ViewMultipleReplace
         };
 
         grid.Add(labelHeader, 0, 0);
-        grid.Add(checkBoxNormalCasing, 1, 0);
-        grid.Add(checkBoxNormalCasingFixNames, 2, 0);
 
         return grid;
     }
