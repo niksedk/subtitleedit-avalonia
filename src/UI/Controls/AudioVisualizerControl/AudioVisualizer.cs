@@ -16,14 +16,6 @@ using System.Threading;
 
 namespace Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 
-public class MinMax
-{
-    public double Min { get; set; }
-    public double Max { get; set; }
-    public double Avg { get; set; }
-}
-
-
 public class AudioVisualizer : Control
 {
     public static readonly StyledProperty<WavePeakData2?> WavePeaksProperty =
@@ -71,7 +63,11 @@ public class AudioVisualizer : Control
     public double StartPositionSeconds
     {
         get => GetValue(StartPositionSecondsProperty);
-        set => SetValue(StartPositionSecondsProperty, value);
+        set
+        {
+            var clampedValue = Math.Max(0, Math.Min(value, MaxStartPositionSeconds));
+            SetValue(StartPositionSecondsProperty, clampedValue);
+        }
     }
 
     public double ZoomFactor
@@ -167,6 +163,25 @@ public class AudioVisualizer : Control
         }
     }
 
+    private double MaxStartPositionSeconds
+    {
+        get
+        {
+            if (WavePeaks == null || Bounds.Width <= 0 || ZoomFactor <= 0)
+            {
+                return int.MaxValue;
+            }
+
+            // Calculate how many seconds are visible in the current view
+            var visibleSeconds = Bounds.Width / (ZoomFactor * WavePeaks.SampleRate);
+
+            // Maximum start position is total length minus visible length
+            var maxStart = WavePeaks.LengthInSeconds - visibleSeconds;
+
+            // Don't allow negative values (when zoomed out beyond waveform length)
+            return Math.Max(0, maxStart + 1); // +1 to allow some extra space at end
+        }
+    }
 
     // Pens and brushes
     private Pen _paintWaveform = new Pen(new SolidColorBrush(Color.FromArgb(150, 144, 238, 144)), 1);
