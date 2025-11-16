@@ -1,6 +1,3 @@
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -9,6 +6,9 @@ using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -28,7 +28,7 @@ public partial class BatchConvertSettingsViewModel : ObservableObject
     [ObservableProperty] private string? _selectedLanguagePostFix;
 
     public Window? Window { get; set; }
-    
+
     public bool OkPressed { get; private set; }
 
     private readonly IFolderHelper _folderHelper;
@@ -61,7 +61,7 @@ public partial class BatchConvertSettingsViewModel : ObservableObject
 
     private void LoadSettings()
     {
-        UseSourceFolder = Se.Settings.Tools.BatchConvert.SaveInSourceFolder;;
+        UseSourceFolder = Se.Settings.Tools.BatchConvert.SaveInSourceFolder; ;
         UseOutputFolder = !UseSourceFolder;
         OutputFolder = Se.Settings.Tools.BatchConvert.OutputFolder;
         Overwrite = Se.Settings.Tools.BatchConvert.Overwrite;
@@ -108,8 +108,8 @@ public partial class BatchConvertSettingsViewModel : ObservableObject
         }
     }
 
-    [RelayCommand]                   
-    private void Cancel() 
+    [RelayCommand]
+    private void Cancel()
     {
         Window?.Close();
     }

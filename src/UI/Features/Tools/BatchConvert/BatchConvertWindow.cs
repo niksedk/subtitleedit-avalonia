@@ -186,7 +186,7 @@ public class BatchConvertWindow : Window
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedBatchItem)) { Source = vm });
 
         var comboBoxSubtitleFormat = UiUtil.MakeComboBox(vm.TargetFormats, vm, nameof(vm.SelectedTargetFormat));
-        comboBoxSubtitleFormat.PropertyChanged += (_,_) => vm.ComboBoxSubtitleFormatChanged();
+        comboBoxSubtitleFormat.PropertyChanged += (_, _) => vm.ComboBoxSubtitleFormatChanged();
         comboBoxSubtitleFormat.Width = 240;
 
         var buttonTargetFormatSettings = UiUtil.MakeButton(vm.ShowTargetFormatSettingsCommand, IconNames.Settings)

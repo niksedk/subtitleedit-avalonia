@@ -760,13 +760,13 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             exportHandler = new ExportHandlerFcp();
             extension = string.Empty; // folder
         }
-        
+
         if (_config.TargetFormatName == FormatDCinemaInterop)
         {
             exportHandler = new ExportHandlerDCinemaInteropPng();
             extension = string.Empty; // folder
         }
-        
+
         if (_config.TargetFormatName == FormatDCinemaSmpte2014)
         {
             exportHandler = new ExportHandlerDCinemaSmpte2014Png();

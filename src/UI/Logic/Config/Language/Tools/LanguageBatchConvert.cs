@@ -13,10 +13,12 @@ public class LanguageBatchConvert
     public string TargetFormatSettings { get; set; }
     public string FileNameContainsDotDotDot { get; set; }
     public string TrackLanguageContainsDotDotDot { get; set; }
+    public string BatchConvertSettings { get; set; }
 
     public LanguageBatchConvert()
     {
         Title = "Batch convert";
+        BatchConvertSettings = "Batch convert settings";
         OneActionsSelected = "One action selected";
         XActionsSelected = "{0} actions selected";
         OutputFolderSource = " Output folder: Source folder";

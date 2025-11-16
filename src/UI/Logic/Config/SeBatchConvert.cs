@@ -1,6 +1,4 @@
 ﻿using Nikse.SubtitleEdit.Core.AutoTranslate;
-using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
-using System.Linq;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 
@@ -65,5 +63,7 @@ public class SeBatchConvert
         ChangeCasingType = "Normal";
         NormalCasingFixNames = true;
         FixRtlMode = "ReverseStartEnd";
+        LastFilterItem = string.Empty;
+        LanguagePostFix = string.Empty;
     }
 }

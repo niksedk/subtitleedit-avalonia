@@ -1,6 +1,5 @@
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -9,16 +8,12 @@ namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
 public class BatchConvertSettingsWindow : Window
 {
-    private readonly Tools.BatchConvert.BatchConvertSettingsViewModel _vm;
-
-    public BatchConvertSettingsWindow(Tools.BatchConvert.BatchConvertSettingsViewModel vm)
+    public BatchConvertSettingsWindow(BatchConvertSettingsViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = "Batch convert - output settings";
+        Title = Se.Language.Tools.BatchConvert.BatchConvertSettings;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -136,11 +131,6 @@ public class BatchConvertSettingsWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        KeyDown += (s, e) => vm.OnKeyDown(e);
     }
 }
