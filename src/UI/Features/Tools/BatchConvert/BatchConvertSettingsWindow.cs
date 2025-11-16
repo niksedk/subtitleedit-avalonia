@@ -10,14 +10,14 @@ namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 public class BatchConvertSettingsWindow : Window
 {
     private readonly Tools.BatchConvert.BatchConvertSettingsViewModel _vm;
-    
+
     public BatchConvertSettingsWindow(Tools.BatchConvert.BatchConvertSettingsViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = "Batch convert - output settings";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
-        
+
         _vm = vm;
         vm.Window = this;
         DataContext = vm;
@@ -27,7 +27,7 @@ public class BatchConvertSettingsWindow : Window
         var panelTargetEncoding = new StackPanel
         {
             Orientation = Orientation.Horizontal,
-            Children = { labelTargetEncoding, comboBoxTargetEncoding  }
+            Children = { labelTargetEncoding, comboBoxTargetEncoding }
         };
 
         var checkBoxOverwrite = new CheckBox
@@ -43,7 +43,7 @@ public class BatchConvertSettingsWindow : Window
             Content = Se.Language.General.UseSourceFolder,
             IsChecked = vm.UseSourceFolder,
             VerticalAlignment = VerticalAlignment.Center,
-            [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.UseSourceFolder)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },  
+            [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.UseSourceFolder)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
         };
 
         var checkBoxUseOutputFolder = new RadioButton
@@ -51,14 +51,14 @@ public class BatchConvertSettingsWindow : Window
             Content = Se.Language.General.UseOutputFolder,
             IsChecked = vm.UseOutputFolder,
             VerticalAlignment = VerticalAlignment.Center,
-            [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.UseOutputFolder)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },  
+            [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.UseOutputFolder)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
         };
 
         var textBoxOutputFolder = new TextBox
         {
             Text = vm.OutputFolder,
             VerticalAlignment = VerticalAlignment.Center,
-            [!TextBox.TextProperty] = new Binding(nameof(vm.OutputFolder)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },  
+            [!TextBox.TextProperty] = new Binding(nameof(vm.OutputFolder)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
             IsEnabled = vm.UseOutputFolder,
             Width = 400,
         };
@@ -75,16 +75,36 @@ public class BatchConvertSettingsWindow : Window
                 textBoxOutputFolder,
                 buttonBrowse
             }
-        };  
+        };
+
+        var labelOcrEngine = UiUtil.MakeLabel(Se.Language.Ocr.OcrEngine);
+        var comboBoxOcrEngine = UiUtil.MakeComboBox(vm.OcrEngines, vm, nameof(vm.SelectedOcrEngine));
+        var panelOcrEngine = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Margin = new Avalonia.Thickness(0, 30, 0, 0),
+            Children = { labelOcrEngine, comboBoxOcrEngine }
+        };
+
+        var labelLanguagePostFix = UiUtil.MakeLabel(Se.Language.General.LanguagePostFix);
+        var comboBoxLanguagePostFix = UiUtil.MakeComboBox(vm.LanguagePostFixes, vm, nameof(vm.SelectedLanguagePostFix));
+        var panelLanguagePostFix = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Margin = new Avalonia.Thickness(0, 30, 0, 0),
+            Children = { labelLanguagePostFix, comboBoxLanguagePostFix }
+        };
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
-        
+
         var grid = new Grid
         {
             RowDefinitions =
             {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
@@ -108,10 +128,13 @@ public class BatchConvertSettingsWindow : Window
         grid.Add(checkBoxUseSourceFolder, 2, 0);
         grid.Add(checkBoxUseOutputFolder, 3, 0);
         grid.Add(panelOutputFolder, 4, 0);
-        grid.Add(panelButtons, 5, 0);
+        grid.Add(panelOcrEngine, 5, 0);
+        grid.Add(panelLanguagePostFix, 6, 0);
+        grid.Add(panelButtons, 7, 0);
+
 
         Content = grid;
-        
+
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
     }
 

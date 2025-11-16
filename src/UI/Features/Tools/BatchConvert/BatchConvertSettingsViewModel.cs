@@ -21,7 +21,12 @@ public partial class BatchConvertSettingsViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<string> _targetEncodings;
     [ObservableProperty] private string? _selectedTargetEncoding;
 
-    
+    [ObservableProperty] private ObservableCollection<string> _ocrEngines;
+    [ObservableProperty] private string? _selectedOcrEngine;
+
+    [ObservableProperty] private ObservableCollection<string> _languagePostFixes;
+    [ObservableProperty] private string? _selectedLanguagePostFix;
+
     public Window? Window { get; set; }
     
     public bool OkPressed { get; private set; }
@@ -30,8 +35,23 @@ public partial class BatchConvertSettingsViewModel : ObservableObject
 
     public BatchConvertSettingsViewModel(IFolderHelper folderHelper)
     {
-        TargetEncodings =
-            new ObservableCollection<string>(EncodingHelper.GetEncodings().Select(p => p.DisplayName).ToList());
+        var encodings = EncodingHelper.GetEncodings().Select(p => p.DisplayName).ToList();
+        TargetEncodings = new ObservableCollection<string>(encodings);
+
+        OcrEngines = new ObservableCollection<string> { "nOcr", "Tesseract" };
+        SelectedOcrEngine = Se.Settings.Ocr.Engine == "nOcr" ? OcrEngines.First() : OcrEngines.Last();
+
+        LanguagePostFixes = new ObservableCollection<string>()
+        {
+            Se.Language.General.NoLanguageCode,
+            Se.Language.General.TwoLetterLanguageCode,
+            Se.Language.General.ThreeLetterLanguageCode,
+        };
+        SelectedLanguagePostFix = Se.Settings.Tools.BatchConvert.LanguagePostFix;
+        if (SelectedLanguagePostFix == null)
+        {
+            SelectedLanguagePostFix = LanguagePostFixes[1];
+        }
 
         _folderHelper = folderHelper;
 
@@ -54,6 +74,10 @@ public partial class BatchConvertSettingsViewModel : ObservableObject
         Se.Settings.Tools.BatchConvert.OutputFolder = OutputFolder;
         Se.Settings.Tools.BatchConvert.Overwrite = Overwrite;
         Se.Settings.Tools.BatchConvert.TargetEncoding = SelectedTargetEncoding ?? TargetEncodings.First();
+
+        Se.Settings.Tools.BatchConvert.LanguagePostFix = SelectedLanguagePostFix ?? Se.Language.General.TwoLetterLanguageCode;
+        Se.Settings.Ocr.Engine = SelectedOcrEngine ?? "nOcr";
+
         Se.SaveSettings();
     }
 

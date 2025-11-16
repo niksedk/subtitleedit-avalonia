@@ -2361,4 +2361,9 @@ public static class UiUtil
             window.WindowState = WindowState.Normal;
         }
     }
+
+    internal static object MakeLabel(object languagePostFix)
+    {
+        throw new NotImplementedException();
+    }
 }

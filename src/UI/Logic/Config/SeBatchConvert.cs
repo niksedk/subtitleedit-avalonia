@@ -44,6 +44,7 @@ public class SeBatchConvert
     
     public string FixRtlMode { get; set; }
     public string LastFilterItem { get; set; }
+    public string LanguagePostFix { get; set; }
 
     public SeBatchConvert()
     {

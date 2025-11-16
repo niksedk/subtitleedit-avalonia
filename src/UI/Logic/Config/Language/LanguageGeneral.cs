@@ -525,6 +525,10 @@ public class LanguageGeneral
     public string ImagesWithTimeCode { get; set; }
     public string RightToLeft { get; set; }
     public string Filter { get; set; }
+    public string NoLanguageCode { get; set; }
+    public string TwoLetterLanguageCode { get; set; }
+    public string ThreeLetterLanguageCode { get; set; }
+    public string LanguagePostFix { get; set; }
 
     public LanguageGeneral()
     {
@@ -1046,8 +1050,12 @@ public class LanguageGeneral
         VideoCustom1ForwardX = "Video, custom milliseconds ({0}) forward, 1";
         VideoCustom2BackX = "Video, custom milliseconds ({0}) back, 2";
         VideoCustom2ForwardX = "Video, custom milliseconds ({0}) forward, 2";
-        ImagesWithTimeCode = "Images with time code";   
+        ImagesWithTimeCode = "Images with time code";
         RightToLeft = "Right to left";
         Filter = "Filter";
+        NoLanguageCode = "No language code";
+        TwoLetterLanguageCode = "Two-letter language code";
+        ThreeLetterLanguageCode = "Three-letter language code";
+        LanguagePostFix = "Language post-fix (mkv/mp4)";
     }
 }
