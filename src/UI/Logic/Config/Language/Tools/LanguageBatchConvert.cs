@@ -11,6 +11,8 @@ public class LanguageBatchConvert
     public string OutputFolderX { get; set; }
     public string EncodingXOverwriteY { get; set; }
     public string TargetFormatSettings { get; set; }
+    public string FileNameContainsDotDotDot { get; set; }
+    public string TrackLanguageContainsDotDotDot { get; set; }
 
     public LanguageBatchConvert()
     {
@@ -21,5 +23,7 @@ public class LanguageBatchConvert
         OutputFolderX = " Output folder: {0}";
         EncodingXOverwriteY = "Encoding: {0}, overwrite existing files: {1}";
         TargetFormatSettings = "Target format settings";
+        FileNameContainsDotDotDot = "File name contains...";
+        TrackLanguageContainsDotDotDot = "Track language contains...";
     }
 }

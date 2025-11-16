@@ -524,6 +524,7 @@ public class LanguageGeneral
     public string VideoCustom2ForwardX { get; set; }
     public string ImagesWithTimeCode { get; set; }
     public string RightToLeft { get; set; }
+    public string Filter { get; set; }
 
     public LanguageGeneral()
     {
@@ -1047,5 +1048,6 @@ public class LanguageGeneral
         VideoCustom2ForwardX = "Video, custom milliseconds ({0}) forward, 2";
         ImagesWithTimeCode = "Images with time code";   
         RightToLeft = "Right to left";
+        Filter = "Filter";
     }
 }

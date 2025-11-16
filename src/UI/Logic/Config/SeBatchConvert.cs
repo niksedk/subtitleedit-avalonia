@@ -43,6 +43,7 @@ public class SeBatchConvert
     public bool NormalCasingOnlyUpper { get; set; }
     
     public string FixRtlMode { get; set; }
+    public string LastFilterItem { get; set; }
 
     public SeBatchConvert()
     {

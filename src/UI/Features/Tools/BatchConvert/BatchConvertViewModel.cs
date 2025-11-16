@@ -10,6 +10,9 @@ using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.Translate;
+using Nikse.SubtitleEdit.Features.Files.ExportCustomTextFormat;
+using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
+using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Ocr;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
@@ -28,9 +31,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Features.Files.ExportCustomTextFormat;
-using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
-using Nikse.SubtitleEdit.Features.Main;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -55,6 +55,10 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private double _progressMaxValue;
     [ObservableProperty] private string _actionsSelected;
     [ObservableProperty] private bool _isTargetFormatSettingsVisible;
+    [ObservableProperty] private ObservableCollection<string> _filterItems;
+    [ObservableProperty] private string? _selectedFilterItem;
+    [ObservableProperty] private string _filterText;
+    [ObservableProperty] private bool _isFilterTextVisible;
 
     // Remove formatting
     [ObservableProperty] private bool _formattingRemoveAll;
@@ -139,6 +143,9 @@ public partial class BatchConvertViewModel : ObservableObject
     public bool OkPressed { get; private set; }
     public ScrollViewer FunctionContainer { get; internal set; }
 
+    private List<BatchConvertItem> _allBatchItems;
+    private readonly System.Timers.Timer _filesTimer;
+    private bool _isFilesDirty;
     private readonly IWindowService _windowService;
     private readonly IFileHelper _fileHelper;
     private readonly IFolderHelper _folderHelper;
@@ -157,6 +164,7 @@ public partial class BatchConvertViewModel : ObservableObject
         _folderHelper = folderHelper;
 
         BatchItems = new ObservableCollection<BatchConvertItem>();
+        _allBatchItems = new List<BatchConvertItem>();
         BatchFunctions = new ObservableCollection<BatchConvertFunction>();
 
         TargetFormats = new ObservableCollection<string>(SubtitleFormat.AllSubtitleFormats.Select(p => p.Name))
@@ -175,6 +183,15 @@ public partial class BatchConvertViewModel : ObservableObject
             BatchConverter.FormatPlainText,
             BatchConverter.FormatVobSub
         };
+
+        FilterItems =
+        [
+            Se.Language.General.AllFiles,
+            Se.Language.Tools.BatchConvert.FileNameContainsDotDotDot,
+            Se.Language.Tools.BatchConvert.TrackLanguageContainsDotDotDot,
+        ];
+        SelectedFilterItem = FilterItems.FirstOrDefault();
+        FilterText = string.Empty;
 
         DeleteLineNumbers = new ObservableCollection<int>();
         BatchItemsInfo = string.Empty;
@@ -253,6 +270,53 @@ public partial class BatchConvertViewModel : ObservableObject
         };
 
         LoadSettings();
+        FilterComboBoxChanged();
+        _filesTimer = new System.Timers.Timer(250);
+        _filesTimer.Elapsed += (sender, args) =>
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                _filesTimer.Stop();
+
+                if (_isFilesDirty)
+                {
+                    _isFilesDirty = false;
+                    UpdateFilteredFiles();
+                }
+
+                _filesTimer.Start();
+            });
+        };
+        _filesTimer.Start();
+    }
+
+    private void UpdateFilteredFiles()
+    {
+        BatchItems.Clear();
+        if (SelectedFilterItem == Se.Language.Tools.BatchConvert.FileNameContainsDotDotDot && !string.IsNullOrEmpty(FilterText))
+        {
+            foreach (var item in _allBatchItems)
+            {
+                if (item.FileName.Contains(FilterText, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    BatchItems.Add(item);
+                }
+            }
+        }
+        else if (SelectedFilterItem == Se.Language.Tools.BatchConvert.TrackLanguageContainsDotDotDot && !string.IsNullOrEmpty(FilterText))
+        {
+            foreach (var item in _allBatchItems)
+            {
+                if (item.Format.Contains(FilterText, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    BatchItems.Add(item);
+                }
+            }
+        }
+        else
+        {
+            BatchItems.AddRange(_allBatchItems);
+        }
     }
 
     private static FixCommonErrors.ProfileDisplayItem LoadDefaultProfile()
@@ -303,6 +367,8 @@ public partial class BatchConvertViewModel : ObservableObject
     private void SaveSettings()
     {
         Se.Settings.Tools.BatchConvert.TargetFormat = SelectedTargetFormat ?? TargetFormats.First();
+
+        Se.Settings.Tools.BatchConvert.LastFilterItem = SelectedFilterItem ?? string.Empty;
 
         Se.Settings.Tools.BatchConvert.AdjustVia = SelectedAdjustType.Name;
         Se.Settings.Tools.BatchConvert.AdjustMaxCps = AdjustRecalculateMaxCharacterPerSecond;
@@ -368,6 +434,12 @@ public partial class BatchConvertViewModel : ObservableObject
                 SelectedAdjustType = adjustType;
                 break;
             }
+        }
+
+        var filterItem = FilterItems.FirstOrDefault(p => p == Se.Settings.Tools.BatchConvert.LastFilterItem);
+        if (filterItem != null)
+        {
+            SelectedFilterItem = filterItem;
         }
 
         AdjustRecalculateMaxCharacterPerSecond = Se.Settings.Tools.BatchConvert.AdjustMaxCps;
@@ -631,10 +703,10 @@ public partial class BatchConvertViewModel : ObservableObject
 
         if (targetFormat == BatchConverter.FormatCustomTextFormat)
         {
-            var subtitles = new List<SubtitleLineViewModel>();                                   
-            var p = new Paragraph("This is a sample text", 0, 1000);                                             
-            subtitles.Add(new SubtitleLineViewModel(p, new SubRip()));                                           
-            
+            var subtitles = new List<SubtitleLineViewModel>();
+            var p = new Paragraph("This is a sample text", 0, 1000);
+            subtitles.Add(new SubtitleLineViewModel(p, new SubRip()));
+
             var result = await _windowService.ShowDialogAsync<ExportCustomTextFormatWindow, ExportCustomTextFormatViewModel>(Window,
                 vm =>
                 {
@@ -665,11 +737,11 @@ public partial class BatchConvertViewModel : ObservableObject
         {
             exportHandler = new ExportHandlerImagesWithTimeCode();
         }
-        else if (targetFormat == BatchConverter.FormatVobSub)           
-        {                                                                                      
-            exportHandler = new ExportHandlerVobSub();                             
-        }                                                                                      
-        
+        else if (targetFormat == BatchConverter.FormatVobSub)
+        {
+            exportHandler = new ExportHandlerVobSub();
+        }
+
         if (exportHandler != null)
         {
             var result = await _windowService.ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(Window, vm =>
@@ -754,6 +826,7 @@ public partial class BatchConvertViewModel : ObservableObject
                                     format = $"Matroska/{kvp.Key} - {lang}";
                                     var matroskaBatchItem = new BatchConvertItem(fileName, fileInfo.Length, format, subtitle);
                                     BatchItems.Add(matroskaBatchItem);
+                                    _allBatchItems.Add(matroskaBatchItem);
                                 }
                             }
                         }
@@ -791,6 +864,7 @@ public partial class BatchConvertViewModel : ObservableObject
                     {
                         var mp4BatchItem = new BatchConvertItem(fileName, fileInfo.Length, name, subtitle);
                         BatchItems.Add(mp4BatchItem);
+                        _allBatchItems.Add(mp4BatchItem);
                     }
                 }
 
@@ -802,6 +876,7 @@ public partial class BatchConvertViewModel : ObservableObject
                 format = "Transport Stream";
                 var tsBatchItem = new BatchConvertItem(fileName, fileInfo.Length, format, subtitle);
                 BatchItems.Add(tsBatchItem);
+                _allBatchItems.Add(tsBatchItem);
                 continue;
             }
 
@@ -840,9 +915,11 @@ public partial class BatchConvertViewModel : ObservableObject
 
             var batchItem = new BatchConvertItem(fileName, fileInfo.Length, format, subtitle);
             BatchItems.Add(batchItem);
+            _allBatchItems.Add(batchItem);
         }
 
         MakeBatchItemsInfo();
+        _isFilesDirty = true;
     }
 
     private static string MakeMkvTrackInfoString(MatroskaTrackInfo track)
@@ -915,6 +992,8 @@ public partial class BatchConvertViewModel : ObservableObject
             SelectedBatchItem = BatchItems[idx];
         }
 
+        _allBatchItems.Remove(selected);
+
         MakeBatchItemsInfo();
     }
 
@@ -922,6 +1001,7 @@ public partial class BatchConvertViewModel : ObservableObject
     private void ClearAllFiles()
     {
         BatchItems.Clear();
+        _allBatchItems.Clear();
         MakeBatchItemsInfo();
     }
 
@@ -1551,8 +1631,10 @@ public partial class BatchConvertViewModel : ObservableObject
                         var batchItem = new BatchConvertItem(path, fileInfo.Length,
                             subtitle != null ? subtitle.OriginalFormat.Name : Se.Language.General.Unknown, subtitle);
                         BatchItems.Add(batchItem);
+                        _allBatchItems.Add(batchItem);
                     }
                 }
+                _isFilesDirty = true;
             });
         }
     }
@@ -1591,5 +1673,24 @@ public partial class BatchConvertViewModel : ObservableObject
     {
         var selectedFormat = SelectedTargetFormat ?? string.Empty;
         IsTargetFormatSettingsVisible = _targetFormatsWithSettings.Contains(selectedFormat);
+    }
+
+    internal void FilterComboBoxChanged()
+    {
+        var selection = SelectedFilterItem;
+        if (selection == Se.Language.General.AllFiles)
+        {
+            IsFilterTextVisible = false;
+        }
+        else
+        {
+            IsFilterTextVisible = true;
+        }
+        _isFilesDirty = true;
+    }
+
+    internal void FilterTextChanged()
+    {
+        _isFilesDirty = true;
     }
 }
