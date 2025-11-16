@@ -64,6 +64,6 @@ public class SeBatchConvert
         NormalCasingFixNames = true;
         FixRtlMode = "ReverseStartEnd";
         LastFilterItem = string.Empty;
-        LanguagePostFix = string.Empty;
+        LanguagePostFix = Se.Language.General.TwoLetterLanguageCode;
     }
 }

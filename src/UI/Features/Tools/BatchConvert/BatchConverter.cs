@@ -127,7 +127,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                                 var vobSubs = LoadVobSubFromMatroska(track, matroska, out var idx);
                                 imageSubtitle = new OcrSubtitleVobSub(vobSubs);
                                 var fileName = Path.GetFileName(item.FileName);
-                                item.OutputFileName = fileName.Substring(0, fileName.LastIndexOf('.')) + "." + GetMkvLanguage(track.Language).Replace("undefined.", string.Empty).TrimEnd('.') + ".mkv";
+                                item.OutputFileName = fileName.Substring(0, fileName.LastIndexOf('.')).TrimEnd('.') + ".mkv";
                                 break;
                             }
                         }
@@ -138,7 +138,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                                 var bluRaySubtitles = LoadBluRaySupFromMatroska(track, matroska);
                                 imageSubtitle = new OcrSubtitleMkvBluRay(track, bluRaySubtitles);
                                 var fileName = Path.GetFileName(item.FileName);
-                                item.OutputFileName = fileName.Substring(0, fileName.LastIndexOf('.')) + "." + GetMkvLanguage(track.Language).Replace("undefined.", string.Empty).TrimEnd('.') + ".mkv";
+                                item.OutputFileName = fileName.Substring(0, fileName.LastIndexOf('.')).TrimEnd('.') + ".mkv";
                                 break;
                             }
                         }
@@ -150,7 +150,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                                 var binaryParagraphs = LoadDvbFromMatroska(track, matroska, ref sub);
                                 imageSubtitle = new OcrSubtitleIBinaryParagraph(binaryParagraphs);
                                 var fileName = Path.GetFileName(item.FileName);
-                                item.OutputFileName = fileName.Substring(0, fileName.LastIndexOf('.')) + "." + GetMkvLanguage(track.Language).Replace("undefined.", string.Empty).TrimEnd('.') + ".mkv";
+                                item.OutputFileName = fileName.Substring(0, fileName.LastIndexOf('.')).TrimEnd('.') + ".mkv";
                                 break;
                             }
                         }
@@ -162,7 +162,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                                 item.Subtitle = new Subtitle();
                                 Utilities.LoadMatroskaTextSubtitle(track, matroska, mkvSub, item.Subtitle);
                                 var fileName = Path.GetFileName(item.FileName);
-                                item.OutputFileName = fileName.Substring(0, fileName.LastIndexOf('.')) + "." + GetMkvLanguage(track.Language).Replace("undefined.", string.Empty).TrimEnd('.') + ".mkv";
+                                item.OutputFileName = fileName.Substring(0, fileName.LastIndexOf('.')).TrimEnd('.') + ".mkv";
 
                                 if (track.CodecId.Equals("S_TEXT/UTF8", StringComparison.OrdinalIgnoreCase))
                                 {
@@ -190,7 +190,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                                 Utilities.ParseMatroskaTextSt(track, mkvSub, item.Subtitle);
                                 item.Subtitle.OriginalFormat = new SubRip();
                                 var fileName = Path.GetFileName(item.FileName);
-                                item.OutputFileName = fileName.Substring(0, fileName.LastIndexOf('.')) + "." + GetMkvLanguage(track.Language).Replace("undefined.", string.Empty).TrimEnd('.') + ".mkv";
+                                item.OutputFileName = fileName.Substring(0, fileName.LastIndexOf('.')).TrimEnd('.') + ".mkv";
                                 break;
                             }
                         }
@@ -239,7 +239,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                     item.Subtitle = mp4Parser.VttcSubtitle;
                     mp4Found = true;
                     var fileName = Path.GetFileName(item.FileName);
-                    item.OutputFileName = fileName.Substring(0, fileName.LastIndexOf('.')) + "." + GetMp4Language(mp4Parser.VttcLanguage) + "mp4";
+                    item.OutputFileName = fileName.Substring(0, fileName.LastIndexOf('.')).TrimEnd('.') + ".mp4";
                 }
                 else
                 {
@@ -254,7 +254,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                                 item.Subtitle.Paragraphs.AddRange(track.Mdia.Minf.Stbl.GetParagraphs());
                                 mp4Found = true;
                                 var fileName = Path.GetFileName(item.FileName);
-                                item.OutputFileName = fileName.Substring(0, fileName.LastIndexOf('.')) + "." + GetMp4Language(language) + "mp4";
+                                item.OutputFileName = fileName.Substring(0, fileName.LastIndexOf('.')).TrimEnd('.') + ".mp4";
                                 break;
                             }
                         }
@@ -349,11 +349,6 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         }
 
         WriteToImageBasedFormat(item, imageSubtitle, cancellationToken);
-    }
-
-    private string GetMp4Language(string vttcLanguage)
-    {
-        return string.Empty;
     }
 
     private IOcrSubtitle? LoadTransportStream(BatchConvertItem item, CancellationToken cancellationToken)
@@ -550,11 +545,6 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             position += length;
         }
         return false;
-    }
-
-    private string GetMkvLanguage(string trackLanguage)
-    {
-        return trackLanguage;
     }
 
     private async Task SaveCustomSubtitleFormat(BatchConvertItem item, CancellationToken cancellationToken)
@@ -1498,6 +1488,46 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         }
 
         var targetExtension = extension;
+
+        if (!string.IsNullOrEmpty(item.LanguageCode))
+        {
+            if (Se.Settings.Tools.BatchConvert.LanguagePostFix == Se.Language.General.TwoLetterLanguageCode)
+            {
+                var code = item.LanguageCode;
+                if (code.Length == 3)
+                {
+                    code = Iso639Dash2LanguageCode.GetTwoLetterCodeFromThreeLetterCode(code);
+                }
+                else if (code.Length > 3)
+                {
+                    code = Iso639Dash2LanguageCode.GetTwoLetterCodeFromEnglishName(code);
+                }
+
+                if (code.Length == 2 && !fileName.EndsWith("." + code, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    fileName += "." + code;
+                }
+            }
+            else if (Se.Settings.Tools.BatchConvert.LanguagePostFix == Se.Language.General.ThreeLetterLanguageCode)
+            {
+                var code = item.LanguageCode;
+                if (code.Length == 2)
+                {
+                    code = Iso639Dash2LanguageCode.GetThreeLetterCodeFromTwoLetterCode(code);
+                }
+                else if (code.Length > 3)
+                {
+                    code = Iso639Dash2LanguageCode.GetTwoLetterCodeFromEnglishName(code);
+                    code = Iso639Dash2LanguageCode.GetThreeLetterCodeFromTwoLetterCode(code);
+                }
+
+                if (code.Length == 3 && !fileName.EndsWith("." + code, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    fileName += "." + code;
+                }
+            }
+        }
+
         var outputFileName = Path.Combine(outputFolder, fileName + targetExtension);
         if (targetExtension != string.Empty && !File.Exists(outputFileName) && Directory.Exists(outputFolder))
         {

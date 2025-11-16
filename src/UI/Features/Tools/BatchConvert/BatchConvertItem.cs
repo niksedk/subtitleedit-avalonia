@@ -12,6 +12,8 @@ public partial class BatchConvertItem : ObservableObject
     public string Format { get; set; }
     public Subtitle? Subtitle { get; set; }
     public string OutputFileName { get; set; }
+    public string LanguageCode { get; set; }
+    public string TrackNumber { get; set; }
 
     public BatchConvertItem()
     {
@@ -20,6 +22,8 @@ public partial class BatchConvertItem : ObservableObject
         Status = string.Empty;
         DisplaySize = string.Empty;
         OutputFileName = string.Empty;
+        LanguageCode = string.Empty;
+        TrackNumber = string.Empty;
     }
 
     public BatchConvertItem(string fileName, long size, string format, Subtitle? subtitle)
@@ -31,5 +35,7 @@ public partial class BatchConvertItem : ObservableObject
         Subtitle = subtitle;
         DisplaySize = Utilities.FormatBytesToDisplayFileSize(size);
         OutputFileName = string.Empty;
+        LanguageCode = string.Empty;
+        TrackNumber = string.Empty;
     }
 }

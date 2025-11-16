@@ -31,6 +31,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -810,25 +811,19 @@ public partial class BatchConvertViewModel : ObservableObject
                                 }
 
                                 tracksByFormat[formatName].Add(MakeMkvTrackInfoString(track));
+
+                                format = $"Matroska/{formatName} - {MakeMkvTrackInfoString(track)}";
+                                var matroskaBatchItem = new BatchConvertItem(fileName, fileInfo.Length, format, subtitle);
+                                matroskaBatchItem.LanguageCode = track.Language;
+                                matroskaBatchItem.TrackNumber = track.TrackNumber.ToString(CultureInfo.InvariantCulture);
+                                BatchItems.Add(matroskaBatchItem);
+                                _allBatchItems.Add(matroskaBatchItem);
                             }
                         }
 
                         if (tracksByFormat.Count == 0)
                         {
                             format = "No subtitle tracks";
-                        }
-                        else
-                        {
-                            foreach (var kvp in tracksByFormat)
-                            {
-                                foreach (var lang in kvp.Value)
-                                {
-                                    format = $"Matroska/{kvp.Key} - {lang}";
-                                    var matroskaBatchItem = new BatchConvertItem(fileName, fileInfo.Length, format, subtitle);
-                                    BatchItems.Add(matroskaBatchItem);
-                                    _allBatchItems.Add(matroskaBatchItem);
-                                }
-                            }
                         }
 
                         continue;
@@ -842,30 +837,30 @@ public partial class BatchConvertViewModel : ObservableObject
                 var mp4SubtitleTracks = mp4Parser.GetSubtitleTracks();
                 if (mp4Parser.VttcSubtitle?.Paragraphs.Count > 0)
                 {
-                    mp4Files.Add("MP4/WebVTT - " + mp4Parser.VttcLanguage);
+                    var name = "MP4/WebVTT - " + mp4Parser.VttcLanguage;
+                    mp4Files.Add(name);
+                    var mp4BatchItem = new BatchConvertItem(fileName, fileInfo.Length, name, subtitle);
+                    mp4BatchItem.LanguageCode = mp4Parser.VttcLanguage;
+                    BatchItems.Add(mp4BatchItem);
+                    _allBatchItems.Add(mp4BatchItem);
                 }
 
                 foreach (var track in mp4SubtitleTracks)
                 {
                     if (track.Mdia.IsTextSubtitle || track.Mdia.IsClosedCaption)
                     {
-                        mp4Files.Add(
-                            $"MP4/#{mp4SubtitleTracks.IndexOf(track)} {track.Mdia.HandlerType} - {track.Mdia.Mdhd.Iso639ThreeLetterCode ?? track.Mdia.Mdhd.LanguageString}");
+                        var name = $"MP4/#{mp4SubtitleTracks.IndexOf(track)} {track.Mdia.HandlerType} - {track.Mdia.Mdhd.Iso639ThreeLetterCode ?? track.Mdia.Mdhd.LanguageString}";
+                        mp4Files.Add(name);
+                        var mp4BatchItem = new BatchConvertItem(fileName, fileInfo.Length, name, subtitle);
+                        mp4BatchItem.LanguageCode = track.Mdia.Mdhd.Iso639ThreeLetterCode ?? track.Mdia.Mdhd.LanguageString;
+                        BatchItems.Add(mp4BatchItem);
+                        _allBatchItems.Add(mp4BatchItem);
                     }
                 }
 
                 if (mp4Files.Count <= 0)
                 {
                     format = "No subtitle tracks";
-                }
-                else
-                {
-                    foreach (var name in mp4Files)
-                    {
-                        var mp4BatchItem = new BatchConvertItem(fileName, fileInfo.Length, name, subtitle);
-                        BatchItems.Add(mp4BatchItem);
-                        _allBatchItems.Add(mp4BatchItem);
-                    }
                 }
 
                 continue;
