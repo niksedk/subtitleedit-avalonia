@@ -211,6 +211,18 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
             {
                 MacHelper.MakeExecutable(cppPath);
             }
+            
+            cppPath = Path.Combine(folder, "libwhisper.1.dylib-cli");
+            if (File.Exists(cppPath))
+            {
+                MacHelper.MakeExecutable(cppPath);
+            }
+            
+            cppPath = Path.Combine(folder, "libwhisper.1.8.2.dylib");
+            if (File.Exists(cppPath))
+            {
+                MacHelper.MakeExecutable(cppPath);
+            }
         }
     }
 
