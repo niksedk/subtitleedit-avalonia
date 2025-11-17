@@ -6,7 +6,7 @@ using Nikse.SubtitleEdit.Logic.Config;
 namespace Nikse.SubtitleEdit.Features.Options.Shortcuts.PickMilliseconds;
 
 public class PickMillisecondsWindow : Window
-{   
+{
     public PickMillisecondsWindow(PickMillisecondsViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -18,12 +18,12 @@ public class PickMillisecondsWindow : Window
         DataContext = vm;
 
         var labelMilliseconds = UiUtil.MakeLabel(Se.Language.General.Milliseconds);
-        var numericUpDownMilliseconds = UiUtil.MakeNumericUpDownInt(1, 100000, 5000, 200, vm, nameof(vm.Milliseconds));
+        var numericUpDownMilliseconds = UiUtil.MakeNumericUpDownInt(1, 1_000_000, 5000, 200, vm, nameof(vm.Milliseconds));
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
-        
+
         var grid = new Grid
         {
             RowDefinitions =
@@ -49,8 +49,8 @@ public class PickMillisecondsWindow : Window
         grid.Add(buttonPanel, 2, 0, 1, 2);
 
         Content = grid;
-        
+
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
-        KeyDown += (s, e) => vm.OnKeyDown(e);   
+        KeyDown += (s, e) => vm.OnKeyDown(e);
     }
 }
