@@ -1047,7 +1047,7 @@ public class LanguageGeneral
         VideoCustom1BackX = "Video, custom milliseconds ({0:#,###,##0}) back, 1";
         VideoCustom1ForwardX = "Video, custom milliseconds ({0:#,###,##0}) forward, 1";
         VideoCustom2BackX = "Video, custom milliseconds ({0:#,###,##0}) back, 2";
-        VideoCustom2ForwardX = "Video, custom milliseconds ({0}:#,###,##0) forward, 2";
+        VideoCustom2ForwardX = "Video, custom milliseconds ({0:#,###,##0}) forward, 2";
         ImagesWithTimeCode = "Images with time code";
         RightToLeft = "Right to left";
         Filter = "Filter";
