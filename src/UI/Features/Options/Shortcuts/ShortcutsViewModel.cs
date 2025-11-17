@@ -92,19 +92,19 @@ public partial class ShortcutsViewModel : ObservableObject
         _surround3Right = Se.Settings.Surround3Right;
     }
 
-    private static IEnumerable<string> GetShortcutKeys()
+    private static List<string> GetShortcutKeys()
     {
         var result = new List<string>();
         var all = Enum.GetValues(typeof(Key)).Cast<Key>().Select(p => p.ToString()).Distinct();
         foreach (var key in all)
         {
-            if (key == Key.None.ToString() ||
-                key == Key.LeftCtrl.ToString() ||
-                key == Key.RightCtrl.ToString() ||
-                key == Key.LeftAlt.ToString() ||
-                key == Key.RightAlt.ToString() ||
-                key == Key.LeftShift.ToString() ||
-                key == Key.RightShift.ToString())
+            if (key == nameof(Key.None) ||
+                key == nameof(Key.LeftCtrl) ||
+                key == nameof(Key.RightCtrl) ||
+                key == nameof(Key.LeftAlt) ||
+                key == nameof(Key.RightAlt) ||
+                key == nameof(Key.LeftShift) ||
+                key == nameof(Key.RightShift))
             {
                 continue;
             }
@@ -152,11 +152,9 @@ public partial class ShortcutsViewModel : ObservableObject
     {
         var shortcuts = _allShortcuts.Where(p => p.Category == category && Search(searchText, p)).ToList();
 
-        var children = new ObservableCollection<ShortcutTreeNode>();
         foreach (var x in shortcuts)
         {
             var leaf = new ShortcutTreeNode(categoryName, MakeDisplayName(x, false), MakeDisplayShortCut(x), x);
-            children.Add(leaf);
             FlatNodes.Add(leaf);
         }
     }
