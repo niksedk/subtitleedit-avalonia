@@ -20,8 +20,12 @@ public class LibMpvDynamicOpenGLControl : OpenGlControlBase
 
     private GlClearDelegate? _glClear;
     private GlClearColorDelegate? _glClearColor;
-
     private const uint GL_COLOR_BUFFER_BIT = 0x00004000;
+
+    public LibMpvDynamicOpenGLControl(LibMpvDynamicPlayer videoPlayerInstanceMpv)
+    {
+        _mpvPlayer = videoPlayerInstanceMpv;
+    }
 
     public LibMpvDynamicPlayer? Player => _mpvPlayer;
 

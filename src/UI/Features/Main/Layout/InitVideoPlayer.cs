@@ -8,6 +8,7 @@ using HanumanInstitute.LibMpv.Avalonia;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -80,10 +81,11 @@ public static class InitVideoPlayer
                     render = VideoRenderer.Auto; 
                 }
                 
-                var videoPlayerInstanceMpv = new VideoPlayerInstanceMpv(render);
+                var videoPlayerInstanceMpv = new LibMpvDynamicPlayer();
+                var view = new LibMpvDynamicOpenGLControl(videoPlayerInstanceMpv);
                 control = new VideoPlayerControl(videoPlayerInstanceMpv)
                 {
-                    PlayerContent = videoPlayerInstanceMpv.MpvView,
+                    PlayerContent = view,
                     StopIsVisible = Se.Settings.Video.ShowStopButton,
                     FullScreenIsVisible = Se.Settings.Video.ShowFullscreenButton,
                 };

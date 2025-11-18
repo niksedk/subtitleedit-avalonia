@@ -421,7 +421,6 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         }
     }
 
-
     public void RenderToFramebuffer(int fbo, int width, int height, bool flipY = true)
     {
         if (_renderContext == IntPtr.Zero)
