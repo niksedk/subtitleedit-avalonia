@@ -83,6 +83,7 @@ public static class InitVideoPlayer
                 
                 var videoPlayerInstanceMpv = new LibMpvDynamicPlayer();
                 var view = new LibMpvDynamicOpenGLControl(videoPlayerInstanceMpv);
+                 //view.InitializeOpenGL();
                 control = new VideoPlayerControl(videoPlayerInstanceMpv)
                 {
                     PlayerContent = view,

@@ -1,6 +1,7 @@
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -533,6 +534,9 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
             throw new InvalidOperationException(GetErrorString(err));
         }
 
+        SetOptionString("keep-open", "always");
+        SetOptionString("sid", "no");
+
         _fileName = path;
     }
 
@@ -668,7 +672,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
                 return;
             }
 
-            var err = DoMpvCommand("seek", value.ToString("F3"), "absolute");
+            var err = DoMpvCommand("seek", value.ToString(CultureInfo.InvariantCulture), "absolute");
             if (err < 0)
             {
                 throw new InvalidOperationException(GetErrorString(err));
@@ -746,7 +750,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 
             // Clamp volume between 0 and 100
             var clampedVolume = Math.Max(0, Math.Min(100, value));
-            var err = DoMpvCommand("set", "volume", clampedVolume.ToString("F2"));
+            var err = DoMpvCommand("set", "volume", clampedVolume.ToString(CultureInfo.InvariantCulture));
             if (err < 0)
             {
                 throw new InvalidOperationException(GetErrorString(err));
@@ -792,7 +796,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 
             // Clamp speed to reasonable values (0.25x to 4x)
             var clampedSpeed = Math.Max(0.25, Math.Min(4.0, value));
-            var err = DoMpvCommand("set", "speed", clampedSpeed.ToString("F2"));
+            var err = DoMpvCommand("set", "speed", clampedSpeed.ToString(CultureInfo.InvariantCulture));
             if (err < 0)
             {
                 throw new InvalidOperationException(GetErrorString(err));

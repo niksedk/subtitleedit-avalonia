@@ -8,7 +8,7 @@ namespace Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 
 public class LibMpvDynamicOpenGLControl : OpenGlControlBase
 {
-    private LibMpvDynamicPlayer? _mpvPlayer;
+    public LibMpvDynamicPlayer? _mpvPlayer;
     private bool _isInitialized;
 
     // OpenGL delegates for clearing framebuffer
@@ -36,9 +36,9 @@ public class LibMpvDynamicOpenGLControl : OpenGlControlBase
         // Resolve OpenGL functions
         ResolveGlFunctions(gl);
 
-        if (_mpvPlayer == null)
+        if (!_isInitialized)
         {
-            _mpvPlayer = new LibMpvDynamicPlayer();
+            //_mpvPlayer = new LibMpvDynamicPlayer();
 
             // Set up the GetProcAddress delegate for OpenGL
             _mpvPlayer.InitializeWithOpenGL((ctx, name) =>
