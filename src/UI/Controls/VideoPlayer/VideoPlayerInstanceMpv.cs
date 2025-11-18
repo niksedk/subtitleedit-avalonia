@@ -89,13 +89,13 @@ public class VideoPlayerInstanceMpv : IVideoPlayerInstance
         MpvView.Bind(MpvView.MpvContextProperty, new Binding(nameof(MpvContext)));
     }
 
-    public void Close()
+    public void CloseFile()
     {
         MpvContext?.Stop().Invoke();
         _fileName = string.Empty;
     }
 
-    public async Task Open(string fileName)
+    public async Task LoadFile(string fileName)
     {
         if (MpvContext == null)
         {

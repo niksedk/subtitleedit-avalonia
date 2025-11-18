@@ -7925,7 +7925,7 @@ public partial class MainViewModel :
             _audioVisualizerUndockedViewModel.Window?.Close();
         }
 
-        VideoPlayerControl?.VideoPlayerInstance.Close();
+        VideoPlayerControl?.VideoPlayerInstance.CloseFile();
     }
 
     internal void OnLoaded()

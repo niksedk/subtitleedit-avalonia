@@ -40,12 +40,12 @@ public class VideoPlayerInstanceNone : IVideoPlayerInstance
         }
     }
 
-    public void Close()
+    public void CloseFile()
     {
         _fileName = string.Empty;
     }
 
-    public Task Open(string fileName)
+    public Task LoadFile(string fileName)
     {
         _fileName = fileName;
         return Task.CompletedTask;

@@ -7,8 +7,8 @@ public interface IVideoPlayerInstance
     string Name { get; }
     string FileName { get; }
 
-    Task Open(string fileName);
-    void Close();
+    Task LoadFile(string fileName);
+    void CloseFile();
 
     void Play();
     void PlayOrPause();

@@ -502,7 +502,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
 
         internal async Task Open(string videoFileName)
         {
-            await _videoPlayerInstance.Open(videoFileName);
+            await _videoPlayerInstance.LoadFile(videoFileName);
             _videoPlayerInstance.Volume = Volume;
             _positionTimer?.Stop();
             StartPositionTimer();
@@ -515,7 +515,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         {
             _positionTimer?.Stop();
             StopAutoHideControls();
-            _videoPlayerInstance.Close();
+            _videoPlayerInstance.CloseFile();
             ProgressText = string.Empty;
             _videoFileName = string.Empty;
         }

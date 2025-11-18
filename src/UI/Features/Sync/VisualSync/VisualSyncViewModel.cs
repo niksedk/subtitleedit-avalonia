@@ -455,8 +455,8 @@ public partial class VisualSyncViewModel : ObservableObject
     internal void OnClosing()
     {
         _positionTimer.Stop();
-        VideoPlayerControlLeft.VideoPlayerInstance.Close();
-        VideoPlayerControlRight.VideoPlayerInstance.Close();
+        VideoPlayerControlLeft.VideoPlayerInstance.CloseFile();
+        VideoPlayerControlRight.VideoPlayerInstance.CloseFile();
     }
 
     [RelayCommand]

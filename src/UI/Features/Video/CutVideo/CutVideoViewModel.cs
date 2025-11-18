@@ -713,7 +713,7 @@ public partial class CutVideoViewModel : ObservableObject
     {
         _positionTimer.Stop();
 
-        VideoPlayer.VideoPlayerInstance.Close();
+        VideoPlayer.VideoPlayerInstance.CloseFile();
 
         if (_ffmpegListKeyFramesProcess != null && !_ffmpegListKeyFramesProcess.HasExited)
         {
