@@ -552,7 +552,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 
     // public media player properties/methods
 
-    public string Name => "libmpv";
+    public string Name => $"libmpv {VersionNumber}";
 
     public string FileName => _fileName;
 
@@ -1154,4 +1154,21 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
     {
         DoMpvCommand("sub-add", fileName, "select");
     }
+
+    public string VersionNumber
+    {
+        get
+        {
+            if (_mpv == IntPtr.Zero)
+            {
+                return string.Empty;
+            }
+
+            var version = _mpvClientApiVersion();
+            var high = version >> 16;
+            var low = version & 0xff;
+            return high + "." + low;
+        }
+    }
+
 }
