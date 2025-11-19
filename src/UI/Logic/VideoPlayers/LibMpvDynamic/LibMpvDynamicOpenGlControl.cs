@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 
-public class LibMpvDynamicOpenGLControl : OpenGlControlBase
+public class LibMpvDynamicOpenGlControl : OpenGlControlBase
 {
     public LibMpvDynamicPlayer? _mpvPlayer;
     private bool _isInitialized;
@@ -22,7 +22,7 @@ public class LibMpvDynamicOpenGLControl : OpenGlControlBase
     private GlClearColorDelegate? _glClearColor;
     private const uint GL_COLOR_BUFFER_BIT = 0x00004000;
 
-    public LibMpvDynamicOpenGLControl(LibMpvDynamicPlayer videoPlayerInstanceMpv)
+    public LibMpvDynamicOpenGlControl(LibMpvDynamicPlayer videoPlayerInstanceMpv)
     {
         _mpvPlayer = videoPlayerInstanceMpv;
     }

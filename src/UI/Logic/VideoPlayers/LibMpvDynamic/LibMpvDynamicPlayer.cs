@@ -46,71 +46,88 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
     // Basic mpv functions
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate IntPtr MpvCreate();
+
     private MpvCreate? _mpvCreate;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int MpvInitialize(IntPtr mpvHandle);
+
     private MpvInitialize _mpvInitialize;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int MpvCommand(IntPtr mpvHandle, IntPtr utf8Strings);
+
     private MpvCommand _mpvCommand;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate IntPtr MpvWaitEvent(IntPtr mpvHandle, double wait);
+
     private MpvWaitEvent _mpvWaitEvent;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int MpvSetOption(IntPtr mpvHandle, byte[] name, int format, ref ulong data);
+
     private MpvSetOption _mpvSetOption;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int MpvSetOptionString(IntPtr mpvHandle, byte[] name, byte[] value);
+
     private MpvSetOptionString _mpvSetOptionString;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int MpvGetPropertyString(IntPtr mpvHandle, byte[] name, int format, ref IntPtr data);
+
     private MpvGetPropertyString _mpvGetPropertyString;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int MpvGetPropertyDouble(IntPtr mpvHandle, byte[] name, int format, ref double data);
+
     private MpvGetPropertyDouble _mpvGetPropertyDouble;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int MpvSetProperty(IntPtr mpvHandle, byte[] name, int format, ref byte[] data);
+
     private MpvSetProperty _mpvSetProperty;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void MpvFree(IntPtr data);
+
     private MpvFree _mpvFree;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate ulong MpvClientApiVersion();
+
     private MpvClientApiVersion _mpvClientApiVersion;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate IntPtr MpvErrorString(int error);
+
     private MpvErrorString _mpvErrorString;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate IntPtr MpvTerminateDestroy(IntPtr mpvHandle);
+
     private MpvTerminateDestroy _mpvTerminateDestroy;
 
     // Render API functions
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int MpvRenderContextCreate(out IntPtr res, IntPtr mpvHandle, IntPtr parameters);
+
     private MpvRenderContextCreate _mpvRenderContextCreate;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int MpvRenderContextRender(IntPtr ctx, IntPtr parameters);
+
     private MpvRenderContextRender _mpvRenderContextRender;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void MpvRenderContextFree(IntPtr ctx);
+
     private MpvRenderContextFree _mpvRenderContextFree;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void MpvRenderContextSetUpdateCallback(IntPtr ctx, IntPtr callback, IntPtr callbackCtx);
+
     private MpvRenderContextSetUpdateCallback _mpvRenderContextSetUpdateCallback;
 
     // OpenGL proc address callback - public delegate for external use
@@ -134,9 +151,14 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
     private const int MPV_RENDER_PARAM_OPENGL_FBO = 3;
     private const int MPV_RENDER_PARAM_FLIP_Y = 4;
     private const int MPV_RENDER_PARAM_DEPTH = 5;
+    private const int MPV_RENDER_PARAM_SW_SIZE = 6;
+    private const int MPV_RENDER_PARAM_SW_FORMAT = 7;
+    private const int MPV_RENDER_PARAM_SW_STRIDE = 8;
+    private const int MPV_RENDER_PARAM_SW_POINTER = 9;
     private const int MPV_RENDER_PARAM_INVALID = 0;
 
     private const string MPV_RENDER_API_TYPE_OPENGL = "opengl";
+    private const string MPV_RENDER_API_TYPE_SW = "sw";
 
     private const int MPV_FORMAT_STRING = 1;
     private const int MPV_FORMAT_FLAG = 3;
@@ -295,6 +317,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
             Marshal.Copy(bytes, 0, unmanagedPointer, bytes.Length);
             byteArrayPointers[index] = unmanagedPointer;
         }
+
         Marshal.Copy(byteArrayPointers, 0, rootPointer, numberOfStrings);
         return rootPointer;
     }
@@ -312,6 +335,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         {
             Marshal.FreeHGlobal(ptr);
         }
+
         Marshal.FreeHGlobal(mainPtr);
         return result;
     }
@@ -857,7 +881,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         var err = DoMpvCommand("set", "pause", "yes");
         if (err < 0)
         {
-            Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer pause");   
+            Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer pause");
         }
     }
 
@@ -950,7 +974,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
             err = DoMpvCommand("set", "aid", next.id.ToString());
             if (err < 0)
             {
-                Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer ToggleAudioTrack set aid");    
+                Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer ToggleAudioTrack set aid");
             }
 
             // Return language code if available, otherwise return track ID
@@ -964,6 +988,135 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         catch
         {
             return string.Empty;
+        }
+    }
+
+    public void InitializeWithSoftwareRendering()
+    {
+        LoadLib();
+        EnsureNotDisposed();
+
+        // Set mpv to use software rendering
+        SetOptionString("vo", "libmpv");
+
+        // Initialize mpv
+        var err = _mpvInitialize(_mpv);
+        if (err < 0)
+        {
+            throw new InvalidOperationException(GetErrorString(err));
+        }
+
+        // Build render context params for software rendering
+        var apiTypeBytes = Encoding.UTF8.GetBytes(MPV_RENDER_API_TYPE_SW + "\0");
+        var apiTypePtr = Marshal.AllocHGlobal(apiTypeBytes.Length);
+        Marshal.Copy(apiTypeBytes, 0, apiTypePtr, apiTypeBytes.Length);
+
+        try
+        {
+            var renderParams = new[]
+            {
+                new MpvRenderParam { type = MPV_RENDER_PARAM_API_TYPE, data = apiTypePtr },
+                new MpvRenderParam { type = MPV_RENDER_PARAM_INVALID, data = IntPtr.Zero }
+            };
+
+            var renderParamsSize = Marshal.SizeOf<MpvRenderParam>() * renderParams.Length;
+            var renderParamsPtr = Marshal.AllocHGlobal(renderParamsSize);
+
+            try
+            {
+                for (int i = 0; i < renderParams.Length; i++)
+                {
+                    var offset = renderParamsPtr + (i * Marshal.SizeOf<MpvRenderParam>());
+                    Marshal.StructureToPtr(renderParams[i], offset, false);
+                }
+
+                // Create render context
+                err = _mpvRenderContextCreate(out _renderContext, _mpv, renderParamsPtr);
+                if (err < 0)
+                {
+                    throw new InvalidOperationException($"Failed to create software render context: {GetErrorString(err)}");
+                }
+
+                // Set update callback
+                _renderUpdateCallback = OnRenderUpdate;
+                var callbackPtr = Marshal.GetFunctionPointerForDelegate(_renderUpdateCallback);
+                _mpvRenderContextSetUpdateCallback(_renderContext, callbackPtr, IntPtr.Zero);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(renderParamsPtr);
+            }
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(apiTypePtr);
+        }
+    }
+
+    public void SoftwareRender(int width, int height, IntPtr surfaceAddress, string format)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        if (_renderContext == IntPtr.Zero)
+        {
+            return;
+        }
+
+        unsafe
+        {
+            var size = new[] { width, height };
+            var stride = new[] { (uint)width * 4 };
+
+            fixed (int* sizePtr = size)
+            {
+                fixed (uint* stridePtr = stride)
+                {
+                    var formatBytes = Encoding.UTF8.GetBytes(format + "\0");
+                    var formatPtr = Marshal.AllocHGlobal(formatBytes.Length);
+                    Marshal.Copy(formatBytes, 0, formatPtr, formatBytes.Length);
+
+                    try
+                    {
+                        var renderParams = new[]
+                        {
+                            new MpvRenderParam { type = MPV_RENDER_PARAM_SW_SIZE, data = (IntPtr)sizePtr },
+                            new MpvRenderParam { type = MPV_RENDER_PARAM_SW_FORMAT, data = formatPtr },
+                            new MpvRenderParam { type = MPV_RENDER_PARAM_SW_STRIDE, data = (IntPtr)stridePtr },
+                            new MpvRenderParam { type = MPV_RENDER_PARAM_SW_POINTER, data = surfaceAddress },
+                            new MpvRenderParam { type = MPV_RENDER_PARAM_INVALID, data = IntPtr.Zero }
+                        };
+
+                        var renderParamsSize = Marshal.SizeOf<MpvRenderParam>() * renderParams.Length;
+                        var renderParamsPtr = Marshal.AllocHGlobal(renderParamsSize);
+
+                        try
+                        {
+                            for (int i = 0; i < renderParams.Length; i++)
+                            {
+                                var offset = renderParamsPtr + (i * Marshal.SizeOf<MpvRenderParam>());
+                                Marshal.StructureToPtr(renderParams[i], offset, false);
+                            }
+
+                            var err = _mpvRenderContextRender(_renderContext, renderParamsPtr);
+                            if (err < 0 && err != -2) // -2 = nothing to render
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Software render failed: {GetErrorString(err)}");
+                            }
+                        }
+                        finally
+                        {
+                            Marshal.FreeHGlobal(renderParamsPtr);
+                        }
+                    }
+                    finally
+                    {
+                        Marshal.FreeHGlobal(formatPtr);
+                    }
+                }
+            }
         }
     }
 }

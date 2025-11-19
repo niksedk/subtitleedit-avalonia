@@ -77,7 +77,7 @@ public static class InitVideoPlayer
                 //}
 
                 var videoPlayerInstanceMpv = new LibMpvDynamicPlayer();
-                var view = new LibMpvDynamicOpenGLControl(videoPlayerInstanceMpv);
+                var view = new LibMpvDynamicOpenGlControl(videoPlayerInstanceMpv);
                 control = new VideoPlayerControl(videoPlayerInstanceMpv)
                 {
                     PlayerContent = view,
