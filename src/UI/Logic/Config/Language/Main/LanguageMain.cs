@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Avalonia.Controls;
+using System;
 
 namespace Nikse.SubtitleEdit.Logic.Config.Language.Main;
 
@@ -61,6 +62,15 @@ public class LanguageMain
     public string FixedRightToLeftUsingUnicodeControlCharactersX { get; set; }
     public string RemovedUnicodeControlCharactersX { get; set; }
     public string ReversedStartAndEndingsForRightToLeftX { get; set; }
+    public string ErrorLoadRar { get; set; }
+    public string ErrorLoadZip { get; set; }
+    public string ErrorLoadGZip { get; set; }
+    public string ErrorLoad7Zip { get; set; }
+    public string ErrorLoadPng { get; set; }
+    public string ErrorLoadJpg { get; set; }
+    public string ErrorLoadSrr { get; set; }
+    public string ErrorLoadTorrent { get; set; }
+    public string ErrorLoadBinaryZeroes { get; set; }
 
     public LanguageMain()
     {
@@ -117,5 +127,14 @@ public class LanguageMain
         FixedRightToLeftUsingUnicodeControlCharactersX = "Fixed right-to-left using Unicode control characters in {0} lines";
         RemovedUnicodeControlCharactersX = "Removed Unicode control characters from {0} lines";
         ReversedStartAndEndingsForRightToLeftX = "Reversed start and endings for right-to-left in {0} lines";
+        ErrorLoadRar = "This file seems to be a compressed 7-Zip file. \nSubtitle Edit cannot open compressed files.";
+        ErrorLoadZip = "This file seems to be a compressed ZIP file. \nSubtitle Edit cannot open compressed files.";
+        ErrorLoadGZip = "This file seems to be a compressed GZip file. \nSubtitle Edit cannot open compressed files.";
+        ErrorLoad7Zip = "This file seems to be a compressed 7-Zip file. \nSubtitle Edit cannot open compressed files.";
+        ErrorLoadPng = "This file seems to be a PNG image file. \nSubtitle Edit cannot open image files.";
+        ErrorLoadJpg = "This file seems to be a JPG image file. \nSubtitle Edit cannot open image files.";
+        ErrorLoadSrr = "This file seems to be a ReScene SRR file. \nSubtitle Edit cannot open SRR files.";
+        ErrorLoadTorrent = "This file seems to be a BitTorrent file. \nSubtitle Edit cannot open torrent files.";
+        ErrorLoadBinaryZeroes = "Sorry, this file contains only binary zeroes!\r\n\r\nIf you have edited this file with Subtitle Edit you might be able to find a backup via the menu item File -&gt; Restore auto-backup...";
     }
 }

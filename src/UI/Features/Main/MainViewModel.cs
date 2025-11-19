@@ -6692,11 +6692,92 @@ public partial class MainViewModel :
                     }
                 }
 
+                // check for .rar file
+                if (subtitle == null && fileSize > 100 && FileUtil.IsRar(fileName))
+                {
+                    await MessageBox.Show(Window!, Se.Language.General.Error, Se.Language.Main.ErrorLoadRar);
+                    return;
+                }
+
+                // check for .zip file
+                if (subtitle == null && fileSize > 100 && FileUtil.IsZip(fileName))
+                {
+                    await MessageBox.Show(Window!, Se.Language.General.Error, Se.Language.Main.ErrorLoadZip);
+                    return;
+                }
+
+                //TODO: uncomment when ready
+                // check for .gzip file
+                //if (subtitle == null && fileSize > 100 && FileUtil.IsGZip(fileName))
+                //{
+                //    await MessageBox.Show(Window!, Se.Language.General.Error, Se.Language.Main.ErrorLoadGZip);
+                //    return;
+                //}
+
+                // check for .7z file
+                if (subtitle == null && fileSize > 100 && FileUtil.Is7Zip(fileName))
+                {
+                    await MessageBox.Show(Window!, Se.Language.General.Error, Se.Language.Main.ErrorLoad7Zip);
+                    return;
+                }
+
+                // check for .png file
+                if (subtitle == null && fileSize > 100 && FileUtil.IsPng(fileName))
+                {
+                    await MessageBox.Show(Window!, Se.Language.General.Error, Se.Language.Main.ErrorLoadPng);
+                    return;
+                }
+
+                // check for .jpg file
+                if (subtitle == null && fileSize > 100 && FileUtil.IsJpg(fileName))
+                {
+                    await MessageBox.Show(Window!, Se.Language.General.Error, Se.Language.Main.ErrorLoadJpg);
+                    return;
+                }
+
+                // check for .srr file
+                if (subtitle == null && fileSize > 100 && ext == ".srr" && FileUtil.IsSrr(fileName))
+                {
+                    await MessageBox.Show(Window!, Se.Language.General.Error, Se.Language.Main.ErrorLoadSrr);
+                    return;
+                }
+
+                // check for Torrent file
+                if (subtitle == null && fileSize > 50 && FileUtil.IsTorrentFile(fileName))
+                {
+                    await MessageBox.Show(Window!, Se.Language.General.Error, Se.Language.Main.ErrorLoadTorrent);
+                    return;
+                }
+
+                // check for all binary zeroes (I've heard about this a few times... perhaps related to crashes?)
+                if (subtitle == null && FileUtil.IsSubtitleFileAllBinaryZeroes(fileName))
+                {
+                    await MessageBox.Show(Window!, Se.Language.General.Error, Se.Language.Main.ErrorLoadBinaryZeroes);
+                    return;
+                }
+
+                // check for mp3 file
+                if (subtitle == null && fileSize > 50 && FileUtil.IsMp3(fileName))
+                {
+                    await MessageBox.Show(Window!, Se.Language.General.Error, "This file seems to be an .mp3 audio file which does not contains subtitles." + Environment.NewLine +
+                    Environment.NewLine +
+                    "You can open media files via the Video menu.");
+                    return;
+                }
+
+                // check for wav file
+                if (subtitle == null && fileSize > 50 && FileUtil.IsWav(fileName))
+                {
+                    await MessageBox.Show(Window!, Se.Language.General.Error, "This file seems to be a .wav audio file which does not contains subtitles." + Environment.NewLine +
+                                    Environment.NewLine +
+                                    "You can open media files via the Video menu.");
+                    return;
+                }
+
                 if (subtitle == null)
                 {
                     var message = Se.Language.General.UnknownSubtitleFormat;
-                    await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
+                    await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
             }
