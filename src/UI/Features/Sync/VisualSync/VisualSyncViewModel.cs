@@ -491,27 +491,6 @@ public partial class VisualSyncViewModel : ObservableObject
         _updateAudioVisualizer = true;
     }
 
-    private async Task WaitForPlayersReadyAsync(int timeoutMs = 2500)
-    {
-        var end = DateTime.UtcNow.AddMilliseconds(timeoutMs);
-        while (DateTime.UtcNow < end)
-        {
-            // Consider player ready when Duration is known (> 0)
-            var leftReady = VideoPlayerControlLeft.Duration > 0.001;
-            var rightReady = VideoPlayerControlRight.Duration > 0.001;
-
-            if (leftReady && rightReady)
-            {
-                break;
-            }
-
-            await Task.Delay(100);
-        }
-
-        // Small extra delay to ensure seeking is reliable
-        await Task.Delay(100);
-    }
-
     internal async void OnLoaded()
     {
         if (string.IsNullOrEmpty(_videoFileName))
@@ -520,7 +499,8 @@ public partial class VisualSyncViewModel : ObservableObject
         }
 
         // Wait a bit for video players to finish opening the file (or until they report a duration)
-        await WaitForPlayersReadyAsync();
+        await VideoPlayerControlLeft.WaitForPlayersReadyAsync();
+        await VideoPlayerControlRight.WaitForPlayersReadyAsync();
 
         Dispatcher.UIThread.Post(() =>
         {

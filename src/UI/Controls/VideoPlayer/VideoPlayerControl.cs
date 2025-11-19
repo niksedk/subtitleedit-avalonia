@@ -520,6 +520,26 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             _videoFileName = string.Empty;
         }
 
+        internal async Task WaitForPlayersReadyAsync(int timeoutMs = 2500)
+        {
+            var end = DateTime.UtcNow.AddMilliseconds(timeoutMs);
+            while (DateTime.UtcNow < end)
+            {
+                // Consider player ready when Duration is known (> 0)
+                var ready = VideoPlayerInstance.Duration > 0.001;
+
+                if (ready)
+                {
+                    break;
+                }
+
+                await Task.Delay(100);
+            }
+
+            // Small extra delay to ensure seeking is reliable
+            await Task.Delay(100);
+        }
+
         internal void TogglePlayPause()
         {
             _videoPlayerInstance.PlayOrPause();

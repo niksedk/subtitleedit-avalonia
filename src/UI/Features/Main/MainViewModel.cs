@@ -99,6 +99,7 @@ using Nikse.SubtitleEdit.Logic.Config.Language;
 using Nikse.SubtitleEdit.Logic.Initializers;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
+using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -5121,10 +5122,8 @@ public partial class MainViewModel :
         SelectAndScrollToRow(idx);
     }
 
-    private Control? _fullScreenBeforeParent;
-
     [RelayCommand]
-    private void VideoFullScreen()
+    private async Task VideoFullScreen()
     {
         var control = VideoPlayerControl;
         if (control == null || control.IsFullScreen || string.IsNullOrEmpty(_videoFileName))
@@ -5132,23 +5131,15 @@ public partial class MainViewModel :
             return;
         }
 
+        control.VideoPlayerInstance.Pause();
+        var position = control.Position;
         var parent = (Control)control.Parent!;
-        _fullScreenBeforeParent = parent;
-        control.RemoveControlFromParent();
-        control.IsFullScreen = true;
-        var fullScreenWindow = new FullScreenVideoWindow(control, _videoFileName, () =>
+
+        var newVp = InitVideoPlayer.MakeVideoPlayer();
+        newVp.IsFullScreen = true;
+        var fullScreenWindow = new FullScreenVideoWindow(newVp, _videoFileName, position, () =>
         {
-            if (_fullScreenBeforeParent != null)
-            {
-                control.RemoveControlFromParent().AddControlToParent(_fullScreenBeforeParent);
-            }
-
-            control.IsFullScreen = false;
-
-            if (OperatingSystem.IsMacOS() && !string.IsNullOrEmpty(_videoFileName) && VideoPlayerControl != null)
-            {
-                VideoPlayerControl.Reload();
-            }
+            VideoPlayerControl!.Position = newVp.Position;
         });
         fullScreenWindow.Show(Window!);
         _shortcutManager.ClearKeys();

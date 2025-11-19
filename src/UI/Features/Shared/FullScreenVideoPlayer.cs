@@ -5,6 +5,7 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using Nikse.SubtitleEdit.Logic;
 using System;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Shared;
 
@@ -14,8 +15,12 @@ public class FullScreenVideoWindow : Window
     private (int X, int Y) _lastCursorPosition;
     private (int X, int Y) _lastPointerMovedCursorPosition;
 
-    public FullScreenVideoWindow(Controls.VideoPlayer.VideoPlayerControl videoPlayer, string videoFileName, Action onClose)
-    {
+    public FullScreenVideoWindow(
+        Controls.VideoPlayer.VideoPlayerControl videoPlayer, 
+        string videoFileName, 
+        double position, 
+        Action onClose)
+    {       
         WindowState = WindowState.FullScreen;
         SystemDecorations = SystemDecorations.None;
 
@@ -112,14 +117,15 @@ public class FullScreenVideoWindow : Window
 
         Closing += (_, _) =>
         {
+            onClose?.Invoke();
             _mouseMoveDetectionTimer?.Stop();
             _mouseMoveDetectionTimer = null;
             videoPlayer.FullscreenCollapseRequested -= () => Close();
-            onClose?.Invoke();
+            videoPlayer.VideoPlayerInstance.CloseFile();
         };
 
         Activated += delegate { Focus(); }; // hack to make OnKeyDown work
-        Loaded += (_, _) =>
+        Loaded += async(_, _) =>
         {
             WindowState = WindowState.Maximized;
             WindowState = WindowState.FullScreen;
@@ -127,10 +133,11 @@ public class FullScreenVideoWindow : Window
             // Start polling for cursor movement
             _mouseMoveDetectionTimer?.Start();
 
-            if (OperatingSystem.IsMacOS() && !string.IsNullOrEmpty(videoFileName))
-            {
-                videoPlayer.Reload();
-            }
+            await videoPlayer.Open(videoFileName);
+            await videoPlayer.WaitForPlayersReadyAsync();
+            videoPlayer.VideoPlayerInstance.Pause();
+            videoPlayer.VideoPlayerInstance.Position = position;
+            videoPlayer.Position = position;
         };
     }
 }

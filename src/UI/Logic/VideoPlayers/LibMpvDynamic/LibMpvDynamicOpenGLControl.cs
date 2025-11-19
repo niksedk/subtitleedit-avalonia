@@ -127,12 +127,12 @@ public class LibMpvDynamicOpenGLControl : OpenGlControlBase
 
     protected override void OnOpenGlDeinit(GlInterface gl)
     {
-        if (_mpvPlayer != null)
-        {
-            _mpvPlayer.RequestRender -= OnMpvRequestRender;
-            _mpvPlayer.Dispose();
-            _mpvPlayer = null;
-        }
+        //if (_mpvPlayer != null)
+        //{
+        //    _mpvPlayer.RequestRender -= OnMpvRequestRender;
+        //    _mpvPlayer.Dispose();
+        //    _mpvPlayer = null;
+        //}
 
         base.OnOpenGlDeinit(gl);
     }
