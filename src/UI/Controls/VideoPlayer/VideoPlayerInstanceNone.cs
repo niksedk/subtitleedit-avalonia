@@ -1,4 +1,4 @@
-﻿using HanumanInstitute.LibMpv.Core;
+﻿using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Controls.VideoPlayer;
@@ -22,7 +22,7 @@ public class VideoPlayerInstanceNone : IVideoPlayerInstance
 
     public double Duration => 0;
 
-    public int VolumeMaximum => MpvApi.MaxVolume;
+    public int VolumeMaximum => LibMpvDynamicPlayer.MaxVolume;
 
     public double Volume
     {

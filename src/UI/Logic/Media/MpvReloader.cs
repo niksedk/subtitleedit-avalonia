@@ -1,8 +1,8 @@
-﻿using HanumanInstitute.LibMpv;
-using Nikse.SubtitleEdit.Core.Common;
+﻿using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Settings;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 using System;
 using System.IO;
 
@@ -21,7 +21,7 @@ public class MpvReloader : IMpvReloader
     private int _retryCount = 3;
     private string? _mpvPreviewStyleHeader;
 
-    public void RefreshMpv(MpvContext mpvContext, Subtitle subtitle, SubtitleFormat uiFormat)
+    public void RefreshMpv(LibMpvDynamicPlayer mpvContext, Subtitle subtitle, SubtitleFormat uiFormat)
     {
         if (subtitle == null)
         {
@@ -157,19 +157,19 @@ public class MpvReloader : IMpvReloader
             {
                 if (_retryCount >= 0 || string.IsNullOrEmpty(_mpvTextFileName) || _subtitlePrev == null || _subtitlePrev.FileName != subtitle.FileName || !_mpvTextFileName.EndsWith(format.Extension, StringComparison.Ordinal))
                 {
-                    mpvContext.SubRemove().Invoke();
+                    mpvContext.SubRemove();
                     DeleteTempMpvFileName();
                     _mpvTextFileName = FileUtil.GetTempFileName(format.Extension);
                     File.WriteAllText(_mpvTextFileName, text);
-                    mpvContext.SubAdd(_mpvTextFileName).Invoke();
+                    mpvContext.SubAdd(_mpvTextFileName);
                     mpvContext.SetOptionString("sid", "auto");
                     _retryCount--;
                 }
                 else
                 {
-                    mpvContext.SubRemove().Invoke();
+                    mpvContext.SubRemove();
                     File.WriteAllText(_mpvTextFileName, text);
-                    mpvContext.SubAdd(_mpvTextFileName).Invoke();
+                    mpvContext.SubAdd(_mpvTextFileName);
                 }
                 _mpvTextOld = text;
             }

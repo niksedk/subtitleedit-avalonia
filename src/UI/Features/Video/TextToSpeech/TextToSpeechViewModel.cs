@@ -4,7 +4,6 @@ using Avalonia.Interactivity;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using HanumanInstitute.LibMpv;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.DownloadTts;
@@ -18,6 +17,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Download;
 using Nikse.SubtitleEdit.Logic.Media;
+using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -78,7 +78,7 @@ public partial class TextToSpeechViewModel : ObservableObject
     private WavePeakData2? _wavePeakData;
     private FfmpegMediaInfo? _mediaInfo;
     private string _videoFileName = string.Empty;
-    private MpvContext? _mpvContext;
+    private LibMpvDynamicPlayer? _mpvContext;
     private Lock _playLock;
     private readonly Timer _timer;
     private readonly IWindowService _windowService;
@@ -134,7 +134,7 @@ public partial class TextToSpeechViewModel : ObservableObject
             }
             else
             {
-                IsVoiceTestEnabled = _mpvContext.Pause.Get() ?? false;
+                IsVoiceTestEnabled = _mpvContext.IsPaused;
             }
         }
     }
@@ -513,9 +513,9 @@ public partial class TextToSpeechViewModel : ObservableObject
         {
             _mpvContext?.Stop();
             _mpvContext?.Dispose();
-            _mpvContext = new MpvContext();
+            _mpvContext = new LibMpvDynamicPlayer();
         }
-        await _mpvContext.LoadFile(fileName).InvokeAsync();
+        await _mpvContext.LoadFile(fileName);
     }
 
     private async Task<bool> IsEngineInstalled(ITtsEngine engine)

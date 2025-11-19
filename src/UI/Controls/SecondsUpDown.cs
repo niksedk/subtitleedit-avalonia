@@ -47,7 +47,6 @@ public class SecondsUpDown : TemplatedControl
     public SecondsUpDown()
     {
         Template = CreateTemplate();
-        this.GetObservable(ValueProperty).Subscribe(_ => UpdateText());
     }
 
     private static FuncControlTemplate<SecondsUpDown> CreateTemplate()

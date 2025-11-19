@@ -151,11 +151,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\LibMpv.Avalonia\LibMpv.Avalonia.csproj" />
-		<ProjectReference Include="..\LibMpv\LibMpv.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <None Update="Assets\Languages\Danish.json">
 	    <CopyToOutputDirectory></CopyToOutputDirectory>
 	  </None>

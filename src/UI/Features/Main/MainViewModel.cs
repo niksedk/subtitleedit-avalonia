@@ -5127,7 +5127,7 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private async Task VideoFullScreen()
+    private void VideoFullScreen()
     {
         var control = VideoPlayerControl;
         if (control == null || control.IsFullScreen || string.IsNullOrEmpty(_videoFileName))
@@ -9332,9 +9332,9 @@ public partial class MainViewModel :
                 }
             }
 
-            if (VideoPlayerControl?.VideoPlayerInstance is VideoPlayerInstanceMpv mpv)
+            if (VideoPlayerControl?.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
             {
-                _mpvReloader.RefreshMpv(mpv.MpvContext!, GetUpdateSubtitle(), SelectedSubtitleFormat);
+                _mpvReloader.RefreshMpv(mpv, GetUpdateSubtitle(), SelectedSubtitleFormat);
             }
         }
             ;

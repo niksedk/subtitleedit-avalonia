@@ -1138,4 +1138,14 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
             }
         }
     }
+
+    internal void SubRemove()
+    {
+        DoMpvCommand("sub-remove");
+    }
+
+    internal void SubAdd(string fileName)
+    {
+        DoMpvCommand("sub-add", fileName, "select");
+    } 
 }

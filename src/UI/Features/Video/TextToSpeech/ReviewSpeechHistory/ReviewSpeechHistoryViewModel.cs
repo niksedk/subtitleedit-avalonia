@@ -2,10 +2,9 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using HanumanInstitute.LibMpv;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.ReviewSpeech;
 using Nikse.SubtitleEdit.Logic;
-using System;
+using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,7 +21,7 @@ public partial class ReviewSpeechHistoryViewModel : ObservableObject
 
     public bool OkPressed { get; private set; }
 
-    private MpvContext? _mpvContext;
+    private LibMpvDynamicPlayer? _mpvContext;
     private Lock _playLock;
     private readonly System.Timers.Timer _timer;
     private CancellationTokenSource _cancellationTokenSource;
@@ -56,7 +55,7 @@ public partial class ReviewSpeechHistoryViewModel : ObservableObject
         {
             lock (_playLock)
             {
-                var paused = _mpvContext.Pause.Get() ?? false;
+                var paused = _mpvContext.IsPaused;
                 if (paused)
                 {
                     StopPlay();
@@ -86,10 +85,10 @@ public partial class ReviewSpeechHistoryViewModel : ObservableObject
         {
             _mpvContext?.Stop();
             _mpvContext?.Dispose();
-            _mpvContext = new MpvContext();
+            _mpvContext = new LibMpvDynamicPlayer();
         }
         
-        await _mpvContext.LoadFile(fileName).InvokeAsync();
+        await _mpvContext.LoadFile(fileName);
 
         foreach (var row in HistoryItems)
         {

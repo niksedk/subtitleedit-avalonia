@@ -1,12 +1,11 @@
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.IO;
 using System.Text;
 using System.Xml;
-using Nikse.SubtitleEdit.Core.SubtitleFormats;
-using Nikse.SubtitleEdit.Logic.Config.Language.Options;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 
@@ -17,20 +16,12 @@ public class ExportHandlerDCinemaInteropPng : IExportHandler
     public bool UseFileName => false;
     public string Title => string.Format(Se.Language.General.ExportToX, "DCinema interop/png");
 
-    private int _width;
-    private int _height;
     private StringBuilder _sb = new StringBuilder();
-    private Paragraph? _first;
-    private Paragraph? _last;
     private string _folderName = string.Empty;
     private int _imagesSavedCount = 0;
-    private double _frameRate = 23.976;
 
     public void WriteHeader(string fileOrFolderName, ImageParameter imageParameter)
     {
-        _width = imageParameter.ScreenWidth;
-        _height = imageParameter.ScreenHeight;
-
         _folderName = fileOrFolderName;
         if (!Directory.Exists(_folderName))
         {

@@ -3,7 +3,6 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using HanumanInstitute.LibMpv;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.DownloadTts;
@@ -13,6 +12,7 @@ using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Voices;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
+using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -65,7 +65,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
     private readonly IFolderHelper _folderHelper;
     private readonly IWindowService _windowService;
 
-    private MpvContext? _mpvContext;
+    private LibMpvDynamicPlayer? _mpvContext;
     private Lock _playLock;
     private readonly Timer _timer;
     private string _videoFileName;
@@ -125,7 +125,7 @@ public partial class ReviewSpeechViewModel : ObservableObject
             return;
         }
 
-        var paused = _mpvContext.Pause.Get() ?? false;
+        var paused = _mpvContext.IsPaused;
 
         var line = SelectedLine;
         var timeSinceStart = TimeSpan.FromTicks(DateTime.UtcNow.Ticks - _startPlayTicks);
@@ -182,10 +182,10 @@ public partial class ReviewSpeechViewModel : ObservableObject
         {
             _mpvContext?.Stop();
             _mpvContext?.Dispose();
-            _mpvContext = new MpvContext();
+            _mpvContext = new LibMpvDynamicPlayer();
         }
 
-        await _mpvContext.LoadFile(fileName).InvokeAsync();
+        await _mpvContext.LoadFile(fileName);
 
         _timer.Start();
     }
