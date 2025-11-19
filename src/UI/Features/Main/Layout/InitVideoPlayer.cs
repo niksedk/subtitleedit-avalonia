@@ -71,19 +71,28 @@ public static class InitVideoPlayer
         {
             try
             {
-                //if (!Enum.TryParse<VideoRenderer>(Se.Settings.Video.VideoPlayerMpvRender, true, out var render))
-                //{
-                //    render = VideoRenderer.Auto;
-                //}
-
-                var videoPlayerInstanceMpv = new LibMpvDynamicPlayer();
-                var view = new LibMpvDynamicOpenGlControl(videoPlayerInstanceMpv);
-                control = new VideoPlayerControl(videoPlayerInstanceMpv)
+                if (Se.Settings.Video.VideoPlayer.Equals("mpv-sw", StringComparison.OrdinalIgnoreCase))
                 {
-                    PlayerContent = view,
-                    StopIsVisible = Se.Settings.Video.ShowStopButton,
-                    FullScreenIsVisible = Se.Settings.Video.ShowFullscreenButton,
-                };
+                    var libMpv = new LibMpvDynamicPlayer();
+                    var view = new LibMpvDynamicSoftwareControl(libMpv);
+                    control = new VideoPlayerControl(libMpv)
+                    {
+                        PlayerContent = view,
+                        StopIsVisible = Se.Settings.Video.ShowStopButton,
+                        FullScreenIsVisible = Se.Settings.Video.ShowFullscreenButton,
+                    };
+                }
+                else // libmpv OpenGL
+                {
+                    var libMpv = new LibMpvDynamicPlayer();
+                    var view = new LibMpvDynamicOpenGlControl(libMpv);
+                    control = new VideoPlayerControl(libMpv)
+                    {
+                        PlayerContent = view,
+                        StopIsVisible = Se.Settings.Video.ShowStopButton,
+                        FullScreenIsVisible = Se.Settings.Video.ShowFullscreenButton,
+                    };
+                }
             }
             catch
             {

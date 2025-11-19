@@ -16,8 +16,9 @@ public class LibMpvDynamicSoftwareControl : Control
 
     public LibMpvDynamicPlayer? Player => _mpvPlayer;
 
-    public LibMpvDynamicSoftwareControl()
+    public LibMpvDynamicSoftwareControl(LibMpvDynamicPlayer mpvPlayer)
     {
+        _mpvPlayer = mpvPlayer;
         ClipToBounds = true;
     }
 
@@ -27,20 +28,21 @@ public class LibMpvDynamicSoftwareControl : Control
 
         if (_mpvPlayer == null)
         {
-            System.Diagnostics.Debug.WriteLine("Initializing MpvPlayer with software rendering...");
-            _mpvPlayer = new LibMpvDynamicPlayer();
+            throw new InvalidOperationException("MpvPlayer is not initialized");
+        }
 
-            try
-            {
-                _mpvPlayer.InitializeWithSoftwareRendering();
-                _mpvPlayer.RequestRender += OnMpvRequestRender;
-                _isInitialized = true;
-                System.Diagnostics.Debug.WriteLine("MpvPlayer initialized successfully with software rendering!");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Failed to initialize MpvPlayer: {ex.Message}");
-            }
+        System.Diagnostics.Debug.WriteLine("Initializing MpvPlayer with software rendering...");
+
+        try
+        {
+            _mpvPlayer.InitializeWithSoftwareRendering();
+            _mpvPlayer.RequestRender += OnMpvRequestRender;
+            _isInitialized = true;
+            System.Diagnostics.Debug.WriteLine("MpvPlayer initialized successfully with software rendering!");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to initialize MpvPlayer: {ex.Message}");
         }
     }
 
@@ -116,8 +118,8 @@ public class LibMpvDynamicSoftwareControl : Control
     {
         var scaling = VisualRoot?.RenderScaling ?? 1.0;
         return new PixelSize(
-        (int)(Bounds.Width * scaling),
-        (int)(Bounds.Height * scaling));
+            (int)(Bounds.Width * scaling),
+            (int)(Bounds.Height * scaling));
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)

@@ -288,27 +288,6 @@ public class SettingsPage : UserControl
                     MakeVideoPlayerComboBox()
                 }
             }),
-            new SettingsItem(Se.Language.Options.Settings.MpvVideoOutput, () => new StackPanel
-            {
-                Children =
-                {
-                    new ComboBox
-                    {
-                        Width = 200,
-                        Height = 30,
-                        [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.VideoPlayerMpvRenders)),
-                        [!SelectingItemsControl.SelectedItemProperty] =
-                            new Binding(nameof(_vm.SelectedVideoPlayerMpvRender)),
-                        DataContext = _vm,
-                        ItemTemplate = new FuncDataTemplate<object>((item, _) =>
-                            new TextBlock
-                            {
-                                [!TextBlock.TextProperty] = new Binding(nameof(VideoPlayerMpvRenderItem.Name)),
-                                Width = 150,
-                            }, true)
-                    }
-                }
-            }, nameof(_vm.IsMpvChosen)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowStopButton, nameof(_vm.ShowStopButton)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowFullscreenButton, nameof(_vm.ShowFullscreenButton)),
             MakeCheckboxSetting(Se.Language.Options.Settings.AutoOpenVideoFile, nameof(_vm.AutoOpenVideoFile)),
@@ -508,7 +487,7 @@ public class SettingsPage : UserControl
     {
         var cb = new ComboBox
         {
-            Width = 200,
+            Width = 300,
             Height = 30,
             [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.VideoPlayers)),
             [!SelectingItemsControl.SelectedItemProperty] =
@@ -518,7 +497,7 @@ public class SettingsPage : UserControl
                 new TextBlock
                 {
                     [!TextBlock.TextProperty] = new Binding(nameof(VideoPlayerItem.Name)),
-                    Width = 150,
+                    Width = 250,
                 }, true)
         };
 

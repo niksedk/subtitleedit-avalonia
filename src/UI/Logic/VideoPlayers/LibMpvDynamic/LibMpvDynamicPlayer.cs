@@ -309,11 +309,11 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
     {
         var numberOfStrings = arr.Length + 1;
         byteArrayPointers = new IntPtr[numberOfStrings];
-        IntPtr rootPointer = Marshal.AllocCoTaskMem(IntPtr.Size * numberOfStrings);
+        var rootPointer = Marshal.AllocCoTaskMem(IntPtr.Size * numberOfStrings);
         for (var index = 0; index < arr.Length; index++)
         {
             var bytes = GetUtf8Bytes(arr[index]);
-            IntPtr unmanagedPointer = Marshal.AllocHGlobal(bytes.Length);
+            var unmanagedPointer = Marshal.AllocHGlobal(bytes.Length);
             Marshal.Copy(bytes, 0, unmanagedPointer, bytes.Length);
             byteArrayPointers[index] = unmanagedPointer;
         }
@@ -419,7 +419,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
             var renderParamsSize = Marshal.SizeOf<MpvRenderParam>() * renderParams.Length;
             var renderParamsPtr = Marshal.AllocHGlobal(renderParamsSize);
 
-            for (int i = 0; i < renderParams.Length; i++)
+            for (var i = 0; i < renderParams.Length; i++)
             {
                 var offset = renderParamsPtr + (i * Marshal.SizeOf<MpvRenderParam>());
                 Marshal.StructureToPtr(renderParams[i], offset, false);
@@ -467,7 +467,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 
         try
         {
-            int flipYValue = flipY ? 1 : 0;
+            var flipYValue = flipY ? 1 : 0;
             var flipYPtr = Marshal.AllocHGlobal(sizeof(int));
             Marshal.WriteInt32(flipYPtr, flipYValue);
 
@@ -485,7 +485,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 
                 try
                 {
-                    for (int i = 0; i < renderParams.Length; i++)
+                    for (var i = 0; i < renderParams.Length; i++)
                     {
                         var offset = renderParamsPtr + (i * Marshal.SizeOf<MpvRenderParam>());
                         Marshal.StructureToPtr(renderParams[i], offset, false);
@@ -795,7 +795,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 
             try
             {
-                double speed = 1.0;
+                var speed = 1.0;
                 var nameBytes = GetUtf8Bytes("speed");
                 var err = _mpvGetPropertyDouble(_mpv, nameBytes, MPV_FORMAT_DOUBLE, ref speed);
 
@@ -908,10 +908,10 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
             var audioTracks = new List<(int listIndex, int id, string? lang, bool selected)>();
 
             // Iterate through tracks to find audio tracks
-            for (int i = 0; i < (int)trackCount; i++)
+            for (var i = 0; i < (int)trackCount; i++)
             {
                 // Get track type
-                IntPtr typePtr = IntPtr.Zero;
+                var typePtr = IntPtr.Zero;
                 var typeBytes = GetUtf8Bytes($"track-list/{i}/type");
                 err = _mpvGetPropertyString(_mpv, typeBytes, MPV_FORMAT_STRING, ref typePtr);
 
@@ -940,7 +940,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 
                 // Get track language (optional)
                 string? lang = null;
-                IntPtr langPtr = IntPtr.Zero;
+                var langPtr = IntPtr.Zero;
                 var langBytes = GetUtf8Bytes($"track-list/{i}/lang");
                 err = _mpvGetPropertyString(_mpv, langBytes, MPV_FORMAT_STRING, ref langPtr);
 
@@ -955,7 +955,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
                 var selectedBytes = GetUtf8Bytes($"track-list/{i}/selected");
                 err = _mpvGetPropertyDouble(_mpv, selectedBytes, MPV_FORMAT_FLAG, ref selectedValue);
 
-                bool selected = err >= 0 && selectedValue == 1;
+                var selected = err >= 0 && selectedValue == 1;
 
                 audioTracks.Add((i, (int)trackId, lang, selected));
             }
@@ -1024,7 +1024,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 
             try
             {
-                for (int i = 0; i < renderParams.Length; i++)
+                for (var i = 0; i < renderParams.Length; i++)
                 {
                     var offset = renderParamsPtr + (i * Marshal.SizeOf<MpvRenderParam>());
                     Marshal.StructureToPtr(renderParams[i], offset, false);
@@ -1094,7 +1094,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 
                         try
                         {
-                            for (int i = 0; i < renderParams.Length; i++)
+                            for (var i = 0; i < renderParams.Length; i++)
                             {
                                 var offset = renderParamsPtr + (i * Marshal.SizeOf<MpvRenderParam>());
                                 Marshal.StructureToPtr(renderParams[i], offset, false);

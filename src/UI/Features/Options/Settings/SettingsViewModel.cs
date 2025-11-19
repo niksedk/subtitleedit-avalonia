@@ -99,8 +99,6 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty] private ObservableCollection<VideoPlayerItem> _videoPlayers;
     [ObservableProperty] private VideoPlayerItem _selectedVideoPlayer;
-    [ObservableProperty] private ObservableCollection<VideoPlayerMpvRenderItem> _videoPlayerMpvRenders;
-    [ObservableProperty] private VideoPlayerMpvRenderItem _selectedVideoPlayerMpvRender;
     [ObservableProperty] private bool _showStopButton;
     [ObservableProperty] private bool _showFullscreenButton;
     [ObservableProperty] private bool _autoOpenVideoFile;
@@ -220,9 +218,6 @@ public partial class SettingsViewModel : ObservableObject
 
         VideoPlayers = new ObservableCollection<VideoPlayerItem>(VideoPlayerItem.ListVideoPlayerItem());
         SelectedVideoPlayer = VideoPlayers[0];
-
-        VideoPlayerMpvRenders = new ObservableCollection<VideoPlayerMpvRenderItem>(VideoPlayerMpvRenderItem.ListVideoPlayerMpvRenderItems());
-        SelectedVideoPlayerMpvRender = VideoPlayerMpvRenders[0];
 
         var subtitleFormats = SubtitleFormat.AllSubtitleFormats;
         var defaultSubtitleFormats = new List<string>();
@@ -419,16 +414,12 @@ public partial class SettingsViewModel : ObservableObject
         _customContinuationStyleGapPrefixAddSpace = general.CustomContinuationStyleGapPrefixAddSpace;
 
         var video = Se.Settings.Video;
-        var videoPlayer = VideoPlayers.FirstOrDefault(p => p.Name == video.VideoPlayer);
+        var videoPlayer = VideoPlayers.FirstOrDefault(p => p.Code == video.VideoPlayer);
         if (videoPlayer != null)
         {
             SelectedVideoPlayer = videoPlayer;
         }
-        var mpvRender = VideoPlayerMpvRenders.FirstOrDefault(p => p.Code == video.VideoPlayerMpvRender);
-        if (mpvRender != null)
-        {
-            SelectedVideoPlayerMpvRender = mpvRender;
-        }
+
         ShowStopButton = video.ShowStopButton;
         ShowFullscreenButton = video.ShowFullscreenButton;
         AutoOpenVideoFile = video.AutoOpen;
@@ -549,8 +540,7 @@ public partial class SettingsViewModel : ObservableObject
         general.CustomContinuationStyleGapPrefix = _customContinuationStyleGapPrefix;
         general.CustomContinuationStyleGapPrefixAddSpace = _customContinuationStyleGapPrefixAddSpace;
 
-        video.VideoPlayer = SelectedVideoPlayer.Name;
-        video.VideoPlayerMpvRender = SelectedVideoPlayerMpvRender.Code;
+        video.VideoPlayer = SelectedVideoPlayer.Code;
         video.ShowStopButton = ShowStopButton;
         video.ShowFullscreenButton = ShowFullscreenButton;
         video.AutoOpen = AutoOpenVideoFile;

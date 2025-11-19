@@ -183,6 +183,8 @@ public class LanguageSettings
     public string ResetRules { get; set; }
     public string UseFrameMode { get; set; }
     public string MpvVideoOutput { get; set; }
+    public string MpvOpenGl { get; set; }
+    public string MpvSoftwareRendering { get; set; }
 
     public LanguageSettings()
     {
@@ -363,6 +365,8 @@ public class LanguageSettings
         ResetRules = "Reset rules";
         UseFrameMode = "Use frame mode (hh.mm.ss.ff)";
         MpvVideoOutput = "Video output  (mpv)";
+        MpvOpenGl = "libmpv - OpenGL";
+        MpvSoftwareRendering = "libmpv - Software rendering (slow)";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)
