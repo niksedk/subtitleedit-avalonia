@@ -1,4 +1,5 @@
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
+using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -362,7 +363,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         var err = _mpvInitialize(_mpv);
         if (err < 0)
         {
-            throw new InvalidOperationException(GetErrorString(err));
+            Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer InitializeWithOpenGL mpv_initialize");
         }
 
         // Create OpenGL init params
@@ -404,7 +405,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
             err = _mpvRenderContextCreate(out _renderContext, _mpv, renderParamsPtr);
             if (err < 0)
             {
-                throw new InvalidOperationException($"Failed to create render context: {GetErrorString(err)}");
+                Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer InitializeWithOpenGL mpv_render_context_create");
             }
 
             // Set update callback
@@ -469,7 +470,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
                     var err = _mpvRenderContextRender(_renderContext, renderParamsPtr);
                     if (err < 0 && err != -2) // -2 = nothing to render
                     {
-                        throw new InvalidOperationException($"Render failed: {GetErrorString(err)}");
+                        Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer RenderToFramebuffer mpv_render_context_render");
                     }
                 }
                 finally
@@ -514,7 +515,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
     {
         if (_disposed)
         {
-            throw new ObjectDisposedException(nameof(LibMpvDynamicPlayer));
+            Se.LogError(new ObjectDisposedException(nameof(LibMpvDynamicPlayer)), "LibMpvDynamicPlayer method called after disposal");
         }
     }
 
@@ -531,7 +532,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         var err = await Task.Run(() => DoMpvCommand("loadfile", path));
         if (err < 0)
         {
-            throw new InvalidOperationException(GetErrorString(err));
+            Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer LoadFile");
         }
 
         SetOptionString("keep-open", "always");
@@ -551,7 +552,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         var err = DoMpvCommand("cycle", "pause");
         if (err < 0)
         {
-            throw new InvalidOperationException(GetErrorString(err));
+            Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer PlayOrPause");
         }
     }
 
@@ -569,7 +570,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         var err = DoMpvCommand("stop");
         if (err < 0)
         {
-            throw new InvalidOperationException(GetErrorString(err));
+            Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer CloseFile");
         }
 
         // Ask UI to repaint so any previously rendered frame can be cleared
@@ -675,7 +676,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
             var err = DoMpvCommand("seek", value.ToString(CultureInfo.InvariantCulture), "absolute");
             if (err < 0)
             {
-                throw new InvalidOperationException(GetErrorString(err));
+                Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer Position set");
             }
         }
     }
@@ -753,7 +754,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
             var err = DoMpvCommand("set", "volume", clampedVolume.ToString(CultureInfo.InvariantCulture));
             if (err < 0)
             {
-                throw new InvalidOperationException(GetErrorString(err));
+                Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer Volume set");
             }
         }
     }
@@ -799,7 +800,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
             var err = DoMpvCommand("set", "speed", clampedSpeed.ToString(CultureInfo.InvariantCulture));
             if (err < 0)
             {
-                throw new InvalidOperationException(GetErrorString(err));
+                Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer Speed set");
             }
         }
     }
@@ -816,14 +817,14 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         var err = DoMpvCommand("set", "pause", "yes");
         if (err < 0)
         {
-            throw new InvalidOperationException(GetErrorString(err));
+            Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer Stop pause");
         }
 
         // Seek back to position 0
         err = DoMpvCommand("seek", "0", "absolute");
         if (err < 0)
         {
-            throw new InvalidOperationException(GetErrorString(err));
+            Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer Stop seek");
         }
 
         // Request render to show the first frame
@@ -841,7 +842,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         var err = DoMpvCommand("set", "pause", "no");
         if (err < 0)
         {
-            throw new InvalidOperationException(GetErrorString(err));
+            Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer play");
         }
     }
 
@@ -856,7 +857,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         var err = DoMpvCommand("set", "pause", "yes");
         if (err < 0)
         {
-            throw new InvalidOperationException(GetErrorString(err));
+            Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer pause");   
         }
     }
 
@@ -949,7 +950,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
             err = DoMpvCommand("set", "aid", next.id.ToString());
             if (err < 0)
             {
-                throw new InvalidOperationException(GetErrorString(err));
+                Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer ToggleAudioTrack set aid");    
             }
 
             // Return language code if available, otherwise return track ID

@@ -1027,7 +1027,7 @@ public partial class MainViewModel :
             return;
         }
     }
-    
+
     [RelayCommand]
     private async Task ExportDCinemaInteropPng()
     {
@@ -1051,7 +1051,7 @@ public partial class MainViewModel :
             return;
         }
     }
-    
+
     [RelayCommand]
     private async Task ExportDCinemaSmpte2014Png()
     {
@@ -1075,7 +1075,7 @@ public partial class MainViewModel :
             return;
         }
     }
-    
+
     [RelayCommand]
     private async Task ExportDostPng()
     {
@@ -1099,7 +1099,7 @@ public partial class MainViewModel :
             return;
         }
     }
-    
+
     [RelayCommand]
     private async Task ExportFcpPng()
     {
@@ -1123,7 +1123,7 @@ public partial class MainViewModel :
             return;
         }
     }
-    
+
     [RelayCommand]
     private async Task ExportImagesWithTimeCode()
     {
@@ -1147,7 +1147,7 @@ public partial class MainViewModel :
             return;
         }
     }
-    
+
     [RelayCommand]
     private async Task ExportVobSub()
     {
@@ -2639,26 +2639,30 @@ public partial class MainViewModel :
     [RelayCommand]
     private void VideoUndockControls()
     {
-        if (Window == null)
+        if (Window == null || VideoPlayerControl == null)
         {
             return;
         }
 
-        AreVideoControlsUndocked = true;
-
-        _windowService.ShowWindow<VideoPlayerUndockedWindow, VideoPlayerUndockedViewModel>(Window, (window, vm) =>
+        Dispatcher.UIThread.Post(async () =>
         {
-            _videoPlayerUndockedViewModel = vm;
-            vm.Initialize(VideoPlayerControl!, this);
-        });
+            AreVideoControlsUndocked = true;
+            await VideoPlayerControl.WaitForPlayersReadyAsync();
 
-        _windowService.ShowWindow<AudioVisualizerUndockedWindow, AudioVisualizerUndockedViewModel>(Window, (window, vm) =>
-        {
-            _audioVisualizerUndockedViewModel = vm;
-            vm.Initialize(AudioVisualizer!, this);
-        });
+            _windowService.ShowWindow<VideoPlayerUndockedWindow, VideoPlayerUndockedViewModel>(Window, (window, vm) =>
+            {
+                _videoPlayerUndockedViewModel = vm;
+                vm.Initialize(VideoPlayerControl!, this);
+            });
 
-        InitLayout.MakeLayout12KeepVideo(MainView!, this);
+            _windowService.ShowWindow<AudioVisualizerUndockedWindow, AudioVisualizerUndockedViewModel>(Window, (window, vm) =>
+            {
+                _audioVisualizerUndockedViewModel = vm;
+                vm.Initialize(AudioVisualizer!, this);
+            });
+
+            InitLayout.MakeLayout12KeepVideo(MainView!, this);
+        });
     }
 
     [RelayCommand]

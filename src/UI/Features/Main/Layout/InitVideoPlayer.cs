@@ -1,14 +1,13 @@
-﻿using System;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using HanumanInstitute.LibMpv.Avalonia;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
-using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
+using System;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -28,32 +27,22 @@ public static class InitVideoPlayer
         mainGrid.AddHandler(DragDrop.DragOverEvent, vm.VideoOnDragOver, RoutingStrategies.Bubble);
         mainGrid.AddHandler(DragDrop.DropEvent, vm.VideoOnDrop, RoutingStrategies.Bubble);
 
-        if (vm.VideoPlayerControl == null)
+        var control = MakeVideoPlayer();
+        control.FullScreenCommand = vm.VideoFullScreenCommand;
+        vm.VideoPlayerControl = control;
+        vm.VideoPlayerControl.Volume = Se.Settings.Video.Volume;
+        vm.VideoPlayerControl.VideoPlayerDisplayTimeLeft = Se.Settings.Video.VideoPlayerDisplayTimeLeft;
+        vm.VideoPlayerControl.VolumeChanged += v =>
         {
-            var control = MakeVideoPlayer();
-            control.FullScreenCommand = vm.VideoFullScreenCommand;
-            vm.VideoPlayerControl = control;
-            vm.VideoPlayerControl.Volume = Se.Settings.Video.Volume;
-            vm.VideoPlayerControl.VideoPlayerDisplayTimeLeft = Se.Settings.Video.VideoPlayerDisplayTimeLeft;
-            vm.VideoPlayerControl.VolumeChanged += v =>
-            {
-                Se.Settings.Video.Volume = v;
-            };
-            vm.VideoPlayerControl.ToggleDisplayProgressTextModeRequested += () =>
-            {
-                vm.ToggleVideoPlayerDisplayTimeLeftCommand.Execute(null);
-            };
+            Se.Settings.Video.Volume = v;
+        };
+        vm.VideoPlayerControl.ToggleDisplayProgressTextModeRequested += () =>
+        {
+            vm.ToggleVideoPlayerDisplayTimeLeftCommand.Execute(null);
+        };
 
-            Grid.SetRow(control, 0);
-            mainGrid.Children.Add(control);
-        }
-        else
-        {
-            vm.VideoPlayerControl.RemoveControlFromParent();
-            Grid.SetRow(vm.VideoPlayerControl!, 0);
-            mainGrid.Children.Add(vm.VideoPlayerControl!);
-            vm.VideoPlayerControl.IsVisible = true;
-        }
+        Grid.SetRow(control, 0);
+        mainGrid.Children.Add(control);
 
         return mainGrid;
     }
@@ -78,12 +67,12 @@ public static class InitVideoPlayer
             {
                 if (!Enum.TryParse<VideoRenderer>(Se.Settings.Video.VideoPlayerMpvRender, true, out var render))
                 {
-                    render = VideoRenderer.Auto; 
+                    render = VideoRenderer.Auto;
                 }
-                
+
                 var videoPlayerInstanceMpv = new LibMpvDynamicPlayer();
                 var view = new LibMpvDynamicOpenGLControl(videoPlayerInstanceMpv);
-                 //view.InitializeOpenGL();
+                //view.InitializeOpenGL();
                 control = new VideoPlayerControl(videoPlayerInstanceMpv)
                 {
                     PlayerContent = view,
