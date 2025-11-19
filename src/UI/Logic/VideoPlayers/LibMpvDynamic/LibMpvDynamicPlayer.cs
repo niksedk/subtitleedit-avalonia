@@ -199,7 +199,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
             return
             [
                 MpvPath,
-                "C:\\git\\subtitleedit\\src\\ui\\bin\\Debug\\net48",
+                Directory.GetCurrentDirectory(),
                 string.Empty,
             ];
         }
@@ -208,13 +208,18 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
             return
             [
                 MpvPath,
-                "/lib64",
-                "/usr/lib64",
-                "/lib",
-                "/usr/lib",
-                "/lib/x86_64-linux-gnu",
-                "/usr/lib/x86_64-linux-gnu",
+                Directory.GetCurrentDirectory(),
                 "/usr/local/lib",
+                "/usr/lib",
+                "/lib",
+                "/usr/lib64",
+                "/lib64",
+                "/usr/lib/x86_64-linux-gnu",
+                "/lib/x86_64-linux-gnu",
+                "/usr/lib/aarch64-linux-gnu",
+                "/lib/aarch64-linux-gnu",
+                "/usr/lib/arm-linux-gnueabihf",
+                "/lib/arm-linux-gnueabihf",
             ];
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
@@ -222,6 +227,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
             return
             [
                 MpvPath,
+                Directory.GetCurrentDirectory(),
                 "/Applications/Subtitle Edit.app/Contents/Frameworks",
                 "/opt/local/lib",
                 "/usr/local/lib",
@@ -1139,13 +1145,13 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         }
     }
 
-    internal void SubRemove()
+    public void SubRemove()
     {
         DoMpvCommand("sub-remove");
     }
 
-    internal void SubAdd(string fileName)
+    public void SubAdd(string fileName)
     {
         DoMpvCommand("sub-add", fileName, "select");
-    } 
+    }
 }

@@ -50,6 +50,10 @@ namespace Nikse.SubtitleEdit
                 // Build and configure the app
                 var appBuilder = AppBuilder.Configure<Application>()
                     .UsePlatformDetect()
+                     .With(new X11PlatformOptions
+                     {
+                         RenderingMode = new[] { X11RenderingMode.Glx, X11RenderingMode.Egl }
+                     })
                     .AfterSetup(b => ConfigureApplication(b, lifetime))
                     .SetupWithLifetime(lifetime);
 
