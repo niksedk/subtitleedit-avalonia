@@ -13,6 +13,7 @@ namespace Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 {
     public static string MpvPath = string.Empty;
+    public static int MaxVolume { get; set; } = 130;
 
     private IntPtr _library = IntPtr.Zero;
     private IntPtr _mpv = IntPtr.Zero;

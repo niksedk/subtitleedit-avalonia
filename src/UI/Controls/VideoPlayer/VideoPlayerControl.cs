@@ -11,6 +11,7 @@ using Avalonia.Threading;
 using HanumanInstitute.LibMpv.Core;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 using Projektanker.Icons.Avalonia;
 using System;
 using System.Threading.Tasks;
@@ -416,7 +417,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             sliderPosition.Maximum = 1;
             sliderPosition.Value = 0;
 
-            sliderVolume.Maximum = MpvApi.MaxVolume;
+            sliderVolume.Maximum = LibMpvDynamicPlayer.MaxVolume;
             sliderVolume.Value = 50;
 
             // Attach keyboard event handler to detect keyboard activity
