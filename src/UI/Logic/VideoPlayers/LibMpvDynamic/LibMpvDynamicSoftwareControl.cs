@@ -31,7 +31,7 @@ public class LibMpvDynamicSoftwareControl : Control
             throw new InvalidOperationException("MpvPlayer is not initialized");
         }
 
-        System.Diagnostics.Debug.WriteLine("Initializing MpvPlayer with software rendering...");
+        System.Diagnostics.Debug.WriteLine("Initializing MpvPlayer with software rendering");
 
         try
         {
@@ -49,7 +49,7 @@ public class LibMpvDynamicSoftwareControl : Control
     private void OnMpvRequestRender()
     {
         // Request a redraw on the UI thread
-        Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Render);
+        Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
     }
 
     public override void Render(DrawingContext context)
@@ -62,8 +62,10 @@ public class LibMpvDynamicSoftwareControl : Control
         }
 
         var bitmapSize = GetPixelSize();
+
         if (bitmapSize.Width <= 0 || bitmapSize.Height <= 0)
         {
+            System.Diagnostics.Debug.WriteLine("Skipping render - invalid size");
             return;
         }
 
@@ -103,9 +105,8 @@ public class LibMpvDynamicSoftwareControl : Control
                     pixelFormat);
             }
 
-            context.DrawImage(
-                _renderTarget,
-                new Rect(0, 0, Bounds.Width, Bounds.Height));
+            var destRect = new Rect(0, 0, Bounds.Width, Bounds.Height);
+            context.DrawImage(_renderTarget, destRect);
         }
         catch (Exception ex)
         {
@@ -116,10 +117,11 @@ public class LibMpvDynamicSoftwareControl : Control
 
     private PixelSize GetPixelSize()
     {
-        var scaling = VisualRoot?.RenderScaling ?? 1.0;
+        // Don't apply scaling - use bounds directly as pixel size
+        // This matches the working LibMpv.Avalonia implementation
         return new PixelSize(
-            (int)(Bounds.Width * scaling),
-            (int)(Bounds.Height * scaling));
+            (int)Bounds.Width,
+            (int)Bounds.Height);
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
@@ -142,6 +144,8 @@ public class LibMpvDynamicSoftwareControl : Control
     public void LoadFile(string path)
     {
         _mpvPlayer?.LoadFile(path);
+        // Trigger initial render
+        InvalidateVisual();
     }
 
     public void TogglePlayPause()

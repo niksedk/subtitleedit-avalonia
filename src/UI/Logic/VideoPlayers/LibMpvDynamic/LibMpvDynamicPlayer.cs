@@ -146,16 +146,16 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
     private MpvRenderUpdateFunc? _renderUpdateCallback;
 
     // Render API constants
+    private const int MPV_RENDER_PARAM_INVALID = 0;
     private const int MPV_RENDER_PARAM_API_TYPE = 1;
     private const int MPV_RENDER_PARAM_OPENGL_INIT_PARAMS = 2;
     private const int MPV_RENDER_PARAM_OPENGL_FBO = 3;
     private const int MPV_RENDER_PARAM_FLIP_Y = 4;
     private const int MPV_RENDER_PARAM_DEPTH = 5;
-    private const int MPV_RENDER_PARAM_SW_SIZE = 6;
-    private const int MPV_RENDER_PARAM_SW_FORMAT = 7;
-    private const int MPV_RENDER_PARAM_SW_STRIDE = 8;
-    private const int MPV_RENDER_PARAM_SW_POINTER = 9;
-    private const int MPV_RENDER_PARAM_INVALID = 0;
+    private const int MPV_RENDER_PARAM_SW_SIZE = 17;
+    private const int MPV_RENDER_PARAM_SW_FORMAT = 18;
+    private const int MPV_RENDER_PARAM_SW_STRIDE = 19;
+    private const int MPV_RENDER_PARAM_SW_POINTER = 20;
 
     private const string MPV_RENDER_API_TYPE_OPENGL = "opengl";
     private const string MPV_RENDER_API_TYPE_SW = "sw";
@@ -1065,56 +1065,74 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
             return;
         }
 
+        System.Diagnostics.Debug.WriteLine($"SoftwareRender: width={width}, height={height}, format={format}, address={surfaceAddress}");
+
         unsafe
         {
             var size = new[] { width, height };
-            var stride = new[] { (uint)width * 4 };
+            // MPV_RENDER_PARAM_SW_STRIDE expects a pointer to size_t
+            // size_t is platform-specific: 4 bytes on 32-bit, 8 bytes on 64-bit
+            // nuint (native uint) is the C# equivalent of size_t
+            nuint stride = (nuint)(width * 4);
 
             fixed (int* sizePtr = size)
             {
-                fixed (uint* stridePtr = stride)
+                var formatBytes = Encoding.UTF8.GetBytes(format + "\0");
+                var formatPtr = Marshal.AllocHGlobal(formatBytes.Length);
+                Marshal.Copy(formatBytes, 0, formatPtr, formatBytes.Length);
+
+                // Allocate and write the stride value (size_t)
+                var stridePtr = Marshal.AllocHGlobal(IntPtr.Size);
+                if (IntPtr.Size == 8) // 64-bit
                 {
-                    var formatBytes = Encoding.UTF8.GetBytes(format + "\0");
-                    var formatPtr = Marshal.AllocHGlobal(formatBytes.Length);
-                    Marshal.Copy(formatBytes, 0, formatPtr, formatBytes.Length);
+                    *(ulong*)stridePtr = (ulong)stride;
+                }
+                else // 32-bit
+                {
+                    *(uint*)stridePtr = (uint)stride;
+                }
+
+                try
+                {
+                    var renderParams = new[]
+                    {
+                        new MpvRenderParam { type = MPV_RENDER_PARAM_SW_SIZE, data = (IntPtr)sizePtr },
+                        new MpvRenderParam { type = MPV_RENDER_PARAM_SW_FORMAT, data = formatPtr },
+                        new MpvRenderParam { type = MPV_RENDER_PARAM_SW_STRIDE, data = stridePtr },
+                        new MpvRenderParam { type = MPV_RENDER_PARAM_SW_POINTER, data = surfaceAddress },
+                        new MpvRenderParam { type = MPV_RENDER_PARAM_INVALID, data = IntPtr.Zero }
+                    };
+
+                    var renderParamsSize = Marshal.SizeOf<MpvRenderParam>() * renderParams.Length;
+                    var renderParamsPtr = Marshal.AllocHGlobal(renderParamsSize);
 
                     try
                     {
-                        var renderParams = new[]
+                        for (var i = 0; i < renderParams.Length; i++)
                         {
-                            new MpvRenderParam { type = MPV_RENDER_PARAM_SW_SIZE, data = (IntPtr)sizePtr },
-                            new MpvRenderParam { type = MPV_RENDER_PARAM_SW_FORMAT, data = formatPtr },
-                            new MpvRenderParam { type = MPV_RENDER_PARAM_SW_STRIDE, data = (IntPtr)stridePtr },
-                            new MpvRenderParam { type = MPV_RENDER_PARAM_SW_POINTER, data = surfaceAddress },
-                            new MpvRenderParam { type = MPV_RENDER_PARAM_INVALID, data = IntPtr.Zero }
-                        };
-
-                        var renderParamsSize = Marshal.SizeOf<MpvRenderParam>() * renderParams.Length;
-                        var renderParamsPtr = Marshal.AllocHGlobal(renderParamsSize);
-
-                        try
-                        {
-                            for (var i = 0; i < renderParams.Length; i++)
-                            {
-                                var offset = renderParamsPtr + (i * Marshal.SizeOf<MpvRenderParam>());
-                                Marshal.StructureToPtr(renderParams[i], offset, false);
-                            }
-
-                            var err = _mpvRenderContextRender(_renderContext, renderParamsPtr);
-                            if (err < 0 && err != -2) // -2 = nothing to render
-                            {
-                                System.Diagnostics.Debug.WriteLine($"Software render failed: {GetErrorString(err)}");
-                            }
+                            var offset = renderParamsPtr + (i * Marshal.SizeOf<MpvRenderParam>());
+                            Marshal.StructureToPtr(renderParams[i], offset, false);
                         }
-                        finally
+
+                        var err = _mpvRenderContextRender(_renderContext, renderParamsPtr);
+                        if (err < 0 && err != -2) // -2 = nothing to render
                         {
-                            Marshal.FreeHGlobal(renderParamsPtr);
+                            System.Diagnostics.Debug.WriteLine($"Software render failed: {GetErrorString(err)} (code: {err})");
+                        }
+                        else if (err == 0)
+                        {
+                            System.Diagnostics.Debug.WriteLine("Software render SUCCESS");
                         }
                     }
                     finally
                     {
-                        Marshal.FreeHGlobal(formatPtr);
+                        Marshal.FreeHGlobal(renderParamsPtr);
                     }
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(formatPtr);
+                    Marshal.FreeHGlobal(stridePtr);
                 }
             }
         }
