@@ -15,6 +15,11 @@ public static class InitVideoPlayer
 {
     public static Grid MakeLayoutVideoPlayer(MainViewModel vm)
     {
+        return MakeLayoutVideoPlayer(vm, out _);
+    }
+
+    public static Grid MakeLayoutVideoPlayer(MainViewModel vm, out VideoPlayerControl videoPlayerControl)
+    {
         var mainGrid = new Grid
         {
             RowDefinitions = new RowDefinitions("*"),
@@ -29,6 +34,7 @@ public static class InitVideoPlayer
 
         var control = MakeVideoPlayer();
         control.FullScreenCommand = vm.VideoFullScreenCommand;
+        videoPlayerControl = control;
         vm.VideoPlayerControl = control;
         vm.VideoPlayerControl.Volume = Se.Settings.Video.Volume;
         vm.VideoPlayerControl.VideoPlayerDisplayTimeLeft = Se.Settings.Video.VideoPlayerDisplayTimeLeft;
@@ -65,14 +71,13 @@ public static class InitVideoPlayer
         {
             try
             {
-                if (!Enum.TryParse<VideoRenderer>(Se.Settings.Video.VideoPlayerMpvRender, true, out var render))
-                {
-                    render = VideoRenderer.Auto;
-                }
+                //if (!Enum.TryParse<VideoRenderer>(Se.Settings.Video.VideoPlayerMpvRender, true, out var render))
+                //{
+                //    render = VideoRenderer.Auto;
+                //}
 
                 var videoPlayerInstanceMpv = new LibMpvDynamicPlayer();
                 var view = new LibMpvDynamicOpenGLControl(videoPlayerInstanceMpv);
-                //view.InitializeOpenGL();
                 control = new VideoPlayerControl(videoPlayerInstanceMpv)
                 {
                     PlayerContent = view,
