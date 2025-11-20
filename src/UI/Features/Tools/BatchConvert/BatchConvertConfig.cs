@@ -1,4 +1,5 @@
-﻿using Nikse.SubtitleEdit.Core.AutoTranslate;
+﻿using Avalonia.Media;
+using Nikse.SubtitleEdit.Core.AutoTranslate;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.Translate;
@@ -14,6 +15,7 @@ public class BatchConvertConfig
     public string TargetFormatName { get; set; }
     public string TargetEncoding { get; set; }
 
+    public AddFormattingSettings AddFormatting { get; set; }
     public RemoveFormattingSettings RemoveFormatting { get; set; }
     public OffsetTimeCodesSettings OffsetTimeCodes { get; set; }
     public AdjustDurationSettings AdjustDuration { get; set; }
@@ -60,6 +62,18 @@ public class BatchConvertConfig
         TargetFormatName == BatchConverter.FormatBdnXml ||
         TargetFormatName == BatchConverter.FormatFcpImage ||
         TargetFormatName == BatchConverter.FormatImagesWithTimeCodesInFileName;
+
+    public class AddFormattingSettings
+    {
+        public bool IsActive { get; set; }
+        public bool AddItalic { get; set; }
+        public bool AddBold { get; set; }
+        public bool AddUnderline { get; set; }
+        public bool AddColor { get; set; }
+        public Color AddColorValue { get; set; }
+        public bool AddAlignment { get; set; }
+        public string AddAlignmentValue { get; set; } = string.Empty;
+    }
 
     public class RemoveFormattingSettings
     {

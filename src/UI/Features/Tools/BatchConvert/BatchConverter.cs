@@ -280,7 +280,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         var imageToImage = _config.IsTargetFormatImageBased && imageSubtitle != null;
         if (item.Subtitle != null)
         {
-            item.Subtitle = await RunConvertFunctions(item, cancellationToken, imageToImage);
+            item.Subtitle = await RunConvertFunctions(item, imageToImage, cancellationToken);
         }
 
         // Save text based formats
@@ -876,33 +876,34 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         return new OcrSubtitleImageParameter(imageParameters);
     }
 
-    private async Task<Subtitle> RunConvertFunctions(BatchConvertItem item, CancellationToken cancellationToken, bool imageToImage)
+    private async Task<Subtitle> RunConvertFunctions(BatchConvertItem item, bool imageToImage, CancellationToken cancellationToken)
     {
         var s = new Subtitle(item.Subtitle, false);
         Language = LanguageAutoDetect.AutoDetectGoogleLanguageOrNull(s) ?? "en";
 
         if (imageToImage)
         {
+            s = DeleteLines(s);
+            s = OffsetTimeCodes(s);
             s = AdjustDisplayDuration(s);
             s = ChangeFrameRate(s);
             s = ChangeSpeed(s);
-            s = DeleteLines(s);
-            s = OffsetTimeCodes(s);
         }
         else
         {
+            s = DeleteLines(s);
+            s = RemoveFormatting(s);
+            s = AddFormatting(s);
             s = AdjustDisplayDuration(s);
             s = await AutoTranslate(s, cancellationToken);
             s = ChangeCasing(s, Language);
             s = ChangeFrameRate(s);
             s = ChangeSpeed(s);
-            s = DeleteLines(s);
             s = FixCommonErrors(s);
             s = MergeLinesWithSameText(s);
             s = MergeLinesWithSameTimeCodes(s, Language);
             s = MultipleReplace(s);
             s = OffsetTimeCodes(s);
-            s = RemoveFormatting(s);
             s = RemoveLineBreaks(s);
             s = RemoveTextForHearingImpaired(s, Language);
             s = FixRightToLeft(s);
@@ -1058,6 +1059,109 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                         p.Text = HtmlUtil.RemoveAssAlignmentTags(p.Text);
                     }
                 }
+            }
+        }
+
+        return subtitle;
+    }
+
+    private Subtitle AddFormatting(Subtitle subtitle)
+    {
+        if (!_config.AddFormatting.IsActive)
+        {
+            return subtitle;
+        }
+
+        var isAssa = _config.TargetFormatName == AdvancedSubStationAlpha.NameOfFormat;
+        foreach (var p in subtitle.Paragraphs)
+        {
+            if (_config.AddFormatting.AddItalic)
+            {
+                p.Text = HtmlUtil.RemoveOpenCloseTags(p.Text, HtmlUtil.TagItalic);
+                p.Text = p.Text
+                    .Replace("{\\i}", string.Empty)
+                    .Replace("{\\i0}", string.Empty)
+                    .Replace("{\\i1}", string.Empty)
+                    .Replace("\\i0", string.Empty)
+                    .Replace("\\i1", string.Empty);
+                if (isAssa)
+                {
+                    p.Text = "{\\i1}" + p.Text + "{\\i0}";
+                }
+                else
+                {
+                    p.Text = "<i>" + p.Text + "</i>";
+                }
+            }
+
+            if (_config.AddFormatting.AddBold)
+            {
+                p.Text = HtmlUtil.RemoveOpenCloseTags(p.Text, HtmlUtil.TagBold);
+                p.Text = p.Text
+                    .Replace("{\\b}", string.Empty)
+                    .Replace("{\\b0}", string.Empty)
+                    .Replace("{\\b1}", string.Empty)
+                    .Replace("\\b0", string.Empty)
+                    .Replace("\\b1", string.Empty);
+
+                if (isAssa)
+                {
+                    p.Text = "{\\b1}" + p.Text + "{\\b0}";
+                }
+                else
+                {
+                    p.Text = "<b>" + p.Text + "</b>";
+                }
+            }
+
+            if (_config.AddFormatting.AddUnderline)
+            {
+                p.Text = HtmlUtil.RemoveOpenCloseTags(p.Text, HtmlUtil.TagUnderline);
+                p.Text = p.Text
+                    .Replace("{\\u}", string.Empty)
+                    .Replace("{\\u0}", string.Empty)
+                    .Replace("{\\u1}", string.Empty)
+                    .Replace("\\u0", string.Empty)
+                    .Replace("\\u1", string.Empty);
+
+                if (isAssa)
+                {
+                    p.Text = "{\\u1}" + p.Text + "{\\u0}";
+                }
+                else
+                {
+                    p.Text = "<u>" + p.Text + "</u>";
+                }
+            }
+
+            if (_config.AddFormatting.AddColor)
+            {
+                p.Text = HtmlUtil.RemoveColorTags(p.Text);
+                if (p.Text.Contains("\\c") || p.Text.Contains("\\1c"))
+                {
+                    p.Text = HtmlUtil.RemoveAssaColor(p.Text);
+                }
+
+                if (isAssa)
+                {
+                    var color = AdvancedSubStationAlpha.GetSsaColorString(_config.AddFormatting.AddColorValue.ToSKColor());
+                    p.Text = $"{{\\c{color}}}{p.Text}";
+                }
+                else
+                {
+                    var color = _config.AddFormatting.AddColorValue.FromColorToHex(false);
+                    p.Text = $"<font color=\"{color}\">{p.Text}</font>";
+                }
+            }
+
+            if (_config.AddFormatting.AddAlignment)
+            {
+                if (p.Text.Contains('{'))
+                {
+                    p.Text = HtmlUtil.RemoveAssAlignmentTags(p.Text);
+                }
+
+                p.Text = _config.AddFormatting.AddAlignmentValue + p.Text;
             }
         }
 

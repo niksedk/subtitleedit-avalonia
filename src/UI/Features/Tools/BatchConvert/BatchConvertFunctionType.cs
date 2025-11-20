@@ -2,6 +2,7 @@
 
 public enum BatchConvertFunctionType
 {
+    AddFormatting,
     RemoveFormatting,
     OffsetTimeCodes,
     AdjustDisplayDuration,

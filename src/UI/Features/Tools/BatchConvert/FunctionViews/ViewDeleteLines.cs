@@ -48,9 +48,9 @@ public static class ViewDeleteLines
             Children =
             {
                 labelHeader,
-                panelDeleteContains,
                 panelDeleteFirstLines,
                 panelDeleteLastLines,
+                panelDeleteContains,
             }
         };
 

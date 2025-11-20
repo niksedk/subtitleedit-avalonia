@@ -15,8 +15,6 @@ namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
 public class BatchConvertWindow : Window
 {
-    private readonly BatchConvertViewModel _vm;
-
     public BatchConvertWindow(BatchConvertViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -26,8 +24,6 @@ public class BatchConvertWindow : Window
         MinWidth = 900;
         MinHeight = 600;
         CanResize = true;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -115,6 +111,7 @@ public class BatchConvertWindow : Window
         Activated += delegate { buttonDone.Focus(); }; // hack to make OnKeyDown work
         Loaded += vm.Onloaded;
         Closing += vm.OnClosing;
+        KeyDown += (s, e) => vm.OnKeyDown(e);
     }
 
     private static Border MakeFileView(BatchConvertViewModel vm)
@@ -303,7 +300,7 @@ public class BatchConvertWindow : Window
         return grid;
     }
 
-    private Border MakeFunctionsListView(BatchConvertViewModel vm)
+    private static Border MakeFunctionsListView(BatchConvertViewModel vm)
     {
         var dataGrid = new DataGrid
         {
@@ -382,11 +379,5 @@ public class BatchConvertWindow : Window
         vm.FunctionContainer = scrollViewer;
 
         return UiUtil.MakeBorderForControl(scrollViewer);
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
     }
 }

@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -31,7 +32,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -60,6 +60,16 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private string? _selectedFilterItem;
     [ObservableProperty] private string _filterText;
     [ObservableProperty] private bool _isFilterTextVisible;
+
+    // Add formatting
+    [ObservableProperty] private bool _formattingAddItalic;
+    [ObservableProperty] private bool _formattingAddBold;
+    [ObservableProperty] private bool _formattingAddUnderline;
+    [ObservableProperty] private bool _formattingAddAlignmentTag;
+    [ObservableProperty] private bool _formattingAddColor;
+    [ObservableProperty] private Color _formattingAddColorValue;
+    [ObservableProperty] private ObservableCollection<DisplayAlignment> _alignmentTagOptions;
+    [ObservableProperty] private DisplayAlignment? _selectedAlignmentTagOption;
 
     // Remove formatting
     [ObservableProperty] private bool _formattingRemoveAll;
@@ -230,6 +240,9 @@ public partial class BatchConvertViewModel : ObservableObject
         };
         AdjustTypes = new ObservableCollection<AdjustDurationDisplay>(AdjustDurationDisplay.ListAll());
         SelectedAdjustType = AdjustTypes.First();
+
+        AlignmentTagOptions = new ObservableCollection<DisplayAlignment>(DisplayAlignment.GetAll());
+        SelectedAlignmentTagOption = AlignmentTagOptions[1];
 
         BatchFunctions = new ObservableCollection<BatchConvertFunction>(BatchConvertFunction.List(this));
 
@@ -1106,6 +1119,18 @@ public partial class BatchConvertViewModel : ObservableObject
                 IsActive = activeFunctions.Contains(BatchConvertFunctionType.OffsetTimeCodes),
                 Forward = OffsetTimeCodesForward,
                 Milliseconds = (long)OffsetTimeCodesTime.TotalMilliseconds,
+            },
+
+            AddFormatting = new BatchConvertConfig.AddFormattingSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.AddFormatting),
+                AddItalic = FormattingAddItalic,
+                AddBold = FormattingAddBold,
+                AddUnderline = FormattingAddUnderline,
+                AddColor = FormattingAddColor,
+                AddColorValue = FormattingAddColorValue,
+                AddAlignment = FormattingAddAlignmentTag,
+                AddAlignmentValue = SelectedAlignmentTagOption?.Code ?? "an2",
             },
 
             RemoveFormatting = new BatchConvertConfig.RemoveFormattingSettings
