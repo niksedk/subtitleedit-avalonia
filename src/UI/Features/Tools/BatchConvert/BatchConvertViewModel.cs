@@ -32,6 +32,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -578,6 +579,14 @@ public partial class BatchConvertViewModel : ObservableObject
         OutputEncodingLabel = string.Format(Se.Language.Tools.BatchConvert.EncodingXOverwriteY,
             Se.Settings.Tools.BatchConvert.TargetEncoding,
             Se.Settings.Tools.BatchConvert.Overwrite);
+    }
+
+    [RelayCommand]
+    private async Task ShowRemoveTextForHearingImpairedSettings()
+    {
+        _ = await _windowService
+            .ShowDialogAsync<RemoveTextForHearingImpairedWindow, RemoveTextForHearingImpairedViewModel>(
+                Window!, vm => { vm.Initialize(new Subtitle()); });
     }
 
     [RelayCommand]
