@@ -82,7 +82,7 @@ public partial class SplitBreakLongLinesViewModel : ObservableObject
                 {
                     var item = new SubtitleLineViewModel(_allSubtitles[index]);
 
-                    var splitLines = Split(item, maxCharactersPerSubtitle);
+                    var splitLines = Split(item, maxCharactersPerSubtitle, SingleLineMaxLength);
                     if (splitLines.Count > 1)
                     {
                         splitCount++;
@@ -128,7 +128,7 @@ public partial class SplitBreakLongLinesViewModel : ObservableObject
         });
     }
 
-    private List<SubtitleLineViewModel> Split(SubtitleLineViewModel item, int maxCharactersPerSubtitle)
+    public static List<SubtitleLineViewModel> Split(SubtitleLineViewModel item, int maxCharactersPerSubtitle, int singleLineMaxLength)
     {
         var lines = new List<SubtitleLineViewModel>();
 
@@ -139,7 +139,7 @@ public partial class SplitBreakLongLinesViewModel : ObservableObject
         var originalDurationMs = Math.Max(0, originalEndMs - originalStartMs);
 
         // Per-line maximum for visual wrapping and per-subtitle maximum for splitting
-        var perLineMax = Math.Max(5, SingleLineMaxLength);
+        var perLineMax = Math.Max(5, singleLineMaxLength);
         var perSubtitleMax = Math.Max(perLineMax, maxCharactersPerSubtitle);
 
         // If already short enough, return as-is

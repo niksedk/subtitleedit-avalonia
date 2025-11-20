@@ -16,6 +16,7 @@ using Nikse.SubtitleEdit.Features.Ocr.NOcr;
 using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameTimeCodes;
+using Nikse.SubtitleEdit.Features.Tools.SplitBreakLongLines;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Ocr;
@@ -896,6 +897,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             s = DeleteLines(s);
             s = RemoveFormatting(s);
             s = AddFormatting(s);
+            s = SplitBreakLongLines(s, Language);
             s = AdjustDisplayDuration(s);
             s = await AutoTranslate(s, cancellationToken);
             s = ChangeCasing(s, Language);
@@ -1166,6 +1168,53 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
 
                 p.Text = _config.AddFormatting.AddAlignmentValue + p.Text;
             }
+        }
+
+        return subtitle;
+    }
+
+    private Subtitle SplitBreakLongLines(Subtitle subtitle, string language)
+    {
+        if (!_config.AddFormatting.IsActive)
+        {
+            return subtitle;
+        }
+
+        var c = _config.SplitBreakLongLines;
+        var subtitles = new List<SubtitleLineViewModel>(subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, subtitle.OriginalFormat)));
+        var subtitlesFixed = new List<SubtitleLineViewModel>();
+        var maxCharactersPerSubtitle = c.MaxNumberOfLines * c.SingleLineMaxLength;
+        if (c.SplitLongLines)
+        {
+            for (var index = 0; index < subtitles.Count; index++)
+            {
+                var item = new SubtitleLineViewModel(subtitles[index]);
+
+                var splitLines = SplitBreakLongLinesViewModel.Split(item, maxCharactersPerSubtitle, c.SingleLineMaxLength);
+                foreach (var s in splitLines)
+                {
+                    subtitlesFixed.Add(s);
+                }
+            }
+        }
+
+        if (c.RebalanceLongLines)
+        {
+            for (var index = 0; index < subtitlesFixed.Count; index++)
+            {
+                var item = subtitlesFixed[index];
+                var rebalancedText = item.Text = Utilities.AutoBreakLine(item.Text, c.SingleLineMaxLength, Se.Settings.General.UnbreakLinesShorterThan, language);
+                if (rebalancedText != item.Text)
+                {
+                    item.Text = rebalancedText;
+                }
+            }
+        }
+
+        subtitle.Paragraphs.Clear();
+        foreach (var sv in subtitlesFixed)
+        {
+            subtitle.Paragraphs.Add(sv.ToParagraph());
         }
 
         return subtitle;

@@ -18,4 +18,5 @@ public enum BatchConvertFunctionType
     MergeLinesWithSameText,
     FixRightToLeft,
     BridgeGaps,
+    SplitBreakLongLines,
 }

@@ -36,6 +36,7 @@ public class BatchConvertFunction
             MakeFunction(BatchConvertFunctionType.RemoveTextForHearingImpaired, Se.Language.General.RemoveTextForHearingImpaired, ViewRemoveTextForHearingImpaired.Make(vm), activeFunctions),
             MakeFunction(BatchConvertFunctionType.RemoveFormatting, Se.Language.General.RemoveFormatting, ViewRemoveFormatting.Make(vm) , activeFunctions),
             MakeFunction(BatchConvertFunctionType.AddFormatting, Se.Language.Tools.BatchConvert.AddFormatting, ViewAddFormatting.Make(vm) , activeFunctions),
+            MakeFunction(BatchConvertFunctionType.SplitBreakLongLines,  Se.Language.Tools.SplitBreakLongLines.Title, ViewSplitBreakLongLines.Make(vm), activeFunctions),
             MakeFunction(BatchConvertFunctionType.OffsetTimeCodes,  Se.Language.General.OffsetTimeCodes, ViewOffsetTimeCodes.Make(vm), activeFunctions),
             MakeFunction(BatchConvertFunctionType.AdjustDisplayDuration, Se.Language.General.AdjustDisplayDuration, ViewAdjustDuration.Make(vm), activeFunctions),
             MakeFunction(BatchConvertFunctionType.ChangeFrameRate, Se.Language.General.ChangeFrameRate, ViewChangeFrameRate.Make(vm), activeFunctions),

@@ -155,6 +155,12 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private int _bridgeGapsMinGapMs;
     [ObservableProperty] private int _bridgeGapsPercentForLeft;
 
+    // Split/break long lines
+    [ObservableProperty] private bool _splitBreakSplitLongLines;
+    [ObservableProperty] private int _splitBreakSingleLineMaxLength;
+    [ObservableProperty] private int _splitBreakMaxNumberOfLines;
+    [ObservableProperty] private bool _splitBreakRebalanceLongLines;
+
     public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
@@ -219,6 +225,7 @@ public partial class BatchConvertViewModel : ObservableObject
         OutputFolderLinkLabel = string.Empty;
         OutputEncodingLabel = string.Empty;
         StatusText = string.Empty;
+        DeleteActorsOrStyles = string.Empty;
         FunctionContainer = new ScrollViewer();
         FromFrameRates = new ObservableCollection<double>
         {
@@ -534,6 +541,11 @@ public partial class BatchConvertViewModel : ObservableObject
         BridgeGapsSmallerThanMs = Se.Settings.Tools.BridgeGaps.BridgeGapsSmallerThanMs;
         BridgeGapsMinGapMs = Se.Settings.Tools.BridgeGaps.MinGapMs;
         BridgeGapsPercentForLeft = Se.Settings.Tools.BridgeGaps.PercentForLeft;
+
+        SplitBreakSingleLineMaxLength = Se.Settings.General.SubtitleLineMaximumLength;
+        SplitBreakMaxNumberOfLines = Se.Settings.General.MaxNumberOfLines;
+        SplitBreakSplitLongLines = Se.Settings.Tools.SplitRebalanceLongLinesSplit;
+        SplitBreakRebalanceLongLines = Se.Settings.Tools.SplitRebalanceLongLinesRebalance;
     }
 
     private void UpdateOutputProperties()
@@ -1170,7 +1182,16 @@ public partial class BatchConvertViewModel : ObservableObject
                 BridgeGapsSmallerThanMs = BridgeGapsSmallerThanMs,
                 MinGapMs = BridgeGapsMinGapMs,
                 PercentForLeft = BridgeGapsPercentForLeft,
-            }
+            },
+
+            SplitBreakLongLines = new BatchConvertConfig.SplitBreakLongLinesSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.SplitBreakLongLines),
+                SplitLongLines = SplitBreakSplitLongLines,
+                RebalanceLongLines = SplitBreakRebalanceLongLines,
+                MaxNumberOfLines = SplitBreakMaxNumberOfLines,
+                SingleLineMaxLength = SplitBreakSingleLineMaxLength,
+            },
         };
     }
 
