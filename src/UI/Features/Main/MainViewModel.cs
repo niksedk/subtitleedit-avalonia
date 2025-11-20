@@ -5932,25 +5932,25 @@ public partial class MainViewModel :
     [RelayCommand]
     private void VideoMoveCustom1Back()
     {
-        MoveVideoPositionMs(-Se.Settings.Video.MoveVideoPositionCustom1);
+        MoveVideoPositionMs(-Se.Settings.Video.MoveVideoPositionCustom1Back);
     }
 
     [RelayCommand]
     private void VideoMoveCustom1Forward()
     {
-        MoveVideoPositionMs(Se.Settings.Video.MoveVideoPositionCustom1);
+        MoveVideoPositionMs(Se.Settings.Video.MoveVideoPositionCustom1Forward);
     }
 
     [RelayCommand]
     private void VideoMoveCustom2Back()
     {
-        MoveVideoPositionMs(-Se.Settings.Video.MoveVideoPositionCustom2);
+        MoveVideoPositionMs(-Se.Settings.Video.MoveVideoPositionCustom2Back);
     }
 
     [RelayCommand]
     private void VideoMoveCustom2Forward()
     {
-        MoveVideoPositionMs(Se.Settings.Video.MoveVideoPositionCustom2);
+        MoveVideoPositionMs(Se.Settings.Video.MoveVideoPositionCustom2Forward);
     }
 
     [RelayCommand]

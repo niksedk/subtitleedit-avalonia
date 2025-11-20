@@ -352,49 +352,71 @@ public partial class ShortcutsViewModel : ObservableObject
                 _surround3Right = result.After;
             }
         }
-        else if (node.ShortCut.Action == MainViewModel.VideoMoveCustom1BackCommand || node.ShortCut.Action == MainViewModel.VideoMoveCustom1ForwardCommand)
+        else if (node.ShortCut.Action == MainViewModel.VideoMoveCustom1BackCommand)
         {
             var result = await _windowService.ShowDialogAsync<PickMillisecondsWindow, PickMillisecondsViewModel>(Window, vm =>
             {
-                vm.Initialize(Se.Settings.Video.MoveVideoPositionCustom1);
+                vm.Initialize(Se.Settings.Video.MoveVideoPositionCustom1Back);
             });
             if (result.OkPressed)
             {
-                Se.Settings.Video.MoveVideoPositionCustom1 = result.Milliseconds;
+                Se.Settings.Video.MoveVideoPositionCustom1Back = result.Milliseconds;
 
                 var flatNodeBack = FlatNodes.FirstOrDefault(n => n?.ShortCut?.Action == MainViewModel.VideoMoveCustom1BackCommand);
                 if (flatNodeBack != null)
                 {
-                    flatNodeBack.Title = string.Format(Se.Language.General.VideoCustom1BackX, Se.Settings.Video.MoveVideoPositionCustom1);
+                    flatNodeBack.Title = string.Format(Se.Language.General.VideoCustom1BackX, Se.Settings.Video.MoveVideoPositionCustom1Back);
                 }
+            }
+        }
+        else if (node.ShortCut.Action == MainViewModel.VideoMoveCustom1ForwardCommand)
+        {
+            var result = await _windowService.ShowDialogAsync<PickMillisecondsWindow, PickMillisecondsViewModel>(Window, vm =>
+            {
+                vm.Initialize(Se.Settings.Video.MoveVideoPositionCustom1Forward);
+            });
+            if (result.OkPressed)
+            {
+                Se.Settings.Video.MoveVideoPositionCustom1Forward = result.Milliseconds;
 
                 var flatNodeForward = FlatNodes.FirstOrDefault(n => n?.ShortCut?.Action == MainViewModel.VideoMoveCustom1ForwardCommand);
                 if (flatNodeForward != null)
                 {
-                    flatNodeForward.Title = string.Format(Se.Language.General.VideoCustom1ForwardX, Se.Settings.Video.MoveVideoPositionCustom1);
+                    flatNodeForward.Title = string.Format(Se.Language.General.VideoCustom1ForwardX, Se.Settings.Video.MoveVideoPositionCustom1Forward);
                 }
             }
         }
-        else if (node.ShortCut.Action == MainViewModel.VideoMoveCustom2BackCommand || node.ShortCut.Action == MainViewModel.VideoMoveCustom2ForwardCommand)
+        else if (node.ShortCut.Action == MainViewModel.VideoMoveCustom2BackCommand)
         {
             var result = await _windowService.ShowDialogAsync<PickMillisecondsWindow, PickMillisecondsViewModel>(Window, vm =>
             {
-                vm.Initialize(Se.Settings.Video.MoveVideoPositionCustom2);
+                vm.Initialize(Se.Settings.Video.MoveVideoPositionCustom2Back);
             });
             if (result.OkPressed)
             {
-                Se.Settings.Video.MoveVideoPositionCustom2 = result.Milliseconds;
+                Se.Settings.Video.MoveVideoPositionCustom2Back = result.Milliseconds;
 
                 var flatNodeBack = FlatNodes.FirstOrDefault(n => n?.ShortCut?.Action == MainViewModel.VideoMoveCustom2BackCommand);
                 if (flatNodeBack != null)
                 {
-                    flatNodeBack.Title = string.Format(Se.Language.General.VideoCustom2BackX, Se.Settings.Video.MoveVideoPositionCustom2);
+                    flatNodeBack.Title = string.Format(Se.Language.General.VideoCustom2BackX, Se.Settings.Video.MoveVideoPositionCustom2Back);
                 }
+            }
+        }
+        else if (node.ShortCut.Action == MainViewModel.VideoMoveCustom2ForwardCommand)
+        {
+            var result = await _windowService.ShowDialogAsync<PickMillisecondsWindow, PickMillisecondsViewModel>(Window, vm =>
+            {
+                vm.Initialize(Se.Settings.Video.MoveVideoPositionCustom2Forward);
+            });
+            if (result.OkPressed)
+            {
+                Se.Settings.Video.MoveVideoPositionCustom2Forward = result.Milliseconds;
 
                 var flatNodeForward = FlatNodes.FirstOrDefault(n => n?.ShortCut?.Action == MainViewModel.VideoMoveCustom2ForwardCommand);
                 if (flatNodeForward != null)
                 {
-                    flatNodeForward.Title = string.Format(Se.Language.General.VideoCustom2ForwardX, Se.Settings.Video.MoveVideoPositionCustom2);
+                    flatNodeForward.Title = string.Format(Se.Language.General.VideoCustom2ForwardX, Se.Settings.Video.MoveVideoPositionCustom2Forward);
                 }
             }
         }

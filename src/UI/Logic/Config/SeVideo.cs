@@ -1,11 +1,9 @@
-﻿using System;
-
-namespace Nikse.SubtitleEdit.Logic.Config;
+﻿namespace Nikse.SubtitleEdit.Logic.Config;
 
 public class SeVideo
 {
-    public SeVideoBurnIn BurnIn { get; set; } 
-    public SeVideoTransparent Transparent { get; set; } 
+    public SeVideoBurnIn BurnIn { get; set; }
+    public SeVideoTransparent Transparent { get; set; }
     public SeVideoTextToSpeech TextToSpeech { get; set; }
     public string VideoPlayer { get; set; }
     public double Volume { get; set; }
@@ -17,8 +15,10 @@ public class SeVideo
     public string ShowChangesFFmpegArguments { get; set; }
     public bool VideoPlayerDisplayTimeLeft { get; set; }
     public string CutDefaultVideoExtension { get; set; }
-    public int MoveVideoPositionCustom1 { get; set; }
-    public int MoveVideoPositionCustom2 { get; set; }
+    public int MoveVideoPositionCustom1Back { get; set; }
+    public int MoveVideoPositionCustom1Forward { get; set; }
+    public int MoveVideoPositionCustom2Back { get; set; }
+    public int MoveVideoPositionCustom2Forward { get; set; }
 
     public SeVideo()
     {
@@ -34,7 +34,9 @@ public class SeVideo
         CutType = Features.Video.CutVideo.CutType.MergeSegments.ToString();
         CutDefaultVideoExtension = ".mkv";
         ShowChangesFFmpegArguments = "-i \"{0}\" -vf \"select=gt(scene\\,{1}),showinfo\" -threads 0 -vsync vfr -f null -";
-        MoveVideoPositionCustom1 = 5000; // 5 seconds
-        MoveVideoPositionCustom2 = 10_000; // 10 seconds
+        MoveVideoPositionCustom1Back = 2000; // 2 seconds
+        MoveVideoPositionCustom1Forward = 2000; // 2 seconds
+        MoveVideoPositionCustom2Back = 5000; // 5 seconds
+        MoveVideoPositionCustom2Forward = 5000; // 5 seconds
     }
 }

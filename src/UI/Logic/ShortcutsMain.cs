@@ -13,11 +13,11 @@ public static class ShortcutsMain
     public static List<ShortCut> GetUsedShortcuts(MainViewModel vm)
     {
         var shortcuts = new List<ShortCut>();
-        
+
         var keys = Se.Settings.Shortcuts
             .Where(p => !p.ActionName.Contains(' '))
             .GroupBy(p => p.ActionName)
-            .Select(g => g.First())           
+            .Select(g => g.First())
             .ToDictionary(p => p.ActionName, p => p);
 
         foreach (var shortcut in GetAllAvailableShortcuts(vm))
@@ -189,10 +189,10 @@ public static class ShortcutsMain
         { nameof(MainViewModel.Video500MsForwardCommand),  Se.Language.General.Video500MsForward },
         { nameof(MainViewModel.VideoOneSecondBackCommand), Se.Language.General.VideoOneSecondBack },
         { nameof(MainViewModel.VideoOneSecondForwardCommand),  Se.Language.General.VideoOneSecondForward },
-        { nameof(MainViewModel.VideoMoveCustom1BackCommand),  string.Format(Se.Language.General.VideoCustom1BackX, Se.Settings.Video.MoveVideoPositionCustom1) },
-        { nameof(MainViewModel.VideoMoveCustom1ForwardCommand),  string.Format(Se.Language.General.VideoCustom1ForwardX, Se.Settings.Video.MoveVideoPositionCustom1) },
-        { nameof(MainViewModel.VideoMoveCustom2BackCommand),  string.Format(Se.Language.General.VideoCustom2BackX, Se.Settings.Video.MoveVideoPositionCustom2) },
-        { nameof(MainViewModel.VideoMoveCustom2ForwardCommand),  string.Format(Se.Language.General.VideoCustom2ForwardX, Se.Settings.Video.MoveVideoPositionCustom2) }, 
+        { nameof(MainViewModel.VideoMoveCustom1BackCommand),  string.Format(Se.Language.General.VideoCustom1BackX, Se.Settings.Video.MoveVideoPositionCustom1Back) },
+        { nameof(MainViewModel.VideoMoveCustom1ForwardCommand),  string.Format(Se.Language.General.VideoCustom1ForwardX, Se.Settings.Video.MoveVideoPositionCustom1Forward) },
+        { nameof(MainViewModel.VideoMoveCustom2BackCommand),  string.Format(Se.Language.General.VideoCustom2BackX, Se.Settings.Video.MoveVideoPositionCustom2Back) },
+        { nameof(MainViewModel.VideoMoveCustom2ForwardCommand),  string.Format(Se.Language.General.VideoCustom2ForwardX, Se.Settings.Video.MoveVideoPositionCustom2Forward) },
 
         { nameof(MainViewModel.WaveformSetStartAndOffsetTheRestCommand),  Se.Language.General.SetStartAndOffsetTheRest },
         { nameof(MainViewModel.WaveformSetStartCommand),  Se.Language.General.SetStart },
