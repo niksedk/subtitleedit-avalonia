@@ -20,6 +20,7 @@ public class LanguageBatchConvert
     public string AddUnderline { get; set; }
     public string AddAlignment { get; set; }
     public string AddColor { get; set; }
+    public string DeleteLinesWithSpecificActorsOrStyles { get; set; }
 
     public LanguageBatchConvert()
     {
@@ -39,5 +40,6 @@ public class LanguageBatchConvert
         AddUnderline = "Add underline";
         AddAlignment = "Add alignment";
         AddColor = "Add color";
+        DeleteLinesWithSpecificActorsOrStyles = "Delete lines with actors or styles (separate multiple by comma)";
     }
 }

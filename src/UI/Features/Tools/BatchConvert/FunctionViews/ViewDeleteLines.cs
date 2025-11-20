@@ -42,6 +42,15 @@ public static class ViewDeleteLines
             Margin = new Avalonia.Thickness(0, 0, 0, 10),
         };
 
+        var labelDeleteActorsOrStyles = UiUtil.MakeLabel(Se.Language.Tools.BatchConvert.DeleteLinesWithSpecificActorsOrStyles);
+        var textBoxDeleteActorsOrStyles = UiUtil.MakeTextBox(400, vm, nameof(vm.DeleteActorsOrStyles));
+        var panelDeleteActorsOrStyles = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Vertical,
+            Children = { labelDeleteActorsOrStyles, textBoxDeleteActorsOrStyles },
+            Margin = new Avalonia.Thickness(0, 10, 0, 10),
+        };
+
         var panel = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Vertical,
@@ -51,6 +60,7 @@ public static class ViewDeleteLines
                 panelDeleteFirstLines,
                 panelDeleteLastLines,
                 panelDeleteContains,
+                panelDeleteActorsOrStyles,
             }
         };
 

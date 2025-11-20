@@ -103,6 +103,7 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private int _deleteXFirstLines;
     [ObservableProperty] private int _deleteXLastLines;
     [ObservableProperty] private string _deleteLinesContains;
+    [ObservableProperty] private string _deleteActorsOrStyles;
 
     // Change frame rate
     [ObservableProperty] private ObservableCollection<double> _fromFrameRates;
@@ -148,6 +149,11 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private bool _rtlFixViaUniCode;
     [ObservableProperty] private bool _rtlRemoveUniCode;
     [ObservableProperty] private bool _rtlReverseStartEnd;
+
+    // Bride gaps
+    [ObservableProperty] private int _bridgeGapsSmallerThanMs;
+    [ObservableProperty] private int _bridgeGapsMinGapMs;
+    [ObservableProperty] private int _bridgeGapsPercentForLeft;
 
     public Window? Window { get; set; }
 
@@ -524,6 +530,10 @@ public partial class BatchConvertViewModel : ObservableObject
         {
             RtlReverseStartEnd = true;
         }
+
+        BridgeGapsSmallerThanMs = Se.Settings.Tools.BridgeGaps.BridgeGapsSmallerThanMs;
+        BridgeGapsMinGapMs = Se.Settings.Tools.BridgeGaps.MinGapMs;
+        BridgeGapsPercentForLeft = Se.Settings.Tools.BridgeGaps.PercentForLeft;
     }
 
     private void UpdateOutputProperties()
@@ -1091,6 +1101,7 @@ public partial class BatchConvertViewModel : ObservableObject
                 DeleteXFirst = DeleteXFirstLines,
                 DeleteXLast = DeleteXLastLines,
                 DeleteContains = DeleteLinesContains,
+                DeleteActorsOrStyles = DeleteActorsOrStyles,
             },
 
             FixCommonErrors = new BatchConvertConfig.FixCommonErrorsSettings2
@@ -1152,6 +1163,14 @@ public partial class BatchConvertViewModel : ObservableObject
                 RemoveUnicode = RtlRemoveUniCode,
                 ReverseStartEnd = RtlReverseStartEnd,
             },
+
+            BridgeGaps = new BatchConvertConfig.BridgeGapsSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.BridgeGaps),
+                BridgeGapsSmallerThanMs = BridgeGapsSmallerThanMs,
+                MinGapMs = BridgeGapsMinGapMs,
+                PercentForLeft = BridgeGapsPercentForLeft,
+            }
         };
     }
 

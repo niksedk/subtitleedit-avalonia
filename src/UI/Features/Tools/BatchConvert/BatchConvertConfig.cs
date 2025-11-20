@@ -1,4 +1,5 @@
 ﻿using Avalonia.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Nikse.SubtitleEdit.Core.AutoTranslate;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
@@ -31,6 +32,7 @@ public class BatchConvertConfig
     public MergeLinesWithSameTextsSettings MergeLinesWithSameTexts { get; set; }
     public MultipleReplaceSettings MultipleReplace { get; set; }
     public RightToLeftSettings RightToLeft { get; set; }
+    public BridgeGapsSettings BridgeGaps { get; set; }
 
     public BatchConvertConfig()
     {
@@ -38,6 +40,7 @@ public class BatchConvertConfig
         SaveInSourceFolder = true;
         TargetFormatName = SubRip.NameOfFormat;
         TargetEncoding = TextEncoding.Utf8WithBom;
+        AddFormatting = new AddFormattingSettings();
         RemoveFormatting = new RemoveFormattingSettings();
         OffsetTimeCodes = new OffsetTimeCodesSettings();
         AdjustDuration = new AdjustDurationSettings();
@@ -53,6 +56,7 @@ public class BatchConvertConfig
         MergeLinesWithSameTexts = new MergeLinesWithSameTextsSettings();
         MultipleReplace = new MultipleReplaceSettings();
         RightToLeft = new RightToLeftSettings();
+        BridgeGaps = new BridgeGapsSettings();
     }
 
     public bool IsTargetFormatImageBased =>
@@ -153,6 +157,7 @@ public class BatchConvertConfig
         public int DeleteXFirst { get; set; }
         public int DeleteXLast { get; set; }
         public string DeleteContains { get; set; }
+        public string DeleteActorsOrStyles { get; set; }
 
         public DeleteLinesSettings()
         {
@@ -217,8 +222,16 @@ public class BatchConvertConfig
     public class RightToLeftSettings
     {
         public bool IsActive { get; set; }
-        public bool FixViaUnicode { get; internal set; }
-        public bool RemoveUnicode { get; internal set; }
-        public bool ReverseStartEnd { get; internal set; }
+        public bool FixViaUnicode { get; set; }
+        public bool RemoveUnicode { get; set; }
+        public bool ReverseStartEnd { get; set; }
+    }
+
+    public class BridgeGapsSettings
+    {
+        public bool IsActive { get; set; }
+        public int BridgeGapsSmallerThanMs { get; set; }
+        public int MinGapMs { get; set; }
+        public int PercentForLeft { get; set; }
     }
 }

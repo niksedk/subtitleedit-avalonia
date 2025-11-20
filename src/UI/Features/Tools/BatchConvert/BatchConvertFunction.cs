@@ -41,6 +41,7 @@ public class BatchConvertFunction
             MakeFunction(BatchConvertFunctionType.ChangeFrameRate, Se.Language.General.ChangeFrameRate, ViewChangeFrameRate.Make(vm), activeFunctions),
             MakeFunction(BatchConvertFunctionType.ChangeSpeed, Se.Language.General.ChangeSpeed, ViewChangeSpeed.Make(vm), activeFunctions),
             MakeFunction(BatchConvertFunctionType.ChangeCasing, Se.Language.General.ChangeCasing, ViewChangeCasing.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.BridgeGaps, Se.Language.General.BridgeGaps, ViewBridgeGaps.Make(vm), activeFunctions),
             MakeFunction(BatchConvertFunctionType.FixCommonErrors, Se.Language.General.FixCommonErrors, ViewFixCommonErrors.Make(vm), activeFunctions),
             MakeFunction(BatchConvertFunctionType.MultipleReplace, Se.Language.General.MultipleReplace, ViewMultipleReplace.Make(vm), activeFunctions),
             MakeFunction(BatchConvertFunctionType.MergeLinesWithSameText, Se.Language.General.MergeLinesWithSameText, ViewMergeLinesWithSameText.Make(vm), activeFunctions),

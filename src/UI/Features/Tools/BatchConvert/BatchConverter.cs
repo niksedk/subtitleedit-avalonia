@@ -22,6 +22,7 @@ using Nikse.SubtitleEdit.Logic.Ocr;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -888,6 +889,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             s = AdjustDisplayDuration(s);
             s = ChangeFrameRate(s);
             s = ChangeSpeed(s);
+            s = BridgeGaps(s);
         }
         else
         {
@@ -897,13 +899,14 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             s = AdjustDisplayDuration(s);
             s = await AutoTranslate(s, cancellationToken);
             s = ChangeCasing(s, Language);
+            s = OffsetTimeCodes(s);
             s = ChangeFrameRate(s);
             s = ChangeSpeed(s);
+            s = BridgeGaps(s);
             s = FixCommonErrors(s);
             s = MergeLinesWithSameText(s);
             s = MergeLinesWithSameTimeCodes(s, Language);
             s = MultipleReplace(s);
-            s = OffsetTimeCodes(s);
             s = RemoveLineBreaks(s);
             s = RemoveTextForHearingImpaired(s, Language);
             s = FixRightToLeft(s);
@@ -1185,6 +1188,35 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         return subtitle;
     }
 
+    private Subtitle BridgeGaps(Subtitle subtitle)
+    {
+        if (!_config.BridgeGaps.IsActive)
+        {
+            return subtitle;
+        }
+
+        var dic = new Dictionary<string, string>();
+        var fixedIndexes = new List<int>(subtitle.Paragraphs.Count);
+        var minMsBetweenLines = _config.BridgeGaps.MinGapMs;
+        var maxMs = _config.BridgeGaps.BridgeGapsSmallerThanMs;
+        if (Configuration.Settings.General.UseTimeFormatHHMMSSFF)
+        {
+            minMsBetweenLines = SubtitleFormat.FramesToMilliseconds(minMsBetweenLines);
+            maxMs = SubtitleFormat.FramesToMilliseconds(maxMs);
+        }
+
+        var subtitles = new ObservableCollection<SubtitleLineViewModel>(subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, subtitle.OriginalFormat)));
+        var fixedCount = DurationsBridgeGaps2.BridgeGaps(subtitles, minMsBetweenLines, _config.BridgeGaps.PercentForLeft, maxMs, fixedIndexes, dic, Configuration.Settings.General.UseTimeFormatHHMMSSFF);
+
+        for (var i = 0; i < subtitles.Count && i < subtitle.Paragraphs.Count; i++)
+        {
+            subtitle.Paragraphs[i].StartTime.TotalMilliseconds = subtitles[i].StartTime.TotalMilliseconds;
+            subtitle.Paragraphs[i].EndTime.TotalMilliseconds = subtitles[i].EndTime.TotalMilliseconds;
+        }
+
+        return subtitle;
+    }
+
     private Subtitle ChangeFrameRate(Subtitle subtitle)
     {
         if (!_config.ChangeFrameRate.IsActive)
@@ -1285,9 +1317,18 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
 
         var paragraphs = subtitle.Paragraphs.Skip(c.DeleteXFirst).ToList();
         paragraphs = paragraphs.Take(paragraphs.Count - c.DeleteXLast).ToList();
+
         if (!string.IsNullOrWhiteSpace(c.DeleteContains))
         {
             paragraphs = paragraphs.Where(p => !p.Text.Contains(c.DeleteContains)).ToList();
+        }
+
+        var actorsOrSpeakers = c.DeleteActorsOrStyles.Split([',', ';'], StringSplitOptions.RemoveEmptyEntries)
+            .Select(a => a.Trim()).ToList();
+        foreach (var actor in actorsOrSpeakers)
+        {
+            paragraphs = paragraphs.Where(p => !p.Actor.Equals(actor, StringComparison.OrdinalIgnoreCase)).ToList();
+            paragraphs = paragraphs.Where(p => !p.Style.Equals(actor, StringComparison.OrdinalIgnoreCase)).ToList();
         }
 
         subtitle.Paragraphs.Clear();
