@@ -224,6 +224,14 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
                 MacHelper.MakeExecutable(cppPath);
             }
         }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            var cppPath = Path.Combine(folder, "whisper-cli");
+            if (File.Exists(cppPath))
+            {
+                LinuxHelper.MakeExecutable(cppPath);
+            }
+        }
     }
 
     private void Close()
