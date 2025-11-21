@@ -186,10 +186,10 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
                 }
 
                 ProgressText = $"Unpacking: {displayName}";
-                reader.WriteEntryToDirectory(fullPath, new ExtractionOptions() 
-                { 
-                    ExtractFullPath = false, 
-                    Overwrite = true 
+                reader.WriteEntryToDirectory(fullPath, new ExtractionOptions()
+                {
+                    ExtractFullPath = false,
+                    Overwrite = true
                 });
                 unpackedSize += reader.Entry.Size;
             }
@@ -206,30 +206,30 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            var cppPath = Path.Combine(folder, "whisper-cli");
-            if (File.Exists(cppPath))
+            var path = Path.Combine(folder, "whisper-cli");
+            if (File.Exists(path))
             {
-                MacHelper.MakeExecutable(cppPath);
+                MacHelper.MakeExecutable(path);
             }
-            
-            cppPath = Path.Combine(folder, "libwhisper.1.dylib-cli");
-            if (File.Exists(cppPath))
+
+            path = Path.Combine(folder, "faster-whisper-xxl");
+            if (File.Exists(path))
             {
-                MacHelper.MakeExecutable(cppPath);
-            }
-            
-            cppPath = Path.Combine(folder, "libwhisper.1.8.2.dylib");
-            if (File.Exists(cppPath))
-            {
-                MacHelper.MakeExecutable(cppPath);
+                MacHelper.MakeExecutable(path);
             }
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            var cppPath = Path.Combine(folder, "whisper-cli");
-            if (File.Exists(cppPath))
+            var path = Path.Combine(folder, "whisper-cli");
+            if (File.Exists(path))
             {
-                LinuxHelper.MakeExecutable(cppPath);
+                LinuxHelper.MakeExecutable(path);
+            }
+
+            path = Path.Combine(folder, "faster-whisper-xxl");
+            if (File.Exists(path))
+            {
+                LinuxHelper.MakeExecutable(path);
             }
         }
     }
