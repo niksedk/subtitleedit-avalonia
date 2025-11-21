@@ -11,7 +11,8 @@ public class WhisperDownloadService : IWhisperDownloadService
 {
     private readonly HttpClient _httpClient;
     private const string WindowsUrl = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-182/whisper-blas-bin-x64.zip";
-    private const string MacUrl = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-182/WhisperCpp182-mac-m.zip";
+    private const string MacArmUrl = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-182/whisper-cpp-182-mac-arm.zip";
+    private const string MacX64Url = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-182/whisper-cpp-182-mac-x64.zip";
     private const string LinuxUrl = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-182/whisper-182-linux.zip";
 
     private const string DownloadUrlConstMe = "https://github.com/Const-me/Whisper/releases/download/1.12.0/cli.zip";
@@ -73,9 +74,9 @@ public class WhisperDownloadService : IWhisperDownloadService
             switch (RuntimeInformation.ProcessArchitecture)
             {
                 case Architecture.Arm64:
-                    return MacUrl; // e.g., for M1, M2, M3, M4 chips
+                    return MacArmUrl; // e.g., for M1, M2, M3, M4 chips
                 case Architecture.X64:
-                    return MacUrl;
+                    return MacX64Url;
                 default:
                     throw new PlatformNotSupportedException("Unsupported macOS architecture.");
             }
