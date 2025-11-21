@@ -146,9 +146,9 @@ jobs:
         run: dotnet test --no-build --verbosity normal
       - name: Download ffmpeg for macOS
         run: |
-          curl -L -o ffmpeg-mac-7.1.1.zip "https://github.com/SubtitleEdit/support-files/releases/download/ffmpeg-v7-1/ffmpeg-mac-7.1.1.zip"
-          unzip ffmpeg-mac-7.1.1.zip -d ffmpeg-temp
-          rm ffmpeg-mac-7.1.1.zip  # Clean up immediately after extraction
+          curl -L -o ffmpeg8-mac-arm.zip "https://github.com/SubtitleEdit/support-files/releases/download/ffmpeg-v8/ffmpeg8-mac-arm.zip"
+          unzip ffmpeg8-mac-arm.zip -d ffmpeg-temp
+          rm ffmpeg8-mac-arm.zip  # Clean up immediately after extraction
       - name: Download libmpv for macOS ARM64
         run: |
           curl -L -o libmpv-mac-arm.zip "https://github.com/SubtitleEdit/support-files/releases/download/libmpv-2025-01-25/libmpv-mac-arm.zip"
