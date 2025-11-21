@@ -13,6 +13,12 @@ using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
+using Nikse.SubtitleEdit.Features.Shared.PromptFileSaved;
+using SkiaSharp;
 
 namespace Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 
@@ -28,22 +34,30 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
     public bool OkPressed { get; private set; }
     public string WindowTitle { get; private set; }
 
+    private readonly IFileHelper _fileHelper;
+    private readonly IWindowService _windowService;
+
     private List<MatroskaTrackInfo> _matroskaTracks;
     private MatroskaFile? _matroskaFile;
+    private string _fileName;
 
-    public PickMatroskaTrackViewModel()
+    public PickMatroskaTrackViewModel(IFileHelper fileHelper, IWindowService windowService)
     {
+        _fileHelper = fileHelper;
+        _windowService = windowService;
         Tracks = new ObservableCollection<MatroskaTrackInfoDisplay>();
         TracksGrid = new DataGrid();
         WindowTitle = string.Empty;
         Rows = new ObservableCollection<MatroskaSubtitleCueDisplay>();
         _matroskaTracks = new List<MatroskaTrackInfo>();
+        _fileName = string.Empty;
     }
 
     public void Initialize(MatroskaFile matroskaFile, List<MatroskaTrackInfo> matroskaTracks, string fileName)
     {
         _matroskaFile = matroskaFile;
         _matroskaTracks = matroskaTracks;
+        _fileName = fileName;
         WindowTitle = string.Format(Se.Language.File.PickMatroskaTrackX, fileName);
         foreach (var track in _matroskaTracks)
         {
@@ -63,15 +77,107 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
 
     private void Close()
     {
-        Dispatcher.UIThread.Post(() =>
-        {
-            Window?.Close();
-        });
+        Dispatcher.UIThread.Post(() => { Window?.Close(); });
     }
 
     [RelayCommand]
-    private void Export()
+    private async Task Export()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var selectedTrack = SelectedTrack;
+        if (selectedTrack == null)
+        {
+            return;
+        }
+
+        var trackInfo = selectedTrack.MatroskaTrackInfo!;
+        var subtitles = _matroskaFile?.GetSubtitle(trackInfo.TrackNumber, null);
+        if (trackInfo.CodecId == MatroskaTrackType.SubRip && subtitles != null)
+        {
+            await WriteTextSubtitleFile(Window, trackInfo, subtitles, new SubRip());
+        }
+        else if (trackInfo.CodecId is MatroskaTrackType.SubStationAlpha or MatroskaTrackType.SubStationAlpha2 && subtitles != null)
+        {
+            await WriteTextSubtitleFile(Window, trackInfo, subtitles, new SubStationAlpha());
+        }
+        else if (trackInfo.CodecId is MatroskaTrackType.AdvancedSubStationAlpha or MatroskaTrackType.AdvancedSubStationAlpha2 && subtitles != null)
+        {
+            await WriteTextSubtitleFile(Window, trackInfo, subtitles, new AdvancedSubStationAlpha());
+        }
+        else if (trackInfo.CodecId == MatroskaTrackType.BluRay && subtitles != null && _matroskaFile != null)
+        {
+            var suggestedFileName = Path.GetFileNameWithoutExtension(_fileName);
+            var fileName = await _fileHelper.PickSaveSubtitleFile(Window, ".sup", suggestedFileName, Se.Language.General.SaveFileAsTitle);
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return;
+            }
+
+            var pcsData = BluRaySupParser.ParseBluRaySupFromMatroska(trackInfo, _matroskaFile);
+            if (pcsData.Count == 0)
+            {
+                return;
+            }
+
+            var exportHandler = new ExportHandlerBluRaySup();
+            exportHandler.WriteHeader(fileName, new ImageParameter
+            {
+                ScreenWidth = (int)Math.Round(pcsData[0].GetScreenSize().Width, MidpointRounding.AwayFromZero),
+                ScreenHeight = (int)Math.Round(pcsData[0].GetScreenSize().Height, MidpointRounding.AwayFromZero),
+            });
+            for (var i = 0; i < pcsData.Count; i++)
+            {
+                var item = pcsData[i];
+                var ip = new ImageParameter
+                {
+                    Bitmap = item.GetBitmap(),
+                    StartTime = TimeSpan.FromMilliseconds(item.StartTimeCode.TotalMilliseconds),
+                    EndTime = TimeSpan.FromMilliseconds(item.EndTimeCode.TotalMilliseconds),
+                    ScreenWidth = 1920,
+                    ScreenHeight = 1080,
+                    Index = i + 1,
+                    OverridePosition = new SKPointI(item.GetPosition().Left, item.GetPosition().Top),
+                };
+                exportHandler.WriteParagraph(ip);
+            }
+
+            exportHandler.WriteFooter();
+
+            _ = await _windowService.ShowDialogAsync<PromptFileSavedWindow, PromptFileSavedViewModel>(Window,
+                vm => { vm.Initialize(Se.Language.General.SubtitleFileSaved, string.Format(Se.Language.General.SubtitleFileSavedToX, fileName), fileName, true, true); });
+        }
+        else if (trackInfo.CodecId == MatroskaTrackType.TextSt && subtitles != null && _matroskaFile != null)
+        {
+            var subtitle = new Subtitle();
+            var sub = _matroskaFile.GetSubtitle(trackInfo.TrackNumber, null);
+            Utilities.LoadMatroskaTextSubtitle(trackInfo, _matroskaFile, sub, subtitle);
+            Utilities.ParseMatroskaTextSt(trackInfo, sub, subtitle);
+            await WriteTextSubtitleFile(Window, trackInfo, subtitles, new SubRip());
+        }
+        else
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, "Format not supported: " + trackInfo.CodecId);
+        }
+    }
+
+    private async Task WriteTextSubtitleFile(Window window, MatroskaTrackInfo trackInfo, List<MatroskaSubtitle> subtitles, SubtitleFormat format)
+    {
+        var sub = new Subtitle();
+        Utilities.LoadMatroskaTextSubtitle(trackInfo, _matroskaFile, subtitles, sub);
+        var rawText = format.ToText(sub, string.Empty);
+        var suggestedFileName = Path.GetFileNameWithoutExtension(_fileName);
+        var fileName = await _fileHelper.PickSaveSubtitleFile(window, format.Extension, suggestedFileName, Se.Language.General.SaveFileAsTitle);
+
+        if (!string.IsNullOrEmpty(fileName))
+        {
+            await File.WriteAllTextAsync(fileName, rawText, Encoding.UTF8);
+            _ = await _windowService.ShowDialogAsync<PromptFileSavedWindow, PromptFileSavedViewModel>(window,
+                vm => { vm.Initialize(Se.Language.General.SubtitleFileSaved, string.Format(Se.Language.General.SubtitleFileSavedToX, fileName), fileName, true, true); });
+        }
     }
 
     [RelayCommand]
@@ -98,11 +204,7 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
 
     internal void DataGridTracksSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        bool flowControl = TrackChanged();
-        if (!flowControl)
-        {
-            return;
-        }
+        TrackChanged();
     }
 
     private bool TrackChanged()
@@ -139,7 +241,6 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
                 {
                     Number = i + 1,
                     Show = TimeSpan.FromMilliseconds(item.StartTimeCode.TotalMilliseconds),
-                    Hide = TimeSpan.FromMilliseconds(item.EndTimeCode.TotalMilliseconds),
                     Duration = TimeSpan.FromMilliseconds(item.EndTimeCode.TotalMilliseconds - item.StartTimeCode.TotalMilliseconds),
                     Image = new Image { Source = bitmap.ToAvaloniaBitmap() },
                 };
@@ -160,7 +261,6 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
                 {
                     Number = i + 1,
                     Show = item.StartTime.TimeSpan,
-                    Hide = item.EndTime.TimeSpan,
                     Duration = TimeSpan.FromMilliseconds(item.EndTime.TotalMilliseconds - item.StartTime.TotalMilliseconds),
                     Text = item.Text,
                 };
@@ -184,7 +284,6 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
                 Number = p.Number,
                 Text = p.Text,
                 Show = TimeSpan.FromMilliseconds(p.StartTime.TotalMilliseconds),
-                Hide = TimeSpan.FromMilliseconds(p.EndTime.TotalMilliseconds),
                 Duration = TimeSpan.FromMilliseconds(p.EndTime.TotalMilliseconds - p.StartTime.TotalMilliseconds),
             };
             Rows.Add(cue);

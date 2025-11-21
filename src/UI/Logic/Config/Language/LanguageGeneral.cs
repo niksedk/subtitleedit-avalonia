@@ -533,6 +533,8 @@ public class LanguageGeneral
     public string UnpackingX { get; set; }
     public string DownloadingX { get; set; }
     public string DownloadingXPercent { get; set; }
+    public string SubtitleFileSaved { get; set; }
+    public string SubtitleFileSavedToX { get; set; }
 
     public LanguageGeneral()
     {
@@ -1065,5 +1067,7 @@ public class LanguageGeneral
         UnpackingX = "Unpacking {0}";
         DownloadingX = "Downloading {0}";
         DownloadingXPercent = "Downloading {0}%";
+        SubtitleFileSaved = "Subtitle file saved";
+        SubtitleFileSavedToX = "Subtitle file saved to {0}";
     }
 }
