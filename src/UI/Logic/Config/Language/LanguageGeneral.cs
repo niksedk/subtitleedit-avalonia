@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language;
+﻿using System;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
 public class LanguageGeneral
 {
@@ -527,6 +529,10 @@ public class LanguageGeneral
     public string TwoLetterLanguageCode { get; set; }
     public string ThreeLetterLanguageCode { get; set; }
     public string LanguagePostFix { get; set; }
+    public string Unpacking7ZipArchiveDotDotDot { get; set; }
+    public string UnpackingX { get; set; }
+    public string DownloadingX { get; set; }
+    public string DownloadingXPercent { get; set; }
 
     public LanguageGeneral()
     {
@@ -1055,5 +1061,9 @@ public class LanguageGeneral
         TwoLetterLanguageCode = "Two-letter language code";
         ThreeLetterLanguageCode = "Three-letter language code";
         LanguagePostFix = "Language post-fix (mkv/mp4)";
+        Unpacking7ZipArchiveDotDotDot = "Unpacking 7-zip archive...";
+        UnpackingX = "Unpacking {0}";
+        DownloadingX = "Downloading {0}";
+        DownloadingXPercent = "Downloading {0}%";
     }
 }

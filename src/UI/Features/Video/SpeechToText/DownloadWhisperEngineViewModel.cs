@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper.Engines;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Compression;
+using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Download;
 using SharpCompress.Archives.SevenZip;
 using SharpCompress.Common;
@@ -51,8 +52,8 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
 
         _downloadStream = new MemoryStream();
 
-        TitleText = "Downloading Whisper engine";
-        ProgressText = "Starting...";
+        TitleText = Se.Language.Video.AudioToText.DownloadingWhisperEngine;
+        ProgressText = Se.Language.General.StartingDotDotDot;
         Error = string.Empty;
 
         _timer = new Timer(500);
@@ -74,7 +75,7 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
                     var dir = Engine.GetAndCreateWhisperFolder();
                     var tempFileName = Path.Combine(dir, Engine.Name + ".7z");
 
-                    ProgressText = "Unpacking 7-zip archive...";
+                    ProgressText = Se.Language.General.Unpacking7ZipArchiveDotDotDot;
                     Extract7Zip(tempFileName, dir);
 
                     try
@@ -185,7 +186,7 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
                     displayName = "..." + displayName.Remove(0, displayName.Length - 26).Trim();
                 }
 
-                ProgressText = $"Unpacking: {displayName}";
+                ProgressText = string.Format(Se.Language.General.UnpackingX, displayName); ;
                 reader.WriteEntryToDirectory(fullPath, new ExtractionOptions()
                 {
                     ExtractFullPath = false,
@@ -257,14 +258,14 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
 
     public void StartDownload()
     {
-        TitleText = $"Downloading {Engine?.Name}";
+        TitleText = string.Format(Se.Language.General.DownloadingX, Engine?.Name);
 
         var downloadProgress = new Progress<float>(number =>
         {
             var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
             var pctString = percentage.ToString(CultureInfo.InvariantCulture);
             ProgressValue = percentage;
-            ProgressText = $"Downloading... {pctString}%";
+            ProgressText = string.Format(Se.Language.General.DownloadingXPercent, pctString);
         });
 
         if (Engine is WhisperEngineCpp)
