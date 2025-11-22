@@ -157,8 +157,18 @@ public class ExportHandlerBdnXml : IExportHandler
                     "<Events>" + Environment.NewLine +
                     "</Events>" + Environment.NewLine +
                     "</BDN>");
-        XmlNode events = doc.DocumentElement.SelectSingleNode("Events");
+        if (doc == null || doc.DocumentElement == null)
+        {
+            throw new InvalidOperationException("BDN XML document could not be created.");
+        }
+
+        XmlNode? events = doc.DocumentElement.SelectSingleNode("Events");
         doc.PreserveWhitespace = true;
+
+        if (events == null)
+        {
+            throw new InvalidOperationException("BDN XML Events node not found.");
+        }
         events.InnerXml = _sb.ToString();
         FileUtil.WriteAllTextWithDefaultUtf8(Path.Combine(_folderName, "index.xml"), FormatUtf8Xml(doc));
     }

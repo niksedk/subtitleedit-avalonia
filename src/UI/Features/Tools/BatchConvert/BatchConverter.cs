@@ -234,12 +234,10 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             }
             else
             {
-                var mp4Found = false;
                 var trackId = item.Format;
                 if (mp4Parser.VttcSubtitle?.Paragraphs.Count > 0 && trackId == "MP4/WebVTT - " + mp4Parser.VttcLanguage)
                 {
                     item.Subtitle = mp4Parser.VttcSubtitle;
-                    mp4Found = true;
                     var fileName = Path.GetFileName(item.FileName);
                     item.OutputFileName = fileName.Substring(0, fileName.LastIndexOf('.')).TrimEnd('.') + ".mp4";
                 }
@@ -254,7 +252,6 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                             {
                                 item.Subtitle = new Subtitle();
                                 item.Subtitle.Paragraphs.AddRange(track.Mdia.Minf.Stbl.GetParagraphs());
-                                mp4Found = true;
                                 var fileName = Path.GetFileName(item.FileName);
                                 item.OutputFileName = fileName.Substring(0, fileName.LastIndexOf('.')).TrimEnd('.') + ".mp4";
                                 break;

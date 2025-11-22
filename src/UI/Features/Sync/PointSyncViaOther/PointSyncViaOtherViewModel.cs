@@ -53,6 +53,7 @@ public partial class PointSyncViaOtherViewModel : ObservableObject
         FileName = string.Empty;
         FileNameOther = string.Empty;
         _videoFileName = string.Empty;
+        SyncedSubtitles = new List<SubtitleLineViewModel>();
     }
 
     public void Initialize(List<SubtitleLineViewModel> subtitles, string videoFileName, string fileName)

@@ -53,83 +53,83 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int MpvInitialize(IntPtr mpvHandle);
 
-    private MpvInitialize _mpvInitialize;
+    private MpvInitialize? _mpvInitialize;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int MpvCommand(IntPtr mpvHandle, IntPtr utf8Strings);
 
-    private MpvCommand _mpvCommand;
+    private MpvCommand? _mpvCommand;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate IntPtr MpvWaitEvent(IntPtr mpvHandle, double wait);
 
-    private MpvWaitEvent _mpvWaitEvent;
+    private MpvWaitEvent? _mpvWaitEvent;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int MpvSetOption(IntPtr mpvHandle, byte[] name, int format, ref ulong data);
 
-    private MpvSetOption _mpvSetOption;
+    private MpvSetOption? _mpvSetOption;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int MpvSetOptionString(IntPtr mpvHandle, byte[] name, byte[] value);
 
-    private MpvSetOptionString _mpvSetOptionString;
+    private MpvSetOptionString? _mpvSetOptionString;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int MpvGetPropertyString(IntPtr mpvHandle, byte[] name, int format, ref IntPtr data);
 
-    private MpvGetPropertyString _mpvGetPropertyString;
+    private MpvGetPropertyString? _mpvGetPropertyString;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int MpvGetPropertyDouble(IntPtr mpvHandle, byte[] name, int format, ref double data);
 
-    private MpvGetPropertyDouble _mpvGetPropertyDouble;
+    private MpvGetPropertyDouble? _mpvGetPropertyDouble;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int MpvSetProperty(IntPtr mpvHandle, byte[] name, int format, ref byte[] data);
 
-    private MpvSetProperty _mpvSetProperty;
+    private MpvSetProperty? _mpvSetProperty;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void MpvFree(IntPtr data);
 
-    private MpvFree _mpvFree;
+    private MpvFree? _mpvFree;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate ulong MpvClientApiVersion();
 
-    private MpvClientApiVersion _mpvClientApiVersion;
+    private MpvClientApiVersion? _mpvClientApiVersion;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate IntPtr MpvErrorString(int error);
 
-    private MpvErrorString _mpvErrorString;
+    private MpvErrorString? _mpvErrorString;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate IntPtr MpvTerminateDestroy(IntPtr mpvHandle);
 
-    private MpvTerminateDestroy _mpvTerminateDestroy;
+    private MpvTerminateDestroy? _mpvTerminateDestroy;
 
     // Render API functions
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int MpvRenderContextCreate(out IntPtr res, IntPtr mpvHandle, IntPtr parameters);
 
-    private MpvRenderContextCreate _mpvRenderContextCreate;
+    private MpvRenderContextCreate? _mpvRenderContextCreate;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int MpvRenderContextRender(IntPtr ctx, IntPtr parameters);
 
-    private MpvRenderContextRender _mpvRenderContextRender;
+    private MpvRenderContextRender? _mpvRenderContextRender;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void MpvRenderContextFree(IntPtr ctx);
 
-    private MpvRenderContextFree _mpvRenderContextFree;
+    private MpvRenderContextFree? _mpvRenderContextFree;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void MpvRenderContextSetUpdateCallback(IntPtr ctx, IntPtr callback, IntPtr callbackCtx);
 
-    private MpvRenderContextSetUpdateCallback _mpvRenderContextSetUpdateCallback;
+    private MpvRenderContextSetUpdateCallback? _mpvRenderContextSetUpdateCallback;
 
     // OpenGL proc address callback - public delegate for external use
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -170,6 +170,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 
     public LibMpvDynamicPlayer()
     {
+
     }
 
     private static string[] GetLibraryNames()
@@ -305,7 +306,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
     public int Initialize()
     {
         EnsureNotDisposed();
-        if (_mpv == IntPtr.Zero)
+        if (_mpv == IntPtr.Zero || _mpvInitialize == null)
         {
             return -1;
         }
@@ -320,12 +321,22 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 
     public string GetErrorString(int error)
     {
+        if (_mpvErrorString == null)
+        {
+            return $"mpv error {error}";
+        }
+
         var ptr = _mpvErrorString(error);
         return ptr == IntPtr.Zero ? $"mpv error {error}" : Marshal.PtrToStringUTF8(ptr) ?? $"mpv error {error}";
     }
 
     public int SetOptionString(string name, string value)
     {
+        if (_mpvSetOptionString == null)
+        {
+            return -1;
+        }
+
         var nameBytes = GetUtf8Bytes(name);
         var valueBytes = GetUtf8Bytes(value);
         return _mpvSetOptionString(_mpv, nameBytes, valueBytes);
@@ -350,7 +361,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 
     private int DoMpvCommand(params string[] args)
     {
-        if (_mpv == IntPtr.Zero)
+        if (_mpv == IntPtr.Zero || _mpvCommand == null)
         {
             return 0;
         }
@@ -376,6 +387,12 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
     {
         LoadLibraryInternal();
         EnsureNotDisposed();
+
+        if (_mpvInitialize == null || _mpvRenderContextCreate == null || _mpvRenderContextSetUpdateCallback == null)
+        {
+            Se.LogError(new InvalidOperationException("MPV delegates not loaded"), "LibMpvDynamicPlayer InitializeWithOpenGL");
+            return;
+        }
 
         _getProcAddress = getProcAddress;
 
@@ -475,7 +492,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 
     public void RenderToFramebuffer(int fbo, int width, int height, bool flipY = true)
     {
-        if (_renderContext == IntPtr.Zero)
+        if (_renderContext == IntPtr.Zero || _mpvRenderContextRender == null)
         {
             return;
         }
@@ -548,13 +565,13 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 
         _disposed = true;
 
-        if (_renderContext != IntPtr.Zero)
+        if (_renderContext != IntPtr.Zero && _mpvRenderContextFree != null)
         {
             _mpvRenderContextFree(_renderContext);
             _renderContext = IntPtr.Zero;
         }
 
-        if (_mpv != IntPtr.Zero)
+        if (_mpv != IntPtr.Zero && _mpvTerminateDestroy != null)
         {
             _mpvTerminateDestroy.Invoke(_mpv);
             _mpv = IntPtr.Zero;
@@ -632,7 +649,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         get
         {
             EnsureNotDisposed();
-            if (_mpv == IntPtr.Zero)
+            if (_mpv == IntPtr.Zero || _mpvGetPropertyDouble == null)
             {
                 return false;
             }
@@ -662,7 +679,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         get
         {
             EnsureNotDisposed();
-            if (_mpv == IntPtr.Zero)
+            if (_mpv == IntPtr.Zero || _mpvGetPropertyDouble == null)
             {
                 return false;
             }
@@ -692,7 +709,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         get
         {
             EnsureNotDisposed();
-            if (_mpv == IntPtr.Zero)
+            if (_mpv == IntPtr.Zero || _mpvGetPropertyDouble == null)
             {
                 return 0;
             }
@@ -736,7 +753,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         get
         {
             EnsureNotDisposed();
-            if (_mpv == IntPtr.Zero)
+            if (_mpv == IntPtr.Zero || _mpvGetPropertyDouble == null)
             {
                 return 0;
             }
@@ -768,7 +785,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         get
         {
             EnsureNotDisposed();
-            if (_mpv == IntPtr.Zero)
+            if (_mpv == IntPtr.Zero || _mpvGetPropertyDouble == null)
             {
                 return 100;
             }
@@ -814,7 +831,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         get
         {
             EnsureNotDisposed();
-            if (_mpv == IntPtr.Zero)
+            if (_mpv == IntPtr.Zero || _mpvGetPropertyDouble == null)
             {
                 return 1.0;
             }
@@ -914,7 +931,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
     public string ToggleAudioTrack()
     {
         EnsureNotDisposed();
-        if (_mpv == IntPtr.Zero)
+        if (_mpv == IntPtr.Zero || _mpvGetPropertyDouble == null || _mpvGetPropertyString == null || _mpvFree == null)
         {
             return string.Empty;
         }
@@ -1025,6 +1042,11 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         // Set mpv to use software rendering
         SetOptionString("vo", "libmpv");
 
+        if (_mpvInitialize == null || _mpvRenderContextCreate == null || _mpvRenderContextSetUpdateCallback == null)
+        {
+            throw new InvalidOperationException("MPV delegates not loaded for software rendering.");
+        }
+
         // Initialize mpv
         var err = _mpvInitialize(_mpv);
         if (err < 0)
@@ -1086,7 +1108,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
             return;
         }
 
-        if (_renderContext == IntPtr.Zero)
+        if (_renderContext == IntPtr.Zero || _mpvRenderContextRender == null)
         {
             return;
         }
@@ -1178,7 +1200,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
     {
         get
         {
-            if (_mpv == IntPtr.Zero)
+            if (_mpv == IntPtr.Zero || _mpvClientApiVersion == null)
             {
                 return string.Empty;
             }

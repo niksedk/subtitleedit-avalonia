@@ -164,6 +164,7 @@ public class BatchConvertConfig
         public DeleteLinesSettings()
         {
             DeleteContains = string.Empty;
+            DeleteActorsOrStyles = string.Empty;
         }
     }
 

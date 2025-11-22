@@ -38,10 +38,8 @@ public class LibMpvDynamicOpenGlControl : OpenGlControlBase
 
         if (!_isInitialized)
         {
-            //_mpvPlayer = new LibMpvDynamicPlayer();
-
             // Set up the GetProcAddress delegate for OpenGL
-            _mpvPlayer.InitializeWithOpenGL((ctx, name) =>
+            _mpvPlayer?.InitializeWithOpenGL((ctx, name) =>
             {
                 try
                 {
@@ -54,7 +52,10 @@ public class LibMpvDynamicOpenGlControl : OpenGlControlBase
             });
 
             // Subscribe to render requests
-            _mpvPlayer.RequestRender += OnMpvRequestRender;
+            if (_mpvPlayer != null)
+            {
+                _mpvPlayer.RequestRender += OnMpvRequestRender;
+            }
 
             _isInitialized = true;
         }

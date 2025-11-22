@@ -44,7 +44,7 @@ public static class InitVideoPlayer
         mainGrid.AddHandler(DragDrop.DropEvent, vm.VideoOnDrop, RoutingStrategies.Bubble);
 
         var control = MakeVideoPlayer();
-        if (!string.IsNullOrEmpty(mediaFile) && control != null)
+        if (!string.IsNullOrEmpty(mediaFile))
         {
             Dispatcher.UIThread.Post(async () =>
             {
