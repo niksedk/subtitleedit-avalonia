@@ -113,6 +113,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nikse.SubtitleEdit.Features.Sync.PointSyncViaOther;
 using static Nikse.SubtitleEdit.Logic.FindService;
+using Nikse.SubtitleEdit.Features.Sync.PointSync;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -3156,18 +3157,18 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<VisualSyncWindow, VisualSyncViewModel>(vm =>
+        var result = await ShowDialogAsync<PointSyncWindow, PointSyncViewModel>(vm =>
         {
             var paragraphs = Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList();
-            vm.Initialize(paragraphs, _videoFileName, _subtitleFileName, AudioVisualizer);
+            vm.Initialize(paragraphs, _videoFileName ?? string.Empty, _subtitleFileName ?? string.Empty, AudioVisualizer?.WavePeaks);
         });
 
         if (result.OkPressed)
         {
             Subtitles.Clear();
-            foreach (var p in result.Paragraphs)
+            foreach (var p in result.SyncedSubtitles)
             {
-                Subtitles.Add(p.Subtitle);
+                Subtitles.Add(p);
             }
 
             SelectAndScrollToRow(0);
@@ -3191,21 +3192,20 @@ public partial class MainViewModel :
         var result = await ShowDialogAsync<PointSyncViaOtherWindow, PointSyncViaOtherViewModel>(vm =>
         {
             var paragraphs = Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList();
-            vm.Initialize(paragraphs, _videoFileName, _subtitleFileName);
+            vm.Initialize(paragraphs, _videoFileName ?? string.Empty, _subtitleFileName ?? string.Empty);
         });
 
         if (result.OkPressed)
         {
-            // Subtitles.Clear();
-            // foreach (var p in result.Paragraphs)
-            // {
-            //     Subtitles.Add(p.Subtitle);
-            // }
+            Subtitles.Clear();
+            foreach (var p in result.SyncedSubtitles)
+            {
+                Subtitles.Add(p);
+            }
 
             SelectAndScrollToRow(0);
         }
     }
-
 
     [RelayCommand]
     private async Task ShowAutoTranslate()

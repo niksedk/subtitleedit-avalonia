@@ -58,6 +58,7 @@ using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
 using Nikse.SubtitleEdit.Features.Sync.AdjustAllTimes;
 using Nikse.SubtitleEdit.Features.Sync.ChangeFrameRate;
 using Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
+using Nikse.SubtitleEdit.Features.Sync.PointSync;
 using Nikse.SubtitleEdit.Features.Sync.PointSyncViaOther;
 using Nikse.SubtitleEdit.Features.Sync.VisualSync;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
@@ -245,6 +246,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<PickRuleProfileViewModel>();
         collection.AddTransient<PickTsTrackViewModel>();
         collection.AddTransient<PointSyncViaOtherViewModel>();
+        collection.AddTransient<PointSyncViewModel>();
         collection.AddTransient<PreProcessingViewModel>();
         collection.AddTransient<ProfilesExportViewModel>();
         collection.AddTransient<ProfilesViewModel>();
