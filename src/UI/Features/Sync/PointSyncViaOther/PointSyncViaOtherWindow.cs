@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
@@ -15,7 +16,7 @@ public class PointSyncViaOtherWindow : Window
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = vm.WindowTitle;
-        Width = 1024;
+        Width = 1100;
         Height = 600;
         MinWidth = 800;
         MinHeight = 600;
@@ -24,6 +25,7 @@ public class PointSyncViaOtherWindow : Window
         DataContext = vm;
 
         var subtitleViewView = MakeSubtitleView(vm);
+        var controlView = MakeControlView(vm);
         var subtitleOtherView = MakeSubtitleOtherView(vm);
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
@@ -40,6 +42,7 @@ public class PointSyncViaOtherWindow : Window
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
@@ -49,7 +52,8 @@ public class PointSyncViaOtherWindow : Window
         };
 
         grid.Add(subtitleViewView, 0);
-        grid.Add(subtitleOtherView, 0, 1);
+        grid.Add(controlView, 0, 1);
+        grid.Add(subtitleOtherView, 0, 2);
         grid.Add(panelButtons, 1, 0, 1, 2);
 
         Content = grid;
@@ -63,6 +67,51 @@ public class PointSyncViaOtherWindow : Window
         {
             //vm.SelectAndScrollToRow(0);
         };
+    }
+
+    private static Control MakeControlView(PointSyncViaOtherViewModel vm)
+    {
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(50, GridUnitType.Pixel) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            Margin = new Thickness(0, 60, 0, 0),
+        };
+
+        var dataGrid = new DataGrid
+        {
+            AutoGenerateColumns = false,
+            SelectionMode = DataGridSelectionMode.Single,
+            DataContext = vm,
+            ItemsSource = vm.SyncPoints,
+            HeadersVisibility = DataGridHeadersVisibility.None,
+            Columns =
+            {
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.Sync.SyncPoints,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(SyncPoint.Text)),
+                    IsReadOnly = true,
+                },
+            },
+        };
+
+        var buttonSetSyncPoint = UiUtil.MakeButton(Se.Language.Sync.SetSyncPoint, vm.SetSyncPointCommand);
+        
+        grid.Add(buttonSetSyncPoint, 0);
+        grid.Add(UiUtil.MakeBorderForControlNoPadding( dataGrid), 1);
+
+        return grid;
     }
 
     private static Grid MakeSubtitleView(PointSyncViaOtherViewModel vm)
@@ -114,13 +163,13 @@ public class PointSyncViaOtherWindow : Window
                     Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)) { Converter = fullTimeConverter },
                     IsReadOnly = true,
                 },
-                new DataGridTextColumn
-                {
-                    Header = Se.Language.General.Duration,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(SubtitleLineViewModel.Duration)) { Converter = shortTimeConverter },
-                    IsReadOnly = true,
-                },
+                // new DataGridTextColumn
+                // {
+                //     Header = Se.Language.General.Duration,
+                //     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                //     Binding = new Binding(nameof(SubtitleLineViewModel.Duration)) { Converter = shortTimeConverter },
+                //     IsReadOnly = true,
+                // },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Text,
@@ -197,13 +246,13 @@ public class PointSyncViaOtherWindow : Window
                     Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)) { Converter = fullTimeConverter },
                     IsReadOnly = true,
                 },
-                new DataGridTextColumn
-                {
-                    Header = Se.Language.General.Duration,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(SubtitleLineViewModel.Duration)) { Converter = shortTimeConverter },
-                    IsReadOnly = true,
-                },
+                // new DataGridTextColumn
+                // {
+                //     Header = Se.Language.General.Duration,
+                //     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                //     Binding = new Binding(nameof(SubtitleLineViewModel.Duration)) { Converter = shortTimeConverter },
+                //     IsReadOnly = true,
+                // },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Text,
@@ -214,6 +263,7 @@ public class PointSyncViaOtherWindow : Window
                 },
             },
         };
+        dataGridSubtitle.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedOtherSubtitle)));
 
         grid.Add(panelOtherBrowse, 0);
         grid.Add(UiUtil.MakeBorderForControlNoPadding(dataGridSubtitle), 1);

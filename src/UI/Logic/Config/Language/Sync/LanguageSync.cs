@@ -23,6 +23,8 @@ public class LanguageSync
     public string ShowEarlier { get; set; }
     public string ShowLater { get; set; }
     public string ChangeFrameRate { get; set; }
+    public string SetSyncPoint { get; set; }
+    public string SyncPoints { get; set; }
 
     public LanguageSync()
     {
@@ -47,6 +49,7 @@ public class LanguageSync
         ShowEarlier = "Show earlier";
         ShowLater = "Show later";
         ChangeFrameRate = "Change frame rate";
-
+        SetSyncPoint = "Set sync point";
+        SyncPoints = "Sync points";
     }
 }
