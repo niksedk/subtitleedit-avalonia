@@ -63,10 +63,6 @@ public class PointSyncViaOtherWindow : Window
             buttonOk.Focus(); // hack to make OnKeyDown work
         };
         KeyDown += (_, e) => vm.OnKeyDown(e);
-        Loaded += (_, _) =>
-        {
-            //vm.SelectAndScrollToRow(0);
-        };
     }
 
     private static Control MakeControlView(PointSyncViaOtherViewModel vm)
@@ -163,13 +159,6 @@ public class PointSyncViaOtherWindow : Window
                     Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)) { Converter = fullTimeConverter },
                     IsReadOnly = true,
                 },
-                // new DataGridTextColumn
-                // {
-                //     Header = Se.Language.General.Duration,
-                //     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                //     Binding = new Binding(nameof(SubtitleLineViewModel.Duration)) { Converter = shortTimeConverter },
-                //     IsReadOnly = true,
-                // },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Text,
@@ -181,9 +170,6 @@ public class PointSyncViaOtherWindow : Window
             },
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedSubtitle)));
-//        dataGridTracks.SelectionChanged += vm.DataGridTracksSelectionChanged;
-        dataGrid.DoubleTapped += (_, _) => vm.OkCommand.Execute(null);
-        //      vm.TracksGrid = dataGridTracks;
 
         grid.Add(labelFileName, 0);
         grid.Add(UiUtil.MakeBorderForControlNoPadding(dataGrid), 1);
@@ -246,18 +232,11 @@ public class PointSyncViaOtherWindow : Window
                     Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)) { Converter = fullTimeConverter },
                     IsReadOnly = true,
                 },
-                // new DataGridTextColumn
-                // {
-                //     Header = Se.Language.General.Duration,
-                //     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                //     Binding = new Binding(nameof(SubtitleLineViewModel.Duration)) { Converter = shortTimeConverter },
-                //     IsReadOnly = true,
-                // },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Text,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(SubtitleLineViewModel.Text)) { Converter = shortTimeConverter },
+                    Binding = new Binding(nameof(SubtitleLineViewModel.Text)),
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
