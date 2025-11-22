@@ -97,6 +97,8 @@ public class LanguageMainMenu
     public string FixRightToLeftViaUnicodeControlCharacters { get; set; }
     public string RemoveUnicodeControlCharacters { get; set; }
     public string ReverseRightToLeftStartEnd { get; set; }
+    public string PointSync { get; set; }
+    public string PointSyncViaOther { get; set; }
 
     public LanguageMainMenu()
     {
@@ -172,6 +174,8 @@ public class LanguageMainMenu
         Synchronization = "S_ynchronization";
         AdjustAllTimes = "_Adjust all times...";
         VisualSync = "_Visual sync...";
+        PointSync = "_Point sync...";
+        PointSyncViaOther = "Point sync via _other subtitle...";
         ChangeFrameRate = "Change _frame rate...";
         ChangeSpeed = "Change _speed...";
 

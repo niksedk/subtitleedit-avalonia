@@ -1,8 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
-using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -12,11 +10,8 @@ namespace Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 
 public class PickMatroskaTrackWindow : Window
 {
-    private readonly PickMatroskaTrackViewModel _vm;
-
     public PickMatroskaTrackWindow(PickMatroskaTrackViewModel vm)
     {
-        _vm = vm;
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = vm.WindowTitle;
@@ -54,7 +49,7 @@ public class PickMatroskaTrackWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(tracksView, 0, 0);
+        grid.Add(tracksView, 0);
         grid.Add(subtitleView, 0, 1);
         grid.Add(panelButtons, 1, 0, 1, 2);
 
@@ -65,15 +60,14 @@ public class PickMatroskaTrackWindow : Window
         {
             buttonOk.Focus(); // hack to make OnKeyDown work
         };
+        KeyDown += (_, e) => vm.OnKeyDown(e);
+        Loaded += (_, _) =>
+        {
+            vm.SelectAndScrollToRow(0);
+        };
     }
 
-    protected override void OnLoaded(RoutedEventArgs e)
-    {
-        base.OnLoaded(e);
-        _vm.SelectAndScrollToRow(0);
-    }
-
-    private Border MakeTracksView(PickMatroskaTrackViewModel vm)
+    private static Border MakeTracksView(PickMatroskaTrackViewModel vm)
     {
         var dataGridTracks = new DataGrid
         {
@@ -85,8 +79,8 @@ public class PickMatroskaTrackWindow : Window
             VerticalAlignment = VerticalAlignment.Stretch,
             Width = double.NaN,
             Height = double.NaN,
-            DataContext = _vm,
-            ItemsSource = _vm.Tracks,
+            DataContext = vm,
+            ItemsSource = vm.Tracks,
             Columns =
             {
                 new DataGridTextColumn
@@ -130,12 +124,13 @@ public class PickMatroskaTrackWindow : Window
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(MatroskaTrackInfoDisplay.IsForced)),
                     IsReadOnly = true,
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
             },
         };
-        dataGridTracks.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(_vm.SelectedTrack)));
+        dataGridTracks.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedTrack)));
         dataGridTracks.SelectionChanged += vm.DataGridTracksSelectionChanged;
-        dataGridTracks.DoubleTapped += (s, e) => vm.OkCommand.Execute(null);
+        dataGridTracks.DoubleTapped += (_, _) => vm.OkCommand.Execute(null);
         vm.TracksGrid = dataGridTracks;
 
         return UiUtil.MakeBorderForControlNoPadding(dataGridTracks);
@@ -155,8 +150,8 @@ public class PickMatroskaTrackWindow : Window
             VerticalAlignment = VerticalAlignment.Stretch,
             Width = double.NaN,
             Height = double.NaN,
-            DataContext = _vm,
-            ItemsSource = _vm.Rows,
+            DataContext = vm,
+            ItemsSource = vm.Rows,
             Columns =
             {
                 new DataGridTextColumn
@@ -184,6 +179,7 @@ public class PickMatroskaTrackWindow : Window
                 {
                     Header = Se.Language.General.TextOrImage,
                     IsReadOnly = true,
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                     CellTemplate = new FuncDataTemplate<MatroskaSubtitleCueDisplay>((item, _) =>
                     {
                         var stackPanel = new StackPanel
@@ -224,11 +220,5 @@ public class PickMatroskaTrackWindow : Window
         };
 
         return UiUtil.MakeBorderForControlNoPadding(dataGridSubtitle);
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
     }
 }

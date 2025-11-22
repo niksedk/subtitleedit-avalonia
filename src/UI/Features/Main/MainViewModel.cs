@@ -111,6 +111,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Features.Sync.PointSyncViaOther;
 using static Nikse.SubtitleEdit.Logic.FindService;
 
 namespace Nikse.SubtitleEdit.Features.Main;
@@ -3140,6 +3141,71 @@ public partial class MainViewModel :
             _updateAudioVisualizer = true;
         }
     }
+    
+    [RelayCommand]
+    private async Task ShowPointSync()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
+        var result = await ShowDialogAsync<VisualSyncWindow, VisualSyncViewModel>(vm =>
+        {
+            var paragraphs = Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList();
+            vm.Initialize(paragraphs, _videoFileName, _subtitleFileName, AudioVisualizer);
+        });
+
+        if (result.OkPressed)
+        {
+            Subtitles.Clear();
+            foreach (var p in result.Paragraphs)
+            {
+                Subtitles.Add(p.Subtitle);
+            }
+
+            SelectAndScrollToRow(0);
+        }
+    }
+    
+    [RelayCommand]
+    private async Task ShowPointSyncViaOther()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
+        var result = await ShowDialogAsync<PointSyncViaOtherWindow, PointSyncViaOtherViewModel>(vm =>
+        {
+            var paragraphs = Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList();
+            vm.Initialize(paragraphs, _videoFileName, _subtitleFileName);
+        });
+
+        if (result.OkPressed)
+        {
+            // Subtitles.Clear();
+            // foreach (var p in result.Paragraphs)
+            // {
+            //     Subtitles.Add(p.Subtitle);
+            // }
+
+            SelectAndScrollToRow(0);
+        }
+    }
+
 
     [RelayCommand]
     private async Task ShowAutoTranslate()
