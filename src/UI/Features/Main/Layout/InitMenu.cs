@@ -542,6 +542,16 @@ public static class InitMenu
                 },
                 new MenuItem
                 {
+                    Header = l.PointSync,
+                    Command = vm.ShowPointSyncCommand,
+                },
+                new MenuItem
+                {
+                    Header = l.PointSyncViaOther,
+                    Command = vm.ShowPointSyncViaOtherCommand,
+                },
+                new MenuItem
+                {
                     Header = l.ChangeFrameRate,
                     Command = vm.ShowSyncChangeFrameRateCommand,
                 },

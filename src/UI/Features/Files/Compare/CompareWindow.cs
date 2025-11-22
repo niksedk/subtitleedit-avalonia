@@ -50,7 +50,7 @@ public class CompareWindow : Window
         var buttonLeftFileName = UiUtil.MakeButtonBrowse(vm.PickLeftSubtitleFileCommand);
         var labelLeftFileName = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.LeftFileName));
         var labelLeftFileNameHasChanges = UiUtil.MakeLabel("*").WithBindVisible(vm, nameof(vm.LeftFileNameHasChanges));
-        var panelLeftBrowse = new StackPanel()
+        var panelLeftBrowse = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Children = { buttonLeftFileName, labelLeftFileName, labelLeftFileNameHasChanges },
