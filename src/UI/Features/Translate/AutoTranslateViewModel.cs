@@ -4,7 +4,6 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Newtonsoft.Json.Linq;
 using Nikse.SubtitleEdit.Core.AutoTranslate;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
@@ -620,6 +619,7 @@ public partial class AutoTranslateViewModel : ObservableObject
         if (engineType == typeof(GeminiTranslate))
         {
             Configuration.Settings.Tools.GeminiProApiKey = apiKey.Trim();
+            Configuration.Settings.Tools.GeminiModel = apiModel.Trim();
         }
 
         if (engineType == typeof(PapagoTranslate))
@@ -895,6 +895,12 @@ public partial class AutoTranslateViewModel : ObservableObject
         {
             ApiKeyText = Configuration.Settings.Tools.GeminiProApiKey;
             ApiKeyIsVisible = true;
+
+            _apiModels = GeminiTranslate.Models.ToList();
+            ModelIsVisible = true;
+            ButtonModelIsVisible = true;
+            ModelText = string.IsNullOrEmpty(Configuration.Settings.Tools.GeminiModel) ? _apiModels[0] : Configuration.Settings.Tools.GeminiModel;
+
             return;
         }
 
