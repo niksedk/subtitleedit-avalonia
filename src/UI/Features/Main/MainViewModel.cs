@@ -8696,6 +8696,33 @@ public partial class MainViewModel :
 
         var first = true;
         var makeItalic = true;
+        var isAssa = SelectedSubtitleFormat is AdvancedSubStationAlpha;
+
+        if (isAssa)
+        {
+            foreach (var item in selectedItems)
+            {
+                if (first)
+                {
+                    first = false;
+                    makeItalic = !item.Text.Contains("{\\i1}") && !item.Text.Contains("\\i1");
+                }
+                item.Text = item.Text
+                    .Replace("{\\i1}", string.Empty)
+                    .Replace("{\\i0}", string.Empty)
+                    .Replace("\\i1\\", "\\")
+                    .Replace("\\i0\\", "\\");
+                if (makeItalic)
+                {
+                    if (!string.IsNullOrEmpty(item.Text))
+                    {
+                        item.Text = $"{{\\i1}}{item.Text}";
+                    }
+                }
+            }
+            return;
+        }
+
         foreach (var item in selectedItems)
         {
             if (first)
@@ -8726,6 +8753,33 @@ public partial class MainViewModel :
 
         var first = true;
         var makeBold = true;
+        var isAssa = SelectedSubtitleFormat is AdvancedSubStationAlpha;
+
+        if (isAssa)
+        {
+            foreach (var item in selectedItems)
+            {
+                if (first)
+                {
+                    first = false;
+                    makeBold = !item.Text.Contains("{\\b1}") && !item.Text.Contains("\\b1");
+                }
+                item.Text = item.Text
+                    .Replace("{\\b1}", string.Empty)
+                    .Replace("{\\b0}", string.Empty)
+                    .Replace("\\b1\\", "\\")
+                    .Replace("\\b0\\", "\\");
+                if (makeBold)
+                {
+                    if (!string.IsNullOrEmpty(item.Text))
+                    {
+                        item.Text = $"{{\\b1}}{item.Text}";
+                    }
+                }
+            }
+            return;
+        }
+
         foreach (var item in selectedItems)
         {
             if (first)
