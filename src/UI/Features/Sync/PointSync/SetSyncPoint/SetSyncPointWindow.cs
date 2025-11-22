@@ -6,13 +6,13 @@ using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Sync.VisualSync;
+namespace Nikse.SubtitleEdit.Features.Sync.PointSync.SetSyncPoint;
 
-public class VisualSyncWindow : Window
+public class SetSyncPointWindow : Window
 {
-    private readonly VisualSyncViewModel _vm;
+    private readonly SetSyncPointViewModel _vm;
 
-    public VisualSyncWindow(VisualSyncViewModel vm)
+    public SetSyncPointWindow(SetSyncPointViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Sync.VisualSync;

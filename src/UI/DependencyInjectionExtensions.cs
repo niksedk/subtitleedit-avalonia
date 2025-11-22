@@ -59,6 +59,7 @@ using Nikse.SubtitleEdit.Features.Sync.AdjustAllTimes;
 using Nikse.SubtitleEdit.Features.Sync.ChangeFrameRate;
 using Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
 using Nikse.SubtitleEdit.Features.Sync.PointSync;
+using Nikse.SubtitleEdit.Features.Sync.PointSync.SetSyncPoint;
 using Nikse.SubtitleEdit.Features.Sync.PointSyncViaOther;
 using Nikse.SubtitleEdit.Features.Sync.VisualSync;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
@@ -260,6 +261,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<ReviewSpeechHistoryViewModel>();
         collection.AddTransient<ReviewSpeechViewModel>();
         collection.AddTransient<SelectVideoPositionViewModel>();
+        collection.AddTransient<SetSyncPointViewModel>();
         collection.AddTransient<SettingsResetViewModel>();
         collection.AddTransient<SettingsViewModel>();
         collection.AddTransient<SetVideoOffsetViewModel>();
