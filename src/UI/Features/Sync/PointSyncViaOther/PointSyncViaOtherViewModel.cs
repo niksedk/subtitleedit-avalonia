@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
@@ -13,6 +10,12 @@ using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
+using ZstdSharp.Unsafe;
 
 namespace Nikse.SubtitleEdit.Features.Sync.PointSyncViaOther;
 
@@ -24,11 +27,13 @@ public partial class PointSyncViaOtherViewModel : ObservableObject
     [ObservableProperty] private SubtitleLineViewModel? _selectedOtherSubtitle;
     [ObservableProperty] private string _fileName;
     [ObservableProperty] private string _fileNameOther;
+    [ObservableProperty] private bool _isOkEnabled;
 
     public ObservableCollection<SyncPoint> SyncPoints { get; set; }
     [ObservableProperty] private SyncPoint? _selectedSyncPoint;
-    
+
     public Window? Window { get; set; }
+    public List<SubtitleLineViewModel> SyncedSubtitles { get; private set; }
     public bool OkPressed { get; private set; }
     public string WindowTitle { get; private set; }
 
@@ -41,7 +46,7 @@ public partial class PointSyncViaOtherViewModel : ObservableObject
     {
         _fileHelper = fileHelper;
         _windowService = windowService;
-        Subtitles =  new ObservableCollection<SubtitleLineViewModel>();
+        Subtitles = new ObservableCollection<SubtitleLineViewModel>();
         Othersubtitles = new ObservableCollection<SubtitleLineViewModel>();
         SyncPoints = new ObservableCollection<SyncPoint>();
         WindowTitle = string.Empty;
@@ -49,7 +54,7 @@ public partial class PointSyncViaOtherViewModel : ObservableObject
         FileNameOther = string.Empty;
         _videoFileName = string.Empty;
     }
- 
+
     public void Initialize(List<SubtitleLineViewModel> subtitles, string videoFileName, string fileName)
     {
         Subtitles.Clear();
@@ -76,7 +81,7 @@ public partial class PointSyncViaOtherViewModel : ObservableObject
         {
             return;
         }
-        
+
         var subtitle = Subtitle.Parse(fileName);
         if (subtitle == null)
         {
@@ -99,7 +104,7 @@ public partial class PointSyncViaOtherViewModel : ObservableObject
         }
 
         FileNameOther = fileName;
-        foreach (var p in subtitle.Paragraphs)   
+        foreach (var p in subtitle.Paragraphs)
         {
             Othersubtitles.Add(new SubtitleLineViewModel(p, subtitle.OriginalFormat));
         }
@@ -115,7 +120,7 @@ public partial class PointSyncViaOtherViewModel : ObservableObject
         {
             return;
         }
-        
+
         if (right == null)
         {
             return;
@@ -124,13 +129,28 @@ public partial class PointSyncViaOtherViewModel : ObservableObject
         var syncPoint = new SyncPoint(
             left, Subtitles.IndexOf(left),
             right, Othersubtitles.IndexOf(right));
-        
+
         SyncPoints.Add(syncPoint);
+        IsOkEnabled = true;
+    }
+
+    [RelayCommand]
+    private void DeleteSelectedPointSync()
+    {
+        var selectedPointSync = SelectedSyncPoint;
+        if (selectedPointSync == null)
+        {
+            return;
+        }
+
+        SyncPoints.Remove(selectedPointSync);
+        IsOkEnabled = SyncPoints.Count > 0;
     }
 
     [RelayCommand]
     private void Ok()
     {
+        SyncedSubtitles = PointSyncer.PointSync(Subtitles.ToList(), SyncPoints.ToList());
         OkPressed = true;
         Close();
     }
@@ -147,5 +167,15 @@ public partial class PointSyncViaOtherViewModel : ObservableObject
         {
             Cancel();
         }
+    }
+
+    internal void PointSyncContextMenuOpening(object? sender, EventArgs e)
+    {
+        if (SyncPoints.Count == 0)
+        {
+            return;
+        }
+
+        DeleteSelectedPointSync();
     }
 }

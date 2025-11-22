@@ -28,7 +28,7 @@ public class PointSyncViaOtherWindow : Window
         var controlView = MakeControlView(vm);
         var subtitleOtherView = MakeSubtitleOtherView(vm);
 
-        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand).WithBindIsEnabled(nameof(vm.IsOkEnabled));
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
@@ -102,10 +102,20 @@ public class PointSyncViaOtherWindow : Window
             },
         };
 
+        var flyout = new MenuFlyout();
+        flyout.Opening += vm.PointSyncContextMenuOpening;
+        dataGrid.ContextFlyout = flyout;
+        var menuItemDelete = new MenuItem
+        {
+            Header = Se.Language.General.Delete,
+            DataContext = vm,
+            Command = vm.DeleteSelectedPointSyncCommand,
+        };
+
         var buttonSetSyncPoint = UiUtil.MakeButton(Se.Language.Sync.SetSyncPoint, vm.SetSyncPointCommand);
-        
+
         grid.Add(buttonSetSyncPoint, 0);
-        grid.Add(UiUtil.MakeBorderForControlNoPadding( dataGrid), 1);
+        grid.Add(UiUtil.MakeBorderForControlNoPadding(dataGrid), 1);
 
         return grid;
     }
