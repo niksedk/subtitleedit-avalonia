@@ -25,7 +25,8 @@ public partial class VideoPlayerItem : ObservableObject
         return
         [
             new VideoPlayerItem { Name = Se.Language.Options.Settings.MpvOpenGl, Code = "mpv-opengl" },
-            new VideoPlayerItem { Name = Se.Language.Options.Settings.MpvSoftwareRendering, Code = "mpv-sw" }
+            new VideoPlayerItem { Name = Se.Language.Options.Settings.MpvWidRendering, Code = "mpv-wid" },
+            new VideoPlayerItem { Name = Se.Language.Options.Settings.MpvSoftwareRendering, Code = "mpv-sw" },
         ];
     }
 }

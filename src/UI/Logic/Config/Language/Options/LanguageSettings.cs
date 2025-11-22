@@ -185,6 +185,7 @@ public class LanguageSettings
     public string MpvVideoOutput { get; set; }
     public string MpvOpenGl { get; set; }
     public string MpvSoftwareRendering { get; set; }
+    public string MpvWidRendering { get; set; }
 
     public LanguageSettings()
     {
@@ -366,6 +367,7 @@ public class LanguageSettings
         UseFrameMode = "Use frame mode (hh.mm.ss.ff)";
         MpvVideoOutput = "Video output  (mpv)";
         MpvOpenGl = "libmpv - OpenGL";
+        MpvWidRendering = "libmpv - Native Window ID rendering";
         MpvSoftwareRendering = "libmpv - Software rendering (slow)";
     }
 

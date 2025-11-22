@@ -69,7 +69,18 @@ public static class InitVideoPlayer
             //   };
             //}
             //else
-            if (Se.Settings.Video.VideoPlayer.Equals("mpv-sw", StringComparison.OrdinalIgnoreCase))
+            if (Se.Settings.Video.VideoPlayer.Equals("mpv-wid", StringComparison.OrdinalIgnoreCase))
+            {
+                var libMpv = new LibMpvDynamicPlayer();
+                var view = new LibMpvDynamicNativeControl(libMpv);
+                control = new VideoPlayerControl(libMpv)
+                {
+                    PlayerContent = view,
+                    StopIsVisible = Se.Settings.Video.ShowStopButton,
+                    FullScreenIsVisible = Se.Settings.Video.ShowFullscreenButton,
+                };
+            }
+            else if (Se.Settings.Video.VideoPlayer.Equals("mpv-sw", StringComparison.OrdinalIgnoreCase))
             {
                 var libMpv = new LibMpvDynamicPlayer();
                 var view = new LibMpvDynamicSoftwareControl(libMpv);
@@ -80,7 +91,7 @@ public static class InitVideoPlayer
                     FullScreenIsVisible = Se.Settings.Video.ShowFullscreenButton,
                 };
             }
-            else // libmpv OpenGL
+            else if (Se.Settings.Video.VideoPlayer.StartsWith("mpv", StringComparison.OrdinalIgnoreCase)) // mpv-opengl
             {
                 var libMpv = new LibMpvDynamicPlayer();
                 var view = new LibMpvDynamicOpenGlControl(libMpv);
@@ -89,6 +100,16 @@ public static class InitVideoPlayer
                     PlayerContent = view,
                     StopIsVisible = Se.Settings.Video.ShowStopButton,
                     FullScreenIsVisible = Se.Settings.Video.ShowFullscreenButton,
+                };
+            }
+            else
+            {
+                var videoPlayerInstanceNone = new VideoPlayerInstanceNone();
+                control = new VideoPlayerControl(videoPlayerInstanceNone)
+                {
+                    PlayerContent = new Label(),
+                    StopIsVisible = false,
+                    FullScreenIsVisible = false,
                 };
             }
         }

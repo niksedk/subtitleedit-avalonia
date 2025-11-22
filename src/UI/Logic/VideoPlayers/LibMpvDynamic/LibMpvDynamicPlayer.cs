@@ -270,7 +270,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         return address != IntPtr.Zero ? Marshal.GetDelegateForFunctionPointer(address, type) : IntPtr.Zero;
     }
 
-    private bool LoadLib()
+    private bool LoadLibraryInternal()
     {
         foreach (var libName in GetLibraryNames())
         {
@@ -292,6 +292,25 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         }
 
         return false;
+    }
+
+    public void LoadLib()
+    {
+        if (_library == IntPtr.Zero)
+        {
+            LoadLibraryInternal();
+        }
+    }
+
+    public int Initialize()
+    {
+        EnsureNotDisposed();
+        if (_mpv == IntPtr.Zero)
+        {
+            return -1;
+        }
+
+        return _mpvInitialize(_mpv);
     }
 
     private static byte[] GetUtf8Bytes(string s)
@@ -355,7 +374,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 
     public void InitializeWithOpenGL(GetProcAddress getProcAddress)
     {
-        LoadLib();
+        LoadLibraryInternal();
         EnsureNotDisposed();
 
         _getProcAddress = getProcAddress;
@@ -1000,7 +1019,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 
     public void InitializeWithSoftwareRendering()
     {
-        LoadLib();
+        LoadLibraryInternal();
         EnsureNotDisposed();
 
         // Set mpv to use software rendering
