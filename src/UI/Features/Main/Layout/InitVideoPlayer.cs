@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Threading;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
@@ -19,6 +20,17 @@ public static class InitVideoPlayer
 
     public static Grid MakeLayoutVideoPlayer(MainViewModel vm, out VideoPlayerControl videoPlayerControl)
     {
+        var mediaFile = string.Empty;
+        double position = 0;
+        if (vm.VideoPlayerControl != null)
+        {
+            mediaFile = vm.VideoPlayerControl.VideoPlayerInstance.FileName;
+            position = vm.VideoPlayerControl.VideoPlayerInstance.Position;
+            vm.VideoPlayerControl.VideoPlayerInstance.CloseFile();
+            vm.VideoPlayerControl.Content = null;
+            vm.VideoPlayerControl = null;
+        }
+
         var mainGrid = new Grid
         {
             RowDefinitions = new RowDefinitions("*"),
@@ -32,6 +44,19 @@ public static class InitVideoPlayer
         mainGrid.AddHandler(DragDrop.DropEvent, vm.VideoOnDrop, RoutingStrategies.Bubble);
 
         var control = MakeVideoPlayer();
+        if (!string.IsNullOrEmpty(mediaFile) && control != null)
+        {
+            Dispatcher.UIThread.Post(async () =>
+            {
+                await control.Open(mediaFile);
+                await control.WaitForPlayersReadyAsync();
+                for (var i = 0; i < 10; i++)
+                {
+                    await System.Threading.Tasks.Task.Delay(10);
+                    control.Position = position;
+                }
+            });
+        }
         control.FullScreenCommand = vm.VideoFullScreenCommand;
         videoPlayerControl = control;
         vm.VideoPlayerControl = control;

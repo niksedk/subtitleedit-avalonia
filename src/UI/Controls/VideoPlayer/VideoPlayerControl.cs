@@ -537,7 +537,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             }
 
             // Small extra delay to ensure seeking is reliable
-            await Task.Delay(100);
+            await Task.Delay(200);
         }
 
         internal void TogglePlayPause()
