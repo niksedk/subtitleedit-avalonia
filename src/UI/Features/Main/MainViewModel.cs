@@ -1556,6 +1556,19 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void DoWaveformCenter()
+    {
+        if (Window == null || AudioVisualizer?.WavePeaks == null || VideoPlayerControl == null)
+        {
+            return;
+        }
+
+        AudioVisualizer.CenterOnPosition(VideoPlayerControl.Position);
+        _updateAudioVisualizer = true;
+    }
+
+
+    [RelayCommand]
     private async Task ShowPickLayerFilter()
     {
         if (Window == null || AudioVisualizer?.WavePeaks == null)

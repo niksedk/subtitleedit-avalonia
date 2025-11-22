@@ -198,6 +198,7 @@ public static class ShortcutsMain
         { nameof(MainViewModel.WaveformSetStartCommand),  Se.Language.General.SetStart },
         { nameof(MainViewModel.WaveformSetEndCommand),  Se.Language.General.SetEnd },
         { nameof(MainViewModel.WaveformSetEndAndGoToNextCommand),  Se.Language.General.SetEndAndGoToNext },
+        { nameof(MainViewModel.DoWaveformCenterCommand),  Se.Language.General.WaveformCenterOnVideoPosition },
         { nameof(MainViewModel.ToggleShotChangesAtVideoPositionCommand),  Se.Language.General.ToggleShotChangesAtVideoPosition },
         { nameof(MainViewModel.ShowWaveformSeekSilenceCommand),  Se.Language.Options.Shortcuts.SeekSilence },
         { nameof(MainViewModel.ShowShotChangesListCommand),  Se.Language.General.ShowShotChangesList },
@@ -401,6 +402,7 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.WaveformSetStartCommand, nameof(vm.WaveformSetStartCommand), ShortcutCategory.Waveform);
         AddShortcut(shortcuts, vm.WaveformSetEndCommand, nameof(vm.WaveformSetEndCommand), ShortcutCategory.Waveform);
         AddShortcut(shortcuts, vm.WaveformSetEndAndGoToNextCommand, nameof(vm.WaveformSetEndAndGoToNextCommand), ShortcutCategory.Waveform);
+        AddShortcut(shortcuts, vm.DoWaveformCenterCommand, nameof(vm.DoWaveformCenterCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.WaveformSetEndAndStartOfNextAfterGapCommand, nameof(vm.WaveformSetEndAndStartOfNextAfterGapCommand), ShortcutCategory.Waveform);
         AddShortcut(shortcuts, vm.WaveformSetEndAndStartOfNextAfterGapAndGoToNextCommand, nameof(vm.WaveformSetEndAndStartOfNextAfterGapAndGoToNextCommand), ShortcutCategory.Waveform);
         AddShortcut(shortcuts, vm.WaveformSetStartAndSetEndOfPreviousMinusGapCommand, nameof(vm.WaveformSetStartAndSetEndOfPreviousMinusGapCommand), ShortcutCategory.Waveform);

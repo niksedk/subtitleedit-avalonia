@@ -1877,4 +1877,15 @@ public class AudioVisualizer : Control
 
         return v / (max - from);
     }
+
+    internal void CenterOnPosition(double position)
+    {
+        if (WavePeaks == null)
+        {
+            return;
+        }
+
+        var halfWidthInSeconds = (Bounds.Width / 2) / (WavePeaks.SampleRate * ZoomFactor);
+        StartPositionSeconds = Math.Max(0, position - halfWidthInSeconds);
+    }
 }

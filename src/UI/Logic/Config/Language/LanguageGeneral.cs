@@ -535,6 +535,7 @@ public class LanguageGeneral
     public string DownloadingXPercent { get; set; }
     public string SubtitleFileSaved { get; set; }
     public string SubtitleFileSavedToX { get; set; }
+    public string WaveformCenterOnVideoPosition { get; set; }
 
     public LanguageGeneral()
     {
@@ -1069,5 +1070,6 @@ public class LanguageGeneral
         DownloadingXPercent = "Downloading {0}%";
         SubtitleFileSaved = "Subtitle file saved";
         SubtitleFileSavedToX = "Subtitle file saved to {0}";
+        WaveformCenterOnVideoPosition = "Waveform center on video position";
     }
 }
