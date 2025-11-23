@@ -3,13 +3,11 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Features.Main;
-using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Sync.PointSync.SetSyncPoint;
 using Nikse.SubtitleEdit.Features.Sync.PointSyncViaOther;
 using Nikse.SubtitleEdit.Logic;
-using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.Generic;
@@ -23,8 +21,6 @@ public partial class PointSyncViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _subtitles;
     [ObservableProperty] private SubtitleLineViewModel? _selectedSubtitle;
-    [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _othersubtitles;
-    [ObservableProperty] private SubtitleLineViewModel? _selectedOtherSubtitle;
     [ObservableProperty] private string _fileName;
     [ObservableProperty] private string _fileNameOther;
     [ObservableProperty] private bool _isOkEnabled;
@@ -41,13 +37,13 @@ public partial class PointSyncViewModel : ObservableObject
     private readonly IWindowService _windowService;
 
     private string _videoFileName;
+    private AudioVisualizer? _audioVisualizer;
 
     public PointSyncViewModel(IFileHelper fileHelper, IWindowService windowService)
     {
         _fileHelper = fileHelper;
         _windowService = windowService;
         Subtitles = new ObservableCollection<SubtitleLineViewModel>();
-        Othersubtitles = new ObservableCollection<SubtitleLineViewModel>();
         SyncPoints = new ObservableCollection<SyncPoint>();
         WindowTitle = string.Empty;
         FileName = string.Empty;
@@ -56,12 +52,13 @@ public partial class PointSyncViewModel : ObservableObject
         SyncedSubtitles = new List<SubtitleLineViewModel>();
     }
 
-    public void Initialize(List<SubtitleLineViewModel> subtitles, string videoFileName, string fileName, WavePeakData2? wavePeaks)
+    public void Initialize(List<SubtitleLineViewModel> subtitles, string videoFileName, string fileName, AudioVisualizer? audioVisualizer)
     {
         Subtitles.Clear();
         Subtitles.AddRange(subtitles);
         FileName = fileName;
         _videoFileName = videoFileName;
+        _audioVisualizer = audioVisualizer;
     }
 
     private void Close()
@@ -70,68 +67,25 @@ public partial class PointSyncViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task BrowseOther()
+    private async Task SetSyncPoint()
     {
-        if (Window == null)
+        var selectedSubtitle = SelectedSubtitle;
+        if (selectedSubtitle == null || Window == null)
         {
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenSubtitleFile(Window, Se.Language.General.OpenSubtitleFileTitle);
-        if (string.IsNullOrEmpty(fileName))
+        var result = await _windowService.ShowDialogAsync<SetSyncPointWindow, SetSyncPointViewModel>(Window, vm =>
         {
-            return;
-        }
+            vm.Initialize(Subtitles.ToList(), _videoFileName, FileName, _audioVisualizer);
+            //vm.RemoveUseSourceResolution();
+        });
 
-        var subtitle = Subtitle.Parse(fileName);
-        if (subtitle == null)
-        {
-            foreach (var f in SubtitleFormat.GetBinaryFormats(false))
-            {
-                if (f.IsMine(null, fileName))
-                {
-                    subtitle = new Subtitle();
-                    f.LoadSubtitle(subtitle, null, fileName);
-                    subtitle.OriginalFormat = f;
-                    break; // format found, exit the loop
-                }
-            }
-        }
+        //var syncPoint = new SyncPoint(
+        //    left, Subtitles.IndexOf(left),
+        //    right, Othersubtitles.IndexOf(right));
 
-        if (subtitle == null)
-        {
-            await MessageBox.Show(Window, Se.Language.General.Error, Se.Language.General.UnknownSubtitleFormat);
-            return;
-        }
-
-        FileNameOther = fileName;
-        foreach (var p in subtitle.Paragraphs)
-        {
-            Othersubtitles.Add(new SubtitleLineViewModel(p, subtitle.OriginalFormat));
-        }
-    }
-
-    [RelayCommand]
-    private void SetSyncPoint()
-    {
-        var left = SelectedSubtitle;
-        var right = SelectedOtherSubtitle;
-
-        if (left == null)
-        {
-            return;
-        }
-
-        if (right == null)
-        {
-            return;
-        }
-
-        var syncPoint = new SyncPoint(
-            left, Subtitles.IndexOf(left),
-            right, Othersubtitles.IndexOf(right));
-
-        SyncPoints.Add(syncPoint);
+        //SyncPoints.Add(syncPoint);
         IsOkEnabled = true;
     }
 

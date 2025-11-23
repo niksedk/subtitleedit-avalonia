@@ -15,11 +15,11 @@ public class SetSyncPointWindow : Window
     public SetSyncPointWindow(SetSyncPointViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = Se.Language.Sync.VisualSync;
+        Title = Se.Language.Sync.SetSyncPoint;
         CanResize = true;
-        Width = 1100;
-        Height = 700;
-        MinWidth = 900;
+        Width = 1000;
+        Height = 800;
+        MinWidth = 800;
         MinHeight = 650;
 
         _vm = vm;
@@ -39,9 +39,6 @@ public class SetSyncPointWindow : Window
         vm.VideoPlayerControlLeft = InitVideoPlayer.MakeVideoPlayer();
         vm.VideoPlayerControlLeft.FullScreenIsVisible = false;
 
-        vm.VideoPlayerControlRight = InitVideoPlayer.MakeVideoPlayer();
-        vm.VideoPlayerControlRight.FullScreenIsVisible = false;
-
         vm.AudioVisualizerLeft = new AudioVisualizer
         {
             Height = 80,
@@ -53,18 +50,6 @@ public class SetSyncPointWindow : Window
             InvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel,
         };
         vm.AudioVisualizerLeft.OnVideoPositionChanged += vm.AudioVisualizerLeftPositionChanged;
-
-        vm.AudioVisualizerRight = new AudioVisualizer
-        {
-            Height = 80,
-            Width = double.NaN,
-            IsReadOnly = true,
-            DrawGridLines = Se.Settings.Waveform.DrawGridLines,
-            WaveformColor = Se.Settings.Waveform.WaveformColor.FromHexToColor(),
-            WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor(),
-            InvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel,
-        };
-        vm.AudioVisualizerRight.OnVideoPositionChanged += vm.AudioVisualizerRightPositionChanged;
 
         var comboBoxLeft = UiUtil.MakeComboBoxBindText(vm.Paragraphs, vm, nameof(SubtitleDisplayItem.Text), nameof(vm.SelectedParagraphLeftIndex));
         comboBoxLeft.Width = double.NaN;
@@ -85,36 +70,14 @@ public class SetSyncPointWindow : Window
             }
         };
 
-        var comboBoxRight = UiUtil.MakeComboBoxBindText(vm.Paragraphs, vm, nameof(SubtitleDisplayItem.Text), nameof(vm.SelectedParagraphRightIndex));
-        comboBoxRight.Width = double.NaN;
-        comboBoxRight.MinHeight = 50;
-        comboBoxRight.HorizontalAlignment = HorizontalAlignment.Stretch;
-        vm.ComboBoxRight = comboBoxRight;
-
-        var panelRightButtons = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            Children =
-            {
-                UiUtil.MakeButton(vm.RightOneSecondBackCommand, IconNames.ArrowLeftThick, Se.Language.General.OneSecondBack),
-                UiUtil.MakeButton(Se.Language.Sync.PlayTwoSecondsAndBack, vm.PlayTwoSecondsAndBackRightCommand),
-                UiUtil.MakeButton(vm.RightOneSecondForwardCommand, IconNames.ArrowRightThick, Se.Language.General.OneSecondForward),
-                UiUtil.MakeButton(Se.Language.Sync.GoToSubPos, vm.GoToRightSubtitleCommand),
-                UiUtil.MakeButton(Se.Language.Sync.FindText, vm.FindTextRightCommand),
-            }
-        };
-
-        var labelInfo = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.AdjustInfo));
-        var buttonSync = UiUtil.MakeButton(Se.Language.Sync.Sync, vm.SyncCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var buttonPanel = UiUtil.MakeButtonBar(labelInfo, buttonSync, buttonOk, buttonCancel);
+        var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
         var gridLeft = new Grid
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // label
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // video player
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // audio visualizer
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // combo box
@@ -130,37 +93,10 @@ public class SetSyncPointWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        gridLeft.Add(UiUtil.MakeLabel(Se.Language.Sync.StartScene), 0);
-        gridLeft.Add(vm.VideoPlayerControlLeft, 1);
-        gridLeft.Add(vm.AudioVisualizerLeft, 2);
-        gridLeft.Add(comboBoxLeft, 3);
-        gridLeft.Add(panelLeftButtons, 4);
-
-        var gridRight = new Grid
-        {
-            RowDefinitions =
-            {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // label
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // video player
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // audio visualizer
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // combo box
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // buttons
-            },
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-            },
-            ColumnSpacing = 10,
-            RowSpacing = 10,
-            Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-        };
-
-        gridRight.Add(UiUtil.MakeLabel(Se.Language.Sync.EndScene), 0);
-        gridRight.Add(vm.VideoPlayerControlRight, 1);
-        gridRight.Add(vm.AudioVisualizerRight, 2);
-        gridRight.Add(comboBoxRight, 3);
-        gridRight.Add(panelRightButtons, 4);
+        gridLeft.Add(vm.VideoPlayerControlLeft, 0);
+        gridLeft.Add(vm.AudioVisualizerLeft, 1);
+        gridLeft.Add(comboBoxLeft, 2);
+        gridLeft.Add(panelLeftButtons, 3);
 
         var grid = new Grid
         {
@@ -173,7 +109,6 @@ public class SetSyncPointWindow : Window
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
@@ -184,7 +119,6 @@ public class SetSyncPointWindow : Window
 
         grid.Add(panelVideo, 0, 0, 1, 2);
         grid.Add(UiUtil.MakeBorderForControl(gridLeft), 1);
-        grid.Add(UiUtil.MakeBorderForControl(gridRight), 1, 1);
         grid.Add(buttonPanel, 2, 0, 1, 2);
 
         Content = grid;

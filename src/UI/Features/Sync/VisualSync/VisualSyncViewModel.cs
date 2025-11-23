@@ -11,6 +11,7 @@ using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.FindText;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -106,20 +107,15 @@ public partial class VisualSyncViewModel : ObservableObject
 
         _ = Task.Run(() =>
         {
-            for (var i = 0; i < 10; i++)
+            var mediaInfo = FfmpegMediaInfo2.Parse(videoFileName);
+            if (mediaInfo?.Dimension is { Width: > 0, Height: > 0 } && mediaInfo.Duration != null)
             {
-                var mediaInfo = FfmpegMediaInfo.Parse(videoFileName);
-                if (mediaInfo?.Dimension is { Width: > 0, Height: > 0 })
-                {
-                    VideoInfo = string.Format(Se.Language.General.FileNameX, videoFileName) + Environment.NewLine +
-                                string.Format(Se.Language.Sync.ResolutionXDurationYFrameRateZ,
-                                    $"{mediaInfo.Dimension.Width}x{mediaInfo.Dimension.Height}",
-                                    mediaInfo.Duration.ToShortDisplayString(),
-                                    mediaInfo.FramesRate);
-                    return;
-                }
-
-                Task.Delay(250).Wait();
+                VideoInfo = string.Format(Se.Language.General.FileNameX, videoFileName) + Environment.NewLine +
+                            string.Format(Se.Language.Sync.ResolutionXDurationYFrameRateZ,
+                                $"{mediaInfo.Dimension.Width}x{mediaInfo.Dimension.Height}",
+                                mediaInfo.Duration.ToShortDisplayString(),
+                                mediaInfo.FramesRateNonNormalized);
+                return;
             }
 
             VideoInfo = Se.Language.General.NoVideoLoaded;

@@ -3173,7 +3173,7 @@ public partial class MainViewModel :
         var result = await ShowDialogAsync<PointSyncWindow, PointSyncViewModel>(vm =>
         {
             var paragraphs = Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList();
-            vm.Initialize(paragraphs, _videoFileName ?? string.Empty, _subtitleFileName ?? string.Empty, AudioVisualizer?.WavePeaks);
+            vm.Initialize(paragraphs, _videoFileName ?? string.Empty, _subtitleFileName ?? string.Empty, AudioVisualizer);
         });
 
         if (result.OkPressed)

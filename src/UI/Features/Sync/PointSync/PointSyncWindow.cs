@@ -16,7 +16,7 @@ public class PointSyncWindow : Window
     {
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = vm.WindowTitle;
+        Title = Se.Language.Sync.PointSync;
         Width = 1100;
         Height = 600;
         MinWidth = 800;

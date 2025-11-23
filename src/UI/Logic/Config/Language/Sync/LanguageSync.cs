@@ -25,6 +25,8 @@ public class LanguageSync
     public string ChangeFrameRate { get; set; }
     public string SetSyncPoint { get; set; }
     public string SyncPoints { get; set; }
+    public string PointSync { get; set; }
+    public string PointSyncViaOther { get; set; }
 
     public LanguageSync()
     {
@@ -51,5 +53,7 @@ public class LanguageSync
         ChangeFrameRate = "Change frame rate";
         SetSyncPoint = "Set sync point";
         SyncPoints = "Sync points";
+        PointSync = "Point sync";
+        PointSyncViaOther = "Point sync via other subtitle";
     }
 }
