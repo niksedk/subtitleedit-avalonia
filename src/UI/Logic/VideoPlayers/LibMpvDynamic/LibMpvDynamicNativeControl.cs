@@ -29,6 +29,7 @@ public class LibMpvDynamicNativeControl : NativeControlHost
         {
             try
             {
+                _mpvPlayer.PlayerSubName = "wid";
                 System.Diagnostics.Debug.WriteLine($"Initializing mpv with native window handle: {_nativeHandle}");
 
                 // Initialize mpv with native window embedding

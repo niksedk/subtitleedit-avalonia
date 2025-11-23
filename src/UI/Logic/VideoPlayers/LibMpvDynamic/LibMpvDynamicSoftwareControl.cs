@@ -36,6 +36,7 @@ public class LibMpvDynamicSoftwareControl : Control
         try
         {
             _mpvPlayer.InitializeWithSoftwareRendering();
+            _mpvPlayer.PlayerSubName = "sw";
             _mpvPlayer.RequestRender += OnMpvRequestRender;
             _isInitialized = true;
             System.Diagnostics.Debug.WriteLine("MpvPlayer initialized successfully with software rendering!");

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -22,11 +23,15 @@ public partial class VideoPlayerItem : ObservableObject
 
     public static List<VideoPlayerItem> ListVideoPlayerItem()
     {
-        return
-        [
-            new VideoPlayerItem { Name = Se.Language.Options.Settings.MpvOpenGl, Code = "mpv-opengl" },
-            new VideoPlayerItem { Name = Se.Language.Options.Settings.MpvWidRendering, Code = "mpv-wid" },
-            new VideoPlayerItem { Name = Se.Language.Options.Settings.MpvSoftwareRendering, Code = "mpv-sw" },
-        ];
+        var result = new List<VideoPlayerItem>();
+        result.Add(new VideoPlayerItem { Name = Se.Language.Options.Settings.MpvOpenGl, Code = "mpv-opengl" });
+        
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            result.Add(new VideoPlayerItem { Name = Se.Language.Options.Settings.MpvWidRendering, Code = "mpv-wid" });
+        }
+
+        result.Add(new VideoPlayerItem { Name = Se.Language.Options.Settings.MpvSoftwareRendering, Code = "mpv-sw" });
+        return result;
     }
 }

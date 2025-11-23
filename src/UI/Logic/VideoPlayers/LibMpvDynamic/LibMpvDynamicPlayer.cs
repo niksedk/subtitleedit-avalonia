@@ -12,7 +12,12 @@ namespace Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 
 public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 {
+    /// <summary>
+    /// Set this path (directory only) to override the default search paths.
+    /// </summary>
     public static string MpvPath = string.Empty;
+
+    public string PlayerSubName { get; set; } = string.Empty;
     public static int MaxVolume { get; set; } = 130;
 
     private IntPtr _library = IntPtr.Zero;
@@ -22,7 +27,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
     private string _fileName = string.Empty;
 
     [StructLayout(LayoutKind.Sequential)]
-    private struct MpvOpenGLInitParams
+    private struct MpvOpenGlInitParams
     {
         public IntPtr get_proc_address;
         public IntPtr get_proc_address_ctx;
@@ -434,7 +439,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         }
 
         // Create OpenGL init params
-        var initParams = new MpvOpenGLInitParams
+        var initParams = new MpvOpenGlInitParams
         {
             get_proc_address = Marshal.GetFunctionPointerForDelegate<MpvGetProcAddressFunc>(
                 new MpvGetProcAddressFunc((ctx, name) => getProcAddress(ctx, name))
@@ -442,7 +447,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
             get_proc_address_ctx = IntPtr.Zero
         };
 
-        var initParamsPtr = Marshal.AllocHGlobal(Marshal.SizeOf<MpvOpenGLInitParams>());
+        var initParamsPtr = Marshal.AllocHGlobal(Marshal.SizeOf<MpvOpenGlInitParams>());
         Marshal.StructureToPtr(initParams, initParamsPtr, false);
 
         try
@@ -588,7 +593,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 
     // public media player properties/methods
 
-    public string Name => $"libmpv {VersionNumber}";
+    public string Name => $"libmpv {VersionNumber} " + PlayerSubName;
 
     public string FileName => _fileName;
 
