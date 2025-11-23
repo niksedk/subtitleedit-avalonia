@@ -1,11 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text.RegularExpressions;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic.Config;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Nikse.SubtitleEdit.Logic;
 
@@ -14,6 +16,7 @@ public interface IAutoBackupService
     void StartAutoBackup(MainViewModel mainViewModel);
     void StopAutobackup();
     public List<string> GetAutoBackupFiles();
+    public void CleanAutoBackupFolder();
 }
 
 public class AutoBackupService : IAutoBackupService
@@ -25,12 +28,12 @@ public class AutoBackupService : IAutoBackupService
     public void StartAutoBackup(MainViewModel mainViewModel)
     {
         _mainViewModel = mainViewModel;
-        
+
         if (!Se.Settings.General.AutoBackupOn)
         {
             return;
         }
-        
+
         var minutes = Se.Settings.General.AutoBackupIntervalMinutes;
         if (minutes < 1)
         {
@@ -45,8 +48,8 @@ public class AutoBackupService : IAutoBackupService
             }
 
             var saveFormat = _mainViewModel.SelectedSubtitleFormat;
-            var subtitle =  _mainViewModel.GetUpdateSubtitle(); 
-            SaveAutoBackup(subtitle, saveFormat);   
+            var subtitle = _mainViewModel.GetUpdateSubtitle();
+            SaveAutoBackup(subtitle, saveFormat);
         };
         _timerAutoBackup.Start();
     }
@@ -112,5 +115,36 @@ public class AutoBackupService : IAutoBackupService
         }
 
         return result;
+    }
+
+    private static readonly Lock Locker = new Lock();
+    public void CleanAutoBackupFolder()
+    {
+        var autoBackupFolder = Se.AutoBackupFolder;
+        var autoBackupDeleteAfterMonths = Se.Settings.General.AutoBackupDeleteAfterMonths;
+
+        lock (Locker) // only allow one thread
+        {
+            if (Directory.Exists(autoBackupFolder))
+            {
+                var targetDate = DateTime.Now.AddMonths(-autoBackupDeleteAfterMonths);
+                var files = Directory.GetFiles(autoBackupFolder, "*.*");
+                foreach (var fileName in files)
+                {
+                    try
+                    {
+                        var name = Path.GetFileName(fileName);
+                        if (RegexFileNamePattern.IsMatch(name) && Convert.ToDateTime(name.Substring(0, 10), CultureInfo.InvariantCulture) <= targetDate)
+                        {
+                            File.Delete(fileName);
+                        }
+                    }
+                    catch
+                    {
+                        // ignore
+                    }
+                }
+            }
+        }
     }
 }

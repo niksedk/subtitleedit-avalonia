@@ -8083,6 +8083,8 @@ public partial class MainViewModel :
         }
 
         VideoPlayerControl?.VideoPlayerInstance.CloseFile();
+
+        _ = Task.Run(_autoBackupService.CleanAutoBackupFolder);
     }
 
     internal void OnLoaded()

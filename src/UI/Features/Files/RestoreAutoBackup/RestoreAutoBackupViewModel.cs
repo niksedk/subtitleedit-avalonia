@@ -90,6 +90,8 @@ public partial class RestoreAutoBackupViewModel : ObservableObject
         }
         
         Files.Clear();
+        IsEmptyFilesVisible = false;
+        IsOkButtonEnabled = false;
     }
 
     [RelayCommand]
