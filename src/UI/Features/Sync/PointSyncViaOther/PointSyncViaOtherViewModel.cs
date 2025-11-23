@@ -15,7 +15,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using ZstdSharp.Unsafe;
 
 namespace Nikse.SubtitleEdit.Features.Sync.PointSyncViaOther;
 
@@ -62,6 +61,11 @@ public partial class PointSyncViaOtherViewModel : ObservableObject
         Subtitles.AddRange(subtitles);
         FileName = fileName;
         _videoFileName = videoFileName;
+
+        if (Subtitles.Count > 0)
+        {
+            SelectedSubtitle = Subtitles[0];
+        }
     }
 
     private void Close()

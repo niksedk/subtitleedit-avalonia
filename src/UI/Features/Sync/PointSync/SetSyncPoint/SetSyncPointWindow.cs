@@ -36,10 +36,10 @@ public class SetSyncPointWindow : Window
             }
         };
 
-        vm.VideoPlayerControlLeft = InitVideoPlayer.MakeVideoPlayer();
-        vm.VideoPlayerControlLeft.FullScreenIsVisible = false;
+        vm.VideoPlayerControl = InitVideoPlayer.MakeVideoPlayer();
+        vm.VideoPlayerControl.FullScreenIsVisible = false;
 
-        vm.AudioVisualizerLeft = new AudioVisualizer
+        vm.AudioVisualizer = new AudioVisualizer
         {
             Height = 80,
             Width = double.NaN,
@@ -49,13 +49,13 @@ public class SetSyncPointWindow : Window
             WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor(),
             InvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel,
         };
-        vm.AudioVisualizerLeft.OnVideoPositionChanged += vm.AudioVisualizerLeftPositionChanged;
+        vm.AudioVisualizer.OnVideoPositionChanged += vm.AudioVisualizerLeftPositionChanged;
 
-        var comboBoxLeft = UiUtil.MakeComboBoxBindText(vm.Paragraphs, vm, nameof(SubtitleDisplayItem.Text), nameof(vm.SelectedParagraphLeftIndex));
+        var comboBoxLeft = UiUtil.MakeComboBoxBindText(vm.Paragraphs, vm, nameof(SubtitleDisplayItem.Text), nameof(vm.SelectedParagraphIndex));
         comboBoxLeft.Width = double.NaN;
         comboBoxLeft.MinHeight = 50;
         comboBoxLeft.HorizontalAlignment = HorizontalAlignment.Stretch;
-        vm.ComboBoxLeft = comboBoxLeft;
+        vm.ComboBoxSubtitle = comboBoxLeft;
 
         var panelLeftButtons = new StackPanel
         {
@@ -93,8 +93,8 @@ public class SetSyncPointWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        gridLeft.Add(vm.VideoPlayerControlLeft, 0);
-        gridLeft.Add(vm.AudioVisualizerLeft, 1);
+        gridLeft.Add(vm.VideoPlayerControl, 0);
+        gridLeft.Add(vm.AudioVisualizer, 1);
         gridLeft.Add(comboBoxLeft, 2);
         gridLeft.Add(panelLeftButtons, 3);
 

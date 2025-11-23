@@ -59,6 +59,11 @@ public partial class PointSyncViewModel : ObservableObject
         FileName = fileName;
         _videoFileName = videoFileName;
         _audioVisualizer = audioVisualizer;
+
+        if (Subtitles.Count > 0)
+        {
+            SelectedSubtitle = Subtitles[0];
+        }
     }
 
     private void Close()
@@ -78,14 +83,19 @@ public partial class PointSyncViewModel : ObservableObject
         var result = await _windowService.ShowDialogAsync<SetSyncPointWindow, SetSyncPointViewModel>(Window, vm =>
         {
             vm.Initialize(Subtitles.ToList(), _videoFileName, FileName, _audioVisualizer);
-            //vm.RemoveUseSourceResolution();
         });
 
-        //var syncPoint = new SyncPoint(
-        //    left, Subtitles.IndexOf(left),
-        //    right, Othersubtitles.IndexOf(right));
+        if (!result.OkPressed)
+        {
+            return;
+        }
 
-        //SyncPoints.Add(syncPoint);
+        var subtitleOther = new SubtitleLineViewModel(selectedSubtitle);
+        subtitleOther.StartTime = TimeSpan.FromSeconds(result.SyncPosition);
+        var syncPoint = new SyncPoint(
+            selectedSubtitle, Subtitles.IndexOf(selectedSubtitle),
+            subtitleOther, Subtitles.IndexOf(selectedSubtitle));
+        SyncPoints.Add(syncPoint);
         IsOkEnabled = true;
     }
 
