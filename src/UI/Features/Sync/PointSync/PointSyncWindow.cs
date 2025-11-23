@@ -17,9 +17,9 @@ public class PointSyncWindow : Window
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Sync.PointSync;
-        Width = 1100;
+        Width = 800;
         Height = 600;
-        MinWidth = 800;
+        MinWidth = 600;
         MinHeight = 600;
         CanResize = true;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -148,6 +148,13 @@ public class PointSyncWindow : Window
                     Header = Se.Language.General.Show,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)) { Converter = fullTimeConverter },
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Duration,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(SubtitleLineViewModel.Duration)) { Converter = shortTimeConverter },
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn

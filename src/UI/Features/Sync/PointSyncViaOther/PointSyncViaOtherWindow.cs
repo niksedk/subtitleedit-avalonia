@@ -54,7 +54,7 @@ public class PointSyncViaOtherWindow : Window
         grid.Add(subtitleViewView, 0);
         grid.Add(controlView, 0, 1);
         grid.Add(subtitleOtherView, 0, 2);
-        grid.Add(panelButtons, 1, 0, 1, 2);
+        grid.Add(panelButtons, 1, 0, 1, 3);
 
         Content = grid;
 
