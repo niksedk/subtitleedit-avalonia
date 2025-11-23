@@ -1,6 +1,7 @@
 using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
 using Avalonia.Threading;
+using Avalonia.Input;
 using System;
 using System.Runtime.InteropServices;
 
@@ -25,6 +26,8 @@ public class LibMpvDynamicOpenGlControl : OpenGlControlBase
     public LibMpvDynamicOpenGlControl(LibMpvDynamicPlayer videoPlayerInstanceMpv)
     {
         _mpvPlayer = videoPlayerInstanceMpv;
+        ClipToBounds = true;
+        Cursor = new Cursor(StandardCursorType.Arrow);
     }
 
     public LibMpvDynamicPlayer? Player => _mpvPlayer;

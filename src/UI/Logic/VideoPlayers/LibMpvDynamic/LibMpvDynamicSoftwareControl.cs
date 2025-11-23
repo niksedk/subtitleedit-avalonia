@@ -5,6 +5,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using Avalonia.Input;
 
 namespace Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 
@@ -20,6 +21,7 @@ public class LibMpvDynamicSoftwareControl : Control
     {
         _mpvPlayer = mpvPlayer;
         ClipToBounds = true;
+        Cursor = new Cursor(StandardCursorType.Arrow);
     }
 
     protected override void OnInitialized()

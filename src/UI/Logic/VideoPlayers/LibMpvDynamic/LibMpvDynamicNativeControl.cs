@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using Avalonia.Input;
 using System;
 using System.Runtime.InteropServices;
 
@@ -18,6 +19,7 @@ public class LibMpvDynamicNativeControl : NativeControlHost
     {
         _mpvPlayer = mpvPlayer;
         ClipToBounds = true;
+        Cursor = new Cursor(StandardCursorType.Arrow);
     }
 
     protected override IPlatformHandle CreateNativeControlCore(IPlatformHandle parent)
