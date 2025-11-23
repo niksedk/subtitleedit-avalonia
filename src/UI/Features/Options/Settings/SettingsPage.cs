@@ -9,6 +9,7 @@ using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
@@ -324,6 +325,7 @@ public class SettingsPage : UserControl
                 },
                 [!StackPanel.IsVisibleProperty] = new Binding(nameof(_vm.IsLibMpvDownloadVisible)) { Source = _vm }
             }),
+            new SettingsItem("Subtitle preview properties", () => MakeMpvPreviewSettings(_vm)),
         ]));
 
         sections.Add(new SettingsSection(Se.Language.Options.Settings.WaveformSpectrogram,
@@ -498,6 +500,114 @@ public class SettingsPage : UserControl
         return sections;
     }
 
+    private Control MakeMpvPreviewSettings(SettingsViewModel vm)
+    {
+        var labelFontName = UiUtil.MakeLabel(Se.Language.General.FontName);
+        var comboBoxFontName = UiUtil.MakeComboBox(vm.Fonts, vm, nameof(vm.MpvPreviewFontName)).WithMinWidth(150);
+
+        var labelFontSize = UiUtil.MakeLabel(Se.Language.General.FontSize);
+        var numericUpDownFontSize = UiUtil.MakeNumericUpDownOneDecimal(1, 1000, 130, vm, nameof(vm.MpvPreviewFontSize));
+        numericUpDownFontSize.Increment = 1;
+
+        var checkBoxBold = UiUtil.MakeCheckBox(Se.Language.General.Bold, vm, nameof(vm.MpvPreviewFontBold) + "." + nameof(StyleDisplay.Bold));
+
+        var labelColorPrimary = UiUtil.MakeLabel(Se.Language.Assa.Primary);
+        var colorPickerPrimary = UiUtil.MakeColorPicker(vm, nameof(vm.MpvPreviewColorPrimary));
+
+        var labelColorOutline = UiUtil.MakeLabel(Se.Language.General.Outline);
+        var colorPickerOutline = UiUtil.MakeColorPicker(vm, nameof(vm.MpvPreviewColorPrimary));
+
+        var labelColorShadow = UiUtil.MakeLabel(Se.Language.General.Shadow);
+        var colorPickerShadow = UiUtil.MakeColorPicker(vm, nameof(vm.MpvPreviewColorPrimary));
+
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+            },
+            Margin = new Thickness(0, 5, 0, 0),
+            ColumnSpacing = 5,
+            RowSpacing = 5,
+        };
+
+        grid.Add(labelFontName, 0);
+        grid.Add(comboBoxFontName, 0, 1);
+
+        grid.Add(labelFontSize, 1);
+        grid.Add(numericUpDownFontSize, 1, 1);
+
+        grid.Add(checkBoxBold, 2, 1);
+
+        grid.Add(labelColorPrimary, 3);
+        grid.Add(colorPickerPrimary, 3, 1);
+
+        grid.Add(labelColorOutline, 4);
+        grid.Add(colorPickerOutline, 4, 1);
+
+        grid.Add(labelColorShadow, 5);
+        grid.Add(colorPickerShadow, 5, 1);
+
+        return UiUtil.MakeBorderForControl(grid);
+    }
+
+    private static Border MakeBorderView(SettingsViewModel vm)
+    {
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+            },
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            RowSpacing = 5,
+        };
+
+        var label = UiUtil.MakeLabel(Se.Language.General.BorderStyle);
+        grid.Add(label, 1, 0);
+
+        var comboBoxBorderType = UiUtil.MakeComboBox(vm.BorderTypes, vm, nameof(vm.SelectedBorderType));
+        comboBoxBorderType.SelectionChanged += vm.BorderTypeChanged;
+        grid.Add(comboBoxBorderType, 2, 0, 1, 2);
+
+        var labelOutlineWidth = UiUtil.MakeLabel(Se.Language.General.OutlineWidth);
+        var numericUpDownOutlineWidth = UiUtil.MakeNumericUpDownOneDecimal(0, 100, 130, vm, nameof(StyleDisplay.OutlineWidth));
+        numericUpDownOutlineWidth.Increment = 0.5m;
+        grid.Add(labelOutlineWidth, 3, 0);
+        grid.Add(numericUpDownOutlineWidth, 3, 1);
+
+        var labelShadowWidth = UiUtil.MakeLabel(Se.Language.General.ShadowWidth);
+        var numericUpDownShadowWidth = UiUtil.MakeNumericUpDownOneDecimal(0, 100, 130, vm, nameof(StyleDisplay.ShadowWidth));
+        numericUpDownShadowWidth.Increment = 0.5m;
+        grid.Add(labelShadowWidth, 4, 0);
+        grid.Add(numericUpDownShadowWidth, 4, 1);
+
+        return UiUtil.MakeBorderForControl(grid);
+    }
+
     private ComboBox MakeVideoPlayerComboBox()
     {
         var cb = new ComboBox
@@ -615,7 +725,7 @@ public class SettingsPage : UserControl
             FormatString = "F0",
             [!NumericUpDown.ValueProperty] = new Binding(bindingProperty) { Source = _vm, Mode = BindingMode.TwoWay },
         };
-        
+
         if (minValue.HasValue)
         {
             nud.Minimum = (decimal)minValue;

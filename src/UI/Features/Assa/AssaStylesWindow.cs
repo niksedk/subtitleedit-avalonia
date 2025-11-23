@@ -432,13 +432,13 @@ public class AssaStylesWindow : Window
         numericUpDownAngle.Increment = 1;
         var panelTransform2 = UiUtil.MakeHorizontalPanel(labelSpacing, numericUpDownSpacing, labelAngle, numericUpDownAngle).WithMarginBottom(10);
 
-        var labelColorPrimary = UiUtil.MakeLabel("Primary");
+        var labelColorPrimary = UiUtil.MakeLabel(Se.Language.Assa.Primary);
         var colorPickerPrimary = UiUtil.MakeColorPicker(vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ColorPrimary));
-        var labelColorOutline = UiUtil.MakeLabel("Outline");
+        var labelColorOutline = UiUtil.MakeLabel(Se.Language.General.Outline);
         var colorPickerOutline = UiUtil.MakeColorPicker(vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ColorOutline));
-        var labelColorShadow = UiUtil.MakeLabel("Shadow");
+        var labelColorShadow = UiUtil.MakeLabel(Se.Language.General.Shadow);
         var colorPickerShadow = UiUtil.MakeColorPicker(vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ColorShadow));
-        var labelColorSecondary = UiUtil.MakeLabel("Secondary");
+        var labelColorSecondary = UiUtil.MakeLabel(Se.Language.Assa.Secondary);
         var colorPickerSecondary = UiUtil.MakeColorPicker(vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ColorSecondary));
         var panelColors = UiUtil.MakeHorizontalPanel(
             labelColorPrimary,

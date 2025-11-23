@@ -13,6 +13,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Enums;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
@@ -50,6 +51,18 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private ContinuationStyleDisplay _continuationStyle;
     [ObservableProperty] private ObservableCollection<CpsLineLengthStrategyDisplay> _cpsLineLengthStrategies;
     [ObservableProperty] private CpsLineLengthStrategyDisplay _cpsLineLengthStrategy;
+    [ObservableProperty] private ObservableCollection<string> _fonts;
+    [ObservableProperty] private string _mpvPreviewFontName;
+    [ObservableProperty] private int _mpvPreviewFontSize;
+    [ObservableProperty] private bool _mpvPreviewFontBold;
+    [ObservableProperty] private Color _mpvPreviewColorPrimary;
+    [ObservableProperty] private Color _mpvPreviewColorOutline;
+    [ObservableProperty] private Color _mpvPreviewColorShadow;
+    [ObservableProperty] private ObservableCollection<BorderStyleItem> _mpvPreviewBorderTypes;
+    [ObservableProperty] private BorderStyleItem _mpvPreviewSelectedBorderType;
+    [ObservableProperty] private ObservableCollection<BorderStyleItem> _mpvPreviewBorderTypes;
+    [ObservableProperty] private BorderStyleItem _mpvPreviewSelectedBorderType;
+
 
     [ObservableProperty] private int? _newEmptyDefaultMs;
     [ObservableProperty] private bool _promptDeleteLines;
@@ -206,6 +219,8 @@ public partial class SettingsViewModel : ObservableObject
         DialogStyle = DialogStyles.First();
         ContinuationStyle = ContinuationStyles.First();
         CpsLineLengthStrategy = CpsLineLengthStrategies.First();
+        Fonts = new ObservableCollection<string>(FontHelper.GetSystemFonts());
+        MpvPreviewBorderTypes = new ObservableCollection<BorderStyleItem>(BorderStyleItem.List());
 
         Themes = [Se.Language.General.System, Se.Language.General.Light, Se.Language.General.Dark];
         SelectedTheme = Themes[0];

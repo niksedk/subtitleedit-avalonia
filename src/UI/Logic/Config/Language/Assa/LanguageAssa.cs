@@ -25,6 +25,8 @@ public class LanguageAssa
     public string DeleteStyleQuestion { get; set; }
     public string DeleteStylesQuestion { get; set; }
     public string OpenStyleImportFile { get; set; }
+    public string Primary { get; set; }
+    public string Secondary { get; set; }
 
     public LanguageAssa()
     {
@@ -51,5 +53,7 @@ public class LanguageAssa
         DeleteStyleQuestion = "Delete style?";
         DeleteStylesQuestion = "Delete styles?";
         OpenStyleImportFile = "Open subtitle file to import styles from";
+        Primary = "Primary";
+        Secondary = "Secondary";
     }
 }
