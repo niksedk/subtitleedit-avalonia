@@ -5216,13 +5216,15 @@ public partial class MainViewModel :
 
         control.VideoPlayerInstance.Pause();
         var position = control.Position;
+        var volume = control.Volume;
         var parent = (Control)control.Parent!;
 
         var newVp = InitVideoPlayer.MakeVideoPlayer();
         newVp.IsFullScreen = true;
-        var fullScreenWindow = new FullScreenVideoWindow(newVp, _videoFileName, position, () =>
+        var fullScreenWindow = new FullScreenVideoWindow(newVp, _videoFileName, position, volume, () =>
         {
             VideoPlayerControl!.Position = newVp.Position;
+            VideoPlayerControl!.Volume = volume;
         });
         fullScreenWindow.Show(Window!);
         _shortcutManager.ClearKeys();

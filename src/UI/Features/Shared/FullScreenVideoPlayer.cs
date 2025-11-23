@@ -19,6 +19,7 @@ public class FullScreenVideoWindow : Window
         Controls.VideoPlayer.VideoPlayerControl videoPlayer, 
         string videoFileName, 
         double position, 
+        double volume,
         Action onClose)
     {       
         WindowState = WindowState.FullScreen;
@@ -138,6 +139,7 @@ public class FullScreenVideoWindow : Window
             videoPlayer.VideoPlayerInstance.Pause();
             videoPlayer.VideoPlayerInstance.Position = position;
             videoPlayer.Position = position;
+            videoPlayer.Volume = volume;
         };
     }
 }

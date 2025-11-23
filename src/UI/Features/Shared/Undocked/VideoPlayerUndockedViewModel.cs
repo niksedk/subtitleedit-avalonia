@@ -52,6 +52,7 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
 
     internal void Initialize(VideoPlayerControl originalVideoPlayerControl, Main.MainViewModel mainViewModel)
     {
+        var originalVolume = originalVideoPlayerControl.Volume;
         VideoPlayer = InitVideoPlayer.MakeLayoutVideoPlayer(mainViewModel, out var videoPlayerControl);
         _videoPlayerControl = videoPlayerControl;
         _videoPlayerControl.FullScreenCommand = ToggleFullScreenCommand;
@@ -63,6 +64,7 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
             {
                 Task.Delay(100).Wait();
                 await videoPlayerControl.Open(originalVideoPlayerControl.VideoPlayerInstance.FileName);
+                videoPlayerControl.Volume = originalVolume;
             });
         }
 
