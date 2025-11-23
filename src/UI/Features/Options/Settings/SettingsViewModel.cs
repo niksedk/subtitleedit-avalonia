@@ -112,6 +112,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _showWaveformVideoPositionSlider;
     [ObservableProperty] private bool _showWaveformPlaybackSpeed;
     [ObservableProperty] private bool _waveformFocusTextboxAfterInsertNew;
+    [ObservableProperty] private string _waveformSpaceInfo;
     [ObservableProperty] private string _libMpvPath;
     [ObservableProperty] private string _libMpvStatus;
     [ObservableProperty] private bool _isLibMpvDownloadVisible;
@@ -238,6 +239,7 @@ public partial class SettingsViewModel : ObservableObject
         SelectedSaveSubtitleFormat = SaveSubtitleFormats.First();
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         DefaultEncoding = Encodings.First();
+        WaveformSpaceInfo = string.Empty;
         IsMpvChosen = true;
 
         GridLinesVisibilities = new ObservableCollection<GridLinesVisibilityDisplay>(GridLinesVisibilityDisplay.GetAll());
@@ -245,10 +247,10 @@ public partial class SettingsViewModel : ObservableObject
 
         ErrorColor = Color.FromArgb(50, 255, 0, 0);
 
-        FfmpegStatus = "Not installed";
+        FfmpegStatus = Se.Language.General.NotInstalled;
         FfmpegPath = string.Empty;
 
-        LibMpvStatus = "Not installed";
+        LibMpvStatus = Se.Language.General.NotInstalled;
         LibMpvPath = string.Empty;
         IsLibMpvDownloadVisible = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
@@ -661,6 +663,79 @@ public partial class SettingsViewModel : ObservableObject
 
         return animation.RunAsync(control);
     }
+
+    [RelayCommand]
+    private async Task EmptyWaveformsAndSpectrograms()
+    {
+        var answer = MessageBoxResult.Yes;
+        if (Se.Settings.General.PromptDeleteLines)
+        {
+            answer = await MessageBox.Show(
+                Window!,
+                Se.Language.General.Delete,
+                Se.Language.Options.Settings.DeleteWaveformAndSpectrogramFoldersQuestion,
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question);
+        }
+        if (answer != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        List<string> files = GetWaveformAndSpecgtrogramFiles();
+        foreach (var file in files)
+        {
+            try
+            {
+                File.Delete(file);
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+
+        _ = UpdateWaveformSpaceInfoAsync();
+    }
+
+    private static List<string> GetWaveformAndSpecgtrogramFiles()
+    {
+        var files = Directory.GetFiles(Se.WaveformsFolder, "*.wav").ToList();
+        files.AddRange(Directory.GetFiles(Se.SpectrogramsFolder, "*.png"));
+        return files;
+    }
+
+    private async Task UpdateWaveformSpaceInfoAsync()
+    {
+        var files = GetWaveformAndSpecgtrogramFiles();
+
+        long totalBytes = await Task.Run(() =>
+        {
+            long total = 0;
+            foreach (var file in files)
+            {
+                try
+                {
+                    total += new FileInfo(file).Length;
+                }
+                catch
+                {
+                    // ignore
+                }
+            }
+
+            return total;
+        });
+
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            WaveformSpaceInfo = string.Format(
+                Se.Language.Options.Settings.WaveFormsAndSpectrogramFoldersContainsX,
+                Utilities.FormatBytesToDisplayFileSize(totalBytes)
+            );
+        });
+    }
+
 
     [RelayCommand]
     private void ScrollToSection(string title)
@@ -1127,6 +1202,7 @@ public partial class SettingsViewModel : ObservableObject
     internal void Onloaded(object? sender, RoutedEventArgs e)
     {
         UiUtil.RestoreWindowPosition(Window);
+        _ = UpdateWaveformSpaceInfoAsync();
     }
 
     internal void OnClosing(object? sender, WindowClosingEventArgs e)

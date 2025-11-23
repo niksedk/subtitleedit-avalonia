@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -224,5 +225,10 @@ public class MessageBox : Window
             Close(_result);
             e.Handled = true;
         }
+    }
+
+    internal static async Task<MessageBoxResult> Show(Window window, string delete, object deleteWaveformAndSpectrogramFoldersQuestion, MessageBoxButtons yesNoCancel, MessageBoxIcon question)
+    {
+        throw new NotImplementedException();
     }
 }

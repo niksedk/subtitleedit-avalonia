@@ -536,6 +536,8 @@ public class LanguageGeneral
     public string SubtitleFileSaved { get; set; }
     public string SubtitleFileSavedToX { get; set; }
     public string WaveformCenterOnVideoPosition { get; set; }
+    public string NotInstalled { get; set; }
+    public string DiskSpace { get; set; }
 
     public LanguageGeneral()
     {
@@ -1071,5 +1073,7 @@ public class LanguageGeneral
         SubtitleFileSaved = "Subtitle file saved";
         SubtitleFileSavedToX = "Subtitle file saved to {0}";
         WaveformCenterOnVideoPosition = "Waveform center on video position";
+        NotInstalled = "Not installed";
+        DiskSpace = "Disk space";
     }
 }

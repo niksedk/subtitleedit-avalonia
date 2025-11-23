@@ -63,7 +63,7 @@ public partial class RestoreAutoBackupViewModel : ObservableObject
             IsEmptyFilesVisible = true;
         }
     }
-    
+
     [RelayCommand]
     private async Task DeleteAllFiles()
     {
@@ -72,13 +72,16 @@ public partial class RestoreAutoBackupViewModel : ObservableObject
             return;
         }
 
-        var answer = await MessageBox.Show(
-            Window,
-            Se.Language.General.Delete,
-             Se.Language.File.RestoreAutoBackup.DeleteAllSubtitleBackups,
-            MessageBoxButtons.YesNoCancel,
-            MessageBoxIcon.Question);
-
+        var answer = MessageBoxResult.Yes;
+        if (Se.Settings.General.PromptDeleteLines)
+        {
+            answer = await MessageBox.Show(
+                Window,
+                Se.Language.General.Delete,
+                 Se.Language.File.RestoreAutoBackup.DeleteAllSubtitleBackups,
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question);
+        }
         if (answer != MessageBoxResult.Yes)
         {
             return;
@@ -88,7 +91,7 @@ public partial class RestoreAutoBackupViewModel : ObservableObject
         {
             File.Delete(file.FullPath);
         }
-        
+
         Files.Clear();
         IsEmptyFilesVisible = false;
         IsOkButtonEnabled = false;
@@ -112,7 +115,7 @@ public partial class RestoreAutoBackupViewModel : ObservableObject
         {
             return;
         }
-        
+
         OkPressed = true;
         RestoreFileName = file.FullPath;
         Window?.Close();
@@ -123,7 +126,7 @@ public partial class RestoreAutoBackupViewModel : ObservableObject
     {
         Window?.Close();
     }
-    
+
     [RelayCommand]
     private async Task OpenFolder()
     {
@@ -134,7 +137,7 @@ public partial class RestoreAutoBackupViewModel : ObservableObject
             {
                 Directory.CreateDirectory(folder);
             }
-            catch 
+            catch
             {
                 return;
             }

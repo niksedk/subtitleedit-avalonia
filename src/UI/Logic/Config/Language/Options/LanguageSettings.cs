@@ -1,4 +1,5 @@
 ﻿using Nikse.SubtitleEdit.Core.Enums;
+using System;
 
 namespace Nikse.SubtitleEdit.Logic.Config.Language.Options;
 
@@ -186,6 +187,8 @@ public class LanguageSettings
     public string MpvOpenGl { get; set; }
     public string MpvSoftwareRendering { get; set; }
     public string MpvWidRendering { get; set; }
+    public string WaveFormsAndSpectrogramFoldersContainsX { get; set; }
+    public string DeleteWaveformAndSpectrogramFoldersQuestion { get; set; }
 
     public LanguageSettings()
     {
@@ -369,6 +372,8 @@ public class LanguageSettings
         MpvOpenGl = "libmpv - OpenGL";
         MpvWidRendering = "libmpv - Native Window ID rendering";
         MpvSoftwareRendering = "libmpv - Software rendering (slow)";
+        WaveFormsAndSpectrogramFoldersContainsX = "'Waveforms' and 'spectrogram' folders contains {0}";
+        DeleteWaveformAndSpectrogramFoldersQuestion = "Delete 'Waveforms' and 'Spectrogram' files?";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

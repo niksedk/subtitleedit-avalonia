@@ -375,6 +375,21 @@ public class SettingsPage : UserControl
                     }
                 }
             }),
+            new SettingsItem(Se.Language.General.DiskSpace, () => new StackPanel
+            {
+                Children =
+                {
+                    new StackPanel
+                    {
+                        Orientation = Orientation.Vertical,
+                        Children =
+                        {
+                            UiUtil.MakeLabel().WithBindText(_vm, nameof(_vm.WaveformSpaceInfo)),
+                            UiUtil.MakeButton(Se.Language.General.Delete, _vm.EmptyWaveformsAndSpectrogramsCommand).WithLeftAlignment(),
+                        }
+                    },
+                }
+            }),
         ]));
 
         sections.Add(new SettingsSection(Se.Language.General.Tools,
