@@ -3155,7 +3155,7 @@ public partial class MainViewModel :
             _updateAudioVisualizer = true;
         }
     }
-    
+
     [RelayCommand]
     private async Task ShowPointSync()
     {
@@ -3187,7 +3187,7 @@ public partial class MainViewModel :
             SelectAndScrollToRow(0);
         }
     }
-    
+
     [RelayCommand]
     private async Task ShowPointSyncViaOther()
     {
@@ -8158,6 +8158,16 @@ public partial class MainViewModel :
                     try
                     {
                         await SubtitleOpen(first.SubtitleFileName, first.VideoFileName, first.SelectedLine);
+                        if (!string.IsNullOrEmpty(_videoFileName) && SelectedSubtitle != null && VideoPlayerControl != null)
+                        {
+                            await VideoPlayerControl.WaitForPlayersReadyAsync();
+                            await Task.Delay(200);
+                            VideoPlayerControl.Position = SelectedSubtitle.StartTime.TotalSeconds;
+                            Dispatcher.UIThread.Post(() =>
+                            {
+                                VideoPlayerControl.Position = SelectedSubtitle.StartTime.TotalSeconds;
+                            });
+                        }
                     }
                     catch (Exception e)
                     {
