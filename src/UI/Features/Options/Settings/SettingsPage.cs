@@ -207,8 +207,8 @@ public class SettingsPage : UserControl
             MakeCheckboxSetting(Se.Language.Options.Settings.RememberPositionAndSize, nameof(_vm.RememberPositionAndSize)),
             MakeSeparator(),
             MakeCheckboxSetting(Se.Language.Options.Settings.AutoBackupOn, nameof(_vm.AutoBackupOn)),
-            MakeNumericSettingInt(Se.Language.Options.Settings.AutoBackupIntervalMinutes, nameof(_vm.AutoBackupIntervalMinutes)),
-            MakeNumericSettingInt(Se.Language.Options.Settings.AutoBackupDeleteAfterMonths, nameof(_vm.AutoBackupDeleteAfterMonths)),
+            MakeNumericSettingInt(Se.Language.Options.Settings.AutoBackupIntervalMinutes, nameof(_vm.AutoBackupIntervalMinutes), 1),
+            MakeNumericSettingInt(Se.Language.Options.Settings.AutoBackupDeleteAfterMonths, nameof(_vm.AutoBackupDeleteAfterMonths), 1),
             new SettingsItem(Se.Language.Options.Settings.DefaultEncoding, () => new ComboBox
             {
                 Width = 200,
@@ -587,19 +587,26 @@ public class SettingsPage : UserControl
         };
     }
 
-    private SettingsItem MakeNumericSettingInt(string label, string bindingProperty)
+    private SettingsItem MakeNumericSettingInt(string label, string bindingProperty, int? minValue = null)
     {
-        return new SettingsItem(label, () => MakeNumericUpDownInt(bindingProperty));
+        return new SettingsItem(label, () => MakeNumericUpDownInt(bindingProperty, minValue));
     }
 
-    private NumericUpDown MakeNumericUpDownInt(string bindingProperty)
+    private NumericUpDown MakeNumericUpDownInt(string bindingProperty, int? minValue = null)
     {
-        return new NumericUpDown
+        var nud = new NumericUpDown
         {
             Width = 150,
             FormatString = "F0",
             [!NumericUpDown.ValueProperty] = new Binding(bindingProperty) { Source = _vm, Mode = BindingMode.TwoWay },
         };
+        
+        if (minValue.HasValue)
+        {
+            nud.Minimum = (decimal)minValue;
+        }
+
+        return nud;
     }
 
     private NumericUpDown MakeNumericUpDownInt(string bindingProperty, Action valueChanged)

@@ -64,10 +64,12 @@ public class RestoreAutoBackupWindow : Window
 
         var linkOpenFolder = UiUtil.MakeLink(Se.Language.File.RestoreAutoBackup.OpenAutoBackupFolder, vm.OpenFolderCommand);
 
+        var buttonDeleteAllSubtitles = UiUtil.MakeButton(Se.Language.File.RestoreAutoBackup.DeleteAll, vm.DeleteAllFilesCommand)
+            .WithBindIsVisible(nameof(vm.IsEmptyFilesVisible));
         var buttonRestore = UiUtil.MakeButton(Se.Language.File.RestoreAutoBackup.RestoreAutoBackupFile, vm.RestoreFileCommand);
         buttonRestore.BindIsEnabled(vm, nameof(vm.IsOkButtonEnabled));
         var buttonOk = UiUtil.MakeButtonOk(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar(buttonRestore, buttonOk);
+        var panelButtons = UiUtil.MakeButtonBar(buttonDeleteAllSubtitles, buttonRestore, buttonOk);
 
         var grid = new Grid
         {

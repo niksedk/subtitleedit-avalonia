@@ -19,6 +19,7 @@ public partial class RestoreAutoBackupViewModel : ObservableObject
     [ObservableProperty] private bool _isOkButtonEnabled;
     [ObservableProperty] private DisplayFile? _selectedFile;
     [ObservableProperty] private ObservableCollection<DisplayFile> _files;
+    [ObservableProperty] private bool _isEmptyFilesVisible;
 
     public Window? Window { get; set; }
     public string? RestoreFileName { get; set; }
@@ -59,7 +60,36 @@ public partial class RestoreAutoBackupViewModel : ObservableObject
         if (Files.Count > 0)
         {
             SelectedFile = Files[0];
+            IsEmptyFilesVisible = true;
         }
+    }
+    
+    [RelayCommand]
+    private async Task DeleteAllFiles()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var answer = await MessageBox.Show(
+            Window,
+            Se.Language.General.Delete,
+             Se.Language.File.RestoreAutoBackup.DeleteAllSubtitleBackups,
+            MessageBoxButtons.YesNoCancel,
+            MessageBoxIcon.Question);
+
+        if (answer != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        foreach (var file in Files)
+        {
+            File.Delete(file.FullPath);
+        }
+        
+        Files.Clear();
     }
 
     [RelayCommand]
