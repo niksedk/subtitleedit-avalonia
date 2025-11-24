@@ -560,6 +560,8 @@ public class SettingsPage : UserControl
 
         grid.Add(labelColorShadow, 5);
         grid.Add(colorPickerShadow, 5, 1);
+        
+        grid.Add(MakeBorderView(vm), 6, 1, 0, 2);
 
         return UiUtil.MakeBorderForControl(grid);
     }
@@ -589,18 +591,17 @@ public class SettingsPage : UserControl
         var label = UiUtil.MakeLabel(Se.Language.General.BorderStyle);
         grid.Add(label, 1, 0);
 
-        var comboBoxBorderType = UiUtil.MakeComboBox(vm.BorderTypes, vm, nameof(vm.SelectedBorderType));
-        comboBoxBorderType.SelectionChanged += vm.BorderTypeChanged;
+        var comboBoxBorderType = UiUtil.MakeComboBox(vm.MpvPreviewBorderTypes, vm, nameof(vm.MpvPreviewSelectedBorderType));
         grid.Add(comboBoxBorderType, 2, 0, 1, 2);
 
         var labelOutlineWidth = UiUtil.MakeLabel(Se.Language.General.OutlineWidth);
-        var numericUpDownOutlineWidth = UiUtil.MakeNumericUpDownOneDecimal(0, 100, 130, vm, nameof(StyleDisplay.OutlineWidth));
+        var numericUpDownOutlineWidth = UiUtil.MakeNumericUpDownOneDecimal(0, 100, 130, vm, nameof(vm.MpvPreviewOutlineWidth));
         numericUpDownOutlineWidth.Increment = 0.5m;
         grid.Add(labelOutlineWidth, 3, 0);
         grid.Add(numericUpDownOutlineWidth, 3, 1);
 
         var labelShadowWidth = UiUtil.MakeLabel(Se.Language.General.ShadowWidth);
-        var numericUpDownShadowWidth = UiUtil.MakeNumericUpDownOneDecimal(0, 100, 130, vm, nameof(StyleDisplay.ShadowWidth));
+        var numericUpDownShadowWidth = UiUtil.MakeNumericUpDownOneDecimal(0, 100, 130, vm, nameof(vm.MpvPreviewShadowWidth));
         numericUpDownShadowWidth.Increment = 0.5m;
         grid.Add(labelShadowWidth, 4, 0);
         grid.Add(numericUpDownShadowWidth, 4, 1);

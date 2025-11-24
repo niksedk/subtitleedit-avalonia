@@ -60,9 +60,8 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private Color _mpvPreviewColorShadow;
     [ObservableProperty] private ObservableCollection<BorderStyleItem> _mpvPreviewBorderTypes;
     [ObservableProperty] private BorderStyleItem _mpvPreviewSelectedBorderType;
-    [ObservableProperty] private ObservableCollection<BorderStyleItem> _mpvPreviewBorderTypes;
-    [ObservableProperty] private BorderStyleItem _mpvPreviewSelectedBorderType;
-
+    [ObservableProperty] private double _mpvPreviewOutlineWidth;
+    [ObservableProperty] private double _mpvPreviewShadowWidth;
 
     [ObservableProperty] private int? _newEmptyDefaultMs;
     [ObservableProperty] private bool _promptDeleteLines;
