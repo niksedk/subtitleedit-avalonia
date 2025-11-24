@@ -3622,6 +3622,12 @@ public partial class MainViewModel :
 
         _oldSubtitleGrid = SubtitleGrid;
         _oldEditTextBox = EditTextBox;
+        
+        if (VideoPlayerControl?.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
+        {
+            _mpvReloader.Reset();
+            _mpvReloader.RefreshMpv(mpv, GetUpdateSubtitle(), SelectedSubtitleFormat);
+        }
     }
 
     [RelayCommand]

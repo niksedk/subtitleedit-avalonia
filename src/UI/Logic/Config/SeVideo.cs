@@ -53,7 +53,7 @@ public class SeVideo
         MoveVideoPositionCustom2Forward = 5000; // 5 seconds
         
         MpvPreviewFontName = "Arial";
-        MpvPreviewFontSize = 50;
+        MpvPreviewFontSize = 26;
         MpvPreviewFontBold = true;
         MpvPreviewOutlineWidth = 4;
         MpvPreviewShadowWidth = 2;

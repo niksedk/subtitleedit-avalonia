@@ -24,7 +24,7 @@ public class MpvReloader : IMpvReloader
 
     public void RefreshMpv(LibMpvDynamicPlayer mpvContext, Subtitle subtitle, SubtitleFormat uiFormat)
     {
-        if (subtitle == null)
+        if (subtitle.Paragraphs.Count == 0)
         {
             return;
         }
@@ -217,7 +217,7 @@ public class MpvReloader : IMpvReloader
             OutlineWidth = gs.MpvPreviewOutlineWidth,
             ShadowWidth = gs.MpvPreviewShadowWidth,
             BorderStyle = gs.MpvPreviewBorderType.ToString(),
-            Alignment = string.Empty,  // bottom center
+            Alignment = "2",  // bottom center
             MarginVertical = 10,
         };
     }
@@ -242,6 +242,7 @@ public class MpvReloader : IMpvReloader
     {
         _mpvTextFileName = null;
         _mpvTextOld = string.Empty;
+        _mpvPreviewStyleHeader = null;
         _retryCount = 3;
     }
 }
