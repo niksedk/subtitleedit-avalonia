@@ -137,6 +137,11 @@ public static class InitMenu
                         },
                         new MenuItem
                         {
+                            Header = Se.Language.File.Export.TitleExportBdnXml,
+                            Command = vm.ExportBdnXmlCommand,
+                        },
+                        new MenuItem
+                        {
                             Header = new CapMakerPlus().Name,
                             Command = vm.ExportCapMakerPlusCommand,
                         },
@@ -189,6 +194,11 @@ public static class InitMenu
                         {
                             Header = Se.Language.File.Export.TitleExportVobSub,
                             Command = vm.ExportVobSubCommand,
+                        },
+                        new MenuItem
+                        {
+                            Header = Se.Language.File.Export.TitleExportWebVttThumbnails,
+                            Command = vm.ExportWebVttThumbnailsCommand,
                         },
                         new Separator(),
                         new MenuItem

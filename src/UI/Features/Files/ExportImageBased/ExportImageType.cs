@@ -9,4 +9,5 @@ public enum ExportImageType
     Fcp,
     ImagesWithTimeCode,
     VobSub,
+    WebVttThumbnail
 }

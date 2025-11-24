@@ -1029,7 +1029,31 @@ public partial class MainViewModel :
             return;
         }
     }
+    
+    [RelayCommand]
+    private async Task ExportWebVttThumbnails()
+    {
+        if (Window == null)
+        {
+            return;
+        }
 
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
+        IExportHandler exportHandler = new ExportHandlerWebVttThumbnail();
+        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(
+            vm => { vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName); });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+    }
+    
     [RelayCommand]
     private async Task ExportDCinemaInteropPng()
     {
