@@ -1,4 +1,5 @@
-﻿using Nikse.SubtitleEdit.Core.Common;
+﻿using Avalonia.Skia;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Settings;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -57,7 +58,7 @@ public class MpvReloader : IMpvReloader
             if (uiFormatType == typeof(WebVTT) || uiFormatType == typeof(WebVTTFileWithLineNumber))
             {
                 //TODO: add some caching!?
-                var defaultStyle = GetMpvPreviewStyle(Configuration.Settings.General);
+                var defaultStyle = GetMpvPreviewStyle(Se.Settings.Video);
                 defaultStyle.BorderStyle = "3";
                 subtitle = new Subtitle(subtitle);
                 subtitle = WebVttToAssa.Convert(subtitle, defaultStyle, VideoWidth, VideoHeight);
@@ -197,28 +198,27 @@ public class MpvReloader : IMpvReloader
 
     public void UpdateMpvStyle()
     {
-        var gs = Configuration.Settings.General;
-        var mpvStyle = GetMpvPreviewStyle(gs);
+        var mpvStyle = GetMpvPreviewStyle(Se.Settings.Video);
 
         MpvPreviewStyleHeader = string.Format(AdvancedSubStationAlpha.HeaderNoStyles, "MPV preview file", mpvStyle.ToRawAss(SsaStyle.DefaultAssStyleFormat));
     }
 
-    private static SsaStyle GetMpvPreviewStyle(GeneralSettings gs)
+    private static SsaStyle GetMpvPreviewStyle(SeVideo gs)
     {
         return new SsaStyle
         {
             Name = "Default",
-            FontName = gs.VideoPlayerPreviewFontName,
-            FontSize = gs.VideoPlayerPreviewFontSize,
-            Bold = gs.VideoPlayerPreviewFontBold,
-            Primary = gs.MpvPreviewTextPrimaryColor,
-            Outline = gs.MpvPreviewTextOutlineColor,
-            Background = gs.MpvPreviewTextBackgroundColor,
-            OutlineWidth = gs.MpvPreviewTextOutlineWidth,
-            ShadowWidth = gs.MpvPreviewTextShadowWidth,
-            BorderStyle = gs.MpvPreviewTextOpaqueBoxStyle,
-            Alignment = gs.MpvPreviewTextAlignment,
-            MarginVertical = gs.MpvPreviewTextMarginVertical
+            FontName = gs.MpvPreviewFontName,
+            FontSize = gs.MpvPreviewFontSize,
+            Bold = gs.MpvPreviewFontBold,
+            Primary = gs.MpvPreviewColorPrimary.FromHexToColor().ToSKColor(),
+            Outline = gs.MpvPreviewColorOutline.FromHexToColor().ToSKColor(),
+            Background = gs.MpvPreviewColorShadow.FromHexToColor().ToSKColor(),
+            OutlineWidth = gs.MpvPreviewOutlineWidth,
+            ShadowWidth = gs.MpvPreviewShadowWidth,
+            BorderStyle = gs.MpvPreviewBorderType.ToString(),
+            Alignment = string.Empty,  // bottom center
+            MarginVertical = 10,
         };
     }
 

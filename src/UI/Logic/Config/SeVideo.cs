@@ -1,4 +1,5 @@
 ﻿using Avalonia.Media;
+using Nikse.SubtitleEdit.Features.Assa;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 
@@ -28,9 +29,9 @@ public class SeVideo
     public  string MpvPreviewColorPrimary{ get; set; }
     public  string MpvPreviewColorOutline{ get; set; }
     public  string MpvPreviewColorShadow{ get; set; }
-    public  string MpvPreviewSelectedBorderType{ get; set; }
-    public  double MpvPreviewOutlineWidth{ get; set; }
-    public  double MpvPreviewShadowWidth{ get; set; }
+    public  decimal MpvPreviewOutlineWidth{ get; set; }
+    public  decimal MpvPreviewShadowWidth{ get; set; }
+    public  int MpvPreviewBorderType { get; set; }
 
     public SeVideo()
     {
@@ -59,5 +60,6 @@ public class SeVideo
         MpvPreviewColorPrimary = Color.FromRgb(255, 255, 255).FromColorToHex();
         MpvPreviewColorOutline = Color.FromRgb(0,0,0).FromColorToHex();
         MpvPreviewColorShadow = Color.FromRgb(0,0,0).FromColorToHex();
+        MpvPreviewBorderType = (int)BorderStyleType.Outline;
     }
 }

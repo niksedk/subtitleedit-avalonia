@@ -60,8 +60,8 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private Color _mpvPreviewColorShadow;
     [ObservableProperty] private ObservableCollection<BorderStyleItem> _mpvPreviewBorderTypes;
     [ObservableProperty] private BorderStyleItem _mpvPreviewSelectedBorderType;
-    [ObservableProperty] private double _mpvPreviewOutlineWidth;
-    [ObservableProperty] private double _mpvPreviewShadowWidth;
+    [ObservableProperty] private decimal _mpvPreviewOutlineWidth;
+    [ObservableProperty] private decimal _mpvPreviewShadowWidth;
 
     [ObservableProperty] private int? _newEmptyDefaultMs;
     [ObservableProperty] private bool _promptDeleteLines;
@@ -448,7 +448,7 @@ public partial class SettingsViewModel : ObservableObject
         MpvPreviewColorPrimary = video.MpvPreviewColorPrimary.FromHexToColor();
         MpvPreviewColorOutline = video.MpvPreviewColorOutline.FromHexToColor();
         MpvPreviewColorShadow = video.MpvPreviewColorShadow.FromHexToColor();
-        
+        MpvPreviewSelectedBorderType = MpvPreviewBorderTypes.FirstOrDefault(p => p.Style == (BorderStyleType)video.MpvPreviewBorderType) ?? MpvPreviewBorderTypes.First();
 
         FfmpegPath = Se.Settings.General.FfmpegPath;
         LibMpvPath = Se.Settings.General.LibMpvPath;
@@ -570,6 +570,16 @@ public partial class SettingsViewModel : ObservableObject
         video.ShowStopButton = ShowStopButton;
         video.ShowFullscreenButton = ShowFullscreenButton;
         video.AutoOpen = AutoOpenVideoFile;
+
+        video.MpvPreviewFontName = MpvPreviewFontName;
+        video.MpvPreviewFontSize = MpvPreviewFontSize;
+        video.MpvPreviewFontBold = MpvPreviewFontBold;
+        video.MpvPreviewOutlineWidth = MpvPreviewOutlineWidth;
+        video.MpvPreviewShadowWidth = MpvPreviewShadowWidth;
+        video.MpvPreviewColorPrimary = MpvPreviewColorPrimary.FromColorToHex();
+        video.MpvPreviewColorOutline = MpvPreviewColorOutline.FromColorToHex();
+        video.MpvPreviewColorShadow = MpvPreviewColorShadow.FromColorToHex();
+        video.MpvPreviewBorderType = (int)(MpvPreviewSelectedBorderType?.Style ?? BorderStyleType.Outline);
 
         general.FfmpegPath = FfmpegPath;
         general.LibMpvPath = LibMpvPath;
