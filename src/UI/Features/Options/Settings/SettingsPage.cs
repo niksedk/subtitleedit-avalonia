@@ -509,23 +509,21 @@ public class SettingsPage : UserControl
         var numericUpDownFontSize = UiUtil.MakeNumericUpDownOneDecimal(1, 1000, 130, vm, nameof(vm.MpvPreviewFontSize));
         numericUpDownFontSize.Increment = 1;
 
-        var checkBoxBold = UiUtil.MakeCheckBox(Se.Language.General.Bold, vm, nameof(vm.MpvPreviewFontBold) + "." + nameof(StyleDisplay.Bold));
+        var checkBoxBold = UiUtil.MakeCheckBox(Se.Language.General.Bold, vm, nameof(vm.MpvPreviewFontBold));
 
         var labelColorPrimary = UiUtil.MakeLabel(Se.Language.Assa.Primary);
         var colorPickerPrimary = UiUtil.MakeColorPicker(vm, nameof(vm.MpvPreviewColorPrimary));
 
         var labelColorOutline = UiUtil.MakeLabel(Se.Language.General.Outline);
-        var colorPickerOutline = UiUtil.MakeColorPicker(vm, nameof(vm.MpvPreviewColorPrimary));
+        var colorPickerOutline = UiUtil.MakeColorPicker(vm, nameof(vm.MpvPreviewColorOutline));
 
         var labelColorShadow = UiUtil.MakeLabel(Se.Language.General.Shadow);
-        var colorPickerShadow = UiUtil.MakeColorPicker(vm, nameof(vm.MpvPreviewColorPrimary));
+        var colorPickerShadow = UiUtil.MakeColorPicker(vm, nameof(vm.MpvPreviewColorShadow));
 
         var grid = new Grid
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
@@ -561,7 +559,7 @@ public class SettingsPage : UserControl
         grid.Add(labelColorShadow, 5);
         grid.Add(colorPickerShadow, 5, 1);
         
-        grid.Add(MakeBorderView(vm), 6, 1, 0, 2);
+        grid.Add(MakeBorderView(vm), 6, 0, 1, 2);
 
         return UiUtil.MakeBorderForControl(grid);
     }

@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config;
+﻿using Avalonia.Media;
+
+namespace Nikse.SubtitleEdit.Logic.Config;
 
 public class SeVideo
 {
@@ -19,6 +21,16 @@ public class SeVideo
     public int MoveVideoPositionCustom1Forward { get; set; }
     public int MoveVideoPositionCustom2Back { get; set; }
     public int MoveVideoPositionCustom2Forward { get; set; }
+    
+    public string MpvPreviewFontName { get; set; }
+    public  int MpvPreviewFontSize{ get; set; }
+    public  bool MpvPreviewFontBold{ get; set; }
+    public  string MpvPreviewColorPrimary{ get; set; }
+    public  string MpvPreviewColorOutline{ get; set; }
+    public  string MpvPreviewColorShadow{ get; set; }
+    public  string MpvPreviewSelectedBorderType{ get; set; }
+    public  double MpvPreviewOutlineWidth{ get; set; }
+    public  double MpvPreviewShadowWidth{ get; set; }
 
     public SeVideo()
     {
@@ -38,5 +50,14 @@ public class SeVideo
         MoveVideoPositionCustom1Forward = 2000; // 2 seconds
         MoveVideoPositionCustom2Back = 5000; // 5 seconds
         MoveVideoPositionCustom2Forward = 5000; // 5 seconds
+        
+        MpvPreviewFontName = "Arial";
+        MpvPreviewFontSize = 50;
+        MpvPreviewFontBold = true;
+        MpvPreviewOutlineWidth = 4;
+        MpvPreviewShadowWidth = 2;
+        MpvPreviewColorPrimary = Color.FromRgb(255, 255, 255).FromColorToHex();
+        MpvPreviewColorOutline = Color.FromRgb(0,0,0).FromColorToHex();
+        MpvPreviewColorShadow = Color.FromRgb(0,0,0).FromColorToHex();
     }
 }

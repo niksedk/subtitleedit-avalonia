@@ -439,6 +439,16 @@ public partial class SettingsViewModel : ObservableObject
         ShowStopButton = video.ShowStopButton;
         ShowFullscreenButton = video.ShowFullscreenButton;
         AutoOpenVideoFile = video.AutoOpen;
+        
+        MpvPreviewFontName  = video.MpvPreviewFontName;
+        MpvPreviewFontSize = video.MpvPreviewFontSize;
+        MpvPreviewFontBold = video.MpvPreviewFontBold;
+        MpvPreviewOutlineWidth = video.MpvPreviewOutlineWidth;
+        MpvPreviewShadowWidth = video.MpvPreviewShadowWidth;
+        MpvPreviewColorPrimary = video.MpvPreviewColorPrimary.FromHexToColor();
+        MpvPreviewColorOutline = video.MpvPreviewColorOutline.FromHexToColor();
+        MpvPreviewColorShadow = video.MpvPreviewColorShadow.FromHexToColor();
+        
 
         FfmpegPath = Se.Settings.General.FfmpegPath;
         LibMpvPath = Se.Settings.General.LibMpvPath;
