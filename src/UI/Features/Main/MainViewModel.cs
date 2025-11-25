@@ -8687,8 +8687,8 @@ public partial class MainViewModel :
         Renumber();
         _subtitleGridSelectionChangedSkip = false;
         SelectAndScrollToRow(idx);
-
         _undoRedoManager.StartChangeDetection();
+        SubtitleGridSelectionChanged();
     }
 
     private void InsertBeforeSelectedItem()
