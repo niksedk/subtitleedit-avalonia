@@ -19,6 +19,16 @@ namespace Nikse.SubtitleEdit.Logic.Media
             // Get top level from the current control. Alternatively, you can use Window reference instead.
             var topLevel = TopLevel.GetTopLevel(sender)!;
 
+            if (extension.StartsWith('.'))
+            {
+                extension = "*" + extension;
+            }
+
+            if (!extension2.StartsWith('.'))
+            {
+                extension2 = "*" + extension2;
+            }
+
             var fileTypes = new List<FilePickerFileType>
             {
                 new FilePickerFileType(extensionTitle)

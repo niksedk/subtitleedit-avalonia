@@ -2,7 +2,6 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Core.Enums;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -88,7 +87,8 @@ public partial class ProfilesViewModel : ObservableObject
             return;
         }
 
-        var json = JsonSerializer.Serialize(toExport);
+        var export = new ProfileImportExport(toExport);
+        var json = JsonSerializer.Serialize(export, new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         System.IO.File.WriteAllText(fileName, json);
 
         await MessageBox.Show(
@@ -118,7 +118,15 @@ public partial class ProfilesViewModel : ObservableObject
         try
         {
             var json = System.IO.File.ReadAllText(fileName);
-            imported = JsonSerializer.Deserialize<List<ProfileDisplay>>(json);
+            var temp = JsonSerializer.Deserialize<ProfileImportExport>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            if (temp == null)
+            {
+                imported = new List<ProfileDisplay>();
+            }
+            else
+            {
+                imported = temp.ToProfileDisplayList();
+            }
         }
         catch (Exception exception)
         {
