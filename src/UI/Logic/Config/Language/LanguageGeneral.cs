@@ -539,6 +539,8 @@ public class LanguageGeneral
     public string NotInstalled { get; set; }
     public string DiskSpace { get; set; }
     public string FileSaved { get; set; }
+    public string BluRaySup { get; set; }
+    public string BdnXml { get; set; }
 
     public LanguageGeneral()
     {
@@ -1077,5 +1079,7 @@ public class LanguageGeneral
         NotInstalled = "Not installed";
         DiskSpace = "Disk space";
         FileSaved = "File saved";
+        BluRaySup = "Blu-ray (sup)";
+        BdnXml =  "BDN/xml";
     }
 }

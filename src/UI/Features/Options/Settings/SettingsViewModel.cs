@@ -70,7 +70,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _useFrameMode;
     [ObservableProperty] private bool _autoBackupOn;
     [ObservableProperty] private int? _autoBackupIntervalMinutes;
-    [ObservableProperty] private int? _autoBackupDeleteAfterMonths;
+    [ObservableProperty] private int? _autoBackupDeleteAfterDays;
 
     [ObservableProperty] private ObservableCollection<string> _defaultSubtitleFormats;
     [ObservableProperty] private string _selectedDefaultSubtitleFormat;
@@ -349,7 +349,7 @@ public partial class SettingsViewModel : ObservableObject
         RememberPositionAndSize = general.RememberPositionAndSize;
         AutoBackupOn = general.AutoBackupOn;
         AutoBackupIntervalMinutes = general.AutoBackupIntervalMinutes;
-        AutoBackupDeleteAfterMonths = general.AutoBackupDeleteAfterMonths;
+        AutoBackupDeleteAfterDays = general.AutoBackupDeleteAfterDays;
         DefaultEncoding = Encodings.FirstOrDefault(e => e.DisplayName == general.DefaultEncoding) ?? Encodings.First();
 
         SelectedDefaultSubtitleFormat = general.DefaultSubtitleFormat;
@@ -489,7 +489,7 @@ public partial class SettingsViewModel : ObservableObject
         general.RememberPositionAndSize = RememberPositionAndSize;
         general.AutoBackupOn = AutoBackupOn;
         general.AutoBackupIntervalMinutes = AutoBackupIntervalMinutes ?? general.AutoBackupIntervalMinutes;
-        general.AutoBackupDeleteAfterMonths = AutoBackupDeleteAfterMonths ?? general.AutoBackupDeleteAfterMonths;
+        general.AutoBackupDeleteAfterDays = AutoBackupDeleteAfterDays ?? general.AutoBackupDeleteAfterDays;
         general.DefaultEncoding = DefaultEncoding?.DisplayName ?? Encodings.First().DisplayName;
         general.DefaultSubtitleFormat = SelectedDefaultSubtitleFormat;
 

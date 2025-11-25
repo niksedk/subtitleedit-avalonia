@@ -132,12 +132,12 @@ public static class InitMenu
                     {
                         new MenuItem
                         {
-                            Header = Se.Language.File.Export.TitleExportBluRaySup,
+                            Header = Se.Language.General.BluRaySup,
                             Command = vm.ExportBluRaySupCommand,
                         },
                         new MenuItem
                         {
-                            Header = Se.Language.File.Export.TitleExportBdnXml,
+                            Header = Se.Language.General.BdnXml,
                             Command = vm.ExportBdnXmlCommand,
                         },
                         new MenuItem
@@ -197,7 +197,7 @@ public static class InitMenu
                         },
                         new MenuItem
                         {
-                            Header = Se.Language.File.Export.TitleExportWebVttThumbnails,
+                            Header = "WebVTT png",
                             Command = vm.ExportWebVttThumbnailsCommand,
                         },
                         new Separator(),

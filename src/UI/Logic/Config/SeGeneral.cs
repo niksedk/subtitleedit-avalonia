@@ -69,7 +69,7 @@ public class SeGeneral
     public List<SeWindowPosition> WindowPositions { get; set; } = new List<SeWindowPosition>();
     public bool AutoBackupOn { get; set; }
     public int AutoBackupIntervalMinutes { get; set; }
-    public int AutoBackupDeleteAfterMonths { get; set; }
+    public int AutoBackupDeleteAfterDays { get; set; }
 
     public bool ColorDurationTooShort { get; set; }
     public bool ColorDurationTooLong { get; set; }
@@ -166,7 +166,7 @@ public class SeGeneral
         PromptDeleteLines = true;
         AutoBackupOn = true;
         AutoBackupIntervalMinutes = 5;
-        AutoBackupDeleteAfterMonths = 3;
+        AutoBackupDeleteAfterDays = 90;
         DefaultSaveAsFormat = "SubRip";
         FavoriteSubtitleFormats = "SubRip";
         CpsLineLengthStrategy = "";//TODO: Add default value

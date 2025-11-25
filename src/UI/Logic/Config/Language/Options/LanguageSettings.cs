@@ -100,7 +100,7 @@ public class LanguageSettings
     public string RememberPositionAndSize { get; set; }
     public string AutoBackupOn { get; set; }
     public string AutoBackupIntervalMinutes { get; set; }
-    public string AutoBackupDeleteAfterMonths { get; set; }
+    public string AutoBackupDeleteAfterDays { get; set; }
     public string DefaultEncoding { get; set; }
     public string ColorDurationTooShort { get; set; }
     public string ColorDurationTooLong { get; set; }
@@ -286,7 +286,7 @@ public class LanguageSettings
         RememberPositionAndSize = "Remember window position and size";
         AutoBackupOn = "Auto-backup";
         AutoBackupIntervalMinutes = "Auto-backup interval (minutes)";
-        AutoBackupDeleteAfterMonths = "Auto-backup retention (months)";
+        AutoBackupDeleteAfterDays = "Auto-backup retention (days)";
         DefaultEncoding = "Default encoding";
         ColorDurationTooShort = "Color duration if too short";
         ColorDurationTooLong = "Color duration if too long";

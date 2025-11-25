@@ -39,6 +39,7 @@ public class AutoBackupService : IAutoBackupService
         {
             minutes = 1;
         }
+
         _timerAutoBackup = new System.Timers.Timer(TimeSpan.FromMinutes(minutes));
         _timerAutoBackup.Elapsed += (_, _) =>
         {
@@ -85,7 +86,8 @@ public class AutoBackupService : IAutoBackupService
             title = "_" + Path.GetFileNameWithoutExtension(subtitle.FileName);
         }
 
-        var fileName = Path.Combine(folder, $"{DateTime.Now.Year:0000}-{DateTime.Now.Month:00}-{DateTime.Now.Day:00}_{DateTime.Now.Hour:00}-{DateTime.Now.Minute:00}-{DateTime.Now.Second:00}{title}{saveFormat.Extension}");
+        var fileName = Path.Combine(folder,
+            $"{DateTime.Now.Year:0000}-{DateTime.Now.Month:00}-{DateTime.Now.Day:00}_{DateTime.Now.Hour:00}-{DateTime.Now.Minute:00}-{DateTime.Now.Second:00}{title}{saveFormat.Extension}");
         try
         {
             var format = saveFormat.IsTextBased ? saveFormat : new SubRip();
@@ -118,23 +120,25 @@ public class AutoBackupService : IAutoBackupService
     }
 
     private static readonly Lock Locker = new Lock();
+
     public void CleanAutoBackupFolder()
     {
         var autoBackupFolder = Se.AutoBackupFolder;
-        var autoBackupDeleteAfterMonths = Se.Settings.General.AutoBackupDeleteAfterMonths;
+        var autoBackupDeleteAfterDays = Se.Settings.General.AutoBackupDeleteAfterDays;
 
         lock (Locker) // only allow one thread
         {
             if (Directory.Exists(autoBackupFolder))
             {
-                var targetDate = DateTime.Now.AddMonths(-autoBackupDeleteAfterMonths);
+                var targetDate = DateTime.Now.AddDays(-autoBackupDeleteAfterDays);
                 var files = Directory.GetFiles(autoBackupFolder, "*.*");
                 foreach (var fileName in files)
                 {
                     try
                     {
                         var name = Path.GetFileName(fileName);
-                        if (RegexFileNamePattern.IsMatch(name) && Convert.ToDateTime(name.Substring(0, 10), CultureInfo.InvariantCulture) <= targetDate)
+                        if (RegexFileNamePattern.IsMatch(name) && 
+                            Convert.ToDateTime(name.Substring(0, 10), CultureInfo.InvariantCulture) <= targetDate)
                         {
                             File.Delete(fileName);
                         }
