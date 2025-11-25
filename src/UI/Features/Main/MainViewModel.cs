@@ -571,8 +571,8 @@ public partial class MainViewModel :
         {
             var text = GetUpdateSubtitle().ToText(SelectedSubtitleFormat);
             var title = string.Format(Se.Language.General.SourceViewX, (string.IsNullOrEmpty(_subtitleFileName)
-                    ? Se.Language.General.Untitled
-                    : Path.GetFileName(_subtitleFileName)));
+                ? Se.Language.General.Untitled
+                : Path.GetFileName(_subtitleFileName)));
             vm.Initialize(title, text, SelectedSubtitleFormat);
         });
 
@@ -585,12 +585,11 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowAssaStyles()
     {
-        var result = await ShowDialogAsync<AssaStylesWindow, AssaStylesViewModel>(
-            vm =>
-            {
-                vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty,
-                    SelectedSubtitle?.Style ?? string.Empty);
-            });
+        var result = await ShowDialogAsync<AssaStylesWindow, AssaStylesViewModel>(vm =>
+        {
+            vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty,
+                SelectedSubtitle?.Style ?? string.Empty);
+        });
 
         if (result.OkPressed)
         {
@@ -611,12 +610,11 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowAssaProperties()
     {
-        var result = await ShowDialogAsync<AssaPropertiesWindow, AssaPropertiesViewModel>(
-            vm =>
-            {
-                vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty,
-                    _videoFileName ?? string.Empty);
-            });
+        var result = await ShowDialogAsync<AssaPropertiesWindow, AssaPropertiesViewModel>(vm =>
+        {
+            vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty,
+                _videoFileName ?? string.Empty);
+        });
 
         if (result.OkPressed)
         {
@@ -628,8 +626,10 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowAssaAttachments()
     {
-        var result = await ShowDialogAsync<AssaAttachmentsWindow, AssaAttachmentsViewModel>(
-            vm => { vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty); });
+        var result = await ShowDialogAsync<AssaAttachmentsWindow, AssaAttachmentsViewModel>(vm =>
+        {
+            vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
+        });
 
         if (result.OkPressed)
         {
@@ -1022,8 +1022,10 @@ public partial class MainViewModel :
         }
 
         IExportHandler exportHandler = new ExportHandlerBdnXml();
-        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(
-            vm => { vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName); });
+        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(vm =>
+        {
+            vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName);
+        });
 
         if (!result.OkPressed)
         {
@@ -1046,8 +1048,10 @@ public partial class MainViewModel :
         }
 
         IExportHandler exportHandler = new ExportHandlerWebVttThumbnail();
-        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(
-            vm => { vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName); });
+        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(vm =>
+        {
+            vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName);
+        });
 
         if (!result.OkPressed)
         {
@@ -1070,8 +1074,10 @@ public partial class MainViewModel :
         }
 
         IExportHandler exportHandler = new ExportHandlerDCinemaInteropPng();
-        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(
-            vm => { vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName); });
+        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(vm =>
+        {
+            vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName);
+        });
 
         if (!result.OkPressed)
         {
@@ -1094,8 +1100,10 @@ public partial class MainViewModel :
         }
 
         IExportHandler exportHandler = new ExportHandlerDCinemaSmpte2014Png();
-        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(
-            vm => { vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName); });
+        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(vm =>
+        {
+            vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName);
+        });
 
         if (!result.OkPressed)
         {
@@ -1118,8 +1126,10 @@ public partial class MainViewModel :
         }
 
         IExportHandler exportHandler = new ExportHandlerDost();
-        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(
-            vm => { vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName); });
+        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(vm =>
+        {
+            vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName);
+        });
 
         if (!result.OkPressed)
         {
@@ -1142,8 +1152,10 @@ public partial class MainViewModel :
         }
 
         IExportHandler exportHandler = new ExportHandlerFcp();
-        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(
-            vm => { vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName); });
+        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(vm =>
+        {
+            vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName);
+        });
 
         if (!result.OkPressed)
         {
@@ -1166,8 +1178,10 @@ public partial class MainViewModel :
         }
 
         IExportHandler exportHandler = new ExportHandlerImagesWithTimeCode();
-        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(
-            vm => { vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName); });
+        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(vm =>
+        {
+            vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName);
+        });
 
         if (!result.OkPressed)
         {
@@ -1190,8 +1204,10 @@ public partial class MainViewModel :
         }
 
         IExportHandler exportHandler = new ExportHandlerVobSub();
-        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(
-            vm => { vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName); });
+        var result = await ShowDialogAsync<ExportImageBasedWindow, ExportImageBasedViewModel>(vm =>
+        {
+            vm.Initialize(exportHandler, Subtitles, _subtitleFileName, _videoFileName);
+        });
 
         if (!result.OkPressed)
         {
@@ -1213,8 +1229,10 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<ExportCustomTextFormatWindow, ExportCustomTextFormatViewModel>(
-            vm => { vm.Initialize(Subtitles.ToList(), _subtitleFileName, _videoFileName); });
+        var result = await ShowDialogAsync<ExportCustomTextFormatWindow, ExportCustomTextFormatViewModel>(vm =>
+        {
+            vm.Initialize(Subtitles.ToList(), _subtitleFileName, _videoFileName);
+        });
     }
 
     [RelayCommand]
@@ -1231,8 +1249,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<ExportPlainTextWindow, ExportPlainTextViewModel>(
-            vm => { vm.Initialize(Subtitles.ToList(), _subtitleFileName, _videoFileName); });
+        var result = await ShowDialogAsync<ExportPlainTextWindow, ExportPlainTextViewModel>(vm => { vm.Initialize(Subtitles.ToList(), _subtitleFileName, _videoFileName); });
     }
 
     [RelayCommand]
@@ -1389,8 +1406,7 @@ public partial class MainViewModel :
         }
 
         var result =
-            await ShowDialogAsync<ExportEbuStlWindow, ExportEbuStlViewModel>(
-                vm => { vm.Initialize(GetUpdateSubtitle()); });
+            await ShowDialogAsync<ExportEbuStlWindow, ExportEbuStlViewModel>(vm => { vm.Initialize(GetUpdateSubtitle()); });
 
         if (!result.OkPressed)
         {
@@ -1497,8 +1513,7 @@ public partial class MainViewModel :
         }
 
         var result =
-            await ShowDialogAsync<ManualChosenEncodingWindow, ManualChosenEncodingViewModel>(
-                vm => { vm.Initialize(fileName); });
+            await ShowDialogAsync<ManualChosenEncodingWindow, ManualChosenEncodingViewModel>(vm => { vm.Initialize(fileName); });
 
         if (result.OkPressed && result.SelectedEncoding != null)
         {
@@ -1933,6 +1948,7 @@ public partial class MainViewModel :
                 pos++;
                 end = sel[pos];
             }
+
             blocks.Add((start, end));
             pos++;
         }
@@ -1953,6 +1969,7 @@ public partial class MainViewModel :
             {
                 Subtitles[i].Text = Subtitles[i + 1].Text;
             }
+
             Subtitles[end].Text = temp;
         }
 
@@ -1995,6 +2012,7 @@ public partial class MainViewModel :
                 pos++;
                 end = sel[pos];
             }
+
             blocks.Add((start, end));
             pos++;
         }
@@ -2015,6 +2033,7 @@ public partial class MainViewModel :
             {
                 Subtitles[i].Text = Subtitles[i - 1].Text;
             }
+
             Subtitles[start].Text = temp;
         }
 
@@ -2030,8 +2049,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<BlankVideoWindow, BlankVideoViewModel>(
-            vm => { vm.Initialize(_subtitleFileName ?? string.Empty, SelectedSubtitleFormat); });
+        var result = await ShowDialogAsync<BlankVideoWindow, BlankVideoViewModel>(vm => { vm.Initialize(_subtitleFileName ?? string.Empty, SelectedSubtitleFormat); });
 
         if (!result.OkPressed)
         {
@@ -2058,8 +2076,10 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<CutVideoWindow, CutVideoViewModel>(
-            vm => { vm.Initialize(_videoFileName, AudioVisualizer?.WavePeaks, GetUpdateSubtitle(), SelectedSubtitleFormat); });
+        var result = await ShowDialogAsync<CutVideoWindow, CutVideoViewModel>(vm =>
+        {
+            vm.Initialize(_videoFileName, AudioVisualizer?.WavePeaks, GetUpdateSubtitle(), SelectedSubtitleFormat);
+        });
 
         if (!result.OkPressed)
         {
@@ -2086,8 +2106,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<ReEncodeVideoWindow, ReEncodeVideoViewModel>(
-            vm => { vm.Initialize(_videoFileName, SelectedSubtitleFormat); });
+        var result = await ShowDialogAsync<ReEncodeVideoWindow, ReEncodeVideoViewModel>(vm => { vm.Initialize(_videoFileName, SelectedSubtitleFormat); });
 
         if (!result.OkPressed)
         {
@@ -2145,12 +2164,11 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<ApplyDurationLimitsWindow, ApplyDurationLimitsViewModel>(
-            vm =>
-            {
-                var shotChanges = AudioVisualizer?.ShotChanges ?? new List<double>();
-                vm.Initialize(Subtitles.ToList(), shotChanges);
-            });
+        var result = await ShowDialogAsync<ApplyDurationLimitsWindow, ApplyDurationLimitsViewModel>(vm =>
+        {
+            var shotChanges = AudioVisualizer?.ShotChanges ?? new List<double>();
+            vm.Initialize(Subtitles.ToList(), shotChanges);
+        });
 
         if (result.OkPressed)
         {
@@ -2200,8 +2218,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<MergeSameTextWindow, MergeSameTextViewModel>(
-            vm => { vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList()); });
+        var result = await ShowDialogAsync<MergeSameTextWindow, MergeSameTextViewModel>(vm => { vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList()); });
 
         if (!result.OkPressed)
         {
@@ -2228,8 +2245,10 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<MergeSameTimeCodesWindow, MergeSameTimeCodesViewModel>(
-            vm => { vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList(), GetUpdateSubtitle()); });
+        var result = await ShowDialogAsync<MergeSameTimeCodesWindow, MergeSameTimeCodesViewModel>(vm =>
+        {
+            vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList(), GetUpdateSubtitle());
+        });
 
         if (!result.OkPressed)
         {
@@ -2391,8 +2410,7 @@ public partial class MainViewModel :
             return;
         }
 
-        await ShowDialogAsync<SplitSubtitleWindow, SplitSubtitleViewModel>(
-            vm => { vm.Initialize(fileName ?? string.Empty, s); });
+        await ShowDialogAsync<SplitSubtitleWindow, SplitSubtitleViewModel>(vm => { vm.Initialize(fileName ?? string.Empty, s); });
     }
 
     [RelayCommand]
@@ -2409,8 +2427,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<BridgeGapsWindow, BridgeGapsViewModel>(
-            vm => { vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList()); });
+        var result = await ShowDialogAsync<BridgeGapsWindow, BridgeGapsViewModel>(vm => { vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList()); });
 
         if (result.OkPressed)
         {
@@ -2436,8 +2453,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<ApplyMinGapWindow, ApplyMinGapViewModel>(
-            vm => { vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList()); });
+        var result = await ShowDialogAsync<ApplyMinGapWindow, ApplyMinGapViewModel>(vm => { vm.Initialize(Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList()); });
 
         if (result.OkPressed)
         {
@@ -2463,8 +2479,7 @@ public partial class MainViewModel :
         }
 
         var result =
-            await ShowDialogAsync<ChangeCasingWindow, ChangeCasingViewModel>(
-                vm => { vm.Initialize(GetUpdateSubtitle()); });
+            await ShowDialogAsync<ChangeCasingWindow, ChangeCasingViewModel>(vm => { vm.Initialize(GetUpdateSubtitle()); });
 
         if (result.OkPressed)
         {
@@ -2496,8 +2511,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var viewModel = await ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(
-            vm => { vm.Initialize(GetUpdateSubtitle(), SelectedSubtitleFormat); });
+        var viewModel = await ShowDialogAsync<FixCommonErrorsWindow, FixCommonErrorsViewModel>(vm => { vm.Initialize(GetUpdateSubtitle(), SelectedSubtitleFormat); });
 
         if (viewModel.OkPressed)
         {
@@ -2521,11 +2535,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var viewModel = await ShowDialogAsync<FixNetflixErrorsWindow, FixNetflixErrorsViewModel>(
-            vm =>
-            {
-                vm.Initialize(GetUpdateSubtitle(), _videoFileName ?? string.Empty);
-            });
+        var viewModel = await ShowDialogAsync<FixNetflixErrorsWindow, FixNetflixErrorsViewModel>(vm => { vm.Initialize(GetUpdateSubtitle(), _videoFileName ?? string.Empty); });
 
         if (viewModel.OkPressed)
         {
@@ -2660,8 +2670,7 @@ public partial class MainViewModel :
         }
 
         var viewModel =
-            await ShowDialogAsync<GoToVideoPositionWindow, GoToVideoPositionViewModel>(
-                vm => { vm.Time = TimeSpan.FromSeconds(VideoPlayerControl.Position); });
+            await ShowDialogAsync<GoToVideoPositionWindow, GoToVideoPositionViewModel>(vm => { vm.Time = TimeSpan.FromSeconds(VideoPlayerControl.Position); });
 
         if (viewModel is { OkPressed: true, Time.TotalMicroseconds: >= 0 })
         {
@@ -2748,8 +2757,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(
-            vm => { vm.Initialize(Subtitles, SelectedSubtitleIndex, this); });
+        var result = await ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(vm => { vm.Initialize(Subtitles, SelectedSubtitleIndex, this); });
 
         if (result.OkPressed && result.TotalChangedWords > 0)
         {
@@ -2788,10 +2796,7 @@ public partial class MainViewModel :
             }
         }
 
-        var result = await ShowDialogAsync<AddToNamesListWindow, AddToNamesListViewModel>(vm =>
-        {
-            vm.Initialize(word, dictionaries, selectedDictionary);
-        });
+        var result = await ShowDialogAsync<AddToNamesListWindow, AddToNamesListViewModel>(vm => { vm.Initialize(word, dictionaries, selectedDictionary); });
     }
 
     [RelayCommand]
@@ -2802,10 +2807,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<FindDoubleWordsWindow, FindDoubleWordsViewModel>(vm =>
-        {
-            vm.Initialize(Subtitles.ToList());
-        });
+        var result = await ShowDialogAsync<FindDoubleWordsWindow, FindDoubleWordsViewModel>(vm => { vm.Initialize(Subtitles.ToList()); });
     }
 
     [RelayCommand]
@@ -2858,8 +2860,7 @@ public partial class MainViewModel :
         }
 
         var result =
-            await ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(
-                vm => { vm.Initialize(_videoFileName); });
+            await ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(vm => { vm.Initialize(_videoFileName); });
 
         if (result.OkPressed && !result.IsBatchMode)
         {
@@ -2884,8 +2885,7 @@ public partial class MainViewModel :
             return;
         }
 
-        await ShowDialogAsync<BurnInWindow, BurnInViewModel>(
-            vm => { vm.Initialize(_videoFileName ?? string.Empty, GetUpdateSubtitle(), SelectedSubtitleFormat); });
+        await ShowDialogAsync<BurnInWindow, BurnInViewModel>(vm => { vm.Initialize(_videoFileName ?? string.Empty, GetUpdateSubtitle(), SelectedSubtitleFormat); });
     }
 
     [RelayCommand]
@@ -2986,8 +2986,10 @@ public partial class MainViewModel :
             return;
         }
 
-        await ShowDialogAsync<TransparentSubtitlesWindow, TransparentSubtitlesViewModel>(
-            vm => { vm.Initialize(_videoFileName ?? string.Empty, GetUpdateSubtitle(), SelectedSubtitleFormat); });
+        await ShowDialogAsync<TransparentSubtitlesWindow, TransparentSubtitlesViewModel>(vm =>
+        {
+            vm.Initialize(_videoFileName ?? string.Empty, GetUpdateSubtitle(), SelectedSubtitleFormat);
+        });
     }
 
     [RelayCommand]
@@ -3036,8 +3038,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<ShotChangeListWindow, ShotChangeListViewModel>(
-            vm => { vm.Initialize(AudioVisualizer?.ShotChanges ?? new List<double>()); });
+        var result = await ShowDialogAsync<ShotChangeListWindow, ShotChangeListViewModel>(vm => { vm.Initialize(AudioVisualizer?.ShotChanges ?? new List<double>()); });
 
         if (result.OKProssed && AudioVisualizer != null)
         {
@@ -3658,8 +3659,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task CommandShowSettingsShortcuts()
     {
-        await ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(
-            vm => { vm.LoadShortCuts(this); });
+        await ShowDialogAsync<ShortcutsWindow, ShortcutsViewModel>(vm => { vm.LoadShortCuts(this); });
         ReloadShortcuts();
     }
 
@@ -3753,8 +3753,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<BookmarksListWindow, BookmarksListViewModel>(
-            vm => { vm.Initialize(Subtitles.Where(p => p.Bookmark != null).ToList()); });
+        var result = await ShowDialogAsync<BookmarksListWindow, BookmarksListViewModel>(vm => { vm.Initialize(Subtitles.Where(p => p.Bookmark != null).ToList()); });
 
         if (result.GoToPressed && result.SelectedSubtitle != null)
         {
@@ -3826,8 +3825,7 @@ public partial class MainViewModel :
             }
         }
 
-        var result = await ShowDialogAsync<ErrorListWindow, ErrorListViewModel>(
-            vm => { vm.Initialize(list.ToList()); });
+        var result = await ShowDialogAsync<ErrorListWindow, ErrorListViewModel>(vm => { vm.Initialize(list.ToList()); });
 
         if (result.GoToPressed && result.SelectedSubtitle != null)
         {
@@ -4117,8 +4115,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<PickAlignmentWindow, PickAlignmentViewModel>(
-            vm => { vm.Initialize(selected, SubtitleGrid.SelectedItems.Count); });
+        var result = await ShowDialogAsync<PickAlignmentWindow, PickAlignmentViewModel>(vm => { vm.Initialize(selected, SubtitleGrid.SelectedItems.Count); });
 
         if (result.OkPressed)
         {
@@ -4136,8 +4133,7 @@ public partial class MainViewModel :
         }
 
         var result =
-            await ShowDialogAsync<PickFontNameWindow, PickFontNameViewModel>(
-                vm => { vm.Initialize(); });
+            await ShowDialogAsync<PickFontNameWindow, PickFontNameViewModel>(vm => { vm.Initialize(); });
 
         if (result.OkPressed && result.SelectedFontName != null)
         {
@@ -4442,8 +4438,7 @@ public partial class MainViewModel :
         _undoRedoManager.StopChangeDetection();
 
         var result =
-            await ShowDialogAsync<ShowHistoryWindow, ShowHistoryViewModel>(
-                vm => { vm.Initialize(_undoRedoManager); });
+            await ShowDialogAsync<ShowHistoryWindow, ShowHistoryViewModel>(vm => { vm.Initialize(_undoRedoManager); });
 
         if (result.OkPressed && result.SelectedHistoryItem != null)
         {
@@ -4809,8 +4804,7 @@ public partial class MainViewModel :
         }
 
         var result =
-            await ShowDialogAsync<MultipleReplaceWindow, MultipleReplaceViewModel>(
-                vm => { vm.Initialize(GetUpdateSubtitle()); });
+            await ShowDialogAsync<MultipleReplaceWindow, MultipleReplaceViewModel>(vm => { vm.Initialize(GetUpdateSubtitle()); });
 
         if (result.OkPressed)
         {
@@ -5007,7 +5001,6 @@ public partial class MainViewModel :
     }
 
 
-
     [RelayCommand]
     private void RepeatLineToggle()
     {
@@ -5043,6 +5036,7 @@ public partial class MainViewModel :
             {
                 vp.TogglePlayPause();
             }
+
             _updateAudioVisualizer = true;
         }
         finally
@@ -5097,8 +5091,8 @@ public partial class MainViewModel :
             {
                 vp.TogglePlayPause();
             }
-            _updateAudioVisualizer = true;
 
+            _updateAudioVisualizer = true;
         }
         finally
         {
@@ -5147,8 +5141,8 @@ public partial class MainViewModel :
             {
                 vp.TogglePlayPause();
             }
-            _updateAudioVisualizer = true;
 
+            _updateAudioVisualizer = true;
         }
         finally
         {
@@ -5458,8 +5452,7 @@ public partial class MainViewModel :
         var selectionLength = selectionEnd - selectionStart;
 
         var result =
-            await ShowDialogAsync<PickFontNameWindow, PickFontNameViewModel>(
-                vm => { vm.Initialize(); });
+            await ShowDialogAsync<PickFontNameWindow, PickFontNameViewModel>(vm => { vm.Initialize(); });
 
         if (!result.OkPressed || result.SelectedFontName == null)
         {
@@ -6187,8 +6180,10 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task SetNewStyleForSelectedLines(string styleName)
     {
-        var result = await ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(
-            vm => { vm.Initialize(Se.Language.General.Style + " - " + Se.Language.General.New, string.Empty, 250, 20, true); });
+        var result = await ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(vm =>
+        {
+            vm.Initialize(Se.Language.General.Style + " - " + Se.Language.General.New, string.Empty, 250, 20, true);
+        });
 
         if (result.OkPressed && !string.IsNullOrWhiteSpace(result.Text))
         {
@@ -6262,8 +6257,10 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task SetNewActorForSelectedLines(string styleName)
     {
-        var result = await ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(
-            vm => { vm.Initialize(Se.Language.General.Actor + " - " + Se.Language.General.New, string.Empty, 250, 20, true); });
+        var result = await ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(vm =>
+        {
+            vm.Initialize(Se.Language.General.Actor + " - " + Se.Language.General.New, string.Empty, 250, 20, true);
+        });
 
         if (result.OkPressed && !string.IsNullOrWhiteSpace(result.Text))
         {
@@ -6286,9 +6283,9 @@ public partial class MainViewModel :
     }
 
     private async Task<TViewModel> ShowDialogAsync<TWindow, TViewModel>(
-         Action<TViewModel>? configureViewModel = null, Action<TWindow>? configureWindow = null)
-         where TWindow : Window
-         where TViewModel : class
+        Action<TViewModel>? configureViewModel = null, Action<TWindow>? configureWindow = null)
+        where TWindow : Window
+        where TViewModel : class
     {
         VideoPlayerControl?.VideoPlayerInstance.Pause();
         var result = await _windowService.ShowDialogAsync<TWindow, TViewModel>(Window!, configureViewModel, configureWindow);
@@ -6702,8 +6699,7 @@ public partial class MainViewModel :
                 {
                     Dispatcher.UIThread.Post(async () =>
                     {
-                        var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(
-                            vm => { vm.Initialize(subtitles, fileName); });
+                        var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(vm => { vm.Initialize(subtitles, fileName); });
 
                         if (result.OkPressed)
                         {
@@ -6752,7 +6748,12 @@ public partial class MainViewModel :
 
             if (FileUtil.IsVobSub(fileName) && ext == ".sub")
             {
-                ImportSubtitleFromVobSubFile(fileName, videoFileName);
+                var ok = await ImportSubtitleFromVobSubFile(fileName, videoFileName);
+                if (ok)
+                {
+                    SelectAndScrollToRow(0);
+                }
+
                 return;
             }
 
@@ -6886,8 +6887,8 @@ public partial class MainViewModel :
                 if (subtitle == null && fileSize > 50 && FileUtil.IsMp3(fileName))
                 {
                     await MessageBox.Show(Window!, Se.Language.General.Error, "This file seems to be an .mp3 audio file which does not contains subtitles." + Environment.NewLine +
-                    Environment.NewLine +
-                    "You can open media files via the Video menu.");
+                                                                              Environment.NewLine +
+                                                                              "You can open media files via the Video menu.");
                     return;
                 }
 
@@ -6895,8 +6896,8 @@ public partial class MainViewModel :
                 if (subtitle == null && fileSize > 50 && FileUtil.IsWav(fileName))
                 {
                     await MessageBox.Show(Window!, Se.Language.General.Error, "This file seems to be a .wav audio file which does not contains subtitles." + Environment.NewLine +
-                                    Environment.NewLine +
-                                    "You can open media files via the Video menu.");
+                                                                              Environment.NewLine +
+                                                                              "You can open media files via the Video menu.");
                     return;
                 }
 
@@ -6964,10 +6965,7 @@ public partial class MainViewModel :
     {
         Dispatcher.UIThread.Post(async () =>
         {
-            var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(vm =>
-            {
-                vm.InitializeBdn(subtitle, fileName, false);
-            });
+            var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(vm => { vm.InitializeBdn(subtitle, fileName, false); });
 
             if (result.OkPressed)
             {
@@ -6988,10 +6986,7 @@ public partial class MainViewModel :
     {
         Dispatcher.UIThread.Post(async () =>
         {
-            var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(vm =>
-            {
-                vm.InitializeWebVtt(subtitle, fileName);
-            });
+            var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(vm => { vm.InitializeWebVtt(subtitle, fileName); });
 
             if (result.OkPressed)
             {
@@ -7045,10 +7040,7 @@ public partial class MainViewModel :
 
         Dispatcher.UIThread.Post(async () =>
         {
-            var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(vm =>
-            {
-                vm.Initialize(list, fileName);
-            });
+            var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(vm => { vm.Initialize(list, fileName); });
 
             if (result.OkPressed)
             {
@@ -7126,10 +7118,7 @@ public partial class MainViewModel :
         int packetId = 0;
         if (tsParser.SubtitlePacketIds.Count + tsParser.TeletextSubtitlesLookup.Sum(p => p.Value.Count) > 1)
         {
-            var result = await ShowDialogAsync<PickTsTrackWindow, PickTsTrackViewModel>(vm =>
-            {
-                vm.Initialize(tsParser, fileName);
-            });
+            var result = await ShowDialogAsync<PickTsTrackWindow, PickTsTrackViewModel>(vm => { vm.Initialize(tsParser, fileName); });
 
             if (result.OkPressed && result.SelectedTrack != null && result.SelectedTrack.IsTeletext)
             {
@@ -7142,6 +7131,7 @@ public partial class MainViewModel :
                 {
                     await VideoOpenFile(fileName);
                 }
+
                 return;
             }
             else if (!result.OkPressed || result.SelectedTrack == null)
@@ -7232,8 +7222,7 @@ public partial class MainViewModel :
         else
         {
             var result =
-                await ShowDialogAsync<PickMp4TrackWindow, PickMp4TrackViewModel>(
-                    vm => { vm.Initialize(mp4SubtitleTracks, fileName); });
+                await ShowDialogAsync<PickMp4TrackWindow, PickMp4TrackViewModel>(vm => { vm.Initialize(mp4SubtitleTracks, fileName); });
 
             if (result.OkPressed && result.SelectedTrack != null && result.SelectedTrack.Track != null)
             {
@@ -7249,8 +7238,7 @@ public partial class MainViewModel :
             Dispatcher.UIThread.Post(async () =>
             {
                 var paragraphs = mp4SubtitleTrack.Mdia.Minf.Stbl.GetParagraphs();
-                var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(
-                    vm => { vm.Initialize(mp4SubtitleTrack, paragraphs, fileName); });
+                var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(vm => { vm.Initialize(mp4SubtitleTrack, paragraphs, fileName); });
 
                 if (result.OkPressed)
                 {
@@ -7310,8 +7298,7 @@ public partial class MainViewModel :
             Dispatcher.UIThread.Post(async void () =>
             {
                 var result =
-                    await ShowDialogAsync<PickMatroskaTrackWindow, PickMatroskaTrackViewModel>(
-                        vm => { vm.Initialize(matroska, subtitleList, fileName); });
+                    await ShowDialogAsync<PickMatroskaTrackWindow, PickMatroskaTrackViewModel>(vm => { vm.Initialize(matroska, subtitleList, fileName); });
                 if (result.OkPressed && result.SelectedMatroskaTrack != null)
                 {
                     if (await LoadMatroskaSubtitle(result.SelectedMatroskaTrack, matroska, fileName))
@@ -7397,8 +7384,7 @@ public partial class MainViewModel :
 
             Dispatcher.UIThread.Post(async () =>
             {
-                var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(
-                    vm => { vm.Initialize(matroskaSubtitleInfo, pgsSubtitle, fileName); });
+                var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(vm => { vm.Initialize(matroskaSubtitleInfo, pgsSubtitle, fileName); });
 
                 if (result.OkPressed)
                 {
@@ -7529,8 +7515,7 @@ public partial class MainViewModel :
 
         Dispatcher.UIThread.Post(async () =>
         {
-            var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(
-                vm => { vm.Initialize(matroskaSubtitleInfo, subtitle, subtitleImages, fileName); });
+            var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(vm => { vm.Initialize(matroskaSubtitleInfo, subtitle, subtitleImages, fileName); });
 
             if (result.OkPressed)
             {
@@ -7598,8 +7583,7 @@ public partial class MainViewModel :
 
         Dispatcher.UIThread.Post(async () =>
         {
-            var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(
-                vm => { vm.Initialize(mergedVobSubPacks, matroskaSubtitleInfo, fileName); });
+            var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(vm => { vm.Initialize(mergedVobSubPacks, matroskaSubtitleInfo, fileName); });
 
             if (result.OkPressed)
             {
@@ -7646,7 +7630,7 @@ public partial class MainViewModel :
         return true;
     }
 
-    private bool ImportSubtitleFromVobSubFile(string vobSubFileName, string? videoFileName)
+    private async Task<bool> ImportSubtitleFromVobSubFile(string vobSubFileName, string? videoFileName)
     {
         var vobSubParser = new VobSubParser(true);
         string idxFileName = Path.ChangeExtension(vobSubFileName, ".idx");
@@ -7715,11 +7699,15 @@ public partial class MainViewModel :
         }
 
         var streamId = languageStreamIds.First();
-        Dispatcher.UIThread.Post(async () =>
+        var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(vm => { vm.Initialize(streamIdDictionary[streamId], palette, vobSubFileName); });
+
+        if (result.OkPressed)
         {
-            var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(
-                vm => { vm.Initialize(streamIdDictionary[streamId], palette, vobSubFileName); });
-        });
+            _subtitleFileName = Path.GetFileNameWithoutExtension(vobSubFileName);
+            Subtitles.Clear();
+            Subtitles.AddRange(result.OcredSubtitle);
+            return true;
+        }
 
         return false;
     }
@@ -7913,6 +7901,7 @@ public partial class MainViewModel :
                 p.StartTime.TotalMilliseconds -= videoOffsetMs;
                 p.EndTime.TotalMilliseconds -= videoOffsetMs;
             }
+
             _subtitle.Paragraphs.Add(p);
         }
 
@@ -7934,6 +7923,7 @@ public partial class MainViewModel :
                 p.StartTime.TotalMilliseconds -= videoOffsetMs;
                 p.EndTime.TotalMilliseconds -= videoOffsetMs;
             }
+
             _subtitleOriginal.Paragraphs.Add(p);
         }
 
@@ -8237,10 +8227,7 @@ public partial class MainViewModel :
                             await VideoPlayerControl.WaitForPlayersReadyAsync();
                             await Task.Delay(200);
                             VideoPlayerControl.Position = SelectedSubtitle.StartTime.TotalSeconds;
-                            Dispatcher.UIThread.Post(() =>
-                            {
-                                VideoPlayerControl.Position = SelectedSubtitle.StartTime.TotalSeconds;
-                            });
+                            Dispatcher.UIThread.Post(() => { VideoPlayerControl.Position = SelectedSubtitle.StartTime.TotalSeconds; });
                         }
                     }
                     catch (Exception e)
@@ -8870,6 +8857,7 @@ public partial class MainViewModel :
                     first = false;
                     makeItalic = !item.Text.Contains("{\\i1}") && !item.Text.Contains("\\i1");
                 }
+
                 item.Text = item.Text
                     .Replace("{\\i1}", string.Empty)
                     .Replace("{\\i0}", string.Empty)
@@ -8883,6 +8871,7 @@ public partial class MainViewModel :
                     }
                 }
             }
+
             return;
         }
 
@@ -8927,6 +8916,7 @@ public partial class MainViewModel :
                     first = false;
                     makeBold = !item.Text.Contains("{\\b1}") && !item.Text.Contains("\\b1");
                 }
+
                 item.Text = item.Text
                     .Replace("{\\b1}", string.Empty)
                     .Replace("{\\b0}", string.Empty)
@@ -8940,6 +8930,7 @@ public partial class MainViewModel :
                     }
                 }
             }
+
             return;
         }
 
@@ -9197,6 +9188,7 @@ public partial class MainViewModel :
                 {
                     relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.SubtitleGridAndTextBox.ToString());
                 }
+
                 if (relayCommand != null)
                 {
                     keyEventArgs.Handled = true;
@@ -9477,161 +9469,162 @@ public partial class MainViewModel :
     {
         _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
         _positionTimer.Tick += (s, e) =>
-        {
-            var text = Se.Language.General.Untitled;
-            if (!string.IsNullOrEmpty(_subtitleFileName))
             {
-                text = Configuration.Settings.General.TitleBarFullFileName
-                    ? _subtitleFileName
-                    : Path.GetFileName(_subtitleFileName);
-            }
-
-            if (ShowColumnOriginalText)
-            {
-                text += " + ";
-
-                if (_changeSubtitleHashOriginal != GetFastHashOriginal())
+                var text = Se.Language.General.Untitled;
+                if (!string.IsNullOrEmpty(_subtitleFileName))
                 {
-                    text += "*";
+                    text = Configuration.Settings.General.TitleBarFullFileName
+                        ? _subtitleFileName
+                        : Path.GetFileName(_subtitleFileName);
                 }
 
-                if (string.IsNullOrEmpty(_subtitleFileNameOriginal))
+                if (ShowColumnOriginalText)
                 {
-                    text += Se.Language.General.Untitled;
-                }
-                else
-                {
-                    text += Configuration.Settings.General.TitleBarFullFileName
-                        ? _subtitleFileNameOriginal
-                        : Path.GetFileName(_subtitleFileNameOriginal);
-                }
-            }
+                    text += " + ";
 
-            text = text + " - " + Se.Language.Title;
-            if (_changeSubtitleHash != GetFastHash())
-            {
-                text = "*" + text;
-            }
-
-            if (Window != null)
-            {
-                Window.Title = text;
-            }
-
-            // update audio visualizer position if available
-            var av = AudioVisualizer;
-            var vp = VideoPlayerControl;
-            if (av != null && vp != null && !string.IsNullOrEmpty(_videoFileName))
-            {
-                var offset = TimeSpan.FromMilliseconds(Se.Settings.General.CurrentVideoOffsetInMs);
-                var hasOffset = Se.Settings.General.CurrentVideoOffsetInMs != 0;
-
-                var subtitle = new ObservableCollection<SubtitleLineViewModel>(
-                     Subtitles
-                         .OrderBy(p => p.StartTime.TotalMilliseconds)
-                         .Select(dp => hasOffset
-                             ? new SubtitleLineViewModel(dp) { StartTime = dp.StartTime - offset }
-                             : dp)
-                         .Where(p => _visibleLayers == null || _visibleLayers.Contains(p.Layer))
-                );
-
-                var mediaPlayerSeconds = vp.Position;
-                var startPos = mediaPlayerSeconds - 0.01;
-                if (startPos < 0)
-                {
-                    startPos = 0;
-                }
-
-                av.CurrentVideoPositionSeconds = vp.Position;
-                var isPlaying = vp.IsPlaying;
-                var firstSelectedIndex = -1;
-
-                if (WaveformCenter && isPlaying)
-                {
-                    // calculate the center position based on the waveform width
-                    var waveformHalfSeconds = (av.EndPositionSeconds - av.StartPositionSeconds) / 2.0;
-                    av.SetPosition(Math.Max(0, mediaPlayerSeconds - waveformHalfSeconds), subtitle, mediaPlayerSeconds,
-                        firstSelectedIndex, _selectedSubtitles ?? []);
-                }
-                else if ((isPlaying || !av.IsScrolling) && (mediaPlayerSeconds > av.EndPositionSeconds ||
-                                                            mediaPlayerSeconds < av.StartPositionSeconds))
-                {
-                    av.SetPosition(startPos, subtitle, mediaPlayerSeconds, 0,
-                        _selectedSubtitles ?? []);
-                }
-                else
-                {
-                    av.SetPosition(av.StartPositionSeconds, subtitle, mediaPlayerSeconds, firstSelectedIndex,
-                        _selectedSubtitles ?? []);
-                }
-
-                if (_updateAudioVisualizer)
-                {
-                    av.InvalidateVisual();
-                    _updateAudioVisualizer = false;
-                }
-
-                if (isPlaying)
-                {
-                    Projektanker.Icons.Avalonia.Attached.SetIcon(ButtonWaveformPlay, IconNames.Pause);
-                    var rs = _repeatSubtitle;
-                    if (rs != null)
+                    if (_changeSubtitleHashOriginal != GetFastHashOriginal())
                     {
-                        if (mediaPlayerSeconds >= rs.StartTime.TotalSeconds &&
-                            mediaPlayerSeconds <= rs.EndTime.TotalSeconds)
-                        {
-                            // do nothing, still in repeat range
-                        }
-                        else
-                        {
-                            vp.Position = rs.StartTime.TotalSeconds;
-                        }
+                        text += "*";
                     }
-                    else if (SelectCurrentSubtitleWhilePlaying)
-                    {
-                        var ss = SelectedSubtitle;
-                        if (ss == null || mediaPlayerSeconds < ss.StartTime.TotalSeconds ||
-                            mediaPlayerSeconds > ss.EndTime.TotalSeconds || ss.Duration.TotalSeconds > 20)
-                        {
-                            SubtitleLineViewModel? firstMatch = null;
-                            var matchFound = false;
-                            for (var i = 0; i < subtitle.Count; i++)
-                            {
-                                var p = subtitle[i];
-                                if (mediaPlayerSeconds >= p.StartTime.TotalSeconds &&
-                                    mediaPlayerSeconds <= p.EndTime.TotalSeconds)
-                                {
-                                    if (firstMatch == null)
-                                    {
-                                        firstMatch = p;
-                                    }
 
-                                    if (p.Duration.TotalSeconds < 20)
+                    if (string.IsNullOrEmpty(_subtitleFileNameOriginal))
+                    {
+                        text += Se.Language.General.Untitled;
+                    }
+                    else
+                    {
+                        text += Configuration.Settings.General.TitleBarFullFileName
+                            ? _subtitleFileNameOriginal
+                            : Path.GetFileName(_subtitleFileNameOriginal);
+                    }
+                }
+
+                text = text + " - " + Se.Language.Title;
+                if (_changeSubtitleHash != GetFastHash())
+                {
+                    text = "*" + text;
+                }
+
+                if (Window != null)
+                {
+                    Window.Title = text;
+                }
+
+                // update audio visualizer position if available
+                var av = AudioVisualizer;
+                var vp = VideoPlayerControl;
+                if (av != null && vp != null && !string.IsNullOrEmpty(_videoFileName))
+                {
+                    var offset = TimeSpan.FromMilliseconds(Se.Settings.General.CurrentVideoOffsetInMs);
+                    var hasOffset = Se.Settings.General.CurrentVideoOffsetInMs != 0;
+
+                    var subtitle = new ObservableCollection<SubtitleLineViewModel>(
+                        Subtitles
+                            .OrderBy(p => p.StartTime.TotalMilliseconds)
+                            .Select(dp => hasOffset
+                                ? new SubtitleLineViewModel(dp) { StartTime = dp.StartTime - offset }
+                                : dp)
+                            .Where(p => _visibleLayers == null || _visibleLayers.Contains(p.Layer))
+                    );
+
+                    var mediaPlayerSeconds = vp.Position;
+                    var startPos = mediaPlayerSeconds - 0.01;
+                    if (startPos < 0)
+                    {
+                        startPos = 0;
+                    }
+
+                    av.CurrentVideoPositionSeconds = vp.Position;
+                    var isPlaying = vp.IsPlaying;
+                    var firstSelectedIndex = -1;
+
+                    if (WaveformCenter && isPlaying)
+                    {
+                        // calculate the center position based on the waveform width
+                        var waveformHalfSeconds = (av.EndPositionSeconds - av.StartPositionSeconds) / 2.0;
+                        av.SetPosition(Math.Max(0, mediaPlayerSeconds - waveformHalfSeconds), subtitle, mediaPlayerSeconds,
+                            firstSelectedIndex, _selectedSubtitles ?? []);
+                    }
+                    else if ((isPlaying || !av.IsScrolling) && (mediaPlayerSeconds > av.EndPositionSeconds ||
+                                                                mediaPlayerSeconds < av.StartPositionSeconds))
+                    {
+                        av.SetPosition(startPos, subtitle, mediaPlayerSeconds, 0,
+                            _selectedSubtitles ?? []);
+                    }
+                    else
+                    {
+                        av.SetPosition(av.StartPositionSeconds, subtitle, mediaPlayerSeconds, firstSelectedIndex,
+                            _selectedSubtitles ?? []);
+                    }
+
+                    if (_updateAudioVisualizer)
+                    {
+                        av.InvalidateVisual();
+                        _updateAudioVisualizer = false;
+                    }
+
+                    if (isPlaying)
+                    {
+                        Projektanker.Icons.Avalonia.Attached.SetIcon(ButtonWaveformPlay, IconNames.Pause);
+                        var rs = _repeatSubtitle;
+                        if (rs != null)
+                        {
+                            if (mediaPlayerSeconds >= rs.StartTime.TotalSeconds &&
+                                mediaPlayerSeconds <= rs.EndTime.TotalSeconds)
+                            {
+                                // do nothing, still in repeat range
+                            }
+                            else
+                            {
+                                vp.Position = rs.StartTime.TotalSeconds;
+                            }
+                        }
+                        else if (SelectCurrentSubtitleWhilePlaying)
+                        {
+                            var ss = SelectedSubtitle;
+                            if (ss == null || mediaPlayerSeconds < ss.StartTime.TotalSeconds ||
+                                mediaPlayerSeconds > ss.EndTime.TotalSeconds || ss.Duration.TotalSeconds > 20)
+                            {
+                                SubtitleLineViewModel? firstMatch = null;
+                                var matchFound = false;
+                                for (var i = 0; i < subtitle.Count; i++)
+                                {
+                                    var p = subtitle[i];
+                                    if (mediaPlayerSeconds >= p.StartTime.TotalSeconds &&
+                                        mediaPlayerSeconds <= p.EndTime.TotalSeconds)
                                     {
-                                        matchFound = true;
-                                        SelectAndScrollToSubtitle(p);
-                                        break;
+                                        if (firstMatch == null)
+                                        {
+                                            firstMatch = p;
+                                        }
+
+                                        if (p.Duration.TotalSeconds < 20)
+                                        {
+                                            matchFound = true;
+                                            SelectAndScrollToSubtitle(p);
+                                            break;
+                                        }
                                     }
                                 }
-                            }
-                            if (!matchFound && firstMatch != null)
-                            {
-                                SelectAndScrollToSubtitle(firstMatch);
+
+                                if (!matchFound && firstMatch != null)
+                                {
+                                    SelectAndScrollToSubtitle(firstMatch);
+                                }
                             }
                         }
                     }
+                    else
+                    {
+                        Projektanker.Icons.Avalonia.Attached.SetIcon(ButtonWaveformPlay, IconNames.Play);
+                    }
                 }
-                else
-                {
-                    Projektanker.Icons.Avalonia.Attached.SetIcon(ButtonWaveformPlay, IconNames.Play);
-                }
-            }
 
-            if (VideoPlayerControl?.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
-            {
-                _mpvReloader.RefreshMpv(mpv, GetUpdateSubtitle(), SelectedSubtitleFormat);
+                if (VideoPlayerControl?.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
+                {
+                    _mpvReloader.RefreshMpv(mpv, GetUpdateSubtitle(), SelectedSubtitleFormat);
+                }
             }
-        }
             ;
         _positionTimer.Start();
 
