@@ -267,6 +267,8 @@ public partial class SettingsViewModel : ObservableObject
         LibMpvStatus = Se.Language.General.NotInstalled;
         LibMpvPath = string.Empty;
         IsLibMpvDownloadVisible = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        MpvPreviewFontName = FontNames.First();
+        MpvPreviewSelectedBorderType = MpvPreviewBorderTypes.First();
 
         _profilesForEdit = new List<ProfileDisplay>();
 
@@ -978,9 +980,9 @@ public partial class SettingsViewModel : ObservableObject
         foreach (var profile in _profilesForEdit)
         {
             var pd = new ProfileDisplay(profile);
-            pd.DialogStyle = DialogStyles.FirstOrDefault(p => p.Code == profile.DialogStyle.Code) ?? DialogStyles.First();
-            pd.ContinuationStyle = ContinuationStyles.FirstOrDefault(p => p.Code == profile.ContinuationStyle.Code) ?? ContinuationStyles.First();
-            pd.CpsLineLengthStrategy = CpsLineLengthStrategies.FirstOrDefault(p => p.Code == profile.CpsLineLengthStrategy.Code) ?? CpsLineLengthStrategies.First();
+            pd.DialogStyle = DialogStyles.FirstOrDefault(p => p.Code == profile.DialogStyle?.Code) ?? DialogStyles.First();
+            pd.ContinuationStyle = ContinuationStyles.FirstOrDefault(p => p.Code == profile.ContinuationStyle?.Code) ?? ContinuationStyles.First();
+            pd.CpsLineLengthStrategy = CpsLineLengthStrategies.FirstOrDefault(p => p.Code == profile.CpsLineLengthStrategy?.Code) ?? CpsLineLengthStrategies.First();
             profilesForEdit.Add(pd);
             Profiles.Add(profile.Name);
         }

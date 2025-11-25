@@ -13,8 +13,13 @@ public class ContinuationStyleDisplay
         Name = string.Empty;
         Code = string.Empty;
     }
+    public ContinuationStyleDisplay(ContinuationStyleDisplay other)
+    {
+        Name = other.Name;
+        Code = other.Code;
+    }
 
-    override public string ToString()
+    public override string ToString()
     {
         return Name;
     }

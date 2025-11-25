@@ -47,10 +47,11 @@ public partial class ProfilesViewModel : ObservableObject
         Profiles.Clear();
         foreach (var profile in profiles)
         {
-            profile.DialogStyle = DialogStyles.FirstOrDefault(d => d.Code == profile.DialogStyle.Code) ?? DialogStyles.First();   
-            profile.ContinuationStyle = ContinuationStyles.FirstOrDefault(c => c.Code == profile.ContinuationStyle.Code) ?? ContinuationStyles.First();
-            profile.CpsLineLengthStrategy = CpsLineLengthStrategies.FirstOrDefault(c => c.Code == profile.CpsLineLengthStrategy.Code) ?? CpsLineLengthStrategies.First();
-            Profiles.Add(new ProfileDisplay(profile));
+            var pd = new ProfileDisplay(profile);
+            pd.DialogStyle = DialogStyles.FirstOrDefault(d => d.Code == profile.DialogStyle?.Code) ?? DialogStyles.First();   
+            pd.ContinuationStyle = ContinuationStyles.FirstOrDefault(c => c.Code == profile.ContinuationStyle?.Code) ?? ContinuationStyles.First();
+            pd.CpsLineLengthStrategy = CpsLineLengthStrategies.FirstOrDefault(c => c.Code == profile.CpsLineLengthStrategy?.Code) ?? CpsLineLengthStrategies.First();
+            Profiles.Add(pd);
         }
 
         SelectedProfile = Profiles.FirstOrDefault(p => p.Name == profileName);

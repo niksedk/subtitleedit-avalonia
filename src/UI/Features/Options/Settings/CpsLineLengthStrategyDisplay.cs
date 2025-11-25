@@ -15,7 +15,13 @@ public class CpsLineLengthStrategyDisplay
         Code = string.Empty;
     }
 
-    override public string ToString()
+    public CpsLineLengthStrategyDisplay(CpsLineLengthStrategyDisplay other)
+    {
+        Name = other.Name;
+        Code = other.Code;
+    }
+
+    public override string ToString()
     {
         return Name;
     }

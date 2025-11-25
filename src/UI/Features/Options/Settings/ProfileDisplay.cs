@@ -54,9 +54,9 @@ public partial class ProfileDisplay : ObservableObject
         MinGapMs = other.MinGapMs;
         MaxLines = other.MaxLines;
         UnbreakLinesShorterThan = other.UnbreakLinesShorterThan;
-        DialogStyle = other.DialogStyle;
-        ContinuationStyle = other.ContinuationStyle;
-        CpsLineLengthStrategy = other.CpsLineLengthStrategy;
+        DialogStyle = new DialogStyleDisplay(other.DialogStyle ?? DialogStyleDisplay.List().First());
+        ContinuationStyle = new ContinuationStyleDisplay(other.ContinuationStyle ?? ContinuationStyleDisplay.List().First());
+        CpsLineLengthStrategy = new CpsLineLengthStrategyDisplay(other.CpsLineLengthStrategy ?? CpsLineLengthStrategyDisplay.List().First());
     }
 
     public ProfileDisplay(
