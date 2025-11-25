@@ -101,6 +101,7 @@ using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
 using BatchConvertFixCommonErrorsSettingsViewModel = Nikse.SubtitleEdit.Features.Tools.BatchConvert.BatchConvertFixCommonErrorsSettingsViewModel;
 using BatchConvertSettingsViewModel = Nikse.SubtitleEdit.Features.Tools.BatchConvert.BatchConvertSettingsViewModel;
+using CategoryExportViewModel = Nikse.SubtitleEdit.Features.Edit.MultipleReplace.CategoryExportViewModel;
 using ReviewSpeechViewModel = Nikse.SubtitleEdit.Features.Video.TextToSpeech.ReviewSpeech.ReviewSpeechViewModel;
 using SetVideoOffsetViewModel = Nikse.SubtitleEdit.Features.Shared.SetVideoOffset.SetVideoOffsetViewModel;
 

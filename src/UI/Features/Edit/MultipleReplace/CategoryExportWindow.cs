@@ -4,17 +4,18 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Nikse.SubtitleEdit.Features.Options.Settings;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Options.Settings;
+namespace Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 
 public class CategoryExportWindow : Window
 {
-    public CategoryExportWindow(CategoryExportViewModel vm)
+    public CategoryExportWindow(Edit.MultipleReplace.CategoryExportViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = Se.Language.Options.Settings.ExportProfiles;
+        Title = Se.Language.Edit.MultipleReplace.ExportReplaceRules;
         CanResize = true;
         Width = 1100;
         Height = 750;
@@ -62,7 +63,7 @@ public class CategoryExportWindow : Window
         KeyDown += vm.KeyDown;
     }
 
-    private static Border MakeDataGrid(CategoryExportViewModel vm)
+    private static Border MakeDataGrid(Edit.MultipleReplace.CategoryExportViewModel vm)
     {
         var grid = new Grid
         {
@@ -97,14 +98,14 @@ public class CategoryExportWindow : Window
                 {
                     Header = Se.Language.General.Enabled,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    CellTemplate = new FuncDataTemplate<ProfileDisplay>((item, _) =>
+                    CellTemplate = new FuncDataTemplate<RuleTreeNode>((item, _) =>
                     new Border
                     {
                         Background = Brushes.Transparent, // Prevents highlighting
                         Padding = new Thickness(4),
                         Child = new CheckBox
                         {
-                            [!CheckBox.IsCheckedProperty] = new Binding(nameof(ProfileDisplay.IsSelected)),
+                            [!CheckBox.IsCheckedProperty] = new Binding(nameof(RuleTreeNode.IsSelected)),
                             HorizontalAlignment = HorizontalAlignment.Center
                         }
                     }),
@@ -114,13 +115,20 @@ public class CategoryExportWindow : Window
                 {
                     Header = Se.Language.General.Name,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(ProfileDisplay.Name)),
+                    Binding = new Binding(nameof(RuleTreeNode.Find)),
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.ReplaceWith,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(RuleTreeNode.ReplaceWith)),
                     IsReadOnly = true,
                 },
             },
         };
-        dataGrid.Bind(DataGrid.ItemsSourceProperty, new Binding(nameof(vm.Profiles)) { Source = vm });
-        dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedProfile)) { Source = vm });
+        dataGrid.Bind(DataGrid.ItemsSourceProperty, new Binding(nameof(vm.Rules)) { Source = vm });
+        dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedRule)) { Source = vm });
 
         grid.Add(dataGrid, 0);
 

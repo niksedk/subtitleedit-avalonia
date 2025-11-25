@@ -1,21 +1,20 @@
-using Avalonia.Controls;
-using Avalonia.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
-using Nikse.SubtitleEdit.Features.Shared;
-using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Controls;
+using Avalonia.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Options.Settings;
+namespace Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 
 public partial class CategoryExportViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<RuleTreeNode> _profiles;
-    [ObservableProperty] private RuleTreeNode? _selectedProfile;
+    [ObservableProperty] private ObservableCollection<RuleTreeNode> _rules;
+    [ObservableProperty] private RuleTreeNode? _selectedRule;
 
     public Window? Window { get; set; }
 
@@ -23,15 +22,15 @@ public partial class CategoryExportViewModel : ObservableObject
 
     public CategoryExportViewModel()
     {
-        Profiles = new ObservableCollection<RuleTreeNode>();
+        Rules = new ObservableCollection<RuleTreeNode>();
     }
 
-    public void Initialize(List<RuleTreeNode> profiles)
+    public void Initialize(List<RuleTreeNode> rules)
     {
-        Profiles.Clear();
-        foreach (var profile in profiles)
+        Rules.Clear();
+        foreach (var rule in rules)
         {
-            Profiles.Add(profile);
+            Rules.Add(rule);
         }
     }
 
@@ -43,12 +42,12 @@ public partial class CategoryExportViewModel : ObservableObject
             return;
         }
 
-        if (Profiles.Where(p => p.IsSelected).Count() == 0)
+        if (Enumerable.Where<RuleTreeNode>(Rules, p => p.IsSelected).Count() == 0)
         {
             await MessageBox.Show(
                 Window!,
                 Se.Language.General.Error,
-                $"No profile selected for export",
+                $"No rule categories selected for export",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
 

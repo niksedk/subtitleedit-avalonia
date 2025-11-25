@@ -27,12 +27,12 @@ public partial class ProfilesExportViewModel : ObservableObject
         Profiles = new ObservableCollection<ProfileDisplay>();
     }
 
-    public void Initialize(List<RuleTreeNode> ruleTreeNodes)
+    public void Initialize(List<ProfileDisplay> profiles)
     {
         Profiles.Clear();
-        foreach (var node in ruleTreeNodes)
+        foreach (var profile in profiles)
         {
-        //    Profiles.Add(new ProfileDisplay(profile));
+            Profiles.Add(new ProfileDisplay(profile));
         }
     }
 

@@ -433,17 +433,17 @@ public partial class MultipleReplaceViewModel : ObservableObject
                 );
             if (exists != null)
             {
-                // rename
-                var idx = 2;
-                var newName = profile.Name + " " + idx;
-                while (Profiles.Any(p => p.Name.Equals(newName, StringComparison.OrdinalIgnoreCase)))
-                {
-                    idx++;
-                    newName = profile.Name + " " + idx;
-                }
-                profile.Name = newName;
+                // // rename
+                // var idx = 2;
+                // var newName = profile.Name + " " + idx;
+                // while (Profiles.Any(p => p.Name.Equals(newName, StringComparison.OrdinalIgnoreCase)))
+                // {
+                //     idx++;
+                //     newName = profile.Name + " " + idx;
+                // }
+                // profile.Name = newName;
             }
-            Profiles.Add(profile);
+            Nodes.Add(profile);
         }
 
         await MessageBox.Show(
@@ -480,7 +480,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
             return;
         }
 
-        var toExport = result.Profiles.Where(p => p.IsSelected).ToList();
+        var toExport = result.Rules.Where(p => p.IsSelected).ToList();
         if (toExport.Count == 0)
         {
             return;
