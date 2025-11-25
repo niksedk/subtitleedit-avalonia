@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Options.Settings;
 using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Shared.PromptFileSaved;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
@@ -181,8 +182,6 @@ public partial class MultipleReplaceViewModel : ObservableObject
                 });
             }
         }
-
-        Se.SaveSettings();
     }
 
     private static void AddDefaultCategoryIfNone(List<RuleTreeNode> nodes)
@@ -217,7 +216,6 @@ public partial class MultipleReplaceViewModel : ObservableObject
     {
         GeneratePreview();
         UndoUnchecked();
-        SaveSettings();
         OkPressed = true;
         Window?.Close();
     }
@@ -390,15 +388,26 @@ public partial class MultipleReplaceViewModel : ObservableObject
         List<RuleTreeNode>? imported = null;
         try
         {
-            var json = System.IO.File.ReadAllText(fileName);
-            var temp = JsonSerializer.Deserialize<CategoryImportExportItem>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var jsonOrXml = System.IO.File.ReadAllText(fileName);
+
+            CategoryImportExportItem? temp = null;
+
+            if (jsonOrXml.Contains("<MultipleSearchAndReplaceList>"))
+            {
+                temp = Se4XmlImporter.ImportFromXml(jsonOrXml);
+            }
+            else
+            {
+                temp = JsonSerializer.Deserialize<CategoryImportExportItem>(jsonOrXml, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+
             if (temp == null)
             {
                 imported = new List<RuleTreeNode>();
             }
             else
             {
-                //imported = temp.ToProfileDisplayList();
+                imported = temp.RuleTreeNodeList();
             }
         }
         catch (Exception exception)
@@ -426,7 +435,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
 
         foreach (var profile in imported)
         {
-            var exists = node.SubNodes.FirstOrDefault(p => 
+            var exists = node.SubNodes.FirstOrDefault(p =>
                 p.Find.Equals(profile.Find, StringComparison.OrdinalIgnoreCase) &&
                 p.ReplaceWith.Equals(profile.ReplaceWith, StringComparison.OrdinalIgnoreCase) &&
                 p.Type == profile.Type
@@ -490,12 +499,12 @@ public partial class MultipleReplaceViewModel : ObservableObject
         var json = JsonSerializer.Serialize(export, new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         System.IO.File.WriteAllText(fileName, json);
 
-        await MessageBox.Show(
-            Window!,
-            Se.Language.General.Information,
-            string.Format(Se.Language.Options.Settings.RuleProfilesExportedX, toExport.Count),
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Information);
+        _ = await _windowService.ShowDialogAsync<PromptFileSavedWindow, PromptFileSavedViewModel>(Window,
+            vm =>
+            {
+                vm.Initialize(Se.Language.General.FileSaved,
+                    string.Format(Se.Language.Options.Settings.RuleProfilesExportedX, toExport.Count), fileName, true, true);
+            });
     }
 
     [RelayCommand]
@@ -928,5 +937,10 @@ public partial class MultipleReplaceViewModel : ObservableObject
         node.Type = newType.Type;
 
         _dirty = true;
+    }
+
+    internal void OnClosing()
+    {
+        SaveSettings();
     }
 }

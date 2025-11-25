@@ -538,6 +538,7 @@ public class LanguageGeneral
     public string WaveformCenterOnVideoPosition { get; set; }
     public string NotInstalled { get; set; }
     public string DiskSpace { get; set; }
+    public string FileSaved { get; set; }
 
     public LanguageGeneral()
     {
@@ -1075,5 +1076,6 @@ public class LanguageGeneral
         WaveformCenterOnVideoPosition = "Waveform center on video position";
         NotInstalled = "Not installed";
         DiskSpace = "Disk space";
+        FileSaved = "File saved";
     }
 }

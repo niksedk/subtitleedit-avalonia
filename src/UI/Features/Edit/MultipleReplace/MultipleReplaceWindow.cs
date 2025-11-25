@@ -75,6 +75,7 @@ public class MultipleReplaceWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        Closing += (_,_) => vm.OnClosing();
         KeyDown += vm.OnKeyDown;
     }
     private static Border MakeRulesView(MultipleReplaceViewModel vm)

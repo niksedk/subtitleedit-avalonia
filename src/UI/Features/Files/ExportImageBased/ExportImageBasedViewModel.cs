@@ -404,7 +404,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                             vm =>
                             {
                                 vm.Initialize(Se.Language.File.Export.ImageBasedSubtitleSaved,
-                                    string.Format(Se.Language.Tools.NetflixCheckAndFix.NetFlixQualityReportSavedToX, fileOrFolderName), fileOrFolderName, true,
+                                    string.Format(Se.Language.General.SubtitleFileSavedToX, fileOrFolderName), fileOrFolderName, true,
                                     _exportImageHandler.UseFileName);
                             });
                     }

@@ -48,6 +48,21 @@ public partial class RuleTreeNode : ObservableObject
         }
     }
 
+    public RuleTreeNode(bool isCategory)
+    {
+        CategoryName = string.Empty;
+        Find = string.Empty;
+        ReplaceWith = string.Empty;
+        Description = string.Empty;
+        IsActive = true;
+        IsCategory = isCategory;
+        IconName = string.Empty;        
+        if (isCategory)
+        {
+            SubNodes = new ObservableCollection<RuleTreeNode>();
+        }
+    }
+
     public RuleTreeNode(RuleTreeNode? parent, MultipleReplaceRule rule)
     {
         CategoryName = string.Empty;
