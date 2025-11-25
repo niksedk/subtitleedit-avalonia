@@ -1849,6 +1849,13 @@ public partial class OcrViewModel : ObservableObject
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
     }
 
+    public void InitializeWebVtt(Subtitle subtitle, string fileName)
+    {
+        Title = string.Format(Se.Language.Ocr.OcrX, fileName);
+        _ocrSubtitle = new OcrSubtitleWebVttImages(subtitle, fileName);
+        OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
+    }
+
     internal void Initialize(TransportStreamParser tsParser, List<TransportStreamSubtitle> subtitles, string fileName)
     {
         Title = string.Format(Se.Language.Ocr.OcrX, fileName);

@@ -66,6 +66,8 @@ using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
 using Nikse.SubtitleEdit.Features.Sync.AdjustAllTimes;
 using Nikse.SubtitleEdit.Features.Sync.ChangeFrameRate;
 using Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
+using Nikse.SubtitleEdit.Features.Sync.PointSync;
+using Nikse.SubtitleEdit.Features.Sync.PointSyncViaOther;
 using Nikse.SubtitleEdit.Features.Sync.VisualSync;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Features.Tools.ApplyDurationLimits;
@@ -98,6 +100,7 @@ using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Config.Language;
 using Nikse.SubtitleEdit.Logic.Initializers;
 using Nikse.SubtitleEdit.Logic.Media;
+using Nikse.SubtitleEdit.Logic.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
 using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 using System;
@@ -111,9 +114,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Features.Sync.PointSyncViaOther;
 using static Nikse.SubtitleEdit.Logic.FindService;
-using Nikse.SubtitleEdit.Features.Sync.PointSync;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -1029,7 +1030,7 @@ public partial class MainViewModel :
             return;
         }
     }
-    
+
     [RelayCommand]
     private async Task ExportWebVttThumbnails()
     {
@@ -1053,7 +1054,7 @@ public partial class MainViewModel :
             return;
         }
     }
-    
+
     [RelayCommand]
     private async Task ExportDCinemaInteropPng()
     {
@@ -3646,7 +3647,7 @@ public partial class MainViewModel :
 
         _oldSubtitleGrid = SubtitleGrid;
         _oldEditTextBox = EditTextBox;
-        
+
         if (VideoPlayerControl?.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
         {
             _mpvReloader.Reset();
@@ -6755,6 +6756,7 @@ public partial class MainViewModel :
                 return;
             }
 
+
             if (ext == ".ismt" || ext == ".mp4" || ext == ".m4v" || ext == ".mov" || ext == ".3gp" || ext == ".cmaf" ||
                 ext == ".m4s")
             {
@@ -6790,6 +6792,19 @@ public partial class MainViewModel :
             }
 
             var subtitle = Subtitle.Parse(fileName, textEncoding?.Encoding);
+            if (subtitle != null && subtitle.OriginalFormat.Name == new WebVTT().Name)
+            {
+                var lines = FileUtil.ReadAllLinesShared(fileName, Encoding.UTF8);
+                var format = new WebVttThumbnail();
+                if (format.IsMine(lines, fileName))
+                {
+                    subtitle = new Subtitle();
+                    format.LoadSubtitle(subtitle, lines, fileName);
+                    ImportAndOcrWebVttImages(fileName, subtitle);
+                    return;
+                }
+            }
+
             if (subtitle == null)
             {
                 foreach (var f in SubtitleFormat.GetBinaryFormats(false))
@@ -6952,6 +6967,30 @@ public partial class MainViewModel :
             var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(vm =>
             {
                 vm.InitializeBdn(subtitle, fileName, false);
+            });
+
+            if (result.OkPressed)
+            {
+                ResetSubtitle();
+                _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
+                _converted = true;
+                _subtitle.Paragraphs.Clear();
+                Subtitles.Clear();
+                Subtitles.AddRange(result.OcredSubtitle);
+                Renumber();
+                ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
+                SelectAndScrollToRow(0);
+            }
+        });
+    }
+
+    private void ImportAndOcrWebVttImages(string fileName, Subtitle subtitle)
+    {
+        Dispatcher.UIThread.Post(async () =>
+        {
+            var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(vm =>
+            {
+                vm.InitializeWebVtt(subtitle, fileName);
             });
 
             if (result.OkPressed)

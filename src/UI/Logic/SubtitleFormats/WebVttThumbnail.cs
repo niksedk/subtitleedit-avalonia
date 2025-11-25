@@ -11,12 +11,10 @@ public class WebVttThumbnail : SubtitleFormat
 {
     public override string Extension => "vtt";
     public override string Name => "WebVTT based thumbnails";
-    private string _fileName = string.Empty;
-    private Subtitle _subtitle = new Subtitle();
 
     public override string ToText(Subtitle subtitle, string title)
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 
     public override bool IsMine(List<string> lines, string fileName)
@@ -28,7 +26,6 @@ public class WebVttThumbnail : SubtitleFormat
 
     public override void LoadSubtitle(Subtitle subtitle, List<string> lines, string fileName)
     {
-        _fileName = fileName;
         var format = new WebVTT();
         var s = new Subtitle();
         format.LoadSubtitle(s, lines, fileName);
@@ -64,18 +61,17 @@ public class WebVttThumbnail : SubtitleFormat
         }
 
         subtitle.Paragraphs.AddRange(s.Paragraphs);
-        _subtitle = subtitle;
     }
 
-    public SKBitmap GetBitmap(int index)
+    public SKBitmap GetBitmap(string fileName, Subtitle subtitle, int index)
     {
-        if (index < 0 || index >= _subtitle.Paragraphs.Count)
+        if (index < 0 || index >= subtitle.Paragraphs.Count)
         {
             return new SKBitmap(1, 1, true);
         }
 
-        var folder = Path.GetDirectoryName(_fileName);
-        var raw = _subtitle.Paragraphs[index].Text?.Trim();
+        var folder = Path.GetDirectoryName(fileName);
+        var raw = subtitle.Paragraphs[index].Text?.Trim();
         if (string.IsNullOrEmpty(raw))
         {
             return new SKBitmap(1, 1, true);
@@ -104,6 +100,16 @@ public class WebVttThumbnail : SubtitleFormat
         {
             string spec = imageFileName.Substring(posJpg + 10); // after ".jpg#xywh="
             imageFileName = imageFileName.Substring(0, posJpg + 4); // keep ".jpg"
+            ParseSpriteSpec(spec, out x, out y, out w, out h);
+            useSprite = true;
+        }
+
+        // Handles .jpeg#xywh=
+        var posJpeg = imageFileName.IndexOf(".jpeg#xywh=", StringComparison.OrdinalIgnoreCase);
+        if (posJpeg >= 0)
+        {
+            string spec = imageFileName.Substring(posJpg + 11); // after ".jepg#xywh="
+            imageFileName = imageFileName.Substring(0, posJpeg + 5); // keep ".jpeg"
             ParseSpriteSpec(spec, out x, out y, out w, out h);
             useSprite = true;
         }
