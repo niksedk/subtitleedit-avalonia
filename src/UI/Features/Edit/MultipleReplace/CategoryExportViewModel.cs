@@ -5,7 +5,6 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic.Config;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -13,26 +12,26 @@ using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Options.Settings;
 
-public partial class ProfilesExportViewModel : ObservableObject
+public partial class CategoryExportViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<ProfileDisplay> _profiles;
-    [ObservableProperty] private ProfileDisplay? _selectedProfile;
+    [ObservableProperty] private ObservableCollection<RuleTreeNode> _profiles;
+    [ObservableProperty] private RuleTreeNode? _selectedProfile;
 
     public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
 
-    public ProfilesExportViewModel()
+    public CategoryExportViewModel()
     {
-        Profiles = new ObservableCollection<ProfileDisplay>();
+        Profiles = new ObservableCollection<RuleTreeNode>();
     }
 
-    public void Initialize(List<RuleTreeNode> ruleTreeNodes)
+    public void Initialize(List<RuleTreeNode> profiles)
     {
         Profiles.Clear();
-        foreach (var node in ruleTreeNodes)
+        foreach (var profile in profiles)
         {
-        //    Profiles.Add(new ProfileDisplay(profile));
+            Profiles.Add(profile);
         }
     }
 
@@ -42,19 +41,19 @@ public partial class ProfilesExportViewModel : ObservableObject
         if (Window == null)
         {
             return;
-        }   
+        }
 
-        if (Profiles.Where(p=>p.IsSelected).Count() == 0)
+        if (Profiles.Where(p => p.IsSelected).Count() == 0)
         {
             await MessageBox.Show(
                 Window!,
                 Se.Language.General.Error,
                 $"No profile selected for export",
-                MessageBoxButtons.OK, 
+                MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
 
             return;
-        }   
+        }
 
         OkPressed = true;
         Window?.Close();

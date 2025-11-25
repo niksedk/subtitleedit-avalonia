@@ -172,6 +172,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<BurnInResolutionPickerViewModel>();
         collection.AddTransient<BurnInSettingsViewModel>();
         collection.AddTransient<BurnInViewModel>();
+        collection.AddTransient<CategoryExportViewModel>();
         collection.AddTransient<ChangeCasingViewModel>();
         collection.AddTransient<ChangeFrameRateViewModel>();
         collection.AddTransient<ChangeSpeedViewModel>();

@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -6,17 +7,20 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Features.Options.Settings;
+using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
-using Avalonia;
-using System.Collections;
 
 namespace Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 
@@ -39,15 +43,16 @@ public partial class MultipleReplaceViewModel : ObservableObject
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
     public Subtitle FixedSubtitle { get; private set; }
-    public int TotalReplaced  { get; private set; }
+    public int TotalReplaced { get; private set; }
 
     private readonly IWindowService _windowService;
+    private readonly IFileHelper _fileHelper;
     private Subtitle _subtitle;
     private readonly Dictionary<string, Regex> _compiledRegExList;
     private readonly Timer _timerReplace;
     private bool _dirty;
 
-    public MultipleReplaceViewModel(IWindowService windowService)
+    public MultipleReplaceViewModel(IWindowService windowService, IFileHelper fileHelper)
     {
         _windowService = windowService;
 
@@ -56,15 +61,15 @@ public partial class MultipleReplaceViewModel : ObservableObject
         RulesTreeView = new TreeView();
 
         _compiledRegExList = new Dictionary<string, Regex>();
-        
+
         _timerReplace = new Timer();
         _timerReplace.Interval = 250;
         _timerReplace.Elapsed += TimerReplaceElapsed;
         _timerReplace.Start();
-        
+
         _subtitle = new Subtitle();
         FixedSubtitle = new Subtitle();
-        
+
         ReplaceTypes =
         [
             new MultipleReplaceTypeItem(Se.Language.General.CaseInsensitive, MultipleReplaceType.CaseInsensitive),
@@ -72,6 +77,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
             new MultipleReplaceTypeItem(Se.Language.General.RegularExpression, MultipleReplaceType.RegularExpression)
         ];
         RuleTypes = ReplaceTypes; // bridge for ItemsSource expected by view
+        _fileHelper = fileHelper;
     }
 
     // Keep SelectedRuleType in sync with SelectedNode
@@ -113,9 +119,9 @@ public partial class MultipleReplaceViewModel : ObservableObject
         {
             return;
         }
-        
+
         _timerReplace.Stop();
-        _dirty  = false;
+        _dirty = false;
         GeneratePreview();
         _timerReplace.Start();
     }
@@ -269,7 +275,18 @@ public partial class MultipleReplaceViewModel : ObservableObject
                 },
                 new Separator(),
                 new MenuItem
-                    { Header = Se.Language.General.Delete, Command = CategoryDeleteCommand, CommandParameter = node }
+                {
+                    Header = Se.Language.General.Delete, Command = CategoryDeleteCommand, CommandParameter = node,
+                },
+                new Separator(),
+                new MenuItem
+                {
+                    Header = Se.Language.General.ImportDotDotDot, Command = CategoryImportCommand, CommandParameter = node,
+                },
+                new MenuItem
+                {
+                    Header = Se.Language.General.ExportDotDotDot, Command = CategoryExportCommand, CommandParameter = node,
+                },
             }
         };
 
@@ -328,9 +345,9 @@ public partial class MultipleReplaceViewModel : ObservableObject
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!, vm => 
-        { 
-            vm.Initialize(Se.Language.Edit.MultipleReplace.NewRule, node); 
+        var result = await _windowService.ShowDialogAsync<EditRuleWindow, EditRuleViewModel>(Window!, vm =>
+        {
+            vm.Initialize(Se.Language.Edit.MultipleReplace.NewRule, node);
         });
 
         if (result.OkPressed)
@@ -353,6 +370,132 @@ public partial class MultipleReplaceViewModel : ObservableObject
         Nodes.Remove(node);
         AddDefaultCategoryIfNone();
         _dirty = true;
+    }
+
+    [RelayCommand]
+    private async Task CategoryImport(RuleTreeNode? node)
+    {
+        if (node == null || Window == null)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.Options.Settings.OpenRuleFile, "Replace rules", ".template");
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        // import from json
+        List<RuleTreeNode>? imported = null;
+        try
+        {
+            var json = System.IO.File.ReadAllText(fileName);
+            var temp = JsonSerializer.Deserialize<CategoryImportExportItem>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            if (temp == null)
+            {
+                imported = new List<RuleTreeNode>();
+            }
+            else
+            {
+                //imported = temp.ToProfileDisplayList();
+            }
+        }
+        catch (Exception exception)
+        {
+            await MessageBox.Show(
+                Window!,
+                Se.Language.General.Error,
+                "Unable to import replace rules: " + exception.Message,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+
+            return;
+        }
+
+        if (imported == null || imported.Count == 0)
+        {
+            await MessageBox.Show(
+                Window!,
+                Se.Language.General.Error,
+                "No replace rules found in file",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+            return;
+        }
+
+        foreach (var profile in imported)
+        {
+            var exists = node.SubNodes.FirstOrDefault(p => 
+                p.Find.Equals(profile.Find, StringComparison.OrdinalIgnoreCase) &&
+                p.ReplaceWith.Equals(profile.ReplaceWith, StringComparison.OrdinalIgnoreCase) &&
+                p.Type == profile.Type
+                );
+            if (exists != null)
+            {
+                // rename
+                var idx = 2;
+                var newName = profile.Name + " " + idx;
+                while (Profiles.Any(p => p.Name.Equals(newName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    idx++;
+                    newName = profile.Name + " " + idx;
+                }
+                profile.Name = newName;
+            }
+            Profiles.Add(profile);
+        }
+
+        await MessageBox.Show(
+            Window!,
+            Se.Language.General.Information,
+            string.Format(Se.Language.Options.Settings.RuleProfilesImportedX, imported.Count),
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
+    }
+
+
+    [RelayCommand]
+    private async Task CategoryExport(RuleTreeNode? node)
+    {
+        if (node == null || node.SubNodes == null || Window == null)
+        {
+            return;
+        }
+
+        var result = await _windowService
+        .ShowDialogAsync<CategoryExportWindow, CategoryExportViewModel>(Window, vm =>
+        {
+            vm.Initialize(node.SubNodes.ToList());
+        });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickSaveFile(Window, ".template", "SE_Replace_Rules", Se.Language.Options.Settings.SaveRuleProfilesFile);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        var toExport = result.Profiles.Where(p => p.IsSelected).ToList();
+        if (toExport.Count == 0)
+        {
+            return;
+        }
+
+        var export = new CategoryImportExportItem(toExport);
+        var json = JsonSerializer.Serialize(export, new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        System.IO.File.WriteAllText(fileName, json);
+
+        await MessageBox.Show(
+            Window!,
+            Se.Language.General.Information,
+            string.Format(Se.Language.Options.Settings.RuleProfilesExportedX, toExport.Count),
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
     }
 
     [RelayCommand]
@@ -384,7 +527,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
         {
             Nodes.Move(index, index + 1);
         }
-        
+
         _dirty = true;
     }
 
@@ -464,7 +607,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
             {
                 node.Type = MultipleReplaceType.CaseInsensitive;
             }
-            
+
             _dirty = true;
         }
     }
@@ -546,7 +689,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
         }
 
         Nodes.Remove(node);
-        
+
         _dirty = true;
     }
 
@@ -564,7 +707,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
         {
             nodes.Move(index, index - 1);
         }
-        
+
         _dirty = true;
     }
 
@@ -698,7 +841,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
                 var fix = new MultipleReplaceFix
                 {
                     Apply = true,
-                    Number = i +1,
+                    Number = i + 1,
                     Before = p.Text,
                     After = newText,
                 };
@@ -706,11 +849,11 @@ public partial class MultipleReplaceViewModel : ObservableObject
                 FixedSubtitle.Paragraphs[i].Text = newText;
             }
         }
-        
+
         Dispatcher.UIThread.Post(() =>
         {
             Fixes.Clear();
-            Fixes.AddRange(fixes); 
+            Fixes.AddRange(fixes);
         });
 
         //groupBoxLinesFound.Text = string.Format(LanguageSettings.Current.MultipleReplace.LinesFoundX, fixedLines);
@@ -777,13 +920,13 @@ public partial class MultipleReplaceViewModel : ObservableObject
         }
 
         var node = SelectedNode;
-        if (node is null)   
+        if (node is null)
         {
             return;
         }
-        
+
         node.Type = newType.Type;
-        
+
         _dirty = true;
     }
 }
