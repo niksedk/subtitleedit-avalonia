@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Layout;
@@ -9,6 +7,7 @@ using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Shared;
 
@@ -225,10 +224,5 @@ public class MessageBox : Window
             Close(_result);
             e.Handled = true;
         }
-    }
-
-    internal static async Task<MessageBoxResult> Show(Window window, string delete, object deleteWaveformAndSpectrogramFoldersQuestion, MessageBoxButtons yesNoCancel, MessageBoxIcon question)
-    {
-        throw new NotImplementedException();
     }
 }

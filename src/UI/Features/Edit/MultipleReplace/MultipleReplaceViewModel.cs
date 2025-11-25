@@ -435,23 +435,6 @@ public partial class MultipleReplaceViewModel : ObservableObject
 
         foreach (var profile in imported)
         {
-            var exists = node.SubNodes.FirstOrDefault(p =>
-                p.Find.Equals(profile.Find, StringComparison.OrdinalIgnoreCase) &&
-                p.ReplaceWith.Equals(profile.ReplaceWith, StringComparison.OrdinalIgnoreCase) &&
-                p.Type == profile.Type
-                );
-            if (exists != null)
-            {
-                // // rename
-                // var idx = 2;
-                // var newName = profile.Name + " " + idx;
-                // while (Profiles.Any(p => p.Name.Equals(newName, StringComparison.OrdinalIgnoreCase)))
-                // {
-                //     idx++;
-                //     newName = profile.Name + " " + idx;
-                // }
-                // profile.Name = newName;
-            }
             Nodes.Add(profile);
         }
 

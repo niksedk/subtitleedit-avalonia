@@ -53,10 +53,10 @@ public class SeVideo
         MoveVideoPositionCustom2Forward = 5000; // 5 seconds
         
         MpvPreviewFontName = "Arial";
-        MpvPreviewFontSize = 26;
+        MpvPreviewFontSize = 20;
         MpvPreviewFontBold = true;
-        MpvPreviewOutlineWidth = 4;
-        MpvPreviewShadowWidth = 2;
+        MpvPreviewOutlineWidth = 2;
+        MpvPreviewShadowWidth = 1;
         MpvPreviewColorPrimary = Color.FromRgb(255, 255, 255).FromColorToHex();
         MpvPreviewColorOutline = Color.FromRgb(0,0,0).FromColorToHex();
         MpvPreviewColorShadow = Color.FromRgb(0,0,0).FromColorToHex();
