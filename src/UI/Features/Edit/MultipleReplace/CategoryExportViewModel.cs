@@ -25,11 +25,12 @@ public partial class CategoryExportViewModel : ObservableObject
         Rules = new ObservableCollection<RuleTreeNode>();
     }
 
-    public void Initialize(List<RuleTreeNode> rules)
+    public void Initialize(List<RuleTreeNode> rules, RuleTreeNode selectedNode)
     {
         Rules.Clear();
         foreach (var rule in rules)
         {
+            rule.IsSelected = rule == selectedNode;
             Rules.Add(rule);
         }
     }

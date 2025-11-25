@@ -115,14 +115,7 @@ public class CategoryExportWindow : Window
                 {
                     Header = Se.Language.General.Name,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(RuleTreeNode.Find)),
-                    IsReadOnly = true,
-                },
-                new DataGridTextColumn
-                {
-                    Header = Se.Language.General.ReplaceWith,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(RuleTreeNode.ReplaceWith)),
+                    Binding = new Binding(nameof(RuleTreeNode.CategoryName)),
                     IsReadOnly = true,
                 },
             },

@@ -466,7 +466,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
         var result = await _windowService
         .ShowDialogAsync<CategoryExportWindow, CategoryExportViewModel>(Window, vm =>
         {
-            vm.Initialize(node.SubNodes.ToList());
+            vm.Initialize(Nodes.ToList(), node);
         });
 
         if (!result.OkPressed)
