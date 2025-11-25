@@ -145,6 +145,7 @@ public static class DependencyInjectionExtensions
         collection.AddHttpClient<ISpellCheckDictionaryDownloadService, SpellCheckDictionaryDownloadService>();
         collection.AddHttpClient<ITesseractDownloadService, TesseractDownloadService>();
         collection.AddHttpClient<IWhisperDownloadService, WhisperDownloadService>();
+        collection.AddHttpClient<IYtDlpDownloadService, YtDlpDownloadService>();
 
         // Window view models
         collection.AddTransient<AddToNamesListViewModel>();
@@ -191,6 +192,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<DownloadTtsViewModel>();
         collection.AddTransient<DownloadWhisperEngineViewModel>();
         collection.AddTransient<DownloadWhisperModelsViewModel>();
+        collection.AddTransient<DownloadYtDlpViewModel>();
         collection.AddTransient<EditCategoryViewModel>();
         collection.AddTransient<EditCustomTextFormatViewModel>();
         collection.AddTransient<EditRuleViewModel>();

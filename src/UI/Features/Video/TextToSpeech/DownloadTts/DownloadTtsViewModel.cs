@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Engines;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Voices;
 using Nikse.SubtitleEdit.Logic.Compression;
+using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Download;
 using System;
 using System.Collections.Generic;
@@ -58,7 +59,7 @@ public partial class DownloadTtsViewModel : ObservableObject
         _configFileName = string.Empty;
         TitleText = string.Empty;
 
-        ProgressText = "Starting...";
+        ProgressText = Se.Language.General.StartingDotDotDot;
         Error = string.Empty;
 
         _timer.Interval = 500;

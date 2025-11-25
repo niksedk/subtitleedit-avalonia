@@ -44,7 +44,7 @@ public partial class DownloadLibMpvViewModel : ObservableObject
 
         _downloadStream = new MemoryStream();
 
-        StatusText = "Starting...";
+        StatusText = Se.Language.General.StartingDotDotDot;
         Error = string.Empty;
         LibMpvFileName = string.Empty;
 
@@ -84,13 +84,13 @@ public partial class DownloadLibMpvViewModel : ObservableObject
                     {
                         File.Delete(fileName); //TODO: might be in use... save to temp file instead
                     }
-                    catch 
+                    catch
                     {
                         // If the file is in use, we will not be able to delete it.
                         // We will just leave it and let the user know to restart SE.
 
                         StatusText = "Download complete...";
-                        Dispatcher.UIThread.Post(async() =>
+                        Dispatcher.UIThread.Post(async () =>
                         {
                             _ = await MessageBox.Show(
                                 Window!,
@@ -109,7 +109,7 @@ public partial class DownloadLibMpvViewModel : ObservableObject
                 }
 
                 UnpackLibMpv(fileName);
-                
+
                 LibMpvFileName = fileName;
                 Close();
             }
@@ -139,11 +139,11 @@ public partial class DownloadLibMpvViewModel : ObservableObject
         {
             _downloadStream.Position = 0;
             _zipUnpacker.UnpackZipStream(
-                _downloadStream, 
-                folder, 
-                string.Empty, 
-                false, 
-                new System.Collections.Generic.List<string> { ".dll"}, 
+                _downloadStream,
+                folder,
+                string.Empty,
+                false,
+                new System.Collections.Generic.List<string> { ".dll" },
                 new System.Collections.Generic.List<string> { newFileName });
         }
 

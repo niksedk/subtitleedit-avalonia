@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.AudioToText;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper.Engines;
+using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Download;
 using Nikse.SubtitleEdit.Logic.Media;
 using System;
@@ -61,7 +62,7 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
 
         _cancellationTokenSource = new CancellationTokenSource();
 
-        ProgressText = "Starting...";
+        ProgressText = Se.Language.General.StartingDotDotDot;
         Error = string.Empty;
         DownloadIsEnabled = true;
 

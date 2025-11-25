@@ -1,7 +1,4 @@
-﻿using Avalonia.Controls;
-using System;
-
-namespace Nikse.SubtitleEdit.Logic.Config.Language.Main;
+﻿namespace Nikse.SubtitleEdit.Logic.Config.Language.Main;
 
 public class LanguageMain
 {
@@ -71,6 +68,8 @@ public class LanguageMain
     public string ErrorLoadSrr { get; set; }
     public string ErrorLoadTorrent { get; set; }
     public string ErrorLoadBinaryZeroes { get; set; }
+    public string YoutubeDlNotInstalledDownloadNow { get; set; }
+    public string YoutubeDlDownloadedSuccessfully { get; set; }
 
     public LanguageMain()
     {
@@ -127,14 +126,16 @@ public class LanguageMain
         FixedRightToLeftUsingUnicodeControlCharactersX = "Fixed right-to-left using Unicode control characters in {0} lines";
         RemovedUnicodeControlCharactersX = "Removed Unicode control characters from {0} lines";
         ReversedStartAndEndingsForRightToLeftX = "Reversed start and endings for right-to-left in {0} lines";
-        ErrorLoadRar = "This file seems to be a compressed 7-Zip file. \nSubtitle Edit cannot open compressed files.";
-        ErrorLoadZip = "This file seems to be a compressed ZIP file. \nSubtitle Edit cannot open compressed files.";
-        ErrorLoadGZip = "This file seems to be a compressed GZip file. \nSubtitle Edit cannot open compressed files.";
-        ErrorLoad7Zip = "This file seems to be a compressed 7-Zip file. \nSubtitle Edit cannot open compressed files.";
-        ErrorLoadPng = "This file seems to be a PNG image file. \nSubtitle Edit cannot open image files.";
-        ErrorLoadJpg = "This file seems to be a JPG image file. \nSubtitle Edit cannot open image files.";
-        ErrorLoadSrr = "This file seems to be a ReScene SRR file. \nSubtitle Edit cannot open SRR files.";
-        ErrorLoadTorrent = "This file seems to be a BitTorrent file. \nSubtitle Edit cannot open torrent files.";
-        ErrorLoadBinaryZeroes = "Sorry, this file contains only binary zeroes!\r\n\r\nIf you have edited this file with Subtitle Edit you might be able to find a backup via the menu item File -&gt; Restore auto-backup...";
+        ErrorLoadRar = "This file seems to be a compressed 7-Zip file.\n\nSubtitle Edit cannot open compressed files.";
+        ErrorLoadZip = "This file seems to be a compressed ZIP file.\n\nSubtitle Edit cannot open compressed files.";
+        ErrorLoadGZip = "This file seems to be a compressed GZip file.\n\nSubtitle Edit cannot open compressed files.";
+        ErrorLoad7Zip = "This file seems to be a compressed 7-Zip file.\n\nSubtitle Edit cannot open compressed files.";
+        ErrorLoadPng = "This file seems to be a PNG image file.\n\nSubtitle Edit cannot open image files.";
+        ErrorLoadJpg = "This file seems to be a JPG image file.\n\nSubtitle Edit cannot open image files.";
+        ErrorLoadSrr = "This file seems to be a ReScene SRR file.\n\nSubtitle Edit cannot open SRR files.";
+        ErrorLoadTorrent = "This file seems to be a BitTorrent file.\n\nSubtitle Edit cannot open torrent files.";
+        ErrorLoadBinaryZeroes = "Sorry, this file contains only binary zeroes!\n\nIf you have edited this file with Subtitle Edit you might be able to find a backup via the menu item File -&gt; Restore auto-backup...";
+        YoutubeDlNotInstalledDownloadNow = "\"yt-dlp\" is not installed and is required for playing online videos.\n\nDownload now?";
+        YoutubeDlDownloadedSuccessfully = "\"yt-dlp\" downloaded successfully.";
     }
 }

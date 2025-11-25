@@ -44,7 +44,7 @@ public partial class DownloadTesseractViewModel : ObservableObject
 
         _downloadStream = new MemoryStream();
 
-        StatusText = "Starting...";
+        StatusText = Se.Language.General.StartingDotDotDot;
         Error = string.Empty;
         FfmpegFileName = string.Empty;
 

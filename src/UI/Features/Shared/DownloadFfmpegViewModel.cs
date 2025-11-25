@@ -46,7 +46,7 @@ public partial class DownloadFfmpegViewModel : ObservableObject
 
         _downloadStream = new MemoryStream();
 
-        StatusText = "Starting...";
+        StatusText = Se.Language.General.StartingDotDotDot;
         Error = string.Empty;
         FfmpegFileName = string.Empty;
 
@@ -86,12 +86,12 @@ public partial class DownloadFfmpegViewModel : ObservableObject
                 }
 
                 UnpackFfmpeg(ffmpegFileName);
-                
+
                 if (File.Exists(ffmpegFileName) && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    MacHelper.MakeExecutable(ffmpegFileName);   
+                    MacHelper.MakeExecutable(ffmpegFileName);
                 }
-                
+
                 FfmpegFileName = ffmpegFileName;
                 Close();
             }
@@ -151,7 +151,7 @@ public partial class DownloadFfmpegViewModel : ObservableObject
             {
                 if (File.Exists(path))
                 {
-                    return path;    
+                    return path;
                 }
             }
         }

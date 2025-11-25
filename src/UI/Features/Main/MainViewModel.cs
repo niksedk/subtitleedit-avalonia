@@ -98,6 +98,7 @@ using Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Config.Language;
+using Nikse.SubtitleEdit.Logic.Download;
 using Nikse.SubtitleEdit.Logic.Initializers;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.SubtitleFormats;
@@ -245,6 +246,7 @@ public partial class MainViewModel :
     private readonly IColorService _colorService;
     private readonly IFontNameService _fontNameService;
     private readonly ISpellCheckManager _spellCheckManager;
+    private readonly IYtDlpDownloadService _ytDlpDownloadService;
 
     private bool IsEmpty => Subtitles.Count == 0 || (Subtitles.Count == 1 && string.IsNullOrEmpty(Subtitles[0].Text));
 
@@ -289,7 +291,9 @@ public partial class MainViewModel :
         IOcrInitializer ocrInitializer,
         IThemeInitializer themeInitializer,
         IColorService colorService,
-        IFontNameService fontNameService, ISpellCheckManager spellCheckManager)
+        IFontNameService fontNameService,
+        ISpellCheckManager spellCheckManager,
+        IYtDlpDownloadService ytDlpDownloadService)
     {
         _fileHelper = fileHelper;
         _folderHelper = folderHelper;
@@ -306,6 +310,7 @@ public partial class MainViewModel :
         _colorService = colorService;
         _fontNameService = fontNameService;
         _spellCheckManager = spellCheckManager;
+        _ytDlpDownloadService = ytDlpDownloadService;
 
         _loading = true;
         EditText = string.Empty;
@@ -2894,6 +2899,31 @@ public partial class MainViewModel :
         if (Window == null)
         {
             return;
+        }
+
+        var isYouTubeDlInstalled = File.Exists(YtDlpDownloadService.GetFullFileName());
+        if (!isYouTubeDlInstalled)
+        {
+            var download = await MessageBox.Show(Window, Se.Language.General.Information,
+                Se.Language.Main.YoutubeDlNotInstalledDownloadNow,
+                MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+            if (download == MessageBoxResult.Yes)
+            {
+                var downloadResult = await ShowDialogAsync<DownloadYtDlpWindow, DownloadYtDlpViewModel>();
+                isYouTubeDlInstalled = File.Exists(YtDlpDownloadService.GetFullFileName());
+                if (isYouTubeDlInstalled)
+                {
+                    ShowStatus(Se.Language.Main.YoutubeDlDownloadedSuccessfully);
+                }
+                else
+                {
+                    return;
+                }
+            }
+            else
+            {
+                return;
+            }
         }
 
         var result = await ShowDialogAsync<OpenFromUrlWindow, OpenFromUrlViewModel>();
