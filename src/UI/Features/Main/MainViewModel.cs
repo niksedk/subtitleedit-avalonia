@@ -7316,6 +7316,7 @@ public partial class MainViewModel :
                 {
                     if (await LoadMatroskaSubtitle(result.SelectedMatroskaTrack, matroska, fileName))
                     {
+                        SelectAndScrollToRow(0);
                         _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
 
                         if (Se.Settings.General.AutoOpenVideo)
