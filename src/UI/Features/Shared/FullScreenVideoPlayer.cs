@@ -5,7 +5,6 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using Nikse.SubtitleEdit.Logic;
 using System;
-using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Shared;
 
@@ -114,14 +113,14 @@ public class FullScreenVideoWindow : Window
             videoPlayer.NotifyUserActivity();
         };
 
-        videoPlayer.FullscreenCollapseRequested += () => { Close(); };
+        videoPlayer.FullscreenCollapseRequested += Close;
 
         Closing += (_, _) =>
         {
             onClose?.Invoke();
             _mouseMoveDetectionTimer?.Stop();
             _mouseMoveDetectionTimer = null;
-            videoPlayer.FullscreenCollapseRequested -= () => Close();
+            videoPlayer.FullscreenCollapseRequested -= Close;
             videoPlayer.VideoPlayerInstance.CloseFile();
         };
 

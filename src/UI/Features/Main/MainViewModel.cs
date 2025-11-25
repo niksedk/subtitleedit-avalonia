@@ -8343,7 +8343,9 @@ public partial class MainViewModel :
 
         if (IsValidUrl(videoFileName))
         {
-            //TODO: create empty waveform
+            _videoFileName = videoFileName;
+            await AddEmptyWaveform();
+            IsVideoLoaded = true;
             return;
         }
 
@@ -8380,6 +8382,22 @@ public partial class MainViewModel :
 
         _videoFileName = videoFileName;
         IsVideoLoaded = true;
+    }
+    
+    private async Task AddEmptyWaveform()
+    {
+        await VideoPlayerControl.WaitForPlayersReadyAsync(10_000);
+        if (VideoPlayerControl.VideoPlayerInstance.Duration > 0)
+        {
+            var peakWaveFileName = WavePeakGenerator.GetPeakWaveFileName(_videoFileName);
+            AudioVisualizer.ZoomFactor = 1.0;
+            AudioVisualizer.VerticalZoomFactor = 1.0;
+            AudioVisualizer.WavePeaks =  WavePeakGenerator2.GenerateEmptyPeaks(peakWaveFileName, (int)VideoPlayerControl.VideoPlayerInstance.Duration);
+            // if (smpteTimeModedropFrameToolStripMenuItem.Checked)
+            // {
+            //     audioVisualizer.UseSmpteDropFrameTime();
+            // }
+        }
     }
 
     private async Task ExtractWaveformAndSpectrogramAndShotChanges(

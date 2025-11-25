@@ -8,9 +8,11 @@ using Nikse.SubtitleEdit.Logic.Download;
 using System;
 using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using Nikse.SubtitleEdit.Logic;
 using Timer = System.Timers.Timer;
 
 namespace Nikse.SubtitleEdit.Features.Shared;
@@ -58,10 +60,30 @@ public partial class DownloadYtDlpViewModel : ObservableObject
             {
                 _timer.Stop();
                 _done = true;
+
+                var fileName = YtDlpDownloadService.GetFullFileName();
+                if (File.Exists(fileName) && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    MacHelper.MakeExecutable(fileName);
+                }
+                else if (File.Exists(fileName) && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    LinuxHelper.MakeExecutable(fileName);
+                }
+
                 Close();
             }
             else if (_downloadTask is { IsFaulted: true })
             {
+                try
+                {
+                    File.Delete(YtDlpDownloadService.GetFullFileName());
+                }
+                catch
+                {
+                    // ignore
+                }
+                
                 _timer.Stop();
                 _done = true;
                 var ex = _downloadTask.Exception?.InnerException ?? _downloadTask.Exception;
