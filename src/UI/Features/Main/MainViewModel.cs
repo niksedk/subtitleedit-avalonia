@@ -9362,15 +9362,12 @@ public partial class MainViewModel :
         }
 
         _updateAudioVisualizer = true;
-        Dispatcher.UIThread.Post(() =>
-        {
-            SelectedSubtitle = item;
-            SelectedSubtitleIndex = Subtitles.IndexOf(item);
-            StatusTextRight = $"{Subtitles.IndexOf(item) + 1}/{Subtitles.Count}";
+        SelectedSubtitle = item;
+        SelectedSubtitleIndex = Subtitles.IndexOf(item);
+        StatusTextRight = $"{Subtitles.IndexOf(item) + 1}/{Subtitles.Count}";
 
-            MakeSubtitleTextInfo(item.Text, item);
-            MakeSubtitleTextInfoOriginal(item.OriginalText, item);
-        });
+        MakeSubtitleTextInfo(item.Text, item);
+        MakeSubtitleTextInfoOriginal(item.OriginalText, item);
     }
 
     private void MakeSubtitleTextInfo(string text, SubtitleLineViewModel item)
