@@ -10,6 +10,7 @@ public class LanguageAudioToText
     public string InputLanguage { get; set; }
     public string AdvancedWhisperSettings { get; set; }
     public string DownloadingWhisperEngine { get; set; }
+    public string EnableVad { get; set; }
 
     public LanguageAudioToText()
     {
@@ -21,5 +22,6 @@ public class LanguageAudioToText
         InputLanguage = "Input language";
         AdvancedWhisperSettings = "Advanced Whisper settings";
         DownloadingWhisperEngine = "Downloading Whisper engine";
+        EnableVad = "Enable VAD";
     }
 }

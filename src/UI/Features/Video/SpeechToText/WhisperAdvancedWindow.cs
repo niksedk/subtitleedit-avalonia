@@ -2,7 +2,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -11,8 +10,6 @@ namespace Nikse.SubtitleEdit.Features.Video.SpeechToText;
 
 public class WhisperAdvancedWindow : Window
 {
-    private readonly SpeechToText.WhisperAdvancedViewModel _vm;
-
     public WhisperAdvancedWindow(SpeechToText.WhisperAdvancedViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -22,8 +19,6 @@ public class WhisperAdvancedWindow : Window
         MinWidth = 800;
         MinHeight = 400;
         CanResize = true;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -76,9 +71,11 @@ public class WhisperAdvancedWindow : Window
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
-        };  
+        };
 
         var buttonPanel = UiUtil.MakeButtonBar(
+            UiUtil.MakeButton(Se.Language.Video.AudioToText.EnableVad, vm.EnableVadCppCommand)
+                .WithBindEnabled(nameof(vm.EnableVadCppCommand)),   
             UiUtil.MakeButton(Se.Language.General.Ok, vm.OkCommand),
             UiUtil.MakeButton(Se.Language.General.Cancel, vm.CancelCommand)
         );
@@ -136,11 +133,6 @@ public class WhisperAdvancedWindow : Window
         Content = grid;
 
         Activated += delegate { textBoxParameters.Focus(); }; // hack to make OnKeyDown work
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        KeyDown += (s, e) => vm.OnKeyDown(e);
     }
 }
