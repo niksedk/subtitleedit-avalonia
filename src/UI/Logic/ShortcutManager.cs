@@ -10,7 +10,8 @@ namespace Nikse.SubtitleEdit.Logic;
 public class ShortcutManager : IShortcutManager
 {
     private readonly HashSet<Key> _activeKeys = [];
-    private readonly List<ShortCut> _shortcuts = [];
+    private List<ShortCut> _shortcuts = [];
+    private bool _sorted = false;
     
     public static string GetKeyDisplayName(string key)
     {
@@ -58,6 +59,12 @@ public class ShortcutManager : IShortcutManager
 
     public IRelayCommand? CheckShortcuts(string activeControl)
     {
+        if (!_sorted)
+        {
+            _sorted = true;
+            _shortcuts = _shortcuts.OrderByDescending(p=>p.Keys.Count ).ToList();
+        }
+
         var keys = _activeKeys.Select(p => p.ToString()).ToList();
         var hashCode = ShortCut.CalculateHash(keys, activeControl);
         var inputWithNormalizedModifiers = CalculateNormalizedHash(keys, activeControl);
