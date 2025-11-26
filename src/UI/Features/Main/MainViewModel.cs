@@ -3600,8 +3600,7 @@ public partial class MainViewModel :
 
         _updateAudioVisualizer = true;
     }
-
-
+    
     private DataGrid _oldSubtitleGrid = new DataGrid();
     private TextBox _oldEditTextBox = new TextBox();
 
@@ -3669,7 +3668,10 @@ public partial class MainViewModel :
 
         _errorColor = Se.Settings.General.ErrorColor.FromHexToColor();
 
-        InitLayout.MakeLayout(MainView!, this, Se.Settings.General.LayoutNumber);
+        if (!AreVideoControlsUndocked)
+        {
+            InitLayout.MakeLayout(MainView!, this, Se.Settings.General.LayoutNumber);
+        }
 
         _autoBackupService.StopAutobackup();
         _autoBackupService.StartAutoBackup(this);
@@ -3679,10 +3681,23 @@ public partial class MainViewModel :
         _oldSubtitleGrid = SubtitleGrid;
         _oldEditTextBox = EditTextBox;
 
-        if (VideoPlayerControl?.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
+        var vp = GetVideoPlayerControl();
+        if (vp.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
         {
             _mpvReloader.Reset();
             _mpvReloader.RefreshMpv(mpv, GetUpdateSubtitle(), SelectedSubtitleFormat);
+        }
+    }
+
+    private VideoPlayerControl? GetVideoPlayerControl()
+    {
+        if (AreVideoControlsUndocked)
+        {
+            return _videoPlayerUndockedViewModel._videoPlayerControl;
+        }
+        else
+        {
+            return VideoPlayerControl;
         }
     }
 
@@ -9560,7 +9575,7 @@ public partial class MainViewModel :
 
                 // update audio visualizer position if available
                 var av = AudioVisualizer;
-                var vp = VideoPlayerControl;
+                var vp = GetVideoPlayerControl();
                 if (av != null && vp != null && !string.IsNullOrEmpty(_videoFileName))
                 {
                     var offset = TimeSpan.FromMilliseconds(Se.Settings.General.CurrentVideoOffsetInMs);
@@ -9668,12 +9683,11 @@ public partial class MainViewModel :
                     }
                 }
 
-                if (VideoPlayerControl?.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
+                if (vp?.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
                 {
                     _mpvReloader.RefreshMpv(mpv, GetUpdateSubtitle(), SelectedSubtitleFormat);
                 }
-            }
-            ;
+            };
         _positionTimer.Start();
 
         _slowTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };

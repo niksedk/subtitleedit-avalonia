@@ -25,7 +25,7 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
     public Main.MainViewModel? MainViewModel { get; set; }
     public bool AllowClose { get; set; }
 
-    private VideoPlayerControl? _videoPlayerControl;
+    public VideoPlayerControl? _videoPlayerControl;
     private DispatcherTimer? _mouseMoveDetectionTimer;
     private (int X, int Y) _lastCursorPosition;
     private (int X, int Y) _lastPointerMovedCursorPosition;
@@ -53,17 +53,18 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
     internal void Initialize(VideoPlayerControl originalVideoPlayerControl, Main.MainViewModel mainViewModel)
     {
         var originalVolume = originalVideoPlayerControl.Volume;
+        var fileName = originalVideoPlayerControl.VideoPlayerInstance.FileName;
         VideoPlayer = InitVideoPlayer.MakeLayoutVideoPlayer(mainViewModel, out var videoPlayerControl);
         _videoPlayerControl = videoPlayerControl;
         _videoPlayerControl.FullScreenCommand = ToggleFullScreenCommand;
         _videoPlayerControl.FullscreenCollapseRequested += () => ToggleFullScreen();
 
-        if (!string.IsNullOrEmpty(originalVideoPlayerControl.VideoPlayerInstance.FileName))
+        if (!string.IsNullOrEmpty(fileName))
         {
             Dispatcher.UIThread.Post(async () =>
             {
                 Task.Delay(100).Wait();
-                await videoPlayerControl.Open(originalVideoPlayerControl.VideoPlayerInstance.FileName);
+                await videoPlayerControl.Open(fileName);
                 videoPlayerControl.Volume = originalVolume;
             });
         }
