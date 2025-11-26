@@ -17,6 +17,7 @@ public class FullScreenVideoWindow : Window
     public FullScreenVideoWindow(
         Controls.VideoPlayer.VideoPlayerControl videoPlayer, 
         string videoFileName, 
+        string subtitleFileName,
         double position, 
         double volume,
         Action onClose)

@@ -233,6 +233,7 @@ public partial class MainViewModel :
     private CancellationTokenSource _videoOpenTokenSource;
     private SubtitleLineViewModel? _repeatSubtitle;
     private bool _ignoreRepeatToggleCommand;
+    private VideoPlayerControl? _fullScreenVideoPlayerControl;
 
     private readonly IFileHelper _fileHelper;
     private readonly IFolderHelper _folderHelper;
@@ -3694,7 +3695,11 @@ public partial class MainViewModel :
 
     private VideoPlayerControl? GetVideoPlayerControl()
     {
-        if (AreVideoControlsUndocked)
+        if (_fullScreenVideoPlayerControl != null)
+        {
+            return _fullScreenVideoPlayerControl;
+        }
+        else if (AreVideoControlsUndocked)
         {
             return _videoPlayerUndockedViewModel.VideoPlayerControl;
         }
@@ -5292,12 +5297,13 @@ public partial class MainViewModel :
         var volume = control.Volume;
         var parent = (Control)control.Parent!;
 
-        var newVp = InitVideoPlayer.MakeVideoPlayer();
-        newVp.IsFullScreen = true;
-        var fullScreenWindow = new FullScreenVideoWindow(newVp, _videoFileName, position, volume, () =>
+        _fullScreenVideoPlayerControl = InitVideoPlayer.MakeVideoPlayer();
+        _fullScreenVideoPlayerControl.IsFullScreen = true;
+        var fullScreenWindow = new FullScreenVideoWindow(_fullScreenVideoPlayerControl, _videoFileName, _subtitleFileName, position, volume, () =>
         {
-            VideoPlayerControl!.Position = newVp.Position;
-            VideoPlayerControl!.Volume = volume;
+            VideoPlayerControl!.Position = _fullScreenVideoPlayerControl.Position;
+            VideoPlayerControl!.Volume = _fullScreenVideoPlayerControl.Volume;
+            _fullScreenVideoPlayerControl = null;
         });
         fullScreenWindow.Show(Window!);
         _shortcutManager.ClearKeys();
