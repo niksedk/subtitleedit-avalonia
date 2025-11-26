@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -16,7 +17,7 @@ public partial class WhisperAdvancedViewModel : ObservableObject
 {
     [ObservableProperty] private string _parameters;
     [ObservableProperty] private string _helpText;
-    [ObservableProperty] private bool _isVadCppEnabled;
+    [ObservableProperty] private bool _isVadCppVisible;
 
     public Window? Window { get; set; }
     public List<IWhisperEngine> Engines { get; set; }
@@ -30,9 +31,9 @@ public partial class WhisperAdvancedViewModel : ObservableObject
         Engines = new List<IWhisperEngine>();
     }
 
-    public void RefreshVadCpp(IWhisperEngine engine)
+    private void RefreshVadCpp(IWhisperEngine engine)
     {
-        IsVadCppEnabled = engine.Name == WhisperEngineCpp.StaticName;
+        IsVadCppVisible = engine.Name == WhisperEngineCpp.StaticName;
     }
 
     [RelayCommand]
@@ -52,7 +53,7 @@ public partial class WhisperAdvancedViewModel : ObservableObject
             return;
         }
 
-        Parameters = $"--vad --vad-model '{fileName}'";
+        Parameters = $"--vad --vad-model \"{fileName}\"";
     }
 
     private static string? GetVadCppFile()
@@ -60,7 +61,6 @@ public partial class WhisperAdvancedViewModel : ObservableObject
         var searchPaths = new List<string>
         {
             Path.Combine(Se.WhisperFolder, "Cpp", "Models"),
-            Path.Combine(Se.WhisperFolder, "Cpp", "models"),
             Path.Combine(Se.WhisperFolder, "Cpp"),
         };
 
@@ -74,7 +74,7 @@ public partial class WhisperAdvancedViewModel : ObservableObject
             var files = Directory.GetFiles(searchPath, "ggml-silero-v*.bin", SearchOption.TopDirectoryOnly);
             if (files.Length > 0)
             {
-                return files[0];
+                return files.OrderByDescending(p => p).First();
             }
         }
 

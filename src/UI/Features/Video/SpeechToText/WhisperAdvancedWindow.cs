@@ -22,7 +22,7 @@ public class WhisperAdvancedWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        var labelParameters = UiUtil.MakeTextBlock("Parameters");
+        var labelParameters = UiUtil.MakeTextBlock(Se.Language.General.Parameters);
         var textBoxParameters = new TextBox
         {
             AcceptsReturn = true,
@@ -75,7 +75,7 @@ public class WhisperAdvancedWindow : Window
 
         var buttonPanel = UiUtil.MakeButtonBar(
             UiUtil.MakeButton(Se.Language.Video.AudioToText.EnableVad, vm.EnableVadCppCommand)
-                .WithBindEnabled(nameof(vm.EnableVadCppCommand)),   
+                .WithBindIsVisible(nameof(vm.IsVadCppVisible)),   
             UiUtil.MakeButton(Se.Language.General.Ok, vm.OkCommand),
             UiUtil.MakeButton(Se.Language.General.Cancel, vm.CancelCommand)
         );
