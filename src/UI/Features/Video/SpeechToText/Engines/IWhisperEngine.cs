@@ -1,8 +1,8 @@
-﻿using Nikse.SubtitleEdit.Core.AudioToText;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Core.AudioToText;
 
-namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper.Engines;
+namespace Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
 
 public interface IWhisperEngine
 {

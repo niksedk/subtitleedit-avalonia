@@ -1,14 +1,3 @@
-using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Threading;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Core.AudioToText;
-using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper.Engines;
-using Nikse.SubtitleEdit.Logic.Config;
-using Nikse.SubtitleEdit.Logic.Download;
-using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,9 +8,20 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.AudioToText;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
+using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Download;
+using Nikse.SubtitleEdit.Logic.Media;
 using Timer = System.Timers.Timer;
 
-namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
+namespace Nikse.SubtitleEdit.Features.Video.SpeechToText;
 
 public partial class DownloadWhisperModelsViewModel : ObservableObject
 {
@@ -58,7 +58,7 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
         _whisperDownloadService = whisperDownloadService;
 
         Models = new ObservableCollection<WhisperModelDisplay>();
-        SelectedModel = Models.FirstOrDefault();
+        SelectedModel = Enumerable.FirstOrDefault<WhisperModelDisplay>(Models);
 
         _cancellationTokenSource = new CancellationTokenSource();
 

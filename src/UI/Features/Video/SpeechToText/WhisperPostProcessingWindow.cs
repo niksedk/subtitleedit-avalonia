@@ -4,7 +4,7 @@ using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
+namespace Nikse.SubtitleEdit.Features.Video.SpeechToText;
 
 public class WhisperPostProcessingWindow : Window
 {
@@ -23,22 +23,22 @@ public class WhisperPostProcessingWindow : Window
         DataContext = vm;
 
         var labelAdjustTimings = UiUtil.MakeTextBlock("Adjust timings");
-        var checkAdjustTimings = UiUtil.MakeCheckBox(vm, nameof(vm.AdjustTimings));
+        var checkAdjustTimings = UiUtil.MakeCheckBox(vm, nameof(WhisperPostProcessingViewModel.AdjustTimings));
 
         var labelMergeShortLines = UiUtil.MakeTextBlock("Merge short lines");
-        var checkMergeShortLines = UiUtil.MakeCheckBox(vm, nameof(vm.MergeShortLines));
+        var checkMergeShortLines = UiUtil.MakeCheckBox(vm, nameof(WhisperPostProcessingViewModel.MergeShortLines));
 
         var labelBreakSplitLongLines = UiUtil.MakeTextBlock("Break/split long lines");
-        var checkBreakSplitLongLines = UiUtil.MakeCheckBox(vm, nameof(vm.BreakSplitLongLines));
+        var checkBreakSplitLongLines = UiUtil.MakeCheckBox(vm, nameof(WhisperPostProcessingViewModel.BreakSplitLongLines));
 
         var labelFixShortDuration = UiUtil.MakeTextBlock("Fix short duration");
-        var checkFixShortDuration = UiUtil.MakeCheckBox(vm, nameof(vm.FixShortDuration));
+        var checkFixShortDuration = UiUtil.MakeCheckBox(vm, nameof(WhisperPostProcessingViewModel.FixShortDuration));
 
         var labelFixCasing = UiUtil.MakeTextBlock("Fix casing");
-        var checkFixCasing = UiUtil.MakeCheckBox(vm, nameof(vm.FixCasing));
+        var checkFixCasing = UiUtil.MakeCheckBox(vm, nameof(WhisperPostProcessingViewModel.FixCasing));
 
         var labelAddPeriods = UiUtil.MakeTextBlock("Add periods");
-        var checkAddPeriods = UiUtil.MakeCheckBox(vm, nameof(vm.AddPeriods));
+        var checkAddPeriods = UiUtil.MakeCheckBox(vm, nameof(WhisperPostProcessingViewModel.AddPeriods));
 
         var buttonPanel = UiUtil.MakeButtonBar(
             UiUtil.MakeButton(Se.Language.General.Ok, vm.OKCommand),

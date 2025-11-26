@@ -78,7 +78,6 @@ using Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
 using Nikse.SubtitleEdit.Features.Tools.SplitBreakLongLines;
 using Nikse.SubtitleEdit.Features.Tools.SplitSubtitle;
 using Nikse.SubtitleEdit.Features.Translate;
-using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 using Nikse.SubtitleEdit.Features.Video.BlankVideo;
 using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Features.Video.CutVideo;
@@ -99,13 +98,18 @@ using Nikse.SubtitleEdit.Logic.Download;
 using Nikse.SubtitleEdit.Logic.Initializers;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
+using AudioToTextWhisperViewModel = Nikse.SubtitleEdit.Features.Video.SpeechToText.AudioToTextWhisperViewModel;
 using AudioVisualizerUndockedViewModel = Nikse.SubtitleEdit.Features.Shared.Undocked.AudioVisualizerUndockedViewModel;
 using BatchConvertFixCommonErrorsSettingsViewModel = Nikse.SubtitleEdit.Features.Tools.BatchConvert.BatchConvertFixCommonErrorsSettingsViewModel;
 using BatchConvertSettingsViewModel = Nikse.SubtitleEdit.Features.Tools.BatchConvert.BatchConvertSettingsViewModel;
 using CategoryExportViewModel = Nikse.SubtitleEdit.Features.Edit.MultipleReplace.CategoryExportViewModel;
+using DownloadWhisperEngineViewModel = Nikse.SubtitleEdit.Features.Video.SpeechToText.DownloadWhisperEngineViewModel;
+using DownloadWhisperModelsViewModel = Nikse.SubtitleEdit.Features.Video.SpeechToText.DownloadWhisperModelsViewModel;
 using ReviewSpeechViewModel = Nikse.SubtitleEdit.Features.Video.TextToSpeech.ReviewSpeech.ReviewSpeechViewModel;
 using SetVideoOffsetViewModel = Nikse.SubtitleEdit.Features.Shared.SetVideoOffset.SetVideoOffsetViewModel;
 using VideoPlayerUndockedViewModel = Nikse.SubtitleEdit.Features.Shared.Undocked.VideoPlayerUndockedViewModel;
+using WhisperAdvancedViewModel = Nikse.SubtitleEdit.Features.Video.SpeechToText.WhisperAdvancedViewModel;
+using WhisperPostProcessingViewModel = Nikse.SubtitleEdit.Features.Video.SpeechToText.WhisperPostProcessingViewModel;
 
 namespace Nikse.SubtitleEdit;
 

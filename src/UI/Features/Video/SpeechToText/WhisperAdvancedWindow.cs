@@ -7,13 +7,13 @@ using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
+namespace Nikse.SubtitleEdit.Features.Video.SpeechToText;
 
 public class WhisperAdvancedWindow : Window
 {
-    private readonly WhisperAdvancedViewModel _vm;
+    private readonly SpeechToText.WhisperAdvancedViewModel _vm;
 
-    public WhisperAdvancedWindow(WhisperAdvancedViewModel vm)
+    public WhisperAdvancedWindow(SpeechToText.WhisperAdvancedViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Video.AudioToText.AdvancedWhisperSettings;

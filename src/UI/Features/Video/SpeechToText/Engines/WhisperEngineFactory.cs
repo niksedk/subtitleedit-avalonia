@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper.Engines;
+namespace Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
 
 public static class WhisperEngineFactory
 {

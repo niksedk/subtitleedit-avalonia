@@ -1,21 +1,21 @@
-using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Data;
-using Nikse.SubtitleEdit.Logic;
-using Avalonia.Controls.Primitives;
-using Avalonia.Styling;
-using Nikse.SubtitleEdit.Logic.Config;
-using Avalonia.Layout;
 using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Data;
+using Avalonia.Input;
+using Avalonia.Layout;
+using Avalonia.Styling;
+using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 
-namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
+namespace Nikse.SubtitleEdit.Features.Video.SpeechToText;
 
 public class DownloadWhisperModelsWindow : Window
 {
-    private readonly DownloadWhisperModelsViewModel _vm;
+    private readonly SpeechToText.DownloadWhisperModelsViewModel _vm;
 
-    public DownloadWhisperModelsWindow(DownloadWhisperModelsViewModel vm)
+    public DownloadWhisperModelsWindow(SpeechToText.DownloadWhisperModelsViewModel vm)
     {
         _vm = vm;
         vm.Window = this;

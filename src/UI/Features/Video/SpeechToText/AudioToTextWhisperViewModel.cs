@@ -1,18 +1,3 @@
-using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Threading;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Core.AudioToText;
-using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
-using Nikse.SubtitleEdit.Core.SubtitleFormats;
-using Nikse.SubtitleEdit.Features.Shared;
-using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper.Engines;
-using Nikse.SubtitleEdit.Features.Video.BurnIn;
-using Nikse.SubtitleEdit.Logic;
-using Nikse.SubtitleEdit.Logic.Config;
-using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -27,8 +12,22 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.AudioToText;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
+using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media;
 
-namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
+namespace Nikse.SubtitleEdit.Features.Video.SpeechToText;
 
 public partial class AudioToTextWhisperViewModel : ObservableObject
 {
@@ -129,7 +128,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         SelectedEngine = Engines[0];
 
         Languages = new ObservableCollection<WhisperLanguage>(SelectedEngine.Languages);
-        SelectedLanguage = Languages.FirstOrDefault(p => p.Name == "English");
+        SelectedLanguage = Enumerable.FirstOrDefault<WhisperLanguage>(Languages, p => p.Name == "English");
 
         Models = new ObservableCollection<WhisperModelDisplay>();
 
@@ -163,7 +162,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         DoPostProcessing = Se.Settings.Tools.AudioToText.PostProcessing;
         Parameters = Se.Settings.Tools.AudioToText.WhisperCustomCommandLineArguments;
 
-        var selectedEngine = Engines.FirstOrDefault(p => p.Choice == Se.Settings.Tools.AudioToText.WhisperChoice);
+        var selectedEngine = Enumerable.FirstOrDefault<IWhisperEngine>(Engines, p => p.Choice == Se.Settings.Tools.AudioToText.WhisperChoice);
         if (selectedEngine != null)
         {
             SelectedEngine = selectedEngine;
@@ -197,7 +196,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                 _whisperProcess.Kill(true);
 #pragma warning restore CA1416
 
-                Dispatcher.UIThread.Invoke(async () =>
+                Dispatcher.UIThread.Invoke<Task>(async () =>
                 {
                     ProgressOpacity = 0;
                     var partialSub = new Subtitle();
@@ -276,7 +275,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             _timerWhisper.Stop();
 
 
-            Dispatcher.UIThread.Invoke(async () =>
+            Dispatcher.UIThread.Invoke<Task>(async () =>
             {
                 ProgressValue = 100;
                 var settings = Se.Settings.Tools.AudioToText;
@@ -370,10 +369,10 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             return;
         }
 
-        var convertedJobs = BatchItems.Count(p => p.Status == Se.Language.General.Converted);
-        var failed = BatchItems.Count(p => p.Status != Se.Language.General.Converted);
+        var convertedJobs = Enumerable.Count<WhisperJobItem>(BatchItems, p => p.Status == Se.Language.General.Converted);
+        var failed = Enumerable.Count<WhisperJobItem>(BatchItems, p => p.Status != Se.Language.General.Converted);
 
-        Dispatcher.UIThread.Invoke(async () =>
+        Dispatcher.UIThread.Invoke<Task>(async () =>
         {
             var msg = $"Videos converted: " + convertedJobs;
             if (failed > 0)
@@ -881,7 +880,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             viewModal =>
             {
                 viewModal.Parameters = Parameters;
-                viewModal.Engines = Engines.ToList();
+                viewModal.Engines = Enumerable.ToList<IWhisperEngine>(Engines);
                 viewModal.EngineClickedCommand.Execute(SelectedEngine);
             });
 
@@ -1610,11 +1609,11 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
         if (result != null)
         {
-            SelectedModel = Models.FirstOrDefault(m => m.Model.Name == result.Name);
+            SelectedModel = Enumerable.FirstOrDefault<WhisperModelDisplay>(Models, m => m.Model.Name == result.Name);
         }
         else
         {
-            SelectedModel = Models.FirstOrDefault(m => m.Model.Name == oldModel.Model.Name);
+            SelectedModel = Enumerable.FirstOrDefault<WhisperModelDisplay>(Models, m => m.Model.Name == oldModel.Model.Name);
         }
     }
 
@@ -1635,7 +1634,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
         if (!string.IsNullOrEmpty(Se.Settings.Tools.AudioToText.WhisperLanguageCode))
         {
-            var language = Languages.FirstOrDefault(p => p.Code == Se.Settings.Tools.AudioToText.WhisperLanguageCode);
+            var language = Enumerable.FirstOrDefault<WhisperLanguage>(Languages, p => p.Code == Se.Settings.Tools.AudioToText.WhisperLanguageCode);
             if (language != null)
             {
                 SelectedLanguage = language;
@@ -1643,7 +1642,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         }
         else
         {
-            SelectedLanguage = Languages.FirstOrDefault(p => p.Name == "English");
+            SelectedLanguage = Enumerable.FirstOrDefault<WhisperLanguage>(Languages, p => p.Name == "English");
         }
 
         Models.Clear();
@@ -1658,14 +1657,14 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
         if (Models.Count > 0)
         {
-            var model = Models.FirstOrDefault(p => p.Model.Name == Se.Settings.Tools.AudioToText.WhisperModel);
+            var model = Enumerable.FirstOrDefault<WhisperModelDisplay>(Models, p => p.Model.Name == Se.Settings.Tools.AudioToText.WhisperModel);
             if (model != null)
             {
                 SelectedModel = model;
             }
             else
             {
-                SelectedModel = Models.FirstOrDefault();
+                SelectedModel = Enumerable.FirstOrDefault<WhisperModelDisplay>(Models);
             }
         }
 

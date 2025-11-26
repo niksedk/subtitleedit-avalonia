@@ -1,12 +1,12 @@
-﻿using Avalonia.Platform;
-using Nikse.SubtitleEdit.Core.AudioToText;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Platform;
+using Nikse.SubtitleEdit.Core.AudioToText;
 
-namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper.Engines;
+namespace Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
 
 public class WhisperEngineOpenAi : IWhisperEngine
 {

@@ -1,16 +1,3 @@
-using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Threading;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper.Engines;
-using Nikse.SubtitleEdit.Logic;
-using Nikse.SubtitleEdit.Logic.Compression;
-using Nikse.SubtitleEdit.Logic.Config;
-using Nikse.SubtitleEdit.Logic.Download;
-using SharpCompress.Archives.SevenZip;
-using SharpCompress.Common;
-using SharpCompress.Readers;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -19,9 +6,22 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
+using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Compression;
+using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Download;
+using SharpCompress.Archives.SevenZip;
+using SharpCompress.Common;
+using SharpCompress.Readers;
 using Timer = System.Timers.Timer;
 
-namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
+namespace Nikse.SubtitleEdit.Features.Video.SpeechToText;
 
 public partial class DownloadWhisperEngineViewModel : ObservableObject
 {

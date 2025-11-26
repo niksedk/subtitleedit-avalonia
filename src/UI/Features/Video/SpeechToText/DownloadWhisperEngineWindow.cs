@@ -1,20 +1,20 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Media;
-using Avalonia.Data;
-using Nikse.SubtitleEdit.Logic;
-using Avalonia.Controls.Primitives;
 using Avalonia.Styling;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
+namespace Nikse.SubtitleEdit.Features.Video.SpeechToText;
 
 public class DownloadWhisperEngineWindow : Window
 {
-    private readonly DownloadWhisperEngineViewModel _vm;
+    private readonly SpeechToText.DownloadWhisperEngineViewModel _vm;
 
-    public DownloadWhisperEngineWindow(DownloadWhisperEngineViewModel vm)
+    public DownloadWhisperEngineWindow(SpeechToText.DownloadWhisperEngineViewModel vm)
     {
         _vm = vm;
         vm.Window = this;

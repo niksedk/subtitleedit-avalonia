@@ -9,15 +9,14 @@ using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
-using System;
 
-namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
+namespace Nikse.SubtitleEdit.Features.Video.SpeechToText;
 
 public class AudioToTextWhisperWindow : Window
 {
-    private readonly AudioToTextWhisperViewModel _vm;
+    private readonly SpeechToText.AudioToTextWhisperViewModel _vm;
 
-    public AudioToTextWhisperWindow(AudioToTextWhisperViewModel vm)
+    public AudioToTextWhisperWindow(SpeechToText.AudioToTextWhisperViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Video.AudioToText.Title;
@@ -388,7 +387,7 @@ public class AudioToTextWhisperWindow : Window
         Closing += (s, e) => vm.OnWindowClosing(e);
     }
 
-    private static Grid MakeConsoleLogAndBatchView(AudioToTextWhisperViewModel vm)
+    private static Grid MakeConsoleLogAndBatchView(SpeechToText.AudioToTextWhisperViewModel vm)
     {
         var textBoxConsoleLog = new TextBox()
         {
@@ -507,7 +506,7 @@ public class AudioToTextWhisperWindow : Window
         return grid;
     }
 
-    private static TextBox MakeConsoleLogOnlyView(AudioToTextWhisperViewModel vm)
+    private static TextBox MakeConsoleLogOnlyView(SpeechToText.AudioToTextWhisperViewModel vm)
     {
         var textBoxConsoleLog = new TextBox()
         {

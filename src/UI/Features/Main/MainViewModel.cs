@@ -85,7 +85,6 @@ using Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
 using Nikse.SubtitleEdit.Features.Tools.SplitBreakLongLines;
 using Nikse.SubtitleEdit.Features.Tools.SplitSubtitle;
 using Nikse.SubtitleEdit.Features.Translate;
-using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
 using Nikse.SubtitleEdit.Features.Video.BlankVideo;
 using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Features.Video.CutVideo;
@@ -116,7 +115,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Nikse.SubtitleEdit.Features.Shared.Undocked;
+using Nikse.SubtitleEdit.Features.Video.SpeechToText;
 using static Nikse.SubtitleEdit.Logic.FindService;
+using AudioToTextWhisperViewModel = Nikse.SubtitleEdit.Features.Video.SpeechToText.AudioToTextWhisperViewModel;
 using AudioVisualizerUndockedViewModel = Nikse.SubtitleEdit.Features.Shared.Undocked.AudioVisualizerUndockedViewModel;
 using VideoPlayerUndockedViewModel = Nikse.SubtitleEdit.Features.Shared.Undocked.VideoPlayerUndockedViewModel;
 

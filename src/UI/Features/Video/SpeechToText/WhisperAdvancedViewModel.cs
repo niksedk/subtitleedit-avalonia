@@ -1,14 +1,14 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper.Engines;
+using Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
 using Nikse.SubtitleEdit.Logic;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
-namespace Nikse.SubtitleEdit.Features.Video.AudioToTextWhisper;
+namespace Nikse.SubtitleEdit.Features.Video.SpeechToText;
 
 public partial class WhisperAdvancedViewModel : ObservableObject
 {

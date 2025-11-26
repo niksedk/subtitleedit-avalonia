@@ -2,7 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Nikse.SubtitleEdit.Core.Common;
 
-namespace Nikse.SubtitleEdit.Features.Video.BurnIn;
+namespace Nikse.SubtitleEdit.Features.Video.SpeechToText;
 
 public partial class WhisperJobItem : ObservableObject
 {
