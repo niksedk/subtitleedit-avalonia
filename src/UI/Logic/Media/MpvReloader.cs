@@ -186,7 +186,7 @@ public class MpvReloader : IMpvReloader
     {
         get
         {
-            if (_mpvPreviewStyleHeader is null)
+            if (string.IsNullOrEmpty(_mpvPreviewStyleHeader))
             {
                 UpdateMpvStyle();
             }

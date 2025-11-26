@@ -3702,7 +3702,7 @@ public partial class MainViewModel :
         }
         else if (AreVideoControlsUndocked)
         {
-            return _videoPlayerUndockedViewModel.VideoPlayerControl;
+            return _videoPlayerUndockedViewModel?.VideoPlayerControl;
         }
         else
         {
