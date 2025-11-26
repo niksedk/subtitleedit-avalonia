@@ -5307,6 +5307,13 @@ public partial class MainViewModel :
         });
         fullScreenWindow.Show(Window!);
         _shortcutManager.ClearKeys();
+        
+        var vp = GetVideoPlayerControl();
+        if (vp.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
+        {
+            _mpvReloader.Reset();
+            _mpvReloader.RefreshMpv(mpv, GetUpdateSubtitle(), SelectedSubtitleFormat);
+        }
     }
 
     [RelayCommand]
