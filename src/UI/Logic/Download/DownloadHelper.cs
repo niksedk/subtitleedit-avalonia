@@ -26,7 +26,7 @@ public static class DownloadHelper
       IProgress<float>? progress,
       CancellationToken cancellationToken,
       int maxRetries = 5,
-      int timeoutSeconds = 900) // 15 minutes for large files
+      int timeoutSeconds = 1800) // 30 minutes for large files
     {
         if (httpClient == null)
         {
