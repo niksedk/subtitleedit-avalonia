@@ -3605,7 +3605,7 @@ public partial class MainViewModel :
 
         _updateAudioVisualizer = true;
     }
-    
+
     private DataGrid _oldSubtitleGrid = new DataGrid();
     private TextBox _oldEditTextBox = new TextBox();
 
@@ -5308,7 +5308,7 @@ public partial class MainViewModel :
         });
         fullScreenWindow.Show(Window!);
         _shortcutManager.ClearKeys();
-        
+
         var vp = GetVideoPlayerControl();
         if (vp != null && vp.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
         {
@@ -6895,13 +6895,12 @@ public partial class MainViewModel :
                     return;
                 }
 
-                //TODO: uncomment when ready
                 // check for .gzip file
-                //if (subtitle == null && fileSize > 100 && FileUtil.IsGZip(fileName))
-                //{
-                //    await MessageBox.Show(Window!, Se.Language.General.Error, Se.Language.Main.ErrorLoadGZip);
-                //    return;
-                //}
+                if (subtitle == null && fileSize > 100 && FileUtil.IsGZip(fileName))
+                {
+                    await MessageBox.Show(Window!, Se.Language.General.Error, Se.Language.Main.ErrorLoadGZip);
+                    return;
+                }
 
                 // check for .7z file
                 if (subtitle == null && fileSize > 100 && FileUtil.Is7Zip(fileName))
@@ -8415,7 +8414,7 @@ public partial class MainViewModel :
         _videoFileName = videoFileName;
         IsVideoLoaded = true;
     }
-    
+
     private async Task AddEmptyWaveform()
     {
         if (VideoPlayerControl == null || AudioVisualizer == null)
@@ -8429,7 +8428,7 @@ public partial class MainViewModel :
             var peakWaveFileName = WavePeakGenerator.GetPeakWaveFileName(_videoFileName);
             AudioVisualizer.ZoomFactor = 1.0;
             AudioVisualizer.VerticalZoomFactor = 1.0;
-            AudioVisualizer.WavePeaks =  WavePeakGenerator2.GenerateEmptyPeaks(peakWaveFileName, (int)VideoPlayerControl.VideoPlayerInstance.Duration);
+            AudioVisualizer.WavePeaks = WavePeakGenerator2.GenerateEmptyPeaks(peakWaveFileName, (int)VideoPlayerControl.VideoPlayerInstance.Duration);
             // if (smpteTimeModedropFrameToolStripMenuItem.Checked)
             // {
             //     audioVisualizer.UseSmpteDropFrameTime();
