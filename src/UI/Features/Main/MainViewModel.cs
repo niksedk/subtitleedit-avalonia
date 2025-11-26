@@ -3687,7 +3687,7 @@ public partial class MainViewModel :
         _oldEditTextBox = EditTextBox;
 
         var vp = GetVideoPlayerControl();
-        if (vp.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
+        if (vp != null && vp.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
         {
             _mpvReloader.Reset();
             _mpvReloader.RefreshMpv(mpv, GetUpdateSubtitle(), SelectedSubtitleFormat);
@@ -5300,7 +5300,7 @@ public partial class MainViewModel :
 
         _fullScreenVideoPlayerControl = InitVideoPlayer.MakeVideoPlayer();
         _fullScreenVideoPlayerControl.IsFullScreen = true;
-        var fullScreenWindow = new FullScreenVideoWindow(_fullScreenVideoPlayerControl, _videoFileName, _subtitleFileName, position, volume, () =>
+        var fullScreenWindow = new FullScreenVideoWindow(_fullScreenVideoPlayerControl, _videoFileName, _subtitleFileName ?? string.Empty, position, volume, () =>
         {
             VideoPlayerControl!.Position = _fullScreenVideoPlayerControl.Position;
             VideoPlayerControl!.Volume = _fullScreenVideoPlayerControl.Volume;
@@ -5310,7 +5310,7 @@ public partial class MainViewModel :
         _shortcutManager.ClearKeys();
         
         var vp = GetVideoPlayerControl();
-        if (vp.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
+        if (vp != null && vp.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
         {
             _mpvReloader.Reset();
             _mpvReloader.RefreshMpv(mpv, GetUpdateSubtitle(), SelectedSubtitleFormat);
@@ -8418,6 +8418,11 @@ public partial class MainViewModel :
     
     private async Task AddEmptyWaveform()
     {
+        if (VideoPlayerControl == null || AudioVisualizer == null)
+        {
+            return;
+        }
+
         await VideoPlayerControl.WaitForPlayersReadyAsync(10_000);
         if (VideoPlayerControl.VideoPlayerInstance.Duration > 0)
         {

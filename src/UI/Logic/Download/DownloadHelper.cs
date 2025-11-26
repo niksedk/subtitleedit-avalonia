@@ -9,10 +9,10 @@ namespace Nikse.SubtitleEdit.Logic.Download;
 public static class DownloadHelper
 {
     public static async Task DownloadFileAsync(
-        HttpClient httpClient, 
-        string url, 
-        string destinationPath, 
-        IProgress<float>? progress, 
+        HttpClient httpClient,
+        string url,
+        string destinationPath,
+        IProgress<float>? progress,
         CancellationToken cancellationToken)
     {
         await using var fileStream = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
@@ -25,8 +25,8 @@ public static class DownloadHelper
       Stream destination,
       IProgress<float>? progress,
       CancellationToken cancellationToken,
-      int maxRetries = 3,
-      int timeoutSeconds = 30)
+      int maxRetries = 5,
+      int timeoutSeconds = 900) // 15 minutes for large files
     {
         if (httpClient == null)
         {
@@ -50,6 +50,11 @@ public static class DownloadHelper
 
         var attempt = 0;
         Exception? lastException = null;
+        long? totalBytes = null;
+        var startPosition = destination.CanSeek ? destination.Position : 0;
+
+        // Check if server supports range requests
+        var supportsRangeRequests = await CheckRangeSupport(httpClient, url, cancellationToken);
 
         while (attempt < maxRetries)
         {
@@ -60,36 +65,62 @@ public static class DownloadHelper
                 using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                 cts.CancelAfter(TimeSpan.FromSeconds(timeoutSeconds));
 
-                using var response = await httpClient.GetAsync(
-                    url,
+                var currentPosition = destination.CanSeek ? destination.Position : startPosition;
+
+                // Create request with range header if resuming and supported
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                if (supportsRangeRequests && currentPosition > 0 && destination.CanSeek)
+                {
+                    request.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(currentPosition, null);
+                }
+
+                using var response = await httpClient.SendAsync(
+                    request,
                     HttpCompletionOption.ResponseHeadersRead,
                     cts.Token).ConfigureAwait(false);
 
                 response.EnsureSuccessStatusCode();
 
-                var totalBytes = response.Content.Headers.ContentLength ?? -1L;
-                var totalReadBytes = 0L;
-                var startPosition = destination.Position;
+                // Get total size from headers
+                if (totalBytes == null)
+                {
+                    totalBytes = response.Content.Headers.ContentLength;
+
+                    // For range requests, get total from Content-Range header
+                    if (response.Content.Headers.ContentRange != null)
+                    {
+                        totalBytes = response.Content.Headers.ContentRange.Length;
+                    }
+                }
+
+                var totalReadBytes = currentPosition; // Start from current position
 
                 await using var contentStream = await response.Content.ReadAsStreamAsync(cts.Token).ConfigureAwait(false);
 
-                var buffer = new byte[81920]; // 80KB buffer for better performance
+                var buffer = new byte[81920]; // 80KB buffer
                 int readBytes;
+                var lastProgressReport = DateTime.UtcNow;
 
                 while ((readBytes = await contentStream.ReadAsync(buffer, cts.Token).ConfigureAwait(false)) > 0)
                 {
                     await destination.WriteAsync(buffer.AsMemory(0, readBytes), cts.Token).ConfigureAwait(false);
                     totalReadBytes += readBytes;
 
+                    // Report progress at most once per 100ms to avoid overwhelming the UI
                     if (progress != null && totalBytes > 0)
                     {
-                        var progressPercentage = (float)totalReadBytes / totalBytes;
-                        progress.Report(Math.Clamp(progressPercentage, 0f, 1f));
+                        var now = DateTime.UtcNow;
+                        if ((now - lastProgressReport).TotalMilliseconds >= 100)
+                        {
+                            var progressPercentage = (float)totalReadBytes / totalBytes.Value;
+                            progress.Report(Math.Clamp(progressPercentage, 0f, 1f));
+                            lastProgressReport = now;
+                        }
                     }
                 }
 
                 // Verify download completeness if Content-Length was provided
-                if (totalBytes > 0 && totalReadBytes != totalBytes)
+                if (totalBytes > 0 && totalReadBytes != totalBytes.Value)
                 {
                     throw new InvalidOperationException(
                         $"Download incomplete: expected {totalBytes} bytes, received {totalReadBytes} bytes");
@@ -97,7 +128,7 @@ public static class DownloadHelper
 
                 await destination.FlushAsync(cts.Token).ConfigureAwait(false);
 
-                // Success - report 100% if we haven't already
+                // Success - report 100%
                 progress?.Report(1f);
                 return;
             }
@@ -109,27 +140,62 @@ public static class DownloadHelper
             {
                 lastException = ex;
 
-                // If this was the last retry or cancellation was requested, don't retry
-                if (attempt >= maxRetries || cancellationToken.IsCancellationRequested)
+                // If cancellation was requested by user, don't retry
+                if (cancellationToken.IsCancellationRequested)
                 {
                     break;
                 }
 
-                // Exponential backoff: wait before retrying
-                var delayMs = Math.Min(1000 * (int)Math.Pow(2, attempt - 1), 10000);
+                // If this was the last retry, don't wait
+                if (attempt >= maxRetries)
+                {
+                    break;
+                }
+
+                // Exponential backoff with jitter: wait before retrying
+                var baseDelay = Math.Min(2000 * (int)Math.Pow(2, attempt - 1), 30000);
+                var jitter = Random.Shared.Next(0, 1000);
+                var delayMs = baseDelay + jitter;
+
                 await Task.Delay(delayMs, CancellationToken.None).ConfigureAwait(false);
 
-                // Reset stream position if possible for retry
-                if (destination.CanSeek)
+                // Don't reset stream position - we'll resume from where we left off
+                // Only reset if we can't seek (which means we can't resume anyway)
+                if (!destination.CanSeek && destination.Position > 0)
                 {
-                    destination.Position = 0;
+                    throw new InvalidOperationException(
+                        "Cannot retry download on non-seekable stream after partial download",
+                        lastException);
                 }
             }
         }
 
         // All retries exhausted
+        var bytesDownloaded = destination.CanSeek ? destination.Position : 0;
         throw new InvalidOperationException(
-            $"Failed to download file after {maxRetries} attempts. URL: {url}",
+            $"Failed to download file after {maxRetries} attempts. URL: {url}. Downloaded: {bytesDownloaded}/{totalBytes ?? 0} bytes",
             lastException);
+    }
+
+    private static async Task<bool> CheckRangeSupport(
+        HttpClient httpClient,
+        string url,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(TimeSpan.FromSeconds(10));
+
+            using var request = new HttpRequestMessage(HttpMethod.Head, url);
+            using var response = await httpClient.SendAsync(request, cts.Token).ConfigureAwait(false);
+
+            return response.Headers.AcceptRanges?.Contains("bytes") == true;
+        }
+        catch
+        {
+            // If HEAD request fails, assume no range support
+            return false;
+        }
     }
 }
