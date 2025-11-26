@@ -5,9 +5,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Logic;
-using System;
 
-namespace Nikse.SubtitleEdit.Features.Shared;
+namespace Nikse.SubtitleEdit.Features.Shared.Undocked;
 
 public partial class AudioVisualizerUndockedViewModel : ObservableObject
 {

@@ -115,7 +115,10 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Features.Shared.Undocked;
 using static Nikse.SubtitleEdit.Logic.FindService;
+using AudioVisualizerUndockedViewModel = Nikse.SubtitleEdit.Features.Shared.Undocked.AudioVisualizerUndockedViewModel;
+using VideoPlayerUndockedViewModel = Nikse.SubtitleEdit.Features.Shared.Undocked.VideoPlayerUndockedViewModel;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -3693,7 +3696,7 @@ public partial class MainViewModel :
     {
         if (AreVideoControlsUndocked)
         {
-            return _videoPlayerUndockedViewModel._videoPlayerControl;
+            return _videoPlayerUndockedViewModel.VideoPlayerControl;
         }
         else
         {

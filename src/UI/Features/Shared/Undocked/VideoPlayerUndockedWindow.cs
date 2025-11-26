@@ -2,13 +2,13 @@
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Shared;
+namespace Nikse.SubtitleEdit.Features.Shared.Undocked;
 
 public class VideoPlayerUndockedWindow : Window
 {
-    private readonly VideoPlayerUndockedViewModel _vm;
+    private readonly Undocked.VideoPlayerUndockedViewModel _vm;
 
-    public VideoPlayerUndockedWindow(VideoPlayerUndockedViewModel vm)
+    public VideoPlayerUndockedWindow(Undocked.VideoPlayerUndockedViewModel vm)
     {
         _vm = vm;
         vm.Window = this;

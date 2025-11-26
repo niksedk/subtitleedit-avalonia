@@ -99,11 +99,13 @@ using Nikse.SubtitleEdit.Logic.Download;
 using Nikse.SubtitleEdit.Logic.Initializers;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
+using AudioVisualizerUndockedViewModel = Nikse.SubtitleEdit.Features.Shared.Undocked.AudioVisualizerUndockedViewModel;
 using BatchConvertFixCommonErrorsSettingsViewModel = Nikse.SubtitleEdit.Features.Tools.BatchConvert.BatchConvertFixCommonErrorsSettingsViewModel;
 using BatchConvertSettingsViewModel = Nikse.SubtitleEdit.Features.Tools.BatchConvert.BatchConvertSettingsViewModel;
 using CategoryExportViewModel = Nikse.SubtitleEdit.Features.Edit.MultipleReplace.CategoryExportViewModel;
 using ReviewSpeechViewModel = Nikse.SubtitleEdit.Features.Video.TextToSpeech.ReviewSpeech.ReviewSpeechViewModel;
 using SetVideoOffsetViewModel = Nikse.SubtitleEdit.Features.Shared.SetVideoOffset.SetVideoOffsetViewModel;
+using VideoPlayerUndockedViewModel = Nikse.SubtitleEdit.Features.Shared.Undocked.VideoPlayerUndockedViewModel;
 
 namespace Nikse.SubtitleEdit;
 

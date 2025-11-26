@@ -1,4 +1,6 @@
-﻿using Avalonia.Controls;
+﻿using System;
+using System.Threading.Tasks;
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
@@ -7,10 +9,8 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Logic;
-using System;
-using System.Threading.Tasks;
 
-namespace Nikse.SubtitleEdit.Features.Shared;
+namespace Nikse.SubtitleEdit.Features.Shared.Undocked;
 
 public partial class VideoPlayerUndockedViewModel : ObservableObject
 {
@@ -24,8 +24,8 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
     public Grid? VideoPlayer { get; set; }
     public Main.MainViewModel? MainViewModel { get; set; }
     public bool AllowClose { get; set; }
-
-    public VideoPlayerControl? _videoPlayerControl;
+    public VideoPlayerControl? VideoPlayerControl { get; set; }
+    
     private DispatcherTimer? _mouseMoveDetectionTimer;
     private (int X, int Y) _lastCursorPosition;
     private (int X, int Y) _lastPointerMovedCursorPosition;
@@ -33,7 +33,7 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
     [RelayCommand]
     private void ToggleFullScreen()
     {
-        if (Window == null || _videoPlayerControl == null)
+        if (Window == null || VideoPlayerControl == null)
         {
             return;
         }
@@ -41,12 +41,12 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
         if (Window.WindowState == WindowState.FullScreen)
         {
             Window.WindowState = WindowState.Normal;
-            _videoPlayerControl.IsFullScreen = false;
+            VideoPlayerControl.IsFullScreen = false;
         }
         else
         {
             Window.WindowState = WindowState.FullScreen;
-            _videoPlayerControl.IsFullScreen = true;
+            VideoPlayerControl.IsFullScreen = true;
         }
     }
 
@@ -55,9 +55,9 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
         var originalVolume = originalVideoPlayerControl.Volume;
         var fileName = originalVideoPlayerControl.VideoPlayerInstance.FileName;
         VideoPlayer = InitVideoPlayer.MakeLayoutVideoPlayer(mainViewModel, out var videoPlayerControl);
-        _videoPlayerControl = videoPlayerControl;
-        _videoPlayerControl.FullScreenCommand = ToggleFullScreenCommand;
-        _videoPlayerControl.FullscreenCollapseRequested += () => ToggleFullScreen();
+        VideoPlayerControl = videoPlayerControl;
+        VideoPlayerControl.FullScreenCommand = ToggleFullScreenCommand;
+        VideoPlayerControl.FullscreenCollapseRequested += () => ToggleFullScreen();
 
         if (!string.IsNullOrEmpty(fileName))
         {
@@ -85,7 +85,7 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
                         Math.Abs(cursorPos.Value.Y - _lastCursorPosition.Y) > mouseMovementMinPixels)
                     {
                         _lastCursorPosition = cursorPos.Value;
-                        _videoPlayerControl.NotifyUserActivity();
+                        VideoPlayerControl.NotifyUserActivity();
                     }
                 }
             }
@@ -102,13 +102,13 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
             if (Math.Abs(pos.Position.X - _lastPointerMovedCursorPosition.X) > mouseMovementMinPixels ||
                 Math.Abs(pos.Position.Y - _lastPointerMovedCursorPosition.Y) > mouseMovementMinPixels)
             {
-                _videoPlayerControl.NotifyUserActivity();
+                VideoPlayerControl.NotifyUserActivity();
                 _lastPointerMovedCursorPosition = ((int)pos.Position.X, (int)pos.Position.Y);
             }
 
             if (Window != null)
             {
-                _videoPlayerControl.IsFullScreen = Window.WindowState == WindowState.FullScreen;
+                VideoPlayerControl.IsFullScreen = Window.WindowState == WindowState.FullScreen;
             }
         };
 
@@ -136,61 +136,61 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
 
             ToggleFullScreen();
 
-            _videoPlayerControl?.NotifyUserActivity();
+            VideoPlayerControl?.NotifyUserActivity();
             return;
         }
 
-        if (_videoPlayerControl != null)
+        if (VideoPlayerControl != null)
         {
             if (e.Key == Key.Escape && Window is { } && Window.WindowState == WindowState.FullScreen)
             {
                 ToggleFullScreen();
                 e.Handled = true;
-                _videoPlayerControl.NotifyUserActivity();
+                VideoPlayerControl.NotifyUserActivity();
                 return;
             }
 
             if (e.Key == Key.Space)
             {
-                _videoPlayerControl.TogglePlayPause();
+                VideoPlayerControl.TogglePlayPause();
                 e.Handled = true;
-                _videoPlayerControl.NotifyUserActivity();
+                VideoPlayerControl.NotifyUserActivity();
                 return;
             }
 
             if (e.Key == Key.Right)
             {
                 e.Handled = true;
-                _videoPlayerControl.Position += 2;
-                _videoPlayerControl.NotifyUserActivity();
+                VideoPlayerControl.Position += 2;
+                VideoPlayerControl.NotifyUserActivity();
                 return;
             }
 
             if (e.Key == Key.Left)
             {
                 e.Handled = true;
-                _videoPlayerControl.Position -= 2;
-                _videoPlayerControl.NotifyUserActivity();
+                VideoPlayerControl.Position -= 2;
+                VideoPlayerControl.NotifyUserActivity();
                 return;
             }
 
             if (e.Key == Key.Up && e.KeyModifiers == KeyModifiers.None)
             {
                 e.Handled = true;
-                _videoPlayerControl.Volume += 2;
-                _videoPlayerControl.NotifyUserActivity();
+                VideoPlayerControl.Volume += 2;
+                VideoPlayerControl.NotifyUserActivity();
                 return;
             }
 
             if (e.Key == Key.Down && e.KeyModifiers == KeyModifiers.None)
             {
                 e.Handled = true;
-                _videoPlayerControl.Volume -= 2;
-                _videoPlayerControl.NotifyUserActivity();
+                VideoPlayerControl.Volume -= 2;
+                VideoPlayerControl.NotifyUserActivity();
                 return;
             }
 
-            _videoPlayerControl.NotifyUserActivity();
+            VideoPlayerControl.NotifyUserActivity();
         }
 
         MainViewModel?.OnKeyDownHandler(sender, e);

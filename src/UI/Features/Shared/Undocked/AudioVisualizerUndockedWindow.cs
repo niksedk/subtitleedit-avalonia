@@ -2,13 +2,13 @@
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Shared;
+namespace Nikse.SubtitleEdit.Features.Shared.Undocked;
 
 public class AudioVisualizerUndockedWindow : Window
 {
-    private readonly AudioVisualizerUndockedViewModel _vm;
+    private readonly Undocked.AudioVisualizerUndockedViewModel _vm;
 
-    public AudioVisualizerUndockedWindow(AudioVisualizerUndockedViewModel vm)
+    public AudioVisualizerUndockedWindow(Undocked.AudioVisualizerUndockedViewModel vm)
     {
         _vm = vm;
         vm.Window = this;
