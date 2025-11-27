@@ -1,12 +1,127 @@
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
+using System;
+using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
 public static partial class InitLayout
 {
     public const int WaveFormHeight = 150;
+
+    private static readonly Dictionary<int, LayoutPositions> _savedLayoutPositions = new();
+
+    public class LayoutPositions
+    {
+        public List<double> RowHeights { get; set; } = new();
+        public List<double> ColumnWidths { get; set; } = new();
+        public List<double> NestedRowHeights { get; set; } = new();
+        public List<double> NestedColumnWidths { get; set; } = new();
+    }
+
+    public static LayoutPositions SaveLayoutPositions(int layoutNumber, Grid contentGrid)
+    {
+        if (contentGrid == null || contentGrid.Children.Count == 0)
+        {
+            return new LayoutPositions();
+        }
+
+        var positions = new LayoutPositions();
+
+        // Save main grid row heights
+        foreach (var rowDef in contentGrid.RowDefinitions)
+        {
+            positions.RowHeights.Add(rowDef.ActualHeight);
+        }
+
+        // Save main grid column widths
+        foreach (var colDef in contentGrid.ColumnDefinitions)
+        {
+            positions.ColumnWidths.Add(colDef.ActualWidth);
+        }
+
+        // Look for nested grids
+        foreach (var child in contentGrid.Children)
+        {
+            if (child is Border border && border.Child is Grid nestedGrid)
+            {
+                // Save nested grid row heights
+                foreach (var rowDef in nestedGrid.RowDefinitions)
+                {
+                    positions.NestedRowHeights.Add(rowDef.ActualHeight);
+                }
+
+                // Save nested grid column widths
+                foreach (var colDef in nestedGrid.ColumnDefinitions)
+                {
+                    positions.NestedColumnWidths.Add(colDef.ActualWidth);
+                }
+
+                break; // Only process the first nested grid found
+            }
+        }
+
+        return positions;
+    }
+
+    public static void RestoreLayoutPositions(LayoutPositions positions, Grid contentGrid)
+    {
+        if (contentGrid == null || contentGrid.Children.Count == 0 ||
+            positions.ColumnWidths.Count + positions.RowHeights.Count == 0)
+        {
+            return;
+        }
+
+        // Restore main grid row heights
+        for (int i = 0; i < Math.Min(contentGrid.RowDefinitions.Count, positions.RowHeights.Count); i++)
+        {
+            var savedHeight = positions.RowHeights[i];
+            if (savedHeight > 0)
+            {
+                contentGrid.RowDefinitions[i].Height = new GridLength(savedHeight, GridUnitType.Pixel);
+            }
+        }
+
+        // Restore main grid column widths
+        for (int i = 0; i < Math.Min(contentGrid.ColumnDefinitions.Count, positions.ColumnWidths.Count); i++)
+        {
+            var savedWidth = positions.ColumnWidths[i];
+            if (savedWidth > 0)
+            {
+                contentGrid.ColumnDefinitions[i].Width = new GridLength(savedWidth, GridUnitType.Pixel);
+            }
+        }
+
+        // Look for nested grids to restore
+        foreach (var child in contentGrid.Children)
+        {
+            if (child is Border border && border.Child is Grid nestedGrid)
+            {
+                // Restore nested grid row heights
+                for (int i = 0; i < Math.Min(nestedGrid.RowDefinitions.Count, positions.NestedRowHeights.Count); i++)
+                {
+                    var savedHeight = positions.NestedRowHeights[i];
+                    if (savedHeight > 0)
+                    {
+                        nestedGrid.RowDefinitions[i].Height = new GridLength(savedHeight, GridUnitType.Pixel);
+                    }
+                }
+
+                // Restore nested grid column widths
+                for (int i = 0; i < Math.Min(nestedGrid.ColumnDefinitions.Count, positions.NestedColumnWidths.Count); i++)
+                {
+                    var savedWidth = positions.NestedColumnWidths[i];
+                    if (savedWidth > 0)
+                    {
+                        nestedGrid.ColumnDefinitions[i].Width = new GridLength(savedWidth, GridUnitType.Pixel);
+                    }
+                }
+
+                break; // Only process the first nested grid found
+            }
+        }
+    }
 
     public static int MakeLayout(MainView mainPage, MainViewModel vm, int layoutNumber)
     {

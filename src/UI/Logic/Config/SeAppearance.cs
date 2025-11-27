@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Media;
+using static Nikse.SubtitleEdit.Features.Main.Layout.InitLayout;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 
@@ -40,8 +41,11 @@ public class SeAppearance
     public bool ShowUpDownDuration { get; set; }
     public bool ShowUpDownLabels { get; set; }
 
+    public LayoutPositions CurrentLayoutPositions { get; set; } 
+
     public SeAppearance()
     {
+        CurrentLayoutPositions = new LayoutPositions();
         Theme = "System";
         FontName = "Default";
         SubtitleTextBoxAndGridFontName = "Default";

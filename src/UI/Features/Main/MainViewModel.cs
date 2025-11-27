@@ -8152,6 +8152,7 @@ public partial class MainViewModel :
 
             UiUtil.SaveWindowPosition(Window);
             Se.Settings.General.UndockVideoControls = Se.Settings.General.RememberPositionAndSize && AreVideoControlsUndocked;
+            Se.Settings.Appearance.CurrentLayoutPositions = InitLayout.SaveLayoutPositions(0, ContentGrid.Children.FirstOrDefault() as Grid ?? new Grid());
 
             if (_findViewModel != null)
             {
@@ -8331,10 +8332,15 @@ public partial class MainViewModel :
             RightToLeftToggle();
         }
 
-        UiUtil.RestoreWindowPosition(Window);
-        if (Se.Settings.General.UndockVideoControls)
+        if (Se.Settings.General.RememberPositionAndSize)
         {
-            VideoUndockControls();
+            UiUtil.RestoreWindowPosition(Window);
+            InitLayout.RestoreLayoutPositions(Se.Settings.Appearance.CurrentLayoutPositions, ContentGrid.Children.FirstOrDefault() as Grid ?? new Grid());
+
+            if (Se.Settings.General.UndockVideoControls)
+            {
+                VideoUndockControls();
+            }
         }
 
         Task.Run(async () =>
