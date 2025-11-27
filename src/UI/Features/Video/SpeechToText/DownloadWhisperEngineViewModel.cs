@@ -213,10 +213,13 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
                 MacHelper.MakeExecutable(path);
             }
 
-            path = Path.Combine(folder, "faster-whisper-xxl");
-            if (File.Exists(path))
+            if (Engine is WhisperEnginePurfviewFasterWhisperXxl purfviewEngine)
             {
-                MacHelper.MakeExecutable(path);
+                path = Path.Combine(folder, purfviewEngine.GetExecutableFileName());
+                if (File.Exists(path))
+                {
+                    MacHelper.MakeExecutable(path);
+                }
             }
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -227,10 +230,13 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
                 LinuxHelper.MakeExecutable(path);
             }
 
-            path = Path.Combine(folder, "faster-whisper-xxl");
-            if (File.Exists(path))
+            if (Engine is WhisperEnginePurfviewFasterWhisperXxl purfviewEngine)
             {
-                LinuxHelper.MakeExecutable(path);
+                path = Path.Combine(folder, purfviewEngine.GetExecutableFileName());
+                if (File.Exists(path))
+                {
+                    LinuxHelper.MakeExecutable(path);
+                }
             }
         }
     }
