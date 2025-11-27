@@ -54,8 +54,7 @@ Requires mpv and ffmpeg (ffmpeg is normally already installed) to enable video f
 
 #### Debian/Ubuntu
 ```bash
-sudo apt update
-sudo apt install mpv libmpv-dev ffmpeg
+sudo apt update && sudo apt install -y mpv libmpv-dev ffmpeg
 ```
 
 #### Arch
