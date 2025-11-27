@@ -3,6 +3,7 @@ using Avalonia.Data;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
 
 namespace Nikse.SubtitleEdit.Features.Files.ImportImages;
 
@@ -48,7 +49,7 @@ public class ImportImagesWindow : Window
         var panelButtons = UiUtil.MakeButtonBar(buttonImport, buttonOk, buttonCancel);
 
         grid.Add(labelFontsAndImages, 0);
-        grid.Add(MakeLeftView(vm), 1);
+        grid.Add(MakeImagesView(vm), 1);
         grid.Add(panelButtons, 3, 0);
 
         Content = grid;
@@ -57,7 +58,7 @@ public class ImportImagesWindow : Window
         KeyDown += vm.KeyDown;
     }
 
-    private static Border MakeLeftView(ImportImagesViewModel vm)
+    private static Border MakeImagesView(ImportImagesViewModel vm)
     {
         var grid = new Grid
         {
@@ -73,6 +74,9 @@ public class ImportImagesWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
+        var fullTimeConverter = new TimeSpanToDisplayFullConverter();
+        var shortTimeConverter = new TimeSpanToDisplayShortConverter();
+        var fileSizeConverter = new FileSizeConverter();
         var dataGrid = new DataGrid
         {
             AutoGenerateColumns = false,
@@ -98,7 +102,7 @@ public class ImportImagesWindow : Window
                 {
                     Header = Se.Language.General.Size,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(ImportImageItem.Size)),
+                    Binding = new Binding(nameof(ImportImageItem.Size)) { Converter = fileSizeConverter },
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
@@ -106,7 +110,7 @@ public class ImportImagesWindow : Window
                 {
                     Header = Se.Language.General.Show,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(ImportImageItem.Start)),
+                    Binding = new Binding(nameof(ImportImageItem.Start)) { Converter = fullTimeConverter },
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
@@ -114,7 +118,7 @@ public class ImportImagesWindow : Window
                 {
                     Header = Se.Language.General.Hide,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(ImportImageItem.End)),
+                    Binding = new Binding(nameof(ImportImageItem.End)){ Converter = fullTimeConverter },
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
@@ -122,7 +126,7 @@ public class ImportImagesWindow : Window
                 {
                     Header = Se.Language.General.Duration,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(ImportImageItem.Duration)),
+                    Binding = new Binding(nameof(ImportImageItem.Duration)){ Converter = shortTimeConverter },
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
