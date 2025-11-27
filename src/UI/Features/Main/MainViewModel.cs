@@ -9807,7 +9807,8 @@ public partial class MainViewModel :
         var newPosition = e.PositionInSeconds;
         newPosition = Math.Max(0, newPosition);
         newPosition = Math.Min(vp.Duration, newPosition);
-        
+
+        vp.VideoPlayerInstance.Pause();
         vp.SetPosition(newPosition);
         _updateAudioVisualizer = true; // Update the audio visualizer position
     }
