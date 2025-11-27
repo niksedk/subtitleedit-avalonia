@@ -213,6 +213,8 @@ public static partial class InitLayout
         var bottomContent = new Border
         {
             Child = InitWaveform.MakeWaveform(vm),
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Height = double.NaN,
         };
         Grid.SetRow(bottomContent, 2);
         contentGrid.Children.Add(bottomContent);
@@ -297,6 +299,8 @@ public static partial class InitLayout
         var bottomContent = new Border
         {
             Child = InitWaveform.MakeWaveform(vm),
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Height = double.NaN,
         };
         Grid.SetRow(bottomContent, 2);
         contentGrid.Children.Add(bottomContent);
@@ -360,6 +364,8 @@ public static partial class InitLayout
         var nestedBottom = new Border
         {
             Child = InitWaveform.MakeWaveform(vm),
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Height = double.NaN,
         };
         Grid.SetRow(nestedBottom, 2);
         nestedGrid.Children.Add(nestedBottom);
@@ -459,6 +465,8 @@ public static partial class InitLayout
         var rightNestedBottom = new Border
         {
             Child = InitWaveform.MakeWaveform(vm),
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Height = double.NaN,
         };
         Grid.SetRow(rightNestedBottom, 2);
         rightNestedGrid.Children.Add(rightNestedBottom);
@@ -526,6 +534,8 @@ public static partial class InitLayout
         var bottomContent = new Border
         {
             Child = InitWaveform.MakeWaveform(vm),
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Height = double.NaN,
         };
         Grid.SetRow(bottomContent, 4);
         contentGrid.Children.Add(bottomContent);
@@ -579,6 +589,8 @@ public static partial class InitLayout
         var bottomContent = new Border
         {
             Child = InitWaveform.MakeWaveform(vm),
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Height = double.NaN,
         };
         Grid.SetRow(bottomContent, 2);
         contentGrid.Children.Add(bottomContent);
@@ -771,6 +783,8 @@ public static partial class InitLayout
         var nestedRight = new Border
         {
             Child = InitWaveform.MakeWaveform(vm),
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Height = double.NaN,
         };
         Grid.SetColumn(nestedRight, 2);
         nestedGrid.Children.Add(nestedRight);
@@ -838,6 +852,8 @@ public static partial class InitLayout
         var middleContent = new Border
         {
             Child = InitWaveform.MakeWaveform(vm),
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Height = double.NaN,
         };
         Grid.SetRow(middleContent, 2);
         contentGrid.Children.Add(middleContent);

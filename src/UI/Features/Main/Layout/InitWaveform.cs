@@ -25,6 +25,8 @@ public class InitWaveform
         {
             RowDefinitions = new RowDefinitions("*,Auto"),
             Margin = new Thickness(10, 0, 10, 0),
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Height = double.NaN, // Auto height
         };
 
         // waveform area
@@ -37,7 +39,11 @@ public class InitWaveform
                 WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor(),
                 WaveformCursorColor = Se.Settings.Waveform.WaveformCursorColor.FromHexToColor(),
                 InvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel,
+                VerticalAlignment = VerticalAlignment.Stretch,
+                Height = double.NaN, // Auto height
             };
+            vm.AudioVisualizer.VerticalAlignment = VerticalAlignment.Stretch;
+            vm.AudioVisualizer.Height = double.NaN; // Auto height
             vm.AudioVisualizer.OnNewSelectionInsert += vm.AudioVisualizerOnNewSelectionInsert;
             vm.AudioVisualizer.OnVideoPositionChanged += vm.AudioVisualizerOnVideoPositionChanged;
             vm.AudioVisualizer.OnToggleSelection += vm.AudioVisualizerOnToggleSelection;
@@ -165,7 +171,7 @@ public class InitWaveform
         {
             Margin = new Thickness(0, 0, 3, 0),
             Command = vm.TogglePlayPauseCommand,
-            FontWeight = Avalonia.Media.FontWeight.Bold,
+            FontWeight = FontWeight.Bold,
             [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.PlayPauseHint, shortcuts, nameof(vm.TogglePlayPauseCommand)),
         };
         Attached.SetIcon(buttonPlay, IconNames.Play);
@@ -186,25 +192,19 @@ public class InitWaveform
         {
             Margin = new Thickness(0, 0, 3, 0),
             Command = vm.WaveformInsertAtPositionCommand,
-            FontWeight = Avalonia.Media.FontWeight.Bold,
+            FontWeight = FontWeight.Bold,
             [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.NewHint, shortcuts, nameof(vm.WaveformInsertAtPositionCommand)),
         };
         Attached.SetIcon(buttonNew, IconNames.Plus);
 
-        var buttonSetStartAndOffsetTheRest = new Button
-        {
-            Margin = new Thickness(0, 0, 3, 0),
-            Command = vm.WaveformSetStartAndOffsetTheRestCommand,
-            FontWeight = Avalonia.Media.FontWeight.Bold,
-            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.SetStartAndOffsetTheRestHint, shortcuts, nameof(vm.WaveformSetStartAndOffsetTheRestCommand)),
-        };
+        var buttonSetStartAndOffsetTheRest = new Button { Margin = new Thickness(0, 0, 3, 0), Command = vm.WaveformSetStartAndOffsetTheRestCommand, FontWeight = FontWeight.Bold, [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.SetStartAndOffsetTheRestHint, shortcuts, nameof(vm.WaveformSetStartAndOffsetTheRestCommand)), };
         Attached.SetIcon(buttonSetStartAndOffsetTheRest, IconNames.ArrowExpandRight);
 
         var buttonSetStart = new Button
         {
             Margin = new Thickness(0, 0, 3, 0),
             Command = vm.WaveformSetStartCommand,
-            FontWeight = Avalonia.Media.FontWeight.Bold,
+            FontWeight = FontWeight.Bold,
             [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.SetStartHint, shortcuts, nameof(vm.WaveformSetStartCommand)),
         };
         Attached.SetIcon(buttonSetStart, IconNames.RayStart);
@@ -213,7 +213,7 @@ public class InitWaveform
         {
             Margin = new Thickness(0, 0, 3, 0),
             Command = vm.WaveformSetEndCommand,
-            FontWeight = Avalonia.Media.FontWeight.Bold,
+            FontWeight = FontWeight.Bold,
             [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.SetEndHint, shortcuts, nameof(vm.WaveformSetEndCommand)),
         };
         Attached.SetIcon(buttonSetEnd, IconNames.RayEnd);
