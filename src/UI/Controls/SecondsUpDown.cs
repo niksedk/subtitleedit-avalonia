@@ -18,28 +18,16 @@ public class SecondsUpDown : TemplatedControl
     private ButtonSpinner? _spinner;
 
     public static readonly StyledProperty<TimeSpan> ValueProperty =
-               AvaloniaProperty.Register<SecondsUpDown, TimeSpan>(
-                   nameof(Value),
-                   defaultValue: TimeSpan.Zero,
-                   defaultBindingMode: Avalonia.Data.BindingMode.TwoWay);
+    AvaloniaProperty.Register<SecondsUpDown, TimeSpan>(
+       nameof(Value),
+               defaultValue: TimeSpan.Zero,
+  defaultBindingMode: Avalonia.Data.BindingMode.TwoWay,
+         coerce: CoerceValue);
 
     public TimeSpan Value
     {
         get => GetValue(ValueProperty);
-        set
-        {
-            var oldValue = GetValue(ValueProperty);
-            var newValue = Clamp(value);
-
-            SetValue(ValueProperty, newValue);
-            UpdateText();
-
-            // Fire the event if the value actually changed
-            if (oldValue != newValue)
-            {
-                ValueChanged?.Invoke(this, newValue);
-            }
-        }
+        set => SetValue(ValueProperty, value);
     }
 
     public event EventHandler<TimeSpan>? ValueChanged;
@@ -47,6 +35,26 @@ public class SecondsUpDown : TemplatedControl
     public SecondsUpDown()
     {
         Template = CreateTemplate();
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+
+        if (change.Property == ValueProperty)
+        {
+  UpdateText();
+   
+      if (change.OldValue is TimeSpan oldValue && change.NewValue is TimeSpan newValue && oldValue != newValue)
+            {
+         ValueChanged?.Invoke(this, newValue);
+        }
+ }
+    }
+
+    private static TimeSpan CoerceValue(AvaloniaObject sender, TimeSpan value)
+    {
+        return Clamp(value);
     }
 
     private static FuncControlTemplate<SecondsUpDown> CreateTemplate()
@@ -154,38 +162,37 @@ public class SecondsUpDown : TemplatedControl
 
     private void ParseAndUpdate()
     {
-        if (_textBox == null)
+    if (_textBox == null)
         {
-            return;
+         return;
         }
 
         var parsed = ParseTime(_textBox.Text ?? string.Empty);
         if (parsed != Value)
         {
-            Value = parsed;
-            ValueChanged?.Invoke(this, parsed);
+    Value = parsed;
         }
-
-        UpdateText();
+        else
+     {
+            UpdateText();
+        }
     }
 
     private void ChangeValue(int delta)
     {
         var val = Value;
 
-        if (Se.Settings.General.UseFrameMode)
+    if (Se.Settings.General.UseFrameMode)
         {
             var ms = SubtitleFormat.FramesToMilliseconds(delta);
-            val = val.Add(TimeSpan.FromMilliseconds(ms));
+        val = val.Add(TimeSpan.FromMilliseconds(ms));
         }
         else
         {
             val = val.Add(TimeSpan.FromMilliseconds(10 * delta));
         }
 
-        Value = Clamp(val);
-        ValueChanged?.Invoke(this, Value);
-        UpdateText();
+        Value = val;
     }
 
     private void UpdateText()
@@ -210,21 +217,21 @@ public class SecondsUpDown : TemplatedControl
         {
             // Expect "seconds:frames"
             var parts = text.Split(':');
-            if (parts.Length == 2 &&
-                double.TryParse(parts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out var seconds) &&
+         if (parts.Length == 2 &&
+     double.TryParse(parts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out var seconds) &&
                 int.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out var frames))
-            {
-                var totalMs = seconds * 1000 + SubtitleFormat.FramesToMilliseconds(frames);
-                return TimeSpan.FromMilliseconds(totalMs);
+     {
+       var totalMs = seconds * 1000 + SubtitleFormat.FramesToMilliseconds(frames);
+    return TimeSpan.FromMilliseconds(totalMs);
             }
         }
         else
         {
-            // Expect "seconds.ms" or "seconds,ms"
+    // Expect "seconds.ms" or "seconds,ms"
             if (double.TryParse(text.Replace(',', '.') , NumberStyles.Float, CultureInfo.InvariantCulture, out var seconds))
-            {
-                return TimeSpan.FromSeconds(seconds);
-            }
+    {
+   return TimeSpan.FromSeconds(seconds);
+     }
         }
 
         return TimeSpan.Zero;
@@ -232,12 +239,12 @@ public class SecondsUpDown : TemplatedControl
 
     private static string FormatTime(TimeSpan ts)
     {
-        if (Se.Settings.General.UseFrameMode)
+     if (Se.Settings.General.UseFrameMode)
         {
-            var seconds = Math.Floor(ts.TotalSeconds);
-            var frames = SubtitleFormat.MillisecondsToFramesMaxFrameRate(ts.Milliseconds);
-            return $"{seconds:0}:{frames:00}";
-        }
+      var seconds = Math.Floor(ts.TotalSeconds);
+    var frames = SubtitleFormat.MillisecondsToFramesMaxFrameRate(ts.Milliseconds);
+         return $"{seconds:0}:{frames:00}";
+   }
 
         return ts.TotalSeconds.ToString("0.000");
     }
