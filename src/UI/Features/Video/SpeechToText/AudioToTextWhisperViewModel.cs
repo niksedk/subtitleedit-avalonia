@@ -1011,7 +1011,11 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             }
 
             var vm = await _windowService.ShowDialogAsync<DownloadWhisperModelsWindow, DownloadWhisperModelsViewModel>(
-                Window!, viewModel => { viewModel.SetModels(Models, SelectedEngine, SelectedModel); });
+                Window!, viewModel => 
+                { 
+                    viewModel.SetModels(Models, SelectedEngine, SelectedModel); 
+                    viewModel.StartDownload();
+                });
 
             RefreshDownloadStatus(vm.SelectedModel?.Model as WhisperModel);
 

@@ -257,7 +257,7 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
             var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
             var pctString = percentage.ToString(CultureInfo.InvariantCulture);
             ProgressValue = percentage;
-            ProgressText = $"Downloading... {pctString}%";
+            ProgressText = string.Format(Se.Language.General.DownloadingXPercent, pctString);
         });
     }
 
@@ -270,5 +270,11 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
     internal void OnKeyDown(KeyEventArgs e)
     {
         Cancel();
+    }
+
+    internal async void StartDownload()
+    {
+        await Task.Delay(200);
+        Download();
     }
 }
