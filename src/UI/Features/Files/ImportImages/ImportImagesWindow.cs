@@ -1,7 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
-using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -43,12 +42,10 @@ public class ImportImagesWindow : Window
 
         var labelFontsAndImages = UiUtil.MakeLabel(Se.Language.Assa.FontsAndGraphics);
 
-        var buttonAttach = UiUtil.MakeButton(Se.Language.General.AttachDotDotDot, vm.FileAttachCommand);
         var buttonImport = UiUtil.MakeButton(Se.Language.General.ImportDotDotDot, vm.FileImportCommand);
-        var buttonExport = UiUtil.MakeButton(Se.Language.General.ExportDotDotDot, vm.FileExportCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar(buttonAttach, buttonImport, buttonExport, buttonOk, buttonCancel);
+        var panelButtons = UiUtil.MakeButtonBar(buttonImport, buttonOk, buttonCancel);
 
         grid.Add(labelFontsAndImages, 0);
         grid.Add(MakeLeftView(vm), 1);
@@ -87,7 +84,7 @@ public class ImportImagesWindow : Window
             Width = double.NaN,
             Height = double.NaN,
             DataContext = vm,
-            ItemsSource = vm.Attachments,
+            ItemsSource = vm.Images,
             Columns =
             {
                 new DataGridTextColumn
@@ -131,7 +128,7 @@ public class ImportImagesWindow : Window
                 },
             },
         };
-        dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedAttachment)) { Source = vm });
+        dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedImage)) { Source = vm });
         dataGrid.SelectionChanged += vm.DataGridSelectionChanged;
         dataGrid.KeyDown += vm.AttachmentsDataGridKeyDown;
 

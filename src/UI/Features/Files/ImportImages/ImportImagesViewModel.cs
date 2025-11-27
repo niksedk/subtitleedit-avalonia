@@ -24,8 +24,8 @@ namespace Nikse.SubtitleEdit.Features.Files.ImportImages;
 public partial class ImportImagesViewModel : ObservableObject
 {
     [ObservableProperty] private string _title;
-    [ObservableProperty] private ObservableCollection<ImportImageItem> _attachments;
-    [ObservableProperty] private ImportImageItem? _selectedAttachment;
+    [ObservableProperty] private ObservableCollection<ImportImageItem> _images;
+    [ObservableProperty] private ImportImageItem? _selectedImage;
     [ObservableProperty] private string _previewTitle;
     [ObservableProperty] private Bitmap? _previewImage;
     [ObservableProperty] private bool _isDeleteVisible;
@@ -54,7 +54,7 @@ public partial class ImportImagesViewModel : ObservableObject
         _fileHelper = fileHelper;
 
         Title = string.Empty;
-        Attachments = new ObservableCollection<ImportImageItem>();
+        Images = new ObservableCollection<ImportImageItem>();
         PreviewTitle = string.Empty;
         _fileName = string.Empty;
         Header = string.Empty;
@@ -76,21 +76,6 @@ public partial class ImportImagesViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task FileAttach()
-    {
-        var fileNames = await _fileHelper.PickOpenFiles(Window!, "Select attachment", "True type font", ["*.ttf"], Se.Language.Assa.Graphics, _imageExtensions);
-
-        foreach (var fileName in fileNames)
-        {
-            var attachmentFileName = Path.GetFileName(fileName);
-            var attachment = new ImportImageItem(fileName);
-            var ext = Path.GetExtension(attachmentFileName)?.ToLowerInvariant();
-            Attachments.Add(attachment);
-            SelectedAttachment = attachment;
-        }
-    }
-
-    [RelayCommand]
     private async Task FileImport()
     {
         if (Window == null)
@@ -98,59 +83,27 @@ public partial class ImportImagesViewModel : ObservableObject
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenFile(Window, "Select import file", "Advanced Sub Station Alpha files", "*.ass");
-        if (string.IsNullOrEmpty(fileName))
+        var fileNames = await _fileHelper.PickOpenFiles(Window, Se.Language.General.ChooseImageFiles, Se.Language.General.Images, _imageExtensions, string.Empty, new List<string>());
+        if (fileNames.Length == 0)
         {
             return;
         }
 
-        var subtitle = Subtitle.Parse(fileName, new AdvancedSubStationAlpha());
-        var attachments = ListAttachments(subtitle.Footer.SplitToLines() ?? []);
-        if (attachments.Count == 0)
+        foreach (var fileName in fileNames)
         {
-            await MessageBox.Show(Window, Se.Language.General.Error, Se.Language.Assa.NoAttachmentsFound, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            return;
+            var importImageItem = new ImportImageItem(fileName);
+            Images.Add(importImageItem);
         }
-
-        Attachments.AddRange(attachments);
-        if (Attachments.Count > 0 && SelectedAttachment == null)
+        if (Images.Count > 0)
         {
-            SelectedAttachment = Attachments.First();
-        }
-    }
-
-    [RelayCommand]
-    private async Task FileExport()
-    {
-        var selected = SelectedAttachment;
-        if (Window == null || selected == null)
-        {
-            return;
-        }
-
-        var ext = Path.GetExtension(selected.FileName);
-        var suggestedFileName = Path.GetFileName(selected.FileName);
-        var fileName = await _fileHelper.PickSaveFile(Window, ext, suggestedFileName, "Export attachment");
-        if (string.IsNullOrEmpty(fileName))
-        {
-            return;
-        }
-
-        var bytes = selected.Bytes;
-        try
-        {
-            File.WriteAllBytes(fileName, bytes);
-        }
-        catch (Exception exception)
-        {
-            await MessageBox.Show(Window, exception.Message, Se.Language.General.Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            SelectedImage = Images.First();
         }
     }
 
     [RelayCommand]
     private void AttachmentRemove()
     {
-        var selectedStyle = SelectedAttachment;
+        var selectedStyle = SelectedImage;
         if (selectedStyle == null)
         {
             return;
@@ -172,16 +125,16 @@ public partial class ImportImagesViewModel : ObservableObject
 
             if (selectedStyle != null)
             {
-                var idx = Attachments.IndexOf(selectedStyle);
-                Attachments.Remove(selectedStyle);
-                SelectedAttachment = null;
-                if (Attachments.Count > 0)
+                var idx = Images.IndexOf(selectedStyle);
+                Images.Remove(selectedStyle);
+                SelectedImage = null;
+                if (Images.Count > 0)
                 {
-                    if (idx >= Attachments.Count)
+                    if (idx >= Images.Count)
                     {
-                        idx = Attachments.Count - 1;
+                        idx = Images.Count - 1;
                     }
-                    SelectedAttachment = Attachments[idx];
+                    SelectedImage = Images[idx];
                 }
             }
         });
@@ -190,7 +143,7 @@ public partial class ImportImagesViewModel : ObservableObject
     [RelayCommand]
     private void AttachemntsRemoveAll()
     {
-        Attachments.Clear();
+        Images.Clear();
     }
 
 
@@ -204,36 +157,6 @@ public partial class ImportImagesViewModel : ObservableObject
 
     public void Initialize(Subtitle subtitle, SubtitleFormat format, string fileName)
     {
-        Title = string.Format(Se.Language.Assa.AttachmentsTitleX, fileName);
-        Header = subtitle.Header;
-        Footer = subtitle.Footer ?? string.Empty;
-        _subtitle = subtitle;
-
-        if (Header != null && Header.Contains("http://www.w3.org/ns/ttml"))
-        {
-            var s = new Subtitle { Header = Header };
-            AdvancedSubStationAlpha.LoadStylesFromTimedText10(s, string.Empty, Header, AdvancedSubStationAlpha.HeaderNoStyles, new StringBuilder());
-            Header = s.Header;
-        }
-        else if (Header != null && Header.StartsWith("WEBVTT", StringComparison.Ordinal))
-        {
-            _subtitle = WebVttToAssa.Convert(subtitle, new SsaStyle(), 0, 0);
-            Header = _subtitle.Header;
-        }
-
-        if (Header == null || !Header.Contains("style:", StringComparison.OrdinalIgnoreCase))
-        {
-            ResetHeader();
-        }
-
-        Attachments.AddRange(ListAttachments(Footer.SplitToLines() ?? []));
-
-        if (Attachments.Count > 0)
-        {
-            SelectedAttachment = Attachments[0];
-        }
-
-        UpdatePreview();
     }
 
     private List<ImportImageItem> ListAttachments(List<string> lines)
@@ -333,7 +256,7 @@ public partial class ImportImagesViewModel : ObservableObject
 
     private void UpdatePreview()
     {
-        var selectedItem = SelectedAttachment;
+        var selectedItem = SelectedImage;
         if (selectedItem == null)
         {
             PreviewImage = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
@@ -344,7 +267,7 @@ public partial class ImportImagesViewModel : ObservableObject
     private void ShowImage(byte[] bytes)
     {
         using var skBitmap = SKBitmap.Decode(bytes);
-        PreviewTitle = $"{Se.Language.General.Image}: {SelectedAttachment?.FileName ?? "untitled"}, {skBitmap.Width}x{skBitmap.Height}";
+        PreviewTitle = $"{Se.Language.General.Image}: {SelectedImage?.FileName ?? "untitled"}, {skBitmap.Width}x{skBitmap.Height}";
         PreviewImage?.Dispose();
         PreviewImage = skBitmap.ToAvaloniaBitmap();
     }
@@ -423,13 +346,13 @@ public partial class ImportImagesViewModel : ObservableObject
 
     internal void AttachmentsContextMenuOpening(object? sender, EventArgs e)
     {
-        IsDeleteAllVisible = Attachments.Count > 0;
-        IsDeleteVisible = SelectedAttachment != null;
+        IsDeleteAllVisible = Images.Count > 0;
+        IsDeleteVisible = SelectedImage != null;
     }
 
     internal void AttachmentsDataGridKeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Delete && SelectedAttachment != null)
+        if (e.Key == Key.Delete && SelectedImage != null)
         {
             AttachmentRemove();
             e.Handled = true;

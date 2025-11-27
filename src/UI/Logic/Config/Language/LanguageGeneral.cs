@@ -540,6 +540,7 @@ public class LanguageGeneral
     public string XRequiresAnApiKey { get; set; }
     public string XSeconds { get; set; }
     public string Yes { get; set; }
+    public string ChooseImageFiles { get; set; }
 
     public LanguageGeneral()
     {
@@ -1081,5 +1082,6 @@ public class LanguageGeneral
         XRequiresAnApiKey = "{0} requires an API key";
         XSeconds = "{0:0.0##} seconds";
         Yes = "Yes";
+        ChooseImageFiles = "Choose image files";
     }
 }

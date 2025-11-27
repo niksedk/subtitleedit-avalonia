@@ -116,7 +116,7 @@ public static class InitMenu
                         new MenuItem
                         {
                             Header = Se.Language.File.Import.ImagesDotDotDot,
-                            Command = vm.ImportTimeCodesCommand,
+                            Command = vm.ImportImagesCommand,
                         },
                         new MenuItem
                         {
