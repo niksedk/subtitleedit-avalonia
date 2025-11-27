@@ -50,8 +50,28 @@ Because *Subtitle Edit* is not signed with an Apple developer certificate, macOS
    ````
 
 ### Linux
-- Requires **libmpv** (install via package manager, e.g. `sudo apt install mpv libmpv-dev`)
-- Requires **ffmpeg** (e.g. `sudo apt install ffmpeg`)
+Requires mpv and ffmpeg (ffmpeg is normally already installed) to enable video functionality.
+
+#### Debian/Ubuntu
+```bash
+sudo apt update
+sudo apt install mpv libmpv-dev ffmpeg
+```
+
+#### Arch
+```bash
+sudo pacman -S mpv ffmpeg
+```
+
+#### Fedora
+```bash
+sudo dnf install mpv ffmpeg
+```
+
+#### openSUSE
+```bash
+sudo zypper install mpv ffmpeg
+```
 
 > ⚙️ Note: The provided builds are self-contained and do not require a separate .NET installation.
 
