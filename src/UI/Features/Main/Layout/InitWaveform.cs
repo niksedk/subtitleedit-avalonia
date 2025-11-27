@@ -309,7 +309,7 @@ public class InitWaveform
             if (vm.AudioVisualizer != null && comboBoxSpeed.SelectedItem is string s1 && s1.EndsWith("x") &&
                 double.TryParse(s1.Trim('x'), NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out double speed))
             {
-                vm.VideoPlayerControl?.SetSpeed(speed);
+                vm.GetVideoPlayerControl()?.SetSpeed(speed);
             }
         };
         var panelSpeed = new StackPanel

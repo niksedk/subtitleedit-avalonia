@@ -43,7 +43,7 @@ public partial class AudioVisualizerUndockedViewModel : ObservableObject
 
     internal void OnKeyDown(object? sender, KeyEventArgs e)
     {
-        var videoPlayer = MainViewModel?.VideoPlayerControl;
+        var videoPlayer = MainViewModel?.GetVideoPlayerControl();
 
         if (videoPlayer != null)
         {

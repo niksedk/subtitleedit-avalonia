@@ -512,18 +512,13 @@ public partial class MainViewModel :
             }
 
             Se.Settings.General.LayoutNumber = InitLayout.MakeLayout(MainView!, this, vm.SelectedLayout.Value);
-
-            if (OperatingSystem.IsMacOS() && !string.IsNullOrEmpty(_videoFileName) && VideoPlayerControl != null)
-            {
-                VideoPlayerControl.Reload();
-            }
         }
     }
 
     [RelayCommand]
     private void TogglePlayPause()
     {
-        var control = VideoPlayerControl;
+        var control = GetVideoPlayerControl();
         if (control == null)
         {
             return;
@@ -541,7 +536,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private void ToggleAudioTracks()
     {
-        var control = VideoPlayerControl;
+        var control = GetVideoPlayerControl();
         if (control == null)
         {
             return;
@@ -1534,7 +1529,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowWaveformSeekSilence()
     {
-        if (Window == null || AudioVisualizer?.WavePeaks == null || VideoPlayerControl == null)
+        var vp = GetVideoPlayerControl();
+        if (Window == null || AudioVisualizer?.WavePeaks == null || vp == null)
         {
             return;
         }
@@ -1547,7 +1543,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var seconds = VideoPlayerControl.Position;
+        var seconds = vp.Position;
         if (result.SeekForward)
         {
             seconds = AudioVisualizer.FindDataBelowThreshold(result.SilenceMaxVolume.Value, result.SilenceMinDuration.Value);
@@ -1559,14 +1555,15 @@ public partial class MainViewModel :
 
         if (seconds >= 0)
         {
-            VideoPlayerControl.Position = seconds;
+            vp.Position = seconds;
         }
     }
 
     [RelayCommand]
     private async Task ShowWaveformGuessTimeCodes()
     {
-        if (Window == null || AudioVisualizer?.WavePeaks == null || VideoPlayerControl == null)
+        var vp = GetVideoPlayerControl();
+        if (Window == null || AudioVisualizer?.WavePeaks == null || vp == null)
         {
             return;
         }
@@ -1586,7 +1583,7 @@ public partial class MainViewModel :
         double startFromSeconds = 0;
         if (result.StartFromVideoPosition)
         {
-            startFromSeconds = VideoPlayerControl.Position;
+            startFromSeconds = vp.Position;
         }
 
         if (result.DeleteLinesAll)
@@ -1595,7 +1592,7 @@ public partial class MainViewModel :
         }
         else if (result.DeleteLinesFromVideoPosition)
         {
-            var subsToKeep = Subtitles.Where(p => p.StartTime.TotalSeconds >= VideoPlayerControl.Position).ToList();
+            var subsToKeep = Subtitles.Where(p => p.StartTime.TotalSeconds >= vp.Position).ToList();
             _subtitle.Paragraphs.Clear();
             _subtitle.Paragraphs.AddRange(subsToKeep.Select(p => p.ToParagraph()));
         }
@@ -1608,15 +1605,15 @@ public partial class MainViewModel :
     [RelayCommand]
     private void DoWaveformCenter()
     {
-        if (Window == null || AudioVisualizer?.WavePeaks == null || VideoPlayerControl == null)
+        var vp = GetVideoPlayerControl();
+        if (Window == null || AudioVisualizer?.WavePeaks == null || vp == null)
         {
             return;
         }
 
-        AudioVisualizer.CenterOnPosition(VideoPlayerControl.Position);
+        AudioVisualizer.CenterOnPosition(vp.Position);
         _updateAudioVisualizer = true;
     }
-
 
     [RelayCommand]
     private async Task ShowPickLayerFilter()
@@ -2674,17 +2671,18 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowGoToVideoPosition()
     {
-        if (Subtitles.Count == 0 || string.IsNullOrEmpty(_videoFileName) || VideoPlayerControl == null || Window == null)
+        var vp = GetVideoPlayerControl();
+        if (Subtitles.Count == 0 || string.IsNullOrEmpty(_videoFileName) || vp == null || Window == null)
         {
             return;
         }
 
         var viewModel =
-            await ShowDialogAsync<GoToVideoPositionWindow, GoToVideoPositionViewModel>(vm => { vm.Time = TimeSpan.FromSeconds(VideoPlayerControl.Position); });
+            await ShowDialogAsync<GoToVideoPositionWindow, GoToVideoPositionViewModel>(vm => { vm.Time = TimeSpan.FromSeconds(vp.Position); });
 
         if (viewModel is { OkPressed: true, Time.TotalMicroseconds: >= 0 })
         {
-            VideoPlayerControl.Position = viewModel.Time.TotalSeconds;
+            vp.Position = viewModel.Time.TotalSeconds;
             _updateAudioVisualizer = true;
         }
     }
@@ -2698,7 +2696,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private void VideoUndockControls()
     {
-        if (Window == null || VideoPlayerControl == null)
+        var vp = GetVideoPlayerControl();
+        if (Window == null || vp == null)
         {
             return;
         }
@@ -2706,12 +2705,12 @@ public partial class MainViewModel :
         Dispatcher.UIThread.Post(async () =>
         {
             AreVideoControlsUndocked = true;
-            await VideoPlayerControl.WaitForPlayersReadyAsync();
+            await vp.WaitForPlayersReadyAsync();
 
             _windowService.ShowWindow<VideoPlayerUndockedWindow, VideoPlayerUndockedViewModel>(Window, (window, vm) =>
             {
                 _videoPlayerUndockedViewModel = vm;
-                vm.Initialize(VideoPlayerControl!, this);
+                vm.Initialize(vp, this);
             });
 
             _windowService.ShowWindow<AudioVisualizerUndockedWindow, AudioVisualizerUndockedViewModel>(Window, (window, vm) =>
@@ -2730,7 +2729,6 @@ public partial class MainViewModel :
         AreVideoControlsUndocked = false;
         var videoFileName = _videoFileName ?? string.Empty;
         VideoCloseFile();
-        VideoPlayerControl = InitVideoPlayer.MakeVideoPlayer();
 
         if (_videoPlayerUndockedViewModel != null)
         {
@@ -2958,9 +2956,10 @@ public partial class MainViewModel :
             var offset = result.TimeOffset.Value;
             if (result.RelativeToCurrentVideoPosition)
             {
-                if (VideoPlayerControl != null)
+                var vp = GetVideoPlayerControl();
+                if (vp != null)
                 {
-                    offset = offset + TimeSpan.FromSeconds(VideoPlayerControl.Position);
+                    offset = offset + TimeSpan.FromSeconds(vp.Position);
                 }
             }
 
@@ -3035,7 +3034,8 @@ public partial class MainViewModel :
             return;
         }
 
-        if (string.IsNullOrEmpty(_videoFileName) || VideoPlayerControl == null || AudioVisualizer == null)
+        var vp = GetVideoPlayerControl();
+        if (string.IsNullOrEmpty(_videoFileName) || vp == null || AudioVisualizer == null)
         {
             return;
         }
@@ -3062,7 +3062,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowShotChangesList()
     {
-        if (Window == null)
+        var vp = GetVideoPlayerControl();
+        if (Window == null || vp == null)
         {
             return;
         }
@@ -3082,7 +3083,7 @@ public partial class MainViewModel :
 
         if (result.GoToPressed && result.SelectedShotChange != null)
         {
-            VideoPlayerControl!.Position = result.SelectedShotChange.Seconds;
+            vp.Position = result.SelectedShotChange.Seconds;
         }
 
         ShowShotChangesListMenuItem = AudioVisualizer?.ShotChanges.Count > 0;
@@ -3092,7 +3093,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private void ToggleShotChangesAtVideoPosition()
     {
-        if (string.IsNullOrEmpty(_videoFileName) || VideoPlayerControl == null || AudioVisualizer == null)
+        var vp = GetVideoPlayerControl();
+        if (string.IsNullOrEmpty(_videoFileName) || vp == null || AudioVisualizer == null)
         {
             return;
         }
@@ -3694,7 +3696,7 @@ public partial class MainViewModel :
         }
     }
 
-    private VideoPlayerControl? GetVideoPlayerControl()
+    public VideoPlayerControl? GetVideoPlayerControl()
     {
         if (_fullScreenVideoPlayerControl != null)
         {
@@ -4871,7 +4873,7 @@ public partial class MainViewModel :
 
     [RelayCommand]
     private async Task ShowGoToLine()
-    {
+    {        
         if (Subtitles.Count == 0)
         {
             return;
@@ -4892,12 +4894,13 @@ public partial class MainViewModel :
         {
             var no = (int)viewModel.LineNumber;
             SelectAndScrollToRow(no - 1);
-            if (Se.Settings.Tools.GoToLineNumberAlsoSetVideoPosition && !string.IsNullOrEmpty(_videoFileName) && VideoPlayerControl != null)
+            var vp = GetVideoPlayerControl();
+            if (Se.Settings.Tools.GoToLineNumberAlsoSetVideoPosition && !string.IsNullOrEmpty(_videoFileName) && vp != null)
             {
                 var s = Subtitles.GetOrNull(no - 1);
                 if (s != null)
                 {
-                    VideoPlayerControl.Position = s.StartTime.TotalSeconds;
+                    vp.Position = s.StartTime.TotalSeconds;
                     _updateAudioVisualizer = true;
                 }
             }
@@ -5076,7 +5079,7 @@ public partial class MainViewModel :
 
             var selectedSubtitle = SelectedSubtitle;
             _repeatSubtitle = null;
-            var vp = VideoPlayerControl;
+            var vp = GetVideoPlayerControl();
             if (selectedSubtitle == null || vp == null || string.IsNullOrEmpty(_videoFileName))
             {
                 IsRepeatOn = false;
@@ -5112,7 +5115,7 @@ public partial class MainViewModel :
             _ignoreRepeatToggleCommand = true;
 
             var idx = SelectedSubtitleIndex ?? -1;
-            var vp = VideoPlayerControl;
+            var vp = GetVideoPlayerControl();
             _repeatSubtitle = null;
             if (Subtitles.Count == 0 || idx <= 0 || idx >= Subtitles.Count || vp == null || string.IsNullOrEmpty(_videoFileName))
             {
@@ -5167,7 +5170,7 @@ public partial class MainViewModel :
             _ignoreRepeatToggleCommand = true;
 
             var idx = SelectedSubtitleIndex ?? -1;
-            var vp = VideoPlayerControl;
+            var vp = GetVideoPlayerControl();
             _repeatSubtitle = null;
             if (Subtitles.Count == 0 || idx < 0 || idx >= Subtitles.Count || vp == null || string.IsNullOrEmpty(_videoFileName))
             {
@@ -5244,10 +5247,11 @@ public partial class MainViewModel :
     private void GoToNextLineAndSetVideoPosition()
     {
         var idx = SelectedSubtitleIndex ?? -1;
+        var vp = GetVideoPlayerControl();
         if (Subtitles.Count == 0 ||
             idx < 0 || idx - 2 >= Subtitles.Count ||
             string.IsNullOrEmpty(_videoFileName) ||
-            VideoPlayerControl == null)
+            vp == null)
         {
             return;
         }
@@ -5259,17 +5263,18 @@ public partial class MainViewModel :
         }
 
         SelectAndScrollToRow(idx);
-        VideoPlayerControl.Position = Subtitles[idx].StartTime.TotalSeconds;
+        vp.Position = Subtitles[idx].StartTime.TotalSeconds;
     }
 
     [RelayCommand]
     private void GoToPreviousLineAndSetVideoPosition()
     {
+        var vp = GetVideoPlayerControl();
         var idx = SelectedSubtitleIndex ?? -1;
         if (Subtitles.Count == 0 ||
             idx <= 0 || idx >= Subtitles.Count ||
             string.IsNullOrEmpty(_videoFileName) ||
-            VideoPlayerControl == null)
+            vp == null)
         {
             return;
         }
@@ -5280,14 +5285,14 @@ public partial class MainViewModel :
             return;
         }
 
-        VideoPlayerControl.Position = Subtitles[idx].StartTime.TotalSeconds;
+        vp.Position = Subtitles[idx].StartTime.TotalSeconds;
         SelectAndScrollToRow(idx);
     }
 
     [RelayCommand]
     private void VideoFullScreen()
     {
-        var control = VideoPlayerControl;
+        var control = GetVideoPlayerControl();
         if (control == null || control.IsFullScreen || string.IsNullOrEmpty(_videoFileName))
         {
             return;
@@ -5302,8 +5307,8 @@ public partial class MainViewModel :
         _fullScreenVideoPlayerControl.IsFullScreen = true;
         var fullScreenWindow = new FullScreenVideoWindow(_fullScreenVideoPlayerControl, _videoFileName, _subtitleFileName ?? string.Empty, position, volume, () =>
         {
-            VideoPlayerControl!.Position = _fullScreenVideoPlayerControl.Position;
-            VideoPlayerControl!.Volume = _fullScreenVideoPlayerControl.Volume;
+            control!.Position = _fullScreenVideoPlayerControl.Position;
+            control!.Volume = _fullScreenVideoPlayerControl.Volume;
             _fullScreenVideoPlayerControl = null;
         });
         fullScreenWindow.Show(Window!);
@@ -5322,9 +5327,10 @@ public partial class MainViewModel :
     {
         Se.Settings.Video.VideoPlayerDisplayTimeLeft = !Se.Settings.Video.VideoPlayerDisplayTimeLeft;
 
-        if (VideoPlayerControl != null)
+        var vp = GetVideoPlayerControl();
+        if (vp != null)
         {
-            VideoPlayerControl.VideoPlayerDisplayTimeLeft = Se.Settings.Video.VideoPlayerDisplayTimeLeft;
+            vp.VideoPlayerDisplayTimeLeft = Se.Settings.Video.VideoPlayerDisplayTimeLeft;
         }
     }
 
@@ -5548,12 +5554,13 @@ public partial class MainViewModel :
     private void VideoSetPositionCurrentSubtitleStart()
     {
         var s = SelectedSubtitle;
-        if (s == null || VideoPlayerControl == null)
+        var vp = GetVideoPlayerControl();
+        if (s == null || vp == null)
         {
             return;
         }
 
-        VideoPlayerControl.Position = s.StartTime.TotalSeconds;
+        vp.Position = s.StartTime.TotalSeconds;
         _updateAudioVisualizer = true;
     }
 
@@ -5561,19 +5568,21 @@ public partial class MainViewModel :
     private void VideoSetPositionCurrentSubtitleEnd()
     {
         var s = SelectedSubtitle;
-        if (s == null || VideoPlayerControl == null)
+        var vp = GetVideoPlayerControl();
+        if (s == null || vp == null)
         {
             return;
         }
 
-        VideoPlayerControl.Position = s.EndTime.TotalSeconds;
+        vp.Position = s.EndTime.TotalSeconds;
         _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
     private void WaveformInsertNewSelection()
     {
-        if (VideoPlayerControl == null ||
+        var vp = GetVideoPlayerControl();
+        if (vp == null ||
             AudioVisualizer == null ||
             AudioVisualizer.NewSelectionParagraph == null)
         {
@@ -5591,14 +5600,15 @@ public partial class MainViewModel :
     [RelayCommand]
     private void WaveformInsertAtPosition()
     {
-        if (VideoPlayerControl == null ||
+        var vp = GetVideoPlayerControl();
+        if (vp == null ||
             AudioVisualizer == null ||
             AudioVisualizer.NewSelectionParagraph == null)
         {
             return;
         }
 
-        var startMs = VideoPlayerControl.Position * 1000.0;
+        var startMs = vp.Position * 1000.0;
         var endMs = startMs + Se.Settings.General.NewEmptyDefaultMs;
         var newParagraph =
             new SubtitleLineViewModel(new Paragraph(string.Empty, startMs, endMs), SelectedSubtitleFormat);
@@ -5622,13 +5632,13 @@ public partial class MainViewModel :
     [RelayCommand]
     private void WaveformDeleteAtPosition()
     {
-        if (VideoPlayerControl == null ||
-            AudioVisualizer == null)
+        var vp = GetVideoPlayerControl();
+        if (vp == null || AudioVisualizer == null)
         {
             return;
         }
 
-        var pos = VideoPlayerControl.Position;
+        var pos = vp.Position;
         var subtitlesAtPosition = Subtitles
             .Where(p =>
                 p.StartTime.TotalSeconds < pos &&
@@ -5648,12 +5658,13 @@ public partial class MainViewModel :
     private void WaveformSetStartAndOffsetTheRest()
     {
         var s = SelectedSubtitle;
-        if (s == null || VideoPlayerControl == null || LockTimeCodes)
+        var vp = GetVideoPlayerControl();
+        if (s == null || vp == null || LockTimeCodes)
         {
             return;
         }
 
-        var videoPositionSeconds = VideoPlayerControl.Position;
+        var videoPositionSeconds = vp.Position;
         var index = Subtitles.IndexOf(s);
         if (index < 0 || index >= Subtitles.Count)
         {
@@ -5679,12 +5690,13 @@ public partial class MainViewModel :
     private void WaveformSetStart()
     {
         var s = SelectedSubtitle;
-        if (s == null || VideoPlayerControl == null || LockTimeCodes)
+        var vp = GetVideoPlayerControl();
+        if (s == null || vp == null || LockTimeCodes)
         {
             return;
         }
 
-        var videoPositionSeconds = VideoPlayerControl.Position;
+        var videoPositionSeconds = vp.Position;
         var gap = Se.Settings.General.MinimumMillisecondsBetweenLines / 1000.0;
         if (videoPositionSeconds >= s.EndTime.TotalSeconds - gap)
         {
@@ -5699,12 +5711,13 @@ public partial class MainViewModel :
     private void WaveformSetEnd()
     {
         var s = SelectedSubtitle;
-        if (s == null || VideoPlayerControl == null || LockTimeCodes)
+        var vp = GetVideoPlayerControl();
+        if (s == null || vp == null || LockTimeCodes)
         {
             return;
         }
 
-        var videoPositionSeconds = VideoPlayerControl.Position;
+        var videoPositionSeconds = vp.Position;
         var gap = Se.Settings.General.MinimumMillisecondsBetweenLines / 1000.0;
         if (videoPositionSeconds < s.StartTime.TotalSeconds + gap)
         {
@@ -5719,7 +5732,8 @@ public partial class MainViewModel :
     private void WaveformSetEndAndGoToNext()
     {
         var s = SelectedSubtitle;
-        if (s == null || VideoPlayerControl == null || LockTimeCodes)
+        var vp = GetVideoPlayerControl();
+        if (s == null || vp == null || LockTimeCodes)
         {
             return;
         }
@@ -5730,7 +5744,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var videoPositionSeconds = VideoPlayerControl.Position;
+        var videoPositionSeconds = vp.Position;
         var gap = Se.Settings.General.MinimumMillisecondsBetweenLines / 1000.0;
         if (videoPositionSeconds < s.StartTime.TotalSeconds + gap)
         {
@@ -5749,7 +5763,8 @@ public partial class MainViewModel :
     private void WaveformSetEndAndStartOfNextAfterGap()
     {
         var s = SelectedSubtitle;
-        if (s == null || AudioVisualizer?.WavePeaks == null || VideoPlayerControl == null || LockTimeCodes)
+        var vp = GetVideoPlayerControl();
+        if (s == null || AudioVisualizer?.WavePeaks == null || vp == null || LockTimeCodes)
         {
             return;
         }
@@ -5761,7 +5776,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var videoPositionSeconds = VideoPlayerControl.Position;
+        var videoPositionSeconds = vp.Position;
         var gapMs = Se.Settings.General.MinimumMillisecondsBetweenLines;
         if (videoPositionSeconds < s.StartTime.TotalSeconds + 0.001)
         {
@@ -5779,7 +5794,8 @@ public partial class MainViewModel :
     private void WaveformSetEndAndStartOfNextAfterGapAndGoToNext()
     {
         var s = SelectedSubtitle;
-        if (s == null || AudioVisualizer?.WavePeaks == null || VideoPlayerControl == null || LockTimeCodes)
+        var vp = GetVideoPlayerControl();
+        if (s == null || AudioVisualizer?.WavePeaks == null || vp == null || LockTimeCodes)
         {
             return;
         }
@@ -5791,7 +5807,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var videoPositionSeconds = VideoPlayerControl.Position;
+        var videoPositionSeconds = vp.Position;
         var gapMs = Se.Settings.General.MinimumMillisecondsBetweenLines;
         if (videoPositionSeconds < s.StartTime.TotalSeconds + 0.001)
         {
@@ -5811,7 +5827,8 @@ public partial class MainViewModel :
     private void WaveformSetStartAndSetEndOfPreviousMinusGap()
     {
         var s = SelectedSubtitle;
-        if (s == null || AudioVisualizer?.WavePeaks == null || VideoPlayerControl == null || LockTimeCodes)
+        var vp = GetVideoPlayerControl();
+        if (s == null || AudioVisualizer?.WavePeaks == null || vp == null || LockTimeCodes)
         {
             return;
         }
@@ -5823,7 +5840,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var videoPositionSeconds = VideoPlayerControl.Position;
+        var videoPositionSeconds = vp.Position;
         var gapMs = Se.Settings.General.MinimumMillisecondsBetweenLines;
         if (videoPositionSeconds > s.EndTime.TotalSeconds - 0.001)
         {
@@ -5848,12 +5865,13 @@ public partial class MainViewModel :
     [RelayCommand]
     private void ResetWaveformZoomAndSpeed()
     {
-        if (AudioVisualizer == null || VideoPlayerControl == null)
+        var vp = GetVideoPlayerControl();
+        if (AudioVisualizer == null || vp == null)
         {
             return;
         }
 
-        VideoPlayerControl.SetSpeed(1.0);
+        vp.SetSpeed(1.0);
         SelectedSpeed = Speeds.FirstOrDefault(p => p == "1.0x") ?? Speeds[2];
         AudioVisualizer.ZoomFactor = 1.0;
         AudioVisualizer.VerticalZoomFactor = 1.0;
@@ -5862,7 +5880,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private void TogglePlaybackSpeed()
     {
-        if (AudioVisualizer == null || VideoPlayerControl == null)
+        var vp = GetVideoPlayerControl();
+        if (AudioVisualizer == null || vp == null)
         {
             return;
         }
@@ -6349,7 +6368,7 @@ public partial class MainViewModel :
         where TWindow : Window
         where TViewModel : class
     {
-        VideoPlayerControl?.VideoPlayerInstance.Pause();
+        GetVideoPlayerControl()?.VideoPlayerInstance.Pause();
         var result = await _windowService.ShowDialogAsync<TWindow, TViewModel>(Window!, configureViewModel, configureWindow);
         _shortcutManager.ClearKeys();
         return result;
@@ -6358,18 +6377,19 @@ public partial class MainViewModel :
     private void SplitSelectedLine(bool atVideoPosition, bool atTextBoxPosition)
     {
         var s = SelectedSubtitle;
-        if (s == null || VideoPlayerControl == null || EditTextBox == null)
+        var vp = GetVideoPlayerControl();
+        if (s == null || vp == null || EditTextBox == null)
         {
             return;
         }
 
         if (atTextBoxPosition && atTextBoxPosition)
         {
-            _splitManager.Split(Subtitles, s, VideoPlayerControl.Position, EditTextBox.SelectionStart);
+            _splitManager.Split(Subtitles, s, vp.Position, EditTextBox.SelectionStart);
         }
         else if (atVideoPosition)
         {
-            _splitManager.Split(Subtitles, s, VideoPlayerControl.Position);
+            _splitManager.Split(Subtitles, s, vp.Position);
         }
         else if (atTextBoxPosition)
         {
@@ -6383,23 +6403,24 @@ public partial class MainViewModel :
 
     private void MoveVideoPositionMs(int ms)
     {
-        if (VideoPlayerControl == null || string.IsNullOrEmpty(_videoFileName))
+        var vp = GetVideoPlayerControl();
+        if (vp == null || string.IsNullOrEmpty(_videoFileName))
         {
             return;
         }
 
-        var newPosition = VideoPlayerControl.Position + (ms / 1000.0);
+        var newPosition = vp.Position + (ms / 1000.0);
         if (newPosition < 0)
         {
             newPosition = 0;
         }
 
-        if (newPosition > VideoPlayerControl.Duration)
+        if (newPosition > vp.Duration)
         {
-            newPosition = VideoPlayerControl.Duration;
+            newPosition = vp.Duration;
         }
 
-        VideoPlayerControl.Position = newPosition;
+        vp.Position = newPosition;
     }
 
     private async Task<bool> RequireFfmpegOk()
@@ -8203,7 +8224,7 @@ public partial class MainViewModel :
             _audioVisualizerUndockedViewModel.Window?.Close();
         }
 
-        VideoPlayerControl?.VideoPlayerInstance.CloseFile();
+        GetVideoPlayerControl()?.VideoPlayerInstance.CloseFile();
 
         _ = Task.Run(_autoBackupService.CleanAutoBackupFolder);
     }
@@ -8283,12 +8304,13 @@ public partial class MainViewModel :
                     try
                     {
                         await SubtitleOpen(first.SubtitleFileName, first.VideoFileName, first.SelectedLine);
-                        if (!string.IsNullOrEmpty(_videoFileName) && SelectedSubtitle != null && VideoPlayerControl != null)
+                        var vp = GetVideoPlayerControl();
+                        if (!string.IsNullOrEmpty(_videoFileName) && SelectedSubtitle != null && vp != null)
                         {
-                            await VideoPlayerControl.WaitForPlayersReadyAsync();
+                            await vp.WaitForPlayersReadyAsync();
                             await Task.Delay(200);
-                            VideoPlayerControl.Position = SelectedSubtitle.StartTime.TotalSeconds;
-                            Dispatcher.UIThread.Post(() => { VideoPlayerControl.Position = SelectedSubtitle.StartTime.TotalSeconds; });
+                            vp.Position = SelectedSubtitle.StartTime.TotalSeconds;
+                            Dispatcher.UIThread.Post(() => { vp.Position = SelectedSubtitle.StartTime.TotalSeconds; });
                         }
                     }
                     catch (Exception e)
@@ -8363,13 +8385,14 @@ public partial class MainViewModel :
 
     private async Task VideoOpenFile(string videoFileName) // OpenVideoFile
     {
-        if (VideoPlayerControl == null)
+        var vp = GetVideoPlayerControl();
+        if (vp == null)
         {
             return;
         }
 
         _videoOpenTokenSource?.Cancel();
-        await VideoPlayerControl.Open(videoFileName);
+        await vp.Open(videoFileName);
         _mpvReloader.Reset();
 
         if (IsValidUrl(videoFileName))
@@ -8417,18 +8440,19 @@ public partial class MainViewModel :
 
     private async Task AddEmptyWaveform()
     {
-        if (VideoPlayerControl == null || AudioVisualizer == null)
+        var vp = GetVideoPlayerControl();
+        if (vp == null || AudioVisualizer == null)
         {
             return;
         }
 
-        await VideoPlayerControl.WaitForPlayersReadyAsync(10_000);
-        if (VideoPlayerControl.VideoPlayerInstance.Duration > 0)
+        await vp.WaitForPlayersReadyAsync(10_000);
+        if (vp.VideoPlayerInstance.Duration > 0)
         {
             var peakWaveFileName = WavePeakGenerator.GetPeakWaveFileName(_videoFileName);
             AudioVisualizer.ZoomFactor = 1.0;
             AudioVisualizer.VerticalZoomFactor = 1.0;
-            AudioVisualizer.WavePeaks = WavePeakGenerator2.GenerateEmptyPeaks(peakWaveFileName, (int)VideoPlayerControl.VideoPlayerInstance.Duration);
+            AudioVisualizer.WavePeaks = WavePeakGenerator2.GenerateEmptyPeaks(peakWaveFileName, (int)vp.VideoPlayerInstance.Duration);
             // if (smpteTimeModedropFrameToolStripMenuItem.Checked)
             // {
             //     audioVisualizer.UseSmpteDropFrameTime();
@@ -8574,7 +8598,7 @@ public partial class MainViewModel :
     private void VideoCloseFile()
     {
         _videoOpenTokenSource?.Cancel();
-        VideoPlayerControl?.Close();
+        GetVideoPlayerControl()?.Close();
         _videoFileName = string.Empty;
         IsVideoLoaded = false;
 
@@ -9774,7 +9798,7 @@ public partial class MainViewModel :
 
     internal void AudioVisualizerOnVideoPositionChanged(object sender, AudioVisualizer.PositionEventArgs e)
     {
-        var vp = VideoPlayerControl;
+        var vp = GetVideoPlayerControl();
         if (vp == null)
         {
             return;
@@ -9783,8 +9807,8 @@ public partial class MainViewModel :
         var newPosition = e.PositionInSeconds;
         newPosition = Math.Max(0, newPosition);
         newPosition = Math.Min(vp.Duration, newPosition);
-
-        VideoPlayerControl?.SetPosition(newPosition);
+        
+        vp.SetPosition(newPosition);
         _updateAudioVisualizer = true; // Update the audio visualizer position
     }
 
@@ -9802,18 +9826,20 @@ public partial class MainViewModel :
 
         if (grid.SelectedItem is SubtitleLineViewModel selectedItem)
         {
-            if (!string.IsNullOrEmpty(_videoFileName) && VideoPlayerControl != null)
+            var vp = GetVideoPlayerControl();
+            if (!string.IsNullOrEmpty(_videoFileName) && vp != null)
             {
-                VideoPlayerControl.Position = selectedItem.StartTime.TotalSeconds;
+                vp.Position = selectedItem.StartTime.TotalSeconds;
             }
         }
     }
 
     internal void OnWaveformDoubleTapped(object sender, ParagraphEventArgs e)
     {
-        if (!string.IsNullOrEmpty(_videoFileName) && VideoPlayerControl != null)
+        var vp = GetVideoPlayerControl();
+        if (!string.IsNullOrEmpty(_videoFileName) && vp != null)
         {
-            VideoPlayerControl.Position = e.Seconds;
+            vp.Position = e.Seconds;
             var p = Subtitles.FirstOrDefault(p =>
                 Math.Abs(p.StartTime.TotalMilliseconds - e.Paragraph.StartTime.TotalMilliseconds) < 0.01);
             if (p != null)
@@ -9825,7 +9851,8 @@ public partial class MainViewModel :
 
     public void AudioVisualizerOnToggleSelection(object sender, ParagraphEventArgs e)
     {
-        if (!string.IsNullOrEmpty(_videoFileName) && VideoPlayerControl != null)
+        var vp = GetVideoPlayerControl();
+        if (!string.IsNullOrEmpty(_videoFileName) && vp != null)
         {
             var p = Subtitles.FirstOrDefault(p =>
                 Math.Abs(p.StartTime.TotalMilliseconds - e.Paragraph.StartTime.TotalMilliseconds) < 0.01);
@@ -9950,10 +9977,11 @@ public partial class MainViewModel :
         IsTextBoxSplitAtCursorAndVideoPositionVisible = false;
 
         var s = SelectedSubtitle;
-        if (VideoPlayerControl != null && !string.IsNullOrEmpty(_videoFileName) && s != null)
+        var vp = GetVideoPlayerControl();
+        if (vp != null && !string.IsNullOrEmpty(_videoFileName) && s != null)
         {
-            if (s.StartTime.TotalSeconds < VideoPlayerControl.Position &&
-                VideoPlayerControl.Position < s.EndTime.TotalSeconds)
+            if (s.StartTime.TotalSeconds < vp.Position &&
+                vp.Position < s.EndTime.TotalSeconds)
             {
                 IsTextBoxSplitAtCursorAndVideoPositionVisible = true;
             }
