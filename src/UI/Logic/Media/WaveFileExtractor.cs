@@ -87,6 +87,14 @@ public static class WaveFileExtractor
             parameters = string.Format(fFmpegWaveTranscodeSettings, inputVideoFile, outWaveFile, audioParameter);
         }
 
-        return new Process { StartInfo = new ProcessStartInfo(exeFilePath, parameters) { WindowStyle = ProcessWindowStyle.Hidden, CreateNoWindow = true } };
+        return new Process
+        {
+            StartInfo = new ProcessStartInfo(exeFilePath, parameters)
+            {
+                WindowStyle = ProcessWindowStyle.Hidden,
+                CreateNoWindow = true,
+                UseShellExecute = false,
+            }
+        };
     }
 }

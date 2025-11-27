@@ -11,6 +11,11 @@ public class LanguageAudioToText
     public string AdvancedWhisperSettings { get; set; }
     public string DownloadingWhisperEngine { get; set; }
     public string EnableVad { get; set; }
+    public string WhisperXxlStandard { get; set; }
+    public string WhisperXxlStandardAsia { get; set; }
+    public string WhisperXxlSentence { get; set; }
+    public string WhisperXxlSingleWords { get; set; }
+    public string WhisperXxlHighlightWord { get; set; }
 
     public LanguageAudioToText()
     {
@@ -23,5 +28,10 @@ public class LanguageAudioToText
         AdvancedWhisperSettings = "Advanced Whisper settings";
         DownloadingWhisperEngine = "Downloading Whisper engine";
         EnableVad = "Enable VAD";
+        WhisperXxlStandard = "Standard";
+        WhisperXxlStandardAsia = "Standard Asia";
+        WhisperXxlSentence = "Sentence-level";
+        WhisperXxlSingleWords = "Single words";
+        WhisperXxlHighlightWord = "Highlight word";
     }
 }

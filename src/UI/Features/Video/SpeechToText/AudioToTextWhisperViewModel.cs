@@ -1277,7 +1277,11 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         var process = new Process
         {
             StartInfo = new ProcessStartInfo(w, parameters)
-            { WindowStyle = ProcessWindowStyle.Hidden, CreateNoWindow = true }
+            { 
+                WindowStyle = ProcessWindowStyle.Hidden, 
+                CreateNoWindow = true,
+                UseShellExecute = false,
+            }
         };
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {

@@ -73,7 +73,40 @@ public class WhisperAdvancedWindow : Window
             VerticalAlignment = VerticalAlignment.Stretch,
         };
 
+        var buttonXxlOptions = new SplitButton
+        {
+            Content = Se.Language.Video.AudioToText.WhisperXxlStandard,
+            Command = vm.WhisperXxlSettingStandardCommand,
+            Flyout = new MenuFlyout
+            {
+                Items =
+                {
+                    new MenuItem
+                    {
+                        Header = Se.Language.Video.AudioToText.WhisperXxlStandardAsia,
+                        Command = vm.WhisperXxlSettingStandardAsiaCommand,
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.Video.AudioToText.WhisperXxlSentence,
+                        Command = vm.WhisperXxlSettingSentenceCommand,
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.Video.AudioToText.WhisperXxlSingleWords,
+                        Command = vm.WhisperXxlSettingOneWordCommand,
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.Video.AudioToText.WhisperXxlHighlightWord,
+                        Command = vm.WhisperXxlSettingHighLightWordCommand,
+                    },
+                }
+            }
+        }.WithBindIsVisible(nameof(vm.IsWhisperXxlVisible));
+
         var buttonPanel = UiUtil.MakeButtonBar(
+            buttonXxlOptions,
             UiUtil.MakeButton(Se.Language.Video.AudioToText.EnableVad, vm.EnableVadCppCommand)
                 .WithBindIsVisible(nameof(vm.IsVadCppVisible)),   
             UiUtil.MakeButton(Se.Language.General.Ok, vm.OkCommand),

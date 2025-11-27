@@ -887,6 +887,17 @@ public static class UiUtil
         return control;
     }
 
+    public static SplitButton WithBindIsVisible(this SplitButton control, string isVisiblePropertyPath)
+    {
+        control.Bind(SplitButton.IsVisibleProperty, new Binding
+        {
+            Path = isVisiblePropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
     public static ComboBox WithBindEnabled(this ComboBox control, string isEnabledPropertyPath)
     {
         control.Bind(ComboBox.IsEnabledProperty, new Binding
