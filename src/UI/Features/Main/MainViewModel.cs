@@ -6626,11 +6626,20 @@ public partial class MainViewModel :
             return;
         }
 
-        Dispatcher.UIThread.Post(() =>
+        try
         {
-            SubtitleGrid.SelectedIndex = index;
-            SubtitleGrid.ScrollIntoView(SubtitleGrid.SelectedItem, null);
-        });
+            var item = Subtitles[index];
+            Dispatcher.UIThread.Post(() =>
+            {
+
+                SubtitleGrid.SelectedItem = item;
+                SubtitleGrid.ScrollIntoView(item, null);
+            });
+        }
+        catch
+        {
+            // ignore
+        }
     }
 
     public void SelectAndScrollToSubtitle(SubtitleLineViewModel subtitle)
