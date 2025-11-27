@@ -4873,7 +4873,7 @@ public partial class MainViewModel :
 
     [RelayCommand]
     private async Task ShowGoToLine()
-    {        
+    {
         if (Subtitles.Count == 0)
         {
             return;
@@ -9462,13 +9462,17 @@ public partial class MainViewModel :
             return;
         }
 
-        _updateAudioVisualizer = true;
-        SelectedSubtitle = item;
-        SelectedSubtitleIndex = Subtitles.IndexOf(item);
-        StatusTextRight = $"{Subtitles.IndexOf(item) + 1}/{Subtitles.Count}";
+        if (item == SelectedSubtitle)
+        {
+            return;
+        }
 
+        SelectedSubtitle = item;
+        //SelectedSubtitleIndex = Subtitles.IndexOf(item);
+        StatusTextRight = $"{Subtitles.IndexOf(item) + 1}/{Subtitles.Count}";
         MakeSubtitleTextInfo(item.Text, item);
         MakeSubtitleTextInfoOriginal(item.OriginalText, item);
+        _updateAudioVisualizer = true;
     }
 
     private void MakeSubtitleTextInfo(string text, SubtitleLineViewModel item)
@@ -9917,7 +9921,7 @@ public partial class MainViewModel :
     }
 
 
-    internal void DurationChanged2(object? sender, AvaloniaPropertyChangedEventArgs e)
+    internal void DurationChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
         _updateAudioVisualizer = true;
 

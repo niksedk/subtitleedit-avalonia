@@ -816,7 +816,7 @@ public static class InitListViewAndEditBox
             ToolTip.SetTip(durationUpDown, Se.Language.General.Duration);
         }
         durationUpDown.Bind(SecondsUpDown.IsEnabledProperty, new Binding(nameof(vm.LockTimeCodes)) { Mode = BindingMode.TwoWay, Converter = new InverseBooleanConverter() });
-        durationUpDown.PropertyChanged += vm.DurationChanged2;
+        durationUpDown.PropertyChanged += vm.DurationChanged;
         durationPanel.Children.Add(durationUpDown);
         timeControlsPanel.Children.Add(durationPanel);
 
