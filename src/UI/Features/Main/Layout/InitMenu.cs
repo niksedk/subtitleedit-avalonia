@@ -115,12 +115,17 @@ public static class InitMenu
                     {
                         new MenuItem
                         {
-                            Header = Se.Language.File.Import.ImportTimeCodes,
+                            Header = Se.Language.File.Import.ImagesDotDotDot,
                             Command = vm.ImportTimeCodesCommand,
                         },
                         new MenuItem
                         {
-                            Header = Se.Language.File.Import.ImportSubtitleWithManuallyChosenEncoding,
+                            Header = Se.Language.File.Import.TimeCodesDotDotDot,
+                            Command = vm.ImportTimeCodesCommand,
+                        },
+                        new MenuItem
+                        {
+                            Header = Se.Language.File.Import.SubtitleWithManuallyChosenEncodingDotDotDot,
                             Command = vm.ShowImportSubtitleWithManuallyChosenEncodingCommand,
                         },
                     }

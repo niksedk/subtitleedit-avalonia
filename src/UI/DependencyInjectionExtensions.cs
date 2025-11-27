@@ -13,6 +13,7 @@ using Nikse.SubtitleEdit.Features.Files.ExportCustomTextFormat;
 using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Files.ExportPac;
 using Nikse.SubtitleEdit.Features.Files.ExportPlainText;
+using Nikse.SubtitleEdit.Features.Files.ImportImages;
 using Nikse.SubtitleEdit.Features.Files.ManualChosenEncoding;
 using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 using Nikse.SubtitleEdit.Features.Files.Statistics;
@@ -225,6 +226,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<GoToVideoPositionViewModel>();
         collection.AddTransient<ImageBasedPreviewViewModel>();
         collection.AddTransient<ImageBasedProfileViewModel>();
+        collection.AddTransient<ImportImagesViewModel>();
         collection.AddTransient<InterjectionsViewModel>();
         collection.AddTransient<JoinSubtitlesViewModel>();
         collection.AddTransient<LanguageViewModel>();

@@ -19,13 +19,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Nikse.SubtitleEdit.Features.Assa;
+namespace Nikse.SubtitleEdit.Features.Files.ImportImages;
 
-public partial class AssaAttachmentsViewModel : ObservableObject
+public partial class ImportImagesViewModel : ObservableObject
 {
     [ObservableProperty] private string _title;
-    [ObservableProperty] private ObservableCollection<AssaAttachmentItem> _attachments;
-    [ObservableProperty] private AssaAttachmentItem? _selectedAttachment;
+    [ObservableProperty] private ObservableCollection<ImportImageItem> _attachments;
+    [ObservableProperty] private ImportImageItem? _selectedAttachment;
     [ObservableProperty] private string _previewTitle;
     [ObservableProperty] private Bitmap? _previewImage;
     [ObservableProperty] private bool _isDeleteVisible;
@@ -43,17 +43,18 @@ public partial class AssaAttachmentsViewModel : ObservableObject
     {
         "*.png",
         "*.jpg" ,
+        "*.jpeg" ,
         "*.gif" ,
         "*.bmp" ,
         "*.ico"
     };
 
-    public AssaAttachmentsViewModel(IFileHelper fileHelper)
+    public ImportImagesViewModel(IFileHelper fileHelper)
     {
         _fileHelper = fileHelper;
 
         Title = string.Empty;
-        Attachments = new ObservableCollection<AssaAttachmentItem>();
+        Attachments = new ObservableCollection<ImportImageItem>();
         PreviewTitle = string.Empty;
         _fileName = string.Empty;
         Header = string.Empty;
@@ -65,7 +66,6 @@ public partial class AssaAttachmentsViewModel : ObservableObject
     private void Ok()
     {
         OkPressed = true;
-        Footer = GetUpdatedFooter();
         Close();
     }
 
@@ -83,7 +83,7 @@ public partial class AssaAttachmentsViewModel : ObservableObject
         foreach (var fileName in fileNames)
         {
             var attachmentFileName = Path.GetFileName(fileName);
-            var attachment = new AssaAttachmentItem(fileName);
+            var attachment = new ImportImageItem(fileName);
             var ext = Path.GetExtension(attachmentFileName)?.ToLowerInvariant();
             Attachments.Add(attachment);
             SelectedAttachment = attachment;
@@ -236,9 +236,9 @@ public partial class AssaAttachmentsViewModel : ObservableObject
         UpdatePreview();
     }
 
-    private List<AssaAttachmentItem> ListAttachments(List<string> lines)
+    private List<ImportImageItem> ListAttachments(List<string> lines)
     {
-        var attachments = new List<AssaAttachmentItem>();
+        var attachments = new List<ImportImageItem>();
         bool attachmentOn = false;
         var attachmentContent = new StringBuilder();
         var attachmentFileName = string.Empty;
@@ -306,53 +306,16 @@ public partial class AssaAttachmentsViewModel : ObservableObject
         return attachments;
     }
 
-    private string GetUpdatedFooter()
-    {
-        var sb = new StringBuilder();
-
-        var fonts = Attachments.Where(p => p.Category == Se.Language.General.Fonts).ToList();
-        if (fonts.Count > 0)
-        {
-            sb.AppendLine("[Fonts]");
-            foreach (var font in fonts)
-            {
-                sb.AppendLine("fontname: " + Path.GetFileName(font.FileName));
-                sb.AppendLine(font.Content.Trim());
-            }
-            sb.AppendLine();
-        }
-
-        var graphics = Attachments.Where(p => p.Category == Se.Language.Assa.Graphics).ToList();
-        if (graphics.Count > 0)
-        {
-            sb = new StringBuilder(sb.ToString().Trim());
-            sb.AppendLine();
-            sb.AppendLine();
-            sb.AppendLine("[Graphics]");
-            foreach (var g in graphics)
-            {
-                sb.AppendLine("filename: " + Path.GetFileName(g.FileName));
-                sb.AppendLine(g.Content.Trim());
-            }
-            sb.AppendLine();
-        }
-
-        return sb.ToString().TrimStart();
-    }
-
-    private void AddToListIfNotEmpty(List<AssaAttachmentItem> attachments, string attachmentContent, string attachmentFileName, string category)
+    private void AddToListIfNotEmpty(List<ImportImageItem> attachments, string attachmentContent, string attachmentFileName, string category)
     {
         var content = attachmentContent.Trim();
         if (!string.IsNullOrWhiteSpace(attachmentFileName) && !string.IsNullOrEmpty(content))
         {
             var bytes = UUEncoding.UUDecode(content);
-            var attachment = new AssaAttachmentItem
+            var attachment = new ImportImageItem
             {
                 FileName = Path.GetFileName(attachmentFileName),
                 Bytes = bytes,
-                Category = category,
-                Content = content,
-                Size = Utilities.FormatBytesToDisplayFileSize(bytes.Length),
             };
             attachments.Add(attachment);
         }
@@ -375,19 +338,6 @@ public partial class AssaAttachmentsViewModel : ObservableObject
         {
             PreviewImage = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
             return;
-        }
-
-        if (selectedItem.Category == Se.Language.General.Fonts)
-        {
-            ShowFont(selectedItem.Bytes);
-        }
-        else if (selectedItem.Category == Se.Language.Assa.Graphics)
-        {
-            ShowImage(selectedItem.Bytes);
-        }
-        else
-        {
-            PreviewImage = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
         }
     }
 

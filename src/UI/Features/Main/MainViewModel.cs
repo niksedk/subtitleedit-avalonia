@@ -120,6 +120,7 @@ using static Nikse.SubtitleEdit.Logic.FindService;
 using AudioToTextWhisperViewModel = Nikse.SubtitleEdit.Features.Video.SpeechToText.AudioToTextWhisperViewModel;
 using AudioVisualizerUndockedViewModel = Nikse.SubtitleEdit.Features.Shared.Undocked.AudioVisualizerUndockedViewModel;
 using VideoPlayerUndockedViewModel = Nikse.SubtitleEdit.Features.Shared.Undocked.VideoPlayerUndockedViewModel;
+using Nikse.SubtitleEdit.Features.Files.ImportImages;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -1437,6 +1438,26 @@ public partial class MainViewModel :
         ShowStatus($"File exported in format \"{format.Name}\" to file \"{fileName}\"");
     }
 
+
+    [RelayCommand]
+    private async Task ImportImages()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var result =
+           await ShowDialogAsync<ImportImagesWindow, ImportImagesViewModel>(vm =>
+           {
+               //vm.Initialize(AudioVisualizer.WavePeaks); 
+           });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+    }
 
     [RelayCommand]
     private async Task ImportTimeCodes()

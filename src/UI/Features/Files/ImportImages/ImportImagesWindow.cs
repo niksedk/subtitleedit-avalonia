@@ -1,22 +1,18 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
-using Avalonia.Media;
+using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Assa;
+namespace Nikse.SubtitleEdit.Features.Files.ImportImages;
 
-public class AssaAttachmentsWindow : Window
+public class ImportImagesWindow : Window
 {
-    public AssaAttachmentsWindow(AssaAttachmentsViewModel vm)
+    public ImportImagesWindow(ImportImagesViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Bind(Window.TitleProperty, new Binding(nameof(vm.Title))
-        {
-            Source = vm,
-            Mode = BindingMode.TwoWay,
-        });
+        Title = Se.Language.File.Import.TitleImportImages;
         CanResize = true;
         Width = 1200;
         Height = 850;
@@ -37,7 +33,6 @@ public class AssaAttachmentsWindow : Window
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 5,
@@ -47,7 +42,6 @@ public class AssaAttachmentsWindow : Window
         };
 
         var labelFontsAndImages = UiUtil.MakeLabel(Se.Language.Assa.FontsAndGraphics);
-        var labelPreview = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.PreviewTitle));
 
         var buttonAttach = UiUtil.MakeButton(Se.Language.General.AttachDotDotDot, vm.FileAttachCommand);
         var buttonImport = UiUtil.MakeButton(Se.Language.General.ImportDotDotDot, vm.FileImportCommand);
@@ -57,10 +51,8 @@ public class AssaAttachmentsWindow : Window
         var panelButtons = UiUtil.MakeButtonBar(buttonAttach, buttonImport, buttonExport, buttonOk, buttonCancel);
 
         grid.Add(labelFontsAndImages, 0);
-        grid.Add(labelPreview, 0, 1);
         grid.Add(MakeLeftView(vm), 1);
-        grid.Add(MakeRightView(vm), 1, 1);
-        grid.Add(panelButtons, 3, 0, 1, 2);
+        grid.Add(panelButtons, 3, 0);
 
         Content = grid;
 
@@ -68,7 +60,7 @@ public class AssaAttachmentsWindow : Window
         KeyDown += vm.KeyDown;
     }
 
-    private static Border MakeLeftView(AssaAttachmentsViewModel vm)
+    private static Border MakeLeftView(ImportImagesViewModel vm)
     {
         var grid = new Grid
         {
@@ -102,22 +94,38 @@ public class AssaAttachmentsWindow : Window
                 {
                     Header = Se.Language.General.FileName,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(AssaAttachmentItem.FileName)),
+                    Binding = new Binding(nameof(ImportImageItem.FileName)),
                     IsReadOnly = true,
-                },
-                new DataGridTextColumn
-                {
-                    Header = Se.Language.General.Type,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(AssaAttachmentItem.Category)),
-                    IsReadOnly = true,
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Size,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(AssaAttachmentItem.Size)),
+                    Binding = new Binding(nameof(ImportImageItem.Size)),
+                    IsReadOnly = true,
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Show,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(ImportImageItem.Start)),
+                    IsReadOnly = true,
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Hide,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(ImportImageItem.End)),
+                    IsReadOnly = true,
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Duration,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(ImportImageItem.Duration)),
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
@@ -152,35 +160,5 @@ public class AssaAttachmentsWindow : Window
         grid.Add(dataGrid, 0);
 
         return UiUtil.MakeBorderForControlNoPadding(grid);
-    }
-
-    private static Border MakeRightView(AssaAttachmentsViewModel vm)
-    {
-        var grid = new Grid
-        {
-            RowDefinitions =
-            {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
-            },
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-            },
-            Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-        };
-
-        var image = new Image
-        {
-            [!Image.SourceProperty] = new Binding(nameof(vm.PreviewImage)),
-            DataContext = vm,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Top,
-            Stretch = Stretch.Uniform,
-        };
-
-        grid.Add(image, 0);
-
-        return UiUtil.MakeBorderForControl(grid);
     }
 }
