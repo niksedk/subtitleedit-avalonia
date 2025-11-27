@@ -13,14 +13,14 @@ namespace Nikse.SubtitleEdit.Features.Video.SpeechToText;
 
 public class DownloadWhisperModelsWindow : Window
 {
-    private readonly SpeechToText.DownloadWhisperModelsViewModel _vm;
+    private readonly DownloadWhisperModelsViewModel _vm;
 
-    public DownloadWhisperModelsWindow(SpeechToText.DownloadWhisperModelsViewModel vm)
+    public DownloadWhisperModelsWindow(DownloadWhisperModelsViewModel vm)
     {
         _vm = vm;
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = "Downloading Whisper model";
+        Title = Se.Language.Video.AudioToText.DownloadingWhisperModel;
         Width = 450;
         Height = 220;
         CanResize = false;
@@ -30,7 +30,7 @@ public class DownloadWhisperModelsWindow : Window
 
         var labelSelectModel = new TextBlock
         {
-            Text = "Select model",
+            Text = Se.Language.Video.AudioToText.SelectModel,
         };
 
         var comboBoxModel = UiUtil.MakeComboBox(vm.Models, vm, nameof(vm.SelectedModel)).WithMinWidth(200);

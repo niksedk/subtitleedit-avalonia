@@ -2,7 +2,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
@@ -12,24 +11,20 @@ namespace Nikse.SubtitleEdit.Features.Video.SpeechToText;
 
 public class DownloadWhisperEngineWindow : Window
 {
-    private readonly SpeechToText.DownloadWhisperEngineViewModel _vm;
-
-    public DownloadWhisperEngineWindow(SpeechToText.DownloadWhisperEngineViewModel vm)
+    public DownloadWhisperEngineWindow(DownloadWhisperEngineViewModel vm)
     {
-        _vm = vm;
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = "Downloading Whisper engine";
+        Title = Se.Language.Video.AudioToText.DownloadingWhisperEngine;
         Width = 500;
         Height = 190;
         CanResize = false;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
-
         DataContext = vm;
 
         var titleText = new TextBlock
         {
-            Text = "Downloading Whisper engine",
+            Text = Se.Language.Video.AudioToText.DownloadingWhisperEngine,
             FontSize = 20,
             FontWeight = FontWeight.Bold,
         };
@@ -83,12 +78,7 @@ public class DownloadWhisperEngineWindow : Window
         Activated += delegate
         {
             buttonCancel.Focus(); // hack to make OnKeyDown work
-        }; 
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        };
+        KeyDown += (s, e) => vm.OnKeyDown(e);
     }
 }
