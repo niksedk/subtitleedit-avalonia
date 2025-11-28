@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Declarative;
+using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Logic;
@@ -92,7 +93,18 @@ public class MainView : ViewBase
 
         // Main content (fills all remaining space)
         _vm.ContentGrid = ViewContent.Make(_vm);
-        InitLayout.MakeLayout(this, _vm, Se.Settings.General.LayoutNumber);
+
+        // Wait for the view to be attached to visual tree before initializing layout
+        this.AttachedToVisualTree += (s, e) =>
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                 InitLayout.MakeLayout(this, _vm, Se.Settings.General.LayoutNumber);
+                 _vm.ContentGrid.InvalidateMeasure();
+                 _vm.ContentGrid.InvalidateArrange();
+             }, DispatcherPriority.Loaded);
+        };
+
         root.Children.Add(_vm.ContentGrid);
 
         AddHandler(KeyDownEvent, _vm.OnKeyDownHandler, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: false);
