@@ -221,7 +221,7 @@ public class AudioVisualizer : Control
     private long _audioVisualizerLastScroll;
     private long _lastPointerPressed = -1;
 
-    private SpectrogramData _spectrogram;
+    private SpectrogramData2 _spectrogram;
     private const int SpectrogramDisplayHeight = 128;
 
 
@@ -376,7 +376,7 @@ public class AudioVisualizer : Control
         }
         else if (e.Key == Key.Delete && !e.KeyModifiers.HasFlag(KeyModifiers.Control) && !e.KeyModifiers.HasFlag(KeyModifiers.Alt) && !e.KeyModifiers.HasFlag(KeyModifiers.Shift))
         {
-            OnDeletePressed?.Invoke(this, new ParagraphEventArgs(0, _activeParagraph)); 
+            OnDeletePressed?.Invoke(this, new ParagraphEventArgs(0, _activeParagraph));
         }
     }
 
@@ -1012,38 +1012,9 @@ public class AudioVisualizer : Control
                 imageIndex++;
             }
 
-            if (CombineSpectrogramAndWaveform)
-            {
-                var destRect = new Rectangle(0, Height - height, Width, height);
-
-                // Create ImageAttributes
-                using (ImageAttributes imageAttributes = new ImageAttributes())
-                {
-                    // Create a color matrix for transparency
-                    float[][] colorMatrixElements =
-                    {
-                            new float[] { 1, 0, 0, 0, 0 },
-                            new float[] { 0, 1, 0, 0, 0 },
-                            new float[] { 0, 0, 1, 0, 0 },
-                            new float[] { 0, 0, 0, this.SpectrogramAlpha, 0 },
-                            new float[] { 0, 0, 0, 0, 1 }
-                        };
-                    ColorMatrix colorMatrix = new ColorMatrix(colorMatrixElements);
-
-                    // Set the color matrix in ImageAttributes
-                    imageAttributes.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
-
-                    // Draw the image with transparency
-                    graphics.DrawImage(bmpCombined, destRect, 0, 0, bmpCombined.Width, bmpCombined.Height, GraphicsUnit.Pixel, imageAttributes);
-                }
-            }
-            else
-            {
-                var displayHeight = _showWaveform ? SpectrogramDisplayHeight : Height;
-                graphics.DrawImage(bmpCombined, new Rectangle(0, Height - displayHeight, Width, displayHeight));
-            }
+            var displayHeight = _showWaveform ? SpectrogramDisplayHeight : Height;
+            graphics.DrawImage(bmpCombined, new Rectangle(0, Height - displayHeight, Width, displayHeight));
         }
-    }
     }
 
     private void DrawTimeLine(DrawingContext context)
@@ -1643,7 +1614,7 @@ public class AudioVisualizer : Control
         InitializeSpectrogram(spectrogramData);
     }
 
-    private void InitializeSpectrogram(SpectrogramData spectrogram)
+    private void InitializeSpectrogram(SpectrogramData2 spectrogram)
     {
         if (_spectrogram != null)
         {
