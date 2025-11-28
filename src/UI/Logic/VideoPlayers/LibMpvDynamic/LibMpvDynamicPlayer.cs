@@ -615,6 +615,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 
     public void PlayOrPause() // toggle play/pause
     {
+        _pausedValue = null;
         EnsureNotDisposed();
         if (_mpv == IntPtr.Zero)
         {
@@ -631,6 +632,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
     public void CloseFile()
     {
         _fileName = string.Empty;
+        _pausedValue = null;
 
         EnsureNotDisposed();
         if (_mpv == IntPtr.Zero)
@@ -700,7 +702,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
                     return false;
                 }
 
-                return pauseValue == 1; // pause=1 means paused
+                return pauseValue != 0;
             }
             catch
             {
@@ -709,10 +711,18 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         }
     }
 
+
+    private double? _pausedValue;
+
     public double Position
     {
         get
         {
+            if (_pausedValue.HasValue && IsPaused)
+            {
+                return _pausedValue.Value;
+            }
+
             EnsureNotDisposed();
             if (_mpv == IntPtr.Zero || _mpvGetPropertyDouble == null)
             {
@@ -739,6 +749,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         }
         set
         {
+            _pausedValue = value;
             EnsureNotDisposed();
             if (_mpv == IntPtr.Zero)
             {
@@ -879,6 +890,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 
     public void Stop()
     {
+        _pausedValue = null;
         EnsureNotDisposed();
         if (_mpv == IntPtr.Zero)
         {
