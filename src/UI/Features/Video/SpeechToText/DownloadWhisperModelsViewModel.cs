@@ -269,7 +269,10 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
 
     internal void OnKeyDown(KeyEventArgs e)
     {
-        Cancel();
+        if (e.Key == Key.Escape)
+        {
+            Cancel();
+        }
     }
 
     internal async void StartDownload()

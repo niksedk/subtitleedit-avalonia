@@ -292,6 +292,9 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
 
     internal void OnKeyDown(KeyEventArgs e)
     {
-        CommandCancel();
+        if (e.Key == Key.Escape)
+        {
+            CommandCancel();
+        }
     }
 }
