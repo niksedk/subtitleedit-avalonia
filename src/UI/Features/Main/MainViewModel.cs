@@ -3698,7 +3698,9 @@ public partial class MainViewModel :
 
         if (!AreVideoControlsUndocked)
         {
+            Se.Settings.Appearance.CurrentLayoutPositions = InitLayout.SaveLayoutPositions(ContentGrid.Children.FirstOrDefault() as Grid);
             InitLayout.MakeLayout(MainView!, this, Se.Settings.General.LayoutNumber);
+            InitLayout.RestoreLayoutPositions(Se.Settings.Appearance.CurrentLayoutPositions, ContentGrid.Children.FirstOrDefault() as Grid);
         }
 
         _autoBackupService.StopAutobackup();
@@ -8182,7 +8184,7 @@ public partial class MainViewModel :
 
             UiUtil.SaveWindowPosition(Window);
             Se.Settings.General.UndockVideoControls = Se.Settings.General.RememberPositionAndSize && AreVideoControlsUndocked;
-            Se.Settings.Appearance.CurrentLayoutPositions = InitLayout.SaveLayoutPositions(0, ContentGrid.Children.FirstOrDefault() as Grid ?? new Grid());
+            Se.Settings.Appearance.CurrentLayoutPositions = InitLayout.SaveLayoutPositions(ContentGrid.Children.FirstOrDefault() as Grid);
 
             if (_findViewModel != null)
             {
@@ -8365,7 +8367,7 @@ public partial class MainViewModel :
         if (Se.Settings.General.RememberPositionAndSize)
         {
             UiUtil.RestoreWindowPosition(Window);
-            InitLayout.RestoreLayoutPositions(Se.Settings.Appearance.CurrentLayoutPositions, ContentGrid.Children.FirstOrDefault() as Grid ?? new Grid());
+            InitLayout.RestoreLayoutPositions(Se.Settings.Appearance.CurrentLayoutPositions, ContentGrid.Children.FirstOrDefault() as Grid);
 
             if (Se.Settings.General.UndockVideoControls)
             {

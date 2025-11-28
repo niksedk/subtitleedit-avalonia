@@ -20,7 +20,7 @@ public static partial class InitLayout
         public List<double> NestedColumnWidths { get; set; } = new();
     }
 
-    public static LayoutPositions SaveLayoutPositions(int layoutNumber, Grid contentGrid)
+    public static LayoutPositions SaveLayoutPositions(Grid? contentGrid)
     {
         if (contentGrid == null || contentGrid.Children.Count == 0)
         {
@@ -65,7 +65,7 @@ public static partial class InitLayout
         return positions;
     }
 
-    public static void RestoreLayoutPositions(LayoutPositions positions, Grid contentGrid)
+    public static void RestoreLayoutPositions(LayoutPositions positions, Grid? contentGrid)
     {
         if (contentGrid == null || contentGrid.Children.Count == 0 ||
             positions.ColumnWidths.Count + positions.RowHeights.Count == 0)
