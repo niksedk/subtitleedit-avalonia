@@ -57,27 +57,6 @@ public class InitWaveform
             //flyout.Opening += vm.AudioVisualizerContextOpening;
             vm.AudioVisualizer.FlyoutMenuOpening += vm.AudioVisualizerFlyoutMenuOpening;
 
-            var showOnlyWaveformMenuItem = new MenuItem
-            {
-                Header = Se.Language.Waveform.ShowOnlyWaveform,
-                Command = vm.WaveformShowOnlyWaveformCommand,
-            };
-            flyout.Items.Add(showOnlyWaveformMenuItem);
-
-            var showOnlySpectrogramMenuItem = new MenuItem
-            {
-                Header = Se.Language.Waveform.ShowOnlySpectrogram,
-                Command = vm.WaveformShowOnlySpectrogramCommand,
-            };
-            flyout.Items.Add(showOnlySpectrogramMenuItem);
-
-            var showWaveformAndSpectrogramMenuItem = new MenuItem
-            {
-                Header = Se.Language.Waveform.ShowWaveformAndSpectrogram,
-                Command = vm.WaveformShowWaveformAndSpectrogramCommand,
-            };
-            flyout.Items.Add(showWaveformAndSpectrogramMenuItem);
-
             var insertSelectionMenuItem = new MenuItem
             {
                 Header = Se.Language.General.InsertNewSelection,
@@ -162,13 +141,38 @@ public class InitWaveform
             };
             flyout.Items.Add(menuItemAddShotChange);
 
-
             var menuItemSeekSilence = new MenuItem
             {
                 Header = Se.Language.Waveform.SeekSilenceDotDotDot,
                 Command = vm.ShowWaveformSeekSilenceCommand,
             };
             flyout.Items.Add(menuItemSeekSilence);
+
+            var separatorDisplayMode = new Separator();
+            separatorDisplayMode.DataContext = vm;
+            separatorDisplayMode.Bind(Separator.IsVisibleProperty, new Binding(nameof(vm.ShowWaveformDisplayModeSeparator))); 
+            flyout.Items.Add(separatorDisplayMode);
+
+            var showOnlyWaveformMenuItem = new MenuItem
+            {
+                Header = Se.Language.Waveform.ShowOnlyWaveform,
+                Command = vm.WaveformShowOnlyWaveformCommand,
+            }.BindIsVisible(vm, nameof(vm.ShowWaveformOnlyWaveform));
+            flyout.Items.Add(showOnlyWaveformMenuItem);
+
+            var showOnlySpectrogramMenuItem = new MenuItem
+            {
+                Header = Se.Language.Waveform.ShowOnlySpectrogram,
+                Command = vm.WaveformShowOnlySpectrogramCommand,
+            }.BindIsVisible(vm, nameof(vm.ShowWaveformOnlySpectrogram));
+            flyout.Items.Add(showOnlySpectrogramMenuItem);
+
+            var showWaveformAndSpectrogramMenuItem = new MenuItem
+            {
+                Header = Se.Language.Waveform.ShowWaveformAndSpectrogram,
+                Command = vm.WaveformShowWaveformAndSpectrogramCommand,
+            }.BindIsVisible(vm, nameof(vm.ShowWaveformWaveformAndSpectrogram));
+            flyout.Items.Add(showWaveformAndSpectrogramMenuItem);
 
             vm.AudioVisualizer.MenuFlyout = flyout;
         }

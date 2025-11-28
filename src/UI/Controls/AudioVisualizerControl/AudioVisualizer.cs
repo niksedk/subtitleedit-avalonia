@@ -993,10 +993,7 @@ public class AudioVisualizer : Control
 
     private void DrawSpectrogram(DrawingContext context)
     {
-        if (_spectrogram == null || 
-            _spectrogram.Images == null || 
-            _spectrogram.Images.Count == 0 ||
-            _displayMode == WaveformDisplayMode.OnlyWaveform)
+        if (!HasSpectrogram() || _displayMode == WaveformDisplayMode.OnlyWaveform)
         {
             return;
         }
@@ -1016,21 +1013,21 @@ public class AudioVisualizer : Control
         // Create a combined bitmap using SkiaSharp
         using var skBitmapCombined = new SKBitmap(width, _spectrogram.FftSize / 2);
         using var skCanvas = new SKCanvas(skBitmapCombined);
-        
+
         var left = (int)Math.Round(StartPositionSeconds / _spectrogram.SampleDuration);
         var offset = 0;
         var imageIndex = left / _spectrogram.ImageWidth;
-        
+
         while (offset < width && imageIndex < _spectrogram.Images.Count)
         {
             var x = (left + offset) % _spectrogram.ImageWidth;
             var w = Math.Min(_spectrogram.ImageWidth - x, width - offset);
-            
+
             // Draw part of the spectrogram image
             var sourceRect = new SKRect(x, 0, x + w, skBitmapCombined.Height);
             var destRect = new SKRect(offset, 0, offset + w, skBitmapCombined.Height);
             skCanvas.DrawBitmap(_spectrogram.Images[imageIndex], sourceRect, destRect);
-            
+
             offset += w;
             imageIndex++;
         }
@@ -1038,7 +1035,7 @@ public class AudioVisualizer : Control
         // Convert SKBitmap to Avalonia Bitmap and draw it
         var displayHeight = height;
         var avaloniaBitmap = skBitmapCombined.ToAvaloniaBitmap();
-        
+
         var destRectangle = new Rect(0, Bounds.Height - displayHeight, Bounds.Width, displayHeight);
         context.DrawImage(avaloniaBitmap, destRectangle);
     }
@@ -1635,18 +1632,12 @@ public class AudioVisualizer : Control
         return -1;
     }
 
-    internal void SetSpectrogram(SpectrogramData2 spectrogramData)
-    {
-        InitializeSpectrogram(spectrogramData);
-    }
-
-    private void InitializeSpectrogram(SpectrogramData2 spectrogram)
+    internal void SetSpectrogram(SpectrogramData2 spectrogram)
     {
         if (_spectrogram != null)
         {
             _spectrogram.Dispose();
             _spectrogram = null;
-            InvalidateVisual();
         }
 
         if (spectrogram == null)
@@ -1671,6 +1662,13 @@ public class AudioVisualizer : Control
         }
     }
 
+    public bool HasSpectrogram()
+    {
+        return _spectrogram != null &&
+               _spectrogram.Images != null &&
+               _spectrogram.Images.Count > 0;
+    }
+
     private void InitializeSpectrogramInternal(SpectrogramData2 spectrogram)
     {
         if (_spectrogram != null)
@@ -1679,7 +1677,6 @@ public class AudioVisualizer : Control
         }
 
         _spectrogram = spectrogram;
-        InvalidateVisual();
     }
 
     public double FindDataBelowThreshold(double thresholdPercent, double durationInSeconds)
@@ -2014,5 +2011,10 @@ public class AudioVisualizer : Control
     internal void SetDisplayMode(WaveformDisplayMode displayMode)
     {
         _displayMode = displayMode;
+    }
+
+    internal WaveformDisplayMode GetDisplayMode()
+    {
+        return _displayMode;
     }
 }

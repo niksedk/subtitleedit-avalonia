@@ -196,7 +196,10 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _isRepeatOn;
     [ObservableProperty] private ObservableCollection<string> _speeds;
     [ObservableProperty] private string _selectedSpeed;
-
+    [ObservableProperty] private bool _showWaveformDisplayModeSeparator;
+    [ObservableProperty] private bool _showWaveformOnlyWaveform;
+    [ObservableProperty] private bool _showWaveformOnlySpectrogram;
+    [ObservableProperty] private bool _showWaveformWaveformAndSpectrogram;
 
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
@@ -1644,7 +1647,12 @@ public partial class MainViewModel :
             return;
         }
 
-        AudioVisualizer.SetDisplayMode(WaveformDisplayMode.OnlySpectogram);
+        ShowWaveformOnlyWaveform = true;
+        ShowWaveformOnlySpectrogram = false;
+        ShowWaveformWaveformAndSpectrogram = true;
+        ShowWaveformDisplayModeSeparator = true;
+
+        AudioVisualizer.SetDisplayMode(WaveformDisplayMode.OnlySpectrogram);
         _updateAudioVisualizer = true;
     }
 
@@ -1655,6 +1663,11 @@ public partial class MainViewModel :
         {
             return;
         }
+
+        ShowWaveformOnlyWaveform = false;
+        ShowWaveformOnlySpectrogram = true;
+        ShowWaveformWaveformAndSpectrogram = true;
+        ShowWaveformDisplayModeSeparator = true;
 
         AudioVisualizer.SetDisplayMode(WaveformDisplayMode.OnlyWaveform);
         _updateAudioVisualizer = true;
@@ -1667,6 +1680,11 @@ public partial class MainViewModel :
         {
             return;
         }
+
+        ShowWaveformOnlyWaveform = true;
+        ShowWaveformOnlySpectrogram = true;
+        ShowWaveformWaveformAndSpectrogram = false;
+        ShowWaveformDisplayModeSeparator = true;
 
         AudioVisualizer.SetDisplayMode(WaveformDisplayMode.WaveformAndSpectrogram);
         _updateAudioVisualizer = true;
@@ -8236,6 +8254,11 @@ public partial class MainViewModel :
             {
                 UiUtil.SaveWindowPosition(_audioVisualizerUndockedViewModel.Window);
             }
+
+            if (AudioVisualizer != null && AudioVisualizer.HasSpectrogram())
+            {
+                Se.Settings.Waveform.LastDisplayMode = AudioVisualizer.GetDisplayMode().ToString();
+            }
         }
 
         Se.SaveSettings();
@@ -8492,7 +8515,6 @@ public partial class MainViewModel :
                 var tempWaveFileName = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.wav");
                 var process = WaveFileExtractor.GetCommandLineProcess(videoFileName, -1, tempWaveFileName,
                     Configuration.Settings.General.VlcWaveTranscodeSettings, out _);
-                ShowStatus(Se.Language.Main.ExtractingWaveInfo);
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 Task.Run(async () => { await ExtractWaveformAndSpectrogramAndShotChanges(process, tempWaveFileName, peakWaveFileName, videoFileName); });
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
@@ -8505,7 +8527,14 @@ public partial class MainViewModel :
             if (AudioVisualizer != null)
             {
                 AudioVisualizer.WavePeaks = wavePeaks;
-                AudioVisualizer.SetSpectrogram(SpectrogramData2.FromDisk(spectrogramFolder));
+                var spectrogram = SpectrogramData2.FromDisk(spectrogramFolder);
+                if (spectrogram != null)
+                {
+                    spectrogram.Load();
+                    AudioVisualizer.SetSpectrogram(spectrogram);
+                }
+                InitializeWaveformDisplayMode();
+
                 AudioVisualizer.ShotChanges = ShotChangesHelper.FromDisk(videoFileName);
                 if (AudioVisualizer.ShotChanges.Count == 0)
                 {
@@ -8516,6 +8545,32 @@ public partial class MainViewModel :
 
         _videoFileName = videoFileName;
         IsVideoLoaded = true;
+    }
+
+    private void InitializeWaveformDisplayMode()
+    {
+        if (AudioVisualizer != null && AudioVisualizer.HasSpectrogram())
+        {
+            if (Se.Settings.Waveform.LastDisplayMode == WaveformDisplayMode.WaveformAndSpectrogram.ToString())
+            {
+                WaveformShowWaveformAndSpectrogram();
+            }
+            else if (Se.Settings.Waveform.LastDisplayMode == WaveformDisplayMode.OnlySpectrogram.ToString())
+            {
+                WaveformShowOnlySpectrogram();
+            }
+            else
+            {
+                WaveformShowOnlyWaveform();
+            }
+        }
+        else
+        {
+            ShowWaveformOnlyWaveform = false;
+            ShowWaveformOnlySpectrogram = false;
+            ShowWaveformWaveformAndSpectrogram = false;
+            ShowWaveformDisplayModeSeparator = false;
+        }
     }
 
     private async Task AddEmptyWaveform()
@@ -8546,6 +8601,7 @@ public partial class MainViewModel :
         string peakWaveFileName,
         string videoFileName)
     {
+        ShowStatus(Se.Language.Main.ExtractingWaveInfo);
         process.Start();
 
         _videoOpenTokenSource = new CancellationTokenSource();
@@ -8570,20 +8626,25 @@ public partial class MainViewModel :
         {
             using var waveFile = new WavePeakGenerator2(tempWaveFileName);
             waveFile.GeneratePeaks(0, peakWaveFileName);
-
             var wavePeaks = WavePeakData2.FromDisk(peakWaveFileName);
 
             if (Se.Settings.Waveform.GenerateSpectrogram)
             {
+                ShowStatus(Se.Language.Main.GeneratingSpectrogramDotDotDot);
                 var spectrogram = waveFile.GenerateSpectrogram(0, WavePeakGenerator.SpectrogramDrawer.GetSpectrogramFolder(videoFileName));
                 AudioVisualizer?.SetSpectrogram(spectrogram);
             }
 
             Dispatcher.UIThread.Post(() =>
             {
+                ShowWaveformOnlyWaveform = false;
+                ShowWaveformOnlySpectrogram = false;
+                ShowWaveformWaveformAndSpectrogram = false;
+
                 if (AudioVisualizer != null)
                 {
                     AudioVisualizer.WavePeaks = wavePeaks;
+                    InitializeWaveformDisplayMode();
                 }
 
                 _updateAudioVisualizer = true;

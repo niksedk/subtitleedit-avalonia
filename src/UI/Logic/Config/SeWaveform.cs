@@ -1,4 +1,5 @@
 ﻿using Avalonia.Media;
+using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 
@@ -31,6 +32,7 @@ public class SeWaveform
     public double SeekSilenceMaxVolume { get; set; }
     public bool SeekSilenceSeekForward { get; set; }
     public bool GenerateSpectrogram { get; set; }
+    public string LastDisplayMode { get; set; }
 
     public SeWaveform()
     {
@@ -49,6 +51,7 @@ public class SeWaveform
         ShowWaveformHorizontalZoom = true;
         ShowWaveformVideoPositionSlider = true;
         ShowWaveformPlaybackSpeed = true;
+        LastDisplayMode = WaveformDisplayMode.OnlyWaveform.ToString();  
 
         GuessTimeCodeStartFromBeginning = false;
         GuessTimeCodeScanBlockSize = 100;

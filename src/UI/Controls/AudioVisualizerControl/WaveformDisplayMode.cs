@@ -3,6 +3,6 @@
 public enum WaveformDisplayMode
 {
     OnlyWaveform,
-    OnlySpectogram,
+    OnlySpectrogram,
     WaveformAndSpectrogram,
 }

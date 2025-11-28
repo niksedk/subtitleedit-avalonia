@@ -70,6 +70,7 @@ public class LanguageMain
     public string ErrorLoadBinaryZeroes { get; set; }
     public string YoutubeDlNotInstalledDownloadNow { get; set; }
     public string YoutubeDlDownloadedSuccessfully { get; set; }
+    public string GeneratingSpectrogramDotDotDot { get; set; }
 
     public LanguageMain()
     {
@@ -137,5 +138,6 @@ public class LanguageMain
         ErrorLoadBinaryZeroes = "Sorry, this file contains only binary zeroes!\n\nIf you have edited this file with Subtitle Edit you might be able to find a backup via the menu item File -&gt; Restore auto-backup...";
         YoutubeDlNotInstalledDownloadNow = "\"yt-dlp\" is not installed and is required for playing online videos.\n\nDownload now?";
         YoutubeDlDownloadedSuccessfully = "\"yt-dlp\" downloaded successfully.";
+        GeneratingSpectrogramDotDotDot = "Generating spectrogram...";   
     }
 }

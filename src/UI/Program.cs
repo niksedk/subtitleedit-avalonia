@@ -170,7 +170,7 @@ namespace Nikse.SubtitleEdit
                     }
 
                     Se.LogError($"App activated with {args.Files.Count} files");
-                    
+
                     foreach (var storageItem in args.Files)
                     {
                         var filePath = storageItem.Path.LocalPath;
