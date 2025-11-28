@@ -77,19 +77,22 @@ public static partial class InitLayout
 
     public static void RestoreLayoutPositions(LayoutPositions positions, Grid? contentGrid)
     {
-        if (contentGrid == null || contentGrid.Children.Count == 0 ||
+        if (contentGrid == null ||
+            contentGrid.Children.Count == 0 ||
             positions.ColumnWidths.Count + positions.RowHeights.Count == 0)
         {
             return;
         }
 
         // Restore main grid row heights - preserve Pixel, restore Star ratio, keep Auto
-        for (int i = 0; i < Math.Min(contentGrid.RowDefinitions.Count, positions.RowHeights.Count); i++)
+        for (var i = 0; i < Math.Min(contentGrid.RowDefinitions.Count, positions.RowHeights.Count); i++)
         {
             var savedHeight = positions.RowHeights[i];
             var unitType = i < positions.RowUnitTypes.Count ? positions.RowUnitTypes[i] : GridUnitType.Pixel; // default pixel
             if (savedHeight <= 0)
+            {
                 continue;
+            }
 
             if (unitType == GridUnitType.Pixel)
             {
@@ -103,12 +106,14 @@ public static partial class InitLayout
         }
 
         // Restore main grid column widths - preserve Pixel, restore Star ratio, keep Auto
-        for (int i = 0; i < Math.Min(contentGrid.ColumnDefinitions.Count, positions.ColumnWidths.Count); i++)
+        for (var i = 0; i < Math.Min(contentGrid.ColumnDefinitions.Count, positions.ColumnWidths.Count); i++)
         {
             var savedWidth = positions.ColumnWidths[i];
             var unitType = i < positions.ColumnUnitTypes.Count ? positions.ColumnUnitTypes[i] : GridUnitType.Pixel;
             if (savedWidth <= 0)
+            {
                 continue;
+            }
 
             if (unitType == GridUnitType.Pixel)
             {
@@ -127,12 +132,14 @@ public static partial class InitLayout
             if (child is Border border && border.Child is Grid nestedGrid)
             {
                 // Restore nested grid row heights - preserve Pixel, restore Star ratio, keep Auto
-                for (int i = 0; i < Math.Min(nestedGrid.RowDefinitions.Count, positions.NestedRowHeights.Count); i++)
+                for (var i = 0; i < Math.Min(nestedGrid.RowDefinitions.Count, positions.NestedRowHeights.Count); i++)
                 {
                     var savedHeight = positions.NestedRowHeights[i];
                     var unitType = i < positions.NestedRowUnitTypes.Count ? positions.NestedRowUnitTypes[i] : GridUnitType.Pixel;
                     if (savedHeight <= 0)
+                    {
                         continue;
+                    }
 
                     if (unitType == GridUnitType.Pixel)
                     {
@@ -146,12 +153,14 @@ public static partial class InitLayout
                 }
 
                 // Restore nested grid column widths (video/list view splitter) - preserve Pixel, restore Star ratio, keep Auto
-                for (int i = 0; i < Math.Min(nestedGrid.ColumnDefinitions.Count, positions.NestedColumnWidths.Count); i++)
+                for (var i = 0; i < Math.Min(nestedGrid.ColumnDefinitions.Count, positions.NestedColumnWidths.Count); i++)
                 {
                     var savedWidth = positions.NestedColumnWidths[i];
                     var unitType = i < positions.NestedColumnUnitTypes.Count ? positions.NestedColumnUnitTypes[i] : GridUnitType.Pixel;
                     if (savedWidth <= 0)
+                    {
                         continue;
+                    }
 
                     if (unitType == GridUnitType.Pixel)
                     {
