@@ -1637,6 +1637,42 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void WaveformShowOnlySpectrogram()
+    {
+        if (Window == null || AudioVisualizer?.WavePeaks == null)
+        {
+            return;
+        }
+
+        AudioVisualizer.SetDisplayMode(WaveformDisplayMode.OnlySpectogram);
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void WaveformShowOnlyWaveform()
+    {
+        if (Window == null || AudioVisualizer?.WavePeaks == null)
+        {
+            return;
+        }
+
+        AudioVisualizer.SetDisplayMode(WaveformDisplayMode.OnlyWaveform);
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void WaveformShowWaveformAndSpectrogram()
+    {
+        if (Window == null || AudioVisualizer?.WavePeaks == null)
+        {
+            return;
+        }
+
+        AudioVisualizer.SetDisplayMode(WaveformDisplayMode.WaveformAndSpectrogram);
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
     private async Task ShowPickLayerFilter()
     {
         if (Window == null || AudioVisualizer?.WavePeaks == null)

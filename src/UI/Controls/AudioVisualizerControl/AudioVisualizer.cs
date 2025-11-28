@@ -1,9 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Markup.Declarative;
 using Avalonia.Media;
-using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
@@ -221,10 +219,8 @@ public class AudioVisualizer : Control
     private double _originalNextStartSeconds;
     private long _audioVisualizerLastScroll;
     private long _lastPointerPressed = -1;
-
-    private SpectrogramData2 _spectrogram;
-    private const int SpectrogramDisplayHeight = 128;
-
+    private WaveformDisplayMode _displayMode = WaveformDisplayMode.OnlyWaveform;
+    private SpectrogramData2? _spectrogram;
 
     private enum InteractionMode
     {
@@ -981,8 +977,8 @@ public class AudioVisualizer : Control
         {
             DrawAllGridLines(context);
             DrawWaveForm(context);
+            DrawSpectrogram(context);
             DrawTimeLine(context);
-            DrawSpectrogram(context, (int)Bounds.Height);
             DrawParagraphs(context);
             DrawShotChanges(context);
             DrawCurrentVideoPosition(context);
@@ -995,11 +991,20 @@ public class AudioVisualizer : Control
         }
     }
 
-    private void DrawSpectrogram(DrawingContext context, int height)
+    private void DrawSpectrogram(DrawingContext context)
     {
-        if (_spectrogram == null || _spectrogram.Images == null || _spectrogram.Images.Count == 0)
+        if (_spectrogram == null || 
+            _spectrogram.Images == null || 
+            _spectrogram.Images.Count == 0 ||
+            _displayMode == WaveformDisplayMode.OnlyWaveform)
         {
             return;
+        }
+
+        var height = Bounds.Height;
+        if (_displayMode == WaveformDisplayMode.WaveformAndSpectrogram)
+        {
+            height = Bounds.Height / 2;
         }
 
         var width = (int)Math.Round((EndPositionSeconds - StartPositionSeconds) / _spectrogram.SampleDuration);
@@ -1031,7 +1036,7 @@ public class AudioVisualizer : Control
         }
 
         // Convert SKBitmap to Avalonia Bitmap and draw it
-        var displayHeight = SpectrogramDisplayHeight;
+        var displayHeight = height;
         var avaloniaBitmap = skBitmapCombined.ToAvaloniaBitmap();
         
         var destRectangle = new Rect(0, Bounds.Height - displayHeight, Bounds.Width, displayHeight);
@@ -2004,5 +2009,10 @@ public class AudioVisualizer : Control
 
         var halfWidthInSeconds = (Bounds.Width / 2.0) / (WavePeaks.SampleRate * ZoomFactor) - (line.Duration.TotalSeconds / 2.0);
         StartPositionSeconds = Math.Max(0, line.StartTime.TotalSeconds - halfWidthInSeconds);
+    }
+
+    internal void SetDisplayMode(WaveformDisplayMode displayMode)
+    {
+        _displayMode = displayMode;
     }
 }

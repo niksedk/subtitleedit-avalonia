@@ -57,6 +57,27 @@ public class InitWaveform
             //flyout.Opening += vm.AudioVisualizerContextOpening;
             vm.AudioVisualizer.FlyoutMenuOpening += vm.AudioVisualizerFlyoutMenuOpening;
 
+            var showOnlyWaveformMenuItem = new MenuItem
+            {
+                Header = Se.Language.Waveform.ShowOnlyWaveform,
+                Command = vm.WaveformShowOnlyWaveformCommand,
+            };
+            flyout.Items.Add(showOnlyWaveformMenuItem);
+
+            var showOnlySpectrogramMenuItem = new MenuItem
+            {
+                Header = Se.Language.Waveform.ShowOnlySpectrogram,
+                Command = vm.WaveformShowOnlySpectrogramCommand,
+            };
+            flyout.Items.Add(showOnlySpectrogramMenuItem);
+
+            var showWaveformAndSpectrogramMenuItem = new MenuItem
+            {
+                Header = Se.Language.Waveform.ShowWaveformAndSpectrogram,
+                Command = vm.WaveformShowWaveformAndSpectrogramCommand,
+            };
+            flyout.Items.Add(showWaveformAndSpectrogramMenuItem);
+
             var insertSelectionMenuItem = new MenuItem
             {
                 Header = Se.Language.General.InsertNewSelection,

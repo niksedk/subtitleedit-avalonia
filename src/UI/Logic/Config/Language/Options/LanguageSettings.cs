@@ -189,7 +189,7 @@ public class LanguageSettings
     public string MpvWidRendering { get; set; }
     public string WaveFormsAndSpectrogramFoldersContainsX { get; set; }
     public string DeleteWaveformAndSpectrogramFoldersQuestion { get; set; }
-    public string WaveformShowSpectrogram { get; set; }
+    public string WaveformGenerateSpectrogram { get; set; }
 
     public LanguageSettings()
     {
@@ -375,7 +375,7 @@ public class LanguageSettings
         MpvSoftwareRendering = "libmpv - Software rendering (slow)";
         WaveFormsAndSpectrogramFoldersContainsX = "'Waveforms' and 'spectrogram' folders contains {0}";
         DeleteWaveformAndSpectrogramFoldersQuestion = "Delete 'Waveforms' and 'Spectrogram' files?";
-        WaveformShowSpectrogram = "Show/generate spectrogram";
+        WaveformGenerateSpectrogram = "Generate spectrogram";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)
