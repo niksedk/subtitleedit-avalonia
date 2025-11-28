@@ -9879,6 +9879,8 @@ public partial class MainViewModel :
             if (!string.IsNullOrEmpty(_videoFileName) && vp != null)
             {
                 vp.Position = selectedItem.StartTime.TotalSeconds;
+
+                AudioVisualizer?.CenterOnPosition(selectedItem);
             }
         }
     }

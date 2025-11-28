@@ -828,7 +828,6 @@ public class AudioVisualizer : Control
         InvalidateVisual();
     }
 
-
     private void UpdateCursor(Point point)
     {
         var p = HitTestParagraph(point);
@@ -839,7 +838,14 @@ public class AudioVisualizer : Control
 
             if (Math.Abs(point.X - left) <= ResizeMargin || Math.Abs(point.X - right) <= ResizeMargin)
             {
-                Cursor = new Cursor(StandardCursorType.SizeWestEast);
+                if (p == NewSelectionParagraph && NewSelectionParagraph.Duration.TotalMilliseconds < 10)
+                {
+                    Cursor = new Cursor(StandardCursorType.Arrow);
+                }
+                else
+                {
+                    Cursor = new Cursor(StandardCursorType.SizeWestEast);
+                }
             }
             else
             {
@@ -1892,5 +1898,16 @@ public class AudioVisualizer : Control
 
         var halfWidthInSeconds = (Bounds.Width / 2) / (WavePeaks.SampleRate * ZoomFactor);
         StartPositionSeconds = Math.Max(0, position - halfWidthInSeconds);
+    }
+
+    internal void CenterOnPosition(SubtitleLineViewModel line)
+    {
+        if (WavePeaks == null)
+        {
+            return;
+        }
+
+        var halfWidthInSeconds = (Bounds.Width / 2.0) / (WavePeaks.SampleRate * ZoomFactor) - (line.Duration.TotalSeconds / 2.0);
+        StartPositionSeconds = Math.Max(0, line.StartTime.TotalSeconds - halfWidthInSeconds);
     }
 }
