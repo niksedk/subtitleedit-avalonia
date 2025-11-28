@@ -8367,7 +8367,7 @@ public partial class MainViewModel :
         if (Se.Settings.General.RememberPositionAndSize)
         {
             UiUtil.RestoreWindowPosition(Window);
-            InitLayout.RestoreLayoutPositions(Se.Settings.Appearance.CurrentLayoutPositions, ContentGrid.Children.FirstOrDefault() as Grid);
+            //InitLayout.RestoreLayoutPositions(Se.Settings.Appearance.CurrentLayoutPositions, ContentGrid.Children.FirstOrDefault() as Grid);
 
             if (Se.Settings.General.UndockVideoControls)
             {
@@ -8380,6 +8380,15 @@ public partial class MainViewModel :
             await Task.Delay(1000); // delay 1 second (off UI thread)
             _undoRedoManager.StartChangeDetection();
             _loading = false;
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                if (Se.Settings.General.RememberPositionAndSize)
+                {
+                    InitLayout.RestoreLayoutPositions(Se.Settings.Appearance.CurrentLayoutPositions, ContentGrid.Children.FirstOrDefault() as Grid);
+                }
+            }, DispatcherPriority.Loaded);
+
         });
     }
 

@@ -18,6 +18,12 @@ public static partial class InitLayout
         public List<double> ColumnWidths { get; set; } = new();
         public List<double> NestedRowHeights { get; set; } = new();
         public List<double> NestedColumnWidths { get; set; } = new();
+
+        // store unit types so we do not convert Star/Auto to fixed pixels on restore
+        public List<GridUnitType> RowUnitTypes { get; set; } = new();
+        public List<GridUnitType> ColumnUnitTypes { get; set; } = new();
+        public List<GridUnitType> NestedRowUnitTypes { get; set; } = new();
+        public List<GridUnitType> NestedColumnUnitTypes { get; set; } = new();
     }
 
     public static LayoutPositions SaveLayoutPositions(Grid? contentGrid)
@@ -29,16 +35,18 @@ public static partial class InitLayout
 
         var positions = new LayoutPositions();
 
-        // Save main grid row heights
+        // Save main grid row heights + unit types
         foreach (var rowDef in contentGrid.RowDefinitions)
         {
             positions.RowHeights.Add(rowDef.ActualHeight);
+            positions.RowUnitTypes.Add(rowDef.Height.GridUnitType);
         }
 
-        // Save main grid column widths
+        // Save main grid column widths + unit types
         foreach (var colDef in contentGrid.ColumnDefinitions)
         {
             positions.ColumnWidths.Add(colDef.ActualWidth);
+            positions.ColumnUnitTypes.Add(colDef.Width.GridUnitType);
         }
 
         // Look for nested grids
@@ -46,16 +54,18 @@ public static partial class InitLayout
         {
             if (child is Border border && border.Child is Grid nestedGrid)
             {
-                // Save nested grid row heights
+                // Save nested grid row heights + unit types
                 foreach (var rowDef in nestedGrid.RowDefinitions)
                 {
                     positions.NestedRowHeights.Add(rowDef.ActualHeight);
+                    positions.NestedRowUnitTypes.Add(rowDef.Height.GridUnitType);
                 }
 
-                // Save nested grid column widths
+                // Save nested grid column widths + unit types
                 foreach (var colDef in nestedGrid.ColumnDefinitions)
                 {
                     positions.NestedColumnWidths.Add(colDef.ActualWidth);
+                    positions.NestedColumnUnitTypes.Add(colDef.Width.GridUnitType);
                 }
 
                 break; // Only process the first nested grid found
@@ -73,21 +83,23 @@ public static partial class InitLayout
             return;
         }
 
-        // Restore main grid row heights
+        // Restore main grid row heights ONLY for pixel-sized rows
         for (int i = 0; i < Math.Min(contentGrid.RowDefinitions.Count, positions.RowHeights.Count); i++)
         {
             var savedHeight = positions.RowHeights[i];
-            if (savedHeight > 0)
+            var unitType = i < positions.RowUnitTypes.Count ? positions.RowUnitTypes[i] : GridUnitType.Pixel; // default pixel
+            if (savedHeight > 0 && unitType == GridUnitType.Pixel)
             {
                 contentGrid.RowDefinitions[i].Height = new GridLength(savedHeight, GridUnitType.Pixel);
             }
         }
 
-        // Restore main grid column widths
+        // Restore main grid column widths ONLY for pixel-sized columns
         for (int i = 0; i < Math.Min(contentGrid.ColumnDefinitions.Count, positions.ColumnWidths.Count); i++)
         {
             var savedWidth = positions.ColumnWidths[i];
-            if (savedWidth > 0)
+            var unitType = i < positions.ColumnUnitTypes.Count ? positions.ColumnUnitTypes[i] : GridUnitType.Pixel;
+            if (savedWidth > 0 && unitType == GridUnitType.Pixel)
             {
                 contentGrid.ColumnDefinitions[i].Width = new GridLength(savedWidth, GridUnitType.Pixel);
             }
@@ -98,21 +110,23 @@ public static partial class InitLayout
         {
             if (child is Border border && border.Child is Grid nestedGrid)
             {
-                // Restore nested grid row heights
+                // Restore nested grid row heights ONLY for pixel-sized rows
                 for (int i = 0; i < Math.Min(nestedGrid.RowDefinitions.Count, positions.NestedRowHeights.Count); i++)
                 {
                     var savedHeight = positions.NestedRowHeights[i];
-                    if (savedHeight > 0)
+                    var unitType = i < positions.NestedRowUnitTypes.Count ? positions.NestedRowUnitTypes[i] : GridUnitType.Pixel;
+                    if (savedHeight > 0 && unitType == GridUnitType.Pixel)
                     {
                         nestedGrid.RowDefinitions[i].Height = new GridLength(savedHeight, GridUnitType.Pixel);
                     }
                 }
 
-                // Restore nested grid column widths
+                // Restore nested grid column widths ONLY for pixel-sized columns
                 for (int i = 0; i < Math.Min(nestedGrid.ColumnDefinitions.Count, positions.NestedColumnWidths.Count); i++)
                 {
                     var savedWidth = positions.NestedColumnWidths[i];
-                    if (savedWidth > 0)
+                    var unitType = i < positions.NestedColumnUnitTypes.Count ? positions.NestedColumnUnitTypes[i] : GridUnitType.Pixel;
+                    if (savedWidth > 0 && unitType == GridUnitType.Pixel)
                     {
                         nestedGrid.ColumnDefinitions[i].Width = new GridLength(savedWidth, GridUnitType.Pixel);
                     }
