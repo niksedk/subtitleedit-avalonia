@@ -382,7 +382,7 @@ public class AudioVisualizer : Control
 
         if (_isAltDown)
         {
-            var newZoomFactor = ZoomFactor + delta / 1000.0;
+            var newZoomFactor = ZoomFactor + delta / 100.0;
 
             if (newZoomFactor < 0.1)
             {
