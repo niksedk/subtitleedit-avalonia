@@ -83,26 +83,42 @@ public static partial class InitLayout
             return;
         }
 
-        // Restore main grid row heights ONLY for pixel-sized rows
+        // Restore main grid row heights - preserve Pixel, restore Star ratio, keep Auto
         for (int i = 0; i < Math.Min(contentGrid.RowDefinitions.Count, positions.RowHeights.Count); i++)
         {
             var savedHeight = positions.RowHeights[i];
             var unitType = i < positions.RowUnitTypes.Count ? positions.RowUnitTypes[i] : GridUnitType.Pixel; // default pixel
-            if (savedHeight > 0 && unitType == GridUnitType.Pixel)
+            if (savedHeight <= 0)
+                continue;
+
+            if (unitType == GridUnitType.Pixel)
             {
                 contentGrid.RowDefinitions[i].Height = new GridLength(savedHeight, GridUnitType.Pixel);
             }
+            else if (unitType == GridUnitType.Star)
+            {
+                contentGrid.RowDefinitions[i].Height = new GridLength(savedHeight, GridUnitType.Star);
+            }
+            // Auto: do nothing
         }
 
-        // Restore main grid column widths ONLY for pixel-sized columns
+        // Restore main grid column widths - preserve Pixel, restore Star ratio, keep Auto
         for (int i = 0; i < Math.Min(contentGrid.ColumnDefinitions.Count, positions.ColumnWidths.Count); i++)
         {
             var savedWidth = positions.ColumnWidths[i];
             var unitType = i < positions.ColumnUnitTypes.Count ? positions.ColumnUnitTypes[i] : GridUnitType.Pixel;
-            if (savedWidth > 0 && unitType == GridUnitType.Pixel)
+            if (savedWidth <= 0)
+                continue;
+
+            if (unitType == GridUnitType.Pixel)
             {
                 contentGrid.ColumnDefinitions[i].Width = new GridLength(savedWidth, GridUnitType.Pixel);
             }
+            else if (unitType == GridUnitType.Star)
+            {
+                contentGrid.ColumnDefinitions[i].Width = new GridLength(savedWidth, GridUnitType.Star);
+            }
+            // Auto: do nothing
         }
 
         // Look for nested grids to restore
@@ -110,26 +126,42 @@ public static partial class InitLayout
         {
             if (child is Border border && border.Child is Grid nestedGrid)
             {
-                // Restore nested grid row heights ONLY for pixel-sized rows
+                // Restore nested grid row heights - preserve Pixel, restore Star ratio, keep Auto
                 for (int i = 0; i < Math.Min(nestedGrid.RowDefinitions.Count, positions.NestedRowHeights.Count); i++)
                 {
                     var savedHeight = positions.NestedRowHeights[i];
                     var unitType = i < positions.NestedRowUnitTypes.Count ? positions.NestedRowUnitTypes[i] : GridUnitType.Pixel;
-                    if (savedHeight > 0 && unitType == GridUnitType.Pixel)
+                    if (savedHeight <= 0)
+                        continue;
+
+                    if (unitType == GridUnitType.Pixel)
                     {
                         nestedGrid.RowDefinitions[i].Height = new GridLength(savedHeight, GridUnitType.Pixel);
                     }
+                    else if (unitType == GridUnitType.Star)
+                    {
+                        nestedGrid.RowDefinitions[i].Height = new GridLength(savedHeight, GridUnitType.Star);
+                    }
+                    // Auto: do nothing
                 }
 
-                // Restore nested grid column widths ONLY for pixel-sized columns
+                // Restore nested grid column widths (video/list view splitter) - preserve Pixel, restore Star ratio, keep Auto
                 for (int i = 0; i < Math.Min(nestedGrid.ColumnDefinitions.Count, positions.NestedColumnWidths.Count); i++)
                 {
                     var savedWidth = positions.NestedColumnWidths[i];
                     var unitType = i < positions.NestedColumnUnitTypes.Count ? positions.NestedColumnUnitTypes[i] : GridUnitType.Pixel;
-                    if (savedWidth > 0 && unitType == GridUnitType.Pixel)
+                    if (savedWidth <= 0)
+                        continue;
+
+                    if (unitType == GridUnitType.Pixel)
                     {
                         nestedGrid.ColumnDefinitions[i].Width = new GridLength(savedWidth, GridUnitType.Pixel);
                     }
+                    else if (unitType == GridUnitType.Star)
+                    {
+                        nestedGrid.ColumnDefinitions[i].Width = new GridLength(savedWidth, GridUnitType.Star);
+                    }
+                    // Auto: do nothing (usually the splitter column)
                 }
 
                 break; // Only process the first nested grid found
