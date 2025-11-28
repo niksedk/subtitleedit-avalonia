@@ -76,6 +76,9 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
                     var tempFileName = Path.Combine(dir, Engine.Name + ".7z");
 
                     ProgressText = Se.Language.General.Unpacking7ZipArchiveDotDotDot;
+
+                    //TODO: make undetimnedistic progress bar for slider
+
                     Extract7Zip(tempFileName, dir);
 
                     try
