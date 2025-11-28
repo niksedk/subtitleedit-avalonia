@@ -10330,4 +10330,12 @@ public partial class MainViewModel :
             });
         }
     }
+
+    internal void AudioVisualizerOnDeletePressed(object sender, ParagraphEventArgs e)
+    {
+        Dispatcher.UIThread.Post(async void () =>
+        {
+            await DeleteSelectedItems();
+        });
+    }
 }

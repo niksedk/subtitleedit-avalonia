@@ -263,6 +263,7 @@ public class AudioVisualizer : Control
     //public event ParagraphEventHandler? OnNonParagraphRightClicked;
     //public event ParagraphEventHandler? OnSingleClick;
     //public event ParagraphEventHandler? OnStatus;
+    public event ParagraphEventHandler? OnDeletePressed;
 
     public AudioVisualizer()
     {
@@ -364,6 +365,10 @@ public class AudioVisualizer : Control
         else if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
         {
             _isShiftDown = true;
+        }
+        else if (e.Key == Key.Delete && !e.KeyModifiers.HasFlag(KeyModifiers.Control) && !e.KeyModifiers.HasFlag(KeyModifiers.Alt) && !e.KeyModifiers.HasFlag(KeyModifiers.Shift))
+        {
+            OnDeletePressed?.Invoke(this, new ParagraphEventArgs(0, _activeParagraph)); 
         }
     }
 
