@@ -118,6 +118,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _waveformDrawGridLines;
     [ObservableProperty] private bool _waveformFocusOnMouseOver;
     [ObservableProperty] private bool _waveformCenterVideoPosition;
+    [ObservableProperty] private bool _waveformShowSpectrogram;
     [ObservableProperty] private bool _waveformShowToolbar;
     [ObservableProperty] private bool _showWaveformVerticalZoom;
     [ObservableProperty] private bool _showWaveformHorizontalZoom;
@@ -395,6 +396,7 @@ public partial class SettingsViewModel : ObservableObject
         WaveformFocusOnMouseOver = Se.Settings.Waveform.FocusOnMouseOver;
         WaveformCenterVideoPosition = Se.Settings.Waveform.CenterVideoPosition;
         WaveformShowToolbar = Se.Settings.Waveform.ShowToolbar;
+        WaveformShowSpectrogram = Se.Settings.Waveform.GenerateSpectrogram;
         ShowWaveformVerticalZoom = Se.Settings.Waveform.ShowWaveformVerticalZoom;
         ShowWaveformHorizontalZoom = Se.Settings.Waveform.ShowWaveformHorizontalZoom;
         ShowWaveformVideoPositionSlider = Se.Settings.Waveform.ShowWaveformVideoPositionSlider;
@@ -533,6 +535,7 @@ public partial class SettingsViewModel : ObservableObject
         Se.Settings.Waveform.CenterVideoPosition = WaveformCenterVideoPosition;
         Se.Settings.Waveform.FocusTextBoxAfterInsertNew = WaveformFocusTextboxAfterInsertNew;
         Se.Settings.Waveform.ShowToolbar = WaveformShowToolbar;
+        Se.Settings.Waveform.GenerateSpectrogram = WaveformShowSpectrogram;
         Se.Settings.Waveform.ShowWaveformVerticalZoom = ShowWaveformVerticalZoom;
         Se.Settings.Waveform.ShowWaveformHorizontalZoom = ShowWaveformHorizontalZoom;
         Se.Settings.Waveform.ShowWaveformVideoPositionSlider = ShowWaveformVideoPositionSlider;

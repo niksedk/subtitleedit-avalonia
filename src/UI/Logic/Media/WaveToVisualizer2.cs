@@ -313,7 +313,7 @@ public class SpectrogramData2 : IDisposable
 
             var images = new List<SKBitmap>();
             var fileNames = Enumerable.Range(0, int.MaxValue)
-                .Select(n => Path.Combine(directory, n + ".gif"))
+                .Select(n => Path.Combine(directory, n + ".png"))
                 .TakeWhile(p => File.Exists(p));
             foreach (string fileName in fileNames)
             {
@@ -795,7 +795,7 @@ public class WavePeakGenerator2 : IDisposable
 
     //////////////////////////////////////// SPECTRUM ///////////////////////////////////////////////////////////
 
-    public SpectrogramData GenerateSpectrogram(int delayInMilliseconds, string spectrogramDirectory)
+    public SpectrogramData2 GenerateSpectrogram(int delayInMilliseconds, string spectrogramDirectory)
     {
         const int fftSize = 256; // image height = fft size / 2
         const int imageWidth = 1024;
@@ -887,13 +887,13 @@ public class WavePeakGenerator2 : IDisposable
             saveImageTask?.Wait();
 
             // save image
-            string imagePath = Path.Combine(spectrogramDirectory, iChunk + ".gif");
+            string imagePath = Path.Combine(spectrogramDirectory, iChunk + ".png");
             saveImageTask = Task.Factory.StartNew(() =>
             {
                 using (var stream = File.OpenWrite(imagePath))
-                using (var gitData = bmp.Encode(SKEncodedImageFormat.Gif, 100))
+                using (var pngData = bmp.Encode(SKEncodedImageFormat.Png, 100))
                 {
-                    gitData.SaveTo(stream);
+                    pngData.SaveTo(stream);
                 }
             });
         }
@@ -914,7 +914,7 @@ public class WavePeakGenerator2 : IDisposable
         }
         doc.Save(Path.Combine(spectrogramDirectory, "Info.xml"));
 
-        return new SpectrogramData(fftSize, imageWidth, sampleDuration, images);
+        return new SpectrogramData2(fftSize, imageWidth, sampleDuration, images);
     }
 
     public class SpectrogramDrawer

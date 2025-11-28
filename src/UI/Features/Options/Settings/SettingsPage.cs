@@ -334,6 +334,7 @@ public class SettingsPage : UserControl
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformVerticalZoom, nameof(_vm.ShowWaveformVerticalZoom)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformVideoPositionSlider, nameof(_vm.ShowWaveformVideoPositionSlider)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformPlaybackSpeed, nameof(_vm.ShowWaveformPlaybackSpeed)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformShowSpectrogram, nameof(_vm.WaveformShowSpectrogram)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformFocusOnMouseOver, nameof(_vm.WaveformFocusOnMouseOver)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformCenterVideoPosition, nameof(_vm.WaveformCenterVideoPosition)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformSnapToShotChanges, nameof(_vm.WaveformSnapToShotChanges)),

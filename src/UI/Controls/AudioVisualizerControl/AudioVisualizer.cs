@@ -1,11 +1,14 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Markup.Declarative;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Media;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,6 +16,7 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 
@@ -216,6 +220,10 @@ public class AudioVisualizer : Control
     private double _originalNextStartSeconds;
     private long _audioVisualizerLastScroll;
     private long _lastPointerPressed = -1;
+
+    private SpectrogramData _spectrogram;
+    private const int SpectrogramDisplayHeight = 128;
+
 
     private enum InteractionMode
     {
@@ -973,6 +981,7 @@ public class AudioVisualizer : Control
             DrawAllGridLines(context);
             DrawWaveForm(context);
             DrawTimeLine(context);
+            DrawSpectrogram(context, (int)Bounds.Height);
             DrawParagraphs(context);
             DrawShotChanges(context);
             DrawCurrentVideoPosition(context);
@@ -983,6 +992,58 @@ public class AudioVisualizer : Control
                 context.DrawRectangle(null, _paintPenSelected, new Rect(0, 0, Bounds.Width, Bounds.Height));
             }
         }
+    }
+
+    private void DrawSpectrogram(DrawingContext context, int height)
+    {
+        var width = (int)Math.Round((EndPositionSeconds - _startPositionSeconds) / _spectrogram.SampleDuration);
+        using (var bmpCombined = new Bitmap(width, _spectrogram.FftSize / 2))
+        using (var gfxCombined = Graphics.FromImage(bmpCombined))
+        {
+            var left = (int)Math.Round(_startPositionSeconds / _spectrogram.SampleDuration);
+            var offset = 0;
+            var imageIndex = left / _spectrogram.ImageWidth;
+            while (offset < width && imageIndex < _spectrogram.Images.Count)
+            {
+                var x = (left + offset) % _spectrogram.ImageWidth;
+                var w = Math.Min(_spectrogram.ImageWidth - x, width - offset);
+                gfxCombined.DrawImage(_spectrogram.Images[imageIndex], offset, 0, new Rectangle(x, 0, w, bmpCombined.Height), GraphicsUnit.Pixel);
+                offset += w;
+                imageIndex++;
+            }
+
+            if (CombineSpectrogramAndWaveform)
+            {
+                var destRect = new Rectangle(0, Height - height, Width, height);
+
+                // Create ImageAttributes
+                using (ImageAttributes imageAttributes = new ImageAttributes())
+                {
+                    // Create a color matrix for transparency
+                    float[][] colorMatrixElements =
+                    {
+                            new float[] { 1, 0, 0, 0, 0 },
+                            new float[] { 0, 1, 0, 0, 0 },
+                            new float[] { 0, 0, 1, 0, 0 },
+                            new float[] { 0, 0, 0, this.SpectrogramAlpha, 0 },
+                            new float[] { 0, 0, 0, 0, 1 }
+                        };
+                    ColorMatrix colorMatrix = new ColorMatrix(colorMatrixElements);
+
+                    // Set the color matrix in ImageAttributes
+                    imageAttributes.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+
+                    // Draw the image with transparency
+                    graphics.DrawImage(bmpCombined, destRect, 0, 0, bmpCombined.Width, bmpCombined.Height, GraphicsUnit.Pixel, imageAttributes);
+                }
+            }
+            else
+            {
+                var displayHeight = _showWaveform ? SpectrogramDisplayHeight : Height;
+                graphics.DrawImage(bmpCombined, new Rectangle(0, Height - displayHeight, Width, displayHeight));
+            }
+        }
+    }
     }
 
     private void DrawTimeLine(DrawingContext context)
@@ -1579,7 +1640,100 @@ public class AudioVisualizer : Control
 
     internal void SetSpectrogram(SpectrogramData2 spectrogramData)
     {
-        //TODO: implement spectrogram
+        InitializeSpectrogram(spectrogramData);
+    }
+
+    private void InitializeSpectrogram(SpectrogramData spectrogram)
+    {
+        if (_spectrogram != null)
+        {
+            _spectrogram.Dispose();
+            _spectrogram = null;
+            Invalidate();
+        }
+
+        if (spectrogram == null)
+        {
+            return;
+        }
+
+        if (spectrogram.IsLoaded)
+        {
+            InitializeSpectrogramInternal(spectrogram);
+        }
+        else
+        {
+            Task.Factory.StartNew(() =>
+            {
+                spectrogram.Load();
+                BeginInvoke((Action)(() =>
+                {
+                    InitializeSpectrogramInternal(spectrogram);
+                }));
+            });
+        }
+    }
+
+    private void InitializeSpectrogramInternal(SpectrogramData spectrogram)
+    {
+        if (_spectrogram != null)
+        {
+            return;
+        }
+
+        _spectrogram = spectrogram;
+        Invalidate();
+    }
+
+    private void DrawSpectrogram(Graphics graphics, int height) // Add transparency parameter
+    {
+        var width = (int)Math.Round((EndPositionSeconds - _startPositionSeconds) / _spectrogram.SampleDuration);
+        using (var bmpCombined = new Bitmap(width, _spectrogram.FftSize / 2))
+        using (var gfxCombined = Graphics.FromImage(bmpCombined))
+        {
+            var left = (int)Math.Round(_startPositionSeconds / _spectrogram.SampleDuration);
+            var offset = 0;
+            var imageIndex = left / _spectrogram.ImageWidth;
+            while (offset < width && imageIndex < _spectrogram.Images.Count)
+            {
+                var x = (left + offset) % _spectrogram.ImageWidth;
+                var w = Math.Min(_spectrogram.ImageWidth - x, width - offset);
+                gfxCombined.DrawImage(_spectrogram.Images[imageIndex], offset, 0, new Rectangle(x, 0, w, bmpCombined.Height), GraphicsUnit.Pixel);
+                offset += w;
+                imageIndex++;
+            }
+
+            if (CombineSpectrogramAndWaveform)
+            {
+                var destRect = new Rectangle(0, Height - height, Width, height);
+
+                // Create ImageAttributes
+                using (ImageAttributes imageAttributes = new ImageAttributes())
+                {
+                    // Create a color matrix for transparency
+                    float[][] colorMatrixElements =
+                    {
+                            new float[] { 1, 0, 0, 0, 0 },
+                            new float[] { 0, 1, 0, 0, 0 },
+                            new float[] { 0, 0, 1, 0, 0 },
+                            new float[] { 0, 0, 0, this.SpectrogramAlpha, 0 },
+                            new float[] { 0, 0, 0, 0, 1 }
+                        };
+                    ColorMatrix colorMatrix = new ColorMatrix(colorMatrixElements);
+
+                    // Set the color matrix in ImageAttributes
+                    imageAttributes.SetColorMatrix(colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+
+                    // Draw the image with transparency
+                    graphics.DrawImage(bmpCombined, destRect, 0, 0, bmpCombined.Width, bmpCombined.Height, GraphicsUnit.Pixel, imageAttributes);
+                }
+            }
+            else
+            {
+                var displayHeight = _showWaveform ? SpectrogramDisplayHeight : Height;
+                graphics.DrawImage(bmpCombined, new Rectangle(0, Height - displayHeight, Width, displayHeight));
+            }
+        }
     }
 
     public double FindDataBelowThreshold(double thresholdPercent, double durationInSeconds)

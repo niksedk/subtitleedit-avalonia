@@ -8537,10 +8537,10 @@ public partial class MainViewModel :
 
             var wavePeaks = WavePeakData2.FromDisk(peakWaveFileName);
 
-            if (_videoOpenTokenSource.IsCancellationRequested)
+            if (Se.Settings.Waveform.GenerateSpectrogram)
             {
-                DeleteTempFile(tempWaveFileName);
-                return;
+                var spectrogram = waveFile.GenerateSpectrogram(0, WavePeakGenerator.SpectrogramDrawer.GetSpectrogramFolder(videoFileName));
+                AudioVisualizer?.SetSpectrogram(spectrogram);
             }
 
             Dispatcher.UIThread.Post(() =>
@@ -8552,6 +8552,13 @@ public partial class MainViewModel :
 
                 _updateAudioVisualizer = true;
             }, DispatcherPriority.Background);
+
+
+            if (_videoOpenTokenSource.IsCancellationRequested)
+            {
+                DeleteTempFile(tempWaveFileName);
+                return;
+            }
         }
 
         ExtractShotChanges(videoFileName);

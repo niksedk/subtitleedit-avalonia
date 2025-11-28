@@ -30,6 +30,7 @@ public class SeWaveform
     public double SeekSilenceMinDurationSeconds { get; set; }
     public double SeekSilenceMaxVolume { get; set; }
     public bool SeekSilenceSeekForward { get; set; }
+    public bool GenerateSpectrogram { get; set; }
 
     public SeWaveform()
     {
