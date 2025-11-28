@@ -805,11 +805,7 @@ public static class InitListViewAndEditBox
             {
                 Mode = BindingMode.TwoWay,
             },
-            // Add a binding for the background property
-            [!SecondsUpDown.BackgroundProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.Duration)}")
-            {
-                Converter = DurationToBackgroundConverter.Instance,
-            },
+            [!SecondsUpDown.BackgroundProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.DurationBackgroundBrush)}")
         };
         if (!vm.ShowUpDownLabels && Se.Settings.Appearance.ShowHints)
         {
