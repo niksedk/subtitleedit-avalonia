@@ -34,6 +34,7 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
     public Window? Window { get; set; }
     public bool OkPressed { get; internal set; }
     public IWhisperEngine? Engine { get; internal set; }
+    public Slider? ProgressSlider { get; internal set; }
 
     private readonly IWhisperDownloadService _whisperDownloadService;
     private Task? _downloadTask;
@@ -42,6 +43,11 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
     private readonly MemoryStream _downloadStream;
 
     private readonly IZipUnpacker _zipUnpacker;
+
+    // Indeterminate progress animation while extracting7z (marquee style)
+    private Timer? _indeterminateTimer;
+    private const double IndeterminateStep = 3.5; // percentage per tick
+    private const int IndeterminateIntervalMs = 75; // tick interval
 
     public DownloadWhisperEngineViewModel(IWhisperDownloadService whisperDownloadService, IZipUnpacker zipUnpacker)
     {
@@ -63,6 +69,53 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
 
     private readonly Lock _lockObj = new();
 
+    private void StartIndeterminateProgress()
+    {
+        StopIndeterminateProgress();
+        ProgressOpacity = 1.0;
+        ProgressValue = 0;
+        _indeterminateTimer = new Timer(IndeterminateIntervalMs);
+        _indeterminateTimer.Elapsed += (_, __) =>
+        {
+            if (_cancellationTokenSource.IsCancellationRequested)
+            {
+                StopIndeterminateProgress();
+                return;
+            }
+
+            // Marquee-style: increase and wrap around to0 when reaching100
+            var next = ProgressValue + IndeterminateStep;
+            if (next >= 100)
+            {
+                next = 0;
+            }
+
+            Dispatcher.UIThread.Post(() => { ProgressValue = next; });
+        };
+        _indeterminateTimer.AutoReset = true;
+        _indeterminateTimer.Start();
+    }
+
+    private void StopIndeterminateProgress()
+    {
+        if (_indeterminateTimer != null)
+        {
+            try
+            {
+                _indeterminateTimer.Stop();
+                _indeterminateTimer.Dispose();
+            }
+            catch
+            {
+                // ignore
+            }
+            finally
+            {
+                _indeterminateTimer = null;
+            }
+        }
+    }
+
     private void OnTimerOnElapsed(object? sender, ElapsedEventArgs args)
     {
         lock (_lockObj)
@@ -77,9 +130,13 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
 
                     ProgressText = Se.Language.General.Unpacking7ZipArchiveDotDotDot;
 
-                    //TODO: make undetimnedistic progress bar for slider
+                    // Start indeterminate progress animation while unpacking
+                    StartIndeterminateProgress();
 
                     Extract7Zip(tempFileName, dir);
+
+                    // Stop indeterminate animation once extraction completes
+                    StopIndeterminateProgress();
 
                     try
                     {
@@ -262,6 +319,7 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
     {
         _cancellationTokenSource?.Cancel();
         _timer.Stop();
+        StopIndeterminateProgress();
         Close();
     }
 
