@@ -446,8 +446,8 @@ public partial class SettingsViewModel : ObservableObject
         ShowStopButton = video.ShowStopButton;
         ShowFullscreenButton = video.ShowFullscreenButton;
         AutoOpenVideoFile = video.AutoOpen;
-        
-        MpvPreviewFontName  = video.MpvPreviewFontName;
+
+        MpvPreviewFontName = video.MpvPreviewFontName;
         MpvPreviewFontSize = video.MpvPreviewFontSize;
         MpvPreviewFontBold = video.MpvPreviewFontBold;
         MpvPreviewOutlineWidth = video.MpvPreviewOutlineWidth;
@@ -726,8 +726,13 @@ public partial class SettingsViewModel : ObservableObject
             return;
         }
 
-        List<string> files = GetWaveformAndSpecgtrogramFiles();
-        foreach (var file in files)
+        DeleteWaveformAndSpectrogramFiles();
+        _ = UpdateWaveformSpaceInfoAsync();
+    }
+
+    public static void DeleteWaveformAndSpectrogramFiles()
+    {
+        foreach (var file in Directory.GetFiles(Se.WaveformsFolder, "*.wav").ToList())
         {
             try
             {
@@ -739,13 +744,23 @@ public partial class SettingsViewModel : ObservableObject
             }
         }
 
-        _ = UpdateWaveformSpaceInfoAsync();
+        foreach (var directory in Directory.GetDirectories(Se.SpectrogramsFolder).ToList())
+        {
+            try
+            {
+                Directory.Delete(directory, recursive: true);
+            }
+            catch
+            {
+                // ignore
+            }
+        }
     }
 
     private static List<string> GetWaveformAndSpecgtrogramFiles()
     {
         var files = Directory.GetFiles(Se.WaveformsFolder, "*.wav").ToList();
-        files.AddRange(Directory.GetFiles(Se.SpectrogramsFolder, "*.png"));
+        files.AddRange(Directory.GetFiles(Se.SpectrogramsFolder, "*.png", SearchOption.AllDirectories));
         return files;
     }
 

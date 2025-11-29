@@ -63,6 +63,8 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     [ObservableProperty] private string _progressText;
     [ObservableProperty] private string _elapsedText;
     [ObservableProperty] private string _estimatedText;
+    [ObservableProperty] private bool _isReDownloadVisible;
+    [ObservableProperty] private string _reDownloadText;
 
     public Window? Window { get; set; }
 
@@ -146,6 +148,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         TranscribedSubtitle = new Subtitle();
         TextBoxConsoleLog = new TextBox();
         BatchGrid = new DataGrid();
+        ReDownloadText = string.Empty;
         _audioTrackNumber = 0;
         _error = string.Empty;
 
@@ -831,23 +834,18 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task ReDownloadWhisperCpp()
+    private async Task ReDownloadWhisperEngine()
     {
-        var vm = await _windowService.ShowDialogAsync<DownloadWhisperEngineWindow, DownloadWhisperEngineViewModel>(
-            Window!, viewModel =>
-            {
-                viewModel.Engine = Engines.First(p => p.Name == WhisperEngineCpp.StaticName);
-                viewModel.StartDownload();
-            });
-    }
+        var engine = SelectedEngine;
+        if (Window == null || engine == null)
+        {
+            return;
+        }
 
-    [RelayCommand]
-    private async Task ReDownloadWhisperPurfviewXxl()
-    {
         var vm = await _windowService.ShowDialogAsync<DownloadWhisperEngineWindow, DownloadWhisperEngineViewModel>(
             Window!, viewModel =>
             {
-                viewModel.Engine = Engines.First(p => p.Name == WhisperEnginePurfviewFasterWhisperXxl.StaticName);
+                viewModel.Engine = engine;
                 viewModel.StartDownload();
             });
     }
@@ -1764,7 +1762,21 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
     internal void WindowContextMenuOpening(object? sender, EventArgs e)
     {
-        IsWhisperCppActive = SelectedEngine != null && SelectedEngine.Name == WhisperEngineCpp.StaticName;
-        IsWhisperPurfviewXxlActive = SelectedEngine != null && SelectedEngine.Name == WhisperEnginePurfviewFasterWhisperXxl.StaticName;
+        var engine = SelectedEngine;
+        if (engine == null)
+        {
+            IsReDownloadVisible = false;
+            return;
+        }
+
+        IsReDownloadVisible = true;
+        if (engine.IsEngineInstalled())
+        {
+            ReDownloadText = string.Format(Se.Language.General.ReDownloadX, engine.Name);
+        }
+        else
+        {
+            ReDownloadText = string.Format(Se.Language.General.DownloadX, engine.Name);
+        }
     }
 }

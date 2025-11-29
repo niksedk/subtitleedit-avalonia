@@ -117,6 +117,7 @@ public class LanguageGeneral
     public string DoubleWords { get; set; }
     public string Download { get; set; }
     public string DownloadX { get; set; }
+    public string ReDownloadX { get; set; }
     public string DownloadingX { get; set; }
     public string DownloadingXPercent { get; set; }
     public string Duplicate { get; set; }
@@ -659,6 +660,7 @@ public class LanguageGeneral
         DoubleWords = "Double words";
         Download = "Download";
         DownloadX = "Download {0}";
+        ReDownloadX = "Re-download {0}";
         DownloadingX = "Downloading {0}";
         DownloadingXPercent = "Downloading {0}%";
         Duplicate = "Duplicate";

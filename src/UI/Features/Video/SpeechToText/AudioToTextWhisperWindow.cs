@@ -2,10 +2,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Styling;
-using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
@@ -14,19 +12,15 @@ namespace Nikse.SubtitleEdit.Features.Video.SpeechToText;
 
 public class AudioToTextWhisperWindow : Window
 {
-    private readonly SpeechToText.AudioToTextWhisperViewModel _vm;
-
-    public AudioToTextWhisperWindow(SpeechToText.AudioToTextWhisperViewModel vm)
+    public AudioToTextWhisperWindow(AudioToTextWhisperViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Video.AudioToText.Title;
-        Width = 950;
+        Width = 1100;
         Height = 660;
         MinWidth = 800;
         MinHeight = 500;
         CanResize = true;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -302,23 +296,14 @@ public class AudioToTextWhisperWindow : Window
         };
         flyout.Items.Add(menuItemViewWhisperLog);
 
-        var menuItemRedownloadWhisperCpp = new MenuItem
+        var menuItemReDownloadWhisperEngine = new MenuItem
         {
-            Header = string.Format(Se.Language.Video.AudioToText.ReDownloadX, "Whisper CPP"),
             DataContext = vm,
-            Command = vm.ReDownloadWhisperCppCommand,
+            Command = vm.ReDownloadWhisperEngineCommand,
         };
-        menuItemRedownloadWhisperCpp.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsWhisperCppActive)) { Source = vm });
-        flyout.Items.Add(menuItemRedownloadWhisperCpp);
-
-        var menuItemRedownloadWhisperPurfviewXxl = new MenuItem
-        {
-            Header = string.Format(Se.Language.Video.AudioToText.ReDownloadX, "Purfview Faster Whisper XXL"),
-            DataContext = vm,
-            Command = vm.ReDownloadWhisperPurfviewXxlCommand,
-        };
-        menuItemRedownloadWhisperPurfviewXxl.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsWhisperPurfviewXxlActive)) { Source = vm });
-        flyout.Items.Add(menuItemRedownloadWhisperPurfviewXxl);
+        menuItemReDownloadWhisperEngine.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsReDownloadVisible)) { Source = vm });
+        menuItemReDownloadWhisperEngine.Bind(MenuItem.HeaderProperty, new Binding(nameof(vm.ReDownloadText)) { Source = vm });
+        flyout.Items.Add(menuItemReDownloadWhisperEngine);
 
 
         var row = 0;
@@ -416,9 +401,10 @@ public class AudioToTextWhisperWindow : Window
         Activated += delegate { Focus(); }; // hack to make OnKeyDown work
         Loaded += (s, e) => vm.OnWindowLoaded();
         Closing += (s, e) => vm.OnWindowClosing(e);
+        KeyDown += (s, e) => vm.OnKeyDown(e);
     }
 
-    private static Grid MakeConsoleLogAndBatchView(SpeechToText.AudioToTextWhisperViewModel vm)
+    private static Grid MakeConsoleLogAndBatchView(AudioToTextWhisperViewModel vm)
     {
         var textBoxConsoleLog = new TextBox()
         {
@@ -537,7 +523,7 @@ public class AudioToTextWhisperWindow : Window
         return grid;
     }
 
-    private static TextBox MakeConsoleLogOnlyView(SpeechToText.AudioToTextWhisperViewModel vm)
+    private static TextBox MakeConsoleLogOnlyView(AudioToTextWhisperViewModel vm)
     {
         var textBoxConsoleLog = new TextBox()
         {
@@ -559,11 +545,5 @@ public class AudioToTextWhisperWindow : Window
         vm.TextBoxConsoleLog = textBoxConsoleLog;
 
         return textBoxConsoleLog;
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
     }
 }
