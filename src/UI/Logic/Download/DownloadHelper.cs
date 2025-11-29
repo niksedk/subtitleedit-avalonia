@@ -79,6 +79,11 @@ public static class DownloadHelper
                     HttpCompletionOption.ResponseHeadersRead,
                     cts.Token).ConfigureAwait(false);
 
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                { 
+                    throw new FileNotFoundException($"The requested URL was not found: {url}");
+                }
+
                 response.EnsureSuccessStatusCode();
 
                 // Get total size from headers
@@ -135,7 +140,7 @@ public static class DownloadHelper
             catch (Exception ex) when (
                 ex is HttpRequestException ||
                 ex is TaskCanceledException ||
-                ex is IOException ||
+                (ex is IOException && ex is not FileNotFoundException) ||
                 ex is InvalidOperationException)
             {
                 lastException = ex;

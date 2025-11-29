@@ -105,8 +105,10 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
                 _downloadIndex++;
                 if (_downloadIndex < _downloadUrls.Count)
                 {
-                    _downloadFileName = GetDownloadFileName(_downloadModel!, _downloadUrls[_downloadIndex]);
+                    var url = _downloadUrls[_downloadIndex];
+                    _downloadFileName = GetDownloadFileName(_downloadModel!, url);
                     _downloadTask = _whisperDownloadService.DownloadFile(_downloadUrls[_downloadIndex], _downloadFileName, MakeDownloadProgress(), _cancellationTokenSource.Token);
+
                     ProgressValue = 0;
                     _timer.Start();
 
@@ -148,6 +150,11 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
         if (string.IsNullOrEmpty(downloadFileName) || !File.Exists(downloadFileName))
         {
             return;
+        }
+
+        if (_downloadTask?.Exception != null)
+        {
+            Se.LogError(_downloadTask.Exception, "Whisper model warning");
         }
 
         var fileInfo = new FileInfo(downloadFileName);
