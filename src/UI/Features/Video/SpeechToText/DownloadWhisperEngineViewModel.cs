@@ -47,7 +47,7 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
     private Timer? _indeterminateTimer;
     private DateTime _indeterminateStartUtc;
     private const int IndeterminateIntervalMs = 16; // ~60 FPS
-    private const double PositionCycleSeconds = 1.5; // seconds per sweep 0 -> 100
+    private const double PositionCycleSeconds = 10; // seconds per sweep 0 -> 100 (increase to slow, decrease to speed up)
     private const double PulseFrequencyHz = 1.2; // opacity pulse frequency
     private const double MinOpacity = 0.35; // lower to make pulse more visible
     private const double MaxOpacity = 1.0;
