@@ -8426,20 +8426,27 @@ public partial class MainViewModel :
         if (Se.Settings.General.RememberPositionAndSize)
         {
             UiUtil.RestoreWindowPosition(Window);
-            if (Se.Settings.General.UndockVideoControls)
-            {
-                VideoUndockControls();
-            }
         }
 
         Task.Run(async () =>
         {
+            await Task.Delay(25);
             Dispatcher.UIThread.Post(() =>
             {
                 if (Se.Settings.General.RememberPositionAndSize)
                 {
+                    UiUtil.RestoreWindowPosition(Window);
+                    if (Se.Settings.General.UndockVideoControls)
+                    {
+                        VideoUndockControls();
+                    }
+                }
+
+                if (Se.Settings.General.RememberPositionAndSize)
+                {
                     InitLayout.RestoreLayoutPositions(Se.Settings.Appearance.CurrentLayoutPositions, ContentGrid.Children.FirstOrDefault() as Grid);
                 }
+
             }, DispatcherPriority.Loaded);
 
             await Task.Delay(1000); // delay 1 second (off UI thread)
