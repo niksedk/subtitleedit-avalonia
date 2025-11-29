@@ -6,6 +6,7 @@ using Avalonia.Threading;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using SkiaSharp;
 using System;
@@ -1897,7 +1898,7 @@ public class AudioVisualizer : Control
 
         int length50Ms = SecondsToSampleIndex(0.050);
         double secondsPerParagraph = defaultMilliseconds / TimeCode.BaseUnit;
-        int minBetween = SecondsToSampleIndex(Configuration.Settings.General.MinimumMillisecondsBetweenLines / TimeCode.BaseUnit);
+        int minBetween = SecondsToSampleIndex(Se.Settings.General.MinimumMillisecondsBetweenLines / TimeCode.BaseUnit);
         bool subtitleOn = false;
         int i = begin;
         while (i < WavePeaks.Peaks.Count)

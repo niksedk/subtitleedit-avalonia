@@ -795,7 +795,7 @@ public class WavePeakGenerator2 : IDisposable
 
     //////////////////////////////////////// SPECTRUM ///////////////////////////////////////////////////////////
 
-    public SpectrogramData2 GenerateSpectrogram(int delayInMilliseconds, string spectrogramDirectory)
+    public SpectrogramData2 GenerateSpectrogram(int delayInMilliseconds, string spectrogramDirectory, System.Threading.CancellationToken token)
     {
         const int fftSize = 256; // image height = fft size / 2
         const int imageWidth = 1024;
@@ -827,7 +827,7 @@ public class WavePeakGenerator2 : IDisposable
             _stream.Seek(fileSampleOffset * Header.BlockAlign, SeekOrigin.Current);
         }
 
-        for (int iChunk = 0; iChunk < chunkCount; iChunk++)
+        for (var iChunk = 0; iChunk < chunkCount; iChunk++)
         {
             // calculate padding at the beginning (for positive delays)
             int startPaddingSampleCount = 0;
@@ -896,6 +896,11 @@ public class WavePeakGenerator2 : IDisposable
                     pngData.SaveTo(stream);
                 }
             });
+
+            if (token.IsCancellationRequested)
+            {
+                break;
+            }
         }
 
         // wait for last image to finish saving
@@ -912,7 +917,11 @@ public class WavePeakGenerator2 : IDisposable
             doc.DocumentElement.SelectSingleNode("ImageWidth")!.InnerText = imageWidth.ToString(culture);
             doc.DocumentElement.SelectSingleNode("SecondsPerImage")!.InnerText = ((double)chunkSampleCount / Header.SampleRate).ToString(culture); // currently unused; for backwards compatibility
         }
-        doc.Save(Path.Combine(spectrogramDirectory, "Info.xml"));
+
+        if (!token.IsCancellationRequested)
+        {
+            doc.Save(Path.Combine(spectrogramDirectory, "Info.xml"));
+        }
 
         return new SpectrogramData2(fftSize, imageWidth, sampleDuration, images);
     }

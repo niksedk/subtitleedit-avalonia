@@ -7496,7 +7496,7 @@ public partial class MainViewModel :
             var ext = Path.GetExtension(matroska.Path).ToLowerInvariant();
             if (await LoadMatroskaSubtitle(subtitleList[0], matroska, fileName))
             {
-                if (!Configuration.Settings.General.DisableVideoAutoLoading)
+                if (Se.Settings.General.AutoOpenVideo)
                 {
                     if (ext == ".mkv")
                     {
@@ -8642,7 +8642,7 @@ public partial class MainViewModel :
             if (Se.Settings.Waveform.GenerateSpectrogram)
             {
                 ShowStatus(Se.Language.Main.GeneratingSpectrogramDotDotDot);
-                var spectrogram = waveFile.GenerateSpectrogram(0, WavePeakGenerator.SpectrogramDrawer.GetSpectrogramFolder(videoFileName));
+                var spectrogram = waveFile.GenerateSpectrogram(0, WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(videoFileName), _videoOpenTokenSource.Token);
                 AudioVisualizer?.SetSpectrogram(spectrogram);
             }
 
