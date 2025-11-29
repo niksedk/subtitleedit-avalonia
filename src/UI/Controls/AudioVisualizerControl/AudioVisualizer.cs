@@ -993,7 +993,7 @@ public class AudioVisualizer : Control
 
     private void DrawSpectrogram(DrawingContext context)
     {
-        if (!HasSpectrogram() || _displayMode == WaveformDisplayMode.OnlyWaveform)
+        if (!HasSpectrogram() || _displayMode == WaveformDisplayMode.OnlyWaveform || _spectrogram == null)
         {
             return;
         }

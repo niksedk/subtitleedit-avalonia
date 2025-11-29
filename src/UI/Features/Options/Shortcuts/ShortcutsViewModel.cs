@@ -11,6 +11,7 @@ using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.PickColor;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -40,8 +41,9 @@ public partial class ShortcutsViewModel : ObservableObject
     public MainViewModel? MainViewModel { get; set; }
     public TreeView ShortcutsTreeView { get; internal set; }
 
-    private List<ShortCut> _allShortcuts;
+    private IFileHelper _fileHelper;
     private readonly IWindowService _windowService;
+    private List<ShortCut> _allShortcuts;
     private List<IRelayCommand> _configurableCommands;
     private Color _color1;
     private Color _color2;
@@ -61,9 +63,11 @@ public partial class ShortcutsViewModel : ObservableObject
     // Add this flag to prevent updates during selection changes
     private bool _isLoadingSelection = false;
 
-    public ShortcutsViewModel(IWindowService windowService)
+    public ShortcutsViewModel(IWindowService windowService, IFileHelper fileHelper)
     {
         _windowService = windowService;
+        _fileHelper = fileHelper;
+
         SearchText = string.Empty;
         Shortcuts = new ObservableCollection<string>(GetShortcutKeys());
         Filters = new ObservableCollection<string>
@@ -183,6 +187,42 @@ public partial class ShortcutsViewModel : ObservableObject
 
         return string.Empty;
     }
+
+    [RelayCommand]
+    private async Task Import()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.Options.Shortcuts.ImportShortcutsTitle, "Shortcuts Files", "shortcuts");
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        //TODO: Implement import logic
+
+    }
+
+    [RelayCommand]
+    private async Task Export()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickSaveFile(Window, "shortcuts", "se.shortcuts", Se.Language.Options.Shortcuts.ExportShortcutsTitle);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        //TODO: Implement export logic
+    }
+
 
     [RelayCommand]
     private void CommandOk()
