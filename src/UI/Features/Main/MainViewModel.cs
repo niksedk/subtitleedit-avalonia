@@ -1450,15 +1450,19 @@ public partial class MainViewModel :
             return;
         }
 
-        var result =
-           await ShowDialogAsync<ImportImagesWindow, ImportImagesViewModel>(vm =>
-           {
-               //vm.Initialize(AudioVisualizer.WavePeaks); 
-           });
-
-        if (!result.OkPressed)
+        var result = await ShowDialogAsync<ImportImagesWindow, ImportImagesViewModel>();
+        if (!result.OkPressed || result.Images.Count == 0)
         {
             return;
+        }
+
+        var ocrResult = await ShowDialogAsync<OcrWindow, OcrViewModel>(vm => { vm.Initialize(result.Images.ToList()); });
+        if (ocrResult.OkPressed)
+        {
+            _subtitleFileName = string.Empty;
+            ResetSubtitle();
+            Subtitles.Clear();
+            Subtitles.AddRange(ocrResult.OcredSubtitle);
         }
     }
 

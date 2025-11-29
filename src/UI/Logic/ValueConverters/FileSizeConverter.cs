@@ -53,7 +53,8 @@ internal class FileSizeConverter : IValueConverter
         // Format with appropriate decimal places
         string format = adjustedSize >= 100 ? "0" : (adjustedSize >= 10 ? "0.0" : "0.##");
 
-        return $"{adjustedSize.ToString(format, culture)} {SizeSuffixes[magnitude]}";
+        var result = $"{adjustedSize.ToString(format, culture)} {SizeSuffixes[magnitude]}";
+        return result;
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

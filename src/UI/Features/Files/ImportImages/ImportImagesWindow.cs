@@ -1,6 +1,9 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Data;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
@@ -102,7 +105,7 @@ public class ImportImagesWindow : Window
                 {
                     Header = Se.Language.General.Size,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(ImportImageItem.Size)) { Converter = fileSizeConverter },
+                    Binding = new Binding(nameof(ImportImageItem.Size)) { Converter = fileSizeConverter, Mode = BindingMode.OneWay },
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
@@ -110,7 +113,7 @@ public class ImportImagesWindow : Window
                 {
                     Header = Se.Language.General.Show,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(ImportImageItem.Start)) { Converter = fullTimeConverter },
+                    Binding = new Binding(nameof(ImportImageItem.Start)) { Converter = fullTimeConverter, Mode = BindingMode.OneWay },
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
@@ -118,7 +121,7 @@ public class ImportImagesWindow : Window
                 {
                     Header = Se.Language.General.Hide,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(ImportImageItem.End)){ Converter = fullTimeConverter },
+                    Binding = new Binding(nameof(ImportImageItem.End)){ Converter = fullTimeConverter, Mode = BindingMode.OneWay },
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
@@ -126,7 +129,7 @@ public class ImportImagesWindow : Window
                 {
                     Header = Se.Language.General.Duration,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(ImportImageItem.Duration)){ Converter = shortTimeConverter },
+                    Binding = new Binding(nameof(ImportImageItem.Duration)){ Converter = shortTimeConverter, Mode = BindingMode.OneWay },
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
@@ -136,6 +139,16 @@ public class ImportImagesWindow : Window
         dataGrid.SelectionChanged += vm.DataGridSelectionChanged;
         dataGrid.KeyDown += vm.AttachmentsDataGridKeyDown;
 
+        // hack to make drag and drop work on the DataGrid - also on empty rows
+        var dropHost = new Border
+        {
+            Background = Brushes.Transparent,
+            Child = dataGrid,
+        };
+        DragDrop.SetAllowDrop(dropHost, true);
+        dropHost.AddHandler(DragDrop.DragOverEvent, vm.FileGridOnDragOver, RoutingStrategies.Bubble);
+        dropHost.AddHandler(DragDrop.DropEvent, vm.FileGridOnDrop, RoutingStrategies.Bubble);
+
         var flyout = new MenuFlyout();
         flyout.Opening += vm.AttachmentsContextMenuOpening;
         dataGrid.ContextFlyout = flyout;
@@ -144,7 +157,7 @@ public class ImportImagesWindow : Window
         {
             Header = Se.Language.General.Delete,
             DataContext = vm,
-            Command = vm.AttachmentRemoveCommand,
+            Command = vm.ImageRemoveCommand,
         };
         menuItemDelete.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsDeleteVisible)) { Source = vm });
         flyout.Items.Add(menuItemDelete);
@@ -158,7 +171,7 @@ public class ImportImagesWindow : Window
         menuItemClear.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsDeleteAllVisible)) { Source = vm });
         flyout.Items.Add(menuItemClear);
 
-        grid.Add(dataGrid, 0);
+        grid.Add(dropHost, 0);
 
         return UiUtil.MakeBorderForControlNoPadding(grid);
     }

@@ -1,14 +1,16 @@
-﻿using Nikse.SubtitleEdit.Core.Common;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Nikse.SubtitleEdit.Core.Common;
+using SkiaSharp;
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
 
 namespace Nikse.SubtitleEdit.Features.Files.ImportImages;
 
-public class ImportImageItem
+public partial  class ImportImageItem : ObservableObject
 {
-    public string FileName { get; set; }
-    public long Size { get; set; }
+    [ObservableProperty] private string _fileName;
+    [ObservableProperty] private long _size;
     public TimeSpan Start { get; set; }
     public TimeSpan End { get; set; }
     public TimeSpan Duration { get; set; }
@@ -59,6 +61,11 @@ public class ImportImageItem
                 }
             }
         }
+    }
+
+    internal SKBitmap GetBitmap()
+    {
+        return SKBitmap.Decode(Bytes);
     }
 }
 

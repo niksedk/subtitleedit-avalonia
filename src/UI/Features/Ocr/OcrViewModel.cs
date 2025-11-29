@@ -12,6 +12,7 @@ using Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream;
 using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Core.VobSub;
 using Nikse.SubtitleEdit.Core.VobSub.Ocr.Service;
+using Nikse.SubtitleEdit.Features.Files.ImportImages;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Ocr.Download;
 using Nikse.SubtitleEdit.Features.Ocr.Engines;
@@ -1776,7 +1777,6 @@ public partial class OcrViewModel : ObservableObject
         return new Bitmap(stream);
     }
 
-
     internal void SelectAndScrollToRow(int index)
     {
         if (index < 0 || index >= OcrSubtitleItems.Count)
@@ -1860,6 +1860,13 @@ public partial class OcrViewModel : ObservableObject
     {
         Title = string.Format(Se.Language.Ocr.OcrX, fileName);
         _ocrSubtitle = new OcrSubtitleTransportStream(tsParser, subtitles, fileName);
+        OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
+    }
+
+    internal void Initialize(List<ImportImageItem> images)
+    {
+        Title = string.Format(Se.Language.Ocr.OcrX, Se.Language.General.Images);
+        _ocrSubtitle = new OcrImportImage(images);
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
     }
 

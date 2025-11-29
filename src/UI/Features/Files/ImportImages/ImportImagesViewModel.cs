@@ -4,13 +4,13 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -25,12 +25,8 @@ public partial class ImportImagesViewModel : ObservableObject
 
     public Window? Window { get; internal set; }
     public bool OkPressed { get; private set; }
-    public string Header { get; set; }
-    public string Footer { get; set; }
 
     private readonly IFileHelper _fileHelper;
-    private string _fileName;
-    private Subtitle _subtitle;
     private readonly List<string> _imageExtensions = new List<string>
     {
         "*.png",
@@ -43,12 +39,7 @@ public partial class ImportImagesViewModel : ObservableObject
     public ImportImagesViewModel(IFileHelper fileHelper)
     {
         _fileHelper = fileHelper;
-
         Images = new ObservableCollection<ImportImageItem>();
-        _fileName = string.Empty;
-        Header = string.Empty;
-        Footer = string.Empty;
-        _subtitle = new Subtitle();
     }
 
     [RelayCommand]
@@ -90,7 +81,7 @@ public partial class ImportImagesViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void AttachmentRemove()
+    private void ImageRemove()
     {
         var selectedStyle = SelectedImage;
         if (selectedStyle == null)
@@ -102,8 +93,8 @@ public partial class ImportImagesViewModel : ObservableObject
         {
             var answer = await MessageBox.Show(
             Window!,
-            "Delete attachment?",
-            $"Do you want to delete {selectedStyle.FileName}?",
+            "Remove image?",
+            $"Do you want to remove {selectedStyle.FileName}?",
             MessageBoxButtons.YesNoCancel,
             MessageBoxIcon.Question);
 
@@ -135,17 +126,12 @@ public partial class ImportImagesViewModel : ObservableObject
         Images.Clear();
     }
 
-
     private void Close()
     {
         Dispatcher.UIThread.Post(() =>
         {
             Window?.Close();
         });
-    }
-
-    public void Initialize(Subtitle subtitle, SubtitleFormat format, string fileName)
-    {
     }
 
     internal void KeyDown(object? sender, KeyEventArgs e)
@@ -170,8 +156,53 @@ public partial class ImportImagesViewModel : ObservableObject
     {
         if (e.Key == Key.Delete && SelectedImage != null)
         {
-            AttachmentRemove();
+            ImageRemove();
             e.Handled = true;
+        }
+    }
+
+    internal void FileGridOnDragOver(object? sender, DragEventArgs e)
+    {
+        if (e.DataTransfer.Contains(DataFormat.File))
+        {
+            e.DragEffects = DragDropEffects.Copy; // show copy cursor
+        }
+        else
+        {
+            e.DragEffects = DragDropEffects.None;
+        }
+
+        e.Handled = true;
+    }
+
+    internal void FileGridOnDrop(object? sender, DragEventArgs e)
+    {
+        if (!e.DataTransfer.Contains(DataFormat.File))
+        {
+            return;
+        }
+
+        var files = e.DataTransfer.TryGetFiles();
+        if (files != null)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                foreach (var file in files)
+                {
+                    var path = file.Path?.LocalPath;
+                    if (path != null && File.Exists(path))
+                    {
+                        var ext = Path.GetExtension(path).ToLowerInvariant();
+                        if (!_imageExtensions.Any(x => x.EndsWith(ext)))
+                        {
+                            continue;
+                        }
+
+                        var importImageItem = new ImportImageItem(path);
+                        Images.Add(importImageItem);
+                    }
+                }
+            });
         }
     }
 }
