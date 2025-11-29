@@ -3,7 +3,6 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream;
 using Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Compression;
@@ -46,8 +45,12 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
     private readonly IZipUnpacker _zipUnpacker;
 
     private Timer? _indeterminateTimer;
-    private const double IndeterminateStep = 3.5; // percentage per tick
-    private const int IndeterminateIntervalMs = 75; // tick interval
+    private DateTime _indeterminateStartUtc;
+    private const int IndeterminateIntervalMs = 16; // ~60 FPS
+    private const double PositionCycleSeconds = 1.5; // seconds per sweep 0 -> 100
+    private const double PulseFrequencyHz = 1.2; // opacity pulse frequency
+    private const double MinOpacity = 0.35; // lower to make pulse more visible
+    private const double MaxOpacity = 1.0;
 
     public DownloadWhisperEngineViewModel(IWhisperDownloadService whisperDownloadService, IZipUnpacker zipUnpacker)
     {
@@ -74,6 +77,7 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
         StopIndeterminateProgress();
         ProgressOpacity = 1.0;
         ProgressValue = 0;
+        _indeterminateStartUtc = DateTime.UtcNow;
         _indeterminateTimer = new Timer(IndeterminateIntervalMs);
         _indeterminateTimer.Elapsed += (_, __) =>
         {
@@ -83,14 +87,27 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
                 return;
             }
 
-            // Marquee-style: increase and wrap around to0 when reaching100
-            var next = ProgressValue + IndeterminateStep;
-            if (next >= 100)
-            {
-                next = 0;
-            }
+            // Time since start
+            var t = (DateTime.UtcNow - _indeterminateStartUtc).TotalSeconds;
 
-            Dispatcher.UIThread.Post(() => { ProgressValue = next; });
+            // Forward-only sweep with easing (0 ->100), then reset (marquee-like)
+            var pos01 = (t % PositionCycleSeconds) / PositionCycleSeconds; // 0..1
+            pos01 = EaseInOutCubic(pos01);
+            var nextValue = pos01 * 100.0;
+
+            // Opacity pulse using sine wave
+            var s = Math.Sin(2 * Math.PI * PulseFrequencyHz * t); // -1..1
+            var nextOpacity = MinOpacity + (MaxOpacity - MinOpacity) * ((s + 1) / 2.0); // Min..Max
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                ProgressValue = nextValue;
+                ProgressOpacity = nextOpacity;
+                if (ProgressSlider != null)
+                {
+                    ProgressSlider.Opacity = nextOpacity; // ensure visible pulse even if not bound to ProgressOpacity
+                }
+            });
         };
         _indeterminateTimer.AutoReset = true;
         _indeterminateTimer.Start();
@@ -114,6 +131,23 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
                 _indeterminateTimer = null;
             }
         }
+
+        // Restore opacity
+        ProgressOpacity = 1.0;
+        if (ProgressSlider != null)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                ProgressSlider.Opacity = 1.0;
+            }); 
+        }
+    }
+
+    private static double EaseInOutCubic(double x)
+    {
+        if (x <= 0) return 0;
+        if (x >= 1) return 1;
+        return x < 0.5 ? 4 * x * x * x : 1 - Math.Pow(-2 * x + 2, 3) / 2;
     }
 
     private void OnTimerOnElapsed(object? sender, ElapsedEventArgs args)
@@ -128,7 +162,7 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
                     var dir = Engine.GetAndCreateWhisperFolder();
                     var tempFileName = Path.Combine(dir, Engine.Name + ".7z");
 
-                    TitleText = Se.Language.General.Unpacking7ZipArchiveDotDotDot;                    
+                    TitleText = Se.Language.General.Unpacking7ZipArchiveDotDotDot;
                     StartIndeterminateProgress();
                     Extract7Zip(tempFileName, dir);
                     StopIndeterminateProgress();
