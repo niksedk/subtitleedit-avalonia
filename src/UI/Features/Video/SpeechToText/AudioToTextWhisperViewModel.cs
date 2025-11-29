@@ -76,7 +76,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     private string _waveFileName = string.Empty;
     private int _audioTrackNumber;
     private readonly List<string> _filesToDelete = new();
-    private readonly ConcurrentBag<string> _outputText = new();
+    private readonly ConcurrentQueue<string> _outputText = new();
     private long _startTicks = 0;
     private double _endSeconds;
     private double _showProgressPct = -1;
@@ -295,7 +295,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                     return;
                 }
 
-                _outputText.Add("Loading result from STDOUT" + Environment.NewLine);
+                _outputText.Enqueue("Loading result from STDOUT" + Environment.NewLine);
 
                 var transcribedSubtitleFromStdOut = new Subtitle();
                 transcribedSubtitleFromStdOut.Paragraphs.AddRange(_resultList.OrderBy(p => p.Start)
@@ -540,7 +540,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     }
 
     public bool GetResultFromSrt(string waveFileName, string videoFileName, out List<ResultText> resultTexts,
-        ConcurrentBag<string> outputText, List<string> filesToDelete)
+        ConcurrentQueue<string> outputText, List<string> filesToDelete)
     {
         if (SelectedEngine is not IWhisperEngine engine)
         {
@@ -582,13 +582,13 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         {
             var rawText = FileUtil.ReadAllLinesShared(srtFileName, Encoding.UTF8);
             new SubRip().LoadSubtitle(sub, rawText, srtFileName);
-            outputText?.Add($"Loading result from {srtFileName}{Environment.NewLine}");
+            outputText?.Enqueue($"Loading result from {srtFileName}{Environment.NewLine}");
         }
         else
         {
             var rawText = FileUtil.ReadAllLinesShared(srtFileName, Encoding.UTF8);
             new WebVTT().LoadSubtitle(sub, rawText, srtFileName);
-            outputText?.Add($"Loading result from {vttFileName}{Environment.NewLine}");
+            outputText?.Enqueue($"Loading result from {vttFileName}{Environment.NewLine}");
         }
 
         sub.RemoveEmptyLines();
@@ -649,6 +649,9 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
     private async Task MakeResult(Subtitle? transcribedSubtitle)
     {
+        // Small delay to ensure all output is captured and flushed
+        await Task.Delay(100);
+
         var sbLog = new StringBuilder();
         foreach (var s in _outputText)
         {
@@ -1526,11 +1529,11 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
     private void LogToConsole(string s)
     {
-        _outputText.Add(s);
-        ConsoleLog += s.Trim() + "\n";
+        _outputText.Enqueue(s);
+  ConsoleLog += s.Trim() + "\n";
 
-        Dispatcher.UIThread.Post(() => { TextBoxConsoleLog.CaretIndex = TextBoxConsoleLog.Text?.Length ?? 0; },
-            DispatcherPriority.Background);
+     Dispatcher.UIThread.Post(() => { TextBoxConsoleLog.CaretIndex = TextBoxConsoleLog.Text?.Length ?? 0; },
+        DispatcherPriority.Background);
     }
 
     private static decimal GetSeconds(string timeCode)
