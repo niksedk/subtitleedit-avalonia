@@ -1763,7 +1763,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     internal void WindowContextMenuOpening(object? sender, EventArgs e)
     {
         var engine = SelectedEngine;
-        if (engine == null)
+        if (engine == null || !engine.CanBeDownloaded())
         {
             IsReDownloadVisible = false;
             return;

@@ -134,4 +134,9 @@ public class WhisperEngineConstMe : IWhisperEngine
     {
         return "main.exe";
     }
+
+    public bool CanBeDownloaded()
+    {
+        return true;
+    }
 }

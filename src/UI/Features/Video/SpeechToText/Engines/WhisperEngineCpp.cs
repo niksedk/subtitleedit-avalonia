@@ -154,4 +154,9 @@ public class WhisperEngineCpp : IWhisperEngine
 
         return "whisper-cli";
     }
+
+    public bool CanBeDownloaded()
+    {
+        return true;
+    }
 }

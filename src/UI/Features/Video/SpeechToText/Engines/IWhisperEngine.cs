@@ -14,6 +14,7 @@ public interface IWhisperEngine
     string Extension { get;  }
     string UnpackSkipFolder { get; }
     bool IsEngineInstalled();
+    bool CanBeDownloaded();
     string GetAndCreateWhisperFolder();
     string GetAndCreateWhisperModelFolder(WhisperModel? whisperModel);
     string GetExecutable();

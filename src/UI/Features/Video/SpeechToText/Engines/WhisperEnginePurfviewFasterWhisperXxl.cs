@@ -140,4 +140,9 @@ public class WhisperEnginePurfviewFasterWhisperXxl : IWhisperEngine
 
         return "faster-whisper-xxl";
     }
+
+    public bool CanBeDownloaded()
+    {
+        return true;
+    }
 }

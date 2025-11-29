@@ -98,4 +98,9 @@ public class WhisperEngineOpenAi : IWhisperEngine
         var fileName = Path.Combine(folder, whisperModel.Name + Extension);
         return fileName;
     }
+
+    public bool CanBeDownloaded()
+    {
+        return false;
+    }
 }
