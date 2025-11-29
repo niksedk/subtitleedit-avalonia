@@ -2,7 +2,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
@@ -13,16 +12,13 @@ namespace Nikse.SubtitleEdit.Features.Video.SpeechToText;
 
 public class DownloadWhisperModelsWindow : Window
 {
-    private readonly DownloadWhisperModelsViewModel _vm;
-
     public DownloadWhisperModelsWindow(DownloadWhisperModelsViewModel vm)
     {
-        _vm = vm;
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Video.AudioToText.DownloadingWhisperModel;
-        Width = 450;
-        Height = 220;
+        SizeToContent = SizeToContent.WidthAndHeight;
+        MinWidth = 500;
         CanResize = false;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
 
@@ -57,7 +53,7 @@ public class DownloadWhisperModelsWindow : Window
                 buttonDownload,
                 buttonOpenFolder
             }
-        };  
+        };
 
 
         var progressSlider = new Slider
@@ -90,11 +86,20 @@ public class DownloadWhisperModelsWindow : Window
         progressSlider.Bind(Slider.OpacityProperty, new Binding(nameof(vm.ProgressOpacity)));
         var statusText = new TextBlock
         {
-            Margin = new Thickness(0, 0, 0, 0),
+            Margin = new Thickness(0, 1, 0, 1),
             HorizontalAlignment = HorizontalAlignment.Center,
         };
         statusText.Bind(TextBlock.TextProperty, new Binding(nameof(vm.ProgressText)));
         statusText.Bind(TextBlock.OpacityProperty, new Binding(nameof(vm.ProgressOpacity)));
+
+        var fileText = new TextBlock
+        {
+            Margin = new Thickness(0, 1, 0, 1),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Opacity = 0.5,
+        };
+        fileText.Bind(TextBlock.TextProperty, new Binding(nameof(vm.ProgressFileName)));
+
         var panelStatus = new StackPanel
         {
             Orientation = Orientation.Vertical,
@@ -102,9 +107,10 @@ public class DownloadWhisperModelsWindow : Window
             Children =
             {
                 progressSlider,
-                statusText
+                statusText,
+                fileText,
             }
-        };  
+        };
 
         var buttonCancel = UiUtil.MakeButton(Se.Language.General.Cancel, vm.CancelCommand);
         var buttonBar = UiUtil.MakeButtonBar(buttonCancel);
@@ -148,12 +154,7 @@ public class DownloadWhisperModelsWindow : Window
         Activated += delegate
         {
             buttonCancel.Focus(); // hack to make OnKeyDown work
-        }; 
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        };
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 }

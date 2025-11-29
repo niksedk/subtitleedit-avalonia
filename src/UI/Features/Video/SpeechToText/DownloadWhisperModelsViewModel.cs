@@ -32,6 +32,7 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
     [ObservableProperty] private double _progressOpacity;
     [ObservableProperty] private double _progressValue;
     [ObservableProperty] private string _progressText;
+    [ObservableProperty] private string _progressFileName;
     [ObservableProperty] private string _error;
     [ObservableProperty] bool _downloadIsEnabled;
 
@@ -63,6 +64,7 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
         _cancellationTokenSource = new CancellationTokenSource();
 
         ProgressText = Se.Language.General.StartingDotDotDot;
+        ProgressFileName = string.Empty;
         Error = string.Empty;
         DownloadIsEnabled = true;
 
@@ -108,7 +110,7 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
                     var url = _downloadUrls[_downloadIndex];
                     _downloadFileName = GetDownloadFileName(_downloadModel!, url);
                     _downloadTask = _whisperDownloadService.DownloadFile(_downloadUrls[_downloadIndex], _downloadFileName, MakeDownloadProgress(), _cancellationTokenSource.Token);
-
+                    ProgressFileName = string.Format(Se.Language.General.FileNameX, Path.GetFileName(_downloadUrls[_downloadIndex]));
                     ProgressValue = 0;
                     _timer.Start();
 
@@ -253,6 +255,8 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
         _timer.Interval = 500;
         _timer.Elapsed += OnTimerOnElapsed;
         _timer.Start();
+
+        ProgressFileName = string.Format(Se.Language.General.FileNameX, Path.GetFileName(_downloadUrls[_downloadIndex]));
 
         ProgressOpacity = 1;
     }
