@@ -228,6 +228,8 @@ public class LanguageSettingsShortcuts
     public string MoveVideoPositionMilliseconds { get; set; }
     public string ImportShortcutsTitle { get; set; }
     public string ExportShortcutsTitle { get; set; }
+    public string XShortcutsImportedFromY { get; set; }
+    public string XShortcutsExportedToY { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -459,5 +461,7 @@ public class LanguageSettingsShortcuts
         MoveVideoPositionMilliseconds = "Move video position in milliseconds";
         ImportShortcutsTitle = "Import shortcuts";
         ExportShortcutsTitle = "Export shortcuts";
+        XShortcutsImportedFromY = "{0} shortcuts imported from {1}";
+        XShortcutsExportedToY = "{0} shortcuts exported to {1}";
     }
 }

@@ -9,6 +9,7 @@ using Nikse.SubtitleEdit.Features.Options.Shortcuts.PickMilliseconds;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts.SurroundWith;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.PickColor;
+using Nikse.SubtitleEdit.Features.Shared.PromptFileSaved;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
@@ -196,14 +197,60 @@ public partial class ShortcutsViewModel : ObservableObject
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.Options.Shortcuts.ImportShortcutsTitle, "Shortcuts Files", "shortcuts");
+        var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.Options.Shortcuts.ImportShortcutsTitle, "Shortcuts Files", ".shortcuts");
         if (string.IsNullOrEmpty(fileName))
         {
             return;
         }
 
-        //TODO: Implement import logic
+        try
+        {
+            var json = await System.IO.File.ReadAllTextAsync(fileName, System.Text.Encoding.UTF8);
+            var options = new System.Text.Json.JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                ReadCommentHandling = System.Text.Json.JsonCommentHandling.Skip,
+                AllowTrailingCommas = true,
+            };
 
+            var importedShortcuts = System.Text.Json.JsonSerializer.Deserialize<List<SeShortCut>>(json, options);
+            if (importedShortcuts == null || importedShortcuts.Count == 0)
+            {
+                await MessageBox.Show(Window, Se.Language.General.Error, "No shortcuts found in file.", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            var importCount = 0;
+            foreach (var importedShortcut in importedShortcuts)
+            {
+                // Remove existing shortcut with same action name
+                var existing = Se.Settings.Shortcuts.FirstOrDefault(s => s.ActionName == importedShortcut.ActionName);
+                if (existing != null)
+                {
+                    Se.Settings.Shortcuts.Remove(existing);
+                }
+
+                Se.Settings.Shortcuts.Add(importedShortcut);
+                importCount++;
+            }
+
+            // Reload shortcuts in UI
+            if (MainViewModel != null)
+            {
+                _allShortcuts = ShortcutsMain.GetAllShortcuts(MainViewModel);
+                UpdateVisibleShortcuts(string.Empty);
+            }
+
+            await MessageBox.Show(Window, Se.Language.General.Information,
+                string.Format(Se.Language.Options.Shortcuts.XShortcutsImportedFromY, importCount, System.IO.Path.GetFileName(fileName)),
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error,
+                $"Failed to import shortcuts:\r\n{ex.Message}",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
     }
 
     [RelayCommand]
@@ -220,10 +267,41 @@ public partial class ShortcutsViewModel : ObservableObject
             return;
         }
 
-        //TODO: Implement export logic
+        try
+        {
+            // Get all configured shortcuts
+            var shortcuts = new List<SeShortCut>();
+            foreach (var shortcut in _allShortcuts)
+            {
+                if (shortcut != null) // && !IsEmpty(shortcut))
+                {
+                    shortcuts.Add(new SeShortCut(shortcut));
+                }
+            }
+
+            // Serialize to JSON
+            var options = new System.Text.Json.JsonSerializerOptions
+            {
+                WriteIndented = true,
+            };
+
+            var json = System.Text.Json.JsonSerializer.Serialize(shortcuts, options);
+            await System.IO.File.WriteAllTextAsync(fileName, json, System.Text.Encoding.UTF8);
+
+            _ = await _windowService.ShowDialogAsync<PromptFileSavedWindow, PromptFileSavedViewModel>(Window,
+                vm =>
+                {
+                    vm.Initialize(Se.Language.General.FileSaved,
+                        string.Format(Se.Language.Options.Shortcuts.XShortcutsExportedToY, shortcuts.Count, System.IO.Path.GetFileName(fileName)), fileName, true, true);
+                });
+        }
+        catch (Exception ex)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error,
+                $"Failed to export shortcuts:\r\n{ex.Message}",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
     }
-
-
     [RelayCommand]
     private void CommandOk()
     {

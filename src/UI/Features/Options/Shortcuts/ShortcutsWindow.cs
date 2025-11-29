@@ -128,6 +128,25 @@ public class ShortcutsWindow : Window
         dataGrid.DoubleTapped += vm.ShortcutsDataGridDoubleTapped;
         var borderDataGrid = UiUtil.MakeBorderForControlNoPadding(dataGrid).WithMarginBottom(5);
 
+        var flyout = new MenuFlyout();
+        dataGrid.ContextFlyout = flyout;
+        var menuItemImport = new MenuItem
+        {
+            Header = Se.Language.General.ImportDotDotDot,
+            DataContext = vm,
+            Command = vm.ImportCommand,
+        };
+        flyout.Items.Add(menuItemImport);
+
+        var menuItemExport = new MenuItem
+        {
+            Header = Se.Language.General.ExportDotDotDot,
+            DataContext = vm,
+            Command = vm.ExportCommand,
+        };
+        flyout.Items.Add(menuItemExport);
+
+
         var buttonOk = UiUtil.MakeButtonOk(vm.CommandOkCommand);
         var buttonResetAllShortcuts = UiUtil.MakeButton(Se.Language.General.Reset, vm.ResetAllShortcutsCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CommandCancelCommand);
