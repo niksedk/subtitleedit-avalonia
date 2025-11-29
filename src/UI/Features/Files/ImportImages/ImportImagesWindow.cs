@@ -44,14 +44,22 @@ public class ImportImagesWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        var labelFontsAndImages = UiUtil.MakeLabel(Se.Language.Assa.FontsAndGraphics);
+        var labelImportInfo = new TextBlock
+        {
+            Text = Se.Language.File.Import.ImportFileLabel,
+        };
+
+        if (Se.Settings.Appearance.ShowHints)
+        {
+            ToolTip.SetTip(labelImportInfo, Se.Language.File.Import.ImportFilesInfo);
+        }
 
         var buttonImport = UiUtil.MakeButton(Se.Language.General.ImportDotDotDot, vm.FileImportCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonImport, buttonOk, buttonCancel);
 
-        grid.Add(labelFontsAndImages, 0);
+        grid.Add(labelImportInfo, 0);
         grid.Add(MakeImagesView(vm), 1);
         grid.Add(panelButtons, 3, 0);
 
@@ -150,12 +158,12 @@ public class ImportImagesWindow : Window
         dropHost.AddHandler(DragDrop.DropEvent, vm.FileGridOnDrop, RoutingStrategies.Bubble);
 
         var flyout = new MenuFlyout();
-        flyout.Opening += vm.AttachmentsContextMenuOpening;
+        flyout.Opening += vm.ImagesContextMenuOpening;
         dataGrid.ContextFlyout = flyout;
 
         var menuItemDelete = new MenuItem
         {
-            Header = Se.Language.General.Delete,
+            Header = Se.Language.General.Remove,
             DataContext = vm,
             Command = vm.ImageRemoveCommand,
         };

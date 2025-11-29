@@ -146,7 +146,7 @@ public partial class ImportImagesViewModel : ObservableObject
     {
     }
 
-    internal void AttachmentsContextMenuOpening(object? sender, EventArgs e)
+    internal void ImagesContextMenuOpening(object? sender, EventArgs e)
     {
         IsDeleteAllVisible = Images.Count > 0;
         IsDeleteVisible = SelectedImage != null;
