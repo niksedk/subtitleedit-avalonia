@@ -1179,6 +1179,11 @@ public class AudioVisualizer : Control
         }
 
         var waveformHeight = Bounds.Height;
+        if (_displayMode == WaveformDisplayMode.WaveformAndSpectrogram)
+        {
+            waveformHeight = Bounds.Height / 2;
+        }
+
         var isSelectedHelper = new IsSelectedHelper(AllSelectedParagraphs, WavePeaks.SampleRate);
         var halfWaveformHeight = waveformHeight / 2;
         var div = WavePeaks.SampleRate * ZoomFactor;
