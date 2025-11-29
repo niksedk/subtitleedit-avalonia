@@ -1,17 +1,3 @@
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Timers;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
@@ -26,6 +12,20 @@ using Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Timers;
 
 namespace Nikse.SubtitleEdit.Features.Video.SpeechToText;
 
@@ -54,6 +54,8 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     [ObservableProperty] private bool _isBatchMode;
     [ObservableProperty] private bool _isBatchModeVisible;
     [ObservableProperty] private bool _isSingleModeVisible;
+    [ObservableProperty] private bool _isWhisperCppActive;
+    [ObservableProperty] private bool _isWhisperPurfviewXxlActive;
     [ObservableProperty] private bool _isTranscribeEnabled;
     [ObservableProperty] private double _progressOpacity;
 
@@ -819,6 +821,38 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void ViewWhisperLogFile()
+    {
+        var logFilePath = Se.GetWhisperLogFilePath();
+        if (Window != null)
+        {
+            _fileHelper.OpenFileWithDefaultProgram(Window, logFilePath);
+        }
+    }
+
+    [RelayCommand]
+    private async Task ReDownloadWhisperCpp()
+    {
+        var vm = await _windowService.ShowDialogAsync<DownloadWhisperEngineWindow, DownloadWhisperEngineViewModel>(
+            Window!, viewModel =>
+            {
+                viewModel.Engine = Engines.First(p => p.Name == WhisperEngineCpp.StaticName);
+                viewModel.StartDownload();
+            });
+    }
+
+    [RelayCommand]
+    private async Task ReDownloadWhisperPurfviewXxl()
+    {
+        var vm = await _windowService.ShowDialogAsync<DownloadWhisperEngineWindow, DownloadWhisperEngineViewModel>(
+            Window!, viewModel =>
+            {
+                viewModel.Engine = Engines.First(p => p.Name == WhisperEnginePurfviewFasterWhisperXxl.StaticName);
+                viewModel.StartDownload();
+            });
+    }
+
+    [RelayCommand]
     private void SingleMode()
     {
         IsBatchMode = false;
@@ -1025,9 +1059,9 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             }
 
             var vm = await _windowService.ShowDialogAsync<DownloadWhisperModelsWindow, DownloadWhisperModelsViewModel>(
-                Window!, viewModel => 
-                { 
-                    viewModel.SetModels(Models, SelectedEngine, SelectedModel); 
+                Window!, viewModel =>
+                {
+                    viewModel.SetModels(Models, SelectedEngine, SelectedModel);
                     viewModel.StartDownload();
                 });
 
@@ -1295,8 +1329,8 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         var process = new Process
         {
             StartInfo = new ProcessStartInfo(w, parameters)
-            { 
-                WindowStyle = ProcessWindowStyle.Hidden, 
+            {
+                WindowStyle = ProcessWindowStyle.Hidden,
                 CreateNoWindow = true,
                 UseShellExecute = false,
             }
@@ -1541,10 +1575,10 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     private void LogToConsole(string s)
     {
         _outputText.Enqueue(s);
-  ConsoleLog += s.Trim() + "\n";
+        ConsoleLog += s.Trim() + "\n";
 
-     Dispatcher.UIThread.Post(() => { TextBoxConsoleLog.CaretIndex = TextBoxConsoleLog.Text?.Length ?? 0; },
-        DispatcherPriority.Background);
+        Dispatcher.UIThread.Post(() => { TextBoxConsoleLog.CaretIndex = TextBoxConsoleLog.Text?.Length ?? 0; },
+           DispatcherPriority.Background);
     }
 
     private static decimal GetSeconds(string timeCode)
@@ -1726,5 +1760,11 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     internal void OnWindowClosing(WindowClosingEventArgs e)
     {
         UiUtil.SaveWindowPosition(Window);
+    }
+
+    internal void WindowContextMenuOpening(object? sender, EventArgs e)
+    {
+        IsWhisperCppActive = SelectedEngine != null && SelectedEngine.Name == WhisperEngineCpp.StaticName;
+        IsWhisperPurfviewXxlActive = SelectedEngine != null && SelectedEngine.Name == WhisperEnginePurfviewFasterWhisperXxl.StaticName;
     }
 }

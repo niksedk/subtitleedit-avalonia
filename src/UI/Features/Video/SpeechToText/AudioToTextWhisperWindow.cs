@@ -290,6 +290,37 @@ public class AudioToTextWhisperWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
+        var flyout = new MenuFlyout();
+        flyout.Opening += vm.WindowContextMenuOpening;
+        ContextFlyout = flyout;
+
+        var menuItemViewWhisperLog = new MenuItem
+        {
+            Header = Se.Language.Video.AudioToText.ViewWhisperLogFile,
+            DataContext = vm,
+            Command = vm.ViewWhisperLogFileCommand,
+        };
+        flyout.Items.Add(menuItemViewWhisperLog);
+
+        var menuItemRedownloadWhisperCpp = new MenuItem
+        {
+            Header = string.Format(Se.Language.Video.AudioToText.ReDownloadX, "Whisper CPP"),
+            DataContext = vm,
+            Command = vm.ReDownloadWhisperCppCommand,
+        };
+        menuItemRedownloadWhisperCpp.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsWhisperCppActive)) { Source = vm });
+        flyout.Items.Add(menuItemRedownloadWhisperCpp);
+
+        var menuItemRedownloadWhisperPurfviewXxl = new MenuItem
+        {
+            Header = string.Format(Se.Language.Video.AudioToText.ReDownloadX, "Purfview Faster Whisper XXL"),
+            DataContext = vm,
+            Command = vm.ReDownloadWhisperPurfviewXxlCommand,
+        };
+        menuItemRedownloadWhisperPurfviewXxl.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsWhisperPurfviewXxlActive)) { Source = vm });
+        flyout.Items.Add(menuItemRedownloadWhisperPurfviewXxl);
+
+
         var row = 0;
 
         grid.Children.Add(labelConsoleLog);

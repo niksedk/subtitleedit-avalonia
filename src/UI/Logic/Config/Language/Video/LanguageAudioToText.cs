@@ -18,6 +18,8 @@ public class LanguageAudioToText
     public string WhisperXxlHighlightWord { get; set; }
     public string DownloadingWhisperModel { get; set; }
     public string SelectModel { get; set; }
+    public string ViewWhisperLogFile { get; set; }
+    public string ReDownloadX { get; set; }
 
     public LanguageAudioToText()
     {
@@ -37,5 +39,7 @@ public class LanguageAudioToText
         WhisperXxlHighlightWord = "Highlight word";
         DownloadingWhisperModel = "Downloading Whisper model";
         SelectModel = "Select model";
+        ViewWhisperLogFile = "View Whisper log file";
+        ReDownloadX = "Re-download {0}";
     }
 }
