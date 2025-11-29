@@ -137,7 +137,8 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _waveformInvertMouseWheel;
     [ObservableProperty] private bool _waveformSnapToShotChanges;
     [ObservableProperty] private bool _waveformShotChangesAutoGenerate;
-
+    [ObservableProperty] private bool _waveformPauseOnSingleClick;
+    [ObservableProperty] private bool _waveformCenterOnSingleClick;
 
     [ObservableProperty] private ObservableCollection<string> _themes;
     [ObservableProperty] private string _selectedTheme;
@@ -408,6 +409,8 @@ public partial class SettingsViewModel : ObservableObject
         WaveformInvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel;
         WaveformSnapToShotChanges = Se.Settings.Waveform.SnapToShotChanges;
         WaveformShotChangesAutoGenerate = Se.Settings.Waveform.ShotChangesAutoGenerate;
+        WaveformPauseOnSingleClick = Se.Settings.Waveform.PauseOnSingleClick;
+        WaveformCenterOnSingleClick = Se.Settings.Waveform.CenterOnSingleClick;
 
         ColorDurationTooLong = general.ColorDurationTooLong;
         ColorDurationTooShort = general.ColorDurationTooShort;
@@ -546,6 +549,8 @@ public partial class SettingsViewModel : ObservableObject
         Se.Settings.Waveform.InvertMouseWheel = WaveformInvertMouseWheel;
         Se.Settings.Waveform.SnapToShotChanges = WaveformSnapToShotChanges;
         Se.Settings.Waveform.ShotChangesAutoGenerate = WaveformShotChangesAutoGenerate;
+        Se.Settings.Waveform.PauseOnSingleClick = WaveformPauseOnSingleClick;
+        Se.Settings.Waveform.CenterOnSingleClick = WaveformCenterOnSingleClick;
 
         general.ColorDurationTooLong = ColorDurationTooLong;
         general.ColorDurationTooShort = ColorDurationTooShort;

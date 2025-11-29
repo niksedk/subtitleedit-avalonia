@@ -9960,8 +9960,17 @@ public partial class MainViewModel :
         newPosition = Math.Max(0, newPosition);
         newPosition = Math.Min(vp.Duration, newPosition);
 
-        vp.VideoPlayerInstance.Pause();
-        vp.SetPosition(newPosition);
+        if (Se.Settings.Waveform.PauseOnSingleClick)
+        {
+            vp.VideoPlayerInstance.Pause();
+            vp.SetPosition(newPosition);
+        }
+
+        if (Se.Settings.Waveform.CenterOnSingleClick)
+        {
+            AudioVisualizer?.CenterOnPosition(newPosition);
+        }
+
         _updateAudioVisualizer = true; // Update the audio visualizer position
     }
 

@@ -190,6 +190,8 @@ public class LanguageSettings
     public string WaveFormsAndSpectrogramFoldersContainsX { get; set; }
     public string DeleteWaveformAndSpectrogramFoldersQuestion { get; set; }
     public string WaveformGenerateSpectrogram { get; set; }
+    public string WaveformCenterOnSingleClick { get; set; }
+    public string WaveformPauseOnSingleClick { get; set; }
 
     public LanguageSettings()
     {
@@ -376,6 +378,8 @@ public class LanguageSettings
         WaveFormsAndSpectrogramFoldersContainsX = "'Waveforms' and 'spectrogram' folders contains {0}";
         DeleteWaveformAndSpectrogramFoldersQuestion = "Delete 'Waveforms' and 'Spectrogram' files?";
         WaveformGenerateSpectrogram = "Generate spectrogram";
+        WaveformCenterOnSingleClick = "Center on single click";
+        WaveformPauseOnSingleClick = "Pause on single click";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

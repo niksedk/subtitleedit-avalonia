@@ -33,6 +33,8 @@ public class SeWaveform
     public bool SeekSilenceSeekForward { get; set; }
     public bool GenerateSpectrogram { get; set; }
     public string LastDisplayMode { get; set; }
+    public bool PauseOnSingleClick { get; set; }
+    public bool CenterOnSingleClick { get; set; }
 
     public SeWaveform()
     {
@@ -52,6 +54,8 @@ public class SeWaveform
         ShowWaveformVideoPositionSlider = true;
         ShowWaveformPlaybackSpeed = true;
         LastDisplayMode = WaveformDisplayMode.OnlyWaveform.ToString();  
+        PauseOnSingleClick = true;
+        CenterOnSingleClick = false;
 
         GuessTimeCodeStartFromBeginning = false;
         GuessTimeCodeScanBlockSize = 100;
