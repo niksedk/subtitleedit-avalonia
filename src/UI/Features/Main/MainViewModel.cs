@@ -5862,7 +5862,7 @@ public partial class MainViewModel :
 
         s.EndTime = TimeSpan.FromSeconds(videoPositionSeconds);
         var nextStart = s.EndTime.TotalMilliseconds + gapMs;
-        next.StartTime = TimeSpan.FromMilliseconds(nextStart);
+        next.SetStartTimeOnly(TimeSpan.FromMilliseconds(nextStart));
 
         _updateAudioVisualizer = true;
     }
@@ -5893,7 +5893,7 @@ public partial class MainViewModel :
 
         s.EndTime = TimeSpan.FromSeconds(videoPositionSeconds);
         var nextStart = s.EndTime.TotalMilliseconds + gapMs;
-        next.StartTime = TimeSpan.FromMilliseconds(nextStart);
+        next.SetStartTimeOnly(TimeSpan.FromMilliseconds(nextStart));
 
         SelectAndScrollToRow(idx + 1);
 
