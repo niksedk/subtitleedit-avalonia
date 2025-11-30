@@ -3690,6 +3690,7 @@ public partial class MainViewModel :
     private DataGrid _oldSubtitleGrid = new DataGrid();
     private TextBox _oldEditTextBox = new TextBox();
     private bool _oldGenerateSpectrogram;
+    private string _oldSpectrogramStyle;
 
     [RelayCommand]
     private async Task CommandShowSettings()
@@ -3697,6 +3698,7 @@ public partial class MainViewModel :
         _oldSubtitleGrid = SubtitleGrid;
         _oldEditTextBox = EditTextBox;
         _oldGenerateSpectrogram = Se.Settings.Waveform.GenerateSpectrogram;
+        _oldSpectrogramStyle = Se.Settings.Waveform.SpectrogramStyle;
 
         var viewModel = await _windowService
             .ShowDialogAsync<SettingsWindow, SettingsViewModel>(Window!, vm => { vm.Initialize(this); });
@@ -3743,22 +3745,31 @@ public partial class MainViewModel :
             AudioVisualizer.UpdateTheme();
             AudioVisualizer.IsReadOnly = LockTimeCodes;
 
-            if (_oldGenerateSpectrogram == false && Se.Settings.Waveform.GenerateSpectrogram && !string.IsNullOrEmpty(_videoFileName))
+            if (!string.IsNullOrEmpty(_videoFileName))
             {
-                SettingsViewModel.DeleteWaveformAndSpectrogramFiles();
-
-                var peakWaveFileName = WavePeakGenerator2.GetPeakWaveFileName(_videoFileName);
-                var spectrogramFolder = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(_videoFileName, 0);
-                if (!File.Exists(peakWaveFileName))
+                if (_oldGenerateSpectrogram == false && Se.Settings.Waveform.GenerateSpectrogram ||
+                    _oldSpectrogramStyle != Se.Settings.Waveform.SpectrogramStyle)
                 {
-                    if (FfmpegHelper.IsFfmpegInstalled())
+                    SettingsViewModel.DeleteWaveformAndSpectrogramFiles();
+
+                    var peakWaveFileName = WavePeakGenerator2.GetPeakWaveFileName(_videoFileName);
+                    var spectrogramFolder = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(_videoFileName, 0);
+                    if (!File.Exists(peakWaveFileName))
                     {
-                        var tempWaveFileName = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.wav");
-                        var process = WaveFileExtractor.GetCommandLineProcess(_videoFileName, -1, tempWaveFileName,
-                            Configuration.Settings.General.VlcWaveTranscodeSettings, out _);
+                        if (FfmpegHelper.IsFfmpegInstalled())
+                        {
+                            var tempWaveFileName = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.wav");
+                            var process = WaveFileExtractor.GetCommandLineProcess(_videoFileName, -1, tempWaveFileName,
+                                Configuration.Settings.General.VlcWaveTranscodeSettings, out _);
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                        Task.Run(async () => { await ExtractWaveformAndSpectrogramAndShotChanges(process, tempWaveFileName, peakWaveFileName, _videoFileName); });
+                            Task.Run(async () => { await ExtractWaveformAndSpectrogramAndShotChanges(process, tempWaveFileName, peakWaveFileName, _videoFileName); });
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                        }
+                    }
+
+                    if (_oldGenerateSpectrogram == false && Se.Settings.Waveform.GenerateSpectrogram)
+                    {
+                        Se.Settings.Waveform.LastDisplayMode = WaveformDisplayMode.WaveformAndSpectrogram.ToString();
                     }
                 }
             }
@@ -8663,7 +8674,7 @@ public partial class MainViewModel :
 
             if (Se.Settings.Waveform.GenerateSpectrogram)
             {
-                ShowStatus(Se.Language.Main.GeneratingSpectrogramDotDotDot);
+                ShowStatus(Se.Language.Main.GeneratingSpectrogramDotDotDot, 10000);
                 var spectrogram = waveFile.GenerateSpectrogram(0, WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(videoFileName), _videoOpenTokenSource.Token);
                 AudioVisualizer?.SetSpectrogram(spectrogram);
             }

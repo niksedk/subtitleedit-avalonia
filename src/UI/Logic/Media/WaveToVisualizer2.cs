@@ -1058,31 +1058,28 @@ public class WavePeakGenerator2 : IDisposable
         private static FastBitmap.PixelData[] GeneratePalette()
         {
             var palette = new FastBitmap.PixelData[MagnitudeIndexRange];
-            if (Configuration.Settings.VideoControls.SpectrogramAppearance == "Classic")
+            if (Se.Settings.Waveform.SpectrogramStyle == SeSpectrogramStyle.ClassicViridis.ToString())
+            {
+                for (int colorIndex = 0; colorIndex < MagnitudeIndexRange; colorIndex++)
+                {
+                    palette[colorIndex] = new FastBitmap.PixelData(PaletteValueViridis(colorIndex, MagnitudeIndexRange));
+                }
+            }
+            else if (Se.Settings.Waveform.SpectrogramStyle == SeSpectrogramStyle.ClassicPlasma.ToString())
+            {
+                for (int colorIndex = 0; colorIndex < MagnitudeIndexRange; colorIndex++)
+                {
+                    palette[colorIndex] = new FastBitmap.PixelData(PaletteValuePlasma(colorIndex, MagnitudeIndexRange));
+                }
+            }
+            else // Classic
             {
                 for (int colorIndex = 0; colorIndex < MagnitudeIndexRange; colorIndex++)
                 {
                     palette[colorIndex] = new FastBitmap.PixelData(PaletteValue(colorIndex, MagnitudeIndexRange));
                 }
             }
-            //else if (Configuration.Settings.VideoControls.SpectrogramAppearance == "Heat")
-            //{
-            //    palette = FastBitmap.ConvertByteArrayToPixelData(Properties.Resources.Heat_Image);
-            //}
-            //else if (Configuration.Settings.VideoControls.SpectrogramAppearance == "Cyan to orange")
-            //{
-            //    palette = FastBitmap.ConvertByteArrayToPixelData(Properties.Resources.cyan_to_orange_Image);
-            //}
-            else
-            {
-                var list = SmoothColors(0, 0, 0, Configuration.Settings.VideoControls.WaveformColor.Red,
-                                                 Configuration.Settings.VideoControls.WaveformColor.Green,
-                                                 Configuration.Settings.VideoControls.WaveformColor.Blue, MagnitudeIndexRange);
-                for (int i = 0; i < MagnitudeIndexRange; i++)
-                {
-                    palette[i] = new FastBitmap.PixelData(list[i]);
-                }
-            }
+
             return palette;
         }
 
@@ -1127,31 +1124,45 @@ public class WavePeakGenerator2 : IDisposable
             return new SKColor((byte)r, (byte)g, (byte)b);
         }
 
-        private static List<SKColor> SmoothColors(int fromR, int fromG, int fromB, int toR, int toG, int toB, int count)
+        /// <summary>
+        /// Viridis color palette - perceptually uniform color scheme from dark purple to yellow-green
+        /// </summary>
+        private static SKColor PaletteValueViridis(int x, int range)
         {
-            while (toR < 255 && toG < 255 && toB < 255)
-            {
-                toR++;
-                toG++;
-                toB++;
-            }
+            double t = (double)x / range;
 
-            var list = new List<SKColor>();
-            double r = fromR;
-            double g = fromG;
-            double b = fromB;
-            double diffR = (toR - fromR) / (double)count;
-            double diffG = (toG - fromG) / (double)count;
-            double diffB = (toB - fromB) / (double)count;
+            // Viridis polynomial approximation
+            double r = 0.267004 + t * (0.281908 + t * (-1.135700 + t * (1.155175 + t * (-0.569888))));
+            double g = 0.004874 + t * (1.336760 + t * (-0.747169 + t * (0.144650 + t * (0.239742))));
+            double b = 0.329415 + t * (1.375486 + t * (-2.889028 + t * (2.790644 + t * (-1.283776))));
 
-            for (int i = 0; i < count; i++)
-            {
-                list.Add(ColorUtils.FromArgb((int)r, (int)g, (int)b));
-                r += diffR;
-                g += diffG;
-                b += diffB;
-            }
-            return list;
+            // Clamp and convert to bytes
+            r = Math.Max(0, Math.Min(1, r));
+            g = Math.Max(0, Math.Min(1, g));
+            b = Math.Max(0, Math.Min(1, b));
+
+            return new SKColor((byte)(r * 255), (byte)(g * 255), (byte)(b * 255));
+        }
+
+        /// <summary>
+        /// Plasma color palette - perceptually uniform color scheme from deep blue/purple through pink to yellow
+        /// </summary>
+        private static SKColor PaletteValuePlasma(int x, int range)
+        {
+            double t = (double)x / range;
+
+            // Plasma polynomial approximation
+            double r = 0.050383 + t * (2.176514 + t * (-2.689460 + t * (6.130348 + t * (-11.107290 + t * (10.024779 + t * (-3.657430))))));
+            double g = 0.029803 + t * (0.280267 + t * (2.645293 + t * (-5.336825 + t * (4.481445 + t * (-1.355430)))));
+            double b = 0.527975 + t * (0.600417 + t * (1.412440 + t * (-11.930240 + t * (20.434160 + t * (-12.791690)))));
+
+
+            // Clamp and convert to bytes
+            r = Math.Max(0, Math.Min(1, r));
+            g = Math.Max(0, Math.Min(1, g));
+            b = Math.Max(0, Math.Min(1, b));
+
+            return new SKColor((byte)(r * 255), (byte)(g * 255), (byte)(b * 255));
         }
 
         /// Maps magnitudes in the range [-decibelRange .. 0] dB to palette index values in the range [0 .. indexMax]

@@ -190,6 +190,7 @@ public class LanguageSettings
     public string WaveFormsAndSpectrogramFoldersContainsX { get; set; }
     public string DeleteWaveformAndSpectrogramFoldersQuestion { get; set; }
     public string WaveformGenerateSpectrogram { get; set; }
+    public string WaveformSpectrogramMode { get; set; }
     public string WaveformCenterOnSingleClick { get; set; }
     public string WaveformPauseOnSingleClick { get; set; }
 
@@ -378,6 +379,7 @@ public class LanguageSettings
         WaveFormsAndSpectrogramFoldersContainsX = "'Waveforms' and 'spectrogram' folders contains {0}";
         DeleteWaveformAndSpectrogramFoldersQuestion = "Delete 'Waveforms' and 'Spectrogram' files?";
         WaveformGenerateSpectrogram = "Generate spectrogram";
+        WaveformSpectrogramMode = "Spectrogram mode (works at generate time)";
         WaveformCenterOnSingleClick = "Center on single click";
         WaveformPauseOnSingleClick = "Pause on single click";
     }

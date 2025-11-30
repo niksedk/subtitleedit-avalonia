@@ -118,7 +118,11 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _waveformDrawGridLines;
     [ObservableProperty] private bool _waveformFocusOnMouseOver;
     [ObservableProperty] private bool _waveformCenterVideoPosition;
-    [ObservableProperty] private bool _waveformShowSpectrogram;
+
+    [ObservableProperty] private bool _waveformGenerateSpectrogram;
+    [ObservableProperty] private ObservableCollection<string> _waveformSpectrogramStyles;
+    [ObservableProperty] private string _selectedWaveformSpectrogramStyle;
+
     [ObservableProperty] private bool _waveformShowToolbar;
     [ObservableProperty] private bool _showWaveformVerticalZoom;
     [ObservableProperty] private bool _showWaveformHorizontalZoom;
@@ -235,6 +239,14 @@ public partial class SettingsViewModel : ObservableObject
 
         VideoPlayers = new ObservableCollection<VideoPlayerItem>(VideoPlayerItem.ListVideoPlayerItem());
         SelectedVideoPlayer = VideoPlayers[0];
+
+        WaveformSpectrogramStyles = new ObservableCollection<string>
+        {
+            Se.Language.Waveform.SpectrogramClassic,
+            Se.Language.Waveform.SpectrogramClassicViridis,
+            Se.Language.Waveform.SpectrogramClassicPlasma,
+        };
+        SelectedWaveformSpectrogramStyle = WaveformSpectrogramStyles[0];
 
         var subtitleFormats = SubtitleFormat.AllSubtitleFormats;
         var defaultSubtitleFormats = new List<string>();
@@ -397,7 +409,25 @@ public partial class SettingsViewModel : ObservableObject
         WaveformFocusOnMouseOver = Se.Settings.Waveform.FocusOnMouseOver;
         WaveformCenterVideoPosition = Se.Settings.Waveform.CenterVideoPosition;
         WaveformShowToolbar = Se.Settings.Waveform.ShowToolbar;
-        WaveformShowSpectrogram = Se.Settings.Waveform.GenerateSpectrogram;
+        
+        WaveformGenerateSpectrogram = Se.Settings.Waveform.GenerateSpectrogram;
+        if (Se.Settings.Waveform.SpectrogramStyle == SeSpectrogramStyle.Classic.ToString())
+        {
+            SelectedWaveformSpectrogramStyle = WaveformSpectrogramStyles[0];
+        }
+        else if (Se.Settings.Waveform.SpectrogramStyle == SeSpectrogramStyle.ClassicViridis.ToString())
+        {
+            SelectedWaveformSpectrogramStyle = WaveformSpectrogramStyles[1];
+        }
+        else if (Se.Settings.Waveform.SpectrogramStyle == SeSpectrogramStyle.ClassicPlasma.ToString())
+        {
+            SelectedWaveformSpectrogramStyle = WaveformSpectrogramStyles[2];
+        }
+        else
+        {
+            SelectedWaveformSpectrogramStyle = WaveformSpectrogramStyles[0];
+        }
+
         ShowWaveformVerticalZoom = Se.Settings.Waveform.ShowWaveformVerticalZoom;
         ShowWaveformHorizontalZoom = Se.Settings.Waveform.ShowWaveformHorizontalZoom;
         ShowWaveformVideoPositionSlider = Se.Settings.Waveform.ShowWaveformVideoPositionSlider;
@@ -538,7 +568,21 @@ public partial class SettingsViewModel : ObservableObject
         Se.Settings.Waveform.CenterVideoPosition = WaveformCenterVideoPosition;
         Se.Settings.Waveform.FocusTextBoxAfterInsertNew = WaveformFocusTextboxAfterInsertNew;
         Se.Settings.Waveform.ShowToolbar = WaveformShowToolbar;
-        Se.Settings.Waveform.GenerateSpectrogram = WaveformShowSpectrogram;
+
+        Se.Settings.Waveform.GenerateSpectrogram = WaveformGenerateSpectrogram;
+        if (SelectedWaveformSpectrogramStyle == Se.Language.Waveform.SpectrogramClassic)
+        {
+            Se.Settings.Waveform.SpectrogramStyle = SeSpectrogramStyle.Classic.ToString();
+        }
+        else if (SelectedWaveformSpectrogramStyle == Se.Language.Waveform.SpectrogramClassicPlasma)
+        {
+            Se.Settings.Waveform.SpectrogramStyle = SeSpectrogramStyle.ClassicPlasma.ToString();
+        }
+        else if (SelectedWaveformSpectrogramStyle == Se.Language.Waveform.SpectrogramClassicViridis)
+        {
+            Se.Settings.Waveform.SpectrogramStyle = SeSpectrogramStyle.ClassicViridis.ToString();
+        }
+
         Se.Settings.Waveform.ShowWaveformVerticalZoom = ShowWaveformVerticalZoom;
         Se.Settings.Waveform.ShowWaveformHorizontalZoom = ShowWaveformHorizontalZoom;
         Se.Settings.Waveform.ShowWaveformVideoPositionSlider = ShowWaveformVideoPositionSlider;

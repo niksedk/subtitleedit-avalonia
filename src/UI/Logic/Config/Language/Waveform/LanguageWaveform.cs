@@ -17,6 +17,9 @@ public class LanguageWaveform
     public object ShowOnlyWaveform { get; set; }
     public object ShowOnlySpectrogram { get; set; }
     public object ShowWaveformAndSpectrogram { get; set; }
+    public string SpectrogramClassic { get; set; }
+    public string SpectrogramClassicViridis { get; set; }
+    public string SpectrogramClassicPlasma { get; set; }
 
     public LanguageWaveform()
     {
@@ -36,5 +39,8 @@ public class LanguageWaveform
         ShowOnlyWaveform = "Show only waveform";
         ShowOnlySpectrogram = "Show only spectrogram";
         ShowWaveformAndSpectrogram = "Show waveform and spectrogram";
+        SpectrogramClassic = "Classic";
+        SpectrogramClassicViridis = "Classic Viridis";
+        SpectrogramClassicPlasma = "Classic Plasma";
     }
 }

@@ -32,6 +32,7 @@ public class SeWaveform
     public double SeekSilenceMaxVolume { get; set; }
     public bool SeekSilenceSeekForward { get; set; }
     public bool GenerateSpectrogram { get; set; }
+    public string SpectrogramStyle { get; set; }
     public string LastDisplayMode { get; set; }
     public bool PauseOnSingleClick { get; set; }
     public bool CenterOnSingleClick { get; set; }
@@ -53,6 +54,7 @@ public class SeWaveform
         ShowWaveformHorizontalZoom = true;
         ShowWaveformVideoPositionSlider = true;
         ShowWaveformPlaybackSpeed = true;
+        SpectrogramStyle = SeSpectrogramStyle.Classic.ToString();
         LastDisplayMode = WaveformDisplayMode.OnlyWaveform.ToString();  
         PauseOnSingleClick = true;
         CenterOnSingleClick = false;
