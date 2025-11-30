@@ -1206,10 +1206,79 @@ public class WavePeakGenerator2 : IDisposable
         {
             double t = (double)x / range;
 
-            // Turbo polynomial approximation
-            double r = 0.189821 + t * (3.491135 + t * (-21.261450 + t * (42.656200 + t * (-35.405670 + t * 11.330190))));
-            double g = 0.107649 + t * (6.625090 + t * (-35.477900 + t * (61.508800 + t * (-45.042980 + t * 12.404370))));
-            double b = 0.438744 + t * (1.402950 + t * (-4.452030 + t * (6.452650 + t * (-4.657570 + t * 1.313470))));
+            // Enhanced Turbo with more contrast and color saturation
+            // Using a modified approach with wider color gamut
+            double r, g, b;
+
+            if (t < 0.125)
+            {
+                // Deep blue to cyan
+                double localT = t / 0.125;
+                r = 0.0;
+                g = 0.3 * localT;
+                b = 0.5 + 0.5 * localT;
+            }
+            else if (t < 0.25)
+            {
+                // Cyan to green
+                double localT = (t - 0.125) / 0.125;
+                r = 0.0;
+                g = 0.3 + 0.7 * localT;
+                b = 1.0 - 0.5 * localT;
+            }
+            else if (t < 0.375)
+            {
+                // Green to yellow-green
+                double localT = (t - 0.25) / 0.125;
+                r = 0.6 * localT;
+                g = 1.0;
+                b = 0.5 - 0.5 * localT;
+            }
+            else if (t < 0.5)
+            {
+                // Yellow-green to yellow
+                double localT = (t - 0.375) / 0.125;
+                r = 0.6 + 0.4 * localT;
+                g = 1.0;
+                b = 0.0;
+            }
+            else if (t < 0.625)
+            {
+                // Yellow to orange
+                double localT = (t - 0.5) / 0.125;
+                r = 1.0;
+                g = 1.0 - 0.3 * localT;
+                b = 0.0;
+            }
+            else if (t < 0.75)
+            {
+                // Orange to red-orange
+                double localT = (t - 0.625) / 0.125;
+                r = 1.0;
+                g = 0.7 - 0.4 * localT;
+                b = 0.2 * localT;
+            }
+            else if (t < 0.875)
+            {
+                // Red-orange to magenta
+                double localT = (t - 0.75) / 0.125;
+                r = 1.0;
+                g = 0.3 - 0.3 * localT;
+                b = 0.2 + 0.5 * localT;
+            }
+            else
+            {
+                // Magenta to bright pink/white
+                double localT = (t - 0.875) / 0.125;
+                r = 1.0;
+                g = 0.4 * localT;
+                b = 0.7 + 0.3 * localT;
+            }
+
+            // Apply gamma correction for better perceptual uniformity and increased contrast
+            r = Math.Pow(r, 0.8);
+            g = Math.Pow(g, 0.8);
+            b = Math.Pow(b, 0.8);
 
             // Clamp and convert to bytes
             r = Math.Max(0, Math.Min(1, r));
