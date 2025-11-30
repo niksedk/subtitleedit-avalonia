@@ -479,7 +479,7 @@ public static class ShortcutsMain
             new(nameof(vm.UndoCommand), [commandOrWin, "Z"]),
             new(nameof(vm.RedoCommand), [commandOrWin, "Y"]),
             new(nameof(vm.ShowGoToLineCommand), [commandOrWin, "G"]),
-            new(nameof(vm.AddOrEditBookmarkCommand), [commandOrWin + "Shift", "B"]),
+            new(nameof(vm.AddOrEditBookmarkCommand), [commandOrWin, "Shift", "B"]),
             new(nameof(vm.GoToPreviousLineCommand), ["Alt", "Up"]),
             new(nameof(vm.GoToNextLineCommand), ["Alt", "Down"]),
             new(nameof(vm.SelectAllLinesCommand), [commandOrWin, "A"], ShortcutCategory.SubtitleGrid),
