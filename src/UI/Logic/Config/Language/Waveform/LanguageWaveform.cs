@@ -20,6 +20,8 @@ public class LanguageWaveform
     public string SpectrogramClassic { get; set; }
     public string SpectrogramClassicViridis { get; set; }
     public string SpectrogramClassicPlasma { get; set; }
+    public string SpectrogramClassicInferno { get; set; }
+    public string SpectrogramClassicTurbo { get; set; }
 
     public LanguageWaveform()
     {
@@ -40,7 +42,9 @@ public class LanguageWaveform
         ShowOnlySpectrogram = "Show only spectrogram";
         ShowWaveformAndSpectrogram = "Show waveform and spectrogram";
         SpectrogramClassic = "Classic";
-        SpectrogramClassicViridis = "Classic Viridis";
-        SpectrogramClassicPlasma = "Classic Plasma";
+        SpectrogramClassicViridis = "Viridis";
+        SpectrogramClassicPlasma = "Plasma";
+        SpectrogramClassicInferno = "Inferno";
+        SpectrogramClassicTurbo = "Turbo";
     }
 }

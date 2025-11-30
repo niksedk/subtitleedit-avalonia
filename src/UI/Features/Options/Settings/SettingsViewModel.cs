@@ -245,6 +245,8 @@ public partial class SettingsViewModel : ObservableObject
             Se.Language.Waveform.SpectrogramClassic,
             Se.Language.Waveform.SpectrogramClassicViridis,
             Se.Language.Waveform.SpectrogramClassicPlasma,
+            Se.Language.Waveform.SpectrogramClassicInferno,
+            Se.Language.Waveform.SpectrogramClassicTurbo,
         };
         SelectedWaveformSpectrogramStyle = WaveformSpectrogramStyles[0];
 
@@ -423,6 +425,14 @@ public partial class SettingsViewModel : ObservableObject
         {
             SelectedWaveformSpectrogramStyle = WaveformSpectrogramStyles[2];
         }
+        else if (Se.Settings.Waveform.SpectrogramStyle == SeSpectrogramStyle.ClassicInferno.ToString())
+        {
+            SelectedWaveformSpectrogramStyle = WaveformSpectrogramStyles[3];
+        }
+        else if (Se.Settings.Waveform.SpectrogramStyle == SeSpectrogramStyle.ClassicTurbo.ToString())
+        {
+            SelectedWaveformSpectrogramStyle = WaveformSpectrogramStyles[4];
+        }
         else
         {
             SelectedWaveformSpectrogramStyle = WaveformSpectrogramStyles[0];
@@ -581,6 +591,14 @@ public partial class SettingsViewModel : ObservableObject
         else if (SelectedWaveformSpectrogramStyle == Se.Language.Waveform.SpectrogramClassicViridis)
         {
             Se.Settings.Waveform.SpectrogramStyle = SeSpectrogramStyle.ClassicViridis.ToString();
+        }
+        else if (SelectedWaveformSpectrogramStyle == Se.Language.Waveform.SpectrogramClassicInferno)
+        {
+            Se.Settings.Waveform.SpectrogramStyle = SeSpectrogramStyle.ClassicInferno.ToString();
+        }
+        else if (SelectedWaveformSpectrogramStyle == Se.Language.Waveform.SpectrogramClassicTurbo)
+        {
+            Se.Settings.Waveform.SpectrogramStyle = SeSpectrogramStyle.ClassicTurbo.ToString();
         }
 
         Se.Settings.Waveform.ShowWaveformVerticalZoom = ShowWaveformVerticalZoom;

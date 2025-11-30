@@ -1072,6 +1072,20 @@ public class WavePeakGenerator2 : IDisposable
                     palette[colorIndex] = new FastBitmap.PixelData(PaletteValuePlasma(colorIndex, MagnitudeIndexRange));
                 }
             }
+            else if (Se.Settings.Waveform.SpectrogramStyle == SeSpectrogramStyle.ClassicInferno.ToString())
+            {
+                for (int colorIndex = 0; colorIndex < MagnitudeIndexRange; colorIndex++)
+                {
+                    palette[colorIndex] = new FastBitmap.PixelData(PaletteValueInferno(colorIndex, MagnitudeIndexRange));
+                }
+            }
+            else if (Se.Settings.Waveform.SpectrogramStyle == SeSpectrogramStyle.ClassicTurbo.ToString())
+            {
+                for (int colorIndex = 0; colorIndex < MagnitudeIndexRange; colorIndex++)
+                {
+                    palette[colorIndex] = new FastBitmap.PixelData(PaletteValueTurbo(colorIndex, MagnitudeIndexRange));
+                }
+            }
             else // Classic
             {
                 for (int colorIndex = 0; colorIndex < MagnitudeIndexRange; colorIndex++)
@@ -1156,6 +1170,46 @@ public class WavePeakGenerator2 : IDisposable
             double g = 0.029803 + t * (0.280267 + t * (2.645293 + t * (-5.336825 + t * (4.481445 + t * (-1.355430)))));
             double b = 0.527975 + t * (0.600417 + t * (1.412440 + t * (-11.930240 + t * (20.434160 + t * (-12.791690)))));
 
+
+            // Clamp and convert to bytes
+            r = Math.Max(0, Math.Min(1, r));
+            g = Math.Max(0, Math.Min(1, g));
+            b = Math.Max(0, Math.Min(1, b));
+
+            return new SKColor((byte)(r * 255), (byte)(g * 255), (byte)(b * 255));
+        }
+
+        /// <summary>
+        /// Inferno color palette - high contrast black to white through red, orange, and yellow
+        /// </summary>
+        private static SKColor PaletteValueInferno(int x, int range)
+        {
+            double t = (double)x / range;
+
+            // Inferno polynomial approximation
+            double r = 0.001462 + t * (1.217761 + t * (1.795470 + t * (-7.361869 + t * (13.446884 + t * (-9.555991 + t * 2.455710)))));
+            double g = 0.000466 + t * (0.125098 + t * (3.875940 + t * (-10.418160 + t * (11.001100 + t * (-4.909755)))));
+            double b = 0.013866 + t * (2.565590 + t * (-6.945260 + t * (9.287860 + t * (-5.684940 + t * 1.316750))));
+
+            // Clamp and convert to bytes
+            r = Math.Max(0, Math.Min(1, r));
+            g = Math.Max(0, Math.Min(1, g));
+            b = Math.Max(0, Math.Min(1, b));
+
+            return new SKColor((byte)(r * 255), (byte)(g * 255), (byte)(b * 255));
+        }
+
+        /// <summary>
+        /// Turbo color palette - high contrast rainbow-like palette optimized for maximum perceptual contrast
+        /// </summary>
+        private static SKColor PaletteValueTurbo(int x, int range)
+        {
+            double t = (double)x / range;
+
+            // Turbo polynomial approximation
+            double r = 0.189821 + t * (3.491135 + t * (-21.261450 + t * (42.656200 + t * (-35.405670 + t * 11.330190))));
+            double g = 0.107649 + t * (6.625090 + t * (-35.477900 + t * (61.508800 + t * (-45.042980 + t * 12.404370))));
+            double b = 0.438744 + t * (1.402950 + t * (-4.452030 + t * (6.452650 + t * (-4.657570 + t * 1.313470))));
 
             // Clamp and convert to bytes
             r = Math.Max(0, Math.Min(1, r));
