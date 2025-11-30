@@ -291,6 +291,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
                 if (GetResultFromSrt(_waveFileName, _videoFileName!, out var resultTexts, _outputText, _filesToDelete))
                 {
+                    _loadedFromStdOut = false;
                     var subtitle = new Subtitle();
                     subtitle.Paragraphs.AddRange(resultTexts
                         .Select(p => new Paragraph(p.Text, (double)p.Start * 1000.0, (double)p.End * 1000.0)).ToList());
@@ -301,7 +302,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                     return;
                 }
 
-                _outputText.Enqueue("Loading result from STDOUT" + Environment.NewLine);
+                _outputText.Enqueue("Loading result from STDOUT");
                 _loadedFromStdOut = true;
                 var transcribedSubtitleFromStdOut = new Subtitle();
                 transcribedSubtitleFromStdOut.Paragraphs.AddRange(_resultList.OrderBy(p => p.Start)
@@ -545,9 +546,15 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         return null;
     }
 
-    public bool GetResultFromSrt(string waveFileName, string videoFileName, out List<ResultText> resultTexts,
-        ConcurrentQueue<string> outputText, List<string> filesToDelete)
+    public bool GetResultFromSrt(
+        string waveFileName, 
+        string videoFileName, 
+        out List<ResultText> resultTexts,
+        ConcurrentQueue<string> outputText, 
+        List<string> filesToDelete)
     {
+        Task.Delay(500);
+
         if (SelectedEngine is not IWhisperEngine engine)
         {
             resultTexts = new List<ResultText>();
@@ -588,13 +595,13 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         {
             var rawText = FileUtil.ReadAllLinesShared(srtFileName, Encoding.UTF8);
             new SubRip().LoadSubtitle(sub, rawText, srtFileName);
-            outputText?.Enqueue($"Loading result from {srtFileName}{Environment.NewLine}");
+            outputText?.Enqueue($"Loading result from {srtFileName}");
         }
         else
         {
             var rawText = FileUtil.ReadAllLinesShared(srtFileName, Encoding.UTF8);
             new WebVTT().LoadSubtitle(sub, rawText, srtFileName);
-            outputText?.Enqueue($"Loading result from {vttFileName}{Environment.NewLine}");
+            outputText?.Enqueue($"Loading result from {vttFileName}");
         }
 
         sub.RemoveEmptyLines();
@@ -634,6 +641,15 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         }
     }
 
+    private void HideProgressBar()
+    {
+        if (ProgressOpacity > 0)
+        {
+            ProgressValue = 0;
+            ProgressOpacity = 0;
+        }
+    }
+
     private void SetProgressBarPct(double pct)
     {
         if (pct > 100)
@@ -661,7 +677,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         var sbLog = new StringBuilder();
         foreach (var s in _outputText)
         {
-            sbLog.AppendLine(s);
+            sbLog.AppendLine(s.TrimEnd());
         }
 
         Se.WriteWhisperLog(sbLog.ToString().Trim());
@@ -681,6 +697,9 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             if (Window != null)
             {
                 _fileHelper.OpenFileWithDefaultProgram(Window, Se.GetWhisperLogFilePath());
+                HideProgressBar();
+                _abort = false;
+                return;
             }
         }
 
