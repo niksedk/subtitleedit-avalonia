@@ -12,7 +12,6 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 using Projektanker.Icons.Avalonia;
-using System;
 using MenuItem = Avalonia.Controls.MenuItem;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
@@ -70,6 +69,7 @@ public static class InitListViewAndEditBox
         {
             Header = Se.Language.General.NumberSymbol,
             Width = new DataGridLength(50),
+            MinWidth = 40,
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
             CellTemplate = new FuncDataTemplate<SubtitleLineViewModel>((value, namescope) =>
                 new StackPanel
@@ -96,6 +96,7 @@ public static class InitListViewAndEditBox
             Header = Se.Language.General.Show,
             Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)) { Converter = fullTimeConverter },
             Width = new DataGridLength(120),
+            MinWidth = 100,
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
         });
 
@@ -104,6 +105,7 @@ public static class InitListViewAndEditBox
             Header = Se.Language.General.Hide,
             Binding = new Binding(nameof(SubtitleLineViewModel.EndTime)) { Converter = fullTimeConverter },
             Width = new DataGridLength(120),
+            MinWidth = 100,
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
         };
         vm.SubtitleGrid.Columns.Add(hideColumn);
@@ -117,6 +119,7 @@ public static class InitListViewAndEditBox
         {
             Header = Se.Language.General.Duration,
             Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
+            MinWidth = 60,
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
             CellTemplate = new FuncDataTemplate<SubtitleLineViewModel>((value, nameScope) =>
             {
@@ -149,7 +152,7 @@ public static class InitListViewAndEditBox
             Header = Se.Language.General.Text,
             Width = new DataGridLength(1, DataGridLengthUnitType.Star),
             MinWidth = 100,
-            CellTheme = UiUtil.DataGridNoBorderCellTheme,            
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
             CellTemplate = new FuncDataTemplate<SubtitleLineViewModel>((value, nameScope) =>
             {
                 var border = new Border
@@ -175,23 +178,41 @@ public static class InitListViewAndEditBox
             })
         });
 
-        var originalColumn = new DataGridTextColumn
+        var originalColumn = new DataGridTemplateColumn
         {
             Header = Se.Language.General.OriginalText,
-            Binding = new Binding(nameof(SubtitleLineViewModel.OriginalText)),
             Width = new DataGridLength(1, DataGridLengthUnitType.Star), // Stretch text column
             MinWidth = 100,
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
+            CellTemplate = new FuncDataTemplate<SubtitleLineViewModel>((value, nameScope) =>
+            {
+                var border = new Border
+                {
+                    Padding = new Thickness(4, 2),
+                    //[!Border.BackgroundProperty] = new Binding(nameof(SubtitleLineViewModel.TextBackgroundBrush))
+                };
+
+                var textBlock = new TextBlock
+                {
+                    VerticalAlignment = VerticalAlignment.Center,
+                    TextWrapping = TextWrapping.NoWrap,
+                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.OriginalText)) { Converter = textToSingleLineConverter },
+                };
+
+                if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
+                {
+                    textBlock.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
+                }
+
+                border.Child = textBlock;
+                return border;
+            })
         };
         originalColumn.Bind(DataGridTextColumn.IsVisibleProperty, new Binding(nameof(vm.ShowColumnOriginalText))
         {
             Mode = BindingMode.OneWay,
             Source = vm
         });
-        if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
-        {
-            originalColumn.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
-        }
         vm.SubtitleGrid.Columns.Add(originalColumn);
 
         var styleColumn = new DataGridTextColumn

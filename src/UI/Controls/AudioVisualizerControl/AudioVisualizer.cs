@@ -1175,24 +1175,29 @@ public class AudioVisualizer : Control
 
     private void DrawWaveForm(DrawingContext context)
     {
-        if (WavePeaks?.Peaks == null || WavePeaks.Peaks.Count == 0)
+        if (WavePeaks?.Peaks == null || WavePeaks.Peaks.Count == 0 || _displayMode == WaveformDisplayMode.OnlySpectrogram)
         {
             return;
         }
 
+        var waveformHeight = Bounds.Height;
+        if (_displayMode == WaveformDisplayMode.WaveformAndSpectrogram)
+        {
+            waveformHeight = Bounds.Height / 2;
+        }
+
         if (WaveformDrawStyle == WaveformDrawStyle.Classic)
         {
-            DrawWaveFormClassic(context);
+            DrawWaveFormClassic(context, waveformHeight);
         }
         else
         {
-            DrawWaveFormFancy(context);
+            DrawWaveFormFancy(context, waveformHeight);
         }
     }
 
-    private void DrawWaveFormFancy(DrawingContext context)
+    private void DrawWaveFormFancy(DrawingContext context, double waveformHeight)
     {
-        var waveformHeight = Bounds.Height;
         var isSelectedHelper = new IsSelectedHelper(AllSelectedParagraphs, WavePeaks!.SampleRate);
         var halfWaveformHeight = waveformHeight / 2;
         var div = WavePeaks.SampleRate * ZoomFactor;
@@ -1309,15 +1314,8 @@ public class AudioVisualizer : Control
         }
     }
 
-    private void DrawWaveFormClassic(DrawingContext context)
+    private void DrawWaveFormClassic(DrawingContext context, double waveformHeight)
     {
-        var showWaveform = true;
-        if (!showWaveform)
-        {
-            return;
-        }
-
-        var waveformHeight = Bounds.Height;
         var isSelectedHelper = new IsSelectedHelper(AllSelectedParagraphs, WavePeaks.SampleRate);
         var halfWaveformHeight = waveformHeight / 2;
         var div = WavePeaks.SampleRate * ZoomFactor;

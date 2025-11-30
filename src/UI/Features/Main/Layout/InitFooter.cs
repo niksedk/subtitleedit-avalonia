@@ -2,7 +2,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
-using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
@@ -21,7 +20,7 @@ public static class InitFooter
             VerticalAlignment = VerticalAlignment.Bottom,
             Margin = new Thickness(5, 0, 5, 0),
         };
-        
+
         vm.StatusTextLeftLabel = new TextBlock
         {
             Text = string.Empty,
@@ -74,7 +73,7 @@ public static class InitFooter
                 },
                 right,
             },
-        };  
+        };
 
         grid.Add(panelRight, 0, 1);
 
