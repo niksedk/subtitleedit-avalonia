@@ -96,9 +96,9 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
         };
 
         // Keep these handlers as fallback if native APIs fail
-        originalVideoPlayerControl.PointerMoved += (_, e) =>
+        videoPlayerControl.PointerMoved += (_, e) =>
         {
-            var pos = e.GetCurrentPoint(originalVideoPlayerControl);
+            var pos = e.GetCurrentPoint(videoPlayerControl);
             if (Math.Abs(pos.Position.X - _lastPointerMovedCursorPosition.X) > mouseMovementMinPixels ||
                 Math.Abs(pos.Position.Y - _lastPointerMovedCursorPosition.Y) > mouseMovementMinPixels)
             {
