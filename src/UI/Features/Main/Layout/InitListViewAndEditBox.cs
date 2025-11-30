@@ -149,7 +149,7 @@ public static class InitListViewAndEditBox
             Header = Se.Language.General.Text,
             Width = new DataGridLength(1, DataGridLengthUnitType.Star),
             MinWidth = 100,
-            CellTheme = UiUtil.DataGridNoBorderCellTheme,
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,            
             CellTemplate = new FuncDataTemplate<SubtitleLineViewModel>((value, nameScope) =>
             {
                 var border = new Border
@@ -161,7 +161,7 @@ public static class InitListViewAndEditBox
                 var textBlock = new TextBlock
                 {
                     VerticalAlignment = VerticalAlignment.Center,
-                    TextWrapping = TextWrapping.Wrap,
+                    TextWrapping = TextWrapping.NoWrap,
                     [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.Text)) { Converter = textToSingleLineConverter },
                 };
 
