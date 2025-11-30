@@ -260,7 +260,8 @@ public static class ShortcutsMain
         { nameof(MainViewModel.RepeatNextLineCommand), Se.Language.Options.Shortcuts.RepeatNextLine },
         { nameof(MainViewModel.InsertLineBeforeCommand), Se.Language.General.InsertBefore },
         { nameof(MainViewModel.InsertLineAfterCommand), Se.Language.General.InsertAfter },
-        { nameof(MainViewModel.WaveformInsertAtPositionCommand), Se.Language.General.InsertAtPosition },
+        { nameof(MainViewModel.WaveformInsertAtPositionAndFocusTextBoxCommand), Se.Language.General.InsertAtPositionAndFocusTextBox },
+        { nameof(MainViewModel.WaveformInsertAtPositionNoFocusTextBoxCommand), Se.Language.General.InsertAtPositionNoFocusTextBox },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -463,7 +464,8 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.RepeatNextLineCommand, nameof(vm.RepeatNextLineCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.InsertLineBeforeCommand, nameof(vm.InsertLineBeforeCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.InsertLineAfterCommand, nameof(vm.InsertLineAfterCommand), ShortcutCategory.General);
-        AddShortcut(shortcuts, vm.WaveformInsertAtPositionCommand, nameof(vm.WaveformInsertAtPositionCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.WaveformInsertAtPositionAndFocusTextBoxCommand, nameof(vm.WaveformInsertAtPositionAndFocusTextBoxCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.WaveformInsertAtPositionNoFocusTextBoxCommand, nameof(vm.WaveformInsertAtPositionNoFocusTextBoxCommand), ShortcutCategory.General);
 
         return shortcuts;
     }

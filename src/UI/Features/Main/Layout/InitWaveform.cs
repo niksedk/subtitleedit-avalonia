@@ -69,8 +69,8 @@ public class InitWaveform
 
             var insertNewMenuItem = new MenuItem
             {
-                Header = Se.Language.General.InsertAtPosition,
-                Command = vm.WaveformInsertAtPositionCommand,
+                Header = Se.Language.General.InsertAtPositionAndFocusTextBox,
+                Command = vm.WaveformInsertAtPositionAndFocusTextBoxCommand,
             };
             flyout.Items.Add(insertNewMenuItem);
             vm.MenuItemAudioVisualizerInsertAtPosition = insertNewMenuItem;
@@ -219,9 +219,9 @@ public class InitWaveform
         var buttonNew = new Button
         {
             Margin = new Thickness(0, 0, 3, 0),
-            Command = vm.WaveformInsertAtPositionCommand,
+            Command = vm.WaveformInsertAtPositionAndFocusTextBoxCommand,
             FontWeight = FontWeight.Bold,
-            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.NewHint, shortcuts, nameof(vm.WaveformInsertAtPositionCommand)),
+            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.NewHint, shortcuts, nameof(vm.WaveformInsertAtPositionAndFocusTextBoxCommand)),
         };
         Attached.SetIcon(buttonNew, IconNames.Plus);
 

@@ -3692,7 +3692,7 @@ public partial class MainViewModel :
     private DataGrid _oldSubtitleGrid = new DataGrid();
     private TextBox _oldEditTextBox = new TextBox();
     private bool _oldGenerateSpectrogram;
-    private string _oldSpectrogramStyle;
+    private string _oldSpectrogramStyle = string.Empty;
 
     [RelayCommand]
     private async Task CommandShowSettings()
@@ -5715,7 +5715,7 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private void WaveformInsertAtPosition()
+    private void WaveformInsertAtPositionAndFocusTextBox()
     {
         var vp = GetVideoPlayerControl();
         if (vp == null ||
@@ -5743,6 +5743,37 @@ public partial class MainViewModel :
         AudioVisualizer.NewSelectionParagraph = null;
         SelectAndScrollToSubtitle(newParagraph);
         EditTextBox.Focus();
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void WaveformInsertAtPositionNoFocusTextBox()
+    {
+        var vp = GetVideoPlayerControl();
+        if (vp == null ||
+            AudioVisualizer == null ||
+            AudioVisualizer.NewSelectionParagraph == null)
+        {
+            return;
+        }
+
+        var startMs = vp.Position * 1000.0;
+        var endMs = startMs + Se.Settings.General.NewEmptyDefaultMs;
+        var newParagraph =
+            new SubtitleLineViewModel(new Paragraph(string.Empty, startMs, endMs), SelectedSubtitleFormat);
+        var idx = _insertService.InsertInCorrectPosition(Subtitles, newParagraph);
+        var next = Subtitles.GetOrNull(idx + 1);
+        if (next != null)
+        {
+            if (next.StartTime.TotalMilliseconds < endMs)
+            {
+                newParagraph.EndTime = TimeSpan.FromMilliseconds(next.StartTime.TotalMilliseconds -
+                                                                 Se.Settings.General.MinimumMillisecondsBetweenLines);
+            }
+        }
+
+        AudioVisualizer.NewSelectionParagraph = null;
+        SelectAndScrollToSubtitle(newParagraph);
         _updateAudioVisualizer = true;
     }
 

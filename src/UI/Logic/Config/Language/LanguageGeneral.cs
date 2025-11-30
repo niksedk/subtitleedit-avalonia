@@ -208,7 +208,8 @@ public class LanguageGeneral
     public string Include { get; set; }
     public string Information { get; set; }
     public string InsertAfter { get; set; }
-    public string InsertAtPosition { get; set; }
+    public string InsertAtPositionAndFocusTextBox { get; set; }
+    public string InsertAtPositionNoFocusTextBox { get; set; }
     public string InsertBefore { get; set; }
     public string InsertNewSelection { get; set; }
     public string InspectAdditions { get; set; }
@@ -751,7 +752,8 @@ public class LanguageGeneral
         Include = "Include";
         Information = "Information";
         InsertAfter = "Insert after";
-        InsertAtPosition = "Insert subtitle at video position";
+        InsertAtPositionAndFocusTextBox = "Insert subtitle at video position and focus text box";
+        InsertAtPositionNoFocusTextBox = "Insert subtitle at video position (no focus text box)";
         InsertBefore = "Insert before";
         InsertNewSelection = "Insert new selection";
         InspectAdditions = "Inspect additions...";
