@@ -330,6 +330,8 @@ public class SettingsPage : UserControl
         sections.Add(new SettingsSection(Se.Language.Options.Settings.WaveformSpectrogram,
         [
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformShowToolbar, nameof(_vm.WaveformShowToolbar)),
+            new SettingsItem(Se.Language.Options.Settings.WaveformDrawStyle,
+                () => UiUtil.MakeComboBox(_vm.WaveformDrawStyles, _vm, nameof(_vm.SelectedWaveformDrawStyle))),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformHorizontalZoom, nameof(_vm.ShowWaveformHorizontalZoom)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformVerticalZoom, nameof(_vm.ShowWaveformVerticalZoom)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformVideoPositionSlider, nameof(_vm.ShowWaveformVideoPositionSlider)),

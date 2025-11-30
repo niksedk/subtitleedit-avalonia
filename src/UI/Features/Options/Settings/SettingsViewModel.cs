@@ -10,6 +10,7 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Enums;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
@@ -118,6 +119,9 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _waveformDrawGridLines;
     [ObservableProperty] private bool _waveformFocusOnMouseOver;
     [ObservableProperty] private bool _waveformCenterVideoPosition;
+
+    [ObservableProperty] private ObservableCollection<string> _waveformDrawStyles;
+    [ObservableProperty] private string _selectedWaveformDrawStyle;
 
     [ObservableProperty] private bool _waveformGenerateSpectrogram;
     [ObservableProperty] private ObservableCollection<string> _waveformSpectrogramStyles;
@@ -239,6 +243,13 @@ public partial class SettingsViewModel : ObservableObject
 
         VideoPlayers = new ObservableCollection<VideoPlayerItem>(VideoPlayerItem.ListVideoPlayerItem());
         SelectedVideoPlayer = VideoPlayers[0];
+
+        WaveformDrawStyles = new ObservableCollection<string>
+        {
+            Se.Language.Waveform.WaveformDrawStyleClassic,
+            Se.Language.Waveform.WaveformDrawStyleFancy,
+        };
+        SelectedWaveformDrawStyle = WaveformDrawStyles[0];
 
         WaveformSpectrogramStyles = new ObservableCollection<string>
         {
@@ -411,7 +422,20 @@ public partial class SettingsViewModel : ObservableObject
         WaveformFocusOnMouseOver = Se.Settings.Waveform.FocusOnMouseOver;
         WaveformCenterVideoPosition = Se.Settings.Waveform.CenterVideoPosition;
         WaveformShowToolbar = Se.Settings.Waveform.ShowToolbar;
-        
+
+        if (Se.Settings.Waveform.WaveformDrawStyle == WaveformDrawStyle.Classic.ToString())
+        {
+            SelectedWaveformDrawStyle = WaveformDrawStyles[0];
+        }
+        else if (Se.Settings.Waveform.WaveformDrawStyle == WaveformDrawStyle.Fancy.ToString())
+        {
+            SelectedWaveformDrawStyle = WaveformDrawStyles[1];
+        }
+        else
+        {
+            SelectedWaveformDrawStyle = WaveformDrawStyles[0];
+        }
+
         WaveformGenerateSpectrogram = Se.Settings.Waveform.GenerateSpectrogram;
         if (Se.Settings.Waveform.SpectrogramStyle == SeSpectrogramStyle.Classic.ToString())
         {
@@ -578,6 +602,15 @@ public partial class SettingsViewModel : ObservableObject
         Se.Settings.Waveform.CenterVideoPosition = WaveformCenterVideoPosition;
         Se.Settings.Waveform.FocusTextBoxAfterInsertNew = WaveformFocusTextboxAfterInsertNew;
         Se.Settings.Waveform.ShowToolbar = WaveformShowToolbar;
+
+        if (SelectedWaveformDrawStyle == Se.Language.Waveform.WaveformDrawStyleClassic)
+        {
+            Se.Settings.Waveform.WaveformDrawStyle = WaveformDrawStyle.Classic.ToString();
+        }
+        else if (SelectedWaveformDrawStyle == Se.Language.Waveform.WaveformDrawStyleFancy)
+        {
+            Se.Settings.Waveform.WaveformDrawStyle = WaveformDrawStyle.Fancy.ToString();
+        }
 
         Se.Settings.Waveform.GenerateSpectrogram = WaveformGenerateSpectrogram;
         if (SelectedWaveformSpectrogramStyle == Se.Language.Waveform.SpectrogramClassic)

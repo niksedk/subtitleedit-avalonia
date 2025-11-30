@@ -193,6 +193,7 @@ public class LanguageSettings
     public string WaveformSpectrogramMode { get; set; }
     public string WaveformCenterOnSingleClick { get; set; }
     public string WaveformPauseOnSingleClick { get; set; }
+    public string WaveformDrawStyle { get; set; }
 
     public LanguageSettings()
     {
@@ -382,6 +383,7 @@ public class LanguageSettings
         WaveformSpectrogramMode = "Spectrogram mode (works at generate time)";
         WaveformCenterOnSingleClick = "Center on single click";
         WaveformPauseOnSingleClick = "Pause on single click";
+        WaveformDrawStyle = "Waveform draw style";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

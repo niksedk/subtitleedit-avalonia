@@ -22,6 +22,8 @@ public class LanguageWaveform
     public string SpectrogramClassicPlasma { get; set; }
     public string SpectrogramClassicInferno { get; set; }
     public string SpectrogramClassicTurbo { get; set; }
+    public string WaveformDrawStyleClassic { get; set; }
+    public string WaveformDrawStyleFancy { get; set; }
 
     public LanguageWaveform()
     {
@@ -46,5 +48,7 @@ public class LanguageWaveform
         SpectrogramClassicPlasma = "Plasma";
         SpectrogramClassicInferno = "Inferno";
         SpectrogramClassicTurbo = "Turbo";
+        WaveformDrawStyleClassic = "Classic";
+        WaveformDrawStyleFancy = "Fancy";
     }
 }

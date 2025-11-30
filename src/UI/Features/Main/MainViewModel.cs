@@ -3744,6 +3744,7 @@ public partial class MainViewModel :
             AudioVisualizer.InvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel;
             AudioVisualizer.UpdateTheme();
             AudioVisualizer.IsReadOnly = LockTimeCodes;
+            AudioVisualizer.WaveformDrawStyle = InitWaveform.GetWaveformDrawStyle(Se.Settings.Waveform.WaveformDrawStyle);
 
             if (!string.IsNullOrEmpty(_videoFileName))
             {

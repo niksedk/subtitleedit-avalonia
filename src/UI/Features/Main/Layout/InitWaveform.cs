@@ -8,6 +8,7 @@ using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
+using System;
 using System.Globalization;
 using MenuItem = Avalonia.Controls.MenuItem;
 
@@ -41,6 +42,7 @@ public class InitWaveform
                 InvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel,
                 VerticalAlignment = VerticalAlignment.Stretch,
                 Height = double.NaN, // Auto height
+                WaveformDrawStyle = GetWaveformDrawStyle(Se.Settings.Waveform.WaveformDrawStyle),
             };
             vm.AudioVisualizer.VerticalAlignment = VerticalAlignment.Stretch;
             vm.AudioVisualizer.Height = double.NaN; // Auto height
@@ -416,5 +418,15 @@ public class InitWaveform
         Grid.SetRow(controlsPanel, 1);
 
         return mainGrid;
+    }
+
+    public static WaveformDrawStyle GetWaveformDrawStyle(string waveformDrawStyle)
+    {
+        if (Enum.TryParse<WaveformDrawStyle>(waveformDrawStyle, ignoreCase: true, out var value))
+        {
+            return value;
+        }
+
+        return WaveformDrawStyle.Classic;
     }
 }
