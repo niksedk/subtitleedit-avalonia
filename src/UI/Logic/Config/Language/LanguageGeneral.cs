@@ -1094,6 +1094,6 @@ public class LanguageGeneral
         FocusSelectedLine = "Focus selected line (scroll into view in grid)";
         PlayFromStartOfVideo = "Play from start of video";
         RemoveBlankLines = "Remove blank lines";
-        NewSubtitleStartKeyDownSetEndKeyUp = "Insert new: Start on key down, set end on key up";
+        NewSubtitleStartKeyDownSetEndKeyUp = "Insert subtitle: Start on key down, set end on key up";
     }
 }

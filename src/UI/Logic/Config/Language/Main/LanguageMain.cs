@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language.Main;
+﻿using System;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language.Main;
 
 public class LanguageMain
 {
@@ -71,6 +73,7 @@ public class LanguageMain
     public string YoutubeDlNotInstalledDownloadNow { get; set; }
     public string YoutubeDlDownloadedSuccessfully { get; set; }
     public string GeneratingSpectrogramDotDotDot { get; set; }
+    public string RemovedXBlankLines { get; set; }
 
     public LanguageMain()
     {
@@ -139,5 +142,6 @@ public class LanguageMain
         YoutubeDlNotInstalledDownloadNow = "\"yt-dlp\" is not installed and is required for playing online videos.\n\nDownload now?";
         YoutubeDlDownloadedSuccessfully = "\"yt-dlp\" downloaded successfully.";
         GeneratingSpectrogramDotDotDot = "Generating spectrogram...";   
+        RemovedXBlankLines = "Removed {0} blank lines";
     }
 }

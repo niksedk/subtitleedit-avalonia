@@ -5454,6 +5454,12 @@ public partial class MainViewModel :
     private void RemoveBlankLines()
     {
         var blankLines = Subtitles.Where(s => string.IsNullOrWhiteSpace(s.Text)).ToList();
+        var count = blankLines.Count;
+        if (count == 0)
+        {
+            return;
+        }
+
         foreach (var line in blankLines)
         {
             Subtitles.Remove(line);
@@ -5461,6 +5467,8 @@ public partial class MainViewModel :
 
         Renumber();
         _updateAudioVisualizer = true;
+
+        ShowStatus(string.Format(Se.Language.Main.RemovedXBlankLines, count));
     }
 
     private SubtitleLineViewModel? _setEndAtKeyUpLine;
@@ -5474,7 +5482,7 @@ public partial class MainViewModel :
         }
 
         var vp = GetVideoPlayerControl();
-        if (vp == null)
+        if (vp == null || !vp.VideoPlayerInstance.IsPlaying)
         {
             return;
         }
@@ -9719,10 +9727,8 @@ public partial class MainViewModel :
 
     public void OnKeyUpHandler(object? sender, KeyEventArgs e)
     {
-        var vp = GetVideoPlayerControl();
-        if (_setEndAtKeyUpLine != null && vp != null)
+        if (_setEndAtKeyUpLine != null)
         {
-            _setEndAtKeyUpLine.EndTime = TimeSpan.FromSeconds(vp.VideoPlayerInstance.Position);
             _setEndAtKeyUpLine = null;
         }
 
@@ -10019,8 +10025,15 @@ public partial class MainViewModel :
                 // update audio visualizer position if available
                 var av = AudioVisualizer;
                 var vp = GetVideoPlayerControl();
+
+
                 if (av != null && vp != null && !string.IsNullOrEmpty(_videoFileName))
                 {
+                    if (_setEndAtKeyUpLine != null)
+                    {
+                        _setEndAtKeyUpLine.EndTime = TimeSpan.FromSeconds(vp.VideoPlayerInstance.Position);
+                    }
+
                     var offset = TimeSpan.FromMilliseconds(Se.Settings.General.CurrentVideoOffsetInMs);
                     var hasOffset = Se.Settings.General.CurrentVideoOffsetInMs != 0;
 
