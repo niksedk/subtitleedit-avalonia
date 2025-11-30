@@ -1,5 +1,6 @@
 ﻿using Avalonia.Media;
 using Nikse.SubtitleEdit.Features.Assa;
+using System;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 
@@ -22,23 +23,23 @@ public class SeVideo
     public int MoveVideoPositionCustom1Forward { get; set; }
     public int MoveVideoPositionCustom2Back { get; set; }
     public int MoveVideoPositionCustom2Forward { get; set; }
-    
+
     public string MpvPreviewFontName { get; set; }
-    public  int MpvPreviewFontSize{ get; set; }
-    public  bool MpvPreviewFontBold{ get; set; }
-    public  string MpvPreviewColorPrimary{ get; set; }
-    public  string MpvPreviewColorOutline{ get; set; }
-    public  string MpvPreviewColorShadow{ get; set; }
-    public  decimal MpvPreviewOutlineWidth{ get; set; }
-    public  decimal MpvPreviewShadowWidth{ get; set; }
-    public  int MpvPreviewBorderType { get; set; }
+    public int MpvPreviewFontSize { get; set; }
+    public bool MpvPreviewFontBold { get; set; }
+    public string MpvPreviewColorPrimary { get; set; }
+    public string MpvPreviewColorOutline { get; set; }
+    public string MpvPreviewColorShadow { get; set; }
+    public decimal MpvPreviewOutlineWidth { get; set; }
+    public decimal MpvPreviewShadowWidth { get; set; }
+    public int MpvPreviewBorderType { get; set; }
 
     public SeVideo()
     {
         BurnIn = new();
         Transparent = new();
         TextToSpeech = new();
-        VideoPlayer = "mpv-opengl";
+        VideoPlayer = OperatingSystem.IsWindows() ? "mpv-wid" : "mpv-opengl";
         Volume = 60;
         ShowStopButton = true;
         ShowFullscreenButton = true;
@@ -51,15 +52,15 @@ public class SeVideo
         MoveVideoPositionCustom1Forward = 2000; // 2 seconds
         MoveVideoPositionCustom2Back = 5000; // 5 seconds
         MoveVideoPositionCustom2Forward = 5000; // 5 seconds
-        
+
         MpvPreviewFontName = "Arial";
         MpvPreviewFontSize = 20;
         MpvPreviewFontBold = true;
         MpvPreviewOutlineWidth = 2;
         MpvPreviewShadowWidth = 1;
         MpvPreviewColorPrimary = Color.FromRgb(255, 255, 255).FromColorToHex();
-        MpvPreviewColorOutline = Color.FromRgb(0,0,0).FromColorToHex();
-        MpvPreviewColorShadow = Color.FromRgb(0,0,0).FromColorToHex();
+        MpvPreviewColorOutline = Color.FromRgb(0, 0, 0).FromColorToHex();
+        MpvPreviewColorShadow = Color.FromRgb(0, 0, 0).FromColorToHex();
         MpvPreviewBorderType = (int)BorderStyleType.Outline;
     }
 }
