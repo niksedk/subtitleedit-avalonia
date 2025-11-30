@@ -9751,8 +9751,17 @@ public partial class MainViewModel :
             return;
         }
 
-        SelectedSubtitle = item;
-        //SelectedSubtitleIndex = Subtitles.IndexOf(item);
+        try
+        {
+            _subtitleGridSelectionChangedSkip = true;
+            SelectedSubtitle = item;
+            SelectedSubtitleIndex = Subtitles.IndexOf(item);
+        }
+        finally
+        {
+            _subtitleGridSelectionChangedSkip = false;
+        }
+
         StatusTextRight = $"{Subtitles.IndexOf(item) + 1}/{Subtitles.Count}";
         MakeSubtitleTextInfo(item.Text, item);
         MakeSubtitleTextInfoOriginal(item.OriginalText, item);
