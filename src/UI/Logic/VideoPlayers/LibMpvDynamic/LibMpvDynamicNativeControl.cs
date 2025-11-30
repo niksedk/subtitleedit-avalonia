@@ -1,7 +1,7 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Platform;
 using Avalonia.Threading;
-using Avalonia.Input;
 using System;
 using System.Runtime.InteropServices;
 
@@ -19,7 +19,16 @@ public class LibMpvDynamicNativeControl : NativeControlHost
     {
         _mpvPlayer = mpvPlayer;
         ClipToBounds = true;
+
+        // Force arrow cursor immediately
         Cursor = new Cursor(StandardCursorType.Arrow);
+
+        // Handle when control is loaded
+        Loaded += (s, e) =>
+        {
+            Cursor = new Cursor(StandardCursorType.Arrow);
+            PlatformCursorManager.ForceArrowCursor();
+        };
     }
 
     protected override IPlatformHandle CreateNativeControlCore(IPlatformHandle parent)
@@ -106,6 +115,13 @@ public class LibMpvDynamicNativeControl : NativeControlHost
         {
             throw new InvalidOperationException($"Failed to initialize mpv: {_mpvPlayer.GetErrorString(err)}");
         }
+
+        // After initialization, ensure cursor is reset
+        Dispatcher.UIThread.Post(() =>
+        {
+            Cursor = new Cursor(StandardCursorType.Arrow);
+            PlatformCursorManager.ForceArrowCursor();
+        }, DispatcherPriority.Background);
     }
 
     private void ConfigureLinuxGpuContext()
