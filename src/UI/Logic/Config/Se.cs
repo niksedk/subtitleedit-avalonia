@@ -332,8 +332,7 @@ public class Se
     {
         try
         {
-            return
-                $"{System.Reflection.Assembly.GetEntryAssembly()!.GetName().Version} - {Environment.OSVersion} - {IntPtr.Size * 8}-bit";
+            return $"{Version} - {Environment.OSVersion} - {IntPtr.Size * 8}-bit";
         }
         catch
         {

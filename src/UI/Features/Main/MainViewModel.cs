@@ -121,6 +121,8 @@ using AudioToTextWhisperViewModel = Nikse.SubtitleEdit.Features.Video.SpeechToTe
 using AudioVisualizerUndockedViewModel = Nikse.SubtitleEdit.Features.Shared.Undocked.AudioVisualizerUndockedViewModel;
 using VideoPlayerUndockedViewModel = Nikse.SubtitleEdit.Features.Shared.Undocked.VideoPlayerUndockedViewModel;
 using Nikse.SubtitleEdit.Features.Files.ImportImages;
+using System.Xml.Linq;
+using System.Text.Json;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -8356,7 +8358,18 @@ public partial class MainViewModel :
 
         GetVideoPlayerControl()?.VideoPlayerInstance.CloseFile();
 
-        _ = Task.Run(_autoBackupService.CleanAutoBackupFolder);
+        _ = Task.Run(() =>
+        {
+            try
+            {
+                _autoBackupService.CleanAutoBackupFolder();
+                CheckAndRenameDamagedFiles();
+            }
+            catch (Exception ex)
+            {
+                Se.LogError(ex, "Auto-backup cleanup failed");
+            }
+        });
     }
 
     internal void OnLoaded()
@@ -8487,10 +8500,57 @@ public partial class MainViewModel :
 
             }, DispatcherPriority.Loaded);
 
-            await Task.Delay(1000); // delay 1 second (off UI thread)
+            await Task.Delay(1000); // delay 1 second (off UI thread)          
+
             _undoRedoManager.StartChangeDetection();
             _loading = false;
         });
+    }
+
+    private static void CheckAndRenameDamagedFiles()
+    {
+        var filesToCheck = new List<string>();
+        if (Directory.Exists(Se.DictionariesFolder))
+        {
+            filesToCheck.AddRange(Directory.GetFiles(Se.DictionariesFolder, "*.xml"));
+        }
+
+        foreach (var file in filesToCheck)
+        {
+            try
+            {
+                using var stream = File.OpenRead(file);
+                var xmlDoc = XDocument.Load(stream);
+            }
+            catch (Exception ex)
+            {
+                var damagedFileName = file + ".damaged_" + DateTime.Now.ToString("yyyyMMddHHmmss");
+                Se.LogError(ex, $"Damaged file detected: {file}  -- renamed to {damagedFileName}");
+                File.Move(file, damagedFileName);
+            }
+        }
+
+
+        filesToCheck = new List<string>();
+        if (Directory.Exists(Se.TranslationFolder))
+        {
+            filesToCheck.AddRange(Directory.GetFiles(Se.TranslationFolder, "*.json"));
+        }
+
+        foreach (var file in filesToCheck)
+        {
+            try
+            {
+                using var stream = File.OpenRead(file);
+                var jsonDoc = JsonDocument.Parse(stream);
+            }
+            catch (Exception ex)
+            {
+                var damagedFileName = file + ".damaged_" + DateTime.Now.ToString("yyyyMMddHHmmss");
+                Se.LogError(ex, $"Damaged file detected: {file}  -- renamed to {damagedFileName}");
+                File.Move(file, damagedFileName);
+            }
+        }
     }
 
     private bool IsPositionOnAnyScreen(PixelRect windowBounds)

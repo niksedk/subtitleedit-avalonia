@@ -1,10 +1,11 @@
 ﻿using Avalonia.Data.Converters;
+using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Globalization;
 
 namespace Nikse.SubtitleEdit.Logic.ValueConverters;
 
-public class TextOneLineShortConverter : IValueConverter
+public class TextToSingleLineConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
@@ -13,11 +14,13 @@ public class TextOneLineShortConverter : IValueConverter
             return string.Empty;
         }
 
-        // Replace line breaks with spaces
-        str = str.Replace("\r", " ").Replace("\n", " ").Trim();
+        var separator = Se.Settings.Appearance.SubtitleGridTextSingleLineSeparator;
+        str = str
+            .Replace("\r\n", separator)
+            .Replace("\n", separator);
 
         // Allow custom max length via binding parameter
-        var maxLength = 25;
+        var maxLength = 250;
         if (parameter is string p && int.TryParse(p, out var len))
         {
             maxLength = len;
@@ -38,7 +41,7 @@ public class TextOneLineShortConverter : IValueConverter
         // Fallback: hard cut
         return str[..maxLength] + "...";
     }
-
+    
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         throw new NotImplementedException();

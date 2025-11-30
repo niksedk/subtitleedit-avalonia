@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
+using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
@@ -11,6 +12,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 using Projektanker.Icons.Avalonia;
+using System;
 using MenuItem = Avalonia.Controls.MenuItem;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
@@ -62,6 +64,7 @@ public static class InitListViewAndEditBox
         var shortTimeConverter = new TimeSpanToDisplayShortConverter();
         var doubleRoundedConverter = new DoubleToOneDecimalConverter();
         var cpsWmpConverter = new DoubleToOneDecimalHideMaxConverter();
+        IValueConverter? textToSingleLineConverter = MakeGridTextConverter();
 
         vm.SubtitleGrid.Columns.Add(new DataGridTemplateColumn
         {
@@ -159,7 +162,7 @@ public static class InitListViewAndEditBox
                 {
                     VerticalAlignment = VerticalAlignment.Center,
                     TextWrapping = TextWrapping.Wrap,
-                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.Text))
+                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.Text)) { Converter = textToSingleLineConverter },
                 };
 
                 if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
@@ -1229,5 +1232,15 @@ public static class InitListViewAndEditBox
         });
 
         return mainGrid;
+    }
+
+    public static IValueConverter? MakeGridTextConverter()
+    {
+        if (Se.Settings.Appearance.SubtitleGridTextSingleLine)
+        {
+            return new TextToSingleLineConverter();
+        }
+
+        return null;
     }
 }

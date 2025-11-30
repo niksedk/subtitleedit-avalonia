@@ -9,6 +9,8 @@ public class SeAppearance
     public string Theme { get; set; }
     public string FontName { get; set; }
     public double SubtitleGridFontSize { get; set; }
+    public bool SubtitleGridTextSingleLine { get; set; }
+    public string SubtitleGridTextSingleLineSeparator { get; set; }
     public double SubtitleTextBoxFontSize { get; set; }
     public string SubtitleTextBoxAndGridFontName { get; set; }
     public bool SubtitleTextBoxFontBold { get; set; }
@@ -50,6 +52,7 @@ public class SeAppearance
         FontName = "Default";
         SubtitleTextBoxAndGridFontName = "Default";
         SubtitleGridFontSize = 13d;
+        SubtitleGridTextSingleLineSeparator = "<br />";
         SubtitleTextBoxFontSize = 15d;
         SubtitleTextBoxFontBold = true;
         ShowHints = true;
