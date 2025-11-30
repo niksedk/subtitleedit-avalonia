@@ -1192,7 +1192,121 @@ public class AudioVisualizer : Control
 
     private void DrawWaveFormFancy(DrawingContext context)
     {
-        
+        var waveformHeight = Bounds.Height;
+        var isSelectedHelper = new IsSelectedHelper(AllSelectedParagraphs, WavePeaks!.SampleRate);
+        var halfWaveformHeight = waveformHeight / 2;
+        var div = WavePeaks.SampleRate * ZoomFactor;
+
+        if (div <= 0)
+        {
+            return;
+        }
+
+        // Draw center line first
+        var centerLinePen = new Pen(Brushes.DarkGray, 0.5);
+        context.DrawLine(centerLinePen, new Point(0, halfWaveformHeight), new Point(Bounds.Width, halfWaveformHeight));
+
+        // Calculate the threshold for color transitions (as a fraction of the highest peak)
+        var lowThreshold = WavePeaks.HighestPeak * 0.3;
+        var mediumThreshold = WavePeaks.HighestPeak * 0.6;
+
+        for (var x = 0; x < Bounds.Width; x++)
+        {
+            var pos = (StartPositionSeconds + x / div) * WavePeaks.SampleRate;
+            var pos0 = (int)pos;
+            var pos1 = pos0 + 1;
+
+            if (pos1 >= WavePeaks.Peaks.Count || pos0 > WavePeaks.Peaks.Count)
+            {
+                break;
+            }
+
+            var pos1Weight = pos - pos0;
+            var pos0Weight = 1.0 - pos1Weight;
+            var peak0 = WavePeaks.Peaks[pos0];
+            var peak1 = WavePeaks.Peaks[pos1];
+            var max = peak0.Max * pos0Weight + peak1.Max * pos1Weight;
+            var min = peak0.Min * pos0Weight + peak1.Min * pos1Weight;
+
+            var yMax = CalculateY(max, 0, halfWaveformHeight);
+            var yMin = CalculateY(min, 0, halfWaveformHeight);
+
+            if (yMin < yMax)
+            {
+                (yMin, yMax) = (yMax, yMin);
+            }
+
+            // Make sure there's at least a 1 pixel line
+            if (Math.Abs(yMax - yMin) < 1)
+            {
+                yMin = yMax + 1;
+            }
+
+            var isSelected = isSelectedHelper.IsSelected(pos0);
+
+            // Calculate amplitude for color determination
+            var amplitude = Math.Abs(max) > Math.Abs(min) ? Math.Abs(max) : Math.Abs(min);
+
+            // Determine color based on amplitude
+            Color color;
+            if (isSelected)
+            {
+                // Selected always uses the selected color
+                color = WaveformSelectedColor;
+            }
+            else
+            {
+                // Dynamic coloring based on amplitude
+                if (amplitude < lowThreshold)
+                {
+                    // Low amplitude - greenish/blue
+                    color = Color.FromArgb(200, 100, 200, 150);
+                }
+                else if (amplitude < mediumThreshold)
+                {
+                    // Medium amplitude - yellow/orange blend
+                    var blend = (amplitude - lowThreshold) / (mediumThreshold - lowThreshold);
+                    var r = (byte)(100 + blend * 155);
+                    var g = (byte)(200 - blend * 50);
+                    var b = (byte)(150 - blend * 150);
+                    color = Color.FromArgb(200, r, g, b);
+                }
+                else
+                {
+                    // High amplitude - red/orange
+                    var blend = Math.Min(1.0, (amplitude - mediumThreshold) / (WavePeaks.HighestPeak - mediumThreshold));
+                    var r = (byte)255;
+                    var g = (byte)(150 - blend * 100);
+                    var b = (byte)(0);
+                    color = Color.FromArgb(220, r, g, b);
+                }
+            }
+
+            // Create gradient for this specific line based on the color
+            var gradient = new LinearGradientBrush
+            {
+                StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
+                EndPoint = new RelativePoint(0, 1, RelativeUnit.Relative),
+                GradientStops = new GradientStops
+            {
+                new GradientStop(Color.FromArgb((byte)(color.A * 0.3), color.R, color.G, color.B), 0.0),
+                new GradientStop(color, 0.5),
+                new GradientStop(Color.FromArgb((byte)(color.A * 0.3), color.R, color.G, color.B), 1.0),
+            }
+            };
+
+            var pen = new Pen(gradient, 1.5);
+            context.DrawLine(pen, new Point(x, yMax), new Point(x, yMin));
+
+            // Add subtle glow for higher amplitudes
+            if (amplitude > mediumThreshold)
+            {
+                var glowAlpha = (byte)(50 * ((amplitude - mediumThreshold) / (WavePeaks.HighestPeak - mediumThreshold)));
+                var glowColor = Color.FromArgb(glowAlpha, color.R, color.G, color.B);
+                var glowPen = new Pen(new SolidColorBrush(glowColor), 3.0);
+                context.DrawLine(glowPen, new Point(x, yMax - 0.5), new Point(x, yMin + 0.5));
+            }
+        }
     }
 
     private void DrawWaveFormClassic(DrawingContext context)
