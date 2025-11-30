@@ -2961,6 +2961,23 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private async Task SpeechToTextSelectedLines()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var ffmpegOk = await RequireFfmpegOk();
+        if (!ffmpegOk)
+        {
+            return;
+        }
+
+       
+    }
+
+    [RelayCommand]
     private async Task ShowVideoBurnIn()
     {
         if (Window == null)
@@ -5404,6 +5421,83 @@ public partial class MainViewModel :
 
         vp.Position = Subtitles[idx].StartTime.TotalSeconds;
         SelectAndScrollToRow(idx);
+    }
+
+    [RelayCommand]
+    private void FocusSelectedLine()
+    {
+        var idx = SelectedSubtitleIndex ?? -1;
+        if (Subtitles.Count == 0 || idx < 0 || idx >= Subtitles.Count)
+        {
+            return;
+        }
+
+        SelectAndScrollToRow(idx);
+        AudioVisualizer?.CenterOnPosition(Subtitles[idx]);
+    }
+
+    [RelayCommand]
+    private void PlayFromStartOfVideo()
+    {
+        var vp = GetVideoPlayerControl();
+        if (string.IsNullOrEmpty(_videoFileName) || vp == null)
+        {
+            return;
+        }
+
+        vp.VideoPlayerInstance.Stop();
+        vp.VideoPlayerInstance.Play();
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void RemoveBlankLines()
+    {
+        var blankLines = Subtitles.Where(s => string.IsNullOrWhiteSpace(s.Text)).ToList();
+        foreach (var line in blankLines)
+        {
+            Subtitles.Remove(line);
+        }
+
+        Renumber();
+        _updateAudioVisualizer = true;
+    }
+
+    private SubtitleLineViewModel? _setEndAtKeyUpLine;
+
+    [RelayCommand]
+    private void InsertSubtitleAtVideoPositionSetEndAtKeyUp()
+    {
+        if (_setEndAtKeyUpLine != null)
+        {
+            return;
+        }
+
+        var vp = GetVideoPlayerControl();
+        if (vp == null)
+        {
+            return;
+        }
+
+        var startMs = vp.Position * 1000.0;
+        var endMs = startMs + Se.Settings.General.NewEmptyDefaultMs;
+        var newParagraph =
+            new SubtitleLineViewModel(new Paragraph(string.Empty, startMs, endMs), SelectedSubtitleFormat);
+        var idx = _insertService.InsertInCorrectPosition(Subtitles, newParagraph);
+        var next = Subtitles.GetOrNull(idx + 1);
+        if (next != null)
+        {
+            if (next.StartTime.TotalMilliseconds < endMs)
+            {
+                newParagraph.EndTime = TimeSpan.FromMilliseconds(next.StartTime.TotalMilliseconds -
+                                                                 Se.Settings.General.MinimumMillisecondsBetweenLines);
+            }
+        }
+
+        _setEndAtKeyUpLine = newParagraph;
+        SelectAndScrollToSubtitle(newParagraph);
+        Renumber();
+        _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
@@ -9625,6 +9719,13 @@ public partial class MainViewModel :
 
     public void OnKeyUpHandler(object? sender, KeyEventArgs e)
     {
+        var vp = GetVideoPlayerControl();
+        if (_setEndAtKeyUpLine != null && vp != null)
+        {
+            _setEndAtKeyUpLine.EndTime = TimeSpan.FromSeconds(vp.VideoPlayerInstance.Position);
+            _setEndAtKeyUpLine = null;
+        }
+
         _shortcutManager.OnKeyReleased(this, e);
     }
 

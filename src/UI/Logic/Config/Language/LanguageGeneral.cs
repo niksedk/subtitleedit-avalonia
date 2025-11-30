@@ -543,6 +543,10 @@ public class LanguageGeneral
     public string XSeconds { get; set; }
     public string Yes { get; set; }
     public string ChooseImageFiles { get; set; }
+    public string FocusSelectedLine { get; set; }
+    public string PlayFromStartOfVideo { get; set; }
+    public string RemoveBlankLines { get; set; }
+    public string NewSubtitleStartKeyDownSetEndKeyUp { get; set; }
 
     public LanguageGeneral()
     {
@@ -1087,5 +1091,9 @@ public class LanguageGeneral
         XSeconds = "{0:0.0##} seconds";
         Yes = "Yes";
         ChooseImageFiles = "Choose image files";
+        FocusSelectedLine = "Focus selected line (scroll into view in grid)";
+        PlayFromStartOfVideo = "Play from start of video";
+        RemoveBlankLines = "Remove blank lines";
+        NewSubtitleStartKeyDownSetEndKeyUp = "Insert new: Start on key down, set end on key up";
     }
 }
