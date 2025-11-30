@@ -149,6 +149,7 @@ public class AudioVisualizer : Control
     public SubtitleLineViewModel? SelectedParagraph { get; set; }
 
     public double ShotChangeSnapSeconds { get; set; } = 0.05;
+    public WaveformDrawStyle WaveformDrawStyle { get; set; } = WaveformDrawStyle.Classic;
 
     public bool SnapToShotChanges { get; set; } = true;
     public bool FocusOnMouseOver { get; set; } = true;
@@ -1179,6 +1180,23 @@ public class AudioVisualizer : Control
             return;
         }
 
+        if (WaveformDrawStyle == WaveformDrawStyle.Classic)
+        {
+            DrawWaveFormClassic(context);
+        }
+        else
+        {
+            DrawWaveFormFancy(context);
+        }
+    }
+
+    private void DrawWaveFormFancy(DrawingContext context)
+    {
+        
+    }
+
+    private void DrawWaveFormClassic(DrawingContext context)
+    {
         var showWaveform = true;
         if (!showWaveform)
         {
