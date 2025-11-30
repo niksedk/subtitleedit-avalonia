@@ -258,6 +258,9 @@ public static class ShortcutsMain
         { nameof(MainViewModel.RepeatLineToggleCommand), Se.Language.Options.Shortcuts.RepeatLine },
         { nameof(MainViewModel.RepeatPreviousLineCommand), Se.Language.Options.Shortcuts.RepeatPreviousLine },
         { nameof(MainViewModel.RepeatNextLineCommand), Se.Language.Options.Shortcuts.RepeatNextLine },
+        { nameof(MainViewModel.InsertLineBeforeCommand), Se.Language.General.InsertBefore },
+        { nameof(MainViewModel.InsertLineAfterCommand), Se.Language.General.InsertAfter },
+        { nameof(MainViewModel.WaveformInsertAtPositionCommand), Se.Language.General.InsertAtPosition },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -458,6 +461,9 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.RepeatLineToggleCommand, nameof(vm.RepeatLineToggleCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.RepeatPreviousLineCommand, nameof(vm.RepeatPreviousLineCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.RepeatNextLineCommand, nameof(vm.RepeatNextLineCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.InsertLineBeforeCommand, nameof(vm.InsertLineBeforeCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.InsertLineAfterCommand, nameof(vm.InsertLineAfterCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.WaveformInsertAtPositionCommand, nameof(vm.WaveformInsertAtPositionCommand), ShortcutCategory.General);
 
         return shortcuts;
     }
