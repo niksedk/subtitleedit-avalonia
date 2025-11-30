@@ -547,6 +547,7 @@ public class LanguageGeneral
     public string PlayFromStartOfVideo { get; set; }
     public string RemoveBlankLines { get; set; }
     public string NewSubtitleStartKeyDownSetEndKeyUp { get; set; }
+    public string SpeechToTextSelectedLines { get; set; }
 
     public LanguageGeneral()
     {
@@ -1095,5 +1096,6 @@ public class LanguageGeneral
         PlayFromStartOfVideo = "Play from start of video";
         RemoveBlankLines = "Remove blank lines";
         NewSubtitleStartKeyDownSetEndKeyUp = "Insert subtitle: Start on key down, set end on key up";
+        SpeechToTextSelectedLines = "Speech-to-text selected lines";
     }
 }

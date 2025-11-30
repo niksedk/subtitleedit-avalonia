@@ -37,6 +37,7 @@ using Nikse.SubtitleEdit.Features.Shared.Bookmarks;
 using Nikse.SubtitleEdit.Features.Shared.ColumnPaste;
 using Nikse.SubtitleEdit.Features.Shared.ErrorList;
 using Nikse.SubtitleEdit.Features.Shared.FindText;
+using Nikse.SubtitleEdit.Features.Shared.GetAudioCips;
 using Nikse.SubtitleEdit.Features.Shared.GoToLineNumber;
 using Nikse.SubtitleEdit.Features.Shared.PickAlignment;
 using Nikse.SubtitleEdit.Features.Shared.PickColor;
@@ -220,6 +221,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<FixCommonErrorsViewModel>();
         collection.AddTransient<FixNamesViewModel>();
         collection.AddTransient<FixNetflixErrorsViewModel>();
+        collection.AddTransient<GetAudioClipsViewModel>();
         collection.AddTransient<GetDictionariesViewModel>();
         collection.AddTransient<GetKeyViewModel>();
         collection.AddTransient<GoToLineNumberViewModel>();

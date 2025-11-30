@@ -266,6 +266,7 @@ public static class ShortcutsMain
         { nameof(MainViewModel.PlayFromStartOfVideoCommand), Se.Language.General.PlayFromStartOfVideo },
         { nameof(MainViewModel.RemoveBlankLinesCommand), Se.Language.General.RemoveBlankLines },
         { nameof(MainViewModel.InsertSubtitleAtVideoPositionSetEndAtKeyUpCommand), Se.Language.General.NewSubtitleStartKeyDownSetEndKeyUp },
+        { nameof(MainViewModel.SpeechToTextSelectedLinesCommand), Se.Language.General.SpeechToTextSelectedLines },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -474,6 +475,7 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.PlayFromStartOfVideoCommand, nameof(vm.PlayFromStartOfVideoCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.RemoveBlankLinesCommand, nameof(vm.RemoveBlankLinesCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.InsertSubtitleAtVideoPositionSetEndAtKeyUpCommand, nameof(vm.InsertSubtitleAtVideoPositionSetEndAtKeyUpCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.SpeechToTextSelectedLinesCommand, nameof(vm.SpeechToTextSelectedLinesCommand), ShortcutCategory.General);
 
         return shortcuts;
     }
