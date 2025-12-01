@@ -23,7 +23,7 @@ public partial class GetAudioClipsViewModel : ObservableObject
     [ObservableProperty] private string _error;
 
     public Window? Window { get; set; }
-    public List<string> AudioClips { get; set; }
+    public List<AudioClip> AudioClips { get; set; }
     public bool OkPressed { get; private set; }
 
     private string _videoFileName;
@@ -36,7 +36,7 @@ public partial class GetAudioClipsViewModel : ObservableObject
 
         StatusText = Se.Language.General.StartingDotDotDot;
         Error = string.Empty;
-        AudioClips = new List<string>();
+        AudioClips = new List<AudioClip>();
         _videoFileName = string.Empty;
         _lines = new List<SubtitleLineViewModel>();
     }
@@ -64,7 +64,7 @@ public partial class GetAudioClipsViewModel : ObservableObject
             process.WaitForExit();
             if (process.ExitCode == 0 && File.Exists(outputFileName))
             {
-                AudioClips.Add(outputFileName);
+                AudioClips.Add(new AudioClip(outputFileName, line));
             }
             else
             {

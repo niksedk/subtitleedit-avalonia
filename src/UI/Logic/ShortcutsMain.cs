@@ -127,7 +127,7 @@ public static class ShortcutsMain
         { nameof(MainViewModel.CommandVideoOpenCommand), Se.Language.Options.Shortcuts.OpenVideo },
         { nameof(MainViewModel.ShowVideoOpenFromUrlCommand), Se.Language.Options.Shortcuts.OpenVideoFromUrl },
         { nameof(MainViewModel.CommandVideoCloseCommand), Se.Language.Options.Shortcuts.CloseVideo },
-        { nameof(MainViewModel.ShowVideoAudioToTextWhisperCommand), Se.Language.Options.Shortcuts.SpeechToText },
+        { nameof(MainViewModel.ShowSpeechToTextWhisperCommand), Se.Language.Options.Shortcuts.SpeechToText },
         { nameof(MainViewModel.ShowVideoTextToSpeechCommand), Se.Language.Options.Shortcuts.TextToSpeech },
         { nameof(MainViewModel.ShowVideoBurnInCommand), Se.Language.Options.Shortcuts.BurnIn },
         { nameof(MainViewModel.ShowVideoTransparentSubtitlesCommand), Se.Language.Options.Shortcuts.GenerateTransparent },
@@ -381,7 +381,7 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.CommandVideoOpenCommand, nameof(vm.CommandVideoOpenCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowVideoOpenFromUrlCommand, nameof(vm.ShowVideoOpenFromUrlCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.CommandVideoCloseCommand, nameof(vm.CommandVideoCloseCommand), ShortcutCategory.General);
-        AddShortcut(shortcuts, vm.ShowVideoAudioToTextWhisperCommand, nameof(vm.ShowVideoAudioToTextWhisperCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowSpeechToTextWhisperCommand, nameof(vm.ShowSpeechToTextWhisperCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowVideoTextToSpeechCommand, nameof(vm.ShowVideoTextToSpeechCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowVideoBurnInCommand, nameof(vm.ShowVideoBurnInCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowVideoTransparentSubtitlesCommand, nameof(vm.ShowVideoTransparentSubtitlesCommand), ShortcutCategory.General);

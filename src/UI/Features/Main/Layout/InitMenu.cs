@@ -466,7 +466,7 @@ public static class InitMenu
                 new MenuItem
                 {
                     Header = l.SpeechToText,
-                    Command = vm.ShowVideoAudioToTextWhisperCommand,
+                    Command = vm.ShowSpeechToTextWhisperCommand,
                 },
                 new MenuItem
                 {

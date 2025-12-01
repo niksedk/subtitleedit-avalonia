@@ -8,6 +8,7 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Shared.GetAudioClips;
 using Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -108,6 +109,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     private readonly Lock _lockObj = new();
     private int _batchIndex = -1;
     private string _error;
+    private List<AudioClip>? _audioClips;
 
     private readonly IWindowService _windowService;
     private readonly IFileHelper _fileHelper;
@@ -907,8 +909,27 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             return;
         }
 
-        Window.Cursor = new Cursor(StandardCursorType.Wait);
+        var error = await AddFiles(fileNames);
+
+        if (error)
+        {
+            await MessageBox.Show(Window!,
+                 "Unable to get video info",
+                 "File skipped as video info was unavailable",
+             MessageBoxButtons.OK,
+             MessageBoxIcon.Error);
+        }
+    }
+
+    private async Task<bool> AddFiles(string[] fileNames)
+    {
         var error = false;
+        if (Window == null)
+        {
+            return false;
+        }
+
+        Window.Cursor = new Cursor(StandardCursorType.Wait);
 
         try
         {
@@ -918,7 +939,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                 foreach (var fileName in fileNames)
                 {
                     var mediaInfo = FfmpegMediaInfo.Parse(fileName);
-                    if (mediaInfo.Duration == null || mediaInfo.Dimension.Width == 0 || mediaInfo.Dimension.Height == 0)
+                    if (mediaInfo.Duration == null || mediaInfo.Duration.TotalMilliseconds < 1)
                     {
                         error = true;
                     }
@@ -935,14 +956,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             Window.Cursor = new Cursor(StandardCursorType.Arrow);
         }
 
-        if (error)
-        {
-            await MessageBox.Show(Window!,
-                 "Unable to get video info",
-                 "File skipped as video info was unavailable",
-             MessageBoxButtons.OK,
-             MessageBoxIcon.Error);
-        }
+        return error;
     }
 
     [RelayCommand]
@@ -1467,7 +1481,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                 if (waveFile.Header != null && waveFile.Header.SampleRate == 16000)
                 {
                     _videoFileName = videoFileName;
-                    var startOk = TranscribeViaWhisper(_waveFileName, _videoFileName);
+                    var startOk = TranscribeViaWhisper(videoFileName, _videoFileName);
                     return startOk;
                 }
             }
@@ -1796,9 +1810,25 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         }
     }
 
+    internal void InitializeBatch(List<AudioClip> audioClips)
+    {
+        IsBatchMode = true;
+        _audioClips = audioClips;
+    }
+
+
     internal void OnWindowLoaded()
     {
         UiUtil.RestoreWindowPosition(Window);
+
+        if (_audioClips != null)
+        {
+            Dispatcher.UIThread.Post(async () =>
+            {
+                await AddFiles(_audioClips.Select(ac => ac.AudioFileName).ToArray());
+                await Transcribe();
+            });
+        }
     }
 
     internal void OnWindowClosing(WindowClosingEventArgs e)

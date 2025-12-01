@@ -31,6 +31,7 @@ using Nikse.SubtitleEdit.Features.Files.ExportEbuStl;
 using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Files.ExportPac;
 using Nikse.SubtitleEdit.Features.Files.ExportPlainText;
+using Nikse.SubtitleEdit.Features.Files.ImportImages;
 using Nikse.SubtitleEdit.Features.Files.ManualChosenEncoding;
 using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 using Nikse.SubtitleEdit.Features.Files.Statistics;
@@ -46,6 +47,7 @@ using Nikse.SubtitleEdit.Features.Shared.AddToNamesList;
 using Nikse.SubtitleEdit.Features.Shared.Bookmarks;
 using Nikse.SubtitleEdit.Features.Shared.ColumnPaste;
 using Nikse.SubtitleEdit.Features.Shared.ErrorList;
+using Nikse.SubtitleEdit.Features.Shared.GetAudioClips;
 using Nikse.SubtitleEdit.Features.Shared.GoToLineNumber;
 using Nikse.SubtitleEdit.Features.Shared.PickAlignment;
 using Nikse.SubtitleEdit.Features.Shared.PickColor;
@@ -58,6 +60,7 @@ using Nikse.SubtitleEdit.Features.Shared.PickTsTrack;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 using Nikse.SubtitleEdit.Features.Shared.SetVideoOffset;
 using Nikse.SubtitleEdit.Features.Shared.SourceView;
+using Nikse.SubtitleEdit.Features.Shared.Undocked;
 using Nikse.SubtitleEdit.Features.Shared.WaveformGuessTimeCodes;
 using Nikse.SubtitleEdit.Features.Shared.WaveformSeekSilence;
 using Nikse.SubtitleEdit.Features.SpellCheck;
@@ -92,6 +95,7 @@ using Nikse.SubtitleEdit.Features.Video.GoToVideoPosition;
 using Nikse.SubtitleEdit.Features.Video.OpenFromUrl;
 using Nikse.SubtitleEdit.Features.Video.ReEncodeVideo;
 using Nikse.SubtitleEdit.Features.Video.ShotChanges;
+using Nikse.SubtitleEdit.Features.Video.SpeechToText;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech;
 using Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
 using Nikse.SubtitleEdit.Logic;
@@ -112,14 +116,10 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Features.Shared.Undocked;
-using Nikse.SubtitleEdit.Features.Video.SpeechToText;
-using Nikse.SubtitleEdit.Features.Files.ImportImages;
 using System.Xml.Linq;
-using System.Text.Json;
-using Nikse.SubtitleEdit.Features.Shared.GetAudioClips;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -2932,7 +2932,7 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private async Task ShowVideoAudioToTextWhisper()
+    private async Task ShowSpeechToTextWhisper()
     {
         if (Window == null)
         {
@@ -2972,9 +2972,19 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<GetAudioClipsWindow, GetAudioClipsViewModel>(vm =>
+        var resultGetAudioClips = await ShowDialogAsync<GetAudioClipsWindow, GetAudioClipsViewModel>(vm =>
         {
             vm.Initialize(_videoFileName ?? string.Empty, selectedItems);
+        });
+
+        if (!resultGetAudioClips.OkPressed || resultGetAudioClips.AudioClips.Count == 0)
+        {
+            return;
+        }
+
+        var result = await ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(vm => 
+        {
+            vm.InitializeBatch(resultGetAudioClips.AudioClips);
         });
     }
 
