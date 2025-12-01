@@ -907,44 +907,41 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             return;
         }
 
+        Window.Cursor = new Cursor(StandardCursorType.Wait);
         var error = false;
 
         try
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            // Process files on background thread
+            await Task.Run(async () =>
             {
-                Window.Cursor = new Cursor(StandardCursorType.Wait);
+                foreach (var fileName in fileNames)
+                {
+                    var mediaInfo = FfmpegMediaInfo.Parse(fileName);
+                    if (mediaInfo.Duration == null || mediaInfo.Dimension.Width == 0 || mediaInfo.Dimension.Height == 0)
+                    {
+                        error = true;
+                    }
+                    else
+                    {
+                        var batchItem = new WhisperJobItem(fileName, string.Empty, mediaInfo);
+                        await Dispatcher.UIThread.InvokeAsync(() => BatchItems.Add(batchItem));
+                    }
+                }
             });
-
-            foreach (var fileName in fileNames)
-            {
-                var mediaInfo = FfmpegMediaInfo.Parse(fileName);
-                if (mediaInfo.Duration == null || mediaInfo.Dimension.Width == 0 || mediaInfo.Dimension.Height == 0)
-                {
-                    error = true;
-                }
-                else
-                {
-                    var batchItem = new WhisperJobItem(fileName, string.Empty, mediaInfo);
-                    await Dispatcher.UIThread.InvokeAsync(() => BatchItems.Add(batchItem));
-                }
-            }
         }
         finally
         {
-            await Dispatcher.UIThread.InvokeAsync(() =>
-            {
-                Window.Cursor = new Cursor(StandardCursorType.Arrow);
-            });
+            Window.Cursor = new Cursor(StandardCursorType.Arrow);
         }
 
         if (error)
         {
             await MessageBox.Show(Window!,
-                "Unable to get video info",
-                "File skipped as video info was unavailable",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+                 "Unable to get video info",
+                 "File skipped as video info was unavailable",
+             MessageBoxButtons.OK,
+             MessageBoxIcon.Error);
         }
     }
 
