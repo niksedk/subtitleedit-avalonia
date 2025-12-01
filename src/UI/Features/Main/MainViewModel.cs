@@ -116,15 +116,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nikse.SubtitleEdit.Features.Shared.Undocked;
 using Nikse.SubtitleEdit.Features.Video.SpeechToText;
-using static Nikse.SubtitleEdit.Logic.FindService;
-using AudioToTextWhisperViewModel = Nikse.SubtitleEdit.Features.Video.SpeechToText.AudioToTextWhisperViewModel;
-using AudioVisualizerUndockedViewModel = Nikse.SubtitleEdit.Features.Shared.Undocked.AudioVisualizerUndockedViewModel;
-using VideoPlayerUndockedViewModel = Nikse.SubtitleEdit.Features.Shared.Undocked.VideoPlayerUndockedViewModel;
 using Nikse.SubtitleEdit.Features.Files.ImportImages;
 using System.Xml.Linq;
 using System.Text.Json;
 using Nikse.SubtitleEdit.Features.Shared.GetAudioClips;
-using GetAudioClipsViewModel = Nikse.SubtitleEdit.Features.Shared.GetAudioClips.GetAudioClipsViewModel;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -4721,14 +4716,14 @@ public partial class MainViewModel :
 
         if ((result.FindNextPressed || result.FindPreviousPressed) && !string.IsNullOrEmpty(result.SearchText))
         {
-            var findMode = FindMode.CaseSensitive;
+            var findMode = FindService.FindMode.CaseSensitive;
             if (result.FindTypeCanseInsensitive)
             {
-                findMode = FindMode.CaseInsensitive;
+                findMode = FindService.FindMode.CaseInsensitive;
             }
             else if (result.FindTypeRegularExpression)
             {
-                findMode = FindMode.RegularExpression;
+                findMode = FindService.FindMode.RegularExpression;
             }
 
             var currentLineIndex = Subtitles.IndexOf(selectedSubtitle);
@@ -4897,14 +4892,14 @@ public partial class MainViewModel :
 
         if ((result.FindNextPressed || result.ReplaceNextPressed || result.ReplaceAllPressed) && !string.IsNullOrEmpty(result.SearchText))
         {
-            var findMode = FindMode.CaseSensitive;
+            var findMode = FindService.FindMode.CaseSensitive;
             if (result.FindTypeCanseInsensitive)
             {
-                findMode = FindMode.CaseInsensitive;
+                findMode = FindService.FindMode.CaseInsensitive;
             }
             else if (result.FindTypeRegularExpression)
             {
-                findMode = FindMode.RegularExpression;
+                findMode = FindService.FindMode.RegularExpression;
             }
 
             var currentLineIndex = Subtitles.IndexOf(selectedSubtitle);
