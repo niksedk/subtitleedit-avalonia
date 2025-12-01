@@ -123,6 +123,8 @@ using VideoPlayerUndockedViewModel = Nikse.SubtitleEdit.Features.Shared.Undocked
 using Nikse.SubtitleEdit.Features.Files.ImportImages;
 using System.Xml.Linq;
 using System.Text.Json;
+using Nikse.SubtitleEdit.Features.Shared.GetAudioClips;
+using GetAudioClipsViewModel = Nikse.SubtitleEdit.Features.Shared.GetAudioClips.GetAudioClipsViewModel;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -2963,7 +2965,8 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task SpeechToTextSelectedLines()
     {
-        if (Window == null)
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (Window == null || selectedItems.Count == 0|| string.IsNullOrEmpty(_videoFileName))
         {
             return;
         }
@@ -2974,7 +2977,10 @@ public partial class MainViewModel :
             return;
         }
 
-       
+        var result = await ShowDialogAsync<GetAudioClipsWindow, GetAudioClipsViewModel>(vm =>
+        {
+            vm.Initialize(_videoFileName ?? string.Empty, selectedItems);
+        });
     }
 
     [RelayCommand]

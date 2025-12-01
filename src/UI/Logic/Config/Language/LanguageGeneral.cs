@@ -548,6 +548,8 @@ public class LanguageGeneral
     public string RemoveBlankLines { get; set; }
     public string NewSubtitleStartKeyDownSetEndKeyUp { get; set; }
     public string SpeechToTextSelectedLines { get; set; }
+    public string GetAudioClips { get; set; }
+    public string ExtractingAudioClips { get; set; }
 
     public LanguageGeneral()
     {
@@ -1097,5 +1099,7 @@ public class LanguageGeneral
         RemoveBlankLines = "Remove blank lines";
         NewSubtitleStartKeyDownSetEndKeyUp = "Insert subtitle: Start on key down, set end on key up";
         SpeechToTextSelectedLines = "Speech-to-text selected lines";
+        GetAudioClips =  "Get audio clips";
+        ExtractingAudioClips = "Extracting audio clips...";
     }
 }

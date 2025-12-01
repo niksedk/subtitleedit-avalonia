@@ -1,23 +1,20 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Timers;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Logic;
-using Nikse.SubtitleEdit.Logic.Compression;
+using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic.Config;
-using Nikse.SubtitleEdit.Logic.Download;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Timers;
 using Timer = System.Timers.Timer;
 
-namespace Nikse.SubtitleEdit.Features.Shared.GetAudioCips;
+namespace Nikse.SubtitleEdit.Features.Shared.GetAudioClips;
 
 public partial class GetAudioClipsViewModel : ObservableObject
 {
@@ -26,33 +23,34 @@ public partial class GetAudioClipsViewModel : ObservableObject
     [ObservableProperty] private string _error;
 
     public Window? Window { get; set; }
-    public string FfmpegFileName { get; set; }
+    public List<string> AudioClipFileNames { get; set; }
 
-    private IFfmpegDownloadService _ffmpegDownloadService;
     private Task? _downloadTask;
     private readonly Timer _timer;
     private bool _done;
+    private string _videoFileName;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly MemoryStream _downloadStream;
 
-    private readonly IZipUnpacker _zipUnpacker;
-
-    public GetAudioClipsViewModel(IFfmpegDownloadService ffmpegDownloadService, IZipUnpacker zipUnpacker)
+    public GetAudioClipsViewModel()
     {
-        _ffmpegDownloadService = ffmpegDownloadService;
-        _zipUnpacker = zipUnpacker;
-
         _cancellationTokenSource = new CancellationTokenSource();
 
         _downloadStream = new MemoryStream();
 
         StatusText = Se.Language.General.StartingDotDotDot;
         Error = string.Empty;
-        FfmpegFileName = string.Empty;
+        AudioClipFileNames = new List<string>();
+        _videoFileName = string.Empty;  
 
         _timer = new Timer(500);
         _timer.Elapsed += OnTimerOnElapsed;
         _timer.Start();
+    }
+
+    public void Initialize(string videoFileName, List<SubtitleLineViewModel> lines)
+    {
+        _videoFileName =  videoFileName;
     }
 
     private readonly Lock _lockObj = new();
@@ -78,109 +76,14 @@ public partial class GetAudioClipsViewModel : ObservableObject
                     return;
                 }
 
-                var ffmpegFileName = GetFfmpegFileName();
-
-                if (File.Exists(ffmpegFileName))
-                {
-                    File.Delete(ffmpegFileName);
-                }
-
-                UnpackFfmpeg(ffmpegFileName);
-
-                if (File.Exists(ffmpegFileName) && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    MacHelper.MakeExecutable(ffmpegFileName);
-                }
-
-                FfmpegFileName = ffmpegFileName;
                 Close();
             }
             else if (_downloadTask is { IsFaulted: true })
             {
                 _timer.Stop();
                 _done = true;
-                var ex = _downloadTask.Exception?.InnerException ?? _downloadTask.Exception;
-                if (ex is OperationCanceledException)
-                {
-                    StatusText = "Download canceled";
-                    Close();
-                }
-                else
-                {
-                    StatusText = "Download failed";
-                    Error = ex?.Message ?? "Unknown error";
-                }
             }
         }
-    }
-
-    private void UnpackFfmpeg(string newFileName)
-    {
-        var folder = Path.GetDirectoryName(newFileName);
-        if (folder != null)
-        {
-            _downloadStream.Position = 0;
-            _zipUnpacker.UnpackZipStream(_downloadStream, folder);
-        }
-
-        _downloadStream.Dispose();
-    }
-
-
-    public static string GetFfmpegFileName()
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            return Path.Combine(Se.FfmpegFolder, "ffmpeg.exe");
-        }
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            var paths = new List<string>
-            {
-                Path.Combine(AppContext.BaseDirectory, "ffmpeg"),
-                Se.FfmpegFolder,
-                "/Applications/Subtitle Edit.app/Contents/MacOS", // Bundled with "Subtitle Edit" app
-                "/Applications/Subtitle Edit.app/Contents/Frameworks/ffmpeg", // Bundled with "Subtitle Edit" app
-                "/opt/local/bin/ffmpeg", // MacPorts
-                "/usr/local/bin/ffmpeg", // Intel Macs
-                "/opt/homebrew/bin/ffmpeg", // Apple Silicon Macs
-            };
-
-            foreach (var path in paths)
-            {
-                if (File.Exists(path))
-                {
-                    return path;
-                }
-            }
-        }
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            var paths = new List<string>
-            {
-                Se.FfmpegFolder,
-                "/user/bin/ffmpeg",
-                "/snap/bin/ffmpeg",
-            };
-
-            foreach (var path in paths)
-            {
-                if (File.Exists(path))
-                {
-                    return path;
-                }
-            }
-        }
-
-        var seFfmpeg = Path.Combine(Se.FfmpegFolder, "ffmpeg");
-        if (File.Exists(seFfmpeg))
-        {
-            return seFfmpeg;
-        }
-
-        return "ffmpeg";
     }
 
     private void Close()
@@ -215,11 +118,6 @@ public partial class GetAudioClipsViewModel : ObservableObject
         {
             Directory.CreateDirectory(folder);
         }
-
-        _downloadTask = _ffmpegDownloadService.DownloadFfmpeg(
-            _downloadStream,
-            downloadProgress,
-            _cancellationTokenSource.Token);
     }
 
     internal void OnKeyDown(KeyEventArgs e)

@@ -1,13 +1,12 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Styling;
-using Nikse.SubtitleEdit.Features.Shared.GetAudioCips;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Shared;
+namespace Nikse.SubtitleEdit.Features.Shared.GetAudioClips;
 
 public class GetAudioClipsWindow : Window
 {
@@ -15,7 +14,7 @@ public class GetAudioClipsWindow : Window
     {
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = "Downloading ffmpeg";
+        Title = Se.Language.General.GetAudioClips;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -24,7 +23,7 @@ public class GetAudioClipsWindow : Window
 
         var titleText = new TextBlock
         {
-            Text = "Downloading ffmpeg",
+            Text = Se.Language.General.ExtractingAudioClips,
             FontSize = 20,
             FontWeight = FontWeight.Bold,
         };
