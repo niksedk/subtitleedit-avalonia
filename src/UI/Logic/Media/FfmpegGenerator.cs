@@ -981,4 +981,12 @@ public class FfmpegGenerator
 
         return arguments.Trim();
     }
+
+    internal static string ExtractAudioClipFromVideoParameters(string videoFileName, double startSeconds, double endSeconds, bool useCenterChannelOnly, string outputFileName)
+    {
+        var start = $"{startSeconds:0.000}".Replace(",", ".");
+        var duration = $"{endSeconds:0.000}".Replace(",", ".");
+        var arguments = $"-ss {start} -t {duration} -i \"{videoFileName}\" -vn -ar 16000 -ab 32k";
+        return arguments;
+    }
 }
