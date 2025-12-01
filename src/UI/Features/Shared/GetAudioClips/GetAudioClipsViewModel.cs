@@ -26,7 +26,6 @@ public partial class GetAudioClipsViewModel : ObservableObject
     public List<string> AudioClips { get; set; }
     public bool OkPressed { get; private set; }
 
-    private readonly Timer _timer;
     private string _videoFileName;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private List<SubtitleLineViewModel> _lines;
@@ -69,7 +68,6 @@ public partial class GetAudioClipsViewModel : ObservableObject
             }
             else
             {
-                _timer.Stop();
                 Dispatcher.UIThread.Post(async () =>
                 {
                     await MessageBox.Show(Window!,

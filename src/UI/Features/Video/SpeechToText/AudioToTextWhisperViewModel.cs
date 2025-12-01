@@ -397,6 +397,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         var convertedJobs = Enumerable.Count<WhisperJobItem>(BatchItems, p => p.Status == Se.Language.General.Converted);
         var failed = Enumerable.Count<WhisperJobItem>(BatchItems, p => p.Status != Se.Language.General.Converted);
 
+
         Dispatcher.UIThread.Invoke<Task>(async () =>
         {
             var msg = $"Videos converted: " + convertedJobs;
@@ -404,6 +405,13 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             {
                 msg += Environment.NewLine + $"Videos failed: " + failed;
             }
+
+            _timerWhisper.Stop();
+            Task.Delay(250).Wait();
+            HideProgressBar();
+            ProgressText = string.Empty;
+            EstimatedText = string.Empty;
+            ElapsedText = string.Empty;
 
             await MessageBox.Show(
                 Window!,
@@ -413,6 +421,11 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                 MessageBoxIcon.Information);
 
             IsTranscribeEnabled = true;
+
+            if (failed == 0)
+            {
+                Window?.Close();
+            }
         });
     }
 
@@ -889,25 +902,40 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     private async Task Add()
     {
         var fileNames = await _fileHelper.PickOpenVideoFiles(Window!, Se.Language.General.AddVideoFiles);
-        if (fileNames.Length == 0)
+        if (fileNames.Length == 0 || Window == null)
         {
             return;
         }
 
         var error = false;
 
-        foreach (var fileName in fileNames)
+        try
         {
-            var mediaInfo = FfmpegMediaInfo.Parse(fileName);
-            if (mediaInfo.Duration == null || mediaInfo.Dimension.Width == 0 || mediaInfo.Dimension.Height == 0)
+            await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                error = true;
-            }
-            else
+                Window.Cursor = new Cursor(StandardCursorType.Wait);
+            });
+
+            foreach (var fileName in fileNames)
             {
-                var batchItem = new WhisperJobItem(fileName, string.Empty, mediaInfo);
-                Dispatcher.UIThread.Invoke(() => { BatchItems.Add(batchItem); });
+                var mediaInfo = FfmpegMediaInfo.Parse(fileName);
+                if (mediaInfo.Duration == null || mediaInfo.Dimension.Width == 0 || mediaInfo.Dimension.Height == 0)
+                {
+                    error = true;
+                }
+                else
+                {
+                    var batchItem = new WhisperJobItem(fileName, string.Empty, mediaInfo);
+                    await Dispatcher.UIThread.InvokeAsync(() => BatchItems.Add(batchItem));
+                }
             }
+        }
+        finally
+        {
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                Window.Cursor = new Cursor(StandardCursorType.Arrow);
+            });
         }
 
         if (error)
@@ -920,7 +948,6 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         }
     }
 
-
     [RelayCommand]
     private void Remove()
     {
@@ -930,7 +957,6 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             BatchItems.Remove(SelectedBatchItem);
         }
     }
-
 
     [RelayCommand]
     private void Clear()
