@@ -71,6 +71,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
     public bool OkPressed { get; private set; }
     public Subtitle TranscribedSubtitle { get; private set; }
+    public List<AudioClip> ResultAudioClips { get; private set; }
     public TextBox TextBoxConsoleLog { get; internal set; }
     public DataGrid BatchGrid { get; internal set; }
 
@@ -140,6 +141,8 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         Models = new ObservableCollection<WhisperModelDisplay>();
 
         BatchItems = new ObservableCollection<WhisperJobItem>();
+
+        ResultAudioClips = new List<AudioClip>();
 
         IsTranscribeEnabled = true;
         Parameters = string.Empty;
@@ -318,7 +321,18 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                         .Select(p => new Paragraph(p.Text, (double)p.Start * 1000.0, (double)p.End * 1000.0)).ToList());
 
                     var postProcessedSubtitle = PostProcess(subtitle);
+
+                    if (_audioClips != null && ResultAudioClips.Count > 0)
+                    {
+                        var outputAudioClip = ResultAudioClips.FirstOrDefault(p => p.AudioFileName == _videoFileName);
+                        if (outputAudioClip != null)
+                        {
+                            outputAudioClip.Transcription = new Subtitle(postProcessedSubtitle);
+                        }
+                    }
+
                     await MakeResult(postProcessedSubtitle);
+
                     return;
                 }
 
@@ -399,7 +413,6 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         var convertedJobs = Enumerable.Count<WhisperJobItem>(BatchItems, p => p.Status == Se.Language.General.Converted);
         var failed = Enumerable.Count<WhisperJobItem>(BatchItems, p => p.Status != Se.Language.General.Converted);
 
-
         Dispatcher.UIThread.Invoke<Task>(async () =>
         {
             var msg = $"Videos converted: " + convertedJobs;
@@ -414,6 +427,13 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             ProgressText = string.Empty;
             EstimatedText = string.Empty;
             ElapsedText = string.Empty;
+
+            if (_audioClips != null && failed == 0)
+            {
+                OkPressed = true;
+                Window?.Close();
+                return;
+            }
 
             await MessageBox.Show(
                 Window!,
@@ -1256,12 +1276,6 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         ProgressOpacity = 1;
         ProgressText = GetProgressText();
 
-        //if (_batchMode)
-        //{
-
-        //    LabelProgress.Text = string.Format("Transcribing {0} of {1}", _batchFileNumber, 0); // TODO: listViewInputFiles.Items.Count);
-        //}
-
         _useCenterChannelOnly = Configuration.Settings.General.FFmpegUseCenterChannelOnly &&
                                 FfmpegMediaInfo.Parse(_videoFileName).HasFrontCenterAudio(_audioTrackNumber);
 
@@ -1814,8 +1828,8 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     {
         IsBatchMode = true;
         _audioClips = audioClips;
+        ResultAudioClips = audioClips.Select(ac => new AudioClip(ac)).ToList();
     }
-
 
     internal void OnWindowLoaded()
     {

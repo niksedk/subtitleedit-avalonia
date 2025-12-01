@@ -24,7 +24,6 @@ public class LanguageGeneral
     public string ApiKey { get; set; }
     public string Appearance { get; set; }
     public string Apply { get; set; }
-    public string ApplyTo { get; set; }
     public string AttachDotDotDot { get; set; }
     public string AudioFiles { get; set; }
     public string AudioVisualizer { get; set; }
@@ -327,8 +326,6 @@ public class LanguageGeneral
     public string PickSubtitleFile { get; set; }
     public string PickVideoFile { get; set; }
     public string PickVideoPosition { get; set; }
-    public string Play { get; set; }
-    public string PlaySelectedLine { get; set; }
     public string PleaseEnterAValidValueForX { get; set; }
     public string PleaseWait { get; set; }
     public string PostProcessing { get; set; }
@@ -553,6 +550,8 @@ public class LanguageGeneral
     public string GetAudioClips { get; set; }
     public string ExtractingAudioClips { get; set; }
     public string FileXOfY { get; set; }
+    public string PlaySelectedLines { get; set; }
+    public string PlaySelectedLinesWithLoop { get; set; }
 
     public LanguageGeneral()
     {
@@ -576,7 +575,6 @@ public class LanguageGeneral
         ApiKey = "API key";
         Appearance = "Appearance";
         Apply = "Apply";
-        ApplyTo = "Apply to";
         AttachDotDotDot = "Attach...";
         AudioFiles = "Audio files";
         AudioVisualizer = "Audio visualizer";
@@ -879,8 +877,6 @@ public class LanguageGeneral
         PickSubtitleFile = "Pick subtitle file...";
         PickVideoFile = "Pick video file...";
         PickVideoPosition = "Pick video position";
-        Play = "Play";
-        PlaySelectedLine = "Play selected line";
         PleaseEnterAValidValueForX = "Please enter a valid value for \"{0}\"";
         PleaseWait = "Please wait...";
         PostProcessing = "Post processing";
@@ -1105,5 +1101,7 @@ public class LanguageGeneral
         GetAudioClips =  "Get audio clips";
         ExtractingAudioClips = "Extracting audio clips...";
         FileXOfY = "File {0} of {1}";
+        PlaySelectedLines = "Play selected lines";
+        PlaySelectedLinesWithLoop = "Play selected lines with loop";
     }
 }

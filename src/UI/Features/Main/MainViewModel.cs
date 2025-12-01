@@ -2961,7 +2961,7 @@ public partial class MainViewModel :
     private async Task SpeechToTextSelectedLines()
     {
         var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
-        if (Window == null || selectedItems.Count == 0|| string.IsNullOrEmpty(_videoFileName))
+        if (Window == null || selectedItems.Count == 0 || string.IsNullOrEmpty(_videoFileName))
         {
             return;
         }
@@ -2982,10 +2982,116 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(vm => 
+        var resultSpeechToText = await ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(vm =>
         {
             vm.InitializeBatch(resultGetAudioClips.AudioClips);
         });
+
+        if (!resultSpeechToText.OkPressed)
+        {
+            return;
+        }
+
+        // Update selected lines with transcribed text
+        var newLines = new List<SubtitleLineViewModel>();
+        var deleteLines = new List<SubtitleLineViewModel>();
+        for (var i = 0; i < selectedItems.Count; i++)
+        {
+            var selectedLine = selectedItems[i];
+            var transcribedLine = resultSpeechToText.ResultAudioClips[i];
+            if (transcribedLine != null)
+            {
+                if (selectedLine.Duration.TotalSeconds > 10 && transcribedLine.Transcription.Paragraphs.Count > 1)
+                {
+                    // generate new subtitles
+                    deleteLines.Add(selectedLine);
+                    foreach (var p in transcribedLine.Transcription.Paragraphs)
+                    {
+                        var newLine = new SubtitleLineViewModel(p, SelectedSubtitleFormat);
+                        newLine.StartTime = selectedLine.StartTime + p.StartTime.TimeSpan;
+                        newLines.Add(newLine);
+                    }
+                }
+                else
+                {
+                    // single line update
+                    var sb = new StringBuilder();
+                    foreach (var line in transcribedLine.Transcription.Paragraphs)
+                    {
+                        sb.AppendLine(line.Text);
+                    }
+
+                    selectedLine.Text = sb.ToString().Trim();
+                }
+            }
+        }
+
+        foreach (var line in deleteLines)
+        {
+            Subtitles.Remove(line);
+        }
+
+        foreach (var line in newLines)
+        {
+            _insertService.InsertInCorrectPosition(Subtitles, line);
+        }
+
+        _updateAudioVisualizer = true;
+    }
+
+    private void ResetPlaySelection()
+    {
+        _playSelectionEndSeconds = -1;
+        _playSelectionIndex = -1;
+        _playSelectionIndexLoopStart = -1;
+    }
+
+    private double _playSelectionEndSeconds = -1;
+    private int _playSelectionIndex = -1;
+    private int _playSelectionIndexLoopStart = -1;
+    private double _endSecondsNewPosition = -1;
+    private long _endSecondsNewPositionTicks;
+
+    [RelayCommand]
+    private void PlaySelectedLinesWithLoop()
+    {
+        PlayerSelectedLines(true);
+    }
+
+    [RelayCommand]
+    private void PlaySelectedLinesWithoutLoop()
+    {
+        PlayerSelectedLines(false);
+    }
+
+    private bool PlayerSelectedLines(bool loop)
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        var vp = GetVideoPlayerControl();
+        if (Window == null || selectedItems.Count == 0 || vp == null)
+        {
+            return false;
+        }
+
+        var p = selectedItems.MinBy(p => p.StartTime);
+        if (p != null)
+        {
+            vp.Position = p.StartTime.TotalSeconds;
+            vp.VideoPlayerInstance.Play();
+            _playSelectionEndSeconds = p.EndTime.TotalSeconds;
+            _playSelectionIndex = Subtitles.IndexOf(p);
+
+            if (loop)
+            {
+                _playSelectionIndexLoopStart = _playSelectionIndex;
+            }
+            else
+            {
+                _playSelectionIndexLoopStart = -1;
+            }
+        }
+
+        return true;
     }
 
     [RelayCommand]
@@ -6896,7 +7002,6 @@ public partial class MainViewModel :
             var item = Subtitles[index];
             Dispatcher.UIThread.Post(() =>
             {
-
                 SubtitleGrid.SelectedItem = item;
                 SubtitleGrid.ScrollIntoView(item, null);
             });
@@ -9817,6 +9922,7 @@ public partial class MainViewModel :
         var selectedItems = SubtitleGrid.SelectedItems;
         EditTextBox.ClearSelection();
         EditTextBoxOriginal.ClearSelection();
+        ResetPlaySelection();
 
         if (selectedItems == null)
         {
@@ -10113,6 +10219,69 @@ public partial class MainViewModel :
                                 vp.Position = rs.StartTime.TotalSeconds;
                             }
                         }
+
+
+                        else if (_playSelectionEndSeconds >= 0 && mediaPlayerSeconds >= _playSelectionEndSeconds && _playSelectionIndex >= 0)
+                        {
+                            vp.VideoPlayerInstance.Pause();
+                            if (_playSelectionIndex < 0)
+                            {
+                                if (_endSecondsNewPosition >= 0 && _endSecondsNewPositionTicks > Stopwatch.GetTimestamp() - (10000 * 900)) // 900 ms
+                                {
+                                    vp.Position = _endSecondsNewPosition;
+                                }
+                                else
+                                {
+                                    vp.Position = _playSelectionEndSeconds;
+                                }
+                            }
+
+
+                            vp.Position = _playSelectionEndSeconds;
+                            if (_playSelectionIndex >= 0)
+                            {
+                                var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().OrderBy(p => p.StartTime).ToList();
+                                var nextIndex = Subtitles.IndexOf(selectedItems.FirstOrDefault(p => Subtitles.IndexOf(p) > _playSelectionIndex));
+                                var p = _subtitle.GetParagraphOrDefault(nextIndex);
+                                if (p != null && _playSelectionIndex < nextIndex) // && SubtitleListview1.Items[nextIndex].Selected)
+                                {
+                                    _playSelectionEndSeconds = p.EndTime.TotalSeconds;
+                                    vp.Position = p.StartTime.TotalSeconds;
+
+                                    Dispatcher.UIThread.Post(() =>
+                                    {
+                                        SubtitleGrid.ScrollIntoView(Subtitles[nextIndex], null);
+                                        vp.VideoPlayerInstance.Play();
+                                        _playSelectionIndex = nextIndex;
+                                    });
+                                }
+                                else
+                                {
+                                    var first = _subtitle.GetParagraphOrDefault(_playSelectionIndexLoopStart);
+                                    if (first != null)
+                                    {
+                                        _playSelectionEndSeconds = first.EndTime.TotalSeconds;
+                                        vp.Position = first.StartTime.TotalSeconds;
+                                        Dispatcher.UIThread.Post(() =>
+                                        {
+                                            SubtitleGrid.ScrollIntoView(Subtitles[_playSelectionIndexLoopStart], null);
+                                            _playSelectionEndSeconds = first.EndTime.TotalSeconds;
+                                            _playSelectionIndex = _playSelectionIndexLoopStart;
+                                            vp.VideoPlayerInstance.Play();
+                                        });
+                                    }
+                                    else
+                                    {
+                                        ResetPlaySelection();
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                ResetPlaySelection();
+                            }
+                        }
+
                         else if (SelectCurrentSubtitleWhilePlaying)
                         {
                             var ss = SelectedSubtitle;
@@ -10151,6 +10320,7 @@ public partial class MainViewModel :
                     else
                     {
                         Projektanker.Icons.Avalonia.Attached.SetIcon(ButtonWaveformPlay, IconNames.Play);
+                        ResetPlaySelection();
                     }
                 }
 

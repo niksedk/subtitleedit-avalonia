@@ -267,6 +267,8 @@ public static class ShortcutsMain
         { nameof(MainViewModel.RemoveBlankLinesCommand), Se.Language.General.RemoveBlankLines },
         { nameof(MainViewModel.InsertSubtitleAtVideoPositionSetEndAtKeyUpCommand), Se.Language.General.NewSubtitleStartKeyDownSetEndKeyUp },
         { nameof(MainViewModel.SpeechToTextSelectedLinesCommand), Se.Language.General.SpeechToTextSelectedLines },
+        { nameof(MainViewModel.PlaySelectedLinesWithoutLoopCommand), Se.Language.General.PlaySelectedLines },
+        { nameof(MainViewModel.PlaySelectedLinesWithLoopCommand), Se.Language.General.PlaySelectedLinesWithLoop },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -476,6 +478,8 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.RemoveBlankLinesCommand, nameof(vm.RemoveBlankLinesCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.InsertSubtitleAtVideoPositionSetEndAtKeyUpCommand, nameof(vm.InsertSubtitleAtVideoPositionSetEndAtKeyUpCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.SpeechToTextSelectedLinesCommand, nameof(vm.SpeechToTextSelectedLinesCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.PlaySelectedLinesWithoutLoopCommand, nameof(vm.PlaySelectedLinesWithoutLoopCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.PlaySelectedLinesWithLoopCommand, nameof(vm.PlaySelectedLinesWithLoopCommand), ShortcutCategory.General);
 
         return shortcuts;
     }
