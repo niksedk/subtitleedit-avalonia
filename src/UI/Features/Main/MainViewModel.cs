@@ -6831,7 +6831,11 @@ public partial class MainViewModel :
                 }
                 else
                 {
-                    column.Width = new DataGridLength(1, DataGridLengthUnitType.Auto);
+                    if (column.Header.ToString() != Se.Language.General.OriginalText &&
+                        column.Header.ToString() != Se.Language.General.Text)
+                    {
+                        column.Width = new DataGridLength(1, DataGridLengthUnitType.Auto);
+                    }
                 }
             }
         }
