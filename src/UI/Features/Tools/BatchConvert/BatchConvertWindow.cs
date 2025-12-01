@@ -238,7 +238,6 @@ public class BatchConvertWindow : Window
         };
 
         var flyout = new MenuFlyout();
-        dataGrid.ContextFlyout = flyout;
         var menuItemRemove = new MenuItem
         {
             Header = Se.Language.General.Remove,
@@ -252,6 +251,13 @@ public class BatchConvertWindow : Window
         });
         flyout.Items.Add(menuItemRemove);
 
+        var menuItemImport = new MenuItem
+        {
+            Header = Se.Language.General.AddDotDotDot,
+            DataContext = vm,
+            Command = vm.AddFilesCommand,
+        };
+        flyout.Items.Add(menuItemImport);
 
         // hack to make drag and drop work on the DataGrid - also on empty rows
         var dropHost = new Border
@@ -262,6 +268,7 @@ public class BatchConvertWindow : Window
         DragDrop.SetAllowDrop(dropHost, true);
         dropHost.AddHandler(DragDrop.DragOverEvent, vm.FileGridOnDragOver, RoutingStrategies.Bubble);
         dropHost.AddHandler(DragDrop.DropEvent, vm.FileGridOnDrop, RoutingStrategies.Bubble);
+        dropHost.ContextFlyout = flyout;
 
         grid.Add(dropHost, 0, 0);
         grid.Add(panelFileControls, 1, 0);
