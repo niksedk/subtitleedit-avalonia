@@ -77,7 +77,7 @@ public class GetAudioClipsWindow : Window
         Activated += delegate
         {
             buttonCancel.Focus(); // hack to make OnKeyDown work
-            vm.StartDownload();
+            vm.StartAudioExtract();
         }; 
         KeyDown += (s, e) => vm.OnKeyDown(e);  
     }

@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language;
+﻿using System;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
 public class LanguageGeneral
 {
@@ -550,6 +552,7 @@ public class LanguageGeneral
     public string SpeechToTextSelectedLines { get; set; }
     public string GetAudioClips { get; set; }
     public string ExtractingAudioClips { get; set; }
+    public string FileXOfY { get; set; }
 
     public LanguageGeneral()
     {
@@ -1101,5 +1104,6 @@ public class LanguageGeneral
         SpeechToTextSelectedLines = "Speech-to-text selected lines";
         GetAudioClips =  "Get audio clips";
         ExtractingAudioClips = "Extracting audio clips...";
+        FileXOfY = "File {0} of {1}";
     }
 }

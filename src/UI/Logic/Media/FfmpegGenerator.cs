@@ -982,11 +982,29 @@ public class FfmpegGenerator
         return arguments.Trim();
     }
 
-    internal static string ExtractAudioClipFromVideoParameters(string videoFileName, double startSeconds, double endSeconds, bool useCenterChannelOnly, string outputFileName)
+    internal static string ExtractAudioClipFromVideoParameters(
+       string videoFileName,
+       double startSeconds,
+       double durationSeconds,
+       bool useCenterChannelOnly,
+       string outputFileName)
     {
         var start = $"{startSeconds:0.000}".Replace(",", ".");
-        var duration = $"{endSeconds:0.000}".Replace(",", ".");
-        var arguments = $"-ss {start} -t {duration} -i \"{videoFileName}\" -vn -ar 16000 -ab 32k";
-        return arguments;
+        var duration = $"{durationSeconds:0.000}".Replace(",", ".");
+
+        // Base parameters
+        var args = $"-ss {start} -t {duration} -i \"{videoFileName}\" -vn -ar 16000 -b:a 32k";
+
+        // Optional center-channel only
+        if (useCenterChannelOnly)
+        {
+            // Extract center channel: pan mono|c0=c2
+            args += " -af \"pan=mono|c0=c2\"";
+        }
+
+        // Add output file name
+        args += $" \"{outputFileName}\"";
+
+        return args;
     }
 }
