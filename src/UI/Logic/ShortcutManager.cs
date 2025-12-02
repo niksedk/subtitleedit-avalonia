@@ -95,6 +95,19 @@ public class ShortcutManager : IShortcutManager
         return [.. _activeKeys];
     }
 
+    public bool IsControlPressed()
+    {
+        foreach (var key in _activeKeys)
+        {
+            if (key == Key.LeftCtrl || key == Key.RightCtrl)
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
     public static string CalculateNormalizedHash(List<string> inputKeys, string? control)
     {
         var keys = new List<string>();

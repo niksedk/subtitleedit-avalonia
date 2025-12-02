@@ -13,4 +13,5 @@ public interface IShortcutManager
     IRelayCommand? CheckShortcuts(string activeControl);
     void ClearShortcuts();
     HashSet<Key> GetActiveKeys();
+    bool IsControlPressed();
 }
