@@ -8710,6 +8710,7 @@ public partial class MainViewModel :
                                 VideoUndockControls();
                                 skipLoadVideo = true;
                             }
+
                             InitLayout.RestoreLayoutPositions(Se.Settings.Appearance.CurrentLayoutPositions, ContentGrid.Children.FirstOrDefault() as Grid);
                         }
 
@@ -8740,6 +8741,7 @@ public partial class MainViewModel :
                         {
                             VideoUndockControls();
                         }
+
                         InitLayout.RestoreLayoutPositions(Se.Settings.Appearance.CurrentLayoutPositions, ContentGrid.Children.FirstOrDefault() as Grid);
                     });
                 }
@@ -8760,9 +8762,11 @@ public partial class MainViewModel :
                     {
                         VideoUndockControls();
                     }
+
                     InitLayout.RestoreLayoutPositions(Se.Settings.Appearance.CurrentLayoutPositions, ContentGrid.Children.FirstOrDefault() as Grid);
-                }
-            }, DispatcherPriority.Loaded);
+                }, DispatcherPriority.Loaded);
+            }
+        }
 
         Task.Run(async () =>
         {
@@ -10240,7 +10244,7 @@ public partial class MainViewModel :
                         vp.VideoPlayerInstance.Pause();
                         if (_playSelectionIndex < 0)
                         {
-                            if (_endSecondsNewPosition >= 0 && _endSecondsNewPositionTicks > Stopwatch.GetTimestamp() - (10000 * 900)) // 900 ms
+                            if (_endSecondsNewPosition >= 0) 
                             {
                                 vp.Position = _endSecondsNewPosition;
                             }
