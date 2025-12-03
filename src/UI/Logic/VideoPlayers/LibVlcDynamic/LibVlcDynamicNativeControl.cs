@@ -3,7 +3,6 @@ using Avalonia.Input;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using System;
-using System.Runtime.InteropServices;
 
 namespace Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 
