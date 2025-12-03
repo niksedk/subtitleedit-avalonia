@@ -249,6 +249,8 @@ public sealed class LibVlcDynamicPlayer : IDisposable, IVideoPlayerInstance
             [
                 LibVlcPath,
                 Directory.GetCurrentDirectory(),
+                Path.Combine(Directory.GetCurrentDirectory(), "VLC"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "VideoLAN", "VLC"),
                 string.Empty,
             ];
         }
@@ -361,7 +363,6 @@ public sealed class LibVlcDynamicPlayer : IDisposable, IVideoPlayerInstance
                     {
                         _library = libHandle;
                         LoadLibVlcMethods();
-                        // load something here?
                         return true;
                     }
                 }
