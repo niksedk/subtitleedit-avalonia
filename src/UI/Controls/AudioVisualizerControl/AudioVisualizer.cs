@@ -1316,7 +1316,7 @@ public class AudioVisualizer : Control
 
     private void DrawWaveFormClassic(DrawingContext context, double waveformHeight)
     {
-        var isSelectedHelper = new IsSelectedHelper(AllSelectedParagraphs, WavePeaks.SampleRate);
+        var isSelectedHelper = new IsSelectedHelper(AllSelectedParagraphs, WavePeaks!.SampleRate);
         var halfWaveformHeight = waveformHeight / 2;
         var div = WavePeaks.SampleRate * ZoomFactor;
 

@@ -707,6 +707,7 @@ public partial class MainViewModel :
     private void ResetSubtitle(SubtitleFormat? format = null)
     {
         _videoOpenTokenSource?.Cancel();
+        ResetPlaySelection();
         ShowColumnOriginalText = false;
         _subtitle.Paragraphs.Clear();
         Subtitles.Clear();
@@ -2780,21 +2781,26 @@ public partial class MainViewModel :
             return;
         }
 
-        Dispatcher.UIThread.Post(async () =>
+        Dispatcher.UIThread.Post(() =>
         {
             AreVideoControlsUndocked = true;
-            await vp.WaitForPlayersReadyAsync();
+
+            var position = vp.Position;
+            var volume = vp.Volume;
+            var videoFileName = vp.VideoPlayerInstance.FileName;
+            VideoPlayerControl?.Close();
+            VideoPlayerControl = null;
 
             _windowService.ShowWindow<VideoPlayerUndockedWindow, VideoPlayerUndockedViewModel>(Window, (window, vm) =>
             {
                 _videoPlayerUndockedViewModel = vm;
-                vm.Initialize(vp, this);
+                vm.Initialize(_videoFileName ?? string.Empty, position, volume, this);
             });
 
             _windowService.ShowWindow<AudioVisualizerUndockedWindow, AudioVisualizerUndockedViewModel>(Window, (window, vm) =>
             {
                 _audioVisualizerUndockedViewModel = vm;
-                vm.Initialize(AudioVisualizer!, this);
+                vm.Initialize(AudioVisualizer, this);
             });
 
             InitLayout.MakeLayout12KeepVideo(MainView!, this);
@@ -3044,7 +3050,6 @@ public partial class MainViewModel :
     private int _playSelectionIndex = -1;
     private int _playSelectionIndexLoopStart = -1;
     private double _endSecondsNewPosition = -1;
-    private long _endSecondsNewPositionTicks;
 
     [RelayCommand]
     private void PlaySelectedLinesWithLoop()
@@ -8693,7 +8698,22 @@ public partial class MainViewModel :
                 {
                     try
                     {
-                        await SubtitleOpen(first.SubtitleFileName, first.VideoFileName, first.SelectedLine);
+                        bool skipLoadVideo = false;
+                        _videoFileName = first.VideoFileName;
+                        await Task.Delay(25);
+
+                        if (Se.Settings.General.RememberPositionAndSize)
+                        {
+                            UiUtil.RestoreWindowPosition(Window);
+                            if (Se.Settings.General.UndockVideoControls)
+                            {
+                                VideoUndockControls();
+                                skipLoadVideo = true;
+                            }
+                            InitLayout.RestoreLayoutPositions(Se.Settings.Appearance.CurrentLayoutPositions, ContentGrid.Children.FirstOrDefault() as Grid);
+                        }
+
+                        await SubtitleOpen(first.SubtitleFileName, first.VideoFileName, first.SelectedLine, null, skipLoadVideo);
                         var vp = GetVideoPlayerControl();
                         if (!string.IsNullOrEmpty(_videoFileName) && SelectedSubtitle != null && vp != null)
                         {
@@ -8711,41 +8731,41 @@ public partial class MainViewModel :
             }
             else
             {
-                Se.Settings.File.RecentFiles =
-                    Se.Settings.File.RecentFiles.Where(p => File.Exists(p.SubtitleFileName)).ToList();
+                if (Se.Settings.General.RememberPositionAndSize)
+                {
+                    Dispatcher.UIThread.Post(void () =>
+                    {
+                        UiUtil.RestoreWindowPosition(Window);
+                        if (Se.Settings.General.UndockVideoControls)
+                        {
+                            VideoUndockControls();
+                        }
+                        InitLayout.RestoreLayoutPositions(Se.Settings.Appearance.CurrentLayoutPositions, ContentGrid.Children.FirstOrDefault() as Grid);
+                    });
+                }
+
+                Se.Settings.File.RecentFiles = Se.Settings.File.RecentFiles
+                    .Where(p => File.Exists(p.SubtitleFileName))
+                    .ToList();
             }
         }
-
-        if (Se.Settings.Appearance.RightToLeft)
+        else
         {
-            RightToLeftToggle();
-        }
-
-        if (Se.Settings.General.RememberPositionAndSize)
-        {
-            UiUtil.RestoreWindowPosition(Window);
-        }
-
-        Task.Run(async () =>
-        {
-            await Task.Delay(25);
-            Dispatcher.UIThread.Post(() =>
+            if (Se.Settings.General.RememberPositionAndSize)
             {
-                if (Se.Settings.General.RememberPositionAndSize)
+                Dispatcher.UIThread.Post(void () =>
                 {
                     UiUtil.RestoreWindowPosition(Window);
                     if (Se.Settings.General.UndockVideoControls)
                     {
                         VideoUndockControls();
                     }
-                }
-
-                if (Se.Settings.General.RememberPositionAndSize)
-                {
                     InitLayout.RestoreLayoutPositions(Se.Settings.Appearance.CurrentLayoutPositions, ContentGrid.Children.FirstOrDefault() as Grid);
                 }
             }, DispatcherPriority.Loaded);
 
+        Task.Run(async () =>
+        {
             await Task.Delay(1000); // delay 1 second (off UI thread)          
 
             _undoRedoManager.StartChangeDetection();
@@ -8847,6 +8867,7 @@ public partial class MainViewModel :
 
         _videoOpenTokenSource?.Cancel();
         await vp.Open(videoFileName);
+        _videoFileName = videoFileName;
         _mpvReloader.Reset();
 
         if (IsValidUrl(videoFileName))
@@ -8895,7 +8916,6 @@ public partial class MainViewModel :
             }
         }
 
-        _videoFileName = videoFileName;
         IsVideoLoaded = true;
     }
 
