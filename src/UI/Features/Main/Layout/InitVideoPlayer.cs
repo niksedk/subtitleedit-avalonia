@@ -83,18 +83,18 @@ public static class InitVideoPlayer
 
         try
         {
-            //if (Se.Settings.Video.VideoPlayer.Equals("vlc", StringComparison.OrdinalIgnoreCase))
-            //{
-            //   var videoPlayerInstance = new VideoPlayerInstanceVlc();
-            //   control = new VideoPlayerControl(videoPlayerInstance)
-            //   {
-            //       PlayerContent = videoPlayerInstance.VideoViewVlc,
-            //       StopIsVisible = Se.Settings.Video.ShowStopButton,
-            //       FullScreenIsVisible = Se.Settings.Video.ShowFullscreenButton,
-            //   };
-            //}
-            //else
-            if (Se.Settings.Video.VideoPlayer.Equals("mpv-wid", StringComparison.OrdinalIgnoreCase))
+            if (true) //Se.Settings.Video.VideoPlayer.Equals("vlc-wid", StringComparison.OrdinalIgnoreCase))
+            {
+                var videoPlayerInstance = new LibVlcDynamicPlayer();
+                var view = new LibVlcDynamicNativeControl(videoPlayerInstance);
+                control = new VideoPlayerControl(videoPlayerInstance)
+                {
+                    PlayerContent = view,
+                    StopIsVisible = Se.Settings.Video.ShowStopButton,
+                    FullScreenIsVisible = Se.Settings.Video.ShowFullscreenButton,
+                };
+            }
+            else if (Se.Settings.Video.VideoPlayer.Equals("mpv-wid", StringComparison.OrdinalIgnoreCase))
             {
                 var libMpv = new LibMpvDynamicPlayer();
                 var view = new LibMpvDynamicNativeControl(libMpv);
