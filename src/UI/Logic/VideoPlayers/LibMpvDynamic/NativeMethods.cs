@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
@@ -87,12 +88,28 @@ internal static class NativeMethods
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Ansi)]
     internal static extern IntPtr LoadLibrary(string dllToLoad);
 
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    internal static extern IntPtr LoadLibraryW(string dllToLoad);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    internal static extern IntPtr LoadLibraryEx(string lpFileName, IntPtr hReservedNull, uint dwFlags);
+
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Ansi)]
     internal static extern IntPtr GetProcAddress(IntPtr hModule, string procedureName);
 
     [DllImport("kernel32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static extern bool FreeLibrary(IntPtr hModule);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool SetDllDirectory(string lpPathName);
+
+    [DllImport("kernel32.dll")]
+    internal static extern uint GetLastError();
+
+    // LoadLibraryEx flags
+    internal const uint LOAD_WITH_ALTERED_SEARCH_PATH = 0x00000008;
 
     // POSIX constants
     internal const int LC_NUMERIC = 1;
@@ -141,7 +158,53 @@ internal static class NativeMethods
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            return LoadLibrary(fileName);
+            // For VLC on Windows, we need to help LoadLibrary find dependencies
+            var directory = Path.GetDirectoryName(fileName);
+            var originalDirectory = Directory.GetCurrentDirectory();
+            IntPtr handle = IntPtr.Zero;
+
+            try
+            {
+                if (!string.IsNullOrEmpty(directory) && Directory.Exists(directory))
+                {
+                    // Set the current directory to the DLL's directory
+                    // This helps LoadLibrary find dependencies in the same folder
+                    Directory.SetCurrentDirectory(directory);
+
+                    // Also set the DLL directory for additional search path help
+                    SetDllDirectory(directory);
+                }
+
+                // First try LoadLibraryEx with LOAD_WITH_ALTERED_SEARCH_PATH
+                // This makes the DLL's directory part of the search path for its dependencies
+                handle = LoadLibraryEx(fileName, IntPtr.Zero, LOAD_WITH_ALTERED_SEARCH_PATH);
+
+                if (handle == IntPtr.Zero)
+                {
+                    // Fall back to regular LoadLibrary
+                    handle = LoadLibrary(fileName);
+                }
+
+                if (handle == IntPtr.Zero)
+                {
+                    var error = GetLastError();
+                    System.Diagnostics.Debug.WriteLine($"Failed to load {fileName}, error code: {error}");
+                }
+            }
+            finally
+            {
+                // Always restore the original current directory
+                try
+                {
+                    Directory.SetCurrentDirectory(originalDirectory);
+                }
+                catch
+                {
+                    // Ignore errors when restoring directory
+                }
+            }
+
+            return handle;
         }
         else
         {

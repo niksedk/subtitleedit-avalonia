@@ -69,7 +69,7 @@ public class LibVlcDynamicNativeControl : NativeControlHost
         }
 
         _vlcPlayer.LoadLib();
-        
+
         var err = _vlcPlayer.Initialize();
         if (err < 0)
         {

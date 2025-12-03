@@ -83,7 +83,7 @@ public static class InitVideoPlayer
 
         try
         {
-            if (true) //Se.Settings.Video.VideoPlayer.Equals("vlc-wid", StringComparison.OrdinalIgnoreCase))
+            if (Se.Settings.Video.VideoPlayer.Equals("vlc", StringComparison.OrdinalIgnoreCase))
             {
                 var videoPlayerInstance = new LibVlcDynamicPlayer();
                 var view = new LibVlcDynamicNativeControl(videoPlayerInstance);

@@ -195,6 +195,7 @@ public class LanguageSettings
     public string WaveformCenterOnSingleClick { get; set; }
     public string WaveformPauseOnSingleClick { get; set; }
     public string WaveformDrawStyle { get; set; }
+    public string VlcWidRendering { get; set; }
 
     public LanguageSettings()
     {
@@ -379,6 +380,7 @@ public class LanguageSettings
         MpvOpenGl = "libmpv - OpenGL";
         MpvWidRendering = "libmpv - Native Window ID rendering";
         MpvSoftwareRendering = "libmpv - Software rendering (slow)";
+        VlcWidRendering = "libVLC - Native Window ID rendering";
         WaveFormsAndSpectrogramFoldersContainsX = "'Waveforms' and 'spectrogram' folders contains {0}";
         DeleteWaveformAndSpectrogramFoldersQuestion = "Delete 'Waveforms' and 'Spectrogram' files?";
         WaveformGenerateSpectrogram = "Generate spectrogram";

@@ -1,7 +1,7 @@
+using Avalonia.Input;
 using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
 using Avalonia.Threading;
-using Avalonia.Input;
 using System;
 using System.Runtime.InteropServices;
 

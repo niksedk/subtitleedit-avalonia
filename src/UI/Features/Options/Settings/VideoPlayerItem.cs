@@ -32,6 +32,9 @@ public partial class VideoPlayerItem : ObservableObject
         }
 
         result.Add(new VideoPlayerItem { Name = Se.Language.Options.Settings.MpvSoftwareRendering, Code = "mpv-sw" });
+
+        result.Add(new VideoPlayerItem { Name = Se.Language.Options.Settings.VlcWidRendering, Code = "vlc" });
+
         return result;
     }
 }

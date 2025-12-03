@@ -355,20 +355,38 @@ public sealed class LibVlcDynamicPlayer : IDisposable, IVideoPlayerInstance
         {
             foreach (var libPath in GetLibraryPaths())
             {
-                var fullPath = Path.Combine(libPath, libName);
-                if (File.Exists(fullPath))
+                if (string.IsNullOrWhiteSpace(libPath))
                 {
-                    var libHandle = NativeMethods.CrossLoadLibrary(fullPath);
-                    if (libHandle != IntPtr.Zero)
-                    {
-                        _library = libHandle;
-                        LoadLibVlcMethods();
-                        return true;
-                    }
+                    continue;
+                }
+
+                var fullPath = Path.Combine(libPath, libName);
+                System.Diagnostics.Debug.WriteLine($"Trying to load VLC from: {fullPath}");
+
+                if (!File.Exists(fullPath))
+                {
+                    System.Diagnostics.Debug.WriteLine($"File not found: {fullPath}");
+                    continue;
+                }
+
+                System.Diagnostics.Debug.WriteLine($"File exists, attempting to load: {fullPath}");
+                var libHandle = NativeMethods.CrossLoadLibrary(fullPath);
+
+                if (libHandle != IntPtr.Zero)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Successfully loaded VLC from: {fullPath}");
+                    _library = libHandle;
+                    LoadLibVlcMethods();
+                    return true;
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"Failed to load: {fullPath}");
                 }
             }
         }
 
+        System.Diagnostics.Debug.WriteLine("Failed to load VLC from any path");
         return false;
     }
 
@@ -393,6 +411,8 @@ public sealed class LibVlcDynamicPlayer : IDisposable, IVideoPlayerInstance
         }
     }
 
+    private IntPtr _windowHandle = IntPtr.Zero;
+
     public int Initialize()
     {
         EnsureNotDisposed();
@@ -406,8 +426,12 @@ public sealed class LibVlcDynamicPlayer : IDisposable, IVideoPlayerInstance
             return -1;
         }
 
-        string[] initParameters = { "--no-sub-autodetect-file" };
-        _libVlc = _libvlc_new(initParameters.Length, initParameters);
+        if (_libVlc == IntPtr.Zero)
+        {
+            string[] initParameters = { "--no-sub-autodetect-file" };
+            _libVlc = _libvlc_new(initParameters.Length, initParameters);
+        }
+
         return _libVlc != IntPtr.Zero ? 0 : -1;
     }
 
@@ -446,15 +470,30 @@ public sealed class LibVlcDynamicPlayer : IDisposable, IVideoPlayerInstance
 
         await Task.Run(() =>
         {
-            if (_mediaPlayer != IntPtr.Zero)
+            var media = _libvlc_media_new_path(_libVlc, GetUtf8Bytes(path));
+
+            if (_mediaPlayer == IntPtr.Zero)
             {
+                // Create new media player from this media
+                _mediaPlayer = _libvlc_media_player_new_from_media(media);
+
+                // Apply window handle if it was set before LoadFile was called
+                ApplyWindowHandle();
+            }
+            else
+            {
+                // Media player already exists, just load the new media
+                // Stop current playback first
                 _libvlc_media_player_stop?.Invoke(_mediaPlayer);
+
+                // Release the old media player and create a new one
                 _libvlc_media_player_release?.Invoke(_mediaPlayer);
-                _mediaPlayer = IntPtr.Zero;
+                _mediaPlayer = _libvlc_media_player_new_from_media(media);
+
+                // Reapply window handle to the new media player
+                ApplyWindowHandle();
             }
 
-            var media = _libvlc_media_new_path(_libVlc, GetUtf8Bytes(path));
-            _mediaPlayer = _libvlc_media_player_new_from_media(media);
             _libvlc_media_release(media);
 
             try
@@ -802,13 +841,32 @@ public sealed class LibVlcDynamicPlayer : IDisposable, IVideoPlayerInstance
     {
         EnsureNotDisposed();
 
+        // Store the window handle
+        _windowHandle = windowHandle;
+
+        // If media player already exists, set it now
+        if (_mediaPlayer != IntPtr.Zero)
+        {
+            ApplyWindowHandle();
+        }
+    }
+
+    private void ApplyWindowHandle()
+    {
+        if (_windowHandle == IntPtr.Zero || _mediaPlayer == IntPtr.Zero)
+        {
+            return;
+        }
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            _libvlc_media_player_set_hwnd?.Invoke(_mediaPlayer, windowHandle);
+            _libvlc_media_player_set_hwnd?.Invoke(_mediaPlayer, _windowHandle);
+            System.Diagnostics.Debug.WriteLine($"Set HWND: {_windowHandle}");
         }
         else
         {
-            _libvlc_media_player_set_xwindow?.Invoke(_mediaPlayer, windowHandle);
+            _libvlc_media_player_set_xwindow?.Invoke(_mediaPlayer, _windowHandle);
+            System.Diagnostics.Debug.WriteLine($"Set XWindow: {_windowHandle}");
         }
     }
 
