@@ -370,8 +370,6 @@ public static class InitListViewAndEditBox
 
         Grid.SetRow(dropHost, 0);
         mainGrid.Children.Add(dropHost);
-        //Grid.SetRow(vm.SubtitleGrid, 0);
-        //mainGrid.Children.Add(vm.SubtitleGrid);
 
         // Create a Flyout for the DataGrid
         var flyout = new MenuFlyout();
@@ -1032,6 +1030,7 @@ public static class InitListViewAndEditBox
         var flyoutTextBox = new MenuFlyout();
         textBox.ContextFlyout = flyoutTextBox;
         flyoutTextBox.Opening += vm.TextBoxContextOpening;
+        textBox.PointerReleased += vm.TextBoxPointerReleased;
 
         var cutMenuItem = new MenuItem { Header = Se.Language.General.Cut };
         cutMenuItem.Command = vm.TextBoxCutCommand;
