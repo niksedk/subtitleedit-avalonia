@@ -797,6 +797,20 @@ public sealed class LibVlcDynamicPlayer : IDisposable, IVideoPlayerInstance
         }
     }
 
+    public void SetWindowHandle(IntPtr windowHandle)
+    {
+        EnsureNotDisposed();
+        
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            _libvlc_media_player_set_hwnd?.Invoke(_mediaPlayer, windowHandle);
+        }
+        else
+        {
+            _libvlc_media_player_set_xwindow?.Invoke(_mediaPlayer, windowHandle);
+        }
+    }
+
     public void Dispose()
     {
         if (_disposed)
