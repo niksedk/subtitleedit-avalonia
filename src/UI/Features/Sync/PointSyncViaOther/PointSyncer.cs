@@ -43,7 +43,15 @@ public static class PointSyncer
                     maxIndex = syncPoints[i].LeftIndex;
                 }
 
-                Sync(subtitles, result, startIndex, endIndex, minIndex, maxIndex, syncPoints[startIndex].LeftStartTime.TotalMilliseconds / TimeCode.BaseUnit, syncPoints[endIndex].RightStartTime.TotalMilliseconds / TimeCode.BaseUnit);
+                Sync(
+                    subtitles, 
+                    result, 
+                    startIndex, 
+                    endIndex, 
+                    minIndex, 
+                    maxIndex, 
+                    syncPoints[i].LeftStartTime.TotalMilliseconds / TimeCode.BaseUnit, 
+                    syncPoints[i].RightStartTime.TotalMilliseconds / TimeCode.BaseUnit);
 
                 minIndex = endIndex;
             }
@@ -54,7 +62,7 @@ public static class PointSyncer
 
     private static void AdjustViaShowEarlierLater(List<SubtitleLineViewModel> result, SyncPoint syncPoint)
     {
-        var diff = syncPoint.LeftStartTime - syncPoint.RightStartTime;
+        var diff = syncPoint.RightStartTime - syncPoint.LeftStartTime;
         for (var i = 0; i < result.Count; i++)
         {
             result[i].StartTime = result[i].StartTime.Add(diff);
