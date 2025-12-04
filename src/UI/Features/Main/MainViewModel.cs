@@ -199,6 +199,7 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _showWaveformOnlyWaveform;
     [ObservableProperty] private bool _showWaveformOnlySpectrogram;
     [ObservableProperty] private bool _showWaveformWaveformAndSpectrogram;
+    [ObservableProperty] private bool _isSmpteTimingEnabled;
 
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
@@ -708,6 +709,7 @@ public partial class MainViewModel :
     {
         _videoOpenTokenSource?.Cancel();
         ResetPlaySelection();
+        IsSmpteTimingEnabled = false;
         ShowColumnOriginalText = false;
         _subtitle.Paragraphs.Clear();
         Subtitles.Clear();
@@ -3185,6 +3187,23 @@ public partial class MainViewModel :
                 }
             }
         }
+    }
+
+    [RelayCommand]
+    private async Task ToggleSmpteTiming()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+        
+        IsSmpteTimingEnabled = !IsSmpteTimingEnabled;
     }
 
     [RelayCommand]

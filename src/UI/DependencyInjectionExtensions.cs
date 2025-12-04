@@ -130,6 +130,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<IDictionaryInitializer, DictionaryInitializer>();
         collection.AddTransient<IFindService, FindService>();
         collection.AddTransient<IFontNameService, FontNameService>();
+        collection.AddTransient<IGoogleLensOcrDownloadService, GoogleLensOcrDownloadService>();
         collection.AddTransient<IInsertService, InsertService>();
         collection.AddTransient<ILanguageInitializer, LanguageInitializer>();
         collection.AddTransient<IMergeManager, MergeManager>();

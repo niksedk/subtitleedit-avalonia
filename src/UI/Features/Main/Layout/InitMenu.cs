@@ -535,6 +535,17 @@ public static class InitMenu
                             Header = l.SetVideoOffset,
                             Command = vm.ShowVideoSetOffsetCommand,
                         },
+                        new MenuItem
+                        {
+                            Header = l.SmpteTiming,
+                            Command = vm.ToggleSmpteTimingCommand,
+                            Icon = new Projektanker.Icons.Avalonia.Icon
+                            {
+                                Value = IconNames.CheckBold,
+                                VerticalAlignment = VerticalAlignment.Center,
+                                [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsSmpteTimingEnabled)),
+                            }
+                        },
                     }
                 },
             },
