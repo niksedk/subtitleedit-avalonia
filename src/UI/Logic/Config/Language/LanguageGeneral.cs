@@ -552,6 +552,7 @@ public class LanguageGeneral
     public string FileXOfY { get; set; }
     public string PlaySelectedLines { get; set; }
     public string PlaySelectedLinesWithLoop { get; set; }
+    public string ToggleCasing { get; set; }
 
     public LanguageGeneral()
     {
@@ -1103,5 +1104,6 @@ public class LanguageGeneral
         FileXOfY = "File {0} of {1}";
         PlaySelectedLines = "Play selected lines";
         PlaySelectedLinesWithLoop = "Play selected lines with loop";
+        ToggleCasing = "Toggle casing";
     }
 }

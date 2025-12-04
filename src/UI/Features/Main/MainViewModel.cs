@@ -254,7 +254,7 @@ public partial class MainViewModel :
     private readonly IColorService _colorService;
     private readonly IFontNameService _fontNameService;
     private readonly ISpellCheckManager _spellCheckManager;
-    private readonly IYtDlpDownloadService _ytDlpDownloadService;
+    private readonly ICasingToggler _casingToggler;
 
     private bool IsEmpty => Subtitles.Count == 0 || (Subtitles.Count == 1 && string.IsNullOrEmpty(Subtitles[0].Text));
 
@@ -301,7 +301,7 @@ public partial class MainViewModel :
         IColorService colorService,
         IFontNameService fontNameService,
         ISpellCheckManager spellCheckManager,
-        IYtDlpDownloadService ytDlpDownloadService)
+        ICasingToggler casingToggler)
     {
         _fileHelper = fileHelper;
         _folderHelper = folderHelper;
@@ -318,7 +318,7 @@ public partial class MainViewModel :
         _colorService = colorService;
         _fontNameService = fontNameService;
         _spellCheckManager = spellCheckManager;
-        _ytDlpDownloadService = ytDlpDownloadService;
+        _casingToggler = casingToggler;
 
         _loading = true;
         EditText = string.Empty;
@@ -4376,6 +4376,34 @@ public partial class MainViewModel :
     private void MergeSelectedLinesDialog()
     {
         MergeLinesSelectedAsDialog();
+    }
+
+    [RelayCommand]
+    private void ToggleCasing()
+    {
+        if (SubtitleGrid.IsFocused)
+        {
+            var selectedItems = _selectedSubtitles?.ToList() ?? [];
+            if (selectedItems.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var item in selectedItems)
+            {
+                item.Text = _casingToggler.ToggleCasing(item.Text, SelectedSubtitleFormat);
+            }
+
+            _updateAudioVisualizer = true;
+            return;
+        }
+
+        if (EditTextBox.SelectedText.Length <= 0)
+        {
+            return;
+        }
+
+        EditTextBox.SelectedText = _casingToggler.ToggleCasing(EditTextBox.SelectedText, SelectedSubtitleFormat);
     }
 
     [RelayCommand]

@@ -269,6 +269,7 @@ public static class ShortcutsMain
         { nameof(MainViewModel.SpeechToTextSelectedLinesCommand), Se.Language.General.SpeechToTextSelectedLines },
         { nameof(MainViewModel.PlaySelectedLinesWithoutLoopCommand), Se.Language.General.PlaySelectedLines },
         { nameof(MainViewModel.PlaySelectedLinesWithLoopCommand), Se.Language.General.PlaySelectedLinesWithLoop },
+        { nameof(MainViewModel.ToggleCasingCommand), Se.Language.General.ToggleCasing },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -480,6 +481,7 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.SpeechToTextSelectedLinesCommand, nameof(vm.SpeechToTextSelectedLinesCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.PlaySelectedLinesWithoutLoopCommand, nameof(vm.PlaySelectedLinesWithoutLoopCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.PlaySelectedLinesWithLoopCommand, nameof(vm.PlaySelectedLinesWithLoopCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ToggleCasingCommand, nameof(vm.ToggleCasingCommand), ShortcutCategory.SubtitleGridAndTextBox);
 
         return shortcuts;
     }

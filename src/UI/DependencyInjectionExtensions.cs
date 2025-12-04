@@ -125,14 +125,18 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<IAutoBackupService, AutoBackupService>();
         collection.AddTransient<IBatchConverter, BatchConverter>();
         collection.AddTransient<IBluRayHelper, BluRayHelper>();
+        collection.AddTransient<ICasingToggler, CasingToggler>();
+        collection.AddTransient<IColorService, ColorService>();
         collection.AddTransient<IDictionaryInitializer, DictionaryInitializer>();
         collection.AddTransient<IFindService, FindService>();
+        collection.AddTransient<IFontNameService, FontNameService>();
         collection.AddTransient<IInsertService, InsertService>();
         collection.AddTransient<ILanguageInitializer, LanguageInitializer>();
         collection.AddTransient<IMergeManager, MergeManager>();
         collection.AddTransient<IMpvReloader, MpvReloader>();
         collection.AddTransient<INOcrCaseFixer, NOcrCaseFixer>();
         collection.AddTransient<INamesList, SeNamesList>();
+        collection.AddTransient<IOcrFixEngine2, OcrFixEngine2>();
         collection.AddTransient<IOcrInitializer, OcrInitializer>();
         collection.AddTransient<IShortcutManager, ShortcutManager>();
         collection.AddTransient<ISpellCheckManager, SpellCheckManager>();
@@ -142,9 +146,6 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<IUndoRedoManager, UndoRedoManager>();
         collection.AddTransient<IWindowService, WindowService>();
         collection.AddTransient<IZipUnpacker, ZipUnpacker>();
-        collection.AddTransient<IColorService, ColorService>();
-        collection.AddTransient<IFontNameService, FontNameService>();
-        collection.AddTransient<IOcrFixEngine2, OcrFixEngine2>();
 
         // Download services
         collection.AddHttpClient<IFfmpegDownloadService, FfmpegDownloadService>();

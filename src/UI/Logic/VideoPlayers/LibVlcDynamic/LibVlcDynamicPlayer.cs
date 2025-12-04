@@ -271,6 +271,7 @@ public sealed class LibVlcDynamicPlayer : IDisposable, IVideoPlayerInstance
                 "/lib/aarch64-linux-gnu",
                 "/usr/lib/arm-linux-gnueabihf",
                 "/lib/arm-linux-gnueabihf",
+                "/snap/vlc/current/usr/lib",
             ];
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
@@ -280,6 +281,8 @@ public sealed class LibVlcDynamicPlayer : IDisposable, IVideoPlayerInstance
                 LibVlcPath,
                 Directory.GetCurrentDirectory(),
                 "/Applications/Subtitle Edit.app/Contents/Frameworks",
+                "/Applications/VLC.app/Contents/MacOS/lib",
+                "/Applications/VLC.app/Contents/Frameworks",
                 "/opt/local/lib",
                 "/usr/local/lib",
                 "/opt/homebrew/lib",
