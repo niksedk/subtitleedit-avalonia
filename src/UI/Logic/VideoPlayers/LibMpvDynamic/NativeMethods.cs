@@ -206,6 +206,30 @@ internal static class NativeMethods
 
             return handle;
         }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            // On macOS, try using .NET's NativeLibrary.TryLoad first which handles @rpath and other macOS-specific features
+            if (NativeLibrary.TryLoad(fileName, out var handle))
+            {
+                System.Diagnostics.Debug.WriteLine($"Successfully loaded {fileName} using NativeLibrary.TryLoad");
+                return handle;
+            }
+
+            // If NativeLibrary.TryLoad fails, fall back to dlopen
+            System.Diagnostics.Debug.WriteLine($"NativeLibrary.TryLoad failed for {fileName}, trying dlopen");
+            var result = dlopen(fileName, RTLD_NOW | RTLD_GLOBAL);
+            
+            if (result == IntPtr.Zero)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to load {fileName} with dlopen");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"Successfully loaded {fileName} with dlopen");
+            }
+            
+            return result;
+        }
         else
         {
             return dlopen(fileName, RTLD_NOW | RTLD_GLOBAL);
