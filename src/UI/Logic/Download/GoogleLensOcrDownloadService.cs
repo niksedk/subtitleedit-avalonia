@@ -15,18 +15,18 @@ public interface IGoogleLensOcrDownloadService
 
 public class GoogleLensOcrDownloadService(HttpClient httpClient) : IGoogleLensOcrDownloadService
 {
-    private const string WindowsUrl = "https://github.com/SubtitleEdit/support-files/releases/download/libmpv-2025-01-25/libmpv2-64.zip";
+    private const string WindowsUrl = "https://github.com/timminator/chrome-lens-py/releases/download/v3.3.0/Chrome-Lens-CLI-v3.3.0.7z";
 
     public async Task DownloadGoogleLensOcrStandalone(string destinationFileName, IProgress<float>? progress, CancellationToken cancellationToken)
     {
         await DownloadHelper.DownloadFileAsync(httpClient, GetUrl(), destinationFileName, progress, cancellationToken);
     }
-    
+
     public async Task DownloadGoogleLensOcrStandalone(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken)
     {
         await DownloadHelper.DownloadFileAsync(httpClient, GetUrl(), stream, progress, cancellationToken);
     }
-    
+
     private string GetUrl()
     {
         return WindowsUrl;

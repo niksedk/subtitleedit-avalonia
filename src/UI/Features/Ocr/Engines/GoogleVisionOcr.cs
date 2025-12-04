@@ -1,4 +1,9 @@
-﻿using System;
+﻿using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.VobSub.Ocr;
+using Nikse.SubtitleEdit.Core.VobSub.Ocr.Service;
+using Nikse.SubtitleEdit.Logic;
+using SkiaSharp;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,11 +15,6 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Core.VobSub.Ocr;
-using Nikse.SubtitleEdit.Core.VobSub.Ocr.Service;
-using Nikse.SubtitleEdit.Logic;
-using SkiaSharp;
 
 namespace Nikse.SubtitleEdit.Features.Ocr.Engines;
 

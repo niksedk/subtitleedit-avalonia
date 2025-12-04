@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
+using SkiaSharp;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Logic;
-using Nikse.SubtitleEdit.Logic.Config;
-using SkiaSharp;
 
 namespace Nikse.SubtitleEdit.Features.Ocr;
 
