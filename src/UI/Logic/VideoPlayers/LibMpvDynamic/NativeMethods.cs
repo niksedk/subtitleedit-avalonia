@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -22,39 +22,59 @@ internal static class NativeMethods
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate IntPtr DlsymDelegate(IntPtr handle, string symbol);
 
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate IntPtr DlerrorDelegate();
+
     private static readonly SetlocaleDelegate? _setlocale;
     private static readonly DlopenDelegate? _dlopen;
     private static readonly DlcloseDelegate? _dlclose;
     private static readonly DlsymDelegate? _dlsym;
+    private static readonly DlerrorDelegate? _dlerror;
 
     static NativeMethods()
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            // Try to load libc with various names
-            var libcNames = new[] { "libc.so.6", "libc.so", "libc" };
-            foreach (var name in libcNames)
+            // On macOS, system libraries are in libSystem.dylib
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                if (NativeLibrary.TryLoad(name, out _libcHandle))
+                var libSystemNames = new[] { "libSystem.dylib", "libSystem.B.dylib" };
+                foreach (var name in libSystemNames)
                 {
-                    break;
+                    if (NativeLibrary.TryLoad(name, out _libcHandle))
+                    {
+                        _libdlHandle = _libcHandle; // On macOS, dl* functions are in libSystem
+                        break;
+                    }
                 }
             }
-
-            // Try to load libdl with various names (dl functions might be in libc on modern systems)
-            var libdlNames = new[] { "libdl.so.2", "libdl.so", "libdl" };
-            foreach (var name in libdlNames)
+            else
             {
-                if (NativeLibrary.TryLoad(name, out _libdlHandle))
+                // Try to load libc with various names (Linux)
+                var libcNames = new[] { "libc.so.6", "libc.so", "libc" };
+                foreach (var name in libcNames)
                 {
-                    break;
+                    if (NativeLibrary.TryLoad(name, out _libcHandle))
+                    {
+                        break;
+                    }
                 }
-            }
 
-            // If libdl didn't load, try using libc handle (many modern systems have dl* functions in libc)
-            if (_libdlHandle == IntPtr.Zero)
-            {
-                _libdlHandle = _libcHandle;
+                // Try to load libdl with various names (dl functions might be in libc on modern systems)
+                var libdlNames = new[] { "libdl.so.2", "libdl.so", "libdl" };
+                foreach (var name in libdlNames)
+                {
+                    if (NativeLibrary.TryLoad(name, out _libdlHandle))
+                    {
+                        break;
+                    }
+                }
+
+                // If libdl didn't load, try using libc handle (many modern systems have dl* functions in libc)
+                if (_libdlHandle == IntPtr.Zero)
+                {
+                    _libdlHandle = _libcHandle;
+                }
             }
 
             // Load function pointers
@@ -79,6 +99,10 @@ internal static class NativeMethods
                 if (NativeLibrary.TryGetExport(_libdlHandle, "dlsym", out var dlsymPtr))
                 {
                     _dlsym = Marshal.GetDelegateForFunctionPointer<DlsymDelegate>(dlsymPtr);
+                }
+                if (NativeLibrary.TryGetExport(_libdlHandle, "dlerror", out var dlerrorPtr))
+                {
+                    _dlerror = Marshal.GetDelegateForFunctionPointer<DlerrorDelegate>(dlerrorPtr);
                 }
             }
         }
@@ -113,8 +137,10 @@ internal static class NativeMethods
 
     // POSIX constants
     internal const int LC_NUMERIC = 1;
+    internal const int RTLD_LAZY = 0x0001;
     internal const int RTLD_NOW = 0x0002;
     internal const int RTLD_GLOBAL = 0x0100;
+    internal const int RTLD_LOCAL = 0x0000;
 
     // POSIX function wrappers
     internal static IntPtr setlocale(int category, string locale)
@@ -151,6 +177,16 @@ internal static class NativeMethods
             throw new PlatformNotSupportedException("dlsym is not supported on Windows");
         }
         return _dlsym?.Invoke(handle, symbol) ?? IntPtr.Zero;
+    }
+
+    internal static string? dlerror()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            throw new PlatformNotSupportedException("dlerror is not supported on Windows");
+        }
+        var ptr = _dlerror?.Invoke() ?? IntPtr.Zero;
+        return ptr != IntPtr.Zero ? Marshal.PtrToStringAnsi(ptr) : null;
     }
 
     // Cross-platform wrappers
@@ -215,20 +251,40 @@ internal static class NativeMethods
                 return handle;
             }
 
-            // If NativeLibrary.TryLoad fails, fall back to dlopen
-            System.Diagnostics.Debug.WriteLine($"NativeLibrary.TryLoad failed for {fileName}, trying dlopen");
-            var result = dlopen(fileName, RTLD_NOW | RTLD_GLOBAL);
-            
-            if (result == IntPtr.Zero)
+            System.Diagnostics.Debug.WriteLine($"NativeLibrary.TryLoad failed for {fileName}, trying dlopen strategies");
+
+            // Strategy 1: Try RTLD_LAZY | RTLD_GLOBAL (more permissive, allows undefined symbols)
+            var result = dlopen(fileName, RTLD_LAZY | RTLD_GLOBAL);
+            if (result != IntPtr.Zero)
             {
-                System.Diagnostics.Debug.WriteLine($"Failed to load {fileName} with dlopen");
+                System.Diagnostics.Debug.WriteLine($"Successfully loaded {fileName} with dlopen (RTLD_LAZY | RTLD_GLOBAL)");
+                return result;
             }
-            else
+            var error1 = dlerror();
+            System.Diagnostics.Debug.WriteLine($"dlopen with RTLD_LAZY | RTLD_GLOBAL failed: {error1}");
+
+            // Strategy 2: Try RTLD_NOW | RTLD_GLOBAL (resolve all symbols immediately)
+            result = dlopen(fileName, RTLD_NOW | RTLD_GLOBAL);
+            if (result != IntPtr.Zero)
             {
-                System.Diagnostics.Debug.WriteLine($"Successfully loaded {fileName} with dlopen");
+                System.Diagnostics.Debug.WriteLine($"Successfully loaded {fileName} with dlopen (RTLD_NOW | RTLD_GLOBAL)");
+                return result;
             }
-            
-            return result;
+            var error2 = dlerror();
+            System.Diagnostics.Debug.WriteLine($"dlopen with RTLD_NOW | RTLD_GLOBAL failed: {error2}");
+
+            // Strategy 3: Try with RTLD_LAZY | RTLD_LOCAL
+            result = dlopen(fileName, RTLD_LAZY | RTLD_LOCAL);
+            if (result != IntPtr.Zero)
+            {
+                System.Diagnostics.Debug.WriteLine($"Successfully loaded {fileName} with dlopen (RTLD_LAZY | RTLD_LOCAL)");
+                return result;
+            }
+            var error3 = dlerror();
+            System.Diagnostics.Debug.WriteLine($"dlopen with RTLD_LAZY | RTLD_LOCAL failed: {error3}");
+
+            System.Diagnostics.Debug.WriteLine($"All dlopen strategies failed for {fileName}");
+            return IntPtr.Zero;
         }
         else
         {
@@ -266,4 +322,3 @@ internal static class NativeMethods
         return address != IntPtr.Zero ? Marshal.GetDelegateForFunctionPointer(address, type) : null;
     }
 }
-
