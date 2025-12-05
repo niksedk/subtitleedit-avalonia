@@ -1,5 +1,6 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,23 +18,23 @@ namespace Nikse.SubtitleEdit.Features.Ocr.Engines;
 public class GoogleLensOcr
 {
     public string Error { get; set; }
-    private bool hasErrors = false;
+    private bool _hasErrors = false;
     private StringBuilder _log = new StringBuilder();
     public const string ExeFileName = "chrome-lens-cli.exe";
+    private IProgress<PaddleOcrBatchProgress>? _batchProgress;
 
     public GoogleLensOcr()
     {
         Error = string.Empty;
     }
 
+    private Lock _lockObject = new Lock();
 
-    private Lock LockObject = new Lock();
-
-    public void OcrBatch(List<PaddleOcrBatchInput> input, string language, Action<PaddleOcrBatchInput> progressCallback, Func<bool> abortCheck)
+    public void OcrBatch(List<PaddleOcrBatchInput> input, string language, IProgress<PaddleOcrBatchProgress> progress, CancellationToken cancellationToken)
     {
         _log.Clear();
-        hasErrors = false;
-
+        _hasErrors = false;
+        _batchProgress = progress;
         var tempFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
         Directory.CreateDirectory(tempFolder);
 
@@ -58,17 +59,17 @@ public class GoogleLensOcr
 
             var parameters = $"\"{tempFolder}\" {language}";
 
-            string GoogleLensPath = "GoogleLens";
-            if (File.Exists(Path.Combine(Configuration.GoogleLensDirectory, "Chrome-Lens-CLI.exe")))
+            string googleLensPath = ExeFileName;
+            if (File.Exists(Path.Combine(Se.GoogleLensOcrFolder, ExeFileName)))
             {
-                GoogleLensPath = Path.GetFullPath(Path.Combine(Configuration.GoogleLensDirectory, "Chrome-Lens-CLI.exe"));
+                googleLensPath = Path.GetFullPath(Path.Combine(Se.GoogleLensOcrFolder, ExeFileName));
             }
 
             using (var process = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = GoogleLensPath,
+                    FileName = googleLensPath,
                     Arguments = parameters,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
@@ -109,9 +110,15 @@ public class GoogleLensOcr
                             if (existingInput != null && results.ContainsKey(currentFileName))
                             {
                                 existingInput.Text = results[currentFileName].Trim();
-                                lock (LockObject)
+                                lock (_lockObject)
                                 {
-                                    progressCallback?.Invoke(existingInput);
+                                    var progressReport = new PaddleOcrBatchProgress
+                                    {
+                                        Index = existingInput.Index,
+                                        Text = existingInput.Text,
+                                        Item = existingInput.Item,
+                                    };
+                                    _batchProgress?.Report(progressReport);
                                 }
                             }
                         }
@@ -139,7 +146,7 @@ public class GoogleLensOcr
                         }
                     }
 
-                    if (abortCheck != null && abortCheck.Invoke())
+                    if (cancellationToken.IsCancellationRequested)
                     {
                         try
                         {
@@ -163,7 +170,7 @@ public class GoogleLensOcr
                     }
                     Error = errorLine.Data;
 
-                    hasErrors = true;
+                    _hasErrors = true;
                     _log.AppendLine(errorLine.Data);
                 };
 
@@ -176,7 +183,7 @@ public class GoogleLensOcr
 
                 process.WaitForExit();
 
-                if (hasErrors)
+                if (_hasErrors)
                 {
                     SeLogger.Error("GoogleLensError: " + _log.ToString());
                 }
@@ -187,9 +194,15 @@ public class GoogleLensOcr
                     if (existingInput != null && results.ContainsKey(currentFileName))
                     {
                         existingInput.Text = results[currentFileName].Trim();
-                        lock (LockObject)
+                        lock (_lockObject)
                         {
-                            progressCallback?.Invoke(existingInput);
+                            var progressReport = new PaddleOcrBatchProgress
+                            {
+                                Index = existingInput.Index,
+                                Text = existingInput.Text,
+                                Item = existingInput.Item,
+                            };
+                            _batchProgress?.Report(progressReport);
                         }
                     }
                 }

@@ -23,6 +23,8 @@ public class SeOcr
     public int NOcrZoomFactor { get; set; }
     public string PaddleOcrMode { get; set; }
     public string PaddleOcrLastLanguage { get; set; }
+    public string GoogleVisionOcrLastLanguage { get; set; }
+    public string GoogleLensOcrLastLanguage { get; set; }
     public bool DoTryToGuessUnknownWords { get; set; }
     public bool DoPromptForUnknownWords { get; set; }
     public bool DoAutoBreak { get; set; }
@@ -52,6 +54,9 @@ public class SeOcr
 
         PaddleOcrMode = "mobile";
         PaddleOcrLastLanguage = "en";
+
+        GoogleVisionOcrLastLanguage = "en";
+        GoogleLensOcrLastLanguage = "en";
 
         MistralApiKey = string.Empty;
         
