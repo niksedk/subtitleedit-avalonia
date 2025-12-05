@@ -27,7 +27,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using DownloadFfmpegViewModel = Nikse.SubtitleEdit.Features.Shared.DownloadFfmpegViewModel;
 using DownloadLibMpvViewModel = Nikse.SubtitleEdit.Features.Shared.DownloadLibMpvViewModel;
@@ -533,6 +532,7 @@ public partial class SettingsViewModel : ObservableObject
         LibMpvPath = Se.Settings.General.LibMpvPath;
         SetFfmpegStatus();
         SetLibMpvStatus();
+        SetLibVlcStatus();
         LoadFileTypeAssociations();
 
         ExistsErrorLogFile = File.Exists(Se.GetErrorLogFilePath());
@@ -762,16 +762,22 @@ public partial class SettingsViewModel : ObservableObject
 
     private void SetLibVlcStatus()
     {
-        if (new LibVlcDynamicPlayer().CanLoad())
+        _ = Task.Run(() =>
         {
-            LibVlcStatus = "Installed";
-        }
-        else
-        {
-            LibVlcStatus = "Not installed";
-        }
+            var canLoad = new LibVlcDynamicPlayer().CanLoad();
+            Dispatcher.UIThread.Post(() =>
+            {
+                if (canLoad)
+                {
+                    LibVlcStatus = "Installed";
+                }
+                else
+                {
+                    LibVlcStatus = "Not installed";
+                }
+            });
+        });
     }
-
 
     public async void ScrollElementIntoView(ScrollViewer scrollViewer, Control target)
     {
@@ -958,9 +964,8 @@ public partial class SettingsViewModel : ObservableObject
             return;
         }
 
-        SetLibMpvStatus();
+        SetLibVlcStatus();
     }
-
 
     [RelayCommand]
     private async Task ResetAllSettings()
