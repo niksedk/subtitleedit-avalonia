@@ -59,6 +59,14 @@ public sealed class LibVlcDynamicPlayer : IDisposable, IVideoPlayerInstance
     private delegate void libvlc_media_release(IntPtr media);
     private libvlc_media_release? _libvlc_media_release;
 
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate int libvlc_media_parse_with_options(IntPtr media, int parse_flag, int timeout);
+    private libvlc_media_parse_with_options? _libvlc_media_parse_with_options;
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate long libvlc_media_get_duration(IntPtr media);
+    private libvlc_media_get_duration? _libvlc_media_get_duration;
+
     // LibVLC Video Controls - http://www.videolan.org/developers/vlc/doc/doxygen/html/group__libvlc__video.html#g8f55326b8b51aecb59d8b8a446c3f118
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void libvlc_video_get_size(IntPtr mediaPlayer, UInt32 number, out UInt32 x, out UInt32 y);
@@ -302,6 +310,8 @@ public sealed class LibVlcDynamicPlayer : IDisposable, IVideoPlayerInstance
         _libvlc_media_new_path = (libvlc_media_new_path)GetDllType(typeof(libvlc_media_new_path), "libvlc_media_new_path");
         _libvlc_media_player_new_from_media = (libvlc_media_player_new_from_media)GetDllType(typeof(libvlc_media_player_new_from_media), "libvlc_media_player_new_from_media");
         _libvlc_media_release = (libvlc_media_release)GetDllType(typeof(libvlc_media_release), "libvlc_media_release");
+        _libvlc_media_parse_with_options = (libvlc_media_parse_with_options)GetDllType(typeof(libvlc_media_parse_with_options), "libvlc_media_parse_with_options");
+        _libvlc_media_get_duration = (libvlc_media_get_duration)GetDllType(typeof(libvlc_media_get_duration), "libvlc_media_get_duration");
 
         _libvlc_video_get_size = (libvlc_video_get_size)GetDllType(typeof(libvlc_video_get_size), "libvlc_video_get_size");
         _libvlc_video_set_spu = (libvlc_video_set_spu)GetDllType(typeof(libvlc_video_set_spu), "libvlc_video_set_spu");
@@ -478,6 +488,16 @@ public sealed class LibVlcDynamicPlayer : IDisposable, IVideoPlayerInstance
 
             var media = _libvlc_media_new_path(_libVlc, GetUtf8Bytes(path));
 
+            // Parse media to get duration and metadata (0x00 = parse local, timeout in ms)
+            try
+            {
+                _libvlc_media_parse_with_options?.Invoke(media, 0x00, 5000);
+            }
+            catch
+            {
+                // Ignore parsing errors, will try to get duration from player later
+            }
+
             if (_mediaPlayer == IntPtr.Zero)
             {
                 // Create new media player from this media
@@ -503,13 +523,37 @@ public sealed class LibVlcDynamicPlayer : IDisposable, IVideoPlayerInstance
             _libvlc_media_release?.Invoke(media);
 
             try
-            {   
+            {
                 _libvlc_video_set_spu?.Invoke(_mediaPlayer, -1);
             }
             catch
             {
                 // Ignore
             }
+
+            // Start playing to parse media and get duration
+            _libvlc_media_player_play?.Invoke(_mediaPlayer);
+
+            // Wait for duration to become available
+            var timeout = 5000; // 5 seconds timeout
+            var elapsed = 0;
+            var sleepInterval = 50;
+
+            while (elapsed < timeout)
+            {
+                System.Threading.Thread.Sleep(sleepInterval);
+                elapsed += sleepInterval;
+
+                var duration = _libvlc_media_player_get_length?.Invoke(_mediaPlayer) ?? 0;
+                if (duration > 0)
+                {
+                    break;
+                }
+            }
+
+            // Pause immediately after getting duration and seek to start
+            _libvlc_media_player_set_pause?.Invoke(_mediaPlayer, 1);
+            _libvlc_media_player_set_time?.Invoke(_mediaPlayer, 0);
 
             _fileName = path;
         });
