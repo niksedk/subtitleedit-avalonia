@@ -3190,9 +3190,9 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private async Task ToggleSmpteTiming()
+    private void ToggleSmpteTiming()
     {
-        if (Window == null)
+        if (Window == null || string.IsNullOrEmpty(_videoFileName))
         {
             return;
         }
@@ -3202,8 +3202,65 @@ public partial class MainViewModel :
             ShowSubtitleNotLoadedMessage();
             return;
         }
-        
-        IsSmpteTimingEnabled = !IsSmpteTimingEnabled;
+
+        if (IsSmpteTimingEnabled)
+        {
+            IsSmpteTimingEnabled = false;
+            if (AudioVisualizer != null)
+            {
+                ReloadAudioVisualizer();
+            }
+        }
+        else
+        {
+            IsSmpteTimingEnabled = true;
+            if (AudioVisualizer != null)
+            {
+                AudioVisualizer.UseSmpteDropFrameTime();
+            }
+        }
+
+        if (VideoPlayerControl != null)
+        {
+            VideoPlayerControl.IsSmpteTimingEnabled = IsSmpteTimingEnabled;
+        }
+    }
+
+    private void ReloadAudioVisualizer()
+    {
+        if (string.IsNullOrEmpty(_videoFileName))
+        {
+            return;
+        }
+
+        var peakWaveFileName = WavePeakGenerator2.GetPeakWaveFileName(_videoFileName);
+        var spectrogramFolder = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(_videoFileName, 0);
+
+        var wavePeaks = WavePeakData2.FromDisk(peakWaveFileName);
+        if (AudioVisualizer != null)
+        {
+            AudioVisualizer.WavePeaks = wavePeaks;
+
+            if (IsSmpteTimingEnabled)
+            {
+                AudioVisualizer.UseSmpteDropFrameTime();
+            }
+
+            var spectrogram = SpectrogramData2.FromDisk(spectrogramFolder);
+            if (spectrogram != null)
+            {
+                spectrogram.Load();
+                AudioVisualizer.SetSpectrogram(spectrogram);
+            }
+
+            InitializeWaveformDisplayMode();
+
+            AudioVisualizer.ShotChanges = ShotChangesHelper.FromDisk(_videoFileName);
+            if (AudioVisualizer.ShotChanges.Count == 0)
+            {
+                ExtractShotChanges(_videoFileName);
+            }
+        }
     }
 
     [RelayCommand]
@@ -8871,33 +8928,6 @@ public partial class MainViewModel :
         }
     }
 
-    private bool IsPositionOnAnyScreen(PixelRect windowBounds)
-    {
-        if (Window?.Screens?.All == null)
-        {
-            return false;
-        }
-
-        foreach (var screen in Window.Screens.All)
-        {
-            var screenBounds = screen.WorkingArea;
-            if (screenBounds.Intersects(windowBounds))
-            {
-                // Ensure at least 100px of the title bar is visible for dragging
-                var titleBarArea = new PixelRect(
-                    windowBounds.X,
-                    windowBounds.Y,
-                    windowBounds.Width,
-                    30); // Approximate title bar height
-
-                if (screenBounds.Intersects(titleBarArea))
-                    return true;
-            }
-        }
-
-        return false;
-    }
-
     private static bool IsValidUrl(string url)
     {
         if (string.IsNullOrWhiteSpace(url))
@@ -8951,6 +8981,12 @@ public partial class MainViewModel :
             if (AudioVisualizer != null)
             {
                 AudioVisualizer.WavePeaks = wavePeaks;
+
+                if (IsSmpteTimingEnabled)
+                {
+                    AudioVisualizer.UseSmpteDropFrameTime();
+                }
+
                 var spectrogram = SpectrogramData2.FromDisk(spectrogramFolder);
                 if (spectrogram != null)
                 {
@@ -9012,10 +9048,6 @@ public partial class MainViewModel :
             AudioVisualizer.ZoomFactor = 1.0;
             AudioVisualizer.VerticalZoomFactor = 1.0;
             AudioVisualizer.WavePeaks = WavePeakGenerator2.GenerateEmptyPeaks(peakWaveFileName, (int)vp.VideoPlayerInstance.Duration);
-            // if (smpteTimeModedropFrameToolStripMenuItem.Checked)
-            // {
-            //     audioVisualizer.UseSmpteDropFrameTime();
-            // }
         }
     }
 
@@ -9068,6 +9100,10 @@ public partial class MainViewModel :
                 if (AudioVisualizer != null)
                 {
                     AudioVisualizer.WavePeaks = wavePeaks;
+                    if (IsSmpteTimingEnabled)
+                    {
+                        AudioVisualizer.UseSmpteDropFrameTime();
+                    }
                     InitializeWaveformDisplayMode();
                 }
 
@@ -10292,7 +10328,7 @@ public partial class MainViewModel :
                         vp.VideoPlayerInstance.Pause();
                         if (_playSelectionIndex < 0)
                         {
-                            if (_endSecondsNewPosition >= 0) 
+                            if (_endSecondsNewPosition >= 0)
                             {
                                 vp.Position = _endSecondsNewPosition;
                             }

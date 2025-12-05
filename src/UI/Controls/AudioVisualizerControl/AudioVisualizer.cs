@@ -181,6 +181,28 @@ public class AudioVisualizer : Control
         }
     }
 
+    public void UseSmpteDropFrameTime()
+    {
+        if (WavePeaks != null)
+        {
+            var list = new List<WavePeak2>();
+            for (var i = 0; i < WavePeaks.Peaks.Count; i++)
+            {
+                if (i % 1001 != 0)
+                {
+                    list.Add(WavePeaks.Peaks[i]);
+                }
+            }
+
+            WavePeaks = new WavePeakData2(WavePeaks.SampleRate, list);
+
+            if (_shotChanges?.Count > 0)
+            {
+                _shotChanges = _shotChanges.Select(sc => Math.Round(sc /= 1.001, 3, MidpointRounding.AwayFromZero)).ToList();
+            }
+        }
+    }
+
     private double MaxStartPositionSeconds
     {
         get
@@ -1113,6 +1135,11 @@ public class AudioVisualizer : Control
 
     private static string GetDisplayTime(double seconds)
     {
+        if (Se.Settings.General.CurrentVideoOffsetInMs > 0.00001)
+        {
+            seconds = seconds + Se.Settings.General.CurrentVideoOffsetInMs / 1000.0;
+        }
+
         var secs = (int)Math.Round(seconds, MidpointRounding.AwayFromZero);
         if (secs < 60)
         {

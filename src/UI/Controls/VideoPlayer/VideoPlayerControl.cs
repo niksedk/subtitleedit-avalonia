@@ -428,6 +428,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
 
         // Enable/disable click-to-toggle behavior (default on)
         public bool ClickToTogglePlay { get; set; } = true;
+        public bool IsSmpteTimingEnabled { get; set; }
 
         private void OnMainGridPointerPressed(object? sender, PointerPressedEventArgs e)
         {
