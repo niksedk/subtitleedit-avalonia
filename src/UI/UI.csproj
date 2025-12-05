@@ -36,7 +36,6 @@
 		</PackageReference>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="Google.Cloud.TextToSpeech.V1" Version="3.17.0" />
-		<PackageReference Include="libse" Version="4.1.0-alpha8" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
@@ -148,6 +147,10 @@
 		<AvaloniaResource Include="Assets\TextToSpeech\MurfVoices.json" />
 		<AvaloniaResource Include="Assets\TextToSpeech\GoogleVoices.json" />
 		<AvaloniaResource Include="Assets\TextToSpeech\PiperVoices.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\libse\LibSE.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
