@@ -2,7 +2,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Styling;
@@ -14,11 +13,8 @@ namespace Nikse.SubtitleEdit.Features.Ocr.Download;
 
 public class DownloadTesseractModelWindow : Window
 {
-    private readonly DownloadTesseractModelViewModel _vm;
-
     public DownloadTesseractModelWindow(DownloadTesseractModelViewModel vm)
     {
-        _vm = vm;
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = "Downloading Tesseract model";
@@ -113,11 +109,6 @@ public class DownloadTesseractModelWindow : Window
         {
             buttonCancel.Focus(); // hack to make OnKeyDown work
         }; 
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        KeyDown += (s, e) => vm.OnKeyDown(e);   
     }
 }

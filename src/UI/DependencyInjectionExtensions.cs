@@ -151,6 +151,7 @@ public static class DependencyInjectionExtensions
         // Download services
         collection.AddHttpClient<IFfmpegDownloadService, FfmpegDownloadService>();
         collection.AddHttpClient<ILibMpvDownloadService, LibMpvDownloadService>();
+        collection.AddHttpClient<ILibVlcDownloadService, LibVlcDownloadService>();
         collection.AddHttpClient<IPaddleOcrDownloadService, PaddleOcrDownloadService>();
         collection.AddHttpClient<ISpellCheckDictionaryDownloadService, SpellCheckDictionaryDownloadService>();
         collection.AddHttpClient<ITesseractDownloadService, TesseractDownloadService>();
@@ -196,6 +197,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<CutVideoViewModel>();
         collection.AddTransient<DownloadFfmpegViewModel>();
         collection.AddTransient<DownloadLibMpvViewModel>();
+        collection.AddTransient<DownloadLibVlcViewModel>();
         collection.AddTransient<DownloadGoogleLensOcrViewModel>();
         collection.AddTransient<DownloadPaddleOcrViewModel>();
         collection.AddTransient<DownloadTesseractModelViewModel>();

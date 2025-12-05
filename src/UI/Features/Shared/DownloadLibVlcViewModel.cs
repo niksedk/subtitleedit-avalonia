@@ -16,9 +16,9 @@ using System.Threading.Tasks;
 using System.Timers;
 using Timer = System.Timers.Timer;
 
-namespace Nikse.SubtitleEdit.Features.Ocr.Download;
+namespace Nikse.SubtitleEdit.Features.Shared;
 
-public partial class DownloadGoogleLensOcrViewModel : ObservableObject
+public partial class DownloadLibVlcViewModel : ObservableObject
 {
     [ObservableProperty] private double _progressValue;
     [ObservableProperty] private string _progressText;
@@ -29,15 +29,15 @@ public partial class DownloadGoogleLensOcrViewModel : ObservableObject
     public bool OkPressed { get; internal set; }
 
     private string _tempFileName;
-    private IGoogleLensOcrDownloadService _googleLensOcrDownloadService;
+    private ILibVlcDownloadService _libVlcDownloadService;
     private Task? _downloadTask;
     private readonly Timer _timer;
     private bool _done;
     private readonly CancellationTokenSource _cancellationTokenSource;
 
-    public DownloadGoogleLensOcrViewModel(IGoogleLensOcrDownloadService googleLensOcrDownloadService)
+    public DownloadLibVlcViewModel(ILibVlcDownloadService libVlcDownloadService)
     {
-        _googleLensOcrDownloadService = googleLensOcrDownloadService;
+        _libVlcDownloadService = libVlcDownloadService;
 
         _cancellationTokenSource = new CancellationTokenSource();
 
@@ -82,7 +82,7 @@ public partial class DownloadGoogleLensOcrViewModel : ObservableObject
                     return;
                 }
 
-                Extract7Zip(_tempFileName, Se.GoogleLensOcrFolder, "Chrome-Lens-CLI-v3.3.0");
+                Extract7Zip(_tempFileName, Se.VlcFolder, "vlc-3.0.21");
 
                 OkPressed = true;
                 Close();
@@ -200,14 +200,14 @@ public partial class DownloadGoogleLensOcrViewModel : ObservableObject
             ProgressText = string.Format(Se.Language.General.DownloadingXPercent, pctString);
         });
 
-        var folder = Se.PaddleOcrFolder;
+        var folder = Se.DataFolder;
         if (!Directory.Exists(folder))
         {
             Directory.CreateDirectory(folder);
         }
 
         _tempFileName = Path.Combine(folder, $"{Guid.NewGuid()}.7z");
-        _downloadTask = _googleLensOcrDownloadService.DownloadGoogleLensOcrStandalone(_tempFileName, downloadProgress, _cancellationTokenSource.Token);
+        _downloadTask = _libVlcDownloadService.DownloadLibVlc(_tempFileName, downloadProgress, _cancellationTokenSource.Token);
     }
 
     internal void OnKeyDown(KeyEventArgs e)

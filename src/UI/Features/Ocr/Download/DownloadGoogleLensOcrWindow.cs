@@ -1,7 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
@@ -10,11 +9,8 @@ namespace Nikse.SubtitleEdit.Features.Ocr.Download;
 
 public class DownloadGoogleLensOcrWindow : Window
 {
-    private readonly DownloadGoogleLensOcrViewModel _vm;
-
     public DownloadGoogleLensOcrWindow(DownloadGoogleLensOcrViewModel vm)
     {
-        _vm = vm;
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = "Downloading Google Lens OCR";
@@ -80,12 +76,7 @@ public class DownloadGoogleLensOcrWindow : Window
         {
             buttonCancel.Focus(); // hack to make OnKeyDown work
             vm.StartDownload();
-        }; 
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        };
+        KeyDown += (s, e) => vm.OnKeyDown(e);
     }
 }

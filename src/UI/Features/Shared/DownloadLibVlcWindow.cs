@@ -3,18 +3,17 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Media;
 using Avalonia.Styling;
-using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 
-namespace Nikse.SubtitleEdit.Features.Ocr.Download;
+namespace Nikse.SubtitleEdit.Features.Shared;
 
-public class DownloadTesseractWindow : Window
+public class DownloadLibVlcWindow : Window
 {
-    public DownloadTesseractWindow(DownloadTesseractViewModel vm)
+    public DownloadLibVlcWindow(DownloadLibVlcViewModel vm)
     {
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = "Downloading Tesseract";
+        Title = "Downloading libVLC";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -23,10 +22,9 @@ public class DownloadTesseractWindow : Window
 
         var titleText = new TextBlock
         {
-            Text = "Downloading Tesseract",
             FontSize = 20,
             FontWeight = FontWeight.Bold,
-        };
+        }.WithBindText(vm, nameof(vm.StatusText));
 
         var progressSlider = new Slider
         {
@@ -34,7 +32,7 @@ public class DownloadTesseractWindow : Window
             Maximum = 100,
             IsHitTestVisible = false,
             Focusable = false,
-            MinWidth = 400,
+            MinWidth = 450,
             Styles =
             {
                 new Style(x => x.OfType<Thumb>())
@@ -53,10 +51,10 @@ public class DownloadTesseractWindow : Window
                 },
             }
         };
-        progressSlider.Bind(Slider.ValueProperty, new Binding(nameof(DownloadFfmpegViewModel.Progress)));
+        progressSlider.Bind(Slider.ValueProperty, new Binding(nameof(vm.ProgressValue)));
 
         var statusText = new TextBlock();
-        statusText.Bind(TextBlock.TextProperty, new Binding(nameof(DownloadFfmpegViewModel.StatusText)));
+        statusText.Bind(TextBlock.TextProperty, new Binding(nameof(vm.ProgressText)));
 
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CommandCancelCommand);
         var buttonBar = UiUtil.MakeButtonBar(buttonCancel);

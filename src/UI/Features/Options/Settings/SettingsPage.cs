@@ -325,6 +325,31 @@ public class SettingsPage : UserControl
                 [!StackPanel.IsVisibleProperty] = new Binding(nameof(_vm.IsLibMpvDownloadVisible)) { Source = _vm }
             }),
             new SettingsItem("Subtitle preview properties", () => MakeMpvPreviewSettings(_vm)),
+            new SettingsItem(Se.Language.Options.Settings.DownloadVlc, () => new StackPanel
+            {
+                Children =
+                {
+                    new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Spacing = 10,
+                        Children =
+                        {
+                            UiUtil.MakeButton(Se.Language.General.Download, _vm.DownloadLibVlcCommand),
+                            new TextBlock
+                            {
+                                DataContext = _vm,
+                                [!TextBlock.TextProperty] = new Binding(nameof(_vm.LibVlcStatus)),
+                                Margin = new Thickness(0, 0, 0, 0),
+                                VerticalAlignment = VerticalAlignment.Center,
+                                HorizontalAlignment = HorizontalAlignment.Left,
+                            }
+                        }
+                    },
+                },
+                [!StackPanel.IsVisibleProperty] = new Binding(nameof(_vm.IsLibVlcDownloadVisible)) { Source = _vm }
+            }),
+
         ]));
 
         sections.Add(new SettingsSection(Se.Language.Options.Settings.WaveformSpectrogram,
