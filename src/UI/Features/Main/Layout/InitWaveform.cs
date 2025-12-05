@@ -37,6 +37,7 @@ public class InitWaveform
             {
                 DrawGridLines = Se.Settings.Waveform.DrawGridLines,
                 WaveformColor = Se.Settings.Waveform.WaveformColor.FromHexToColor(),
+                WaveformBackgroundColor = Se.Settings.Waveform.WaveformBackgroundColor.FromHexToColor(),
                 WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor(),
                 WaveformCursorColor = Se.Settings.Waveform.WaveformCursorColor.FromHexToColor(),
                 InvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel,

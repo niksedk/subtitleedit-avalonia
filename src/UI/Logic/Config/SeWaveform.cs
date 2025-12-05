@@ -14,6 +14,7 @@ public class SeWaveform
     public bool ShowWaveformVideoPositionSlider { get; set; }
     public bool ShowWaveformPlaybackSpeed { get; set; }
     public string WaveformColor { get; set; }
+    public string WaveformBackgroundColor { get; set; }
     public string WaveformSelectedColor { get; set; }
     public string WaveformCursorColor { get; set; }
     public bool InvertMouseWheel { get; set; }
@@ -33,7 +34,7 @@ public class SeWaveform
     public bool SeekSilenceSeekForward { get; set; }
     public bool GenerateSpectrogram { get; set; }
     public string SpectrogramStyle { get; set; }
-    public string WaveformDrawStyle { get; set; } 
+    public string WaveformDrawStyle { get; set; }
     public string LastDisplayMode { get; set; }
     public bool PauseOnSingleClick { get; set; }
     public bool CenterOnSingleClick { get; set; }
@@ -44,6 +45,7 @@ public class SeWaveform
         DrawGridLines = true;
         FocusTextBoxAfterInsertNew = true;
         WaveformColor = Color.FromArgb(150, 100, 100, 100).FromColorToHex();
+        WaveformBackgroundColor = Color.FromArgb(255, 0, 0, 0).FromColorToHex();
         WaveformSelectedColor = Color.FromArgb(150, 0, 120, 255).FromColorToHex();
         WaveformCursorColor = Colors.Cyan.FromColorToHex();
         ShotChangesSensitivity = 0.4;

@@ -140,6 +140,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _ffmpegPath;
     [ObservableProperty] private string _ffmpegStatus;
     [ObservableProperty] private Color _waveformColor;
+    [ObservableProperty] private Color _waveformBackgroundColor;
     [ObservableProperty] private Color _waveformSelectedColor;
     [ObservableProperty] private Color _waveformCursorColor;
     [ObservableProperty] private bool _waveformInvertMouseWheel;
@@ -470,6 +471,7 @@ public partial class SettingsViewModel : ObservableObject
         ShowWaveformPlaybackSpeed = Se.Settings.Waveform.ShowWaveformPlaybackSpeed;
         WaveformFocusTextboxAfterInsertNew = Se.Settings.Waveform.FocusTextBoxAfterInsertNew;
         WaveformColor = Se.Settings.Waveform.WaveformColor.FromHexToColor();
+        WaveformBackgroundColor = Se.Settings.Waveform.WaveformBackgroundColor.FromHexToColor();
         WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor();
         WaveformCursorColor = Se.Settings.Waveform.WaveformCursorColor.FromHexToColor();
         WaveformInvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel;
@@ -642,6 +644,7 @@ public partial class SettingsViewModel : ObservableObject
         Se.Settings.Waveform.ShowWaveformVideoPositionSlider = ShowWaveformVideoPositionSlider;
         Se.Settings.Waveform.ShowWaveformPlaybackSpeed = ShowWaveformPlaybackSpeed;
         Se.Settings.Waveform.WaveformColor = WaveformColor.FromColorToHex();
+        Se.Settings.Waveform.WaveformBackgroundColor = WaveformBackgroundColor.FromColorToHex();
         Se.Settings.Waveform.WaveformSelectedColor = WaveformSelectedColor.FromColorToHex();
         Se.Settings.Waveform.WaveformCursorColor = WaveformCursorColor.FromColorToHex();
         Se.Settings.Waveform.InvertMouseWheel = WaveformInvertMouseWheel;

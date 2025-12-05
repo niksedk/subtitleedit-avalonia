@@ -52,6 +52,9 @@ public class AudioVisualizer : Control
     public static readonly StyledProperty<Color> WaveformColorProperty =
         AvaloniaProperty.Register<AudioVisualizer, Color>(nameof(WaveformColor));
 
+    public static readonly StyledProperty<Color> WaveformBackgroundColorProperty =
+        AvaloniaProperty.Register<AudioVisualizer, Color>(nameof(WaveformBackgroundColor));
+
     public static readonly StyledProperty<Color> WaveformSelectedColorProperty =
         AvaloniaProperty.Register<AudioVisualizer, Color>(nameof(WaveformSelectedColor));
 
@@ -126,6 +129,16 @@ public class AudioVisualizer : Control
         }
     }
 
+    public Color WaveformBackgroundColor
+    {
+        get => GetValue(WaveformBackgroundColorProperty);
+        set
+        {
+            _paintBackground = new SolidColorBrush(value);
+            SetValue(WaveformBackgroundColorProperty, value);
+        }
+    }
+
     public Color WaveformSelectedColor
     {
         get => GetValue(WaveformSelectedColorProperty);
@@ -196,7 +209,8 @@ public class AudioVisualizer : Control
     private readonly IBrush _mouseOverBrush = new SolidColorBrush(Color.FromArgb(50, 255, 255, 0));
 
     // Paragraph painting
-    private readonly IBrush _paintBackground = new SolidColorBrush(Color.FromArgb(90, 70, 70, 70));
+    private IBrush _paintBackground = new SolidColorBrush(Color.FromArgb(90, 70, 70, 70));
+    private IBrush _paintParagraphBackground = new SolidColorBrush(Color.FromArgb(90, 70, 70, 70));
     private readonly Pen _paintLeft = new Pen(new SolidColorBrush(Color.FromArgb(60, 0, 255, 0)), 2);
     private readonly Pen _paintRight = new Pen(new SolidColorBrush(Color.FromArgb(100, 255, 0, 0)), 2);
     private readonly IBrush _paintText = Brushes.White;
@@ -974,7 +988,7 @@ public class AudioVisualizer : Control
 
     public override void Render(DrawingContext context)
     {
-        context.DrawRectangle(Brushes.Transparent, null, new Rect(Bounds.Size));
+        context.DrawRectangle(_paintBackground, null, new Rect(Bounds.Size));
         using (context.PushClip(new Rect(0, 0, Bounds.Width, Bounds.Height)))
         {
             DrawAllGridLines(context);
@@ -1401,7 +1415,7 @@ public class AudioVisualizer : Control
         var height = Bounds.Height;
 
         // Draw background rectangle
-        context.FillRectangle(_paintBackground, new Rect(currentRegionLeft, 0, currentRegionWidth, height));
+        context.FillRectangle(_paintParagraphBackground, new Rect(currentRegionLeft, 0, currentRegionWidth, height));
 
         // Draw left and right borders
         context.DrawLine(_paintLeft, new Point(currentRegionLeft, 0), new Point(currentRegionLeft, height));
@@ -1553,7 +1567,7 @@ public class AudioVisualizer : Control
         if (currentRegionRight >= 0 && currentRegionLeft <= Bounds.Width)
         {
             var rect = new Rect(currentRegionLeft, 0, currentRegionWidth, Bounds.Height);
-            context.FillRectangle(_paintBackground, rect);
+            context.FillRectangle(_paintParagraphBackground, rect);
         }
     }
 

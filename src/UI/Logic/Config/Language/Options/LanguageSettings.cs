@@ -123,6 +123,7 @@ public class LanguageSettings
     public string WaveformSnapToShotChanges { get; set; }
     public string WaveformShotChangesAutoGenerate { get; set; }
     public string WaveformColor { get; set; }
+    public string WaveformBackgroundColor { get; set; }
     public string WaveformSelectedColor { get; set; }
     public string DownloadFfmpeg { get; set; }
 
@@ -317,6 +318,7 @@ public class LanguageSettings
         WaveformSnapToShotChanges = "Snap to shot changes";
         WaveformShotChangesAutoGenerate = "Shot changes auto-generate";
         WaveformColor = "Waveform color";
+        WaveformBackgroundColor = "Waveform background color";
         WaveformSelectedColor = "Waveform selected color";
         DownloadFfmpeg = "Download ffmpeg";
 
