@@ -42,7 +42,7 @@ public class SeWaveform
     public SeWaveform()
     {
         ShowToolbar = true;
-        DrawGridLines = true;
+        DrawGridLines = false;
         FocusTextBoxAfterInsertNew = true;
         WaveformColor = Color.FromArgb(150, 100, 100, 100).FromColorToHex();
         WaveformBackgroundColor = Color.FromArgb(255, 0, 0, 0).FromColorToHex();
