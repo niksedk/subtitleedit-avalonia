@@ -6816,7 +6816,7 @@ public partial class MainViewModel :
 
         if (result.OkPressed && !string.IsNullOrWhiteSpace(result.Text))
         {
-            SetStyleForSelectedLines(result.Text);
+            SetActorForSelectedLines(result.Text);
         }
     }
 
