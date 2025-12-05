@@ -409,6 +409,16 @@ public sealed class LibVlcDynamicPlayer : IDisposable, IVideoPlayerInstance
         }
     }
 
+    public bool CanLoad()
+    {
+        if (_library != IntPtr.Zero)
+        {
+            return true;
+        }
+
+        return LoadLibraryInternal();
+    }
+
     private static byte[] GetUtf8Bytes(string s)
     {
         return Encoding.UTF8.GetBytes(s + "\0");

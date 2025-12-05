@@ -41,6 +41,11 @@ public class VideoPlayerInstanceNone : IVideoPlayerInstance
         }
     }
 
+    public bool CanLoad()
+    {
+        return true;
+    }
+
     public void CloseFile()
     {
         _fileName = string.Empty;
