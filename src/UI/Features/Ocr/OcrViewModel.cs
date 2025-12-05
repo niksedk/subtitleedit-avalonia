@@ -76,6 +76,7 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private bool _isTesseractVisible;
     [ObservableProperty] private bool _isPaddleOcrVisible;
     [ObservableProperty] private bool _isGoogleVisionVisible;
+    [ObservableProperty] private bool _isGoogleLensVisible;
     [ObservableProperty] private bool _isMistralOcrVisible;
     [ObservableProperty] private bool _nOcrDrawUnknownText;
     [ObservableProperty] private bool _isInspectLineVisible;
@@ -84,6 +85,8 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private string _mistralApiKey;
     [ObservableProperty] private ObservableCollection<OcrLanguage> _googleVisionLanguages;
     [ObservableProperty] private OcrLanguage? _selectedGoogleVisionLanguage;
+    [ObservableProperty] private ObservableCollection<OcrLanguage2> _googleLensLanguages;
+    [ObservableProperty] private OcrLanguage2 _selectedGoogleLensLanguage;
     [ObservableProperty] private ObservableCollection<OcrLanguage2> _paddleOcrLanguages;
     [ObservableProperty] private OcrLanguage2? _selectedPaddleOcrLanguage;
     [ObservableProperty] private bool _paddleUseGpu;
@@ -159,6 +162,7 @@ public partial class OcrViewModel : ObservableObject
         GoogleVisionApiKey = string.Empty;
         MistralApiKey = string.Empty;
         GoogleVisionLanguages = new ObservableCollection<OcrLanguage>(GoogleVisionOcr.GetLanguages().OrderBy(p => p.ToString()));
+        GoogleLensLanguages = new ObservableCollection<OcrLanguage2>(GoogleLensOcr.GetLanguages().OrderBy(p => p.ToString()));
         PaddleOcrLanguages = new ObservableCollection<OcrLanguage2>(PaddleOcr.GetLanguages().OrderBy(p => p.ToString()));
         OcredSubtitle = new List<SubtitleLineViewModel>();
         Dictionaries = new ObservableCollection<SpellCheckDictionaryDisplay>();
@@ -912,7 +916,7 @@ public partial class OcrViewModel : ObservableObject
     [RelayCommand]
     private async Task StartOcr(List<int>? selectedIndices)
     {
-        if (IsOcrRunning)
+        if (IsOcrRunning || Window == null)
         {
             return;
         }
@@ -1053,6 +1057,33 @@ public partial class OcrViewModel : ObservableObject
         }
         else if (ocrEngine.EngineType == OcrEngineType.GoogleVision)
         {
+            //   RunGoogleVisionOcr(startFromIndex);
+        }
+        else if (ocrEngine.EngineType == OcrEngineType.GoogleLens)
+        {
+            if (Configuration.IsRunningOnWindows && !File.Exists(Path.Combine(Se.GoogleLensOcrFolder, GoogleLensOcr.ExeFileName)))
+            {
+                var answer = await MessageBox.Show(
+                    Window!,
+                    "Download Google Lens OCR?",
+                    $"{Environment.NewLine}\"Google Lens OCR\" requires downloading Google Lens OCR standalone.{Environment.NewLine}{Environment.NewLine}Download and use Google Lens OCR?",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Question);
+
+                if (answer != MessageBoxResult.Yes)
+                {
+                    PauseOcr();
+                    return;
+                }
+
+                var result = await _windowService.ShowDialogAsync<DownloadGoogleLensOcrWindow, DownloadGoogleLensOcrViewModel>(Window);
+                if (!result.OkPressed)
+                {
+                    PauseOcr();
+                    return;
+                }
+            }
+
             //   RunGoogleVisionOcr(startFromIndex);
         }
     }
@@ -1888,6 +1919,7 @@ public partial class OcrViewModel : ObservableObject
         IsTesseractVisible = SelectedOcrEngine?.EngineType == OcrEngineType.Tesseract;
         IsPaddleOcrVisible = SelectedOcrEngine?.EngineType == OcrEngineType.PaddleOcrStandalone || SelectedOcrEngine?.EngineType == OcrEngineType.PaddleOcrPython;
         IsGoogleVisionVisible = SelectedOcrEngine?.EngineType == OcrEngineType.GoogleVision;
+        IsGoogleLensVisible = SelectedOcrEngine?.EngineType == OcrEngineType.GoogleLens;
         IsMistralOcrVisible = SelectedOcrEngine?.EngineType == OcrEngineType.Mistral;
 
         if (IsNOcrVisible && NOcrDatabases.Count == 0)

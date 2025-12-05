@@ -19,6 +19,7 @@ public class GoogleLensOcr
     public string Error { get; set; }
     private bool hasErrors = false;
     private StringBuilder _log = new StringBuilder();
+    public const string ExeFileName = "chrome-lens-cli.exe";
 
     public GoogleLensOcr()
     {

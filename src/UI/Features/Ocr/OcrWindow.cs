@@ -192,6 +192,14 @@ public class OcrWindow : Window
                     .BindIsVisible(vm, nameof(vm.IsGoogleVisionVisible))
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
 
+                // Google Lens settings
+                UiUtil.MakeLabel(Se.Language.General.Language, nameof(vm.IsGoogleLensVisible)),
+                UiUtil.MakeComboBox(vm.GoogleLensLanguages, vm, nameof(vm.SelectedGoogleLensLanguage),
+                        nameof(vm.IsGoogleLensVisible))
+                    .WithWidth(100)
+                    .WithMarginRight(10)
+                    .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
+
                 // Paddle OCR settings
                 UiUtil.MakeLabel(Se.Language.General.Language, nameof(vm.IsPaddleOcrVisible)),
                 UiUtil.MakeComboBox(vm.PaddleOcrLanguages, vm, nameof(vm.SelectedPaddleOcrLanguage),

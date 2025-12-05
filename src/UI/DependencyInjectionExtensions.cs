@@ -196,6 +196,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<CutVideoViewModel>();
         collection.AddTransient<DownloadFfmpegViewModel>();
         collection.AddTransient<DownloadLibMpvViewModel>();
+        collection.AddTransient<DownloadGoogleLensOcrViewModel>();
         collection.AddTransient<DownloadPaddleOcrViewModel>();
         collection.AddTransient<DownloadTesseractModelViewModel>();
         collection.AddTransient<DownloadTesseractViewModel>();

@@ -88,8 +88,9 @@ public class Se
     public static string TtsFolder => Path.Combine(DataFolder, "TTS");
     public static string OcrFolder => Path.Combine(DataFolder, "OCR");
     public static string TranslationFolder => Path.Combine(DataFolder, "Languages");
-    public static string PaddleOcrFolder => Path.Combine(DataFolder, "PaddleOCR3-1");
+    public static string PaddleOcrFolder => Path.Combine(OcrFolder, "PaddleOCR3-1");
     public static string PaddleOcrModelsFolder => Path.Combine(PaddleOcrFolder, "models");
+    public static string GoogleLensOcrFolder => Path.Combine(OcrFolder, "Google-Lens");
     public static string TesseractFolder
     {
         get

@@ -84,14 +84,7 @@ public partial class DownloadGoogleLensOcrViewModel : ObservableObject
                     return;
                 }
 
-                if (_downloadType == PaddleOcrDownloadType.Models)
-                {
-                    Extract7Zip(_tempFileName, Se.PaddleOcrModelsFolder, "PaddleOCR.PP-OCRv5.support.files");
-                }
-                else
-                {
-                    Extract7Zip(_tempFileName, Se.PaddleOcrFolder, "PaddleOCR-CPU-v1.3.0");
-                }
+                Extract7Zip(_tempFileName, Se.GoogleLensOcrFolder, "Chrome-Lens-CLI-v3.3.0");
 
                 OkPressed = true;
                 Close();
