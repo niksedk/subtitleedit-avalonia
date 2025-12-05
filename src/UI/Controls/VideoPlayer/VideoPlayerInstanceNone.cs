@@ -1,4 +1,5 @@
-﻿using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
+﻿using Nikse.SubtitleEdit.Logic.VideoPlayers;
+using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Controls.VideoPlayer;

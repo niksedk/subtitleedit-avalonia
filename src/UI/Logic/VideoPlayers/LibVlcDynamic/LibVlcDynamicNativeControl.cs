@@ -86,9 +86,20 @@ public class LibVlcDynamicNativeControl : NativeControlHost
         }, DispatcherPriority.Background);
     }
 
-    public void LoadFile(string path)
+    public async void LoadFile(string path)
     {
-        _vlcPlayer?.LoadFile(path);
+        if (_vlcPlayer == null)
+        {
+            return;
+        }
+
+        await _vlcPlayer.LoadFile(path);
+        
+        // Wait a bit for VLC to parse the media information
+        // This ensures Duration and other metadata are available
+        await System.Threading.Tasks.Task.Delay(300);
+        
+        System.Diagnostics.Debug.WriteLine($"File loaded, duration: {_vlcPlayer.Duration}s");
     }
 
     public void TogglePlayPause()

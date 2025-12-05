@@ -10343,7 +10343,14 @@ public partial class MainViewModel :
                         if (_playSelectionIndex >= 0)
                         {
                             var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().OrderBy(p => p.StartTime).ToList();
-                            var nextIndex = Subtitles.IndexOf(selectedItems.FirstOrDefault(p => Subtitles.IndexOf(p) > _playSelectionIndex));
+                            var selectedItem = selectedItems.FirstOrDefault(p => Subtitles.IndexOf(p) > _playSelectionIndex);
+                            if (selectedItem == null)
+                            {
+                                ResetPlaySelection();
+                                return;
+                            }
+
+                                var nextIndex = Subtitles.IndexOf(selectedItem);
                             var p = _subtitle.GetParagraphOrDefault(nextIndex);
                             if (p != null && _playSelectionIndex < nextIndex) // && SubtitleListview1.Items[nextIndex].Selected)
                             {

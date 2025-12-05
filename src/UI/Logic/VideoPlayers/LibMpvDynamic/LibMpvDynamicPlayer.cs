@@ -1,4 +1,3 @@
-using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Collections.Generic;

@@ -108,6 +108,9 @@ public class LibVlcDynamicOpenGlControl : OpenGlControlBase
                     _glGenTextures(1, ref _textureId);
                 }
 
+                // Set up video callbacks to receive frames
+                SetupVideoCallbacks();
+
                 _isInitialized = true;
                 System.Diagnostics.Debug.WriteLine("VLC Player initialized successfully with OpenGL!");
             }
@@ -205,6 +208,18 @@ public class LibVlcDynamicOpenGlControl : OpenGlControlBase
     public void LoadFile(string path)
     {
         _vlcPlayer?.LoadFile(path);
+        
+        // Update video dimensions after loading file
+        System.Threading.Tasks.Task.Run(async () =>
+        {
+            // Wait a bit for VLC to initialize the media
+            await System.Threading.Tasks.Task.Delay(500);
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                UpdateVideoDimensions();
+                RequestNextFrameRendering();
+            });
+        });
     }
 
     public void TogglePlayPause()
@@ -215,5 +230,53 @@ public class LibVlcDynamicOpenGlControl : OpenGlControlBase
     public void Unload()
     {
         _vlcPlayer?.CloseFile();
+    }
+
+    private void SetupVideoCallbacks()
+    {
+        if (_vlcPlayer == null)
+        {
+            return;
+        }
+
+        // Note: VLC video callbacks would be set up here
+        // For now, we'll get dimensions from video metadata when a file is loaded
+        // The actual callback implementation requires proper P/Invoke setup in LibVlcDynamicPlayer
+        // which is beyond the current scope
+        System.Diagnostics.Debug.WriteLine("Video callbacks setup (placeholder)");
+    }
+
+    private void UpdateVideoDimensions()
+    {
+        if (_vlcPlayer == null || string.IsNullOrEmpty(_vlcPlayer.FileName))
+        {
+            return;
+        }
+
+        try
+        {
+            // Try to get video dimensions from media info
+            // This is a workaround until proper video callbacks are implemented
+            var mediaInfo = Logic.Media.FfmpegMediaInfo2.Parse(_vlcPlayer.FileName);
+            if (mediaInfo?.Dimension != null && mediaInfo.Dimension.Width > 0 && mediaInfo.Dimension.Height > 0)
+            {
+                _videoWidth = mediaInfo.Dimension.Width;
+                _videoHeight = mediaInfo.Dimension.Height;
+
+                // Allocate buffer for video frame
+                var bufferSize = _videoWidth * _videoHeight * 4; // RGBA
+                if (_videoBuffer != IntPtr.Zero)
+                {
+                    Marshal.FreeHGlobal(_videoBuffer);
+                }
+                _videoBuffer = Marshal.AllocHGlobal(bufferSize);
+
+                System.Diagnostics.Debug.WriteLine($"Video dimensions set: {_videoWidth}x{_videoHeight}");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to get video dimensions: {ex.Message}");
+        }
     }
 }

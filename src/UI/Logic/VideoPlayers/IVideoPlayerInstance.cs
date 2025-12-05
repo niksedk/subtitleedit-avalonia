@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace Nikse.SubtitleEdit.Controls.VideoPlayer;
+namespace Nikse.SubtitleEdit.Logic.VideoPlayers;
 
 public interface IVideoPlayerInstance
 {

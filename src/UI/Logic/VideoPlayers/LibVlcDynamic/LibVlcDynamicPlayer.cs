@@ -1,4 +1,3 @@
-using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -41,143 +40,143 @@ public sealed class LibVlcDynamicPlayer : IDisposable, IVideoPlayerInstance
     // LibVLC Core - http://www.videolan.org/developers/vlc/doc/doxygen/html/group__libvlc__core.html
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate IntPtr libvlc_new(int argc, [MarshalAs(UnmanagedType.LPArray)] string[] argv);
-    private libvlc_new _libvlc_new;
+    private libvlc_new? _libvlc_new;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate IntPtr libvlc_get_version();
-    private libvlc_get_version _libvlc_get_version;
+    private libvlc_get_version? _libvlc_get_version;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void libvlc_release(IntPtr libVlc);
-    private libvlc_release _libvlc_release;
+    private libvlc_release? _libvlc_release;
 
     // LibVLC Media - http://www.videolan.org/developers/vlc/doc/doxygen/html/group__libvlc__media.html
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate IntPtr libvlc_media_new_path(IntPtr instance, byte[] input);
-    private libvlc_media_new_path _libvlc_media_new_path;
+    private libvlc_media_new_path? _libvlc_media_new_path;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void libvlc_media_release(IntPtr media);
-    private libvlc_media_release _libvlc_media_release;
+    private libvlc_media_release? _libvlc_media_release;
 
     // LibVLC Video Controls - http://www.videolan.org/developers/vlc/doc/doxygen/html/group__libvlc__video.html#g8f55326b8b51aecb59d8b8a446c3f118
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void libvlc_video_get_size(IntPtr mediaPlayer, UInt32 number, out UInt32 x, out UInt32 y);
-    private libvlc_video_get_size _libvlc_video_get_size;
+    private libvlc_video_get_size? _libvlc_video_get_size;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int libvlc_video_take_snapshot(IntPtr mediaPlayer, byte num, byte[] filePath, UInt32 width, UInt32 height);
-    private libvlc_video_take_snapshot _libvlc_video_take_snapshot;
+    private libvlc_video_take_snapshot? _libvlc_video_take_snapshot;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void libvlc_video_set_callbacks(IntPtr playerInstance, LockCallbackDelegate @lock, UnlockCallbackDelegate unlock, DisplayCallbackDelegate display, IntPtr opaque);
-    private libvlc_video_set_callbacks _libvlc_video_set_callbacks;
+    private libvlc_video_set_callbacks? _libvlc_video_set_callbacks;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int libvlc_video_set_format(IntPtr mediaPlayer, string chroma, UInt32 width, UInt32 height, UInt32 pitch);
-    private libvlc_video_set_format _libvlc_video_set_format;
+    private libvlc_video_set_format? _libvlc_video_set_format;
 
     // LibVLC Audio Controls - http://www.videolan.org/developers/vlc/doc/doxygen/html/group__libvlc__audio.html
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int libvlc_audio_get_volume(IntPtr mediaPlayer);
-    private libvlc_audio_get_volume _libvlc_audio_get_volume;
+    private libvlc_audio_get_volume? _libvlc_audio_get_volume;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void libvlc_audio_set_volume(IntPtr mediaPlayer, int volume);
-    private libvlc_audio_set_volume _libvlc_audio_set_volume;
+    private libvlc_audio_set_volume? _libvlc_audio_set_volume;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int libvlc_audio_get_track_count(IntPtr mediaPlayer);
-    private libvlc_audio_get_track_count _libvlc_audio_get_track_count;
+    private libvlc_audio_get_track_count? _libvlc_audio_get_track_count;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate IntPtr libvlc_audio_get_track_description(IntPtr mediaPlayer);
-    private libvlc_audio_get_track_description _libvlc_audio_get_track_description;
+    private libvlc_audio_get_track_description? _libvlc_audio_get_track_description;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void libvlc_track_description_release(IntPtr mediaPlayer);
-    private libvlc_track_description_release _libvlc_track_description_release;
+    private libvlc_track_description_release? _libvlc_track_description_release;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int libvlc_audio_get_track(IntPtr mediaPlayer);
-    private libvlc_audio_get_track _libvlc_audio_get_track;
+    private libvlc_audio_get_track? _libvlc_audio_get_track;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int libvlc_audio_set_track(IntPtr mediaPlayer, int trackNumber);
-    private libvlc_audio_set_track _libvlc_audio_set_track;
+    private libvlc_audio_set_track? _libvlc_audio_set_track;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate Int64 libvlc_audio_get_delay(IntPtr mediaPlayer);
-    private libvlc_audio_get_delay _libvlc_audio_get_delay;
+    private libvlc_audio_get_delay? _libvlc_audio_get_delay;
 
     // LibVLC media player - http://www.videolan.org/developers/vlc/doc/doxygen/html/group__libvlc__media__player.html
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate IntPtr libvlc_media_player_new_from_media(IntPtr media);
-    private libvlc_media_player_new_from_media _libvlc_media_player_new_from_media;
+    private libvlc_media_player_new_from_media? _libvlc_media_player_new_from_media;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void libvlc_media_player_play(IntPtr mediaPlayer);
-    private libvlc_media_player_play _libvlc_media_player_play;
+    private libvlc_media_player_play? _libvlc_media_player_play;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void libvlc_media_player_stop(IntPtr mediaPlayer);
-    private libvlc_media_player_stop _libvlc_media_player_stop;
+    private libvlc_media_player_stop? _libvlc_media_player_stop;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void libvlc_media_player_set_hwnd(IntPtr mediaPlayer, IntPtr windowsHandle);
-    private libvlc_media_player_set_hwnd _libvlc_media_player_set_hwnd;
+    private libvlc_media_player_set_hwnd? _libvlc_media_player_set_hwnd;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void libvlc_media_player_set_xwindow(IntPtr mediaPlayer, IntPtr windowsHandle);
-    private libvlc_media_player_set_xwindow _libvlc_media_player_set_xwindow;
+    private libvlc_media_player_set_xwindow? _libvlc_media_player_set_xwindow;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int libvlc_media_player_is_playing(IntPtr mediaPlayer);
-    private libvlc_media_player_is_playing _libvlc_media_player_is_playing;
+    private libvlc_media_player_is_playing? _libvlc_media_player_is_playing;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int libvlc_media_player_set_pause(IntPtr mediaPlayer, int doPause);
-    private libvlc_media_player_set_pause _libvlc_media_player_set_pause;
+    private libvlc_media_player_set_pause? _libvlc_media_player_set_pause;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate Int64 libvlc_media_player_get_time(IntPtr mediaPlayer);
-    private libvlc_media_player_get_time _libvlc_media_player_get_time;
+    private libvlc_media_player_get_time? _libvlc_media_player_get_time;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void libvlc_media_player_set_time(IntPtr mediaPlayer, Int64 position);
-    private libvlc_media_player_set_time _libvlc_media_player_set_time;
+    private libvlc_media_player_set_time? _libvlc_media_player_set_time;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate byte libvlc_media_player_get_state(IntPtr mediaPlayer);
-    private libvlc_media_player_get_state _libvlc_media_player_get_state;
+    private libvlc_media_player_get_state? _libvlc_media_player_get_state;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate Int64 libvlc_media_player_get_length(IntPtr mediaPlayer);
-    private libvlc_media_player_get_length _libvlc_media_player_get_length;
+    private libvlc_media_player_get_length? _libvlc_media_player_get_length;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void libvlc_media_player_release(IntPtr mediaPlayer);
-    private libvlc_media_player_release _libvlc_media_player_release;
+    private libvlc_media_player_release? _libvlc_media_player_release;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate float libvlc_media_player_get_rate(IntPtr mediaPlayer);
-    private libvlc_media_player_get_rate _libvlc_media_player_get_rate;
+    private libvlc_media_player_get_rate? _libvlc_media_player_get_rate;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int libvlc_media_player_set_rate(IntPtr mediaPlayer, float rate);
-    private libvlc_media_player_set_rate _libvlc_media_player_set_rate;
+    private libvlc_media_player_set_rate? _libvlc_media_player_set_rate;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int libvlc_media_player_next_frame(IntPtr mediaPlayer);
-    private libvlc_media_player_next_frame _libvlc_media_player_next_frame;
+    private libvlc_media_player_next_frame? _libvlc_media_player_next_frame;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int libvlc_media_player_add_slave(IntPtr mediaPlayer, int type, byte[] filePath, bool select);
-    private libvlc_media_player_add_slave _libvlc_media_player_add_slave;
+    private libvlc_media_player_add_slave? _libvlc_media_player_add_slave;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate int libvlc_video_set_spu(IntPtr mediaPlayer, int trackNumber);
-    private libvlc_video_set_spu _libvlc_video_set_spu;
+    private libvlc_video_set_spu? _libvlc_video_set_spu;
 
     /// <summary>
     /// Callback prototype to allocate and lock a picture buffer. Whenever a new video frame needs to be decoded, the lock callback is invoked. Depending on the video chroma, one or three pixel planes of adequate dimensions must be returned via the second parameter. Those planes must be aligned on 32-bytes boundaries.
@@ -218,7 +217,6 @@ public sealed class LibVlcDynamicPlayer : IDisposable, IVideoPlayerInstance
 
     public LibVlcDynamicPlayer()
     {
-
     }
 
     private static string[] GetLibraryNames()
@@ -473,6 +471,11 @@ public sealed class LibVlcDynamicPlayer : IDisposable, IVideoPlayerInstance
 
         await Task.Run(() =>
         {
+            if (_libvlc_media_new_path == null || _libvlc_media_player_new_from_media == null)
+            {
+                return;
+            }
+
             var media = _libvlc_media_new_path(_libVlc, GetUtf8Bytes(path));
 
             if (_mediaPlayer == IntPtr.Zero)
@@ -497,10 +500,10 @@ public sealed class LibVlcDynamicPlayer : IDisposable, IVideoPlayerInstance
                 ApplyWindowHandle();
             }
 
-            _libvlc_media_release(media);
+            _libvlc_media_release?.Invoke(media);
 
             try
-            {
+            {   
                 _libvlc_video_set_spu?.Invoke(_mediaPlayer, -1);
             }
             catch
