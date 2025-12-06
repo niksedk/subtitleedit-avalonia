@@ -17,7 +17,7 @@ public interface ILibVlcDownloadService
 public class LibVlcDownloadService(HttpClient httpClient) : ILibVlcDownloadService
 {
     private const string WindowsUrl = "https://get.videolan.org/vlc/3.0.21/win64/vlc-3.0.21-win64.7z";
-    private const string MacX64Url = "https://github.com/SubtitleEdit/support-files/releases/download/vlc3/libvlc.dylib-osx64.zip";
+    private const string MacX64Url = "https://github.com/SubtitleEdit/support-files/releases/download/vlc3/libvlc-osx64.7z";
 
     public async Task DownloadLibVlc(string destinationFileName, IProgress<float>? progress, CancellationToken cancellationToken)
     {
