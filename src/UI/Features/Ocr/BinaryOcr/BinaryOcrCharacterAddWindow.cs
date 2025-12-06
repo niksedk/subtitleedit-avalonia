@@ -6,11 +6,11 @@ using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Ocr.NOcr;
+namespace Nikse.SubtitleEdit.Features.Ocr.BinaryOcr;
 
-public class NOcrCharacterAddWindow : Window
+public class BinaryOcrCharacterAddWindow : Window
 {
-    public NOcrCharacterAddWindow(NOcrCharacterAddViewModel vm)
+    public BinaryOcrCharacterAddWindow(BinaryOcrCharacterAddViewModel vm)
     {
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -75,11 +75,11 @@ public class NOcrCharacterAddWindow : Window
         Loaded += vm.Onloaded;
         Closing += vm.OnClosing;
         PointerWheelChanged += vm.PointerWheelChanged;
-        KeyDown += (sender, args) => vm.KeyDown(args);
-        KeyUp += (sender, args) => vm.KeyUp(args);
+        KeyDown += (_, args) => vm.KeyDown(args);
+        KeyUp += (_, args) => vm.KeyUp(args);
     }
 
-    private static Grid MakeControlsView(NOcrCharacterAddViewModel vm)
+    private static Grid MakeControlsView(BinaryOcrCharacterAddViewModel vm)
     {
         var grid = new Grid
         {
@@ -289,5 +289,5 @@ public class NOcrCharacterAddWindow : Window
         grid.Add(panelButtons, 0, 2, 1, 2);
 
         return grid;
-    }
+    }   
 }

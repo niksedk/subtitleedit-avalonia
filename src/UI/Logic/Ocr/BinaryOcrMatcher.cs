@@ -5,7 +5,12 @@ using System.Threading;
 
 namespace Nikse.SubtitleEdit.Logic.Ocr;
 
-public class BinaryOcrMatcher
+public interface IBinaryOcrMatcher
+{
+    BinaryOcrMatcher.CompareMatch? GetCompareMatch(ImageSplitterItem2 targetItem, out BinaryOcrMatcher.CompareMatch? secondBestGuess, List<ImageSplitterItem2> list, int listIndex, BinaryOcrDb binaryOcrDb);
+}
+
+public class BinaryOcrMatcher : IBinaryOcrMatcher
 {
     public bool IsLatinDb { get; set; }
     private double _numericUpDownMaxErrorPct = 6;
@@ -65,7 +70,7 @@ public class BinaryOcrMatcher
         }
     }
 
-    private CompareMatch? GetCompareMatchNew(ImageSplitterItem2 targetItem, out CompareMatch? secondBestGuess, List<ImageSplitterItem2> list, int listIndex, BinaryOcrDb binaryOcrDb)
+    public CompareMatch? GetCompareMatch(ImageSplitterItem2 targetItem, out CompareMatch? secondBestGuess, List<ImageSplitterItem2> list, int listIndex, BinaryOcrDb binaryOcrDb)
     {
         double maxDiff = _numericUpDownMaxErrorPct;
         secondBestGuess = null;
@@ -156,23 +161,23 @@ public class BinaryOcrMatcher
             }
         }
 
-        FindBestMatchNew(ref index, ref smallestDifference, out var hit, target, binaryOcrDb, bob, maxDiff);
+        FindBestMatch(ref index, ref smallestDifference, out var hit, target, binaryOcrDb, bob, maxDiff);
         if (maxDiff > 0)
         {
             if (target.Width > 16 && target.Height > 16 && (hit == null || smallestDifference * 100.0 / (target.Width * target.Height) > maxDiff))
             {
                 var t2 = target.CopyRectangle(new NikseRectangle(0, 1, target.Width, target.Height));
-                FindBestMatchNew(ref index, ref smallestDifference, out hit, t2, binaryOcrDb, bob, maxDiff);
+                FindBestMatch(ref index, ref smallestDifference, out hit, t2, binaryOcrDb, bob, maxDiff);
             }
             if (target.Width > 16 && target.Height > 16 && (hit == null || smallestDifference * 100.0 / (target.Width * target.Height) > maxDiff))
             {
                 var t2 = target.CopyRectangle(new NikseRectangle(1, 0, target.Width, target.Height));
-                FindBestMatchNew(ref index, ref smallestDifference, out hit, t2, binaryOcrDb, bob, maxDiff);
+                FindBestMatch(ref index, ref smallestDifference, out hit, t2, binaryOcrDb, bob, maxDiff);
             }
             if (target.Width > 16 && target.Height > 16 && (hit == null || smallestDifference * 100.0 / (target.Width * target.Height) > maxDiff))
             {
                 var t2 = target.CopyRectangle(new NikseRectangle(0, 0, target.Width - 1, target.Height));
-                FindBestMatchNew(ref index, ref smallestDifference, out hit, t2, binaryOcrDb, bob, maxDiff);
+                FindBestMatch(ref index, ref smallestDifference, out hit, t2, binaryOcrDb, bob, maxDiff);
             }
         }
 
@@ -325,7 +330,7 @@ public class BinaryOcrMatcher
         if (text == null)
         {
             return;
-        }   
+        }
 
         if (text == "e" || text == "a")
         {
@@ -399,7 +404,7 @@ public class BinaryOcrMatcher
         return uppercaseHeight;
     }
 
-    private static void FindBestMatchNew(ref int index, ref int smallestDifference, out BinaryOcrBitmap? hit, NikseBitmap2 target, BinaryOcrDb binOcrDb, BinaryOcrBitmap bob, double maxDiff)
+    private static void FindBestMatch(ref int index, ref int smallestDifference, out BinaryOcrBitmap? hit, NikseBitmap2 target, BinaryOcrDb binOcrDb, BinaryOcrBitmap bob, double maxDiff)
     {
         hit = null;
         var bobExactMatch = binOcrDb.FindExactMatch(bob);

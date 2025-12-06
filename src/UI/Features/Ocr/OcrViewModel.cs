@@ -124,6 +124,7 @@ public partial class OcrViewModel : ObservableObject
     private readonly IFileHelper _fileHelper;
     private readonly ISpellCheckManager _spellCheckManager;
     private readonly IOcrFixEngine2 _ocrFixEngine;
+    private readonly IBinaryOcrMatcher _binaryOcrMatcher;
     private PreProcessingSettings? _preProcessingSettings;
 
     private CancellationTokenSource _cancellationTokenSource;
@@ -137,13 +138,15 @@ public partial class OcrViewModel : ObservableObject
         IWindowService windowService,
         IFileHelper fileHelper,
         ISpellCheckManager spellCheckManager,
-        IOcrFixEngine2 ocrFixEngine)
+        IOcrFixEngine2 ocrFixEngine,
+        IBinaryOcrMatcher binaryOcrMatcher)
     {
         _nOcrCaseFixer = nOcrCaseFixer;
         _windowService = windowService;
         _fileHelper = fileHelper;
         _spellCheckManager = spellCheckManager;
         _ocrFixEngine = ocrFixEngine;
+        _binaryOcrMatcher = binaryOcrMatcher;
 
         Title = Se.Language.Ocr.Ocr;
         OcrEngines = new ObservableCollection<OcrEngineItem>(OcrEngineItem.GetOcrEngines());
@@ -983,6 +986,10 @@ public partial class OcrViewModel : ObservableObject
         {
             RunNOcr(selectedIndices);
         }
+        else if (ocrEngine.EngineType == OcrEngineType.BinaryImageCompare)
+        {
+            RunImageCompareOcr(selectedIndices);
+        }
         else if (ocrEngine.EngineType == OcrEngineType.Tesseract)
         {
             RunTesseractOcr(selectedIndices);
@@ -1370,6 +1377,224 @@ public partial class OcrViewModel : ObservableObject
             }
 
             item.Text = ItalicTextMerger.MergeWithItalicTags(matches).Trim();
+            var unknownWords = OcrFixLineAndSetText(i, item);
+
+            _runOnceChars.Clear();
+            _skipOnceChars.Clear();
+
+            if (DoPromptForUnknownWords && unknownWords.Count > 0)
+            {
+                var tcs = new TaskCompletionSource<bool>();
+                Dispatcher.UIThread.Post(async () =>
+                {
+                    foreach (var unknownWord in unknownWords)
+                    {
+                        var suggestions = _ocrFixEngine.GetSpellCheckSuggestions(unknownWord.Word.FixedWord);
+                        var result = await _windowService.ShowDialogAsync<PromptUnknownWordWindow, PromptUnknownWordViewModel>(Window!,
+                            vm =>
+                            {
+                                vm.Initialize(item.GetBitmap(), item.Text, unknownWord, suggestions);
+                            });
+
+                        if (result.ChangeWholeTextPressed)
+                        {
+                            item.Text = result.WholeText;
+                            break;
+                        }
+                        else if (result.ChangeOncePressed)
+                        {
+                            ChangeWord(item, unknownWord, result.Word);
+                        }
+                        else if (result.ChangeAllPressed)
+                        {
+                            _ocrFixEngine.ChangeAll(unknownWord.Word.Word, result.Word);
+                        }
+                        else if (result.SkipOncePressed)
+                        {
+                            // do nothing
+                        }
+                        else if (result.SkipAllPressed)
+                        {
+                            _ocrFixEngine.SkipAll(unknownWord.Word.Word);
+                        }
+                        else if (result.AddToNamesListPressed)
+                        {
+                            _ocrFixEngine.AddName(unknownWord.Word.Word);
+                        }
+                        else if (result.AddToUserDictionaryPressed)
+                        {
+                            if (SelectedDictionary != null)
+                            {
+                                UserWordsHelper.AddToUserDictionary(unknownWord.Word.Word, SelectedDictionary.GetFiveLetterLanguageName() ?? "en_US");
+                            }
+                        }
+                        else
+                        {
+                            _cancellationTokenSource.Cancel();
+                            IsOcrRunning = false;
+                            break;
+                        }
+                    }
+                    tcs.SetResult(true);
+                });
+                await tcs.Task;
+                if (!IsOcrRunning)
+                {
+                    return;
+                }
+            }
+        }
+
+        IsOcrRunning = false;
+    }
+
+    private void RunImageCompareOcr(List<int> selectedIndices)
+    {
+        var db = InitImageComparOcrDb();
+        if (db == null)
+        {
+            return;
+        }
+
+        _skipOnceChars.Clear();
+        _ = Task.Run(() => { using var _ = RunImageCompareOcrLoop(db, selectedIndices); });
+    }
+
+    private BinaryOcrDb? InitImageComparOcrDb()
+    {
+        var fileName = Path.Combine(Se.OcrFolder, SelectedImageCompareDatabase + ".db");
+        if (!File.Exists(fileName))
+        {
+            return null;
+        }
+
+        return new BinaryOcrDb(fileName, true);
+    }
+
+    private async Task RunImageCompareOcrLoop(BinaryOcrDb db, List<int> selectedIndices)
+    {
+        foreach (var i in selectedIndices)
+        {
+            if (_cancellationTokenSource.Token.IsCancellationRequested)
+            {
+                IsOcrRunning = false;
+                return;
+            }
+
+            ProgressValue = i * 100.0 / OcrSubtitleItems.Count;
+            ProgressText = string.Format(Se.Language.Ocr.RunningOcrDotDotDotXY, i + 1, OcrSubtitleItems.Count);
+
+            var item = OcrSubtitleItems[i];
+            var bitmap = item.GetSkBitmap();
+            var parentBitmap = new NikseBitmap2(bitmap);
+            parentBitmap.MakeTwoColor(200);
+            parentBitmap.CropTop(0, new SKColor(0, 0, 0, 0));
+            var letters = NikseBitmapImageSplitter2.SplitBitmapToLettersNew(parentBitmap, SelectedNOcrPixelsAreSpace, false, true, 20, true);
+            SelectedOcrSubtitleItem = item;
+            int index = 0;
+            var matches = new List<BinaryOcrMatcher.CompareMatch>();
+            while (index < letters.Count)
+            {
+                var splitterItem = letters[index];
+                if (splitterItem.NikseBitmap == null)
+                {
+                    if (splitterItem.SpecialCharacter != null)
+                    {
+                        // space or special character
+                        matches.Add(new BinaryOcrMatcher.CompareMatch(splitterItem.SpecialCharacter, false, 0, nameof(splitterItem.SpecialCharacter)));
+                    }
+                }
+                else
+                {
+                    var match = _binaryOcrMatcher.GetCompareMatch(splitterItem, out var secondBestMatch, letters, index, db);
+
+                    if (match == null)
+                    {
+                        var letterIndex = letters.IndexOf(splitterItem);
+
+                        if (_skipOnceChars.Any(p => p.LetterIndex == letterIndex && p.LineIndex == i))
+                        {
+                            matches.Add(new BinaryOcrMatcher.CompareMatch("*", false, 0, null));
+                            index++;
+                            continue;
+                        }
+
+                        var runOnceChar =
+                            _runOnceChars.FirstOrDefault(p => p.LetterIndex == letterIndex && p.LineIndex == i);
+                        if (runOnceChar != null)
+                        {
+                            matches.Add(new BinaryOcrMatcher.CompareMatch(runOnceChar.Text, false, 0, null));
+                            _runOnceChars.Clear();
+                            index++;
+                            continue;
+                        }
+
+                        Dispatcher.UIThread.Post(async void () =>
+                        {
+                            //        var result =
+                            //            await _windowService.ShowDialogAsync<NOcrCharacterAddWindow, NOcrCharacterAddViewModel>(
+                            //                Window!,
+                            //                vm =>
+                            //                {
+                            //                    vm.Initialize(parentBitmap, item, letters, letterIndex, _nOcrDb,
+                            //                        SelectedNOcrMaxWrongPixels, _nOcrAddHistoryManager, true, true);
+                            //                });
+
+                            //        if (result.OkPressed)
+                            //        {
+                            //            var letterBitmap = letters[letterIndex].NikseBitmap;
+                            //            _nOcrAddHistoryManager.Add(result.NOcrChar, letterBitmap,
+                            //                OcrSubtitleItems.IndexOf(item));
+                            //            IsInspectAdditionsVisible = true;
+                            //            _nOcrDb.Add(result.NOcrChar);
+                            //            _ = Task.Run(() => _nOcrDb.Save());
+                            //            _ = Task.Run(() => RunNOcrLoop(selectedIndices.Where(p => p >= i).ToList()));
+                            //        }
+                            //        else if (result.AbortPressed)
+                            //        {
+                            //            IsOcrRunning = false;
+                            //        }
+                            //        else if (result.UseOncePressed)
+                            //        {
+                            //            _runOnceChars.Add(new SkipOnceChar(i, letterIndex, result.NewText));
+                            //            _ = Task.Run(() => RunNOcrLoop(selectedIndices.Where(p => p >= i).ToList()));
+                            //        }
+                            //        else if (result.SkipPressed)
+                            //        {
+                            //            _skipOnceChars.Add(new SkipOnceChar(i, letterIndex));
+                            //            _ = Task.Run(() => RunNOcrLoop(selectedIndices.Where(p => p >= i).ToList()));
+                            //        }
+                            //        else if (result.InspectHistoryPressed)
+                            //        {
+                            //            IsOcrRunning = false;
+                            //            await _windowService
+                            //                .ShowDialogAsync<NOcrCharacterHistoryWindow, NOcrCharacterHistoryViewModel>(Window!,
+                            //                    vm => { vm.Initialize(_nOcrDb!, _nOcrAddHistoryManager); });
+                            //        }
+                        });
+                        // return;
+                    }
+
+                    if (match is { ExpandCount: > 0 })
+                    {
+                        index += match.ExpandCount - 1;
+                    }
+
+                    if (match == null)
+                    {
+                        matches.Add(new BinaryOcrMatcher.CompareMatch("*", false, 0, null));
+                    }
+                    else
+                    {
+                        matches.Add(new BinaryOcrMatcher.CompareMatch(match.Text, match.Italic, match.ExpandCount, match.Name));
+                    }
+                }
+
+                index++;
+            }
+
+            // item.Text = ItalicTextMerger.MergeWithItalicTags(matches).Trim();
+            item.Text = matches.Aggregate(string.Empty, (current, match) => current + match.Text).Trim();
             var unknownWords = OcrFixLineAndSetText(i, item);
 
             _runOnceChars.Clear();

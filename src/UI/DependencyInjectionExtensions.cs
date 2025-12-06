@@ -20,6 +20,7 @@ using Nikse.SubtitleEdit.Features.Files.Statistics;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Features.Ocr;
+using Nikse.SubtitleEdit.Features.Ocr.BinaryOcr;
 using Nikse.SubtitleEdit.Features.Ocr.Download;
 using Nikse.SubtitleEdit.Features.Ocr.FixEngine;
 using Nikse.SubtitleEdit.Features.Ocr.NOcr;
@@ -98,6 +99,7 @@ using Nikse.SubtitleEdit.Logic.Dictionaries;
 using Nikse.SubtitleEdit.Logic.Download;
 using Nikse.SubtitleEdit.Logic.Initializers;
 using Nikse.SubtitleEdit.Logic.Media;
+using Nikse.SubtitleEdit.Logic.Ocr;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
 using AudioToTextWhisperViewModel = Nikse.SubtitleEdit.Features.Video.SpeechToText.AudioToTextWhisperViewModel;
 using AudioVisualizerUndockedViewModel = Nikse.SubtitleEdit.Features.Shared.Undocked.AudioVisualizerUndockedViewModel;
@@ -120,6 +122,7 @@ public static class DependencyInjectionExtensions
     public static void AddSubtitleEditServices(this IServiceCollection collection)
     {
         // Misc services        
+        collection.AddTransient<IBinaryOcrMatcher, BinaryOcrMatcher>();
         collection.AddSingleton<IFileHelper, FileHelper>();
         collection.AddSingleton<IFolderHelper, FolderHelper>();
         collection.AddTransient<IAutoBackupService, AutoBackupService>();
@@ -177,6 +180,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<BatchConvertFixCommonErrorsSettingsViewModel>();
         collection.AddTransient<BatchConvertSettingsViewModel>();
         collection.AddTransient<BatchConvertViewModel>();
+        collection.AddTransient<BinaryOcrCharacterAddViewModel>();
         collection.AddTransient<BlankVideoViewModel>();
         collection.AddTransient<BookmarkEditViewModel>();
         collection.AddTransient<BookmarksListViewModel>();
