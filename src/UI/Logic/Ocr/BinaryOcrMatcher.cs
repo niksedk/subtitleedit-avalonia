@@ -8,6 +8,7 @@ namespace Nikse.SubtitleEdit.Logic.Ocr;
 public interface IBinaryOcrMatcher
 {
     BinaryOcrMatcher.CompareMatch? GetCompareMatch(ImageSplitterItem2 targetItem, out BinaryOcrMatcher.CompareMatch? secondBestGuess, List<ImageSplitterItem2> list, int listIndex, BinaryOcrDb binaryOcrDb);
+    bool IsLatinDb { get; set; }
 }
 
 public class BinaryOcrMatcher : IBinaryOcrMatcher

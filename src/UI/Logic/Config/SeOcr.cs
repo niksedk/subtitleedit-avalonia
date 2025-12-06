@@ -10,6 +10,8 @@ public class SeOcr
     public int NOcrMaxWrongPixels { get; set; }
     public int NOcrPixelsAreSpace { get; set; }
     public bool NOcrDrawUnknownText { get; set; }
+    public int BinaryOcrPixelsAreSpace { get; set; }
+    public double BinaryOcrMaxErrorPercent { get; set; }
     public List<string> OllamaModels { get; set; }
     public string OllamaModel { get; set; }
     public string OllamaUrl { get; set; }
@@ -43,6 +45,9 @@ public class SeOcr
         NOcrDrawUnknownText = true;
         NOcrNoOfLinesToAutoDraw = 60;
         NOcrZoomFactor = 4;
+
+        BinaryOcrPixelsAreSpace = 12;
+        BinaryOcrMaxErrorPercent = 7.5;
 
         OllamaModels = new List<string> { "llama3.2-vision", "llava-phi3", "moondream", "minicpm-v" };
         OllamaLanguage = "English";

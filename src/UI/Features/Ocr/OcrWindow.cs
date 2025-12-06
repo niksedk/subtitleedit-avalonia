@@ -157,6 +157,11 @@ public class OcrWindow : Window
                 UiUtil.MakeComboBox(vm.ImageCompareDatabases, vm, nameof(vm.SelectedImageCompareDatabase), nameof(vm.IsBinaryImageCompareVisible))
                     .WithMarginRight(0)
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
+                UiUtil.MakeLabel(Se.Language.Ocr.NumberOfPixelsIsSpace, nameof(vm.IsBinaryImageCompareVisible)),
+                UiUtil.MakeComboBox(vm.BinaryOcrPixelsAreSpaceList, vm, nameof(vm.SelectedBinaryOcrPixelsAreSpace),
+                        nameof(vm.IsBinaryImageCompareVisible))
+                    .WithMarginRight(10)
+                    .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
 
                 // Tesseract settings
                 UiUtil.MakeLabel(Se.Language.General.Language, nameof(vm.IsTesseractVisible)),

@@ -181,6 +181,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<BatchConvertSettingsViewModel>();
         collection.AddTransient<BatchConvertViewModel>();
         collection.AddTransient<BinaryOcrCharacterAddViewModel>();
+        collection.AddTransient<BinaryOcrCharacterHistoryViewModel>();
         collection.AddTransient<BinaryOcrInspectViewModel>();
         collection.AddTransient<BlankVideoViewModel>();
         collection.AddTransient<BookmarkEditViewModel>();

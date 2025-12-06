@@ -44,6 +44,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using static Nikse.SubtitleEdit.Core.AudioToText.AudioToTextPostProcessor;
 
 namespace Nikse.SubtitleEdit.Features.Ocr;
 
@@ -58,6 +59,9 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private string? _selectedNOcrDatabase;
     [ObservableProperty] private ObservableCollection<string> _imageCompareDatabases;
     [ObservableProperty] private string? _selectedImageCompareDatabase;
+    [ObservableProperty] private ObservableCollection<int> _binaryOcrPixelsAreSpaceList;
+    [ObservableProperty] private int _selectedBinaryOcrPixelsAreSpace;
+    [ObservableProperty] private double _binaryOcrMaxErrorPercent;
     [ObservableProperty] private ObservableCollection<int> _nOcrMaxWrongPixelsList;
     [ObservableProperty] private int _selectedNOcrMaxWrongPixels;
     [ObservableProperty] private ObservableCollection<int> _nOcrPixelsAreSpaceList;
@@ -158,6 +162,7 @@ public partial class OcrViewModel : ObservableObject
         SelectedImageCompareDatabase = ImageCompareDatabases.FirstOrDefault();
         NOcrMaxWrongPixelsList = new ObservableCollection<int>(Enumerable.Range(0, 500));
         NOcrPixelsAreSpaceList = new ObservableCollection<int>(Enumerable.Range(1, 50));
+        BinaryOcrPixelsAreSpaceList = new ObservableCollection<int>(Enumerable.Range(1, 50));
         OllamaLanguages = new ObservableCollection<string>(Iso639Dash2LanguageCode.List
             .Select(p => p.EnglishName)
             .OrderBy(p => p));
@@ -208,6 +213,8 @@ public partial class OcrViewModel : ObservableObject
             SelectedNOcrMaxWrongPixels = ocr.NOcrMaxWrongPixels;
             NOcrDrawUnknownText = ocr.NOcrDrawUnknownText;
             SelectedNOcrPixelsAreSpace = ocr.NOcrPixelsAreSpace;
+            SelectedBinaryOcrPixelsAreSpace = ocr.BinaryOcrPixelsAreSpace;
+            BinaryOcrMaxErrorPercent = ocr.BinaryOcrMaxErrorPercent;
             OllamaModel = ocr.OllamaModel;
             OllamaUrl = ocr.OllamaUrl;
             SelectedOllamaLanguage = ocr.OllamaLanguage;
@@ -232,6 +239,8 @@ public partial class OcrViewModel : ObservableObject
         ocr.NOcrMaxWrongPixels = SelectedNOcrMaxWrongPixels;
         ocr.NOcrDrawUnknownText = NOcrDrawUnknownText;
         ocr.NOcrPixelsAreSpace = SelectedNOcrPixelsAreSpace;
+        ocr.BinaryOcrPixelsAreSpace = SelectedBinaryOcrPixelsAreSpace;
+        ocr.BinaryOcrMaxErrorPercent = BinaryOcrMaxErrorPercent;
         ocr.OllamaModel = OllamaModel;
         ocr.OllamaUrl = OllamaUrl;
         ocr.OllamaLanguage = SelectedOllamaLanguage ?? "English";
@@ -531,20 +540,41 @@ public partial class OcrViewModel : ObservableObject
                 db.Add(characterAddResult.BinaryOcrBitmap);
                 _ = Task.Run(db.Save);
             }
-            // TODO: Implement Binary OCR Character History Window
-            //else if (characterAddResult.InspectHistoryPressed)
-            //{
-            //    await _windowService.ShowDialogAsync<BinaryOcrCharacterHistoryWindow, BinaryOcrCharacterHistoryViewModel>(Window!,
-            //        vm => { vm.Initialize(db, _binaryOcrAddHistoryManager); });
-            //}
+            else if (characterAddResult.InspectHistoryPressed)
+            {
+                await _windowService.ShowDialogAsync<BinaryOcrCharacterHistoryWindow, BinaryOcrCharacterHistoryViewModel>(Window!,
+                    vm => { vm.Initialize(db, _binaryOcrAddHistoryManager); });
+            }
         }
     }
 
     [RelayCommand]
     private async Task InspectAdditions()
     {
-        await _windowService.ShowDialogAsync<NOcrCharacterHistoryWindow, NOcrCharacterHistoryViewModel>(Window!,
-            vm => { vm.Initialize(_nOcrDb!, _nOcrAddHistoryManager); });
+        var item = SelectedOcrSubtitleItem;
+        var engine = SelectedOcrEngine;
+        if (item == null || engine == null)
+        {
+            return;
+        }
+
+        if (engine.EngineType == OcrEngineType.nOcr)
+        {
+            await _windowService.ShowDialogAsync<NOcrCharacterHistoryWindow, NOcrCharacterHistoryViewModel>(Window!,
+                vm => { vm.Initialize(_nOcrDb!, _nOcrAddHistoryManager); });
+        }
+
+        if (engine.EngineType == OcrEngineType.BinaryImageCompare)
+        {
+            var db = InitImageComparOcrDb();
+            if (db == null)
+            {
+                return;
+            }
+
+            await _windowService.ShowDialogAsync<BinaryOcrCharacterHistoryWindow, BinaryOcrCharacterHistoryViewModel>(Window!,
+                vm => { vm.Initialize(db, _binaryOcrAddHistoryManager); });
+        }
     }
 
     [RelayCommand]
@@ -1541,12 +1571,18 @@ public partial class OcrViewModel : ObservableObject
 
     private BinaryOcrDb? InitImageComparOcrDb()
     {
+        if (SelectedImageCompareDatabase == null)
+        {
+            return null;
+        }
+
         var fileName = Path.Combine(Se.OcrFolder, SelectedImageCompareDatabase + ".db");
         if (!File.Exists(fileName))
         {
             return null;
         }
 
+        _binaryOcrMatcher.IsLatinDb = SelectedImageCompareDatabase.Contains("Latin", StringComparison.OrdinalIgnoreCase);
         return new BinaryOcrDb(fileName, true);
     }
 
@@ -1568,7 +1604,7 @@ public partial class OcrViewModel : ObservableObject
             var parentBitmap = new NikseBitmap2(bitmap);
             parentBitmap.MakeTwoColor(200);
             parentBitmap.CropTop(0, new SKColor(0, 0, 0, 0));
-            var letters = NikseBitmapImageSplitter2.SplitBitmapToLettersNew(parentBitmap, SelectedNOcrPixelsAreSpace, false, true, 20, true);
+            var letters = NikseBitmapImageSplitter2.SplitBitmapToLettersNew(parentBitmap, SelectedBinaryOcrPixelsAreSpace, false, true, 20, true);
             SelectedOcrSubtitleItem = item;
             int index = 0;
             var matches = new List<BinaryOcrMatcher.CompareMatch>();
@@ -1649,10 +1685,9 @@ public partial class OcrViewModel : ObservableObject
                             else if (result.InspectHistoryPressed)
                             {
                                 IsOcrRunning = false;
-                                // TODO: Implement BinaryOcrCharacterHistoryWindow
-                                // await _windowService
-                                //     .ShowDialogAsync<BinaryOcrCharacterHistoryWindow, BinaryOcrCharacterHistoryViewModel>(Window!,
-                                //         vm => { vm.Initialize(db, _binaryOcrAddHistoryManager); });
+                                await _windowService
+                                    .ShowDialogAsync<BinaryOcrCharacterHistoryWindow, BinaryOcrCharacterHistoryViewModel>(Window!,
+                                        vm => { vm.Initialize(db, _binaryOcrAddHistoryManager); });
                             }
                         });
                         return;
