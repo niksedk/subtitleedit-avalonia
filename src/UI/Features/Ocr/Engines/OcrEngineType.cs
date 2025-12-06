@@ -12,4 +12,5 @@ public enum OcrEngineType
     AzureVision,
     AmazonRekognition,
     Mistral,
+    BinaryImageCompare,
 }

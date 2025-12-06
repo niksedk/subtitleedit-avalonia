@@ -235,6 +235,7 @@ public partial class SettingsViewModel : ObservableObject
         CpsLineLengthStrategy = CpsLineLengthStrategies.First();
         Fonts = new ObservableCollection<string>(FontHelper.GetSystemFonts());
         MpvPreviewBorderTypes = new ObservableCollection<BorderStyleItem>(BorderStyleItem.List());
+        LibVlcStatus = string.Empty;
 
         Themes = [Se.Language.General.System, Se.Language.General.Light, Se.Language.General.Dark];
         SelectedTheme = Themes[0];

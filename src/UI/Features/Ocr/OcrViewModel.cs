@@ -74,6 +74,7 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private bool _isNOcrVisible;
     [ObservableProperty] private bool _isOllamaVisible;
     [ObservableProperty] private bool _isTesseractVisible;
+    [ObservableProperty] private bool _isBinaryImageCompareVisible;
     [ObservableProperty] private bool _isPaddleOcrVisible;
     [ObservableProperty] private bool _isGoogleVisionVisible;
     [ObservableProperty] private bool _isGoogleLensVisible;
@@ -163,6 +164,7 @@ public partial class OcrViewModel : ObservableObject
         MistralApiKey = string.Empty;
         GoogleVisionLanguages = new ObservableCollection<OcrLanguage>(GoogleVisionOcr.GetLanguages().OrderBy(p => p.ToString()));
         GoogleLensLanguages = new ObservableCollection<OcrLanguage2>(GoogleLensOcr.GetLanguages().OrderBy(p => p.ToString()));
+        SelectedGoogleLensLanguage = GoogleLensLanguages.FirstOrDefault(p => p.Code == "en") ?? GoogleLensLanguages.First();
         PaddleOcrLanguages = new ObservableCollection<OcrLanguage2>(PaddleOcr.GetLanguages().OrderBy(p => p.ToString()));
         OcredSubtitle = new List<SubtitleLineViewModel>();
         Dictionaries = new ObservableCollection<SpellCheckDictionaryDisplay>();
@@ -1991,6 +1993,7 @@ public partial class OcrViewModel : ObservableObject
         IsGoogleVisionVisible = SelectedOcrEngine?.EngineType == OcrEngineType.GoogleVision;
         IsGoogleLensVisible = SelectedOcrEngine?.EngineType == OcrEngineType.GoogleLens;
         IsMistralOcrVisible = SelectedOcrEngine?.EngineType == OcrEngineType.Mistral;
+        IsBinaryImageCompareVisible = SelectedOcrEngine?.EngineType == OcrEngineType.BinaryImageCompare;
 
         if (IsNOcrVisible && NOcrDatabases.Count == 0)
         {

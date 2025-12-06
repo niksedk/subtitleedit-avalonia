@@ -30,8 +30,8 @@ public class OcrEngineItem
     {
         var list = new List<OcrEngineItem>();
 
-
         list.Add(new("nOcr", OcrEngineType.nOcr, "nOcr is an internal OCR engine (free/open source)", "", ""));
+        list.Add(new("Binary image compare", OcrEngineType.BinaryImageCompare, "OCR via image compare (free/open source)", "", ""));
         list.Add(new("Tesseract", OcrEngineType.Tesseract, "Tesseract is an open-source OCR engine", "", ""));
         list.Add(new("Paddle OCR Standalone", OcrEngineType.PaddleOcrStandalone, "Paddle OCR Standalone", "", ""));
         list.Add(new("Paddle OCR Python", OcrEngineType.PaddleOcrPython, "Paddle OCR Python", "", ""));
