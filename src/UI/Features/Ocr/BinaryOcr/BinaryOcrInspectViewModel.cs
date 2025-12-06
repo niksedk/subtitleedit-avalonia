@@ -8,7 +8,6 @@ using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Features.Ocr.NOcr;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -17,6 +16,7 @@ using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Ocr.BinaryOcr;
@@ -26,12 +26,6 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
     public Window? Window { get; set; }
 
     [ObservableProperty] private string _title;
-    [ObservableProperty] private ObservableCollection<NOcrLine> _linesForeground;
-    [ObservableProperty] private NOcrLine? _selectedLineForeground;
-    [ObservableProperty] private ObservableCollection<NOcrLine> _linesBackground;
-    [ObservableProperty] private NOcrLine? _selectedLineBackground;
-    [ObservableProperty] private bool _isNewLinesForegroundActive;
-    [ObservableProperty] private bool _isNewLinesBackgroundActive;
     [ObservableProperty] private string _newText;
     [ObservableProperty] private string _resolutionAndTopMargin;
     [ObservableProperty] private string _matchResolutionAndTopMargin;
@@ -47,10 +41,9 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
     [ObservableProperty] private Bitmap _sentenceBitmap;
 
     private List<ImageSplitterItem2> _letters;
-    private List<NOcrChar?> _matches;
+    private List<BinaryOcrMatcher.CompareMatch?> _matches;
     private ImageSplitterItem2 _splitItem;
-    public NOcrChar NOcrChar { get; private set; }
-    public NOcrDrawingCanvasView NOcrDrawingCanvas { get; set; }
+    public BinaryOcrBitmap? BinaryOcrBitmap { get; private set; }
     public StackPanel PanelLines { get; set; }
     public TextBox TextBoxNew { get; set; }
     public bool OkPressed { get; set; }
@@ -58,25 +51,21 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
     public int LetterIndex { get; internal set; }
 
     private SKBitmap _sentenceBitmapOriginal;
-    private NOcrDb _nOcrDb;
+    private BinaryOcrDb _db;
     private bool _isControlDown = false;
     private bool _isWinDown = false;
 
     public BinaryOcrInspectViewModel()
     {
         Title = Se.Language.Ocr.InspectImageMatches;
-        LinesForeground = new ObservableCollection<NOcrLine>();
-        LinesBackground = new ObservableCollection<NOcrLine>();
         PanelLines = new StackPanel();
-        IsNewLinesForegroundActive = true;
-        IsNewLinesBackgroundActive = false;
         NewText = string.Empty;
         ResolutionAndTopMargin = string.Empty;
         MatchResolutionAndTopMargin = string.Empty;
         IsNewTextItalic = false;
         SubmitOnFirstLetter = false;
         _letters = new List<ImageSplitterItem2>();
-        _matches = new List<NOcrChar?>();
+        _matches = new List<BinaryOcrMatcher.CompareMatch?>();
         _sentenceBitmapOriginal = new SKBitmap(1, 1, true);
         ZoomFactorInfo = string.Empty;
 
@@ -88,23 +77,20 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
         }
 
         SelectedNoOfLinesToAutoDraw = Se.Settings.Ocr.NOcrNoOfLinesToAutoDraw;
-        NOcrChar = new NOcrChar();
-        _nOcrDb = new NOcrDb(string.Empty);
+        BinaryOcrBitmap = null;
+        _db = new BinaryOcrDb(string.Empty);
         SentenceBitmap = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
         CurrentBitmap = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
         _splitItem = new ImageSplitterItem2(string.Empty);
-        NOcrDrawingCanvas = new NOcrDrawingCanvasView();
         TextBoxNew = new TextBox();
     }
 
-    internal void Initialize(SKBitmap sKBitmap, OcrSubtitleItem? selectedOcrSubtitleItem, NOcrDb? nOcrDb, int selectedNOcrMaxWrongPixels, List<ImageSplitterItem2> letters, List<NOcrChar?> matches)
+    internal void Initialize(SKBitmap sKBitmap, OcrSubtitleItem? selectedOcrSubtitleItem, BinaryOcrDb db, int selectedNOcrMaxWrongPixels, List<ImageSplitterItem2> letters, List<BinaryOcrMatcher.CompareMatch?> matches)
     {
         _letters = letters;
         _matches = matches;
-        _nOcrDb = nOcrDb ?? new NOcrDb(string.Empty);
+        _db = db;
         _sentenceBitmapOriginal = sKBitmap;
-        NOcrDrawingCanvas.BackgroundImage = CurrentBitmap;
-        NOcrDrawingCanvas.ZoomFactor = Se.Settings.Ocr.NOcrZoomFactor;
 
         if (letters.Count > 0)
         {
@@ -144,7 +130,10 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
     [RelayCommand]
     private void Ok()
     {
-        NOcrChar.Text = NewText;
+        if (BinaryOcrBitmap != null)
+        {
+            BinaryOcrBitmap.Text = NewText;
+        }
         OkPressed = true;
         Close();
     }
@@ -168,7 +157,7 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
     [RelayCommand]
     private void Update()
     {
-        var item = NOcrChar;
+        var item = BinaryOcrBitmap;
         if (item == null || string.IsNullOrEmpty(NewText))
         {
             return;
@@ -176,7 +165,7 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
 
         item.Text = NewText;
         item.Italic = IsNewTextItalic;
-        _nOcrDb.Save();
+        _db.Save();
 
         Close();
     }
@@ -184,7 +173,7 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
     [RelayCommand]
     private async Task Delete()
     {
-        var item = NOcrChar;
+        var item = BinaryOcrBitmap;
         if (item == null)
         {
             return;
@@ -192,8 +181,8 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
 
         var answer = await MessageBox.Show(
                    Window!,
-                   "Delete nOCR item?",
-                   $"Do you want to delete the current nOCR item?",
+                   "Delete Binary OCR item?",
+                   $"Do you want to delete the current Binary OCR item?",
                    MessageBoxButtons.YesNoCancel,
                    MessageBoxIcon.Question);
 
@@ -202,9 +191,15 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
             return;
         }
 
-        _nOcrDb.OcrCharacters.Remove(item);
-        _nOcrDb.OcrCharactersExpanded.Remove(item);
-        _nOcrDb.Save();
+        if (item.ExpandCount > 0)
+        {
+            _db.CompareImagesExpanded.Remove(item);
+        }
+        else
+        {
+            _db.CompareImages.Remove(item);
+        }
+        _db.Save();
 
         Close();
     }
@@ -212,7 +207,10 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
     [RelayCommand]
     private void AddBetterMatch()
     {
-        NOcrChar.Text = NewText;
+        if (BinaryOcrBitmap != null)
+        {
+            BinaryOcrBitmap.Text = NewText;
+        }
         AddBetterMatchPressed = true;
         Close();
     }
@@ -220,56 +218,37 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
     [RelayCommand]
     private void DrawAgain()
     {
-        NOcrChar.LinesForeground.Clear();
-        NOcrChar.LinesBackground.Clear();
-        NOcrChar.GenerateLineSegments(SelectedNoOfLinesToAutoDraw, false, NOcrChar, _splitItem.NikseBitmap!);
-        ShowOcrPoints();
+        // Binary OCR doesn't use drawing - images are compared pixel by pixel
     }
 
     [RelayCommand]
     private void ClearDraw()
     {
-        NOcrChar.LinesForeground.Clear();
-        NOcrChar.LinesBackground.Clear();
-        ShowOcrPoints();
+        // Binary OCR doesn't use drawing - images are compared pixel by pixel
     }
 
     [RelayCommand]
     private void ClearDrawForeGround()
     {
-        NOcrChar.LinesForeground.Clear();
-        ShowOcrPoints();
+        // Binary OCR doesn't use drawing - images are compared pixel by pixel
     }
 
     [RelayCommand]
     private void ClearDrawBackground()
     {
-        NOcrChar.LinesBackground.Clear();
-        ShowOcrPoints();
+        // Binary OCR doesn't use drawing - images are compared pixel by pixel
     }
 
     [RelayCommand]
     private void ZoomIn()
     {
-        if (NOcrDrawingCanvas.ZoomFactor < 20)
-        {
-            NOcrDrawingCanvas.ZoomFactor++;
-            Se.Settings.Ocr.NOcrZoomFactor = (int)NOcrDrawingCanvas.ZoomFactor;
-        }
-
-        ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
+        // Binary OCR inspect doesn't use zoom
     }
 
     [RelayCommand]
     private void ZoomOut()
     {
-        if (NOcrDrawingCanvas.ZoomFactor > 1)
-        {
-            NOcrDrawingCanvas.ZoomFactor--;
-            Se.Settings.Ocr.NOcrZoomFactor = (int)NOcrDrawingCanvas.ZoomFactor;
-        }
-
-        ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
+        // Binary OCR inspect doesn't use zoom
     }
 
     private void Close()
@@ -278,16 +257,6 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
         {
             Window?.Close();
         });
-    }
-
-    private void ShowOcrPoints()
-    {
-        NOcrDrawingCanvas.MissPaths.Clear();
-        NOcrDrawingCanvas.HitPaths.Clear();
-
-        NOcrDrawingCanvas.MissPaths.AddRange(NOcrChar.LinesBackground);
-        NOcrDrawingCanvas.HitPaths.AddRange(NOcrChar.LinesForeground);
-        NOcrDrawingCanvas.InvalidateVisual();
     }
 
     internal void TextBoxNewOnKeyDown(object? sender, KeyEventArgs e)
@@ -309,7 +278,7 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
 
         for (var i = 0; i < _matches.Count; i++)
         {
-            NOcrChar? match = _matches[i];
+            BinaryOcrMatcher.CompareMatch? match = _matches[i];
             if (match == null)
             {
                 var buttonNotFound = UiUtil.MakeButton(string.Empty)
@@ -354,16 +323,32 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
         }
     }
 
-    private void OnLetterClicked(int index, NOcrChar? match)
+    private void OnLetterClicked(int index, BinaryOcrMatcher.CompareMatch? match)
     {
         LetterIndex = index;
         _splitItem = _letters[index];
 
         IsEditControlsEnabled = match != null;
 
-        if (match != null)
+        if (match != null && _splitItem.NikseBitmap != null)
         {
-            MatchResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, match.Width, match.Height, match.MarginTop);
+            // Try to find the actual BinaryOcrBitmap from the database
+            BinaryOcrBitmap? dbBitmap = null;
+            if (match.Name != null)
+            {
+                var key = match.Name;
+                dbBitmap = _db.CompareImages.FirstOrDefault(b => b.Key == key) ??
+                          _db.CompareImagesExpanded.FirstOrDefault(b => b.Key == key);
+            }
+
+            if (dbBitmap != null)
+            {
+                MatchResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, dbBitmap.Width, dbBitmap.Height, dbBitmap.Y);
+            }
+            else
+            {
+                MatchResolutionAndTopMargin = string.Empty;
+            }
         }
         else
         {
@@ -372,11 +357,12 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
 
         if (_splitItem.NikseBitmap != null)
         {
-            NOcrChar = match ?? new NOcrChar
+            BinaryOcrBitmap = new BinaryOcrBitmap(_splitItem.NikseBitmap)
             {
-                Width = _splitItem.NikseBitmap.Width,
-                Height = _splitItem.NikseBitmap.Height,
-                MarginTop = 0
+                X = _splitItem.X,
+                Y = _splitItem.Top,
+                Text = match?.Text ?? string.Empty,
+                Italic = match?.Italic ?? false
             };
 
             NewText = match?.Text ?? string.Empty;
@@ -384,42 +370,6 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
             ResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, _splitItem.NikseBitmap.Width, _splitItem.NikseBitmap.Height, _splitItem.Top);
 
             CurrentBitmap = _splitItem.NikseBitmap!.GetBitmap().ToAvaloniaBitmap();
-            NOcrDrawingCanvas.BackgroundImage = CurrentBitmap;
-
-            if (match == null)
-            {
-                NOcrDrawingCanvas.BackgroundImage = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
-                NOcrDrawingCanvas.HitPaths.Clear();
-                NOcrDrawingCanvas.MissPaths.Clear();
-            }
-            else
-            {
-                NOcrDrawingCanvas.HitPaths.Clear();
-                foreach (var line in match.LinesForeground)
-                {
-                    NOcrDrawingCanvas.HitPaths.Add(new NOcrLine(
-                        line.GetScaledStart(match, NOcrChar.Width, NOcrChar.Height),
-                        line.GetScaledEnd(match, NOcrChar.Width, NOcrChar.Height)));
-                }
-
-                NOcrDrawingCanvas.MissPaths.Clear();
-                foreach (var line in match.LinesBackground)
-                {
-                    NOcrDrawingCanvas.MissPaths.Add(new NOcrLine(
-                        line.GetScaledStart(match, NOcrChar.Width, NOcrChar.Height),
-                        line.GetScaledEnd(match, NOcrChar.Width, NOcrChar.Height)));
-                }
-            }
-
-            NOcrDrawingCanvas.InvalidateVisual();
-            NOcrDrawingCanvas.ZoomFactor = Se.Settings.Ocr.NOcrZoomFactor; 
-            ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
-        }
-        else
-        {
-            NOcrDrawingCanvas.HitPaths.Clear();
-            NOcrDrawingCanvas.MissPaths.Clear();
-            NOcrDrawingCanvas.InvalidateVisual();
         }
 
         InitSentenceBitmap();
@@ -430,15 +380,7 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
         if (e.Key == Key.Escape)
         {
             e.Handled = true;
-
-            if (NOcrDrawingCanvas.IsDrawing)
-            {
-                NOcrDrawingCanvas.AbortDraw();
-            }
-            else
-            {
-                Cancel();
-            }
+            Cancel();
         }
         else if (e.Key == Key.Left)
         {
@@ -456,22 +398,6 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
                 IsNewTextItalic = !IsNewTextItalic;
             }
         }
-        else if (e.Key == Key.Z)
-        {
-            if (_isControlDown || _isWinDown)
-            {
-                e.Handled = true;
-                NOcrDrawingCanvas.UndoLastPath();
-            }
-        }
-        else if (e.Key == Key.Y)
-        {
-            if (_isControlDown || _isWinDown)
-            {
-                e.Handled = true;
-                NOcrDrawingCanvas.ReDoLastPath();
-            }
-        }
         else if (e.Key == Key.F)
         {
             if (_isControlDown || _isWinDown)
@@ -483,7 +409,6 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
         else if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
         {
             _isControlDown = true;
-            NOcrDrawingCanvas.IsControlDown = _isControlDown;
         }
         else if (e.Key == Key.LWin || e.Key == Key.RWin)
         {
@@ -496,7 +421,6 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
         if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
         {
             _isControlDown = false;
-            NOcrDrawingCanvas.IsControlDown = _isControlDown;
         }
         else if (e.Key == Key.LWin || e.Key == Key.RWin)
         {
@@ -509,24 +433,6 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
         Dispatcher.UIThread.Post(() =>
         {
             TextBoxNew.FontStyle = IsNewTextItalic ? FontStyle.Italic : FontStyle.Normal;
-        });
-    }
-
-    internal void DrawModeForegroundChanged(object? sender, RoutedEventArgs e)
-    {
-        Dispatcher.UIThread.Post(() =>
-        {
-            NOcrDrawingCanvas.NewLinesAreHits = IsNewLinesForegroundActive;
-            IsNewLinesBackgroundActive = !IsNewLinesForegroundActive;
-        });
-    }
-
-    internal void DrawModeBackgroundChanged(object? sender, RoutedEventArgs e)
-    {
-        Dispatcher.UIThread.Post(() =>
-        {
-            IsNewLinesForegroundActive = !IsNewLinesBackgroundActive;
-            NOcrDrawingCanvas.NewLinesAreHits = IsNewLinesForegroundActive;
         });
     }
 

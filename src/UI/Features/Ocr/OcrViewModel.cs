@@ -411,7 +411,7 @@ public partial class OcrViewModel : ObservableObject
             await InspectLineNOcr(item);
         }
 
-        if (engine.EngineType == OcrEngineType.nOcr)
+        if (engine.EngineType == OcrEngineType.BinaryImageCompare)
         {
             await InspectLineBinaryImageCompareOcr(item);
         }
@@ -480,63 +480,64 @@ public partial class OcrViewModel : ObservableObject
 
     private async Task InspectLineBinaryImageCompareOcr(OcrSubtitleItem item)
     {
-        //if (!InitNOcrDb())
-        //{
-        //    return;
-        //}
+        var db = InitImageComparOcrDb();
+        if (db == null)
+        {
+            return;
+        }
 
-        //var bitmap = item.GetSkBitmap();
-        //var nBmp = new NikseBitmap2(bitmap);
-        //nBmp.MakeTwoColor(200);
-        //nBmp.CropTop(0, new SKColor(0, 0, 0, 0));
-        //var letters =
-        //    NikseBitmapImageSplitter2.SplitBitmapToLettersNew(nBmp, SelectedNOcrPixelsAreSpace, false, true, 20, true);
-        //var matches = new List<NOcrChar?>();
-        //foreach (var splitterItem in letters)
-        //{
-        //    if (splitterItem.NikseBitmap == null)
-        //    {
-        //        var match = new NOcrChar { Text = splitterItem.SpecialCharacter ?? string.Empty };
-        //        matches.Add(match);
-        //    }
-        //    else
-        //    {
-        //        var match = _nOcrDb!.GetMatch(nBmp, letters, splitterItem, splitterItem.Top, true,
-        //            SelectedNOcrMaxWrongPixels);
-        //        matches.Add(match);
-        //    }
-        //}
+        var bitmap = item.GetSkBitmap();
+        var nBmp = new NikseBitmap2(bitmap);
+        nBmp.MakeTwoColor(200);
+        nBmp.CropTop(0, new SKColor(0, 0, 0, 0));
+        var letters =
+            NikseBitmapImageSplitter2.SplitBitmapToLettersNew(nBmp, SelectedNOcrPixelsAreSpace, false, true, 20, true);
+        var matches = new List<BinaryOcrMatcher.CompareMatch?>();
+        foreach (var splitterItem in letters)
+        {
+            if (splitterItem.NikseBitmap == null)
+            {
+                var match = new BinaryOcrMatcher.CompareMatch(splitterItem.SpecialCharacter ?? string.Empty, false, 0, nameof(splitterItem.SpecialCharacter));
+                matches.Add(match);
+            }
+            else
+            {
+                var match = _binaryOcrMatcher.GetCompareMatch(splitterItem, out _, letters, letters.IndexOf(splitterItem), db);
+                matches.Add(match);
+            }
+        }
 
-        //var result = await _windowService.ShowDialogAsync<NOcrInspectWindow, NOcrInspectViewModel>(Window!,
-        //    vm =>
-        //    {
-        //        vm.Initialize(nBmp.GetBitmap(), SelectedOcrSubtitleItem, _nOcrDb, SelectedNOcrMaxWrongPixels, letters,
-        //            matches);
-        //    });
+        var result = await _windowService.ShowDialogAsync<BinaryOcrInspectWindow, BinaryOcrInspectViewModel>(Window!,
+            vm =>
+            {
+                vm.Initialize(nBmp.GetBitmap(), SelectedOcrSubtitleItem, db, SelectedNOcrMaxWrongPixels, letters,
+                    matches);
+            });
 
-        //if (result.AddBetterMatchPressed)
-        //{
-        //    var characterAddResult =
-        //        await _windowService.ShowDialogAsync<NOcrCharacterAddWindow, NOcrCharacterAddViewModel>(Window!,
-        //            vm =>
-        //            {
-        //                vm.Initialize(nBmp, item, letters, result.LetterIndex, _nOcrDb!, SelectedNOcrMaxWrongPixels,
-        //                    _nOcrAddHistoryManager, false, false);
-        //            });
+        if (result.AddBetterMatchPressed)
+        {
+            var characterAddResult =
+                await _windowService.ShowDialogAsync<BinaryOcrCharacterAddWindow, BinaryOcrCharacterAddViewModel>(Window!,
+                    vm =>
+                    {
+                        vm.Initialize(nBmp, item, letters, result.LetterIndex, db, SelectedNOcrMaxWrongPixels,
+                            _binaryOcrAddHistoryManager, false, false);
+                    });
 
-        //    if (characterAddResult.OkPressed)
-        //    {
-        //        var letterBitmap = letters[result.LetterIndex].NikseBitmap;
-        //        _nOcrAddHistoryManager.Add(characterAddResult.NOcrChar, letterBitmap, OcrSubtitleItems.IndexOf(item));
-        //        _nOcrDb!.Add(characterAddResult.NOcrChar);
-        //        _ = Task.Run(_nOcrDb.Save);
-        //    }
-        //    else if (characterAddResult.InspectHistoryPressed)
-        //    {
-        //        await _windowService.ShowDialogAsync<NOcrCharacterHistoryWindow, NOcrCharacterHistoryViewModel>(Window!,
-        //            vm => { vm.Initialize(_nOcrDb!, _nOcrAddHistoryManager); });
-        //    }
-        //}
+            if (characterAddResult.OkPressed && characterAddResult.BinaryOcrBitmap != null)
+            {
+                var letterBitmap = letters[result.LetterIndex].NikseBitmap;
+                _binaryOcrAddHistoryManager.Add(characterAddResult.BinaryOcrBitmap, letterBitmap, OcrSubtitleItems.IndexOf(item));
+                db.Add(characterAddResult.BinaryOcrBitmap);
+                _ = Task.Run(db.Save);
+            }
+            // TODO: Implement Binary OCR Character History Window
+            //else if (characterAddResult.InspectHistoryPressed)
+            //{
+            //    await _windowService.ShowDialogAsync<BinaryOcrCharacterHistoryWindow, BinaryOcrCharacterHistoryViewModel>(Window!,
+            //        vm => { vm.Initialize(db, _binaryOcrAddHistoryManager); });
+            //}
+        }
     }
 
     [RelayCommand]
@@ -1066,7 +1067,7 @@ public partial class OcrViewModel : ObservableObject
         }
         else if (ocrEngine.EngineType == OcrEngineType.BinaryImageCompare)
         {
-            RunImageCompareOcr(selectedIndices);
+            RunBinaryImageCompareOcr(selectedIndices);
         }
         else if (ocrEngine.EngineType == OcrEngineType.Tesseract)
         {
@@ -1526,7 +1527,7 @@ public partial class OcrViewModel : ObservableObject
         IsOcrRunning = false;
     }
 
-    private void RunImageCompareOcr(List<int> selectedIndices)
+    private void RunBinaryImageCompareOcr(List<int> selectedIndices)
     {
         var db = InitImageComparOcrDb();
         if (db == null)
@@ -1535,7 +1536,7 @@ public partial class OcrViewModel : ObservableObject
         }
 
         _skipOnceChars.Clear();
-        _ = Task.Run(() => { using var _ = RunImageCompareOcrLoop(db, selectedIndices); });
+        _ = Task.Run(() => { using var _ = RunBinaryImageCompareOcrLoop(db, selectedIndices); });
     }
 
     private BinaryOcrDb? InitImageComparOcrDb()
@@ -1549,7 +1550,7 @@ public partial class OcrViewModel : ObservableObject
         return new BinaryOcrDb(fileName, true);
     }
 
-    private async Task RunImageCompareOcrLoop(BinaryOcrDb db, List<int> selectedIndices)
+    private async Task RunBinaryImageCompareOcrLoop(BinaryOcrDb db, List<int> selectedIndices)
     {
         foreach (var i in selectedIndices)
         {
@@ -1629,7 +1630,7 @@ public partial class OcrViewModel : ObservableObject
                                     db.Add(result.BinaryOcrBitmap);
                                     _ = Task.Run(() => db.Save());
                                 }
-                                _ = Task.Run(() => RunImageCompareOcrLoop(db, selectedIndices.Where(p => p >= i).ToList()));
+                                _ = Task.Run(() => RunBinaryImageCompareOcrLoop(db, selectedIndices.Where(p => p >= i).ToList()));
                             }
                             else if (result.AbortPressed)
                             {
@@ -1638,12 +1639,12 @@ public partial class OcrViewModel : ObservableObject
                             else if (result.UseOncePressed)
                             {
                                 _runOnceChars.Add(new SkipOnceChar(i, letterIndex, result.NewText));
-                                _ = Task.Run(() => RunImageCompareOcrLoop(db, selectedIndices.Where(p => p >= i).ToList()));
+                                _ = Task.Run(() => RunBinaryImageCompareOcrLoop(db, selectedIndices.Where(p => p >= i).ToList()));
                             }
                             else if (result.SkipPressed)
                             {
                                 _skipOnceChars.Add(new SkipOnceChar(i, letterIndex));
-                                _ = Task.Run(() => RunImageCompareOcrLoop(db, selectedIndices.Where(p => p >= i).ToList()));
+                                _ = Task.Run(() => RunBinaryImageCompareOcrLoop(db, selectedIndices.Where(p => p >= i).ToList()));
                             }
                             else if (result.InspectHistoryPressed)
                             {
