@@ -11004,7 +11004,7 @@ public partial class MainViewModel :
         Dispatcher.UIThread.Post(async void () => { await DeleteSelectedItems(); });
     }
 
-    public void TextBoxPointerReleased(object? sender, PointerReleasedEventArgs e)
+    public void ControlMacPointerReleased(object? sender, PointerReleasedEventArgs e)
     {
         if (OperatingSystem.IsMacOS() &&
             _shortcutManager.IsControlPressed() &&

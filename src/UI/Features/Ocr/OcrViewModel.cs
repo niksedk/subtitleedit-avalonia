@@ -1220,7 +1220,7 @@ public partial class OcrViewModel : ObservableObject
             }
         });
 
-        _ = Task.Run(async () =>
+        _ = Task.Run(() =>
         {
             ocrEngine.OcrBatch(batchImages, language, ocrProgress, _cancellationTokenSource.Token);
             IsOcrRunning = false;

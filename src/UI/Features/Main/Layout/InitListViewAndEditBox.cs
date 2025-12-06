@@ -1030,7 +1030,7 @@ public static class InitListViewAndEditBox
         var flyoutTextBox = new MenuFlyout();
         textBox.ContextFlyout = flyoutTextBox;
         flyoutTextBox.Opening += vm.TextBoxContextOpening;
-        textBox.PointerReleased += vm.TextBoxPointerReleased;
+        textBox.PointerReleased += vm.ControlMacPointerReleased;
 
         var cutMenuItem = new MenuItem { Header = Se.Language.General.Cut };
         cutMenuItem.Command = vm.TextBoxCutCommand;

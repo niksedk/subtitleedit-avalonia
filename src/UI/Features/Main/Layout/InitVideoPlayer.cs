@@ -80,8 +80,6 @@ public static class InitVideoPlayer
 
     public static VideoPlayerControl MakeVideoPlayer()
     {
-        VideoPlayerControl? control = null;
-
         try
         {
             if (Se.Settings.Video.VideoPlayer.Equals("vlc", StringComparison.OrdinalIgnoreCase))
