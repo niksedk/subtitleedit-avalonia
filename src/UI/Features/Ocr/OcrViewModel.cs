@@ -14,6 +14,7 @@ using Nikse.SubtitleEdit.Core.VobSub;
 using Nikse.SubtitleEdit.Core.VobSub.Ocr.Service;
 using Nikse.SubtitleEdit.Features.Files.ImportImages;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Ocr.BinaryOcr;
 using Nikse.SubtitleEdit.Features.Ocr.Download;
 using Nikse.SubtitleEdit.Features.Ocr.Engines;
 using Nikse.SubtitleEdit.Features.Ocr.FixEngine;
@@ -1531,14 +1532,14 @@ public partial class OcrViewModel : ObservableObject
 
                         Dispatcher.UIThread.Post(async void () =>
                         {
-                            //        var result =
-                            //            await _windowService.ShowDialogAsync<NOcrCharacterAddWindow, NOcrCharacterAddViewModel>(
-                            //                Window!,
-                            //                vm =>
-                            //                {
-                            //                    vm.Initialize(parentBitmap, item, letters, letterIndex, _nOcrDb,
-                            //                        SelectedNOcrMaxWrongPixels, _nOcrAddHistoryManager, true, true);
-                            //                });
+                            var result =
+                                await _windowService.ShowDialogAsync<BinaryOcrCharacterAddWindow, BinaryOcrCharacterAddViewModel>(
+                                    Window!,
+                                    vm =>
+                                    {
+                                        vm.Initialize(parentBitmap, item, letters, letterIndex, db,
+                                            SelectedNOcrMaxWrongPixels, _nOcrAddHistoryManager, true, true);
+                                    });
 
                             //        if (result.OkPressed)
                             //        {

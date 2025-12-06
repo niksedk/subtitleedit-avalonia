@@ -63,7 +63,7 @@ public partial class BinaryOcrCharacterAddViewModel : ObservableObject
     private NikseBitmap2 _nBmp;
     private OcrSubtitleItem? _item;
     private int _expandCount;
-    private NOcrDb _nOcrDb;
+    private BinaryOcrDb _db;
     private bool _isControlDown;
     private bool _isWinDown;
 
@@ -90,7 +90,7 @@ public partial class BinaryOcrCharacterAddViewModel : ObservableObject
 
         SelectedNoOfLinesToAutoDraw = 100;
         NOcrChar = new NOcrChar();
-        _nOcrDb = new NOcrDb(string.Empty);
+        _db = new NOcrDb(string.Empty);
         SentenceBitmap = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
         CurrentBitmap = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
         _splitItem = new ImageSplitterItem2(string.Empty);
@@ -122,13 +122,13 @@ public partial class BinaryOcrCharacterAddViewModel : ObservableObject
         OcrSubtitleItem item,
         List<ImageSplitterItem2> letters,
         int i,
-        NOcrDb nOcrDb,
+        BinaryOcrDb db,
         int maxWrongPixels,
         NOcrAddHistoryManager nOcrAddHistoryManager,
         bool showUseOnce,
         bool showSkip)
     {
-        _nOcrDb = nOcrDb;
+        _db = db;
         _letters = letters;
         _startFromNumber = i;
         _nBmp = nBmp;
@@ -419,7 +419,7 @@ public partial class BinaryOcrCharacterAddViewModel : ObservableObject
     private void SetTitle()
     {
         Title =
-            $"Add nOCR character for line  {_startFromNumber}, character {_letters.IndexOf(_splitItem) + 1} of {_letters.Count} using database \"{Path.GetFileNameWithoutExtension(_nOcrDb.FileName)}\"";
+            $"Add nOCR character for line  {_startFromNumber}, character {_letters.IndexOf(_splitItem) + 1} of {_letters.Count} using database \"{Path.GetFileNameWithoutExtension(_db.FileName)}\"";
     }
 
     internal void TextBoxNewOnKeyDown(object? sender, KeyEventArgs e)
