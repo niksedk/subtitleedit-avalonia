@@ -53,6 +53,7 @@ public class DownloadLibVlcWindow : Window
             }
         };
         progressSlider.Bind(Slider.ValueProperty, new Binding(nameof(vm.ProgressValue)));
+        progressSlider.Bind(Slider.OpacityProperty, new Binding(nameof(vm.ProgressOpacity)));
 
         var statusText = new TextBlock();
         statusText.Bind(TextBlock.TextProperty, new Binding(nameof(vm.ProgressText)));

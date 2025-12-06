@@ -22,6 +22,7 @@ public partial class DownloadLibVlcViewModel : ObservableObject
 {
     [ObservableProperty] private double _progressValue;
     [ObservableProperty] private string _progressText;
+    [ObservableProperty] private double _progressOpacity;
     [ObservableProperty] private string _statusText;
     [ObservableProperty] private string _error;
 
@@ -34,6 +35,7 @@ public partial class DownloadLibVlcViewModel : ObservableObject
     private readonly Timer _timer;
     private bool _done;
     private readonly CancellationTokenSource _cancellationTokenSource;
+    private IndeterminateProgressHelper? _indeterminateProgressHelper;
 
     public DownloadLibVlcViewModel(ILibVlcDownloadService libVlcDownloadService)
     {
@@ -43,6 +45,7 @@ public partial class DownloadLibVlcViewModel : ObservableObject
 
         StatusText = string.Format(Se.Language.General.DownloadingX, "libVLC");
         ProgressText = string.Empty;
+        ProgressOpacity = 1.0;
         Error = string.Empty;
         _tempFileName = string.Empty;
 
@@ -82,7 +85,9 @@ public partial class DownloadLibVlcViewModel : ObservableObject
                     return;
                 }
 
+                StartIndeterminateProgress();
                 Extract7Zip(_tempFileName, Se.VlcFolder, "vlc-3.0.21");
+                StopIndeterminateProgress();
 
                 OkPressed = true;
                 Close();
@@ -104,6 +109,21 @@ public partial class DownloadLibVlcViewModel : ObservableObject
                 }
             }
         }
+    }
+
+    private void StartIndeterminateProgress()
+    {
+        _indeterminateProgressHelper?.Dispose();
+        _indeterminateProgressHelper = new IndeterminateProgressHelper(
+            value => ProgressValue = value,
+            opacity => ProgressOpacity = opacity,
+            () => _cancellationTokenSource.IsCancellationRequested);
+        _indeterminateProgressHelper.Start();
+    }
+
+    private void StopIndeterminateProgress()
+    {
+        _indeterminateProgressHelper?.Stop();
     }
 
     private void Extract7Zip(string tempFileName, string dir, string skipFolderLevel)

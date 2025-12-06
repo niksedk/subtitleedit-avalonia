@@ -55,7 +55,7 @@ public class DownloadWhisperEngineWindow : Window
             }
         };
         progressSlider.Bind(Slider.ValueProperty, new Binding(nameof(vm.ProgressValue)));
-        vm.ProgressSlider = progressSlider;
+        progressSlider.Bind(Slider.OpacityProperty, new Binding(nameof(vm.ProgressOpacity)));
 
         var statusText = new TextBlock();
         statusText.Bind(TextBlock.TextProperty, new Binding(nameof(vm.ProgressText)));

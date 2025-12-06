@@ -3,6 +3,7 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Compression;
@@ -34,7 +35,6 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
     public Window? Window { get; set; }
     public bool OkPressed { get; internal set; }
     public IWhisperEngine? Engine { get; internal set; }
-    public Slider? ProgressSlider { get; internal set; }
 
     private readonly IWhisperDownloadService _whisperDownloadService;
     private Task? _downloadTask;
@@ -44,13 +44,7 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
 
     private readonly IZipUnpacker _zipUnpacker;
 
-    private Timer? _indeterminateTimer;
-    private DateTime _indeterminateStartUtc;
-    private const int IndeterminateIntervalMs = 16; // ~60 FPS
-    private const double PositionCycleSeconds = 10; // seconds per sweep 0 -> 100 (increase to slow, decrease to speed up)
-    private const double PulseFrequencyHz = 1.2; // opacity pulse frequency
-    private const double MinOpacity = 0.35; // lower to make pulse more visible
-    private const double MaxOpacity = 1.0;
+    private IndeterminateProgressHelper? _indeterminateProgressHelper;
 
     public DownloadWhisperEngineViewModel(IWhisperDownloadService whisperDownloadService, IZipUnpacker zipUnpacker)
     {
@@ -63,6 +57,7 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
 
         TitleText = Se.Language.Video.AudioToText.DownloadingWhisperEngine;
         ProgressText = Se.Language.General.StartingDotDotDot;
+        ProgressOpacity = 1.0;
         Error = string.Empty;
 
         _timer = new Timer(500);
@@ -74,80 +69,17 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
 
     private void StartIndeterminateProgress()
     {
-        StopIndeterminateProgress();
-        ProgressOpacity = 1.0;
-        ProgressValue = 0;
-        _indeterminateStartUtc = DateTime.UtcNow;
-        _indeterminateTimer = new Timer(IndeterminateIntervalMs);
-        _indeterminateTimer.Elapsed += (_, __) =>
-        {
-            if (_cancellationTokenSource.IsCancellationRequested)
-            {
-                StopIndeterminateProgress();
-                return;
-            }
-
-            // Time since start
-            var t = (DateTime.UtcNow - _indeterminateStartUtc).TotalSeconds;
-
-            // Forward-only sweep with easing (0 ->100), then reset (marquee-like)
-            var pos01 = (t % PositionCycleSeconds) / PositionCycleSeconds; // 0..1
-            pos01 = EaseInOutCubic(pos01);
-            var nextValue = pos01 * 100.0;
-
-            // Opacity pulse using sine wave
-            var s = Math.Sin(2 * Math.PI * PulseFrequencyHz * t); // -1..1
-            var nextOpacity = MinOpacity + (MaxOpacity - MinOpacity) * ((s + 1) / 2.0); // Min..Max
-
-            Dispatcher.UIThread.Post(() =>
-            {
-                ProgressValue = nextValue;
-                ProgressOpacity = nextOpacity;
-                if (ProgressSlider != null)
-                {
-                    ProgressSlider.Opacity = nextOpacity; // ensure visible pulse even if not bound to ProgressOpacity
-                }
-            });
-        };
-        _indeterminateTimer.AutoReset = true;
-        _indeterminateTimer.Start();
+        _indeterminateProgressHelper?.Dispose();
+        _indeterminateProgressHelper = new IndeterminateProgressHelper(
+            value => ProgressValue = value,
+            opacity => ProgressOpacity = opacity,
+            () => _cancellationTokenSource.IsCancellationRequested);
+        _indeterminateProgressHelper.Start();
     }
 
     private void StopIndeterminateProgress()
     {
-        if (_indeterminateTimer != null)
-        {
-            try
-            {
-                _indeterminateTimer.Stop();
-                _indeterminateTimer.Dispose();
-            }
-            catch
-            {
-                // ignore
-            }
-            finally
-            {
-                _indeterminateTimer = null;
-            }
-        }
-
-        // Restore opacity
-        ProgressOpacity = 1.0;
-        if (ProgressSlider != null)
-        {
-            Dispatcher.UIThread.Post(() =>
-            {
-                ProgressSlider.Opacity = 1.0;
-            }); 
-        }
-    }
-
-    private static double EaseInOutCubic(double x)
-    {
-        if (x <= 0) return 0;
-        if (x >= 1) return 1;
-        return x < 0.5 ? 4 * x * x * x : 1 - Math.Pow(-2 * x + 2, 3) / 2;
+        _indeterminateProgressHelper?.Stop();
     }
 
     private void OnTimerOnElapsed(object? sender, ElapsedEventArgs args)
