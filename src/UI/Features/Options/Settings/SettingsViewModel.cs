@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using DownloadFfmpegViewModel = Nikse.SubtitleEdit.Features.Shared.DownloadFfmpegViewModel;
 using DownloadLibMpvViewModel = Nikse.SubtitleEdit.Features.Shared.DownloadLibMpvViewModel;
@@ -298,7 +299,9 @@ public partial class SettingsViewModel : ObservableObject
         LibMpvStatus = Se.Language.General.NotInstalled;
         LibMpvPath = string.Empty;
         IsLibMpvDownloadVisible = OperatingSystem.IsWindows();
-        IsLibVlcDownloadVisible = OperatingSystem.IsWindows();
+        IsLibVlcDownloadVisible = OperatingSystem.IsMacOS() && RuntimeInformation.ProcessArchitecture == Architecture.X64 ||
+                                  OperatingSystem.IsWindows();
+
         MpvPreviewFontName = FontNames.First();
         MpvPreviewSelectedBorderType = MpvPreviewBorderTypes.First();
 
