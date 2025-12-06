@@ -55,6 +55,8 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private OcrSubtitleItem? _selectedOcrSubtitleItem;
     [ObservableProperty] private ObservableCollection<string> _nOcrDatabases;
     [ObservableProperty] private string? _selectedNOcrDatabase;
+    [ObservableProperty] private ObservableCollection<string> _imageCompareDatabases;
+    [ObservableProperty] private string? _selectedImageCompareDatabase;
     [ObservableProperty] private ObservableCollection<int> _nOcrMaxWrongPixelsList;
     [ObservableProperty] private int _selectedNOcrMaxWrongPixels;
     [ObservableProperty] private ObservableCollection<int> _nOcrPixelsAreSpaceList;
@@ -147,6 +149,8 @@ public partial class OcrViewModel : ObservableObject
         OcrEngines = new ObservableCollection<OcrEngineItem>(OcrEngineItem.GetOcrEngines());
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>();
         NOcrDatabases = new ObservableCollection<string>();
+        ImageCompareDatabases = new ObservableCollection<string>(BinaryOcrDb.GetDatabases());
+        SelectedImageCompareDatabase = ImageCompareDatabases.FirstOrDefault();
         NOcrMaxWrongPixelsList = new ObservableCollection<int>(Enumerable.Range(0, 500));
         NOcrPixelsAreSpaceList = new ObservableCollection<int>(Enumerable.Range(1, 50));
         OllamaLanguages = new ObservableCollection<string>(Iso639Dash2LanguageCode.List
