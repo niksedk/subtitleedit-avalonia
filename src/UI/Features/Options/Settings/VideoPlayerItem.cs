@@ -34,7 +34,9 @@ public partial class VideoPlayerItem : ObservableObject
 
         result.Add(new VideoPlayerItem { Name = Se.Language.Options.Settings.MpvSoftwareRendering, Code = "mpv-sw" });
 
-        if (OperatingSystem.IsMacOS() && RuntimeInformation.ProcessArchitecture == Architecture.X64 || OperatingSystem.IsWindows())
+        if (OperatingSystem.IsMacOS() && RuntimeInformation.ProcessArchitecture == Architecture.X64 || 
+            OperatingSystem.IsWindows() ||
+            OperatingSystem.IsLinux())
         {
             result.Add(new VideoPlayerItem { Name = Se.Language.Options.Settings.VlcWidRendering, Code = "vlc" });
         }
