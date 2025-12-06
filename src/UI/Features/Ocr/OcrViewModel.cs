@@ -400,11 +400,25 @@ public partial class OcrViewModel : ObservableObject
     private async Task InspectLine()
     {
         var item = SelectedOcrSubtitleItem;
-        if (item == null)
+        var engine = SelectedOcrEngine;
+        if (item == null || engine == null)
         {
             return;
         }
 
+        if (engine.EngineType == OcrEngineType.nOcr)
+        {
+            await InspectLineNOcr(item);
+        }
+
+        if (engine.EngineType == OcrEngineType.nOcr)
+        {
+            await InspectLineBinaryImageCompareOcr(item);
+        }
+    }
+
+    private async Task InspectLineNOcr(OcrSubtitleItem item)
+    {
         if (!InitNOcrDb())
         {
             return;
@@ -462,6 +476,67 @@ public partial class OcrViewModel : ObservableObject
                     vm => { vm.Initialize(_nOcrDb!, _nOcrAddHistoryManager); });
             }
         }
+    }
+
+    private async Task InspectLineBinaryImageCompareOcr(OcrSubtitleItem item)
+    {
+        //if (!InitNOcrDb())
+        //{
+        //    return;
+        //}
+
+        //var bitmap = item.GetSkBitmap();
+        //var nBmp = new NikseBitmap2(bitmap);
+        //nBmp.MakeTwoColor(200);
+        //nBmp.CropTop(0, new SKColor(0, 0, 0, 0));
+        //var letters =
+        //    NikseBitmapImageSplitter2.SplitBitmapToLettersNew(nBmp, SelectedNOcrPixelsAreSpace, false, true, 20, true);
+        //var matches = new List<NOcrChar?>();
+        //foreach (var splitterItem in letters)
+        //{
+        //    if (splitterItem.NikseBitmap == null)
+        //    {
+        //        var match = new NOcrChar { Text = splitterItem.SpecialCharacter ?? string.Empty };
+        //        matches.Add(match);
+        //    }
+        //    else
+        //    {
+        //        var match = _nOcrDb!.GetMatch(nBmp, letters, splitterItem, splitterItem.Top, true,
+        //            SelectedNOcrMaxWrongPixels);
+        //        matches.Add(match);
+        //    }
+        //}
+
+        //var result = await _windowService.ShowDialogAsync<NOcrInspectWindow, NOcrInspectViewModel>(Window!,
+        //    vm =>
+        //    {
+        //        vm.Initialize(nBmp.GetBitmap(), SelectedOcrSubtitleItem, _nOcrDb, SelectedNOcrMaxWrongPixels, letters,
+        //            matches);
+        //    });
+
+        //if (result.AddBetterMatchPressed)
+        //{
+        //    var characterAddResult =
+        //        await _windowService.ShowDialogAsync<NOcrCharacterAddWindow, NOcrCharacterAddViewModel>(Window!,
+        //            vm =>
+        //            {
+        //                vm.Initialize(nBmp, item, letters, result.LetterIndex, _nOcrDb!, SelectedNOcrMaxWrongPixels,
+        //                    _nOcrAddHistoryManager, false, false);
+        //            });
+
+        //    if (characterAddResult.OkPressed)
+        //    {
+        //        var letterBitmap = letters[result.LetterIndex].NikseBitmap;
+        //        _nOcrAddHistoryManager.Add(characterAddResult.NOcrChar, letterBitmap, OcrSubtitleItems.IndexOf(item));
+        //        _nOcrDb!.Add(characterAddResult.NOcrChar);
+        //        _ = Task.Run(_nOcrDb.Save);
+        //    }
+        //    else if (characterAddResult.InspectHistoryPressed)
+        //    {
+        //        await _windowService.ShowDialogAsync<NOcrCharacterHistoryWindow, NOcrCharacterHistoryViewModel>(Window!,
+        //            vm => { vm.Initialize(_nOcrDb!, _nOcrAddHistoryManager); });
+        //    }
+        //}
     }
 
     [RelayCommand]
@@ -2221,15 +2296,16 @@ public partial class OcrViewModel : ObservableObject
             SelectedOcrEngine = OcrEngines.FirstOrDefault();
         }
 
-        IsNOcrVisible = SelectedOcrEngine?.EngineType == OcrEngineType.nOcr;
-        IsInspectLineVisible = SelectedOcrEngine?.EngineType == OcrEngineType.nOcr;
-        IsOllamaVisible = SelectedOcrEngine?.EngineType == OcrEngineType.Ollama;
-        IsTesseractVisible = SelectedOcrEngine?.EngineType == OcrEngineType.Tesseract;
-        IsPaddleOcrVisible = SelectedOcrEngine?.EngineType == OcrEngineType.PaddleOcrStandalone || SelectedOcrEngine?.EngineType == OcrEngineType.PaddleOcrPython;
-        IsGoogleVisionVisible = SelectedOcrEngine?.EngineType == OcrEngineType.GoogleVision;
-        IsGoogleLensVisible = SelectedOcrEngine?.EngineType == OcrEngineType.GoogleLens;
-        IsMistralOcrVisible = SelectedOcrEngine?.EngineType == OcrEngineType.Mistral;
-        IsBinaryImageCompareVisible = SelectedOcrEngine?.EngineType == OcrEngineType.BinaryImageCompare;
+        var et = SelectedOcrEngine?.EngineType;
+        IsNOcrVisible = et == OcrEngineType.nOcr;
+        IsInspectLineVisible = et == OcrEngineType.nOcr || et == OcrEngineType.BinaryImageCompare;
+        IsOllamaVisible = et == OcrEngineType.Ollama;
+        IsTesseractVisible = et == OcrEngineType.Tesseract;
+        IsPaddleOcrVisible = et == OcrEngineType.PaddleOcrStandalone || et == OcrEngineType.PaddleOcrPython;
+        IsGoogleVisionVisible = et == OcrEngineType.GoogleVision;
+        IsGoogleLensVisible = et == OcrEngineType.GoogleLens;
+        IsMistralOcrVisible = et == OcrEngineType.Mistral;
+        IsBinaryImageCompareVisible = et == OcrEngineType.BinaryImageCompare;
 
         if (IsNOcrVisible && NOcrDatabases.Count == 0)
         {
