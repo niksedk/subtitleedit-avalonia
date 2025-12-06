@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,6 +17,7 @@ public interface ILibVlcDownloadService
 public class LibVlcDownloadService(HttpClient httpClient) : ILibVlcDownloadService
 {
     private const string WindowsUrl = "https://get.videolan.org/vlc/3.0.21/win64/vlc-3.0.21-win64.7z";
+    private const string MacX64Url = "https://github.com/SubtitleEdit/support-files/releases/download/vlc3/libvlc.dylib-osx64.zip";
 
     public async Task DownloadLibVlc(string destinationFileName, IProgress<float>? progress, CancellationToken cancellationToken)
     {
@@ -32,6 +34,17 @@ public class LibVlcDownloadService(HttpClient httpClient) : ILibVlcDownloadServi
         if (OperatingSystem.IsWindows())
         {
             return WindowsUrl;
+        }
+
+        if (OperatingSystem.IsMacOS())
+        {
+            switch (RuntimeInformation.ProcessArchitecture)
+            {
+                // case Architecture.Arm64:
+                //     return MacArmUrl; // e.g., for M1, M2, M3, M4 chips
+                case Architecture.X64:
+                    return MacX64Url;
+            }
         }
 
         throw new PlatformNotSupportedException("LibVLC download is only supported on Windows.");
