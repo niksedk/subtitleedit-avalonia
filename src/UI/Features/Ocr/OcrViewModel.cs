@@ -1573,7 +1573,7 @@ public partial class OcrViewModel : ObservableObject
                             //                    vm => { vm.Initialize(_nOcrDb!, _nOcrAddHistoryManager); });
                             //        }
                         });
-                        // return;
+                        return;
                     }
 
                     if (match is { ExpandCount: > 0 })

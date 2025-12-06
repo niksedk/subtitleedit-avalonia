@@ -1,6 +1,5 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
@@ -74,7 +73,6 @@ public class BinaryOcrCharacterAddWindow : Window
         };
         Loaded += vm.Onloaded;
         Closing += vm.OnClosing;
-        PointerWheelChanged += vm.PointerWheelChanged;
         KeyDown += (_, args) => vm.KeyDown(args);
         KeyUp += (_, args) => vm.KeyUp(args);
     }
@@ -138,133 +136,6 @@ public class BinaryOcrCharacterAddWindow : Window
             },
         };
 
-        var toggleButtonForeground = new ToggleButton
-        {
-            Content = Se.Language.General.Foreground,
-            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(vm.IsNewLinesForegroundActive))
-            {
-                Source = vm,
-            },
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            Margin = new Thickness(0, 0, 5, 0),
-        };
-        toggleButtonForeground.IsCheckedChanged += vm.DrawModeForegroundChanged;
-        var toggleButtonBackground = new ToggleButton
-        {
-            Content = Se.Language.General.Background,
-            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(vm.IsNewLinesBackgroundActive))
-            {
-                Source = vm,
-            },
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-        };
-        toggleButtonBackground.IsCheckedChanged += vm.DrawModeBackgroundChanged;
-
-        var panelDrawMode = new StackPanel
-        {
-            Orientation = Avalonia.Layout.Orientation.Horizontal,
-            Children =
-            {
-                toggleButtonForeground,
-                toggleButtonBackground,
-            }
-        };
-
-        var comboBoxLinesToAutoDraw = UiUtil.MakeComboBox(vm.NoOfLinesToAutoDrawList, vm, nameof(vm.SelectedNoOfLinesToAutoDraw));
-        var iconInfo = new Projektanker.Icons.Avalonia.Icon
-        {
-            Value = IconNames.Information,
-            Margin = new Thickness(5, 0, 0, 0),
-        };
-        iconInfo.PointerPressed += (sender, args) =>
-        {
-            _ = vm.ShowDrawingTips();
-        };
-        ToolTip.SetTip(iconInfo, Se.Language.Ocr.NOcrDrawHelp);
-        var panelLinesToDraw = new StackPanel
-        {
-            Orientation = Avalonia.Layout.Orientation.Horizontal,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            Children =
-            {
-                comboBoxLinesToAutoDraw,
-                iconInfo,
-            }
-        };
-
-        var buttonClear = new SplitButton
-        {
-            Content = Se.Language.General.Clear,
-            Command = vm.ClearDrawCommand,
-            Flyout = new MenuFlyout
-            {
-                Items =
-                {
-                    new MenuItem
-                    {
-                        Header = Se.Language.Ocr.ClearForeground,
-                        Command = vm.ClearDrawForeGroundCommand,
-                    },
-                    new MenuItem
-                    {
-                        Header = Se.Language.Ocr.ClearBackground,
-                        Command = vm.ClearDrawBackgroundCommand,
-                    },
-                }
-            }
-        };
-
-        var panelDrawControls = new StackPanel
-        {
-            Orientation = Avalonia.Layout.Orientation.Vertical,
-            Children =
-            {
-                UiUtil.MakeLabel(Se.Language.Ocr.LinesToDraw).WithBold(),
-                panelLinesToDraw,
-                UiUtil.MakeButton(Se.Language.Ocr.AutoDrawAgain, vm.DrawAgainCommand).WithMinWidth(100).WithMarginTop(10).WithLeftAlignment().WithMarginLeft(0),
-                buttonClear.WithMinWidth(100).WithMarginTop(5).WithLeftAlignment().WithMarginLeft(0),
-            }
-        };
-
-        vm.NOcrDrawingCanvas.SetStrokeWidth(1);
-        var borderDrawingCanvas = new Border
-        {
-            BorderThickness = new Thickness(1),
-            BorderBrush = new SolidColorBrush(Colors.Black),
-            Child = vm.NOcrDrawingCanvas,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
-        };
-
-        var panelZoom = new StackPanel
-        {
-            Orientation = Avalonia.Layout.Orientation.Horizontal,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            Margin = new Thickness(0, 0, 0, 5),
-            Children =
-            {
-                UiUtil.MakeButton(vm.ZoomOutCommand, IconNames.Minus),
-                UiUtil.MakeButton(vm.ZoomInCommand, IconNames.Plus),
-                UiUtil.MakeLabel(string.Empty).WithMarginLeft(10).WithBindText(vm, nameof(vm.ZoomFactorInfo)),
-                UiUtil.MakeLabel(Se.Language.Ocr.DrawMode).WithMarginLeft(10),
-                panelDrawMode,
-            }
-        };
-
-        var panelImage = new StackPanel
-        {
-            Orientation = Avalonia.Layout.Orientation.Vertical,
-            Children =
-            {
-                panelZoom,
-                borderDrawingCanvas,
-            }
-        };
-
         var buttonShrink = UiUtil.MakeButton(Se.Language.General.Shrink, vm.ShrinkCommand)
             .WithMinWidth(100).WithBindEnabled(nameof(vm.CanShrink));
         var buttonExpand = UiUtil.MakeButton(Se.Language.General.Expand, vm.ExpandCommand)
@@ -280,14 +151,12 @@ public class BinaryOcrCharacterAddWindow : Window
             {
                 buttonShrink,
                 buttonExpand,
-            }
+            },
         };
 
         grid.Add(panelCurrent, 0, 0);
-        grid.Add(panelDrawControls, 0, 1);
-        grid.Add(panelImage, 0, 2);
-        grid.Add(panelButtons, 0, 2, 1, 2);
+        grid.Add(panelButtons, 0, 1);
 
         return grid;
-    }   
+    }
 }
