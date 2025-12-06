@@ -5,7 +5,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 
-
 namespace Nikse.SubtitleEdit.Logic.Ocr;
 
 public class BinaryOcrDb
@@ -35,9 +34,12 @@ public class BinaryOcrDb
             File.Delete(FileName);
         }
 
+        var compareImages = new List<BinaryOcrBitmap>(CompareImages);
+        var compareImagesExpanded = new List<BinaryOcrBitmap>(CompareImagesExpanded);
+
         using (Stream gz = new GZipStream(File.OpenWrite(FileName), CompressionMode.Compress))
         {
-            foreach (var bob in CompareImages)
+            foreach (var bob in compareImages)
             {
                 if (bob.ExpandCount > 0)
                 {
@@ -46,7 +48,7 @@ public class BinaryOcrDb
 
                 bob.Save(gz);
             }
-            foreach (var bob in CompareImagesExpanded)
+            foreach (var bob in compareImagesExpanded)
             {
                 if (bob.ExpandCount == 0)
                 {
@@ -258,7 +260,7 @@ public class BinaryOcrDb
     {
         var files = Directory.GetFiles(Se.OcrFolder.TrimEnd(Path.DirectorySeparatorChar), "*.db");
         return files
-            .Select(p=> Path.GetFileNameWithoutExtension(p) ?? string.Empty) 
+            .Select(p => Path.GetFileNameWithoutExtension(p) ?? string.Empty)
             .Where(p => !string.IsNullOrEmpty(p))
             .OrderBy(p => p)
             .ToList();

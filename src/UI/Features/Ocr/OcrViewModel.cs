@@ -133,6 +133,7 @@ public partial class OcrViewModel : ObservableObject
     private readonly List<SkipOnceChar> _runOnceChars;
     private readonly List<SkipOnceChar> _skipOnceChars;
     private readonly NOcrAddHistoryManager _nOcrAddHistoryManager;
+    private readonly BinaryOcrAddHistoryManager _binaryOcrAddHistoryManager;
 
     public OcrViewModel(
         INOcrCaseFixer nOcrCaseFixer,
@@ -182,6 +183,7 @@ public partial class OcrViewModel : ObservableObject
         _runOnceChars = new List<SkipOnceChar>();
         _skipOnceChars = new List<SkipOnceChar>();
         _nOcrAddHistoryManager = new NOcrAddHistoryManager();
+        _binaryOcrAddHistoryManager = new BinaryOcrAddHistoryManager();
         _cancellationTokenSource = new CancellationTokenSource();
         LoadSettings();
         EngineSelectionChanged();
@@ -1538,40 +1540,44 @@ public partial class OcrViewModel : ObservableObject
                                     vm =>
                                     {
                                         vm.Initialize(parentBitmap, item, letters, letterIndex, db,
-                                            SelectedNOcrMaxWrongPixels, _nOcrAddHistoryManager, true, true);
+                                            SelectedNOcrMaxWrongPixels, _binaryOcrAddHistoryManager, true, true);
                                     });
 
-                            //        if (result.OkPressed)
-                            //        {
-                            //            var letterBitmap = letters[letterIndex].NikseBitmap;
-                            //            _nOcrAddHistoryManager.Add(result.NOcrChar, letterBitmap,
-                            //                OcrSubtitleItems.IndexOf(item));
-                            //            IsInspectAdditionsVisible = true;
-                            //            _nOcrDb.Add(result.NOcrChar);
-                            //            _ = Task.Run(() => _nOcrDb.Save());
-                            //            _ = Task.Run(() => RunNOcrLoop(selectedIndices.Where(p => p >= i).ToList()));
-                            //        }
-                            //        else if (result.AbortPressed)
-                            //        {
-                            //            IsOcrRunning = false;
-                            //        }
-                            //        else if (result.UseOncePressed)
-                            //        {
-                            //            _runOnceChars.Add(new SkipOnceChar(i, letterIndex, result.NewText));
-                            //            _ = Task.Run(() => RunNOcrLoop(selectedIndices.Where(p => p >= i).ToList()));
-                            //        }
-                            //        else if (result.SkipPressed)
-                            //        {
-                            //            _skipOnceChars.Add(new SkipOnceChar(i, letterIndex));
-                            //            _ = Task.Run(() => RunNOcrLoop(selectedIndices.Where(p => p >= i).ToList()));
-                            //        }
-                            //        else if (result.InspectHistoryPressed)
-                            //        {
-                            //            IsOcrRunning = false;
-                            //            await _windowService
-                            //                .ShowDialogAsync<NOcrCharacterHistoryWindow, NOcrCharacterHistoryViewModel>(Window!,
-                            //                    vm => { vm.Initialize(_nOcrDb!, _nOcrAddHistoryManager); });
-                            //        }
+                            if (result.OkPressed)
+                            {
+                                if (result.BinaryOcrBitmap != null)
+                                {
+                                    var letterBitmap = letters[letterIndex].NikseBitmap;
+                                    _binaryOcrAddHistoryManager.Add(result.BinaryOcrBitmap, letterBitmap,
+                                        OcrSubtitleItems.IndexOf(item));
+                                    IsInspectAdditionsVisible = true;
+                                    db.Add(result.BinaryOcrBitmap);
+                                    _ = Task.Run(() => db.Save());
+                                }
+                                _ = Task.Run(() => RunImageCompareOcrLoop(db, selectedIndices.Where(p => p >= i).ToList()));
+                            }
+                            else if (result.AbortPressed)
+                            {
+                                IsOcrRunning = false;
+                            }
+                            else if (result.UseOncePressed)
+                            {
+                                _runOnceChars.Add(new SkipOnceChar(i, letterIndex, result.NewText));
+                                _ = Task.Run(() => RunImageCompareOcrLoop(db, selectedIndices.Where(p => p >= i).ToList()));
+                            }
+                            else if (result.SkipPressed)
+                            {
+                                _skipOnceChars.Add(new SkipOnceChar(i, letterIndex));
+                                _ = Task.Run(() => RunImageCompareOcrLoop(db, selectedIndices.Where(p => p >= i).ToList()));
+                            }
+                            else if (result.InspectHistoryPressed)
+                            {
+                                IsOcrRunning = false;
+                                // TODO: Implement BinaryOcrCharacterHistoryWindow
+                                // await _windowService
+                                //     .ShowDialogAsync<BinaryOcrCharacterHistoryWindow, BinaryOcrCharacterHistoryViewModel>(Window!,
+                                //         vm => { vm.Initialize(db, _binaryOcrAddHistoryManager); });
+                            }
                         });
                         return;
                     }
