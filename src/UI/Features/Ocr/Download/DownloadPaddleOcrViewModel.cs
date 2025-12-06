@@ -134,6 +134,7 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
 
     private void Extract7Zip(string tempFileName, string dir, string skipFolderLevel)
     {
+        StatusText = Se.Language.General.Unpacking7ZipArchiveDotDotDot;
         using Stream stream = File.OpenRead(tempFileName);
         using var archive = SevenZipArchive.Open(stream);
         double totalSize = archive.TotalUncompressSize;
