@@ -2879,7 +2879,7 @@ public partial class MainViewModel :
 
         if (result.OkPressed && result.TotalChangedWords > 0)
         {
-            ShowStatus(StatusTextRight = $"{result.TotalChangedWords} words corrected in spell check");
+            ShowStatus($"{result.TotalChangedWords} words corrected in spell check");
         }
     }
 
@@ -10179,7 +10179,7 @@ public partial class MainViewModel :
         _selectedSubtitles = selectedItems.Cast<SubtitleLineViewModel>().ToList();
         if (selectedItems.Count > 1)
         {
-            StatusTextRight = $"{selectedItems.Count} lines selected of {Subtitles.Count}";
+            StatusTextRight = string.Format(Se.Language.Main.XLinesSelectedOfY, selectedItems.Count, Subtitles.Count);
             EditTextCharactersPerSecond = string.Empty;
             EditTextCharactersPerSecondBackground = Brushes.Transparent;
             EditTextTotalLengthBackground = Brushes.Transparent;
@@ -10205,6 +10205,7 @@ public partial class MainViewModel :
             return;
         }
 
+        StatusTextRight = $"{Subtitles.IndexOf(item) + 1}/{Subtitles.Count}";
         if (item == SelectedSubtitle)
         {
             return;
@@ -10221,7 +10222,6 @@ public partial class MainViewModel :
             _subtitleGridSelectionChangedSkip = false;
         }
 
-        StatusTextRight = $"{Subtitles.IndexOf(item) + 1}/{Subtitles.Count}";
         MakeSubtitleTextInfo(item.Text, item);
         MakeSubtitleTextInfoOriginal(item.OriginalText, item);
         _updateAudioVisualizer = true;
