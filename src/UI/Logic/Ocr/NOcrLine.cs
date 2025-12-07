@@ -100,11 +100,11 @@ public class NOcrLine
 
     internal OcrPoint GetScaledStart(NOcrChar ocrChar, int width, int height)
     {
-        return new OcrPoint((int)Math.Round(Start.X * 100.0 / ocrChar.Width * width / 100.0, MidpointRounding.AwayFromZero), (int)Math.Round(Start.Y * 100.0 / ocrChar.Height * height / 100.0, MidpointRounding.AwayFromZero));
+        return new OcrPoint((int)Math.Round(Start.X * width / (double)ocrChar.Width, MidpointRounding.AwayFromZero), (int)Math.Round(Start.Y * height / (double)ocrChar.Height, MidpointRounding.AwayFromZero));
     }
 
     internal OcrPoint GetScaledEnd(NOcrChar ocrChar, int width, int height)
     {
-        return new OcrPoint((int)Math.Round(End.X * 100.0 / ocrChar.Width * width / 100.0, MidpointRounding.AwayFromZero), (int)Math.Round(End.Y * 100.0 / ocrChar.Height * height / 100.0, MidpointRounding.AwayFromZero));
+        return new OcrPoint((int)Math.Round(End.X * width / (double)ocrChar.Width, MidpointRounding.AwayFromZero), (int)Math.Round(End.Y * height / (double)ocrChar.Height, MidpointRounding.AwayFromZero));
     }
 }
