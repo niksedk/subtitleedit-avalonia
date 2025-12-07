@@ -762,10 +762,11 @@ public static class InitListViewAndEditBox
         var timeCodeUpDown = new TimeCodeUpDown
         {
             DataContext = vm,
+            UseVideoOffset = true,
             [!TimeCodeUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.StartTime)}")
             {
                 Mode = BindingMode.TwoWay,
-            }
+            },
         };
         if (!vm.ShowUpDownLabels && Se.Settings.Appearance.ShowHints)
         {

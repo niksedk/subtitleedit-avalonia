@@ -200,6 +200,8 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _showWaveformOnlySpectrogram;
     [ObservableProperty] private bool _showWaveformWaveformAndSpectrogram;
     [ObservableProperty] private bool _isSmpteTimingEnabled;
+    [ObservableProperty] private string _videoOffsetText;
+    [ObservableProperty] private bool _isVideoOffsetVisible;
 
     public DataGrid SubtitleGrid { get; set; }
     public TextBox EditTextBox { get; set; }
@@ -396,6 +398,7 @@ public partial class MainViewModel :
         _videoOpenTokenSource = new CancellationTokenSource();
         Speeds = new ObservableCollection<string>(new[] { "0.5x", "0.75x", "1.0x", "1.25x", "1.5x", "1.75x", "2.0x", "3.0x" });
         SelectedSpeed = "1.0x";
+        VideoOffsetText = string.Empty;
 
         Configuration.DataDirectoryOverride = Se.DataFolder;
 
@@ -715,6 +718,7 @@ public partial class MainViewModel :
         Subtitles.Clear();
         Se.Settings.General.CurrentVideoIsSmpte = false;
         Se.Settings.General.CurrentVideoOffsetInMs = 0;
+        UpdateVideoOffsetStatus();
 
         if (format != null)
         {
@@ -906,8 +910,25 @@ public partial class MainViewModel :
                 await SubtitleOpenOriginal(selectedIndex, recentFile.SubtitleFileNameOriginal);
             }
 
+            SetRecentFileProperties(recentFile);
+
             _shortcutManager.ClearKeys();
         });
+    }
+
+    private void SetRecentFileProperties(RecentFile recentFile)
+    {
+        if (recentFile.VideoIsSmpte)
+        {
+            IsSmpteTimingEnabled = false;
+        }
+        else
+        {
+            IsSmpteTimingEnabled = false;
+        }
+
+        Se.Settings.General.CurrentVideoOffsetInMs = recentFile.VideoOffsetInMs;
+        UpdateVideoOffsetStatus();
     }
 
     [RelayCommand]
@@ -3167,25 +3188,68 @@ public partial class MainViewModel :
 
         var result = await ShowDialogAsync<SetVideoOffsetWindow, SetVideoOffsetViewModel>();
 
-        if (result.OkPressed && result.TimeOffset.HasValue)
+        if (result.ResetPressed)
         {
-            var offset = result.TimeOffset.Value;
-            if (result.RelativeToCurrentVideoPosition)
+            Se.Settings.General.CurrentVideoOffsetInMs = 0;
+            UpdateVideoOffsetStatus();
+            _updateAudioVisualizer = true;
+            return;
+        }
+
+        if (!result.OkPressed || !result.TimeOffset.HasValue)
+        {
+            return;
+        }
+
+        var offset = result.TimeOffset.Value;
+        if (result.RelativeToCurrentVideoPosition)
+        {
+            var vp = GetVideoPlayerControl();
+            if (vp != null)
             {
-                var vp = GetVideoPlayerControl();
-                if (vp != null)
-                {
-                    offset = offset + TimeSpan.FromSeconds(vp.Position);
-                }
+                offset = offset - TimeSpan.FromSeconds(vp.Position);
             }
 
-            if (!result.KeepTimeCodes)
+            Se.Settings.General.CurrentVideoOffsetInMs = (int)Math.Round(offset.TotalMilliseconds, MidpointRounding.AwayFromZero);
+        }
+
+        if (result.KeepTimeCodes)
+        {
+            foreach (var s in Subtitles)
             {
-                foreach (var s in Subtitles)
-                {
-                    s.StartTime = s.StartTime + offset;
-                }
+                s.StartTime = s.StartTime - offset;
             }
+        }
+
+        UpdateVideoOffsetStatus();
+        _updateAudioVisualizer = true;
+    }
+
+    private void UpdateVideoOffsetStatus()
+    {
+        IsVideoOffsetVisible = Se.Settings.General.CurrentVideoOffsetInMs != 0;
+        if (IsVideoOffsetVisible)
+        {
+            VideoOffsetText = new TimeCode(Se.Settings.General.CurrentVideoOffsetInMs).ToShortString();
+        }
+        else
+        {
+            VideoOffsetText = string.Empty;
+        }
+
+        // refresh all Subtitle rows
+        foreach (var s in Subtitles)
+        {
+            s.RefreshTimeCodes();
+        }
+
+        var ss = SelectedSubtitle;
+        if (ss != null)
+        {
+            // trigger UI update
+            ss.StartTime = ss.StartTime.Add(TimeSpan.FromMilliseconds(1));
+            ss.StartTime = ss.StartTime.Add(TimeSpan.FromMilliseconds(-1));
+            SubtitleGridSelectionChanged();
         }
     }
 
@@ -8456,16 +8520,16 @@ public partial class MainViewModel :
 
     public Subtitle GetUpdateSubtitle(bool subtractVideoOffset = false)
     {
-        var videoOffsetMs = Se.Settings.General.CurrentVideoOffsetInMs;
+        //var videoOffsetMs = Se.Settings.General.CurrentVideoOffsetInMs;
         _subtitle.Paragraphs.Clear();
         foreach (var line in Subtitles)
         {
             var p = line.ToParagraph(SelectedSubtitleFormat);
-            if (subtractVideoOffset && videoOffsetMs != 0)
-            {
-                p.StartTime.TotalMilliseconds -= videoOffsetMs;
-                p.EndTime.TotalMilliseconds -= videoOffsetMs;
-            }
+            //if (subtractVideoOffset && videoOffsetMs != 0)
+            //{
+            //    p.StartTime.TotalMilliseconds -= videoOffsetMs;
+            //    p.EndTime.TotalMilliseconds -= videoOffsetMs;
+            //}
 
             _subtitle.Paragraphs.Add(p);
         }
@@ -8475,7 +8539,7 @@ public partial class MainViewModel :
 
     public Subtitle GetUpdateSubtitleOriginal(bool subtractVideoOffset = false)
     {
-        var videoOffsetMs = Se.Settings.General.CurrentVideoOffsetInMs;
+        //  var videoOffsetMs = Se.Settings.General.CurrentVideoOffsetInMs;
         _subtitleOriginal ??= new Subtitle();
         _subtitleOriginal.OriginalFormat ??= SelectedSubtitleFormat;
 
@@ -8483,11 +8547,11 @@ public partial class MainViewModel :
         foreach (var line in Subtitles)
         {
             var p = line.ToParagraphOriginal(SelectedSubtitleFormat);
-            if (subtractVideoOffset && videoOffsetMs != 0)
-            {
-                p.StartTime.TotalMilliseconds -= videoOffsetMs;
-                p.EndTime.TotalMilliseconds -= videoOffsetMs;
-            }
+            //if (subtractVideoOffset && videoOffsetMs != 0)
+            //{
+            //    p.StartTime.TotalMilliseconds -= videoOffsetMs;
+            //    p.EndTime.TotalMilliseconds -= videoOffsetMs;
+            //}
 
             _subtitleOriginal.Paragraphs.Add(p);
         }
@@ -8575,8 +8639,14 @@ public partial class MainViewModel :
         }
 
         var idx = SelectedSubtitleIndex ?? 0;
-        Se.Settings.File.AddToRecentFiles(_subtitleFileName ?? string.Empty, _subtitleFileNameOriginal ?? string.Empty,
-            _videoFileName ?? string.Empty, idx, SelectedEncoding.DisplayName);
+        Se.Settings.File.AddToRecentFiles(
+            _subtitleFileName ?? string.Empty,
+            _subtitleFileNameOriginal ?? string.Empty,
+            _videoFileName ?? string.Empty,
+            idx,
+            SelectedEncoding.DisplayName,
+            Se.Settings.General.CurrentVideoOffsetInMs,
+            IsSmpteTimingEnabled);
         Se.SaveSettings();
 
         if (updateMenu)
@@ -8828,6 +8898,8 @@ public partial class MainViewModel :
                             vp.Position = SelectedSubtitle.StartTime.TotalSeconds;
                             Dispatcher.UIThread.Post(() => { vp.Position = SelectedSubtitle.StartTime.TotalSeconds; });
                         }
+
+                        SetRecentFileProperties(first);
                     }
                     catch (Exception e)
                     {
@@ -10257,15 +10329,15 @@ public partial class MainViewModel :
                     _setEndAtKeyUpLine.EndTime = TimeSpan.FromSeconds(vp.VideoPlayerInstance.Position);
                 }
 
-                var offset = TimeSpan.FromMilliseconds(Se.Settings.General.CurrentVideoOffsetInMs);
-                var hasOffset = Se.Settings.General.CurrentVideoOffsetInMs != 0;
+                //var offset = TimeSpan.FromMilliseconds(Se.Settings.General.CurrentVideoOffsetInMs);
+                //var hasOffset = Se.Settings.General.CurrentVideoOffsetInMs != 0;
 
                 var subtitle = new ObservableCollection<SubtitleLineViewModel>(
                     Subtitles
                         .OrderBy(p => p.StartTime.TotalMilliseconds)
-                        .Select(dp => hasOffset
-                            ? new SubtitleLineViewModel(dp) { StartTime = dp.StartTime - offset }
-                            : dp)
+                        //.Select(dp => hasOffset
+                        //    ? new SubtitleLineViewModel(dp) { StartTime = dp.StartTime - offset }
+                        //    : dp)
                         .Where(p => _visibleLayers == null || _visibleLayers.Contains(p.Layer))
                 );
 
@@ -10350,7 +10422,7 @@ public partial class MainViewModel :
                                 return;
                             }
 
-                                var nextIndex = Subtitles.IndexOf(selectedItem);
+                            var nextIndex = Subtitles.IndexOf(selectedItem);
                             var p = _subtitle.GetParagraphOrDefault(nextIndex);
                             if (p != null && _playSelectionIndex < nextIndex) // && SubtitleListview1.Items[nextIndex].Selected)
                             {

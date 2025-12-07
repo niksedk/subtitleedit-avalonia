@@ -169,7 +169,7 @@ public class LanguageMainMenu
         GenerateImportShotChanges = "Generate/import s_hot changes...";
         DockVideoControls = "_Dock video controls";
         SetVideoOffset = "Set video offset...";
-        SmpteTiming = "Smpte timing";
+        SmpteTiming = "SMPTE timing (non-integer frame rate)";
         GenerateBurnIn = "Generate video with _burned-in subtitles...";
         GenerateTransparent = "_Generate transparent video with subtitles...";
 

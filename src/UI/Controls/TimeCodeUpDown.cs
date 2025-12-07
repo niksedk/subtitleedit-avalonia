@@ -6,15 +6,18 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
-using System;
+using Google.Protobuf.WellKnownTypes;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic.Config;
+using System;
 
 namespace Nikse.SubtitleEdit.Controls
 {
     public class TimeCodeUpDown : TemplatedControl
     {
+        public bool UseVideoOffset { get; set; } = false;
+
         private TextBox? _textBox;
         private ButtonSpinner? _spinner;
         private string _textBuffer = "00:00:00:000";
@@ -216,13 +219,13 @@ namespace Nikse.SubtitleEdit.Controls
             // Try parsing with milliseconds format (00:00:00:000 or 00:00:00.000)
             if (TimeSpan.TryParseExact(text, @"hh\:mm\:ss\:fff", null, out var result))
             {
-                return result;
+                return RemoveVideoOffset(result);
             }
 
             // Try parsing with dot separator for milliseconds
             if (TimeSpan.TryParseExact(text, @"hh\:mm\:ss\.fff", null, out result))
             {
-                return result;
+                return RemoveVideoOffset(result);
             }
 
             // Manual parsing as fallback
@@ -234,11 +237,21 @@ namespace Nikse.SubtitleEdit.Controls
                     int.TryParse(parts[2], out var seconds) &&
                     int.TryParse(parts[3], out var milliseconds))
                 {
-                    return new TimeSpan(0, hours, minutes, seconds, milliseconds);
+                    return RemoveVideoOffset(new TimeSpan(0, hours, minutes, seconds, milliseconds));
                 }
             }
 
             return TimeSpan.Zero;
+        }
+
+        private TimeSpan RemoveVideoOffset(TimeSpan result)
+        {
+            if (UseVideoOffset && Se.Settings.General.CurrentVideoOffsetInMs != 0)
+            {
+                result = TimeSpan.FromMilliseconds(result.TotalMilliseconds - Se.Settings.General.CurrentVideoOffsetInMs);
+            }
+
+            return result;
         }
 
         private void OnSpin(object? sender, SpinEventArgs e)
@@ -350,6 +363,11 @@ namespace Nikse.SubtitleEdit.Controls
 
         private string FormatTime(TimeSpan time)
         {
+            if (UseVideoOffset && Se.Settings.General.CurrentVideoOffsetInMs != 0)
+            {
+                time = TimeSpan.FromMilliseconds(time.TotalMilliseconds + Se.Settings.General.CurrentVideoOffsetInMs);
+            }
+
             TimeCode tc;
             if (time.TotalHours > 99)
             {
@@ -359,6 +377,7 @@ namespace Nikse.SubtitleEdit.Controls
             {
                 tc = new TimeCode(time.Hours, time.Minutes, time.Seconds, time.Milliseconds);
             }
+
 
             if (Se.Settings.General.UseFrameMode)
             {

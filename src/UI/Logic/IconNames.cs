@@ -80,6 +80,7 @@ internal class IconNames
     public const string Spellcheck = "mdi-spellcheck";
     public const string StopCircle = "mdi-stop-circle";
     public const string SwapVertical = "mdi-swap-vertical";
+    public const string TimerSettings = "mdi-timer-cog-outline";
     public const string Tools = "mdi-tools";
     public const string Trash = "mdi-trash-can-outline";
     public const string Waveform = "mdi-waveform";

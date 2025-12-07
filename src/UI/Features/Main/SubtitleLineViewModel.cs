@@ -430,4 +430,11 @@ public partial class SubtitleLineViewModel : ObservableObject
 
         return errors.ToString();
     }
+
+    public void RefreshTimeCodes()
+    {
+        OnPropertyChanged(nameof(StartTime));
+        OnPropertyChanged(nameof(EndTime));
+        OnPropertyChanged(nameof(Duration));
+    }
 }
