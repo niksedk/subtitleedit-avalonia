@@ -990,6 +990,13 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             var endAttr = TryGetAttribute(paragraph, "end", TtmlNamespace);
             var durAttr = TryGetAttribute(paragraph, "dur", TtmlNamespace);
 
+            if (string.IsNullOrEmpty(beginAttr) && string.IsNullOrEmpty(endAttr) && string.IsNullOrEmpty(durAttr) && paragraph.ParentNode.Name == "div")
+            {
+                beginAttr = TryGetAttribute(paragraph.ParentNode, "begin", TtmlNamespace);
+                endAttr = TryGetAttribute(paragraph.ParentNode, "end", TtmlNamespace);
+                durAttr = TryGetAttribute(paragraph.ParentNode, "dur", TtmlNamespace);
+            }
+
             begin = new TimeCode();
             if (beginAttr.Length > 0)
             {
