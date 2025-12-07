@@ -42,7 +42,7 @@ public static class InitMenu
                 new MenuItem
                 {
                     Header = l.New,
-                    Command = vm.CommandFileNewCommand,                                      
+                    Command = vm.CommandFileNewCommand,
                 },
                 new MenuItem
                 {
@@ -537,7 +537,7 @@ public static class InitMenu
                         },
                         new MenuItem
                         {
-                            Header = l.SmpteTiming, 
+                            Header = l.SmpteTiming,
                             Command = vm.ToggleSmpteTimingCommand,
                             Icon = new Projektanker.Icons.Avalonia.Icon
                             {
