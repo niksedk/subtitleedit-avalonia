@@ -1456,8 +1456,8 @@ public class AudioVisualizer : Control
 
         var startPositionMilliseconds = StartPositionSeconds * 1000.0;
         var endPositionMilliseconds = RelativeXPositionToSeconds((int)Bounds.Width) * 1000.0;
-        var paragraphStartList = new List<int>();
-        var paragraphEndList = new List<int>();
+        var paragraphStartList = new List<int>(_displayableParagraphs.Count);
+        var paragraphEndList = new List<int>(_displayableParagraphs.Count);
         var paragraphs = _displayableParagraphs;
 
         foreach (var p in paragraphs)
@@ -1641,6 +1641,7 @@ public class AudioVisualizer : Control
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private double CalculateY(double value, double baseHeight, double halfWaveformHeight)
     {
         if (WavePeaks == null)
@@ -1657,6 +1658,7 @@ public class AudioVisualizer : Control
         return Math.Max(0, Math.Min(Bounds.Height, y));
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private double RelativeXPositionToSeconds(int x)
     {
         if (WavePeaks == null)
