@@ -320,7 +320,11 @@ public partial class SetSyncPointViewModel : ObservableObject
                 return;
             }
 
-            SelectedParagraphIndex = 0;
+            if (SelectedParagraphIndex < 0 || SelectedParagraphIndex >= Paragraphs.Count)
+            {
+                SelectedParagraphIndex = 0;
+            }
+
             GoToLeftSubtitle();
         });
     }
