@@ -230,6 +230,11 @@ public class AudioVisualizer : Control
     private readonly Pen _paintGridLines = new Pen(Brushes.DarkGray, 0.2);
     private readonly IBrush _mouseOverBrush = new SolidColorBrush(Color.FromArgb(50, 255, 255, 0));
 
+    // Cached drawing resources for fancy waveform
+    private readonly Dictionary<int, Pen> _fancyWaveformPenCache = new(20);
+    private readonly Dictionary<int, LinearGradientBrush> _fancyWaveformGradientCache = new(20);
+    private readonly Dictionary<int, Pen> _fancyWaveformGlowPenCache = new(10);
+
     // Paragraph painting
     private IBrush _paintBackground = new SolidColorBrush(Color.FromArgb(90, 70, 70, 70));
     private IBrush _paintParagraphBackground = new SolidColorBrush(Color.FromArgb(90, 70, 70, 70));
@@ -1237,6 +1242,47 @@ public class AudioVisualizer : Control
         }
     }
 
+    private Pen GetCachedFancyWaveformPen(int colorKey, Color color)
+    {
+        if (!_fancyWaveformPenCache.TryGetValue(colorKey, out var pen))
+        {
+            var gradient = GetCachedFancyWaveformGradient(colorKey, color);
+            pen = new Pen(gradient, 1.5);
+            _fancyWaveformPenCache[colorKey] = pen;
+        }
+        return pen;
+    }
+
+    private LinearGradientBrush GetCachedFancyWaveformGradient(int colorKey, Color color)
+    {
+        if (!_fancyWaveformGradientCache.TryGetValue(colorKey, out var gradient))
+        {
+            gradient = new LinearGradientBrush
+            {
+                StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
+                EndPoint = new RelativePoint(0, 1, RelativeUnit.Relative),
+                GradientStops = new GradientStops
+                {
+                    new GradientStop(Color.FromArgb((byte)(color.A * 0.3), color.R, color.G, color.B), 0.0),
+                    new GradientStop(color, 0.5),
+                    new GradientStop(Color.FromArgb((byte)(color.A * 0.3), color.R, color.G, color.B), 1.0),
+                }
+            };
+            _fancyWaveformGradientCache[colorKey] = gradient;
+        }
+        return gradient;
+    }
+
+    private Pen GetCachedFancyWaveformGlowPen(int colorKey, Color color, double width)
+    {
+        if (!_fancyWaveformGlowPenCache.TryGetValue(colorKey, out var pen))
+        {
+            pen = new Pen(new SolidColorBrush(color), width);
+            _fancyWaveformGlowPenCache[colorKey] = pen;
+        }
+        return pen;
+    }
+
     private void DrawWaveFormFancy(DrawingContext context, double waveformHeight)
     {
         var isSelectedHelper = new IsSelectedHelper(AllSelectedParagraphs, WavePeaks!.SampleRate);
@@ -1293,20 +1339,23 @@ public class AudioVisualizer : Control
             // Calculate amplitude for color determination
             var amplitude = Math.Abs(max) > Math.Abs(min) ? Math.Abs(max) : Math.Abs(min);
 
-            // Determine color based on amplitude
+            // Determine color based on amplitude and create a cache key
             Color color;
+            int colorKey;
             if (isSelected)
             {
                 // Selected always uses the selected color
                 color = WaveformSelectedColor;
+                colorKey = -1; // Special key for selected
             }
             else
             {
-                // Dynamic coloring based on amplitude
+                // Dynamic coloring based on amplitude - quantize to reduce cache variations
                 if (amplitude < lowThreshold)
                 {
                     // Low amplitude - greenish/blue
                     color = Color.FromArgb(200, 100, 200, 150);
+                    colorKey = 0;
                 }
                 else if (amplitude < mediumThreshold)
                 {
@@ -1316,6 +1365,8 @@ public class AudioVisualizer : Control
                     var g = (byte)(200 - blend * 50);
                     var b = (byte)(150 - blend * 150);
                     color = Color.FromArgb(200, r, g, b);
+                    // Quantize blend to 10 steps for caching
+                    colorKey = 1 + (int)(blend * 10);
                 }
                 else
                 {
@@ -1325,23 +1376,13 @@ public class AudioVisualizer : Control
                     var g = (byte)(150 - blend * 100);
                     var b = (byte)(0);
                     color = Color.FromArgb(220, r, g, b);
+                    // Quantize blend to 10 steps for caching
+                    colorKey = 12 + (int)(blend * 10);
                 }
             }
 
-            // Create gradient for this specific line based on the color
-            var gradient = new LinearGradientBrush
-            {
-                StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
-                EndPoint = new RelativePoint(0, 1, RelativeUnit.Relative),
-                GradientStops = new GradientStops
-            {
-                new GradientStop(Color.FromArgb((byte)(color.A * 0.3), color.R, color.G, color.B), 0.0),
-                new GradientStop(color, 0.5),
-                new GradientStop(Color.FromArgb((byte)(color.A * 0.3), color.R, color.G, color.B), 1.0),
-            }
-            };
-
-            var pen = new Pen(gradient, 1.5);
+            // Get cached pen with gradient
+            var pen = GetCachedFancyWaveformPen(colorKey, color);
             context.DrawLine(pen, new Point(x, yMax), new Point(x, yMin));
 
             // Add subtle glow for higher amplitudes
@@ -1349,7 +1390,9 @@ public class AudioVisualizer : Control
             {
                 var glowAlpha = (byte)(50 * ((amplitude - mediumThreshold) / (WavePeaks.HighestPeak - mediumThreshold)));
                 var glowColor = Color.FromArgb(glowAlpha, color.R, color.G, color.B);
-                var glowPen = new Pen(new SolidColorBrush(glowColor), 3.0);
+                // Quantize glow alpha to 5 steps for caching
+                var glowKey = 1000 + colorKey * 10 + (glowAlpha / 10);
+                var glowPen = GetCachedFancyWaveformGlowPen(glowKey, glowColor, 3.0);
                 context.DrawLine(glowPen, new Point(x, yMax - 0.5), new Point(x, yMin + 0.5));
             }
         }
