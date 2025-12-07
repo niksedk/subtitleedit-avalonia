@@ -3294,6 +3294,32 @@ public partial class MainViewModel :
         }
     }
 
+    [RelayCommand]
+    private async Task ShowSmpteTiming()
+    {
+        if (Window == null || string.IsNullOrEmpty(_videoFileName))
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
+        var answer = await MessageBox.Show(Window, Se.Language.General.Information,
+            "Turn SMPTE timing off?",
+            MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+
+        if (answer != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        ToggleSmpteTiming();
+    }
+
     private void ReloadAudioVisualizer()
     {
         if (string.IsNullOrEmpty(_videoFileName))
@@ -4089,6 +4115,8 @@ public partial class MainViewModel :
             _mpvReloader.Reset();
             _mpvReloader.RefreshMpv(mpv, GetUpdateSubtitle(), SelectedSubtitleFormat);
         }
+
+        UpdateVideoOffsetStatus();
     }
 
     public VideoPlayerControl? GetVideoPlayerControl()
