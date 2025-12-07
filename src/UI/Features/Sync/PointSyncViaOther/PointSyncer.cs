@@ -50,7 +50,7 @@ public static class PointSyncer
                     endIndex, 
                     minIndex, 
                     maxIndex, 
-                    syncPoints[i].LeftStartTime.TotalMilliseconds / TimeCode.BaseUnit, 
+                    syncPoints[i - 1].RightStartTime.TotalMilliseconds / TimeCode.BaseUnit, 
                     syncPoints[i].RightStartTime.TotalMilliseconds / TimeCode.BaseUnit);
 
                 minIndex = endIndex;

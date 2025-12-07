@@ -59,6 +59,7 @@ public partial class SetSyncPointViewModel : ObservableObject
 
     public void Initialize(
         List<SubtitleLineViewModel> paragraphs,
+        SubtitleLineViewModel? selectedSubtitle,
         string? videoFileName,
         string? subtitleFileName,
         AudioVisualizer? audioVisualizer)
@@ -80,6 +81,13 @@ public partial class SetSyncPointViewModel : ObservableObject
                 AudioVisualizer.WavePeaks = audioVisualizer.WavePeaks;
                 IsAudioVisualizerVisible = true;
             }
+
+            var idx = paragraphs.IndexOf(selectedSubtitle);
+            if (idx >= 0)
+            {
+                SelectedParagraphIndex = idx;
+            }
+
             StartTitleTimer();
             _updateAudioVisualizer = true;
         });
