@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 {
@@ -34,6 +35,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             var xmlAsString = sb.ToString().Trim();
 
             if (xmlAsString.Contains("xmlns:tts=\"http://www.w3.org/2006/04"))
+            {
+                return false;
+            }
+
+            if (xmlAsString.Contains("<rosetta:format>imsc-rosetta</rosetta:format>", StringComparison.Ordinal))
             {
                 return false;
             }
