@@ -54,6 +54,7 @@ public class InitWaveform
             vm.AudioVisualizer.OnParagraphDoubleTapped += vm.OnWaveformDoubleTapped;
             vm.AudioVisualizer.OnDeletePressed += vm.AudioVisualizerOnDeletePressed;
             vm.AudioVisualizer.PointerReleased += vm.ControlMacPointerReleased;
+            vm.AudioVisualizer.IsReadOnly = Se.Settings.General.LockTimeCodes;
 
             // Create a Flyout for the DataGrid
             var flyout = new MenuFlyout();
