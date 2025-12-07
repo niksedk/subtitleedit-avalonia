@@ -9629,17 +9629,20 @@ public partial class MainViewModel :
 
     private void MergeLinesSelected()
     {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
         var selectedItem = SelectedSubtitle;
-        if (selectedItem != null)
+        if (selectedItems.Count == 0 || selectedItem == null)
         {
-            var index = Subtitles.IndexOf(selectedItem);
-
-            _mergeManager.MergeSelectedLines(Subtitles,
-                SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList());
-
-            SelectAndScrollToRow(index - 1);
-            Renumber();
+            return;
         }
+
+        var index = Subtitles.IndexOf(selectedItem);
+
+        _mergeManager.MergeSelectedLines(Subtitles,
+            SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList());
+
+        SelectAndScrollToRow(index - 1);
+        Renumber();
     }
 
     private void MergeLinesSelectedAsDialog()
