@@ -10688,13 +10688,17 @@ public partial class MainViewModel :
                 Math.Abs(p.StartTime.TotalMilliseconds - e.Paragraph.StartTime.TotalMilliseconds) < 0.01);
             if (p != null)
             {
-                if (SubtitleGrid.SelectedItems.Contains(p))
+                var selectedItems = SubtitleGrid.SelectedItems;
+                if (selectedItems.Contains(p))
                 {
-                    SubtitleGrid.SelectedItems.Remove(p);
+                    if (selectedItems.Count != 1 || selectedItems[0] != p)
+                    {
+                        selectedItems.Remove(p);
+                    }
                 }
                 else
                 {
-                    SubtitleGrid.SelectedItems.Add(p);
+                    selectedItems.Add(p);
                 }
 
                 _updateAudioVisualizer = true;
