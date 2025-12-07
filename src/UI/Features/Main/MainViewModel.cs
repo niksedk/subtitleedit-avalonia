@@ -10129,6 +10129,22 @@ public partial class MainViewModel :
             return;
         }
 
+        var selectedItems = SubtitleGrid.SelectedItems;
+
+        // If user is trying to deselect the last selected item
+        if (selectedItems.Count == 0 && e.AddedItems.Count == 0 && e.RemovedItems.Count == 1)
+        {
+            if (Subtitles.Count > 0)
+            {
+                // Re-select the item that was just removed
+                _subtitleGridSelectionChangedSkip = true;
+                SubtitleGrid.SelectedItem = e.RemovedItems[0];
+                _subtitleGridSelectionChangedSkip = false;
+                e.Handled = true;
+                return;
+            }
+        }
+
         SubtitleGridSelectionChanged();
     }
 
