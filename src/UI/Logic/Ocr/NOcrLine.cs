@@ -57,45 +57,33 @@ public class NOcrLine
 
     public static List<OcrPoint> GetPoints(OcrPoint start, OcrPoint end)
     {
-        List<OcrPoint> list;
-        var x1 = start.X;
-        var x2 = end.X;
-        var y1 = start.Y;
-        var y2 = end.Y;
-        if (Math.Abs(start.X - end.X) > Math.Abs(start.Y - end.Y))
+        var dx = end.X - start.X;
+        var dy = end.Y - start.Y;
+        var absDx = Math.Abs(dx);
+        var absDy = Math.Abs(dy);
+
+        if (absDx > absDy)
         {
-            if (x1 > x2)
-            {
-                x2 = start.X;
-                x1 = end.X;
-                y2 = start.Y;
-                y1 = end.Y;
-            }
+            var (x1, y1, x2, y2) = dx > 0 ? (start.X, start.Y, end.X, end.Y) : (end.X, end.Y, start.X, start.Y);
             var factor = (double)(y2 - y1) / (x2 - x1);
-            list = new List<OcrPoint>(x2 - x1 + 1);
+            var list = new List<OcrPoint>(absDx + 1);
             for (var i = x1; i <= x2; i++)
             {
                 list.Add(new OcrPoint(i, (int)Math.Round(y1 + factor * (i - x1), MidpointRounding.AwayFromZero)));
             }
+            return list;
         }
         else
         {
-            if (y1 > y2)
-            {
-                x2 = start.X;
-                x1 = end.X;
-                y2 = start.Y;
-                y1 = end.Y;
-            }
+            var (x1, y1, x2, y2) = dy > 0 ? (start.X, start.Y, end.X, end.Y) : (end.X, end.Y, start.X, start.Y);
             var factor = (double)(x2 - x1) / (y2 - y1);
-            list = new List<OcrPoint>(y2 - y1 + 1);
+            var list = new List<OcrPoint>(absDy + 1);
             for (var i = y1; i <= y2; i++)
             {
                 list.Add(new OcrPoint((int)Math.Round(x1 + factor * (i - y1), MidpointRounding.AwayFromZero), i));
             }
+            return list;
         }
-
-        return list;
     }
 
     internal OcrPoint GetScaledStart(NOcrChar ocrChar, int width, int height)
