@@ -48,7 +48,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream
             // Calculate rgb - based on Project X
             int r = (int)(y + (1.402f * (cr - 128)));
             int g = (int)(y - (0.34414 * (cb - 128)) - (0.71414 * (cr - 128)));
-            int b = (int)(y + (1.722 * (cb - 128)));
+            int b = (int)(y + (1.772 * (cb - 128)));
 
             int t = byte.MaxValue - BoundByteRange(ClutEntryT);
             r = BoundByteRange(r);

@@ -1,7 +1,7 @@
-﻿using System;
-using Nikse.SubtitleEdit.Core.Common;
-using System.Collections.Generic;
+﻿using Nikse.SubtitleEdit.Core.Common;
 using SkiaSharp;
+using System;
+using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream
 {
@@ -88,6 +88,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream
                 }
 
                 Image = new SKBitmap(Math.Max(1, width), y + 1);
+                Image.Erase(SKColors.Transparent);
                 _fastImage = new FastBitmap(Image);
                 _fastImage.LockImage();
 
