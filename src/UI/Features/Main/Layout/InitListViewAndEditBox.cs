@@ -548,12 +548,12 @@ public static class InitListViewAndEditBox
         flyout.Items.Add(splitMenuItem);
 
         var mergePreviousMenuItem = new MenuItem { Header = Se.Language.General.MergeBefore, DataContext = vm };
-        mergePreviousMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        mergePreviousMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsMergeWithNextOrPreviousVisible)));
         mergePreviousMenuItem.Command = vm.MergeWithLineBeforeCommand;
         flyout.Items.Add(mergePreviousMenuItem);
 
         var mergeNextMenuItem = new MenuItem { Header = Se.Language.General.MergeAfter, DataContext = vm };
-        mergeNextMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        mergeNextMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsMergeWithNextOrPreviousVisible)));
         mergeNextMenuItem.Command = vm.MergeWithLineAfterCommand;
         flyout.Items.Add(mergeNextMenuItem);
 

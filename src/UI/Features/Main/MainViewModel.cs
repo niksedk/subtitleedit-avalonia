@@ -160,6 +160,7 @@ public partial class MainViewModel :
 
     [ObservableProperty] private bool _isWaveformToolbarVisible;
     [ObservableProperty] private bool _isSubtitleGridFlyoutHeaderVisible;
+    [ObservableProperty] private bool _isMergeWithNextOrPreviousVisible;
     [ObservableProperty] private bool _showColumnOriginalText;
     [ObservableProperty] private bool _showColumnEndTime;
     [ObservableProperty] private bool _showColumnGap;
@@ -9836,9 +9837,12 @@ public partial class MainViewModel :
 
         if (IsSubtitleGridFlyoutHeaderVisible)
         {
+            IsMergeWithNextOrPreviousVisible = false;
         }
         else
         {
+            IsMergeWithNextOrPreviousVisible = SubtitleGrid.SelectedItems.Count == 1;
+
             if (IsFormatAssa)
             {
                 AreAssaContentMenuItemsVisible = true;
@@ -10074,6 +10078,7 @@ public partial class MainViewModel :
         _subtitleGridIsLeftClick = false;
         _subtitleGridIsRightClick = false;
         IsSubtitleGridFlyoutHeaderVisible = false;
+
         if (sender is Control { ContextFlyout: not null } control)
         {
             var props = e.GetCurrentPoint(control).Properties;
@@ -10088,6 +10093,7 @@ public partial class MainViewModel :
                 if (current is DataGridColumnHeader)
                 {
                     IsSubtitleGridFlyoutHeaderVisible = true;
+                    IsMergeWithNextOrPreviousVisible = false;
                     return;
                 }
 
