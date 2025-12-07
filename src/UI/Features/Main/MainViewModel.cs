@@ -201,6 +201,7 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _showWaveformWaveformAndSpectrogram;
     [ObservableProperty] private bool _isSmpteTimingEnabled;
     [ObservableProperty] private string _videoOffsetText;
+    [ObservableProperty] private string _setVideoOffsetText;
     [ObservableProperty] private bool _isVideoOffsetVisible;
 
     public DataGrid SubtitleGrid { get; set; }
@@ -399,6 +400,7 @@ public partial class MainViewModel :
         Speeds = new ObservableCollection<string>(new[] { "0.5x", "0.75x", "1.0x", "1.25x", "1.5x", "1.75x", "2.0x", "3.0x" });
         SelectedSpeed = "1.0x";
         VideoOffsetText = string.Empty;
+        SetVideoOffsetText = Se.Language.Main.Menu.SetVideoOffset;
 
         Configuration.DataDirectoryOverride = Se.DataFolder;
 
@@ -3231,10 +3233,12 @@ public partial class MainViewModel :
         if (IsVideoOffsetVisible)
         {
             VideoOffsetText = new TimeCode(Se.Settings.General.CurrentVideoOffsetInMs).ToShortString();
+            SetVideoOffsetText = string.Format(Se.Language.Main.Menu.UpdateVideoOffsetX, VideoOffsetText);
         }
         else
         {
             VideoOffsetText = string.Empty;
+            SetVideoOffsetText = Se.Language.Main.Menu.SetVideoOffset;
         }
 
         // refresh all Subtitle rows

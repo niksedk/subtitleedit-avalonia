@@ -532,12 +532,12 @@ public static class InitMenu
                         },
                         new MenuItem
                         {
-                            Header = l.SetVideoOffset,
+                            [!MenuItem.HeaderProperty] = new Binding(nameof(vm.SetVideoOffsetText)),
                             Command = vm.ShowVideoSetOffsetCommand,
                         },
                         new MenuItem
                         {
-                            Header = l.SmpteTiming,
+                            Header = l.SmpteTiming, 
                             Command = vm.ToggleSmpteTimingCommand,
                             Icon = new Projektanker.Icons.Avalonia.Icon
                             {
