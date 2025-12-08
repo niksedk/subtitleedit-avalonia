@@ -5937,6 +5937,27 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void SplitInWaveform()
+    {
+        var vp = GetVideoPlayerControl();
+        var selectedLine = SelectedSubtitle;
+        if (vp == null || selectedLine == null || AudioVisualizer == null)
+        {
+            return;
+        }
+
+        var videoPosition = vp.Position;
+        if (videoPosition < selectedLine.StartTime.TotalSeconds + 0.3 ||
+            videoPosition > selectedLine.EndTime.TotalSeconds - 0.3)
+        {
+            SplitSelectedLine(false, false);
+            return;
+        }
+
+        SplitSelectedLine(true, false);
+    }
+
+    [RelayCommand]
     private void SplitAtVideoPosition()
     {
         SplitSelectedLine(true, false);

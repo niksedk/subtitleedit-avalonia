@@ -118,7 +118,7 @@ public class InitWaveform
             var splitMenuItem = new MenuItem
             {
                 Header = Se.Language.General.SplitLine,
-                Command = vm.SplitCommand
+                Command = vm.SplitInWaveformCommand,
             };
             flyout.Items.Add(splitMenuItem);
             vm.MenuItemAudioVisualizerSplit = splitMenuItem;
