@@ -311,7 +311,7 @@ public class AudioVisualizer : Control
     //public event ParagraphEventHandler? OnParagraphRightClicked;
     //public event ParagraphEventHandler? OnNonParagraphRightClicked;
     //public event ParagraphEventHandler? OnSingleClick;
-    public event ParagraphEventHandler? OnStatus;
+    //public event ParagraphEventHandler? OnStatus;
     public event ParagraphEventHandler? OnDeletePressed;
 
     public AudioVisualizer()
@@ -1012,60 +1012,97 @@ public class AudioVisualizer : Control
         return null;
     }
 
+    //Queue<double> _renderTimes = new Queue<double>();
 
-    Queue<double> _renderTimes = new Queue<double>();
+    // Cached render values to avoid repeated calculations
+    private struct RenderContext
+    {
+        public double Width;
+        public double Height;
+        public double StartPositionSeconds;
+        public double ZoomFactor;
+        public double VerticalZoomFactor;
+        public double CurrentVideoPositionSeconds;
+        public int SampleRate;
+        public double HighestPeak;
+        public Rect BoundsRect;
+    }
 
     public override void Render(DrawingContext context)
     {
-        context.DrawRectangle(_paintBackground, null, new Rect(Bounds.Size));
-        var ticks = DateTime.UtcNow.Ticks;
-        using (context.PushClip(new Rect(0, 0, Bounds.Width, Bounds.Height)))
-        {
-            DrawAllGridLines(context);
-            DrawWaveForm(context);
-            DrawSpectrogram(context);
-            DrawTimeLine(context);
-            DrawParagraphs(context);
-            DrawShotChanges(context);
-            DrawCurrentVideoPosition(context);
-            DrawNewParagraph(context);
-
-            if (IsFocused)
-            {
-                context.DrawRectangle(null, _paintPenSelected, new Rect(0, 0, Bounds.Width, Bounds.Height));
-            }
-        }
-
-        var timeSpan = TimeSpan.FromTicks(DateTime.UtcNow.Ticks - ticks);
-        _renderTimes.Enqueue(timeSpan.TotalMilliseconds);
-        if (_renderTimes.Count > 100)
-        {
-            _renderTimes.Dequeue();
-        }
-
-        var mean = _renderTimes.Average();
-
-        OnStatus?.Invoke(this,
-            new ParagraphEventArgs(0, new SubtitleLineViewModel()
-            {
-                Text = $"Render time: {mean:0.00} ms"
-            }, new SubtitleLineViewModel()));
-    }
-
-    private void DrawSpectrogram(DrawingContext context)
-    {
-        if (!HasSpectrogram() || _displayMode == WaveformDisplayMode.OnlyWaveform || _spectrogram == null)
+        // Early exit if no valid bounds
+        var width = Bounds.Width;
+        var height = Bounds.Height;
+        if (width <= 0 || height <= 0)
         {
             return;
         }
 
-        var height = Bounds.Height;
-        if (_displayMode == WaveformDisplayMode.WaveformAndSpectrogram)
+        var boundsRect = new Rect(0, 0, width, height);
+        context.DrawRectangle(_paintBackground, null, new Rect(Bounds.Size));
+        
+        //var ticks = DateTime.UtcNow.Ticks;
+        
+        // Pre-calculate commonly used values
+        var renderCtx = new RenderContext
         {
-            height = Bounds.Height / 2;
+            Width = width,
+            Height = height,
+            StartPositionSeconds = StartPositionSeconds,
+            ZoomFactor = ZoomFactor,
+            VerticalZoomFactor = VerticalZoomFactor,
+            CurrentVideoPositionSeconds = CurrentVideoPositionSeconds,
+            SampleRate = WavePeaks?.SampleRate ?? 0,
+            HighestPeak = WavePeaks?.HighestPeak ?? 1.0,
+            BoundsRect = boundsRect
+        };
+
+        using (context.PushClip(boundsRect))
+        {
+            DrawAllGridLines(context, ref renderCtx);
+            DrawWaveForm(context, ref renderCtx);
+            DrawSpectrogram(context, ref renderCtx);
+            DrawTimeLine(context, ref renderCtx);
+            DrawParagraphs(context, ref renderCtx);
+            DrawShotChanges(context, ref renderCtx);
+            DrawCurrentVideoPosition(context, ref renderCtx);
+            DrawNewParagraph(context, ref renderCtx);
+
+            if (IsFocused)
+            {
+                context.DrawRectangle(null, _paintPenSelected, boundsRect);
+            }
         }
 
-        var width = (int)Math.Round((EndPositionSeconds - StartPositionSeconds) / _spectrogram.SampleDuration);
+        //var timeSpan = TimeSpan.FromTicks(DateTime.UtcNow.Ticks - ticks);
+        //_renderTimes.Enqueue(timeSpan.TotalMilliseconds);
+        //if (_renderTimes.Count > 100)
+        //{
+        //    _renderTimes.Dequeue();
+        //}
+        //var mean = _renderTimes.Average();
+        //OnStatus?.Invoke(this,
+        //    new ParagraphEventArgs(0, new SubtitleLineViewModel()
+        //    {
+        //        Text = $"Render time: {mean:0.00} ms"
+        //    }, new SubtitleLineViewModel()));
+    }
+
+    private void DrawSpectrogram(DrawingContext context, ref RenderContext renderCtx)
+    {
+        if (_spectrogram == null || _displayMode == WaveformDisplayMode.OnlyWaveform)
+        {
+            return;
+        }
+
+        var height = renderCtx.Height;
+        if (_displayMode == WaveformDisplayMode.WaveformAndSpectrogram)
+        {
+            height = renderCtx.Height / 2;
+        }
+
+        var endPositionSeconds = RelativeXPositionToSecondsOptimized((int)renderCtx.Width, renderCtx.SampleRate, renderCtx.StartPositionSeconds, renderCtx.ZoomFactor);
+        var width = (int)Math.Round((endPositionSeconds - renderCtx.StartPositionSeconds) / _spectrogram.SampleDuration);
         if (width <= 0)
         {
             return;
@@ -1097,35 +1134,35 @@ public class AudioVisualizer : Control
         var displayHeight = height;
         var avaloniaBitmap = skBitmapCombined.ToAvaloniaBitmap();
 
-        var destRectangle = new Rect(0, Bounds.Height - displayHeight, Bounds.Width, displayHeight);
+        var destRectangle = new Rect(0, renderCtx.Height - displayHeight, renderCtx.Width, displayHeight);
         context.DrawImage(avaloniaBitmap, destRectangle);
     }
 
-    private void DrawTimeLine(DrawingContext context)
+    private void DrawTimeLine(DrawingContext context, ref RenderContext renderCtx)
     {
-        if (WavePeaks == null || Bounds.Height < 1)
+        if (renderCtx.SampleRate == 0)
         {
             return;
         }
 
-        var seconds = Math.Ceiling(StartPositionSeconds) - StartPositionSeconds;
-        var position = SecondsToXPosition(seconds);
-        var imageHeight = Bounds.Height;
+        var seconds = Math.Ceiling(renderCtx.StartPositionSeconds) - renderCtx.StartPositionSeconds;
+        var position = SecondsToXPositionOptimized(seconds, renderCtx.SampleRate, renderCtx.ZoomFactor);
+        var imageHeight = renderCtx.Height;
 
         var pen = _paintTimeLine;
         var textBrush = _paintTimeText;
 
-        while (position < Bounds.Width)
+        while (position < renderCtx.Width)
         {
-            var n = ZoomFactor * WavePeaks.SampleRate;
+            var n = renderCtx.ZoomFactor * renderCtx.SampleRate;
 
-            if (n > 38 || (int)Math.Round(StartPositionSeconds + seconds) % 5 == 0)
+            if (n > 38 || (int)Math.Round(renderCtx.StartPositionSeconds + seconds) % 5 == 0)
             {
                 // Draw major tick lines (seconds)
                 context.DrawLine(pen, new Point(position, imageHeight), new Point(position, imageHeight - 10));
 
                 // Draw time text 
-                var timeText = GetDisplayTime(StartPositionSeconds + seconds);
+                var timeText = GetDisplayTime(renderCtx.StartPositionSeconds + seconds);
                 var formattedText = new FormattedText(
                     timeText,
                     CultureInfo.CurrentCulture,
@@ -1140,7 +1177,7 @@ public class AudioVisualizer : Control
             }
 
             seconds += 0.5;
-            position = SecondsToXPosition(seconds);
+            position = SecondsToXPositionOptimized(seconds, renderCtx.SampleRate, renderCtx.ZoomFactor);
 
             if (n > 64)
             {
@@ -1149,7 +1186,7 @@ public class AudioVisualizer : Control
             }
 
             seconds += 0.5;
-            position = SecondsToXPosition(seconds);
+            position = SecondsToXPositionOptimized(seconds, renderCtx.SampleRate, renderCtx.ZoomFactor);
         }
     }
 
@@ -1193,17 +1230,17 @@ public class AudioVisualizer : Control
 
     public MenuFlyout MenuFlyout { get; set; }
 
-    private void DrawAllGridLines(DrawingContext context)
+    private void DrawAllGridLines(DrawingContext context, ref RenderContext renderCtx)
     {
         if (!DrawGridLines)
         {
             return;
         }
 
-        var width = Bounds.Width;
-        var height = Bounds.Height;
+        var width = renderCtx.Width;
+        var height = renderCtx.Height;
 
-        if (WavePeaks == null)
+        if (renderCtx.SampleRate == 0)
         {
             for (var i = 0; i < width; i += 10)
             {
@@ -1213,11 +1250,11 @@ public class AudioVisualizer : Control
         }
         else
         {
-            var seconds = Math.Ceiling(StartPositionSeconds) - StartPositionSeconds - 1;
-            var xPosition = SecondsToXPosition(seconds);
+            var seconds = Math.Ceiling(renderCtx.StartPositionSeconds) - renderCtx.StartPositionSeconds - 1;
+            var xPosition = SecondsToXPositionOptimized(seconds, renderCtx.SampleRate, renderCtx.ZoomFactor);
             var yPosition = 0;
             var yCounter = 0d;
-            var interval = ZoomFactor >= 0.4d ?
+            var interval = renderCtx.ZoomFactor >= 0.4d ?
                 0.1d : // a pixel is 0.1 second
                 1.0d;  // a pixel is 1.0 second
 
@@ -1225,38 +1262,38 @@ public class AudioVisualizer : Control
             {
                 context.DrawLine(_paintGridLines, new Point(xPosition, 0), new Point(xPosition, height));
                 seconds += interval;
-                xPosition = SecondsToXPosition(seconds);
+                xPosition = SecondsToXPositionOptimized(seconds, renderCtx.SampleRate, renderCtx.ZoomFactor);
             }
 
             while (yPosition < height)
             {
                 context.DrawLine(_paintGridLines, new Point(0, yPosition), new Point(width, yPosition));
                 yCounter += interval;
-                yPosition = Convert.ToInt32(yCounter * WavePeaks.SampleRate * ZoomFactor);
+                yPosition = Convert.ToInt32(yCounter * renderCtx.SampleRate * renderCtx.ZoomFactor);
             }
         }
     }
 
-    private void DrawWaveForm(DrawingContext context)
+    private void DrawWaveForm(DrawingContext context, ref RenderContext renderCtx)
     {
-        if (WavePeaks?.Peaks == null || WavePeaks.Peaks.Count == 0 || _displayMode == WaveformDisplayMode.OnlySpectrogram)
+        if (WavePeaks == null || _displayMode == WaveformDisplayMode.OnlySpectrogram)
         {
             return;
         }
 
-        var waveformHeight = Bounds.Height;
+        var waveformHeight = renderCtx.Height;
         if (_displayMode == WaveformDisplayMode.WaveformAndSpectrogram)
         {
-            waveformHeight = Bounds.Height / 2;
+            waveformHeight = renderCtx.Height / 2;
         }
 
         if (WaveformDrawStyle == WaveformDrawStyle.Classic)
         {
-            DrawWaveFormClassic(context, waveformHeight);
+            DrawWaveFormClassic(context, waveformHeight, ref renderCtx);
         }
         else
         {
-            DrawWaveFormFancy(context, waveformHeight);
+            DrawWaveFormFancy(context, waveformHeight, ref renderCtx);
         }
     }
 
@@ -1301,45 +1338,49 @@ public class AudioVisualizer : Control
         return pen;
     }
 
-    private void DrawWaveFormFancy(DrawingContext context, double waveformHeight)
+    private void DrawWaveFormFancy(DrawingContext context, double waveformHeight, ref RenderContext renderCtx)
     {
-        var isSelectedHelper = new IsSelectedHelper(AllSelectedParagraphs, WavePeaks!.SampleRate);
+        var isSelectedHelper = new IsSelectedHelper(AllSelectedParagraphs, renderCtx.SampleRate);
         var halfWaveformHeight = waveformHeight / 2;
-        var div = WavePeaks.SampleRate * ZoomFactor;
+        var div = renderCtx.SampleRate * renderCtx.ZoomFactor;
 
-        if (div <= 0)
+        if (div <= 0 || WavePeaks == null)
         {
             return;
         }
 
+        var peaks = WavePeaks.Peaks;
+        var peaksCount = peaks.Count;
+        var highestPeak = renderCtx.HighestPeak;
+
         // Draw center line first
         var centerLinePen = new Pen(Brushes.DarkGray, 0.5);
-        context.DrawLine(centerLinePen, new Point(0, halfWaveformHeight), new Point(Bounds.Width, halfWaveformHeight));
+        context.DrawLine(centerLinePen, new Point(0, halfWaveformHeight), new Point(renderCtx.Width, halfWaveformHeight));
 
         // Calculate the threshold for color transitions (as a fraction of the highest peak)
-        var lowThreshold = WavePeaks.HighestPeak * 0.3;
-        var mediumThreshold = WavePeaks.HighestPeak * 0.6;
+        var lowThreshold = highestPeak * 0.3;
+        var mediumThreshold = highestPeak * 0.6;
 
-        for (var x = 0; x < Bounds.Width; x++)
+        for (var x = 0; x < renderCtx.Width; x++)
         {
-            var pos = (StartPositionSeconds + x / div) * WavePeaks.SampleRate;
+            var pos = (renderCtx.StartPositionSeconds + x / div) * renderCtx.SampleRate;
             var pos0 = (int)pos;
             var pos1 = pos0 + 1;
 
-            if (pos1 >= WavePeaks.Peaks.Count || pos0 > WavePeaks.Peaks.Count)
+            if (pos1 >= peaksCount || pos0 > peaksCount)
             {
                 break;
             }
 
             var pos1Weight = pos - pos0;
             var pos0Weight = 1.0 - pos1Weight;
-            var peak0 = WavePeaks.Peaks[pos0];
-            var peak1 = WavePeaks.Peaks[pos1];
+            var peak0 = peaks[pos0];
+            var peak1 = peaks[pos1];
             var max = peak0.Max * pos0Weight + peak1.Max * pos1Weight;
             var min = peak0.Min * pos0Weight + peak1.Min * pos1Weight;
 
-            var yMax = CalculateY(max, 0, halfWaveformHeight);
-            var yMin = CalculateY(min, 0, halfWaveformHeight);
+            var yMax = CalculateYOptimized(max, halfWaveformHeight, renderCtx.HighestPeak, renderCtx.VerticalZoomFactor, renderCtx.Height);
+            var yMin = CalculateYOptimized(min, halfWaveformHeight, renderCtx.HighestPeak, renderCtx.VerticalZoomFactor, renderCtx.Height);
 
             if (yMin < yMax)
             {
@@ -1389,7 +1430,7 @@ public class AudioVisualizer : Control
                 else
                 {
                     // High amplitude - red/orange
-                    var blend = Math.Min(1.0, (amplitude - mediumThreshold) / (WavePeaks.HighestPeak - mediumThreshold));
+                    var blend = Math.Min(1.0, (amplitude - mediumThreshold) / (highestPeak - mediumThreshold));
                     var r = (byte)255;
                     var g = (byte)(150 - blend * 100);
                     var b = (byte)(0);
@@ -1406,7 +1447,7 @@ public class AudioVisualizer : Control
             // Add subtle glow for higher amplitudes
             if (amplitude > mediumThreshold)
             {
-                var glowAlpha = (byte)(50 * ((amplitude - mediumThreshold) / (WavePeaks.HighestPeak - mediumThreshold)));
+                var glowAlpha = (byte)(50 * ((amplitude - mediumThreshold) / (highestPeak - mediumThreshold)));
                 var glowColor = Color.FromArgb(glowAlpha, color.R, color.G, color.B);
                 // Quantize glow alpha to 5 steps for caching
                 var glowKey = 1000 + colorKey * 10 + (glowAlpha / 10);
@@ -1416,37 +1457,40 @@ public class AudioVisualizer : Control
         }
     }
 
-    private void DrawWaveFormClassic(DrawingContext context, double waveformHeight)
+    private void DrawWaveFormClassic(DrawingContext context, double waveformHeight, ref RenderContext renderCtx)
     {
-        var isSelectedHelper = new IsSelectedHelper(AllSelectedParagraphs, WavePeaks!.SampleRate);
+        var isSelectedHelper = new IsSelectedHelper(AllSelectedParagraphs, renderCtx.SampleRate);
         var halfWaveformHeight = waveformHeight / 2;
-        var div = WavePeaks.SampleRate * ZoomFactor;
+        var div = renderCtx.SampleRate * renderCtx.ZoomFactor;
 
-        if (div <= 0)
+        if (div <= 0 || WavePeaks == null)
         {
             return;
         }
 
-        for (var x = 0; x < Bounds.Width; x++)
+        var peaks = WavePeaks.Peaks;
+        var peaksCount = peaks.Count;
+
+        for (var x = 0; x < renderCtx.Width; x++)
         {
-            var pos = (StartPositionSeconds + x / div) * WavePeaks.SampleRate;
+            var pos = (renderCtx.StartPositionSeconds + x / div) * renderCtx.SampleRate;
             var pos0 = (int)pos;
             var pos1 = pos0 + 1;
 
-            if (pos1 >= WavePeaks.Peaks.Count || pos0 > WavePeaks.Peaks.Count)
+            if (pos1 >= peaksCount || pos0 > peaksCount)
             {
                 break;
             }
 
             var pos1Weight = pos - pos0;
             var pos0Weight = 1.0 - pos1Weight;
-            var peak0 = WavePeaks.Peaks[pos0];
-            var peak1 = WavePeaks.Peaks[pos1];
+            var peak0 = peaks[pos0];
+            var peak1 = peaks[pos1];
             var max = peak0.Max * pos0Weight + peak1.Max * pos1Weight;
             var min = peak0.Min * pos0Weight + peak1.Min * pos1Weight;
 
-            var yMax = CalculateY(max, 0, halfWaveformHeight);
-            var yMin = CalculateY(min, 0, halfWaveformHeight);
+            var yMax = CalculateYOptimized(max, halfWaveformHeight, renderCtx.HighestPeak, renderCtx.VerticalZoomFactor, renderCtx.Height);
+            var yMin = CalculateYOptimized(min, halfWaveformHeight, renderCtx.HighestPeak, renderCtx.VerticalZoomFactor, renderCtx.Height);
 
             // Ensure yMin is below yMax and both are within bounds
             if (yMin < yMax)
@@ -1465,15 +1509,15 @@ public class AudioVisualizer : Control
         }
     }
 
-    private void DrawParagraphs(DrawingContext context)
+    private void DrawParagraphs(DrawingContext context, ref RenderContext renderCtx)
     {
         if (_displayableParagraphs == null)
         {
             return;
         }
 
-        var startPositionMilliseconds = StartPositionSeconds * 1000.0;
-        var endPositionMilliseconds = RelativeXPositionToSeconds((int)Bounds.Width) * 1000.0;
+        var startPositionMilliseconds = renderCtx.StartPositionSeconds * 1000.0;
+        var endPositionMilliseconds = RelativeXPositionToSecondsOptimized((int)renderCtx.Width, renderCtx.SampleRate, renderCtx.StartPositionSeconds, renderCtx.ZoomFactor) * 1000.0;
         var paragraphStartList = new List<int>(_displayableParagraphs.Count);
         var paragraphEndList = new List<int>(_displayableParagraphs.Count);
         var paragraphs = _displayableParagraphs;
@@ -1482,25 +1526,25 @@ public class AudioVisualizer : Control
         {
             if (p.EndTime.TotalMilliseconds >= startPositionMilliseconds && p.StartTime.TotalMilliseconds <= endPositionMilliseconds)
             {
-                paragraphStartList.Add(SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds));
-                paragraphEndList.Add(SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds));
-                DrawParagraph(p, context);
+                paragraphStartList.Add(SecondsToXPositionOptimized(p.StartTime.TotalSeconds - renderCtx.StartPositionSeconds, renderCtx.SampleRate, renderCtx.ZoomFactor));
+                paragraphEndList.Add(SecondsToXPositionOptimized(p.EndTime.TotalSeconds - renderCtx.StartPositionSeconds, renderCtx.SampleRate, renderCtx.ZoomFactor));
+                DrawParagraph(p, context, ref renderCtx);
             }
         }
     }
 
-    private void DrawParagraph(SubtitleLineViewModel paragraph, DrawingContext context)
+    private void DrawParagraph(SubtitleLineViewModel paragraph, DrawingContext context, ref RenderContext renderCtx)
     {
-        var currentRegionLeft = SecondsToXPosition(paragraph.StartTime.TotalSeconds - StartPositionSeconds);
-        var currentRegionRight = SecondsToXPosition(paragraph.EndTime.TotalSeconds - StartPositionSeconds);
+        var currentRegionLeft = SecondsToXPositionOptimized(paragraph.StartTime.TotalSeconds - renderCtx.StartPositionSeconds, renderCtx.SampleRate, renderCtx.ZoomFactor);
+        var currentRegionRight = SecondsToXPositionOptimized(paragraph.EndTime.TotalSeconds - renderCtx.StartPositionSeconds, renderCtx.SampleRate, renderCtx.ZoomFactor);
         var currentRegionWidth = currentRegionRight - currentRegionLeft;
 
-        if (currentRegionWidth <= 5 || Bounds.Height < 1)
+        if (currentRegionWidth <= 5)
         {
             return;
         }
 
-        var height = Bounds.Height;
+        var height = renderCtx.Height;
 
         // Draw background rectangle
         context.FillRectangle(_paintParagraphBackground, new Rect(currentRegionLeft, 0, currentRegionWidth, height));
@@ -1542,21 +1586,21 @@ public class AudioVisualizer : Control
         }
     }
 
-    private void DrawShotChanges(DrawingContext context)
+    private void DrawShotChanges(DrawingContext context, ref RenderContext renderCtx)
     {
         var index = 0;
-        var currentPositionPos = SecondsToXPosition(CurrentVideoPositionSeconds - StartPositionSeconds);
+        var currentPositionPos = SecondsToXPositionOptimized(renderCtx.CurrentVideoPositionSeconds - renderCtx.StartPositionSeconds, renderCtx.SampleRate, renderCtx.ZoomFactor);
 
-        var startPositionMilliseconds = StartPositionSeconds * 1000.0;
-        var endPositionMilliseconds = RelativeXPositionToSeconds((int)Bounds.Width) * 1000.0; //TODO: Bounds.Width or Width ???
+        var startPositionMilliseconds = renderCtx.StartPositionSeconds * 1000.0;
+        var endPositionMilliseconds = RelativeXPositionToSecondsOptimized((int)renderCtx.Width, renderCtx.SampleRate, renderCtx.StartPositionSeconds, renderCtx.ZoomFactor) * 1000.0;
         var paragraphStartList = new List<int>();
         var paragraphEndList = new List<int>();
         foreach (var p in _displayableParagraphs)
         {
             if (p.EndTime.TotalMilliseconds >= startPositionMilliseconds && p.StartTime.TotalMilliseconds <= endPositionMilliseconds)
             {
-                paragraphStartList.Add(SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds));
-                paragraphEndList.Add(SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds));
+                paragraphStartList.Add(SecondsToXPositionOptimized(p.StartTime.TotalSeconds - renderCtx.StartPositionSeconds, renderCtx.SampleRate, renderCtx.ZoomFactor));
+                paragraphEndList.Add(SecondsToXPositionOptimized(p.EndTime.TotalSeconds - renderCtx.StartPositionSeconds, renderCtx.SampleRate, renderCtx.ZoomFactor));
             }
         }
 
@@ -1566,60 +1610,60 @@ public class AudioVisualizer : Control
             try
             {
                 var time = _shotChanges[index++];
-                pos = SecondsToXPosition(time - StartPositionSeconds);
+                pos = SecondsToXPositionOptimized(time - renderCtx.StartPositionSeconds, renderCtx.SampleRate, renderCtx.ZoomFactor);
             }
             catch
             {
                 pos = -1;
             }
 
-            if (pos > 0 && pos < Bounds.Width)
+            if (pos > 0 && pos < renderCtx.Width)
             {
                 if (currentPositionPos == pos)
                 {
                     // shot change and current pos are the same
                     var pen1 = new Pen(Brushes.AntiqueWhite, 2);
-                    context.DrawLine(pen1, new Point(pos, 0), new Point(pos, Bounds.Height));
-                    context.DrawLine(_paintPenCursor, new Point(pos, 0), new Point(pos, Bounds.Height));
+                    context.DrawLine(pen1, new Point(pos, 0), new Point(pos, renderCtx.Height));
+                    context.DrawLine(_paintPenCursor, new Point(pos, 0), new Point(pos, renderCtx.Height));
                 }
                 else if (paragraphStartList.Contains(pos))
                 {
                     var pen1 = new Pen(Brushes.AntiqueWhite, 2);
-                    context.DrawLine(pen1, new Point(pos, 0), new Point(pos, Bounds.Height));
+                    context.DrawLine(pen1, new Point(pos, 0), new Point(pos, renderCtx.Height));
 
                     var brush = new SolidColorBrush(Color.FromArgb(175, 0, 100, 0));
                     var pen2 = new Pen(brush, 2, dashStyle: DashStyle.Dash);
-                    context.DrawLine(pen2, new Point(pos, 0), new Point(pos, Bounds.Height));
+                    context.DrawLine(pen2, new Point(pos, 0), new Point(pos, renderCtx.Height));
                 }
                 else if (paragraphEndList.Contains(pos))
                 {
                     var pen1 = new Pen(Brushes.AntiqueWhite, 2);
-                    context.DrawLine(pen1, new Point(pos, 0), new Point(pos, Bounds.Height));
+                    context.DrawLine(pen1, new Point(pos, 0), new Point(pos, renderCtx.Height));
 
                     var brush = new SolidColorBrush(Color.FromArgb(175, 110, 10, 10));
                     var pen2 = new Pen(brush, 2, dashStyle: DashStyle.Dash);
-                    context.DrawLine(pen2, new Point(pos, 0), new Point(pos, Bounds.Height));
+                    context.DrawLine(pen2, new Point(pos, 0), new Point(pos, renderCtx.Height));
                 }
                 else
                 {
                     var pen = new Pen(Brushes.AntiqueWhite, 1);
-                    context.DrawLine(pen, new Point(pos, 0), new Point(pos, Bounds.Height));
+                    context.DrawLine(pen, new Point(pos, 0), new Point(pos, renderCtx.Height));
                 }
             }
         }
     }
 
-    private void DrawCurrentVideoPosition(DrawingContext context)
+    private void DrawCurrentVideoPosition(DrawingContext context, ref RenderContext renderCtx)
     {
-        if (CurrentVideoPositionSeconds <= 0)
+        if (renderCtx.CurrentVideoPositionSeconds <= 0)
         {
             return;
         }
 
-        var currentPositionPos = SecondsToXPosition(CurrentVideoPositionSeconds - StartPositionSeconds);
-        if (currentPositionPos > 0 && currentPositionPos < Bounds.Width)
+        var currentPositionPos = SecondsToXPositionOptimized(renderCtx.CurrentVideoPositionSeconds - renderCtx.StartPositionSeconds, renderCtx.SampleRate, renderCtx.ZoomFactor);
+        if (currentPositionPos > 0 && currentPositionPos < renderCtx.Width)
         {
-            var isOnShotChange = GetShotChangeIndex(CurrentVideoPositionSeconds) >= 0;
+            var isOnShotChange = GetShotChangeIndex(renderCtx.CurrentVideoPositionSeconds) >= 0;
 
             if (isOnShotChange)
             {
@@ -1630,31 +1674,31 @@ public class AudioVisualizer : Control
 
                 context.DrawLine(paintCurrentPositionOverlap,
                     new Point(currentPositionPos, 0),
-                    new Point(currentPositionPos, Bounds.Height));
+                    new Point(currentPositionPos, renderCtx.Height));
             }
             else
             {
                 context.DrawLine(_paintPenCursor,
                     new Point(currentPositionPos, 0),
-                    new Point(currentPositionPos, Bounds.Height));
+                    new Point(currentPositionPos, renderCtx.Height));
             }
         }
     }
 
-    private void DrawNewParagraph(DrawingContext context)
+    private void DrawNewParagraph(DrawingContext context, ref RenderContext renderCtx)
     {
         if (NewSelectionParagraph == null)
         {
             return;
         }
 
-        double currentRegionLeft = SecondsToXPosition(NewSelectionParagraph.StartTime.TotalSeconds - StartPositionSeconds);
-        double currentRegionRight = SecondsToXPosition(NewSelectionParagraph.EndTime.TotalSeconds - StartPositionSeconds);
+        double currentRegionLeft = SecondsToXPositionOptimized(NewSelectionParagraph.StartTime.TotalSeconds - renderCtx.StartPositionSeconds, renderCtx.SampleRate, renderCtx.ZoomFactor);
+        double currentRegionRight = SecondsToXPositionOptimized(NewSelectionParagraph.EndTime.TotalSeconds - renderCtx.StartPositionSeconds, renderCtx.SampleRate, renderCtx.ZoomFactor);
         var currentRegionWidth = currentRegionRight - currentRegionLeft;
 
-        if (currentRegionRight >= 0 && currentRegionLeft <= Bounds.Width)
+        if (currentRegionRight >= 0 && currentRegionLeft <= renderCtx.Width)
         {
-            var rect = new Rect(currentRegionLeft, 0, currentRegionWidth, Bounds.Height);
+            var rect = new Rect(currentRegionLeft, 0, currentRegionWidth, renderCtx.Height);
             context.FillRectangle(_paintParagraphBackground, rect);
         }
     }
@@ -1677,6 +1721,18 @@ public class AudioVisualizer : Control
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static double CalculateYOptimized(double value, double halfWaveformHeight, double highestPeak, double verticalZoomFactor, double boundsHeight)
+    {
+        // Normalize the value to the control's height
+        var normalizedValue = value / highestPeak * verticalZoomFactor;
+        var yOffset = normalizedValue * halfWaveformHeight;
+
+        // Ensure Y stays within bounds
+        var y = halfWaveformHeight - yOffset;
+        return Math.Max(0, Math.Min(boundsHeight, y));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private double RelativeXPositionToSeconds(int x)
     {
         if (WavePeaks == null)
@@ -1684,6 +1740,16 @@ public class AudioVisualizer : Control
             return 0;
         }
         return StartPositionSeconds + (double)x / WavePeaks.SampleRate / ZoomFactor;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static double RelativeXPositionToSecondsOptimized(int x, int sampleRate, double startPositionSeconds, double zoomFactor)
+    {
+        if (sampleRate == 0)
+        {
+            return 0;
+        }
+        return startPositionSeconds + (double)x / sampleRate / zoomFactor;
     }
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1695,6 +1761,16 @@ public class AudioVisualizer : Control
         }
 
         return (int)Math.Round(seconds * WavePeaks.SampleRate * ZoomFactor, MidpointRounding.AwayFromZero);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int SecondsToXPositionOptimized(double seconds, int sampleRate, double zoomFactor)
+    {
+        if (sampleRate == 0)
+        {
+            return 0;
+        }
+        return (int)Math.Round(seconds * sampleRate * zoomFactor, MidpointRounding.AwayFromZero);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

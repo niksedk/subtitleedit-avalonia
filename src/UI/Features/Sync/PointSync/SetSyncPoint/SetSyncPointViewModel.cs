@@ -82,10 +82,13 @@ public partial class SetSyncPointViewModel : ObservableObject
                 IsAudioVisualizerVisible = true;
             }
 
-            var idx = paragraphs.IndexOf(selectedSubtitle);
-            if (idx >= 0)
+            if (selectedSubtitle != null)
             {
-                SelectedParagraphIndex = idx;
+                var idx = paragraphs.IndexOf(selectedSubtitle);
+                if (idx >= 0)
+                {
+                    SelectedParagraphIndex = idx;
+                }
             }
 
             StartTitleTimer();
