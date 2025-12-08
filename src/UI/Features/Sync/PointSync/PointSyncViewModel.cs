@@ -82,7 +82,7 @@ public partial class PointSyncViewModel : ObservableObject
 
         var result = await _windowService.ShowDialogAsync<SetSyncPointWindow, SetSyncPointViewModel>(Window, vm =>
         {
-            vm.Initialize(Subtitles.ToList(), _videoFileName, FileName, _audioVisualizer);
+            vm.Initialize(Subtitles.ToList(), SelectedSubtitle, _videoFileName, FileName, _audioVisualizer);
         });
 
         if (!result.OkPressed)

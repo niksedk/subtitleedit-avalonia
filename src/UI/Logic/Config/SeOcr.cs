@@ -10,6 +10,8 @@ public class SeOcr
     public int NOcrMaxWrongPixels { get; set; }
     public int NOcrPixelsAreSpace { get; set; }
     public bool NOcrDrawUnknownText { get; set; }
+    public int BinaryOcrPixelsAreSpace { get; set; }
+    public double BinaryOcrMaxErrorPercent { get; set; }
     public List<string> OllamaModels { get; set; }
     public string OllamaModel { get; set; }
     public string OllamaUrl { get; set; }
@@ -23,6 +25,8 @@ public class SeOcr
     public int NOcrZoomFactor { get; set; }
     public string PaddleOcrMode { get; set; }
     public string PaddleOcrLastLanguage { get; set; }
+    public string GoogleVisionOcrLastLanguage { get; set; }
+    public string GoogleLensOcrLastLanguage { get; set; }
     public bool DoTryToGuessUnknownWords { get; set; }
     public bool DoPromptForUnknownWords { get; set; }
     public bool DoAutoBreak { get; set; }
@@ -42,6 +46,9 @@ public class SeOcr
         NOcrNoOfLinesToAutoDraw = 60;
         NOcrZoomFactor = 4;
 
+        BinaryOcrPixelsAreSpace = 12;
+        BinaryOcrMaxErrorPercent = 7.5;
+
         OllamaModels = new List<string> { "llama3.2-vision", "llava-phi3", "moondream", "minicpm-v" };
         OllamaLanguage = "English";
         OllamaModel = OllamaModels.First();
@@ -52,6 +59,9 @@ public class SeOcr
 
         PaddleOcrMode = "mobile";
         PaddleOcrLastLanguage = "en";
+
+        GoogleVisionOcrLastLanguage = "en";
+        GoogleLensOcrLastLanguage = "en";
 
         MistralApiKey = string.Empty;
         

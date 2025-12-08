@@ -134,6 +134,7 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
 
     private void Extract7Zip(string tempFileName, string dir, string skipFolderLevel)
     {
+        StatusText = Se.Language.General.Unpacking7ZipArchiveDotDotDot;
         using Stream stream = File.OpenRead(tempFileName);
         using var archive = SevenZipArchive.Open(stream);
         double totalSize = archive.TotalUncompressSize;
@@ -184,7 +185,7 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
 
                 Dispatcher.UIThread.Post(() =>
                 {
-                    ProgressText = $"Unpacking: {displayName}";
+                    ProgressText = string.Format(Se.Language.General.UnpackingX, displayName);
                 });
 
                 reader.WriteEntryToDirectory(fullPath, new ExtractionOptions()
@@ -223,7 +224,7 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
             var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
             var pctString = percentage.ToString(CultureInfo.InvariantCulture);
             ProgressValue = percentage;
-            ProgressText = $"Downloading... {pctString}%";
+            ProgressText = string.Format(Se.Language.General.DownloadingXPercent, pctString);
         });
 
         var folder = Se.PaddleOcrFolder;

@@ -464,6 +464,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream
             var bmp = new SKBitmap(width, height);
             using (var canvas = new SKCanvas(bmp))
             {
+                canvas.Clear(SKColors.Transparent);
                 foreach (var ods in ObjectDataList)
                 {
                     var odsImage = GetImage(ods); // Assuming GetImage returns SKBitmap now

@@ -34,7 +34,6 @@ public partial class DownloadGoogleLensOcrViewModel : ObservableObject
     private readonly Timer _timer;
     private bool _done;
     private readonly CancellationTokenSource _cancellationTokenSource;
-    private PaddleOcrDownloadType _downloadType;
 
     public DownloadGoogleLensOcrViewModel(IGoogleLensOcrDownloadService googleLensOcrDownloadService)
     {
@@ -46,7 +45,6 @@ public partial class DownloadGoogleLensOcrViewModel : ObservableObject
         ProgressText = string.Empty;
         Error = string.Empty;
         _tempFileName = string.Empty;
-        _downloadType = PaddleOcrDownloadType.Models;
 
         _timer = new Timer(500);
         _timer.Elapsed += OnTimerOnElapsed;
@@ -84,14 +82,7 @@ public partial class DownloadGoogleLensOcrViewModel : ObservableObject
                     return;
                 }
 
-                if (_downloadType == PaddleOcrDownloadType.Models)
-                {
-                    Extract7Zip(_tempFileName, Se.PaddleOcrModelsFolder, "PaddleOCR.PP-OCRv5.support.files");
-                }
-                else
-                {
-                    Extract7Zip(_tempFileName, Se.PaddleOcrFolder, "PaddleOCR-CPU-v1.3.0");
-                }
+                Extract7Zip(_tempFileName, Se.GoogleLensOcrFolder, "Chrome-Lens-CLI-v3.3.0");
 
                 OkPressed = true;
                 Close();
@@ -117,6 +108,7 @@ public partial class DownloadGoogleLensOcrViewModel : ObservableObject
 
     private void Extract7Zip(string tempFileName, string dir, string skipFolderLevel)
     {
+        StatusText = Se.Language.General.Unpacking7ZipArchiveDotDotDot;
         using Stream stream = File.OpenRead(tempFileName);
         using var archive = SevenZipArchive.Open(stream);
         double totalSize = archive.TotalUncompressSize;
@@ -167,7 +159,7 @@ public partial class DownloadGoogleLensOcrViewModel : ObservableObject
 
                 Dispatcher.UIThread.Post(() =>
                 {
-                    ProgressText = $"Unpacking: {displayName}";
+                    ProgressText = string.Format(Se.Language.General.UnpackingX, displayName);
                 });
 
                 reader.WriteEntryToDirectory(fullPath, new ExtractionOptions()
@@ -206,7 +198,7 @@ public partial class DownloadGoogleLensOcrViewModel : ObservableObject
             var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
             var pctString = percentage.ToString(CultureInfo.InvariantCulture);
             ProgressValue = percentage;
-            ProgressText = $"Downloading... {pctString}%";
+            ProgressText = string.Format(Se.Language.General.DownloadingXPercent, pctString);
         });
 
         var folder = Se.PaddleOcrFolder;

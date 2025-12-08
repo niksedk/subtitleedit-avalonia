@@ -42,7 +42,7 @@ public static class InitMenu
                 new MenuItem
                 {
                     Header = l.New,
-                    Command = vm.CommandFileNewCommand,                                      
+                    Command = vm.CommandFileNewCommand,
                 },
                 new MenuItem
                 {
@@ -532,7 +532,7 @@ public static class InitMenu
                         },
                         new MenuItem
                         {
-                            Header = l.SetVideoOffset,
+                            [!MenuItem.HeaderProperty] = new Binding(nameof(vm.SetVideoOffsetText)),
                             Command = vm.ShowVideoSetOffsetCommand,
                         },
                         new MenuItem

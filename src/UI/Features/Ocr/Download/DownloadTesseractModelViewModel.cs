@@ -156,7 +156,7 @@ public partial class DownloadTesseractModelViewModel : ObservableObject
             var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
             var pctString = percentage.ToString(CultureInfo.InvariantCulture);
             Progress = percentage;
-            StatusText = $"Downloading... {pctString}%";
+            StatusText = string.Format(Se.Language.General.DownloadingXPercent, pctString);
         });
 
         _downloadTask = _tesseractDownloadService.DownloadTesseractModel(

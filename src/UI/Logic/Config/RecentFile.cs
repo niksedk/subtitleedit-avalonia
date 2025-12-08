@@ -7,4 +7,6 @@ public class RecentFile
     public string VideoFileName { get; set; } = string.Empty;
     public int SelectedLine { get; set; }
     public string Encoding { get; set; } = string.Empty;
+    public long VideoOffsetInMs { get; set; }
+    public bool VideoIsSmpte { get; set; }
 }

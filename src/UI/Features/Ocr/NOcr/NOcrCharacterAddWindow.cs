@@ -2,8 +2,6 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
-using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -12,11 +10,8 @@ namespace Nikse.SubtitleEdit.Features.Ocr.NOcr;
 
 public class NOcrCharacterAddWindow : Window
 {
-    private readonly NOcrCharacterAddViewModel _vm;
-
     public NOcrCharacterAddWindow(NOcrCharacterAddViewModel vm)
     {
-        _vm = vm;
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = string.Empty;
@@ -80,6 +75,8 @@ public class NOcrCharacterAddWindow : Window
         Loaded += vm.Onloaded;
         Closing += vm.OnClosing;
         PointerWheelChanged += vm.PointerWheelChanged;
+        KeyDown += (sender, args) => vm.KeyDown(args);
+        KeyUp += (sender, args) => vm.KeyUp(args);
     }
 
     private static Grid MakeControlsView(NOcrCharacterAddViewModel vm)
@@ -292,23 +289,5 @@ public class NOcrCharacterAddWindow : Window
         grid.Add(panelButtons, 0, 2, 1, 2);
 
         return grid;
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.KeyDown(e);
-    }
-
-    protected override void OnKeyUp(KeyEventArgs e)
-    {
-        base.OnKeyUp(e);
-        _vm.KeyUp(e);
-    }
-
-    protected override void OnLoaded(RoutedEventArgs e)
-    {
-        base.OnLoaded(e);
-        Title = _vm.Title;
     }
 }

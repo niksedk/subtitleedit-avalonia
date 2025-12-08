@@ -29,6 +29,11 @@ public class GoogleLensOcrDownloadService(HttpClient httpClient) : IGoogleLensOc
 
     private string GetUrl()
     {
-        return WindowsUrl;
+        if (OperatingSystem.IsWindows())
+        {
+            return WindowsUrl;
+        }
+
+        throw new PlatformNotSupportedException("Google Lens OCR download is only supported on Windows.");
     }
 }

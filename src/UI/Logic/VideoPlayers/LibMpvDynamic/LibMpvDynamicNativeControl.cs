@@ -1,9 +1,11 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using System;
 using System.Runtime.InteropServices;
+using System.Timers;
 
 namespace Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 
@@ -12,6 +14,8 @@ public class LibMpvDynamicNativeControl : NativeControlHost
     private LibMpvDynamicPlayer? _mpvPlayer;
     private bool _isInitialized;
     private IntPtr _nativeHandle;
+    private Timer? _resizeTimer;
+    private bool _isResizing;
 
     public LibMpvDynamicPlayer? Player => _mpvPlayer;
 
@@ -23,12 +27,66 @@ public class LibMpvDynamicNativeControl : NativeControlHost
         // Force arrow cursor immediately
         Cursor = new Cursor(StandardCursorType.Arrow);
 
+        // Initialize resize timer - wait for resize to finish before showing video again
+        _resizeTimer = new Timer(10); // 10ms after resize stops
+        _resizeTimer.AutoReset = false;
+        _resizeTimer.Elapsed += OnResizeFinished;
+
         // Handle when control is loaded
         Loaded += (s, e) =>
         {
             Cursor = new Cursor(StandardCursorType.Arrow);
             PlatformCursorManager.ForceArrowCursor();
         };
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+
+        // Detect window resize
+        if (change.Property.Name == nameof(Bounds) && _isInitialized && _mpvPlayer != null)
+        {
+            var newBounds = (Rect)change.NewValue!;
+            var oldBounds = (Rect)(change.OldValue ?? new Rect());
+
+            // Check if size actually changed
+            if (Math.Abs(newBounds.Width - oldBounds.Width) > 1 || 
+                Math.Abs(newBounds.Height - oldBounds.Height) > 1)
+            {
+                OnResizeStarted();
+            }
+        }
+    }
+
+    private void OnResizeStarted()
+    {
+        if (!_isResizing && _mpvPlayer != null)
+        {
+            _isResizing = true;
+            
+            // Hide the native control during resize to prevent flashing
+            IsVisible = false;
+        }
+
+        // Reset timer - resize is ongoing
+        _resizeTimer?.Stop();
+        _resizeTimer?.Start();
+    }
+
+    private void OnResizeFinished(object? sender, ElapsedEventArgs e)
+    {
+        // Resize has stopped, show the control again
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (_isResizing && _mpvPlayer != null)
+            {
+                _isResizing = false;
+
+                // Show the control again
+                IsVisible = true;
+            }
+        });
     }
 
     protected override IPlatformHandle CreateNativeControlCore(IPlatformHandle parent)
@@ -67,6 +125,15 @@ public class LibMpvDynamicNativeControl : NativeControlHost
         if (_mpvPlayer != null)
         {
             _mpvPlayer.RequestRender -= OnMpvRequestRender;
+        }
+
+        // Clean up resize timer
+        if (_resizeTimer != null)
+        {
+            _resizeTimer.Stop();
+            _resizeTimer.Elapsed -= OnResizeFinished;
+            _resizeTimer.Dispose();
+            _resizeTimer = null;
         }
 
         _isInitialized = false;

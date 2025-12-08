@@ -51,8 +51,8 @@ public class SplitManager : ISplitManager
         else if (lines.Count > 2)
         {
             var splitIndex = lines.Count / 2;
-            subtitle.Text = string.Join(Environment.NewLine, lines, 0, splitIndex).Trim();
-            newSubtitle.Text = string.Join(Environment.NewLine, lines, splitIndex, lines.Count - splitIndex).Trim();
+            subtitle.Text = string.Join(Environment.NewLine, lines.GetRange(0, splitIndex)).Trim();
+            newSubtitle.Text = string.Join(Environment.NewLine, lines.GetRange(splitIndex, lines.Count - splitIndex)).Trim();
         }
         else
         {

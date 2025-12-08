@@ -15,6 +15,11 @@ public class TimeSpanToDisplayFullConverter : IValueConverter
     {
         if (value is TimeSpan ts)
         {
+            if (Se.Settings.General.CurrentVideoOffsetInMs != 0)
+            {
+                ts = ts.Add(TimeSpan.FromMilliseconds(Se.Settings.General.CurrentVideoOffsetInMs));
+            }
+
             if (Se.Settings.General.UseFrameMode)
             {
                 var resultFrames = new TimeCode(ts).ToHHMMSSFF();
@@ -47,6 +52,12 @@ public class TimeSpanToDisplayFullConverter : IValueConverter
                     int.TryParse(parts[3], out int frames))
                 {
                     var result = new TimeSpan(0, hours, minutes, seconds, SubtitleFormat.FramesToMillisecondsMax999(frames));
+
+                    if (Se.Settings.General.CurrentVideoOffsetInMs != 0)
+                    {
+                        result = result.Add(TimeSpan.FromMilliseconds(-Se.Settings.General.CurrentVideoOffsetInMs));
+                    }
+
                     return result;
                 }
             }
@@ -59,6 +70,12 @@ public class TimeSpanToDisplayFullConverter : IValueConverter
                     int.TryParse(parts[3], out int ms))
                 {
                     var result = new TimeSpan(0, hours, minutes, seconds, ms);
+
+                    if (Se.Settings.General.CurrentVideoOffsetInMs != 0)
+                    {
+                        result = result.Add(TimeSpan.FromMilliseconds(-Se.Settings.General.CurrentVideoOffsetInMs));
+                    }
+
                     return result;
                 }
             }

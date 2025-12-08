@@ -307,6 +307,16 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         }
     }
 
+    public bool CanLoad()
+    {
+        if (_library != IntPtr.Zero)
+        {
+            return true;
+        }
+
+        return LoadLibraryInternal();
+    }
+
     public int Initialize()
     {
         EnsureNotDisposed();

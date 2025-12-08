@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -33,7 +34,12 @@ public partial class VideoPlayerItem : ObservableObject
 
         result.Add(new VideoPlayerItem { Name = Se.Language.Options.Settings.MpvSoftwareRendering, Code = "mpv-sw" });
 
-        result.Add(new VideoPlayerItem { Name = Se.Language.Options.Settings.VlcWidRendering, Code = "vlc" });
+        if (OperatingSystem.IsMacOS() && RuntimeInformation.ProcessArchitecture == Architecture.X64 || 
+            OperatingSystem.IsWindows() ||
+            OperatingSystem.IsLinux())
+        {
+            result.Add(new VideoPlayerItem { Name = Se.Language.Options.Settings.VlcWidRendering, Code = "vlc" });
+        }
 
         return result;
     }

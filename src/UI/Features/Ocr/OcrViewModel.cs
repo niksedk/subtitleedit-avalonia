@@ -14,6 +14,7 @@ using Nikse.SubtitleEdit.Core.VobSub;
 using Nikse.SubtitleEdit.Core.VobSub.Ocr.Service;
 using Nikse.SubtitleEdit.Features.Files.ImportImages;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Ocr.BinaryOcr;
 using Nikse.SubtitleEdit.Features.Ocr.Download;
 using Nikse.SubtitleEdit.Features.Ocr.Engines;
 using Nikse.SubtitleEdit.Features.Ocr.FixEngine;
@@ -43,6 +44,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using static Nikse.SubtitleEdit.Core.AudioToText.AudioToTextPostProcessor;
 
 namespace Nikse.SubtitleEdit.Features.Ocr;
 
@@ -55,6 +57,11 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private OcrSubtitleItem? _selectedOcrSubtitleItem;
     [ObservableProperty] private ObservableCollection<string> _nOcrDatabases;
     [ObservableProperty] private string? _selectedNOcrDatabase;
+    [ObservableProperty] private ObservableCollection<string> _imageCompareDatabases;
+    [ObservableProperty] private string? _selectedImageCompareDatabase;
+    [ObservableProperty] private ObservableCollection<int> _binaryOcrPixelsAreSpaceList;
+    [ObservableProperty] private int _selectedBinaryOcrPixelsAreSpace;
+    [ObservableProperty] private double _binaryOcrMaxErrorPercent;
     [ObservableProperty] private ObservableCollection<int> _nOcrMaxWrongPixelsList;
     [ObservableProperty] private int _selectedNOcrMaxWrongPixels;
     [ObservableProperty] private ObservableCollection<int> _nOcrPixelsAreSpaceList;
@@ -74,8 +81,10 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private bool _isNOcrVisible;
     [ObservableProperty] private bool _isOllamaVisible;
     [ObservableProperty] private bool _isTesseractVisible;
+    [ObservableProperty] private bool _isBinaryImageCompareVisible;
     [ObservableProperty] private bool _isPaddleOcrVisible;
     [ObservableProperty] private bool _isGoogleVisionVisible;
+    [ObservableProperty] private bool _isGoogleLensVisible;
     [ObservableProperty] private bool _isMistralOcrVisible;
     [ObservableProperty] private bool _nOcrDrawUnknownText;
     [ObservableProperty] private bool _isInspectLineVisible;
@@ -84,6 +93,8 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private string _mistralApiKey;
     [ObservableProperty] private ObservableCollection<OcrLanguage> _googleVisionLanguages;
     [ObservableProperty] private OcrLanguage? _selectedGoogleVisionLanguage;
+    [ObservableProperty] private ObservableCollection<OcrLanguage2> _googleLensLanguages;
+    [ObservableProperty] private OcrLanguage2 _selectedGoogleLensLanguage;
     [ObservableProperty] private ObservableCollection<OcrLanguage2> _paddleOcrLanguages;
     [ObservableProperty] private OcrLanguage2? _selectedPaddleOcrLanguage;
     [ObservableProperty] private bool _paddleUseGpu;
@@ -118,6 +129,7 @@ public partial class OcrViewModel : ObservableObject
     private readonly IFileHelper _fileHelper;
     private readonly ISpellCheckManager _spellCheckManager;
     private readonly IOcrFixEngine2 _ocrFixEngine;
+    private readonly IBinaryOcrMatcher _binaryOcrMatcher;
     private PreProcessingSettings? _preProcessingSettings;
 
     private CancellationTokenSource _cancellationTokenSource;
@@ -125,26 +137,32 @@ public partial class OcrViewModel : ObservableObject
     private readonly List<SkipOnceChar> _runOnceChars;
     private readonly List<SkipOnceChar> _skipOnceChars;
     private readonly NOcrAddHistoryManager _nOcrAddHistoryManager;
+    private readonly BinaryOcrAddHistoryManager _binaryOcrAddHistoryManager;
 
     public OcrViewModel(
         INOcrCaseFixer nOcrCaseFixer,
         IWindowService windowService,
         IFileHelper fileHelper,
         ISpellCheckManager spellCheckManager,
-        IOcrFixEngine2 ocrFixEngine)
+        IOcrFixEngine2 ocrFixEngine,
+        IBinaryOcrMatcher binaryOcrMatcher)
     {
         _nOcrCaseFixer = nOcrCaseFixer;
         _windowService = windowService;
         _fileHelper = fileHelper;
         _spellCheckManager = spellCheckManager;
         _ocrFixEngine = ocrFixEngine;
+        _binaryOcrMatcher = binaryOcrMatcher;
 
         Title = Se.Language.Ocr.Ocr;
         OcrEngines = new ObservableCollection<OcrEngineItem>(OcrEngineItem.GetOcrEngines());
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>();
         NOcrDatabases = new ObservableCollection<string>();
+        ImageCompareDatabases = new ObservableCollection<string>(BinaryOcrDb.GetDatabases());
+        SelectedImageCompareDatabase = ImageCompareDatabases.FirstOrDefault();
         NOcrMaxWrongPixelsList = new ObservableCollection<int>(Enumerable.Range(0, 500));
         NOcrPixelsAreSpaceList = new ObservableCollection<int>(Enumerable.Range(1, 50));
+        BinaryOcrPixelsAreSpaceList = new ObservableCollection<int>(Enumerable.Range(1, 50));
         OllamaLanguages = new ObservableCollection<string>(Iso639Dash2LanguageCode.List
             .Select(p => p.EnglishName)
             .OrderBy(p => p));
@@ -159,6 +177,8 @@ public partial class OcrViewModel : ObservableObject
         GoogleVisionApiKey = string.Empty;
         MistralApiKey = string.Empty;
         GoogleVisionLanguages = new ObservableCollection<OcrLanguage>(GoogleVisionOcr.GetLanguages().OrderBy(p => p.ToString()));
+        GoogleLensLanguages = new ObservableCollection<OcrLanguage2>(GoogleLensOcr.GetLanguages().OrderBy(p => p.ToString()));
+        SelectedGoogleLensLanguage = GoogleLensLanguages.FirstOrDefault(p => p.Code == "en") ?? GoogleLensLanguages.First();
         PaddleOcrLanguages = new ObservableCollection<OcrLanguage2>(PaddleOcr.GetLanguages().OrderBy(p => p.ToString()));
         OcredSubtitle = new List<SubtitleLineViewModel>();
         Dictionaries = new ObservableCollection<SpellCheckDictionaryDisplay>();
@@ -168,6 +188,7 @@ public partial class OcrViewModel : ObservableObject
         _runOnceChars = new List<SkipOnceChar>();
         _skipOnceChars = new List<SkipOnceChar>();
         _nOcrAddHistoryManager = new NOcrAddHistoryManager();
+        _binaryOcrAddHistoryManager = new BinaryOcrAddHistoryManager();
         _cancellationTokenSource = new CancellationTokenSource();
         LoadSettings();
         EngineSelectionChanged();
@@ -192,6 +213,8 @@ public partial class OcrViewModel : ObservableObject
             SelectedNOcrMaxWrongPixels = ocr.NOcrMaxWrongPixels;
             NOcrDrawUnknownText = ocr.NOcrDrawUnknownText;
             SelectedNOcrPixelsAreSpace = ocr.NOcrPixelsAreSpace;
+            SelectedBinaryOcrPixelsAreSpace = ocr.BinaryOcrPixelsAreSpace;
+            BinaryOcrMaxErrorPercent = ocr.BinaryOcrMaxErrorPercent;
             OllamaModel = ocr.OllamaModel;
             OllamaUrl = ocr.OllamaUrl;
             SelectedOllamaLanguage = ocr.OllamaLanguage;
@@ -199,6 +222,8 @@ public partial class OcrViewModel : ObservableObject
             MistralApiKey = ocr.MistralApiKey;
             SelectedGoogleVisionLanguage = GoogleVisionLanguages.FirstOrDefault(p => p.Code == ocr.GoogleVisionLanguage);
             SelectedPaddleOcrLanguage = PaddleOcrLanguages.FirstOrDefault(p => p.Code == Se.Settings.Ocr.PaddleOcrLastLanguage) ?? PaddleOcrLanguages.First();
+            SelectedGoogleLensLanguage = GoogleLensLanguages.FirstOrDefault(p => p.Code == Se.Settings.Ocr.GoogleLensOcrLastLanguage) ?? GoogleLensLanguages.First();
+
             DoFixOcrErrors = ocr.DoFixOcrErrors;
             DoPromptForUnknownWords = ocr.DoPromptForUnknownWords;
             DoTryToGuessUnknownWords = ocr.DoTryToGuessUnknownWords;
@@ -214,6 +239,8 @@ public partial class OcrViewModel : ObservableObject
         ocr.NOcrMaxWrongPixels = SelectedNOcrMaxWrongPixels;
         ocr.NOcrDrawUnknownText = NOcrDrawUnknownText;
         ocr.NOcrPixelsAreSpace = SelectedNOcrPixelsAreSpace;
+        ocr.BinaryOcrPixelsAreSpace = SelectedBinaryOcrPixelsAreSpace;
+        ocr.BinaryOcrMaxErrorPercent = BinaryOcrMaxErrorPercent;
         ocr.OllamaModel = OllamaModel;
         ocr.OllamaUrl = OllamaUrl;
         ocr.OllamaLanguage = SelectedOllamaLanguage ?? "English";
@@ -382,11 +409,25 @@ public partial class OcrViewModel : ObservableObject
     private async Task InspectLine()
     {
         var item = SelectedOcrSubtitleItem;
-        if (item == null)
+        var engine = SelectedOcrEngine;
+        if (item == null || engine == null)
         {
             return;
         }
 
+        if (engine.EngineType == OcrEngineType.nOcr)
+        {
+            await InspectLineNOcr(item);
+        }
+
+        if (engine.EngineType == OcrEngineType.BinaryImageCompare)
+        {
+            await InspectLineBinaryImageCompareOcr(item);
+        }
+    }
+
+    private async Task InspectLineNOcr(OcrSubtitleItem item)
+    {
         if (!InitNOcrDb())
         {
             return;
@@ -446,11 +487,94 @@ public partial class OcrViewModel : ObservableObject
         }
     }
 
+    private async Task InspectLineBinaryImageCompareOcr(OcrSubtitleItem item)
+    {
+        var db = InitImageComparOcrDb();
+        if (db == null)
+        {
+            return;
+        }
+
+        var bitmap = item.GetSkBitmap();
+        var nBmp = new NikseBitmap2(bitmap);
+        nBmp.MakeTwoColor(200);
+        nBmp.CropTop(0, new SKColor(0, 0, 0, 0));
+        var letters =
+            NikseBitmapImageSplitter2.SplitBitmapToLettersNew(nBmp, SelectedNOcrPixelsAreSpace, false, true, 20, true);
+        var matches = new List<BinaryOcrMatcher.CompareMatch?>();
+        foreach (var splitterItem in letters)
+        {
+            if (splitterItem.NikseBitmap == null)
+            {
+                var match = new BinaryOcrMatcher.CompareMatch(splitterItem.SpecialCharacter ?? string.Empty, false, 0, nameof(splitterItem.SpecialCharacter));
+                matches.Add(match);
+            }
+            else
+            {
+                var match = _binaryOcrMatcher.GetCompareMatch(splitterItem, out _, letters, letters.IndexOf(splitterItem), db);
+                matches.Add(match);
+            }
+        }
+
+        var result = await _windowService.ShowDialogAsync<BinaryOcrInspectWindow, BinaryOcrInspectViewModel>(Window!,
+            vm =>
+            {
+                vm.Initialize(nBmp.GetBitmap(), SelectedOcrSubtitleItem, db, SelectedNOcrMaxWrongPixels, letters,
+                    matches);
+            });
+
+        if (result.AddBetterMatchPressed)
+        {
+            var characterAddResult =
+                await _windowService.ShowDialogAsync<BinaryOcrCharacterAddWindow, BinaryOcrCharacterAddViewModel>(Window!,
+                    vm =>
+                    {
+                        vm.Initialize(nBmp, item, letters, result.LetterIndex, db, SelectedNOcrMaxWrongPixels,
+                            _binaryOcrAddHistoryManager, false, false);
+                    });
+
+            if (characterAddResult.OkPressed && characterAddResult.BinaryOcrBitmap != null)
+            {
+                var letterBitmap = letters[result.LetterIndex].NikseBitmap;
+                _binaryOcrAddHistoryManager.Add(characterAddResult.BinaryOcrBitmap, letterBitmap, OcrSubtitleItems.IndexOf(item));
+                db.Add(characterAddResult.BinaryOcrBitmap);
+                _ = Task.Run(db.Save);
+            }
+            else if (characterAddResult.InspectHistoryPressed)
+            {
+                await _windowService.ShowDialogAsync<BinaryOcrCharacterHistoryWindow, BinaryOcrCharacterHistoryViewModel>(Window!,
+                    vm => { vm.Initialize(db, _binaryOcrAddHistoryManager); });
+            }
+        }
+    }
+
     [RelayCommand]
     private async Task InspectAdditions()
     {
-        await _windowService.ShowDialogAsync<NOcrCharacterHistoryWindow, NOcrCharacterHistoryViewModel>(Window!,
-            vm => { vm.Initialize(_nOcrDb!, _nOcrAddHistoryManager); });
+        var item = SelectedOcrSubtitleItem;
+        var engine = SelectedOcrEngine;
+        if (item == null || engine == null)
+        {
+            return;
+        }
+
+        if (engine.EngineType == OcrEngineType.nOcr)
+        {
+            await _windowService.ShowDialogAsync<NOcrCharacterHistoryWindow, NOcrCharacterHistoryViewModel>(Window!,
+                vm => { vm.Initialize(_nOcrDb!, _nOcrAddHistoryManager); });
+        }
+
+        if (engine.EngineType == OcrEngineType.BinaryImageCompare)
+        {
+            var db = InitImageComparOcrDb();
+            if (db == null)
+            {
+                return;
+            }
+
+            await _windowService.ShowDialogAsync<BinaryOcrCharacterHistoryWindow, BinaryOcrCharacterHistoryViewModel>(Window!,
+                vm => { vm.Initialize(db, _binaryOcrAddHistoryManager); });
+        }
     }
 
     [RelayCommand]
@@ -912,7 +1036,7 @@ public partial class OcrViewModel : ObservableObject
     [RelayCommand]
     private async Task StartOcr(List<int>? selectedIndices)
     {
-        if (IsOcrRunning)
+        if (IsOcrRunning || Window == null)
         {
             return;
         }
@@ -970,6 +1094,10 @@ public partial class OcrViewModel : ObservableObject
         if (ocrEngine.EngineType == OcrEngineType.nOcr)
         {
             RunNOcr(selectedIndices);
+        }
+        else if (ocrEngine.EngineType == OcrEngineType.BinaryImageCompare)
+        {
+            RunBinaryImageCompareOcr(selectedIndices);
         }
         else if (ocrEngine.EngineType == OcrEngineType.Tesseract)
         {
@@ -1055,6 +1183,33 @@ public partial class OcrViewModel : ObservableObject
         {
             //   RunGoogleVisionOcr(startFromIndex);
         }
+        else if (ocrEngine.EngineType == OcrEngineType.GoogleLens)
+        {
+            if (Configuration.IsRunningOnWindows && !File.Exists(Path.Combine(Se.GoogleLensOcrFolder, GoogleLensOcr.ExeFileName)))
+            {
+                var answer = await MessageBox.Show(
+                    Window!,
+                    "Download Google Lens OCR?",
+                    $"{Environment.NewLine}\"Google Lens OCR\" requires downloading Google Lens OCR standalone.{Environment.NewLine}{Environment.NewLine}Download and use Google Lens OCR?",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Question);
+
+                if (answer != MessageBoxResult.Yes)
+                {
+                    PauseOcr();
+                    return;
+                }
+
+                var result = await _windowService.ShowDialogAsync<DownloadGoogleLensOcrWindow, DownloadGoogleLensOcrViewModel>(Window);
+                if (!result.OkPressed)
+                {
+                    PauseOcr();
+                    return;
+                }
+            }
+
+            RunGoogleLensOcr(selectedIndices);
+        }
     }
 
     private Lock BatchLock = new Lock();
@@ -1126,6 +1281,74 @@ public partial class OcrViewModel : ObservableObject
             IsOcrRunning = false;
         });
     }
+
+    private void RunGoogleLensOcr(List<int> selectedIndices)
+    {
+        var numberOfImages = selectedIndices.Count;
+        var ocrEngine = new GoogleLensOcr();
+        var language = SelectedGoogleLensLanguage?.Code ?? "en";
+        Se.Settings.Ocr.PaddleOcrLastLanguage = language;
+
+        var batchImages = new List<PaddleOcrBatchInput>(numberOfImages);
+        var count = 0;
+        ProgressText = $"Initializing Google Lens OCR...";
+        foreach (var i in selectedIndices)
+        {
+            count++;
+            var ocrItem = OcrSubtitleItems[i];
+            batchImages.Add(new PaddleOcrBatchInput
+            {
+                Bitmap = ocrItem.GetSkBitmap(),
+                Index = i,
+                Text = $"{count} / {numberOfImages}: {ocrItem.StartTime} - {ocrItem.EndTime}"
+            });
+
+            if (_cancellationTokenSource.Token.IsCancellationRequested)
+            {
+                IsOcrRunning = false;
+                return;
+            }
+        }
+
+        var ocrProgress = new Progress<PaddleOcrBatchProgress>(p =>
+        {
+            if (_cancellationTokenSource.Token.IsCancellationRequested)
+            {
+                return;
+            }
+
+            lock (BatchLock)
+            {
+                var number = p.Index;
+                if (!selectedIndices.Contains(number))
+                {
+                    return;
+                }
+
+                var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
+                var pctString = percentage.ToString(CultureInfo.InvariantCulture);
+                ProgressValue = number / (double)OcrSubtitleItems.Count;
+                ProgressText = $"Running OCR... {number + 1}/{OcrSubtitleItems.Count}";
+
+                var scrollToIndex = number;
+                var item = p.Item;
+                if (item == null)
+                {
+                    item = OcrSubtitleItems[p.Index];
+                }
+
+                item.Text = p.Text;
+                OcrFixLineAndSetText(number, item);
+            }
+        });
+
+        _ = Task.Run(() =>
+        {
+            ocrEngine.OcrBatch(batchImages, language, ocrProgress, _cancellationTokenSource.Token);
+            IsOcrRunning = false;
+        });
+    }
+
 
     private void RunNOcr(List<int> selectedIndices)
     {
@@ -1263,6 +1486,233 @@ public partial class OcrViewModel : ObservableObject
             }
 
             item.Text = ItalicTextMerger.MergeWithItalicTags(matches).Trim();
+            var unknownWords = OcrFixLineAndSetText(i, item);
+
+            _runOnceChars.Clear();
+            _skipOnceChars.Clear();
+
+            if (DoPromptForUnknownWords && unknownWords.Count > 0)
+            {
+                var tcs = new TaskCompletionSource<bool>();
+                Dispatcher.UIThread.Post(async () =>
+                {
+                    foreach (var unknownWord in unknownWords)
+                    {
+                        var suggestions = _ocrFixEngine.GetSpellCheckSuggestions(unknownWord.Word.FixedWord);
+                        var result = await _windowService.ShowDialogAsync<PromptUnknownWordWindow, PromptUnknownWordViewModel>(Window!,
+                            vm =>
+                            {
+                                vm.Initialize(item.GetBitmap(), item.Text, unknownWord, suggestions);
+                            });
+
+                        if (result.ChangeWholeTextPressed)
+                        {
+                            item.Text = result.WholeText;
+                            break;
+                        }
+                        else if (result.ChangeOncePressed)
+                        {
+                            ChangeWord(item, unknownWord, result.Word);
+                        }
+                        else if (result.ChangeAllPressed)
+                        {
+                            _ocrFixEngine.ChangeAll(unknownWord.Word.Word, result.Word);
+                        }
+                        else if (result.SkipOncePressed)
+                        {
+                            // do nothing
+                        }
+                        else if (result.SkipAllPressed)
+                        {
+                            _ocrFixEngine.SkipAll(unknownWord.Word.Word);
+                        }
+                        else if (result.AddToNamesListPressed)
+                        {
+                            _ocrFixEngine.AddName(unknownWord.Word.Word);
+                        }
+                        else if (result.AddToUserDictionaryPressed)
+                        {
+                            if (SelectedDictionary != null)
+                            {
+                                UserWordsHelper.AddToUserDictionary(unknownWord.Word.Word, SelectedDictionary.GetFiveLetterLanguageName() ?? "en_US");
+                            }
+                        }
+                        else
+                        {
+                            _cancellationTokenSource.Cancel();
+                            IsOcrRunning = false;
+                            break;
+                        }
+                    }
+                    tcs.SetResult(true);
+                });
+                await tcs.Task;
+                if (!IsOcrRunning)
+                {
+                    return;
+                }
+            }
+        }
+
+        IsOcrRunning = false;
+    }
+
+    private void RunBinaryImageCompareOcr(List<int> selectedIndices)
+    {
+        var db = InitImageComparOcrDb();
+        if (db == null)
+        {
+            return;
+        }
+
+        _skipOnceChars.Clear();
+        _ = Task.Run(() => { using var _ = RunBinaryImageCompareOcrLoop(db, selectedIndices); });
+    }
+
+    private BinaryOcrDb? InitImageComparOcrDb()
+    {
+        if (SelectedImageCompareDatabase == null)
+        {
+            return null;
+        }
+
+        var fileName = Path.Combine(Se.OcrFolder, SelectedImageCompareDatabase + ".db");
+        if (!File.Exists(fileName))
+        {
+            return null;
+        }
+
+        _binaryOcrMatcher.IsLatinDb = SelectedImageCompareDatabase.Contains("Latin", StringComparison.OrdinalIgnoreCase);
+        return new BinaryOcrDb(fileName, true);
+    }
+
+    private async Task RunBinaryImageCompareOcrLoop(BinaryOcrDb db, List<int> selectedIndices)
+    {
+        foreach (var i in selectedIndices)
+        {
+            if (_cancellationTokenSource.Token.IsCancellationRequested)
+            {
+                IsOcrRunning = false;
+                return;
+            }
+
+            ProgressValue = i * 100.0 / OcrSubtitleItems.Count;
+            ProgressText = string.Format(Se.Language.Ocr.RunningOcrDotDotDotXY, i + 1, OcrSubtitleItems.Count);
+
+            var item = OcrSubtitleItems[i];
+            var bitmap = item.GetSkBitmap();
+            var parentBitmap = new NikseBitmap2(bitmap);
+            parentBitmap.MakeTwoColor(200);
+            parentBitmap.CropTop(0, new SKColor(0, 0, 0, 0));
+            var letters = NikseBitmapImageSplitter2.SplitBitmapToLettersNew(parentBitmap, SelectedBinaryOcrPixelsAreSpace, false, true, 20, true);
+            SelectedOcrSubtitleItem = item;
+            int index = 0;
+            var matches = new List<BinaryOcrMatcher.CompareMatch>();
+            while (index < letters.Count)
+            {
+                var splitterItem = letters[index];
+                if (splitterItem.NikseBitmap == null)
+                {
+                    if (splitterItem.SpecialCharacter != null)
+                    {
+                        // space or special character
+                        matches.Add(new BinaryOcrMatcher.CompareMatch(splitterItem.SpecialCharacter, false, 0, nameof(splitterItem.SpecialCharacter)));
+                    }
+                }
+                else
+                {
+                    var match = _binaryOcrMatcher.GetCompareMatch(splitterItem, out var secondBestMatch, letters, index, db);
+
+                    if (match == null)
+                    {
+                        var letterIndex = letters.IndexOf(splitterItem);
+
+                        if (_skipOnceChars.Any(p => p.LetterIndex == letterIndex && p.LineIndex == i))
+                        {
+                            matches.Add(new BinaryOcrMatcher.CompareMatch("*", false, 0, null));
+                            index++;
+                            continue;
+                        }
+
+                        var runOnceChar =
+                            _runOnceChars.FirstOrDefault(p => p.LetterIndex == letterIndex && p.LineIndex == i);
+                        if (runOnceChar != null)
+                        {
+                            matches.Add(new BinaryOcrMatcher.CompareMatch(runOnceChar.Text, false, 0, null));
+                            _runOnceChars.Clear();
+                            index++;
+                            continue;
+                        }
+
+                        Dispatcher.UIThread.Post(async void () =>
+                        {
+                            var result =
+                                await _windowService.ShowDialogAsync<BinaryOcrCharacterAddWindow, BinaryOcrCharacterAddViewModel>(
+                                    Window!,
+                                    vm =>
+                                    {
+                                        vm.Initialize(parentBitmap, item, letters, letterIndex, db,
+                                            SelectedNOcrMaxWrongPixels, _binaryOcrAddHistoryManager, true, true);
+                                    });
+
+                            if (result.OkPressed)
+                            {
+                                if (result.BinaryOcrBitmap != null)
+                                {
+                                    var letterBitmap = letters[letterIndex].NikseBitmap;
+                                    _binaryOcrAddHistoryManager.Add(result.BinaryOcrBitmap, letterBitmap,
+                                        OcrSubtitleItems.IndexOf(item));
+                                    IsInspectAdditionsVisible = true;
+                                    db.Add(result.BinaryOcrBitmap);
+                                    _ = Task.Run(() => db.Save());
+                                }
+                                _ = Task.Run(() => RunBinaryImageCompareOcrLoop(db, selectedIndices.Where(p => p >= i).ToList()));
+                            }
+                            else if (result.AbortPressed)
+                            {
+                                IsOcrRunning = false;
+                            }
+                            else if (result.UseOncePressed)
+                            {
+                                _runOnceChars.Add(new SkipOnceChar(i, letterIndex, result.NewText));
+                                _ = Task.Run(() => RunBinaryImageCompareOcrLoop(db, selectedIndices.Where(p => p >= i).ToList()));
+                            }
+                            else if (result.SkipPressed)
+                            {
+                                _skipOnceChars.Add(new SkipOnceChar(i, letterIndex));
+                                _ = Task.Run(() => RunBinaryImageCompareOcrLoop(db, selectedIndices.Where(p => p >= i).ToList()));
+                            }
+                            else if (result.InspectHistoryPressed)
+                            {
+                                IsOcrRunning = false;
+                                await _windowService
+                                    .ShowDialogAsync<BinaryOcrCharacterHistoryWindow, BinaryOcrCharacterHistoryViewModel>(Window!,
+                                        vm => { vm.Initialize(db, _binaryOcrAddHistoryManager); });
+                            }
+                        });
+                        return;
+                    }
+
+                    if (match is { ExpandCount: > 0 })
+                    {
+                        index += match.ExpandCount - 1;
+                    }
+
+                    if (match == null)
+                    {
+                        matches.Add(new BinaryOcrMatcher.CompareMatch("*", false, 0, null));
+                    }
+                    else
+                    {
+                        matches.Add(new BinaryOcrMatcher.CompareMatch(match.Text, match.Italic, match.ExpandCount, match.Name));
+                    }
+                }
+
+                index++;
+            }
+
+            // item.Text = ItalicTextMerger.MergeWithItalicTags(matches).Trim();
+            item.Text = matches.Aggregate(string.Empty, (current, match) => current + match.Text).Trim();
             var unknownWords = OcrFixLineAndSetText(i, item);
 
             _runOnceChars.Clear();
@@ -1882,13 +2332,16 @@ public partial class OcrViewModel : ObservableObject
             SelectedOcrEngine = OcrEngines.FirstOrDefault();
         }
 
-        IsNOcrVisible = SelectedOcrEngine?.EngineType == OcrEngineType.nOcr;
-        IsInspectLineVisible = SelectedOcrEngine?.EngineType == OcrEngineType.nOcr;
-        IsOllamaVisible = SelectedOcrEngine?.EngineType == OcrEngineType.Ollama;
-        IsTesseractVisible = SelectedOcrEngine?.EngineType == OcrEngineType.Tesseract;
-        IsPaddleOcrVisible = SelectedOcrEngine?.EngineType == OcrEngineType.PaddleOcrStandalone || SelectedOcrEngine?.EngineType == OcrEngineType.PaddleOcrPython;
-        IsGoogleVisionVisible = SelectedOcrEngine?.EngineType == OcrEngineType.GoogleVision;
-        IsMistralOcrVisible = SelectedOcrEngine?.EngineType == OcrEngineType.Mistral;
+        var et = SelectedOcrEngine?.EngineType;
+        IsNOcrVisible = et == OcrEngineType.nOcr;
+        IsInspectLineVisible = et == OcrEngineType.nOcr || et == OcrEngineType.BinaryImageCompare;
+        IsOllamaVisible = et == OcrEngineType.Ollama;
+        IsTesseractVisible = et == OcrEngineType.Tesseract;
+        IsPaddleOcrVisible = et == OcrEngineType.PaddleOcrStandalone || et == OcrEngineType.PaddleOcrPython;
+        IsGoogleVisionVisible = et == OcrEngineType.GoogleVision;
+        IsGoogleLensVisible = et == OcrEngineType.GoogleLens;
+        IsMistralOcrVisible = et == OcrEngineType.Mistral;
+        IsBinaryImageCompareVisible = et == OcrEngineType.BinaryImageCompare;
 
         if (IsNOcrVisible && NOcrDatabases.Count == 0)
         {

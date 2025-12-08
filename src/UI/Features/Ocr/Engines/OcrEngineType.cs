@@ -8,7 +8,9 @@ public enum OcrEngineType
     PaddleOcrPython,
     Ollama,
     GoogleVision,
+    GoogleLens,
     AzureVision,
     AmazonRekognition,
     Mistral,
+    BinaryImageCompare,
 }

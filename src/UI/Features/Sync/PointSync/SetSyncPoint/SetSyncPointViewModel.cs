@@ -59,6 +59,7 @@ public partial class SetSyncPointViewModel : ObservableObject
 
     public void Initialize(
         List<SubtitleLineViewModel> paragraphs,
+        SubtitleLineViewModel? selectedSubtitle,
         string? videoFileName,
         string? subtitleFileName,
         AudioVisualizer? audioVisualizer)
@@ -80,6 +81,16 @@ public partial class SetSyncPointViewModel : ObservableObject
                 AudioVisualizer.WavePeaks = audioVisualizer.WavePeaks;
                 IsAudioVisualizerVisible = true;
             }
+
+            if (selectedSubtitle != null)
+            {
+                var idx = paragraphs.IndexOf(selectedSubtitle);
+                if (idx >= 0)
+                {
+                    SelectedParagraphIndex = idx;
+                }
+            }
+
             StartTitleTimer();
             _updateAudioVisualizer = true;
         });
@@ -312,7 +323,11 @@ public partial class SetSyncPointViewModel : ObservableObject
                 return;
             }
 
-            SelectedParagraphIndex = 0;
+            if (SelectedParagraphIndex < 0 || SelectedParagraphIndex >= Paragraphs.Count)
+            {
+                SelectedParagraphIndex = 0;
+            }
+
             GoToLeftSubtitle();
         });
     }

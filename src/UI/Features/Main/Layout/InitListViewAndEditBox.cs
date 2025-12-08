@@ -548,12 +548,12 @@ public static class InitListViewAndEditBox
         flyout.Items.Add(splitMenuItem);
 
         var mergePreviousMenuItem = new MenuItem { Header = Se.Language.General.MergeBefore, DataContext = vm };
-        mergePreviousMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        mergePreviousMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsMergeWithNextOrPreviousVisible)));
         mergePreviousMenuItem.Command = vm.MergeWithLineBeforeCommand;
         flyout.Items.Add(mergePreviousMenuItem);
 
         var mergeNextMenuItem = new MenuItem { Header = Se.Language.General.MergeAfter, DataContext = vm };
-        mergeNextMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        mergeNextMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsMergeWithNextOrPreviousVisible)));
         mergeNextMenuItem.Command = vm.MergeWithLineAfterCommand;
         flyout.Items.Add(mergeNextMenuItem);
 
@@ -762,10 +762,11 @@ public static class InitListViewAndEditBox
         var timeCodeUpDown = new TimeCodeUpDown
         {
             DataContext = vm,
+            UseVideoOffset = true,
             [!TimeCodeUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.StartTime)}")
             {
                 Mode = BindingMode.TwoWay,
-            }
+            },
         };
         if (!vm.ShowUpDownLabels && Se.Settings.Appearance.ShowHints)
         {
@@ -1030,7 +1031,7 @@ public static class InitListViewAndEditBox
         var flyoutTextBox = new MenuFlyout();
         textBox.ContextFlyout = flyoutTextBox;
         flyoutTextBox.Opening += vm.TextBoxContextOpening;
-        textBox.PointerReleased += vm.TextBoxPointerReleased;
+        textBox.PointerReleased += vm.ControlMacPointerReleased;
 
         var cutMenuItem = new MenuItem { Header = Se.Language.General.Cut };
         cutMenuItem.Command = vm.TextBoxCutCommand;

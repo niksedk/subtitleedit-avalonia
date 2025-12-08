@@ -196,7 +196,7 @@ public partial class DownloadTtsViewModel : ObservableObject
             var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
             var pctString = percentage.ToString(CultureInfo.InvariantCulture);
             ProgressValue = percentage;
-            ProgressText = $"Downloading... {pctString}%";
+            ProgressText = string.Format(Se.Language.General.DownloadingXPercent, pctString);
         });
 
         _downloadTask = _ttsDownloadService.DownloadPiper(_downloadStream, downloadProgress, _cancellationTokenSource.Token);
@@ -218,7 +218,7 @@ public partial class DownloadTtsViewModel : ObservableObject
             var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
             var pctString = percentage.ToString(CultureInfo.InvariantCulture);
             ProgressValue = percentage;
-            ProgressText = $"Downloading... {pctString}%";
+            ProgressText = string.Format(Se.Language.General.DownloadingXPercent, pctString);
         });
         var downloadProgressNull = new Progress<float>(_ => { });
 

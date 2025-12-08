@@ -21,6 +21,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.Platform.Windows;
+using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -136,7 +137,9 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _waveformSpaceInfo;
     [ObservableProperty] private string _libMpvPath;
     [ObservableProperty] private string _libMpvStatus;
+    [ObservableProperty] private string _libVlcStatus;
     [ObservableProperty] private bool _isLibMpvDownloadVisible;
+    [ObservableProperty] private bool _isLibVlcDownloadVisible;
     [ObservableProperty] private string _ffmpegPath;
     [ObservableProperty] private string _ffmpegStatus;
     [ObservableProperty] private Color _waveformColor;
@@ -232,6 +235,7 @@ public partial class SettingsViewModel : ObservableObject
         CpsLineLengthStrategy = CpsLineLengthStrategies.First();
         Fonts = new ObservableCollection<string>(FontHelper.GetSystemFonts());
         MpvPreviewBorderTypes = new ObservableCollection<BorderStyleItem>(BorderStyleItem.List());
+        LibVlcStatus = string.Empty;
 
         Themes = [Se.Language.General.System, Se.Language.General.Light, Se.Language.General.Dark];
         SelectedTheme = Themes[0];
@@ -295,7 +299,11 @@ public partial class SettingsViewModel : ObservableObject
 
         LibMpvStatus = Se.Language.General.NotInstalled;
         LibMpvPath = string.Empty;
-        IsLibMpvDownloadVisible = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        IsLibMpvDownloadVisible = OperatingSystem.IsWindows();
+        IsLibVlcDownloadVisible = OperatingSystem.IsMacOS() && RuntimeInformation.ProcessArchitecture == Architecture.X64 ||
+                                  OperatingSystem.IsWindows() ||
+                                  OperatingSystem.IsLinux();
+
         MpvPreviewFontName = FontNames.First();
         MpvPreviewSelectedBorderType = MpvPreviewBorderTypes.First();
 
@@ -529,6 +537,7 @@ public partial class SettingsViewModel : ObservableObject
         LibMpvPath = Se.Settings.General.LibMpvPath;
         SetFfmpegStatus();
         SetLibMpvStatus();
+        SetLibVlcStatus();
         LoadFileTypeAssociations();
 
         ExistsErrorLogFile = File.Exists(Se.GetErrorLogFilePath());
@@ -756,6 +765,24 @@ public partial class SettingsViewModel : ObservableObject
         }
     }
 
+    private void SetLibVlcStatus()
+    {
+        _ = Task.Run(() =>
+        {
+            var canLoad = new LibVlcDynamicPlayer().CanLoad();
+            Dispatcher.UIThread.Post(() =>
+            {
+                if (canLoad)
+                {
+                    LibVlcStatus = "Installed";
+                }
+                else
+                {
+                    LibVlcStatus = "Not installed";
+                }
+            });
+        });
+    }
 
     public async void ScrollElementIntoView(ScrollViewer scrollViewer, Control target)
     {
@@ -923,14 +950,26 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private async Task DownloadLibMpv()
     {
-        var vm = await _windowService.ShowDialogAsync<DownloadLibMpvWindow, DownloadLibMpvViewModel>(Window!);
-        if (string.IsNullOrEmpty(vm.LibMpvFileName))
+        var result = await _windowService.ShowDialogAsync<DownloadLibMpvWindow, DownloadLibMpvViewModel>(Window!);
+        if (string.IsNullOrEmpty(result.LibMpvFileName))
         {
             return;
         }
 
-        LibMpvPath = vm.LibMpvFileName;
+        LibMpvPath = result.LibMpvFileName;
         SetLibMpvStatus();
+    }
+
+    [RelayCommand]
+    private async Task DownloadLibVlc()
+    {
+        var result = await _windowService.ShowDialogAsync<DownloadLibVlcWindow, DownloadLibVlcViewModel>(Window!);
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        SetLibVlcStatus();
     }
 
     [RelayCommand]

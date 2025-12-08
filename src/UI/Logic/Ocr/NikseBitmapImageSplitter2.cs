@@ -1082,82 +1082,82 @@ public class NikseBitmapImageSplitter2
     //    return different;
     //}
 
-    //internal static int IsBitmapsAlike(Ocr.Binary.BinaryOcrBitmap bmp1, NikseBitmap2 bmp2)
-    //{
-    //    var different = 0;
-    //    var maxDiff = bmp1.Width * bmp1.Height / 5;
-    //    var w4 = bmp2.Width * 4;
-    //    for (var y = 0; y < bmp1.Height; y++)
-    //    {
-    //        var alpha = y * w4 + 3;
-    //        var pixel = y * bmp1.Width;
-    //        for (var x = 0; x < bmp1.Width; x++)
-    //        {
-    //            if (bmp1.GetPixel(pixel) > 0 && bmp2.GetAlpha(alpha) < 100)
-    //            {
-    //                different++;
-    //            }
+    internal static int IsBitmapsAlike(BinaryOcrBitmap bmp1, NikseBitmap2 bmp2)
+    {
+        var different = 0;
+        var maxDiff = bmp1.Width * bmp1.Height / 5;
+        var w4 = bmp2.Width * 4;
+        for (var y = 0; y < bmp1.Height; y++)
+        {
+            var alpha = y * w4 + 3;
+            var pixel = y * bmp1.Width;
+            for (var x = 0; x < bmp1.Width; x++)
+            {
+                if (bmp1.GetPixel(pixel) > 0 && bmp2.GetAlpha(alpha) < 100)
+                {
+                    different++;
+                }
 
-    //            pixel++;
-    //            alpha += 4;
-    //        }
-    //        if (different > maxDiff)
-    //        {
-    //            return different + 10;
-    //        }
-    //    }
-    //    return different;
-    //}
+                pixel++;
+                alpha += 4;
+            }
+            if (different > maxDiff)
+            {
+                return different + 10;
+            }
+        }
+        return different;
+    }
 
-    //internal static int IsBitmapsAlike(Ocr.Binary.BinaryOcrBitmap bmp1, Ocr.Binary.BinaryOcrBitmap bmp2)
-    //{
-    //    var different = 0;
-    //    var maxDiff = bmp1.Width * bmp1.Height / 5;
-    //    for (var y = 0; y < bmp1.Height; y++)
-    //    {
-    //        var pixel = y * bmp1.Width;
-    //        for (var x = 0; x < bmp1.Width; x++)
-    //        {
-    //            if (bmp1.GetPixel(pixel) != bmp2.GetPixel(pixel))
-    //            {
-    //                different++;
-    //            }
+    internal static int IsBitmapsAlike(BinaryOcrBitmap bmp1,BinaryOcrBitmap bmp2)
+    {
+        var different = 0;
+        var maxDiff = bmp1.Width * bmp1.Height / 5;
+        for (var y = 0; y < bmp1.Height; y++)
+        {
+            var pixel = y * bmp1.Width;
+            for (var x = 0; x < bmp1.Width; x++)
+            {
+                if (bmp1.GetPixel(pixel) != bmp2.GetPixel(pixel))
+                {
+                    different++;
+                }
 
-    //            pixel++;
-    //        }
-    //        if (different > maxDiff)
-    //        {
-    //            return different + 10;
-    //        }
-    //    }
-    //    return different;
-    //}
+                pixel++;
+            }
+            if (different > maxDiff)
+            {
+                return different + 10;
+            }
+        }
+        return different;
+    }
 
-    //internal static int IsBitmapsAlike(NikseBitmap bmp1, Ocr.Binary.BinaryOcrBitmap bmp2)
-    //{
-    //    var different = 0;
-    //    var maxDiff = bmp1.Width * bmp1.Height / 5;
-    //    var w4 = bmp1.Width * 4;
-    //    for (var y = 1; y < bmp1.Height; y++)
-    //    {
-    //        var alpha = y * w4 + 7;
-    //        var pixel = y * bmp2.Width + 1;
-    //        for (var x = 1; x < bmp1.Width; x++)
-    //        {
-    //            if (bmp1.GetAlpha(alpha) < 100 && bmp2.GetPixel(pixel) > 0)
-    //            {
-    //                different++;
-    //            }
+    internal static int IsBitmapsAlike(NikseBitmap2 bmp1, BinaryOcrBitmap bmp2)
+    {
+        var different = 0;
+        var maxDiff = bmp1.Width * bmp1.Height / 5;
+        var w4 = bmp1.Width * 4;
+        for (var y = 1; y < bmp1.Height; y++)
+        {
+            var alpha = y * w4 + 7;
+            var pixel = y * bmp2.Width + 1;
+            for (var x = 1; x < bmp1.Width; x++)
+            {
+                if (bmp1.GetAlpha(alpha) < 100 && bmp2.GetPixel(pixel) > 0)
+                {
+                    different++;
+                }
 
-    //            pixel++;
-    //            alpha += 4;
-    //        }
-    //        if (different > maxDiff)
-    //        {
-    //            return different + 10;
-    //        }
-    //    }
-    //    return different;
-    //}
+                pixel++;
+                alpha += 4;
+            }
+            if (different > maxDiff)
+            {
+                return different + 10;
+            }
+        }
+        return different;
+    }
 
 }

@@ -152,6 +152,7 @@ public class LanguageSettings
     public string ShowFullscreenButton { get; set; }
     public string AutoOpenVideoFile { get; set; }
     public string DownloadMpv { get; set; }
+    public string DownloadVlc { get; set; }
     public string GoToLineNumberSetsVideoPosition { get; set; }
     public string FilesAndLogs { get; set; }
     public string ShowErrorLogFile { get; set; }
@@ -344,6 +345,7 @@ public class LanguageSettings
         ShowFullscreenButton = "Show full-screen button";
         AutoOpenVideoFile = "Auto-open video file when opening subtitle";
         DownloadMpv = "Download mpv";
+        DownloadVlc = "Download VLC";
         GoToLineNumberSetsVideoPosition = "Go-to-line-number also sets video position";
         DefaultFormat = "Default format";
         DefaultSaveAsFormat = "Default 'Save as' format";

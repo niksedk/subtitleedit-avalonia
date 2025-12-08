@@ -235,15 +235,15 @@ namespace Nikse.SubtitleEdit.Logic
 
         public void MergeSelectedLinesAsDialog(ObservableCollection<SubtitleLineViewModel> subtitles, List<SubtitleLineViewModel> selectedItems)
         {
-            if (subtitles.Count != 2)
+            if (selectedItems.Count != 2)
             {
                 return;
             }
 
-            var currentParagraph = subtitles[0];
+            var currentParagraph = selectedItems[0];
             var currentText = Utilities.UnbreakLine(currentParagraph.Text);
 
-            var nextParagraph = subtitles[1];
+            var nextParagraph = selectedItems[1];
             var nextText = Utilities.UnbreakLine(nextParagraph.Text);
 
             var subtitle = new Subtitle();

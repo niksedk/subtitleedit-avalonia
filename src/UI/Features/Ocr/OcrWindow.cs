@@ -152,6 +152,17 @@ public class OcrWindow : Window
                     .WithMarginRight(10)
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
 
+                // Image Compare settings
+                UiUtil.MakeLabel(Se.Language.Ocr.Database, nameof(vm.IsBinaryImageCompareVisible)),
+                UiUtil.MakeComboBox(vm.ImageCompareDatabases, vm, nameof(vm.SelectedImageCompareDatabase), nameof(vm.IsBinaryImageCompareVisible))
+                    .WithMarginRight(0)
+                    .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
+                UiUtil.MakeLabel(Se.Language.Ocr.NumberOfPixelsIsSpace, nameof(vm.IsBinaryImageCompareVisible)),
+                UiUtil.MakeComboBox(vm.BinaryOcrPixelsAreSpaceList, vm, nameof(vm.SelectedBinaryOcrPixelsAreSpace),
+                        nameof(vm.IsBinaryImageCompareVisible))
+                    .WithMarginRight(10)
+                    .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
+
                 // Tesseract settings
                 UiUtil.MakeLabel(Se.Language.General.Language, nameof(vm.IsTesseractVisible)),
                 UiUtil.MakeComboBox(vm.TesseractDictionaryItems, vm, nameof(vm.SelectedTesseractDictionaryItem),
@@ -190,6 +201,14 @@ public class OcrWindow : Window
                 UiUtil.MakeLabel(Se.Language.General.ApiKey, nameof(vm.IsGoogleVisionVisible)),
                 UiUtil.MakeTextBox(200, vm, nameof(vm.GoogleVisionApiKey))
                     .BindIsVisible(vm, nameof(vm.IsGoogleVisionVisible))
+                    .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
+
+                // Google Lens settings
+                UiUtil.MakeLabel(Se.Language.General.Language, nameof(vm.IsGoogleLensVisible)),
+                UiUtil.MakeComboBox(vm.GoogleLensLanguages, vm, nameof(vm.SelectedGoogleLensLanguage),
+                        nameof(vm.IsGoogleLensVisible))
+                    .WithWidth(100)
+                    .WithMarginRight(10)
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
 
                 // Paddle OCR settings

@@ -45,10 +45,10 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream
                 cb = ClutEntryCb * 255 / 15.0;
             }
 
-            // Calculate rgb - based on Project X
-            int r = (int)(y + (1.402f * (cr - 128)));
-            int g = (int)(y - (0.34414 * (cb - 128)) - (0.71414 * (cr - 128)));
-            int b = (int)(y + (1.722 * (cb - 128)));
+            // Calculate rgb - using ITU-R BT.601 for DVB subtitles
+            int r = (int)(y + (1.402 * (cr - 128)));
+            int g = (int)(y - (0.34413 * (cb - 128)) - (0.71414 * (cr - 128)));
+            int b = (int)(y + (1.772 * (cb - 128)));
 
             int t = byte.MaxValue - BoundByteRange(ClutEntryT);
             r = BoundByteRange(r);

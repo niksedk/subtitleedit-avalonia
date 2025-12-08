@@ -178,7 +178,7 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
                     return new SKBitmap(1, 1);
                 }
 
-                var bm = new SKBitmap(w, h, SKColorType.Rgba8888, SKAlphaType.Opaque);
+                var bm = new SKBitmap(w, h, SKColorType.Rgba8888, SKAlphaType.Premul);
                 var pixelPtr = bm.GetPixels(); // Writable pixel buffer
                 if (pixelPtr == IntPtr.Zero)
                 {
@@ -205,7 +205,6 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
                             if (b == 0)
                             {
                                 // Next line
-                                //ofs = (ofs / w + 1) * w;
                                 ofs = ofs / w * w;
                                 if (xpos < w)
                                 {
@@ -264,15 +263,15 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
             }
 
             // Helper for filling multiple pixels
-            private static void FillPixels(Span<byte> pixelSpan, int offset, int count, SKColor color)
+            private static unsafe void FillPixels(Span<byte> pixelSpan, int offset, int count, SKColor color)
             {
                 var idx = offset * 4; // Assuming RGBA8888 (4 bytes per pixel)
+                Span<byte> colorBytes = stackalloc byte[4] { color.Red, color.Green, color.Blue, color.Alpha };
+                
                 for (var i = 0; i < count; i++)
                 {
-                    pixelSpan[idx++] = color.Red;
-                    pixelSpan[idx++] = color.Green;
-                    pixelSpan[idx++] = color.Blue;
-                    pixelSpan[idx++] = color.Alpha;
+                    colorBytes.CopyTo(pixelSpan.Slice(idx, 4));
+                    idx += 4;
                 }
             }
 
@@ -333,35 +332,22 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
                     }
                 }
 
-                var mergedBmp = new SKBitmap(r.Size.Width, r.Size.Height);
+            var mergedBmp = new SKBitmap(r.Size.Width, r.Size.Height, SKColorType.Rgba8888, SKAlphaType.Premul);
+            using (var canvas = new SKCanvas(mergedBmp))
+            {
+                canvas.Clear(SKColors.Transparent);
                 for (var ioIndex = 0; ioIndex < PcsObjects.Count; ioIndex++)
                 {
                     if (ioIndex < BitmapObjects.Count)
                     {
                         var offset = new BluRayPoint(PcsObjects[ioIndex].Origin.X - r.Location.X, PcsObjects[ioIndex].Origin.Y - r.Location.Y);
                         using (var singleBmp = SupDecoder.DecodeImage(PcsObjects[ioIndex], BitmapObjects[ioIndex], PaletteInfos))
-                        //    using (var gSideBySide = Graphics.FromImage(mergedBmp))
-                        //    {
-                        //        gSideBySide.DrawImage(singleBmp, offset.X, offset.Y);
-                        //    }
-                        //}
-
-                        using (var surface = SKSurface.Create(new SKImageInfo(mergedBmp.Width, mergedBmp.Height)))
                         {
-                            var canvas = surface.Canvas;
-                            canvas.DrawBitmap(mergedBmp, 0, 0); // Draw existing mergedBmp as the background
-                            canvas.DrawBitmap(singleBmp, offset.X, offset.Y); // Draw singleBmp at the specified offset
-                            canvas.Flush();
-
-                            // Save the result to an SKBitmap
-                            using (var image = surface.Snapshot())
-                            using (var data = image.Encode(SKEncodedImageFormat.Png, 100)) // Use your desired format and quality
-                            {
-                                mergedBmp = SKBitmap.Decode(data.AsStream());
-                            }
+                            canvas.DrawBitmap(singleBmp, offset.X, offset.Y);
                         }
                     }
                 }
+            }
 
                 return mergedBmp;
             }
@@ -769,7 +755,7 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
             var palettes = new Dictionary<int, List<PaletteInfo>>();
             var forceFirstOds = true;
             PcsData latestPcs = null;
-            var pcsList = new List<PcsData>();
+            var pcsList = new List<PcsData>(64); // Pre-allocate reasonable capacity
             var headerBuffer = fromMatroskaFile ? new byte[3] : new byte[HeaderSize];
 
             while (ms.Read(headerBuffer, 0, headerBuffer.Length) == headerBuffer.Length)
@@ -976,25 +962,19 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
                 {
                     if (odsList.Count > 1)
                     {
-                        var bufSize = 0;
-                        foreach (var ods in odsList)
-                        {
-                            bufSize += ods.Fragment.ImagePacketSize;
-                        }
-
+                        var bufSize = odsList.Sum(ods => ods.Fragment.ImagePacketSize);
                         var buf = new byte[bufSize];
                         var offset = 0;
+                        
                         foreach (var ods in odsList)
                         {
-                            Buffer.BlockCopy(ods.Fragment.ImageBuffer, 0, buf, offset, ods.Fragment.ImagePacketSize);
+                            Array.Copy(ods.Fragment.ImageBuffer, 0, buf, offset, ods.Fragment.ImagePacketSize);
                             offset += ods.Fragment.ImagePacketSize;
                         }
+                        
                         odsList[0].Fragment.ImageBuffer = buf;
                         odsList[0].Fragment.ImagePacketSize = bufSize;
-                        while (odsList.Count > 1)
-                        {
-                            odsList.RemoveAt(1);
-                        }
+                        odsList.RemoveRange(1, odsList.Count - 1);
                     }
                 }
             }
@@ -1133,7 +1113,7 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
 
             using (var b1 = i1.GetBitmap())
             {
-                var n1 = b1.Copy();
+                var n1 = new NikseBitmap(b1);
                 var height = n1.GetNonTransparentHeight();
                 var width = n1.GetNonTransparentWidth();
                 if (height > 110 || width > 300)
@@ -1143,9 +1123,8 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
 
                 using (var b2 = i2.GetBitmap())
                 {
-                    var n2 = b2.Copy();
-                    var areEqual = n1.IsEqualTo(n2);
-                    return areEqual;
+                    var n2 = new NikseBitmap(b2);
+                    return n1.IsEqualTo(n2);
                 }
             }
         }
@@ -1173,15 +1152,7 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
                 return false;
             }
 
-            for (var i = 0; i < b1.Length; i++)
-            {
-                if (b1[i] != b2[i])
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            return b1.AsSpan().SequenceEqual(b2);
         }
 
         private static CompositionState GetCompositionState(byte type)

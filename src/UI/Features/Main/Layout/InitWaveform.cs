@@ -53,6 +53,8 @@ public class InitWaveform
             //vm.AudioVisualizer.OnStatus += vm.AudioVisualizerOnStatus;
             vm.AudioVisualizer.OnParagraphDoubleTapped += vm.OnWaveformDoubleTapped;
             vm.AudioVisualizer.OnDeletePressed += vm.AudioVisualizerOnDeletePressed;
+            vm.AudioVisualizer.PointerReleased += vm.ControlMacPointerReleased;
+            vm.AudioVisualizer.IsReadOnly = Se.Settings.General.LockTimeCodes;
 
             // Create a Flyout for the DataGrid
             var flyout = new MenuFlyout();
@@ -153,7 +155,7 @@ public class InitWaveform
 
             var separatorDisplayMode = new Separator();
             separatorDisplayMode.DataContext = vm;
-            separatorDisplayMode.Bind(Separator.IsVisibleProperty, new Binding(nameof(vm.ShowWaveformDisplayModeSeparator))); 
+            separatorDisplayMode.Bind(Separator.IsVisibleProperty, new Binding(nameof(vm.ShowWaveformDisplayModeSeparator)));
             flyout.Items.Add(separatorDisplayMode);
 
             var showOnlyWaveformMenuItem = new MenuItem

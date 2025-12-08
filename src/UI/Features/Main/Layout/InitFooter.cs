@@ -50,10 +50,12 @@ public static class InitFooter
                 new Icon
                 {
                     Value = IconNames.LockClock,
-                    [!Visual.IsVisibleProperty] = new Binding(nameof(vm.LockTimeCodes)),
                     FontSize = 20,
                     [ToolTip.TipProperty] = Se.Language.General.LockTimeCodes,
+                    [!Visual.IsVisibleProperty] = new Binding(nameof(vm.LockTimeCodes)),
+                    Margin = new Thickness(0, 0, 15, 0),
                 },
+
                 new Button
                 {
                     Content = new Icon
@@ -69,8 +71,48 @@ public static class InitFooter
                     Background = null,
                     BorderBrush = null,
                     Padding = new Thickness(0),
+                    Margin = new Thickness(0, 0, 15, 0),
+                },
+
+                new Button
+                {
+                    Content = new Icon
+                    {
+                        Value = IconNames.TimerMinus,
+                        FontSize = 20,
+                        [ToolTip.TipProperty] = Se.Language.Main.Menu.SmpteTiming,
+                    },
+                    [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsSmpteTimingEnabled)),
+                    [!Button.CommandProperty] = new Binding(nameof(vm.ShowSmpteTimingCommand)),
+
+                    // make it look like just an icon
+                    Background = null,
+                    BorderBrush = null,
+                    Padding = new Thickness(0),
+                    Margin = new Thickness(0, 0, 15, 0),
+                },
+
+                new Button
+                {
+                    Content = new Icon
+                    {
+                        Value = IconNames.TimerSettings,
+                        FontSize = 20,
+                        [ToolTip.TipProperty] = Se.Language.General.OffsetTimeCodes,
+                    },
+                    [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsVideoOffsetVisible)),
+                    [!Button.CommandProperty] = new Binding(nameof(vm.ShowVideoSetOffsetCommand)),
+
+                    // make it look like just an icon
+                    Background = null,
+                    BorderBrush = null,
+                    Padding = new Thickness(0),
                     Margin = new Thickness(0),
                 },
+                UiUtil.MakeLabel()
+                    .WithBindText(vm, nameof(vm.VideoOffsetText))
+                    .WithBindVisible(vm, nameof(vm.IsVideoOffsetVisible)).WithMarginRight(15),
+
                 right,
             },
         };

@@ -74,6 +74,7 @@ public class LanguageMain
     public string YoutubeDlDownloadedSuccessfully { get; set; }
     public string GeneratingSpectrogramDotDotDot { get; set; }
     public string RemovedXBlankLines { get; set; }
+    public string XLinesSelectedOfY { get; set; }
 
     public LanguageMain()
     {
@@ -143,5 +144,6 @@ public class LanguageMain
         YoutubeDlDownloadedSuccessfully = "\"yt-dlp\" downloaded successfully.";
         GeneratingSpectrogramDotDotDot = "Generating spectrogram...";   
         RemovedXBlankLines = "Removed {0} blank lines";
+        XLinesSelectedOfY = "{0} lines selected of {1}";
     }
 }

@@ -6,6 +6,7 @@ using Avalonia.Layout;
 using Avalonia.Threading;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.VideoPlayers;
 using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 using System;
 
@@ -79,79 +80,67 @@ public static class InitVideoPlayer
 
     public static VideoPlayerControl MakeVideoPlayer()
     {
-        VideoPlayerControl control;
-
         try
         {
             if (Se.Settings.Video.VideoPlayer.Equals("vlc", StringComparison.OrdinalIgnoreCase))
             {
-                var videoPlayerInstance = new LibVlcDynamicPlayer();
-                var view = new LibVlcDynamicNativeControl(videoPlayerInstance);
-                control = new VideoPlayerControl(videoPlayerInstance)
+                var player = new LibVlcDynamicPlayer();
+                if (player.CanLoad())
                 {
-                    PlayerContent = view,
-                    StopIsVisible = Se.Settings.Video.ShowStopButton,
-                    FullScreenIsVisible = Se.Settings.Video.ShowFullscreenButton,
-                };
+                    var view = new LibVlcDynamicNativeControl(player);
+                    return MakeVideoPlayerControl(player, view);
+                }
             }
-            else if (Se.Settings.Video.VideoPlayer.Equals("mpv-wid", StringComparison.OrdinalIgnoreCase))
+
+            if (Se.Settings.Video.VideoPlayer.Equals("mpv-wid", StringComparison.OrdinalIgnoreCase))
             {
-                var libMpv = new LibMpvDynamicPlayer();
-                var view = new LibMpvDynamicNativeControl(libMpv);
-                control = new VideoPlayerControl(libMpv)
+                var player = new LibMpvDynamicPlayer();
+                if (player.CanLoad())
                 {
-                    PlayerContent = view,
-                    StopIsVisible = Se.Settings.Video.ShowStopButton,
-                    FullScreenIsVisible = Se.Settings.Video.ShowFullscreenButton,
-                };
+                    var view = new LibMpvDynamicNativeControl(player);
+                    return MakeVideoPlayerControl(player, view);
+                }
             }
-            else if (Se.Settings.Video.VideoPlayer.Equals("mpv-sw", StringComparison.OrdinalIgnoreCase))
+
+            if (Se.Settings.Video.VideoPlayer.Equals("mpv-sw", StringComparison.OrdinalIgnoreCase))
             {
-                var libMpv = new LibMpvDynamicPlayer();
-                var view = new LibMpvDynamicSoftwareControl(libMpv);
-                control = new VideoPlayerControl(libMpv)
+                var player = new LibMpvDynamicPlayer();
+                if (player.CanLoad())
                 {
-                    PlayerContent = view,
-                    StopIsVisible = Se.Settings.Video.ShowStopButton,
-                    FullScreenIsVisible = Se.Settings.Video.ShowFullscreenButton,
-                };
+                    var view = new LibMpvDynamicSoftwareControl(player);
+                    return MakeVideoPlayerControl(player, view);
+                }
             }
-            else if (Se.Settings.Video.VideoPlayer.StartsWith("mpv", StringComparison.OrdinalIgnoreCase)) // mpv-opengl
+
+            if (Se.Settings.Video.VideoPlayer.StartsWith("mpv", StringComparison.OrdinalIgnoreCase)) // mpv-opengl
             {
-                var libMpv = new LibMpvDynamicPlayer();
-                var view = new LibMpvDynamicOpenGlControl(libMpv);
-                control = new VideoPlayerControl(libMpv)
+                var player = new LibMpvDynamicPlayer();
+                if (player.CanLoad())
                 {
-                    PlayerContent = view,
-                    StopIsVisible = Se.Settings.Video.ShowStopButton,
-                    FullScreenIsVisible = Se.Settings.Video.ShowFullscreenButton,
-                };
+                    var view = new LibMpvDynamicOpenGlControl(player);
+                    return MakeVideoPlayerControl(player, view);
+                }
             }
-            else
-            {
-                var videoPlayerInstanceNone = new VideoPlayerInstanceNone();
-                control = new VideoPlayerControl(videoPlayerInstanceNone)
-                {
-                    PlayerContent = new Label(),
-                    StopIsVisible = false,
-                    FullScreenIsVisible = false,
-                };
-            }
+
+            return MakeVideoPlayerControl(new VideoPlayerInstanceNone(), new Label());
         }
         catch
         {
-            var videoPlayerInstanceNone = new VideoPlayerInstanceNone();
-            control = new VideoPlayerControl(videoPlayerInstanceNone)
-            {
-                PlayerContent = new Label(),
-                StopIsVisible = false,
-                FullScreenIsVisible = false,
-            };
+            return MakeVideoPlayerControl(new VideoPlayerInstanceNone(), new Label());
         }
 
-        control.VerticalAlignment = VerticalAlignment.Stretch;
-        control.HorizontalAlignment = HorizontalAlignment.Stretch;
+        throw new InvalidOperationException("Failed to create video player control.");
+    }
 
-        return control;
+    private static VideoPlayerControl MakeVideoPlayerControl(IVideoPlayerInstance videoPlayer, Control view)
+    {
+        return new VideoPlayerControl(videoPlayer)
+        {
+            PlayerContent = view,
+            StopIsVisible = Se.Settings.Video.ShowStopButton,
+            FullScreenIsVisible = Se.Settings.Video.ShowFullscreenButton,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
     }
 }
