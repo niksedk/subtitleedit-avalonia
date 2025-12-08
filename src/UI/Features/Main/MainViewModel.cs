@@ -426,6 +426,30 @@ public partial class MainViewModel :
         _autoBackupService.StartAutoBackup(this);
         _undoRedoManager.SetupChangeDetection(this, TimeSpan.FromSeconds(1));
         LockTimeCodes = Se.Settings.General.LockTimeCodes;
+        SetLibSeSettings();
+    }
+
+    private static void SetLibSeSettings()
+    {
+        Configuration.Settings.General.SubtitleLineMaximumLength = Se.Settings.General.SubtitleLineMaximumLength;
+        Configuration.Settings.General.SubtitleMaximumCharactersPerSeconds = Se.Settings.General.SubtitleMaximumCharactersPerSeconds;
+        Configuration.Settings.General.SubtitleOptimalCharactersPerSeconds = Se.Settings.General.SubtitleOptimalCharactersPerSeconds;
+        Configuration.Settings.General.SubtitleMaximumWordsPerMinute = Se.Settings.General.SubtitleMaximumWordsPerMinute;
+        Configuration.Settings.General.MinimumMillisecondsBetweenLines = Se.Settings.General.MinimumMillisecondsBetweenLines;
+        Configuration.Settings.General.MaxNumberOfLines = Se.Settings.General.MaxNumberOfLines;
+        Configuration.Settings.General.MergeLinesShorterThan = Se.Settings.General.UnbreakLinesShorterThan;
+
+        if (Enum.TryParse<Core.Enums.DialogType>(Se.Settings.General.DialogStyle, out var dt))
+        {
+            Configuration.Settings.General.DialogStyle = dt;
+        }
+
+        if (Enum.TryParse<Core.Enums.ContinuationStyle>(Se.Settings.General.ContinuationStyle, out var cs))
+        {
+            Configuration.Settings.General.ContinuationStyle = cs;
+        }
+
+        Configuration.Settings.General.CpsLineLengthStrategy = Se.Settings.General.CpsLineLengthStrategy;
     }
 
     private static void InitializeFfmpeg()
@@ -4117,6 +4141,7 @@ public partial class MainViewModel :
         }
 
         UpdateVideoOffsetStatus();
+        SetLibSeSettings();
     }
 
     public VideoPlayerControl? GetVideoPlayerControl()
@@ -7003,13 +7028,13 @@ public partial class MainViewModel :
             return true;
         }
 
-        if (!Configuration.IsRunningOnWindows && File.Exists("/usr/local/bin/ffmpeg"))
+        if (!OperatingSystem.IsWindows() && File.Exists("/usr/local/bin/ffmpeg"))
         {
             Se.Settings.General.FfmpegPath = "/usr/local/bin/ffmpeg";
             return true;
         }
 
-        if (Configuration.IsRunningOnWindows || Configuration.IsRunningOnMac)
+        if (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS())
         {
             var answer = await MessageBox.Show(
                 Window!,
@@ -8134,7 +8159,7 @@ public partial class MainViewModel :
                     {
                         last.EndTime.TotalMilliseconds = msub.Start;
                         if (last.DurationTotalMilliseconds >
-                            Configuration.Settings.General.SubtitleMaximumDisplayMilliseconds)
+                            Se.Settings.General.SubtitleMaximumDisplayMilliseconds)
                         {
                             last.EndTime.TotalMilliseconds = last.StartTime.TotalMilliseconds + 3000;
                         }
@@ -8272,7 +8297,7 @@ public partial class MainViewModel :
         Utilities.ParseMatroskaTextSt(matroskaSubtitleInfo, sub, _subtitle);
 
         SelectedSubtitleFormat =
-            SubtitleFormats.FirstOrDefault(p => p.Name == Configuration.Settings.General.DefaultSubtitleFormat) ??
+            SubtitleFormats.FirstOrDefault(p => p.Name == Se.Settings.General.DefaultSubtitleFormat) ??
             SelectedSubtitleFormat;
         ShowStatus(Se.Language.Main.SubtitleImportedFromMatroskaFile);
         _subtitle.Renumber();
