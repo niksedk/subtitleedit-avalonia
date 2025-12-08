@@ -56,7 +56,7 @@ public class PreProcessingWindow : Window
         var labelOneColorThreshold = UiUtil.MakeLabel(Se.Language.Ocr.DarknessThreshold);
         var numericUpDownOneColorThreshold = UiUtil.MakeNumericUpDownInt(1, 255, 128, 200, vm, nameof(vm.OneColorDarknessThreshold))
             .WithBindEnabled(nameof(vm.ToOneColor));
-        numericUpDownOneColorThreshold.PropertyChanged += (s, e) => vm.RequestPreviewUpdate();
+        numericUpDownOneColorThreshold.ValueChanged += (s, e) => vm.RequestPreviewUpdate();
         var panelOneColorThreshold = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -78,7 +78,7 @@ public class PreProcessingWindow : Window
         var labelBorderSize = UiUtil.MakeLabel(Se.Language.Ocr.BorderSize);
         var numericUpDownBorderSize = UiUtil.MakeNumericUpDownInt(1, 20, 2, 200, vm, nameof(vm.BorderSize))
             .WithBindEnabled(nameof(vm.RemoveBorders));
-        numericUpDownBorderSize.PropertyChanged += (s, e) => vm.RequestPreviewUpdate();
+        numericUpDownBorderSize.ValueChanged += (s, e) => vm.RequestPreviewUpdate();
         var panelRemoveBorderSize = new StackPanel
         {
             Orientation = Orientation.Horizontal,

@@ -193,7 +193,6 @@ public partial class SettingsViewModel : ObservableObject
     private string _customContinuationStyleGapPrefix;
     private bool _customContinuationStyleGapPrefixAddSpace;
 
-
     public ObservableCollection<FileTypeAssociationViewModel> FileTypeAssociations { get; set; } = new()
     {
         new() { Extension = ".ass", IconPath = "avares://SubtitleEdit/Assets/FileTypes/ass.ico" },
@@ -218,6 +217,7 @@ public partial class SettingsViewModel : ObservableObject
     private readonly IFolderHelper _folderHelper;
     private MainViewModel? _mainViewModel;
     private List<ProfileDisplay> _profilesForEdit;
+    private bool _skipRuleValueChanged = false;
 
     public SettingsViewModel(IWindowService windowService, IFolderHelper folderHelper)
     {
@@ -1352,24 +1352,38 @@ public partial class SettingsViewModel : ObservableObject
             return;
         }
 
-        SingleLineMaxLength = profile.SingleLineMaxLength;
-        OptimalCharsPerSec = profile.OptimalCharsPerSec;
-        MaxCharsPerSec = profile.MaxCharsPerSec;
-        MaxWordsPerMin = profile.MaxWordsPerMin;
-        MinDurationMs = profile.MinDurationMs;
-        MaxDurationMs = profile.MaxDurationMs;
-        MinGapMs = profile.MinGapMs;
-        MaxLines = profile.MaxLines;
-        UnbreakLinesShorterThan = profile.UnbreakLinesShorterThan;
-        DialogStyle = profile.DialogStyle;
-        ContinuationStyle = profile.ContinuationStyle;
-        CpsLineLengthStrategy = profile.CpsLineLengthStrategy;
-    }
+        _skipRuleValueChanged = true;
 
+        try
+        {
+            SingleLineMaxLength = profile.SingleLineMaxLength;
+            OptimalCharsPerSec = profile.OptimalCharsPerSec;
+            MaxCharsPerSec = profile.MaxCharsPerSec;
+            MaxWordsPerMin = profile.MaxWordsPerMin;
+            MinDurationMs = profile.MinDurationMs;
+            MaxDurationMs = profile.MaxDurationMs;
+            MinGapMs = profile.MinGapMs;
+            MaxLines = profile.MaxLines;
+            UnbreakLinesShorterThan = profile.UnbreakLinesShorterThan;
+            DialogStyle = profile.DialogStyle;
+            ContinuationStyle = profile.ContinuationStyle;
+            CpsLineLengthStrategy = profile.CpsLineLengthStrategy;
+        }
+        finally
+        {
+            _skipRuleValueChanged = false;
+        }
+    }
+    
     internal void RuleValueChanged()
     {
         var profileItem = _profilesForEdit.FirstOrDefault(p => p.Name == SelectedProfile);
         if (profileItem == null)
+        {
+            return;
+        }
+
+        if (_skipRuleValueChanged)
         {
             return;
         }

@@ -1743,7 +1743,7 @@ public partial class BurnInViewModel : ObservableObject
         UpdateNonAssaPreview();
     }
 
-    internal void CheckBoxChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    internal void ParameterChanged()
     {
         UpdateNonAssaPreview();
     }
@@ -1872,7 +1872,7 @@ public partial class BurnInViewModel : ObservableObject
         CalculateTargetFileBitRate();
     }
 
-    internal void CheckBoxTargetFileChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    internal void CheckBoxTargetFileChanged()
     {
         CalculateTargetFileBitRate();
     }

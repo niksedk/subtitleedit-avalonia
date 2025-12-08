@@ -76,19 +76,19 @@ public class SplitBreakLongLinesWindow : Window
 
         var checkBoxSplitLongLines = UiUtil.MakeCheckBox(Se.Language.Tools.SplitBreakLongLines.SplitLongLines, vm, nameof(vm.SplitLongLines))
             .WithMarginRight(40);
-        checkBoxSplitLongLines.PropertyChanged += (s, e) => vm.SetChanged();
+        checkBoxSplitLongLines.IsCheckedChanged += (s, e) => vm.SetChanged();
 
         var checkBoxRebalanceLongLines = UiUtil.MakeCheckBox(Se.Language.Tools.SplitBreakLongLines.RebalanceLongLines, vm, nameof(vm.RebalanceLongLines))
             .WithMarginRight(40);
-        checkBoxRebalanceLongLines.PropertyChanged += (s, e) => vm.SetChanged();
+        checkBoxRebalanceLongLines.IsCheckedChanged += (s, e) => vm.SetChanged();
 
         var labelSingleLineMaxLength = UiUtil.MakeLabel(Se.Language.Options.Settings.SingleLineMaxLength);
         var numericUpDownSingleLineMaxLength = UiUtil.MakeNumericUpDownInt(5, 1000, 10, 130, vm, nameof(vm.SingleLineMaxLength));
-        numericUpDownSingleLineMaxLength.PropertyChanged += (s, e) => vm.SetChanged();
+        numericUpDownSingleLineMaxLength.ValueChanged += (s, e) => vm.SetChanged();
 
         var labelMaxNumberOfLines = UiUtil.MakeLabel(Se.Language.Options.Settings.MaxLines);
         var numericUpDownMaxNumberOfLines = UiUtil.MakeNumericUpDownInt(2, 10, 2, 130, vm, nameof(vm.MaxNumberOfLines));
-        numericUpDownMaxNumberOfLines.PropertyChanged += (s, e) => vm.SetChanged();
+        numericUpDownMaxNumberOfLines.ValueChanged += (s, e) => vm.SetChanged();
 
         grid.Add(checkBoxSplitLongLines, 0);
         grid.Add(labelSingleLineMaxLength, 0, 1);

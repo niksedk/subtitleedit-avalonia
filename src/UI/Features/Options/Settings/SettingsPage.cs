@@ -658,7 +658,7 @@ public class SettingsPage : UserControl
                 }, true)
         };
 
-        cb.PropertyChanged += (s, e) => _vm.VideoPlayerChanged();
+        cb.SelectionChanged += (s, e) => _vm.VideoPlayerChanged();
 
         return cb;
     }
@@ -675,7 +675,7 @@ public class SettingsPage : UserControl
             ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
                 new TextBlock { Text = f?.Name }, true)
         };
-        comboBoxCpsLineLengthStyle.PropertyChanged += (s, e) => _vm.RuleValueChanged();
+        comboBoxCpsLineLengthStyle.SelectionChanged += (s, e) => _vm.RuleValueChanged();
         return comboBoxCpsLineLengthStyle;
     }
 
@@ -691,7 +691,7 @@ public class SettingsPage : UserControl
             ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
                 new TextBlock { Text = f?.Name }, true)
         };
-        comboBoxDialogStyle.PropertyChanged += (s, e) => _vm.RuleValueChanged();
+        comboBoxDialogStyle.SelectionChanged += (s, e) => _vm.RuleValueChanged();
         return comboBoxDialogStyle;
     }
 
@@ -704,7 +704,7 @@ public class SettingsPage : UserControl
             [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.Profiles)),
             [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedProfile)) { Mode = BindingMode.TwoWay }
         };
-        comboBoxProfile.PropertyChanged += (s, e) => _vm.ProfileChanged();
+        comboBoxProfile.SelectionChanged += (s, e) => _vm.ProfileChanged();
         return comboBoxProfile;
     }
 
@@ -720,7 +720,7 @@ public class SettingsPage : UserControl
             ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
                 new TextBlock { Text = f?.Name }, true)
         };
-        comboBoxContinuationStyle.PropertyChanged += (s, e) => _vm.ContinuationStyleChanged();
+        comboBoxContinuationStyle.SelectionChanged += (s, e) => _vm.ContinuationStyleChanged();
 
         return comboBoxContinuationStyle;
     }
@@ -775,7 +775,7 @@ public class SettingsPage : UserControl
             [!NumericUpDown.ValueProperty] = new Binding(bindingProperty) { Source = _vm, Mode = BindingMode.TwoWay },
         };
 
-        numericUpDown.PropertyChanged += (s, e) => valueChanged.Invoke();
+        numericUpDown.ValueChanged += (s, e) => valueChanged.Invoke();
         return numericUpDown;
     }
 
@@ -787,7 +787,7 @@ public class SettingsPage : UserControl
             [!NumericUpDown.ValueProperty] = new Binding(bindingProperty) { Source = _vm, Mode = BindingMode.TwoWay },
         };
 
-        numericUpDown.PropertyChanged += (s, e) => valueChanged.Invoke();
+        numericUpDown.ValueChanged += (s, e) => valueChanged.Invoke();
         return numericUpDown;
     }
 

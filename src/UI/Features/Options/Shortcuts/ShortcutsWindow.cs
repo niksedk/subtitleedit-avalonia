@@ -186,28 +186,28 @@ public class ShortcutsWindow : Window
         // Shift checkbox and label
         editPanel.Children.Add(UiUtil.MakeTextBlock(shiftLabel).WithMarginRight(3));
         var checkBoxShift = UiUtil.MakeCheckBox(vm, nameof(vm.ShiftIsSelected));
-        checkBoxShift.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);
+        checkBoxShift.IsCheckedChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);
         checkBoxShift.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(checkBoxShift);
 
         // Control checkbox and label
         editPanel.Children.Add(UiUtil.MakeTextBlock(ctrlLabel).WithMarginRight(3));
         var controlCheckBox = UiUtil.MakeCheckBox(vm, nameof(vm.CtrlIsSelected));
-        controlCheckBox.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);
+        controlCheckBox.IsCheckedChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);
         controlCheckBox.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(controlCheckBox);
 
         // Alt checkbox and label
         editPanel.Children.Add(UiUtil.MakeTextBlock(altLabel).WithMarginRight(3));
         var checkBoxAlt = UiUtil.MakeCheckBox(vm, nameof(vm.AltIsSelected));
-        checkBoxAlt.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);
+        checkBoxAlt.IsCheckedChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);
         checkBoxAlt.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(checkBoxAlt);
 
         // Win key checkbox and label
         editPanel.Children.Add(UiUtil.MakeTextBlock(winLabel).WithMarginRight(3));
         var checkBoxWin = UiUtil.MakeCheckBox(vm, nameof(vm.WinIsSelected));
-        checkBoxWin.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);
+        checkBoxWin.IsCheckedChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);
         checkBoxWin.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(checkBoxWin);
 
@@ -221,7 +221,7 @@ public class ShortcutsWindow : Window
         comboBoxKeys.Bind(Avalonia.Controls.Primitives.SelectingItemsControl.SelectedItemProperty, new Binding(nameof(vm.SelectedShortcut)) { Source = vm });
         comboBoxKeys.Bind(IsEnabledProperty, new Binding(nameof(vm.IsControlsEnabled)) { Source = vm });
         editPanel.Children.Add(comboBoxKeys);
-        comboBoxKeys.PropertyChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);
+        comboBoxKeys.SelectionChanged += (s, e) => vm.UpdateShortcutCommand.Execute(null);
 
         // browse button
         var buttonBrowse = UiUtil.MakeButtonBrowse(vm.ShowGetKeyCommand);

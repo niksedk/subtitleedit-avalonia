@@ -137,7 +137,7 @@ public class BurnInWindow : Window
         };
 
         var checkBoxUseBold = UiUtil.MakeCheckBox(Se.Language.General.Bold, vm, nameof(vm.FontIsBold));
-        checkBoxUseBold.PropertyChanged += vm.CheckBoxChanged;
+        checkBoxUseBold.IsCheckedChanged += (_, _) => vm.ParameterChanged();
 
         var labelTextColor = UiUtil.MakeLabel(Se.Language.General.TextColor);
         var colorPickerTextColor = UiUtil.MakeColorPicker(vm, nameof(vm.FontTextColor));
@@ -691,7 +691,7 @@ public class BurnInWindow : Window
     private static Border MakeTargetFileSizeView(BurnInViewModel vm)
     {
         var checkBoxUseTargetFileSize = UiUtil.MakeCheckBox(Se.Language.Video.BurnIn.TargetFileSize, vm, nameof(vm.UseTargetFileSize));
-        checkBoxUseTargetFileSize.PropertyChanged += vm.CheckBoxTargetFileChanged;
+        checkBoxUseTargetFileSize.IsCheckedChanged += (_,_) => vm.CheckBoxTargetFileChanged();
 
         var labelTargetFileSize = UiUtil.MakeLabel(Se.Language.Video.BurnIn.FileSizeMb);
         var numericUpDownTargetFileSize = UiUtil.MakeNumericUpDownInt(1, 1000_000_000, 0, 150, vm, nameof(vm.TargetFileSize));

@@ -81,22 +81,22 @@ public class ApplyDurationLimitsWindow : Window
         };
 
         var checkBoxFixMinDuration = UiUtil.MakeCheckBox(Se.Language.Tools.ApplyDurationLimits.FixMinDurationMs, vm, nameof(vm.FixMinDurationMs));
-        checkBoxFixMinDuration.PropertyChanged += (s, e) => vm.SetChanged();
+        checkBoxFixMinDuration.IsCheckedChanged += (s, e) => vm.SetChanged();
         var numericUpDownMinDuration = UiUtil.MakeNumericUpDownInt(1, 10000, 1000, 150, vm, nameof(vm.MinDurationMs))
                 .WithBindEnabled(nameof(vm.FixMinDurationMs));
-        numericUpDownMinDuration.PropertyChanged += (s, e) => vm.SetChanged();
+        numericUpDownMinDuration.ValueChanged += (s, e) => vm.SetChanged();
         var checkBoxDoNotGoPastShotChange = UiUtil.MakeCheckBox(Se.Language.Tools.ApplyDurationLimits.DoNotGoPastShotChange, vm, nameof(vm.DoNotGoPastShotChange))
             .WithBindEnabled(nameof(vm.FixMinDurationMs))
             .WithMarginLeft(5)
             .BindIsVisible(vm, nameof(vm.IsDoNotGoPastShotChangeVisible));
-        checkBoxDoNotGoPastShotChange.PropertyChanged += (s, e) => vm.SetChanged();
+        checkBoxDoNotGoPastShotChange.IsCheckedChanged += (s, e) => vm.SetChanged();
         var panelMin = UiUtil.MakeHorizontalPanel(numericUpDownMinDuration, checkBoxDoNotGoPastShotChange);
 
         var checkBoxFixMaxDuration = UiUtil.MakeCheckBox(Se.Language.Tools.ApplyDurationLimits.FixMaxDurationMs, vm, nameof(vm.FixMaxDurationMs));
-        checkBoxFixMaxDuration.PropertyChanged += (s, e) => vm.SetChanged();
+        checkBoxFixMaxDuration.IsCheckedChanged += (s, e) => vm.SetChanged();
         var numericUpDownMaxDuration = UiUtil.MakeNumericUpDownInt(1, 10000, 1000, 150, vm, nameof(vm.MaxDurationMs))
             .WithBindEnabled(nameof(vm.FixMaxDurationMs));
-        numericUpDownMaxDuration.PropertyChanged += (s, e) => vm.SetChanged();
+        numericUpDownMaxDuration.ValueChanged += (s, e) => vm.SetChanged();
 
         grid.Add(checkBoxFixMinDuration, 0, 0);
         grid.Add(panelMin, 0, 1);
