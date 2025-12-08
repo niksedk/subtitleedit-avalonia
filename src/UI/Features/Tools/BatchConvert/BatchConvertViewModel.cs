@@ -124,15 +124,19 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private bool _allLowercase;
 
     // Auto translate
-    public ObservableCollection<IAutoTranslator> AutoTranslators { get; set; }
+    [ObservableProperty] public ObservableCollection<IAutoTranslator> _autoTranslators;
     [ObservableProperty] private IAutoTranslator _selectedAutoTranslator;
     [ObservableProperty] private ObservableCollection<TranslationPair> _sourceLanguages = new();
     [ObservableProperty] private TranslationPair? _selectedSourceLanguage;
     [ObservableProperty] private ObservableCollection<TranslationPair> _targetLanguages = new();
     [ObservableProperty] private TranslationPair? _selectedTargetLanguage;
-    [ObservableProperty] private string _autoTranslateModelText;
+    [ObservableProperty] private string _autoTranslateModel;
+    [ObservableProperty] private string _autoTranslateUrl;
+    [ObservableProperty] private string _autoTranslateApiKey;
     [ObservableProperty] private bool _autoTranslateModelIsVisible;
     [ObservableProperty] private bool _autoTranslateModelBrowseIsVisible;
+    [ObservableProperty] private bool _autoTranslateUrlIsVisible;
+    [ObservableProperty] private bool _autoTranslateApiKeyIsVisible;
 
     // Fix common errors
     [ObservableProperty] private FixCommonErrors.ProfileDisplayItem? _fixCommonErrorsProfile;
@@ -264,8 +268,10 @@ public partial class BatchConvertViewModel : ObservableObject
 
         _encodings = EncodingHelper.GetEncodings().Select(p => p.DisplayName).ToList();
 
-        AutoTranslateModelText = string.Empty;
-        AutoTranslators = new ObservableCollection<IAutoTranslator>
+        AutoTranslateModel = string.Empty;
+        AutoTranslateUrl = string.Empty;
+        AutoTranslateApiKey = string.Empty;
+        AutoTranslators = new ObservableCollection<IAutoTranslator>()
         {
             new OllamaTranslate(),
             new LibreTranslate(),
@@ -1060,6 +1066,11 @@ public partial class BatchConvertViewModel : ObservableObject
     {
         var activeFunctions = BatchFunctions.Where(p => p.IsSelected).Select(p => p.Type).ToList();
 
+        if (activeFunctions.Contains(BatchConvertFunctionType.AutoTranslate))
+        {
+            UpdateAutoTranslateSettings();
+        }
+
         return new BatchConvertConfig
         {
             SaveInSourceFolder = Se.Settings.Tools.BatchConvert.SaveInSourceFolder,
@@ -1200,6 +1211,49 @@ public partial class BatchConvertViewModel : ObservableObject
         };
     }
 
+    private void UpdateAutoTranslateSettings()
+    {
+        var translator = SelectedAutoTranslator;
+        if (translator == null)
+        {
+            return;
+        }
+
+        var engineType = translator.GetType();
+
+        if (engineType == typeof(LibreTranslate))
+        {
+            Configuration.Settings.Tools.AutoTranslateLibreUrl = AutoTranslateUrl.Trim();
+            Configuration.Settings.Tools.AutoTranslateLibreApiKey = AutoTranslateUrl.Trim();
+        }
+
+        if (engineType == typeof(LmStudioTranslate))
+        {
+            Configuration.Settings.Tools.LmStudioApiUrl = AutoTranslateUrl.Trim();
+            Configuration.Settings.Tools.LmStudioModel = AutoTranslateUrl.Trim();
+        }
+
+        if (engineType == typeof(OllamaTranslate))
+        {
+            Configuration.Settings.Tools.OllamaApiUrl = AutoTranslateUrl.Trim();
+            Configuration.Settings.Tools.OllamaModel = AutoTranslateModel.Trim();
+            Se.Settings.AutoTranslate.OllamaUrl = AutoTranslateUrl.Trim();
+            Se.Settings.AutoTranslate.OllamaModel = AutoTranslateModel.Trim();
+        }
+
+        if (engineType == typeof(NoLanguageLeftBehindServe))
+        {
+            Configuration.Settings.Tools.AutoTranslateNllbApiUrl = AutoTranslateUrl.Trim();
+            Se.Settings.AutoTranslate.NnlServeUrl = AutoTranslateUrl.Trim();
+        }
+
+        if (engineType == typeof(NoLanguageLeftBehindApi))
+        {
+            Configuration.Settings.Tools.AutoTranslateNllbApiUrl = AutoTranslateUrl.Trim();
+            Se.Settings.AutoTranslate.NnlApiUrl = AutoTranslateUrl.Trim();
+        }
+    }
+
     internal void SelectedFunctionChanged()
     {
         var selectedFunction = SelectedBatchFunction;
@@ -1294,15 +1348,63 @@ public partial class BatchConvertViewModel : ObservableObject
 
         if (engine is OllamaTranslate)
         {
-            AutoTranslateModelText = Se.Settings.AutoTranslate.OllamaModel;
+            AutoTranslateModel = Se.Settings.AutoTranslate.OllamaModel;
             AutoTranslateModelBrowseIsVisible = true;
             AutoTranslateModelIsVisible = true;
+            AutoTranslateUrl = string.Empty;
+            AutoTranslateUrlIsVisible = false;
+            AutoTranslateApiKey = string.Empty;
+            AutoTranslateApiKeyIsVisible = false;
+        }
+        else if (engine is LibreTranslate)
+        {
+            AutoTranslateModel = string.Empty;
+            AutoTranslateModelBrowseIsVisible = false;
+            AutoTranslateModelIsVisible = false;
+            AutoTranslateUrl = Se.Settings.AutoTranslate.LibreTranslateUrl;
+            AutoTranslateUrlIsVisible = true;
+            AutoTranslateApiKey = Se.Settings.AutoTranslate.LibreTranslateApiKey;
+            AutoTranslateApiKeyIsVisible = true;
+        }
+        else if (engine is LmStudioTranslate)
+        {
+            AutoTranslateModel = string.Empty;
+            AutoTranslateModelBrowseIsVisible = false;
+            AutoTranslateModelIsVisible = false;
+            AutoTranslateUrl = Se.Settings.AutoTranslate.LmStudioUrl;
+            AutoTranslateUrlIsVisible = true;
+            AutoTranslateApiKey = string.Empty;
+            AutoTranslateApiKeyIsVisible = false;
+        }
+        else if (engine is NoLanguageLeftBehindServe)
+        {
+            AutoTranslateModel = string.Empty;
+            AutoTranslateModelBrowseIsVisible = false;
+            AutoTranslateModelIsVisible = false;
+            AutoTranslateUrl = Se.Settings.AutoTranslate.NnlServeUrl;
+            AutoTranslateUrlIsVisible = true;
+            AutoTranslateApiKey = string.Empty;
+            AutoTranslateApiKeyIsVisible = false;
+        }
+        else if (engine is NoLanguageLeftBehindApi)
+        {
+            AutoTranslateModel = string.Empty;
+            AutoTranslateModelBrowseIsVisible = false;
+            AutoTranslateModelIsVisible = false;
+            AutoTranslateUrl = Se.Settings.AutoTranslate.NnlApiUrl;
+            AutoTranslateUrlIsVisible = true;
+            AutoTranslateApiKey = string.Empty;
+            AutoTranslateApiKeyIsVisible = false;
         }
         else
         {
-            AutoTranslateModelText = string.Empty;
+            AutoTranslateModel = string.Empty;
             AutoTranslateModelBrowseIsVisible = false;
             AutoTranslateModelIsVisible = false;
+            AutoTranslateUrl = string.Empty;
+            AutoTranslateUrlIsVisible = false;
+            AutoTranslateApiKey = string.Empty;
+            AutoTranslateApiKeyIsVisible = false;
         }
     }
 

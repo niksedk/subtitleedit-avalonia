@@ -19,6 +19,11 @@ public class SeAutoTranslate
     public decimal RequestDelaySeconds { get; set; }
     public int CopyPasteMaxBlockSize { get; set; }
     public string CopyPasteLineSeparator { get; set; }
+    public string LibreTranslateUrl { get; internal set; }
+    public string LmStudioUrl { get; internal set; }
+    public string NnlServeUrl { get; internal set; }
+    public string NnlApiUrl { get; internal set; }
+    public string LibreTranslateApiKey { get; internal set; }
 
     public SeAutoTranslate()
     {
@@ -28,10 +33,15 @@ public class SeAutoTranslate
         AnthropicPrompt = Configuration.Settings.Tools.AnthropicPrompt;
         GroqPrompt = Configuration.Settings.Tools.GroqPrompt;
         OpenRouterPrompt = Configuration.Settings.Tools.OpenRouterPrompt;
+        LibreTranslateUrl = "http://localhost:5000/";
+        LibreTranslateApiKey = string.Empty;
+        LmStudioUrl = "http://localhost:1234/v1/chat/completions/";
+        NnlServeUrl = "http://127.0.0.1:6060/";
+        NnlApiUrl = "http://localhost:7860/api/v4/";
         RequestMaxBytes = 1000;
         CopyPasteMaxBlockSize = 5000;
         CopyPasteLineSeparator = "(...)";
         OllamaModel = string.Empty;
-        OllamaUrl = string.Empty;
+        OllamaUrl = "http://localhost:11434/api/generate/";
     }
 }

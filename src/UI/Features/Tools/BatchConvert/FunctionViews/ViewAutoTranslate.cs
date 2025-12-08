@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -17,17 +18,26 @@ public static class ViewAutoTranslate
         };
 
         var labelEngine = UiUtil.MakeLabel(Se.Language.General.Engine);
-        var comboBoxEngine = UiUtil.MakeComboBox(vm.AutoTranslators, vm, nameof(vm.SelectedAutoTranslator));
-        comboBoxEngine.SelectionChanged += (s, e) => vm.OnAutoTranslatorChanged();  
+
+        var cbEngines = new ComboBox
+        {
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalContentAlignment = HorizontalAlignment.Left,
+            VerticalContentAlignment = VerticalAlignment.Center,
+        };
+        cbEngines.DataContext = vm;
+        cbEngines.Bind(ComboBox.ItemsSourceProperty, new Binding(nameof(vm.AutoTranslators)));
+        cbEngines.Bind(ComboBox.SelectedItemProperty, new Binding(nameof(vm.SelectedAutoTranslator)) { Mode = BindingMode.TwoWay });
+        cbEngines.SelectionChanged += (s, e) => vm.OnAutoTranslatorChanged();  
         var labelModel = UiUtil.MakeLabel(Se.Language.General.Model).WithBindVisible(vm, nameof(vm.AutoTranslateModelIsVisible)).WithMarginLeft(10).WithMarginRight(3);
-        var textBoxModel =  UiUtil.MakeTextBox(150, vm, nameof(vm.AutoTranslateModelText), nameof(vm.AutoTranslateModelIsVisible));
+        var textBoxModel =  UiUtil.MakeTextBox(150, vm, nameof(vm.AutoTranslateModel), nameof(vm.AutoTranslateModelIsVisible));
         var buttonModel = UiUtil.MakeButtonBrowse(vm.AutoTranslateBrowseModelCommand, nameof(vm.AutoTranslateModelBrowseIsVisible)).WithMarginLeft(3);
         var panelEngineControls = UiUtil.MakeHorizontalPanel(
-            comboBoxEngine,
+            cbEngines,
             labelModel, 
             textBoxModel,
-            buttonModel
-            );
+            buttonModel);
 
         var labelSourceLanguage = UiUtil.MakeLabel(Se.Language.General.From);
         var sourceLangCombo = UiUtil.MakeComboBox(vm.SourceLanguages, vm, nameof(vm.SelectedSourceLanguage));
@@ -35,10 +45,19 @@ public static class ViewAutoTranslate
         var labelTargetLanguage = UiUtil.MakeLabel(Se.Language.General.To);
         var targetLangCombo = UiUtil.MakeComboBox(vm.TargetLanguages, vm, nameof(vm.SelectedTargetLanguage));
 
+        var labelUrl = UiUtil.MakeLabel(Se.Language.General.Url).WithBindVisible(vm, nameof(vm.AutoTranslateUrlIsVisible));
+        var textBoxUrl = UiUtil.MakeTextBox(300, vm, nameof(vm.AutoTranslateUrl), nameof(vm.AutoTranslateUrlIsVisible));
+
+        var labelApiKey = UiUtil.MakeLabel(Se.Language.General.ApiKey).WithBindVisible(vm, nameof(vm.AutoTranslateApiKeyIsVisible));
+        var textBoxApiKey = UiUtil.MakeTextBox(300, vm, nameof(vm.AutoTranslateApiKey), nameof(vm.AutoTranslateApiKeyIsVisible));
+
+
         var grid = new Grid
         {
             RowDefinitions =
             {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
@@ -65,6 +84,12 @@ public static class ViewAutoTranslate
         
         grid.Add(labelTargetLanguage, 3, 0);
         grid.Add(targetLangCombo, 3, 1);
+
+        grid.Add(labelUrl, 4, 0);
+        grid.Add(textBoxUrl, 4, 1);
+
+        grid.Add(labelApiKey, 5, 0);
+        grid.Add(textBoxApiKey, 5, 1);
 
         return grid;
     }
