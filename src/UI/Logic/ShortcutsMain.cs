@@ -505,7 +505,8 @@ public static class ShortcutsMain
             new(nameof(vm.ShowFindCommand), [commandOrWin, "F"], ShortcutCategory.General),
             new(nameof(vm.FindNextCommand), [nameof(Avalonia.Input.Key.F3)], ShortcutCategory.General),
             new(nameof(vm.FindPreviousCommand), ["Shift", nameof(Avalonia.Input.Key.F3)], ShortcutCategory.General),
-            new(nameof(vm.ShowReplaceCommand), [commandOrWin, "H"], ShortcutCategory.General),
+            new(nameof(vm.ShowReplaceCommand), [commandOrWin, "R"], ShortcutCategory.General),
+            new(nameof(vm.ShowMultipleReplaceCommand), [commandOrWin, "Shift", "R"], ShortcutCategory.General),
             new(nameof(vm.OpenDataFolderCommand), [commandOrWin, "Alt", "Shift", "D"], ShortcutCategory.General),
             new(nameof(vm.CommandFileNewCommand), [commandOrWin, "N"], ShortcutCategory.General),
             new(nameof(vm.CommandFileOpenCommand), [commandOrWin, "O"], ShortcutCategory.General),
@@ -529,6 +530,8 @@ public static class ShortcutsMain
             new(nameof(vm.GoToPreviousErrorCommand), ["Shift", nameof(Avalonia.Input.Key.F8)], ShortcutCategory.SubtitleGrid),
             new(nameof(vm.GoToNextErrorCommand), [nameof(Avalonia.Input.Key.F8)], ShortcutCategory.SubtitleGrid),
             new(nameof(vm.ShowSpellCheckCommand), ["Alt", nameof(Avalonia.Input.Key.F7)], ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.ShowToolsChangeCasingCommand), [GetCommandOrWin(), "Shift", nameof(Avalonia.Input.Key.C)], ShortcutCategory.General),
+            new(nameof(vm.ShowToolsRemoveTextForHearingImpairedCommand), [GetCommandOrWin(), "Shift", nameof(Avalonia.Input.Key.H)], ShortcutCategory.General),
         ];
     }
 
