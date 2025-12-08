@@ -281,7 +281,6 @@ public partial class BatchConvertViewModel : ObservableObject
         };
         SelectedAutoTranslator = AutoTranslators[0];
         OnAutoTranslatorChanged();
-        UpdateAutoTranslateLanguages();
 
         SelectedFromFrameRate = FromFrameRates[0];
         SelectedToFrameRate = ToFrameRates[1];
@@ -379,22 +378,6 @@ public partial class BatchConvertViewModel : ObservableObject
         }
 
         return displayProfiles.First();
-    }
-
-    private void UpdateAutoTranslateLanguages()
-    {
-        SourceLanguages.Clear();
-        SourceLanguages.Add(new TranslationPair(" - " + Se.Language.General.Autodetect + " - ", "auto"));
-        foreach (var language in SelectedAutoTranslator.GetSupportedSourceLanguages())
-        {
-            SourceLanguages.Add(language);
-        }
-
-        TargetLanguages.Clear();
-        foreach (var language in SelectedAutoTranslator.GetSupportedTargetLanguages())
-        {
-            TargetLanguages.Add(language);
-        }
     }
 
     private void SaveSettings()
@@ -1405,6 +1388,106 @@ public partial class BatchConvertViewModel : ObservableObject
             AutoTranslateUrlIsVisible = false;
             AutoTranslateApiKey = string.Empty;
             AutoTranslateApiKeyIsVisible = false;
+        }
+
+        UpdateSourceLanguages(engine);
+        UpdateTargetLanguages(engine);
+    }
+
+    private void UpdateSourceLanguages(IAutoTranslator autoTranslator)
+    {
+        UpdateSourceLanguages(autoTranslator, SourceLanguages);
+    }
+
+    private void UpdateSourceLanguages(IAutoTranslator autoTranslator, ObservableCollection<TranslationPair> sourceLanguages)
+    {
+        SourceLanguages.Clear();
+        if (autoTranslator == null)
+        {
+            return;
+        }
+
+        SourceLanguages.Add(new TranslationPair(" - " + Se.Language.General.Autodetect + " - ", "auto"));
+
+        foreach (var language in autoTranslator.GetSupportedSourceLanguages())
+        {
+            SourceLanguages.Add(language);
+        }
+
+        SelectedSourceLanguage = null;
+        var sourceLanguageIsoCode = AutoTranslateViewModel.EvaluateDefaultSourceLanguageCode(null, new Subtitle(), sourceLanguages);
+        if (!string.IsNullOrEmpty(sourceLanguageIsoCode))
+        {
+            var lang = SourceLanguages.FirstOrDefault(p => p.Code == sourceLanguageIsoCode);
+            if (lang != null)
+            {
+                SelectedSourceLanguage = lang;
+            }
+        }
+
+        if (SelectedSourceLanguage == null && !string.IsNullOrEmpty(Se.Settings.AutoTranslate.AutoTranslateLastSource))
+        {
+            var lang = SourceLanguages.FirstOrDefault(p => p.Code == Se.Settings.AutoTranslate.AutoTranslateLastSource);
+            if (lang != null)
+            {
+                SelectedSourceLanguage = lang;
+            }
+        }
+
+        if (SelectedSourceLanguage == null && SourceLanguages.Count > 0)
+        {
+            SelectedSourceLanguage = SourceLanguages[0];
+        }
+    }
+
+    private void UpdateTargetLanguages(IAutoTranslator autoTranslator)
+    {
+        TargetLanguages.Clear();
+        if (autoTranslator == null)
+        {
+            return;
+        }
+
+        foreach (var language in autoTranslator.GetSupportedTargetLanguages())
+        {
+            TargetLanguages.Add(language);
+        }
+
+        SelectedTargetLanguage = null;
+        var targetLanguageIsoCode = AutoTranslateViewModel.EvaluateDefaultTargetLanguageCode(SelectedTargetLanguage?.Code ?? string.Empty, SelectedSourceLanguage?.Code ?? string.Empty);
+        if (!string.IsNullOrEmpty(targetLanguageIsoCode))
+        {
+            var lang = TargetLanguages.FirstOrDefault(p => p.Code == targetLanguageIsoCode);
+            if (lang != null)
+            {
+                SelectedTargetLanguage = lang;
+            }
+        }
+
+        if (!string.IsNullOrEmpty(Se.Settings.AutoTranslate.AutoTranslateLastTarget))
+        {
+            var lang = TargetLanguages.FirstOrDefault(p => p.Code == Se.Settings.AutoTranslate.AutoTranslateLastTarget);
+            if ((SelectedSourceLanguage == null || lang == null || SelectedSourceLanguage.Code != lang.Code) && lang != null)
+            {
+                SelectedTargetLanguage = lang;
+            }
+        }
+
+        if (SelectedTargetLanguage == null && TargetLanguages.Count > 0)
+        {
+            SelectedTargetLanguage = TargetLanguages[0];
+        }
+
+        if (SelectedSourceLanguage == SelectedTargetLanguage && TargetLanguages.Count > 1)
+        {
+            if (SelectedSourceLanguage?.Code == "en")
+            {
+                SelectedTargetLanguage = TargetLanguages.FirstOrDefault(p => p.Code == "de");
+            }
+            else
+            {
+                SelectedTargetLanguage = TargetLanguages.FirstOrDefault(p => p.Code == "en");
+            }
         }
     }
 
