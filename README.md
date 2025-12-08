@@ -83,7 +83,7 @@ It does **not** collect, store, transmit, or analyze the content of your subtitl
 
 All core features, including editing, converting, video playback, and **local auto-backup**, run entirely on your device.
 
-If you choose to use optional third-party online services within Subtitle Edit (such as translation, speech recognition, or dictionary/lookups), only the minimal data required to perform that specific request is sent directly to the selected provider. Any such data transfer is governed by the provider’s own privacy policy, and Subtitle Edit does not retain or forward this data in any way.
+If you choose to use optional third-party online services within Subtitle Edit (such as translation, speech-to-text, text-to-speech, OCR, or dictionary/lookups), only the minimal data required to perform that specific request is sent directly to the selected provider. Any such data transfer is governed by the provider’s own privacy policy, and Subtitle Edit does not retain or forward this data in any way.
 
 Subtitle Edit aims to give you full control over your files — your data stays yours.
 
