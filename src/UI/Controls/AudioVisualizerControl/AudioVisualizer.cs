@@ -2,7 +2,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
-using Avalonia.Rendering;
 using Avalonia.Threading;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
@@ -431,7 +430,7 @@ public class AudioVisualizer : Control
 
         if (_isAltDown)
         {
-            var newZoomFactor = ZoomFactor + delta / 100.0;
+            var newZoomFactor = ZoomFactor + delta / 10.0;
 
             if (newZoomFactor < 0.1)
             {
@@ -451,7 +450,7 @@ public class AudioVisualizer : Control
 
         if (_isShiftDown)
         {
-            var newZoomFactor = VerticalZoomFactor + delta / 100.0;
+            var newZoomFactor = VerticalZoomFactor + delta / 10.0;
 
             if (newZoomFactor < 0.1)
             {
