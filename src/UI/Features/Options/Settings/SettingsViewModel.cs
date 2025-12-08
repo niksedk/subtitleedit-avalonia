@@ -860,27 +860,34 @@ public partial class SettingsViewModel : ObservableObject
 
     public static void DeleteWaveformAndSpectrogramFiles()
     {
-        foreach (var file in Directory.GetFiles(Se.WaveformsFolder, "*.wav").ToList())
+       
+        if (Directory.Exists(Se.WaveformsFolder))
         {
-            try
+            foreach (var file in Directory.GetFiles(Se.WaveformsFolder, "*.wav").ToList())
             {
-                File.Delete(file);
-            }
-            catch
-            {
-                // ignore
+                try
+                {
+                    File.Delete(file);
+                }
+                catch
+                {
+                    // ignore
+                }
             }
         }
 
-        foreach (var directory in Directory.GetDirectories(Se.SpectrogramsFolder).ToList())
+        if (Directory.Exists(Se.SpectrogramsFolder))
         {
-            try
+            foreach (var directory in Directory.GetDirectories(Se.SpectrogramsFolder).ToList())
             {
-                Directory.Delete(directory, recursive: true);
-            }
-            catch
-            {
-                // ignore
+                try
+                {
+                    Directory.Delete(directory, recursive: true);
+                }
+                catch
+                {
+                    // ignore
+                }
             }
         }
     }

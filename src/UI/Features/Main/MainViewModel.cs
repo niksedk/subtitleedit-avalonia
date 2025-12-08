@@ -4101,6 +4101,7 @@ public partial class MainViewModel :
                     if (_oldGenerateSpectrogram == false && Se.Settings.Waveform.GenerateSpectrogram)
                     {
                         Se.Settings.Waveform.LastDisplayMode = WaveformDisplayMode.WaveformAndSpectrogram.ToString();
+                        AudioVisualizer?.SetDisplayMode(WaveformDisplayMode.WaveformAndSpectrogram);
                     }
                 }
             }

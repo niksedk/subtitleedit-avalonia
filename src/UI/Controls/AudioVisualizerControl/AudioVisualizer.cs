@@ -1103,7 +1103,7 @@ public class AudioVisualizer : Control
 
         var endPositionSeconds = RelativeXPositionToSecondsOptimized((int)renderCtx.Width, renderCtx.SampleRate, renderCtx.StartPositionSeconds, renderCtx.ZoomFactor);
         var width = (int)Math.Round((endPositionSeconds - renderCtx.StartPositionSeconds) / _spectrogram.SampleDuration);
-        if (width <= 0)
+        if (width <= 0 || width > 4000)
         {
             return;
         }
