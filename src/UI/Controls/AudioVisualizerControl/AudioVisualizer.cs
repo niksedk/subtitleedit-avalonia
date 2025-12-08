@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
+using Avalonia.Rendering;
 using Avalonia.Threading;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
@@ -310,7 +311,7 @@ public class AudioVisualizer : Control
     //public event ParagraphEventHandler? OnParagraphRightClicked;
     //public event ParagraphEventHandler? OnNonParagraphRightClicked;
     //public event ParagraphEventHandler? OnSingleClick;
-    //public event ParagraphEventHandler? OnStatus;
+    public event ParagraphEventHandler? OnStatus;
     public event ParagraphEventHandler? OnDeletePressed;
 
     public AudioVisualizer()
@@ -1012,10 +1013,12 @@ public class AudioVisualizer : Control
     }
 
 
+    Queue<double> _renderTimes = new Queue<double>();
 
     public override void Render(DrawingContext context)
     {
         context.DrawRectangle(_paintBackground, null, new Rect(Bounds.Size));
+        var ticks = DateTime.UtcNow.Ticks;
         using (context.PushClip(new Rect(0, 0, Bounds.Width, Bounds.Height)))
         {
             DrawAllGridLines(context);
@@ -1032,6 +1035,21 @@ public class AudioVisualizer : Control
                 context.DrawRectangle(null, _paintPenSelected, new Rect(0, 0, Bounds.Width, Bounds.Height));
             }
         }
+
+        var timeSpan = TimeSpan.FromTicks(DateTime.UtcNow.Ticks - ticks);
+        _renderTimes.Enqueue(timeSpan.TotalMilliseconds);
+        if (_renderTimes.Count > 100)
+        {
+            _renderTimes.Dequeue();
+        }
+
+        var mean = _renderTimes.Average();
+
+        OnStatus?.Invoke(this,
+            new ParagraphEventArgs(0, new SubtitleLineViewModel()
+            {
+                Text = $"Render time: {mean:0.00} ms"
+            }, new SubtitleLineViewModel()));
     }
 
     private void DrawSpectrogram(DrawingContext context)
