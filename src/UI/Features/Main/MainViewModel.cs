@@ -326,6 +326,7 @@ public partial class MainViewModel :
         _casingToggler = casingToggler;
 
         _loading = true;
+        Configuration.DataDirectoryOverride = Se.DataFolder;
         EditText = string.Empty;
         EditTextCharactersPerSecond = string.Empty;
         EditTextCharactersPerSecondBackground = Brushes.Transparent;
@@ -402,8 +403,6 @@ public partial class MainViewModel :
         SelectedSpeed = "1.0x";
         VideoOffsetText = string.Empty;
         SetVideoOffsetText = Se.Language.Main.Menu.SetVideoOffset;
-
-        Configuration.DataDirectoryOverride = Se.DataFolder;
 
         themeInitializer.UpdateThemesIfNeeded().ConfigureAwait(true);
         Dispatcher.UIThread.Post(async void () =>

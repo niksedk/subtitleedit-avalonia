@@ -326,7 +326,7 @@ public class SeNamesList : INamesList
         }
         catch (Exception ex)
         {
-            throw new Exception("Unable to read name list file: " + fileNameOrUrl, ex);
+            throw new Exception("SeNamesList: Unable to read name list file: " + fileNameOrUrl, ex);
         }
     }
 }
