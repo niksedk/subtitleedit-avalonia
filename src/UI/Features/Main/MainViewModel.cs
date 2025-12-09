@@ -6285,11 +6285,49 @@ public partial class MainViewModel :
             return;
         }
 
-        _undoRedoManager.StopChangeDetection();
         var videoStartTime = TimeSpan.FromSeconds(videoPositionSeconds);
         var subtitleStartTime = s.StartTime;
         var difference = videoStartTime - subtitleStartTime;
 
+        _undoRedoManager.StopChangeDetection();
+        for (var i = index; i < Subtitles.Count; i++)
+        {
+            var subtitle = Subtitles[i];
+            subtitle.StartTime += difference;
+        }
+
+        _updateAudioVisualizer = true;
+        _undoRedoManager.StartChangeDetection();
+    }
+
+    [RelayCommand]
+    private void WaveformSetEndAndOffsetTheRest()
+    {
+        var s = SelectedSubtitle;
+        var vp = GetVideoPlayerControl();
+        if (s == null || vp == null || LockTimeCodes)
+        {
+            return;
+        }
+
+        var videoPositionSeconds = vp.Position;
+        var index = Subtitles.IndexOf(s);
+        if (index < 0 || index >= Subtitles.Count)
+        {
+            return;
+        }
+
+        var videoTime = TimeSpan.FromSeconds(videoPositionSeconds);
+        var subtitleEndTime = s.EndTime;
+        if (videoTime <= s.StartTime)
+        {
+            ShowStatus(Se.Language.Main.EndTimeMustBeAfterStartTime);
+            return;
+        }
+
+        var difference = videoTime - subtitleEndTime;
+
+        _undoRedoManager.StopChangeDetection();
         for (var i = index; i < Subtitles.Count; i++)
         {
             var subtitle = Subtitles[i];

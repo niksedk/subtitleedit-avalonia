@@ -75,6 +75,7 @@ public class LanguageMain
     public string GeneratingSpectrogramDotDotDot { get; set; }
     public string RemovedXBlankLines { get; set; }
     public string XLinesSelectedOfY { get; set; }
+    public string EndTimeMustBeAfterStartTime { get; set; }
 
     public LanguageMain()
     {
@@ -145,5 +146,6 @@ public class LanguageMain
         GeneratingSpectrogramDotDotDot = "Generating spectrogram...";   
         RemovedXBlankLines = "Removed {0} blank lines";
         XLinesSelectedOfY = "{0} lines selected of {1}";
+        EndTimeMustBeAfterStartTime = "End time must be after start time.";
     }
 }

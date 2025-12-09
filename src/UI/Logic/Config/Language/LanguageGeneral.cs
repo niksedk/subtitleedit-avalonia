@@ -553,6 +553,7 @@ public class LanguageGeneral
     public string PlaySelectedLines { get; set; }
     public string PlaySelectedLinesWithLoop { get; set; }
     public string ToggleCasing { get; set; }
+    public string SetEndAndOffsetTheRest { get; set; }
 
     public LanguageGeneral()
     {
@@ -1099,11 +1100,12 @@ public class LanguageGeneral
         RemoveBlankLines = "Remove blank lines";
         NewSubtitleStartKeyDownSetEndKeyUp = "Insert subtitle: Start on key down, set end on key up";
         SpeechToTextSelectedLines = "Speech-to-text selected lines";
-        GetAudioClips =  "Get audio clips";
+        GetAudioClips = "Get audio clips";
         ExtractingAudioClips = "Extracting audio clips...";
         FileXOfY = "File {0} of {1}";
         PlaySelectedLines = "Play selected lines";
         PlaySelectedLinesWithLoop = "Play selected lines with loop";
         ToggleCasing = "Toggle casing";
+        SetEndAndOffsetTheRest = "Set end and offset the rest";
     }
 }
