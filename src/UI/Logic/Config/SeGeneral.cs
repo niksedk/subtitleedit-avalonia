@@ -8,6 +8,14 @@ using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 
+public enum SubtitleDoubleClickActionType
+{
+    GoToSubtitleAndPause,
+    GoToSubtitleAndPlay,
+    GoToSubtitleOnly,
+    GoToSubtitleAndFocusTextBox,
+}
+
 public class SeGeneral
 {
     public string Version { get; set; }
@@ -55,6 +63,7 @@ public class SeGeneral
     public string DefaultSaveAsFormat { get; set; }
     public string FavoriteSubtitleFormats { get; set; }
     public string DefaultEncoding { get; set; }
+    public string SubtitleDoubleClickAction { get; set; }
     public bool AutoConvertToUtf8 { get; set; }
     public bool AutoGuessAnsiEncoding { get; set; }
     public int MaxNumberOfLinesPlusAbort { get; set; }
