@@ -887,11 +887,11 @@ public class WavePeakGenerator2 : IDisposable
             saveImageTask?.Wait();
 
             // save image
-            string imagePath = Path.Combine(spectrogramDirectory, iChunk + ".png");
+            string imagePath = Path.Combine(spectrogramDirectory, iChunk + ".jpg");
             saveImageTask = Task.Factory.StartNew(() =>
             {
                 using (var stream = File.OpenWrite(imagePath))
-                using (var pngData = bmp.Encode(SKEncodedImageFormat.Png, 100))
+                using (var pngData = bmp.Encode(SKEncodedImageFormat.Jpeg, 80))
                 {
                     pngData.SaveTo(stream);
                 }
