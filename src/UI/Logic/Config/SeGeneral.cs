@@ -13,7 +13,7 @@ public enum SubtitleDoubleClickActionType
     GoToSubtitleAndPause,
     GoToSubtitleAndPlay,
     GoToSubtitleOnly,
-    GoToSubtitleAndFocusTextBox,
+    GoToSubtitleAndPauseAndFocusTextBox,
 }
 
 public class SeGeneral
@@ -169,6 +169,7 @@ public class SeGeneral
         SubtitleLineMaximumPixelWidth = 576;
         DefaultSubtitleFormat = new SubRip().FriendlyName;
         DefaultEncoding = TextEncoding.Utf8WithBom;
+        SubtitleDoubleClickAction = SubtitleDoubleClickActionType.GoToSubtitleAndPause.ToString();
         AutoConvertToUtf8 = false;
         AutoGuessAnsiEncoding = true;
         NewEmptyDefaultMs = 2000;

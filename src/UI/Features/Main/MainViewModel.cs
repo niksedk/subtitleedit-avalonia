@@ -10755,12 +10755,52 @@ public partial class MainViewModel :
         if (grid.SelectedItem is SubtitleLineViewModel selectedItem)
         {
             var vp = GetVideoPlayerControl();
-            if (!string.IsNullOrEmpty(_videoFileName) && vp != null)
+            if (vp == null)
+            {
+                return;
+            }
+
+            if (Se.Settings.General.SubtitleDoubleClickAction == SubtitleDoubleClickActionType.GoToSubtitleOnly.ToString())
             {
                 vp.Position = selectedItem.StartTime.TotalSeconds;
-
                 AudioVisualizer?.CenterOnPosition(selectedItem);
+                return;
             }
+
+            if (Se.Settings.General.SubtitleDoubleClickAction == SubtitleDoubleClickActionType.GoToSubtitleAndPlay.ToString())
+            {
+                vp.Position = selectedItem.StartTime.TotalSeconds;
+                vp.VideoPlayerInstance.Play();
+                AudioVisualizer?.CenterOnPosition(selectedItem);
+                return;
+            }
+
+            if (Se.Settings.General.SubtitleDoubleClickAction == SubtitleDoubleClickActionType.GoToSubtitleAndPauseAndFocusTextBox.ToString())
+            {
+                vp.VideoPlayerInstance.Pause();
+                AudioVisualizer?.CenterOnPosition(selectedItem);
+                Dispatcher.UIThread.Post(async void () =>
+                {
+                    try
+                    {
+                        EditTextBox.Focus();
+                        EditTextBox.Focus();
+                        EditTextBox.Focus();
+                        EditTextBox.Focus();
+                    }
+                    catch (Exception e)
+                    {
+                        // ignore
+                    }
+                });
+
+                return;
+            }
+
+            // SubtitleDoubleClickActionType.GoToSubtitleAndPause
+            vp.VideoPlayerInstance.Pause();
+            AudioVisualizer?.CenterOnPosition(selectedItem);
+            return;
         }
     }
 

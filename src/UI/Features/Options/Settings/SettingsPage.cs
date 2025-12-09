@@ -11,6 +11,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
 using Projektanker.Icons.Avalonia;
 using System;
 using System.Collections.Generic;
@@ -218,6 +219,16 @@ public class SettingsPage : UserControl
                     new Binding(nameof(_vm.DefaultEncoding)) { Mode = BindingMode.TwoWay },
                 ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
                     new TextBlock { Text = f?.Name }, true)
+            }),
+            new SettingsItem(Se.Language.Options.Settings.SubtitleDoubleClickAction, () => new ComboBox
+            {
+                MinWidth = 200,
+                DataContext = _vm,
+                [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.SubtitleDoubleClickActionTypes)),
+                [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedSubtitleDoubleClickActionType)) 
+                { 
+                    Mode = BindingMode.TwoWay,
+                }
             }),
         ]));
 

@@ -83,6 +83,9 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<TextEncoding> _encodings;
     [ObservableProperty] private TextEncoding _defaultEncoding;
 
+    [ObservableProperty] private ObservableCollection<string> _subtitleDoubleClickActionTypes;
+    [ObservableProperty] private string _selectedSubtitleDoubleClickActionType;
+
     [ObservableProperty] private bool _goToLineNumberAlsoSetVideoPosition;
 
     [ObservableProperty] private bool _showUpDownStartTime;
@@ -280,12 +283,23 @@ public partial class SettingsViewModel : ObservableObject
             defaultSubtitleFormats.Add(format.FriendlyName);
             saveSubtitleFormats.Add(format.FriendlyName);
         }
+
         DefaultSubtitleFormats = new ObservableCollection<string>(defaultSubtitleFormats);
         SaveSubtitleFormats = new ObservableCollection<string>(saveSubtitleFormats);
         SelectedDefaultSubtitleFormat = DefaultSubtitleFormats.First();
         SelectedSaveSubtitleFormat = SaveSubtitleFormats.First();
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         DefaultEncoding = Encodings.First();
+
+        SubtitleDoubleClickActionTypes = new ObservableCollection<string>()
+        {
+                Se.Language.Options.Settings.GridGoToSubtitleAndPause,
+                Se.Language.Options.Settings.GridGoToSubtitleAndPlay,
+                Se.Language.Options.Settings.GridGoToSubtitleOnly,
+                Se.Language.Options.Settings.GridGoToSubtitleAndPauseAndFocusTextBox,
+        };
+        SelectedSubtitleDoubleClickActionType = SubtitleDoubleClickActionTypes[0];
+
         WaveformSpaceInfo = string.Empty;
         IsMpvChosen = true;
 
@@ -388,6 +402,7 @@ public partial class SettingsViewModel : ObservableObject
         AutoBackupIntervalMinutes = general.AutoBackupIntervalMinutes;
         AutoBackupDeleteAfterDays = general.AutoBackupDeleteAfterDays;
         DefaultEncoding = Encodings.FirstOrDefault(e => e.DisplayName == general.DefaultEncoding) ?? Encodings.First();
+        SelectedSubtitleDoubleClickActionType = MapFromSelectedSubtitleDoubleClickAction(Se.Settings.General.SubtitleDoubleClickAction);
 
         SelectedDefaultSubtitleFormat = general.DefaultSubtitleFormat;
         if (!DefaultSubtitleFormats.Contains(SelectedDefaultSubtitleFormat))
@@ -545,6 +560,42 @@ public partial class SettingsViewModel : ObservableObject
         ExistsSettingsFile = File.Exists(Se.GetSettingsFilePath());
     }
 
+
+    private static readonly Dictionary<string, string> _actionToTextMap = new Dictionary<string, string>
+    {
+        { SubtitleDoubleClickActionType.GoToSubtitleAndPause.ToString(), Se.Language.Options.Settings.GridGoToSubtitleAndPause },
+        { SubtitleDoubleClickActionType.GoToSubtitleAndPlay.ToString(), Se.Language.Options.Settings.GridGoToSubtitleAndPlay },
+        { SubtitleDoubleClickActionType.GoToSubtitleOnly.ToString(), Se.Language.Options.Settings.GridGoToSubtitleOnly },
+        { SubtitleDoubleClickActionType.GoToSubtitleAndPauseAndFocusTextBox.ToString(), Se.Language.Options.Settings.GridGoToSubtitleAndPauseAndFocusTextBox },
+    };
+    private static Dictionary<string, string> TextToActionMap => _actionToTextMap.ToDictionary(x => x.Value, x => x.Key);
+
+
+    private static string MapFromSelectedSubtitleDoubleClickAction(string action)
+    {
+        if (string.IsNullOrEmpty(action))
+        {
+            return Se.Language.Options.Settings.GridGoToSubtitleAndPause;
+        }
+
+        return _actionToTextMap.TryGetValue(action, out var text)
+            ? text
+            : Se.Language.Options.Settings.GridGoToSubtitleAndPause;
+    }
+
+    public static string MapToSelectedSubtitleDoubleClickAction(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return SubtitleDoubleClickActionType.GoToSubtitleAndPause.ToString();
+        }
+
+        return TextToActionMap.TryGetValue(text, out var action)
+            ? action
+            : SubtitleDoubleClickActionType.GoToSubtitleAndPause.ToString();
+    }
+
+
     private void SaveSettings()
     {
         var general = Se.Settings.General;
@@ -573,6 +624,8 @@ public partial class SettingsViewModel : ObservableObject
         general.AutoBackupIntervalMinutes = AutoBackupIntervalMinutes ?? general.AutoBackupIntervalMinutes;
         general.AutoBackupDeleteAfterDays = AutoBackupDeleteAfterDays ?? general.AutoBackupDeleteAfterDays;
         general.DefaultEncoding = DefaultEncoding?.DisplayName ?? Encodings.First().DisplayName;
+        general.SubtitleDoubleClickAction = MapToSelectedSubtitleDoubleClickAction(SelectedSubtitleDoubleClickActionType);
+
         general.DefaultSubtitleFormat = SelectedDefaultSubtitleFormat;
 
         Se.Settings.Tools.GoToLineNumberAlsoSetVideoPosition = GoToLineNumberAlsoSetVideoPosition;
@@ -860,7 +913,7 @@ public partial class SettingsViewModel : ObservableObject
 
     public static void DeleteWaveformAndSpectrogramFiles()
     {
-       
+
         if (Directory.Exists(Se.WaveformsFolder))
         {
             foreach (var file in Directory.GetFiles(Se.WaveformsFolder, "*.wav").ToList())
@@ -1374,7 +1427,7 @@ public partial class SettingsViewModel : ObservableObject
             _skipRuleValueChanged = false;
         }
     }
-    
+
     internal void RuleValueChanged()
     {
         var profileItem = _profilesForEdit.FirstOrDefault(p => p.Name == SelectedProfile);

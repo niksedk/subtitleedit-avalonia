@@ -198,6 +198,11 @@ public class LanguageSettings
     public string WaveformPauseOnSingleClick { get; set; }
     public string WaveformDrawStyle { get; set; }
     public string VlcWidRendering { get; set; }
+    public string SubtitleDoubleClickAction { get; set; }
+    public string GridGoToSubtitleAndPause { get; set; }
+    public string GridGoToSubtitleAndPlay { get; set; }
+    public string GridGoToSubtitleOnly { get; set; }
+    public string GridGoToSubtitleAndPauseAndFocusTextBox { get; set; }
 
     public LanguageSettings()
     {
@@ -392,6 +397,11 @@ public class LanguageSettings
         WaveformCenterOnSingleClick = "Center on single click";
         WaveformPauseOnSingleClick = "Pause on single click";
         WaveformDrawStyle = "Waveform draw style";
+        SubtitleDoubleClickAction = "Subtitle grid double-click action";
+        GridGoToSubtitleAndPause = "Go to subtitle and pause";
+        GridGoToSubtitleAndPlay = "Go to subtitle and play";
+        GridGoToSubtitleOnly = "Go to subtitle only";
+        GridGoToSubtitleAndPauseAndFocusTextBox = "Go to subtitle and pause and focus text box";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)
