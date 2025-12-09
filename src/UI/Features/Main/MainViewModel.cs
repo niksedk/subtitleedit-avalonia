@@ -109,6 +109,7 @@ using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -9594,22 +9595,49 @@ public partial class MainViewModel :
         _subtitleGridSelectionChangedSkip = true;
         var idx = Subtitles.IndexOf(selectedItems.First());
         _undoRedoManager.StopChangeDetection();
-        foreach (var item in selectedItems)
+
+        // Detach ItemsSource to prevent updates
+        var itemsSource = SubtitleGrid.ItemsSource;
+        var isLargeDelete = selectedItems.Count > 10;
+        if (isLargeDelete)
         {
-            Subtitles.Remove(item);
+            SubtitleGrid.ItemsSource = null;
         }
 
-        if (idx >= Subtitles.Count)
+        try
         {
-            idx = Subtitles.Count - 1;
-        }
+            var indicesToRemove = selectedItems
+                .Select(item => Subtitles.IndexOf(item))
+                .Where(i => i >= 0)
+                .OrderByDescending(i => i)
+                .ToList();
 
-        Renumber();
-        _subtitleGridSelectionChangedSkip = false;
-        SelectAndScrollToRow(idx);
-        _undoRedoManager.StartChangeDetection();
-        SubtitleGridSelectionChanged();
-        _updateAudioVisualizer = true;
+            foreach (var index in indicesToRemove)
+            {
+                Subtitles.RemoveAt(index);
+            }
+
+            if (idx >= Subtitles.Count)
+            {
+                idx = Subtitles.Count - 1;
+            }
+
+            Renumber();
+        }
+        finally
+        {
+            // Reattach ItemsSource
+            if (isLargeDelete)
+            {
+                SubtitleGrid.ItemsSource = itemsSource;
+            }
+
+            _subtitleGridSelectionChangedSkip = false;
+            SelectAndScrollToRow(idx);
+            _undoRedoManager.StartChangeDetection();
+            SubtitleGridSelectionChanged();
+            _updateAudioVisualizer = true;
+        }
     }
 
     private void InsertBeforeSelectedItem()
@@ -10348,6 +10376,11 @@ public partial class MainViewModel :
 
     private void MakeSubtitleTextInfo(string text, SubtitleLineViewModel item)
     {
+        if (_subtitleGridSelectionChangedSkip)
+        {
+            return;
+        }
+
         text ??= string.Empty;
 
         text = HtmlUtil.RemoveHtmlTags(text, true);
