@@ -891,7 +891,7 @@ public class WavePeakGenerator2 : IDisposable
             saveImageTask = Task.Factory.StartNew(() =>
             {
                 using (var stream = File.OpenWrite(imagePath))
-                using (var pngData = bmp.Encode(SKEncodedImageFormat.Jpeg, 25)
+                using (var pngData = bmp.Encode(SKEncodedImageFormat.Jpeg, 50))
                 {
                     pngData.SaveTo(stream);
                 }
