@@ -9025,7 +9025,6 @@ public partial class MainViewModel :
 
                         if (Se.Settings.General.RememberPositionAndSize)
                         {
-                            UiUtil.RestoreWindowPosition(Window);
                             if (Se.Settings.General.UndockVideoControls)
                             {
                                 VideoUndockControls();

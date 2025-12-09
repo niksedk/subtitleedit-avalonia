@@ -213,6 +213,12 @@ namespace Nikse.SubtitleEdit
             var mainView = new MainView();
             lifetime.MainWindow.Content = mainView;
 
+            // Restore window position BEFORE setting content and showing
+            if (Se.Settings.General.RememberPositionAndSize)
+            {
+                UiUtil.RestoreWindowPosition(lifetime.MainWindow);
+            }
+
             lifetime.Startup += (_, e) =>
             {
                 if (e.Args.Length > 0 && System.IO.File.Exists(e.Args[0]))
