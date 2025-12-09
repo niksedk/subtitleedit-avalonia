@@ -9298,8 +9298,7 @@ public partial class MainViewModel :
         if (File.Exists(tempWaveFileName))
         {
             using var waveFile = new WavePeakGenerator2(tempWaveFileName);
-            waveFile.GeneratePeaks(0, peakWaveFileName);
-            var wavePeaks = WavePeakData2.FromDisk(peakWaveFileName);
+            var wavePeaks = waveFile.GeneratePeaks(0, peakWaveFileName);
 
             if (Se.Settings.Waveform.GenerateSpectrogram)
             {
