@@ -1518,23 +1518,19 @@ public class AudioVisualizer : Control
 
     private void DrawParagraphs(DrawingContext context, ref RenderContext renderCtx)
     {
-        if (_displayableParagraphs == null)
+        var paragraphs = _displayableParagraphs;
+        if (paragraphs == null)
         {
             return;
         }
 
         var startPositionMilliseconds = renderCtx.StartPositionSeconds * 1000.0;
         var endPositionMilliseconds = RelativeXPositionToSecondsOptimized((int)renderCtx.Width, renderCtx.SampleRate, renderCtx.StartPositionSeconds, renderCtx.ZoomFactor) * 1000.0;
-        var paragraphStartList = new List<int>(_displayableParagraphs.Count);
-        var paragraphEndList = new List<int>(_displayableParagraphs.Count);
-        var paragraphs = _displayableParagraphs;
 
         foreach (var p in paragraphs)
         {
             if (p.EndTime.TotalMilliseconds >= startPositionMilliseconds && p.StartTime.TotalMilliseconds <= endPositionMilliseconds)
             {
-                paragraphStartList.Add(SecondsToXPositionOptimized(p.StartTime.TotalSeconds - renderCtx.StartPositionSeconds, renderCtx.SampleRate, renderCtx.ZoomFactor));
-                paragraphEndList.Add(SecondsToXPositionOptimized(p.EndTime.TotalSeconds - renderCtx.StartPositionSeconds, renderCtx.SampleRate, renderCtx.ZoomFactor));
                 DrawParagraph(p, context, ref renderCtx);
             }
         }
