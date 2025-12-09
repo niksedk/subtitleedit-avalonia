@@ -1,5 +1,4 @@
-﻿using Avalonia;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -10779,19 +10778,9 @@ public partial class MainViewModel :
             {
                 vp.VideoPlayerInstance.Pause();
                 AudioVisualizer?.CenterOnPosition(selectedItem);
-                Dispatcher.UIThread.Post(async void () =>
+                Dispatcher.UIThread.Post(void () =>
                 {
-                    try
-                    {
-                        EditTextBox.Focus();
-                        EditTextBox.Focus();
-                        EditTextBox.Focus();
-                        EditTextBox.Focus();
-                    }
-                    catch (Exception e)
-                    {
-                        // ignore
-                    }
+                    EditTextBox.Focus();
                 });
 
                 return;

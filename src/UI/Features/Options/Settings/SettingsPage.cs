@@ -11,7 +11,6 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using Nikse.SubtitleEdit.Logic.ValueConverters;
 using Projektanker.Icons.Avalonia;
 using System;
 using System.Collections.Generic;
@@ -225,8 +224,8 @@ public class SettingsPage : UserControl
                 MinWidth = 200,
                 DataContext = _vm,
                 [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.SubtitleDoubleClickActionTypes)),
-                [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedSubtitleDoubleClickActionType)) 
-                { 
+                [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedSubtitleDoubleClickActionType))
+                {
                     Mode = BindingMode.TwoWay,
                 }
             }),
@@ -602,7 +601,7 @@ public class SettingsPage : UserControl
 
         grid.Add(labelColorShadow, 5);
         grid.Add(colorPickerShadow, 5, 1);
-        
+
         grid.Add(MakeBorderView(vm), 6, 0, 1, 2);
 
         return UiUtil.MakeBorderForControl(grid);

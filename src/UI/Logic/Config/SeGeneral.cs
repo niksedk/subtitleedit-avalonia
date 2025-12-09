@@ -8,14 +8,6 @@ using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 
-public enum SubtitleDoubleClickActionType
-{
-    GoToSubtitleAndPause,
-    GoToSubtitleAndPlay,
-    GoToSubtitleOnly,
-    GoToSubtitleAndPauseAndFocusTextBox,
-}
-
 public class SeGeneral
 {
     public string Version { get; set; }
