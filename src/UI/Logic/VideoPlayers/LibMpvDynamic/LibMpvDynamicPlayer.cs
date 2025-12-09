@@ -844,10 +844,10 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
             // Clamp volume between 0 and 100
             var clampedVolume = Math.Max(0, Math.Min(100, value));
             var err = DoMpvCommand("set", "volume", clampedVolume.ToString(CultureInfo.InvariantCulture));
-            if (err < 0)
-            {
-                Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer Volume set");
-            }
+            //if (err < 0)
+            //{
+            //    Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer Volume set");
+            //}
         }
     }
 
