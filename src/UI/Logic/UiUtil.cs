@@ -1028,7 +1028,7 @@ public static class UiUtil
     {
         control.DataContext = viewModel;
         control.Bind(Button.IsVisibleProperty, new Binding
-        {           
+        {
             Path = isVisiblePropertyPath,
             Mode = BindingMode.TwoWay,
         });
@@ -1397,7 +1397,7 @@ public static class UiUtil
     {
         return new Border
         {
-            DataContext = vm,   
+            DataContext = vm,
             Width = 1,
             Background = GetBorderBrush(),
             Margin = new Thickness(5, 5, 5, 5),
@@ -2267,7 +2267,7 @@ public static class UiUtil
         var shortcutString = string.Empty;
         if (shortcut is { Keys.Count: > 0 })
         {
-            shortcutString = string.Join("+",  shortcut.Keys.Select(k => ShortcutManager.GetKeyDisplayName(k.ToString())));
+            shortcutString = string.Join("+", shortcut.Keys.Select(k => ShortcutManager.GetKeyDisplayName(k.ToString())));
             shortcutString = $"({shortcutString})";
         }
 
@@ -2351,12 +2351,6 @@ public static class UiUtil
             }
         }
 
-        // Apply size & position before maximizing
-        if (existing.Width > 0 && existing.Height > 0)
-        {
-            window.Width = existing.Width;
-            window.Height = existing.Height;
-        }
         window.Position = desired;
 
         if (existing.IsFullScreen)
@@ -2369,12 +2363,13 @@ public static class UiUtil
         }
         else
         {
+            if (existing.Width > 0 && existing.Height > 0)
+            {
+                window.Width = existing.Width;
+                window.Height = existing.Height;
+            }
+
             window.WindowState = WindowState.Normal;
         }
-    }
-
-    internal static object MakeLabel(object languagePostFix)
-    {
-        throw new NotImplementedException();
     }
 }
