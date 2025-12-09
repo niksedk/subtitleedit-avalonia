@@ -6175,8 +6175,22 @@ public partial class MainViewModel :
         _insertService.InsertInCorrectPosition(Subtitles, newParagraph);
         AudioVisualizer.NewSelectionParagraph = null;
         SelectAndScrollToSubtitle(newParagraph);
-        EditTextBox.Focus();
+        FocusEditTextBox();
         _updateAudioVisualizer = true;
+    }
+
+    private void FocusEditTextBox()
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (AudioVisualizer != null && AudioVisualizer.IsFocused)
+            {
+                AudioVisualizer.SkipNextPointerEntered = true;
+            }
+            EditTextBox.Focus();
+            Task.Delay(10);
+            EditTextBox.Focus();
+        });
     }
 
     [RelayCommand]
@@ -6207,7 +6221,7 @@ public partial class MainViewModel :
 
         AudioVisualizer.NewSelectionParagraph = null;
         SelectAndScrollToSubtitle(newParagraph);
-        EditTextBox.Focus();
+        FocusEditTextBox();
         _updateAudioVisualizer = true;
     }
 
@@ -6683,6 +6697,11 @@ public partial class MainViewModel :
         }
         else
         {
+            if (AudioVisualizer.IsFocused)
+            {
+                AudioVisualizer.SkipNextPointerEntered = true;
+            }
+
             SubtitleGrid.Focus();
         }
     }
@@ -6697,20 +6716,30 @@ public partial class MainViewModel :
 
         if (EditTextBox.IsFocused)
         {
+            if (AudioVisualizer.IsFocused)
+            {
+                AudioVisualizer.SkipNextPointerEntered = true;
+            }
+
             AudioVisualizer.Focus();
         }
         else
         {
-            EditTextBox.Focus();
+            FocusEditTextBox();
         }
     }
 
     [RelayCommand]
     private void ToggleFocusTextBoxAndSubtitleGrid()
     {
+        if (AudioVisualizer != null && AudioVisualizer.IsFocused)
+        {
+            AudioVisualizer.SkipNextPointerEntered = true;
+        }
+
         if (SubtitleGrid.IsFocused)
         {
-            EditTextBox.Focus();
+            FocusEditTextBox();
         }
         else
         {
@@ -9581,6 +9610,7 @@ public partial class MainViewModel :
         SelectAndScrollToRow(idx);
         _undoRedoManager.StartChangeDetection();
         SubtitleGridSelectionChanged();
+        _updateAudioVisualizer = true;
     }
 
     private void InsertBeforeSelectedItem()
@@ -9592,6 +9622,7 @@ public partial class MainViewModel :
             _insertService.InsertBefore(SelectedSubtitleFormat, _subtitle, Subtitles, index, string.Empty);
             Renumber();
             SelectAndScrollToRow(index);
+            _updateAudioVisualizer = true;
         }
     }
 
@@ -9604,6 +9635,7 @@ public partial class MainViewModel :
             _insertService.InsertAfter(SelectedSubtitleFormat, _subtitle, Subtitles, index, string.Empty);
             Renumber();
             SelectAndScrollToRow(index + 1);
+            _updateAudioVisualizer = true;
         }
     }
 
@@ -9613,6 +9645,8 @@ public partial class MainViewModel :
         {
             Subtitles[index].Number = index + 1;
         }
+
+        _updateAudioVisualizer = true;
     }
 
     private void MergeLineBefore()
@@ -9636,6 +9670,7 @@ public partial class MainViewModel :
             _mergeManager.MergeSelectedLines(Subtitles, list, breakMode: MergeManager.BreakMode.Normal);
             Renumber();
             SelectAndScrollToRow(index - 1);
+            _updateAudioVisualizer = true;
         }
     }
 
@@ -9660,6 +9695,7 @@ public partial class MainViewModel :
             _mergeManager.MergeSelectedLines(Subtitles, list, breakMode: MergeManager.BreakMode.KeepBreaks);
             Renumber();
             SelectAndScrollToRow(index - 1);
+            _updateAudioVisualizer = true;
         }
     }
 
@@ -9684,6 +9720,7 @@ public partial class MainViewModel :
             _mergeManager.MergeSelectedLines(Subtitles, list, breakMode: MergeManager.BreakMode.Normal);
             Renumber();
             SelectAndScrollToRow(index);
+            _updateAudioVisualizer = true;
         }
     }
 
@@ -10709,7 +10746,7 @@ public partial class MainViewModel :
 
         if (Se.Settings.Waveform.FocusTextBoxAfterInsertNew)
         {
-            Dispatcher.UIThread.Post(() => { EditTextBox.Focus(); }, DispatcherPriority.Background);
+            FocusEditTextBox();
         }
     }
 
@@ -10763,6 +10800,7 @@ public partial class MainViewModel :
             {
                 vp.Position = selectedItem.StartTime.TotalSeconds;
                 AudioVisualizer?.CenterOnPosition(selectedItem);
+                _updateAudioVisualizer = true;
                 return;
             }
 
@@ -10771,24 +10809,25 @@ public partial class MainViewModel :
                 vp.Position = selectedItem.StartTime.TotalSeconds;
                 vp.VideoPlayerInstance.Play();
                 AudioVisualizer?.CenterOnPosition(selectedItem);
+                _updateAudioVisualizer = true;
                 return;
             }
 
             if (Se.Settings.General.SubtitleDoubleClickAction == SubtitleDoubleClickActionType.GoToSubtitleAndPauseAndFocusTextBox.ToString())
             {
                 vp.VideoPlayerInstance.Pause();
+                vp.Position = selectedItem.StartTime.TotalSeconds;
                 AudioVisualizer?.CenterOnPosition(selectedItem);
-                Dispatcher.UIThread.Post(void () =>
-                {
-                    EditTextBox.Focus();
-                });
-
+                FocusEditTextBox();
+                _updateAudioVisualizer = true;
                 return;
             }
 
             // SubtitleDoubleClickActionType.GoToSubtitleAndPause
             vp.VideoPlayerInstance.Pause();
+            vp.Position = selectedItem.StartTime.TotalSeconds;
             AudioVisualizer?.CenterOnPosition(selectedItem);
+            _updateAudioVisualizer = true;
             return;
         }
     }

@@ -668,6 +668,8 @@ public class AudioVisualizer : Control
         InvalidateVisual();
     }
 
+    public bool SkipNextPointerEntered { get; set; }    
+
     private void OnPointerEntered(object? sender, PointerEventArgs e)
     {
         base.OnPointerEntered(e);
@@ -679,6 +681,12 @@ public class AudioVisualizer : Control
 
         if (!IsFocused)
         {
+            if (SkipNextPointerEntered)
+            { 
+                SkipNextPointerEntered = false;
+                return;
+            }
+
             Focus();
         }
 
